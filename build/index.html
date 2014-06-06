@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+      <title>Mocha Spec Runner</title>
+
+      <link rel="stylesheet" href="/css/mocha.css">
+      <link rel="stylesheet" href="/css/runner.css">
+
+      <script type="text/javascript" src="/js/jquery.js"></script>
+      <script type="text/javascript" src="/js/mocha.js"></script>
+      <script type="text/javascript" src="/js/parent.js"></script>
+  </head>
+  <body>
+    <div id="test-wrapper">
+      <div id="iframe-wrapper">
+        <div id="iframe-container">
+          <iframe src="/iframes/foo.html" class="iframe-spec"></iframe>
+        </div>
+      </div>
+      <div id="mocha"></div>
+    </div>
+  </body>
+</html>

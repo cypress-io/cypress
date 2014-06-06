@@ -1,0 +1,55 @@
+html {
+  background-color: #EEE;
+}
+
+#test-wrapper {
+  padding: 60px 0;
+  overflow: auto;
+  position: relative;
+  top: 0;
+  bottom: 0;
+}
+
+#iframe-container {
+  -webkit-transform-origin: right top;
+  -moz-transform-origin: right top;
+  -ms-transform-origin: right top;
+  -o-transform-origin: right top;
+  transform-origin: right top;
+  width: 150%;
+  height: 100%;
+  -webkit-transform: scale(0.65);
+  -moz-transform: scale(0.65);
+  -ms-transform: scale(0.65);
+  -o-transform: scale(0.65);
+  transform: scale(0.65);
+  position: relative;
+  float: right;
+}
+
+#iframe-container iframe {
+  display: none;
+  box-sizing: border-box;
+  height: 95%;
+  width: 99.5%;
+  border-top: 2px solid #c8c8c8;
+  border-bottom: 2px solid #eee;
+  border-left: 2px solid #ddd;
+  border-right: 2px solid #ddd;
+  z-index: 1;
+  background-color: white;
+}
+
+#mocha {
+  width: 40%;
+}
+
+#iframe-wrapper {
+  width: 55%;
+  height: 1000px;
+  overflow: auto;
+  box-sizing: border-box;
+  position: fixed;
+  top: 80px;
+  right: 25px;
+}
