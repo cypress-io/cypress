@@ -18,7 +18,7 @@
     get: function(attr){
       return _.reduce(this.suites, function(memo, suite){
         val = _.isFunction(suite[attr]) ? suite[attr]() : suite[attr];
-        return memo + val;
+        return memo + (val || 0);
       }, 0);
     }
   };
@@ -106,7 +106,7 @@
         id = found.data("id")
 
         // remove the suite from our stats
-        delete stats.suites[id]
+        stats.suites[id] = {};
 
         // remove the iframe DOM
         found.remove()
