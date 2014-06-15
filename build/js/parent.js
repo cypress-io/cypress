@@ -4,8 +4,32 @@
 
   iframes = ["foo", "bar"];
 
+  window.stats = stats = {
+    suites: {},
+    total: function(){
+      return this.get("total");
+    },
+    failed: function(){
+      return this.get("failed");
+    },
+    passed: function(){
+      return this.get("passed");
+    },
+    get: function(attr){
+      return _.reduce(this.suites, function(memo, suite){
+        val = _.isFunction(suite[attr]) ? suite[attr]() : suite[attr];
+        return memo + val;
+      }, 0);
+    }
+  };
+
   var ecl = function ecl(runner){
     console.log("runner is", runner)
+
+    window.addIframe = function (iframe) {
+      iframes.push(iframe);
+      nextSuite(runner)
+    };
 
     // runner.suite.addSuite
     nextSuite(runner)
@@ -51,7 +75,18 @@
     });
 
     runner.on("test end", function(test){
-      console.log("test end", test)
+      console.log("test end", test, test.state)
+
+      // need to reduce until we're at the top parent
+      suite = test.parent.parent;
+
+      stat = stats.suites[suite.id];
+      console.warn("stat is", suite, stat);
+      if(test.state == "passed"){
+        stat.passed += 1
+      } else {
+        stat.failed += 1
+      }
     });
   }
 
@@ -61,17 +96,45 @@
     //   console.log("loaded", next);
     //   runner.run()
     // });
-    console.log("next is", next);
+
     if(next){
+      // find any existing iframes
+      found = $("iframe[src='/iframes/" + next + ".html']")
+
+      if(found){
+        // store its old data id
+        id = found.data("id")
+
+        // remove the suite from our stats
+        delete stats.suites[id]
+
+        // remove the iframe DOM
+        found.remove()
+      }
+
+      // create the new one
       iframe = $("<iframe />", {
         src: "/iframes/" + next + ".html",
         load: function(){
           console.info("loaded!", iframe, this);
           // debugger
+          suite = this.contentWindow.mocha.suite
+
+          suite.id = id || _.uniqueId("suite")
+
+          // add the suite to the stats
+          stats.suites[suite.id] = {
+            suite: suite,
+            passed: 0,
+            failed: 0,
+            total: suite.total()
+          }
+
+          $(this).data("id", suite.id)
 
           // runner.run()
           // run each of the iframes suite independently
-          runner.runSuite(this.contentWindow.mocha.suite, function(){
+          runner.runSuite(suite, function(){
             console.log("runSuite finished", arguments, this)
           });
         }
