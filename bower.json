@@ -1,0 +1,23 @@
+{
+  "name": "eclectus",
+  "version": "0.0.0",
+  "homepage": "https://github.com/brian-mann/eclectus",
+  "authors": [
+    "brian.mann86@gmail.com"
+  ],
+  "moduleType": [
+    "globals"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "labjs": "*"
+  }
+}
