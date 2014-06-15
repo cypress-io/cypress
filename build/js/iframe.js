@@ -7,6 +7,8 @@ window.onerror = function() {
 window.Mocha = Object.create(parent.Mocha);
 window.mocha = Object.create(parent.mocha);
 
+console.log("child setting mocha")
+
 // In order to isolate top-level before/beforeEach hooks,
 // the specs in each iframe are wrapped in an anonymous suite.
 mocha.suite = Mocha.Suite.create(mocha.suite);
