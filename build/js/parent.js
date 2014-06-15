@@ -115,6 +115,7 @@
       // create the new one
       iframe = $("<iframe />", {
         src: "/iframes/" + next + ".html",
+        "class": "iframe-spec",
         load: function(){
           console.info("loaded!", iframe, this);
           // debugger
