@@ -1,7 +1,21 @@
 describe("Baz Spec", function(){
-  console.warn("baz spec")
-  it("can baz", function(){
+  it("can baz [aad]", function(){
     console.warn("can baz");
     expect("baz").to.eq("baz");
+  });
+
+  it("can baz2 [aae]", function(){
+    console.warn("can baz2");
+    expect("baz2").to.eq("baz2");
+  });
+
+  it("can baz3 [aaf]", function(){
+    console.warn("can baz3");
+    expect("baz3").to.eq("baz3");
+  });
+
+  it("can baz4 [aag]", function(){
+    console.warn("can baz4");
+    expect("baz4").to.eq("baz4");
   });
 });
