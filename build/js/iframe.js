@@ -12,7 +12,8 @@ console.log("child setting mocha")
 // In order to isolate top-level before/beforeEach hooks,
 // the specs in each iframe are wrapped in an anonymous suite.
 mocha.suite = Mocha.Suite.create(mocha.suite);
-// mocha.suite.path = document.documentElement.getAttribute("data-path");
+
+mocha.suite.path = document.documentElement.getAttribute("data-path");
 
 // Override mocha.ui so that the pre-require event is emitted
 // with the iframe's `window` reference, rather than the parent's.
