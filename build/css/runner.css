@@ -53,3 +53,7 @@ html {
   top: 80px;
   right: 25px;
 }
+
+.active {
+  font-weight: bold;
+}
