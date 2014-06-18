@@ -100,9 +100,11 @@
       if(test.state == "passed"){
         klass = "passed"
         stat.passed += 1
+        updateStats("passed", stats.passed())
       } else {
         klass = "failed"
         stat.failed += 1
+        updateStats("failed", stats.failed())
       }
 
       console.log(stat, id, test.title, "#" + id)
@@ -148,6 +150,20 @@
   var getTestId = function getTestId(test){
     // returns the capture'd part of the test id
     return (/\[(.{3})\]$/).exec(test.title)[1]
+  };
+
+  var updateStats = function updateStats(type, num){
+    var el
+    switch(type){
+      case "passed":
+        el = $("#tests-passed")
+        break;
+      case "failed":
+        el = $("#test-failed")
+        break;
+    }
+
+    el.find("span.num").text(num)
   };
 
   var nextSuite = function nextSuite(runner){

@@ -57,3 +57,29 @@ html {
 .active {
   font-weight: bold;
 }
+
+#stats-container {
+  background-color: white;
+  padding: 0;
+  text-align: center;
+  position: absolute;
+  top: 0;
+  left: 20px;
+  border-radius: 5px;
+  overflow: hidden;
+  color: #666;
+  box-shadow: 0 1px 0 #ddd;
+}
+
+#stats-container li {
+  float: left;
+  margin: 0 10px;
+  list-style-type: none;
+  line-height: 2;
+}
+
+#stats-container #tests-duration {
+  background-color: #e1e1e1;
+  margin-right: 0;
+  padding: 0 10px;
+}
