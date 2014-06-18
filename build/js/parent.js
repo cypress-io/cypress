@@ -2,7 +2,9 @@
 //our iframes and tests are loaded
 (function(Mocha){
 
-  iframes = ["foo", "bar"];
+  var iframes = ["foo", "bar"];
+
+  window.activeId = null;
 
   window.stats = stats = {
     suites: {},
@@ -60,10 +62,21 @@
     //   console.log("runner has ended", arguments, this)
     // });
 
-    // runner.on("suite", function(suite){
-    //   if (suite.root) return;
-    //   console.log("suite", suite);
-    // });
+    runner.on("suite", function(suite){
+      if (suite.root) return
+
+      var id = getSuiteId(suite)
+
+      var found = $("#" + id).length
+
+      if (!found) {
+        $("<li />", {
+          text: suite.title,
+          id: getSuiteId(suite)
+        }).appendTo("#mocha").wrap("<ul class='suite'></ul>")
+      }
+
+    });
 
     runner.on("suite end", function(suite){
       if (suite.root) return;
@@ -78,20 +91,67 @@
       console.log("test end", test, test.state)
 
       // need to reduce until we're at the top parent
-      suite = test.parent.parent;
+      // test.suite.parents: mocha.js 4704
+      var klass
+      var id = getSuiteId(test)
 
-      stat = stats.suites[suite.id];
-      console.warn("stat is", suite, stat);
+      var stat = stats.suites[id];
+      console.warn("stat is", stat);
       if(test.state == "passed"){
+        klass = "passed"
         stat.passed += 1
       } else {
+        klass = "failed"
         stat.failed += 1
+      }
+
+      console.log(stat, id, test.title, "#" + id)
+
+      var testId = getTestId(test)
+
+      var li = $("<li />", {
+        text: test.title,
+        "class": klass,
+        id: testId,
+        click: function() {
+          activeId = $(this).prop("id")
+
+          // create regex to .only the active id
+          re = new RegExp("\\[" + activeId + "\\]$")
+          runner.grep(re)
+
+          $(".active").removeClass("active")
+          $(this).addClass("active")
+        }
+      })
+
+      // if the test id is the active id
+      // append into its parent test container
+      if (testId === activeId) {
+        $("#test-" + testId).append(li.addClass("active"))
+      } else {
+        // append to the suite id and wrap with a ul
+        li.appendTo("#" + id).wrap("<ul class='test'></ul>")
       }
     });
   }
 
+  var getSuiteId = function getSuiteId(obj){
+    while (obj.parent) {
+      if (obj.id) {
+        return obj.id
+      }
+      var obj = obj.parent
+    }
+  };
+
+  var getTestId = function getTestId(test){
+    // returns the capture'd part of the test id
+    return (/\[(.{3})\]$/).exec(test.title)[1]
+  };
+
   var nextSuite = function nextSuite(runner){
-    next = iframes.shift();
+    var next = iframes.shift();
     // $LAB.script("/specs/" + next + "_spec.js").wait(function(){
     //   console.log("loaded", next);
     //   runner.run()
@@ -99,21 +159,33 @@
 
     if(next){
       // find any existing iframes
-      found = $("iframe[src='/iframes/" + next + ".html']")
+      var found = $("iframe[src='/iframes/" + next + ".html']")
 
       if(found){
         // store its old data id
-        id = found.data("id")
+        var id = found.data("id")
 
         // remove the suite from our stats
         stats.suites[id] = {};
 
         // remove the iframe DOM
         found.remove()
+
+        // if we have an active global id
+        // dont remove the children tests
+        // instead just nuke this single
+        // test
+        if (activeId) {
+          $("#" + activeId).parent().prop("id", "test-" + activeId).empty()
+
+        } else {
+          // remove the existing test html
+          $("#" + id).empty()
+        }
       }
 
       // create the new one
-      iframe = $("<iframe />", {
+      var iframe = $("<iframe />", {
         src: "/iframes/" + next + ".html",
         "class": "iframe-spec",
         load: function(){
@@ -144,7 +216,7 @@
     }
   };
 
-  mocha = new Mocha({reporter: ecl})
+  window.mocha = new Mocha({reporter: ecl})
 
   // var addIframe = function addIframe(){
   //   iframe = iframes.shift()
