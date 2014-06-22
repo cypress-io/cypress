@@ -7,41 +7,62 @@
   var Ecl = function() {
     this.logs = [];
     this.xhrs = [];
-
-    _.extend(this, {
-      log: function(msg) {
-        this.logs.push({
-          type: "log",
-          msg: msg
-        });
-        return this;
-      },
-
-      info: function(msg) {
-        this.logs.push({
-          type: "info",
-          msg: msg
-        });
-        return this;
-      },
-
-      warn: function(msg) {
-        return this;
-      },
-
-      xhr: function(req, res) {
-        return this;
-      },
-
-      find: function(el) {
-        this.logs.push({
-          type: "dom",
-          msg: "Finding el: '" + $(el).prop("nodeName").toLowerCase() + "' => " + (el.length ? "Found" : "Not Found")
-        })
-        return this;
-      }
-    });
   };
+
+  var eclMethods = {
+    log: function(title, id, msg) {
+      console.info("log form Ecl", arguments)
+      this.logs.push({
+        title: title,
+        id: id,
+        type: "log",
+        msg: msg
+      });
+      return this;
+    },
+
+    info: function(title, id, msg) {
+      this.logs.push({
+        title: title,
+        id: id,
+        type: "info",
+        msg: msg
+      });
+      return this;
+    },
+
+    warn: function(title, id, msg) {
+      return this;
+    },
+
+    xhr: function(title, id, req, res) {
+      return this;
+    },
+
+    find: function(title, id, el) {
+      this.logs.push({
+        title: title,
+        id: id,
+        type: "dom",
+        msg: "Finding el: '" + $(el).prop("nodeName").toLowerCase() + "' => " + (el.length ? "Found" : "Not Found")
+      })
+      return this;
+    }
+  };
+
+  _.extend(Ecl.prototype, {
+    patch: function(title, id) {
+      var fns = _.functions(eclMethods)
+      var _this = this;
+
+      // bind title + id args to each function
+      _.each(fns, function(fn){
+        // must use a separate object for eclMethods since we're
+        // using those as buffer and re-partialing them each time
+        _this[fn] = _.partial(eclMethods[fn], title, id)
+      });
+    }
+  });
 
   var iframes = ["foo", "bar"];
 

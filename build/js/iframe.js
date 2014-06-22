@@ -56,6 +56,14 @@ mocha.suite.beforeEach(function() {
   // binding them to the tests id here
 });
 
+// we need to tap into emit so we can get notified when our suite
+// or tests are running.  this code needs to exist in the iframe
+// in order to properly the window's global context, since we're
+// searching in the iframe's DOM.  we tap into the suite + tests
+// so we have access to the title + id.  this could potentially be
+// moved over to the parent if we store the iframe id on each suite
+// that way the parent can just navigate into the frame prior to
+// querying the DOM, and we won't have to split up this code.
 var emit = Mocha.Runner.prototype.emit
 Mocha.Runner.prototype.emit = function() {
   console.log("Child Runner Proto emit", window, this, arguments);
@@ -71,12 +79,20 @@ Mocha.Runner.prototype.emit = function() {
       break;
     case "test":
       // proxy all of the Ecl methods here with the test's title + id
+      var title = args[1].title
       console.log("test title is:", args[1].title)
+      Ecl.patch(title, getIdByTitle(title))
       break;
 
   };
 
   emit.apply(this, arguments);
+};
+
+var getIdByTitle = function getIdByTitle(title) {
+  return _(title.split(" ")).filter(function(item){
+    return /\[[a-zA-Z0-9]{3}\]/.test(item)
+  }).join("");
 };
 
 var expect = chai.expect,
