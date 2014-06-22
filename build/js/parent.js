@@ -2,6 +2,47 @@
 //our iframes and tests are loaded
 (function(Mocha){
 
+  // need to find an easy way to proxy the 'Test ID'
+  // from each iframe child into each of these methods
+  var Ecl = function() {
+    this.logs = [];
+    this.xhrs = [];
+
+    _.extend(this, {
+      log: function(msg) {
+        this.logs.push({
+          type: "log",
+          msg: msg
+        });
+        return this;
+      },
+
+      info: function(msg) {
+        this.logs.push({
+          type: "info",
+          msg: msg
+        });
+        return this;
+      },
+
+      warn: function(msg) {
+        return this;
+      },
+
+      xhr: function(req, res) {
+        return this;
+      },
+
+      find: function(el) {
+        this.logs.push({
+          type: "dom",
+          msg: "Finding el: '" + $(el).prop("nodeName").toLowerCase() + "' => " + (el.length ? "Found" : "Not Found")
+        })
+        return this;
+      }
+    });
+  };
+
   var iframes = ["foo", "bar"];
 
   window.activeId = null;
@@ -85,6 +126,10 @@
       // iframe = iframes.shift()
       // runner.runSuite
       nextSuite(runner);
+    });
+
+    runner.on("test", function(test){
+      console.log("test from runner", window, test, this)
     });
 
     runner.on("test end", function(test){
@@ -232,6 +277,7 @@
     }
   };
 
+  window.Ecl = new Ecl()
   window.mocha = new Mocha({reporter: ecl})
 
   // var addIframe = function addIframe(){
