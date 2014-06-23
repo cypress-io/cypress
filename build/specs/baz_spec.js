@@ -16,6 +16,7 @@ describe("Baz Spec", function(){
 
   it("can baz4 [aag]", function(){
     console.warn("can baz4");
+    Ecl.info("child msg from baz4")
     expect("baz4").to.eq("baz4");
   });
 });

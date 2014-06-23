@@ -1,11 +1,15 @@
+* {
+  box-sizing: border-box;
+}
+
 html {
   background-color: #EEE;
+  color: #555;
 }
 
 #test-wrapper {
   padding: 60px 0;
   overflow: auto;
-  position: relative;
   top: 0;
   bottom: 0;
 }
@@ -82,4 +86,32 @@ html {
   background-color: #e1e1e1;
   margin-right: 0;
   padding: 0 10px;
+}
+
+#ecl-panel {
+  width: 400px;
+  height: 250px;
+  background-color: #DDD;
+  position: absolute;
+  bottom: 0;
+  border-radius: 5px;
+  box-shadow: 0 1px 2px #999;
+  margin: 0 0 20px 20px;
+  padding: 10px;
+}
+
+#ecl-panel ul {
+  border-radius: 5px;
+  overflow: hidden;
+  background-color: white;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+#ecl-panel li {
+  padding: 5px 10px;
+  margin: 0;
+  list-style-type: none;
+  border-bottom: 1px dotted #CCC;
 }

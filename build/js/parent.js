@@ -7,11 +7,18 @@
   var Eclectus = function() {
     this.logs = [];
     this.xhrs = [];
+
+    this.output = {
+      add: function(obj) {
+        addOutputLog(obj);
+        this.logs.push(obj);
+      }
+    };
   };
 
   var eclMethods = {
     log: function(title, id, msg) {
-      this.logs.push({
+      this.output.add({
         title: title,
         id: id,
         type: "log",
@@ -21,7 +28,7 @@
     },
 
     info: function(title, id, msg) {
-      this.logs.push({
+      this.output.add({
         title: title,
         id: id,
         type: "info",
@@ -39,7 +46,7 @@
     },
 
     find: function(title, id, el) {
-      this.logs.push({
+      this.output.add({
         title: title,
         id: id,
         type: "dom",
@@ -238,6 +245,12 @@
 
     el.find("span.num").text(num)
   };
+
+  var addOutputLog = function addOutputLog(obj){
+    $("#ecl-panel ul").append($("<li />", {
+      text: obj.msg
+    }));
+  }
 
   var nextSuite = function nextSuite(runner){
     var next = iframes.shift();
