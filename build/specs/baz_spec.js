@@ -1,6 +1,6 @@
 describe("Baz Spec", function(){
-  it("can baz [aad]", function(){
-    console.warn("can baz");
+  it("can baz -- first one [aad]", function(){
+    Ecl.info("new info!")
     expect("baz").to.eq("baz");
   });
 

@@ -114,4 +114,32 @@ html {
   margin: 0;
   list-style-type: none;
   border-bottom: 1px dotted #CCC;
+  overflow: auto;
+}
+
+#ecl-panel li .title {
+  display: block;
+}
+
+#ecl-panel li .msg {
+  display: block;
+}
+
+#ecl-panel li .left {
+  float: left;
+}
+
+#ecl-panel li .right {
+  float: right;
+}
+
+#ecl-panel li .id {
+  font-size: 11px;
+  color: #999;
+  margin-right: 5px;
+}
+
+#ecl-panel li .test {
+  font-weight: bold;
+  font-size: 12px;
 }

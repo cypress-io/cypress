@@ -8,10 +8,12 @@
     this.logs = [];
     this.xhrs = [];
 
+    _this = this;
+
     this.output = {
       add: function(obj) {
         addOutputLog(obj);
-        this.logs.push(obj);
+        _this.logs.push(obj);
       }
     };
   };
@@ -71,6 +73,8 @@
   });
 
   var iframes = ["foo", "bar"];
+
+  var testIdRegExp = /\[(.{3})\]$/
 
   window.activeId = null;
 
@@ -229,7 +233,11 @@
 
   var getTestId = function getTestId(test){
     // returns the capture'd part of the test id
-    return (/\[(.{3})\]$/).exec(test.title)[1]
+    return (testIdRegExp).exec(test.title)[1]
+  };
+
+  var getTestTitle = function getTestTitle(test){
+    return test.title.replace(testIdRegExp, "")
   };
 
   var updateStats = function updateStats(type, num){
@@ -247,9 +255,19 @@
   };
 
   var addOutputLog = function addOutputLog(obj){
-    $("#ecl-panel ul").append($("<li />", {
-      text: obj.msg
-    }));
+    tmpl = _.template(
+      "<li>" +
+        "<span class='left'>" +
+          "<span class='test'><%= title %></span>" +
+          "<span class='msg'><%= msg %></span>" +
+        "</span>" +
+        "<span class='right'>" +
+          "<span class='id'><%= id %></span>" +
+          "<span class='arrow'>></span>" +
+        "</span>" +
+      "</li>"
+    );
+    $("#ecl-panel ul").append( tmpl(obj) );
   }
 
   var nextSuite = function nextSuite(runner){
@@ -334,7 +352,7 @@
       case "test":
         // proxy all of the Ecl methods here with the test's title + id
         console.log("test title is:", args[1].title, args[1], getSuiteId(args[1]))
-        Ecl.patch(args[1].title, getSuiteId(args[1]))
+        Ecl.patch(getTestTitle(args[1]), getTestId(args[1]))
         break;
 
     };
