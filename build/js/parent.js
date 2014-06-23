@@ -4,14 +4,13 @@
 
   // need to find an easy way to proxy the 'Test ID'
   // from each iframe child into each of these methods
-  var Ecl = function() {
+  var Eclectus = function() {
     this.logs = [];
     this.xhrs = [];
   };
 
   var eclMethods = {
     log: function(title, id, msg) {
-      console.info("log form Ecl", arguments)
       this.logs.push({
         title: title,
         id: id,
@@ -50,7 +49,7 @@
     }
   };
 
-  _.extend(Ecl.prototype, {
+  _.extend(Eclectus.prototype, {
     patch: function(title, id) {
       var fns = _.functions(eclMethods)
       var _this = this;
@@ -87,7 +86,7 @@
     }
   };
 
-  var ecl = function ecl(runner){
+  Eclectus.Reporter = function ecl(runner){
     console.log("runner is", runner)
 
     window.addIframe = function (iframe) {
@@ -150,7 +149,7 @@
     });
 
     runner.on("test", function(test){
-      console.log("test from runner", window, test, this)
+      console.log("test from runner", test, getSuiteWindow(test))
     });
 
     runner.on("test end", function(test){
@@ -205,9 +204,17 @@
   }
 
   var getSuiteId = function getSuiteId(obj){
+    return getParentSuiteBy(obj, "id")
+  };
+
+  var getSuiteWindow = function getSuiteWindow(obj){
+    return getParentSuiteBy(obj, "window")
+  };
+
+  var getParentSuiteBy = function(obj, prop){
     while (obj.parent) {
-      if (obj.id) {
-        return obj.id
+      if (obj[prop]) {
+        return obj[prop]
       }
       var obj = obj.parent
     }
@@ -271,11 +278,11 @@
         src: "/iframes/" + next + ".html",
         "class": "iframe-spec",
         load: function(){
-          console.info("loaded!", iframe, this);
+          // console.info("loaded!", iframe, this);
           // debugger
-          suite = this.contentWindow.mocha.suite
-
-          suite.id = id || _.uniqueId("suite")
+          suite         = this.contentWindow.mocha.suite
+          suite.window  = this.contentWindow
+          suite.id      = id || _.uniqueId("suite")
 
           // add the suite to the stats
           stats.suites[suite.id] = {
@@ -298,16 +305,32 @@
     }
   };
 
-  window.Ecl = new Ecl()
-  window.mocha = new Mocha({reporter: ecl})
+  var emit = Mocha.Runner.prototype.emit
+  Mocha.Runner.prototype.emit = function() {
+    // console.log("Child Runner Proto emit", window, this, arguments, emit);
+    var args = [].slice.apply(arguments);
 
-  // var addIframe = function addIframe(){
-  //   iframe = iframes.shift()
+    switch(args[0]){
+      case "suite":
+        // dont return here, just log something special since its the root suite
+        if(args[1].root) return;
 
-  //   if(iframe){
+        // proxy the Ecl methods here with the suite's title + id
+        console.log("suite title is", args[1].title);
+        break;
+      case "test":
+        // proxy all of the Ecl methods here with the test's title + id
+        console.log("test title is:", args[1].title, args[1], getSuiteId(args[1]))
+        Ecl.patch(args[1].title, getSuiteId(args[1]))
+        break;
 
-  //   }
-  // }
+    };
+
+    emit.apply(this, arguments);
+  };
+
+  window.Ecl = new Eclectus()
+  window.mocha = new Mocha({reporter: Eclectus.Reporter})
 
 })(Mocha);
 
