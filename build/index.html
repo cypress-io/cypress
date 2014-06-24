@@ -2,10 +2,15 @@
 <html>
   <head>
       <meta http-equiv="content-type" content="text/html;charset=utf-8" />
-      <title>Mocha Spec Runner</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Eclectus</title>
 
-      <link rel="stylesheet" href="/css/mocha.css">
-      <link rel="stylesheet" href="/css/runner.css">
+      <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,400italic,700,800' rel='stylesheet' type='text/css'>
+      <link href='http://fonts.googleapis.com/css?family=Raleway:300,200,100' rel='stylesheet' type='text/css'>
+
+      <!-- <link rel="stylesheet" href="/css/mocha.css"> -->
+      <!-- <link rel="stylesheet" href="/css/runner.css"> -->
+      <link rel="stylesheet" href="/css/application.css">
 
       <script type="text/javascript" src="/js/jquery.js"></script>
       <script type="text/javascript" src="/js/underscore.js"></script>
@@ -13,29 +18,75 @@
       <script type="text/javascript" src="/js/parent.js"></script>
   </head>
   <body>
-    <div id="test-wrapper">
-      <ul id="stats-container">
-        <li id="tests-passed">
-          <span class="num"></span>
-          <span class="name">Passed</span>
-        </li>
-        <li id="tests-failed">
-          <span class="num"></span>
-          <span class="name">Failed</span>
-        </li>
-        <li id="tests-pending">
-          <span class="num"></span>
-          <span class="name">Pending</span>
-        </li>
-        <li id="tests-duration">0s</li>
-      </ul>
-      <div id="iframe-wrapper">
-        <div id="iframe-container">
+    <div id="ecl-wrapper">
+      <div class="ecl-sidebar">
+        <div class="ecl-toggle">
+          <i class="fa fa-reorder"></i>
+        </div>
+        <div class="ecl-navblock">
+          <div class="text-right collapse-button">
+            <button class="btn btn-default" id="sidebar-collapse">
+              <i class="fa fa-angle-left"></i>
+            </button>
+          </div>
+          <ul class="ecl-vnavigation">
+            <li class="parent">
+              <a href="#">
+                <i class="fa fa-code"></i>
+                Tests
+              </a>
+            </li>
+            <li class="parent">
+              <a href="#">
+                <i class="fa fa-th"></i>
+                Organize
+              </a>
+            </li>
+            <li class="parent">
+              <a href="#">
+                <i class="fa fa-bar-chart-o"></i>
+                Analytics
+              </a>
+            </li>
+            <li class="parent">
+              <a href="#">
+                <i class="fa fa-cog"></i>
+                Settings
+              </a>
+            </li>
+          </ul>
         </div>
       </div>
-      <div id="mocha"></div>
-      <div id="ecl-panel">
-        <ul></ul>
+      <div class="container-fluid" id="primary-content">
+        <div class="ecl-main-content">
+
+          <div id="test-wrapper">
+            <ul id="stats-container">
+              <li id="tests-passed">
+                <span class="num"></span>
+                <span class="name">Passed</span>
+              </li>
+              <li id="tests-failed">
+                <span class="num"></span>
+                <span class="name">Failed</span>
+              </li>
+              <li id="tests-pending">
+                <span class="num"></span>
+                <span class="name">Pending</span>
+              </li>
+              <li id="tests-duration">0s</li>
+            </ul>
+            <div id="iframe-wrapper">
+              <div id="iframe-container">
+              </div>
+            </div>
+            <div id="mocha"></div>
+            <div id="ecl-panel">
+              <ul></ul>
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
   </body>

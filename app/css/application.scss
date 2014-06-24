@@ -1,1 +1,20 @@
-@import "bootstrap-sass-official/vendor/assets/stylesheets/bootstrap";
+// @import "bootstrap-sass-official/vendor/assets/stylesheets/bootstrap";
+
+@import "core/variables";
+
+// Core variables and mixins
+@import "bootstrap-sass-official/vendor/assets/stylesheets/bootstrap/variables";
+@import "bootstrap-sass-official/vendor/assets/stylesheets/bootstrap/mixins";
+
+// Reset and dependencies
+@import "bootstrap-sass-official/vendor/assets/stylesheets/bootstrap/normalize";
+
+// Core CSS
+@import "bootstrap-sass-official/vendor/assets/stylesheets/bootstrap/type";
+@import "bootstrap-sass-official/vendor/assets/stylesheets/bootstrap/buttons";
+
+@import "font-awesome/scss/font-awesome";
+
+@import "elements/general";
+@import "elements/main-content";
+@import "elements/sidebar";

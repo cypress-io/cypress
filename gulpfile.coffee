@@ -9,5 +9,14 @@ gulp.task "css", ->
       cacheLocation: ".tmp/.sass-cache"
     .pipe gulp.dest "build/css"
 
-gulp.task "default", ["server", "css"], ->
+gulp.task "fonts", ->
+  gulp.src("bower_components/font-awesome/fonts/**")
+    .pipe gulp.dest "build/css/fonts"
+
+gulp.task "watch", ->
+  gulp.watch "app/css/**", ["css"]
+
+gulp.task "server", ->
   require("./server.coffee")
+
+gulp.task "default", ["server", "css", "fonts", "watch"]
