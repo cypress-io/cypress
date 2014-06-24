@@ -23,6 +23,7 @@
     "express": "^4.4.1",
     "gulp": "^3.7.0",
     "gulp-load-plugins": "^0.5.1",
+    "gulp-ruby-sass": "^0.5.0",
     "http": "0.0.0",
     "method-override": "^2.0.2",
     "morgan": "^1.1.1",
