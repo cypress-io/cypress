@@ -10,11 +10,14 @@
 @import "bootstrap-sass-official/vendor/assets/stylesheets/bootstrap/normalize";
 
 // Core CSS
+@import "bootstrap-sass-official/vendor/assets/stylesheets/bootstrap/scaffolding";
 @import "bootstrap-sass-official/vendor/assets/stylesheets/bootstrap/type";
+@import "bootstrap-sass-official/vendor/assets/stylesheets/bootstrap/grid";
 @import "bootstrap-sass-official/vendor/assets/stylesheets/bootstrap/buttons";
 
 @import "font-awesome/scss/font-awesome";
 
 @import "elements/general";
+@import "elements/header";
 @import "elements/main-content";
 @import "elements/sidebar";

@@ -1,5 +1,5 @@
 #ecl-wrapper {
-  padding-top: 50px;
+  // padding-top: 50px;
   display: table;
   width: 100%;
   position: absolute;
@@ -31,7 +31,7 @@
     margin: 0;
     padding: 0;
     border-top: 1px solid #1a1c20;
-    border-bottom: 1px solid #2f323a;
+    // border-bottom: 1px solid #2f323a;
 
     li.active > a {
       background: #2A2C34;
@@ -74,6 +74,14 @@
     bottom: 0;
     border-top: 1px solid #131519;
     box-shadow: 0 1px 0 #2A2C31 inset;
+    overflow: auto;
+
+    .logo {
+      text-align: left;
+      display: inline-block;
+      font-size: 200%;
+      color: #aaa;
+    }
 
     button {
       margin: 0 !important;

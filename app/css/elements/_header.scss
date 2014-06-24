@@ -1,0 +1,33 @@
+#header-container {
+  background-color: lighten(#428BCA, 0%);
+
+  #header-content {
+    padding: 0 20px;
+
+    ul#test-tabs {
+      list-style-type: none;
+      margin: 0;
+      padding: 20px 0 0;
+      overflow: auto;
+
+      li {
+        float: left;
+        border-radius: 5px 5px 0 0;
+        line-height: 30px;
+
+        &.active {
+          background-color: #F6F6F6;
+
+          a {
+            color: #3380FF
+          }
+        }
+
+        a {
+          color: #fff;
+          padding: 5px 10px;
+        }
+      }
+    }
+  }
+}
