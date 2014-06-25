@@ -15,9 +15,14 @@
 @import "bootstrap-sass-official/vendor/assets/stylesheets/bootstrap/grid";
 @import "bootstrap-sass-official/vendor/assets/stylesheets/bootstrap/buttons";
 
+// Fonts
 @import "font-awesome/scss/font-awesome";
 
+// Reusable Elements
 @import "elements/general";
 @import "elements/header";
 @import "elements/main-content";
 @import "elements/sidebar";
+
+// Independent Pages
+@import "pages/tests";

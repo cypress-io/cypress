@@ -257,13 +257,13 @@
   var addOutputLog = function addOutputLog(obj){
     tmpl = _.template(
       "<li>" +
-        "<span class='left'>" +
+        "<span class='pull-left'>" +
           "<span class='test'><%= title %></span>" +
           "<span class='msg'><%= msg %></span>" +
         "</span>" +
-        "<span class='right'>" +
+        "<span class='pull-right'>" +
           "<span class='id'><%= id %></span>" +
-          "<span class='arrow'>></span>" +
+          "<i class='fa fa-chevron-right'></i>" +
         "</span>" +
       "</li>"
     );
