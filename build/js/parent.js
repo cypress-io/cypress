@@ -1,6 +1,6 @@
 // need to use window.onload here so all of
 //our iframes and tests are loaded
-(function(Mocha){
+;(function(Mocha){
 
   // need to find an easy way to proxy the 'Test ID'
   // from each iframe child into each of these methods
@@ -16,50 +16,90 @@
         _this.logs.push(obj);
       }
     };
+
+    this.error = function(test, msg, obj) {
+      this.output.add({
+        title: getTestTitle(test),
+        id: getTestId(test),
+        type: "error",
+        msg: msg,
+        obj: obj
+      });
+      return this;
+    }
   };
 
   var eclMethods = {
-    log: function(title, id, msg) {
+    log: function(test, msg) {
       this.output.add({
-        title: title,
-        id: id,
+        title: getTestTitle(test),
+        id: getTestId(test),
         type: "log",
         msg: msg
       });
       return this;
     },
 
-    info: function(title, id, msg) {
+    info: function(test, msg) {
       this.output.add({
-        title: title,
-        id: id,
+        title: getTestTitle(test),
+        id: getTestId(test),
         type: "info",
         msg: msg
       });
       return this;
     },
 
-    warn: function(title, id, msg) {
+    warn: function(test, msg) {
       return this;
     },
 
-    xhr: function(title, id, req, res) {
+    xhr: function(test, req, res) {
       return this;
     },
 
-    find: function(title, id, el) {
+    find: function(test, el) {
+      // need to instantiate a new finder Ecl class here
+      // so we can return that in order to do things with
+      // the el
+
+      var $ = getSuiteWindow(test).$
+
+      var el = $(el)
+
+      var _this = this;
+
       this.output.add({
-        title: title,
-        id: id,
+        title: getTestTitle(test),
+        id: getTestId(test),
         type: "dom",
-        msg: "Finding el: '" + $(el).prop("nodeName").toLowerCase() + "' => " + (el.length ? "Found" : "Not Found")
+        msg: "Finding el: '" + el.prop("nodeName").toLowerCase() + "' => " + (el.length ? "Found" : "Not Found"),
+        dom: $("body").clone(true, true)
       })
-      return this;
+
+      // hack here just for proof of concept
+      var click = el.click;
+
+      el.click = function() {
+        console.warn("el clicked!", this);
+
+        click.apply(this, arguments)
+
+        _this.output.add({
+          title: getTestTitle(test),
+          id: getTestId(test),
+          type: "dom",
+          msg: "clicking el: '" + el.prop("nodeName").toLowerCase() + "'",
+          dom: $("body").clone(true, true)
+        })
+      };
+
+      return el;
     }
   };
 
   _.extend(Eclectus.prototype, {
-    patch: function(title, id) {
+    patch: function(test) {
       var fns = _.functions(eclMethods)
       var _this = this;
 
@@ -67,7 +107,7 @@
       _.each(fns, function(fn){
         // must use a separate object for eclMethods since we're
         // using those as buffer and re-partialing them each time
-        _this[fn] = _.partial(eclMethods[fn], title, id)
+        _this[fn] = _.partial(eclMethods[fn],test)
       });
     }
   });
@@ -164,7 +204,7 @@
     });
 
     runner.on("test end", function(test){
-      console.log("test end", test, test.state)
+      console.log("test end", test, test.state, test.err)
 
       // need to reduce until we're at the top parent
       // test.suite.parents: mocha.js 4704
@@ -336,9 +376,26 @@
     }
   };
 
+  // Mocha.process.on = function(e, fn){
+  //   console.warn("MOCHA PROCESS ON", fn, this)
+  // };
+
+  // handle failing when its not a test
+  // look at the parent title?
+  var fail = Mocha.Runner.prototype.fail
+  Mocha.Runner.prototype.fail = function(test, err) {
+    console.warn("MOCHA RUNNER FAIL", test, err);
+    Ecl.error(test, err.message, {err: err})
+    // window.onerror.call(this, err)
+    // console.warn(err.lineNumber)
+    // throw new Error(err)
+    console.error(err)
+    // throw err
+  }
+
   var emit = Mocha.Runner.prototype.emit
   Mocha.Runner.prototype.emit = function() {
-    // console.log("Child Runner Proto emit", window, this, arguments, emit);
+    console.log("Child Runner Proto emit", window, this, arguments, emit);
     var args = [].slice.apply(arguments);
 
     switch(args[0]){
@@ -352,7 +409,7 @@
       case "test":
         // proxy all of the Ecl methods here with the test's title + id
         console.log("test title is:", args[1].title, args[1], getSuiteId(args[1]))
-        Ecl.patch(getTestTitle(args[1]), getTestId(args[1]))
+        Ecl.patch(args[1])
         break;
 
     };
