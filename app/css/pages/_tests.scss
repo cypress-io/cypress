@@ -75,12 +75,13 @@
   #ecl-panel {
     position: fixed;
     bottom: 0;
+    padding: 0;
+    overflow: hidden;
 
     ul {
       list-style-type: none;
       padding-left: 0;
-      background-color: #fff;
-      overflow: hidden;
+      margin-bottom: 0;
 
       li {
         padding: 5px 10px;
@@ -88,6 +89,10 @@
         list-style-type: none;
         border-bottom: 1px dotted #CCC;
         overflow: auto;
+
+        &:last-child {
+          border-bottom: 0;
+        }
 
         & .title {
           display: block;
@@ -104,7 +109,7 @@
         }
 
         & .test {
-          font-weight: bold
+          font-weight: 600
         }
 
         i {
