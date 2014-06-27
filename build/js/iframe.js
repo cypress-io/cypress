@@ -46,6 +46,7 @@ mocha.suite.beforeAll(function () {
   });
 });
 
+var chai = parent.chai;
 
 var expect = chai.expect,
     should = chai.should(),
