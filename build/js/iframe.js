@@ -1,11 +1,12 @@
 // proxy the Ecl to the parent
 window.Ecl = parent.Ecl;
 
-window.onerror = function() {
-  if (parent.onerror) {
-    return parent.onerror.apply(parent, arguments);
-  }
-};
+// for some reason applying this to the parent is not bubbling whatsoever
+// window.onerror = function() {
+//   if (parent.onerror) {
+//     return parent.onerror.apply(parent, arguments);
+//   }
+// };
 
 window.Mocha = Object.create(parent.Mocha);
 window.mocha = Object.create(parent.mocha);
@@ -45,6 +46,7 @@ mocha.suite.beforeAll(function () {
   });
 });
 
+var chai = parent.chai;
 
 var expect = chai.expect,
     should = chai.should(),

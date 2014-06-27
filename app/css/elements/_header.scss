@@ -1,0 +1,57 @@
+#header-container {
+  background-color: lighten(#535762, 0%);
+
+  #header-content {
+    padding: 0 20px;
+
+    ul#test-tabs {
+      list-style-type: none;
+      margin: 0;
+      padding: 21px 0 0;
+      overflow: auto;
+
+      li {
+        float: left;
+        border-radius: 5px 5px 0 0;
+        line-height: 30px;
+        margin-left: 5px;
+
+        &.passed {
+          border-top: 1px solid darken(#23AE89, 5%);
+          background-color: lighten(#535762, 25%);
+
+          i {
+            color: darken(#23AE89, 8%);
+          }
+        }
+
+        &.failed {
+          border-top: 1px solid darken(#DF4A32, 5%);
+          background-color: lighten(#535762, 25%);
+
+          i {
+            color: darken(#DF4A32, 5%);
+          }
+        }
+
+        &.active {
+          border-top: 1px solid #3380FF;
+          background-color: #F6F6F6;
+
+          a {
+            color: #3380FF
+          }
+        }
+
+        a {
+          color: #fff;
+          padding: 5px 10px;
+        }
+
+        i {
+          margin-right: 3px;
+        }
+      }
+    }
+  }
+}

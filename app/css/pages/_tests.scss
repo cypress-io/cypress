@@ -1,0 +1,124 @@
+#test-page {
+  position: relative;
+
+  #stats-container {
+    background-color: white;
+    padding: 0;
+    text-align: center;
+    float: left;
+    border-radius: 5px;
+    color: #666;
+    box-shadow: 0 1px 0 #ddd;
+    overflow: hidden;
+
+    li {
+      list-style-type: none;
+      float: left;
+      margin: 0 10px;
+      line-height: 2;
+    }
+
+    #tests-duration {
+      background-color: #e1e1e1;
+      margin-right: 0;
+      padding: 0 10px;
+    }
+  }
+
+  #iframe-wrapper {
+    position: absolute;
+    right: 0;
+    top: 0;
+
+    #iframe-container {
+      height: 100;
+      width: 100%;
+      position: relative;
+
+      iframe {
+        display: none;
+        border-top: 2px solid #c8c8c8;
+        border-bottom: 2px solid #eee;
+        border-left: 2px solid #ddd;
+        border-right: 2px solid #ddd;
+        z-index: 1;
+        background-color: white;
+      }
+    }
+  }
+
+  #mocha {
+    clear: both;
+
+    li {
+      list-style-type: none;
+    }
+
+    ul.suite {
+      padding-left: 5px;
+
+      &>li {
+        font-family: "Raleway",Helvetica,sans-serif;
+        font-weight: 300;
+        font-size: 16px;
+      }
+
+      ul.test {
+        padding-left: 15px;
+        font-family: "Open Sans", sans-serif;
+        font-size: 13px;
+        font-weight: 300;
+      }
+    }
+  }
+
+  #ecl-panel {
+    position: fixed;
+    bottom: 0;
+    padding: 0;
+    overflow: hidden;
+
+    ul {
+      list-style-type: none;
+      padding-left: 0;
+      margin-bottom: 0;
+
+      li {
+        padding: 5px 10px;
+        margin: 0;
+        list-style-type: none;
+        border-bottom: 1px dotted #CCC;
+        overflow: auto;
+
+        &:last-child {
+          border-bottom: 0;
+        }
+
+        & .title {
+          display: block;
+        }
+
+        & .msg {
+          display: block;
+        }
+
+        & .id {
+          font-size: 11px;
+          color: #999;
+          margin-right: 5px
+        }
+
+        & .test {
+          font-weight: 600
+        }
+
+        i {
+          font-size: 10px;
+          font-weight: 200;
+          color: #999;
+        }
+      }
+    }
+  }
+
+}

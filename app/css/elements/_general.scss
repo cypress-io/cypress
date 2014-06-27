@@ -1,0 +1,57 @@
+html {
+  height: 100%;
+}
+
+body {
+  position: relative;
+  padding: 0;
+  background-color: #F6F6F6;
+  font-family: "Open Sans", sans-serif;
+  font-size: 12px;
+  color: #555;
+  // opacity: 0;
+  // margin-left: -20px;
+  height: 100%
+}
+
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 300;
+}
+
+a {
+  color: #3380FF;
+  text-decoration: none;
+  outline: 0 none;
+}
+
+a:focus, a:hover, a:active {
+  outline: 0 none;
+  text-decoration: none;
+  color: #3078ef;
+}
+
+p {
+  font-size: 13px;
+  line-height: 22px;
+}
+
+b {
+  font-weight: 400;
+}
+
+blockquote p {
+  font-size:1 5px;
+}
+
+ul {
+  padding-left: 30px;
+}
+
+#primary-content{
+  margin-left: 216px;
+  position: relative;
+  padding: 0;
+  display: table-cell;
+  vertical-align: top;
+}

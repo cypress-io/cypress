@@ -1,6 +1,6 @@
 // need to use window.onload here so all of
 //our iframes and tests are loaded
-(function(Mocha){
+;(function(Mocha){
 
   // need to find an easy way to proxy the 'Test ID'
   // from each iframe child into each of these methods
@@ -16,50 +16,96 @@
         _this.logs.push(obj);
       }
     };
+
+    this.error = function(test, msg, obj) {
+      this.output.add({
+        title: getTestTitle(test),
+        id: getTestId(test),
+        type: "error",
+        msg: msg,
+        obj: obj
+      });
+      return this;
+    }
   };
 
   var eclMethods = {
-    log: function(title, id, msg) {
+    log: function(test, msg) {
       this.output.add({
-        title: title,
-        id: id,
+        title: getTestTitle(test),
+        id: getTestId(test),
         type: "log",
         msg: msg
       });
       return this;
     },
 
-    info: function(title, id, msg) {
+    info: function(test, msg) {
       this.output.add({
-        title: title,
-        id: id,
+        title: getTestTitle(test),
+        id: getTestId(test),
         type: "info",
         msg: msg
       });
       return this;
     },
 
-    warn: function(title, id, msg) {
+    warn: function(test, msg) {
       return this;
     },
 
-    xhr: function(title, id, req, res) {
-      return this;
-    },
-
-    find: function(title, id, el) {
+    xhr: function(test, msg) {
       this.output.add({
-        title: title,
-        id: id,
-        type: "dom",
-        msg: "Finding el: '" + $(el).prop("nodeName").toLowerCase() + "' => " + (el.length ? "Found" : "Not Found")
-      })
+        title: getTestTitle(test),
+        id: getTestId(test),
+        type: "info",
+        msg: msg
+      });
       return this;
+    },
+
+    find: function(test, el) {
+      // need to instantiate a new finder Ecl class here
+      // so we can return that in order to do things with
+      // the el
+
+      var $ = getSuiteWindow(test).$
+
+      var el = $(el)
+
+      var _this = this;
+
+      this.output.add({
+        title: getTestTitle(test),
+        id: getTestId(test),
+        type: "dom",
+        msg: "Finding el: '" + el.prop("nodeName").toLowerCase() + "' => " + (el.length ? "Found" : "Not Found"),
+        dom: $("body").clone(true, true)
+      })
+
+      // hack here just for proof of concept
+      var click = el.click;
+
+      el.click = function() {
+        console.warn("el clicked!", this);
+
+        click.apply(this, arguments)
+
+        _this.output.add({
+          title: getTestTitle(test),
+          id: getTestId(test),
+          type: "dom",
+          msg: "clicking el: '" + el.prop("nodeName").toLowerCase() + "'",
+          dom: $("body").clone(true, true)
+        })
+      };
+
+      return el;
     }
   };
 
   _.extend(Eclectus.prototype, {
-    patch: function(title, id) {
+    patch: function(test) {
       var fns = _.functions(eclMethods)
       var _this = this;
 
@@ -67,10 +113,113 @@
       _.each(fns, function(fn){
         // must use a separate object for eclMethods since we're
         // using those as buffer and re-partialing them each time
-        _this[fn] = _.partial(eclMethods[fn], title, id)
+        _this[fn] = _.partial(eclMethods[fn],test)
       });
+    },
+
+    beforeAll: function(){
+      console.info("suite beforeAll", this)
+      this.sandbox = new Eclectus.Sandbox(this)
+    },
+
+    afterEach: function(){
+      console.info("suite afterEach", this)
+      this.sandbox.restore()
     }
   });
+
+  Eclectus.Sandbox = function(ctx){
+    // hold reference to iframe window
+    this._window = getSuiteWindow(ctx.test)
+
+    // hold the actual sinon sandbox
+    this._sandbox = this._window.sinon.sandbox.create()
+
+    this.requests = []
+    this.responses = []
+  };
+
+  _.extend(Eclectus.Sandbox.prototype, {
+    get: function(){
+      return this._sandbox
+    },
+
+    restore: function(){
+      this._server && this._server.restore && this._server.restore()
+      this._xhr && this._xhr.restore && this._xhr.restore()
+
+      return this;
+    },
+
+    server: function(){
+      this._server = this._window.sinon.fakeServer.create()
+
+      this._server.addRequest = _.wrap(this._server.addRequest, function(orig, xhrObj){
+
+        //call the original addRequest method
+        orig.call(this, xhrObj)
+
+        //overload the xhrObj's onsend method so we log out when the request happens
+        xhrObj.onSend = _.wrap(xhrObj.onSend, function(orig){
+          Ecl.xhr("Request: " + xhrObj.method + " " + xhrObj.url)
+          orig.call(orig)
+        });
+
+      });
+
+
+      this.server.mock = _.bind(mock, this, this._server)
+
+      this.server.respond = function(){}
+
+      return this;
+    },
+
+    xhr: function(){
+      this._xhr = this._window.sinon.useFakeXMLHttpRequest()
+      return this;
+    }
+  });
+
+  var mock = function mock(server, options){
+    var options = options || {}
+
+    console.log("mock", arguments)
+
+    _.defaults(options, {
+      url: /.*/,
+      method: "GET",
+      status: 200,
+      contentType: "application/json",
+      response: "",
+      headers: {}
+    });
+
+    server.respondWith(function(request){
+      if (request.readyState === 4) return
+
+      if (requestMatchesResponse(request, options)){
+        var headers = _.extend(options.headers, { "Content-Type": options.contentType });
+
+        return request.respond(options.status, headers, parseResponse(options));
+      }
+    });
+  };
+
+  var requestMatchesResponse = function requestMatchesResponse(request, options){
+    return request.method === options.method &&
+      (_.isRegExp(options.url) ? options.url.test(request.url) : options.url === request.url)
+  };
+
+  var parseResponse = function parseResponse(options){
+    var response = _.result(options, "response")
+
+    if (!_.isString(response)){
+      return JSON.stringify(response)
+    }
+
+    return response
+  };
 
   var iframes = ["foo", "bar"];
 
@@ -98,7 +247,11 @@
   };
 
   Eclectus.Reporter = function ecl(runner){
-    console.log("runner is", runner)
+    console.info("runner is", runner.suite)
+
+    // runner.suite.beforeEach(function(){
+      // console.info("beforeEach", this)
+    // });
 
     window.addIframe = function (iframe) {
       iframes.push(iframe);
@@ -164,7 +317,7 @@
     });
 
     runner.on("test end", function(test){
-      console.log("test end", test, test.state)
+      console.log("test end", test, test.state, test.err)
 
       // need to reduce until we're at the top parent
       // test.suite.parents: mocha.js 4704
@@ -257,13 +410,13 @@
   var addOutputLog = function addOutputLog(obj){
     tmpl = _.template(
       "<li>" +
-        "<span class='left'>" +
+        "<span class='pull-left'>" +
           "<span class='test'><%= title %></span>" +
           "<span class='msg'><%= msg %></span>" +
         "</span>" +
-        "<span class='right'>" +
+        "<span class='pull-right'>" +
           "<span class='id'><%= id %></span>" +
-          "<span class='arrow'>></span>" +
+          "<i class='fa fa-chevron-right'></i>" +
         "</span>" +
       "</li>"
     );
@@ -309,11 +462,15 @@
         src: "/iframes/" + next + ".html",
         "class": "iframe-spec",
         load: function(){
-          // console.info("loaded!", iframe, this);
+          console.info("loaded!", iframe, this);
           // debugger
           suite         = this.contentWindow.mocha.suite
           suite.window  = this.contentWindow
           suite.id      = id || _.uniqueId("suite")
+
+          suite.beforeAll(Ecl.beforeAll)
+
+          suite.afterEach(Ecl.afterEach)
 
           // add the suite to the stats
           stats.suites[suite.id] = {
@@ -332,13 +489,39 @@
           });
         }
       });
+
+      console.warn("iframe", iframe, iframe[0], iframe[0].contentWindow)
+
+      // _.extend(iframe[0].contentWindow, {
+      //   expect: chai.expect,
+      //   should: chai.should(),
+      //   assert: chai.assert
+      // });
+
       iframe.appendTo($("#iframe-container"))
     }
   };
 
+  // Mocha.process.on = function(e, fn){
+  //   console.warn("MOCHA PROCESS ON", fn, this)
+  // };
+
+  // handle failing when its not a test
+  // look at the parent title?
+  var fail = Mocha.Runner.prototype.fail
+  Mocha.Runner.prototype.fail = function(test, err) {
+    console.warn("MOCHA RUNNER FAIL", test, err);
+    Ecl.error(test, err.message, {err: err})
+    // window.onerror.call(this, err)
+    // console.warn(err.lineNumber)
+    // throw new Error(err)
+    console.error(err)
+    // throw err
+  }
+
   var emit = Mocha.Runner.prototype.emit
   Mocha.Runner.prototype.emit = function() {
-    // console.log("Child Runner Proto emit", window, this, arguments, emit);
+    console.log("Child Runner Proto emit", window, this, arguments, emit);
     var args = [].slice.apply(arguments);
 
     switch(args[0]){
@@ -352,7 +535,7 @@
       case "test":
         // proxy all of the Ecl methods here with the test's title + id
         console.log("test title is:", args[1].title, args[1], getSuiteId(args[1]))
-        Ecl.patch(getTestTitle(args[1]), getTestId(args[1]))
+        Ecl.patch(args[1])
         break;
 
     };
