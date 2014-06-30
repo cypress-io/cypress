@@ -24,7 +24,6 @@ window.App = (function($, _){
       $("body").html(tmp(obj)).css("background-color", obj.color);
 
       $("#green").click(function(){
-        console.info("#green has been clicked");
         $("body").css("background-color", "green")
       })
     }

@@ -72,51 +72,118 @@
     }
   }
 
-  #ecl-panel {
+  #ecl-panel-container {
     position: fixed;
     bottom: 0;
-    padding: 0;
-    overflow: hidden;
 
-    ul {
-      list-style-type: none;
-      padding-left: 0;
-      margin-bottom: 0;
+    #ecl-panel, #ecl-xhr-panel {
+      overflow: hidden;
+      float: left;
+      padding: 10px;
+
+      ul {
+        list-style-type: none;
+        padding-left: 0;
+        margin-bottom: 0;
+        clear: both;
+
+        li {
+          padding: 5px 10px;
+          margin: 0;
+          list-style-type: none;
+          border-bottom: 1px dotted #CCC;
+          overflow: auto;
+
+          &:last-child {
+            border-bottom: 0;
+          }
+
+          & .title {
+            display: block;
+          }
+
+          & .msg {
+            display: block;
+          }
+
+          & .id {
+            font-size: 11px;
+            color: #999;
+            margin-right: 5px
+          }
+
+          & .test {
+            font-weight: 600
+          }
+
+          i {
+            font-size: 10px;
+            font-weight: 200;
+            color: #999;
+          }
+        }
+      }
+    }
+
+    #ecl-xhr-panel {
+      float: left;
+      margin-left: 20px;
+      width: 400px;
+      background-color: #FCF8E3;
+
+      #xhr-header {
+        border-bottom: 1px solid #ddd;
+        float: left; width: 100%;
+        font-weight: 600;
+        span {
+          float: left;
+          width: 50%;
+          padding-left: 10px;
+        }
+        span:last-child {
+          padding-left: 5%;
+        }
+      }
 
       li {
-        padding: 5px 10px;
-        margin: 0;
-        list-style-type: none;
-        border-bottom: 1px dotted #CCC;
-        overflow: auto;
+        width: 100%;
+        cursor: pointer;
 
-        &:last-child {
-          border-bottom: 0;
+        &:hover {
+          background-color: darken(#FCF8E3, 5%)
         }
+      }
 
-        & .title {
-          display: block;
-        }
+      span {
+        display: inline-block;
+      }
 
-        & .msg {
-          display: block;
-        }
+      .method {
+        width: 15%;
+        color: #3380FF;
+      }
 
-        & .id {
-          font-size: 11px;
-          color: #999;
-          margin-right: 5px
-        }
+      .url {
+        width: 35%;
+        color: #3380FF
+      }
 
-        & .test {
-          font-weight: 600
-        }
+      .fa-chevron-right {
+        width: 5%;
+      }
 
-        i {
-          font-size: 10px;
-          font-weight: 200;
-          color: #999;
-        }
+      .status {
+        width: 10%;
+        color: #008000;
+      }
+
+      .body {
+        width: 35%;
+        color: #008000;
+      }
+
+      .pending {
+        width: 45%;
       }
     }
   }

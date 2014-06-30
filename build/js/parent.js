@@ -1,3 +1,7 @@
+// window.onerror = function(){
+  // console.warn("onerror", arguments)
+// };
+
 // need to use window.onload here so all of
 //our iframes and tests are loaded
 ;(function(Mocha){
@@ -54,13 +58,26 @@
       return this;
     },
 
-    xhr: function(test, msg) {
+    xhr: function(test, request) {
+      request._id = _.uniqueId("request");
+
       this.output.add({
         title: getTestTitle(test),
         id: getTestId(test),
-        type: "info",
-        msg: msg
+        type: "xhr",
+        msg: "Request: " + request.method + " " + request.url
       });
+
+      var xhr = {
+        id: request._id,
+        method: request.method,
+        url: request.url
+      }
+
+      addXhrOutputLog(xhr)
+
+      this.xhrs.push({request: request});
+
       return this;
     },
 
@@ -117,6 +134,21 @@
       });
     },
 
+    addXhrResponse: function(request, response) {
+      // looks up the stored xhr request and adds the response to it
+      var xhrObj = this.getXhrByRequest(request);
+      console.warn("xhrObj", xhrObj, this, request, response)
+      // xhrObj.response = response
+
+      appendXhrOutputLog(request, response)
+    },
+
+    getXhrByRequest: function(request){
+      return _.find(this.xhrs, function(xhr) { 
+        return xhr.request === request
+      });
+    },
+
     beforeAll: function(){
       // need to run the patch stuff here because we dont want to expose
       // a sandbox property to our tests.  instead we want to go through Ecl
@@ -156,16 +188,18 @@
     server: function(){
       this._server = this._window.sinon.fakeServer.create()
 
-      this._server.addRequest = _.wrap(this._server.addRequest, function(orig, xhrObj){
+      this._server.addRequest = _.wrap(this._server.addRequest, function(addRequestOrig, xhrObj){
 
         //call the original addRequest method
-        orig.call(this, xhrObj)
+        addRequestOrig.call(this, xhrObj)
 
         //overload the xhrObj's onsend method so we log out when the request happens
-        xhrObj.onSend = _.wrap(xhrObj.onSend, function(orig){
-          Ecl.xhr("Request: " + xhrObj.method + " " + xhrObj.url)
-          orig.call(orig)
+        xhrObj.onSend = _.wrap(xhrObj.onSend, function(onSendOrig){
+          Ecl.xhr(xhrObj);
+          onSendOrig.call(this)
         });
+
+        return xhrObj;
 
       });
 
@@ -206,8 +240,18 @@
 
       if (requestMatchesResponse(request, options)){
         var headers = _.extend(options.headers, { "Content-Type": options.contentType });
+        
+        var response = {
+          status: options.status,
+          headers: headers,
+          body: parseResponse(options)
+        }
 
-        return request.respond(options.status, headers, parseResponse(options));
+        console.warn("ECL RESPONSE", request, response)
+        
+        Ecl.addXhrResponse(request, response)
+
+        return request.respond(response.status, response.headers, response.body);
       }
     });
   };
@@ -414,7 +458,7 @@
   };
 
   var addOutputLog = function addOutputLog(obj){
-    tmpl = _.template(
+    var tmpl = _.template(
       "<li>" +
         "<span class='pull-left'>" +
           "<span class='test'><%= title %></span>" +
@@ -427,6 +471,33 @@
       "</li>"
     );
     $("#ecl-panel ul").append( tmpl(obj) );
+  }
+
+  var addXhrOutputLog = function addXhrOutputLog(xhr){
+    var tmpl = _.template(
+      "<li id='<%= id %>'>" +
+        "<span class='method'><%= method %></span>" +
+        "<span class='url'><%= url %></span>" +
+        "<i class='fa fa-chevron-right'></i>" +
+        "<span class='status'></span>" +
+        "<span class='body'></span>" +
+        "<span class='pending'>--pending--</span>" +
+      "</li>"
+    );
+    var li = $(tmpl(xhr)).appendTo("#ecl-xhr-panel ul")
+    li.find(".status").hide()
+    li.find(".body").hide()
+  }
+
+  var appendXhrOutputLog = function appendXhrOutputLog(request, response){
+    var li = $("#ecl-xhr-panel li#" + request._id)
+
+    li.find(".status").text(response.status).show()
+    li.find(".body").text(response.body).show()
+    li.find(".pending").hide()
+    li.click(function(){
+      console.log("Request: " + request.method + " " + request.url, request, "==> Response: " + response.status, JSON.parse(response.body))
+    })
   }
 
   var nextSuite = function nextSuite(runner){

@@ -3,12 +3,21 @@ describe("Foo Spec", function(){
   it("can foo [aaa]", function(){
     // Ecl.server()
     this.sandbox.server()
+
     this.sandbox.server.mock({
       url: /foo/,
-      response: {}
+      response: {foo: "bar"}
     })
-    $.getJSON("/foo.json")
-    console.warn("can foo", this, this.sandbox);
+
+    $.ajax({
+      url: "/foo",
+      data: {baz: "quux"},
+      success: function(){},
+      dataType: "json",
+    });
+
+    console.warn("SERVER RESPONDING", this.sandbox)
+    this.sandbox._server.respond()
     Ecl.info("msg from child");
     Ecl.find("body")
     expect("foo").to.eq("foo");
