@@ -401,7 +401,7 @@
           re = new RegExp("\\[" + activeId + "\\]$")
           runner.grep(re)
 
-          $(".active").removeClass("active")
+          $("#mocha .active").removeClass("active")
           $(this).addClass("active")
         }
       })

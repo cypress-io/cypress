@@ -52,6 +52,10 @@
 
     li {
       list-style-type: none;
+
+      &.active {
+        font-weight: bold;
+      }
     }
 
     ul.suite {
