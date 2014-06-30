@@ -4,7 +4,7 @@
 
 // need to use window.onload here so all of
 //our iframes and tests are loaded
-;(function(Mocha){
+;window.Eclectus = (function(Mocha){
 
   // need to find an easy way to proxy the 'Test ID'
   // from each iframe child into each of these methods
@@ -206,7 +206,7 @@
 
       this.server.mock = _.bind(mock, this, this._server)
 
-      this.server.respond = function(){}
+      this.server.respond = _.bind(this._server.respond, this._server)
 
       return this;
     },
@@ -622,6 +622,8 @@
 
   window.Ecl = new Eclectus()
   window.mocha = new Mocha({reporter: Eclectus.Reporter})
+
+  return Eclectus
 
 })(Mocha);
 

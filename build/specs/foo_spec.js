@@ -17,7 +17,7 @@ describe("Foo Spec", function(){
     });
 
     console.warn("SERVER RESPONDING", this.sandbox)
-    this.sandbox._server.respond()
+    this.sandbox.server.respond()
     Ecl.info("msg from child");
     Ecl.find("body")
     expect("foo").to.eq("foo");
