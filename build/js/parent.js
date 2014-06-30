@@ -118,6 +118,8 @@
     },
 
     beforeAll: function(){
+      // need to run the patch stuff here because we dont want to expose
+      // a sandbox property to our tests.  instead we want to go through Ecl
       console.info("suite beforeAll", this)
       this.sandbox = new Eclectus.Sandbox(this)
     },
@@ -180,6 +182,10 @@
       return this;
     }
   });
+
+  Eclectus.Sandbox.prototype.server.mock = function(){
+    throw new Error("You can't apply mocks without first patching xhr by running: Ecl.server()")
+  }
 
   var mock = function mock(server, options){
     var options = options || {}
