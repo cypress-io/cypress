@@ -144,7 +144,7 @@
     },
 
     getXhrByRequest: function(request){
-      return _.find(this.xhrs, function(xhr) { 
+      return _.find(this.xhrs, function(xhr) {
         return xhr.request === request
       });
     },
@@ -240,7 +240,7 @@
 
       if (requestMatchesResponse(request, options)){
         var headers = _.extend(options.headers, { "Content-Type": options.contentType });
-        
+
         var response = {
           status: options.status,
           headers: headers,
@@ -248,7 +248,7 @@
         }
 
         console.warn("ECL RESPONSE", request, response)
-        
+
         Ecl.addXhrResponse(request, response)
 
         return request.respond(response.status, response.headers, response.body);
@@ -481,7 +481,7 @@
         "<i class='fa fa-chevron-right'></i>" +
         "<span class='status'></span>" +
         "<span class='body'></span>" +
-        "<span class='pending'>--pending--</span>" +
+        "<span class='pending'><i class='fa fa-spin fa-spinner'></i>...loading</span>" +
       "</li>"
     );
     var li = $(tmpl(xhr)).appendTo("#ecl-xhr-panel ul")
