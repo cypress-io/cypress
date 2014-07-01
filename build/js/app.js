@@ -23,8 +23,16 @@ window.App = (function($, _){
 
       $("body").html(tmp(obj)).css("background-color", obj.color);
 
+      $("#red").click(function(){
+        $("body").css("background-color", "#DF4A32")
+      })
+
       $("#green").click(function(){
-        $("body").css("background-color", "green")
+        $("body").css("background-color", "#23AE89")
+      })
+
+      $("#blue").click(function(){
+        $("body").css("background-color", "#1C7EBB")
       })
     }
   };

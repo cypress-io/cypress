@@ -16,6 +16,7 @@
 
     this.output = {
       add: function(obj) {
+        obj._id = _.uniqueId("dom");
         addOutputLog(obj);
         _this.logs.push(obj);
       }
@@ -81,14 +82,14 @@
       return this;
     },
 
-    find: function(test, el) {
+    find: function(test, selector) {
       // need to instantiate a new finder Ecl class here
       // so we can return that in order to do things with
       // the el
 
       var $ = getSuiteWindow(test).$
 
-      var el = $(el)
+      var el = $(selector)
 
       var _this = this;
 
@@ -97,7 +98,8 @@
         id: getTestId(test),
         type: "dom",
         msg: "Finding el: '" + el.prop("nodeName").toLowerCase() + "' => " + (el.length ? "Found" : "Not Found"),
-        dom: $("body").clone(true, true)
+        dom: $("body").clone(true, true),
+        el: selector
       })
 
       // hack here just for proof of concept
@@ -147,6 +149,45 @@
       return _.find(this.xhrs, function(xhr) {
         return xhr.request === request
       });
+    },
+
+    updateIframeToDom: function(id){
+      var log = _.find(this.logs, function(log){
+        return log._id === id
+      });
+
+      if(log.dom){
+        log.dom.replaceAll($("#current-iframe").contents().find("body"))
+
+        if(log.el) {
+          this.highlightEl(log)
+        }
+      }
+    },
+
+    highlightEl: function(log){
+      var el = log.dom.find(log.el)
+      var dimensions = this.getDimensions(el)
+
+      $("<div>")
+        .appendTo(log.dom)
+          .css({
+            width: dimensions.width - 10,
+            height: dimensions.height - 10,
+            top: dimensions.offset.top,
+            left: dimensions.offset.left,
+            position: "absolute",
+            zIndex: el.css("zIndex") === "auto" || el.css("zIndex") === 0 ? 1000 : Number(el.css("zIndex")),
+            border: "5px solid red"
+          })
+    },
+
+    getDimensions: function(el){
+      return {
+        offset: el.offset(),
+        width: el.outerWidth(false),
+        height: el.outerHeight(false)
+      }
     },
 
     beforeAll: function(){
@@ -223,8 +264,6 @@
 
   var mock = function mock(server, options){
     var options = options || {}
-
-    console.log("mock", arguments)
 
     _.defaults(options, {
       url: /.*/,
@@ -459,7 +498,7 @@
 
   var addOutputLog = function addOutputLog(obj){
     var tmpl = _.template(
-      "<li>" +
+      "<li class='<%= type %>' id='<%= _id %>'>" +
         "<span class='pull-left'>" +
           "<span class='test'><%= title %></span>" +
           "<span class='msg'><%= msg %></span>" +
@@ -470,7 +509,12 @@
         "</span>" +
       "</li>"
     );
-    $("#ecl-panel ul").append( tmpl(obj) );
+
+    $(tmpl(obj)).appendTo("#ecl-panel ul").click(function(){
+      $("#ecl-panel .active").removeClass("active")
+      $(this).addClass("active")
+      Ecl.updateIframeToDom($(this).prop("id"))
+    })
   }
 
   var addXhrOutputLog = function addXhrOutputLog(xhr){
@@ -481,7 +525,7 @@
         "<i class='fa fa-chevron-right'></i>" +
         "<span class='status'></span>" +
         "<span class='body'></span>" +
-        "<span class='pending'><i class='fa fa-spin fa-spinner'></i>...loading</span>" +
+        "<span class='pending'><i class='fa fa-spin fa-refresh'></i>...loading</span>" +
       "</li>"
     );
     var li = $(tmpl(xhr)).appendTo("#ecl-xhr-panel ul")

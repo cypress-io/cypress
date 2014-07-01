@@ -129,6 +129,51 @@
       }
     }
 
+    #ecl-panel {
+      ul li {
+        padding-left: 20px;
+
+        &.xhr:before,
+        &.log:before,
+        &.info:before,
+        &.dom:before {
+          @extend .#{$fa-css-prefix}-circle:before;
+          @extend .fa;
+          position: absolute;
+          left: 13px;
+          margin-top: 6px;
+        }
+
+        &.xhr:before {
+          color: #FFB61C;
+        }
+
+        &.log:before {
+          color: lighten(#9296A3, 20%);
+        }
+
+        &.info:before {
+          color: #335397;
+        }
+
+        &.dom:before {
+          color: #2EC1CC;
+        }
+
+        &.dom {
+          cursor: pointer;
+        }
+
+        &.dom:hover {
+          background-color: lighten(#1C7EBB, 50%);
+        }
+
+        &.dom.active {
+          background-color: lighten(#1C7EBB, 43%);
+        }
+      }
+    }
+
     #ecl-xhr-panel {
       float: left;
       margin-left: 20px;
@@ -190,7 +235,7 @@
         width: 45%;
 
         i {
-          font-size: 16px;
+          font-size: 15px;
           margin-right: 5px;
           color: #444;
         }

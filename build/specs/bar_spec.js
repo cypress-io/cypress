@@ -19,7 +19,9 @@ describe("Bar Spec", function(){
 
   it("can bar2 [aac]", function(){
     Ecl.log("can bar2");
+    Ecl.find("#red").click()
     Ecl.find("#green").click()
+    Ecl.find("#blue").click()
     expect("bar2").to.eq("bar2");
   });
 
