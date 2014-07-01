@@ -172,13 +172,13 @@
       $("<div>")
         .appendTo(log.dom)
           .css({
-            width: dimensions.width - 10,
-            height: dimensions.height - 10,
+            width: dimensions.width - 6,
+            height: dimensions.height - 6,
             top: dimensions.offset.top,
             left: dimensions.offset.left,
             position: "absolute",
             zIndex: el.css("zIndex") === "auto" || el.css("zIndex") === 0 ? 1000 : Number(el.css("zIndex")),
-            border: "5px solid red"
+            border: "3px solid red"
           })
     },
 
