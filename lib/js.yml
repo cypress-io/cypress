@@ -18,3 +18,4 @@ eclectus:
   - app/js/backbone/lib/components/**
   - app/js/backbone/entities/abstract/*
   - app/js/backbone/entities/*
+  - app/js/backbone/apps/**

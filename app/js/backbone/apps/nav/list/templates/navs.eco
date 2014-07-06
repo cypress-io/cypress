@@ -1,0 +1,16 @@
+<div class="ecl-sidebar">
+  <div class="ecl-toggle">
+    <i class="fa fa-reorder"></i>
+  </div>
+  <div class="ecl-navblock">
+    <div class="collapse-button">
+      <div class="pull-left logo">Eclectus</div>
+      <div class="pull-right">
+        <button class="btn btn-default" id="sidebar-collapse">
+          <i class="fa fa-angle-left"></i>
+        </button>
+      </div>
+    </div>
+    <ul class="ecl-vnavigation"></ul>
+  </div>
+</div>

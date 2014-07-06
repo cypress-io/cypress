@@ -79,6 +79,18 @@
     App.reqres.setHandler("default:region", function() {
       return App.mainRegion;
     });
+    App.on("before:start", function(options) {
+      if (options == null) {
+        options = {};
+      }
+      return console.warn("before:start");
+    });
+    App.on("start", function(options) {
+      if (options == null) {
+        options = {};
+      }
+      return App.module("NavApp").start();
+    });
     return App;
   })(Backbone, Marionette);
 
@@ -87,7 +99,7 @@
 if (!window.JST) {
   window.JST = {};
 }
-window.JST["_empty"] = function (__obj) {
+window.JST["backbone/lib/templates/_empty"] = function (__obj) {
   if (!__obj) __obj = {};
   var __out = [], __capture = function(callback) {
     var out = __out, result;
@@ -313,22 +325,22 @@ window.JST["_empty"] = function (__obj) {
         if (this.isUl()) {
           options.tagName = "li";
         }
-        this.itemViewOptions = _.extend({}, _.result(this, "itemViewOptions"), options);
+        this.childViewOptions = _.extend({}, _.result(this, "childViewOptions"), options);
       }
 
-      CompositeView.prototype.buildItemView = function(item, ItemViewType, itemViewOptions) {
+      CompositeView.prototype.buildItemView = function(item, ItemViewType, childViewOptions) {
         if (this.isTbody()) {
-          itemViewOptions.tableColumns = this.$el.find("th").length;
+          childViewOptions.tableColumns = this.$el.find("th").length;
         }
         return CompositeView.__super__.buildItemView.apply(this, arguments);
       };
 
       CompositeView.prototype.isTbody = function() {
-        return this.itemViewContainer === "tbody";
+        return this.childViewContainer === "tbody";
       };
 
       CompositeView.prototype.isUl = function() {
-        return this.itemViewContainer === "ul";
+        return this.childViewContainer === "ul";
       };
 
       return CompositeView;
@@ -715,6 +727,7 @@ window.JST["_empty"] = function (__obj) {
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   this.Ecl.module("Entities", function(Entities, App, Backbone, Marionette, $, _) {
+    var API;
     Entities.Nav = (function(_super) {
       __extends(Nav, _super);
 
@@ -725,7 +738,7 @@ window.JST["_empty"] = function (__obj) {
       return Nav;
 
     })(Entities.Model);
-    return Entities.NavsCollection = (function(_super) {
+    Entities.NavsCollection = (function(_super) {
       __extends(NavsCollection, _super);
 
       function NavsCollection() {
@@ -737,6 +750,230 @@ window.JST["_empty"] = function (__obj) {
       return NavsCollection;
 
     })(Entities.Collection);
+    API = {
+      getNavs: function() {
+        return new Entities.NavsCollection([
+          {
+            name: "Tests",
+            href: "#",
+            icon: "fa fa-code"
+          }, {
+            name: "Organize",
+            href: "#",
+            icon: "fa fa-th"
+          }, {
+            name: "Analytics",
+            href: "#",
+            icon: "fa fa-bar-chart-o"
+          }, {
+            name: "Settings",
+            href: "#",
+            icon: "fa fa-cog"
+          }
+        ]);
+      }
+    };
+    return App.reqres.setHandler("nav:entities", function() {
+      return API.getNavs();
+    });
   });
 
 }).call(this);
+; 
+(function() {
+  this.Ecl.module("NavApp", function(NavApp, App, Backbone, Marionette, $, _) {
+    this.startWithParent = false;
+    return NavApp.on("start", function() {
+      console.warn("NavApp starting");
+      return new NavApp.List.Controller;
+    });
+  });
+
+}).call(this);
+; 
+(function() {
+  var __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  this.Ecl.module("NavApp.List", function(List, App, Backbone, Marionette, $, _) {
+    return List.Controller = (function(_super) {
+      __extends(Controller, _super);
+
+      function Controller() {
+        return Controller.__super__.constructor.apply(this, arguments);
+      }
+
+      Controller.prototype.initialize = function() {
+        var navs, view;
+        navs = App.request("nav:entities");
+        view = this.getView(navs);
+        return this.show(view, {
+          region: App.navRegion
+        });
+      };
+
+      Controller.prototype.getView = function(navs) {
+        return new List.Navs({
+          collection: navs
+        });
+      };
+
+      return Controller;
+
+    })(App.Controllers.Application);
+  });
+
+}).call(this);
+; 
+(function() {
+  var __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  this.Ecl.module("NavApp.List", function(List, App, Backbone, Marionette, $, _) {
+    List.Nav = (function(_super) {
+      __extends(Nav, _super);
+
+      function Nav() {
+        return Nav.__super__.constructor.apply(this, arguments);
+      }
+
+      Nav.prototype.template = "nav/list/_nav";
+
+      Nav.prototype.className = "parent";
+
+      return Nav;
+
+    })(App.Views.ItemView);
+    return List.Navs = (function(_super) {
+      __extends(Navs, _super);
+
+      function Navs() {
+        return Navs.__super__.constructor.apply(this, arguments);
+      }
+
+      Navs.prototype.template = "nav/list/navs";
+
+      Navs.prototype.childView = List.Nav;
+
+      Navs.prototype.childViewContainer = "ul";
+
+      return Navs;
+
+    })(App.Views.CompositeView);
+  });
+
+}).call(this);
+; 
+if (!window.JST) {
+  window.JST = {};
+}
+window.JST["backbone/apps/nav/list/templates/_nav"] = function (__obj) {
+  if (!__obj) __obj = {};
+  var __out = [], __capture = function(callback) {
+    var out = __out, result;
+    __out = [];
+    callback.call(this);
+    result = __out.join('');
+    __out = out;
+    return __safe(result);
+  }, __sanitize = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else if (typeof value !== 'undefined' && value != null) {
+      return __escape(value);
+    } else {
+      return '';
+    }
+  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
+  __safe = __obj.safe = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else {
+      if (!(typeof value !== 'undefined' && value != null)) value = '';
+      var result = new String(value);
+      result.ecoSafe = true;
+      return result;
+    }
+  };
+  if (!__escape) {
+    __escape = __obj.escape = function(value) {
+      return ('' + value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    };
+  }
+  (function() {
+    (function() {
+      __out.push('<a href="');
+    
+      __out.push(__sanitize(this.href));
+    
+      __out.push('">\n  <i class="');
+    
+      __out.push(__sanitize(this.icon));
+    
+      __out.push('"></i>\n  ');
+    
+      __out.push(__sanitize(this.name));
+    
+      __out.push('\n</a>');
+    
+    }).call(this);
+    
+  }).call(__obj);
+  __obj.safe = __objSafe, __obj.escape = __escape;
+  return __out.join('');
+};
+; 
+if (!window.JST) {
+  window.JST = {};
+}
+window.JST["backbone/apps/nav/list/templates/navs"] = function (__obj) {
+  if (!__obj) __obj = {};
+  var __out = [], __capture = function(callback) {
+    var out = __out, result;
+    __out = [];
+    callback.call(this);
+    result = __out.join('');
+    __out = out;
+    return __safe(result);
+  }, __sanitize = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else if (typeof value !== 'undefined' && value != null) {
+      return __escape(value);
+    } else {
+      return '';
+    }
+  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
+  __safe = __obj.safe = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else {
+      if (!(typeof value !== 'undefined' && value != null)) value = '';
+      var result = new String(value);
+      result.ecoSafe = true;
+      return result;
+    }
+  };
+  if (!__escape) {
+    __escape = __obj.escape = function(value) {
+      return ('' + value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    };
+  }
+  (function() {
+    (function() {
+      __out.push('<div class="ecl-sidebar">\n  <div class="ecl-toggle">\n    <i class="fa fa-reorder"></i>\n  </div>\n  <div class="ecl-navblock">\n    <div class="collapse-button">\n      <div class="pull-left logo">Eclectus</div>\n      <div class="pull-right">\n        <button class="btn btn-default" id="sidebar-collapse">\n          <i class="fa fa-angle-left"></i>\n        </button>\n      </div>\n    </div>\n    <ul class="ecl-vnavigation"></ul>\n  </div>\n</div>');
+    
+    }).call(this);
+    
+  }).call(__obj);
+  __obj.safe = __objSafe, __obj.escape = __escape;
+  return __out.join('');
+};
