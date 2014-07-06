@@ -22,11 +22,19 @@
     "errorhandler": "^1.0.2",
     "express": "^4.4.1",
     "gulp": "^3.7.0",
+    "gulp-coffee": "^2.0.1",
+    "gulp-concat": "^2.2.0",
+    "gulp-eco": "0.0.2",
     "gulp-load-plugins": "^0.5.1",
     "gulp-ruby-sass": "^0.5.0",
+    "gulp-tap": "^0.1.1",
+    "gulp-util": "^2.2.19",
     "http": "0.0.0",
+    "jquery-deferred": "^0.3.0",
+    "js-yaml": "^3.0.2",
     "method-override": "^2.0.2",
     "morgan": "^1.1.1",
-    "path": "^0.4.9"
+    "path": "^0.4.9",
+    "underscore": "^1.6.0"
   }
 }
