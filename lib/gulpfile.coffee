@@ -17,7 +17,7 @@ transform = (paths, options = {}) ->
       t.through($.coffee, []) if isCoffee(file)
 
     .pipe $.tap (file, t) ->
-      t.through($.eco, [])  if isEco(file)
+      t.through($.eco, [basePath: "app/js"])  if isEco(file)
 
     .pipe if options.concat then $.concat(options.concat + ".js", newLine: "; \r\n") else $.util.noop()
 
@@ -58,8 +58,16 @@ gulp.task "html", ->
   gulp.src("app/html/index.html")
     .pipe gulp.dest("build")
 
-gulp.task "watch", ->
+gulp.task "watch", ["watch:css", "watch:js", "watch:html"]
+
+gulp.task "watch:css", ->
   gulp.watch "app/css/**", ["css"]
+
+gulp.task "watch:js", ->
+  gulp.watch "app/js/**/*", ["js"]
+
+gulp.task "watch:html", ->
+  gulp.watch "app/html/index.html", ["html"]
 
 gulp.task "server", ->
   require("./server.coffee")
