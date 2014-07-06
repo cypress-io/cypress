@@ -8,14 +8,14 @@
       options.tagName = "tr" if @isTbody()
       options.tagName = "li" if @isUl()
 
-      @itemViewOptions = _.extend {}, _.result(@, "itemViewOptions"), options
+      @childViewOptions = _.extend {}, _.result(@, "childViewOptions"), options
 
-    buildItemView: (item, ItemViewType, itemViewOptions) ->
-      itemViewOptions.tableColumns = @$el.find("th").length if @isTbody()
+    buildItemView: (item, ItemViewType, childViewOptions) ->
+      childViewOptions.tableColumns = @$el.find("th").length if @isTbody()
       super
 
     isTbody: ->
-      @itemViewContainer is "tbody"
+      @childViewContainer is "tbody"
 
     isUl: ->
-      @itemViewContainer is "ul"
+      @childViewContainer is "ul"
