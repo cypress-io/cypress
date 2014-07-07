@@ -72,6 +72,7 @@
   this.Ecl = (function(Backbone, Marionette) {
     var App;
     App = new Marionette.Application;
+    App.rootRoute = "/tests";
     App.addRegions({
       navRegion: "#nav-region",
       mainRegion: "#main-region"
@@ -89,7 +90,11 @@
       if (options == null) {
         options = {};
       }
-      return App.module("NavApp").start();
+      App.module("NavApp").start();
+      App.startHistory();
+      if (!App.currentRoute()) {
+        return App.visit(App.rootRoute);
+      }
     });
     return App;
   })(Backbone, Marionette);
@@ -215,6 +220,23 @@ window.JST["backbone/lib/templates/_empty"] = function (__obj) {
 ; 
 (function() {
   this.Ecl.module("Utilities", function(Utilities, App, Backbone, Marionette, $, _) {
+    return _.extend(App, {
+      visit: function(route) {
+        return Backbone.history.navigate(route);
+      },
+      currentRoute: function() {
+        return Backbone.history.fragment || null;
+      },
+      startHistory: function() {
+        return Backbone.history.start();
+      }
+    });
+  });
+
+}).call(this);
+; 
+(function() {
+  this.Ecl.module("Utilities", function(Utilities, App, Backbone, Marionette, $, _) {
     var methods;
     methods = {
       lookups: ["backbone/apps/", "backbone/lib/components/", "backbone/lib/templates/", "support/"],
@@ -255,6 +277,119 @@ window.JST["backbone/lib/templates/_empty"] = function (__obj) {
         return !!this.getTemplate(path);
       }
     });
+  });
+
+}).call(this);
+; 
+(function() {
+  var __slice = [].slice;
+
+  this.Ecl.module("Utilities", function(Utilities, App, Backbone, Marionette, $, _) {
+    return window.Routes = (function(_, Backbone) {
+      var Routes, addRoutes, createPathFn, extractObjectParams, extractParams, getParams, getQueryParams, parseArray, parseObject, r, replacePath;
+      getParams = /(:([\w\d]+)|\*([\w\d]+))/g;
+      replacePath = function(path, part, replacement) {
+        if (replacement != null) {
+          return path.replace(part, replacement);
+        } else {
+          return path;
+        }
+      };
+      parseObject = function(parts, path, obj) {
+        return _.reduce(parts, function(memo, part, index) {
+          var sliced;
+          sliced = part.slice(1);
+          return memo = replacePath(memo, part, obj[sliced]);
+        }, path);
+      };
+      parseArray = function(parts, path, args) {
+        return _.reduce(parts, function(memo, part, index) {
+          return memo = replacePath(memo, part, args[index]);
+        }, path);
+      };
+      extractParams = function(args, parts) {
+        var count;
+        if (parts == null) {
+          parts = [];
+        }
+        count = _.isObject(args[0]) ? _.keys(args[0]).length : args.length;
+        if (count <= parts.length) {
+          return;
+        }
+        if (_.isObject(args[0])) {
+          return extractObjectParams(args[0], parts);
+        } else {
+          return args.pop();
+        }
+      };
+      extractObjectParams = function(obj, parts) {
+        var partsOfRoute, _ref;
+        partsOfRoute = _.map(parts, function(part) {
+          return part.replace(":", "");
+        });
+        return (_ref = _(obj)).omit.apply(_ref, partsOfRoute);
+      };
+      getQueryParams = function(path, args, parts) {
+        var params;
+        params = extractParams(args, parts);
+        if (!params) {
+          return path;
+        }
+        return Backbone.Router.prototype.toFragment(path, params);
+      };
+      createPathFn = function(pathString) {
+        var parts;
+        parts = pathString.match(getParams);
+        return function() {
+          var args, path;
+          args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+          path = pathString.toString();
+          if (args.length) {
+            path = (function() {
+              switch (false) {
+                case !_.isObject(args[0]):
+                  return parseObject(parts, path, args[0]);
+                default:
+                  return parseArray(parts, path, args);
+              }
+            })();
+          }
+          if (!/^(http|\/\/)/.test(path)) {
+            path = "/" + path;
+          }
+          path = getQueryParams(path, args, parts);
+          return path;
+        };
+      };
+      addRoutes = function(obj, routes) {
+        var name, path, _results;
+        _results = [];
+        for (name in routes) {
+          path = routes[name];
+          obj.routes[name] = path;
+          _results.push(obj[name + "_path"] = createPathFn(path));
+        }
+        return _results;
+      };
+      Routes = (function() {
+        function Routes(routes) {
+          this.routes = routes != null ? routes : {};
+        }
+
+        return Routes;
+
+      })();
+      r = new Routes;
+      r.url_for = function(name) {
+        return this.routes[name];
+      };
+      r.create = function() {
+        var args, path;
+        path = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+        return createPathFn(path).apply(this, args);
+      };
+      return r;
+    })(_, Backbone);
   });
 
 }).call(this);
@@ -723,6 +858,226 @@ window.JST["backbone/lib/templates/_empty"] = function (__obj) {
 }).call(this);
 ; 
 (function() {
+  var __slice = [].slice;
+
+  this.Ecl.module("Routers", function(Routers, App, Backbone, Marionette, $, _) {
+    var routeParams;
+    routeParams = /(:([\w\d]+)|\*([\w\d]+))/g;
+    Routers.Application = (function() {
+      Application.prototype.initialize = true;
+
+      Application.prototype.module = void 0;
+
+      Application.prototype.updateUrl = true;
+
+      Application.prototype.before = function() {};
+
+      Application.prototype.after = function() {};
+
+      Application.prototype.controllerMap = {
+        "list": "List",
+        "show": "Show",
+        "edit": "Edit",
+        "new": "New",
+        "destroy": "Destroy"
+      };
+
+      function Application() {
+        this.routes = this._createRoutes();
+        this.handlers = this._createHandlers();
+        if (this.initialize && this.hasRoutes()) {
+          App.addRouter(this);
+        }
+      }
+
+      Application.prototype.to = function(action, options) {
+        if (options == null) {
+          options = {};
+        }
+        return this.handlers[action](options);
+      };
+
+      Application.prototype.hasRoutes = function() {
+        return !_.isEmpty(this.routes);
+      };
+
+      Application.prototype._createRoutes = function() {
+        var routes;
+        routes = this._getActions((function(_this) {
+          return function(action, key) {
+            if (_.isUndefined(action) || !_(action).has("route")) {
+              return [];
+            }
+            return [action.route, key];
+          };
+        })(this));
+        return this._toObject(routes);
+      };
+
+      Application.prototype._createHandlers = function() {
+        var handlers;
+        handlers = this._getActions((function(_this) {
+          return function(action, key) {
+            var fn;
+            fn = function(options) {
+              var controller, resolve;
+              resolve = options.resolve;
+              controller = new (_this._getController(action, key))(options);
+              return typeof resolve === "function" ? resolve(controller) : void 0;
+            };
+            fn = _.wrap(fn, function() {
+              var args, before, df, options, orig;
+              orig = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+              options = _this._normalizeArguments(args, action, key);
+              df = $.Deferred();
+              df._id = _.uniqueId("deferred");
+              _.defaults(options, {
+                resolve: df.resolve
+              });
+              if (!options.resolve) {
+                options.deferred = df;
+              }
+              before = _this._invokeBefore(options, action);
+              if (before === false) {
+                return;
+              }
+              if (_this._shouldUpdateUrl(action, args)) {
+                _this._updateUrl(action, options);
+              }
+              $.when(before).done(function() {
+                return orig.call(_this, options);
+              });
+              return df;
+            });
+            return [key, fn];
+          };
+        })(this));
+        return this._toObject(handlers);
+      };
+
+      Application.prototype._normalizeArguments = function(args, action, key) {
+        var defaultParams;
+        if (this._argsArePresentAndStrings(args)) {
+          args[0] = this._parseStringMatches(args, action, key);
+        }
+        if (args[0] == null) {
+          args[0] = {};
+        }
+        defaultParams = _.isFunction(action != null ? action.defaultParams : void 0) ? action.defaultParams.call(this) : action != null ? action.defaultParams : void 0;
+        _.defaults(args[0], defaultParams || {});
+        return args[0];
+      };
+
+      Application.prototype._parseStringMatches = function(args, action, key) {
+        var route;
+        route = action != null ? action.route : void 0;
+        if (!route) {
+          throw new Error("Routes must be defined on the action: " + key);
+        }
+        return _.reduce(args, function(memo, arg) {
+          var i, matches;
+          i = _(args).indexOf(arg);
+          matches = route.match(routeParams);
+          memo[matches[i].slice(1)] = arg;
+          return memo;
+        }, {});
+      };
+
+      Application.prototype._invokeBefore = function(options, action) {
+        var before;
+        if (!(before = this._shouldInvokeBefore(action))) {
+          return;
+        }
+        return before.call(this, options);
+      };
+
+      Application.prototype._shouldInvokeBefore = function(action) {
+        return (action != null ? action.before : void 0) || this.before;
+      };
+
+      Application.prototype._interpolateUrl = function(action, options) {
+        return Routes.create(action.route, _(options).omit("region"));
+      };
+
+      Application.prototype._updateUrl = function(action, options) {
+        var route;
+        route = this._interpolateUrl(action, options);
+        if (App.currentRoute() !== route.replace(/^\//, "")) {
+          return App.visit(route);
+        }
+      };
+
+      Application.prototype._shouldUpdateUrl = function(action, args) {
+        if (!(action != null ? action.route : void 0) || this._argsArePresentAndStrings(args)) {
+          return false;
+        }
+        if (action && _(action).has("updateUrl")) {
+          return action != null ? action.updateUrl : void 0;
+        }
+        return this.updateUrl;
+      };
+
+      Application.prototype._getActions = function(fn) {
+        return _(this.actions).map((function(_this) {
+          return function(action, key) {
+            action = _.result(_this.actions, key);
+            return fn(action, key);
+          };
+        })(this));
+      };
+
+      Application.prototype._getController = function(action, key) {
+        switch (false) {
+          case !_.isFunction(action != null ? action.controller : void 0):
+            return action.controller;
+          case !_.isUndefined(this.module):
+            throw new Error("Module must be defined on the resource in order to instantiate a controller");
+            break;
+          case !_.isString(action != null ? action.controller : void 0):
+            return this._getControllerConstructor(this.module[action.controller]);
+          default:
+            return this._getControllerConstructor(this.module[this.controllerMap[key]], this.controllerMap[key], this.module.moduleName);
+        }
+      };
+
+      Application.prototype._getControllerConstructor = function(obj, key, module) {
+        var err;
+        try {
+          if (_.isFunction(obj)) {
+            return obj;
+          } else {
+            return obj.Controller;
+          }
+        } catch (_error) {
+          err = _error;
+          throw new Error("The '" + key + "' Controller was not found for for the module: '" + module + "'");
+        }
+      };
+
+      Application.prototype._argsArePresentAndStrings = function(args) {
+        return !_.isEmpty(args) && _.all(args, _.isString);
+      };
+
+      Application.prototype._toObject = function(array) {
+        return _.chain(array).reject(_.isEmpty).object().value();
+      };
+
+      return Application;
+
+    })();
+    return App.addRouter = function(resource) {
+      return App.addInitializer(function() {
+        return new Marionette.AppRouter({
+          appRoutes: resource.routes,
+          controller: resource.handlers
+        });
+      });
+    };
+  });
+
+}).call(this);
+; 
+(function() {
   var __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -781,12 +1136,119 @@ window.JST["backbone/lib/templates/_empty"] = function (__obj) {
 }).call(this);
 ; 
 (function() {
+  var __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  this.Ecl.module("TestsApp", function(TestsApp, App, Backbone, Marionette, $, _) {
+    var Router, router;
+    Router = (function(_super) {
+      __extends(Router, _super);
+
+      function Router() {
+        return Router.__super__.constructor.apply(this, arguments);
+      }
+
+      Router.prototype.module = TestsApp;
+
+      Router.prototype.actions = {
+        list: function() {
+          return {
+            route: "tests"
+          };
+        }
+      };
+
+      return Router;
+
+    })(App.Routers.Application);
+    return router = new Router;
+  });
+
+}).call(this);
+; 
+(function() {
+  var __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
   this.Ecl.module("NavApp", function(NavApp, App, Backbone, Marionette, $, _) {
+    var Router, router;
     this.startWithParent = false;
+    Router = (function(_super) {
+      __extends(Router, _super);
+
+      function Router() {
+        return Router.__super__.constructor.apply(this, arguments);
+      }
+
+      Router.prototype.module = NavApp;
+
+      Router.prototype.actions = {
+        list: function() {
+          return {
+            defaultParams: {
+              region: App.navRegion
+            }
+          };
+        }
+      };
+
+      return Router;
+
+    })(App.Routers.Application);
+    router = new Router;
     return NavApp.on("start", function() {
-      console.warn("NavApp starting");
-      return new NavApp.List.Controller;
+      return router.to("list");
     });
+  });
+
+}).call(this);
+; 
+(function() {
+  var __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  this.Ecl.module("TestsApp.List", function(List, App, Backbone, Marionette, $, _) {
+    return List.Controller = (function(_super) {
+      __extends(Controller, _super);
+
+      function Controller() {
+        return Controller.__super__.constructor.apply(this, arguments);
+      }
+
+      Controller.prototype.initialize = function() {
+        var view;
+        view = this.getView();
+        return this.show(view);
+      };
+
+      Controller.prototype.getView = function(navs) {
+        return new List.Tests;
+      };
+
+      return Controller;
+
+    })(App.Controllers.Application);
+  });
+
+}).call(this);
+; 
+(function() {
+  var __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  this.Ecl.module("TestsApp.List", function(List, App, Backbone, Marionette, $, _) {
+    return List.Tests = (function(_super) {
+      __extends(Tests, _super);
+
+      function Tests() {
+        return Tests.__super__.constructor.apply(this, arguments);
+      }
+
+      Tests.prototype.template = "tests/list/tests";
+
+      return Tests;
+
+    })(App.Views.LayoutView);
   });
 
 }).call(this);
@@ -807,9 +1269,7 @@ window.JST["backbone/lib/templates/_empty"] = function (__obj) {
         var navs, view;
         navs = App.request("nav:entities");
         view = this.getView(navs);
-        return this.show(view, {
-          region: App.navRegion
-        });
+        return this.show(view);
       };
 
       Controller.prototype.getView = function(navs) {
@@ -863,6 +1323,57 @@ window.JST["backbone/lib/templates/_empty"] = function (__obj) {
   });
 
 }).call(this);
+; 
+if (!window.JST) {
+  window.JST = {};
+}
+window.JST["backbone/apps/tests/list/templates/tests"] = function (__obj) {
+  if (!__obj) __obj = {};
+  var __out = [], __capture = function(callback) {
+    var out = __out, result;
+    __out = [];
+    callback.call(this);
+    result = __out.join('');
+    __out = out;
+    return __safe(result);
+  }, __sanitize = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else if (typeof value !== 'undefined' && value != null) {
+      return __escape(value);
+    } else {
+      return '';
+    }
+  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
+  __safe = __obj.safe = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else {
+      if (!(typeof value !== 'undefined' && value != null)) value = '';
+      var result = new String(value);
+      result.ecoSafe = true;
+      return result;
+    }
+  };
+  if (!__escape) {
+    __escape = __obj.escape = function(value) {
+      return ('' + value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    };
+  }
+  (function() {
+    (function() {
+      __out.push('<div id="header-container">\n  <div id="header-content">\n    <ul id="test-tabs">\n      <li class="active">\n        <a href="#">\n          <i class="fa fa-spin fa-circle-o-notch"></i>\n          20/25\n        </a>\n      </li>\n      <li class="passed">\n        <a href="#">\n          <i class="fa fa-check"></i>\n          8/8\n        </a>\n      </li>\n      <li class="failed">\n        <a href="#">\n          <i class="fa fa-times"></i>\n          7/12\n        </a>\n      </li>\n    </ul>\n  </div>\n</div>\n<div class="ecl-main-content">\n  <div id="test-page">\n    <ul id="stats-container">\n      <li id="tests-passed">\n        <span class="num"></span>\n        <span class="name">Passed</span>\n      </li>\n      <li id="tests-failed">\n        <span class="num"></span>\n        <span class="name">Failed</span>\n      </li>\n      <li id="tests-pending">\n        <span class="num"></span>\n        <span class="name">Pending</span>\n      </li>\n      <li id="tests-duration">0s</li>\n    </ul>\n    <div id="iframe-wrapper">\n      <div id="iframe-container">\n      </div>\n    </div>\n    <div id="mocha"></div>\n    <div id="ecl-panel-container">\n      <div id="ecl-panel" class="block-panel">\n        <ul></ul>\n      </div>\n      <div id="ecl-xhr-panel" class="block-panel">\n        <div id="xhr-header">\n          <span>Request</span>\n          <span>Response</span>\n        </div>\n        <ul></ul>\n      </div>\n    </div>\n  </div>\n</div>');
+    
+    }).call(this);
+    
+  }).call(__obj);
+  __obj.safe = __objSafe, __obj.escape = __escape;
+  return __out.join('');
+};
 ; 
 if (!window.JST) {
   window.JST = {};
