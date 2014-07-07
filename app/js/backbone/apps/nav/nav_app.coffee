@@ -1,17 +1,15 @@
 @Ecl.module "NavApp", (NavApp, App, Backbone, Marionette, $, _) ->
   @startWithParent = false
 
-  # class Router extends App.Routers.Application
-  #   module: NavApp
+  class Router extends App.Routers.Application
+    module: NavApp
 
-  #   actions:
-  #     list: ->
-  #       defaultParams:
-  #         region: App.navRegion
+    actions:
+      list: ->
+        defaultParams:
+          region: App.navRegion
 
-  # router = new Router
+  router = new Router
 
   NavApp.on "start", ->
-    # router.to "list"
-    console.warn "NavApp starting"
-    new NavApp.List.Controller
+    router.to "list"

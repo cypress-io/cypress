@@ -7,7 +7,7 @@
 
       view = @getView(navs)
 
-      @show view, region: App.navRegion
+      @show view
 
     getView: (navs) ->
       new List.Navs
