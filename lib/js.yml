@@ -5,6 +5,7 @@ vendor:
   - bower_components/marionette/lib/backbone.marionette.js
   - bower_components/underscore.string/underscore.string.js
   - bower_components/spin.js/spin.js
+  - bower_components/backbone-query-parameters/backbone.queryparams.js
   - bower_components/spin.js/jquery.spin.js
 
 eclectus:
@@ -16,6 +17,7 @@ eclectus:
   - app/js/backbone/lib/views/**
   - app/js/backbone/lib/controllers/**
   - app/js/backbone/lib/components/**
+  - app/js/backbone/lib/routers/**
   - app/js/backbone/entities/abstract/*
   - app/js/backbone/entities/*
   - app/js/backbone/apps/**
