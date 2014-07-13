@@ -8,7 +8,7 @@ jQuery    = require("jquery-deferred")
 
 transform = (paths, options = {}) ->
   _.defaults options,
-    destination: "./build/js"
+    destination: "./lib/public/js"
 
   df = jQuery.Deferred()
 
@@ -36,11 +36,11 @@ gulp.task "css", ->
       trace: true
       compass: true
       cacheLocation: ".tmp/.sass-cache"
-    .pipe gulp.dest "build/css"
+    .pipe gulp.dest "lib/public/css"
 
 gulp.task "fonts", ->
   gulp.src("bower_components/font-awesome/fonts/**")
-    .pipe gulp.dest "build/css/fonts"
+    .pipe gulp.dest "lib/public/css/fonts"
 
 gulp.task "js", (cb) ->
   bundles = yaml.load(fs.readFileSync("./lib/js.yml", "utf8"))
@@ -56,7 +56,7 @@ gulp.task "js", (cb) ->
 
 gulp.task "html", ->
   gulp.src("app/html/index.html")
-    .pipe gulp.dest("build")
+    .pipe gulp.dest("lib/public")
 
 gulp.task "watch", ["watch:css", "watch:js", "watch:html"]
 
