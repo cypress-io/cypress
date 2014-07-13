@@ -2,7 +2,6 @@
 
 var program   = require("commander")
 var path      = require("path")
-var exec      = require("child_process").exec
 var yo        = require("yeoman-generator")
 
 program
@@ -15,10 +14,6 @@ program
     yo("eclectus")
       .register(electusGenerator("config"), "eclectus")
       .run()
-
-    // exec("yo eclectus:config", function(err, stdout, stderr){
-    //   console.log(err, stdout, stderr)
-    // })
   })
 
 program
