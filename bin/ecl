@@ -21,11 +21,12 @@ program
   .command("start")
   .description("Starts the Eclectus server")
   .action(function(){
-    // console.log(__dirname)
-    // console.log(process.cwd())
-    // console.log(path.resolve())
+    // bail immediately here if we dont have the eclectus.json file
+    // tell us to run install
+
     require("coffee-script/register");
 
+    // need to add the eclectus.json file to the watch list
     var server = path.join(__dirname, "..", "lib", "server.coffee")
 
     nodemon({
