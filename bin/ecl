@@ -3,6 +3,7 @@
 var program   = require("commander")
 var path      = require("path")
 var yo        = require("yeoman-generator")
+var nodemon   = require("nodemon")
 
 program
   .version(require("../package.json").version)
@@ -24,7 +25,21 @@ program
     // console.log(process.cwd())
     // console.log(path.resolve())
     require("coffee-script/register");
-    require(path.join(__dirname, "..", "lib", "server"))
+
+    var server = path.join(__dirname, "..", "lib", "server.coffee")
+
+    nodemon({
+      script: server,
+      watch: [server]
+    })
+
+    nodemon.on("start", function(){
+      console.log("app has started")
+    })
+
+    nodemon.on("restart", function(files){
+      console.log("app has restarted", files)
+    })
   })
 
 program.parse(process.argv)
