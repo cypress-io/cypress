@@ -39,6 +39,9 @@ class ConfigGenerator extends Eclectus.Base
     @prompt question, (answers) =>
       @exampleTestHtml = answers.exampleTestHtml
 
+      ## add the other configuration keys for stylesheets, utilities, etc
+      ## add a message to the user that additional configuration options
+      ## were written
       @config.set _(answers).omit("exampleTestHtml")
       @config.save()
 
