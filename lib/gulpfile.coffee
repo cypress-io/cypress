@@ -72,4 +72,4 @@ gulp.task "watch:html", ->
 gulp.task "server", ->
   require("./server.coffee")
 
-gulp.task "default", ["server", "css", "fonts", "js", "html", "watch"]
+gulp.task "default", ["css", "fonts", "js", "html", "watch"]

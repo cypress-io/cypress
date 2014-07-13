@@ -1,15 +1,39 @@
 #!/usr/bin/env node
 
-var program = require("commander")
+var program   = require("commander")
+var path      = require("path")
+var exec      = require("child_process").exec
+var yo        = require("yeoman-generator")
 
 program
-  .version("0.0.1")
+  .version(require("../package.json").version)
 
 program
   .command("install")
   .description("Installs Eclectus")
   .action(function(){
-    console.log("install called")
+    yo("eclectus")
+      .register(electusGenerator("config"), "eclectus")
+      .run()
+
+    // exec("yo eclectus:config", function(err, stdout, stderr){
+    //   console.log(err, stdout, stderr)
+    // })
+  })
+
+program
+  .command("start")
+  .description("Starts the Eclectus server")
+  .action(function(){
+    // console.log(__dirname)
+    // console.log(process.cwd())
+    // console.log(path.resolve())
+    require("coffee-script/register");
+    require(path.join(__dirname, "..", "lib", "server"))
   })
 
 program.parse(process.argv)
+
+function electusGenerator(name){
+  return path.join(__dirname, "..", "lib", "generator-eclectus", name)
+}
