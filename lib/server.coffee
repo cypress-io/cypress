@@ -13,7 +13,7 @@ app.use require("body-parser")()
 app.use require("method-override")()
 
 # app.use app.router
-app.use express.static("build")
+app.use express.static(__dirname + "/public")
 
 ## development only
 if app.get('env') is 'development'

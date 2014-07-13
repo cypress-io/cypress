@@ -1139,37 +1139,6 @@ window.JST["backbone/lib/templates/_empty"] = function (__obj) {
   var __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  this.Ecl.module("TestsApp", function(TestsApp, App, Backbone, Marionette, $, _) {
-    var Router, router;
-    Router = (function(_super) {
-      __extends(Router, _super);
-
-      function Router() {
-        return Router.__super__.constructor.apply(this, arguments);
-      }
-
-      Router.prototype.module = TestsApp;
-
-      Router.prototype.actions = {
-        list: function() {
-          return {
-            route: "tests"
-          };
-        }
-      };
-
-      return Router;
-
-    })(App.Routers.Application);
-    return router = new Router;
-  });
-
-}).call(this);
-; 
-(function() {
-  var __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
   this.Ecl.module("NavApp", function(NavApp, App, Backbone, Marionette, $, _) {
     var Router, router;
     this.startWithParent = false;
@@ -1207,48 +1176,29 @@ window.JST["backbone/lib/templates/_empty"] = function (__obj) {
   var __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  this.Ecl.module("TestsApp.List", function(List, App, Backbone, Marionette, $, _) {
-    return List.Controller = (function(_super) {
-      __extends(Controller, _super);
+  this.Ecl.module("TestsApp", function(TestsApp, App, Backbone, Marionette, $, _) {
+    var Router, router;
+    Router = (function(_super) {
+      __extends(Router, _super);
 
-      function Controller() {
-        return Controller.__super__.constructor.apply(this, arguments);
+      function Router() {
+        return Router.__super__.constructor.apply(this, arguments);
       }
 
-      Controller.prototype.initialize = function() {
-        var view;
-        view = this.getView();
-        return this.show(view);
+      Router.prototype.module = TestsApp;
+
+      Router.prototype.actions = {
+        list: function() {
+          return {
+            route: "tests"
+          };
+        }
       };
 
-      Controller.prototype.getView = function(navs) {
-        return new List.Tests;
-      };
+      return Router;
 
-      return Controller;
-
-    })(App.Controllers.Application);
-  });
-
-}).call(this);
-; 
-(function() {
-  var __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  this.Ecl.module("TestsApp.List", function(List, App, Backbone, Marionette, $, _) {
-    return List.Tests = (function(_super) {
-      __extends(Tests, _super);
-
-      function Tests() {
-        return Tests.__super__.constructor.apply(this, arguments);
-      }
-
-      Tests.prototype.template = "tests/list/tests";
-
-      return Tests;
-
-    })(App.Views.LayoutView);
+    })(App.Routers.Application);
+    return router = new Router;
   });
 
 }).call(this);
@@ -1324,56 +1274,55 @@ window.JST["backbone/lib/templates/_empty"] = function (__obj) {
 
 }).call(this);
 ; 
-if (!window.JST) {
-  window.JST = {};
-}
-window.JST["backbone/apps/tests/list/templates/tests"] = function (__obj) {
-  if (!__obj) __obj = {};
-  var __out = [], __capture = function(callback) {
-    var out = __out, result;
-    __out = [];
-    callback.call(this);
-    result = __out.join('');
-    __out = out;
-    return __safe(result);
-  }, __sanitize = function(value) {
-    if (value && value.ecoSafe) {
-      return value;
-    } else if (typeof value !== 'undefined' && value != null) {
-      return __escape(value);
-    } else {
-      return '';
-    }
-  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
-  __safe = __obj.safe = function(value) {
-    if (value && value.ecoSafe) {
-      return value;
-    } else {
-      if (!(typeof value !== 'undefined' && value != null)) value = '';
-      var result = new String(value);
-      result.ecoSafe = true;
-      return result;
-    }
-  };
-  if (!__escape) {
-    __escape = __obj.escape = function(value) {
-      return ('' + value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    };
-  }
-  (function() {
-    (function() {
-      __out.push('<div id="header-container">\n  <div id="header-content">\n    <ul id="test-tabs">\n      <li class="active">\n        <a href="#">\n          <i class="fa fa-spin fa-circle-o-notch"></i>\n          20/25\n        </a>\n      </li>\n      <li class="passed">\n        <a href="#">\n          <i class="fa fa-check"></i>\n          8/8\n        </a>\n      </li>\n      <li class="failed">\n        <a href="#">\n          <i class="fa fa-times"></i>\n          7/12\n        </a>\n      </li>\n    </ul>\n  </div>\n</div>\n<div class="ecl-main-content">\n  <div id="test-page">\n    <ul id="stats-container">\n      <li id="tests-passed">\n        <span class="num"></span>\n        <span class="name">Passed</span>\n      </li>\n      <li id="tests-failed">\n        <span class="num"></span>\n        <span class="name">Failed</span>\n      </li>\n      <li id="tests-pending">\n        <span class="num"></span>\n        <span class="name">Pending</span>\n      </li>\n      <li id="tests-duration">0s</li>\n    </ul>\n    <div id="iframe-wrapper">\n      <div id="iframe-container">\n      </div>\n    </div>\n    <div id="mocha"></div>\n    <div id="ecl-panel-container">\n      <div id="ecl-panel" class="block-panel">\n        <ul></ul>\n      </div>\n      <div id="ecl-xhr-panel" class="block-panel">\n        <div id="xhr-header">\n          <span>Request</span>\n          <span>Response</span>\n        </div>\n        <ul></ul>\n      </div>\n    </div>\n  </div>\n</div>');
-    
-    }).call(this);
-    
-  }).call(__obj);
-  __obj.safe = __objSafe, __obj.escape = __escape;
-  return __out.join('');
-};
+(function() {
+  var __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  this.Ecl.module("TestsApp.List", function(List, App, Backbone, Marionette, $, _) {
+    return List.Controller = (function(_super) {
+      __extends(Controller, _super);
+
+      function Controller() {
+        return Controller.__super__.constructor.apply(this, arguments);
+      }
+
+      Controller.prototype.initialize = function() {
+        var view;
+        view = this.getView();
+        return this.show(view);
+      };
+
+      Controller.prototype.getView = function(navs) {
+        return new List.Tests;
+      };
+
+      return Controller;
+
+    })(App.Controllers.Application);
+  });
+
+}).call(this);
+; 
+(function() {
+  var __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  this.Ecl.module("TestsApp.List", function(List, App, Backbone, Marionette, $, _) {
+    return List.Tests = (function(_super) {
+      __extends(Tests, _super);
+
+      function Tests() {
+        return Tests.__super__.constructor.apply(this, arguments);
+      }
+
+      Tests.prototype.template = "tests/list/tests";
+
+      return Tests;
+
+    })(App.Views.LayoutView);
+  });
+
+}).call(this);
 ; 
 if (!window.JST) {
   window.JST = {};
@@ -1481,6 +1430,57 @@ window.JST["backbone/apps/nav/list/templates/navs"] = function (__obj) {
   (function() {
     (function() {
       __out.push('<div class="ecl-sidebar">\n  <div class="ecl-toggle">\n    <i class="fa fa-reorder"></i>\n  </div>\n  <div class="ecl-navblock">\n    <div class="collapse-button">\n      <div class="pull-left logo">Eclectus</div>\n      <div class="pull-right">\n        <button class="btn btn-default" id="sidebar-collapse">\n          <i class="fa fa-angle-left"></i>\n        </button>\n      </div>\n    </div>\n    <ul class="ecl-vnavigation"></ul>\n  </div>\n</div>');
+    
+    }).call(this);
+    
+  }).call(__obj);
+  __obj.safe = __objSafe, __obj.escape = __escape;
+  return __out.join('');
+};
+; 
+if (!window.JST) {
+  window.JST = {};
+}
+window.JST["backbone/apps/tests/list/templates/tests"] = function (__obj) {
+  if (!__obj) __obj = {};
+  var __out = [], __capture = function(callback) {
+    var out = __out, result;
+    __out = [];
+    callback.call(this);
+    result = __out.join('');
+    __out = out;
+    return __safe(result);
+  }, __sanitize = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else if (typeof value !== 'undefined' && value != null) {
+      return __escape(value);
+    } else {
+      return '';
+    }
+  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
+  __safe = __obj.safe = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else {
+      if (!(typeof value !== 'undefined' && value != null)) value = '';
+      var result = new String(value);
+      result.ecoSafe = true;
+      return result;
+    }
+  };
+  if (!__escape) {
+    __escape = __obj.escape = function(value) {
+      return ('' + value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    };
+  }
+  (function() {
+    (function() {
+      __out.push('<div id="header-container">\n  <div id="header-content">\n    <ul id="test-tabs">\n      <li class="active">\n        <a href="#">\n          <i class="fa fa-spin fa-circle-o-notch"></i>\n          20/25\n        </a>\n      </li>\n      <li class="passed">\n        <a href="#">\n          <i class="fa fa-check"></i>\n          8/8\n        </a>\n      </li>\n      <li class="failed">\n        <a href="#">\n          <i class="fa fa-times"></i>\n          7/12\n        </a>\n      </li>\n    </ul>\n  </div>\n</div>\n<div class="ecl-main-content">\n  <div id="test-page">\n    <ul id="stats-container">\n      <li id="tests-passed">\n        <span class="num"></span>\n        <span class="name">Passed</span>\n      </li>\n      <li id="tests-failed">\n        <span class="num"></span>\n        <span class="name">Failed</span>\n      </li>\n      <li id="tests-pending">\n        <span class="num"></span>\n        <span class="name">Pending</span>\n      </li>\n      <li id="tests-duration">0s</li>\n    </ul>\n    <div id="iframe-wrapper">\n      <div id="iframe-container">\n      </div>\n    </div>\n    <div id="mocha"></div>\n    <div id="ecl-panel-container">\n      <div id="ecl-panel" class="block-panel">\n        <ul></ul>\n      </div>\n      <div id="ecl-xhr-panel" class="block-panel">\n        <div id="xhr-header">\n          <span>Request</span>\n          <span>Response</span>\n        </div>\n        <ul></ul>\n      </div>\n    </div>\n  </div>\n</div>');
     
     }).call(this);
     
