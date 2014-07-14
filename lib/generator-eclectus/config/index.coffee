@@ -9,8 +9,8 @@ class ConfigGenerator extends Eclectus.Base
     ## replace the defaults
     question = [
       {
-        name: "testPath"
-        message: "What's the path to your JS tests?"
+        name: "testFolder"
+        message: "What's the folder which contains your JS tests?"
         default: "tests"
       },{
         name: "testFiles"
@@ -33,11 +33,33 @@ class ConfigGenerator extends Eclectus.Base
         type: "confirm"
         message: "Should I create an example 'index.html' for you?"
         default: true
+      },{
+        name: "testFramework"
+        type: "list",
+        message: "Which test framework would you like to use?"
+        choices: ["Mocha", "Jasmine", "QUnit", "Custom"]
+        default: "Mocha"
+      },{
+        name: "sinon"
+        type: "confirm"
+        message: "Enable Sinon.js?"
+        default: true
+      },{
+        name: "fixtures"
+        type: "confirm"
+        message: "Enable Fixtures?"
+        default: true
       }
     ]
 
     @prompt question, (answers) =>
       @exampleTestHtml = answers.exampleTestHtml
+
+      @config.set
+        stylesheets: []
+        javascripts: []
+        sourceFolder: []
+        sourceFiles: []
 
       ## add the other configuration keys for stylesheets, utilities, etc
       ## add a message to the user that additional configuration options
