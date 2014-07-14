@@ -33,7 +33,19 @@ getFiles = (pattern) ->
 getStylesheets = ->
   app.get("eclectus").stylesheets
 
-getSpec = (spec) ->
+getUtilities = ->
+  utils = ["jquery", "iframe"]
+
+  ## push sinon into utilities if enabled
+  utils.push "sinon" if app.get("eclectus").sinon
+
+  ## i believe fixtures can be moved to the parent since
+  ## its not actually mutated within the specs
+  utils.push "fixtures" if app.get("eclectus").fixtures
+
+  utils.map (util) -> "/js/#{util}.js"
+
+getTest = (spec) ->
   file = fs.readFileSync(spec, "utf8")
 
   return coffee.compile(file) if path.extname(spec) is ".coffee"
@@ -47,19 +59,19 @@ getSpec = (spec) ->
 
 ## routing for the actual specs which are processed automatically
 ## this could be just a regular .js file or a .coffee file
-app.get "/specs/:spec", (req, res) ->
+app.get "/tests/:test", (req, res) ->
   res.type "js"
-  res.send getSpec "tests/#{req.params.spec}.coffee"
+  res.send getTest("tests/#{req.params.test}.coffee")
 
 ## routing for the dynamic iframe html
-app.get "/iframe/:test", (req, res) ->
+app.get "/iframes/:test", (req, res) ->
 
   ## renders the testHtml file defined in the config
   res.render path.join(process.cwd(), app.get("eclectus").testHtml), {
     title:        req.params.test
     stylesheets:  getStylesheets()
     utilities:    getUtilities()
-    specs:        req.params.test
+    spec:         "/tests/#{req.params.test}"
   }
 
 ## serve static file from public

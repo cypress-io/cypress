@@ -5,18 +5,18 @@
     <title>{{title}}</title>
 
     {{#each stylesheets}}
-      <link rel="stylesheet" href="/css/{{this}}.css">
+      <link rel="stylesheet" href="{{this}}">
     {{/each}}
 
     {{#each utilities}}
-      <script type="text/javascript" src="/js/{{this}}.js"></script>
+      <script type="text/javascript" src="{{this}}"></script>
     {{/each}}
 
-    <script type="text/javascript" src="/js/app.js"></script>
-
-    {{#each specs}}
-      <script type="text/javascript" src="/specs/{{this}}.js"></script>
+    {{#each javascripts}}
+      <script type="text/javascript" src="{{this}}"></script>
     {{/each}}
+
+    <script type="text/javascript" src="{{spec}}"></script>
   </head>
   <body></body>
 </html>
