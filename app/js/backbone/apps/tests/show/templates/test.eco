@@ -29,6 +29,7 @@
     </ul>
     <div id="iframe-wrapper">
       <div id="iframe-container">
+        <div id="iframe-region"></div>
       </div>
     </div>
     <div id="mocha"></div>
