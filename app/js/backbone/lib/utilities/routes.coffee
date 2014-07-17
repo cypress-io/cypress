@@ -1,4 +1,4 @@
-@Ecl.module "Utilities", (Utilities, App, Backbone, Marionette, $, _) ->
+@App.module "Utilities", (Utilities, App, Backbone, Marionette, $, _) ->
 
   window.Routes = do (_, Backbone) ->
     getParams = /(:([\w\d]+)|\*([\w\d]+))/g

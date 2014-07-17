@@ -1,4 +1,4 @@
-@Ecl.module "Utilities", (Utilities, App, Backbone, Marionette, $, _) ->
+@App.module "Utilities", (Utilities, App, Backbone, Marionette, $, _) ->
 
   methods =
     lookups: ["backbone/apps/", "backbone/lib/components/", "backbone/lib/templates/", "support/"]

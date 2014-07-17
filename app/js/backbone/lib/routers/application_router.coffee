@@ -1,4 +1,4 @@
-@Ecl.module "Routers", (Routers, App, Backbone, Marionette, $, _) ->
+@App.module "Routers", (Routers, App, Backbone, Marionette, $, _) ->
 
   ## match named params or splats and capture them
   routeParams = /(:([\w\d]+)|\*([\w\d]+))/g

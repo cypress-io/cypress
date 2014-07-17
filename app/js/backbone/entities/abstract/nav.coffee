@@ -1,4 +1,4 @@
-@Ecl.module "Entities", (Entities, App, Backbone, Marionette, $, _) ->
+@App.module "Entities", (Entities, App, Backbone, Marionette, $, _) ->
 
   class Entities.Nav extends Entities.Model
 
@@ -8,7 +8,7 @@
   API =
     getNavs: ->
       new Entities.NavsCollection [
-        {name: "Tests",     href: "#test",       icon: "fa fa-code"}
+        {name: "Tests",     href: "#tests",       icon: "fa fa-code"}
         {name: "Organize",  href: "#organize",   icon: "fa fa-th"}
         {name: "Analytics", href: "#analytics",  icon: "fa fa-bar-chart-o"}
         {name: "Settings",  href: "#settings",   icon: "fa fa-cog"}

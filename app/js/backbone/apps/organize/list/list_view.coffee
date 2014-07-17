@@ -1,4 +1,4 @@
-@Ecl.module "OrganizeApp.List", (List, App, Backbone, Marionette, $, _) ->
+@App.module "OrganizeApp.List", (List, App, Backbone, Marionette, $, _) ->
 
   class List.Layout extends App.Views.LayoutView
     template: "organize/list/list_layout"

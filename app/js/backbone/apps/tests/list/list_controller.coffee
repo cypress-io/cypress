@@ -1,4 +1,4 @@
-@Ecl.module "TestsApp.List", (List, App, Backbone, Marionette, $, _) ->
+@App.module "TestsApp.List", (List, App, Backbone, Marionette, $, _) ->
 
   class List.Controller extends App.Controllers.Application
 

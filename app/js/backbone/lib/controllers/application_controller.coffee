@@ -1,4 +1,4 @@
-@Ecl.module "Controllers", (Controllers, App, Backbone, Marionette, $, _) ->
+@App.module "Controllers", (Controllers, App, Backbone, Marionette, $, _) ->
 
   class Controllers.Application extends Marionette.Controller
 

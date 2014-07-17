@@ -1,4 +1,4 @@
-@Ecl.module "Utilities", (Utilities, App, Backbone, Marionette, $, _) ->
+@App.module "Utilities", (Utilities, App, Backbone, Marionette, $, _) ->
 
   flattenedFetches = (entities) ->
     _.chain([entities]).flatten().compact().pluck("_fetch").value()

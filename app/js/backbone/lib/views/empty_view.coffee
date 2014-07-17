@@ -1,4 +1,4 @@
-@Ecl.module "Views", (Views, App, Backbone, Marionette, $, _) ->
+@App.module "Views", (Views, App, Backbone, Marionette, $, _) ->
 
   class Views.EmptyView extends Marionette.ItemView
     template: "_empty"
