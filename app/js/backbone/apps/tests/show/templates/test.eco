@@ -1,0 +1,48 @@
+<div id="header-container">
+  <div id="header-content">
+    <ul id="test-tabs">
+      <li class="active">
+        <a href="#">
+          <i class="fa fa-spin fa-circle-o-notch"></i>
+          1/1
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+<div class="ecl-main-content">
+  <div id="test-page">
+    <ul id="stats-container">
+      <li id="tests-passed">
+        <span class="num"></span>
+        <span class="name">Passed</span>
+      </li>
+      <li id="tests-failed">
+        <span class="num"></span>
+        <span class="name">Failed</span>
+      </li>
+      <li id="tests-pending">
+        <span class="num"></span>
+        <span class="name">Pending</span>
+      </li>
+      <li id="tests-duration">0s</li>
+    </ul>
+    <div id="iframe-wrapper">
+      <div id="iframe-container">
+      </div>
+    </div>
+    <div id="mocha"></div>
+    <div id="ecl-panel-container">
+      <div id="ecl-panel" class="block-panel">
+        <ul></ul>
+      </div>
+      <div id="ecl-xhr-panel" class="block-panel">
+        <div id="xhr-header">
+          <span>Request</span>
+          <span>Response</span>
+        </div>
+        <ul></ul>
+      </div>
+    </div>
+  </div>
+</div>
