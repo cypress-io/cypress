@@ -44,7 +44,7 @@ getJavascripts = ->
   convertToAbsolutePath app.get("eclectus").javascripts
 
 getUtilities = ->
-  utils = []
+  utils = ["iframe"]
   # utils = ["jquery", "iframe"]
 
   ## push sinon into utilities if enabled
@@ -79,7 +79,7 @@ getTest = (spec) ->
 ## this could be just a regular .js file or a .coffee file
 app.get "/tests/:test", (req, res) ->
   res.type "js"
-  res.send getTest("tests/#{req.params.test}.coffee")
+  res.send getTest("tests/#{req.params.test}")
 
 app.get "/files", (req, res) ->
   res.json getTestFiles()
