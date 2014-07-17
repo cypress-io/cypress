@@ -1,4 +1,4 @@
-@Ecl.module "Components.Loading", (Loading, App, Backbone, Marionette, $, _) ->
+@App.module "Components.Loading", (Loading, App, Backbone, Marionette, $, _) ->
 
   class Loading.LoadingView extends App.Views.ItemView
     template: false
@@ -12,7 +12,7 @@
       opts = @_getOptions()
       @$el.spin opts
 
-    onClose: ->
+    onDestroy: ->
       @$el.spin false
 
     _getOptions: ->

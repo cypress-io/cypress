@@ -1,4 +1,4 @@
-@Ecl.module "NavApp.List", (List, App, Backbone, Marionette, $, _) ->
+@App.module "NavApp.List", (List, App, Backbone, Marionette, $, _) ->
 
   class List.Controller extends App.Controllers.Application
 

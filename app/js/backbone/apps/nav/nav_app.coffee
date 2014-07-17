@@ -1,4 +1,4 @@
-@Ecl.module "NavApp", (NavApp, App, Backbone, Marionette, $, _) ->
+@App.module "NavApp", (NavApp, App, Backbone, Marionette, $, _) ->
   @startWithParent = false
 
   class Router extends App.Routers.Application

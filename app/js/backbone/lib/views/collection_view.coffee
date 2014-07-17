@@ -1,4 +1,4 @@
-@Ecl.module "Views", (Views, App, Backbone, Marionette, $, _) ->
+@App.module "Views", (Views, App, Backbone, Marionette, $, _) ->
 
   class Views.CollectionView extends Marionette.CollectionView
     childViewOptions: (model, index) ->

@@ -1,4 +1,4 @@
-@Ecl = do (Backbone, Marionette) ->
+@App = do (Backbone, Marionette) ->
 
   App = new Marionette.Application
 
