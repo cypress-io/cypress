@@ -11,6 +11,9 @@ vendor:
   - bower_components/spin.js/jquery.spin.js
 
 eclectus:
+  - app/js/api/eclectus.coffee
+  - app/js/api/reporter.coffee
+  - app/js/api/sandbox.coffee
   - app/js/config/**
   - app/js/backbone/app.coffee
   - app/js/backbone/lib/templates/**
