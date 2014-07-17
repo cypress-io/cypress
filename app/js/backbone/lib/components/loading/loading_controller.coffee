@@ -35,7 +35,7 @@
       ## if the old view closes prior to any of the XHR stuff
       ## we want to remove the opacity wrapper from the old view
       if config.loadingType is "opacity" and oldView
-        @listenTo oldView, "close", =>
+        @listenTo oldView, "destroy", =>
           ## remove any opacity wrappers
           @removeOpacity(oldView)
 
