@@ -48,7 +48,7 @@
         ## view so its controller is also closed.  We also prevent showing the real
         ## view (which would snap the user back to the old view unexpectedly)
         ## ================================================================ ##
-        return realView.close() if loadingView and (@region.currentView isnt loadingView)
+        return realView.destroy() if loadingView and (@region.currentView isnt loadingView)
 
         ## show the real view unless we've set debug in the loading options
         @show realView unless config.debug
@@ -60,7 +60,7 @@
         ## we're allowing aborting because if there are multiple AJAX requests going on we
         ## run the risk of older requests finishing later (race condition) and then
         ## updating the view to an older incorrect request's view
-        realView.close() unless @region.currentView is realView
+        realView.destroy() unless @region.currentView is realView
         ## also need to handle any error messaging to the client here
         ## --my implementation for that (project specific) --
 
@@ -72,10 +72,10 @@
         @removeOpacity(oldView) if config.loadingType is "opacity"
 
         ## we always want to close the loadingView if it exists
-        loadingView?.close()
+        loadingView?.destroy()
 
         ## and close out the loading controller since its no longer needed regardless
-        @close()
+        @destroy()
         @clearFetches(config.entities)
 
     getEntities: (view) ->

@@ -10,7 +10,7 @@
 
       @childViewOptions = _.extend {}, _.result(@, "childViewOptions"), options
 
-    buildItemView: (item, ItemViewType, childViewOptions) ->
+    buildChildView: (item, childViewType, childViewOptions) ->
       childViewOptions.tableColumns = @$el.find("th").length if @isTbody()
       super
 
