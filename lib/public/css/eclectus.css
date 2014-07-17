@@ -1436,8 +1436,8 @@ input[type="button"].btn-block {
  * -------------------------- */
 @font-face {
   font-family: 'FontAwesome';
-  src: url("/css/fonts/fontawesome-webfont.eot?v=4.1.0");
-  src: url("/css/fonts/fontawesome-webfont.eot?#iefix&v=4.1.0") format("embedded-opentype"), url("/css/fonts/fontawesome-webfont.woff?v=4.1.0") format("woff"), url("/css/fonts/fontawesome-webfont.ttf?v=4.1.0") format("truetype"), url("/css/fonts/fontawesome-webfont.svg?v=4.1.0#fontawesomeregular") format("svg");
+  src: url("/eclectus/css/fonts/fontawesome-webfont.eot?v=4.1.0");
+  src: url("/eclectus/css/fonts/fontawesome-webfont.eot?#iefix&v=4.1.0") format("embedded-opentype"), url("/eclectus/css/fonts/fontawesome-webfont.woff?v=4.1.0") format("woff"), url("/eclectus/css/fonts/fontawesome-webfont.ttf?v=4.1.0") format("truetype"), url("/eclectus/css/fonts/fontawesome-webfont.svg?v=4.1.0#fontawesomeregular") format("svg");
   font-weight: normal;
   font-style: normal; }
 
