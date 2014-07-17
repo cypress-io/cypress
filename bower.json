@@ -25,6 +25,9 @@
     "backbone": "~1.1.2",
     "spin.js": "~2.0.1",
     "underscore.string": "~2.3.3",
-    "backbone-query-parameters": "~0.3.0"
+    "backbone-query-parameters": "~0.3.0",
+    "mocha": "~1.20.1",
+    "chai": "~1.9.1",
+    "sinonjs": "~1.10.2"
   }
 }
