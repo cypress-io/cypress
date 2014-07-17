@@ -56,6 +56,13 @@ getUtilities = ->
 
   utils.map (util) -> "/eclectus/js/#{util}.js"
 
+getTestFiles = ->
+  ## grab all the js and coffee files
+  files = glob.sync "#{testFolder}/**/*.+(js|coffee)"
+
+  ## slice off the first directory (which is our test folder)
+  _(files).map (file) -> {name: file.split("/").slice(1).join("/")}
+
 getTest = (spec) ->
   file = fs.readFileSync(spec, "utf8")
 
@@ -73,6 +80,9 @@ getTest = (spec) ->
 app.get "/tests/:test", (req, res) ->
   res.type "js"
   res.send getTest("tests/#{req.params.test}.coffee")
+
+app.get "/files", (req, res) ->
+  res.json getTestFiles()
 
 ## routing for the dynamic iframe html
 app.get "/iframes/:test", (req, res) ->
