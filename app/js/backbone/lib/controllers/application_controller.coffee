@@ -31,7 +31,7 @@
 
       return if @_mainView
       @_mainView = view
-      @listenTo view, "close", @close
+      @listenTo view, "destroy", @destroy
 
     ## called when the main view is first shown
     onMainShow: ->
