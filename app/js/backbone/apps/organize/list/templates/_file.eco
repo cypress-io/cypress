@@ -1,0 +1,1 @@
+<a href="#/tests/<%= @name %>"><%= @name %></a>
