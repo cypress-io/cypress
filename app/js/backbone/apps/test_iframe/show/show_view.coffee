@@ -3,16 +3,53 @@
   class Show.Iframe extends App.Views.ItemView
     template: "test_iframe/show/iframe"
 
+    ui:
+      header:   "header"
+      expand:   ".fa-expand"
+      compress: ".fa-compress"
+
+    events:
+      "click @ui.expand"    : "expandClicked"
+      "click @ui.compress"  : "compressClicked"
+
+    onShow: ->
+      @ui.header.hide()
+      @ui.compress.hide()
+
     loadIframe: (src, fn) ->
-      console.warn "loading iframe", src
+      view = @
+
+      @src = "/iframes/" + src
+
       iframe = $ "<iframe />",
-        src: "/iframes/" + src
-        class: "iframe-spec",
+        src: @src
+        class: "iframe-spec"
         load: ->
           console.info("loaded!", iframe, @contentWindow);
           fn(@contentWindow)
+          view.ui.header.show()
 
       iframe.appendTo(@$el)
+
+    expandClicked: (e) ->
+      @ui.expand.hide()
+      @ui.compress.show()
+
+      @$el.find("iframe").hide()
+      ## display the iframe header in an 'external' mode
+      ## swap out fa-expand with fa-compress
+
+      @externalWindow = window.open @src, "testIframeWindow", "titlebar=no,menubar=no,toolbar=no,location=no,personalbar=no,status=no"
+
+      ## when the externalWindow is open, keep the iframe around but proxy
+      ## the ECL and dom commands to it
+
+    compressClicked: (e) ->
+      @ui.compress.hide()
+      @ui.expand.show()
+
+      @$el.find("iframe").show()
+      @externalWindow.close?()
 
 
           # suite         = this.contentWindow.mocha.suite
