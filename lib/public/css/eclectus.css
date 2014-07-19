@@ -3230,17 +3230,29 @@ ul {
       list-style-type: none; }
       #test-page #specs-container li.active {
         font-weight: bold; }
-    #test-page #specs-container ul.suite {
-      padding-left: 5px; }
-      #test-page #specs-container ul.suite > li {
-        font-family: "Raleway",Helvetica,sans-serif;
-        font-weight: 300;
-        font-size: 16px; }
-      #test-page #specs-container ul.suite ul.test {
+    #test-page #specs-container li.suite {
+      font-family: "Raleway",Helvetica,sans-serif;
+      font-weight: 300;
+      font-size: 16px; }
+      #test-page #specs-container li.suite ul.test {
         padding-left: 15px;
         font-family: "Open Sans", sans-serif;
         font-size: 13px;
         font-weight: 300; }
+        #test-page #specs-container li.suite ul.test .test-state {
+          font-size: 10px; }
+        #test-page #specs-container li.suite ul.test li.pending {
+          color: #AAA; }
+          #test-page #specs-container li.suite ul.test li.pending .test-state {
+            color: #CCC; }
+        #test-page #specs-container li.suite ul.test li.failed {
+          color: #E94B3B; }
+          #test-page #specs-container li.suite ul.test li.failed .test-state {
+            color: #E94B3B; }
+        #test-page #specs-container li.suite ul.test li.passed {
+          color: #23AE89; }
+        #test-page #specs-container li.suite ul.test .text-state {
+          color: #23AE89; }
   #test-page #ecl-panel-container {
     position: fixed;
     bottom: 0; }

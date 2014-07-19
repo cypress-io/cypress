@@ -20,9 +20,12 @@
       # @runner.on "suite end", (suite) ->
       #   console.warn "suite end", suite
 
+      @runner.on "test", (test) =>
+        test.cid = _.uniqueId("test")
+        @trigger "test", test
+
       @runner.on "test end", (test) =>
         console.warn "test end", test
-        test.cid = _.uniqueId("test")
         @trigger "test:end", test
       ## start listening to all the pertinent runner events
 

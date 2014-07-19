@@ -102,20 +102,44 @@
       }
     }
 
-    ul.suite {
-      padding-left: 5px;
-
-      &>li {
-        font-family: "Raleway",Helvetica,sans-serif;
-        font-weight: 300;
-        font-size: 16px;
-      }
+    li.suite {
+      font-family: "Raleway",Helvetica,sans-serif;
+      font-weight: 300;
+      font-size: 16px;
 
       ul.test {
         padding-left: 15px;
         font-family: "Open Sans", sans-serif;
         font-size: 13px;
         font-weight: 300;
+
+        .test-state {
+          font-size: 10px;
+        }
+
+        li.pending {
+          color: #AAA;
+
+          .test-state {
+            color: #CCC;
+          }
+        }
+
+        li.failed {
+          color: #E94B3B;
+
+          .test-state {
+            color: #E94B3B;
+          }
+        }
+
+        li.passed {
+          color: #23AE89;
+        }
+
+        .text-state {
+          color: #23AE89;
+        }
       }
     }
   }

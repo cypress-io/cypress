@@ -1,1 +1,6 @@
-Test: <%= @title %>
+<span class="test-state">
+  <i class="fa fa-circle"></i>
+</span>
+<span class="test-title">
+  <%= @title %>
+</span>

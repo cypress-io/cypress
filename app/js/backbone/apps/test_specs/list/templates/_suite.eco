@@ -1,1 +1,2 @@
-Suite: <%= @title %>
+<%= @title %>
+<ul class="test"></ul>
