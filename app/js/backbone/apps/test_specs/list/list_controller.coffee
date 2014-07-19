@@ -24,7 +24,7 @@
 
       @listenTo runner, "test:end", (test) ->
         console.log "test:end", test
-        suites.getTest(test).getResults()
+        suites.getTest(test).getResults(test)
 
       suitesView = @getSuitesView suites
 

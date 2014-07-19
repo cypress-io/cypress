@@ -4,3 +4,4 @@
 <span class="test-title">
   <%= @title %>
 </span>
+<pre class="test-error"></pre>

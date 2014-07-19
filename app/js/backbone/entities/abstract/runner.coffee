@@ -12,6 +12,9 @@
       @runner = runner
 
     startListening: ->
+      ## mocha has begun running the specs per iframe
+      @runner.on "start", =>
+
       @runner.on "suite", (suite) =>
         console.warn "suite", suite
         suite.cid = _.uniqueId("suite")
@@ -19,6 +22,11 @@
 
       # @runner.on "suite end", (suite) ->
       #   console.warn "suite end", suite
+
+      @runner.on "fail", (test, err) =>
+        console.warn("runner has failed", test, err)
+        ## set the AssertionError on the test
+        test.err = err
 
       @runner.on "test", (test) =>
         test.cid = _.uniqueId("test")
@@ -44,7 +52,7 @@
       ## tell our runner to run our iframes mocha suite
       console.info("runIframeSuite", contentWindow.mocha.suite)
       @runner.runSuite contentWindow.mocha.suite, ->
-        console.log "running the iframes suite!"
+        console.log "finished running the iframes suite!"
 
   API =
     getRunner: (testRunner) ->
