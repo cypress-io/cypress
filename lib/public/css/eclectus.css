@@ -3224,19 +3224,19 @@ ul {
         width: 900px;
         height: 700px;
         border: 1px solid #D5D5D5; }
-  #test-page #mocha {
+  #test-page #specs-container {
     clear: both; }
-    #test-page #mocha li {
+    #test-page #specs-container li {
       list-style-type: none; }
-      #test-page #mocha li.active {
+      #test-page #specs-container li.active {
         font-weight: bold; }
-    #test-page #mocha ul.suite {
+    #test-page #specs-container ul.suite {
       padding-left: 5px; }
-      #test-page #mocha ul.suite > li {
+      #test-page #specs-container ul.suite > li {
         font-family: "Raleway",Helvetica,sans-serif;
         font-weight: 300;
         font-size: 16px; }
-      #test-page #mocha ul.suite ul.test {
+      #test-page #specs-container ul.suite ul.test {
         padding-left: 15px;
         font-family: "Open Sans", sans-serif;
         font-size: 13px;

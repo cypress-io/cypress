@@ -12,7 +12,18 @@
       @runner = runner
 
     startListening: ->
-      console.warn "listening to runner!", @runner
+      @runner.on "suite", (suite) =>
+        console.warn "suite", suite
+        suite.cid = _.uniqueId("suite")
+        @trigger "suite:start", suite
+
+      # @runner.on "suite end", (suite) ->
+      #   console.warn "suite end", suite
+
+      @runner.on "test end", (test) =>
+        console.warn "test end", test
+        test.cid = _.uniqueId("test")
+        @trigger "test:end", test
       ## start listening to all the pertinent runner events
 
     stop: ->
@@ -28,6 +39,7 @@
 
     runIframeSuite: (contentWindow) ->
       ## tell our runner to run our iframes mocha suite
+      console.info("runIframeSuite", contentWindow.mocha.suite)
       @runner.runSuite contentWindow.mocha.suite, ->
         console.log "running the iframes suite!"
 

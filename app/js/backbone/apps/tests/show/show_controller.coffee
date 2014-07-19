@@ -13,7 +13,7 @@
 
         @listenTo @layout, "show", =>
           @iframeRegion(runner)
-          # @specsRegion(runner)
+          @specsRegion(runner)
           # @statsRegion(runner)
           # @logRegion(runner)
           # @domRegion(runner)
@@ -27,6 +27,9 @@
 
     iframeRegion: (runner) ->
       App.execute "show:test:iframe", @layout.iframeRegion, runner
+
+    specsRegion: (runner) ->
+      App.execute "list:test:specs", @layout.specsRegion, runner
 
     onDestroy: ->
       App.request "stop:test:runner", @runner
