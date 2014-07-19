@@ -6,6 +6,20 @@ fs        = require("fs")
 yaml      = require("js-yaml")
 jQuery    = require("jquery-deferred")
 
+log = (obj = {}) ->
+  args = [
+    "\n{",
+    "\n\tname:       #{$.util.colors.yellow(obj.name)}",
+    "\n\tplugin:     #{$.util.colors.blue(obj.plugin)}",
+    "\n\tmessage:    #{$.util.colors.red(obj.message)}",
+    "\n\tfileName:   #{obj.fileName}",
+    "\n\tlineNumber: #{obj.lineNumber}",
+    "\n\tstack:      #{obj.stack}" if obj.showStack,
+    "\n}"
+  ]
+  $.util.log _(args).compact()...
+  $.util.beep()
+
 transform = (paths, options = {}) ->
   _.defaults options,
     destination: "./lib/public/js"
@@ -13,6 +27,8 @@ transform = (paths, options = {}) ->
   df = jQuery.Deferred()
 
   gulp.src(paths)
+    .pipe $.plumber errorHandler: log
+
     .pipe $.tap (file, t) ->
       t.through($.coffee, []) if isCoffee(file)
 
@@ -36,6 +52,7 @@ gulp.task "css", ->
       trace: true
       compass: true
       cacheLocation: ".tmp/.sass-cache"
+    .on "error", log
     .pipe gulp.dest "lib/public/css"
 
 gulp.task "fonts", ->
