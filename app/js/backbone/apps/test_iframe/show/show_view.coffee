@@ -20,6 +20,7 @@
       view = @
 
       @src = "/iframes/" + src
+      @fn = fn
 
       iframe = $ "<iframe />",
         src: @src
@@ -39,8 +40,13 @@
       ## display the iframe header in an 'external' mode
       ## swap out fa-expand with fa-compress
 
-      @externalWindow = window.open @src, "testIframeWindow", "titlebar=no,menubar=no,toolbar=no,location=no,personalbar=no,status=no"
+      @externalWindow = window.open(@src, "testIframeWindow", "titlebar=no,menubar=no,toolbar=no,location=no,personalbar=no,status=no")
+      # console.warn @externalWindow, @fn
+      # @externalWindow.onload =>
+        # console.warn "externalWindow ready!"
+        # @fn(@externalWindow)
 
+      # @externalWindow
       ## when the externalWindow is open, keep the iframe around but proxy
       ## the ECL and dom commands to it
 

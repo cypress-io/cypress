@@ -32,7 +32,7 @@
         <div id="iframe-region"></div>
       </div>
     </div>
-    <div id="mocha"></div>
+    <div id="specs-region"></div>
     <div id="ecl-panel-container">
       <div id="ecl-panel" class="block-panel">
         <ul></ul>
