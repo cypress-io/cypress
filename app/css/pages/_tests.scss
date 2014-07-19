@@ -117,6 +117,16 @@
           font-size: 10px;
         }
 
+        pre.test-error {
+          margin-top: 0;
+          padding-left: 12px;
+
+          &:hover {
+            background-color: #FCF8E3;
+            cursor: pointer;
+          }
+        }
+
         li.pending {
           color: #AAA;
 

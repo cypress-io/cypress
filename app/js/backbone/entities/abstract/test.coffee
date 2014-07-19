@@ -5,7 +5,19 @@
       state: "pending"
 
     getResults: (test) ->
-      @set state: test.state
+      attrs = {state: test.state}
+
+      if test.err
+        ## output the error to the console to receive stack trace
+        console.error(test.err)
+
+        ## backup the original error to output to the console
+        @originalError = test.err
+
+        ## set the err on the attrs
+        attrs.error = test.err.stack or test.err.toString()
+
+      @set attrs
 
   class Entities.TestsCollection extends Entities.Collection
     model: Entities.Test

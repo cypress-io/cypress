@@ -24,13 +24,28 @@
       ## set global mocha with our custom reporter
       window.mocha = new Mocha reporter: Reporter
 
+      ## if app evironment is development we need to list to errors
+      ## emitted from all Runnable inherited objects (like hooks)
+      ## this makes tracking down Eclectus related App errors much easier
+      Mocha.Runnable::emit = _.wrap Mocha.Runner::emit, (orig, event, err) ->
+        if event is "error"
+          throw err
+
+        orig.call(@, event, err)
+
+      ## if app environment is development we need to listen to
+      ## uncaught exceptions (else it makes tracking down bugs hard)
+      Mocha.Runner::uncaught = _.wrap Mocha.Runner::uncaught, (orig, err) ->
+        throw err
+
+        orig.call(@, err)
+
       ## start running the tests
       mocha.run()
 
       return df
 
     stop: (runner) ->
-      console.warn "stopping runner", runner
       ## call the stop method which cleans up any listeners
       runner.stop()
 

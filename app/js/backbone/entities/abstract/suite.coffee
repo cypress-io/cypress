@@ -5,7 +5,7 @@
       @get("tests").addTest(test)
 
     getTest: (test) ->
-      @get("tests").get(test.cid).getResults(test)
+      @get("tests").get(test.cid)
 
   class Entities.SuitesCollection extends Entities.Collection
     model: Entities.Suite
@@ -26,7 +26,7 @@
 
     getTest: (test) ->
       suite = @getSuiteByTest(test)
-      suite.getTest(test).getResults()
+      suite.getTest(test)
 
   API =
     getNewSuites: (suites) ->
