@@ -10,7 +10,7 @@
 
       @listenTo runner, "all", (e) -> console.info e
 
-      @listenTo runner, "suite:start", (suite) =>
+      @listenTo runner, "suite:start", (suite) ->
         ## bail if we're the root suite
         ## we dont care about that one
         return if suite.root
@@ -19,9 +19,12 @@
         console.log "suite start", suite, suite.cid, suites
         suites.addSuite(suite)
 
-      @listenTo runner, "test:end", (test) =>
-        console.log "test:end", test
+      @listenTo runner, "test", (test) ->
         suites.addTest(test)
+
+      @listenTo runner, "test:end", (test) ->
+        console.log "test:end", test
+        suites.getTest(test).getResults()
 
       suitesView = @getSuitesView suites
 

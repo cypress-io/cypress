@@ -4,6 +4,9 @@
     addTest: (test) ->
       @get("tests").addTest(test)
 
+    getTest: (test) ->
+      @get("tests").get(test.cid).getResults(test)
+
   class Entities.SuitesCollection extends Entities.Collection
     model: Entities.Suite
 
@@ -13,10 +16,17 @@
         id: suite.cid
         tests: App.request("new:test:entities")
 
+    getSuiteByTest: (test) ->
+      @get(test.parent.cid)
+
     addTest: (test) ->
       ## find the suite by its id from the cid of the tests parent suite
-      suite = @get(test.parent.cid)
+      suite = @getSuiteByTest(test)
       suite.addTest(test)
+
+    getTest: (test) ->
+      suite = @getSuiteByTest(test)
+      suite.getTest(test).getResults()
 
   API =
     getNewSuites: (suites) ->
