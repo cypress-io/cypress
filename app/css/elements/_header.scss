@@ -1,57 +1,55 @@
 #header-container {
-  background-color: lighten(#535762, 0%);
+  background-color: darken(#F6F6F6, 12%);
+  padding-left: 20px;
+  overflow: auto;
+  height: 50px;
 
-  #header-content {
-    padding: 0 20px;
+  #stats-container {
+    padding: 0;
+    float: left;
+    height: 100%;
+    margin-bottom: 0;
 
-    ul#test-tabs {
+    li {
       list-style-type: none;
-      margin: 0;
-      padding: 21px 0 0;
-      overflow: auto;
+      float: left;
+      margin: 0 10px;
+      padding-top: 5px;
+      font-weight: 300;
+      height: 100%;
 
-      li {
-        float: left;
-        border-radius: 5px 5px 0 0;
-        line-height: 30px;
-        margin-left: 5px;
-
-        &.passed {
-          border-top: 1px solid darken(#23AE89, 5%);
-          background-color: lighten(#535762, 25%);
-
-          i {
-            color: darken(#23AE89, 8%);
-          }
-        }
-
-        &.failed {
-          border-top: 1px solid darken(#DF4A32, 5%);
-          background-color: lighten(#535762, 25%);
-
-          i {
-            color: darken(#DF4A32, 5%);
-          }
-        }
-
-        &.active {
-          border-top: 1px solid #3380FF;
-          background-color: #F6F6F6;
-
-          a {
-            color: #3380FF
-          }
-        }
-
-        a {
-          color: #fff;
-          padding: 5px 10px;
-        }
-
+      &#tests-passed {
         i {
-          margin-right: 3px;
+          color: #23AE89;
         }
       }
+
+      &#tests-failed {
+        i {
+          color: #E94B3B;
+        }
+      }
+
+      span {
+        display: block;
+      }
+
+      .num {
+        font-size: 24px;
+        line-height: 1;
+      }
+
+      .name {
+        text-transform: uppercase;
+        font-size: 12px;
+        color: #777;
+      }
+    }
+
+    #tests-duration {
+      background-color: #e1e1e1;
+      padding-left: 10px;
+      padding-right: 10px;
     }
   }
 }
