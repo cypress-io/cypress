@@ -3033,7 +3033,7 @@ ul {
   vertical-align: top; }
 
 #header-container {
-  background-color: #d7d7d7;
+  background-color: #E1E1E1;
   padding-left: 20px;
   overflow: auto;
   height: 50px; }
@@ -3063,7 +3063,7 @@ ul {
         font-size: 12px;
         color: #777; }
     #header-container #stats-container #tests-duration {
-      background-color: #e1e1e1;
+      background-color: #d5d5d5;
       padding-left: 10px;
       padding-right: 10px; }
 
@@ -3165,7 +3165,7 @@ ul {
   #test-page #iframe-wrapper {
     position: absolute;
     right: 0;
-    top: 0; }
+    top: -51px; }
     #test-page #iframe-wrapper #iframe-container {
       height: 100;
       width: 100%;
