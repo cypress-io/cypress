@@ -3225,7 +3225,8 @@ ul {
         height: 700px;
         border: 1px solid #D5D5D5; }
   #test-page #specs-container {
-    clear: both; }
+    clear: both;
+    padding-left: 0; }
     #test-page #specs-container li {
       list-style-type: none; }
       #test-page #specs-container li.active {
@@ -3233,7 +3234,13 @@ ul {
     #test-page #specs-container li.suite {
       font-family: "Raleway",Helvetica,sans-serif;
       font-weight: 300;
-      font-size: 16px; }
+      font-size: 16px;
+      padding-left: 5px; }
+      #test-page #specs-container li.suite.hover {
+        background-color: #E1E1E1;
+        border-left: 2px solid #3380FF;
+        padding-left: 3px;
+        cursor: pointer; }
       #test-page #specs-container li.suite.pending .suite-state i {
         color: #888;
         font-size: 14px; }
@@ -3244,17 +3251,24 @@ ul {
         color: #23AE89;
         font-size: 12px; }
       #test-page #specs-container li.suite ul.test {
-        padding-left: 17px;
+        padding-left: 12px;
         font-family: "Open Sans", sans-serif;
         font-size: 13px;
         font-weight: 300; }
         #test-page #specs-container li.suite ul.test .test-state {
           font-size: 10px; }
+        #test-page #specs-container li.suite ul.test li {
+          padding-left: 5px; }
+          #test-page #specs-container li.suite ul.test li.hover {
+            background-color: #E1E1E1;
+            border-left: 2px solid #3380FF;
+            padding-left: 3px;
+            cursor: pointer; }
         #test-page #specs-container li.suite ul.test pre.test-error {
           margin-top: 0;
           padding-left: 12px; }
           #test-page #specs-container li.suite ul.test pre.test-error:hover {
-            background-color: #FCF8E3;
+            text-decoration: underline;
             cursor: pointer; }
         #test-page #specs-container li.suite ul.test li.pending {
           color: #AAA; }

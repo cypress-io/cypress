@@ -93,6 +93,7 @@
 
   #specs-container {
     clear: both;
+    padding-left: 0;
 
     li {
       list-style-type: none;
@@ -106,6 +107,14 @@
       font-family: "Raleway",Helvetica,sans-serif;
       font-weight: 300;
       font-size: 16px;
+      padding-left: 5px;
+
+      &.hover {
+        background-color: #E1E1E1;
+        border-left: 2px solid #3380FF;
+        padding-left: 3px;
+        cursor: pointer;
+      }
 
       &.pending {
         .suite-state i {
@@ -133,7 +142,7 @@
       }
 
       ul.test {
-        padding-left: 17px;
+        padding-left: 12px;
         font-family: "Open Sans", sans-serif;
         font-size: 13px;
         font-weight: 300;
@@ -142,12 +151,23 @@
           font-size: 10px;
         }
 
+        li {
+          padding-left: 5px;
+
+          &.hover {
+            background-color: #E1E1E1;
+            border-left: 2px solid #3380FF;
+            padding-left: 3px;
+            cursor: pointer;
+          }
+        }
+
         pre.test-error {
           margin-top: 0;
           padding-left: 12px;
 
           &:hover {
-            background-color: #FCF8E3;
+            text-decoration: underline;
             cursor: pointer;
           }
         }
