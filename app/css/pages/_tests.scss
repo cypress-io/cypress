@@ -1,30 +1,6 @@
 #test-page {
   position: relative;
 
-  #stats-container {
-    background-color: white;
-    padding: 0;
-    text-align: center;
-    float: left;
-    border-radius: 5px;
-    color: #666;
-    box-shadow: 0 1px 0 #ddd;
-    overflow: hidden;
-
-    li {
-      list-style-type: none;
-      float: left;
-      margin: 0 10px;
-      line-height: 2;
-    }
-
-    #tests-duration {
-      background-color: #e1e1e1;
-      margin-right: 0;
-      padding: 0 10px;
-    }
-  }
-
   #iframe-wrapper {
     position: absolute;
     right: 0;

@@ -3033,39 +3033,39 @@ ul {
   vertical-align: top; }
 
 #header-container {
-  background-color: #535762; }
-  #header-container #header-content {
-    padding: 0 20px; }
-    #header-container #header-content ul#test-tabs {
+  background-color: #d7d7d7;
+  padding-left: 20px;
+  overflow: auto;
+  height: 50px; }
+  #header-container #stats-container {
+    padding: 0;
+    float: left;
+    height: 100%;
+    margin-bottom: 0; }
+    #header-container #stats-container li {
       list-style-type: none;
-      margin: 0;
-      padding: 21px 0 0;
-      overflow: auto; }
-      #header-container #header-content ul#test-tabs li {
-        float: left;
-        border-radius: 5px 5px 0 0;
-        line-height: 30px;
-        margin-left: 5px; }
-        #header-container #header-content ul#test-tabs li.passed {
-          border-top: 1px solid #1f9978;
-          background-color: #9296a3; }
-          #header-container #header-content ul#test-tabs li.passed i {
-            color: #1c8c6e; }
-        #header-container #header-content ul#test-tabs li.failed {
-          border-top: 1px solid #d63a21;
-          background-color: #9296a3; }
-          #header-container #header-content ul#test-tabs li.failed i {
-            color: #d63a21; }
-        #header-container #header-content ul#test-tabs li.active {
-          border-top: 1px solid #3380FF;
-          background-color: #F6F6F6; }
-          #header-container #header-content ul#test-tabs li.active a {
-            color: #3380ff; }
-        #header-container #header-content ul#test-tabs li a {
-          color: #fff;
-          padding: 5px 10px; }
-        #header-container #header-content ul#test-tabs li i {
-          margin-right: 3px; }
+      float: left;
+      margin: 0 10px;
+      padding-top: 5px;
+      font-weight: 300;
+      height: 100%; }
+      #header-container #stats-container li#tests-passed i {
+        color: #23AE89; }
+      #header-container #stats-container li#tests-failed i {
+        color: #E94B3B; }
+      #header-container #stats-container li span {
+        display: block; }
+      #header-container #stats-container li .num {
+        font-size: 24px;
+        line-height: 1; }
+      #header-container #stats-container li .name {
+        text-transform: uppercase;
+        font-size: 12px;
+        color: #777; }
+    #header-container #stats-container #tests-duration {
+      background-color: #e1e1e1;
+      padding-left: 10px;
+      padding-right: 10px; }
 
 .ecl-main-content {
   background-color: #F6F6F6;
@@ -3074,7 +3074,9 @@ ul {
   font-weight: 200;
   line-height: 21px;
   padding: 30px;
-  margin-top: 0; }
+  margin-top: 0;
+  float: left;
+  width: 100%; }
   .ecl-main-content h1 {
     line-height: 1.3em; }
 
@@ -3160,24 +3162,6 @@ ul {
 
 #test-page {
   position: relative; }
-  #test-page #stats-container {
-    background-color: white;
-    padding: 0;
-    text-align: center;
-    float: left;
-    border-radius: 5px;
-    color: #666;
-    box-shadow: 0 1px 0 #ddd;
-    overflow: hidden; }
-    #test-page #stats-container li {
-      list-style-type: none;
-      float: left;
-      margin: 0 10px;
-      line-height: 2; }
-    #test-page #stats-container #tests-duration {
-      background-color: #e1e1e1;
-      margin-right: 0;
-      padding: 0 10px; }
   #test-page #iframe-wrapper {
     position: absolute;
     right: 0;
