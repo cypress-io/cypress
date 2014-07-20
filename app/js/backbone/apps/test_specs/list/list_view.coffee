@@ -11,16 +11,26 @@
 
     events:
       "click @ui.pre" : "preClicked"
+      "mouseover"     : "mouseover"
+      "mouseout"      : "mouseout"
 
     modelEvents:
       "change:state" : "stateChanged"
       "change:error" : "errorChanged"
 
+    mouseover: (e) ->
+      e.stopPropagation()
+      @$el.addClass("hover")
+
+    mouseout: (e) ->
+      e.stopPropagation()
+      @$el.removeClass("hover")
+
     onBeforeRender: ->
       @$el.addClass @model.get("state")
 
     stateChanged: (model, value, options) ->
-      @$el.removeClass().addClass(value)
+      @$el.removeClass("pending failed passed").addClass(value)
 
     errorChanged: (model, value, options) ->
       @ui.pre.text(value)
@@ -38,8 +48,18 @@
     childView: List.Test
     childViewContainer: "ul"
 
+    events:
+      "mouseover"   : "mouseover"
+      "mouseout"    : "mouseout"
+
     modelEvents:
       "change:state" : "stateChanged"
+
+    mouseover: (e) ->
+      @$el.addClass("hover")
+
+    mouseout: (e) ->
+      @$el.removeClass("hover")
 
     initialize: ->
       @collection = @model.get("tests")
