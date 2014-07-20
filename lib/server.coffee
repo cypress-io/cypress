@@ -74,6 +74,8 @@ getTest = (spec) ->
   return file
 
 io.on "connection", (socket) ->
+
+  ## watch js/coffee files for changes
   gaze "#{testFolder}/**/*.+(js|coffee)", (err, watcher) ->
     @watched (err, watched) ->
       console.log watched
@@ -87,6 +89,15 @@ io.on "connection", (socket) ->
       index = filepath.indexOf(testFolder)
       filepath  = _(filepath).rest(index).join("/")
       socket.emit "test:changed", file: filepath
+
+  ## only do this in development mode
+  gaze path.join(__dirname, "public", "css", "*.css"), (err, watcher) ->
+    @watched (err, watched) ->
+      console.log watched
+
+    @on "changed", (filepath) ->
+      filepath = path.basename(filepath)
+      socket.emit "eclectus:css:changed", file: filepath
 
 # getSpecs = (spec) ->
   ## grab all the files from our test folder

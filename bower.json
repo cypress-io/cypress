@@ -28,6 +28,7 @@
     "backbone-query-parameters": "~0.3.0",
     "mocha": "~1.20.1",
     "chai": "~1.9.1",
-    "sinonjs": "~1.10.2"
+    "sinonjs": "~1.10.2",
+    "jsuri": "~1.2.2"
   }
 }
