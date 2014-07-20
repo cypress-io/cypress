@@ -1,16 +1,16 @@
-express = require("express")
-http    = require("http")
-path    = require("path")
-fs      = require("fs")
-hbs     = require("hbs")
-glob    = require("glob")
-coffee  = require("coffee-script")
-_       = require("underscore")
-gaze    = require("gaze")
+express   = require("express")
+http      = require("http")
+path      = require("path")
+fs        = require("fs")
+hbs       = require("hbs")
+glob      = require("glob")
+coffee    = require("coffee-script")
+_         = require("underscore")
+chokidar  = require("chokidar")
 
-app     = express()
-server  = http.Server(app)
-io      = require("socket.io")(server)
+app       = express()
+server    = http.Server(app)
+io        = require("socket.io")(server)
 
 ## all environments
 app.set 'port', "3000"
@@ -74,30 +74,61 @@ getTest = (spec) ->
   return file
 
 io.on "connection", (socket) ->
+  #, ignoreInitial: true
+  watchTestFiles = chokidar.watch testFolder, ignored: (path, stats) ->
+    ## this fn gets called twice, once with the directory
+    ## which does not have a stats argument
+    ## we always return false to include directories
+    ## until we implement ignoring specific directories
+    return false if fs.statSync(path).isDirectory()
 
-  ## watch js/coffee files for changes
-  gaze "#{testFolder}/**/*.+(js|coffee)", (err, watcher) ->
-    @watched (err, watched) ->
-      console.log watched
+    ## else if this is a file make sure its ignored if its not
+    ## a js or coffee files
+    not /\.(js|coffee)$/.test path
 
-    @on "changed", (filepath) ->
-      ## split the path into an array
-      ## find the index of our testFolder
-      ## grab all the rest of the elements
-      ## past this testFolder
-      filepath  = filepath.split("/")
-      index = filepath.indexOf(testFolder)
-      filepath  = _(filepath).rest(index + 1).join("/")
-      socket.emit "test:changed", file: filepath
+  # watchTestFiles.on "add", (path) -> console.log "added js:", path
+  watchTestFiles.on "change", (filepath, stats) ->
+    filepath  = filepath.split("/")
+    index     = filepath.indexOf(testFolder)
+    filepath  = _(filepath).rest(index + 1).join("/")
+    socket.emit "test:changed", file: filepath
 
-  ## only do this in development mode
-  gaze path.join(__dirname, "public", "css", "*.css"), (err, watcher) ->
-    @watched (err, watched) ->
-      console.log watched
+  watchCssFiles = chokidar.watch path.join(__dirname, "public", "css"), ignored: (path, stats) ->
+    return false if fs.statSync(path).isDirectory()
 
-    @on "changed", (filepath) ->
-      filepath = path.basename(filepath)
-      socket.emit "eclectus:css:changed", file: filepath
+    not /\.css$/.test path
+
+  # watchCssFiles.on "add", (path) -> console.log "added css:", path
+  watchCssFiles.on "change", (filepath, stats) ->
+    filepath = path.basename(filepath)
+    socket.emit "eclectus:css:changed", file: filepath
+
+  # ## watch js/coffee files for changes
+  # gazeTestFiles = new Gaze
+  # gazeTestFiles.add "#{testFolder}/**/*.+(js|coffee)"
+
+  # gazeTestFiles.watched (err, watched) ->
+  #   console.log "gazeTestFiles", watched
+
+  # gazeTestFiles.on "changed", (filepath) ->
+  #   ## split the path into an array
+  #   ## find the index of our testFolder
+  #   ## grab all the rest of the elements
+  #   ## past this testFolder
+  #   filepath  = filepath.split("/")
+  #   index = filepath.indexOf(testFolder)
+  #   filepath  = _(filepath).rest(index + 1).join("/")
+  #   socket.emit "test:changed", file: filepath
+
+  # ## only do this in development mode
+  # gazeCss = new Gaze path.join(__dirname, "public", "css", "*.css")
+
+  # gazeCss.watched (err, watched) ->
+  #   console.log "gazeCss", watched
+
+  # gazeCss.on "changed", (filepath) ->
+  #   filepath = path.basename(filepath)
+  #   socket.emit "eclectus:css:changed", file: filepath
 
 # getSpecs = (spec) ->
   ## grab all the files from our test folder
