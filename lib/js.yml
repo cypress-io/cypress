@@ -10,6 +10,7 @@ vendor:
   - bower_components/backbone-query-parameters/backbone.queryparams.js
   - bower_components/spin.js/jquery.spin.js
   - bower_components/jsuri/Uri.js
+  - app/js/vendor/backbone-chooser.coffee
 
 eclectus:
   - app/js/api/eclectus.coffee
