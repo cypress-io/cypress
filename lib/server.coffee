@@ -6,8 +6,11 @@ hbs     = require("hbs")
 glob    = require("glob")
 coffee  = require("coffee-script")
 _       = require("underscore")
+gaze    = require("gaze")
 
 app     = express()
+server  = http.Server(app)
+io      = require("socket.io")(server)
 
 ## all environments
 app.set 'port', "3000"
@@ -70,10 +73,30 @@ getTest = (spec) ->
 
   return file
 
+io.on "connection", (socket) ->
+  gaze "#{testFolder}/**/*.+(js|coffee)", (err, watcher) ->
+    @watched (err, watched) ->
+      console.log watched
+
+    @on "changed", (filepath) ->
+      ## split the path into an array
+      ## find the index of our testFolder
+      ## grab all the rest of the elements
+      ## past this index
+      filepath  = filepath.split("/")
+      index = filepath.indexOf(testFolder)
+      filepath  = _(filepath).rest(index).join("/")
+      socket.emit "test:changed", file: filepath
+
 # getSpecs = (spec) ->
   ## grab all the files from our test folder
   # _(files).filter (file) -> testFiles.match file
   # files = getFiles("#{testFolder}/**/#{spec}")
+
+## serve static file from public when route is /eclectus
+## this is to namespace the static eclectus files away from
+## the real application
+app.use "/eclectus", express.static(__dirname + "/public")
 
 ## routing for the actual specs which are processed automatically
 ## this could be just a regular .js file or a .coffee file
@@ -96,11 +119,6 @@ app.get "/iframes/:test", (req, res) ->
     spec:         "/tests/#{req.params.test}"
   }
 
-## serve static file from public when route is /eclectus
-## this is to namespace the static eclectus files away from
-## the real application
-app.use "/eclectus", express.static(__dirname + "/public")
-
 ## serve the real eclectus JS app when we're at root
 app.get "/", (req, res) ->
   res.sendfile path.join(__dirname, "public", "index.html")
@@ -112,7 +130,7 @@ app.get "*", (req, res) ->
 ## errorhandler
 app.use require("errorhandler")()
 
-http.createServer(app).listen app.get('port'), ->
+server.listen app.get("port"), ->
   console.log 'Express server listening on port ' + app.get('port')
 
 console.log(process.cwd())
