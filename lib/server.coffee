@@ -84,10 +84,10 @@ io.on "connection", (socket) ->
       ## split the path into an array
       ## find the index of our testFolder
       ## grab all the rest of the elements
-      ## past this index
+      ## past this testFolder
       filepath  = filepath.split("/")
       index = filepath.indexOf(testFolder)
-      filepath  = _(filepath).rest(index).join("/")
+      filepath  = _(filepath).rest(index + 1).join("/")
       socket.emit "test:changed", file: filepath
 
   ## only do this in development mode

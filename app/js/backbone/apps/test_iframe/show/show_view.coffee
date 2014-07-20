@@ -17,6 +17,9 @@
       @ui.compress.hide()
 
     loadIframe: (src, fn) ->
+      ## remove any existing iframes
+      @$el.find("iframe").remove()
+
       view = @
 
       @src = "/iframes/" + src

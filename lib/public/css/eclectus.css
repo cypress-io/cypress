@@ -1641,7 +1641,7 @@ input[type="button"].btn-block {
 .fa-th-list:before {
   content: "\f00b"; }
 
-.fa-check:before, #test-page #specs-container li.suite.passed .suite-state i:before, #test-page #specs-container li.suite ul.test .text-state i:before {
+.fa-check:before, #test-page #specs-container li.suite.passed .suite-state i:before, #test-page #specs-container li.suite ul.test li.passed .test-state i:before {
   content: "\f00c"; }
 
 .fa-times:before, #test-page #specs-container li.suite.failed .suite-state i:before, #test-page #specs-container li.suite ul.test li.failed .test-state i:before {
@@ -3287,8 +3287,8 @@ ul {
             color: #E94B3B; }
         #test-page #specs-container li.suite ul.test li.passed {
           color: #23AE89; }
-        #test-page #specs-container li.suite ul.test .text-state {
-          color: #23AE89; }
+          #test-page #specs-container li.suite ul.test li.passed .test-state {
+            color: #23AE89; }
   #test-page #ecl-panel-container {
     position: fixed;
     bottom: 0; }

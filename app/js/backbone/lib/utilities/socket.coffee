@@ -3,18 +3,16 @@
   API =
 
     start: ->
-      ## should create a backbone model here
-      ## to be shared with the entire app.
-      ## that way everything else can just listen
-      ## to it via normal triggered events
-      ## App.request("socket:io:entity")
+      ## create the app socket entity
+      socket = App.request("io:entity")
 
-      socket = io.connect()
+      ## connect to socket io
+      channel = io.connect()
 
-      socket.on "test:changed", (data) ->
-        console.warn "test:changed", data
+      channel.on "test:changed", (data) ->
+        socket.trigger "test:changed", data.file
 
-      socket.on "eclectus:css:changed", (data) ->
+      channel.on "eclectus:css:changed", (data) ->
         ## find the eclectus stylesheet
         link = $("link").filter (index, link) ->
           new RegExp(data.file).test $(link).attr("href")
@@ -27,6 +25,8 @@
 
         ## set it back on the link
         link.attr("href", href.toString())
+
+      App.reqres.setHandler "socket:entity", -> socket
 
   App.commands.setHandler "socket:start", ->
     API.start()
