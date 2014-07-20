@@ -24,7 +24,11 @@
 
       @listenTo runner, "test:end", (test) ->
         console.log "test:end", test
+        ## sets the internal state of the test's results
         suites.getTest(test).getResults(test)
+
+        ## updates the parent suites state
+        suites.getSuiteByTest(test).updateState()
 
       suitesView = @getSuitesView suites
 

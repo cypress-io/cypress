@@ -1504,7 +1504,7 @@ input[type="button"].btn-block {
 .fa.pull-right, #test-page #ecl-panel-container #ecl-panel ul li.pull-right.xhr:before, #test-page #ecl-panel-container #ecl-panel ul li.pull-right.log:before, #test-page #ecl-panel-container #ecl-panel ul li.pull-right.info:before, #test-page #ecl-panel-container #ecl-panel ul li.pull-right.dom:before {
   margin-left: .3em; }
 
-.fa-spin {
+.fa-spin, #test-page #specs-container li.suite.pending .suite-state i {
   -webkit-animation: spin 2s infinite linear;
   -moz-animation: spin 2s infinite linear;
   -o-animation: spin 2s infinite linear;
@@ -1641,10 +1641,10 @@ input[type="button"].btn-block {
 .fa-th-list:before {
   content: "\f00b"; }
 
-.fa-check:before {
+.fa-check:before, #test-page #specs-container li.suite.passed .suite-state i:before, #test-page #specs-container li.suite ul.test .text-state i:before {
   content: "\f00c"; }
 
-.fa-times:before {
+.fa-times:before, #test-page #specs-container li.suite.failed .suite-state i:before, #test-page #specs-container li.suite ul.test li.failed .test-state i:before {
   content: "\f00d"; }
 
 .fa-search-plus:before {
@@ -1697,7 +1697,7 @@ input[type="button"].btn-block {
 .fa-repeat:before {
   content: "\f01e"; }
 
-.fa-refresh:before {
+.fa-refresh:before, #test-page #specs-container li.suite.pending .suite-state i:before {
   content: "\f021"; }
 
 .fa-list-alt:before {
@@ -3234,8 +3234,17 @@ ul {
       font-family: "Raleway",Helvetica,sans-serif;
       font-weight: 300;
       font-size: 16px; }
+      #test-page #specs-container li.suite.pending .suite-state i {
+        color: #888;
+        font-size: 14px; }
+      #test-page #specs-container li.suite.failed .suite-state i {
+        color: #E94B3B;
+        font-size: 12px; }
+      #test-page #specs-container li.suite.passed .suite-state i {
+        color: #23AE89;
+        font-size: 12px; }
       #test-page #specs-container li.suite ul.test {
-        padding-left: 15px;
+        padding-left: 17px;
         font-family: "Open Sans", sans-serif;
         font-size: 13px;
         font-weight: 300; }

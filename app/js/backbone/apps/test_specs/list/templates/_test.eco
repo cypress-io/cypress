@@ -1,5 +1,5 @@
 <span class="test-state">
-  <i class="fa fa-circle"></i>
+  <i class="fa"></i>
 </span>
 <span class="test-title">
   <%= @title %>
