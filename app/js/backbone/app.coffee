@@ -14,6 +14,9 @@
     console.warn "before:start"
 
   App.on "start", (options = {}) ->
+    ## start listening to socket io
+    App.execute "socket:start"
+
     App.module("NavApp").start()
 
     App.startHistory()
