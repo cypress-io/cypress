@@ -9,7 +9,7 @@
       ## to it via normal triggered events
       ## App.request("socket:io:entity")
 
-      socket = io.connect(location.host)
+      socket = io.connect()
 
       socket.on "test:changed", (data) ->
         console.warn "test:changed", data
@@ -23,7 +23,7 @@
         href = new Uri(link.attr("href"))
 
         ## append a random time after it
-        href.replaceQueryParam "t", (new Date).getTime()
+        href.replaceQueryParam "t", _.now()
 
         ## set it back on the link
         link.attr("href", href.toString())
