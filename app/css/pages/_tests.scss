@@ -206,13 +206,13 @@
 
         li.passed {
           color: #23AE89;
-        }
 
-        .text-state {
-          color: #23AE89;
+          .test-state {
+            color: #23AE89;
 
-          i {
-            @extend .#{$fa-css-prefix}-check;
+            i {
+              @extend .#{$fa-css-prefix}-check;
+            }
           }
         }
       }
