@@ -1,2 +1,5 @@
-<%= @title %>
+<span class="suite-state">
+  <i class="fa"></i>
+  <%= @title %>
+</span>
 <ul class="test"></ul>

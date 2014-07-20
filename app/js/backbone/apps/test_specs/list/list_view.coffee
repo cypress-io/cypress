@@ -38,8 +38,17 @@
     childView: List.Test
     childViewContainer: "ul"
 
+    modelEvents:
+      "change:state" : "stateChanged"
+
     initialize: ->
       @collection = @model.get("tests")
+
+    onBeforeRender: ->
+      @$el.addClass @model.get("state")
+
+    stateChanged: (model, value, options) ->
+      @$el.removeClass("pending failed passed").addClass(value)
 
   class List.Suites extends App.Views.CollectionView
     tagName: "ul"

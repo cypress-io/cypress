@@ -107,8 +107,33 @@
       font-weight: 300;
       font-size: 16px;
 
+      &.pending {
+        .suite-state i {
+          @extend .#{$fa-css-prefix}-refresh;
+          @extend .fa-spin;
+          color: #888;
+          font-size: 14px;
+        }
+      }
+
+      &.failed {
+        .suite-state i {
+          @extend .#{$fa-css-prefix}-times;
+          color: #E94B3B;
+          font-size: 12px;
+        }
+      }
+
+      &.passed {
+        .suite-state i {
+          @extend .#{$fa-css-prefix}-check;
+          color: #23AE89;
+          font-size: 12px;
+        }
+      }
+
       ul.test {
-        padding-left: 15px;
+        padding-left: 17px;
         font-family: "Open Sans", sans-serif;
         font-size: 13px;
         font-weight: 300;
@@ -140,6 +165,10 @@
 
           .test-state {
             color: #E94B3B;
+
+            i {
+              @extend .#{$fa-css-prefix}-times;
+            }
           }
         }
 
@@ -149,6 +178,10 @@
 
         .text-state {
           color: #23AE89;
+
+          i {
+            @extend .#{$fa-css-prefix}-check;
+          }
         }
       }
     }
