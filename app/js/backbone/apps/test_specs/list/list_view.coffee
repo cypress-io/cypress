@@ -15,8 +15,12 @@
       "mouseout"      : "mouseout"
 
     modelEvents:
-      "change:state" : "stateChanged"
-      "change:error" : "errorChanged"
+      "change:state"  : "stateChanged"
+      "change:error"  : "errorChanged"
+      "change:chosen" : "chosenChanged"
+
+    triggers:
+      "click" : "test:clicked"
 
     mouseover: (e) ->
       e.stopPropagation()
@@ -25,6 +29,9 @@
     mouseout: (e) ->
       e.stopPropagation()
       @$el.removeClass("hover")
+
+    chosenChanged: (model, value, options) ->
+      @$el.toggleClass "active", value
 
     onBeforeRender: ->
       @$el.addClass @model.get("state")
@@ -52,8 +59,12 @@
       "mouseover"   : "mouseover"
       "mouseout"    : "mouseout"
 
+    triggers:
+      "click" : "suite:clicked"
+
     modelEvents:
-      "change:state" : "stateChanged"
+      "change:state"  : "stateChanged"
+      "change:chosen" : "chosenChanged"
 
     mouseover: (e) ->
       @$el.addClass("hover")
@@ -63,6 +74,9 @@
 
     initialize: ->
       @collection = @model.get("tests")
+
+    chosenChanged: (model, value, options) ->
+      @$el.toggleClass "active", value
 
     onBeforeRender: ->
       @$el.addClass @model.get("state")

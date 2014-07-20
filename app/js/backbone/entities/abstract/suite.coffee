@@ -4,6 +4,9 @@
     defaults: ->
       state: "pending"
 
+    initialize: ->
+      new Backbone.Chooser(@)
+
     addTest: (test) ->
       @get("tests").addTest(test)
 
@@ -32,8 +35,14 @@
 
       @set state: state
 
+    unchooseTests: ->
+      @get("tests").invoke "unchoose"
+
   class Entities.SuitesCollection extends Entities.Collection
     model: Entities.Suite
+
+    initialize: ->
+      new Backbone.SingleChooser(@)
 
     addSuite: (suite) ->
       @add
@@ -52,6 +61,9 @@
     getTest: (test) ->
       suite = @getSuiteByTest(test)
       suite.getTest(test)
+
+    unchooseTests: ->
+      @invoke "unchooseTests"
 
   API =
     getNewSuites: (suites) ->

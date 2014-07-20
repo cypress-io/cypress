@@ -32,6 +32,21 @@
 
       suitesView = @getSuitesView suites
 
+      ## when a suite is clicked, we choose the suite
+      ## and unchoose all of the other tests
+      @listenTo suitesView, "childview:suite:clicked", (iv, args) ->
+        suite = args.model
+        suites.unchooseTests()
+        suite.choose()
+
+      ## when a test is clicked, we unchoose any suite
+      ## and then choose the test
+      @listenTo suitesView, "childview:childview:test:clicked", (iv, iv2, args) ->
+        test = args.model
+        chosen = suites.getFirstChosen()
+        suites.unchoose(chosen) if chosen
+        test.choose()
+
       @show suitesView
 
     getSuitesView: (suites) ->
