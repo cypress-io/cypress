@@ -4,6 +4,9 @@
     defaults: ->
       state: "pending"
 
+    initialize: ->
+      new Backbone.Chooser(@)
+
     getResults: (test) ->
       attrs = {state: test.state}
 
@@ -26,6 +29,9 @@
       @add
         title: test.title
         id: test.cid
+
+    initialize: ->
+      new Backbone.SingleChooser(@)
 
   API =
     getNewTests: (tests) ->

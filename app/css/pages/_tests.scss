@@ -94,26 +94,33 @@
   #specs-container {
     clear: both;
     padding-left: 0;
+    float: left;
+
+    pre {
+      margin-bottom: 2px;
+    }
 
     li {
       list-style-type: none;
 
-      &.active {
-        font-weight: bold;
-      }
     }
 
     li.suite {
       font-family: "Raleway",Helvetica,sans-serif;
       font-weight: 300;
       font-size: 16px;
-      padding-left: 5px;
+      padding: 3px 10px 2px 5px;
 
       &.hover {
-        background-color: #E1E1E1;
+        background-color: #E5E5E5;
         border-left: 2px solid #3380FF;
         padding-left: 3px;
         cursor: pointer;
+      }
+
+      &.active {
+        background-color: #FFF;
+        box-shadow: 0 1px 2px #DDD;
       }
 
       &.pending {
@@ -152,13 +159,18 @@
         }
 
         li {
-          padding-left: 5px;
+          padding: 0 5px;
 
           &.hover {
-            background-color: #E1E1E1;
+            background-color: #E5E5E5;
             border-left: 2px solid #3380FF;
             padding-left: 3px;
             cursor: pointer;
+          }
+
+          &.active {
+            background-color: #FFF;
+            box-shadow: 0 1px 2px #DDD;
           }
         }
 
