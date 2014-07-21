@@ -3,5 +3,6 @@
 </span>
 <span class="test-title">
   <%= @title %>
+  <label class="label"></span>
 </span>
 <pre class="test-error"></pre>

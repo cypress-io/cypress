@@ -8,6 +8,7 @@
 
     ui:
       pre: "pre"
+      label: "label"
 
     events:
       "click @ui.pre" : "preClicked"
@@ -38,6 +39,21 @@
 
     stateChanged: (model, value, options) ->
       @$el.removeClass("pending failed passed").addClass(value)
+
+      ## if the test passed check on the duration
+      @checkDuration() if value is "passed"
+      @checkTimeout() if value is "failed"
+
+    checkDuration: ->
+      return if not @model.isSlow()
+
+      ## need to add a tooltip here
+      @ui.label.addClass("label-primary").text(@model.get("duration") + "ms")
+
+    checkTimeout: ->
+      return if not @model.timedOut()
+
+      @ui.label.addClass("label-danger").text("Timed Out")
 
     errorChanged: (model, value, options) ->
       @ui.pre.text(value)

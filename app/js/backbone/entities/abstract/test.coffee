@@ -7,8 +7,19 @@
     initialize: ->
       new Backbone.Chooser(@)
 
+    ## did our test take a long time to run?
+    isSlow: ->
+      @get("duration") > @_slow
+
+    timedOut: ->
+      @get("duration") > @_timeout
+
     getResults: (test) ->
-      attrs = {state: test.state}
+      ## dont use underscore pick here because we'll most likely
+      ## have to do some property translation from other frameworks
+      attrs =
+        state:    test.state
+        duration: test.duration
 
       if test.err
         ## output the error to the console to receive stack trace
@@ -19,6 +30,11 @@
 
         ## set the err on the attrs
         attrs.error = test.err.stack or test.err.toString()
+
+      ## set the private _slow and _timeout
+      ## based on the result of these methods
+      @_slow = test.slow()
+      @_timeout = test.timeout()
 
       @set attrs
 
