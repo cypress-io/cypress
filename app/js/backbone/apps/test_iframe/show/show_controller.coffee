@@ -23,7 +23,6 @@
       @show view
 
     loadIframe: (view, runner, iframe) ->
-      console.info view, iframe
       view.loadIframe iframe, (contentWindow) ->
         ## once its loaded we receive the contentWindow
         ## and tell our runner to run the iframe's suite

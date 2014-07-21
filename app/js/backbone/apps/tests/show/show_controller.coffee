@@ -12,9 +12,9 @@
         @layout = @getTestView()
 
         @listenTo @layout, "show", =>
+          @statsRegion(runner)
           @iframeRegion(runner)
           @specsRegion(runner)
-          # @statsRegion(runner)
           # @logRegion(runner)
           # @domRegion(runner)
           # @xhrRegion(runner)
@@ -24,6 +24,9 @@
           runner.start(options.id)
 
         @show @layout
+
+    statsRegion: (runner) ->
+      App.execute "show:test:stats", @layout.statsRegion, runner
 
     iframeRegion: (runner) ->
       App.execute "show:test:iframe", @layout.iframeRegion, runner
