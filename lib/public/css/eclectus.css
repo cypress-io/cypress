@@ -1428,6 +1428,58 @@ input[type="reset"].btn-block,
 input[type="button"].btn-block {
   width: 100%; }
 
+.label {
+  display: inline;
+  padding: .2em .6em .3em;
+  font-size: 75%;
+  font-weight: bold;
+  line-height: 1;
+  color: white;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: .25em; }
+  .label:empty {
+    display: none; }
+  .btn .label {
+    position: relative;
+    top: -1px; }
+
+a.label:hover, a.label:focus {
+  color: white;
+  text-decoration: none;
+  cursor: pointer; }
+
+.label-default {
+  background-color: #999999; }
+  .label-default[href]:hover, .label-default[href]:focus {
+    background-color: gray; }
+
+.label-primary {
+  background-color: #428bca; }
+  .label-primary[href]:hover, .label-primary[href]:focus {
+    background-color: #3071a9; }
+
+.label-success {
+  background-color: #5cb85c; }
+  .label-success[href]:hover, .label-success[href]:focus {
+    background-color: #449d44; }
+
+.label-info {
+  background-color: #5bc0de; }
+  .label-info[href]:hover, .label-info[href]:focus {
+    background-color: #31b0d5; }
+
+.label-warning {
+  background-color: #f0ad4e; }
+  .label-warning[href]:hover, .label-warning[href]:focus {
+    background-color: #ec971f; }
+
+.label-danger {
+  background-color: #d9534f; }
+  .label-danger[href]:hover, .label-danger[href]:focus {
+    background-color: #c9302c; }
+
 /*!
  *  Font Awesome 4.1.0 by @davegandy - http://fontawesome.io - @fontawesome
  *  License - http://fontawesome.io/license (Font: SIL OFL 1.1, CSS: MIT License)
@@ -3046,7 +3098,7 @@ ul {
       list-style-type: none;
       float: left;
       margin: 0 10px;
-      padding-top: 5px;
+      padding-top: 6px;
       font-weight: 300;
       height: 100%; }
       #header-container #stats-container li#tests-passed i {
@@ -3255,6 +3307,8 @@ ul {
           #test-page #specs-container li.suite ul.test li.active {
             background-color: #FFF;
             box-shadow: 0 1px 2px #DDD; }
+          #test-page #specs-container li.suite ul.test li label {
+            padding: 1px 4px; }
         #test-page #specs-container li.suite ul.test pre.test-error {
           margin-top: 0;
           padding-left: 12px; }
@@ -3269,6 +3323,8 @@ ul {
           color: #E94B3B; }
           #test-page #specs-container li.suite ul.test li.failed .test-state {
             color: #E94B3B; }
+          #test-page #specs-container li.suite ul.test li.failed label {
+            text-transform: uppercase; }
         #test-page #specs-container li.suite ul.test li.passed {
           color: #23AE89; }
           #test-page #specs-container li.suite ul.test li.passed .test-state {
