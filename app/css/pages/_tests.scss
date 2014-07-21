@@ -129,6 +129,9 @@
         font-family: "Open Sans", sans-serif;
         font-size: 13px;
         font-weight: 300;
+        padding-left: 8px;
+        margin-left: 4px;
+        border-left: 1px dotted #CCC;
 
         .test-state {
           font-size: 10px;
@@ -156,7 +159,9 @@
 
         pre.test-error {
           margin-top: 0;
-          padding-left: 12px;
+          padding-left: 7px;
+          margin-left: 4px;
+          border-left: 1px solid #CCC;
 
           &:hover {
             text-decoration: underline;
