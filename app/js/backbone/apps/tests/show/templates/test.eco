@@ -1,28 +1,5 @@
 <div id="header-container">
-  <ul id="stats-container">
-    <li id="tests-passed">
-      <span class="num">10</span>
-      <span class="name">
-        <i class="fa fa-check"></i>
-        Passed
-      </span>
-    </li>
-    <li id="tests-failed">
-      <span class="num">2</span>
-      <span class="name">
-        <i class="fa fa-times"></i>
-        Failed
-      </span>
-    </li>
-    <li id="tests-pending">
-      <span class="num">5</span>
-      <span class="name">Pending</span>
-    </li>
-    <li id="tests-duration">
-      <span class="num">0</span>
-      <span class="name">secs</span>
-    </li>
-  </ul>
+  <div id="stats-region"></div>
 </div>
 <div class="ecl-main-content">
   <div id="test-page">

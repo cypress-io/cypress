@@ -14,11 +14,20 @@
     startListening: ->
       ## mocha has begun running the specs per iframe
       @runner.on "start", =>
+        console.warn "RUNNER HAS STARTED"
+        @trigger "runner:start"
+
+      @runner.on "end", =>
+        console.warn "RUNNER HAS ENDED"
+        @trigger "runner:end"
 
       @runner.on "suite", (suite) =>
         console.warn "suite", suite
         suite.cid = _.uniqueId("suite")
         @trigger "suite:start", suite
+
+      @runner.on "suite end", (suite) =>
+        @trigger "suite:stop", suite
 
       # @runner.on "suite end", (suite) ->
       #   console.warn "suite end", suite
