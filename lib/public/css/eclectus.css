@@ -3099,6 +3099,7 @@ ul {
       float: left;
       margin: 0 10px;
       padding-top: 6px;
+      padding-bottom: 3px;
       font-weight: 300;
       height: 100%; }
       #header-container #stats-container li#tests-passed i {
@@ -3294,7 +3295,10 @@ ul {
         padding-left: 12px;
         font-family: "Open Sans", sans-serif;
         font-size: 13px;
-        font-weight: 300; }
+        font-weight: 300;
+        padding-left: 8px;
+        margin-left: 4px;
+        border-left: 1px dotted #CCC; }
         #test-page #specs-container li.suite ul.test .test-state {
           font-size: 10px; }
         #test-page #specs-container li.suite ul.test li {
@@ -3311,7 +3315,9 @@ ul {
             padding: 1px 4px; }
         #test-page #specs-container li.suite ul.test pre.test-error {
           margin-top: 0;
-          padding-left: 12px; }
+          padding-left: 7px;
+          margin-left: 4px;
+          border-left: 1px solid #CCC; }
           #test-page #specs-container li.suite ul.test pre.test-error:hover {
             text-decoration: underline;
             cursor: pointer; }
