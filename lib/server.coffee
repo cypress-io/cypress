@@ -6,8 +6,11 @@ hbs       = require("hbs")
 glob      = require("glob")
 coffee    = require("coffee-script")
 _         = require("underscore")
+_.str     = require("underscore.string")
 chokidar  = require("chokidar")
-mkdirp    = require('mkdirp');
+mkdirp    = require('mkdirp')
+
+_.mixin _.str.exports()
 
 app       = express()
 server    = http.Server(app)
@@ -74,6 +77,9 @@ getTest = (spec) ->
 
   return file
 
+escapeRegExp = (str) ->
+  str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+
 alphabet = "abcdefghijklmnopqrstuvwxyz0123456789"
 
 getRandom = (alphabet) ->
@@ -87,23 +93,23 @@ generateId = ->
 appendTestId = (spec, title, id) ->
   specFile = path.join(testFolder, spec)
   contents = fs.readFileSync specFile, "utf8"
-  re = new RegExp("(#{title})[^\\s*\\[.{3}\\]]")
-  console.log contents, re
+  re = new RegExp "['\"](" + escapeRegExp(title) + ")['\"]"
 
   # ## if the string is found and it doesnt have an id
   matches = re.exec contents
 
   ## matches[1] will be the captured group which is the title
   if matches
-    contents = contents.replace matches[1], "#{matches[1]} [#{id}]"
+    ## position is the string index where we first find the capture
+    ## group and include its length, so we insert right after it
+    position = matches.index + matches[1].length + 1
+    contents = _(contents).insert position, " [#{id}]"
 
     fs.writeFileSync specFile, contents
 
 io.on "connection", (socket) ->
   socket.on "generate:test:id", (data, fn) ->
     { spec, title } = data
-
-    console.log "generate:test:id", data
 
     id = generateId()
 
