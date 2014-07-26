@@ -7,6 +7,7 @@ glob      = require("glob")
 coffee    = require("coffee-script")
 _         = require("underscore")
 chokidar  = require("chokidar")
+mkdirp    = require('mkdirp');
 
 app       = express()
 server    = http.Server(app)
@@ -73,7 +74,42 @@ getTest = (spec) ->
 
   return file
 
+alphabet = "abcdefghijklmnopqrstuvwxyz0123456789"
+
+getRandom = (alphabet) ->
+  index = Math.floor(Math.random() * alphabet.length)
+  alphabet[index]
+
+generateId = ->
+  ids = _(3).times -> getRandom(alphabet)
+  ids.join("")
+
+appendTestId = (spec, title, id) ->
+  specFile = path.join(testFolder, spec)
+  contents = fs.readFileSync specFile, "utf8"
+  re = new RegExp("(#{title})[^\\s*\\[.{3}\\]]")
+  console.log contents, re
+
+  # ## if the string is found and it doesnt have an id
+  matches = re.exec contents
+
+  ## matches[1] will be the captured group which is the title
+  if matches
+    contents = contents.replace matches[1], "#{matches[1]} [#{id}]"
+
+    fs.writeFileSync specFile, contents
+
 io.on "connection", (socket) ->
+  socket.on "generate:test:id", (data, fn) ->
+    { spec, title } = data
+
+    console.log "generate:test:id", data
+
+    id = generateId()
+
+    appendTestId(spec, title, id)
+    fn(id)
+
   #, ignoreInitial: true
   watchTestFiles = chokidar.watch testFolder, ignored: (path, stats) ->
     ## this fn gets called twice, once with the directory
@@ -88,6 +124,12 @@ io.on "connection", (socket) ->
 
   # watchTestFiles.on "add", (path) -> console.log "added js:", path
   watchTestFiles.on "change", (filepath, stats) ->
+
+    # contents    = fs.readFileSync filepath, "utf8"
+    # newFilePath = path.join process.cwd(), filepath#.replace("tests", "compiled")
+    # mkdirp.sync path.dirname(newFilePath)
+    # fs.writeFileSync newFilePath, contents + "\n  it 'tests', ->"
+
     filepath  = filepath.split("/")
     index     = filepath.indexOf(testFolder)
     filepath  = _(filepath).rest(index + 1).join("/")

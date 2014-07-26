@@ -3,9 +3,6 @@
   API =
 
     start: ->
-      ## create the app socket entity
-      socket = App.request("io:entity")
-
       ## connect to socket io
       channel = io.connect()
 
@@ -25,6 +22,9 @@
 
         ## set it back on the link
         link.attr("href", href.toString())
+
+      ## create the app socket entity
+      socket = App.request "io:entity", channel
 
       App.reqres.setHandler "socket:entity", -> socket
 
