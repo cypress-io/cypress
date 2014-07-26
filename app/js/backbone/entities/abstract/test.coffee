@@ -17,6 +17,10 @@
     getResults: (test) ->
       ## dont use underscore pick here because we'll most likely
       ## have to do some property translation from other frameworks
+
+      ## we have to normalize the state by first looking at whether
+      ## its pending (because then it wont have a state)
+      # state:    if test.pending then "pending" else test.state
       attrs =
         state:    test.state
         duration: test.duration

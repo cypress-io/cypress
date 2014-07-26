@@ -87,7 +87,16 @@
         ## set the AssertionError on the test
         test.err = err
 
+      ## if a test is pending mocha will only
+      ## emit the pending event instead of the test
+      ## so we normalize the pending / test events
+      @runner.on "pending", (test) =>
+        test.cid ?= _.uniqueId("test")
+        @trigger "test", test
+
       @runner.on "test", (test) =>
+        ## need to do this temporarily until we add id's to suites
+        test.cid ?= _.uniqueId("test")
         @trigger "test", test
 
       @runner.on "test end", (test) =>

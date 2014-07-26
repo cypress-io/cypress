@@ -23,7 +23,7 @@
         suites.addTest(test)
 
       @listenTo runner, "test:end", (test) ->
-        console.log "test:end", test
+        console.log "test:end", test, test.cid, suites
         ## sets the internal state of the test's results
         suites.getTest(test).getResults(test)
 
