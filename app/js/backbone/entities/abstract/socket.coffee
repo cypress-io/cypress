@@ -1,6 +1,12 @@
 @App.module "Entities", (Entities, App, Backbone, Marionette, $, _) ->
 
   class Entities.Socket extends Entities.Model
+    setChannel: (@channel) ->
 
-  App.reqres.setHandler "io:entity", ->
-    new Entities.Socket
+    emit: (event, data, fn = ->) ->
+      @channel.emit event, data, fn
+
+  App.reqres.setHandler "io:entity", (channel) ->
+    socket = new Entities.Socket
+    socket.setChannel channel
+    socket
