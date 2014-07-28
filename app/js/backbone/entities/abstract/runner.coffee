@@ -18,6 +18,9 @@
       ## use the captured group if there was a match
       matches and matches[1]
 
+    getIdToAppend: (cid) ->
+      " [" + cid + "]"
+
     logResults: (test) ->
       @trigger "test:results:ready", test
 
@@ -34,34 +37,45 @@
       ## proxy this to everyone else
       @listenTo socket, "test:changed", @triggerLoadIframe
 
+      _this = @
 
       ## TODO: IMPLEMENT FOR SUITES
       @runner.runSuite = _.wrap @runner.runSuite, (runSuite, suite, fn) ->
         ## iterate through each test
         generatedIds = []
 
-        suite.eachTest (test) =>
-          test.cid ?= runner.getTestCid(test)
+        suite.eachTest (test) ->
+          ## iterating on both the test and its parent (the suite)
+          _.each [test, test.parent], (type) ->
 
-          ## if test doesnt have an id
-          if not test.cid
-            df = $.Deferred()
+            ## allow to get the original title
+            type.originalTitle = ->
+              @title.replace _this.getIdToAppend(type.cid), ""
 
-            generatedIds.push df
+            ## parse the cid out of the title if it exists
+            type.cid ?= _this.getTestCid(type)
 
-            data = {title: test.title, spec: runner.iframe}
-            socket.emit "generate:test:id", data, (id) ->
-              test.cid = id
-              df.resolve id
+            ## if test or suite doesnt have a cid
+            if not type.cid
+              ## override each test's and suite's fullTitle to include its real id
+              ## this cant use a regular client id, since when the iframe reloads
+              ## each test will have a unique id again -- this is why
+              ## you have to use client id's in the title in the
+              ## original spec
 
-          ## override each test's fullTitle to include its cid
-          ## this cant use cid, since when the iframe reloads
-          ## each test will have a unique id again -- this is why
-          ## you have to use client id's in the title in the
-          ## original spec
-          test.fullTitle = _.wrap test.fullTitle, (origTitle) ->
-            title = origTitle.apply(@)
-            title + " [" + test.cid + "]"
+              type.fullTitle = _.wrap type.fullTitle, (origTitle) ->
+                title = origTitle.apply(@)
+                title + _this.getIdToAppend(type.cid)
+
+              df = $.Deferred()
+
+              generatedIds.push df
+
+              ## go get the id from the server via websockets
+              data = {title: type.title, spec: _this.iframe}
+              socket.emit "generate:test:id", data, (id) ->
+                type.cid = id
+                df.resolve id
 
         # console.info generatedIds
         $.when(generatedIds...).done =>
@@ -79,7 +93,6 @@
 
       @runner.on "suite", (suite) =>
         console.warn "suite", suite
-        suite.cid = _.uniqueId("suite")
         @trigger "suite:start", suite
 
       @runner.on "suite end", (suite) =>
@@ -97,12 +110,10 @@
       ## emit the pending event instead of the test
       ## so we normalize the pending / test events
       @runner.on "pending", (test) =>
-        test.cid ?= _.uniqueId("test")
         @trigger "test", test
 
       @runner.on "test", (test) =>
         ## need to do this temporarily until we add id's to suites
-        test.cid ?= _.uniqueId("test")
         @trigger "test", test
 
       @runner.on "test end", (test) =>
@@ -133,10 +144,30 @@
       ## if it does fire the event
       @trigger "load:iframe", @iframe, opts
 
+    hasChosen: ->
+      !!@get("chosenId")
 
-    ## sets the id of the test/suite which has been chosen in the UI
     setChosenId: (id) ->
-      @set "chosenId", id
+      ## if the chosen id matches this id argument
+      ## it means we've unselected a test / suite
+      if @get("chosenId") is id
+        ## so unset this attribute
+        @unset("chosenId")
+
+      else
+        @set "chosenId", id
+
+      ## always reload the iframe
+      @triggerLoadIframe @iframe
+
+    getGrep: ->
+      if id = @get("chosenId")
+        ## create a regex based on the id of the suite / test
+        new RegExp @escapeId("[" + id + "]")
+
+      else
+        ## just use every test
+        /.*/
 
     escapeId: (id) ->
       id.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -150,9 +181,8 @@
       @setIframe iframe
 
       ## grep for the correct test / suite by its id if chosenId is set
-      if id = @get("chosenId")
-        testOrSuiteId = new RegExp(@escapeId("[" + id + "]") + "\$")
-        @runner.grep testOrSuiteId
+      ## or all the tests
+      @runner.grep @getGrep()
 
       ## run the suite for the iframe
       @runner.runSuite contentWindow.mocha.suite, ->
