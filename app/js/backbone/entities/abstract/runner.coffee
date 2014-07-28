@@ -115,6 +115,13 @@
       console.warn "starting", iframe
       @trigger "load:iframe", iframe
 
+    ## sets the id of the test/suite which has been chosen in the UI
+    setChosenId: (id) ->
+      @set "chosenId", id
+
+    escapeId: (id) ->
+      id.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+
     runIframeSuite: (iframe, contentWindow) ->
       ## tell our runner to run our iframes mocha suite
       console.info("runIframeSuite", @runner, iframe, contentWindow.mocha.suite)
@@ -122,6 +129,13 @@
       ## right before we run the root runner's suite we iterate
       ## through each test and give it a unique id
       @setIframe iframe
+
+      ## grep for the correct test / suite by its id if chosenId is set
+      if id = @get("chosenId")
+        testOrSuiteId = new RegExp(@escapeId("[" + id + "]") + "\$")
+        @runner.grep testOrSuiteId
+
+      ## run the suite for the iframe
       @runner.runSuite contentWindow.mocha.suite, ->
         console.log "finished running the iframes suite!"
 

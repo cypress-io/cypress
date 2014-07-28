@@ -46,6 +46,7 @@
         chosen = suites.getFirstChosen()
         suites.unchoose(chosen) if chosen
         test.choose()
+        runner.setChosenId test.id
 
       @show suitesView
 
