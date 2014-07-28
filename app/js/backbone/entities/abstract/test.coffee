@@ -14,9 +14,19 @@
     timedOut: ->
       @get("duration") > @_timeout
 
-    getResults: (test) ->
+    reset: ->
+      @removeOriginalError()
+
+      ## reset these specific attributes
+      _.each ["state", "duration", "error"], (key) =>
+        @unset key
+
+      ## merge in the defaults
+      @set _.result(@, "defaults")
+
     removeOriginalError: ->
       delete @originalError
+
     setResults: (test) ->
       ## dont use underscore pick here because we'll most likely
       ## have to do some property translation from other frameworks

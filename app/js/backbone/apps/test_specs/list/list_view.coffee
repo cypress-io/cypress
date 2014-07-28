@@ -38,7 +38,7 @@
       @$el.addClass @model.get("state")
 
     stateChanged: (model, value, options) ->
-      @$el.removeClass("pending failed passed").addClass(value)
+      @$el.removeClass("processing failed passed").addClass(value)
 
       ## if the test passed check on the duration
       @checkDuration() if value is "passed"
@@ -56,6 +56,7 @@
       @ui.label.addClass("label-danger").text("Timed Out")
 
     errorChanged: (model, value, options) ->
+      value or= ""
       @ui.pre.text(value)
 
     preClicked: (e) ->
@@ -98,7 +99,7 @@
       @$el.addClass @model.get("state")
 
     stateChanged: (model, value, options) ->
-      @$el.removeClass("pending failed passed").addClass(value)
+      @$el.removeClass("processing failed passed").addClass(value)
 
   class List.Suites extends App.Views.CollectionView
     tagName: "ul"
