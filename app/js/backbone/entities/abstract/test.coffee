@@ -15,6 +15,9 @@
       @get("duration") > @_timeout
 
     getResults: (test) ->
+    removeOriginalError: ->
+      delete @originalError
+    setResults: (test) ->
       ## dont use underscore pick here because we'll most likely
       ## have to do some property translation from other frameworks
 
@@ -33,6 +36,13 @@
 
         ## set the err on the attrs
         attrs.error = test.err.stack or test.err.toString()
+      else
+        ## remove the original error in case it exists
+        @removeOriginalError()
+
+        ## reset the error attribute to null so we remove any
+        ## existing error message
+        attrs.error = null
 
       ## set the private _slow and _timeout
       ## based on the result of these methods
@@ -46,7 +56,7 @@
 
     addTest: (test) ->
       @add
-        title: test.title
+        title: test.originalTitle()
         id: test.cid
 
     initialize: ->
