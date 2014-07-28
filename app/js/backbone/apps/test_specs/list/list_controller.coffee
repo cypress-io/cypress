@@ -25,11 +25,15 @@
       @listenTo runner, "test:end", (test) ->
         console.log "test:end", test, test.cid, suites
         ## sets the internal state of the test's results
-        suites.getTest(test).getResults(test)
+        testModel = suites.getTest(test)
+        testModel.setResults(test)
 
         ## updates the parent suites state
         suites.getSuiteByTest(test).updateState()
 
+        ## causes the runner to fire 'test:results:ready' after we've
+        ## normalized the test results in our own testModel
+        runner.logResults testModel
       suitesView = @getSuitesView suites
 
       ## when a suite is clicked, we choose the suite

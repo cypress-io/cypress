@@ -18,6 +18,9 @@
       ## use the captured group if there was a match
       matches and matches[1]
 
+    logResults: (test) ->
+      @trigger "test:results:ready", test
+
     setTestRunner: (runner) ->
       ## store the test runner as a property on ourselves
       @runner = runner

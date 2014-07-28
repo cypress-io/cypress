@@ -16,18 +16,20 @@
       "change:duration" : "durationChanged"
 
     passedChanged: (model, value, options) ->
-      @ui.passed.text value
+      @ui.passed.text @count(value)
 
     failedChanged: (model, value, options) ->
-      @ui.failed.text value
+      @ui.failed.text @count(value)
 
     pendingChanged: (model, value, options) ->
-      @ui.pending.text value
+      @ui.pending.text @count(value)
 
     durationChanged: (model, value, options) ->
       duration = @model.getDurationFormatted()
-      @ui.duration.text duration
+      @ui.duration.text @count(duration)
+
+    count: (num) ->
+      if num > 0 then num else "--"
 
     templateHelpers: ->
-      count: (num) ->
-        if num > 0 then num else "--"
+      count: @count

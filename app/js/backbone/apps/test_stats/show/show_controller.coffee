@@ -13,8 +13,13 @@
       @listenTo runner, "suite:stop", ->
         stats.stopCounting()
 
-      @listenTo runner, "test:end", (test) ->
+      @listenTo runner, "test:results:ready", (test) ->
         stats.countTestState(test)
+
+      @listenTo runner, "load:iframe", ->
+        ## anytime the iframe needs to be reloaded
+        ## we reset our stats back to 0
+        stats.reset()
 
       statsView = @getStatsView stats
 
