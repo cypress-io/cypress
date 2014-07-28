@@ -2,7 +2,7 @@
 
   class Entities.Suite extends Entities.Model
     defaults: ->
-      state: "pending"
+      state: "processing"
 
     initialize: ->
       new Backbone.Chooser(@)
@@ -13,8 +13,8 @@
     getTest: (test) ->
       @get("tests").get(test.cid)
 
-    anyArePending: (states) ->
-      _(states).any (state) -> state is "pending"
+    anyAreProcessing: (states) ->
+      _(states).any (state) -> state is "processing"
 
     anyAreFailed: (states) ->
       _(states).any (state) -> state is "failed"
@@ -23,13 +23,11 @@
       _(states).all (state) -> state is "passed"
 
     updateState: ->
-      # _(states).any (state) -> state is "pending"
       ## grab all of the states of the tests
-      # tests = @get("tests")
       states = @get("tests").pluck("state")
 
       state = switch
-        when @anyArePending(states) then "pending"
+        when @anyAreProcessing(states) then "processing"
         when @anyAreFailed(states) then "failed"
         when @allArePassed(states) then "passed"
 

@@ -100,7 +100,7 @@
         box-shadow: 0 1px 2px #DDD;
       }
 
-      &.pending {
+      &.processing {
         .suite-state i {
           @extend .#{$fa-css-prefix}-refresh;
           @extend .fa-spin;
@@ -170,7 +170,7 @@
           }
         }
 
-        li.pending {
+        li.processing {
           color: #AAA;
 
           .test-state {
@@ -364,7 +364,7 @@
         color: #008000;
       }
 
-      .pending {
+      .processing {
         width: 45%;
 
         i {
