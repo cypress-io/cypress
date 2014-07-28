@@ -44,7 +44,7 @@
 
     addSuite: (suite) ->
       @add
-        title: suite.title
+        title: suite.originalTitle()
         id: suite.cid
         tests: App.request("new:test:entities")
 
