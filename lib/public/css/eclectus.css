@@ -1556,7 +1556,7 @@ a.label:hover, a.label:focus {
 .fa.pull-right, #test-page #ecl-panel-container #ecl-panel ul li.pull-right.xhr:before, #test-page #ecl-panel-container #ecl-panel ul li.pull-right.log:before, #test-page #ecl-panel-container #ecl-panel ul li.pull-right.info:before, #test-page #ecl-panel-container #ecl-panel ul li.pull-right.dom:before {
   margin-left: .3em; }
 
-.fa-spin, #test-page #specs-container li.suite.pending .suite-state i {
+.fa-spin, #test-page #specs-container li.suite.processing .suite-state i {
   -webkit-animation: spin 2s infinite linear;
   -moz-animation: spin 2s infinite linear;
   -o-animation: spin 2s infinite linear;
@@ -1749,7 +1749,7 @@ a.label:hover, a.label:focus {
 .fa-repeat:before {
   content: "\f01e"; }
 
-.fa-refresh:before, #test-page #specs-container li.suite.pending .suite-state i:before {
+.fa-refresh:before, #test-page #specs-container li.suite.processing .suite-state i:before {
   content: "\f021"; }
 
 .fa-list-alt:before {
@@ -3283,7 +3283,7 @@ ul {
       #test-page #specs-container li.suite.active {
         background-color: #FFF;
         box-shadow: 0 1px 2px #DDD; }
-      #test-page #specs-container li.suite.pending .suite-state i {
+      #test-page #specs-container li.suite.processing .suite-state i {
         color: #888;
         font-size: 14px; }
       #test-page #specs-container li.suite.failed .suite-state i {
@@ -3322,9 +3322,9 @@ ul {
           #test-page #specs-container li.suite ul.test pre.test-error:hover {
             text-decoration: underline;
             cursor: pointer; }
-        #test-page #specs-container li.suite ul.test li.pending {
+        #test-page #specs-container li.suite ul.test li.processing {
           color: #AAA; }
-          #test-page #specs-container li.suite ul.test li.pending .test-state {
+          #test-page #specs-container li.suite ul.test li.processing .test-state {
             color: #CCC; }
         #test-page #specs-container li.suite ul.test li.failed {
           color: #E94B3B; }
@@ -3427,9 +3427,9 @@ ul {
       #test-page #ecl-panel-container #ecl-xhr-panel .body {
         width: 35%;
         color: #008000; }
-      #test-page #ecl-panel-container #ecl-xhr-panel .pending {
+      #test-page #ecl-panel-container #ecl-xhr-panel .processing {
         width: 45%; }
-        #test-page #ecl-panel-container #ecl-xhr-panel .pending i {
+        #test-page #ecl-panel-container #ecl-xhr-panel .processing i {
           font-size: 15px;
           margin-right: 5px;
           color: #444; }

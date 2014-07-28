@@ -2,7 +2,7 @@
 
   class Entities.Test extends Entities.Model
     defaults: ->
-      state: "pending"
+      state: "processing"
 
     initialize: ->
       new Backbone.Chooser(@)
@@ -20,9 +20,8 @@
 
       ## we have to normalize the state by first looking at whether
       ## its pending (because then it wont have a state)
-      # state:    if test.pending then "pending" else test.state
       attrs =
-        state:    test.state
+        state:    if test.pending then "pending" else test.state
         duration: test.duration
 
       if test.err
