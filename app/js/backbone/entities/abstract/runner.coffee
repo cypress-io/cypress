@@ -30,7 +30,10 @@
       ## through a specific test
       socket = App.request "socket:entity"
 
-      runner = @
+      ## whenever our socket fires 'test:changed' we want to
+      ## proxy this to everyone else
+      @listenTo socket, "test:changed", @triggerLoadIframe
+
 
       ## TODO: IMPLEMENT FOR SUITES
       @runner.runSuite = _.wrap @runner.runSuite, (runSuite, suite, fn) ->
@@ -114,9 +117,22 @@
       ## delete this property
       delete @runner
 
+      ## cleanup any of our handlers
+      @stopListening()
+
     start: (iframe) ->
-      console.warn "starting", iframe
-      @trigger "load:iframe", iframe
+      @setIframe iframe
+
+      @triggerLoadIframe @iframe
+
+    triggerLoadIframe: (iframe, opts = {}) ->
+      ## first we want to make sure that our last stored
+      ## iframe matches the one we're receiving
+      return if iframe isnt @iframe
+
+      ## if it does fire the event
+      @trigger "load:iframe", @iframe, opts
+
 
     ## sets the id of the test/suite which has been chosen in the UI
     setChosenId: (id) ->
