@@ -105,7 +105,18 @@ appendTestId = (spec, title, id) ->
     position = matches.index + matches[1].length + 1
     contents = _(contents).insert position, " [#{id}]"
 
+    ## enable editFileMode which prevents us from sending out test:changed events
+    app.enable("editFileMode")
+
+    ## write the actual contents to the file
     fs.writeFileSync specFile, contents
+
+    ## remove the editFileMode so we emit file changes again
+    ## if we're still in edit file mode then wait 1 second and disable it
+    ## chokidar doesnt instantly see file changes so we have to wait
+    _.delay ->
+      app.disable("editFileMode")
+    , 1000
 
 io.on "connection", (socket) ->
   socket.on "generate:test:id", (data, fn) ->
@@ -135,6 +146,10 @@ io.on "connection", (socket) ->
     # newFilePath = path.join process.cwd(), filepath#.replace("tests", "compiled")
     # mkdirp.sync path.dirname(newFilePath)
     # fs.writeFileSync newFilePath, contents + "\n  it 'tests', ->"
+
+    ## simple solution for preventing firing test:changed events
+    ## when we are making modifications to our own files
+    return if app.enabled("editFileMode")
 
     filepath  = filepath.split("/")
     index     = filepath.indexOf(testFolder)
