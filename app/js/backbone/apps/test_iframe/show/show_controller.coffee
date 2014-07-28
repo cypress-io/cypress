@@ -5,20 +5,11 @@
     initialize: (options) ->
       { runner } = options
 
-      socket = App.request "socket:entity"
-
       view = @getView()
 
-      ## partial apply the view instance and the runner
-      ## to the loadIframe method
-      @loadIframe = _.partial(@loadIframe, view, runner)
-
-      ## whenever our socket notifies us of a file change
-      ## we will reload the iframe
-      @listenTo socket, "test:changed", @loadIframe
-
       ## when the runner triggers load:iframe we load the iframe
-      @listenTo runner, "load:iframe", @loadIframe
+      @listenTo runner, "load:iframe", (iframe) =>
+        @loadIframe view, runner, iframe
 
       @show view
 
