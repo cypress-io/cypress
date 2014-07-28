@@ -3266,7 +3266,8 @@ ul {
     padding-left: 0;
     float: left; }
     #test-page #specs-container pre {
-      margin-bottom: 2px; }
+      margin-bottom: 0;
+      padding-bottom: 2px; }
     #test-page #specs-container li {
       list-style-type: none; }
     #test-page #specs-container li.suite {
