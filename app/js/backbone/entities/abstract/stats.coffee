@@ -7,6 +7,10 @@
       pending:  0
       duration: 0
 
+    reset: ->
+      @clear silent: true
+      @set _.result(@, "defaults")
+
     startCounting: ->
       @stopCounting() if @intervalId
       @intervalId = setInterval _.bind(@increment, @, "duration"), 100
@@ -18,7 +22,7 @@
       @set state, @get(state) + 1
 
     countTestState: (test) ->
-      @increment test.state
+      @increment test.get("state")
 
     ## should be using a mutator here
     getDurationFormatted: ->
