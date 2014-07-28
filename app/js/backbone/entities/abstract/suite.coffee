@@ -36,6 +36,10 @@
     unchooseTests: ->
       @get("tests").invoke "unchoose"
 
+    # removeTestsNotChosen: ->
+    #   tests = @get("tests")
+    #   tests.remove tests.where chosen: false
+
   class Entities.SuitesCollection extends Entities.Collection
     model: Entities.Suite
 
@@ -62,6 +66,33 @@
 
     unchooseTests: ->
       @invoke "unchooseTests"
+
+    # removeSuitesAndTestsNotChosen: ->
+    #   ## remove all tests not chosen
+    #   @invoke "removeTestsNotChosen"
+
+    #   ## if we have a currently chosen suite
+    #   chosen = @getFirstChosen()
+
+    #   ## remove the tests not chosen
+    #   chosen.removeTestsNotChosen() if chosen
+
+    #   ## remove any unchosen suites
+    #   @remove @where(chosen: false)
+
+    resetTestsOrClearOne: ->
+      ## remove all of the tests in the suite
+      ## if we are chosen
+      if chosen = @getFirstChosen()
+        chosen.get("tests").reset()
+
+      else
+        ## find the test thats chosen + reset its attrs
+        tests = @reduce (memo, suite) ->
+          memo = memo.concat suite.get("tests").models
+        , []
+        test = tests.find (test) -> test.isChosen()
+        test.reset()
 
   API =
     getNewSuites: (suites) ->
