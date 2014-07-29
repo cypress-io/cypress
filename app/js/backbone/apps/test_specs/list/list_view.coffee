@@ -86,9 +86,11 @@
         when "test" then List.Test
 
     mouseover: (e) ->
+      e.stopPropagation()
       @$el.addClass("hover")
 
     mouseout: (e) ->
+      e.stopPropagation()
       @$el.removeClass("hover")
 
     initialize: ->
