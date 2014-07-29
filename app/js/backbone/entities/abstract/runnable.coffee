@@ -21,6 +21,13 @@
       @get("duration") > @_timeout
 
     reset: ->
+      return @resetTest() if @get("type") is "test"
+      @resetSuite()
+
+    resetSuite: ->
+      @get("children").invoke("reset")
+
+    resetTest: ->
       @removeOriginalError()
 
       ## reset these specific attributes
@@ -93,9 +100,6 @@
 
   class Entities.RunnableCollection extends Entities.Collection
     model: Entities.Runnable
-
-    initialize: ->
-      new Backbone.SingleChooser(@)
 
     addRunnable: (runnable, type) ->
       model = @add
