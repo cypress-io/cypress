@@ -47,6 +47,8 @@
         suite.eachTest (test) ->
           ## iterating on both the test and its parent (the suite)
           _.each [test, test.parent], (type) ->
+            ## bail if we're the root runnable
+            return if type.root
 
             ## allow to get the original title
             type.originalTitle = ->
