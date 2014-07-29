@@ -36,7 +36,7 @@
       @$el.addClass @model.get("state")
 
     stateChanged: (model, value, options) ->
-      @$el.removeClass("processing failed passed").addClass(value)
+      @$el.removeClass("processing pending failed passed").addClass(value)
 
       ## if the test passed check on the duration
       @checkDuration() if value is "passed"
@@ -103,12 +103,7 @@
       @$el.addClass @model.get("state")
 
     stateChanged: (model, value, options) ->
-      @$el.removeClass("processing failed passed").addClass(value)
-
-  class List.Suites extends App.Views.CollectionView
-    className: "suite"
-
-    childView: List.Suite
+      @$el.removeClass("processing pending failed passed").addClass(value)
 
   class List.Runnable extends App.Views.CollectionView
     tagName: "ul"
