@@ -12,14 +12,12 @@
       "click @ui.pre" : "preClicked"
       "mouseover"     : "mouseover"
       "mouseout"      : "mouseout"
+      "click"         : "testClicked"
 
     modelEvents:
       "change:state"  : "stateChanged"
       "change:error"  : "errorChanged"
       "change:chosen" : "chosenChanged"
-
-    triggers:
-      "click" : "test:clicked"
 
     mouseover: (e) ->
       e.stopPropagation()
@@ -64,6 +62,10 @@
       ## this nukes the original stack trace though...
       console.error(error)
 
+    testClicked: (e) ->
+      e.stopPropagation()
+      @model.trigger "model:clicked"
+
   class List.Suite extends App.Views.CompositeView
     template: "test_specs/list/_suite"
     className: "suite"
@@ -72,9 +74,7 @@
     events:
       "mouseover"   : "mouseover"
       "mouseout"    : "mouseout"
-
-    triggers:
-      "click" : "suite:clicked"
+      "click"       : "suiteClicked"
 
     modelEvents:
       "change:state"  : "stateChanged"
@@ -104,6 +104,10 @@
 
     stateChanged: (model, value, options) ->
       @$el.removeClass("processing pending failed passed").addClass(value)
+
+    suiteClicked: (e) ->
+      e.stopPropagation()
+      @model.trigger "model:clicked"
 
   class List.Runnable extends App.Views.CollectionView
     tagName: "ul"
