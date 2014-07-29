@@ -32,6 +32,13 @@
         ## add the suite to the list of suites
         @addRunnable(suite, "suite")
 
+      @listenTo runner, "suite:stop", (suite) ->
+        return if suite.root
+
+        ## when our suite stop update its state
+        ## based on all the tests that ran
+        suite.model.updateState()
+
       # add the test to the suite unless it already exists
       @listenTo runner, "test", (test) ->
         ## add the test to the list of runnables
@@ -45,11 +52,6 @@
         ## this logs the results of the test
         ## and causes our runner to fire 'test:results:ready'
         runner.logResults test.model
-
-        ## bail if our parent is the root suite
-        return if test.parent.root
-
-        test.parent.model.updateState()
 
       #   console.log "test:end", test, test.cid, suites
       #   ## sets the internal state of the test's results

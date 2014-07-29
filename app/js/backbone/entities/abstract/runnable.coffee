@@ -76,6 +76,9 @@
     allArePassed: (states) ->
       _(states).all (state) -> state is "passed"
 
+    allArePending: (states) ->
+      _(states).all (state) -> state is "pending"
+
     updateState: ->
       ## grab all of the states of the tests
       states = @get("children").pluck("state")
@@ -84,6 +87,7 @@
         when @anyAreProcessing(states) then "processing"
         when @anyAreFailed(states) then "failed"
         when @allArePassed(states) then "passed"
+        when @allArePending(states) then "pending"
 
       @set state: state
 
