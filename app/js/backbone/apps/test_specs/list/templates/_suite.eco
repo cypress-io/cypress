@@ -2,4 +2,4 @@
   <i class="fa"></i>
   <%= @title %>
 </span>
-<ul class="test"></ul>
+<ul class="runnables"></ul>

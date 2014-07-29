@@ -2,6 +2,7 @@
 
   class List.Test extends App.Views.ItemView
     template: "test_specs/list/_test"
+    className: "test"
 
     ui:
       pre: "pre"
@@ -66,7 +67,6 @@
   class List.Suite extends App.Views.CompositeView
     template: "test_specs/list/_suite"
     className: "suite"
-    # childView: List.Test
     childViewContainer: "ul"
 
     events:

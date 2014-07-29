@@ -79,14 +79,20 @@
 
     li {
       list-style-type: none;
-
+      padding-left: 5px;
     }
 
-    li.suite {
-      font-family: "Raleway",Helvetica,sans-serif;
-      font-weight: 300;
-      font-size: 16px;
-      padding: 3px 10px 2px 5px;
+    li {
+      &.suite {
+        font-family: "Raleway",Helvetica,sans-serif;
+        font-weight: 300;
+        font-size: 16px;
+        padding: 3px 10px 2px 5px;
+      }
+
+      &.test {
+        font-size: 13px;
+      }
 
       &.hover {
         background-color: #E5E5E5;
@@ -100,32 +106,77 @@
         box-shadow: 0 1px 2px #DDD;
       }
 
+      pre.test-error {
+        margin-top: 0;
+        padding-left: 10px;
+        margin-left: 4px;
+
+        &:hover {
+          text-decoration: underline;
+          cursor: pointer;
+        }
+      }
+
+      label {
+        padding: 1px 4px;
+      }
+
       &.processing {
-        .suite-state i {
+        color: #AAA;
+
+        &>.suite-state i {
           @extend .#{$fa-css-prefix}-refresh;
           @extend .fa-spin;
           color: #888;
           font-size: 14px;
         }
+
+        &>.test-state {
+          color: #CCC;
+        }
       }
 
       &.failed {
-        .suite-state i {
+        &>pre {
+          color: #E94B3B;
+        }
+
+        &>.suite-state i {
           @extend .#{$fa-css-prefix}-times;
           color: #E94B3B;
           font-size: 12px;
         }
+
+        &>.test-state {
+          color: #E94B3B;
+
+          i {
+            @extend .#{$fa-css-prefix}-times;
+          }
+        }
+
+        label {
+          text-transform: uppercase;
+        }
       }
 
       &.passed {
-        .suite-state i {
+        &>.suite-state i {
           @extend .#{$fa-css-prefix}-check;
           color: #23AE89;
           font-size: 12px;
         }
+
+        &>.test-state {
+          color: #23AE89;
+
+          i {
+            @extend .#{$fa-css-prefix}-check;
+          }
+        }
       }
 
-      ul.test {
+      ul.runnables {
         padding-left: 12px;
         font-family: "Open Sans", sans-serif;
         font-size: 13px;
@@ -133,78 +184,6 @@
         padding-left: 8px;
         margin-left: 4px;
         border-left: 1px dotted #CCC;
-
-        .test-state {
-          font-size: 10px;
-        }
-
-        li {
-          padding: 0 5px;
-
-          &.hover {
-            background-color: #E5E5E5;
-            border-left: 2px solid #3380FF;
-            padding-left: 3px;
-            cursor: pointer;
-          }
-
-          &.active {
-            background-color: #FFF;
-            box-shadow: 0 1px 2px #DDD;
-          }
-
-          label {
-            padding: 1px 4px;
-          }
-        }
-
-        pre.test-error {
-          margin-top: 0;
-          padding-left: 7px;
-          margin-left: 4px;
-          border-left: 1px solid #CCC;
-
-          &:hover {
-            text-decoration: underline;
-            cursor: pointer;
-          }
-        }
-
-        li.processing {
-          color: #AAA;
-
-          .test-state {
-            color: #CCC;
-          }
-        }
-
-        li.failed {
-          color: #E94B3B;
-
-          .test-state {
-            color: #E94B3B;
-
-            i {
-              @extend .#{$fa-css-prefix}-times;
-            }
-          }
-
-          label {
-            text-transform: uppercase;
-          }
-        }
-
-        li.passed {
-          color: #23AE89;
-
-          .test-state {
-            color: #23AE89;
-
-            i {
-              @extend .#{$fa-css-prefix}-check;
-            }
-          }
-        }
       }
     }
   }

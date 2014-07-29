@@ -1556,7 +1556,7 @@ a.label:hover, a.label:focus {
 .fa.pull-right, #test-page #ecl-panel-container #ecl-panel ul li.pull-right.xhr:before, #test-page #ecl-panel-container #ecl-panel ul li.pull-right.log:before, #test-page #ecl-panel-container #ecl-panel ul li.pull-right.info:before, #test-page #ecl-panel-container #ecl-panel ul li.pull-right.dom:before {
   margin-left: .3em; }
 
-.fa-spin, #test-page #specs-container li.suite.processing .suite-state i {
+.fa-spin, #test-page #specs-container li.processing > .suite-state i {
   -webkit-animation: spin 2s infinite linear;
   -moz-animation: spin 2s infinite linear;
   -o-animation: spin 2s infinite linear;
@@ -1693,10 +1693,10 @@ a.label:hover, a.label:focus {
 .fa-th-list:before {
   content: "\f00b"; }
 
-.fa-check:before, #test-page #specs-container li.suite.passed .suite-state i:before, #test-page #specs-container li.suite ul.test li.passed .test-state i:before {
+.fa-check:before, #test-page #specs-container li.passed > .suite-state i:before, #test-page #specs-container li.passed > .test-state i:before {
   content: "\f00c"; }
 
-.fa-times:before, #test-page #specs-container li.suite.failed .suite-state i:before, #test-page #specs-container li.suite ul.test li.failed .test-state i:before {
+.fa-times:before, #test-page #specs-container li.failed > .suite-state i:before, #test-page #specs-container li.failed > .test-state i:before {
   content: "\f00d"; }
 
 .fa-search-plus:before {
@@ -1749,7 +1749,7 @@ a.label:hover, a.label:focus {
 .fa-repeat:before {
   content: "\f01e"; }
 
-.fa-refresh:before, #test-page #specs-container li.suite.processing .suite-state i:before {
+.fa-refresh:before, #test-page #specs-container li.processing > .suite-state i:before {
   content: "\f021"; }
 
 .fa-list-alt:before {
@@ -3269,73 +3269,61 @@ ul {
       margin-bottom: 0;
       padding-bottom: 2px; }
     #test-page #specs-container li {
-      list-style-type: none; }
+      list-style-type: none;
+      padding-left: 5px; }
     #test-page #specs-container li.suite {
       font-family: "Raleway",Helvetica,sans-serif;
       font-weight: 300;
       font-size: 16px;
       padding: 3px 10px 2px 5px; }
-      #test-page #specs-container li.suite.hover {
-        background-color: #E5E5E5;
-        border-left: 2px solid #3380FF;
-        padding-left: 3px;
+    #test-page #specs-container li.test {
+      font-size: 13px; }
+    #test-page #specs-container li.hover {
+      background-color: #E5E5E5;
+      border-left: 2px solid #3380FF;
+      padding-left: 3px;
+      cursor: pointer; }
+    #test-page #specs-container li.active {
+      background-color: #FFF;
+      box-shadow: 0 1px 2px #DDD; }
+    #test-page #specs-container li pre.test-error {
+      margin-top: 0;
+      padding-left: 10px;
+      margin-left: 4px; }
+      #test-page #specs-container li pre.test-error:hover {
+        text-decoration: underline;
         cursor: pointer; }
-      #test-page #specs-container li.suite.active {
-        background-color: #FFF;
-        box-shadow: 0 1px 2px #DDD; }
-      #test-page #specs-container li.suite.processing .suite-state i {
+    #test-page #specs-container li label {
+      padding: 1px 4px; }
+    #test-page #specs-container li.processing {
+      color: #AAA; }
+      #test-page #specs-container li.processing > .suite-state i {
         color: #888;
         font-size: 14px; }
-      #test-page #specs-container li.suite.failed .suite-state i {
-        color: #E94B3B;
-        font-size: 12px; }
-      #test-page #specs-container li.suite.passed .suite-state i {
-        color: #23AE89;
-        font-size: 12px; }
-      #test-page #specs-container li.suite ul.test {
-        padding-left: 12px;
-        font-family: "Open Sans", sans-serif;
-        font-size: 13px;
-        font-weight: 300;
-        padding-left: 8px;
-        margin-left: 4px;
-        border-left: 1px dotted #CCC; }
-        #test-page #specs-container li.suite ul.test .test-state {
-          font-size: 10px; }
-        #test-page #specs-container li.suite ul.test li {
-          padding: 0 5px; }
-          #test-page #specs-container li.suite ul.test li.hover {
-            background-color: #E5E5E5;
-            border-left: 2px solid #3380FF;
-            padding-left: 3px;
-            cursor: pointer; }
-          #test-page #specs-container li.suite ul.test li.active {
-            background-color: #FFF;
-            box-shadow: 0 1px 2px #DDD; }
-          #test-page #specs-container li.suite ul.test li label {
-            padding: 1px 4px; }
-        #test-page #specs-container li.suite ul.test pre.test-error {
-          margin-top: 0;
-          padding-left: 7px;
-          margin-left: 4px;
-          border-left: 1px solid #CCC; }
-          #test-page #specs-container li.suite ul.test pre.test-error:hover {
-            text-decoration: underline;
-            cursor: pointer; }
-        #test-page #specs-container li.suite ul.test li.processing {
-          color: #AAA; }
-          #test-page #specs-container li.suite ul.test li.processing .test-state {
-            color: #CCC; }
-        #test-page #specs-container li.suite ul.test li.failed {
-          color: #E94B3B; }
-          #test-page #specs-container li.suite ul.test li.failed .test-state {
-            color: #E94B3B; }
-          #test-page #specs-container li.suite ul.test li.failed label {
-            text-transform: uppercase; }
-        #test-page #specs-container li.suite ul.test li.passed {
-          color: #23AE89; }
-          #test-page #specs-container li.suite ul.test li.passed .test-state {
-            color: #23AE89; }
+      #test-page #specs-container li.processing > .test-state {
+        color: #CCC; }
+    #test-page #specs-container li.failed > pre {
+      color: #E94B3B; }
+    #test-page #specs-container li.failed > .suite-state i {
+      color: #E94B3B;
+      font-size: 12px; }
+    #test-page #specs-container li.failed > .test-state {
+      color: #E94B3B; }
+    #test-page #specs-container li.failed label {
+      text-transform: uppercase; }
+    #test-page #specs-container li.passed > .suite-state i {
+      color: #23AE89;
+      font-size: 12px; }
+    #test-page #specs-container li.passed > .test-state {
+      color: #23AE89; }
+    #test-page #specs-container li ul.runnables {
+      padding-left: 12px;
+      font-family: "Open Sans", sans-serif;
+      font-size: 13px;
+      font-weight: 300;
+      padding-left: 8px;
+      margin-left: 4px;
+      border-left: 1px dotted #CCC; }
   #test-page #ecl-panel-container {
     position: fixed;
     bottom: 0; }
