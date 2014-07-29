@@ -81,10 +81,9 @@
     #   @remove @where(chosen: false)
 
     resetTestsOrClearOne: ->
-      ## remove all of the tests in the suite
-      ## if we are chosen
+      ## reset all of the tests in our chosen suite
       if chosen = @getFirstChosen()
-        chosen.get("tests").reset()
+        chosen.get("tests").invoke "reset"
 
       else
         ## find the test thats chosen + reset its attrs
