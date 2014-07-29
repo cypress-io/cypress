@@ -121,18 +121,25 @@
         padding: 1px 4px;
       }
 
-      &.processing {
-        color: #AAA;
+      .suite-state i {
+        font-size: 14px;
+      }
 
+      .test-state i {
+        font-size: 12px;
+      }
+
+      &.processing {
         &>.suite-state i {
           @extend .#{$fa-css-prefix}-refresh;
           @extend .fa-spin;
           color: #888;
-          font-size: 14px;
         }
 
-        &>.test-state {
-          color: #CCC;
+        &>.test-state i {
+          @extend .#{$fa-css-prefix}-refresh;
+          @extend .fa-spin;
+          color: #888;
         }
       }
 
@@ -141,18 +148,10 @@
           color: #E94B3B;
         }
 
-        &>.suite-state i {
+        &>.suite-state i,
+        &>.test-state i {
           @extend .#{$fa-css-prefix}-times;
           color: #E94B3B;
-          font-size: 12px;
-        }
-
-        &>.test-state {
-          color: #E94B3B;
-
-          i {
-            @extend .#{$fa-css-prefix}-times;
-          }
         }
 
         label {
@@ -161,28 +160,18 @@
       }
 
       &.passed {
-        &>.suite-state i {
+        &>.suite-state i,
+        &>.test-state i {
           @extend .#{$fa-css-prefix}-check;
           color: #23AE89;
-          font-size: 12px;
-        }
-
-        &>.test-state {
-          color: #23AE89;
-
-          i {
-            @extend .#{$fa-css-prefix}-check;
-          }
         }
       }
 
       &.pending {
-        &>.test-state {
+        &>.suite-state i,
+        &>.test-state i {
+          @extend .#{$fa-css-prefix}-star-half-o;
           color: #428BCA;
-
-          i {
-            @extend .#{$fa-css-prefix}-star-half-o;
-          }
         }
       }
 
