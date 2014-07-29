@@ -2463,7 +2463,8 @@ a.label:hover, a.label:focus {
 
 .fa-star-half-empty:before,
 .fa-star-half-full:before,
-.fa-star-half-o:before {
+.fa-star-half-o:before,
+#test-page #specs-container li.pending > .test-state i:before {
   content: "\f123"; }
 
 .fa-location-arrow:before {
@@ -3106,6 +3107,8 @@ ul {
         color: #23AE89; }
       #header-container #stats-container li#tests-failed i {
         color: #E94B3B; }
+      #header-container #stats-container li#tests-pending i {
+        color: #428BCA; }
       #header-container #stats-container li span {
         display: block; }
       #header-container #stats-container li .num {
@@ -3316,6 +3319,8 @@ ul {
       font-size: 12px; }
     #test-page #specs-container li.passed > .test-state {
       color: #23AE89; }
+    #test-page #specs-container li.pending > .test-state {
+      color: #428BCA; }
     #test-page #specs-container li ul.runnables {
       padding-left: 12px;
       font-family: "Open Sans", sans-serif;

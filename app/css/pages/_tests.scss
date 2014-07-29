@@ -176,6 +176,16 @@
         }
       }
 
+      &.pending {
+        &>.test-state {
+          color: #428BCA;
+
+          i {
+            @extend .#{$fa-css-prefix}-star-half-o;
+          }
+        }
+      }
+
       ul.runnables {
         padding-left: 12px;
         font-family: "Open Sans", sans-serif;
