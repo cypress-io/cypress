@@ -2463,9 +2463,7 @@ a.label:hover, a.label:focus {
 
 .fa-star-half-empty:before,
 .fa-star-half-full:before,
-.fa-star-half-o:before,
-#test-page #specs-container li.pending > .suite-state i:before,
-#test-page #specs-container li.pending > .test-state i:before {
+.fa-star-half-o:before {
   content: "\f123"; }
 
 .fa-location-arrow:before {
@@ -2978,7 +2976,7 @@ a.label:hover, a.label:focus {
 .fa-life-ring:before {
   content: "\f1cd"; }
 
-.fa-circle-o-notch:before {
+.fa-circle-o-notch:before, #test-page #specs-container li.pending > .suite-state i:before, #test-page #specs-container li.pending > .test-state i:before {
   content: "\f1ce"; }
 
 .fa-ra:before,
