@@ -102,14 +102,14 @@
     model: Entities.Runnable
 
     addRunnable: (runnable, type) ->
-      model = @add
+      attrs =
         title: runnable.originalTitle()
         id: runnable.cid
         type: type
 
-      runnable.model = model
-
-      model
+      ## merge attributes so existing models
+      ## are updated
+      runnable.model = @add attrs, merge: true
 
   App.reqres.setHandler "new:root:runnable:entity", ->
     new Entities.Runnable
