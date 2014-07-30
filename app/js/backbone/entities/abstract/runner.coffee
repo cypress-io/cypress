@@ -139,6 +139,17 @@
       @triggerLoadIframe @iframe
 
     triggerLoadIframe: (iframe, opts = {}) ->
+      ## set any outstanding test to pending and stopped
+      ## so we bypass all old ones
+      @runner.suite.eachTest (test) ->
+        test.pending = true
+        test.stopped = true
+        while obj = test.parent
+          return if obj.stopped
+          obj.pending = true
+          obj.stopped = true
+          obj = obj.parent
+
       ## first we want to make sure that our last stored
       ## iframe matches the one we're receiving
       return if iframe isnt @iframe
