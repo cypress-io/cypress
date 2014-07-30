@@ -170,7 +170,7 @@
       &.pending {
         &>.suite-state i,
         &>.test-state i {
-          @extend .#{$fa-css-prefix}-star-half-o;
+          @extend .#{$fa-css-prefix}-circle-o-notch;
           color: #428BCA;
         }
       }

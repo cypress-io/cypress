@@ -16,7 +16,7 @@
   <li id="tests-pending">
     <span class="num"><%= @count(@pending) %></span>
     <span class="name">
-      <i class="fa fa-star-half-o"></i>
+      <i class="fa fa-circle-o-notch"></i>
       Pending
     </span>
   </li>
