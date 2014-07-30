@@ -67,7 +67,7 @@
 
       @show runnableView
 
-    resetRunnables: (root, runnables) ->
+    resetRunnables: (runnables) ->
       while runnables.length
         runnables.pop()
 
