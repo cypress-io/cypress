@@ -28,6 +28,8 @@
       "change:error"  : "errorChanged"
       "change:chosen" : "chosenChanged"
 
+    ## this view is a good candidate for stick it
+
     initialize: ->
       @collection = @model.get("children")
 

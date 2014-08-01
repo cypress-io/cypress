@@ -18,6 +18,8 @@
       "change:pending"  : "pendingChanged"
       "change:duration" : "durationChanged"
 
+    ## this view is a good candidate for stick it
+
     passedChanged: (model, value, options) ->
       @ui.passed.text @count(value)
 
