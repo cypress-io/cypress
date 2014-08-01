@@ -5,6 +5,8 @@
     initialize: (options) ->
       config = App.request("app:config:entity")
 
+      @onDestroy = _.partial(@onDestroy, config)
+
       ## request and receive the runner entity
       ## which is the mediator of all test framework events
       App.request("start:test:runner").done (runner) =>
@@ -42,7 +44,8 @@
       ## and pass up the runner
       config.trigger "list:test:panels", runner
 
-    onDestroy: ->
+    onDestroy: (config) ->
+      config.trigger "close:test:panels"
       App.request "stop:test:runner", @runner
 
     getTestView: ->
