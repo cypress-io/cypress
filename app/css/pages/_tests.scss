@@ -104,6 +104,11 @@
       &.active {
         background-color: #FFF;
         box-shadow: 0 1px 2px #DDD;
+
+        &:hover {
+          padding-left: 5px;
+          border-left: 0;
+        }
       }
 
       pre.test-error {
