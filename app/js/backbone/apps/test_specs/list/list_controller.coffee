@@ -56,20 +56,33 @@
         ## if just a test is chosen -- just clear/reset its attributes
         ## if a suite is chosen -- reset all of the children runnable attrs
         if runner.hasChosen()
-          runnables.eachModel (model) ->
-            model.reset() if model.isChosen()
+          runnables.eachModel (model, runnable) ->
+            if model.isChosen()
+              ## reset its state
+              model.reset()
+
+              ## just splice out this single runnable
+              @resetRunnables(runnables, runnable)
+        ## nothing is chosen so reset everything
+        ## and remove all the runnables because
+        ## they're being reset
         else
           root.reset()
-
-        @resetRunnables(runnables)
+          @resetRunnables(runnables)
 
       runnableView = @getRunnableView root
 
       @show runnableView
 
-    resetRunnables: (runnables) ->
-      while runnables.length
-        runnables.pop()
+    resetRunnables: (runnables, runnable) ->
+      ## if we have a runnable we're only slicing out this specific one
+      if runnable
+        index = _(runnables).indexOf runnable
+        runnables.splice(index, 1)
+      else
+        ## nuke everything
+        while runnables.length
+          runnables.pop()
 
     addRunnable: (root, runnables, runnable, type) ->
       ## we need to bail here because this is most likely due
