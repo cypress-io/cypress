@@ -3347,7 +3347,15 @@ ul {
       border-left: 1px dotted #CCC; }
   #test-page #ecl-panel-container {
     position: fixed;
-    bottom: 0; }
+    bottom: 0;
+    margin: 0;
+    padding: 0; }
+    #test-page #ecl-panel-container > li {
+      float: left;
+      list-style-type: none;
+      padding: 15px; }
+      #test-page #ecl-panel-container > li:first-child {
+        padding-left: 0; }
     #test-page #ecl-panel-container #ecl-panel, #test-page #ecl-panel-container #ecl-xhr-panel {
       overflow: hidden;
       float: left;

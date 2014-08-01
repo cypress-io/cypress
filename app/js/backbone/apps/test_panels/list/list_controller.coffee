@@ -2,7 +2,7 @@
 
   class List.Controller extends App.Controllers.Application
     initialize: (options) ->
-      { runner } = options
+      { runner, regions } = options
 
       config = App.request "app:config:entity"
       panels = App.request "panel:entities"
@@ -10,10 +10,24 @@
       ## when panels chooses/unchooses we need to update our app config
       @listenTo panels, "change:chosen", (model, value, options) ->
         config.togglePanel model, value
+        @panelRegion model, value, regions
 
       panelsView = @getPanelsView panels
 
       @show panelsView
+
+    panelRegion: (panel, show, regions) ->
+      region = @getRegion(panel.get("name"), regions)
+
+      ## if we're supposed to show the panel then fire the app command
+      if show
+        App.execute "show:panel", panel, region
+      else
+        ## just close the region
+        region.empty()
+
+    getRegion: (name, regions) ->
+      regions[name.toLowerCase() + "Region"] or throw new Error("Did not find a valid region for: #{name}")
 
     getPanelsView: (panels) ->
       new List.Panels
