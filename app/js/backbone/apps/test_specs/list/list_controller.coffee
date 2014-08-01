@@ -117,18 +117,15 @@
       ## we have unlimited nested / fragmented collections
       ## so we have to handle this logic ourselves
       @listenTo model, "model:clicked", =>
-        ## we should choose this model if its not currently chosen
-        shouldChoose = not model.isChosen()
-
         ## always unchoose all other models
         runnables.eachModel (runnable) ->
           runnable.unchoose()
 
         ## choose this model if we should choose it
-        model.choose() if shouldChoose
+        model.choose()
 
         ## pass this id along to runner
-        runner.setChosenId model.id
+        runner.setChosen model
 
     getRunnableView: (root) ->
       new List.Root
