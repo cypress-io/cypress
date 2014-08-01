@@ -3,6 +3,8 @@
   class Show.Controller extends App.Controllers.Application
 
     initialize: (options) ->
+      config = App.request("app:config:entity")
+
       ## request and receive the runner entity
       ## which is the mediator of all test framework events
       App.request("start:test:runner").done (runner) =>
@@ -15,6 +17,7 @@
           @statsRegion(runner)
           @iframeRegion(runner)
           @specsRegion(runner)
+          @panelsRegion(runner, config)
           # @logRegion(runner)
           # @domRegion(runner)
           # @xhrRegion(runner)
@@ -33,6 +36,11 @@
 
     specsRegion: (runner) ->
       App.execute "list:test:specs", @layout.specsRegion, runner
+
+    panelsRegion: (runner, config) ->
+      ## trigger the event to ensure the test panels are listed
+      ## and pass up the runner
+      config.trigger "list:test:panels", runner
 
     onDestroy: ->
       App.request "stop:test:runner", @runner
