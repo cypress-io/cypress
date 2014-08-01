@@ -2,15 +2,33 @@
 
   class List.Controller extends App.Controllers.Application
 
-    initialize: ->
-      navs    = App.request "nav:entities"
-      config  = App.request "app:config:entity"
+    initialize: (options) ->
+      { navs } = options
 
-      view = @getView(navs, config)
+      config   = App.request "app:config:entity"
 
-      @show view
+      @listenTo config, "list:test:panels", (runner) ->
+        @panelsRegion runner
 
-    getView: (navs, config) ->
+      @layout = @getLayoutView()
+
+      @listenTo @layout, "show", =>
+        @navsRegion(navs, config)
+
+      @show @layout
+
+    navsRegion: (navs, config) ->
+      navView = @getNavView(navs, config)
+
+      @show navView, region: @layout.navRegion
+
+    panelsRegion: (runner) ->
+      App.execute "list:test:panels", @layout.panelsRegion, runner
+
+    getNavView: (navs, config) ->
       new List.Navs
         collection: navs
         model: config
+
+    getLayoutView: ->
+      new List.Layout
