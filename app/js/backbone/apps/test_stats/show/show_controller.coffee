@@ -16,15 +16,43 @@
       @listenTo runner, "test:results:ready", (test) ->
         stats.countTestState(test)
 
+      @listenTo runner, "change:chosen", (model, value, options) ->
+        @chosenRegion runner, value
+
       @listenTo runner, "load:iframe", ->
         ## anytime the iframe needs to be reloaded
         ## we reset our stats back to 0
         stats.reset()
 
-      statsView = @getStatsView stats
+      @layout = @getLayoutView()
 
-      @show statsView
+      @listenTo @layout, "show", =>
+        @statsRegion stats
+
+      @show @layout
+
+    statsRegion: (stats) ->
+      statsView = @getStatsView stats
+      @show statsView, region: @layout.statsRegion
+
+    chosenRegion: (runner, chosen) ->
+      return @layout.chosenRegion.empty() if not chosen
+
+      chosenView = @getChosenView chosen
+
+      @listenTo chosenView, "close:clicked", ->
+        chosen.unchoose()
+        runner.setChosen()
+
+      @show chosenView, region: @layout.chosenRegion
+
+    getChosenView: (chosen) ->
+      new Show.Chosen
+        model: chosen
 
     getStatsView: (stats) ->
       new Show.Stats
         model: stats
+
+    getLayoutView: ->
+      new Show.Layout

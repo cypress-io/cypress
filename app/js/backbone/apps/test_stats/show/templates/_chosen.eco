@@ -1,0 +1,7 @@
+<div id="chosen-runnable">
+  <span class="uppercase">Running</span>
+  <label class="label label-primary">
+    <span class="length"><%= @children.length or 1 %></span> Tests
+    | <i class="fa fa-times"></i>
+  </label>
+</div>

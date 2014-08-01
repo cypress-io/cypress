@@ -5,6 +5,7 @@
   height: 50px;
 
   #stats-container {
+    min-width: 330px;
     padding: 0;
     float: left;
     height: 100%;
@@ -57,6 +58,21 @@
       background-color: #d5d5d5;
       padding-left: 10px;
       padding-right: 10px;
+    }
+  }
+
+  #chosen-runnable {
+    position: relative;
+    top: 6px;
+
+    .uppercase {
+      text-transform: uppercase;
+      font-size: 10px;
+      display: block;
+    }
+
+    label {
+      cursor: pointer;
     }
   }
 }

@@ -3090,6 +3090,7 @@ ul {
   overflow: auto;
   height: 50px; }
   #header-container #stats-container {
+    min-width: 330px;
     padding: 0;
     float: left;
     height: 100%;
@@ -3121,6 +3122,15 @@ ul {
       background-color: #d5d5d5;
       padding-left: 10px;
       padding-right: 10px; }
+  #header-container #chosen-runnable {
+    position: relative;
+    top: 6px; }
+    #header-container #chosen-runnable .uppercase {
+      text-transform: uppercase;
+      font-size: 10px;
+      display: block; }
+    #header-container #chosen-runnable label {
+      cursor: pointer; }
 
 .ecl-main-content {
   background-color: #F6F6F6;
@@ -3288,6 +3298,9 @@ ul {
     #test-page #specs-container li.active {
       background-color: #FFF;
       box-shadow: 0 1px 2px #DDD; }
+      #test-page #specs-container li.active:hover {
+        padding-left: 5px;
+        border-left: 0; }
     #test-page #specs-container li pre.test-error {
       margin-top: 0;
       padding-left: 10px;

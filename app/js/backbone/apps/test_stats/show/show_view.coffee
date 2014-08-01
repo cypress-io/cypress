@@ -1,7 +1,10 @@
 @App.module "TestStatsApp.Show", (Show, App, Backbone, Marionette, $, _) ->
 
+  class Show.Layout extends App.Views.LayoutView
+    template: "test_stats/show/show_layout"
+
   class Show.Stats extends App.Views.ItemView
-    template: "test_stats/show/stats"
+    template: "test_stats/show/_stats"
 
     ui:
       passed:     "#tests-passed .num"
@@ -33,3 +36,17 @@
 
     templateHelpers: ->
       count: @count
+
+  class Show.Chosen extends App.Views.ItemView
+    template: "test_stats/show/_chosen"
+
+    ui:
+      length: ".length"
+      label: "label"
+
+    triggers:
+      "click @ui.label" : "close:clicked"
+
+    initialize: ->
+      @listenTo @model.get("children"), "add remove reset", =>
+        @ui.length.text @model.get("children").length

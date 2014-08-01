@@ -158,25 +158,19 @@
       @trigger "load:iframe", @iframe, opts
 
     hasChosen: ->
-      !!@get("chosenId")
+      !!@get("chosen")
 
-    setChosenId: (id) ->
-      ## if the chosen id matches this id argument
-      ## it means we've unselected a test / suite
-      if @get("chosenId") is id
-        ## so unset this attribute
-        @unset("chosenId")
-
-      else
-        @set "chosenId", id
+    setChosen: (runnable) ->
+      ## set chosen as runnable if present else unset
+      if runnable then @set("chosen", runnable) else @unset("chosen")
 
       ## always reload the iframe
       @triggerLoadIframe @iframe
 
     getGrep: ->
-      if id = @get("chosenId")
+      if chosen = @get("chosen")
         ## create a regex based on the id of the suite / test
-        new RegExp @escapeId("[" + id + "]")
+        new RegExp @escapeId("[" + chosen.id + "]")
 
       else
         ## just use every test
