@@ -3170,9 +3170,6 @@ ul {
     margin: 0;
     padding: 0;
     border-top: 1px solid #1a1c20; }
-    #ecl-wrapper #ecl-sidebar .ecl-vnavigation li.active > a {
-      background: #2A2C34;
-      border-left: 1px solid #2494F2; }
     #ecl-wrapper #ecl-sidebar .ecl-vnavigation li a {
       border-top: 1px solid #32353e;
       border-bottom: 1px solid #1a1c20;
@@ -3192,6 +3189,9 @@ ul {
         margin-right: 7px; }
       #ecl-wrapper #ecl-sidebar .ecl-vnavigation li a span {
         display: inline-block; }
+    #ecl-wrapper #ecl-sidebar .ecl-vnavigation li.active > a {
+      background-color: #22242a;
+      border-left: 1px solid #2494F2; }
   #ecl-wrapper #ecl-sidebar .collapse-container {
     padding: 7px 9px;
     background: #1F2126;
@@ -3214,6 +3214,9 @@ ul {
         background: #23252A; }
       #ecl-wrapper #ecl-sidebar .collapse-container button i {
         color: #fff; }
+  #ecl-wrapper #ecl-sidebar #ecl-test-panels {
+    position: absolute;
+    bottom: 0; }
 
 .block-panel {
   margin-bottom: 40px;
