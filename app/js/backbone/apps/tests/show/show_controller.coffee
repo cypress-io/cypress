@@ -39,7 +39,10 @@
     panelsRegion: (runner, config) ->
       ## trigger the event to ensure the test panels are listed
       ## and pass up the runner
-      config.trigger "list:test:panels", runner
+      config.trigger "list:test:panels", runner,
+        domRegion: @layout.domRegion
+        xhrRegion: @layout.xhrRegion
+        logRegion: @layout.logRegion
 
     onDestroy: (config) ->
       config.trigger "close:test:panels"

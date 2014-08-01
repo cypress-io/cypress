@@ -2,8 +2,8 @@
 
   class Entities.Config extends Entities.Model
     defaults: ->
-      ## look at LS or false by default
       collapsed: @getConfig "collapsed", default: false, type: "boolean"
+      panels: @getConfig "panels", default: {}, type: "object"
 
     toggleCollapse: ->
       @setConfig "collapsed", !@get("collapsed")

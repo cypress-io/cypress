@@ -195,6 +195,18 @@
   #ecl-panel-container {
     position: fixed;
     bottom: 0;
+    margin: 0;
+    padding: 0;
+
+    &>li {
+      float: left;
+      list-style-type: none;
+      padding: 15px;
+
+      &:first-child {
+        padding-left: 0;
+      }
+    }
 
     #ecl-panel, #ecl-xhr-panel {
       overflow: hidden;
