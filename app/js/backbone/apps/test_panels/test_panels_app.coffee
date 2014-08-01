@@ -1,4 +1,5 @@
 @App.module "TestPanelsApp", (TestPanelsApp, App, Backbone, Marionette, $, _) ->
+
   class Router extends App.Routers.Application
     module: TestPanelsApp
 

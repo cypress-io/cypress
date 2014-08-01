@@ -9,6 +9,9 @@
     modelEvents:
       "change:chosen" : "chosenChanged"
 
+    onBeforeRender: ->
+      @chosenChanged @model, @model.isChosen()
+
     clicked: (e) ->
       e.preventDefault()
       @model.toggleChoose()
