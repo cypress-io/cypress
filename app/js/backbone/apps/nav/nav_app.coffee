@@ -11,5 +11,5 @@
 
   router = new Router
 
-  NavApp.on "start", ->
-    router.to "list"
+  NavApp.on "start", (navs) ->
+    router.to "list", navs: navs

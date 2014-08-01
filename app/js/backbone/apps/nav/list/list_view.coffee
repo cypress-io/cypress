@@ -1,11 +1,20 @@
 @App.module "NavApp.List", (List, App, Backbone, Marionette, $, _) ->
 
+  class List.Layout extends App.Views.LayoutView
+    template: "nav/list/layout"
+
   class List.Nav extends App.Views.ItemView
     template: "nav/list/_nav"
     className: "parent"
 
+    modelEvents:
+      "change:chosen" : "chosenChanged"
+
+    chosenChanged: (model, value, options) ->
+      @$el.toggleClass "active", value
+
   class List.Navs extends App.Views.CompositeView
-    template: "nav/list/navs"
+    template: "nav/list/_navs"
     childView: List.Nav
     childViewContainer: "ul"
 

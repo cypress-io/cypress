@@ -3,10 +3,10 @@
   class Router extends App.Routers.Application
     module: TestsApp
 
-    actions:
-      list: ->
-        route: "tests"
+    before: ->
+      App.vent.trigger "main:nav:choose", "Tests"
 
+    actions:
       show: ->
         route: "tests/:id"
 
