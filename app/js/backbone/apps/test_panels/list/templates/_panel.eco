@@ -1,0 +1,4 @@
+<a href="#">
+  <i class="fa fa-circle" style="color: <%= @color %>"></i>
+  <span><%= @name %>
+</a>

@@ -4,4 +4,12 @@
     initialize: (options) ->
       { runner } = options
 
-      @show new List.Layout
+      panels = App.request "panel:entities"
+
+      panelsView = @getPanelsView panels
+
+      @show panelsView
+
+    getPanelsView: (panels) ->
+      new List.Panels
+        collection: panels
