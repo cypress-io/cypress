@@ -3185,9 +3185,9 @@ ul {
       #ecl-wrapper #ecl-sidebar .ecl-vnavigation li a i {
         text-align: center;
         width: 20px;
-        font-size: 14px;
-        margin-right: 7px; }
+        font-size: 14px; }
       #ecl-wrapper #ecl-sidebar .ecl-vnavigation li a span {
+        margin-left: 7px;
         display: inline-block; }
     #ecl-wrapper #ecl-sidebar .ecl-vnavigation li.active > a {
       background-color: #22242a;
@@ -3216,7 +3216,13 @@ ul {
         color: #fff; }
   #ecl-wrapper #ecl-sidebar #ecl-test-panels {
     position: absolute;
-    bottom: 0; }
+    bottom: 0;
+    width: 100%;
+    border-top: 0; }
+    #ecl-wrapper #ecl-sidebar #ecl-test-panels li.active a {
+      border-left: 0;
+      box-shadow: 0 0 5px #17181c inset;
+      background-color: #22242A; }
 
 .block-panel {
   margin-bottom: 40px;

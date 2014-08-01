@@ -20,9 +20,6 @@
           @iframeRegion(runner)
           @specsRegion(runner)
           @panelsRegion(runner, config)
-          # @logRegion(runner)
-          # @domRegion(runner)
-          # @xhrRegion(runner)
 
           ## start running the tests
           ## and load the iframe
