@@ -1,4 +1,4 @@
 <a href="<%= @href %>">
   <i class="<%= @icon %>"></i>
-  <%= @name %>
+  <span><%= @name %></span>
 </a>

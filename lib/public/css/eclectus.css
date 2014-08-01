@@ -3077,12 +3077,19 @@ blockquote p {
 ul {
   padding-left: 30px; }
 
-#main-region {
-  margin-left: 216px;
-  position: relative;
-  padding: 0;
-  display: table-cell;
-  vertical-align: top; }
+#ecl-wrapper {
+  position: absolute;
+  width: 100%;
+  height: 100%; }
+  #ecl-wrapper.collapsed #main-region {
+    margin-left: 55px; }
+  #ecl-wrapper #main-region {
+    margin-left: 216px;
+    position: relative;
+    padding: 0;
+    overflow: auto;
+    height: 100%;
+    vertical-align: top; }
 
 #header-container {
   background-color: #E1E1E1;
@@ -3145,35 +3152,28 @@ ul {
   .ecl-main-content h1 {
     line-height: 1.3em; }
 
-#ecl-wrapper {
-  display: table;
-  width: 100%;
+#ecl-wrapper.collapsed #ecl-sidebar {
+  width: 55px; }
+  #ecl-wrapper.collapsed #ecl-sidebar .logo {
+    display: none !important; }
+  #ecl-wrapper.collapsed #ecl-sidebar .ecl-vnavigation li span {
+    display: none; }
+#ecl-wrapper #ecl-sidebar {
+  width: 216px;
+  background: #272930;
+  z-index: 2;
   position: absolute;
+  vertical-align: top;
+  padding-bottom: 49px;
   height: 100%; }
-  #ecl-wrapper #nav-region {
-    background: #272930;
-    width: 216px;
-    z-index: 2;
-    display: table-cell;
-    position: relative;
-    vertical-align: top;
-    padding-bottom: 49px; }
-    #ecl-wrapper #nav-region .ecl-toggle {
-      display: none;
-      padding: 10px 0;
-      text-align: center;
-      cursor: pointer; }
-      #ecl-wrapper #nav-region .ecl-toggle i {
-        font-size: 24px;
-        color: #C9D4F6; }
-  #ecl-wrapper .ecl-vnavigation {
+  #ecl-wrapper #ecl-sidebar .ecl-vnavigation {
     margin: 0;
     padding: 0;
     border-top: 1px solid #1a1c20; }
-    #ecl-wrapper .ecl-vnavigation li.active > a {
+    #ecl-wrapper #ecl-sidebar .ecl-vnavigation li.active > a {
       background: #2A2C34;
       border-left: 1px solid #2494F2; }
-    #ecl-wrapper .ecl-vnavigation li a {
+    #ecl-wrapper #ecl-sidebar .ecl-vnavigation li a {
       border-top: 1px solid #32353e;
       border-bottom: 1px solid #1a1c20;
       display: block;
@@ -3183,36 +3183,36 @@ ul {
       font-weight: 300;
       text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
       white-space: nowrap; }
-      #ecl-wrapper .ecl-vnavigation li a:hover {
+      #ecl-wrapper #ecl-sidebar .ecl-vnavigation li a:hover {
         background-color: #2a2c34; }
-      #ecl-wrapper .ecl-vnavigation li a i {
+      #ecl-wrapper #ecl-sidebar .ecl-vnavigation li a i {
         text-align: center;
         width: 20px;
         font-size: 14px;
         margin-right: 7px; }
-      #ecl-wrapper .ecl-vnavigation li a span {
+      #ecl-wrapper #ecl-sidebar .ecl-vnavigation li a span {
         display: inline-block; }
-  #ecl-wrapper .collapse-button {
+  #ecl-wrapper #ecl-sidebar .collapse-container {
     padding: 7px 9px;
     background: #1F2126;
     bottom: 0;
     border-top: 1px solid #131519;
     box-shadow: 0 1px 0 #2A2C31 inset;
     overflow: auto; }
-    #ecl-wrapper .collapse-button .logo {
+    #ecl-wrapper #ecl-sidebar .collapse-container .logo {
       text-align: left;
       display: inline-block;
       font-size: 200%;
       color: #aaa; }
-    #ecl-wrapper .collapse-button button {
+    #ecl-wrapper #ecl-sidebar .collapse-container button {
       margin: 0 !important;
       background: transparent;
       box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.1) inset;
       border: 1px solid rgba(0, 0, 0, 0.25);
       border-radius: 2px; }
-      #ecl-wrapper .collapse-button button:hover {
+      #ecl-wrapper #ecl-sidebar .collapse-container button:hover {
         background: #23252A; }
-      #ecl-wrapper .collapse-button button i {
+      #ecl-wrapper #ecl-sidebar .collapse-container button i {
         color: #fff; }
 
 .block-panel {

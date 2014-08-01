@@ -48,10 +48,24 @@ ul {
   padding-left: 30px;
 }
 
-#main-region{
-  margin-left: 216px;
-  position: relative;
-  padding: 0;
-  display: table-cell;
-  vertical-align: top;
+#ecl-wrapper {
+  // padding-top: 50px;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+
+  &.collapsed {
+    #main-region {
+      margin-left: 55px;
+    }
+  }
+
+  #main-region {
+    margin-left: 216px;
+    position: relative;
+    padding: 0;
+    overflow: auto;
+    height: 100%;
+    vertical-align: top;
+  }
 }
