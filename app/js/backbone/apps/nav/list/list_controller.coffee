@@ -10,6 +10,11 @@
       @listenTo config, "list:test:panels", (runner) ->
         @panelsRegion runner
 
+      ## make sure we empty this region since we're
+      ## in control of it
+      @listenTo config, "close:test:panels", ->
+        @layout.panelsRegion.empty()
+
       @layout = @getLayoutView()
 
       @listenTo @layout, "show", =>
