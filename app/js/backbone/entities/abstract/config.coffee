@@ -6,26 +6,26 @@
       panels: @getConfig "panels", default: {}, type: "object"
 
     toggleCollapse: ->
-      @setConfig "collapsed", !@get("collapsed")
+      @set "collapsed", !@get("collapsed")
 
     togglePanel: (panel, bool) ->
       obj = {}
       obj[panel.get("name")] = bool
-      @setConfig "panels", obj, type: "object"
+      @set "panels", obj, type: "object"
 
     ## this also needs to do a .save to the server (or use websockets)
-    setConfig: (attr, value, options = {}) ->
+    set: (attr, value, options = {}) ->
       ## get a reference to any existing value
       existing = @getConfig(attr, options)
 
       ## if this is an object we need to merge into existing value
       value = _.extend existing, value if options.type is "object"
 
-      ## set the value on ourselves
-      @set attr, value, options
-
       ## also set this in LS
       localStorage.setItem attr, JSON.stringify(value)
+
+      ## set the value on ourselves
+      super
 
     ## returns the item in LS or uses the default
     getConfig: (attr, options = {}) ->
