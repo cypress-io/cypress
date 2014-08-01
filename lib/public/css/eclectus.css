@@ -3356,6 +3356,8 @@ ul {
       padding: 15px; }
       #test-page #ecl-panel-container > li:first-child {
         padding-left: 0; }
+      #test-page #ecl-panel-container > li:empty {
+        padding: 0; }
     #test-page #ecl-panel-container #ecl-panel, #test-page #ecl-panel-container #ecl-xhr-panel {
       overflow: hidden;
       float: left;

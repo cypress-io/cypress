@@ -5,12 +5,15 @@
       { runner, regions } = options
 
       config = App.request "app:config:entity"
+
       panels = App.request "panel:entities"
 
       ## when panels chooses/unchooses we need to update our app config
       @listenTo panels, "change:chosen", (model, value, options) ->
         config.togglePanel model, value
         @panelRegion model, value, regions
+
+      panels.setInitialStateByConfig config.get("panels")
 
       panelsView = @getPanelsView panels
 

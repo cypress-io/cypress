@@ -206,6 +206,10 @@
       &:first-child {
         padding-left: 0;
       }
+
+      &:empty {
+        padding: 0;
+      }
     }
 
     #ecl-panel, #ecl-xhr-panel {
