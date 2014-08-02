@@ -5,7 +5,6 @@
       { runner, regions } = options
 
       config = App.request "app:config:entity"
-
       panels = App.request "panel:entities"
 
       ## when panels chooses/unchooses we need to update our app config

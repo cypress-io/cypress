@@ -4,4 +4,21 @@
     initialize: (options) ->
       { panel } = options
 
-      @show new DOM.Layout
+      @layout = @getLayoutView(panel)
+
+      @listenTo @layout, "show", ->
+        @domContentRegion()
+
+      @show @layout
+
+    domContentRegion: ->
+      domView = @getDomView()
+      @show domView, region: @layout.domContentRegion
+
+    getDomView: ->
+      new DOM.Content
+        collection: new App.Entities.Collection [{}, {}]
+
+    getLayoutView: (panel) ->
+      new DOM.Layout
+        model: panel

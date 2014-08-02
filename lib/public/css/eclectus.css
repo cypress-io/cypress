@@ -1493,7 +1493,7 @@ a.label:hover, a.label:focus {
   font-weight: normal;
   font-style: normal; }
 
-.fa, #test-page #ecl-panel-container #ecl-panel ul li.xhr:before, #test-page #ecl-panel-container #ecl-panel ul li.log:before, #test-page #ecl-panel-container #ecl-panel ul li.info:before, #test-page #ecl-panel-container #ecl-panel ul li.dom:before {
+.fa {
   display: inline-block;
   font-family: FontAwesome;
   font-style: normal;
@@ -1551,9 +1551,9 @@ a.label:hover, a.label:focus {
 .pull-left {
   float: left; }
 
-.fa.pull-left, #test-page #ecl-panel-container #ecl-panel ul li.pull-left.xhr:before, #test-page #ecl-panel-container #ecl-panel ul li.pull-left.log:before, #test-page #ecl-panel-container #ecl-panel ul li.pull-left.info:before, #test-page #ecl-panel-container #ecl-panel ul li.pull-left.dom:before {
+.fa.pull-left {
   margin-right: .3em; }
-.fa.pull-right, #test-page #ecl-panel-container #ecl-panel ul li.pull-right.xhr:before, #test-page #ecl-panel-container #ecl-panel ul li.pull-right.log:before, #test-page #ecl-panel-container #ecl-panel ul li.pull-right.info:before, #test-page #ecl-panel-container #ecl-panel ul li.pull-right.dom:before {
+.fa.pull-right {
   margin-left: .3em; }
 
 .fa-spin, #test-page #specs-container li.processing > .suite-state i, #test-page #specs-container li.processing > .test-state i {
@@ -2414,7 +2414,7 @@ a.label:hover, a.label:focus {
 .fa-spinner:before {
   content: "\f110"; }
 
-.fa-circle:before, #test-page #ecl-panel-container #ecl-panel ul li.xhr:before, #test-page #ecl-panel-container #ecl-panel ul li.log:before, #test-page #ecl-panel-container #ecl-panel ul li.info:before, #test-page #ecl-panel-container #ecl-panel ul li.dom:before {
+.fa-circle:before {
   content: "\f111"; }
 
 .fa-mail-reply:before,
@@ -3217,11 +3217,11 @@ ul {
   #ecl-wrapper #ecl-sidebar #ecl-test-panels {
     position: absolute;
     bottom: 0;
-    width: 100%;
-    border-top: 0; }
+    width: 100%; }
     #ecl-wrapper #ecl-sidebar #ecl-test-panels li.active a {
+      box-shadow: 1px 2px 5px #1b1d22 inset;
+      border-top: 1px solid #191919;
       border-left: 0;
-      box-shadow: 0 0 5px #17181c inset;
       background-color: #22242A; }
 
 .block-panel {
@@ -3349,106 +3349,68 @@ ul {
     position: fixed;
     bottom: 0;
     margin: 0;
-    padding: 0; }
+    margin-left: -30px;
+    padding: 0;
+    background-color: #444; }
     #test-page #ecl-panel-container > li {
       float: left;
       list-style-type: none;
-      padding: 15px; }
+      border-left: 1px solid #191919;
+      border-right: 1px solid #191919;
+      width: 300px;
+      margin-left: 5px;
+      background-color: #3C3E43; }
       #test-page #ecl-panel-container > li:first-child {
-        padding-left: 0; }
+        margin-left: 0; }
       #test-page #ecl-panel-container > li:empty {
-        padding: 0; }
-    #test-page #ecl-panel-container #ecl-panel, #test-page #ecl-panel-container #ecl-xhr-panel {
-      overflow: hidden;
-      float: left;
-      padding: 10px; }
-      #test-page #ecl-panel-container #ecl-panel ul, #test-page #ecl-panel-container #ecl-xhr-panel ul {
-        list-style-type: none;
-        padding-left: 0;
-        margin-bottom: 0;
-        clear: both; }
-        #test-page #ecl-panel-container #ecl-panel ul li, #test-page #ecl-panel-container #ecl-xhr-panel ul li {
-          padding: 5px 10px;
-          margin: 0;
-          list-style-type: none;
-          border-bottom: 1px dotted #CCC;
-          overflow: auto; }
-          #test-page #ecl-panel-container #ecl-panel ul li:last-child, #test-page #ecl-panel-container #ecl-xhr-panel ul li:last-child {
-            border-bottom: 0; }
-          #test-page #ecl-panel-container #ecl-panel ul li .title, #test-page #ecl-panel-container #ecl-xhr-panel ul li .title {
-            display: block; }
-          #test-page #ecl-panel-container #ecl-panel ul li .msg, #test-page #ecl-panel-container #ecl-xhr-panel ul li .msg {
-            display: block; }
-          #test-page #ecl-panel-container #ecl-panel ul li .id, #test-page #ecl-panel-container #ecl-xhr-panel ul li .id {
-            font-size: 11px;
-            color: #999;
-            margin-right: 5px; }
-          #test-page #ecl-panel-container #ecl-panel ul li .test, #test-page #ecl-panel-container #ecl-xhr-panel ul li .test {
-            font-weight: 600; }
-          #test-page #ecl-panel-container #ecl-panel ul li i, #test-page #ecl-panel-container #ecl-xhr-panel ul li i {
-            font-size: 10px;
-            font-weight: 200;
-            color: #999; }
-    #test-page #ecl-panel-container #ecl-panel ul li {
-      padding-left: 20px; }
-      #test-page #ecl-panel-container #ecl-panel ul li.xhr:before, #test-page #ecl-panel-container #ecl-panel ul li.log:before, #test-page #ecl-panel-container #ecl-panel ul li.info:before, #test-page #ecl-panel-container #ecl-panel ul li.dom:before {
-        position: absolute;
-        left: 13px;
-        margin-top: 6px; }
-      #test-page #ecl-panel-container #ecl-panel ul li.xhr:before {
-        color: #FFB61C; }
-      #test-page #ecl-panel-container #ecl-panel ul li.log:before {
-        color: #c9cbd2; }
-      #test-page #ecl-panel-container #ecl-panel ul li.info:before {
-        color: #335397; }
-      #test-page #ecl-panel-container #ecl-panel ul li.dom:before {
-        color: #2EC1CC; }
-      #test-page #ecl-panel-container #ecl-panel ul li.dom {
-        cursor: pointer; }
-      #test-page #ecl-panel-container #ecl-panel ul li.dom:hover {
-        background-color: #dceefa; }
-      #test-page #ecl-panel-container #ecl-panel ul li.dom.active {
-        background-color: #bde0f5; }
-    #test-page #ecl-panel-container #ecl-xhr-panel {
-      float: left;
-      margin-left: 20px;
-      width: 400px;
-      background-color: #FCF8E3; }
-      #test-page #ecl-panel-container #ecl-xhr-panel #xhr-header {
-        border-bottom: 1px solid #ddd;
-        float: left;
-        width: 100%;
-        font-weight: 600; }
-        #test-page #ecl-panel-container #ecl-xhr-panel #xhr-header span {
-          float: left;
-          width: 50%;
-          padding-left: 10px; }
-        #test-page #ecl-panel-container #ecl-xhr-panel #xhr-header span:last-child {
-          padding-left: 5%; }
-      #test-page #ecl-panel-container #ecl-xhr-panel li {
-        width: 100%;
-        cursor: pointer; }
-        #test-page #ecl-panel-container #ecl-xhr-panel li:hover {
-          background-color: #faf2cc; }
-      #test-page #ecl-panel-container #ecl-xhr-panel span {
+        padding: 0;
+        display: none; }
+      #test-page #ecl-panel-container > li:hover .panel-close,
+      #test-page #ecl-panel-container > li:hover .panel-controls {
         display: inline-block; }
-      #test-page #ecl-panel-container #ecl-xhr-panel .method {
-        width: 15%;
-        color: #3380FF; }
-      #test-page #ecl-panel-container #ecl-xhr-panel .url {
-        width: 35%;
-        color: #3380ff; }
-      #test-page #ecl-panel-container #ecl-xhr-panel .fa-chevron-right {
-        width: 5%; }
-      #test-page #ecl-panel-container #ecl-xhr-panel .status {
-        width: 10%;
-        color: #008000; }
-      #test-page #ecl-panel-container #ecl-xhr-panel .body {
-        width: 35%;
-        color: #008000; }
-      #test-page #ecl-panel-container #ecl-xhr-panel .processing {
-        width: 45%; }
-        #test-page #ecl-panel-container #ecl-xhr-panel .processing i {
-          font-size: 15px;
-          margin-right: 5px;
-          color: #444; }
+      #test-page #ecl-panel-container > li header {
+        background-color: #1F2126;
+        text-align: center;
+        color: #888;
+        padding: 3px 5px;
+        border-top: 1px solid #000;
+        box-shadow: 0 1px 0 #444 inset;
+        position: relative; }
+        #test-page #ecl-panel-container > li header i.fa-circle {
+          font-size: 11px;
+          position: relative;
+          top: -1px;
+          margin-right: 2px; }
+        #test-page #ecl-panel-container > li header .panel-close,
+        #test-page #ecl-panel-container > li header .panel-controls {
+          float: left;
+          display: none;
+          color: #999;
+          position: absolute;
+          cursor: pointer; }
+          #test-page #ecl-panel-container > li header .panel-close i:hover,
+          #test-page #ecl-panel-container > li header .panel-controls i:hover {
+            color: #DDD; }
+        #test-page #ecl-panel-container > li header .panel-close {
+          left: 5px; }
+        #test-page #ecl-panel-container > li header .panel-controls {
+          right: 5px; }
+      #test-page #ecl-panel-container > li .panel-content {
+        height: 250px; }
+        #test-page #ecl-panel-container > li .panel-content ul {
+          padding: 0; }
+          #test-page #ecl-panel-container > li .panel-content ul li {
+            width: 100%;
+            list-style-type: none;
+            color: #ddd;
+            padding: 2px 5px;
+            border-bottom: 1px solid #222;
+            border-top: 1px solid #515151;
+            background-color: #43454b; }
+            #test-page #ecl-panel-container > li .panel-content ul li:hover {
+              cursor: pointer;
+              background-color: #484a50; }
+            #test-page #ecl-panel-container > li .panel-content ul li:first-child {
+              border-top: 0; }
+            #test-page #ecl-panel-container > li .panel-content ul li:last-child {
+              box-shadow: 0 1px 2px #373737; }

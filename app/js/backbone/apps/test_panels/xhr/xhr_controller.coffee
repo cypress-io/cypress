@@ -4,4 +4,13 @@
     initialize: (options) ->
       { panel } = options
 
-      @show new XHR.Layout
+      @layout = @getLayoutView(panel)
+
+      @listenTo @layout, "show", ->
+        # @xhrContentRegion()
+
+      @show @layout
+
+    getLayoutView: (panel) ->
+      new XHR.Layout
+        model: panel

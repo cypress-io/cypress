@@ -21,4 +21,4 @@
     router.to "list", region: region, runner: runner, regions: regions
 
   App.commands.setHandler "show:panel", (panel, region) ->
-    router.to panel.get("name").toLowerCase(), region: region
+    router.to panel.get("name").toLowerCase(), region: region, panel: panel
