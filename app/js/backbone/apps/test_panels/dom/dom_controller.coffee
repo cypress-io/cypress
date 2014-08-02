@@ -2,7 +2,7 @@
 
   class DOM.Controller extends App.Controllers.Application
     initialize: (options) ->
-      { panel } = options
+      { panel, runner } = options
 
       @layout = @getLayoutView(panel)
 
