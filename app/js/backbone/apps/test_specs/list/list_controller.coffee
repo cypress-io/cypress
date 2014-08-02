@@ -56,13 +56,14 @@
         ## if just a test is chosen -- just clear/reset its attributes
         ## if a suite is chosen -- reset all of the children runnable attrs
         if runner.hasChosen()
-          runnables.eachModel (model, runnable) ->
-            if model.isChosen()
-              ## reset its state
-              model.reset()
+          runnables.eachModel (model, runnable) =>
+            return if not model.isChose()
 
-              ## just splice out this single runnable
-              @resetRunnables(runnables, runnable)
+            ## reset its state
+            model.reset()
+
+            ## just splice out this single runnable
+            @resetRunnables(runnables, runnable)
         ## nothing is chosen so reset everything
         ## and remove all the runnables because
         ## they're being reset
