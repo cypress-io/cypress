@@ -1,1 +1,15 @@
-DOM Layout
+<div class="panel-container">
+  <header>
+    <div class="panel-close">
+      <i class="fa fa-times"></i>
+    </div>
+    <i class="fa fa-circle" style="color: <%= @color %>"></i>
+    <%= @name %>
+    <div class="panel-controls">
+      <i class="fa fa-cog"></i>
+    </div>
+  </header>
+  <div class="panel-content">
+    <div id="dom-content-region"></div>
+  </div>
+</div>

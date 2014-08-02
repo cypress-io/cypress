@@ -196,183 +196,274 @@
     position: fixed;
     bottom: 0;
     margin: 0;
+    margin-left: -30px;
     padding: 0;
+    background-color: #444;
+
+    // &>li + li:empty {
+    //   padding-left: 0;
+    //   background-color: red;
+    //   margin-right: 5px solid blue;
+    // }
 
     &>li {
       float: left;
       list-style-type: none;
-      padding: 15px;
+      border-left: 1px solid #191919;
+      border-right: 1px solid #191919;
+      width: 300px;
+      margin-left: 5px;
+      background-color: #3C3E43;
 
       &:first-child {
-        padding-left: 0;
+        margin-left: 0;
       }
 
       &:empty {
         padding: 0;
+        display: none;
       }
-    }
 
-    #ecl-panel, #ecl-xhr-panel {
-      overflow: hidden;
-      float: left;
-      padding: 10px;
-
-      ul {
-        list-style-type: none;
-        padding-left: 0;
-        margin-bottom: 0;
-        clear: both;
-
-        li {
-          padding: 5px 10px;
-          margin: 0;
-          list-style-type: none;
-          border-bottom: 1px dotted #CCC;
-          overflow: auto;
-
-          &:last-child {
-            border-bottom: 0;
-          }
-
-          & .title {
-            display: block;
-          }
-
-          & .msg {
-            display: block;
-          }
-
-          & .id {
-            font-size: 11px;
-            color: #999;
-            margin-right: 5px
-          }
-
-          & .test {
-            font-weight: 600
-          }
-
-          i {
-            font-size: 10px;
-            font-weight: 200;
-            color: #999;
-          }
+      &:hover {
+        .panel-close,
+        .panel-controls {
+          display: inline-block;
         }
       }
-    }
 
-    #ecl-panel {
-      ul li {
-        padding-left: 20px;
+      header {
+        background-color: #1F2126;
+        text-align: center;
+        color: #888;
+        padding: 3px 5px;
+        border-top: 1px solid #000;
+        box-shadow: 0 1px 0 #444 inset;
+        position: relative;
 
-        &.xhr:before,
-        &.log:before,
-        &.info:before,
-        &.dom:before {
-          @extend .#{$fa-css-prefix}-circle:before;
-          @extend .fa;
-          position: absolute;
-          left: 13px;
-          margin-top: 6px;
+        i.fa-circle {
+          font-size: 11px;
+          position: relative;
+          top: -1px;
+          margin-right: 2px;
         }
 
-        &.xhr:before {
-          color: #FFB61C;
-        }
-
-        &.log:before {
-          color: lighten(#9296A3, 20%);
-        }
-
-        &.info:before {
-          color: #335397;
-        }
-
-        &.dom:before {
-          color: #2EC1CC;
-        }
-
-        &.dom {
-          cursor: pointer;
-        }
-
-        &.dom:hover {
-          background-color: lighten(#1C7EBB, 50%);
-        }
-
-        &.dom.active {
-          background-color: lighten(#1C7EBB, 43%);
-        }
-      }
-    }
-
-    #ecl-xhr-panel {
-      float: left;
-      margin-left: 20px;
-      width: 400px;
-      background-color: #FCF8E3;
-
-      #xhr-header {
-        border-bottom: 1px solid #ddd;
-        float: left; width: 100%;
-        font-weight: 600;
-        span {
+        .panel-close,
+        .panel-controls {
           float: left;
-          width: 50%;
-          padding-left: 10px;
+          display: none;
+          color: #999;
+          position: absolute;
+          cursor: pointer;
+
+          i:hover {
+            color: #DDD;
+          }
         }
-        span:last-child {
-          padding-left: 5%;
+
+        .panel-close {
+          left: 5px;
+        }
+
+        .panel-controls {
+          right: 5px;
         }
       }
 
-      li {
-        width: 100%;
-        cursor: pointer;
+      .panel-content {
+        height: 250px;
 
-        &:hover {
-          background-color: darken(#FCF8E3, 5%)
-        }
-      }
+        ul {
+          padding: 0;
 
-      span {
-        display: inline-block;
-      }
+          li {
+            width: 100%;
+            list-style-type: none;
+            color: #ddd;
+            padding: 2px 5px;
+            border-bottom: 1px solid #222;
+            border-top: 1px solid #515151;
+            background-color: lighten(#3C3E43, 3%);
 
-      .method {
-        width: 15%;
-        color: #3380FF;
-      }
+            &:hover {
+              cursor: pointer;
+              background-color: lighten(#3C3E43, 5%);
+            }
 
-      .url {
-        width: 35%;
-        color: #3380FF
-      }
+            &:first-child {
+              border-top: 0;
+            }
 
-      .fa-chevron-right {
-        width: 5%;
-      }
-
-      .status {
-        width: 10%;
-        color: #008000;
-      }
-
-      .body {
-        width: 35%;
-        color: #008000;
-      }
-
-      .processing {
-        width: 45%;
-
-        i {
-          font-size: 15px;
-          margin-right: 5px;
-          color: #444;
+            &:last-child {
+              box-shadow: 0 1px 2px #373737;
+            }
+          }
         }
       }
     }
+
+
+
+    // #ecl-panel, #ecl-xhr-panel {
+    //   overflow: hidden;
+    //   float: left;
+    //   padding: 10px;
+
+    //   ul {
+    //     list-style-type: none;
+    //     padding-left: 0;
+    //     margin-bottom: 0;
+    //     clear: both;
+
+    //     li {
+    //       padding: 5px 10px;
+    //       margin: 0;
+    //       list-style-type: none;
+    //       border-bottom: 1px dotted #CCC;
+    //       overflow: auto;
+
+    //       &:last-child {
+    //         border-bottom: 0;
+    //       }
+
+    //       & .title {
+    //         display: block;
+    //       }
+
+    //       & .msg {
+    //         display: block;
+    //       }
+
+    //       & .id {
+    //         font-size: 11px;
+    //         color: #999;
+    //         margin-right: 5px
+    //       }
+
+    //       & .test {
+    //         font-weight: 600
+    //       }
+
+    //       i {
+    //         font-size: 10px;
+    //         font-weight: 200;
+    //         color: #999;
+    //       }
+    //     }
+    //   }
+    // }
+
+    // #ecl-panel {
+    //   ul li {
+    //     padding-left: 20px;
+
+    //     &.xhr:before,
+    //     &.log:before,
+    //     &.info:before,
+    //     &.dom:before {
+    //       @extend .#{$fa-css-prefix}-circle:before;
+    //       @extend .fa;
+    //       position: absolute;
+    //       left: 13px;
+    //       margin-top: 6px;
+    //     }
+
+    //     &.xhr:before {
+    //       color: #FFB61C;
+    //     }
+
+    //     &.log:before {
+    //       color: lighten(#9296A3, 20%);
+    //     }
+
+    //     &.info:before {
+    //       color: #335397;
+    //     }
+
+    //     &.dom:before {
+    //       color: #2EC1CC;
+    //     }
+
+    //     &.dom {
+    //       cursor: pointer;
+    //     }
+
+    //     &.dom:hover {
+    //       background-color: lighten(#1C7EBB, 50%);
+    //     }
+
+    //     &.dom.active {
+    //       background-color: lighten(#1C7EBB, 43%);
+    //     }
+    //   }
+    // }
+
+    // #ecl-xhr-panel {
+    //   float: left;
+    //   margin-left: 20px;
+    //   width: 400px;
+    //   background-color: #FCF8E3;
+
+    //   #xhr-header {
+    //     border-bottom: 1px solid #ddd;
+    //     float: left; width: 100%;
+    //     font-weight: 600;
+    //     span {
+    //       float: left;
+    //       width: 50%;
+    //       padding-left: 10px;
+    //     }
+    //     span:last-child {
+    //       padding-left: 5%;
+    //     }
+    //   }
+
+    //   li {
+    //     width: 100%;
+    //     cursor: pointer;
+
+    //     &:hover {
+    //       background-color: darken(#FCF8E3, 5%)
+    //     }
+    //   }
+
+    //   span {
+    //     display: inline-block;
+    //   }
+
+    //   .method {
+    //     width: 15%;
+    //     color: #3380FF;
+    //   }
+
+    //   .url {
+    //     width: 35%;
+    //     color: #3380FF
+    //   }
+
+    //   .fa-chevron-right {
+    //     width: 5%;
+    //   }
+
+    //   .status {
+    //     width: 10%;
+    //     color: #008000;
+    //   }
+
+    //   .body {
+    //     width: 35%;
+    //     color: #008000;
+    //   }
+
+    //   .processing {
+    //     width: 45%;
+
+    //     i {
+    //       font-size: 15px;
+    //       margin-right: 5px;
+    //       color: #444;
+    //     }
+    //   }
+    // }
   }
 
 }

@@ -104,13 +104,13 @@
       position: absolute;
       bottom: 0;
       width: 100%;
-      border-top: 0;
 
       li.active {
 
         a {
+          box-shadow: 1px 2px 5px darken(#22242A, 3%) inset;
+          border-top: 1px solid #191919;
           border-left: 0;
-          box-shadow: 0 0 5px darken(#22242A, 5%) inset;
           background-color: #22242A;
         }
       }

@@ -4,4 +4,13 @@
     initialize: (options) ->
       { panel } = options
 
-      @show new LOG.Layout
+      @layout = @getLayoutView(panel)
+
+      @listenTo @layout, "show", ->
+        # @logContentRegion()
+
+      @show @layout
+
+    getLayoutView: (panel) ->
+      new LOG.Layout
+        model: panel
