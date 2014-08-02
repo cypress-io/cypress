@@ -5,10 +5,14 @@
 
   class Reporter
     constructor: (runner) ->
+      ## we need to have access to the methods we need to partial
+      ## each time our tests / suites / hooks run
+      patch = Eclectus.patch
+
       ## resolve the promise with our bona-fide
       ## runner entity which will manage the lifecycle
       ## of our test runner
-      df.resolve App.request("runner:entity", runner)
+      df.resolve App.request("runner:entity", runner, patch)
 
   API =
     ## the start method will be responsible for setting up
