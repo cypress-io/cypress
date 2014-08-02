@@ -10,7 +10,7 @@
       ## when panels chooses/unchooses we need to update our app config
       @listenTo panels, "change:chosen", (model, value, options) ->
         config.togglePanel model, value
-        @panelRegion model, value, regions
+        @panelRegion model, value, regions, runner
 
       panels.setInitialStateByConfig config.get("panels")
 
@@ -18,12 +18,12 @@
 
       @show panelsView
 
-    panelRegion: (panel, show, regions) ->
+    panelRegion: (panel, show, regions, runner) ->
       region = @getRegion(panel.get("name"), regions)
 
       ## if we're supposed to show the panel then fire the app command
       if show
-        App.execute "show:panel", panel, region
+        App.execute "show:panel", panel, region, runner
       else
         ## just close the region
         region.empty()
