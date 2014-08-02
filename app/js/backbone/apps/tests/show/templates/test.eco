@@ -3,26 +3,16 @@
 </div>
 <div class="ecl-main-content">
   <div id="test-page">
-    <div id="iframe-wrapper">
-      <div id="iframe-container">
-        <div id="iframe-region"></div>
-      </div>
-    </div>
     <div id="specs-region"></div>
-    <ul id="ecl-panel-container">
-      <li id="dom-region"></li>
-      <li id="xhr-region"></li>
-      <li id="log-region"></li>
-<!--       <div id="ecl-panel" class="block-panel">
-        <ul></ul>
-      </div>
-      <div id="ecl-xhr-panel" class="block-panel">
-        <div id="xhr-header">
-          <span>Request</span>
-          <span>Response</span>
-        </div>
-        <ul></ul>
-      </div> -->
-    </div>
   </div>
 </div>
+<div id="iframe-wrapper">
+  <div id="iframe-container">
+    <div id="iframe-region"></div>
+  </div>
+</div>
+<ul id="panel-wrapper">
+  <li id="dom-region"></li>
+  <li id="xhr-region"></li>
+  <li id="log-region"></li>
+</ul>
