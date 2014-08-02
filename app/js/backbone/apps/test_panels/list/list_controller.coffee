@@ -9,8 +9,8 @@
 
       ## when panels chooses/unchooses we need to update our app config
       @listenTo panels, "change:chosen", (model, value, options) ->
-        config.togglePanel model, value
         @panelRegion model, value, regions, runner
+        config.togglePanel model, value
 
       panels.setInitialStateByConfig config.get("panels")
 

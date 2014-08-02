@@ -3,7 +3,10 @@
   class Show.Controller extends App.Controllers.Application
 
     initialize: (options) ->
-      config = App.request("app:config:entity")
+      config = App.request "app:config:entity"
+
+      @listenTo config, "change:panels", ->
+        @layout.resizePanels()
 
       @onDestroy = _.partial(@onDestroy, config)
 
@@ -13,7 +16,7 @@
         ## store this as a property on ourselves
         @runner = runner
 
-        @layout = @getTestView()
+        @layout = @getLayoutView config
 
         @listenTo @layout, "show", =>
           @statsRegion(runner)
@@ -24,6 +27,8 @@
           ## start running the tests
           ## and load the iframe
           runner.start(options.id)
+
+          @layout.resizePanels()
 
         @show @layout
 
@@ -48,5 +53,6 @@
       config.trigger "close:test:panels"
       App.request "stop:test:runner", @runner
 
-    getTestView: ->
-      new Show.Test
+    getLayoutView: (config) ->
+      new Show.Layout
+        model: config
