@@ -4,7 +4,7 @@
     template: "test_iframe/show/iframe"
 
     ui:
-      header:   "header"
+      # header:   "header"
       expand:   ".fa-expand"
       compress: ".fa-compress"
 
@@ -13,12 +13,14 @@
       "click @ui.compress"  : "compressClicked"
 
     onShow: ->
-      @ui.header.hide()
+      # @ui.header.hide()
       @ui.compress.hide()
 
     loadIframe: (src, fn) ->
       ## remove any existing iframes
       @$el.find("iframe").remove()
+
+      @$el.hide()
 
       view = @
 
@@ -31,7 +33,8 @@
         load: ->
           console.info("loaded!", iframe, @contentWindow);
           fn(@contentWindow)
-          view.ui.header.show()
+          view.$el.show()
+          # view.ui.header.show()
 
       iframe.appendTo(@$el)
 

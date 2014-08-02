@@ -3341,7 +3341,6 @@ ul {
         float: left;
         width: 70%; }
     #iframe-wrapper #iframe-container iframe {
-      display: none;
       z-index: 1;
       background-color: white;
       width: 900px;
