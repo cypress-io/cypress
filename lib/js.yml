@@ -28,3 +28,9 @@ eclectus:
   - app/js/backbone/entities/abstract/*
   - app/js/backbone/entities/*
   - app/js/backbone/apps/**
+
+iframe:
+  - app/js/api/iframe.coffee
+
+sinon:
+  - bower_components/sinonjs/sinon.js

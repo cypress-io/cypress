@@ -49,7 +49,7 @@
   window.should = chai.should(),
   window.assert = chai.assert;
 
-})(window.parent)
+})(window.opener || window.parent)
 
 // for some reason applying this to the parent is not bubbling whatsoever
 // window.onerror = function() {
