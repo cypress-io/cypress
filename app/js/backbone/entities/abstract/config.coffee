@@ -4,6 +4,7 @@
     defaults: ->
       collapsed: @getConfig "collapsed", default: false, type: "boolean"
       panels: @getConfig "panels", default: {}, type: "object"
+      panelWidth: @getConfig "panelWidth", default: 300, type: "number"
 
     toggleCollapse: ->
       @set "collapsed", !@get("collapsed")
@@ -12,6 +13,18 @@
       obj = {}
       obj[panel.get("name")] = bool
       @set "panels", obj, type: "object"
+
+    anyPanelOpen: ->
+      ## are any of the panels open?
+      _.any _.values @get("panels")
+
+    calculatePanelHeight: ->
+      num = _.reduce @get("panels"), (memo, value, key) ->
+        memo += 1 if value
+        memo
+      , 0
+
+      (100 / num).toFixed(2)
 
     ## this also needs to do a .save to the server (or use websockets)
     set: (attr, value, options = {}) ->
@@ -34,6 +47,7 @@
       ## attempt type cooercion if type was given
       switch options.type
         when "boolean" then _.toBoolean(item)
+        when "number" then _.toNumber(item)
         when "object" then JSON.parse(item)
         else item
 
