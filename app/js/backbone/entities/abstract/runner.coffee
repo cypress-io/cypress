@@ -9,6 +9,14 @@
       passed: 0
       iframes: []
 
+  ## need to compose this runner with models for each panel
+  ## DOM / XHR / LOG
+  ## and partial each test (on test run) if its chosen...?
+    # initialize: ->
+    #   @dom = App.request "dom:entity"
+    #   @xhr = App.request "xhr:entity"
+    #   @log = App.request "log:entity"
+
     setIframe: (@iframe) ->
 
     getTestCid: (test) ->
