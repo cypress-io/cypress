@@ -4,9 +4,6 @@
 
   class Entities.Runner extends Entities.Model
     defaults: ->
-      total: 0
-      failed: 0
-      passed: 0
       iframes: []
 
   ## need to compose this runner with models for each panel
@@ -18,6 +15,8 @@
     #   @log = App.request "log:entity"
 
     setIframe: (@iframe) ->
+
+    setEclPatch: (@patchEcl) ->
 
     getTestCid: (test) ->
       ## grab the test id from the test's title
@@ -31,6 +30,9 @@
 
     logResults: (test) ->
       @trigger "test:results:ready", test
+
+    # patchEclForTest: (test) ->
+      # @eclPatch(test)
 
     setTestRunner: (runner) ->
       ## store the test runner as a property on ourselves
@@ -123,7 +125,11 @@
         @trigger "test", test
 
       @runner.on "test", (test) =>
-        ## need to do this temporarily until we add id's to suites
+        ## partials in the test object
+        ## into any Ecl command
+        @patchEcl(test)
+        # @patchEclForTest(test)
+
         @trigger "test", test
 
       @runner.on "test end", (test) =>
@@ -204,12 +210,13 @@
         console.log "finished running the iframes suite!"
 
   API =
-    getRunner: (testRunner) ->
+    getRunner: (testRunner, patch) ->
       ## store the actual testRunner on ourselves
       runner = new Entities.Runner
       runner.setTestRunner testRunner
+      runner.setEclPatch patch
       runner.startListening()
       runner
 
-  App.reqres.setHandler "runner:entity", (testRunner) ->
-    API.getRunner(testRunner)
+  App.reqres.setHandler "runner:entity", (testRunner, patch) ->
+    API.getRunner(testRunner, patch)
