@@ -57,7 +57,7 @@
         ## if a suite is chosen -- reset all of the children runnable attrs
         if runner.hasChosen()
           runnables.eachModel (model, runnable) =>
-            return if not model.isChose()
+            return if not model.isChosen()
 
             ## reset its state
             model.reset()
