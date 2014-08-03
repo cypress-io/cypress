@@ -4,20 +4,25 @@
     initialize: (options) ->
       { panel, runner } = options
 
+      doms = runner.getEntitiesByEvent("dom")
+
+      # @listenTo runner, "dom:added", (model, collection) ->
+        # console.log "dom:added", model, collection
+
       @layout = @getLayoutView(panel)
 
       @listenTo @layout, "show", ->
-        @domContentRegion()
+        @domContentRegion doms
 
       @show @layout
 
-    domContentRegion: ->
-      domView = @getDomView()
+    domContentRegion: (doms) ->
+      domView = @getDomsView doms
       @show domView, region: @layout.domContentRegion
 
-    getDomView: ->
-      new DOM.Content
-        collection: new App.Entities.Collection [{}, {}]
+    getDomsView: (doms) ->
+      new DOM.Doms
+        collection: doms
 
     getLayoutView: (panel) ->
       new DOM.Layout

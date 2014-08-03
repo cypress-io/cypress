@@ -1,0 +1,2 @@
+<span class="content-title"><%= @title%></span>
+<span class="content-msg"><%= @msg %></span>
