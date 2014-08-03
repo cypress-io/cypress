@@ -5,6 +5,7 @@ window.Eclectus = do ($, _) ->
     find: (obj, el) ->
       dom = new Eclectus.Dom obj.contentWindow.document
       obj.channel.trigger "dom", obj.runnable,
+        node: el
         el: dom.$(el)
         dom: dom.$("body").clone(true, true)
         method: "find"
