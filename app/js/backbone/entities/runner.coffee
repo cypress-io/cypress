@@ -128,11 +128,16 @@
         ## partials in the test object
         ## into any Ecl command
         @patchEcl(test)
+        # test.on "find", (details) ->
+        # test.on "dom", @dom.getEvent
+        # test.on "xhr", @xhr.getEvent
+
         # @patchEclForTest(test)
 
         @trigger "test", test
 
       @runner.on "test end", (test) =>
+        # test.removeAllListeners()
         console.warn "test end", test
         @trigger "test:end", test
       ## start listening to all the pertinent runner events
