@@ -2,6 +2,10 @@
 
   testIdRegExp = /\[(.{3})\]$/
 
+  ## create our own private bus channel for communicating with
+  ## 3rd party objects outside of our application
+  runnerChannel = _.extend {}, Backbone.Events
+
   class Entities.Runner extends Entities.Model
     defaults: ->
       iframes: []
@@ -10,9 +14,11 @@
   ## DOM / XHR / LOG
   ## and partial each test (on test run) if its chosen...?
     # initialize: ->
-    #   @dom = App.request "dom:entity"
+      @doms = App.request "dom:entities"
     #   @xhr = App.request "xhr:entity"
     #   @log = App.request "log:entity"
+
+    setContentWindow: (@contentWindow) ->
 
     setIframe: (@iframe) ->
 
@@ -30,9 +36,6 @@
 
     logResults: (test) ->
       @trigger "test:results:ready", test
-
-    # patchEclForTest: (test) ->
-      # @eclPatch(test)
 
     setTestRunner: (runner) ->
       ## store the test runner as a property on ourselves
@@ -93,9 +96,26 @@
         $.when(generatedIds...).done =>
           runSuite.call(@, suite, fn)
 
+    getEntitiesByEvent: (event) ->
+      obj = {dom: @doms, xhr: @xhrs, log: @logs}
+      obj[event or throw new Error("Cannot find entities by event: #{event}")]
+
     startListening: ->
+      @listenTo runnerChannel, "all", (event, runnable, attrs) ->
+
+        ## grab the entities on our instance
+        entities = @getEntitiesByEvent(event)
+        entities.add attrs, runnable
+
+        ## Do not necessarily need to trigger anything, just need to
+        ## expose these entities to the outside world so they can listen
+        ## to them themselves
+        ## trigger the entities:added event passing up our model and collection
+        # @trigger "#{event}:added", model, entities
+
       ## mocha has begun running the specs per iframe
       @runner.on "start", =>
+        ## wipe out all listeners on our private runner bus
         console.warn "RUNNER HAS STARTED"
         @trigger "runner:start"
 
@@ -125,14 +145,15 @@
         @trigger "test", test
 
       @runner.on "test", (test) =>
-        ## partials in the test object
-        ## into any Ecl command
-        @patchEcl(test)
-        # test.on "find", (details) ->
-        # test.on "dom", @dom.getEvent
-        # test.on "xhr", @xhr.getEvent
-
-        # @patchEclForTest(test)
+        ## partials in the runnable object
+        ## our private channel
+        ## the iframes contentWindow
+        ## and the iframe string
+        @patchEcl
+          runnable: test
+          channel: runnerChannel
+          contentWindow: @contentWindow
+          iframe: @iframe
 
         @trigger "test", test
 
@@ -146,8 +167,13 @@
       ## remove all the listeners from EventEmitter
       @runner.removeAllListeners()
 
-      ## delete this property
+      ## delete these properties
       delete @runner
+      delete @contentWindow
+      delete @iframe
+      delete @doms
+      delete @xhrs
+      delete @logs
 
       ## cleanup any of our handlers
       @stopListening()
@@ -202,15 +228,20 @@
       ## tell our runner to run our iframes mocha suite
       console.info("runIframeSuite", @runner, iframe, contentWindow.mocha.suite)
 
-      ## right before we run the root runner's suite we iterate
-      ## through each test and give it a unique id
+      ## store the current iframe
       @setIframe iframe
+
+      ## store the content window so we can
+      ## pass this along to our Eclectus methods
+      @setContentWindow contentWindow
 
       ## grep for the correct test / suite by its id if chosenId is set
       ## or all the tests
       @runner.grep @getGrep()
 
       ## run the suite for the iframe
+      ## right before we run the root runner's suite we iterate
+      ## through each test and give it a unique id
       @runner.runSuite contentWindow.mocha.suite, ->
         console.log "finished running the iframes suite!"
 
