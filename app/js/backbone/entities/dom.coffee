@@ -11,24 +11,37 @@
       new Backbone.MultiChooser(@)
 
     ## msg should be a mutator
-    getMsg: (el, node) ->
-      found = el.length
-      a = ["'#{node}'"]
-      a.push if found then "found" else "not found"
-      a.join(" ")
+    # getMsg: (el, node) ->
+    #   found = el.length
+    #   a = ["'#{node}'"]
+    #   a.push if found then "found" else "not found"
+    #   a.join(" ")
 
     add: (attrs = {}, runnable) ->
-      {@el, @dom} = attrs
+      {el, dom} = attrs
 
-      attrs = _(attrs).pick("method")
+      # console.warn "add", @, attrs, @el, @dom
+
+      attrs = _(attrs).pick("method", "node")
+
       _.extend attrs,
-        node: @el.prop("nodeName").toLowerCase()
+        node: attrs.node.toLowerCase()
         title: runnable.originalTitle()
+        parent: runnable.parent?.originalTitle()
         testId: runnable.cid
 
-      attrs.msg = @getMsg(@el, attrs.node)
+      # attrs.msg = @getMsg(el, attrs.node)
 
-      super attrs
+      attrs.error = "could not find: #{attrs.node}" if not el.length
+
+      ## create the model
+      model = super attrs
+
+      ## add these backed up properties
+      model.el = el
+      model.dom = dom
+
+      return model
 
   App.reqres.setHandler "dom:entities", ->
     new Entities.DomsCollection

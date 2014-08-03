@@ -6,9 +6,6 @@
 
       doms = runner.getEntitiesByEvent("dom")
 
-      # @listenTo runner, "dom:added", (model, collection) ->
-        # console.log "dom:added", model, collection
-
       @layout = @getLayoutView(panel)
 
       @listenTo @layout, "show", ->

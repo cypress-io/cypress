@@ -3234,6 +3234,175 @@ ul {
   border-bottom: 1px solid #e2e2e2;
   box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.04); }
 
+#panel-wrapper {
+  position: absolute;
+  bottom: 0;
+  top: 0;
+  right: 0;
+  margin: 0;
+  padding: 0; }
+  #panel-wrapper > li {
+    list-style-type: none;
+    border-left: 1px solid #191919;
+    border-right: 1px solid #191919;
+    width: 300px;
+    background-color: #3C3E43; }
+    #panel-wrapper > li:empty {
+      padding: 0;
+      display: none; }
+    #panel-wrapper > li:hover .panel-close,
+    #panel-wrapper > li:hover .panel-controls {
+      display: inline-block; }
+    #panel-wrapper > li header {
+      background-color: #1F2126;
+      text-align: center;
+      color: #888;
+      padding: 3px 5px;
+      border-top: 1px solid #000;
+      box-shadow: 0 1px 0 #444 inset;
+      position: relative; }
+      #panel-wrapper > li header i.fa-circle {
+        font-size: 11px;
+        position: relative;
+        top: -1px;
+        margin-right: 2px; }
+      #panel-wrapper > li header .panel-close,
+      #panel-wrapper > li header .panel-controls {
+        float: left;
+        display: none;
+        color: #999;
+        position: absolute;
+        cursor: pointer; }
+        #panel-wrapper > li header .panel-close i:hover,
+        #panel-wrapper > li header .panel-controls i:hover {
+          color: #DDD; }
+      #panel-wrapper > li header .panel-close {
+        left: 5px; }
+      #panel-wrapper > li header .panel-controls {
+        right: 5px; }
+    #panel-wrapper > li .panel-content {
+      height: 250px; }
+      #panel-wrapper > li .panel-content ul {
+        padding: 0; }
+        #panel-wrapper > li .panel-content ul li {
+          width: 100%;
+          list-style-type: none;
+          color: #ddd;
+          border-bottom: 1px solid #222;
+          border-top: 1px solid #515151;
+          background-color: #43454b;
+          overflow: auto;
+          line-height: 18px; }
+          #panel-wrapper > li .panel-content ul li:first-child {
+            border-top: 0; }
+          #panel-wrapper > li .panel-content ul li:last-child {
+            box-shadow: 0 1px 2px #373737; }
+          #panel-wrapper > li .panel-content ul li.error {
+            border-right: 2px solid #E94B3B;
+            padding-right: 0px; }
+            #panel-wrapper > li .panel-content ul li.error .content-method {
+              color: #ee7569 !important; }
+            #panel-wrapper > li .panel-content ul li.error .content-node {
+              color: #e94b3b !important; }
+          #panel-wrapper > li .panel-content ul li .meta-container {
+            float: left;
+            width: 100%;
+            padding: 2px 5px; }
+            #panel-wrapper > li .panel-content ul li .meta-container:hover {
+              background-color: #484a50;
+              cursor: pointer; }
+          #panel-wrapper > li .panel-content ul li .content-icon {
+            float: left;
+            width: 5%;
+            color: #BBB;
+            font-size: 10px; }
+            #panel-wrapper > li .panel-content ul li .content-icon i {
+              position: relative;
+              top: 1px; }
+            #panel-wrapper > li .panel-content ul li .content-icon i.fa-chevron-down {
+              top: 0; }
+          #panel-wrapper > li .panel-content ul li .content-identifer {
+            float: left;
+            width: 65%; }
+            #panel-wrapper > li .panel-content ul li .content-identifer span {
+              float: left;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+              overflow: hidden; }
+            #panel-wrapper > li .panel-content ul li .content-identifer .content-parent {
+              width: 31%;
+              color: #BBB; }
+            #panel-wrapper > li .panel-content ul li .content-identifer .content-divider {
+              width: 9%;
+              text-align: center;
+              color: #888; }
+            #panel-wrapper > li .panel-content ul li .content-identifer .content-title {
+              width: 60%; }
+          #panel-wrapper > li .panel-content ul li .content-msg {
+            float: right;
+            width: 30%;
+            text-align: right; }
+            #panel-wrapper > li .panel-content ul li .content-msg span {
+              display: inline-block; }
+            #panel-wrapper > li .panel-content ul li .content-msg .content-selector-container:hover .content-node {
+              text-decoration: underline; }
+            #panel-wrapper > li .panel-content ul li .content-msg .content-method {
+              font-variant: small-caps;
+              font-size: 13px;
+              color: #E0C85E;
+              margin-right: 2px; }
+            #panel-wrapper > li .panel-content ul li .content-msg .content-node {
+              font-size: 12px;
+              color: #80b0ff; }
+          #panel-wrapper > li .panel-content ul li .details-container {
+            float: left;
+            width: 100%;
+            border-top: 1px solid #494949;
+            box-shadow: 0 3px 1px #393939 inset;
+            background-color: #393b40;
+            padding-top: 5px;
+            position: relative; }
+            #panel-wrapper > li .panel-content ul li .details-container i.fa-times, #panel-wrapper > li .panel-content ul #test-page #specs-container li.failed > .suite-state .details-container i, #test-page #specs-container #panel-wrapper > li .panel-content ul li.failed > .suite-state .details-container i, #panel-wrapper > li .panel-content ul #test-page #specs-container li.failed > .test-state .details-container i, #test-page #specs-container #panel-wrapper > li .panel-content ul li.failed > .test-state .details-container i {
+              position: absolute;
+              top: 0;
+              right: 0;
+              padding: 5px 10px 10px;
+              color: #999; }
+              #panel-wrapper > li .panel-content ul li .details-container i.fa-times:hover, #panel-wrapper > li .panel-content ul #test-page #specs-container li.failed > .suite-state .details-container i:hover, #test-page #specs-container #panel-wrapper > li .panel-content ul li.failed > .suite-state .details-container i:hover, #panel-wrapper > li .panel-content ul #test-page #specs-container li.failed > .test-state .details-container i:hover, #test-page #specs-container #panel-wrapper > li .panel-content ul li.failed > .test-state .details-container i:hover {
+                color: #EEE;
+                cursor: pointer; }
+            #panel-wrapper > li .panel-content ul li .details-container .actions-container {
+              padding: 2px 10px;
+              margin-bottom: -12px; }
+              #panel-wrapper > li .panel-content ul li .details-container .actions-container .icon-wrapper {
+                width: 20px;
+                height: 22px;
+                background-color: #333;
+                border: 1px solid #555;
+                border-radius: 3px;
+                display: inline-block;
+                text-align: center;
+                box-shadow: 1px 1px 2px #333; }
+                #panel-wrapper > li .panel-content ul li .details-container .actions-container .icon-wrapper:hover {
+                  cursor: pointer;
+                  background-color: #3b3b3b; }
+                  #panel-wrapper > li .panel-content ul li .details-container .actions-container .icon-wrapper:hover i {
+                    color: #FFF; }
+              #panel-wrapper > li .panel-content ul li .details-container .actions-container i.fa-play {
+                font-size: 11px; }
+            #panel-wrapper > li .panel-content ul li .details-container dl {
+              margin-bottom: 7px; }
+              #panel-wrapper > li .panel-content ul li .details-container dl dt {
+                width: 30%;
+                text-transform: uppercase;
+                color: #AAA;
+                font-weight: 300;
+                font-size: 11px; }
+              #panel-wrapper > li .panel-content ul li .details-container dl dd {
+                margin-left: 34%;
+                width: 66%;
+                color: #CCC; }
+
 #test-page {
   position: relative; }
   #test-page #specs-container {
@@ -3346,69 +3515,3 @@ ul {
       width: 900px;
       height: 700px;
       border: 1px solid #D5D5D5; }
-
-#panel-wrapper {
-  position: absolute;
-  bottom: 0;
-  top: 0;
-  right: 0;
-  margin: 0;
-  padding: 0; }
-  #panel-wrapper > li {
-    list-style-type: none;
-    border-left: 1px solid #191919;
-    border-right: 1px solid #191919;
-    width: 300px;
-    background-color: #3C3E43; }
-    #panel-wrapper > li:empty {
-      padding: 0;
-      display: none; }
-    #panel-wrapper > li:hover .panel-close,
-    #panel-wrapper > li:hover .panel-controls {
-      display: inline-block; }
-    #panel-wrapper > li header {
-      background-color: #1F2126;
-      text-align: center;
-      color: #888;
-      padding: 3px 5px;
-      border-top: 1px solid #000;
-      box-shadow: 0 1px 0 #444 inset;
-      position: relative; }
-      #panel-wrapper > li header i.fa-circle {
-        font-size: 11px;
-        position: relative;
-        top: -1px;
-        margin-right: 2px; }
-      #panel-wrapper > li header .panel-close,
-      #panel-wrapper > li header .panel-controls {
-        float: left;
-        display: none;
-        color: #999;
-        position: absolute;
-        cursor: pointer; }
-        #panel-wrapper > li header .panel-close i:hover,
-        #panel-wrapper > li header .panel-controls i:hover {
-          color: #DDD; }
-      #panel-wrapper > li header .panel-close {
-        left: 5px; }
-      #panel-wrapper > li header .panel-controls {
-        right: 5px; }
-    #panel-wrapper > li .panel-content {
-      height: 250px; }
-      #panel-wrapper > li .panel-content ul {
-        padding: 0; }
-        #panel-wrapper > li .panel-content ul li {
-          width: 100%;
-          list-style-type: none;
-          color: #ddd;
-          padding: 2px 5px;
-          border-bottom: 1px solid #222;
-          border-top: 1px solid #515151;
-          background-color: #43454b; }
-          #panel-wrapper > li .panel-content ul li:hover {
-            cursor: pointer;
-            background-color: #484a50; }
-          #panel-wrapper > li .panel-content ul li:first-child {
-            border-top: 0; }
-          #panel-wrapper > li .panel-content ul li:last-child {
-            box-shadow: 0 1px 2px #373737; }
