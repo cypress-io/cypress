@@ -140,6 +140,10 @@
       #   console.warn "suite end", suite
 
       @runner.on "fail", (test, err) =>
+        ## need to check here if type is hook -- because if its a hook
+        ## like beforeEach then test end will never fire
+        ## and we need to handle this in the UI somehow...
+        ## look at Mocha HTML?
         console.warn("runner has failed", test, err)
         ## set the AssertionError on the test
         test.err = err
@@ -190,6 +194,9 @@
       @triggerLoadIframe @iframe
 
     triggerLoadIframe: (iframe, opts = {}) ->
+      ## clear out the doms and xhrs
+      _([@doms]).invoke "reset"
+
       ## set any outstanding test to pending and stopped
       ## so we bypass all old ones
       @runner.suite.eachTest (test) ->

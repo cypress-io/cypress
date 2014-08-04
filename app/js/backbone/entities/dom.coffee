@@ -24,6 +24,9 @@
     #   a.join(" ")
 
     add: (attrs = {}, runnable) ->
+      ## bail if our attrs are empty
+      return if _.isEmpty(attrs)
+
       {el, dom} = attrs
 
       # console.warn "add", @, attrs, @el, @dom
