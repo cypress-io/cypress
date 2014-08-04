@@ -197,14 +197,19 @@
             }
           }
 
-          .details-container {
+          .details-wrapper {
+            position: relative;
+            background-color: darken(#43454B, 7%);
             float: left;
             width: 100%;
             border-top: 1px solid #494949;
             // box-shadow: 2px 2px 10px #333 inset;
             box-shadow: 0 3px 1px #393939 inset;
-            background-color: darken(#43454B, 4%);
             padding-top: 5px;
+            background-color: darken(#43454B, 4%);
+          }
+
+          .details-container {
             position: relative;
 
             i.fa-times {
@@ -221,8 +226,11 @@
             }
 
             .actions-container {
-              padding: 2px 10px;
-              margin-bottom: -12px;
+              padding: 3px 5px 0;
+              position: absolute;
+              background-color: darken(#43454B, 7%);
+              top: -3px;
+              bottom: 0;
 
               .icon-wrapper {
                 width: 20px;
@@ -230,9 +238,10 @@
                 background-color: #333;
                 border: 1px solid #555;
                 border-radius: 3px;
-                display: inline-block;
+                display: block;
                 text-align: center;
                 box-shadow: 1px 1px 2px #333;
+                margin-bottom: 3px;
 
                 &:hover {
                   cursor: pointer;
@@ -250,7 +259,8 @@
             }
 
             dl {
-              margin-bottom: 7px;
+              padding-bottom: 7px;
+              margin-bottom: 0;
 
               dt {
                 width: 30%;

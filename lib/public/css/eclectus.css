@@ -3354,13 +3354,16 @@ ul {
             #panel-wrapper > li .panel-content ul li .content-msg .content-selector {
               font-size: 12px;
               color: #80b0ff; }
-          #panel-wrapper > li .panel-content ul li .details-container {
+          #panel-wrapper > li .panel-content ul li .details-wrapper {
+            position: relative;
+            background-color: #323438;
             float: left;
             width: 100%;
             border-top: 1px solid #494949;
             box-shadow: 0 3px 1px #393939 inset;
-            background-color: #393b40;
             padding-top: 5px;
+            background-color: #393b40; }
+          #panel-wrapper > li .panel-content ul li .details-container {
             position: relative; }
             #panel-wrapper > li .panel-content ul li .details-container i.fa-times, #panel-wrapper > li .panel-content ul #test-page #specs-container li.failed > .suite-state .details-container i, #test-page #specs-container #panel-wrapper > li .panel-content ul li.failed > .suite-state .details-container i, #panel-wrapper > li .panel-content ul #test-page #specs-container li.failed > .test-state .details-container i, #test-page #specs-container #panel-wrapper > li .panel-content ul li.failed > .test-state .details-container i {
               position: absolute;
@@ -3372,17 +3375,21 @@ ul {
                 color: #EEE;
                 cursor: pointer; }
             #panel-wrapper > li .panel-content ul li .details-container .actions-container {
-              padding: 2px 10px;
-              margin-bottom: -12px; }
+              padding: 3px 5px 0;
+              position: absolute;
+              background-color: #323438;
+              top: -3px;
+              bottom: 0; }
               #panel-wrapper > li .panel-content ul li .details-container .actions-container .icon-wrapper {
                 width: 20px;
                 height: 22px;
                 background-color: #333;
                 border: 1px solid #555;
                 border-radius: 3px;
-                display: inline-block;
+                display: block;
                 text-align: center;
-                box-shadow: 1px 1px 2px #333; }
+                box-shadow: 1px 1px 2px #333;
+                margin-bottom: 3px; }
                 #panel-wrapper > li .panel-content ul li .details-container .actions-container .icon-wrapper:hover {
                   cursor: pointer;
                   background-color: #3b3b3b; }
@@ -3391,7 +3398,8 @@ ul {
               #panel-wrapper > li .panel-content ul li .details-container .actions-container i.fa-play {
                 font-size: 11px; }
             #panel-wrapper > li .panel-content ul li .details-container dl {
-              margin-bottom: 7px; }
+              padding-bottom: 7px;
+              margin-bottom: 0; }
               #panel-wrapper > li .panel-content ul li .details-container dl dt {
                 width: 30%;
                 text-transform: uppercase;
