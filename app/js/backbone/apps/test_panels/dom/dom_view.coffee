@@ -31,7 +31,7 @@
 
     onRender: ->
       klass = if @model.isChosen() then "down" else "right"
-      @ui.icon.removeClass().addClass("fa fa-chevron-#{klass}")
+      @ui.icon.removeClass().addClass("fa fa-caret-#{klass}")
 
     selectorClicked: (e) ->
       e.stopPropagation()
