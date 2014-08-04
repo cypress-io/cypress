@@ -8,8 +8,11 @@
       view = @getView()
 
       ## when the runner triggers load:iframe we load the iframe
-      @listenTo runner, "load:iframe", (iframe) =>
+      @listenTo runner, "load:iframe", (iframe) ->
         @loadIframe view, runner, iframe
+
+      @listenTo runner, "revert:dom", (dom, options) ->
+        view.revertToDom dom, options
 
       @show view
 

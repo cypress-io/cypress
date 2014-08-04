@@ -9,12 +9,16 @@
       @layout = @getLayoutView(panel)
 
       @listenTo @layout, "show", ->
-        @domContentRegion doms
+        @domContentRegion doms, runner
 
       @show @layout
 
-    domContentRegion: (doms) ->
+    domContentRegion: (doms, runner) ->
       domView = @getDomsView doms
+
+      @listenTo domView, "childview:revert:clicked", (iv, args) ->
+        runner.revertDom(args.model)
+
       @show domView, region: @layout.domContentRegion
 
     getDomsView: (doms) ->

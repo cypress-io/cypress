@@ -106,8 +106,8 @@
               color: lighten(#E94B3B, 10%) !important;
             }
 
-            .content-node {
-              color: darken(#E94B3B, 0%) !important;
+            .content-selector {
+              color: #E94B3B !important;
             }
 
             border-right: 2px solid #E94B3B;
@@ -178,7 +178,7 @@
             }
 
             .content-selector-container:hover {
-              .content-node {
+              .content-selector {
                 text-decoration: underline;
               }
             }
@@ -191,7 +191,7 @@
               // border-bottom: 1px dotted #AAA;
             }
 
-            .content-node {
+            .content-selector {
               font-size: 12px;
               color: lighten(#3380FF, 15%);
             }

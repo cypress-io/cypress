@@ -12,6 +12,39 @@
       "click @ui.expand"    : "expandClicked"
       "click @ui.compress"  : "compressClicked"
 
+    revertToDom: (dom, options) ->
+      ## replaces the iframes body with the dom object
+      dom.replaceAll @$el.find("iframe").contents().find("body")
+
+      return if not options.highlight
+      @highlight dom, options.el
+
+    getZIndex: (el) ->
+      if /^(auto|0)$/.test el.css("zIndex") then 1000 else Number el.css("zIndex")
+
+    highlight: (dom, el) ->
+      el = dom.find(el.selector)
+      dimensions = @getDimensions(el)
+      console.warn el, dimensions
+
+      $("<div>")
+        .appendTo(dom)
+          .css
+            width: dimensions.width - 6,
+            height: dimensions.height - 6,
+            top: dimensions.offset.top,
+            left: dimensions.offset.left,
+            position: "absolute",
+            zIndex: @getZIndex(el)
+            border: "3px solid #E94B3B"
+
+    getDimensions: (el) ->
+      {
+        offset: el.offset()
+        width: el.outerWidth(false)
+        height: el.outerHeight(false)
+      }
+
     onShow: ->
       # @ui.header.hide()
       @ui.compress.hide()

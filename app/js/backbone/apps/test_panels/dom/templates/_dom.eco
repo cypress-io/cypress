@@ -10,7 +10,7 @@
   <span class="content-msg">
     <span class="content-selector-container">
       <span class="content-method"><%= @method %></span>
-      <span class="content-node"><%= "#{@node}" %></span>
+      <span class="content-selector"><%= "#{@selector}" %></span>
     </span>
   </span>
 </div>
@@ -18,10 +18,10 @@
   <div class="details-container">
     <i class="fa fa-times"></i>
     <div class="actions-container">
-      <span class="icon-wrapper">
+      <span class="icon-wrapper" data-js="revert">
         <i class="fa fa-search"></i>
       </span>
-      <span class="icon-wrapper">
+      <span class="icon-wrapper" data-js="play">
         <i class="fa fa-play"></i>
       </span>
     </div>
@@ -37,7 +37,7 @@
       <dt>method</dt>
       <dd><%= @method %></dd>
       <dt>element</dt>
-      <dd><%= @node %></dd>
+      <dd><%= "<#{@selector}>" %></dd>
       <% if @error: %>
         <dt>error</dt>
         <dd><%= @error %></dd>

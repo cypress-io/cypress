@@ -37,6 +37,12 @@
     logResults: (test) ->
       @trigger "test:results:ready", test
 
+    revertDom: (dom) ->
+      console.warn dom
+      @trigger "revert:dom", dom.getDom(),
+        highlight: dom.get("highlight")
+        el: dom.getEl()
+
     setTestRunner: (runner) ->
       ## store the test runner as a property on ourselves
       @runner = runner

@@ -4,6 +4,12 @@
     initialize: ->
       new Backbone.Chooser(@)
 
+    getDom: ->
+      @dom
+
+    getEl: ->
+      @el
+
   class Entities.DomsCollection extends Entities.Collection
     model: Entities.Dom
 
@@ -22,17 +28,20 @@
 
       # console.warn "add", @, attrs, @el, @dom
 
-      attrs = _(attrs).pick("method", "node")
+      attrs = _(attrs).pick("method", "selector")
 
       _.extend attrs,
-        node: attrs.node.toLowerCase()
-        title: runnable.originalTitle()
-        parent: runnable.parent?.originalTitle()
-        testId: runnable.cid
+        selector: attrs.selector.toLowerCase()
+        title:    runnable.originalTitle()
+        parent:   runnable.parent?.originalTitle()
+        testId:   runnable.cid
 
-      # attrs.msg = @getMsg(el, attrs.node)
+      # attrs.msg = @getMsg(el, attrs.selector)
 
-      attrs.error = "could not find: #{attrs.node}" if not el.length
+      attrs.error = "could not find: #{attrs.selector}" if not el.length
+
+      ## highlight if we dont have errors
+      attrs.highlight = !attrs.error
 
       ## create the model
       model = super attrs
