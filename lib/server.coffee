@@ -56,6 +56,7 @@ getUtilities = ->
 
   ## push sinon into utilities if enabled
   utils.push "sinon" if app.get("eclectus").sinon
+  # utils.push "chai-jquery" if app.get("eclectus")["chai-jquery"]
 
   ## i believe fixtures can be moved to the parent since
   ## its not actually mutated within the specs
