@@ -11,11 +11,17 @@
       icon:     ".content-icon i"
       selector: ".content-selector-container"
       close:    ".fa-times"
+      revert:   "[data-js='revert']"
+      play:     "[data-js='play']"
 
     events:
       "click @ui.meta"     : "metaClicked"
       "click @ui.selector" : "selectorClicked"
       "click @ui.close"    : "closeClicked"
+
+    triggers:
+      "click @ui.revert"   : "revert:clicked"
+      "click @ui.play"     : "play:clicked"
 
     modelEvents:
       "change:chosen" : "render"
