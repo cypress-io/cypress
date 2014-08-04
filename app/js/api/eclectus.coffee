@@ -3,17 +3,8 @@ window.Eclectus = do ($, _) ->
 
   methods =
     find: (obj, el) ->
-      dom = new Eclectus.Dom obj.contentWindow.document
-
-      ## clone the body but strip out any script tags
-      body = dom.$("body").clone(true, true)
-      body.find("script").remove()
-
-      obj.channel.trigger "dom", obj.runnable,
-        selector: el
-        el:       dom.$(el)
-        dom:      body
-        method:   "find"
+      dom = new Eclectus.Dom obj.contentWindow.document, obj.channel, obj.runnable
+      dom.find(el)
 
   class Eclectus
     constructor: (@logs = [], @xhrs = []) ->
