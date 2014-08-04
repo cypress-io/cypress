@@ -102,6 +102,10 @@
           }
 
           &.error {
+            .meta-container {
+              padding-right: 5px;
+            }
+
             .content-method {
               color: lighten(#E94B3B, 10%) !important;
             }
@@ -111,18 +115,24 @@
             }
 
             border-right: 2px solid #E94B3B;
-            padding-right: 0px;
           }
 
           .meta-container {
             float: left;
             width: 100%;
-            padding: 2px 5px;
+            padding: 2px 7px 2px 5px;
 
             &:hover {
               background-color: lighten(#3C3E43, 5%);
               cursor: pointer;
             }
+          }
+
+          span {
+            display: block;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
           }
 
           .content-icon {
@@ -143,39 +153,32 @@
 
           .content-identifer {
             float: left;
-            width: 65%;
-
-            span {
-              float: left;
-              text-overflow: ellipsis;
-              white-space: nowrap;
-              overflow: hidden;
-            }
+            width: 60%;
 
             .content-parent {
-              width: 31%;
+              // width: 31%;
               color: #BBB;
             }
 
-            .content-divider {
-              width: 9%;
-              text-align: center;
-              color: #888;
-            }
+            // .content-divider {
+            //   width: 9%;
+            //   text-align: center;
+            //   color: #888;
+            // }
 
             .content-title {
-              width: 60%;
+              // width: 60%;
             }
           }
 
           .content-msg {
             float: right;
-            width: 30%;
+            width: 35%;
             text-align: right;
 
-            span {
-              display: inline-block;
-            }
+            // span {
+            //   display: inline-block;
+            // }
 
             .content-selector-container:hover {
               .content-selector {
@@ -187,11 +190,13 @@
               font-variant: small-caps;
               font-size: 13px;
               color: #E0C85E;
-              margin-right: 2px;
+              // margin-right: 2px;
+              // width: 25%;
               // border-bottom: 1px dotted #AAA;
             }
 
             .content-selector {
+              // width: 75%;
               font-size: 12px;
               color: lighten(#3380FF, 15%);
             }

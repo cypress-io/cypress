@@ -4,7 +4,6 @@
   </div>
   <div class="content-identifer">
     <span class="content-parent"><%= @parent %></span>
-    <span class="content-divider">/</span>
     <span class="content-title"><%= @title %></span>
   </div>
   <span class="content-msg">
@@ -37,8 +36,8 @@
         <dd><%= @title %></dd>
         <dt>method</dt>
         <dd><%= @method %></dd>
-        <dt>element</dt>
-        <dd><%= "<#{@selector}>" %></dd>
+        <dt>selector</dt>
+        <dd><%= @selector %></dd>
         <% if @error: %>
           <dt>error</dt>
           <dd><%= @error %></dd>
