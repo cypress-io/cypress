@@ -3449,7 +3449,8 @@ ul {
         position: relative;
         overflow: auto; }
         #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-icon {
-          position: absolute; }
+          position: absolute;
+          color: #AAA; }
         #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content {
           padding-left: 12px;
           overflow: auto; }
@@ -3459,8 +3460,6 @@ ul {
             text-overflow: ellipsis;
             white-space: nowrap;
             overflow: hidden; }
-            #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content .runnable-state i {
-              margin-right: 2px; }
             #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content .runnable-state .suite-title {
               color: #ab9f9b;
               text-transform: uppercase; }
@@ -3477,9 +3476,19 @@ ul {
         clear: both; }
         #test-specs ul.runnables li.runnable pre:empty {
           display: none; }
-      #test-specs ul.runnables li.runnable .suite-state i {
-        font-size: 13px;
-        padding-left: 2px; }
+      #test-specs ul.runnables li.runnable .suite-state {
+        width: 13px;
+        display: inline-block;
+        margin-right: 3px;
+        margin-left: 1px; }
+        #test-specs ul.runnables li.runnable .suite-state i {
+          font-size: 13px;
+          padding-left: 2px; }
+      #test-specs ul.runnables li.runnable .test-state {
+        width: 12px;
+        display: inline-block;
+        text-align: left;
+        margin-right: 3px; }
       #test-specs ul.runnables li.runnable.processing > .runnable-wrapper .suite-state i,
       #test-specs ul.runnables li.runnable.processing > .runnable-wrapper .test-state i {
         color: #888; }
