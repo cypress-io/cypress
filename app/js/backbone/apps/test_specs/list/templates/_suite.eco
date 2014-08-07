@@ -6,8 +6,8 @@
     <div class="runnable-state">
       <span class="suite-state">
         <i class="fa fa-folder-o"></i>
-        <span class="suite-title"><%= @title %></span>
       </span>
+      <span class="suite-title"><%= @title %></span>
     </div>
     <div class="runnable-controls"></div>
   </div>

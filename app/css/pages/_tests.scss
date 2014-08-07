@@ -55,6 +55,8 @@
 
         .runnable-icon {
           position: absolute;
+          // display: none;
+          color: #AAA;
         }
 
         .runnable-content {
@@ -67,10 +69,6 @@
             text-overflow: ellipsis;
             white-space: nowrap;
             overflow: hidden;
-
-            & i {
-              margin-right: 2px;
-            }
 
             .suite-title {
               color: lighten(#8D7D77, 13%);
@@ -115,9 +113,25 @@
         // font-weight: 100;
       }
 
-      .suite-state i {
-        font-size: 13px;
-        padding-left: 2px;
+      .suite-state {
+        width: 13px;
+        display: inline-block;
+        margin-right: 3px;
+        margin-left: 1px;
+
+        i {
+          font-size: 13px;
+          padding-left: 2px;
+        }
+      }
+
+      .test-state {
+        width: 12px;
+        display: inline-block;
+        text-align: left;
+        margin-right: 3px;
+
+        // i { display: none;}
       }
 
       // .test-state i {
