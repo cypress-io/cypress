@@ -1,11 +1,16 @@
-<div id="header-container">
-  <div id="stats-region"></div>
-</div>
-<div class="ecl-main-content">
-  <div id="test-page">
+<div id="test-specs">
+  <div id="header-container">
+    <div id="stats-region"></div>
+  </div>
+  <div id="specs-container">
     <div id="specs-region"></div>
   </div>
 </div>
+<!-- <div class="ecl-main-content">
+  <div id="test-page">
+    <div id="specs-region"></div>
+  </div>
+</div> -->
 <div id="iframe-wrapper">
   <div id="iframe-container">
     <div id="iframe-region"></div>

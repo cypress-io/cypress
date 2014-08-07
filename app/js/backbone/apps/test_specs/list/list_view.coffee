@@ -10,11 +10,12 @@
 
     ## set the className to be either test or suite
     attributes: ->
-      class: @model.get("type")
+      class: @model.get("type") + " runnable"
 
     ui:
       pre: "pre"
       label: "label"
+      wrapper: ".runnable-wrapper"
 
     events:
       "mouseover"     : "mouseover"
@@ -57,8 +58,17 @@
     onBeforeRender: ->
       @$el.addClass @model.get("state")
 
+    onRender: ->
+      @applyIndent()
+
+    applyIndent: (state) ->
+      indent = @model.get("indent")
+      indent -= 1 if state is "failed"
+      @ui.wrapper.css "padding-left", indent
+
     stateChanged: (model, value, options) ->
       @$el.removeClass("processing pending failed passed").addClass(value)
+      @applyIndent(value)
 
       if @model.get("type") is "test"
         ## if the test passed check on the duration
@@ -89,7 +99,8 @@
 
   class List.Root extends App.Views.CollectionView
     tagName: "ul"
-    id: "specs-container"
+    id: "specs-list"
+    className: "runnables"
     childView: List.Runnable
 
     initialize: ->

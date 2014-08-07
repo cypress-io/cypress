@@ -6,12 +6,14 @@
     defaults: ->
       children: new Entities.RunnableCollection
       state: "processing"
+      indent: 0
 
     initialize: ->
       new Backbone.Chooser(@)
 
     addRunnable: (runnable, type) ->
-      @get("children").addRunnable(runnable, type)
+      indent = @get("indent")
+      @get("children").addRunnable(runnable, type, indent)
 
     ## did our test take a long time to run?
     isSlow: ->
@@ -101,15 +103,22 @@
   class Entities.RunnableCollection extends Entities.Collection
     model: Entities.Runnable
 
-    addRunnable: (runnable, type) ->
+    addRunnable: (runnable, type, indent) ->
       attrs =
         title: runnable.originalTitle()
         id: runnable.cid
         type: type
+        indent: indent + 15
 
       ## merge attributes so existing models
       ## are updated
       runnable.model = @add attrs, merge: true
 
+  API =
+    newRoot: ->
+      root = new Entities.Runnable
+      root.set root: true
+      root
+
   App.reqres.setHandler "new:root:runnable:entity", ->
-    new Entities.Runnable
+    API.newRoot()

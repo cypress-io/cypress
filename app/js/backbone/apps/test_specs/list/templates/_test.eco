@@ -1,8 +1,18 @@
-<span class="test-state">
-  <i class="fa"></i>
-</span>
-<span class="test-title">
-  <%= @title %>
-  <label class="label"></span>
-</span>
-<pre class="test-error"></pre>
+<div class="runnable-wrapper">
+  <div class="runnable-icon">
+    <i class="fa fa-caret-right"></i>
+  </div>
+  <div class="runnable-content">
+    <div class="runnable-state">
+      <span class="test-state">
+        <i class="fa"></i>
+      </span>
+      <span class="test-title">
+        <%= @title %>
+        <label class="label"></label>
+      </span>
+    </div>
+    <div class="runnable-controls"></div>
+    <pre class="test-error"></pre>
+  </div>
+</div>
