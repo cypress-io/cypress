@@ -1556,7 +1556,8 @@ a.label:hover, a.label:focus {
 .fa.pull-right {
   margin-left: .3em; }
 
-.fa-spin, #test-page #specs-container li.processing > .suite-state i, #test-page #specs-container li.processing > .test-state i {
+.fa-spin, #test-specs ul.runnables li.runnable.processing > .runnable-wrapper .suite-state i,
+#test-specs ul.runnables li.runnable.processing > .runnable-wrapper .test-state i, #test-page #specs-container li.processing > .suite-state i, #test-page #specs-container li.processing > .test-state i {
   -webkit-animation: spin 2s infinite linear;
   -moz-animation: spin 2s infinite linear;
   -o-animation: spin 2s infinite linear;
@@ -1693,10 +1694,10 @@ a.label:hover, a.label:focus {
 .fa-th-list:before {
   content: "\f00b"; }
 
-.fa-check:before, #test-page #specs-container li.passed > .suite-state i:before, #test-page #specs-container li.passed > .test-state i:before {
+.fa-check:before, #test-specs ul.runnables li.runnable.passed > .runnable-wrapper .test-state i:before, #test-page #specs-container li.passed > .suite-state i:before, #test-page #specs-container li.passed > .test-state i:before {
   content: "\f00c"; }
 
-.fa-times:before, #test-page #specs-container li.failed > .suite-state i:before, #test-page #specs-container li.failed > .test-state i:before {
+.fa-times:before, #test-specs ul.runnables li.runnable.failed > .runnable-wrapper .test-state i:before, #test-page #specs-container li.failed > .suite-state i:before, #test-page #specs-container li.failed > .test-state i:before {
   content: "\f00d"; }
 
 .fa-search-plus:before {
@@ -1749,7 +1750,8 @@ a.label:hover, a.label:focus {
 .fa-repeat:before {
   content: "\f01e"; }
 
-.fa-refresh:before, #test-page #specs-container li.processing > .suite-state i:before, #test-page #specs-container li.processing > .test-state i:before {
+.fa-refresh:before, #test-specs ul.runnables li.runnable.processing > .runnable-wrapper .suite-state i:before,
+#test-specs ul.runnables li.runnable.processing > .runnable-wrapper .test-state i:before, #test-page #specs-container li.processing > .suite-state i:before, #test-page #specs-container li.processing > .test-state i:before {
   content: "\f021"; }
 
 .fa-list-alt:before {
@@ -2976,7 +2978,7 @@ a.label:hover, a.label:focus {
 .fa-life-ring:before {
   content: "\f1cd"; }
 
-.fa-circle-o-notch:before, #test-page #specs-container li.pending > .suite-state i:before, #test-page #specs-container li.pending > .test-state i:before {
+.fa-circle-o-notch:before, #test-specs ul.runnables li.runnable.pending > .runnable-wrapper .test-state i:before, #test-page #specs-container li.pending > .suite-state i:before, #test-page #specs-container li.pending > .test-state i:before {
   content: "\f1ce"; }
 
 .fa-ra:before,
@@ -3093,7 +3095,8 @@ ul {
     vertical-align: top; }
 
 #header-container {
-  background-color: #E1E1E1;
+  background-color: #1C1D22;
+  box-shadow: 0 1px 0 #444444 inset;
   padding-left: 20px;
   overflow: auto;
   height: 50px; }
@@ -3127,7 +3130,6 @@ ul {
         font-size: 12px;
         color: #777; }
     #header-container #stats-container #tests-duration {
-      background-color: #d5d5d5;
       padding-left: 10px;
       padding-right: 10px; }
   #header-container #chosen-runnable {
@@ -3357,13 +3359,13 @@ ul {
             background-color: #393b40; }
           #panel-wrapper > li .panel-content ul li .details-container {
             position: relative; }
-            #panel-wrapper > li .panel-content ul li .details-container i.fa-times, #panel-wrapper > li .panel-content ul #test-page #specs-container li.failed > .suite-state .details-container i, #test-page #specs-container #panel-wrapper > li .panel-content ul li.failed > .suite-state .details-container i, #panel-wrapper > li .panel-content ul #test-page #specs-container li.failed > .test-state .details-container i, #test-page #specs-container #panel-wrapper > li .panel-content ul li.failed > .test-state .details-container i {
+            #panel-wrapper > li .panel-content ul li .details-container i.fa-times, #panel-wrapper > li .panel-content #test-specs ul.runnables li.runnable.failed > .runnable-wrapper .details-container .test-state i, #test-specs #panel-wrapper > li .panel-content ul.runnables li.runnable.failed > .runnable-wrapper .details-container .test-state i, #panel-wrapper > li .panel-content #test-specs ul.runnables li.runnable.failed > .runnable-wrapper .test-state .details-container i, #test-specs #panel-wrapper > li .panel-content ul.runnables li.runnable.failed > .runnable-wrapper .test-state .details-container i, #panel-wrapper > li .panel-content ul #test-page #specs-container li.failed > .suite-state .details-container i, #test-page #specs-container #panel-wrapper > li .panel-content ul li.failed > .suite-state .details-container i, #panel-wrapper > li .panel-content ul #test-page #specs-container li.failed > .test-state .details-container i, #test-page #specs-container #panel-wrapper > li .panel-content ul li.failed > .test-state .details-container i {
               position: absolute;
               top: 0;
               right: 0;
               padding: 5px 10px 10px;
               color: #999; }
-              #panel-wrapper > li .panel-content ul li .details-container i.fa-times:hover, #panel-wrapper > li .panel-content ul #test-page #specs-container li.failed > .suite-state .details-container i:hover, #test-page #specs-container #panel-wrapper > li .panel-content ul li.failed > .suite-state .details-container i:hover, #panel-wrapper > li .panel-content ul #test-page #specs-container li.failed > .test-state .details-container i:hover, #test-page #specs-container #panel-wrapper > li .panel-content ul li.failed > .test-state .details-container i:hover {
+              #panel-wrapper > li .panel-content ul li .details-container i.fa-times:hover, #panel-wrapper > li .panel-content #test-specs ul.runnables li.runnable.failed > .runnable-wrapper .details-container .test-state i:hover, #test-specs #panel-wrapper > li .panel-content ul.runnables li.runnable.failed > .runnable-wrapper .details-container .test-state i:hover, #panel-wrapper > li .panel-content #test-specs ul.runnables li.runnable.failed > .runnable-wrapper .test-state .details-container i:hover, #test-specs #panel-wrapper > li .panel-content ul.runnables li.runnable.failed > .runnable-wrapper .test-state .details-container i:hover, #panel-wrapper > li .panel-content ul #test-page #specs-container li.failed > .suite-state .details-container i:hover, #test-page #specs-container #panel-wrapper > li .panel-content ul li.failed > .suite-state .details-container i:hover, #panel-wrapper > li .panel-content ul #test-page #specs-container li.failed > .test-state .details-container i:hover, #test-page #specs-container #panel-wrapper > li .panel-content ul li.failed > .test-state .details-container i:hover {
                 color: #EEE;
                 cursor: pointer; }
             #panel-wrapper > li .panel-content ul li .details-container .actions-container {
@@ -3402,6 +3404,105 @@ ul {
                 margin-left: 34%;
                 width: 66%;
                 color: #CCC; }
+
+#test-specs {
+  background-color: #222;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  top: 0;
+  width: 33%;
+  border: 1px solid #191919;
+  border-top: 0;
+  border-bottom: 0;
+  padding-left: 5px;
+  overflow: hidden; }
+  #test-specs #specs-container {
+    background-color: #3C3E43;
+    padding-left: 0;
+    position: absolute;
+    height: 100%;
+    border-left: 1px solid #191919; }
+    #test-specs #specs-container #specs-list {
+      box-shadow: 0 1px 2px #373737;
+      border-bottom: 1px solid #222;
+      margin-bottom: 0; }
+    #test-specs #specs-container li {
+      list-style-type: none; }
+      #test-specs #specs-container li:last-child {
+        border-bottom: 0; }
+  #test-specs ul.runnables {
+    padding-left: 0;
+    border-top: 1px solid #222; }
+    #test-specs ul.runnables li.runnable {
+      width: 100%;
+      color: #ddd;
+      border-bottom: 1px solid #222;
+      border-top: 1px solid #515151;
+      background-color: #43454b;
+      overflow: auto;
+      line-height: 18px;
+      padding-left: 0;
+      text-shadow: 0 1px 1px #000; }
+      #test-specs ul.runnables li.runnable .runnable-wrapper {
+        padding: 5px;
+        position: relative;
+        overflow: auto; }
+        #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-icon {
+          position: absolute; }
+        #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content {
+          padding-left: 12px;
+          overflow: auto; }
+          #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content .runnable-state {
+            width: 80%;
+            float: left;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden; }
+            #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content .runnable-state i {
+              margin-right: 2px; }
+            #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content .runnable-state .suite-title {
+              color: #ab9f9b;
+              text-transform: uppercase; }
+          #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content .runnable-controls {
+            width: 50px;
+            float: right; }
+      #test-specs ul.runnables li.runnable.hover {
+        background-color: #484a50;
+        cursor: pointer; }
+      #test-specs ul.runnables li.runnable pre {
+        margin-bottom: 0;
+        padding-bottom: 2px;
+        white-space: pre-wrap;
+        clear: both; }
+        #test-specs ul.runnables li.runnable pre:empty {
+          display: none; }
+      #test-specs ul.runnables li.runnable .suite-state i {
+        font-size: 13px;
+        padding-left: 2px; }
+      #test-specs ul.runnables li.runnable.processing > .runnable-wrapper .suite-state i,
+      #test-specs ul.runnables li.runnable.processing > .runnable-wrapper .test-state i {
+        color: #888; }
+      #test-specs ul.runnables li.runnable.test.failed > .runnable-wrapper {
+        border-left: 1px solid #E94B3B; }
+      #test-specs ul.runnables li.runnable.failed > .runnable-wrapper pre {
+        color: #eb5c4d; }
+      #test-specs ul.runnables li.runnable.failed > .runnable-wrapper .suite-state i {
+        color: #E94B3B; }
+      #test-specs ul.runnables li.runnable.failed > .runnable-wrapper .test-state i {
+        color: #E94B3B; }
+      #test-specs ul.runnables li.runnable.failed > .runnable-wrapper label {
+        text-transform: uppercase; }
+      #test-specs ul.runnables li.runnable.passed > .runnable-wrapper .suite-state i {
+        color: #23AE89; }
+      #test-specs ul.runnables li.runnable.passed > .runnable-wrapper .test-state i {
+        color: #23AE89; }
+      #test-specs ul.runnables li.runnable.pending > .runnable-wrapper .suite-state {
+        color: #92bce0; }
+      #test-specs ul.runnables li.runnable.pending > .runnable-wrapper .test-title {
+        color: #a6c8e6; }
+      #test-specs ul.runnables li.runnable.pending > .runnable-wrapper .test-state i {
+        color: #92bce0; }
 
 #test-page {
   position: relative; }

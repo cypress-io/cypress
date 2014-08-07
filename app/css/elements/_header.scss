@@ -1,5 +1,6 @@
 #header-container {
-  background-color: #E1E1E1;
+  background-color: #1C1D22;
+  box-shadow: 0 1px 0 #444444 inset;
   padding-left: 20px;
   overflow: auto;
   height: 50px;
@@ -55,7 +56,7 @@
     }
 
     #tests-duration {
-      background-color: #d5d5d5;
+      // background-color: #d5d5d5;
       padding-left: 10px;
       padding-right: 10px;
     }

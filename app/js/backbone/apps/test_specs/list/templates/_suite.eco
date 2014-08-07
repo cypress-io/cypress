@@ -1,5 +1,15 @@
-<span class="suite-state">
-  <i class="fa"></i>
-  <%= @title %>
-</span>
+<div class="runnable-wrapper">
+  <div class="runnable-icon">
+    <i class="fa fa-caret-down"></i>
+  </div>
+  <div class="runnable-content">
+    <div class="runnable-state">
+      <span class="suite-state">
+        <i class="fa fa-folder-o"></i>
+        <span class="suite-title"><%= @title %></span>
+      </span>
+    </div>
+    <div class="runnable-controls"></div>
+  </div>
+</div>
 <ul class="runnables"></ul>
