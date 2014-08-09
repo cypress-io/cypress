@@ -1,6 +1,6 @@
 <div class="runnable-state">
   <span class="suite-state">
-    <i class="fa fa-folder-o"></i>
+    <i class="fa fa-caret-down"></i>
   </span>
   <span class="suite-title"><%= @title %></span>
 </div>

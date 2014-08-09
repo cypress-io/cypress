@@ -84,7 +84,6 @@
           runnables.pop()
 
     addRunnable: (root, runnables, runnable, type) ->
-      console.log "addRunnable", arguments
       ## we need to bail here because this is most likely due
       ## to the user changing their tests and the old test
       ## are still running...

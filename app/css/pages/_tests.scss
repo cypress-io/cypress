@@ -16,6 +16,7 @@
     padding-left: 0;
     position: absolute;
     height: 100%;
+    width: 100%;
     border-left: 1px solid #191919;
 
     #specs-list {
@@ -89,11 +90,6 @@
         }
       }
 
-      &.hover {
-        background-color: lighten(#3C3E43, 5%);
-        cursor: pointer;
-      }
-
       pre {
         margin-bottom: 0;
         padding-bottom: 2px;
@@ -104,6 +100,11 @@
         &:empty {
           display: none;
         }
+      }
+
+      &.hover {
+        background-color: lighten(#3C3E43, 5%);
+        cursor: pointer;
       }
 
       &.suite {
@@ -131,8 +132,9 @@
         margin-left: 1px;
 
         i {
-          font-size: 13px;
+          font-size: 16px;
           padding-left: 2px;
+          color: #999;
         }
       }
 
@@ -167,9 +169,9 @@
           color: lighten(#E94B3B, 4%);
         }
 
-        .suite-state i {
-          color: #E94B3B;
-        }
+        // .suite-state i {
+        //   color: #E94B3B;
+        // }
 
         .test-state i {
           @extend .#{$fa-css-prefix}-times;
@@ -182,9 +184,9 @@
       }
 
       &.passed > .runnable-wrapper {
-        .suite-state i {
-          color: #23AE89;
-        }
+        // .suite-state i {
+        //   color: #23AE89;
+        // }
 
         .test-state i {
           @extend .#{$fa-css-prefix}-check;
@@ -193,9 +195,9 @@
       }
 
       &.pending > .runnable-wrapper {
-        .suite-state {
-          color: lighten(#428BCA, 20%);
-        }
+        // .suite-state {
+        //   color: lighten(#428BCA, 20%);
+        // }
 
         .test-title {
           color: lighten(#428BCA, 25%);
