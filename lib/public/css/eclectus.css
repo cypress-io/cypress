@@ -190,7 +190,7 @@ th {
   box-sizing: border-box; }
 
 html {
-  font-size: 62.5%;
+  font-size: 10px;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0); }
 
 body {
@@ -227,6 +227,7 @@ img {
 
 .img-responsive {
   display: block;
+  width: 100% \9;
   max-width: 100%;
   height: auto; }
 
@@ -243,6 +244,7 @@ img {
   -o-transition: all 0.2s ease-in-out;
   transition: all 0.2s ease-in-out;
   display: inline-block;
+  width: 100% \9;
   max-width: 100%;
   height: auto; }
 
@@ -295,7 +297,7 @@ h1, h2, h3, h4, h5, h6,
   .h6 .small {
     font-weight: normal;
     line-height: 1;
-    color: #999999; }
+    color: #777777; }
 
 h1, .h1,
 h2, .h2,
@@ -353,7 +355,7 @@ p {
 .lead {
   margin-bottom: 20px;
   font-size: 16px;
-  font-weight: 200;
+  font-weight: 300;
   line-height: 1.4; }
   @media (min-width: 768px) {
     .lead {
@@ -383,8 +385,20 @@ mark,
 .text-justify {
   text-align: justify; }
 
+.text-nowrap {
+  white-space: nowrap; }
+
+.text-lowercase {
+  text-transform: lowercase; }
+
+.text-uppercase {
+  text-transform: uppercase; }
+
+.text-capitalize {
+  text-transform: capitalize; }
+
 .text-muted {
-  color: #999999; }
+  color: #777777; }
 
 .text-primary {
   color: #428bca; }
@@ -509,7 +523,7 @@ dd {
 abbr[title],
 abbr[data-original-title] {
   cursor: help;
-  border-bottom: 1px dotted #999999; }
+  border-bottom: 1px dotted #777777; }
 
 .initialism {
   font-size: 90%;
@@ -530,7 +544,7 @@ blockquote {
     display: block;
     font-size: 80%;
     line-height: 1.42857;
-    color: #999999; }
+    color: #777777; }
     blockquote footer:before,
     blockquote small:before,
     blockquote .small:before {
@@ -1393,7 +1407,7 @@ address {
     text-decoration: underline;
     background-color: transparent; }
   .btn-link[disabled]:hover, .btn-link[disabled]:focus, fieldset[disabled] .btn-link:hover, fieldset[disabled] .btn-link:focus {
-    color: #999999;
+    color: #777777;
     text-decoration: none; }
 
 .btn-lg {
@@ -1416,9 +1430,7 @@ address {
 
 .btn-block {
   display: block;
-  width: 100%;
-  padding-left: 0;
-  padding-right: 0; }
+  width: 100%; }
 
 .btn-block + .btn-block {
   margin-top: 5px; }
@@ -1451,9 +1463,9 @@ a.label:hover, a.label:focus {
   cursor: pointer; }
 
 .label-default {
-  background-color: #999999; }
+  background-color: #777777; }
   .label-default[href]:hover, .label-default[href]:focus {
-    background-color: gray; }
+    background-color: #5e5e5e; }
 
 .label-primary {
   background-color: #428bca; }
@@ -1479,6 +1491,48 @@ a.label:hover, a.label:focus {
   background-color: #d9534f; }
   .label-danger[href]:hover, .label-danger[href]:focus {
     background-color: #c9302c; }
+
+.clearfix:before, .clearfix:after {
+  content: " ";
+  display: table; }
+.clearfix:after {
+  clear: both; }
+
+.center-block {
+  display: block;
+  margin-left: auto;
+  margin-right: auto; }
+
+.pull-right {
+  float: right !important; }
+
+.pull-left {
+  float: left !important; }
+
+.hide {
+  display: none !important; }
+
+.show {
+  display: block !important; }
+
+.invisible {
+  visibility: hidden; }
+
+.text-hide {
+  font: 0/0 a;
+  color: transparent;
+  text-shadow: none;
+  background-color: transparent;
+  border: 0; }
+
+.hidden {
+  display: none !important;
+  visibility: hidden !important; }
+
+.affix {
+  position: fixed;
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0); }
 
 /*!
  *  Font Awesome 4.1.0 by @davegandy - http://fontawesome.io - @fontawesome
@@ -3451,19 +3505,19 @@ ul {
         #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-icon {
           position: absolute;
           color: #AAA; }
-        #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content {
+        #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content-region {
           padding-left: 12px;
           overflow: auto; }
-          #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content .runnable-state {
+          #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content-region .runnable-state {
             width: 80%;
             float: left;
             text-overflow: ellipsis;
             white-space: nowrap;
             overflow: hidden; }
-            #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content .runnable-state .suite-title {
+            #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content-region .runnable-state .suite-title {
               color: #ab9f9b;
               text-transform: uppercase; }
-          #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content .runnable-controls {
+          #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content-region .runnable-controls {
             width: 50px;
             float: right; }
       #test-specs ul.runnables li.runnable.hover {
@@ -3472,10 +3526,13 @@ ul {
       #test-specs ul.runnables li.runnable pre {
         margin-bottom: 0;
         padding-bottom: 2px;
+        margin-left: 18px;
         white-space: pre-wrap;
         clear: both; }
         #test-specs ul.runnables li.runnable pre:empty {
           display: none; }
+      #test-specs ul.runnables li.runnable.test .runnable-icon {
+        display: none; }
       #test-specs ul.runnables li.runnable .suite-state {
         width: 13px;
         display: inline-block;

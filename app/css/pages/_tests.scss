@@ -57,9 +57,12 @@
           position: absolute;
           // display: none;
           color: #AAA;
+          // right: 5px;
+          // text-shadow: 0 0 0;
+          // font-size: 13px;
         }
 
-        .runnable-content {
+        .runnable-content-region {
           padding-left: 12px;
           overflow: auto;
 
@@ -94,6 +97,7 @@
       pre {
         margin-bottom: 0;
         padding-bottom: 2px;
+        margin-left: 18px;
         white-space: pre-wrap;
         clear: both;
 
@@ -103,11 +107,18 @@
       }
 
       &.suite {
+        .runnable-icon {
+          // display: none;
+        }
         // font-family: "Raleway",Helvetica,sans-serif;
         // font-weight: 500;
       }
 
       &.test {
+        .runnable-icon {
+          display: none;
+          // right: 5px;
+        }
         // font-size: 13px;
         // font-family: "Open Sans", sans-serif;
         // font-weight: 100;

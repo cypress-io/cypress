@@ -1,19 +1,31 @@
 @App.module "Entities", (Entities, App, Backbone, Marionette, $, _) ->
 
   class Entities.Runnable extends Entities.Model
-    ## create an empty backbone collection
-    ## as children
     defaults: ->
-      children: new Entities.RunnableCollection
-      state: "processing"
-      indent: 0
+      attrs =
+        state: "processing"
+        indent: -10
+        open: false
+        children:  new Entities.RunnableCollection
+
+      ## tests have commands
+      attrs.commands = new Entities.CommandsCollection if @is("test")
+
+      attrs
 
     initialize: ->
       new Backbone.Chooser(@)
 
+    ## toggles open true|false
+    toggleOpen: ->
+      @set "open", !@get("open")
+
     addRunnable: (runnable, type) ->
       indent = @get("indent")
       @get("children").addRunnable(runnable, type, indent)
+
+    is: (type) ->
+      @get("type") is type
 
     ## did our test take a long time to run?
     isSlow: ->
@@ -23,8 +35,7 @@
       @get("duration") > @_timeout
 
     reset: ->
-      return @resetTest() if @get("type") is "test"
-      @resetSuite()
+      if @is("test") then @resetTest() else @resetSuite()
 
     resetSuite: ->
       @get("children").invoke("reset")
@@ -35,6 +46,9 @@
       ## reset these specific attributes
       _.each ["state", "duration", "error"], (key) =>
         @unset key
+
+      ## remove the models within our commands collection
+      @get("commands").reset()
 
       ## merge in the defaults
       @set _.result(@, "defaults")
@@ -108,7 +122,7 @@
         title: runnable.originalTitle()
         id: runnable.cid
         type: type
-        indent: indent + 15
+        indent: indent + 20
 
       ## merge attributes so existing models
       ## are updated
