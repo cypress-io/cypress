@@ -2,6 +2,7 @@
 
   class List.Runnable extends App.Views.CompositeView
     childViewContainer: "ul"
+    childView: List.RunnableLayout
 
     getTemplate: ->
       switch @model.get("type")
@@ -13,14 +14,18 @@
       class: @model.get("type") + " runnable"
 
     ui:
-      pre: "pre"
-      label: "label"
-      wrapper: ".runnable-wrapper"
+      pre:        "pre"
+      label:      "label"
+      wrapper:    ".runnable-wrapper"
+      runnables:  ".runnables"
+      log:        ".runnable-log"
+      icon:       ".runnable-icon i"
 
     events:
       "mouseover"     : "mouseover"
       "mouseout"      : "mouseout"
       "click @ui.pre" : "preClicked"
+      "dblclick"      : "dblClicked"
       "click"         : "clicked"
 
     modelEvents:
@@ -28,11 +33,13 @@
       "change:state"  : "stateChanged"
       "change:error"  : "errorChanged"
       "change:chosen" : "chosenChanged"
+      "change:open"   : "openChanged"
 
     ## this view is a good candidate for stick it
 
     initialize: ->
       @collection = @model.get("children")
+      console.info "@collection", @collection
 
     _renderChildren: ->
       ## override the internal method to prevent our composite view from
@@ -40,9 +47,25 @@
       return if @model.get("type") is "test"
       super
 
+    openChanged: (model, value, options) ->
+      @hideOrShowRunnableContent()
+      @changeIconDirection() if @model.is("suite")
+
+    hideOrShowRunnableContent: ->
+      el = if @model.is("test") then @ui.log else @ui.runnables
+      el.toggleClass("hidden")
+
+    changeIconDirection: ->
+      klass = if @model.get("open") then "right" else "down"
+      @ui.icon.removeClass().addClass("fa fa-caret-#{klass}")
+
+    dblClicked: (e) ->
+      e.stopPropagation()
+      @model.trigger "model:double:clicked"
+
     clicked: (e) ->
       e.stopPropagation()
-      @model.trigger "model:clicked"
+      @model.toggleOpen()
 
     mouseover: (e) ->
       e.stopPropagation()
@@ -97,11 +120,46 @@
       ## this nukes the original stack trace though...
       console.error(error)
 
-  class List.Root extends App.Views.CollectionView
+  class List.RunnableContent extends App.Views.ItemView
+    getTemplate: ->
+      switch @model.get("type")
+        when "test"  then "test_specs/list/_test"
+        when "suite" then "test_specs/list/_suite"
+
+  class List.RunnableLayout extends App.Views.LayoutView
+    getTemplate: ->
+      switch @model.get("type")
+        when "test"  then "test_specs/list/_test_layout"
+        when "suite" then "test_specs/list/_suite_layout"
+
+    ## set the className to be either test or suite
+    attributes: ->
+      class: @model.get("type") + " runnable"
+
+    regions:
+      contentRegion:    ".runnable-content-region"
+      commandsRegion:   ".runnable-commands-region"
+      runnablesRegion:  ".runnables-region"
+
+    ui:
+      wrapper:    ".runnable-wrapper"
+      runnables:  ".runnables"
+      icon:       ".runnable-icon i"
+
+    modelEvents:
+      "get:layout:view" : "getLayoutView"
+
+    getLayoutView: (fn) ->
+      fn(@)
+
+  class List.Runnables extends App.Views.CollectionView
     tagName: "ul"
-    id: "specs-list"
     className: "runnables"
-    childView: List.Runnable
+    childView: List.RunnableLayout
+
+    ## add the #specs-list if we're the root view
+    onBeforeRender: ->
+      @$el.prop("id", "specs-list") if @model.get("root")
 
     initialize: ->
       @collection = @model.get("children")

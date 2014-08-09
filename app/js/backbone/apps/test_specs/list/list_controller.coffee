@@ -22,8 +22,6 @@
       ## always make the first two arguments the runner + runnables array
       @createRunnableListeners = _.partial(@createRunnableListeners, runner, runnables)
 
-      @listenTo runner, "all", (e) -> console.info e
-
       @listenTo runner, "suite:start", (suite) ->
         @addRunnable(suite, "suite")
 
@@ -71,9 +69,9 @@
           root.reset()
           @resetRunnables(runnables)
 
-      runnableView = @getRunnableView root
+      runnablesView = @getRunnablesView root
 
-      @show runnableView
+      @show runnablesView
 
     resetRunnables: (runnables, runnable) ->
       ## if we have a runnable we're only slicing out this specific one
@@ -86,6 +84,7 @@
           runnables.pop()
 
     addRunnable: (root, runnables, runnable, type) ->
+      console.log "addRunnable", arguments
       ## we need to bail here because this is most likely due
       ## to the user changing their tests and the old test
       ## are still running...
@@ -108,26 +107,56 @@
 
       @createRunnableListeners(runnable.model)
 
+      @addNewViewFor(runnable.model)
+
+    addNewViewFor: (model) ->
+      ## we could alternatively loop through all of the children
+      ## from the root as opposed to going through the model
+      ## to receive its layout but that would be much slower
+      ## because we have# unlimited nesting, unfortunately
+      ## this is the easiest way to receive our layout view
+      model.trigger "get:layout:view", (layout) =>
+
+        ## insert the runnable view into the layout
+        contentView = @getRunnableContentView(model)
+        @show contentView, region: layout.contentRegion
+
+        if model.is("test")
+        #   ## and pass up the commands collection and the commands region
+        #   App.execute "list:spec:commands", model.get("commands"), layout.commandsRegion
+        else
+          ## repeat the nesting by inserting the collection view again
+          runnablesView = @getRunnablesView model
+          @show runnablesView, region: layout.runnablesRegion
+
     createRunnableListeners: (runner, runnables, model) ->
       ## unbind everything else we will get duplicated events
       @stopListening model
 
+      console.info "createRunnableListeners", model
+
       ## because we have infinite view nesting we can't really utilize
       ## the view event bus in a reliable way.  thus we have to go through
-      ## our models.  we also can't use the normal backbone-chooser because
+      ## our models.
+
+      ## we also can't use the normal backbone-chooser because
       ## we have unlimited nested / fragmented collections
       ## so we have to handle this logic ourselves
-      @listenTo model, "model:clicked", =>
+      @listenTo model, "model:double:clicked", ->
         ## always unchoose all other models
         runnables.eachModel (runnable) ->
           runnable.unchoose()
 
-        ## choose this model if we should choose it
+        ## choose this model
         model.choose()
 
         ## pass this id along to runner
         runner.setChosen model
 
-    getRunnableView: (root) ->
-      new List.Root
-        model: root
+    getRunnableContentView: (runnable) ->
+      new List.RunnableContent
+        model: runnable
+
+    getRunnablesView: (runnable) ->
+      new List.Runnables
+        model: runnable

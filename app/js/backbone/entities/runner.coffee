@@ -13,7 +13,7 @@
   ## need to compose this runner with models for each panel
   ## DOM / XHR / LOG
   ## and partial each test (on test run) if its chosen...?
-    # initialize: ->
+    initialize: ->
       @doms = App.request "dom:entities"
     #   @xhr = App.request "xhr:entity"
     #   @log = App.request "log:entity"
