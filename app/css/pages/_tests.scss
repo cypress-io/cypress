@@ -54,17 +54,7 @@
         position: relative;
         overflow: auto;
 
-        .runnable-icon {
-          position: absolute;
-          // display: none;
-          color: #AAA;
-          // right: 5px;
-          // text-shadow: 0 0 0;
-          // font-size: 13px;
-        }
-
         .runnable-content-region {
-          padding-left: 12px;
           overflow: auto;
 
           .runnable-state {
@@ -107,49 +97,22 @@
         cursor: pointer;
       }
 
-      &.suite {
-        .runnable-icon {
-          // display: none;
-        }
-        // font-family: "Raleway",Helvetica,sans-serif;
-        // font-weight: 500;
-      }
-
-      &.test {
-        .runnable-icon {
-          display: none;
-          // right: 5px;
-        }
-        // font-size: 13px;
-        // font-family: "Open Sans", sans-serif;
-        // font-weight: 100;
-      }
-
-      .suite-state {
-        width: 13px;
+      .suite-state, .test-state {
+        width: 12px;
         display: inline-block;
         margin-right: 3px;
+        text-align: left;
+      }
+
+      .suite-state  {
         margin-left: 1px;
 
         i {
-          font-size: 16px;
           padding-left: 2px;
+          font-size: 16px;
           color: #999;
         }
       }
-
-      .test-state {
-        width: 12px;
-        display: inline-block;
-        text-align: left;
-        margin-right: 3px;
-
-        // i { display: none;}
-      }
-
-      // .test-state i {
-        // font-size: 12px;
-      // }
 
       &.processing > .runnable-wrapper {
         .suite-state i,
@@ -169,9 +132,14 @@
           color: lighten(#E94B3B, 4%);
         }
 
-        // .suite-state i {
-        //   color: #E94B3B;
-        // }
+        .suite-title i {
+          border-radius: 3px;
+          background-color: lighten(#E94B3B, 2%);
+          color: #FFF;
+          padding: 0 4px 0 3px;
+          font-size: 10px;
+          margin-left: 2px;
+        }
 
         .test-state i {
           @extend .#{$fa-css-prefix}-times;
