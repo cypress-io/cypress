@@ -106,6 +106,9 @@
       obj = {dom: @doms, xhr: @xhrs, log: @logs}
       obj[event or throw new Error("Cannot find entities by event: #{event}")]
 
+    getCommands: ->
+      @doms
+
     startListening: ->
       @listenTo runnerChannel, "all", (event, runnable, attrs) ->
 

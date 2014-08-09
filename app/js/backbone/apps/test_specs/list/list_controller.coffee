@@ -6,15 +6,22 @@
       { runner } = options
 
       ## hold onto every single runnable type (suite or test)
-      runnables  = []
-      runnables.eachModel = (fn) ->
-        _.each @, (runnable) ->
-          fn runnable.model
+      runnables  = App.request "runnable:container"
 
       root = App.request "new:root:runnable:entity"
 
       ## use a collection as the container of all of our suites
       suites = App.request "new:suite:entities"
+
+      ## grab the commands collection from the runner
+      commands = runner.getCommands()
+
+      ## when commands are added to this collection
+      ## we need to find the runnable model by its cid
+      ## and then add this command model to the runnable model
+      @listenTo commands, "add", (command) ->
+        model = runnables.get command.get("testId")
+        model.addCommand(command) if model
 
       ## always make the first two arguments the root model + runnables array
       @addRunnable = _.partial(@addRunnable, root, runnables)
@@ -54,7 +61,7 @@
         ## if just a test is chosen -- just clear/reset its attributes
         ## if a suite is chosen -- reset all of the children runnable attrs
         if runner.hasChosen()
-          runnables.eachModel (model, runnable) =>
+          runnables.each (model, runnable) =>
             return if not model.isChosen()
 
             ## reset its state
@@ -74,14 +81,12 @@
       @show runnablesView
 
     resetRunnables: (runnables, runnable) ->
-      ## if we have a runnable we're only slicing out this specific one
+      ## if we have a runnable we're only removing this specific one
       if runnable
-        index = _(runnables).indexOf runnable
-        runnables.splice(index, 1)
+        runnables.remove(runnable)
       else
         ## nuke everything
-        while runnables.length
-          runnables.pop()
+        runnables.reset()
 
     addRunnable: (root, runnables, runnable, type) ->
       ## we need to bail here because this is most likely due
@@ -102,13 +107,13 @@
         ## it needs to go on the root if its parent is the root
         root.addRunnable runnable, type
 
-      runnables.push runnable
+      runnables.add runnable
 
       @createRunnableListeners(runnable.model)
 
-      @addNewViewFor(runnable.model)
+      @insertChildViews(runnable.model)
 
-    addNewViewFor: (model) ->
+    insertChildViews: (model) ->
       ## we could alternatively loop through all of the children
       ## from the root as opposed to going through the model
       ## to receive its layout but that would be much slower
@@ -116,7 +121,7 @@
       ## this is the easiest way to receive our layout view
       model.trigger "get:layout:view", (layout) =>
 
-        ## insert the runnable view into the layout
+        ## insert the content view into the layout
         contentView = @getRunnableContentView(model)
         @show contentView, region: layout.contentRegion
 
@@ -131,8 +136,6 @@
     createRunnableListeners: (runner, runnables, model) ->
       ## unbind everything else we will get duplicated events
       @stopListening model
-
-      console.info "createRunnableListeners", model
 
       ## because we have infinite view nesting we can't really utilize
       ## the view event bus in a reliable way.  thus we have to go through
