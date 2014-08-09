@@ -3476,6 +3476,7 @@ ul {
     padding-left: 0;
     position: absolute;
     height: 100%;
+    width: 100%;
     border-left: 1px solid #191919; }
     #test-specs #specs-container #specs-list {
       box-shadow: 0 1px 2px #373737;
@@ -3520,9 +3521,6 @@ ul {
           #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content-region .runnable-controls {
             width: 50px;
             float: right; }
-      #test-specs ul.runnables li.runnable.hover {
-        background-color: #484a50;
-        cursor: pointer; }
       #test-specs ul.runnables li.runnable pre {
         margin-bottom: 0;
         padding-bottom: 2px;
@@ -3531,6 +3529,9 @@ ul {
         clear: both; }
         #test-specs ul.runnables li.runnable pre:empty {
           display: none; }
+      #test-specs ul.runnables li.runnable.hover {
+        background-color: #484a50;
+        cursor: pointer; }
       #test-specs ul.runnables li.runnable.test .runnable-icon {
         display: none; }
       #test-specs ul.runnables li.runnable .suite-state {
@@ -3539,8 +3540,9 @@ ul {
         margin-right: 3px;
         margin-left: 1px; }
         #test-specs ul.runnables li.runnable .suite-state i {
-          font-size: 13px;
-          padding-left: 2px; }
+          font-size: 16px;
+          padding-left: 2px;
+          color: #999; }
       #test-specs ul.runnables li.runnable .test-state {
         width: 12px;
         display: inline-block;
@@ -3553,18 +3555,12 @@ ul {
         border-left: 1px solid #E94B3B; }
       #test-specs ul.runnables li.runnable.failed > .runnable-wrapper pre {
         color: #eb5c4d; }
-      #test-specs ul.runnables li.runnable.failed > .runnable-wrapper .suite-state i {
-        color: #E94B3B; }
       #test-specs ul.runnables li.runnable.failed > .runnable-wrapper .test-state i {
         color: #E94B3B; }
       #test-specs ul.runnables li.runnable.failed > .runnable-wrapper label {
         text-transform: uppercase; }
-      #test-specs ul.runnables li.runnable.passed > .runnable-wrapper .suite-state i {
-        color: #23AE89; }
       #test-specs ul.runnables li.runnable.passed > .runnable-wrapper .test-state i {
         color: #23AE89; }
-      #test-specs ul.runnables li.runnable.pending > .runnable-wrapper .suite-state {
-        color: #92bce0; }
       #test-specs ul.runnables li.runnable.pending > .runnable-wrapper .test-title {
         color: #a6c8e6; }
       #test-specs ul.runnables li.runnable.pending > .runnable-wrapper .test-state i {

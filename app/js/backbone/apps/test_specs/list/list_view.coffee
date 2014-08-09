@@ -126,6 +126,25 @@
         when "test"  then "test_specs/list/_test"
         when "suite" then "test_specs/list/_suite"
 
+    ui:
+      pre:  "pre"
+      icon: "i"
+
+    modelEvents:
+      "change:error"    : "errorChanged"
+      "change:open"     : "openChanged"
+
+    errorChanged: (model, value, options) ->
+      value or= ""
+      @ui.pre.text(value)
+
+    openChanged: (model, value, options) ->
+      @changeIconDirection() if @model.is("suite")
+
+    changeIconDirection: ->
+      klass = if @model.get("open") then "right" else "down"
+      @ui.icon.removeClass().addClass("fa fa-caret-#{klass}")
+
   class List.RunnableLayout extends App.Views.LayoutView
     getTemplate: ->
       switch @model.get("type")
@@ -143,14 +162,79 @@
 
     ui:
       wrapper:    ".runnable-wrapper"
-      runnables:  ".runnables"
-      icon:       ".runnable-icon i"
+      runnables:  ".runnables-region"
+      commands:   ".runnable-commands-region"
+
+    events:
+      "mouseover"     : "mouseover"
+      "mouseout"      : "mouseout"
+      "dblclick"      : "dblClicked"
+      "click"         : "clicked"
 
     modelEvents:
       "get:layout:view" : "getLayoutView"
+      "change:title"    : "render"
+      "change:state"    : "stateChanged"
+      "change:chosen"   : "chosenChanged"
+      "change:open"     : "openChanged"
+
+    onBeforeRender: ->
+      @$el.addClass @model.get("state")
+
+    onRender: ->
+      @applyIndent()
+
+    mouseover: (e) ->
+      e.stopPropagation()
+      @$el.addClass("hover")
+
+    mouseout: (e) ->
+      e.stopPropagation()
+      @$el.removeClass("hover")
+
+    dblClicked: (e) ->
+      e.stopPropagation()
+      @model.trigger "model:double:clicked"
+
+    clicked: (e) ->
+      e.stopPropagation()
+      @model.toggleOpen()
+
+    applyIndent: (state) ->
+      indent = @model.get("indent")
+      indent -= 1 if state is "failed"
+      @ui.wrapper.css "padding-left", indent
 
     getLayoutView: (fn) ->
       fn(@)
+
+    chosenChanged: (model, value, options) ->
+      @$el.toggleClass "active", value
+
+    stateChanged: (model, value, options) ->
+      @$el.removeClass("processing pending failed passed").addClass(value)
+      @applyIndent(value)
+
+      if @model.get("type") is "test"
+        ## if the test passed check on the duration
+        @checkDuration() if value is "passed"
+        @checkTimeout() if value is "failed"
+
+    openChanged: (model, value, options) ->
+      ## hide or show the commands or runnables
+      el = if @model.is("test") then @ui.commands else @ui.runnables
+      el.toggleClass("hidden")
+
+    checkDuration: ->
+      return if not @model.isSlow()
+
+      ## need to add a tooltip here
+      @ui.label.addClass("label-primary").text(@model.get("duration") + "ms")
+
+    checkTimeout: ->
+      return if not @model.timedOut()
+
+      @ui.label.addClass("label-danger").text("Timed Out")
 
   class List.Runnables extends App.Views.CollectionView
     tagName: "ul"
