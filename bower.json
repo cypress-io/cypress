@@ -19,7 +19,7 @@
   ],
   "dependencies": {
     "labjs": "*",
-    "bootstrap-sass-official": "~3.1.1+2",
+    "bootstrap-sass-official": "3.2.0+1",
     "font-awesome": "~4.1.0",
     "marionette": "~2.0.1",
     "backbone": "~1.1.2",
