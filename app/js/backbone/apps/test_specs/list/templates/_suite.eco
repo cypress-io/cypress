@@ -2,6 +2,9 @@
   <span class="suite-state">
     <i class="fa fa-caret-down"></i>
   </span>
-  <span class="suite-title"><%= @title %></span>
+  <span class="suite-title">
+    <%= @title %>
+    <i class="fa fa-ellipsis-h hidden"></i>
+  </span>
 </div>
 <div class="runnable-controls"></div>

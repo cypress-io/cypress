@@ -3503,11 +3503,7 @@ ul {
         padding: 5px;
         position: relative;
         overflow: auto; }
-        #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-icon {
-          position: absolute;
-          color: #AAA; }
         #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content-region {
-          padding-left: 12px;
           overflow: auto; }
           #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content-region .runnable-state {
             width: 80%;
@@ -3532,22 +3528,17 @@ ul {
       #test-specs ul.runnables li.runnable.hover {
         background-color: #484a50;
         cursor: pointer; }
-      #test-specs ul.runnables li.runnable.test .runnable-icon {
-        display: none; }
-      #test-specs ul.runnables li.runnable .suite-state {
-        width: 13px;
-        display: inline-block;
-        margin-right: 3px;
-        margin-left: 1px; }
-        #test-specs ul.runnables li.runnable .suite-state i {
-          font-size: 16px;
-          padding-left: 2px;
-          color: #999; }
-      #test-specs ul.runnables li.runnable .test-state {
+      #test-specs ul.runnables li.runnable .suite-state, #test-specs ul.runnables li.runnable .test-state {
         width: 12px;
         display: inline-block;
-        text-align: left;
-        margin-right: 3px; }
+        margin-right: 3px;
+        text-align: left; }
+      #test-specs ul.runnables li.runnable .suite-state {
+        margin-left: 1px; }
+        #test-specs ul.runnables li.runnable .suite-state i {
+          padding-left: 2px;
+          font-size: 16px;
+          color: #999; }
       #test-specs ul.runnables li.runnable.processing > .runnable-wrapper .suite-state i,
       #test-specs ul.runnables li.runnable.processing > .runnable-wrapper .test-state i {
         color: #888; }
@@ -3555,6 +3546,13 @@ ul {
         border-left: 1px solid #E94B3B; }
       #test-specs ul.runnables li.runnable.failed > .runnable-wrapper pre {
         color: #eb5c4d; }
+      #test-specs ul.runnables li.runnable.failed > .runnable-wrapper .suite-title i {
+        border-radius: 3px;
+        background-color: #ea5344;
+        color: #FFF;
+        padding: 0 4px 0 3px;
+        font-size: 10px;
+        margin-left: 2px; }
       #test-specs ul.runnables li.runnable.failed > .runnable-wrapper .test-state i {
         color: #E94B3B; }
       #test-specs ul.runnables li.runnable.failed > .runnable-wrapper label {

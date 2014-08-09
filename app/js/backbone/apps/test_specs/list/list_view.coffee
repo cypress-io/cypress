@@ -127,8 +127,9 @@
         when "suite" then "test_specs/list/_suite"
 
     ui:
-      pre:  "pre"
-      icon: "i"
+      pre:        "pre"
+      icon:       ".suite-state i"
+      ellipsis:   ".suite-title i"
 
     modelEvents:
       "change:error"    : "errorChanged"
@@ -139,11 +140,16 @@
       @ui.pre.text(value)
 
     openChanged: (model, value, options) ->
-      @changeIconDirection() if @model.is("suite")
+      if @model.is("suite")
+        @changeIconDirection(value)
+        @displayEllipsis(value)
 
-    changeIconDirection: ->
-      klass = if @model.get("open") then "right" else "down"
+    changeIconDirection: (bool) ->
+      klass = if bool then "right" else "down"
       @ui.icon.removeClass().addClass("fa fa-caret-#{klass}")
+
+    displayEllipsis: (bool) ->
+      @ui.ellipsis.toggleClass "hidden", !bool
 
   class List.RunnableLayout extends App.Views.LayoutView
     getTemplate: ->
