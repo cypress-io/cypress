@@ -1,0 +1,4 @@
+<%= @parent %>
+<%= @title %>
+<%= @method %>
+<%= @selector %>
