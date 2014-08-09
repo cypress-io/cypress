@@ -7,9 +7,7 @@
         indent: -10
         open: false
         children:  new Entities.RunnableCollection
-
-      ## tests have commands
-      attrs.commands = new Entities.CommandsCollection if @is("test")
+        commands: App.request("command:entities")
 
       attrs
 
@@ -23,6 +21,9 @@
     addRunnable: (runnable, type) ->
       indent = @get("indent")
       @get("children").addRunnable(runnable, type, indent)
+
+    addCommand: (command) ->
+      @get("commands").add command
 
     is: (type) ->
       @get("type") is type
