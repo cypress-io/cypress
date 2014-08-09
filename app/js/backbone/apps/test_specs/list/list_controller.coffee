@@ -127,7 +127,7 @@
 
         if model.is("test")
         #   ## and pass up the commands collection and the commands region
-        #   App.execute "list:spec:commands", model.get("commands"), layout.commandsRegion
+          App.execute "list:test:commands", model.get("commands"), layout.commandsRegion
         else
           ## repeat the nesting by inserting the collection view again
           runnablesView = @getRunnablesView model
