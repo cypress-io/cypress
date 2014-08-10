@@ -29,6 +29,9 @@
       ## always make the first two arguments the runner + runnables array
       @createRunnableListeners = _.partial(@createRunnableListeners, runner, runnables)
 
+      ## always make the first argument the runner
+      @insertChildViews = _.partial(@insertChildViews, runner)
+
       @listenTo runner, "suite:start", (suite) ->
         @addRunnable(suite, "suite")
 
@@ -113,11 +116,11 @@
 
       @insertChildViews(runnable.model)
 
-    insertChildViews: (model) ->
+    insertChildViews: (runner, model) ->
       ## we could alternatively loop through all of the children
       ## from the root as opposed to going through the model
       ## to receive its layout but that would be much slower
-      ## because we have# unlimited nesting, unfortunately
+      ## because we have unlimited nesting, unfortunately
       ## this is the easiest way to receive our layout view
       model.trigger "get:layout:view", (layout) =>
 
@@ -129,9 +132,16 @@
         #   ## and pass up the commands collection and the commands region
           App.execute "list:test:commands", model.get("commands"), layout.commandsRegion
         else
+          region = layout.runnablesRegion
+
+          ## dont replace the current view if theres one in the region
+          ## and our runner has chosen
+          ## else this would cause all of our existing tests to be removed
+          return if region.currentView and runner.hasChosen()
+
           ## repeat the nesting by inserting the collection view again
           runnablesView = @getRunnablesView model
-          @show runnablesView, region: layout.runnablesRegion
+          @show runnablesView, region: region
 
     createRunnableListeners: (runner, runnables, model) ->
       ## unbind everything else we will get duplicated events
@@ -146,7 +156,7 @@
       ## so we have to handle this logic ourselves
       @listenTo model, "model:double:clicked", ->
         ## always unchoose all other models
-        runnables.eachModel (runnable) ->
+        runnables.each (runnable) ->
           runnable.unchoose()
 
         ## choose this model
