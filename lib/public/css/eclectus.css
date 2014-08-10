@@ -3608,6 +3608,8 @@ ul {
         letter-spacing: .6px; }
       #test-specs ul.runnables .commands-container .command-selector {
         color: #80B0FF; }
+      #test-specs ul.runnables .commands-container .command-sequence {
+        color: #F98E33; }
 
 #test-page {
   position: relative; }

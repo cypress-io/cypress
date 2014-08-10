@@ -48,6 +48,7 @@ Eclectus.Dom = do ($, _) ->
         el:       @$(@selector)
         dom:      body
         method:   "type"
+        sequence: sequence
 
       return @
 

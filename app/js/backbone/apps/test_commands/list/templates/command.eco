@@ -1,2 +1,7 @@
 <span class="command-method"><%= @method %></span>
-<span class="command-selector"><%= @selector %></span>
+<% if @sequence: %>
+  <span class="command-sequence"><%= @sequence %></span>
+<% else: %>
+  <span class="command-selector"><%= @selector %></span>
+<% end %>
+<i class="fa fa-search fa-flip-horizontal pull-right"></i>
