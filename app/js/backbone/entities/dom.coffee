@@ -31,7 +31,13 @@
 
       # console.warn "add", @, attrs, @el, @dom
 
-      attrs = _(attrs).pick("method", "selector")
+      attrs = _(attrs).pick("method", "selector", "sequence")
+
+      ## remove all undefined values from our object
+      attrs = _(attrs).reduce (memo, value, key) ->
+        memo[key] = value if not _.isUndefined(value)
+        memo
+      , {}
 
       _.extend attrs,
         selector: attrs.selector.toLowerCase()
