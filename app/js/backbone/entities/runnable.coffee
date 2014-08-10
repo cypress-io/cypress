@@ -51,8 +51,10 @@
       ## remove the models within our commands collection
       @get("commands").reset()
 
-      ## merge in the defaults
-      @set _.result(@, "defaults")
+      ## merge in the defaults unless we already have them set
+      defaults = _(@).result "defaults"
+      attributes = _(@attributes).keys()
+      @set _(defaults).omit(attributes...)
 
     removeOriginalError: ->
       delete @originalError
