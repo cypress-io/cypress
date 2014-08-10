@@ -7,5 +7,7 @@
     <label class="label"></label>
   </span>
 </div>
-<div class="runnable-controls"></div>
-<pre class="test-error"></pre>
+<div class="runnable-controls">
+  <i class="fa fa-repeat"></i>
+  <i class="fa fa-info-circle"></i>
+</div>

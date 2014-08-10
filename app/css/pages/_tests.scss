@@ -84,11 +84,23 @@
           .runnable-controls {
             width: 50px;
             float: right;
+            text-align: right;
+
+            i {
+              margin: 0 2px;
+              color: #999;
+              visibility: hidden;
+
+              &:hover {
+                color: #DDD;
+              }
+            }
           }
         }
       }
 
       pre {
+        margin-top: 2px;
         margin-bottom: 0;
         padding-bottom: 2px;
         margin-left: 18px;
@@ -103,33 +115,39 @@
       &.hover {
         background-color: lighten(#3C3E43, 5%);
         cursor: pointer;
+
+        &>.runnable-wrapper .runnable-controls i {
+          visibility: visible !important;
+        }
       }
 
       &.active {
-        background-color: lighten(#3C3E43, 10%);
+        // background-color: lighten(#3C3E43, 10%);
         // box-shadow: -3px 0 0 #999 inset;
 
-        .commands-container {
-          border-bottom: 1px solid #666;
+        .runnable-wrapper:before {
+          position: absolute;
+          left: 7px;
+          top: 50%;
+          margin-top: -5px;
+          color: #E9A61A;
+          font-size: 8px;
+          @extend .fa;
+          @extend .#{$fa-css-prefix}-circle;
         }
 
-        .runnables {
-          .runnable-wrapper:after {
-            position: absolute;
-            top: -3px;
-            right: -3px;
-            width: 7px;
-            height: 7px;
-            background-color: lighten(#3C3E43, 40%);
-            content: "";
-            transform: rotate(45deg);
-            text-shadow: 0 0 0;
-          }
-        }
+        // &>.runnable-wrapper .runnable-controls i.fa-repeat {
+        //   color: #DDD;
+        //   visibility: visible !important;
+        // }
 
-        &.hover {
-          background-color: lighten(#3C3E43, 13%)
-        }
+        // .commands-container {
+        //   border-bottom: 1px solid #666;
+        // }
+
+        // &.hover {
+        //   background-color: lighten(#3C3E43, 13%)
+        // }
       }
 
       .suite-state, .test-state {
@@ -215,7 +233,7 @@
 
     .commands-container {
       padding: 4px 10px;
-      margin: 2px 30px 0 20px;
+      margin: 5px 30px 0 20px;
       box-shadow: 0 0 3px #222 inset;
       background-color: #404040;
       border-radius: 4px;
