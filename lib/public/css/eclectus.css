@@ -1547,7 +1547,7 @@ a.label:hover, a.label:focus {
   font-weight: normal;
   font-style: normal; }
 
-.fa {
+.fa, #test-specs ul.runnables li.runnable.active .runnable-wrapper:before {
   display: inline-block;
   font-family: FontAwesome;
   font-style: normal;
@@ -1605,9 +1605,9 @@ a.label:hover, a.label:focus {
 .pull-left {
   float: left; }
 
-.fa.pull-left {
+.fa.pull-left, #test-specs ul.runnables li.runnable.active .pull-left.runnable-wrapper:before {
   margin-right: .3em; }
-.fa.pull-right {
+.fa.pull-right, #test-specs ul.runnables li.runnable.active .pull-right.runnable-wrapper:before {
   margin-left: .3em; }
 
 .fa-spin, #test-specs ul.runnables li.runnable.processing > .runnable-wrapper .suite-state i,
@@ -2470,7 +2470,7 @@ a.label:hover, a.label:focus {
 .fa-spinner:before {
   content: "\f110"; }
 
-.fa-circle:before {
+.fa-circle:before, #test-specs ul.runnables li.runnable.active .runnable-wrapper:before {
   content: "\f111"; }
 
 .fa-mail-reply:before,
@@ -3318,7 +3318,7 @@ ul {
       border-top: 1px solid #000;
       box-shadow: 0 1px 0 #444 inset;
       position: relative; }
-      #panel-wrapper > li header i.fa-circle {
+      #panel-wrapper > li header i.fa-circle, #panel-wrapper > li header #test-specs ul.runnables li.runnable.active i.runnable-wrapper:before, #test-specs ul.runnables li.runnable.active #panel-wrapper > li header i.runnable-wrapper:before {
         font-size: 11px;
         position: relative;
         top: -1px;
@@ -3523,8 +3523,16 @@ ul {
               text-transform: uppercase; }
           #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content-region .runnable-controls {
             width: 50px;
-            float: right; }
+            float: right;
+            text-align: right; }
+            #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content-region .runnable-controls i {
+              margin: 0 2px;
+              color: #999;
+              visibility: hidden; }
+              #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content-region .runnable-controls i:hover {
+                color: #DDD; }
       #test-specs ul.runnables li.runnable pre {
+        margin-top: 2px;
         margin-bottom: 0;
         padding-bottom: 2px;
         margin-left: 18px;
@@ -3535,22 +3543,15 @@ ul {
       #test-specs ul.runnables li.runnable.hover {
         background-color: #484a50;
         cursor: pointer; }
-      #test-specs ul.runnables li.runnable.active {
-        background-color: #54575e; }
-        #test-specs ul.runnables li.runnable.active .commands-container {
-          border-bottom: 1px solid #666; }
-        #test-specs ul.runnables li.runnable.active .runnables .runnable-wrapper:after {
-          position: absolute;
-          top: -3px;
-          right: -3px;
-          width: 7px;
-          height: 7px;
-          background-color: #a1a3aa;
-          content: "";
-          transform: rotate(45deg);
-          text-shadow: 0 0 0; }
-        #test-specs ul.runnables li.runnable.active.hover {
-          background-color: #5b5e66; }
+        #test-specs ul.runnables li.runnable.hover > .runnable-wrapper .runnable-controls i {
+          visibility: visible !important; }
+      #test-specs ul.runnables li.runnable.active .runnable-wrapper:before {
+        position: absolute;
+        left: 7px;
+        top: 50%;
+        margin-top: -5px;
+        color: #E9A61A;
+        font-size: 8px; }
       #test-specs ul.runnables li.runnable .suite-state, #test-specs ul.runnables li.runnable .test-state {
         width: 12px;
         display: inline-block;
@@ -3588,7 +3589,7 @@ ul {
         color: #92bce0; }
     #test-specs ul.runnables .commands-container {
       padding: 4px 10px;
-      margin: 2px 30px 0 20px;
+      margin: 5px 30px 0 20px;
       box-shadow: 0 0 3px #222 inset;
       background-color: #404040;
       border-radius: 4px;

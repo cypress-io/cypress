@@ -127,17 +127,15 @@
         when "suite" then "test_specs/list/_suite"
 
     ui:
-      pre:        "pre"
       icon:       ".suite-state i"
       ellipsis:   ".suite-title i"
+      repeat:     ".fa-repeat"
+
+    events:
+      "click @ui.repeat" : "repeatClicked"
 
     modelEvents:
-      "change:error"    : "errorChanged"
       "change:open"     : "openChanged"
-
-    errorChanged: (model, value, options) ->
-      value or= ""
-      @ui.pre.text(value)
 
     openChanged: (model, value, options) ->
       if @model.is("suite")
@@ -150,6 +148,10 @@
 
     displayEllipsis: (bool) ->
       @ui.ellipsis.toggleClass "hidden", !bool
+
+    repeatClicked: (e) ->
+      e.stopPropagation()
+      @model.trigger "model:double:clicked"
 
   class List.RunnableLayout extends App.Views.LayoutView
     getTemplate: ->
@@ -170,11 +172,12 @@
       wrapper:    ".runnable-wrapper"
       runnables:  ".runnables-region"
       commands:   ".runnable-commands-region"
+      pre:        "pre"
 
     events:
       "mouseover"     : "mouseover"
       "mouseout"      : "mouseout"
-      "dblclick"      : "dblClicked"
+      # "dblclick"      : "dblClicked"
       "click"         : "clicked"
 
     modelEvents:
@@ -183,6 +186,7 @@
       "change:state"    : "stateChanged"
       "change:chosen"   : "chosenChanged"
       "change:open"     : "openChanged"
+      "change:error"    : "errorChanged"
 
     onBeforeRender: ->
       @$el.addClass @model.get("state")
@@ -230,6 +234,10 @@
       ## hide or show the commands or runnables
       el = if @model.is("test") then @ui.commands else @ui.runnables
       el.toggleClass("hidden")
+
+    errorChanged: (model, value, options) ->
+      value or= ""
+      @ui.pre.text(value)
 
     checkDuration: ->
       return if not @model.isSlow()
