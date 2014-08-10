@@ -1,9 +1,11 @@
-<div id="test-specs">
-  <div id="header-container">
-    <div id="stats-region"></div>
-  </div>
-  <div id="specs-container">
-    <div id="specs-region"></div>
+<div id="test-container">
+  <div id="test-specs">
+    <div id="header-container">
+      <div id="stats-region"></div>
+    </div>
+    <div id="specs-container">
+      <div id="specs-region"></div>
+    </div>
   </div>
 </div>
 <!-- <div class="ecl-main-content">

@@ -5,4 +5,5 @@
 
   class List.Commands extends App.Views.CollectionView
     tagName: "ul"
+    className: "commands-container"
     childView: List.Command

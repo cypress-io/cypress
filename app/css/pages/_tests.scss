@@ -1,23 +1,31 @@
-#test-specs {
+#test-container {
   background-color: #222;
   position: absolute;
   left: 0;
   bottom: 0;
   top: 0;
   width: 33%;
+}
+
+#test-specs {
+  background-color: #222;
   border: 1px solid #191919;
   border-top: 0;
   border-bottom: 0;
   padding-left: 5px;
   overflow: hidden;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
 
   #specs-container {
     background-color: #3C3E43;
     padding-left: 0;
-    position: absolute;
-    height: 100%;
-    width: 100%;
     border-left: 1px solid #191919;
+    width: 100%;
+    height: 100%;
 
     #specs-list {
       box-shadow: 0 1px 2px #373737;
@@ -52,7 +60,7 @@
       .runnable-wrapper {
         padding: 5px;
         position: relative;
-        overflow: auto;
+        overflow: hidden;
 
         .runnable-content-region {
           overflow: auto;
@@ -95,6 +103,33 @@
       &.hover {
         background-color: lighten(#3C3E43, 5%);
         cursor: pointer;
+      }
+
+      &.active {
+        background-color: lighten(#3C3E43, 10%);
+        // box-shadow: -3px 0 0 #999 inset;
+
+        .commands-container {
+          border-bottom: 1px solid #666;
+        }
+
+        .runnables {
+          .runnable-wrapper:after {
+            position: absolute;
+            top: -3px;
+            right: -3px;
+            width: 7px;
+            height: 7px;
+            background-color: lighten(#3C3E43, 40%);
+            content: "";
+            transform: rotate(45deg);
+            text-shadow: 0 0 0;
+          }
+        }
+
+        &.hover {
+          background-color: lighten(#3C3E43, 13%)
+        }
       }
 
       .suite-state, .test-state {
@@ -175,6 +210,49 @@
           @extend .#{$fa-css-prefix}-circle-o-notch;
           color: lighten(#428BCA, 20%);
         }
+      }
+    }
+
+    .commands-container {
+      padding: 4px 10px;
+      margin: 2px 30px 0 20px;
+      box-shadow: 0 0 3px #222 inset;
+      background-color: #404040;
+      border-radius: 4px;
+      color: #BBB;
+      border-bottom: 1px solid #555;
+
+      &:empty {
+        display: none;
+      }
+
+      &>li {
+        margin: 2px 0;
+      }
+      .command-method {
+        color: #E0C85E;
+        padding: 0 2px;
+        display: inline-block;
+        width: 34px;
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: .6px;
+      }
+
+      // .command-method {
+      //   background-color: #23AE89;
+      //   color: white;
+      //   border-radius: 3px;
+      //   padding: 0 2px;
+      //   display: inline-block;
+      //   width: 30px;
+      //   text-transform: uppercase;
+      //   font-size: 11px;
+      //   letter-spacing: .7px;
+      // }
+
+      .command-selector {
+        color: #80B0FF;
       }
     }
   }

@@ -1,4 +1,2 @@
-<%= @parent %>
-<%= @title %>
-<%= @method %>
-<%= @selector %>
+<span class="command-method"><%= @method %></span>
+<span class="command-selector"><%= @selector %></span>
