@@ -56,7 +56,7 @@
       ## proxy this to everyone else
       @listenTo socket, "test:changed", @triggerLoadIframe
 
-      _this = @
+      runner = @
 
       ## TODO: IMPLEMENT FOR SUITES
       @runner.runSuite = _.wrap @runner.runSuite, (runSuite, suite, fn) ->
@@ -65,16 +65,35 @@
 
         suite.eachTest (test) ->
           ## iterating on both the test and its parent (the suite)
-          _.each [test, test.parent], (type) ->
+          _.each [test.parent, test], (type) ->
             ## bail if we're the root runnable
-            return if type.root
+            ## or we've already processed this tests parent
+            return if type.root or type.added
+
+            ## parse the cid out of the title if it exists
+            type.cid ?= runner.getTestCid(type)
 
             ## allow to get the original title
             type.originalTitle = ->
-              @title.replace _this.getIdToAppend(type.cid), ""
+              @title.replace runner.getIdToAppend(type.cid), ""
 
-            ## parse the cid out of the title if it exists
-            type.cid ?= _this.getTestCid(type)
+            df = $.Deferred()
+
+            ## when we're done getting our cid
+            ## or if we already have it
+            df.done ->
+              ## dont fire duplicate events if this is already fired
+              ## its 'been added' event
+              return if type.added
+
+              type.added = true
+
+              ## tests have a type of 'test' whereas suites do not have a type property
+              event = type.type or "suite"
+
+              ## trigger the add events so our UI can begin displaying
+              ## the tests + suites
+              runner.trigger "#{event}:add", type
 
             ## if test or suite doesnt have a cid
             if not type.cid
@@ -86,17 +105,17 @@
 
               type.fullTitle = _.wrap type.fullTitle, (origTitle) ->
                 title = origTitle.apply(@)
-                title + _this.getIdToAppend(type.cid)
-
-              df = $.Deferred()
+                title + runner.getIdToAppend(type.cid)
 
               generatedIds.push df
 
               ## go get the id from the server via websockets
-              data = {title: type.title, spec: _this.iframe}
+              data = {title: type.title, spec: runner.iframe}
               socket.emit "generate:test:id", data, (id) ->
                 type.cid = id
                 df.resolve id
+            else
+              df.resolve()
 
         # console.info generatedIds
         $.when(generatedIds...).done =>
@@ -168,7 +187,7 @@
           contentWindow: @contentWindow
           iframe: @iframe
 
-        @trigger "test", test
+        @trigger "test:start", test
 
       @runner.on "test end", (test) =>
         # test.removeAllListeners()
