@@ -158,6 +158,8 @@
       switch @model.get("type")
         when "test"  then "test_specs/list/_test_layout"
         when "suite" then "test_specs/list/_suite_layout"
+        else
+          throw new Error("Model type: #{@model.get('type')} does not match 'test' or 'suite'")
 
     ## set the className to be either test or suite
     attributes: ->
@@ -179,6 +181,7 @@
       "mouseout"      : "mouseout"
       # "dblclick"      : "dblClicked"
       "click"         : "clicked"
+      "mouseover .commands-container" : "commandsMouseover"
 
     modelEvents:
       "get:layout:view" : "getLayoutView"
@@ -199,6 +202,10 @@
       @$el.addClass("hover")
 
     mouseout: (e) ->
+      e.stopPropagation()
+      @$el.removeClass("hover")
+
+    commandsMouseover: (e) ->
       e.stopPropagation()
       @$el.removeClass("hover")
 
