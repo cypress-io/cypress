@@ -18,9 +18,21 @@
     toggleOpen: ->
       @set "open", !@get("open")
 
-    addRunnable: (runnable, type) ->
-      indent = @get("indent")
-      @get("children").addRunnable(runnable, type, indent)
+    setAttrsFromRunnable: (runnable) ->
+      @set
+        id: runnable.cid
+        title: runnable.originalTitle()
+        parentId: runnable.parent.cid
+        parentRoot: runnable.parent.root
+
+    addRunnable: (model) ->
+      ## reset its indent
+      model.set "indent", @get("indent") + 20
+      model.collection = @get("children")
+      @get("children").add(model, merge: true)
+
+    remove: ->
+      @collection.remove(@)
 
     addCommand: (command) ->
       @get("commands").add command
@@ -120,22 +132,17 @@
   class Entities.RunnableCollection extends Entities.Collection
     model: Entities.Runnable
 
-    addRunnable: (runnable, type, indent) ->
-      attrs =
-        title: runnable.originalTitle()
-        id: runnable.cid
-        type: type
-        indent: indent + 20
-
-      ## merge attributes so existing models
-      ## are updated
-      runnable.model = @add attrs, merge: true
-
   API =
     newRoot: ->
       root = new Entities.Runnable
       root.set root: true
       root
 
+    newRunnable: (type) ->
+      new Entities.Runnable type: type
+
   App.reqres.setHandler "new:root:runnable:entity", ->
     API.newRoot()
+
+  App.reqres.setHandler "runnable:entity", (type) ->
+    API.newRunnable type

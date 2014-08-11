@@ -152,7 +152,6 @@
         @trigger "runner:end"
 
       @runner.on "suite", (suite) =>
-        console.warn "suite", suite
         @trigger "suite:start", suite
 
       @runner.on "suite end", (suite) =>
@@ -191,7 +190,6 @@
 
       @runner.on "test end", (test) =>
         # test.removeAllListeners()
-        console.warn "test end", test
         @trigger "test:end", test
       ## start listening to all the pertinent runner events
 
@@ -274,10 +272,16 @@
       ## or all the tests
       @runner.grep @getGrep()
 
+      ## trigger the before run event
+      @trigger "before:run"
+
       ## run the suite for the iframe
       ## right before we run the root runner's suite we iterate
       ## through each test and give it a unique id
-      @runner.runSuite contentWindow.mocha.suite, ->
+      @runner.runSuite contentWindow.mocha.suite, =>
+        ## trigger the after run event
+        @trigger "after:run"
+
         console.log "finished running the iframes suite!"
 
   API =
