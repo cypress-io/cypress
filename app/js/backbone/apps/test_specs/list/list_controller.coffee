@@ -6,9 +6,12 @@
       { runner } = options
 
       ## hold onto every single runnable type (suite or test)
-      runnables  = App.request "runnable:container"
+      container  = App.request "runnable:container:entity"
 
+      ## generate the root runnable which holds everything
       root = App.request "new:root:runnable:entity"
+
+      console.info root
 
       ## use a collection as the container of all of our suites
       suites = App.request "new:suite:entities"
@@ -20,101 +23,101 @@
       ## we need to find the runnable model by its cid
       ## and then add this command model to the runnable model
       @listenTo commands, "add", (command) ->
-        model = runnables.get command.get("testId")
+        model = container.get command.get("testId")
         model.addCommand(command) if model
 
-      ## always make the first two arguments the root model + runnables array
-      @addRunnable = _.partial(@addRunnable, root, runnables)
+      ## always make the first two arguments the root model + container collection
+      @addRunnable = _.partial(@addRunnable, root, container)
 
-      ## always make the first two arguments the runner + runnables array
-      @createRunnableListeners = _.partial(@createRunnableListeners, runner, runnables)
+      ## always make the first two arguments the runner + container collection
+      @createRunnableListeners = _.partial(@createRunnableListeners, runner, container)
 
       ## always make the first argument the runner
       @insertChildViews = _.partial(@insertChildViews, runner)
 
-      @listenTo runner, "suite:start", (suite) ->
+      @listenTo runner, "before:run", ->
+        ## move all the models over to previous run
+        ## and reset all existing one
+        container.reset()
+
+      @listenTo runner, "after:run", ->
+        ## removes any old models no longer in our run
+        container.removeOldModels()
+
+      @listenTo runner, "suite:add", (suite) ->
         @addRunnable(suite, "suite")
+      # @listenTo runner, "suite:start", (suite) ->
+        # @addRunnable(suite, "suite")
 
       @listenTo runner, "suite:stop", (suite) ->
         return if suite.root or suite.stopped
 
         ## when our suite stop update its state
         ## based on all the tests that ran
-        suite.model.updateState()
+        container.get(suite.cid).updateState()
 
       # add the test to the suite unless it already exists
-      @listenTo runner, "test", (test) ->
-        ## add the test to the list of runnables
+      @listenTo runner, "test:add", (test) ->
+        ## add the test to the container collection of runnables
         @addRunnable(test, "test")
 
+      # @listenTo runner, "test:start", (test) ->
+        ## add the test to the container collection of runnables
+        # @addRunnable(test, "test")
+
       @listenTo runner, "test:end", (test) ->
-        return if test.stopped or not test.model
+        return if test.stopped
+
+        ## find the client runnable model by the test's cide
+        runnable = container.get(test.cid)
+        console.info "test:end", runnable
 
         ## set the results of the test on the test client model
         ## passed | failed | pending
-        test.model.setResults(test)
+        runnable.setResults(test)
 
         ## this logs the results of the test
         ## and causes our runner to fire 'test:results:ready'
-        runner.logResults test.model
+        runner.logResults runnable
 
       @listenTo runner, "load:iframe", (iframe, options) ->
+        console.log "runner load:iframe", runner.hasChosen(), runner.get("chosen")
         ## when our runner says to load the iframe
         ## if nothing is chosen -- reset everything
         ## if just a test is chosen -- just clear/reset its attributes
         ## if a suite is chosen -- reset all of the children runnable attrs
+
+        ## we do this so our tests go into the 'reset' state prior to the iframe
+        ## loading -- so it visually looks like things are moving along faster
+        ## and it gives a more accurate portrayal of whats about to happen
+        ## your tests are going to re-run!
         if runner.hasChosen()
-          runnables.each (model, runnable) =>
-            return if not model.isChosen()
-
-            ## reset its state
-            model.reset()
-
-            ## just splice out this single runnable
-            @resetRunnables(runnables, runnable)
-        ## nothing is chosen so reset everything
-        ## and remove all the runnables because
-        ## they're being reset
+          container.each (model) =>
+            if model.isChosen()
+              model.reset()
+              console.warn "model is reset", model
         else
           root.reset()
-          @resetRunnables(runnables)
 
       runnablesView = @getRunnablesView root
 
       @show runnablesView
 
-    resetRunnables: (runnables, runnable) ->
-      ## if we have a runnable we're only removing this specific one
-      if runnable
-        runnables.remove(runnable)
-      else
-        ## nuke everything
-        runnables.reset()
-
-    addRunnable: (root, runnables, runnable, type) ->
+    addRunnable: (root, container, runnable, type) ->
       ## we need to bail here because this is most likely due
       ## to the user changing their tests and the old test
       ## are still running...
       return if runnable.root or runnable.stopped
 
-      ## if the suite or tests' parent is already a runnable
-      ## we know its a nested suite / test
-      if runnable.parent in runnables
-        runnable.parent.model.addRunnable runnable, type
-      else
-        ## bail if our parent isnt the root
-        ## this happens when old tests aren't stopped
-        ## or pended fast enough
-        return if not runnable.parent.root
+      ## add it to our flat container
+      ## and figure out where this model should be added
+      ## does it go into an existing nested collection?
+      ## or does it belong on the root?
+      runnable = container.add runnable, type, root
 
-        ## it needs to go on the root if its parent is the root
-        root.addRunnable runnable, type
+      @createRunnableListeners(runnable)
 
-      runnables.add runnable
-
-      @createRunnableListeners(runnable.model)
-
-      @insertChildViews(runnable.model)
+      @insertChildViews(runnable)
 
     insertChildViews: (runner, model) ->
       ## we could alternatively loop through all of the children
@@ -143,7 +146,7 @@
           runnablesView = @getRunnablesView model
           @show runnablesView, region: region
 
-    createRunnableListeners: (runner, runnables, model) ->
+    createRunnableListeners: (runner, container, model) ->
       ## unbind everything else we will get duplicated events
       @stopListening model
 
@@ -156,7 +159,7 @@
       ## so we have to handle this logic ourselves
       @listenTo model, "model:double:clicked", ->
         ## always unchoose all other models
-        runnables.each (runnable) ->
+        container.each (runnable) ->
           runnable.unchoose()
 
         ## choose this model
