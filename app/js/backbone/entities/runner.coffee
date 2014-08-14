@@ -183,7 +183,7 @@
         @patchEcl
           runnable: test
           channel: runnerChannel
-          contentWindow: @contentWindow
+          document: @contentWindow.document
           iframe: @iframe
 
         @trigger "test:start", test
