@@ -22,7 +22,7 @@ eclectus:
   - app/js/api/eclectus.coffee
   - app/js/api/reporter.coffee
   - app/js/api/sandbox.coffee
-  - app/js/api/dom.coffee
+  - app/js/api/command.coffee
   - app/js/api/xhr.coffee
   - app/js/config/**
   - app/js/backbone/app.coffee

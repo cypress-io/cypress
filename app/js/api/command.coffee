@@ -7,8 +7,8 @@ Eclectus.Command = do ($, _) ->
   ## included in their project, and any modifications they make
   ## to jquery will not affect our own internal use of it
   class Command
-    constructor: (@document, @channel, @runnable, prevObject) ->
-      @$el = prevObject if prevObject
+    constructor: (@document, @channel, @runnable) ->
+      @id = _.uniqueId("command")
       # @selector = el
       # @$el = @$(el)
 
@@ -35,7 +35,7 @@ Eclectus.Command = do ($, _) ->
       return @
 
     within: (el, fn) ->
-      @$el      = if @el then @el.find(el) else @$(el)
+      @$el      = if @$el then @$el.find(el) else @$(el)
       @selector = @$el.selector
 
       ## instead of patching all of these things here
