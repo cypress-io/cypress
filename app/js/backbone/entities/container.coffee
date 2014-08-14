@@ -31,25 +31,27 @@
       ## ids or create a real runnable model from the original framework runnable
       ## this ensures we are working with the same model and not generating a new one
       model = @getPreviousById(runnable.cid) or App.request("runnable:entity", type)
-      ## this sets its attributes from the runnable - so if its new it gets its
-      ## normal attributes, but if its existing it has a chance to have them updated
-      ## either its title, parent id, etc
-      model.setAttrsFromRunnable(runnable)
-
-      console.info model
 
       ## push the model into our current runnables array
       @currentRunnables.push model
 
-      ## and set its id for fast lookup
-      @currentIds[model.id] = model
+      ## this sets its attributes from the runnable - so if its new it gets its
+      ## normal attributes, but if its existing it has a chance to have them updated
+      ## either its title, parent id, etc
+      model.setAttrsFromRunnable runnable, @getIndex(model)
 
       ## figure out where this model should go?
       ## if we have its existing parent we insert it there
       ## else it goes on the root
       @insertIntoExistingParentOrRoot model, root
 
+      ## and set its id for fast lookup
+      @currentIds[model.id] = model
+
       return model
+
+    getIndex: (model) ->
+      _.indexOf @currentRunnables, model
 
     ## backup a reference to the previous runnables
     reset: ->
