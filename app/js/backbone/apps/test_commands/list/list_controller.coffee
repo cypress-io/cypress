@@ -6,6 +6,9 @@
 
       commandsView = @getCommandsView commands
 
+      @listenTo commandsView, "childview:pause:clicked", (iv, args) ->
+        console.warn args
+
       @show commandsView
 
     getCommandsView: (commands) ->
