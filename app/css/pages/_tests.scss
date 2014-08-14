@@ -123,19 +123,25 @@
       }
 
       &.active {
-        // background-color: lighten(#3C3E43, 10%);
+        background-color: #4A4A4A;
+        box-shadow: 0 1px 3px #555 inset;
+
+        .runnables .runnable-wrapper {
+          background-color: #4A4A4A;
+          box-shadow: 0 1px 3px #555 inset;
+        }
         // box-shadow: -3px 0 0 #999 inset;
 
-        .runnable-wrapper:before {
-          position: absolute;
-          left: 9px;
-          top: 50%;
-          margin-top: -5px;
-          color: #E9A61A;
-          font-size: 8px;
-          @extend .fa;
-          @extend .#{$fa-css-prefix}-circle;
-        }
+        // .runnable-wrapper:before {
+        //   position: absolute;
+        //   left: 9px;
+        //   top: 50%;
+        //   margin-top: -5px;
+        //   color: #E9A61A;
+        //   font-size: 8px;
+        //   @extend .fa;
+        //   @extend .#{$fa-css-prefix}-circle;
+        // }
 
         // &>.runnable-wrapper .runnable-controls i.fa-repeat {
         //   color: #DDD;
