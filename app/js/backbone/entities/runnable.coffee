@@ -18,18 +18,31 @@
     toggleOpen: ->
       @set "open", !@get("open")
 
-    setAttrsFromRunnable: (runnable) ->
+    setAttrsFromRunnable: (runnable, index) ->
       @set
         id: runnable.cid
         title: runnable.originalTitle()
         parentId: runnable.parent.cid
         parentRoot: runnable.parent.root
+        index: index
 
     addRunnable: (model) ->
+      ## if we're already a part of a collection and our index
+      ## attribute is changing, we need to resort the collection
+      sort = model.hasChanged("index") and !!model.collection
+
       ## reset its indent
       model.set "indent", @get("indent") + 20
-      model.collection = @get("children")
+
+      ## add the model, which if it exists will simply merge
+      ## in the model attribute changes
       @get("children").add(model, merge: true)
+
+      ## sort the collection manually if sort was true.  this has
+      ## to be here because collections will not resort unless models
+      ## are added or removed.  when we change a models comparator
+      ## attribute (index) -- we need to resort the collection ourselves
+      @get("children").sort() if sort
 
     remove: ->
       @collection.remove(@)
@@ -131,6 +144,8 @@
 
   class Entities.RunnableCollection extends Entities.Collection
     model: Entities.Runnable
+
+    comparator: "index"
 
   API =
     newRoot: ->

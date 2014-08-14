@@ -11,8 +11,6 @@
       ## generate the root runnable which holds everything
       root = App.request "new:root:runnable:entity"
 
-      console.info root
-
       ## use a collection as the container of all of our suites
       suites = App.request "new:suite:entities"
 
@@ -138,9 +136,8 @@
           region = layout.runnablesRegion
 
           ## dont replace the current view if theres one in the region
-          ## and our runner has chosen
           ## else this would cause all of our existing tests to be removed
-          return if region.currentView and runner.hasChosen()
+          return if region.hasView()
 
           ## repeat the nesting by inserting the collection view again
           runnablesView = @getRunnablesView model

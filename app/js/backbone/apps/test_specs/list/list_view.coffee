@@ -268,3 +268,14 @@
 
     initialize: ->
       @collection = @model.get("children")
+
+    resortView: ->
+      @collection.each (model, index) =>
+        view = @children.findByModel(model)
+        @moveViewToIndex(view, index) if view._index isnt index
+
+    moveViewToIndex: (view, index) ->
+      view._index = index
+      sibling = view.$el.siblings().eq(index)
+      view.$el.insertBefore(sibling)
+
