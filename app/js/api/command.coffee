@@ -86,6 +86,8 @@ Eclectus.Command = do ($, _) ->
 
       return @
 
+    ## should not talk directly to the runnable here
+    ## need to go through the runner to do this?
     pauseRunnable: ->
       @runnable.async = true
       @runnable.sync = false

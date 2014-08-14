@@ -25,17 +25,17 @@ window.Eclectus = do ($, _) ->
       _.each methods, (fn, key, obj) ->
         Eclectus.prototype[key] = _.partial(fn, args)
 
-    @scope = (instance) ->
-      instance.unscope = =>
+    @scope = (command) ->
+      command.unscope = =>
         @patch _(runnable).pick "runnable", "channel", "document"
 
-      @patch instance
+      @patch command
 
     @createCommand = (argsOrInstance) ->
       obj = command = argsOrInstance
 
       ## if this is an instance already just return that
-      return command if _.isFunction(command) and command instanceof Eclectus.DOM
+      return command if _.isFunction(command) and command instanceof Eclectus.Command
 
       ## else createCommand
       command = new Eclectus.Command obj.document, obj.channel, obj.runnable
