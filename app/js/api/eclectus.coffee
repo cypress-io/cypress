@@ -27,20 +27,23 @@ window.Eclectus = do ($, _) ->
 
     @scope = (command) ->
       command.unscope = =>
-        @patch _(runnable).pick "runnable", "channel", "document"
+        @patch _(command).pick "runnable", "channel", "document"
 
       @patch command
 
     @createCommand = (argsOrInstance) ->
       obj = command = argsOrInstance
 
-      ## if this is an instance already just return that
-      return command if _.isFunction(command) and command instanceof Eclectus.Command
+      try
+        ## if this is an instance already just return that
+        return command if command instanceof Eclectus.Command
 
       ## else createCommand
       command = new Eclectus.Command obj.document, obj.channel, obj.runnable
 
       ## pass down the scope method?
-      command.scope = _.partial @scope, command
+      command.scope = _.bind @scope, @, command
+
+      return command
 
   return Eclectus
