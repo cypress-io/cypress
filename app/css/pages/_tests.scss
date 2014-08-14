@@ -264,6 +264,25 @@
         letter-spacing: .6px;
       }
 
+      .command-controls {
+        float: right;
+
+        i {
+          padding: 2px;
+          color: #777;
+        }
+
+        i:hover {
+          color: #DDD;
+          cursor: pointer;
+        }
+
+        .fa-pause {
+          font-size: 11px;
+          margin-right: 2px;
+        }
+      }
+
       // .command-method {
       //   background-color: #23AE89;
       //   color: white;

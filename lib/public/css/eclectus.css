@@ -3616,6 +3616,17 @@ ul {
         text-transform: uppercase;
         font-size: 11px;
         letter-spacing: .6px; }
+      #test-specs ul.runnables .commands-container .command-controls {
+        float: right; }
+        #test-specs ul.runnables .commands-container .command-controls i {
+          padding: 2px;
+          color: #777; }
+        #test-specs ul.runnables .commands-container .command-controls i:hover {
+          color: #DDD;
+          cursor: pointer; }
+        #test-specs ul.runnables .commands-container .command-controls .fa-pause {
+          font-size: 11px;
+          margin-right: 2px; }
       #test-specs ul.runnables .commands-container .command-selector {
         color: #80B0FF; }
       #test-specs ul.runnables .commands-container .command-sequence {

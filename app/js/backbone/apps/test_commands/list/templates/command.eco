@@ -4,4 +4,7 @@
 <% else: %>
   <span class="command-selector"><%= @selector %></span>
 <% end %>
-<i class="fa fa-search fa-flip-horizontal pull-right"></i>
+<span class="command-controls">
+  <i class="fa fa-pause"></i>
+  <i class="fa fa-search fa-flip-horizontal"></i>
+</span>
