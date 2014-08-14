@@ -1547,7 +1547,7 @@ a.label:hover, a.label:focus {
   font-weight: normal;
   font-style: normal; }
 
-.fa, #test-specs ul.runnables li.runnable.active .runnable-wrapper:before {
+.fa {
   display: inline-block;
   font-family: FontAwesome;
   font-style: normal;
@@ -1605,9 +1605,9 @@ a.label:hover, a.label:focus {
 .pull-left {
   float: left; }
 
-.fa.pull-left, #test-specs ul.runnables li.runnable.active .pull-left.runnable-wrapper:before {
+.fa.pull-left {
   margin-right: .3em; }
-.fa.pull-right, #test-specs ul.runnables li.runnable.active .pull-right.runnable-wrapper:before {
+.fa.pull-right {
   margin-left: .3em; }
 
 .fa-spin, #test-page #specs-container li.processing > .suite-state i, #test-page #specs-container li.processing > .test-state i {
@@ -2469,7 +2469,7 @@ a.label:hover, a.label:focus {
 .fa-spinner:before {
   content: "\f110"; }
 
-.fa-circle:before, #test-specs ul.runnables li.runnable.active .runnable-wrapper:before {
+.fa-circle:before {
   content: "\f111"; }
 
 .fa-mail-reply:before,
@@ -3317,7 +3317,7 @@ ul {
       border-top: 1px solid #000;
       box-shadow: 0 1px 0 #444 inset;
       position: relative; }
-      #panel-wrapper > li header i.fa-circle, #panel-wrapper > li header #test-specs ul.runnables li.runnable.active i.runnable-wrapper:before, #test-specs ul.runnables li.runnable.active #panel-wrapper > li header i.runnable-wrapper:before {
+      #panel-wrapper > li header i.fa-circle {
         font-size: 11px;
         position: relative;
         top: -1px;
@@ -3545,13 +3545,12 @@ ul {
         cursor: pointer; }
         #test-specs ul.runnables li.runnable.hover > .runnable-wrapper .runnable-controls i {
           visibility: visible !important; }
-      #test-specs ul.runnables li.runnable.active .runnable-wrapper:before {
-        position: absolute;
-        left: 9px;
-        top: 50%;
-        margin-top: -5px;
-        color: #E9A61A;
-        font-size: 8px; }
+      #test-specs ul.runnables li.runnable.active {
+        background-color: #4A4A4A;
+        box-shadow: 0 1px 3px #555 inset; }
+        #test-specs ul.runnables li.runnable.active .runnables .runnable-wrapper {
+          background-color: #4A4A4A;
+          box-shadow: 0 1px 3px #555 inset; }
       #test-specs ul.runnables li.runnable .suite-state, #test-specs ul.runnables li.runnable .test-state {
         width: 12px;
         display: inline-block;
