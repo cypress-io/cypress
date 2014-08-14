@@ -34,6 +34,8 @@ Eclectus.Dom = do ($, _) ->
       return @
 
     type: (sequence, options = {}) ->
+      #@pauseRunnable() if sequence is "walk the dog{enter}" and @runnable.cid is "1lc"
+
       _.extend options,
         sequence: sequence
 
@@ -50,6 +52,18 @@ Eclectus.Dom = do ($, _) ->
         method:   "type"
         sequence: sequence
 
+      # debugger
+
       return @
+
+    pauseRunnable: ->
+      @runnable.async = true
+      @runnable.sync = false
+      ## unless i wrap this in a defer it wont
+      ## actually clear the timeout
+      ## gonna have to dig into mocha something is
+      ## probably resetting the timeout
+      _.defer =>
+        @runnable.clearTimeout()
 
   return Dom
