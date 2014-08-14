@@ -175,7 +175,6 @@
       }
 
       &.processing > .runnable-wrapper {
-        .suite-state i,
         .test-state i {
           @extend .#{$fa-css-prefix}-refresh;
           // @extend .fa-spin;
@@ -239,7 +238,7 @@
     }
 
     .commands-container {
-      padding: 4px 10px;
+      padding: 4px 0;
       margin: 5px 30px 0 20px;
       box-shadow: 0 0 3px #222 inset;
       background-color: #404040;
@@ -252,13 +251,20 @@
       }
 
       &>li {
-        margin: 2px 0;
+        padding: 2px 6px;
+        margin: 0 3px;
+        border-radius: 3px;
+
+        &:hover {
+          background-color: #474747;
+        }
       }
+
       .command-method {
         color: #E0C85E;
         padding: 0 2px;
         display: inline-block;
-        width: 34px;
+        width: 50px;
         text-transform: uppercase;
         font-size: 11px;
         letter-spacing: .6px;
