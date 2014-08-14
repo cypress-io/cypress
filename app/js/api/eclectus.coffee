@@ -25,6 +25,12 @@ window.Eclectus = do ($, _) ->
       _.each methods, (fn, key, obj) ->
         Eclectus.prototype[key] = _.partial(fn, args)
 
+    @scope = (instance) ->
+      instance.unscope = =>
+        @patch _(runnable).pick "runnable", "channel", "document"
+
+      @patch instance
+
     @instantiate = (argsOrInstance) ->
       obj = dom = argsOrInstance
 
@@ -32,7 +38,9 @@ window.Eclectus = do ($, _) ->
       return dom if _.isFunction(dom) and dom instanceof Eclectus.DOM
 
       ## else instantiate
-      dom = new Eclectus.Dom obj.document, obj.channel, obj.runnable, obj.prevObject
+      dom = new Eclectus.Dom obj.document, obj.channel, obj.runnable
 
+      ## pass down the scope method?
+      dom.scope = _.partial @scope, dom
 
   return Eclectus

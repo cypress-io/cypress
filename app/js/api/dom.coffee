@@ -46,11 +46,7 @@ Eclectus.Dom = do ($, _) ->
       ## else instatiate a new one
       ## ----------------------------------------------
       ## re-patch eclectus with this previous el object
-      Eclectus.patch
-        runnable: @runnable
-        channel: @channel
-        document: @document
-        prevObject: @$el
+      @scope()
 
       ## clone the body and strip out any script tags
       body = @$("body").clone(true, true)
@@ -65,10 +61,7 @@ Eclectus.Dom = do ($, _) ->
       fn.call(@)
 
       ## then undo so commands after this are back to normal
-      Eclectus.patch
-        runnable: @runnable
-        channel: @channel
-        document: @document
+      @unscope()
 
     type: (sequence, options = {}) ->
       #@pauseRunnable() if sequence is "walk the dog{enter}" and @runnable.cid is "1lc"
