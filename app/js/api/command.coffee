@@ -1,3 +1,8 @@
+## TODO need to handle scoping inner commands when the outer command fails
+## it doesnt make sense to fail the first .find and then fail all
+## subsequent finds.  should probably display that these have been skipped
+## or just dont display them at all
+
 ## attach to Eclectus global
 Eclectus.Command = do ($, _) ->
 
@@ -38,6 +43,20 @@ Eclectus.Command = do ($, _) ->
       @$el      = if @$el then @$el.find(el) else @$(el)
       @selector = @$el.selector
 
+      ## clone the body and strip out any script tags
+      body = @$("body").clone(true, true)
+      body.find("script").remove()
+
+      ## might want to strip out the previous selector here
+      ## since we may not want to display that in our command view
+      ## so instead of WITHIN #foo WITHIN #foo #bar WITHIN #foo #bar #baz
+      ## we'd have WITHIN #foo WITHIN #bar WITHIN #baz
+      @channel.trigger "dom", @runnable,
+        selector: @selector
+        el:       @$(@selector)
+        dom:      body
+        method:   "within"
+
       ## instead of patching all of these things here
       ## why wouldnt we just pass this instance around?
       ## that would probably work better with chaining
@@ -47,16 +66,6 @@ Eclectus.Command = do ($, _) ->
       ## ----------------------------------------------
       ## re-patch eclectus with this previous el object
       @scope()
-
-      ## clone the body and strip out any script tags
-      body = @$("body").clone(true, true)
-      body.find("script").remove()
-
-      @channel.trigger "dom", @runnable,
-        selector: @selector
-        el:       @$(@selector)
-        dom:      body
-        method:   "within"
 
       fn.call(@)
 
