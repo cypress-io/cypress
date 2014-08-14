@@ -1803,8 +1803,7 @@ a.label:hover, a.label:focus {
 .fa-repeat:before {
   content: "\f01e"; }
 
-.fa-refresh:before, #test-specs ul.runnables li.runnable.processing > .runnable-wrapper .suite-state i:before,
-#test-specs ul.runnables li.runnable.processing > .runnable-wrapper .test-state i:before, #test-page #specs-container li.processing > .suite-state i:before, #test-page #specs-container li.processing > .test-state i:before {
+.fa-refresh:before, #test-specs ul.runnables li.runnable.processing > .runnable-wrapper .test-state i:before, #test-page #specs-container li.processing > .suite-state i:before, #test-page #specs-container li.processing > .test-state i:before {
   content: "\f021"; }
 
 .fa-list-alt:before {
@@ -3572,7 +3571,6 @@ ul {
           padding-left: 2px;
           font-size: 16px;
           color: #999; }
-      #test-specs ul.runnables li.runnable.processing > .runnable-wrapper .suite-state i,
       #test-specs ul.runnables li.runnable.processing > .runnable-wrapper .test-state i {
         color: #888; }
       #test-specs ul.runnables li.runnable.test.failed > .runnable-wrapper {
@@ -3597,7 +3595,7 @@ ul {
       #test-specs ul.runnables li.runnable.pending > .runnable-wrapper .test-state i {
         color: #92bce0; }
     #test-specs ul.runnables .commands-container {
-      padding: 4px 10px;
+      padding: 4px 0;
       margin: 5px 30px 0 20px;
       box-shadow: 0 0 3px #222 inset;
       background-color: #404040;
@@ -3607,12 +3605,16 @@ ul {
       #test-specs ul.runnables .commands-container:empty {
         display: none; }
       #test-specs ul.runnables .commands-container > li {
-        margin: 2px 0; }
+        padding: 2px 6px;
+        margin: 0 3px;
+        border-radius: 3px; }
+        #test-specs ul.runnables .commands-container > li:hover {
+          background-color: #474747; }
       #test-specs ul.runnables .commands-container .command-method {
         color: #E0C85E;
         padding: 0 2px;
         display: inline-block;
-        width: 34px;
+        width: 50px;
         text-transform: uppercase;
         font-size: 11px;
         letter-spacing: .6px; }
