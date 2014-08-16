@@ -14,7 +14,7 @@ window.Eclectus = do ($, _) ->
 
     server: (obj) ->
       @sandbox._server = server = obj.contentWindow.sinon.fakeServer.create()
-      @sandbox.server = new Eclectus.Xhr server, obj.channel, obj.runnable
+      @sandbox.server = new Eclectus.Xhr server, obj.contentWindow.document, obj.channel, obj.runnable
 
       Eclectus.Xhr.bindServerTo(@, "server", @sandbox.server)
 
