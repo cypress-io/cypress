@@ -38,9 +38,10 @@
       ## replace only the first occurance of the parent selector
       selector.replace parent, ""
 
-    setResponse: ->
+    setResponse: (response) ->
       @set "status", @xhr.status
       @set "response", @xhr.responseText
+      @response = response
 
     getDom: ->
       @dom
@@ -105,14 +106,14 @@
       return command
 
     addXhr: (attrs) ->
-      {xhr} = attrs
+      {xhr, response} = attrs
 
       attrs = _(attrs).omit "xhr"
 
       ## does an existing xhr command already exist?
       if command = @parentExistsFor(attrs.instanceId)
         ## if so update its response body
-        command.setResponse()
+        command.setResponse(response)
         command.doNotAdd = true
 
       else

@@ -91,10 +91,11 @@ Eclectus.Xhr = do ($, _) ->
           request.respond(response.status, response.headers, response.body)
 
           @channel.trigger "xhr", @runnable,
-            instanceId: request.instanceId
-            method:     request.method
-            url:        request.url
-            xhr:        request
+            instanceId:   request.instanceId
+            method:       request.method
+            url:          request.url
+            xhr:          request
+            response:     options
 
     requestMatchesResponse: (request, options) ->
       request.method is options.method and
