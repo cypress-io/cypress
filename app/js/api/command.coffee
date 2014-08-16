@@ -13,7 +13,11 @@ Eclectus.Command = do ($, _) ->
   ## to jquery will not affect our own internal use of it
   class Command
     constructor: (@document, @channel, @runnable) ->
-      @id = _.uniqueId("command")
+      ## this is the unique identifer of all instantiated
+      ## commands.  so as we chain off of this instanceId
+      ## we can reference back up to the parent instanceId
+      ## we chained off of.
+      @instanceId = _.uniqueId("commandInstance")
       # @selector = el
       # @$el = @$(el)
 
@@ -36,6 +40,8 @@ Eclectus.Command = do ($, _) ->
         el:       @$(@selector)
         dom:      body
         method:   "find"
+        isParent: true
+        instanceId: @instanceId
 
       return @
 
@@ -56,12 +62,14 @@ Eclectus.Command = do ($, _) ->
         el:       @$(@selector)
         dom:      body
         method:   "within"
+        isParent: true
+        instanceId: @instanceId
 
       ## instead of patching all of these things here
-      ## why wouldnt we just pass this instance around?
+      ## why wouldnt we just pass this instanceId around?
       ## that would probably work better with chaining
       ## call this scope? instead of patch?
-      ## if obj instanceof Eclectus.Command then just use that
+      ## if obj instanceIdof Eclectus.Command then just use that
       ## else instatiate a new one
       ## ----------------------------------------------
       ## re-patch eclectus with this previous el object
@@ -90,8 +98,24 @@ Eclectus.Command = do ($, _) ->
         dom:      body
         method:   "type"
         sequence: sequence
+        instanceId: @instanceId
 
-      # debugger
+      return @
+
+    click: ->
+      @selector = @$el.selector
+
+      @$el.simulate "click"
+
+      ## clone the body and strip out any script tags
+      body = @$("body").clone(true, true)
+      body.find("script").remove()
+
+      @channel.trigger "dom", @runnable,
+        el:       @$(@selector)
+        dom:      body
+        method:   "click"
+        instanceId: @instanceId
 
       return @
 

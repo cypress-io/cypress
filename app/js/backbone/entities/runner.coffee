@@ -14,9 +14,7 @@
   ## DOM / XHR / LOG
   ## and partial each test (on test run) if its chosen...?
     initialize: ->
-      @doms = App.request "dom:entities"
-    #   @xhr = App.request "xhr:entity"
-    #   @log = App.request "log:entity"
+      @commands = App.request "command:entities"
 
     setContentWindow: (@contentWindow) ->
 
@@ -37,11 +35,11 @@
     logResults: (test) ->
       @trigger "test:results:ready", test
 
-    revertDom: (dom) ->
-      console.warn dom
-      @trigger "revert:dom", dom.getDom(),
-        highlight: dom.get("highlight")
-        el: dom.getEl()
+    revertDom: (command) ->
+      console.warn command
+      @trigger "revert:dom", command.getDom(),
+        highlight: command.get("highlight")
+        el: command.getEl()
 
     setTestRunner: (runner) ->
       ## store the test runner as a property on ourselves
@@ -121,19 +119,20 @@
         $.when(generatedIds...).done =>
           runSuite.call(@, suite, fn)
 
-    getEntitiesByEvent: (event) ->
-      obj = {dom: @doms, xhr: @xhrs, log: @logs}
-      obj[event or throw new Error("Cannot find entities by event: #{event}")]
+    # getEntitiesByEvent: (event) ->
+    #   obj = {dom: @doms, xhr: @xhrs, log: @logs}
+    #   obj[event or throw new Error("Cannot find entities by event: #{event}")]
 
     getCommands: ->
-      @doms
+      @commands
 
     startListening: ->
       @listenTo runnerChannel, "all", (event, runnable, attrs) ->
 
+        @commands.add attrs, runnable
         ## grab the entities on our instance
-        entities = @getEntitiesByEvent(event)
-        entities.add attrs, runnable
+        # entities = @getEntitiesByEvent(event)
+        # entities.add attrs, runnable
 
         ## Do not necessarily need to trigger anything, just need to
         ## expose these entities to the outside world so they can listen
@@ -183,7 +182,7 @@
         @patchEcl
           runnable: test
           channel: runnerChannel
-          document: @contentWindow.document
+          contentWindow: @contentWindow
           iframe: @iframe
 
         @trigger "test:start", test
@@ -201,9 +200,7 @@
       delete @runner
       delete @contentWindow
       delete @iframe
-      delete @doms
-      delete @xhrs
-      delete @logs
+      delete @commands
 
       ## cleanup any of our handlers
       @stopListening()
@@ -214,8 +211,8 @@
       @triggerLoadIframe @iframe
 
     triggerLoadIframe: (iframe, opts = {}) ->
-      ## clear out the doms and xhrs
-      _([@doms]).invoke "reset"
+      ## clear out the commands
+      @commands.reset()
 
       ## set any outstanding test to pending and stopped
       ## so we bypass all old ones

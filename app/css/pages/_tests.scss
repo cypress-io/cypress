@@ -239,7 +239,7 @@
 
     .commands-container {
       padding: 4px 0;
-      margin: 5px 30px 0 20px;
+      margin: 5px 30px 5px 20px;
       box-shadow: 0 0 3px #222 inset;
       background-color: #404040;
       border-radius: 4px;
@@ -260,6 +260,30 @@
         }
       }
 
+      .command-child {
+        &:before {
+          border-left: 1px dotted #999;
+          border-bottom: 1px dotted #999;
+          position: absolute;
+          width: 10px;
+          height: 11px;
+          content: "";
+          margin-left: -12px;
+        }
+      }
+
+      .command-parent {
+        border-top: 1px dotted #535353;
+
+        &:first-child {
+          border-top: 0;
+        }
+      }
+
+      .command-wrapper {
+        position: relative;
+      }
+
       .command-method {
         color: #E0C85E;
         padding: 0 2px;
@@ -268,6 +292,7 @@
         text-transform: uppercase;
         font-size: 11px;
         letter-spacing: .6px;
+        // @include text-overflow;
       }
 
       .command-controls {
@@ -303,10 +328,14 @@
 
       .command-selector {
         color: #80B0FF;
+        position: absolute;
+        left: 80px;
       }
 
       .command-sequence {
         color: #F98E33;
+        position: absolute;
+        left: 80px;
       }
     }
   }
@@ -452,6 +481,22 @@
     width: 100%;
     position: relative;
     box-shadow: 0 0 12px #CCCCCC;
+
+    #iframe-message {
+      position: absolute;
+      right: 150px;
+      top: 6px;
+      background-color: #111;
+      color: #FFF;
+      opacity: 0.7;
+      padding: 5px 10px;
+      border-radius: 5px;
+      display: none;
+
+      &:empty {
+        display: none;
+      }
+    }
 
     header {
       overflow: auto;
