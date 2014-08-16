@@ -8,11 +8,12 @@
       ## we need to have access to the methods we need to partial
       ## each time our tests / suites / hooks run
       patch = Eclectus.patch
+      sandbox = Eclectus.sandbox
 
       ## resolve the promise with our bona-fide
       ## runner entity which will manage the lifecycle
       ## of our test runner
-      df.resolve App.request("runner:entity", runner, patch)
+      df.resolve App.request("runner:entity", runner, patch, sandbox)
 
   API =
     ## the start method will be responsible for setting up

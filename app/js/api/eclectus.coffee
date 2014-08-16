@@ -12,18 +12,27 @@ window.Eclectus = do ($, _) ->
       command = Eclectus.createCommand(obj)
       command.within(el, fn)
 
-  class Eclectus
-    constructor: (@logs = [], @xhrs = []) ->
+    server: (obj) ->
+      @sandbox._server = server = obj.contentWindow.sinon.fakeServer.create()
+      @sandbox.server = new Eclectus.Xhr server, obj.channel, obj.runnable
 
+    ## these should have commands to log out the # of times called
+    ## the arguments, etc
+    stub: (obj) ->
+    mock: (obj) ->
+
+  class Eclectus
     ## class method patch
     ## loops through each method and partials
     ## the runnable onto our prototype
-    ## i think besides passing runnable i should pass
-    ## a bus object for passing messages through instead
-    ## of relying on the runnable object having an 'emit' method
     @patch = (args) ->
       _.each methods, (fn, key, obj) ->
         Eclectus.prototype[key] = _.partial(fn, args)
+
+    ## store the sandbox for each iframe window
+    ## so all of our Ecl commands can utilize this
+    @sandbox = (contentWindow) ->
+      Eclectus.prototype.sandbox = contentWindow.sinon.sandbox.create()
 
     @scope = (command) ->
       command.unscope = =>
@@ -39,7 +48,7 @@ window.Eclectus = do ($, _) ->
         return command if command instanceof Eclectus.Command
 
       ## else createCommand
-      command = new Eclectus.Command obj.document, obj.channel, obj.runnable
+      command = new Eclectus.Command obj.contentWindow.document, obj.channel, obj.runnable
 
       ## pass down the scope method?
       command.scope = _.bind @scope, @, command

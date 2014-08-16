@@ -22,6 +22,8 @@
 
     setEclPatch: (@patchEcl) ->
 
+    setEclSandbox: (@patchSandbox) ->
+
     getTestCid: (test) ->
       ## grab the test id from the test's title
       matches = testIdRegExp.exec(test.title)
@@ -127,9 +129,9 @@
       @commands
 
     startListening: ->
-      @listenTo runnerChannel, "all", (event, runnable, attrs) ->
+      @listenTo runnerChannel, "all", (type, runnable, attrs) ->
 
-        @commands.add attrs, runnable
+        @commands.add attrs, type, runnable
         ## grab the entities on our instance
         # entities = @getEntitiesByEvent(event)
         # entities.add attrs, runnable
@@ -265,6 +267,9 @@
       ## pass this along to our Eclectus methods
       @setContentWindow contentWindow
 
+      ## patch the sinon sandbox for Eclectus methods
+      @patchSandbox @contentWindow
+
       ## grep for the correct test / suite by its id if chosenId is set
       ## or all the tests
       @runner.grep @getGrep()
@@ -282,13 +287,14 @@
         console.log "finished running the iframes suite!"
 
   API =
-    getRunner: (testRunner, patch) ->
+    getRunner: (testRunner, patch, sandbox) ->
       ## store the actual testRunner on ourselves
       runner = new Entities.Runner
       runner.setTestRunner testRunner
       runner.setEclPatch patch
+      runner.setEclSandbox sandbox
       runner.startListening()
       runner
 
-  App.reqres.setHandler "runner:entity", (testRunner, patch) ->
-    API.getRunner(testRunner, patch)
+  App.reqres.setHandler "runner:entity", (testRunner, patch, sandbox) ->
+    API.getRunner testRunner, patch, sandbox
