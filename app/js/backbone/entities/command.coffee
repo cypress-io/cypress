@@ -38,6 +38,10 @@
       ## replace only the first occurance of the parent selector
       selector.replace parent, ""
 
+    setResponse: ->
+      @set "status", @xhr.status
+      @set "response", @xhr.responseText
+
     getDom: ->
       @dom
 
@@ -105,9 +109,16 @@
 
       attrs = _(attrs).omit "xhr"
 
-      ## instantiate the new model
-      command = new Entities.Command attrs
-      command.xhr = xhr
+      ## does an existing xhr command already exist?
+      if command = @parentExistsFor(attrs.instanceId)
+        ## if so update its response body
+        command.setResponse()
+        command.doNotAdd = true
+
+      else
+        ## instantiate the new model
+        command = new Entities.Command attrs
+        command.xhr = xhr
 
       return command
 
@@ -126,6 +137,9 @@
       command = @getCommandByType(attrs)
 
       console.warn "command model is: ", command
+
+      ## need to refactor this
+      return command if command.doNotAdd
 
       super command
 

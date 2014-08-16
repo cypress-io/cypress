@@ -3,12 +3,28 @@
   class List.Xhr extends App.Views.ItemView
     template: "test_commands/list/_xhr"
 
+    ui:
+      response: ".command-response"
+
+    modelEvents:
+      "change:response"  : "render"
+
     events:
-      "click" : "clicked"
+      "click"               : "clicked"
+      "click @ui.response"  : "responseClicked"
 
     clicked: (e) ->
       e.stopPropagation()
       console.log @model.xhr
+
+    responseClicked: (e) ->
+      e.stopPropagation()
+      response = @model.xhr.responseText
+
+      try
+        console.log JSON.parse(response)
+      catch e
+        console.log(response)
 
   class List.Dom extends App.Views.ItemView
     template: "test_commands/list/_dom"

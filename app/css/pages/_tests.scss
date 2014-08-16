@@ -284,7 +284,7 @@
         position: relative;
       }
 
-      .command-method {
+      .command-method, .command-xhr {
         color: #E0C85E;
         padding: 0 2px;
         display: inline-block;
@@ -293,6 +293,11 @@
         font-size: 11px;
         letter-spacing: .6px;
         // @include text-overflow;
+      }
+
+
+      .command-xhr {
+        color: darken(#2EC1CC, 2%);
       }
 
       .command-controls {
@@ -336,6 +341,37 @@
         color: #F98E33;
         position: absolute;
         left: 80px;
+      }
+
+      .command-request {
+        color: #80B0FF;
+
+        &:hover {
+          cursor: pointer;
+          text-decoration: underline;
+        }
+      }
+
+      .command-response {
+        float: right;
+
+        &:hover {
+          cursor: pointer;
+
+          .command-body {
+            text-decoration: underline;
+          }
+        }
+
+        .command-status {
+          font-weight: 300;
+          color: #CCC;
+          margin-right: 3px;
+        }
+
+        .command-body {
+          color: #AAA;
+        }
       }
     }
   }

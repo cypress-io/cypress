@@ -16,6 +16,8 @@ window.Eclectus = do ($, _) ->
       @sandbox._server = server = obj.contentWindow.sinon.fakeServer.create()
       @sandbox.server = new Eclectus.Xhr server, obj.channel, obj.runnable
 
+      Eclectus.Xhr.bindServerTo(@, "server", @sandbox.server)
+
     ## these should have commands to log out the # of times called
     ## the arguments, etc
     stub: (obj) ->
