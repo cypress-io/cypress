@@ -1,9 +1,9 @@
 ## attach to Eclectus global
-Eclectus.Xhr = do ($, _) ->
+Eclectus.Xhr = do ($, _, Eclectus) ->
 
   methods = ["stub", "get", "post", "put", "patch", "delete", "respond", "requests", "onRequest"]
 
-  class Xhr
+  class Xhr extends Eclectus.Command
     constructor: (@server, @document, @channel, @runnable) ->
       ## make sure to reset both of these on restore()
       @requests = []
@@ -45,9 +45,6 @@ Eclectus.Xhr = do ($, _) ->
           _this.invokeOnRequest(xhr)
 
         return xhr
-
-    $: (selector) ->
-      new $.fn.init(selector, @document)
 
     ## need to find the onRequest based on the matching response
     ## this loops through all the responses, finds the matching one
