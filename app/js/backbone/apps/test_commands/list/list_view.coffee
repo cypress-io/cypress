@@ -5,9 +5,11 @@
 
     ui:
       pause: ".fa-pause"
+      revert:   ".fa-search"
 
     triggers:
       "click @ui.pause" : "pause:clicked"
+      "click @ui.revert"  : "revert:clicked"
 
   class List.Commands extends App.Views.CollectionView
     tagName: "ul"
