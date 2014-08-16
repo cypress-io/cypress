@@ -22,9 +22,12 @@
       response = @model.xhr.responseText
 
       try
-        console.log JSON.parse(response)
-      catch e
-        console.log(response)
+        response = JSON.parse response
+
+      console.log "Status:     ", @model.xhr.status
+      console.log "URL:        ", @model.xhr.url
+      console.log "Matched URL:", @model.response.url
+      console.log "Response:   ", response
 
   class List.Dom extends App.Views.ItemView
     template: "test_commands/list/_dom"
