@@ -2,6 +2,7 @@
 
   class DOM.Controller extends App.Controllers.Application
     initialize: (options) ->
+      return
       { panel, runner } = options
 
       doms = runner.getEntitiesByEvent("dom")

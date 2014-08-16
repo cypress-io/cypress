@@ -3596,7 +3596,7 @@ ul {
         color: #92bce0; }
     #test-specs ul.runnables .commands-container {
       padding: 4px 0;
-      margin: 5px 30px 0 20px;
+      margin: 5px 30px 5px 20px;
       box-shadow: 0 0 3px #222 inset;
       background-color: #404040;
       border-radius: 4px;
@@ -3610,6 +3610,20 @@ ul {
         border-radius: 3px; }
         #test-specs ul.runnables .commands-container > li:hover {
           background-color: #474747; }
+      #test-specs ul.runnables .commands-container .command-child:before {
+        border-left: 1px dotted #999;
+        border-bottom: 1px dotted #999;
+        position: absolute;
+        width: 10px;
+        height: 11px;
+        content: "";
+        margin-left: -12px; }
+      #test-specs ul.runnables .commands-container .command-parent {
+        border-top: 1px dotted #535353; }
+        #test-specs ul.runnables .commands-container .command-parent:first-child {
+          border-top: 0; }
+      #test-specs ul.runnables .commands-container .command-wrapper {
+        position: relative; }
       #test-specs ul.runnables .commands-container .command-method {
         color: #E0C85E;
         padding: 0 2px;
@@ -3630,9 +3644,13 @@ ul {
           font-size: 11px;
           margin-right: 2px; }
       #test-specs ul.runnables .commands-container .command-selector {
-        color: #80B0FF; }
+        color: #80B0FF;
+        position: absolute;
+        left: 80px; }
       #test-specs ul.runnables .commands-container .command-sequence {
-        color: #F98E33; }
+        color: #F98E33;
+        position: absolute;
+        left: 80px; }
 
 #test-page {
   position: relative; }
