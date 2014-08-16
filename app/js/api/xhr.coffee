@@ -62,9 +62,10 @@ Eclectus.Xhr = do ($, _) ->
         onRequest.call xhr, xhr
 
     stub: (options = {}) ->
+      throw new Error("Ecl.server.stub() must be called with a method option") if not options.method
+
       _.defaults options,
         url: /.*/
-        method: "GET"
         status: 200
         contentType: "application/json"
         response: ""
@@ -107,12 +108,29 @@ Eclectus.Xhr = do ($, _) ->
       JSON.stringify(response)
 
     get: (options = {}) ->
+      options.method = "GET"
+      @stub options
+
     post: (options = {}) ->
+      options.method = "POST"
+      @stub options
+
     put: (options = {}) ->
+      options.method = "PUT"
+      @stub options
+
     patch: (options = {}) ->
+      options.method = "PATCH"
+      @stub options
+
     delete: (options = {}) ->
-    onRequest: (options = {}) ->
+      options.method = "DELETE"
+      @stub options
+
     respond: -> @server.respond()
+
+    onRequest: (fn) ->
+      @onRequests.push fn
 
     ## class method responsible for dynamically binding
     ## our patched obj[property] to the servers proto methods
