@@ -4,14 +4,14 @@
 ## or just dont display them at all
 
 ## attach to Eclectus global
-Eclectus.Dom = do ($, _) ->
+Eclectus.Dom = do ($, _, Eclectus) ->
 
   ## create a reusable jquery selector object for our iframes
   ## which utilitizes our parent jquery object with the iframe
   ## context.  this means our consumers dont have to have jquery
   ## included in their project, and any modifications they make
   ## to jquery will not affect our own internal use of it
-  class Dom
+  class Dom extends Eclectus.Command
     constructor: (@document, @channel, @runnable) ->
       ## this is the unique identifer of all instantiated
       ## commands.  so as we chain off of this instanceId
@@ -20,9 +20,6 @@ Eclectus.Dom = do ($, _) ->
       @instanceId = _.uniqueId("domInstance")
       # @selector = el
       # @$el = @$(el)
-
-    $: (selector) ->
-      new $.fn.init(selector, @document)
 
     ## if find is called and we already have a selector
     ## it means we're chaining and we need to set prevObject
