@@ -127,6 +127,7 @@
         when "suite" then "test_specs/list/_suite"
 
     ui:
+      label:      "label"
       icon:       ".suite-state i"
       ellipsis:   ".suite-title i"
       repeat:     ".fa-repeat"
@@ -136,6 +137,7 @@
 
     modelEvents:
       "change:open"     : "openChanged"
+      "change:state"    : "stateChanged"
 
     openChanged: (model, value, options) ->
       if @model.is("suite")
@@ -152,6 +154,23 @@
     repeatClicked: (e) ->
       e.stopPropagation()
       @model.trigger "model:double:clicked"
+
+    stateChanged: (model, value, options) ->
+      if @model.get("type") is "test"
+        ## if the test passed check on the duration
+        @checkDuration() if value is "passed"
+        @checkTimeout() if value is "failed"
+
+    checkDuration: ->
+      return if not @model.isSlow()
+
+      ## need to add a tooltip here
+      @ui.label.addClass("label-primary").text(@model.get("duration") + "ms")
+
+    checkTimeout: ->
+      return if not @model.timedOut()
+
+      @ui.label.addClass("label-danger").text("Timed Out")
 
   class List.RunnableLayout extends App.Views.LayoutView
     getTemplate: ->
@@ -232,11 +251,6 @@
       @$el.removeClass("processing pending failed passed").addClass(value)
       @applyIndent(value)
 
-      if @model.get("type") is "test"
-        ## if the test passed check on the duration
-        @checkDuration() if value is "passed"
-        @checkTimeout() if value is "failed"
-
     openChanged: (model, value, options) ->
       ## hide or show the commands or runnables
       el = if @model.is("test") then @ui.commands else @ui.runnables
@@ -245,17 +259,6 @@
     errorChanged: (model, value, options) ->
       value or= ""
       @ui.pre.text(value)
-
-    checkDuration: ->
-      return if not @model.isSlow()
-
-      ## need to add a tooltip here
-      @ui.label.addClass("label-primary").text(@model.get("duration") + "ms")
-
-    checkTimeout: ->
-      return if not @model.timedOut()
-
-      @ui.label.addClass("label-danger").text("Timed Out")
 
   class List.Runnables extends App.Views.CollectionView
     tagName: "ul"
