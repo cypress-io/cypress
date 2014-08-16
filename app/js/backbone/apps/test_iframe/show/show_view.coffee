@@ -7,6 +7,7 @@
       # header:   "header"
       expand:   ".fa-expand"
       compress: ".fa-compress"
+      message:  "#iframe-message"
 
     events:
       "click @ui.expand"    : "expandClicked"
@@ -16,8 +17,12 @@
       ## replaces the iframes body with the dom object
       dom.replaceAll @$el.find("iframe").contents().find("body")
 
-      return if not options.highlight
-      @highlight dom, options.el
+      @addRevertMessage(options)
+
+      @highlight(dom, options.el) if options.highlight
+
+    addRevertMessage: (options) ->
+      @ui.message.text("DOM has been reverted").show()
 
     getZIndex: (el) ->
       if /^(auto|0)$/.test el.css("zIndex") then 1000 else Number el.css("zIndex")
@@ -51,6 +56,7 @@
 
     loadIframe: (src, fn) ->
       ## remove any existing iframes
+      @ui.message.hide().empty()
       @$el.find("iframe").remove()
 
       @$el.hide()
