@@ -2,14 +2,11 @@
 
   class Entities.Runnable extends Entities.Model
     defaults: ->
-      attrs =
-        state: "processing"
-        indent: -10
-        open: false
-        children:  new Entities.RunnableCollection
-        commands: App.request("command:entities")
-
-      attrs
+      state: "processing"
+      indent: -10
+      open: false
+      children:  new Entities.RunnableCollection
+      commands: App.request("command:entities")
 
     initialize: ->
       new Backbone.Chooser(@)
