@@ -41,7 +41,13 @@
     setResponse: (response) ->
       @set "status", @xhr.status
       @set "response", @xhr.responseText
+      @set "method", "resp"
       @response = response
+
+    getPrimaryObject: ->
+      switch @get("type")
+        when "xhr" then @xhr
+        when "dom" then @dom
 
     getDom: ->
       @dom
@@ -66,7 +72,7 @@
     insertParent: (parent) ->
       clone = parent.clone()
 
-      _.each ["el", "dom", "parent"], (prop) ->
+      _.each ["el", "dom", "xhr", "response", "parent"], (prop) ->
         clone[prop] = parent[prop]
 
       @add clone
@@ -99,27 +105,26 @@
         ## that means something has been inserted in between our command
         ## instance group and we need to insert the parent so this command
         ## looks visually linked to its parent
-        if @lastCommandIsNotRelatedTo(command)
-          # debugger
-          @insertParent(parent)
+        @insertParent(parent) if @lastCommandIsNotRelatedTo(command)
 
       return command
 
     addXhr: (attrs) ->
-      {xhr, response} = attrs
+      {xhr, response, dom} = attrs
 
-      attrs = _(attrs).omit "xhr"
+      attrs = _(attrs).omit "xhr", "response", "dom"
 
-      ## does an existing xhr command already exist?
-      if command = @parentExistsFor(attrs.instanceId)
-        ## if so update its response body
-        command.setResponse(response)
-        command.doNotAdd = true
+      ## instantiate the new model
+      command = new Entities.Command attrs
+      command.xhr = xhr
+      command.dom = dom
 
-      else
-        ## instantiate the new model
-        command = new Entities.Command attrs
-        command.xhr = xhr
+      if parent = @parentExistsFor(attrs.instanceId)
+        command.setParent parent
+        command.setResponse response
+        command.indent()
+
+        @insertParent(parent) if @lastCommandIsNotRelatedTo(command)
 
       return command
 
@@ -138,9 +143,6 @@
       command = @getCommandByType(attrs)
 
       console.warn "command model is: ", command
-
-      ## need to refactor this
-      return command if command.doNotAdd
 
       super command
 

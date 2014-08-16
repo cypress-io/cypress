@@ -1,10 +1,15 @@
 <div class="command-wrapper">
   <span class="command-xhr"><%= @method %></span>
-  <span class="command-request"><%= @url %></span>
   <% if @response: %>
     <span class="command-response">
       <span class="command-status"><%= @status %></span>
       <span class="command-body"><%= @response %></span>
-    <span>
+    </span>
+  <% else: %>
+    <span class="command-request"><%= @url %></span>
   <% end %>
+  <span class="command-controls">
+    <i class="fa fa-pause"></i>
+    <i class="fa fa-search fa-flip-horizontal"></i>
+  </span>
 </div>
