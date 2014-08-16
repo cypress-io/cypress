@@ -331,16 +331,17 @@
       //   letter-spacing: .7px;
       // }
 
-      .command-selector {
+      .command-selector,
+      .command-sequence,
+      .command-request,
+      .command-response {
         color: #80B0FF;
         position: absolute;
         left: 80px;
       }
 
-      .command-sequence {
+      .command-sequence, .command-response {
         color: #F98E33;
-        position: absolute;
-        left: 80px;
       }
 
       .command-request {
@@ -353,8 +354,6 @@
       }
 
       .command-response {
-        float: right;
-
         &:hover {
           cursor: pointer;
 

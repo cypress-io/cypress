@@ -3645,31 +3645,30 @@ ul {
         #test-specs ul.runnables .commands-container .command-controls .fa-pause {
           font-size: 11px;
           margin-right: 2px; }
-      #test-specs ul.runnables .commands-container .command-selector {
+      #test-specs ul.runnables .commands-container .command-selector,
+      #test-specs ul.runnables .commands-container .command-sequence,
+      #test-specs ul.runnables .commands-container .command-request,
+      #test-specs ul.runnables .commands-container .command-response {
         color: #80B0FF;
         position: absolute;
         left: 80px; }
-      #test-specs ul.runnables .commands-container .command-sequence {
-        color: #F98E33;
-        position: absolute;
-        left: 80px; }
+      #test-specs ul.runnables .commands-container .command-sequence, #test-specs ul.runnables .commands-container .command-response {
+        color: #F98E33; }
       #test-specs ul.runnables .commands-container .command-request {
         color: #80B0FF; }
         #test-specs ul.runnables .commands-container .command-request:hover {
           cursor: pointer;
           text-decoration: underline; }
-      #test-specs ul.runnables .commands-container .command-response {
-        float: right; }
-        #test-specs ul.runnables .commands-container .command-response:hover {
-          cursor: pointer; }
-          #test-specs ul.runnables .commands-container .command-response:hover .command-body {
-            text-decoration: underline; }
-        #test-specs ul.runnables .commands-container .command-response .command-status {
-          font-weight: 300;
-          color: #CCC;
-          margin-right: 3px; }
-        #test-specs ul.runnables .commands-container .command-response .command-body {
-          color: #AAA; }
+      #test-specs ul.runnables .commands-container .command-response:hover {
+        cursor: pointer; }
+        #test-specs ul.runnables .commands-container .command-response:hover .command-body {
+          text-decoration: underline; }
+      #test-specs ul.runnables .commands-container .command-response .command-status {
+        font-weight: 300;
+        color: #CCC;
+        margin-right: 3px; }
+      #test-specs ul.runnables .commands-container .command-response .command-body {
+        color: #AAA; }
 
 #test-page {
   position: relative; }
