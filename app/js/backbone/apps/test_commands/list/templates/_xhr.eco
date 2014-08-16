@@ -1,0 +1,4 @@
+<div class="command-wrapper">
+  <span class="command-method"><%= @method %></span>
+  <span class="command-selector"><%= @url %></span>
+</div>

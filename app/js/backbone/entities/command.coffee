@@ -66,21 +66,17 @@
 
       @add clone
 
-    add: (attrs, runnable) ->
-      try
-        ## bail if we're attempting to add a real model here
-        ## instead of an object
-        return super(attrs) if attrs instanceof Entities.Command
+    getCommandByType: (attrs) ->
+      switch attrs.type
+        when "dom" then @addDom attrs
+        when "xhr" then @addXhr attrs
 
-      return if _.isEmpty attrs
-
+    addDom: (attrs) ->
       {el, dom} = attrs
 
       attrs = _(attrs).omit "el", "dom"
 
-      _.extend attrs,
-        testId: runnable.cid
-        highlight: true
+      attrs.highlight = true
 
       ## instantiate the new model
       command = new Entities.Command attrs
@@ -101,6 +97,33 @@
         if @lastCommandIsNotRelatedTo(command)
           # debugger
           @insertParent(parent)
+
+      return command
+
+    addXhr: (attrs) ->
+      {xhr} = attrs
+
+      attrs = _(attrs).omit "xhr"
+
+      ## instantiate the new model
+      command = new Entities.Command attrs
+      command.xhr = xhr
+
+      return command
+
+    add: (attrs, type, runnable) ->
+      try
+        ## bail if we're attempting to add a real model here
+        ## instead of an object
+        return super(attrs) if attrs instanceof Entities.Command
+
+      return if _.isEmpty attrs
+
+      _.extend attrs,
+        type: type
+        testId: runnable.cid
+
+      command = @getCommandByType(attrs)
 
       console.warn "command model is: ", command
 

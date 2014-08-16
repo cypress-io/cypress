@@ -1,7 +1,17 @@
 @App.module "TestCommandsApp.List", (List, App, Backbone, Marionette, $, _) ->
 
-  class List.Command extends App.Views.ItemView
-    template: "test_commands/list/command"
+  class List.Xhr extends App.Views.ItemView
+    template: "test_commands/list/_xhr"
+
+    events:
+      "click" : "clicked"
+
+    clicked: (e) ->
+      e.stopPropagation()
+      console.log @model.xhr
+
+  class List.Dom extends App.Views.ItemView
+    template: "test_commands/list/_dom"
 
     ui:
       wrapper:  ".command-wrapper"
@@ -29,4 +39,7 @@
   class List.Commands extends App.Views.CollectionView
     tagName: "ul"
     className: "commands-container"
-    childView: List.Command
+    getChildView: (command) ->
+      switch command.get("type")
+        when "dom" then List.Dom
+        when "xhr" then List.Xhr
