@@ -3,14 +3,14 @@ window.Eclectus = do ($, _) ->
 
   methods =
     find: (obj, el) ->
-      command = Eclectus.createCommand(obj)
-      command.find(el)
+      dom = Eclectus.createDom(obj)
+      dom.find(el)
 
     within: (obj, el, fn) ->
       throw new Error("Ecl.within() must be given a callback function!") if not _.isFunction(fn)
 
-      command = Eclectus.createCommand(obj)
-      command.within(el, fn)
+      dom = Eclectus.createDom(obj)
+      dom.within(el, fn)
 
     server: (obj) ->
       @sandbox._server = server = obj.contentWindow.sinon.fakeServer.create()
@@ -36,25 +36,25 @@ window.Eclectus = do ($, _) ->
     @sandbox = (contentWindow) ->
       Eclectus.prototype.sandbox = contentWindow.sinon.sandbox.create()
 
-    @scope = (command) ->
-      command.unscope = =>
-        @patch _(command).pick "runnable", "channel", "document"
+    @scope = (dom) ->
+      dom.unscope = =>
+        @patch _(dom).pick "runnable", "channel", "document"
 
-      @patch command
+      @patch dom
 
-    @createCommand = (argsOrInstance) ->
-      obj = command = argsOrInstance
+    @createDom = (argsOrInstance) ->
+      obj = dom = argsOrInstance
 
       try
         ## if this is an instance already just return that
-        return command if command instanceof Eclectus.Command
+        return dom if dom instanceof Eclectus.Dom
 
-      ## else createCommand
-      command = new Eclectus.Command obj.contentWindow.document, obj.channel, obj.runnable
+      ## else createDom
+      dom = new Eclectus.Dom obj.contentWindow.document, obj.channel, obj.runnable
 
       ## pass down the scope method?
-      command.scope = _.bind @scope, @, command
+      dom.scope = _.bind @scope, @, dom
 
-      return command
+      return dom
 
   return Eclectus

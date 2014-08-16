@@ -4,20 +4,20 @@
 ## or just dont display them at all
 
 ## attach to Eclectus global
-Eclectus.Command = do ($, _) ->
+Eclectus.Dom = do ($, _) ->
 
   ## create a reusable jquery selector object for our iframes
   ## which utilitizes our parent jquery object with the iframe
   ## context.  this means our consumers dont have to have jquery
   ## included in their project, and any modifications they make
   ## to jquery will not affect our own internal use of it
-  class Command
+  class Dom
     constructor: (@document, @channel, @runnable) ->
       ## this is the unique identifer of all instantiated
       ## commands.  so as we chain off of this instanceId
       ## we can reference back up to the parent instanceId
       ## we chained off of.
-      @instanceId = _.uniqueId("commandInstance")
+      @instanceId = _.uniqueId("domInstance")
       # @selector = el
       # @$el = @$(el)
 
@@ -69,7 +69,7 @@ Eclectus.Command = do ($, _) ->
       ## why wouldnt we just pass this instanceId around?
       ## that would probably work better with chaining
       ## call this scope? instead of patch?
-      ## if obj instanceIdof Eclectus.Command then just use that
+      ## if obj instanceIdof Eclectus.Dom then just use that
       ## else instatiate a new one
       ## ----------------------------------------------
       ## re-patch eclectus with this previous el object
@@ -131,4 +131,4 @@ Eclectus.Command = do ($, _) ->
       _.defer =>
         @runnable.clearTimeout()
 
-  return Command
+  return Dom
