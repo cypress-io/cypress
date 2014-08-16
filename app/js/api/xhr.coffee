@@ -4,7 +4,7 @@ Eclectus.Xhr = do ($, _) ->
   methods = ["stub", "get", "post", "put", "patch", "delete", "respond", "requests", "onRequest"]
 
   class Xhr
-    constructor: (@server, @channel, @runnable) ->
+    constructor: (@server, @document, @channel, @runnable) ->
       ## make sure to reset both of these on restore()
       @requests = []
       @onRequests = []
@@ -25,12 +25,11 @@ Eclectus.Xhr = do ($, _) ->
           ## call the original so sinon does its thing
           onSendOrig.call(@)
 
-          ## invokes onRequest callback function on any matching responses
-          ## and then also calls this on any global onRequest methods on
-          ## our server
-          _this.invokeOnRequest(xhr)
-
           xhr.instanceId = _.uniqueId("xhrInstance")
+
+          ## clone the body and strip out any script tags
+          body = _this.$("body").clone(true, true)
+          body.find("script").remove()
 
           _this.channel.trigger "xhr", _this.runnable,
             instanceId: xhr.instanceId
@@ -38,8 +37,17 @@ Eclectus.Xhr = do ($, _) ->
             url:        xhr.url
             xhr:        xhr
             isParent:   true
+            dom:        body
+
+          ## invokes onRequest callback function on any matching responses
+          ## and then also calls this on any global onRequest methods on
+          ## our server
+          _this.invokeOnRequest(xhr)
 
         return xhr
+
+    $: (selector) ->
+      new $.fn.init(selector, @document)
 
     ## need to find the onRequest based on the matching response
     ## this loops through all the responses, finds the matching one
@@ -90,12 +98,17 @@ Eclectus.Xhr = do ($, _) ->
 
           request.respond(response.status, response.headers, response.body)
 
+          ## clone the body and strip out any script tags
+          body = @$("body").clone(true, true)
+          body.find("script").remove()
+
           @channel.trigger "xhr", @runnable,
             instanceId:   request.instanceId
             method:       request.method
             url:          request.url
             xhr:          request
             response:     options
+            dom:          body
 
     requestMatchesResponse: (request, options) ->
       request.method is options.method and
