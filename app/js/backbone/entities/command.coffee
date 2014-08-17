@@ -70,6 +70,8 @@
         a.push ["Expected: ", @expected]
         a.push ["Actual:   ", @actual]
 
+      a.push ["Message:  ", @get("message")]
+
       a
 
   class Entities.CommandsCollection extends Entities.Collection
