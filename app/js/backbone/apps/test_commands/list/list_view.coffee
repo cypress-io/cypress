@@ -33,7 +33,9 @@
 
     clicked: (e) ->
       e.stopPropagation()
-      console.log @model.getPrimaryObject()
+      _.each @model.getPrimaryObjects(), (obj, index) ->
+        obj = if _.isArray(obj) then obj else [obj]
+        console.log obj...
 
     responseClicked: (e) ->
       e.stopPropagation()
@@ -45,6 +47,7 @@
       console.log "Status:     ", @model.xhr.status
       console.log "URL:        ", @model.xhr.url
       console.log "Matched URL:", @model.response.url
+      console.log "Request:    ", @model.xhr
       console.log "Response:   ", response
 
   class List.Commands extends App.Views.CollectionView
