@@ -5,7 +5,7 @@ Eclectus.Assertion = do ($, _, Eclectus) ->
     constructor: (@document, @channel, @runnable) ->
       @instanceId = _.uniqueId("instance")
 
-    log: (expr, msg, negateMsg, expected, actual) ->
+    log: (passed, message, value, actual, expected) ->
       ## clone the body and strip out any script tags
       body = @$("body").clone(true, true)
       body.find("script").remove()
@@ -13,11 +13,14 @@ Eclectus.Assertion = do ($, _, Eclectus) ->
       ## figure out if this passed / failed by comparing expected to actual
 
       @channel.trigger "assertion", @runnable,
-        dom:      body
-        method:   "assert"
-        msg:      msg
+        dom:        body
+        method:     "assert"
+        value:      value
+        message:    message
+        actual:     actual
+        expected:   expected
+        passed:     passed
         instanceId: @instanceId
-        # passed:   expected is actual
 
 
   return Assertion

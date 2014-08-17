@@ -12,9 +12,9 @@ window.Eclectus = do ($, _) ->
       dom = Eclectus.createDom(obj)
       dom.within(el, fn)
 
-    assert: (obj, expr, msg, negateMsg, expected, actual) ->
+    assert: (obj, passed, message, value, actual, expected) ->
       assertion = new Eclectus.Assertion obj.contentWindow.document, obj.channel, obj.runnable
-      assertion.log expr, msg, negateMsg, expected, actual
+      assertion.log passed, message, value, actual, expected
 
     server: (obj) ->
       @sandbox._server = server = obj.contentWindow.sinon.fakeServer.create()
