@@ -3659,13 +3659,6 @@ ul {
         color: #F98E33; }
       #test-specs ul.runnables .commands-container .command-request {
         color: #80B0FF; }
-        #test-specs ul.runnables .commands-container .command-request:hover {
-          cursor: pointer;
-          text-decoration: underline; }
-      #test-specs ul.runnables .commands-container .command-response:hover {
-        cursor: pointer; }
-        #test-specs ul.runnables .commands-container .command-response:hover .command-body {
-          text-decoration: underline; }
       #test-specs ul.runnables .commands-container .command-response .command-status {
         font-weight: 300;
         color: #CCC;
