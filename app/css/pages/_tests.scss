@@ -351,21 +351,9 @@
 
       .command-request {
         color: #80B0FF;
-
-        &:hover {
-          cursor: pointer;
-          text-decoration: underline;
-        }
       }
 
       .command-response {
-        &:hover {
-          cursor: pointer;
-
-          .command-body {
-            text-decoration: underline;
-          }
-        }
 
         .command-status {
           font-weight: 300;
