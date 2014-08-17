@@ -3,8 +3,9 @@
   class List.Command extends App.Views.ItemView
     getTemplate: ->
       switch @model.get("type")
-        when "xhr" then "test_commands/list/_xhr"
-        when "dom" then "test_commands/list/_dom"
+        when "xhr"        then "test_commands/list/_xhr"
+        when "dom"        then "test_commands/list/_dom"
+        when "assertion"  then "test_commands/list/_assertion"
 
     ui:
       wrapper:  ".command-wrapper"

@@ -79,8 +79,19 @@
 
     getCommandByType: (attrs) ->
       switch attrs.type
-        when "dom" then @addDom attrs
-        when "xhr" then @addXhr attrs
+        when "dom"        then @addDom attrs
+        when "xhr"        then @addXhr attrs
+        when "assertion"  then @addAssertion attrs
+
+    addAssertion: (attrs) ->
+      {dom} = attrs
+      attrs = _(attrs).omit "dom"
+
+      ## instantiate the new model
+      command = new Entities.Command attrs
+      command.dom = dom
+
+      return command
 
     addDom: (attrs) ->
       {el, dom} = attrs

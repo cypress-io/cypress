@@ -3624,7 +3624,7 @@ ul {
           border-top: 0; }
       #test-specs ul.runnables .commands-container .command-wrapper {
         position: relative; }
-      #test-specs ul.runnables .commands-container .command-method, #test-specs ul.runnables .commands-container .command-xhr {
+      #test-specs ul.runnables .commands-container .command-method, #test-specs ul.runnables .commands-container .command-xhr, #test-specs ul.runnables .commands-container .command-assertion {
         color: #E0C85E;
         padding: 0 2px;
         display: inline-block;
@@ -3634,6 +3634,8 @@ ul {
         letter-spacing: .6px; }
       #test-specs ul.runnables .commands-container .command-xhr {
         color: #2cb9c4; }
+      #test-specs ul.runnables .commands-container .command-assertion {
+        color: #E94B3B; }
       #test-specs ul.runnables .commands-container .command-controls {
         float: right; }
         #test-specs ul.runnables .commands-container .command-controls i {
@@ -3648,7 +3650,8 @@ ul {
       #test-specs ul.runnables .commands-container .command-selector,
       #test-specs ul.runnables .commands-container .command-sequence,
       #test-specs ul.runnables .commands-container .command-request,
-      #test-specs ul.runnables .commands-container .command-response {
+      #test-specs ul.runnables .commands-container .command-response,
+      #test-specs ul.runnables .commands-container .command-message {
         color: #80B0FF;
         position: absolute;
         left: 80px; }

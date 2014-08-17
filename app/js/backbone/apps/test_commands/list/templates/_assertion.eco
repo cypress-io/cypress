@@ -1,0 +1,10 @@
+<div class="command-wrapper">
+  <span class="command-assertion"><%= @method %></span>
+  <span class="command-message">
+    <%= @msg %>
+  </span>
+  <span class="command-controls">
+    <i class="fa fa-pause"></i>
+    <i class="fa fa-search fa-flip-horizontal"></i>
+  </span>
+</div>

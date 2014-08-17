@@ -45,6 +45,11 @@
 
         orig.call(@, err)
 
+      if chai and chai.AssertionError
+        chai.Assertion.prototype.assert = _.wrap chai.Assertion.prototype.assert, (orig, args...) ->
+          Ecl.assert args...
+          orig.apply(@, args)
+
       ## start running the tests
       mocha.run()
 
