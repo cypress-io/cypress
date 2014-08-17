@@ -284,7 +284,7 @@
         position: relative;
       }
 
-      .command-method, .command-xhr {
+      .command-method, .command-xhr, .command-assertion {
         color: #E0C85E;
         padding: 0 2px;
         display: inline-block;
@@ -298,6 +298,10 @@
 
       .command-xhr {
         color: darken(#2EC1CC, 2%);
+      }
+
+      .command-assertion {
+        color: #E94B3B;
       }
 
       .command-controls {
@@ -334,7 +338,8 @@
       .command-selector,
       .command-sequence,
       .command-request,
-      .command-response {
+      .command-response,
+      .command-message {
         color: #80B0FF;
         position: absolute;
         left: 80px;

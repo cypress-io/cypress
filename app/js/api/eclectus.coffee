@@ -12,6 +12,10 @@ window.Eclectus = do ($, _) ->
       dom = Eclectus.createDom(obj)
       dom.within(el, fn)
 
+    assert: (obj, expr, msg, negateMsg, expected, actual) ->
+      assertion = new Eclectus.Assertion obj.contentWindow.document, obj.channel, obj.runnable
+      assertion.log expr, msg, negateMsg, expected, actual
+
     server: (obj) ->
       @sandbox._server = server = obj.contentWindow.sinon.fakeServer.create()
       @sandbox.server = new Eclectus.Xhr server, obj.contentWindow.document, obj.channel, obj.runnable
@@ -27,8 +31,10 @@ window.Eclectus = do ($, _) ->
     ## class method patch
     ## loops through each method and partials
     ## the runnable onto our prototype
-    @patch = (args) ->
-      _.each methods, (fn, key, obj) ->
+    @patch = (args, fns) ->
+      ## we want to be able to pass in specific functions to patch here
+      ## else use the default methods object
+      _.each (fns or methods), (fn, key, obj) ->
         Eclectus.prototype[key] = _.partial(fn, args)
 
     ## store the sandbox for each iframe window
@@ -37,10 +43,13 @@ window.Eclectus = do ($, _) ->
       Eclectus.prototype.sandbox = contentWindow.sinon.sandbox.create()
 
     @scope = (dom) ->
-      dom.unscope = =>
-        @patch _(dom).pick "runnable", "channel", "document"
+      ## only re-patch these specific methods, not the others
+      fns = {find: methods.find, within: methods.within}
 
-      @patch dom
+      dom.unscope = =>
+        @patch _(dom).pick("runnable", "channel", "document"), fns
+
+      @patch dom, fns
 
     @createDom = (argsOrInstance) ->
       obj = dom = argsOrInstance
