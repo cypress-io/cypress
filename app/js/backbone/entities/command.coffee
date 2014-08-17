@@ -44,16 +44,33 @@
       @set "method", "resp"
       @response = response
 
-    getPrimaryObject: ->
-      switch @get("type")
-        when "xhr" then @xhr
-        when "dom" then @dom
+    getPrimaryObjects: ->
+      objs = switch @get("type")
+        when "xhr"        then @xhr
+        when "dom"        then @dom
+        when "assertion"  then @getAssertion()
+
+      _([objs]).flatten(true)
 
     getDom: ->
       @dom
 
     getEl: ->
       @el
+
+    getAssertion: ->
+      a = []
+      ## push a 'subject' into here if its not the actual value
+      ## this happens when there are really '3' involved objects
+      ## such as jQuery expectations
+      if @value isnt @actual or _.isUndefined(@expected)
+        a.push ["Subject:  ", @value]
+
+      if not _.isUndefined(@expected)
+        a.push ["Expected: ", @expected]
+        a.push ["Actual:   ", @actual]
+
+      a
 
   class Entities.CommandsCollection extends Entities.Collection
     model: Entities.Command
@@ -84,12 +101,15 @@
         when "assertion"  then @addAssertion attrs
 
     addAssertion: (attrs) ->
-      {dom} = attrs
-      attrs = _(attrs).omit "dom"
+      {dom, actual, expected, value} = attrs
+      attrs = _(attrs).omit "dom", "actual", "expected", "value"
 
       ## instantiate the new model
       command = new Entities.Command attrs
       command.dom = dom
+      command.actual = actual
+      command.expected = expected
+      command.value = value
 
       return command
 
