@@ -3,11 +3,15 @@
   ## set our df closure to null
   df = null
 
+  emit      = Mocha.Runnable::emit
+  uncaught  = Mocha.Runner::uncaught
+  assert    = chai.Assertion::assert if chai
+
   overloadMochaRunnableEmit = ->
     ## if app evironment is development we need to list to errors
     ## emitted from all Runnable inherited objects (like hooks)
     ## this makes tracking down Eclectus related App errors much easier
-    Mocha.Runnable::emit = _.wrap Mocha.Runner::emit, (orig, event, err) ->
+    Mocha.Runnable::emit = _.wrap emit, (orig, event, err) ->
       if event is "error"
         throw err
 
@@ -16,14 +20,14 @@
   overloadMochaRunnerUncaught = ->
     ## if app environment is development we need to listen to
     ## uncaught exceptions (else it makes tracking down bugs hard)
-    Mocha.Runner::uncaught = _.wrap Mocha.Runner::uncaught, (orig, err) ->
+    Mocha.Runner::uncaught = _.wrap uncaught, (orig, err) ->
       throw err
 
       orig.call(@, err)
 
   overloadChaiAssertions = (Ecl) ->
     chai.use (_chai, utils) ->
-      _chai.Assertion::assert = _.wrap _chai.Assertion::assert, (orig, args...) ->
+      _chai.Assertion::assert = _.wrap assert, (orig, args...) ->
         passed    = utils.test(@, args)
         value     = utils.flag(@, "object")
         expected  = args[3]
@@ -59,13 +63,8 @@
       ## set global mocha with our custom reporter
       window.mocha = new Mocha reporter: Reporter
 
-      ## need to handle restoring these methods on stop
       overloadMochaRunnableEmit()
-
-      ## need to handle restoring these methods on stop
       overloadMochaRunnerUncaught()
-
-      ## need to handle restoring these methods on stop
       overloadChaiAssertions(Ecl) if chai and chai.use
 
       ## start running the tests
