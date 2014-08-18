@@ -47,7 +47,7 @@
     getPrimaryObjects: ->
       objs = switch @get("type")
         when "xhr"        then @xhr
-        when "dom"        then @dom
+        when "dom"        then @el
         when "assertion"  then @getAssertion()
 
       _([objs]).flatten(true)

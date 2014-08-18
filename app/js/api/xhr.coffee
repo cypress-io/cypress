@@ -4,11 +4,15 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
   methods = ["stub", "get", "post", "put", "patch", "delete", "respond", "requests", "onRequest"]
 
   class Xhr extends Eclectus.Command
-    constructor: (@server, @document, @channel, @runnable) ->
+    config:
+      type: "xhr"
+
+    initialize: ->
       ## make sure to reset both of these on restore()
       @requests = []
       @onRequests = []
 
+    setServer: (@server) ->
       _this = @
 
       @server.addRequest = _.wrap @server.addRequest, (addRequestOrig, xhr) ->
@@ -25,19 +29,14 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
           ## call the original so sinon does its thing
           onSendOrig.call(@)
 
-          xhr.instanceId = _.uniqueId("xhrInstance")
+          xhr.instanceId = _this.instanceId
 
-          ## clone the body and strip out any script tags
-          body = _this.$("body").clone(true, true)
-          body.find("script").remove()
-
-          _this.channel.trigger "xhr", _this.runnable,
+          _this.emit
             instanceId: xhr.instanceId
             method:     xhr.method
             url:        xhr.url
             xhr:        xhr
             isParent:   true
-            dom:        body
 
           ## invokes onRequest callback function on any matching responses
           ## and then also calls this on any global onRequest methods on
@@ -99,13 +98,12 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
           body = @$("body").clone(true, true)
           body.find("script").remove()
 
-          @channel.trigger "xhr", @runnable,
+          @emit
             instanceId:   request.instanceId
             method:       request.method
             url:          request.url
             xhr:          request
             response:     options
-            dom:          body
 
     requestMatchesResponse: (request, options) ->
       request.method is options.method and

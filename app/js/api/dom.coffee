@@ -12,14 +12,8 @@ Eclectus.Dom = do ($, _, Eclectus) ->
   ## included in their project, and any modifications they make
   ## to jquery will not affect our own internal use of it
   class Dom extends Eclectus.Command
-    constructor: (@document, @channel, @runnable) ->
-      ## this is the unique identifer of all instantiated
-      ## commands.  so as we chain off of this instanceId
-      ## we can reference back up to the parent instanceId
-      ## we chained off of.
-      @instanceId = _.uniqueId("domInstance")
-      # @selector = el
-      # @$el = @$(el)
+    config:
+      type: "dom"
 
     ## if find is called and we already have a selector
     ## it means we're chaining and we need to set prevObject
@@ -28,17 +22,11 @@ Eclectus.Dom = do ($, _, Eclectus) ->
       @$el      = if @$el then @$el.find(el) else @$(el)
       @selector = @$el.selector
 
-      ## clone the body and strip out any script tags
-      body = @$("body").clone(true, true)
-      body.find("script").remove()
-
-      @channel.trigger "dom", @runnable,
+      @emit
         selector: @selector
         el:       @$(@selector)
-        dom:      body
         method:   "find"
         isParent: true
-        instanceId: @instanceId
 
       return @
 
@@ -46,21 +34,15 @@ Eclectus.Dom = do ($, _, Eclectus) ->
       @$el      = if @$el then @$el.find(el) else @$(el)
       @selector = @$el.selector
 
-      ## clone the body and strip out any script tags
-      body = @$("body").clone(true, true)
-      body.find("script").remove()
-
       ## might want to strip out the previous selector here
       ## since we may not want to display that in our command view
       ## so instead of WITHIN #foo WITHIN #foo #bar WITHIN #foo #bar #baz
       ## we'd have WITHIN #foo WITHIN #bar WITHIN #baz
-      @channel.trigger "dom", @runnable,
+      @emit
         selector: @selector
         el:       @$(@selector)
-        dom:      body
         method:   "within"
         isParent: true
-        instanceId: @instanceId
 
       ## instead of patching all of these things here
       ## why wouldnt we just pass this instanceId around?
@@ -85,17 +67,11 @@ Eclectus.Dom = do ($, _, Eclectus) ->
 
       @$el.simulate "key-sequence", options
 
-      ## clone the body and strip out any script tags
-      body = @$("body").clone(true, true)
-      body.find("script").remove()
-
-      @channel.trigger "dom", @runnable,
+      @emit
         selector: @selector
         el:       @$(@selector)
-        dom:      body
         method:   "type"
         sequence: sequence
-        instanceId: @instanceId
 
       return @
 
@@ -104,15 +80,9 @@ Eclectus.Dom = do ($, _, Eclectus) ->
 
       @$el.simulate "click"
 
-      ## clone the body and strip out any script tags
-      body = @$("body").clone(true, true)
-      body.find("script").remove()
-
-      @channel.trigger "dom", @runnable,
+      @emit
         el:       @$(@selector)
-        dom:      body
         method:   "click"
-        instanceId: @instanceId
 
       return @
 
