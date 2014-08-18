@@ -25,7 +25,18 @@
       "click @ui.response"  : "responseClicked"
 
     onShow: ->
+      @$el.addClass "command-type-#{@model.get("type")}"
+
+      switch @model.get("type")
+        when "dom"
+          ## quick hack to get sub types
+          @$el.addClass "command-type-dom-action" if not @model.isParent()
+
+        when "assertion"
+          @$el.addClass "command-type-assertion-failed" if not @model.get("passed")
+
       @ui.wrapper.css "padding-left", @model.get("indent")
+
       if @model.hasParent()
         @ui.wrapper.addClass "command-child"
       else

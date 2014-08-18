@@ -1,5 +1,5 @@
 <div class="command-wrapper">
-  <span class="command-xhr"><%= @method %></span>
+  <span class="command-method"><%= @method %></span>
   <% if @response: %>
     <span class="command-response">
       <span class="command-status"><%= @status %></span>

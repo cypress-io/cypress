@@ -1,5 +1,5 @@
 <div class="command-wrapper">
-  <span class="command-assertion"><%= @method %></span>
+  <span class="command-method"><%= @method %></span>
   <span class="command-message">
     <%= @message %>
   </span>

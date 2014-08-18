@@ -260,6 +260,14 @@
         }
       }
 
+      .command-parent {
+        border-top: 1px dotted #535353;
+
+        &:first-child {
+          border-top: 0;
+        }
+      }
+
       .command-child {
         &:before {
           border-left: 1px dotted #999;
@@ -272,20 +280,11 @@
         }
       }
 
-      .command-parent {
-        border-top: 1px dotted #535353;
-
-        &:first-child {
-          border-top: 0;
-        }
-      }
-
       .command-wrapper {
         position: relative;
       }
 
-      .command-method, .command-xhr, .command-assertion {
-        color: #E0C85E;
+      .command-method {
         padding: 0 2px;
         display: inline-block;
         width: 50px;
@@ -295,14 +294,61 @@
         // @include text-overflow;
       }
 
-
-      .command-xhr {
-        color: darken(#2EC1CC, 2%);
+      .command-type-xhr {
+        .command-method {
+          color: #E0C85E;
+        }
       }
 
-      .command-assertion {
-        color: #E94B3B;
+      .command-type-dom {
+        .command-method {
+          color: #80B0FF;
+        }
+
+        .command-selector {
+          color: lighten(#80B0FF, 15%);
+        }
       }
+
+      .command-type-dom-action {
+        .command-method {
+          color: lighten(#80B0FF, 10%);
+        }
+
+        .command-sequence {
+          // color: lighten(#80B0FF, 25%);
+          color: #DDD;
+        }
+      }
+
+      .command-type-assertion {
+        .command-method {
+          color: lighten(#23AE89, 5%);
+        }
+
+        .command-message {
+          color: lighten(#23AE89, 35%);
+        }
+      }
+
+      .command-type-assertion-failed {
+        .command-method {
+          color: lighten(#E94B3B, 3%);
+        }
+
+        .command-message {
+          color: lighten(#E94B3B, 15%);
+        }
+      }
+
+
+      // .command-xhr {
+      //   color: #E0C85E;
+      // }
+
+      // .command-assertion {
+      //   color: #E94B3B;
+      // }
 
       .command-controls {
         float: right;
@@ -340,29 +386,28 @@
       .command-request,
       .command-response,
       .command-message {
-        color: #80B0FF;
         position: absolute;
         left: 80px;
       }
 
-      .command-sequence, .command-response {
-        color: #F98E33;
-      }
+      // .command-sequence, .command-response {
+      //   color: #F98E33;
+      // }
 
       .command-request {
-        color: #80B0FF;
+        color: lighten(#E0C85E, 20%);
       }
 
       .command-response {
 
         .command-status {
           font-weight: 300;
-          color: #CCC;
+          color: lighten(#E0C85E, 20%);
           margin-right: 3px;
         }
 
         .command-body {
-          color: #AAA;
+          color: lighten(#E0C85E, 20%);
         }
       }
     }
