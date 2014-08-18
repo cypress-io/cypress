@@ -10,7 +10,11 @@ Eclectus.Assertion = do ($, _, Eclectus) ->
       body = @$("body").clone(true, true)
       body.find("script").remove()
 
-      ## figure out if this passed / failed by comparing expected to actual
+      ## if this is a jquery object and its true
+      ## then remove all the 'but's and replace with 'and'
+      ## also just think about slicing off everything after a comma?
+      if passed and value instanceof $
+        message = message.split("but").join("and")
 
       @channel.trigger "assertion", @runnable,
         dom:        body
