@@ -2,7 +2,7 @@
   <span class="command-method"><%= @method %></span>
   <% if @sequence: %>
     <span class="command-sequence"><%= @sequence %></span>
-  <% else: %>
+  <% else if @selector: %>
     <span class="command-selector"><%= @selector %></span>
   <% end %>
   <span class="command-controls">
