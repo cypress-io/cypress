@@ -269,28 +269,32 @@
       }
 
       .command-child {
-        &:before {
-          border-left: 1px dotted #999;
-          border-bottom: 1px dotted #999;
-          position: absolute;
-          width: 10px;
-          height: 11px;
-          content: "";
-          margin-left: -12px;
+        .command-method {
+          &:before {
+            border-left: 1px dotted #999;
+            border-bottom: 1px dotted #999;
+            position: absolute;
+            width: 10px;
+            height: 11px;
+            content: "";
+            margin-left: -12px;
+          }
         }
       }
 
       .command-wrapper {
         position: relative;
+        overflow: hidden;
       }
 
       .command-method {
         padding: 0 2px;
         display: inline-block;
-        width: 50px;
         text-transform: uppercase;
         font-size: 11px;
         letter-spacing: .6px;
+        float: left;
+        min-width: 80px;
         // @include text-overflow;
       }
 
@@ -350,25 +354,6 @@
       //   color: #E94B3B;
       // }
 
-      .command-controls {
-        float: right;
-
-        i {
-          padding: 2px;
-          color: #777;
-        }
-
-        i:hover {
-          color: #DDD;
-          cursor: pointer;
-        }
-
-        .fa-pause {
-          font-size: 11px;
-          margin-right: 2px;
-        }
-      }
-
       // .command-method {
       //   background-color: #23AE89;
       //   color: white;
@@ -386,8 +371,9 @@
       .command-request,
       .command-response,
       .command-message {
-        position: absolute;
-        left: 80px;
+        display: block;
+        margin-left: 80px;
+        width: 70%;
       }
 
       // .command-sequence, .command-response {
@@ -408,6 +394,27 @@
 
         .command-body {
           color: lighten(#E0C85E, 20%);
+        }
+      }
+
+      .command-controls {
+        position: absolute;
+        top: 0;
+        right: 0;
+
+        i {
+          padding: 2px;
+          color: #777;
+        }
+
+        i:hover {
+          color: #DDD;
+          cursor: pointer;
+        }
+
+        .fa-pause {
+          font-size: 11px;
+          margin-right: 2px;
         }
       }
     }

@@ -9,6 +9,7 @@
 
     ui:
       wrapper:  ".command-wrapper"
+      method:   ".command-method"
       response: ".command-response"
       pause:    ".fa-pause"
       revert:   ".fa-search"
@@ -35,7 +36,7 @@
         when "assertion"
           @$el.addClass "command-type-assertion-failed" if not @model.get("passed")
 
-      @ui.wrapper.css "padding-left", @model.get("indent")
+      @ui.method.css "padding-left", @model.get("indent")
 
       if @model.hasParent()
         @ui.wrapper.addClass "command-child"
