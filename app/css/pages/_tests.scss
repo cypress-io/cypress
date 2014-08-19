@@ -9,9 +9,6 @@
 
 #test-specs {
   background-color: #222;
-  border: 1px solid #191919;
-  border-top: 0;
-  border-bottom: 0;
   padding-left: 5px;
   overflow: hidden;
   position: absolute;
@@ -30,7 +27,6 @@
 
     #specs-list {
       box-shadow: 0 1px 2px #373737;
-      border-bottom: 1px solid #222;
       margin-bottom: 100px;
     }
 
@@ -45,18 +41,14 @@
 
   ul.runnables {
     padding-left: 0;
-    border-top: 1px solid #222;
 
     li.runnable {
       width: 100%;
       color: #ddd;
-      border-bottom: 1px solid #222;
-      border-top: 1px solid #515151;
       background-color: lighten(#3C3E43, 3%);
       overflow: auto;
       line-height: 18px;
       padding-left: 0;
-      text-shadow: 0 1px 1px #000;
 
       .runnable-wrapper {
         padding: 5px;
@@ -77,7 +69,6 @@
               color: lighten(#8D7D77, 13%);
               // color: lighten(#1C7EBB, 25%);
               // font-variant: small-caps;
-              text-transform: uppercase;
               // font-size: 13px;
             }
           }
@@ -91,6 +82,7 @@
               margin: 0 2px;
               color: #999;
               visibility: hidden;
+              font-size: 15px;
 
               &:hover {
                 color: #DDD;
@@ -124,37 +116,13 @@
 
       &.active {
         background-color: #4A4A4A;
-        box-shadow: 0 1px 3px #555 inset;
+        // box-shadow: 0 1px 3px #555 inset;
 
         .runnables .runnable-wrapper {
           background-color: #4A4A4A;
-          box-shadow: 0 1px 3px #555 inset;
+          border-left: 1px solid transparent;
+          // box-shadow: 0 1px 3px #555 inset;
         }
-        // box-shadow: -3px 0 0 #999 inset;
-
-        // .runnable-wrapper:before {
-        //   position: absolute;
-        //   left: 9px;
-        //   top: 50%;
-        //   margin-top: -5px;
-        //   color: #E9A61A;
-        //   font-size: 8px;
-        //   @extend .fa;
-        //   @extend .#{$fa-css-prefix}-circle;
-        // }
-
-        // &>.runnable-wrapper .runnable-controls i.fa-repeat {
-        //   color: #DDD;
-        //   visibility: visible !important;
-        // }
-
-        // .commands-container {
-        //   border-bottom: 1px solid #666;
-        // }
-
-        // &.hover {
-        //   background-color: lighten(#3C3E43, 13%)
-        // }
       }
 
       .suite-state, .test-state {
@@ -183,7 +151,7 @@
       }
 
       &.test.failed > .runnable-wrapper {
-        border-left: 1px solid #E94B3B;
+        border-left: 2px solid #E94B3B;
       }
 
       &.failed > .runnable-wrapper {
@@ -238,13 +206,9 @@
     }
 
     .commands-container {
-      padding: 4px 0;
       margin: 5px 30px 5px 20px;
-      box-shadow: 0 0 3px #222 inset;
-      background-color: #404040;
-      border-radius: 4px;
+      background-color: #333339;
       color: #BBB;
-      border-bottom: 1px solid #555;
 
       &:empty {
         display: none;
@@ -253,7 +217,6 @@
       &>li {
         padding: 2px 6px;
         margin: 0 3px;
-        border-radius: 3px;
 
         &:hover {
           background-color: #474747;
@@ -306,7 +269,7 @@
 
       .command-type-dom {
         .command-method {
-          color: #80B0FF;
+          color: #888888;
         }
 
         .command-selector {
@@ -345,27 +308,6 @@
         }
       }
 
-
-      // .command-xhr {
-      //   color: #E0C85E;
-      // }
-
-      // .command-assertion {
-      //   color: #E94B3B;
-      // }
-
-      // .command-method {
-      //   background-color: #23AE89;
-      //   color: white;
-      //   border-radius: 3px;
-      //   padding: 0 2px;
-      //   display: inline-block;
-      //   width: 30px;
-      //   text-transform: uppercase;
-      //   font-size: 11px;
-      //   letter-spacing: .7px;
-      // }
-
       .command-selector,
       .command-sequence,
       .command-request,
@@ -375,10 +317,6 @@
         margin-left: 80px;
         width: 70%;
       }
-
-      // .command-sequence, .command-response {
-      //   color: #F98E33;
-      // }
 
       .command-request {
         color: lighten(#E0C85E, 20%);
@@ -472,6 +410,7 @@
         margin-top: 0;
         padding-left: 10px;
         margin-left: 4px;
+        color: #E49E97;
 
         &:hover {
           text-decoration: underline;
