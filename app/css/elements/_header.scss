@@ -1,6 +1,5 @@
 #header-container {
   background-color: #1C1D22;
-  box-shadow: 0 1px 0 #444444 inset;
   padding-left: 20px;
   overflow: auto;
   height: 50px;
@@ -40,18 +39,7 @@
       }
 
       span {
-        display: block;
-      }
-
-      .num {
-        font-size: 24px;
-        line-height: 1;
-      }
-
-      .name {
-        text-transform: uppercase;
-        font-size: 12px;
-        color: #777;
+        color: #ccc;
       }
     }
 
@@ -67,7 +55,6 @@
     top: 6px;
 
     .uppercase {
-      text-transform: uppercase;
       font-size: 10px;
       display: block;
     }
