@@ -38,7 +38,6 @@
       @trigger "test:results:ready", test
 
     revertDom: (command) ->
-      console.warn command
       @trigger "revert:dom", command.getDom(),
         highlight: command.get("highlight")
         el: command.getEl()
@@ -59,71 +58,80 @@
       runner = @
 
       ## TODO: IMPLEMENT FOR SUITES
-      @runner.runSuite = _.wrap @runner.runSuite, (runSuite, suite, fn) ->
+      @runner.runSuite = _.wrap @runner.runSuite, (runSuite, rootSuite, fn) ->
         ## iterate through each test
         generatedIds = []
 
-        suite.eachTest (test) ->
-          ## iterating on both the test and its parent (the suite)
-          _.each [test.parent, test], (type) ->
-            ## bail if we're the root runnable
-            ## or we've already processed this tests parent
-            return if type.root or type.added
+        runner.iterateThroughRunnables rootSuite, generatedIds, socket
 
-            ## parse the cid out of the title if it exists
-            type.cid ?= runner.getTestCid(type)
-
-            ## allow to get the original title
-            type.originalTitle = ->
-              @title.replace runner.getIdToAppend(type.cid), ""
-
-            df = $.Deferred()
-
-            ## when we're done getting our cid
-            ## or if we already have it
-            df.done ->
-              ## dont fire duplicate events if this is already fired
-              ## its 'been added' event
-              return if type.added
-
-              type.added = true
-
-              ## tests have a type of 'test' whereas suites do not have a type property
-              event = type.type or "suite"
-
-              ## trigger the add events so our UI can begin displaying
-              ## the tests + suites
-              runner.trigger "#{event}:add", type
-
-            ## if test or suite doesnt have a cid
-            if not type.cid
-              ## override each test's and suite's fullTitle to include its real id
-              ## this cant use a regular client id, since when the iframe reloads
-              ## each test will have a unique id again -- this is why
-              ## you have to use client id's in the title in the
-              ## original spec
-
-              type.fullTitle = _.wrap type.fullTitle, (origTitle) ->
-                title = origTitle.apply(@)
-                title + runner.getIdToAppend(type.cid)
-
-              generatedIds.push df
-
-              ## go get the id from the server via websockets
-              data = {title: type.title, spec: runner.iframe}
-              socket.emit "generate:test:id", data, (id) ->
-                type.cid = id
-                df.resolve id
-            else
-              df.resolve()
-
-        # console.info generatedIds
         $.when(generatedIds...).done =>
-          runSuite.call(@, suite, fn)
+          runSuite.call(@, rootSuite, fn)
 
-    # getEntitiesByEvent: (event) ->
-    #   obj = {dom: @doms, xhr: @xhrs, log: @logs}
-    #   obj[event or throw new Error("Cannot find entities by event: #{event}")]
+    ## iterates through both the runnables tests + suites if it has any
+    iterateThroughRunnables: (runnable, ids, socket) ->
+      _.each [runnable.tests, runnable.suites], (array) =>
+        _.each array, (runnable) =>
+          @generateId runnable, ids, socket
+
+    ## generates an id for each runnable and then continues iterating
+    ## on children tests + suites
+    generateId: (runnable, ids = [], socket) ->
+      ## iterating on both the test and its parent (the suite)
+      ## bail if we're the root runnable
+      ## or we've already processed this tests parent
+      return if runnable.root or runnable.added
+
+      runner = @
+
+      ## parse the cid out of the title if it exists
+      runnable.cid ?= runner.getTestCid(runnable)
+
+      ## allow to get the original title
+      runnable.originalTitle = ->
+        @title.replace runner.getIdToAppend(runnable.cid), ""
+
+      df = $.Deferred()
+
+      ## when we're done getting our cid
+      ## or if we already have it
+      df.done ->
+        ## dont fire duplicate events if this is already fired
+        ## its 'been added' event
+        return if runnable.added
+
+        runnable.added = true
+
+        ## tests have a runnable of 'test' whereas suites do not have a runnable property
+        event = runnable.type or "suite"
+
+        ## trigger the add events so our UI can begin displaying
+        ## the tests + suites
+        runner.trigger "#{event}:add", runnable
+
+        ## recursively apply to all tests / suites of this runnable
+        runner.iterateThroughRunnables(runnable, ids, socket)
+
+      ## if test or suite doesnt have a cid
+      if not runnable.cid
+        ## override each test's and suite's fullTitle to include its real id
+        ## this cant use a regular client id, since when the iframe reloads
+        ## each test will have a unique id again -- this is why
+        ## you have to use client id's in the title in the
+        ## original spec
+
+        runnable.fullTitle = _.wrap runnable.fullTitle, (origTitle) ->
+          title = origTitle.apply(@)
+          title + runner.getIdToAppend(runnable.cid)
+
+        ids.push df
+
+        ## go get the id from the server via websockets
+        data = {title: runnable.title, spec: runner.iframe}
+        socket.emit "generate:test:id", data, (id) ->
+          runnable.cid = id
+          df.resolve id
+      else
+        df.resolve()
 
     getCommands: ->
       @commands
