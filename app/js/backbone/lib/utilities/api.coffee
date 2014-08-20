@@ -3,9 +3,12 @@
   ## set our df closure to null
   df = null
 
-  emit      = Mocha.Runnable::emit
-  uncaught  = Mocha.Runner::uncaught
-  assert    = chai.Assertion::assert if chai
+  emit          = Mocha.Runnable::emit
+  uncaught      = Mocha.Runner::uncaught
+  assertProto   = chai.Assertion::assert if chai
+  expect        = chai.expect
+  assert        = chai.assert
+  ## still need to do should here...
 
   overloadMochaRunnableEmit = ->
     ## if app evironment is development we need to list to errors
@@ -27,7 +30,14 @@
 
   overloadChaiAssertions = (Ecl) ->
     chai.use (_chai, utils) ->
-      _chai.Assertion::assert = _.wrap assert, (orig, args...) ->
+      _.each {expect: expect, assert: assert}, (value, key) ->
+        _chai[key] = _.wrap value, (orig, args...) ->
+          if args[0] instanceof Eclectus.Command
+            args[0] = args[0].$el
+
+          orig.apply(@, args)
+
+      _chai.Assertion::assert = _.wrap assertProto, (orig, args...) ->
         passed    = utils.test(@, args)
         value     = utils.flag(@, "object")
         expected  = args[3]
