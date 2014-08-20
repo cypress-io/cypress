@@ -30,7 +30,6 @@
     highlight: (dom, el) ->
       el = dom.find(el.selector)
       dimensions = @getDimensions(el)
-      console.warn el, dimensions
 
       $("<div>")
         .appendTo(dom)
