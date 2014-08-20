@@ -64,8 +64,18 @@
 
         runner.iterateThroughRunnables rootSuite, generatedIds, socket
 
+        _this = @
+
         $.when(generatedIds...).done =>
-          runSuite.call(@, rootSuite, fn)
+          ## grep for the correct test / suite by its id if chosenId is set
+          ## or all the tests
+          ## we need to grep at the last possible moment because if we've chosen
+          ## a runnable but then deleted it afterwards, then we'll incorrectly
+          ## continue to grep for it.  instead we need to do a check to ensure
+          ## we still have the runnable's cid which matches our chosen id
+          _this.grep runner.getGrep(rootSuite)
+
+          runSuite.call(_this, rootSuite, fn)
 
     ## iterates through both the runnables tests + suites if it has any
     iterateThroughRunnables: (runnable, ids, socket) ->
@@ -252,14 +262,35 @@
       ## always reload the iframe
       @triggerLoadIframe @iframe
 
-    getGrep: ->
-      if chosen = @get("chosen")
-        ## create a regex based on the id of the suite / test
-        new RegExp @escapeId("[" + chosen.id + "]")
+    ## this recursively loops through all tests / suites
+    ## plucking out their cid's and returning those
+    ## this should be refactored since it creates an N+1 loop
+    ## through all runnables.  instead this should happen during
+    ## the original loop through to ensure we have cid's
+    getRunnableCids: (root, ids) ->
+      ids ?= []
 
-      else
-        ## just use every test
-        /.*/
+      _.each root.tests, (test) ->
+        ids.push test.cid
+
+      _.each root.suites, (suite) =>
+        @getRunnableCids suite, ids
+
+      ids
+
+    getGrep: (root) ->
+      chosen = @get("chosen")
+      if chosen
+        ## if we have a chosen model and its in our runnables cid
+        if chosen.id in @getRunnableCids(root)
+          ## create a regex based on the id of the suite / test
+          return new RegExp @escapeId("[" + chosen.id + "]")
+
+        ## lets remove our chosen runnable since its no longer with us
+        else
+          @unset "chosen"
+
+      return /.*/ if not @hasChosen()
 
     escapeId: (id) ->
       id.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -277,10 +308,6 @@
 
       ## patch the sinon sandbox for Eclectus methods
       @patchSandbox @contentWindow
-
-      ## grep for the correct test / suite by its id if chosenId is set
-      ## or all the tests
-      @runner.grep @getGrep()
 
       ## trigger the before run event
       @trigger "before:run"
