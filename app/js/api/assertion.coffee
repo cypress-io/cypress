@@ -1,6 +1,7 @@
 ## attach to Eclectus global
 
 Eclectus.Assertion = do ($, _, Eclectus) ->
+
   class Assertion extends Eclectus.Command
     config:
       type: "assertion"
@@ -12,10 +13,13 @@ Eclectus.Assertion = do ($, _, Eclectus) ->
       if passed and value instanceof $
         message = message.split("but").join("and")
 
+      ## think about completely gutting the whole object toString
+      ## which chai does by default, its so ugly and worthless
+
       @emit
         method:     "assert"
-        value:      value
         message:    message
+        value:      value
         actual:     actual
         expected:   expected
         passed:     passed
