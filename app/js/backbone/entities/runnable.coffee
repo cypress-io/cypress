@@ -57,6 +57,15 @@
     timedOut: ->
       @get("duration") > @_timeout
 
+    ## always open the commands when a test is chosen
+    onChoose: ->
+      @set "open", true if @is("test")
+
+    ## when our tests are unchosen we want to close their open state
+    collapse: ->
+      console.warn @, "onUnchoose"
+      @set "open", false if @is("test")
+
     reset: ->
       if @is("test") then @resetTest() else @resetSuite()
 
