@@ -157,6 +157,7 @@
       @listenTo model, "model:double:clicked", ->
         ## always unchoose all other models
         container.each (runnable) ->
+          runnable.collapse()
           runnable.unchoose()
 
         ## choose this model
