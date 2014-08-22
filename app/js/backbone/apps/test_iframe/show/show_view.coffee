@@ -53,10 +53,17 @@
       # @ui.header.hide()
       @ui.compress.hide()
 
+    onDestroy: ->
+      # _.each ["Ecl", "$", "jQuery", "parent", "chai", "expect", "should", "assert", "Mocha", "mocha"], (global) =>
+      #   delete @iframe[0].contentWindow[global]
+      @iframe?.remove()
+      delete @iframe
+      delete @fn
+
     loadIframe: (src, fn) ->
       ## remove any existing iframes
       @ui.message.hide().empty()
-      @$el.find("iframe").remove()
+      @iframe?.remove()
 
       @$el.hide()
 
@@ -65,16 +72,15 @@
       @src = "/iframes/" + src
       @fn = fn
 
-      iframe = $ "<iframe />",
+      @iframe = $ "<iframe />",
         src: @src
         class: "iframe-spec"
         load: ->
-          console.info("loaded!", iframe, @contentWindow);
           fn(@contentWindow)
           view.$el.show()
           # view.ui.header.show()
 
-      iframe.appendTo(@$el)
+      @iframe.appendTo(@$el)
 
     expandClicked: (e) ->
       @ui.expand.hide()

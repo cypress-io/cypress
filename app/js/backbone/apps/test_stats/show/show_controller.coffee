@@ -5,7 +5,7 @@
     initialize: (options) ->
       { runner } = options
 
-      stats = App.request "stats:entity"
+      stats = @stats = App.request "stats:entity"
 
       @listenTo runner, "suite:start", ->
         stats.startCounting()
@@ -30,6 +30,12 @@
         @statsRegion stats
 
       @show @layout
+
+    onDestroy: ->
+      ## make sure we stop counting just in case we've clicked
+      ## between test specs too quickly!
+      @stats.stopCounting()
+      delete @stats
 
     statsRegion: (stats) ->
       statsView = @getStatsView stats
