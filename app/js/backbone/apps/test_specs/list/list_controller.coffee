@@ -68,7 +68,6 @@
 
         ## find the client runnable model by the test's cide
         runnable = container.get(test.cid)
-        console.info "test:end", runnable
 
         ## set the results of the test on the test client model
         ## passed | failed | pending
@@ -79,7 +78,6 @@
         runner.logResults runnable
 
       @listenTo runner, "load:iframe", (iframe, options) ->
-        console.log "runner load:iframe", runner.hasChosen(), runner.get("chosen")
         ## when our runner says to load the iframe
         ## if nothing is chosen -- reset everything
         ## if just a test is chosen -- just clear/reset its attributes
@@ -93,7 +91,6 @@
           container.each (model) =>
             if model.isChosen()
               model.reset()
-              console.warn "model is reset", model
         else
           root.reset()
 
@@ -157,6 +154,7 @@
       @listenTo model, "model:double:clicked", ->
         ## always unchoose all other models
         container.each (runnable) ->
+          runnable.collapse()
           runnable.unchoose()
 
         ## choose this model

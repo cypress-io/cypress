@@ -12,25 +12,24 @@
 
       ## request and receive the runner entity
       ## which is the mediator of all test framework events
-      App.request("start:test:runner").done (runner) =>
-        ## store this as a property on ourselves
-        @runner = runner
+      ## store this as a property on ourselves
+      @runner = runner = App.request("start:test:runner")
 
-        @layout = @getLayoutView config
+      @layout = @getLayoutView config
 
-        @listenTo @layout, "show", =>
-          @statsRegion(runner)
-          @iframeRegion(runner)
-          @specsRegion(runner)
-          @panelsRegion(runner, config)
+      @listenTo @layout, "show", =>
+        @statsRegion(runner)
+        @iframeRegion(runner)
+        @specsRegion(runner)
+        @panelsRegion(runner, config)
 
-          ## start running the tests
-          ## and load the iframe
-          runner.start(options.id)
+        ## start running the tests
+        ## and load the iframe
+        runner.start(options.id)
 
-          @layout.resizePanels()
+        # @layout.resizePanels()
 
-        @show @layout
+      @show @layout
 
     statsRegion: (runner) ->
       App.execute "show:test:stats", @layout.statsRegion, runner
