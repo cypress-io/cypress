@@ -3205,6 +3205,8 @@ ul {
   #ecl-wrapper.collapsed #ecl-sidebar .ecl-vnavigation li span {
     display: none; }
 #ecl-wrapper #ecl-sidebar {
+  -webkit-transition: width 0.1s ease;
+  transition: width 0.1s ease;
   width: 216px;
   background: #272930;
   z-index: 2;
@@ -3239,12 +3241,12 @@ ul {
       background-color: #22242a;
       border-top: 1px solid #1A1C20; }
   #ecl-wrapper #ecl-sidebar .collapse-container {
-    padding: 7px 9px;
+    padding: 7px 13px 7px 9px;
     background: #1F2126;
     bottom: 0;
     border-top: 1px solid #131519;
     box-shadow: 0 1px 0 #2A2C31 inset;
-    overflow: auto; }
+    overflow: hidden; }
     #ecl-wrapper #ecl-sidebar .collapse-container .logo {
       text-align: left;
       display: inline-block;
