@@ -3145,11 +3145,16 @@ ul {
     overflow-y: scroll;
     height: 100%;
     vertical-align: top;
-    -webkit-transition: margin 0.05s ease;
-    transition: margin 0.05s ease; }
+    -webkit-transition: margin-left 0.05s ease;
+    transition: margin-left 0.05s ease; }
+    #ecl-wrapper #main-region > div {
+      top: 0;
+      bottom: 0;
+      height: 100%;
+      overflow: auto; }
 
 #header-container {
-  background-color: #1C1D22;
+  background-color: #3C3E43;
   padding-left: 20px;
   overflow: auto;
   height: 50px; }
@@ -3730,8 +3735,10 @@ ul {
       border-left: 1px dotted #CCC; }
 
 #iframe-wrapper {
-  position: absolute;
+  position: relative;
   right: 0;
+  left: 35%;
+  width: 900px;
   top: 27px;
   margin-right: 30px; }
   #iframe-wrapper #iframe-container {
