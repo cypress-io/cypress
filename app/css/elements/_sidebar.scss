@@ -16,6 +16,8 @@
   }
 
   #ecl-sidebar {
+    -webkit-transition: width 0.1s ease;
+    transition: width 0.1s ease;
     width: 216px;
     background: #272930;
     z-index: 2;
@@ -68,12 +70,12 @@
     }
 
     .collapse-container {
-      padding: 7px 9px;
+      padding: 7px 13px 7px 9px;
       background: #1F2126;
       bottom: 0;
       border-top: 1px solid #131519;
       box-shadow: 0 1px 0 #2A2C31 inset;
-      overflow: auto;
+      overflow: hidden;
 
       .logo {
         text-align: left;
