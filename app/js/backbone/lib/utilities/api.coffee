@@ -1,8 +1,5 @@
 @App.module "Utilities", (Utilities, App, Backbone, Marionette, $, _) ->
 
-  ## set our df closure to null
-  df = null
-
   emit          = Mocha.Runnable::emit
   uncaught      = Mocha.Runner::uncaught
   assertProto   = chai.Assertion::assert if chai
@@ -51,13 +48,13 @@
     constructor: (runner) ->
       ## we need to have access to the methods we need to partial
       ## each time our tests / suites / hooks run
-      patch = Eclectus.patch
-      sandbox = Eclectus.sandbox
+      # patch = Eclectus.patch
+      # sandbox = Eclectus.sandbox
 
       ## resolve the promise with our bona-fide
       ## runner entity which will manage the lifecycle
       ## of our test runner
-      df.resolve App.request("runner:entity", runner, patch, sandbox)
+      # df.resolve App.request("runner:entity", runner, patch, sandbox)
 
   API =
     ## the start method will be responsible for setting up
@@ -65,7 +62,7 @@
     ## ATM its hard coded to work with Mocha
     start: ->
       ## reset df to a new deferred instance
-      df = $.Deferred()
+      # df = $.Deferred()
 
       ## instantiate Eclectus
       window.Ecl = new Eclectus
@@ -78,9 +75,10 @@
       overloadChaiAssertions(Ecl) if chai and chai.use
 
       ## start running the tests
-      mocha.run()
+      runner = mocha.run()
 
-      return df
+      ## return our runner entity
+      return App.request("runner:entity", runner, Eclectus.patch, Eclectus.sandbox)
 
     stop: (runner) ->
       ## call the stop method which cleans up any listeners
