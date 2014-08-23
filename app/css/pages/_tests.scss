@@ -494,8 +494,10 @@
 }
 
 #iframe-wrapper {
-  position: absolute;
+  position: relative;
   right: 0;
+  left: 35%;
+  width: 900px;
   top: 27px;
   margin-right: 30px;
 
