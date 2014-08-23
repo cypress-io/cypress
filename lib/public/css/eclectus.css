@@ -3126,10 +3126,10 @@ b {
   font-weight: 400; }
 
 blockquote p {
-  font-size: 1 5px; }
+  font-size: 15px; }
 
 ul {
-  padding-left: 30px; }
+  padding-left: 0px; }
 
 #ecl-wrapper {
   position: absolute;
@@ -3153,11 +3153,18 @@ ul {
       height: 100%;
       overflow: auto; }
 
+code, kbd, pre, samp {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 1.05em;
+  letter-spacing: 0.5px; }
+
 #header-container {
   background-color: #3C3E43;
   padding-left: 20px;
   overflow: auto;
-  height: 50px; }
+  height: 50px;
+  border-left: 1px solid #191919;
+  border-bottom: 1px solid #3d3a3f; }
   #header-container #stats-container {
     min-width: 330px;
     padding: 0;
@@ -3177,7 +3184,7 @@ ul {
       #header-container #stats-container li#tests-failed i {
         color: #E94B3B; }
       #header-container #stats-container li#tests-pending i {
-        color: #428BCA; }
+        color: #aaa; }
       #header-container #stats-container li span {
         color: #ccc; }
     #header-container #stats-container #tests-duration {
@@ -3230,7 +3237,7 @@ ul {
       border-bottom: 1px solid #1a1c20;
       display: block;
       padding: 14px 18px 13px 15px;
-      color: #9a9aaa;
+      color: #9A9A9f;
       font-size: 12px;
       font-weight: 300;
       white-space: nowrap; }
@@ -3258,7 +3265,7 @@ ul {
       text-align: left;
       display: inline-block;
       font-size: 200%;
-      color: #9a9aaa; }
+      color: #9A9A9f; }
     #ecl-wrapper #ecl-sidebar .collapse-container button {
       margin: 0 !important;
       background: transparent;
@@ -3520,7 +3527,7 @@ ul {
             white-space: nowrap;
             overflow: hidden; }
             #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content-region .runnable-state .suite-title {
-              color: #ab9f9b; }
+              color: #9f9f9f; }
           #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content-region .runnable-controls {
             width: 50px;
             float: right;
@@ -3536,6 +3543,7 @@ ul {
         margin-top: 2px;
         margin-bottom: 0;
         padding-bottom: 2px;
+        padding-top: 2px;
         margin-left: 18px;
         white-space: pre-wrap;
         clear: both; }
@@ -3567,7 +3575,7 @@ ul {
       #test-specs ul.runnables li.runnable.test.failed > .runnable-wrapper {
         border-left: 2px solid #E94B3B; }
       #test-specs ul.runnables li.runnable.failed > .runnable-wrapper pre {
-        color: #eb5c4d; }
+        color: #ff5f4f; }
       #test-specs ul.runnables li.runnable.failed > .runnable-wrapper .suite-title i {
         border-radius: 3px;
         background-color: #ea5344;
@@ -3587,17 +3595,19 @@ ul {
         color: #92bce0; }
     #test-specs ul.runnables .commands-container {
       margin: 5px 30px 5px 20px;
-      background-color: #333339;
-      color: #BBB; }
+      background-color: #343644;
+      color: #bcbccc;
+      padding: 1px; }
       #test-specs ul.runnables .commands-container:empty {
         display: none; }
       #test-specs ul.runnables .commands-container > li {
-        padding: 2px 6px;
-        margin: 0 3px; }
+        padding: 4px 9px 4px 20px;
+        margin: 0; }
         #test-specs ul.runnables .commands-container > li:hover {
-          background-color: #474747; }
+          background-color: #3b3f50;
+          cursor: pointer; }
       #test-specs ul.runnables .commands-container .command-parent {
-        border-top: 1px dotted #535353; }
+        border-top: 1px solid #3f3f4f; }
         #test-specs ul.runnables .commands-container .command-parent:first-child {
           border-top: 0; }
       #test-specs ul.runnables .commands-container .command-child .command-method:before {
@@ -3618,25 +3628,27 @@ ul {
         font-size: 11px;
         letter-spacing: .6px;
         float: left;
-        min-width: 80px; }
-      #test-specs ul.runnables .commands-container .command-type-xhr .command-method {
-        color: #E0C85E; }
+        min-width: 80px;
+        font-weight: 600;
+        color: #888888; }
+      #test-specs ul.runnables .commands-container .command-type-xhr.command-parent .command-method {
+        color: #a0dFcf; }
       #test-specs ul.runnables .commands-container .command-type-dom .command-method {
         color: #888888; }
       #test-specs ul.runnables .commands-container .command-type-dom .command-selector {
-        color: #cce0ff; }
+        color: #DDDDDD; }
       #test-specs ul.runnables .commands-container .command-type-dom-action .command-method {
-        color: #b3d0ff; }
+        color: #888888; }
       #test-specs ul.runnables .commands-container .command-type-dom-action .command-sequence {
-        color: #DDD; }
+        color: #ddd; }
       #test-specs ul.runnables .commands-container .command-type-assertion .command-method {
-        color: #27c39a; }
+        color: #afd4AD; }
       #test-specs ul.runnables .commands-container .command-type-assertion .command-message {
-        color: #99ead5; }
+        color: #afd4AD; }
       #test-specs ul.runnables .commands-container .command-type-assertion-failed .command-method {
-        color: #eb5849; }
+        color: #ee7569; }
       #test-specs ul.runnables .commands-container .command-type-assertion-failed .command-message {
-        color: #f18a80; }
+        color: #ee7569; }
       #test-specs ul.runnables .commands-container .command-selector,
       #test-specs ul.runnables .commands-container .command-sequence,
       #test-specs ul.runnables .commands-container .command-request,
@@ -3644,15 +3656,15 @@ ul {
       #test-specs ul.runnables .commands-container .command-message {
         display: block;
         margin-left: 80px;
-        width: 70%; }
+        width: 65%; }
       #test-specs ul.runnables .commands-container .command-request {
-        color: #f0e5b4; }
+        color: #a0dFcf; }
       #test-specs ul.runnables .commands-container .command-response .command-status {
         font-weight: 300;
-        color: #f0e5b4;
+        color: #ddd;
         margin-right: 3px; }
       #test-specs ul.runnables .commands-container .command-response .command-body {
-        color: #f0e5b4; }
+        color: #ddd; }
       #test-specs ul.runnables .commands-container .command-controls {
         position: absolute;
         top: 0;
