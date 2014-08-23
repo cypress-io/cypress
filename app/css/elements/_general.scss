@@ -41,11 +41,11 @@ b {
 }
 
 blockquote p {
-  font-size:1 5px;
+  font-size: 15px;
 }
 
 ul {
-  padding-left: 30px;
+  padding-left: 0px;
 }
 
 #ecl-wrapper {
@@ -79,4 +79,10 @@ ul {
 
     }
   }
+}
+
+code, kbd, pre, samp {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 1.05em;
+  letter-spacing: 0.5px;
 }

@@ -41,6 +41,7 @@
             position: "absolute",
             zIndex: @getZIndex(el)
             border: "3px solid #E94B3B"
+            opacity: 0.8
 
     getDimensions: (el) ->
       {

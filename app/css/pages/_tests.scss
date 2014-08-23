@@ -66,10 +66,7 @@
             overflow: hidden;
 
             .suite-title {
-              color: lighten(#8D7D77, 13%);
-              // color: lighten(#1C7EBB, 25%);
-              // font-variant: small-caps;
-              // font-size: 13px;
+              color: #9f9f9f;
             }
           }
 
@@ -96,6 +93,7 @@
         margin-top: 2px;
         margin-bottom: 0;
         padding-bottom: 2px;
+        padding-top: 2px;
         margin-left: 18px;
         white-space: pre-wrap;
         clear: both;
@@ -156,7 +154,7 @@
 
       &.failed > .runnable-wrapper {
         pre {
-          color: lighten(#E94B3B, 4%);
+          color: #ff5f4f;
         }
 
         .suite-title i {
@@ -207,24 +205,26 @@
 
     .commands-container {
       margin: 5px 30px 5px 20px;
-      background-color: #333339;
-      color: #BBB;
+      background-color: #343644;
+      color: #bcbccc;
+      padding: 1px;
 
       &:empty {
         display: none;
       }
 
       &>li {
-        padding: 2px 6px;
-        margin: 0 3px;
+        padding: 4px 9px 4px 20px;
+        margin: 0;
 
         &:hover {
-          background-color: #474747;
+          background-color: #3b3f50;
+          cursor: pointer;
         }
       }
 
       .command-parent {
-        border-top: 1px dotted #535353;
+        border-top: 1px solid #3f3f4f;
 
         &:first-child {
           border-top: 0;
@@ -258,14 +258,16 @@
         letter-spacing: .6px;
         float: left;
         min-width: 80px;
+        font-weight: 600;
+        color: #888888;
         // @include text-overflow;
       }
 
-      .command-type-xhr {
+      .command-type-xhr.command-parent {
         // background-color: mix(#E0C85E, #383838, 10%);
 
         .command-method {
-          color: #E0C85E;
+          color: #a0dFcf;
         }
       }
 
@@ -277,38 +279,37 @@
         }
 
         .command-selector {
-          color: lighten(#80B0FF, 15%);
+          color: #DDDDDD;
         }
       }
 
       .command-type-dom-action {
         .command-method {
-          color: lighten(#80B0FF, 10%);
+          color: #888888;
         }
 
         .command-sequence {
-          // color: lighten(#80B0FF, 25%);
-          color: #DDD;
+          color: #ddd;
         }
       }
 
       .command-type-assertion {
         .command-method {
-          color: lighten(#23AE89, 5%);
+          color: #afd4AD;
         }
 
         .command-message {
-          color: lighten(#23AE89, 35%);
+          color: #afd4AD;
         }
       }
 
       .command-type-assertion-failed {
         .command-method {
-          color: lighten(#E94B3B, 3%);
+          color: lighten(#E94B3B, 10%);
         }
 
         .command-message {
-          color: lighten(#E94B3B, 15%);
+          color: lighten(#E94B3B, 10%);
         }
       }
 
@@ -319,23 +320,23 @@
       .command-message {
         display: block;
         margin-left: 80px;
-        width: 70%;
+        width: 65%;
       }
 
       .command-request {
-        color: lighten(#E0C85E, 20%);
+        color: #a0dFcf;
       }
 
       .command-response {
 
         .command-status {
           font-weight: 300;
-          color: lighten(#E0C85E, 20%);
+          color: #ddd;
           margin-right: 3px;
         }
 
         .command-body {
-          color: lighten(#E0C85E, 20%);
+          color: #ddd;
         }
       }
 
