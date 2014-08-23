@@ -68,5 +68,7 @@ ul {
     overflow-y: scroll;
     height: 100%;
     vertical-align: top;
+    -webkit-transition: margin 0.05s ease;
+    transition: margin 0.05s ease;
   }
 }

@@ -3144,7 +3144,9 @@ ul {
     overflow: auto;
     overflow-y: scroll;
     height: 100%;
-    vertical-align: top; }
+    vertical-align: top;
+    -webkit-transition: margin 0.05s ease;
+    transition: margin 0.05s ease; }
 
 #header-container {
   background-color: #1C1D22;
@@ -3205,8 +3207,8 @@ ul {
   #ecl-wrapper.collapsed #ecl-sidebar .ecl-vnavigation li span {
     display: none; }
 #ecl-wrapper #ecl-sidebar {
-  -webkit-transition: width 0.1s ease;
-  transition: width 0.1s ease;
+  -webkit-transition: width 0.05s ease;
+  transition: width 0.05s ease;
   width: 216px;
   background: #272930;
   z-index: 2;
