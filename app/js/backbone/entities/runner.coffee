@@ -168,11 +168,9 @@
       ## mocha has begun running the specs per iframe
       @runner.on "start", =>
         ## wipe out all listeners on our private runner bus
-        console.warn "RUNNER HAS STARTED"
         @trigger "runner:start"
 
       @runner.on "end", =>
-        console.warn "RUNNER HAS ENDED"
         @trigger "runner:end"
 
       @runner.on "suite", (suite) =>
@@ -304,9 +302,8 @@
     escapeId: (id) ->
       id.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
+    ## tell our runner to run our iframes mocha suite
     runIframeSuite: (iframe, contentWindow) ->
-      ## tell our runner to run our iframes mocha suite
-      console.info("runIframeSuite", @runner, iframe, contentWindow.mocha.suite)
 
       ## store the current iframe
       @setIframe iframe
