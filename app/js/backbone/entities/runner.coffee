@@ -38,7 +38,6 @@
       @trigger "test:results:ready", test
 
     revertDom: (command) ->
-      console.warn command
       @trigger "revert:dom", command.getDom(),
         highlight: command.get("highlight")
         el: command.getEl()
@@ -58,72 +57,96 @@
 
       runner = @
 
-      ## TODO: IMPLEMENT FOR SUITES
-      @runner.runSuite = _.wrap @runner.runSuite, (runSuite, suite, fn) ->
-        ## iterate through each test
+      @runner.runSuite = _.wrap @runner.runSuite, (runSuite, rootSuite, fn) ->
+        ## the runSuite function is recursively called for each individual suite
+        ## since we iterate through all tests and all suites initially we need
+        ## to bail early if this isnt the root suite
+        return runSuite.call(@, rootSuite, fn) if not rootSuite.root
+
         generatedIds = []
 
-        suite.eachTest (test) ->
-          ## iterating on both the test and its parent (the suite)
-          _.each [test.parent, test], (type) ->
-            ## bail if we're the root runnable
-            ## or we've already processed this tests parent
-            return if type.root or type.added
+        runner.iterateThroughRunnables rootSuite, generatedIds, socket
 
-            ## parse the cid out of the title if it exists
-            type.cid ?= runner.getTestCid(type)
+        _this = @
 
-            ## allow to get the original title
-            type.originalTitle = ->
-              @title.replace runner.getIdToAppend(type.cid), ""
+        $.when(generatedIds...).done ->
+          ## grep for the correct test / suite by its id if chosenId is set
+          ## or all the tests
+          ## we need to grep at the last possible moment because if we've chosen
+          ## a runnable but then deleted it afterwards, then we'll incorrectly
+          ## continue to grep for it.  instead we need to do a check to ensure
+          ## we still have the runnable's cid which matches our chosen id
+          _this.grep runner.getGrep(rootSuite)
 
-            df = $.Deferred()
+          runSuite.call(_this, rootSuite, fn)
 
-            ## when we're done getting our cid
-            ## or if we already have it
-            df.done ->
-              ## dont fire duplicate events if this is already fired
-              ## its 'been added' event
-              return if type.added
+    ## iterates through both the runnables tests + suites if it has any
+    iterateThroughRunnables: (runnable, ids, socket) ->
+      _.each [runnable.tests, runnable.suites], (array) =>
+        _.each array, (runnable) =>
+          @generateId runnable, ids, socket
 
-              type.added = true
+    ## generates an id for each runnable and then continues iterating
+    ## on children tests + suites
+    generateId: (runnable, ids = [], socket) ->
+      ## iterating on both the test and its parent (the suite)
+      ## bail if we're the root runnable
+      ## or we've already processed this tests parent
+      return if runnable.root or runnable.added
 
-              ## tests have a type of 'test' whereas suites do not have a type property
-              event = type.type or "suite"
+      runner = @
 
-              ## trigger the add events so our UI can begin displaying
-              ## the tests + suites
-              runner.trigger "#{event}:add", type
+      ## parse the cid out of the title if it exists
+      runnable.cid ?= runner.getTestCid(runnable)
 
-            ## if test or suite doesnt have a cid
-            if not type.cid
-              ## override each test's and suite's fullTitle to include its real id
-              ## this cant use a regular client id, since when the iframe reloads
-              ## each test will have a unique id again -- this is why
-              ## you have to use client id's in the title in the
-              ## original spec
+      ## allow to get the original title
+      runnable.originalTitle = ->
+        @title.replace runner.getIdToAppend(runnable.cid), ""
 
-              type.fullTitle = _.wrap type.fullTitle, (origTitle) ->
-                title = origTitle.apply(@)
-                title + runner.getIdToAppend(type.cid)
+      df = $.Deferred()
 
-              generatedIds.push df
+      ## when we're done getting our cid
+      ## or if we already have it
+      df.done ->
+        ## dont fire duplicate events if this is already fired
+        ## its 'been added' event
+        return if runnable.added
 
-              ## go get the id from the server via websockets
-              data = {title: type.title, spec: runner.iframe}
-              socket.emit "generate:test:id", data, (id) ->
-                type.cid = id
-                df.resolve id
-            else
-              df.resolve()
+        runnable.added = true
 
-        # console.info generatedIds
-        $.when(generatedIds...).done =>
-          runSuite.call(@, suite, fn)
+        ## tests have a runnable of 'test' whereas suites do not have a runnable property
+        event = runnable.type or "suite"
 
-    # getEntitiesByEvent: (event) ->
-    #   obj = {dom: @doms, xhr: @xhrs, log: @logs}
-    #   obj[event or throw new Error("Cannot find entities by event: #{event}")]
+        ## trigger the add events so our UI can begin displaying
+        ## the tests + suites
+        runner.trigger "#{event}:add", runnable
+
+        ## recursively apply to all tests / suites of this runnable
+        runner.iterateThroughRunnables(runnable, ids, socket)
+
+      ## if test or suite doesnt have a cid
+      if not runnable.cid
+        ## override each test's and suite's fullTitle to include its real id
+        ## this cant use a regular client id, since when the iframe reloads
+        ## each test will have a unique id again -- this is why
+        ## you have to use client id's in the title in the
+        ## original spec
+
+        runnable.fullTitle = _.wrap runnable.fullTitle, (origTitle) ->
+          title = origTitle.apply(@)
+          title + runner.getIdToAppend(runnable.cid)
+
+        ids.push df
+
+        ## go get the id from the server via websockets
+        data = {title: runnable.title, spec: runner.iframe}
+        socket.emit "generate:test:id", data, (id) ->
+          runnable.cid = id
+          df.resolve id
+      else
+        df.resolve()
+
+      return df
 
     getCommands: ->
       @commands
@@ -145,11 +168,9 @@
       ## mocha has begun running the specs per iframe
       @runner.on "start", =>
         ## wipe out all listeners on our private runner bus
-        console.warn "RUNNER HAS STARTED"
         @trigger "runner:start"
 
       @runner.on "end", =>
-        console.warn "RUNNER HAS ENDED"
         @trigger "runner:end"
 
       @runner.on "suite", (suite) =>
@@ -244,21 +265,45 @@
       ## always reload the iframe
       @triggerLoadIframe @iframe
 
-    getGrep: ->
-      if chosen = @get("chosen")
-        ## create a regex based on the id of the suite / test
-        new RegExp @escapeId("[" + chosen.id + "]")
+    ## this recursively loops through all tests / suites
+    ## plucking out their cid's and returning those
+    ## this should be refactored since it creates an N+1 loop
+    ## through all runnables.  instead this should happen during
+    ## the original loop through to ensure we have cid's
+    getRunnableCids: (root, ids) ->
+      ids ?= []
 
-      else
-        ## just use every test
-        /.*/
+      ## make sure we push our own cid in here
+      ## when we're a suite but not the root!
+      ids.push root.cid if root.cid
+
+      _.each root.tests, (test) ->
+        ids.push test.cid
+
+      _.each root.suites, (suite) =>
+        @getRunnableCids suite, ids
+
+      ids
+
+    getGrep: (root) ->
+      chosen = @get("chosen")
+      if chosen
+        ## if we have a chosen model and its in our runnables cid
+        if chosen.id in @getRunnableCids(root)
+          ## create a regex based on the id of the suite / test
+          return new RegExp @escapeId("[" + chosen.id + "]")
+
+        ## lets remove our chosen runnable since its no longer with us
+        else
+          @unset "chosen"
+
+      return /.*/ if not @hasChosen()
 
     escapeId: (id) ->
       id.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
+    ## tell our runner to run our iframes mocha suite
     runIframeSuite: (iframe, contentWindow) ->
-      ## tell our runner to run our iframes mocha suite
-      console.info("runIframeSuite", @runner, iframe, contentWindow.mocha.suite)
 
       ## store the current iframe
       @setIframe iframe
@@ -268,11 +313,7 @@
       @setContentWindow contentWindow
 
       ## patch the sinon sandbox for Eclectus methods
-      @patchSandbox @contentWindow
-
-      ## grep for the correct test / suite by its id if chosenId is set
-      ## or all the tests
-      @runner.grep @getGrep()
+      @patchSandbox contentWindow
 
       ## trigger the before run event
       @trigger "before:run"

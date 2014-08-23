@@ -1,11 +1,11 @@
 @App.module "Utilities", (Utilities, App, Backbone, Marionette, $, _) ->
 
-  ## set our df closure to null
-  df = null
-
-  emit      = Mocha.Runnable::emit
-  uncaught  = Mocha.Runner::uncaught
-  assert    = chai.Assertion::assert if chai
+  emit          = Mocha.Runnable::emit
+  uncaught      = Mocha.Runner::uncaught
+  assertProto   = chai.Assertion::assert if chai
+  expect        = chai.expect
+  assert        = chai.assert
+  ## still need to do should here...
 
   overloadMochaRunnableEmit = ->
     ## if app evironment is development we need to list to errors
@@ -27,7 +27,14 @@
 
   overloadChaiAssertions = (Ecl) ->
     chai.use (_chai, utils) ->
-      _chai.Assertion::assert = _.wrap assert, (orig, args...) ->
+      _.each {expect: expect, assert: assert}, (value, key) ->
+        _chai[key] = _.wrap value, (orig, args...) ->
+          if args[0] instanceof Eclectus.Command
+            args[0] = args[0].$el
+
+          orig.apply(@, args)
+
+      _chai.Assertion::assert = _.wrap assertProto, (orig, args...) ->
         passed    = utils.test(@, args)
         value     = utils.flag(@, "object")
         expected  = args[3]
@@ -41,13 +48,13 @@
     constructor: (runner) ->
       ## we need to have access to the methods we need to partial
       ## each time our tests / suites / hooks run
-      patch = Eclectus.patch
-      sandbox = Eclectus.sandbox
+      # patch = Eclectus.patch
+      # sandbox = Eclectus.sandbox
 
       ## resolve the promise with our bona-fide
       ## runner entity which will manage the lifecycle
       ## of our test runner
-      df.resolve App.request("runner:entity", runner, patch, sandbox)
+      # df.resolve App.request("runner:entity", runner, patch, sandbox)
 
   API =
     ## the start method will be responsible for setting up
@@ -55,7 +62,7 @@
     ## ATM its hard coded to work with Mocha
     start: ->
       ## reset df to a new deferred instance
-      df = $.Deferred()
+      # df = $.Deferred()
 
       ## instantiate Eclectus
       window.Ecl = new Eclectus
@@ -68,9 +75,10 @@
       overloadChaiAssertions(Ecl) if chai and chai.use
 
       ## start running the tests
-      mocha.run()
+      runner = mocha.run()
 
-      return df
+      ## return our runner entity
+      return App.request("runner:entity", runner, Eclectus.patch, Eclectus.sandbox)
 
     stop: (runner) ->
       ## call the stop method which cleans up any listeners

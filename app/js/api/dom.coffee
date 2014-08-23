@@ -6,6 +6,12 @@
 ## attach to Eclectus global
 Eclectus.Dom = do ($, _, Eclectus) ->
 
+  jQueryMethods =
+    ["attr", "class", "css", "data", "have", "html", "id", "is", "prop", "text", "val"]
+
+  traversalMethods =
+    ["children", "eq", "first", "last", "next", "parent", "parents", "prev", "siblings"]
+
   ## create a reusable jquery selector object for our iframes
   ## which utilitizes our parent jquery object with the iframe
   ## context.  this means our consumers dont have to have jquery
@@ -20,6 +26,7 @@ Eclectus.Dom = do ($, _, Eclectus) ->
     ## just like jQuery
     find: (el) ->
       @$el      = if @$el then @$el.find(el) else @$(el)
+      @length   = @$el.length
       @selector = @$el.selector
 
       @emit
@@ -32,6 +39,7 @@ Eclectus.Dom = do ($, _, Eclectus) ->
 
     within: (el, fn) ->
       @$el      = if @$el then @$el.find(el) else @$(el)
+      @length   = @$el.length
       @selector = @$el.selector
 
       ## might want to strip out the previous selector here
@@ -58,6 +66,8 @@ Eclectus.Dom = do ($, _, Eclectus) ->
 
       ## then undo so commands after this are back to normal
       @unscope()
+
+      return @
 
     type: (sequence, options = {}) ->
       #@pauseRunnable() if sequence is "walk the dog{enter}" and @runnable.cid is "1lc"
@@ -97,5 +107,54 @@ Eclectus.Dom = do ($, _, Eclectus) ->
       ## probably resetting the timeout
       _.defer =>
         @runnable.clearTimeout()
+
+    ## sugar for chai jquery to check element existance
+    exist: ->
+      @$el.length > 0
+
+  ## apply each of native jQuery methods
+  ## directly to our dom instance
+  _.each jQueryMethods, (method) ->
+    Dom.prototype[method] = ->
+      @$el[method].apply(@$el, arguments)
+
+  ## both within + find + eq are all traversal methods
+  ## double check that find + within are
+  ## but eq, children, siblings, parent, parents, etc
+  ## are all traversal methods that can simply be looped over
+  ## and dynamically generated
+  _.each traversalMethods, (method) ->
+    Dom.prototype[method] = ->
+      throw new Error("Cannot call method: #{method} without an existing DOM element.  Did you forget to call 'find' or 'within'?") if not @$el
+
+      ## there wont be a selector with traversal methods
+      ## instead there will just be arguments
+      dom           = @clone(Dom)
+      dom.$el       = @$el[method].apply(@$el, arguments)
+      dom.length    = dom.$el.length
+      dom.selector  = dom.$el.selector
+
+      ## TODO refactor selectors / el highlighting
+      ## how to persist the document DOM?
+
+      ## should i just always send the arguments instead
+      ## of the selector? why ever use the selector?
+
+      dom.emit
+        selector: dom.selector or arguments[0].toString()
+        el:       dom.$(dom.selector)
+        method:   method
+        # isParent: true
+
+      ## after we emit this event, changed the cloned instanceid?
+      ## that way when we chain methods
+
+      ## think about how to improve chaining instances together
+      ## perhaps always return a new instance and prior to cloning
+      ## we should reference the original parent
+
+      ## jQuery always returns a new object instance when you traverse
+
+      return dom
 
   return Dom
