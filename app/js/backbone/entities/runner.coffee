@@ -57,16 +57,19 @@
 
       runner = @
 
-      ## TODO: IMPLEMENT FOR SUITES
       @runner.runSuite = _.wrap @runner.runSuite, (runSuite, rootSuite, fn) ->
-        ## iterate through each test
+        ## the runSuite function is recursively called for each individual suite
+        ## since we iterate through all tests and all suites initially we need
+        ## to bail early if this isnt the root suite
+        return runSuite.call(@, rootSuite, fn) if not rootSuite.root
+
         generatedIds = []
 
         runner.iterateThroughRunnables rootSuite, generatedIds, socket
 
         _this = @
 
-        $.when(generatedIds...).done =>
+        $.when(generatedIds...).done ->
           ## grep for the correct test / suite by its id if chosenId is set
           ## or all the tests
           ## we need to grep at the last possible moment because if we've chosen
@@ -142,6 +145,8 @@
           df.resolve id
       else
         df.resolve()
+
+      return df
 
     getCommands: ->
       @commands
@@ -270,6 +275,10 @@
     getRunnableCids: (root, ids) ->
       ids ?= []
 
+      ## make sure we push our own cid in here
+      ## when we're a suite but not the root!
+      ids.push root.cid if root.cid
+
       _.each root.tests, (test) ->
         ids.push test.cid
 
@@ -307,7 +316,7 @@
       @setContentWindow contentWindow
 
       ## patch the sinon sandbox for Eclectus methods
-      @patchSandbox @contentWindow
+      @patchSandbox contentWindow
 
       ## trigger the before run event
       @trigger "before:run"
