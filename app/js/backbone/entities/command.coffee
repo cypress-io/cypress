@@ -175,8 +175,6 @@
 
       command = @getCommandByType(attrs)
 
-      console.warn "command model is: ", command
-
       super command
 
   App.reqres.setHandler "command:entities", ->
