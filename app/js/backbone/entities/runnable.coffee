@@ -63,7 +63,6 @@
 
     ## when our tests are unchosen we want to close their open state
     collapse: ->
-      console.warn @, "onUnchoose"
       @set "open", false if @is("test")
 
     reset: ->
