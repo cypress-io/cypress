@@ -3636,11 +3636,11 @@ code, kbd, pre, samp {
       #test-specs ul.runnables .commands-container .command-type-dom .command-method {
         color: #888888; }
       #test-specs ul.runnables .commands-container .command-type-dom .command-selector {
-        color: #DDDDDD; }
+        color: #888888; }
       #test-specs ul.runnables .commands-container .command-type-dom-action .command-method {
         color: #888888; }
       #test-specs ul.runnables .commands-container .command-type-dom-action .command-sequence {
-        color: #ddd; }
+        color: #888; }
       #test-specs ul.runnables .commands-container .command-type-assertion .command-method {
         color: #afd4AD; }
       #test-specs ul.runnables .commands-container .command-type-assertion .command-message {
