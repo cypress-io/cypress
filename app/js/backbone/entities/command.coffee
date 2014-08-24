@@ -20,6 +20,8 @@
     setParent: (parent) ->
       @parent = parent
       @set "hasParent", true
+      @parent.set "isParent", true
+      @
 
     hasParent: ->
       !!@get("hasParent")
@@ -77,12 +79,8 @@
   class Entities.CommandsCollection extends Entities.Collection
     model: Entities.Command
 
-    parentExistsFor: (instanceId) ->
-      ## this returns us the last (parent)
-      found = @filter (command) ->
-        command.isParent() and command.get("instanceId") is instanceId
-
-      _(found).last()
+    parentExistsFor: (id) ->
+      @get(id)
 
     lastCommandIsNotRelatedTo: (command) ->
       ## does the last command's instanceId not match ours?
@@ -130,7 +128,7 @@
       ## if we're chained to an existing instanceId
       ## that means we have a parent
 
-      if parent = @parentExistsFor(attrs.instanceId)
+      if parent = @parentExistsFor(attrs.parent)
         command.setParent parent
         command.indent()
         ## we want to reinsert the parent if this current command
@@ -138,7 +136,7 @@
         ## that means something has been inserted in between our command
         ## instance group and we need to insert the parent so this command
         ## looks visually linked to its parent
-        @insertParent(parent) if @lastCommandIsNotRelatedTo(command)
+        # @insertParent(parent) if @lastCommandIsNotRelatedTo(command)
 
       return command
 

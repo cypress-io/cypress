@@ -40,26 +40,31 @@ Eclectus.Dom = do ($, _, Eclectus) ->
 
       dom.emit
         selector: dom.selector
-        el:       dom.$(dom.selector)
+        el:       dom.$el
         method:   "find"
-        isParent: true
 
       return dom
 
-    within: (el, fn) ->
-      @$el      = if @$el then @$el.find(el) else @$(el)
-      @length   = @$el.length
-      @selector = @$el.selector
+    within: (selector, fn) ->
+      if @$el
+        dom         = @clone()
+        dom.parent  = @
+        dom.$el     = @$el.find(selector)
+      else
+        dom     = @
+        dom.$el = @$(selector)
+
+      dom.length   = dom.$el.length
+      dom.selector = dom.$el.selector
 
       ## might want to strip out the previous selector here
       ## since we may not want to display that in our command view
       ## so instead of WITHIN #foo WITHIN #foo #bar WITHIN #foo #bar #baz
       ## we'd have WITHIN #foo WITHIN #bar WITHIN #baz
-      @emit
-        selector: @selector
-        el:       @$(@selector)
+      dom.emit
+        selector: dom.selector
+        el:       dom.$el
         method:   "within"
-        isParent: true
 
       ## instead of patching all of these things here
       ## why wouldnt we just pass this instanceId around?
@@ -69,14 +74,14 @@ Eclectus.Dom = do ($, _, Eclectus) ->
       ## else instatiate a new one
       ## ----------------------------------------------
       ## re-patch eclectus with this previous el object
-      @scope()
+      dom.scope()
 
-      fn.call(@)
+      fn.call(dom)
 
       ## then undo so commands after this are back to normal
-      @unscope()
+      dom.unscope()
 
-      return @
+      return dom
 
     type: (sequence, options = {}) ->
       #@pauseRunnable() if sequence is "walk the dog{enter}" and @runnable.cid is "1lc"
@@ -149,7 +154,6 @@ Eclectus.Dom = do ($, _, Eclectus) ->
       dom.$el       = @$el[method].apply(@$el, arguments)
       dom.length    = dom.$el.length
       dom.selector  = arguments[0]
-      dom.dom       = @getDom()
 
       # dom.replaceAll @$el.find("iframe").contents().find("body")
 
@@ -160,8 +164,8 @@ Eclectus.Dom = do ($, _, Eclectus) ->
       ## of the selector? why ever use the selector?
 
       dom.emit
-        selector: dom.selector or arguments[0].toString()
-        el:       dom.$(dom.selector)
+        selector: dom.selector
+        el:       dom.$el
         method:   method
         # isParent: true
 
