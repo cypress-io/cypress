@@ -5,10 +5,10 @@ Eclectus.Command = do ($, _) ->
   class Command
     constructor: (@document, @channel, @runnable) ->
       ## this is the unique identifer of all instantiated
-      ## commands.  so as we chain off of this instanceId
-      ## we can reference back up to the parent instanceId
+      ## commands.  so as we chain off of this id
+      ## we can reference back up to the parent id
       ## we chained off of.
-      @instanceId = _.uniqueId("instance")
+      @id = _.uniqueId("instance")
 
       ## call init passing up our arguments
       @initialize(arguments...) if @initialize
@@ -25,17 +25,19 @@ Eclectus.Command = do ($, _) ->
 
       _(config).defaults
         dom: true
+        parent: @parent?.id
+        length: @length
 
     getDom: ->
       ## create a unique selector for this el
-      @$el.attr("data-eclectus-el", true)
+      @$el.attr("data-eclectus-el", true) if @$el
 
       ## clone the body and strip out any script tags
       body = @$("body").clone(true, true)
       body.find("script").remove()
 
       ## now remove it after we clone
-      @$el.removeAttr("data-eclectus-el")
+      @$el.removeAttr("data-eclectus-el") if @$el
 
       return body
 
@@ -47,8 +49,8 @@ Eclectus.Command = do ($, _) ->
       ## and its not already set
       obj.dom ?= @getDom() if config.dom
 
-      ## set instanceId if not already set
-      obj.instanceId ?= @instanceId
+      ## set id if not already set
+      obj.id ?= @id
 
       @channel.trigger config.type, @runnable, obj
 
