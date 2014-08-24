@@ -101,6 +101,21 @@
         when "xhr"        then @addXhr attrs
         when "assertion"  then @addAssertion attrs
 
+    handleParent: (command, parent) ->
+      df = $.Deferred()
+
+      if parent = @parentExistsFor(parent)
+        ## make sure the last command is our parent, if its not
+        ## then re-insert it (as a new model) and reset which
+        ## one is our parent
+        parent = @insertParent(parent) if @lastCommandIsNot(parent)
+
+        command.setParent parent
+        command.indent()
+        df.resolve()
+
+      df
+
     addAssertion: (attrs) ->
       {dom, actual, expected, value} = attrs
       attrs = _(attrs).omit "dom", "actual", "expected", "value"
@@ -128,15 +143,7 @@
 
       ## if we're chained to an existing id
       ## that means we have a parent
-
-      if parent = @parentExistsFor(attrs.parent)
-        ## make sure the last command is our parent, if its not
-        ## then re-insert it (as a new model) and reset which
-        ## one is our parent
-        parent = @insertParent(parent) if @lastCommandIsNot(parent)
-
-        command.setParent parent
-        command.indent()
+      @handleParent(command, attrs.parent)
 
       return command
 
@@ -150,15 +157,8 @@
       command.xhr = xhr
       command.dom = dom
 
-      if parent = @parentExistsFor(attrs.parent)
-        ## make sure the last command is our parent, if its not
-        ## then re-insert it (as a new model) and reset which
-        ## one is our parent
-        parent = @insertParent(parent) if @lastCommandIsNot(parent)
-
-        command.setParent parent
+      @handleParent(command, attrs.parent).done ->
         command.setResponse response
-        command.indent()
 
       return command
 
