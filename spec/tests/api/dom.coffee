@@ -86,5 +86,4 @@ describe "Dom Command API", ->
         expect(li).to.have.prop "nodeName", "LI"
 
       it "removes the special data-eclectus-el selector from $el", ->
-        console.warn @eq
         expect(@eq.$el).not.to.have.attr "data-eclectus-el"
