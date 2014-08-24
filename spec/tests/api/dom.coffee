@@ -16,7 +16,7 @@ describe "Dom Command API", ->
       src: "/fixtures/dom.html"
       class: "iframe-spec"
       load: ->
-        _this.dom = new Eclectus.Dom @contentWindow.document
+        _this.dom = Eclectus.createDom {contentWindow: @contentWindow}
         df.resolve()
     })
 
@@ -55,12 +55,31 @@ describe "Dom Command API", ->
       it "sets the parent of dom2 to dom", ->
         expect(@dom2.parent).to.eq @dom
 
+  describe "#within", ->
+    beforeEach ->
+      @dom.within "#dom", =>
+        @dom2 = Eclectus::find "#nested-find"
+
+    it "sets $el", ->
+      expect(@dom.$el).to.be.instanceof($)
+
+    it "sets length", ->
+      expect(@dom.length).to.eq @dom.$el.length
+
+    it "sets selector to the first argument", ->
+      expect(@dom.selector).to.eq "#dom"
+
+    context "nested method within (#within)", ->
+      it "sets parent of dom2 to dom", ->
+        expect(@dom2.parent).to.eq @dom
+
   describe "traversal methods", ->
     it "throws if calling these methods directly"
 
     context "eq", ->
       beforeEach ->
         @eq = @dom.find("#list li").eq(0)
+        @eq.dom = @eq.getDom()
 
       it "returns a new dom instance", ->
         expect(@eq).not.to.eq @dom
