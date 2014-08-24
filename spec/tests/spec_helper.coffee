@@ -1,0 +1,1 @@
+window.expect = chai.expect

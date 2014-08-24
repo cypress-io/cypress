@@ -58,6 +58,14 @@ app.get "/bower_components/*", (req, res) ->
   res.sendFile path.join("bower_components", req.params[0]),
     root: path.join(__dirname, "..")
 
+app.get "/lib/*", (req, res) ->
+  res.sendFile path.join("lib", req.params[0]),
+    root: path.join(__dirname, "..")
+
+app.get "/fixtures/:fixture", (req, res) ->
+  res.sendFile "fixtures/#{req.params.fixture}",
+    root: __dirname
+
 app.get "/", (req, res) ->
   res.render path.join(__dirname, "views", "index.html"), {
     specs: getAllSpecs()
