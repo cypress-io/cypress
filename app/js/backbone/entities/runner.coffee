@@ -39,8 +39,9 @@
 
     revertDom: (command) ->
       @trigger "revert:dom", command.getDom(),
+        el:        command.getEl()
+        attr:      command.get("highlightAttr")
         highlight: command.get("highlight")
-        el: command.getEl()
 
     setTestRunner: (runner) ->
       ## store the test runner as a property on ourselves

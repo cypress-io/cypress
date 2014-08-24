@@ -14,12 +14,13 @@
       "click @ui.compress"  : "compressClicked"
 
     revertToDom: (dom, options) ->
+
       ## replaces the iframes body with the dom object
       dom.replaceAll @$el.find("iframe").contents().find("body")
 
       @addRevertMessage(options)
 
-      @highlight(dom, options.el) if options.highlight
+      @highlight(dom, options.el, options.attr) if options.highlight
 
     addRevertMessage: (options) ->
       @ui.message.text("DOM has been reverted").show()
@@ -27,20 +28,24 @@
     getZIndex: (el) ->
       if /^(auto|0)$/.test el.css("zIndex") then 1000 else Number el.css("zIndex")
 
-    highlight: (dom, el) ->
-      el = dom.find(el.selector)
-      dimensions = @getDimensions(el)
+    highlight: (dom, el, attr) ->
+      ## find the element by its special attr
+      ## in the stored dom
+      found = dom.find("[" + attr + "]")
+      found.each (index, el) =>
+        el = $(el)
+        dimensions = @getDimensions(el)
 
-      $("<div>")
-        .appendTo(dom)
-          .css
-            width: dimensions.width - 6,
-            height: dimensions.height - 6,
-            top: dimensions.offset.top,
-            left: dimensions.offset.left,
-            position: "absolute",
-            zIndex: @getZIndex(el)
-            border: "3px solid #E94B3B"
+        $("<div>")
+          .appendTo(dom)
+            .css
+              width: dimensions.width - 6,
+              height: dimensions.height - 6,
+              top: dimensions.offset.top,
+              left: dimensions.offset.left,
+              position: "absolute",
+              zIndex: @getZIndex(el)
+              border: "3px solid #E94B3B"
 
     getDimensions: (el) ->
       {
