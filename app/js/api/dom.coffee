@@ -24,18 +24,27 @@ Eclectus.Dom = do ($, _, Eclectus) ->
     ## if find is called and we already have a selector
     ## it means we're chaining and we need to set prevObject
     ## just like jQuery
-    find: (el) ->
-      @$el      = if @$el then @$el.find(el) else @$(el)
-      @length   = @$el.length
-      @selector = @$el.selector
+    find: (selector) ->
+      ## if we already have an $el property it means we're chaining
+      ## the find method and need to clone this and return a new dom object
+      if @$el
+        dom         = @clone()
+        dom.parent  = @
+        dom.$el     = @$el.find(selector)
+      else
+        dom     = @
+        dom.$el = @$(selector)
 
-      @emit
-        selector: @selector
-        el:       @$(@selector)
+      dom.length   = dom.$el.length
+      dom.selector = selector
+
+      dom.emit
+        selector: dom.selector
+        el:       dom.$(dom.selector)
         method:   "find"
         isParent: true
 
-      return @
+      return dom
 
     within: (el, fn) ->
       @$el      = if @$el then @$el.find(el) else @$(el)
@@ -74,8 +83,13 @@ Eclectus.Dom = do ($, _, Eclectus) ->
 
       _.extend options,
         sequence: sequence
+        # eventProps:
+          # jQueryTrigger: true
+          # simulatedEvent: true
+        # triggerKeyEvents: false
 
-      @$el.simulate "key-sequence", options
+      # @$el.val sequence
+      @$el.simulate "key-sequence", options #if sequence is "{enter}"
 
       @emit
         selector: @selector
@@ -89,6 +103,7 @@ Eclectus.Dom = do ($, _, Eclectus) ->
       @selector = @$el.selector
 
       @$el.simulate "click"
+      # @$el.click()
 
       @emit
         el:       @$(@selector)
@@ -129,10 +144,17 @@ Eclectus.Dom = do ($, _, Eclectus) ->
 
       ## there wont be a selector with traversal methods
       ## instead there will just be arguments
-      dom           = @clone(Dom)
+      dom           = @clone()
+      dom.parent    = @
       dom.$el       = @$el[method].apply(@$el, arguments)
       dom.length    = dom.$el.length
-      dom.selector  = dom.$el.selector
+      dom.selector  = arguments[0]
+
+      dom.$el.attr("data-eclectus-el", true)
+      dom.dom = @getDom()
+      dom.$el.removeAttr("data-eclectus-el")
+
+      # dom.replaceAll @$el.find("iframe").contents().find("body")
 
       ## TODO refactor selectors / el highlighting
       ## how to persist the document DOM?
