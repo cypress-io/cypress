@@ -14,7 +14,6 @@
       "click @ui.compress"  : "compressClicked"
 
     revertToDom: (dom, options) ->
-
       ## replaces the iframes body with the dom object
       dom.replaceAll @$el.find("iframe").contents().find("body")
 

@@ -82,12 +82,13 @@
     parentExistsFor: (id) ->
       @get(id)
 
-    lastCommandIsNotRelatedTo: (command) ->
-      ## does the last command's instanceId not match ours?
-      @last().get("instanceId") isnt command.get("instanceId")
+    lastCommandIsNot: (command) ->
+      @last() isnt command
 
     insertParent: (parent) ->
+      ## get a clone of our parent but reset its id
       clone = parent.clone()
+      clone.id = _.uniqueId("cloneId")
 
       _.each ["el", "dom", "xhr", "response", "parent"], (prop) ->
         clone[prop] = parent[prop]
@@ -125,18 +126,17 @@
       command.dom = dom
       command.el = el
 
-      ## if we're chained to an existing instanceId
+      ## if we're chained to an existing id
       ## that means we have a parent
 
       if parent = @parentExistsFor(attrs.parent)
+        ## make sure the last command is our parent, if its not
+        ## then re-insert it (as a new model) and reset which
+        ## one is our parent
+        parent = @insertParent(parent) if @lastCommandIsNot(parent)
+
         command.setParent parent
         command.indent()
-        ## we want to reinsert the parent if this current command
-        ## is not related to our last.
-        ## that means something has been inserted in between our command
-        ## instance group and we need to insert the parent so this command
-        ## looks visually linked to its parent
-        # @insertParent(parent) if @lastCommandIsNotRelatedTo(command)
 
       return command
 
@@ -150,12 +150,15 @@
       command.xhr = xhr
       command.dom = dom
 
-      if parent = @parentExistsFor(attrs.instanceId)
+      if parent = @parentExistsFor(attrs.parent)
+        ## make sure the last command is our parent, if its not
+        ## then re-insert it (as a new model) and reset which
+        ## one is our parent
+        parent = @insertParent(parent) if @lastCommandIsNot(parent)
+
         command.setParent parent
         command.setResponse response
         command.indent()
-
-        @insertParent(parent) if @lastCommandIsNotRelatedTo(command)
 
       return command
 
