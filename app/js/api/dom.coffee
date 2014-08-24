@@ -149,10 +149,7 @@ Eclectus.Dom = do ($, _, Eclectus) ->
       dom.$el       = @$el[method].apply(@$el, arguments)
       dom.length    = dom.$el.length
       dom.selector  = arguments[0]
-
-      dom.$el.attr("data-eclectus-el", true)
-      dom.dom = @getDom()
-      dom.$el.removeAttr("data-eclectus-el")
+      dom.dom       = @getDom()
 
       # dom.replaceAll @$el.find("iframe").contents().find("body")
 

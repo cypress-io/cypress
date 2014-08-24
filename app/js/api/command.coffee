@@ -27,9 +27,15 @@ Eclectus.Command = do ($, _) ->
         dom: true
 
     getDom: ->
+      ## create a unique selector for this el
+      @$el.attr("data-eclectus-el", true)
+
       ## clone the body and strip out any script tags
       body = @$("body").clone(true, true)
       body.find("script").remove()
+
+      ## now remove it after we clone
+      @$el.removeAttr("data-eclectus-el")
 
       return body
 
