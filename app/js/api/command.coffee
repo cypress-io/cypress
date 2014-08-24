@@ -46,9 +46,7 @@ Eclectus.Command = do ($, _) ->
 
       @channel.trigger config.type, @runnable, obj
 
-    clone: (klass) ->
-      instance = new klass @document, @channel, @runnable
-      instance.instanceId = @instanceId
-      instance
+    clone: ->
+      new @constructor(@document, @channel, @runnable)
 
   return Command
