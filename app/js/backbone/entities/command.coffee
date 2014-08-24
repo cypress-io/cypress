@@ -101,9 +101,7 @@
         when "xhr"        then @addXhr attrs
         when "assertion"  then @addAssertion attrs
 
-    handleParent: (command, parent) ->
-      df = $.Deferred()
-
+    handleParent: (command, parent, cb) ->
       if parent = @parentExistsFor(parent)
         ## make sure the last command is our parent, if its not
         ## then re-insert it (as a new model) and reset which
@@ -112,9 +110,7 @@
 
         command.setParent parent
         command.indent()
-        df.resolve()
-
-      df
+        cb() if cb
 
     addAssertion: (attrs) ->
       {dom, actual, expected, value} = attrs
@@ -143,7 +139,7 @@
 
       ## if we're chained to an existing id
       ## that means we have a parent
-      @handleParent(command, attrs.parent)
+      @handleParent command, attrs.parent
 
       return command
 
@@ -157,7 +153,7 @@
       command.xhr = xhr
       command.dom = dom
 
-      @handleParent(command, attrs.parent).done ->
+      @handleParent command, attrs.parent, ->
         command.setResponse response
 
       return command
