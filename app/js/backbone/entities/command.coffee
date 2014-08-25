@@ -61,20 +61,16 @@
       @el
 
     getAssertion: ->
-      a = []
-      ## push a 'subject' into here if its not the actual value
-      ## this happens when there are really '3' involved objects
-      ## such as jQuery expectations
-      if @value isnt @actual or _.isUndefined(@expected)
-        a.push ["Subject:  ", @value]
+      obj =
+        "Subject:  ": @subject
+        "Expected: ": @expected
+        "Actual:   ": @actual
+        "Message:  ": @get("message")
 
-      if not _.isUndefined(@expected)
-        a.push ["Expected: ", @expected]
-        a.push ["Actual:   ", @actual]
-
-      a.push ["Message:  ", @get("message")]
-
-      a
+      _.reduce obj, (memo, value, key) ->
+        memo.push [key, value] if value
+        memo
+      , []
 
   class Entities.CommandsCollection extends Entities.Collection
     model: Entities.Command
@@ -113,15 +109,15 @@
         cb() if cb
 
     addAssertion: (attrs) ->
-      {dom, actual, expected, value} = attrs
-      attrs = _(attrs).omit "dom", "actual", "expected", "value"
+      {dom, actual, expected, subject} = attrs
+      attrs = _(attrs).omit "dom", "actual", "expected", "subject"
 
       ## instantiate the new model
       command = new Entities.Command attrs
       command.dom = dom
       command.actual = actual
       command.expected = expected
-      command.value = value
+      command.subject = subject
 
       return command
 
