@@ -1,9 +1,6 @@
 describe "Dom Command API", ->
   before ->
-    sinon.stub(Eclectus.Dom.prototype, "emit").returns(null)
-
-  after ->
-    Eclectus.Dom.prototype.emit.restore()
+    @sandbox.stub(Eclectus.Dom.prototype, "emit").returns(null)
 
   beforeEach ->
     df = $.Deferred()
