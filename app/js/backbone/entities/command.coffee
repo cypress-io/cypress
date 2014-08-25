@@ -84,7 +84,7 @@
     insertParent: (parent) ->
       ## get a clone of our parent but reset its id
       clone = parent.clone()
-      clone.id = _.uniqueId("cloneId")
+      clone.set "id", _.uniqueId("cloneId")
 
       _.each ["el", "dom", "xhr", "response", "parent"], (prop) ->
         clone[prop] = parent[prop]
