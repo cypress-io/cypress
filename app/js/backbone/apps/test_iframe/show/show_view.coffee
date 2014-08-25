@@ -19,7 +19,11 @@
 
       @addRevertMessage(options)
 
-      @highlight(dom, options.el, options.attr) if options.highlight
+      if options.el
+        @highlightEl options.el,
+          id:   options.id
+          attr: options.attr
+          dom:  dom
 
     addRevertMessage: (options) ->
       @ui.message.text("DOM has been reverted").show()
@@ -27,24 +31,37 @@
     getZIndex: (el) ->
       if /^(auto|0)$/.test el.css("zIndex") then 1000 else Number el.css("zIndex")
 
-    highlight: (dom, el, attr) ->
-      ## find the element by its special attr
-      ## in the stored dom
-      found = dom.find("[" + attr + "]")
-      found.each (index, el) =>
+    highlightEl: (el, options = {}) ->
+      _.defaults options,
+        init: true
+
+      ## if init is false then nuke the currently highlighted el
+      return @iframe.contents().find("[data-highlight-el='#{options.id}']").remove() if not options.init
+
+      if options.dom
+        dom = options.dom
+        el  = options.dom.find("[" + options.attr + "]")
+      else
+        dom = @iframe.contents().find("body")
+
+      el.each (index, el) =>
         el = $(el)
         dimensions = @getDimensions(el)
 
+        ## dont show anything if our element displaces nothing
+        return if dimensions.width is 0 and dimensions.height is 0
+
         $("<div>")
+          .attr("data-highlight-el", options.id)
+          .css
+            width: dimensions.width - 6,
+            height: dimensions.height - 6,
+            top: dimensions.offset.top,
+            left: dimensions.offset.left,
+            position: "absolute",
+            zIndex: @getZIndex(el)
+            border: "3px solid #E94B3B"
           .appendTo(dom)
-            .css
-              width: dimensions.width - 6,
-              height: dimensions.height - 6,
-              top: dimensions.offset.top,
-              left: dimensions.offset.left,
-              position: "absolute",
-              zIndex: @getZIndex(el)
-              border: "3px solid #E94B3B"
 
     getDimensions: (el) ->
       {

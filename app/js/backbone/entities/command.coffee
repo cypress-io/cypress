@@ -127,7 +127,6 @@
 
       attrs = _(attrs).omit "el", "dom"
 
-      attrs.highlight = true
 
       ## instantiate the new model
       command = new Entities.Command attrs

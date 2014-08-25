@@ -14,6 +14,9 @@
       @listenTo runner, "revert:dom", (dom, options) ->
         view.revertToDom dom, options
 
+      @listenTo runner, "highlight:el", (el, options) ->
+        view.highlightEl el, options
+
       @show view
 
     loadIframe: (view, runner, iframe) ->

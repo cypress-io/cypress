@@ -39,9 +39,14 @@
 
     revertDom: (command) ->
       @trigger "revert:dom", command.getDom(),
-        el:        command.getEl()
-        attr:      command.get("highlightAttr")
-        highlight: command.get("highlight")
+        id:   command.id
+        el:   command.getEl()
+        attr: command.get("highlightAttr")
+
+    highlightEl: (command, init = true) ->
+      @trigger "highlight:el", command.getEl(),
+        id: command.id
+        init: init
 
     setTestRunner: (runner) ->
       ## store the test runner as a property on ourselves
