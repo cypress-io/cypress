@@ -12,6 +12,12 @@
       @listenTo commandsView, "childview:revert:clicked", (iv, args) ->
         runner.revertDom(args.model)
 
+      @listenTo commandsView, "childview:command:mouseenter", (iv, args) ->
+        runner.highlightEl(args.model)
+
+      @listenTo commandsView, "childview:command:mouseleave", (iv, args) ->
+        runner.highlightEl(args.model, false)
+
       @show commandsView
 
     getCommandsView: (commands) ->

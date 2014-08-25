@@ -20,6 +20,8 @@
     triggers:
       "click @ui.pause"   : "pause:clicked"
       "click @ui.revert"  : "revert:clicked"
+      "mouseenter"        : "command:mouseenter"
+      "mouseleave"        : "command:mouseleave"
 
     events:
       "click"               : "clicked"
