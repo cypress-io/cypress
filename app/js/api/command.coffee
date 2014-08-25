@@ -56,6 +56,8 @@ Eclectus.Command = do ($, _) ->
       ## convert to a string always in case our arg was an object
       obj.selector = obj.selector.toString()
 
+      obj.el = @$el if @$el
+
       ## add the dom to the object
       ## if its true in the config
       ## and its not already set

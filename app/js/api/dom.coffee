@@ -40,7 +40,6 @@ Eclectus.Dom = do ($, _, Eclectus) ->
 
       dom.emit
         selector: dom.selector
-        el:       dom.$el
         method:   "find"
 
       return dom
@@ -63,7 +62,6 @@ Eclectus.Dom = do ($, _, Eclectus) ->
       ## we'd have WITHIN #foo WITHIN #bar WITHIN #baz
       dom.emit
         selector: dom.selector
-        el:       dom.$el
         method:   "within"
 
       ## instead of patching all of these things here
@@ -97,8 +95,8 @@ Eclectus.Dom = do ($, _, Eclectus) ->
       @$el.simulate "key-sequence", options #if sequence is "{enter}"
 
       @emit
-        selector: @selector
-        el:       @$(@selector)
+        # selector: @selector
+        # el:       @$(@selector)
         method:   "type"
         sequence: sequence
 
@@ -111,7 +109,7 @@ Eclectus.Dom = do ($, _, Eclectus) ->
       # @$el.click()
 
       @emit
-        el:       @$(@selector)
+        # el:       @$(@selector)
         method:   "click"
 
       return @
@@ -165,9 +163,7 @@ Eclectus.Dom = do ($, _, Eclectus) ->
 
       dom.emit
         selector: dom.selector
-        el:       dom.$el
         method:   method
-        # isParent: true
 
       ## after we emit this event, changed the cloned instanceid?
       ## that way when we chain methods
