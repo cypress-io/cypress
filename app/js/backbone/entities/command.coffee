@@ -109,12 +109,13 @@
         cb() if cb
 
     addAssertion: (attrs) ->
-      {dom, actual, expected, subject} = attrs
-      attrs = _(attrs).omit "dom", "actual", "expected", "subject"
+      {dom, el, actual, expected, subject} = attrs
+      attrs = _(attrs).omit "dom", "el", "actual", "expected", "subject"
 
       ## instantiate the new model
       command = new Entities.Command attrs
       command.dom = dom
+      command.el = el
       command.actual = actual
       command.expected = expected
       command.subject = subject

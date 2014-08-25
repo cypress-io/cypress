@@ -10,8 +10,12 @@ Eclectus.Assertion = do ($, _, Eclectus) ->
       ## if this is a jquery object and its true
       ## then remove all the 'but's and replace with 'and'
       ## also just think about slicing off everything after a comma?
-      if passed and value instanceof $
-        message = message.split("but").join("and") if message
+      if value instanceof $
+        message = message.split("but").join("and") if message and passed
+
+        ## store the $el
+        @$el = value
+
 
       obj = @parseValueActualAndExpected(value, actual, expected)
 
@@ -31,6 +35,8 @@ Eclectus.Assertion = do ($, _, Eclectus) ->
       ## which chai does by default, its so ugly and worthless
 
       @emit obj
+
+      return @
 
     ## Rules:
     ## 1. always remove value

@@ -29,3 +29,12 @@ describe "Assertion Command API", ->
         obj = @assertion.parseValueActualAndExpected 2, 2, 3
         expect(obj).to.have.keys("actual", "expected")
         expect(obj).not.to.have.keys("subject", "value")
+
+  context "#log", ->
+    it "stores the $el if passed a jQuery object as value", ->
+      as = @assertion.log $("body")
+      expect(as.$el).to.be.instanceof($)
+
+    it "does not store a jquery object if not passed as value", ->
+      as = @assertion.log 2, 2
+      expect(as).not.to.have.property "$el"
