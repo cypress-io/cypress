@@ -78,6 +78,11 @@ Eclectus.Command = do ($, _) ->
       return parent.id if parent.canBeParent
       @getParentId(parent.prevObject)
 
+    ## check to make sure our real dom element
+    ## still exists in our current document
+    elExistsInDocument: ->
+      $.contains @document, @$el[0]
+
     clone: ->
       new @constructor(@document, @channel, @runnable)
 
