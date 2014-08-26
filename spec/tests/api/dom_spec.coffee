@@ -95,6 +95,8 @@ describe "Dom Command API", ->
       it "instantiates a new instance", ->
         expect(@click).not.to.eq @button
 
+      it "does not set an error (obviously)", ->
+        expect(@click).not.to.have.property("error")
 
       describe "nested #click", ->
         it "sets parent to the original instance id", ->
@@ -106,11 +108,15 @@ describe "Dom Command API", ->
           @click2 = @click.click()
           expect(@click2.$el).to.eq @button.$el
 
+        it "throws an error when the $el is removed from the DOM", ->
+          @click.$el.remove()
+          @click2 = @click.click()
+          expect(@click2).to.have.property("error")
 
   describe "traversal methods", ->
     it "throws if calling these methods directly"
 
-    context "eq", ->
+    context "#eq", ->
       beforeEach ->
         @eq = @dom.find("#list li").eq(0)
         @eq.dom = @eq.getDom()
@@ -118,8 +124,8 @@ describe "Dom Command API", ->
       it "returns a new dom instance", ->
         expect(@eq).not.to.eq @dom
 
-      it "sets the parent dom instance", ->
-        expect(@eq.parent).to.eq @dom
+      it "sets the prevObject dom instance", ->
+        expect(@eq.prevObject).to.eq @dom
 
       it "sets selector to 0", ->
         expect(@eq.selector).to.eq 0
