@@ -26,6 +26,7 @@
           dom:  dom
 
     addRevertMessage: (options) ->
+      @reverted = true
       @ui.message.text("DOM has been reverted").show()
 
     getZIndex: (el) ->
@@ -35,8 +36,10 @@
       _.defaults options,
         init: true
 
-      ## if init is false then nuke the currently highlighted el
-      return @iframe.contents().find("[data-highlight-el='#{options.id}']").remove() if not options.init
+      ## if we're not currently reverted
+      ## and init is false then nuke the currently highlighted el
+      if not @reverted and not options.init
+        return @iframe.contents().find("[data-highlight-el='#{options.id}']").remove()
 
       if options.dom
         dom = options.dom
@@ -49,19 +52,20 @@
         dimensions = @getDimensions(el)
 
         ## dont show anything if our element displaces nothing
-        return if dimensions.width is 0 and dimensions.height is 0
+        return if not el.length or dimensions.width is 0 or dimensions.height is 0
 
-        $("<div>")
-          .attr("data-highlight-el", options.id)
-          .css
-            width: dimensions.width - 6,
-            height: dimensions.height - 6,
-            top: dimensions.offset.top,
-            left: dimensions.offset.left,
-            position: "absolute",
-            zIndex: @getZIndex(el)
-            border: "3px solid #E94B3B"
-          .appendTo(dom)
+        _.defer =>
+          $("<div>")
+            .attr("data-highlight-el", options.id)
+            .css
+              width: dimensions.width - 6,
+              height: dimensions.height - 6,
+              top: dimensions.offset.top,
+              left: dimensions.offset.left,
+              position: "absolute",
+              zIndex: @getZIndex(el)
+              border: "3px solid #E94B3B"
+            .appendTo(dom)
 
     getDimensions: (el) ->
       {
