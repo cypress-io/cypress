@@ -1,8 +1,7 @@
 describe "Dom Command API", ->
-  before ->
-    @sandbox.stub(Eclectus.Dom.prototype, "emit").returns(null)
-
   beforeEach ->
+    @emit = @sandbox.stub(Eclectus.Command.prototype, "emit").returns(null)
+
     df = $.Deferred()
 
     _this = @
@@ -49,8 +48,8 @@ describe "Dom Command API", ->
       it "returns a new Dom instance", ->
         expect(@dom2).not.to.eq @dom
 
-      it "sets the parent of dom2 to dom", ->
-        expect(@dom2.parent).to.eq @dom
+      it "sets the prevObject of dom2 to dom", ->
+        expect(@dom2.prevObject).to.eq @dom
 
   describe "#within", ->
     beforeEach ->
@@ -67,8 +66,46 @@ describe "Dom Command API", ->
       expect(@dom.selector).to.eq "#dom"
 
     context "nested method within (#within)", ->
-      it "sets parent of dom2 to dom", ->
-        expect(@dom2.parent).to.eq @dom
+      it "sets prevObject of dom2 to dom", ->
+        expect(@dom2.prevObject).to.eq @dom
+
+  describe "action methods", ->
+    context "#type", ->
+      beforeEach ->
+        @input = @dom.find("#input")
+        @type = @input.type "foo"
+
+      it "instantiates a new instance", ->
+        expect(@type).not.to.eq @input
+
+      it "sets the prevObject", ->
+        expect(@type.prevObject).to.eq @input
+
+      describe "nested #type", ->
+        it "sets the parent to the original $el", ->
+          @emit.restore()
+          @type2 = @type.type("bar")
+          expect(@type2._parent).to.eq @input.id
+
+    context "#click", ->
+      beforeEach ->
+        @button = @dom.find("#button")
+        @click = @button.click()
+
+      it "instantiates a new instance", ->
+        expect(@click).not.to.eq @button
+
+
+      describe "nested #click", ->
+        it "sets parent to the original instance id", ->
+          @emit.restore()
+          @click2 = @click.click()
+          expect(@click2._parent).to.eq @button.id
+
+        it "stores a reference to the original $el", ->
+          @click2 = @click.click()
+          expect(@click2.$el).to.eq @button.$el
+
 
   describe "traversal methods", ->
     it "throws if calling these methods directly"
