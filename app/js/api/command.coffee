@@ -47,23 +47,36 @@ Eclectus.Command = do ($, _) ->
       config = @getConfig()
 
       _.defaults obj,
-        parent: @parent?.id
+        parent: @getParentId(@prevObject)
         length: @length
         highlightAttr: @highlightAttr
         id: @id
         selector: ""
+        canBeParent: @canBeParent
 
       ## convert to a string always in case our arg was an object
       obj.selector = obj.selector.toString()
 
       obj.el = @$el if @$el
 
+      ## store this as a private property so its
+      ## test accessible
+      @_parent = obj.parent
+
       ## add the dom to the object
       ## if its true in the config
       ## and its not already set
       obj.dom ?= @getDom() if config.dom
 
-      @channel.trigger config.type, @runnable, obj
+      @channel.trigger config.type, @runnable, obj if @channel
+
+    ## walk up the 'prevObject' chain until we have an object
+    ## which can be a parent
+    getParentId: (parent) ->
+      return if not parent
+
+      return parent.id if parent.canBeParent
+      @getParentId(parent.prevObject)
 
     clone: ->
       new @constructor(@document, @channel, @runnable)

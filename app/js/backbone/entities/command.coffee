@@ -78,8 +78,16 @@
     parentExistsFor: (id) ->
       @get(id)
 
-    lastCommandIsNot: (command) ->
-      @last() isnt command
+    ## check to see if the last parent command
+    ## is the passed in parent
+    lastParentCommandIsNot: (command) ->
+      ## loop through this in reverse
+      ## cannot reverse the models array
+      ## and use _.find because .clone()
+      ## is throwing an error
+      for model in @models by -1
+        if model.get("canBeParent")
+          return model isnt command
 
     insertParent: (parent) ->
       ## get a clone of our parent but reset its id
@@ -102,7 +110,11 @@
         ## make sure the last command is our parent, if its not
         ## then re-insert it (as a new model) and reset which
         ## one is our parent
-        parent = @insertParent(parent) if @lastCommandIsNot(parent)
+        # debugger
+
+        ## right here we need to potentially insert multiple parents
+        ## in case we've referenced an ecl object way down the line
+        parent = @insertParent(parent) if @lastParentCommandIsNot(parent)
 
         command.setParent parent
         command.indent()

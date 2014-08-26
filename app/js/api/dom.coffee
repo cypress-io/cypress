@@ -21,6 +21,20 @@ Eclectus.Dom = do ($, _, Eclectus) ->
     config:
       type: "dom"
 
+    initialize: ->
+      @canBeParent = true
+
+    wrap: (obj) ->
+      return new Error "Ecl.wrap must be passed a jQuery instance" if not obj instanceof $
+
+      @$el      = obj
+      @length   = obj.length
+      @selector = obj.selector or obj.prop("nodeName").toLowerCase()
+
+      @emit
+        selector: @selector
+        method: "wrap"
+
     ## if find is called and we already have a selector
     ## it means we're chaining and we need to set prevObject
     ## just like jQuery
@@ -28,9 +42,9 @@ Eclectus.Dom = do ($, _, Eclectus) ->
       ## if we already have an $el property it means we're chaining
       ## the find method and need to clone this and return a new dom object
       if @$el
-        dom         = @clone()
-        dom.parent  = @
-        dom.$el     = @$el.find(selector)
+        dom            = @clone()
+        dom.prevObject = @
+        dom.$el        = @$el.find(selector)
       else
         dom     = @
         dom.$el = @$(selector)
@@ -46,9 +60,9 @@ Eclectus.Dom = do ($, _, Eclectus) ->
 
     within: (selector, fn) ->
       if @$el
-        dom         = @clone()
-        dom.parent  = @
-        dom.$el     = @$el.find(selector)
+        dom             = @clone()
+        dom.prevObject  = @
+        dom.$el         = @$el.find(selector)
       else
         dom     = @
         dom.$el = @$(selector)
@@ -84,6 +98,8 @@ Eclectus.Dom = do ($, _, Eclectus) ->
     type: (sequence, options = {}) ->
       #@pauseRunnable() if sequence is "walk the dog{enter}" and @runnable.cid is "1lc"
 
+      dom             = @clone()
+
       _.extend options,
         sequence: sequence
         # eventProps:
@@ -94,31 +110,42 @@ Eclectus.Dom = do ($, _, Eclectus) ->
       # @$el.val sequence
       @$el.simulate "key-sequence", options #if sequence is "{enter}"
 
-      @emit
-        # selector: @selector
-        # el:       @$(@selector)
+      dom.prevObject  = @
+      dom.$el         = @$el
+      dom.length      = @$el.length
+      dom.selector    = @selector
+      dom.canBeParent = false ## do not allow parent/child chaining off of this action
+
+      dom.emit
         method:   "type"
         sequence: sequence
 
-      return @
+      return dom
 
     click: ->
-      @selector = @$el.selector
+      dom             = @clone()
 
-      @$el.simulate "click"
-      # @$el.click()
+      if @elExistsInDocument()
+        @$el.simulate "click"
+      else
+        dom.error = "not found"
 
-      @emit
-        # el:       @$(@selector)
+      dom.prevObject  = @
+      dom.$el         = @$el
+      dom.length      = @$el.length
+      dom.selector    = @selector
+      dom.canBeParent = false ## do not allow parent/child chaining off of this action
+
+      dom.emit
         method:   "click"
 
-      return @
+      return dom
 
     ## should not talk directly to the runnable here
     ## need to go through the runner to do this?
     pauseRunnable: ->
       @runnable.async = true
-      @runnable.sync = false
+      @runnable.sync  = false
       ## unless i wrap this in a defer it wont
       ## actually clear the timeout
       ## gonna have to dig into mocha something is
@@ -135,6 +162,7 @@ Eclectus.Dom = do ($, _, Eclectus) ->
   _.each jQueryMethods, (method) ->
     Dom.prototype[method] = ->
       @$el[method].apply(@$el, arguments)
+      return @
 
   ## both within + find + eq are all traversal methods
   ## double check that find + within are
@@ -147,11 +175,11 @@ Eclectus.Dom = do ($, _, Eclectus) ->
 
       ## there wont be a selector with traversal methods
       ## instead there will just be arguments
-      dom           = @clone()
-      dom.parent    = @
-      dom.$el       = @$el[method].apply(@$el, arguments)
-      dom.length    = dom.$el.length
-      dom.selector  = arguments[0]
+      dom             = @clone()
+      dom.prevObject  = @
+      dom.$el         = @$el[method].apply(@$el, arguments)
+      dom.length      = dom.$el.length
+      dom.selector    = arguments[0]
 
       # dom.replaceAll @$el.find("iframe").contents().find("body")
 
