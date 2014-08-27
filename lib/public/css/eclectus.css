@@ -1,4 +1,3 @@
-
 /*! normalize.css v3.0.1 | MIT License | git.io/normalize */
 html {
   font-family: sans-serif;
@@ -3127,10 +3126,10 @@ b {
   font-weight: 400; }
 
 blockquote p {
-  font-size: 1 5px; }
+  font-size: 15px; }
 
 ul {
-  padding-left: 30px; }
+  padding-left: 0px; }
 
 #ecl-wrapper {
   position: absolute;
@@ -3145,14 +3144,27 @@ ul {
     overflow: auto;
     overflow-y: scroll;
     height: 100%;
-    vertical-align: top; }
+    vertical-align: top;
+    -webkit-transition: margin-left 0.05s ease;
+    transition: margin-left 0.05s ease; }
+    #ecl-wrapper #main-region > div {
+      top: 0;
+      bottom: 0;
+      height: 100%;
+      overflow: auto; }
+
+code, kbd, pre, samp {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 1.05em;
+  letter-spacing: 0.5px; }
 
 #header-container {
-  background-color: #1C1D22;
-  box-shadow: 0 1px 0 #444444 inset;
+  background-color: #3C3E43;
   padding-left: 20px;
   overflow: auto;
-  height: 50px; }
+  height: 50px;
+  border-left: 1px solid #191919;
+  border-bottom: 1px solid #3d3a3f; }
   #header-container #stats-container {
     min-width: 330px;
     padding: 0;
@@ -3172,16 +3184,9 @@ ul {
       #header-container #stats-container li#tests-failed i {
         color: #E94B3B; }
       #header-container #stats-container li#tests-pending i {
-        color: #428BCA; }
+        color: #aaa; }
       #header-container #stats-container li span {
-        display: block; }
-      #header-container #stats-container li .num {
-        font-size: 24px;
-        line-height: 1; }
-      #header-container #stats-container li .name {
-        text-transform: uppercase;
-        font-size: 12px;
-        color: #777; }
+        color: #ccc; }
     #header-container #stats-container #tests-duration {
       padding-left: 10px;
       padding-right: 10px; }
@@ -3189,7 +3194,6 @@ ul {
     position: relative;
     top: 6px; }
     #header-container #chosen-runnable .uppercase {
-      text-transform: uppercase;
       font-size: 10px;
       display: block; }
     #header-container #chosen-runnable label {
@@ -3215,6 +3219,8 @@ ul {
   #ecl-wrapper.collapsed #ecl-sidebar .ecl-vnavigation li span {
     display: none; }
 #ecl-wrapper #ecl-sidebar {
+  -webkit-transition: width 0.05s ease;
+  transition: width 0.05s ease;
   width: 216px;
   background: #272930;
   z-index: 2;
@@ -3231,10 +3237,9 @@ ul {
       border-bottom: 1px solid #1a1c20;
       display: block;
       padding: 14px 18px 13px 15px;
-      color: #c9d4f6;
+      color: #9A9A9f;
       font-size: 12px;
       font-weight: 300;
-      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
       white-space: nowrap; }
       #ecl-wrapper #ecl-sidebar .ecl-vnavigation li a:hover {
         background-color: #2a2c34; }
@@ -3244,32 +3249,33 @@ ul {
         font-size: 14px; }
       #ecl-wrapper #ecl-sidebar .ecl-vnavigation li a span {
         margin-left: 7px;
-        display: inline-block; }
+        display: inline-block;
+        letter-spacing: 0.5px; }
     #ecl-wrapper #ecl-sidebar .ecl-vnavigation li.active > a {
       background-color: #22242a;
-      border-left: 1px solid #2494F2; }
+      border-top: 1px solid #1A1C20; }
   #ecl-wrapper #ecl-sidebar .collapse-container {
-    padding: 7px 9px;
+    padding: 7px 13px 7px 9px;
     background: #1F2126;
     bottom: 0;
     border-top: 1px solid #131519;
     box-shadow: 0 1px 0 #2A2C31 inset;
-    overflow: auto; }
+    overflow: hidden; }
     #ecl-wrapper #ecl-sidebar .collapse-container .logo {
       text-align: left;
       display: inline-block;
       font-size: 200%;
-      color: #aaa; }
+      color: #9A9A9f; }
     #ecl-wrapper #ecl-sidebar .collapse-container button {
       margin: 0 !important;
       background: transparent;
-      box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.1) inset;
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.1) inset;
       border: 1px solid rgba(0, 0, 0, 0.25);
       border-radius: 2px; }
       #ecl-wrapper #ecl-sidebar .collapse-container button:hover {
         background: #23252A; }
       #ecl-wrapper #ecl-sidebar .collapse-container button i {
-        color: #fff; }
+        color: #9a9aaa; }
   #ecl-wrapper #ecl-sidebar #ecl-test-panels {
     position: absolute;
     bottom: 0;
@@ -3478,9 +3484,6 @@ ul {
 
 #test-specs {
   background-color: #222;
-  border: 1px solid #191919;
-  border-top: 0;
-  border-bottom: 0;
   padding-left: 5px;
   overflow: hidden;
   position: absolute;
@@ -3497,25 +3500,20 @@ ul {
     overflow: auto; }
     #test-specs #specs-container #specs-list {
       box-shadow: 0 1px 2px #373737;
-      border-bottom: 1px solid #222;
       margin-bottom: 100px; }
     #test-specs #specs-container li {
       list-style-type: none; }
       #test-specs #specs-container li:last-child {
         border-bottom: 0; }
   #test-specs ul.runnables {
-    padding-left: 0;
-    border-top: 1px solid #222; }
+    padding-left: 0; }
     #test-specs ul.runnables li.runnable {
       width: 100%;
       color: #ddd;
-      border-bottom: 1px solid #222;
-      border-top: 1px solid #515151;
       background-color: #43454b;
       overflow: auto;
       line-height: 18px;
-      padding-left: 0;
-      text-shadow: 0 1px 1px #000; }
+      padding-left: 0; }
       #test-specs ul.runnables li.runnable .runnable-wrapper {
         padding: 5px;
         position: relative;
@@ -3529,8 +3527,7 @@ ul {
             white-space: nowrap;
             overflow: hidden; }
             #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content-region .runnable-state .suite-title {
-              color: #ab9f9b;
-              text-transform: uppercase; }
+              color: #ddd; }
           #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content-region .runnable-controls {
             width: 50px;
             float: right;
@@ -3538,13 +3535,15 @@ ul {
             #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content-region .runnable-controls i {
               margin: 0 2px;
               color: #999;
-              visibility: hidden; }
+              visibility: hidden;
+              font-size: 15px; }
               #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content-region .runnable-controls i:hover {
                 color: #DDD; }
       #test-specs ul.runnables li.runnable pre {
         margin-top: 2px;
         margin-bottom: 0;
         padding-bottom: 2px;
+        padding-top: 2px;
         margin-left: 18px;
         white-space: pre-wrap;
         clear: both; }
@@ -3556,11 +3555,10 @@ ul {
         #test-specs ul.runnables li.runnable.hover > .runnable-wrapper .runnable-controls i {
           visibility: visible !important; }
       #test-specs ul.runnables li.runnable.active {
-        background-color: #4A4A4A;
-        box-shadow: 0 1px 3px #555 inset; }
+        background-color: #4A4A4A; }
         #test-specs ul.runnables li.runnable.active .runnables .runnable-wrapper {
           background-color: #4A4A4A;
-          box-shadow: 0 1px 3px #555 inset; }
+          border-left: 1px solid transparent; }
       #test-specs ul.runnables li.runnable .suite-state, #test-specs ul.runnables li.runnable .test-state {
         width: 12px;
         display: inline-block;
@@ -3575,9 +3573,9 @@ ul {
       #test-specs ul.runnables li.runnable.processing > .runnable-wrapper .test-state i {
         color: #888; }
       #test-specs ul.runnables li.runnable.test.failed > .runnable-wrapper {
-        border-left: 1px solid #E94B3B; }
+        border-left: 2px solid #E94B3B; }
       #test-specs ul.runnables li.runnable.failed > .runnable-wrapper pre {
-        color: #eb5c4d; }
+        color: #ff5f4f; }
       #test-specs ul.runnables li.runnable.failed > .runnable-wrapper .suite-title i {
         border-radius: 3px;
         background-color: #ea5344;
@@ -3596,25 +3594,22 @@ ul {
       #test-specs ul.runnables li.runnable.pending > .runnable-wrapper .test-state i {
         color: #92bce0; }
     #test-specs ul.runnables .commands-container {
-      padding: 4px 0;
       margin: 5px 30px 5px 20px;
-      box-shadow: 0 0 3px #222 inset;
-      background-color: #404040;
-      border-radius: 4px;
-      color: #BBB;
-      border-bottom: 1px solid #555; }
+      background-color: #343644;
+      color: #bcbccc;
+      padding: 1px; }
       #test-specs ul.runnables .commands-container:empty {
         display: none; }
       #test-specs ul.runnables .commands-container > li {
-        padding: 2px 6px;
-        margin: 0 3px;
-        border-radius: 3px; }
+        padding: 4px 9px 4px 20px;
+        margin: 0; }
         #test-specs ul.runnables .commands-container > li:hover:not(.command-cloned) {
-          background-color: #474747; }
+          background-color: #3b3f50;
+          cursor: pointer; }
         #test-specs ul.runnables .commands-container > li.active {
           background-color: #515151 !important; }
       #test-specs ul.runnables .commands-container .command-parent {
-        border-top: 1px dotted #535353; }
+        border-top: 1px solid #3f3f4f; }
         #test-specs ul.runnables .commands-container .command-parent:first-child {
           border-top: 0; }
       #test-specs ul.runnables .commands-container .command-child .command-method:before {
@@ -3635,7 +3630,9 @@ ul {
         font-size: 11px;
         letter-spacing: .6px;
         float: left;
-        min-width: 80px; }
+        min-width: 80px;
+        font-weight: 600;
+        color: #888888; }
       #test-specs ul.runnables .commands-container .command-error {
         background-color: #e84332;
         color: #fff;
@@ -3646,23 +3643,23 @@ ul {
         font-size: 10px;
         text-transform: uppercase; }
       #test-specs ul.runnables .commands-container .command-type-xhr .command-method {
-        color: #E0C85E; }
+        color: #a0dFcf; }
       #test-specs ul.runnables .commands-container .command-type-dom .command-method {
-        color: #80B0FF; }
+        color: #888888; }
       #test-specs ul.runnables .commands-container .command-type-dom .command-selector {
-        color: #cce0ff; }
+        color: #888888; }
       #test-specs ul.runnables .commands-container .command-type-dom-action .command-method {
-        color: #b3d0ff; }
+        color: #888888; }
       #test-specs ul.runnables .commands-container .command-type-dom-action .command-sequence {
-        color: #DDD; }
+        color: #888; }
       #test-specs ul.runnables .commands-container .command-type-assertion .command-method {
-        color: #27c39a; }
+        color: #afd4AD; }
       #test-specs ul.runnables .commands-container .command-type-assertion .command-message {
-        color: #99ead5; }
+        color: #afd4AD; }
       #test-specs ul.runnables .commands-container .command-type-assertion-failed .command-method {
-        color: #eb5849; }
+        color: #ee7569; }
       #test-specs ul.runnables .commands-container .command-type-assertion-failed .command-message {
-        color: #f18a80; }
+        color: #ee7569; }
       #test-specs ul.runnables .commands-container .command-selector,
       #test-specs ul.runnables .commands-container .command-sequence,
       #test-specs ul.runnables .commands-container .command-request,
@@ -3670,15 +3667,15 @@ ul {
       #test-specs ul.runnables .commands-container .command-message {
         display: block;
         margin-left: 80px;
-        width: 70%; }
+        width: 65%; }
       #test-specs ul.runnables .commands-container .command-request {
-        color: #f0e5b4; }
+        color: #a0dFcf; }
       #test-specs ul.runnables .commands-container .command-response .command-status {
         font-weight: 300;
-        color: #f0e5b4;
+        color: #ddd;
         margin-right: 3px; }
       #test-specs ul.runnables .commands-container .command-response .command-body {
-        color: #f0e5b4; }
+        color: #ddd; }
       #test-specs ul.runnables .commands-container .command-controls {
         position: absolute;
         top: 0;
@@ -3726,7 +3723,8 @@ ul {
     #test-page #specs-container li pre.test-error {
       margin-top: 0;
       padding-left: 10px;
-      margin-left: 4px; }
+      margin-left: 4px;
+      color: #E49E97; }
       #test-page #specs-container li pre.test-error:hover {
         text-decoration: underline;
         cursor: pointer; }
@@ -3760,8 +3758,10 @@ ul {
       border-left: 1px dotted #CCC; }
 
 #iframe-wrapper {
-  position: absolute;
+  position: relative;
   right: 0;
+  left: 35%;
+  width: 900px;
   top: 27px;
   margin-right: 30px; }
   #iframe-wrapper #iframe-container {
