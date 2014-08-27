@@ -258,6 +258,10 @@
         &:hover:not(.command-cloned) {
           background-color: #474747;
         }
+
+        &.active {
+          background-color: #515151 !important;
+        }
       }
 
       .command-parent {

@@ -10,7 +10,9 @@
         console.warn args
 
       @listenTo commandsView, "childview:revert:clicked", (iv, args) ->
-        runner.revertDom(args.model)
+        command = args.model
+        command.choose()
+        runner.revertDom(command)
 
       @listenTo commandsView, "childview:command:mouseenter", (iv, args) ->
         return if args.model.isCloned()

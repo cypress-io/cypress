@@ -18,6 +18,9 @@
       shouldDisplayControls: ->
         not @get("error") and not @isCloned()
 
+    initialize: ->
+      new Backbone.Chooser(@)
+
     indent: (indent) ->
       indent = @parent.get("indent")
       @set "indent", indent + 17
@@ -82,6 +85,9 @@
 
   class Entities.CommandsCollection extends Entities.Collection
     model: Entities.Command
+
+    initialize: ->
+      new Backbone.SingleChooser(@)
 
     parentExistsFor: (id) ->
       @get(id)
