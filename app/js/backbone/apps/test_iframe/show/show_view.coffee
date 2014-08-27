@@ -52,7 +52,8 @@
         dimensions = @getDimensions(el)
 
         ## dont show anything if our element displaces nothing
-        return if not el.length or dimensions.width is 0 or dimensions.height is 0
+        ## or it no longer exists in the parent dom
+        return if not @elExistsInDocument(dom, el) or dimensions.width is 0 or dimensions.height is 0
 
         _.defer =>
           $("<div>")
@@ -66,6 +67,9 @@
               zIndex: @getZIndex(el)
               border: "3px solid #E94B3B"
             .appendTo(dom)
+
+    elExistsInDocument: (parent, el) ->
+      $.contains parent[0], el[0]
 
     getDimensions: (el) ->
       {
