@@ -16,6 +16,7 @@
 
     modelEvents:
       "change:response"  : "render"
+      "change:chosen"    : "chosenChanged"
 
     triggers:
       "click @ui.pause"   : "pause:clicked"
@@ -65,6 +66,9 @@
       console.log "Matched URL:", @model.response.url
       console.log "Request:    ", @model.xhr
       console.log "Response:   ", response
+
+    chosenChanged: (model, value, options) ->
+      @$el.toggleClass "active", value
 
   class List.Commands extends App.Views.CollectionView
     tagName: "ul"
