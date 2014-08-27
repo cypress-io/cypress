@@ -68,7 +68,7 @@ Eclectus.Dom = do ($, _, Eclectus) ->
         dom.$el = @$(selector)
 
       dom.length   = dom.$el.length
-      dom.selector = dom.$el.selector
+      dom.selector = selector
 
       ## might want to strip out the previous selector here
       ## since we may not want to display that in our command view
