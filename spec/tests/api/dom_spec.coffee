@@ -41,6 +41,10 @@ describe "Dom Command API", ->
     it "sets selector to the first argument", ->
       expect(@dom.selector).to.eq "#dom"
 
+    it "sets error when $el cannot be found", ->
+      dom = @dom.find("#foobarbaz")
+      expect(dom).to.have.property("error")
+
     context "chaining #find off of existing Dom instance", ->
       beforeEach ->
         @dom2 = @dom.find("#nested-find")

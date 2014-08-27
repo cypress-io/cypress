@@ -3633,6 +3633,15 @@ ul {
         letter-spacing: .6px;
         float: left;
         min-width: 80px; }
+      #test-specs ul.runnables .commands-container .command-error {
+        background-color: #e84332;
+        color: #fff;
+        border-radius: 5px;
+        margin-left: 10px;
+        float: left;
+        padding: 0 4px;
+        font-size: 10px;
+        text-transform: uppercase; }
       #test-specs ul.runnables .commands-container .command-type-xhr .command-method {
         color: #E0C85E; }
       #test-specs ul.runnables .commands-container .command-type-dom .command-method {

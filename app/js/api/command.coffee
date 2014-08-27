@@ -59,6 +59,8 @@ Eclectus.Command = do ($, _) ->
 
       obj.el = @$el if @$el
 
+      obj.error = @error if @error
+
       ## store this as a private property so its
       ## test accessible
       @_parent = obj.parent

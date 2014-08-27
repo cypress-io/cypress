@@ -298,6 +298,18 @@
         // @include text-overflow;
       }
 
+      .command-error {
+        background-color: darken(#eb5849, 5%);
+        color: #fff;
+        border-radius: 5px;
+        margin-left: 10px;
+        float: left;
+        padding: 0 4px;
+        font-size: 10px;
+        text-transform: uppercase;
+
+      }
+
       .command-type-xhr {
         // background-color: mix(#E0C85E, #383838, 10%);
 

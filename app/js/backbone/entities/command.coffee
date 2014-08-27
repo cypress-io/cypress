@@ -13,6 +13,11 @@
       selector: ->
         _.trim @stripParentSelector()
 
+      ## display controls if there isnt an error
+      ## and this isnt a clone
+      shouldDisplayControls: ->
+        not @get("error") and not @isCloned()
+
     indent: (indent) ->
       indent = @parent.get("indent")
       @set "indent", indent + 17

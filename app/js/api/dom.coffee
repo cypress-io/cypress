@@ -31,6 +31,8 @@ Eclectus.Dom = do ($, _, Eclectus) ->
       @length   = obj.length
       @selector = obj.selector or obj.prop("nodeName").toLowerCase()
 
+      @checkForDomErrors()
+
       @emit
         selector: @selector
         method: "wrap"
@@ -49,6 +51,8 @@ Eclectus.Dom = do ($, _, Eclectus) ->
         dom     = @
         dom.$el = @$(selector)
 
+      dom.checkForDomErrors()
+
       dom.length   = dom.$el.length
       dom.selector = selector
 
@@ -66,6 +70,8 @@ Eclectus.Dom = do ($, _, Eclectus) ->
       else
         dom     = @
         dom.$el = @$(selector)
+
+      dom.checkForDomErrors()
 
       dom.length   = dom.$el.length
       dom.selector = selector
@@ -108,7 +114,10 @@ Eclectus.Dom = do ($, _, Eclectus) ->
         # triggerKeyEvents: false
 
       # @$el.val sequence
-      @$el.simulate "key-sequence", options #if sequence is "{enter}"
+      if @elExistsInDocument()
+        @$el.simulate "key-sequence", options #if sequence is "{enter}"
+      else
+        dom.error = "not found"
 
       dom.prevObject  = @
       dom.$el         = @$el
@@ -152,6 +161,14 @@ Eclectus.Dom = do ($, _, Eclectus) ->
       ## probably resetting the timeout
       _.defer =>
         @runnable.clearTimeout()
+
+    checkForDomErrors: ->
+      error = switch
+        ## ...will add more conditions here...
+        when @$el.length is 0 or !@elExistsInDocument() then "not found"
+
+      @error = error if error
+      @
 
     ## sugar for chai jquery to check element existance
     exist: ->
