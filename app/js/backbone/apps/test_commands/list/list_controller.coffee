@@ -13,9 +13,11 @@
         runner.revertDom(args.model)
 
       @listenTo commandsView, "childview:command:mouseenter", (iv, args) ->
+        return if args.model.isCloned()
         runner.highlightEl(args.model)
 
       @listenTo commandsView, "childview:command:mouseleave", (iv, args) ->
+        return if args.model.isCloned()
         runner.highlightEl(args.model, false)
 
       @show commandsView
