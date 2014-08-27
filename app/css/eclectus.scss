@@ -1,19 +1,23 @@
-// @import "bootstrap-sass-official/vendor/assets/stylesheets/bootstrap";
+// @import "bootstrap-sass-official/assets/stylesheets/bootstrap";
 
 @import "core/variables";
 
 // Core variables and mixins
-@import "bootstrap-sass-official/vendor/assets/stylesheets/bootstrap/variables";
-@import "bootstrap-sass-official/vendor/assets/stylesheets/bootstrap/mixins";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/variables";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/mixins";
 
 // Reset and dependencies
-@import "bootstrap-sass-official/vendor/assets/stylesheets/bootstrap/normalize";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/normalize";
 
 // Core CSS
-@import "bootstrap-sass-official/vendor/assets/stylesheets/bootstrap/scaffolding";
-@import "bootstrap-sass-official/vendor/assets/stylesheets/bootstrap/type";
-@import "bootstrap-sass-official/vendor/assets/stylesheets/bootstrap/grid";
-@import "bootstrap-sass-official/vendor/assets/stylesheets/bootstrap/buttons";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/scaffolding";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/type";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/grid";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/buttons";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/labels";
+
+// Utilities
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/utilities";
 
 // Fonts
 @import "font-awesome/scss/font-awesome";
@@ -24,6 +28,8 @@
 @import "elements/main-content";
 @import "elements/sidebar";
 @import "elements/block-panels";
+@import "elements/panels";
+@import "elements/scroll-bars";
 
 // Independent Pages
 @import "pages/tests";

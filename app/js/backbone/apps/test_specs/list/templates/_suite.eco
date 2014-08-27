@@ -1,0 +1,12 @@
+<div class="runnable-state">
+  <span class="suite-state">
+    <i class="fa fa-caret-down"></i>
+  </span>
+  <span class="suite-title">
+    <%= @title %>
+    <i class="fa fa-ellipsis-h hidden"></i>
+  </span>
+</div>
+<div class="runnable-controls">
+  <i class="fa fa-repeat"></i>
+</div>

@@ -1,0 +1,15 @@
+<header>
+  <div id="url-container" class="pull-left">
+    <i class="fa fa-arrow-left"></i>
+    <i class="fa fa-arrow-right"></i>
+    <input class="url" />
+  </div>
+  <div class="pull-right">
+    <i class="fa fa-cog">
+      <span class="fa fa-caret-down"></span>
+    </i>
+    <i class="fa fa-compress"></i>
+    <i class="fa fa-expand"></i>
+  </div>
+</header>
+<div id="iframe-message"></div>

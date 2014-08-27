@@ -1,0 +1,50 @@
+#!/usr/bin/env node
+
+var program   = require("commander")
+var path      = require("path")
+var yo        = require("yeoman-generator")
+var nodemon   = require("nodemon")
+
+program
+  .version(require("../package.json").version)
+
+program
+  .command("install")
+  .description("Installs Eclectus")
+  .action(function(){
+    yo("eclectus")
+      .register(electusGenerator("config"), "eclectus")
+      .run()
+  })
+
+program
+  .command("start")
+  .description("Starts the Eclectus server")
+  .action(function(){
+    // bail immediately here if we dont have the eclectus.json file
+    // tell us to run install
+
+    require("coffee-script/register");
+
+    // need to add the eclectus.json file to the watch list
+    var server = path.join(__dirname, "..", "lib", "server.coffee")
+
+    nodemon({
+      script: server,
+      watch: [server]
+    })
+
+    nodemon.on("start", function(){
+      console.log("app has started")
+    })
+
+    nodemon.on("restart", function(files){
+      console.log("app has restarted", files)
+    })
+  })
+
+program.parse(process.argv)
+
+function electusGenerator(name){
+  return path.join(__dirname, "..", "lib", "generator-eclectus", name)
+}

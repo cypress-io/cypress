@@ -1,0 +1,5 @@
+<div class="runnable-wrapper">
+  <div class="runnable-content-region"></div>
+  <div class="runnable-commands-region hidden"></div>
+  <pre class="test-error"></pre>
+</div>
