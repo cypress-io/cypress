@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <title>{{title}}</title>
+
+    {{#each stylesheets}}
+      <link rel="stylesheet" href="{{this}}">
+    {{/each}}
+
+    {{#each utilities}}
+      <script type="text/javascript" src="{{this}}"></script>
+    {{/each}}
+
+    {{#each javascripts}}
+      <script type="text/javascript" src="{{this}}"></script>
+    {{/each}}
+
+    <script type="text/javascript" src="{{spec}}"></script>
+  </head>
+  <body></body>
+</html>

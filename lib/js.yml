@@ -1,0 +1,46 @@
+vendor:
+  - bower_components/jquery/dist/jquery.js
+  - bower_components/underscore/underscore.js
+  - bower_components/mocha/mocha.js
+  - bower_components/chai/chai.js
+  - bower_components/chai-jquery/chai-jquery.js ## need to conditionally load this in vendor
+  - bower_components/bililiteRange/bililiteRange.js
+  - bower_components/jquery-simulate-ext/libs/jquery.simulate.js
+  - bower_components/jquery-simulate-ext/src/jquery.simulate.ext.js
+  - bower_components/jquery-simulate-ext/src/jquery.simulate.drag-n-drop.js
+  - bower_components/jquery-simulate-ext/src/jquery.simulate.key-sequence.js
+  - bower_components/backbone/backbone.js
+  - bower_components/marionette/lib/backbone.marionette.js
+  - bower_components/underscore.string/lib/underscore.string.js
+  - bower_components/spin.js/spin.js
+  - bower_components/backbone-query-parameters/backbone.queryparams.js
+  - bower_components/backbone.mutators/backbone.mutators.js
+  - bower_components/spin.js/jquery.spin.js
+  - bower_components/jsuri/Uri.js
+  - app/js/vendor/backbone-chooser.coffee
+
+eclectus:
+  - app/js/api/eclectus.coffee
+  - app/js/api/reporter.coffee
+  - app/js/api/sandbox.coffee
+  - app/js/api/command.coffee
+  - app/js/api/dom.coffee
+  - app/js/api/xhr.coffee
+  - app/js/api/assertion.coffee
+  - app/js/config/**
+  - app/js/backbone/app.coffee
+  - app/js/backbone/lib/templates/**
+  - app/js/backbone/lib/entities/**
+  - app/js/backbone/lib/utilities/**
+  - app/js/backbone/lib/views/**
+  - app/js/backbone/lib/controllers/**
+  - app/js/backbone/lib/components/**
+  - app/js/backbone/lib/routers/**
+  - app/js/backbone/entities/**
+  - app/js/backbone/apps/**
+
+iframe:
+  - app/js/api/iframe.coffee
+
+sinon:
+  - bower_components/sinonjs/sinon.js

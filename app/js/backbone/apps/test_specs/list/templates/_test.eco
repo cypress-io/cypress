@@ -1,0 +1,12 @@
+<div class="runnable-state">
+  <span class="test-state">
+    <i class="fa"></i>
+  </span>
+  <span class="test-title">
+    <%= @title %>
+    <label class="label"></label>
+  </span>
+</div>
+<div class="runnable-controls">
+  <i class="fa fa-repeat"></i>
+</div>

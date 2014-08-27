@@ -1,0 +1,15 @@
+<div class="command-wrapper">
+  <span class="command-method"><%= @method %></span>
+  <span class="command-message">
+    <%= @message %>
+  </span>
+  <% if @error: %>
+    <span class="command-error"><%= @error %></span>
+  <% end %>
+  <% if @shouldDisplayControls: %>
+    <span class="command-controls">
+      <i class="fa fa-pause"></i>
+      <i class="fa fa-search fa-flip-horizontal"></i>
+    </span>
+  <% end %>
+</div>
