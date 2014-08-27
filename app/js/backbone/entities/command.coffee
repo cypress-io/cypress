@@ -29,6 +29,9 @@
     isParent: ->
       !!@get("isParent")
 
+    isCloned: ->
+      !!@get("isCloned")
+
     stripParentSelector: ->
       selector = @attributes.selector ? ""
 
@@ -80,21 +83,25 @@
 
     ## check to see if the last parent command
     ## is the passed in parent
-    lastParentCommandIsNot: (command) ->
+    lastParentCommandIsNot: (parent, command) ->
       ## loop through this in reverse
       ## cannot reverse the models array
       ## and use _.find because .clone()
       ## is throwing an error
       for model in @models by -1
+        ## exclude ourselves since we recursively check
+        ## up the parent chains
         if model.get("canBeParent")
-          return model isnt command
+          return model isnt parent
 
-    insertParent: (parent) ->
+    cloneParent: (parent) ->
       ## get a clone of our parent but reset its id
       clone = parent.clone()
-      clone.set "id", _.uniqueId("cloneId")
+      clone.set
+        id: _.uniqueId("cloneId")
+        isCloned: true
 
-      _.each ["el", "dom", "xhr", "response", "parent"], (prop) ->
+      _.each ["el", "xhr", "response", "parent"], (prop) ->
         clone[prop] = parent[prop]
 
       @add clone
@@ -105,20 +112,27 @@
         when "xhr"        then @addXhr attrs
         when "assertion"  then @addAssertion attrs
 
-    handleParent: (command, parent, cb) ->
-      if parent = @parentExistsFor(parent)
+    insertParents: (command, parentId, cb) ->
+      if parent = @parentExistsFor(parentId)
+
         ## make sure the last command is our parent, if its not
         ## then re-insert it (as a new model) and reset which
         ## one is our parent
-        # debugger
 
         ## right here we need to potentially insert multiple parents
         ## in case we've referenced an ecl object way down the line
-        parent = @insertParent(parent) if @lastParentCommandIsNot(parent)
+        if @lastParentCommandIsNot(parent, command)
+
+          ## recursively walk up the parent chain by ensuring we insert
+          ## as many parents as necessary to get back to the root command
+          @insertParents(parent, parent.parent.id) if parent.hasParent()
+
+          parent = @cloneParent(parent)
 
         command.setParent parent
         command.indent()
         cb() if cb
+
 
     addAssertion: (attrs) ->
       {dom, el, actual, expected, subject} = attrs
@@ -147,7 +161,7 @@
 
       ## if we're chained to an existing id
       ## that means we have a parent
-      @handleParent command, attrs.parent
+      @insertParents command, attrs.parent
 
       return command
 
@@ -161,7 +175,7 @@
       command.xhr = xhr
       command.dom = dom
 
-      @handleParent command, attrs.parent, ->
+      @insertParents command, attrs.parent, ->
         command.setResponse response
 
       return command
