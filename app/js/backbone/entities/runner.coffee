@@ -240,6 +240,10 @@
       @triggerLoadIframe @iframe
 
     triggerLoadIframe: (iframe, opts = {}) ->
+      ## first we want to make sure that our last stored
+      ## iframe matches the one we're receiving
+      return if iframe isnt @iframe
+
       ## clear out the commands
       @commands.reset()
 
@@ -253,10 +257,6 @@
           obj.pending = true
           obj.stopped = true
           obj = obj.parent
-
-      ## first we want to make sure that our last stored
-      ## iframe matches the one we're receiving
-      return if iframe isnt @iframe
 
       ## if it does fire the event
       @trigger "load:iframe", @iframe, opts
