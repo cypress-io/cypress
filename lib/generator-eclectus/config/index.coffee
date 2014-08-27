@@ -25,6 +25,10 @@ class ConfigGenerator extends Eclectus.Base
         message: "Which files should I ignore?"
         default: ""
       },{
+        name: "rootFolder"
+        message: "What is the root folder your assets should be served from?"
+        default: ""
+      },{
         name: "testHtml"
         message: "What's the path to your .html file?"
         default: "tests/support/index.html"
