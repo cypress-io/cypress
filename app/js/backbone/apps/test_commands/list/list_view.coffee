@@ -45,6 +45,8 @@
       else
         @$el.addClass "command-parent"
 
+      @$el.addClass "command-cloned" if @model.isCloned()
+
     clicked: (e) ->
       e.stopPropagation()
       _.each @model.getPrimaryObjects(), (obj, index) ->

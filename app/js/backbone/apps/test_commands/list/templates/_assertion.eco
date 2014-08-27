@@ -3,8 +3,10 @@
   <span class="command-message">
     <%= @message %>
   </span>
-  <span class="command-controls">
-    <i class="fa fa-pause"></i>
-    <i class="fa fa-search fa-flip-horizontal"></i>
-  </span>
+  <% if not @isCloned: %>
+    <span class="command-controls">
+      <i class="fa fa-pause"></i>
+      <i class="fa fa-search fa-flip-horizontal"></i>
+    </span>
+  <% end %>
 </div>

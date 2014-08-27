@@ -5,8 +5,10 @@
   <% else if @selector: %>
     <span class="command-selector"><%= @selector %></span>
   <% end %>
-  <span class="command-controls">
-    <i class="fa fa-pause"></i>
-    <i class="fa fa-search fa-flip-horizontal"></i>
-  </span>
+  <% if not @isCloned: %>
+    <span class="command-controls">
+      <i class="fa fa-pause"></i>
+      <i class="fa fa-search fa-flip-horizontal"></i>
+    </span>
+  <% end %>
 </div>
