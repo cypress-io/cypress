@@ -255,7 +255,7 @@
         margin: 0 3px;
         border-radius: 3px;
 
-        &:hover {
+        &:hover:not(.command-cloned) {
           background-color: #474747;
         }
       }

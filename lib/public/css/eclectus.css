@@ -3608,7 +3608,7 @@ ul {
         padding: 2px 6px;
         margin: 0 3px;
         border-radius: 3px; }
-        #test-specs ul.runnables .commands-container > li:hover {
+        #test-specs ul.runnables .commands-container > li:hover:not(.command-cloned) {
           background-color: #474747; }
       #test-specs ul.runnables .commands-container .command-parent {
         border-top: 1px dotted #535353; }
