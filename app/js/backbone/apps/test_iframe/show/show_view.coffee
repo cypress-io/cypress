@@ -33,13 +33,18 @@
       if /^(auto|0)$/.test el.css("zIndex") then 1000 else Number el.css("zIndex")
 
     highlightEl: (el, options = {}) ->
+
       _.defaults options,
         init: true
 
+      @iframe.contents().find("[data-highlight-el]").remove() if not @reverted
+
+      return if not options.init
+
       ## if we're not currently reverted
       ## and init is false then nuke the currently highlighted el
-      if not @reverted and not options.init
-        return @iframe.contents().find("[data-highlight-el='#{options.id}']").remove()
+      # if not @reverted and not options.init
+        # return @iframe.contents().find("[data-highlight-el='#{options.id}']").remove()
 
       if options.dom
         dom = options.dom
