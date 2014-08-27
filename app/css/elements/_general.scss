@@ -41,11 +41,11 @@ b {
 }
 
 blockquote p {
-  font-size:1 5px;
+  font-size: 15px;
 }
 
 ul {
-  padding-left: 30px;
+  padding-left: 0px;
 }
 
 #ecl-wrapper {
@@ -68,5 +68,21 @@ ul {
     overflow-y: scroll;
     height: 100%;
     vertical-align: top;
+    -webkit-transition: margin-left 0.05s ease;
+    transition: margin-left 0.05s ease;
+
+    &>div {
+      top: 0;
+      bottom: 0;
+      height: 100%;
+      overflow: auto;
+
+    }
   }
+}
+
+code, kbd, pre, samp {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 1.05em;
+  letter-spacing: 0.5px;
 }

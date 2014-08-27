@@ -1,27 +1,22 @@
 <ul id="stats-container">
   <li id="tests-passed">
+    <i class="fa fa-check"></i>
     <span class="num"><%= @count(@passed) %></span>
-    <span class="name">
-      <i class="fa fa-check"></i>
-      Passed
-    </span>
+    <span>Passed</span>
   </li>
   <li id="tests-failed">
+    <i class="fa fa-times"></i>
     <span class="num"><%= @count(@failed) %></span>
-    <span class="name">
-      <i class="fa fa-times"></i>
-      Failed
-    </span>
+    <span>Failed</span>
   </li>
   <li id="tests-pending">
+    <i class="fa fa-circle-o-notch"></i>
     <span class="num"><%= @count(@pending) %></span>
-    <span class="name">
-      <i class="fa fa-circle-o-notch"></i>
-      Pending
-    </span>
+    <span>Pending</span>
   </li>
   <li id="tests-duration">
+    <span>Runtime:</span>
     <span class="num"><%= @count(@duration) %></span>
-    <span class="name">secs</span>
+    <span>secs</span>
   </li>
 </ul>
