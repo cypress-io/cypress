@@ -8,6 +8,6 @@
 
     actions:
       show: ->
-        route: "tests/:id"
+        route: "tests/*id"
 
   router = new Router
