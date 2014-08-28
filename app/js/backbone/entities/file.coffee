@@ -7,6 +7,9 @@
     hasChildren: ->
       @get("children").length
 
+    setFullPath: (array) ->
+      @set "fullPath", array.join("/")
+
   class Entities.FilesCollection extends Entities.Collection
     model: Entities.File
 
@@ -63,6 +66,8 @@
           ## if its not found then we know we need to
           ## push a new model into the memo collection
           model ?= memo.push {name: path}
+
+          model.setFullPath(array)
 
           ## and always return the model's children
           model.get("children")
