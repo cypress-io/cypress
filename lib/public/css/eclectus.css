@@ -3531,23 +3531,22 @@ code, kbd, pre, samp {
       margin-right: 2px; }
 
 #iframe-wrapper {
-  position: fixed;
+  position: absolute;
   right: auto;
-  left: 34.4%;
-  width: 64.4%;
+  left: 34%;
+  width: 65%;
   height: 98%;
   bottom: 0;
   overflow: hidden;
   box-sizing: border-box; }
   #iframe-wrapper #iframe-container {
     height: 150%;
-    width: 150%;
+    width: 153%;
     transform-origin: left top;
     transform: scale(0.65);
     position: absolute;
     box-shadow: 0 0 12px #CCCCCC;
     bottom: 24px;
-    left: 24px;
     top: 0; }
     #iframe-wrapper #iframe-container #iframe-message {
       position: absolute;
