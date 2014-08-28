@@ -3527,7 +3527,7 @@ code, kbd, pre, samp {
             white-space: nowrap;
             overflow: hidden; }
             #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content-region .runnable-state .suite-title {
-              color: #9f9f9f; }
+              color: #ddd; }
           #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content-region .runnable-controls {
             width: 50px;
             float: right;
