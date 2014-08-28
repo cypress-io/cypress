@@ -27,6 +27,7 @@
     "errorhandler": "^1.1.1",
     "express": "^4.8.5",
     "gulp": "^3.8.6",
+    "gulp-bower": "0.0.6",
     "gulp-coffee": "^2.1.1",
     "gulp-concat": "^2.3.3",
     "gulp-eco": "0.0.2",
