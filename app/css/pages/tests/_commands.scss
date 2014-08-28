@@ -1,0 +1,174 @@
+.commands-container {
+  margin: 5px 30px 5px 20px;
+  background-color: #343644;
+  color: #bcbccc;
+  padding: 1px;
+
+  &:empty {
+    display: none;
+  }
+
+  &>li {
+    padding: 4px 9px 4px 20px;
+    margin: 0;
+
+    &:hover:not(.command-cloned) {
+      background-color: #3b3f50;
+      cursor: pointer;
+    }
+
+    &.active {
+      background-color: #515151 !important;
+    }
+  }
+
+  .command-parent {
+    border-top: 1px solid #3f3f4f;
+
+    &:first-child {
+      border-top: 0;
+    }
+  }
+
+  .command-child {
+    .command-method {
+      &:before {
+        border-left: 1px dotted #999;
+        border-bottom: 1px dotted #999;
+        position: absolute;
+        width: 10px;
+        height: 11px;
+        content: "";
+        margin-left: -12px;
+      }
+    }
+  }
+
+  .command-wrapper {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .command-method {
+    padding: 0 2px;
+    display: inline-block;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: .6px;
+    float: left;
+    min-width: 80px;
+    font-weight: 600;
+    color: #888888;
+    // @include text-overflow;
+  }
+
+  .command-error {
+    background-color: darken(#eb5849, 5%);
+    color: #fff;
+    border-radius: 5px;
+    margin-left: 10px;
+    float: left;
+    padding: 0 4px;
+    font-size: 10px;
+    text-transform: uppercase;
+
+  }
+
+  .command-type-xhr {
+    // background-color: mix(#E0C85E, #383838, 10%);
+
+    .command-method {
+      color: #a0dFcf;
+    }
+  }
+
+  .command-type-dom {
+    // background-color: mix(#80B0FF, #383838, 10%);
+
+    .command-method {
+      color: #888888;
+    }
+
+    .command-selector {
+      color: #888888;
+    }
+  }
+
+  .command-type-dom-action {
+    .command-method {
+      color: #888888;
+    }
+
+    .command-sequence {
+      color: #888;
+    }
+  }
+
+  .command-type-assertion {
+    .command-method {
+      color: #afd4AD;
+    }
+
+    .command-message {
+      color: #afd4AD;
+    }
+  }
+
+  .command-type-assertion-failed {
+    .command-method {
+      color: lighten(#E94B3B, 10%);
+    }
+
+    .command-message {
+      color: lighten(#E94B3B, 10%);
+    }
+  }
+
+  .command-selector,
+  .command-sequence,
+  .command-request,
+  .command-response,
+  .command-message {
+    display: block;
+    margin-left: 80px;
+    width: 65%;
+  }
+
+  .command-request {
+    color: #a0dFcf;
+  }
+
+  .command-response {
+
+    .command-status {
+      font-weight: 300;
+      color: #ddd;
+      margin-right: 3px;
+    }
+
+    .command-body {
+      color: #ddd;
+    }
+  }
+
+  .command-controls {
+    position: absolute;
+    top: 0;
+    right: 0;
+
+    i {
+      padding: 2px;
+      color: #777;
+    }
+
+    i:hover {
+      color: #DDD;
+      cursor: pointer;
+    }
+
+    .fa-pause {
+      font-size: 11px;
+      margin-right: 2px;
+    }
+  }
+}

@@ -24,7 +24,6 @@
 
 // Reusable Elements
 @import "elements/general";
-@import "elements/header";
 @import "elements/main-content";
 @import "elements/sidebar";
 @import "elements/block-panels";
@@ -32,4 +31,7 @@
 @import "elements/scroll-bars";
 
 // Independent Pages
-@import "pages/tests";
+@import "pages/tests/commands";
+@import "pages/tests/iframe";
+@import "pages/tests/runnables";
+@import "pages/tests/stats";
