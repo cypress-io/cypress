@@ -5,9 +5,9 @@
   width: 64.4%;
   height: 98%;
   bottom: 0;
-  top: 12px;
-  margin-right: 30px;
-  overflow: auto;
+  // top: 12px;
+  // margin-right: 30px;
+  overflow: hidden;
   box-sizing: border-box;
 
   #iframe-container {
@@ -46,6 +46,10 @@
       color: #888;
       border: 1px solid #ddd;
       border-bottom: 0;
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 37px;
 
       #url-container {
         width: 65%;
@@ -89,7 +93,8 @@
       border: 1px solid #D5D5D5;
       position: absolute;
       bottom: 0;
-
+      top: 38px;
+      overflow: auto;
     }
   }
 }
