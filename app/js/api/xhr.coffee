@@ -12,6 +12,8 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
       @requests = []
       @onRequests = []
 
+      @canBeParent = true
+
     setServer: (@server) ->
       _this = @
 
@@ -29,14 +31,12 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
           ## call the original so sinon does its thing
           onSendOrig.call(@)
 
-          xhr.instanceId = _this.instanceId
+          xhr.id          = _this.id
 
           _this.emit
-            instanceId: xhr.instanceId
-            method:     xhr.method
-            url:        xhr.url
-            xhr:        xhr
-            isParent:   true
+            method:      xhr.method
+            url:         xhr.url
+            xhr:         xhr
 
           ## invokes onRequest callback function on any matching responses
           ## and then also calls this on any global onRequest methods on
@@ -98,8 +98,11 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
           body = @$("body").clone(true, true)
           body.find("script").remove()
 
-          @emit
-            instanceId:   request.instanceId
+          resp = @clone()
+          resp.prevObject = @
+          resp.canBeParent = false
+
+          resp.emit
             method:       request.method
             url:          request.url
             xhr:          request
