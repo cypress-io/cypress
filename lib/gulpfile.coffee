@@ -71,6 +71,9 @@ gulp.task "js", (cb) ->
 
   return false
 
+gulp.task "bower", ->
+  $.bower()
+
 gulp.task "html", ->
   gulp.src("app/html/index.html")
     .pipe gulp.dest("lib/public")
@@ -92,4 +95,4 @@ gulp.task "server", ->
 gulp.task "test", ->
   require("../spec/server.coffee")
 
-gulp.task "default", ["css", "fonts", "js", "html", "watch"]
+gulp.task "default", ["bower", "css", "fonts", "js", "html", "watch"]
