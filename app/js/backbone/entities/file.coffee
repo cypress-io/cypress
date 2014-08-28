@@ -15,29 +15,29 @@
 
     url: "/files"
 
-    comparator: (a, b) ->
-      ## if a.children.length is 0 and b.children.length is 0
-      ## then compare their names
-      # if a.get("children").length is 0 and b.get("children").length is 0
-        # return @sortByName(a, b)
+    # comparator: (a, b) ->
+    #   ## if a.children.length is 0 and b.children.length is 0
+    #   ## then compare their names
+    #   # if a.get("children").length is 0 and b.get("children").length is 0
+    #     # return @sortByName(a, b)
 
-      ## else if b's children length is 0 move it up (return -1)
-      # if b.get("children").length is 0
-        # return -1
+    #   ## else if b's children length is 0 move it up (return -1)
+    #   # if b.get("children").length is 0
+    #     # return -1
 
 
-      if a.get("children").length is 0
-        return 1
+    #   if a.get("children").length is 0
+    #     return 1
 
-      @sortByName(a, b)
+    #   @sortByName(a, b)
 
-    sortByName: (a, b) ->
-      if a.get("name") > b.get("name") then 1 else -1
-      # if a.get("children").length > 0 then a.get("name") else 0
-      # if model.get("children").length > 0
-      #   return model.get("name")
+    # sortByName: (a, b) ->
+    #   if a.get("name") > b.get("name") then 1 else -1
+    #   # if a.get("children").length > 0 then a.get("name") else 0
+    #   # if model.get("children").length > 0
+    #   #   return model.get("name")
 
-      # 0
+    #   # 0
 
     findByName: (path) ->
       @findWhere name: path
@@ -67,7 +67,8 @@
           ## push a new model into the memo collection
           model ?= memo.push {name: path}
 
-          model.setFullPath(array)
+          ## set the full path if its the file model
+          model.setFullPath(array) if _(array).last() is path
 
           ## and always return the model's children
           model.get("children")
