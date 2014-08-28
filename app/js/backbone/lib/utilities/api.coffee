@@ -29,8 +29,20 @@
     chai.use (_chai, utils) ->
       _.each {expect: expect, assert: assert}, (value, key) ->
         _chai[key] = _.wrap value, (orig, args...) ->
-          if args[0] instanceof Eclectus.Command
-            args[0] = args[0].$el
+
+          switch
+            ## shift the expectation to use the $el on
+            ## the command
+            when args[0] instanceof Eclectus.Command
+              args[0] = args[0].$el
+
+            ## chai-jquery hard codes checking instanceof's
+            ## and would always return false if we're receiving
+            ## a child jQuery object -- so we need to reset
+            ## this object to a jQuery instance that the parent
+            ## window controls
+            when args[0] instanceof $("iframe.iframe-spec")[0]?.contentWindow.$
+              args[0] = $(args[0])
 
           orig.apply(@, args)
 
