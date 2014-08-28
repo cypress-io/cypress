@@ -92,12 +92,12 @@ Eclectus.Dom = do ($, _, Eclectus) ->
       ## else instatiate a new one
       ## ----------------------------------------------
       ## re-patch eclectus with this previous el object
-      dom.scope()
+      @scope()
 
       fn.call(dom)
 
       ## then undo so commands after this are back to normal
-      dom.unscope()
+      @unscope()
 
       return dom
 
