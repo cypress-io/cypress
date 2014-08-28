@@ -53,6 +53,10 @@ class ConfigGenerator extends Eclectus.Base
         type: "confirm"
         message: "Enable Fixtures?"
         default: true
+      },{
+        name: "port"
+        message: "What port should I run the server on?"
+        default: 3000
       }
     ]
 

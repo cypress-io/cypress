@@ -17,16 +17,16 @@ app       = express()
 server    = http.Server(app)
 io        = require("socket.io")(server)
 
-## all environments
-app.set 'port', "3000"
-
 ## set the eclectus config from the eclectus.json file
 app.set "eclectus", JSON.parse(fs.readFileSync("eclectus.json", encoding: "utf8")).eclectus
 
 ## set the locals up here so we dont have to process them on every request
-{ testFiles, testFolder, rootFolder } = app.get("eclectus")
+{ testFiles, testFolder } = app.get("eclectus")
 
 testFiles = new RegExp(testFiles)
+
+## all environments
+app.set 'port', app.get("eclectus").port or 3000
 
 app.set "view engine", "html"
 app.engine "html", hbs.__express
@@ -240,7 +240,7 @@ app.get "*", (req, res) ->
   ## strip off any query params from our req's url
   baseUrl = url.parse(req.url).pathname
 
-  args = _.compact([process.cwd(), rootFolder, baseUrl])
+  args = _.compact([process.cwd(), app.get("eclectus").rootFolder, baseUrl])
   res.sendFile path.join args...
 
 ## errorhandler
