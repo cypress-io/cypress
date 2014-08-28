@@ -3751,3 +3751,12 @@ code, kbd, pre, samp {
       display: block; }
     #header-container #chosen-runnable label {
       cursor: pointer; }
+
+#organize-page h4 {
+  margin: 0; }
+#organize-page ul {
+  margin: 5px 0 5px 20px; }
+  #organize-page ul > li > ul h4 {
+    font-size: 125%; }
+#organize-page li {
+  list-style: none; }
