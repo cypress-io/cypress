@@ -3537,9 +3537,7 @@ code, kbd, pre, samp {
   width: 64.4%;
   height: 98%;
   bottom: 0;
-  top: 12px;
-  margin-right: 30px;
-  overflow: auto;
+  overflow: hidden;
   box-sizing: border-box; }
   #iframe-wrapper #iframe-container {
     height: 150%;
@@ -3571,7 +3569,11 @@ code, kbd, pre, samp {
       padding: 5px 10px;
       color: #888;
       border: 1px solid #ddd;
-      border-bottom: 0; }
+      border-bottom: 0;
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 37px; }
       #iframe-wrapper #iframe-container header #url-container {
         width: 65%; }
       #iframe-wrapper #iframe-container header i {
@@ -3600,7 +3602,9 @@ code, kbd, pre, samp {
       height: 100%;
       border: 1px solid #D5D5D5;
       position: absolute;
-      bottom: 0; }
+      bottom: 0;
+      top: 38px;
+      overflow: auto; }
 
 #test-container {
   background-color: #222;
