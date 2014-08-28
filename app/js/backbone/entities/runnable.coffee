@@ -5,6 +5,7 @@
       state: "processing"
       indent: -10
       open: false
+      error: null
       children:  new Entities.RunnableCollection
       commands: App.request("command:entities")
 
@@ -107,7 +108,7 @@
         @originalError = test.err
 
         ## set the err on the attrs
-        attrs.error = test.err.stack or test.err.toString()
+        attrs.error = test.err.toString()
       else
         ## remove the original error in case it exists
         @removeOriginalError()
