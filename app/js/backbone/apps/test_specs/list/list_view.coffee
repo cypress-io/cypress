@@ -45,7 +45,7 @@
       return if not @model.isSlow()
 
       ## need to add a tooltip here
-      @ui.label.addClass("label-primary").text(@model.get("duration") + "ms")
+      @ui.label.addClass("label-warning").text(@model.get("duration") + "ms")
 
     checkTimeout: ->
       return if not @model.timedOut()
