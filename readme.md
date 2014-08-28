@@ -8,4 +8,4 @@
 
 ## Docs / API
 
-[wiki](https://github.com/brian-mann/eclectus/wiki)
+[Visit the Wiki](https://github.com/brian-mann/eclectus/wiki)
