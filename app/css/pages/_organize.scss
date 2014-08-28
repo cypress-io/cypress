@@ -4,7 +4,8 @@
   }
 
   ul {
-    margin: 5px 0 5px 20px;
+    margin: 5px 0 5px 10px;
+    padding-left: 11px;
 
     & > li > ul h4 {
       font-size: 125%;
@@ -13,6 +14,23 @@
 
   li {
     list-style: none;
+    position: relative;
+  }
+
+  ul.outer-files-container li > ul {
+    border-left: 1px dotted #999;
+  }
+
+  ul.outer-files-container li > ul > li {
+    &:before {
+      // border-left: 1px dotted #999;
+      border-bottom: 1px dotted #999;
+      position: absolute;
+      width: 10px;
+      height: 11px;
+      content: "";
+      margin-left: -12px;
+    }
   }
 
   // li.file {

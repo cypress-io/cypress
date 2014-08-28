@@ -23,3 +23,4 @@
   class List.Files extends App.Views.CollectionView
     childView: List.File
     tagName: "ul"
+    className: "outer-files-container"
