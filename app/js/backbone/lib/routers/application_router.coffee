@@ -155,7 +155,7 @@
 
     _interpolateUrl: (action, options) ->
       ## remove region from the params automatically
-      Routes.create action.route, _(options).omit("region")
+      Routes.create action.route, _(options).omit("region", "resolve")
 
     _updateUrl: (action, options) ->
       route = @_interpolateUrl(action, options)
