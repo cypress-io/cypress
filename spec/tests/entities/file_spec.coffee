@@ -12,13 +12,13 @@ describe "File Entities", ->
 
       json = files.toJSON()
 
-      expect(json).to.deep.eq
-      [
+      expect(json).to.deep.eq [
         {
           name: "application"
           children: [
             {
               name: "app_spec.coffee"
+              fullPath: "application/app_spec.coffee"
               children: []
             }
           ]
@@ -31,10 +31,12 @@ describe "File Entities", ->
               children: [
                 {
                   name: "account_new_spec.coffee"
+                  fullPath: "apps/accounts/account_new_spec.coffee"
                   children: []
                 },
                 {
                   name: "accounts_list_spec.coffee"
+                  fullPath: "apps/accounts/accounts_list_spec.coffee"
                   children: []
                 }
               ]
@@ -44,6 +46,7 @@ describe "File Entities", ->
               children: [
                 {
                   name: "admin_users_list_spec.coffee"
+                  fullPath: "apps/admin_users/admin_users_list_spec.coffee"
                   children: []
                 }
               ]
