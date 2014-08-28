@@ -3531,17 +3531,26 @@ code, kbd, pre, samp {
       margin-right: 2px; }
 
 #iframe-wrapper {
-  position: relative;
-  right: 0;
-  left: 35%;
-  width: 900px;
-  top: 27px;
-  margin-right: 30px; }
+  position: fixed;
+  right: auto;
+  left: 34.4%;
+  width: 64.4%;
+  height: 98%;
+  bottom: 0;
+  top: 12px;
+  margin-right: 30px;
+  overflow: auto;
+  box-sizing: border-box; }
   #iframe-wrapper #iframe-container {
-    height: 100;
-    width: 100%;
-    position: relative;
-    box-shadow: 0 0 12px #CCCCCC; }
+    height: 150%;
+    width: 150%;
+    transform-origin: left top;
+    transform: scale(0.65);
+    position: absolute;
+    box-shadow: 0 0 12px #CCCCCC;
+    bottom: 24px;
+    left: 24px;
+    top: 0; }
     #iframe-wrapper #iframe-container #iframe-message {
       position: absolute;
       right: 150px;
@@ -3586,10 +3595,12 @@ code, kbd, pre, samp {
         width: 70%; }
     #iframe-wrapper #iframe-container iframe {
       z-index: 1;
-      background-color: white;
-      width: 900px;
-      height: 700px;
-      border: 1px solid #D5D5D5; }
+      background-color: transparent;
+      width: 100%;
+      height: 100%;
+      border: 1px solid #D5D5D5;
+      position: absolute;
+      bottom: 0; }
 
 #test-container {
   background-color: #222;
