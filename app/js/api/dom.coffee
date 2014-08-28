@@ -101,6 +101,8 @@ Eclectus.Dom = do ($, _, Eclectus) ->
 
       return dom
 
+    hover: ->
+
     type: (sequence, options = {}) ->
       #@pauseRunnable() if sequence is "walk the dog{enter}" and @runnable.cid is "1lc"
 
