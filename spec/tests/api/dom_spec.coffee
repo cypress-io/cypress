@@ -59,6 +59,8 @@ describe "Dom Command API", ->
     beforeEach ->
       @dom.within "#dom", =>
         @dom2 = Eclectus::find "#nested-find"
+        @dom3 = Eclectus::within "#list", =>
+          @dom4 = Eclectus::find "li"
 
     it "sets $el", ->
       expect(@dom.$el).to.be.instanceof($)
