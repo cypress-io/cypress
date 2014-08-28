@@ -3755,8 +3755,19 @@ code, kbd, pre, samp {
 #organize-page h4 {
   margin: 0; }
 #organize-page ul {
-  margin: 5px 0 5px 20px; }
+  margin: 5px 0 5px 10px;
+  padding-left: 11px; }
   #organize-page ul > li > ul h4 {
     font-size: 125%; }
 #organize-page li {
-  list-style: none; }
+  list-style: none;
+  position: relative; }
+#organize-page ul.outer-files-container li > ul {
+  border-left: 1px dotted #999; }
+#organize-page ul.outer-files-container li > ul > li:before {
+  border-bottom: 1px dotted #999;
+  position: absolute;
+  width: 10px;
+  height: 11px;
+  content: "";
+  margin-left: -12px; }
