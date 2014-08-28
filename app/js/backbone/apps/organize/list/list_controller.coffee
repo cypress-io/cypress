@@ -7,7 +7,7 @@
 
       @layout = @getLayoutView()
 
-      @listenTo @layout, "show", =>
+      @listenTo files, "sync", =>
         @filesRegion(files)
 
       @show @layout,
@@ -15,9 +15,12 @@
           entities: files
 
     filesRegion: (files) ->
+      files.resetToTreeView()
+
       filesView = @getFilesView files
 
-      @show filesView, region: @layout.filesRegion
+      @show filesView,
+        region: @layout.filesRegion
 
     getLayoutView: ->
       new List.Layout
