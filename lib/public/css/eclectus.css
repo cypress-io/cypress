@@ -1610,7 +1610,7 @@ a.label:hover, a.label:focus {
 .fa.pull-right {
   margin-left: .3em; }
 
-.fa-spin, #test-page #specs-container li.processing > .suite-state i, #test-page #specs-container li.processing > .test-state i {
+.fa-spin {
   -webkit-animation: spin 2s infinite linear;
   -moz-animation: spin 2s infinite linear;
   -o-animation: spin 2s infinite linear;
@@ -1747,10 +1747,10 @@ a.label:hover, a.label:focus {
 .fa-th-list:before {
   content: "\f00b"; }
 
-.fa-check:before, #test-specs ul.runnables li.runnable.passed > .runnable-wrapper .test-state i:before, #test-page #specs-container li.passed > .suite-state i:before, #test-page #specs-container li.passed > .test-state i:before {
+.fa-check:before, #test-specs ul.runnables li.runnable.passed > .runnable-wrapper .test-state i:before {
   content: "\f00c"; }
 
-.fa-times:before, #test-specs ul.runnables li.runnable.failed > .runnable-wrapper .test-state i:before, #test-page #specs-container li.failed > .suite-state i:before, #test-page #specs-container li.failed > .test-state i:before {
+.fa-times:before, #test-specs ul.runnables li.runnable.failed > .runnable-wrapper .test-state i:before {
   content: "\f00d"; }
 
 .fa-search-plus:before {
@@ -1803,7 +1803,7 @@ a.label:hover, a.label:focus {
 .fa-repeat:before {
   content: "\f01e"; }
 
-.fa-refresh:before, #test-specs ul.runnables li.runnable.processing > .runnable-wrapper .test-state i:before, #test-page #specs-container li.processing > .suite-state i:before, #test-page #specs-container li.processing > .test-state i:before {
+.fa-refresh:before, #test-specs ul.runnables li.runnable.processing > .runnable-wrapper .test-state i:before {
   content: "\f021"; }
 
 .fa-list-alt:before {
@@ -3030,7 +3030,7 @@ a.label:hover, a.label:focus {
 .fa-life-ring:before {
   content: "\f1cd"; }
 
-.fa-circle-o-notch:before, #test-specs ul.runnables li.runnable.pending > .runnable-wrapper .test-state i:before, #test-page #specs-container li.pending > .suite-state i:before, #test-page #specs-container li.pending > .test-state i:before {
+.fa-circle-o-notch:before, #test-specs ul.runnables li.runnable.pending > .runnable-wrapper .test-state i:before {
   content: "\f1ce"; }
 
 .fa-ra:before,
@@ -3157,47 +3157,6 @@ code, kbd, pre, samp {
   font-family: 'Open Sans', sans-serif;
   font-size: 1.05em;
   letter-spacing: 0.5px; }
-
-#header-container {
-  background-color: #3C3E43;
-  padding-left: 20px;
-  overflow: auto;
-  height: 50px;
-  border-left: 1px solid #191919;
-  border-bottom: 1px solid #3d3a3f; }
-  #header-container #stats-container {
-    min-width: 330px;
-    padding: 0;
-    float: left;
-    height: 100%;
-    margin-bottom: 0; }
-    #header-container #stats-container li {
-      list-style-type: none;
-      float: left;
-      margin: 0 10px;
-      padding-top: 6px;
-      padding-bottom: 3px;
-      font-weight: 300;
-      height: 100%; }
-      #header-container #stats-container li#tests-passed i {
-        color: #23AE89; }
-      #header-container #stats-container li#tests-failed i {
-        color: #E94B3B; }
-      #header-container #stats-container li#tests-pending i {
-        color: #aaa; }
-      #header-container #stats-container li span {
-        color: #ccc; }
-    #header-container #stats-container #tests-duration {
-      padding-left: 10px;
-      padding-right: 10px; }
-  #header-container #chosen-runnable {
-    position: relative;
-    top: 6px; }
-    #header-container #chosen-runnable .uppercase {
-      font-size: 10px;
-      display: block; }
-    #header-container #chosen-runnable label {
-      cursor: pointer; }
 
 .ecl-main-content {
   background-color: #F6F6F6;
@@ -3418,13 +3377,13 @@ code, kbd, pre, samp {
             background-color: #393b40; }
           #panel-wrapper > li .panel-content ul li .details-container {
             position: relative; }
-            #panel-wrapper > li .panel-content ul li .details-container i.fa-times, #panel-wrapper > li .panel-content #test-specs ul.runnables li.runnable.failed > .runnable-wrapper .details-container .test-state i, #test-specs #panel-wrapper > li .panel-content ul.runnables li.runnable.failed > .runnable-wrapper .details-container .test-state i, #panel-wrapper > li .panel-content #test-specs ul.runnables li.runnable.failed > .runnable-wrapper .test-state .details-container i, #test-specs #panel-wrapper > li .panel-content ul.runnables li.runnable.failed > .runnable-wrapper .test-state .details-container i, #panel-wrapper > li .panel-content ul #test-page #specs-container li.failed > .suite-state .details-container i, #test-page #specs-container #panel-wrapper > li .panel-content ul li.failed > .suite-state .details-container i, #panel-wrapper > li .panel-content ul #test-page #specs-container li.failed > .test-state .details-container i, #test-page #specs-container #panel-wrapper > li .panel-content ul li.failed > .test-state .details-container i {
+            #panel-wrapper > li .panel-content ul li .details-container i.fa-times, #panel-wrapper > li .panel-content #test-specs ul.runnables li.runnable.failed > .runnable-wrapper .details-container .test-state i, #test-specs #panel-wrapper > li .panel-content ul.runnables li.runnable.failed > .runnable-wrapper .details-container .test-state i, #panel-wrapper > li .panel-content #test-specs ul.runnables li.runnable.failed > .runnable-wrapper .test-state .details-container i, #test-specs #panel-wrapper > li .panel-content ul.runnables li.runnable.failed > .runnable-wrapper .test-state .details-container i {
               position: absolute;
               top: 0;
               right: 0;
               padding: 5px 10px 10px;
               color: #999; }
-              #panel-wrapper > li .panel-content ul li .details-container i.fa-times:hover, #panel-wrapper > li .panel-content #test-specs ul.runnables li.runnable.failed > .runnable-wrapper .details-container .test-state i:hover, #test-specs #panel-wrapper > li .panel-content ul.runnables li.runnable.failed > .runnable-wrapper .details-container .test-state i:hover, #panel-wrapper > li .panel-content #test-specs ul.runnables li.runnable.failed > .runnable-wrapper .test-state .details-container i:hover, #test-specs #panel-wrapper > li .panel-content ul.runnables li.runnable.failed > .runnable-wrapper .test-state .details-container i:hover, #panel-wrapper > li .panel-content ul #test-page #specs-container li.failed > .suite-state .details-container i:hover, #test-page #specs-container #panel-wrapper > li .panel-content ul li.failed > .suite-state .details-container i:hover, #panel-wrapper > li .panel-content ul #test-page #specs-container li.failed > .test-state .details-container i:hover, #test-page #specs-container #panel-wrapper > li .panel-content ul li.failed > .test-state .details-container i:hover {
+              #panel-wrapper > li .panel-content ul li .details-container i.fa-times:hover, #panel-wrapper > li .panel-content #test-specs ul.runnables li.runnable.failed > .runnable-wrapper .details-container .test-state i:hover, #test-specs #panel-wrapper > li .panel-content ul.runnables li.runnable.failed > .runnable-wrapper .details-container .test-state i:hover, #panel-wrapper > li .panel-content #test-specs ul.runnables li.runnable.failed > .runnable-wrapper .test-state .details-container i:hover, #test-specs #panel-wrapper > li .panel-content ul.runnables li.runnable.failed > .runnable-wrapper .test-state .details-container i:hover {
                 color: #EEE;
                 cursor: pointer; }
             #panel-wrapper > li .panel-content ul li .details-container .actions-container {
@@ -3473,6 +3432,164 @@ code, kbd, pre, samp {
 
 ::-webkit-scrollbar-track {
   background: #DDD; }
+
+.commands-container {
+  margin: 5px 30px 5px 20px;
+  background-color: #343644;
+  color: #bcbccc;
+  padding: 1px; }
+  .commands-container:empty {
+    display: none; }
+  .commands-container > li {
+    padding: 4px 9px 4px 20px;
+    margin: 0; }
+    .commands-container > li:hover:not(.command-cloned) {
+      background-color: #3b3f50;
+      cursor: pointer; }
+    .commands-container > li.active {
+      background-color: #515151 !important; }
+  .commands-container .command-parent {
+    border-top: 1px solid #3f3f4f; }
+    .commands-container .command-parent:first-child {
+      border-top: 0; }
+  .commands-container .command-child .command-method:before {
+    border-left: 1px dotted #999;
+    border-bottom: 1px dotted #999;
+    position: absolute;
+    width: 10px;
+    height: 11px;
+    content: "";
+    margin-left: -12px; }
+  .commands-container .command-wrapper {
+    position: relative;
+    overflow: hidden; }
+  .commands-container .command-method {
+    padding: 0 2px;
+    display: inline-block;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: .6px;
+    float: left;
+    min-width: 80px;
+    font-weight: 600;
+    color: #888888; }
+  .commands-container .command-error {
+    background-color: #e84332;
+    color: #fff;
+    border-radius: 5px;
+    margin-left: 10px;
+    float: left;
+    padding: 0 4px;
+    font-size: 10px;
+    text-transform: uppercase; }
+  .commands-container .command-type-xhr .command-method {
+    color: #a0dFcf; }
+  .commands-container .command-type-dom .command-method {
+    color: #888888; }
+  .commands-container .command-type-dom .command-selector {
+    color: #888888; }
+  .commands-container .command-type-dom-action .command-method {
+    color: #888888; }
+  .commands-container .command-type-dom-action .command-sequence {
+    color: #888; }
+  .commands-container .command-type-assertion .command-method {
+    color: #afd4AD; }
+  .commands-container .command-type-assertion .command-message {
+    color: #afd4AD; }
+  .commands-container .command-type-assertion-failed .command-method {
+    color: #ee7569; }
+  .commands-container .command-type-assertion-failed .command-message {
+    color: #ee7569; }
+  .commands-container .command-selector,
+  .commands-container .command-sequence,
+  .commands-container .command-request,
+  .commands-container .command-response,
+  .commands-container .command-message {
+    display: block;
+    margin-left: 80px;
+    width: 65%; }
+  .commands-container .command-request {
+    color: #a0dFcf; }
+  .commands-container .command-response .command-status {
+    font-weight: 300;
+    color: #ddd;
+    margin-right: 3px; }
+  .commands-container .command-response .command-body {
+    color: #ddd; }
+  .commands-container .command-controls {
+    position: absolute;
+    top: 0;
+    right: 0; }
+    .commands-container .command-controls i {
+      padding: 2px;
+      color: #777; }
+    .commands-container .command-controls i:hover {
+      color: #DDD;
+      cursor: pointer; }
+    .commands-container .command-controls .fa-pause {
+      font-size: 11px;
+      margin-right: 2px; }
+
+#iframe-wrapper {
+  position: relative;
+  right: 0;
+  left: 35%;
+  width: 900px;
+  top: 27px;
+  margin-right: 30px; }
+  #iframe-wrapper #iframe-container {
+    height: 100;
+    width: 100%;
+    position: relative;
+    box-shadow: 0 0 12px #CCCCCC; }
+    #iframe-wrapper #iframe-container #iframe-message {
+      position: absolute;
+      right: 150px;
+      top: 6px;
+      background-color: #111;
+      color: #FFF;
+      opacity: 0.7;
+      padding: 5px 10px;
+      border-radius: 5px;
+      display: none; }
+      #iframe-wrapper #iframe-container #iframe-message:empty {
+        display: none; }
+    #iframe-wrapper #iframe-container header {
+      overflow: auto;
+      background-color: #FFF;
+      border-radius: 5px 5px 0 0;
+      line-height: 22px;
+      padding: 5px 10px;
+      color: #888;
+      border: 1px solid #ddd;
+      border-bottom: 0; }
+      #iframe-wrapper #iframe-container header #url-container {
+        width: 65%; }
+      #iframe-wrapper #iframe-container header i {
+        cursor: pointer;
+        font-size: 18px;
+        margin-right: 10px;
+        margin-top: 3px;
+        float: left; }
+        #iframe-wrapper #iframe-container header i:hover {
+          color: #555; }
+        #iframe-wrapper #iframe-container header i.fa-expand, #iframe-wrapper #iframe-container header i.fa-compress {
+          margin-right: 0; }
+      #iframe-wrapper #iframe-container header .fa-caret-down {
+        font-size: 14px; }
+      #iframe-wrapper #iframe-container header input.url {
+        box-shadow: inset 0 1px 2px #AAA;
+        border-radius: 20px;
+        border: 0;
+        padding: 2px 10px;
+        float: left;
+        width: 70%; }
+    #iframe-wrapper #iframe-container iframe {
+      z-index: 1;
+      background-color: white;
+      width: 900px;
+      height: 700px;
+      border: 1px solid #D5D5D5; }
 
 #test-container {
   background-color: #222;
@@ -3593,227 +3710,44 @@ code, kbd, pre, samp {
         color: #a6c8e6; }
       #test-specs ul.runnables li.runnable.pending > .runnable-wrapper .test-state i {
         color: #92bce0; }
-    #test-specs ul.runnables .commands-container {
-      margin: 5px 30px 5px 20px;
-      background-color: #343644;
-      color: #bcbccc;
-      padding: 1px; }
-      #test-specs ul.runnables .commands-container:empty {
-        display: none; }
-      #test-specs ul.runnables .commands-container > li {
-        padding: 4px 9px 4px 20px;
-        margin: 0; }
-        #test-specs ul.runnables .commands-container > li:hover:not(.command-cloned) {
-          background-color: #3b3f50;
-          cursor: pointer; }
-        #test-specs ul.runnables .commands-container > li.active {
-          background-color: #515151 !important; }
-      #test-specs ul.runnables .commands-container .command-parent {
-        border-top: 1px solid #3f3f4f; }
-        #test-specs ul.runnables .commands-container .command-parent:first-child {
-          border-top: 0; }
-      #test-specs ul.runnables .commands-container .command-child .command-method:before {
-        border-left: 1px dotted #999;
-        border-bottom: 1px dotted #999;
-        position: absolute;
-        width: 10px;
-        height: 11px;
-        content: "";
-        margin-left: -12px; }
-      #test-specs ul.runnables .commands-container .command-wrapper {
-        position: relative;
-        overflow: hidden; }
-      #test-specs ul.runnables .commands-container .command-method {
-        padding: 0 2px;
-        display: inline-block;
-        text-transform: uppercase;
-        font-size: 11px;
-        letter-spacing: .6px;
-        float: left;
-        min-width: 80px;
-        font-weight: 600;
-        color: #888888; }
-      #test-specs ul.runnables .commands-container .command-error {
-        background-color: #e84332;
-        color: #fff;
-        border-radius: 5px;
-        margin-left: 10px;
-        float: left;
-        padding: 0 4px;
-        font-size: 10px;
-        text-transform: uppercase; }
-      #test-specs ul.runnables .commands-container .command-type-xhr .command-method {
-        color: #a0dFcf; }
-      #test-specs ul.runnables .commands-container .command-type-dom .command-method {
-        color: #888888; }
-      #test-specs ul.runnables .commands-container .command-type-dom .command-selector {
-        color: #888888; }
-      #test-specs ul.runnables .commands-container .command-type-dom-action .command-method {
-        color: #888888; }
-      #test-specs ul.runnables .commands-container .command-type-dom-action .command-sequence {
-        color: #888; }
-      #test-specs ul.runnables .commands-container .command-type-assertion .command-method {
-        color: #afd4AD; }
-      #test-specs ul.runnables .commands-container .command-type-assertion .command-message {
-        color: #afd4AD; }
-      #test-specs ul.runnables .commands-container .command-type-assertion-failed .command-method {
-        color: #ee7569; }
-      #test-specs ul.runnables .commands-container .command-type-assertion-failed .command-message {
-        color: #ee7569; }
-      #test-specs ul.runnables .commands-container .command-selector,
-      #test-specs ul.runnables .commands-container .command-sequence,
-      #test-specs ul.runnables .commands-container .command-request,
-      #test-specs ul.runnables .commands-container .command-response,
-      #test-specs ul.runnables .commands-container .command-message {
-        display: block;
-        margin-left: 80px;
-        width: 65%; }
-      #test-specs ul.runnables .commands-container .command-request {
-        color: #a0dFcf; }
-      #test-specs ul.runnables .commands-container .command-response .command-status {
-        font-weight: 300;
-        color: #ddd;
-        margin-right: 3px; }
-      #test-specs ul.runnables .commands-container .command-response .command-body {
-        color: #ddd; }
-      #test-specs ul.runnables .commands-container .command-controls {
-        position: absolute;
-        top: 0;
-        right: 0; }
-        #test-specs ul.runnables .commands-container .command-controls i {
-          padding: 2px;
-          color: #777; }
-        #test-specs ul.runnables .commands-container .command-controls i:hover {
-          color: #DDD;
-          cursor: pointer; }
-        #test-specs ul.runnables .commands-container .command-controls .fa-pause {
-          font-size: 11px;
-          margin-right: 2px; }
 
-#test-page {
-  position: relative; }
-  #test-page #specs-container {
-    clear: both;
-    padding-left: 0;
-    float: left; }
-    #test-page #specs-container pre {
-      margin-bottom: 0;
-      padding-bottom: 2px; }
-    #test-page #specs-container li {
+#header-container {
+  background-color: #3C3E43;
+  padding-left: 20px;
+  overflow: auto;
+  height: 50px;
+  border-left: 1px solid #191919;
+  border-bottom: 1px solid #3d3a3f; }
+  #header-container #stats-container {
+    min-width: 330px;
+    padding: 0;
+    float: left;
+    height: 100%;
+    margin-bottom: 0; }
+    #header-container #stats-container li {
       list-style-type: none;
-      padding-left: 5px; }
-    #test-page #specs-container li.suite {
-      font-family: "Raleway",Helvetica,sans-serif;
+      float: left;
+      margin: 0 10px;
+      padding-top: 6px;
+      padding-bottom: 3px;
       font-weight: 300;
-      font-size: 16px;
-      padding: 3px 10px 2px 5px; }
-    #test-page #specs-container li.test {
-      font-size: 13px; }
-    #test-page #specs-container li.hover {
-      background-color: #E5E5E5;
-      border-left: 2px solid #3380FF;
-      padding-left: 3px;
-      cursor: pointer; }
-    #test-page #specs-container li.active {
-      background-color: #FFF;
-      box-shadow: 0 1px 2px #DDD; }
-      #test-page #specs-container li.active:hover {
-        padding-left: 5px;
-        border-left: 0; }
-    #test-page #specs-container li pre.test-error {
-      margin-top: 0;
+      height: 100%; }
+      #header-container #stats-container li#tests-passed i {
+        color: #23AE89; }
+      #header-container #stats-container li#tests-failed i {
+        color: #E94B3B; }
+      #header-container #stats-container li#tests-pending i {
+        color: #aaa; }
+      #header-container #stats-container li span {
+        color: #ccc; }
+    #header-container #stats-container #tests-duration {
       padding-left: 10px;
-      margin-left: 4px;
-      color: #E49E97; }
-      #test-page #specs-container li pre.test-error:hover {
-        text-decoration: underline;
-        cursor: pointer; }
-    #test-page #specs-container li label {
-      padding: 1px 4px; }
-    #test-page #specs-container li .suite-state i {
-      font-size: 14px; }
-    #test-page #specs-container li .test-state i {
-      font-size: 12px; }
-    #test-page #specs-container li.processing > .suite-state i {
-      color: #888; }
-    #test-page #specs-container li.processing > .test-state i {
-      color: #888; }
-    #test-page #specs-container li.failed > pre {
-      color: #E94B3B; }
-    #test-page #specs-container li.failed > .suite-state i, #test-page #specs-container li.failed > .test-state i {
-      color: #E94B3B; }
-    #test-page #specs-container li.failed label {
-      text-transform: uppercase; }
-    #test-page #specs-container li.passed > .suite-state i, #test-page #specs-container li.passed > .test-state i {
-      color: #23AE89; }
-    #test-page #specs-container li.pending > .suite-state i, #test-page #specs-container li.pending > .test-state i {
-      color: #428BCA; }
-    #test-page #specs-container li ul.runnables {
-      padding-left: 12px;
-      font-family: "Open Sans", sans-serif;
-      font-size: 13px;
-      font-weight: 300;
-      padding-left: 8px;
-      margin-left: 4px;
-      border-left: 1px dotted #CCC; }
-
-#iframe-wrapper {
-  position: relative;
-  right: 0;
-  left: 35%;
-  width: 900px;
-  top: 27px;
-  margin-right: 30px; }
-  #iframe-wrapper #iframe-container {
-    height: 100;
-    width: 100%;
+      padding-right: 10px; }
+  #header-container #chosen-runnable {
     position: relative;
-    box-shadow: 0 0 12px #CCCCCC; }
-    #iframe-wrapper #iframe-container #iframe-message {
-      position: absolute;
-      right: 150px;
-      top: 6px;
-      background-color: #111;
-      color: #FFF;
-      opacity: 0.7;
-      padding: 5px 10px;
-      border-radius: 5px;
-      display: none; }
-      #iframe-wrapper #iframe-container #iframe-message:empty {
-        display: none; }
-    #iframe-wrapper #iframe-container header {
-      overflow: auto;
-      background-color: #FFF;
-      border-radius: 5px 5px 0 0;
-      line-height: 22px;
-      padding: 5px 10px;
-      color: #888;
-      border: 1px solid #ddd;
-      border-bottom: 0; }
-      #iframe-wrapper #iframe-container header #url-container {
-        width: 65%; }
-      #iframe-wrapper #iframe-container header i {
-        cursor: pointer;
-        font-size: 18px;
-        margin-right: 10px;
-        margin-top: 3px;
-        float: left; }
-        #iframe-wrapper #iframe-container header i:hover {
-          color: #555; }
-        #iframe-wrapper #iframe-container header i.fa-expand, #iframe-wrapper #iframe-container header i.fa-compress {
-          margin-right: 0; }
-      #iframe-wrapper #iframe-container header .fa-caret-down {
-        font-size: 14px; }
-      #iframe-wrapper #iframe-container header input.url {
-        box-shadow: inset 0 1px 2px #AAA;
-        border-radius: 20px;
-        border: 0;
-        padding: 2px 10px;
-        float: left;
-        width: 70%; }
-    #iframe-wrapper #iframe-container iframe {
-      z-index: 1;
-      background-color: white;
-      width: 900px;
-      height: 700px;
-      border: 1px solid #D5D5D5; }
+    top: 6px; }
+    #header-container #chosen-runnable .uppercase {
+      font-size: 10px;
+      display: block; }
+    #header-container #chosen-runnable label {
+      cursor: pointer; }

@@ -1,0 +1,206 @@
+#test-container {
+  background-color: #222;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  top: 0;
+  width: 33%;
+}
+
+#test-specs {
+  background-color: #222;
+  padding-left: 5px;
+  overflow: hidden;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+
+  #specs-container {
+    background-color: #3C3E43;
+    padding-left: 0;
+    border-left: 1px solid #191919;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+
+    #specs-list {
+      box-shadow: 0 1px 2px #373737;
+      margin-bottom: 100px;
+    }
+
+    li {
+      list-style-type: none;
+
+      &:last-child {
+        border-bottom: 0;
+      }
+    }
+  }
+
+  ul.runnables {
+    padding-left: 0;
+
+    li.runnable {
+      width: 100%;
+      color: #ddd;
+      background-color: lighten(#3C3E43, 3%);
+      overflow: auto;
+      line-height: 18px;
+      padding-left: 0;
+
+      .runnable-wrapper {
+        padding: 5px;
+        position: relative;
+        overflow: hidden;
+
+        .runnable-content-region {
+          overflow: auto;
+
+          .runnable-state {
+            width: 80%;
+            float: left;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+
+            .suite-title {
+              color: #ddd;
+            }
+          }
+
+          .runnable-controls {
+            width: 50px;
+            float: right;
+            text-align: right;
+
+            i {
+              margin: 0 2px;
+              color: #999;
+              visibility: hidden;
+              font-size: 15px;
+
+              &:hover {
+                color: #DDD;
+              }
+            }
+          }
+        }
+      }
+
+      pre {
+        margin-top: 2px;
+        margin-bottom: 0;
+        padding-bottom: 2px;
+        padding-top: 2px;
+        margin-left: 18px;
+        white-space: pre-wrap;
+        clear: both;
+
+        &:empty {
+          display: none;
+        }
+      }
+
+      &.hover {
+        background-color: lighten(#3C3E43, 5%);
+        cursor: pointer;
+
+        &>.runnable-wrapper .runnable-controls i {
+          visibility: visible !important;
+        }
+      }
+
+      &.active {
+        background-color: #4A4A4A;
+        // box-shadow: 0 1px 3px #555 inset;
+
+        .runnables .runnable-wrapper {
+          background-color: #4A4A4A;
+          border-left: 1px solid transparent;
+          // box-shadow: 0 1px 3px #555 inset;
+        }
+      }
+
+      .suite-state, .test-state {
+        width: 12px;
+        display: inline-block;
+        margin-right: 3px;
+        text-align: left;
+      }
+
+      .suite-state  {
+        margin-left: 1px;
+
+        i {
+          padding-left: 2px;
+          font-size: 16px;
+          color: #999;
+        }
+      }
+
+      &.processing > .runnable-wrapper {
+        .test-state i {
+          @extend .#{$fa-css-prefix}-refresh;
+          // @extend .fa-spin;
+          color: #888;
+        }
+      }
+
+      &.test.failed > .runnable-wrapper {
+        border-left: 2px solid #E94B3B;
+      }
+
+      &.failed > .runnable-wrapper {
+        pre {
+          color: #ff5f4f;
+        }
+
+        .suite-title i {
+          border-radius: 3px;
+          background-color: lighten(#E94B3B, 2%);
+          color: #FFF;
+          padding: 0 4px 0 3px;
+          font-size: 10px;
+          margin-left: 2px;
+        }
+
+        .test-state i {
+          @extend .#{$fa-css-prefix}-times;
+          color: #E94B3B;
+        }
+
+        label {
+          text-transform: uppercase;
+        }
+      }
+
+      &.passed > .runnable-wrapper {
+        // .suite-state i {
+        //   color: #23AE89;
+        // }
+
+        .test-state i {
+          @extend .#{$fa-css-prefix}-check;
+          color: #23AE89;
+        }
+      }
+
+      &.pending > .runnable-wrapper {
+        // .suite-state {
+        //   color: lighten(#428BCA, 20%);
+        // }
+
+        .test-title {
+          color: lighten(#428BCA, 25%);
+        }
+
+        .test-state i {
+          @extend .#{$fa-css-prefix}-circle-o-notch;
+          color: lighten(#428BCA, 20%);
+        }
+      }
+    }
+  }
+}
