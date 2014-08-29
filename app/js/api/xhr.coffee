@@ -10,6 +10,7 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
     initialize: ->
       ## make sure to reset both of these on restore()
       @requests = []
+      @responses = []
       @onRequests = []
 
       @canBeParent = true
@@ -93,6 +94,11 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
             body: @parseResponse(options)
 
           request.respond(response.status, response.headers, response.body)
+
+          ## since we emit the options as the response
+          ## lets push this into our responses for accessibility
+          ## and testability
+          @responses.push options
 
           ## clone the body and strip out any script tags
           body = @$("body").clone(true, true)

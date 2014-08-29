@@ -73,4 +73,70 @@ describe "XHR Command API", ->
         Ecl.server.stub
           method: "GET"
           url: "/"
+
         expect(@server.server.responses).to.have.length(1)
+
+      it "emits a response when matched", ->
+        Ecl.server.get
+          url: "/"
+          response:
+            foo: "bar"
+
+        @contentWindow.$.get "/"
+
+        Ecl.server.respond()
+
+        ## get the 2nd call which is our response emit
+        args = @emit.getCall(1).args[0]
+        expect(args).to.deep.eq {
+          method: "GET"
+          url: "/"
+          xhr: @server.requests[0]
+          response: @server.responses[0]
+        }
+
+      it "#get", ->
+        spy = @sandbox.spy()
+        Ecl.server.get
+          url: "/"
+          onRequest: spy
+        @contentWindow.$.get "/"
+        expect(spy).to.be.called
+
+      it "#post", ->
+        spy = @sandbox.spy()
+        Ecl.server.post
+          url: "/"
+          onRequest: spy
+        @contentWindow.$.post "/"
+        expect(spy).to.be.called
+
+      it "#delete", ->
+        spy = @sandbox.spy()
+        Ecl.server.delete
+          url: "/"
+          onRequest: spy
+        @contentWindow.$.ajax
+          url: "/"
+          method: "DELETE"
+        expect(spy).to.be.called
+
+      it "#put", ->
+        spy = @sandbox.spy()
+        Ecl.server.put
+          url: "/"
+          onRequest: spy
+        @contentWindow.$.ajax
+          url: "/"
+          method: "PUT"
+        expect(spy).to.be.called
+
+      it "#patch", ->
+        spy = @sandbox.spy()
+        Ecl.server.patch
+          url: "/"
+          onRequest: spy
+        @contentWindow.$.ajax
+          url: "/"
+          method: "PATCH"
+        expect(spy).to.be.called
