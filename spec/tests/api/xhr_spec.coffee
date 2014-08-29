@@ -2,7 +2,6 @@ Ecl = new Eclectus
 
 describe "XHR Command API", ->
   beforeEach ->
-
     @emit = @sandbox.stub(Eclectus.Command.prototype, "emit").returns(null)
 
     df = $.Deferred()
@@ -68,75 +67,88 @@ describe "XHR Command API", ->
         xhr: @server.requests[0]
       }
 
-    describe "#stub", ->
-      it "inserts a response", ->
-        Ecl.server.stub
-          method: "GET"
-          url: "/"
+    it "inserts a response", ->
+      Ecl.server.stub
+        method: "GET"
+        url: "/"
 
-        expect(@server.server.responses).to.have.length(1)
+      expect(@server.server.responses).to.have.length(1)
 
-      it "emits a response when matched", ->
-        Ecl.server.get
-          url: "/"
-          response:
-            foo: "bar"
+    it "emits a response when matched", ->
+      Ecl.server.get
+        url: "/"
+        response:
+          foo: "bar"
 
-        @contentWindow.$.get "/"
+      @contentWindow.$.get "/"
 
-        Ecl.server.respond()
+      Ecl.server.respond()
 
-        ## get the 2nd call which is our response emit
-        args = @emit.getCall(1).args[0]
-        expect(args).to.deep.eq {
-          method: "GET"
-          url: "/"
-          xhr: @server.requests[0]
-          response: @server.responses[0]
-        }
+      ## get the 2nd call which is our response emit
+      args = @emit.getCall(1).args[0]
+      expect(args).to.deep.eq {
+        method: "GET"
+        url: "/"
+        xhr: @server.requests[0]
+        response: @server.responses[0]
+      }
 
-      it "#get", ->
-        spy = @sandbox.spy()
-        Ecl.server.get
-          url: "/"
-          onRequest: spy
-        @contentWindow.$.get "/"
-        expect(spy).to.be.called
+    it "#get", ->
+      spy = @sandbox.spy()
+      Ecl.server.get
+        url: "/"
+        onRequest: spy
+      @contentWindow.$.get "/"
+      expect(spy).to.be.called
 
-      it "#post", ->
-        spy = @sandbox.spy()
-        Ecl.server.post
-          url: "/"
-          onRequest: spy
-        @contentWindow.$.post "/"
-        expect(spy).to.be.called
+    it "#post", ->
+      spy = @sandbox.spy()
+      Ecl.server.post
+        url: "/"
+        onRequest: spy
+      @contentWindow.$.post "/"
+      expect(spy).to.be.called
 
-      it "#delete", ->
-        spy = @sandbox.spy()
-        Ecl.server.delete
-          url: "/"
-          onRequest: spy
-        @contentWindow.$.ajax
-          url: "/"
-          method: "DELETE"
-        expect(spy).to.be.called
+    it "#delete", ->
+      spy = @sandbox.spy()
+      Ecl.server.delete
+        url: "/"
+        onRequest: spy
+      @contentWindow.$.ajax
+        url: "/"
+        method: "DELETE"
+      expect(spy).to.be.called
 
-      it "#put", ->
-        spy = @sandbox.spy()
-        Ecl.server.put
-          url: "/"
-          onRequest: spy
-        @contentWindow.$.ajax
-          url: "/"
-          method: "PUT"
-        expect(spy).to.be.called
+    it "#put", ->
+      spy = @sandbox.spy()
+      Ecl.server.put
+        url: "/"
+        onRequest: spy
+      @contentWindow.$.ajax
+        url: "/"
+        method: "PUT"
+      expect(spy).to.be.called
 
-      it "#patch", ->
-        spy = @sandbox.spy()
-        Ecl.server.patch
-          url: "/"
-          onRequest: spy
-        @contentWindow.$.ajax
-          url: "/"
-          method: "PATCH"
-        expect(spy).to.be.called
+    it "#patch", ->
+      spy = @sandbox.spy()
+      Ecl.server.patch
+        url: "/"
+        onRequest: spy
+      @contentWindow.$.ajax
+        url: "/"
+        method: "PATCH"
+      expect(spy).to.be.called
+
+    it "multiple requests", ->
+      Ecl.server.get
+        url: "/user"
+        response: {foo: "bar"}
+
+      @contentWindow.$.get "/admin"
+      @contentWindow.$.get "/user"
+
+      Ecl.server.respond()
+
+      expect(@server.responses).to.have.length 2
+
+    describe "non matching requests"
