@@ -1,6 +1,6 @@
 <div class="command-wrapper">
   <span class="command-method"><%= @method %></span>
-  <% if @response: %>
+  <% if @response?: %>
     <span class="command-response">
       <span class="command-status"><%= @status %></span>
       <span class="command-body"><%= @response %></span>

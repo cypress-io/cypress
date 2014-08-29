@@ -64,6 +64,7 @@ describe "XHR Command API", ->
       expect(args).deep.eq {
         method: "GET"
         url: "/"
+        id: @server.requests[0].id
         xhr: @server.requests[0]
       }
 
@@ -86,9 +87,12 @@ describe "XHR Command API", ->
 
       ## get the 2nd call which is our response emit
       args = @emit.getCall(1).args[0]
+
       expect(args).to.deep.eq {
-        method: "GET"
-        url: "/"
+        canBeParent: false
+        method: "resp"
+        id: @server.responses[0].id
+        parent: @server.requests[0].id
         xhr: @server.requests[0]
         response: @server.responses[0]
       }
@@ -139,6 +143,28 @@ describe "XHR Command API", ->
         method: "PATCH"
       expect(spy).to.be.called
 
+    describe "parent / child ids", ->
+      beforeEach ->
+        Eclectus.Command::emit.restore()
+        @emit = @sandbox.spy Eclectus.Command.prototype, "emit"
+
+        Ecl.server.get
+          url: "/user"
+          response: {foo: "bar"}
+
+        @contentWindow.$.get "/user"
+
+        Ecl.server.respond()
+
+      it "adjusts id's not to use the xhr instance", ->
+        id = @emit.getCall(0).args[0].id
+        expect(id).not.to.eq @server.id
+
+      it "child responses reference parent requests", ->
+        parentId = @emit.getCall(0).args[0].id
+        parent = @emit.getCall(1).args[0].parent
+        expect(parentId).to.eq parent
+
     describe "multiple requests", ->
       beforeEach ->
         Eclectus.Command::emit.restore()
@@ -153,19 +179,16 @@ describe "XHR Command API", ->
 
         Ecl.server.respond()
 
+      it "emits 4 events", ->
+        expect(@emit).to.have.callCount 4
+
       it "logs all requests", ->
         expect(@server.responses).to.have.length 2
 
       it "logs non requests which had no responses", ->
         expect(@server.responses[0]).to.deep.eq {
+          id: @server.responses[0].id
           status: 404
           response: ""
           headers: {}
         }
-
-      describe.only "emits events for requests + responses", ->
-        it "emits 4 events", ->
-          expect(@emit).to.have.callCount 4
-
-        it "adjusts id's not to use the xhr instance", ->
-          # console.log @emit
