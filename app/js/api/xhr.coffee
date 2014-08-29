@@ -44,6 +44,19 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
           ## our server
           _this.invokeOnRequest(xhr)
 
+        xhr.respond = _.wrap xhr.respond, (orig, args...) ->
+          orig.apply(@, args)
+
+          ## after we loop through all of the responses to make sure
+          ## something can response to this request, we need to emit
+          ## a 404 if nothing matched and sinon slurped up this request
+          ## and simply output its default 404 response
+          if _this.requestDidNotMatchAnyResponses(xhr, args)
+            _this.respondToRequest xhr,
+              status: 404
+              headers: {}
+              response: ""
+
         return xhr
 
     ## need to find the onRequest based on the matching response
@@ -65,6 +78,41 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
       ## call each onRequest callback with our xhr object
       _.each @onRequests, (onRequest) ->
         onRequest.call xhr, xhr
+
+    requestDidNotMatchAnyResponses: (request, args) ->
+      return if request.emittedResponse
+
+      status  = args[0]
+      headers = args[1]
+      body    = args[2]
+
+      status is 404 and
+        _.isEqual(headers, {}) and
+            body is ""
+
+    respondToRequest: (request, response) =>
+      ## since we emit the options as the response
+      ## lets push this into our responses for accessibility
+      ## and testability
+      @responses.push response
+
+      ## set this to true so we avoid emitting twice
+      ## if there is a real 404 that we submitted
+      request.emittedResponse = true
+
+      ## clone the body and strip out any script tags
+      body = @$("body").clone(true, true)
+      body.find("script").remove()
+
+      resp = @clone()
+      resp.prevObject = @
+      resp.canBeParent = false
+
+      resp.emit
+        method:       request.method
+        url:          request.url
+        xhr:          request
+        response:     response
 
     stub: (options = {}) ->
       throw new Error("Ecl.server.stub() must be called with a method option") if not options.method
@@ -95,24 +143,7 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
 
           request.respond(response.status, response.headers, response.body)
 
-          ## since we emit the options as the response
-          ## lets push this into our responses for accessibility
-          ## and testability
-          @responses.push options
-
-          ## clone the body and strip out any script tags
-          body = @$("body").clone(true, true)
-          body.find("script").remove()
-
-          resp = @clone()
-          resp.prevObject = @
-          resp.canBeParent = false
-
-          resp.emit
-            method:       request.method
-            url:          request.url
-            xhr:          request
-            response:     options
+          @respondToRequest request, options
 
     requestMatchesResponse: (request, options) ->
       request.method is options.method and
