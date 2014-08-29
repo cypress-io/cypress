@@ -139,16 +139,33 @@ describe "XHR Command API", ->
         method: "PATCH"
       expect(spy).to.be.called
 
-    it "multiple requests", ->
-      Ecl.server.get
-        url: "/user"
-        response: {foo: "bar"}
+    describe "multiple requests", ->
+      beforeEach ->
+        Eclectus.Command::emit.restore()
+        @emit = @sandbox.spy Eclectus.Command.prototype, "emit"
 
-      @contentWindow.$.get "/admin"
-      @contentWindow.$.get "/user"
+        Ecl.server.get
+          url: "/user"
+          response: {foo: "bar"}
 
-      Ecl.server.respond()
+        @contentWindow.$.get "/admin"
+        @contentWindow.$.get "/user"
 
-      expect(@server.responses).to.have.length 2
+        Ecl.server.respond()
 
-    describe "non matching requests"
+      it "logs all requests", ->
+        expect(@server.responses).to.have.length 2
+
+      it "logs non requests which had no responses", ->
+        expect(@server.responses[0]).to.deep.eq {
+          status: 404
+          response: ""
+          headers: {}
+        }
+
+      describe.only "emits events for requests + responses", ->
+        it "emits 4 events", ->
+          expect(@emit).to.have.callCount 4
+
+        it "adjusts id's not to use the xhr instance", ->
+          # console.log @emit

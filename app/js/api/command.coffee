@@ -12,13 +12,16 @@ Eclectus.Command = do ($, _) ->
       ## commands.  so as we chain off of this id
       ## we can reference back up to the parent id
       ## we chained off of.
-      @id = _.uniqueId("instance")
+      @id = @getId()
 
       ## call init passing up our arguments
       @initialize(arguments...) if @initialize
 
     $: (selector) ->
       new $.fn.init(selector, @document)
+
+    getId: ->
+      _.uniqueId("instance")
 
     getConfig: ->
       throw new Error("config must be set") if not @config
