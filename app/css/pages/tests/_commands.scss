@@ -136,9 +136,17 @@
 
   .command-request {
     color: #a0dFcf;
+    word-wrap: break-word
   }
 
   .command-response {
+
+    i.fa-ellipsis-h {
+      color: #fff;
+      background-color: #555;
+      border-radius: 3px;
+      padding: 0 4px;
+    }
 
     .command-status {
       font-weight: 300;

@@ -53,7 +53,8 @@
 
     setResponse: (response) ->
       @set "status", @xhr.status
-      @set "response", @xhr.responseText
+      @set "response", _(@xhr.responseText).truncate(40, " ")
+      @set "truncated", @xhr.responseText.length > 40
       @set "method", "resp"
       @response = response
 

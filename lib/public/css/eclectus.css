@@ -3509,7 +3509,13 @@ code, kbd, pre, samp {
     margin-left: 80px;
     width: 65%; }
   .commands-container .command-request {
-    color: #a0dFcf; }
+    color: #a0dFcf;
+    word-wrap: break-word; }
+  .commands-container .command-response i.fa-ellipsis-h {
+    color: #fff;
+    background-color: #555;
+    border-radius: 3px;
+    padding: 0 4px; }
   .commands-container .command-response .command-status {
     font-weight: 300;
     color: #ddd;
