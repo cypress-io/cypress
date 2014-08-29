@@ -32,7 +32,7 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
           ## call the original so sinon does its thing
           onSendOrig.call(@)
 
-          xhr.id          = _this.id
+          xhr.id          = _this.getId()
 
           _this.emit
             method:      xhr.method
@@ -86,9 +86,7 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
       headers = args[1]
       body    = args[2]
 
-      status is 404 and
-        _.isEqual(headers, {}) and
-            body is ""
+      status is 404 and _.isEqual(headers, {}) and body is ""
 
     respondToRequest: (request, response) =>
       ## since we emit the options as the response
@@ -100,19 +98,15 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
       ## if there is a real 404 that we submitted
       request.emittedResponse = true
 
-      ## clone the body and strip out any script tags
-      body = @$("body").clone(true, true)
-      body.find("script").remove()
-
-      resp = @clone()
-      resp.prevObject = @
-      resp.canBeParent = false
-
-      resp.emit
+      @emit
         method:       request.method
         url:          request.url
         xhr:          request
         response:     response
+        parent:       request.id
+        canBeParent:  false
+        id:           @getId()
+        method:       "resp"
 
     stub: (options = {}) ->
       throw new Error("Ecl.server.stub() must be called with a method option") if not options.method

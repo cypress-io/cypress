@@ -55,7 +55,6 @@
       @set "status", @xhr.status
       @set "response", _(@xhr.responseText).truncate(40, " ")
       @set "truncated", @xhr.responseText.length > 40
-      @set "method", "resp"
       @response = response
 
     getPrimaryObjects: ->
