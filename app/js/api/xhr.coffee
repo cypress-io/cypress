@@ -35,9 +35,10 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
           xhr.id          = _this.getId()
 
           _this.emit
-            method:      xhr.method
-            url:         xhr.url
-            xhr:         xhr
+            method:  xhr.method
+            url:     xhr.url
+            id:      xhr.id
+            xhr:     xhr
 
           ## invokes onRequest callback function on any matching responses
           ## and then also calls this on any global onRequest methods on
@@ -98,15 +99,15 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
       ## if there is a real 404 that we submitted
       request.emittedResponse = true
 
+      response.id = @getId()
+
       @emit
-        method:       request.method
-        url:          request.url
+        method:       "resp"
         xhr:          request
         response:     response
         parent:       request.id
         canBeParent:  false
-        id:           @getId()
-        method:       "resp"
+        id:           response.id
 
     stub: (options = {}) ->
       throw new Error("Ecl.server.stub() must be called with a method option") if not options.method

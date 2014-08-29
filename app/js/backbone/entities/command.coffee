@@ -170,6 +170,7 @@
       command.dom = dom
       command.el = el
 
+
       ## if we're chained to an existing id
       ## that means we have a parent
       @insertParents command, attrs.parent
