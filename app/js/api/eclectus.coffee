@@ -27,6 +27,7 @@ window.Eclectus = do ($, _) ->
     ## the arguments, etc
     stub: (obj) ->
     mock: (obj) ->
+    spy: (obj) ->
 
   class Eclectus
     ## class method patch
