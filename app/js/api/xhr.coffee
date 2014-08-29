@@ -54,7 +54,7 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
       ## out of the loop early so our onRequest is called
       ## only 1 time in case multiple requests match
       found = false
-      for response in @server.responses
+      for response in (@server.responses or [])
         break if found
 
         response.response xhr, (options) ->
