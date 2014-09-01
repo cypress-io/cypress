@@ -74,11 +74,11 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
 
         response.response xhr, (options) ->
           found = true
-          options.onRequest.call(xhr)
+          options.onRequest.call(xhr, xhr)
 
       ## call each onRequest callback with our xhr object
       _.each @onRequests, (onRequest) ->
-        onRequest.call xhr, xhr
+        onRequest.call(xhr, xhr)
 
     requestDidNotMatchAnyResponses: (request, args) ->
       return if request.emittedResponse
