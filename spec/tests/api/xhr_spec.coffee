@@ -52,11 +52,13 @@ describe "XHR Command API", ->
       @contentWindow.$.get "/"
       expect(Ecl.server.requests).to.have.length 1
 
-    it "invokes any onRequest callback functions on the Ecl server", ->
+    it "invokes any onRequest callback functions on the Ecl server with an xhr instance", ->
       spy = @sandbox.spy()
       Ecl.server.onRequest spy
       @contentWindow.$.get "/"
       expect(spy).to.be.called
+      args = spy.getCall(0).args
+      expect(args).to.have.length 1
 
     it "emits the request", ->
       @contentWindow.$.get "/"
