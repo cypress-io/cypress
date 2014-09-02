@@ -57,11 +57,6 @@
       @set "truncated", @xhr.responseText.length > 40
       @response = response
 
-    getIndexByParent: (commands) ->
-      return if not @hasParent()
-
-      commands.getCommandIndex(@parent)
-
     getPrimaryObjects: ->
       objs = switch @get("type")
         when "xhr"        then @xhr
@@ -160,6 +155,20 @@
         command.indent()
         options.onSetParent.call(@, parent) if options.onSetParent
 
+    getIndexByParent: (command) ->
+      return if not command.hasParent()
+
+      @getCommandIndex(command.parent)
+
+    getXhrOptions: (command, options) ->
+      ## at the very last minute we splice in this
+      ## new command by figuring out what its parents
+      ## index is (if this is an xhr)
+
+      index = @getIndexByParent(command)
+      options.at = index if index
+      options
+
     addAssertion: (attrs) ->
       {dom, el, actual, expected, subject} = attrs
       attrs = _(attrs).omit "dom", "el", "actual", "expected", "subject"
@@ -226,8 +235,11 @@
         ## this happens because we split up into separate collections by runnable
         ## so this model will be added twice, once to the original collection
         ## and twice to the runnable collection.
+        command = attrs
         options = type
-        return super(attrs, options) if attrs instanceof Entities.Command
+
+        options = @getXhrOptions(command, options) if command.get("type") is "xhr"
+        return super(command, options) if attrs instanceof Entities.Command
 
       return if _.isEmpty attrs
 
