@@ -3668,7 +3668,8 @@ code, kbd, pre, samp {
           #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content-region .runnable-controls {
             width: 50px;
             float: right;
-            text-align: right; }
+            text-align: right;
+            margin-right: 7px; }
             #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content-region .runnable-controls i {
               margin: 0 2px;
               color: #999;
