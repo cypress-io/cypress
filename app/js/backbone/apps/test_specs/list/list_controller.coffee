@@ -20,9 +20,9 @@
       ## when commands are added to this collection
       ## we need to find the runnable model by its cid
       ## and then add this command model to the runnable model
-      @listenTo commands, "add", (command) ->
+      @listenTo commands, "add", (command, commands, options) ->
         model = container.get command.get("testId")
-        model.addCommand(command) if model
+        model.addCommand(command, options) if model
 
       ## always make the first two arguments the root model + container collection
       @addRunnable = _.partial(@addRunnable, root, container)

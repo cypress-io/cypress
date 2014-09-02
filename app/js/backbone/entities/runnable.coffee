@@ -45,8 +45,8 @@
     remove: ->
       @collection.remove(@)
 
-    addCommand: (command) ->
-      @get("commands").add command
+    addCommand: (command, options) ->
+      @get("commands").add command, options
 
     is: (type) ->
       @get("type") is type

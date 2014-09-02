@@ -157,3 +157,35 @@ describe "Command Entities", ->
 
       child = @addCommand attrs, "xhr"
       expect(setResponse).to.be.called
+
+    context "parent / child xhrs", ->
+      beforeEach ->
+        attrs =
+          parent: undefined
+          id: "instance1"
+          canBeParent: true
+
+        parent = @addCommand attrs, "xhr"
+
+        attrs =
+          parent: undefined
+          id: "instance2"
+          canBeParent: true
+
+        @addCommand attrs, "xhr"
+
+        attrs =
+          parent: "instance1"
+          id: "instance3"
+
+        @child = @addCommand attrs, "xhr"
+
+      it "does not insert reinsert parents if all of the parents are xhrs", ->
+        expect(@commands).to.have.length 3
+
+      it "children have index set to parent + 1", ->
+        expect(@child.index).to.eq 1
+
+      it "children are inserted into the correct index within the collection", ->
+        console.warn @commands
+        expect(@commands.indexOf(@child)).to.eq 1
