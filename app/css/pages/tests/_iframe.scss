@@ -3,19 +3,19 @@
   right: auto;
   left: 34%;
   width: 65%;
-  height: 98%;
-  bottom: 0;
   overflow: hidden;
   box-sizing: border-box;
+  top: 20px;
+  bottom: 20px;
 
   #iframe-container {
-    height: 150%;
-    width: 153%;
-    transform-origin: left top;
-    transform: scale(0.65);
+    height: 100%;
+    width: 100%;
+    // transform-origin: left top;
+    // transform: scale(0.65);
     position: absolute;
     box-shadow: 0 0 12px #CCCCCC;
-    bottom: 24px;
+    // bottom: 24px;
     // left: 24px;
     top: 0;
 
