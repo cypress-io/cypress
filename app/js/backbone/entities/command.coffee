@@ -57,6 +57,11 @@
       @set "truncated", @xhr.responseText.length > 40
       @response = response
 
+    getIndexByParent: (commands) ->
+      return if not @hasParent()
+
+      commands.getCommandIndex(@parent)
+
     getPrimaryObjects: ->
       objs = switch @get("type")
         when "xhr"        then @xhr
@@ -92,9 +97,8 @@
     parentExistsFor: (id) ->
       @get(id)
 
-    getParentIndex: (id) ->
-      parent = @get(id)
-      @indexOf(parent) + 1 if parent
+    getCommandIndex: (command) ->
+      @indexOf(command) + 1
 
     ## check to see if the last parent command
     ## is the passed in parent
@@ -202,8 +206,6 @@
       command.xhr = xhr
       command.dom = dom
 
-      command.index = @getParentIndex(attrs.parent) if attrs.parent
-
       @insertParents command, attrs.parent,
         ## insert a parent if the last parent commands
         ## are not xhr types
@@ -212,7 +214,7 @@
 
         ## when the parent is set on this child command
         ## set the response for it
-        onSetParent: ->
+        onSetParent: (parent) ->
           command.setResponse response
 
       return command
@@ -235,10 +237,7 @@
 
       command = @getCommandByType(attrs)
 
-      opts = {}
-      opts.at = command.index if command.index
-
-      super command, opts
+      super command
 
   App.reqres.setHandler "command:entities", ->
     new Entities.CommandsCollection
