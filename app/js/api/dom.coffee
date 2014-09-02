@@ -12,6 +12,9 @@ Eclectus.Dom = do ($, _, Eclectus) ->
   traversalMethods =
     ["children", "eq", "first", "last", "next", "parent", "parents", "prev", "siblings"]
 
+  jQueryTriggers =
+    []
+
   ## create a reusable jquery selector object for our iframes
   ## which utilitizes our parent jquery object with the iframe
   ## context.  this means our consumers dont have to have jquery
@@ -152,6 +155,36 @@ Eclectus.Dom = do ($, _, Eclectus) ->
 
       return dom
 
+    submit: ->
+      submit = new Event("submit")
+
+      throw new Error("Cannot call method: #{method} without an existing DOM element.  Did you forget to call 'find' or 'within'?") if not @$el
+
+      dom             = @clone()
+
+      # if(document.createEvent) {
+      #         var event = document.createEvent('Event');
+      #         event.initEvent(eventName, true, true);
+      #         document.dispatchEvent(event);
+      #     } else {
+      #         document.documentElement[eventName]++;
+      #     }
+
+      if @elExistsInDocument()
+        @$el.each (index, el) ->
+          el.dispatchEvent(submit)
+      else
+        dom.error = "not found"
+
+      dom.prevObject  = @
+      dom.$el         = @$el
+      dom.length      = dom.$el.length
+      dom.selector    = arguments[0]
+
+      dom.emit
+        selector: dom.selector
+        method:   "submit"
+
     ## should not talk directly to the runnable here
     ## need to go through the runner to do this?
     pauseRunnable: ->
@@ -222,5 +255,25 @@ Eclectus.Dom = do ($, _, Eclectus) ->
       ## jQuery always returns a new object instance when you traverse
 
       return dom
+
+  _.each jQueryTriggers, (method) ->
+    Dom.prototype[method] = ->
+      throw new Error("Cannot call method: #{method} without an existing DOM element.  Did you forget to call 'find' or 'within'?") if not @$el
+
+      dom             = @clone()
+
+      if @elExistsInDocument()
+        @$el[method].call(@$el)
+      else
+        dom.error = "not found"
+
+      dom.prevObject  = @
+      dom.$el         = @$el
+      dom.length      = dom.$el.length
+      dom.selector    = arguments[0]
+
+      dom.emit
+        selector: dom.selector
+        method:   method
 
   return Dom
