@@ -4,7 +4,16 @@ describe "Command Entities", ->
       @commands.add attrs, type, {}
 
   beforeEach ->
+    ## we're using the runnableModel here because every command
+    ## goes through the .add method twice.  once when its originally
+    ## added to the command collection, and twice when its
+    ## added to its specific runnable's command collection
+    @runnableModel = App.request "runnable:entity", "test"
+
     @commands = App.request "command:entities"
+
+    @commands.on "add", (command, commands, options) =>
+      @runnableModel.addCommand command, options
 
   context "#addDom", ->
     beforeEach ->
@@ -183,9 +192,6 @@ describe "Command Entities", ->
       it "does not insert reinsert parents if all of the parents are xhrs", ->
         expect(@commands).to.have.length 3
 
-      it "children have index set to parent + 1", ->
-        expect(@child.index).to.eq 1
-
       it "children are inserted into the correct index within the collection", ->
-        console.warn @commands
-        expect(@commands.indexOf(@child)).to.eq 1
+        commands = @runnableModel.get("commands")
+        expect(commands.indexOf(@child)).to.eq 1

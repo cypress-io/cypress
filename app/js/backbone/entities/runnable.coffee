@@ -46,17 +46,7 @@
       @collection.remove(@)
 
     addCommand: (command, options = {}) ->
-      ## at the very last minute we splice in this
-      ## new command by figuring out what its parents
-      ## index is (if this is an xhr)
-      commands = @get("commands")
-
-      ## only want to do this on xhr's
-      if command.get("type") is "xhr"
-        index = command.getIndexByParent commands
-        options.at = index if index
-
-      commands.add command, options
+      @get("commands").add command, options
 
     is: (type) ->
       @get("type") is type
