@@ -71,7 +71,9 @@
     padding: 0 4px;
     font-size: 10px;
     text-transform: uppercase;
-
+    position: absolute;
+    top: 0;
+    right: 0;
   }
 
   .command-type-xhr {

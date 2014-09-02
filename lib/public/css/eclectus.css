@@ -3481,7 +3481,10 @@ code, kbd, pre, samp {
     float: left;
     padding: 0 4px;
     font-size: 10px;
-    text-transform: uppercase; }
+    text-transform: uppercase;
+    position: absolute;
+    top: 0;
+    right: 0; }
   .commands-container .command-type-xhr .command-method {
     color: #a0dFcf; }
   .commands-container .command-type-dom .command-method {
@@ -3541,18 +3544,15 @@ code, kbd, pre, samp {
   right: auto;
   left: 34%;
   width: 65%;
-  height: 98%;
-  bottom: 0;
   overflow: hidden;
-  box-sizing: border-box; }
+  box-sizing: border-box;
+  top: 20px;
+  bottom: 20px; }
   #iframe-wrapper #iframe-container {
-    height: 150%;
-    width: 153%;
-    transform-origin: left top;
-    transform: scale(0.65);
+    height: 100%;
+    width: 100%;
     position: absolute;
     box-shadow: 0 0 12px #CCCCCC;
-    bottom: 24px;
     top: 0; }
     #iframe-wrapper #iframe-container #iframe-message {
       position: absolute;
