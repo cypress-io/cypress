@@ -92,9 +92,13 @@
     parentExistsFor: (id) ->
       @get(id)
 
+    getParentIndex: (id) ->
+      parent = @get(id)
+      @indexOf(parent) + 1 if parent
+
     ## check to see if the last parent command
     ## is the passed in parent
-    lastParentCommandIsNot: (parent, command) ->
+    lastParentCommandIsNotParent: (parent, command) ->
       ## loop through this in reverse
       ## cannot reverse the models array
       ## and use _.find because .clone()
@@ -104,6 +108,15 @@
         ## up the parent chains
         if model.get("canBeParent")
           return model isnt parent
+
+    lastParentsAreNotXhr: (parent, command) ->
+      for model in @models by -1
+        ## if any of the parents arent xhr's return true
+        return true if model.get("type") isnt "xhr"
+
+        ## if we eventually make it to our parent then
+        ## return false
+        return false if model is parent
 
     cloneParent: (parent) ->
       ## get a clone of our parent but reset its id
@@ -123,7 +136,7 @@
         when "xhr"        then @addXhr attrs
         when "assertion"  then @addAssertion attrs
 
-    insertParents: (command, parentId, cb) ->
+    insertParents: (command, parentId, options = {}) ->
       if parent = @parentExistsFor(parentId)
 
         ## make sure the last command is our parent, if its not
@@ -132,18 +145,16 @@
 
         ## right here we need to potentially insert multiple parents
         ## in case we've referenced an ecl object way down the line
-        if @lastParentCommandIsNot(parent, command)
-
+        if options.if and options.if.call(@, parent, command)
           ## recursively walk up the parent chain by ensuring we insert
           ## as many parents as necessary to get back to the root command
-          @insertParents(parent, parent.parent.id) if parent.hasParent()
+          @insertParents(parent, parent.parent.id, options) if parent.hasParent()
 
           parent = @cloneParent(parent)
 
         command.setParent parent
         command.indent()
-        cb() if cb
-
+        options.onSetParent.call(@, parent) if options.onSetParent
 
     addAssertion: (attrs) ->
       {dom, el, actual, expected, subject} = attrs
@@ -170,10 +181,14 @@
       command.dom = dom
       command.el = el
 
-
       ## if we're chained to an existing id
       ## that means we have a parent
-      @insertParents command, attrs.parent
+      @insertParents command, attrs.parent,
+
+        ## insert a parent if the last parent command
+        ## is not these arguments
+        if: (parent, cmd) ->
+          @lastParentCommandIsNotParent(parent, cmd)
 
       return command
 
@@ -187,8 +202,18 @@
       command.xhr = xhr
       command.dom = dom
 
-      @insertParents command, attrs.parent, ->
-        command.setResponse response
+      command.index = @getParentIndex(attrs.parent) if attrs.parent
+
+      @insertParents command, attrs.parent,
+        ## insert a parent if the last parent commands
+        ## are not xhr types
+        if: (parent, cmd) ->
+          @lastParentsAreNotXhr(parent, cmd)
+
+        ## when the parent is set on this child command
+        ## set the response for it
+        onSetParent: ->
+          command.setResponse response
 
       return command
 
@@ -196,7 +221,11 @@
       try
         ## bail if we're attempting to add a real model here
         ## instead of an object
-        return super(attrs) if attrs instanceof Entities.Command
+        ## this happens because we split up into separate collections by runnable
+        ## so this model will be added twice, once to the original collection
+        ## and twice to the runnable collection.
+        options = type
+        return super(attrs, options) if attrs instanceof Entities.Command
 
       return if _.isEmpty attrs
 
@@ -206,7 +235,10 @@
 
       command = @getCommandByType(attrs)
 
-      super command
+      opts = {}
+      opts.at = command.index if command.index
+
+      super command, opts
 
   App.reqres.setHandler "command:entities", ->
     new Entities.CommandsCollection
