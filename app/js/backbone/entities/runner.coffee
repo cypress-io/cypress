@@ -24,6 +24,8 @@
 
     setEclSandbox: (@patchSandbox) ->
 
+    setOptions: (@options) ->
+
     getTestCid: (test) ->
       ## grab the test id from the test's title
       matches = testIdRegExp.exec(test.title)
@@ -123,9 +125,25 @@
         ## tests have a runnable of 'test' whereas suites do not have a runnable property
         event = runnable.type or "suite"
 
+        ## we need to change our strategy of displaying runnables
+        ## if grep is set (runner.options.grep)  that means the user
+        ## has written a .only on a suite or a test, and in that case
+        ## we dont want to display the tests or suites unless they match
+        ## our grep.
+        grep = runner.options?.grep
+
+        ## grep will always be set to something here... even /.*/
+
         ## trigger the add events so our UI can begin displaying
         ## the tests + suites
-        runner.trigger "#{event}:add", runnable
+        if grep and event is "suite"
+          count = 0
+          runnable.eachTest (test) ->
+            count += 1 if grep.test(test.fullTitle())
+          runner.trigger "suite:add", runnable if count > 0
+
+        if grep and event is "test"
+          runner.trigger "test:add", runnable if grep.test(runnable.fullTitle())
 
         ## recursively apply to all tests / suites of this runnable
         runner.iterateThroughRunnables(runnable, ids, socket)
@@ -247,6 +265,12 @@
       ## clear out the commands
       @commands.reset()
 
+      ## always reset @options.grep to /.*/ so we know
+      ## if the user has removed a .only in between runs
+      ## if they havent, it will just be picked back up
+      ## by mocha
+      @options.grep = /.*/
+
       ## set any outstanding test to pending and stopped
       ## so we bypass all old ones
       @runner.suite.eachTest (test) ->
@@ -292,6 +316,9 @@
       ids
 
     getGrep: (root) ->
+      console.warn "GREP IS: ", @options.grep
+      return re if re = @parseMochaGrep(@options.grep)
+
       chosen = @get("chosen")
       if chosen
         ## if we have a chosen model and its in our runnables cid
@@ -304,6 +331,35 @@
           @unset "chosen"
 
       return /.*/ if not @hasChosen()
+
+    parseMochaGrep: (re) ->
+      re = re.toString()
+
+      ## continue on if this is just a regex matching anything
+      return if re is "/.*/"
+
+      ## else if this isnt /.*/ we know the user has used a .only
+      ## and we need to .....
+
+      ## replace any single character except for digits,
+      ## letters, [] or whitespaces
+      re = re.replace /[^a-zA-Z0-9\[\]\s]/g, ""
+
+      ## test the new re string against our testIdRegExp
+      matches = testIdRegExp.exec(re)
+
+      ## bail if this doesnt match what we expect
+      return if not matches
+
+      ## dont do anything if the matched id is our chosen
+      return if matches[1] is @get("chosen")?.id
+
+      ## else if at this point if we have matches and its not
+      ## our chosen runnable, we need to unset what is currently
+      ## chosen and we need to choose this new runnable by its cid
+      @unset "chosen"
+
+      return new RegExp @escapeId("[" + matches[1] + "]")
 
     escapeId: (id) ->
       id.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -334,14 +390,15 @@
         console.log "finished running the iframes suite!"
 
   API =
-    getRunner: (testRunner, patch, sandbox) ->
+    getRunner: (testRunner, options, patch, sandbox) ->
       ## store the actual testRunner on ourselves
       runner = new Entities.Runner
       runner.setTestRunner testRunner
+      runner.setOptions options
       runner.setEclPatch patch
       runner.setEclSandbox sandbox
       runner.startListening()
       runner
 
-  App.reqres.setHandler "runner:entity", (testRunner, patch, sandbox) ->
-    API.getRunner testRunner, patch, sandbox
+  App.reqres.setHandler "runner:entity", (testRunner, options, patch, sandbox) ->
+    API.getRunner testRunner, options, patch, sandbox
