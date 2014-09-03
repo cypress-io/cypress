@@ -11,9 +11,6 @@
       ## generate the root runnable which holds everything
       root = App.request "new:root:runnable:entity"
 
-      ## use a collection as the container of all of our suites
-      suites = App.request "new:suite:entities"
-
       ## grab the commands collection from the runner
       commands = runner.getCommands()
 
