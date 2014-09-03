@@ -80,6 +80,7 @@
       "mouseout"      : "mouseout"
       # "dblclick"      : "dblClicked"
       "click"         : "clicked"
+      "click @ui.pre" : "preClicked"
       "mouseover .commands-container" : "commandsMouseover"
 
     modelEvents:
@@ -139,6 +140,11 @@
     errorChanged: (model, value, options) ->
       value or= ""
       @ui.pre.text(value)
+
+    preClicked: (e) ->
+      return if not @model.originalError
+
+      console.error(@model.originalError.stack)
 
   class List.Runnables extends App.Views.CollectionView
     tagName: "ul"
