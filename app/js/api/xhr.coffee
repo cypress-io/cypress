@@ -1,7 +1,7 @@
 ## attach to Eclectus global
 Eclectus.Xhr = do ($, _, Eclectus) ->
 
-  methods = ["stub", "get", "post", "put", "patch", "delete", "respond", "requests", "onRequest"]
+  methods = ["stub", "get", "post", "put", "patch", "delete", "respond", "requests", "onRequest", "autoRespond"]
 
   class Xhr extends Eclectus.Command
     config:
@@ -175,6 +175,9 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
 
     onRequest: (fn) ->
       @onRequests.push fn
+
+    autoRespond: (bool = true) ->
+      @server.autoRespond = bool
 
     ## class method responsible for dynamically binding
     ## our patched obj[property] to the servers proto methods

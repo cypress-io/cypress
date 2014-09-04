@@ -99,6 +99,7 @@
       ## remove any existing iframes
       @ui.message.hide().empty()
       @iframe?.remove()
+      # @iframe?.close()
 
       @$el.hide()
 
@@ -106,6 +107,10 @@
 
       @src = "/iframes/" + src
       @fn = fn
+
+      # @iframe = window.open(@src, "testIframeWindow", "titlebar=no,menubar=no,toolbar=no,location=no,personalbar=no,status=no")
+      # @iframe.onload = =>
+      #   fn(@iframe)
 
       @iframe = $ "<iframe />",
         src: @src
