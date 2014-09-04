@@ -33,7 +33,6 @@
       if /^(auto|0)$/.test el.css("zIndex") then 1000 else Number el.css("zIndex")
 
     highlightEl: (el, options = {}) ->
-
       _.defaults options,
         init: true
 
@@ -97,6 +96,7 @@
 
     loadIframe: (src, fn) ->
       ## remove any existing iframes
+      @reverted = false
       @ui.message.hide().empty()
       @iframe?.remove()
       # @iframe?.close()
