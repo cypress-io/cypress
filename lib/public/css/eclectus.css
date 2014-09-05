@@ -3640,14 +3640,14 @@ code, kbd, pre, samp {
   top: 0;
   bottom: 0; }
   #test-specs #specs-container {
-    background-color: #3C3E43;
+    background-color: #eee;
     padding-left: 0;
     border-left: 1px solid #191919;
     width: 100%;
     height: 100%;
     overflow: auto; }
     #test-specs #specs-container #specs-list {
-      box-shadow: 0 1px 2px #373737;
+      box-shadow: 0 1px 2px #aaa;
       margin-bottom: 100px; }
     #test-specs #specs-container li {
       list-style-type: none; }
