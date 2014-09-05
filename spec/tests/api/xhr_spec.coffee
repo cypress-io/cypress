@@ -194,3 +194,22 @@ describe "XHR Command API", ->
           response: ""
           headers: {}
         }
+
+    describe "duplicate requests", ->
+      it "matches sinon's logic and calls onRequest for the 2nd matching requesting", ->
+        spy = @sandbox.spy()
+
+        Ecl.server.get
+          url: "/"
+
+        @contentWindow.$.get "/"
+
+        Ecl.server.respond()
+
+        Ecl.server.get
+          url: "/"
+          onRequest: spy
+
+        @contentWindow.$.get "/"
+
+        expect(spy).to.be.called

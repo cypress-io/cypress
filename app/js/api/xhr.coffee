@@ -68,8 +68,14 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
       ## have to do this ugly variable juggling to bail
       ## out of the loop early so our onRequest is called
       ## only 1 time in case multiple requests match
+
+      ## also sinon loops over responses in reverse so that
+      ## later responses which are added to the server are
+      ## matched first before earlier matching ones. this makes
+      ## a lot of sense since new responses that you've added
+      ## later would cancel out previous ones.
       found = false
-      for response in (@server.responses or [])
+      for response in (@server.responses or []) by -1
         break if found
 
         response.response xhr, (options) ->
@@ -81,7 +87,7 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
         onRequest.call(xhr, xhr)
 
     requestDidNotMatchAnyResponses: (request, args) ->
-      return if request.emittedResponse
+      return if request.hasResponded
 
       status  = args[0]
       headers = args[1]
@@ -97,7 +103,7 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
 
       ## set this to true so we avoid emitting twice
       ## if there is a real 404 that we submitted
-      request.emittedResponse = true
+      request.hasResponded = true
 
       response.id = @getId()
 
