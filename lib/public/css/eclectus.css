@@ -3434,8 +3434,8 @@ code, kbd, pre, samp {
   background: #DDD; }
 
 .commands-container {
-  margin: 5px 30px 5px 20px;
-  background-color: #343644;
+  margin: 5px 10px 5px 15px;
+  background-color: #eef1f4;
   color: #bcbccc;
   padding: 1px; }
   .commands-container:empty {
@@ -3444,12 +3444,14 @@ code, kbd, pre, samp {
     padding: 4px 9px 4px 20px;
     margin: 0; }
     .commands-container > li:hover:not(.command-cloned) {
-      background-color: #3b3f50;
+      background-color: #EDEFF4;
       cursor: pointer; }
+    .commands-container > li:hover .command-controls i {
+      visibility: visible; }
     .commands-container > li.active {
       background-color: #515151 !important; }
   .commands-container .command-parent {
-    border-top: 1px solid #3f3f4f; }
+    border-top: 1px solid #efefef; }
     .commands-container .command-parent:first-child {
       border-top: 0; }
   .commands-container .command-child .command-method:before {
@@ -3472,7 +3474,7 @@ code, kbd, pre, samp {
     float: left;
     min-width: 80px;
     font-weight: 600;
-    color: #888888; }
+    color: #565554; }
   .commands-container .command-error {
     background-color: #e84332;
     color: #fff;
@@ -3486,54 +3488,63 @@ code, kbd, pre, samp {
     top: 0;
     right: 0; }
   .commands-container .command-type-xhr .command-method {
-    color: #a0dFcf; }
+    color: #565554; }
   .commands-container .command-type-dom .command-method {
-    color: #888888; }
+    color: #565554; }
   .commands-container .command-type-dom .command-selector {
-    color: #888888; }
+    color: #565554; }
   .commands-container .command-type-dom-action .command-method {
-    color: #888888; }
+    color: #565554; }
   .commands-container .command-type-dom-action .command-sequence {
-    color: #888; }
-  .commands-container .command-type-assertion .command-method {
-    color: #afd4AD; }
+    color: #565554; }
+  .commands-container .command-type-assertion .command-method span {
+    background-color: #00a500;
+    color: white;
+    border-radius: 2px;
+    padding: 0 2px; }
   .commands-container .command-type-assertion .command-message {
-    color: #afd4AD; }
+    color: #00a500; }
   .commands-container .command-type-assertion-failed .command-method {
-    color: #ee7569; }
+    color: #565554; }
   .commands-container .command-type-assertion-failed .command-message {
-    color: #ee7569; }
+    color: #565554; }
   .commands-container .command-selector,
   .commands-container .command-sequence,
   .commands-container .command-request,
   .commands-container .command-response,
   .commands-container .command-message {
-    display: block;
-    margin-left: 80px;
+    display: inline-block;
+    margin-left: 0;
     width: 65%; }
   .commands-container .command-request {
-    color: #a0dFcf;
-    word-wrap: break-word; }
+    color: #565554;
+    height: 17px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap; }
+    .commands-container .command-request:before {
+      content: '';
+      /* IE9 ellipsis fix */ }
   .commands-container .command-response i.fa-ellipsis-h {
     color: #fff;
-    background-color: #555;
+    background-color: #888;
     border-radius: 3px;
     padding: 0 4px; }
   .commands-container .command-response .command-status {
-    font-weight: 300;
-    color: #ddd;
+    font-weight: 700;
+    color: #565554;
     margin-right: 3px; }
   .commands-container .command-response .command-body {
-    color: #ddd; }
+    color: #565554; }
   .commands-container .command-controls {
     position: absolute;
     top: 0;
     right: 0; }
     .commands-container .command-controls i {
       padding: 2px;
-      color: #777; }
+      color: #3f7bA1;
+      visibility: hidden; }
     .commands-container .command-controls i:hover {
-      color: #DDD;
       cursor: pointer; }
     .commands-container .command-controls .fa-pause {
       font-size: 11px;
@@ -3642,19 +3653,22 @@ code, kbd, pre, samp {
       list-style-type: none; }
       #test-specs #specs-container li:last-child {
         border-bottom: 0; }
+  #test-specs #specs-list > .suite > .runnable-wrapper:first-child .suite-title {
+    font-weight: bold; }
   #test-specs ul.runnables {
     padding-left: 0; }
     #test-specs ul.runnables li.runnable {
       width: 100%;
-      color: #ddd;
-      background-color: #43454b;
+      color: #6B6C6B;
+      background-color: #fdfdfd;
       overflow: auto;
       line-height: 18px;
       padding-left: 0; }
       #test-specs ul.runnables li.runnable .runnable-wrapper {
         padding: 5px;
         position: relative;
-        overflow: hidden; }
+        overflow: hidden;
+        border-left: 10px solid transparent; }
         #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content-region {
           overflow: auto; }
           #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content-region .runnable-state {
@@ -3664,7 +3678,7 @@ code, kbd, pre, samp {
             white-space: nowrap;
             overflow: hidden; }
             #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content-region .runnable-state .suite-title {
-              color: #9f9f9f; }
+              color: #6B6C6B; }
           #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content-region .runnable-controls {
             width: 50px;
             float: right;
@@ -3675,20 +3689,21 @@ code, kbd, pre, samp {
               color: #999;
               visibility: hidden;
               font-size: 15px; }
-              #test-specs ul.runnables li.runnable .runnable-wrapper .runnable-content-region .runnable-controls i:hover {
-                color: #DDD; }
       #test-specs ul.runnables li.runnable pre {
         margin-top: 2px;
         margin-bottom: 0;
         padding-bottom: 2px;
         padding-top: 2px;
-        margin-left: 18px;
+        padding-left: 10px;
         white-space: pre-wrap;
         clear: both; }
         #test-specs ul.runnables li.runnable pre:empty {
           display: none; }
+        #test-specs ul.runnables li.runnable pre.test-error {
+          background-color: #FFFEEE;
+          border-left: 5px solid #E94B3B; }
       #test-specs ul.runnables li.runnable.hover {
-        background-color: #484a50;
+        background-color: #f7f8f9;
         cursor: pointer; }
         #test-specs ul.runnables li.runnable.hover > .runnable-wrapper .runnable-controls i {
           visibility: visible !important; }
@@ -3706,12 +3721,18 @@ code, kbd, pre, samp {
         margin-left: 1px; }
         #test-specs ul.runnables li.runnable .suite-state i {
           padding-left: 2px;
-          font-size: 16px;
-          color: #999; }
+          font-size: 14px;
+          color: #bbbcbd; }
       #test-specs ul.runnables li.runnable.processing > .runnable-wrapper .test-state i {
         color: #888; }
       #test-specs ul.runnables li.runnable.test.failed > .runnable-wrapper {
-        border-left: 2px solid #E94B3B; }
+        border-left: 10px solid #E94B3B; }
+      #test-specs ul.runnables li.runnable.suite.failed > .runnable-wrapper {
+        border-left: 10px solid #E94B3B; }
+      #test-specs ul.runnables li.runnable.test.passed > .runnable-wrapper {
+        border-left: 10px solid #4FBD5D; }
+      #test-specs ul.runnables li.runnable.suite.passed > .runnable-wrapper {
+        border-left: 10px solid #4FBD5D; }
       #test-specs ul.runnables li.runnable.failed > .runnable-wrapper pre {
         color: #ff5f4f; }
       #test-specs ul.runnables li.runnable.failed > .runnable-wrapper .suite-title i {

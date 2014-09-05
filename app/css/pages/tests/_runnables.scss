@@ -39,13 +39,21 @@
     }
   }
 
+  #specs-list>.suite>.runnable-wrapper:first-child {
+
+    .suite-title {
+      font-weight: bold;
+    }
+
+  }
+
   ul.runnables {
     padding-left: 0;
 
     li.runnable {
       width: 100%;
-      color: #ddd;
-      background-color: lighten(#3C3E43, 3%);
+      color: #6B6C6B;
+      background-color: #fdfdfd;
       overflow: auto;
       line-height: 18px;
       padding-left: 0;
@@ -54,6 +62,8 @@
         padding: 5px;
         position: relative;
         overflow: hidden;
+        border-left: 10px solid transparent;
+
 
         .runnable-content-region {
           overflow: auto;
@@ -66,7 +76,7 @@
             overflow: hidden;
 
             .suite-title {
-              color: #9f9f9f;
+              color: #6B6C6B;
             }
           }
 
@@ -83,7 +93,7 @@
               font-size: 15px;
 
               &:hover {
-                color: #DDD;
+                // color: #DDD;
               }
             }
           }
@@ -95,17 +105,22 @@
         margin-bottom: 0;
         padding-bottom: 2px;
         padding-top: 2px;
-        margin-left: 18px;
+        padding-left: 10px;
         white-space: pre-wrap;
         clear: both;
 
         &:empty {
           display: none;
         }
+
+        &.test-error {
+          background-color: #FFFEEE;
+          border-left: 5px solid #E94B3B;
+        }
       }
 
       &.hover {
-        background-color: lighten(#3C3E43, 5%);
+        background-color: #f7f8f9;
         cursor: pointer;
 
         &>.runnable-wrapper .runnable-controls i {
@@ -136,8 +151,8 @@
 
         i {
           padding-left: 2px;
-          font-size: 16px;
-          color: #999;
+          font-size: 14px;
+          color: #bbbcbd;
         }
       }
 
@@ -150,7 +165,20 @@
       }
 
       &.test.failed > .runnable-wrapper {
-        border-left: 2px solid #E94B3B;
+        border-left: 10px solid #E94B3B;
+      }
+
+
+      &.suite.failed > .runnable-wrapper {
+        border-left: 10px solid #E94B3B;
+      }
+
+      &.test.passed > .runnable-wrapper {
+        border-left: 10px solid #4FBD5D;
+      }
+
+      &.suite.passed > .runnable-wrapper {
+        border-left: 10px solid #4FBD5D;
       }
 
       &.failed > .runnable-wrapper {
