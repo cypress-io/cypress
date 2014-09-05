@@ -1,6 +1,6 @@
 .commands-container {
-  margin: 5px 30px 5px 20px;
-  background-color: #343644;
+  margin: 5px 10px 5px 15px;
+  background-color: #eef1f4;
   color: #bcbccc;
   padding: 1px;
 
@@ -13,8 +13,12 @@
     margin: 0;
 
     &:hover:not(.command-cloned) {
-      background-color: #3b3f50;
+      background-color: #EDEFF4;
       cursor: pointer;
+    }
+
+    &:hover .command-controls i {
+      visibility: visible;
     }
 
     &.active {
@@ -23,7 +27,7 @@
   }
 
   .command-parent {
-    border-top: 1px solid #3f3f4f;
+    border-top: 1px solid #efefef;
 
     &:first-child {
       border-top: 0;
@@ -58,7 +62,7 @@
     float: left;
     min-width: 80px;
     font-weight: 600;
-    color: #888888;
+    color: #565554;
     // @include text-overflow;
   }
 
@@ -80,7 +84,7 @@
     // background-color: mix(#E0C85E, #383838, 10%);
 
     .command-method {
-      color: #a0dFcf;
+      color: #565554;
     }
   }
 
@@ -88,41 +92,46 @@
     // background-color: mix(#80B0FF, #383838, 10%);
 
     .command-method {
-      color: #888888;
+      color: #565554;
     }
 
     .command-selector {
-      color: #888888;
+      color: #565554;
     }
   }
 
   .command-type-dom-action {
     .command-method {
-      color: #888888;
+      color: #565554;
     }
 
     .command-sequence {
-      color: #888;
+      color: #565554;
     }
   }
 
   .command-type-assertion {
     .command-method {
-      color: #afd4AD;
+      span {
+        background-color: #00a500;
+        color: white;
+        border-radius: 2px;
+        padding: 0 2px;
+      }
     }
 
     .command-message {
-      color: #afd4AD;
+      color: #00a500;
     }
   }
 
   .command-type-assertion-failed {
     .command-method {
-      color: lighten(#E94B3B, 10%);
+      color: #565554;
     }
 
     .command-message {
-      color: lighten(#E94B3B, 10%);
+      color: #565554;
     }
   }
 
@@ -131,33 +140,40 @@
   .command-request,
   .command-response,
   .command-message {
-    display: block;
-    margin-left: 80px;
+    display: inline-block;
+    margin-left: 0;
     width: 65%;
   }
 
   .command-request {
-    color: #a0dFcf;
-    word-wrap: break-word
+    color: #565554;
+    height: 17px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &:before {
+      content: ''; /* IE9 ellipsis fix */
+    }
   }
 
   .command-response {
 
     i.fa-ellipsis-h {
       color: #fff;
-      background-color: #555;
+      background-color: #888;
       border-radius: 3px;
       padding: 0 4px;
     }
 
     .command-status {
-      font-weight: 300;
-      color: #ddd;
+      font-weight: 700;
+      color: #565554;
       margin-right: 3px;
     }
 
     .command-body {
-      color: #ddd;
+      color: #565554;
     }
   }
 
@@ -168,12 +184,14 @@
 
     i {
       padding: 2px;
-      color: #777;
+      color: #3f7bA1;
+      visibility: hidden;
     }
 
+
     i:hover {
-      color: #DDD;
       cursor: pointer;
+
     }
 
     .fa-pause {

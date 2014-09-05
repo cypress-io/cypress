@@ -1,5 +1,7 @@
 <div class="command-wrapper">
-  <span class="command-method"><%= @method %></span>
+  <span class="command-method">
+    <span><%= @method %></span>
+  </span>
   <span class="command-message">
     <%= @message %>
   </span>
