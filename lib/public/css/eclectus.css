@@ -3449,7 +3449,7 @@ code, kbd, pre, samp {
     .commands-container > li:hover .command-controls i {
       visibility: visible; }
     .commands-container > li.active {
-      background-color: #515151 !important; }
+      background-color: #EDEFF4 !important; }
   .commands-container .command-parent {
     border-top: 1px solid #efefef; }
     .commands-container .command-parent:first-child {
