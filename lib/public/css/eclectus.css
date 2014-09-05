@@ -3708,9 +3708,9 @@ code, kbd, pre, samp {
         #test-specs ul.runnables li.runnable.hover > .runnable-wrapper .runnable-controls i {
           visibility: visible !important; }
       #test-specs ul.runnables li.runnable.active {
-        background-color: #4A4A4A; }
+        background-color: #f7f8f9; }
         #test-specs ul.runnables li.runnable.active .runnables .runnable-wrapper {
-          background-color: #4A4A4A;
+          background-color: #f7f8f9;
           border-left: 1px solid transparent; }
       #test-specs ul.runnables li.runnable .suite-state, #test-specs ul.runnables li.runnable .test-state {
         width: 12px;
