@@ -1,10 +1,15 @@
 #organize-page {
   h4 {
-    margin: 0;
+    // margin: 0;
+
+    i {
+      font-size: 80%;
+    }
+
   }
 
   ul {
-    margin: 5px 0 5px 10px;
+    margin: 5px 0 5px 7px;
     padding-left: 11px;
 
     & > li > ul h4 {
