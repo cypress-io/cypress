@@ -3470,7 +3470,6 @@ code, kbd, pre, samp {
     display: inline-block;
     text-transform: uppercase;
     font-size: 11px;
-    letter-spacing: .6px;
     float: left;
     min-width: 80px;
     font-weight: 600;
@@ -3498,12 +3497,13 @@ code, kbd, pre, samp {
   .commands-container .command-type-dom-action .command-sequence {
     color: #565554; }
   .commands-container .command-type-assertion .command-method span {
-    background-color: #00a500;
+    background-color: #08c18d;
     color: white;
     border-radius: 2px;
-    padding: 0 2px; }
+    padding: 0 3px;
+    font-size: 10px; }
   .commands-container .command-type-assertion .command-message {
-    color: #00a500; }
+    color: #08c18d; }
   .commands-container .command-type-assertion-failed .command-method {
     color: #565554; }
   .commands-container .command-type-assertion-failed .command-message {
@@ -3700,8 +3700,8 @@ code, kbd, pre, samp {
         #test-specs ul.runnables li.runnable pre:empty {
           display: none; }
         #test-specs ul.runnables li.runnable pre.test-error {
-          background-color: #FFFEEE;
-          border-left: 5px solid #E94B3B; }
+          background-color: #ffffee;
+          border-left: 5px solid #e94f5f; }
       #test-specs ul.runnables li.runnable.hover {
         background-color: #f7f8f9;
         cursor: pointer; }
@@ -3726,18 +3726,18 @@ code, kbd, pre, samp {
       #test-specs ul.runnables li.runnable.processing > .runnable-wrapper .test-state i {
         color: #888; }
       #test-specs ul.runnables li.runnable.test.failed > .runnable-wrapper {
-        border-left: 10px solid #E94B3B; }
+        border-left: 10px solid #e94f5f; }
       #test-specs ul.runnables li.runnable.suite.failed > .runnable-wrapper {
-        border-left: 10px solid #E94B3B; }
+        border-left: 10px solid #e94f5f; }
       #test-specs ul.runnables li.runnable.test.passed > .runnable-wrapper {
-        border-left: 10px solid #4FBD5D; }
+        border-left: 10px solid #08c18d; }
       #test-specs ul.runnables li.runnable.suite.passed > .runnable-wrapper {
-        border-left: 10px solid #4FBD5D; }
+        border-left: 10px solid #08c18d; }
       #test-specs ul.runnables li.runnable.failed > .runnable-wrapper pre {
-        color: #ff5f4f; }
+        color: #e94f5f; }
       #test-specs ul.runnables li.runnable.failed > .runnable-wrapper .suite-title i {
         border-radius: 3px;
-        background-color: #ea5344;
+        background-color: #e94f5f;
         color: #FFF;
         padding: 0 4px 0 3px;
         font-size: 10px;
@@ -3747,7 +3747,7 @@ code, kbd, pre, samp {
       #test-specs ul.runnables li.runnable.failed > .runnable-wrapper label {
         text-transform: uppercase; }
       #test-specs ul.runnables li.runnable.passed > .runnable-wrapper .test-state i {
-        color: #23AE89; }
+        color: #08c18d; }
       #test-specs ul.runnables li.runnable.pending > .runnable-wrapper .test-title {
         color: #a6c8e6; }
       #test-specs ul.runnables li.runnable.pending > .runnable-wrapper .test-state i {
@@ -3795,10 +3795,10 @@ code, kbd, pre, samp {
     #header-container #chosen-runnable label {
       cursor: pointer; }
 
-#organize-page h4 {
-  margin: 0; }
+#organize-page h4 i {
+  font-size: 80%; }
 #organize-page ul {
-  margin: 5px 0 5px 10px;
+  margin: 5px 0 5px 7px;
   padding-left: 11px; }
   #organize-page ul > li > ul h4 {
     font-size: 125%; }
