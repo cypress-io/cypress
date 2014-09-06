@@ -3164,7 +3164,7 @@ code, kbd, pre, samp {
   font-size: 13px;
   font-weight: 200;
   line-height: 21px;
-  padding: 30px;
+  padding: 0 30px;
   margin-top: 0;
   float: left;
   width: 100%; }
@@ -3797,6 +3797,8 @@ code, kbd, pre, samp {
 
 #organize-page h4 i {
   font-size: 80%; }
+#organize-page .block-panel {
+  padding: 10px; }
 #organize-page ul {
   margin: 5px 0 5px 7px;
   padding-left: 11px; }
