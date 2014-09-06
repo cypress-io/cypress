@@ -114,8 +114,8 @@
         }
 
         &.test-error {
-          background-color: #FFFEEE;
-          border-left: 5px solid #E94B3B;
+          background-color: $yellow-lightest;
+          border-left: 5px solid $fail;
         }
       }
 
@@ -165,30 +165,30 @@
       }
 
       &.test.failed > .runnable-wrapper {
-        border-left: 10px solid #E94B3B;
+        border-left: 10px solid $fail;
       }
 
 
       &.suite.failed > .runnable-wrapper {
-        border-left: 10px solid #E94B3B;
+        border-left: 10px solid $fail;
       }
 
       &.test.passed > .runnable-wrapper {
-        border-left: 10px solid #4FBD5D;
+        border-left: 10px solid $pass;
       }
 
       &.suite.passed > .runnable-wrapper {
-        border-left: 10px solid #4FBD5D;
+        border-left: 10px solid $pass;
       }
 
       &.failed > .runnable-wrapper {
         pre {
-          color: #ff5f4f;
+          color: $fail;
         }
 
         .suite-title i {
           border-radius: 3px;
-          background-color: lighten(#E94B3B, 2%);
+          background-color: $fail;
           color: #FFF;
           padding: 0 4px 0 3px;
           font-size: 10px;
@@ -212,7 +212,7 @@
 
         .test-state i {
           @extend .#{$fa-css-prefix}-check;
-          color: #23AE89;
+          color: $pass;
         }
       }
 
