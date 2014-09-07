@@ -34,6 +34,6 @@
     App.startHistory()
 
     ## navigate to /tests if there is no current route
-    App.visit(App.rootRoute) if not App.currentRoute()
+    App.visit(App.rootRoute, trigger: true) if not App.currentRoute()
 
   return App
