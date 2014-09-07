@@ -18,7 +18,7 @@
   bottom: 0;
 
   #specs-container {
-    background-color: #3C3E43;
+    background-color: #eee;
     padding-left: 0;
     border-left: 1px solid #191919;
     width: 100%;
@@ -26,7 +26,7 @@
     overflow: auto;
 
     #specs-list {
-      box-shadow: 0 1px 2px #373737;
+      box-shadow: 0 1px 2px #aaa;
       margin-bottom: 100px;
     }
 
@@ -39,13 +39,21 @@
     }
   }
 
+  #specs-list>.suite>.runnable-wrapper:first-child {
+
+    .suite-title {
+      font-weight: bold;
+    }
+
+  }
+
   ul.runnables {
     padding-left: 0;
 
     li.runnable {
       width: 100%;
-      color: #ddd;
-      background-color: lighten(#3C3E43, 3%);
+      color: #6B6C6B;
+      background-color: #fdfdfd;
       overflow: auto;
       line-height: 18px;
       padding-left: 0;
@@ -54,6 +62,8 @@
         padding: 5px;
         position: relative;
         overflow: hidden;
+        border-left: 10px solid transparent;
+
 
         .runnable-content-region {
           overflow: auto;
@@ -66,7 +76,7 @@
             overflow: hidden;
 
             .suite-title {
-              color: #9f9f9f;
+              color: #6B6C6B;
             }
           }
 
@@ -83,7 +93,7 @@
               font-size: 15px;
 
               &:hover {
-                color: #DDD;
+                // color: #DDD;
               }
             }
           }
@@ -95,17 +105,22 @@
         margin-bottom: 0;
         padding-bottom: 2px;
         padding-top: 2px;
-        margin-left: 18px;
+        padding-left: 10px;
         white-space: pre-wrap;
         clear: both;
 
         &:empty {
           display: none;
         }
+
+        &.test-error {
+          background-color: $yellow-lightest;
+          border-left: 5px solid $fail;
+        }
       }
 
       &.hover {
-        background-color: lighten(#3C3E43, 5%);
+        background-color: #f7f8f9;
         cursor: pointer;
 
         &>.runnable-wrapper .runnable-controls i {
@@ -114,11 +129,11 @@
       }
 
       &.active {
-        background-color: #4A4A4A;
+        background-color: #f7f8f9;
         // box-shadow: 0 1px 3px #555 inset;
 
         .runnables .runnable-wrapper {
-          background-color: #4A4A4A;
+          background-color: #f7f8f9;
           border-left: 1px solid transparent;
           // box-shadow: 0 1px 3px #555 inset;
         }
@@ -136,8 +151,8 @@
 
         i {
           padding-left: 2px;
-          font-size: 16px;
-          color: #999;
+          font-size: 14px;
+          color: #bbbcbd;
         }
       }
 
@@ -150,17 +165,30 @@
       }
 
       &.test.failed > .runnable-wrapper {
-        border-left: 2px solid #E94B3B;
+        border-left: 10px solid $fail;
+      }
+
+
+      &.suite.failed > .runnable-wrapper {
+        border-left: 10px solid $fail;
+      }
+
+      &.test.passed > .runnable-wrapper {
+        border-left: 10px solid $pass;
+      }
+
+      &.suite.passed > .runnable-wrapper {
+        border-left: 10px solid $pass;
       }
 
       &.failed > .runnable-wrapper {
         pre {
-          color: #ff5f4f;
+          color: $fail;
         }
 
         .suite-title i {
           border-radius: 3px;
-          background-color: lighten(#E94B3B, 2%);
+          background-color: $fail;
           color: #FFF;
           padding: 0 4px 0 3px;
           font-size: 10px;
@@ -184,7 +212,7 @@
 
         .test-state i {
           @extend .#{$fa-css-prefix}-check;
-          color: #23AE89;
+          color: $pass;
         }
       }
 
