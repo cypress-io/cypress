@@ -1,8 +1,8 @@
 @App.module "Utilities", (Utilities, App, Backbone, Marionette, $, _) ->
 
   _.extend App,
-    visit: (route) ->
-      Backbone.history.navigate route
+    visit: (route, options = {}) ->
+      Backbone.history.navigate route, options
 
     currentRoute: ->
       Backbone.history.fragment or null
