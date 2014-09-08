@@ -2,14 +2,15 @@
   margin: 5px 10px 5px 15px;
   background-color: #eef1f4;
   color: #bcbccc;
-  padding: 1px;
+  padding: 0;
+  padding-bottom: 4px;
 
   &:empty {
     display: none;
   }
 
   &>li {
-    padding: 4px 9px 4px 20px;
+    padding: 0 9px 0 20px;
     margin: 0;
 
     &:hover:not(.command-cloned) {
@@ -27,7 +28,9 @@
   }
 
   .command-parent {
-    border-top: 1px solid #efefef;
+    border-top: 1px solid #e3e3e3;
+    padding-top: 4px;
+    margin-top: 4px;
 
     &:first-child {
       border-top: 0;

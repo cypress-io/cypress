@@ -3437,11 +3437,12 @@ code, kbd, pre, samp {
   margin: 5px 10px 5px 15px;
   background-color: #eef1f4;
   color: #bcbccc;
-  padding: 1px; }
+  padding: 0;
+  padding-bottom: 4px; }
   .commands-container:empty {
     display: none; }
   .commands-container > li {
-    padding: 4px 9px 4px 20px;
+    padding: 0 9px 0 20px;
     margin: 0; }
     .commands-container > li:hover:not(.command-cloned) {
       background-color: #EDEFF4;
@@ -3451,7 +3452,9 @@ code, kbd, pre, samp {
     .commands-container > li.active {
       background-color: #EDEFF4 !important; }
   .commands-container .command-parent {
-    border-top: 1px solid #efefef; }
+    border-top: 1px solid #e3e3e3;
+    padding-top: 4px;
+    margin-top: 4px; }
     .commands-container .command-parent:first-child {
       border-top: 0; }
   .commands-container .command-child .command-method:before {
