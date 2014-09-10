@@ -3539,6 +3539,10 @@ code, kbd, pre, samp {
     margin-right: 3px; }
   .commands-container .command-response .command-body {
     color: #565554; }
+  .commands-container .command-response .fa-circle.successful {
+    color: #428BCA; }
+  .commands-container .command-response .fa-circle.bad {
+    color: #F0AD4E; }
   .commands-container .command-controls {
     position: absolute;
     top: 0;

@@ -2,10 +2,12 @@
   <span class="command-method"><%= @method %></span>
   <% if @response?: %>
     <span class="command-response">
-      <i class="fa fa-circle"></i>
-      <span class="command-status">
-        <%= @status %>
-      </span>
+      <% if @status?: %>
+        <i class="fa fa-circle <%= if @status is 200 then 'successful' else if 404 then 'bad' else '' %>"></i>
+        <span class="command-status">
+          <%= @status %>
+        </span>
+      <% end %>
       <span class="command-body"><%= @response %></span>
       <% if @truncated: %>
         <i class="fa fa-ellipsis-h"></i>
