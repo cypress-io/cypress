@@ -2,7 +2,10 @@
   <span class="command-method"><%= @method %></span>
   <% if @response?: %>
     <span class="command-response">
-      <span class="command-status"><%= @status %></span>
+      <i class="fa fa-circle"></i>
+      <span class="command-status">
+        <%= @status %>
+      </span>
       <span class="command-body"><%= @response %></span>
       <% if @truncated: %>
         <i class="fa fa-ellipsis-h"></i>
