@@ -178,6 +178,14 @@
     .command-body {
       color: #565554;
     }
+
+    .fa-circle.successful {
+      color: #428BCA;
+
+    }
+    .fa-circle.bad {
+      color: #F0AD4E;
+    }
   }
 
   .command-controls {
