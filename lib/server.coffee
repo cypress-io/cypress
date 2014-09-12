@@ -32,8 +32,8 @@ app.set "view engine", "html"
 app.engine "html", hbs.__express
 
 app.use require("compression")()
-app.use require("morgan")(format: "dev")
-app.use require("body-parser")()
+app.use require("morgan")("dev")
+app.use require("body-parser").json()
 app.use require("method-override")()
 
 convertToAbsolutePath = (files) ->
