@@ -23,8 +23,12 @@ app.use require("method-override")()
 removeExtension = (str) ->
   str.split(".").slice(0, -1).join(".")
 
-getAllSpecs = ->
+getSpecPath = (pathName) ->
+  if /all_specs/.test(pathName) then getAllSpecs(false) else [pathName.replace(/^\//, "")]
+
+getAllSpecs = (allSpecs = true) ->
   specs = glob.sync "tests/**/*.coffee", cwd: __dirname
+  specs.unshift "tests/all_specs.coffee" if allSpecs
   _.chain(specs)
     ## remove the spec helper file
     .reject (spec) -> /spec_helper/.test(spec)
@@ -51,7 +55,7 @@ app.get "/specs/*", (req, res) ->
       res.send getSpec(spec)
     else
       res.render path.join(__dirname, "views", "spec.html"), {
-        spec: req.path
+        specs: getSpecPath(req.path)
       }
 
 app.get "/bower_components/*", (req, res) ->
