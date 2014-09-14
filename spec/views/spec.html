@@ -13,7 +13,9 @@
     <script src="/lib/public/js/eclectus.js"></script>
     <script>mocha.setup('bdd')</script>
     <script src="/specs/spec_helper.js"></script>
-    <script src="{{spec}}.js"></script>
+    {{#each specs}}
+      <script src="/{{this}}.js"></script>
+    {{/each}}
     <script>
       mocha.run();
     </script>
