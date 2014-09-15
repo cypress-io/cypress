@@ -84,6 +84,8 @@
           ## a runnable but then deleted it afterwards, then we'll incorrectly
           ## continue to grep for it.  instead we need to do a check to ensure
           ## we still have the runnable's cid which matches our chosen id
+          console.log "time: ", Date.now() - window.t
+
           _this.grep runner.getGrep(rootSuite)
 
           runSuite.call(_this, rootSuite, fn)
@@ -258,6 +260,8 @@
       @triggerLoadIframe @iframe
 
     triggerLoadIframe: (iframe, opts = {}) ->
+      window.t = Date.now()
+
       ## first we want to make sure that our last stored
       ## iframe matches the one we're receiving
       return if iframe isnt @iframe
@@ -336,7 +340,7 @@
       re = re.toString()
 
       ## continue on if this is just a regex matching anything
-      return if re is "/.*/"
+      return if @isDefaultGrep(re)
 
       ## else if this isnt /.*/ we know the user has used a .only
       ## and we need to .....
@@ -361,12 +365,14 @@
 
       return new RegExp @escapeId("[" + matches[1] + "]")
 
+    isDefaultGrep: (str) ->
+      str.toString() is "/.*/"
+
     escapeId: (id) ->
       id.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
     ## tell our runner to run our iframes mocha suite
     runIframeSuite: (iframe, contentWindow) ->
-
       ## store the current iframe
       @setIframe iframe
 
@@ -379,6 +385,10 @@
 
       ## trigger the before run event
       @trigger "before:run"
+
+      ## trigger this event if we're not using the default
+      ## grep so we can remove existing tests
+      @trigger "exclusive:test" if not @isDefaultGrep(@options.grep)
 
       ## run the suite for the iframe
       ## right before we run the root runner's suite we iterate
