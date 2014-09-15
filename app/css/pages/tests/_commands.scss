@@ -115,11 +115,14 @@
   .command-type-assertion {
     .command-method {
       span {
-        color: white;
+        color: #565554;
         border-radius: 2px;
         padding: 0 3px;
         font-size: 10px;
       }
+    }
+    .command-message {
+      color: #565554;
     }
   }
 
@@ -127,6 +130,8 @@
     & .command-method {
       & span {
         background-color: $fail;
+        color: white;
+
       }
     }
     & .command-message {
@@ -140,6 +145,8 @@
 
       span {
         background-color: $pass;
+        color: white;
+
       }
     }
     & .command-message {
