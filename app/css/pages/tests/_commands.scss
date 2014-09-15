@@ -115,28 +115,45 @@
   .command-type-assertion {
     .command-method {
       span {
-        background-color: $pass;
-        color: white;
+        color: #565554;
         border-radius: 2px;
         padding: 0 3px;
         font-size: 10px;
       }
     }
-
     .command-message {
-      color: $pass;
+      color: #565554;
     }
   }
 
   .command-type-assertion-failed {
-    .command-method {
-      color: #565554;
-    }
+    & .command-method {
+      & span {
+        background-color: $fail;
+        color: white;
 
-    .command-message {
-      color: #565554;
+      }
+    }
+    & .command-message {
+      color: $fail;
     }
   }
+
+  .command-type-assertion-passed {
+    & .command-method {
+      color: $pass;
+
+      span {
+        background-color: $pass;
+        color: white;
+
+      }
+    }
+    & .command-message {
+      color: $pass;
+    }
+  }
+
 
   .command-selector,
   .command-sequence,
