@@ -3500,17 +3500,24 @@ code, kbd, pre, samp {
   .commands-container .command-type-dom-action .command-sequence {
     color: #565554; }
   .commands-container .command-type-assertion .command-method span {
-    background-color: #08c18d;
-    color: white;
+    color: #565554;
     border-radius: 2px;
     padding: 0 3px;
     font-size: 10px; }
   .commands-container .command-type-assertion .command-message {
-    color: #08c18d; }
-  .commands-container .command-type-assertion-failed .command-method {
     color: #565554; }
+  .commands-container .command-type-assertion-failed .command-method span {
+    background-color: #e94f5f;
+    color: white; }
   .commands-container .command-type-assertion-failed .command-message {
-    color: #565554; }
+    color: #e94f5f; }
+  .commands-container .command-type-assertion-passed .command-method {
+    color: #08c18d; }
+    .commands-container .command-type-assertion-passed .command-method span {
+      background-color: #08c18d;
+      color: white; }
+  .commands-container .command-type-assertion-passed .command-message {
+    color: #08c18d; }
   .commands-container .command-selector,
   .commands-container .command-sequence,
   .commands-container .command-request,
