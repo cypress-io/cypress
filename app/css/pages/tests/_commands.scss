@@ -124,26 +124,25 @@
   }
 
   .command-type-assertion-failed {
-    .command-method {
-
-      span {
+    & .command-method {
+      & span {
         background-color: $fail;
       }
     }
-    .command-message {
+    & .command-message {
       color: $fail;
     }
   }
 
   .command-type-assertion-passed {
-    .command-method {
+    & .command-method {
       color: $pass;
 
       span {
         background-color: $pass;
       }
     }
-    .command-message {
+    & .command-message {
       color: $pass;
     }
   }
