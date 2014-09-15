@@ -10,6 +10,8 @@ _.str     = require("underscore.string")
 chokidar  = require("chokidar")
 mkdirp    = require('mkdirp')
 url       = require("url")
+spawn     = require("child_process").spawn
+phantom   = require("node-phantom")
 
 _.mixin _.str.exports()
 
@@ -122,8 +124,40 @@ appendTestId = (spec, title, id) ->
       app.disable("editFileMode")
     , 1000
 
+phantomjs = (filepath, cb) ->
+  cmd = path.join __dirname, "id_generator.coffee"
+
+  t = Date.now()
+
+  p = spawn "phantomjs", [cmd, "http://localhost:#{app.get('port')}/id_generator/#{filepath}"]
+  p.stdout.pipe process.stdout
+  p.stderr.pipe process.stderr
+  p.on 'exit', (code) ->
+    t = Date.now() - t
+    console.log "exit", code, "time: ", t
+    cb(code)
+
+  # phantom.create (err, ph) ->
+  #   console.log "phantom create"
+  #   ph.createPage (err, page) ->
+  #     console.log "phantom createPage"
+  #     page.open "http://www.google.com", (err, status) ->
+  #       console.log "opened", status
+  #       ph.exit()
+
+  # process.env["TZ"] = "America/New_York"
+  # cmd = path.join __dirname, "..", "node_modules/mocha-phantomjs/lib/mocha-phantomjs.coffee"
+  # phantomjs = spawn "phantomjs", [cmd, "http://localhost:#{app.get('port')}/id_generator/#{filepath}"]
+  # phantomjs.stdout.pipe process.stdout
+  # phantomjs.stderr.pipe process.stderr
+  # phantomjs.on 'exit', (code) ->
+  #   console.log "exit", code
+  #   cb(code)
+  #   process.exit(code)
+
 io.on "connection", (socket) ->
   socket.on "generate:test:id", (data, fn) ->
+    console.log "generate:test:id", data
     { spec, title } = data
 
     id = generateId()
@@ -157,6 +191,8 @@ io.on "connection", (socket) ->
     ## strip out our testFolder path from the filepath, and any leading forward slashes
     filepath  = filepath.replace(testFolder, "").replace(/^\/+/, "")#split("/")
 
+    ## run this file through phantomjs and make sure we have id's for everything
+    # phantomjs filepath, ->
     socket.emit "test:changed", file: filepath
 
   watchCssFiles = chokidar.watch path.join(__dirname, "public", "css"), ignored: (path, stats) ->
@@ -209,6 +245,14 @@ app.use "/eclectus", express.static(__dirname + "/public")
 ## routing for the actual specs which are processed automatically
 ## this could be just a regular .js file or a .coffee file
 app.get "/tests/*", (req, res) ->
+  test = req.params[0]
+
+  res.type "js"
+  res.send getTest(test)
+
+## this serves the html file which is stripped down
+## to generate the id's for the test files
+app.get "/id_generator/*", (req, res) ->
   test = req.params[0]
 
   res.type "js"
