@@ -64,9 +64,12 @@
       ## grab a list of current runnable ids
       ids = @pluck("id")
 
-      _(@previousRunnables).each (runnable) ->
+      ## iterate in reverse since we're splicing out ones that dont exist anymore
+      for runnable, index in @previousRunnables by -1
         ## remove it if its id isnt in our current runnables
-        runnable.remove() if runnable.id not in ids
+        if runnable.id not in ids
+          runnable.remove()
+          @previousRunnables.splice(index, 1)
 
     insertIntoExistingParentOrRoot: (model, root) ->
       ## if our parent exists add the runnable model to it
@@ -84,7 +87,7 @@
         root.addRunnable model
 
   ## mixin underscore methods
-  _.each ["each", "pluck"], (method) ->
+  _.each ["each", "pluck", "indexOf"], (method) ->
     Entities.Container.prototype[method] = (args...) ->
       args.unshift(@currentRunnables)
       _[method].apply(_, args)

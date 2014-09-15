@@ -35,7 +35,7 @@
         ## and reset all existing one
         container.reset()
 
-      @listenTo runner, "after:run", ->
+      @listenTo runner, "exclusive:test after:run", ->
         ## removes any old models no longer in our run
         container.removeOldModels()
 
