@@ -12,9 +12,9 @@ do (parent = window.opener or window.parent) ->
   window.should = chai.should()
   window.assert = chai.assert
 
-  ## create our own mocha objects from our parents
-  window.Mocha = Object.create(parent.Mocha)
-  window.mocha = Object.create(parent.mocha)
+  ## create our own mocha objects from our parents if its not already defined
+  window.Mocha ?= Object.create(parent.Mocha)
+  window.mocha ?= Object.create(parent.mocha)
 
   ## In order to isolate top-level before/beforeEach hooks,
   ## the specs in each iframe are wrapped in an anonymous suite.
