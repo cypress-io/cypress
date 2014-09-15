@@ -66,8 +66,8 @@ app.get "/lib/*", (req, res) ->
   res.sendFile path.join("lib", req.params[0]),
     root: path.join(__dirname, "..")
 
-app.get "/fixtures/:fixture", (req, res) ->
-  res.sendFile "fixtures/#{req.params.fixture}",
+app.get "/fixtures/*", (req, res) ->
+  res.sendFile "fixtures/#{req.params[0]}",
     root: __dirname
 
 app.get "/", (req, res) ->
