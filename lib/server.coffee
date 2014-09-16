@@ -12,6 +12,12 @@ mkdirp    = require('mkdirp')
 url       = require("url")
 spawn     = require("child_process").spawn
 phantom   = require("node-phantom")
+# ph = null
+
+# do ->
+#   phantom.create (err, phInstance) ->
+#     console.log "PhantomJS ready..."
+#     ph = phInstance
 
 _.mixin _.str.exports()
 
@@ -113,47 +119,26 @@ appendTestId = (spec, title, id) ->
 
     ## enable editFileMode which prevents us from sending out test:changed events
     app.enable("editFileMode")
-
-    ## write the actual contents to the file
-    fs.writeFileSync specFile, contents
-
-    ## remove the editFileMode so we emit file changes again
-    ## if we're still in edit file mode then wait 1 second and disable it
-    ## chokidar doesnt instantly see file changes so we have to wait
-    _.delay ->
-      app.disable("editFileMode")
-    , 1000
-
 phantomjs = (filepath, cb) ->
-  cmd = path.join __dirname, "id_generator.coffee"
+  # cmd = path.join __dirname, "id_generator.coffee"
 
-  t = Date.now()
+  # t = Date.now()
 
-  p = spawn "phantomjs", [cmd, "http://localhost:#{app.get('port')}/id_generator/#{filepath}"]
-  p.stdout.pipe process.stdout
-  p.stderr.pipe process.stderr
-  p.on 'exit', (code) ->
-    t = Date.now() - t
-    console.log "exit", code, "time: ", t
-    cb(code)
-
-  # phantom.create (err, ph) ->
-  #   console.log "phantom create"
-  #   ph.createPage (err, page) ->
-  #     console.log "phantom createPage"
-  #     page.open "http://www.google.com", (err, status) ->
-  #       console.log "opened", status
-  #       ph.exit()
-
-  # process.env["TZ"] = "America/New_York"
-  # cmd = path.join __dirname, "..", "node_modules/mocha-phantomjs/lib/mocha-phantomjs.coffee"
-  # phantomjs = spawn "phantomjs", [cmd, "http://localhost:#{app.get('port')}/id_generator/#{filepath}"]
-  # phantomjs.stdout.pipe process.stdout
-  # phantomjs.stderr.pipe process.stderr
-  # phantomjs.on 'exit', (code) ->
-  #   console.log "exit", code
+  # p = spawn "phantomjs", [cmd, "http://localhost:#{app.get('port')}/id_generator/#{filepath}"]
+  # p.stdout.pipe process.stdout
+  # p.stderr.pipe process.stderr
+  # p.on 'exit', (code) ->
+  #   t = Date.now() - t
+  #   console.log "exit", code, "time: ", t
   #   cb(code)
-  #   process.exit(code)
+
+  ph.createPage (err, page) ->
+    t = Date.now()
+    pathToPage = "http://localhost:#{app.get('port')}/id_generator/#{filepath}"
+    page.open pathToPage, (err, status) ->
+      console.log "opened: ", pathToPage, "time: ", Date.now() - t
+      cb()
+  #       ph.exit()
 
 io.on "connection", (socket) ->
   socket.on "generate:test:id", (data, fn) ->
