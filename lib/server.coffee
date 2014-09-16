@@ -12,6 +12,8 @@ mkdirp    = require('mkdirp')
 url       = require("url")
 spawn     = require("child_process").spawn
 phantom   = require("node-phantom")
+mocha     = require("./mocha.coffee")
+
 # ph = null
 
 # do ->
@@ -21,9 +23,9 @@ phantom   = require("node-phantom")
 
 _.mixin _.str.exports()
 
-app       = express()
-server    = http.Server(app)
-io        = require("socket.io")(server)
+global.app  = express()
+server      = http.Server(app)
+io          = require("socket.io")(server)
 
 ## set the eclectus config from the eclectus.json file
 app.set "eclectus", JSON.parse(fs.readFileSync("eclectus.json", encoding: "utf8")).eclectus
@@ -89,36 +91,6 @@ getTest = (spec) ->
 
   return file
 
-escapeRegExp = (str) ->
-  str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-
-alphabet = "abcdefghijklmnopqrstuvwxyz0123456789"
-
-getRandom = (alphabet) ->
-  index = Math.floor(Math.random() * alphabet.length)
-  alphabet[index]
-
-generateId = ->
-  ids = _(3).times -> getRandom(alphabet)
-  ids.join("")
-
-appendTestId = (spec, title, id) ->
-  specFile = path.join(testFolder, spec)
-  contents = fs.readFileSync specFile, "utf8"
-  re = new RegExp "['\"](" + escapeRegExp(title) + ")['\"]"
-
-  # ## if the string is found and it doesnt have an id
-  matches = re.exec contents
-
-  ## matches[1] will be the captured group which is the title
-  if matches
-    ## position is the string index where we first find the capture
-    ## group and include its length, so we insert right after it
-    position = matches.index + matches[1].length + 1
-    contents = _(contents).insert position, " [#{id}]"
-
-    ## enable editFileMode which prevents us from sending out test:changed events
-    app.enable("editFileMode")
 phantomjs = (filepath, cb) ->
   # cmd = path.join __dirname, "id_generator.coffee"
 
@@ -141,15 +113,6 @@ phantomjs = (filepath, cb) ->
   #       ph.exit()
 
 io.on "connection", (socket) ->
-  socket.on "generate:test:id", (data, fn) ->
-    console.log "generate:test:id", data
-    { spec, title } = data
-
-    id = generateId()
-
-    appendTestId(spec, title, id)
-    fn(id)
-
   #, ignoreInitial: true
   watchTestFiles = chokidar.watch testFolder, ignored: (path, stats) ->
     ## this fn gets called twice, once with the directory
@@ -174,11 +137,14 @@ io.on "connection", (socket) ->
     return if app.enabled("editFileMode")
 
     ## strip out our testFolder path from the filepath, and any leading forward slashes
-    filepath  = filepath.replace(testFolder, "").replace(/^\/+/, "")#split("/")
+    strippedPath  = filepath.replace(testFolder, "").replace(/^\/+/, "")#split("/")
 
     ## run this file through phantomjs and make sure we have id's for everything
     # phantomjs filepath, ->
-    socket.emit "test:changed", file: filepath
+      # socket.emit "test:changed", file: filepath
+
+    mocha.generateIds filepath, strippedPath, app, ->
+      socket.emit "test:changed", file: strippedPath
 
   watchCssFiles = chokidar.watch path.join(__dirname, "public", "css"), ignored: (path, stats) ->
     return false if fs.statSync(path).isDirectory()

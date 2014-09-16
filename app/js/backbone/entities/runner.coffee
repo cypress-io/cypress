@@ -71,34 +71,27 @@
         ## to bail early if this isnt the root suite
         return runSuite.call(@, rootSuite, fn) if not rootSuite.root
 
-        generatedIds = []
+        runner.iterateThroughRunnables rootSuite
 
-        runner.iterateThroughRunnables rootSuite, generatedIds, socket
+        ## grep for the correct test / suite by its id if chosenId is set
+        ## or all the tests
+        ## we need to grep at the last possible moment because if we've chosen
+        ## a runnable but then deleted it afterwards, then we'll incorrectly
+        ## continue to grep for it.  instead we need to do a check to ensure
+        ## we still have the runnable's cid which matches our chosen id
+        @grep runner.getGrep(rootSuite)
 
-        _this = @
-
-        $.when(generatedIds...).done ->
-          ## grep for the correct test / suite by its id if chosenId is set
-          ## or all the tests
-          ## we need to grep at the last possible moment because if we've chosen
-          ## a runnable but then deleted it afterwards, then we'll incorrectly
-          ## continue to grep for it.  instead we need to do a check to ensure
-          ## we still have the runnable's cid which matches our chosen id
-          console.log "time: ", Date.now() - window.t
-
-          _this.grep runner.getGrep(rootSuite)
-
-          runSuite.call(_this, rootSuite, fn)
+        runSuite.call(@, rootSuite, fn)
 
     ## iterates through both the runnables tests + suites if it has any
-    iterateThroughRunnables: (runnable, ids, socket) ->
+    iterateThroughRunnables: (runnable) ->
       _.each [runnable.tests, runnable.suites], (array) =>
         _.each array, (runnable) =>
-          @generateId runnable, ids, socket
+          @generateId runnable
 
     ## generates an id for each runnable and then continues iterating
     ## on children tests + suites
-    generateId: (runnable, ids = [], socket) ->
+    generateId: (runnable) ->
       ## iterating on both the test and its parent (the suite)
       ## bail if we're the root runnable
       ## or we've already processed this tests parent
@@ -113,66 +106,39 @@
       runnable.originalTitle = ->
         @title.replace runner.getIdToAppend(runnable.cid), ""
 
-      df = $.Deferred()
+      ## dont fire duplicate events if this is already fired
+      ## its 'been added' event
+      return if runnable.added
 
-      ## when we're done getting our cid
-      ## or if we already have it
-      df.done ->
-        ## dont fire duplicate events if this is already fired
-        ## its 'been added' event
-        return if runnable.added
+      runnable.added = true
 
-        runnable.added = true
+      ## tests have a runnable of 'test' whereas suites do not have a runnable property
+      event = runnable.type or "suite"
 
-        ## tests have a runnable of 'test' whereas suites do not have a runnable property
-        event = runnable.type or "suite"
+      ## we need to change our strategy of displaying runnables
+      ## if grep is set (runner.options.grep)  that means the user
+      ## has written a .only on a suite or a test, and in that case
+      ## we dont want to display the tests or suites unless they match
+      ## our grep.
+      grep = runner.options?.grep
 
-        ## we need to change our strategy of displaying runnables
-        ## if grep is set (runner.options.grep)  that means the user
-        ## has written a .only on a suite or a test, and in that case
-        ## we dont want to display the tests or suites unless they match
-        ## our grep.
-        grep = runner.options?.grep
+      ## grep will always be set to something here... even /.*/
 
-        ## grep will always be set to something here... even /.*/
+      ## trigger the add events so our UI can begin displaying
+      ## the tests + suites
+      if grep and event is "suite"
+        count = 0
+        runnable.eachTest (test) ->
+          count += 1 if grep.test(test.fullTitle())
+        runner.trigger "suite:add", runnable if count > 0
 
-        ## trigger the add events so our UI can begin displaying
-        ## the tests + suites
-        if grep and event is "suite"
-          count = 0
-          runnable.eachTest (test) ->
-            count += 1 if grep.test(test.fullTitle())
-          runner.trigger "suite:add", runnable if count > 0
+      if grep and event is "test"
+        runner.trigger "test:add", runnable if grep.test(runnable.fullTitle())
 
-        if grep and event is "test"
-          runner.trigger "test:add", runnable if grep.test(runnable.fullTitle())
+      ## recursively apply to all tests / suites of this runnable
+      runner.iterateThroughRunnables(runnable)
 
-        ## recursively apply to all tests / suites of this runnable
-        runner.iterateThroughRunnables(runnable, ids, socket)
-
-      ## if test or suite doesnt have a cid
-      if not runnable.cid
-        ## override each test's and suite's fullTitle to include its real id
-        ## this cant use a regular client id, since when the iframe reloads
-        ## each test will have a unique id again -- this is why
-        ## you have to use client id's in the title in the
-        ## original spec
-
-        runnable.fullTitle = _.wrap runnable.fullTitle, (origTitle) ->
-          title = origTitle.apply(@)
-          title + runner.getIdToAppend(runnable.cid)
-
-        ids.push df
-
-        ## go get the id from the server via websockets
-        data = {title: runnable.title, spec: runner.iframe}
-        socket.emit "generate:test:id", data, (id) ->
-          runnable.cid = id
-          df.resolve id
-      else
-        df.resolve()
-
-      return df
+      return runnable
 
     getCommands: ->
       @commands

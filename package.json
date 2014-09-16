@@ -53,6 +53,7 @@
     "grunt-cli": "^0.1.13",
     "hbs": "^2.7.0",
     "mkdirp": "^0.5.0",
+    "mocha": "^1.21.4",
     "mocha-phantomjs": "^3.5.0",
     "node-phantom": "^0.2.5",
     "phantomjs": "^1.9.7-15",
