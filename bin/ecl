@@ -29,10 +29,14 @@ program
     // need to add the eclectus.json file to the watch list
     var server = path.join(__dirname, "..", "lib", "server.coffee")
 
-    nodemon({
-      script: server,
-      watch: [server]
-    })
+    // watch other .coffee files based on the directory our server.coffee file is in
+    // need to optionally accept a --debug argument here to put
+    // nodemon into debug mode instead of always putting in there
+    var str = "--debug --verbose --watch " + path.dirname(server) + "/*.coffee " + server
+
+    console.log("nodemon options:", str)
+
+    nodemon(str)
 
     nodemon.on("start", function(){
       console.log("app has started")
