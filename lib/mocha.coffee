@@ -3,6 +3,7 @@ jQuery    = require("jquery-deferred")
 fs        = require("fs")
 _         = require("underscore")
 path      = require("path")
+gutil     = require("gulp-util")
 
 testIdRegExp = /\[(.{3})\]$/
 
@@ -19,13 +20,15 @@ iterateThroughRunnables = (runnable, spec) ->
       generateId item, spec
 
 generateId = (runnable, spec) ->
-  return if runnable.root or runnable.added
+  return if runnable.root
 
   runnable.cid ?= getTestCid(runnable)
 
   if not runnable.cid
     data = {title: runnable.title, spec: spec}
     runnable.cid = getId(data)
+
+  iterateThroughRunnables(runnable, spec)
 
 escapeRegExp = (str) ->
   str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -90,5 +93,11 @@ module.exports =
 
     mocha.addFile filepath
 
-    mocha.run filepath
+    try
+      mocha.run filepath
+    catch e
+      gutil.beep()
+      console.log gutil.colors.yellow("There is an error in the file: "), gutil.colors.blue(filepath)
+      console.log gutil.colors.red(e.name), ": ", e.message
+
     cb()
