@@ -3,3 +3,4 @@ bower_components
 .tmp
 .sass-cache
 build/css
+lib/public
