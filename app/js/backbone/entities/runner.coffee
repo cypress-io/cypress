@@ -226,7 +226,6 @@
       @triggerLoadIframe @iframe
 
     triggerLoadIframe: (iframe, opts = {}) ->
-      window.t = Date.now()
 
       ## first we want to make sure that our last stored
       ## iframe matches the one we're receiving

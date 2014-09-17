@@ -144,7 +144,11 @@ io.on "connection", (socket) ->
       # socket.emit "test:changed", file: filepath
 
     mocha.generateIds filepath, strippedPath, app, ->
-      socket.emit "test:changed", file: strippedPath
+      ## for some reason sometimes socket.io isnt emitting
+      ## the test:changed event
+      _.defer ->
+        console.log "test:changed", filepath
+        socket.emit "test:changed", file: strippedPath
 
   watchCssFiles = chokidar.watch path.join(__dirname, "public", "css"), ignored: (path, stats) ->
     return false if fs.statSync(path).isDirectory()
