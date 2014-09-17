@@ -71,7 +71,11 @@
         ## to bail early if this isnt the root suite
         return runSuite.call(@, rootSuite, fn) if not rootSuite.root
 
+        runner.trigger "before:add"
+
         runner.iterateThroughRunnables rootSuite
+
+        runner.trigger "after:add"
 
         ## grep for the correct test / suite by its id if chosenId is set
         ## or all the tests
