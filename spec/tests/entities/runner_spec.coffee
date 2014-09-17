@@ -25,3 +25,45 @@ describe "Runner Entity", ->
       trigger = @sandbox.spy @runnerModel, "trigger"
       @runnerModel.runIframeSuite "only.html", @contentWindow
       expect(trigger).not.to.be.calledWith "exclusive:test"
+
+  context "events", ->
+    beforeEach ->
+      loadFixture("tests/events").progress (iframe) =>
+        @contentWindow = iframe.contentWindow
+        @mocha         = iframe.contentWindow.mocha
+        @runner        = iframe.contentWindow.mocha.run()
+
+    it "triggers the following events", (done) ->
+      @mocha.options.grep = /.*/
+      @runnerModel = App.request "runner:entity", @runner, @mocha.options, Eclectus.patch, Eclectus.sandbox
+      trigger = @sandbox.spy @runnerModel, "trigger"
+      @runner.on "end", ->
+        events = _(trigger.args).map (args) -> args[0]
+        debugger
+        expect(events).to.deep.eq [
+          "before:run"
+          "before:add"
+          "test:add"
+          "suite:add"
+          "test:add"
+          "after:add"
+          "suite:start"
+          "test:start"
+          "test:start"
+          "test:end"
+          "test:end"
+          "suite:start"
+          "test:start"
+          "suite:start"
+          "test:end"
+          "test:start"
+          "test:end"
+          "suite:stop"
+          "suite:stop"
+          "after:run"
+          "suite:stop"
+          "suite:stop"
+          "runner:end"
+        ]
+        done()
+      @runnerModel.runIframeSuite "events.html", @contentWindow
