@@ -53,11 +53,14 @@
 
       el.each (index, el) =>
         el = $(el)
+
+        ## bail if our el no longer exists in the parent dom
+        return if not @elExistsInDocument(dom, el)
+
         dimensions = @getDimensions(el)
 
         ## dont show anything if our element displaces nothing
-        ## or it no longer exists in the parent dom
-        return if not @elExistsInDocument(dom, el) or dimensions.width is 0 or dimensions.height is 0
+        return if dimensions.width is 0 or dimensions.height is 0
 
         _.defer =>
           $("<div>")
