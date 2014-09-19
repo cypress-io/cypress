@@ -16,7 +16,7 @@
       ## display controls if there isnt an error
       ## and this isnt a clone
       shouldDisplayControls: ->
-        not @get("error") and not @isCloned()
+        not @isCloned()
 
     initialize: ->
       new Backbone.Chooser(@)
