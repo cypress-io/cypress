@@ -39,7 +39,6 @@ describe "Runner Entity", ->
       trigger = @sandbox.spy @runnerModel, "trigger"
       @runner.on "end", ->
         events = _(trigger.args).map (args) -> args[0]
-        debugger
         expect(events).to.deep.eq [
           "before:run"
           "before:add"
