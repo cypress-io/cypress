@@ -5,6 +5,9 @@
   <% else if @selector: %>
     <span class="command-selector"><%= @selector %></span>
   <% end %>
+  <% if @length > 1: %>
+    <label title="<%= @length %> matched elements" class="label label-primary"><%= @length %></label>
+  <% end %>
   <% if @error: %>
     <span class="command-error"><%= @error %></span>
   <% end %>
