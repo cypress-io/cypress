@@ -37,7 +37,8 @@
           @$el.addClass "command-type-dom-action" if not @model.isParent()
 
         when "assertion"
-          @$el.addClass "command-type-assertion-failed" if not @model.get("passed")
+          klass = if @model.get("passed") then "passed" else "failed"
+          @$el.addClass "command-type-assertion-#{klass}"
 
       @ui.method.css "padding-left", @model.get("indent")
 
