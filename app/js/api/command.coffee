@@ -56,6 +56,8 @@ Eclectus.Command = do ($, _) ->
         id: @id
         selector: ""
         canBeParent: @canBeParent
+        dom: config.dom
+        type: config.type
 
       ## convert to a string always in case our arg was an object
       obj.selector = obj.selector.toString()
@@ -69,11 +71,10 @@ Eclectus.Command = do ($, _) ->
       @_parent = obj.parent
 
       ## add the dom to the object
-      ## if its true in the config
-      ## and its not already set
-      obj.dom ?= @getDom() if config.dom
+      ## if its true
+      obj.dom = @getDom() if obj.dom
 
-      @channel.trigger config.type, @runnable, obj if @channel
+      @channel.trigger obj.type, @runnable, obj if @channel
 
     ## walk up the 'prevObject' chain until we have an object
     ## which can be a parent
