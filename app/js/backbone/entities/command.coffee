@@ -229,17 +229,14 @@
       return command
 
     add: (attrs, type, runnable) ->
-      try
-        ## bail if we're attempting to add a real model here
-        ## instead of an object
-        ## this happens because we split up into separate collections by runnable
-        ## so this model will be added twice, once to the original collection
-        ## and twice to the runnable collection.
-        command = attrs
-        options = type
+      command = attrs
+      options = type
 
+      ## if we have both of these methods assume this is
+      ## a backbone model
+      if command and command.set and command.get
         options = @getXhrOptions(command, options) if command.get("type") is "xhr"
-        return super(command, options) if attrs instanceof Entities.Command
+        return super(command, options)
 
       return if _.isEmpty attrs
 
