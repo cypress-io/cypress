@@ -62,6 +62,7 @@
         when "xhr"        then @xhr
         when "dom"        then @el
         when "assertion"  then @getAssertion()
+        when "server"     then @getServer()
 
       _([objs]).flatten(true)
 
@@ -71,17 +72,25 @@
     getEl: ->
       @el
 
+    convertToArray: (obj) ->
+      _.reduce obj, (memo, value, key) ->
+        memo.push [key, value] if value?
+        memo
+      , []
+
     getAssertion: ->
-      obj =
+      @convertToArray
         "Subject:  ": @subject
         "Expected: ": @expected
         "Actual:   ": @actual
         "Message:  ": @get("message")
 
-      _.reduce obj, (memo, value, key) ->
-        memo.push [key, value] if value
-        memo
-      , []
+    getServer: ->
+      @convertToArray
+        "Server:    ": @server
+        "Requests:  ": @requests
+        "Responses: ": @responses
+        "Queue:     ": (@requests.length - @responses.length)
 
   class Entities.CommandsCollection extends Entities.Collection
     model: Entities.Command
@@ -134,6 +143,8 @@
         when "dom"        then @addDom attrs
         when "xhr"        then @addXhr attrs
         when "assertion"  then @addAssertion attrs
+        when "server"     then @addServer attrs
+        else throw new Error("Command .type did not match anything")
 
     insertParents: (command, parentId, options = {}) ->
       if parent = @parentExistsFor(parentId)
@@ -171,6 +182,7 @@
 
     addAssertion: (attrs) ->
       {dom, el, actual, expected, subject} = attrs
+
       attrs = _(attrs).omit "dom", "el", "actual", "expected", "subject"
 
       ## instantiate the new model
@@ -187,7 +199,6 @@
       {el, dom} = attrs
 
       attrs = _(attrs).omit "el", "dom"
-
 
       ## instantiate the new model
       command = new Entities.Command attrs
@@ -225,6 +236,19 @@
         ## set the response for it
         onSetParent: (parent) ->
           command.setResponse response
+
+      return command
+
+    addServer: (attrs) ->
+      {dom, requests, responses, server} = attrs
+
+      attrs = _(attrs).omit "requests", "responses", "server"
+
+      command = new Entities.Command attrs
+      command.dom       = dom
+      command.requests  = requests
+      command.responses = responses
+      command.server    = server
 
       return command
 

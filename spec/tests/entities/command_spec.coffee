@@ -195,3 +195,11 @@ describe "Command Entities", ->
       it "children are inserted into the correct index within the collection", ->
         commands = @runnableModel.get("commands")
         expect(commands.indexOf(@child)).to.eq 1
+
+  context "#addServer", ->
+    it "emits server command", ->
+      attrs =
+        id: "instance1"
+
+      command = @addCommand attrs, "server"
+      expect(command.get("type")).to.eq "server"

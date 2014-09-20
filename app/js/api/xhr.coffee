@@ -16,6 +16,15 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
       @canBeParent = true
 
     setServer: (@server) ->
+      @emit
+        method:       "server"
+        server:       @server
+        requests:     @requests
+        responses:    @responses
+        canBeParent:  false
+        id:           @getId()
+        type:         "server"
+
       _this = @
 
       @server.addRequest = _.wrap @server.addRequest, (addRequestOrig, xhr) ->
@@ -177,7 +186,18 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
       options.method = "DELETE"
       @stub options
 
-    respond: -> @server.respond()
+    respond: ->
+      @server.respond()
+
+      @emit
+        method:       "responses"
+        server:       @server
+        requests:     @requests
+        responses:    @responses
+        canBeParent:  false
+        finished:     true
+        id:           @getId()
+        type:         "server"
 
     onRequest: (fn) ->
       @onRequests.push fn
