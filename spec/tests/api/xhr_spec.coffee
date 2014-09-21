@@ -62,7 +62,7 @@ describe "XHR Command API", ->
 
     it "emits the request", ->
       @contentWindow.$.get "/"
-      args = @emit.getCall(0).args[0]
+      args = @emit.getCall(1).args[0]
       expect(args).deep.eq {
         method: "GET"
         url: "/"
@@ -88,7 +88,7 @@ describe "XHR Command API", ->
       Ecl.server.respond()
 
       ## get the 2nd call which is our response emit
-      args = @emit.getCall(1).args[0]
+      args = @emit.getCall(2).args[0]
 
       expect(args).to.deep.eq {
         canBeParent: false
@@ -181,8 +181,8 @@ describe "XHR Command API", ->
 
         Ecl.server.respond()
 
-      it "emits 4 events", ->
-        expect(@emit).to.have.callCount 4
+      it "emits 5 events", ->
+        expect(@emit).to.have.callCount 5
 
       it "logs all requests", ->
         expect(@server.responses).to.have.length 2
