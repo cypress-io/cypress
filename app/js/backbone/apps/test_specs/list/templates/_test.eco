@@ -4,9 +4,9 @@
   </span>
   <span class="test-title">
     <%= @title %>
-    <label class="label"></label>
   </span>
 </div>
 <div class="runnable-controls">
+  <label class="label"></label>
   <i class="fa fa-repeat"></i>
 </div>

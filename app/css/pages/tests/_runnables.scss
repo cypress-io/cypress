@@ -85,6 +85,11 @@
             float: right;
             text-align: right;
             margin-right: 7px;
+            overflow: hidden;
+
+            label {
+              padding: 2px 4px;
+            }
 
             i {
               margin: 0 2px;

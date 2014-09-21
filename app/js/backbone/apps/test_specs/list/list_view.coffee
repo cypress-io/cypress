@@ -36,10 +36,13 @@
       @model.trigger "model:double:clicked"
 
     stateChanged: (model, value, options) ->
+      @countCommands()
+
       if @model.get("type") is "test"
         ## if the test passed check on the duration
-        @checkDuration() if value is "passed"
+        # @checkDuration() if value is "passed"
         @checkTimeout() if value is "failed"
+        @checkCommands() if value is "failed"
 
     checkDuration: ->
       return if not @model.isSlow()
@@ -51,6 +54,13 @@
       return if not @model.timedOut()
 
       @ui.label.addClass("label-danger").text("Timed Out")
+
+    checkCommands: ->
+      @ui.label.removeClass("label-success").addClass("label-danger") if @model.anyCommandsFailed()
+
+    countCommands: ->
+      commands = @model.get("commands").getTotalNumber()
+      @ui.label.addClass("label-success").text(commands) if commands > 0
 
   class List.RunnableLayout extends App.Views.LayoutView
     getTemplate: ->

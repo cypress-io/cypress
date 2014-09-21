@@ -109,12 +109,14 @@
       @indexOf(command) + 1
 
     increment: (command) ->
-      command.set "number", @maxNumber() + 1
+      command.set "number", @maxNumber()
 
     maxNumber: ->
-      return 0 if not @length
-      numbers = @pluck("number")
-      Math.max _(numbers).compact()...
+      ## set to 0 if its undefined
+      @_maxNumber ?= 0
+
+      ## incremental by one
+      @_maxNumber += 1
 
     ## check to see if the last parent command
     ## is the passed in parent
@@ -186,6 +188,12 @@
       return if not command.hasParent()
 
       @getCommandIndex(command.parent)
+
+    anyFailed: ->
+      @any (command) -> command.get("error")
+
+    getTotalNumber: ->
+      @_maxNumber
 
     getXhrOptions: (command, options) ->
       ## at the very last minute we splice in this

@@ -72,6 +72,9 @@
     resetSuite: ->
       @get("children").invoke("reset")
 
+    anyCommandsFailed: ->
+      @get("commands").anyFailed()
+
     resetTest: ->
       @removeOriginalError()
 
