@@ -7,7 +7,8 @@
         when "dom"        then "test_commands/list/_dom"
         when "assertion"  then "test_commands/list/_assertion"
         when "server"     then "test_commands/list/_server"
-        else throw new Error("Command .type did not match any template")
+        else
+          throw new Error("Command .type did not match any template")
 
     ui:
       wrapper:  ".command-wrapper"
