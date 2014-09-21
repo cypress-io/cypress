@@ -65,7 +65,7 @@ Eclectus.Dom = do ($, _, Eclectus) ->
 
       return dom
 
-    within: (selector, fn) ->
+    within: (selector) ->
       if @$el
         dom             = @clone()
         dom.prevObject  = @
@@ -86,21 +86,6 @@ Eclectus.Dom = do ($, _, Eclectus) ->
       dom.emit
         selector: dom.selector
         method:   "within"
-
-      ## instead of patching all of these things here
-      ## why wouldnt we just pass this instanceId around?
-      ## that would probably work better with chaining
-      ## call this scope? instead of patch?
-      ## if obj instanceIdof Eclectus.Dom then just use that
-      ## else instatiate a new one
-      ## ----------------------------------------------
-      ## re-patch eclectus with this previous el object
-      @scope()
-
-      fn.call(dom)
-
-      ## then undo so commands after this are back to normal
-      @unscope()
 
       return dom
 

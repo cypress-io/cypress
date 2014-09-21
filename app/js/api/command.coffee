@@ -92,4 +92,6 @@ Eclectus.Command = do ($, _) ->
     clone: ->
       new @constructor(@document, @channel, @runnable)
 
+    isCommand: -> true
+
   return Command

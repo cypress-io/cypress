@@ -13,6 +13,7 @@ describe "Dom Command API", ->
       class: "iframe-spec"
       load: ->
         _this.dom = Eclectus.createDom {contentWindow: @contentWindow}
+        Eclectus.patch {contentWindow: @contentWindow}
         df.resolve()
     })
 
@@ -57,7 +58,7 @@ describe "Dom Command API", ->
 
   describe "#within", ->
     beforeEach ->
-      @dom.within "#dom", =>
+      @dom = Eclectus::within "#dom", =>
         @dom2 = Eclectus::find "#nested-find"
         @dom3 = Eclectus::within "#list", =>
           @dom4 = Eclectus::find "li"
@@ -74,6 +75,15 @@ describe "Dom Command API", ->
     context "nested method within (#within)", ->
       it "sets prevObject of dom2 to dom", ->
         expect(@dom2.prevObject).to.eq @dom
+
+    context "double within", ->
+      beforeEach ->
+        @dom = Eclectus::within "#dom", =>
+          @dom2 = Eclectus::within "#list", =>
+            @dom3 = Eclectus::find "li"
+
+      it "sets dom3 prevObject to dom2", ->
+        expect(@dom3.prevObject).to.eq @dom2
 
   describe "action methods", ->
     context "#type", ->
