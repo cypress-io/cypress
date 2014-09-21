@@ -8,6 +8,7 @@
       indent: 0
       pause: false
       revert: false
+      number: 0
 
     mutators:
       selector: ->
@@ -17,6 +18,9 @@
       ## and this isnt a clone
       shouldDisplayControls: ->
         not @isCloned()
+
+      numberFormatted: ->
+        "#{number}." if number = @get("number")
 
     initialize: ->
       new Backbone.Chooser(@)
@@ -104,6 +108,14 @@
     getCommandIndex: (command) ->
       @indexOf(command) + 1
 
+    increment: (command) ->
+      command.set "number", @maxNumber() + 1
+
+    maxNumber: ->
+      return 0 if not @length
+      numbers = @pluck("number")
+      Math.max _(numbers).compact()...
+
     ## check to see if the last parent command
     ## is the passed in parent
     lastParentCommandIsNotParent: (parent, command) ->
@@ -129,6 +141,10 @@
     cloneParent: (parent) ->
       ## get a clone of our parent but reset its id
       clone = parent.clone()
+
+      ## also remove its number
+      clone.unset "number"
+
       clone.set
         id: _.uniqueId("cloneId")
         isCloned: true
@@ -260,6 +276,10 @@
       ## a backbone model
       if command and command.set and command.get
         options = @getXhrOptions(command, options) if command.get("type") is "xhr"
+
+        ## increment the number if its not cloned
+        @increment(command) unless command.isCloned()
+
         return super(command, options)
 
       return if _.isEmpty attrs

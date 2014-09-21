@@ -1,4 +1,7 @@
 <div class="command-wrapper">
+  <span class="command-number">
+    <%= @numberFormatted %>
+  </span>
   <span class="command-method"><%= @method %></span>
   <% if @sequence: %>
     <span class="command-sequence"><%= @sequence %></span>

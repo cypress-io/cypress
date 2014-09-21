@@ -42,10 +42,10 @@
           klass = if @model.get("passed") then "passed" else "failed"
           @$el.addClass "command-type-assertion-#{klass}"
 
-      @ui.method.css "padding-left", @model.get("indent")
+      # @ui.method.css "padding-left", @model.get("indent")
 
       if @model.hasParent()
-        @ui.wrapper.addClass "command-child"
+      #   @ui.wrapper.addClass "command-child"
       else
         @$el.addClass "command-parent"
 

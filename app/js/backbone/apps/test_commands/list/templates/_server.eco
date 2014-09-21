@@ -1,7 +1,10 @@
 <div class="command-wrapper">
+  <span class="command-number">
+    <%= @numberFormatted %>
+  </span>
   <span class="command-method"><%= @method %></span>
   <% if @finished: %>
-    <span>Finished Responding to XHR Queue</span>
+    <span>Finished Responding to XHR's in Queue</span>
   <% else: %>
     <span>Started XHR Server</span>
   <% end %>

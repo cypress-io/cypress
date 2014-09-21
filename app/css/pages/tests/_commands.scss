@@ -10,7 +10,7 @@
   }
 
   &>li {
-    padding: 0 9px 0 20px;
+    padding: 0 9px 0 10px;
     margin: 0;
 
     &:hover:not(.command-cloned) {
@@ -24,6 +24,14 @@
 
     &.active {
       background-color: #EDEFF4 !important;
+    }
+  }
+
+  .command-cloned {
+    font-style: italic;
+
+    span {
+      color: lighten(#565554, 20%) !important;
     }
   }
 
@@ -54,6 +62,12 @@
   .command-wrapper {
     position: relative;
     overflow: hidden;
+  }
+
+  .command-number {
+    float: left;
+    width: 20px;
+    min-height: 1px; //used because some numbers are empty
   }
 
   .command-method {
