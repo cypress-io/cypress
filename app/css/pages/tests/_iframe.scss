@@ -42,7 +42,7 @@
 
     header {
       position: relative;
-      overflow: auto;
+      overflow: hidden;
       background-color: #FFF;
       line-height: 22px;
       padding: 5px 10px;
@@ -53,6 +53,17 @@
       right: 0;
       height: 37px;
       top: 0;
+
+      .iframe-menu {
+        float: right;
+
+        .btn-link {
+          padding-top: 2px;
+          padding-bottom: 2px;
+          color: #888;
+        }
+
+      }
 
       #url-container {
         width: 65%;
@@ -85,6 +96,11 @@
         padding: 2px 10px;
         float: left;
         width: 70%;
+
+        &:focus {
+          // the outline color on focus looks strange
+          // because it doesn't respect input's border-radius
+        }
       }
     }
 

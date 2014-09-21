@@ -4,10 +4,27 @@
     <i class="fa fa-arrow-right"></i>
     <input class="url" />
   </div>
-  <div class="pull-right">
-    <i class="fa fa-cog">
-      <span class="fa fa-caret-down"></span>
-    </i>
+  <div class="iframe-menu">
+    <div class="dropdown pull-left">
+      <button data-toggle="dropdown" class="btn btn-link">
+        <i class="fa fa-cog"></i>
+        <i class="fa fa-caret-down"></i>
+      </button>
+      <ul class="dropdown-menu" role="menu">
+        <li>
+          <i class="fa fa-desktop"></i>
+          800x400
+        </li>
+        <li>
+          <i class="fa fa-desktop"></i>
+          800x400
+        </li>
+        <li>
+          <i class="fa fa-mobile"></i>
+          400x340
+        </li>
+      </ul>
+    </div>
     <i class="fa fa-compress"></i>
     <i class="fa fa-expand"></i>
   </div>
