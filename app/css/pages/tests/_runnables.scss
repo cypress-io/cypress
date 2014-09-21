@@ -1,15 +1,14 @@
 #test-container {
-  background-color: #222;
+  background-color: #eee;
   position: absolute;
   left: 0;
   bottom: 0;
   top: 0;
   width: 33%;
+  border-left: 1px solid #191919;
 }
 
 #test-specs {
-  background-color: #222;
-  padding-left: 5px;
   overflow: hidden;
   position: absolute;
   left: 0;
@@ -18,16 +17,17 @@
   bottom: 0;
 
   #specs-container {
-    background-color: #eee;
     padding-left: 0;
-    border-left: 1px solid #191919;
     width: 100%;
-    height: 100%;
     overflow: auto;
+    padding-bottom: 30px;
+
+    #specs-region {
+      height: 100%;
+    }
 
     #specs-list {
       box-shadow: 0 1px 2px #aaa;
-      margin-bottom: 100px;
     }
 
     li {
@@ -37,7 +37,27 @@
         border-bottom: 0;
       }
     }
+
   }
+.keyboard-shortcuts-helper {
+  // this needs to be styled to work like
+  // a sticky footer
+  color: #aaa;
+  text-align: center;
+  position: absolute;
+  bottom: 5px;
+  left: 25%;
+
+  mark {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 0 5px;
+    display: inline-block;
+    color: #888;
+  }
+
+}
 
   #specs-list>.suite>.runnable-wrapper:first-child {
 
