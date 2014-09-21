@@ -13,7 +13,7 @@
       wrapper:  ".command-wrapper"
       method:   ".command-method"
       response: ".command-response"
-      pause:    ".fa-pause"
+      # pause:    ".fa-pause"
       revert:   ".fa-search"
 
     modelEvents:
