@@ -46,7 +46,7 @@
       # @ui.method.css "padding-left", @model.get("indent")
 
       if @model.hasParent()
-      #   @ui.wrapper.addClass "command-child"
+        @ui.wrapper.addClass "command-child"
       else
         @$el.addClass "command-parent"
 

@@ -45,19 +45,19 @@
     }
   }
 
-  .command-child {
-    .command-method {
-      &:before {
-        border-left: 1px dotted #999;
-        border-bottom: 1px dotted #999;
-        position: absolute;
-        width: 10px;
-        height: 11px;
-        content: "";
-        margin-left: -12px;
-      }
-    }
-  }
+  // .command-child {
+  //   .command-method {
+  //     &:before {
+  //       border-left: 1px dotted #999;
+  //       border-bottom: 1px dotted #999;
+  //       position: absolute;
+  //       width: 10px;
+  //       height: 11px;
+  //       content: "-";
+  //       margin-left: -8px;
+  //     }
+  //   }
+  // }
 
   .command-wrapper {
     position: relative;
