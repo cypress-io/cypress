@@ -20,7 +20,7 @@
         not @isCloned()
 
       numberFormatted: ->
-        "#{number}." if number = @get("number")
+        "#{number}" if number = @get("number")
 
     initialize: ->
       new Backbone.Chooser(@)

@@ -1,7 +1,6 @@
 .commands-container {
   margin: 5px 10px 5px 15px;
   background-color: #eef1f4;
-  color: #bcbccc;
   padding: 0;
   padding-bottom: 4px;
 
@@ -10,11 +9,11 @@
   }
 
   &>li {
-    padding: 0 9px 0 10px;
+    padding: 0 9px 0 5px;
     margin: 0;
 
     &:hover:not(.command-cloned) {
-      background-color: #EDEFF4;
+      background-color: #E0E5E7;
       cursor: pointer;
     }
 
@@ -23,7 +22,7 @@
     }
 
     &.active {
-      background-color: #EDEFF4 !important;
+      background-color: #E0E5E7 !important;
     }
   }
 
@@ -31,14 +30,14 @@
     font-style: italic;
 
     span {
-      color: lighten(#565554, 20%) !important;
+      color: #9a9aaa !important;
     }
+
   }
 
   .command-parent {
     border-top: 1px solid #e3e3e3;
     padding-top: 4px;
-    margin-top: 4px;
 
     &:first-child {
       border-top: 0;
@@ -66,8 +65,11 @@
 
   .command-number {
     float: left;
-    width: 20px;
+    width: 25px;
+    color: #bcbccc;
     min-height: 1px; //used because some numbers are empty
+    text-align: right;
+    padding-right: 10px;
   }
 
   .command-method {
@@ -195,7 +197,7 @@
 
     i.fa-ellipsis-h {
       color: #fff;
-      background-color: #888;
+      background-color: #abaaaa;
       border-radius: 3px;
       padding: 0 4px;
     }
