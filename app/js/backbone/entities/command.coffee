@@ -300,5 +300,9 @@
 
       super command
 
+    reset: ->
+      @_maxNumber = 0
+      super
+
   App.reqres.setHandler "command:entities", ->
     new Entities.CommandsCollection
