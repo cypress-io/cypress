@@ -12,6 +12,7 @@ describe "Dom Command API", ->
       src: "/fixtures/dom.html"
       class: "iframe-spec"
       load: ->
+        _this.contentWindow = @contentWindow
         _this.dom = Eclectus.createDom {contentWindow: @contentWindow}
         Eclectus.patch {contentWindow: @contentWindow}
         df.resolve()
@@ -22,7 +23,7 @@ describe "Dom Command API", ->
     df
 
   it "stores the iframe's document", ->
-    expect(@dom.document).to.eq $("iframe")[0].contentWindow.document
+    expect(@dom.document).to.eq @contentWindow.document
 
   it "uses '$' to reference the iframe document", ->
     el = @dom.$("#dom")[0]
@@ -33,8 +34,14 @@ describe "Dom Command API", ->
     beforeEach ->
       @dom.find "#dom"
 
-    it "sets $el", ->
+    it "sets $el to the parent $", ->
+      delete @contentWindow.jQuery
+      @dom = Eclectus::find "#dom"
       expect(@dom.$el).to.be.instanceof($)
+
+    it "sets $el to the iframe $ if it exists", ->
+      @dom = Eclectus::find "#dom"
+      expect(@dom.$el).to.be.instanceof @contentWindow.$
 
     it "sets length", ->
       expect(@dom.length).to.eq @dom.$el.length
@@ -63,8 +70,13 @@ describe "Dom Command API", ->
         @dom3 = Eclectus::within "#list", =>
           @dom4 = Eclectus::find "li"
 
-    it "sets $el", ->
+    it "sets $el to the parent $", ->
+      delete @contentWindow.jQuery
+      @dom = Eclectus::within "#dom", =>
       expect(@dom.$el).to.be.instanceof($)
+
+    it "sets $el to the iframe $ if it exists", ->
+      expect(@dom.$el).to.be.instanceof @contentWindow.$
 
     it "sets length", ->
       expect(@dom.length).to.eq @dom.$el.length

@@ -7,7 +7,9 @@ Eclectus.Command = do ($, _) ->
   class Command
     highlightAttr: "data-eclectus-el"
 
-    constructor: (@document, @channel, @runnable) ->
+    constructor: (@contentWindow, @channel, @runnable) ->
+      @document = @contentWindow.document
+
       ## this is the unique identifer of all instantiated
       ## commands.  so as we chain off of this id
       ## we can reference back up to the parent id
@@ -17,8 +19,13 @@ Eclectus.Command = do ($, _) ->
       ## call init passing up our arguments
       @initialize(arguments...) if @initialize
 
-    $: (selector) ->
-      new $.fn.init(selector, @document)
+    ## instatiate a new jquery instance using
+    ## the window's or our own if its undefined
+    ## this should probably be configurable for
+    ## projects which dont have jQuery attached as
+    ## a global (like requireJS)
+    $: (selector, jQuery = $) ->
+      new jQuery.fn.init(selector, @document)
 
     getId: ->
       _.uniqueId("instance")
@@ -90,7 +97,7 @@ Eclectus.Command = do ($, _) ->
       $.contains @document, @$el[0]
 
     clone: ->
-      new @constructor(@document, @channel, @runnable)
+      new @constructor(@contentWindow, @channel, @runnable)
 
     isCommand: -> true
 

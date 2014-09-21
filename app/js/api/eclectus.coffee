@@ -25,12 +25,12 @@ window.Eclectus = do ($, _) ->
       return dom
 
     assert: (obj, passed, message, value, actual, expected) ->
-      assertion = new Eclectus.Assertion obj.contentWindow.document, obj.channel, obj.runnable
+      assertion = new Eclectus.Assertion obj.contentWindow, obj.channel, obj.runnable
       assertion.log value, actual, expected, message, passed
 
     server: (obj) ->
       @sandbox._server = server = obj.contentWindow.sinon.fakeServer.create()
-      @sandbox.server = new Eclectus.Xhr obj.contentWindow.document, obj.channel, obj.runnable
+      @sandbox.server = new Eclectus.Xhr obj.contentWindow, obj.channel, obj.runnable
       @sandbox.server.setServer server
 
       Eclectus.Xhr.bindServerTo(@, "server", @sandbox.server)
@@ -63,7 +63,7 @@ window.Eclectus = do ($, _) ->
 
     @unscope = (dom) ->
       fns = {find: methods.find, within: methods.within}
-      @patch {contentWindow: {document: dom.document}, channel: dom.channel, runnable: dom.runnable}, fns
+      @patch _(dom).pick("contentWindow", "channel", "runnable"), fns
 
     @createDom = (argsOrInstance) ->
       obj = dom = argsOrInstance
@@ -73,7 +73,7 @@ window.Eclectus = do ($, _) ->
       ## in that case we need to clone it and prevent it from being cloned
       ## again by setting isCloned to true
       if not dom.isCommand
-        dom = new Eclectus.Dom obj.contentWindow.document, obj.channel, obj.runnable
+        dom = new Eclectus.Dom obj.contentWindow, obj.channel, obj.runnable
 
       return dom
 

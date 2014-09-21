@@ -46,13 +46,20 @@ Eclectus.Dom = do ($, _, Eclectus) ->
     find: (selector) ->
       ## if we already have an $el property it means we're chaining
       ## the find method and need to clone this and return a new dom object
+      ## we store a _$el property because this is always the object
+      ## we operate on since its our jQuery version and we can control
+      ## methods and collisions + plugins
+      ## we expose the .$el property which will use the contentWindow's jQuery
+      ## version so users can continue to utilize their own 3rd party plugins
+      ## they've extended jQuery with
       if @$el
         dom            = @clone()
         dom.prevObject = @
         dom.$el        = @$el.find(selector)
       else
-        dom     = @
-        dom.$el = @$(selector)
+        dom       = @
+        dom.$el   = @$(selector, @contentWindow.jQuery)
+        dom._$el  = @$(selector)
 
       dom.checkForDomErrors()
 
@@ -72,7 +79,8 @@ Eclectus.Dom = do ($, _, Eclectus) ->
         dom.$el         = @$el.find(selector)
       else
         dom     = @
-        dom.$el = @$(selector)
+        dom.$el = @$(selector, @contentWindow.jQuery)
+        dom._$el  = @$(selector)
 
       dom.checkForDomErrors()
 
@@ -105,12 +113,13 @@ Eclectus.Dom = do ($, _, Eclectus) ->
 
       # @$el.val sequence
       if @elExistsInDocument()
-        @$el.simulate "key-sequence", options #if sequence is "{enter}"
+        @_$el.simulate "key-sequence", options #if sequence is "{enter}"
       else
         dom.error = "not found"
 
       dom.prevObject  = @
       dom.$el         = @$el
+      dom._$el        = @_$el
       dom.length      = @$el.length
       dom.selector    = @selector
       dom.canBeParent = false ## do not allow parent/child chaining off of this action
@@ -125,12 +134,13 @@ Eclectus.Dom = do ($, _, Eclectus) ->
       dom             = @clone()
 
       if @elExistsInDocument()
-        @$el.simulate "click"
+        @_$el.simulate "click"
       else
         dom.error = "not found"
 
       dom.prevObject  = @
       dom.$el         = @$el
+      dom._$el        = @_$el
       dom.length      = @$el.length
       dom.selector    = @selector
       dom.canBeParent = false ## do not allow parent/child chaining off of this action
@@ -156,13 +166,14 @@ Eclectus.Dom = do ($, _, Eclectus) ->
       #     }
 
       if @elExistsInDocument()
-        @$el.each (index, el) ->
+        @_$el.each (index, el) ->
           el.dispatchEvent(submit)
       else
         dom.error = "not found"
 
       dom.prevObject  = @
       dom.$el         = @$el
+      dom._$el        = @_$el
       dom.length      = dom.$el.length
       dom.selector    = arguments[0]
 
@@ -198,7 +209,7 @@ Eclectus.Dom = do ($, _, Eclectus) ->
   ## directly to our dom instance
   _.each jQueryMethods, (method) ->
     Dom.prototype[method] = ->
-      @$el[method].apply(@$el, arguments)
+      @_$el[method].apply(@_$el, arguments)
       return @
 
   ## both within + find + eq are all traversal methods
@@ -215,6 +226,7 @@ Eclectus.Dom = do ($, _, Eclectus) ->
       dom             = @clone()
       dom.prevObject  = @
       dom.$el         = @$el[method].apply(@$el, arguments)
+      dom._$el         = @_$el[method].apply(@_$el, arguments)
       dom.length      = dom.$el.length
       dom.selector    = arguments[0]
 
@@ -248,12 +260,13 @@ Eclectus.Dom = do ($, _, Eclectus) ->
       dom             = @clone()
 
       if @elExistsInDocument()
-        @$el[method].call(@$el)
+        @_$el[method].call(@$el)
       else
         dom.error = "not found"
 
       dom.prevObject  = @
       dom.$el         = @$el
+      dom._$el        = @_$el
       dom.length      = dom.$el.length
       dom.selector    = arguments[0]
 
