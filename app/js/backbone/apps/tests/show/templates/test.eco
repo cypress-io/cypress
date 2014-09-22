@@ -6,9 +6,9 @@
     <div id="specs-container">
       <div id="specs-region"></div>
     </div>
-    <div class="keyboard-shortcuts-helper">
+<!--     <div class="keyboard-shortcuts-helper">
       Type <mark>?</mark> to see a list of keyboard shortcuts
-    </div>
+    </div> -->
   </div>
 </div>
 <!-- <div class="ecl-main-content">
