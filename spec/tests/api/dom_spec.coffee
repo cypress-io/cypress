@@ -87,6 +87,9 @@ describe "Dom Command API", ->
     it "sets _$el to the parent jquery instance", ->
       expect(@dom._$el).to.exist
 
+    it "finds the child _$el", ->
+      expect(@dom2._$el[0]).to.eq @contentWindow.$("#nested-find")[0]
+
     it "sets length", ->
       expect(@dom.length).to.eq @dom.$el.length
 
@@ -108,6 +111,9 @@ describe "Dom Command API", ->
 
       it "sets _$el to the parent jquery instance", ->
         expect(@dom2._$el).to.exist
+
+      it "finds the child _$el", ->
+        expect(@dom2._$el[0]).to.eq @contentWindow.$("#list")[0]
 
   describe "action methods", ->
     context "#type", ->

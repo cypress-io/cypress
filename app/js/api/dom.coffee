@@ -56,7 +56,7 @@ Eclectus.Dom = do ($, _, Eclectus) ->
         dom            = @clone()
         dom.prevObject = @
         dom.$el        = @$el.find(selector)
-        dom._$el       = @_$el
+        dom._$el       = @_$el.find(selector)
       else
         dom       = @
         dom.$el   = @$(selector, @contentWindow.jQuery)
@@ -78,7 +78,7 @@ Eclectus.Dom = do ($, _, Eclectus) ->
         dom             = @clone()
         dom.prevObject  = @
         dom.$el         = @$el.find(selector)
-        dom._$el        = @_$el
+        dom._$el        = @_$el.find(selector)
       else
         dom     = @
         dom.$el = @$(selector, @contentWindow.jQuery)
