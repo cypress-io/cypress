@@ -43,6 +43,9 @@ describe "Dom Command API", ->
       @dom = Eclectus::find "#dom"
       expect(@dom.$el).to.be.instanceof @contentWindow.$
 
+    it "sets _$el to the parent jquery instance", ->
+      expect(@dom._$el).to.exist
+
     it "sets length", ->
       expect(@dom.length).to.eq @dom.$el.length
 
@@ -63,6 +66,9 @@ describe "Dom Command API", ->
       it "sets the prevObject of dom2 to dom", ->
         expect(@dom2.prevObject).to.eq @dom
 
+      it "sets _$el to the parent jquery instance", ->
+        expect(@dom2._$el).to.exist
+
   describe "#within", ->
     beforeEach ->
       @dom = Eclectus::within "#dom", =>
@@ -77,6 +83,9 @@ describe "Dom Command API", ->
 
     it "sets $el to the iframe $ if it exists", ->
       expect(@dom.$el).to.be.instanceof @contentWindow.$
+
+    it "sets _$el to the parent jquery instance", ->
+      expect(@dom._$el).to.exist
 
     it "sets length", ->
       expect(@dom.length).to.eq @dom.$el.length
@@ -96,6 +105,9 @@ describe "Dom Command API", ->
 
       it "sets dom3 prevObject to dom2", ->
         expect(@dom3.prevObject).to.eq @dom2
+
+      it "sets _$el to the parent jquery instance", ->
+        expect(@dom2._$el).to.exist
 
   describe "action methods", ->
     context "#type", ->
