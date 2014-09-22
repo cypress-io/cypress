@@ -33,8 +33,8 @@
           switch
             ## shift the expectation to use the $el on
             ## the command
-            when args[0] instanceof Eclectus.Command
-              args[0] = args[0].$el
+            when args[0] and args[0].isCommand?()
+              args[0] = args[0]._$el
 
             ## chai-jquery hard codes checking instanceof's
             ## and would always return false if we're receiving
