@@ -11,6 +11,7 @@
       icon:       ".suite-state i"
       ellipsis:   ".suite-title i"
       repeat:     ".fa-repeat"
+      warning:    ".fa-warning"
 
     events:
       "click @ui.repeat" : "repeatClicked"
@@ -36,8 +37,6 @@
       @model.trigger "model:double:clicked"
 
     stateChanged: (model, value, options) ->
-      @countCommands()
-
       if @model.get("type") is "test"
         ## if the test passed check on the duration
         # @checkDuration() if value is "passed"
@@ -56,11 +55,8 @@
       @ui.label.addClass("label-danger").text("Timed Out")
 
     checkCommands: ->
+      @ui.warning.addClass("has-command-errors").prop("title", "One or more commands failed") if @model.anyCommandsFailed()
       @ui.label.removeClass("label-success").addClass("label-danger") if @model.anyCommandsFailed()
-
-    countCommands: ->
-      commands = @model.get("commands").getTotalNumber()
-      @ui.label.addClass("label-success").text(commands) if commands > 0
 
   class List.RunnableLayout extends App.Views.LayoutView
     getTemplate: ->

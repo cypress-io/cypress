@@ -149,7 +149,7 @@
         background-color: #f7f8f9;
         cursor: pointer;
 
-        &>.runnable-wrapper .runnable-controls i {
+        &>.runnable-wrapper .runnable-controls i.fa-repeat {
           visibility: visible !important;
         }
 
@@ -193,6 +193,10 @@
 
       &.test.failed > .runnable-wrapper {
         border-left: 10px solid $fail;
+
+        .fa-warning.has-command-errors {
+          visibility: visible;
+        }
       }
 
 

@@ -7,6 +7,6 @@
   </span>
 </div>
 <div class="runnable-controls">
-  <label class="label"></label>
+  <i class="fa fa-warning"></i>
   <i class="fa fa-repeat"></i>
 </div>
