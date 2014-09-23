@@ -11,7 +11,7 @@ chokidar  = require("chokidar")
 mkdirp    = require('mkdirp')
 url       = require("url")
 spawn     = require("child_process").spawn
-phantom   = require("node-phantom")
+phantom   = require("node-phantom-simple")
 mocha     = require("./mocha.coffee")
 
 # ph = null

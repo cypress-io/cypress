@@ -20,7 +20,8 @@ program
 program
   .command("start")
   .description("Starts the Eclectus server")
-  .action(function(){
+  .option("-d, --debug", "Starts the server in debug mode")
+  .action(function(options){
     // bail immediately here if we dont have the eclectus.json file
     // tell us to run install
 
@@ -32,7 +33,43 @@ program
     // watch other .coffee files based on the directory our server.coffee file is in
     // need to optionally accept a --debug argument here to put
     // nodemon into debug mode instead of always putting in there
-    var str = "--debug --verbose --watch " + path.dirname(server) + "/*.coffee " + server
+    var str = ""
+
+    if (options.debug) {
+      str += "--debug "
+    }
+
+    str += "--verbose --watch " + path.dirname(server) + "/*.coffee " + server
+
+    console.log("nodemon options:", str)
+
+    nodemon(str)
+
+    nodemon.on("start", function(){
+      console.log("app has started")
+    })
+
+    nodemon.on("restart", function(files){
+      console.log("app has restarted", files)
+    })
+  })
+
+program
+  .command("ci")
+  .description("Runs Tests in PhantomJS (Continuous Integration Mode)")
+  .option("-d, --debug", "Starts the server in debug mode")
+  .action(function(options){
+    require("coffee-script/register")
+
+    var server = path.join(__dirname, "..", "lib", "ci.coffee")
+
+    var str = ""
+
+    if (options.debug) {
+      str += "--debug "
+    }
+
+    str += "--verbose --watch " + server + " " + server
 
     console.log("nodemon options:", str)
 

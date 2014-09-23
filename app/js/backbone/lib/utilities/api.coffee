@@ -79,15 +79,21 @@
       ## instantiate Eclectus
       window.Ecl = new Eclectus
 
-      ## set global mocha with our custom reporter
-      window.mocha = new Mocha reporter: Reporter
 
       overloadMochaRunnableEmit()
       overloadMochaRunnerUncaught()
       overloadChaiAssertions(Ecl) if chai and chai.use
 
       ## start running the tests
-      runner = mocha.run()
+      if window.mochaPhantomJS
+        debugger
+        runner = window.mochaPhantomJS.run()
+      else
+        debugger
+        ## set global mocha with our custom reporter
+        window.mocha = new Mocha reporter: Reporter
+
+        runner = mocha.run()
 
       ## return our runner entity
       return App.request("runner:entity", runner, mocha.options, Eclectus.patch, Eclectus.sandbox)

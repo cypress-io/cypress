@@ -55,7 +55,7 @@
     "mkdirp": "^0.5.0",
     "mocha": "^1.21.4",
     "mocha-phantomjs": "^3.5.0",
-    "node-phantom": "^0.2.5",
+    "node-phantom-simple": "^1.2.0",
     "phantomjs": "^1.9.7-15",
     "socket.io": "^1.0.6",
     "underscore": "^1.6.0",
