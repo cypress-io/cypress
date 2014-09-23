@@ -179,13 +179,16 @@
       #   console.warn "suite end", suite
 
       @runner.on "fail", (test, err) =>
-        ## need to check here if type is hook -- because if its a hook
-        ## like beforeEach then test end will never fire
-        ## and we need to handle this in the UI somehow...
-        ## look at Mocha HTML?
         console.warn("runner has failed", test, err)
+
         ## set the AssertionError on the test
         test.err = err
+
+        ## if this is a hook then we need to make sure
+        ## we still submit the test:end event and since
+        ## this is a hook we know its related to the first
+        ## test of our parent suite
+        @hookFailed(test, err) if test.type is "hook"
 
       ## if a test is pending mocha will only
       ## emit the pending event instead of the test
@@ -210,6 +213,20 @@
         # test.removeAllListeners()
         @trigger "test:end", test
       ## start listening to all the pertinent runner events
+
+    hookFailed: (hook, err) ->
+      ## find the name of the hook by parsing its
+      ## title and pulling out whats between the quotes
+      name = hook.title.match(/\"(.+)\"/)
+
+      ## assume the test that failed is the first test
+      ## of our hook's parent suite tests
+      test = hook.parent.tests[0]
+      test.err = err
+      test.state = "failed"
+      test.hook = name[1]
+      test.failedFromHook = true
+      @trigger "test:end", test.parent.tests[0]
 
     stop: ->
       ## remove all the listeners from EventEmitter

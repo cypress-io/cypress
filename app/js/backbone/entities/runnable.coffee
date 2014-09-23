@@ -79,7 +79,7 @@
       @removeOriginalError()
 
       ## reset these specific attributes
-      _.each ["state", "duration", "error"], (key) =>
+      _.each ["state", "duration", "error", "hook"], (key) =>
         @unset key
 
       ## remove the models within our commands collection
@@ -112,6 +112,10 @@
 
         ## set the err on the attrs
         attrs.error = test.err.toString()
+
+        ## get the hook type (beforeEach, afterEach, etc)
+        ## if the test failed from a hook
+        attrs.hook = test.hook if test.failedFromHook
       else
         ## remove the original error in case it exists
         @removeOriginalError()
@@ -119,6 +123,9 @@
         ## reset the error attribute to null so we remove any
         ## existing error message
         attrs.error = null
+
+        ## remove the hook as well
+        attrs.hook = null
 
       ## set the private _slow and _timeout
       ## based on the result of these methods

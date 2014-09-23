@@ -79,6 +79,7 @@
       wrapper:    ".runnable-wrapper"
       runnables:  ".runnables-region"
       commands:   ".runnable-commands-region"
+      hook:       ".hook"
       pre:        "pre"
 
     events:
@@ -96,6 +97,7 @@
       "change:chosen"   : "chosenChanged"
       "change:open"     : "openChanged"
       "change:error"    : "errorChanged"
+      "change:hook"     : "hookChanged"
 
     onBeforeRender: ->
       @$el.addClass @model.get("state")
@@ -151,6 +153,12 @@
       return if not @model.originalError
 
       console.error(@model.originalError.stack)
+
+    hookChanged: (model, value, options) ->
+      if value
+        @ui.hook.text(value + " failed")
+      else
+        @ui.hook.empty()
 
   class List.Runnables extends App.Views.CollectionView
     tagName: "ul"
