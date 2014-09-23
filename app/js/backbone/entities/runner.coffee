@@ -214,14 +214,23 @@
         @trigger "test:end", test
       ## start listening to all the pertinent runner events
 
+    ## recursively tries to find the first test
+    ## from a parent suite
+    getFirstTestFromParent: (suite) ->
+      if suite.tests.length
+        return suite.tests[0]
+      else
+        @getFirstTestFromParent(suite.suites[0])
+
     hookFailed: (hook, err) ->
       ## find the name of the hook by parsing its
       ## title and pulling out whats between the quotes
       name = hook.title.match(/\"(.+)\"/)
 
-      ## assume the test that failed is the first test
-      ## of our hook's parent suite tests
-      test = hook.parent.tests[0]
+      ## finds the test by returning the first test from
+      ## the parent or looping through the suites until
+      ## it finds the first test
+      test = @getFirstTestFromParent(hook.parent)
       test.err = err
       test.state = "failed"
       test.hook = name[1]
