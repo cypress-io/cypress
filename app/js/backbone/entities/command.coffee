@@ -25,6 +25,9 @@
     initialize: ->
       new Backbone.Chooser(@)
 
+    highlight: (init) ->
+      @set "highlight", init
+
     indent: (indent) ->
       indent = @parent.get("indent")
       @set "indent", indent + 17
@@ -102,6 +105,11 @@
     initialize: ->
       new Backbone.SingleChooser(@)
 
+    ## returns the original command
+    ## from this cloned command
+    getOriginalByClone: (command) ->
+      @get command.get("clonedFrom")
+
     parentExistsFor: (id) ->
       @get(id)
 
@@ -150,6 +158,7 @@
       clone.set
         id: _.uniqueId("cloneId")
         isCloned: true
+        clonedFrom: parent.id
 
       _.each ["el", "xhr", "response", "parent"], (prop) ->
         clone[prop] = parent[prop]

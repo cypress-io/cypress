@@ -20,6 +20,7 @@
     modelEvents:
       "change:response"  : "render"
       "change:chosen"    : "chosenChanged"
+      "change:highlight" : "highlightChanged"
 
     triggers:
       "click @ui.pause"   : "pause:clicked"
@@ -73,6 +74,9 @@
 
     chosenChanged: (model, value, options) ->
       @$el.toggleClass "active", value
+
+    highlightChanged: (model, value, options) ->
+      @$el.toggleClass "highlight", value
 
   class List.Commands extends App.Views.CollectionView
     tagName: "ul"

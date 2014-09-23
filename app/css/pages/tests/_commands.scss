@@ -12,7 +12,7 @@
     padding: 0 9px 0 5px;
     margin: 0;
 
-    &:hover:not(.command-cloned) {
+    &:hover {
       background-color: #E0E5E7;
       cursor: pointer;
     }
@@ -23,6 +23,10 @@
 
     &.active {
       background-color: #E0E5E7 !important;
+    }
+
+    &.highlight {
+      background-color: #FFB61C !important;
     }
   }
 
