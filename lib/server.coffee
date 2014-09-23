@@ -187,10 +187,16 @@ io.on "connection", (socket) ->
   #   filepath = path.basename(filepath)
   #   socket.emit "eclectus:css:changed", file: filepath
 
-# getSpecs = (spec) ->
-  ## grab all the files from our test folder
-  # _(files).filter (file) -> testFiles.match file
-  # files = getFiles("#{testFolder}/**/#{spec}")
+getSpecs = (test) ->
+  ## grab all of the specs if this is ci
+  if test is "ci"
+    specs = _(getTestFiles()).pluck "name"
+  else
+    ## return just this single test
+    specs = [test]
+
+  ## return the specs prefixed with /tests/
+  _(specs).map (spec) -> "/tests/#{spec}"
 
 ## serve static file from public when route is /eclectus
 ## this is to namespace the static eclectus files away from
@@ -227,7 +233,7 @@ app.get "/iframes/*", (req, res) ->
     stylesheets:  getStylesheets()
     javascripts:  getJavascripts()
     utilities:    getUtilities()
-    spec:         "/tests/#{test}"
+    specs:        getSpecs(test)
   }
 
 ## serve the real eclectus JS app when we're at root

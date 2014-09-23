@@ -16,7 +16,9 @@
       <script type="text/javascript" src="{{this}}"></script>
     {{/each}}
 
-    <script type="text/javascript" src="{{spec}}"></script>
+    {{#each specs}}
+      <script type="text/javascript" src="{{this}}"></script>
+    {{/each}}
   </head>
   <body></body>
 </html>
