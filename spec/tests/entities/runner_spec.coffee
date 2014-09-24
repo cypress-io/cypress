@@ -31,10 +31,10 @@ describe "Runner Entity", ->
       loadFixture("tests/events").progress (iframe) =>
         @contentWindow = iframe.contentWindow
         @mocha         = iframe.contentWindow.mocha
-        @runner        = iframe.contentWindow.mocha.run()
 
     it "triggers the following events", (done) ->
       @mocha.options.grep = /.*/
+      @runner = @contentWindow.mocha.run()
       @runnerModel = App.request "runner:entity", @runner, @mocha.options, Eclectus.patch, Eclectus.sandbox
       trigger = @sandbox.spy @runnerModel, "trigger"
       @runner.on "end", ->
@@ -66,3 +66,15 @@ describe "Runner Entity", ->
         ]
         done()
       @runnerModel.runIframeSuite "events.html", @contentWindow
+
+    it.only "prevents the 'end' event from firing until all tests have run", (done) ->
+      @runnerModel = App.request("start:test:runner")
+      @runnerModel.options.grep = /.*/
+
+      runner = @runnerModel.runner
+      emit = @sandbox.spy runner, "emit"
+
+      @runnerModel.runIframeSuite "events.html", @contentWindow, ->
+        lastEvent = _.last(emit.args)[0]
+        expect(lastEvent).to.eq "eclectus end"
+        done()

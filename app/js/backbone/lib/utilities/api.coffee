@@ -12,10 +12,29 @@
     ## emitted from all Runnable inherited objects (like hooks)
     ## this makes tracking down Eclectus related App errors much easier
     Mocha.Runnable::emit = _.wrap emit, (orig, event, err) ->
-      if event is "error"
-        throw err
+      switch event
+        when "error" then throw err
 
       orig.call(@, event, err)
+
+  overloadMochaRunnerEmit = ->
+    Mocha.Runner::emit = _.wrap emit, (orig, args...) ->
+      event = args[0]
+
+      switch event
+        ## if the end event was triggered by mocha
+        ## then back it up and wait for our own
+        ## runner to fire the eclectus end event
+        when "end"
+          return
+
+        ## when our runner fires this custom event
+        ## then we know we're truly done and should
+        ## callback the original end event
+        when "eclectus end"
+          orig.call(@, "end")
+
+      orig.apply(@, args)
 
   overloadMochaRunnerUncaught = ->
     ## if app environment is development we need to listen to
@@ -79,13 +98,13 @@
       ## instantiate Eclectus
       window.Ecl = new Eclectus
 
-
-      overloadMochaRunnableEmit()
-      overloadMochaRunnerUncaught()
+      overloadMochaRunnableEmit() if App.env("web")
+      overloadMochaRunnerEmit()
+      overloadMochaRunnerUncaught() if App.env("web")
       overloadChaiAssertions(Ecl) if chai and chai.use
 
       ## start running the tests
-      if window.mochaPhantomJS
+      if App.env("ci")
         runner = window.mochaPhantomJS.run()
       else
         ## set global mocha with our custom reporter

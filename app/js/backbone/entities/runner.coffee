@@ -148,18 +148,27 @@
       @commands
 
     startListening: ->
+      @setListenersForAll()
+      @setListenersForCI() if App.env("ci")
+      @setListenersForWeb() if App.env("web")
+
+    setListenersForAll: ->
+      ## partials in the runnable object
+      ## our private channel
+      ## the iframes contentWindow
+      ## and the iframe string
+      @runner.on "test", (test) =>
+        @patchEcl
+          runnable: test
+          channel: runnerChannel
+          contentWindow: @contentWindow
+          iframe: @iframe
+
+    setListenersForCI: ->
+
+    setListenersForWeb: ->
       @listenTo runnerChannel, "all", (type, runnable, attrs) ->
-
         @commands.add attrs, type, runnable
-        ## grab the entities on our instance
-        # entities = @getEntitiesByEvent(event)
-        # entities.add attrs, runnable
-
-        ## Do not necessarily need to trigger anything, just need to
-        ## expose these entities to the outside world so they can listen
-        ## to them themselves
-        ## trigger the entities:added event passing up our model and collection
-        # @trigger "#{event}:added", model, entities
 
       ## mocha has begun running the specs per iframe
       @runner.on "start", =>
@@ -197,16 +206,6 @@
         @trigger "test", test
 
       @runner.on "test", (test) =>
-        ## partials in the runnable object
-        ## our private channel
-        ## the iframes contentWindow
-        ## and the iframe string
-        @patchEcl
-          runnable: test
-          channel: runnerChannel
-          contentWindow: @contentWindow
-          iframe: @iframe
-
         @trigger "test:start", test
 
       @runner.on "test end", (test) =>
@@ -367,7 +366,7 @@
       id.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
     ## tell our runner to run our iframes mocha suite
-    runIframeSuite: (iframe, contentWindow) ->
+    runIframeSuite: (iframe, contentWindow, fn) ->
       ## store the current iframe
       @setIframe iframe
 
@@ -388,11 +387,15 @@
       ## run the suite for the iframe
       ## right before we run the root runner's suite we iterate
       ## through each test and give it a unique id
-      @runner.runSuite contentWindow.mocha.suite, =>
+      @runner.runSuite contentWindow.mocha.suite, (err) =>
         ## trigger the after run event
         @trigger "after:run"
 
+        @runner.emit "eclectus end"
+
         console.log "finished running the iframes suite!"
+
+        fn?(err)
 
   API =
     getRunner: (testRunner, options, patch, sandbox) ->
