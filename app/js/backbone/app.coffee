@@ -29,6 +29,8 @@
     ## start listening to socket io
     App.execute "socket:start"
 
+    App.execute "set:app:env"
+
     App.module("NavApp").start(App.navs)
 
     App.startHistory()
