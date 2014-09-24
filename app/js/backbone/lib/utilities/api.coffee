@@ -86,10 +86,8 @@
 
       ## start running the tests
       if window.mochaPhantomJS
-        debugger
         runner = window.mochaPhantomJS.run()
       else
-        debugger
         ## set global mocha with our custom reporter
         window.mocha = new Mocha reporter: Reporter
 
