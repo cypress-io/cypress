@@ -78,7 +78,45 @@
     highlightChanged: (model, value, options) ->
       @$el.toggleClass "highlight", value
 
-  class List.Commands extends App.Views.CollectionView
-    tagName: "ul"
-    className: "commands-container"
+  class List.Hook extends App.Views.CompositeView
+    template: "test_commands/list/_hook"
+    tagName: "li"
+    className: "hook-item"
     childView: List.Command
+    childViewContainer: "ul"
+
+    ui:
+      "commands" : ".commands-container"
+      "caret"    : "i.fa-caret-down"
+      "ellipsis" : "i.fa-ellipsis-h"
+
+    modelEvents:
+      "change:visible" : "visibleChanged"
+
+    events:
+      "click .hook-name" : "hookClicked"
+
+    initialize: ->
+      @collection = @model.get("commands")
+
+    hookClicked: (e) ->
+      @model.toggle()
+      e.preventDefault()
+      e.stopPropagation()
+
+    visibleChanged: (model, value, options) ->
+      @ui.commands.toggleClass "hidden", !value
+      @changeIconDirection(!value)
+      @displayEllipsis(!value)
+
+    changeIconDirection: (bool) ->
+      klass = if bool then "right" else "down"
+      @ui.caret.removeClass().addClass("fa fa-caret-#{klass}")
+
+    displayEllipsis: (bool) ->
+      @ui.ellipsis.toggleClass "hidden", !bool
+
+  class List.Hooks extends App.Views.CollectionView
+    tagName: "ul"
+    className: "hooks-container"
+    childView: List.Hook

@@ -7,7 +7,7 @@ Eclectus.Command = do ($, _) ->
   class Command
     highlightAttr: "data-eclectus-el"
 
-    constructor: (@contentWindow, @channel, @runnable) ->
+    constructor: (@contentWindow, @channel, @runnable, @hook) ->
       @document = @contentWindow.document
 
       ## this is the unique identifer of all instantiated
@@ -81,7 +81,7 @@ Eclectus.Command = do ($, _) ->
       ## if its true
       obj.dom = @getDom() if obj.dom
 
-      @channel.trigger obj.type, @runnable, obj if @channel
+      @channel.trigger(obj.type, @runnable, obj, @hook) if @channel
 
     ## walk up the 'prevObject' chain until we have an object
     ## which can be a parent
@@ -97,7 +97,7 @@ Eclectus.Command = do ($, _) ->
       $.contains @document, @$el[0]
 
     clone: ->
-      new @constructor(@contentWindow, @channel, @runnable)
+      new @constructor(@contentWindow, @channel, @runnable, @hook)
 
     isCommand: -> true
 

@@ -1,5 +1,33 @@
+.hooks-container {
+  margin: 5px 10px 5px 5px;
+  padding-left: 10px;
+  border-left: 1px dotted #DDD;
+
+  .hook-item {
+    margin-bottom: 5px;
+
+    &:last-of-type {
+      margin-bottom: 0;
+    }
+  }
+
+  i {
+    margin-right: 3px;
+  }
+
+  .hook-name {
+    text-transform: uppercase;
+    color: #959595;
+    @include user-select(none);
+
+    &:hover {
+      border-bottom: 1px dotted #959595;
+      color: #333;
+    }
+  }
+}
+
 .commands-container {
-  margin: 5px 10px 5px 15px;
   background-color: #eef1f4;
   padding: 0;
   padding-bottom: 4px;

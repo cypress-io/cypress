@@ -124,8 +124,8 @@
         @show contentView, region: layout.contentRegion
 
         if model.is("test")
-        #   ## and pass up the commands collection and the commands region
-          App.execute "list:test:commands", model.get("commands"), runner, layout.commandsRegion
+          ## and pass up the commands collection (via hooks) and the commands region
+          App.execute "list:test:commands", model.get("hooks"), runner, layout.commandsRegion
         else
           region = layout.runnablesRegion
 

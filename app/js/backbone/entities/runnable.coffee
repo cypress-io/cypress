@@ -7,7 +7,7 @@
       open: false
       error: null
       children:  new Entities.RunnableCollection
-      commands: App.request("command:entities")
+      hooks: App.request("hook:entities")
 
     initialize: ->
       new Backbone.Chooser(@)
@@ -46,7 +46,8 @@
       @collection.remove(@)
 
     addCommand: (command, options = {}) ->
-      @get("commands").add command, options
+      hook = command.get("hook")
+      @get("hooks").addCommandToHook hook, command, options
 
     is: (type) ->
       @get("type") is type
@@ -73,7 +74,7 @@
       @get("children").invoke("reset")
 
     anyCommandsFailed: ->
-      @get("commands").anyFailed()
+      @get("hooks").anyFailed()
 
     resetTest: ->
       @removeOriginalError()
@@ -83,7 +84,7 @@
         @unset key
 
       ## remove the models within our commands collection
-      @get("commands").reset()
+      @get("hooks").reset()
 
       ## merge in the defaults unless we already have them set
       defaults = _(@).result "defaults"

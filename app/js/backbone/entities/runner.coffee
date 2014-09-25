@@ -14,6 +14,7 @@
   ## DOM / XHR / LOG
   ## and partial each test (on test run) if its chosen...?
     initialize: ->
+      @hooks    = App.request "hook:entities"
       @commands = App.request "command:entities"
 
     setContentWindow: (@contentWindow) ->
@@ -164,6 +165,7 @@
       ## and the iframe string
       @runner.on "test", (test) =>
         @patchEcl
+          hook: "test"
           runnable: test
           channel: runnerChannel
           contentWindow: @contentWindow
@@ -172,8 +174,8 @@
     setListenersForCI: ->
 
     setListenersForWeb: ->
-      @listenTo runnerChannel, "all", (type, runnable, attrs) ->
-        @commands.add attrs, type, runnable
+      @listenTo runnerChannel, "all", (type, runnable, attrs, hook) ->
+        @commands.add attrs, type, runnable, hook
 
       ## mocha has begun running the specs per iframe
       @runner.on "start", =>
@@ -204,6 +206,31 @@
         ## test of our parent suite
         @hookFailed(test, err) if test.type is "hook"
 
+      @runner.on "hook", (hook) =>
+        test = @getTestFromHook(hook, hook.parent)
+
+        @patchEcl
+          hook: @getHookName(hook)
+          runnable: test
+          channel: runnerChannel
+          contentWindow: @contentWindow
+          iframe: @iframe
+
+      ## when a hook ends we want to repatch
+      ## Ecl with the associated test from the hook
+      ## this is due to the order of events mocha
+      ## fires when our tests run
+      @runner.on "hook end", (hook) =>
+
+        test = @getTestFromHook(hook, hook.parent)
+
+        @patchEcl
+          hook: "test"
+          runnable: test
+          channel: runnerChannel
+          contentWindow: @contentWindow
+          iframe: @iframe
+
       ## if a test is pending mocha will only
       ## emit the pending event instead of the test
       ## so we normalize the pending / test events
@@ -214,30 +241,36 @@
         @trigger "test:start", test
 
       @runner.on "test end", (test) =>
-        # test.removeAllListeners()
         @trigger "test:end", test
       ## start listening to all the pertinent runner events
 
-    ## recursively tries to find the first test
-    ## from a parent suite
-    getFirstTestFromParent: (suite) ->
+    ## recursively tries to find the test associated
+    ## with the hook
+    getTestFromHook: (hook, suite) ->
+      ## if theres already a currentTest use that
+      return test if test = hook.ctx.currentTest
+
+      ## else go look for the test because our suite
+      ## is most likely the root suite (which does not share a ctx)
       if suite.tests.length
         return suite.tests[0]
       else
-        @getFirstTestFromParent(suite.suites[0])
+        @getTestFromHook(hook, suite.suites[0])
 
-    hookFailed: (hook, err) ->
+    getHookName: (hook) ->
       ## find the name of the hook by parsing its
       ## title and pulling out whats between the quotes
       name = hook.title.match(/\"(.+)\"/)
+      name and name[1]
 
+    hookFailed: (hook, err) ->
       ## finds the test by returning the first test from
       ## the parent or looping through the suites until
       ## it finds the first test
-      test = @getFirstTestFromParent(hook.parent)
+      test = @getTestFromHook(hook, hook.parent)
       test.err = err
       test.state = "failed"
-      test.hook = name[1]
+      test.hook = @getHookName(hook)
       test.failedFromHook = true
       @trigger "test:end", test.parent.tests[0]
 

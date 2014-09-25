@@ -2,9 +2,9 @@
 
   class List.Controller extends App.Controllers.Application
     initialize: (options) ->
-      { commands, runner } = options
+      { hooks, runner } = options
 
-      commandsView = @getCommandsView commands
+      commandsView = @getCommandsView hooks
 
       @listenTo commandsView, "childview:pause:clicked", (iv, args) ->
         console.warn args
@@ -33,6 +33,6 @@
     highlightClone: (commands, command, init) ->
       commands.getOriginalByClone(command).highlight(init)
 
-    getCommandsView: (commands) ->
-      new List.Commands
-        collection: commands
+    getCommandsView: (hooks) ->
+      new List.Hooks
+        collection: hooks

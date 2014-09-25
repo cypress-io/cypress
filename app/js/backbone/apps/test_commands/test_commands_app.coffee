@@ -8,5 +8,5 @@
 
   router = new Router
 
-  App.commands.setHandler "list:test:commands", (commands, runner, region) ->
-    router.to "list", commands: commands, runner: runner, region: region
+  App.commands.setHandler "list:test:commands", (hooks, runner, region) ->
+    router.to "list", hooks: hooks, runner: runner, region: region
