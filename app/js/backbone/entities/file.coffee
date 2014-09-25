@@ -89,24 +89,14 @@
 
 # [
 #   {
-#     apps: [
-#       { accounts: [] },
-#       "foo",
-#       "bar",
+#     name: "apps"
+#     children: [
+#       { name: "app_spec.coffee" }
+#       {
+#         name: "accounts", children: [
+#           { name: "account_new_spec" }
+#         ]
+#       }
 #     ]
 #   }
 # ]
-
-[
-  {
-    name: "apps"
-    children: [
-      { name: "app_spec.coffee" }
-      {
-        name: "accounts", children: [
-          { name: "account_new_spec" }
-        ]
-      }
-    ]
-  }
-]
