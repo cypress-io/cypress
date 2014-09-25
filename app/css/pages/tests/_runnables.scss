@@ -60,16 +60,9 @@
 
 }
 
-  #specs-list>.suite>.runnable-wrapper:first-child {
-
-    .suite-title {
-      font-weight: bold;
-    }
-
-  }
-
   ul.runnables {
     padding-left: 0;
+    @include user-select(none);
 
     li.runnable {
       width: 100%;
@@ -98,6 +91,7 @@
 
             .suite-title {
               color: #6B6C6B;
+              font-weight: 600;
             }
           }
 

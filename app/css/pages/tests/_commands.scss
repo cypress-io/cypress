@@ -18,7 +18,6 @@
   .hook-name {
     text-transform: uppercase;
     color: #959595;
-    @include user-select(none);
 
     &:hover {
       border-bottom: 1px dotted #959595;
