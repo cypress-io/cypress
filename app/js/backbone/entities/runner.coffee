@@ -63,6 +63,9 @@
       ## proxy this to everyone else
       @listenTo socket, "test:changed", @triggerLoadIframe
 
+      ## dont overload the runSuite fn if we're in CI mode
+      return @ if App.env("ci")
+
       runner = @
 
       @runner.runSuite = _.wrap @runner.runSuite, (runSuite, rootSuite, fn) ->
@@ -86,6 +89,8 @@
         @grep runner.getGrep(rootSuite)
 
         runSuite.call(@, rootSuite, fn)
+
+      return @
 
     ## iterates through both the runnables tests + suites if it has any
     iterateThroughRunnables: (runnable) ->
