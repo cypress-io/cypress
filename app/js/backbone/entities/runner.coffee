@@ -278,14 +278,14 @@
       ## remove all the listeners from EventEmitter
       @runner.removeAllListeners()
 
+      ## cleanup any of our handlers
+      @stopListening()
+
       ## delete these properties
       delete @runner
       delete @contentWindow
       delete @iframe
       delete @commands
-
-      ## cleanup any of our handlers
-      @stopListening()
 
     start: (iframe) ->
       @setIframe iframe
@@ -426,6 +426,11 @@
       ## right before we run the root runner's suite we iterate
       ## through each test and give it a unique id
       @runner.runSuite contentWindow.mocha.suite, (err) =>
+        ## its possible there is no runner when this
+        ## finishes if the user navigated away from
+        ## the tests
+        return if not @runner
+
         ## trigger the after run event
         @trigger "after:run"
 
