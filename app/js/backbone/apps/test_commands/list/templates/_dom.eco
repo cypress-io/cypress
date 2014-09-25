@@ -9,7 +9,7 @@
     <span class="command-selector"><%= @selector %></span>
   <% end %>
   <% if @length > 1: %>
-    <label title="<%= @length %> matched elements" class="label label-primary"><%= @length %></label>
+    <span title="<%= @length %> matched elements" class="badge"><%= @length %></span>
   <% end %>
   <% if @error: %>
     <span class="command-error"><%= @error %></span>
