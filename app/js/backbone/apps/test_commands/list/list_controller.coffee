@@ -13,22 +13,22 @@
 
       @listenTo commandsView, "childview:childview:command:mouseenter", (iv, iv2, args) ->
         command = args.model
-        return @highlightClone(commands, command) if command.isCloned()
+        return @highlightClone(command) if command.isCloned()
 
         return if not command.getEl()
         runner.highlightEl(command)
 
       @listenTo commandsView, "childview:childview:command:mouseleave", (iv, iv2, args) ->
         command = args.model
-        return @highlightClone(commands, command, false) if command.isCloned()
+        return @highlightClone(command, false) if command.isCloned()
 
         return if not command.getEl()
         runner.highlightEl(command, false)
 
       @show commandsView
 
-    highlightClone: (commands, command, init) ->
-      commands.getOriginalByClone(command).highlight(init)
+    highlightClone: (command, init) ->
+      command.collection.getOriginalByClone(command).highlight(init)
 
     getCommandsView: (hooks) ->
       new List.Hooks
