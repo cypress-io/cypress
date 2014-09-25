@@ -113,7 +113,7 @@
         runner = mocha.run()
 
       ## return our runner entity
-      return App.request("runner:entity", runner, mocha.options, Eclectus.patch, Eclectus.sandbox)
+      return App.request("runner:entity", runner, mocha.options, Eclectus.patch, Eclectus.hook, Eclectus.sandbox)
 
     stop: (runner) ->
       ## call the stop method which cleans up any listeners

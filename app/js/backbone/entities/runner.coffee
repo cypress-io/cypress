@@ -23,6 +23,8 @@
 
     setEclPatch: (@patchEcl) ->
 
+    setEclHook: (@patchHook) ->
+
     setEclSandbox: (@patchSandbox) ->
 
     setOptions: (@options) ->
@@ -165,11 +167,12 @@
       ## and the iframe string
       @runner.on "test", (test) =>
         @patchEcl
-          hook: "test"
           runnable: test
           channel: runnerChannel
           contentWindow: @contentWindow
           iframe: @iframe
+
+        @patchHook "test"
 
     setListenersForCI: ->
 
@@ -207,29 +210,31 @@
         @hookFailed(test, err) if test.type is "hook"
 
       @runner.on "hook", (hook) =>
-        test = @getTestFromHook(hook, hook.parent)
+        ## if our hook doesnt have an associated test ctx
+        ## then we need to patchEcl with the first test
+        ## we can find
+        if not hook.ctx.currentTest
+          test = @getTestFromHook(hook, hook.parent)
 
-        @patchEcl
-          hook: @getHookName(hook)
-          runnable: test
-          channel: runnerChannel
-          contentWindow: @contentWindow
-          iframe: @iframe
+          @patchEcl
+            hook: @getHookName(hook)
+            runnable: test
+            channel: runnerChannel
+            contentWindow: @contentWindow
+            iframe: @iframe
+
+        ## dynamically changes the current patched test's hook name
+        @patchHook @getHookName(hook)
 
       ## when a hook ends we want to repatch
       ## Ecl with the associated test from the hook
       ## this is due to the order of events mocha
       ## fires when our tests run
       @runner.on "hook end", (hook) =>
-
-        test = @getTestFromHook(hook, hook.parent)
-
-        @patchEcl
-          hook: "test"
-          runnable: test
-          channel: runnerChannel
-          contentWindow: @contentWindow
-          iframe: @iframe
+        ## we only care to re-patch the hook name if
+        ## we have a current test, else the next test
+        ## will naturally patchEcl again for itself
+        @patchHook("test") if hook.ctx.currentTest
 
       ## if a test is pending mocha will only
       ## emit the pending event instead of the test
@@ -441,15 +446,16 @@
         fn?(err)
 
   API =
-    getRunner: (testRunner, options, patch, sandbox) ->
+    getRunner: (testRunner, options, patch, hook, sandbox) ->
       ## store the actual testRunner on ourselves
       runner = new Entities.Runner
       runner.setTestRunner testRunner
       runner.setOptions options
       runner.setEclPatch patch
+      runner.setEclHook hook
       runner.setEclSandbox sandbox
       runner.startListening()
       runner
 
-  App.reqres.setHandler "runner:entity", (testRunner, options, patch, sandbox) ->
-    API.getRunner testRunner, options, patch, sandbox
+  App.reqres.setHandler "runner:entity", (testRunner, options, patch, hook, sandbox) ->
+    API.getRunner testRunner, options, patch, hook, sandbox
