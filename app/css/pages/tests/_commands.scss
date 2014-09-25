@@ -93,6 +93,7 @@
   .command-wrapper {
     position: relative;
     overflow: hidden;
+    color: #777;
   }
 
   .command-number {
@@ -130,44 +131,15 @@
     right: 0;
   }
 
-  .command-type-xhr {
-    // background-color: mix(#E0C85E, #383838, 10%);
-
-    .command-method {
-      color: #565554;
-    }
-  }
-
   .command-type-dom {
-    // background-color: mix(#80B0FF, #383838, 10%);
-
-    .command-method {
-      color: #565554;
-    }
-
-    .command-selector {
-      color: #565554;
-    }
-
     .badge {
       font-weight: normal;
-    }
-  }
-
-  .command-type-dom-action {
-    .command-method {
-      color: #565554;
-    }
-
-    .command-sequence {
-      color: #565554;
     }
   }
 
   .command-type-assertion {
     .command-method {
       span {
-        color: #565554;
         border-radius: 2px;
         padding: 0 3px;
         font-size: 10px;
