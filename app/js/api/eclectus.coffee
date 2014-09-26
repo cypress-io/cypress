@@ -75,7 +75,7 @@ window.Eclectus = do ($, _) ->
       ## in that case we need to clone it and prevent it from being cloned
       ## again by setting isCloned to true
       if not dom.isCommand
-        dom = new Eclectus.Dom obj.contentWindow, obj.channel, obj.runnable, @hook
+        dom = new Eclectus.Dom obj.contentWindow, obj.channel, obj.runnable, Eclectus.prototype.hook
 
       return dom
 
