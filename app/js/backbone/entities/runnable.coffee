@@ -6,6 +6,7 @@
       indent: -10
       open: false
       error: null
+      hook: null
       children:  new Entities.RunnableCollection
       hooks: App.request("hook:entities")
 
