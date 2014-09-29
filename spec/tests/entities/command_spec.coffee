@@ -193,7 +193,7 @@ describe "Command Entities", ->
         expect(@commands).to.have.length 3
 
       it "children are inserted into the correct index within the collection", ->
-        commands = @runnableModel.get("commands")
+        commands = @runnableModel.get("hooks").first().get("commands")
         expect(commands.indexOf(@child)).to.eq 1
 
   context "#addServer", ->

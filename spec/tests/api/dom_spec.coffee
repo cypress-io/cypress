@@ -165,7 +165,7 @@ describe "Dom Command API", ->
     context "#eq", ->
       beforeEach ->
         @eq = @dom.find("#list li").eq(0)
-        @eq.dom = @eq.getDom()
+        @eq.snapshot = @eq.getSnapshot()
 
       it "returns a new dom instance", ->
         expect(@eq).not.to.eq @dom
@@ -184,10 +184,10 @@ describe "Dom Command API", ->
         expect(@eq.$el[0]).to.eq li
 
       it "sets the dom", ->
-        expect(@eq.dom).to.be.instanceof($)
+        expect(@eq.snapshot).to.be.instanceof($)
 
       it "allows the el to be findable in the stored dom", ->
-        li = @eq.dom.find("[data-eclectus-el]")
+        li = @eq.snapshot.find("[data-eclectus-el]")
         expect(li).to.have.prop "nodeName", "LI"
 
       it "removes the special data-eclectus-el selector from $el", ->

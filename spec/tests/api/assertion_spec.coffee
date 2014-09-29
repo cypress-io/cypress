@@ -1,7 +1,7 @@
 describe "Assertion Command API", ->
   beforeEach ->
     @sandbox.stub(Eclectus.Assertion.prototype, "emit").returns(null)
-    @assertion = new Eclectus.Assertion
+    @assertion = new Eclectus.Assertion {contentWindow: {}}
 
   context "#parseValueActualAndExpected", ->
     describe "parses and transforms value, actual, and expected", ->

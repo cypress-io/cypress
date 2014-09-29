@@ -1,4 +1,3 @@
-
 ## attach to Eclectus global
 ## this is our base command class the others will inherit from
 Eclectus.Command = do ($, _) ->
@@ -38,9 +37,9 @@ Eclectus.Command = do ($, _) ->
       throw new Error("config.type must be set") if not config.type
 
       _(config).defaults
-        dom: true
+        snapshot: true
 
-    getDom: ->
+    getSnapshot: ->
       ## create a unique selector for this el
       @$el.attr(@highlightAttr, true) if @$el
 
@@ -63,7 +62,7 @@ Eclectus.Command = do ($, _) ->
         id: @id
         selector: ""
         canBeParent: @canBeParent
-        dom: config.dom
+        snapshot: config.snapshot
         type: config.type
 
       ## convert to a string always in case our arg was an object
@@ -77,9 +76,9 @@ Eclectus.Command = do ($, _) ->
       ## test accessible
       @_parent = obj.parent
 
-      ## add the dom to the object
+      ## add the snapshot to the object
       ## if its true
-      obj.dom = @getDom() if obj.dom
+      obj.snapshot = @getSnapshot() if obj.snapshot
 
       @channel.trigger(obj.type, @runnable, obj, @hook) if @channel
 

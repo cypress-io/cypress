@@ -43,7 +43,7 @@
       @trigger "test:results:ready", test
 
     revertDom: (command) ->
-      @trigger "revert:dom", command.getDom(),
+      @trigger "revert:dom", command.getSnapshot(),
         id:   command.id
         el:   command.getEl()
         attr: command.get("highlightAttr")
@@ -447,6 +447,9 @@
 
   API =
     getRunner: (testRunner, options, patch, hook, sandbox) ->
+      ## always set grep if its not already set
+      options.grep ?= /.*/
+
       ## store the actual testRunner on ourselves
       runner = new Entities.Runner
       runner.setTestRunner testRunner

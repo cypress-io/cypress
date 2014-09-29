@@ -73,8 +73,8 @@
 
       _([objs]).flatten(true)
 
-    getDom: ->
-      @dom
+    getSnapshot: ->
+      @snapshot
 
     getEl: ->
       @el
@@ -214,13 +214,13 @@
       options
 
     addAssertion: (attrs) ->
-      {dom, el, actual, expected, subject} = attrs
+      {snapshot, el, actual, expected, subject} = attrs
 
-      attrs = _(attrs).omit "dom", "el", "actual", "expected", "subject"
+      attrs = _(attrs).omit "snapshot", "el", "actual", "expected", "subject"
 
       ## instantiate the new model
       command = new Entities.Command attrs
-      command.dom = dom
+      command.snapshot = snapshot
       command.el = el
       command.actual = actual
       command.expected = expected
@@ -229,13 +229,13 @@
       return command
 
     addDom: (attrs) ->
-      {el, dom} = attrs
+      {el, snapshot} = attrs
 
-      attrs = _(attrs).omit "el", "dom"
+      attrs = _(attrs).omit "el", "snapshot"
 
       ## instantiate the new model
       command = new Entities.Command attrs
-      command.dom = dom
+      command.snapshot = snapshot
       command.el = el
 
       ## if we're chained to an existing id
@@ -250,14 +250,14 @@
       return command
 
     addXhr: (attrs) ->
-      {xhr, response, dom} = attrs
+      {xhr, response, snapshot} = attrs
 
-      attrs = _(attrs).omit "xhr", "response", "dom"
+      attrs = _(attrs).omit "xhr", "response", "snapshot"
 
       ## instantiate the new model
       command = new Entities.Command attrs
       command.xhr = xhr
-      command.dom = dom
+      command.snapshot = snapshot
 
       @insertParents command, attrs.parent,
         ## insert a parent if the last parent commands
@@ -273,12 +273,12 @@
       return command
 
     addServer: (attrs) ->
-      {dom, requests, responses, server} = attrs
+      {snapshot, requests, responses, server} = attrs
 
       attrs = _(attrs).omit "requests", "responses", "server"
 
       command = new Entities.Command attrs
-      command.dom       = dom
+      command.snapshot       = snapshot
       command.requests  = requests
       command.responses = responses
       command.server    = server
