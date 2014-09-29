@@ -91,11 +91,24 @@
         height: el.outerHeight(false)
       }
 
+    calcWidth: (main, tests, container) ->
+      container.width main.width() - tests.width()
+
     onShow: ->
+      main      = $("#main-region :first-child")
+      tests     = $("#test-container")
+      container = $("#iframe-wrapper")
+
+      @calcWidth = _(@calcWidth).partial main, tests, container
+
+      $(window).on "resize", @calcWidth
+
       # @ui.header.hide()
       @ui.compress.hide()
 
     onDestroy: ->
+      $(window).off "resize", @calcWidth
+
       # _.each ["Ecl", "$", "jQuery", "parent", "chai", "expect", "should", "assert", "Mocha", "mocha"], (global) =>
       #   delete @iframe[0].contentWindow[global]
       @iframe?.remove()
@@ -126,6 +139,7 @@
         load: ->
           fn(@contentWindow)
           view.$el.show()
+          view.calcWidth()
           # view.ui.header.show()
 
       @iframe.appendTo(@$el)
