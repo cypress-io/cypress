@@ -16,6 +16,17 @@
     toggleOpen: ->
       @set "open", !@get("open")
 
+    failHookByName: (name) ->
+      hook = @get("hooks").getByName(name)
+      hook.failed()
+
+    checkForFailedHook: ->
+      ## bail if our hook property is falsy
+      return if not name = @get("hook")
+
+      ## else continue to fail the hook by name
+      @failHookByName(name)
+
     setAttrsFromRunnable: (runnable, index) ->
       @set
         id: runnable.cid
@@ -134,6 +145,11 @@
       @_timeout = test.timeout()
 
       @set attrs
+
+      ## check to see if we have a failed hook
+      @checkForFailedHook()
+
+      return @
 
     anyAreProcessing: (states) ->
       _(states).any (state) -> state is "processing"

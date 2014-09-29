@@ -89,9 +89,11 @@
       "commands" : ".commands-container"
       "caret"    : "i.fa-caret-down"
       "ellipsis" : "i.fa-ellipsis-h"
+      "failed"   : ".hook-failed"
 
     modelEvents:
       "change:visible" : "visibleChanged"
+      "change:failed"  : "failedChanged"
 
     events:
       "click .hook-name" : "hookClicked"
@@ -115,6 +117,9 @@
 
     displayEllipsis: (bool) ->
       @ui.ellipsis.toggleClass "hidden", !bool
+
+    failedChanged: (model, bool, options) ->
+      @ui.failed.toggleClass "hidden", !bool
 
   class List.Hooks extends App.Views.CollectionView
     tagName: "ul"

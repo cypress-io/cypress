@@ -2,6 +2,7 @@
 
   class Entities.Hook extends Entities.Model
     defaults: ->
+      failed: false
       visible: true
       commands: App.request("command:entities")
 
@@ -14,15 +15,21 @@
     anyFailed: ->
       @get("commands").anyFailed()
 
+    failed: ->
+      @set "failed", true
+
   class Entities.HooksCollection extends Entities.Collection
     model: Entities.Hook
+
+    getByName: (name) ->
+      @findWhere({name: name})
 
     addCommandToHook: (name, command, options) ->
       hook = @findOrCreateHookByName(name)
       hook.addCommand command, options
 
     findOrCreateHookByName: (name) ->
-      return hook if hook = @findWhere({name: name})
+      return hook if hook = @getByName(name)
       @add({name: name})
 
     anyFailed: ->
