@@ -91,10 +91,7 @@
     ## the start method will be responsible for setting up
     ## the ability to run tests based on our test framework
     ## ATM its hard coded to work with Mocha
-    start: ->
-      ## reset df to a new deferred instance
-      # df = $.Deferred()
-
+    start: (options) ->
       ## instantiate Eclectus
       window.Ecl = new Eclectus
 
@@ -103,6 +100,16 @@
       overloadMochaRunnerUncaught() if App.env("web")
       overloadChaiAssertions(Ecl) if chai and chai.use
 
+      ## get the runner and mocha variables if they're not
+      ## passed into our options.  options will normally be
+      ## null, but its helpful in testing
+      runner = options.runner ?= API.getRunner()
+      mocha  = options.mocha ?= window.mocha
+
+      ## return our runner entity
+      return App.request("runner:entity", runner, mocha.options, Eclectus.patch, Eclectus.hook, Eclectus.sandbox)
+
+    getRunner: ->
       ## start running the tests
       if App.env("ci")
         runner = window.mochaPhantomJS.run()
@@ -112,8 +119,7 @@
 
         runner = mocha.run()
 
-      ## return our runner entity
-      return App.request("runner:entity", runner, mocha.options, Eclectus.patch, Eclectus.hook, Eclectus.sandbox)
+      return runner
 
     stop: (runner) ->
       ## call the stop method which cleans up any listeners
@@ -123,8 +129,8 @@
       delete window.Ecl
       delete window.mocha
 
-  App.reqres.setHandler "start:test:runner", ->
-    API.start()
+  App.reqres.setHandler "start:test:runner", (options = {}) ->
+    API.start options
 
   App.reqres.setHandler "stop:test:runner", (runner) ->
     API.stop(runner)

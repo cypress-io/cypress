@@ -14,14 +14,20 @@ describe "Runner Entity", ->
         @runner        = iframe.contentWindow.mocha.run()
 
     it "triggers 'exclusive:test' when tests have an .only", ->
-      @runnerModel = App.request "runner:entity", @runner, @mocha.options, Eclectus.patch, Eclectus.sandbox
+      @runnerModel = App.request("start:test:runner")
+
+      ## we need to set the runner model's grep options
+      ## to our iframes mocha options
+      @runnerModel.options.grep = @mocha.options.grep
+
       trigger = @sandbox.spy @runnerModel, "trigger"
+
       @runnerModel.runIframeSuite "only.html", @contentWindow
       expect(trigger).to.be.calledWith "exclusive:test"
 
     it "does not trigger 'exclutive:test' when tests do not have a .only", ->
-      @mocha.options.grep = /.*/
-      @runnerModel = App.request "runner:entity", @runner, @mocha.options, Eclectus.patch, Eclectus.sandbox
+      @runnerModel = App.request("start:test:runner")
+      @runnerModel.options.grep = /.*/
       trigger = @sandbox.spy @runnerModel, "trigger"
       @runnerModel.runIframeSuite "only.html", @contentWindow
       expect(trigger).not.to.be.calledWith "exclusive:test"
@@ -31,13 +37,15 @@ describe "Runner Entity", ->
       loadFixture("tests/events").progress (iframe) =>
         @contentWindow = iframe.contentWindow
         @mocha         = iframe.contentWindow.mocha
+        @runner        = iframe.contentWindow.mocha.run()
 
     it "triggers the following events", (done) ->
-      @mocha.options.grep = /.*/
-      @runner = @contentWindow.mocha.run()
-      @runnerModel = App.request "runner:entity", @runner, @mocha.options, Eclectus.patch, Eclectus.sandbox
+      @runnerModel = App.request "start:test:runner",
+        mocha: @mocha
+        runner: @runner
+
       trigger = @sandbox.spy @runnerModel, "trigger"
-      @runner.on "end", ->
+      @runnerModel.runIframeSuite "events.html", @contentWindow, ->
         events = _(trigger.args).map (args) -> args[0]
         expect(events).to.deep.eq [
           "before:run"
@@ -65,9 +73,8 @@ describe "Runner Entity", ->
           "runner:end"
         ]
         done()
-      @runnerModel.runIframeSuite "events.html", @contentWindow
 
-    it.only "prevents the 'end' event from firing until all tests have run", (done) ->
+    it "prevents the 'end' event from firing until all tests have run", (done) ->
       @runnerModel = App.request("start:test:runner")
       @runnerModel.options.grep = /.*/
 
