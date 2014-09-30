@@ -43,6 +43,12 @@ describe "Element Dimensions Utility", ->
     it "setsHeightWithPadding to 30", ->
       expect(@dimensions).to.have.property "heightWithPadding", 30
 
+    describe "layering inspector divs", ->
+      before ->
+        @layer = App.request "element:box:model:layers", @square, @html.find("body")
+
+      it "layers height + margin div", ->
+
   context "square with border", ->
     beforeEach ->
       @square      = @html.find("#square-border")
@@ -88,4 +94,11 @@ describe "Element Dimensions Utility", ->
 
     it "sets margin-left to 6", ->
       expect(@dimensions).to.have.property "marginLeft", 6
+
+    describe "layering inspector divs", ->
+      before ->
+        @layer = App.request "element:box:model:layers", @square, @html.find("body")
+
+      it "layers height + margin div", ->
+
 
