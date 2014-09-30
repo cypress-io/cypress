@@ -2,7 +2,6 @@
 
 var program   = require("commander")
 var path      = require("path")
-var yo        = require("yeoman-generator")
 var nodemon   = require("nodemon")
 
 program
@@ -12,7 +11,7 @@ program
   .command("install")
   .description("Installs Eclectus")
   .action(function(){
-    yo("eclectus")
+    require("yeoman-generator")("eclectus")
       .register(electusGenerator("config"), "eclectus")
       .run()
   })
