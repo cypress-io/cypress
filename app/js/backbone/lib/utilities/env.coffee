@@ -6,7 +6,7 @@
 
       App._environment is env
 
-  App.commands.setHandler "set:app:env", ->
+  App.commands.setHandler "set:app:env", (env) ->
     ## set environment to ci or web
-    env = if window.mochaPhantomJS then "ci" else "web"
+    env ?= if window.mochaPhantomJS then "ci" else "web"
     App._environment = env
