@@ -13,7 +13,7 @@ describe "Runner Entity", ->
         @mocha         = iframe.contentWindow.mocha
         @runner        = iframe.contentWindow.mocha.run()
 
-    it "triggers 'exclusive:test' when tests have an .only", ->
+    it "triggers 'exclusive:test' when tests have an .only", (done) ->
       @runnerModel = App.request("start:test:runner")
 
       ## we need to set the runner model's grep options
@@ -22,15 +22,17 @@ describe "Runner Entity", ->
 
       trigger = @sandbox.spy @runnerModel, "trigger"
 
-      @runnerModel.runIframeSuite "only.html", @contentWindow
-      expect(trigger).to.be.calledWith "exclusive:test"
+      @runnerModel.runIframeSuite "only.html", @contentWindow, ->
+        expect(trigger).to.be.calledWith "exclusive:test"
+        done()
 
-    it "does not trigger 'exclutive:test' when tests do not have a .only", ->
+    it "does not trigger 'exclutive:test' when tests do not have a .only", (done) ->
       @runnerModel = App.request("start:test:runner")
       @runnerModel.options.grep = /.*/
       trigger = @sandbox.spy @runnerModel, "trigger"
-      @runnerModel.runIframeSuite "only.html", @contentWindow
-      expect(trigger).not.to.be.calledWith "exclusive:test"
+      @runnerModel.runIframeSuite "only.html", @contentWindow, ->
+        expect(trigger).not.to.be.calledWith "exclusive:test"
+        done()
 
   context "events", ->
     beforeEach ->
@@ -68,8 +70,6 @@ describe "Runner Entity", ->
           "suite:stop"
           "suite:stop"
           "after:run"
-          "suite:stop"
-          "suite:stop"
           "runner:end"
         ]
         done()

@@ -3,6 +3,9 @@ window.expect = chai.expect
 before ->
   @sandbox = sinon.sandbox.create()
 
+beforeEach ->
+  App.execute "set:app:env", "web"
+
 afterEach ->
   @sandbox.restore()
 
