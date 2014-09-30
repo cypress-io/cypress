@@ -13,7 +13,6 @@
     ui:
       wrapper:  ".command-wrapper"
       method:   ".command-method"
-      response: ".command-response"
       # pause:    ".fa-pause"
       revert:   ".fa-search"
 
@@ -30,7 +29,6 @@
 
     events:
       "click"               : "clicked"
-      "click @ui.response"  : "responseClicked"
 
     onShow: ->
       @$el.addClass "command-type-#{@model.get("type")}"
@@ -58,19 +56,6 @@
       _.each @model.getPrimaryObjects(), (obj, index) ->
         obj = if _.isArray(obj) then obj else [obj]
         console.log obj...
-
-    responseClicked: (e) ->
-      e.stopPropagation()
-      response = @model.xhr.responseText
-
-      try
-        response = JSON.parse response
-
-      console.log "Status:     ", @model.xhr.status
-      console.log "URL:        ", @model.xhr.url
-      console.log "Matched URL:", @model.response.url
-      console.log "Request:    ", @model.xhr
-      console.log "Response:   ", response
 
     chosenChanged: (model, value, options) ->
       @$el.toggleClass "active", value

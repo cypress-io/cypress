@@ -63,12 +63,13 @@
 
     getPrimaryObjects: ->
       objs = switch @get("type")
-        when "xhr"        then @xhr
         when "dom"        then @el
         when "assertion"  then @getAssertion()
         when "server"     then @getServer()
+        when "xhr"        then @getXhrObject()
 
       _([objs]).flatten(true)
+
 
     getSnapshot: ->
       @snapshot
@@ -81,6 +82,23 @@
         memo.push [key, value] if value?
         memo
       , []
+
+    getXhrObject: ->
+      ## return the primary xhr object
+      ## if we dont have a response
+      return @xhr if not @get("response")
+
+      response = @xhr.responseText
+
+      try
+        response = JSON.parse response
+
+      @convertToArray
+        "Status:     ": @xhr.status
+        "URL:        ": @xhr.url
+        "Matched URL:": @response.url
+        "Request:    ": @xhr
+        "Response:   ": response
 
     getAssertion: ->
       @convertToArray
