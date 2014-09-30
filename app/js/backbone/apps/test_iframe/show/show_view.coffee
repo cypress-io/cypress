@@ -168,28 +168,3 @@
 
       @$el.find("iframe").show()
       @externalWindow.close?()
-
-
-          # suite         = this.contentWindow.mocha.suite
-          # suite.window  = this.contentWindow
-          # suite.id      = id || _.uniqueId("suite")
-
-          # suite.beforeAll(Ecl.beforeAll)
-
-          # suite.afterEach(Ecl.afterEach)
-
-          # // add the suite to the stats
-          # stats.suites[suite.id] = {
-            # suite: suite,
-            # passed: 0,
-            # failed: 0,
-            # total: suite.total()
-          # }
-
-          # $(this).data("id", suite.id)
-
-          # // runner.run()
-          # // run each of the iframes suite independently
-          # runner.runSuite(suite, function(){
-            # console.log("runSuite finished", arguments, this)
-          # });
