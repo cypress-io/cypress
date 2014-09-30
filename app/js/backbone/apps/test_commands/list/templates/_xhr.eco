@@ -1,6 +1,6 @@
 <div class="command-wrapper">
   <span class="command-number">
-    <%= @numberFormatted %>
+    <%= @number %>
   </span>
   <span class="command-method"><%= @method %></span>
   <% if @response?: %>
