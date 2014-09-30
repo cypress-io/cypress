@@ -100,6 +100,30 @@ Eclectus.Dom = do ($, _, Eclectus) ->
       return dom
 
     hover: ->
+      # for index, stylesheet of document.styleSheets
+      #   if stylesheet.rules
+      #     for ruleIndex, rule of stylesheet.rules
+      #       console.log rule.cssText
+      #       debugger if _.str.contains rule.cssText, ":hover"
+
+      dom             = @clone()
+
+      if @elExistsInDocument()
+        @_$el.simulate "mouseover"
+      else
+        dom.error = "not found"
+
+      dom.prevObject  = @
+      dom.$el         = @$el
+      dom._$el        = @_$el
+      dom.length      = @$el.length
+      dom.selector    = @selector
+      dom.canBeParent = false ## do not allow parent/child chaining off of this action
+
+      dom.emit
+        method:   "hover"
+
+      return dom
 
     type: (sequence, options = {}) ->
       #@pauseRunnable() if sequence is "walk the dog{enter}" and @runnable.cid is "1lc"
