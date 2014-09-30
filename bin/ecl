@@ -4,9 +4,10 @@ var program   = require("commander")
 var path      = require("path")
 var yo        = require("yeoman-generator")
 var nodemon   = require("nodemon")
+var package   = require(path.join(__dirname, "../", "package.json"));
 
 program
-  .version(require("../package.json").version)
+  .version(package.version)
 
 program
   .command("install")
