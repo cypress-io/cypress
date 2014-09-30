@@ -84,6 +84,12 @@ program
     })
   })
 
+// If the user does not pass any arguments
+// show the help message by default and exit the process.
+if (process.argv.length == 2) {
+  program.help();
+}
+
 program.parse(process.argv)
 
 function electusGenerator(name){
