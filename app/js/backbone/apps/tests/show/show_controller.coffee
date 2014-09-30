@@ -51,6 +51,7 @@
     onDestroy: (config) ->
       config.trigger "close:test:panels"
       App.request "stop:test:runner", @runner
+      delete @runner
 
     getLayoutView: (config) ->
       new Show.Layout
