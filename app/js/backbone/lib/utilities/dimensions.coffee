@@ -20,7 +20,7 @@
       _.each layers, (color, attr) =>
         obj = switch attr
           when "Content"
-            ## rearrange the conents offset so
+            ## rearrange the contents offset so
             ## its inside of our border + padding
             {
               width: dimensions.width
@@ -48,13 +48,13 @@
         ## so we dont create unnecessary layers
         return if @dimensionsMatchPreviousLayer(obj, container)
 
-        @createLayer el, color, container, obj
+        @createLayer el, attr, color, container, obj
 
       container.appendTo(body)
 
       return container
 
-    createLayer: (el, color, container, dimensions) ->
+    createLayer: (el, attr, color, container, dimensions) ->
       $("<div>")
         .css
           width: dimensions.width
@@ -65,15 +65,19 @@
           zIndex: @getZIndex(el)
           backgroundColor: color
           opacity: 0.7
+        .attr("data-layer", attr)
         .prependTo(container)
 
     dimensionsMatchPreviousLayer: (obj, container) ->
+      ## since we're prepending to the container that
+      ## means the previous layer is actually the first child element
       previousLayer = container.children().first()
 
       ## bail if there is no previous layer
       return if not previousLayer.length
 
-      obj.width is previousLayer.width() and obj.height is previousLayer.height()
+      obj.width is previousLayer.width() and
+      obj.height is previousLayer.height()
 
     getDimensionsFor: (dimensions, attr, dimension) ->
       dimensions[dimension + "With" + attr]

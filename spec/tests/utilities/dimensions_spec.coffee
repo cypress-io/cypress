@@ -48,7 +48,7 @@ describe "Element Dimensions Utility", ->
 
     it "layers padding div", ->
       @layer = App.request "element:box:model:layers", @square, @html.find("body")
-      style = @layer.children().eq(2).prop("style")
+      style = @layer.find("[data-layer='Padding']").prop("style")
       expect(style).to.have.property("height", "30px")
       expect(style).to.have.property("width", "40px")
 
@@ -83,7 +83,7 @@ describe "Element Dimensions Utility", ->
 
     it "layers border div", ->
       @layer = App.request "element:box:model:layers", @square, @html.find("body")
-      style = @layer.children().eq(1).prop("style")
+      style = @layer.find("[data-layer='Border']").prop("style")
       expect(style).to.have.property("height", "24px")
       expect(style).to.have.property("width", "24px")
 
@@ -118,7 +118,7 @@ describe "Element Dimensions Utility", ->
 
     it "layers margin div", ->
       @layer = App.request "element:box:model:layers", @square, @html.find("body")
-      style = @layer.children().eq(0).prop("style")
+      style = @layer.find("[data-layer='Margin']").prop("style")
       expect(style).to.have.property("height", "36px")
       expect(style).to.have.property("width", "32px")
 
@@ -128,6 +128,6 @@ describe "Element Dimensions Utility", ->
 
     it "layers content div", ->
       @layer = App.request "element:box:model:layers", @square, @html.find("body")
-      style = @layer.children().eq(3).prop("style")
+      style = @layer.find("[data-layer='Content']").prop("style")
       expect(style).to.have.property("height", "20px")
       expect(style).to.have.property("width", "20px")
