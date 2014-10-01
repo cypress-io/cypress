@@ -10,19 +10,32 @@
       container = $("<div>")
 
       layers = {
-        Margin: "#F9CC9D"
-        Border: "#FCDB9A"
+        Content: "#9FC4E7"
         Padding: "#C1CD89"
+        Border: "#FCDB9A"
+        Margin: "#F9CC9D"
       }
 
       ## create the margin / bottom / padding layers
       _.each layers, (color, attr) =>
+        obj = switch attr
+          when "Content"
+            ## rearrange the conents offset so
+            ## its inside of our border + padding
+            {
+              width: dimensions.width
+              height: dimensions.height
+              top: (dimensions.offset.top + dimensions.borderTop + dimensions.paddingTop)
+              left: (dimensions.offset.left + dimensions.borderLeft + dimensions.paddingLeft)
+            }
 
-        obj =
-          width: @getDimensionsFor(dimensions, attr, "width")
-          height: @getDimensionsFor(dimensions, attr, "height")
-          top: dimensions.offset.top
-          left: dimensions.offset.left
+          else
+            {
+              width: @getDimensionsFor(dimensions, attr, "width")
+              height: @getDimensionsFor(dimensions, attr, "height")
+              top: dimensions.offset.top
+              left: dimensions.offset.left
+            }
 
         ## if attr is margin then we need to additional
         ## subtract what the actual marginTop + marginLeft
@@ -31,17 +44,11 @@
           obj.top -= dimensions.marginTop
           obj.left -= dimensions.marginLeft
 
-        @createLayer el, color, container, obj
+        ## bail if the dimesions of this layer match the previous one
+        ## so we dont create unnecessary layers
+        return if @dimensionsMatchPreviousLayer(obj, container)
 
-      ## finally create the actual "height" (content)
-      ## layer and rearrange its offset so its inside
-      ## of our border + padding
-      @createLayer el, "#9FC4E7", container, {
-        width: dimensions.width
-        height: dimensions.height
-        top: (dimensions.offset.top + dimensions.borderTop + dimensions.paddingTop)
-        left: (dimensions.offset.left + dimensions.borderLeft + dimensions.paddingLeft)
-      }
+        @createLayer el, color, container, obj
 
       container.appendTo(body)
 
@@ -58,7 +65,15 @@
           zIndex: @getZIndex(el)
           backgroundColor: color
           opacity: 0.7
-        .appendTo(container)
+        .prependTo(container)
+
+    dimensionsMatchPreviousLayer: (obj, container) ->
+      previousLayer = container.children().first()
+
+      ## bail if there is no previous layer
+      return if not previousLayer.length
+
+      obj.width is previousLayer.width() and obj.height is previousLayer.height()
 
     getDimensionsFor: (dimensions, attr, dimension) ->
       dimensions[dimension + "With" + attr]
@@ -108,7 +123,7 @@
       dimensions.heightWithMargin = el.outerHeight(true)
 
       dimensions.widthWithPadding = el.innerWidth()
-      dimensions.widthWithBorder = el.innerHeight() + @getTotalFor(["borderRight", "borderLeft"], dimensions)
+      dimensions.widthWithBorder = el.innerWidth() + @getTotalFor(["borderRight", "borderLeft"], dimensions)
       dimensions.widthWithMargin = el.outerWidth(true)
 
       return dimensions
