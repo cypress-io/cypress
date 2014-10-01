@@ -80,7 +80,7 @@
 
     convertToArray: (obj) ->
       _.reduce obj, (memo, value, key) ->
-        memo.push [key, value] if value?
+        memo.push ["%c" + key, "font-weight: bold;", value] if value?
         memo
       , []
 
