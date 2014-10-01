@@ -1,97 +1,18 @@
 #!/usr/bin/env node
+require("coffee-script/register");
 
-var program   = require("commander")
-var path      = require("path")
-var nodemon   = require("nodemon")
-var package   = require(path.join(__dirname, "../", "package.json"));
+var ecl = new (require('../lib/ecl'));
 
-program
-  .version(package.version)
-
-program
-  .command("install")
-  .description("Installs Eclectus")
-  .action(function(){
-    require("yeoman-generator")("eclectus")
-      .register(electusGenerator("config"), "eclectus")
-      .run()
-  })
-
-program
-  .command("start")
-  .description("Starts the Eclectus server")
-  .option("-d, --debug", "Starts the server in debug mode")
-  .action(function(options){
-    // bail immediately here if we dont have the eclectus.json file
-    // tell us to run install
-
-    require("coffee-script/register");
-
-    // need to add the eclectus.json file to the watch list
-    var server = path.join(__dirname, "..", "lib", "server.coffee")
-
-    // watch other .coffee files based on the directory our server.coffee file is in
-    // need to optionally accept a --debug argument here to put
-    // nodemon into debug mode instead of always putting in there
-    var str = ""
-
-    if (options.debug) {
-      str += "--debug "
-    }
-
-    str += "--verbose --watch " + path.dirname(server) + "/*.coffee " + server
-
-    console.log("nodemon options:", str)
-
-    nodemon(str)
-
-    nodemon.on("start", function(){
-      console.log("app has started")
-    })
-
-    nodemon.on("restart", function(files){
-      console.log("app has restarted", files)
-    })
-  })
-
-program
-  .command("ci")
-  .description("Runs Tests in PhantomJS (Continuous Integration Mode)")
-  .option("-d, --debug", "Starts the server in debug mode")
-  .action(function(options){
-    require("coffee-script/register")
-
-    var server = path.join(__dirname, "..", "lib", "ci.coffee")
-
-    var str = ""
-
-    if (options.debug) {
-      str += "--debug "
-    }
-
-    str += "--verbose --watch " + server + " " + server
-
-    console.log("nodemon options:", str)
-
-    nodemon(str)
-
-    nodemon.on("start", function(){
-      console.log("app has started")
-    })
-
-    nodemon.on("restart", function(files){
-      console.log("app has restarted", files)
-    })
-  })
-
-// If the user does not pass any arguments
-// show the help message by default and exit the process.
-if (process.argv.length == 2) {
-  program.help();
+// Enable Verbose logging of ECL
+if (~process.argv.indexOf('--verbose')) {
+  ecl.on('verbose', function() {
+    console.log.call(console, ":VERBOSE: ", Array.prototype.slice.call(arguments).join(' '));
+  });
 }
 
-program.parse(process.argv)
-
-function electusGenerator(name){
-  return path.join(__dirname, "..", "lib", "generator-eclectus", name)
-}
+// Kick it all off
+ecl.parseCliArguments(
+  // Clone to argv just in case someone decides
+  // to be evil and mutate them somewhere.
+  Array.prototype.slice.call(process.argv)
+);
