@@ -3,9 +3,10 @@
 var program   = require("commander")
 var path      = require("path")
 var nodemon   = require("nodemon")
+var package   = require(path.join(__dirname, "../", "package.json"));
 
 program
-  .version(require("../package.json").version)
+  .version(package.version)
 
 program
   .command("install")
@@ -82,6 +83,12 @@ program
       console.log("app has restarted", files)
     })
   })
+
+// If the user does not pass any arguments
+// show the help message by default and exit the process.
+if (process.argv.length == 2) {
+  program.help();
+}
 
 program.parse(process.argv)
 
