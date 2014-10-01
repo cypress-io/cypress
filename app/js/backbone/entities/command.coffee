@@ -102,7 +102,10 @@
         @logSpyProperty("Arguments:     %O", spy.args[i])
         @logSpyProperty("Context:      ", spy.thisValues[i])
         @logSpyProperty("Return Value: ", spy.returnValues[i])
-        # console.log @logSpyProperty(spy, i)
+
+        exception = spy.exceptions[i]
+        @logSpyProperty("Exception: ", exception) if exception
+
         console.groupEnd()
 
     logSpyProperty: (key, value) ->
