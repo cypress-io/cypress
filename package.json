@@ -4,6 +4,7 @@
   "description": "Javascript Test Studio",
   "main": "index.js",
   "scripts": {
+    "test-server": "mocha --opts spec/server/mocha.opts"
   },
   "repository": {
     "type": "git",
@@ -40,6 +41,7 @@
     "method-override": "^2.2.0",
     "morgan": "^1.3.0",
     "nodemon": "^1.2.1",
+    "chai": "^1.9.2"
   },
   "dependencies": {
     "bower": "^1.3.8",
