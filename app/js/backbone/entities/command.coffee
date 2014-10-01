@@ -71,7 +71,6 @@
 
       _([objs]).flatten(true)
 
-
     getSnapshot: ->
       @snapshot
 
@@ -83,6 +82,52 @@
         memo.push ["%c" + key, "font-weight: bold;", value] if value?
         memo
       , []
+
+    getSpyObject: ->
+      spy = @spy
+
+      _.defer =>
+        @logSpyTableProperties(spy)
+
+      @convertToArray
+        "Spy:      %O": spy
+        "Call Count: ": spy.callCount
+
+    logSpyTableProperties: (spy) ->
+      return if count = spy.callCount is 0
+
+      for i in [0..count]
+        console.group("Call ##{i}:")
+        # console.log.apply(console, @getSpyArgsForCall(spy, i))
+        @logSpyProperty("Arguments:     %O", spy.args[i])
+        @logSpyProperty("Context:      ", spy.thisValues[i])
+        @logSpyProperty("Return Value: ", spy.returnValues[i])
+        # console.log @logSpyProperty(spy, i)
+        console.groupEnd()
+
+    logSpyProperty: (key, value) ->
+      console.log "%c#{key}", "color: blue", value
+      # {
+      #   Arguments: spy.args[index]
+      #   "'this' Context": spy.thisValues[index]
+      #   "Return Values": spy.returnValues[index]
+      # }
+      # array = [
+        # "%cArguments: %O",
+        # "color: blue;",
+        # spy.args[index],
+        # "'this' Context: ",
+        # spy.thisValues[index],
+        # "Return Value: ",
+        # spy.returnValues[index],
+      # ]
+
+      # exception = spy.exceptions[index]
+
+      # array = array.concat("Exceptions: ", exception) if exception
+
+      # return array
+      # _(spy).zip(spy.args, spy.thisValues, spy.returnValues, spy.exceptions)
 
     getXhrObject: ->
       ## return the primary xhr object
