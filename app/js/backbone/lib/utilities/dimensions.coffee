@@ -9,8 +9,14 @@
 
       container = $("<div>")
 
+      layers = {
+        Margin: "#F9CC9D"
+        Border: "#FCDB9A"
+        Padding: "#C1CD89"
+      }
+
       ## create the margin / bottom / padding layers
-      _.each ["Margin", "Border", "Padding"], (attr) =>
+      _.each layers, (color, attr) =>
 
         obj =
           width: @getDimensionsFor(dimensions, attr, "width")
@@ -25,12 +31,12 @@
           obj.top -= dimensions.marginTop
           obj.left -= dimensions.marginLeft
 
-        @createLayer el, container, obj
+        @createLayer el, color, container, obj
 
       ## finally create the actual "height" (content)
       ## layer and rearrange its offset so its inside
       ## of our border + padding
-      @createLayer el, container, {
+      @createLayer el, "#9FC4E7", container, {
         width: dimensions.width
         height: dimensions.height
         top: (dimensions.offset.top + dimensions.borderTop + dimensions.paddingTop)
@@ -41,7 +47,7 @@
 
       return container
 
-    createLayer: (el, container, dimensions) ->
+    createLayer: (el, color, container, dimensions) ->
       $("<div>")
         .css
           width: dimensions.width
@@ -50,7 +56,7 @@
           left: dimensions.left
           position: "absolute"
           zIndex: @getZIndex(el)
-          backgroundColor: "#F9CC9D"
+          backgroundColor: color
           opacity: 0.8
         .appendTo(container)
 
@@ -89,16 +95,21 @@
         marginLeft: @getMargin(el, "left")
       }
 
-      ## push dimensions object into this fn
-      getCalcFor = _(@getCalcFor).bind(API, dimensions)
+      ## innerHeight: Get the current computed height for the first
+      ## element in the set of matched elements, including padding but not border.
 
-      getCalcFor("heightWithPadding", "padding", "height")
-      getCalcFor("heightWithBorder", "border", "height")
-      getCalcFor("heightWithMargin", "margin", "height")
+      ## outerHeight: Get the current computed height for the first
+      ## element in the set of matched elements, including padding, border,
+      ## and optionally margin. Returns a number (without "px") representation
+      ## of the value or null if called on an empty set of elements.
 
-      getCalcFor("widthWithPadding", "padding", "width")
-      getCalcFor("widthWithBorder", "border", "width")
-      getCalcFor("widthWithMargin", "margin", "width")
+      dimensions.heightWithPadding = el.innerHeight()
+      dimensions.heightWithBorder = el.innerHeight() + @getTotalFor(["borderTop", "borderBottom"], dimensions)
+      dimensions.heightWithMargin = el.outerHeight(true)
+
+      dimensions.widthWithPadding = el.innerWidth()
+      dimensions.widthWithBorder = el.innerHeight() + @getTotalFor(["borderRight", "borderLeft"], dimensions)
+      dimensions.widthWithMargin = el.outerWidth(true)
 
       return dimensions
 
@@ -117,12 +128,9 @@
     getMargin: (el, dir) ->
       @attr "margin-#{dir}"
 
-    getCalcFor: (obj, prop, attr, dimension) ->
-      obj[prop] = @getTotalFor(obj, attr, dimension)
-
-    getTotalFor: (obj, attr, dimension) ->
-      _.reduce ["Top", "Right", "Bottom", "Left"], (memo, direction) ->
-        memo += obj[attr + direction]
+    getTotalFor: (directions, dimensions) ->
+      _.reduce directions, (memo, direction) ->
+        memo += dimensions[direction]
       , 0
 
   App.reqres.setHandler "element:box:model:layers", (el, body) ->
