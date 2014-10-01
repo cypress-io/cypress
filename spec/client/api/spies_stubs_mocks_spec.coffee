@@ -19,15 +19,13 @@ describe "Spies Stubs Mocks API", ->
       expect(fn).to.throw(Error)
 
     it "emits the original spy object", ->
-      fn =
-        foo: ->
+      fn = { foo: -> }
 
       Ecl.spy(fn, "foo")
       expect(@emit.getCall(0).args[0]).to.have.property "spy", fn.foo
 
     it "emits a child object when the spy is invoked", ->
-      fn =
-        foo: ->
+      fn = { foo: -> }
 
       Ecl.spy(fn, "foo")
       fn.foo()
@@ -42,3 +40,10 @@ describe "Spies Stubs Mocks API", ->
       expect(emit2).to.have.property "spyCall"
       expect(emit2).to.have.property "parent", emit1.id
       expect(emit2).to.have.property "method", "call #1"
+
+    it "can create a spy from nothing", ->
+      spy = Ecl.spy()
+
+      spy("foo")
+
+      expect(@emit).to.be.calledTwice
