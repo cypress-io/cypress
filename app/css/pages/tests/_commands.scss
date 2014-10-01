@@ -99,6 +99,13 @@
     position: relative;
     overflow: hidden;
     color: #777;
+
+    i.fa-ellipsis-h {
+      color: #fff;
+      background-color: #abaaaa;
+      border-radius: 3px;
+      padding: 0 4px;
+    }
   }
 
   .command-number {
@@ -207,13 +214,6 @@
   }
 
   .command-response {
-
-    i.fa-ellipsis-h {
-      color: #fff;
-      background-color: #abaaaa;
-      border-radius: 3px;
-      padding: 0 4px;
-    }
 
     .command-status {
       font-weight: 700;

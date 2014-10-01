@@ -6,7 +6,10 @@
     <span><%= @method %></span>
   </span>
   <span class="command-message">
-    <%= @message %>
+    <%= @messageTruncated %>
+    <% if @truncated: %>
+      <i class="fa fa-ellipsis-h"></i>
+    <% end %>
   </span>
   <% if @error: %>
     <span class="command-error"><%= @error %></span>

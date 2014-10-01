@@ -19,6 +19,15 @@
       shouldDisplayControls: ->
         not @isCloned()
 
+      truncated: ->
+        switch @get("type")
+          when "xhr"        then @xhr.responseTextText.length > 40
+          when "assertion"  then @get("message").length > 100
+
+      messageTruncated: ->
+        return if not message = @get("message")
+        _(message).truncate(100, " ")
+
     initialize: ->
       new Backbone.Chooser(@)
 
@@ -58,7 +67,6 @@
     setResponse: (response) ->
       @set "status", @xhr.status
       @set "response", _(@xhr.responseText).truncate(40, " ")
-      @set "truncated", @xhr.responseText.length > 40
       @response = response
 
     getPrimaryObjects: ->
@@ -110,9 +118,9 @@
     logSpyCall: (spy, index) ->
       console.group("Call ##{index + 1}:")
       # console.log.apply(console, @getSpyArgsForCall(spy, i))
-      @logSpyProperty("Arguments:     %O", spy.args[index])
-      @logSpyProperty("Context:      ", spy.thisValues[index])
-      @logSpyProperty("Return Value: ", spy.returnValues[index])
+      @logSpyProperty("Arguments:  %O", spy.args[index])
+      @logSpyProperty("Context:   ", spy.thisValues[index])
+      @logSpyProperty("Returned:  ", spy.returnValues[index])
 
       exception = spy.exceptions[index]
       @logSpyProperty("Exception: ", exception) if exception
