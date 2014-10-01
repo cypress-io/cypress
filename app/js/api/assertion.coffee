@@ -10,9 +10,9 @@ Eclectus.Assertion = do ($, _, Eclectus) ->
       ## if this is a jquery object and its true
       ## then remove all the 'but's and replace with 'and'
       ## also just think about slicing off everything after a comma?
-      if value instanceof $
-        message = message.split("but").join("and") if message and passed
+      message = message.split("but").join("and") if message and passed
 
+      if value instanceof $
         ## store the $el
         @$el = value
 
