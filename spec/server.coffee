@@ -27,13 +27,13 @@ getSpecPath = (pathName) ->
   if /all_specs/.test(pathName) then getAllSpecs(false) else [pathName.replace(/^\//, "")]
 
 getAllSpecs = (allSpecs = true) ->
-  specs = glob.sync "tests/**/*.coffee", cwd: __dirname
-  specs.unshift "tests/all_specs.coffee" if allSpecs
+  specs = glob.sync "client/**/*.coffee", cwd: __dirname
+  specs.unshift "client/all_specs.coffee" if allSpecs
   _.chain(specs)
     ## remove the spec helper file
     .reject (spec) -> /spec_helper/.test(spec)
     .map (spec) ->
-      ## replace tests/whatevs.coffee -> specs/whatevs.coffee
+      ## replace client/whatevs.coffee -> specs/whatevs.coffee
       spec = spec.split("/")
       spec.splice(0, 1, "specs")
 
@@ -43,7 +43,7 @@ getAllSpecs = (allSpecs = true) ->
 
 getSpec = (spec) ->
   spec = removeExtension(spec) + ".coffee"
-  file = fs.readFileSync path.join(__dirname, "tests", spec), "utf8"
+  file = fs.readFileSync path.join(__dirname, "client", spec), "utf8"
   coffee.compile(file)
 
 app.get "/specs/*", (req, res) ->
