@@ -36,5 +36,12 @@
       @any (hook) ->
         hook.anyFailed()
 
+    ## loop through all of our hook models
+    ## and find the original command
+    getOriginalCommandByClone: (command) ->
+      for hook in @models
+        if original = hook.get("commands").getOriginalByClone(command)
+          return original
+
   App.reqres.setHandler "hook:entities", ->
     new Entities.HooksCollection
