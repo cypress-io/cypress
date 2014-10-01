@@ -85,28 +85,39 @@
 
     getSpyObject: ->
       spy = @spy
+      spyCall = @spyCall
 
       _.defer =>
-        @logSpyTableProperties(spy)
+        @logSpyTableProperties(spy, spyCall)
 
       @convertToArray
-        "Spy:      %O": spy
-        "Call Count: ": spy.callCount
+        "Spy:    %O": spy
+        "Calls: ": spy.callCount
 
-    logSpyTableProperties: (spy) ->
-      return if count = spy.callCount is 0
+    logSpyTableProperties: (spy, spyCall) ->
+      count = spy.callCount
+      return if count is 0
 
-      for i in [0..count]
-        console.group("Call ##{i}:")
-        # console.log.apply(console, @getSpyArgsForCall(spy, i))
-        @logSpyProperty("Arguments:     %O", spy.args[i])
-        @logSpyProperty("Context:      ", spy.thisValues[i])
-        @logSpyProperty("Return Value: ", spy.returnValues[i])
+      ## if spyCall is passed in just log out this
+      ## specific spyCall as opposed to all of them
+      ## use its num - 1 for 0 based indexes
+      if spyCall
+        @logSpyCall(spy, spyCall.num - 1)
+      else
+        for i in [0..count - 1]
+          @logSpyCall(spy, i)
 
-        exception = spy.exceptions[i]
-        @logSpyProperty("Exception: ", exception) if exception
+    logSpyCall: (spy, index) ->
+      console.group("Call ##{index + 1}:")
+      # console.log.apply(console, @getSpyArgsForCall(spy, i))
+      @logSpyProperty("Arguments:     %O", spy.args[index])
+      @logSpyProperty("Context:      ", spy.thisValues[index])
+      @logSpyProperty("Return Value: ", spy.returnValues[index])
 
-        console.groupEnd()
+      exception = spy.exceptions[index]
+      @logSpyProperty("Exception: ", exception) if exception
+
+      console.groupEnd()
 
     logSpyProperty: (key, value) ->
       console.log "%c#{key}", "color: blue", value
@@ -279,12 +290,18 @@
       options
 
     addSpy: (attrs) ->
-      {spy} = attrs
+      {spy, spyCall, snapshot} = attrs
 
-      attrs = _(attrs).omit "spy"
+      attrs = _(attrs).omit "spy", "spyCall", "snapshot"
 
       command = new Entities.Command attrs
       command.spy = spy
+      command.spyCall = spyCall
+      command.snapshot = snapshot
+
+      @insertParents command, attrs.parent,
+        if: (parent, cmd) ->
+          @lastParentCommandIsNotParent(parent, cmd)
 
       return command
 
