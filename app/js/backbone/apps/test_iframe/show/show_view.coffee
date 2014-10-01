@@ -57,38 +57,25 @@
         ## bail if our el no longer exists in the parent dom
         return if not @elExistsInDocument(dom, el)
 
+        ## bail if our el isnt visible either
+        return if not el.is(":visible")
+
         dimensions = @getDimensions(el)
 
         ## dont show anything if our element displaces nothing
         return if dimensions.width is 0 or dimensions.height is 0
 
         _.defer =>
-          $("<div>")
-            .attr("data-highlight-el", options.id)
-            .css
-              width: dimensions.width - 6,
-              height: dimensions.height - 6,
-              top: dimensions.offset.top,
-              left: dimensions.offset.left,
-              position: "absolute",
-              zIndex: @getZIndex(el)
-              backgroundColor: "blue"
-              opacity: 0.3
-            .hover ->
-              $(@)
-                .css
-                  backgroundColor: "red"
-                  opacity: 0.3
-            .appendTo(dom)
+          div = App.request("element:box:model:layers", el, dom)
+          div.attr("data-highlight-el", options.id)
 
     elExistsInDocument: (parent, el) ->
       $.contains parent[0], el[0]
 
     getDimensions: (el) ->
       {
-        offset: el.offset()
-        width: el.outerWidth(false)
-        height: el.outerHeight(false)
+        width: el.width()
+        height: el.height()
       }
 
     calcWidth: (main, tests, container) ->

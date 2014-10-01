@@ -57,7 +57,7 @@
           position: "absolute"
           zIndex: @getZIndex(el)
           backgroundColor: color
-          opacity: 0.8
+          opacity: 0.7
         .appendTo(container)
 
     getDimensionsFor: (dimensions, attr, dimension) ->
@@ -71,7 +71,7 @@
       ## around el
       @attr = (attr) ->
         ## nuke anything thats not a number
-        num = el.css(attr).replace /[^0-9]+/, ""
+        num = el.css(attr).replace /[^0-9\.]+/, ""
 
         throw new Error("Element attr did not return a valid number") if not _.isFinite(num)
 
@@ -79,8 +79,8 @@
 
       dimensions = {
         offset: el.offset() ## offset disregards margin but takes into account border + padding
-        height: @getHeight(el)
-        width: @getWidth(el)
+        height: el.height() ## we want to use height here (because that always returns just the content hight) instead of .css() because .css("height") is altered based on whether box-sizing: border-box is set
+        width: el.width()
         paddingTop: @getPadding(el, "top")
         paddingRight: @getPadding(el, "right")
         paddingBottom: @getPadding(el, "bottom")
@@ -112,12 +112,6 @@
       dimensions.widthWithMargin = el.outerWidth(true)
 
       return dimensions
-
-    getHeight: (el) ->
-      @attr "height"
-
-    getWidth: (el) ->
-      @attr "width"
 
     getPadding: (el, dir) ->
       @attr "padding-#{dir}"
