@@ -2,25 +2,10 @@ describe "Dom Command API", ->
   beforeEach ->
     @emit = @sandbox.stub(Eclectus.Command.prototype, "emit").returns(null)
 
-    df = $.Deferred()
-
-    _this = @
-
-    $("iframe").remove()
-
-    iframe = $("<iframe />", {
-      src: "/fixtures/dom.html"
-      class: "iframe-spec"
-      load: ->
-        _this.contentWindow = @contentWindow
-        _this.dom = Eclectus.createDom {contentWindow: @contentWindow}
-        Eclectus.patch {contentWindow: @contentWindow}
-        df.resolve()
-    })
-
-    iframe.appendTo $("body")
-
-    df
+    loadFixture("html/dom").progress (iframe) =>
+      Eclectus.patch {contentWindow: iframe.contentWindow}
+      @dom = Eclectus.createDom {contentWindow: iframe.contentWindow}
+      @contentWindow = iframe.contentWindow
 
   it "stores the iframe's document", ->
     expect(@dom.document).to.eq @contentWindow.document

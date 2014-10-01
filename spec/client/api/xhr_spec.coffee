@@ -4,26 +4,10 @@ describe "XHR Command API", ->
   beforeEach ->
     @emit = @sandbox.stub(Eclectus.Command.prototype, "emit").returns(null)
 
-    df = $.Deferred()
-
-    _this = @
-
-    $("iframe").remove()
-
-    iframe = $("<iframe />", {
-      src: "/fixtures/xhr.html"
-      class: "iframe-spec"
-      load: ->
-        ## sandbox this iframe's contentWindow
-        Eclectus.sandbox @contentWindow
-        Eclectus.patch {contentWindow: @contentWindow}
-        _this.contentWindow = @contentWindow
-        df.resolve()
-    })
-
-    iframe.appendTo $("body")
-
-    df
+    loadFixture("html/sinon").progress (iframe) =>
+      Eclectus.sandbox iframe.contentWindow
+      Eclectus.patch {contentWindow: iframe.contentWindow}
+      @contentWindow = iframe.contentWindow
 
   it "sets sandbox for each content window", ->
     expect(Ecl.sandbox).to.exist
