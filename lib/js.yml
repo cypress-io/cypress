@@ -28,6 +28,7 @@ eclectus:
   - app/js/api/dom.coffee
   - app/js/api/xhr.coffee
   - app/js/api/assertion.coffee
+  - app/js/api/spies_stubs_mocks.coffee
   - app/js/config/**
   - app/js/backbone/app.coffee
   - app/js/backbone/lib/templates/**

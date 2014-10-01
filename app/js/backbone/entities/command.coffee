@@ -67,6 +67,7 @@
         when "assertion"  then @getAssertion()
         when "server"     then @getServer()
         when "xhr"        then @getXhrObject()
+        when "spy"        then @getSpyObject()
 
       _([objs]).flatten(true)
 
@@ -186,6 +187,7 @@
         when "xhr"        then @addXhr attrs
         when "assertion"  then @addAssertion attrs
         when "server"     then @addServer attrs
+        when "spy"        then @addSpy attrs
         else throw new Error("Command .type did not match anything")
 
     insertParents: (command, parentId, options = {}) ->
@@ -227,6 +229,16 @@
       index = @getIndexByParent(command)
       options.at = index if index
       options
+
+    addSpy: (attrs) ->
+      {spy} = attrs
+
+      attrs = _(attrs).omit "spy"
+
+      command = new Entities.Command attrs
+      command.spy = spy
+
+      return command
 
     addAssertion: (attrs) ->
       {snapshot, el, actual, expected, subject} = attrs

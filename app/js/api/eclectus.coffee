@@ -2,14 +2,14 @@
 window.Eclectus = do ($, _) ->
 
   methods =
-    find: (obj, el) ->
-      dom = Eclectus.createDom(obj)
+    find: (partial, el) ->
+      dom = Eclectus.createDom(partial)
       dom.find(el)
 
-    within: (obj, el, fn) ->
+    within: (partial, el, fn) ->
       throw new Error("Ecl.within() must be given a callback function!") if not _.isFunction(fn)
 
-      dom = Eclectus.createDom(obj)
+      dom = Eclectus.createDom(partial)
       dom = dom.within(el)
 
       ## scope eclectus methods (within / find) to automatically
@@ -24,22 +24,31 @@ window.Eclectus = do ($, _) ->
 
       return dom
 
-    server: (obj) ->
-      @sandbox._server = server = obj.contentWindow.sinon.fakeServer.create()
-      @sandbox.server = new Eclectus.Xhr obj.contentWindow, obj.channel, obj.runnable, @hook
+    server: (partial) ->
+      throw new Error("Eclectus.sandbox() must be invoked first") if not @sandbox
+
+      @sandbox._server = server = partial.contentWindow.sinon.fakeServer.create()
+      @sandbox.server = new Eclectus.Xhr partial.contentWindow, partial.channel, partial.runnable, @hook
       @sandbox.server.setServer server
 
       Eclectus.Xhr.bindServerTo(@, "server", @sandbox.server)
 
-    assert: (obj, passed, message, value, actual, expected) ->
-      assertion = new Eclectus.Assertion obj.contentWindow, obj.channel, obj.runnable, @hook
+    assert: (partial, passed, message, value, actual, expected) ->
+      assertion = new Eclectus.Assertion partial.contentWindow, partial.channel, partial.runnable, @hook
       assertion.log value, actual, expected, message, passed
 
-    ## these should have commands to log out the # of times called
-    ## the arguments, etc
-    stub: (obj) ->
-    mock: (obj) ->
-    spy: (obj) ->
+    stub: (partial) ->
+    mock: (partial) ->
+    spy: (partial, obj, method) ->
+      throw new Error("Eclectus.sandbox() must be invoked first") if not @sandbox
+
+      spy = @sandbox.spy(obj, method)
+
+      eclSpy = new Eclectus.Spy partial.contentWindow, partial.channel, partial.runnable, @hook
+      eclSpy.log(obj, method, spy)
+
+      ## return the sinon spy for chainability
+      return spy
 
   class Eclectus
     ## class method patch
