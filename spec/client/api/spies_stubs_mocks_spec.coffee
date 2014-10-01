@@ -24,3 +24,21 @@ describe "Spies Stubs Mocks API", ->
 
       Ecl.spy(fn, "foo")
       expect(@emit.getCall(0).args[0]).to.have.property "spy", fn.foo
+
+    it "emits a child object when the spy is invoked", ->
+      fn =
+        foo: ->
+
+      Ecl.spy(fn, "foo")
+      fn.foo()
+
+      ## this is the first emit for the spy
+      emit1 = @emit.getCall(0).args[0]
+
+      ## this is the 2nd emit for the invocation of the spy
+      emit2 = @emit.getCall(1).args[0]
+
+      expect(emit2).to.have.property "spy"
+      expect(emit2).to.have.property "spyCall"
+      expect(emit2).to.have.property "parent", emit1.id
+      expect(emit2).to.have.property "method", "call #1"
