@@ -78,9 +78,14 @@
     // padding-top: 4px;
     // margin-top: 4px;
 
+    &:hover {
+      border-top: 1px solid #eef1f4;
+    }
+
     &:first-child {
       border-top: 0;
     }
+
   }
 
   // .command-child {
