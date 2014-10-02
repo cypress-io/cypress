@@ -81,7 +81,7 @@
       div
         .fadeIn(180)
           .delay(120)
-            .fadeOut(300)
+            .fadeOut 300, -> $(@).remove()
 
     chosenChanged: (model, value, options) ->
       @$el.toggleClass "active", value

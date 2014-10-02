@@ -175,7 +175,7 @@
       div
         .fadeIn(180)
           .delay(120)
-            .fadeOut(300)
+            .fadeOut 300, -> $(@).remove()
 
     mouseoverPre: (e) ->
       e.stopPropagation()
