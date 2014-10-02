@@ -10,15 +10,7 @@ _.str     = require("underscore.string")
 chokidar  = require("chokidar")
 url       = require("url")
 spawn     = require("child_process").spawn
-phantom   = require("node-phantom-simple")
 mocha     = require("./mocha.coffee")
-
-# ph = null
-
-# do ->
-#   phantom.create (err, phInstance) ->
-#     console.log "PhantomJS ready..."
-#     ph = phInstance
 
 _.mixin _.str.exports()
 
@@ -90,27 +82,6 @@ getTest = (spec) ->
 
   return file
 
-phantomjs = (filepath, cb) ->
-  # cmd = path.join __dirname, "id_generator.coffee"
-
-  # t = Date.now()
-
-  # p = spawn "phantomjs", [cmd, "http://localhost:#{app.get('port')}/id_generator/#{filepath}"]
-  # p.stdout.pipe process.stdout
-  # p.stderr.pipe process.stderr
-  # p.on 'exit', (code) ->
-  #   t = Date.now() - t
-  #   console.log "exit", code, "time: ", t
-  #   cb(code)
-
-  ph.createPage (err, page) ->
-    t = Date.now()
-    pathToPage = "http://localhost:#{app.get('port')}/id_generator/#{filepath}"
-    page.open pathToPage, (err, status) ->
-      console.log "opened: ", pathToPage, "time: ", Date.now() - t
-      cb()
-  #       ph.exit()
-
 io.on "connection", (socket) ->
   #, ignoreInitial: true
   watchTestFiles = chokidar.watch testFolder, ignored: (path, stats) ->
@@ -132,10 +103,6 @@ io.on "connection", (socket) ->
 
     ## strip out our testFolder path from the filepath, and any leading forward slashes
     strippedPath  = filepath.replace(testFolder, "").replace(/^\/+/, "")#split("/")
-
-    ## run this file through phantomjs and make sure we have id's for everything
-    # phantomjs filepath, ->
-      # socket.emit "test:changed", file: filepath
 
     mocha.generateIds filepath, strippedPath, app, ->
       ## for some reason sometimes socket.io isnt emitting
