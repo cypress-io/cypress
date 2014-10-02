@@ -83,11 +83,12 @@
       pre:        "pre"
 
     events:
-      "mouseover"     : "mouseover"
-      "mouseout"      : "mouseout"
-      # "dblclick"      : "dblClicked"
-      "click"         : "clicked"
-      "click @ui.pre" : "preClicked"
+      "mouseover"         : "mouseover"
+      "mouseout"          : "mouseout"
+      # "dblclick"        : "dblClicked"
+      "click"             : "clicked"
+      "click @ui.pre"     : "preClicked"
+      "mouseover @ui.pre" : "mouseoverPre"
       "mouseover .commands-container" : "commandsMouseover"
 
     modelEvents:
@@ -152,7 +153,11 @@
     preClicked: (e) ->
       return if not @model.originalError
 
+      e.stopPropagation()
       console.error(@model.originalError.stack)
+
+    mouseoverPre: (e) ->
+      e.stopPropagation()
 
     hookChanged: (model, value, options) ->
       if value

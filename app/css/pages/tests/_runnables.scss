@@ -135,8 +135,13 @@
         }
 
         &.test-error {
-          background-color: $yellow-lightest;
+          background-color: darken($yellow-lightest, 5%);
           border-left: 5px solid $fail;
+
+          &:hover {
+            cursor: pointer;
+            background-color: darken($yellow-lightest, 15%);
+          }
         }
       }
 
