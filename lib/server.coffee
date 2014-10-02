@@ -160,33 +160,6 @@ io.on "connection", (socket) ->
     filepath = path.basename(filepath)
     socket.emit "eclectus:css:changed", file: filepath
 
-  # ## watch js/coffee files for changes
-  # gazeTestFiles = new Gaze
-  # gazeTestFiles.add "#{testFolder}/**/*.+(js|coffee)"
-
-  # gazeTestFiles.watched (err, watched) ->
-  #   console.log "gazeTestFiles", watched
-
-  # gazeTestFiles.on "changed", (filepath) ->
-  #   ## split the path into an array
-  #   ## find the index of our testFolder
-  #   ## grab all the rest of the elements
-  #   ## past this testFolder
-  #   filepath  = filepath.split("/")
-  #   index = filepath.indexOf(testFolder)
-  #   filepath  = _(filepath).rest(index + 1).join("/")
-  #   socket.emit "test:changed", file: filepath
-
-  # ## only do this in development mode
-  # gazeCss = new Gaze path.join(__dirname, "public", "css", "*.css")
-
-  # gazeCss.watched (err, watched) ->
-  #   console.log "gazeCss", watched
-
-  # gazeCss.on "changed", (filepath) ->
-  #   filepath = path.basename(filepath)
-  #   socket.emit "eclectus:css:changed", file: filepath
-
 getSpecs = (test) ->
   ## grab all of the specs if this is ci
   if test is "ci"
