@@ -54,12 +54,31 @@
 
     clicked: (e) ->
       e.stopPropagation()
+      @displayConsoleMessage()
       console.clear?()
       _.each @model.getPrimaryObjects(), (obj, index) ->
         return if not obj
 
         obj = if _.isArray(obj) then obj else [obj]
         console.log obj...
+
+    displayConsoleMessage: ->
+      width  = @$el.outerWidth()
+      offset = @$el.offset()
+
+      div = $("<div>", class: "command-console-message")
+      div.text("Printed output to your console!")
+
+      ## center this guy in the middle of our command
+      div.appendTo($("body"))
+        .css
+          top: offset.top
+          left: offset.left
+          marginLeft: (width / 2) - (div.innerWidth() / 2)
+      div
+        .fadeIn(180)
+          .delay(120)
+            .fadeOut(300)
 
     chosenChanged: (model, value, options) ->
       @$el.toggleClass "active", value
