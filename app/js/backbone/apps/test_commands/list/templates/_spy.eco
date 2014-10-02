@@ -6,6 +6,9 @@
   <span class="command-message">
     <%= @message %>
   </span>
+  <% if @error: %>
+    <span class="command-error"><%= @error %></span>
+  <% end %>
   <% if @shouldDisplayControls: %>
     <span class="command-controls">
       <!-- <i class="fa fa-pause"></i> -->

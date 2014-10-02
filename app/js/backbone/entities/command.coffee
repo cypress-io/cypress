@@ -21,8 +21,8 @@
 
       truncated: ->
         switch @get("type")
-          when "xhr" and @response then @xhr.responseText.length > 40
-          when "assertion"         then @get("message").length > 100
+          when "xhr"        then @xhr.responseTextText.length > 40
+          when "assertion"  then @get("message").length > 100
 
       messageTruncated: ->
         return if not message = @get("message")
@@ -123,33 +123,14 @@
       @logSpyProperty("Returned:  ", spy.returnValues[index])
 
       exception = spy.exceptions[index]
-      @logSpyProperty("Exception: ", exception) if exception
+      if exception
+        @logSpyProperty("Error:     ", exception)
+        @logSpyProperty("Stack:     ", exception.stack)
 
       console.groupEnd()
 
     logSpyProperty: (key, value) ->
       console.log "%c#{key}", "color: blue", value
-      # {
-      #   Arguments: spy.args[index]
-      #   "'this' Context": spy.thisValues[index]
-      #   "Return Values": spy.returnValues[index]
-      # }
-      # array = [
-        # "%cArguments: %O",
-        # "color: blue;",
-        # spy.args[index],
-        # "'this' Context: ",
-        # spy.thisValues[index],
-        # "Return Value: ",
-        # spy.returnValues[index],
-      # ]
-
-      # exception = spy.exceptions[index]
-
-      # array = array.concat("Exceptions: ", exception) if exception
-
-      # return array
-      # _(spy).zip(spy.args, spy.thisValues, spy.returnValues, spy.exceptions)
 
     getXhrObject: ->
       ## return the primary xhr object
