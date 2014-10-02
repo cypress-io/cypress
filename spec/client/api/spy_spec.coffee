@@ -39,6 +39,7 @@ describe "Spy API", ->
     expect(emit2).to.have.property "spyCall"
     expect(emit2).to.have.property "parent", emit1.id
     expect(emit2).to.have.property "method", "call #1"
+    expect(emit2).not.to.have.property "error"
 
   it "can create a spy from nothing", ->
     spy = Ecl.spy()
@@ -46,3 +47,14 @@ describe "Spy API", ->
     spy("foo")
 
     expect(@emit).to.be.calledTwice
+
+  it "captures the error when the spy throws an exception", ->
+    fn = { foo: -> throw new Error() }
+
+    Ecl.spy(fn, "foo")
+
+    try
+      fn.foo()
+
+    emit2 = @emit.getCall(1).args[0]
+    expect(emit2).to.have.property "error"
