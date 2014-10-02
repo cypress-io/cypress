@@ -154,7 +154,28 @@
       return if not @model.originalError
 
       e.stopPropagation()
+
+      @displayConsoleMessage()
+
       console.error(@model.originalError.stack)
+
+    displayConsoleMessage: ->
+      width  = @ui.pre.outerWidth()
+      offset = @ui.pre.offset()
+
+      div = $("<div>", class: "command-console-message")
+      div.text("Printed output to your console!")
+
+      ## center this guy in the middle of our command
+      div.appendTo($("body"))
+        .css
+          top: offset.top
+          left: offset.left
+          marginLeft: (width / 2) - (div.innerWidth() / 2)
+      div
+        .fadeIn(180)
+          .delay(120)
+            .fadeOut(300)
 
     mouseoverPre: (e) ->
       e.stopPropagation()

@@ -54,8 +54,11 @@
 
     clicked: (e) ->
       e.stopPropagation()
+
       @displayConsoleMessage()
+
       console.clear?()
+
       _.each @model.getPrimaryObjects(), (obj, index) ->
         return if not obj
 
