@@ -34,19 +34,20 @@
 .commands-container {
   background-color: #eef1f4;
   padding: 0;
-  padding-bottom: 4px;
+  // padding-bottom: 4px;
 
   &:empty {
     display: none;
   }
 
   &>li {
-    padding: 0 9px 0 5px;
+    padding: 1px 9px 1px 5px;
     margin: 0;
 
     &:hover {
       background-color: #E0E5E7;
       cursor: pointer;
+      box-shadow: 0 1px 2px #ccc inset;
     }
 
     &:hover .command-controls i {
@@ -54,7 +55,8 @@
     }
 
     &.active {
-      background-color: #E0E5E7 !important;
+      background-color: #E1E1E1 !important;
+      box-shadow: 0 1px 6px #ccc inset;
     }
 
     &.highlight {
@@ -73,8 +75,8 @@
 
   .command-parent {
     border-top: 1px solid #e3e3e3;
-    padding-top: 4px;
-    margin-top: 4px;
+    // padding-top: 4px;
+    // margin-top: 4px;
 
     &:first-child {
       border-top: 0;
@@ -144,8 +146,10 @@
   }
 
   .command-type-dom {
-    .badge {
+    .label {
       font-weight: normal;
+      padding: 1px 5px;
+      border-radius: 5px;
     }
   }
 

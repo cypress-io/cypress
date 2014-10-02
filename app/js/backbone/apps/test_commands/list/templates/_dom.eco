@@ -5,11 +5,11 @@
   <span class="command-method"><%= @method %></span>
   <% if @sequence: %>
     <span class="command-sequence"><%= @sequence %></span>
-  <% else if @selector: %>
+  <% else: %>
     <span class="command-selector"><%= @selector %></span>
   <% end %>
   <% if @length > 1: %>
-    <span title="<%= @length %> matched elements" class="badge"><%= @length %></span>
+    <label title="<%= @length %> matched elements" class="label label-default"><%= @length %></label>
   <% end %>
   <% if @error: %>
     <span class="command-error"><%= @error %></span>
