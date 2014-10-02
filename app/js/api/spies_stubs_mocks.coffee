@@ -32,7 +32,7 @@ Eclectus.Spy = do ($, _, Eclectus) ->
         lastCall     = spy.lastCall
         lastCall.num = spy.callCount
 
-        obj =
+        props =
           id:           _this.getId()
           method:       "call ##{lastCall.num}"
           message:      "#{args.length} arguments"
@@ -41,9 +41,9 @@ Eclectus.Spy = do ($, _, Eclectus) ->
           parent:       _this.id
           canBeParent:  false
 
-        obj.error = "exception thrown" if error
+        props.error = "exception thrown" if error
 
-        _this.emit obj
+        _this.emit props
 
         ## if an error did exist then we need
         ## to throw it right now
