@@ -21,8 +21,8 @@
 
       truncated: ->
         switch @get("type")
-          when "xhr"        then @xhr.responseTextText.length > 40
-          when "assertion"  then @get("message").length > 100
+          when "xhr" and @response  then @xhr.responseTextText.length > 40
+          when "assertion"          then @get("message").length > 100
 
       messageTruncated: ->
         return if not message = @get("message")
