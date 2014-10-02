@@ -36,7 +36,7 @@
 
     indent: (indent) ->
       indent = @parent.get("indent")
-      @set "indent", indent + 17
+      @set "indent", indent + 5
 
     setParent: (parent) ->
       @parent = parent
