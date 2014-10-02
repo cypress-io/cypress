@@ -8,7 +8,6 @@ coffee    = require("coffee-script")
 _         = require("underscore")
 _.str     = require("underscore.string")
 chokidar  = require("chokidar")
-mkdirp    = require('mkdirp')
 url       = require("url")
 spawn     = require("child_process").spawn
 phantom   = require("node-phantom-simple")
@@ -125,12 +124,7 @@ io.on "connection", (socket) ->
     ## a js or coffee files
     not /\.(js|coffee)$/.test path
 
-  # watchTestFiles.on "add", (path) -> console.log "added js:", path
   watchTestFiles.on "change", (filepath, stats) ->
-    # contents    = fs.readFileSync filepath, "utf8"
-    # newFilePath = path.join process.cwd(), filepath#.replace("tests", "compiled")
-    # mkdirp.sync path.dirname(newFilePath)
-    # fs.writeFileSync newFilePath, contents + "\n  it 'tests', ->"
 
     ## simple solution for preventing firing test:changed events
     ## when we are making modifications to our own files
