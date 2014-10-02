@@ -13,7 +13,7 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
       @responses = []
       @onRequests = []
 
-      @canBeParent = true
+      @canBeParent = false
 
     setServer: (@server) ->
       @emit
@@ -117,10 +117,10 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
       response.id = @getId()
 
       @emit
-        method:       "response"
-        xhr:          request
-        response:     response
-        parent:       request.id
+        method:         "#{request.method} response"
+        xhr:            request
+        response:       response
+        # parent:       request.id
         canBeParent:  false
         id:           response.id
 

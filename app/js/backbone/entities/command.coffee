@@ -67,6 +67,8 @@
     setResponse: (response) ->
       @set "status", @xhr.status
       @set "response", _(@xhr.responseText).truncate(40, " ")
+      @set "requestMethod", @xhr.method
+      @set "url", @xhr.url
       @response = response
 
     getPrimaryObjects: ->
@@ -367,17 +369,19 @@
       command = new Entities.Command attrs
       command.xhr = xhr
       command.snapshot = snapshot
+      command.setResponse(response) if response
 
-      @insertParents command, attrs.parent,
+      # @insertParents command, attrs.parent,
         ## insert a parent if the last parent commands
         ## are not xhr types
-        if: (parent, cmd) ->
-          @lastParentsAreNotXhr(parent, cmd)
+        # if: (parent, cmd) ->
+          # @lastParentsAreNotXhr(parent, cmd)
 
         ## when the parent is set on this child command
         ## set the response for it
-        onSetParent: (parent) ->
-          command.setResponse response
+        # onSetParent: (parent) ->
+          # command.setResponse response
+
 
       return command
 

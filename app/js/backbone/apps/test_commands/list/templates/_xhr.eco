@@ -2,8 +2,12 @@
   <span class="command-number">
     <%= @number %>
   </span>
-  <span class="command-method"><%= @method %></span>
   <% if @response?: %>
+    <span class="command-method">
+      <%= @method.split(" ")[0] %><br />
+      <%= @method.split(" ")[1] %>
+    </span>
+    <span class="command-request"><%= @url %></span>
     <span class="command-response">
       <% if @status?: %>
         <i class="fa fa-circle <%= if @status is 200 then 'successful' else if 404 then 'bad' else '' %>"></i>
@@ -17,6 +21,7 @@
       <% end %>
     </span>
   <% else: %>
+    <span class="command-method"><%= @method %></span>
     <span class="command-request"><%= @url %></span>
   <% end %>
   <% if @error: %>
