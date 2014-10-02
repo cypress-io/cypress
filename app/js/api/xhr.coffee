@@ -117,7 +117,7 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
       response.id = @getId()
 
       @emit
-        method:       "resp"
+        method:       "response"
         xhr:          request
         response:     response
         parent:       request.id
@@ -190,7 +190,7 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
       @server.respond()
 
       @emit
-        method:       "responses"
+        method:       "respond"
         server:       @server
         requests:     @requests
         responses:    @responses

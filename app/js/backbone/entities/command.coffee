@@ -71,7 +71,7 @@
 
     getPrimaryObjects: ->
       objs = switch @get("type")
-        when "dom"        then @el
+        when "dom"        then @getDomObject()
         when "assertion"  then @getAssertion()
         when "server"     then @getServer()
         when "xhr"        then @getXhrObject()
@@ -87,9 +87,30 @@
 
     convertToArray: (obj) ->
       _.reduce obj, (memo, value, key) ->
-        memo.push ["%c" + key, "font-weight: bold;", value] if value?
+        memo.push ["%c" + key, "font-weight: bold;", value] unless _.isBlank(value)
         memo
       , []
+
+    getDomObject: ->
+      ## we want to get all the .click() .type() commands here
+      ## rename this method to something like actions / traversal vs finders
+      return @getSequenceObject() if @get("sequence") or not @get("selector")
+
+      @convertToArray
+        "Prev Obj:   ": if @hasParent() then @parent.el
+        "Command:    ": @get("method")
+        "Selector:   ": @get("selector")
+        "Returned:   ": @el
+        "Elements:   ": @get("length")
+        "Error:      ": @get("error")
+
+    getSequenceObject: ->
+      @convertToArray
+        "Command:    ": @get("method")
+        "Sequence:   ": @get("sequence")
+        "Applied To: ": if @hasParent() then @parent.el
+        "Elements:   ": @get("length")
+        "Error:      ": @get("error")
 
     getSpyObject: ->
       spy = @spy
@@ -135,7 +156,11 @@
     getXhrObject: ->
       ## return the primary xhr object
       ## if we dont have a response
-      return @xhr if not @get("response")
+      if not @get("response")
+        return @convertToArray
+          "Command: ": @get("method")
+          "URL:     ": @xhr.url
+          "Request: ": @xhr
 
       response = @xhr.responseText
 
@@ -143,6 +168,7 @@
         response = JSON.parse response
 
       @convertToArray
+        "Command:    ": @get("method")
         "Status:     ": @xhr.status
         "URL:        ": @xhr.url
         "Matched URL:": @response.url
@@ -151,6 +177,7 @@
 
     getAssertion: ->
       @convertToArray
+        "Command:  ": @get("method")
         "Subject:  ": @subject
         "Expected: ": @expected
         "Actual:   ": @actual
@@ -158,6 +185,7 @@
 
     getServer: ->
       @convertToArray
+        "Command:   ": @get("method")
         "Server:    ": @server
         "Requests:  ": @requests
         "Responses: ": @responses
