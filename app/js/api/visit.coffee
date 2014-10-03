@@ -14,6 +14,8 @@ Eclectus.Visit = do ($, _, Eclectus) ->
       ## callback fn
       @$remoteIframe.one "load", fn
 
+      url = encodeURIComponent(url)
+
       ## navigate the remote iframe to the url
       @$remoteIframe[0].contentWindow.location.href = "/remotes?url=#{url}"
 
