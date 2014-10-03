@@ -27,6 +27,8 @@
 
     setEclSandbox: (@patchSandbox) ->
 
+    setEclRestore: (@eclRestore) ->
+
     setOptions: (@options) ->
 
     getTestCid: (test) ->
@@ -234,6 +236,7 @@
         ## we only care to re-patch the hook name if
         ## we have a current test, else the next test
         ## will naturally patchEcl again for itself
+        hook.removeAllListeners()
         @patchHook("test") if hook.ctx.currentTest
 
       ## if a test is pending mocha will only
@@ -247,6 +250,8 @@
 
       @runner.on "test end", (test) =>
         @trigger "test:end", test
+        test.removeAllListeners()
+        @eclRestore()
       ## start listening to all the pertinent runner events
 
     ## recursively tries to find the test associated
@@ -280,16 +285,25 @@
       @trigger "test:end", test.parent.tests[0]
 
     stop: ->
+      ## clear out the commands
+      @commands.reset([], {silent: true})
+
       ## remove all the listeners from EventEmitter
       @runner.removeAllListeners()
 
       ## cleanup any of our handlers
       @stopListening()
 
+      ## remove all references to other objects
+      ## clear twice to nuke _previousAttributes
+      @clear()
+      @clear()
+
       ## delete these properties
       delete @runner
       delete @contentWindow
       delete @iframe
+      delete @hooks
       delete @commands
 
     start: (iframe) ->
@@ -304,7 +318,7 @@
       return if iframe isnt @iframe
 
       ## clear out the commands
-      @commands.reset()
+      @commands.reset([], {silent: true})
 
       ## always reset @options.grep to /.*/ so we know
       ## if the user has removed a .only in between runs
@@ -452,20 +466,17 @@
 
         fn?(err)
 
-  API =
-    getRunner: (testRunner, options, patch, hook, sandbox) ->
-      ## always set grep if its not already set
-      options.grep ?= /.*/
+  App.reqres.setHandler "runner:entity", (testRunner, options, patch, hook, sandbox, restore) ->
+    ## always set grep if its not already set
+    options.grep ?= /.*/
 
-      ## store the actual testRunner on ourselves
-      runner = new Entities.Runner
-      runner.setTestRunner testRunner
-      runner.setOptions options
-      runner.setEclPatch patch
-      runner.setEclHook hook
-      runner.setEclSandbox sandbox
-      runner.startListening()
-      runner
-
-  App.reqres.setHandler "runner:entity", (testRunner, options, patch, hook, sandbox) ->
-    API.getRunner testRunner, options, patch, hook, sandbox
+    ## store the actual testRunner on ourselves
+    runner = new Entities.Runner
+    runner.setTestRunner testRunner
+    runner.setOptions options
+    runner.setEclPatch patch
+    runner.setEclHook hook
+    runner.setEclSandbox sandbox
+    runner.setEclRestore restore
+    runner.startListening()
+    runner

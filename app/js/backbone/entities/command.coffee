@@ -28,6 +28,12 @@
         return if not message = @get("message")
         _(message).truncate(100, " ")
 
+    reset: ->
+      @clear(silent: true)
+      @clear(silent: true)
+      _.each ["assert", "spy", "spyCall", "el", "server", "subject", "expected", "actual", "xhr", "snapshot", "requests", "responses", "response"], (attr) =>
+        delete @[attr]
+
     initialize: ->
       new Backbone.Chooser(@)
 
@@ -425,6 +431,9 @@
 
     reset: ->
       @_maxNumber = 0
+      chosen = @getFirstChosen()
+      @unchoose(chosen, {silent: true}) if chosen
+      @invoke "reset"
       super
 
   App.reqres.setHandler "command:entities", ->

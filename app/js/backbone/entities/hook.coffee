@@ -43,5 +43,11 @@
         if original = hook.get("commands").getOriginalByClone(command)
           return original
 
+    reset: ->
+      @each (hook) ->
+        hook.get("commands").reset([], {silent: true})
+
+      super
+
   App.reqres.setHandler "hook:entities", ->
     new Entities.HooksCollection

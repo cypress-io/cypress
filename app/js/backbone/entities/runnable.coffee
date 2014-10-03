@@ -96,7 +96,7 @@
         @unset key
 
       ## remove the models within our commands collection
-      @get("hooks").reset()
+      @get("hooks").reset([], {silent: true})
 
       ## merge in the defaults unless we already have them set
       defaults = _(@).result "defaults"

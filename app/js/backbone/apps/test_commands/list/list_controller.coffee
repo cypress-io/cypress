@@ -4,6 +4,8 @@
     initialize: (options) ->
       { hooks, runner } = options
 
+      @hooks = hooks
+
       commandsView = @getCommandsView hooks
 
       @listenTo commandsView, "childview:childview:revert:clicked", (iv, iv2, args) ->
@@ -26,6 +28,9 @@
         runner.highlightEl(command, false)
 
       @show commandsView
+
+    onDestroy: ->
+      @hooks.reset([], {silent: true})
 
     highlightClone: (hooks, command, init) ->
       hooks.getOriginalCommandByClone(command).highlight(init)

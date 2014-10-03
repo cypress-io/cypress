@@ -113,7 +113,7 @@
       mocha  = options.mocha ?= window.mocha
 
       ## return our runner entity
-      return App.request("runner:entity", runner, mocha.options, Eclectus.patch, Eclectus.hook, Eclectus.sandbox)
+      return App.request("runner:entity", runner, mocha.options, Eclectus.patch, Eclectus.hook, Eclectus.sandbox, Eclectus.prototype.restore)
 
     getRunner: ->
       ## start running the tests
@@ -128,8 +128,22 @@
       return runner
 
     stop: (runner) ->
+      ## restore chai to the normal expect / assert
+      chai.expect = expect
+      chai.assert = assert
+      chai.Assertion::assert = assertProto
+
+      ## unpatch eclectus to remove any current partial'd objects
+      Eclectus.unpatch()
+
       ## call the stop method which cleans up any listeners
       runner.stop()
+
+      ## remove any listeners from the mocha.suite
+      mocha.suite.removeAllListeners()
+
+      ## null it out to break any references
+      mocha.suite = null
 
       ## delete the globals to cleanup memory
       delete window.Ecl

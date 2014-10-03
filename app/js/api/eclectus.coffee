@@ -51,6 +51,10 @@ window.Eclectus = do ($, _) ->
       return spy
 
   class Eclectus
+    ## restores the sandbox after each test run
+    restore: ->
+      @sandbox?.restore?()
+
     ## class method patch
     ## loops through each method and partials
     ## the runnable onto our prototype
@@ -59,6 +63,12 @@ window.Eclectus = do ($, _) ->
       ## else use the default methods object
       _.each (fns or methods), (fn, key, obj) ->
         Eclectus.prototype[key] = _.partial(fn, args)
+
+    ## remove all of the partialed functions from Eclectus prototype
+    @unpatch = (fns) ->
+      fns = _(methods).keys().concat("hook", "sandbox")
+      _.each (fns), (fn, obj) ->
+        delete Eclectus.prototype[fn]
 
     ## store the sandbox for each iframe window
     ## so all of our Ecl commands can utilize this
