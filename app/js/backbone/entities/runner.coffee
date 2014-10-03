@@ -217,16 +217,16 @@
         ## if our hook doesnt have an associated test ctx
         ## then we need to patchEcl with the first test
         ## we can find
-        # if not hook.ctx.currentTest
-        test = @getTestFromHook(hook, hook.parent)
+        if not hook.ctx.currentTest
+          test = @getTestFromHook(hook, hook.parent)
 
-        @patchEcl
-          hook: @getHookName(hook)
-          runnable: test
-          channel: runnerChannel
-          contentWindow: @contentWindow
-          remoteIframe: @remoteIframe
-          iframe: @iframe
+          @patchEcl
+            hook: @getHookName(hook)
+            runnable: test
+            channel: runnerChannel
+            contentWindow: @contentWindow
+            remoteIframe: @remoteIframe
+            iframe: @iframe
 
         ## dynamically changes the current patched test's hook name
         @patchHook @getHookName(hook)
@@ -456,7 +456,7 @@
       ## through each test and give it a unique id
       t = Date.now()
 
-      @runner.suite.ctx.currentTest = undefined
+      @runner.test = undefined
 
       @runner.runSuite contentWindow.mocha.suite, (err) =>
         ## its possible there is no runner when this
