@@ -19,8 +19,7 @@ window.loadFixture = (path) ->
   iframe = $("<iframe />", {
     src: path
     load: ->
-      df.notify @
-      df.resolve()
+      df.resolve(@)
   })
 
   iframe.appendTo $("body")

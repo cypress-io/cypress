@@ -4,7 +4,7 @@ describe "XHR Command API", ->
   beforeEach ->
     @emit = @sandbox.stub(Eclectus.Command.prototype, "emit").returns(null)
 
-    loadFixture("html/sinon").progress (iframe) =>
+    loadFixture("html/sinon").done (iframe) =>
       Eclectus.sandbox iframe.contentWindow
       Eclectus.patch {contentWindow: iframe.contentWindow}
       @contentWindow = iframe.contentWindow

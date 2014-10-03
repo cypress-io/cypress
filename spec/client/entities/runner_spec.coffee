@@ -8,7 +8,7 @@ describe "Runner Entity", ->
 
   context ".only tests", ->
     beforeEach ->
-      loadFixture("tests/only").progress (iframe) =>
+      loadFixture("tests/only").done (iframe) =>
         @contentWindow = iframe.contentWindow
         @mocha         = iframe.contentWindow.mocha
         @runner        = iframe.contentWindow.mocha.run()
@@ -36,7 +36,7 @@ describe "Runner Entity", ->
 
   context "events", ->
     beforeEach ->
-      loadFixture("tests/events").progress (iframe) =>
+      loadFixture("tests/events").done (iframe) =>
         @contentWindow = iframe.contentWindow
         @mocha         = iframe.contentWindow.mocha
         @runner        = iframe.contentWindow.mocha.run()

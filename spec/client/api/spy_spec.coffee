@@ -4,7 +4,7 @@ describe "Spy API", ->
   beforeEach ->
     @emit = @sandbox.stub(Eclectus.Command.prototype, "emit")
 
-    loadFixture("html/sinon").progress (iframe) =>
+    loadFixture("html/sinon").done (iframe) =>
       Eclectus.sandbox iframe.contentWindow
       Eclectus.patch {contentWindow: iframe.contentWindow}
       @contentWindow = iframe.contentWindow

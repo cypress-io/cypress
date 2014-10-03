@@ -2,7 +2,7 @@ describe "Dom Command API", ->
   beforeEach ->
     @emit = @sandbox.stub(Eclectus.Command.prototype, "emit").returns(null)
 
-    loadFixture("html/dom").progress (iframe) =>
+    loadFixture("html/dom").done (iframe) =>
       Eclectus.patch {contentWindow: iframe.contentWindow}
       @dom = Eclectus.createDom {contentWindow: iframe.contentWindow}
       @contentWindow = iframe.contentWindow
