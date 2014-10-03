@@ -236,10 +236,14 @@ app.get "/iframes/*", (req, res) ->
     specs:        getSpecs(test)
   }
 
-app.get "/remotes/*", (req, res) ->
-  res.render path.join(__dirname, "remote.html"), {
-    url: req.params[0]
+app.get "/remotes", (req, res) ->
+  res.render path.join(__dirname, "todo.html"), {
+    utilities: getUtilities()
+    # url: req.query.url
   }
+  # res.render path.join(__dirname, "remote.html"), {
+  #   url: req.params[0]
+  # }
 
 ## serve the real eclectus JS app when we're at root
 app.get "/", (req, res) ->
