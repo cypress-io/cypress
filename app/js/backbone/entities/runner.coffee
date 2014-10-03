@@ -427,6 +427,13 @@
       ## grep so we can remove existing tests
       @trigger "exclusive:test" if not @isDefaultGrep(@options.grep)
 
+      ## we need to reset the runner.test to undefined
+      ## when the user clicks the reload button, mocha
+      ## will think that the currentTest is really the
+      ## last test that was run.  so we always reset
+      ## the state of the runner to prevent problems
+      @runner.test = undefined
+
       ## run the suite for the iframe
       ## right before we run the root runner's suite we iterate
       ## through each test and give it a unique id
