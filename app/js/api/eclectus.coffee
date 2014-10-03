@@ -37,8 +37,18 @@ window.Eclectus = do ($, _) ->
       assertion = new Eclectus.Assertion partial.contentWindow, partial.channel, partial.runnable, @hook
       assertion.log value, actual, expected, message, passed
 
-    stub: (partial) ->
+    stub: (partial, obj, method) ->
+      throw new Error("Eclectus.sandbox() must be invoked first") if not @sandbox
+
+      stub = @sandbox.stub(obj, method)
+
+      eclStub = new Eclectus.Stub partial.contentWindow, partial.channel, partial.runnable, @hook
+      eclStub.log(obj, method, stub)
+
+      return stub
+
     mock: (partial) ->
+
     spy: (partial, obj, method) ->
       throw new Error("Eclectus.sandbox() must be invoked first") if not @sandbox
 
