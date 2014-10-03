@@ -13,12 +13,17 @@ do (parent = window.opener or window.parent) ->
   window.assert = chai.assert
 
   ## create our own mocha objects from our parents if its not already defined
-  window.Mocha ?= Object.create(parent.Mocha)
-  window.mocha ?= Object.create(parent.mocha)
+  window.Mocha = parent.Mocha
+  window.mocha = parent.mocha
 
-  ## In order to isolate top-level before/beforeEach hooks,
-  ## the specs in each iframe are wrapped in an anonymous suite.
-  mocha.suite = Mocha.Suite.create(mocha.suite)
+  ## remove all of the listeners from the previous root suite
+  mocha.suite.removeAllListeners()
+
+  ## We clone the outermost root level suite - and replace
+  ## the existing root suite with a new one. this wipes out
+  ## all references to hooks / tests / suites and thus
+  ## prevents holding reference to old suites / tests
+  mocha.suite = mocha.suite.clone()
 
   ## Override mocha.ui so that the pre-require event is emitted
   ## with the iframe's `window` reference, rather than the parent's.
