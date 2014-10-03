@@ -9,17 +9,17 @@ Eclectus.Visit = do ($, _, Eclectus) ->
     initialize: ->
       @canBeParent = false
 
-    log: ($remote, url, fn) ->
+    log: (url, fn) ->
       ## when the remote iframe's load event fires
       ## callback fn
-      $remote.one "load", fn
+      @$remoteIframe.one "load", fn
 
       ## navigate the remote iframe to the url
-      $remote[0].contentWindow.location.href = "/remotes/?url=#{url}"
+      @$remoteIframe[0].contentWindow.location.href = "/remotes?url=#{url}"
 
       @emit
         method: "visit"
         message: url
-        page: $remote
+        page: @$remoteIframe
 
   return Visit

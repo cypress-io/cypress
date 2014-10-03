@@ -27,8 +27,8 @@ window.Eclectus = do ($, _) ->
     server: (partial) ->
       throw new Error("Eclectus.sandbox() must be invoked first") if not @sandbox
 
-      @sandbox._server = server = partial.contentWindow.sinon.fakeServer.create()
-      @sandbox.server = new Eclectus.Xhr partial.contentWindow, partial.channel, partial.runnable, @hook
+      @sandbox._server = server = partial.remoteIframe.sinon.fakeServer.create()
+      @sandbox.server = new Eclectus.Xhr partial.remoteIframe, partial.channel, partial.runnable, @hook
       @sandbox.server.setServer server
 
       Eclectus.Xhr.bindServerTo(@, "server", @sandbox.server)
@@ -37,7 +37,7 @@ window.Eclectus = do ($, _) ->
       return server
 
     assert: (partial, passed, message, value, actual, expected) ->
-      assertion = new Eclectus.Assertion partial.contentWindow, partial.channel, partial.runnable, @hook
+      assertion = new Eclectus.Assertion partial.remoteIframe, partial.channel, partial.runnable, @hook
       assertion.log value, actual, expected, message, passed
 
     stub: (partial, obj, method) ->
@@ -57,7 +57,7 @@ window.Eclectus = do ($, _) ->
 
       spy = @sandbox.spy(obj, method)
 
-      eclSpy = new Eclectus.Spy partial.contentWindow, partial.channel, partial.runnable, @hook
+      eclSpy = new Eclectus.Spy partial.remoteIframe, partial.channel, partial.runnable, @hook
       eclSpy.log(obj, method, spy)
 
       ## return the sinon spy for chainability
@@ -66,8 +66,11 @@ window.Eclectus = do ($, _) ->
     visit: (partial, url, options = {}) ->
       df = $.Deferred()
 
-      visit = new Eclectus.Visit partial.contentWindow, partial.channel, partial.runnable, @hook
-      visit.log partial.remoteIframe, url, -> df.resolve()
+      try
+        visit = new Eclectus.Visit partial.remoteIframe, partial.channel, partial.runnable, @hook
+        visit.log url, -> df.resolve()
+      catch e
+        debugger
 
       return df
 
@@ -93,8 +96,8 @@ window.Eclectus = do ($, _) ->
 
     ## store the sandbox for each iframe window
     ## so all of our Ecl commands can utilize this
-    @sandbox = (contentWindow) ->
-      Eclectus.prototype.sandbox = contentWindow.sinon.sandbox.create()
+    @sandbox = (remoteIframe) ->
+      # Eclectus.prototype.sandbox = remoteIframe.sinon.sandbox.create()
 
     @scope = (dom) ->
       ## only re-patch these specific methods, not the others
@@ -104,7 +107,7 @@ window.Eclectus = do ($, _) ->
 
     @unscope = (dom) ->
       fns = {find: methods.find, within: methods.within}
-      @patch _(dom).pick("contentWindow", "channel", "runnable"), fns
+      @patch _(dom).pick("remoteIframe", "channel", "runnable"), fns
       @hook dom.hook
 
     @createDom = (argsOrInstance) ->
@@ -115,7 +118,7 @@ window.Eclectus = do ($, _) ->
       ## in that case we need to clone it and prevent it from being cloned
       ## again by setting isCloned to true
       if not dom.isCommand
-        dom = new Eclectus.Dom obj.contentWindow, obj.channel, obj.runnable, Eclectus.prototype.hook
+        dom = new Eclectus.Dom obj.remoteIframe, obj.channel, obj.runnable, Eclectus.prototype.hook
 
       return dom
 

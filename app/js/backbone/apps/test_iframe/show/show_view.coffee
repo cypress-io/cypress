@@ -60,7 +60,7 @@
 
     revertToDom: (dom, options) ->
       ## replaces the iframes body with the dom object
-      dom.replaceAll @$el.find("iframe").contents().find("body")
+      dom.replaceAll @$el.find("#iframe-remote").contents().find("body")
 
       @addRevertMessage(options)
 
@@ -81,7 +81,7 @@
       _.defaults options,
         init: true
 
-      @$iframe.contents().find("[data-highlight-el]").remove() if not @reverted
+      @$remote.contents().find("[data-highlight-el]").remove() if not @reverted
 
       return if not options.init
 
@@ -94,7 +94,7 @@
         dom = options.dom
         el  = options.dom.find("[" + options.attr + "]")
       else
-        dom = @$iframe.contents().find("body")
+        dom = @$remote.contents().find("body")
 
       el.each (index, el) =>
         el = $(el)
@@ -165,20 +165,21 @@
       $(window).off "resize", @calcWidth
 
       # _.each ["Ecl", "$", "jQuery", "parent", "chai", "expect", "should", "assert", "Mocha", "mocha"], (global) =>
-      #   delete @iframe[0].contentWindow[global]
+      #   delete @$iframe[0].contentWindow[global]
       @$iframe?.remove()
       @$remote?.remove()
 
       delete @$remote
-      delete @iframe
+      delete @$iframe
       delete @fn
 
     loadIframe: (src, fn) ->
       ## remove any existing iframes
       @reverted = false
       @ui.message.hide().empty()
+
+      @$remote?.remove()
       @$iframe?.remove()
-      # @$iframe?.close()
 
       @$el.hide()
 

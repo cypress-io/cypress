@@ -59,7 +59,7 @@ Eclectus.Dom = do ($, _, Eclectus) ->
         dom._$el       = @_$el.find(selector)
       else
         dom       = @
-        dom.$el   = @$(selector, @contentWindow.jQuery)
+        dom.$el   = @$(selector, @$remoteIframe[0].contentWindow.jQuery)
         dom._$el  = @$(selector)
 
       dom.checkForDomErrors()
@@ -81,7 +81,7 @@ Eclectus.Dom = do ($, _, Eclectus) ->
         dom._$el        = @_$el.find(selector)
       else
         dom     = @
-        dom.$el = @$(selector, @contentWindow.jQuery)
+        dom.$el = @$(selector, @$remoteIframe[0].contentWindow.jQuery)
         dom._$el  = @$(selector)
 
       dom.checkForDomErrors()
