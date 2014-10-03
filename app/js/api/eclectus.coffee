@@ -63,6 +63,14 @@ window.Eclectus = do ($, _) ->
       ## return the sinon spy for chainability
       return spy
 
+    visit: (partial, url, options = {}) ->
+      df = $.Deferred()
+
+      visit = new Eclectus.Visit partial.contentWindow, partial.channel, partial.runnable, @hook
+      visit.log partial.remoteIframe, url, -> df.resolve()
+
+      return df
+
   class Eclectus
     ## restores the sandbox after each test run
     restore: ->

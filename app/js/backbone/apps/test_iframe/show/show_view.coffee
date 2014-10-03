@@ -165,9 +165,12 @@
       $(window).off "resize", @calcWidth
 
       # _.each ["Ecl", "$", "jQuery", "parent", "chai", "expect", "should", "assert", "Mocha", "mocha"], (global) =>
-      #   delete @$iframe[0].contentWindow[global]
+      #   delete @iframe[0].contentWindow[global]
       @$iframe?.remove()
-      delete @$iframe
+      @$remote?.remove()
+
+      delete @$remote
+      delete @iframe
       delete @fn
 
     loadIframe: (src, fn) ->
@@ -188,16 +191,19 @@
       # @$iframe.onload = =>
       #   fn(@$iframe)
 
-      @$iframe = $ "<iframe />",
+      @$remote = $ "<iframe />",
+        id: "iframe-remote"
+
         src: @src
-        class: "iframe-spec"
+        id: "iframe-spec"
         load: ->
-          fn(@contentWindow)
+          fn(@contentWindow, view.remote)
           view.$el.show()
           view.calcWidth()
           # view.ui.header.show()
 
-      @$iframe.appendTo(@ui.size)
+      @$remote.appendTo(@ui.size)
+      @$iframe.appendTo(@$el)
 
     expandClicked: (e) ->
       @ui.expand.hide()

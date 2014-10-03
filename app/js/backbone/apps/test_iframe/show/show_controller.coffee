@@ -20,10 +20,10 @@
       @show view
 
     loadIframe: (view, runner, iframe) ->
-      view.loadIframe iframe, (contentWindow) ->
+      view.loadIframe iframe, (contentWindow, remoteIframe) ->
         ## once its loaded we receive the contentWindow
         ## and tell our runner to run the iframe's suite
-        runner.runIframeSuite(iframe, contentWindow)
+        runner.runIframeSuite(iframe, contentWindow, remoteIframe)
 
     getView: ->
       new Show.Iframe

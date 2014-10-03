@@ -17,7 +17,9 @@
       @hooks    = App.request "hook:entities"
       @commands = App.request "command:entities"
 
-    setContentWindow: (@contentWindow) ->
+    setContentWindow: (@contentWindow, @remoteIframe) ->
+      ## make a reference between the iframes
+      @contentWindow.remote = @remoteIframe[0].contentWindow
 
     setIframe: (@iframe) ->
 
@@ -172,6 +174,7 @@
           runnable: test
           channel: runnerChannel
           contentWindow: @contentWindow
+          remoteIframe: @remoteIframe
           iframe: @iframe
 
         @patchHook "test"
@@ -223,6 +226,7 @@
             runnable: test
             channel: runnerChannel
             contentWindow: @contentWindow
+            remoteIframe: @remoteIframe
             iframe: @iframe
 
         ## dynamically changes the current patched test's hook name
@@ -423,13 +427,13 @@
       id.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
     ## tell our runner to run our iframes mocha suite
-    runIframeSuite: (iframe, contentWindow, fn) ->
+    runIframeSuite: (iframe, contentWindow, remoteIframe, fn) ->
       ## store the current iframe
       @setIframe iframe
 
       ## store the content window so we can
       ## pass this along to our Eclectus methods
-      @setContentWindow contentWindow
+      @setContentWindow contentWindow, remoteIframe
 
       ## patch the sinon sandbox for Eclectus methods
       @patchSandbox contentWindow
