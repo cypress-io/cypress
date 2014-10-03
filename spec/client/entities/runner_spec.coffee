@@ -85,3 +85,24 @@ describe "Runner Entity", ->
         lastEvent = _.last(emit.args)[0]
         expect(lastEvent).to.eq "eclectus end"
         done()
+
+  context "runner state", ->
+    beforeEach ->
+      loadFixture("tests/events").done (iframe) =>
+        @contentWindow = iframe.contentWindow
+        @mocha         = iframe.contentWindow.mocha
+        @runner        = iframe.contentWindow.mocha.run()
+
+    it "clears out the runner.test before a test run", ->
+      @runnerModel = App.request("start:test:runner")
+      @runnerModel.options.grep = /.*/
+
+      runner = @runnerModel.runner
+
+      runner.test = "last test"
+
+      @sandbox.stub runner, "runSuite"
+
+      @runnerModel.runIframeSuite "events.html", @contentWindow, ->
+
+      expect(runner.test).to.be.undefined
