@@ -456,6 +456,11 @@
       ## through each test and give it a unique id
       t = Date.now()
 
+      ## we need to reset the runner.test to undefined
+      ## when the user clicks the reload button, mocha
+      ## will think that the currentTest is really the
+      ## last test that was run.  so we always reset
+      ## the state of the runner to prevent problems
       @runner.test = undefined
 
       @runner.runSuite contentWindow.mocha.suite, (err) =>
