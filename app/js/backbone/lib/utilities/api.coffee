@@ -66,13 +66,19 @@
           orig.apply(@, args)
 
       _chai.Assertion::assert = _.wrap assertProto, (orig, args...) ->
-        passed    = utils.test(@, args)
-        value     = utils.flag(@, "object")
-        expected  = args[3]
-        message   = utils.getMessage(@, args)
-        actual    = utils.getActual(@, args)
+        ## we only want to shift the arguments and send these
+        ## off to Ecl.assert if it exists (which it wont in our
+        ## own test mode)
 
-        Ecl.assert passed, message, value, actual, expected
+        if Ecl and Ecl.assert
+          passed    = utils.test(@, args)
+          value     = utils.flag(@, "object")
+          expected  = args[3]
+          message   = utils.getMessage(@, args)
+          actual    = utils.getActual(@, args)
+
+          Ecl.assert passed, message, value, actual, expected
+
         orig.apply(@, args)
 
   class Reporter
