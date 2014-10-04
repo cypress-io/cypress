@@ -2,7 +2,7 @@ Ecl = new Eclectus
 
 describe "Spy API", ->
   beforeEach ->
-    @emit = @sandbox.stub(Eclectus.Command.prototype, "emit")
+    @emit = @sandbox.spy(Eclectus.Command.prototype, "emit")
 
     loadFixture("html/sinon").done (iframe) =>
       Eclectus.sandbox iframe.contentWindow
@@ -21,7 +21,12 @@ describe "Spy API", ->
     fn = { foo: -> }
 
     Ecl.spy(fn, "foo")
-    expect(@emit.getCall(0).args[0]).to.have.property "spy", fn.foo
+
+    emit1 = @emit.getCall(0).args[0]
+
+    expect(emit1).to.have.property "spy", fn.foo
+    expect(emit1).to.have.property "spyObj", fn
+    expect(emit1).to.have.property "canBeParent", true
 
   it "emits a child object when the spy is invoked", ->
     fn = { foo: -> }
@@ -37,6 +42,7 @@ describe "Spy API", ->
 
     expect(emit2).to.have.property "spy"
     expect(emit2).to.have.property "spyCall"
+    expect(emit2).to.have.property "spyObj", fn
     expect(emit2).to.have.property "parent", emit1.id
     expect(emit2).to.have.property "method", "call #1"
     expect(emit2).not.to.have.property "error"
@@ -58,3 +64,9 @@ describe "Spy API", ->
 
     emit2 = @emit.getCall(1).args[0]
     expect(emit2).to.have.property "error"
+
+  it "returns the correct return value", ->
+    fn = { foo: -> {foo: "foo"} }
+    Ecl.spy(fn, "foo")
+
+    expect(fn.foo()).to.deep.eq {foo: "foo"}

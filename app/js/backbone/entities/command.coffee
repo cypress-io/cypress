@@ -21,8 +21,8 @@
 
       truncated: ->
         switch @get("type")
-          when "xhr" and @response  then @xhr.responseTextText.length > 40
-          when "assertion"          then @get("message").length > 100
+          when "xhr" and @response          then @xhr.responseTextText.length > 40
+          when "assertion", "spy", "stub"   then @get("message")?.length > 100
 
       messageTruncated: ->
         return if not message = @get("message")
@@ -31,7 +31,7 @@
     reset: ->
       @clear(silent: true)
       @clear(silent: true)
-      _.each ["assert", "spy", "spyCall", "el", "server", "subject", "expected", "actual", "xhr", "snapshot", "requests", "responses", "response"], (attr) =>
+      _.each ["assert", "spy", "spyCall", "spyObj", "stub", "stubCall", "stubObj", "el", "server", "subject", "expected", "actual", "xhr", "snapshot", "requests", "responses", "response"], (attr) =>
         delete @[attr]
 
     initialize: ->
@@ -84,6 +84,7 @@
         when "server"     then @getServer()
         when "xhr"        then @getXhrObject()
         when "spy"        then @getSpyObject()
+        when "stub"       then @getStubObject()
 
       _([objs]).flatten(true)
 
@@ -120,38 +121,53 @@
         "Elements:   ": @get("length")
         "Error:      ": @get("error")
 
+    getStubObject: ->
+      stub = @stub
+      stubCall = @stubCall
+      stubObj = @stubObj
+
+      _.defer =>
+        @logSpyOrStubTableProperties(stub, stubCall)
+
+      @convertToArray
+        "Stub:         %O": stub
+        "Stubbed Obj: ": stubObj
+        "Calls:       ": stub.callCount
+
     getSpyObject: ->
       spy = @spy
       spyCall = @spyCall
+      spyObj = @spyObj
 
       _.defer =>
-        @logSpyTableProperties(spy, spyCall)
+        @logSpyOrStubTableProperties(spy, spyCall)
 
       @convertToArray
-        "Spy:    %O": spy
-        "Calls: ": spy.callCount
+        "Spy:      %O": spy
+        "Spy Obj: ": stubObj
+        "Calls:   ": spy.callCount
 
-    logSpyTableProperties: (spy, spyCall) ->
-      count = spy.callCount
+    logSpyOrStubTableProperties: (spyOrStub, spyOrStubCall) ->
+      count = spyOrStub.callCount
       return if count is 0
 
-      ## if spyCall is passed in just log out this
-      ## specific spyCall as opposed to all of them
+      ## if spyOrStubCall is passed in just log out this
+      ## specific spyOrStubCall as opposed to all of them
       ## use its num - 1 for 0 based indexes
-      if spyCall
-        @logSpyCall(spy, spyCall.num - 1)
+      if spyOrStubCall
+        @logSpyOrStubCall(spyOrStub, spyOrStubCall.num - 1)
       else
         for i in [0..count - 1]
-          @logSpyCall(spy, i)
+          @logSpyOrStubCall(spyOrStub, i)
 
-    logSpyCall: (spy, index) ->
+    logSpyOrStubCall: (spyOrStub, index) ->
       console.group("Call ##{index + 1}:")
-      # console.log.apply(console, @getSpyArgsForCall(spy, i))
-      @logSpyProperty("Arguments:  %O", spy.args[index])
-      @logSpyProperty("Context:   ", spy.thisValues[index])
-      @logSpyProperty("Returned:  ", spy.returnValues[index])
+      # console.log.apply(console, @getSpyArgsForCall(spyOrStub, i))
+      @logSpyProperty("Arguments:  %O", spyOrStub.args[index])
+      @logSpyProperty("Context:   ", spyOrStub.thisValues[index])
+      @logSpyProperty("Returned:  ", spyOrStub.returnValues[index])
 
-      exception = spy.exceptions[index]
+      exception = spyOrStub.exceptions[index]
       if exception
         @logSpyProperty("Error:     ", exception)
         @logSpyProperty("Stack:     ", exception.stack)
@@ -272,6 +288,7 @@
         when "assertion"  then @addAssertion attrs
         when "server"     then @addServer attrs
         when "spy"        then @addSpy attrs
+        when "stub"       then @addStub attrs
         else throw new Error("Command .type did not match anything")
 
     insertParents: (command, parentId, options = {}) ->
@@ -315,13 +332,31 @@
       options
 
     addSpy: (attrs) ->
-      {spy, spyCall, snapshot} = attrs
+      {spy, spyCall, spyObj, snapshot} = attrs
 
-      attrs = _(attrs).omit "spy", "spyCall", "snapshot"
+      attrs = _(attrs).omit "spy", "spyCall", "snapshot", "spyObj"
 
       command = new Entities.Command attrs
       command.spy = spy
       command.spyCall = spyCall
+      command.spyObj = spyObj
+      command.snapshot = snapshot
+
+      @insertParents command, attrs.parent,
+        if: (parent, cmd) ->
+          @lastParentCommandIsNotParent(parent, cmd)
+
+      return command
+
+    addStub: (attrs) ->
+      {stub, stubCall, stubObj, snapshot} = attrs
+
+      attrs = _(attrs).omit "stub", "stubCall", "snapshot", "stubObj"
+
+      command = new Entities.Command attrs
+      command.stub = stub
+      command.stubCall = stubCall
+      command.stubObj = stubObj
       command.snapshot = snapshot
 
       @insertParents command, attrs.parent,
