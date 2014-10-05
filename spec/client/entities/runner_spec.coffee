@@ -8,13 +8,14 @@ describe "Runner Entity", ->
 
   context ".only tests", ->
     beforeEach ->
-      df = loadFixture("tests/only", autoResolve: false).progress (iframe) =>
+      loadFixture("tests/only").done (iframe) =>
         @contentWindow = iframe.contentWindow
         @mocha         = iframe.contentWindow.mocha
-        @runner        = iframe.contentWindow.mocha.run -> df.resolve()
 
     it "triggers 'exclusive:test' when tests have an .only", (done) ->
-      @runnerModel = App.request("start:test:runner")
+      @runnerModel = App.request "start:test:runner",
+        mocha: @mocha
+        runner: new Mocha.Runner(@mocha.suite)
 
       ## we need to set the runner model's grep options
       ## to our iframes mocha options
@@ -36,15 +37,14 @@ describe "Runner Entity", ->
 
   context "events", ->
     beforeEach ->
-      df = loadFixture("tests/events", autoResolve: false).progress (iframe) =>
+      loadFixture("tests/events").done (iframe) =>
         @contentWindow = iframe.contentWindow
         @mocha         = iframe.contentWindow.mocha
-        @runner        = iframe.contentWindow.mocha.run -> df.resolve()
 
     it "triggers the following events", (done) ->
       @runnerModel = App.request "start:test:runner",
         mocha: @mocha
-        runner: @runner
+        runner: new Mocha.Runner(@mocha.suite)
 
       @runnerModel.options.grep = /.*/
 
@@ -65,7 +65,7 @@ describe "Runner Entity", ->
           "suite:stop"
           "suite:stop"
           "after:run"
-          # "runner:end"
+          "runner:end"
         ]
         done()
 
@@ -83,13 +83,15 @@ describe "Runner Entity", ->
 
   context "runner state", ->
     beforeEach ->
-      df = loadFixture("tests/events", autoResolve: false).progress (iframe) =>
+      loadFixture("tests/events").done (iframe) =>
         @contentWindow = iframe.contentWindow
         @mocha         = iframe.contentWindow.mocha
-        @runner        = iframe.contentWindow.mocha.run -> df.resolve()
 
     it "clears out the runner.test before a test run", ->
-      @runnerModel = App.request("start:test:runner")
+      @runnerModel = App.request "start:test:runner",
+        mocha: @mocha
+        runner: new Mocha.Runner(@mocha.suite)
+
       @runnerModel.options.grep = /.*/
 
       runner = @runnerModel.runner
