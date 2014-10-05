@@ -44,7 +44,7 @@ describe "Command Entities", ->
         expect(@child.parent.isParent()).to.be.true
 
       it "indents based on the parent's indent", ->
-        expect(@child.get("indent")).to.eq @child.parent.get("indent") + 17
+        expect(@child.get("indent")).to.eq @child.parent.get("indent") + 5
 
     describe "it clones the parent when its not the last command", ->
       it "inserts a new parent", ->
@@ -167,34 +167,35 @@ describe "Command Entities", ->
       child = @addCommand attrs, "xhr"
       expect(setResponse).to.be.called
 
-    context "parent / child xhrs", ->
-      beforeEach ->
-        attrs =
-          parent: undefined
-          id: "instance1"
-          canBeParent: true
+    ## xhr's are no longer parent / child
+    # context "parent / child xhrs", ->
+    #   beforeEach ->
+    #     attrs =
+    #       parent: undefined
+    #       id: "instance1"
+    #       canBeParent: true
 
-        parent = @addCommand attrs, "xhr"
+    #     parent = @addCommand attrs, "xhr"
 
-        attrs =
-          parent: undefined
-          id: "instance2"
-          canBeParent: true
+    #     attrs =
+    #       parent: undefined
+    #       id: "instance2"
+    #       canBeParent: true
 
-        @addCommand attrs, "xhr"
+    #     @addCommand attrs, "xhr"
 
-        attrs =
-          parent: "instance1"
-          id: "instance3"
+    #     attrs =
+    #       parent: "instance1"
+    #       id: "instance3"
 
-        @child = @addCommand attrs, "xhr"
+    #     @child = @addCommand attrs, "xhr"
 
-      it "does not insert reinsert parents if all of the parents are xhrs", ->
-        expect(@commands).to.have.length 3
+    #   it "does not insert reinsert parents if all of the parents are xhrs", ->
+    #     expect(@commands).to.have.length 3
 
-      it "children are inserted into the correct index within the collection", ->
-        commands = @runnableModel.get("hooks").first().get("commands")
-        expect(commands.indexOf(@child)).to.eq 1
+    #   it "children are inserted into the correct index within the collection", ->
+    #     commands = @runnableModel.get("hooks").first().get("commands")
+    #     expect(commands.indexOf(@child)).to.eq 1
 
   context "#addServer", ->
     it "emits server command", ->

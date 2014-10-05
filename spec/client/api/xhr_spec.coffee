@@ -76,9 +76,9 @@ describe "XHR Command API", ->
 
       expect(args).to.deep.eq {
         canBeParent: false
-        method: "resp"
+        method: "GET response"
         id: @server.responses[0].id
-        parent: @server.requests[0].id
+        # parent: @server.requests[0].id
         xhr: @server.requests[0]
         response: @server.responses[0]
       }
@@ -146,10 +146,11 @@ describe "XHR Command API", ->
         id = @emit.getCall(0).args[0].id
         expect(id).not.to.eq @server.id
 
-      it "child responses reference parent requests", ->
-        parentId = @emit.getCall(0).args[0].id
-        parent = @emit.getCall(1).args[0].parent
-        expect(parentId).to.eq parent
+      ## responses are no longer grouped with their parent requests
+      # it "child responses reference parent requests", ->
+      #   parentId = @emit.getCall(0).args[0].id
+      #   parent = @emit.getCall(1).args[0].parent
+      #   expect(parentId).to.eq parent
 
     describe "multiple requests", ->
       beforeEach ->
