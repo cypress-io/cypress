@@ -13,8 +13,8 @@ do (parent = window.opener or window.parent) ->
   window.assert = chai.assert
 
   ## create our own mocha objects from our parents if its not already defined
-  window.Mocha = parent.Mocha
-  window.mocha = parent.mocha
+  window.Mocha ?= parent.Mocha
+  window.mocha ?= parent.mocha
 
   ## remove all of the listeners from the previous root suite
   mocha.suite.removeAllListeners()

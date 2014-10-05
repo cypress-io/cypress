@@ -102,7 +102,7 @@
       window.Ecl = new Eclectus
 
       overloadMochaRunnableEmit() if App.env("web")
-      overloadMochaRunnerEmit()
+      overloadMochaRunnerEmit() if App.env("ci")
       overloadMochaRunnerUncaught() if App.env("web")
       overloadChaiAssertions(Ecl) if chai and chai.use
 

@@ -8,11 +8,10 @@ describe "Runner Entity", ->
 
   context ".only tests", ->
     beforeEach ->
-      loadFixture("tests/only").done (iframe) =>
+      df = loadFixture("tests/only", autoResolve: false).progress (iframe) =>
         @contentWindow = iframe.contentWindow
         @mocha         = iframe.contentWindow.mocha
-        @mocha.reporter(->)
-        @runner        = iframe.contentWindow.mocha.run()
+        @runner        = iframe.contentWindow.mocha.run -> df.resolve()
 
     it "triggers 'exclusive:test' when tests have an .only", (done) ->
       @runnerModel = App.request("start:test:runner")
@@ -37,11 +36,10 @@ describe "Runner Entity", ->
 
   context "events", ->
     beforeEach ->
-      loadFixture("tests/events").done (iframe) =>
+      df = loadFixture("tests/events", autoResolve: false).progress (iframe) =>
         @contentWindow = iframe.contentWindow
         @mocha         = iframe.contentWindow.mocha
-        @mocha.reporter(->)
-        @runner        = iframe.contentWindow.mocha.run()
+        @runner        = iframe.contentWindow.mocha.run -> df.resolve()
 
     it "triggers the following events", (done) ->
       @runnerModel = App.request "start:test:runner",
@@ -67,7 +65,7 @@ describe "Runner Entity", ->
           "suite:stop"
           "suite:stop"
           "after:run"
-          "runner:end"
+          # "runner:end"
         ]
         done()
 
@@ -85,11 +83,10 @@ describe "Runner Entity", ->
 
   context "runner state", ->
     beforeEach ->
-      loadFixture("tests/events").done (iframe) =>
+      df = loadFixture("tests/events", autoResolve: false).progress (iframe) =>
         @contentWindow = iframe.contentWindow
         @mocha         = iframe.contentWindow.mocha
-        @mocha.reporter(->)
-        @runner        = iframe.contentWindow.mocha.run()
+        @runner        = iframe.contentWindow.mocha.run -> df.resolve()
 
     it "clears out the runner.test before a test run", ->
       @runnerModel = App.request("start:test:runner")
