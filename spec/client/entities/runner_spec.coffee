@@ -46,25 +46,19 @@ describe "Runner Entity", ->
         mocha: @mocha
         runner: @runner
 
+      @runnerModel.options.grep = /.*/
+
       trigger = @sandbox.spy @runnerModel, "trigger"
       @runnerModel.runIframeSuite "events.html", @contentWindow, ->
         events = _(trigger.args).map (args) -> args[0]
         expect(events).to.deep.eq [
           "before:run"
           "before:add"
-          "test:add"
           "suite:add"
           "test:add"
           "after:add"
           "suite:start"
-          "test:start"
-          "test:start"
-          "test:end"
-          "test:end"
           "suite:start"
-          "test:start"
-          "suite:start"
-          "test:end"
           "test:start"
           "test:end"
           "suite:stop"
