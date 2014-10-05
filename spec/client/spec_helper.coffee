@@ -9,7 +9,10 @@ beforeEach ->
 afterEach ->
   @sandbox.restore()
 
-window.loadFixture = (path) ->
+window.loadFixture = (path, options = {}) ->
+  _.defaults options,
+    autoResolve: true
+
   path = "/fixtures/" + path + ".html"
 
   df = $.Deferred()
@@ -19,7 +22,8 @@ window.loadFixture = (path) ->
   iframe = $("<iframe />", {
     src: path
     load: ->
-      df.resolve(@)
+      df.notify(@)
+      df.resolve(@) if options.autoResolve
   })
 
   iframe.appendTo $("body")
