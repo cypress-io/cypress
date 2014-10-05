@@ -12,6 +12,10 @@ url       = require("url")
 spawn     = require("child_process").spawn
 mocha     = require("./mocha.coffee")
 
+controllers =
+  RemoteLoader: new (require('./controllers/remote_loader'))().handle
+
+
 _.mixin _.str.exports()
 
 global.app  = express()
@@ -171,13 +175,9 @@ app.get "/iframes/*", (req, res) ->
   }
 
 app.get "/remotes", (req, res) ->
-  res.render path.join(__dirname, "todo.html"), {
-    utilities: getUtilities()
-    # url: req.query.url
-  }
-  # res.render path.join(__dirname, "remote.html"), {
-  #   url: req.params[0]
-  # }
+  controllers.RemoteLoader(req, res, {
+    inject: "<script src='/eclectus/js/sinon.js'></script>"
+  })
 
 ## serve the real eclectus JS app when we're at root
 app.get "/", (req, res) ->
