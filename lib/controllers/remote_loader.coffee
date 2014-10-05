@@ -6,13 +6,13 @@ path          = require "path"
 
 module.exports = class extends require('events').EventEmitter
   handle: (req, res, opts) =>
-    @emit "verbose", "handling request for #{req.query.url}"
+    @emit "verbose", "handling request for #{req.session.proxyUrl}"
 
-    @getContent(req.query.url)
+    @getContent(req.session.proxyUrl)
     .then(_.partialRight(@injectContent, opts.inject))
     .then(res.send.bind(res))
     .catch(
-      _.partialRight(@errorHandler, res, req.query.url)
+      _.partialRight(@errorHandler, res, req.session.proxyUrl)
     )
 
   injectContent: (content, toInject) ->

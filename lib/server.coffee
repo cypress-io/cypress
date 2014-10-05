@@ -8,13 +8,12 @@ coffee    = require("coffee-script")
 _         = require("underscore")
 _.str     = require("underscore.string")
 chokidar  = require("chokidar")
-url       = require("url")
 spawn     = require("child_process").spawn
 mocha     = require("./mocha.coffee")
 
 controllers =
   RemoteLoader: new (require('./controllers/remote_loader'))().handle
-
+  RemoteProxy: new (require('./controllers/remote_proxy'))().handle
 
 _.mixin _.str.exports()
 
@@ -40,6 +39,7 @@ app.use require("compression")()
 app.use require("morgan")("dev")
 app.use require("body-parser").json()
 app.use require("method-override")()
+app.use(require('express-session')({secret: "marionette is cool"}))
 
 convertToAbsolutePath = (files) ->
   ## make sure its an array and remap to an absolute path
@@ -175,6 +175,8 @@ app.get "/iframes/*", (req, res) ->
   }
 
 app.get "/remotes", (req, res) ->
+  req.session.proxyUrl = req.query.url
+
   controllers.RemoteLoader(req, res, {
     inject: "<script src='/eclectus/js/sinon.js'></script>"
   })
@@ -183,13 +185,9 @@ app.get "/remotes", (req, res) ->
 app.get "/", (req, res) ->
   res.sendFile path.join(__dirname, "public", "index.html")
 
-## else send the file from process.cwd()
-app.get "*", (req, res) ->
-  ## strip off any query params from our req's url
-  baseUrl = url.parse(req.url).pathname
-
-  args = _.compact([process.cwd(), app.get("eclectus").rootFolder, baseUrl])
-  res.sendFile path.join args...
+## unfound paths we assume we want to pass on through
+## to the origin proxyUrl
+app.get "*", controllers.RemoteProxy
 
 ## errorhandler
 app.use require("errorhandler")()
