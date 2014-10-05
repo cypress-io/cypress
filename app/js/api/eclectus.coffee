@@ -33,6 +33,9 @@ window.Eclectus = do ($, _) ->
 
       Eclectus.Xhr.bindServerTo(@, "server", @sandbox.server)
 
+      ## return the actual sinon server object for additional use in its API
+      return server
+
     assert: (partial, passed, message, value, actual, expected) ->
       assertion = new Eclectus.Assertion partial.contentWindow, partial.channel, partial.runnable, @hook
       assertion.log value, actual, expected, message, passed
