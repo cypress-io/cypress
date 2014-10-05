@@ -11,6 +11,7 @@ describe "Runner Entity", ->
       loadFixture("tests/only").done (iframe) =>
         @contentWindow = iframe.contentWindow
         @mocha         = iframe.contentWindow.mocha
+        @mocha.reporter(->)
         @runner        = iframe.contentWindow.mocha.run()
 
     it "triggers 'exclusive:test' when tests have an .only", (done) ->
@@ -39,6 +40,7 @@ describe "Runner Entity", ->
       loadFixture("tests/events").done (iframe) =>
         @contentWindow = iframe.contentWindow
         @mocha         = iframe.contentWindow.mocha
+        @mocha.reporter(->)
         @runner        = iframe.contentWindow.mocha.run()
 
     it "triggers the following events", (done) ->
@@ -49,6 +51,7 @@ describe "Runner Entity", ->
       @runnerModel.options.grep = /.*/
 
       trigger = @sandbox.spy @runnerModel, "trigger"
+
       @runnerModel.runIframeSuite "events.html", @contentWindow, ->
         events = _(trigger.args).map (args) -> args[0]
         expect(events).to.deep.eq [
@@ -85,6 +88,7 @@ describe "Runner Entity", ->
       loadFixture("tests/events").done (iframe) =>
         @contentWindow = iframe.contentWindow
         @mocha         = iframe.contentWindow.mocha
+        @mocha.reporter(->)
         @runner        = iframe.contentWindow.mocha.run()
 
     it "clears out the runner.test before a test run", ->
