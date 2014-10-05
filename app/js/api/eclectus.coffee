@@ -25,7 +25,7 @@ window.Eclectus = do ($, _) ->
       return dom
 
     server: (partial) ->
-      throw new Error("Eclectus.sandbox() must be invoked first") if not @sandbox
+      @createSandbox(partial.remoteIframe)
 
       @sandbox._server = server = partial.remoteIframe.sinon.fakeServer.create()
       @sandbox.server = new Eclectus.Xhr partial.remoteIframe, partial.channel, partial.runnable, @hook
@@ -41,7 +41,7 @@ window.Eclectus = do ($, _) ->
       assertion.log value, actual, expected, message, passed
 
     stub: (partial, obj, method) ->
-      throw new Error("Eclectus.sandbox() must be invoked first") if not @sandbox
+      @createSandbox(partial.remoteIframe)
 
       stub = @sandbox.stub(obj, method)
 
@@ -53,7 +53,7 @@ window.Eclectus = do ($, _) ->
     mock: (partial) ->
 
     spy: (partial, obj, method) ->
-      throw new Error("Eclectus.sandbox() must be invoked first") if not @sandbox
+      @createSandbox(partial.remoteIframe)
 
       spy = @sandbox.spy(obj, method)
 
@@ -79,6 +79,17 @@ window.Eclectus = do ($, _) ->
     restore: ->
       @sandbox?.restore?()
 
+    createSandbox: (remoteIframe) ->
+      ## bail if its already created
+      return if @sandbox
+
+      contentWindow = remoteIframe[0].contentWindow
+
+      throw new Error("Remote Iframe did not load sinon.js") if not contentWindow.sinon
+
+      ## set sandbox up on the remote iframes sinon sandbox
+      @sandbox = contentWindow.sinon.sandbox.create()
+
     ## class method patch
     ## loops through each method and partials
     ## the runnable onto our prototype
@@ -93,11 +104,6 @@ window.Eclectus = do ($, _) ->
       fns = _(methods).keys().concat("hook", "sandbox")
       _.each (fns), (fn, obj) ->
         delete Eclectus.prototype[fn]
-
-    ## store the sandbox for each iframe window
-    ## so all of our Ecl commands can utilize this
-    @sandbox = (remoteIframe) ->
-      # Eclectus.prototype.sandbox = remoteIframe.sinon.sandbox.create()
 
     @scope = (dom) ->
       ## only re-patch these specific methods, not the others

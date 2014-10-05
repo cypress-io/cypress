@@ -27,8 +27,6 @@
 
     setEclHook: (@patchHook) ->
 
-    setEclSandbox: (@patchSandbox) ->
-
     setEclRestore: (@eclRestore) ->
 
     setOptions: (@options) ->
@@ -434,9 +432,6 @@
       ## pass this along to our Eclectus methods
       @setContentWindow contentWindow, remoteIframe
 
-      ## patch the sinon sandbox for Eclectus methods
-      @patchSandbox remoteIframe[0].contentWindow
-
       ## trigger the before run event
       @trigger "before:run"
 
@@ -478,7 +473,7 @@
 
         fn?(err)
 
-  App.reqres.setHandler "runner:entity", (testRunner, options, patch, hook, sandbox, restore) ->
+  App.reqres.setHandler "runner:entity", (testRunner, options, patch, hook, restore) ->
     ## always set grep if its not already set
     options.grep ?= /.*/
 
@@ -488,7 +483,6 @@
     runner.setOptions options
     runner.setEclPatch patch
     runner.setEclHook hook
-    runner.setEclSandbox sandbox
     runner.setEclRestore restore
     runner.startListening()
     runner

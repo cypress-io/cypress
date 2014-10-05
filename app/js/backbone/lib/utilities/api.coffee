@@ -113,7 +113,7 @@
       mocha  = options.mocha ?= window.mocha
 
       ## return our runner entity
-      return App.request("runner:entity", runner, mocha.options, Eclectus.patch, Eclectus.hook, Eclectus.sandbox, Eclectus.prototype.restore)
+      return App.request("runner:entity", runner, mocha.options, Eclectus.patch, Eclectus.hook, Eclectus.prototype.restore)
 
     getRunner: ->
       ## start running the tests
