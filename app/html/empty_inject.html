@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en" data-framework="marionettejs">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+  </head>
+  <body>
+    {{#each utilities}}
+      <script type="text/javascript" src="{{this}}"></script>
+    {{/each}}
+
+    {{#each javascripts}}
+      <script type="text/javascript" src="{{this}}"></script>
+    {{/each}}
+
+    {{#each specs}}
+      <script type="text/javascript" src="{{this}}"></script>
+    {{/each}}
+  </body>
+</html>
