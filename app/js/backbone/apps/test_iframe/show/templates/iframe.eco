@@ -10,9 +10,54 @@
         <i class="fa fa-cog"></i>
         <i class="fa fa-caret-down"></i>
       </button>
-      <form class="dropdown-menu">
-        form content
-      </form>
+      <div id="browser-size-form-wrapper" class="dropdown-menu dropdown-menu-right">
+        <div class="container-fluid">
+          <form class="form-horizontal">
+            <div class="form-group form-group-sm">
+              <label class="control-label col-xs-6">
+                <i class="fa fa-arrows-h fa-fw"></i>
+                Width
+              </label>
+              <div class="col-xs-6">
+                <div class="row">
+                  <input class="form-control col-xs-5" name="width" />
+                  <div class="col-xs-7">
+                    <p class="form-control-static">% / px</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="form-group form-group-sm">
+              <label class="control-label col-xs-6">
+                <i class="fa fa-arrows-v fa-fw"></i>
+                Height
+              </label>
+              <div class="col-xs-6">
+                <div class="row">
+                  <input class="form-control col-xs-5" name="width" />
+                  <div class="col-xs-7">
+                    <p class="form-control-static">% / px</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="form-group form-group-sm">
+              <label class="control-label col-xs-6">
+                <i class="fa fa-search-minus fa-flip-horizontal fa-fw"></i>
+                Scale
+              </label>
+              <div class="col-xs-6">
+                <div class="row">
+                  <input class="form-control col-xs-5" name="width" />
+                  <div class="col-xs-7">
+                    <p class="form-control-static">%</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
     <i class="fa fa-compress"></i>
     <i class="fa fa-expand"></i>

@@ -104,6 +104,16 @@
           background-color: #FFFFD5;
         }
       }
+
+      #browser-size-form-wrapper {
+        padding: 15px 0 5px;
+        width: 240px;
+
+        label {
+          font-weight: normal;
+          // text-align: left;
+        }
+      }
     }
 
     iframe {
