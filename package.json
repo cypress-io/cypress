@@ -23,6 +23,7 @@
   "devDependencies": {
     "body-parser": "^1.8.1",
     "chai": "^1.9.2",
+    "chai-as-promised": "^4.1.1",
     "commander": "^2.3.0",
     "compression": "^1.1.0",
     "errorhandler": "^1.1.1",
