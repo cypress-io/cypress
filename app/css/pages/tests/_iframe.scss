@@ -5,6 +5,7 @@
   top: 0;
   bottom: 0;
   right: 0;
+  box-shadow: 2px 0 7px #333;
 
   #iframe-container {
     height: 100%;
@@ -16,6 +17,7 @@
     // bottom: 24px;
     // left: 24px;
     top: 0px;
+    background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1IiBoZWlnaHQ9IjUiPgo8cmVjdCB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjOWU5ZTllIj48L3JlY3Q+CjxwYXRoIGQ9Ik0wIDVMNSAwWk02IDRMNCA2Wk0tMSAxTDEgLTFaIiBzdHJva2U9IiM4ODgiIHN0cm9rZS13aWR0aD0iMSI+PC9wYXRoPgo8L3N2Zz4=");
 
     #iframe-region,
     #iframe-region>div {
@@ -41,7 +43,7 @@
     header {
       position: relative;
       overflow: hidden;
-      background-color: #FFF;
+      background-color: #F7F7F7;
       line-height: 22px;
       padding: 5px 10px;
       color: #888;
@@ -51,6 +53,7 @@
       right: 0;
       height: 37px;
       top: 0;
+      box-shadow: 0 2px 3px #888;
 
       .iframe-menu {
         float: right;
@@ -98,12 +101,15 @@
         &:focus {
           // the outline color on focus looks strange
           // because it doesn't respect input's
+          outline: 0;
+          background-color: #FFFFD5;
         }
       }
     }
 
     iframe {
       background-color: transparent;
+      // width: 600px;
       width: 100%;
       height: 100%;
       border: 1px solid #D5D5D5;
@@ -111,6 +117,11 @@
       bottom: 0;
       top: 0;
       overflow: auto;
+      display: block;
+      margin: 0 auto;
+      box-shadow: 0 6px 10px #555;
+      transform: scale(1);
+      transform-origin: 50% 0; //center vertically at the top
     }
   }
 }
