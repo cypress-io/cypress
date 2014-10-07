@@ -9,6 +9,7 @@
       compress: ".fa-compress"
       message:  "#iframe-message"
       dropdown: ".dropdown"
+      sliders:  ".slider"
 
     events:
       "click @ui.expand"    : "expandClicked"
@@ -117,6 +118,11 @@
       main      = $("#main-region :first-child")
       tests     = $("#test-container")
       container = $("#iframe-wrapper")
+
+      @ui.sliders.slider
+        range: "min"
+        min: 1
+        max: 100
 
       @calcWidth = _(@calcWidth).partial main, tests, container
 

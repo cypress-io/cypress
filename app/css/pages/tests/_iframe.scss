@@ -106,12 +106,31 @@
       }
 
       #browser-size-form-wrapper {
-        padding: 15px 0 5px;
         width: 240px;
+        padding: 0;
+
+        form {
+          padding: 15px 0 5px;
+        }
 
         label {
           font-weight: normal;
           // text-align: left;
+        }
+
+        .form-group {
+          border-bottom: 1px dotted #ccc;
+          padding-bottom: 10px;
+        }
+
+        .slider {
+          margin: 5px;
+        }
+
+        .ui-slider-handle {
+          &:focus {
+            outline: 0;
+          }
         }
       }
     }

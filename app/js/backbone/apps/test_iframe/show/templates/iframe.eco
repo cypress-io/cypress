@@ -26,6 +26,9 @@
                   </div>
                 </div>
               </div>
+              <div class="col-xs-12">
+                <div class="slider"></div>
+              </div>
             </div>
             <div class="form-group form-group-sm">
               <label class="control-label col-xs-6">
@@ -40,6 +43,9 @@
                   </div>
                 </div>
               </div>
+              <div class="col-xs-12">
+                <div class="slider"></div>
+              </div>
             </div>
             <div class="form-group form-group-sm">
               <label class="control-label col-xs-6">
@@ -53,6 +59,9 @@
                     <p class="form-control-static">%</p>
                   </div>
                 </div>
+              </div>
+              <div class="col-xs-12">
+                <div class="slider"></div>
               </div>
             </div>
           </form>
