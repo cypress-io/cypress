@@ -114,15 +114,33 @@
     calcWidth: (main, tests, container) ->
       container.width main.width() - tests.width()
 
+    updateIframeCss: (name, val) ->
+      switch name
+        when "height", "width"
+          @$iframe.css(name, val + "%")
+        when "scale"
+          num = (val / 100)
+          @$iframe.css("transform", "scale(#{num})")
+
     onShow: ->
       main      = $("#main-region :first-child")
       tests     = $("#test-container")
       container = $("#iframe-wrapper")
 
+      view = @
+
       @ui.sliders.slider
         range: "min"
         min: 1
         max: 100
+        slide: (e, ui) ->
+          name = $(@).parents(".form-group").find("input").val(ui.value).prop("name")
+          view.updateIframeCss(name, ui.value)
+
+      @ui.sliders.each (index, slider) ->
+        $slider = $(slider)
+        val = $slider.parents(".form-group").find("input").val()
+        $slider.slider("value", val)
 
       @calcWidth = _(@calcWidth).partial main, tests, container
 
