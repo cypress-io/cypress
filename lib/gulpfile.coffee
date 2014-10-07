@@ -59,6 +59,10 @@ gulp.task "fonts", ->
   gulp.src("bower_components/font-awesome/fonts/**")
     .pipe gulp.dest "lib/public/css/fonts"
 
+gulp.task "img", ->
+  gulp.src("bower_components/jquery-ui/themes/smoothness/images/**")
+    .pipe gulp.dest "lib/public/css/images"
+
 gulp.task "js", (cb) ->
   bundles = yaml.load(fs.readFileSync("./lib/js.yml", "utf8"))
 
@@ -95,4 +99,4 @@ gulp.task "server", ->
 gulp.task "test", ->
   require("../spec/server.coffee")
 
-gulp.task "default", ["bower", "css", "fonts", "js", "html", "watch"]
+gulp.task "default", ["bower", "css", "img", "fonts", "js", "html", "watch"]
