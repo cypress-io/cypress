@@ -12,7 +12,9 @@
       channel.on "eclectus:css:changed", (data) ->
         ## find the eclectus stylesheet
         link = $("link").filter (index, link) ->
-          new RegExp(data.file).test $(link).attr("href")
+          ## replace a period with 1 back slash
+          re = data.file.split(".").join("\\.")
+          new RegExp(re).test $(link).attr("href")
 
         ## get the relative href excluding host, domain, etc
         href = new Uri(link.attr("href"))
