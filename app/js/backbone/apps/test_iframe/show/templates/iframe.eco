@@ -34,7 +34,7 @@
               </label>
               <div class="col-xs-6">
                 <div class="row">
-                  <input class="form-control col-xs-5" name="width" />
+                  <input class="form-control col-xs-5" name="height" />
                   <div class="col-xs-7">
                     <p class="form-control-static">% / px</p>
                   </div>
@@ -48,7 +48,7 @@
               </label>
               <div class="col-xs-6">
                 <div class="row">
-                  <input class="form-control col-xs-5" name="width" />
+                  <input class="form-control col-xs-5" name="scale" />
                   <div class="col-xs-7">
                     <p class="form-control-static">%</p>
                   </div>
