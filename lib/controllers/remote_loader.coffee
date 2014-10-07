@@ -3,6 +3,7 @@ fs            = Promise.promisifyAll(require("fs"))
 request       = require "request-promise"
 _             = require "lodash"
 path          = require "path"
+fsUtil        = require("../util/file_helpers")
 
 module.exports = class extends require('events').EventEmitter
   handle: (req, res, opts) =>
@@ -21,19 +22,13 @@ module.exports = class extends require('events').EventEmitter
     )
 
   getContent: (url) ->
-    if @isRelativeRequest(url)
+    if fsUtil.isRelativeRequest(url)
       return @getRelativeFileContent(url)
 
-    if @isFileRequest(url)
+    if fsUtil.isFileProtocol(url)
       return @getFileContent(url)
 
     @getUrlContent(url)
-
-  isRelativeRequest: (url) ->
-    !url.match(/:\/\//)
-
-  isFileRequest: (url) ->
-    url.match(/^file:\/\//g)
 
   getRelativeFileContent: (p) ->
     fs.readFileAsync(path.join(process.cwd(), p), 'utf8')
@@ -41,8 +36,7 @@ module.exports = class extends require('events').EventEmitter
   getFileContent: (p) ->
     fs.readFileAsync(p.slice(7), 'utf8')
 
-  getUrlContent: (url) ->
-    request.get(url)
+  getUrlContent: (url) -> request.get(url)
 
   errorHandler: (e, res, url) ->
     res.status(500)
