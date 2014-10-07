@@ -8,10 +8,42 @@
       expand:   ".fa-expand"
       compress: ".fa-compress"
       message:  "#iframe-message"
+      dropdown: ".dropdown"
 
     events:
       "click @ui.expand"    : "expandClicked"
       "click @ui.compress"  : "compressClicked"
+      "show.bs.dropdown"    : "dropdownShow"
+      "hide.bs.dropdown"    : "dropdownHide"
+
+    getBootstrapNameSpaceForEvent: (name, e) ->
+      name + "." + e.namespace
+
+    dropdownShow: (e) ->
+      return if not @$iframe
+
+      ## the bootstrap namespace for click events
+      ## ie click.bs.bootstrap
+      eventNamespace = @getBootstrapNameSpaceForEvent("click", e)
+
+      ## binds to the $iframe document's click event
+      ## and repropogates this to our document
+      ## we do this because bootstrap will only bind
+      ## to our documents click event and not our iframes
+      ## so clicking into our iframe should close the dropdown
+      @$iframe.contents().one eventNamespace, (e) =>
+        $(document).trigger(eventNamespace, e)
+
+    dropdownHide: (e) ->
+      return if not @$iframe
+
+      ## the bootstrap namespace for click events
+      ## ie click.bs.bootstrap
+      eventNamespace = @getBootstrapNameSpaceForEvent("click", e)
+
+      ## we always want to remove our old custom handlers
+      ## when the drop down is closed to clean up references
+      @$iframe.contents().off eventNamespace
 
     revertToDom: (dom, options) ->
       ## replaces the iframes body with the dom object
@@ -36,20 +68,20 @@
       _.defaults options,
         init: true
 
-      @iframe.contents().find("[data-highlight-el]").remove() if not @reverted
+      @$iframe.contents().find("[data-highlight-el]").remove() if not @reverted
 
       return if not options.init
 
       ## if we're not currently reverted
       ## and init is false then nuke the currently highlighted el
       # if not @reverted and not options.init
-        # return @iframe.contents().find("[data-highlight-el='#{options.id}']").remove()
+        # return @$iframe.contents().find("[data-highlight-el='#{options.id}']").remove()
 
       if options.dom
         dom = options.dom
         el  = options.dom.find("[" + options.attr + "]")
       else
-        dom = @iframe.contents().find("body")
+        dom = @$iframe.contents().find("body")
 
       el.each (index, el) =>
         el = $(el)
@@ -97,17 +129,17 @@
       $(window).off "resize", @calcWidth
 
       # _.each ["Ecl", "$", "jQuery", "parent", "chai", "expect", "should", "assert", "Mocha", "mocha"], (global) =>
-      #   delete @iframe[0].contentWindow[global]
-      @iframe?.remove()
-      delete @iframe
+      #   delete @$iframe[0].contentWindow[global]
+      @$iframe?.remove()
+      delete @$iframe
       delete @fn
 
     loadIframe: (src, fn) ->
       ## remove any existing iframes
       @reverted = false
       @ui.message.hide().empty()
-      @iframe?.remove()
-      # @iframe?.close()
+      @$iframe?.remove()
+      # @$iframe?.close()
 
       @$el.hide()
 
@@ -116,11 +148,11 @@
       @src = "/iframes/" + src
       @fn = fn
 
-      # @iframe = window.open(@src, "testIframeWindow", "titlebar=no,menubar=no,toolbar=no,location=no,personalbar=no,status=no")
-      # @iframe.onload = =>
-      #   fn(@iframe)
+      # @$iframe = window.open(@src, "testIframeWindow", "titlebar=no,menubar=no,toolbar=no,location=no,personalbar=no,status=no")
+      # @$iframe.onload = =>
+      #   fn(@$iframe)
 
-      @iframe = $ "<iframe />",
+      @$iframe = $ "<iframe />",
         src: @src
         class: "iframe-spec"
         load: ->
@@ -129,7 +161,7 @@
           view.calcWidth()
           # view.ui.header.show()
 
-      @iframe.appendTo(@$el)
+      @$iframe.appendTo(@$el)
 
     expandClicked: (e) ->
       @ui.expand.hide()

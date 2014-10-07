@@ -1,0 +1,11 @@
+.dropdown {
+
+  // turn off tab-focus() mixin on buttons in dropdowns
+  button[data-toggle='dropdown'] {
+    &:active:focus {
+      outline: 0;
+    }
+
+    outline: 0;
+  }
+}

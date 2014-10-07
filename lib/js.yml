@@ -18,6 +18,7 @@ vendor:
   - bower_components/backbone.mutators/backbone.mutators.js
   - bower_components/spin.js/jquery.spin.js
   - bower_components/jsuri/Uri.js
+  - bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/dropdown.js
   - app/js/vendor/backbone-chooser.coffee
 
 eclectus:
@@ -29,6 +30,7 @@ eclectus:
   - app/js/api/xhr.coffee
   - app/js/api/assertion.coffee
   - app/js/api/spies_stubs_mocks.coffee
+  - app/js/api/visit.coffee
   - app/js/config/**
   - app/js/backbone/app.coffee
   - app/js/backbone/lib/templates/**

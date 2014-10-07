@@ -10,12 +10,12 @@
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/normalize";
 
 // Core CSS
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/buttons";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/dropdowns";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/grid";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/labels";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/scaffolding";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/type";
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/grid";
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/buttons";
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/labels";
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/badges";
 
 // Utilities
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/utilities";
@@ -25,6 +25,7 @@
 
 // Reusable Elements
 @import "elements/general";
+@import "elements/buttons";
 @import "elements/main-content";
 @import "elements/sidebar";
 @import "elements/block-panels";

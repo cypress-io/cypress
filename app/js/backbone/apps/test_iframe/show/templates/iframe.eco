@@ -10,20 +10,9 @@
         <i class="fa fa-cog"></i>
         <i class="fa fa-caret-down"></i>
       </button>
-      <ul class="dropdown-menu" role="menu">
-        <li>
-          <i class="fa fa-desktop"></i>
-          800x400
-        </li>
-        <li>
-          <i class="fa fa-desktop"></i>
-          800x400
-        </li>
-        <li>
-          <i class="fa fa-mobile"></i>
-          400x340
-        </li>
-      </ul>
+      <form class="dropdown-menu">
+        form content
+      </form>
     </div>
     <i class="fa fa-compress"></i>
     <i class="fa fa-expand"></i>
