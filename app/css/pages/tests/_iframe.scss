@@ -95,8 +95,28 @@
         }
       }
 
+      #current-browser-sizes {
+        float: left;
+        margin-right: 7px;
+        position: relative;
+        top: 2px;
+        font-size: 13px;
+
+        #browser-scale-container {
+          margin-left: 3px;
+          font-size: 12px;
+          color: #999;
+        }
+      }
+
+      .fa-cog {
+        margin-right: 4px;
+      }
+
       .fa-caret-down {
         font-size: 14px;
+        top: 2px;
+        position: relative;
       }
 
       input.url {
