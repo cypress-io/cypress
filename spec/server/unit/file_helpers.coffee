@@ -1,17 +1,35 @@
 sinon       = require('sinon')
-fileHelpers = require('../../../lib/util/file_helpers')
+FileHelpers = require('../../../lib/util/file_helpers')
 
-require('chai').should()
+require('chai')
+.use(require('sinon-chai'))
+.should()
 
 describe "File helpers", ->
+  beforeEach ->
+    @fileHelpers = new FileHelpers
+
   it "should match file protocal", ->
-    fileHelpers.isFileProtocol("file://foo.txt")
+    @fileHelpers.isFileProtocol("file://foo.txt")
     .should.be.true
 
   it "should detect relative request", ->
-    fileHelpers.isRelativeRequest("/bob/jones")
+    @fileHelpers.isRelativeRequest("/bob/jones")
     .should.be.true
 
   it "should not detect relative request", ->
-    fileHelpers.isRelativeRequest("http://bob/jones")
+    @fileHelpers.isRelativeRequest("http://bob/jones")
     .should.be.false
+
+  describe "#detectType", ->
+    it "detects urls", ->
+      @fileHelpers.detectType('http://www.google.com')
+      .should.eql('url')
+
+    it "detects file urls", ->
+      @fileHelpers.detectType('file:///usr/lib/pron')
+      .should.eql('file')
+
+    it "detects relative paths", ->
+      @fileHelpers.detectType('/usr/lib/dogecoin/vault.txt')
+      .should.eql('relative')

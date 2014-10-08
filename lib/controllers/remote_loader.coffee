@@ -3,7 +3,7 @@ fs            = Promise.promisifyAll(require("fs"))
 request       = require "request-promise"
 _             = require "lodash"
 path          = require "path"
-fsUtil        = require("../util/file_helpers")
+fsUtil        = new (require("../util/file_helpers"))
 
 module.exports = class extends require('events').EventEmitter
   handle: (req, res, opts) =>
@@ -22,13 +22,12 @@ module.exports = class extends require('events').EventEmitter
     )
 
   getContent: (url) ->
-    if fsUtil.isRelativeRequest(url)
-      return @getRelativeFileContent(url)
-
-    if fsUtil.isFileProtocol(url)
-      return @getFileContent(url)
-
-    @getUrlContent(url)
+    switch type = fsUtil.detectType(url)
+      when "relative" then @getRelativeFileContent(url)
+      when "file"     then @getFileContent(url)
+      when "url"      then @getUrlContent(url)
+      else
+        throw new Error "Unable to handle type #{type}"
 
   getRelativeFileContent: (p) ->
     fs.readFileAsync(path.join(process.cwd(), p), 'utf8')
