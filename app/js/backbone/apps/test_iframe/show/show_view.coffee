@@ -195,10 +195,11 @@
       @$remote = $ "<iframe />",
         id: "iframe-remote"
 
+      @$iframe = $ "<iframe />",
         src: @src
         id: "iframe-spec"
         load: ->
-          fn(@contentWindow, view.remote)
+          fn(@contentWindow, view.$remote)
           view.$el.show()
           view.calcWidth()
           # view.ui.header.show()
