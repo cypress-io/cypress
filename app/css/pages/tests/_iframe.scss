@@ -109,6 +109,37 @@
         width: 240px;
         padding: 0;
 
+        #browser-presets-selector {
+          .dropdown {
+            margin-left: 20px;
+          }
+
+          li {
+            min-width: 230px;
+          }
+
+          i {
+            font-size: 15px;
+            width: 20px;
+            text-align: center;
+            margin-right: 5px;
+            margin-top: 2px;
+            color: #555;
+          }
+
+          a {
+            font-size: 12px;
+          }
+
+          .preset-name {
+            color: #777;
+          }
+
+          .preset-size {
+            float: right
+          }
+        }
+
         form {
           padding: 15px 0 5px;
         }

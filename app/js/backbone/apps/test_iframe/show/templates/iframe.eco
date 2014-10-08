@@ -13,6 +13,67 @@
       <div id="browser-size-form-wrapper" class="dropdown-menu dropdown-menu-right">
         <div class="container-fluid">
           <form class="form-horizontal">
+            <div id="browser-presets-selector" class="form-group">
+              <div class="dropdown">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                  --Presets-- <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                  <li class="dropdown-header">Desktop</li>
+                  <li>
+                    <a href="#">
+                      <i class="fa fa-desktop"></i>
+                      <span class="preset-name">1080p LCD</span>
+                      <span class="preset-size">1920 x 1080</span>
+                    </a>
+                    <a href="#">
+                      <i class="fa fa-desktop"></i>
+                      <span class="preset-name">Macbook 15"</span>
+                      <span class="preset-size">1440 x 900</span>
+                    </a>
+                    <a href="#">
+                      <i class="fa fa-desktop"></i>
+                      <span class="preset-name">Macbook 13"</span>
+                      <span class="preset-size">1280 x 800</span>
+                    </a>
+                    <a href="#">
+                      <i class="fa fa-desktop"></i>
+                      <span class="preset-name">Macbook 11"</span>
+                      <span class="preset-size">1366 x 768</span>
+                    </a>
+                  </li>
+                  <li class="divider"></li>
+                  <li class="dropdown-header">Mobile</li>
+                  <li>
+                    <a href="#">
+                      <i class="fa fa-mobile"></i>
+                      <span class="preset-name">iPhone 6+</span>
+                      <span class="preset-size">1920 x 1080</span>
+                    </a>
+                    <a href="#">
+                      <i class="fa fa-mobile"></i>
+                      <span class="preset-name">iPhone 6</span>
+                      <span class="preset-size">750 x 1334</span>
+                    </a>
+                    <a href="#">
+                      <i class="fa fa-mobile"></i>
+                      <span class="preset-name">iPhone 5</span>
+                      <span class="preset-size">640 x 1136</span>
+                    </a>
+                    <a href="#">
+                      <i class="fa fa-mobile"></i>
+                      <span class="preset-name">iPhone 4</span>
+                      <span class="preset-size">640 x 960</span>
+                    </a>
+                    <a href="#">
+                      <i class="fa fa-mobile"></i>
+                      <span class="preset-name">iPhone 3</span>
+                      <span class="preset-size">320 x 480</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
             <div class="form-group form-group-sm">
               <label class="control-label col-xs-6">
                 <i class="fa fa-arrows-h fa-fw"></i>

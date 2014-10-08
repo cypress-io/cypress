@@ -10,12 +10,23 @@
       message:  "#iframe-message"
       dropdown: ".dropdown"
       sliders:  ".slider"
+      button:   ".dropdown-toggle"
+      choices:  ".dropdown-menu li a"
 
     events:
       "click @ui.expand"    : "expandClicked"
       "click @ui.compress"  : "compressClicked"
+      "click @ui.button"    : "buttonClicked"
+      "click @ui.choices"   : "choicesClicked"
       "show.bs.dropdown"    : "dropdownShow"
       "hide.bs.dropdown"    : "dropdownHide"
+
+    choicesClicked: (e) ->
+      e.preventDefault()
+
+    buttonClicked: (e) ->
+      e.stopPropagation()
+      @ui.button.parent().toggleClass("open")
 
     getBootstrapNameSpaceForEvent: (name, e) ->
       name + "." + e.namespace
