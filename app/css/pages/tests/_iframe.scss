@@ -19,9 +19,19 @@
     top: 0px;
     background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1IiBoZWlnaHQ9IjUiPgo8cmVjdCB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjOWU5ZTllIj48L3JlY3Q+CjxwYXRoIGQ9Ik0wIDVMNSAwWk02IDRMNCA2Wk0tMSAxTDEgLTFaIiBzdHJva2U9IiM4ODgiIHN0cm9rZS13aWR0aD0iMSI+PC9wYXRoPgo8L3N2Zz4=");
 
-    #iframe-region,
-    #iframe-region>div {
+    #iframe-region {
       height: 100%;
+
+      & > div {
+        height: 100%;
+      }
+    }
+
+    #iframe-size-container {
+      height: 100%;
+      margin: 0 auto;
+      transform: scale(1);
+      transform-origin: 50% 0; //center vertically at the top
     }
 
     #iframe-message {
@@ -177,10 +187,7 @@
       top: 0;
       overflow: auto;
       display: block;
-      margin: 0 auto;
       box-shadow: 0 6px 10px #555;
-      transform: scale(1);
-      transform-origin: 50% 0; //center vertically at the top
     }
   }
 }

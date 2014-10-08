@@ -134,3 +134,4 @@
   </div>
 </header>
 <div id="iframe-message"></div>
+<div id="iframe-size-container"></div>

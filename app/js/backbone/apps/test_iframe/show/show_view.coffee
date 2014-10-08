@@ -5,6 +5,7 @@
 
     ui:
       # header:   "header"
+      size:     "#iframe-size-container"
       expand:   ".fa-expand"
       compress: ".fa-compress"
       message:  "#iframe-message"
@@ -128,10 +129,10 @@
     updateIframeCss: (name, val) ->
       switch name
         when "height", "width"
-          @$iframe.css(name, val + "%")
+          @ui.size.css(name, val + "%")
         when "scale"
           num = (val / 100)
-          @$iframe.css("transform", "scale(#{num})")
+          @ui.size.css("transform", "scale(#{num})")
 
     onShow: ->
       main      = $("#main-region :first-child")
@@ -196,7 +197,7 @@
           view.calcWidth()
           # view.ui.header.show()
 
-      @$iframe.appendTo(@$el)
+      @$iframe.appendTo(@ui.size)
 
     expandClicked: (e) ->
       @ui.expand.hide()
