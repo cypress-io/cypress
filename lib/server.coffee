@@ -8,18 +8,12 @@ coffee    = require("coffee-script")
 _         = require("underscore")
 _.str     = require("underscore.string")
 chokidar  = require("chokidar")
-mkdirp    = require('mkdirp')
-url       = require("url")
 spawn     = require("child_process").spawn
-phantom   = require("node-phantom-simple")
 mocha     = require("./mocha.coffee")
 
-# ph = null
-
-# do ->
-#   phantom.create (err, phInstance) ->
-#     console.log "PhantomJS ready..."
-#     ph = phInstance
+controllers =
+  RemoteLoader: new (require('./controllers/remote_loader'))().handle
+  RemoteProxy: new (require('./controllers/remote_proxy'))().handle
 
 _.mixin _.str.exports()
 
@@ -45,6 +39,7 @@ app.use require("compression")()
 app.use require("morgan")("dev")
 app.use require("body-parser").json()
 app.use require("method-override")()
+app.use(require('express-session')({secret: "marionette is cool"}))
 
 convertToAbsolutePath = (files) ->
   ## make sure its an array and remap to an absolute path
@@ -91,27 +86,6 @@ getTest = (spec) ->
 
   return file
 
-phantomjs = (filepath, cb) ->
-  # cmd = path.join __dirname, "id_generator.coffee"
-
-  # t = Date.now()
-
-  # p = spawn "phantomjs", [cmd, "http://localhost:#{app.get('port')}/id_generator/#{filepath}"]
-  # p.stdout.pipe process.stdout
-  # p.stderr.pipe process.stderr
-  # p.on 'exit', (code) ->
-  #   t = Date.now() - t
-  #   console.log "exit", code, "time: ", t
-  #   cb(code)
-
-  ph.createPage (err, page) ->
-    t = Date.now()
-    pathToPage = "http://localhost:#{app.get('port')}/id_generator/#{filepath}"
-    page.open pathToPage, (err, status) ->
-      console.log "opened: ", pathToPage, "time: ", Date.now() - t
-      cb()
-  #       ph.exit()
-
 io.on "connection", (socket) ->
   #, ignoreInitial: true
   watchTestFiles = chokidar.watch testFolder, ignored: (path, stats) ->
@@ -125,12 +99,7 @@ io.on "connection", (socket) ->
     ## a js or coffee files
     not /\.(js|coffee)$/.test path
 
-  # watchTestFiles.on "add", (path) -> console.log "added js:", path
   watchTestFiles.on "change", (filepath, stats) ->
-    # contents    = fs.readFileSync filepath, "utf8"
-    # newFilePath = path.join process.cwd(), filepath#.replace("tests", "compiled")
-    # mkdirp.sync path.dirname(newFilePath)
-    # fs.writeFileSync newFilePath, contents + "\n  it 'tests', ->"
 
     ## simple solution for preventing firing test:changed events
     ## when we are making modifications to our own files
@@ -138,10 +107,6 @@ io.on "connection", (socket) ->
 
     ## strip out our testFolder path from the filepath, and any leading forward slashes
     strippedPath  = filepath.replace(testFolder, "").replace(/^\/+/, "")#split("/")
-
-    ## run this file through phantomjs and make sure we have id's for everything
-    # phantomjs filepath, ->
-      # socket.emit "test:changed", file: filepath
 
     mocha.generateIds filepath, strippedPath, app, ->
       ## for some reason sometimes socket.io isnt emitting
@@ -159,33 +124,6 @@ io.on "connection", (socket) ->
   watchCssFiles.on "change", (filepath, stats) ->
     filepath = path.basename(filepath)
     socket.emit "eclectus:css:changed", file: filepath
-
-  # ## watch js/coffee files for changes
-  # gazeTestFiles = new Gaze
-  # gazeTestFiles.add "#{testFolder}/**/*.+(js|coffee)"
-
-  # gazeTestFiles.watched (err, watched) ->
-  #   console.log "gazeTestFiles", watched
-
-  # gazeTestFiles.on "changed", (filepath) ->
-  #   ## split the path into an array
-  #   ## find the index of our testFolder
-  #   ## grab all the rest of the elements
-  #   ## past this testFolder
-  #   filepath  = filepath.split("/")
-  #   index = filepath.indexOf(testFolder)
-  #   filepath  = _(filepath).rest(index + 1).join("/")
-  #   socket.emit "test:changed", file: filepath
-
-  # ## only do this in development mode
-  # gazeCss = new Gaze path.join(__dirname, "public", "css", "*.css")
-
-  # gazeCss.watched (err, watched) ->
-  #   console.log "gazeCss", watched
-
-  # gazeCss.on "changed", (filepath) ->
-  #   filepath = path.basename(filepath)
-  #   socket.emit "eclectus:css:changed", file: filepath
 
 getSpecs = (test) ->
   ## grab all of the specs if this is ci
@@ -227,8 +165,13 @@ app.get "/iframes/*", (req, res) ->
 
   test = req.params[0]
 
-  ## renders the testHtml file defined in the config
-  res.render path.join(process.cwd(), app.get("eclectus").testHtml), {
+  ## renders the testHtml file IF it is defined in the config
+  if app.get("eclectus").testHtml?
+    filePath = path.join(process.cwd(), app.get("eclectus").testHtml)
+  else
+    filePath = path.join(__dirname, "../", "app/html/empty_inject.html")
+
+  res.render filePath, {
     title:        req.params.test
     stylesheets:  getStylesheets()
     javascripts:  getJavascripts()
@@ -236,23 +179,23 @@ app.get "/iframes/*", (req, res) ->
     specs:        getSpecs(test)
   }
 
+app.get "/remotes", (req, res) ->
+  req.session.proxyUrl = req.query.url
+
+  controllers.RemoteLoader(req, res, {
+    inject: "<script src='/eclectus/js/sinon.js'></script>"
+  })
+
 ## serve the real eclectus JS app when we're at root
 app.get "/", (req, res) ->
   res.sendFile path.join(__dirname, "public", "index.html")
 
-## else send the file from process.cwd()
-app.get "*", (req, res) ->
-  ## strip off any query params from our req's url
-  baseUrl = url.parse(req.url).pathname
-
-  args = _.compact([process.cwd(), app.get("eclectus").rootFolder, baseUrl])
-  res.sendFile path.join args...
+## unfound paths we assume we want to pass on through
+## to the origin proxyUrl
+app.get "*", controllers.RemoteProxy
 
 ## errorhandler
 app.use require("errorhandler")()
 
 server.listen app.get("port"), ->
   console.log 'Express server listening on port ' + app.get('port')
-
-console.log(process.cwd())
-console.log(__dirname)

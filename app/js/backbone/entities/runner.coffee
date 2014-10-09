@@ -17,15 +17,15 @@
       @hooks    = App.request "hook:entities"
       @commands = App.request "command:entities"
 
-    setContentWindow: (@contentWindow) ->
+    setContentWindow: (@contentWindow, @remoteIframe) ->
+      ## make a reference between the iframes
+      @contentWindow.remote = @remoteIframe[0].contentWindow
 
     setIframe: (@iframe) ->
 
     setEclPatch: (@patchEcl) ->
 
     setEclHook: (@patchHook) ->
-
-    setEclSandbox: (@patchSandbox) ->
 
     setEclRestore: (@eclRestore) ->
 
@@ -172,7 +172,7 @@
           runnable: test
           channel: runnerChannel
           contentWindow: @contentWindow
-          iframe: @iframe
+          remoteIframe: @remoteIframe
 
         @patchHook "test"
 
@@ -223,6 +223,7 @@
             runnable: test
             channel: runnerChannel
             contentWindow: @contentWindow
+            remoteIframe: @remoteIframe
             iframe: @iframe
 
         ## dynamically changes the current patched test's hook name
@@ -423,16 +424,13 @@
       id.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
     ## tell our runner to run our iframes mocha suite
-    runIframeSuite: (iframe, contentWindow, fn) ->
+    runIframeSuite: (iframe, contentWindow, remoteIframe, fn) ->
       ## store the current iframe
       @setIframe iframe
 
       ## store the content window so we can
       ## pass this along to our Eclectus methods
-      @setContentWindow contentWindow
-
-      ## patch the sinon sandbox for Eclectus methods
-      @patchSandbox contentWindow
+      @setContentWindow contentWindow, remoteIframe
 
       ## trigger the before run event
       @trigger "before:run"
@@ -451,6 +449,15 @@
       ## run the suite for the iframe
       ## right before we run the root runner's suite we iterate
       ## through each test and give it a unique id
+      t = Date.now()
+
+      ## we need to reset the runner.test to undefined
+      ## when the user clicks the reload button, mocha
+      ## will think that the currentTest is really the
+      ## last test that was run.  so we always reset
+      ## the state of the runner to prevent problems
+      @runner.test = undefined
+
       @runner.runSuite contentWindow.mocha.suite, (err) =>
         ## its possible there is no runner when this
         ## finishes if the user navigated away from
@@ -462,11 +469,11 @@
 
         @runner.emit "eclectus end"
 
-        console.log "finished running the iframes suite!"
+        console.log "finished running the iframes suite!", Date.now() - t
 
         fn?(err)
 
-  App.reqres.setHandler "runner:entity", (testRunner, options, patch, hook, sandbox, restore) ->
+  App.reqres.setHandler "runner:entity", (testRunner, options, patch, hook, restore) ->
     ## always set grep if its not already set
     options.grep ?= /.*/
 
@@ -476,7 +483,6 @@
     runner.setOptions options
     runner.setEclPatch patch
     runner.setEclHook hook
-    runner.setEclSandbox sandbox
     runner.setEclRestore restore
     runner.startListening()
     runner

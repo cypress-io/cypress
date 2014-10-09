@@ -60,7 +60,7 @@
             ## a child jQuery object -- so we need to reset
             ## this object to a jQuery instance that the parent
             ## window controls
-            when args[0] instanceof $("iframe.iframe-spec")[0]?.contentWindow.$
+            when args[0] instanceof $("iframe#iframe-remote")[0]?.contentWindow.$
               args[0] = $(args[0])
 
           orig.apply(@, args)
@@ -113,7 +113,7 @@
       mocha  = options.mocha ?= window.mocha
 
       ## return our runner entity
-      return App.request("runner:entity", runner, mocha.options, Eclectus.patch, Eclectus.hook, Eclectus.sandbox, Eclectus.prototype.restore)
+      return App.request("runner:entity", runner, mocha.options, Eclectus.patch, Eclectus.hook, Eclectus.prototype.restore)
 
     getRunner: ->
       ## start running the tests
