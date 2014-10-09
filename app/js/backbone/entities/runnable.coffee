@@ -19,7 +19,14 @@
 
     failHookByName: (name) ->
       hook = @get("hooks").getByName(name)
-      hook.failed()
+
+      ## its possible that we dont have any models in our hooks collection
+      ## if there were no Ecl commands run in the specific hook since
+      ## we don't create the hooks collection UNTIL a valid command runs.
+      ## we probably want to change this logic around to always create
+      ## a hooks collection if the hook ever ran, regardless of how many
+      ## commands passed within each hook
+      hook.failed() if hook
 
     checkForFailedHook: ->
       ## bail if our hook property is falsy
