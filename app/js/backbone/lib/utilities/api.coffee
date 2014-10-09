@@ -40,7 +40,7 @@
     ## if app environment is development we need to listen to
     ## uncaught exceptions (else it makes tracking down bugs hard)
     Mocha.Runner::uncaught = _.wrap uncaught, (orig, err) ->
-      throw err
+      console.error(err.stack)
 
       orig.call(@, err)
 
