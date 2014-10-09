@@ -5,13 +5,9 @@
     <title>{{title}}</title>
   </head>
   <body>
-    {{#each utilities}}
-      <script type="text/javascript" src="{{this}}"></script>
-    {{/each}}
-
-    {{#each javascripts}}
-      <script type="text/javascript" src="{{this}}"></script>
-    {{/each}}
+      <!-- this should be inlined within a script tag so it prevents -->
+      <!-- fetching it from the backend each time the iframe reloads -->
+    <script type="text/javascript" src="/eclectus/js/iframe.js"></script>
 
     {{#each specs}}
       <script type="text/javascript" src="{{this}}"></script>
