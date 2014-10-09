@@ -27,7 +27,7 @@ window.Eclectus = do ($, _) ->
     server: (partial) ->
       @createSandbox(partial.$remoteIframe)
 
-      @sandbox._server = server = partial.$remoteIframe.sinon.fakeServer.create()
+      @sandbox._server = server = partial.$remoteIframe[0].contentWindow.sinon.fakeServer.create()
       @sandbox.server = new Eclectus.Xhr partial.$remoteIframe, partial.channel, partial.runnable, @hook
       @sandbox.server.setServer server
 
@@ -47,7 +47,7 @@ window.Eclectus = do ($, _) ->
 
       stub = @sandbox.stub(obj, method)
 
-      eclStub = new Eclectus.Stub partial.contentWindow, partial.channel, partial.runnable, @hook
+      eclStub = new Eclectus.Stub partial.$remoteIframe, partial.channel, partial.runnable, @hook
       eclStub.log(obj, method, stub)
 
       return stub

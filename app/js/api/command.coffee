@@ -6,7 +6,7 @@ Eclectus.Command = do ($, _) ->
   class Command
     highlightAttr: "data-eclectus-el"
 
-    constructor: (@$remoteIframe,  @channel, @runnable, @hook) ->
+    constructor: (@$remoteIframe, @channel, @runnable, @hook) ->
       # @document = @$remoteIframe[0].contentWindow.document
 
       ## this is the unique identifer of all instantiated
