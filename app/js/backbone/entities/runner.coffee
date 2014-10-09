@@ -17,9 +17,10 @@
       @hooks    = App.request "hook:entities"
       @commands = App.request "command:entities"
 
-    setContentWindow: (@contentWindow, @remoteIframe) ->
+    setContentWindow: (@contentWindow, @$remoteIframe) ->
       ## make a reference between the iframes
-      @contentWindow.remote = @remoteIframe[0].contentWindow
+      ## probably should be dereferencing this later...
+      @contentWindow.remote = @$remoteIframe[0].contentWindow
 
     setIframe: (@iframe) ->
 
@@ -172,7 +173,7 @@
           runnable: test
           channel: runnerChannel
           contentWindow: @contentWindow
-          remoteIframe: @remoteIframe
+          $remoteIframe: @$remoteIframe
 
         @patchHook "test"
 
@@ -223,7 +224,7 @@
             runnable: test
             channel: runnerChannel
             contentWindow: @contentWindow
-            remoteIframe: @remoteIframe
+            $remoteIframe: @$remoteIframe
             iframe: @iframe
 
         ## dynamically changes the current patched test's hook name
