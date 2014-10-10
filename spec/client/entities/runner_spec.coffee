@@ -8,7 +8,8 @@ describe "Runner Entity", ->
 
   context ".only tests", ->
     beforeEach ->
-      loadFixture("tests/only").done (iframe) =>
+      loadFixture(["tests/only", "html/remote"]).done (iframe, remoteIframe) =>
+        @$remoteIframe = $(remoteIframe)
         @contentWindow = iframe.contentWindow
         @mocha         = iframe.contentWindow.mocha
 
@@ -23,7 +24,7 @@ describe "Runner Entity", ->
 
       trigger = @sandbox.spy @runnerModel, "trigger"
 
-      @runnerModel.runIframeSuite "only.html", @contentWindow, ->
+      @runnerModel.runIframeSuite "only.html", @contentWindow, @$remoteIframe, ->
         expect(trigger).to.be.calledWith "exclusive:test"
         done()
 
@@ -31,13 +32,14 @@ describe "Runner Entity", ->
       @runnerModel = App.request("start:test:runner")
       @runnerModel.options.grep = /.*/
       trigger = @sandbox.spy @runnerModel, "trigger"
-      @runnerModel.runIframeSuite "only.html", @contentWindow, ->
+      @runnerModel.runIframeSuite "only.html", @contentWindow, @$remoteIframe, ->
         expect(trigger).not.to.be.calledWith "exclusive:test"
         done()
 
   context "events", ->
     beforeEach ->
-      loadFixture("tests/events").done (iframe) =>
+      loadFixture(["tests/events", "html/remote"]).done (iframe, remoteIframe) =>
+        @$remoteIframe = $(remoteIframe)
         @contentWindow = iframe.contentWindow
         @mocha         = iframe.contentWindow.mocha
 
@@ -50,7 +52,7 @@ describe "Runner Entity", ->
 
       trigger = @sandbox.spy @runnerModel, "trigger"
 
-      @runnerModel.runIframeSuite "events.html", @contentWindow, ->
+      @runnerModel.runIframeSuite "events.html", @contentWindow, @$remoteIframe, ->
         events = _(trigger.args).map (args) -> args[0]
         expect(events).to.deep.eq [
           "before:run"
@@ -76,18 +78,23 @@ describe "Runner Entity", ->
       runner = @runnerModel.runner
       emit = @sandbox.spy runner, "emit"
 
-      @runnerModel.runIframeSuite "events.html", @contentWindow, ->
+      @runnerModel.runIframeSuite "events.html", @contentWindow, @$remoteIframe, ->
         lastEvent = _.last(emit.args)[0]
         expect(lastEvent).to.eq "eclectus end"
         done()
 
   context "runner state", ->
     beforeEach ->
-      loadFixture("tests/events").done (iframe) =>
+      loadFixture(["tests/events", "html/remote"]).done (iframe, remoteIframe) =>
+        @$remoteIframe = $(remoteIframe)
         @contentWindow = iframe.contentWindow
         @mocha         = iframe.contentWindow.mocha
 
     it "clears out the runner.test before a test run", ->
+      ## need to patch here because we are stubbing out the runSuite
+      ## which would normally patch the Ecl prototype
+      Eclectus.patch {$remoteIframe: @$remoteIframe}
+
       @runnerModel = App.request "start:test:runner",
         mocha: @mocha
         runner: new Mocha.Runner(@mocha.suite)
@@ -100,6 +107,6 @@ describe "Runner Entity", ->
 
       @sandbox.stub runner, "runSuite"
 
-      @runnerModel.runIframeSuite "events.html", @contentWindow, ->
+      @runnerModel.runIframeSuite "events.html", @contentWindow, @$remoteIframe, ->
 
       expect(runner.test).to.be.undefined

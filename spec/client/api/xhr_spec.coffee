@@ -5,11 +5,11 @@ describe "XHR Command API", ->
     @emit = @sandbox.stub(Eclectus.Command.prototype, "emit").returns(null)
 
     loadFixture("html/sinon").done (iframe) =>
-      Eclectus.sandbox iframe.contentWindow
-      Eclectus.patch {contentWindow: iframe.contentWindow}
-      @contentWindow = iframe.contentWindow
+      Eclectus.patch {$remoteIframe: $(iframe)}
+      @remoteWindow = iframe.contentWindow
 
   it "sets sandbox for each content window", ->
+    Ecl.server()
     expect(Ecl.sandbox).to.exist
 
   it "creates the sinon XHR server on the sandbox", ->
@@ -29,23 +29,23 @@ describe "XHR Command API", ->
       expect(@server.onRequests).to.deep.eq []
 
     it "inserts xhr into 'requests' for each XHR request", ->
-      @contentWindow.$.get "/"
+      @remoteWindow.$.get "/"
       expect(@server.requests).to.have.length 1
 
     it "makes requests accessible through Ecl.server", ->
-      @contentWindow.$.get "/"
+      @remoteWindow.$.get "/"
       expect(Ecl.server.requests).to.have.length 1
 
     it "invokes any onRequest callback functions on the Ecl server with an xhr instance", ->
       spy = @sandbox.spy()
       Ecl.server.onRequest spy
-      @contentWindow.$.get "/"
+      @remoteWindow.$.get "/"
       expect(spy).to.be.called
       args = spy.getCall(0).args
       expect(args).to.have.length 1
 
     it "emits the request", ->
-      @contentWindow.$.get "/"
+      @remoteWindow.$.get "/"
       args = @emit.getCall(1).args[0]
       expect(args).deep.eq {
         method: "GET"
@@ -67,7 +67,7 @@ describe "XHR Command API", ->
         response:
           foo: "bar"
 
-      @contentWindow.$.get "/"
+      @remoteWindow.$.get "/"
 
       Ecl.server.respond()
 
@@ -75,7 +75,7 @@ describe "XHR Command API", ->
       args = @emit.getCall(2).args[0]
 
       expect(args).to.deep.eq {
-        canBeParent: false
+        canBeParent: true
         method: "GET response"
         id: @server.responses[0].id
         # parent: @server.requests[0].id
@@ -88,7 +88,7 @@ describe "XHR Command API", ->
       Ecl.server.get
         url: "/"
         onRequest: spy
-      @contentWindow.$.get "/"
+      @remoteWindow.$.get "/"
       expect(spy).to.be.called
 
     it "#post", ->
@@ -96,7 +96,7 @@ describe "XHR Command API", ->
       Ecl.server.post
         url: "/"
         onRequest: spy
-      @contentWindow.$.post "/"
+      @remoteWindow.$.post "/"
       expect(spy).to.be.called
 
     it "#delete", ->
@@ -104,7 +104,7 @@ describe "XHR Command API", ->
       Ecl.server.delete
         url: "/"
         onRequest: spy
-      @contentWindow.$.ajax
+      @remoteWindow.$.ajax
         url: "/"
         method: "DELETE"
       expect(spy).to.be.called
@@ -114,7 +114,7 @@ describe "XHR Command API", ->
       Ecl.server.put
         url: "/"
         onRequest: spy
-      @contentWindow.$.ajax
+      @remoteWindow.$.ajax
         url: "/"
         method: "PUT"
       expect(spy).to.be.called
@@ -124,7 +124,7 @@ describe "XHR Command API", ->
       Ecl.server.patch
         url: "/"
         onRequest: spy
-      @contentWindow.$.ajax
+      @remoteWindow.$.ajax
         url: "/"
         method: "PATCH"
       expect(spy).to.be.called
@@ -138,7 +138,7 @@ describe "XHR Command API", ->
           url: "/user"
           response: {foo: "bar"}
 
-        @contentWindow.$.get "/user"
+        @remoteWindow.$.get "/user"
 
         Ecl.server.respond()
 
@@ -161,8 +161,8 @@ describe "XHR Command API", ->
           url: "/user"
           response: {foo: "bar"}
 
-        @contentWindow.$.get "/admin"
-        @contentWindow.$.get "/user"
+        @remoteWindow.$.get "/admin"
+        @remoteWindow.$.get "/user"
 
         Ecl.server.respond()
 
@@ -187,7 +187,7 @@ describe "XHR Command API", ->
         Ecl.server.get
           url: "/"
 
-        @contentWindow.$.get "/"
+        @remoteWindow.$.get "/"
 
         Ecl.server.respond()
 
@@ -195,6 +195,6 @@ describe "XHR Command API", ->
           url: "/"
           onRequest: spy
 
-        @contentWindow.$.get "/"
+        @remoteWindow.$.get "/"
 
         expect(spy).to.be.called

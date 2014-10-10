@@ -9,23 +9,29 @@ beforeEach ->
 afterEach ->
   @sandbox.restore()
 
-window.loadFixture = (path, options = {}) ->
+window.loadFixture = (paths, options = {}) ->
   _.defaults options,
     autoResolve: true
 
-  path = "/fixtures/" + path + ".html"
-
-  df = $.Deferred()
-
   $("iframe").remove()
 
-  iframe = $("<iframe />", {
-    src: path
-    load: ->
-      df.notify(@)
-      df.resolve(@) if options.autoResolve
-  })
+  ## transform to array even if string
+  paths = Array::concat(paths)
+  paths = _(paths).map (path) -> "/fixtures/" + path + ".html"
 
-  iframe.appendTo $("body")
+  dfs = []
 
-  df
+  _.each paths, (path, index) ->
+
+    dfs.push $.Deferred()
+
+    iframe = $("<iframe />", {
+      src: path
+      load: ->
+        dfs[index].notify(@)
+        dfs[index].resolve(@) if options.autoResolve
+    })
+
+    iframe.appendTo $("body")
+
+  $.when(dfs...)

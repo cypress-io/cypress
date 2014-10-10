@@ -3,12 +3,12 @@ describe "Dom Command API", ->
     @emit = @sandbox.stub(Eclectus.Command.prototype, "emit").returns(null)
 
     loadFixture("html/dom").done (iframe) =>
-      Eclectus.patch {contentWindow: iframe.contentWindow}
-      @dom = Eclectus.createDom {contentWindow: iframe.contentWindow}
-      @contentWindow = iframe.contentWindow
+      Eclectus.patch {$remoteIframe: $(iframe)}
+      @dom = Eclectus.createDom {$remoteIframe: $(iframe)}
+      @remoteWindow = iframe.contentWindow
 
   it "stores the iframe's document", ->
-    expect(@dom.document).to.eq @contentWindow.document
+    expect(@dom.getDocument()).to.eq @remoteWindow.document
 
   it "uses '$' to reference the iframe document", ->
     el = @dom.$("#dom")[0]
@@ -20,13 +20,13 @@ describe "Dom Command API", ->
       @dom.find "#dom"
 
     it "sets $el to the parent $", ->
-      delete @contentWindow.jQuery
-      @dom = Eclectus::find "#dom"
-      expect(@dom.$el).to.be.instanceof($)
+      delete @remoteWindow.jQuery
+      @finder = Eclectus::find "#dom"
+      expect(@finder.$el).to.be.instanceof($)
 
     it "sets $el to the iframe $ if it exists", ->
-      @dom = Eclectus::find "#dom"
-      expect(@dom.$el).to.be.instanceof @contentWindow.$
+      @finder = Eclectus::find "#dom"
+      expect(@finder.$el).to.be.instanceof @remoteWindow.$
 
     it "sets _$el to the parent jquery instance", ->
       expect(@dom._$el).to.exist
@@ -62,18 +62,18 @@ describe "Dom Command API", ->
           @dom4 = Eclectus::find "li"
 
     it "sets $el to the parent $", ->
-      delete @contentWindow.jQuery
+      delete @remoteWindow.jQuery
       @dom = Eclectus::within "#dom", =>
       expect(@dom.$el).to.be.instanceof($)
 
     it "sets $el to the iframe $ if it exists", ->
-      expect(@dom.$el).to.be.instanceof @contentWindow.$
+      expect(@dom.$el).to.be.instanceof @remoteWindow.$
 
     it "sets _$el to the parent jquery instance", ->
       expect(@dom._$el).to.exist
 
     it "finds the child _$el", ->
-      expect(@dom2._$el[0]).to.eq @contentWindow.$("#nested-find")[0]
+      expect(@dom2._$el[0]).to.eq @remoteWindow.$("#nested-find")[0]
 
     it "sets length", ->
       expect(@dom.length).to.eq @dom.$el.length
@@ -98,7 +98,7 @@ describe "Dom Command API", ->
         expect(@dom2._$el).to.exist
 
       it "finds the child _$el", ->
-        expect(@dom2._$el[0]).to.eq @contentWindow.$("#list")[0]
+        expect(@dom2._$el[0]).to.eq @remoteWindow.$("#list")[0]
 
   describe "action methods", ->
     context "#type", ->
