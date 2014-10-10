@@ -13,7 +13,7 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
       @responses = []
       @onRequests = []
 
-      @canBeParent = false
+      @canBeParent = true
 
     setServer: (@server) ->
       @emit
@@ -21,7 +21,7 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
         server:       @server
         requests:     @requests
         responses:    @responses
-        canBeParent:  false
+        canBeParent:  true
         id:           @getId()
         type:         "server"
 
@@ -121,8 +121,8 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
         xhr:            request
         response:       response
         # parent:       request.id
-        canBeParent:  false
-        id:           response.id
+        canBeParent:    true
+        id:             response.id
 
     stub: (options = {}) ->
       throw new Error("Ecl.server.stub() must be called with a method option") if not options.method
@@ -194,7 +194,7 @@ Eclectus.Xhr = do ($, _, Eclectus) ->
         server:       @server
         requests:     @requests
         responses:    @responses
-        canBeParent:  false
+        canBeParent:  true
         finished:     true
         id:           @getId()
         type:         "server"
