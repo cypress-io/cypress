@@ -21,6 +21,16 @@
       "click @ui.choices"   : "choicesClicked"
       "show.bs.dropdown"    : "dropdownShow"
       "hide.bs.dropdown"    : "dropdownHide"
+    #   "click #perf"         : "perfClicked"
+
+    # perfClicked: (e) ->
+    #   s = @$remote.contents().find("body").remove("script")
+    #   t = Date.now()
+    #   str = s.prop("outerHTML")
+    #   console.log "prop outerHTML", Date.now() - t
+    #   t = Date.now()
+    #   str = @$remote.contents().find("body").prop("outerHTML")
+    #   console.warn "body outerHTML", Date.now() - t
 
     choicesClicked: (e) ->
       e.preventDefault()
