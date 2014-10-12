@@ -49,8 +49,15 @@ Eclectus.Command = do ($, _) ->
       @$el.attr(@highlightAttr, true) if @$el
 
       ## clone the body and strip out any script tags
-      body = @$("body").clone(true, true)
+      body = @$("body").clone()
       body.find("script").remove()
+
+      ## here we need to figure out if we're in a remote manual environment
+      ## if so we need to stringify the DOM:
+      ## 1. grab all inputs / textareas / options and set their value on the element
+      ## 2. convert DOM to string: body.prop("outerHTML")
+      ## 3. send this string via websocket to our server
+      ## 4. server rebroadcasts this to our client and its stored as a property
 
       ## now remove it after we clone
       @$el.removeAttr(@highlightAttr) if @$el
