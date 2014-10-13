@@ -6,26 +6,20 @@ fsUtil  = new (require("../util/file_helpers"))
 
 module.exports = class extends require('events').EventEmitter
   handle: (req, res) =>
-    @getContentSteam(
-      path: url.parse(req.url).pathname
-      proxyPath: req.session.proxyUrl
-      reqPath: req.path
-    )
-    .pipe(res)
+    ## strip out the /__remote/ from the req.url
+    uri = req.url.split("/__remote/").join("")
+    @getContentSteam(uri).pipe(res)
 
-  getContentSteam: (obj) ->
-    if (!obj.proxyPath)
-      throw new Error("no path set yet for #{obj.reqPath}")
-    else
-      switch type = fsUtil.detectType(obj.proxyPath)
-        when "relative" then @pipeRelativeContent(obj)
-        when "file"     then @getFileContent(obj)
-        when "url"      then @getUrlContent(obj)
-        else
-          throw new Error "Unable to handle type #{type}"
+  getContentSteam: (uri) ->
+    switch type = fsUtil.detectType(uri)
+      # when "relative" then @pipeRelativeContent(uri)
+      # when "file"     then @getFileContent(uri)
+      when "url"      then @getUrlContent(uri)
+      else
+        throw new Error "Unable to handle type #{type}"
 
-  getUrlContent: (obj) ->
-    request.get(obj.proxyPath + obj.path)
+  getUrlContent: (uri) ->
+    request.get(uri)
 
   getFileContent: (obj) ->
     @pipeRelativeContent({

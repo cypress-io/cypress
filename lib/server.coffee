@@ -180,14 +180,17 @@ app.get "/iframes/*", (req, res) ->
   }
 
 app.get "/external", (req, res) ->
-  req.session.proxyUrl = req.query.url
+  # req.session.proxyUrl = req.query.url
 
   controllers.RemoteLoader(req, res, {
-    inject: ""
+    inject: "<script src='/eclectus/js/sinon.js'></script>"
   })
 
 app.get "/__remote/*", (req, res) ->
-  res.render path.join(__dirname, "../", "app/html/__remote.html")
+  if req.query.__initial
+    res.render path.join(__dirname, "../", "app/html/__remote.html")
+  else
+    controllers.RemoteProxy(req, res)
 
 ## serve the real eclectus JS app when we're at root
 app.get "/", (req, res) ->
