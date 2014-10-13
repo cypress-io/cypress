@@ -90,61 +90,10 @@ Eclectus.Visit = do ($, _, Eclectus) ->
       @canBeParent = false
 
     log: (url, options, fn) ->
-      ## when the remote iframe's load event fires
-      ## callback fn
-      # debugger
-      ## navigate the remote iframe to the url
-
-      ## when our iframe navigates to 'about:blank'
-      ## this callback will fire
-      ## here is where we inject sinon into the window
-      # @$remoteIframe.one "load", =>
-
-      #   script = $("<script />", type: "text/javascript")
-      #   @$remoteIframe.contents().find("head").append(script)
-
-      #   $.get "/eclectus/js/sinon.js", (resp) =>
-      #     script.text(resp)
-
-      #     ## invoke onBeforeLoad if it exists
-      #     options.onBeforeLoad?(@$remoteIframe[0].contentWindow)
-
-      #     ## must defer here for some reason... unknown
-      #     _.defer =>
-      #       ## we setup a new load handler which will fire after we reopen
-      #       ## and close our document
-      #       ## we pipe in the new ajax'd contents into the document
-      #       @$remoteIframe.one "load", =>
-      #         debugger
-      #         options.onLoad?(@$remoteIframe[0].contentWindow)
-      #         fn()
-
-      #       encodedUrl = encodeURIComponent(url)
-
-      #       $.get("/external?url=#{encodedUrl}").done (resp) =>
-      #         doc = @$remoteIframe[0].contentWindow.document
-
-      #         head = $.parseHTML(html.head, doc, true)
-      #         body = $.parseHTML(html.body, doc, true)
-
-      #         debugger
-      #         @$remoteIframe.contents().find("head").append(head)
-      #         @$remoteIframe.contents().find("body").append(body)
-
-      #         # $(resp, @$remoteIframe[0].contentWindow.document)
-
-      #         # doc = @$remoteIframe.prop("contentWindow").document.open()
-
-      #         # @$remoteIframe.contents().find("html").html(html)
-      #         # win = @$remoteIframe.prop("contentWindow")
-      #         # doc = @$remoteIframe.prop("contentWindow").document
-      #         # debugger
-      #         # doc.open()
-      #         # doc.write(resp)
-      #         # doc.close()
-
       win = @$remoteIframe[0].contentWindow
 
+      ## when the remote iframe's load event fires
+      ## callback fn
       @$remoteIframe.one "load", ->
         options.onLoad?(win)
         fn()
