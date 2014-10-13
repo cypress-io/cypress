@@ -179,16 +179,20 @@ app.get "/iframes/*", (req, res) ->
     specs:        getSpecs(test)
   }
 
-app.get "/external", (req, res) ->
-  # req.session.proxyUrl = req.query.url
+# app.get "/external", (req, res) ->
+#   # req.session.proxyUrl = req.query.url
 
-  controllers.RemoteLoader(req, res, {
-    inject: "<script src='/eclectus/js/sinon.js'></script>"
-  })
+#   controllers.RemoteLoader(req, res, {
+#     inject: "<script src='/eclectus/js/sinon.js'></script>"
+#   })
 
 app.get "/__remote/*", (req, res) ->
+  ## might want to use cookies here instead of the query string
+
   if req.query.__initial
-    res.render path.join(__dirname, "../", "app/html/__remote.html")
+    controllers.RemoteLoader(req, res, {
+      inject: "<script type='text/javascript' src='/eclectus/js/sinon.js'></script>"
+    })
   else
     controllers.RemoteProxy(req, res)
 

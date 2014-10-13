@@ -7,20 +7,21 @@ fsUtil        = new (require("../util/file_helpers"))
 
 module.exports = class extends require('events').EventEmitter
   handle: (req, res, opts = {}) =>
-    @emit "verbose", "handling request for #{req.query.url}"
+    uri = req.url.split("/__remote/").join("")
+    @emit "verbose", "handling request for #{uri}"
 
-    @getContent(req.query.url)
+    @getContent(uri)
     .then(_.partialRight(@injectContent, opts.inject))
     .then(res.send.bind(res))
     .catch(
-      _.partialRight(@errorHandler, res, req.query.url)
+      _.partialRight(@errorHandler, res, uri)
     )
 
   injectContent: (content, toInject) ->
     toInject ?= ""
 
     Promise.resolve(
-      content.replace(/<\/body>/, "#{toInject} </body>")
+      content.replace(/<head>/, "<head> #{toInject}")
     )
 
   getContent: (url) ->

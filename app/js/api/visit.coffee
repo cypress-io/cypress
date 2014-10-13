@@ -143,18 +143,35 @@ Eclectus.Visit = do ($, _, Eclectus) ->
       #         # doc.write(resp)
       #         # doc.close()
 
-      @$remoteIframe.one "load", =>
-        script = $("<script />", type: "text/javascript")
-        @$remoteIframe.contents().find("body").append(script)
+      win = @$remoteIframe[0].contentWindow
 
-        $.get "/eclectus/js/sinon.js", (resp) =>
-          script.text(resp)
+      @$remoteIframe.one "load", ->
+        options.onLoad?(win)
+        fn()
 
-          fn()
+      ## if our url is already has a query param
+      ## then append our query param to it
+      if _.str.include(url, "?")
+        url += "&"
+      else
+        ## else create the query param
+        url += "?"
+
+      url += "__initial=true"
 
       ## any existing global variables will get nuked after it navigates
       # @$remoteIframe[0].contentWindow.location.href = "/__blank/"
       @$remoteIframe.prop "src", "/__remote/#{url}"
+
+      ## poll the window to see if sinon has been executed
+      ## if so, call our onBeforeLoad callback
+      _.defer =>
+        id = setInterval =>
+          if win.sinon
+            clearInterval(id)
+            options.onBeforeLoad?(win)
+            win = null
+        , 3
 
       @emit
         method: "visit"
