@@ -9,15 +9,47 @@ Eclectus.Visit = do ($, _, Eclectus) ->
     initialize: ->
       @canBeParent = false
 
-    log: (url, fn) ->
+    log: (url, options, fn) ->
       ## when the remote iframe's load event fires
       ## callback fn
-      @$remoteIframe.one "load", fn
-
-      encodedUrl = encodeURIComponent(url)
-
+      # debugger
       ## navigate the remote iframe to the url
-      @$remoteIframe[0].contentWindow.location.href = "/remotes?url=#{encodedUrl}"
+
+      ## when our iframe navigates to 'about:blank'
+      ## this callback will fire
+      ## here is where we inject sinon into the window
+      @$remoteIframe.one "load", =>
+
+        @$remoteIframe[0].contentWindow.foo = {foo: "foo"}
+        # sinon.call(@$remoteIframe[0].contentWindow)
+
+        script = $("<script />", type: "text/javascript")
+        @$remoteIframe.contents().find("head").append(script)
+
+        $.get "/eclectus/js/sinon.js", (resp) =>
+          script.text(resp)
+
+          ## invoke onBeforeLoad if it exists
+          options.onBeforeLoad?(@$remoteIframe[0].contentWindow)
+
+          ## must defer here for some reason... unknown
+          _.defer =>
+            ## we setup a new load handler which will fire after we reopen
+            ## and close our document
+            ## we pipe in the new ajax'd contents into the document
+            @$remoteIframe.one "load", =>
+              options.onLoad?(@$remoteIframe[0].contentWindow)
+              fn()
+
+            encodedUrl = encodeURIComponent(url)
+
+            $.get("/remotes?url=#{encodedUrl}").done (resp) =>
+              @$remoteIframe[0].contentWindow.document.open()
+              @$remoteIframe[0].contentWindow.document.write(resp)
+              @$remoteIframe[0].contentWindow.document.close()
+
+      ## any existing global variables will get nuked after it navigates
+      @$remoteIframe[0].contentWindow.location.href = "about:blank"
 
       @emit
         method: "visit"

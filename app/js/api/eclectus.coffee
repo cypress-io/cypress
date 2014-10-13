@@ -70,7 +70,8 @@ window.Eclectus = do ($, _) ->
 
       try
         visit = new Eclectus.Visit partial.$remoteIframe, partial.channel, partial.runnable, @hook
-        visit.log url, -> df.resolve()
+        visit.log url, options, ->
+          df.resolve()
       catch e
         debugger
 

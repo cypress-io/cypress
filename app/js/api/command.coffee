@@ -59,6 +59,12 @@ Eclectus.Command = do ($, _) ->
       ## 3. send this string via websocket to our server
       ## 4. server rebroadcasts this to our client and its stored as a property
 
+      ## its also possible for us to store the DOM string completely on the server
+      ## without ever sending it back to the browser (until its requests).
+      ## we could just store it in memory and wipe it out intelligently.
+      ## this would also prevent having to store the DOM structure on the client,
+      ## which would reduce memory, and some CPU operations
+
       ## now remove it after we clone
       @$el.removeAttr(@highlightAttr) if @$el
 
