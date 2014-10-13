@@ -20,9 +20,6 @@ Eclectus.Visit = do ($, _, Eclectus) ->
       ## here is where we inject sinon into the window
       @$remoteIframe.one "load", =>
 
-        @$remoteIframe[0].contentWindow.foo = {foo: "foo"}
-        # sinon.call(@$remoteIframe[0].contentWindow)
-
         script = $("<script />", type: "text/javascript")
         @$remoteIframe.contents().find("head").append(script)
 
@@ -43,13 +40,15 @@ Eclectus.Visit = do ($, _, Eclectus) ->
 
             encodedUrl = encodeURIComponent(url)
 
-            $.get("/remotes?url=#{encodedUrl}").done (resp) =>
-              @$remoteIframe[0].contentWindow.document.open()
-              @$remoteIframe[0].contentWindow.document.write(resp)
-              @$remoteIframe[0].contentWindow.document.close()
+            $.get("/external?url=#{encodedUrl}").done (resp) =>
+              $(@$remoteIframe[0].contentWindow.document).contents().html(resp)
+              # @$remoteIframe[0].contentWindow.document.open()
+              # @$remoteIframe[0].contentWindow.document.write(resp)
+              # @$remoteIframe[0].contentWindow.document.close()
 
       ## any existing global variables will get nuked after it navigates
-      @$remoteIframe[0].contentWindow.location.href = "about:blank"
+      # @$remoteIframe[0].contentWindow.location.href = "/__blank/"
+      @$remoteIframe.prop "src", "/__remote/#{url}"
 
       @emit
         method: "visit"
