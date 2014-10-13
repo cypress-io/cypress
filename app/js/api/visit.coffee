@@ -34,13 +34,14 @@ Eclectus.Visit = do ($, _, Eclectus) ->
 
       ## poll the window to see if sinon has been executed
       ## if so, call our onBeforeLoad callback
-      _.defer =>
-        id = setInterval =>
-          if win.sinon
-            clearInterval(id)
-            options.onBeforeLoad?(win)
-            win = null
-        , 3
+      ## currently this is firing too late
+      ## when we visit google.com but works with todomvc
+      id = setInterval =>
+        if win.sinon
+          clearInterval(id)
+          options.onBeforeLoad?(win)
+          win = null
+      , 1
 
       @emit
         method: "visit"
