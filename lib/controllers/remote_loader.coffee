@@ -7,8 +7,8 @@ fsUtil        = new (require("../util/file_helpers"))
 
 module.exports = class extends require('events').EventEmitter
   handle: (req, res, opts = {}) =>
-    uri = req.url.split("/__remote/").join("")
-    req.session.remote = uri
+    uri                 = req.url.split("/__remote/").join("")
+    req.session.remote  = uri.split("?")[0]
 
     @emit "verbose", "handling request for #{uri}"
 

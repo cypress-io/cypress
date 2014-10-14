@@ -39,8 +39,11 @@ module.exports = class extends require('events').EventEmitter
   pipeAbsolutePath: (paths) ->
     switch type = fsUtil.detectType(paths.remote)
       when "url"
-        @pipeUrlContent(paths.remote + paths.uri)
+        base = url.parse(paths.remote)
+        base = base.protocol + "//" + base.hostname + paths.uri
+
+        @pipeUrlContent(base)
       when "file"
         @pipeFileContent(paths.remote + paths.uri)
       else
-        throw new Error "Unable to handle path pipe for for #{type}"
+        throw new Error "Unable to handle path for #{type}"
