@@ -13,12 +13,12 @@ describe "File helpers", ->
     @fileHelpers.isFileProtocol("file://foo.txt")
     .should.be.true
 
-  it "should detect relative request", ->
-    @fileHelpers.isRelativeRequest("/bob/jones")
+  it "should detect absolute request", ->
+    @fileHelpers.isAbsolute("/bob/jones")
     .should.be.true
 
   it "should not detect relative request", ->
-    @fileHelpers.isRelativeRequest("http://bob/jones")
+    @fileHelpers.isAbsolute("http://bob/jones")
     .should.be.false
 
   describe "#detectType", ->
@@ -32,4 +32,4 @@ describe "File helpers", ->
 
     it "detects relative paths", ->
       @fileHelpers.detectType('/usr/lib/dogecoin/vault.txt')
-      .should.eql('relative')
+      .should.eql('absolute')

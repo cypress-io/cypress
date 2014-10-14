@@ -8,6 +8,8 @@ fsUtil        = new (require("../util/file_helpers"))
 module.exports = class extends require('events').EventEmitter
   handle: (req, res, opts = {}) =>
     uri = req.url.split("/__remote/").join("")
+    req.session.remote = uri
+
     @emit "verbose", "handling request for #{uri}"
 
     @getContent(uri)
@@ -26,17 +28,17 @@ module.exports = class extends require('events').EventEmitter
 
   getContent: (url) ->
     switch type = fsUtil.detectType(url)
-      when "relative" then @getRelativeFileContent(url)
+      when "absolute" then @getRelativeFileContent(url)
       when "file"     then @getFileContent(url)
       when "url"      then @getUrlContent(url)
       else
         throw new Error "Unable to handle type #{type}"
 
   getRelativeFileContent: (p) ->
-    fs.readFileAsync(path.join(process.cwd(), p), 'utf8')
+    fs.readFileAsync(path.join(process.cwd(), p.split('?')[0]), 'utf8')
 
   getFileContent: (p) ->
-    fs.readFileAsync(p.slice(7), 'utf8')
+    fs.readFileAsync(p.slice(7).split('?')[0], 'utf8')
 
   getUrlContent: (url) ->
     request.get(url)
