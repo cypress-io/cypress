@@ -1,3 +1,4 @@
+Domain  = require("domain")
 url     = require("url")
 request = require("request")
 path    = require("path")
@@ -5,13 +6,19 @@ fs      = require("fs")
 fsUtil  = new (require("../util/file_helpers"))
 
 module.exports = class extends require('events').EventEmitter
-  handle: (req, res) =>
+  handle: (req, res, next) =>
     ## strip out the /__remote/ from the req.url
     uri = req.url.split("/__remote/").join("")
-    @getContentSteam({
-      uri: uri,
-      remote: req.session.remote
-    }).pipe(res)
+
+    domain = Domain.create()
+
+    domain.on('error', next)
+
+    domain.run =>
+      @getContentSteam({
+        uri: uri,
+        remote: req.session.remote
+      }).pipe(res)
 
   getContentSteam: (paths) ->
     switch type = fsUtil.detectType(paths.uri)
