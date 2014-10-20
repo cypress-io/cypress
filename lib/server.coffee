@@ -165,8 +165,8 @@ app.get "/iframes/*", (req, res) ->
 
   test = req.params[0]
 
-  ## renders the testHtml file IF it is defined in the config
-  if app.get("eclectus").testHtml?
+  ## renders the testHtml file if it is truthy in the config
+  if app.get("eclectus").testHtml
     filePath = path.join(process.cwd(), app.get("eclectus").testHtml)
   else
     filePath = path.join(__dirname, "../", "app/html/empty_inject.html")
