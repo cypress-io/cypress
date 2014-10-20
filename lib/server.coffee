@@ -11,6 +11,8 @@ chokidar    = require("chokidar")
 spawn       = require("child_process").spawn
 mocha       = require("./mocha.coffee")
 browserify  = require("browserify")
+Stream      = require("stream")
+Domain      = require("domain")
 
 controllers =
   RemoteLoader: new (require('./controllers/remote_loader'))().handle
@@ -85,13 +87,16 @@ getTest = (spec) ->
 
   file = coffee.compile(file) if path.extname(spec) is ".coffee"
 
-  ## need halp here
-  if app.get("eclectus").browserify
-    browserify([file]).bundle (err, buf) ->
-      # debugger
-    # b.add filePath
+  stream = new Stream.Readable()
+  stream.push(file)
+  stream.push(null)
 
-  return file
+  ## need halp here
+  if opts = app.get("eclectus").browserify
+    if _.isObject(opts) then opts else {}
+    return browserify([stream], opts).bundle()
+
+  return stream
 
 io.on "connection", (socket) ->
   #, ignoreInitial: true
@@ -150,11 +155,14 @@ app.use "/eclectus", express.static(__dirname + "/public")
 
 ## routing for the actual specs which are processed automatically
 ## this could be just a regular .js file or a .coffee file
-app.get "/tests/*", (req, res) ->
+app.get "/tests/*", (req, res, next) ->
   test = req.params[0]
 
   res.type "js"
-  res.send getTest(test)
+
+  domain = Domain.create()
+  domain.on 'error', next
+  domain.run -> getTest(test).pipe(res)
 
 ## this serves the html file which is stripped down
 ## to generate the id's for the test files
