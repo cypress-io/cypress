@@ -201,7 +201,7 @@ app.get "/iframes/*", (req, res) ->
 #     inject: "<script src='/eclectus/js/sinon.js'></script>"
 #   })
 
-app.get "/__remote/*", (req, res) ->
+app.get "/__remote/*", (req, res, next) ->
   ## might want to use cookies here instead of the query string
 
   if req.query.__initial
@@ -209,7 +209,7 @@ app.get "/__remote/*", (req, res) ->
       inject: "<script type='text/javascript' src='/eclectus/js/sinon.js'></script>"
     })
   else
-    controllers.RemoteProxy(req, res)
+    controllers.RemoteProxy.call(this, arguments...)
 
 ## serve the real eclectus JS app when we're at root
 app.get "/", (req, res) ->
