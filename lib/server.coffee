@@ -1,15 +1,16 @@
-express   = require("express")
-http      = require("http")
-path      = require("path")
-fs        = require("fs")
-hbs       = require("hbs")
-glob      = require("glob")
-coffee    = require("coffee-script")
-_         = require("underscore")
-_.str     = require("underscore.string")
-chokidar  = require("chokidar")
-spawn     = require("child_process").spawn
-mocha     = require("./mocha.coffee")
+express     = require("express")
+http        = require("http")
+path        = require("path")
+fs          = require("fs")
+hbs         = require("hbs")
+glob        = require("glob")
+coffee      = require("coffee-script")
+_           = require("underscore")
+_.str       = require("underscore.string")
+chokidar    = require("chokidar")
+spawn       = require("child_process").spawn
+mocha       = require("./mocha.coffee")
+browserify  = require("browserify")
 
 controllers =
   RemoteLoader: new (require('./controllers/remote_loader'))().handle
@@ -82,7 +83,13 @@ getTest = (spec) ->
   filePath = path.join(testFolder, spec)
   file = fs.readFileSync(filePath, "utf8")
 
-  return coffee.compile(file) if path.extname(spec) is ".coffee"
+  file = coffee.compile(file) if path.extname(spec) is ".coffee"
+
+  ## need halp here
+  if app.get("eclectus").browserify
+    browserify([file]).bundle (err, buf) ->
+      # debugger
+    # b.add filePath
 
   return file
 
