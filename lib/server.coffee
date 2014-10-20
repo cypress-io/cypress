@@ -4,19 +4,17 @@ path        = require("path")
 fs          = require("fs")
 hbs         = require("hbs")
 glob        = require("glob")
-coffee      = require("coffee-script")
 _           = require("underscore")
 _.str       = require("underscore.string")
 chokidar    = require("chokidar")
 spawn       = require("child_process").spawn
 mocha       = require("./mocha.coffee")
-browserify  = require("browserify")
-Stream      = require("stream")
 Domain      = require("domain")
 
 controllers =
   RemoteLoader: new (require('./controllers/remote_loader'))().handle
   RemoteProxy: new (require('./controllers/remote_proxy'))().handle
+  Test: new (require('./controllers/test'))().handle
 
 _.mixin _.str.exports()
 
@@ -81,23 +79,6 @@ getTestFiles = ->
   testFolderLength = testFolder.split("/").length
   _(files).map (file) -> {name: file.split("/").slice(testFolderLength).join("/")}
 
-getTest = (spec) ->
-  filePath = path.join(testFolder, spec)
-  file = fs.readFileSync(filePath, "utf8")
-
-  file = coffee.compile(file) if path.extname(spec) is ".coffee"
-
-  stream = new Stream.Readable()
-  stream.push(file)
-  stream.push(null)
-
-  ## need halp here
-  if opts = app.get("eclectus").browserify
-    if _.isObject(opts) then opts else {}
-    return browserify([stream], opts).bundle()
-
-  return stream
-
 io.on "connection", (socket) ->
   #, ignoreInitial: true
   watchTestFiles = chokidar.watch testFolder, ignored: (path, stats) ->
@@ -158,19 +139,24 @@ app.use "/eclectus", express.static(__dirname + "/public")
 app.get "/tests/*", (req, res, next) ->
   test = req.params[0]
 
-  res.type "js"
-
-  domain = Domain.create()
-  domain.on 'error', next
-  domain.run -> getTest(test).pipe(res)
+  controllers.Test.apply(
+    this, [{
+      spec: test,
+      testFolder: testFolder
+    }].concat(arguments...)
+  )
 
 ## this serves the html file which is stripped down
 ## to generate the id's for the test files
 app.get "/id_generator/*", (req, res) ->
   test = req.params[0]
 
-  res.type "js"
-  res.send getTest(test)
+  controllers.Test.apply(
+    this, [{
+      spec: test,
+      testFolder: testFolder
+    }].concat(arguments...)
+  )
 
 app.get "/files", (req, res) ->
   res.json getTestFiles()
