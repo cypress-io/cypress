@@ -52,6 +52,7 @@
     "browserify": "^6.1.0",
     "chokidar": "^0.8.4",
     "coffee-script": "^1.7.1",
+    "coffeeify": "git://github.com/jnordberg/coffeeify",
     "express-session": "^1.8.2",
     "gaze": "^0.6.4",
     "glob": "^4.0.4",

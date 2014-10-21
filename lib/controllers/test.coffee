@@ -4,9 +4,15 @@ path        = require "path"
 Stream      = require("stream")
 coffee      = require("coffee-script")
 browserify  = require("browserify")
+coffeeify   = require("coffeeify")
 Domain      = require("domain")
 
 module.exports = class extends require('events').EventEmitter
+  browserify: (opts, fileStream) ->
+    browserify([fileStream], opts)
+    .transform({}, coffeeify)
+    .bundle()
+
   handle: (opts, req, res, next) =>
     res.type "js"
 
@@ -23,12 +29,9 @@ module.exports = class extends require('events').EventEmitter
 
     domain = Domain.create()
     domain.on 'error', next
-    domain.run ->
-      ## need halp here
+    domain.run =>
       if opts = app.get("eclectus").browserify
-        if _.isObject(opts) then opts else {}
-        browserify([stream], opts)
-        .bundle()
+        @browserify(opts, stream)
         .pipe(res)
       else
         stream.pipe(res)
