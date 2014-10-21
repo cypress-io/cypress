@@ -36,6 +36,9 @@ module.exports = class extends require('events').EventEmitter
         ## need to wrap these contents with almond so we dont
         ## have to add the require.js script tag (which is huge)
         contents = fs.readFileSync(config.out, 'utf8')
+
+        ## also we need to delete config.out since requirejs
+        ## generates this
         debugger
 
     # snockets = new Snockets()
