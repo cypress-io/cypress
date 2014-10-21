@@ -1,6 +1,7 @@
 Domain  = require("domain")
 url     = require("url")
 request = require("request")
+mime    = require("mime")
 path    = require("path")
 fs      = require("fs")
 fsUtil  = new (require("../util/file_helpers"))
@@ -17,14 +18,15 @@ module.exports = class extends require('events').EventEmitter
     domain.run =>
       @getContentSteam({
         uri: uri,
-        remote: req.session.remote
+        remote: req.session.remote,
+        res: res
       }).pipe(res)
 
-  getContentSteam: (paths) ->
-    switch type = fsUtil.detectType(paths.uri)
-      when "absolute" then @pipeAbsolutePath(paths)
-      when "file"     then @pipeFileContent(paths.uri)
-      when "url"      then @pipeUrlContent(paths.uri)
+  getContentSteam: (opts) ->
+    switch type = fsUtil.detectType(opts.uri)
+      when "absolute" then @pipeAbsolutePath(opts, opts.res)
+      when "file"     then @pipeFileContent(opts.uri, opts.res)
+      when "url"      then @pipeUrlContent(opts.uri)
       else
         throw new Error "Unable to handle type #{type}"
 
@@ -32,24 +34,26 @@ module.exports = class extends require('events').EventEmitter
     @emit "verbose", "piping url content #{uri}"
     request.get(uri)
 
-  pipeFileContent: (uri) ->
+  pipeFileContent: (uri, res) ->
     @emit "verbose", "piping url content #{uri}"
 
     if (~uri.indexOf('file://'))
       uri = uri.split('file://')[1]
 
+    @pipeFileUriContents.apply(this, arguments)
+
+  pipeFileUriContents: (uri, res) ->
+    res.contentType(mime.lookup(uri))
+
     fs.createReadStream(
       path.resolve(process.cwd(), uri)
     )
 
-  pipeAbsoluteFileContent: (uri) ->
+  pipeAbsoluteFileContent: (uri, res) ->
     @emit "verbose", "piping url content #{uri}"
+    @pipeFileUriContents.apply(this, arguments)
 
-    fs.createReadStream(
-      path.resolve(process.cwd(), uri)
-    )
-
-  pipeAbsolutePath: (paths) ->
+  pipeAbsolutePath: (paths, res) ->
     switch type = fsUtil.detectType(paths.remote)
       when "url"
         base = url.parse(paths.remote)
@@ -57,8 +61,8 @@ module.exports = class extends require('events').EventEmitter
 
         @pipeUrlContent(base)
       when "file"
-        @pipeFileContent(paths.remote + paths.uri)
+        @pipeFileContent(paths.remote + paths.uri, res)
       when "absolute"
-        @pipeAbsoluteFileContent(paths.uri)
+        @pipeAbsoluteFileContent(paths.uri, res)
       else
         throw new Error "Unable to handle path for '#{type}': " + JSON.stringify(paths)

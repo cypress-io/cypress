@@ -58,6 +58,7 @@
     "grunt-cli": "^0.1.13",
     "hbs": "^2.7.0",
     "lodash": "^2.4.1",
+    "mime": "^1.2.11",
     "mkdirp": "^0.5.0",
     "mocha": "^1.21.4",
     "mocha-phantomjs": "^3.5.0",
