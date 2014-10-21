@@ -12,6 +12,8 @@ Eclectus.Visit = do ($, _, Eclectus) ->
     log: (url, options, fn) ->
       _.defaults options,
         timeout: 10000
+        onBeforeLoad: ->
+        onLoad: ->
 
       prevTimeout = @runnable.timeout()
 
