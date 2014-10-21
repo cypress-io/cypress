@@ -10,11 +10,21 @@ Eclectus.Visit = do ($, _, Eclectus) ->
       @canBeParent = false
 
     log: (url, options, fn) ->
+      _.defaults options,
+        timeout: 10000
+
+      prevTimeout = @runnable.timeout()
+
+      @runnable.timeout(options.timeout)
+      @runnable.resetTimeout()
+
       win = @$remoteIframe[0].contentWindow
 
       ## when the remote iframe's load event fires
       ## callback fn
-      @$remoteIframe.one "load", ->
+      @$remoteIframe.one "load", =>
+        @runnable.timeout(prevTimeout)
+        @runnable.resetTimeout()
         options.onLoad?(win)
         fn()
 
