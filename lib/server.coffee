@@ -195,7 +195,7 @@ app.get "/__remote/*", (req, res, next) ->
       inject: "<script type='text/javascript' src='/eclectus/js/sinon.js'></script>"
     })
   else
-    controllers.RemoteProxy.call(this, arguments...)
+    controllers.RemoteProxy.apply(this, arguments)
 
 ## serve the real eclectus JS app when we're at root
 app.get "/", (req, res) ->
