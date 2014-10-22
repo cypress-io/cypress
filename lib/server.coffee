@@ -14,7 +14,7 @@ idGenerator = require("./id_generator.coffee")
 controllers =
   RemoteLoader: new (require('./controllers/remote_loader'))().handle
   RemoteProxy: new (require('./controllers/remote_proxy'))().handle
-  Test: new (require('./controllers/test'))().handle
+  SpecProcessor: new (require('./controllers/spec_processor'))().handle
 
 _.mixin _.str.exports()
 
@@ -143,7 +143,7 @@ app.use "/eclectus", express.static(__dirname + "/public")
 app.get "/tests/*", (req, res, next) ->
   test = req.params[0]
 
-  controllers.Test.apply(
+  controllers.SpecProcessor.apply(
     this, [{
       spec: test,
       testFolder: testFolder
