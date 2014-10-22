@@ -8,8 +8,8 @@ _           = require("underscore")
 _.str       = require("underscore.string")
 chokidar    = require("chokidar")
 spawn       = require("child_process").spawn
-mocha       = require("./mocha.coffee")
 Domain      = require("domain")
+idGenerator = require("./id_generator.coffee")
 
 controllers =
   RemoteLoader: new (require('./controllers/remote_loader'))().handle
@@ -80,43 +80,47 @@ getTestFiles = ->
   _(files).map (file) -> {name: file.split("/").slice(testFolderLength).join("/")}
 
 io.on "connection", (socket) ->
-  #, ignoreInitial: true
-  watchTestFiles = chokidar.watch testFolder, ignored: (path, stats) ->
-    ## this fn gets called twice, once with the directory
-    ## which does not have a stats argument
-    ## we always return false to include directories
-    ## until we implement ignoring specific directories
-    return false if fs.statSync(path).isDirectory()
+  console.log "socket connected"
 
-    ## else if this is a file make sure its ignored if its not
-    ## a js or coffee files
-    not /\.(js|coffee)$/.test path
+  socket.on "generate:test:id", (data, fn) ->
+    console.log "generate:test:id", data
+    idGenerator data, (id) -> fn(id)
 
-  watchTestFiles.on "change", (filepath, stats) ->
+  socket.on "finished:generating:ids:for:test", (strippedPath) ->
+    console.log "finished:generating:ids:for:test", strippedPath
+    io.emit "test:changed", file: strippedPath
 
-    ## simple solution for preventing firing test:changed events
-    ## when we are making modifications to our own files
-    return if app.enabled("editFileMode")
+watchTestFiles = chokidar.watch testFolder, ignored: (path, stats) ->
+  ## this fn gets called twice, once with the directory
+  ## which does not have a stats argument
+  ## we always return false to include directories
+  ## until we implement ignoring specific directories
+  return false if fs.statSync(path).isDirectory()
 
-    ## strip out our testFolder path from the filepath, and any leading forward slashes
-    strippedPath  = filepath.replace(testFolder, "").replace(/^\/+/, "")#split("/")
+  ## else if this is a file make sure its ignored if its not
+  ## a js or coffee files
+  not /\.(js|coffee)$/.test path
 
-    mocha.generateIds filepath, strippedPath, app, ->
-      ## for some reason sometimes socket.io isnt emitting
-      ## the test:changed event
-      _.defer ->
-        console.log "test:changed", filepath
-        socket.emit "test:changed", file: strippedPath
+watchTestFiles.on "change", (filepath, stats) ->
+  ## simple solution for preventing firing test:changed events
+  ## when we are making modifications to our own files
+  return if app.enabled("editFileMode")
 
-  watchCssFiles = chokidar.watch path.join(__dirname, "public", "css"), ignored: (path, stats) ->
-    return false if fs.statSync(path).isDirectory()
+  ## strip out our testFolder path from the filepath, and any leading forward slashes
+  strippedPath  = filepath.replace(testFolder, "").replace(/^\/+/, "")#split("/")
 
-    not /\.css$/.test path
+  console.log "changed", filepath, strippedPath
+  io.emit "generate:ids:for:test", filepath, strippedPath
 
-  # watchCssFiles.on "add", (path) -> console.log "added css:", path
-  watchCssFiles.on "change", (filepath, stats) ->
-    filepath = path.basename(filepath)
-    socket.emit "eclectus:css:changed", file: filepath
+watchCssFiles = chokidar.watch path.join(__dirname, "public", "css"), ignored: (path, stats) ->
+  return false if fs.statSync(path).isDirectory()
+
+  not /\.css$/.test path
+
+# watchCssFiles.on "add", (path) -> console.log "added css:", path
+watchCssFiles.on "change", (filepath, stats) ->
+  filepath = path.basename(filepath)
+  io.emit "eclectus:css:changed", file: filepath
 
 getSpecs = (test) ->
   ## grab all of the specs if this is ci
@@ -137,18 +141,6 @@ app.use "/eclectus", express.static(__dirname + "/public")
 ## routing for the actual specs which are processed automatically
 ## this could be just a regular .js file or a .coffee file
 app.get "/tests/*", (req, res, next) ->
-  test = req.params[0]
-
-  controllers.Test.apply(
-    this, [{
-      spec: test,
-      testFolder: testFolder
-    }].concat(arguments...)
-  )
-
-## this serves the html file which is stripped down
-## to generate the id's for the test files
-app.get "/id_generator/*", (req, res) ->
   test = req.params[0]
 
   controllers.Test.apply(
@@ -200,6 +192,11 @@ app.get "/__remote/*", (req, res, next) ->
 ## serve the real eclectus JS app when we're at root
 app.get "/", (req, res) ->
   res.sendFile path.join(__dirname, "public", "index.html")
+
+## this serves the html file which is stripped down
+## to generate the id's for the test files
+app.get "/id_generator", (req, res) ->
+  res.sendFile path.join(__dirname, "public", "id_generator.html")
 
 ## unfound paths we assume we want to pass on through
 ## to the origin proxyUrl
