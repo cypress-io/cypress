@@ -64,7 +64,7 @@ module.exports = class extends require('events').EventEmitter
     domain = Domain.create()
     domain.on 'error', ->
       gutil.beep()
-      next()
+      next arguments...
     domain.run =>
       if opts = app.get("eclectus").browserify
         @browserify(opts, stream)
