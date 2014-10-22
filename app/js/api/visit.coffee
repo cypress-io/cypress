@@ -26,11 +26,9 @@ Eclectus.Visit = do ($, _, Eclectus) ->
         ## else create the query param
         url += "?"
 
-      url += "__initial=true"
-
       ## any existing global variables will get nuked after it navigates
       # @$remoteIframe[0].contentWindow.location.href = "/__blank/"
-      @$remoteIframe.prop "src", "/__remote/#{url}"
+      @$remoteIframe.prop "src", "/__remote/#{url}__initial=true"
 
       ## poll the window to see if sinon has been executed
       ## if so, call our onBeforeLoad callback
