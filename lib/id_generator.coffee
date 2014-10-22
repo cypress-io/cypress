@@ -46,7 +46,7 @@ getId = (data, fn = ->) ->
     gutil.beep()
     console.log gutil.colors.yellow("An error occured generating an ID for file: "), gutil.colors.blue(data.spec), gutil.colors.yellow(" for test: "), gutil.colors.blue(data.title)
     console.log gutil.colors.red(e.name), ": ", e.message
-    return fn(e.message)
+    return fn({message: e.message})
 
   fn(id)
 
