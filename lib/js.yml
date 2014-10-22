@@ -52,3 +52,9 @@ iframe:
 
 sinon:
   - bower_components/sinonjs/sinon.js
+
+id_generator:
+  - bower_components/jquery/dist/jquery.js
+  - bower_components/underscore/underscore.js
+  - bower_components/mocha/mocha.js
+  - app/js/id_generator/**
