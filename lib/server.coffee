@@ -84,7 +84,7 @@ io.on "connection", (socket) ->
 
   socket.on "generate:test:id", (data, fn) ->
     console.log "generate:test:id", data
-    idGenerator data, (id) -> fn(id)
+    idGenerator.getId data, (id) -> fn(id)
 
   socket.on "finished:generating:ids:for:test", (strippedPath) ->
     console.log "finished:generating:ids:for:test", strippedPath
@@ -207,3 +207,4 @@ app.use require("errorhandler")()
 
 server.listen app.get("port"), ->
   console.log 'Express server listening on port ' + app.get('port')
+  idGenerator.openPhantom()

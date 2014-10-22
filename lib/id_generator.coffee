@@ -2,6 +2,7 @@ fs        = require("fs")
 _         = require("underscore")
 path      = require("path")
 gutil     = require("gulp-util")
+phantom   = require("node-phantom-simple")
 
 testIdRegExp = /\[(.{3})\]$/
 
@@ -18,24 +19,25 @@ appendTestId = (spec, title, id) ->
   matches = re.exec contents
 
   ## matches[1] will be the captured group which is the title
-  if matches
-    ## position is the string index where we first find the capture
-    ## group and include its length, so we insert right after it
-    position = matches.index + matches[1].length + 1
-    contents = _(contents).insert position, " [#{id}]"
+  return if not matches
 
-    ## enable editFileMode which prevents us from sending out test:changed events
-    app.enable("editFileMode")
+  ## position is the string index where we first find the capture
+  ## group and include its length, so we insert right after it
+  position = matches.index + matches[1].length + 1
+  contents = _(contents).insert position, " [#{id}]"
 
-    ## write the actual contents to the file
-    fs.writeFileSync spec, contents
+  ## enable editFileMode which prevents us from sending out test:changed events
+  app.enable("editFileMode")
 
-    ## remove the editFileMode so we emit file changes again
-    ## if we're still in edit file mode then wait 1 second and disable it
-    ## chokidar doesnt instantly see file changes so we have to wait
-    _.delay ->
-      app.disable("editFileMode")
-    , 1000
+  ## write the actual contents to the file
+  fs.writeFileSync spec, contents
+
+  ## remove the editFileMode so we emit file changes again
+  ## if we're still in edit file mode then wait 1 second and disable it
+  ## chokidar doesnt instantly see file changes so we have to wait
+  _.delay ->
+    app.disable("editFileMode")
+  , 1000
 
 getId = (data, fn = ->) ->
   id = createId()
@@ -58,4 +60,18 @@ createId = ->
   ids = _(3).times -> getRandom(alphabet)
   ids.join("")
 
-module.exports = getId
+openPhantom = ->
+  phantom.create (err, ph) ->
+    console.log "PhantomJS ready..."
+    ph.createPage (err, page) ->
+      t = Date.now()
+      pathToPage = "http://localhost:#{app.get('port')}/id_generator"
+      console.log "PhantomJS opened: ", pathToPage
+
+      page.open pathToPage, (err, status) ->
+        console.log "PhantomJS done! status: #{status}, time: #{Date.now() - t}"
+  # , {parameters: "remote-debugger-port": "9000", "remote-debugger-autorun": "yes"}
+
+module.exports =
+  getId: getId
+  openPhantom: openPhantom
