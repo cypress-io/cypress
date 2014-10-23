@@ -69,3 +69,10 @@ describe "Spy API", ->
     Ecl.spy(fn, "foo")
 
     expect(fn.foo()).to.deep.eq {foo: "foo"}
+
+  it "restores the sandbox", ->
+    fn = { foo: -> }
+    Ecl.spy(fn, "foo")
+
+    Ecl.restore()
+    expect(fn.foo).not.to.have.property "spyCall"
