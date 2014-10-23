@@ -191,7 +191,9 @@ app.get "/__remote/*", (req, res, next) ->
 
 ## serve the real eclectus JS app when we're at root
 app.get "/", (req, res) ->
-  res.sendFile path.join(__dirname, "public", "index.html")
+  res.render path.join(__dirname, "public", "index.html"), {
+    config: JSON.stringify(app.get("eclectus"))
+  }
 
 ## this serves the html file which is stripped down
 ## to generate the id's for the test files
