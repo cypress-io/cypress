@@ -5,7 +5,9 @@
     initialize: (options) ->
       { runner } = options
 
-      view = @getView()
+      config = App.request "app:config:entity"
+
+      view = @getView(config)
 
       ## when the runner triggers load:iframe we load the iframe
       @listenTo runner, "load:iframe", (iframe) ->
@@ -25,5 +27,6 @@
         ## and tell our runner to run the iframe's suite
         runner.runIframeSuite(iframe, contentWindow, remoteIframe)
 
-    getView: ->
+    getView: (config) ->
       new Show.Iframe
+        model: config
