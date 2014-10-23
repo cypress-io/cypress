@@ -5,7 +5,8 @@ module.exports = class
   isAbsolute: (p) ->
     !p.match(/:\/\//)
 
-  detectType: (url) ->
+  ## if url is defined we assume its an absolute url
+  detectType: (url = "") ->
     switch
       when @isAbsolute(url)        then "absolute"
       when @isFileProtocol(url)    then "file"
