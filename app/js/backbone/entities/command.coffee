@@ -145,7 +145,7 @@
 
       @convertToArray
         "Spy:      %O": spy
-        "Spy Obj: ": stubObj
+        "Spy Obj: ": spyObj
         "Calls:   ": spy.callCount
 
     getVisitObject: ->
