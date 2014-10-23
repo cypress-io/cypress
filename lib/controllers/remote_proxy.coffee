@@ -3,6 +3,7 @@ url     = require("url")
 request = require("request")
 mime    = require("mime")
 path    = require("path")
+_       = require("lodash")
 fs      = require("fs")
 fsUtil  = new (require("../util/file_helpers"))
 
@@ -42,11 +43,21 @@ module.exports = class extends require('events').EventEmitter
 
     @pipeFileUriContents.apply(this, arguments)
 
+  ## creates a read stream to a file stored on the users filesystem
+  ## taking into account if they've chosen a specific rootFolder
+  ## that their project files exist in
   pipeFileUriContents: (uri, res) ->
-    res.contentType(mime.lookup(uri))
+    ## strip off any query params from our req's url
+    ## since we're pulling this from the file system
+    ## it does not understand query params
+    baseUri = url.parse(uri).pathname
+
+    res.contentType(mime.lookup(baseUri))
+
+    args = _.compact([process.cwd(), app.get("eclectus").rootFolder, baseUri])
 
     fs.createReadStream(
-      path.resolve(process.cwd(), uri)
+      path.join(args...)
     )
 
   pipeAbsoluteFileContent: (uri, res) ->
