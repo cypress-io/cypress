@@ -18,9 +18,6 @@
       @commands = App.request "command:entities"
 
     setContentWindow: (@contentWindow, @$remoteIframe) ->
-      ## make a reference between the iframes
-      ## probably should be dereferencing this later...
-      @contentWindow.remote = @$remoteIframe[0].contentWindow
 
     setIframe: (@iframe) ->
 

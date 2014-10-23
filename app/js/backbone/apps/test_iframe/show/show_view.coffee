@@ -176,6 +176,8 @@
 
       # _.each ["Ecl", "$", "jQuery", "parent", "chai", "expect", "should", "assert", "Mocha", "mocha"], (global) =>
       #   delete @$iframe[0].contentWindow[global]
+      @$iframe?[0].contentWindow.remote = null
+
       @$iframe?.remove()
       @$remote?.remove()
 
@@ -188,8 +190,9 @@
       @reverted = false
       @ui.message.hide().empty()
 
-      @$remote?.remove()
+      @$iframe?[0].contentWindow.remote = null
       @$iframe?.remove()
+      @$remote?.remove()
 
       @$el.hide()
 
@@ -202,20 +205,56 @@
       # @$iframe.onload = =>
       #   fn(@$iframe)
 
-      @$remote = $ "<iframe />",
+
+      ## we first need to resolve the remote iframe
+      ## because if we've set a testHtml that means
+      ## it needs to be in the DOM before we load our iframe
+      ## which may reference the remote window
+      ## if we don't have a testHtml we just immediately
+      ## resolve the remote iframe so either way it works
+      remoteLoaded = $.Deferred()
+      iframeLoaded = $.Deferred()
+
+      remoteOpts =
         id: "iframe-remote"
 
-      @$iframe = $ "<iframe />",
-        src: @src
-        id: "iframe-spec"
-        load: ->
-          fn(@contentWindow, view.$remote)
-          view.$el.show()
-          view.calcWidth()
-          # view.ui.header.show()
+      ## if our config model has configured testHtml
+      ## then we need to immediately load that
+      ## as our remote iframe and wait for it to load
+      if testHtml = @model.get("testHtml")
+        _.extend remoteOpts,
+          src: "/__remote/" + testHtml + "?__initial=true"
+          load: ->
+            remoteLoaded.resolve(view.$remote)
+
+      @$remote = $ "<iframe />", remoteOpts
+
+      ## if our config model hasnt been configured with testHtml
+      ## then we immediately resolve our remote iframe
+      if not testHtml
+        remoteLoaded.resolve(view.$remote)
 
       @$remote.appendTo(@ui.size)
-      @$iframe.appendTo(@$el)
+
+      remoteLoaded.done =>
+        @$iframe = $ "<iframe />",
+          src: @src
+          id: "iframe-spec"
+          load: ->
+            iframeLoaded.resolve(@contentWindow)
+            view.$el.show()
+            view.calcWidth()
+            # view.ui.header.show()
+
+        @$iframe.appendTo(@$el)
+
+        ## make a reference between the iframes
+        @$iframe[0].contentWindow.remote = view.$remote[0].contentWindow
+
+      $.when(remoteLoaded, iframeLoaded).done (remote, iframe) ->
+        ## yes these args are supposed to be reversed
+        ## TODO FIX THIS
+        fn(iframe, remote)
 
     expandClicked: (e) ->
       @ui.expand.hide()
