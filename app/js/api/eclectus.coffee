@@ -78,20 +78,16 @@ window.Eclectus = do ($, _) ->
       return df
 
   class Eclectus
-    ## restores the sandbox after each test run
-    restore: ->
-      @sandbox?.restore?()
-
     createSandbox: ($remoteIframe) ->
       ## bail if its already created
-      return if @sandbox
+      return if Eclectus.prototype.sandbox
 
       contentWindow = $remoteIframe[0].contentWindow
 
       throw new Error("Remote Iframe did not load sinon.js") if not contentWindow.sinon
 
       ## set sandbox up on the remote iframes sinon sandbox
-      @sandbox = contentWindow.sinon.sandbox.create()
+      Eclectus.prototype.sandbox = contentWindow.sinon.sandbox.create()
 
     ## class method patch
     ## loops through each method and partials
@@ -134,5 +130,11 @@ window.Eclectus = do ($, _) ->
     @hook = (name) ->
       ## simply store the current hook on our prototype
       Eclectus.prototype.hook = name
+
+    ## restores the sandbox after each test run
+    @restore = ->
+      Eclectus.prototype.sandbox?.server = null
+      Eclectus.prototype.sandbox?._server?.restore?()
+      Eclectus.prototype.sandbox?.restore?()
 
   return Eclectus
