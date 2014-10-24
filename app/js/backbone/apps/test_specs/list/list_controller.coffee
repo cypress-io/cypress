@@ -39,6 +39,13 @@
         ## removes any old models no longer in our run
         container.removeOldModels()
 
+        ## if container is empty then we want
+        ## to have our runnablesView render its
+        ## empty view
+        if container.isEmpty()
+          runnablesView.renderEmpty = true
+          runnablesView.render()
+
       @listenTo runner, "suite:add", (suite) ->
         @addRunnable(suite, "suite")
       # @listenTo runner, "suite:start", (suite) ->
