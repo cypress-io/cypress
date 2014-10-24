@@ -13,6 +13,7 @@
       sliders:  ".slider"
       button:   ".dropdown-toggle"
       choices:  ".dropdown-menu li a"
+      url:      "#url-container input"
 
     events:
       "click @ui.expand"    : "expandClicked"
@@ -229,6 +230,22 @@
 
       @$remote = $("<iframe />", remoteOpts).appendTo(@ui.size)
 
+      ## when the remote iframe visits an external URL
+      ## we want to update our header's input
+      @$remote.on "visit:start", (e, url) =>
+        @showSpinner()
+        @urlUpdated(url)
+
+      @$remote.on "visit:done", =>
+        @showSpinner(false)
+
+      ## must re-wrap the contentWindow to get the hashchange event
+      $(@$remote.prop("contentWindow")).on "hashchange", (e) =>
+        ## strip out the extra fluff around the URL
+        url = @parseHashChangeUrl(e.originalEvent.newURL)
+        @urlUpdated(url)
+      # $(@$remote.prop("contentWindow")).on "popstate", @urlUpdated
+
       ## if our config model hasnt been configured with testHtml
       ## then we immediately resolve our remote iframe
       ## and push the default message content into it
@@ -256,6 +273,24 @@
         ## yes these args are supposed to be reversed
         ## TODO FIX THIS
         fn(iframe, remote)
+
+    urlUpdated: (url) =>
+      ## this should figure out whether to append
+      ## a hash or replace a hash
+      ## we need to add logic for stripping out the
+      ## excess document.location fluff around the url
+      @ui.url.val(url)
+
+    parseHashChangeUrl: (url) ->
+      ## returns the very last part
+      ## of the url split by the hash
+      ## think about figuring out what the base
+      ## URL is if we've set a testHtml file
+      "#" + _.last(url.split("#"))
+
+    showSpinner: (bool = true) ->
+      ## hides or shows the loading indicator
+      @ui.url.parent().toggleClass("loading", bool)
 
     expandClicked: (e) ->
       @ui.expand.hide()

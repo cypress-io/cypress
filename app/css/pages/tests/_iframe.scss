@@ -7,6 +7,10 @@
   right: 0;
   box-shadow: 2px 0 7px #333;
 
+  #iframe-spec {
+    display: none !important;
+  }
+
   #iframe-container {
     height: 100%;
     width: 100%;
@@ -24,6 +28,7 @@
 
       & > div {
         height: 100%;
+        padding-top: $header-height;
       }
     }
 
@@ -51,7 +56,7 @@
     }
 
     header {
-      position: relative;
+      position: absolute;
       background-color: #F7F7F7;
       line-height: 22px;
       padding: 5px 10px;
@@ -60,7 +65,7 @@
       border-top: 0;
       left: 0;
       right: 0;
-      height: 37px;
+      height: $header-height;
       top: 0;
       box-shadow: 0 2px 3px #888;
 
@@ -77,6 +82,35 @@
 
       #url-container {
         width: 65%;
+
+        #url-wrapper {
+          float: left;
+          width: 70%;
+          position: relative;
+
+          .loading-wrapper {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 2px;
+
+            i {
+              float: right;
+              margin-left: 5px;
+            }
+
+            .loading-content {
+              top: 2px;
+              position: relative;
+            }
+          }
+
+          &.loading {
+            .loading-wrapper {
+              display: inline-block;
+            }
+          }
+        }
       }
 
       i {
@@ -125,8 +159,7 @@
         border-radius: 20px;
         border: 0;
         padding: 2px 10px;
-        float: left;
-        width: 70%;
+        width: 100%;
 
         &:focus {
           // the outline color on focus looks strange
@@ -205,7 +238,6 @@
       border: 1px solid #D5D5D5;
       position: relative;
       bottom: 0;
-      top: 0;
       overflow: auto;
       display: block;
       box-shadow: 0 6px 10px #555;
