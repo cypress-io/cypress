@@ -5,6 +5,8 @@
     initialize: (options) ->
       config = App.request "app:config:entity"
 
+      spec = config.getPathToSpec(options.id)
+
       @listenTo config, "change:panels", ->
         @layout.resizePanels()
 
@@ -20,7 +22,7 @@
       @listenTo @layout, "show", =>
         @statsRegion(runner)
         @iframeRegion(runner)
-        @specsRegion(runner)
+        @specsRegion(runner, spec)
         @panelsRegion(runner, config)
 
         ## start running the tests
@@ -37,8 +39,8 @@
     iframeRegion: (runner) ->
       App.execute "show:test:iframe", @layout.iframeRegion, runner
 
-    specsRegion: (runner) ->
-      App.execute "list:test:specs", @layout.specsRegion, runner
+    specsRegion: (runner, spec) ->
+      App.execute "list:test:specs", @layout.specsRegion, runner, spec
 
     panelsRegion: (runner, config) ->
       ## trigger the event to ensure the test panels are listed
