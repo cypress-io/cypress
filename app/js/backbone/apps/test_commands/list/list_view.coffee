@@ -9,6 +9,7 @@
         when "server"     then "test_commands/list/_server"
         when "spy"        then "test_commands/list/_spy"
         when "stub"       then "test_commands/list/_stub"
+        when "visit"      then "test_commands/list/_visit"
         else
           throw new Error("Command .type did not match any template")
 

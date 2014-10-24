@@ -26,7 +26,7 @@ class ConfigGenerator extends Eclectus.Base
         default: ""
       },{
         name: "rootFolder"
-        message: "What is the root folder your assets should be served from?"
+        message: "What is the root folder your assets should be served from? By default it is your root project directory."
         default: ""
       },{
         name: "testHtml"

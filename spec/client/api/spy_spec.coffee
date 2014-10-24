@@ -5,15 +5,14 @@ describe "Spy API", ->
     @emit = @sandbox.spy(Eclectus.Command.prototype, "emit")
 
     loadFixture("html/sinon").done (iframe) =>
-      Eclectus.sandbox iframe.contentWindow
-      Eclectus.patch {contentWindow: iframe.contentWindow}
-      @contentWindow = iframe.contentWindow
+      Eclectus.patch {$remoteIframe: $(iframe)}
+      @remoteWindow = iframe.contentWindow
 
   it "has a spy method on Ecl", ->
     expect(Ecl).to.have.property "spy"
 
-  it "throws if there is no sandbox", ->
-    delete Eclectus::sandbox
+  it "throws if there is no global sinon", ->
+    delete @remoteWindow.sinon
     fn = -> Ecl.spy()
     expect(fn).to.throw(Error)
 
@@ -70,3 +69,10 @@ describe "Spy API", ->
     Ecl.spy(fn, "foo")
 
     expect(fn.foo()).to.deep.eq {foo: "foo"}
+
+  it "restores the sandbox", ->
+    fn = { foo: -> }
+    Ecl.spy(fn, "foo")
+
+    Ecl.restore()
+    expect(fn.foo).not.to.have.property "spyCall"

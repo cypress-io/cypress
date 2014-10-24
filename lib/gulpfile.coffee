@@ -79,7 +79,7 @@ gulp.task "bower", ->
   $.bower()
 
 gulp.task "html", ->
-  gulp.src("app/html/index.html")
+  gulp.src(["app/html/index.html", "app/html/id_generator.html"])
     .pipe gulp.dest("lib/public")
 
 gulp.task "watch", ["watch:css", "watch:js", "watch:html"]

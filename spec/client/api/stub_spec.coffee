@@ -5,15 +5,14 @@ describe "Stub API", ->
     @emit = @sandbox.spy(Eclectus.Command.prototype, "emit")
 
     loadFixture("html/sinon").done (iframe) =>
-      Eclectus.sandbox iframe.contentWindow
-      Eclectus.patch {contentWindow: iframe.contentWindow}
-      @contentWindow = iframe.contentWindow
+      Eclectus.patch {$remoteIframe: $(iframe)}
+      @remoteWindow = iframe.contentWindow
 
   it "has a stub method on Ecl", ->
     expect(Ecl).to.have.property "stub"
 
-  it "throws if there is no sandbox", ->
-    delete Eclectus::sandbox
+  it "throws if there is no global sinon", ->
+    delete @remoteWindow.sinon
     fn = -> Ecl.stub()
     expect(fn).to.throw(Error)
 

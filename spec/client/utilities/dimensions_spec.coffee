@@ -1,7 +1,13 @@
 describe "Element Dimensions Utility", ->
   before ->
-    loadFixture("html/dimensions").done =>
-      @html = $("iframe:first").contents()
+    loadFixture("html/dimensions").done (iframe) =>
+      ## need to patch here because chai 'expects' are automatically
+      ## patched to emit events.  should probably think
+      ## about restructuring this logic to prevent
+      ## assertions from either being overridden
+      ## or potentially "unpatched" from within these parent specs
+      Eclectus.patch {$remoteIframe: $(iframe)}
+      @html = $(iframe).contents()
 
   context "square", ->
     beforeEach ->

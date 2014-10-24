@@ -38,12 +38,12 @@ module.exports =
       str = ""
 
       str += "--debug " if (options.debug)
-      str += "--verbose --watch " + path.dirname(server) + "/*.coffee " + server
+      str += "--verbose --watch " + path.dirname(server) + "/**/*.coffee " + server
 
       @_bootServer(str)
 
     startEcl: (options) =>
-      @emit 'verbose', 'run ECL visual mode'
+      @emit 'verbose', 'run ECL UI mode'
       # bail immediately here if we dont have the eclectus.json file
       # tell us to run install
 
@@ -57,7 +57,7 @@ module.exports =
       # THIS NEEDS TO BE FIXED
       str = ""
       str += "--debug " if (options.debug)
-      str += "--verbose --watch " + path.dirname(server) + "/*.coffee " + server
+      str += "--verbose --watch " + path.dirname(server) + "/**/*.coffee " + server
 
       @_bootServer(str)
 

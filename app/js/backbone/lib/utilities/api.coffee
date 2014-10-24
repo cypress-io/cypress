@@ -49,19 +49,21 @@
       _.each {expect: expect, assert: assert}, (value, key) ->
         _chai[key] = _.wrap value, (orig, args...) ->
 
-          switch
-            ## shift the expectation to use the $el on
-            ## the command
-            when args[0] and args[0].isCommand?()
-              args[0] = args[0]._$el
+          try
+            switch
+              ## shift the expectation to use the $el on
+              ## the command
+              when args[0] and args[0].isCommand?()
+                args[0] = args[0]._$el
 
-            ## chai-jquery hard codes checking instanceof's
-            ## and would always return false if we're receiving
-            ## a child jQuery object -- so we need to reset
-            ## this object to a jQuery instance that the parent
-            ## window controls
-            when args[0] instanceof $("iframe.iframe-spec")[0]?.contentWindow.$
-              args[0] = $(args[0])
+              ## chai-jquery hard codes checking instanceof's
+              ## and would always return false if we're receiving
+              ## a child jQuery object -- so we need to reset
+              ## this object to a jQuery instance that the parent
+              ## window controls
+              when args[0] instanceof $("iframe#iframe-remote")[0]?.contentWindow.$
+                args[0] = $(args[0])
+          catch e
 
           orig.apply(@, args)
 
@@ -113,7 +115,7 @@
       mocha  = options.mocha ?= window.mocha
 
       ## return our runner entity
-      return App.request("runner:entity", runner, mocha.options, Eclectus.patch, Eclectus.hook, Eclectus.sandbox, Eclectus.prototype.restore)
+      return App.request("runner:entity", runner, mocha.options, Eclectus.patch, Eclectus.hook, Eclectus.restore)
 
     getRunner: ->
       ## start running the tests

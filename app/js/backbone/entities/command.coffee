@@ -85,6 +85,7 @@
         when "xhr"        then @getXhrObject()
         when "spy"        then @getSpyObject()
         when "stub"       then @getStubObject()
+        when "visit"      then @getVisitObject()
 
       _([objs]).flatten(true)
 
@@ -144,8 +145,14 @@
 
       @convertToArray
         "Spy:      %O": spy
-        "Spy Obj: ": stubObj
+        "Spy Obj: ": spyObj
         "Calls:   ": spy.callCount
+
+    getVisitObject: ->
+      @convertToArray
+        "Command:  ": @get("method")
+        "URL:      ": @get("message")
+        "Page:     ": @page.contents()
 
     logSpyOrStubTableProperties: (spyOrStub, spyOrStubCall) ->
       count = spyOrStub.callCount
@@ -289,6 +296,7 @@
         when "server"     then @addServer attrs
         when "spy"        then @addSpy attrs
         when "stub"       then @addStub attrs
+        when "visit"      then @addVisit attrs
         else throw new Error("Command .type did not match anything")
 
     insertParents: (command, parentId, options = {}) ->
@@ -436,6 +444,16 @@
       command.requests  = requests
       command.responses = responses
       command.server    = server
+
+      return command
+
+    addVisit: (attrs) ->
+      {page} = attrs
+
+      attrs = _(attrs).omit "page"
+
+      command = new Entities.Command attrs
+      command.page = page
 
       return command
 

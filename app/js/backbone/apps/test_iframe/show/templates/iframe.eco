@@ -5,6 +5,7 @@
     <input class="url" />
   </div>
   <div class="iframe-menu">
+    <!-- <button class="btn btn-default pull-left" id="perf">outerhtml</button> -->
     <div class="dropdown pull-left">
       <button data-toggle="dropdown" class="btn btn-link">
         <span id="current-browser-sizes">

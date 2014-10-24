@@ -21,6 +21,16 @@
       "click @ui.choices"   : "choicesClicked"
       "show.bs.dropdown"    : "dropdownShow"
       "hide.bs.dropdown"    : "dropdownHide"
+    #   "click #perf"         : "perfClicked"
+
+    # perfClicked: (e) ->
+    #   s = @$remote.contents().find("body").remove("script")
+    #   t = Date.now()
+    #   str = s.prop("outerHTML")
+    #   console.log "prop outerHTML", Date.now() - t
+    #   t = Date.now()
+    #   str = @$remote.contents().find("body").prop("outerHTML")
+    #   console.warn "body outerHTML", Date.now() - t
 
     choicesClicked: (e) ->
       e.preventDefault()
@@ -60,7 +70,7 @@
 
     revertToDom: (dom, options) ->
       ## replaces the iframes body with the dom object
-      dom.replaceAll @$el.find("iframe").contents().find("body")
+      dom.replaceAll @$el.find("#iframe-remote").contents().find("body")
 
       @addRevertMessage(options)
 
@@ -81,7 +91,7 @@
       _.defaults options,
         init: true
 
-      @$iframe.contents().find("[data-highlight-el]").remove() if not @reverted
+      @$remote.contents().find("[data-highlight-el]").remove() if not @reverted
 
       return if not options.init
 
@@ -94,7 +104,7 @@
         dom = options.dom
         el  = options.dom.find("[" + options.attr + "]")
       else
-        dom = @$iframe.contents().find("body")
+        dom = @$remote.contents().find("body")
 
       el.each (index, el) =>
         el = $(el)
@@ -166,7 +176,12 @@
 
       # _.each ["Ecl", "$", "jQuery", "parent", "chai", "expect", "should", "assert", "Mocha", "mocha"], (global) =>
       #   delete @$iframe[0].contentWindow[global]
+      @$iframe?[0].contentWindow.remote = null
+
       @$iframe?.remove()
+      @$remote?.remove()
+
+      delete @$remote
       delete @$iframe
       delete @fn
 
@@ -174,8 +189,10 @@
       ## remove any existing iframes
       @reverted = false
       @ui.message.hide().empty()
+
+      @$iframe?[0].contentWindow.remote = null
       @$iframe?.remove()
-      # @$iframe?.close()
+      @$remote?.remove()
 
       @$el.hide()
 
@@ -188,16 +205,56 @@
       # @$iframe.onload = =>
       #   fn(@$iframe)
 
-      @$iframe = $ "<iframe />",
-        src: @src
-        class: "iframe-spec"
-        load: ->
-          fn(@contentWindow)
-          view.$el.show()
-          view.calcWidth()
-          # view.ui.header.show()
 
-      @$iframe.appendTo(@ui.size)
+      ## we first need to resolve the remote iframe
+      ## because if we've set a testHtml that means
+      ## it needs to be in the DOM before we load our iframe
+      ## which may reference the remote window
+      ## if we don't have a testHtml we just immediately
+      ## resolve the remote iframe so either way it works
+      remoteLoaded = $.Deferred()
+      iframeLoaded = $.Deferred()
+
+      remoteOpts =
+        id: "iframe-remote"
+
+      ## if our config model has configured testHtml
+      ## then we need to immediately load that
+      ## as our remote iframe and wait for it to load
+      if testHtml = @model.get("testHtml")
+        _.extend remoteOpts,
+          src: "/__remote/" + testHtml + "?__initial=true"
+          load: ->
+            remoteLoaded.resolve(view.$remote)
+
+      @$remote = $ "<iframe />", remoteOpts
+
+      ## if our config model hasnt been configured with testHtml
+      ## then we immediately resolve our remote iframe
+      if not testHtml
+        remoteLoaded.resolve(view.$remote)
+
+      @$remote.appendTo(@ui.size)
+
+      remoteLoaded.done =>
+        @$iframe = $ "<iframe />",
+          src: @src
+          id: "iframe-spec"
+          load: ->
+            iframeLoaded.resolve(@contentWindow)
+            view.$el.show()
+            view.calcWidth()
+            # view.ui.header.show()
+
+        @$iframe.appendTo(@$el)
+
+        ## make a reference between the iframes
+        @$iframe[0].contentWindow.remote = view.$remote[0].contentWindow
+
+      $.when(remoteLoaded, iframeLoaded).done (remote, iframe) ->
+        ## yes these args are supposed to be reversed
+        ## TODO FIX THIS
+        fn(iframe, remote)
 
     expandClicked: (e) ->
       @ui.expand.hide()

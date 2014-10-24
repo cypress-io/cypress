@@ -7,10 +7,11 @@ do (parent = window.opener or window.parent) ->
   $ = parent.$
 
   ## proxy chai from our parent
-  window.chai   = parent.chai
-  window.expect = chai.expect
-  window.should = chai.should()
-  window.assert = chai.assert
+  if parent.chai
+    window.chai   = parent.chai
+    window.expect = chai.expect
+    window.should = chai.should()
+    window.assert = chai.assert
 
   ## create our own mocha objects from our parents if its not already defined
   window.Mocha ?= parent.Mocha
@@ -34,4 +35,11 @@ do (parent = window.opener or window.parent) ->
     @suite.emit 'pre-require', window, null, @
     return @
 
+  ## this needs to be part of the configuration of eclectus.json
+  ## we can't just forcibly use bdd
   mocha.ui "bdd"
+
+  window.proxyRemoteGlobals = (globals) ->
+    throw new Error("Remote iframe window has not been loaded!") if not window.remote
+    for global in globals
+      window[global] = window.remote[global]

@@ -6,8 +6,8 @@ Eclectus.Command = do ($, _) ->
   class Command
     highlightAttr: "data-eclectus-el"
 
-    constructor: (@contentWindow, @channel, @runnable, @hook) ->
-      @document = @contentWindow.document
+    constructor: (@$remoteIframe, @channel, @runnable, @hook) ->
+      # @document = @$remoteIframe[0].contentWindow.document
 
       ## this is the unique identifer of all instantiated
       ## commands.  so as we chain off of this id
@@ -24,7 +24,12 @@ Eclectus.Command = do ($, _) ->
     ## projects which dont have jQuery attached as
     ## a global (like requireJS)
     $: (selector, jQuery = $) ->
-      new jQuery.fn.init(selector, @document)
+      new jQuery.fn.init(selector, @getDocument())
+
+    getDocument: ->
+      contentWindow = @$remoteIframe[0].contentWindow
+      throw new Error("The Remote Iframe has not finished loading, you cannot use finders methods yet!") if not contentWindow.document
+      contentWindow.document
 
     getId: ->
       _.uniqueId("instance")
@@ -44,8 +49,21 @@ Eclectus.Command = do ($, _) ->
       @$el.attr(@highlightAttr, true) if @$el
 
       ## clone the body and strip out any script tags
-      body = @$("body").clone(true, true)
+      body = @$("body").clone()
       body.find("script").remove()
+
+      ## here we need to figure out if we're in a remote manual environment
+      ## if so we need to stringify the DOM:
+      ## 1. grab all inputs / textareas / options and set their value on the element
+      ## 2. convert DOM to string: body.prop("outerHTML")
+      ## 3. send this string via websocket to our server
+      ## 4. server rebroadcasts this to our client and its stored as a property
+
+      ## its also possible for us to store the DOM string completely on the server
+      ## without ever sending it back to the browser (until its requests).
+      ## we could just store it in memory and wipe it out intelligently.
+      ## this would also prevent having to store the DOM structure on the client,
+      ## which would reduce memory, and some CPU operations
 
       ## now remove it after we clone
       @$el.removeAttr(@highlightAttr) if @$el
@@ -93,10 +111,10 @@ Eclectus.Command = do ($, _) ->
     ## check to make sure our real dom element
     ## still exists in our current document
     elExistsInDocument: ->
-      $.contains @document, @$el[0]
+      $.contains @getDocument(), @$el[0]
 
     clone: ->
-      new @constructor(@contentWindow, @channel, @runnable, @hook)
+      new @constructor(@$remoteIframe, @channel, @runnable, @hook)
 
     isCommand: -> true
 
