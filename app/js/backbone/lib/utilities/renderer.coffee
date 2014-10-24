@@ -10,7 +10,7 @@
 
   _.extend Marionette.Renderer,
 
-    render: (template, data) ->
+    render: (template, data = {}) ->
       return if template is false
       path = @getTemplate(template)
       throw new Error("Template #{template} not found!") unless path
