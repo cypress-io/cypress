@@ -1,0 +1,8 @@
+<link rel="stylesheet" href="/eclectus/css/remote.css">
+<div class="container">
+  <div class="jumbotron text-center">
+    <h1><i class="fa fa-home"></i></h1>
+    <p>This is the default page.</p>
+    <p>Ecl.visit(...) to your server to start testing!</p>
+  </div>
+</div>

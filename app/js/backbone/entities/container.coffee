@@ -87,7 +87,7 @@
         root.addRunnable model
 
   ## mixin underscore methods
-  _.each ["each", "pluck", "indexOf"], (method) ->
+  _.each ["each", "pluck", "indexOf", "isEmpty"], (method) ->
     Entities.Container.prototype[method] = (args...) ->
       args.unshift(@currentRunnables)
       _[method].apply(_, args)

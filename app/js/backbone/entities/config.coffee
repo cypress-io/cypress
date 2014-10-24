@@ -65,5 +65,8 @@
           if _.isString(item) then JSON.parse(item) else item
         else item
 
+    getPathToSpec: (id) ->
+      _.compact([@get("testFolder"), id]).join("/")
+
   App.reqres.setHandler "new:config:entity", (attrs = {}) ->
     new Entities.Config attrs

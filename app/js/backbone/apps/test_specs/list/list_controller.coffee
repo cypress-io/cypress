@@ -3,7 +3,7 @@
   class List.Controller extends App.Controllers.Application
 
     initialize: (options) ->
-      { runner } = options
+      { runner, spec } = options
 
       ## hold onto every single runnable type (suite or test)
       container  = App.request "runnable:container:entity"
@@ -38,6 +38,13 @@
       @listenTo runner, "after:add", ->
         ## removes any old models no longer in our run
         container.removeOldModels()
+
+        ## if container is empty then we want
+        ## to have our runnablesView render its
+        ## empty view
+        if container.isEmpty()
+          runnablesView.renderEmpty = true
+          runnablesView.render()
 
       @listenTo runner, "suite:add", (suite) ->
         @addRunnable(suite, "suite")
@@ -91,7 +98,7 @@
         else
           root.reset()
 
-      runnablesView = @getRunnablesView root
+      runnablesView = @getRunnablesView root, spec
 
       @show runnablesView
 
@@ -164,6 +171,7 @@
       new List.RunnableContent
         model: runnable
 
-    getRunnablesView: (runnable) ->
+    getRunnablesView: (runnable, spec) ->
       new List.Runnables
         model: runnable
+        spec: spec

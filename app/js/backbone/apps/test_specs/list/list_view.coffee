@@ -186,10 +186,26 @@
       else
         @ui.hook.empty()
 
+  class List.Empty extends App.Views.ItemView
+    template: "test_specs/list/_empty"
+
+    serializeData: ->
+      spec: @options.spec.split("/").join(" / ")
+
   class List.Runnables extends App.Views.CollectionView
     tagName: "ul"
     className: "runnables"
     childView: List.RunnableLayout
+    emptyView: List.Empty
+    emptyViewOptions: -> _(@options).pick("spec")
+
+    ## only render the empty view
+    ## if this is the root runnable
+    ## and we've been told to render the empty
+    ## this prevents displaying the empty view
+    ## prior to us running any real tests
+    isEmpty: ->
+      @model.get("root") and @renderEmpty
 
     ## add the #specs-list if we're the root view
     onBeforeRender: ->
@@ -207,4 +223,3 @@
       view._index = index
       sibling = view.$el.siblings().eq(index)
       view.$el.insertBefore(sibling)
-

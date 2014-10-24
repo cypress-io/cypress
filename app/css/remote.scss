@@ -1,0 +1,21 @@
+@import "core/variables";
+
+// Core variables and mixins
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/variables";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/mixins";
+
+// Reset and dependencies
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/normalize";
+
+// Core CSS
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/buttons";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/jumbotron";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/grid";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/type";
+
+// Fonts
+@import "font-awesome/scss/font-awesome";
+
+.jumbotron {
+  margin-top: 20px;
+}

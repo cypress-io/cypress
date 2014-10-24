@@ -227,14 +227,15 @@
           load: ->
             remoteLoaded.resolve(view.$remote)
 
-      @$remote = $ "<iframe />", remoteOpts
+      @$remote = $("<iframe />", remoteOpts).appendTo(@ui.size)
 
       ## if our config model hasnt been configured with testHtml
       ## then we immediately resolve our remote iframe
+      ## and push the default message content into it
       if not testHtml
+        contents = Marionette.Renderer.render("test_iframe/show/_default_message")
+        view.$remote.contents().find("body").append(contents)
         remoteLoaded.resolve(view.$remote)
-
-      @$remote.appendTo(@ui.size)
 
       remoteLoaded.done =>
         @$iframe = $ "<iframe />",

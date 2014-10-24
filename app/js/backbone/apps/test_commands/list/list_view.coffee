@@ -134,7 +134,11 @@
     failedChanged: (model, bool, options) ->
       @ui.failed.toggleClass "hidden", !bool
 
+  class List.Empty extends App.Views.ItemView
+    template: "test_commands/list/_empty"
+
   class List.Hooks extends App.Views.CollectionView
     tagName: "ul"
     className: "hooks-container"
     childView: List.Hook
+    emptyView: List.Empty
