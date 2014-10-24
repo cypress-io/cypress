@@ -238,6 +238,14 @@
 
       @$remote.on "visit:done", =>
         @showSpinner(false)
+
+      ## must re-wrap the contentWindow to get the hashchange event
+      $(@$remote.prop("contentWindow")).on "hashchange", (e) =>
+        ## strip out the extra fluff around the URL
+        url = @parseHashChangeUrl(e.originalEvent.newURL)
+        @urlUpdated(url)
+      # $(@$remote.prop("contentWindow")).on "popstate", @urlUpdated
+
       ## if our config model hasnt been configured with testHtml
       ## then we immediately resolve our remote iframe
       ## and push the default message content into it
@@ -272,6 +280,14 @@
       ## we need to add logic for stripping out the
       ## excess document.location fluff around the url
       @ui.url.val(url)
+
+    parseHashChangeUrl: (url) ->
+      ## returns the very last part
+      ## of the url split by the hash
+      ## think about figuring out what the base
+      ## URL is if we've set a testHtml file
+      "#" + _.last(url.split("#"))
+
     showSpinner: (bool = true) ->
       ## hides or shows the loading indicator
       @ui.url.parent().toggleClass("loading", bool)
