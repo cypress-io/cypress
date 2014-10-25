@@ -7,6 +7,7 @@ path        = require("path")
 _           = require("lodash")
 fs          = require("fs")
 fsUtil      = new (require("../util/file_helpers"))
+UrlMerge    = require("../util/url_merge")
 
 module.exports = class extends require('events').EventEmitter
   handle: (req, res, next) =>
@@ -37,11 +38,17 @@ module.exports = class extends require('events').EventEmitter
 
   pipeUrlContent: (uri, res) ->
     @emit "verbose", "piping url content #{uri}"
-    th = Through((b) -> this.queue(b))
-    hq = hyperquest.get uri, {}, (err, incomingRes) ->
-      res.contentType(incomingRes?.headers['content-type'])
-      hq.pipe(th)
-    th
+    thr = Through((b) -> this.queue(b))
+
+    rq = hyperquest.get uri, {}, (err, incomingRes) =>
+      if /^30(1|2|7|8)$/.test(incomingRes.statusCode)
+        newUrl = UrlMerge(uri, incomingRes.headers.location)
+        res.redirect("/__remote/" + newUrl)
+      else
+        res.contentType(incomingRes.headers['content-type'])
+        rq.pipe(thr)
+
+    thr
 
   pipeFileContent: (uri, res) ->
     @emit "verbose", "piping url content #{uri}"
