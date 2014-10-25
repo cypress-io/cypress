@@ -175,25 +175,31 @@
     onDestroy: ->
       $(window).off "resize", @calcWidth
 
+      @resetReferences()
+
+    resetReferences: ->
       # _.each ["Ecl", "$", "jQuery", "parent", "chai", "expect", "should", "assert", "Mocha", "mocha"], (global) =>
       #   delete @$iframe[0].contentWindow[global]
+
+      if @$remote?
+        $(@$remote.prop("contentWindow")).off "hashchange"
+        $(@$remote.prop("contentWindow")).off "popstate"
+
       @$iframe?[0].contentWindow.remote = null
 
       @$iframe?.remove()
       @$remote?.remove()
 
-      delete @$remote
-      delete @$iframe
-      delete @fn
+      @$remote = null
+      @$iframe = null
+      @fn      = null
 
     loadIframe: (src, fn) ->
       ## remove any existing iframes
       @reverted = false
       @ui.message.hide().empty()
 
-      @$iframe?[0].contentWindow.remote = null
-      @$iframe?.remove()
-      @$remote?.remove()
+      @resetReferences()
 
       @$el.hide()
 
