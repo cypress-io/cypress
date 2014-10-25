@@ -2,9 +2,18 @@
 
   class List.Controller extends App.Controllers.Application
     initialize: (options) ->
-      { hooks, runner } = options
+      { test, runner } = options
 
-      @hooks = hooks
+      @hooks = hooks = test.get("hooks")
+
+      ## when our test is done (when it has a duration defined)
+      ## we check to see if we didnt add
+      ## any commands, and if not we render
+      ## our empty view
+      @listenTo test, "change:duration", (model, value, options) ->
+        if value? and not hooks.length
+          commandsView.renderEmpty = true
+          commandsView.render()
 
       commandsView = @getCommandsView hooks
 

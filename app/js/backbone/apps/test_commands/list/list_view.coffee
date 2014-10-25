@@ -142,3 +142,5 @@
     className: "hooks-container"
     childView: List.Hook
     emptyView: List.Empty
+
+    isEmpty: -> @renderEmpty
