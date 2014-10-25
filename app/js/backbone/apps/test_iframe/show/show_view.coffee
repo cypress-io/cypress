@@ -214,10 +214,10 @@
 
 
       ## we first need to resolve the remote iframe
-      ## because if we've set a testHtml that means
+      ## because if we've set a defaultPage that means
       ## it needs to be in the DOM before we load our iframe
       ## which may reference the remote window
-      ## if we don't have a testHtml we just immediately
+      ## if we don't have a defaultPage we just immediately
       ## resolve the remote iframe so either way it works
       remoteLoaded = $.Deferred()
       iframeLoaded = $.Deferred()
@@ -225,12 +225,12 @@
       remoteOpts =
         id: "iframe-remote"
 
-      ## if our config model has configured testHtml
+      ## if our config model has configured defaultPage
       ## then we need to immediately load that
       ## as our remote iframe and wait for it to load
-      if testHtml = @model.get("testHtml")
+      if defaultPage = @model.get("defaultPage")
         _.extend remoteOpts,
-          src: "/__remote/" + testHtml + "?__initial=true"
+          src: "/__remote/" + defaultPage + "?__initial=true"
           load: ->
             remoteLoaded.resolve(view.$remote)
 
@@ -251,10 +251,10 @@
       $(@$remote.prop("contentWindow")).on "hashchange", @updateRemoteUrl
       $(@$remote.prop("contentWindow")).on "popstate",   @updateRemoteUrl
 
-      ## if our config model hasnt been configured with testHtml
+      ## if our config model hasnt been configured with defaultPage
       ## then we immediately resolve our remote iframe
       ## and push the default message content into it
-      if not testHtml
+      if not defaultPage
         contents = Marionette.Renderer.render("test_iframe/show/_default_message")
         view.$remote.contents().find("body").append(contents)
         remoteLoaded.resolve(view.$remote)
@@ -297,7 +297,7 @@
       ## returns the very last part
       ## of the url split by the hash
       ## think about figuring out what the base
-      ## URL is if we've set a testHtml file
+      ## URL is if we've set a defaultPage file
       "#" + _.last(url.split("#"))
 
     showSpinner: (bool = true) ->

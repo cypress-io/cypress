@@ -158,9 +158,9 @@ app.get "/iframes/*", (req, res) ->
 
   test = req.params[0]
 
-  ## renders the testHtml file if it is truthy in the config
-  # if app.get("eclectus").testHtml
-    # filePath = path.join(process.cwd(), app.get("eclectus").testHtml)
+  ## renders the defaultPage file if it is truthy in the config
+  # if app.get("eclectus").defaultPage
+    # filePath = path.join(process.cwd(), app.get("eclectus").defaultPage)
   # else
   filePath = path.join(__dirname, "../", "app/html/empty_inject.html")
 
