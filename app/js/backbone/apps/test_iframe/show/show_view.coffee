@@ -232,19 +232,18 @@
 
       ## when the remote iframe visits an external URL
       ## we want to update our header's input
-      @$remote.on "visit:start", (e, url) =>
+      @$remote.on "visit:start", =>
         @showSpinner()
-        @urlUpdated(url)
+        @updateRemoteUrl()
 
-      @$remote.on "visit:done", =>
+      @$remote.on "load", =>
         @showSpinner(false)
+        @updateRemoteUrl()
 
-      ## must re-wrap the contentWindow to get the hashchange event
-      $(@$remote.prop("contentWindow")).on "hashchange", (e) =>
-        ## strip out the extra fluff around the URL
-        url = @parseHashChangeUrl(e.originalEvent.newURL)
-        @urlUpdated(url)
-      # $(@$remote.prop("contentWindow")).on "popstate", @urlUpdated
+      ## must re-wrap the contentWindow to get the hashchange/popstate event
+      ## we may need to unbind these manually later when we remove the iframe
+      $(@$remote.prop("contentWindow")).on "hashchange", @updateRemoteUrl
+      $(@$remote.prop("contentWindow")).on "popstate",   @updateRemoteUrl
 
       ## if our config model hasnt been configured with testHtml
       ## then we immediately resolve our remote iframe
@@ -274,11 +273,18 @@
         ## TODO FIX THIS
         fn(iframe, remote)
 
-    urlUpdated: (url) =>
-      ## this should figure out whether to append
-      ## a hash or replace a hash
-      ## we need to add logic for stripping out the
-      ## excess document.location fluff around the url
+    updateRemoteUrl: =>
+      loc = @$remote.prop("contentWindow").location
+
+      ## if we're on the starting blank page
+      ## then dont set url
+      if loc.href isnt "about:blank"
+        ## nuke everything up until the end of /__remote/
+        ## and nuke either ?__initial=true or &__intitial=true
+        url = loc.href
+          .replace(/.+\/__remote\//, "")
+          .replace(/[\?|&]__initial=true/, "")
+
       @ui.url.val(url)
 
     parseHashChangeUrl: (url) ->
