@@ -238,9 +238,9 @@
 
       ## when the remote iframe visits an external URL
       ## we want to update our header's input
-      @$remote.on "visit:start", =>
+      @$remote.on "visit:start", (e, url) =>
         @showSpinner()
-        @updateRemoteUrl()
+        @updateRemoteUrl(url)
 
       @$remote.on "load", =>
         @showSpinner(false)
@@ -279,12 +279,13 @@
         ## TODO FIX THIS
         fn(iframe, remote)
 
-    updateRemoteUrl: =>
+    updateRemoteUrl: (url) =>
       loc = @$remote.prop("contentWindow").location
 
-      ## if we're on the starting blank page
+      ## if we didnt pass in a url
+      ## and we're on the starting blank page
       ## then dont set url
-      if loc.href isnt "about:blank"
+      if !url and loc.href isnt "about:blank"
         ## nuke everything up until the end of /__remote/
         ## and nuke either ?__initial=true or &__intitial=true
         url = loc.href

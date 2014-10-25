@@ -24,7 +24,7 @@ Eclectus.Visit = do ($, _, Eclectus) ->
 
       ## trigger that the remoteIframing is visiting
       ## an external URL
-      @$remoteIframe.trigger "visit:start"
+      @$remoteIframe.trigger "visit:start", url
 
       ## when the remote iframe's load event fires
       ## callback fn
