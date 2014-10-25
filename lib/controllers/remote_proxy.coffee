@@ -1,11 +1,12 @@
-Domain  = require("domain")
-url     = require("url")
-request = require("request")
-mime    = require("mime")
-path    = require("path")
-_       = require("lodash")
-fs      = require("fs")
-fsUtil  = new (require("../util/file_helpers"))
+Domain      = require("domain")
+url         = require("url")
+Through     = require("through")
+hyperquest  = require("hyperquest")
+mime        = require("mime")
+path        = require("path")
+_           = require("lodash")
+fs          = require("fs")
+fsUtil      = new (require("../util/file_helpers"))
 
 module.exports = class extends require('events').EventEmitter
   handle: (req, res, next) =>
@@ -27,17 +28,20 @@ module.exports = class extends require('events').EventEmitter
     switch type = fsUtil.detectType(opts.uri)
       when "absolute" then @pipeAbsolutePath(opts, opts.res)
       when "file"     then @pipeFileContent(opts.uri, opts.res)
-      when "url"      then @pipeUrlContent(opts.uri)
+      when "url"      then @pipeUrlContent(opts.uri, opts.res)
       else
         throw new Error "Unable to handle type #{type}"
 
-  pipeUrlContent: (uri) ->
+  pipeUrlContent: (uri, res) ->
     @emit "verbose", "piping url content #{uri}"
-    request.get(uri)
+    th = Through((b) -> this.queue(b))
+    hq = hyperquest.get uri, {}, (err, incomingRes) ->
+      res.contentType(incomingRes?.headers['content-type'])
+      hq.pipe(th)
+    th
 
   pipeFileContent: (uri, res) ->
     @emit "verbose", "piping url content #{uri}"
-
     if (~uri.indexOf('file://'))
       uri = uri.split('file://')[1]
 
@@ -70,7 +74,7 @@ module.exports = class extends require('events').EventEmitter
         base = url.parse(paths.remote)
         base = base.protocol + "//" + base.hostname + paths.uri
 
-        @pipeUrlContent(base)
+        @pipeUrlContent(base, res)
       when "file"
         @pipeFileContent(paths.remote + paths.uri, res)
       when "absolute"
