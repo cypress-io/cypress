@@ -7,6 +7,7 @@ Domain        = require "domain"
 fsUtil        = new (require("../util/file_helpers"))
 through       = require("through")
 Url           = require("url")
+UrlMerge      = require("../util/url_merge")
 
 module.exports = class extends require('events').EventEmitter
   handle: (req, res, opts = {}) =>
@@ -55,18 +56,13 @@ module.exports = class extends require('events').EventEmitter
   _resolveRedirects: (url, res, req) ->
     thr = through((d) -> this.queue(d))
 
-    (findOrigin = (cb, p) ->
-      url = p or url
-      rq = hyperquest.get(url, {}, (err, incomingRes) =>
-        if ((incomingRes.statusCode+"").match(/^30(1|2|7|8)$/))
-          findOrigin(cb, incomingRes.headers.location)
-        else
-          res.contentType(incomingRes.headers['content-type'])
-          uri                 = url.split("/__remote/").join("")
-          req.session.remote  = uri.split("?")[0]
-
-          cb(rq)
-      )
-    ) (str) -> str.pipe(thr)
+    rq = hyperquest.get url, {}, (err, incomingRes) =>
+      if /^30(1|2|7|8)$/.test(incomingRes.statusCode)
+        newUrl = UrlMerge(url, incomingRes.headers.location)
+        res.redirect("/__remote/" + newUrl)
+      else
+        res.contentType(incomingRes.headers['content-type'])
+        req.session.remote  = url.split("?")[0]
+        rq.pipe(thr)
 
     thr
