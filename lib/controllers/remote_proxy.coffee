@@ -1,15 +1,20 @@
-Domain  = require("domain")
-url     = require("url")
-request = require("request")
-mime    = require("mime")
-path    = require("path")
-_       = require("lodash")
-fs      = require("fs")
-fsUtil  = new (require("../util/file_helpers"))
+Domain      = require("domain")
+url         = require("url")
+Through     = require("through")
+hyperquest  = require("hyperquest")
+mime        = require("mime")
+path        = require("path")
+_           = require("lodash")
+fs          = require("fs")
+fsUtil      = new (require("../util/file_helpers"))
+UrlMerge    = require("../util/url_merge")
 
 module.exports = class extends require('events').EventEmitter
   handle: (req, res, next) =>
     ## strip out the /__remote/ from the req.url
+    if not req.session.remote?
+      throw new Error("™ Session Proxy not yet set! ™")
+
     uri = req.url.split("/__remote/").join("")
 
     domain = Domain.create()
@@ -27,17 +32,26 @@ module.exports = class extends require('events').EventEmitter
     switch type = fsUtil.detectType(opts.uri)
       when "absolute" then @pipeAbsolutePath(opts, opts.res)
       when "file"     then @pipeFileContent(opts.uri, opts.res)
-      when "url"      then @pipeUrlContent(opts.uri)
+      when "url"      then @pipeUrlContent(opts.uri, opts.res)
       else
         throw new Error "Unable to handle type #{type}"
 
-  pipeUrlContent: (uri) ->
+  pipeUrlContent: (uri, res) ->
     @emit "verbose", "piping url content #{uri}"
-    request.get(uri)
+    thr = Through((b) -> this.queue(b))
+
+    rq = hyperquest.get uri, {}, (err, incomingRes) =>
+      if /^30(1|2|7|8)$/.test(incomingRes.statusCode)
+        newUrl = UrlMerge(uri, incomingRes.headers.location)
+        res.redirect("/__remote/" + newUrl)
+      else
+        res.contentType(incomingRes.headers['content-type'])
+        rq.pipe(thr)
+
+    thr
 
   pipeFileContent: (uri, res) ->
     @emit "verbose", "piping url content #{uri}"
-
     if (~uri.indexOf('file://'))
       uri = uri.split('file://')[1]
 
@@ -70,7 +84,7 @@ module.exports = class extends require('events').EventEmitter
         base = url.parse(paths.remote)
         base = base.protocol + "//" + base.hostname + paths.uri
 
-        @pipeUrlContent(base)
+        @pipeUrlContent(base, res)
       when "file"
         @pipeFileContent(paths.remote + paths.uri, res)
       when "absolute"
