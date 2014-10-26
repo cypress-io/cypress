@@ -14,6 +14,12 @@ module.exports = class extends require('events').EventEmitter
     uri = req.url.split("/__remote/").join("")
     @emit "verbose", "handling request for #{uri}"
 
+    ## initially set the session to this url
+    ## in case we aren't grabbing url content
+    ## this may later be overridden if we're
+    ## going to to the web and following redirects
+    @setSessionRemoteUrl(req, uri)
+
     d = Domain.create()
 
     d.on 'error', (e) => @errorHandler(e, res, uri)
@@ -22,6 +28,9 @@ module.exports = class extends require('events').EventEmitter
       @getContent(uri, res, req)
       .pipe(@injectContent(opts.inject))
       .pipe(res)
+
+  setSessionRemoteUrl: (req, url) ->
+    req.session.remote  = url.split("?")[0]
 
   injectContent: (toInject) ->
     toInject ?= ""
@@ -62,7 +71,9 @@ module.exports = class extends require('events').EventEmitter
         res.redirect("/__remote/" + newUrl)
       else
         res.contentType(incomingRes.headers['content-type'])
-        req.session.remote  = url.split("?")[0]
+
+        ## reset the session to the latest redirected URL
+        @setSessionRemoteUrl(req, url)
         rq.pipe(thr)
 
     thr
