@@ -15,19 +15,24 @@ describe "Remote Loader", ->
       expect(d.toString()).to.eq("<head> wow</head><body></body>")
       done()
 
-  it "sets session on __initial"
+  context "setting session", ->
+    it "sets immediately before requests"
 
-  it "session does not include __remote"
+    it "resets after a redirect"
+
+    it "does not include query params in the url"
+
+    it "does not include __remote in the url"
 
   it "redirects on 301, 302, 307, 308"
 
   it "bubbles up 500 on fetch error"
 
-  context "relative files"
+  context "relative files", ->
 
-  context "absolute files"
+  context "absolute files", ->
 
-  context "file files"
+  context "file files", ->
 
   context "errors", ->
     it "bubbles 500's from external server"
