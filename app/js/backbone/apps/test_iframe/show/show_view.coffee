@@ -285,7 +285,7 @@
       ## if we didnt pass in a url
       ## and we're on the starting blank page
       ## then dont set url
-      if !url and loc.href isnt "about:blank"
+      if not _.isString(url) and loc.href isnt "about:blank"
         ## nuke everything up until the end of /__remote/
         ## and nuke either ?__initial=true or &__intitial=true
         url = loc.href
