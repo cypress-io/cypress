@@ -20,25 +20,32 @@ describe "Remote Loader", ->
   context "setting session", ->
     beforeEach ->
       @remoteLoader = new RemoteLoader
-      @baseUrl      = "http://foo.com/bar"
+      @res = through (d) ->
+      @res.redirect = ->
+      @next = ->
 
     it "sets immediately before requests", ->
-      res = through (d) ->
-      res.redirect = ->
+      @baseUrl      = "http://foo.com/bar"
 
       @req =
         url: "/__remote/#{@baseUrl}"
         session: {}
 
-      @remoteLoader.handle(@req, res, ->)
+      @remoteLoader.handle(@req, @res, @next)
 
       expect(@req.session.remote).to.eql(@baseUrl)
 
     it "resets after a redirect"
 
-    it "does not include query params in the url"
+    it "does not include query params in the url", ->
+      @baseUrl      = "http://foo.com/bar"
 
-    it "does not include __remote in the url"
+      @req =
+        url: "/__remote/#{@baseUrl}?foo=bar"
+        session: {}
+
+      @remoteLoader.handle(@req, @res, @next)
+      expect(@req.session.remote).to.eql(@baseUrl)
 
   it "redirects on 301, 302, 307, 308"
 
