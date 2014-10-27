@@ -1,5 +1,19 @@
+RemoteProxy = require("../../../lib/controllers/remote_proxy")
+chai        = require('chai')
+expect      = chai.expect
+
+chai
+.use(require('sinon-chai'))
+.should()
+
 describe "remote proxy", ->
-  it "throws without a session.remote"
+  beforeEach ->
+    @remoteProxy = new RemoteProxy
+
+  it "throws without a session.remote", ->
+    expect(-> @remoteProxy.handle({
+      session: {}
+    })).to.throw
 
   it "handles GET's"
 
