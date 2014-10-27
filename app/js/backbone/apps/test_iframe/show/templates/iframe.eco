@@ -98,7 +98,7 @@
                 <div class="row">
                   <input class="form-control col-xs-5" name="width" value="100" />
                   <div class="col-xs-7">
-                    <p class="form-control-static">px</p>
+                    <p class="form-control-static">%</p>
                   </div>
                 </div>
               </div>
@@ -115,7 +115,7 @@
                 <div class="row">
                   <input class="form-control col-xs-5" name="height" value="100" />
                   <div class="col-xs-7">
-                    <p class="form-control-static">px</p>
+                    <p class="form-control-static">%</p>
                   </div>
                 </div>
               </div>

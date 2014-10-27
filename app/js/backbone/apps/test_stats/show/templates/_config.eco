@@ -1,0 +1,44 @@
+<div id="runner-config" class="dropdown">
+  <button class="btn btn-link" data-toggle="dropdown">
+    <i class="fa fa-cog"></i>
+    <i class="fa fa-caret-down"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-right" role="menu">
+    <li class="dropdown-header">Browsers</li>
+    <li>
+      <a href="#">
+        <input type="checkbox" checked="checked" />
+        <img src="/eclectus/img/chrome_32x32.png" />
+        <span class="browser-name">Chrome</span>
+      </a>
+    </li>
+    <li>
+      <a href="#">
+        <input type="checkbox" checked="checked" />
+        <img src="/eclectus/img/firefox_32x32.png" />
+        <span class="browser-name">Firefox</span>
+      </a>
+    </li>
+    <li>
+      <a href="#">
+        <input type="checkbox" checked="checked" />
+        <img src="/eclectus/img/safari_32x32.png" />
+        <span class="browser-name">Safari</span>
+      </a>
+    </li>
+    <li>
+      <a href="#">
+      <input type="checkbox" checked="checked" />
+        <img src="/eclectus/img/internet-explorer_32x32.png" />
+        <span class="browser-name">IE</span>
+      </a>
+    </li>
+    <li class="divider"></li>
+    <li class="save-container">
+      <button class="btn btn-primary btn-xs pull-right">
+        <i class="fa fa-check"></i>
+        Save
+      </button>
+    </li>
+  </ul>
+</div>

@@ -162,14 +162,13 @@
     background-color: darken(#eb5849, 5%);
     color: #fff;
     border-radius: 5px;
-    margin-left: 10px;
     float: left;
     padding: 0 4px;
     font-size: 10px;
     text-transform: uppercase;
     position: absolute;
     top: 0;
-    right: 0;
+    right: 20px;
   }
 
   .command-type-dom {
@@ -229,7 +228,7 @@
   .command-message {
     display: inline-block;
     margin-left: 0;
-    width: 65%;
+    width: 60%;
   }
 
   .command-request {

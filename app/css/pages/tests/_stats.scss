@@ -1,7 +1,7 @@
 #header-container {
   background-color: #eeeff1;
   padding-left: 20px;
-  overflow: auto;
+  overflow: visible;
   height: 37px;
   border-left: 1px solid #191919;
   border-bottom: 1px solid #ddd;
@@ -64,6 +64,33 @@
 
     label {
       cursor: pointer;
+      float: left;
+      line-height: 14px;
+    }
+  }
+
+  #runner-config {
+    float: right;
+
+    i {
+      font-size: 17px;
+    }
+
+    .btn-link {
+      text-decoration: none;
+
+       &:hover {
+        text-decoration: none;
+      }
+    }
+
+    .save-container {
+      padding: 0 10px 3px;
+      overflow: auto;
+
+      i {
+        font-size: 12px;
+      }
     }
   }
 }

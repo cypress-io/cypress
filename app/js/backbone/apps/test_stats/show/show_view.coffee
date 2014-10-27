@@ -52,3 +52,6 @@
     initialize: ->
       @listenTo @model.get("children"), "add remove reset", =>
         @ui.length.text @model.get("children").length
+
+  class Show.Config extends App.Views.ItemView
+    template: "test_stats/show/_config"

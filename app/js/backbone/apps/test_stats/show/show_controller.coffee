@@ -28,6 +28,7 @@
 
       @listenTo @layout, "show", =>
         @statsRegion stats
+        @configRegion stats
 
       @show @layout
 
@@ -41,6 +42,10 @@
       statsView = @getStatsView stats
       @show statsView, region: @layout.statsRegion
 
+    configRegion: ->
+      configView = @getConfigView()
+      @show configView, region: @layout.configRegion
+
     chosenRegion: (runner, chosen) ->
       return @layout.chosenRegion.empty() if not chosen
 
@@ -51,6 +56,9 @@
         runner.setChosen()
 
       @show chosenView, region: @layout.chosenRegion
+
+    getConfigView: ->
+      new Show.Config
 
     getChosenView: (chosen) ->
       new Show.Chosen
