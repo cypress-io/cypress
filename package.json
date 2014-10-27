@@ -65,6 +65,7 @@
     "mkdirp": "^0.5.0",
     "mocha": "^1.21.4",
     "mocha-phantomjs": "^3.5.0",
+    "nock": "^0.48.1",
     "node-phantom-simple": "^1.2.0",
     "phantomjs": "^1.9.7-15",
     "requirejs": "^2.1.15",
