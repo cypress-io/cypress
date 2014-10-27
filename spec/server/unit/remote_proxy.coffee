@@ -5,7 +5,7 @@ describe "remote proxy", ->
 
   it "Basic Auth"
 
-  context "VERBS"
+  context "VERBS", ->
 
     it "GET"
 
@@ -19,10 +19,10 @@ describe "remote proxy", ->
 
     it "PATCH"
 
-  context "websockets"
+  context "websockets", ->
 
-  context "https"
+  context "https", ->
 
-  context "headers"
+  context "headers", ->
 
     it "Custom Headers"
