@@ -2,6 +2,8 @@ remoteLoader  = require('../../../lib/controllers/remote_loader')
 Readable      = require("stream").Readable
 expect        = require("chai").expect
 through       = require("through")
+nock          = require('nock')
+sinon         = require('sinon')
 
 describe "Remote Loader", ->
   it 'injects content', (done) ->
@@ -16,7 +18,21 @@ describe "Remote Loader", ->
       done()
 
   context "setting session", ->
-    it "sets immediately before requests"
+    beforeEach ->
+      @remoteLoader = new remoteLoader
+      @baseUrl      = "http://foo.com/bar"
+
+    it "sets immediately before requests", ->
+      res = through (d) ->
+      res.redirect = ->
+
+      @req =
+        url: "/__remote/#{@baseUrl}"
+        session: {}
+
+      @remoteLoader.handle(@req, res, ->)
+
+      expect(@req.session.remote).to.eql(@baseUrl)
 
     it "resets after a redirect"
 
@@ -29,7 +45,7 @@ describe "Remote Loader", ->
   it "bubbles up 500 on fetch error"
 
   context "relative files", ->
-
+    remoteLoader
   context "absolute files", ->
 
   context "file files", ->
