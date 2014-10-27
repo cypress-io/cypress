@@ -1,4 +1,4 @@
-remoteLoader  = require('../../../lib/controllers/remote_loader')
+RemoteLoader  = require('../../../lib/controllers/remote_loader')
 Readable      = require("stream").Readable
 expect        = require("chai").expect
 through       = require("through")
@@ -12,14 +12,14 @@ describe "Remote Loader", ->
     readable.push('<head></head><body></body>')
     readable.push(null)
 
-    readable.pipe(remoteLoader::injectContent("wow"))
+    readable.pipe(RemoteLoader::injectContent("wow"))
     .pipe through (d) ->
       expect(d.toString()).to.eq("<head> wow</head><body></body>")
       done()
 
   context "setting session", ->
     beforeEach ->
-      @remoteLoader = new remoteLoader
+      @remoteLoader = new RemoteLoader
       @baseUrl      = "http://foo.com/bar"
 
     it "sets immediately before requests", ->
@@ -45,7 +45,7 @@ describe "Remote Loader", ->
   it "bubbles up 500 on fetch error"
 
   context "relative files", ->
-    remoteLoader
+
   context "absolute files", ->
 
   context "file files", ->
