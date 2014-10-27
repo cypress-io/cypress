@@ -59,9 +59,15 @@ gulp.task "fonts", ->
   gulp.src("bower_components/font-awesome/fonts/**")
     .pipe gulp.dest "lib/public/css/fonts"
 
-gulp.task "img", ->
+gulp.task "img", ["vendor:img", "project:img"]
+
+gulp.task "vendor:img", ->
   gulp.src("bower_components/jquery-ui/themes/smoothness/images/**")
     .pipe gulp.dest "lib/public/css/images"
+
+gulp.task "project:img", ->
+  gulp.src("app/img/**/*")
+    .pipe gulp.dest "lib/public/img"
 
 gulp.task "js", (cb) ->
   bundles = yaml.load(fs.readFileSync("./lib/js.yml", "utf8"))
