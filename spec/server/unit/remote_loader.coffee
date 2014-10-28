@@ -26,30 +26,39 @@ describe "Remote Loader", ->
       expect(d.toString()).to.eq("<head> wow</head><body></body>")
       done()
 
-  describe "redirects", ->
+  describe.only "redirects", ->
     beforeEach ->
       @req = {
         url: "/__remote/#{@baseUrl}/",
         session: {}
       }
 
-    it "redirects on 301", (done) ->
       nock(@baseUrl)
       .get("/")
       .reply(301, "", {
         'location': @redirectUrl
       })
 
+      @res.redirect = (loc) =>
+        @req.url = loc
+        @remoteLoader.handle(@req, @res, @next)
+
+    it "redirects on 301", (done) ->
+      nock(@redirectUrl)
+      .get("/")
+      .reply(200, =>
+        done()
+      )
+
+      @remoteLoader.handle(@req, @res, @next)
+
+    it "resets session remote after a redirect", (done) ->
       nock(@redirectUrl)
       .get("/")
       .reply(200, =>
         expect(@req.session.remote).to.eql("http://x.com/")
         done()
       )
-
-      @res.redirect = (loc) =>
-        @req.url = loc
-        @remoteLoader.handle(@req, @res, @next)
 
       @remoteLoader.handle(@req, @res, @next)
 
@@ -71,8 +80,6 @@ describe "Remote Loader", ->
       @remoteLoader.handle(@req, @res, @next)
 
       expect(@req.session.remote).to.eql(@baseUrl)
-
-    it "resets after a redirect"
 
     it "does not include query params in the url", ->
       @req =
