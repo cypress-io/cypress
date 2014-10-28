@@ -17,7 +17,7 @@
       list-style-type: none;
       float: left;
       margin: 0 10px;
-      padding-top: 6px;
+      padding-top: 3px;
       padding-bottom: 3px;
       font-weight: 300;
       height: 100%;
@@ -44,10 +44,12 @@
         color: #555;
         font-weight: 500;
       }
+
     }
 
     #tests-duration {
-      // background-color: #d5d5d5;
+      border-left: 1px dotted #CCC;
+      border-right: 1px dotted #CCC;
       padding-left: 10px;
       padding-right: 10px;
     }

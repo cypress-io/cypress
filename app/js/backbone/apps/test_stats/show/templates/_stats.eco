@@ -2,21 +2,20 @@
   <li id="tests-passed">
     <i class="fa fa-check"></i>
     <span class="num"><%= @count(@passed) %></span>
-    <span>Passed</span>
+    <div>Passed</div>
   </li>
   <li id="tests-failed">
     <i class="fa fa-times"></i>
     <span class="num"><%= @count(@failed) %></span>
-    <span>Failed</span>
+    <div>Failed</div>
   </li>
   <li id="tests-pending">
     <i class="fa fa-circle-o-notch"></i>
     <span class="num"><%= @count(@pending) %></span>
-    <span>Pending</span>
+    <div>Pending</div>
   </li>
   <li id="tests-duration">
-    <span>Runtime:</span>
     <span class="num"><%= @count(@duration) %></span>
-    <span>secs</span>
+    <div>secs</div>
   </li>
 </ul>
