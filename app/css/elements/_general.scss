@@ -60,6 +60,16 @@ ul {
     }
   }
 
+  &.satellite-mode {
+    #main-region {
+      margin-left: 0;
+    }
+
+    #iframe-region > div {
+      padding-top: 0 !important;
+    }
+  }
+
   #main-region {
     margin-left: 216px;
     position: relative;

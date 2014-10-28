@@ -15,6 +15,11 @@
       @listenTo config, "close:test:panels", ->
         @layout.panelsRegion.empty()
 
+      @listenTo config, "enter:app:env:mode", (env) ->
+        if env is "satellite"
+          @layout.satelliteMode()
+          @layout.destroy()
+
       @layout = @getLayoutView()
 
       @listenTo @layout, "show", =>

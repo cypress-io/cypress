@@ -1,152 +1,154 @@
-<header>
-  <div id="url-container" class="pull-left">
-    <i class="fa fa-arrow-left"></i>
-    <i class="fa fa-arrow-right"></i>
-    <div id="url-wrapper">
-      <input class="url" />
-      <span class="loading-wrapper">
-        <span class="loading-content">...loading</span>
-        <i class="fa fa-spinner fa-spin"></i>
-      </span>
-    </div>
-  </div>
-  <div class="iframe-menu">
-    <!-- <button class="btn btn-default pull-left" id="perf">outerhtml</button> -->
-    <div class="dropdown pull-left">
-      <button data-toggle="dropdown" class="btn btn-link">
-        <span id="current-browser-sizes">
-          <span id="browser-width">1920</span>
-          x
-          <span id="browser-height">1080</span>
-          <span id="browser-scale-container">
-            (<span id="browser-scale">100%</span>)
-          </span>
+<% if @env isnt "satellite": %>
+  <header>
+    <div id="url-container" class="pull-left">
+      <i class="fa fa-arrow-left"></i>
+      <i class="fa fa-arrow-right"></i>
+      <div id="url-wrapper">
+        <input class="url" />
+        <span class="loading-wrapper">
+          <span class="loading-content">...loading</span>
+          <i class="fa fa-spinner fa-spin"></i>
         </span>
-        <i class="fa fa-cog"></i>
-        <i class="fa fa-caret-down"></i>
-      </button>
-      <div id="browser-size-form-wrapper" class="dropdown-menu dropdown-menu-right">
-        <div class="container-fluid">
-          <form class="form-horizontal">
-            <div id="browser-presets-selector" class="form-group">
-              <div class="dropdown">
-                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                  --Presets-- <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu" role="menu">
-                  <li class="dropdown-header">Desktop</li>
-                  <li>
-                    <a href="#">
-                      <i class="fa fa-desktop"></i>
-                      <span class="preset-name">1080p LCD</span>
-                      <span class="preset-size">1920 x 1080</span>
-                    </a>
-                    <a href="#">
-                      <i class="fa fa-desktop"></i>
-                      <span class="preset-name">Macbook 15"</span>
-                      <span class="preset-size">1440 x 900</span>
-                    </a>
-                    <a href="#">
-                      <i class="fa fa-desktop"></i>
-                      <span class="preset-name">Macbook 13"</span>
-                      <span class="preset-size">1280 x 800</span>
-                    </a>
-                    <a href="#">
-                      <i class="fa fa-desktop"></i>
-                      <span class="preset-name">Macbook 11"</span>
-                      <span class="preset-size">1366 x 768</span>
-                    </a>
-                  </li>
-                  <li class="divider"></li>
-                  <li class="dropdown-header">Mobile</li>
-                  <li>
-                    <a href="#">
-                      <i class="fa fa-mobile"></i>
-                      <span class="preset-name">iPhone 6+</span>
-                      <span class="preset-size">1920 x 1080</span>
-                    </a>
-                    <a href="#">
-                      <i class="fa fa-mobile"></i>
-                      <span class="preset-name">iPhone 6</span>
-                      <span class="preset-size">750 x 1334</span>
-                    </a>
-                    <a href="#">
-                      <i class="fa fa-mobile"></i>
-                      <span class="preset-name">iPhone 5</span>
-                      <span class="preset-size">640 x 1136</span>
-                    </a>
-                    <a href="#">
-                      <i class="fa fa-mobile"></i>
-                      <span class="preset-name">iPhone 4</span>
-                      <span class="preset-size">640 x 960</span>
-                    </a>
-                    <a href="#">
-                      <i class="fa fa-mobile"></i>
-                      <span class="preset-name">iPhone 3</span>
-                      <span class="preset-size">320 x 480</span>
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <div class="form-group form-group-sm">
-              <label class="control-label col-xs-6">
-                <i class="fa fa-arrows-h fa-fw"></i>
-                Width
-              </label>
-              <div class="col-xs-6">
-                <div class="row">
-                  <input class="form-control col-xs-5" name="width" value="100" />
-                  <div class="col-xs-7">
-                    <p class="form-control-static">%</p>
-                  </div>
-                </div>
-              </div>
-              <div class="col-xs-12">
-                <div class="slider"></div>
-              </div>
-            </div>
-            <div class="form-group form-group-sm">
-              <label class="control-label col-xs-6">
-                <i class="fa fa-arrows-v fa-fw"></i>
-                Height
-              </label>
-              <div class="col-xs-6">
-                <div class="row">
-                  <input class="form-control col-xs-5" name="height" value="100" />
-                  <div class="col-xs-7">
-                    <p class="form-control-static">%</p>
-                  </div>
-                </div>
-              </div>
-              <div class="col-xs-12">
-                <div class="slider"></div>
-              </div>
-            </div>
-            <div class="form-group form-group-sm">
-              <label class="control-label col-xs-6">
-                <i class="fa fa-search-minus fa-flip-horizontal fa-fw"></i>
-                Scale
-              </label>
-              <div class="col-xs-6">
-                <div class="row">
-                  <input class="form-control col-xs-5" name="scale" value="100" />
-                  <div class="col-xs-7">
-                    <p class="form-control-static">%</p>
-                  </div>
-                </div>
-              </div>
-              <div class="col-xs-12">
-                <div class="slider"></div>
-              </div>
-            </div>
-          </form>
-        </div>
       </div>
     </div>
-    <i class="fa fa-compress"></i>
-    <i class="fa fa-expand"></i>
-  </div>
-</header>
-<div id="iframe-message"></div>
+    <div class="iframe-menu">
+      <!-- <button class="btn btn-default pull-left" id="perf">outerhtml</button> -->
+      <div class="dropdown pull-left">
+        <button data-toggle="dropdown" class="btn btn-link">
+          <span id="current-browser-sizes">
+            <span id="browser-width">1920</span>
+            x
+            <span id="browser-height">1080</span>
+            <span id="browser-scale-container">
+              (<span id="browser-scale">100%</span>)
+            </span>
+          </span>
+          <i class="fa fa-cog"></i>
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div id="browser-size-form-wrapper" class="dropdown-menu dropdown-menu-right">
+          <div class="container-fluid">
+            <form class="form-horizontal">
+              <div id="browser-presets-selector" class="form-group">
+                <div class="dropdown">
+                  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                    --Presets-- <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu" role="menu">
+                    <li class="dropdown-header">Desktop</li>
+                    <li>
+                      <a href="#">
+                        <i class="fa fa-desktop"></i>
+                        <span class="preset-name">1080p LCD</span>
+                        <span class="preset-size">1920 x 1080</span>
+                      </a>
+                      <a href="#">
+                        <i class="fa fa-desktop"></i>
+                        <span class="preset-name">Macbook 15"</span>
+                        <span class="preset-size">1440 x 900</span>
+                      </a>
+                      <a href="#">
+                        <i class="fa fa-desktop"></i>
+                        <span class="preset-name">Macbook 13"</span>
+                        <span class="preset-size">1280 x 800</span>
+                      </a>
+                      <a href="#">
+                        <i class="fa fa-desktop"></i>
+                        <span class="preset-name">Macbook 11"</span>
+                        <span class="preset-size">1366 x 768</span>
+                      </a>
+                    </li>
+                    <li class="divider"></li>
+                    <li class="dropdown-header">Mobile</li>
+                    <li>
+                      <a href="#">
+                        <i class="fa fa-mobile"></i>
+                        <span class="preset-name">iPhone 6+</span>
+                        <span class="preset-size">1920 x 1080</span>
+                      </a>
+                      <a href="#">
+                        <i class="fa fa-mobile"></i>
+                        <span class="preset-name">iPhone 6</span>
+                        <span class="preset-size">750 x 1334</span>
+                      </a>
+                      <a href="#">
+                        <i class="fa fa-mobile"></i>
+                        <span class="preset-name">iPhone 5</span>
+                        <span class="preset-size">640 x 1136</span>
+                      </a>
+                      <a href="#">
+                        <i class="fa fa-mobile"></i>
+                        <span class="preset-name">iPhone 4</span>
+                        <span class="preset-size">640 x 960</span>
+                      </a>
+                      <a href="#">
+                        <i class="fa fa-mobile"></i>
+                        <span class="preset-name">iPhone 3</span>
+                        <span class="preset-size">320 x 480</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div class="form-group form-group-sm">
+                <label class="control-label col-xs-6">
+                  <i class="fa fa-arrows-h fa-fw"></i>
+                  Width
+                </label>
+                <div class="col-xs-6">
+                  <div class="row">
+                    <input class="form-control col-xs-5" name="width" value="100" />
+                    <div class="col-xs-7">
+                      <p class="form-control-static">%</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-xs-12">
+                  <div class="slider"></div>
+                </div>
+              </div>
+              <div class="form-group form-group-sm">
+                <label class="control-label col-xs-6">
+                  <i class="fa fa-arrows-v fa-fw"></i>
+                  Height
+                </label>
+                <div class="col-xs-6">
+                  <div class="row">
+                    <input class="form-control col-xs-5" name="height" value="100" />
+                    <div class="col-xs-7">
+                      <p class="form-control-static">%</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-xs-12">
+                  <div class="slider"></div>
+                </div>
+              </div>
+              <div class="form-group form-group-sm">
+                <label class="control-label col-xs-6">
+                  <i class="fa fa-search-minus fa-flip-horizontal fa-fw"></i>
+                  Scale
+                </label>
+                <div class="col-xs-6">
+                  <div class="row">
+                    <input class="form-control col-xs-5" name="scale" value="100" />
+                    <div class="col-xs-7">
+                      <p class="form-control-static">%</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-xs-12">
+                  <div class="slider"></div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <i class="fa fa-compress"></i>
+      <i class="fa fa-expand"></i>
+    </div>
+  </header>
+  <div id="iframe-message"></div>
+<% end %>
 <div id="iframe-size-container"></div>

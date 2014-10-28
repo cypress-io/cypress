@@ -3,9 +3,15 @@
   class Show.Controller extends App.Controllers.Application
 
     initialize: (options) ->
+      {id, __env} = options
+
       config = App.request "app:config:entity"
 
-      spec = config.getPathToSpec(options.id)
+      ## cause the app to enter a special app mode if __env is set
+      App.execute "set:app:env", __env
+      config.trigger "enter:app:env:mode", __env if __env
+
+      spec = config.getPathToSpec(id)
 
       @listenTo config, "change:panels", ->
         @layout.resizePanels()
@@ -20,14 +26,14 @@
       @layout = @getLayoutView config
 
       @listenTo @layout, "show", =>
-        @statsRegion(runner)
+        @statsRegion(runner)          if __env isnt "satellite"
         @iframeRegion(runner)
-        @specsRegion(runner, spec)
-        @panelsRegion(runner, config)
+        @specsRegion(runner, spec)    if __env isnt "satellite"
+        @panelsRegion(runner, config) if __env isnt "satellite"
 
         ## start running the tests
         ## and load the iframe
-        runner.start(options.id)
+        runner.start(id)
 
         # @layout.resizePanels()
 
