@@ -42,3 +42,17 @@
     </li>
   </ul>
 </div>
+<ul id="cross-browsers" class="list-inline">
+  <li>
+    <img src="/eclectus/img/chrome_16x16.png" />
+  </li>
+  <li>
+    <img src="/eclectus/img/firefox_16x16.png" />
+  </li>
+  <li>
+    <img src="/eclectus/img/safari_16x16.png" />
+  </li>
+  <li>
+    <img src="/eclectus/img/internet-explorer_16x16.png" />
+  </li>
+</ul>

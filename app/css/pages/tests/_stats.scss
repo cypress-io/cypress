@@ -45,6 +45,9 @@
         font-weight: 500;
       }
 
+      div {
+        line-height: 1.1;
+      }
     }
 
     #tests-duration {
@@ -68,6 +71,34 @@
       cursor: pointer;
       float: left;
       line-height: 14px;
+    }
+  }
+
+  #cross-browsers {
+    // position: absolute;
+    // right: 0;
+
+    // img {
+      // opacity: 0.7;
+    // }
+    float: right;
+    position: relative;
+    top: 6px;
+    border-radius: 5px;
+    background-color: white;
+    padding: 2px;
+    box-shadow: 0 1px 1px #888;
+
+    li {
+      padding: 0 5px;
+      border-right: 1px dotted #CCC;
+      margin: 0 0;
+      position: relative;
+      top: -1px;
+
+      &:last-child {
+        border-right: 0;
+      }
     }
   }
 
