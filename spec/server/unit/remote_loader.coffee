@@ -11,8 +11,10 @@ describe "Remote Loader", ->
   beforeEach ->
     @remoteLoader = new RemoteLoader
     @res = through (d) ->
+    @res.send = ->
     @res.redirect = ->
     @res.contentType = ->
+    @res.status = => @res
     @next = ->
     @baseUrl = "http://foo.com"
     @redirectUrl  = "http://x.com"
@@ -91,7 +93,19 @@ describe "Remote Loader", ->
       @remoteLoader.handle(@req, @res, @next)
       expect(@req.session.remote).to.eql(@baseUrl)
 
-  it "bubbles up 500 on fetch error"
+  it.only "bubbles up 500 on fetch error", (done) ->
+    @req =
+      url: "/__remote/#{@baseUrl}"
+      session: {}
+
+    @remoteLoader.handle(@req, @res, @next)
+
+    @res.send = (d) ->
+      expect(d).to.eql(
+        "Error getting http://foo.com <pre>Nock: Not allow net connect for \"foo.com:80\"</pre>"
+      )
+
+      done()
 
   context "relative files", ->
 
