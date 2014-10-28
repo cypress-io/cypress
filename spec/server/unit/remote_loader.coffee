@@ -26,7 +26,7 @@ describe "Remote Loader", ->
       expect(d.toString()).to.eq("<head> wow</head><body></body>")
       done()
 
-  describe.only "redirects", ->
+  describe "redirects", ->
     beforeEach ->
       @req = {
         url: "/__remote/#{@baseUrl}/",
