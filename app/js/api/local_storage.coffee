@@ -20,7 +20,7 @@ Eclectus.LocalStorage = do ($, _, Eclectus) ->
         return if @_isEclectusItem(item)
 
         if keys.length
-          @_ifItemStartsWithAnyKey item, keys, (key) =>
+          @_ifItemMatchesAnyKey item, keys, (key) =>
             @_removeItem(key)
         else
           @_removeItem(item)
@@ -35,12 +35,18 @@ Eclectus.LocalStorage = do ($, _, Eclectus) ->
     _isEclectusItem: (item) ->
       eclRegExp.test item
 
-    ## if any key in the array of keys
-    ## matches the dynamic regexp of the item
-    ## then we callback the fn
-    _ifItemStartsWithAnyKey: (item, keys, fn) ->
-      _.any keys, (key) ->
-        re = new RegExp("^" + key)
+    _normalizeRegExpOrString: (key) ->
+      switch
+        when _.isRegExp(key) then key
+        when _.isString(key) then new RegExp("^" + key + "$")
+        else
+          throw new Error("Arguments to Ecl.clear() must be a regular expression or string!")
+
+    ## if item matches by string or regex
+    ## any key in our keys then callback
+    _ifItemMatchesAnyKey: (item, keys, fn) ->
+      _.any keys, (key) =>
+        re = @_normalizeRegExpOrString(key)
 
         fn(item) if re.test(item)
 
