@@ -8,6 +8,8 @@ sinon         = require('sinon')
 nock.disableNetConnect()
 
 describe "Remote Loader", ->
+  afterEach -> nock.cleanAll()
+
   beforeEach ->
     @remoteLoader = new RemoteLoader
     @res = through (d) ->
@@ -93,7 +95,7 @@ describe "Remote Loader", ->
       @remoteLoader.handle(@req, @res, @next)
       expect(@req.session.remote).to.eql(@baseUrl)
 
-  it.only "bubbles up 500 on fetch error", (done) ->
+  it "bubbles up 500 on fetch error", (done) ->
     @req =
       url: "/__remote/#{@baseUrl}"
       session: {}
