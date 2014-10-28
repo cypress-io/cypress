@@ -5,6 +5,8 @@ through       = require("through")
 nock          = require('nock')
 sinon         = require('sinon')
 
+nock.disableNetConnect()
+
 describe "Remote Loader", ->
   beforeEach ->
     @remoteLoader = new RemoteLoader
