@@ -158,7 +158,7 @@
     startListening: ->
       @setListenersForAll()
       @setListenersForCI() if App.env("ci")
-      @setListenersForWeb() if App.env("web")
+      @setListenersForWeb() if not App.env("ci")
 
     setListenersForAll: ->
       ## partials in the runnable object
@@ -192,6 +192,7 @@
         @trigger "suite:start", suite
 
       @runner.on "suite end", (suite) =>
+        debugger
         @trigger "suite:stop", suite
 
       # @runner.on "suite end", (suite) ->

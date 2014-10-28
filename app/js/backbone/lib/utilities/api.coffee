@@ -103,9 +103,9 @@
       ## instantiate Eclectus
       window.Ecl = new Eclectus
 
-      overloadMochaRunnableEmit() if App.env("web")
+      overloadMochaRunnableEmit() if not App.env("ci")
       overloadMochaRunnerEmit()
-      overloadMochaRunnerUncaught() if App.env("web")
+      overloadMochaRunnerUncaught() if not App.env("ci")
       overloadChaiAssertions(Ecl) if chai and chai.use
 
       ## get the runner and mocha variables if they're not
