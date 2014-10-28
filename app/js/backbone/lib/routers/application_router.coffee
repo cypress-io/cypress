@@ -136,13 +136,35 @@
       ## throw an error, we must be passed an object
       throw new Error("Routes must be defined on the action: #{key}") if not route
 
+      matches = route.match(routeParams)
+
+      ## just grab the current objects from args
+      ## which represent our current query params
+      queryParams = @_getObjsFromArgs(args)
+
+      ## slices out any value in args which isnt a string
+      strings = @_getStringsFromArgs(args)
+
       ## match named params or splats and capture them as an obj
-      _.reduce args, (memo, arg) ->
-        i = _(args).indexOf arg
-        matches = route.match(routeParams)
+      params = _.reduce strings, (memo, arg, i) ->
         memo[matches[i].slice(1)] = arg
         memo
       , {}
+
+      ## now merge all of the objects together
+      _.extend {}, queryParams, params
+
+    _getObjsFromArgs: (args) ->
+      ## grab all of the objects in our args
+      args = _(args).filter _.isObject
+
+      ## merge them all into 1 single object
+      ## giving preference to elements later
+      ## overwriting earlier collisions
+      _.extend {}, args...
+
+    _getStringsFromArgs: (args) ->
+      _(args).filter _.isString
 
     _invokeBefore: (options, action) ->
       return if not before = @_shouldInvokeBefore(action)
@@ -154,8 +176,16 @@
       action?.before or @before
 
     _interpolateUrl: (action, options) ->
-      ## remove region from the params automatically
-      Routes.create action.route, _(options).omit("region", "resolve")
+      options = _(options).reduce (memo, value, key) ->
+        ## if its not an object or it is an array
+        ## keep it, else discard it
+        if not _.isObject(value) or _.isArray(value)
+          memo[key] = value
+
+        memo
+      , {}
+
+      Routes.create action.route, options
 
     _updateUrl: (action, options) ->
       route = @_interpolateUrl(action, options)
@@ -206,7 +236,7 @@
         throw new Error("The '#{key}' Controller was not found for for the module: '#{module}'")
 
     _argsArePresentAndStrings: (args) ->
-      not _.isEmpty(args) and _.all args, _.isString
+      not _.isEmpty(args) and _.any args, _.isString
 
     _toObject: (array) ->
       ## takes the multi dimensional array

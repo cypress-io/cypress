@@ -38,8 +38,8 @@
 
     extractObjectParams = (obj, parts) ->
       ## make query params from the object minus the keys that are
-      ## used to create the actual base route
-      partsOfRoute = _.map parts, (part) -> part.replace(":", "")
+      ## used to create the actual base route, which are colors and asterisks
+      partsOfRoute = _.map parts, (part) -> part.replace(/(:|\*)/, "")
       _(obj).omit(partsOfRoute...)
 
     getQueryParams = (path, args, parts) ->
