@@ -290,13 +290,14 @@
 
     getCommandByType: (attrs) ->
       switch attrs.type
-        when "dom"        then @addDom attrs
-        when "xhr"        then @addXhr attrs
-        when "assertion"  then @addAssertion attrs
-        when "server"     then @addServer attrs
-        when "spy"        then @addSpy attrs
-        when "stub"       then @addStub attrs
-        when "visit"      then @addVisit attrs
+        when "dom"          then @addDom attrs
+        when "xhr"          then @addXhr attrs
+        when "assertion"    then @addAssertion attrs
+        when "server"       then @addServer attrs
+        when "spy"          then @addSpy attrs
+        when "stub"         then @addStub attrs
+        when "visit"        then @addVisit attrs
+        when "localStorage" then @addLocalStorage attrs
         else throw new Error("Command .type did not match anything")
 
     insertParents: (command, parentId, options = {}) ->
@@ -454,6 +455,17 @@
 
       command = new Entities.Command attrs
       command.page = page
+
+      return command
+
+    addLocalStorage: (attrs) ->
+      {snapshot} = attrs
+
+      attrs = _(attrs).omit "snapshot"
+
+      ## instantiate the new model
+      command = new Entities.Command attrs
+      command.snapshot = snapshot
 
       return command
 

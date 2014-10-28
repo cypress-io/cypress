@@ -77,6 +77,15 @@ window.Eclectus = do ($, _) ->
 
       return df
 
+    ## clear should be added to the localStorage key
+    ## and partialed in
+    ## Ecl.localStorage.clear() instead of Ecl.clear()
+    clear: (partial, keys = []) ->
+      ls = new Eclectus.LocalStorage partial.$remoteIframe, partial.channel, partial.runnable, @hook
+      ls.clear(keys)
+
+      return ls
+
   class Eclectus
     createSandbox: ($remoteIframe) ->
       ## bail if its already created

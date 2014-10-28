@@ -1,5 +1,7 @@
 @App.module "Entities", (Entities, App, Backbone, Marionette, $, _) ->
 
+  ECL_ATTRIBUTE = "ecl-"
+
   class Entities.Config extends Entities.Model
     defaults: ->
       collapsed: @getConfig("collapsed")
@@ -46,7 +48,7 @@
       value = _.extend existing, value if options.type is "object"
 
       ## also set this in LS
-      localStorage.setItem attr, JSON.stringify(value)
+      localStorage.setItem ECL_ATTRIBUTE + attr, JSON.stringify(value)
 
       ## set the value on ourselves
       super
@@ -55,7 +57,7 @@
     getConfig: (attr, options = {}) ->
       _.defaults options, @storageConfig[attr] or {}
 
-      item = localStorage.getItem(attr) or options.default
+      item = localStorage.getItem(ECL_ATTRIBUTE + attr) or options.default
 
       ## attempt type cooercion if type was given
       switch options.type
