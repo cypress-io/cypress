@@ -69,6 +69,7 @@
     "node-phantom-simple": "^1.2.0",
     "phantomjs": "^1.9.7-15",
     "requirejs": "^2.1.15",
+    "sinon-chai": "^2.6.0",
     "snockets": "^1.3.8",
     "socket.io": "^1.0.6",
     "through2": "^0.6.3",
