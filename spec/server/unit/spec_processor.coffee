@@ -2,6 +2,7 @@ fs            = require('fs')
 path          = require('path')
 chai          = require('chai')
 expect        = chai.expect
+through2      = require('through2')
 through       = require('through')
 sinon         = require('sinon')
 sinonChai     = require('sinon-chai');
@@ -17,7 +18,7 @@ describe.only "spec processor", ->
 
   beforeEach ->
     @specProcessor = new SpecProcessor
-    @res = through (d) -> this.push(d)
+    @res = through2.obj (chunk, enc, cb) -> cb(null, chunk)
 
     @res.type = sinon.stub()
 
@@ -37,7 +38,32 @@ describe.only "spec processor", ->
     expect(@res.type).to.have.been.calledOnce
     .and.to.have.been.calledWith('js')
 
-  it "compiles coffeescript"
+  context 'coffeescript', ->
+    beforeEach ->
+      fs.writeFileSync(path.join(FixturesRoot, '/sample.coffee'), '->')
+
+    afterEach ->
+      try
+        fs.unlinkSync(path.join(FixturesRoot, '/sample.coffee'))
+      catch
+
+    it "compiles coffeescript", (done) ->
+      @opts.spec = 'sample.coffee'
+
+      @res.pipe(through (d) ->
+        ## We have to manually catch the error here
+        ## because this stream is in a domain, thus
+        ## mocha will not pick up the error since we
+        ## are handling it within the controller
+        try
+          expect(d.toString()).to.eql("(function() {\n  (function() {});\n\n}).call(this);\n")
+          done()
+        catch e
+          this.emit('error', e)
+      ).on('error', (e) -> done(e))
+
+      @specProcessor.handle @opts, {}, @res, =>
+
   it "handles snocket includes"
   it "handles commonjs requires"
   it "handles requirejs"
