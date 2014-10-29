@@ -277,16 +277,16 @@
         super event, args...
 
     transformRunnableArgs: (args) ->
-      ## pull off title, cid, root, pending, stopped, type properties
-      props = ["title", "cid", "root", "pending", "stopped", "type"]
+      ## pull off these direct properties
+      props = ["title", "cid", "root", "pending", "stopped", "state", "duration", "type"]
 
       ## pull off these parent props
       parentProps = ["root", "cid"]
 
-      ## invoke fns
+      ## fns to invoke
       fns = ["originalTitle", "slow", "timeout"]
 
-      _(args).map (arg) ->
+      _(args).map (arg) =>
         ## transfer direct props
         obj = _(arg).pick props...
 
@@ -296,9 +296,10 @@
 
         ## transfer the error as JSON
         if err = arg.err
-          obj.err = JSON.stringify(err, ["message", "type", "name", "stack"])
-          obj.err.toString = err.toString()
+          err.host = @$remoteIframe.prop("contentWindow").location.host
+          obj.err = JSON.stringify(err, ["message", "type", "name", "stack", "fileName", "lineNumber", "columnNumber", "host"])
 
+        ## invoke the functions and set those as properties
         _.each fns, (fn) ->
           obj[fn] = _.result(arg, fn)
 
@@ -349,12 +350,13 @@
       @clear()
       @clear()
 
-      ## delete these properties
-      delete @runner
-      delete @contentWindow
-      delete @iframe
-      delete @hooks
-      delete @commands
+      ## null out these properties
+      @runner         = null
+      @contentWindow  = null
+      @$remoteIframe  = null
+      @iframe         = null
+      @hooks          = null
+      @commands       = null
 
     start: (iframe) ->
       @setIframe iframe
