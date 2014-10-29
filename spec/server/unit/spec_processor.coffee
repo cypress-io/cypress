@@ -7,11 +7,12 @@ sinon         = require('sinon')
 sinonChai     = require('sinon-chai');
 _             = require('lodash')
 SpecProcessor = require("../../../lib/controllers/spec_processor")
+FixturesRoot  = path.resolve(__dirname, '../../', 'fixtures/', 'server/')
 
 describe.only "spec processor", ->
   afterEach ->
     try
-      fs.unlinkSync(path.join(__dirname, 'fixtures/', 'sample.js'))
+      fs.unlinkSync(path.join(FixturesRoot, '/sample.js'))
     catch
 
   beforeEach ->
@@ -21,14 +22,14 @@ describe.only "spec processor", ->
     @res.type = sinon.stub()
 
     @opts = {
-      testFolder: "#{__dirname}"
-      spec: 'fixtures/sample.js'
+      testFolder: FixturesRoot
+      spec: 'sample.js'
     }
 
     global.app =
       get: -> {}
 
-    fs.writeFileSync(path.join(__dirname, 'fixtures/', 'sample.js'), ';')
+    fs.writeFileSync(path.join(FixturesRoot, '/sample.js'), ';')
 
   it "sets the correct content type", ->
     @specProcessor.handle @opts, {}, @res, =>
