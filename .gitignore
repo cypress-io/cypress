@@ -4,3 +4,4 @@ bower_components
 .sass-cache
 build/css
 lib/public
+.DS_Store
