@@ -1,10 +1,15 @@
 @App.module "Utilities", (Utilities, App, Backbone, Marionette, $, _) ->
 
-  API =
+  satelliteEvents = "runner:start runner:end before:run before:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test".split(" ")
 
+  API =
     start: ->
       ## connect to socket io
       channel = io.connect()
+
+      _.each satelliteEvents, (event) ->
+        channel.on event, (args...) ->
+          socket.trigger event, args...
 
       channel.on "test:changed", (data) ->
         socket.trigger "test:changed", data.file
@@ -32,3 +37,5 @@
 
   App.commands.setHandler "socket:start", ->
     API.start()
+
+  App.reqres.setHandler "satellite:events", -> satelliteEvents

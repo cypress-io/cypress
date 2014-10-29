@@ -201,6 +201,9 @@
 
       @resetReferences()
 
+      if App.env("host")
+        return @calcWidth()
+
       @$el.hide()
 
       view = @

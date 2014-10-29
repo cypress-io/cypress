@@ -38,7 +38,7 @@
     setAttrsFromRunnable: (runnable, index) ->
       @set
         id: runnable.cid
-        title: runnable.originalTitle()
+        title: _.result(runnable, "originalTitle")
         parentId: runnable.parent.cid
         parentRoot: runnable.parent.root
         index: index
@@ -149,8 +149,8 @@
 
       ## set the private _slow and _timeout
       ## based on the result of these methods
-      @_slow = test.slow()
-      @_timeout = test.timeout()
+      @_slow    = _.result test, "slow"
+      @_timeout = _.result test, "timeout"
 
       @set attrs
 

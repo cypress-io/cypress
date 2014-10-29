@@ -90,6 +90,11 @@ io.on "connection", (socket) ->
     console.log "finished:generating:ids:for:test", strippedPath
     io.emit "test:changed", file: strippedPath
 
+  _.each "runner:start runner:end before:run before:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test".split(" "), (event) ->
+    socket.on event, (args...) ->
+      args = _.chain(args).compact().reject(_.isFunction).value()
+      io.emit event, args...
+
 watchTestFiles = chokidar.watch testFolder, ignored: (path, stats) ->
   ## this fn gets called twice, once with the directory
   ## which does not have a stats argument

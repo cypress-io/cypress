@@ -14,8 +14,9 @@
   ## DOM / XHR / LOG
   ## and partial each test (on test run) if its chosen...?
     initialize: ->
-      @hooks    = App.request "hook:entities"
-      @commands = App.request "command:entities"
+      @hooks            = App.request "hook:entities"
+      @commands         = App.request "command:entities"
+      @satelliteEvents  = App.request "satellite:events"
 
     setContentWindow: (@contentWindow, @$remoteIframe) ->
 
@@ -65,6 +66,11 @@
       ## whenever our socket fires 'test:changed' we want to
       ## proxy this to everyone else
       @listenTo socket, "test:changed", @triggerLoadIframe
+
+      if App.env("host")
+        _.each @satelliteEvents, (event) =>
+          @listenTo socket, event, (args...) =>
+            @trigger event, args...
 
       ## dont overload the runSuite fn if we're in CI mode
       return @ if App.env("ci")
@@ -192,7 +198,6 @@
         @trigger "suite:start", suite
 
       @runner.on "suite end", (suite) =>
-        debugger
         @trigger "suite:stop", suite
 
       # @runner.on "suite end", (suite) ->
@@ -253,6 +258,51 @@
         test.removeAllListeners()
         @eclRestore()
       ## start listening to all the pertinent runner events
+
+    trigger: (event, args...) ->
+      ## because of defaults the change:iframes event
+      ## fires before our initialize (which is stupid)
+      return if not @satelliteEvents
+
+      ## if we're in satellite mode and our event is
+      ## a satellite evnt then emit over websockets
+      if App.env("satellite") and event in @satelliteEvents
+        args   = @transformRunnableArgs(args)
+        socket = App.request "socket:entity"
+        socket.emit event, args...
+
+      ## else just do the normal trigger and
+      ## remove the satellite namespace
+      else
+        super event, args...
+
+    transformRunnableArgs: (args) ->
+      ## pull off title, cid, root, pending, stopped, type properties
+      props = ["title", "cid", "root", "pending", "stopped", "type"]
+
+      ## pull off these parent props
+      parentProps = ["root", "cid"]
+
+      ## invoke fns
+      fns = ["originalTitle", "slow", "timeout"]
+
+      _(args).map (arg) ->
+        ## transfer direct props
+        obj = _(arg).pick props...
+
+        ## transfer parent props
+        if parent = arg.parent
+          obj.parent = _(parent).pick parentProps...
+
+        ## transfer the error as JSON
+        if err = arg.err
+          obj.err = JSON.stringify(err, ["message", "type", "name", "stack"])
+          obj.err.toString = err.toString()
+
+        _.each fns, (fn) ->
+          obj[fn] = _.result(arg, fn)
+
+        obj
 
     ## recursively tries to find the test associated
     ## with the hook
