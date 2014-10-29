@@ -10,7 +10,7 @@ _             = require('lodash')
 SpecProcessor = require("../../../lib/controllers/spec_processor")
 FixturesRoot  = path.resolve(__dirname, '../../', 'fixtures/', 'server/')
 
-describe.only "spec processor", ->
+describe "spec processor", ->
   afterEach ->
     try
       fs.unlinkSync(path.join(FixturesRoot, '/sample.js'))
@@ -38,6 +38,14 @@ describe.only "spec processor", ->
     expect(@res.type).to.have.been.calledOnce
     .and.to.have.been.calledWith('js')
 
+  it "handles snocket includes", (done) ->
+    @opts.spec = 'snocket_root.js'
+    @specProcessor.handle @opts, {}, @res, =>
+
+    @res.pipe through (d) ->
+      expect(d.toString()).eql('console.log(\"hello\");\n//= require snocket_dep\n')
+      done()
+
   context 'coffeescript', ->
     beforeEach ->
       fs.writeFileSync(path.join(FixturesRoot, '/sample.coffee'), '->')
@@ -64,6 +72,6 @@ describe.only "spec processor", ->
 
       @specProcessor.handle @opts, {}, @res, =>
 
-  it "handles snocket includes"
+
   it "handles commonjs requires"
   it "handles requirejs"
