@@ -60,16 +60,51 @@ createId = ->
   ids = _(3).times -> getRandom(alphabet)
   ids.join("")
 
+parseStackTrace = (trace) ->
+  _.reduce trace, (memo, obj) ->
+    str = " --> #{obj.file}: #{obj.line}"
+    str += " (in function #{obj.function})" if obj.function
+    memo.push str
+    memo
+  , []
+
+parseFileFromStackTrace = (trace, rootPath) ->
+  return "Unknown file (could not read from stack trace)" if not trace.length
+
+  trace[0].file.replace(rootPath, "")
+
 openPhantom = ->
+  ## we should pass the path to phantomjs during this create call
+  ## since we cant assume its been exported to PATH
   phantom.create (err, ph) ->
     console.log "PhantomJS ready..."
     ph.createPage (err, page) ->
       t = Date.now()
-      pathToPage = "http://localhost:#{app.get('port')}/id_generator"
+      rootPath = "http://localhost:#{app.get('port')}/"
+      pathToPage = rootPath + "id_generator"
       console.log "PhantomJS opened: ", pathToPage
+
+      # page.onConsoleMessage = (msg, lineNum, sourceId) ->
+      #   debugger
+
+      page.onError = (msg, trace) ->
+        gutil.beep()
+        stack = parseStackTrace(trace)
+        file = parseFileFromStackTrace(trace, rootPath)
+
+        ## need to convert this into a function so we can automatically
+        ## log out the total length of the errors and generate the bar wrappers
+        ## around them
+        console.log ""
+        console.log "========================================"
+        console.log gutil.colors.yellow("An error occured generating ids in file: "), gutil.colors.blue(file)
+        console.log gutil.colors.red(msg)
+        console.log(stack.join("\n")) if stack.length
+        console.log "========================================"
 
       page.open pathToPage, (err, status) ->
         console.log "PhantomJS done! status: #{status}, time: #{Date.now() - t}"
+
   # , {parameters: "remote-debugger-port": "9000", "remote-debugger-autorun": "yes"}
 
 module.exports =
