@@ -7,6 +7,7 @@ through       = require('through')
 sinon         = require('sinon')
 sinonChai     = require('sinon-chai');
 _             = require('lodash')
+_s            = require('underscore.string')
 SpecProcessor = require("../../../lib/controllers/spec_processor")
 FixturesRoot  = path.resolve(__dirname, '../../', 'fixtures/', 'server/')
 
@@ -72,6 +73,24 @@ describe "spec processor", ->
 
       @specProcessor.handle @opts, {}, @res, =>
 
+  context 'browserify', ->
+    it "handles commonjs requires", (done) ->
+      streamOutput = ''
 
-  it "handles commonjs requires"
+      global.app =
+        get: -> {
+          browserify:
+            basedir: FixturesRoot
+        }
+
+      @opts.spec = 'commonjs_root.js'
+      @specProcessor.handle @opts, {}, @res, (e) => done(e)
+
+      @res.pipe(through (d) ->
+        streamOutput += d.toString()
+      ).on 'close', ->
+        expectedOutput = fs.readFileSync(path.join(FixturesRoot, '/commonjs_expected'), 'utf8')
+        expect(_s.trim(streamOutput)).to.eql(_s.trim(expectedOutput))
+        done()
+
   it "handles requirejs"
