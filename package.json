@@ -55,7 +55,7 @@
     "coffeeify": "git://github.com/jnordberg/coffeeify#2f48b07fad1f3b4dbf58dd53bb84198d7066067a",
     "express-session": "1.8.2",
     "gaze": "0.6.4",
-    "glob": "4.0.4",
+    "glob": "4.0.5",
     "grunt-cli": "0.1.13",
     "hbs": "2.7.0",
     "hyperdirect": "0.0.0",
