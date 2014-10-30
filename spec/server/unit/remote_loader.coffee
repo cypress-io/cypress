@@ -5,7 +5,22 @@ through       = require("through")
 nock          = require('nock')
 sinon         = require('sinon')
 
+nock.disableNetConnect()
+
 describe "Remote Loader", ->
+  afterEach -> nock.cleanAll()
+
+  beforeEach ->
+    @remoteLoader = new RemoteLoader
+    @res = through (d) ->
+    @res.send = ->
+    @res.redirect = ->
+    @res.contentType = ->
+    @res.status = => @res
+    @next = ->
+    @baseUrl = "http://foo.com"
+    @redirectUrl  = "http://x.com"
+
   it 'injects content', (done) ->
     readable = new Readable
 
@@ -17,16 +32,53 @@ describe "Remote Loader", ->
       expect(d.toString()).to.eq("<head> wow</head><body></body>")
       done()
 
+  describe "redirects", ->
+    beforeEach ->
+      @req = {
+        url: "/__remote/#{@baseUrl}/",
+        session: {}
+      }
+
+      nock(@baseUrl)
+      .get("/")
+      .reply(301, "", {
+        'location': @redirectUrl
+      })
+
+      @res.redirect = (loc) =>
+        @req.url = loc
+        @remoteLoader.handle(@req, @res, @next)
+
+    it "redirects on 301", (done) ->
+      nock(@redirectUrl)
+      .get("/")
+      .reply(200, =>
+        done()
+      )
+
+      @remoteLoader.handle(@req, @res, @next)
+
+    it "resets session remote after a redirect", (done) ->
+      nock(@redirectUrl)
+      .get("/")
+      .reply(200, =>
+        expect(@req.session.remote).to.eql("http://x.com/")
+        done()
+      )
+
+      @remoteLoader.handle(@req, @res, @next)
+
   context "setting session", ->
     beforeEach ->
-      @remoteLoader = new RemoteLoader
-      @res = through (d) ->
-      @res.redirect = ->
-      @next = ->
+      nock(@baseUrl)
+      .get("/")
+      .reply(200)
+
+      nock(@baseUrl)
+      .get("/?foo=bar")
+      .reply(200)
 
     it "sets immediately before requests", ->
-      @baseUrl      = "http://foo.com/bar"
-
       @req =
         url: "/__remote/#{@baseUrl}"
         session: {}
@@ -35,11 +87,7 @@ describe "Remote Loader", ->
 
       expect(@req.session.remote).to.eql(@baseUrl)
 
-    it "resets after a redirect"
-
     it "does not include query params in the url", ->
-      @baseUrl      = "http://foo.com/bar"
-
       @req =
         url: "/__remote/#{@baseUrl}?foo=bar"
         session: {}
@@ -47,9 +95,19 @@ describe "Remote Loader", ->
       @remoteLoader.handle(@req, @res, @next)
       expect(@req.session.remote).to.eql(@baseUrl)
 
-  it "redirects on 301, 302, 307, 308"
+  it "bubbles up 500 on fetch error", (done) ->
+    @req =
+      url: "/__remote/#{@baseUrl}"
+      session: {}
 
-  it "bubbles up 500 on fetch error"
+    @remoteLoader.handle(@req, @res, @next)
+
+    @res.send = (d) ->
+      expect(d).to.eql(
+        "Error getting http://foo.com <pre>Nock: Not allow net connect for \"foo.com:80\"</pre>"
+      )
+
+      done()
 
   context "relative files", ->
 

@@ -25,7 +25,11 @@ module.exports = class extends require('events').EventEmitter
     d.on 'error', (e) => @errorHandler(e, res, uri)
 
     d.run =>
-      @getContent(uri, res, req)
+      content = @getContent(uri, res, req)
+
+      content.on "error", (e) => @errorHandler(e, res, uri)
+
+      content
       .pipe(@injectContent(opts.inject))
       .pipe(res)
 
@@ -66,6 +70,9 @@ module.exports = class extends require('events').EventEmitter
     thr = through((d) -> this.queue(d))
 
     rq = hyperquest.get url, {}, (err, incomingRes) =>
+      if err?
+        return thr.emit("error", err)
+
       if /^30(1|2|7|8)$/.test(incomingRes.statusCode)
         newUrl = UrlMerge(url, incomingRes.headers.location)
         res.redirect("/__remote/" + newUrl)
