@@ -67,13 +67,13 @@
       ## proxy this to everyone else
       @listenTo socket, "test:changed", @triggerLoadIframe
 
-      if App.env("host")
+      if App.config.env("host")
         _.each @satelliteEvents, (event) =>
           @listenTo socket, event, (args...) =>
             @trigger event, args...
 
       ## dont overload the runSuite fn if we're in CI mode
-      return @ if App.env("ci")
+      return @ if App.config.env("ci")
 
       runner = @
 
@@ -163,8 +163,8 @@
 
     startListening: ->
       @setListenersForAll()
-      @setListenersForCI() if App.env("ci")
-      @setListenersForWeb() if not App.env("ci")
+      @setListenersForCI() if App.config.env("ci")
+      @setListenersForWeb() if not App.config.env("ci")
 
     setListenersForAll: ->
       ## partials in the runnable object
@@ -266,7 +266,7 @@
 
       ## if we're in satellite mode and our event is
       ## a satellite evnt then emit over websockets
-      if App.env("satellite") and event in @satelliteEvents
+      if App.config.env("satellite") and event in @satelliteEvents
         args   = @transformRunnableArgs(args)
         socket = App.request "socket:entity"
         socket.emit event, args...

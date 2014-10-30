@@ -3,13 +3,15 @@
   class Show.Controller extends App.Controllers.Application
 
     initialize: (options) ->
-      {id, __env} = options
+      {id } = options
 
       config = App.request "app:config:entity"
 
-      ## cause the app to enter a special app mode if __env is set
-      App.execute "set:app:env", __env
-      config.trigger "enter:app:env:mode", __env if __env
+      ## this is for any existing controllers which haven't been
+      ## closed yet.  this prevents a bug where we try to replace
+      ## existing Show controllers which on destroy stop the runner
+      @listenTo config, "change:env", (model, value, options) ->
+        @region.empty()
 
       spec = config.getPathToSpec(id)
 
@@ -26,10 +28,10 @@
       @layout = @getLayoutView config
 
       @listenTo @layout, "show", =>
-        @statsRegion(runner)          if __env isnt "satellite"
+        @statsRegion(runner)          if not config.env("satellite")
         @iframeRegion(runner)
-        @specsRegion(runner, spec)    if __env isnt "satellite"
-        @panelsRegion(runner, config) if __env isnt "satellite"
+        @specsRegion(runner, spec)    if not config.env("satellite")
+        @panelsRegion(runner, config) if not config.env("satellite")
 
         ## start running the tests
         ## and load the iframe

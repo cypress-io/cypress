@@ -135,7 +135,8 @@
       }
 
     calcWidth: (main, tests, container) ->
-      container.width main.width() - tests.width()
+      _.defer ->
+        container.width main.width() - tests.width()
 
     updateIframeCss: (name, val) ->
       switch name
@@ -201,7 +202,7 @@
 
       @resetReferences()
 
-      if App.env("host")
+      if App.config.env("host")
         return @calcWidth()
 
       @$el.hide()

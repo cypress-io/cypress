@@ -5,9 +5,14 @@
   class List.Layout extends App.Views.LayoutView
     template: "nav/list/layout"
 
-    satelliteMode: ->
+    satelliteMode: (bool = true) ->
       ## when we enter satellite-mode add this class to our wrapper
-      $(ECL_WRAPPER).removeClass().addClass("satellite-mode")
+      if bool
+        $(ECL_WRAPPER).removeClass().addClass("satellite-mode")
+        @$el.hide()
+      else
+        $(ECL_WRAPPER).removeClass("satellite-mode")
+        @$el.show()
 
   class List.Nav extends App.Views.ItemView
     template: "nav/list/_nav"
