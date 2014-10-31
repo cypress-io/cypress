@@ -16,6 +16,9 @@
         channel.on event, (args...) ->
           socket.trigger event, args...
 
+      channel.on "command:add", (args...) ->
+        socket.trigger "command:add", args...
+
       channel.on "test:changed", (data) ->
         socket.trigger "test:changed", data.file
 

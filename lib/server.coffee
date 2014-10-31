@@ -92,7 +92,7 @@ io.on "connection", (socket) ->
     console.log "finished:generating:ids:for:test", strippedPath
     io.emit "test:changed", file: strippedPath
 
-  _.each "load:iframe runner:start runner:end before:run before:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test".split(" "), (event) ->
+  _.each "load:iframe command:add runner:start runner:end before:run before:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test".split(" "), (event) ->
     socket.on event, (args...) ->
       args = _.chain(args).compact().reject(_.isFunction).value()
       io.emit event, args...

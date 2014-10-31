@@ -78,6 +78,9 @@
           @listenTo socket, event, (args...) =>
             @trigger event, args...
 
+        @listenTo socket, "command:add", (args...) =>
+          @commands.add args...
+
       ## dont overload the runSuite fn if we're in CI mode
       return @ if App.config.env("ci")
 
@@ -189,8 +192,16 @@
     setListenersForCI: ->
 
     setListenersForWeb: ->
-      @listenTo runnerChannel, "all", (type, runnable, attrs, hook) ->
-        @commands.add attrs, type, runnable, hook
+      socket = App.request "socket:entity"
+
+      @listenTo runnerChannel, "all", (type, id, attrs, hook) ->
+        ## if we're in satellite mode then we need to
+        ## broadcast this through websockets
+        if App.config.env("satellite")
+          attrs = @transformEmitAttrs(attrs)
+          socket.emit "command:add", attrs, type, id, hook
+        else
+          @commands.add attrs, type, id, hook
 
       ## mocha has begun running the specs per iframe
       @runner.on "start", =>
@@ -286,6 +297,26 @@
       ## else just do the normal trigger and
       ## remove the satellite namespace
       super event, args...
+
+    transformEmitAttrs: (attrs) ->
+      obj = {}
+
+      ## normally we'd use a reduce here but for some reason
+      ## on dom attrs the reduce completely barfs and is not
+      ## able to iterate over the object.
+      for key, value of attrs
+        obj[key] = value if @isWebSocketCompatibleValue(value)
+
+      obj
+
+    ## make sure this value is capable
+    ## of being sent through websockets
+    isWebSocketCompatibleValue: (value) ->
+      switch
+        when _.isElement(value)                           then false
+        when _.isObject(value) and _.isElement(value[0])  then false
+        when _.isFunction(value)                          then false
+        else true
 
     transformRunnableArgs: (args) ->
       ## pull off these direct properties
