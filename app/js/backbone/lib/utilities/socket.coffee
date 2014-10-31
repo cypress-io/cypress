@@ -1,11 +1,16 @@
 @App.module "Utilities", (Utilities, App, Backbone, Marionette, $, _) ->
 
   satelliteEvents = "runner:start runner:end before:run before:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test".split(" ")
+  hostEvents      = "load:iframe".split(" ")
 
   API =
     start: ->
       ## connect to socket io
       channel = io.connect()
+
+      _.each hostEvents, (event) ->
+        channel.on event, (args...) ->
+          socket.trigger event, args...
 
       _.each satelliteEvents, (event) ->
         channel.on event, (args...) ->
@@ -39,3 +44,4 @@
     API.start()
 
   App.reqres.setHandler "satellite:events", -> satelliteEvents
+  App.reqres.setHandler "host:events",      -> hostEvents

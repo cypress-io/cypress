@@ -212,13 +212,14 @@
     loadSatelitteIframe: (src, fn) ->
       view = @
 
-      # url = encodeURIComponent("http://tunnel.browserling.com:55573/#tests/#{src}?__env=satellite")
+      url = encodeURIComponent("http://tunnel.browserling.com:55573/#tests/#{src}?__env=satellite")
 
       remoteOpts =
         id: "iframe-remote"
-        # src: "https://browserling.com/browse/ie/11/#{url}"
-        src: "http://localhost:3000/#tests/#{src}?__env=satellite"
+        src: "https://browserling.com/browse/ie/11/#{url}"
+        # src: "http://localhost:3000/#tests/#{src}?__env=satellite"
         load: ->
+          fn(null, view.$remote)
           view.$el.show()
           view.calcWidth()
 

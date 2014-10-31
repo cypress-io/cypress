@@ -17,6 +17,7 @@
       @hooks            = App.request "hook:entities"
       @commands         = App.request "command:entities"
       @satelliteEvents  = App.request "satellite:events"
+      @hostEvents       = App.request "host:events"
 
     setContentWindow: (@contentWindow, @$remoteIframe) ->
 
@@ -66,6 +67,11 @@
       ## whenever our socket fires 'test:changed' we want to
       ## proxy this to everyone else
       @listenTo socket, "test:changed", @triggerLoadIframe
+
+      if App.config.env("satellite")
+        _.each @hostEvents, (event) =>
+          @listenTo socket, event, (args...) =>
+            @trigger event, args...
 
       if App.config.env("host")
         _.each @satelliteEvents, (event) =>
@@ -264,17 +270,22 @@
       ## fires before our initialize (which is stupid)
       return if not @satelliteEvents
 
+      socket = App.request "socket:entity"
+
       ## if we're in satellite mode and our event is
-      ## a satellite evnt then emit over websockets
+      ## a satellite event then emit over websockets
       if App.config.env("satellite") and event in @satelliteEvents
         args   = @transformRunnableArgs(args)
-        socket = App.request "socket:entity"
-        socket.emit event, args...
+        return socket.emit event, args...
+
+      ## if we're in host mode and our event is a
+      ## satellite event AND we have a remoteIrame defined
+      if App.config.env("host") and event in @hostEvents and @$remoteIframe
+        return socket.emit event, args...
 
       ## else just do the normal trigger and
       ## remove the satellite namespace
-      else
-        super event, args...
+      super event, args...
 
     transformRunnableArgs: (args) ->
       ## pull off these direct properties
@@ -391,6 +402,8 @@
       ## tells different areas of the app to prepare
       ## for the resetting of the test run
       @trigger "reset:test:run"
+
+      ## tells the iframe view to load up a new iframe
       @trigger "load:iframe", @iframe, opts
 
     hasChosen: ->
@@ -498,17 +511,14 @@
       ## the state of the runner to prevent problems
       @runner.test = undefined
 
+      ## don't attempt to run any tests if we're in manual
+      ## testing mode and our iframe is not readable
+      return if not remoteIframe.isReadable()
+
       ## run the suite for the iframe
       ## right before we run the root runner's suite we iterate
       ## through each test and give it a unique id
       t = Date.now()
-
-      ## we need to reset the runner.test to undefined
-      ## when the user clicks the reload button, mocha
-      ## will think that the currentTest is really the
-      ## last test that was run.  so we always reset
-      ## the state of the runner to prevent problems
-      @runner.test = undefined
 
       @runner.runSuite contentWindow.mocha.suite, (err) =>
         ## its possible there is no runner when this
