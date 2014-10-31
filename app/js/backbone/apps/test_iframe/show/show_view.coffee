@@ -202,11 +202,29 @@
 
       @resetReferences()
 
-      if App.config.env("host")
-        return @calcWidth()
-
       @$el.hide()
 
+      if App.config.env("host")
+        @loadSatelitteIframe(src, fn)
+      else
+        @loadRegularIframes(src, fn)
+
+    loadSatelitteIframe: (src, fn) ->
+      view = @
+
+      # url = encodeURIComponent("http://tunnel.browserling.com:55573/#tests/#{src}?__env=satellite")
+
+      remoteOpts =
+        id: "iframe-remote"
+        # src: "https://browserling.com/browse/ie/11/#{url}"
+        src: "http://localhost:3000/#tests/#{src}?__env=satellite"
+        load: ->
+          view.$el.show()
+          view.calcWidth()
+
+      @$remote = $("<iframe />", remoteOpts).appendTo(@ui.size)
+
+    loadRegularIframes: (src, fn) ->
       view = @
 
       @src = "/iframes/" + src
