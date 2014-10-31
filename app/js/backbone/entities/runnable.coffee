@@ -87,15 +87,13 @@
       @set "open", false if @is("test")
 
     reset: ->
-      if @is("test") then @resetTest() else @resetSuite()
-
-    resetSuite: ->
+      @resetRunnable()
       @get("children").invoke("reset")
 
     anyCommandsFailed: ->
       @get("hooks").anyFailed()
 
-    resetTest: ->
+    resetRunnable: ->
       @removeOriginalError()
 
       ## reset these specific attributes
