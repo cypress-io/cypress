@@ -19,7 +19,7 @@
       @listenTo runner, "change:chosen", (model, value, options) ->
         @chosenRegion runner, value
 
-      @listenTo runner, "load:iframe", ->
+      @listenTo runner, "reset:test:run", ->
         ## anytime the iframe needs to be reloaded
         ## we reset our stats back to 0
         stats.reset()

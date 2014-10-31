@@ -388,7 +388,9 @@
           obj.stopped = true
           obj = obj.parent
 
-      ## if it does fire the event
+      ## tells different areas of the app to prepare
+      ## for the resetting of the test run
+      @trigger "reset:test:run"
       @trigger "load:iframe", @iframe, opts
 
     hasChosen: ->

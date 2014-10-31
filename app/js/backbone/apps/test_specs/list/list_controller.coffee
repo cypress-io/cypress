@@ -81,8 +81,8 @@
         ## and causes our runner to fire 'test:results:ready'
         runner.logResults runnable
 
-      @listenTo runner, "load:iframe", (iframe, options) ->
-        ## when our runner says to load the iframe
+      @listenTo runner, "reset:test:run", ->
+        ## when our runner says to reset the test run
         ## if nothing is chosen -- reset everything
         ## if just a test is chosen -- just clear/reset its attributes
         ## if a suite is chosen -- reset all of the children runnable attrs
