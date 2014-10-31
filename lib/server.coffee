@@ -7,9 +7,11 @@ glob        = require("glob")
 _           = require("underscore")
 _.str       = require("underscore.string")
 chokidar    = require("chokidar")
-spawn       = require("child_process").spawn
+minimist    = require("minimist")
 Domain      = require("domain")
 idGenerator = require("./id_generator.coffee")
+
+argv = minimist(process.argv.slice(2), boolean: true)
 
 controllers =
   RemoteLoader: new (require('./controllers/remote_loader'))().handle
@@ -31,7 +33,7 @@ app.set "eclectus", JSON.parse(fs.readFileSync("eclectus.json", encoding: "utf8"
 testFiles = new RegExp(testFiles)
 
 ## all environments
-app.set 'port', app.get("eclectus").port or 3000
+app.set 'port', argv.port or app.get("eclectus").port or 3000
 
 app.set "view engine", "html"
 app.engine "html", hbs.__express
@@ -214,4 +216,6 @@ app.use require("errorhandler")()
 
 server.listen app.get("port"), ->
   console.log 'Express server listening on port ' + app.get('port')
-  idGenerator.openPhantom()
+
+  ## open phantom if ids are true (which they are by default)
+  idGenerator.openPhantom() if argv.ids
