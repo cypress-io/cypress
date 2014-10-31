@@ -57,3 +57,12 @@ do ($, _) ->
     else
       ## remove the wrapper
       methods.getWrapperByCid(cid).remove()
+
+  $.fn.isReadable = ->
+    throw new Error("isReadable() must only be called on <iframes>") if not @is("iframe")
+
+    try
+      @prop("contentDocument")
+      return true
+    catch e
+      return false

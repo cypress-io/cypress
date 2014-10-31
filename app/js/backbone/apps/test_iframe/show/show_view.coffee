@@ -182,7 +182,7 @@
       # _.each ["Ecl", "$", "jQuery", "parent", "chai", "expect", "should", "assert", "Mocha", "mocha"], (global) =>
       #   delete @$iframe[0].contentWindow[global]
 
-      if @$remote?
+      if @$remote?.isReadable()
         $(@$remote.prop("contentWindow")).off "hashchange"
         $(@$remote.prop("contentWindow")).off "popstate"
 
