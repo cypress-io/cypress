@@ -3,7 +3,7 @@
   class Show.Controller extends App.Controllers.Application
 
     initialize: (options) ->
-      {id } = options
+      { id, browser, version } = options
 
       config = App.request "app:config:entity"
 
@@ -24,6 +24,11 @@
       ## which is the mediator of all test framework events
       ## store this as a property on ourselves
       @runner = runner = App.request("start:test:runner")
+
+      runner.setBrowserAndVersion(browser, version) if browser and version
+
+      @listenTo runner, "switch:to:manual:browser", (browser, version) ->
+        App.execute "switch:to:manual:browser", id, browser, version
 
       @layout = @getLayoutView config
 

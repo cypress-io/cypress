@@ -32,3 +32,12 @@
         route: "tests/*id"
 
   router = new Router
+
+  App.commands.setHandler "switch:to:manual:browser", (id, browser, version) ->
+    obj =
+      id:      id
+      browser: browser
+      version: version
+      __env:   "host"
+
+    router.to "show", obj

@@ -9,6 +9,8 @@
   class Entities.Runner extends Entities.Model
     defaults: ->
       iframes: []
+      browser: null
+      version: null
 
   ## need to compose this runner with models for each panel
   ## DOM / XHR / LOG
@@ -54,6 +56,14 @@
       @trigger "highlight:el", command.getEl(),
         id: command.id
         init: init
+
+    switchToBrowser: (browser, version) ->
+      @trigger "switch:to:manual:browser", browser, version
+
+    setBrowserAndVersion: (browser, version) ->
+      @set
+        browser: browser
+        version: version
 
     setTestRunner: (runner) ->
       ## store the test runner as a property on ourselves
@@ -427,6 +437,8 @@
 
       _.defaults opts,
         chosenId: @get("chosenId")
+        browser:  @get("browser")
+        version:  @get("version")
 
       ## clear out the commands
       @commands.reset([], {silent: true})

@@ -71,13 +71,66 @@
 
       .iframe-menu {
         float: right;
+        margin-bottom: 0;
+        position: relative;
+        top: 1px;
 
         .btn-link {
-          padding-top: 2px;
-          padding-bottom: 2px;
+          padding: 0 0;
           color: #888;
         }
 
+        &>li {
+          border-right: 1px solid #ccc;
+          border-left: 1px solid #fff;
+          float: left;
+          height: 24px;
+          list-style: none;
+          padding: 0 10px;
+
+          &:last-child {
+            border-right: 0;
+          }
+
+          &:first-child {
+            border-left: 0;
+          }
+        }
+
+      }
+
+      #manual-browser-wrapper {
+
+        #chosen-manual-browser {
+          vertical-align: middle;
+          margin-right: 5px;
+
+          em {
+            color: #999;
+          }
+        }
+
+        .fa-caret-down {
+          top: 2px;
+          position: relative;
+        }
+
+        #browser-versions-container {
+          width: 200px;
+          text-align: center;
+        }
+
+        .browser-versions {
+          margin-top: 3px;
+          padding-top: 2px;
+          border-top: 1px solid #CCC;
+
+          li:hover {
+            color: #111;
+            cursor: pointer;
+            text-decoration: underline;
+          }
+        }
       }
 
       #url-container {
@@ -132,8 +185,6 @@
       #current-browser-sizes {
         float: left;
         margin-right: 7px;
-        position: relative;
-        top: 2px;
         font-size: 13px;
         text-shadow: 0 1px 1px #fff;
 
@@ -150,8 +201,7 @@
 
       .fa-caret-down {
         font-size: 14px;
-        top: 2px;
-        position: relative;
+        margin-right: 0;
       }
 
       input.url {

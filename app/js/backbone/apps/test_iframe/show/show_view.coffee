@@ -13,6 +13,7 @@
       sliders:  ".slider"
       button:   ".dropdown-toggle"
       choices:  ".dropdown-menu li a"
+      browser:  ".browser-versions li"
       url:      "#url-container input"
 
     events:
@@ -20,6 +21,7 @@
       "click @ui.compress"  : "compressClicked"
       "click @ui.button"    : "buttonClicked"
       "click @ui.choices"   : "choicesClicked"
+      "click @ui.browser"   : "browserClicked"
       "show.bs.dropdown"    : "dropdownShow"
       "hide.bs.dropdown"    : "dropdownHide"
     #   "click #perf"         : "perfClicked"
@@ -32,6 +34,13 @@
     #   t = Date.now()
     #   str = @$remote.contents().find("body").prop("outerHTML")
     #   console.warn "body outerHTML", Date.now() - t
+
+    browserClicked: (e) ->
+      el      = $(e.target)
+      browser = el.parent().data("browser")
+      version = el.text()
+
+      @trigger "browser:clicked", browser, version
 
     choicesClicked: (e) ->
       e.preventDefault()
@@ -195,7 +204,7 @@
       @$iframe = null
       @fn      = null
 
-    loadIframe: (src, fn) ->
+    loadIframe: (src, options, fn) ->
       ## remove any existing iframes
       @reverted = false
       @ui.message.hide().empty()
@@ -205,19 +214,23 @@
       @$el.hide()
 
       if App.config.env("host")
-        @loadSatelitteIframe(src, fn)
+        @loadSatelitteIframe(src, options, fn)
       else
-        @loadRegularIframes(src, fn)
+        @loadRegularIframes(src, options, fn)
 
-    loadSatelitteIframe: (src, fn) ->
+    loadSatelitteIframe: (src, options, fn) ->
       view = @
 
       url = encodeURIComponent("http://tunnel.browserling.com:55573/#tests/#{src}?__env=satellite")
 
+      src = if options.browser and options.version
+        "https://browserling.com/browse/#{options.browser}/#{options.version}/#{url}"
+      else
+        "http://localhost:3000/#tests/#{src}?__env=satellite"
+
       remoteOpts =
         id: "iframe-remote"
-        src: "https://browserling.com/browse/ie/11/#{url}"
-        # src: "http://localhost:3000/#tests/#{src}?__env=satellite"
+        src: src
         load: ->
           fn(null, view.$remote)
           view.$el.show()
@@ -225,7 +238,7 @@
 
       @$remote = $("<iframe />", remoteOpts).appendTo(@ui.size)
 
-    loadRegularIframes: (src, fn) ->
+    loadRegularIframes: (src, options, fn) ->
       view = @
 
       @src = "/iframes/" + src

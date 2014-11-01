@@ -1,4 +1,4 @@
-<div id="runner-config" class="dropdown">
+<!-- <div id="runner-config" class="dropdown">
   <button class="btn btn-link" data-toggle="dropdown">
     <i class="fa fa-cog"></i>
     <i class="fa fa-caret-down"></i>
@@ -55,4 +55,4 @@
   <li>
     <img src="/eclectus/img/internet-explorer_16x16.png" />
   </li>
-</ul>
+</ul> -->
