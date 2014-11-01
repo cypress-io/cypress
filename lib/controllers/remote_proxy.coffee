@@ -43,7 +43,7 @@ module.exports = class extends require('events').EventEmitter
     @emit "verbose", "piping url content #{uri}"
     thr = Through((b) -> this.queue(b))
 
-    rq = hyperquest uri, {method: req.method}, (err, incomingRes) =>
+    rq = hyperquest uri, {method: req.method, headers: req.headers}, (err, incomingRes) =>
       return thr.emit('error', err) if (err)
 
       if /^30(1|2|7|8)$/.test(incomingRes.statusCode)
