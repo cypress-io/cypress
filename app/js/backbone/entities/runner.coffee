@@ -326,7 +326,7 @@
       parentProps = ["root", "cid"]
 
       ## fns to invoke
-      fns = ["originalTitle", "slow", "timeout"]
+      fns = ["originalTitle", "fullTitle", "slow", "timeout"]
 
       _(args).map (arg) =>
         ## transfer direct props
@@ -352,6 +352,20 @@
     getTestFromHook: (hook, suite) ->
       ## if theres already a currentTest use that
       return test if test = hook.ctx.currentTest
+
+      ## there is a bug where if you have set an 'only'
+      ## and you're running a visit within a hook
+      ## then this will return the incorrect test
+      ## it will return the very first test instead of
+      ## our actual running test.  i've looked through
+      ## mocha's source and cannot find any way to figure
+      ## out which test is running in this scenario.
+      ## so i think the only solution is to look at the grep
+      ## and grep for the first test that matches it
+      grep = @runner._grep
+      if grep.toString() isnt "/.*/"
+        return test if test = @getFirstTestByFn suite, (test) ->
+          grep.test _.result(test, "fullTitle")
 
       ## else go look for the test because our suite
       ## is most likely the root suite (which does not share a ctx)
@@ -466,6 +480,16 @@
         @getRunnableCids suite, ids
 
       ids
+
+    getFirstTestByFn: (root, fn) ->
+      ## loop through each test applying
+      ## the fn and return the first that matches
+      for test in root.tests
+        return test if fn(test)
+
+      ## return recursively
+      for suite in root.suites
+        return @getFirstTestByFn(suite, fn)
 
     getGrep: (root) ->
       console.warn "GREP IS: ", @options.grep
