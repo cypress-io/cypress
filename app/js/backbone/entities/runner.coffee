@@ -12,7 +12,7 @@
 
   ## need to compose this runner with models for each panel
   ## DOM / XHR / LOG
-  ## and partial each test (on test run) if its chosen...?
+  ## and partial each test (on test run) if its chosenId...?
     initialize: ->
       @hooks            = App.request "hook:entities"
       @commands         = App.request "command:entities"
@@ -100,10 +100,10 @@
 
         ## grep for the correct test / suite by its id if chosenId is set
         ## or all the tests
-        ## we need to grep at the last possible moment because if we've chosen
+        ## we need to grep at the last possible moment because if we've chosenId
         ## a runnable but then deleted it afterwards, then we'll incorrectly
         ## continue to grep for it.  instead we need to do a check to ensure
-        ## we still have the runnable's cid which matches our chosen id
+        ## we still have the runnable's cid which matches our chosenId id
         @grep runner.getGrep(rootSuite)
 
         runSuite.call(@, rootSuite, fn)
@@ -413,6 +413,7 @@
       @iframe         = null
       @hooks          = null
       @commands       = null
+      @chosen         = null
 
     start: (iframe) ->
       @setIframe iframe
@@ -423,6 +424,9 @@
       ## first we want to make sure that our last stored
       ## iframe matches the one we're receiving
       return if iframe isnt @iframe
+
+      _.defaults opts,
+        chosenId: @get("chosenId")
 
       ## clear out the commands
       @commands.reset([], {silent: true})
@@ -452,11 +456,22 @@
       @trigger "load:iframe", @iframe, opts
 
     hasChosen: ->
-      !!@get("chosen")
+      !!@get("chosenId")
+
+    getChosen: ->
+      @chosen
+
+    updateChosen: (id) ->
+      ## set chosenId as runnable if present else unset
+      if id then @set("chosenId", id) else @unset("chosenId")
 
     setChosen: (runnable) ->
-      ## set chosen as runnable if present else unset
-      if runnable then @set("chosen", runnable) else @unset("chosen")
+      if runnable
+        @chosen = runnable
+      else
+        @chosen = null
+
+      @updateChosen(runnable?.id)
 
       ## always reload the iframe
       @triggerLoadIframe @iframe
@@ -495,16 +510,16 @@
       console.warn "GREP IS: ", @options.grep
       return re if re = @parseMochaGrep(@options.grep)
 
-      chosen = @get("chosen")
-      if chosen
-        ## if we have a chosen model and its in our runnables cid
-        if chosen.id in @getRunnableCids(root)
-          ## create a regex based on the id of the suite / test
-          return new RegExp @escapeId("[" + chosen.id + "]")
+      chosenId = @get("chosenId")
 
-        ## lets remove our chosen runnable since its no longer with us
-        else
-          @unset "chosen"
+      ## if we have a chosenId model and its in our runnables cid
+      if chosenId and chosenId in @getRunnableCids(root)
+        ## create a regex based on the id of the suite / test
+        return new RegExp @escapeId("[" + chosenId + "]")
+
+      ## lets remove our chosenId runnable since its no longer with us
+      else
+        @unset "chosenId"
 
       return /.*/ if not @hasChosen()
 
@@ -527,13 +542,13 @@
       ## bail if this doesnt match what we expect
       return if not matches
 
-      ## dont do anything if the matched id is our chosen
-      return if matches[1] is @get("chosen")?.id
+      ## dont do anything if the matched id is our chosenId
+      return if matches[1] is @get("chosenId")
 
       ## else if at this point if we have matches and its not
-      ## our chosen runnable, we need to unset what is currently
-      ## chosen and we need to choose this new runnable by its cid
-      @unset "chosen"
+      ## our chosenId runnable, we need to unset what is currently
+      ## chosenId and we need to choose this new runnable by its cid
+      @unset "chosenId"
 
       return new RegExp @escapeId("[" + matches[1] + "]")
 
@@ -544,7 +559,15 @@
       id.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
     ## tell our runner to run our iframes mocha suite
-    runIframeSuite: (iframe, contentWindow, remoteIframe, fn) ->
+    runIframeSuite: (iframe, contentWindow, remoteIframe, options, fn) ->
+      ## options are optional and so if fn is undefined
+      ## we automatically set it to options
+      ## this allows consumers to pass a fn
+      ## as the last argument even though it
+      ## will be received as options
+      if _.isUndefined(fn)
+        fn = options
+
       ## store the current iframe
       @setIframe iframe
 
@@ -569,6 +592,11 @@
       ## don't attempt to run any tests if we're in manual
       ## testing mode and our iframe is not readable
       return if not remoteIframe.isReadable()
+
+      ## reupdate chosen with the passed in chosenId
+      ## this allows us to pass the chosenId around
+      ## through websockets
+      @updateChosen(options.chosenId)
 
       ## run the suite for the iframe
       ## right before we run the root runner's suite we iterate

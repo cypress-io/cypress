@@ -1,6 +1,6 @@
 @App.module "Utilities", (Utilities, App, Backbone, Marionette, $, _) ->
 
-  satelliteEvents = "runner:start runner:end before:run before:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test".split(" ")
+  satelliteEvents = "runner:start runner:end before:run before:add after:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test".split(" ")
   hostEvents      = "load:iframe".split(" ")
 
   API =

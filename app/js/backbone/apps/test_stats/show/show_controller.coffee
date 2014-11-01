@@ -16,8 +16,9 @@
       @listenTo runner, "test:results:ready", (test) ->
         stats.countTestState(test)
 
-      @listenTo runner, "change:chosen", (model, value, options) ->
-        @chosenRegion runner, value
+      @listenTo runner, "change:chosenId", (model, value, options) ->
+        chosen = runner.getChosen()
+        @chosenRegion runner, chosen
 
       @listenTo runner, "reset:test:run", ->
         ## anytime the iframe needs to be reloaded
