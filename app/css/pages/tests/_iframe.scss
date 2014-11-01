@@ -102,11 +102,41 @@
       #manual-browser-wrapper {
 
         #chosen-manual-browser {
-          vertical-align: middle;
-          margin-right: 5px;
+          margin-right: 7px;
+          float: left;
 
           em {
             color: #999;
+            position: relative;
+            top: 2px;
+          }
+
+          img {
+            margin-right: 1px;
+          }
+
+          span {
+            display: inline-block;
+            margin: 0 1px;
+            position: relative;
+            top: 2px
+          }
+
+          #chosen-browser-info {
+            top: 0;
+            border-radius: 5px;
+            background-color: #fff;
+            padding: 0 5px 2px;
+            box-shadow: 0 1px 1px #888;
+
+            i {
+              color: #E94B3B;
+              float: right;
+              font-size: 12px;
+              margin: 0 0 0 5px;
+              position: relative;
+              top: 6px;
+            }
           }
         }
 

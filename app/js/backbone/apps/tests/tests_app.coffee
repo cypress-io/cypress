@@ -34,10 +34,14 @@
   router = new Router
 
   App.commands.setHandler "switch:to:manual:browser", (id, browser, version) ->
-    obj =
-      id:      id
-      browser: browser
-      version: version
-      __env:   "host"
+    obj = {id: id}
+
+    ## if browser and version are set
+    ## then extend the obj, else dont
+    if browser and version
+      _.extend obj,
+        browser: browser
+        version: version
+        __env:   "host"
 
     router.to "show", obj

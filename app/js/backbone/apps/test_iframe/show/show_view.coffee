@@ -5,25 +5,28 @@
 
     ui:
       # header:   "header"
-      size:     "#iframe-size-container"
-      expand:   ".fa-expand"
-      compress: ".fa-compress"
-      message:  "#iframe-message"
-      dropdown: ".dropdown"
-      sliders:  ".slider"
-      button:   ".dropdown-toggle"
-      choices:  ".dropdown-menu li a"
-      browser:  ".browser-versions li"
-      url:      "#url-container input"
+      size:          "#iframe-size-container"
+      expand:        ".fa-expand"
+      compress:      ".fa-compress"
+      message:       "#iframe-message"
+      dropdown:      ".dropdown"
+      sliders:       ".slider"
+      button:        ".dropdown-toggle"
+      choices:       ".dropdown-menu li a"
+      browser:       ".browser-versions li"
+      chosenBrowser: "#chosen-manual-browser"
+      closeBrowser:  "#chosen-manual-browser i"
+      url:           "#url-container input"
 
     events:
-      "click @ui.expand"    : "expandClicked"
-      "click @ui.compress"  : "compressClicked"
-      "click @ui.button"    : "buttonClicked"
-      "click @ui.choices"   : "choicesClicked"
-      "click @ui.browser"   : "browserClicked"
-      "show.bs.dropdown"    : "dropdownShow"
-      "hide.bs.dropdown"    : "dropdownHide"
+      "click @ui.expand"        : "expandClicked"
+      "click @ui.compress"      : "compressClicked"
+      "click @ui.button"        : "buttonClicked"
+      "click @ui.choices"       : "choicesClicked"
+      "click @ui.browser"       : "browserClicked"
+      "click @ui.closeBrowser"  : "closeBrowserClicked"
+      "show.bs.dropdown"        : "dropdownShow"
+      "hide.bs.dropdown"        : "dropdownHide"
     #   "click #perf"         : "perfClicked"
 
     # perfClicked: (e) ->
@@ -35,12 +38,22 @@
     #   str = @$remote.contents().find("body").prop("outerHTML")
     #   console.warn "body outerHTML", Date.now() - t
 
+    closeBrowserClicked: (e) ->
+      @trigger "close:browser:clicked"
+
     browserClicked: (e) ->
       el      = $(e.target)
       browser = el.parent().data("browser")
       version = el.text()
 
       @trigger "browser:clicked", browser, version
+
+    browserChanged: (browser, version) ->
+      @ui.chosenBrowser.html(
+        Marionette.Renderer.render "test_iframe/show/_chosen_browser",
+          browser: browser
+          version: version
+      )
 
     choicesClicked: (e) ->
       e.preventDefault()
@@ -224,6 +237,7 @@
       url = encodeURIComponent("http://tunnel.browserling.com:55573/#tests/#{src}?__env=satellite")
 
       src = if options.browser and options.version
+        @browserChanged options.browser, options.version
         "https://browserling.com/browse/#{options.browser}/#{options.version}/#{url}"
       else
         "http://localhost:3000/#tests/#{src}?__env=satellite"
