@@ -1,10 +1,13 @@
 nock        = require('nock')
 RemoteProxy = require("../../../lib/controllers/remote_proxy")
 through2    = require("through2")
+through     = require("through")
 Readable    = require("stream").Readable
 chai        = require('chai')
 expect      = chai.expect
 _           = require('lodash')
+
+nock.disableNetConnect()
 
 chai
 .use(require('sinon-chai'))
@@ -14,6 +17,9 @@ describe "remote proxy", ->
   beforeEach ->
     @baseUrl      = "http://x.com"
     @remoteProxy  = new RemoteProxy
+
+  afterEach ->
+    nock.cleanAll()
 
   it "throws without a session.remote", ->
     expect(-> @remoteProxy.handle({
@@ -35,6 +41,8 @@ describe "remote proxy", ->
       done()
     )
 
+    resStream.redirect = ->
+
     resStream.contentType = ->
 
     @remoteProxy.handle(
@@ -50,10 +58,35 @@ describe "remote proxy", ->
   it "Basic Auth"
 
   context "VERBS", ->
-
     it "GET"
 
-    it "POST"
+    context "POST", ->
+      it "handle with url params", (done) ->
+        nock(@baseUrl)
+        .post("/?foo=1&bar=2")
+        .reply(200, "ok!")
+
+        @res = through2.obj((cnk, enc, cb) -> cb(null, cnk))
+
+        @res.statusCode = 200
+        @res.contentType = ->
+
+        @remoteProxy.handle(
+          {
+            session:
+              remote: @baseUrl
+            url: "/__remote/#{@baseUrl}?foo=1&bar=2",
+            method: 'POST'
+          },
+          @res,
+          (e) -> done(e)
+        )
+
+        @res.pipe through (chunk) ->
+          expect(chunk.toString()).to.eql("ok!")
+          done()
+
+      it "handle body content"
 
     it "PUT"
 

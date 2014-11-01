@@ -25,28 +25,35 @@ module.exports = class extends require('events').EventEmitter
       @getContentSteam({
         uri: uri,
         remote: req.session.remote,
+        req: req
         res: res
-      }).pipe(res)
+      })
+      .on('error', (e) -> throw e)
+      .pipe(res)
 
   getContentSteam: (opts) ->
     switch type = fsUtil.detectType(opts.uri)
       when "absolute" then @pipeAbsolutePath(opts, opts.res)
       when "file"     then @pipeFileContent(opts.uri, opts.res)
-      when "url"      then @pipeUrlContent(opts.uri, opts.res)
+      when "url"      then @pipeUrlContent(opts.uri, opts.res, opts.req)
       else
         throw new Error "Unable to handle type #{type}"
 
-  pipeUrlContent: (uri, res) ->
+  pipeUrlContent: (uri, res, req) ->
     @emit "verbose", "piping url content #{uri}"
     thr = Through((b) -> this.queue(b))
 
-    rq = hyperquest.get uri, {}, (err, incomingRes) =>
+    rq = hyperquest uri, {method: req.method}, (err, incomingRes) =>
+      return thr.emit('error', err) if (err)
+
       if /^30(1|2|7|8)$/.test(incomingRes.statusCode)
         newUrl = UrlMerge(uri, incomingRes.headers.location)
         res.redirect("/__remote/" + newUrl)
       else
         res.contentType(incomingRes.headers['content-type'])
         rq.pipe(thr)
+
+    rq.end() if req.method?.match(/^post$/i)
 
     thr
 

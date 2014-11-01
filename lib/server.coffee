@@ -202,7 +202,7 @@ app.get "/id_generator", (req, res) ->
 
 ## unfound paths we assume we want to pass on through
 ## to the origin proxyUrl
-app.get "*", controllers.RemoteProxy
+app.all "*", controllers.RemoteProxy
 
 ## errorhandler
 app.use require("errorhandler")()
