@@ -51,7 +51,7 @@
                   </ul>
                 </div>
                 <div class="col-xs-3">
-                  <img src="/eclectus/img/internet-explorer_16x16.png" />
+                  <img src="/eclectus/img/ie_16x16.png" />
                   <ul class="browser-versions list-unstyled" data-browser="ie">
                     <li>11</li>
                     <li>10</li>
