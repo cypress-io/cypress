@@ -69,6 +69,30 @@ module.exports =
 
       @_bootServer(str)
 
+    runSauceEcl: (options) =>
+      @emit "verbose", "run ECL Sauce Labs mode"
+
+      server = path.join(__dirname, "..", "lib", "sauce", "sauce.coffee")
+
+      str = ""
+      str += "--debug " if options.debug
+      str += "--verbose --watch " + path.dirname(server) + "/**/*.coffee " + server
+
+      @_bootServer(str)
+
+    runSauceConnect: (options) =>
+      @emit "verbose", "run Sauce Lab Connect"
+
+      server = path.join(__dirname, "..", "lib", "sauce", "connect.coffee")
+
+      str = ""
+      str += "--debug " if options.debug
+      str += server
+
+      console.log str
+
+      @_bootServer(str)
+
     _bootServer: (opts) ->
       @emit 'verbose', "server started with #{opts}"
 
@@ -100,3 +124,15 @@ module.exports =
         .description("• Runs Tests in PhantomJS (Continuous Integration Mode)")
         .option("-d, --debug", "Starts the server in debug mode")
         .action(@runCiEcl)
+
+      commander
+        .command("sauce")
+        .description("• Runs Tests across multiple browsers via Sauce Labs)")
+        .option("-d, --debug", "Starts the server in debug mode")
+        .action(@runSauceEcl)
+
+      commander
+        .command("connect")
+        .description("• Runs Sauce Connect")
+        .option("-d, --debug", "Starts the server in debug mode")
+        .action(@runSauceConnect)
