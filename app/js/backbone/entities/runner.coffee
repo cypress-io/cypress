@@ -9,13 +9,17 @@
   class Entities.Runner extends Entities.Model
     defaults: ->
       iframes: []
+      browser: null
+      version: null
 
   ## need to compose this runner with models for each panel
   ## DOM / XHR / LOG
-  ## and partial each test (on test run) if its chosen...?
+  ## and partial each test (on test run) if its chosenId...?
     initialize: ->
-      @hooks    = App.request "hook:entities"
-      @commands = App.request "command:entities"
+      @hooks            = App.request "hook:entities"
+      @commands         = App.request "command:entities"
+      @satelliteEvents  = App.request "satellite:events"
+      @hostEvents       = App.request "host:events"
 
     setContentWindow: (@contentWindow, @$remoteIframe) ->
 
@@ -53,6 +57,14 @@
         id: command.id
         init: init
 
+    switchToBrowser: (browser, version) ->
+      @trigger "switch:to:manual:browser", browser, version
+
+    setBrowserAndVersion: (browser, version) ->
+      @set
+        browser: browser
+        version: version
+
     setTestRunner: (runner) ->
       ## store the test runner as a property on ourselves
       @runner = runner
@@ -66,8 +78,21 @@
       ## proxy this to everyone else
       @listenTo socket, "test:changed", @triggerLoadIframe
 
+      if App.config.env("satellite")
+        _.each @hostEvents, (event) =>
+          @listenTo socket, event, (args...) =>
+            @trigger event, args...
+
+      if App.config.env("host")
+        _.each @satelliteEvents, (event) =>
+          @listenTo socket, event, (args...) =>
+            @trigger event, args...
+
+        @listenTo socket, "command:add", (args...) =>
+          @commands.add args...
+
       ## dont overload the runSuite fn if we're in CI mode
-      return @ if App.env("ci")
+      return @ if App.config.env("ci")
 
       runner = @
 
@@ -85,10 +110,10 @@
 
         ## grep for the correct test / suite by its id if chosenId is set
         ## or all the tests
-        ## we need to grep at the last possible moment because if we've chosen
+        ## we need to grep at the last possible moment because if we've chosenId
         ## a runnable but then deleted it afterwards, then we'll incorrectly
         ## continue to grep for it.  instead we need to do a check to ensure
-        ## we still have the runnable's cid which matches our chosen id
+        ## we still have the runnable's cid which matches our chosenId id
         @grep runner.getGrep(rootSuite)
 
         runSuite.call(@, rootSuite, fn)
@@ -157,8 +182,8 @@
 
     startListening: ->
       @setListenersForAll()
-      @setListenersForCI() if App.env("ci")
-      @setListenersForWeb() if App.env("web")
+      @setListenersForCI() if App.config.env("ci")
+      @setListenersForWeb() if not App.config.env("ci")
 
     setListenersForAll: ->
       ## partials in the runnable object
@@ -177,8 +202,16 @@
     setListenersForCI: ->
 
     setListenersForWeb: ->
-      @listenTo runnerChannel, "all", (type, runnable, attrs, hook) ->
-        @commands.add attrs, type, runnable, hook
+      socket = App.request "socket:entity"
+
+      @listenTo runnerChannel, "all", (type, id, attrs, hook) ->
+        ## if we're in satellite mode then we need to
+        ## broadcast this through websockets
+        if App.config.env("satellite")
+          attrs = @transformEmitAttrs(attrs)
+          socket.emit "command:add", attrs, type, id, hook
+        else
+          @commands.add attrs, type, id, hook
 
       ## mocha has begun running the specs per iframe
       @runner.on "start", =>
@@ -253,11 +286,96 @@
         @eclRestore()
       ## start listening to all the pertinent runner events
 
+    trigger: (event, args...) ->
+      ## because of defaults the change:iframes event
+      ## fires before our initialize (which is stupid)
+      return if not @satelliteEvents
+
+      socket = App.request "socket:entity"
+
+      ## if we're in satellite mode and our event is
+      ## a satellite event then emit over websockets
+      if App.config.env("satellite") and event in @satelliteEvents
+        args   = @transformRunnableArgs(args)
+        return socket.emit event, args...
+
+      ## if we're in host mode and our event is a
+      ## satellite event AND we have a remoteIrame defined
+      if App.config.env("host") and event in @hostEvents and @$remoteIframe
+        return socket.emit event, args...
+
+      ## else just do the normal trigger and
+      ## remove the satellite namespace
+      super event, args...
+
+    transformEmitAttrs: (attrs) ->
+      obj = {}
+
+      ## normally we'd use a reduce here but for some reason
+      ## on dom attrs the reduce completely barfs and is not
+      ## able to iterate over the object.
+      for key, value of attrs
+        obj[key] = value if @isWebSocketCompatibleValue(value)
+
+      obj
+
+    ## make sure this value is capable
+    ## of being sent through websockets
+    isWebSocketCompatibleValue: (value) ->
+      switch
+        when _.isElement(value)                           then false
+        when _.isObject(value) and _.isElement(value[0])  then false
+        when _.isFunction(value)                          then false
+        else true
+
+    transformRunnableArgs: (args) ->
+      ## pull off these direct properties
+      props = ["title", "cid", "root", "pending", "stopped", "state", "duration", "type"]
+
+      ## pull off these parent props
+      parentProps = ["root", "cid"]
+
+      ## fns to invoke
+      fns = ["originalTitle", "fullTitle", "slow", "timeout"]
+
+      _(args).map (arg) =>
+        ## transfer direct props
+        obj = _(arg).pick props...
+
+        ## transfer parent props
+        if parent = arg.parent
+          obj.parent = _(parent).pick parentProps...
+
+        ## transfer the error as JSON
+        if err = arg.err
+          err.host = @$remoteIframe.prop("contentWindow").location.host
+          obj.err = JSON.stringify(err, ["message", "type", "name", "stack", "fileName", "lineNumber", "columnNumber", "host"])
+
+        ## invoke the functions and set those as properties
+        _.each fns, (fn) ->
+          obj[fn] = _.result(arg, fn)
+
+        obj
+
     ## recursively tries to find the test associated
     ## with the hook
     getTestFromHook: (hook, suite) ->
       ## if theres already a currentTest use that
       return test if test = hook.ctx.currentTest
+
+      ## there is a bug where if you have set an 'only'
+      ## and you're running a visit within a hook
+      ## then this will return the incorrect test
+      ## it will return the very first test instead of
+      ## our actual running test.  i've looked through
+      ## mocha's source and cannot find any way to figure
+      ## out which test is running in this scenario.
+      ## so i think the only solution is to look at the grep
+      ## and grep for the first test that matches it
+      grep = @runner._grep
+      if grep.toString() isnt "/.*/"
+        return test if test = @getFirstTestByFn suite, (test) ->
+          grep.test _.result(test, "fullTitle")
 
       ## else go look for the test because our suite
       ## is most likely the root suite (which does not share a ctx)
@@ -298,12 +416,14 @@
       @clear()
       @clear()
 
-      ## delete these properties
-      delete @runner
-      delete @contentWindow
-      delete @iframe
-      delete @hooks
-      delete @commands
+      ## null out these properties
+      @runner         = null
+      @contentWindow  = null
+      @$remoteIframe  = null
+      @iframe         = null
+      @hooks          = null
+      @commands       = null
+      @chosen         = null
 
     start: (iframe) ->
       @setIframe iframe
@@ -311,10 +431,14 @@
       @triggerLoadIframe @iframe
 
     triggerLoadIframe: (iframe, opts = {}) ->
-
       ## first we want to make sure that our last stored
       ## iframe matches the one we're receiving
       return if iframe isnt @iframe
+
+      _.defaults opts,
+        chosenId: @get("chosenId")
+        browser:  @get("browser")
+        version:  @get("version")
 
       ## clear out the commands
       @commands.reset([], {silent: true})
@@ -336,15 +460,30 @@
           obj.stopped = true
           obj = obj.parent
 
-      ## if it does fire the event
+      ## tells different areas of the app to prepare
+      ## for the resetting of the test run
+      @trigger "reset:test:run"
+
+      ## tells the iframe view to load up a new iframe
       @trigger "load:iframe", @iframe, opts
 
     hasChosen: ->
-      !!@get("chosen")
+      !!@get("chosenId")
+
+    getChosen: ->
+      @chosen
+
+    updateChosen: (id) ->
+      ## set chosenId as runnable if present else unset
+      if id then @set("chosenId", id) else @unset("chosenId")
 
     setChosen: (runnable) ->
-      ## set chosen as runnable if present else unset
-      if runnable then @set("chosen", runnable) else @unset("chosen")
+      if runnable
+        @chosen = runnable
+      else
+        @chosen = null
+
+      @updateChosen(runnable?.id)
 
       ## always reload the iframe
       @triggerLoadIframe @iframe
@@ -369,20 +508,30 @@
 
       ids
 
+    getFirstTestByFn: (root, fn) ->
+      ## loop through each test applying
+      ## the fn and return the first that matches
+      for test in root.tests
+        return test if fn(test)
+
+      ## return recursively
+      for suite in root.suites
+        return @getFirstTestByFn(suite, fn)
+
     getGrep: (root) ->
       console.warn "GREP IS: ", @options.grep
       return re if re = @parseMochaGrep(@options.grep)
 
-      chosen = @get("chosen")
-      if chosen
-        ## if we have a chosen model and its in our runnables cid
-        if chosen.id in @getRunnableCids(root)
-          ## create a regex based on the id of the suite / test
-          return new RegExp @escapeId("[" + chosen.id + "]")
+      chosenId = @get("chosenId")
 
-        ## lets remove our chosen runnable since its no longer with us
-        else
-          @unset "chosen"
+      ## if we have a chosenId model and its in our runnables cid
+      if chosenId and chosenId in @getRunnableCids(root)
+        ## create a regex based on the id of the suite / test
+        return new RegExp @escapeId("[" + chosenId + "]")
+
+      ## lets remove our chosenId runnable since its no longer with us
+      else
+        @unset "chosenId"
 
       return /.*/ if not @hasChosen()
 
@@ -405,13 +554,13 @@
       ## bail if this doesnt match what we expect
       return if not matches
 
-      ## dont do anything if the matched id is our chosen
-      return if matches[1] is @get("chosen")?.id
+      ## dont do anything if the matched id is our chosenId
+      return if matches[1] is @get("chosenId")
 
       ## else if at this point if we have matches and its not
-      ## our chosen runnable, we need to unset what is currently
-      ## chosen and we need to choose this new runnable by its cid
-      @unset "chosen"
+      ## our chosenId runnable, we need to unset what is currently
+      ## chosenId and we need to choose this new runnable by its cid
+      @unset "chosenId"
 
       return new RegExp @escapeId("[" + matches[1] + "]")
 
@@ -422,7 +571,15 @@
       id.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
     ## tell our runner to run our iframes mocha suite
-    runIframeSuite: (iframe, contentWindow, remoteIframe, fn) ->
+    runIframeSuite: (iframe, contentWindow, remoteIframe, options, fn) ->
+      ## options are optional and so if fn is undefined
+      ## we automatically set it to options
+      ## this allows consumers to pass a fn
+      ## as the last argument even though it
+      ## will be received as options
+      if _.isUndefined(fn)
+        fn = options
+
       ## store the current iframe
       @setIframe iframe
 
@@ -444,17 +601,19 @@
       ## the state of the runner to prevent problems
       @runner.test = undefined
 
+      ## don't attempt to run any tests if we're in manual
+      ## testing mode and our iframe is not readable
+      return if not remoteIframe.isReadable()
+
+      ## reupdate chosen with the passed in chosenId
+      ## this allows us to pass the chosenId around
+      ## through websockets
+      @updateChosen(options.chosenId)
+
       ## run the suite for the iframe
       ## right before we run the root runner's suite we iterate
       ## through each test and give it a unique id
       t = Date.now()
-
-      ## we need to reset the runner.test to undefined
-      ## when the user clicks the reload button, mocha
-      ## will think that the currentTest is really the
-      ## last test that was run.  so we always reset
-      ## the state of the runner to prevent problems
-      @runner.test = undefined
 
       @runner.runSuite contentWindow.mocha.suite, (err) =>
         ## its possible there is no runner when this

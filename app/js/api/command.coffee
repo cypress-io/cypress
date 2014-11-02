@@ -98,7 +98,7 @@ Eclectus.Command = do ($, _) ->
       ## if its true
       obj.snapshot = @getSnapshot() if obj.snapshot
 
-      @channel.trigger(obj.type, @runnable, obj, @hook) if @channel
+      @channel.trigger(obj.type, @runnable.cid, obj, @hook) if @channel
 
     ## walk up the 'prevObject' chain until we have an object
     ## which can be a parent

@@ -103,9 +103,9 @@
       ## instantiate Eclectus
       window.Ecl = new Eclectus
 
-      overloadMochaRunnableEmit() if App.env("web")
+      overloadMochaRunnableEmit() if not App.config.env("ci")
       overloadMochaRunnerEmit()
-      overloadMochaRunnerUncaught() if App.env("web")
+      overloadMochaRunnerUncaught() if not App.config.env("ci")
       overloadChaiAssertions(Ecl) if chai and chai.use
 
       ## get the runner and mocha variables if they're not
@@ -119,7 +119,7 @@
 
     getRunner: ->
       ## start running the tests
-      if App.env("ci")
+      if App.config.env("ci")
         runner = window.mochaPhantomJS.run()
       else
         ## set global mocha with our custom reporter

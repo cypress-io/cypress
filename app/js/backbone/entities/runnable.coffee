@@ -38,7 +38,7 @@
     setAttrsFromRunnable: (runnable, index) ->
       @set
         id: runnable.cid
-        title: runnable.originalTitle()
+        title: _.result(runnable, "originalTitle")
         parentId: runnable.parent.cid
         parentRoot: runnable.parent.root
         index: index
@@ -87,15 +87,13 @@
       @set "open", false if @is("test")
 
     reset: ->
-      if @is("test") then @resetTest() else @resetSuite()
-
-    resetSuite: ->
+      @resetRunnable()
       @get("children").invoke("reset")
 
     anyCommandsFailed: ->
       @get("hooks").anyFailed()
 
-    resetTest: ->
+    resetRunnable: ->
       @removeOriginalError()
 
       ## reset these specific attributes
@@ -124,6 +122,8 @@
         duration: test.duration
 
       if test.err
+        test.err = @parseErrorFromString(test.err) if _.isString(test.err)
+
         ## output the error to the console to receive stack trace
         console.error(test.err.stack)
 
@@ -131,7 +131,7 @@
         @originalError = test.err
 
         ## set the err on the attrs
-        attrs.error = test.err.toString()
+        attrs.error = _.result test.err, "toString"
 
         ## get the hook type (beforeEach, afterEach, etc)
         ## if the test failed from a hook
@@ -149,8 +149,8 @@
 
       ## set the private _slow and _timeout
       ## based on the result of these methods
-      @_slow = test.slow()
-      @_timeout = test.timeout()
+      @_slow    = _.result test, "slow"
+      @_timeout = _.result test, "timeout"
 
       @set attrs
 
@@ -158,6 +158,26 @@
       @checkForFailedHook()
 
       return @
+
+    ## rewrites the error stack and
+    ## manually corrects the root host domain
+    ## which allows these to be clickable
+    parseErrStack: (stack, host) ->
+      re = new RegExp(host, "g")
+      stack.replace re, window.location.host
+
+    ## creates a new error instance and
+    ## sets its properties from the error string
+    parseErrorFromString: (err) ->
+      obj = JSON.parse(err)
+      obj.stack = @parseErrStack(obj.stack, obj.host) if obj.stack
+
+      err = new Error()
+
+      _.chain(obj).keys().each (key) ->
+        err[key] = obj[key]
+
+      return err
 
     anyAreProcessing: (states) ->
       _(states).any (state) -> state is "processing"

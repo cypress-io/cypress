@@ -7,9 +7,11 @@ glob        = require("glob")
 _           = require("underscore")
 _.str       = require("underscore.string")
 chokidar    = require("chokidar")
-spawn       = require("child_process").spawn
+minimist    = require("minimist")
 Domain      = require("domain")
 idGenerator = require("./id_generator.coffee")
+
+argv = minimist(process.argv.slice(2), boolean: true)
 
 controllers =
   RemoteLoader: new (require('./controllers/remote_loader'))().handle
@@ -31,7 +33,7 @@ app.set "eclectus", JSON.parse(fs.readFileSync("eclectus.json", encoding: "utf8"
 testFiles = new RegExp(testFiles)
 
 ## all environments
-app.set 'port', app.get("eclectus").port or 3000
+app.set 'port', argv.port or app.get("eclectus").port or 3000
 
 app.set "view engine", "html"
 app.engine "html", hbs.__express
@@ -89,6 +91,11 @@ io.on "connection", (socket) ->
   socket.on "finished:generating:ids:for:test", (strippedPath) ->
     console.log "finished:generating:ids:for:test", strippedPath
     io.emit "test:changed", file: strippedPath
+
+  _.each "load:iframe command:add runner:start runner:end before:run before:add after:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test".split(" "), (event) ->
+    socket.on event, (args...) ->
+      args = _.chain(args).compact().reject(_.isFunction).value()
+      io.emit event, args...
 
 watchTestFiles = chokidar.watch testFolder, ignored: (path, stats) ->
   ## this fn gets called twice, once with the directory
@@ -209,4 +216,6 @@ app.use require("errorhandler")()
 
 server.listen app.get("port"), ->
   console.log 'Express server listening on port ' + app.get('port')
-  idGenerator.openPhantom()
+
+  ## open phantom if ids are true (which they are by default)
+  idGenerator.openPhantom() if argv.ids

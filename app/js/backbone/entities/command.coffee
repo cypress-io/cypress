@@ -469,7 +469,7 @@
 
       return command
 
-    add: (attrs, type, runnable, hook) ->
+    add: (attrs, type, id, hook) ->
       command = attrs
       options = type
 
@@ -487,7 +487,7 @@
 
       _.extend attrs,
         type: type
-        testId: runnable.cid
+        testId: id
         hook: hook
 
       command = @getCommandByType(attrs)

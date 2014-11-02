@@ -1,3 +1,4 @@
+<% if @env isnt "satellite": %>
 <div id="test-container">
   <div id="test-specs">
     <div id="header-container">
@@ -11,6 +12,7 @@
     </div> -->
   </div>
 </div>
+<% end %>
 <!-- <div class="ecl-main-content">
   <div id="test-page">
     <div id="specs-region"></div>

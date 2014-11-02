@@ -3,9 +3,17 @@
   class Show.Controller extends App.Controllers.Application
 
     initialize: (options) ->
+      { id, browser, version } = options
+
       config = App.request "app:config:entity"
 
-      spec = config.getPathToSpec(options.id)
+      ## this is for any existing controllers which haven't been
+      ## closed yet.  this prevents a bug where we try to replace
+      ## existing Show controllers which on destroy stop the runner
+      @listenTo config, "change:env", (model, value, options) ->
+        @region.empty()
+
+      spec = config.getPathToSpec(id)
 
       @listenTo config, "change:panels", ->
         @layout.resizePanels()
@@ -17,17 +25,22 @@
       ## store this as a property on ourselves
       @runner = runner = App.request("start:test:runner")
 
+      runner.setBrowserAndVersion(browser, version) if browser and version
+
+      @listenTo runner, "switch:to:manual:browser", (browser, version) ->
+        App.execute "switch:to:manual:browser", id, browser, version
+
       @layout = @getLayoutView config
 
       @listenTo @layout, "show", =>
-        @statsRegion(runner)
+        @statsRegion(runner)          if not config.env("satellite")
         @iframeRegion(runner)
-        @specsRegion(runner, spec)
-        @panelsRegion(runner, config)
+        @specsRegion(runner, spec)    if not config.env("satellite")
+        @panelsRegion(runner, config) if not config.env("satellite")
 
         ## start running the tests
         ## and load the iframe
-        runner.start(options.id)
+        runner.start(id)
 
         # @layout.resizePanels()
 

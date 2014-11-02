@@ -3,8 +3,8 @@
   class Entities.Socket extends Entities.Model
     setChannel: (@channel) ->
 
-    emit: (event, data, fn = ->) ->
-      @channel.emit event, data, fn
+    emit: (event, data...) ->
+      @channel.emit event, data...
 
   App.reqres.setHandler "io:entity", (channel) ->
     socket = new Entities.Socket

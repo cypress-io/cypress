@@ -4,7 +4,8 @@ before ->
   @sandbox = sinon.sandbox.create()
 
 beforeEach ->
-  App.execute "set:app:env", "web"
+  App.config = App.request "new:config:entity", {}
+  App.config.setEnv("ui")
 
 afterEach ->
   @sandbox.restore()
@@ -16,7 +17,7 @@ window.loadFixture = (paths, options = {}) ->
   $("iframe").remove()
 
   ## transform to array even if string
-  paths = Array::concat(paths)
+  paths = [].concat(paths)
   paths = _(paths).map (path) -> "/fixtures/" + path + ".html"
 
   dfs = []

@@ -37,7 +37,7 @@ module.exports =
       # THIS NEEDS TO BE FIXED
       str = ""
 
-      str += "--debug " if (options.debug)
+      str += "--debug " if options.debug
       str += "--verbose --watch " + path.dirname(server) + "/**/*.coffee " + server
 
       @_bootServer(str)
@@ -56,8 +56,16 @@ module.exports =
 
       # THIS NEEDS TO BE FIXED
       str = ""
-      str += "--debug " if (options.debug)
+      str += "--debug " if options.debug
       str += "--verbose --watch " + path.dirname(server) + "/**/*.coffee " + server
+
+      ## this tells nodemon to pass on the remaining arguments to our program
+      ## for some reason it will blow up unless we pass -L to it....
+      str += " -- -L "
+      str += "--ids #{options.ids} " if options.ids
+      str += "--port=#{options.port} " if options.port
+
+      console.log str
 
       @_bootServer(str)
 
@@ -83,6 +91,8 @@ module.exports =
         .command("start")
         .description("• Starts the Eclectus server")
         .option("-d, --debug", "Starts the server in debug mode")
+        .option("-p, --port <n>", "Forces the server to start under a different port", parseInt)
+        .option("--no-ids", "Turns off generating ID's for tests")
         .action(@startEcl)
 
       commander

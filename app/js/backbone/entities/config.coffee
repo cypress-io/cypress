@@ -4,8 +4,8 @@
 
   class Entities.Config extends Entities.Model
     defaults: ->
-      collapsed: @getConfig("collapsed")
-      panels: @getConfig("panels")
+      collapsed:  @getConfig("collapsed")
+      panels:     @getConfig("panels")
       panelWidth: @getConfig("panelWidth")
 
     storageConfig:
@@ -18,6 +18,16 @@
       panelWidth:
         default: 300
         type: "number"
+
+    env: (stringOrRegExp) ->
+      env = @get("env")
+      switch
+        when _.isString(stringOrRegExp) then stringOrRegExp is env
+        when _.isRegExp(stringOrRegExp) then stringOrRegExp.test(env)
+        else env
+
+    setEnv: (env) ->
+      @set "env", env
 
     toggleCollapse: ->
       @set "collapsed", !@get("collapsed")

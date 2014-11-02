@@ -15,6 +15,17 @@
       @listenTo config, "close:test:panels", ->
         @layout.panelsRegion.empty()
 
+      @listenTo config, "change:env", (model, value, options) ->
+        ## if we're entering satellite mode then hide our layout
+        ## and update some DOM classes for display purposes
+        return @layout.satelliteMode() if value is "satellite"
+
+        ## else if our previous env attribute was satellite then
+        ## we need to show our layout and re-render our navs region
+        if model.previous("env") is "satellite"
+          @navsRegion(navs, config)
+          @layout.satelliteMode(false)
+
       @layout = @getLayoutView()
 
       @listenTo @layout, "show", =>
