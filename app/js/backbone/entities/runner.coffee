@@ -20,6 +20,7 @@
       @commands         = App.request "command:entities"
       @satelliteEvents  = App.request "satellite:events"
       @hostEvents       = App.request "host:events"
+      @passThruEvents   = App.request "pass:thru:events"
 
     setContentWindow: (@contentWindow, @$remoteIframe) ->
 
@@ -38,8 +39,8 @@
 
       ## when we get a response from the server with
       ## the jobName we notify all parties
-      socket.emit "run:sauce", @iframe, (jobName) =>
-        @trigger "sauce:running", jobName
+      socket.emit "run:sauce", @iframe, (jobName, batchId) =>
+        @trigger "sauce:running", jobName, batchId
 
     getTestCid: (test) ->
       ## grab the test id from the test's title
@@ -82,9 +83,6 @@
       ## through a specific test
       socket = App.request "socket:entity"
 
-      @listenTo socket, "sauce:job:start", (obj) ->
-        @trigger "sauce:job:start", obj
-
       ## whenever our socket fires 'test:changed' we want to
       ## proxy this to everyone else
       @listenTo socket, "test:changed", @triggerLoadIframe
@@ -99,8 +97,9 @@
           @listenTo socket, event, (args...) =>
             @trigger event, args...
 
-        @listenTo socket, "command:add", (args...) =>
-          @commands.add args...
+      _.each @passThruEvents, (event) =>
+        @listenTo socket, event, (args...) =>
+          @trigger event, args...
 
       ## dont overload the runSuite fn if we're in CI mode
       return @ if App.config.env("ci")

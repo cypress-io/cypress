@@ -2,21 +2,23 @@
   <%= @index %>.
 </td>
 <td>
-  <i class="fa fa-refresh fa-spin"></i>
-  Pending
+  <div class="job-state-container">
+    <i class="<%= @stateIcon %>"></i>
+    <span class="job-state"><%= @stateFormatted %></span>
+  </div>
 </td>
 <td>
   <div class="image-wrapper">
     <img src="/eclectus/img/<%= @browser %>_32x32.png" />
   </div>
-  <%= @browser %> <%= @browserVersion %>
+  <%= @browser %> <%= @version %>
 </td>
 <td>
   <i class="fa fa-<%= @icon %>"></i>
   <%= @os %>
 </td>
 <td>
-  <a href="http://saucelabs.com/tests" target="_blank">
+  <a href="http://saucelabs.com/tests/<%= @id %>" target="_blank">
     <i class="fa fa-external-link"></i>
     View
   </a>

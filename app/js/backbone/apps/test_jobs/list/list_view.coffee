@@ -3,6 +3,19 @@
   class List.Job extends App.Views.ItemView
     template: "test_jobs/list/_job"
 
+    ui:
+      state:      ".job-state"
+      stateIcon:  ".job-state-container i"
+
+    modelEvents:
+      "change:state": "stateChanged"
+
+    stateChanged: (model, value, options) ->
+      ## good candidate here for backbone stickit
+      ## for both of these
+      @ui.stateIcon.removeClass().addClass model.get("stateIcon")
+      @ui.state.text model.get("stateFormatted")
+
   class List.Loading extends App.Views.ItemView
     template: "test_jobs/list/_loading"
 

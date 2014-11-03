@@ -11,6 +11,8 @@ minimist    = require("minimist")
 Domain      = require("domain")
 idGenerator = require("./id_generator.coffee")
 uuid        = require("node-uuid")
+sauce       = require("./sauce/sauce.coffee")
+jQuery      = require("jquery-deferred")
 
 argv = minimist(process.argv.slice(2), boolean: true)
 
@@ -106,52 +108,102 @@ io.on "connection", (socket) ->
   socket.on "run:sauce", (spec, fn) ->
     ## this will be used to group jobs
     ## together for the runs related to 1
-    ## spec
+    ## spec by setting custom-data on the job object
     batchId = Date.now()
 
     jobName = testFolder + "/" + spec
     fn(jobName, batchId)
 
-    normalizeJobObject = (job, name, batchId, id) ->
-      job.browser = {
-        iexplore: "ie"
-        googlechrome: "chrome"
-        firefox: "firefox"
-        safari: "safari"
-      }[job.browser]
-
-      job.browserVersion  = job.browser_short_version
-      job.name            = name
-      job.batchId         = batchId
-      job.id              = id
-
-      delete job.browser_short_version
-
-      job
-
+    ## need to handle platform/browser/version incompatible configurations
+    ## and throw our own error
+    ## https://saucelabs.com/platforms/webdriver
     jobs = [
-      { os: "Windows 8", browser: "iexplore",     browser_short_version: 11 }
-      { os: "Windows 7", browser: "iexplore",     browser_short_version: 10 }
-      { os: "Linux",     browser: "googlechrome", browser_short_version: 35 }
-      { os: "Linux",     browser: "firefox",      browser_short_version: 32 }
-      { os: "Mac 10.8",  browser: "safari",       browser_short_version: 6 }
+      { platform: "Windows 8.1", browser: "internet explorer",  version: 11 }
+      # { platform: "Windows 7",   browser: "internet explorer",  version: 10 }
+      # { platform: "Linux",       browser: "chrome",             version: 37 }
+      # { platform: "Linux",       browser: "firefox",            version: 33 }
+      { platform: "OS X 10.9",   browser: "safari",             version: 7 }
     ]
 
-    ## simulate jobs being added into sauce labs
-    _(jobs.length).times ->
-      _.delay ->
-        ## simulate grabbing a random job and getting a unique id
-        guid = uuid.v4()
-        job = jobs.splice _.random(0, jobs.length - 1), 1
-        socket.emit "sauce:job:start", normalizeJobObject(job[0], jobName, batchId, guid)
+    normalizeJobObject = (obj) ->
+      obj.browser = {
+        "internet explorer": "ie"
+      }[obj.browserName] or obj.browserName
 
-        ## emit the 'sauce:job:end' event to simulate
-        ## what its like finishing a job
-        _.delay ->
-          socket.emit "sauce:job:end", guid
-        , _.random(1, 5) * 1000
+      obj.os = obj.platform
 
-      , _.random(1, 3) * 1000
+      delete obj.browserName
+      delete obj.platform
+
+      return obj
+
+    _.each jobs, (job) ->
+      options =
+        host:        "0.0.0.0"
+        port:        app.get("port")
+        name:        jobName
+        batchId:     batchId
+        browserName: job.browser
+        version:     job.version
+        platform:    job.platform
+
+      df = jQuery.Deferred()
+
+      df.progress (sessionID) ->
+        obj         = normalizeJobObject(options)
+        obj         = _(obj).pick "name", "browser", "version", "os", "batchId"
+        obj.id      = sessionID
+
+        socket.emit "sauce:job:start", obj
+
+      df.fail (sessionID, err) ->
+        socket.emit "sauce:job:fail", sessionID, err
+
+      df.done (sessionID, results = {}) ->
+        socket.emit "sauce:job:done", sessionID, results
+
+      sauce options, df
+
+    # normalizeJobObject = (job, name, batchId, id) ->
+    #   job.browser = {
+    #     iexplore: "ie"
+    #     googlechrome: "chrome"
+    #     firefox: "firefox"
+    #     safari: "safari"
+    #   }[job.browser]
+
+    #   job.browserVersion  = job.browser_short_version
+    #   job.name            = name
+    #   job.batchId         = batchId
+    #   job.id              = id
+
+    #   delete job.browser_short_version
+
+    #   job
+
+    # jobs = [
+    #   { os: "Windows 8", browser: "iexplore",     browser_short_version: 11 }
+    #   { os: "Windows 7", browser: "iexplore",     browser_short_version: 10 }
+    #   { os: "Linux",     browser: "googlechrome", browser_short_version: 35 }
+    #   { os: "Linux",     browser: "firefox",      browser_short_version: 32 }
+    #   { os: "Mac 10.8",  browser: "safari",       browser_short_version: 6 }
+    # ]
+
+    # ## simulate jobs being added into sauce labs
+    # _(jobs.length).times ->
+    #   _.delay ->
+    #     ## simulate grabbing a random job and getting a unique id
+    #     guid = uuid.v4()
+    #     job = jobs.splice _.random(0, jobs.length - 1), 1
+    #     socket.emit "sauce:job:start", normalizeJobObject(job[0], jobName, batchId, guid)
+
+    #     ## emit the 'sauce:job:end' event to simulate
+    #     ## what its like finishing a job
+    #     _.delay ->
+    #       socket.emit "sauce:job:end", guid
+    #     , _.random(1, 5) * 1000
+
+    #   , _.random(1, 3) * 1000
 
     # browsers = ["chrome", "firefox"]
 

@@ -1,16 +1,31 @@
 wd = require("wd")
 bluebird = require("bluebird")
-browser = wd.promiseChainRemote()
 
-module.exports = (host, port, spec, browserName, df) ->
+module.exports = (options = {}, df) ->
+  browser = wd.promiseChainRemote("ondemand.saucelabs.com", 80, 'brian-mann', "ab95ecc5-b788-482a-82f6-ea72e1b00b54")
+
+  browser._hasNotified = false
+
+  browser.on "status", (info) ->
+    if not browser._hasNotified
+      browser._hasNotified = true
+      df.notify @sessionID, options
+
+  browser.on "command", (eventType, command, response) ->
+
+  browser.on "http", (meth, path, data) ->
+
   browser
-    .init({browserName: browserName})
-    .get("http://#{host}:#{port}/##{spec}")
+    .init options, (err, arr) ->
+      ## update the job with our custom batchId
+      browser.sauceJobUpdate({"custom-data": {batchId: options.batchId} })
+
+      df.fail(browser.sessionID, err) if err
+    .get("http://#{options.host}:#{options.port}/##{options.name}")
     # .safeEval "window.location.href", (err, res) ->
       # console.log res
     .fin ->
-      result = {}
-      df.resolve(result)
+      df.resolve(browser.sessionID)
       browser.quit()
     .done()
 

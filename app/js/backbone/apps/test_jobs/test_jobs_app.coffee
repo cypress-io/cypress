@@ -8,5 +8,5 @@
 
   router = new Router
 
-  App.commands.setHandler "list:test:jobs", (region, runner, jobName) ->
-    router.to "list", region: region, runner: runner, jobName: jobName
+  App.commands.setHandler "list:test:jobs", (region, runner, jobName, batchId) ->
+    router.to "list", region: region, runner: runner, jobName: jobName, batchId: batchId
