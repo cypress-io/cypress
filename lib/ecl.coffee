@@ -61,7 +61,7 @@ module.exports =
 
       ## this tells nodemon to pass on the remaining arguments to our program
       ## for some reason it will blow up unless we pass -L to it....
-      str += " -- -L "
+      str += " -- "
       str += "--ids #{options.ids} " if options.ids
       str += "--port=#{options.port} " if options.port
 
