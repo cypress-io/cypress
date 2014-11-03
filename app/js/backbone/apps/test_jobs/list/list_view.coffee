@@ -3,9 +3,13 @@
   class List.Job extends App.Views.ItemView
     template: "test_jobs/list/_job"
 
+  class List.Loading extends App.Views.ItemView
+    template: "test_jobs/list/_loading"
+
   class List.Jobs extends App.Views.CompositeView
     template: "test_jobs/list/jobs"
     childView: List.Job
+    emptyView: List.Loading
     childViewContainer: "tbody"
 
     ui:
