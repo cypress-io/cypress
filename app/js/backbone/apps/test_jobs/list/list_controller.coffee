@@ -5,10 +5,16 @@
     initialize: (options) ->
       { runner, jobName } = options
 
-      view = @getView(jobName)
+      jobs = App.request "new:job:entities"
+
+      @listenTo runner, "sauce:job:start", (obj) ->
+        jobs.add obj
+
+      view = @getView(jobs, jobName)
 
       @show view
 
-    getView: (jobName) ->
+    getView: (jobs, jobName) ->
       new List.Jobs
         jobName: jobName
+        collection: jobs

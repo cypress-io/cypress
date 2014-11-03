@@ -68,6 +68,7 @@
     "mocha-phantomjs": "3.5.0",
     "nock": "0.48.1",
     "node-phantom-simple": "1.2.0",
+    "node-uuid": "^1.4.1",
     "phantomjs": "1.9.7-15",
     "requirejs": "2.1.15",
     "sauce-connect-launcher": "^0.7.0",

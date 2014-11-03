@@ -1,0 +1,23 @@
+<td>
+  <%= @index %>.
+</td>
+<td>
+  <i class="fa fa-refresh fa-spin"></i>
+  Pending
+</td>
+<td>
+  <div class="image-wrapper">
+    <img src="/eclectus/img/<%= @browser %>_32x32.png" />
+  </div>
+  <%= @browser %> <%= @browserVersion %>
+</td>
+<td>
+  <i class="fa fa-<%= @icon %>"></i>
+  <%= @os %>
+</td>
+<td>
+  <a href="http://saucelabs.com/tests" target="_blank">
+    <i class="fa fa-external-link"></i>
+    View
+  </a>
+</td>

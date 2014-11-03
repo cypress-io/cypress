@@ -82,6 +82,9 @@
       ## through a specific test
       socket = App.request "socket:entity"
 
+      @listenTo socket, "sauce:job:start", (obj) ->
+        @trigger "sauce:job:start", obj
+
       ## whenever our socket fires 'test:changed' we want to
       ## proxy this to everyone else
       @listenTo socket, "test:changed", @triggerLoadIframe

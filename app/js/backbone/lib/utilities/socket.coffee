@@ -16,6 +16,9 @@
         channel.on event, (args...) ->
           socket.trigger event, args...
 
+      channel.on "sauce:job:start", (args...) ->
+        socket.trigger "sauce:job:start", args...
+
       channel.on "command:add", (args...) ->
         socket.trigger "command:add", args...
 

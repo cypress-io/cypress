@@ -23,6 +23,7 @@
     <div id="iframe-region"></div>
   </div>
 </div>
+<div id="jobs-region"></div>
 <ul id="panel-wrapper">
   <li id="dom-region"></li>
   <li id="xhr-region"></li>

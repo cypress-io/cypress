@@ -31,7 +31,8 @@
         App.execute "switch:to:manual:browser", id, browser, version
 
       @listenTo runner, "sauce:running", (jobName) ->
-        # @layout.iframeRegion.empty()
+        @layout.hideIframe()
+        @layout.iframeRegion.empty()
         @sauceRegion(runner, jobName)
 
       @layout = @getLayoutView config
@@ -60,7 +61,7 @@
       App.execute "list:test:specs", @layout.specsRegion, runner, spec
 
     sauceRegion: (runner, jobName) ->
-      App.execute "list:test:jobs", @layout.iframeRegion, runner, jobName
+      App.execute "list:test:jobs", @layout.jobsRegion, runner, jobName
 
     panelsRegion: (runner, config) ->
       ## trigger the event to ensure the test panels are listed

@@ -38,3 +38,6 @@
         ## set its height to the calculated height or 0 if it is empty
         num = if found.$el.children().length then height else 0
         found.$el.css "height", "#{num}%"
+
+    hideIframe: ->
+      @ui.iframeWrapper.hide()
