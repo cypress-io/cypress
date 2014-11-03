@@ -21,7 +21,9 @@ module.exports = (options = {}, df) ->
     .init options, (err, arr) ->
       ## update the job with our custom batchId
       browser.sauceJobUpdate
-        "custom-data": _(options).pick("batchId", "guid")
+        "custom-data":
+          batchId: options.batchId
+          guid:    options.guid
 
       df.fail(browser.sessionID, err) if err
     .get("http://#{options.host}:#{options.port}/##{options.name}")

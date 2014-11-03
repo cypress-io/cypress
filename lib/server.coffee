@@ -164,63 +164,6 @@ io.on "connection", (socket) ->
 
       sauce options, df
 
-    # normalizeJobObject = (job, name, batchId, id) ->
-    #   job.browser = {
-    #     iexplore: "ie"
-    #     googlechrome: "chrome"
-    #     firefox: "firefox"
-    #     safari: "safari"
-    #   }[job.browser]
-
-    #   job.browserVersion  = job.browser_short_version
-    #   job.name            = name
-    #   job.batchId         = batchId
-    #   job.id              = id
-
-    #   delete job.browser_short_version
-
-    #   job
-
-    # jobs = [
-    #   { os: "Windows 8", browser: "iexplore",     browser_short_version: 11 }
-    #   { os: "Windows 7", browser: "iexplore",     browser_short_version: 10 }
-    #   { os: "Linux",     browser: "googlechrome", browser_short_version: 35 }
-    #   { os: "Linux",     browser: "firefox",      browser_short_version: 32 }
-    #   { os: "Mac 10.8",  browser: "safari",       browser_short_version: 6 }
-    # ]
-
-    # ## simulate jobs being added into sauce labs
-    # _(jobs.length).times ->
-    #   _.delay ->
-    #     ## simulate grabbing a random job and getting a unique id
-    #     guid = uuid.v4()
-    #     job = jobs.splice _.random(0, jobs.length - 1), 1
-    #     socket.emit "sauce:job:start", normalizeJobObject(job[0], jobName, batchId, guid)
-
-    #     ## emit the 'sauce:job:end' event to simulate
-    #     ## what its like finishing a job
-    #     _.delay ->
-    #       socket.emit "sauce:job:end", guid
-    #     , _.random(1, 5) * 1000
-
-    #   , _.random(1, 3) * 1000
-
-    # browsers = ["chrome", "firefox"]
-
-    # runs = _.reduce browsers, (memo, value) ->
-    #   memo.push $.Deferred()
-    #   memo
-    # , []
-
-    # _.each browsers, (browser, index) ->
-    #   run.always (result) ->
-    #     socket.emit "sauce:run:finished", result
-
-    #   sauce.run("0.0.0.0", app.get("port"), spec, browser, runs[index])
-
-    # $.when(runs...).always ->
-    #   socket.emit "sauce:all:runs:finished", runs
-
 watchTestFiles = chokidar.watch testFolder, ignored: (path, stats) ->
   ## this fn gets called twice, once with the directory
   ## which does not have a stats argument
