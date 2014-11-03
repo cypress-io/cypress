@@ -29,7 +29,7 @@
 
       @listenTo @layout, "show", =>
         @statsRegion stats
-        @configRegion stats
+        @configRegion runner
 
       @show @layout
 
@@ -43,8 +43,12 @@
       statsView = @getStatsView stats
       @show statsView, region: @layout.statsRegion
 
-    configRegion: ->
+    configRegion: (runner) ->
       configView = @getConfigView()
+
+      @listenTo configView, "sauce:labs:clicked", (option) ->
+        runner.runSauce() if option is "run"
+
       @show configView, region: @layout.configRegion
 
     chosenRegion: (runner, chosen) ->

@@ -97,6 +97,13 @@ io.on "connection", (socket) ->
       args = _.chain(args).compact().reject(_.isFunction).value()
       io.emit event, args...
 
+  ## when we're told to run:sauce we receive
+  ## the spec and callback with the name of our
+  ## sauce labs job
+  socket.on "run:sauce", (spec, fn) ->
+    jobName = spec + "-" + Date.now()
+    fn(jobName)
+
 watchTestFiles = chokidar.watch testFolder, ignored: (path, stats) ->
   ## this fn gets called twice, once with the directory
   ## which does not have a stats argument

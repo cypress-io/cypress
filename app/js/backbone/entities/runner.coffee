@@ -33,6 +33,14 @@
 
     setOptions: (@options) ->
 
+    runSauce: ->
+      socket = App.request "socket:entity"
+
+      ## when we get a response from the server with
+      ## the jobName we notify all parties
+      socket.emit "run:sauce", @iframe, (jobName) =>
+        @trigger "sauce:running", jobName
+
     getTestCid: (test) ->
       ## grab the test id from the test's title
       matches = testIdRegExp.exec(test.title)

@@ -1,58 +1,21 @@
-<!-- <div id="runner-config" class="dropdown">
+<div id="runner-config" class="dropdown">
   <button class="btn btn-link" data-toggle="dropdown">
-    <i class="fa fa-cog"></i>
+    <i class="fa fa-cloud"></i>
     <i class="fa fa-caret-down"></i>
   </button>
   <ul class="dropdown-menu dropdown-menu-right" role="menu">
-    <li class="dropdown-header">Browsers</li>
+    <li class="dropdown-header">Sauce Labs</li>
     <li>
-      <a href="#">
-        <input type="checkbox" checked="checked" />
-        <img src="/eclectus/img/chrome_32x32.png" />
-        <span class="browser-name">Chrome</span>
+      <a href="#" data-js="run">
+        <i class="fa fa-play-circle"></i>
+        Run
       </a>
     </li>
     <li>
       <a href="#">
-        <input type="checkbox" checked="checked" />
-        <img src="/eclectus/img/firefox_32x32.png" />
-        <span class="browser-name">Firefox</span>
+        <i class="fa fa-wrench"></i>
+        Configuration
       </a>
-    </li>
-    <li>
-      <a href="#">
-        <input type="checkbox" checked="checked" />
-        <img src="/eclectus/img/safari_32x32.png" />
-        <span class="browser-name">Safari</span>
-      </a>
-    </li>
-    <li>
-      <a href="#">
-      <input type="checkbox" checked="checked" />
-        <img src="/eclectus/img/ie_32x32.png" />
-        <span class="browser-name">IE</span>
-      </a>
-    </li>
-    <li class="divider"></li>
-    <li class="save-container">
-      <button class="btn btn-primary btn-xs pull-right">
-        <i class="fa fa-check"></i>
-        Save
-      </button>
     </li>
   </ul>
 </div>
-<ul id="cross-browsers" class="list-inline">
-  <li>
-    <img src="/eclectus/img/chrome_16x16.png" />
-  </li>
-  <li>
-    <img src="/eclectus/img/firefox_16x16.png" />
-  </li>
-  <li>
-    <img src="/eclectus/img/safari_16x16.png" />
-  </li>
-  <li>
-    <img src="/eclectus/img/ie_16x16.png" />
-  </li>
-</ul> -->
