@@ -104,6 +104,22 @@ io.on "connection", (socket) ->
     jobName = spec + "-" + Date.now()
     fn(jobName)
 
+    # browsers = ["chrome", "firefox"]
+
+    # runs = _.reduce browsers, (memo, value) ->
+    #   memo.push $.Deferred()
+    #   memo
+    # , []
+
+    # _.each browsers, (browser, index) ->
+    #   run.always (result) ->
+    #     socket.emit "sauce:run:finished", result
+
+    #   sauce.run("0.0.0.0", app.get("port"), spec, browser, runs[index])
+
+    # $.when(runs...).always ->
+    #   socket.emit "sauce:all:runs:finished", runs
+
 watchTestFiles = chokidar.watch testFolder, ignored: (path, stats) ->
   ## this fn gets called twice, once with the directory
   ## which does not have a stats argument

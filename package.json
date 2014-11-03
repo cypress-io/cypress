@@ -78,6 +78,7 @@
     "through2": "0.6.3",
     "underscore": "1.6.0",
     "underscore.string": "2.3.3",
+    "wd": "^0.3.10",
     "yeoman-generator": "0.17.1"
   }
 }
