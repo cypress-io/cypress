@@ -2,7 +2,7 @@
 
   satelliteEvents = "runner:start runner:end before:run before:add after:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test".split(" ")
   hostEvents      = "load:iframe".split(" ")
-  passThruEvents  = "sauce:job:start sauce:job:done sauce:job:fail command:add".split(" ")
+  passThruEvents  = "sauce:job:create sauce:job:start sauce:job:done sauce:job:fail command:add".split(" ")
 
   API =
     start: ->

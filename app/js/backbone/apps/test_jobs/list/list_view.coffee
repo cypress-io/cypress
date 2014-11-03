@@ -8,13 +8,18 @@
       stateIcon:  ".job-state-container i"
 
     modelEvents:
-      "change:state": "stateChanged"
+      "change:state": "render"
+      "change:id"   : "render"
 
-    stateChanged: (model, value, options) ->
-      ## good candidate here for backbone stickit
-      ## for both of these
-      @ui.stateIcon.removeClass().addClass model.get("stateIcon")
-      @ui.state.text model.get("stateFormatted")
+    onRender: ->
+      @$el.removeClass().addClass @getClassByState()
+
+    getClassByState: ->
+      switch @model.get("state")
+        when "passed" then "success"
+        when "failed" then "danger"
+        when "error"  then "warning"
+        else ""
 
   class List.Loading extends App.Views.ItemView
     template: "test_jobs/list/_loading"

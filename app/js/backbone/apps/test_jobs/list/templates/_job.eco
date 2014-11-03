@@ -18,8 +18,16 @@
   <%= @os %>
 </td>
 <td>
-  <a href="http://saucelabs.com/tests/<%= @id %>" target="_blank">
-    <i class="fa fa-external-link"></i>
-    View
-  </a>
+  <% if @id: %>
+    <a href="http://saucelabs.com/tests/<%= @id %>" target="_blank">
+      <i class="fa fa-external-link"></i>
+      View
+    </a>
+  <% end %>
+</td>
+<td>
+  <% if @time: %>
+    <i class="fa fa-clock-o"></i>
+    <%= @timeFormatted %> secs
+  <% end %>
 </td>

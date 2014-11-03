@@ -119,23 +119,22 @@ io.on "connection", (socket) ->
     ## https://saucelabs.com/platforms/webdriver
     jobs = [
       { platform: "Windows 8.1", browser: "internet explorer",  version: 11 }
-      # { platform: "Windows 7",   browser: "internet explorer",  version: 10 }
-      # { platform: "Linux",       browser: "chrome",             version: 37 }
-      # { platform: "Linux",       browser: "firefox",            version: 33 }
+      { platform: "Windows 7",   browser: "internet explorer",  version: 10 }
+      { platform: "Linux",       browser: "chrome",             version: 37 }
+      { platform: "Linux",       browser: "firefox",            version: 33 }
       { platform: "OS X 10.9",   browser: "safari",             version: 7 }
     ]
 
     normalizeJobObject = (obj) ->
+      obj = _(obj).clone()
+
       obj.browser = {
         "internet explorer": "ie"
       }[obj.browserName] or obj.browserName
 
       obj.os = obj.platform
 
-      delete obj.browserName
-      delete obj.platform
-
-      return obj
+      _(obj).pick "name", "browser", "version", "os", "batchId", "guid"
 
     _.each jobs, (job) ->
       options =
@@ -143,24 +142,25 @@ io.on "connection", (socket) ->
         port:        app.get("port")
         name:        jobName
         batchId:     batchId
+        guid:        uuid.v4()
         browserName: job.browser
         version:     job.version
         platform:    job.platform
 
+      clientObj = normalizeJobObject(options)
+      socket.emit "sauce:job:create", clientObj
+
       df = jQuery.Deferred()
 
       df.progress (sessionID) ->
-        obj         = normalizeJobObject(options)
-        obj         = _(obj).pick "name", "browser", "version", "os", "batchId"
-        obj.id      = sessionID
-
-        socket.emit "sauce:job:start", obj
+        ## pass up the sessionID to the previous client obj by its guid
+        socket.emit "sauce:job:start", clientObj.guid, sessionID
 
       df.fail (sessionID, err) ->
         socket.emit "sauce:job:fail", sessionID, err
 
-      df.done (sessionID, results = {}) ->
-        socket.emit "sauce:job:done", sessionID, results
+      df.done (sessionID, runningTime, results = {}) ->
+        socket.emit "sauce:job:done", sessionID, runningTime, results
 
       sauce options, df
 

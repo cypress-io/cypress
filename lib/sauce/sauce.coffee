@@ -15,17 +15,21 @@ module.exports = (options = {}, df) ->
 
   browser.on "http", (meth, path, data) ->
 
+  timeStart = Date.now()
+
   browser
     .init options, (err, arr) ->
       ## update the job with our custom batchId
-      browser.sauceJobUpdate({"custom-data": {batchId: options.batchId} })
+      browser.sauceJobUpdate
+        "custom-data": _(options).pick("batchId", "guid")
 
       df.fail(browser.sessionID, err) if err
     .get("http://#{options.host}:#{options.port}/##{options.name}")
     # .safeEval "window.location.href", (err, res) ->
       # console.log res
     .fin ->
-      df.resolve(browser.sessionID)
+      timeEnd = Date.now() - timeStart
+      df.resolve(browser.sessionID, timeEnd)
       browser.quit()
     .done()
 
