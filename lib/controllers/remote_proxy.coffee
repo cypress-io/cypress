@@ -8,6 +8,7 @@ _           = require("lodash")
 fs          = require("fs")
 fsUtil      = new (require("../util/file_helpers"))
 UrlMerge    = require("../util/url_merge")
+httpProxy   = require("http-proxy")
 
 module.exports = class extends require('events').EventEmitter
   handle: (req, res, next) =>
@@ -16,6 +17,8 @@ module.exports = class extends require('events').EventEmitter
       throw new Error("™ Session Proxy not yet set! ™")
 
     uri = req.url.split("/__remote/").join("")
+
+    proxy = httpProxy.createProxyServer({})
 
     domain = Domain.create()
 
@@ -27,6 +30,7 @@ module.exports = class extends require('events').EventEmitter
         remote: req.session.remote,
         req: req
         res: res
+        proxy: proxy
       })
       .on('error', (e) -> throw e)
       .pipe(res)
@@ -35,27 +39,28 @@ module.exports = class extends require('events').EventEmitter
     switch type = fsUtil.detectType(opts.uri)
       when "absolute" then @pipeAbsolutePath(opts, opts.res)
       when "file"     then @pipeFileContent(opts.uri, opts.res)
-      when "url"      then @pipeUrlContent(opts.uri, opts.res, opts.req)
+      when "url"      then @pipeUrlContent(opts)
       else
         throw new Error "Unable to handle type #{type}"
 
-  pipeUrlContent: (uri, res, req) ->
-    @emit "verbose", "piping url content #{uri}"
-    thr = Through((b) -> this.queue(b))
+  pipeUrlContent: (opts) ->
+    @emit "verbose", "piping url content #{opts.uri}, #{opts.uri.split(opts.remote)[1]}"
 
-    rq = hyperquest uri, {method: req.method, headers: req.headers}, (err, incomingRes) =>
-      return thr.emit('error', err) if (err)
+    o = url.parse(opts.remote)
 
-      if /^30(1|2|7|8)$/.test(incomingRes.statusCode)
-        newUrl = UrlMerge(uri, incomingRes.headers.location)
-        res.redirect("/__remote/" + newUrl)
-      else
-        res.contentType(incomingRes.headers['content-type'])
-        rq.pipe(thr)
+    opts.req.url = opts.req.url.split("__remote/")[1]
 
-    rq.end() if req.method?.match(/^post$/i)
+    opts.req.url = url.resolve(opts.remote, opts.req.url or "")
 
-    thr
+    o.path = "/"
+    o.pathname = "/"
+
+    opts.proxy.web(opts.req, opts.res, {
+      target: o.format()
+      changeOrigin: true
+    })
+
+    opts.res
 
   pipeFileContent: (uri, res) ->
     @emit "verbose", "piping url content #{uri}"
@@ -85,16 +90,13 @@ module.exports = class extends require('events').EventEmitter
     @emit "verbose", "piping url content #{uri}"
     @pipeFileUriContents.apply(this, arguments)
 
-  pipeAbsolutePath: (paths, res) ->
-    switch type = fsUtil.detectType(paths.remote)
+  pipeAbsolutePath: (opts, res) ->
+    switch type = fsUtil.detectType(opts.remote)
       when "url"
-        base = url.parse(paths.remote)
-        base = base.protocol + "//" + base.hostname + paths.uri
-
-        @pipeUrlContent(base, res)
+        @pipeUrlContent(opts)
       when "file"
-        @pipeFileContent(paths.remote + paths.uri, res)
+        @pipeFileContent(opts.remote + opts.uri, res)
       when "absolute"
-        @pipeAbsoluteFileContent(paths.uri, res)
+        @pipeAbsoluteFileContent(opts.uri, res)
       else
-        throw new Error "Unable to handle path for '#{type}': " + JSON.stringify(paths)
+        throw new Error "Unable to handle path for '#{type}': " + JSON.stringify(opts)
