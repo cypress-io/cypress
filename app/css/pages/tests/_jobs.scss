@@ -42,6 +42,10 @@
       tr {
         cursor: pointer;
       }
+
+      a:hover {
+        text-decoration: underline;
+      }
     }
 
     .image-wrapper {

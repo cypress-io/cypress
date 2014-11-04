@@ -19,9 +19,14 @@
 </td>
 <td>
   <% if @id: %>
+    <a href="<%= @url %>" target="_blank">
+      <i class="fa fa-crosshairs"></i>
+      Manual
+    </a>
+    |
     <a href="http://saucelabs.com/tests/<%= @id %>" target="_blank">
       <i class="fa fa-external-link"></i>
-      View
+      Details
     </a>
   <% end %>
 </td>

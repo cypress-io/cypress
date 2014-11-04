@@ -36,6 +36,12 @@
         for key, re of osRegExp
           return key if re.test(os)
 
+      url: ->
+        Routes.create "#" + @get("name"),
+          __env:  "host"
+          browser: @get("browser")
+          version: @get("version")
+
     start: (id) ->
       @set "id", id, {silent: true}
       @set "state", "running"

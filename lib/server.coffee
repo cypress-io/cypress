@@ -122,7 +122,7 @@ io.on "connection", (socket) ->
       { platform: "Windows 7",   browser: "internet explorer",  version: 10 }
       { platform: "Linux",       browser: "chrome",             version: 37 }
       { platform: "Linux",       browser: "firefox",            version: 33 }
-      { platform: "OS X 10.9",   browser: "safari",             version: 7 }
+      { platform: "OS X 10.6",   browser: "safari",             version: 5.1 }
     ]
 
     normalizeJobObject = (obj) ->
