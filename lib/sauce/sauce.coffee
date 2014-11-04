@@ -26,7 +26,7 @@ module.exports = (options = {}, df) ->
           guid:    options.guid
 
       df.fail(browser.sessionID, err) if err
-    .get("http://#{options.host}:#{options.port}/##{options.name}")
+    .get("http://#{options.host}:#{options.port}/##{options.name}?nav=false")
     # .safeEval "window.location.href", (err, res) ->
       # console.log res
     .fin ->

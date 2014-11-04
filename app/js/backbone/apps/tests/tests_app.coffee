@@ -4,9 +4,16 @@
     module: TestsApp
 
     before: (params = {}) ->
+      @checkNav(params)
       @updateAppEnv(params)
 
       App.vent.trigger "main:nav:choose", "Tests"
+
+    checkNav: (params) ->
+      ## quick hack to get rid of the left nav
+      ## used for sauce labs automated tests
+      if params.nav and params.nav is "false"
+        App.config.trigger "remove:nav"
 
     updateAppEnv: (params) ->
       ## store whether this was existing
