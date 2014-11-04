@@ -5,9 +5,9 @@
         Running on Sauce Labs
       </h2>
       <code class="pull-left"><%= @jobName %></code>
-      <div id="job-counter">
+<!--       <div id="job-counter">
         10s
-      </div>
+      </div> -->
     </header>
     <div class="block-panel">
       <h4>Jobs</h4>

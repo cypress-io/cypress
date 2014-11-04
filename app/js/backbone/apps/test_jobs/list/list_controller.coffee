@@ -21,15 +21,15 @@
         ## by its guid and give it a real id
         jobs.startJobByGuid(guid, id)
 
-      @listenTo runner, "sauce:job:done", (id, runningTime, results = {}) ->
+      @listenTo runner, "sauce:job:done", (id, runningTime, passed) ->
         ## this tells us when our job is done
         ## TODO figure out whether this test passed or failed
-        jobs.done(id, runningTime, results)
+        jobs.done(id, runningTime, passed)
 
-      @listenTo runner, "sauce:job:fail", (id, err) ->
+      @listenTo runner, "sauce:job:fail", (guid, err) ->
         ## if there was a literal error going out
         ## to sauce labs then our job failed
-        jobs.fail(id, err)
+        jobs.fail(guid, err)
 
       view = @getView(jobs, jobName)
 

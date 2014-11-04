@@ -16,23 +16,47 @@ module.exports = (options = {}, df) ->
   browser.on "http", (meth, path, data) ->
 
   timeStart = Date.now()
+  passed    = true
+
+  ## should also add in the functionality to add a timeout per test
+  ## so if the eclectusResults global isnt changing then we should timeout
+  ## and make the global script timeout also configurable
 
   browser
+      # debugger
     .init options, (err, arr) ->
       ## update the job with our custom batchId
-      browser.sauceJobUpdate
-        "custom-data":
-          batchId: options.batchId
-          guid:    options.guid
+      ## unless there was an erro
+      if not err
+        browser.sauceJobUpdate
+          "custom-data":
+            batchId: options.batchId
+            guid:    options.guid
 
-      df.fail(browser.sessionID, err) if err
+    .catch (err) ->
+      # debugger
+      browser._hasError = true
+      df.reject(err)
+      # browser.quit()
+    # .setAsyncScriptTimeout(60*30*1000)
+
     .get("http://#{options.host}:#{options.port}/##{options.name}?nav=false")
-    # .safeEval "window.location.href", (err, res) ->
-      # console.log res
+
+    .waitFor wd.asserters.jsCondition("window.eclectusResults", true), 60*30*1000, 1000, (err, obj) ->
+      ## reset passed to false if there are any failures
+      passed = !obj.failed
+
     .fin ->
+      # debugger
+      # return if browser._hasError
+
+      browser.sauceJobStatus(passed)
+
       timeEnd = Date.now() - timeStart
-      df.resolve(browser.sessionID, timeEnd)
+      df.resolve(browser.sessionID, timeEnd, passed)
+
       browser.quit()
+
     .done()
 
 # Driver = require('selenium-webdriver')

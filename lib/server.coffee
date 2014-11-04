@@ -122,7 +122,7 @@ io.on "connection", (socket) ->
       { platform: "Windows 7",   browser: "internet explorer",  version: 10 }
       { platform: "Linux",       browser: "chrome",             version: 37 }
       { platform: "Linux",       browser: "firefox",            version: 33 }
-      { platform: "OS X 10.6",   browser: "safari",             version: 5.1 }
+      { platform: "OS X 10.9",   browser: "safari",             version: 7 }
     ]
 
     normalizeJobObject = (obj) ->
@@ -156,11 +156,11 @@ io.on "connection", (socket) ->
         ## pass up the sessionID to the previous client obj by its guid
         socket.emit "sauce:job:start", clientObj.guid, sessionID
 
-      df.fail (sessionID, err) ->
-        socket.emit "sauce:job:fail", sessionID, err
+      df.fail (err) ->
+        socket.emit "sauce:job:fail", clientObj.guid, err
 
-      df.done (sessionID, runningTime, results = {}) ->
-        socket.emit "sauce:job:done", sessionID, runningTime, results
+      df.done (sessionID, runningTime, passed) ->
+        socket.emit "sauce:job:done", sessionID, runningTime, passed
 
       sauce options, df
 

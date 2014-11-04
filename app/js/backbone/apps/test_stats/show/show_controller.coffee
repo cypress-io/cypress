@@ -25,6 +25,9 @@
         ## we reset our stats back to 0
         stats.reset()
 
+      @listenTo runner, "runner:end", ->
+        stats.setGlobally()
+
       @layout = @getLayoutView()
 
       @listenTo @layout, "show", =>
@@ -37,7 +40,8 @@
       ## make sure we stop counting just in case we've clicked
       ## between test specs too quickly!
       @stats.stopCounting()
-      delete @stats
+      @stats.setGlobally(false)
+      @stats = null
 
     statsRegion: (stats) ->
       statsView = @getStatsView stats

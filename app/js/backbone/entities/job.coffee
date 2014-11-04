@@ -46,12 +46,9 @@
       @set "id", id, {silent: true}
       @set "state", "running"
 
-    done: (runningTime, results) ->
-      @results = results
+    done: (runningTime, passed) ->
       @set "time", runningTime, {silent: true}
-      @set "state", "passed"
-
-      # @set "state", results.state
+      @set "state", if passed then "passed" else "failed"
 
     fail: (err) ->
       @err = err
@@ -64,12 +61,12 @@
       if job = @findWhere(guid: guid)
         job.start(id)
 
-    done: (id, runningTime, results) ->
+    done: (id, runningTime, passed) ->
       if job = @getById(id)
-        job.done(runningTime, results)
+        job.done(runningTime, passed)
 
-    fail: (id, err) ->
-      if job = @getById(id)
+    fail: (guid, err) ->
+      if job = @findWhere(guid: guid)
         job.fail(err)
 
     getById: (id) ->
