@@ -1,14 +1,14 @@
-Domain      = require("domain")
-url         = require("url")
-Through     = require("through")
-hyperquest  = require("hyperquest")
-mime        = require("mime")
-path        = require("path")
-_           = require("lodash")
-fs          = require("fs")
-fsUtil      = new (require("../util/file_helpers"))
-UrlMerge    = require("../util/url_merge")
-httpProxy   = require("http-proxy")
+Domain      = require 'domain'
+url         = require 'url'
+Through     = require 'through'
+hyperquest  = require 'hyperquest'
+mime        = require 'mime'
+path        = require 'path'
+_           = require 'lodash'
+fs          = require 'fs'
+fsUtil      = new (require('../util/file_helpers'))
+UrlMerge    = require '../util/url_merge'
+httpProxy   = require 'http-proxy'
 
 module.exports = class extends require('events').EventEmitter
   handle: (req, res, next) =>

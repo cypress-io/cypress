@@ -1,10 +1,10 @@
-gulp      = require('gulp')
+gulp      = require 'gulp'
 $         = require('gulp-load-plugins')()
-path      = require("path")
-_         = require("underscore")
-fs        = require("fs")
-yaml      = require("js-yaml")
-jQuery    = require("jquery-deferred")
+path      = require 'path'
+_         = require 'underscore'
+fs        = require 'fs'
+yaml      = require 'js-yaml'
+jQuery    = require 'jquery-deferred'
 
 log = (obj = {}) ->
   args = [

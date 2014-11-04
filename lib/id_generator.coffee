@@ -1,8 +1,8 @@
-fs        = require("fs")
-_         = require("underscore")
-path      = require("path")
-gutil     = require("gulp-util")
-phantom   = require("node-phantom-simple")
+fs        = require 'fs'
+_         = require 'underscore'
+path      = require 'path'
+gutil     = require 'gulp-util'
+phantom   = require 'node-phantom-simple'
 
 testIdRegExp = /\[(.{3})\]$/
 

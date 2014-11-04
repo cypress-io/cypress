@@ -1,5 +1,5 @@
-_   = require("lodash")
-Url = require("url")
+_   = require 'lodash'
+Url = require 'url'
 
 module.exports = (origin, redirect) ->
   originUrl = Url.parse(origin)

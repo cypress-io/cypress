@@ -1,18 +1,18 @@
-express     = require("express")
-http        = require("http")
-path        = require("path")
-fs          = require("fs")
-hbs         = require("hbs")
-glob        = require("glob")
-_           = require("underscore")
-_.str       = require("underscore.string")
-chokidar    = require("chokidar")
-minimist    = require("minimist")
-Domain      = require("domain")
-idGenerator = require("./id_generator.coffee")
-uuid        = require("node-uuid")
-sauce       = require("./sauce/sauce.coffee")
-jQuery      = require("jquery-deferred")
+express     = require 'express'
+http        = require 'http'
+path        = require 'path'
+fs          = require 'fs'
+hbs         = require 'hbs'
+glob        = require 'glob'
+_           = require 'underscore'
+_.str       = require 'underscore.string'
+chokidar    = require 'chokidar'
+minimist    = require 'minimist'
+Domain      = require 'domain'
+idGenerator = require './id_generator.coffee'
+uuid        = require 'node-uuid'
+sauce       = require './sauce/sauce.coffee'
+jQuery      = require 'jquery-deferred'
 
 argv = minimist(process.argv.slice(2), boolean: true)
 

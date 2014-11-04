@@ -1,5 +1,5 @@
-_        = require("underscore")
-Eclectus = require("../eclectus")
+_        = require 'underscore'
+Eclectus = require '../eclectus'
 
 class ConfigGenerator extends Eclectus.Base
   prompting: ->
