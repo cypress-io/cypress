@@ -45,7 +45,11 @@ app.use require("compression")()
 app.use require("morgan")("dev")
 app.use require("body-parser").json()
 app.use require("method-override")()
-app.use(require('express-session')({secret: "marionette is cool"}))
+app.use require('express-session')(
+  secret: "marionette is cool"
+  saveUninitialized: true
+  resave: true
+)
 
 convertToAbsolutePath = (files) ->
   ## make sure its an array and remap to an absolute path
