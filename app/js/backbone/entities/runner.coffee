@@ -259,6 +259,10 @@
         if not hook.ctx.currentTest
           test = @getTestFromHook(hook, hook.parent)
 
+          ## reference the hook by the test so we can
+          ## access this throughout our API
+          test.hook = hook
+
           @patchEcl
             hook: @getHookName(hook)
             runnable: test
@@ -292,6 +296,9 @@
 
       @runner.on "test end", (test) =>
         @trigger "test:end", test
+
+        ## remove the hook reference from the test
+        test.hook = null
         test.removeAllListeners()
         @eclRestore()
       ## start listening to all the pertinent runner events
