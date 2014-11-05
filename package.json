@@ -62,16 +62,16 @@
     "hyperquest": "1.0.1",
     "lodash": "2.4.1",
     "mime": "1.2.11",
-    "minimist": "^1.1.0",
+    "minimist": "1.1.0",
     "mkdirp": "0.5.0",
     "mocha": "1.21.4",
     "mocha-phantomjs": "3.5.0",
     "nock": "0.48.1",
     "node-phantom-simple": "1.2.0",
-    "node-uuid": "^1.4.1",
+    "node-uuid": "1.4.1",
     "phantomjs": "1.9.7-15",
     "requirejs": "2.1.15",
-    "sauce-connect-launcher": "^0.7.0",
+    "sauce-connect-launcher": "0.7.0",
     "sinon-chai": "2.6.0",
     "snockets": "1.3.8",
     "socket.io": "1.0.6",
@@ -79,7 +79,7 @@
     "through2": "0.6.3",
     "underscore": "1.6.0",
     "underscore.string": "2.3.3",
-    "wd": "^0.3.10",
+    "wd": "0.3.10",
     "yeoman-generator": "0.17.1"
   }
 }
