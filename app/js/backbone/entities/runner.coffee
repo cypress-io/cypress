@@ -20,6 +20,7 @@
       @commands         = App.request "command:entities"
       @satelliteEvents  = App.request "satellite:events"
       @hostEvents       = App.request "host:events"
+      @passThruEvents   = App.request "pass:thru:events"
 
     setContentWindow: (@contentWindow, @$remoteIframe) ->
 
@@ -32,6 +33,14 @@
     setEclRestore: (@eclRestore) ->
 
     setOptions: (@options) ->
+
+    runSauce: ->
+      socket = App.request "socket:entity"
+
+      ## when we get a response from the server with
+      ## the jobName we notify all parties
+      socket.emit "run:sauce", @iframe, (jobName, batchId) =>
+        @trigger "sauce:running", jobName, batchId
 
     getTestCid: (test) ->
       ## grab the test id from the test's title
@@ -88,8 +97,12 @@
           @listenTo socket, event, (args...) =>
             @trigger event, args...
 
-        @listenTo socket, "command:add", (args...) =>
-          @commands.add args...
+      _.each @passThruEvents, (event) =>
+        @listenTo socket, event, (args...) =>
+          if event is "command:add"
+            @commands.add args...
+          else
+            @trigger event, args...
 
       ## dont overload the runSuite fn if we're in CI mode
       return @ if App.config.env("ci")
@@ -249,6 +262,10 @@
         if not hook.ctx.currentTest
           test = @getTestFromHook(hook, hook.parent)
 
+          ## reference the hook by the test so we can
+          ## access this throughout our API
+          test.hook = hook
+
           @patchEcl
             hook: @getHookName(hook)
             runnable: test
@@ -282,6 +299,9 @@
 
       @runner.on "test end", (test) =>
         @trigger "test:end", test
+
+        ## remove the hook reference from the test
+        test.hook = null
         test.removeAllListeners()
         @eclRestore()
       ## start listening to all the pertinent runner events

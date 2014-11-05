@@ -55,3 +55,11 @@
 
   class Show.Config extends App.Views.ItemView
     template: "test_stats/show/_config"
+
+    events:
+      "click a" : "aClicked"
+
+    aClicked: (e) ->
+      e.preventDefault()
+      js = $(e.target).data("js")
+      @trigger("sauce:labs:clicked", js) if js

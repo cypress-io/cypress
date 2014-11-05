@@ -15,6 +15,10 @@
       @listenTo config, "close:test:panels", ->
         @layout.panelsRegion.empty()
 
+      @listenTo config, "remove:nav", ->
+        @layout.satelliteMode()
+        @layout.destroy()
+
       @listenTo config, "change:env", (model, value, options) ->
         ## if we're entering satellite mode then hide our layout
         ## and update some DOM classes for display purposes

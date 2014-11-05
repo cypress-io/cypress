@@ -2,6 +2,7 @@
 
   satelliteEvents = "runner:start runner:end before:run before:add after:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test".split(" ")
   hostEvents      = "load:iframe".split(" ")
+  passThruEvents  = "sauce:job:create sauce:job:start sauce:job:done sauce:job:fail command:add".split(" ")
 
   API =
     start: ->
@@ -16,8 +17,9 @@
         channel.on event, (args...) ->
           socket.trigger event, args...
 
-      channel.on "command:add", (args...) ->
-        socket.trigger "command:add", args...
+      _.each passThruEvents, (event) ->
+        channel.on event, (args...) ->
+          socket.trigger event, args...
 
       channel.on "test:changed", (data) ->
         socket.trigger "test:changed", data.file
@@ -48,3 +50,4 @@
 
   App.reqres.setHandler "satellite:events", -> satelliteEvents
   App.reqres.setHandler "host:events",      -> hostEvents
+  App.reqres.setHandler "pass:thru:events", -> passThruEvents

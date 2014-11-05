@@ -10,6 +10,9 @@ chokidar    = require("chokidar")
 minimist    = require("minimist")
 Domain      = require("domain")
 idGenerator = require("./id_generator.coffee")
+uuid        = require("node-uuid")
+sauce       = require("./sauce/sauce.coffee")
+jQuery      = require("jquery-deferred")
 
 argv = minimist(process.argv.slice(2), boolean: true)
 
@@ -96,6 +99,70 @@ io.on "connection", (socket) ->
     socket.on event, (args...) ->
       args = _.chain(args).compact().reject(_.isFunction).value()
       io.emit event, args...
+
+  ## when we're told to run:sauce we receive
+  ## the spec and callback with the name of our
+  ## sauce labs job
+  ## we'll embed some additional meta data into
+  ## the job name
+  socket.on "run:sauce", (spec, fn) ->
+    ## this will be used to group jobs
+    ## together for the runs related to 1
+    ## spec by setting custom-data on the job object
+    batchId = Date.now()
+
+    jobName = testFolder + "/" + spec
+    fn(jobName, batchId)
+
+    ## need to handle platform/browser/version incompatible configurations
+    ## and throw our own error
+    ## https://saucelabs.com/platforms/webdriver
+    jobs = [
+      { platform: "Windows 8.1", browser: "internet explorer",  version: 11 }
+      { platform: "Windows 7",   browser: "internet explorer",  version: 10 }
+      { platform: "Linux",       browser: "chrome",             version: 37 }
+      { platform: "Linux",       browser: "firefox",            version: 33 }
+      { platform: "OS X 10.9",   browser: "safari",             version: 7 }
+    ]
+
+    normalizeJobObject = (obj) ->
+      obj = _(obj).clone()
+
+      obj.browser = {
+        "internet explorer": "ie"
+      }[obj.browserName] or obj.browserName
+
+      obj.os = obj.platform
+
+      _(obj).pick "name", "browser", "version", "os", "batchId", "guid"
+
+    _.each jobs, (job) ->
+      options =
+        host:        "0.0.0.0"
+        port:        app.get("port")
+        name:        jobName
+        batchId:     batchId
+        guid:        uuid.v4()
+        browserName: job.browser
+        version:     job.version
+        platform:    job.platform
+
+      clientObj = normalizeJobObject(options)
+      socket.emit "sauce:job:create", clientObj
+
+      df = jQuery.Deferred()
+
+      df.progress (sessionID) ->
+        ## pass up the sessionID to the previous client obj by its guid
+        socket.emit "sauce:job:start", clientObj.guid, sessionID
+
+      df.fail (err) ->
+        socket.emit "sauce:job:fail", clientObj.guid, err
+
+      df.done (sessionID, runningTime, passed) ->
+        socket.emit "sauce:job:done", sessionID, runningTime, passed
+
+      sauce options, df
 
 watchTestFiles = chokidar.watch testFolder, ignored: (path, stats) ->
   ## this fn gets called twice, once with the directory

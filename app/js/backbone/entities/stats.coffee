@@ -11,6 +11,12 @@
       @clear silent: true
       @set _.result(@, "defaults")
 
+    ## sets the result of all of the tests
+    ## globally so they're accessible from
+    ## sauce labs or nullify them
+    setGlobally: (bool = true) ->
+      window.eclectusResults = if bool then @attributes else null
+
     startCounting: ->
       @stopCounting() if @intervalId
       @intervalId = setInterval _.bind(@increment, @, "duration"), 100

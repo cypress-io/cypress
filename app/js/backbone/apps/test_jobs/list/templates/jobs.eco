@@ -1,0 +1,24 @@
+<div id="test-jobs">
+  <div id="jobs-container">
+    <header>
+      <h2>
+        Running on Sauce Labs
+      </h2>
+      <code class="pull-left"><%= @jobName %></code>
+<!--       <div id="job-counter">
+        10s
+      </div> -->
+    </header>
+    <div class="block-panel">
+      <h4>Jobs</h4>
+<!--       <div id="jobs-progress" class="pull-right">
+        <div class="progress">
+          <div class="progress-bar progress-bar-success" style="width: 40%">40%</div>
+        </div>
+      </div> -->
+      <table class="table table-hover">
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>

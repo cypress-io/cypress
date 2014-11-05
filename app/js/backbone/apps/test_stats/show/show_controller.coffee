@@ -25,11 +25,14 @@
         ## we reset our stats back to 0
         stats.reset()
 
+      @listenTo runner, "runner:end", ->
+        stats.setGlobally()
+
       @layout = @getLayoutView()
 
       @listenTo @layout, "show", =>
         @statsRegion stats
-        @configRegion stats
+        @configRegion runner
 
       @show @layout
 
@@ -37,14 +40,19 @@
       ## make sure we stop counting just in case we've clicked
       ## between test specs too quickly!
       @stats.stopCounting()
-      delete @stats
+      @stats.setGlobally(false)
+      @stats = null
 
     statsRegion: (stats) ->
       statsView = @getStatsView stats
       @show statsView, region: @layout.statsRegion
 
-    configRegion: ->
+    configRegion: (runner) ->
       configView = @getConfigView()
+
+      @listenTo configView, "sauce:labs:clicked", (option) ->
+        runner.runSauce() if option is "run"
+
       @show configView, region: @layout.configRegion
 
     chosenRegion: (runner, chosen) ->
