@@ -99,7 +99,10 @@
 
       _.each @passThruEvents, (event) =>
         @listenTo socket, event, (args...) =>
-          @trigger event, args...
+          if event is "command:add"
+            @commands.add args...
+          else
+            @trigger event, args...
 
       ## dont overload the runSuite fn if we're in CI mode
       return @ if App.config.env("ci")
