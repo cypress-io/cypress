@@ -15,12 +15,24 @@ chai
 
 describe "remote proxy", ->
   beforeEach ->
-    @baseUrl      = "http://x.com"
+    @baseUrl      = "http://www.x.com"
     @remoteProxy  = new RemoteProxy
     @res = through2.obj((cnk, enc, cb) -> cb(null, cnk))
-    @res.statusCode = 200
-    @res.contentType = ->
-    @res.redirect = ->
+    @res = _.extend(@res,
+      statusCode: 200
+      contentType: ->
+      redirect: ->
+      setHeader: ->
+      writeHead: ->
+    )
+
+    @req = through2.obj (d, enc, cb) -> cb(null, d)
+
+    @req = _.extend(@req, {
+      session:
+        remote: @baseUrl
+      headers: {}
+    })
 
   afterEach ->
     nock.cleanAll()
@@ -30,54 +42,127 @@ describe "remote proxy", ->
       session: {}
     })).to.throw
 
-  it "handles GET's", (done) ->
+  it "handles absolute requests", (fin) ->
     nock(@baseUrl)
-    .get("/bob")
-    .reply(200, (uri, b) ->
-      r = new Readable
-      r.push("ok")
-      r.push(null)
-      r
-    )
+    .get("/bob.css")
+    .reply(200)
+
+    @req = _.extend(@req, {
+      url: "/bob.css"
+      method: "GET"
+    })
 
     @remoteProxy.handle(
-      {
-        session:
-          remote: @baseUrl
-        url: "/__remote/#{@baseUrl}/bob"
-      },
-      @res,
+      @req
+      @res
       (e) -> throw e
     )
 
-    @res.pipe through -> done()
+    @res.on 'end', (e) -> fin()
+
+    @req.end()
+
+  context "relative requests from root", ->
+    it "works with a single level up", (done) ->
+      nock(@baseUrl)
+      .get("/bob.css")
+      .reply(200)
+
+      @req = _.extend(@req, {
+        url: "/__remote/http://bob.css"
+        method: "GET"
+      })
+
+      @remoteProxy.handle(
+        @req
+        @res
+        (e) -> throw e
+      )
+
+      @res.on 'end', (e) -> done()
+
+      @req.end()
+
+    it "works with nested paths", (done) ->
+      nock(@baseUrl)
+      .get("/bob/tom/george.css")
+      .reply(200)
+
+      @req = _.extend(@req, {
+        url: "/__remote/http://bob/tom/george.css"
+        method: "GET"
+      })
+
+      @remoteProxy.handle(
+        @req
+        @res
+        (e) -> throw e
+      )
+
+      @res.on 'end', (e) -> done()
+      @req.end()
+
+    it "works with a multiple levels up", (done) ->
+      nock(@baseUrl)
+      .get("/bob")
+      .reply(200)
+
+      @req = _.extend(@req, {
+        url: "/__remote/http:/bob"
+        method: "GET"
+      })
+
+      @remoteProxy.handle(
+        @req
+        @res
+        (e) -> throw e
+      )
+
+      @res.on 'end', (e) -> done()
+
+      @req.end()
+
+  it "handles GET's", (done) ->
+    nock(@baseUrl)
+    .get("/bob")
+    .reply(200)
+
+    @req = _.extend(@req, {
+      url: "/__remote/bob"
+      method: "GET"
+    })
+
+    @remoteProxy.handle(
+      @req
+      @res
+      (e) -> throw e
+    )
+
+    @res.on 'end', (e) -> done()
+
+    @req.end()
 
   it "Basic Auth"
 
   context "VERBS", ->
     beforeEach ->
 
-
     context "POST", ->
       it "handle with url params", (done) ->
         nock(@baseUrl)
         .post("/?foo=1&bar=2")
-        .reply(200, "ok!")
+        .reply(200)
 
-        @remoteProxy.handle(
-          {
-            session:
-              remote: @baseUrl
-            url: "/__remote/#{@baseUrl}?foo=1&bar=2",
-            method: 'POST'
-          },
-          @res,
-          (e) -> done(e)
-        )
+        @req = _.extend(@req, {
+          url: "/__remote/#{@baseUrl}?foo=1&bar=2",
+          method: 'POST'
+        })
 
-        @res.pipe through (chunk) ->
-          expect(chunk.toString()).to.eql("ok!")
-          done()
+        @remoteProxy.handle(@req, @res, (e) -> done(e))
+
+        @res.on 'end', -> done()
+
+        @req.end()
 
       it "handle body content"
 
@@ -99,19 +184,16 @@ describe "remote proxy", ->
         }
       })
       .get("/")
-      .reply(200, "OK")
+      .reply(200)
 
-      @remoteProxy.handle(
-        {
-          session:
-            remote: @baseUrl
-          url: "/__remote/#{@baseUrl}/",
-          method: 'GET',
-          headers:
-            'head': 'goat'
-        },
-        @res,
-        (e) -> done(e)
-      )
+      @req = _.extend(@req, {
+        url: "/__remote/#{@baseUrl}/",
+        method: 'GET',
+        headers:
+          'head': 'goat'
+      })
 
-      @res.pipe through (chunk) -> done()
+      @remoteProxy.handle(@req, @res, (e) -> done(e))
+      @res.on 'end', -> done()
+
+      @req.end()

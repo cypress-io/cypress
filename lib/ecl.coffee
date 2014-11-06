@@ -1,7 +1,7 @@
-commander = require("commander")
-path      = require("path")
-nodemon   = require("nodemon")
-pkg       = require("../package.json")
+commander = require 'commander'
+path      = require 'path'
+nodemon   = require 'nodemon'
+pkg       = require '../package.json'
 
 module.exports =
   class extends require('events').EventEmitter

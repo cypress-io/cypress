@@ -1,18 +1,18 @@
-express     = require("express")
-http        = require("http")
-path        = require("path")
-fs          = require("fs")
-hbs         = require("hbs")
-glob        = require("glob")
-_           = require("underscore")
-_.str       = require("underscore.string")
-chokidar    = require("chokidar")
-minimist    = require("minimist")
-Domain      = require("domain")
-idGenerator = require("./id_generator.coffee")
-uuid        = require("node-uuid")
-sauce       = require("./sauce/sauce.coffee")
-jQuery      = require("jquery-deferred")
+express     = require 'express'
+http        = require 'http'
+path        = require 'path'
+fs          = require 'fs'
+hbs         = require 'hbs'
+glob        = require 'glob'
+_           = require 'underscore'
+_.str       = require 'underscore.string'
+chokidar    = require 'chokidar'
+minimist    = require 'minimist'
+Domain      = require 'domain'
+idGenerator = require './id_generator.coffee'
+uuid        = require 'node-uuid'
+sauce       = require './sauce/sauce.coffee'
+jQuery      = require 'jquery-deferred'
 
 argv = minimist(process.argv.slice(2), boolean: true)
 
@@ -45,7 +45,11 @@ app.use require("compression")()
 app.use require("morgan")("dev")
 app.use require("body-parser").json()
 app.use require("method-override")()
-app.use(require('express-session')({secret: "marionette is cool"}))
+app.use require('express-session')(
+  secret: "marionette is cool"
+  saveUninitialized: true
+  resave: true
+)
 
 convertToAbsolutePath = (files) ->
   ## make sure its an array and remap to an absolute path
@@ -232,10 +236,6 @@ app.get "/iframes/*", (req, res) ->
 
   test = req.params[0]
 
-  ## renders the defaultPage file if it is truthy in the config
-  # if app.get("eclectus").defaultPage
-    # filePath = path.join(process.cwd(), app.get("eclectus").defaultPage)
-  # else
   filePath = path.join(__dirname, "../", "app/html/empty_inject.html")
 
   res.render filePath, {
@@ -246,12 +246,6 @@ app.get "/iframes/*", (req, res) ->
     specs:        getSpecs(test)
   }
 
-# app.get "/external", (req, res) ->
-#   # req.session.proxyUrl = req.query.url
-
-#   controllers.RemoteLoader(req, res, {
-#     inject: "<script src='/eclectus/js/sinon.js'></script>"
-#   })
 
 app.get "/__remote/*", (req, res, next) ->
   ## might want to use cookies here instead of the query string

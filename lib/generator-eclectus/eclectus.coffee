@@ -1,6 +1,6 @@
-path    = require("path")
-yeoman  = require('yeoman-generator')
-Storage = require("yeoman-generator/lib/util/storage")
+path    = require 'path'
+yeoman  = require 'yeoman-generator'
+Storage = require 'yeoman-generator/lib/util/storage'
 
 yeoman.generators.Base::_setStorage = ->
   storePath = path.join(@destinationRoot(), 'eclectus.json')

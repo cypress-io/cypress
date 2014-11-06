@@ -1,13 +1,13 @@
-fs            = require("fs")
-hyperquest    = require("hyperquest")
-through2      = require("through2")
-_             = require "lodash"
-path          = require "path"
-Domain        = require "domain"
+fs            = require 'fs'
+hyperquest    = require 'hyperquest'
+through2      = require 'through2'
+_             = require 'lodash'
+path          = require 'path'
+Domain        = require 'domain'
 fsUtil        = new (require("../util/file_helpers"))
-through       = require("through")
-Url           = require("url")
-UrlMerge      = require("../util/url_merge")
+through       = require 'through'
+Url           = require 'url'
+UrlMerge      = require '../util/url_merge'
 
 module.exports = class extends require('events').EventEmitter
   handle: (req, res, opts = {}) =>
