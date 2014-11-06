@@ -10,6 +10,9 @@ fsUtil      = new (require('../util/file_helpers'))
 UrlMerge    = require '../util/url_merge'
 httpProxy   = require 'http-proxy'
 
+escapeRegExp = (str) ->
+  str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+
 module.exports = class extends require('events').EventEmitter
   handle: (req, res, next) =>
     ## strip out the /__remote/ from the req.url
@@ -49,11 +52,31 @@ module.exports = class extends require('events').EventEmitter
     o = url.parse(opts.remote)
 
     opts.req.url = opts.req.url.split("__remote/")[1]
-
     opts.req.url = url.resolve(opts.remote, opts.req.url or "")
 
     o.path = "/"
     o.pathname = "/"
+
+    ## If the path is relative from root
+    ## like foo.com/../
+    ## we need to handle when it walks up past the root host and into
+    ## the http:// part, so we need to fix the request url to contain
+    ## the correct root.
+
+    requestUrlBase = url.parse(opts.req.url)
+    requestUrlBase = _.extend(requestUrlBase, {
+      path: "/"
+      pathname: "/"
+      query: ""
+      search: ""
+    })
+
+    requestUrlBase = escapeRegExp(requestUrlBase.format())
+
+    unless (o.format().match(///^#{requestUrlBase}///))
+      basePath = url.parse(opts.req.url).path
+      basePath = basePath.replace /\/$/, ""
+      opts.req.url = o.format() + url.parse(opts.req.url).host + basePath
 
     opts.proxy.web(opts.req, opts.res, {
       target: o.format()

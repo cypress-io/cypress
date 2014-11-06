@@ -4,7 +4,8 @@
   "description": "Javascript Test Studio",
   "main": "index.js",
   "scripts": {
-    "test-server": "mocha --opts spec/server/mocha.opts"
+    "test-server":     "mocha --opts spec/server/mocha.opts",
+    "test-server-dev": "mocha --opts spec/server/mocha.opts --watch"
   },
   "repository": {
     "type": "git",

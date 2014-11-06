@@ -42,6 +42,66 @@ describe "remote proxy", ->
       session: {}
     })).to.throw
 
+  context "relative requests from root", ->
+    it "works with a single level up", (done) ->
+      nock(@baseUrl)
+      .get("/bob.css")
+      .reply(200)
+
+      @req = _.extend(@req, {
+        url: "/__remote/http://bob.css"
+        method: "GET"
+      })
+
+      @remoteProxy.handle(
+        @req
+        @res
+        (e) -> throw e
+      )
+
+      @res.on 'end', (e) -> done()
+
+      @req.end()
+
+    it "works with nested paths", (done) ->
+      nock(@baseUrl)
+      .get("/bob/tom/george.css")
+      .reply(200)
+
+      @req = _.extend(@req, {
+        url: "/__remote/http://bob/tom/george.css"
+        method: "GET"
+      })
+
+      @remoteProxy.handle(
+        @req
+        @res
+        (e) -> throw e
+      )
+
+      @res.on 'end', (e) -> done()
+      @req.end()
+
+    it "works with a multiple levels up", (done) ->
+      nock(@baseUrl)
+      .get("/bob")
+      .reply(200)
+
+      @req = _.extend(@req, {
+        url: "/__remote/http:/bob"
+        method: "GET"
+      })
+
+      @remoteProxy.handle(
+        @req
+        @res
+        (e) -> throw e
+      )
+
+      @res.on 'end', (e) -> done()
+
+      @req.end()
+
   it "handles GET's", (done) ->
     nock(@baseUrl)
     .get("/bob")
