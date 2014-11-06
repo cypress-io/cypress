@@ -49,13 +49,13 @@ module.exports = class extends require('events').EventEmitter
   pipeUrlContent: (opts) ->
     @emit "verbose", "piping url content #{opts.uri}, #{opts.uri.split(opts.remote)[1]}"
 
-    o = url.parse(opts.remote)
+    remote = url.parse(opts.remote)
 
-    opts.req.url = opts.req.url.split("__remote/")[1]
+    opts.req.url = opts.req.url.replace(/\/__remote\//, "")
     opts.req.url = url.resolve(opts.remote, opts.req.url or "")
 
-    o.path = "/"
-    o.pathname = "/"
+    remote.path = "/"
+    remote.pathname = "/"
 
     ## If the path is relative from root
     ## like foo.com/../
@@ -73,13 +73,13 @@ module.exports = class extends require('events').EventEmitter
 
     requestUrlBase = escapeRegExp(requestUrlBase.format())
 
-    unless (o.format().match(///^#{requestUrlBase}///))
+    unless (remote.format().match(///^#{requestUrlBase}///))
       basePath = url.parse(opts.req.url).path
       basePath = basePath.replace /\/$/, ""
-      opts.req.url = o.format() + url.parse(opts.req.url).host + basePath
+      opts.req.url = remote.format() + url.parse(opts.req.url).host + basePath
 
     opts.proxy.web(opts.req, opts.res, {
-      target: o.format()
+      target: remote.format()
       changeOrigin: true
     })
 

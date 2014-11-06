@@ -42,6 +42,26 @@ describe "remote proxy", ->
       session: {}
     })).to.throw
 
+  it "handles absolute requests", (fin) ->
+    nock(@baseUrl)
+    .get("/bob.css")
+    .reply(200)
+
+    @req = _.extend(@req, {
+      url: "/bob.css"
+      method: "GET"
+    })
+
+    @remoteProxy.handle(
+      @req
+      @res
+      (e) -> throw e
+    )
+
+    @res.on 'end', (e) -> fin()
+
+    @req.end()
+
   context "relative requests from root", ->
     it "works with a single level up", (done) ->
       nock(@baseUrl)
