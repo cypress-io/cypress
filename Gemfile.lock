@@ -2,7 +2,7 @@ GEM
   remote: http://rubygems.org/
   specs:
     chunky_png (1.3.1)
-    compass (0.12.7)
+    compass (0.12.6)
       chunky_png (~> 1.2)
       fssm (>= 0.2.7)
       sass (~> 3.2.19)
@@ -15,5 +15,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  compass (~> 0.12.6)
-  sass-css-importer (~> 1.0.0.beta.0)
+  compass (= 0.12.6)
+  sass (= 3.2.19)
+  sass-css-importer (= 1.0.0.beta.0)
