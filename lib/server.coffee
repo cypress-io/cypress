@@ -279,4 +279,4 @@ server.listen app.get("port"), ->
   console.log 'Express server listening on port ' + app.get('port')
 
   ## open phantom if ids are true (which they are by default)
-  idGenerator.openPhantom() if argv.ids
+  idGenerator.openPhantom() #if argv.ids
