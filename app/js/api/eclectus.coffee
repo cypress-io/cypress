@@ -102,6 +102,8 @@ window.Eclectus = do ($, _) ->
     ## loops through each method and partials
     ## the runnable onto our prototype
     @patch = (args, fns) ->
+      Cypress.patch(args, fns)
+
       ## we want to be able to pass in specific functions to patch here
       ## else use the default methods object
       _.each (fns or methods), (fn, key, obj) ->
@@ -142,6 +144,7 @@ window.Eclectus = do ($, _) ->
 
     ## restores the sandbox after each test run
     @restore = ->
+      Cypress.restore()
       Eclectus.prototype.sandbox?.server = null
       Eclectus.prototype.sandbox?._server?.restore?()
       Eclectus.prototype.sandbox?.restore?()

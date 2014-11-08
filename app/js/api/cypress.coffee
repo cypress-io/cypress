@@ -1,0 +1,148 @@
+## make this a global to allow attaching / overriding
+## we just need to set the patchEcl properties instead
+## of using a partial
+window.Cypress = do ($, _) ->
+
+  commands =
+    url: (partial) ->
+      partial.$remoteIframe.prop("contentWindow").location.toString()
+
+    then: (partial, fn) ->
+      ## to figure out whether or not to invoke then we just
+      ## see if its the very last command, and its been passed
+      ## two arguments, the second of which is called done
+      ## if so its been added by mocha
+      debugger
+      fn.call(@, @subject)
+
+    find: (partial, selector) ->
+      new $.fn.init(selector, partial.$remoteIframe.prop("contentWindow").document)
+
+    type: (partial, sequence, options = {}) ->
+      throw new Error("Cannot call .type() without first finding an element") unless @subject and _.isElement(@subject[0])
+
+      _.extend options,
+        sequence: sequence
+
+      @subject.simulate "key-sequence", options
+
+    eq: (arg) ->
+
+  class Cypress
+    queue: []
+
+    constructor: (@subject = null, @lastCommand = null) ->
+      # debugger
+      # Object.defineProperty @, "foo",
+      #   get: ->
+      #     debugger
+
+    run: (index = 0) ->
+      queue = @queue[index]
+
+      ## if we're at the very end just return our instance
+      return @ if not queue
+
+      # if queue.name is "foo"
+        # debugger
+        # return queue.ctx[queue.fn].apply(queue.ctx, queue.args)
+
+      df = @set queue, @queue[index - 1], @queue[index + 1]
+      df.done =>
+        @run index + 1
+
+      # _.each @queue, (obj, i, queue) =>
+      #   if obj.name is "foo"
+      #     debugger
+
+      #   ## pass in the obj + prev + next obj from the queue
+      #   @set obj, queue[i - 1], queue[i + 1]
+
+    clearTimeout: (id) ->
+      clearTimeout(id) if id
+      return @
+
+    set: (obj, prev, next) ->
+      obj.prev = prev
+      obj.next = next
+
+      @current = obj
+
+      @invoke(obj)
+
+    invoke: (obj, args...) ->
+      ## allow the invoked arguments to be overridden by
+      ## passing them in explicitly
+      args = if args.length then args else obj.args
+
+      ## if the last argument is a function then instead of
+      ## expecting this to be resolved we wait for that function
+      ## to be invoked
+      $.when(obj.fn.apply(obj.ctx, args)).done (subject) =>
+        @subject = subject
+      # @trigger "set", subject
+
+    _foo: (df, wait = 10) ->
+      df ?= $.Deferred()
+
+      try
+        chai.expect(@subject.length).to.eq(1)
+
+        df.resolve(@subject)
+      catch e
+        ## this should prob match the runnable's timeout here
+        ## we should reset the runnables timeout every time
+        ## a command successfully runs and expose that as
+        ## a configuration variable
+        ## total timeout vs each individuals command timeout
+        return e if wait >= 2000
+
+        _.delay =>
+          wait += 50
+
+          @invoke(@current.prev).done =>
+            @_foo.call(@, df, wait)
+        , 50
+
+      return df
+
+    ## class method patch
+    ## loops through each method and partials
+    ## the runnable onto our prototype
+    @patch = (obj, fns) ->
+
+      ## we want to be able to pass in specific functions to patch here
+      ## else use the default commands object
+      _.each (fns or commands), (fn, key) ->
+        Cypress.prototype[key] = (args...) ->
+          @clearTimeout(@runId)
+          args.unshift(obj)
+          @queue.push {name: key, ctx: @, fn: fn, args: args}
+          @runId = _.defer _(@run).bind(@)
+          return @
+
+      Object.defineProperty Cypress.prototype, "foo",
+        get: ->
+          @clearTimeout(@runId)
+          # args.unshift(obj)
+          @queue.push {name: "foo", ctx: @, fn: Cypress::_foo, args: []}
+          @runId = _.defer _(@run).bind(@)
+          return @
+
+      return @
+
+    ## remove all of the partialed functions from Cypress prototype
+    @unpatch = (fns) ->
+      fns = _(commands).keys().concat("hook", "sandbox")
+      _.each (fns), (fn, obj) ->
+        delete Cypress.prototype[fn]
+
+    @hook = (name) ->
+      ## simply store the current hook on our prototype
+      Cypress.prototype.hook = name
+
+    ## restores the queue after each test run
+    @restore = ->
+      Cypress.prototype.queue = []
+
+  return Cypress

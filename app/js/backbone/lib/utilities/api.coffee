@@ -113,6 +113,7 @@
     start: (options) ->
       ## instantiate Eclectus
       window.Ecl = new Eclectus
+      window.cy  = new Cypress
 
       overloadMochaRunnableEmit() if not App.config.env("ci")
       overloadMochaRunnerEmit()
