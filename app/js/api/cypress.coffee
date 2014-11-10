@@ -14,8 +14,31 @@ window.Cypress = do ($, _) ->
       ## if so its been added by mocha
       fn.call(@, @subject)
 
-    find: (partial, selector) ->
-      new $.fn.init(selector, partial.$remoteIframe.prop("contentWindow").document)
+    find: (partial, selector, alias, options = {}) ->
+      options = if _.isObject(alias) then alias else options
+
+      _.defaults options,
+        df: $.Deferred()
+        retry: true
+        timeout: 2000
+        total: 0
+
+      df.reject("Timed out trying to find element: #{selector}") if options.total >= options.timeout
+
+      $el = new $.fn.init(selector, partial.$remoteIframe.prop("contentWindow").document)
+
+      ## return the $el immediately if we've set not to retry
+      ## or we found an element
+      if $el.length or not options.retry
+        options.df.resolve($el)
+      else
+        ## think about using @retry here to abstract away
+        ## the delay + invocation + options.total increment
+        _.delay =>
+          @invoke(@current, partial, selector, alias, options)
+        , options.total += 50
+
+      return options.df
 
     type: (partial, sequence, options = {}) ->
       throw new Error("Cannot call .type() without first finding an element") unless @subject and _.isElement(@subject[0])
@@ -91,31 +114,7 @@ window.Cypress = do ($, _) ->
         @subject = subject
       # @trigger "set", subject
 
-    retry: (command, args...) ->
-
-    _should: (df, wait = 10) ->
-      df ?= $.Deferred()
-
-      try
-        chai.expect(@subject.length).to.eq(1)
-
-        df.resolve(@subject)
-      catch e
-        ## this should prob match the runnable's timeout here
-        ## we should reset the runnables timeout every time
-        ## a command successfully runs and expose that as
-        ## a configuration variable
-        ## total timeout vs each individuals command timeout
-        return e if wait >= 2000
-
-        _.delay =>
-          wait += 50
-
-          @invoke(@current.prev).done =>
-            @_should.call(@, df, wait)
-        , 50
-
-      return df
+    retry: (args...) ->
 
     enqueue: (key, fn, args, obj) ->
       @clearTimeout(@runId)
