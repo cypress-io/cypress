@@ -12,7 +12,6 @@ window.Cypress = do ($, _) ->
       ## see if its the very last command, and its been passed
       ## two arguments, the second of which is called done
       ## if so its been added by mocha
-      debugger
       fn.call(@, @subject)
 
     find: (partial, selector) ->
@@ -26,16 +25,35 @@ window.Cypress = do ($, _) ->
 
       @subject.simulate "key-sequence", options
 
-    eq: (arg) ->
+    wait: (partial, fn, options = {}) ->
+      _.defaults options,
+        wait: 50
+        df: $.Deferred()
+
+      try
+        ## invoke fn and make sure its truthy
+        fn.call(@, @subject) and options.df.resolve(@subject)
+      catch e
+        ## this should prob match the runnable's timeout here
+        ## we should reset the runnables timeout every time
+        ## a command successfully runs and expose that as
+        ## a configuration variable
+        ## total timeout vs each individuals command timeout
+        return e if options.wait >= 2000
+
+        _.delay =>
+          options.wait += 50
+
+          @invoke(@current.prev).done =>
+            @invoke(@current, partial, fn, options)
+        , 50
+
+      return options.df
 
   class Cypress
     queue: []
 
     constructor: (@subject = null, @lastCommand = null) ->
-      # debugger
-      # Object.defineProperty @, "foo",
-      #   get: ->
-      #     debugger
 
     run: (index = 0) ->
       queue = @queue[index]
@@ -43,20 +61,9 @@ window.Cypress = do ($, _) ->
       ## if we're at the very end just return our instance
       return @ if not queue
 
-      # if queue.name is "foo"
-        # debugger
-        # return queue.ctx[queue.fn].apply(queue.ctx, queue.args)
-
       df = @set queue, @queue[index - 1], @queue[index + 1]
       df.done =>
         @run index + 1
-
-      # _.each @queue, (obj, i, queue) =>
-      #   if obj.name is "foo"
-      #     debugger
-
-      #   ## pass in the obj + prev + next obj from the queue
-      #   @set obj, queue[i - 1], queue[i + 1]
 
     clearTimeout: (id) ->
       clearTimeout(id) if id
@@ -73,6 +80,8 @@ window.Cypress = do ($, _) ->
     invoke: (obj, args...) ->
       ## allow the invoked arguments to be overridden by
       ## passing them in explicitly
+      ## else just use the arguments the command was
+      ## originally created with
       args = if args.length then args else obj.args
 
       ## if the last argument is a function then instead of
@@ -82,7 +91,9 @@ window.Cypress = do ($, _) ->
         @subject = subject
       # @trigger "set", subject
 
-    _foo: (df, wait = 10) ->
+    retry: (command, args...) ->
+
+    _should: (df, wait = 10) ->
       df ?= $.Deferred()
 
       try
@@ -101,10 +112,17 @@ window.Cypress = do ($, _) ->
           wait += 50
 
           @invoke(@current.prev).done =>
-            @_foo.call(@, df, wait)
+            @_should.call(@, df, wait)
         , 50
 
       return df
+
+    enqueue: (key, fn, args, obj) ->
+      @clearTimeout(@runId)
+      args.unshift(obj) if obj
+      @queue.push {name: key, ctx: @, fn: fn, args: args}
+      @runId = _.defer _(@run).bind(@)
+      return @
 
     ## class method patch
     ## loops through each method and partials
@@ -115,19 +133,15 @@ window.Cypress = do ($, _) ->
       ## else use the default commands object
       _.each (fns or commands), (fn, key) ->
         Cypress.prototype[key] = (args...) ->
-          @clearTimeout(@runId)
-          args.unshift(obj)
-          @queue.push {name: key, ctx: @, fn: fn, args: args}
-          @runId = _.defer _(@run).bind(@)
-          return @
+          @enqueue(key, fn, args, obj)
 
-      Object.defineProperty Cypress.prototype, "foo",
-        get: ->
-          @clearTimeout(@runId)
-          # args.unshift(obj)
-          @queue.push {name: "foo", ctx: @, fn: Cypress::_foo, args: []}
-          @runId = _.defer _(@run).bind(@)
-          return @
+      ## whenever we see should that automatically should trigger us
+      ## to build up a new chai.Assertion instance and proxy the methods
+      ## to it
+      # _.each ["should", "have", "be"], (chainable) ->
+      #   Object.defineProperty Cypress.prototype, chainable,
+      #     get: ->
+      #       @enqueue chainable, @["_" + chainable], []
 
       return @
 
