@@ -4,4 +4,9 @@ describe "Simulate DOM Events", ->
     spy = sinon.spy(window, "Simulate")
 
     b = $("body").simulate("click", {foo: "foo"})
-    expect(spy).to.be.calledWith b[0], "click", {foo: "foo"}
+    expect(spy).to.be.calledWith b[0], "click"
+
+  it "first calls mousedown and mouseup if event is clicked"
+
+  it "dynamically figures out clientX and clientY"
+
