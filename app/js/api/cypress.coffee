@@ -86,8 +86,12 @@ window.Cypress = do ($, _) ->
       unless @subject and _.isElement(@subject[0])
         throw new Error("Cannot call .clear() without first finding an element")
 
-      ## on input, then type "" as its value
+      ## on input, selectall then del so it fires all appropriate key events
       ## on select, clear its selected option
+      if @subject.is("input,textarea")
+        @action "type", "{selectall}{del}"
+
+      return @subject
 
     select: (partial, valueOrText) ->
       unless @subject and _.isElement(@subject[0])
