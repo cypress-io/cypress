@@ -50,10 +50,11 @@ window.Cypress = do ($, _) ->
       _.defaults options,
         df: $.Deferred()
         retry: true
-        timeout: 2000
+        timeout: 1000 ## this should not be hard coded here
         total: 0
 
-      df.reject("Timed out trying to find element: #{selector}") if options.total >= options.timeout
+      if options.total >= options.timeout
+        options.df.reject("Timed out trying to find element: #{selector}")
 
       $el = new $.fn.init(selector, partial.$remoteIframe.prop("contentWindow").document)
 
@@ -64,9 +65,11 @@ window.Cypress = do ($, _) ->
       else
         ## think about using @retry here to abstract away
         ## the delay + invocation + options.total increment
+        options.total += 50
+
         _.delay =>
           @invoke(@current, partial, selector, alias, options)
-        , options.total += 50
+        , 50
 
       return options.df
 
