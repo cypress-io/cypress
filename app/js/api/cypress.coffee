@@ -179,6 +179,10 @@ window.Cypress = do ($, _) ->
     constructor: (@subject = null, @lastCommand = null) ->
 
     run: (index = 0) ->
+      ## each time we run we need to reset the runnables
+      ## timeout, since we have a timeout for each individual
+      ## command / action as well as a total one
+
       queue = @queue[index]
 
       ## if we're at the very end just return our instance
@@ -218,6 +222,12 @@ window.Cypress = do ($, _) ->
       # @trigger "set", subject
 
     retry: (args...) ->
+
+    action: (name, args...) ->
+      ## undefined here is the partial -- its going to
+      ## go away soon anyway so it doesnt really matter
+      args.unshift(undefined)
+      commands[name].apply(@, args)
 
     enqueue: (key, fn, args, obj) ->
       @clearTimeout(@runId)
