@@ -5,6 +5,7 @@ vendor:
   - bower_components/chai/chai.js
   - bower_components/chai-jquery/chai-jquery.js ## need to conditionally load this
   - bower_components/sinon-chai/lib/sinon-chai.js ## need to conditionally load this
+  # - bower_components/jquery-simulate/jquery.simulate.js
   - bower_components/bililiteRange/bililiteRange.js
   - bower_components/jquery-simulate-ext/libs/jquery.simulate.js
   - bower_components/jquery-simulate-ext/src/jquery.simulate.ext.js
@@ -24,6 +25,7 @@ vendor:
   - bower_components/jquery-ui/ui/mouse.js
   - bower_components/jquery-ui/ui/slider.js
   - app/js/vendor/backbone-chooser.coffee
+  - app/js/vendor/simulate.coffee
 
 eclectus:
   - app/js/api/eclectus.coffee

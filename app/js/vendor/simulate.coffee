@@ -1,10 +1,21 @@
-do ($, _) ->
+window.Simulate = do ($, _) ->
+
+  $.fn.cySimulate = (event, options) ->
+    @each (index, el) ->
+      Simulate.create(el, event, options)
 
   events = [
     {event: "click", type: "MouseEvents", bubbles: true, cancelable: true}
   ]
 
-  class window.Simulate
+  Simulate = {
+    create: (el, event, options) ->
+      switch
+        when _(events).findWhere({event:event})
+          new Simulate.Native(el, event, options)
+  }
+
+  class Simulate.Native
     constructor: (el, event, options = {}) ->
       @document = el.ownerDocument
       @window   = @getWindowByDocument(@document)
@@ -12,12 +23,6 @@ do ($, _) ->
       @initialize(el, event, options)
 
     initialize: (el, event, options) ->
-      ## if the event is a click event we need to
-      ## additionally send mousedown and mouseup first
-      if event is "click"
-        @initialize(el, "mousedown", options)
-        @initialize(el, "mouseup", options)
-
       eventObj = @createEvent(el, event, options)
       @dispatchEvent(el, eventObj)
 
@@ -75,10 +80,12 @@ do ($, _) ->
             options.screenY
           ]
 
+          ## need to research what other properties should
+          ## be added to the event object
           event.pageX = offset.left
           event.pageY = offset.top
 
-        when document.createdEventObject then ""
+        when document.createEventObject then ""
 
     onHTMLEvents: (event, options) ->
 
@@ -86,6 +93,4 @@ do ($, _) ->
 
     onTouchEvents: (event, options) ->
 
-  $.fn.simulate = (event, options) ->
-    @each (index, el) ->
-      new Simulate(el, event, options)
+  return Simulate

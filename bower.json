@@ -35,6 +35,7 @@
     "bililiteRange": "~2.5.1",
     "backbone.mutators": "~0.4.1",
     "sinon-chai": "~2.5.0",
-    "jquery-ui": "~1.11.1"
+    "jquery-ui": "~1.11.1",
+    "jquery-simulate": "~1.0.0"
   }
 }
