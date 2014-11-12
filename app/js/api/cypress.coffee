@@ -27,11 +27,22 @@ window.Cypress = do ($, _) ->
         el.click()
 
     then: (partial, fn) ->
+      df = $.Deferred()
+
       ## to figure out whether or not to invoke then we just
       ## see if its the very last command, and its been passed
       ## two arguments, the second of which is called done
       ## if so its been added by mocha
-      fn.call(@, @subject)
+      try
+        ret = fn.call(@, @subject)
+
+        ## then will resolve with the fn's
+        ## return or just pass along the subject
+        df.resolve(ret or @subject)
+      catch e
+        df.reject(e)
+
+      return df
 
     find: (partial, selector, alias, options = {}) ->
       options = if _.isObject(alias) then alias else options
