@@ -10,6 +10,12 @@ window.Cypress = do ($, _) ->
     url: (partial) ->
       partial.$remoteIframe.prop("contentWindow").location.toString()
 
+    filter: (partial, fn) ->
+      unless @subject and _.isElement(@subject[0])
+        throw new Error("Cannot call .filter() without first finding an element")
+
+      @subject.filter(fn)
+
     first: (partial) ->
       unless @subject and _.isElement(@subject[0])
         throw new Error("Cannot call .first() without first finding an element")
