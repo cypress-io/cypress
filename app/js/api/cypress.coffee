@@ -10,6 +10,16 @@ window.Cypress = do ($, _) ->
     url: (partial) ->
       partial.$remoteIframe.prop("contentWindow").location.toString()
 
+    first: (partial) ->
+      unless @subject and _.isElement(@subject[0])
+        throw new Error("Cannot call .first() without first finding an element")
+
+      @subject.first()
+
+    click: (partial) ->
+      @subject.each (index, el) ->
+        el.click()
+
     then: (partial, fn) ->
       ## to figure out whether or not to invoke then we just
       ## see if its the very last command, and its been passed
@@ -116,7 +126,7 @@ window.Cypress = do ($, _) ->
 
     wait: (partial, fn, options = {}) ->
       _.defaults options,
-        wait: 50
+        wait: 0
         df: $.Deferred()
 
       try
@@ -128,14 +138,14 @@ window.Cypress = do ($, _) ->
         ## a command successfully runs and expose that as
         ## a configuration variable
         ## total timeout vs each individuals command timeout
-        return e if options.wait >= 2000
+        options.wait += 500
+
+        options.df.reject(e) if options.wait >= 2000
 
         _.delay =>
-          options.wait += 50
-
           @invoke(@current.prev).done =>
             @invoke(@current, partial, fn, options)
-        , 50
+        , 500
 
       return options.df
 
@@ -153,9 +163,6 @@ window.Cypress = do ($, _) ->
       df = @set queue, @queue[index - 1], @queue[index + 1]
       df.done =>
         @run index + 1
-      df.fail (err) =>
-        debugger
-        throw new err
 
     clearTimeout: (id) ->
       clearTimeout(id) if id
@@ -179,8 +186,11 @@ window.Cypress = do ($, _) ->
       ## if the last argument is a function then instead of
       ## expecting this to be resolved we wait for that function
       ## to be invoked
-      $.when(obj.fn.apply(obj.ctx, args)).done (subject) =>
+      df = $.when(obj.fn.apply(obj.ctx, args))
+      df.done (subject) =>
         @subject = subject
+      df.fail (err) ->
+        throw err
       # @trigger "set", subject
 
     retry: (args...) ->
