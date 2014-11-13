@@ -204,7 +204,7 @@
       # _.each ["Ecl", "$", "jQuery", "parent", "chai", "expect", "should", "assert", "Mocha", "mocha"], (global) =>
       #   delete @$iframe[0].contentWindow[global]
 
-      @removeHashAndPopStateListeners() if @$remote?.isReadable()
+      @removeIframeWindowListeners() if @$remote?.isReadable()
 
       @$iframe?[0].contentWindow.remote = null
 
@@ -215,9 +215,10 @@
       @$iframe = null
       @fn      = null
 
-    removeHashAndPopStateListeners: ->
+    removeIframeWindowListeners: ->
       $(@$remote.prop("contentWindow")).off "hashchange", @updateRemoteUrl
       $(@$remote.prop("contentWindow")).off "popstate",   @updateRemoteUrl
+      $(@$remote.prop("contentWindow")).off "unload"
 
     loadIframe: (src, options, fn) ->
       ## remove any existing iframes
@@ -297,16 +298,19 @@
         ## remove any existing hashchange and popstate listeners
         ## whenever we visit we will lose these listeners anyway
         ## and will need to re-add them later
-        @removeHashAndPopStateListeners()
+        @removeIframeWindowListeners()
 
       @$remote.on "load", =>
         @showSpinner(false)
         @updateRemoteUrl()
 
+        @removeIframeWindowListeners()
+
         ## must re-wrap the contentWindow to get the hashchange/popstate event
         ## any time our remote window loads we need to bind to these events
         $(@$remote.prop("contentWindow")).on "hashchange", @updateRemoteUrl
         $(@$remote.prop("contentWindow")).on "popstate",   @updateRemoteUrl
+        $(@$remote.prop("contentWindow")).on "unload",     -> #debugger
 
       ## if our config model hasnt been configured with defaultPage
       ## then we immediately resolve our remote iframe
