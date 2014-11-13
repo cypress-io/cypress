@@ -25,7 +25,7 @@ Eclectus.Visit = do ($, _, Eclectus) ->
       @runnable.timeout(options.timeout)
       @runnable.hook?.timeout(options.timeout)
 
-      win = @$remoteIframe[0].contentWindow
+      win = @$remoteIframe.prop("contentWindow")
 
       ## trigger that the remoteIframing is visiting
       ## an external URL
