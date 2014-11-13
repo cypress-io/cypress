@@ -213,7 +213,7 @@ getSpecs = (test) ->
 
 ## serve static file from public when route is /eclectus
 ## this is to namespace the static eclectus files away from
-## the real application
+## the real application by separating the root from the files
 app.use "/eclectus", express.static(__dirname + "/public")
 
 ## routing for the actual specs which are processed automatically
@@ -255,13 +255,26 @@ app.get "/__remote/*", (req, res, next) ->
       inject: "<script type='text/javascript' src='/eclectus/js/sinon.js'></script>"
     })
   else
-    controllers.RemoteProxy.apply(this, arguments)
+    controllers.RemoteProxy.apply(@, arguments)
 
-## serve the real eclectus JS app when we're at root
-app.get "/", (req, res) ->
+## we've namespaced the initial sending down of our eclectus
+## app as '__'  this route shouldn't ever be used by servers
+## and therefore should not conflict
+app.get "/__", (req, res) ->
   res.render path.join(__dirname, "public", "index.html"), {
     config: JSON.stringify(app.get("eclectus"))
   }
+
+## serve the real eclectus JS app when we're at root
+app.get "/", (req, res) ->
+  ## if we dont have a req.session that means we're initially
+  ## requesting the eclectus app and we need to redirect to the
+  ## root path that serves the app
+  if not req.session.remote
+    res.redirect("/__/")
+  else
+    ## else pass through as normal
+    controllers.RemoteProxy.apply(@, arguments)
 
 ## this serves the html file which is stripped down
 ## to generate the id's for the test files
