@@ -209,6 +209,7 @@
     getAssertion: ->
       @convertToArray
         "Command:  ": @get("method")
+        "Selector  ": @get("selector")
         "Subject:  ": @subject
         "Expected: ": @expected
         "Actual:   ": @actual

@@ -76,7 +76,18 @@
           passed    = utils.test(@, args)
           value     = utils.flag(@, "object")
           expected  = args[3]
+
+          ## shift the selector as the object
+          ## if it has one
+          if value and value.selector
+            @_obj = value.selector
+
           message   = utils.getMessage(@, args)
+
+          ## reset the obj to the old value
+          ## if it was mutated
+          @_obj = value if @_obj isnt value
+
           actual    = utils.getActual(@, args)
 
           Ecl.assert passed, message, value, actual, expected

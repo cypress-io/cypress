@@ -30,6 +30,7 @@ Eclectus.Assertion = do ($, _, Eclectus) ->
         method: "assert"
         message: message
         passed: passed
+        selector: value.selector
 
       ## think about completely gutting the whole object toString
       ## which chai does by default, its so ugly and worthless
