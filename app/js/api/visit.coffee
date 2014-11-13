@@ -17,8 +17,8 @@ Eclectus.Visit = do ($, _, Eclectus) ->
 
       ## backup the previous runnable timeout
       ## and the hook's previous timeout
-      prevTimeout     = @runnable.timeout()
-      hookPrevTimeout = @runnable.hook?.timeout()
+      @prevTimeout     = @runnable.timeout()
+      @hookPrevTimeout = @runnable.hook?.timeout()
 
       ## reset both of them to our visit's
       ## timeout option
@@ -27,6 +27,19 @@ Eclectus.Visit = do ($, _, Eclectus) ->
 
       win = @$remoteIframe.prop("contentWindow")
 
+      ## if we're visiting a page and we're not currently
+      ## on about:blank then we need to nuke the window
+      ## and after its nuked then visit the url
+      if win.location.href isnt "about:blank"
+        win.location.href = "about:blank"
+
+        @$remoteIframe.one "load", =>
+          @visit(win, url, fn, options)
+
+      else
+        @visit(win, url, fn, options)
+
+    visit: (win, url, fn, options) ->
       ## trigger that the remoteIframing is visiting
       ## an external URL
       @$remoteIframe.trigger "visit:start", url
@@ -34,8 +47,8 @@ Eclectus.Visit = do ($, _, Eclectus) ->
       ## when the remote iframe's load event fires
       ## callback fn
       @$remoteIframe.one "load", =>
-        @runnable.timeout(prevTimeout)
-        @runnable.hook?.timeout(hookPrevTimeout)
+        @runnable.timeout(@prevTimeout)
+        @runnable.hook?.timeout(@hookPrevTimeout)
         options.onLoad?(win)
         fn()
 
