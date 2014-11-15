@@ -259,7 +259,9 @@
         ## if our hook doesnt have an associated test ctx
         ## then we need to patchEcl with the first test
         ## we can find
-        if not hook.ctx.currentTest
+        if test = hook.ctx.currentTest
+          test.hook = hook
+        else
           test = @getTestFromHook(hook, hook.parent)
 
           ## reference the hook by the test so we can
