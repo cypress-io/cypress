@@ -26,6 +26,18 @@ window.Cypress = do ($, _) ->
       @subject.each (index, el) ->
         el.click()
 
+    eval: (partial, code, options = {}) ->
+      df = $.Deferred()
+
+      $.getJSON("/eval", {code: code}).done (response) ->
+        resp = if response.obj then JSON.parse(response.obj) else response.text
+        df.resolve resp
+
+      df
+
+    visit: (partial, url, options = {}) ->
+      Ecl.visit(url, options)
+
     then: (partial, fn) ->
       df = $.Deferred()
 
