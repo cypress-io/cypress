@@ -80,8 +80,14 @@ window.Cypress = do ($, _) ->
 
     within: (selector, fn) ->
 
+    options: (options = {}) ->
+      ## change things like pauses in between commands
+      ## the max timeout per command
+      ## or anything else here...
+
     debug: ->
-      _.each ["subject", "runnable", "queue", "index"], (item) =>
+      console.log "\n%c------------------------Cypress Command Info------------------------", "font-weight: bold;"
+      _.each ["options", "subject", "runnable", "queue", "index"], (item) =>
         console.log("#{item}: ", @[item])
       debugger
 
@@ -231,7 +237,14 @@ window.Cypress = do ($, _) ->
     queue: []
     aliases: {}
 
-    constructor: ->
+    constructor: (@options = {}) ->
+      _.defaults @options,
+        commandTimeout: 2000
+        delay: 0 ## whether there is a delay in between commands
+
+    ## global options applicable to all cy instances
+    ## and restores
+    options: (options = {}) ->
 
     run: ->
       @index ?= 0
@@ -322,6 +335,7 @@ window.Cypress = do ($, _) ->
         runId:    null
         subject:  null
         runnable: null
+        options:  {}
 
       return @
 
