@@ -38,6 +38,9 @@ window.Cypress = do ($, _) ->
         @runnable.timeout(timeout)
 
         resp = if response.obj then JSON.parse(response.obj) else response.text
+
+        @alias(options.as, resp) if options.as
+
         df.resolve resp
 
       df
@@ -202,6 +205,7 @@ window.Cypress = do ($, _) ->
 
   class Cypress
     queue: []
+    aliases: {}
 
     constructor: ->
 
@@ -229,6 +233,13 @@ window.Cypress = do ($, _) ->
       clearTimeout(id) if id
       return @
 
+    alias: (name, value) ->
+      @aliases[name] = value
+
+    get: (name) ->
+      @aliases[name] or
+        throw new Error("No alias was found by the name: #{name}")
+
     set: (obj, prev, next) ->
       obj.prev = prev
       obj.next = next
@@ -249,8 +260,11 @@ window.Cypress = do ($, _) ->
       ## to be invoked
       df = $.when(obj.fn.apply(obj.ctx, args))
       df.done (subject) =>
+        ## should parse args.options here and figure
+        ## out if we're using an alias
         @subject = subject
       df.fail (err) ->
+        console.error(err.stack)
         throw err
       # @trigger "set", subject
 
@@ -276,6 +290,7 @@ window.Cypress = do ($, _) ->
     ## removing additional own instance properties
     @restore = ->
       Cypress.prototype.queue = []
+      Cypress.prototype.aliases = {}
 
       _.extend @cy,
         index:    null
