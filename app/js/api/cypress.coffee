@@ -188,7 +188,7 @@ window.Cypress = do ($, _) ->
   class Cypress
     queue: []
 
-    constructor: (@subject = null, @lastCommand = null) ->
+    constructor: (@subject = null) ->
 
     run: ->
       @index ?= 0
@@ -285,8 +285,21 @@ window.Cypress = do ($, _) ->
       ## simply store the current hook on our prototype
       Cypress.prototype.hook = name
 
-    ## restores the queue after each test run
+    ## restores cypress after each test run by
+    ## removing the queue from the proto and
+    ## removing additional own instance properties
     @restore = ->
       Cypress.prototype.queue = []
+
+      _.extend cy,
+        index:    null
+        current:  null
+        runId:    null
+        subject:  null
+
+    ## removes channel, remoteIframe, contentWindow
+    ## from the cypress instance
+    @reset = ->
+
 
   return Cypress
