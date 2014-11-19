@@ -18,12 +18,10 @@ Eclectus.Visit = do ($, _, Eclectus) ->
       ## backup the previous runnable timeout
       ## and the hook's previous timeout
       @prevTimeout     = @runnable.timeout()
-      @hookPrevTimeout = @runnable.hook?.timeout()
 
       ## reset both of them to our visit's
       ## timeout option
       @runnable.timeout(options.timeout)
-      @runnable.hook?.timeout(options.timeout)
 
       win = @$remoteIframe.prop("contentWindow")
 
@@ -48,7 +46,6 @@ Eclectus.Visit = do ($, _, Eclectus) ->
       ## callback fn
       @$remoteIframe.one "load", =>
         @runnable.timeout(@prevTimeout)
-        @runnable.hook?.timeout(@hookPrevTimeout)
         options.onLoad?(win)
         fn()
 

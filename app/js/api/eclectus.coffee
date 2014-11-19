@@ -28,7 +28,7 @@ window.Eclectus = do ($, _) ->
       @createSandbox(partial.$remoteIframe)
 
       @sandbox._server = server = partial.$remoteIframe[0].contentWindow.sinon.fakeServer.create()
-      @sandbox.server = new Eclectus.Xhr partial.$remoteIframe, partial.channel, partial.runnable, @hook
+      @sandbox.server = new Eclectus.Xhr partial.$remoteIframe, partial.channel, partial.runnable
       @sandbox.server.setServer server
 
       Eclectus.Xhr.bindServerTo(@, "server", @sandbox.server)
@@ -37,7 +37,7 @@ window.Eclectus = do ($, _) ->
       return server
 
     assert: (partial, passed, message, value, actual, expected) ->
-      assertion = new Eclectus.Assertion partial.$remoteIframe, partial.channel, partial.runnable, @hook
+      assertion = new Eclectus.Assertion partial.$remoteIframe, partial.channel, partial.runnable
       assertion.log value, actual, expected, message, passed
 
       return assertion
@@ -47,7 +47,7 @@ window.Eclectus = do ($, _) ->
 
       stub = @sandbox.stub(obj, method)
 
-      eclStub = new Eclectus.Stub partial.$remoteIframe, partial.channel, partial.runnable, @hook
+      eclStub = new Eclectus.Stub partial.$remoteIframe, partial.channel, partial.runnable
       eclStub.log(obj, method, stub)
 
       return stub
@@ -59,7 +59,7 @@ window.Eclectus = do ($, _) ->
 
       spy = @sandbox.spy(obj, method)
 
-      eclSpy = new Eclectus.Spy partial.$remoteIframe, partial.channel, partial.runnable, @hook
+      eclSpy = new Eclectus.Spy partial.$remoteIframe, partial.channel, partial.runnable
       eclSpy.log(obj, method, spy)
 
       ## return the sinon spy for chainability
@@ -69,7 +69,7 @@ window.Eclectus = do ($, _) ->
       df = $.Deferred()
 
       try
-        visit = new Eclectus.Visit partial.$remoteIframe, partial.channel, partial.runnable, @hook
+        visit = new Eclectus.Visit partial.$remoteIframe, partial.channel, partial.runnable
         visit.log url, options, ->
           df.resolve()
       catch e
@@ -81,7 +81,7 @@ window.Eclectus = do ($, _) ->
     ## and partialed in
     ## Ecl.localStorage.clear() instead of Ecl.clear()
     clear: (partial, keys = []) ->
-      ls = new Eclectus.LocalStorage partial.$remoteIframe, partial.channel, partial.runnable, @hook
+      ls = new Eclectus.LocalStorage partial.$remoteIframe, partial.channel, partial.runnable
       ls.clear(keys)
 
       return ls
@@ -102,8 +102,6 @@ window.Eclectus = do ($, _) ->
     ## loops through each method and partials
     ## the runnable onto our prototype
     @patch = (args, fns) ->
-      Cypress.patch(args, fns)
-
       ## we want to be able to pass in specific functions to patch here
       ## else use the default methods object
       _.each (fns or methods), (fn, key, obj) ->
@@ -111,7 +109,7 @@ window.Eclectus = do ($, _) ->
 
     ## remove all of the partialed functions from Eclectus prototype
     @unpatch = (fns) ->
-      fns = _(methods).keys().concat("hook", "sandbox")
+      fns = _(methods).keys().concat("sandbox")
       _.each (fns), (fn, obj) ->
         delete Eclectus.prototype[fn]
 
@@ -119,12 +117,10 @@ window.Eclectus = do ($, _) ->
       ## only re-patch these specific methods, not the others
       fns = {find: methods.find, within: methods.within}
       @patch dom, fns
-      @hook dom.hook
 
     @unscope = (dom) ->
       fns = {find: methods.find, within: methods.within}
       @patch _(dom).pick("$remoteIframe", "channel", "runnable"), fns
-      @hook dom.hook
 
     @createDom = (argsOrInstance) ->
       obj = dom = argsOrInstance
@@ -134,13 +130,9 @@ window.Eclectus = do ($, _) ->
       ## in that case we need to clone it and prevent it from being cloned
       ## again by setting isCloned to true
       if not dom.isCommand
-        dom = new Eclectus.Dom obj.$remoteIframe, obj.channel, obj.runnable, Eclectus.prototype.hook
+        dom = new Eclectus.Dom obj.$remoteIframe, obj.channel, obj.runnable
 
       return dom
-
-    @hook = (name) ->
-      ## simply store the current hook on our prototype
-      Eclectus.prototype.hook = name
 
     ## restores the sandbox after each test run
     @restore = ->

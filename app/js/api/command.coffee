@@ -6,7 +6,7 @@ Eclectus.Command = do ($, _) ->
   class Command
     highlightAttr: "data-eclectus-el"
 
-    constructor: (@$remoteIframe, @channel, @runnable, @hook) ->
+    constructor: (@$remoteIframe, @channel, @runnable) ->
       # @document = @$remoteIframe[0].contentWindow.document
 
       ## this is the unique identifer of all instantiated
@@ -98,7 +98,7 @@ Eclectus.Command = do ($, _) ->
       ## if its true
       obj.snapshot = @getSnapshot() if obj.snapshot
 
-      @channel.trigger(obj.type, @runnable.cid, obj, @hook) if @channel
+      @channel.trigger(obj.type, @runnable.cid, obj) if @channel
 
     ## walk up the 'prevObject' chain until we have an object
     ## which can be a parent
@@ -114,7 +114,7 @@ Eclectus.Command = do ($, _) ->
       $.contains @getDocument(), @$el[0]
 
     clone: ->
-      new @constructor(@$remoteIframe, @channel, @runnable, @hook)
+      new @constructor(@$remoteIframe, @channel, @runnable)
 
     isCommand: -> true
 

@@ -115,7 +115,9 @@
     start: (options) ->
       ## instantiate Eclectus
       window.Ecl = new Eclectus
-      window.cy  = new Cypress
+
+      ## create the global cy variable
+      Cypress.start()
 
       overloadMochaRunnableEmit() if not App.config.env("ci")
       overloadMochaRunnerEmit()
@@ -129,7 +131,7 @@
       mocha  = options.mocha ?= window.mocha
 
       ## return our runner entity
-      return App.request("runner:entity", runner, mocha.options, Eclectus.patch, Eclectus.hook, Eclectus.restore)
+      return App.request("runner:entity", runner, mocha.options)
 
     getRunner: ->
       ## start running the tests
@@ -151,6 +153,10 @@
 
       ## unpatch eclectus to remove any current partial'd objects
       Eclectus.unpatch()
+
+      ## resets cypress to remove all references to other objects
+      ## including cy
+      Cypress.stop()
 
       ## call the stop method which cleans up any listeners
       runner.stop()

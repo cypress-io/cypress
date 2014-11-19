@@ -2,50 +2,52 @@
 ## for some references on creating simulated events
 
 ## make this a global to allow attaching / overriding
-## we just need to set the patchEcl properties instead
-## of using a partial
 window.Cypress = do ($, _) ->
 
   commands =
-    url: (partial) ->
-      partial.$remoteIframe.prop("contentWindow").location.toString()
+    url: ->
+      @$remoteIframe.prop("contentWindow").location.toString()
 
-    filter: (partial, fn) ->
+    filter: (fn) ->
       unless @subject and _.isElement(@subject[0])
         throw new Error("Cannot call .filter() without first finding an element")
 
       @subject.filter(fn)
 
-    first: (partial) ->
+    first: ->
       unless @subject and _.isElement(@subject[0])
         throw new Error("Cannot call .first() without first finding an element")
 
       @subject.first()
 
-    click: (partial) ->
+    click: ->
       @subject.each (index, el) ->
         el.click()
 
-    eval: (partial, code, options = {}) ->
+    eval: (code, options = {}) ->
+      _.defaults options,
+        timeout: 15000
+
       df = $.Deferred()
 
       ## obviously this needs to be moved to a separate method
-      partial.runnable.timeout(15000)
-      partial.runnable.hook?.timeout(15000)
+      timeout = @runnable.timeout()
+      @runnable.timeout(options.timeout)
 
-      $.getJSON("/eval", {code: code}).done (response) ->
-        partial.runnable.timeout(2000)
-        partial.runnable.hook?.timeout(2000)
+      $.getJSON("/eval", {code: code}).done (response) =>
+        @runnable.timeout(timeout)
 
         resp = if response.obj then JSON.parse(response.obj) else response.text
         df.resolve resp
 
       df
 
-    visit: (partial, url, options = {}) ->
+    visit: (url, options = {}) ->
+      partial = _(@).pick "$remoteIframe", "channel", "contentWindow", "runnable"
+      Eclectus.patch partial
       Ecl.visit(url, options)
 
-    then: (partial, fn) ->
+    then: (fn) ->
       ## if this is the very last command we know its the 'then'
       ## called by mocha.  in this case, we need to defer its
       ## fn callback else we will not properly finish the run
@@ -69,7 +71,7 @@ window.Cypress = do ($, _) ->
 
       return df
 
-    find: (partial, selector, alias, options = {}) ->
+    find: (selector, alias, options = {}) ->
       options = if _.isObject(alias) then alias else options
 
       _.defaults options,
@@ -81,7 +83,7 @@ window.Cypress = do ($, _) ->
       if options.total >= options.timeout
         options.df.reject("Timed out trying to find element: #{selector}")
 
-      $el = new $.fn.init(selector, partial.$remoteIframe.prop("contentWindow").document)
+      $el = new $.fn.init(selector, @$remoteIframe.prop("contentWindow").document)
 
       ## return the $el immediately if we've set not to retry
       ## or we found an element
@@ -93,12 +95,12 @@ window.Cypress = do ($, _) ->
         options.total += 50
 
         _.delay =>
-          @invoke(@current, partial, selector, alias, options)
+          @invoke(@current, selector, alias, options)
         , 50
 
       return options.df
 
-    type: (partial, sequence, options = {}) ->
+    type: (sequence, options = {}) ->
       unless @subject and _.isElement(@subject[0])
         throw new Error("Cannot call .type() without first finding an element")
 
@@ -107,7 +109,7 @@ window.Cypress = do ($, _) ->
 
       @subject.simulate "key-sequence", options
 
-    clear: (partial) ->
+    clear: ->
       unless @subject and _.isElement(@subject[0])
         throw new Error("Cannot call .clear() without first finding an element")
 
@@ -118,7 +120,7 @@ window.Cypress = do ($, _) ->
 
       return @subject
 
-    select: (partial, valueOrText) ->
+    select: (valueOrText) ->
       unless @subject and _.isElement(@subject[0])
         throw new Error("Cannot call .select() without first finding an element")
 
@@ -173,7 +175,7 @@ window.Cypress = do ($, _) ->
         @subject.each (index, el) ->
           el.dispatchEvent(event)
 
-    wait: (partial, fn, options = {}) ->
+    wait: (fn, options = {}) ->
       _.defaults options,
         wait: 0
         df: $.Deferred()
@@ -193,7 +195,7 @@ window.Cypress = do ($, _) ->
 
         _.delay =>
           @invoke(@current.prev).done =>
-            @invoke(@current, partial, fn, options)
+            @invoke(@current, fn, options)
         , 500
 
       return options.df
@@ -201,7 +203,7 @@ window.Cypress = do ($, _) ->
   class Cypress
     queue: []
 
-    constructor: (@subject = null) ->
+    constructor: ->
 
     run: ->
       @index ?= 0
@@ -255,48 +257,19 @@ window.Cypress = do ($, _) ->
     retry: (args...) ->
 
     action: (name, args...) ->
-      ## undefined here is the partial -- its going to
-      ## go away soon anyway so it doesnt really matter
-      args.unshift(undefined)
       commands[name].apply(@, args)
 
-    enqueue: (key, fn, args, obj) ->
+    enqueue: (key, fn, args) ->
       @clearTimeout(@runId)
-      args.unshift(obj) if obj
       @queue.push {name: key, ctx: @, fn: fn, args: args}
       @runId = _.defer _(@run).bind(@)
       return @
 
-    ## class method patch
-    ## loops through each method and partials
-    ## the runnable onto our prototype
-    @patch = (obj, fns) ->
-
-      ## we want to be able to pass in specific functions to patch here
-      ## else use the default commands object
-      _.each (fns or commands), (fn, key) ->
-        Cypress.prototype[key] = (args...) ->
-          @enqueue(key, fn, args, obj)
-
-      ## whenever we see should that automatically should trigger us
-      ## to build up a new chai.Assertion instance and proxy the methods
-      ## to it
-      # _.each ["should", "have", "be"], (chainable) ->
-      #   Object.defineProperty Cypress.prototype, chainable,
-      #     get: ->
-      #       @enqueue chainable, @["_" + chainable], []
-
-      return @
-
     ## remove all of the partialed functions from Cypress prototype
     @unpatch = (fns) ->
-      fns = _(commands).keys().concat("hook", "sandbox")
+      fns = _(commands).keys().concat("sandbox")
       _.each (fns), (fn, obj) ->
         delete Cypress.prototype[fn]
-
-    @hook = (name) ->
-      ## simply store the current hook on our prototype
-      Cypress.prototype.hook = name
 
     ## restores cypress after each test run by
     ## removing the queue from the proto and
@@ -304,15 +277,47 @@ window.Cypress = do ($, _) ->
     @restore = ->
       Cypress.prototype.queue = []
 
-      _.extend cy,
+      _.extend @cy,
         index:    null
         current:  null
         runId:    null
         subject:  null
+        runnable: null
+
+      return @
 
     ## removes channel, remoteIframe, contentWindow
     ## from the cypress instance
-    @reset = ->
+    @stop = ->
+      @restore()
 
+      _.extend @cy,
+        contentWindow: null
+        remoteIframe: null
+        channel: null
+
+      window.cy = @cy = null
+
+      return @
+
+    ## sets the runnable onto the cy instance
+    @set = (runnable) ->
+      @cy.runnable = runnable
+
+    ## patches the cypress instance with contentWindow
+    ## remoteIframe and channel
+    ## this should be moved to an instance method and
+    @setup = (contentWindow, $remoteIframe, channel) ->
+      _.extend @cy,
+        contentWindow: contentWindow
+        $remoteIframe: $remoteIframe
+        channel:       channel
+
+    @start = ->
+      _.each commands, (fn, key) ->
+        Cypress.prototype[key] = (args...) ->
+          @enqueue(key, fn, args)
+
+      window.cy = @cy = new Cypress
 
   return Cypress

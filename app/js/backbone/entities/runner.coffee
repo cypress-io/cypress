@@ -28,12 +28,6 @@
 
     setIframe: (@iframe) ->
 
-    setEclPatch: (@patchEcl) ->
-
-    setEclHook: (@patchHook) ->
-
-    setEclRestore: (@eclRestore) ->
-
     setOptions: (@options) ->
 
     runSauce: ->
@@ -76,7 +70,7 @@
         browser: browser
         version: version
 
-    setTestRunner: (runner) ->
+    setMochaRunner: (runner) ->
       ## store the test runner as a property on ourselves
       @runner = runner
 
@@ -163,10 +157,6 @@
         ## to bail early if this isnt the root suite
         return runSuite.call(@, rootSuite, fn) if not rootSuite.root
 
-        ## this is where we should automatically patch Ecl/Cy proto's
-        ## with the runnable channel, the iframe contentWindow, and
-        ## remote iframe
-
         runner.trigger "before:add"
 
         runner.iterateThroughRunnables rootSuite
@@ -251,56 +241,59 @@
       @setListenersForWeb() if not App.config.env("ci")
 
     setListenersForAll: ->
-      ## partials in the runnable object
-      ## our private channel
-      ## the iframes contentWindow
-      ## and the iframe string
-      @runner.on "test", (test) =>
-        @test = test
-
-        @patchEcl
-          runnable: test
-          channel: runnerChannel
-          contentWindow: @contentWindow
-          $remoteIframe: @$remoteIframe
-
-        @patchHook "test"
-
       @runner.on "test:before:hooks", (hook, suite) =>
-
         ## if we dont have a test already set then go
         ## find it from the hook
         @test = @getTestFromHook(hook, suite) if not @test
 
-        ## check here to see if cypress has the test + hook
-        ## set. if it does then disregard, else go ahead
-        ## and set it to the prototype. this will replace
-        ## patchEcl
-
       @runner.on "test:after:hooks", =>
+        ## restore the cy instance between tests
+        Cypress.restore()
+
         ## we want to clear any set hook + test
         ## since this is the last event that will be fired
         ## until we either move onto the next test or quit
-        ## we should also remove these from the cypress
-        ## and eclectus prototypes
-        @eclRestore()
-        @test.hook = null ## this is temporary until I update commands using test.hook
         @hook = null
         @test = null
+
+      @runner.on "test", (test) =>
+        @test = test
+        @hook = "test"
+
+        Cypress.set(test)
+
+      @runner.on "hook", (hook) =>
+        @hook = @getHookName(hook)
+
+        ## if the hook is already associated to the test
+        ## just use that, else go find it
+        test     = hook.ctx.currentTest or @getTestFromHook(hook, hook.parent)
+        hook.cid = test.cid
+
+        ## set the hook as our current runnable
+        Cypress.set(hook)
+
+      ## when a hook ends we want to re-set Cypress
+      ## with the test runnable (if one exists) since
+      ## the way mocha fires events for beforeEach's
+      @runner.on "hook end", (hook) =>
+        if test = hook.ctx.currentTest
+          @hook = "test"
+          Cypress.set(test)
 
     setListenersForCI: ->
 
     setListenersForWeb: ->
       socket = App.request "socket:entity"
 
-      @listenTo runnerChannel, "all", (type, id, attrs, hook) ->
+      @listenTo runnerChannel, "all", (type, id, attrs) ->
         ## if we're in satellite mode then we need to
         ## broadcast this through websockets
         if App.config.env("satellite")
           attrs = @transformEmitAttrs(attrs)
-          socket.emit "command:add", attrs, type, id, hook
+          socket.emit "command:add", attrs, type, id, @hook
         else
-          @commands.add attrs, type, id, hook
+          @commands.add attrs, type, id, @hook
 
       ## mocha has begun running the specs per iframe
       @runner.on "start", =>
@@ -332,43 +325,6 @@
         ## test of our parent suite
         @hookFailed(test, err) if test.type is "hook"
 
-      @runner.on "hook", (hook) =>
-        @hook = hook
-
-        ## if our hook doesnt have an associated test ctx
-        ## then we need to patchEcl with the first test
-        ## we can find
-        if test = hook.ctx.currentTest
-          test.hook = hook
-        else
-          test = @getTestFromHook(hook, hook.parent)
-
-          ## reference the hook by the test so we can
-          ## access this throughout our API
-          test.hook = hook
-
-          @patchEcl
-            hook: @getHookName(hook)
-            runnable: test
-            channel: runnerChannel
-            contentWindow: @contentWindow
-            $remoteIframe: @$remoteIframe
-            iframe: @iframe
-
-        ## dynamically changes the current patched test's hook name
-        @patchHook @getHookName(hook)
-
-      ## when a hook ends we want to repatch
-      ## Ecl with the associated test from the hook
-      ## this is due to the order of events mocha
-      ## fires when our tests run
-      @runner.on "hook end", (hook) =>
-        ## we only care to re-patch the hook name if
-        ## we have a current test, else the next test
-        ## will naturally patchEcl again for itself
-        hook.removeAllListeners()
-        @patchHook("test") if hook.ctx.currentTest
-
       ## if a test is pending mocha will only
       ## emit the pending event instead of the test
       ## so we normalize the pending / test events
@@ -384,6 +340,9 @@
         ## remove the hook reference from the test
         test.removeAllListeners()
       ## start listening to all the pertinent runner events
+
+      @runner.on "hook end", (hook) ->
+        hook.removeAllListeners()
 
     trigger: (event, args...) ->
       ## because of defaults the change:iframes event
@@ -706,6 +665,11 @@
       ## testing mode and our iframe is not readable
       return if not remoteIframe.isReadable()
 
+      ## this is where we should automatically patch Ecl/Cy proto's
+      ## with the runnable channel, the iframe contentWindow, and
+      ## remote iframe
+      Cypress.setup(contentWindow, remoteIframe, runnerChannel)
+
       ## reupdate chosen with the passed in chosenId
       ## this allows us to pass the chosenId around
       ## through websockets
@@ -731,16 +695,13 @@
 
         fn?(err)
 
-  App.reqres.setHandler "runner:entity", (testRunner, options, patch, hook, restore) ->
+  App.reqres.setHandler "runner:entity", (mochaRunner, options) ->
     ## always set grep if its not already set
     options.grep ?= /.*/
 
-    ## store the actual testRunner on ourselves
+    ## store the actual mochaRunner on ourselves
     runner = new Entities.Runner
-    runner.setTestRunner testRunner
+    runner.setMochaRunner mochaRunner
     runner.setOptions options
-    runner.setEclPatch patch
-    runner.setEclHook hook
-    runner.setEclRestore restore
     runner.startListening()
     runner
