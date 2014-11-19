@@ -85,14 +85,16 @@ window.Cypress = do ($, _) ->
         console.log("#{item}: ", @[item])
       debugger
 
-    pause: ->
-      @runnable.timeout(1e9)
+    pause: (int) ->
+      int ?= 1e9
+
+      @runnable.timeout(int + 100)
 
       df = $.Deferred()
 
       _.delay ->
         df.resolve()
-      , 1e9
+      , int
 
       df
 
