@@ -538,7 +538,7 @@
 
       ## return recursively
       for suite in root.suites
-        return @getFirstTestByFn(suite, fn)
+        return test if test = @getFirstTestByFn(suite, fn)
 
     getGrep: (root) ->
       console.warn "GREP IS: ", @options.grep
