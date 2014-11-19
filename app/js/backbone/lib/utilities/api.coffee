@@ -1,6 +1,8 @@
 @App.module "Utilities", (Utilities, App, Backbone, Marionette, $, _) ->
 
-  emit          = Mocha.Runnable::emit
+  runnableEmit  = Mocha.Runnable::emit
+  runnerEmit    = Mocha.Runner::emit
+  hook          = Mocha.Runner::hook
   uncaught      = Mocha.Runner::uncaught
   assertProto   = chai.Assertion::assert if chai
   expect        = chai.expect
@@ -11,14 +13,14 @@
     ## if app evironment is development we need to list to errors
     ## emitted from all Runnable inherited objects (like hooks)
     ## this makes tracking down Eclectus related App errors much easier
-    Mocha.Runnable::emit = _.wrap emit, (orig, event, err) ->
+    Mocha.Runnable::emit = _.wrap runnableEmit, (orig, event, err) ->
       switch event
         when "error" then throw err
 
       orig.call(@, event, err)
 
   overloadMochaRunnerEmit = ->
-    Mocha.Runner::emit = _.wrap emit, (orig, args...) ->
+    Mocha.Runner::emit = _.wrap runnerEmit, (orig, args...) ->
       event = args[0]
 
       switch event
