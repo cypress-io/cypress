@@ -21,6 +21,8 @@
       @satelliteEvents  = App.request "satellite:events"
       @hostEvents       = App.request "host:events"
       @passThruEvents   = App.request "pass:thru:events"
+      @hook             = null
+      @test             = null
 
     setContentWindow: (@contentWindow, @$remoteIframe) ->
 
@@ -104,16 +106,66 @@
           else
             @trigger event, args...
 
+      runner = @
+
+      ## monkey patch the hook event so we can wrap
+      ## 'test:before:hooks' and 'test:after:hooks' around all of
+      ## the hooks surrounding a test runnable
+      @runner.hook = _.wrap @runner.hook, (orig, name, fn) ->
+        hooks = @suite["_" + name]
+        _this = @
+
+        switch name
+          when "beforeAll", "beforeEach"
+            ## if we actually have hooks and we havent
+            ## already set the runner's hook then proceed
+            ## we set the runner.hook whenever 'hook' event fires
+            ## and we're trying to wrap 'test:before:hooks' around this
+            ## event.  so if its fired already we dont do anything
+            if hooks.length and not runner.hook
+              _this.emit("test:before:hooks", hooks[0], @suite)
+
+          when "afterEach"
+            ## upon completion of the afterEach callback function
+            ## we need to check to see if this isnt the last test
+            ## if its not the last test then go ahead and fire
+            ## the 'test:after:hooks' event
+            grep = _this._grep
+
+            tests = @suite.tests
+            tests = _(tests).filter (test) ->
+              grep.test _.result(test, "fullTitle")
+
+            fn = _.wrap fn, (orig, args...) ->
+              if tests.length and _(tests).last() isnt runner.test
+                _this.emit("test:after:hooks")
+              orig(args...)
+
+          when "afterAll"
+            ## for afterAll we just need to wait until
+            ## we're at the root suite, and if we still
+            ## have a test at that time then first
+            ## the 'test:after:hooks' after the hooks finish
+            ## their normal callback function
+            if runner.test and @suite.root
+              fn = _.wrap fn, (orig, args...) ->
+                _this.emit("test:after:hooks")
+                orig(args...)
+
+        orig.call(@, name, fn)
+
       ## dont overload the runSuite fn if we're in CI mode
       return @ if App.config.env("ci")
-
-      runner = @
 
       @runner.runSuite = _.wrap @runner.runSuite, (runSuite, rootSuite, fn) ->
         ## the runSuite function is recursively called for each individual suite
         ## since we iterate through all tests and all suites initially we need
         ## to bail early if this isnt the root suite
         return runSuite.call(@, rootSuite, fn) if not rootSuite.root
+
+        ## this is where we should automatically patch Ecl/Cy proto's
+        ## with the runnable channel, the iframe contentWindow, and
+        ## remote iframe
 
         runner.trigger "before:add"
 
@@ -204,6 +256,8 @@
       ## the iframes contentWindow
       ## and the iframe string
       @runner.on "test", (test) =>
+        @test = test
+
         @patchEcl
           runnable: test
           channel: runnerChannel
@@ -211,6 +265,28 @@
           $remoteIframe: @$remoteIframe
 
         @patchHook "test"
+
+      @runner.on "test:before:hooks", (hook, suite) =>
+
+        ## if we dont have a test already set then go
+        ## find it from the hook
+        @test = @getTestFromHook(hook, suite) if not @test
+
+        ## check here to see if cypress has the test + hook
+        ## set. if it does then disregard, else go ahead
+        ## and set it to the prototype. this will replace
+        ## patchEcl
+
+      @runner.on "test:after:hooks", =>
+        ## we want to clear any set hook + test
+        ## since this is the last event that will be fired
+        ## until we either move onto the next test or quit
+        ## we should also remove these from the cypress
+        ## and eclectus prototypes
+        @eclRestore()
+        @test.hook = null ## this is temporary until I update commands using test.hook
+        @hook = null
+        @test = null
 
     setListenersForCI: ->
 
@@ -238,6 +314,7 @@
         @trigger "suite:start", suite
 
       @runner.on "suite end", (suite) =>
+        suite.removeAllListeners()
         @trigger "suite:stop", suite
 
       # @runner.on "suite end", (suite) ->
@@ -256,6 +333,8 @@
         @hookFailed(test, err) if test.type is "hook"
 
       @runner.on "hook", (hook) =>
+        @hook = hook
+
         ## if our hook doesnt have an associated test ctx
         ## then we need to patchEcl with the first test
         ## we can find
@@ -303,9 +382,7 @@
         @trigger "test:end", test
 
         ## remove the hook reference from the test
-        test.hook = null
         test.removeAllListeners()
-        @eclRestore()
       ## start listening to all the pertinent runner events
 
     trigger: (event, args...) ->
@@ -446,6 +523,8 @@
       @hooks          = null
       @commands       = null
       @chosen         = null
+      @hook           = null
+      @test           = null
 
     start: (iframe) ->
       @setIframe iframe
