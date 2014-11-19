@@ -74,6 +74,22 @@ window.Cypress = do ($, _) ->
 
       return df
 
+    debug: ->
+      _.each ["subject", "runnable", "queue", "index"], (item) =>
+        console.log("#{item}: ", @[item])
+      debugger
+
+    pause: ->
+      @runnable.timeout(1e9)
+
+      df = $.Deferred()
+
+      _.delay ->
+        df.resolve()
+      , 1e9
+
+      df
+
     find: (selector, alias, options = {}) ->
       options = if _.isObject(alias) then alias else options
 
