@@ -24,6 +24,10 @@ window.Cypress = do ($, _) ->
       @subject.each (index, el) ->
         el.click()
 
+    # get: (name) ->
+    #   @aliases[name] or
+    #     throw new Error("No alias was found by the name: #{name}")
+
     eval: (code, options = {}) ->
       _.defaults options,
         timeout: 15000
@@ -39,7 +43,7 @@ window.Cypress = do ($, _) ->
 
         resp = if response.obj then JSON.parse(response.obj) else response.text
 
-        @alias(options.as, resp) if options.as
+        @alias(options.store, resp) if options.store
 
         df.resolve resp
 
@@ -73,6 +77,8 @@ window.Cypress = do ($, _) ->
         df.reject(e)
 
       return df
+
+    within: (selector, fn) ->
 
     debug: ->
       _.each ["subject", "runnable", "queue", "index"], (item) =>
@@ -252,7 +258,7 @@ window.Cypress = do ($, _) ->
     alias: (name, value) ->
       @aliases[name] = value
 
-    get: (name) ->
+    store: (name) ->
       @aliases[name] or
         throw new Error("No alias was found by the name: #{name}")
 
