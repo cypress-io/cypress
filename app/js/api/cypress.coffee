@@ -46,12 +46,18 @@ window.Cypress = do ($, _) ->
       Ecl.visit(url, options)
 
     then: (partial, fn) ->
+      ## if this is the very last command we know its the 'then'
+      ## called by mocha.  in this case, we need to defer its
+      ## fn callback else we will not properly finish the run
+      ## of our commands, which ends up duplicating multiple commands
+      ## downstream.  this is because this fn callback forces mocha
+      ## to continue synchronously onto tests (if for instance this
+      ## 'then' is called from a hook) - by defering it, we finish
+      ## resolving our deferred.
+      return _.defer(fn) if not @current.next
+
       df = $.Deferred()
 
-      ## to figure out whether or not to invoke then we just
-      ## see if its the very last command, and its been passed
-      ## two arguments, the second of which is called done
-      ## if so its been added by mocha
       try
         ret = fn.call(@, @subject)
 
