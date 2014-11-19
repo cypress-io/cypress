@@ -29,7 +29,14 @@ window.Cypress = do ($, _) ->
     eval: (partial, code, options = {}) ->
       df = $.Deferred()
 
+      ## obviously this needs to be moved to a separate method
+      partial.runnable.timeout(15000)
+      partial.runnable.hook?.timeout(15000)
+
       $.getJSON("/eval", {code: code}).done (response) ->
+        partial.runnable.timeout(2000)
+        partial.runnable.hook?.timeout(2000)
+
         resp = if response.obj then JSON.parse(response.obj) else response.text
         df.resolve resp
 
