@@ -190,19 +190,25 @@ window.Cypress = do ($, _) ->
 
     constructor: (@subject = null, @lastCommand = null) ->
 
-    run: (index = 0) ->
+    run: ->
+      @index ?= 0
       ## each time we run we need to reset the runnables
       ## timeout, since we have a timeout for each individual
       ## command / action as well as a total one
 
-      queue = @queue[index]
+      queue = @queue[@index]
 
       ## if we're at the very end just return our instance
       return @ if not queue
 
-      df = @set queue, @queue[index - 1], @queue[index + 1]
+      df = @set queue, @queue[@index - 1], @queue[@index + 1]
       df.done =>
-        @run index + 1
+        ## mutate index by incrementing it
+        ## this allows us to keep the proper index
+        ## in between different hooks like before + beforeEach
+        ## else run will be called again and index would start
+        ## over at 0
+        @run @index += 1
 
     clearTimeout: (id) ->
       clearTimeout(id) if id
