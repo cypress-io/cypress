@@ -261,6 +261,8 @@ app.get "/__remote/*", (req, res, next) ->
 ## app as '__'  this route shouldn't ever be used by servers
 ## and therefore should not conflict
 app.get "/__", (req, res) ->
+  req.session.host ?= req.get("host")
+
   res.render path.join(__dirname, "public", "index.html"), {
     config: JSON.stringify(app.get("eclectus"))
   }

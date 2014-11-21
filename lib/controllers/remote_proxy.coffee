@@ -81,7 +81,7 @@ module.exports = class extends require('events').EventEmitter
     opts.proxy.web(opts.req, opts.res, {
       target: remote.format()
       changeOrigin: true,
-      hostRewrite: "localhost:3000"
+      hostRewrite: opts.req.session.host
     })
 
     opts.res
