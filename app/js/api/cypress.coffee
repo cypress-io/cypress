@@ -271,6 +271,10 @@ window.Cypress = do ($, _) ->
 
       df = @set queue, @queue[@index - 1], @queue[@index + 1]
       df.done =>
+        ## each successful command invocation should
+        ## always reset the timeout for the current runnable
+        @runnable.resetTimeout()
+
         ## mutate index by incrementing it
         ## this allows us to keep the proper index
         ## in between different hooks like before + beforeEach
