@@ -54,7 +54,7 @@
     "chokidar": "0.8.4",
     "coffee-script": "1.7.1",
     "coffeeify": "git://github.com/jnordberg/coffeeify#2f48b07fad1f3b4dbf58dd53bb84198d7066067a",
-    "express-session": "1.8.2",
+    "express-session": "1.9.1",
     "gaze": "0.6.4",
     "glob": "4.0.5",
     "grunt-cli": "0.1.13",
