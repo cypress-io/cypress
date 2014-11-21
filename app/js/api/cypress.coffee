@@ -246,6 +246,18 @@ window.Cypress = do ($, _) ->
     ## and restores
     options: (options = {}) ->
 
+    isReady: (bool = true, event) ->
+      return @ready?.resolve() if bool
+
+      ## if we already have a ready object and
+      ## its state is pending just leave it be
+      ## and dont touch it
+      return if @ready and @ready.state() is "pending"
+
+      ## else set it to a deferred object
+      console.info event, Math.random()
+      @ready = $.Deferred()
+
     run: ->
       @index ?= 0
       ## each time we run we need to reset the runnables
@@ -285,25 +297,41 @@ window.Cypress = do ($, _) ->
 
       @invoke(obj)
 
+    ## rethink / refactor nested promises
     invoke: (obj, args...) ->
-      ## allow the invoked arguments to be overridden by
-      ## passing them in explicitly
-      ## else just use the arguments the command was
-      ## originally created with
-      args = if args.length then args else obj.args
+      df = $.Deferred()
 
-      ## if the last argument is a function then instead of
-      ## expecting this to be resolved we wait for that function
-      ## to be invoked
-      df = $.when(obj.fn.apply(obj.ctx, args))
-      df.done (subject) =>
-        ## should parse args.options here and figure
-        ## out if we're using an alias
-        @subject = subject
-      df.fail (err) ->
-        console.error(err.stack)
-        throw err
-      # @trigger "set", subject
+      ## make sure we're ready to invoke commands
+      ## first
+      $.when(@ready).done =>
+        # _.delay =>
+        console.warn "running", @index, @current.name
+
+        ## allow the invoked arguments to be overridden by
+        ## passing them in explicitly
+        ## else just use the arguments the command was
+        ## originally created with
+        args = if args.length then args else obj.args
+
+        ## if the last argument is a function then instead of
+        ## expecting this to be resolved we wait for that function
+        ## to be invoked
+        fn = $.when(obj.fn.apply(obj.ctx, args))
+        fn.done (subject) =>
+          ## should parse args.options here and figure
+          ## out if we're using an alias
+          df.resolve(@subject = subject)
+        fn.fail (err) ->
+          console.error(err.stack)
+          throw err
+
+          ## this wont be invoked because we're throwing
+          ## refactor these promises using another library
+          ## to also handle try/catch using .catch
+          df.reject(err)
+          # @trigger "set", subject
+
+      return df
 
     retry: (args...) ->
 
@@ -335,6 +363,7 @@ window.Cypress = do ($, _) ->
         runId:    null
         subject:  null
         runnable: null
+        ready:    null
         options:  {}
 
       return @
@@ -361,6 +390,26 @@ window.Cypress = do ($, _) ->
     ## remoteIframe and channel
     ## this should be moved to an instance method and
     @setup = (contentWindow, $remoteIframe, channel) ->
+      ## we listen for the unload + submit events on
+      ## the window, because when we receive them we
+      ## tell cy its not ready and this prevents any
+      ## additional invocations of any commands until
+      ## its ready again (which happens after the load
+      ## event)
+      bindEvents = ->
+        win = $($remoteIframe.prop("contentWindow"))
+        win.off("submit").on "submit", =>
+          @cy.isReady(false, "submit")
+
+        win.off("unload").on "unload", =>
+          ## put cy in a waiting state now that
+          ## we've unloaded
+          @cy.isReady(false, "unload")
+
+      $remoteIframe.on "load", =>
+        bindEvents()
+        @cy.isReady()
+
       _.extend @cy,
         contentWindow: contentWindow
         $remoteIframe: $remoteIframe

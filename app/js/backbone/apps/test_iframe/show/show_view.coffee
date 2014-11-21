@@ -218,12 +218,15 @@
     removeIframeWindowListeners: ->
       $(@$remote.prop("contentWindow")).off "hashchange", @updateRemoteUrl
       $(@$remote.prop("contentWindow")).off "popstate",   @updateRemoteUrl
-      $(@$remote.prop("contentWindow")).off "unload"
 
     loadIframe: (src, options, fn) ->
       ## remove any existing iframes
       @reverted = false
       @ui.message.hide().empty()
+
+      ## if we have a remote iframe then remove any
+      ## listeners for load and unload
+      @$remote?.off("load").off("unload")
 
       @resetReferences()
 
@@ -310,7 +313,7 @@
         ## any time our remote window loads we need to bind to these events
         $(@$remote.prop("contentWindow")).on "hashchange", @updateRemoteUrl
         $(@$remote.prop("contentWindow")).on "popstate",   @updateRemoteUrl
-        $(@$remote.prop("contentWindow")).on "unload",     -> #debugger
+        # $(@$remote.prop("contentWindow")).on "unload",     -> #debugger
 
       ## if our config model hasnt been configured with defaultPage
       ## then we immediately resolve our remote iframe
