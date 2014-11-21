@@ -17,7 +17,7 @@ jQuery      = require 'jquery-deferred'
 argv = minimist(process.argv.slice(2), boolean: true)
 
 controllers =
-  RemoteLoader: new (require('./controllers/remote_loader'))().handle
+  RemoteInitial: new (require('./controllers/remote_initial'))().handle
   RemoteProxy: new (require('./controllers/remote_proxy'))().handle
   SpecProcessor: new (require('./controllers/spec_processor'))().handle
 
@@ -251,7 +251,7 @@ app.get "/__remote/*", (req, res, next) ->
   ## might want to use cookies here instead of the query string
 
   if req.query.__initial
-    controllers.RemoteLoader(req, res, {
+    controllers.RemoteInitial(req, res, {
       inject: "<script type='text/javascript' src='/eclectus/js/sinon.js'></script>"
     })
   else

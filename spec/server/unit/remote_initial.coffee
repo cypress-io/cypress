@@ -1,4 +1,4 @@
-RemoteLoader  = require('../../../lib/controllers/remote_loader')
+RemoteInitial  = require('../../../lib/controllers/remote_initial')
 Readable      = require("stream").Readable
 expect        = require("chai").expect
 through       = require("through")
@@ -11,7 +11,7 @@ describe "Remote Loader", ->
   afterEach -> nock.cleanAll()
 
   beforeEach ->
-    @remoteLoader = new RemoteLoader
+    @remoteLoader = new RemoteInitial
     @res = through (d) ->
     @res.send = ->
     @res.redirect = ->
@@ -27,7 +27,7 @@ describe "Remote Loader", ->
     readable.push('<head></head><body></body>')
     readable.push(null)
 
-    readable.pipe(RemoteLoader::injectContent("wow"))
+    readable.pipe(RemoteInitial::injectContent("wow"))
     .pipe through (d) ->
       expect(d.toString()).to.eq("<head> wow</head><body></body>")
       done()
