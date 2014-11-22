@@ -21,7 +21,15 @@ window.Cypress = do ($, _) ->
       @subject.first()
 
     click: ->
-      @subject.each (index, el) ->
+      ## if subject is an anchor link then artificially
+      ## add a delay of 100ms because the unload event
+      ## may be firing async (soon)
+      ## else just normally set a 10ms delay because clicking
+      ## will generally cause some kind of DOM mutation which
+      ## helps with async issues
+      ## we should automatically invoke @each("click") for every
+      ## member of the subject, so it logs out each one
+      @subject.each (index, el) =>
         el.click()
 
     # get: (name) ->
@@ -259,14 +267,12 @@ window.Cypress = do ($, _) ->
       @ready = $.Deferred()
 
     run: ->
+      ## start at 0 index if we dont have one
       @index ?= 0
-      ## each time we run we need to reset the runnables
-      ## timeout, since we have a timeout for each individual
-      ## command / action as well as a total one
 
       queue = @queue[@index]
 
-      ## if we're at the very end just return our instance
+      ## if we're at the very end just return our cy instance
       return @ if not queue
 
       df = @set queue, @queue[@index - 1], @queue[@index + 1]
@@ -293,6 +299,12 @@ window.Cypress = do ($, _) ->
       @aliases[name] or
         throw new Error("No alias was found by the name: #{name}")
 
+    storeHref: ->
+      @href = @$remoteIframe.prop("contentWindow").location.href
+
+    hrefChanged: ->
+      @href isnt @$remoteIframe.prop("contentWindow").location.href
+
     set: (obj, prev, next) ->
       obj.prev = prev
       obj.next = next
@@ -306,10 +318,10 @@ window.Cypress = do ($, _) ->
       df = $.Deferred()
 
       ## make sure we're ready to invoke commands
-      ## first
+      ## first by waiting until we're ready
       $.when(@ready).done =>
-        # _.delay =>
-        console.warn "running", @index, @current.name
+        ## store our current href before invoking the next command
+        @storeHref()
 
         ## allow the invoked arguments to be overridden by
         ## passing them in explicitly
@@ -321,7 +333,14 @@ window.Cypress = do ($, _) ->
         ## expecting this to be resolved we wait for that function
         ## to be invoked
         fn = $.when(obj.fn.apply(obj.ctx, args))
-        fn.done (subject) =>
+        fn.done (subject, options = {}) =>
+
+          ## unless we've explicitly disabled checking for location changes
+          ## and if our href has changed in between running the commands then
+          ## then we're no longer ready to proceed with the next command
+          if options.checkLocation isnt false
+            @isReady(false, "href changed") if @hrefChanged()
+
           ## should parse args.options here and figure
           ## out if we're using an alias
           df.resolve(@subject = subject)

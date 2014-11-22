@@ -47,7 +47,7 @@ Eclectus.Visit = do ($, _, Eclectus) ->
       @$remoteIframe.one "load", =>
         @runnable.timeout(@prevTimeout)
         options.onLoad?(win)
-        fn()
+        fn(win, {checkLocation: false})
 
       ## if our url is already has a query param
       ## then append our query param to it
