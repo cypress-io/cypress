@@ -27,8 +27,15 @@ global.app  = express()
 server      = http.Server(app)
 io          = require("socket.io")(server)
 
+getEclectusJson = ->
+  obj = JSON.parse(fs.readFileSync("eclectus.json", encoding: "utf8")).eclectus
+
+  _.defaults obj,
+    commandTimeout: 5000
+    port: 3000
+
 ## set the eclectus config from the eclectus.json file
-app.set "eclectus", JSON.parse(fs.readFileSync("eclectus.json", encoding: "utf8")).eclectus
+app.set "eclectus", getEclectusJson()
 
 ## set the locals up here so we dont have to process them on every request
 { testFiles, testFolder } = app.get("eclectus")
@@ -36,7 +43,7 @@ app.set "eclectus", JSON.parse(fs.readFileSync("eclectus.json", encoding: "utf8"
 testFiles = new RegExp(testFiles)
 
 ## all environments
-app.set 'port', argv.port or app.get("eclectus").port or 3000
+app.set 'port', argv.port or app.get("eclectus").port
 
 app.set "view engine", "html"
 app.engine "html", hbs.__express
