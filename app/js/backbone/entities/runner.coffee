@@ -238,6 +238,9 @@
     changeRunnableTimeout: (runnable) ->
       runnable.timeout App.config.get("commandTimeout")
 
+    createStartedAt: (runnable) ->
+      runnable.startedAt = new Date
+
     startListening: ->
       @setListenersForAll()
       @setListenersForCI() if App.config.env("ci")
@@ -261,11 +264,13 @@
 
       @runner.on "suite", (suite) =>
         @changeRunnableTimeout(suite)
+        @createStartedAt(suite)
 
         @trigger "suite:start", suite
 
       @runner.on "test", (test) =>
         @changeRunnableTimeout(test)
+        @createStartedAt(test)
 
         @test = test
         @hook = "test"
@@ -274,6 +279,7 @@
 
       @runner.on "hook", (hook) =>
         @changeRunnableTimeout(hook)
+        @createStartedAt(hook)
 
         @hook = @getHookName(hook)
 
@@ -688,7 +694,7 @@
       ## run the suite for the iframe
       ## right before we run the root runner's suite we iterate
       ## through each test and give it a unique id
-      t = Date.now()
+      t = new Date
 
       @runner.runSuite contentWindow.mocha.suite, (err) =>
         ## its possible there is no runner when this
@@ -701,7 +707,7 @@
 
         @runner.emit "eclectus end"
 
-        console.log "finished running the iframes suite!", Date.now() - t
+        console.log "finished running the iframes suite!", new Date - t
 
         fn?(err)
 

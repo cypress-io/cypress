@@ -224,9 +224,14 @@ window.Cypress = do ($, _) ->
           el.dispatchEvent(event)
 
     wait: (fn, options = {}) ->
+      ## we set the initial wait to account for how long the test
+      ## has already been running and we add 100 milliseconds so
+      ## our wait times out before the runnable's timeout fires
+
       _.defaults options,
-        wait: 0
+        wait: (new Date - @runnable.startedAt + 100)
         df: $.Deferred()
+        timeout: @runnable.timeout()
 
       try
         ## invoke fn and make sure its not strictly false
@@ -365,7 +370,7 @@ window.Cypress = do ($, _) ->
       ## total timeout vs each individuals command timeout
       options.wait += 100
 
-      if options.wait >= @runnable.timeout() - 100
+      if options.wait >= options.timeout
         ## we may not have an err here in case wait
         ## simply evaluated to false
         ## prob should throw our own custom error
