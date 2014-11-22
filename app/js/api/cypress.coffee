@@ -421,7 +421,13 @@ window.Cypress = do ($, _) ->
       ## event)
       bindEvents = ->
         win = $($remoteIframe.prop("contentWindow"))
-        win.off("submit").on "submit", =>
+        win.off("submit").on "submit", (e) =>
+          ## if we've prevented the default submit action
+          ## without stopping propagation, we will still
+          ## receive this event even though the form
+          ## did not submit
+          return if e.isDefaultPrevented()
+
           @cy.isReady(false, "submit")
 
         win.off("unload").on "unload", =>
