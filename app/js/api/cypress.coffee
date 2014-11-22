@@ -333,8 +333,6 @@ window.Cypress = do ($, _) ->
         ## originally created with
         args = if args.length then args else obj.args
 
-        console.log "running", @index, obj.name, @current
-
         ## if the last argument is a function then instead of
         ## expecting this to be resolved we wait for that function
         ## to be invoked
@@ -468,6 +466,13 @@ window.Cypress = do ($, _) ->
         $remoteIframe: $remoteIframe
         channel:       channel
         config:        config
+
+      ## anytime setup is called we immediately
+      ## set cy to be ready to invoke commands
+      ## this prevents a bug where we go into not
+      ## ready mode due to the unload event when
+      ## our tests are re-run
+      @cy.isReady()
 
     @start = ->
       _.each commands, (fn, key) ->
