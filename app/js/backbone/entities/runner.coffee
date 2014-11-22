@@ -235,6 +235,9 @@
     getCommands: ->
       @commands
 
+    changeRunnableTimeout: (runnable) ->
+      runnable.timeout App.config.get("commandTimeout")
+
     startListening: ->
       @setListenersForAll()
       @setListenersForCI() if App.config.env("ci")
@@ -256,13 +259,22 @@
         @hook = null
         @test = null
 
+      @runner.on "suite", (suite) =>
+        @changeRunnableTimeout(suite)
+
+        @trigger "suite:start", suite
+
       @runner.on "test", (test) =>
+        @changeRunnableTimeout(test)
+
         @test = test
         @hook = "test"
 
         Cypress.set(test)
 
       @runner.on "hook", (hook) =>
+        @changeRunnableTimeout(hook)
+
         @hook = @getHookName(hook)
 
         ## if the hook is already associated to the test
@@ -302,9 +314,6 @@
 
       @runner.on "end", =>
         @trigger "runner:end"
-
-      @runner.on "suite", (suite) =>
-        @trigger "suite:start", suite
 
       @runner.on "suite end", (suite) =>
         suite.removeAllListeners()

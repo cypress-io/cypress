@@ -30,6 +30,10 @@ io          = require("socket.io")(server)
 getEclectusJson = ->
   obj = JSON.parse(fs.readFileSync("eclectus.json", encoding: "utf8")).eclectus
 
+  ## commandTimeout should be in the eclectus.json file
+  ## since it has a significant impact on the tests
+  ## passing or failing
+
   _.defaults obj,
     commandTimeout: 5000
     port: 3000
