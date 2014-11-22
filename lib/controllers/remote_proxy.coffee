@@ -17,7 +17,10 @@ module.exports = class extends require('events').EventEmitter
   handle: (req, res, next) =>
     ## strip out the /__remote/ from the req.url
     if not req.session.remote?
-      throw new Error("™ Session Proxy not yet set! ™")
+      if r = app.get('eclectus').rootUrl
+        req.session.remote = r
+      else
+        throw new Error("™ Session Proxy not yet set! ™")
 
     uri = req.url.split("/__remote/").join("")
 
