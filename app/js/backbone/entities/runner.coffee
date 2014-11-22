@@ -677,7 +677,8 @@
       ## this is where we should automatically patch Ecl/Cy proto's
       ## with the runnable channel, the iframe contentWindow, and
       ## remote iframe
-      Cypress.setup(contentWindow, remoteIframe, runnerChannel)
+      config = App.config.attributes
+      Cypress.setup(contentWindow, remoteIframe, runnerChannel, config)
 
       ## reupdate chosen with the passed in chosenId
       ## this allows us to pass the chosenId around

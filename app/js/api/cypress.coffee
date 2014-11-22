@@ -58,6 +58,8 @@ window.Cypress = do ($, _) ->
       df
 
     visit: (url, options = {}) ->
+      options.rootUrl = @config.rootUrl
+
       partial = _(@).pick "$remoteIframe", "channel", "contentWindow", "runnable"
       Eclectus.patch partial
       Ecl.visit(url, options)
@@ -263,7 +265,7 @@ window.Cypress = do ($, _) ->
       return if @ready and @ready.state() is "pending"
 
       ## else set it to a deferred object
-      console.info event, Math.random()
+      console.info "No longer ready due to: #{event}", Date.now()
       @ready = $.Deferred()
 
     run: ->
@@ -398,8 +400,9 @@ window.Cypress = do ($, _) ->
 
       _.extend @cy,
         contentWindow: null
-        remoteIframe: null
-        channel: null
+        remoteIframe:  null
+        channel:       null
+        config:        null
 
       window.cy = @cy = null
 
@@ -412,7 +415,7 @@ window.Cypress = do ($, _) ->
     ## patches the cypress instance with contentWindow
     ## remoteIframe and channel
     ## this should be moved to an instance method and
-    @setup = (contentWindow, $remoteIframe, channel) ->
+    @setup = (contentWindow, $remoteIframe, channel, config) ->
       ## we listen for the unload + submit events on
       ## the window, because when we receive them we
       ## tell cy its not ready and this prevents any
@@ -443,6 +446,7 @@ window.Cypress = do ($, _) ->
         contentWindow: contentWindow
         $remoteIframe: $remoteIframe
         channel:       channel
+        config:        config
 
     @start = ->
       _.each commands, (fn, key) ->

@@ -30,6 +30,10 @@ io          = require("socket.io")(server)
 getEclectusJson = ->
   obj = JSON.parse(fs.readFileSync("eclectus.json", encoding: "utf8")).eclectus
 
+  if url = obj.rootUrl
+    ## always strip trailing slashes
+    obj.rootUrl = _.rtrim(url, "/")
+
   ## commandTimeout should be in the eclectus.json file
   ## since it has a significant impact on the tests
   ## passing or failing
@@ -272,7 +276,7 @@ app.get "/__remote/*", (req, res, next) ->
 ## app as '__'  this route shouldn't ever be used by servers
 ## and therefore should not conflict
 app.get "/__", (req, res) ->
-  req.session.host ?= req.get("host")
+  req.session.host = req.get("host")
 
   res.render path.join(__dirname, "public", "index.html"), {
     config: JSON.stringify(app.get("eclectus"))
