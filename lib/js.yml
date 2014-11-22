@@ -24,12 +24,14 @@ vendor:
   - bower_components/jquery-ui/ui/widget.js
   - bower_components/jquery-ui/ui/mouse.js
   - bower_components/jquery-ui/ui/slider.js
+  - bower_components/jsuri/Uri.js
   - app/js/vendor/backbone-chooser.coffee
   - app/js/vendor/simulate.coffee
 
 eclectus:
   - app/js/api/eclectus.coffee
   - app/js/api/cypress.coffee
+  - app/js/api/location.coffee
   - app/js/api/reporter.coffee
   - app/js/api/sandbox.coffee
   - app/js/api/command.coffee

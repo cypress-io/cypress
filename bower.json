@@ -36,6 +36,7 @@
     "backbone.mutators": "~0.4.1",
     "sinon-chai": "~2.5.0",
     "jquery-ui": "~1.11.1",
-    "jquery-simulate": "~1.0.0"
+    "jquery-simulate": "~1.0.0",
+    "jsUri": "~1.2.2"
   }
 }

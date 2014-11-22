@@ -14,6 +14,14 @@ window.Cypress = do ($, _) ->
 
       @subject.filter(fn)
 
+    location: (key) ->
+      currentUrl = window.location.toString()
+      remoteUrl  = @$remoteIframe.prop("contentWindow").location.toString()
+      Cypress.location currentUrl, remoteUrl
+      # debugger
+      # "http://0.0.0.0:3000/__remote/http://localhost:8000/signin?__initial=true"
+      # "http://0.0.0.0:3000/users/1"
+
     first: ->
       unless @subject and _.isElement(@subject[0])
         throw new Error("Cannot call .first() without first finding an element")
