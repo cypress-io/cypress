@@ -78,7 +78,7 @@ window.Cypress = do ($, _) ->
       df = $.Deferred()
 
       try
-        ret = fn.call(@, @subject)
+        ret = fn.call(@runnable.ctx, @subject)
 
         ## then will resolve with the fn's
         ## return or just pass along the subject
@@ -114,7 +114,12 @@ window.Cypress = do ($, _) ->
 
       df
 
-    find: (selector, alias, options = {}) ->
+    find: (selector, alias, options = {}, fn ) ->
+      # if fn
+      #   eval
+      #   any cy methods
+      #   splice into the queue
+
       options = if _.isObject(alias) then alias else options
 
       _.defaults options,
@@ -224,22 +229,14 @@ window.Cypress = do ($, _) ->
         df: $.Deferred()
 
       try
-        ## invoke fn and make sure its truthy
-        fn.call(@, @subject) and options.df.resolve(@subject)
+        ## invoke fn and make sure its not strictly false
+        if fn.call(@runnable.ctx, @subject) is false
+          @retry(null, fn, options)
+        else
+          options.df.resolve(@subject)
+
       catch e
-        ## this should prob match the runnable's timeout here
-        ## we should reset the runnables timeout every time
-        ## a command successfully runs and expose that as
-        ## a configuration variable
-        ## total timeout vs each individuals command timeout
-        options.wait += 500
-
-        options.df.reject(e) if options.wait >= 2000
-
-        _.delay =>
-          @invoke(@current.prev).done =>
-            @invoke(@current, fn, options)
-        , 500
+        @retry(e, fn, options)
 
       return options.df
 
@@ -331,6 +328,8 @@ window.Cypress = do ($, _) ->
         ## originally created with
         args = if args.length then args else obj.args
 
+        console.log "running", @index, obj.name, @current
+
         ## if the last argument is a function then instead of
         ## expecting this to be resolved we wait for that function
         ## to be invoked
@@ -358,7 +357,24 @@ window.Cypress = do ($, _) ->
 
       return df
 
-    retry: (args...) ->
+    retry: (err, fn, options) ->
+      ## this should prob match the runnable's timeout here
+      ## we should reset the runnables timeout every time
+      ## a command successfully runs and expose that as
+      ## a configuration variable
+      ## total timeout vs each individuals command timeout
+      options.wait += 100
+
+      if options.wait >= @runnable.timeout() - 100
+        ## we may not have an err here in case wait
+        ## simply evaluated to false
+        ## prob should throw our own custom error
+        return options.df.reject(err)
+
+      _.delay =>
+        @invoke(@current.prev).done =>
+          @invoke(@current, fn, options)
+      , 100
 
     action: (name, args...) ->
       commands[name].apply(@, args)
