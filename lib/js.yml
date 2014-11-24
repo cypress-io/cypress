@@ -63,4 +63,5 @@ id_generator:
   - bower_components/jquery/dist/jquery.js
   - bower_components/underscore/underscore.js
   - bower_components/mocha/mocha.js
+  - app/js/api/cypress.coffee
   - app/js/id_generator/**

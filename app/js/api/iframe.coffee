@@ -1,7 +1,8 @@
 do (parent = window.opener or window.parent) ->
   ## proxy Ecl from the parent
-  window.Ecl = parent.Ecl
-  window.cy = parent.cy
+  window.Ecl     = parent.Ecl
+  window.Cypress = parent.Cypress
+  window.cy      = parent.cy
 
   ## proxy jQuery from the parent
   ## dont rely on our iframe having jQuery otherwise
