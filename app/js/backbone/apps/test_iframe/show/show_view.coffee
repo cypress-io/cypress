@@ -286,7 +286,7 @@
       ## as our remote iframe and wait for it to load
       if defaultPage = @model.get("defaultPage")
         _.extend remoteOpts,
-          src: "/__remote/" + defaultPage + "?__initial=true"
+        src: Cypress.createInitialRemoteSrc(defaultPage)
           load: ->
             remoteLoaded.resolve(view.$remote)
 

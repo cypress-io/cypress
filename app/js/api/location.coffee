@@ -7,7 +7,7 @@
 ## turns it into about://blank
 
 ## attach to global
-Cypress.location = do (_, Uri) ->
+do (Cypress, _, Uri) ->
 
   class Cypress.Location
     constructor: (current, remote = "", defaultOrigin) ->
@@ -106,8 +106,23 @@ Cypress.location = do (_, Uri) ->
         toString: @getToString()
       }
 
-  create = (current, remote, defaultOrigin) ->
+  Cypress.location = (current, remote, defaultOrigin) ->
     location = new Cypress.Location(current, remote, defaultOrigin)
     location.getObject()
 
-  return create
+  ## think about moving this method out of Cypress
+  ## and into our app, since it kind of leaks the
+  ## remote + initial concerns, which could become
+  ## constants which our server sends us during
+  ## initial boot.
+  Cypress.createInitialRemoteSrc = (url) ->
+    ## prepend /__remote/ and strip any
+    ## leading forward slashes
+    url = "/__remote/" + _.ltrim(url, "/")
+    url = new Uri(url)
+
+    ## add the __intitial=true query param
+    url.addQueryParam("__initial", true)
+
+    ## return the full href
+    url.toString()

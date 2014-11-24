@@ -65,17 +65,9 @@ Eclectus.Visit = do ($, _, Eclectus) ->
         options.onLoad?(win)
         fn(win, {checkLocation: false})
 
-      ## if our url is already has a query param
-      ## then append our query param to it
-      if _.str.include(url, "?")
-        url += "&"
-      else
-        ## else create the query param
-        url += "?"
-
       ## any existing global variables will get nuked after it navigates
       # @$remoteIframe[0].contentWindow.location.href = "/__blank/"
-      @$remoteIframe.prop "src", "/__remote/#{url}__initial=true"
+      @$remoteIframe.prop "src", Cypress.createInitialRemoteSrc(url)
 
       ## poll the window to see if sinon has been executed
       ## if so, call our onBeforeLoad callback
