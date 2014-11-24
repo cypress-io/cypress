@@ -348,20 +348,14 @@
       currentUrl = window.location.toString()
       App.config.setRemoteOrigin(currentUrl, url)
 
-    updateRemoteUrl: (url) =>
-      loc = @$remote.prop("contentWindow").location
+    updateRemoteUrl: (remoteUrl) =>
+      currentUrl    = window.location.toString()
+      remoteUrl     ?= @$remote.prop("contentWindow").location.toString()
+      defaultOrigin = App.config.get("remoteOrigin")
 
-      ## if we didnt pass in a url
-      ## and we're on the starting blank page
-      ## then dont set url
-      if not _.isString(url) and loc.href isnt "about:blank"
-        ## nuke everything up until the end of /__remote/
-        ## and nuke either ?__initial=true or &__intitial=true
-        url = loc.href
-          .replace(/.+\/__remote\//, "")
-          .replace(/[\?|&]__initial=true/, "")
+      location = Cypress.location(currentUrl, remoteUrl, defaultOrigin)
 
-      @ui.url.val(url)
+      @ui.url.val(location.href)
 
     parseHashChangeUrl: (url) ->
       ## returns the very last part
