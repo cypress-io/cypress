@@ -247,9 +247,15 @@ window.Cypress = do ($, _) ->
       ## our wait times out before the runnable's timeout fires
 
       _.defaults options,
-        wait: (new Date - @runnable.startedAt + 100)
+        total: 0
+        start: new Date
+        wait: 100
         df: $.Deferred()
-        timeout: @runnable.timeout()
+
+      ## we always want to make sure we timeout before our runnable does
+      ## so take its current timeout, subtract the total time its already
+      ## been running and add the options.wait for a tiny bit of padding
+      options.timeout ?= @runnable.timeout() - (new Date - @runnable.startedAt + options.wait)
 
       try
         ## invoke fn and make sure its not strictly false
@@ -389,23 +395,22 @@ window.Cypress = do ($, _) ->
       return df
 
     retry: (err, fn, options) ->
-      ## this should prob match the runnable's timeout here
-      ## we should reset the runnables timeout every time
-      ## a command successfully runs and expose that as
-      ## a configuration variable
-      ## total timeout vs each individuals command timeout
-      options.wait += 100
+      ## we calculate the total time we've been retrying
+      ## so we dont exceed the runnables timeout
+      options.total = (new Date - options.start)
 
-      if options.wait >= options.timeout
+      if options.total >= options.timeout
         ## we may not have an err here in case wait
         ## simply evaluated to false
         ## prob should throw our own custom error
+        ## we also need to change the error message
+        ## to indicate that this TIMED OUT + the error
         return options.df.reject(err)
 
       _.delay =>
         @invoke(@current.prev).done =>
           @invoke(@current, fn, options)
-      , 100
+      , options.wait
 
     action: (name, args...) ->
       commands[name].apply(@, args)
