@@ -349,11 +349,15 @@
       App.config.setRemoteOrigin(currentUrl, url)
 
     updateRemoteUrl: (remoteUrl) =>
-      currentUrl    = window.location.toString()
-      remoteUrl     ?= @$remote.prop("contentWindow").location.toString()
-      defaultOrigin = App.config.get("remoteOrigin")
+      remoteUrl = if _.isString(remoteUrl) then remoteUrl else @$remote.prop("contentWindow").location.toString()
 
-      location = Cypress.location(currentUrl, remoteUrl, defaultOrigin)
+      if remoteUrl is "about:blank"
+        location = {href: "about:blank"}
+      else
+        currentUrl    = window.location.toString()
+        defaultOrigin = App.config.get("remoteOrigin")
+
+        location = Cypress.location(currentUrl, remoteUrl, defaultOrigin)
 
       @ui.url.val(location.href)
 
