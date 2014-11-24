@@ -421,6 +421,24 @@ window.Cypress = do ($, _) ->
       @runId = _.defer _(@run).bind(@)
       return @
 
+    @commands = commands
+
+    @add = (key, options, fn) ->
+      ## if fn was omitted then we
+      ## assume fn is the options
+      if _.isUndefined(fn)
+        fn = options
+        options = {}
+
+      @commands[key] = fn
+
+      ## need to pass the options into inject here
+      @inject(key, fn)
+
+    @inject = (key, fn) ->
+      Cypress.prototype[key] = (args...) ->
+        @enqueue(key, fn, args)
+
     ## remove all of the partialed functions from Cypress prototype
     @unpatch = (fns) ->
       fns = _(commands).keys().concat("sandbox")
@@ -509,9 +527,8 @@ window.Cypress = do ($, _) ->
       @cy.isReady()
 
     @start = ->
-      _.each commands, (fn, key) ->
-        Cypress.prototype[key] = (args...) ->
-          @enqueue(key, fn, args)
+      _.each @commands, (fn, key) =>
+        @inject(key, fn)
 
       window.cy = @cy = new Cypress
 
