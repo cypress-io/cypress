@@ -62,7 +62,7 @@ do (Cypress, _, Uri) ->
         ""
 
     getHref: ->
-      @remote.toString()
+      @getToString()
 
     ## Location Host
     ## The URLUtils.host property is a DOMString containing the host,
@@ -90,7 +90,24 @@ do (Cypress, _, Uri) ->
       @remote.query()
 
     getToString: ->
-      _.bind(@remote.toString, @remote)
+      ## created our own custom toString method
+      ## to fix some bugs with jsUri's implementation
+      s = @remote.origin()
+
+      if path = @remote.path()
+        s += path
+
+      if query = @remote.query()
+        s += "?" if not _.str.include(query, "?")
+
+        s += query
+
+      if anchor = @remote.anchor()
+        s += "#" if not _.str.include(anchor, "#")
+
+        s += anchor
+
+      return s
 
     getObject: ->
       {
@@ -103,7 +120,7 @@ do (Cypress, _, Uri) ->
         port: @getPort()
         protocol: @getProtocol()
         search: @getSearch()
-        toString: @getToString()
+        toString: _.bind(@getToString, @)
       }
 
   Cypress.location = (current, remote, defaultOrigin) ->

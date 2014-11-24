@@ -3,6 +3,7 @@ urls =
   signin:   "http://0.0.0.0:3000/__remote/http://localhost:8000/signin?__initial=true"
   users:    "http://0.0.0.0:3000/users/1"
   google:   "http://0.0.0.0:3000/__remote/https://www.google.com"
+  ember:    "http://0.0.0.0:3000/__remote/index.html?__initial=true#/posts"
   app:      "http://localhost:3000/app/#posts/1"
   search:   "http://localhost:3000/search?q=books"
 
@@ -34,6 +35,10 @@ describe "Location API", ->
     it "applies a default origin if none is set", ->
       str = @setup("users", "http://localhost:4000").getHref()
       expect(str).to.eq "http://localhost:4000/users/1"
+
+    it "does not apply a leading slash after removing query params", ->
+      str = @setup("ember").getHref()
+      expect(str).to.eq "index.html#/posts"
 
   context "#getHost", ->
     it "returns port if port is present", ->
@@ -97,10 +102,14 @@ describe "Location API", ->
   context "#getToString", ->
     it "returns the toString function", ->
       str = @setup("signin").getToString()
-      expect(str()).to.eq "http://localhost:8000/signin"
+      expect(str).to.eq "http://localhost:8000/signin"
 
   context "cy.location", ->
     it "returns an object literal", ->
       obj = Cypress.location(urls.cypress, urls.signin)
       keys = ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "toString"]
       expect(obj).to.have.keys(keys)
+
+    it "can invoke toString function", ->
+      obj = Cypress.location(urls.cypress, urls.signin)
+      expect(obj.toString()).to.eq "http://localhost:8000/signin"
