@@ -297,6 +297,7 @@
       @$remote.on "visit:start", (e, url) =>
         @showSpinner()
         @updateRemoteUrl(url)
+        @setRemoteOrigin(url)
 
         ## remove any existing hashchange and popstate listeners
         ## whenever we visit we will lose these listeners anyway
@@ -342,6 +343,10 @@
         ## yes these args are supposed to be reversed
         ## TODO FIX THIS
         fn(iframe, remote)
+
+    setRemoteOrigin: (url) ->
+      currentUrl = window.location.toString()
+      App.config.setRemoteOrigin(currentUrl, url)
 
     updateRemoteUrl: (url) =>
       loc = @$remote.prop("contentWindow").location

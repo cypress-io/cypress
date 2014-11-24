@@ -80,5 +80,9 @@
     getPathToSpec: (id) ->
       _.compact([@get("testFolder"), id]).join("/")
 
+    setRemoteOrigin: (current, remote) ->
+      location = Cypress.location(current, remote)
+      @set "remoteOrigin", location.origin
+
   App.reqres.setHandler "new:config:entity", (attrs = {}) ->
     new Entities.Config attrs
