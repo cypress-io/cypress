@@ -64,6 +64,7 @@ app.use require('express-session')(
   secret: "marionette is cool"
   saveUninitialized: true
   resave: true
+  name: "__cypress.sid"
 )
 
 convertToAbsolutePath = (files) ->
