@@ -322,10 +322,18 @@ window.Cypress = do ($, _) ->
         throw new Error("No alias was found by the name: #{name}")
 
     storeHref: ->
-      @href = @$remoteIframe.prop("contentWindow").location.href
+      ## we are using href and stripping out the hash because
+      ## hash changes do not cause full page refreshes
+      ## however, i believe this will completely barf when
+      ## JS users are using pushstate since there is no hash
+      ## TODO. need to listen to pushstate events here which
+      ## will act as the isReady() the same way load events do
+      location = @action("location")
+      @href    = location.href.replace(location.hash, "")
 
     hrefChanged: ->
-      @href isnt @$remoteIframe.prop("contentWindow").location.href
+      location = @action("location")
+      @href isnt location.href.replace(location.hash, "")
 
     set: (obj, prev, next) ->
       obj.prev = prev

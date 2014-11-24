@@ -1,7 +1,10 @@
 ## TODO:
-## test these method implementations using encoded characters
+## 1. test these method implementations using encoded characters
 ## look at the spec to figure out whether we SHOULD be decoding them
 ## or leaving them as encoded.  also look at jsuri to see what it does
+##
+## 2. there is a bug when handling about:blank which borks it and
+## turns it into about://blank
 
 ## attach to global
 Cypress.location = do (_, Uri) ->
