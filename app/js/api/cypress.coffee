@@ -5,6 +5,9 @@
 window.Cypress = do ($, _) ->
 
   commands =
+    inspect: ->
+      @_inspect = true
+
     url: ->
       @action "location", "href"
 
@@ -339,6 +342,8 @@ window.Cypress = do ($, _) ->
       ## make sure we're ready to invoke commands
       ## first by waiting until we're ready
       $.when(@ready).done =>
+        console.warn("running: ", @index, obj.name) if @_inspect
+
         ## store our current href before invoking the next command
         @storeHref()
 
@@ -423,6 +428,7 @@ window.Cypress = do ($, _) ->
         subject:  null
         runnable: null
         ready:    null
+        _inspect: null
         options:  {}
 
       return @
