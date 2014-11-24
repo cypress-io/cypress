@@ -3,7 +3,7 @@ do ($, _, io) ->
 
   run           = Mocha.prototype.run
 
-  channel       = io.connect()
+  channel       = io.connect({path: "/__socket.io"})
   channel.on "generate:ids:for:test", (filePath, strippedPath) ->
     $("iframe").remove()
 

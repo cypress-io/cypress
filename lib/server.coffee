@@ -24,8 +24,8 @@ controllers =
 _.mixin _.str.exports()
 
 global.app  = express()
-server      = http.Server(app)
-io          = require("socket.io")(server)
+server      = http.createServer(app)
+io          = require("socket.io")(server, {path: "/__socket.io"})
 
 getEclectusJson = ->
   obj = JSON.parse(fs.readFileSync("eclectus.json", encoding: "utf8")).eclectus

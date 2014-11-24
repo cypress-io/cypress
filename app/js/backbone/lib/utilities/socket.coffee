@@ -7,7 +7,7 @@
   API =
     start: ->
       ## connect to socket io
-      channel = io.connect()
+      channel = io.connect({path: "/__socket.io"})
 
       _.each hostEvents, (event) ->
         channel.on event, (args...) ->
