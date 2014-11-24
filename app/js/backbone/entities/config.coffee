@@ -84,5 +84,13 @@
       location = Cypress.location(current, remote)
       @set "remoteOrigin", location.origin
 
+    ## returns a function bound to this model
+    ## which acts as a getter
+    getExternalInterface: ->
+      get = (attr) ->
+        @get(attr)
+
+      _.bind(get, @)
+
   App.reqres.setHandler "new:config:entity", (attrs = {}) ->
     new Entities.Config attrs

@@ -20,7 +20,7 @@ window.Cypress = do ($, _) ->
     location: (key) ->
       currentUrl = window.location.toString()
       remoteUrl  = @$remoteIframe.prop("contentWindow").location.toString()
-      remoteOrigin = @config.get("remoteOrigin")
+      remoteOrigin = @config("remoteOrigin")
 
       location = Cypress.location(currentUrl, remoteUrl, remoteOrigin)
 
@@ -76,7 +76,7 @@ window.Cypress = do ($, _) ->
       df
 
     visit: (url, options = {}) ->
-      options.rootUrl = @config.get("rootUrl")
+      options.rootUrl = @config("rootUrl")
 
       partial = _(@).pick "$remoteIframe", "channel", "contentWindow", "runnable"
       Eclectus.patch partial

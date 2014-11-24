@@ -685,7 +685,7 @@
       ## remote iframe
       ## as of now we're passing App.confg into cypress but i dont like
       ## leaking this backbone model's details into the cypress API
-      Cypress.setup(contentWindow, remoteIframe, runnerChannel, App.config)
+      Cypress.setup(contentWindow, remoteIframe, runnerChannel, App.config.getExternalInterface())
 
       ## reupdate chosen with the passed in chosenId
       ## this allows us to pass the chosenId around
