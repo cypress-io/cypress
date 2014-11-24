@@ -6,7 +6,7 @@ window.Cypress = do ($, _) ->
 
   commands =
     url: ->
-      @$remoteIframe.prop("contentWindow").location.toString()
+      @action "location", "href"
 
     filter: (fn) ->
       unless @subject and _.isElement(@subject[0])
@@ -17,10 +17,17 @@ window.Cypress = do ($, _) ->
     location: (key) ->
       currentUrl = window.location.toString()
       remoteUrl  = @$remoteIframe.prop("contentWindow").location.toString()
-      Cypress.location currentUrl, remoteUrl
-      # debugger
-      # "http://0.0.0.0:3000/__remote/http://localhost:8000/signin?__initial=true"
-      # "http://0.0.0.0:3000/users/1"
+      remoteOrigin = @config.get("remoteOrigin")
+
+      location = Cypress.location(currentUrl, remoteUrl, remoteOrigin)
+
+      if key
+        ## use existential here because we only want to throw
+        ## on null or undefined values (and not empty strings)
+        location[key] ?
+          throw new Error("Location object does have not have key: #{key}")
+      else
+        location
 
     first: ->
       unless @subject and _.isElement(@subject[0])
@@ -66,7 +73,7 @@ window.Cypress = do ($, _) ->
       df
 
     visit: (url, options = {}) ->
-      options.rootUrl = @config.rootUrl
+      options.rootUrl = @config.get("rootUrl")
 
       partial = _(@).pick "$remoteIframe", "channel", "contentWindow", "runnable"
       Eclectus.patch partial
