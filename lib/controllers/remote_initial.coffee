@@ -83,4 +83,10 @@ module.exports = class extends require('events').EventEmitter
         @setSessionRemoteUrl(req, url)
         rq.pipe(thr)
 
+    ## set the headers on the hyperquest request
+    ## this will naturally forward cookies or auth tokens
+    ## or anything else which should be proxied
+    _.each req.headers, (val, key) ->
+      rq.setHeader key, val
+
     thr
