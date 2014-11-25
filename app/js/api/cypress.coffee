@@ -437,8 +437,8 @@ window.Cypress = do ($, _) ->
       ## we also reset the .next property to properly reference
       ## our new obj
       if @nestedIndex
-        @queue.splice (@nestedIndex + 1), 0, obj
         @queue[@nestedIndex].next = obj
+        @queue.splice (@nestedIndex += 1), 0, obj
       else
         @queue.push(obj)
         @runId = _.defer _(@run).bind(@)

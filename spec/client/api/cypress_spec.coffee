@@ -51,3 +51,18 @@ describe "Cypress API", ->
         .nest1()
         .then ->
           expect(getNames(cy.queue)).to.deep.eq ["inspect", "nest1", "nest2", "noop", "then", "then"]
+
+    it "works with multiple nested commands", ->
+      Cypress.set(@test)
+
+      Cypress.add "multiple", ->
+        cy
+          .url()
+          .location()
+          .noop()
+
+      cy
+        .inspect()
+        .multiple()
+        .then ->
+          expect(getNames(cy.queue)).to.deep.eq ["inspect", "multiple", "url", "location", "noop", "then", "then"]
