@@ -17,6 +17,12 @@ window.Cypress = do ($, _) ->
 
       @subject.filter(fn)
 
+    ## allow the user to choose whether the confirmation
+    ## message returns true or false.  need to patch
+    ## window.confirm and store the last confirm message
+    ## so we can async respond to it?
+    confirm: (bool = true) ->
+
     noop: ->
 
     location: (key) ->
@@ -560,6 +566,10 @@ window.Cypress = do ($, _) ->
           ## put cy in a waiting state now that
           ## we've unloaded
           @cy.isReady(false, "unload")
+
+        win.get(0).confirm = (message) ->
+          console.info "Confirming 'true' to: ", message
+          return true
 
       $remoteIframe.on "load", =>
         bindEvents()
