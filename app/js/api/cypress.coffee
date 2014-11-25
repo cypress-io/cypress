@@ -17,6 +17,8 @@ window.Cypress = do ($, _) ->
 
       @subject.filter(fn)
 
+    noop: ->
+
     location: (key) ->
       currentUrl = window.location.toString()
       remoteUrl  = @$remoteIframe.prop("contentWindow").location.toString()
