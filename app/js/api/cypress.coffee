@@ -367,11 +367,17 @@ window.Cypress = do ($, _) ->
         ## originally created with
         args = if args.length then args else obj.args
 
+        if nestedCommands = obj.options.nestedCommands
+          @nestedIndex = @index
+
         ## if the last argument is a function then instead of
         ## expecting this to be resolved we wait for that function
         ## to be invoked
         fn = $.when(obj.fn.apply(obj.ctx, args))
         fn.done (subject, options = {}) =>
+
+          ## reset the nestedIndex back to null
+          @nestedIndex = null if nestedCommands
 
           ## unless we've explicitly disabled checking for location changes
           ## and if our href has changed in between running the commands then
@@ -415,10 +421,26 @@ window.Cypress = do ($, _) ->
     action: (name, args...) ->
       commands[name].apply(@, args)
 
-    enqueue: (key, fn, args) ->
+    enqueue: (key, fn, args, options) ->
       @clearTimeout(@runId)
-      @queue.push {name: key, ctx: @, fn: fn, args: args}
-      @runId = _.defer _(@run).bind(@)
+
+      obj = {name: key, ctx: @, fn: fn, args: args, options: options}
+
+      ## if we have a nestedIndex it means we're processing
+      ## nested commands and need to splice them into the
+      ## index past the current index as opposed to
+      ## pushing them to the end we also dont want to
+      ## reset the run defer because splicing means we're
+      ## already in a run loop and dont want to create another!
+      ## we also reset the .next property to properly reference
+      ## our new obj
+      if @nestedIndex
+        @queue.splice (@nestedIndex + 1), 0, obj
+        @queue[@nestedIndex].next = obj
+      else
+        @queue.push(obj)
+        @runId = _.defer _(@run).bind(@)
+
       return @
 
     @commands = commands
@@ -432,12 +454,17 @@ window.Cypress = do ($, _) ->
 
       @commands[key] = fn
 
-      ## need to pass the options into inject here
-      @inject(key, fn)
+      _.defaults options,
+        nestedCommands: true
+        logChildren: true
+        log: true
 
-    @inject = (key, fn) ->
+      ## need to pass the options into inject here
+      @inject(key, fn, options)
+
+    @inject = (key, fn, options = {}) ->
       Cypress.prototype[key] = (args...) ->
-        @enqueue(key, fn, args)
+        @enqueue(key, fn, args, options)
 
     ## remove all of the partialed functions from Cypress prototype
     @unpatch = (fns) ->
@@ -453,14 +480,15 @@ window.Cypress = do ($, _) ->
       Cypress.prototype.aliases = {}
 
       _.extend @cy,
-        index:    null
-        current:  null
-        runId:    null
-        subject:  null
-        runnable: null
-        ready:    null
-        _inspect: null
-        options:  {}
+        index:        null
+        nestedIndex:  null
+        current:      null
+        runId:        null
+        subject:      null
+        runnable:     null
+        ready:        null
+        _inspect:     null
+        options:      {}
 
       return @
 
