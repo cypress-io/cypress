@@ -313,7 +313,13 @@ window.Cypress = do ($, _) ->
     options: (options = {}) ->
 
     isReady: (bool = true, event) ->
-      return @ready?.resolve() if bool
+      if bool
+        ## we set _recentlyReady to true
+        ## so we dont accidently set isReady
+        ## back to false in between commands
+        ## which are async
+        @_recentlyReady = true
+        return @ready?.resolve()
 
       ## if we already have a ready object and
       ## its state is pending just leave it be
@@ -405,12 +411,18 @@ window.Cypress = do ($, _) ->
         fn = $.when(obj.fn.apply(obj.ctx, args))
         fn.done (subject, options = {}) =>
 
-
-          ## unless we've explicitly disabled checking for location changes
+          ## if we havent become recently ready and unless we've
+          ## explicitly disabled checking for location changes
           ## and if our href has changed in between running the commands then
           ## then we're no longer ready to proceed with the next command
-          if options.checkLocation isnt false
+          if @_recentlyReady isnt true and options.checkLocation isnt false
             @isReady(false, "href changed") if @hrefChanged()
+
+          ## reset the nestedIndex back to null
+          @nestedIndex = null
+
+          ## also reset recentlyReady back to null
+          @_recentlyReady = null
 
           ## should parse args.options here and figure
           ## out if we're using an alias
@@ -505,16 +517,21 @@ window.Cypress = do ($, _) ->
       Cypress.prototype.queue = []
       Cypress.prototype.aliases = {}
 
+      ## instead of manually keeping up with these properties
+      ## we should go through a registerProp method which
+      ## keeps a registry of all properties used, and then
+      ## unregisters each
       _.extend @cy,
-        index:        null
-        nestedIndex:  null
-        current:      null
-        runId:        null
-        subject:      null
-        runnable:     null
-        ready:        null
-        _inspect:     null
-        options:      {}
+        index:          null
+        nestedIndex:    null
+        current:        null
+        runId:          null
+        subject:        null
+        runnable:       null
+        ready:          null
+        _inspect:       null
+        _recentlyReady: null
+        options:        {}
 
       return @
 
