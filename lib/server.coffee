@@ -56,6 +56,7 @@ app.set 'port', argv.port or app.get("eclectus").port
 app.set "view engine", "html"
 app.engine "html", hbs.__express
 
+app.use require("cookie-parser")()
 app.use require("compression")()
 app.use require("morgan")("dev")
 app.use require("body-parser").json()
