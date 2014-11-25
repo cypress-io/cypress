@@ -12,7 +12,7 @@ describe "Cypress API", ->
 
   context "nested commands", ->
     beforeEach ->
-      @setup = (fn) =>
+      @setup = (fn = ->) =>
         Cypress.set(@test)
 
         Cypress.add "nested", ->
@@ -33,9 +33,11 @@ describe "Cypress API", ->
         nested = _(cy.queue).find (obj) -> obj.name is "nested"
         expect(nested.next.name).to.eq "url"
 
-    it "null outs nestedIndex prior to restoring", ->
+    it "null outs nestedIndex prior to restoring", (done) ->
       @setup ->
-        expect(cy.nestedIndex).to.be.null
+        _.defer ->
+          expect(cy.nestedIndex).to.be.null
+          done()
 
     it "can recursively nest", ->
       Cypress.set(@test)

@@ -397,8 +397,7 @@ window.Cypress = do ($, _) ->
         ## originally created with
         args = if args.length then args else obj.args
 
-        if nestedCommands = obj.options.nestedCommands
-          @nestedIndex = @index
+        @nestedIndex = @index
 
         ## if the last argument is a function then instead of
         ## expecting this to be resolved we wait for that function
@@ -406,8 +405,6 @@ window.Cypress = do ($, _) ->
         fn = $.when(obj.fn.apply(obj.ctx, args))
         fn.done (subject, options = {}) =>
 
-          ## reset the nestedIndex back to null
-          @nestedIndex = null if nestedCommands
 
           ## unless we've explicitly disabled checking for location changes
           ## and if our href has changed in between running the commands then
@@ -485,7 +482,6 @@ window.Cypress = do ($, _) ->
       @commands[key] = fn
 
       _.defaults options,
-        nestedCommands: true
         logChildren: true
         log: true
 
