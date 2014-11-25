@@ -32,3 +32,22 @@ describe "Cypress API", ->
       @setup ->
         nested = _(cy.queue).find (obj) -> obj.name is "nested"
         expect(nested.next.name).to.eq "url"
+
+    it "null outs nestedIndex prior to restoring", ->
+      @setup ->
+        expect(cy.nestedIndex).to.be.null
+
+    it "can recursively nest", ->
+      Cypress.set(@test)
+
+      Cypress.add "nest1", ->
+        cy.nest2()
+
+      Cypress.add "nest2", ->
+        cy.noop()
+
+      cy
+        .inspect()
+        .nest1()
+        .then ->
+          expect(getNames(cy.queue)).to.deep.eq ["inspect", "nest1", "nest2", "noop", "then", "then"]
