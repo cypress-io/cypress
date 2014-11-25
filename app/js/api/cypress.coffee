@@ -71,7 +71,7 @@ window.Cypress = do ($, _) ->
 
         _.delay dfs[index].resolve, wait
 
-      @subject.each (el, index) ->
+      @subject.each (index, el) ->
         df = $.Deferred()
         df.done -> click(index + 1)
         dfs.push(df)
