@@ -49,8 +49,30 @@ window.Cypress = do ($, _) ->
       ## helps with async issues
       ## we should automatically invoke @each("click") for every
       ## member of the subject, so it logs out each one
-      @subject.each (index, el) =>
+      clicks = $.Deferred()
+
+      dfs = []
+
+      click = (index) =>
+        el = @subject.get(index)
+
+        ## resolve the outer clicks deferred with our subject again
+        return clicks.resolve(@subject) if not el
+
         el.click()
+
+        wait = if $(el).is("a") then 100 else 10
+
+        _.delay dfs[index].resolve, wait
+
+      @subject.each (el, index) ->
+        df = $.Deferred()
+        df.done -> click(index + 1)
+        dfs.push(df)
+
+      click(0)
+
+      return clicks
 
     # get: (name) ->
     #   @aliases[name] or
