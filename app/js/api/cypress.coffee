@@ -318,6 +318,7 @@ window.Cypress = do ($, _) ->
         ## so we dont accidently set isReady
         ## back to false in between commands
         ## which are async
+        @log "Ready due to: #{event}", "success"
         @_recentlyReady = true
         return @ready?.resolve()
 
@@ -327,7 +328,7 @@ window.Cypress = do ($, _) ->
       return if @ready and @ready.state() is "pending"
 
       ## else set it to a deferred object
-      console.info "No longer ready due to: #{event}", Date.now()
+      @log "No longer ready due to: #{event}", "warning"
       @ready = $.Deferred()
 
     run: ->
@@ -335,6 +336,8 @@ window.Cypress = do ($, _) ->
       @index ?= 0
 
       queue = @queue[@index]
+
+      @group(@runnable.group)
 
       ## if we're at the very end just return our cy instance
       return @ if not queue
@@ -392,7 +395,7 @@ window.Cypress = do ($, _) ->
       ## make sure we're ready to invoke commands
       ## first by waiting until we're ready
       $.when(@ready).done =>
-        console.warn("running: ", @index, obj.name) if @_inspect
+        @log obj
 
         ## store our current href before invoking the next command
         @storeHref()
@@ -428,6 +431,7 @@ window.Cypress = do ($, _) ->
           ## out if we're using an alias
           df.resolve(@subject = subject)
         fn.fail (err) ->
+          @log {name: "Failed: #{obj.name}", args: err.message}, "danger"
           console.error(err.stack)
           throw err
 
@@ -459,6 +463,44 @@ window.Cypress = do ($, _) ->
 
     action: (name, args...) ->
       commands[name].apply(@, args)
+
+    hook: (name) ->
+      return if not @_inspect
+
+      return console.groupEnd() if not name
+
+      console.group(name)
+
+    group: (name) ->
+      ## bail if we're not in inspect mode
+      return if not @_inspect
+
+      ## end the group if name is explicitly false
+      return console.groupEnd() if name is false
+
+      ## bail if we already have a _group set
+      return if @_group
+
+      ## set the _group
+      @_group = name
+
+      ## start a group by the name
+      console.group(name)
+
+    log: (obj, type) ->
+      return if not @_inspect
+
+      color = {
+        success: "#46B848"
+        info:    "#5FC0DD"
+        warning: "#D99538"
+        danger:  "#D7514F"
+      }[type] or "blue"
+
+      if _.isString(obj)
+        obj = {name: obj, args: ""}
+
+      console.log "%c#{obj.name}", "color: #{color}", _.truncate(obj.args, 50)
 
     enqueue: (key, fn, args, options) ->
       @clearTimeout(@runId)
@@ -517,6 +559,11 @@ window.Cypress = do ($, _) ->
       Cypress.prototype.queue = []
       Cypress.prototype.aliases = {}
 
+      ## remove any outstanding groups
+      ## for any open hooks and runnables
+      @cy.group(false)
+      @cy.group(false)
+
       ## instead of manually keeping up with these properties
       ## we should go through a registerProp method which
       ## keeps a registry of all properties used, and then
@@ -551,7 +598,8 @@ window.Cypress = do ($, _) ->
       return @
 
     ## sets the runnable onto the cy instance
-    @set = (runnable) ->
+    @set = (runnable, hook) ->
+      @cy.hook(hook)
       @cy.runnable = runnable
 
     ## patches the cypress instance with contentWindow
@@ -586,7 +634,7 @@ window.Cypress = do ($, _) ->
 
       $remoteIframe.on "load", =>
         bindEvents()
-        @cy.isReady()
+        @cy.isReady(true, "load")
 
       _.extend @cy,
         contentWindow: contentWindow
@@ -599,7 +647,7 @@ window.Cypress = do ($, _) ->
       ## this prevents a bug where we go into not
       ## ready mode due to the unload event when
       ## our tests are re-run
-      @cy.isReady()
+      @cy.isReady(true, "setup")
 
     @start = ->
       _.each @commands, (fn, key) =>

@@ -275,7 +275,9 @@
         @test = test
         @hook = "test"
 
-        Cypress.set(test)
+        test.group = test.title
+
+        Cypress.set(test, @hook)
 
       @runner.on "hook", (hook) =>
         @changeRunnableTimeout(hook)
@@ -285,11 +287,12 @@
 
         ## if the hook is already associated to the test
         ## just use that, else go find it
-        test     = hook.ctx.currentTest or @getTestFromHook(hook, hook.parent)
-        hook.cid = test.cid
+        test       = hook.ctx.currentTest or @getTestFromHook(hook, hook.parent)
+        hook.cid   = test.cid
+        hook.group = test.title
 
         ## set the hook as our current runnable
-        Cypress.set(hook)
+        Cypress.set(hook, @hook)
 
       ## when a hook ends we want to re-set Cypress
       ## with the test runnable (if one exists) since
