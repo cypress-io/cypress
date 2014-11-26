@@ -538,6 +538,11 @@
           obj.stopped = true
           obj = obj.parent
 
+      ## start the abort process since we're about
+      ## to load up in case we're running any tests
+      ## right this moment
+      Cypress.abort()
+
       ## tells different areas of the app to prepare
       ## for the resetting of the test run
       @trigger "reset:test:run"

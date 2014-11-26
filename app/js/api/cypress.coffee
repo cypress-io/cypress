@@ -69,7 +69,7 @@ window.Cypress = do ($, _) ->
 
         wait = if $(el).is("a") then 100 else 10
 
-        _.delay dfs[index].resolve, wait
+        @delay dfs[index].resolve, wait# * 50
 
       @subject.each (index, el) ->
         df = $.Deferred()
@@ -94,7 +94,7 @@ window.Cypress = do ($, _) ->
       timeout = @runnable.timeout()
       @runnable.timeout(options.timeout)
 
-      $.getJSON("/eval", {code: code}).done (response) =>
+      @_xhr = $.getJSON("/eval", {code: code}).done (response) =>
         @runnable.timeout(timeout)
 
         resp = if response.obj then JSON.parse(response.obj) else response.text
@@ -121,7 +121,7 @@ window.Cypress = do ($, _) ->
       ## to continue synchronously onto tests (if for instance this
       ## 'then' is called from a hook) - by defering it, we finish
       ## resolving our deferred.
-      return _.defer(fn) if not @current.next
+      return @defer(fn) if not @current.next
 
       df = $.Deferred()
 
@@ -156,7 +156,7 @@ window.Cypress = do ($, _) ->
 
       df = $.Deferred()
 
-      _.delay ->
+      @delay ->
         df.resolve()
       , int
 
@@ -190,7 +190,7 @@ window.Cypress = do ($, _) ->
         ## the delay + invocation + options.total increment
         options.total += 50
 
-        _.delay =>
+        @delay =>
           @invoke(@current, selector, alias, options)
         , 50
 
@@ -418,7 +418,7 @@ window.Cypress = do ($, _) ->
           ## explicitly disabled checking for location changes
           ## and if our href has changed in between running the commands then
           ## then we're no longer ready to proceed with the next command
-          if @_recentlyReady isnt true and options.checkLocation isnt false
+          if @_recentlyReady is null and options.checkLocation isnt false
             @isReady(false, "href changed") if @hrefChanged()
 
           ## reset the nestedIndex back to null
@@ -456,13 +456,20 @@ window.Cypress = do ($, _) ->
         ## to indicate that this TIMED OUT + the error
         return options.df.reject(err)
 
-      _.delay =>
+      @delay =>
         @invoke(@current.prev).done =>
           @invoke(@current, fn, options)
       , options.wait
 
     action: (name, args...) ->
       commands[name].apply(@, args)
+
+    defer: (fn) ->
+      @delay(fn, 0)
+
+    delay: (fn, ms) ->
+      @clearTimeout(@timerId)
+      @timerId = _.delay(fn, ms)
 
     hook: (name) ->
       return if not @_inspect
@@ -520,7 +527,7 @@ window.Cypress = do ($, _) ->
         @queue.splice (@nestedIndex += 1), 0, obj
       else
         @queue.push(obj)
-        @runId = _.defer _(@run).bind(@)
+        @runId = @defer _(@run).bind(@)
 
       return @
 
@@ -552,10 +559,20 @@ window.Cypress = do ($, _) ->
       _.each (fns), (fn, obj) ->
         delete Cypress.prototype[fn]
 
+    @abort = ->
+      @cy.isReady(false, "abort").reject()
+      @cy.$remoteIframe?.off("submit unload load")
+      @cy.runnable?.clearTimeout()
+      @cy._xhr?.abort()
+      @restore()
+
     ## restores cypress after each test run by
     ## removing the queue from the proto and
     ## removing additional own instance properties
     @restore = ->
+      @cy.clearTimeout(@cy.runId)
+      @cy.clearTimeout(@cy.timerId)
+
       Cypress.prototype.queue = []
       Cypress.prototype.aliases = {}
 
@@ -576,6 +593,7 @@ window.Cypress = do ($, _) ->
         subject:        null
         runnable:       null
         ready:          null
+        _xhr:           null
         _inspect:       null
         _recentlyReady: null
         options:        {}
@@ -585,6 +603,7 @@ window.Cypress = do ($, _) ->
     ## removes channel, remoteIframe, contentWindow
     ## from the cypress instance
     @stop = ->
+      @abort()
       @restore()
 
       _.extend @cy,
