@@ -136,16 +136,16 @@ describe "Runner Entity", ->
         @contentWindow = iframe.contentWindow
         @mocha         = iframe.contentWindow.mocha
 
-    it "emits exactly two test:after:hooks events", (done) ->
-      @run (emit) ->
-        # expect(emit).to.be.calledWith "suite", "test:after:hooks"
-        calls = _(emit.getCalls()).filter (call) -> call.args[0] is "test:after:hooks"
-        expect(calls).to.have.length(2)
-        done()
-
-    it "emits exactly two test:before:hooks events", (done) ->
+    it "emits four test:before:hooks events", (done) ->
       @run (emit) ->
         # expect(emit).to.be.calledWith "suite", "test:after:hooks"
         calls = _(emit.getCalls()).filter (call) -> call.args[0] is "test:before:hooks"
-        expect(calls).to.have.length(2)
+        expect(calls).to.have.length(4)
+        done()
+
+    it "emits four test:after:hooks events", (done) ->
+      @run (emit) ->
+        # expect(emit).to.be.calledWith "suite", "test:after:hooks"
+        calls = _(emit.getCalls()).filter (call) -> call.args[0] is "test:after:hooks"
+        expect(calls).to.have.length(4)
         done()

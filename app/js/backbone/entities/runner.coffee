@@ -112,18 +112,36 @@
 
         switch name
           when "beforeAll"
-            ## if we're the root suite and we're on the first test
-            ## or if we're not on the first test
-            if (runner.test is runner.tests[0] and @suite.root) or (runner.test isnt runner.tests[0])
+            ## if we're the root suite we know to fire
+            if @suite.root
               _this.emit("test:before:hooks", hooks[0], @suite)
 
-          when "afterAll"
-            ## if we're the root suite and are on the last test
-            ## or if we arent on the last test
-            if (runner.test is _(runner.tests).last() and @suite.root) or (runner.test isnt _(runner.tests).last())
+          when "beforeEach"
+            if @suite.root and runner.test and not runner.test._beforeHooks
+              _this.emit("test:before:hooks", hooks[0], @suite)
+
+          when "afterEach"
+            ## find all of the grep'd runner tests which share
+            ## the same parent suite as our current runner test
+            tests = _(runner.tests).filter (test) -> test.parent is runner.test.parent
+
+            if @suite.root and (runner.test isnt _(runner.tests).last()) and (runner.test isnt _(tests).last())
               fn = _.wrap fn, (orig, args...) ->
                 _this.emit("test:after:hooks")
                 orig(args...)
+
+          when "afterAll"
+            ## find all of the grep'd runner tests which share
+            ## the same parent suite as our current runner test
+            if runner.test
+
+              tests = _(runner.tests).filter (test) -> test.parent is runner.test.parent
+
+              ## if we're the root suite we know to fire
+              if @suite.root or runner.test is _(tests).last()
+                fn = _.wrap fn, (orig, args...) ->
+                  _this.emit("test:after:hooks")
+                  orig(args...)
 
         orig.call(@, name, fn)
 
@@ -232,6 +250,7 @@
         ## if we dont have a test already set then go
         ## find it from the hook
         @test = @getTestFromHook(hook, suite) if not @test
+        @test._beforeHooks = true
 
       @runner.on "test:after:hooks", =>
         ## restore the cy instance between tests
