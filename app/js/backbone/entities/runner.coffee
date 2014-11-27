@@ -117,7 +117,8 @@
               _this.emit("test:before:hooks", hooks[0], @suite)
 
           when "beforeEach"
-            if @suite.root and runner.test and not runner.test._beforeHooks
+            ## we havent yet set runner.test here so we can't work off of that
+            if @suite.root and runner.test isnt runner.tests[0]
               _this.emit("test:before:hooks", hooks[0], @suite)
 
           when "afterEach"
@@ -125,6 +126,8 @@
             ## the same parent suite as our current runner test
             tests = _(runner.tests).filter (test) -> test.parent is runner.test.parent
 
+            ## make sure this test isnt the last test overall but also
+            ## isnt the last test in our grep'd parent suite's tests array
             if @suite.root and (runner.test isnt _(runner.tests).last()) and (runner.test isnt _(tests).last())
               fn = _.wrap fn, (orig, args...) ->
                 _this.emit("test:after:hooks")
@@ -250,7 +253,6 @@
         ## if we dont have a test already set then go
         ## find it from the hook
         @test = @getTestFromHook(hook, suite) if not @test
-        @test._beforeHooks = true
 
       @runner.on "test:after:hooks", =>
         ## restore the cy instance between tests
