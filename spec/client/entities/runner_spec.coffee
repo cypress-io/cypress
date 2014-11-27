@@ -110,3 +110,42 @@ describe "Runner Entity", ->
       @runnerModel.runIframeSuite "events.html", @contentWindow, @$remoteIframe, ->
 
       expect(runner.test).to.be.undefined
+
+    it "inserts tests in tests property which match the grep", (done) ->
+      @runnerModel = App.request("start:test:runner")
+      @runnerModel.options.grep = /.*/
+
+      @runnerModel.runIframeSuite "events.html", @contentWindow, @$remoteIframe, =>
+        expect(@runnerModel.tests).to.have.length(1)
+        done()
+
+  context "hook overrides", ->
+    beforeEach ->
+      @run = (fn) ->
+        @runnerModel = App.request("start:test:runner")
+        @runnerModel.options.grep = /.*/
+
+        runner = @runnerModel.runner
+        emit = @sandbox.spy runner, "emit"
+
+        @runnerModel.runIframeSuite "remote.html", @contentWindow, @$remoteIframe, ->
+          fn(emit)
+
+      loadFixture(["tests/hooks", "html/remote"]).done (iframe, remoteIframe) =>
+        @$remoteIframe = $(remoteIframe)
+        @contentWindow = iframe.contentWindow
+        @mocha         = iframe.contentWindow.mocha
+
+    it "emits exactly two test:after:hooks events", (done) ->
+      @run (emit) ->
+        # expect(emit).to.be.calledWith "suite", "test:after:hooks"
+        calls = _(emit.getCalls()).filter (call) -> call.args[0] is "test:after:hooks"
+        expect(calls).to.have.length(2)
+        done()
+
+    it "emits exactly two test:before:hooks events", (done) ->
+      @run (emit) ->
+        # expect(emit).to.be.calledWith "suite", "test:after:hooks"
+        calls = _(emit.getCalls()).filter (call) -> call.args[0] is "test:before:hooks"
+        expect(calls).to.have.length(2)
+        done()

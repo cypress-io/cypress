@@ -21,6 +21,7 @@
       @satelliteEvents  = App.request "satellite:events"
       @hostEvents       = App.request "host:events"
       @passThruEvents   = App.request "pass:thru:events"
+      @tests            = []
       @hook             = null
       @test             = null
 
@@ -110,38 +111,16 @@
         _this = @
 
         switch name
-          when "beforeAll", "beforeEach"
-            ## if we actually have hooks and we havent
-            ## already set the runner's hook then proceed
-            ## we set the runner.hook whenever 'hook' event fires
-            ## and we're trying to wrap 'test:before:hooks' around this
-            ## event.  so if its fired already we dont do anything
-            if hooks.length and not runner.hook
+          when "beforeAll"
+            ## if we're the root suite and we're on the first test
+            ## or if we're not on the first test
+            if (runner.test is runner.tests[0] and @suite.root) or (runner.test isnt runner.tests[0])
               _this.emit("test:before:hooks", hooks[0], @suite)
 
-          when "afterEach"
-            ## upon completion of the afterEach callback function
-            ## we need to check to see if this isnt the last test
-            ## if its not the last test then go ahead and fire
-            ## the 'test:after:hooks' event
-            grep = _this._grep
-
-            tests = @suite.tests
-            tests = _(tests).filter (test) ->
-              grep.test _.result(test, "fullTitle")
-
-            fn = _.wrap fn, (orig, args...) ->
-              if tests.length and _(tests).last() isnt runner.test
-                _this.emit("test:after:hooks")
-              orig(args...)
-
           when "afterAll"
-            ## for afterAll we just need to wait until
-            ## we're at the root suite, and if we still
-            ## have a test at that time then first
-            ## the 'test:after:hooks' after the hooks finish
-            ## their normal callback function
-            if runner.test and @suite.root
+            ## if we're the root suite and are on the last test
+            ## or if we arent on the last test
+            if (runner.test is _(runner.tests).last() and @suite.root) or (runner.test isnt _(runner.tests).last())
               fn = _.wrap fn, (orig, args...) ->
                 _this.emit("test:after:hooks")
                 orig(args...)
@@ -225,7 +204,9 @@
         runner.trigger "suite:add", runnable if count > 0
 
       if grep and event is "test"
-        runner.trigger "test:add", runnable if grep.test(runnable.fullTitle())
+        if grep.test(runnable.fullTitle())
+          runner.tests.push(runnable)
+          runner.trigger "test:add", runnable
 
       ## recursively apply to all tests / suites of this runnable
       runner.iterateThroughRunnables(runnable)
@@ -437,7 +418,7 @@
     ## with the hook
     getTestFromHook: (hook, suite) ->
       ## if theres already a currentTest use that
-      return test if test = hook.ctx.currentTest
+      return test if test = hook?.ctx.currentTest
 
       ## there is a bug where if you have set an 'only'
       ## and you're running a visit within a hook
@@ -676,6 +657,9 @@
       ## trigger this event if we're not using the default
       ## grep so we can remove existing tests
       @trigger "exclusive:test" if not @isDefaultGrep(@options.grep)
+
+      ## reset our runner's tests to an empty array
+      @runner.tests = []
 
       ## we need to reset the runner.test to undefined
       ## when the user clicks the reload button, mocha
