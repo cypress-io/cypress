@@ -430,7 +430,7 @@ window.Cypress = do ($, _) ->
           ## should parse args.options here and figure
           ## out if we're using an alias
           df.resolve(@subject = subject)
-        fn.fail (err) ->
+        fn.fail (err) =>
           @log {name: "Failed: #{obj.name}", args: err.message}, "danger"
           console.error(err.stack)
           throw err
