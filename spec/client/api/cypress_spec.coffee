@@ -3,12 +3,58 @@ getNames = (queue) ->
 
 describe "Cypress API", ->
   beforeEach ->
-    loadFixture("html/generic").done (iframe) =>
-      Cypress.start()
-      Cypress.setup(window, $(iframe), {}, ->)
+    Cypress.start()
 
   afterEach ->
     Cypress.restore()
+
+  context "property registry", ->
+    it "is initially empty", ->
+      expect(cy.props).to.deep.eq {}
+
+    it "inserts into the props registry", ->
+      cy.prop("foo", "bar")
+      expect(cy.props).to.deep.eq {foo: "bar"}
+
+    it "calls unregister during restory", ->
+      unregister = @sandbox.spy(cy, "unregister")
+      Cypress.restore()
+      expect(unregister).to.have.been.called
+
+    it "acts as a getter when no value is given", ->
+      cy.prop("foo", "bar")
+      expect(cy.prop("foo")).to.eq "bar"
+
+    describe "falsy setter values", ->
+      before ->
+        @set = (key, val) ->
+          cy.prop(key, val)
+          expect(cy.prop(key)).to.eq val
+
+      it "sets zero", ->
+        @set "zero", 0
+
+      it "sets null", ->
+        @set "null", null
+
+      it "sets empty string", ->
+        @set "string", ""
+
+    describe "sets each prop in the registry to null", ->
+      beforeEach ->
+        cy.prop("foo", "bar")
+        cy.prop("baz", "quux")
+        cy.unregister()
+
+        ## need to return null here else mocha would insert a .then
+        ## into the cypress instance
+        return null
+
+      it "resets the registry", ->
+        expect(cy.props).to.deep.eq {}
+
+      it "deletes registered properies", ->
+        expect([cy.prop("foo"), cy.prop("baz")]).to.deep.eq [undefined, undefined]
 
   context "nested commands", ->
     beforeEach ->
@@ -24,6 +70,9 @@ describe "Cypress API", ->
           .noop()
           .then -> fn()
 
+      loadFixture("html/generic").done (iframe) =>
+        Cypress.setup(window, $(iframe), {}, ->)
+
     it "queues in the correct order", ->
       @setup ->
         expect(getNames(cy.queue)).to.deep.eq ["inspect", "nested", "url", "noop", "then", "then"]
@@ -35,9 +84,8 @@ describe "Cypress API", ->
 
     it "null outs nestedIndex prior to restoring", (done) ->
       @setup ->
-        _.defer ->
-          expect(cy.nestedIndex).to.be.null
-          done()
+        expect(cy.prop("nestedIndex")).to.be.null
+        done()
 
     it "can recursively nest", ->
       Cypress.set(@test)

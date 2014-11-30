@@ -4,18 +4,23 @@
 ## make this a global to allow attaching / overriding
 window.Cypress = do ($, _) ->
 
+  ## should attach these commands as defaultMethods and allow them
+  ## to be configurable
   commands =
     inspect: ->
-      @_inspect = true
+      @prop("inspect", true)
 
     url: ->
       @action "location", "href"
 
     filter: (fn) ->
-      unless @subject and _.isElement(@subject[0])
+      unless @prop("subject") and _.isElement(@prop("subject")[0])
         throw new Error("Cannot call .filter() without first finding an element")
 
-      @subject.filter(fn)
+      @prop("subject").filter(fn)
+
+    ## add an array of jquery methods
+    eq: ->
 
     ## allow the user to choose whether the confirmation
     ## message returns true or false.  need to patch
@@ -41,10 +46,10 @@ window.Cypress = do ($, _) ->
         location
 
     first: ->
-      unless @subject and _.isElement(@subject[0])
+      unless @prop("subject") and _.isElement(@prop("subject")[0])
         throw new Error("Cannot call .first() without first finding an element")
 
-      @subject.first()
+      @prop("subject").first()
 
     click: ->
       ## if subject is an anchor link then artificially
@@ -60,10 +65,10 @@ window.Cypress = do ($, _) ->
       dfs = []
 
       click = (index) =>
-        el = @subject.get(index)
+        el = @prop("subject").get(index)
 
         ## resolve the outer clicks deferred with our subject again
-        return clicks.resolve(@subject) if not el
+        return clicks.resolve(@prop("subject")) if not el
 
         el.click()
 
@@ -71,7 +76,7 @@ window.Cypress = do ($, _) ->
 
         @delay dfs[index].resolve, wait# * 50
 
-      @subject.each (index, el) ->
+      @prop("subject").each (index, el) ->
         df = $.Deferred()
         df.done -> click(index + 1)
         dfs.push(df)
@@ -91,17 +96,19 @@ window.Cypress = do ($, _) ->
       df = $.Deferred()
 
       ## obviously this needs to be moved to a separate method
-      timeout = @runnable.timeout()
-      @runnable.timeout(options.timeout)
+      timeout = @prop("runnable").timeout()
+      @prop("runnable").timeout(options.timeout)
 
-      @_xhr = $.getJSON("/eval", {code: code}).done (response) =>
-        @runnable.timeout(timeout)
+      xhr = $.getJSON("/eval", {code: code}).done (response) =>
+        @prop("runnable").timeout(timeout)
 
         resp = if response.obj then JSON.parse(response.obj) else response.text
 
         @alias(options.store, resp) if options.store
 
         df.resolve resp
+
+      @prop "xhr", xhr
 
       df
 
@@ -121,16 +128,16 @@ window.Cypress = do ($, _) ->
       ## to continue synchronously onto tests (if for instance this
       ## 'then' is called from a hook) - by defering it, we finish
       ## resolving our deferred.
-      return @defer(fn) if not @current.next
+      return @defer(fn) if not @prop("current").next
 
       df = $.Deferred()
 
       try
-        ret = fn.call(@runnable.ctx, @subject)
+        ret = fn.call(@prop("runnable").ctx, @prop("subject"))
 
         ## then will resolve with the fn's
         ## return or just pass along the subject
-        df.resolve(ret or @subject)
+        df.resolve(ret or @prop("subject"))
       catch e
         df.reject(e)
 
@@ -146,13 +153,13 @@ window.Cypress = do ($, _) ->
     debug: ->
       console.log "\n%c------------------------Cypress Command Info------------------------", "font-weight: bold;"
       _.each ["options", "subject", "runnable", "queue", "index"], (item) =>
-        console.log("#{item}: ", @[item])
+        console.log("#{item}: ", @prop(item))
       debugger
 
     pause: (int) ->
       int ?= 1e9
 
-      @runnable.timeout(int + 100)
+      @prop("runnable").timeout(int + 100)
 
       df = $.Deferred()
 
@@ -191,36 +198,36 @@ window.Cypress = do ($, _) ->
         options.total += 50
 
         @delay =>
-          @invoke(@current, selector, alias, options)
+          @invoke(@prop("current"), selector, alias, options)
         , 50
 
       return options.df
 
     type: (sequence, options = {}) ->
-      unless @subject and _.isElement(@subject[0])
+      unless @prop("subject") and _.isElement(@prop("subject")[0])
         throw new Error("Cannot call .type() without first finding an element")
 
       _.extend options,
         sequence: sequence
 
-      @subject.simulate "key-sequence", options
+      @prop("subject").simulate "key-sequence", options
 
     clear: ->
-      unless @subject and _.isElement(@subject[0])
+      unless @prop("subject") and _.isElement(@prop("subject")[0])
         throw new Error("Cannot call .clear() without first finding an element")
 
       ## on input, selectall then del so it fires all appropriate key events
       ## on select, clear its selected option
-      if @subject.is("input,textarea")
+      if @prop("subject").is("input,textarea")
         @action "type", "{selectall}{del}"
 
-      return @subject
+      return @prop("subject")
 
     select: (valueOrText) ->
-      unless @subject and _.isElement(@subject[0])
+      unless @prop("subject") and _.isElement(@prop("subject")[0])
         throw new Error("Cannot call .select() without first finding an element")
 
-      ## if @subject is a <select> el assume we are filtering down its
+      ## if @prop("subject") is a <select> el assume we are filtering down its
       ## options to a specific option first by value and then by text
       ## we'll throw errors if more than one is found AND the select
       ## element is multiple=multiple
@@ -231,13 +238,13 @@ window.Cypress = do ($, _) ->
       ## or texts and clear the previous selections which matches jQuery's
       ## behavior
 
-      if @subject.is("select")
+      if @prop("subject").is("select")
         ## normalize valueOrText if its not an array
         valueOrText = [].concat(valueOrText)
-        multiple    = @subject.prop("multiple")
+        multiple    = @prop("subject").prop("multiple")
 
         values  = []
-        options = @subject.children().map (index, el) ->
+        options = @prop("subject").children().map (index, el) ->
           ## push the value in values array if its
           ## found within the valueOrText
           value = el.value
@@ -260,7 +267,7 @@ window.Cypress = do ($, _) ->
         if not multiple and values.length > 1
           throw new Error("Found more than one option that was matched by value or text: #{valueOrText.join(", ")}")
 
-        @subject.val(values)
+        @prop("subject").val(values)
 
         ## yup manually create this change event
         ## 1.6.5. HTML event types
@@ -268,7 +275,7 @@ window.Cypress = do ($, _) ->
         event = document.createEvent("HTMLEvents")
         event.initEvent("change", true, false)
 
-        @subject.each (index, el) ->
+        @prop("subject").each (index, el) ->
           el.dispatchEvent(event)
 
     wait: (fn, options = {}) ->
@@ -285,14 +292,14 @@ window.Cypress = do ($, _) ->
       ## we always want to make sure we timeout before our runnable does
       ## so take its current timeout, subtract the total time its already
       ## been running and add the options.wait for a tiny bit of padding
-      options.timeout ?= @runnable.timeout() - (new Date - @runnable.startedAt + options.wait)
+      options.timeout ?= @prop("runnable").timeout() - (new Date - @prop("runnable").startedAt + options.wait)
 
       try
         ## invoke fn and make sure its not strictly false
-        if fn.call(@runnable.ctx, @subject) is false
+        if fn.call(@prop("runnable").ctx, @prop("subject")) is false
           @retry(null, fn, options)
         else
-          options.df.resolve(@subject)
+          options.df.resolve(@prop("subject"))
 
       catch e
         @retry(e, fn, options)
@@ -301,12 +308,26 @@ window.Cypress = do ($, _) ->
 
   class Cypress
     queue: []
-    aliases: {}
 
     constructor: (@options = {}) ->
+      @props   = {}
+      @aliases = {}
+
       _.defaults @options,
         commandTimeout: 2000
         delay: 0 ## whether there is a delay in between commands
+
+    unregister: ->
+      @props   = {}
+      @aliases = {}
+
+      return @
+
+    prop: (key, val) ->
+      if _.isUndefined(val)
+        @props[key]
+      else
+        @props[key] = val
 
     ## global options applicable to all cy instances
     ## and restores
@@ -314,46 +335,47 @@ window.Cypress = do ($, _) ->
 
     isReady: (bool = true, event) ->
       if bool
-        ## we set _recentlyReady to true
+        ## we set recentlyReady to true
         ## so we dont accidently set isReady
         ## back to false in between commands
         ## which are async
         @log "Ready due to: #{event}", "success"
-        @_recentlyReady = true
-        return @ready?.resolve()
+        @prop("recentlyReady", true)
+        return @prop("ready")?.resolve()
 
       ## if we already have a ready object and
       ## its state is pending just leave it be
       ## and dont touch it
-      return if @ready and @ready.state() is "pending"
+      return if @prop("ready") and @prop("ready").state() is "pending"
 
       ## else set it to a deferred object
       @log "No longer ready due to: #{event}", "warning"
-      @ready = $.Deferred()
+      @prop "ready", $.Deferred()
 
     run: ->
       ## start at 0 index if we dont have one
-      @index ?= 0
+      index = @prop("index") ? @prop("index", 0)
 
-      queue = @queue[@index]
+      queue = @queue[index]
 
-      @group(@runnable.group)
+      @group(@prop("runnable").group)
 
       ## if we're at the very end just return our cy instance
       return @ if not queue
 
-      df = @set queue, @queue[@index - 1], @queue[@index + 1]
+      df = @set queue, @queue[index - 1], @queue[index + 1]
       df.done =>
         ## each successful command invocation should
         ## always reset the timeout for the current runnable
-        @runnable.resetTimeout()
+        @prop("runnable").resetTimeout()
 
         ## mutate index by incrementing it
         ## this allows us to keep the proper index
         ## in between different hooks like before + beforeEach
         ## else run will be called again and index would start
         ## over at 0
-        @run @index += 1
+        @prop("index", index += 1)
+        @run index
 
     clearTimeout: (id) ->
       clearTimeout(id) if id
@@ -384,7 +406,7 @@ window.Cypress = do ($, _) ->
       obj.prev = prev
       obj.next = next
 
-      @current = obj
+      @prop("current", obj)
 
       @invoke(obj)
 
@@ -394,7 +416,7 @@ window.Cypress = do ($, _) ->
 
       ## make sure we're ready to invoke commands
       ## first by waiting until we're ready
-      $.when(@ready).done =>
+      $.when(@prop("ready")).done =>
         @log obj
 
         ## store our current href before invoking the next command
@@ -406,7 +428,7 @@ window.Cypress = do ($, _) ->
         ## originally created with
         args = if args.length then args else obj.args
 
-        @nestedIndex = @index
+        @prop "nestedIndex", @prop("index")
 
         ## if the last argument is a function then instead of
         ## expecting this to be resolved we wait for that function
@@ -418,18 +440,18 @@ window.Cypress = do ($, _) ->
           ## explicitly disabled checking for location changes
           ## and if our href has changed in between running the commands then
           ## then we're no longer ready to proceed with the next command
-          if @_recentlyReady is null and options.checkLocation isnt false
+          if @prop("recentlyReady") is null and options.checkLocation isnt false
             @isReady(false, "href changed") if @hrefChanged()
 
           ## reset the nestedIndex back to null
-          @nestedIndex = null
+          @prop("nestedIndex", null)
 
           ## also reset recentlyReady back to null
-          @_recentlyReady = null
+          @prop("recentlyReady", null)
 
           ## should parse args.options here and figure
           ## out if we're using an alias
-          df.resolve(@subject = subject)
+          df.resolve @prop("subject", subject)
         fn.fail (err) =>
           @log {name: "Failed: #{obj.name}", args: err.message}, "danger"
           console.error(err.stack)
@@ -457,8 +479,8 @@ window.Cypress = do ($, _) ->
         return options.df.reject(err)
 
       @delay =>
-        @invoke(@current.prev).done =>
-          @invoke(@current, fn, options)
+        @invoke(@prop("current").prev).done =>
+          @invoke(@prop("current"), fn, options)
       , options.wait
 
     action: (name, args...) ->
@@ -468,11 +490,11 @@ window.Cypress = do ($, _) ->
       @delay(fn, 0)
 
     delay: (fn, ms) ->
-      @clearTimeout(@timerId)
-      @timerId = _.delay(fn, ms)
+      @clearTimeout(@prop("timerId"))
+      @prop "timerId", _.delay(fn, ms)
 
     hook: (name) ->
-      return if not @_inspect
+      return if not @prop("inspect")
 
       return console.groupEnd() if not name
 
@@ -480,7 +502,7 @@ window.Cypress = do ($, _) ->
 
     group: (name) ->
       ## bail if we're not in inspect mode
-      return if not @_inspect
+      return if not @prop("inspect") or _.isUndefined(name)
 
       ## end the group if name is explicitly false
       return console.groupEnd() if name is false
@@ -495,7 +517,7 @@ window.Cypress = do ($, _) ->
       console.group(name)
 
     log: (obj, type) ->
-      return if not @_inspect
+      return if not @prop("inspect")
 
       color = {
         success: "#46B848"
@@ -510,7 +532,7 @@ window.Cypress = do ($, _) ->
       console.log "%c#{obj.name}", "color: #{color}", _.truncate(obj.args, 50)
 
     enqueue: (key, fn, args, options) ->
-      @clearTimeout(@runId)
+      @clearTimeout @prop("runId")
 
       obj = {name: key, ctx: @, fn: fn, args: args, options: options}
 
@@ -522,12 +544,12 @@ window.Cypress = do ($, _) ->
       ## already in a run loop and dont want to create another!
       ## we also reset the .next property to properly reference
       ## our new obj
-      if @nestedIndex
-        @queue[@nestedIndex].next = obj
-        @queue.splice (@nestedIndex += 1), 0, obj
+      if nestedIndex = @prop("nestedIndex")
+        @queue[nestedIndex].next = obj
+        @queue.splice (@prop("nestedIndex", nestedIndex += 1)), 0, obj
       else
         @queue.push(obj)
-        @runId = @defer _(@run).bind(@)
+        @prop "runId", @defer _(@run).bind(@)
 
       return @
 
@@ -562,41 +584,27 @@ window.Cypress = do ($, _) ->
     @abort = ->
       @cy.isReady(false, "abort").reject()
       @cy.$remoteIframe?.off("submit unload load")
-      @cy.runnable?.clearTimeout()
-      @cy._xhr?.abort()
+      @cy.prop("runnable")?.clearTimeout()
+      @cy.prop("xhr")?.abort()
       @restore()
 
     ## restores cypress after each test run by
     ## removing the queue from the proto and
     ## removing additional own instance properties
     @restore = ->
-      @cy.clearTimeout(@cy.runId)
-      @cy.clearTimeout(@cy.timerId)
+      @cy.clearTimeout @cy.prop("runId")
+      @cy.clearTimeout @cy.prop("timerId")
 
       Cypress.prototype.queue = []
-      Cypress.prototype.aliases = {}
 
       ## remove any outstanding groups
       ## for any open hooks and runnables
       @cy.group(false)
       @cy.group(false)
 
-      ## instead of manually keeping up with these properties
-      ## we should go through a registerProp method which
-      ## keeps a registry of all properties used, and then
-      ## unregisters each
-      _.extend @cy,
-        index:          null
-        nestedIndex:    null
-        current:        null
-        runId:          null
-        subject:        null
-        runnable:       null
-        ready:          null
-        _xhr:           null
-        _inspect:       null
-        _recentlyReady: null
-        options:        {}
+      ## removes any registered props from the
+      ## instance
+      @cy.unregister()
 
       return @
 
@@ -619,7 +627,7 @@ window.Cypress = do ($, _) ->
     ## sets the runnable onto the cy instance
     @set = (runnable, hook) ->
       @cy.hook(hook)
-      @cy.runnable = runnable
+      @cy.prop("runnable", runnable)
 
     ## patches the cypress instance with contentWindow
     ## remoteIframe and channel
@@ -673,5 +681,11 @@ window.Cypress = do ($, _) ->
         @inject(key, fn)
 
       window.cy = @cy = new Cypress
+
+      ## return the class as opposed to the
+      ## instance so we dont have to worry about
+      ## accidentally chaining the 'then' method
+      ## during tests
+      return @
 
   return Cypress
