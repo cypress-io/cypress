@@ -28,7 +28,11 @@ window.Cypress = do ($, _) ->
     ## so we can async respond to it?
     confirm: (bool = true) ->
 
-    noop: ->
+    ## saves the current subject as an alias
+    save: (str) ->
+      @alias str, @prop("subject")
+
+    noop: (obj) -> obj
 
     location: (key) ->
       currentUrl = window.location.toString()
@@ -85,10 +89,6 @@ window.Cypress = do ($, _) ->
 
       return clicks
 
-    # get: (name) ->
-    #   @aliases[name] or
-    #     throw new Error("No alias was found by the name: #{name}")
-
     eval: (code, options = {}) ->
       _.defaults options,
         timeout: 15000
@@ -104,7 +104,7 @@ window.Cypress = do ($, _) ->
 
         resp = if response.obj then JSON.parse(response.obj) else response.text
 
-        @alias(options.store, resp) if options.store
+        # @alias(options.store, resp) if options.store
 
         df.resolve resp
 
@@ -384,10 +384,21 @@ window.Cypress = do ($, _) ->
 
     alias: (name, value) ->
       @aliases[name] = value
+      @
 
-    store: (name) ->
-      @aliases[name] or
-        throw new Error("No alias was found by the name: #{name}")
+    get: (name) ->
+      alias = @aliases[name]
+      return alias unless _.isUndefined(alias)
+
+      ## instead of returning a function here and setting this
+      ## invoke property, we should just convert this to a deferred
+      ## and then during the actual save we should find out anystanding
+      ## 'get' promises that match the name and then resolve them.
+      fn = =>
+        @aliases[name] or
+          throw new Error("No alias was found by the name: #{name}")
+      fn.invoke = true
+      fn
 
     storeHref: ->
       ## we are using href and stripping out the hash because
@@ -431,38 +442,48 @@ window.Cypress = do ($, _) ->
 
         @prop "nestedIndex", @prop("index")
 
-        ## if the last argument is a function then instead of
-        ## expecting this to be resolved we wait for that function
-        ## to be invoked
-        fn = $.when(obj.fn.apply(obj.ctx, args))
-        fn.done (subject, options = {}) =>
+        ## because args can be a deferred we want to
+        ## make sure they are resolved and receive their
+        ## resolved objects.  this is how we can use
+        ## cy.get("user") and receive the resolved
+        ## object literal
+        $.when(args...).done (args...) =>
+          ## if the first argument is a function and it has an invoke
+          ## property that means we are supposed to immediately invoke
+          ## it and use its return value as the argument to our
+          ## current command object
+          if _.isFunction(args[0]) and args[0].invoke
+            args[0] = args[0].call(@)
 
-          ## if we havent become recently ready and unless we've
-          ## explicitly disabled checking for location changes
-          ## and if our href has changed in between running the commands then
-          ## then we're no longer ready to proceed with the next command
-          if @prop("recentlyReady") is null and options.checkLocation isnt false
-            @isReady(false, "href changed") if @hrefChanged()
+          fn = $.when(obj.fn.apply(obj.ctx, args))
+          fn.done (subject, options = {}) =>
 
-          ## reset the nestedIndex back to null
-          @prop("nestedIndex", null)
+            ## if we havent become recently ready and unless we've
+            ## explicitly disabled checking for location changes
+            ## and if our href has changed in between running the commands then
+            ## then we're no longer ready to proceed with the next command
+            if @prop("recentlyReady") is null and options.checkLocation isnt false
+              @isReady(false, "href changed") if @hrefChanged()
 
-          ## also reset recentlyReady back to null
-          @prop("recentlyReady", null)
+            ## reset the nestedIndex back to null
+            @prop("nestedIndex", null)
 
-          ## should parse args.options here and figure
-          ## out if we're using an alias
-          df.resolve @prop("subject", subject)
-        fn.fail (err) =>
-          @log {name: "Failed: #{obj.name}", args: err.message}, "danger"
-          console.error(err.stack)
-          throw err
+            ## also reset recentlyReady back to null
+            @prop("recentlyReady", null)
 
-          ## this wont be invoked because we're throwing
-          ## refactor these promises using another library
-          ## to also handle try/catch using .catch
-          df.reject(err)
-          # @trigger "set", subject
+            ## should parse args.options here and figure
+            ## out if we're using an alias
+            df.resolve @prop("subject", subject)
+          fn.fail (err) =>
+            @log {name: "Failed: #{obj.name}", args: err.message}, "danger"
+            console.error(err.stack)
+            throw err
+
+            ## this wont be invoked because we're throwing
+            ## refactor these promises using another library
+            ## to also handle try/catch using .catch
+            df.reject(err)
+            # @trigger "set", subject
 
       return df
 

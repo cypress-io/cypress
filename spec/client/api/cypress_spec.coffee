@@ -8,6 +8,35 @@ describe "Cypress API", ->
   afterEach ->
     Cypress.restore()
 
+  context "saved subjects", ->
+    beforeEach ->
+      Cypress.set(@test)
+
+      loadFixture("html/dom").done (iframe) =>
+        Cypress.setup(window, $(iframe), {}, ->)
+
+    it "will resolve deferred arguments", ->
+      df = $.Deferred()
+
+      _.delay ->
+        df.resolve("iphone")
+      , 100
+
+      cy.find("input").type(df).then ($input) ->
+        expect($input).to.have.value("iphone")
+
+    it "handles saving subjects", ->
+      cy.noop({foo: "foo"}).save("foo").noop(cy.get("foo")).then (subject) ->
+        expect(subject).to.deep.eq {foo: "foo"}
+
+    it "resolves falsy arguments", ->
+      cy.noop(0).save("zero").then ->
+        expect(cy.get("zero")).to.eq 0
+
+    it "returns a function when no alias was found", ->
+      cy.noop().then ->
+        expect(cy.get("something")).to.be.a("function")
+
   context "property registry", ->
     it "is initially empty", ->
       expect(cy.props).to.deep.eq {}
@@ -54,6 +83,7 @@ describe "Cypress API", ->
         expect(cy.props).to.deep.eq {}
 
       it "deletes registered properies", ->
+
         expect([cy.prop("foo"), cy.prop("baz")]).to.deep.eq [undefined, undefined]
 
   context "nested commands", ->
