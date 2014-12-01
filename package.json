@@ -60,7 +60,7 @@
     "glob": "4.0.5",
     "grunt-cli": "0.1.13",
     "hbs": "2.7.0",
-    "http-proxy": "samccone/node-http-proxy#74782bd2e16409df42b577db71c9f5e87d877fcc",
+    "http-proxy": "1.7.0",
     "hyperdirect": "0.0.0",
     "hyperquest": "1.0.1",
     "lodash": "2.4.1",
