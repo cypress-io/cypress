@@ -160,11 +160,14 @@ window.Cypress = do ($, _) ->
     pause: (int) ->
       int ?= 1e9
 
-      @prop("runnable").timeout(int + 100)
+      runnable = @prop("runnable")
+      prevTimeout = runnable.timeout()
+      runnable.timeout(int + 100)
 
       df = $.Deferred()
 
       @delay ->
+        runnable.timeout(prevTimeout)
         df.resolve()
       , int
 
