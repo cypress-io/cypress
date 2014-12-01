@@ -4,6 +4,8 @@
 ## make this a global to allow attaching / overriding
 window.Cypress = do ($, _) ->
 
+  ngPrefixes = ['ng-', 'ng_', 'data-ng-', 'x-ng-']
+
   ## should attach these commands as defaultMethods and allow them
   ## to be configurable
   commands =
@@ -33,6 +35,39 @@ window.Cypress = do ($, _) ->
       @alias str, @prop("subject")
 
     noop: (obj) -> obj
+
+    ng: (type, selector, options = {}) ->
+      ## ng needs to be refactored to use .find
+      ## its very close to it, but not exactly the same
+      ## so we end up duplicating the retry code
+
+      _.defaults options,
+        df: $.Deferred()
+        retry: false
+        timeout: 1000
+        total: 0
+
+      if options.total >= options.timeout
+        options.df.reject("Timed out trying to find element: #{selector}")
+
+      switch type
+        when "model"
+          _.each ngPrefixes, (prefix) =>
+            @findByModel(options, prefix, selector)
+        when "repeater"
+          _.each ngPrefixes, (prefix) =>
+            @findByRepeater(options, prefix, selector)
+        when "binding"
+          @findByBinding(options, selector)
+
+      if options.df.state() is "pending"
+        options.total += 50
+
+        @delay =>
+          @invoke(@prop("current"), type, selector, options)
+        , 50
+
+      options.df
 
     location: (key) ->
       currentUrl = window.location.toString()
@@ -162,7 +197,7 @@ window.Cypress = do ($, _) ->
 
       runnable = @prop("runnable")
       prevTimeout = runnable.timeout()
-      runnable.timeout(int + 100)
+      runnable.timeout(1e9)
 
       df = $.Deferred()
 
@@ -518,6 +553,60 @@ window.Cypress = do ($, _) ->
     delay: (fn, ms) ->
       @clearTimeout(@prop("timerId"))
       @prop "timerId", _.delay(fn, ms)
+
+    findByBinding: (options, binding) ->
+      options = _(options).clone()
+
+      df = options.df
+
+      selector = ".ng-binding"
+
+      angular = @$remoteIframe.prop("contentWindow").angular
+
+      options.df = $.Deferred()
+      options.df.done ($elements) ->
+        filtered = $elements.filter (index) ->
+          dataBinding = angular.element(@).data("$binding")
+
+          if dataBinding
+            bindingName = dataBinding.exp or dataBinding[0].exp or dataBinding
+            return binding in bindingName
+
+        if filtered.length
+          df.resolve(filtered)
+
+      @action("find", selector, null, options)
+
+    findByRepeater: (options, prefix, repeater) ->
+      options = _(options).clone()
+
+      df = options.df
+
+      attr = prefix + "repeat"
+      selector = "[" + attr + "]"
+
+      options.df = $.Deferred()
+      options.df.done ($elements) ->
+        filtered = $elements.filter (index) ->
+          _.str.include($(@).attr(attr), repeater)
+
+        if filtered.length
+          df.resolve(filtered)
+
+      @action("find", selector, null, options)
+
+    findByModel: (options, prefix, model) ->
+      options = _(options).clone()
+
+      df = options.df
+
+      selector = "[" + prefix + "model='" + model + "']"
+
+      options.df = $.Deferred()
+      options.df.done ($elements) ->
+        df.resolve($elements) if $elements.length
+
+      @action("find", selector, null, options)
 
     hook: (name) ->
       return if not @prop("inspect")
