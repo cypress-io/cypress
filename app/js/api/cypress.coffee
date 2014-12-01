@@ -208,13 +208,13 @@ window.Cypress = do ($, _) ->
 
       df
 
-    find: (selector, alias, options = {}, fn ) ->
-      # if fn
-      #   eval
-      #   any cy methods
-      #   splice into the queue
-
+    find: (selector, alias, options = {}) ->
+      ## this is not properly calculating the timeout time
+      ## needs to take into account Date - time
       options = if _.isObject(alias) then alias else options
+
+      ## bail if our deferred has a state other than pending
+      return if options.df and options.df.state() isnt "pending"
 
       _.defaults options,
         df: $.Deferred()
@@ -397,24 +397,58 @@ window.Cypress = do ($, _) ->
 
       queue = @queue[index]
 
-      @group(@prop("runnable").group)
+      runnable = @prop("runnable")
+
+      @group(runnable.group)
 
       ## if we're at the very end just return our cy instance
       return @ if not queue
 
-      df = @set queue, @queue[index - 1], @queue[index + 1]
-      df.done =>
-        ## each successful command invocation should
-        ## always reset the timeout for the current runnable
-        @prop("runnable").resetTimeout()
+      ## store the current runnable's cid
+      cid = @prop("cid")
 
-        ## mutate index by incrementing it
-        ## this allows us to keep the proper index
-        ## in between different hooks like before + beforeEach
-        ## else run will be called again and index would start
-        ## over at 0
-        @prop("index", index += 1)
-        @run index
+      ## store the previous timeout
+      prevTimeout = runnable.timeout()
+
+      ## prior to running set the runnables
+      ## timeout to 30s. this is useful
+      ## because we may have to wait to begin
+      ## running such as the case in angular
+      runnable.timeout(30000)
+
+      run = =>
+        ## bail if we've changed runnables by the
+        ## time this resolves
+        return if @prop("cid") isnt cid
+
+        ## reset the timeout to what it used to be
+        runnable.timeout(prevTimeout)
+
+        df = @set queue, @queue[index - 1], @queue[index + 1]
+        df.done =>
+          ## each successful command invocation should
+          ## always reset the timeout for the current runnable
+          runnable.resetTimeout()
+
+          ## mutate index by incrementing it
+          ## this allows us to keep the proper index
+          ## in between different hooks like before + beforeEach
+          ## else run will be called again and index would start
+          ## over at 0
+          @prop("index", index += 1)
+          @run()
+
+      ## automatically defer running each command in succession
+      ## so each command is async
+      @defer =>
+        angular = @$remoteIframe.prop("contentWindow").angular
+
+        if angular and angular.getTestability
+          root = @$("[ng-app]").get(0)
+          run = _.bind(run, @)
+          angular.getTestability(root).whenStable(run)
+        else
+          run()
 
     clearTimeout: (id) ->
       clearTimeout(id) if id
@@ -746,6 +780,7 @@ window.Cypress = do ($, _) ->
     @set = (runnable, hook) ->
       @cy.hook(hook)
       @cy.prop("runnable", runnable)
+      @cy.prop("cid", runnable.cid)
 
     ## patches the cypress instance with contentWindow
     ## remoteIframe and channel
