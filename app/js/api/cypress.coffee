@@ -394,6 +394,10 @@ window.Cypress = do ($, _) ->
       ## invoke property, we should just convert this to a deferred
       ## and then during the actual save we should find out anystanding
       ## 'get' promises that match the name and then resolve them.
+      ## the problem with this is we still need to run this anonymous
+      ## function to check to see if we have an alias by that name
+      ## else our alias will never resolve (if save is never called
+      ## by this name argument)
       fn = =>
         @aliases[name] or
           throw new Error("No alias was found by the name: #{name}")
@@ -442,11 +446,8 @@ window.Cypress = do ($, _) ->
 
         @prop "nestedIndex", @prop("index")
 
-        ## because args can be a deferred we want to
-        ## make sure they are resolved and receive their
-        ## resolved objects.  this is how we can use
-        ## cy.get("user") and receive the resolved
-        ## object literal
+        ## allow promise objects to be used as arguments
+        ## and wait for them all to be resolve before continuing
         $.when(args...).done (args...) =>
           ## if the first argument is a function and it has an invoke
           ## property that means we are supposed to immediately invoke
