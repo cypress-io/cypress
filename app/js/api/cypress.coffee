@@ -190,7 +190,7 @@ window.Cypress = do ($, _) ->
       if options.total >= options.timeout
         options.df.reject("Timed out trying to find element: #{selector}")
 
-      $el = new $.fn.init(selector, @$remoteIframe.prop("contentWindow").document)
+      $el = @$(selector)
 
       ## return the $el immediately if we've set not to retry
       ## or we found an element
@@ -578,6 +578,9 @@ window.Cypress = do ($, _) ->
         @prop "runId", @defer _(@run).bind(@)
 
       return @
+
+    $: (selector) ->
+      new $.fn.init(selector, @$remoteIframe.prop("contentWindow").document)
 
     @commands = commands
 
