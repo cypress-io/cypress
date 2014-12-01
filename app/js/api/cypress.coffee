@@ -115,7 +115,8 @@ window.Cypress = do ($, _) ->
     visit: (url, options = {}) ->
       options.rootUrl = @config("rootUrl")
 
-      partial = _(@).pick "$remoteIframe", "channel", "contentWindow", "runnable"
+      partial = _(@).pick "$remoteIframe", "channel", "contentWindow"
+      partial.runnable = @prop("runnable")
       Eclectus.patch partial
       Ecl.visit(url, options)
 
@@ -153,7 +154,7 @@ window.Cypress = do ($, _) ->
     debug: ->
       console.log "\n%c------------------------Cypress Command Info------------------------", "font-weight: bold;"
       _.each ["options", "subject", "runnable", "queue", "index"], (item) =>
-        console.log("#{item}: ", @prop(item))
+        console.log "#{item}: ", (@prop(item) or @[item])
       debugger
 
     pause: (int) ->
