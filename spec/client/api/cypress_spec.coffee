@@ -11,23 +11,17 @@ describe "Cypress API", ->
     loadFixture("html/dom").done (iframe) =>
       Cypress.setup(runner, $(iframe), {}, ->)
 
-  afterEach ->
-    Cypress.restore()
+  # afterEach ->
+  #   Cypress.restore()
 
-  after ->
-    Cypress.stop()
+  # after ->
+  #   Cypress.stop()
 
   context "invoke", ->
     it "returns a promise", ->
       cy.type("foo")
 
   context "#isReady", ->
-    beforeEach ->
-      Cypress.set(@test)
-
-      loadFixture("html/dom").done (iframe) =>
-        Cypress.setup(runner, $(iframe), {}, ->)
-
     it "creates a deferred when not ready", ->
       cy.isReady(false)
       expect(cy.prop("ready")).to.have.keys("promise", "resolve", "reject")
@@ -38,26 +32,14 @@ describe "Cypress API", ->
       expect(cy.prop("ready").promise.isResolved()).to.be.true
 
   context "#invoke", ->
-    beforeEach ->
-      Cypress.set(@test)
-
-      loadFixture("html/dom").done (iframe) =>
-        Cypress.setup(runner, $(iframe), {}, ->)
-
     it "fires onInvoke once the promise is set", ->
       cy.pause(1000)
       cy.onInvoke = (obj)
 
   context.only ".abort", ->
-    beforeEach ->
-      Cypress.set(@test)
-
-      loadFixture("html/dom").done (iframe) =>
-        Cypress.setup(runner, $(iframe), {}, ->)
-
     it "cancels any open promise", (done) ->
       cy.pause(1000)
-      cy.on "invoke", (obj) ->
+      cy.on "set", (obj) ->
         debugger
         Cypress.abort()
 
@@ -66,12 +48,6 @@ describe "Cypress API", ->
 
 
   context "saved subjects", ->
-    beforeEach ->
-      Cypress.set(@test)
-
-      loadFixture("html/dom").done (iframe) =>
-        Cypress.setup(window, $(iframe), {}, ->)
-
     it "will resolve deferred arguments", ->
       df = $.Deferred()
 
@@ -146,8 +122,6 @@ describe "Cypress API", ->
   context "nested commands", ->
     beforeEach ->
       @setup = (fn = ->) =>
-        Cypress.set(@test)
-
         Cypress.add "nested", ->
           cy.url()
 
@@ -156,9 +130,6 @@ describe "Cypress API", ->
           .nested()
           .noop()
           .then -> fn()
-
-      loadFixture("html/generic").done (iframe) =>
-        Cypress.setup(window, $(iframe), {}, ->)
 
     it "queues in the correct order", ->
       @setup ->
@@ -175,8 +146,6 @@ describe "Cypress API", ->
         done()
 
     it "can recursively nest", ->
-      Cypress.set(@test)
-
       Cypress.add "nest1", ->
         cy.nest2()
 
@@ -190,8 +159,6 @@ describe "Cypress API", ->
           expect(getNames(cy.queue)).to.deep.eq ["inspect", "nest1", "nest2", "noop", "then", "then"]
 
     it "works with multiple nested commands", ->
-      Cypress.set(@test)
-
       Cypress.add "multiple", ->
         cy
           .url()
