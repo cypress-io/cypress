@@ -21,7 +21,7 @@
       @satelliteEvents  = App.request "satellite:events"
       @hostEvents       = App.request "host:events"
       @passThruEvents   = App.request "pass:thru:events"
-      @tests            = []
+      @tests            = [] ## not sure why we're setting this since tests are set on the mocha runner not on our runner model
       @hook             = null
       @test             = null
 
@@ -698,7 +698,7 @@
       ## remote iframe
       ## as of now we're passing App.confg into cypress but i dont like
       ## leaking this backbone model's details into the cypress API
-      Cypress.setup(contentWindow, remoteIframe, runnerChannel, App.config.getExternalInterface())
+      Cypress.setup(@runner, remoteIframe, runnerChannel, App.config.getExternalInterface())
 
       ## reupdate chosen with the passed in chosenId
       ## this allows us to pass the chosenId around

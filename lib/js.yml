@@ -1,6 +1,7 @@
 vendor:
   - bower_components/jquery/dist/jquery.js
   - bower_components/underscore/underscore.js
+  - bower_components/bluebird/js/browser/bluebird.js
   - bower_components/mocha/mocha.js
   - bower_components/chai/chai.js
   - bower_components/chai-jquery/chai-jquery.js ## need to conditionally load this

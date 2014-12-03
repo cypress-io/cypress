@@ -17,7 +17,7 @@ window.Cypress = do ($, _) ->
 
     filter: (fn) ->
       unless @prop("subject") and _.isElement(@prop("subject")[0])
-        throw new Error("Cannot call .filter() without first finding an element")
+        @throwErr("Cannot call .filter() without first finding an element")
 
       @prop("subject").filter(fn)
 
@@ -80,13 +80,13 @@ window.Cypress = do ($, _) ->
         ## use existential here because we only want to throw
         ## on null or undefined values (and not empty strings)
         location[key] ?
-          throw new Error("Location object does have not have key: #{key}")
+          @throwErr("Location object does have not have key: #{key}")
       else
         location
 
     first: ->
       unless @prop("subject") and _.isElement(@prop("subject")[0])
-        throw new Error("Cannot call .first() without first finding an element")
+        @throwErr("Cannot call .first() without first finding an element")
 
       @prop("subject").first()
 
@@ -244,7 +244,7 @@ window.Cypress = do ($, _) ->
 
     type: (sequence, options = {}) ->
       unless @prop("subject") and _.isElement(@prop("subject")[0])
-        throw new Error("Cannot call .type() without first finding an element")
+        @throwErr("Cannot call .type() without first finding an element")
 
       _.extend options,
         sequence: sequence
@@ -253,7 +253,7 @@ window.Cypress = do ($, _) ->
 
     clear: ->
       unless @prop("subject") and _.isElement(@prop("subject")[0])
-        throw new Error("Cannot call .clear() without first finding an element")
+        @throwErr("Cannot call .clear() without first finding an element")
 
       ## on input, selectall then del so it fires all appropriate key events
       ## on select, clear its selected option
@@ -264,7 +264,7 @@ window.Cypress = do ($, _) ->
 
     select: (valueOrText) ->
       unless @prop("subject") and _.isElement(@prop("subject")[0])
-        throw new Error("Cannot call .select() without first finding an element")
+        @throwErr("Cannot call .select() without first finding an element")
 
       ## if @prop("subject") is a <select> el assume we are filtering down its
       ## options to a specific option first by value and then by text
@@ -304,7 +304,7 @@ window.Cypress = do ($, _) ->
         ## if we didnt set multiple to true and
         ## we have more than 1 option to set then blow up
         if not multiple and values.length > 1
-          throw new Error("Found more than one option that was matched by value or text: #{valueOrText.join(", ")}")
+          @throwErr("Found more than one option that was matched by value or text: #{valueOrText.join(", ")}")
 
         @prop("subject").val(values)
 
@@ -385,11 +385,23 @@ window.Cypress = do ($, _) ->
       ## if we already have a ready object and
       ## its state is pending just leave it be
       ## and dont touch it
-      return if @prop("ready") and @prop("ready").state() is "pending"
+      return if @prop("ready") and @prop("ready").promise.isPending()
 
       ## else set it to a deferred object
       @log "No longer ready due to: #{event}", "warning"
-      @prop "ready", $.Deferred()
+
+      @prop "ready", @_deferred()
+
+    ## simulates the deferred interface with BlueBird
+    _deferred: ->
+      obj = {}
+
+      promise = new Promise (resolve, reject) ->
+        obj.resolve = resolve
+        obj.reject = reject
+
+      obj.promise = promise
+      obj
 
     run: ->
       ## start at 0 index if we dont have one
@@ -421,11 +433,12 @@ window.Cypress = do ($, _) ->
         ## time this resolves
         return if @prop("cid") isnt cid
 
+        @onRun?(queue)
+
         ## reset the timeout to what it used to be
         runnable.timeout(prevTimeout)
 
-        df = @set queue, @queue[index - 1], @queue[index + 1]
-        df.done =>
+        @set(queue, @queue[index - 1], @queue[index + 1]).then =>
           ## each successful command invocation should
           ## always reset the timeout for the current runnable
           runnable.resetTimeout()
@@ -472,7 +485,7 @@ window.Cypress = do ($, _) ->
       ## by this name argument)
       fn = =>
         @aliases[name] or
-          throw new Error("No alias was found by the name: #{name}")
+          @throwErr("No alias was found by the name: #{name}")
       fn.invoke = true
       fn
 
@@ -496,69 +509,82 @@ window.Cypress = do ($, _) ->
 
       @prop("current", obj)
 
-      @invoke(obj)
+      promise = @prop "promise", @invoke2(obj)
 
-    ## rethink / refactor nested promises
-    invoke: (obj, args...) ->
-      df = $.Deferred()
+      @trigger "invoke", obj
 
-      ## make sure we're ready to invoke commands
-      ## first by waiting until we're ready
-      $.when(@prop("ready")).done =>
+      return promise
+
+    invoke2: (obj, args...) ->
+      Promise.resolve(@prop("ready")?.promise)
+
+      ## allow this promise to be cancellable
+      .cancellable()
+
+      .then =>
         @log obj
 
         ## store our current href before invoking the next command
         @storeHref()
 
+        @prop "nestedIndex", @prop("index")
+
         ## allow the invoked arguments to be overridden by
         ## passing them in explicitly
         ## else just use the arguments the command was
         ## originally created with
-        args = if args.length then args else obj.args
+        if args.length then args else obj.args
 
-        @prop "nestedIndex", @prop("index")
+      ## allow promises to be used in the arguments
+      ## and wait until they're all resolved
+      .all(args)
 
-        ## allow promise objects to be used as arguments
-        ## and wait for them all to be resolve before continuing
-        $.when(args...).done (args...) =>
-          ## if the first argument is a function and it has an invoke
-          ## property that means we are supposed to immediately invoke
-          ## it and use its return value as the argument to our
-          ## current command object
-          if _.isFunction(args[0]) and args[0].invoke
-            args[0] = args[0].call(@)
+      .then (args) =>
+        ## if the first argument is a function and it has an invoke
+        ## property that means we are supposed to immediately invoke
+        ## it and use its return value as the argument to our
+        ## current command object
+        if _.isFunction(args[0]) and args[0].invoke
+          args[0] = args[0].call(@)
 
-          fn = $.when(obj.fn.apply(obj.ctx, args))
-          fn.done (subject, options = {}) =>
+        Promise.method(obj.fn).apply(obj.ctx, args)
 
-            ## if we havent become recently ready and unless we've
-            ## explicitly disabled checking for location changes
-            ## and if our href has changed in between running the commands then
-            ## then we're no longer ready to proceed with the next command
-            if @prop("recentlyReady") is null and options.checkLocation isnt false
-              @isReady(false, "href changed") if @hrefChanged()
+      .then (subject, options = {}) =>
+        ## if we havent become recently ready and unless we've
+        ## explicitly disabled checking for location changes
+        ## and if our href has changed in between running the commands then
+        ## then we're no longer ready to proceed with the next command
+        if @prop("recentlyReady") is null and options.checkLocation isnt false
+          @isReady(false, "href changed") if @hrefChanged()
 
-            ## reset the nestedIndex back to null
-            @prop("nestedIndex", null)
+        ## reset the nestedIndex back to null
+        @prop("nestedIndex", null)
 
-            ## also reset recentlyReady back to null
-            @prop("recentlyReady", null)
+        ## also reset recentlyReady back to null
+        @prop("recentlyReady", null)
 
-            ## should parse args.options here and figure
-            ## out if we're using an alias
-            df.resolve @prop("subject", subject)
-          fn.fail (err) =>
-            @log {name: "Failed: #{obj.name}", args: err.message}, "danger"
-            console.error(err.stack)
-            throw err
+        ## return the prop subject
+        @prop("subject", subject)
 
-            ## this wont be invoked because we're throwing
-            ## refactor these promises using another library
-            ## to also handle try/catch using .catch
-            df.reject(err)
-            # @trigger "set", subject
+      .caught Promise.CancellationError, (err) ->
+        debugger
 
-      return df
+      .caught (err) =>
+        debugger
+        @log {name: "Failed: #{obj.name}", args: err.message}, "danger"
+
+        @fail(err)
+
+    throwErr: (err) ->
+      if _.isString(err)
+        err = new Error(err)
+
+      console.error(err.stack)
+
+      throw err
+
+    fail: (err) ->
+      @runner.uncaught(err)
 
     retry: (err, fn, options) ->
       ## we calculate the total time we've been retrying
@@ -705,6 +731,8 @@ window.Cypress = do ($, _) ->
     $: (selector) ->
       new $.fn.init(selector, @$remoteIframe.prop("contentWindow").document)
 
+    _: _
+
     @commands = commands
 
     @add = (key, options, fn) ->
@@ -736,6 +764,7 @@ window.Cypress = do ($, _) ->
     @abort = ->
       @cy.isReady(false, "abort").reject()
       @cy.$remoteIframe?.off("submit unload load")
+      @cy.prop("promise")?.cancel()
       @cy.prop("runnable")?.clearTimeout()
       @cy.prop("xhr")?.abort()
       @restore()
@@ -754,6 +783,9 @@ window.Cypress = do ($, _) ->
       @cy.group(false)
       @cy.group(false)
 
+      ## remove any event listeners
+      @cy.stopListening()
+
       ## removes any registered props from the
       ## instance
       @cy.unregister()
@@ -767,7 +799,7 @@ window.Cypress = do ($, _) ->
       @restore()
 
       _.extend @cy,
-        contentWindow: null
+        runner:        null
         remoteIframe:  null
         channel:       null
         config:        null
@@ -785,7 +817,7 @@ window.Cypress = do ($, _) ->
     ## patches the cypress instance with contentWindow
     ## remoteIframe and channel
     ## this should be moved to an instance method and
-    @setup = (contentWindow, $remoteIframe, channel, config) ->
+    @setup = (runner, $remoteIframe, channel, config) ->
       ## we listen for the unload + submit events on
       ## the window, because when we receive them we
       ## tell cy its not ready and this prevents any
@@ -817,10 +849,12 @@ window.Cypress = do ($, _) ->
         @cy.isReady(true, "load")
 
       _.extend @cy,
-        contentWindow: contentWindow
+        runner:        runner
         $remoteIframe: $remoteIframe
         channel:       channel
         config:        config
+
+      _.extend @cy, Backbone.Events
 
       ## anytime setup is called we immediately
       ## set cy to be ready to invoke commands

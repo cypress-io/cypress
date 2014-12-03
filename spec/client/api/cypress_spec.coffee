@@ -2,11 +2,68 @@ getNames = (queue) ->
   _(queue).pluck("name")
 
 describe "Cypress API", ->
-  beforeEach ->
+  before ->
     Cypress.start()
+
+  beforeEach ->
+    Cypress.set(@test)
+
+    loadFixture("html/dom").done (iframe) =>
+      Cypress.setup(runner, $(iframe), {}, ->)
 
   afterEach ->
     Cypress.restore()
+
+  after ->
+    Cypress.stop()
+
+  context "invoke", ->
+    it "returns a promise", ->
+      cy.type("foo")
+
+  context "#isReady", ->
+    beforeEach ->
+      Cypress.set(@test)
+
+      loadFixture("html/dom").done (iframe) =>
+        Cypress.setup(runner, $(iframe), {}, ->)
+
+    it "creates a deferred when not ready", ->
+      cy.isReady(false)
+      expect(cy.prop("ready")).to.have.keys("promise", "resolve", "reject")
+
+    it "resolves the deferred when ready", ->
+      cy.isReady(false)
+      cy.isReady(true)
+      expect(cy.prop("ready").promise.isResolved()).to.be.true
+
+  context "#invoke", ->
+    beforeEach ->
+      Cypress.set(@test)
+
+      loadFixture("html/dom").done (iframe) =>
+        Cypress.setup(runner, $(iframe), {}, ->)
+
+    it "fires onInvoke once the promise is set", ->
+      cy.pause(1000)
+      cy.onInvoke = (obj)
+
+  context.only ".abort", ->
+    beforeEach ->
+      Cypress.set(@test)
+
+      loadFixture("html/dom").done (iframe) =>
+        Cypress.setup(runner, $(iframe), {}, ->)
+
+    it "cancels any open promise", (done) ->
+      cy.pause(1000)
+      cy.on "invoke", (obj) ->
+        debugger
+        Cypress.abort()
+
+  context ".restore", ->
+    it "calls stopListening", ->
+
 
   context "saved subjects", ->
     beforeEach ->
