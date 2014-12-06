@@ -164,20 +164,21 @@ window.Cypress = do ($, _) ->
       ## to continue synchronously onto tests (if for instance this
       ## 'then' is called from a hook) - by defering it, we finish
       ## resolving our deferred.
-      return @defer(fn) if not @prop("current").next
+      if not @prop("current").next and @prop("current").args.length is 2
+        return @prop("next", fn)
 
-      df = $.Deferred()
-
+      ## we need to wrap this in a try-catch still (even though we're
+      ## using bluebird) because we want to handle the return by
+      ## allow the 'then' to change the subject to the return value
+      ## if its a non null/undefined value else to return the subject
       try
-        ret = fn.call(@prop("runnable").ctx, @prop("subject"))
+        ret = fn.call @prop("runnable").ctx, @prop("subject")
 
         ## then will resolve with the fn's
         ## return or just pass along the subject
-        df.resolve(ret or @prop("subject"))
+        return ret ? @prop("subject")
       catch e
-        df.reject(e)
-
-      return df
+        throw e
 
     within: (selector, fn) ->
 
@@ -380,30 +381,37 @@ window.Cypress = do ($, _) ->
         ## which are async
         @log "Ready due to: #{event}", "success"
         @prop("recentlyReady", true)
-        return @prop("ready")?.resolve()
+
+        if ready = @prop("ready")
+          ready.promise.then =>
+            @trigger "ready", true
+
+        return ready?.resolve()
 
       ## if we already have a ready object and
       ## its state is pending just leave it be
       ## and dont touch it
-      return if @prop("ready") and @prop("ready").state() is "pending"
+      return if @prop("ready") and @prop("ready").promise.isPending()
 
       ## else set it to a deferred object
       @log "No longer ready due to: #{event}", "warning"
 
-      @prop "ready", $.Deferred()
+      @trigger "ready", false
+
+      ## using sync deferred here because we really
+      ## need it to be sync, not async
+      @prop "ready", Promise.pending()
 
     ## simulates the deferred interface with BlueBird
     _deferred: ->
-      Promise.pending()
-      # obj = {}
+      pending = Promise.pending()
+      pending.promise.cancellable()
 
-      # promise = new Promise (resolve, reject) ->
-      #   debugger
-      #   obj.resolve = resolve
-      #   obj.reject = reject
-
-      # obj.promise = promise
-      # obj
+      ## tell it expliticly we're done
+      ## adding handlers because we dont want
+      ## notifications about unhandled error messages
+      pending.promise.caught((err) ->).done()
+      pending
 
     run: ->
       ## start at 0 index if we dont have one
@@ -415,11 +423,18 @@ window.Cypress = do ($, _) ->
 
       @group(runnable.group)
 
-      ## if we're at the very end just return our cy instance
-      return @ if not queue
+      ## if we're at the very end
+      if not queue
 
-      ## store the current runnable's cid
-      cid = @prop("cid")
+        ## trigger end event
+        @trigger("end")
+
+        ## and we should have a next property which
+        ## holds mocha's .then callback fn
+        if next = @prop("next")
+          next()
+
+        return @
 
       ## store the previous timeout
       prevTimeout = runnable.timeout()
@@ -433,42 +448,52 @@ window.Cypress = do ($, _) ->
       run = =>
         ## bail if we've changed runnables by the
         ## time this resolves
-        return if @prop("cid") isnt cid
+        return if @prop("runnable") isnt runnable
 
-        @trigger "run", queue
+        @trigger "command:start", queue
 
         ## reset the timeout to what it used to be
         runnable.timeout(prevTimeout)
 
         promise = @set(queue, @queue[index - 1], @queue[index + 1]).then =>
-        #   promise
-        #   debugger
-        # # deferred.promise.then =>
-        # # @set(queue, @queue[index - 1], @queue[index + 1]).then =>
-        #   ## each successful command invocation should
-        #   ## always reset the timeout for the current runnable
-        #   runnable.resetTimeout()
+          ## each successful command invocation should
+          ## always reset the timeout for the current runnable
+          runnable.resetTimeout()
 
-        #   ## mutate index by incrementing it
-        #   ## this allows us to keep the proper index
-        #   ## in between different hooks like before + beforeEach
-        #   ## else run will be called again and index would start
-        #   ## over at 0
+          ## mutate index by incrementing it
+          ## this allows us to keep the proper index
+          ## in between different hooks like before + beforeEach
+          ## else run will be called again and index would start
+          ## over at 0
           @prop("index", index += 1)
-        #   @run()
-        .caught Promise.CancellationError, (err) ->
-          debugger
-          return
 
-        .caught (err) ->
-          debugger
-          @log {name: "Failed: #{obj.name}", args: err.message}, "danger"
+          @trigger "command:end"
 
+          @defer => @run()
+
+          ## must have this empty return here else we end up creating
+          ## additional .then callbacks due to bluebird chaining
+          return null
+
+        .catch Promise.CancellationError, (err) =>
+          @cancel(err)
+
+          ## need to signify we're done our promise here
+          ## so we cannot chain off of it, or have bluebird
+          ## accidentally chain off of the return value
+          return null
+
+        .catch (err) =>
           @fail(err)
+
+          return null
+        ## signify we are at the end of the chain and do not
+        ## continue chaining anymore
+        # promise.done()
 
         @prop "promise", promise
 
-        @trigger "set", promise
+        @trigger "set"
 
       ## automatically defer running each command in succession
       ## so each command is async
@@ -530,98 +555,94 @@ window.Cypress = do ($, _) ->
 
       @invoke2(obj)
 
-      # deferred = @prop "promise",
-
-      # debugger
-
-      # @trigger "invoke", obj
-
-      # return deferred
+    _checkAbort: ->
+      ## if we have an abort property it means we're
+      ## attempting to abort and therefore we need
+      ## to throw a cancellation error to immediately
+      ## reject our promist
+      if @prop("abort")
+        @throwErr(new Promise.CancellationError)
 
     invoke2: (obj, args...) ->
-      # new Promise (resolve, reject) =>
-        # promise = Promise.resolve(@prop("ready")?.promise)
-        # Promise.resolve(@prop("ready"))
-      # df = Promise.pending()
+      promise = if @prop("ready")
+        Promise.resolve @prop("ready").promise
+      else
+        Promise.resolve()
 
-      # debugger
+      ## break the promise chain and return the outer promise for cancellation
+      ## reasons
+      promise.then =>
+        @_checkAbort()
 
-      # df.promise.bind(obj)
+        @trigger "invoke:start", obj
 
-      promise = Promise.resolve(@prop("ready")).bind(obj)
+        @log obj
 
-      ## allow this promise to be cancellable
-      .cancellable()
+        ## store our current href before invoking the next command
+        @storeHref()
 
-      .then =>
-        promise
-        debugger
+        @prop "nestedIndex", @prop("index")
 
-        # @trigger "invoke:start", obj
-
-        # # throw new Error("foo")
-        # @log obj
-
-        # ## store our current href before invoking the next command
-        # @storeHref()
-
-        # @prop "nestedIndex", @prop("index")
-
-        # ## allow the invoked arguments to be overridden by
-        # ## passing them in explicitly
-        # ## else just use the arguments the command was
-        # ## originally created with
-        # if args.length then args else obj.args
+        ## allow the invoked arguments to be overridden by
+        ## passing them in explicitly
+        ## else just use the arguments the command was
+        ## originally created with
+        if args.length then args else obj.args
 
       ## allow promises to be used in the arguments
       ## and wait until they're all resolved
-      # .all(args)
+      .all(args)
 
       .then (args) =>
-        debugger
+        @_checkAbort()
+
         ## if the first argument is a function and it has an invoke
         ## property that means we are supposed to immediately invoke
         ## it and use its return value as the argument to our
         ## current command object
-        # if _.isFunction(args[0]) and args[0].invoke
-        #   args[0] = args[0].call(@)
+        if _.isFunction(args[0]) and args[0].invoke
+          args[0] = args[0].call(@)
 
-        # Promise.method(obj.fn).apply(obj.ctx, args)
+        Promise.method(obj.fn).apply(obj.ctx, args)
 
       .then (subject, options = {}) =>
-        debugger
-        ## if we havent become recently ready and unless we've
-        ## explicitly disabled checking for location changes
-        ## and if our href has changed in between running the commands then
-        ## then we're no longer ready to proceed with the next command
-        # if @prop("recentlyReady") is null and options.checkLocation isnt false
-        #   @isReady(false, "href changed") if @hrefChanged()
+        @_checkAbort()
 
-        # ## reset the nestedIndex back to null
-        # @prop("nestedIndex", null)
+        # if we havent become recently ready and unless we've
+        # explicitly disabled checking for location changes
+        # and if our href has changed in between running the commands then
+        # then we're no longer ready to proceed with the next command
+        if @prop("recentlyReady") is null and options.checkLocation isnt false
+          @isReady(false, "href changed") if @hrefChanged()
 
-        # ## also reset recentlyReady back to null
-        # @prop("recentlyReady", null)
+        ## reset the nestedIndex back to null
+        @prop("nestedIndex", null)
 
-        # ## return the prop subject
-        # @prop("subject", subject)
+        ## also reset recentlyReady back to null
+        @prop("recentlyReady", null)
 
-        # @trigger "invoke:end", obj
+        ## return the prop subject
+        @prop("subject", subject)
 
-        # return subject
+        @trigger "invoke:end", obj
 
-      # return df
+        return subject
 
     throwErr: (err) ->
       if _.isString(err)
         err = new Error(err)
 
-      console.error(err.stack)
-
       throw err
 
+    cancel: (err) ->
+      @trigger "cancel"
+      @prop("abort").resolve()
+
     fail: (err) ->
+      obj = @prop("current")
+      @log {name: "Failed: #{obj.name}", args: err.message}, "danger"
       @runner.uncaught(err)
+      @trigger "fail", err
 
     retry: (err, fn, options) ->
       ## we calculate the total time we've been retrying
@@ -799,15 +820,24 @@ window.Cypress = do ($, _) ->
         delete Cypress.prototype[fn]
 
     @abort = ->
-      @cy.isReady(false, "abort").reject()
       @cy.$remoteIframe?.off("submit unload load")
-      debugger
-      # @cy.prop("deferred").promise.cancel()
-      # @cy.prop("deferred").reject()
-      @cy.prop("promise")?.cancel()
-      @cy.prop("runnable")?.clearTimeout()
+      @cy.isReady(false, "abort")
       @cy.prop("xhr")?.abort()
-      @restore()
+      @cy.prop("runnable")?.clearTimeout()
+
+      df = Promise.pending()
+      df.promise.then => @restore()
+
+      promise = @cy.prop("promise")
+
+      if promise and promise.isPending()
+        abort = Promise.pending()
+        abort.promise.then -> df.resolve()
+        @cy.prop "abort", abort
+      else
+        df.resolve()
+
+      return df.promise
 
     ## restores cypress after each test run by
     ## removing the queue from the proto and
@@ -824,6 +854,7 @@ window.Cypress = do ($, _) ->
       @cy.group(false)
 
       ## remove any event listeners
+      @cy.off()
       @cy.stopListening()
 
       ## removes any registered props from the
@@ -835,18 +866,16 @@ window.Cypress = do ($, _) ->
     ## removes channel, remoteIframe, contentWindow
     ## from the cypress instance
     @stop = ->
-      @abort()
-      @restore()
+      # @abort().then =>
+      #   _.extend @cy,
+      #     runner:        null
+      #     remoteIframe:  null
+      #     channel:       null
+      #     config:        null
 
-      _.extend @cy,
-        runner:        null
-        remoteIframe:  null
-        channel:       null
-        config:        null
+      #   window.cy = @cy = null
 
-      window.cy = @cy = null
-
-      return @
+      # return @
 
     ## sets the runnable onto the cy instance
     @set = (runnable, hook) ->
@@ -894,8 +923,6 @@ window.Cypress = do ($, _) ->
         channel:       channel
         config:        config
 
-      _.extend @cy, Backbone.Events
-
       ## anytime setup is called we immediately
       ## set cy to be ready to invoke commands
       ## this prevents a bug where we go into not
@@ -908,6 +935,8 @@ window.Cypress = do ($, _) ->
         @inject(key, fn)
 
       window.cy = @cy = new Cypress
+
+      _.extend @cy, Backbone.Events
 
       ## return the class as opposed to the
       ## instance so we dont have to worry about

@@ -543,14 +543,13 @@
       ## start the abort process since we're about
       ## to load up in case we're running any tests
       ## right this moment
-      Cypress.abort()
+      Cypress.abort().then =>
+        ## tells different areas of the app to prepare
+        ## for the resetting of the test run
+        @trigger "reset:test:run"
 
-      ## tells different areas of the app to prepare
-      ## for the resetting of the test run
-      @trigger "reset:test:run"
-
-      ## tells the iframe view to load up a new iframe
-      @trigger "load:iframe", @iframe, opts
+        ## tells the iframe view to load up a new iframe
+        @trigger "load:iframe", @iframe, opts
 
     hasChosen: ->
       !!@get("chosenId")
