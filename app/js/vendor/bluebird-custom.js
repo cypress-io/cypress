@@ -1,7 +1,7 @@
 /**
  * bluebird build version 2.3.11
- * Features enabled: core, cancel, timers
- * Features disabled: race, call_get, generators, map, nodeify, promisify, props, reduce, settle, some, progress, using, filter, any, each
+ * Features enabled: core, settle, cancel, timers
+ * Features disabled: race, call_get, generators, map, nodeify, promisify, props, reduce, some, progress, using, filter, any, each
 */
 /**
  * @preserve The MIT License (MIT)
@@ -142,7 +142,7 @@ Async.prototype._reset = function Async$_reset() {
 
 module.exports = new Async();
 
-},{"./queue.js":15,"./schedule.js":16,"./util.js":20}],2:[function(_dereq_,module,exports){
+},{"./queue.js":15,"./schedule.js":16,"./util.js":21}],2:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -221,7 +221,6 @@ Promise.prototype.cancel = function Promise$cancel(reason) {
         ? (canAttach(reason) ? reason : new Error(reason + ""))
         : new CancellationError();
     async.invokeLater(this._cancel, this, reason);
-    this._setFollowing();
     return this;
 };
 
@@ -497,7 +496,7 @@ var captureStackTrace = (function stackDetection() {
 return CapturedTrace;
 };
 
-},{"./es5.js":9,"./util.js":20}],5:[function(_dereq_,module,exports){
+},{"./es5.js":9,"./util.js":21}],5:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -595,7 +594,7 @@ CatchFilter.prototype.doFilter = function CatchFilter$_doFilter(e) {
 return CatchFilter;
 };
 
-},{"./errors.js":7,"./es5.js":9,"./util.js":20}],6:[function(_dereq_,module,exports){
+},{"./errors.js":7,"./es5.js":9,"./util.js":21}],6:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -677,7 +676,7 @@ function Promise$thenThrow(reason) {
 };
 };
 
-},{"./util.js":20}],7:[function(_dereq_,module,exports){
+},{"./util.js":21}],7:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -826,7 +825,7 @@ module.exports = {
     canAttach: canAttach
 };
 
-},{"./es5.js":9,"./util.js":20}],8:[function(_dereq_,module,exports){
+},{"./es5.js":9,"./util.js":21}],8:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -1083,7 +1082,7 @@ Promise.prototype.tap = function Promise$tap(handler) {
 };
 };
 
-},{"./util.js":20}],11:[function(_dereq_,module,exports){
+},{"./util.js":21}],11:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -1209,7 +1208,7 @@ Promise.join = function Promise$Join() {
 
 };
 
-},{"./util.js":20}],12:[function(_dereq_,module,exports){
+},{"./util.js":21}],12:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -2286,7 +2285,9 @@ util.toFastProperties(Promise.prototype);
 Promise.Promise = Promise;
 _dereq_('./cancel.js')(Promise,INTERNAL);
 _dereq_('./cancel.js')(Promise,INTERNAL);
+_dereq_('./cancel.js')(Promise,INTERNAL);
 _dereq_('./timers.js')(Promise,INTERNAL,cast);
+_dereq_('./settle.js')(Promise,PromiseArray);
 _dereq_('./cancel.js')(Promise,INTERNAL);
 
 Promise.prototype = Promise.prototype;
@@ -2294,7 +2295,7 @@ return Promise;
 
 };
 
-},{"./async.js":1,"./cancel.js":3,"./captured_trace.js":4,"./catch_filter.js":5,"./direct_resolve.js":6,"./errors.js":7,"./errors_api_rejection":8,"./finally.js":10,"./join.js":11,"./promise_array.js":13,"./promise_resolver.js":14,"./synchronous_inspection.js":17,"./thenables.js":18,"./timers.js":19,"./util.js":20}],13:[function(_dereq_,module,exports){
+},{"./async.js":1,"./cancel.js":3,"./captured_trace.js":4,"./catch_filter.js":5,"./direct_resolve.js":6,"./errors.js":7,"./errors_api_rejection":8,"./finally.js":10,"./join.js":11,"./promise_array.js":13,"./promise_resolver.js":14,"./settle.js":17,"./synchronous_inspection.js":18,"./thenables.js":19,"./timers.js":20,"./util.js":21}],13:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -2500,7 +2501,7 @@ function PromiseArray$getActualLength(len) {
 return PromiseArray;
 };
 
-},{"./errors.js":7,"./util.js":20}],14:[function(_dereq_,module,exports){
+},{"./errors.js":7,"./util.js":21}],14:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -2662,7 +2663,7 @@ function PromiseResolver$_setCarriedStackTrace(trace) {
 
 module.exports = PromiseResolver;
 
-},{"./async.js":1,"./errors.js":7,"./es5.js":9,"./util.js":20}],15:[function(_dereq_,module,exports){
+},{"./async.js":1,"./errors.js":7,"./es5.js":9,"./util.js":21}],15:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -2872,6 +2873,77 @@ module.exports = schedule;
  *
  */
 "use strict";
+module.exports =
+    function(Promise, PromiseArray) {
+var PromiseInspection = Promise.PromiseInspection;
+var util = _dereq_("./util.js");
+
+function SettledPromiseArray(values) {
+    this.constructor$(values);
+}
+util.inherits(SettledPromiseArray, PromiseArray);
+
+SettledPromiseArray.prototype._promiseResolved =
+function SettledPromiseArray$_promiseResolved(index, inspection) {
+    this._values[index] = inspection;
+    var totalResolved = ++this._totalResolved;
+    if (totalResolved >= this._length) {
+        this._resolve(this._values);
+    }
+};
+
+SettledPromiseArray.prototype._promiseFulfilled =
+function SettledPromiseArray$_promiseFulfilled(value, index) {
+    if (this._isResolved()) return;
+    var ret = new PromiseInspection();
+    ret._bitField = 268435456;
+    ret._settledValue = value;
+    this._promiseResolved(index, ret);
+};
+SettledPromiseArray.prototype._promiseRejected =
+function SettledPromiseArray$_promiseRejected(reason, index) {
+    if (this._isResolved()) return;
+    var ret = new PromiseInspection();
+    ret._bitField = 134217728;
+    ret._settledValue = reason;
+    this._promiseResolved(index, ret);
+};
+
+Promise.settle = function Promise$Settle(promises) {
+    return new SettledPromiseArray(promises).promise();
+};
+
+Promise.prototype.settle = function Promise$settle() {
+    return new SettledPromiseArray(this).promise();
+};
+};
+
+},{"./util.js":21}],18:[function(_dereq_,module,exports){
+/**
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 Petka Antonov
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:</p>
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ */
+"use strict";
 module.exports = function(Promise) {
 function PromiseInspection(promise) {
     if (promise !== void 0) {
@@ -2926,7 +2998,7 @@ Promise.prototype.isResolved = function Promise$isResolved() {
 Promise.PromiseInspection = PromiseInspection;
 };
 
-},{}],18:[function(_dereq_,module,exports){
+},{}],19:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -3063,7 +3135,7 @@ function Promise$_doThenable(x, then, originalPromise) {
 return Promise$_Cast;
 };
 
-},{"./errors.js":7,"./util.js":20}],19:[function(_dereq_,module,exports){
+},{"./errors.js":7,"./util.js":21}],20:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -3173,7 +3245,7 @@ Promise.prototype.timeout = function Promise$timeout(ms, message) {
 
 };
 
-},{"./errors.js":7,"./errors_api_rejection":8,"./util.js":20}],20:[function(_dereq_,module,exports){
+},{"./errors.js":7,"./errors_api_rejection":8,"./util.js":21}],21:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *

@@ -155,6 +155,9 @@ window.Cypress = do ($, _) ->
       Eclectus.patch partial
       Ecl.visit(url, options)
 
+    ## thens can return more "thenables" which are not resolved
+    ## until they're 'really' resolved, so naturally this API
+    ## supports nesting promises
     then: (fn) ->
       ## if this is the very last command we know its the 'then'
       ## called by mocha.  in this case, we need to defer its
@@ -481,12 +484,12 @@ window.Cypress = do ($, _) ->
           ## need to signify we're done our promise here
           ## so we cannot chain off of it, or have bluebird
           ## accidentally chain off of the return value
-          return null
+          return err
 
         .catch (err) =>
           @fail(err)
 
-          return null
+          return err
         ## signify we are at the end of the chain and do not
         ## continue chaining anymore
         # promise.done()
@@ -555,14 +558,6 @@ window.Cypress = do ($, _) ->
 
       @invoke2(obj)
 
-    _checkAbort: ->
-      ## if we have an abort property it means we're
-      ## attempting to abort and therefore we need
-      ## to throw a cancellation error to immediately
-      ## reject our promist
-      if @prop("abort")
-        @throwErr(new Promise.CancellationError)
-
     invoke2: (obj, args...) ->
       promise = if @prop("ready")
         Promise.resolve @prop("ready").promise
@@ -571,9 +566,8 @@ window.Cypress = do ($, _) ->
 
       ## break the promise chain and return the outer promise for cancellation
       ## reasons
-      promise.then =>
-        @_checkAbort()
-
+      promise.cancellable().then =>
+        # debugger
         @trigger "invoke:start", obj
 
         @log obj
@@ -594,8 +588,7 @@ window.Cypress = do ($, _) ->
       .all(args)
 
       .then (args) =>
-        @_checkAbort()
-
+        # debugger
         ## if the first argument is a function and it has an invoke
         ## property that means we are supposed to immediately invoke
         ## it and use its return value as the argument to our
@@ -603,11 +596,14 @@ window.Cypress = do ($, _) ->
         if _.isFunction(args[0]) and args[0].invoke
           args[0] = args[0].call(@)
 
-        Promise.method(obj.fn).apply(obj.ctx, args)
+        ## we cannot pass our cypress instance back into
+        ## bluebird else it will create a thenable which
+        ## is never resolved
+        ret = obj.fn.apply(obj.ctx, args)
+        if ret is @ then @prop("subject") else ret
 
       .then (subject, options = {}) =>
-        @_checkAbort()
-
+        # debugger
         # if we havent become recently ready and unless we've
         # explicitly disabled checking for location changes
         # and if our href has changed in between running the commands then
@@ -635,8 +631,7 @@ window.Cypress = do ($, _) ->
       throw err
 
     cancel: (err) ->
-      @trigger "cancel"
-      @prop("abort").resolve()
+      @trigger "cancel", @prop("current")
 
     fail: (err) ->
       obj = @prop("current")
@@ -825,19 +820,10 @@ window.Cypress = do ($, _) ->
       @cy.prop("xhr")?.abort()
       @cy.prop("runnable")?.clearTimeout()
 
-      df = Promise.pending()
-      df.promise.then => @restore()
-
       promise = @cy.prop("promise")
+      promise?.cancel()
 
-      if promise and promise.isPending()
-        abort = Promise.pending()
-        abort.promise.then -> df.resolve()
-        @cy.prop "abort", abort
-      else
-        df.resolve()
-
-      return df.promise
+      Promise.resolve(promise).then => @restore()
 
     ## restores cypress after each test run by
     ## removing the queue from the proto and
@@ -866,16 +852,14 @@ window.Cypress = do ($, _) ->
     ## removes channel, remoteIframe, contentWindow
     ## from the cypress instance
     @stop = ->
-      # @abort().then =>
-      #   _.extend @cy,
-      #     runner:        null
-      #     remoteIframe:  null
-      #     channel:       null
-      #     config:        null
+      @abort().then =>
+        _.extend @cy,
+          runner:        null
+          remoteIframe:  null
+          channel:       null
+          config:        null
 
-      #   window.cy = @cy = null
-
-      # return @
+        window.cy = @cy = null
 
     ## sets the runnable onto the cy instance
     @set = (runnable, hook) ->

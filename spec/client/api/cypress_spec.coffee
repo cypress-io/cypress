@@ -27,11 +27,7 @@ describe "Cypress API", ->
       cy.on "set", ->
         ## we wait until we hear set because that means
         ## we've begun running our promise
-        Cypress.abort().then done
-
-        ## we have to eventually set isReady true because
-        ## it will be permanently stuff in isReady false otherwise
-        cy.isReady(true)
+        Cypress.abort().then -> done()
 
   #   it "returns a promise", ->
   #     cy.type("foo")
@@ -71,23 +67,23 @@ describe "Cypress API", ->
 
     #   promise.cancel()
 
-    it "cancels the correct promise", (done) ->
-      pending = Promise.pending()
+    # it "cancels the correct promise", (done) ->
+    #   pending = Promise.pending()
 
-      promise = Promise.resolve(pending.promise).cancellable()
+    #   promise = Promise.resolve(pending.promise).cancellable()
 
-      promise.then ->
-        done("not cancelled")
-      .caught Promise.CancellationError, (err) ->
-        done()
+    #   promise.then ->
+    #     done("not cancelled")
+    #   .caught Promise.CancellationError, (err) ->
+    #     done()
 
-      promise.cancel()
-      pending.resolve()
+    #   promise.cancel()
+    #   pending.resolve()
 
   context ".abort", ->
     it "fires cancel event when theres an outstanding command", (done) ->
       cy.pause(1000)
-      cy.on "cancel", done
+      cy.on "cancel", -> done()
       cy.on "set", ->
         Cypress.abort()
 
@@ -95,7 +91,22 @@ describe "Cypress API", ->
       cy.noop()
       cy.on "cancel", -> done("should not cancel")
       cy.on "end", ->
-        Cypress.abort().then done
+        Cypress.abort().then -> done()
+
+    it "aborts running commands in the middle of running", (done) ->
+      cy.on "cancel", (obj) ->
+        expect(obj.name).to.eq "then"
+        done()
+
+      cy.noop().pause(10).then ->
+        ## simulate the abort action happening
+        ## during this .then command
+        Cypress.abort()
+
+        ## imagine we are returning another promise
+        ## in our then command
+        Promise.delay(10).then ->
+          done("should not reach here")
 
   context "promises", ->
     it "doesnt invoke .then on the cypress instance", (done) ->
@@ -106,7 +117,6 @@ describe "Cypress API", ->
         Cypress.abort().then ->
           expect(_then).not.to.be.called
           done()
-
 
   context "command error bubbling", ->
     beforeEach ->
@@ -173,6 +183,9 @@ describe "Cypress API", ->
         expect(cy.get("something")).to.be.a("function")
 
   context "property registry", ->
+    beforeEach ->
+      Cypress.restore()
+
     it "is initially empty", ->
       expect(cy.props).to.deep.eq {}
 
@@ -243,7 +256,8 @@ describe "Cypress API", ->
         expect(nested.next.name).to.eq "url"
 
     it "null outs nestedIndex prior to restoring", (done) ->
-      @setup ->
+      @setup()
+      cy.on "end", ->
         expect(cy.prop("nestedIndex")).to.be.null
         done()
 
