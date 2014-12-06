@@ -37,6 +37,6 @@
     "sinon-chai": "~2.5.0",
     "jquery-ui": "~1.11.1",
     "jquery-simulate": "~1.0.0",
-    "bluebird": "~2.3.11"
+    "bluebird": "#42c0f3f6d9b8619fd94551bf7c50ff79eba42c8a"
   }
 }
