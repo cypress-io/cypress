@@ -533,7 +533,7 @@ window.Cypress = do ($, _) ->
       fn = =>
         @aliases[name] or
           @throwErr("No alias was found by the name: #{name}")
-      fn.invoke = true
+      fn._invokeImmediately = true
       fn
 
     storeHref: ->
@@ -593,7 +593,7 @@ window.Cypress = do ($, _) ->
         ## property that means we are supposed to immediately invoke
         ## it and use its return value as the argument to our
         ## current command object
-        if _.isFunction(args[0]) and args[0].invoke
+        if _.isFunction(args[0]) and args[0]._invokeImmediately
           args[0] = args[0].call(@)
 
         ## we cannot pass our cypress instance back into
