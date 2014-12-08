@@ -258,6 +258,108 @@ describe "Cypress API", ->
         cy._timeout(500)
 
       expect(fn).to.throw(Error)
+
+  context "#wait", ->
+    describe "number argument", ->
+      it "passes delay onto Promise", ->
+        delay = @sandbox.spy Promise, "delay"
+        cy.wait(100)
+        cy.on "invoke:end", ->
+          expect(delay).to.be.calledWith 100
+
+      it "does not change the subject", ->
+        cy
+          .find("input")
+          .then ($input) ->
+            @$input = $input
+          .wait(10)
+
+        cy.on "invoke:end", (obj) =>
+          if obj.name is "wait"
+            expect(cy.prop("subject")).to.eq @$input
+
+      it "does not time out the runnable", ->
+        timer = @sandbox.useFakeTimers("setTimeout")
+        trigger = @sandbox.spy(cy, "trigger")
+        cy._timeout(100)
+        cy.wait()
+        timer.tick()
+        timer.tick(5000)
+        expect(trigger).not.to.be.calledWith "invoke:end"
+
+      describe "function argument", ->
+        it "resolves when truthy", ->
+          cy.wait ->
+            "foo" is "foo"
+
+        it "retries when false", ->
+          i = 0
+          fn = ->
+            i += 1
+          fn = @sandbox.spy fn
+          cy.then(fn).wait (i) ->
+            console.log "retrying", i
+            i is 3
+          cy.on "end", ->
+            expect(fn.getCalls().length).to.eq 3
+
+        it "retries when null", ->
+          i = 0
+          fn = ->
+            i += 1
+          fn = @sandbox.spy fn
+          cy.then(fn).wait (i) ->
+            if i isnt 2 then null else true
+          cy.on "end", ->
+            expect(fn.getCalls().length).to.eq 2
+
+        it "retries when undefined", ->
+          i = 0
+          fn = ->
+            i += 1
+          fn = @sandbox.spy fn
+          cy.then(fn).wait (i) ->
+            if i isnt 2 then undefined else true
+          cy.on "end", ->
+            expect(fn.getCalls().length).to.eq 2
+
+        it "resolves with existing subject", ->
+          cy
+            .find("input").then ($input) ->
+              @$input = $input
+            .wait(-> true)
+
+          cy.on "invoke:end", (obj) =>
+            if obj.name is "wait"
+              expect(cy.prop("subject")).to.eq @$input
+
+      describe "errors thrown", ->
+        beforeEach ->
+          @uncaught = @sandbox.stub(cy.runner, "uncaught")
+
+        it "times out eventually", (done) ->
+          ## forcibly reduce the timeout to 500 ms
+          ## so we dont have to wait so long
+          cy
+            .noop()
+            .wait (-> false), timeout: 500
+
+          cy.on "fail", (err) ->
+            expect(err.message).to.include "Timed out retrying."
+            done()
+
+        it "appends to the err message", (done) ->
+          cy
+            .noop()
+            .wait (-> expect(true).to.be.false), timeout: 500
+
+          cy.on "fail", (err) ->
+            expect(err.message).to.include "Timed out retrying."
+            done()
+
+  context "#retry", ->
+    it "returns a nested cancellable promise"
+
   context "nested commands", ->
     beforeEach ->
       @setup = (fn = ->) =>

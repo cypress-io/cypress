@@ -321,33 +321,31 @@ window.Cypress = do ($, _) ->
         @prop("subject").each (index, el) ->
           el.dispatchEvent(event)
 
-    wait: (fn, options = {}) ->
-      ## we set the initial wait to account for how long the test
-      ## has already been running and we add 100 milliseconds so
-      ## our wait times out before the runnable's timeout fires
+    wait: (msOrFn, options = {}) ->
+      msOrFn ?= 1e9
 
-      _.defaults options,
-        total: 0
-        start: new Date
-        wait: 100
-        df: $.Deferred()
+      switch
+        when _.isNumber(msOrFn)
+          ## increase the timeout by the delta
+          @_timeout(msOrFn, true)
+          return Promise.delay(msOrFn)
 
-      ## we always want to make sure we timeout before our runnable does
-      ## so take its current timeout, subtract the total time its already
-      ## been running and add the options.wait for a tiny bit of padding
-      options.timeout ?= @prop("runnable").timeout() - (new Date - @prop("runnable").startedAt + options.wait)
+        when _.isFunction(msOrFn)
+          fn = msOrFn
 
-      try
-        ## invoke fn and make sure its not strictly false
-        if fn.call(@prop("runnable").ctx, @prop("subject")) is false
-          @retry(null, fn, options)
+          try
+            ## invoke fn and make sure its not strictly false
+            options.value = fn.call(@prop("runnable").ctx, @prop("subject"))
+            return @prop("subject") if options.value
+          catch e
+            return @retry(e, fn, options)
+
+          ## retry outside of the try / catch block because
+          ## if retry throws errors we want those to bubble
+          return @retry(null, fn, options) if not options.value
+
         else
-          options.df.resolve(@prop("subject"))
-
-      catch e
-        @retry(e, fn, options)
-
-      return options.df
+          @throwErr "wait() must be invoked with either a number or a function!"
 
   class Cypress
     queue: []
@@ -579,7 +577,6 @@ window.Cypress = do ($, _) ->
       ## break the promise chain and return the outer promise for cancellation
       ## reasons
       promise.cancellable().then =>
-        # debugger
         @trigger "invoke:start", obj
 
         @log obj
@@ -600,8 +597,7 @@ window.Cypress = do ($, _) ->
       .all(args)
 
       .then (args) =>
-        # debugger
-        ## if the first argument is a function and it has an invoke
+        ## if the first argument is a function and it has an _invokeImmediately
         ## property that means we are supposed to immediately invoke
         ## it and use its return value as the argument to our
         ## current command object
@@ -615,7 +611,6 @@ window.Cypress = do ($, _) ->
         if ret is @ then @prop("subject") else ret
 
       .then (subject, options = {}) =>
-        # debugger
         # if we havent become recently ready and unless we've
         # explicitly disabled checking for location changes
         # and if our href has changed in between running the commands then
@@ -654,22 +649,33 @@ window.Cypress = do ($, _) ->
       @trigger "fail", err
 
     retry: (err, fn, options) ->
+      _.defaults options,
+        runnableTimeout: @_timeout()
+        start: new Date
+        interval: 50
+
+      ## we always want to make sure we timeout before our runnable does
+      ## so take its current timeout, subtract the total time its already
+      ## been running and add the options.interval for a tiny bit of padding
+      options.timeout ?= options.runnableTimeout - (new Date - @prop("runnable").startedAt + options.interval)
+
       ## we calculate the total time we've been retrying
       ## so we dont exceed the runnables timeout
-      options.total = (new Date - options.start)
+      total = (new Date - options.start)
 
-      if options.total >= options.timeout
-        ## we may not have an err here in case wait
-        ## simply evaluated to false
-        ## prob should throw our own custom error
-        ## we also need to change the error message
-        ## to indicate that this TIMED OUT + the error
-        return options.df.reject(err)
+      ## if our total exceeds the timeout OR the total + the interval
+      ## exceed the runnables timeout, then bail
+      if total >= options.timeout or (total + options.interval >= options.runnableTimeout)
+        err ?= new Error options.value
+        err.message = "Timed out retrying. The final value was: " + err.message
+        @throwErr(err)
 
-      @delay =>
-        @invoke(@prop("current").prev).done =>
-          @invoke(@prop("current"), fn, options)
-      , options.wait
+      ## must set this to cancellable because we are creating
+      ## a nested inner promise thenable chain which will
+      ## propogate properly only if its cancellable
+      Promise.delay(options.interval).cancellable().then =>
+        @invoke2(@prop("current").prev).then =>
+          @invoke2(@prop("current"), fn, options)
 
     action: (name, args...) ->
       commands[name].apply(@, args)
