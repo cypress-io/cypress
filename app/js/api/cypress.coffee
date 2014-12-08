@@ -863,9 +863,9 @@ window.Cypress = do ($, _) ->
 
     ## sets the runnable onto the cy instance
     @set = (runnable, hook) ->
+      runnable.startedAt = new Date
       @cy.hook(hook)
       @cy.prop("runnable", runnable)
-      @cy.prop("cid", runnable.cid)
 
     ## patches the cypress instance with contentWindow
     ## remoteIframe and channel

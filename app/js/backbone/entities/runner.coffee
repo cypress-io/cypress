@@ -240,9 +240,6 @@
     changeRunnableTimeout: (runnable) ->
       runnable.timeout App.config.get("commandTimeout")
 
-    createStartedAt: (runnable) ->
-      runnable.startedAt = new Date
-
     startListening: ->
       @setListenersForAll()
       @setListenersForCI() if App.config.env("ci")
@@ -265,14 +262,10 @@
         @test = null
 
       @runner.on "suite", (suite) =>
-        @changeRunnableTimeout(suite)
-        @createStartedAt(suite)
-
         @trigger "suite:start", suite
 
       @runner.on "test", (test) =>
         @changeRunnableTimeout(test)
-        @createStartedAt(test)
 
         @test = test
         @hook = "test"
@@ -283,7 +276,6 @@
 
       @runner.on "hook", (hook) =>
         @changeRunnableTimeout(hook)
-        @createStartedAt(hook)
 
         @hook = @getHookName(hook)
 
