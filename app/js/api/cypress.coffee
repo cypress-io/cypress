@@ -550,6 +550,18 @@ window.Cypress = do ($, _) ->
       location = @action("location")
       @href isnt location.href.replace(location.hash, "")
 
+    _timeout: (ms, delta = false) ->
+      runnable = @prop("runnable")
+      @throwErr("Cannot call .timeout() without a currently running test!") if not runnable
+      if ms
+        ## if delta is true then we add (or subtract) from the
+        ## runnables current timeout instead of blanketingly setting it
+        ms = if delta then runnable.timeout() + ms else ms
+        runnable.timeout(ms)
+        return @
+      else
+        runnable.timeout()
+
     set: (obj, prev, next) ->
       obj.prev = prev
       obj.next = next

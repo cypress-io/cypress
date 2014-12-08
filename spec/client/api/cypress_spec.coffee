@@ -234,6 +234,30 @@ describe "Cypress API", ->
 
         expect([cy.prop("foo"), cy.prop("baz")]).to.deep.eq [undefined, undefined]
 
+  context "#_timeout", ->
+    it "setter", ->
+      cy._timeout(500)
+      expect(@test.timeout()).to.eq 500
+
+    it "setter returns cy instance", ->
+      ret = cy._timeout(500)
+      expect(ret).to.eq cy
+
+    it "setter can increase by delta", ->
+      currentTimeout = @test.timeout()
+      cy._timeout(500, true)
+      expect(@test.timeout()).to.eq 500 + currentTimeout
+
+    it "getter returns integer", ->
+      timeout = @test.timeout()
+      expect(cy._timeout()).to.eq timeout
+
+    it "throws error when no runnable", ->
+      Cypress.restore()
+      fn = ->
+        cy._timeout(500)
+
+      expect(fn).to.throw(Error)
   context "nested commands", ->
     beforeEach ->
       @setup = (fn = ->) =>
