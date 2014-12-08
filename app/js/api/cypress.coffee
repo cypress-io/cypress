@@ -643,7 +643,9 @@ window.Cypress = do ($, _) ->
       throw err
 
     cancel: (err) ->
-      @trigger "cancel", @prop("current")
+      obj = @prop("current")
+      @log {name: "Cancelled: #{obj.name}", args: err.message}, "danger"
+      @trigger "cancel", obj
 
     fail: (err) ->
       obj = @prop("current")
