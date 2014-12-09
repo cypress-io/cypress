@@ -30,8 +30,8 @@ window.Cypress = do ($, _) ->
         filter  = ""
 
       ## find elements by the :contains psuedo selector
-      ## and any submit inputs with the attributeContains selector
-      elems = @$("#{filter}:contains('#{text}'), #{filter}[type='submit'][value*='#{text}']")
+      ## and any submit inputs with the attributeContainsWord selector
+      elems = @$("#{filter}:contains('#{text}'), #{filter}[type='submit'][value~='#{text}']")
 
       ## need to retry here
 
