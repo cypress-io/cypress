@@ -47,6 +47,29 @@ window.Cypress = do ($, _) ->
         if not values.length or el.val() in values
           el.prop("checked", true).trigger("change")
 
+    uncheck: (values = []) ->
+      ## make sure we're an array of values
+      values = [].concat(values)
+
+      subject = @_ensureDomSubject()
+
+      ## blow up if any member of the subject
+      ## isnt a checkbox
+      subject.each (index, el) =>
+        el = $(el)
+        node = @_stringifyElement(el)
+
+        if not el.is(":checkbox")
+          word = @_plural(subject, "contains", "is")
+          @throwErr(".uncheck() can only be called on :checkbox! Your subject #{word} a: #{node}")
+
+        return if not el.prop("checked")
+
+        ## if we didnt pass in any values or our
+        ## el's value is in the array then check it
+        if not values.length or el.val() in values
+          el.prop("checked", false).trigger("change")
+
     ## add an array of jquery methods
     eq: ->
 

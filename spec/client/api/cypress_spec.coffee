@@ -62,7 +62,6 @@ describe "Cypress API", ->
       $("iframe").contents().find(checkbox).change ->
         done("should not fire change event")
       cy.find(checkbox).check()
-
       cy.on "end", -> done()
 
     it "can check a collection", ->
@@ -108,11 +107,43 @@ describe "Cypress API", ->
           expect(err.message).to.include ".check() can only be called on :checkbox and :radio! Your subject contains a: <textarea id=\"comments\"></textarea>"
           done()
 
-  context "#uncheck", ->
-    it "unchecks a checkbox"
-    it "is a noop if already unchecked"
-    it "throws specifically on a radio"
-    it "throws if not a checkbox"
+  context.only "#uncheck", ->
+    it "unchecks a checkbox", ->
+      cy.find("[name=birds][value=cockatoo]").uncheck().then ($checkbox) ->
+        expect($checkbox).not.to.be.checked
+
+    it "unchecks a checkbox by value", ->
+      cy.find("[name=birds]").uncheck("cockatoo").then ($checkboxes) ->
+        expect($checkboxes.filter(":checked").length).to.eq 1
+        expect($checkboxes.filter("[value=cockatoo]")).not.to.be.checked
+
+    it "unchecks multiple checkboxes by values", ->
+      cy.find("[name=birds]").uncheck(["cockatoo", "amazon"]).then ($checkboxes) ->
+        expect($checkboxes.filter(":checked").length).to.eq 0
+        expect($checkboxes.filter("[value=cockatoo],[value=amazon]")).not.to.be.checked
+
+    it "is a noop if already unchecked", (done) ->
+      checkbox = "[name=birds][value=cockatoo]"
+      $("iframe").contents().find(checkbox).prop("checked", false).change ->
+        done("should not fire change event")
+      cy.find(checkbox).uncheck()
+      cy.on "end", -> done()
+
+    describe "errors", ->
+      beforeEach ->
+        @sandbox.stub cy.runner, "uncaught"
+
+      it "throws specifically on a radio", (done) ->
+        cy.find(":radio").uncheck()
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include ".uncheck() can only be called on :checkbox!"
+          done()
+
+      it "throws if not a checkbox", (done) ->
+        cy.noop({}).uncheck()
+
+        cy.on "fail", -> done()
 
   context "invoke", ->
     it "waits for isReady before invoking command", (done) ->
