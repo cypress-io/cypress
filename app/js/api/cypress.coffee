@@ -24,6 +24,23 @@ window.Cypress = do ($, _) ->
     fill: (obj, options = {}) ->
       @throwErr "cy.fill() must be passed an object literal as its 1st argument!" if not _.isObject(obj)
 
+    contains: (filter, text) ->
+      if _.isUndefined(text)
+        text    = filter
+        filter  = ""
+
+      ## find elements by the :contains psuedo selector
+      ## and any submit inputs with the attributeContains selector
+      elems = @$("#{filter}:contains('#{text}'), #{filter}[type='submit'][value*='#{text}']")
+
+      ## need to retry here
+
+      for el in ["input[type='submit']", "button", "a"]
+        els = elems.filter(el)
+        return els if els.length
+
+      return elems.last()
+
     check: (values = []) ->
       ## make sure we're an array of values
       values = [].concat(values)

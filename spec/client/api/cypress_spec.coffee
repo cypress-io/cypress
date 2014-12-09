@@ -41,6 +41,39 @@ describe "Cypress API", ->
         expect(err.message).to.include "cy.fill() must be passed an object literal as its 1st argument!"
         done()
 
+  context "#contains", ->
+    it "finds the nearest element by :contains selector", ->
+      cy.contains("li 0").then ($el) ->
+        expect($el.length).to.eq(1)
+        expect($el).to.match("li")
+
+    it "has an optional filter argument", ->
+      cy.contains("ul", "li 0").then ($el) ->
+        expect($el.length).to.eq(1)
+        expect($el).to.match("ul")
+
+    it "can find input type=submits by value", ->
+      cy.contains("input contains submit").then ($el) ->
+        expect($el.length).to.eq(1)
+        expect($el).to.match "input[type=submit]"
+
+    it "favors input type=submit", ->
+      cy.contains("click me").then ($el) ->
+        expect($el.length).to.eq(1)
+        expect($el).to.match("input[type=submit]")
+
+    it "favors buttons next", ->
+      cy.contains("click button").then ($el) ->
+        expect($el.length).to.eq(1)
+        expect($el).to.match("button")
+
+    it "favors anchors next", ->
+      cy.contains("Home Page").then ($el) ->
+        expect($el.length).to.eq(1)
+        expect($el).to.match("a")
+
+    it "retries if nothing is found"
+
   context "#check", ->
     it "does not change the subject", ->
       checkboxes = "[name=colors]"
@@ -107,7 +140,7 @@ describe "Cypress API", ->
           expect(err.message).to.include ".check() can only be called on :checkbox and :radio! Your subject contains a: <textarea id=\"comments\"></textarea>"
           done()
 
-  context.only "#uncheck", ->
+  context "#uncheck", ->
     it "unchecks a checkbox", ->
       cy.find("[name=birds][value=cockatoo]").uncheck().then ($checkbox) ->
         expect($checkbox).not.to.be.checked
