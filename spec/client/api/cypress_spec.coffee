@@ -163,7 +163,7 @@ describe "Cypress API", ->
 
   context ".abort", ->
     it "fires cancel event when theres an outstanding command", (done) ->
-      cy.pause(1000)
+      cy.wait(1000)
       cy.on "cancel", -> done()
       cy.on "set", ->
         Cypress.abort()
@@ -179,7 +179,7 @@ describe "Cypress API", ->
         expect(obj.name).to.eq "then"
         done()
 
-      cy.noop().pause(10).then ->
+      cy.noop().wait(10).then ->
         ## simulate the abort action happening
         ## during this .then command
         Cypress.abort()
@@ -192,7 +192,7 @@ describe "Cypress API", ->
   context "promises", ->
     it "doesnt invoke .then on the cypress instance", (done) ->
       _then = @sandbox.spy cy, "then"
-      cy.pause(1000)
+      cy.wait(1000)
 
       cy.on "set", ->
         Cypress.abort().then ->

@@ -197,11 +197,11 @@ window.Cypress = do ($, _) ->
       ## allow the 'then' to change the subject to the return value
       ## if its a non null/undefined value else to return the subject
       try
-        ret = fn.call @prop("runnable").ctx, @_subject()
+        ret = fn.call @prop("runnable").ctx, @prop("subject")
 
         ## then will resolve with the fn's
         ## return or just pass along the subject
-        return ret ? @_subject()
+        return ret ? @prop("subject")
       catch e
         throw e
 
@@ -352,8 +352,8 @@ window.Cypress = do ($, _) ->
 
           try
             ## invoke fn and make sure its not strictly false
-            options.value = fn.call(@prop("runnable").ctx, @_subject())
-            return @_subject() if options.value
+            options.value = fn.call(@prop("runnable").ctx, @prop("subject"))
+            return @prop("subject") if options.value
           catch e
             return @retry(e, fn, options)
 
@@ -616,7 +616,11 @@ window.Cypress = do ($, _) ->
         ## passing them in explicitly
         ## else just use the arguments the command was
         ## originally created with
-        if args.length then args else obj.args
+        if args.length
+          args
+        else
+          debugger if not obj
+          obj.args
 
       ## allow promises to be used in the arguments
       ## and wait until they're all resolved
