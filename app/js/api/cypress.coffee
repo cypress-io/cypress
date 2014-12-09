@@ -16,10 +16,32 @@ window.Cypress = do ($, _) ->
       @action "location", "href"
 
     filter: (fn) ->
-      unless @prop("subject") and _.isElement(@prop("subject")[0])
+      unless @_subject() and _.isElement(@_subject()[0])
         @throwErr("Cannot call .filter() without first finding an element")
 
-      @prop("subject").filter(fn)
+      @_subject().filter(fn)
+
+    fill: (obj, options = {}) ->
+      @throwErr "cy.fill() must be passed an object literal as its 1st argument!" if not _.isObject(obj)
+
+
+    check: (values) ->
+      ## make sure we're an array of values
+      values = [].concat(values)
+
+      subject = @_ensureDomSubjectFor()
+
+      ## blow up if any member of the subject
+      ## isnt a checkbox or radio
+      subject.each (index, el) =>
+        node = @_stringifyElement(el)
+        if not $(el).is(":checkbox,:radio")
+          word = @_plural(subject, "contains", "is")
+          @throwErr(".check() can only be called on :checkbox and :radio! Your subject #{word} a: #{node}")
+
+      return if subject.prop("checked")
+
+      @_subject().prop("checked", true).trigger("change")
 
     ## add an array of jquery methods
     eq: ->
@@ -32,7 +54,7 @@ window.Cypress = do ($, _) ->
 
     ## saves the current subject as an alias
     save: (str) ->
-      @alias str, @prop("subject")
+      @alias str, @_subject()
 
     noop: (obj) -> obj
 
@@ -85,10 +107,10 @@ window.Cypress = do ($, _) ->
         location
 
     first: ->
-      unless @prop("subject") and _.isElement(@prop("subject")[0])
+      unless @_subject() and _.isElement(@_subject()[0])
         @throwErr("Cannot call .first() without first finding an element")
 
-      @prop("subject").first()
+      @_subject().first()
 
     click: ->
       ## if subject is an anchor link then artificially
@@ -104,10 +126,10 @@ window.Cypress = do ($, _) ->
       dfs = []
 
       click = (index) =>
-        el = @prop("subject").get(index)
+        el = @_subject().get(index)
 
         ## resolve the outer clicks deferred with our subject again
-        return clicks.resolve(@prop("subject")) if not el
+        return clicks.resolve(@_subject()) if not el
 
         el.click()
 
@@ -115,7 +137,7 @@ window.Cypress = do ($, _) ->
 
         @delay dfs[index].resolve, wait# * 50
 
-      @prop("subject").each (index, el) ->
+      @_subject().each (index, el) ->
         df = $.Deferred()
         df.done -> click(index + 1)
         dfs.push(df)
@@ -175,11 +197,11 @@ window.Cypress = do ($, _) ->
       ## allow the 'then' to change the subject to the return value
       ## if its a non null/undefined value else to return the subject
       try
-        ret = fn.call @prop("runnable").ctx, @prop("subject")
+        ret = fn.call @prop("runnable").ctx, @_subject()
 
         ## then will resolve with the fn's
         ## return or just pass along the subject
-        return ret ? @prop("subject")
+        return ret ? @_subject()
       catch e
         throw e
 
@@ -242,30 +264,30 @@ window.Cypress = do ($, _) ->
     doc: -> @action("document")
 
     type: (sequence, options = {}) ->
-      unless @prop("subject") and _.isElement(@prop("subject")[0])
+      unless @_subject() and _.isElement(@_subject()[0])
         @throwErr("Cannot call .type() without first finding an element")
 
       _.extend options,
         sequence: sequence
 
-      @prop("subject").simulate "key-sequence", options
+      @_subject().simulate "key-sequence", options
 
     clear: ->
-      unless @prop("subject") and _.isElement(@prop("subject")[0])
+      unless @_subject() and _.isElement(@_subject()[0])
         @throwErr("Cannot call .clear() without first finding an element")
 
       ## on input, selectall then del so it fires all appropriate key events
       ## on select, clear its selected option
-      if @prop("subject").is("input,textarea")
+      if @_subject().is("input,textarea")
         @action "type", "{selectall}{del}"
 
-      return @prop("subject")
+      return @_subject()
 
     select: (valueOrText) ->
-      unless @prop("subject") and _.isElement(@prop("subject")[0])
+      unless @_subject() and _.isElement(@_subject()[0])
         @throwErr("Cannot call .select() without first finding an element")
 
-      ## if @prop("subject") is a <select> el assume we are filtering down its
+      ## if @_subject() is a <select> el assume we are filtering down its
       ## options to a specific option first by value and then by text
       ## we'll throw errors if more than one is found AND the select
       ## element is multiple=multiple
@@ -276,13 +298,13 @@ window.Cypress = do ($, _) ->
       ## or texts and clear the previous selections which matches jQuery's
       ## behavior
 
-      if @prop("subject").is("select")
+      if @_subject().is("select")
         ## normalize valueOrText if its not an array
         valueOrText = [].concat(valueOrText)
-        multiple    = @prop("subject").prop("multiple")
+        multiple    = @_subject().prop("multiple")
 
         values  = []
-        options = @prop("subject").children().map (index, el) ->
+        options = @_subject().children().map (index, el) ->
           ## push the value in values array if its
           ## found within the valueOrText
           value = el.value
@@ -305,7 +327,7 @@ window.Cypress = do ($, _) ->
         if not multiple and values.length > 1
           @throwErr("Found more than one option that was matched by value or text: #{valueOrText.join(", ")}")
 
-        @prop("subject").val(values)
+        @_subject().val(values)
 
         ## yup manually create this change event
         ## 1.6.5. HTML event types
@@ -313,7 +335,7 @@ window.Cypress = do ($, _) ->
         event = document.createEvent("HTMLEvents")
         event.initEvent("change", true, false)
 
-        @prop("subject").each (index, el) ->
+        @_subject().each (index, el) ->
           el.dispatchEvent(event)
 
     wait: (msOrFn, options = {}) ->
@@ -330,8 +352,8 @@ window.Cypress = do ($, _) ->
 
           try
             ## invoke fn and make sure its not strictly false
-            options.value = fn.call(@prop("runnable").ctx, @prop("subject"))
-            return @prop("subject") if options.value
+            options.value = fn.call(@prop("runnable").ctx, @_subject())
+            return @_subject() if options.value
           catch e
             return @retry(e, fn, options)
 
@@ -364,6 +386,24 @@ window.Cypress = do ($, _) ->
         @props[key]
       else
         @props[key] = val
+
+    _ensureDomSubjectFor: (modifier) ->
+      subject = @_subject()
+
+      modifier ?= @prop("current").name
+
+      (subject and subject.get and _.isElement(subject.get(0))) or
+        @throwErr("Cannot use the modifier: .#{modifier}() on a non-DOM subject!")
+
+      return subject
+
+    _stringifyElement: (el) ->
+      el = if _.isElement(el) then $(el) else el
+      el.clone().empty().prop("outerHTML")
+
+    _plural: (obj, plural, singular) ->
+      obj = if _.isNumber(obj) then obj else obj.length
+      if obj > 1 then plural else singular
 
     ## global options applicable to all cy instances
     ## and restores
@@ -532,6 +572,10 @@ window.Cypress = do ($, _) ->
       location = @action("location")
       @href isnt location.href.replace(location.hash, "")
 
+    _subject: ->
+      subject = @prop("subject") ?
+        @throwErr("Subject is #{subject}!")
+
     _timeout: (ms, delta = false) ->
       runnable = @prop("runnable")
       @throwErr("Cannot call .timeout() without a currently running test!") if not runnable
@@ -590,7 +634,7 @@ window.Cypress = do ($, _) ->
         ## bluebird else it will create a thenable which
         ## is never resolved
         ret = obj.fn.apply(obj.ctx, args)
-        if ret is @ then @prop("subject") else ret
+        if ret is @ then @_subject() else ret
 
       .then (subject, options = {}) =>
         # if we havent become recently ready and unless we've

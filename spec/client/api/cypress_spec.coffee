@@ -31,6 +31,73 @@ describe "Cypress API", ->
       cy.doc().then ($doc) ->
         expect($doc.get(0)).to.eq $("iframe").prop("contentDocument")
 
+  context "#fill", ->
+    it "requires an object literal", (done) ->
+      @sandbox.stub cy.runner, "uncaught"
+
+      cy.fill("")
+
+      cy.on "fail", (err) ->
+        expect(err.message).to.include "cy.fill() must be passed an object literal as its 1st argument!"
+        done()
+
+  context "#check", ->
+    it "checks a checkbox", ->
+      cy.find(":checkbox[name='colors'][value='blue']").check().then ($checkbox) ->
+        expect($checkbox).to.be.checked
+
+    it "checks a radio", ->
+      cy.find(":radio[name='gender'][value='male']").check().then ($radio) ->
+        expect($radio).to.be.checked
+
+    it "is a noop if already checked", (done) ->
+      checkbox = ":checkbox[name='colors'][value='blue']"
+      $("iframe").contents().find(checkbox).prop("checked", true)
+      $("iframe").contents().find(checkbox).change ->
+        done("should not fire change event")
+      cy.find(checkbox).check()
+
+      cy.on "end", -> done()
+
+    it "can check a collection"
+    it "can check a specific value from a collection"
+    it "can check multiple values from a collection"
+
+    describe "errors", ->
+      beforeEach ->
+        @sandbox.stub cy.runner, "uncaught"
+
+      it "throws when subject isnt dom", (done) ->
+        cy.noop({}).check()
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "Cannot use the modifier: .check()"
+          done()
+
+      it "throws when subject isnt a checkbox or radio", (done) ->
+        ## this will find multiple forms
+        cy.find("form").check()
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include
+          ".check() can only be called on :checkbox and :radio! Your subject contains a: <form id=\"by-id\"></form>"
+          done()
+
+      it "throws when any member of the subject isnt a checkbox or radio", (done) ->
+        ## find a textare which should blow up
+        ## the textarea is the last member of the subject
+        cy.find(":checkbox,:radio,#comments").check()
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include ".check() can only be called on :checkbox and :radio! Your subject contains a: <textarea id=\"comments\"></textarea>"
+          done()
+
+  context "#uncheck", ->
+    it "unchecks a checkbox"
+    it "is a noop if already unchecked"
+    it "throws specifically on a radio"
+    it "throws if not a checkbox"
+
   context "invoke", ->
     it "waits for isReady before invoking command", (done) ->
       ## when we are isReady false that means we should
