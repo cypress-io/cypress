@@ -17,6 +17,20 @@ describe "Cypress API", ->
   after ->
     Cypress.stop()
 
+  context "#window", ->
+    it "returns the remote window", ->
+      cy.window().then (win) ->
+        expect(win).to.eq $("iframe").prop("contentWindow")
+
+  context "#document", ->
+    it "returns the remote document as a jquery object", ->
+      cy.document().then ($doc) ->
+        expect($doc.get(0)).to.eq $("iframe").prop("contentDocument")
+
+    it "aliases doc to document", ->
+      cy.doc().then ($doc) ->
+        expect($doc.get(0)).to.eq $("iframe").prop("contentDocument")
+
   context "invoke", ->
     it "waits for isReady before invoking command", (done) ->
       ## when we are isReady false that means we should

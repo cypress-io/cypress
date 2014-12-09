@@ -71,7 +71,7 @@ window.Cypress = do ($, _) ->
 
     location: (key) ->
       currentUrl = window.location.toString()
-      remoteUrl  = @$remoteIframe.prop("contentWindow").location.toString()
+      remoteUrl  = @action("window").location.toString()
       remoteOrigin = @config("remoteOrigin")
 
       location = Cypress.location(currentUrl, remoteUrl, remoteOrigin)
@@ -196,22 +196,6 @@ window.Cypress = do ($, _) ->
         console.log "#{item}: ", (@prop(item) or @[item])
       debugger
 
-    pause: (int) ->
-      int ?= 1e9
-
-      runnable = @prop("runnable")
-      prevTimeout = runnable.timeout()
-      runnable.timeout(1e9)
-
-      df = $.Deferred()
-
-      @delay ->
-        runnable.timeout(prevTimeout)
-        df.resolve()
-      , int
-
-      df
-
     find: (selector, alias, options = {}) ->
       ## this is not properly calculating the timeout time
       ## needs to take into account Date - time
@@ -245,6 +229,17 @@ window.Cypress = do ($, _) ->
         , 50
 
       return options.df
+
+    window: ->
+      @throwErr "The remote iframe is undefined!" if not @$remoteIframe
+      @$remoteIframe.prop("contentWindow")
+
+    document: ->
+      win = @action("window")
+      @throwErr "The remote iframe's document is undefined!" if not win.document
+      $(win.document)
+
+    doc: -> @action("document")
 
     type: (sequence, options = {}) ->
       unless @prop("subject") and _.isElement(@prop("subject")[0])
@@ -403,17 +398,6 @@ window.Cypress = do ($, _) ->
       ## need it to be sync, not async
       @prop "ready", Promise.pending()
 
-    ## simulates the deferred interface with BlueBird
-    _deferred: ->
-      pending = Promise.pending()
-      pending.promise.cancellable()
-
-      ## tell it expliticly we're done
-      ## adding handlers because we dont want
-      ## notifications about unhandled error messages
-      pending.promise.caught((err) ->).done()
-      pending
-
     run: ->
       ## start at 0 index if we dont have one
       index = @prop("index") ? @prop("index", 0)
@@ -499,7 +483,7 @@ window.Cypress = do ($, _) ->
       ## automatically defer running each command in succession
       ## so each command is async
       @defer =>
-        angular = @$remoteIframe.prop("contentWindow").angular
+        angular = @action("window").angular
 
         if angular and angular.getTestability
           root = @$("[ng-app]").get(0)
@@ -574,8 +558,6 @@ window.Cypress = do ($, _) ->
       else
         Promise.resolve()
 
-      ## break the promise chain and return the outer promise for cancellation
-      ## reasons
       promise.cancellable().then =>
         @trigger "invoke:start", obj
 
@@ -695,7 +677,7 @@ window.Cypress = do ($, _) ->
 
       selector = ".ng-binding"
 
-      angular = @$remoteIframe.prop("contentWindow").angular
+      angular = @action("window").angular
 
       options.df = $.Deferred()
       options.df.done ($elements) ->
@@ -803,7 +785,7 @@ window.Cypress = do ($, _) ->
       return @
 
     $: (selector) ->
-      new $.fn.init(selector, @$remoteIframe.prop("contentWindow").document)
+      new $.fn.init selector, @action("document")
 
     _: _
 
