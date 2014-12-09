@@ -670,10 +670,11 @@ window.Cypress = do ($, _) ->
         err.message = "Timed out retrying. The final value was: " + err.message
         @throwErr(err)
 
-      ## must set this to cancellable because we are creating
-      ## a nested inner promise thenable chain which will
-      ## propogate properly only if its cancellable
-      Promise.delay(options.interval).cancellable().then =>
+      Promise.delay(options.interval).then =>
+        @trigger "retry", fn, options
+
+        ## should check here to make sure we have a .prev
+        ## and if not we should throwErr
         @invoke2(@prop("current").prev).then =>
           @invoke2(@prop("current"), fn, options)
 

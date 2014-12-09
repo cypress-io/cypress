@@ -301,7 +301,7 @@ describe "Cypress API", ->
             console.log "retrying", i
             i is 3
           cy.on "end", ->
-            expect(fn.getCalls().length).to.eq 3
+            expect(fn.callCount).to.eq 3
 
         it "retries when null", ->
           i = 0
@@ -311,7 +311,7 @@ describe "Cypress API", ->
           cy.then(fn).wait (i) ->
             if i isnt 2 then null else true
           cy.on "end", ->
-            expect(fn.getCalls().length).to.eq 2
+            expect(fn.callCount).to.eq 2
 
         it "retries when undefined", ->
           i = 0
@@ -321,7 +321,7 @@ describe "Cypress API", ->
           cy.then(fn).wait (i) ->
             if i isnt 2 then undefined else true
           cy.on "end", ->
-            expect(fn.getCalls().length).to.eq 2
+            expect(fn.callCount).to.eq 2
 
         it "resolves with existing subject", ->
           cy
@@ -358,7 +358,26 @@ describe "Cypress API", ->
             done()
 
   context "#retry", ->
-    it "returns a nested cancellable promise"
+    it "returns a nested cancellable promise", (done) ->
+      i = 0
+      fn = ->
+        i += 1
+        console.log "iteration #", i
+
+      fn = @sandbox.spy fn
+
+      cy.then(fn).wait -> i is 3
+
+      cy.on "retry", ->
+        ## abort after the 1st retry
+        ## which is the 2nd invocation of i
+        ## which should prevent the 3rd invocation
+        Cypress.abort() if i is 2
+
+      cy.on "cancel", ->
+        ## once from .then and once from .wait
+        expect(fn.callCount).to.eq 2
+        done()
 
   context "nested commands", ->
     beforeEach ->
