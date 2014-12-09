@@ -42,6 +42,12 @@ describe "Cypress API", ->
         done()
 
   context "#check", ->
+    it "does not change the subject", ->
+      checkboxes = "[name=colors]"
+      inputs = $("iframe").contents().find(checkboxes)
+      cy.find(checkboxes).check().then ($inputs) ->
+        expect($inputs).to.match(inputs)
+
     it "checks a checkbox", ->
       cy.find(":checkbox[name='colors'][value='blue']").check().then ($checkbox) ->
         expect($checkbox).to.be.checked
@@ -59,9 +65,20 @@ describe "Cypress API", ->
 
       cy.on "end", -> done()
 
-    it "can check a collection"
-    it "can check a specific value from a collection"
-    it "can check multiple values from a collection"
+    it "can check a collection", ->
+      cy.find("[name=colors]").check().then ($inputs) ->
+        $inputs.each (i, el) ->
+          expect($(el)).to.be.checked
+
+    it "can check a specific value from a collection", ->
+      cy.find("[name=colors]").check("blue").then ($inputs) ->
+        expect($inputs.filter(":checked").length).to.eq 1
+        expect($inputs.filter("[value=blue]")).to.be.checked
+
+    it "can check multiple values from a collection", ->
+      cy.find("[name=colors]").check(["blue", "green"]).then ($inputs) ->
+        expect($inputs.filter(":checked").length).to.eq 2
+        expect($inputs.filter("[value=blue],[value=green]")).to.be.checked
 
     describe "errors", ->
       beforeEach ->
@@ -79,8 +96,7 @@ describe "Cypress API", ->
         cy.find("form").check()
 
         cy.on "fail", (err) ->
-          expect(err.message).to.include
-          ".check() can only be called on :checkbox and :radio! Your subject contains a: <form id=\"by-id\"></form>"
+          expect(err.message).to.include ".check() can only be called on :checkbox and :radio! Your subject contains a: <form id=\"by-id\"></form>"
           done()
 
       it "throws when any member of the subject isnt a checkbox or radio", (done) ->

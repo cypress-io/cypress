@@ -24,24 +24,28 @@ window.Cypress = do ($, _) ->
     fill: (obj, options = {}) ->
       @throwErr "cy.fill() must be passed an object literal as its 1st argument!" if not _.isObject(obj)
 
-
-    check: (values) ->
+    check: (values = []) ->
       ## make sure we're an array of values
       values = [].concat(values)
 
-      subject = @_ensureDomSubjectFor()
+      subject = @_ensureDomSubject()
 
       ## blow up if any member of the subject
       ## isnt a checkbox or radio
       subject.each (index, el) =>
+        el = $(el)
         node = @_stringifyElement(el)
-        if not $(el).is(":checkbox,:radio")
+
+        if not el.is(":checkbox,:radio")
           word = @_plural(subject, "contains", "is")
           @throwErr(".check() can only be called on :checkbox and :radio! Your subject #{word} a: #{node}")
 
-      return if subject.prop("checked")
+        return if el.prop("checked")
 
-      @_subject().prop("checked", true).trigger("change")
+        ## if we didnt pass in any values or our
+        ## el's value is in the array then check it
+        if not values.length or el.val() in values
+          el.prop("checked", true).trigger("change")
 
     ## add an array of jquery methods
     eq: ->
@@ -387,7 +391,7 @@ window.Cypress = do ($, _) ->
       else
         @props[key] = val
 
-    _ensureDomSubjectFor: (modifier) ->
+    _ensureDomSubject: (modifier) ->
       subject = @_subject()
 
       modifier ?= @prop("current").name
