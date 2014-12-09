@@ -28,6 +28,7 @@ window.loadFixture = (paths, options = {}) ->
 
     iframe = $("<iframe />", {
       src: path
+      style: "position: absolute; right: 0; top: 50px; width: 40%; height: 100%;"
       load: ->
         dfs[index].notify(@)
         dfs[index].resolve(@) if options.autoResolve
