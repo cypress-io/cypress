@@ -296,6 +296,9 @@ window.Cypress = do ($, _) ->
 
       return options.df
 
+    title: ->
+      @$("title").text()
+
     window: ->
       @throwErr "The remote iframe is undefined!" if not @$remoteIframe
       @$remoteIframe.prop("contentWindow")

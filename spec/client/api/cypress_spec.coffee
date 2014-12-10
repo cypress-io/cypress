@@ -31,6 +31,12 @@ describe "Cypress API", ->
       cy.doc().then ($doc) ->
         expect($doc.get(0)).to.eq $("iframe").prop("contentDocument")
 
+  context "#title", ->
+    it "returns the pages title as a string", ->
+      title = $("iframe").contents().find("title").text()
+      cy.title().then (text) ->
+        expect(text).to.eq title
+
   context "#fill", ->
     it "requires an object literal", (done) ->
       @sandbox.stub cy.runner, "uncaught"
