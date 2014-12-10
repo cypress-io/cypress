@@ -24,22 +24,29 @@ window.Cypress = do ($, _) ->
     fill: (obj, options = {}) ->
       @throwErr "cy.fill() must be passed an object literal as its 1st argument!" if not _.isObject(obj)
 
-    contains: (filter, text) ->
-      if _.isUndefined(text)
-        text    = filter
-        filter  = ""
+    contains: (filter, text, options = {}) ->
+      switch
+        when _.isObject(text)
+          options = text
+          text = filter
+          filter = ""
+        when _.isUndefined(text)
+          text = filter
+          filter = ""
+
+      word = if filter then "the selector: <#{filter}>" else "any elements"
+      options.error = "Could not find #{word} containing the content: #{text}"
 
       ## find elements by the :contains psuedo selector
       ## and any submit inputs with the attributeContainsWord selector
-      elems = @$("#{filter}:contains('#{text}'), #{filter}[type='submit'][value~='#{text}']")
+      selector = "#{filter}:contains('#{text}'), #{filter}[type='submit'][value~='#{text}']"
 
-      ## need to retry here
+      @action("find", selector, options).then (elements) ->
+        for filter in ["input[type='submit']", "button", "a"]
+          filtered = elements.filter(filter)
+          return filtered if filtered.length
 
-      for el in ["input[type='submit']", "button", "a"]
-        els = elems.filter(el)
-        return els if els.length
-
-      return elems.last()
+        return elements.last()
 
     check: (values = []) ->
       ## make sure we're an array of values

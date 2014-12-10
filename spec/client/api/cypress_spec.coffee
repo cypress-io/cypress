@@ -154,7 +154,34 @@ describe "Cypress API", ->
         expect($el.length).to.eq(1)
         expect($el).to.match("a")
 
-    it "retries if nothing is found"
+    it "retries until content is found", ->
+      span = $("<span>brand new content</span>")
+
+      _.delay ->
+        cy.$("head").append span
+      , 500
+
+      cy.contains("brand new content").then ($span) ->
+        expect($span).to.match span
+
+    describe "errors", ->
+      beforeEach ->
+        @sandbox.stub cy.runner, "uncaught"
+        @currentTest.timeout(500)
+
+      it "throws any elements when timing out and no filter", (done) ->
+        cy.contains("brand new content")
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "Could not find any elements containing the content: brand new content"
+          done()
+
+      it "throws specific selector when timing out with a filter", (done) ->
+        cy.contains("span", "brand new content")
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "Could not find the selector: <span> containing the content: brand new content"
+          done()
 
   context "#check", ->
     it "does not change the subject", ->
@@ -272,9 +299,6 @@ describe "Cypress API", ->
         ## we've begun running our promise
         Cypress.abort().then -> done()
 
-  #   it "returns a promise", ->
-  #     cy.type("foo")
-
   context "#isReady", ->
     it "creates a deferred when not ready", ->
       cy.isReady(false)
@@ -298,30 +322,6 @@ describe "Cypress API", ->
         done()
 
       promise.cancel()
-
-    ## this is currently failing: https://github.com/petkaantonov/bluebird/issues/393
-    # it "cancels via a delay", (done) ->
-    #   promise = Promise.resolve(undefined).cancellable()
-
-    #   promise.then ->
-    #     done("not cancelled")
-    #   .caught Promise.CancellationError, (err) ->
-    #     done()
-
-    #   promise.cancel()
-
-    # it "cancels the correct promise", (done) ->
-    #   pending = Promise.pending()
-
-    #   promise = Promise.resolve(pending.promise).cancellable()
-
-    #   promise.then ->
-    #     done("not cancelled")
-    #   .caught Promise.CancellationError, (err) ->
-    #     done()
-
-    #   promise.cancel()
-    #   pending.resolve()
 
   context ".abort", ->
     it "fires cancel event when theres an outstanding command", (done) ->
