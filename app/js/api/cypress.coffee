@@ -13,7 +13,7 @@ window.Cypress = do ($, _) ->
       @prop("inspect", true)
 
     url: ->
-      @action "location", "href"
+      @_location("href")
 
     filter: (fn) ->
       unless @_subject() and _.isElement(@_subject()[0])
