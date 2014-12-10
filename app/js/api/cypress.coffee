@@ -135,21 +135,6 @@ window.Cypress = do ($, _) ->
 
       options.df
 
-    location: (key) ->
-      currentUrl = window.location.toString()
-      remoteUrl  = @action("window").location.toString()
-      remoteOrigin = @config("remoteOrigin")
-
-      location = Cypress.location(currentUrl, remoteUrl, remoteOrigin)
-
-      if key
-        ## use existential here because we only want to throw
-        ## on null or undefined values (and not empty strings)
-        location[key] ?
-          @throwErr("Location object does have not have key: #{key}")
-      else
-        location
-
     first: ->
       unless @_subject() and _.isElement(@_subject()[0])
         @throwErr("Cannot call .first() without first finding an element")
@@ -279,19 +264,23 @@ window.Cypress = do ($, _) ->
 
       @_retry(retry, options)
 
-    title: ->
-      @$("title").text()
+    title: (options = {}) ->
+      @action("find", "title", options).then (title) ->
+        title.text()
+
+    location: ->
+      ## just use the sync version
+      @_location()
 
     window: ->
-      @throwErr "The remote iframe is undefined!" if not @$remoteIframe
-      @$remoteIframe.prop("contentWindow")
+      ## just use the sync version
+      @_window()
 
     document: ->
-      win = @action("window")
-      @throwErr "The remote iframe's document is undefined!" if not win.document
-      $(win.document)
+      ## just use the sync version
+      @_document()
 
-    doc: -> @action("document")
+    doc: -> @_document()
 
     type: (sequence, options = {}) ->
       unless @_subject() and _.isElement(@_subject()[0])
@@ -443,6 +432,30 @@ window.Cypress = do ($, _) ->
       obj = if _.isNumber(obj) then obj else obj.length
       if obj > 1 then plural else singular
 
+    _window: ->
+      @throwErr "The remote iframe is undefined!" if not @$remoteIframe
+      @$remoteIframe.prop("contentWindow")
+
+    _document: ->
+      win = @_window()
+      @throwErr "The remote iframe's document is undefined!" if not win.document
+      $(win.document)
+
+    _location: (key) ->
+      currentUrl = window.location.toString()
+      remoteUrl  = @_window().location.toString()
+      remoteOrigin = @config("remoteOrigin")
+
+      location = Cypress.location(currentUrl, remoteUrl, remoteOrigin)
+
+      if key
+        ## use existential here because we only want to throw
+        ## on null or undefined values (and not empty strings)
+        location[key] ?
+          @throwErr("Location object does have not have key: #{key}")
+      else
+        location
+
     ## global options applicable to all cy instances
     ## and restores
     options: (options = {}) ->
@@ -561,7 +574,7 @@ window.Cypress = do ($, _) ->
       ## automatically defer running each command in succession
       ## so each command is async
       @defer =>
-        angular = @action("window").angular
+        angular = @_window().angular
 
         if angular and angular.getTestability
           root = @$("[ng-app]").get(0)
@@ -603,12 +616,10 @@ window.Cypress = do ($, _) ->
       ## JS users are using pushstate since there is no hash
       ## TODO. need to listen to pushstate events here which
       ## will act as the isReady() the same way load events do
-      location = @action("location")
-      @href    = location.href.replace(location.hash, "")
+      @href    = @_location().href.replace(location.hash, "")
 
     hrefChanged: ->
-      location = @action("location")
-      @href isnt location.href.replace(location.hash, "")
+      @href isnt @_location().href.replace(location.hash, "")
 
     _subject: ->
       subject = @prop("subject") ?
@@ -654,11 +665,7 @@ window.Cypress = do ($, _) ->
         ## passing them in explicitly
         ## else just use the arguments the command was
         ## originally created with
-        if args.length
-          args
-        else
-          debugger if not obj
-          obj.args
+        if args.length then args else obj.args
 
       ## allow promises to be used in the arguments
       ## and wait until they're all resolved
@@ -766,7 +773,7 @@ window.Cypress = do ($, _) ->
 
       selector = ".ng-binding"
 
-      angular = @action("window").angular
+      angular = @_window().angular
 
       options.df = $.Deferred()
       options.df.done ($elements) ->
@@ -874,7 +881,7 @@ window.Cypress = do ($, _) ->
       return @
 
     $: (selector) ->
-      new $.fn.init selector, @action("document")
+      new $.fn.init selector, @_document()
 
     _: _
 
