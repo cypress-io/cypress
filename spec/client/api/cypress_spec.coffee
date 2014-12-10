@@ -37,6 +37,35 @@ describe "Cypress API", ->
       cy.title().then (text) ->
         expect(text).to.eq title
 
+    it "reties finding the title", ->
+      cy.$("title").remove()
+
+      _.delay ->
+        cy.$("head").append $("<title>waiting on title</title>")
+      , 500
+
+      cy.title().then (text) ->
+        expect(text).to.eq "waiting on title"
+
+    it "retries until it has the correct title", ->
+      cy.$("title").text("home page")
+
+      _.delay ->
+        cy.$("title").text("about page")
+      , 500
+
+      cy.title().wait (title) ->
+        expect(title).to.eq "about page"
+
+    it "throws after timing out", (done) ->
+      @sandbox.stub cy.runner, "uncaught"
+      @test.timeout(500)
+      cy.$("title").remove()
+      cy.title()
+      cy.on "fail", (err) ->
+        expect(err.message).to.include "Could not find element: title"
+        done()
+
   context "#fill", ->
     it "requires an object literal", (done) ->
       @sandbox.stub cy.runner, "uncaught"

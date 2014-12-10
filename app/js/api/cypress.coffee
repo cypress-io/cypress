@@ -258,7 +258,7 @@ window.Cypress = do ($, _) ->
       return $el if $el.length or options.retry is false
 
       retry = ->
-        @invoke2(@prop("current"), selector, options)
+        @action("find", selector, options)
 
       options.error ?= "Could not find element: #{selector}"
 
@@ -747,17 +747,21 @@ window.Cypress = do ($, _) ->
 
       ## if our total exceeds the timeout OR the total + the interval
       ## exceed the runnables timeout, then bail
+      @log "Retrying after: #{options.interval}ms. Total: #{total}, Timeout At: #{options.timeout}, RunnableTimeout: #{options.runnableTimeout}", "warning"
+
       if total >= options.timeout or (total + options.interval >= options.runnableTimeout)
         @throwErr "Timed out retrying. " + options.error ? "The last command was: " + @prop("current").name
 
       Promise.delay(options.interval).then =>
         @trigger "retry", fn, options
 
+        @log {name: "retry", args: fn}
+
         ## invoke the passed in retry fn
         fn.call(@)
 
     action: (name, args...) ->
-      commands[name].apply(@, args)
+      Promise.resolve commands[name].apply(@, args)
 
     defer: (fn) ->
       @delay(fn, 0)
