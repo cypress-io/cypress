@@ -91,7 +91,7 @@ describe "Cypress API", ->
         cy.find("#missing-el")
 
         cy.on "fail", (err) ->
-          expect(err.message).to.include "Timed out trying to find element: #missing-el"
+          expect(err.message).to.include "Could not find element: #missing-el"
           done()
 
   context "#contains", ->
@@ -506,7 +506,7 @@ describe "Cypress API", ->
           cy.wait ->
             "foo" is "foo"
 
-        it "retries when false", ->
+        it "retries when false", (done) ->
           i = 0
           fn = ->
             i += 1
@@ -516,8 +516,9 @@ describe "Cypress API", ->
             i is 3
           cy.on "end", ->
             expect(fn.callCount).to.eq 3
+            done()
 
-        it "retries when null", ->
+        it "retries when null", (done) ->
           i = 0
           fn = ->
             i += 1
@@ -526,8 +527,9 @@ describe "Cypress API", ->
             if i isnt 2 then null else true
           cy.on "end", ->
             expect(fn.callCount).to.eq 2
+            done()
 
-        it "retries when undefined", ->
+        it "retries when undefined", (done) ->
           i = 0
           fn = ->
             i += 1
@@ -536,6 +538,7 @@ describe "Cypress API", ->
             if i isnt 2 then undefined else true
           cy.on "end", ->
             expect(fn.callCount).to.eq 2
+            done()
 
         it "resolves with existing subject", ->
           cy
@@ -551,7 +554,7 @@ describe "Cypress API", ->
         beforeEach ->
           @uncaught = @sandbox.stub(cy.runner, "uncaught")
 
-        it "times out eventually", (done) ->
+        it "times out eventually due to false value", (done) ->
           ## forcibly reduce the timeout to 500 ms
           ## so we dont have to wait so long
           cy
@@ -559,7 +562,7 @@ describe "Cypress API", ->
             .wait (-> false), timeout: 500
 
           cy.on "fail", (err) ->
-            expect(err.message).to.include "Timed out retrying."
+            expect(err.message).to.include "The final value was: false"
             done()
 
         it "appends to the err message", (done) ->
@@ -568,10 +571,10 @@ describe "Cypress API", ->
             .wait (-> expect(true).to.be.false), timeout: 500
 
           cy.on "fail", (err) ->
-            expect(err.message).to.include "Timed out retrying."
+            expect(err.message).to.include "Timed out retrying. Could not continue due to: AssertionError"
             done()
 
-  context "#retry", ->
+  context "#_retry", ->
     it "returns a nested cancellable promise", (done) ->
       i = 0
       fn = ->
@@ -597,14 +600,14 @@ describe "Cypress API", ->
       prevTimeout = @test.timeout()
       options = {}
       fn = ->
-      cy.retry(null, fn, options)
+      cy._retry(fn, options)
       expect(options.runnableTimeout).to.eq prevTimeout
 
     it "increases the runnables timeout exponentially", ->
       prevTimeout = @test.timeout()
       timeout = @sandbox.spy @test, "timeout"
       fn = ->
-      cy.retry(null, fn, {})
+      cy._retry(fn, {})
       expect(timeout).to.be.calledWith 1e9
       expect(@test.timeout()).to.be.gt prevTimeout
 

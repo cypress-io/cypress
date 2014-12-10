@@ -275,9 +275,9 @@ window.Cypress = do ($, _) ->
       retry = ->
         @invoke2(@prop("current"), selector, options)
 
-      err = new Error "Timed out trying to find element: #{selector}"
+      options.error ?= "Could not find element: #{selector}"
 
-      @retry(err, retry, options)
+      @_retry(retry, options)
 
     title: ->
       @$("title").text()
@@ -391,11 +391,13 @@ window.Cypress = do ($, _) ->
             options.value = fn.call(@prop("runnable").ctx, @prop("subject"))
             return @prop("subject") if options.value
           catch e
-            return @retry(e, retry, options)
+            options.error = "Could not continue due to: " + e
+            return @_retry(retry, options)
 
           ## retry outside of the try / catch block because
           ## if retry throws errors we want those to bubble
-          return @retry(null, retry, options) if not options.value
+          options.error = "The final value was: " + options.value
+          return @_retry(retry, options) if not options.value
 
         else
           @throwErr "wait() must be invoked with either a number or a function!"
@@ -714,7 +716,7 @@ window.Cypress = do ($, _) ->
       @runner.uncaught(err)
       @trigger "fail", err
 
-    retry: (err, fn, options) ->
+    _retry: (fn, options) ->
       ## remove the runnables timeout because we are now in retry
       ## mode and should be handling timing out ourselves and dont
       ## want to accidentally time out via mocha
@@ -739,9 +741,7 @@ window.Cypress = do ($, _) ->
       ## if our total exceeds the timeout OR the total + the interval
       ## exceed the runnables timeout, then bail
       if total >= options.timeout or (total + options.interval >= options.runnableTimeout)
-        err ?= new Error options.value
-        err.message = "Timed out retrying. The final value was: " + err.message
-        @throwErr(err)
+        @throwErr "Timed out retrying. " + options.error ? "The last command was: " + @prop("current").name
 
       Promise.delay(options.interval).then =>
         @trigger "retry", fn, options
