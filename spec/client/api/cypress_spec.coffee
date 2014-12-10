@@ -33,7 +33,7 @@ describe "Cypress API", ->
 
   context "#title", ->
     it "returns the pages title as a string", ->
-      title = $("iframe").contents().find("title").text()
+      title = cy.$("title").text()
       cy.title().then (text) ->
         expect(text).to.eq title
 
@@ -46,6 +46,53 @@ describe "Cypress API", ->
       cy.on "fail", (err) ->
         expect(err.message).to.include "cy.fill() must be passed an object literal as its 1st argument!"
         done()
+
+  context "#find", ->
+    beforeEach ->
+      ## make this test timeout quickly so
+      ## we dont have to wait so damn long
+      @currentTest.timeout(800)
+
+    it "finds by selector", ->
+      list = cy.$("#list")
+
+      cy.find("#list").then ($list) ->
+        expect($list).to.match list
+
+    it "retries finding elements until something is found", ->
+      missingEl = $("<div />", id: "missing-el")
+
+      ## wait until we're ALMOST about to time out before
+      ## appending the missingEl
+      _.delay =>
+        cy.$("body").append(missingEl)
+      , @test.timeout() - 300
+
+      cy.find("#missing-el").then ($div) ->
+        expect($div).to.match missingEl
+
+    it "retries until .wait resolves to true", ->
+      _.delay =>
+        cy.$("#list li").last().remove()
+      , @test.timeout() - 300
+
+      cy.find("#list li").wait ($list) ->
+        expect($list.length).to.eq 2
+
+    it "does not throw when could not find element and was told not to retry", ->
+      cy.find("#missing-el", {retry: false}).then ($el) ->
+        expect($el).not.to.exist
+
+    describe "errors", ->
+      beforeEach ->
+        @sandbox.stub cy.runner, "uncaught"
+
+      it "throws after timing out not finding element", (done) ->
+        cy.find("#missing-el")
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "Timed out trying to find element: #missing-el"
+          done()
 
   context "#contains", ->
     it "finds the nearest element by :contains selector", ->
@@ -83,7 +130,7 @@ describe "Cypress API", ->
   context "#check", ->
     it "does not change the subject", ->
       checkboxes = "[name=colors]"
-      inputs = $("iframe").contents().find(checkboxes)
+      inputs = cy.$(checkboxes)
       cy.find(checkboxes).check().then ($inputs) ->
         expect($inputs).to.match(inputs)
 
@@ -97,8 +144,8 @@ describe "Cypress API", ->
 
     it "is a noop if already checked", (done) ->
       checkbox = ":checkbox[name='colors'][value='blue']"
-      $("iframe").contents().find(checkbox).prop("checked", true)
-      $("iframe").contents().find(checkbox).change ->
+      cy.$(checkbox).prop("checked", true)
+      cy.$(checkbox).change ->
         done("should not fire change event")
       cy.find(checkbox).check()
       cy.on "end", -> done()
@@ -163,7 +210,7 @@ describe "Cypress API", ->
 
     it "is a noop if already unchecked", (done) ->
       checkbox = "[name=birds][value=cockatoo]"
-      $("iframe").contents().find(checkbox).prop("checked", false).change ->
+      cy.$(checkbox).prop("checked", false).change ->
         done("should not fire change event")
       cy.find(checkbox).uncheck()
       cy.on "end", -> done()
@@ -545,6 +592,21 @@ describe "Cypress API", ->
         ## once from .then and once from .wait
         expect(fn.callCount).to.eq 2
         done()
+
+    it "stores the runnables current timeout", ->
+      prevTimeout = @test.timeout()
+      options = {}
+      fn = ->
+      cy.retry(null, fn, options)
+      expect(options.runnableTimeout).to.eq prevTimeout
+
+    it "increases the runnables timeout exponentially", ->
+      prevTimeout = @test.timeout()
+      timeout = @sandbox.spy @test, "timeout"
+      fn = ->
+      cy.retry(null, fn, {})
+      expect(timeout).to.be.calledWith 1e9
+      expect(@test.timeout()).to.be.gt prevTimeout
 
   context "nested commands", ->
     beforeEach ->

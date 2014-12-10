@@ -262,39 +262,22 @@ window.Cypress = do ($, _) ->
         console.log "#{item}: ", (@prop(item) or @[item])
       debugger
 
-    find: (selector, alias, options = {}) ->
-      ## this is not properly calculating the timeout time
-      ## needs to take into account Date - time
-      options = if _.isObject(alias) then alias else options
-
-      ## bail if our deferred has a state other than pending
-      return if options.df and options.df.state() isnt "pending"
-
+    find: (selector, options = {}) ->
       _.defaults options,
-        df: $.Deferred()
         retry: true
-        timeout: 1000 ## this should not be hard coded here
-        total: 0
-
-      if options.total >= options.timeout
-        options.df.reject("Timed out trying to find element: #{selector}")
 
       $el = @$(selector)
 
-      ## return the $el immediately if we've set not to retry
-      ## or we found an element
-      if $el.length or not options.retry
-        options.df.resolve($el)
-      else
-        ## think about using @retry here to abstract away
-        ## the delay + invocation + options.total increment
-        options.total += 50
+      ## return the el if it has a length or we've explicitly
+      ## disabled retrying
+      return $el if $el.length or options.retry is false
 
-        @delay =>
-          @invoke(@prop("current"), selector, alias, options)
-        , 50
+      retry = ->
+        @invoke2(@prop("current"), selector, options)
 
-      return options.df
+      err = new Error "Timed out trying to find element: #{selector}"
+
+      @retry(err, retry, options)
 
     title: ->
       @$("title").text()
@@ -397,16 +380,22 @@ window.Cypress = do ($, _) ->
         when _.isFunction(msOrFn)
           fn = msOrFn
 
+          retry = ->
+            ## should check here to make sure we have a .prev
+            ## and if not we should throwErr
+            @invoke2(@prop("current").prev).then =>
+              @invoke2(@prop("current"), fn, options)
+
           try
             ## invoke fn and make sure its not strictly false
             options.value = fn.call(@prop("runnable").ctx, @prop("subject"))
             return @prop("subject") if options.value
           catch e
-            return @retry(e, fn, options)
+            return @retry(e, retry, options)
 
           ## retry outside of the try / catch block because
           ## if retry throws errors we want those to bubble
-          return @retry(null, fn, options) if not options.value
+          return @retry(null, retry, options) if not options.value
 
         else
           @throwErr "wait() must be invoked with either a number or a function!"
@@ -726,15 +715,22 @@ window.Cypress = do ($, _) ->
       @trigger "fail", err
 
     retry: (err, fn, options) ->
+      ## remove the runnables timeout because we are now in retry
+      ## mode and should be handling timing out ourselves and dont
+      ## want to accidentally time out via mocha
+      if not options.runnableTimeout
+        prevTimeout = @_timeout()
+        @_timeout(1e9)
+
       _.defaults options,
-        runnableTimeout: @_timeout()
+        runnableTimeout: prevTimeout
         start: new Date
         interval: 50
 
       ## we always want to make sure we timeout before our runnable does
       ## so take its current timeout, subtract the total time its already
-      ## been running and add the options.interval for a tiny bit of padding
-      options.timeout ?= options.runnableTimeout - (new Date - @prop("runnable").startedAt + options.interval)
+      ## been running
+      options.timeout ?= options.runnableTimeout - (new Date - @prop("runnable").startedAt)
 
       ## we calculate the total time we've been retrying
       ## so we dont exceed the runnables timeout
@@ -750,10 +746,8 @@ window.Cypress = do ($, _) ->
       Promise.delay(options.interval).then =>
         @trigger "retry", fn, options
 
-        ## should check here to make sure we have a .prev
-        ## and if not we should throwErr
-        @invoke2(@prop("current").prev).then =>
-          @invoke2(@prop("current"), fn, options)
+        ## invoke the passed in retry fn
+        fn.call(@)
 
     action: (name, args...) ->
       commands[name].apply(@, args)
