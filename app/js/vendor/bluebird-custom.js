@@ -1,7 +1,7 @@
 /**
  * bluebird build version 2.3.11
- * Features enabled: core, settle, cancel, timers
- * Features disabled: race, call_get, generators, map, nodeify, promisify, props, reduce, some, progress, using, filter, any, each
+ * Features enabled: core, call_get, cancel, timers
+ * Features disabled: race, generators, map, nodeify, promisify, props, reduce, settle, some, progress, using, filter, any, each
 */
 /**
  * @preserve The MIT License (MIT)
@@ -142,7 +142,7 @@ Async.prototype._reset = function Async$_reset() {
 
 module.exports = new Async();
 
-},{"./queue.js":15,"./schedule.js":16,"./util.js":21}],2:[function(_dereq_,module,exports){
+},{"./queue.js":16,"./schedule.js":17,"./util.js":21}],2:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -170,7 +170,130 @@ module.exports = new Async();
 "use strict";
 var Promise = _dereq_("./promise.js")();
 module.exports = Promise;
-},{"./promise.js":12}],3:[function(_dereq_,module,exports){
+},{"./promise.js":13}],3:[function(_dereq_,module,exports){
+/**
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 Petka Antonov
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:</p>
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ */
+"use strict";
+var cr = Object.create;
+if (cr) {
+    var callerCache = cr(null);
+    var getterCache = cr(null);
+    callerCache[" size"] = getterCache[" size"] = 0;
+}
+
+module.exports = function(Promise) {
+var util = _dereq_("./util.js");
+var canEvaluate = util.canEvaluate;
+var isIdentifier = util.isIdentifier;
+
+function makeMethodCaller (methodName) {
+    return new Function("obj", "                                             \n\
+        'use strict'                                                         \n\
+        var len = this.length;                                               \n\
+        switch(len) {                                                        \n\
+            case 1: return obj.methodName(this[0]);                          \n\
+            case 2: return obj.methodName(this[0], this[1]);                 \n\
+            case 3: return obj.methodName(this[0], this[1], this[2]);        \n\
+            case 0: return obj.methodName();                                 \n\
+            default: return obj.methodName.apply(obj, this);                 \n\
+        }                                                                    \n\
+        ".replace(/methodName/g, methodName));
+}
+
+function makeGetter (propertyName) {
+    return new Function("obj", "                                             \n\
+        'use strict';                                                        \n\
+        return obj.propertyName;                                             \n\
+        ".replace("propertyName", propertyName));
+}
+
+function getCompiled(name, compiler, cache) {
+    var ret = cache[name];
+    if (typeof ret !== "function") {
+        if (!isIdentifier(name)) {
+            return null;
+        }
+        ret = compiler(name);
+        cache[name] = ret;
+        cache[" size"]++;
+        if (cache[" size"] > 512) {
+            var keys = Object.keys(cache);
+            for (var i = 0; i < 256; ++i) delete cache[keys[i]];
+            cache[" size"] = keys.length - 256;
+        }
+    }
+    return ret;
+}
+
+function getMethodCaller(name) {
+    return getCompiled(name, makeMethodCaller, callerCache);
+}
+
+function getGetter(name) {
+    return getCompiled(name, makeGetter, getterCache);
+}
+
+function caller(obj) {
+    return obj[this.pop()].apply(obj, this);
+}
+Promise.prototype.call = function Promise$call(methodName) {
+    var $_len = arguments.length;var args = new Array($_len - 1); for(var $_i = 1; $_i < $_len; ++$_i) {args[$_i - 1] = arguments[$_i];}
+    if (canEvaluate) {
+        var maybeCaller = getMethodCaller(methodName);
+        if (maybeCaller !== null) {
+            return this._then(maybeCaller, void 0, void 0, args, void 0);
+        }
+    }
+    args.push(methodName);
+    return this._then(caller, void 0, void 0, args, void 0);
+};
+
+function namedGetter(obj) {
+    return obj[this];
+}
+function indexedGetter(obj) {
+    return obj[this];
+}
+Promise.prototype.get = function Promise$get(propertyName) {
+    var isIndex = (typeof propertyName === "number");
+    var getter;
+    if (!isIndex) {
+        if (canEvaluate) {
+            var maybeGetter = getGetter(propertyName);
+            getter = maybeGetter !== null ? maybeGetter : namedGetter;
+        } else {
+            getter = namedGetter;
+        }
+    } else {
+        getter = indexedGetter;
+    }
+    return this._then(getter, void 0, void 0, propertyName, void 0);
+};
+};
+
+},{"./util.js":21}],4:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -250,7 +373,7 @@ function Promise$fork(didFulfill, didReject, didProgress) {
 };
 };
 
-},{"./async.js":1,"./errors.js":7}],4:[function(_dereq_,module,exports){
+},{"./async.js":1,"./errors.js":8}],5:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -496,7 +619,7 @@ var captureStackTrace = (function stackDetection() {
 return CapturedTrace;
 };
 
-},{"./es5.js":9,"./util.js":21}],5:[function(_dereq_,module,exports){
+},{"./es5.js":10,"./util.js":21}],6:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -594,7 +717,7 @@ CatchFilter.prototype.doFilter = function CatchFilter$_doFilter(e) {
 return CatchFilter;
 };
 
-},{"./errors.js":7,"./es5.js":9,"./util.js":21}],6:[function(_dereq_,module,exports){
+},{"./errors.js":8,"./es5.js":10,"./util.js":21}],7:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -676,7 +799,7 @@ function Promise$thenThrow(reason) {
 };
 };
 
-},{"./util.js":21}],7:[function(_dereq_,module,exports){
+},{"./util.js":21}],8:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -825,7 +948,7 @@ module.exports = {
     canAttach: canAttach
 };
 
-},{"./es5.js":9,"./util.js":21}],8:[function(_dereq_,module,exports){
+},{"./es5.js":10,"./util.js":21}],9:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -867,7 +990,7 @@ function apiRejection(msg) {
 return apiRejection;
 };
 
-},{"./errors.js":7}],9:[function(_dereq_,module,exports){
+},{"./errors.js":8}],10:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -958,7 +1081,7 @@ if (isES5) {
     };
 }
 
-},{}],10:[function(_dereq_,module,exports){
+},{}],11:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -1082,7 +1205,7 @@ Promise.prototype.tap = function Promise$tap(handler) {
 };
 };
 
-},{"./util.js":21}],11:[function(_dereq_,module,exports){
+},{"./util.js":21}],12:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -1208,7 +1331,7 @@ Promise.join = function Promise$Join() {
 
 };
 
-},{"./util.js":21}],12:[function(_dereq_,module,exports){
+},{"./util.js":21}],13:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -2287,7 +2410,7 @@ _dereq_('./cancel.js')(Promise,INTERNAL);
 _dereq_('./cancel.js')(Promise,INTERNAL);
 _dereq_('./cancel.js')(Promise,INTERNAL);
 _dereq_('./timers.js')(Promise,INTERNAL,cast);
-_dereq_('./settle.js')(Promise,PromiseArray);
+_dereq_('./call_get.js')(Promise);
 _dereq_('./cancel.js')(Promise,INTERNAL);
 
 Promise.prototype = Promise.prototype;
@@ -2295,7 +2418,7 @@ return Promise;
 
 };
 
-},{"./async.js":1,"./cancel.js":3,"./captured_trace.js":4,"./catch_filter.js":5,"./direct_resolve.js":6,"./errors.js":7,"./errors_api_rejection":8,"./finally.js":10,"./join.js":11,"./promise_array.js":13,"./promise_resolver.js":14,"./settle.js":17,"./synchronous_inspection.js":18,"./thenables.js":19,"./timers.js":20,"./util.js":21}],13:[function(_dereq_,module,exports){
+},{"./async.js":1,"./call_get.js":3,"./cancel.js":4,"./captured_trace.js":5,"./catch_filter.js":6,"./direct_resolve.js":7,"./errors.js":8,"./errors_api_rejection":9,"./finally.js":11,"./join.js":12,"./promise_array.js":14,"./promise_resolver.js":15,"./synchronous_inspection.js":18,"./thenables.js":19,"./timers.js":20,"./util.js":21}],14:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -2501,7 +2624,7 @@ function PromiseArray$getActualLength(len) {
 return PromiseArray;
 };
 
-},{"./errors.js":7,"./util.js":21}],14:[function(_dereq_,module,exports){
+},{"./errors.js":8,"./util.js":21}],15:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -2663,7 +2786,7 @@ function PromiseResolver$_setCarriedStackTrace(trace) {
 
 module.exports = PromiseResolver;
 
-},{"./async.js":1,"./errors.js":7,"./es5.js":9,"./util.js":21}],15:[function(_dereq_,module,exports){
+},{"./async.js":1,"./errors.js":8,"./es5.js":10,"./util.js":21}],16:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -2782,7 +2905,7 @@ Queue.prototype._resizeTo = function Queue$_resizeTo(capacity) {
 
 module.exports = Queue;
 
-},{}],16:[function(_dereq_,module,exports){
+},{}],17:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -2847,78 +2970,7 @@ else if (typeof setTimeout !== "undefined") {
 else throw new Error("no async scheduler available");
 module.exports = schedule;
 
-},{}],17:[function(_dereq_,module,exports){
-/**
- * The MIT License (MIT)
- *
- * Copyright (c) 2014 Petka Antonov
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:</p>
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
- */
-"use strict";
-module.exports =
-    function(Promise, PromiseArray) {
-var PromiseInspection = Promise.PromiseInspection;
-var util = _dereq_("./util.js");
-
-function SettledPromiseArray(values) {
-    this.constructor$(values);
-}
-util.inherits(SettledPromiseArray, PromiseArray);
-
-SettledPromiseArray.prototype._promiseResolved =
-function SettledPromiseArray$_promiseResolved(index, inspection) {
-    this._values[index] = inspection;
-    var totalResolved = ++this._totalResolved;
-    if (totalResolved >= this._length) {
-        this._resolve(this._values);
-    }
-};
-
-SettledPromiseArray.prototype._promiseFulfilled =
-function SettledPromiseArray$_promiseFulfilled(value, index) {
-    if (this._isResolved()) return;
-    var ret = new PromiseInspection();
-    ret._bitField = 268435456;
-    ret._settledValue = value;
-    this._promiseResolved(index, ret);
-};
-SettledPromiseArray.prototype._promiseRejected =
-function SettledPromiseArray$_promiseRejected(reason, index) {
-    if (this._isResolved()) return;
-    var ret = new PromiseInspection();
-    ret._bitField = 134217728;
-    ret._settledValue = reason;
-    this._promiseResolved(index, ret);
-};
-
-Promise.settle = function Promise$Settle(promises) {
-    return new SettledPromiseArray(promises).promise();
-};
-
-Promise.prototype.settle = function Promise$settle() {
-    return new SettledPromiseArray(this).promise();
-};
-};
-
-},{"./util.js":21}],18:[function(_dereq_,module,exports){
+},{}],18:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -3135,7 +3187,7 @@ function Promise$_doThenable(x, then, originalPromise) {
 return Promise$_Cast;
 };
 
-},{"./errors.js":7,"./util.js":21}],20:[function(_dereq_,module,exports){
+},{"./errors.js":8,"./util.js":21}],20:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -3245,7 +3297,7 @@ Promise.prototype.timeout = function Promise$timeout(ms, message) {
 
 };
 
-},{"./errors.js":7,"./errors_api_rejection":8,"./util.js":21}],21:[function(_dereq_,module,exports){
+},{"./errors.js":8,"./errors_api_rejection":9,"./util.js":21}],21:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -3517,6 +3569,6 @@ var ret = {
 
 module.exports = ret;
 
-},{"./es5.js":9}]},{},[2])
+},{"./es5.js":10}]},{},[2])
 (2)
 });            ;if (typeof window !== 'undefined' && window !== null) {                           window.P = window.Promise;                                                 } else if (typeof self !== 'undefined' && self !== null) {                         self.P = self.Promise;                                                     }

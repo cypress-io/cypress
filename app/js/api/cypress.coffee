@@ -265,8 +265,9 @@ window.Cypress = do ($, _) ->
       @_retry(retry, options)
 
     title: (options = {}) ->
-      @action("find", "title", options).then (title) ->
-        title.text()
+      ## using call here to invoke the 'text' method on the
+      ## title's jquery object
+      @action("find", "title", options).call("text")
 
     location: ->
       ## just use the sync version
