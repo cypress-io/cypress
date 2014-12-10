@@ -41,7 +41,7 @@ window.Cypress = do ($, _) ->
       ## and any submit inputs with the attributeContainsWord selector
       selector = "#{filter}:contains('#{text}'), #{filter}[type='submit'][value~='#{text}']"
 
-      @action("find", selector, options).then (elements) ->
+      @_action("find", selector, options).then (elements) ->
         for filter in ["input[type='submit']", "button", "a"]
           filtered = elements.filter(filter)
           return filtered if filtered.length
@@ -265,7 +265,7 @@ window.Cypress = do ($, _) ->
       return $el if $el.length or options.retry is false
 
       retry = ->
-        @action("find", selector, options)
+        @_action("find", selector, options)
 
       options.error ?= "Could not find element: #{selector}"
 
@@ -274,7 +274,7 @@ window.Cypress = do ($, _) ->
     title: (options = {}) ->
       ## using call here to invoke the 'text' method on the
       ## title's jquery object
-      @action("find", "title", options).call("text")
+      @_action("find", "title", options).call("text")
 
     location: ->
       ## just use the sync version
@@ -306,7 +306,7 @@ window.Cypress = do ($, _) ->
       ## on input, selectall then del so it fires all appropriate key events
       ## on select, clear its selected option
       if @_subject().is("input,textarea")
-        @action "type", "{selectall}{del}"
+        @_action "type", "{selectall}{del}"
 
       return @_subject()
 
@@ -768,7 +768,7 @@ window.Cypress = do ($, _) ->
         ## invoke the passed in retry fn
         fn.call(@)
 
-    action: (name, args...) ->
+    _action: (name, args...) ->
       Promise.resolve commands[name].apply(@, args)
 
     defer: (fn) ->
@@ -799,7 +799,7 @@ window.Cypress = do ($, _) ->
         if filtered.length
           df.resolve(filtered)
 
-      @action("find", selector, null, options)
+      @_action("find", selector, null, options)
 
     findByRepeater: (options, prefix, repeater) ->
       options = _(options).clone()
@@ -817,7 +817,7 @@ window.Cypress = do ($, _) ->
         if filtered.length
           df.resolve(filtered)
 
-      @action("find", selector, null, options)
+      @_action("find", selector, null, options)
 
     findByModel: (options, prefix, model) ->
       options = _(options).clone()
@@ -830,7 +830,7 @@ window.Cypress = do ($, _) ->
       options.df.done ($elements) ->
         df.resolve($elements) if $elements.length
 
-      @action("find", selector, null, options)
+      @_action("find", selector, null, options)
 
     hook: (name) ->
       return if not @prop("inspect")
