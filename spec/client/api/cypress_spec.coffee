@@ -287,6 +287,106 @@ describe "Cypress API", ->
 
         cy.on "fail", -> done()
 
+  context "#click", ->
+    it "sends a click event", (done) ->
+      cy.$("#button").click -> done()
+
+      cy.find("#button").click()
+
+    it "returns the original subject", ->
+      button = cy.$("#button")
+
+      cy.find("#button").click().then ($button) ->
+        expect($button).to.match button
+
+    it "inserts artificial delay of 10ms", ->
+      cy.$("#button").click =>
+        @delay = @sandbox.spy Promise, "delay"
+
+      cy.find("#button").click().then ->
+        expect(@delay).to.be.calledWith 10
+
+    it "inserts artificial delay of 50ms for anchors", ->
+      cy.$("a:contains('Home Page')").click =>
+        @delay = @sandbox.spy Promise, "delay"
+        return false
+
+      cy.contains("Home Page").click().then ->
+        expect(@delay).to.be.calledWith 50
+
+    it "can operate on a jquery collection", ->
+      clicks = 0
+      buttons = cy.$("button")
+      buttons.click ->
+        clicks += 1
+        return false
+
+      ## make sure we have more than 1 button
+      expect(buttons.length).to.be.gt 1
+
+      ## make sure each button received its click event
+      cy.find("button").click().then ($buttons) ->
+        expect($buttons.length).to.eq clicks
+
+    it.only "can cancel multiple clicks", (done) ->
+      clicks = 0
+
+      ## abort after the 3rd click
+      clicked = _.after 3, ->
+        console.warn "after", clicks
+        Cypress.abort().then -> done()
+
+      anchors = cy.$("#sequential-clicks a")
+      anchors.click ->
+        clicks += 1
+        console.log "CLICK", clicks
+        clicked()
+
+      ## make sure we have at least 5 anchor links
+      expect(anchors.length).to.be.gte 5
+
+      cy.on "cancel", ->
+        expect(clicks).to.eq 3
+
+      cy.find("#sequential-clicks a").click()
+
+    it "serially clicks a collection", ->
+      clicks = 0
+
+      ## create a throttled click function
+      ## which proves we are clicking serially
+      throttled = _.throttle ->
+        clicks += 1
+      , 40, {leading: false}
+
+      anchors = cy.$("#sequential-clicks a")
+      anchors.click throttled
+
+      ## make sure we're clicking multiple anchors
+      expect(anchors.length).to.be.gt 1
+      cy.find("#sequential-clicks a").click().then ($anchors) ->
+        expect($anchors.length).to.eq clicks
+
+    it "increases the timeout delta after each click", (done) ->
+      prevTimeout = @test.timeout()
+
+      count = cy.$("button").length
+
+      cy.on "invoke:end", (obj) =>
+        if obj.name is "click"
+          expect(@test.timeout()).to.eq (count * 10) + prevTimeout
+          done()
+
+      cy.find("button").click()
+
+    describe "errors", ->
+      it "throws when not a dom subject", (done) ->
+        @sandbox.stub cy.runner, "uncaught"
+
+        cy.click()
+
+        cy.on "fail", -> done()
+
   context "invoke", ->
     it "waits for isReady before invoking command", (done) ->
       ## when we are isReady false that means we should
