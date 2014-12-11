@@ -51,10 +51,7 @@ module.exports =
       server = path.join(__dirname, "..", "lib", "server.coffee")
 
       # watch other .coffee files based on the directory our server.coffee file is in
-      # need to optionally accept a --debug argument here to put
-      # nodemon into debug mode instead of always putting in there
 
-      # THIS NEEDS TO BE FIXED
       str = ""
       str += "--debug " if options.debug
       str += "--verbose --watch " + path.dirname(server) + "/**/*.coffee " + server
@@ -64,8 +61,6 @@ module.exports =
       # str += " -- "
       # str += "--ids=#{options.ids} " if options.ids
       # str += "--port=#{options.port} " if options.port
-
-      console.log str
 
       @_bootServer(str)
 
