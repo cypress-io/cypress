@@ -5,7 +5,6 @@ fs          = require 'fs'
 hbs         = require 'hbs'
 _           = require 'underscore'
 _.str       = require 'underscore.string'
-chokidar    = require 'chokidar'
 minimist    = require 'minimist'
 idGenerator = require './id_generator.coffee'
 
