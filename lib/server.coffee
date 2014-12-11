@@ -16,10 +16,7 @@ jQuery      = require 'jquery-deferred'
 
 argv = minimist(process.argv.slice(2), boolean: true)
 
-controllers =
-  RemoteInitial: new (require('./controllers/remote_initial'))().handle
-  RemoteProxy: new (require('./controllers/remote_proxy'))().handle
-  SpecProcessor: new (require('./controllers/spec_processor'))().handle
+controllers = require('./controllers')
 
 _.mixin _.str.exports()
 
