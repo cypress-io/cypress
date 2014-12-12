@@ -6,6 +6,8 @@ window.Cypress = do ($, _) ->
 
   ngPrefixes = ['ng-', 'ng_', 'data-ng-', 'x-ng-']
 
+  proxies = ["each", "map", "filter", "children", "eq", "closest", "first", "last", "next", "parent", "parents", "prev", "siblings"]
+
   ## should attach these commands as defaultMethods and allow them
   ## to be configurable
   commands =
@@ -94,9 +96,6 @@ window.Cypress = do ($, _) ->
         if not values.length or el.val() in values
           el.prop("checked", false).trigger("change")
 
-    ## add an array of jquery methods
-    eq: ->
-
     ## allow the user to choose whether the confirmation
     ## message returns true or false.  need to patch
     ## window.confirm and store the last confirm message
@@ -141,12 +140,6 @@ window.Cypress = do ($, _) ->
         , 50
 
       options.df
-
-    first: ->
-      unless @_subject() and _.isElement(@_subject()[0])
-        @throwErr("Cannot call .first() without first finding an element")
-
-      @_subject().first()
 
     click: ->
       subject = @_ensureDomSubject()
@@ -397,6 +390,12 @@ window.Cypress = do ($, _) ->
 
         else
           @throwErr "wait() must be invoked with either a number or a function!"
+
+  _.each proxies, (t) ->
+    commands[t] = (args...) ->
+      subject = @_ensureDomSubject()
+
+      subject[t].apply(subject, args)
 
   class Cypress
     queue: []

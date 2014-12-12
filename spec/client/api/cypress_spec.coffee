@@ -420,6 +420,36 @@ describe "Cypress API", ->
         expect(cy.prop("ready").promise.isResolved()).to.be.true
         done()
 
+  context "jquery proxy methods", ->
+    fns = [
+      {each: -> $(@).removeClass().addClass("foo")}
+      {filter: ":first"}
+      {map: -> $(@).text()}
+      {eq: 0}
+      {closest: "body"}
+      "children", "first", "last", "next", "parent", "parents", "prev", "siblings"
+    ]
+    _.each fns, (fn) ->
+      ## normalize string vs object
+      if _.isObject(fn)
+        name = _.keys(fn)[0]
+        arg = fn[name]
+      else
+        name = fn
+
+      context "##{name}", ->
+        it "proxies through to jquery and returns new subject", ->
+          el = cy.$("#list")[name](arg)
+          cy.find("#list")[name](arg).then ($el) ->
+            expect($el).to.match el
+
+        it "errors without a dom element", (done) ->
+          @sandbox.stub cy.runner, "uncaught"
+
+          cy.noop({})[name](arg)
+
+          cy.on "fail", -> done()
+
   context "cancelling promises", ->
     it "cancels via a delay", (done) ->
       pending = Promise.pending()
