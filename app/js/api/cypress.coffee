@@ -151,26 +151,35 @@ window.Cypress = do ($, _) ->
     click: ->
       subject = @_ensureDomSubject()
 
-      click = (el, index) =>
-        console.info "internal click", el
-        el.click()
-
+      click = (memo, el, index) =>
         wait = if $(el).is("a") then 50 else 10
 
-        ## we want to add this wait delta to our
-        ## runnables timeout so we prevent it from
-        ## timing out from multiple clicks
-        @_timeout(wait, true)
+        memo.then =>
+          el.click()
 
-        Promise.delay(wait)
+          ## we want to add this wait delta to our
+          ## runnables timeout so we prevent it from
+          ## timing out from multiple clicks
+          @_timeout(wait, true)
 
-      ## using each here to create sequential promise
-      ## which waits for the promise in each click(el)
-      ## to resolve before continuing on
-      Promise
-        .each subject.toArray(), click
-        .cancellable()
-        .return(subject)
+          ## need to return null here to prevent
+          ## chaining thenable promises
+          return null
+
+        .delay(wait)
+
+      ## create a new promise and chain off of it using reduce to insert
+      ## the artificial delays.  we have to set this as cancellable for it
+      ## to propogate since this is an "inner" promise
+      clicks = _.reduce subject.toArray(), click, Promise.resolve().cancellable()
+
+      ## return our original subject when our promise resolves
+      clicks.return(subject)
+
+      ## -- this does not work but may work in the future -- ##
+      # Promise
+      #   .each subject.toArray(), click
+      #   .return(subject)
 
     eval: (code, options = {}) ->
       _.defaults options,
@@ -711,8 +720,6 @@ window.Cypress = do ($, _) ->
       throw err
 
     cancel: (err) ->
-      console.log "CANCEL RECEIVED"
-
       obj = @prop("current")
       @log {name: "Cancelled: #{obj.name}", args: err.message}, "danger"
       @trigger "cancel", obj
@@ -923,7 +930,6 @@ window.Cypress = do ($, _) ->
       @cy.prop("xhr")?.abort()
       @cy.prop("runnable")?.clearTimeout()
 
-      console.info "cancelling promise!"
       promise = @cy.prop("promise")
       promise?.cancel()
 

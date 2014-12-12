@@ -300,16 +300,17 @@ describe "Cypress API", ->
         expect($button).to.match button
 
     it "inserts artificial delay of 10ms", ->
-      cy.$("#button").click =>
-        @delay = @sandbox.spy Promise, "delay"
+      cy.on "invoke:start", (obj) =>
+        if obj.name is "click"
+          @delay = @sandbox.spy Promise.prototype, "delay"
 
       cy.find("#button").click().then ->
         expect(@delay).to.be.calledWith 10
 
     it "inserts artificial delay of 50ms for anchors", ->
-      cy.$("a:contains('Home Page')").click =>
-        @delay = @sandbox.spy Promise, "delay"
-        return false
+      cy.on "invoke:start", (obj) =>
+        if obj.name is "click"
+          @delay = @sandbox.spy Promise.prototype, "delay"
 
       cy.contains("Home Page").click().then ->
         expect(@delay).to.be.calledWith 50
@@ -328,25 +329,32 @@ describe "Cypress API", ->
       cy.find("button").click().then ($buttons) ->
         expect($buttons.length).to.eq clicks
 
-    it.only "can cancel multiple clicks", (done) ->
+    it "can cancel multiple clicks", (done) ->
       clicks = 0
 
+      spy = @sandbox.spy ->
+        Cypress.abort()
+
       ## abort after the 3rd click
-      clicked = _.after 3, ->
-        console.warn "after", clicks
-        Cypress.abort().then -> done()
+      clicked = _.after 3, spy
 
       anchors = cy.$("#sequential-clicks a")
       anchors.click ->
         clicks += 1
-        console.log "CLICK", clicks
         clicked()
 
       ## make sure we have at least 5 anchor links
       expect(anchors.length).to.be.gte 5
 
       cy.on "cancel", ->
-        expect(clicks).to.eq 3
+        _.delay ->
+          ## abort should only have been called once
+          expect(spy.callCount).to.eq 1
+
+          ## and we should have stopped clicking after 3
+          expect(clicks).to.eq 3
+          done()
+        , 200
 
       cy.find("#sequential-clicks a").click()
 
