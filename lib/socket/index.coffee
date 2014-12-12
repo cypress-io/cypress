@@ -105,7 +105,7 @@ module.exports = (io, app) ->
     return if app.enabled("editFileMode")
 
     ## strip out our testFolder path from the filepath, and any leading forward slashes
-    strippedPath  = filepath.replace(testFolder, "").replace(/^\/+/, "")#split("/")
+    strippedPath  = filepath.replace(app.get('eclectus').testFolder, "").replace(/^\/+/, "")#split("/")
 
     console.log "changed", filepath, strippedPath
     io.emit "generate:ids:for:test", filepath, strippedPath
