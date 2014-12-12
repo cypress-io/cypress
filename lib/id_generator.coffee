@@ -5,8 +5,7 @@ gutil     = require 'gulp-util'
 phantom   = require 'node-phantom-simple'
 Promise   = require 'bluebird'
 testIdRegExp = /\[(.{3})\]$/
-
-alphabet = "abcdefghijklmnopqrstuvwxyz0123456789"
+keys      = require './keys'
 
 escapeRegExp = (str) ->
   str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -40,25 +39,17 @@ appendTestId = (spec, title, id) ->
   , 1000
 
 getId = (data, fn = ->) ->
-  id = createId()
+  keys.getNew()
+  .then (id) ->
+    try
+      appendTestId data.spec, data.title, id
+    catch e
+      gutil.beep()
+      console.log gutil.colors.yellow("An error occured generating an ID for file: "), gutil.colors.blue(data.spec), gutil.colors.yellow(" for test: "), gutil.colors.blue(data.title)
+      console.log gutil.colors.red(e.name), ": ", e.message
+      return fn({message: e.message})
 
-  try
-    appendTestId data.spec, data.title, id
-  catch e
-    gutil.beep()
-    console.log gutil.colors.yellow("An error occured generating an ID for file: "), gutil.colors.blue(data.spec), gutil.colors.yellow(" for test: "), gutil.colors.blue(data.title)
-    console.log gutil.colors.red(e.name), ": ", e.message
-    return fn({message: e.message})
-
-  fn(id)
-
-getRandom = (alphabet) ->
-  index = Math.floor(Math.random() * alphabet.length)
-  alphabet[index]
-
-createId = ->
-  ids = _(3).times -> getRandom(alphabet)
-  ids.join("")
+    fn(id)
 
 parseStackTrace = (trace) ->
   _.reduce trace, (memo, obj) ->
