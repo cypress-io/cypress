@@ -71,6 +71,7 @@ server.listen app.get("port"), ->
   console.log 'Express server listening on port ' + app.get('port')
 
   ## open phantom if ids are true (which they are by default)
-  idGenerator.openPhantom() #if argv.ids
-
-  require('open')("http://localhost:#{app.get('port')}") unless app.get('eclectus').preventOpen
+  idGenerator.openPhantom()
+  .then ->
+    if !app.get('eclectus').preventOpen
+      require('open')("http://localhost:#{app.get('port')}")

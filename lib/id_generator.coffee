@@ -3,7 +3,7 @@ _         = require 'underscore'
 path      = require 'path'
 gutil     = require 'gulp-util'
 phantom   = require 'node-phantom-simple'
-
+Promise   = require 'bluebird'
 testIdRegExp = /\[(.{3})\]$/
 
 alphabet = "abcdefghijklmnopqrstuvwxyz0123456789"
@@ -76,34 +76,42 @@ parseFileFromStackTrace = (trace, rootPath) ->
 openPhantom = ->
   ## we should pass the path to phantomjs during this create call
   ## since we cant assume its been exported to PATH
-  phantom.create (err, ph) ->
-    console.log "PhantomJS ready..."
-    ph.createPage (err, page) ->
-      t = Date.now()
-      rootPath = "http://localhost:#{app.get('port')}/"
-      pathToPage = rootPath + "id_generator"
-      console.log "PhantomJS opened: ", pathToPage
+  return new Promise (resolve, reject) ->
+    phantom.create (err, ph) ->
+      console.log "PhantomJS ready..."
 
-      # page.onConsoleMessage = (msg, lineNum, sourceId) ->
-      #   debugger
+      return reject(err) if err
 
-      page.onError = (msg, trace) ->
-        gutil.beep()
-        stack = parseStackTrace(trace)
-        file = parseFileFromStackTrace(trace, rootPath)
+      ph.createPage (err, page) ->
+        return reject(err) if err
 
-        ## need to convert this into a function so we can automatically
-        ## log out the total length of the errors and generate the bar wrappers
-        ## around them
-        console.log ""
-        console.log "========================================"
-        console.log gutil.colors.yellow("An error occured generating ids in file: "), gutil.colors.blue(file)
-        console.log gutil.colors.red(msg)
-        console.log(stack.join("\n")) if stack.length
-        console.log "========================================"
+        t = Date.now()
+        rootPath = "http://localhost:#{app.get('port')}/"
+        pathToPage = rootPath + "id_generator"
+        console.log "PhantomJS opened: ", pathToPage
 
-      page.open pathToPage, (err, status) ->
-        console.log "PhantomJS done! status: #{status}, time: #{Date.now() - t}"
+        # page.onConsoleMessage = (msg, lineNum, sourceId) ->
+        #   debugger
+
+        page.onError = (msg, trace) ->
+          gutil.beep()
+          stack = parseStackTrace(trace)
+          file = parseFileFromStackTrace(trace, rootPath)
+
+          ## need to convert this into a function so we can automatically
+          ## log out the total length of the errors and generate the bar wrappers
+          ## around them
+          console.log ""
+          console.log "========================================"
+          console.log gutil.colors.yellow("An error occured generating ids in file: "), gutil.colors.blue(file)
+          console.log gutil.colors.red(msg)
+          console.log(stack.join("\n")) if stack.length
+          console.log "========================================"
+
+        page.open pathToPage, (err, status) ->
+          return reject(err) if err
+          console.log "PhantomJS done! status: #{status}, time: #{Date.now() - t}"
+          resolve()
 
   # , {parameters: "remote-debugger-port": "9000", "remote-debugger-autorun": "yes"}
 
