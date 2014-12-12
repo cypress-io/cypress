@@ -49,7 +49,6 @@ app.use require("cookie-parser")()
 app.use require("compression")()
 app.use require("morgan")("dev")
 app.use require("body-parser").json()
-app.use require("method-override")()
 app.use require('express-session')(
   secret: "marionette is cool"
   saveUninitialized: true
