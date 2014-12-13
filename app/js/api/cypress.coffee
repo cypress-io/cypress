@@ -17,12 +17,6 @@ window.Cypress = do ($, _) ->
     url: ->
       @_location("href")
 
-    filter: (fn) ->
-      unless @_subject() and _.isElement(@_subject()[0])
-        @throwErr("Cannot call .filter() without first finding an element")
-
-      @_subject().filter(fn)
-
     fill: (obj, options = {}) ->
       @throwErr "cy.fill() must be passed an object literal as its 1st argument!" if not _.isObject(obj)
 
@@ -491,8 +485,6 @@ window.Cypress = do ($, _) ->
 
       @trigger "ready", false
 
-      ## using sync deferred here because we really
-      ## need it to be sync, not async
       @prop "ready", Promise.pending()
 
     run: ->
