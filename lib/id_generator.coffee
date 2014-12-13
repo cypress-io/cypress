@@ -39,7 +39,7 @@ appendTestId = (spec, title, id) ->
   , 1000
 
 getId = (data, fn = ->) ->
-  keys.getNew()
+  keys.nextKey(app)
   .then (id) ->
     try
       appendTestId data.spec, data.title, id
