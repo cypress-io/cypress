@@ -37,7 +37,7 @@ describe "Cypress API", ->
       cy.title().then (text) ->
         expect(text).to.eq title
 
-    it "reties finding the title", ->
+    it "retries finding the title", ->
       cy.$("title").remove()
 
       _.delay ->
@@ -181,6 +181,60 @@ describe "Cypress API", ->
 
         cy.on "fail", (err) ->
           expect(err.message).to.include "Could not find the selector: <span> containing the content: brand new content"
+          done()
+
+  context "#clear", ->
+    it "does not change the subject", ->
+      textarea = cy.$("textarea")
+
+      cy.find("textarea").clear().then ($textarea) ->
+        expect($textarea).to.match textarea
+
+    it "removes the current value", ->
+      textarea = cy.$("#comments")
+      textarea.val("foo bar")
+
+      ## make sure it really has that value first
+      expect(textarea).to.have.value("foo bar")
+
+      cy.find("#comments").clear().then ($textarea) ->
+        expect($textarea).to.have.value("")
+
+    describe "errors", ->
+      beforeEach ->
+        @sandbox.stub cy.runner, "uncaught"
+
+      it "throws when not a dom subject", (done) ->
+        cy.noop({}).clear()
+
+        cy.on "fail", (err) -> done()
+
+      it "throws if any subject isnt a textarea", (done) ->
+        cy.find("textarea,form").clear()
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <form id=\"by-id\"></form>"
+          done()
+
+      it "throws if any subject isnt a :text", (done) ->
+        cy.find("div").clear()
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <div id=\"dom\"></div>"
+          done()
+
+      it "throws on an input radio", (done) ->
+        cy.find(":radio").clear()
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <input type=\"radio\" name=\"gender\" value=\"male\">"
+          done()
+
+      it "throws on an input checkbox", (done) ->
+        cy.find(":checkbox").clear()
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <input type=\"checkbox\" name=\"colors\" value=\"blue\">"
           done()
 
   context "#check", ->

@@ -277,24 +277,35 @@ window.Cypress = do ($, _) ->
     doc: -> @_document()
 
     type: (sequence, options = {}) ->
-      unless @_subject() and _.isElement(@_subject()[0])
-        @throwErr("Cannot call .type() without first finding an element")
+      subject = @_ensureDomSubject()
+
+      _.defaults options,
+        el: subject
 
       _.extend options,
         sequence: sequence
 
-      @_subject().simulate "key-sequence", options
+      options.el.simulate "key-sequence", options
 
-    clear: ->
-      unless @_subject() and _.isElement(@_subject()[0])
-        @throwErr("Cannot call .clear() without first finding an element")
+      return subject
 
-      ## on input, selectall then del so it fires all appropriate key events
-      ## on select, clear its selected option
-      if @_subject().is("input,textarea")
-        @_action "type", "{selectall}{del}"
+    clear: (options = {}) ->
+      ## what about other types of inputs besides just text?
+      ## what about the new HTML5 ones?
 
-      return @_subject()
+      subject = @_ensureDomSubject()
+
+      ## blow up if any member of the subject
+      ## isnt a textarea or :text
+      subject.each (index, el) =>
+        el = $(el)
+        node = @_stringifyElement(el)
+
+        if not el.is("textarea,:text")
+          word = @_plural(subject, "contains", "is")
+          @throwErr(".clear() can only be called on textarea or :text! Your subject #{word} a: #{node}")
+
+        @_action "type", "{selectall}{del}", {el: el}
 
     select: (valueOrText) ->
       unless @_subject() and _.isElement(@_subject()[0])
