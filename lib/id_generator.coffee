@@ -1,11 +1,14 @@
-_         = require 'underscore'
-path      = require 'path'
-gutil     = require 'gulp-util'
-phantom   = require 'node-phantom-simple'
-Promise   = require 'bluebird'
-testIdRegExp = /\[(.{3})\]$/
-keys      = require './keys'
-fs        = Promise.promisifyAll(require('fs'))
+_               = require 'underscore'
+path            = require 'path'
+gutil           = require 'gulp-util'
+phantom         = require 'node-phantom-simple'
+Promise         = require 'bluebird'
+keys            = require './keys'
+fs              = Promise.promisifyAll(require('fs'))
+
+testIdRegExp     = /\[(.{3})\]$/
+keyQueue         = []
+currentKeyLookup = Promise.resolve()
 
 escapeRegExp = (str) ->
   str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -38,8 +41,8 @@ appendTestId = (spec, title, id) ->
         app.disable("editFileMode")
       , 1000
 
-getId = (data) ->
-  keys.nextKey(app)
+nextId = (data) ->
+  currentKeyLookup = keys.nextKey(app)
   .then (id) ->
     appendTestId(data.spec, data.title, id)
     .then(-> id)
@@ -49,6 +52,46 @@ getId = (data) ->
       e.details += ["\n " + gutil.colors.red(e.name), ": ", e.message].concat(" ")
 
       throw e
+
+idEnqueue = (data) ->
+  # Creating a pending promise
+  # to be resolvable when the id
+  # is looked up in order
+  p = Promise.pending()
+  data.fulfill = p.promise
+
+  keyQueue.push(data)
+  p.promise
+
+dequeueId = ->
+  # Get the next id lookup data
+  # and Drop the current lookup from the queue
+  data             = keyQueue.shift()
+
+  # kick off the id lookup
+  currentKeyLookup = nextId(data)
+
+  currentKeyLookup
+  .then((id) ->
+    # Pop the next id lookup off of the stack
+    dequeueId() if keyQueue.length
+    # Return the ID so everything can carry on
+    id
+  )
+  .then(data.fulfill.resolve)
+  .catch(data.fulfill.reject)
+
+getId = (data) ->
+  # When a lookup is currently happend
+  # push the lookup into the queue
+  return idEnqueue(data) if currentKeyLookup.isPending()
+
+  # Handles the Zero case
+  nextId(data).then (id) ->
+    # Pop the next id lookup off of the stack
+    dequeueId() if keyQueue.length
+    # Return the ID so everything can carry on
+    id
 
 parseStackTrace = (trace) ->
   _.reduce trace, (memo, obj) ->
