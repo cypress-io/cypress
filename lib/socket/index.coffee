@@ -12,8 +12,12 @@ module.exports = (io, app) ->
     console.log "socket connected"
 
     socket.on "generate:test:id", (data, fn) ->
-      console.log "generate:test:id", data
-      idGenerator.getId data, (id) -> fn(id)
+      console.log("generate:test:id", data)
+      idGenerator.getId(data)
+      .then(fn)
+      .catch (err) ->
+        console.log "\u0007", err.details, err.message
+        fn(message: err.message)
 
     socket.on "finished:generating:ids:for:test", (strippedPath) ->
       console.log "finished:generating:ids:for:test", strippedPath

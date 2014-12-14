@@ -1,4 +1,3 @@
-fs        = require 'fs'
 _         = require 'underscore'
 path      = require 'path'
 gutil     = require 'gulp-util'
@@ -6,50 +5,50 @@ phantom   = require 'node-phantom-simple'
 Promise   = require 'bluebird'
 testIdRegExp = /\[(.{3})\]$/
 keys      = require './keys'
+fs        = Promise.promisifyAll(require('fs'))
 
 escapeRegExp = (str) ->
   str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
 appendTestId = (spec, title, id) ->
-  contents = fs.readFileSync spec, "utf8"
-  re = new RegExp "['\"](" + escapeRegExp(title) + ")['\"]"
+  fs.readFileAsync(spec, "utf8")
+  .then (contents) ->
+    re = new RegExp "['\"](" + escapeRegExp(title) + ")['\"]"
 
-  # ## if the string is found and it doesnt have an id
-  matches = re.exec contents
+    # ## if the string is found and it doesnt have an id
+    matches = re.exec contents
 
-  ## matches[1] will be the captured group which is the title
-  return if not matches
+    ## matches[1] will be the captured group which is the title
+    return if not matches
 
-  ## position is the string index where we first find the capture
-  ## group and include its length, so we insert right after it
-  position = matches.index + matches[1].length + 1
-  contents = _(contents).insert position, " [#{id}]"
+    ## position is the string index where we first find the capture
+    ## group and include its length, so we insert right after it
+    position = matches.index + matches[1].length + 1
+    contents = _(contents).insert position, " [#{id}]"
 
-  ## enable editFileMode which prevents us from sending out test:changed events
-  app.enable("editFileMode")
+    ## enable editFileMode which prevents us from sending out test:changed events
+    app.enable("editFileMode")
 
-  ## write the actual contents to the file
-  fs.writeFileSync spec, contents
+    ## write the actual contents to the file
+    fs.writeFileAsync(spec, contents).then ->
+      ## remove the editFileMode so we emit file changes again
+      ## if we're still in edit file mode then wait 1 second and disable it
+      ## chokidar doesnt instantly see file changes so we have to wait
+      _.delay ->
+        app.disable("editFileMode")
+      , 1000
 
-  ## remove the editFileMode so we emit file changes again
-  ## if we're still in edit file mode then wait 1 second and disable it
-  ## chokidar doesnt instantly see file changes so we have to wait
-  _.delay ->
-    app.disable("editFileMode")
-  , 1000
-
-getId = (data, fn = ->) ->
+getId = (data) ->
   keys.nextKey(app)
   .then (id) ->
-    try
-      appendTestId data.spec, data.title, id
-    catch e
+    appendTestId(data.spec, data.title, id)
+    .then(-> id)
+    .catch (e) ->
       gutil.beep()
-      console.log gutil.colors.yellow("An error occured generating an ID for file: "), gutil.colors.blue(data.spec), gutil.colors.yellow(" for test: "), gutil.colors.blue(data.title)
-      console.log gutil.colors.red(e.name), ": ", e.message
-      return fn({message: e.message})
+      e.details = [gutil.colors.yellow("An error occured generating an ID for file: "), gutil.colors.blue(data.spec), gutil.colors.yellow(" for test: "), gutil.colors.blue(data.title)].concat(" ")
+      e.details += ["\n " + gutil.colors.red(e.name), ": ", e.message].concat(" ")
 
-    fn(id)
+      throw e
 
 parseStackTrace = (trace) ->
   _.reduce trace, (memo, obj) ->
