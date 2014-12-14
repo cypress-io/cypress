@@ -279,11 +279,19 @@ window.Cypress = do ($, _) ->
     type: (sequence, options = {}) ->
       subject = @_ensureDomSubject()
 
+      ## allow the el we're typing into to be
+      ## changed by options
       _.defaults options,
         el: subject
 
-      _.extend options,
-        sequence: sequence
+      if not subject.is("textarea,:text")
+        node = @_stringifyElement(options.el)
+        @throwErr(".type() can only be called on textarea or :text! Your subject is a: #{node}")
+
+      if (num = subject.length) and num > 1
+        @throwErr(".type() can only be called on a single textarea or :text! Your subject contained #{num} elements!")
+
+      options.sequence = sequence
 
       options.el.simulate "key-sequence", options
 
@@ -430,6 +438,11 @@ window.Cypress = do ($, _) ->
 
       modifier ?= @prop("current").name
 
+      ## think about dropping the 'modifier' part
+      ## and adding exactly what the subject is
+      ## if its an object or array, just say Object or Array
+      ## but if its a primitive, just print out its value like
+      ## true, false, 0, 1, 3, "foo", "bar"
       (subject and subject.get and _.isElement(subject.get(0))) or
         @throwErr("Cannot use the modifier: .#{modifier}() on a non-DOM subject!")
 

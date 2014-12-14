@@ -183,6 +183,64 @@ describe "Cypress API", ->
           expect(err.message).to.include "Could not find the selector: <span> containing the content: brand new content"
           done()
 
+  context "#type", ->
+    it "does not change the subject", ->
+      input = cy.$("input:first")
+
+      cy.find("input:first").type("foo").then ($input) ->
+        expect($input).to.match input
+
+    it "changes the value", ->
+      input = cy.$("input:text:first")
+
+      input.val("")
+
+      ## make sure we are starting from a
+      ## clean state
+      expect(input).to.have.value("")
+
+      cy.find("input:text:first").type("foo").then ($input) ->
+        expect($input).to.have.value("foo")
+
+    it "appends to a current value", ->
+      input = cy.$("input:text:first")
+
+      input.val("foo")
+
+      ## make sure we are starting from a
+      ## clean state
+      expect(input).to.have.value("foo")
+
+      cy.find("input:text:first").type(" bar").then ($input) ->
+        expect($input).to.have.value("foo bar")
+
+    describe "errors", ->
+      beforeEach ->
+        @sandbox.stub cy.runner, "uncaught"
+
+      it "throws when not a dom subject", (done) ->
+        cy.noop({}).type("foo")
+
+        cy.on "fail", -> done()
+
+      it "throws when not textarea or :text", (done) ->
+        cy.find("form").type("foo")
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include ".type() can only be called on textarea or :text! Your subject is a: <form id=\"by-id\"></form>"
+          done()
+
+      it "throws when subject is a collection of elements", (done) ->
+        cy
+          .find("textarea,:text").then ($inputs) ->
+            @num = $inputs.length
+            return $inputs
+          .type("foo")
+
+        cy.on "fail", (err) =>
+          expect(err.message).to.include ".type() can only be called on a single textarea or :text! Your subject contained #{@num} elements!"
+          done()
+
   context "#clear", ->
     it "does not change the subject", ->
       textarea = cy.$("textarea")
