@@ -333,9 +333,17 @@ window.Cypress = do ($, _) ->
         node = @_stringifyElement(subject)
         @throwErr ".select() can only be called on a <select>! Your subject is a: #{node}"
 
+      if (num = subject.length) and num > 1
+        @throwErr ".select() can only be called on a single <select>! Your subject contained #{num} elements!"
+
       ## normalize valueOrText if its not an array
       valueOrText = [].concat(valueOrText)
       multiple    = subject.prop("multiple")
+
+      ## throw if we're not a multiple select and we've
+      ## passed an array of values
+      if not multiple and valueOrText.length > 1
+        @throwErr ".select() was called with an array of arguments but does not have a 'multiple' attribute set!"
 
       values  = []
       options = subject.children().map (index, el) ->
@@ -359,7 +367,7 @@ window.Cypress = do ($, _) ->
       ## if we didnt set multiple to true and
       ## we have more than 1 option to set then blow up
       if not multiple and values.length > 1
-        @throwErr("Found more than one option that was matched by value or text: #{valueOrText.join(", ")}")
+        @throwErr(".select() matched than one option by value or text: #{valueOrText.join(", ")}")
 
       subject.val(values)
 

@@ -202,11 +202,21 @@ describe "Cypress API", ->
       cy.find("select[name=foods]").select("Ramen").then ($select) ->
         expect($select).to.have.value("Ramen")
 
-    it "can select an array of values"
+    it "can select an array of values", ->
+      cy.find("select[name=movies]").select(["apoc", "br"]).then ($select) ->
+        expect($select.val()).to.deep.eq ["apoc", "br"]
 
-    it "can select an array of texts"
+    it "can select an array of texts", ->
+      cy.find("select[name=movies]").select(["The Human Condition", "There Will Be Blood"]).then ($select) ->
+        expect($select.val()).to.deep.eq ["thc", "twbb"]
 
-    it "clears previous values when providing an array"
+    it "clears previous values when providing an array", ->
+      ## make sure we have a previous value
+      select = cy.$("select[name=movies]").val(["2001"])
+      expect(select.val()).to.deep.eq ["2001"]
+
+      cy.find("select[name=movies]").select(["apoc", "br"]).then ($select) ->
+        expect($select.val()).to.deep.eq ["apoc", "br"]
 
     describe "errors", ->
       beforeEach ->
@@ -217,7 +227,16 @@ describe "Cypress API", ->
 
         cy.on "fail", -> done()
 
-      it "throws when more than 1 element in the collection"
+      it "throws when more than 1 element in the collection", (done) ->
+        cy
+          .find("select").then ($selects) ->
+            @num = $selects.length
+            return $selects
+          .select("foo")
+
+        cy.on "fail", (err) =>
+          expect(err.message).to.include ".select() can only be called on a single <select>! Your subject contained #{@num} elements!"
+          done()
 
       it "throws on anything other than a select", (done) ->
         cy.find("input:first").select("foo")
@@ -226,9 +245,19 @@ describe "Cypress API", ->
           expect(err.message).to.include ".select() can only be called on a <select>! Your subject is a: <input id=\"input\">"
           done()
 
-      it "throws when finding duplicate values"
+      it "throws when finding duplicate values", (done) ->
+        cy.find("select[name=names]").select("bm")
 
-      it "throws when finding dupliate texts"
+        cy.on "fail", (err) ->
+          expect(err.message).to.include ".select() matched than one option by value or text: bm"
+          done()
+
+      it "throws when passing an array to a non multiple select", (done) ->
+        cy.find("select[name=names]").select(["bm", "ss"])
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include ".select() was called with an array of arguments but does not have a 'multiple' attribute set!"
+          done()
 
   context "#type", ->
     it "does not change the subject", ->
