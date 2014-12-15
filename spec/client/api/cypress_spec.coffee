@@ -183,6 +183,53 @@ describe "Cypress API", ->
           expect(err.message).to.include "Could not find the selector: <span> containing the content: brand new content"
           done()
 
+  context.only "#select", ->
+    it "does not change the subject", ->
+      select = cy.$("select[name=maps]")
+
+      cy.find("select[name=maps]").select("train").then ($select) ->
+        expect($select).to.match select
+
+    it "selects by value", ->
+      cy.find("select[name=maps]").select("de_train").then ($select) ->
+        expect($select).to.have.value("de_train")
+
+    it "selects by text", ->
+      cy.find("select[name=maps]").select("train").then ($select) ->
+        expect($select).to.have.value("de_train")
+
+    it "prioritizes value over text", ->
+      cy.find("select[name=foods]").select("Ramen").then ($select) ->
+        expect($select).to.have.value("Ramen")
+
+    it "can select an array of values"
+
+    it "can select an array of texts"
+
+    it "clears previous values when providing an array"
+
+    describe "errors", ->
+      beforeEach ->
+        @sandbox.stub cy.runner, "uncaught"
+
+      it "throws when not a dom subject", (done) ->
+        cy.noop({}).select("foo")
+
+        cy.on "fail", -> done()
+
+      it "throws when more than 1 element in the collection"
+
+      it "throws on anything other than a select", (done) ->
+        cy.find("input:first").select("foo")
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include ".select() can only be called on a <select>! Your subject is a: <input id=\"input\">"
+          done()
+
+      it "throws when finding duplicate values"
+
+      it "throws when finding dupliate texts"
+
   context "#type", ->
     it "does not change the subject", ->
       input = cy.$("input:first")

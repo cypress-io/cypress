@@ -315,13 +315,12 @@ window.Cypress = do ($, _) ->
 
         @_action "type", "{selectall}{del}", {el: el}
 
-    select: (valueOrText) ->
-      unless @_subject() and _.isElement(@_subject()[0])
-        @throwErr("Cannot call .select() without first finding an element")
+    select: (valueOrText, options = {}) ->
+      subject = @_ensureDomSubject()
 
       ## if @_subject() is a <select> el assume we are filtering down its
       ## options to a specific option first by value and then by text
-      ## we'll throw errors if more than one is found AND the select
+      ## we'll throw if more than one is found AND the select
       ## element is multiple=multiple
 
       ## if the subject isn't a <select> then we'll check to make sure
@@ -330,45 +329,49 @@ window.Cypress = do ($, _) ->
       ## or texts and clear the previous selections which matches jQuery's
       ## behavior
 
-      if @_subject().is("select")
-        ## normalize valueOrText if its not an array
-        valueOrText = [].concat(valueOrText)
-        multiple    = @_subject().prop("multiple")
+      if not subject.is("select")
+        node = @_stringifyElement(subject)
+        @throwErr ".select() can only be called on a <select>! Your subject is a: #{node}"
 
-        values  = []
-        options = @_subject().children().map (index, el) ->
-          ## push the value in values array if its
-          ## found within the valueOrText
-          value = el.value
-          values.push(value) if value in valueOrText
+      ## normalize valueOrText if its not an array
+      valueOrText = [].concat(valueOrText)
+      multiple    = subject.prop("multiple")
 
-          ## return the elements text + value
-          {
-            value: value
-            text: $(el).text()
-          }
+      values  = []
+      options = subject.children().map (index, el) ->
+        ## push the value in values array if its
+        ## found within the valueOrText
+        value = el.value
+        values.push(value) if value in valueOrText
 
-        ## if we couldn't find anything by value then attempt
-        ## to find it by text and insert its value into values arr
-        if not values.length
-          _.each options.get(), (obj, index) ->
-            values.push(obj.value) if obj.text in valueOrText
+        ## return the elements text + value
+        {
+          value: value
+          text: $(el).text()
+        }
 
-        ## if we didnt set multiple to true and
-        ## we have more than 1 option to set then blow up
-        if not multiple and values.length > 1
-          @throwErr("Found more than one option that was matched by value or text: #{valueOrText.join(", ")}")
+      ## if we couldn't find anything by value then attempt
+      ## to find it by text and insert its value into values arr
+      if not values.length
+        _.each options.get(), (obj, index) ->
+          values.push(obj.value) if obj.text in valueOrText
 
-        @_subject().val(values)
+      ## if we didnt set multiple to true and
+      ## we have more than 1 option to set then blow up
+      if not multiple and values.length > 1
+        @throwErr("Found more than one option that was matched by value or text: #{valueOrText.join(", ")}")
 
-        ## yup manually create this change event
-        ## 1.6.5. HTML event types
-        ## scroll down the 'change'
-        event = document.createEvent("HTMLEvents")
-        event.initEvent("change", true, false)
+      subject.val(values)
 
-        @_subject().each (index, el) ->
-          el.dispatchEvent(event)
+      ## yup manually create this change event
+      ## 1.6.5. HTML event types
+      ## scroll down the 'change'
+      event = document.createEvent("HTMLEvents")
+      event.initEvent("change", true, false)
+
+      subject.get(0).dispatchEvent(event)
+
+      return subject
 
     wait: (msOrFn, options = {}) ->
       msOrFn ?= 1e9
