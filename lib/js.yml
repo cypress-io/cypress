@@ -58,7 +58,7 @@ iframe:
   - app/js/api/iframe.coffee
 
 sinon:
-  - bower_components/sinonjs/sinon.js
+  - bower_components/sinon/index.js
 
 id_generator:
   - bower_components/jquery/dist/jquery.js
