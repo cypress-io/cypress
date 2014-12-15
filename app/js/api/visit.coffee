@@ -66,7 +66,7 @@ Eclectus.Visit = do ($, _, Eclectus) ->
         fn(win, {checkLocation: false})
 
       ## any existing global variables will get nuked after it navigates
-      @$remoteIframe.prop "src", Cypress.createInitialRemoteSrc(url)
+      @$remoteIframe.prop "src", Cypress.Location.createInitialRemoteSrc(url)
 
       ## poll the window to see if sinon has been executed
       ## if so, call our onBeforeLoad callback

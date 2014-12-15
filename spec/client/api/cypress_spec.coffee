@@ -23,7 +23,35 @@ describe "Cypress API", ->
   after ->
     Cypress.stop()
 
-  context.only "#eval", ->
+  context "#visit", ->
+    it "returns a promise", ->
+      promise = cy._action("visit", "/foo")
+      expect(promise).to.be.instanceOf(Promise)
+
+    it "triggers visit:start on the remote iframe", (done) ->
+      $("iframe").on "visit:start", (e, url) ->
+        expect(url).to.eq "/foo"
+        done()
+
+      cy.visit("/foo")
+
+    it "resolves the subject to the remote iframe window", ->
+      cy.visit("/foo").then (win) ->
+        expect(win).to.eq $("iframe").prop("contentWindow")
+
+    it "changes the src of the iframe to the initial src", ->
+      cy.visit("/foo").then ->
+        src = $("iframe").attr("src")
+        expect(src).to.eq "/__remote/foo?__initial=true"
+
+    it "extends the runnables timeout before visit"
+
+    it "resets the runnables timeout after visit"
+
+    it "invokes onLoad callback"
+    it "invokes onBeforeLoad callback"
+
+  context "#eval", ->
     beforeEach ->
       @server = @sandbox.useFakeServer()
       @server.autoRespond = true

@@ -15,7 +15,7 @@ window.Cypress = do ($, _) ->
       @prop("inspect", true)
 
     url: ->
-      @_location("href")
+      @_url()
 
     fill: (obj, options = {}) ->
       @throwErr "cy.fill() must be passed an object literal as its 1st argument!" if not _.isObject(obj)
@@ -186,12 +186,50 @@ window.Cypress = do ($, _) ->
           response
 
     visit: (url, options = {}) ->
-      options.rootUrl = @config("rootUrl")
+      _.defaults options,
+        timeout: 15000
+        onBeforeLoad: ->
+        onLoad: ->
 
-      partial = _(@).pick "$remoteIframe", "channel", "contentWindow"
-      partial.runnable = @prop("runnable")
-      Eclectus.patch partial
-      Ecl.visit(url, options)
+      ## trigger that the remoteIframing is visiting
+      ## an external URL
+      @$remoteIframe.trigger "visit:start", url
+
+      rootUrl = @config("rootUrl")
+      url     = Cypress.Location.getRemoteUrl(url, rootUrl)
+
+      ## backup the previous runnable timeout
+      ## and the hook's previous timeout
+      prevTimeout     = @_timeout()
+
+      ## reset the timeout to our options
+      @_timeout(options.timeout)
+
+      win = @_window()
+
+      new Promise (resolve, reject) =>
+        ## if we're visiting a page and we're not currently
+        ## on about:blank then we need to nuke the window
+        ## and after its nuked then visit the url
+        if @_url() isnt "about:blank"
+          win.location.href = "about:blank"
+
+          @$remoteIframe.one "load", =>
+            visit(win, url, options)
+
+        else
+          visit(win, url, options)
+
+        visit = (win, url, options) =>
+          # ## when the remote iframe's load event fires
+          # ## callback fn
+          @$remoteIframe.one "load", =>
+            @_timeout(prevTimeout)
+            options.onLoad?(win)
+            resolve(win)
+
+          # ## any existing global variables will get nuked after it navigates
+          @$remoteIframe.prop "src", Cypress.Location.createInitialRemoteSrc(url)
 
     ## thens can return more "thenables" which are not resolved
     ## until they're 'really' resolved, so naturally this API
@@ -484,6 +522,9 @@ window.Cypress = do ($, _) ->
           @throwErr("Location object does have not have key: #{key}")
       else
         location
+
+    _url: ->
+      @_location("href")
 
     ## global options applicable to all cy instances
     ## and restores

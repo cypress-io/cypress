@@ -9,6 +9,8 @@
 ## attach to global
 do (Cypress, _, Uri) ->
 
+  reHttp = /^http/
+
   class Cypress.Location
     constructor: (current, remote = "", defaultOrigin) ->
       current  = new Uri(current)
@@ -123,23 +125,40 @@ do (Cypress, _, Uri) ->
         toString: _.bind(@getToString, @)
       }
 
+    ## think about moving this method out of Cypress
+    ## and into our app, since it kind of leaks the
+    ## remote + initial concerns, which could become
+    ## constants which our server sends us during
+    ## initial boot.
+    @createInitialRemoteSrc = (url) ->
+      ## prepend /__remote/ and strip any
+      ## leading forward slashes
+      url = "/__remote/" + _.ltrim(url, "/")
+      url = new Uri(url)
+
+      ## add the __intitial=true query param
+      url.addQueryParam("__initial", true)
+
+      ## return the full href
+      url.toString()
+
+    @isFullyQualifiedUrl = (url) ->
+      reHttp.test(url)
+
+    @getRemoteUrl = (url, rootUrl) ->
+      ## if we have a root url and our url isnt full qualified
+      if rootUrl and not @isFullyQualifiedUrl(url)
+        ## prepend the root url to it
+        return @prependRootUrl(url, rootUrl)
+
+      return url
+
+    @prependRootUrl = (url, rootUrl) ->
+      ## prepends the rootUrl to the url and
+      ## joins by / after trimming url for leading
+      ## forward slashes
+      [rootUrl, _.ltrim(url, "/")].join("/")
+
   Cypress.location = (current, remote, defaultOrigin) ->
     location = new Cypress.Location(current, remote, defaultOrigin)
     location.getObject()
-
-  ## think about moving this method out of Cypress
-  ## and into our app, since it kind of leaks the
-  ## remote + initial concerns, which could become
-  ## constants which our server sends us during
-  ## initial boot.
-  Cypress.createInitialRemoteSrc = (url) ->
-    ## prepend /__remote/ and strip any
-    ## leading forward slashes
-    url = "/__remote/" + _.ltrim(url, "/")
-    url = new Uri(url)
-
-    ## add the __intitial=true query param
-    url.addQueryParam("__initial", true)
-
-    ## return the full href
-    url.toString()
