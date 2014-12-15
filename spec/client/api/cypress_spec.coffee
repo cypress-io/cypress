@@ -5,17 +5,29 @@ describe "Cypress API", ->
   before ->
     Cypress.start()
 
-    loadFixture("html/dom").done (iframe) =>
-      @iframe = $(iframe)
-      @head = @iframe.contents().find("head").children().prop("outerHTML")
-      @body = @iframe.contents().find("body").children().prop("outerHTML")
+    @loadDom = =>
+      loadFixture("html/dom").done (iframe) =>
+        @iframe = $(iframe)
+        @head = @iframe.contents().find("head").children().prop("outerHTML")
+        @body = @iframe.contents().find("body").children().prop("outerHTML")
+
+    @loadDom()
 
   beforeEach ->
-    @iframe.contents().find("head").html(@head)
-    @iframe.contents().find("body").html(@body)
+    @setup = =>
+      @iframe.contents().find("head").html(@head)
+      @iframe.contents().find("body").html(@body)
 
-    Cypress.set(@currentTest)
-    Cypress.setup(runner, @iframe, {}, ->)
+      Cypress.set(@currentTest)
+      Cypress.setup(runner, @iframe, {}, ->)
+
+    ## if we've changed the src by navigating
+    ## away (aka cy.visit(...)) then we need
+    ## to reload the fixture again and then setup
+    if /dom/.test(@iframe.attr("src"))
+      @setup()
+    else
+      @loadDom().then @setup
 
   afterEach ->
     Cypress.abort()
