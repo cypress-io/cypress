@@ -11,6 +11,11 @@ afterEach ->
   @sandbox.restore()
 
 window.loadFixture = (paths, options = {}) ->
+  ext = (path) ->
+    ## automatically add .html but if path
+    ## included an extension it will get sliced off
+    (path + ".html").split(".").slice(0, 2).join(".")
+
   _.defaults options,
     autoResolve: true
 
@@ -18,7 +23,7 @@ window.loadFixture = (paths, options = {}) ->
 
   ## transform to array even if string
   paths = [].concat(paths)
-  paths = _(paths).map (path) -> "/fixtures/" + path + ".html"
+  paths = _(paths).map (path) -> "/fixtures/" + ext(path)
 
   dfs = []
 
