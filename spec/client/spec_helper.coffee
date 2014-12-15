@@ -10,6 +10,12 @@ beforeEach ->
 afterEach ->
   @sandbox.restore()
 
+  ## must remove references to the server
+  ## and its requests / responses due to sinon bug
+  @sandbox.server?.requests = []
+  @sandbox.server?.queue = []
+  @sandbox.server?.responses = []
+
 window.loadFixture = (paths, options = {}) ->
   ext = (path) ->
     ## automatically add .html but if path
