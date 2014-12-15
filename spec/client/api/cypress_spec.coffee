@@ -17,6 +17,26 @@ describe "Cypress API", ->
   after ->
     Cypress.stop()
 
+  context.only "#eval", ->
+    beforeEach ->
+      @server = @sandbox.useFakeServer()
+      @server.autoRespond = true
+      @server.respondWith /eval/, JSON.stringify({foo: "bar"})
+
+    it "changes the subject to the response", ->
+      cy.eval("foo()").then (resp) ->
+        expect(resp).to.deep.eq {foo: "bar"}
+
+    it "updates the timeout?"
+
+    it "retains the current xhr", ->
+      cy.eval("foo()").then ->
+        expect(cy.prop("xhr").responseText).to.eq @server.requests[0].responseText
+
+    it "aborts any existing xhr?"
+
+    it "removes the current xhr on success?"
+
   context "#window", ->
     it "returns the remote window", ->
       cy.window().then (win) ->

@@ -172,24 +172,18 @@ window.Cypress = do ($, _) ->
       _.defaults options,
         timeout: 15000
 
-      df = $.Deferred()
-
       ## obviously this needs to be moved to a separate method
-      timeout = @prop("runnable").timeout()
-      @prop("runnable").timeout(options.timeout)
+      prevTimeout = @_timeout()
+      @_timeout(options.timeout)
 
-      xhr = $.getJSON("/eval", {code: code}).done (response) =>
-        @prop("runnable").timeout(timeout)
-
-        resp = if response.obj then JSON.parse(response.obj) else response.text
-
-        # @alias(options.store, resp) if options.store
-
-        df.resolve resp
-
-      @prop "xhr", xhr
-
-      df
+      ## this should probably become a queue of xhr's which we abort
+      ## iterative during Cypress.abort()
+      ## and we splice ourselves out of the xhr array on success
+      xhr = @prop "xhr", $.getJSON("/eval", {code: code})
+      Promise.resolve(xhr)
+        .then (response) =>
+          @_timeout(prevTimeout)
+          response
 
     visit: (url, options = {}) ->
       options.rootUrl = @config("rootUrl")
