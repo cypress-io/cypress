@@ -56,6 +56,22 @@ describe "Cypress API", ->
         src = $("iframe").attr("src")
         expect(src).to.eq "/__remote/foo?__initial=true"
 
+    it "immediately updates the stored href on load", (done) ->
+      _storeHref = @sandbox.spy cy, "_storeHref"
+
+      cy.on "invoke:subject", (subject, obj) ->
+        expect(_storeHref.callCount).to.eq 1
+        done()
+
+      cy.visit("/foo")
+
+    it "prevents _hrefChanged from always being true after visiting", (done) ->
+      cy.on "invoke:subject", (subject, obj) ->
+        expect(cy._hrefChanged()).to.be.false
+        done()
+
+      cy.visit("/foo")
+
     it "extends the runnables timeout before visit"
 
     it "resets the runnables timeout after visit"
@@ -660,6 +676,13 @@ describe "Cypress API", ->
         ## we wait until we hear set because that means
         ## we've begun running our promise
         Cypress.abort().then -> done()
+
+    it "updates the stored href", ->
+      cy
+        .noop({}).then ->
+          expect(cy.prop("href")).to.eq "/fixtures/html/dom.html"
+        .visit("/foo").then ->
+          expect(cy.prop("href")).to.eq "foo"
 
   context "#isReady", ->
     it "creates a deferred when not ready", ->

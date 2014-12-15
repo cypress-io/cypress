@@ -224,6 +224,7 @@ window.Cypress = do ($, _) ->
           # ## when the remote iframe's load event fires
           # ## callback fn
           @$remoteIframe.one "load", =>
+            @_storeHref()
             @_timeout(prevTimeout)
             options.onLoad?(win)
             resolve(win)
@@ -756,12 +757,17 @@ window.Cypress = do ($, _) ->
         if ret is @ then @_subject() else ret
 
       .then (subject, options = {}) =>
+        ## trigger an event here so we know our
+        ## command has been successfully applied
+        ## and we've potentially altered the subject
+        @trigger "invoke:subject", subject, obj
+
         # if we havent become recently ready and unless we've
         # explicitly disabled checking for location changes
         # and if our href has changed in between running the commands then
         # then we're no longer ready to proceed with the next command
-        if @prop("recentlyReady") is null and options.checkLocation isnt false
-          @isReady(false, "href changed") if @hrefChanged()
+        if @prop("recentlyReady") is null
+          @isReady(false, "href changed") if @_hrefChanged()
 
         ## reset the nestedIndex back to null
         @prop("nestedIndex", null)
