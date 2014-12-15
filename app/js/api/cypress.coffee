@@ -544,6 +544,10 @@ window.Cypress = do ($, _) ->
           ready.promise.then =>
             @trigger "ready", true
 
+            ## prevent accidential chaining
+            ## .this after isReady resolves
+            return null
+
         return ready?.resolve()
 
       ## if we already have a ready object and

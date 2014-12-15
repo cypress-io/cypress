@@ -60,7 +60,7 @@ describe "Cypress API", ->
       _storeHref = @sandbox.spy cy, "_storeHref"
 
       cy.on "invoke:subject", (subject, obj) ->
-        expect(_storeHref.callCount).to.eq 1
+        expect(_storeHref.callCount).to.eq 2
         done()
 
       cy.visit("/foo")
@@ -696,6 +696,16 @@ describe "Cypress API", ->
       cy.on "ready", (bool) ->
         expect(cy.prop("ready").promise.isResolved()).to.be.true
         done()
+
+    it "prevents a bug creating an additional .then promise", (done) ->
+      cy.isReady(false)
+      cy.isReady(true)
+
+      cy.on "end", ->
+        expect(cy.queue.length).to.eq(1)
+        done()
+
+      cy.noop({})
 
   context "jquery proxy methods", ->
     fns = [
