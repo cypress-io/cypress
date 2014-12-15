@@ -183,7 +183,7 @@ describe "Cypress API", ->
           expect(err.message).to.include "Could not find the selector: <span> containing the content: brand new content"
           done()
 
-  context.only "#select", ->
+  context "#select", ->
     it "does not change the subject", ->
       select = cy.$("select[name=maps]")
 
