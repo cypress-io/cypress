@@ -660,7 +660,7 @@ describe "Cypress API", ->
         df.resolve("iphone")
       , 100
 
-      cy.find("input").type(df).then ($input) ->
+      cy.find("input:text:first").type(df).then ($input) ->
         expect($input).to.have.value("iphone")
 
     it "handles saving subjects", ->
