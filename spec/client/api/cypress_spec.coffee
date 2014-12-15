@@ -5,11 +5,17 @@ describe "Cypress API", ->
   before ->
     Cypress.start()
 
-  beforeEach ->
-    Cypress.set(@currentTest)
-
     loadFixture("html/dom").done (iframe) =>
-      Cypress.setup(runner, $(iframe), {}, ->)
+      @iframe = $(iframe)
+      @head = @iframe.contents().find("head").children().prop("outerHTML")
+      @body = @iframe.contents().find("body").children().prop("outerHTML")
+
+  beforeEach ->
+    @iframe.contents().find("head").html(@head)
+    @iframe.contents().find("body").html(@body)
+
+    Cypress.set(@currentTest)
+    Cypress.setup(runner, @iframe, {}, ->)
 
   afterEach ->
     Cypress.abort()
