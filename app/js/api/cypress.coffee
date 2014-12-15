@@ -677,17 +677,19 @@ window.Cypress = do ($, _) ->
       fn._invokeImmediately = true
       fn
 
-    storeHref: ->
+    _storeHref: ->
       ## we are using href and stripping out the hash because
       ## hash changes do not cause full page refreshes
       ## however, i believe this will completely barf when
       ## JS users are using pushstate since there is no hash
       ## TODO. need to listen to pushstate events here which
       ## will act as the isReady() the same way load events do
-      @href    = @_location().href.replace(location.hash, "")
+      location = @_location()
+      @prop "href", location.href.replace(location.hash, "")
 
-    hrefChanged: ->
-      @href isnt @_location().href.replace(location.hash, "")
+    _hrefChanged: ->
+      location = @_location()
+      @prop("href") isnt location.href.replace(location.hash, "")
 
     _subject: ->
       subject = @prop("subject") ?
@@ -725,7 +727,7 @@ window.Cypress = do ($, _) ->
         @log obj
 
         ## store our current href before invoking the next command
-        @storeHref()
+        @_storeHref()
 
         @prop "nestedIndex", @prop("index")
 

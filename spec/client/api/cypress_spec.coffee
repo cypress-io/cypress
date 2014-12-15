@@ -704,6 +704,19 @@ describe "Cypress API", ->
 
           cy.on "fail", -> done()
 
+  context "#_storeHref", ->
+    it "sets prop href", ->
+      cy._storeHref()
+      expect(cy.prop("href")).to.eq "/fixtures/html/dom.html"
+
+    it "strips the hash from the href", ->
+      @sandbox.stub(cy, "_location").returns
+        href: "/foo/bar#baz/quux"
+        hash: "#baz/quux"
+
+      cy._storeHref()
+      expect(cy.prop("href")).to.eq "/foo/bar"
+
   context "cancelling promises", ->
     it "cancels via a delay", (done) ->
       pending = Promise.pending()
