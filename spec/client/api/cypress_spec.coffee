@@ -38,201 +38,202 @@ describe "Cypress API", ->
   after ->
     Cypress.stop()
 
-  context "#findByBinding", ->
-    beforeEach ->
-      @currentTest.timeout(800)
-      @loadDom("html/angular").then @setup
-
-    it "finds color.name binding elements", ->
-      spans = cy.$(".colors span.name")
-
-      cy.ng("binding", "color.name").then ($spans) ->
-        $spans.each (i, span) ->
-          expect(span).to.eq(spans[i])
-
-    describe "errors", ->
+  context "#ng", ->
+    context "find by binding", ->
       beforeEach ->
-        @sandbox.stub cy.runner, "uncaught"
+        @currentTest.timeout(800)
+        @loadDom("html/angular").then @setup
 
-      it "throws when cannot find angular", (done) ->
-        delete cy._window().angular
+      it "finds color.name binding elements", ->
+        spans = cy.$(".colors span.name")
 
-        cy.on "fail", (err) ->
-          expect(err.message).to.include "Angular global was not found in your window! You cannot use .ng() methods without angular."
-          done()
+        cy.ng("binding", "color.name").then ($spans) ->
+          $spans.each (i, span) ->
+            expect(span).to.eq(spans[i])
 
-        cy.ng("binding", "phone")
+      describe "errors", ->
+        beforeEach ->
+          @sandbox.stub cy.runner, "uncaught"
 
-      it "throws when binding cannot be found", (done) ->
-        cy.on "fail", (err) ->
-          expect(err.message).to.include "Could not find element for binding: 'not-found'!"
-          done()
+        it "throws when cannot find angular", (done) ->
+          delete cy._window().angular
 
-        cy.ng("binding", "not-found")
-
-      it "cancels additional finds when aborted", (done) ->
-        _.delay ->
-          Cypress.abort()
-        , 200
-
-        cy.ng("binding", "not-found")
-
-        cy.on "fail", (err) ->
-          done(err)
-
-        cy.on "cancel", =>
-          retry = @sandbox.spy cy, "_retry"
-          _.delay ->
-            expect(retry.callCount).to.eq 0
+          cy.on "fail", (err) ->
+            expect(err.message).to.include "Angular global was not found in your window! You cannot use .ng() methods without angular."
             done()
-          , 100
 
-  context "#findByRepeater", ->
-    ngPrefixes = {"phone in phones": 'ng-', "phone2 in phones": 'ng_', "phone3 in phones": 'data-ng-', "phone4 in phones": 'x-ng-'}
+          cy.ng("binding", "phone")
 
-    beforeEach ->
-      ## make this test timeout quickly so
-      ## we dont have to wait so damn long
-      @currentTest.timeout(800)
-      @loadDom("html/angular").then @setup
+        it "throws when binding cannot be found", (done) ->
+          cy.on "fail", (err) ->
+            expect(err.message).to.include "Could not find element for binding: 'not-found'!"
+            done()
 
-    _.each ngPrefixes, (prefix, attr) ->
-      it "finds by #{prefix}repeat", ->
-        ## make sure we find this element
-        li = cy.$("[#{prefix}repeat*='#{attr}']")
-        expect(li).to.exist
+          cy.ng("binding", "not-found")
 
-        ## and make sure they are the same DOM element
-        cy.ng("repeater", attr).then ($li) ->
+        it "cancels additional finds when aborted", (done) ->
+          _.delay ->
+            Cypress.abort()
+          , 200
+
+          cy.ng("binding", "not-found")
+
+          cy.on "fail", (err) ->
+            done(err)
+
+          cy.on "cancel", =>
+            retry = @sandbox.spy cy, "_retry"
+            _.delay ->
+              expect(retry.callCount).to.eq 0
+              done()
+            , 100
+
+    context "find by repeater", ->
+      ngPrefixes = {"phone in phones": 'ng-', "phone2 in phones": 'ng_', "phone3 in phones": 'data-ng-', "phone4 in phones": 'x-ng-'}
+
+      beforeEach ->
+        ## make this test timeout quickly so
+        ## we dont have to wait so damn long
+        @currentTest.timeout(800)
+        @loadDom("html/angular").then @setup
+
+      _.each ngPrefixes, (prefix, attr) ->
+        it "finds by #{prefix}repeat", ->
+          ## make sure we find this element
+          li = cy.$("[#{prefix}repeat*='#{attr}']")
+          expect(li).to.exist
+
+          ## and make sure they are the same DOM element
+          cy.ng("repeater", attr).then ($li) ->
+            expect($li.get(0)).to.eq li.get(0)
+
+      it "favors earlier items in the array when duplicates are found", ->
+        li = cy.$("[ng-repeat*='foo in foos']")
+
+        cy.ng("repeater", "foo in foos").then ($li) ->
           expect($li.get(0)).to.eq li.get(0)
 
-    it "favors earlier items in the array when duplicates are found", ->
-      li = cy.$("[ng-repeat*='foo in foos']")
+      it "waits to find a missing input", ->
+        missingLi = $("<li />", "data-ng-repeat": "li in lis")
 
-      cy.ng("repeater", "foo in foos").then ($li) ->
-        expect($li.get(0)).to.eq li.get(0)
+        ## wait until we're ALMOST about to time out before
+        ## appending the missingInput
+        _.delay =>
+          cy.$("body").append(missingLi)
+          # debugger
+        , @test.timeout() - 300
 
-    it "waits to find a missing input", ->
-      missingLi = $("<li />", "data-ng-repeat": "li in lis")
+        cy.ng("repeater", "li in lis").then ($li) ->
+          expect($li).to.match missingLi
 
-      ## wait until we're ALMOST about to time out before
-      ## appending the missingInput
-      _.delay =>
-        cy.$("body").append(missingLi)
-        # debugger
-      , @test.timeout() - 300
+      describe "errors", ->
+        beforeEach ->
+          @sandbox.stub cy.runner, "uncaught"
 
-      cy.ng("repeater", "li in lis").then ($li) ->
-        expect($li).to.match missingLi
+        it "throws when repeater cannot be found", (done) ->
+          cy.ng("repeater", "not-found")
 
-    describe "errors", ->
-      beforeEach ->
-        @sandbox.stub cy.runner, "uncaught"
-
-      it "throws when repeater cannot be found", (done) ->
-        cy.ng("repeater", "not-found")
-
-        cy.on "fail", (err) ->
-          expect(err.message).to.include "Could not find element for repeater: 'not-found'.  Searched [ng-repeat*='not-found'], [ng_repeat*='not-found'], [data-ng-repeat*='not-found'], [x-ng-repeat*='not-found']."
-          done()
-
-      it "cancels additional finds when aborted", (done) ->
-        _.delay ->
-          Cypress.abort()
-        , 200
-
-        cy.ng("repeater", "not-found")
-
-        cy.on "fail", (err) ->
-          done(err)
-
-        cy.on "cancel", =>
-          retry = @sandbox.spy cy, "_retry"
-          _.delay ->
-            expect(retry.callCount).to.eq 0
+          cy.on "fail", (err) ->
+            expect(err.message).to.include "Could not find element for repeater: 'not-found'.  Searched [ng-repeat*='not-found'], [ng_repeat*='not-found'], [data-ng-repeat*='not-found'], [x-ng-repeat*='not-found']."
             done()
-          , 100
 
-      it "throws when cannot find angular", (done) ->
-        delete cy._window().angular
+        it "cancels additional finds when aborted", (done) ->
+          _.delay ->
+            Cypress.abort()
+          , 200
 
-        cy.on "fail", (err) ->
-          expect(err.message).to.include "Angular global was not found in your window! You cannot use .ng() methods without angular."
-          done()
+          cy.ng("repeater", "not-found")
 
-        cy.ng("repeater", "phone in phones")
+          cy.on "fail", (err) ->
+            done(err)
 
-  context "#findByModel", ->
-    ngPrefixes = {query: 'ng-', query2: 'ng_', query3: 'data-ng-', query4: 'x-ng-'}
+          cy.on "cancel", =>
+            retry = @sandbox.spy cy, "_retry"
+            _.delay ->
+              expect(retry.callCount).to.eq 0
+              done()
+            , 100
 
-    beforeEach ->
-      @currentTest.timeout(800)
-      @loadDom("html/angular").then @setup
+        it "throws when cannot find angular", (done) ->
+          delete cy._window().angular
 
-    _.each ngPrefixes, (prefix, attr) ->
-      it "finds element by #{prefix}model", ->
-        ## make sure we find this element
-        input = cy.$("[#{prefix}model=#{attr}]")
-        expect(input).to.exist
+          cy.on "fail", (err) ->
+            expect(err.message).to.include "Angular global was not found in your window! You cannot use .ng() methods without angular."
+            done()
 
-        ## and make sure they are the same DOM element
-        cy.ng("model", attr).then ($input) ->
+          cy.ng("repeater", "phone in phones")
+
+    context "find by model", ->
+      ngPrefixes = {query: 'ng-', query2: 'ng_', query3: 'data-ng-', query4: 'x-ng-'}
+
+      beforeEach ->
+        @currentTest.timeout(800)
+        @loadDom("html/angular").then @setup
+
+      _.each ngPrefixes, (prefix, attr) ->
+        it "finds element by #{prefix}model", ->
+          ## make sure we find this element
+          input = cy.$("[#{prefix}model=#{attr}]")
+          expect(input).to.exist
+
+          ## and make sure they are the same DOM element
+          cy.ng("model", attr).then ($input) ->
+            expect($input.get(0)).to.eq input.get(0)
+
+      it "favors earlier items in the array when duplicates are found", ->
+        input = cy.$("[ng-model=foo]")
+
+        cy.ng("model", "foo").then ($input) ->
           expect($input.get(0)).to.eq input.get(0)
 
-    it "favors earlier items in the array when duplicates are found", ->
-      input = cy.$("[ng-model=foo]")
+      it "waits to find a missing input", ->
+        missingInput = $("<input />", "data-ng-model": "missing-input")
 
-      cy.ng("model", "foo").then ($input) ->
-        expect($input.get(0)).to.eq input.get(0)
+        ## wait until we're ALMOST about to time out before
+        ## appending the missingInput
+        _.delay =>
+          cy.$("body").append(missingInput)
+        , @test.timeout() - 300
 
-    it "waits to find a missing input", ->
-      missingInput = $("<input />", "data-ng-model": "missing-input")
+        cy.ng("model", "missing-input").then ($input) ->
+          expect($input).to.match missingInput
 
-      ## wait until we're ALMOST about to time out before
-      ## appending the missingInput
-      _.delay =>
-        cy.$("body").append(missingInput)
-      , @test.timeout() - 300
+      describe "errors", ->
+        beforeEach ->
+          @sandbox.stub cy.runner, "uncaught"
 
-      cy.ng("model", "missing-input").then ($input) ->
-        expect($input).to.match missingInput
+        it "throws when model cannot be found", (done) ->
+          cy.ng("model", "not-found")
 
-    describe "errors", ->
-      beforeEach ->
-        @sandbox.stub cy.runner, "uncaught"
-
-      it "throws when model cannot be found", (done) ->
-        cy.ng("model", "not-found")
-
-        cy.on "fail", (err) ->
-          expect(err.message).to.include "Could not find element for model: 'not-found'.  Searched [ng-model='not-found'], [ng_model='not-found'], [data-ng-model='not-found'], [x-ng-model='not-found']."
-          done()
-
-      it "cancels additional finds when aborted", (done) ->
-        _.delay ->
-          Cypress.abort()
-        , 200
-
-        cy.ng("model", "not-found")
-
-        cy.on "fail", (err) ->
-          done(err)
-
-        cy.on "cancel", =>
-          retry = @sandbox.spy cy, "_retry"
-          _.delay ->
-            expect(retry.callCount).to.eq 0
+          cy.on "fail", (err) ->
+            expect(err.message).to.include "Could not find element for model: 'not-found'.  Searched [ng-model='not-found'], [ng_model='not-found'], [data-ng-model='not-found'], [x-ng-model='not-found']."
             done()
-          , 100
 
-      it "throws when cannot find angular", (done) ->
-        delete cy._window().angular
+        it "cancels additional finds when aborted", (done) ->
+          _.delay ->
+            Cypress.abort()
+          , 200
 
-        cy.on "fail", (err) ->
-          expect(err.message).to.include "Angular global was not found in your window! You cannot use .ng() methods without angular."
-          done()
+          cy.ng("model", "not-found")
 
-        cy.ng("model", "query")
+          cy.on "fail", (err) ->
+            done(err)
+
+          cy.on "cancel", =>
+            retry = @sandbox.spy cy, "_retry"
+            _.delay ->
+              expect(retry.callCount).to.eq 0
+              done()
+            , 100
+
+        it "throws when cannot find angular", (done) ->
+          delete cy._window().angular
+
+          cy.on "fail", (err) ->
+            expect(err.message).to.include "Angular global was not found in your window! You cannot use .ng() methods without angular."
+            done()
+
+          cy.ng("model", "query")
 
   context "#visit", ->
     it "returns a promise", ->

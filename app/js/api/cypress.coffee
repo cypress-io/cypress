@@ -107,11 +107,11 @@ window.Cypress = do ($, _) ->
 
       switch type
         when "model"
-          @findByModel(selector, options)
+          @_findByNgAttr("model", "model=", selector, options)
         when "repeater"
-          @findByRepeater(selector, options)
+          @_findByNgAttr("repeater", "repeat*=", selector, options)
         when "binding"
-          @findByBinding(selector, options)
+          @_findByNgBinding(selector, options)
 
     click: ->
       subject = @_ensureDomSubject()
@@ -254,8 +254,6 @@ window.Cypress = do ($, _) ->
     find: (selector, options = {}) ->
       _.defaults options,
         retry: true
-
-      console.warn "finding", selector, options.error
 
       $el = @$(selector)
 
@@ -835,7 +833,7 @@ window.Cypress = do ($, _) ->
       @clearTimeout(@prop("timerId"))
       @prop "timerId", _.delay(fn, ms)
 
-    findByBinding: (binding, options) ->
+    _findByNgBinding: (binding, options) ->
       selector = ".ng-binding"
 
       angular = @_window().angular
@@ -860,35 +858,12 @@ window.Cypress = do ($, _) ->
 
       @_action("find", selector, options)
 
-    _findByNgAttr: (attr, selector, options) ->
-
-    findByRepeater: (repeater, options) ->
+    _findByNgAttr: (name, attr, el, options) ->
       selectors = []
-      error = "Could not find element for repeater: '#{repeater}'.  Searched "
+      error = "Could not find element for #{name}: '#{el}'.  Searched "
 
       finds = _.map ngPrefixes, (prefix) =>
-        selector = "[#{prefix}repeat*='#{repeater}']"
-        selectors.push(selector)
-
-        @_action("find", selector, options)
-
-      error += selectors.join(", ") + "."
-
-      Promise
-        .any(finds)
-        .cancellable()
-        .catch Promise.CancellationError, (err) =>
-          _(finds).invoke("cancel")
-          throw err
-        .catch Promise.AggregateError, (err) =>
-          @throwErr error
-
-    findByModel: (model, options) ->
-      selectors = []
-      error = "Could not find element for model: '#{model}'.  Searched "
-
-      finds = _.map ngPrefixes, (prefix) =>
-        selector = "[#{prefix}model='" + model + "']"
+        selector = "[#{prefix}#{attr}'#{el}']"
         selectors.push(selector)
 
         @_action("find", selector, options)
