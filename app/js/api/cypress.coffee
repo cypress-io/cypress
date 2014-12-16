@@ -103,6 +103,8 @@ window.Cypress = do ($, _) ->
     noop: (obj) -> obj
 
     ng: (type, selector, options = {}) ->
+      @throwErr "Angular global was not found in your window! You cannot use .ng() methods without angular." if not @_window().angular
+
       switch type
         when "model"
           @findByModel(selector, options)
@@ -837,6 +839,8 @@ window.Cypress = do ($, _) ->
 
       angular = @_window().angular
 
+      @throwErr "Angular global was not found in your window! You cannot use .ng() methods without angular." if not angular
+
       options.df = $.Deferred()
       options.df.done ($elements) ->
         filtered = $elements.filter (index) ->
@@ -850,6 +854,8 @@ window.Cypress = do ($, _) ->
           df.resolve(filtered)
 
       @_action("find", selector, null, options)
+
+    _findByNgAttr: (attr, selector, options) ->
 
     findByRepeater: (repeater, options) ->
       selectors = []

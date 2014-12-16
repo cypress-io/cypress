@@ -5,8 +5,8 @@ describe "Cypress API", ->
   before ->
     Cypress.start()
 
-    @loadDom = =>
-      loadFixture("html/dom").done (iframe) =>
+    @loadDom = (fixture = "html/dom") =>
+      loadFixture(fixture).done (iframe) =>
         @iframe = $(iframe)
         @head = @iframe.contents().find("head").children().prop("outerHTML")
         @body = @iframe.contents().find("body").children().prop("outerHTML")
@@ -18,7 +18,7 @@ describe "Cypress API", ->
       @iframe.contents().find("head").html(@head)
       @iframe.contents().find("body").html(@body)
 
-      Cypress.set(@currentTest)
+      Cypress.set(@currentTest) if @currentTest
       Cypress.setup(runner, @iframe, {}, ->)
 
     ## if we've changed the src by navigating
@@ -35,6 +35,24 @@ describe "Cypress API", ->
   after ->
     Cypress.stop()
 
+  context "#findByBinding", ->
+    beforeEach ->
+      @currentTest.timeout(800)
+      @loadDom("html/angular").then @setup
+
+    describe "errors", ->
+      beforeEach ->
+        @sandbox.stub cy.runner, "uncaught"
+
+      it "throws when cannot find angular", (done) ->
+        delete cy._window().angular
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "Angular global was not found in your window! You cannot use .ng() methods without angular."
+          done()
+
+        cy.ng("binding", "phone")
+
   context "#findByRepeater", ->
     ngPrefixes = {"phone in phones": 'ng-', "phone2 in phones": 'ng_', "phone3 in phones": 'data-ng-', "phone4 in phones": 'x-ng-'}
 
@@ -42,6 +60,7 @@ describe "Cypress API", ->
       ## make this test timeout quickly so
       ## we dont have to wait so damn long
       @currentTest.timeout(800)
+      @loadDom("html/angular").then @setup
 
     _.each ngPrefixes, (prefix, attr) ->
       it "finds by #{prefix}repeat", ->
@@ -100,13 +119,21 @@ describe "Cypress API", ->
             done()
           , 100
 
+      it "throws when cannot find angular", (done) ->
+        delete cy._window().angular
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "Angular global was not found in your window! You cannot use .ng() methods without angular."
+          done()
+
+        cy.ng("repeater", "phone in phones")
+
   context "#findByModel", ->
     ngPrefixes = {query: 'ng-', query2: 'ng_', query3: 'data-ng-', query4: 'x-ng-'}
 
     beforeEach ->
-      ## make this test timeout quickly so
-      ## we dont have to wait so damn long
       @currentTest.timeout(800)
+      @loadDom("html/angular").then @setup
 
     _.each ngPrefixes, (prefix, attr) ->
       it "finds element by #{prefix}model", ->
@@ -163,6 +190,15 @@ describe "Cypress API", ->
             expect(retry.callCount).to.eq 0
             done()
           , 100
+
+      it "throws when cannot find angular", (done) ->
+        delete cy._window().angular
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "Angular global was not found in your window! You cannot use .ng() methods without angular."
+          done()
+
+        cy.ng("model", "query")
 
   context "#visit", ->
     it "returns a promise", ->
