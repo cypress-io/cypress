@@ -107,8 +107,7 @@ window.Cypress = do ($, _) ->
         when "model"
           @findByModel(selector, options)
         when "repeater"
-          _.each ngPrefixes, (prefix) =>
-            @findByRepeater(selector, options)
+          @findByRepeater(selector, options)
         when "binding"
           @findByBinding(options, selector)
 
@@ -852,23 +851,26 @@ window.Cypress = do ($, _) ->
 
       @_action("find", selector, null, options)
 
-    findByRepeater: (options, prefix, repeater) ->
-      options = _(options).clone()
+    findByRepeater: (repeater, options) ->
+      selectors = []
+      error = "Could not find element for repeater: '#{repeater}'.  Searched "
 
-      df = options.df
+      finds = _.map ngPrefixes, (prefix) =>
+        selector = "[#{prefix}repeat*='#{repeater}']"
+        selectors.push(selector)
 
-      attr = prefix + "repeat"
-      selector = "[" + attr + "]"
+        @_action("find", selector, options)
 
-      options.df = $.Deferred()
-      options.df.done ($elements) ->
-        filtered = $elements.filter (index) ->
-          _.str.include($(@).attr(attr), repeater)
+      error += selectors.join(", ") + "."
 
-        if filtered.length
-          df.resolve(filtered)
-
-      @_action("find", selector, null, options)
+      Promise
+        .any(finds)
+        .cancellable()
+        .catch Promise.CancellationError, (err) =>
+          _(finds).invoke("cancel")
+          throw err
+        .catch Promise.AggregateError, (err) =>
+          @throwErr error
 
     findByModel: (model, options) ->
       selectors = []

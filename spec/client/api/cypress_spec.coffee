@@ -1,8 +1,6 @@
 getNames = (queue) ->
   _(queue).pluck("name")
 
-ngPrefixes = {query: 'ng-', query2: 'ng_', query3: 'data-ng-', query4: 'x-ng-'}
-
 describe "Cypress API", ->
   before ->
     Cypress.start()
@@ -37,7 +35,74 @@ describe "Cypress API", ->
   after ->
     Cypress.stop()
 
+  context "#findByRepeater", ->
+    ngPrefixes = {"phone in phones": 'ng-', "phone2 in phones": 'ng_', "phone3 in phones": 'data-ng-', "phone4 in phones": 'x-ng-'}
+
+    beforeEach ->
+      ## make this test timeout quickly so
+      ## we dont have to wait so damn long
+      @currentTest.timeout(800)
+
+    _.each ngPrefixes, (prefix, attr) ->
+      it "finds by #{prefix}repeat", ->
+        ## make sure we find this element
+        li = cy.$("[#{prefix}repeat*='#{attr}']")
+        expect(li).to.exist
+
+        ## and make sure they are the same DOM element
+        cy.ng("repeater", attr).then ($li) ->
+          expect($li.get(0)).to.eq li.get(0)
+
+    it "favors earlier items in the array when duplicates are found", ->
+      li = cy.$("[ng-repeat*='foo in foos']")
+
+      cy.ng("repeater", "foo in foos").then ($li) ->
+        expect($li.get(0)).to.eq li.get(0)
+
+    it "waits to find a missing input", ->
+      missingLi = $("<li />", "data-ng-repeat": "li in lis")
+
+      ## wait until we're ALMOST about to time out before
+      ## appending the missingInput
+      _.delay =>
+        cy.$("body").append(missingLi)
+        # debugger
+      , @test.timeout() - 300
+
+      cy.ng("repeater", "li in lis").then ($li) ->
+        expect($li).to.match missingLi
+
+    describe "errors", ->
+      beforeEach ->
+        @sandbox.stub cy.runner, "uncaught"
+
+      it "throws when repeater cannot be found", (done) ->
+        cy.ng("repeater", "not-found")
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "Could not find element for repeater: 'not-found'.  Searched [ng-repeat*='not-found'], [ng_repeat*='not-found'], [data-ng-repeat*='not-found'], [x-ng-repeat*='not-found']."
+          done()
+
+      it "cancels additional finds when aborted", (done) ->
+        _.delay ->
+          Cypress.abort()
+        , 200
+
+        cy.ng("repeater", "not-found")
+
+        cy.on "fail", (err) ->
+          done(err)
+
+        cy.on "cancel", =>
+          retry = @sandbox.spy cy, "_retry"
+          _.delay ->
+            expect(retry.callCount).to.eq 0
+            done()
+          , 100
+
   context "#findByModel", ->
+    ngPrefixes = {query: 'ng-', query2: 'ng_', query3: 'data-ng-', query4: 'x-ng-'}
+
     beforeEach ->
       ## make this test timeout quickly so
       ## we dont have to wait so damn long

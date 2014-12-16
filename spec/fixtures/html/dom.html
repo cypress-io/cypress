@@ -115,6 +115,27 @@
 
         <input ng-model="foo">
         <input data-ng-model="foo">
+
+        <ul class="phones">
+          <li ng-repeat="phone in phones | filter:query | orderBy:orderProp"></li>
+        </ul>
+
+        <ul class="phones">
+          <li ng_repeat="phone2 in phones | filter:query | orderBy:orderProp"></li>
+        </ul>
+
+        <ul class="phones">
+          <li data-ng-repeat="phone3 in phones | filter:query | orderBy:orderProp"></li>
+        </ul>
+
+        <ul class="phones">
+          <li x-ng-repeat="phone4 in phones | filter:query | orderBy:orderProp"></li>
+        </ul>
+
+        <ul class="phones">
+          <li ng-repeat="foo in foos"></li>
+          <li x-ng-repeat="foo in foos"></li>
+        </ul>
       </div>
     </div>
   </body>
