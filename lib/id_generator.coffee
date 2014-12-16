@@ -3,7 +3,7 @@ path            = require 'path'
 gutil           = require 'gulp-util'
 phantom         = require 'node-phantom-simple'
 Promise         = require 'bluebird'
-keys            = require './keys'
+keys            = new (require('./keys'))
 fs              = Promise.promisifyAll(require('fs'))
 
 testIdRegExp     = /\[(.{3})\]$/
