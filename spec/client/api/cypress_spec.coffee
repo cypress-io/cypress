@@ -38,6 +38,42 @@ describe "Cypress API", ->
   after ->
     Cypress.stop()
 
+  context "#clearLocalStorage", ->
+    it "is defined", ->
+      expect(cy.clearLocalStorage).to.be.defined
+
+    it "passes keys onto Cypress.LocalStorage.clear", ->
+      clear = @sandbox.spy Cypress.LocalStorage, "clear"
+
+      cy.clearLocalStorage("foo").then ->
+        expect(clear).to.be.calledWith "foo"
+
+    it "sets the storages", ->
+      localStorage = window.localStorage
+      remoteStorage = cy._window().localStorage
+
+      setStorages = @sandbox.spy Cypress.LocalStorage, "setStorages"
+
+      cy.clearLocalStorage().then ->
+        expect(setStorages).to.be.calledWith localStorage, remoteStorage
+
+    it "unsets the storages", ->
+      unsetStorages = @sandbox.spy Cypress.LocalStorage, "unsetStorages"
+
+      cy.clearLocalStorage().then ->
+        expect(unsetStorages).to.be.called
+
+    describe "errors", ->
+      beforeEach ->
+        @sandbox.stub cy.runner, "uncaught"
+
+      it "throws when being passed a non string or regexp", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "cy.clearLocalStorage() must be called with either a string or regular expression!"
+          done()
+
+        cy.clearLocalStorage({})
+
   context "#ng", ->
     context "find by binding", ->
       beforeEach ->

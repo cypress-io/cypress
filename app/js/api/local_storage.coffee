@@ -1,27 +1,33 @@
 ## attach to Eclectus global
 
-Eclectus.LocalStorage = do ($, _, Eclectus) ->
+Cypress.LocalStorage = do (_) ->
 
   eclRegExp = /^ecl-/
 
   specialKeywords = /(debug)/
 
-  class LocalStorage extends Eclectus.Command
-    config:
-      type: "localStorage"
 
-    initialize: ->
-      @canBeParent = false
+  return {
+    localStorage: null
+    remoteStorage: null
+
+    # config:
+      # type: "localStorage"
+
+    # initialize: ->
+    #   @canBeParent = false
 
     clear: (keys) ->
-      ## make sure we always have an array here
-      keys = [].concat(keys)
+      throw new Error("Cypress.LocalStorage is missing local and remote storage references!") if not @localStorage or not @remoteStorage
+
+      ## make sure we always have an array here with all falsy values removed
+      keys = _.compact [].concat(keys)
 
       ## we have to iterate over both our remoteIframes localStorage
       ## and our window localStorage to remove items from it
       ## due to a bug in IE that does not properly propogate
       ## changes to an iframes localStorage
-      _.each [@$remoteIframe.prop("contentWindow").localStorage, localStorage], (storage) =>
+      _.each [@remoteStorage, @localStorage], (storage) =>
 
         _.chain(storage)
         .keys()
@@ -34,9 +40,18 @@ Eclectus.LocalStorage = do ($, _, Eclectus) ->
           else
             @_removeItem(storage, item)
 
-      @emit
-        method: "clear"
-        message: keys.join(", ")
+      # @emit
+      #   method: "clear"
+      #   message: keys.join(", ")
+
+    setStorages: (local, remote) ->
+      @localStorage = local
+      @remoteStorage = remote
+      @
+
+    unsetStorages: ->
+      @localStorage = @remoteStorage = null
+      @
 
     _removeItem: (storage, item) ->
       storage.removeItem(item)
@@ -51,8 +66,6 @@ Eclectus.LocalStorage = do ($, _, Eclectus) ->
       switch
         when _.isRegExp(key) then key
         when _.isString(key) then new RegExp("^" + key + "$")
-        else
-          throw new Error("Arguments to Ecl.clear() must be a regular expression or string!")
 
     ## if item matches by string or regex
     ## any key in our keys then callback
@@ -61,5 +74,4 @@ Eclectus.LocalStorage = do ($, _, Eclectus) ->
         re = @_normalizeRegExpOrString(key)
 
         return fn(item) if re.test(item)
-
-  return LocalStorage
+  }
