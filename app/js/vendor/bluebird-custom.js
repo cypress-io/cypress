@@ -1,7 +1,7 @@
 /**
  * bluebird build version 2.3.11
- * Features enabled: core, call_get, cancel, timers
- * Features disabled: race, generators, map, nodeify, promisify, props, reduce, settle, some, progress, using, filter, any, each
+ * Features enabled: core, call_get, some, cancel, any, timers
+ * Features disabled: race, generators, map, nodeify, promisify, props, reduce, settle, progress, using, filter, each
 */
 /**
  * @preserve The MIT License (MIT)
@@ -28,6 +28,56 @@
  *
  */
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.Promise=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
+/**
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 Petka Antonov
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:</p>
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ */
+"use strict";
+module.exports = function(Promise) {
+var SomePromiseArray = Promise._SomePromiseArray;
+function Promise$_Any(promises) {
+    var ret = new SomePromiseArray(promises);
+    var promise = ret.promise();
+    if (promise.isRejected()) {
+        return promise;
+    }
+    ret.setHowMany(1);
+    ret.setUnwrap();
+    ret.init();
+    return promise;
+}
+
+Promise.any = function Promise$Any(promises) {
+    return Promise$_Any(promises);
+};
+
+Promise.prototype.any = function Promise$any() {
+    return Promise$_Any(this);
+};
+
+};
+
+},{}],2:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -142,7 +192,7 @@ Async.prototype._reset = function Async$_reset() {
 
 module.exports = new Async();
 
-},{"./queue.js":16,"./schedule.js":17,"./util.js":21}],2:[function(_dereq_,module,exports){
+},{"./queue.js":17,"./schedule.js":18,"./util.js":23}],3:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -170,7 +220,7 @@ module.exports = new Async();
 "use strict";
 var Promise = _dereq_("./promise.js")();
 module.exports = Promise;
-},{"./promise.js":13}],3:[function(_dereq_,module,exports){
+},{"./promise.js":14}],4:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -293,7 +343,7 @@ Promise.prototype.get = function Promise$get(propertyName) {
 };
 };
 
-},{"./util.js":21}],4:[function(_dereq_,module,exports){
+},{"./util.js":23}],5:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -373,7 +423,7 @@ function Promise$fork(didFulfill, didReject, didProgress) {
 };
 };
 
-},{"./async.js":1,"./errors.js":8}],5:[function(_dereq_,module,exports){
+},{"./async.js":2,"./errors.js":9}],6:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -619,7 +669,7 @@ var captureStackTrace = (function stackDetection() {
 return CapturedTrace;
 };
 
-},{"./es5.js":10,"./util.js":21}],6:[function(_dereq_,module,exports){
+},{"./es5.js":11,"./util.js":23}],7:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -717,7 +767,7 @@ CatchFilter.prototype.doFilter = function CatchFilter$_doFilter(e) {
 return CatchFilter;
 };
 
-},{"./errors.js":8,"./es5.js":10,"./util.js":21}],7:[function(_dereq_,module,exports){
+},{"./errors.js":9,"./es5.js":11,"./util.js":23}],8:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -799,7 +849,7 @@ function Promise$thenThrow(reason) {
 };
 };
 
-},{"./util.js":21}],8:[function(_dereq_,module,exports){
+},{"./util.js":23}],9:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -948,7 +998,7 @@ module.exports = {
     canAttach: canAttach
 };
 
-},{"./es5.js":10,"./util.js":21}],9:[function(_dereq_,module,exports){
+},{"./es5.js":11,"./util.js":23}],10:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -990,7 +1040,7 @@ function apiRejection(msg) {
 return apiRejection;
 };
 
-},{"./errors.js":8}],10:[function(_dereq_,module,exports){
+},{"./errors.js":9}],11:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -1081,7 +1131,7 @@ if (isES5) {
     };
 }
 
-},{}],11:[function(_dereq_,module,exports){
+},{}],12:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -1205,7 +1255,7 @@ Promise.prototype.tap = function Promise$tap(handler) {
 };
 };
 
-},{"./util.js":21}],12:[function(_dereq_,module,exports){
+},{"./util.js":23}],13:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -1331,7 +1381,7 @@ Promise.join = function Promise$Join() {
 
 };
 
-},{"./util.js":21}],13:[function(_dereq_,module,exports){
+},{"./util.js":23}],14:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -2409,16 +2459,20 @@ Promise.Promise = Promise;
 _dereq_('./cancel.js')(Promise,INTERNAL);
 _dereq_('./cancel.js')(Promise,INTERNAL);
 _dereq_('./cancel.js')(Promise,INTERNAL);
+_dereq_('./cancel.js')(Promise,INTERNAL);
+_dereq_('./cancel.js')(Promise,INTERNAL);
 _dereq_('./timers.js')(Promise,INTERNAL,cast);
 _dereq_('./call_get.js')(Promise);
+_dereq_('./some.js')(Promise,PromiseArray,apiRejection);
 _dereq_('./cancel.js')(Promise,INTERNAL);
+_dereq_('./any.js')(Promise,PromiseArray);
 
 Promise.prototype = Promise.prototype;
 return Promise;
 
 };
 
-},{"./async.js":1,"./call_get.js":3,"./cancel.js":4,"./captured_trace.js":5,"./catch_filter.js":6,"./direct_resolve.js":7,"./errors.js":8,"./errors_api_rejection":9,"./finally.js":11,"./join.js":12,"./promise_array.js":14,"./promise_resolver.js":15,"./synchronous_inspection.js":18,"./thenables.js":19,"./timers.js":20,"./util.js":21}],14:[function(_dereq_,module,exports){
+},{"./any.js":1,"./async.js":2,"./call_get.js":4,"./cancel.js":5,"./captured_trace.js":6,"./catch_filter.js":7,"./direct_resolve.js":8,"./errors.js":9,"./errors_api_rejection":10,"./finally.js":12,"./join.js":13,"./promise_array.js":15,"./promise_resolver.js":16,"./some.js":19,"./synchronous_inspection.js":20,"./thenables.js":21,"./timers.js":22,"./util.js":23}],15:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -2624,7 +2678,7 @@ function PromiseArray$getActualLength(len) {
 return PromiseArray;
 };
 
-},{"./errors.js":8,"./util.js":21}],15:[function(_dereq_,module,exports){
+},{"./errors.js":9,"./util.js":23}],16:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -2786,7 +2840,7 @@ function PromiseResolver$_setCarriedStackTrace(trace) {
 
 module.exports = PromiseResolver;
 
-},{"./async.js":1,"./errors.js":8,"./es5.js":10,"./util.js":21}],16:[function(_dereq_,module,exports){
+},{"./async.js":2,"./errors.js":9,"./es5.js":11,"./util.js":23}],17:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -2905,7 +2959,7 @@ Queue.prototype._resizeTo = function Queue$_resizeTo(capacity) {
 
 module.exports = Queue;
 
-},{}],17:[function(_dereq_,module,exports){
+},{}],18:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -2970,7 +3024,172 @@ else if (typeof setTimeout !== "undefined") {
 else throw new Error("no async scheduler available");
 module.exports = schedule;
 
-},{}],18:[function(_dereq_,module,exports){
+},{}],19:[function(_dereq_,module,exports){
+/**
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 Petka Antonov
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:</p>
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ */
+"use strict";
+module.exports =
+function(Promise, PromiseArray, apiRejection) {
+var util = _dereq_("./util.js");
+var RangeError = _dereq_("./errors.js").RangeError;
+var AggregateError = _dereq_("./errors.js").AggregateError;
+var isArray = util.isArray;
+
+
+function SomePromiseArray(values) {
+    this.constructor$(values);
+    this._howMany = 0;
+    this._unwrap = false;
+    this._initialized = false;
+}
+util.inherits(SomePromiseArray, PromiseArray);
+
+SomePromiseArray.prototype._init = function SomePromiseArray$_init() {
+    if (!this._initialized) {
+        return;
+    }
+    if (this._howMany === 0) {
+        this._resolve([]);
+        return;
+    }
+    this._init$(void 0, -5);
+    var isArrayResolved = isArray(this._values);
+    if (!this._isResolved() &&
+        isArrayResolved &&
+        this._howMany > this._canPossiblyFulfill()) {
+        this._reject(this._getRangeError(this.length()));
+    }
+};
+
+SomePromiseArray.prototype.init = function SomePromiseArray$init() {
+    this._initialized = true;
+    this._init();
+};
+
+SomePromiseArray.prototype.setUnwrap = function SomePromiseArray$setUnwrap() {
+    this._unwrap = true;
+};
+
+SomePromiseArray.prototype.howMany = function SomePromiseArray$howMany() {
+    return this._howMany;
+};
+
+SomePromiseArray.prototype.setHowMany =
+function SomePromiseArray$setHowMany(count) {
+    if (this._isResolved()) return;
+    this._howMany = count;
+};
+
+SomePromiseArray.prototype._promiseFulfilled =
+function SomePromiseArray$_promiseFulfilled(value) {
+    if (this._isResolved()) return;
+    this._addFulfilled(value);
+    if (this._fulfilled() === this.howMany()) {
+        this._values.length = this.howMany();
+        if (this.howMany() === 1 && this._unwrap) {
+            this._resolve(this._values[0]);
+        } else {
+            this._resolve(this._values);
+        }
+    }
+
+};
+SomePromiseArray.prototype._promiseRejected =
+function SomePromiseArray$_promiseRejected(reason) {
+    if (this._isResolved()) return;
+    this._addRejected(reason);
+    if (this.howMany() > this._canPossiblyFulfill()) {
+        var e = new AggregateError();
+        for (var i = this.length(); i < this._values.length; ++i) {
+            e.push(this._values[i]);
+        }
+        this._reject(e);
+    }
+};
+
+SomePromiseArray.prototype._fulfilled = function SomePromiseArray$_fulfilled() {
+    return this._totalResolved;
+};
+
+SomePromiseArray.prototype._rejected = function SomePromiseArray$_rejected() {
+    return this._values.length - this.length();
+};
+
+SomePromiseArray.prototype._addRejected =
+function SomePromiseArray$_addRejected(reason) {
+    this._values.push(reason);
+};
+
+SomePromiseArray.prototype._addFulfilled =
+function SomePromiseArray$_addFulfilled(value) {
+    this._values[this._totalResolved++] = value;
+};
+
+SomePromiseArray.prototype._canPossiblyFulfill =
+function SomePromiseArray$_canPossiblyFulfill() {
+    return this.length() - this._rejected();
+};
+
+SomePromiseArray.prototype._getRangeError =
+function SomePromiseArray$_getRangeError(count) {
+    var message = "Input array must contain at least " +
+            this._howMany + " items but contains only " + count + " items";
+    return new RangeError(message);
+};
+
+SomePromiseArray.prototype._resolveEmptyArray =
+function SomePromiseArray$_resolveEmptyArray() {
+    this._reject(this._getRangeError(0));
+};
+
+function Promise$_Some(promises, howMany) {
+    if ((howMany | 0) !== howMany || howMany < 0) {
+        return apiRejection("expecting a positive integer");
+    }
+    var ret = new SomePromiseArray(promises);
+    var promise = ret.promise();
+    if (promise.isRejected()) {
+        return promise;
+    }
+    ret.setHowMany(howMany);
+    ret.init();
+    return promise;
+}
+
+Promise.some = function Promise$Some(promises, howMany) {
+    return Promise$_Some(promises, howMany);
+};
+
+Promise.prototype.some = function Promise$some(howMany) {
+    return Promise$_Some(this, howMany);
+};
+
+Promise._SomePromiseArray = SomePromiseArray;
+};
+
+},{"./errors.js":9,"./util.js":23}],20:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -3050,7 +3269,7 @@ Promise.prototype.isResolved = function Promise$isResolved() {
 Promise.PromiseInspection = PromiseInspection;
 };
 
-},{}],19:[function(_dereq_,module,exports){
+},{}],21:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -3187,7 +3406,7 @@ function Promise$_doThenable(x, then, originalPromise) {
 return Promise$_Cast;
 };
 
-},{"./errors.js":8,"./util.js":21}],20:[function(_dereq_,module,exports){
+},{"./errors.js":9,"./util.js":23}],22:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -3297,7 +3516,7 @@ Promise.prototype.timeout = function Promise$timeout(ms, message) {
 
 };
 
-},{"./errors.js":8,"./errors_api_rejection":9,"./util.js":21}],21:[function(_dereq_,module,exports){
+},{"./errors.js":9,"./errors_api_rejection":10,"./util.js":23}],23:[function(_dereq_,module,exports){
 /**
  * The MIT License (MIT)
  *
@@ -3569,6 +3788,6 @@ var ret = {
 
 module.exports = ret;
 
-},{"./es5.js":10}]},{},[2])
-(2)
+},{"./es5.js":11}]},{},[3])
+(3)
 });            ;if (typeof window !== 'undefined' && window !== null) {                           window.P = window.Promise;                                                 } else if (typeof self !== 'undefined' && self !== null) {                         self.P = self.Promise;                                                     }
