@@ -6,7 +6,6 @@ Promise         = require 'bluebird'
 keys            = new (require('./keys'))
 fs              = Promise.promisifyAll(require('fs'))
 
-testIdRegExp     = /\[(.{3})\]$/
 keyQueue         = []
 currentKeyLookup = Promise.resolve()
 
