@@ -103,37 +103,14 @@ window.Cypress = do ($, _) ->
     noop: (obj) -> obj
 
     ng: (type, selector, options = {}) ->
-      ## ng needs to be refactored to use .find
-      ## its very close to it, but not exactly the same
-      ## so we end up duplicating the retry code
-
-      _.defaults options,
-        df: $.Deferred()
-        retry: false
-        timeout: 1000
-        total: 0
-
-      if options.total >= options.timeout
-        options.df.reject("Timed out trying to find element: #{selector}")
-
       switch type
         when "model"
-          _.each ngPrefixes, (prefix) =>
-            @findByModel(options, prefix, selector)
+          @findByModel(selector, options)
         when "repeater"
           _.each ngPrefixes, (prefix) =>
-            @findByRepeater(options, prefix, selector)
+            @findByRepeater(selector, options)
         when "binding"
           @findByBinding(options, selector)
-
-      if options.df.state() is "pending"
-        options.total += 50
-
-        @delay =>
-          @invoke(@prop("current"), type, selector, options)
-        , 50
-
-      options.df
 
     click: ->
       subject = @_ensureDomSubject()
@@ -276,6 +253,8 @@ window.Cypress = do ($, _) ->
     find: (selector, options = {}) ->
       _.defaults options,
         retry: true
+
+      console.warn "finding", selector, options.error
 
       $el = @$(selector)
 
@@ -832,7 +811,7 @@ window.Cypress = do ($, _) ->
       if total >= options.timeout or (total + options.interval >= options.runnableTimeout)
         @throwErr "Timed out retrying. " + options.error ? "The last command was: " + @prop("current").name
 
-      Promise.delay(options.interval).then =>
+      Promise.delay(options.interval).cancellable().then =>
         @trigger "retry", fn, options
 
         @log {name: "retry", args: fn}
@@ -891,18 +870,26 @@ window.Cypress = do ($, _) ->
 
       @_action("find", selector, null, options)
 
-    findByModel: (options, prefix, model) ->
-      options = _(options).clone()
+    findByModel: (model, options) ->
+      selectors = []
+      error = "Could not find element for model: '#{model}'.  Searched "
 
-      df = options.df
+      finds = _.map ngPrefixes, (prefix) =>
+        selector = "[#{prefix}model='" + model + "']"
+        selectors.push(selector)
 
-      selector = "[" + prefix + "model='" + model + "']"
+        @_action("find", selector, options)
 
-      options.df = $.Deferred()
-      options.df.done ($elements) ->
-        df.resolve($elements) if $elements.length
+      error += selectors.join(", ") + "."
 
-      @_action("find", selector, null, options)
+      Promise
+        .any(finds)
+        .cancellable()
+        .catch Promise.CancellationError, (err) =>
+          _(finds).invoke("cancel")
+          throw err
+        .catch Promise.AggregateError, (err) =>
+          @throwErr error
 
     hook: (name) ->
       return if not @prop("inspect")

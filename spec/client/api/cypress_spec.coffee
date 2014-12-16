@@ -1,6 +1,8 @@
 getNames = (queue) ->
   _(queue).pluck("name")
 
+ngPrefixes = {query: 'ng-', query2: 'ng_', query3: 'data-ng-', query4: 'x-ng-'}
+
 describe "Cypress API", ->
   before ->
     Cypress.start()
@@ -34,6 +36,68 @@ describe "Cypress API", ->
 
   after ->
     Cypress.stop()
+
+  context "#findByModel", ->
+    beforeEach ->
+      ## make this test timeout quickly so
+      ## we dont have to wait so damn long
+      @currentTest.timeout(800)
+
+    _.each ngPrefixes, (prefix, attr) ->
+      it "finds element by #{prefix}model", ->
+        ## make sure we find this element
+        input = cy.$("[#{prefix}model=#{attr}]")
+        expect(input).to.exist
+
+        ## and make sure they are the same DOM element
+        cy.ng("model", attr).then ($input) ->
+          expect($input.get(0)).to.eq input.get(0)
+
+    it "favors earlier items in the array when duplicates are found", ->
+      input = cy.$("[ng-model=foo]")
+
+      cy.ng("model", "foo").then ($input) ->
+        expect($input.get(0)).to.eq input.get(0)
+
+    it "waits to find a missing input", ->
+      missingInput = $("<input />", "data-ng-model": "missing-input")
+
+      ## wait until we're ALMOST about to time out before
+      ## appending the missingInput
+      _.delay =>
+        cy.$("body").append(missingInput)
+      , @test.timeout() - 300
+
+      cy.ng("model", "missing-input").then ($input) ->
+        expect($input).to.match missingInput
+
+    describe "errors", ->
+      beforeEach ->
+        @sandbox.stub cy.runner, "uncaught"
+
+      it "throws when model cannot be found", (done) ->
+        cy.ng("model", "not-found")
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "Could not find element for model: 'not-found'.  Searched [ng-model='not-found'], [ng_model='not-found'], [data-ng-model='not-found'], [x-ng-model='not-found']."
+          done()
+
+      it "cancels additional finds when aborted", (done) ->
+        _.delay ->
+          Cypress.abort()
+        , 200
+
+        cy.ng("model", "not-found")
+
+        cy.on "fail", (err) ->
+          done(err)
+
+        cy.on "cancel", =>
+          retry = @sandbox.spy cy, "_retry"
+          _.delay ->
+            expect(retry.callCount).to.eq 0
+            done()
+          , 100
 
   context "#visit", ->
     it "returns a promise", ->
