@@ -15,8 +15,11 @@ describe "Cypress API", ->
 
   beforeEach ->
     @setup = =>
-      @iframe.contents().find("head").html(@head)
-      @iframe.contents().find("body").html(@body)
+      ## do not reset the contents if we're testing angular
+      ## else it will completely blow up
+      if not @iframe.prop("contentWindow").angular
+        @iframe.contents().find("head").html(@head)
+        @iframe.contents().find("body").html(@body)
 
       Cypress.set(@currentTest) if @currentTest
       Cypress.setup(runner, @iframe, {}, ->)
@@ -40,6 +43,13 @@ describe "Cypress API", ->
       @currentTest.timeout(800)
       @loadDom("html/angular").then @setup
 
+    it "finds color.name binding elements", ->
+      spans = cy.$(".colors span.name")
+
+      cy.ng("binding", "color.name").then ($spans) ->
+        $spans.each (i, span) ->
+          expect(span).to.eq(spans[i])
+
     describe "errors", ->
       beforeEach ->
         @sandbox.stub cy.runner, "uncaught"
@@ -52,6 +62,30 @@ describe "Cypress API", ->
           done()
 
         cy.ng("binding", "phone")
+
+      it "throws when binding cannot be found", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "Could not find element for binding: 'not-found'!"
+          done()
+
+        cy.ng("binding", "not-found")
+
+      it "cancels additional finds when aborted", (done) ->
+        _.delay ->
+          Cypress.abort()
+        , 200
+
+        cy.ng("binding", "not-found")
+
+        cy.on "fail", (err) ->
+          done(err)
+
+        cy.on "cancel", =>
+          retry = @sandbox.spy cy, "_retry"
+          _.delay ->
+            expect(retry.callCount).to.eq 0
+            done()
+          , 100
 
   context "#findByRepeater", ->
     ngPrefixes = {"phone in phones": 'ng-', "phone2 in phones": 'ng_', "phone3 in phones": 'data-ng-', "phone4 in phones": 'x-ng-'}

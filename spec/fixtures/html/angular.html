@@ -1,16 +1,28 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="testApp">
   <head>
     <title>Angular HTML Fixture</title>
     <script type="text/javascript" src="/bower_components/angular/angular.js"></script>
+    <script type="text/javascript">
+      var testApp = angular.module('testApp', []);
+
+      testApp.controller("TestCtrl", function($scope){
+        $scope.phones = [1,2]
+
+        $scope.foos = [1,2]
+
+        $scope.colors = [
+          {id: 1, name: "blue"},
+          {id: 2, name: "red"},
+          {id: 3, name: "green"}
+        ];
+      });
+    </script>
   </head>
-  <body ng-app>
+  <body>
     Angular!
 
-    {{phones = [1,2]}}
-    {{foos = [1,2]}}
-
-    <div id="ng-selectors">
+    <div ng-controller="TestCtrl">
       <input ng-model="query">
       <input ng_model="query2">
       <input data-ng-model="query3">
@@ -18,6 +30,13 @@
 
       <input ng-model="foo">
       <input data-ng-model="foo">
+
+      <ul class="colors">
+        <li ng-repeat="color in colors">
+          <span>{{color.id}}: </span>
+          <span class="name">{{color.name}}</span>
+        </li>
+      </ul>
 
       <ul class="phones">
         <li ng-repeat="phone in phones | filter:query | orderBy:orderProp"></li>

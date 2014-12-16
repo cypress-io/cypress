@@ -111,7 +111,7 @@ window.Cypress = do ($, _) ->
         when "repeater"
           @findByRepeater(selector, options)
         when "binding"
-          @findByBinding(options, selector)
+          @findByBinding(selector, options)
 
     click: ->
       subject = @_ensureDomSubject()
@@ -259,9 +259,14 @@ window.Cypress = do ($, _) ->
 
       $el = @$(selector)
 
-      ## return the el if it has a length or we've explicitly
-      ## disabled retrying
-      return $el if $el.length or options.retry is false
+      ## allow retry to be a function which we ensure
+      ## returns truthy before returning its
+      if _.isFunction(options.retry)
+        return ret if ret = options.retry.call(@, $el)
+      else
+        ## return the el if it has a length or we've explicitly
+        ## disabled retrying
+        return $el if $el.length or options.retry is false
 
       retry = ->
         @_action("find", selector, options)
@@ -830,30 +835,30 @@ window.Cypress = do ($, _) ->
       @clearTimeout(@prop("timerId"))
       @prop "timerId", _.delay(fn, ms)
 
-    findByBinding: (options, binding) ->
-      options = _(options).clone()
-
-      df = options.df
-
+    findByBinding: (binding, options) ->
       selector = ".ng-binding"
 
       angular = @_window().angular
 
-      @throwErr "Angular global was not found in your window! You cannot use .ng() methods without angular." if not angular
+      options.error = "Could not find element for binding: '#{binding}'!"
 
-      options.df = $.Deferred()
-      options.df.done ($elements) ->
-        filtered = $elements.filter (index) ->
-          dataBinding = angular.element(@).data("$binding")
+      options.retry = ($elements) ->
+        filtered = $elements.filter (index, el) ->
+          dataBinding = angular.element(el).data("$binding")
 
           if dataBinding
             bindingName = dataBinding.exp or dataBinding[0].exp or dataBinding
             return binding in bindingName
 
+        ## if we have items return
+        ## those filtered items
         if filtered.length
-          df.resolve(filtered)
+          return filtered
 
-      @_action("find", selector, null, options)
+        ## else return false
+        return false
+
+      @_action("find", selector, options)
 
     _findByNgAttr: (attr, selector, options) ->
 
