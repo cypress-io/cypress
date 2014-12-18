@@ -66,7 +66,20 @@ describe "Cypress API", ->
         Cypress.restore()
         expect(sandbox.server).to.have.property(prop).that.deep.eq []
 
-  context.only "#server", ->
+    describe "#errors", ->
+      it "throws when cannot find sinon", ->
+        sinon = cy._window().sinon
+
+        delete cy._window().sinon
+
+        fn = -> cy._getSandbox()
+
+        expect(fn).to.throw "sinon.js was not found in the remote iframe's window."
+
+        ## restore after the test
+        cy._window().sinon = sinon
+
+  context "#server", ->
     beforeEach ->
       @server = @sandbox.spy Cypress, "server"
 
@@ -100,7 +113,7 @@ describe "Cypress API", ->
       beforeEach ->
         @sandbox.stub cy.runner, "uncaught"
 
-      _.each ["asdf", 123, null], (arg) ->
+      _.each ["asdf", 123, null, undefined], (arg) ->
         it "throws on bad argument: #{arg}", (done) ->
           cy.on "fail", (err) ->
             expect(err.message).to.include ".server() only accepts a single object literal or 2 callback functions!"

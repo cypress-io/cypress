@@ -873,9 +873,11 @@ window.Cypress = do ($, _) ->
       Promise.resolve commands[name].apply(@, args)
 
     _getSandbox: ->
+      sinon = @_window().sinon
+
+      @throwErr("sinon.js was not found in the remote iframe's window.  This may happen if you testing a page you did not directly cy.visit(..).  This happens when you click a regular link.") if not sinon
+
       @_sandbox ?= sinon.sandbox.create()
-      # @server = @sandbox.useFakeServer()
-      # @server.autoRespond = true
 
     defer: (fn) ->
       @delay(fn, 0)
