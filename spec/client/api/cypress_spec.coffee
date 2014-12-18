@@ -57,6 +57,15 @@ describe "Cypress API", ->
 
       expect(restore).to.be.called
 
+    it "restores sandbox server during restore", ->
+      sandbox = cy._getSandbox()
+      sandbox.useFakeServer()
+      restore = @sandbox.spy sandbox.server, "restore"
+
+      Cypress.restore()
+
+      expect(restore).to.be.called
+
     _.each ["requests", "queue", "responses"], (prop) ->
       it "resets to an empty array references to the sandbox server's prop: #{prop}", ->
         sandbox = cy._getSandbox()
@@ -107,7 +116,9 @@ describe "Cypress API", ->
 
       cy.server(onRequest, onResponse)
 
-    it "starts the fake XHR server"
+    it "starts the fake XHR server", ->
+      cy.server().then ->
+        expect(cy._sandbox.server).to.be.defined
 
     describe "errors", ->
       beforeEach ->
@@ -120,6 +131,120 @@ describe "Cypress API", ->
             done()
 
           cy.server(arg)
+
+  context "#route", ->
+    beforeEach ->
+      @expectOptionsToBe = (opts) =>
+        options = @stub.getCall(0).args[0]
+        _.each options, (value, key) ->
+          expect(options[key]).to.deep.eq(opts[key], "failed on property: (#{key})")
+
+      cy.server().then ->
+        @server = cy.prop("server")
+        @stub   = @sandbox.spy @server, "stub"
+
+    it "accepts url, response", ->
+      cy.route("/foo", {}).then ->
+        @expectOptionsToBe({
+          method: "GET"
+          url: "/foo"
+          response: {}
+          onRequest: undefined
+          onResponse: undefined
+        })
+
+    it "accepts url, response, onRequest", ->
+      onRequest = ->
+
+      cy.route("/foo", {}, onRequest).then ->
+        @expectOptionsToBe({
+          method: "GET"
+          url: "/foo"
+          response: {}
+          onRequest: onRequest
+          onResponse: undefined
+        })
+
+    it "accepts url, response, onRequest, onResponse", ->
+      onRequest = ->
+      onResponse = ->
+
+      cy.route("/foo", {}, onRequest, onResponse).then ->
+        @expectOptionsToBe({
+          method: "GET"
+          url: "/foo"
+          response: {}
+          onRequest: onRequest
+          onResponse: onResponse
+        })
+
+    it "accepts method, url, response", ->
+      cy.route("GET", "/foo", {}).then ->
+        @expectOptionsToBe({
+          method: "GET"
+          url: "/foo"
+          response: {}
+          onRequest: undefined
+          onResponse: undefined
+        })
+
+    it "accepts method, url, response, onRequest", ->
+      onRequest = ->
+
+      cy.route("GET", "/foo", {}, onRequest).then ->
+        @expectOptionsToBe({
+          method: "GET"
+          url: "/foo"
+          response: {}
+          onRequest: onRequest
+          onResponse: undefined
+        })
+
+    it "accepts method, url, response, onRequest, onResponse", ->
+      onRequest = ->
+      onResponse = ->
+
+      cy.route("GET", "/foo", {}, onRequest, onResponse).then ->
+        @expectOptionsToBe({
+          method: "GET"
+          url: "/foo"
+          response: {}
+          onRequest: onRequest
+          onResponse: onResponse
+        })
+
+    it "uppercases method", ->
+      cy.route("get", "/foo", {}).then ->
+        @expectOptionsToBe({
+          method: "GET"
+          url: "/foo"
+          response: {}
+        })
+
+    it "accepts string or regex as the url", ->
+      cy.route("get", /.*/, {}).then ->
+        @expectOptionsToBe({
+          method: "GET"
+          url: /.*/
+          response: {}
+        })
+
+    describe "errors", ->
+      beforeEach ->
+        @sandbox.stub cy.runner, "uncaught"
+        Cypress.restore()
+        Cypress.set(@currentTest)
+
+      it "throws if cy.server() hasnt been invoked", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "cy.route() cannot be invoked before starting the cy.server()"
+          done()
+
+        cy.route()
+
+      it "requires url"
+      it "requires response"
+      it "url must be a string or regexp"
 
   context "#clearLocalStorage", ->
     it "is defined", ->

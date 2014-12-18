@@ -12,6 +12,8 @@ window.Cypress = do ($, _) ->
   ## to be configurable
   commands =
     server: (args...) ->
+      ## server accepts multiple signatures
+      ## so lets normalize the arguments
       switch
         when not args.length
           options = {}
@@ -32,8 +34,75 @@ window.Cypress = do ($, _) ->
       ## any XHR requests from here on out
       server = sandbox.useFakeServer()
 
-      ## pass in our server + options
-      Cypress.server(server, options)
+      ## pass in our server + options and store this
+      ## this server so we can access it later
+      @prop "server", Cypress.server(server, options)
+
+    route: (args...) ->
+      ## bail if we dont have a server prop
+      @throwErr("cy.route() cannot be invoked before starting the cy.server()") if not @prop("server")
+
+      defaults = {
+        method: "GET"
+      }
+
+      method     = undefined
+      url        = undefined
+      response   = undefined
+      onRequest  = undefined
+      onResponse = undefined
+
+      if not _.isObject(args[0])
+        switch args.length
+          when 2
+            url        = args[0]
+            response   = args[1]
+          when 3
+            if _.isFunction _(args).last()
+              url       = args[0]
+              response  = args[1]
+              onRequest = args[2]
+            else
+              method    = args[0]
+              url       = args[1]
+              response  = args[2]
+          else
+            if _.isFunction _(args).last()
+              lastIndex = args.length - 1
+
+              if _.isFunction(args[lastIndex - 1]) and args.length is 4
+                url        = args[0]
+                response   = args[1]
+                onRequest  = args[2]
+                onResponse = args[3]
+
+              else
+                method     = args[0]
+                url        = args[1]
+                response   = args[2]
+                onRequest  = args[3]
+                onResponse = args[4]
+
+        method = if _.isString(method) then method.toUpperCase() else method
+
+        options = {
+          method:     method
+          url:        url
+          response:   response
+          onRequest:  onRequest
+          onResponse: onResponse
+        }
+
+      _.defaults options, defaults
+
+      @prop("server").stub(options)
+
+      ## route accepts multiple signatures
+      ## so lets normalize the arguments
+      # switch
+        # when _.isObject(args[0])
+          # options = args[0]
+
 
     clearLocalStorage: (keys) ->
       ## bail if we have keys and we're not a string and we're not a regexp
