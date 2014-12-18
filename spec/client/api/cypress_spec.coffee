@@ -38,6 +38,76 @@ describe "Cypress API", ->
   after ->
     Cypress.stop()
 
+  context "#_sandbox", ->
+    it "creates a new sandbox", ->
+      expect(cy._sandbox).to.be.undefined
+      cy._getSandbox()
+      expect(cy._sandbox).to.be.defined
+
+    it "uses existing sandbox", ->
+      sandbox = cy._getSandbox()
+
+      expect(cy._getSandbox()).to.eq sandbox
+
+    it "restores sandbox during restore", ->
+      sandbox = cy._getSandbox()
+      restore = @sandbox.spy sandbox, "restore"
+
+      Cypress.restore()
+
+      expect(restore).to.be.called
+
+    _.each ["requests", "queue", "responses"], (prop) ->
+      it "resets to an empty array references to the sandbox server's prop: #{prop}", ->
+        sandbox = cy._getSandbox()
+        sandbox.useFakeServer()
+        sandbox.server[prop] = [1,2,3]
+        expect(sandbox.server).to.have.property(prop).that.deep.eq [1,2,3]
+        Cypress.restore()
+        expect(sandbox.server).to.have.property(prop).that.deep.eq []
+
+  context.only "#server", ->
+    beforeEach ->
+      @server = @sandbox.spy Cypress, "server"
+
+    it "can accept no arguments", (done) ->
+      cy.on "end", =>
+        expect(@server.getCall(0).args[1]).to.deep.eq {}
+        done()
+
+      cy.server()
+
+    it "can accept an object literal as options", (done) ->
+      cy.on "end", =>
+        expect(@server.getCall(0).args[1]).to.deep.eq {foo: "foo"}
+        done()
+
+      cy.server({foo: "foo"})
+
+    it "can accept an onRequest and onResponse callback", (done) ->
+      onRequest = ->
+      onResponse = ->
+
+      cy.on "end", =>
+        expect(@server.getCall(0).args[1]).to.deep.eq {onRequest: onRequest, onResponse, onResponse}
+        done()
+
+      cy.server(onRequest, onResponse)
+
+    it "starts the fake XHR server"
+
+    describe "errors", ->
+      beforeEach ->
+        @sandbox.stub cy.runner, "uncaught"
+
+      _.each ["asdf", 123, null], (arg) ->
+        it "throws on bad argument: #{arg}", (done) ->
+          cy.on "fail", (err) ->
+            expect(err.message).to.include ".server() only accepts a single object literal or 2 callback functions!"
+            done()
+
+          cy.server(arg)
+
   context "#clearLocalStorage", ->
     it "is defined", ->
       expect(cy.clearLocalStorage).to.be.defined

@@ -11,6 +11,30 @@ window.Cypress = do ($, _) ->
   ## should attach these commands as defaultMethods and allow them
   ## to be configurable
   commands =
+    server: (args...) ->
+      switch
+        when not args.length
+          options = {}
+        when _.isFunction(args[0])
+          options = {
+            onRequest: args[0]
+            onResponse: args[1]
+          }
+        when _.isObject(args[0])
+          options = args[0]
+        else
+          @throwErr(".server() only accepts a single object literal or 2 callback functions!")
+
+      ## get a handle on our sandbox
+      sandbox = @_getSandbox()
+
+      ## start up the fake server to slurp up
+      ## any XHR requests from here on out
+      server = sandbox.useFakeServer()
+
+      ## pass in our server + options
+      Cypress.server(server, options)
+
     clearLocalStorage: (keys) ->
       ## bail if we have keys and we're not a string and we're not a regexp
       if keys and not _.isString(keys) and not _.isRegExp(keys)
@@ -29,6 +53,11 @@ window.Cypress = do ($, _) ->
       Cypress.LocalStorage.unsetStorages()
 
     inspect: ->
+      ## bug fix due to 3rd party libs like
+      ## chai using inspect function for
+      ## special display
+      # return "" if not @prop
+
       @prop("inspect", true)
 
     url: ->
@@ -843,6 +872,11 @@ window.Cypress = do ($, _) ->
     _action: (name, args...) ->
       Promise.resolve commands[name].apply(@, args)
 
+    _getSandbox: ->
+      @_sandbox ?= sinon.sandbox.create()
+      # @server = @sandbox.useFakeServer()
+      # @server.autoRespond = true
+
     defer: (fn) ->
       @delay(fn, 0)
 
@@ -1007,7 +1041,20 @@ window.Cypress = do ($, _) ->
       @cy.clearTimeout @cy.prop("runId")
       @cy.clearTimeout @cy.prop("timerId")
 
+      ## reset the queue to an empty array
       Cypress.prototype.queue = []
+
+      ## restore the sandbox if we've
+      ## created one
+      if sandbox = @cy._sandbox
+        sandbox.restore()
+
+        ## if we have a server, resets
+        ## these references for GC
+        if server = sandbox.server
+          server.requests  = []
+          server.queue     = []
+          server.responses = []
 
       ## remove any outstanding groups
       ## for any open hooks and runnables

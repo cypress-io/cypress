@@ -33,6 +33,7 @@ eclectus:
   - app/js/api/eclectus.coffee
   - app/js/api/cypress.coffee
   - app/js/api/location.coffee
+  - app/js/api/server.coffee
   - app/js/api/reporter.coffee
   - app/js/api/sandbox.coffee
   - app/js/api/command.coffee
