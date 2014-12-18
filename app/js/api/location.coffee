@@ -7,11 +7,11 @@
 ## turns it into about://blank
 
 ## attach to global
-do (Cypress, _, Uri) ->
+Cypress.Location = do (Cypress, _, Uri) ->
 
   reHttp = /^http/
 
-  class Cypress.Location
+  class Location
     constructor: (current, remote = "", defaultOrigin) ->
       current  = new Uri(current)
 
@@ -160,5 +160,7 @@ do (Cypress, _, Uri) ->
       [rootUrl, _.ltrim(url, "/")].join("/")
 
   Cypress.location = (current, remote, defaultOrigin) ->
-    location = new Cypress.Location(current, remote, defaultOrigin)
+    location = new Location(current, remote, defaultOrigin)
     location.getObject()
+
+  return Location

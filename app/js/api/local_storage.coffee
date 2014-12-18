@@ -1,11 +1,10 @@
-## attach to Eclectus global
+## attach to Cypress global
 
 Cypress.LocalStorage = do (_) ->
 
   eclRegExp = /^ecl-/
 
   specialKeywords = /(debug)/
-
 
   return {
     localStorage: null
