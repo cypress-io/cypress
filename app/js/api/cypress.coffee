@@ -178,7 +178,7 @@ window.Cypress = do ($, _) ->
       Promise.resolve(xhr)
         .then (response) =>
           @_timeout(prevTimeout)
-          response
+          return response
 
     visit: (url, options = {}) ->
       _.defaults options,
