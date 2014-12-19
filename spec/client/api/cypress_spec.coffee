@@ -671,6 +671,42 @@ describe "Cypress API", ->
         expect(err.message).to.include "cy.fill() must be passed an object literal as its 1st argument!"
         done()
 
+  context "#as", ->
+    it "stores the lookup as an alias", ->
+      cy.get("body").as("b").then ->
+        expect(cy._aliases.b).to.be.defined
+
+    it "stores the prev object as the alias", (done) ->
+      cy.on "end", ->
+        expect(cy._aliases.b).to.eq cy.queue[0]
+        done()
+
+      cy.get("body").as("b")
+
+  context "#_alias", (done) ->
+    it "retrieves aliases", ->
+      cy.on "end", ->
+        expect(cy._alias("@firstInput")).to.be.defined
+
+      cy
+        .get("body").as("b")
+        .get("input:first").as("firstInput")
+        .get("div:last").as("lastDiv")
+
+    describe "errors", ->
+      beforeEach ->
+        @sandbox.stub cy.runner, "uncaught"
+
+      it "throws when an alias cannot be found", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "cy.get() could not find a registered alias for: 'lastDiv'.  Available aliases are: 'b, firstInput'."
+          done()
+
+        cy
+          .get("body").as("b")
+          .get("input:first").as("firstInput")
+          .get("@lastDiv")
+
   context "#get", ->
     beforeEach ->
       ## make this test timeout quickly so
@@ -707,6 +743,36 @@ describe "Cypress API", ->
       cy.get("#missing-el", {retry: false}).then ($el) ->
         expect($el).not.to.exist
 
+    describe "alias references", ->
+      it "requeries for an existing alias", ->
+        body = cy.$("body")
+
+        cy.get("body").as("b").get("@b").then ($body) ->
+          expect($body.get(0)).to.eq body.get(0)
+
+      ## these other tests are for .save
+      # it "will resolve deferred arguments", ->
+      #   df = $.Deferred()
+
+      #   _.delay ->
+      #     df.resolve("iphone")
+      #   , 100
+
+      #   cy.get("input:text:first").type(df).then ($input) ->
+      #     expect($input).to.have.value("iphone")
+
+      # it "handles saving subjects", ->
+      #   cy.noop({foo: "foo"}).save("foo").noop(cy.get("foo")).then (subject) ->
+      #     expect(subject).to.deep.eq {foo: "foo"}
+
+      # it "resolves falsy arguments", ->
+      #   cy.noop(0).save("zero").then ->
+      #     expect(cy.get("zero")).to.eq 0
+
+      # it "returns a function when no alias was found", ->
+      #   cy.noop().then ->
+      #     expect(cy.get("something")).to.be.a("function")
+
     describe "errors", ->
       beforeEach ->
         @sandbox.stub cy.runner, "uncaught"
@@ -717,6 +783,8 @@ describe "Cypress API", ->
         cy.on "fail", (err) ->
           expect(err.message).to.include "Could not find element: #missing-el"
           done()
+
+      it "throws when using an alias that does not exist"
 
   context "#contains", ->
     it "finds the nearest element by :contains selector", ->
@@ -1353,29 +1421,6 @@ describe "Cypress API", ->
       cy.on "bar", ->
       Cypress.restore()
       expect(cy._events).to.be.undefined
-
-  context "saved subjects", ->
-    it "will resolve deferred arguments", ->
-      df = $.Deferred()
-
-      _.delay ->
-        df.resolve("iphone")
-      , 100
-
-      cy.get("input:text:first").type(df).then ($input) ->
-        expect($input).to.have.value("iphone")
-
-    it "handles saving subjects", ->
-      cy.noop({foo: "foo"}).save("foo").noop(cy.get("foo")).then (subject) ->
-        expect(subject).to.deep.eq {foo: "foo"}
-
-    it "resolves falsy arguments", ->
-      cy.noop(0).save("zero").then ->
-        expect(cy.get("zero")).to.eq 0
-
-    it "returns a function when no alias was found", ->
-      cy.noop().then ->
-        expect(cy.get("something")).to.be.a("function")
 
   context "property registry", ->
     beforeEach ->

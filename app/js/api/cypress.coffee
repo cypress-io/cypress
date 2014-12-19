@@ -10,6 +10,8 @@ window.Cypress = do ($, _) ->
 
   validHttpMethodsRe = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/
 
+  aliasRe = /^@.+/
+
   ## should attach these commands as defaultMethods and allow them
   ## to be configurable
   commands =
@@ -213,9 +215,17 @@ window.Cypress = do ($, _) ->
     ## so we can async respond to it?
     confirm: (bool = true) ->
 
-    ## saves the current subject as an alias
-    save: (str) ->
-      @alias str, @_subject()
+    ## this should now save the subject
+    ## as a property on the runnable ctx
+    # save: (str) ->
+      # @alias str, @_subject()
+
+    as: (str) ->
+      ## make sure the prev object is NOT a modifier
+
+      ## throwErr if prev object is a modifier
+      ## throwErr if prev object is undefined
+      @_aliases[str] = @prop("current").prev
 
     noop: (obj) -> obj
 
@@ -372,6 +382,11 @@ window.Cypress = do ($, _) ->
       _.defaults options,
         retry: true
 
+      if alias = @_alias(selector)
+        ## this might cause some issues such as .prev / .next
+        ## write some additional tests to see how this plays out
+        return @invoke2(alias)
+
       $el = @$(selector)
 
       ## allow retry to be a function which we ensure
@@ -386,6 +401,10 @@ window.Cypress = do ($, _) ->
       retry = ->
         @_action("get", selector, options)
 
+      ## if we REALLY want to be helpful and intelligent then
+      ## if we time out, we should look at our aliases and see
+      ## if our selector matches any aliases without the '@'
+      ## if it did, then perhaps the user forgot to write '@'
       options.error ?= "Could not find element: #{selector}"
 
       @_retry(retry, options)
@@ -576,7 +595,7 @@ window.Cypress = do ($, _) ->
 
     constructor: (@options = {}) ->
       @props   = {}
-      @aliases = {}
+      @_aliases = {}
 
       _.defaults @options,
         commandTimeout: 2000
@@ -584,7 +603,7 @@ window.Cypress = do ($, _) ->
 
     unregister: ->
       @props   = {}
-      @aliases = {}
+      @_aliases = {}
 
       return @
 
@@ -777,27 +796,36 @@ window.Cypress = do ($, _) ->
       clearTimeout(id) if id
       return @
 
-    alias: (name, value) ->
-      @aliases[name] = value
-      @
+    _alias: (name) ->
+      ## bail if the name doesnt reference an alias
+      return if not aliasRe.test(name)
 
-    get: (name) ->
-      alias = @aliases[name]
-      return alias unless _.isUndefined(alias)
+      ## slice off the '@'
+      name = name.slice(1)
 
-      ## instead of returning a function here and setting this
-      ## invoke property, we should just convert this to a deferred
-      ## and then during the actual save we should find out anystanding
-      ## 'get' promises that match the name and then resolve them.
-      ## the problem with this is we still need to run this anonymous
-      ## function to check to see if we have an alias by that name
-      ## else our alias will never resolve (if save is never called
-      ## by this name argument)
-      fn = =>
-        @aliases[name] or
-          @throwErr("No alias was found by the name: #{name}")
-      fn._invokeImmediately = true
-      fn
+      if not alias = @_aliases[name]
+        aliases = _(@_aliases).keys().join(", ")
+        @throwErr "cy.get() could not find a registered alias for: '#{name}'.  Available aliases are: '#{aliases}'."
+
+      return alias
+
+    # get: (name) ->
+    #   alias = @aliases[name]
+    #   return alias unless _.isUndefined(alias)
+
+    #   ## instead of returning a function here and setting this
+    #   ## invoke property, we should just convert this to a deferred
+    #   ## and then during the actual save we should find out anystanding
+    #   ## 'get' promises that match the name and then resolve them.
+    #   ## the problem with this is we still need to run this anonymous
+    #   ## function to check to see if we have an alias by that name
+    #   ## else our alias will never resolve (if save is never called
+    #   ## by this name argument)
+    #   fn = =>
+    #     @aliases[name] or
+    #       @throwErr("No alias was found by the name: #{name}")
+    #   fn._invokeImmediately = true
+    #   fn
 
     _storeHref: ->
       ## we are using href and stripping out the hash because
