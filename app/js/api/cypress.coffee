@@ -602,8 +602,9 @@ window.Cypress = do ($, _) ->
         delay: 0 ## whether there is a delay in between commands
 
     unregister: ->
-      @props   = {}
+      @props    = {}
       @_aliases = {}
+      @_sandbox = null
 
       return @
 

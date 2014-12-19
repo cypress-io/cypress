@@ -75,6 +75,11 @@ describe "Cypress API", ->
         Cypress.restore()
         expect(sandbox.server).to.have.property(prop).that.deep.eq []
 
+    it "nulls the sandbox reference after restore", ->
+      cy._getSandbox()
+      Cypress.restore()
+      expect(cy._sandbox).to.be.null
+
     describe "#errors", ->
       it "throws when cannot find sinon", ->
         sinon = cy._window().sinon
