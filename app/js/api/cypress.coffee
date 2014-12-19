@@ -6,7 +6,7 @@ window.Cypress = do ($, _) ->
 
   ngPrefixes = ['ng-', 'ng_', 'data-ng-', 'x-ng-']
 
-  proxies = ["each", "map", "filter", "children", "eq", "closest", "first", "last", "next", "parent", "parents", "prev", "siblings"]
+  proxies = ["find", "each", "map", "filter", "children", "eq", "closest", "first", "last", "next", "parent", "parents", "prev", "siblings"]
 
   validHttpMethodsRe = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/
 
@@ -154,7 +154,7 @@ window.Cypress = do ($, _) ->
       ## and any submit inputs with the attributeContainsWord selector
       selector = "#{filter}:contains('#{text}'), #{filter}[type='submit'][value~='#{text}']"
 
-      @_action("find", selector, options).then (elements) ->
+      @_action("get", selector, options).then (elements) ->
         for filter in ["input[type='submit']", "button", "a"]
           filtered = elements.filter(filter)
           return filtered if filtered.length
@@ -368,7 +368,7 @@ window.Cypress = do ($, _) ->
         console.log "#{item}: ", (@prop(item) or @[item])
       debugger
 
-    find: (selector, options = {}) ->
+    get: (selector, options = {}) ->
       _.defaults options,
         retry: true
 
@@ -384,7 +384,7 @@ window.Cypress = do ($, _) ->
         return $el if $el.length or options.retry is false
 
       retry = ->
-        @_action("find", selector, options)
+        @_action("get", selector, options)
 
       options.error ?= "Could not find element: #{selector}"
 
@@ -393,7 +393,7 @@ window.Cypress = do ($, _) ->
     title: (options = {}) ->
       ## using call here to invoke the 'text' method on the
       ## title's jquery object
-      @_action("find", "title", options).call("text")
+      @_action("get", "title", options).call("text")
 
     location: ->
       ## just use the sync version
@@ -997,7 +997,7 @@ window.Cypress = do ($, _) ->
         ## else return false
         return false
 
-      @_action("find", selector, options)
+      @_action("get", selector, options)
 
     _findByNgAttr: (name, attr, el, options) ->
       selectors = []
@@ -1007,7 +1007,7 @@ window.Cypress = do ($, _) ->
         selector = "[#{prefix}#{attr}'#{el}']"
         selectors.push(selector)
 
-        @_action("find", selector, options)
+        @_action("get", selector, options)
 
       error += selectors.join(", ") + "."
 

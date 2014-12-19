@@ -671,7 +671,7 @@ describe "Cypress API", ->
         expect(err.message).to.include "cy.fill() must be passed an object literal as its 1st argument!"
         done()
 
-  context "#find", ->
+  context "#get", ->
     beforeEach ->
       ## make this test timeout quickly so
       ## we dont have to wait so damn long
@@ -680,7 +680,7 @@ describe "Cypress API", ->
     it "finds by selector", ->
       list = cy.$("#list")
 
-      cy.find("#list").then ($list) ->
+      cy.get("#list").then ($list) ->
         expect($list).to.match list
 
     it "retries finding elements until something is found", ->
@@ -692,7 +692,7 @@ describe "Cypress API", ->
         cy.$("body").append(missingEl)
       , @test.timeout() - 300
 
-      cy.find("#missing-el").then ($div) ->
+      cy.get("#missing-el").then ($div) ->
         expect($div).to.match missingEl
 
     it "retries until .until resolves to true", ->
@@ -700,11 +700,11 @@ describe "Cypress API", ->
         cy.$("#list li").last().remove()
       , @test.timeout() - 300
 
-      cy.find("#list li").until ($list) ->
+      cy.get("#list li").until ($list) ->
         expect($list.length).to.eq 2
 
     it "does not throw when could not find element and was told not to retry", ->
-      cy.find("#missing-el", {retry: false}).then ($el) ->
+      cy.get("#missing-el", {retry: false}).then ($el) ->
         expect($el).not.to.exist
 
     describe "errors", ->
@@ -712,7 +712,7 @@ describe "Cypress API", ->
         @sandbox.stub cy.runner, "uncaught"
 
       it "throws after timing out not finding element", (done) ->
-        cy.find("#missing-el")
+        cy.get("#missing-el")
 
         cy.on "fail", (err) ->
           expect(err.message).to.include "Could not find element: #missing-el"
@@ -782,27 +782,27 @@ describe "Cypress API", ->
     it "does not change the subject", ->
       select = cy.$("select[name=maps]")
 
-      cy.find("select[name=maps]").select("train").then ($select) ->
+      cy.get("select[name=maps]").select("train").then ($select) ->
         expect($select).to.match select
 
     it "selects by value", ->
-      cy.find("select[name=maps]").select("de_train").then ($select) ->
+      cy.get("select[name=maps]").select("de_train").then ($select) ->
         expect($select).to.have.value("de_train")
 
     it "selects by text", ->
-      cy.find("select[name=maps]").select("train").then ($select) ->
+      cy.get("select[name=maps]").select("train").then ($select) ->
         expect($select).to.have.value("de_train")
 
     it "prioritizes value over text", ->
-      cy.find("select[name=foods]").select("Ramen").then ($select) ->
+      cy.get("select[name=foods]").select("Ramen").then ($select) ->
         expect($select).to.have.value("Ramen")
 
     it "can select an array of values", ->
-      cy.find("select[name=movies]").select(["apoc", "br"]).then ($select) ->
+      cy.get("select[name=movies]").select(["apoc", "br"]).then ($select) ->
         expect($select.val()).to.deep.eq ["apoc", "br"]
 
     it "can select an array of texts", ->
-      cy.find("select[name=movies]").select(["The Human Condition", "There Will Be Blood"]).then ($select) ->
+      cy.get("select[name=movies]").select(["The Human Condition", "There Will Be Blood"]).then ($select) ->
         expect($select.val()).to.deep.eq ["thc", "twbb"]
 
     it "clears previous values when providing an array", ->
@@ -810,7 +810,7 @@ describe "Cypress API", ->
       select = cy.$("select[name=movies]").val(["2001"])
       expect(select.val()).to.deep.eq ["2001"]
 
-      cy.find("select[name=movies]").select(["apoc", "br"]).then ($select) ->
+      cy.get("select[name=movies]").select(["apoc", "br"]).then ($select) ->
         expect($select.val()).to.deep.eq ["apoc", "br"]
 
     describe "errors", ->
@@ -824,7 +824,7 @@ describe "Cypress API", ->
 
       it "throws when more than 1 element in the collection", (done) ->
         cy
-          .find("select").then ($selects) ->
+          .get("select").then ($selects) ->
             @num = $selects.length
             return $selects
           .select("foo")
@@ -834,21 +834,21 @@ describe "Cypress API", ->
           done()
 
       it "throws on anything other than a select", (done) ->
-        cy.find("input:first").select("foo")
+        cy.get("input:first").select("foo")
 
         cy.on "fail", (err) ->
           expect(err.message).to.include ".select() can only be called on a <select>! Your subject is a: <input id=\"input\">"
           done()
 
       it "throws when finding duplicate values", (done) ->
-        cy.find("select[name=names]").select("bm")
+        cy.get("select[name=names]").select("bm")
 
         cy.on "fail", (err) ->
           expect(err.message).to.include ".select() matched than one option by value or text: bm"
           done()
 
       it "throws when passing an array to a non multiple select", (done) ->
-        cy.find("select[name=names]").select(["bm", "ss"])
+        cy.get("select[name=names]").select(["bm", "ss"])
 
         cy.on "fail", (err) ->
           expect(err.message).to.include ".select() was called with an array of arguments but does not have a 'multiple' attribute set!"
@@ -858,7 +858,7 @@ describe "Cypress API", ->
     it "does not change the subject", ->
       input = cy.$("input:first")
 
-      cy.find("input:first").type("foo").then ($input) ->
+      cy.get("input:first").type("foo").then ($input) ->
         expect($input).to.match input
 
     it "changes the value", ->
@@ -870,7 +870,7 @@ describe "Cypress API", ->
       ## clean state
       expect(input).to.have.value("")
 
-      cy.find("input:text:first").type("foo").then ($input) ->
+      cy.get("input:text:first").type("foo").then ($input) ->
         expect($input).to.have.value("foo")
 
     it "appends to a current value", ->
@@ -882,7 +882,7 @@ describe "Cypress API", ->
       ## clean state
       expect(input).to.have.value("foo")
 
-      cy.find("input:text:first").type(" bar").then ($input) ->
+      cy.get("input:text:first").type(" bar").then ($input) ->
         expect($input).to.have.value("foo bar")
 
     describe "errors", ->
@@ -895,7 +895,7 @@ describe "Cypress API", ->
         cy.on "fail", -> done()
 
       it "throws when not textarea or :text", (done) ->
-        cy.find("form").type("foo")
+        cy.get("form").type("foo")
 
         cy.on "fail", (err) ->
           expect(err.message).to.include ".type() can only be called on textarea or :text! Your subject is a: <form id=\"by-id\"></form>"
@@ -903,7 +903,7 @@ describe "Cypress API", ->
 
       it "throws when subject is a collection of elements", (done) ->
         cy
-          .find("textarea,:text").then ($inputs) ->
+          .get("textarea,:text").then ($inputs) ->
             @num = $inputs.length
             return $inputs
           .type("foo")
@@ -916,7 +916,7 @@ describe "Cypress API", ->
     it "does not change the subject", ->
       textarea = cy.$("textarea")
 
-      cy.find("textarea").clear().then ($textarea) ->
+      cy.get("textarea").clear().then ($textarea) ->
         expect($textarea).to.match textarea
 
     it "removes the current value", ->
@@ -926,7 +926,7 @@ describe "Cypress API", ->
       ## make sure it really has that value first
       expect(textarea).to.have.value("foo bar")
 
-      cy.find("#comments").clear().then ($textarea) ->
+      cy.get("#comments").clear().then ($textarea) ->
         expect($textarea).to.have.value("")
 
     describe "errors", ->
@@ -939,28 +939,28 @@ describe "Cypress API", ->
         cy.on "fail", (err) -> done()
 
       it "throws if any subject isnt a textarea", (done) ->
-        cy.find("textarea,form").clear()
+        cy.get("textarea,form").clear()
 
         cy.on "fail", (err) ->
           expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <form id=\"by-id\"></form>"
           done()
 
       it "throws if any subject isnt a :text", (done) ->
-        cy.find("div").clear()
+        cy.get("div").clear()
 
         cy.on "fail", (err) ->
           expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <div id=\"dom\"></div>"
           done()
 
       it "throws on an input radio", (done) ->
-        cy.find(":radio").clear()
+        cy.get(":radio").clear()
 
         cy.on "fail", (err) ->
           expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <input type=\"radio\" name=\"gender\" value=\"male\">"
           done()
 
       it "throws on an input checkbox", (done) ->
-        cy.find(":checkbox").clear()
+        cy.get(":checkbox").clear()
 
         cy.on "fail", (err) ->
           expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <input type=\"checkbox\" name=\"colors\" value=\"blue\">"
@@ -970,15 +970,15 @@ describe "Cypress API", ->
     it "does not change the subject", ->
       checkboxes = "[name=colors]"
       inputs = cy.$(checkboxes)
-      cy.find(checkboxes).check().then ($inputs) ->
+      cy.get(checkboxes).check().then ($inputs) ->
         expect($inputs).to.match(inputs)
 
     it "checks a checkbox", ->
-      cy.find(":checkbox[name='colors'][value='blue']").check().then ($checkbox) ->
+      cy.get(":checkbox[name='colors'][value='blue']").check().then ($checkbox) ->
         expect($checkbox).to.be.checked
 
     it "checks a radio", ->
-      cy.find(":radio[name='gender'][value='male']").check().then ($radio) ->
+      cy.get(":radio[name='gender'][value='male']").check().then ($radio) ->
         expect($radio).to.be.checked
 
     it "is a noop if already checked", (done) ->
@@ -986,21 +986,21 @@ describe "Cypress API", ->
       cy.$(checkbox).prop("checked", true)
       cy.$(checkbox).change ->
         done("should not fire change event")
-      cy.find(checkbox).check()
+      cy.get(checkbox).check()
       cy.on "end", -> done()
 
     it "can check a collection", ->
-      cy.find("[name=colors]").check().then ($inputs) ->
+      cy.get("[name=colors]").check().then ($inputs) ->
         $inputs.each (i, el) ->
           expect($(el)).to.be.checked
 
     it "can check a specific value from a collection", ->
-      cy.find("[name=colors]").check("blue").then ($inputs) ->
+      cy.get("[name=colors]").check("blue").then ($inputs) ->
         expect($inputs.filter(":checked").length).to.eq 1
         expect($inputs.filter("[value=blue]")).to.be.checked
 
     it "can check multiple values from a collection", ->
-      cy.find("[name=colors]").check(["blue", "green"]).then ($inputs) ->
+      cy.get("[name=colors]").check(["blue", "green"]).then ($inputs) ->
         expect($inputs.filter(":checked").length).to.eq 2
         expect($inputs.filter("[value=blue],[value=green]")).to.be.checked
 
@@ -1017,7 +1017,7 @@ describe "Cypress API", ->
 
       it "throws when subject isnt a checkbox or radio", (done) ->
         ## this will find multiple forms
-        cy.find("form").check()
+        cy.get("form").check()
 
         cy.on "fail", (err) ->
           expect(err.message).to.include ".check() can only be called on :checkbox and :radio! Your subject contains a: <form id=\"by-id\"></form>"
@@ -1026,7 +1026,7 @@ describe "Cypress API", ->
       it "throws when any member of the subject isnt a checkbox or radio", (done) ->
         ## find a textare which should blow up
         ## the textarea is the last member of the subject
-        cy.find(":checkbox,:radio,#comments").check()
+        cy.get(":checkbox,:radio,#comments").check()
 
         cy.on "fail", (err) ->
           expect(err.message).to.include ".check() can only be called on :checkbox and :radio! Your subject contains a: <textarea id=\"comments\"></textarea>"
@@ -1034,16 +1034,16 @@ describe "Cypress API", ->
 
   context "#uncheck", ->
     it "unchecks a checkbox", ->
-      cy.find("[name=birds][value=cockatoo]").uncheck().then ($checkbox) ->
+      cy.get("[name=birds][value=cockatoo]").uncheck().then ($checkbox) ->
         expect($checkbox).not.to.be.checked
 
     it "unchecks a checkbox by value", ->
-      cy.find("[name=birds]").uncheck("cockatoo").then ($checkboxes) ->
+      cy.get("[name=birds]").uncheck("cockatoo").then ($checkboxes) ->
         expect($checkboxes.filter(":checked").length).to.eq 1
         expect($checkboxes.filter("[value=cockatoo]")).not.to.be.checked
 
     it "unchecks multiple checkboxes by values", ->
-      cy.find("[name=birds]").uncheck(["cockatoo", "amazon"]).then ($checkboxes) ->
+      cy.get("[name=birds]").uncheck(["cockatoo", "amazon"]).then ($checkboxes) ->
         expect($checkboxes.filter(":checked").length).to.eq 0
         expect($checkboxes.filter("[value=cockatoo],[value=amazon]")).not.to.be.checked
 
@@ -1051,7 +1051,7 @@ describe "Cypress API", ->
       checkbox = "[name=birds][value=cockatoo]"
       cy.$(checkbox).prop("checked", false).change ->
         done("should not fire change event")
-      cy.find(checkbox).uncheck()
+      cy.get(checkbox).uncheck()
       cy.on "end", -> done()
 
     describe "errors", ->
@@ -1059,7 +1059,7 @@ describe "Cypress API", ->
         @sandbox.stub cy.runner, "uncaught"
 
       it "throws specifically on a radio", (done) ->
-        cy.find(":radio").uncheck()
+        cy.get(":radio").uncheck()
 
         cy.on "fail", (err) ->
           expect(err.message).to.include ".uncheck() can only be called on :checkbox!"
@@ -1074,12 +1074,12 @@ describe "Cypress API", ->
     it "sends a click event", (done) ->
       cy.$("#button").click -> done()
 
-      cy.find("#button").click()
+      cy.get("#button").click()
 
     it "returns the original subject", ->
       button = cy.$("#button")
 
-      cy.find("#button").click().then ($button) ->
+      cy.get("#button").click().then ($button) ->
         expect($button).to.match button
 
     it "inserts artificial delay of 10ms", ->
@@ -1087,7 +1087,7 @@ describe "Cypress API", ->
         if obj.name is "click"
           @delay = @sandbox.spy Promise.prototype, "delay"
 
-      cy.find("#button").click().then ->
+      cy.get("#button").click().then ->
         expect(@delay).to.be.calledWith 10
 
     it "inserts artificial delay of 50ms for anchors", ->
@@ -1109,7 +1109,7 @@ describe "Cypress API", ->
       expect(buttons.length).to.be.gt 1
 
       ## make sure each button received its click event
-      cy.find("button").click().then ($buttons) ->
+      cy.get("button").click().then ($buttons) ->
         expect($buttons.length).to.eq clicks
 
     it "can cancel multiple clicks", (done) ->
@@ -1139,7 +1139,7 @@ describe "Cypress API", ->
           done()
         , 200
 
-      cy.find("#sequential-clicks a").click()
+      cy.get("#sequential-clicks a").click()
 
     it "serially clicks a collection", ->
       clicks = 0
@@ -1155,7 +1155,7 @@ describe "Cypress API", ->
 
       ## make sure we're clicking multiple anchors
       expect(anchors.length).to.be.gt 1
-      cy.find("#sequential-clicks a").click().then ($anchors) ->
+      cy.get("#sequential-clicks a").click().then ($anchors) ->
         expect($anchors.length).to.eq clicks
 
     it "increases the timeout delta after each click", (done) ->
@@ -1168,7 +1168,7 @@ describe "Cypress API", ->
           expect(@test.timeout()).to.eq (count * 10) + prevTimeout
           done()
 
-      cy.find("button").click()
+      cy.get("button").click()
 
     describe "errors", ->
       it "throws when not a dom subject", (done) ->
@@ -1222,6 +1222,7 @@ describe "Cypress API", ->
 
   context "jquery proxy methods", ->
     fns = [
+      {find: "*"}
       {each: -> $(@).removeClass().addClass("foo")}
       {filter: ":first"}
       {map: -> $(@).text()}
@@ -1240,7 +1241,7 @@ describe "Cypress API", ->
       context "##{name}", ->
         it "proxies through to jquery and returns new subject", ->
           el = cy.$("#list")[name](arg)
-          cy.find("#list")[name](arg).then ($el) ->
+          cy.get("#list")[name](arg).then ($el) ->
             expect($el).to.match el
 
         it "errors without a dom element", (done) ->
@@ -1361,7 +1362,7 @@ describe "Cypress API", ->
         df.resolve("iphone")
       , 100
 
-      cy.find("input:text:first").type(df).then ($input) ->
+      cy.get("input:text:first").type(df).then ($input) ->
         expect($input).to.have.value("iphone")
 
     it "handles saving subjects", ->
@@ -1522,7 +1523,7 @@ describe "Cypress API", ->
 
       it "does not change the subject", ->
         cy
-          .find("input")
+          .get("input")
           .then ($input) ->
             @$input = $input
           .wait(10)
@@ -1580,7 +1581,7 @@ describe "Cypress API", ->
 
       it "resolves with existing subject", ->
         cy
-          .find("input").then ($input) ->
+          .get("input").then ($input) ->
             @$input = $input
           .wait(-> true)
 
