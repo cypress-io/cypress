@@ -551,7 +551,7 @@ window.Cypress = do ($, _) ->
       ## retry outside of the try / catch block because
       ## if retry throws errors we want those to bubble
       options.error = "The final value was: " + options.value
-      return @_retry(retry, options) if not options.value
+      return @_retry(retry, options) if _.isNull(options.value) or options.value is false
 
     wait: (msOrFn, options = {}) ->
       msOrFn ?= 1e9
@@ -579,7 +579,7 @@ window.Cypress = do ($, _) ->
           ## retry outside of the try / catch block because
           ## if retry throws errors we want those to bubble
           options.error = "The final value was: " + options.value
-          return @_retry(retry, options) if not options.value
+          return @_retry(retry, options) if _.isNull(options.value) or options.value is false
 
         else
           @throwErr "wait() must be invoked with either a number or a function!"

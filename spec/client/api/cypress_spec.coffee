@@ -1613,15 +1613,15 @@ describe "Cypress API", ->
           expect(fn.callCount).to.eq 2
           done()
 
-      it "retries when undefined", (done) ->
+      it "resolves when undefined", (done) ->
         ## after returns undefined
-        fn = _.after 3, -> true
+        fn = -> undefined
 
         fn = @sandbox.spy fn
         cy.wait(fn)
 
         cy.on "end", ->
-          expect(fn.callCount).to.eq 3
+          expect(fn.callCount).to.eq 1
           done()
 
       it "resolves with existing subject", ->
