@@ -166,7 +166,7 @@ describe "Cypress API", ->
 
           cy.server(arg)
 
-  context.only "#route", ->
+  context "#route", ->
     beforeEach ->
       @expectOptionsToBe = (opts) =>
         options = @stub.getCall(0).args[0]
