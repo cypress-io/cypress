@@ -369,6 +369,8 @@ window.Cypress = do ($, _) ->
       catch e
         throw e
 
+    and: (fn) -> @_action("then", fn)
+
     within: (selector, fn) ->
 
     options: (options = {}) ->
