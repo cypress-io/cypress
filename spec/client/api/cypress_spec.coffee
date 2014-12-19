@@ -283,6 +283,27 @@ describe "Cypress API", ->
       cy.route(opts).then ->
         @expectOptionsToBe(opts)
 
+    it "can explicitly done() in onRequest function", (done) ->
+      onRequest = -> done()
+
+      cy
+        .server()
+        .route("POST", "/users", {}, onRequest)
+        .then ->
+          cy._window().$.post("/users", "name=brian")
+
+    it "can explicitly done() in onRequest function from options", (done) ->
+      cy
+        .server()
+        .route({
+          method: "POST"
+          url: "/users"
+          response: {}
+          onRequest: -> done()
+        })
+        .then ->
+          cy._window().$.post("/users", "name=brian")
+
     describe "errors", ->
       beforeEach ->
         @sandbox.stub cy.runner, "uncaught"
@@ -319,6 +340,13 @@ describe "Cypress API", ->
           done()
 
         cy.route("posts", "/foo", {})
+
+      it "requires a response", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "cy.route() must be called with a response."
+          done()
+
+        cy.route("post", "/foo")
 
   context "#clearLocalStorage", ->
     it "is defined", ->

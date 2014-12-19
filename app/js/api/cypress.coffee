@@ -55,7 +55,6 @@ window.Cypress = do ($, _) ->
 
       defaults = {
         method: "GET"
-        response: {}
       }
 
       options = o = {}
@@ -66,6 +65,11 @@ window.Cypress = do ($, _) ->
         when args.length is 2
           o.url        = args[0]
           o.response   = args[1]
+
+          ## if our url actually matches an http method
+          ## then we know the user omitted response
+          if validHttpMethodsRe.test(o.url.toUpperCase())
+            @throwErr "cy.route() must be called with a response."
         when args.length is 3
           if _.isFunction _(args).last()
             o.url       = args[0]
