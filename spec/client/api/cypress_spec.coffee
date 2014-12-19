@@ -90,18 +90,26 @@ describe "Cypress API", ->
 
   context "#server", ->
     beforeEach ->
+      defaults = {
+        autoRespond: true
+        autoRespondAfter: 10
+      }
+
+      @options = (obj) ->
+        _.extend obj, defaults
+
       @server = @sandbox.spy Cypress, "server"
 
     it "can accept no arguments", (done) ->
       cy.on "end", =>
-        expect(@server.getCall(0).args[1]).to.deep.eq {}
+        expect(@server.getCall(0).args[1]).to.deep.eq @options({})
         done()
 
       cy.server()
 
     it "can accept an object literal as options", (done) ->
       cy.on "end", =>
-        expect(@server.getCall(0).args[1]).to.deep.eq {foo: "foo"}
+        expect(@server.getCall(0).args[1]).to.deep.eq @options({foo: "foo"})
         done()
 
       cy.server({foo: "foo"})
@@ -111,14 +119,40 @@ describe "Cypress API", ->
       onResponse = ->
 
       cy.on "end", =>
-        expect(@server.getCall(0).args[1]).to.deep.eq {onRequest: onRequest, onResponse, onResponse}
+        expect(@server.getCall(0).args[1]).to.deep.eq @options({onRequest: onRequest, onResponse, onResponse})
         done()
 
       cy.server(onRequest, onResponse)
 
+    it "can accept onRequest and onRespond through options", (done) ->
+      onRequest = ->
+      onResponse = ->
+
+      cy.on "end", =>
+        expect(@server.getCall(0).args[1]).to.deep.eq @options({onRequest: onRequest, onResponse, onResponse})
+        done()
+
+      cy.server({onRequest: onRequest, onResponse: onResponse})
+
     it "starts the fake XHR server", ->
       cy.server().then ->
         expect(cy._sandbox.server).to.be.defined
+
+    it "sets autoRespond=true by default", ->
+      cy.server().then ->
+        expect(cy._sandbox.server.autoRespond).to.be.true
+
+    it "can set autoRespond=false", ->
+      cy.server({autoRespond: false}).then ->
+        expect(cy._sandbox.server.autoRespond).to.be.false
+
+    it "sets autoRespondAfter to 10ms by default", ->
+      cy.server().then ->
+        expect(cy._sandbox.server.autoRespondAfter).to.eq 10
+
+    it "can set autoRespondAfter to 100ms", ->
+      cy.server({autoRespondAfter: 100}).then ->
+        expect(cy._sandbox.server.autoRespondAfter).to.eq 100
 
     describe "errors", ->
       beforeEach ->
@@ -132,7 +166,7 @@ describe "Cypress API", ->
 
           cy.server(arg)
 
-  context "#route", ->
+  context.only "#route", ->
     beforeEach ->
       @expectOptionsToBe = (opts) =>
         options = @stub.getCall(0).args[0]
@@ -229,22 +263,57 @@ describe "Cypress API", ->
           response: {}
         })
 
+    it "accepts an object literal as options", ->
+      onRequest = ->
+      onResponse = ->
+
+      opts = {
+        method: "PUT"
+        url: "/foo"
+        response: {}
+        onRequest: onRequest
+        onResponse: onResponse
+      }
+
+      cy.route(opts).then ->
+        @expectOptionsToBe(opts)
+
     describe "errors", ->
       beforeEach ->
         @sandbox.stub cy.runner, "uncaught"
-        Cypress.restore()
-        Cypress.set(@currentTest)
 
       it "throws if cy.server() hasnt been invoked", (done) ->
+        Cypress.restore()
+        Cypress.set(@test)
+
         cy.on "fail", (err) ->
           expect(err.message).to.include "cy.route() cannot be invoked before starting the cy.server()"
           done()
 
         cy.route()
 
-      it "requires url"
-      it "requires response"
-      it "url must be a string or regexp"
+      it "requires url", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "cy.route() must be called with a url. It can be a string or regular expression."
+          done()
+
+        cy.route()
+
+      it "url must be a string or regexp", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "cy.route() was called with a invalid url. Url must be either a string or regular expression."
+          done()
+
+        cy.route({
+          url: {}
+        })
+
+      it "url must be one of get, put, post, delete, patch, head, options", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "cy.route() was called with an invalid method: 'POSTS'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"
+          done()
+
+        cy.route("posts", "/foo", {})
 
   context "#clearLocalStorage", ->
     it "is defined", ->

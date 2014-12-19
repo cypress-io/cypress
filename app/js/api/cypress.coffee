@@ -8,6 +8,8 @@ window.Cypress = do ($, _) ->
 
   proxies = ["each", "map", "filter", "children", "eq", "closest", "first", "last", "next", "parent", "parents", "prev", "siblings"]
 
+  validHttpMethodsRe = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/
+
   ## should attach these commands as defaultMethods and allow them
   ## to be configurable
   commands =
@@ -44,65 +46,58 @@ window.Cypress = do ($, _) ->
 
       defaults = {
         method: "GET"
+        response: {}
       }
 
-      method     = undefined
-      url        = undefined
-      response   = undefined
-      onRequest  = undefined
-      onResponse = undefined
+      options = o = {}
 
-      if not _.isObject(args[0])
-        switch args.length
-          when 2
-            url        = args[0]
-            response   = args[1]
-          when 3
-            if _.isFunction _(args).last()
-              url       = args[0]
-              response  = args[1]
-              onRequest = args[2]
-            else
-              method    = args[0]
-              url       = args[1]
-              response  = args[2]
+      switch
+        when _.isObject(args[0])
+          _.extend options, args[0]
+        when args.length is 2
+          o.url        = args[0]
+          o.response   = args[1]
+        when args.length is 3
+          if _.isFunction _(args).last()
+            o.url       = args[0]
+            o.response  = args[1]
+            o.onRequest = args[2]
           else
-            if _.isFunction _(args).last()
-              lastIndex = args.length - 1
+            o.method    = args[0]
+            o.url       = args[1]
+            o.response  = args[2]
+        else
+          if _.isFunction _(args).last()
+            lastIndex = args.length - 1
 
-              if _.isFunction(args[lastIndex - 1]) and args.length is 4
-                url        = args[0]
-                response   = args[1]
-                onRequest  = args[2]
-                onResponse = args[3]
+            if _.isFunction(args[lastIndex - 1]) and args.length is 4
+              o.url        = args[0]
+              o.response   = args[1]
+              o.onRequest  = args[2]
+              o.onResponse = args[3]
 
-              else
-                method     = args[0]
-                url        = args[1]
-                response   = args[2]
-                onRequest  = args[3]
-                onResponse = args[4]
+            else
+              o.method     = args[0]
+              o.url        = args[1]
+              o.response   = args[2]
+              o.onRequest  = args[3]
+              o.onResponse = args[4]
 
-        method = if _.isString(method) then method.toUpperCase() else method
-
-        options = {
-          method:     method
-          url:        url
-          response:   response
-          onRequest:  onRequest
-          onResponse: onResponse
-        }
+      if _.isString(o.method)
+        o.method = o.method.toUpperCase()
 
       _.defaults options, defaults
 
+      if not options.url
+        @throwErr "cy.route() must be called with a url. It can be a string or regular expression."
+
+      if not (_.isString(options.url) or _.isRegExp(options.url))
+        @throwErr "cy.route() was called with a invalid url. Url must be either a string or regular expression."
+
+      if not validHttpMethodsRe.test(options.method)
+        @throwErr "cy.route() was called with an invalid method: '#{o.method}'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"
+
       @prop("server").stub(options)
-
-      ## route accepts multiple signatures
-      ## so lets normalize the arguments
-      # switch
-        # when _.isObject(args[0])
-          # options = args[0]
-
 
     clearLocalStorage: (keys) ->
       ## bail if we have keys and we're not a string and we're not a regexp
