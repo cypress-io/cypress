@@ -649,7 +649,7 @@ describe "Cypress API", ->
         cy.$("title").text("about page")
       , 500
 
-      cy.title().wait (title) ->
+      cy.title().until (title) ->
         expect(title).to.eq "about page"
 
     it "throws after timing out", (done) ->
@@ -695,12 +695,12 @@ describe "Cypress API", ->
       cy.find("#missing-el").then ($div) ->
         expect($div).to.match missingEl
 
-    it "retries until .wait resolves to true", ->
+    it "retries until .until resolves to true", ->
       _.delay =>
         cy.$("#list li").last().remove()
       , @test.timeout() - 300
 
-      cy.find("#list li").wait ($list) ->
+      cy.find("#list li").until ($list) ->
         expect($list.length).to.eq 2
 
     it "does not throw when could not find element and was told not to retry", ->
@@ -1453,6 +1453,65 @@ describe "Cypress API", ->
 
       expect(fn).to.throw(Error)
 
+  context "#until", ->
+    describe "it retries the previous command", ->
+      it "retries when false", (done) ->
+        i = 0
+        fn = ->
+          i += 1
+        fn = @sandbox.spy fn
+        cy.then(fn).until (i) ->
+          i is 3
+        cy.on "end", ->
+          expect(fn.callCount).to.eq 3
+          done()
+
+      it "retries when null", (done) ->
+        i = 0
+        fn = ->
+          i += 1
+        fn = @sandbox.spy fn
+        cy.then(fn).until (i) ->
+          if i isnt 2 then null else true
+        cy.on "end", ->
+          expect(fn.callCount).to.eq 2
+          done()
+
+      it "retries when undefined", (done) ->
+        i = 0
+        fn = ->
+          i += 1
+        fn = @sandbox.spy fn
+        cy.then(fn).until (i) ->
+          if i isnt 2 then undefined else true
+        cy.on "end", ->
+          expect(fn.callCount).to.eq 2
+          done()
+
+    describe "errors thrown", ->
+      beforeEach ->
+        @uncaught = @sandbox.stub(cy.runner, "uncaught")
+
+      it "times out eventually due to false value", (done) ->
+        ## forcibly reduce the timeout to 500 ms
+        ## so we dont have to wait so long
+        cy
+          .noop()
+          .until (-> false), timeout: 500
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "The final value was: false"
+          done()
+
+      it "appends to the err message", (done) ->
+        cy
+          .noop()
+          .until (-> expect(true).to.be.false), timeout: 500
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "Timed out retrying. Could not continue due to: AssertionError"
+          done()
+
   context "#wait", ->
     describe "number argument", ->
       it "passes delay onto Promise", ->
@@ -1481,54 +1540,53 @@ describe "Cypress API", ->
         timer.tick(5000)
         expect(trigger).not.to.be.calledWith "invoke:end"
 
-      describe "function argument", ->
-        it "resolves when truthy", ->
-          cy.wait ->
-            "foo" is "foo"
+    describe "function argument", ->
+      it "resolves when truthy", ->
+        cy.wait ->
+          "foo" is "foo"
 
-        it "retries when false", (done) ->
-          i = 0
-          fn = ->
-            i += 1
-          fn = @sandbox.spy fn
-          cy.then(fn).wait (i) ->
-            console.log "retrying", i
-            i is 3
-          cy.on "end", ->
-            expect(fn.callCount).to.eq 3
-            done()
+      it "retries when false", (done) ->
+        i = 0
+        fn = ->
+          i += 1
+          i is 2
+        fn = @sandbox.spy fn
+        cy.wait(fn)
+        cy.on "end", ->
+          expect(fn.callCount).to.eq 2
+          done()
 
-        it "retries when null", (done) ->
-          i = 0
-          fn = ->
-            i += 1
-          fn = @sandbox.spy fn
-          cy.then(fn).wait (i) ->
-            if i isnt 2 then null else true
-          cy.on "end", ->
-            expect(fn.callCount).to.eq 2
-            done()
+      it "retries when null", (done) ->
+        i = 0
+        fn = ->
+          i += 1
+          if i isnt 2 then null else true
+        fn = @sandbox.spy fn
+        cy.then(fn).wait(fn)
+        cy.on "end", ->
+          expect(fn.callCount).to.eq 2
+          done()
 
-        it "retries when undefined", (done) ->
-          i = 0
-          fn = ->
-            i += 1
-          fn = @sandbox.spy fn
-          cy.then(fn).wait (i) ->
-            if i isnt 2 then undefined else true
-          cy.on "end", ->
-            expect(fn.callCount).to.eq 2
-            done()
+      it "retries when undefined", (done) ->
+        ## after returns undefined
+        fn = _.after 3, -> true
 
-        it "resolves with existing subject", ->
-          cy
-            .find("input").then ($input) ->
-              @$input = $input
-            .wait(-> true)
+        fn = @sandbox.spy fn
+        cy.wait(fn)
 
-          cy.on "invoke:end", (obj) =>
-            if obj.name is "wait"
-              expect(cy.prop("subject")).to.eq @$input
+        cy.on "end", ->
+          expect(fn.callCount).to.eq 3
+          done()
+
+      it "resolves with existing subject", ->
+        cy
+          .find("input").then ($input) ->
+            @$input = $input
+          .wait(-> true)
+
+        cy.on "invoke:end", (obj) =>
+          if obj.name is "wait"
+            expect(cy.prop("subject")).to.eq @$input
 
       describe "errors thrown", ->
         beforeEach ->
@@ -1563,7 +1621,7 @@ describe "Cypress API", ->
 
       fn = @sandbox.spy fn
 
-      cy.then(fn).wait -> i is 3
+      cy.then(fn).until -> i is 3
 
       cy.on "retry", ->
         ## abort after the 1st retry
@@ -1572,7 +1630,7 @@ describe "Cypress API", ->
         Cypress.abort() if i is 2
 
       cy.on "cancel", ->
-        ## once from .then and once from .wait
+        ## once from .then and once from .until
         expect(fn.callCount).to.eq 2
         done()
 

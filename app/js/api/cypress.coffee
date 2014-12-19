@@ -514,6 +514,26 @@ window.Cypress = do ($, _) ->
 
       return subject
 
+    until: (fn, options = {}) ->
+      retry = ->
+        ## should check here to make sure we have a .prev
+        ## and if not we should throwErr
+        @invoke2(@prop("current").prev).then =>
+          @invoke2(@prop("current"), fn, options)
+
+      try
+        ## invoke fn and make sure its not strictly false
+        options.value = fn.call(@prop("runnable").ctx, @prop("subject"))
+        return @prop("subject") if options.value
+      catch e
+        options.error = "Could not continue due to: " + e
+        return @_retry(retry, options)
+
+      ## retry outside of the try / catch block because
+      ## if retry throws errors we want those to bubble
+      options.error = "The final value was: " + options.value
+      return @_retry(retry, options) if not options.value
+
     wait: (msOrFn, options = {}) ->
       msOrFn ?= 1e9
 
@@ -527,10 +547,7 @@ window.Cypress = do ($, _) ->
           fn = msOrFn
 
           retry = ->
-            ## should check here to make sure we have a .prev
-            ## and if not we should throwErr
-            @invoke2(@prop("current").prev).then =>
-              @invoke2(@prop("current"), fn, options)
+            @invoke2(@prop("current"), fn, options)
 
           try
             ## invoke fn and make sure its not strictly false
