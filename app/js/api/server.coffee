@@ -8,6 +8,9 @@ Cypress.Server = do (Cypress, _) ->
       @responses  = []
       @onRequests = []
 
+      @autoRespond(options.autoRespond)
+      @autoRespondAfter(options.autoRespondAfter)
+
       _this = @
 
       @fakeServer.addRequest = _.wrap @fakeServer.addRequest, (orig, xhr) ->
@@ -108,8 +111,6 @@ Cypress.Server = do (Cypress, _) ->
       #   id:             response.id
 
     stub: (options = {}) ->
-      throw new Error("Ecl.server.stub() must be called with a method option") if not options.method
-
       options = _(options).clone()
 
       _.defaults options,
@@ -119,6 +120,7 @@ Cypress.Server = do (Cypress, _) ->
         response: {}
         headers: {}
         onRequest: ->
+        onResponse: ->
 
       @fakeServer.respondWith (request, fn) =>
         return if request.readyState is 4
@@ -151,30 +153,6 @@ Cypress.Server = do (Cypress, _) ->
 
       JSON.stringify(response)
 
-    get: (options = {}) ->
-      options.method = "GET"
-      @stub options
-
-    post: (options = {}) ->
-      options.method = "POST"
-      @stub options
-
-    put: (options = {}) ->
-      options.method = "PUT"
-      @stub options
-
-    patch: (options = {}) ->
-      options.method = "PATCH"
-      @stub options
-
-    delete: (options = {}) ->
-      options.method = "DELETE"
-      @stub options
-
-    head: (options = {}) ->
-      options.method = "HEAD"
-      @stub options
-
     respond: ->
       @fakeServer.respond()
 
@@ -193,6 +171,9 @@ Cypress.Server = do (Cypress, _) ->
 
     autoRespond: (bool = true) ->
       @fakeServer.autoRespond = bool
+
+    autoRespondAfter: (ms) ->
+      @fakeServer.autoRespondAfter = ms
 
   Cypress.server = (server, options) ->
     new Server(server, options)

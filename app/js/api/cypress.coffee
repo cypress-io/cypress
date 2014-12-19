@@ -14,6 +14,11 @@ window.Cypress = do ($, _) ->
   ## to be configurable
   commands =
     server: (args...) ->
+      defaults = {
+        autoRespond: true
+        autoRespondAfter: 10
+      }
+
       ## server accepts multiple signatures
       ## so lets normalize the arguments
       switch
@@ -28,6 +33,8 @@ window.Cypress = do ($, _) ->
           options = args[0]
         else
           @throwErr(".server() only accepts a single object literal or 2 callback functions!")
+
+      _.defaults options, defaults
 
       ## get a handle on our sandbox
       sandbox = @_getSandbox()
