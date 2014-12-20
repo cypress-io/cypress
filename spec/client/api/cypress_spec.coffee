@@ -705,6 +705,12 @@ describe "Cypress API", ->
         done()
 
   context "#as", ->
+    it "does not change the subject", ->
+      body = cy.$("body")
+
+      cy.get("body").as("b").then ($body) ->
+        expect($body.get(0)).to.eq body.get(0)
+
     it "stores the lookup as an alias", ->
       cy.get("body").as("b").then ->
         expect(cy._aliases.b).to.be.defined

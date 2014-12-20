@@ -231,6 +231,8 @@ window.Cypress = do ($, _) ->
       ## throwErr if prev object is undefined
       @_aliases[str] = @prop("current").prev
 
+      return @_subject()
+
     noop: (obj) -> obj
 
     ng: (type, selector, options = {}) ->
