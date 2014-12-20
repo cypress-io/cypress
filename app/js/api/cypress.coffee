@@ -8,6 +8,7 @@ window.Cypress = do ($, _) ->
 
   class Cypress
     queue: []
+    sync: {}
 
     constructor: (@options = {}) ->
       @props   = {}
@@ -173,7 +174,7 @@ window.Cypress = do ($, _) ->
       ## automatically defer running each command in succession
       ## so each command is async
       @defer =>
-        angular = @_window().angular
+        angular = @sync.window().angular
 
         if angular and angular.getTestability
           root = @$("[ng-app]").get(0)
@@ -224,11 +225,11 @@ window.Cypress = do ($, _) ->
       ## JS users are using pushstate since there is no hash
       ## TODO. need to listen to pushstate events here which
       ## will act as the isReady() the same way load events do
-      location = @_location()
+      location = @sync.location()
       @prop "href", location.href.replace(location.hash, "")
 
     _hrefChanged: ->
-      location = @_location()
+      location = @sync.location()
       @prop("href") isnt location.href.replace(location.hash, "")
 
     _subject: ->
@@ -375,11 +376,14 @@ window.Cypress = do ($, _) ->
         ## invoke the passed in retry fn
         fn.call(@)
 
-    _action: (name, args...) ->
-      Promise.resolve commands[name].apply(@, args)
+    ## the command method is useful for synchronously
+    ## calling another command but wrapping it in a
+    ## promise
+    command: (name, args...) ->
+      Promise.resolve @sync[name].apply(@, args)
 
     _getSandbox: ->
-      sinon = @_window().sinon
+      sinon = @sync.window().sinon
 
       @throwErr("sinon.js was not found in the remote iframe's window.  This may happen if you testing a page you did not directly cy.visit(..).  This happens when you click a regular link.") if not sinon
 
@@ -453,7 +457,7 @@ window.Cypress = do ($, _) ->
       return @
 
     $: (selector) ->
-      new $.fn.init selector, @_document()
+      new $.fn.init selector, @sync.document()
 
     _: _
 
@@ -474,9 +478,13 @@ window.Cypress = do ($, _) ->
       ## need to pass the options into inject here
       @inject(key, fn, options)
 
-    @inject = (key, fn, options = {}) ->
+    @inject = (key, fn) ->
       Cypress.prototype[key] = (args...) ->
-        @enqueue(key, fn, args, options)
+        @enqueue(key, fn, args)
+
+      ## reference a synchronous version of this function
+      Cypress.prototype.sync[key] = (args...) ->
+        fn.apply(Cypress.cy, args)
 
     ## remove all of the partialed functions from Cypress prototype
     @unpatch = (fns) ->

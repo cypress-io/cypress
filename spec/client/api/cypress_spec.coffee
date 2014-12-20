@@ -82,16 +82,16 @@ describe "Cypress API", ->
 
     describe "#errors", ->
       it "throws when cannot find sinon", ->
-        sinon = cy._window().sinon
+        sinon = cy.sync.window().sinon
 
-        delete cy._window().sinon
+        delete cy.sync.window().sinon
 
         fn = -> cy._getSandbox()
 
         expect(fn).to.throw "sinon.js was not found in the remote iframe's window."
 
         ## restore after the test
-        cy._window().sinon = sinon
+        cy.sync.window().sinon = sinon
 
   context "#server", ->
     beforeEach ->
@@ -290,7 +290,7 @@ describe "Cypress API", ->
         .server()
         .route("POST", "/users", {}, onRequest)
         .then ->
-          cy._window().$.post("/users", "name=brian")
+          cy.sync.window().$.post("/users", "name=brian")
 
     it "can explicitly done() in onRequest function from options", (done) ->
       cy
@@ -302,7 +302,7 @@ describe "Cypress API", ->
           onRequest: -> done()
         })
         .then ->
-          cy._window().$.post("/users", "name=brian")
+          cy.sync.window().$.post("/users", "name=brian")
 
     describe "errors", ->
       beforeEach ->
@@ -360,7 +360,7 @@ describe "Cypress API", ->
 
     it "sets the storages", ->
       localStorage = window.localStorage
-      remoteStorage = cy._window().localStorage
+      remoteStorage = cy.sync.window().localStorage
 
       setStorages = @sandbox.spy Cypress.LocalStorage, "setStorages"
 
@@ -402,7 +402,7 @@ describe "Cypress API", ->
           @sandbox.stub cy.runner, "uncaught"
 
         it "throws when cannot find angular", (done) ->
-          delete cy._window().angular
+          delete cy.sync.window().angular
 
           cy.on "fail", (err) ->
             expect(err.message).to.include "Angular global was not found in your window! You cannot use .ng() methods without angular."
@@ -501,7 +501,7 @@ describe "Cypress API", ->
             , 100
 
         it "throws when cannot find angular", (done) ->
-          delete cy._window().angular
+          delete cy.sync.window().angular
 
           cy.on "fail", (err) ->
             expect(err.message).to.include "Angular global was not found in your window! You cannot use .ng() methods without angular."
@@ -573,7 +573,7 @@ describe "Cypress API", ->
             , 100
 
         it "throws when cannot find angular", (done) ->
-          delete cy._window().angular
+          delete cy.sync.window().angular
 
           cy.on "fail", (err) ->
             expect(err.message).to.include "Angular global was not found in your window! You cannot use .ng() methods without angular."
@@ -583,7 +583,7 @@ describe "Cypress API", ->
 
   context "#visit", ->
     it "returns a promise", ->
-      promise = cy._action("visit", "/foo")
+      promise = cy.command("visit", "/foo")
       expect(promise).to.be.instanceOf(Promise)
 
     it "triggers visit:start on the remote iframe", (done) ->
@@ -1364,7 +1364,7 @@ describe "Cypress API", ->
       expect(cy.prop("href")).to.eq "/fixtures/html/dom.html"
 
     it "strips the hash from the href", ->
-      @sandbox.stub(cy, "_location").returns
+      @sandbox.stub(cy.sync, "location").returns
         href: "/foo/bar#baz/quux"
         hash: "#baz/quux"
 
