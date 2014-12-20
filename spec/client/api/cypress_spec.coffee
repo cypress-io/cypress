@@ -40,7 +40,7 @@ describe "Cypress API", ->
 
   context "#_sandbox", ->
     it "creates a new sandbox", ->
-      expect(cy._sandbox).to.be.undefined
+      expect(cy._sandbox).to.be.null
       cy._getSandbox()
       expect(cy._sandbox).to.be.defined
 
@@ -1472,10 +1472,10 @@ describe "Cypress API", ->
       cy.prop("foo", "bar")
       expect(cy.props).to.deep.eq {foo: "bar"}
 
-    it "calls unregister during restory", ->
-      unregister = @sandbox.spy(cy, "unregister")
+    it "calls defaults during restory", ->
+      defaults = @sandbox.spy(cy, "defaults")
       Cypress.restore()
-      expect(unregister).to.have.been.called
+      expect(defaults).to.have.been.called
 
     it "acts as a getter when no value is given", ->
       cy.prop("foo", "bar")
@@ -1500,7 +1500,7 @@ describe "Cypress API", ->
       beforeEach ->
         cy.prop("foo", "bar")
         cy.prop("baz", "quux")
-        cy.unregister()
+        cy.defaults()
 
         ## need to return null here else mocha would insert a .then
         ## into the cypress instance

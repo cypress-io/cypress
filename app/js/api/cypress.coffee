@@ -11,14 +11,13 @@ window.Cypress = do ($, _) ->
     sync: {}
 
     constructor: (@options = {}) ->
-      @props   = {}
-      @_aliases = {}
+      @defaults()
 
       _.defaults @options,
         commandTimeout: 2000
         delay: 0 ## whether there is a delay in between commands
 
-    unregister: ->
+    defaults: ->
       @props    = {}
       @_aliases = {}
       @_sandbox = null
@@ -536,7 +535,7 @@ window.Cypress = do ($, _) ->
 
       ## removes any registered props from the
       ## instance
-      @cy.unregister()
+      @cy.defaults()
 
       return @
 
