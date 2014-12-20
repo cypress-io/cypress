@@ -45,14 +45,6 @@ window.Cypress = do ($, _) ->
 
       return subject
 
-    _stringifyElement: (el) ->
-      el = if _.isElement(el) then $(el) else el
-      el.clone().empty().prop("outerHTML")
-
-    _plural: (obj, plural, singular) ->
-      obj = if _.isNumber(obj) then obj else obj.length
-      if obj > 1 then plural else singular
-
     ## global options applicable to all cy instances
     ## and restores
     options: (options = {}) ->
@@ -417,21 +409,6 @@ window.Cypress = do ($, _) ->
 
       ## start a group by the name
       console.group(name)
-
-    log: (obj, type) ->
-      return if not @prop("inspect")
-
-      color = {
-        success: "#46B848"
-        info:    "#5FC0DD"
-        warning: "#D99538"
-        danger:  "#D7514F"
-      }[type] or "blue"
-
-      if _.isString(obj)
-        obj = {name: obj, args: ""}
-
-      console.log "%c#{obj.name}", "color: #{color}", _.truncate(obj.args, 50)
 
     enqueue: (key, fn, args, options) ->
       @clearTimeout @prop("runId")
