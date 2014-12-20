@@ -38,6 +38,11 @@ describe "Cypress API", ->
   after ->
     Cypress.stop()
 
+  context "#url", ->
+    it "returns the location href", ->
+      cy.url().then (url) ->
+        expect(url).to.eq "/fixtures/html/dom.html"
+
   context "#_sandbox", ->
     it "creates a new sandbox", ->
       expect(cy._sandbox).to.be.null
