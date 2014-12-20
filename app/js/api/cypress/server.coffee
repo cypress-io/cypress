@@ -84,9 +84,7 @@ Cypress.Server = do (Cypress, _) ->
     requestDidNotMatchAnyResponses: (request, args) ->
       return if request.hasResponded
 
-      status  = args[0]
-      headers = args[1]
-      body    = args[2]
+      [status, headers, body] = args
 
       status is 404 and _.isEqual(headers, {}) and body is ""
 

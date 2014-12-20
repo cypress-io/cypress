@@ -29,20 +29,13 @@ vendor:
   - app/js/vendor/backbone-chooser.coffee
   - app/js/vendor/simulate.coffee
 
-eclectus:
-  - app/js/api/eclectus.coffee
+cypress:
+  - app/js/api/iframe.coffee
   - app/js/api/cypress.coffee
-  - app/js/api/location.coffee
-  - app/js/api/server.coffee
-  - app/js/api/reporter.coffee
-  - app/js/api/sandbox.coffee
-  - app/js/api/command.coffee
-  - app/js/api/dom.coffee
-  - app/js/api/xhr.coffee
-  - app/js/api/assertion.coffee
-  - app/js/api/spies_stubs_mocks.coffee
-  - app/js/api/visit.coffee
-  - app/js/api/local_storage.coffee
+  - app/js/api/cypress/**
+  - app/js/api/commands/**
+
+app:
   - app/js/config/**
   - app/js/backbone/app.coffee
   - app/js/backbone/lib/templates/**

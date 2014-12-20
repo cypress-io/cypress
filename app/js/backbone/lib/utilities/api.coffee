@@ -97,25 +97,12 @@
         orig.apply(@, args)
 
   class Reporter
-    constructor: (runner) ->
-      ## we need to have access to the methods we need to partial
-      ## each time our tests / suites / hooks run
-      # patch = Eclectus.patch
-      # sandbox = Eclectus.sandbox
-
-      ## resolve the promise with our bona-fide
-      ## runner entity which will manage the lifecycle
-      ## of our test runner
-      # df.resolve App.request("runner:entity", runner, patch, sandbox)
 
   API =
     ## the start method will be responsible for setting up
     ## the ability to run tests based on our test framework
     ## ATM its hard coded to work with Mocha
     start: (options) ->
-      ## instantiate Eclectus
-      window.Ecl = new Eclectus
-
       ## create the global cy variable
       Cypress.start()
 
@@ -151,9 +138,6 @@
       chai.assert = assert
       chai.Assertion::assert = assertProto
 
-      ## unpatch eclectus to remove any current partial'd objects
-      Eclectus.unpatch()
-
       ## resets cypress to remove all references to other objects
       ## including cy
       Cypress.stop()
@@ -168,7 +152,6 @@
       mocha.suite = null
 
       ## delete the globals to cleanup memory
-      delete window.Ecl
       delete window.mocha
 
   App.reqres.setHandler "start:test:runner", (options = {}) ->
