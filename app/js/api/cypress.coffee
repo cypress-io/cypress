@@ -460,22 +460,26 @@ window.Cypress = do ($, _) ->
 
     _: _
 
+    @extend = (key, fn) ->
+      ## allow object signature
+      if _.isObject(key)
+        _.each key, (fn, name) =>
+          @extend(name, fn)
+        return @
 
-    @add = (key, options, fn) ->
-      ## if fn was omitted then we
-      ## assume fn is the options
-      if _.isUndefined(fn)
-        fn = options
-        options = {}
+      Cypress.prototype[key] = fn
+      return @
 
-      @commands[key] = fn
-
-      _.defaults options,
-        logChildren: true
-        log: true
+    @add = (key, fn) ->
+      ## allow object signature
+      if _.isObject(key)
+        _.each key, (fn, name) =>
+          @add(name, fn)
+        return @
 
       ## need to pass the options into inject here
-      @inject(key, fn, options)
+      @inject(key, fn)
+      return @
 
     @inject = (key, fn) ->
       Cypress.prototype[key] = (args...) ->
