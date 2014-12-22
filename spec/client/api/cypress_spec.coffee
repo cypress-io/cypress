@@ -720,12 +720,20 @@ describe "Cypress API", ->
       cy.get("body").as("b").then ->
         expect(cy._aliases.b).to.be.defined
 
-    it "stores the prev object as the alias", (done) ->
+    it "stores the resulting subject as the alias", (done) ->
+      body = cy.$("body")
+
       cy.on "end", ->
-        expect(cy._aliases.b).to.eq cy.queue[0]
+        expect(cy._aliases.b.subject.get(0)).to.eq body.get(0)
         done()
 
       cy.get("body").as("b")
+
+    it "stores subject of chained aliases", ->
+      li = cy.$("#list li").eq(0)
+
+      cy.get("#list li").eq(0).as("firstLi").then ($li) ->
+        expect($li).to.match li
 
   context "#_alias", (done) ->
     it "retrieves aliases", ->
@@ -750,6 +758,54 @@ describe "Cypress API", ->
           .get("body").as("b")
           .get("input:first").as("firstInput")
           .get("@lastDiv")
+
+  context "#_replayFrom", ->
+    describe "subject in document", ->
+      it "returns if subject is still in the document", (done) ->
+        cy.on "end", ->
+          expect(cy.queue.length).to.eq 3
+          done()
+
+        cy
+          .get("#list").as("list")
+          .get("@list")
+
+    describe "subject not in document", ->
+      it "inserts into the queue", (done) ->
+        cy.on "end", ->
+          expect(getNames(cy.queue)).to.deep.eq(
+            ["get", "eq", "as", "then", "get", "get", "eq"]
+          )
+          done()
+
+        cy
+          .get("#list li").eq(0).as("firstLi").then ($li) ->
+            $li.remove()
+          .get("@firstLi")
+
+      it "replays from last root to current", ->
+        first = cy.$("#list li").eq(0)
+        second = cy.$("#list li").eq(1)
+
+        cy
+          .get("#list li").eq(0).as("firstLi").then ($li) ->
+            expect($li.get(0)).to.eq first.get(0)
+            $li.remove()
+          .get("@firstLi").then ($li) ->
+            expect($li.get(0)).to.eq second.get(0)
+
+      it "replays up until first root command", (done) ->
+        cy.on "end", ->
+          expect(getNames(cy.queue)).to.deep.eq(
+            ["get", "noop", "get", "eq", "as", "then", "get", "get", "eq"]
+          )
+          done()
+
+        cy
+          .get("body").noop({})
+          .get("#list li").eq(0).as("firstLi").then ($li) ->
+            $li.remove()
+          .get("@firstLi")
 
   context "#get", ->
     beforeEach ->
@@ -788,7 +844,7 @@ describe "Cypress API", ->
         expect($el).not.to.exist
 
     describe "alias references", ->
-      it "requeries for an existing alias", ->
+      it "re-queries for an existing alias", ->
         body = cy.$("body")
 
         cy.get("body").as("b").get("@b").then ($body) ->

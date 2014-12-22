@@ -33,9 +33,14 @@ do (Cypress, _) ->
         retry: true
 
       if alias = @_alias(selector)
-        ## this might cause some issues such as .prev / .next
-        ## write some additional tests to see how this plays out
-        return @invoke2(alias)
+        {subject, command} = alias
+        if subject and subject.get and _.isElement(subject.get(0))
+          el = subject.get(0)
+          if @_contains(el)
+            return subject
+          else
+            @_replayFrom command.prev
+            return null
 
       $el = @$(selector)
 

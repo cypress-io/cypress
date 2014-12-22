@@ -367,6 +367,26 @@ window.Cypress = do ($, _) ->
         ## invoke the passed in retry fn
         fn.call(@)
 
+    ## recursively inserts previous objects
+    ## up until it finds a root object
+    _replayFrom: (current, memo = []) ->
+      insert = =>
+        _.each memo, (obj) =>
+          @_insert(obj)
+
+      if current
+        memo.unshift current
+
+        if current.type is "root"
+          insert()
+        else
+          @_replayFrom current.prev, memo
+      else
+        insert()
+
+    _contains: (el) ->
+      $.contains(@sync.document().get(0), el)
+
     ## the command method is useful for synchronously
     ## calling another command but wrapping it in a
     ## promise
@@ -410,11 +430,14 @@ window.Cypress = do ($, _) ->
       ## start a group by the name
       console.group(name)
 
-    enqueue: (key, fn, args, options) ->
+    enqueue: (key, fn, args, type) ->
       @clearTimeout @prop("runId")
 
-      obj = {name: key, ctx: @, fn: fn, args: args, options: options}
+      obj = {name: key, ctx: @, fn: fn, args: args, type: type}
 
+      @_insert(obj)
+
+    _insert: (obj) ->
       ## if we have a nestedIndex it means we're processing
       ## nested commands and need to splice them into the
       ## index past the current index as opposed to
