@@ -1,6 +1,6 @@
 do (Cypress, _) ->
 
-  Cypress.add
+  Cypress.addRoot
 
     ## allow the user to choose whether the confirmation
     ## message returns true or false.  need to patch

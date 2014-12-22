@@ -447,20 +447,34 @@ window.Cypress = do ($, _) ->
       Cypress.prototype[key] = fn
       return @
 
-    @add = (key, fn) ->
+    @addRoot = (key, fn) ->
+      @add(key, fn, "root")
+
+    @addModifier = (key, fn) ->
+      @add(key, fn, "modifier")
+
+    @addUtility = (key, fn) ->
+      @add(key, fn, "utility")
+
+    @addAction = (key, fn) ->
+      @add(key, fn, "action")
+
+    @add = (key, fn, type) ->
+      throw new Error("Cypress.add(key, fn, type) must include a type!") if not type
+
       ## allow object signature
       if _.isObject(key)
         _.each key, (fn, name) =>
-          @add(name, fn)
+          @add(name, fn, type)
         return @
 
       ## need to pass the options into inject here
-      @inject(key, fn)
+      @inject(key, fn, type)
       return @
 
-    @inject = (key, fn) ->
+    @inject = (key, fn, type) ->
       Cypress.prototype[key] = (args...) ->
-        @enqueue(key, fn, args)
+        @enqueue(key, fn, args, type)
 
       ## reference a synchronous version of this function
       Cypress.prototype.sync[key] = (args...) ->

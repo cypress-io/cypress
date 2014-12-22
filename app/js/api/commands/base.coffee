@@ -1,6 +1,6 @@
 do (Cypress, _) ->
 
-  Cypress.add
+  Cypress.addUtility
 
     noop: (obj) -> obj
 
@@ -43,6 +43,9 @@ do (Cypress, _) ->
         throw e
 
     and: (fn) -> @sync.then(fn)
+
+
+  Cypress.addRoot
 
     url: ->
       @sync.location("href")

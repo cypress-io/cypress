@@ -1,6 +1,6 @@
 do (Cypress, _) ->
 
-  Cypress.add
+  Cypress.addUtility
     inspect: ->
       ## bug fix due to 3rd party libs like
       ## chai using inspect function for

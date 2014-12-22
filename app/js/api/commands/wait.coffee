@@ -1,6 +1,6 @@
 do (Cypress, _) ->
 
-  Cypress.add
+  Cypress.addUtility
 
     until: (fn, options = {}) ->
       retry = ->

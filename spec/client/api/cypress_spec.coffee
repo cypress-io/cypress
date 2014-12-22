@@ -1742,7 +1742,7 @@ describe "Cypress API", ->
   context "nested commands", ->
     beforeEach ->
       @setup = (fn = ->) =>
-        Cypress.add "nested", ->
+        Cypress.addRoot "nested", ->
           cy.url()
 
         cy
@@ -1767,10 +1767,10 @@ describe "Cypress API", ->
         done()
 
     it "can recursively nest", ->
-      Cypress.add "nest1", ->
+      Cypress.addRoot "nest1", ->
         cy.nest2()
 
-      Cypress.add "nest2", ->
+      Cypress.addRoot "nest2", ->
         cy.noop()
 
       cy
@@ -1780,7 +1780,7 @@ describe "Cypress API", ->
           expect(getNames(cy.queue)).to.deep.eq ["inspect", "nest1", "nest2", "noop", "then", "then"]
 
     it "works with multiple nested commands", ->
-      Cypress.add "multiple", ->
+      Cypress.addRoot "multiple", ->
         cy
           .url()
           .location()
