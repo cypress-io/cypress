@@ -1,6 +1,6 @@
 do (Cypress, _) ->
 
-  Cypress.addRoot
+  Cypress.addParent
 
     within: (selector, fn) ->
 

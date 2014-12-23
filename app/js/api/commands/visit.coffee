@@ -1,6 +1,6 @@
 do (Cypress, _) ->
 
-  Cypress.addRoot
+  Cypress.addParent
 
     visit: (url, options = {}) ->
       _.defaults options,

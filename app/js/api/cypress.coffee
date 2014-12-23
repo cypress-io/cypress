@@ -30,18 +30,18 @@ window.Cypress = do ($, _) ->
       else
         @props[key] = val
 
-    _ensureDomSubject: (modifier) ->
-      subject = @_subject()
+    ensureDom: (subject, method) ->
+      subject ?= @_subject()
 
-      modifier ?= @prop("current").name
+      method ?= @prop("current").name
 
-      ## think about dropping the 'modifier' part
+      ## think about dropping the 'method' part
       ## and adding exactly what the subject is
       ## if its an object or array, just say Object or Array
       ## but if its a primitive, just print out its value like
       ## true, false, 0, 1, 3, "foo", "bar"
       (subject and subject.get and _.isElement(subject.get(0))) or
-        @throwErr("Cannot use the modifier: .#{modifier}() on a non-DOM subject!")
+        @throwErr("Cannot call .#{method}() on a non-DOM subject!")
 
       return subject
 
@@ -160,7 +160,7 @@ window.Cypress = do ($, _) ->
 
         @prop "promise", promise
 
-        @trigger "set"
+        @trigger "set", queue
 
       ## automatically defer running each command in succession
       ## so each command is async
@@ -224,8 +224,13 @@ window.Cypress = do ($, _) ->
       @prop("href") isnt location.href.replace(location.hash, "")
 
     _subject: ->
-      subject = @prop("subject") ?
-        @throwErr("Subject is #{subject}!")
+      subject = @prop("subject")
+
+      if not subject?
+        name = @prop("current").name
+        @throwErr("Subject is #{subject}!  You cannot call .#{name}() without a subject.")
+
+      return subject
 
     _timeout: (ms, delta = false) ->
       runnable = @prop("runnable")
@@ -368,7 +373,7 @@ window.Cypress = do ($, _) ->
         fn.call(@)
 
     ## recursively inserts previous objects
-    ## up until it finds a root object
+    ## up until it finds a parent command
     _replayFrom: (current, memo = []) ->
       insert = =>
         _.each memo, (obj) =>
@@ -377,7 +382,7 @@ window.Cypress = do ($, _) ->
       if current
         memo.unshift current
 
-        if current.type is "root"
+        if current.type is "parent"
           insert()
         else
           @_replayFrom current.prev, memo
@@ -470,8 +475,8 @@ window.Cypress = do ($, _) ->
       Cypress.prototype[key] = fn
       return @
 
-    @addRoot = (key, fn) ->
-      @add(key, fn, "root")
+    # @addParent = (key, fn) ->
+    #   @add(key, fn, "root")
 
     @addModifier = (key, fn) ->
       @add(key, fn, "modifier")
@@ -481,6 +486,12 @@ window.Cypress = do ($, _) ->
 
     @addAction = (key, fn) ->
       @add(key, fn, "action")
+
+    @addChild = (key, fn) ->
+      @add(key, fn, "child")
+
+    @addParent = (key, fn) ->
+      @add(key, fn, "parent")
 
     @add = (key, fn, type) ->
       throw new Error("Cypress.add(key, fn, type) must include a type!") if not type
@@ -496,12 +507,33 @@ window.Cypress = do ($, _) ->
       return @
 
     @inject = (key, fn, type) ->
+      wrap = (fn, args) ->
+        if type is "child"
+          _.wrap fn, (orig) ->
+            @throwErr("cy.#{key}() is a child command which operates on an existing subject.  Child commands must be called after a parent command!") if not @prop("current").prev
+
+            ## push the subject into the args
+            subject = @prop("subject")
+
+            ## if we already have a subject
+            ## then replace the first argument
+            ## with the new subject
+            if args.hasSubject
+              args.splice(0, 1, subject)
+            else
+              args.unshift(subject)
+
+            args.hasSubject or= true
+            orig.apply(@, args)
+        else
+          fn
+
       Cypress.prototype[key] = (args...) ->
-        @enqueue(key, fn, args, type)
+        @enqueue(key, wrap(fn, args), args, type)
 
       ## reference a synchronous version of this function
       Cypress.prototype.sync[key] = (args...) ->
-        fn.apply(Cypress.cy, args)
+        wrap(fn, args).apply(Cypress.cy, args)
 
     ## remove all of the partialed functions from Cypress prototype
     @unpatch = (fns) ->

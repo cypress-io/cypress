@@ -2,7 +2,7 @@ do (Cypress, _) ->
 
   validHttpMethodsRe = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/
 
-  Cypress.addRoot
+  Cypress.addParent
 
     server: (args...) ->
       defaults = {

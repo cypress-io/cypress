@@ -2,7 +2,7 @@ do (Cypress, _) ->
 
   ngPrefixes = ['ng-', 'ng_', 'data-ng-', 'x-ng-']
 
-  Cypress.addRoot
+  Cypress.addParent
     ng: (type, selector, options = {}) ->
       @throwErr "Angular global was not found in your window! You cannot use .ng() methods without angular." if not @sync.window().angular
 

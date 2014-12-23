@@ -1,8 +1,8 @@
 do (Cypress, _) ->
 
-  Cypress.addUtility
+  Cypress.addChild
 
-    until: (fn, options = {}) ->
+    until: (subject, fn, options = {}) ->
       retry = ->
         ## should check here to make sure we have a .prev
         ## and if not we should throwErr
@@ -11,8 +11,8 @@ do (Cypress, _) ->
 
       try
         ## invoke fn and make sure its not strictly false
-        options.value = fn.call(@prop("runnable").ctx, @prop("subject"))
-        return @prop("subject") if options.value
+        options.value = fn.call(@prop("runnable").ctx, subject)
+        return subject if options.value
       catch e
         options.error = "Could not continue due to: " + e
         return @_retry(retry, options)
@@ -22,7 +22,7 @@ do (Cypress, _) ->
       options.error = "The final value was: " + options.value
       return @_retry(retry, options) if _.isNull(options.value) or options.value is false
 
-    wait: (msOrFn, options = {}) ->
+    wait: (subject, msOrFn, options = {}) ->
       msOrFn ?= 1e9
 
       switch
@@ -39,8 +39,8 @@ do (Cypress, _) ->
 
           try
             ## invoke fn and make sure its not strictly false
-            options.value = fn.call(@prop("runnable").ctx, @prop("subject"))
-            return @prop("subject") if options.value
+            options.value = fn.call(@prop("runnable").ctx, subject)
+            return subject if options.value
           catch e
             options.error = "Could not continue due to: " + e
             return @_retry(retry, options)

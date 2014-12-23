@@ -1,15 +1,15 @@
 do (Cypress, _) ->
 
-  Cypress.addAction
+  Cypress.addChild
 
-    fill: (obj, options = {}) ->
+    fill: (subject, obj, options = {}) ->
       @throwErr "cy.fill() must be passed an object literal as its 1st argument!" if not _.isObject(obj)
 
-    check: (values = []) ->
+    check: (subject, values = []) ->
+      @ensureDom(subject)
+
       ## make sure we're an array of values
       values = [].concat(values)
-
-      subject = @_ensureDomSubject()
 
       ## blow up if any member of the subject
       ## isnt a checkbox or radio
@@ -28,11 +28,11 @@ do (Cypress, _) ->
         if not values.length or el.val() in values
           el.prop("checked", true).trigger("change")
 
-    uncheck: (values = []) ->
+    uncheck: (subject, values = []) ->
+      @ensureDom(subject)
+
       ## make sure we're an array of values
       values = [].concat(values)
-
-      subject = @_ensureDomSubject()
 
       ## blow up if any member of the subject
       ## isnt a checkbox
@@ -51,8 +51,8 @@ do (Cypress, _) ->
         if not values.length or el.val() in values
           el.prop("checked", false).trigger("change")
 
-    click: ->
-      subject = @_ensureDomSubject()
+    click: (subject) ->
+      @ensureDom(subject)
 
       click = (memo, el, index) =>
         wait = if $(el).is("a") then 50 else 10
@@ -84,8 +84,8 @@ do (Cypress, _) ->
       #   .each subject.toArray(), click
       #   .return(subject)
 
-    type: (sequence, options = {}) ->
-      subject = @_ensureDomSubject()
+    type: (subject, sequence, options = {}) ->
+      @ensureDom(subject)
 
       ## allow the el we're typing into to be
       ## changed by options
@@ -105,11 +105,11 @@ do (Cypress, _) ->
 
       return subject
 
-    clear: (options = {}) ->
+    clear: (subject, options = {}) ->
       ## what about other types of inputs besides just text?
       ## what about the new HTML5 ones?
 
-      subject = @_ensureDomSubject()
+      @ensureDom(subject)
 
       ## blow up if any member of the subject
       ## isnt a textarea or :text
@@ -123,8 +123,8 @@ do (Cypress, _) ->
 
         @sync.type("{selectall}{del}", {el: el})
 
-    select: (valueOrText, options = {}) ->
-      subject = @_ensureDomSubject()
+    select: (subject, valueOrText, options = {}) ->
+      @ensureDom(subject)
 
       ## if @_subject() is a <select> el assume we are filtering down its
       ## options to a specific option first by value and then by text

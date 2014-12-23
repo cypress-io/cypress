@@ -1,6 +1,6 @@
 do (Cypress, _) ->
 
-  Cypress.addRoot
+  Cypress.addParent
 
     eval: (code, options = {}) ->
       _.defaults options,

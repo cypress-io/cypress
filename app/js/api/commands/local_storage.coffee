@@ -1,6 +1,6 @@
 do (Cypress, _) ->
 
-  Cypress.addRoot
+  Cypress.addParent
 
     clearLocalStorage: (keys) ->
       ## bail if we have keys and we're not a string and we're not a regexp
