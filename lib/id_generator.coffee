@@ -5,9 +5,9 @@ phantom         = require 'node-phantom-simple'
 Promise         = require 'bluebird'
 keys            = new (require('./keys'))
 fs              = Promise.promisifyAll(require('fs'))
+PSemaphore      = require('promise-semaphore')
 
-keyQueue         = []
-currentKeyLookup = Promise.resolve()
+pSemaphore       = new PSemaphore()
 
 escapeRegExp = (str) ->
   str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -41,56 +41,20 @@ appendTestId = (spec, title, id) ->
       , 1000
 
 nextId = (data) ->
-  currentKeyLookup = keys.nextKey(app)
-  .then (id) ->
+  keys.nextKey(app)
+  .then((id) ->
     appendTestId(data.spec, data.title, id)
     .then(-> id)
-    .catch (e) ->
-      gutil.beep()
-      e.details = [gutil.colors.yellow("An error occured generating an ID for file: "), gutil.colors.blue(data.spec), gutil.colors.yellow(" for test: "), gutil.colors.blue(data.title)].concat(" ")
-      e.details += ["\n " + gutil.colors.red(e.name), ": ", e.message].concat(" ")
-
-      throw e
-
-idEnqueue = (data) ->
-  # Creating a pending promise
-  # to be resolvable when the id
-  # is looked up in order
-  p = Promise.pending()
-  data.fulfill = p.promise
-
-  keyQueue.push(data)
-  p.promise
-
-dequeueId = ->
-  # Get the next id lookup data
-  # and Drop the current lookup from the queue
-  data             = keyQueue.shift()
-
-  # kick off the id lookup
-  currentKeyLookup = nextId(data)
-
-  currentKeyLookup
-  .then((id) ->
-    # Pop the next id lookup off of the stack
-    dequeueId() if keyQueue.length
-    # Return the ID so everything can carry on
-    id
   )
-  .then(data.fulfill.resolve)
-  .catch(data.fulfill.reject)
+  .catch (e) ->
+    gutil.beep()
+    e.details = [gutil.colors.yellow("An error occured generating an ID for file: "), gutil.colors.blue(data.spec), gutil.colors.yellow(" for test: "), gutil.colors.blue(data.title)].concat(" ")
+    e.details += ["\n " + gutil.colors.red(e.name), ": ", e.message].concat(" ")
+
+    throw e
 
 getId = (data) ->
-  # When a lookup is currently happend
-  # push the lookup into the queue
-  return idEnqueue(data) if currentKeyLookup.isPending()
-
-  # Handles the Zero case
-  nextId(data).then (id) ->
-    # Pop the next id lookup off of the stack
-    dequeueId() if keyQueue.length
-    # Return the ID so everything can carry on
-    id
+  pSemaphore.add(nextId.bind(this, data))
 
 parseStackTrace = (trace) ->
   _.reduce trace, (memo, obj) ->
