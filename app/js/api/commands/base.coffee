@@ -1,6 +1,6 @@
 do (Cypress, _) ->
 
-  Cypress.addChild
+  Cypress.addDualCommand
     ## this should now save the subject
     ## as a property on the runnable ctx
     # save: (str) ->
@@ -36,7 +36,7 @@ do (Cypress, _) ->
 
     and: (subject, fn) -> @sync.then(subject, fn)
 
-  Cypress.addParent
+  Cypress.addParentCommand
 
     options: (options = {}) ->
       ## change things like pauses in between commands

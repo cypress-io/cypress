@@ -1,6 +1,6 @@
 do (Cypress, _) ->
 
-  Cypress.addChild
+  Cypress.addChildCommand
 
     until: (subject, fn, options = {}) ->
       retry = ->
@@ -21,6 +21,8 @@ do (Cypress, _) ->
       ## if retry throws errors we want those to bubble
       options.error = "The final value was: " + options.value
       return @_retry(retry, options) if _.isNull(options.value) or options.value is false
+
+  Cypress.addDualCommand
 
     wait: (subject, msOrFn, options = {}) ->
       msOrFn ?= 1e9

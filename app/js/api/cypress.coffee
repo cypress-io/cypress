@@ -290,7 +290,7 @@ window.Cypress = do ($, _) ->
         ## bluebird else it will create a thenable which
         ## is never resolved
         ret = obj.fn.apply(obj.ctx, args)
-        if ret is @ then @_subject() else ret
+        if ret is @ then null else ret
 
       .then (subject, options = {}) =>
         ## trigger an event here so we know our
@@ -475,23 +475,14 @@ window.Cypress = do ($, _) ->
       Cypress.prototype[key] = fn
       return @
 
-    # @addParent = (key, fn) ->
-    #   @add(key, fn, "root")
-
-    @addModifier = (key, fn) ->
-      @add(key, fn, "modifier")
-
-    @addUtility = (key, fn) ->
-      @add(key, fn, "utility")
-
-    @addAction = (key, fn) ->
-      @add(key, fn, "action")
-
-    @addChild = (key, fn) ->
+    @addChildCommand = (key, fn) ->
       @add(key, fn, "child")
 
-    @addParent = (key, fn) ->
+    @addParentCommand = (key, fn) ->
       @add(key, fn, "parent")
+
+    @addDualCommand = (key, fn) ->
+      @add(key, fn, "dual")
 
     @add = (key, fn, type) ->
       throw new Error("Cypress.add(key, fn, type) must include a type!") if not type
@@ -507,26 +498,40 @@ window.Cypress = do ($, _) ->
       return @
 
     @inject = (key, fn, type) ->
-      wrap = (fn, args) ->
-        if type is "child"
-          _.wrap fn, (orig) ->
-            @throwErr("cy.#{key}() is a child command which operates on an existing subject.  Child commands must be called after a parent command!") if not @prop("current").prev
-
-            ## push the subject into the args
-            subject = @prop("subject")
-
-            ## if we already have a subject
-            ## then replace the first argument
-            ## with the new subject
-            if args.hasSubject
-              args.splice(0, 1, subject)
-            else
-              args.unshift(subject)
-
-            args.hasSubject or= true
-            orig.apply(@, args)
+      prepareSubject = (subject, args) ->
+        ## if we already have a subject
+        ## then replace the first argument
+        ## with the new subject
+        if args.hasSubject
+          args.splice(0, 1, subject)
         else
-          fn
+          args.unshift(subject)
+
+        args.hasSubject or= true
+        args
+
+      wrap = (fn, args) ->
+        switch type
+          when "parent"
+            return fn
+
+          when "dual"
+            _.wrap fn, (orig) ->
+              subject = @prop("subject")
+              args = prepareSubject(subject, args)
+
+              return orig.apply(@, args)
+
+          when "child"
+            _.wrap fn, (orig) ->
+              @throwErr("cy.#{key}() is a child command which operates on an existing subject.  Child commands must be called after a parent command!") if not @prop("current").prev
+
+              ## push the subject into the args
+              subject = @prop("subject")
+              args = prepareSubject(subject, args)
+
+              ret = orig.apply(@, args)
+              return ret ? subject
 
       Cypress.prototype[key] = (args...) ->
         @enqueue(key, wrap(fn, args), args, type)

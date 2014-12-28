@@ -1,6 +1,6 @@
 do (Cypress, _) ->
 
-  Cypress.addParent
+  Cypress.addParentCommand
 
     ## allow the user to choose whether the confirmation
     ## message returns true or false.  need to patch

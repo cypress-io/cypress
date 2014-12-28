@@ -1,6 +1,6 @@
 do (Cypress, _) ->
 
-  Cypress.addUtility
+  Cypress.addDualCommand
     inspect: ->
       ## bug fix due to 3rd party libs like
       ## chai using inspect function for
@@ -8,6 +8,7 @@ do (Cypress, _) ->
       # return "" if not @prop
 
       @prop("inspect", true)
+      return null
 
     debug: ->
       console.log "\n%c------------------------Cypress Command Info------------------------", "font-weight: bold;"

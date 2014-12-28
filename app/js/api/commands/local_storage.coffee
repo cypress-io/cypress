@@ -1,6 +1,6 @@
 do (Cypress, _) ->
 
-  Cypress.addParent
+  Cypress.addParentCommand
 
     clearLocalStorage: (keys) ->
       ## bail if we have keys and we're not a string and we're not a regexp
@@ -18,3 +18,6 @@ do (Cypress, _) ->
 
       ## and then unset the references
       Cypress.LocalStorage.unsetStorages()
+
+      ## return the remote local storage object
+      return remote

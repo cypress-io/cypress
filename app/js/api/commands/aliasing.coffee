@@ -1,16 +1,16 @@
 do (Cypress, _) ->
 
-  Cypress.addUtility
+  Cypress.addChildCommand
 
-    as: (str) ->
+    as: (subject, str) ->
       ## make sure the prev object is NOT a modifier
 
       ## throwErr if prev object is a modifier
       ## throwErr if prev object is undefined
       # @_aliases[str] = @prop("current").prev
-      @_aliases[str] = {subject: @_subject(), command: @prop("current")}
+      @_aliases[str] = {subject: subject, command: @prop("current")}
 
-      return @_subject()
+      return subject
 
     # cy
     #   .server()

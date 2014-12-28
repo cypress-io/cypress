@@ -1358,7 +1358,7 @@ describe "Cypress API", ->
 
     it "updates the stored href", ->
       cy
-        .noop({}).then ->
+        .then ->
           expect(cy.prop("href")).to.eq "/fixtures/html/dom.html"
         .visit("/foo").then ->
           expect(cy.prop("href")).to.eq "foo"
@@ -1445,7 +1445,7 @@ describe "Cypress API", ->
     it "prepends child callback with subject argument", (done) ->
       body = cy.$("body")
 
-      Cypress.addChild "foo", (subject) ->
+      Cypress.addChildCommand "foo", (subject) ->
         expect(subject).to.match body
         done()
 
@@ -1456,7 +1456,7 @@ describe "Cypress API", ->
         @sandbox.stub cy.runner, "uncaught"
 
       it "throws without a subject", (done) ->
-        Cypress.addChild "foo", ->
+        Cypress.addChildCommand "foo", ->
 
         cy.on "fail", (err) ->
           expect(err.message).to.include "cy.foo() is a child command which operates on an existing subject.  Child commands must be called after a parent command!"
@@ -1466,7 +1466,7 @@ describe "Cypress API", ->
 
   context ".abort", ->
     it "fires cancel event when theres an outstanding command", (done) ->
-      cy.noop({}).wait(1000)
+      cy.wait(1000)
       cy.on "cancel", -> done()
       cy.on "set", (obj) ->
         Cypress.abort() if obj.name is "wait"
@@ -1482,7 +1482,7 @@ describe "Cypress API", ->
         expect(obj.name).to.eq "then"
         done()
 
-      cy.noop().wait(10).then ->
+      cy.wait(10).then ->
         ## simulate the abort action happening
         ## during this .then command
         Cypress.abort()
@@ -1496,7 +1496,7 @@ describe "Cypress API", ->
   context "promises", ->
     it "doesnt invoke .then on the cypress instance", (done) ->
       _then = @sandbox.spy cy, "then"
-      cy.noop({}).wait(1000)
+      cy.wait(1000)
 
       cy.on "set", (obj) ->
         if obj.name is "wait"
@@ -1509,23 +1509,19 @@ describe "Cypress API", ->
       @uncaught = @sandbox.stub(cy.runner, "uncaught")
 
     it "does not emit command:end when a command fails", (done) ->
-      cy
-        .noop({})
-        .then ->
-          trigger = @sandbox.spy cy, "trigger"
+      cy.then ->
+        trigger = @sandbox.spy cy, "trigger"
 
-          _.defer ->
-            expect(trigger).not.to.be.calledWith("command:end")
-            done()
-          throw new Error("err")
+        _.defer ->
+          expect(trigger).not.to.be.calledWith("command:end")
+          done()
+        throw new Error("err")
 
     it "emits fail and passes up err", (done) ->
       err = null
-      cy
-        .noop({})
-        .then ->
-          err = new Error("err")
-          throw err
+      cy.then ->
+        err = new Error("err")
+        throw err
 
       cy.on "fail", (e) ->
         expect(e).to.eq err
@@ -1533,11 +1529,9 @@ describe "Cypress API", ->
 
     it "passes the full stack trace to mocha", (done) ->
       err = null
-      cy
-        .noop({})
-        .then ->
-          err = new Error("err")
-          throw err
+      cy.then ->
+        err = new Error("err")
+        throw err
 
       cy.on "fail", (e) =>
         expect(@uncaught).to.be.calledWith(err)
@@ -1690,7 +1684,7 @@ describe "Cypress API", ->
     describe "number argument", ->
       it "passes delay onto Promise", ->
         delay = @sandbox.spy Promise, "delay"
-        cy.noop().wait(100)
+        cy.wait(100)
         cy.on "invoke:end", (obj) ->
           if obj.name is "wait"
             expect(delay).to.be.calledWith 100
@@ -1710,14 +1704,14 @@ describe "Cypress API", ->
         timer = @sandbox.useFakeTimers("setTimeout")
         trigger = @sandbox.spy(cy, "trigger")
         cy._timeout(100)
-        cy.noop({}).wait()
+        cy.wait()
         timer.tick()
         timer.tick(5000)
         expect(trigger).not.to.be.calledWith "invoke:end"
 
     describe "function argument", ->
       it "resolves when truthy", ->
-        cy.noop({}).wait ->
+        cy.wait ->
           "foo" is "foo"
 
       it "retries when false", (done) ->
@@ -1726,7 +1720,7 @@ describe "Cypress API", ->
           i += 1
           i is 2
         fn = @sandbox.spy fn
-        cy.noop({}).wait(fn)
+        cy.wait(fn)
         cy.on "end", ->
           expect(fn.callCount).to.eq 2
           done()
@@ -1737,7 +1731,7 @@ describe "Cypress API", ->
           i += 1
           if i isnt 2 then null else true
         fn = @sandbox.spy fn
-        cy.noop({}).then(fn).wait(fn)
+        cy.then(fn).wait(fn)
         cy.on "end", ->
           expect(fn.callCount).to.eq 2
           done()
@@ -1747,7 +1741,7 @@ describe "Cypress API", ->
         fn = -> undefined
 
         fn = @sandbox.spy fn
-        cy.noop({}).wait(fn)
+        cy.wait(fn)
 
         cy.on "end", ->
           expect(fn.callCount).to.eq 1
@@ -1770,18 +1764,14 @@ describe "Cypress API", ->
         it "times out eventually due to false value", (done) ->
           ## forcibly reduce the timeout to 500 ms
           ## so we dont have to wait so long
-          cy
-            .noop()
-            .wait (-> false), timeout: 500
+          cy.wait (-> false), timeout: 500
 
           cy.on "fail", (err) ->
             expect(err.message).to.include "The final value was: false"
             done()
 
         it "appends to the err message", (done) ->
-          cy
-            .noop()
-            .wait (-> expect(true).to.be.false), timeout: 500
+          cy.wait (-> expect(true).to.be.false), timeout: 500
 
           cy.on "fail", (err) ->
             expect(err.message).to.include "Timed out retrying. Could not continue due to: AssertionError"
@@ -1827,7 +1817,7 @@ describe "Cypress API", ->
   context "nested commands", ->
     beforeEach ->
       @setup = (fn = ->) =>
-        Cypress.addParent "nested", ->
+        Cypress.addParentCommand "nested", ->
           cy.url()
 
         cy
@@ -1852,10 +1842,10 @@ describe "Cypress API", ->
         done()
 
     it "can recursively nest", ->
-      Cypress.addParent "nest1", ->
+      Cypress.addParentCommand "nest1", ->
         cy.nest2()
 
-      Cypress.addParent "nest2", ->
+      Cypress.addParentCommand "nest2", ->
         cy.noop()
 
       cy
@@ -1865,7 +1855,7 @@ describe "Cypress API", ->
           expect(getNames(cy.queue)).to.deep.eq ["inspect", "nest1", "nest2", "noop", "then", "then"]
 
     it "works with multiple nested commands", ->
-      Cypress.addParent "multiple", ->
+      Cypress.addParentCommand "multiple", ->
         cy
           .url()
           .location()

@@ -3,7 +3,7 @@ do (Cypress, _) ->
   proxies = "find each map filter children eq closest first last next parent parents prev siblings".split(" ")
 
   _.each proxies, (proxy) ->
-    Cypress.addChild proxy, (subject, args...) ->
+    Cypress.addChildCommand proxy, (subject, args...) ->
       @ensureDom(subject)
 
       ## instead of applying directly to the subject
