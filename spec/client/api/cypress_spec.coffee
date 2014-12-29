@@ -709,6 +709,38 @@ describe "Cypress API", ->
         expect(err.message).to.include "cy.fill() must be passed an object literal as its 1st argument!"
         done()
 
+  context "#save", ->
+    it "does not change the subject", ->
+      cy.noop({}).save("obj").then (obj) ->
+        expect(obj).to.deep.eq {}
+
+    it "saves the subject in the runnables ctx", ->
+      cy.noop({}).save("obj").then ->
+        expect(@obj).to.deep.eq {}
+
+    describe "errors", ->
+      beforeEach ->
+        @sandbox.stub cy.runner, "uncaught"
+
+      it "is a child command", (done) ->
+        cy.on "fail", -> done()
+        cy.save("foo")
+
+      it "throws when str is blank", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "cy.save() cannot be passed an empty argument!"
+          done()
+
+        cy.noop({}).save("")
+
+      _.each [[], {}, /foo/, NaN], (val) ->
+        it "throws when str is: #{val}", (done) ->
+          cy.on "fail", (err) ->
+            expect(err.message).to.include "cy.save() can only accept a string or number!"
+            done()
+
+          cy.noop({}).save(val)
+
   context "#as", ->
     it "does not change the subject", ->
       body = cy.$("body")

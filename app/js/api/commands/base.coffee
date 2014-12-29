@@ -1,10 +1,6 @@
 do (Cypress, _) ->
 
   Cypress.addDualCommand
-    ## this should now save the subject
-    ## as a property on the runnable ctx
-    # save: (str) ->
-      # @alias str, @_subject()
 
     ## thens can return more "thenables" which are not resolved
     ## until they're 'really' resolved, so naturally this API
