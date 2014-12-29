@@ -728,11 +728,11 @@ describe "Cypress API", ->
 
   context "#save", ->
     it "does not change the subject", ->
-      cy.noop({}).save("obj").then (obj) ->
+      cy.noop({}).assign("obj").then (obj) ->
         expect(obj).to.deep.eq {}
 
     it "saves the subject in the runnables ctx", ->
-      cy.noop({}).save("obj").then ->
+      cy.noop({}).assign("obj").then ->
         expect(@obj).to.deep.eq {}
 
     describe "errors", ->
@@ -741,22 +741,22 @@ describe "Cypress API", ->
 
       it "is a child command", (done) ->
         cy.on "fail", -> done()
-        cy.save("foo")
+        cy.assign("foo")
 
       it "throws when str is blank", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.save() cannot be passed an empty argument!"
+          expect(err.message).to.include "cy.assign() cannot be passed an empty argument!"
           done()
 
-        cy.noop({}).save("")
+        cy.noop({}).assign("")
 
       _.each [[], {}, /foo/, NaN], (val) ->
         it "throws when str is: #{val}", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.save() can only accept a string or number!"
+            expect(err.message).to.include "cy.assign() can only accept a string or number!"
             done()
 
-          cy.noop({}).save(val)
+          cy.noop({}).assign(val)
 
   context "#as", ->
     it "does not change the subject", ->
@@ -911,11 +911,11 @@ describe "Cypress API", ->
       #     expect($input).to.have.value("iphone")
 
       # it "handles saving subjects", ->
-      #   cy.noop({foo: "foo"}).save("foo").noop(cy.get("foo")).then (subject) ->
+      #   cy.noop({foo: "foo"}).assign("foo").noop(cy.get("foo")).then (subject) ->
       #     expect(subject).to.deep.eq {foo: "foo"}
 
       # it "resolves falsy arguments", ->
-      #   cy.noop(0).save("zero").then ->
+      #   cy.noop(0).assign("zero").then ->
       #     expect(cy.get("zero")).to.eq 0
 
       # it "returns a function when no alias was found", ->
