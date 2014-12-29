@@ -1268,6 +1268,34 @@ describe "Cypress API", ->
 
         cy.on "fail", -> done()
 
+  context "#submit", ->
+    it "does not change the subject", ->
+      form = cy.$("form")
+
+      cy.get("form").submit().then ($form) ->
+        expect($form.get(0)).to.eq form.get(0)
+
+    describe "errors", ->
+      beforeEach ->
+        @sandbox.stub cy.runner, "uncaught"
+
+      it "is a child command", (done) ->
+        cy.on "fail", -> done()
+
+        cy.submit()
+
+      it "throws when non dom subject", (done) ->
+        cy.on "fail", -> done()
+
+        cy.noop({}).submit()
+
+      it "throws when subject isnt a form", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.include ".submit() can only be called on a <form>! Your subject contains a: <input id=\"input\">"
+          done()
+
+        cy.get("input").submit()
+
   context "#click", ->
     it "sends a click event", (done) ->
       cy.$("#button").click -> done()
