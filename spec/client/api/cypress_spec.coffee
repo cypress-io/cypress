@@ -1510,6 +1510,23 @@ describe "Cypress API", ->
 
       cy.then ->
         cy.prop("runnable").state = "foo"
+
+    it "calls prop next() on end if exists", (done) ->
+      fn = -> done()
+
+      cy.prop("next", fn)
+
+      cy.noop()
+
+    it "removes prop next after calling", (done) ->
+      fn = -> _.defer ->
+        expect(cy.prop("next")).to.eq null
+        done()
+
+      cy.prop("next", fn)
+
+      cy.noop()
+
   context "#_storeHref", ->
     it "sets prop href", ->
       cy._storeHref()

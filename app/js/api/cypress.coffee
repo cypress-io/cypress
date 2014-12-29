@@ -100,6 +100,7 @@ window.Cypress = do ($, _) ->
         ## holds mocha's .then callback fn
         if next = @prop("next")
           next()
+          @prop("next", null)
 
         return @
 
