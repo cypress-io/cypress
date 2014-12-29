@@ -197,6 +197,16 @@ describe "Cypress API", ->
           onResponse: undefined
         })
 
+    it "accepts regex url, response", ->
+      cy.route(/foo/, {}).then ->
+        @expectOptionsToBe({
+          method: "GET"
+          url: /foo/
+          response: {}
+          onRequest: undefined
+          onResponse: undefined
+        })
+
     it "accepts url, response, onRequest", ->
       onRequest = ->
 
@@ -308,6 +318,13 @@ describe "Cypress API", ->
         })
         .then ->
           cy.sync.window().$.post("/users", "name=brian")
+
+    it "adds multiple routes to the responses array", ->
+      cy
+        .route("foo", {})
+        .route("bar", {})
+        .then ->
+          expect(cy._sandbox.server.responses).to.have.length(2)
 
     describe "errors", ->
       beforeEach ->

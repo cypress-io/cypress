@@ -49,7 +49,7 @@ do (Cypress, _) ->
       options = o = {}
 
       switch
-        when _.isObject(args[0])
+        when _.isObject(args[0]) and not _.isRegExp(args[0])
           _.extend options, args[0]
         when args.length is 2
           o.url        = args[0]
@@ -57,7 +57,7 @@ do (Cypress, _) ->
 
           ## if our url actually matches an http method
           ## then we know the user omitted response
-          if validHttpMethodsRe.test(o.url.toUpperCase())
+          if _.isString(o.url) and validHttpMethodsRe.test(o.url.toUpperCase())
             @throwErr "cy.route() must be called with a response."
         when args.length is 3
           if _.isFunction _(args).last()
