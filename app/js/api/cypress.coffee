@@ -117,15 +117,18 @@ window.Cypress = do ($, _) ->
         ## time this resolves
         return if @prop("runnable") isnt runnable
 
-        @trigger "command:start", queue
-
         ## reset the timeout to what it used to be
         runnable.timeout(prevTimeout)
+
+        @trigger "command:start", queue
 
         promise = @set(queue, @queue[index - 1], @queue[index + 1]).then =>
           ## each successful command invocation should
           ## always reset the timeout for the current runnable
-          runnable.resetTimeout()
+          ## unless we already have a state.  if we have a state
+          ## then we're already done and resetting would cause a
+          ## timeout to happen in a few seconds
+          runnable.resetTimeout() if not runnable.state
 
           ## mutate index by incrementing it
           ## this allows us to keep the proper index
