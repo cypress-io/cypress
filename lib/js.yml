@@ -1,4 +1,5 @@
 vendor:
+  - node_modules/setimmediate/setImmediate.js
   - bower_components/jquery/dist/jquery.js
   - bower_components/underscore/underscore.js
   - bower_components/mocha/mocha.js

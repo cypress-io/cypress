@@ -140,7 +140,7 @@ window.Cypress = do ($, _) ->
 
           @trigger "command:end"
 
-          @defer => @run()
+          @defer @run
 
           ## must have this empty return here else we end up creating
           ## additional .then callbacks due to bluebird chaining
@@ -168,7 +168,7 @@ window.Cypress = do ($, _) ->
 
       ## automatically defer running each command in succession
       ## so each command is async
-      @defer =>
+      @defer ->
         angular = @sync.window().angular
 
         if angular and angular.getTestability
@@ -180,6 +180,7 @@ window.Cypress = do ($, _) ->
 
     clearTimeout: (id) ->
       clearTimeout(id) if id
+      clearImmediate(id) if id
       return @
 
     _alias: (name) ->
@@ -410,11 +411,9 @@ window.Cypress = do ($, _) ->
       @_sandbox ?= sinon.sandbox.create()
 
     defer: (fn) ->
-      @delay(fn, 0)
-
-    delay: (fn, ms) ->
       @clearTimeout(@prop("timerId"))
-      @prop "timerId", _.delay(fn, ms)
+      # @prop "timerId", _.defer _.bind(fn, @)
+      @prop "timerId", setImmediate _.bind(fn, @)
 
     hook: (name) ->
       return if not @prop("inspect")
@@ -460,7 +459,7 @@ window.Cypress = do ($, _) ->
         @queue.splice (@prop("nestedIndex", nestedIndex += 1)), 0, obj
       else
         @queue.push(obj)
-        @prop "runId", @defer _(@run).bind(@)
+        @prop "runId", @defer(@run)
 
       return @
 
