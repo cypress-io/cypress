@@ -28,7 +28,8 @@ do (Cypress, _) ->
 
       if not alias = @_aliases[name]
         aliases = _(@_aliases).keys().join(", ")
-        @throwErr "cy.get() could not find a registered alias for: '#{name}'.  Available aliases are: '#{aliases}'."
+        currentCommand = @prop("current").name
+        @throwErr "cy.#{currentCommand}() could not find a registered alias for: '#{name}'.  Available aliases are: '#{aliases}'."
 
       return alias
 
