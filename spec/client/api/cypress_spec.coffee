@@ -1898,7 +1898,7 @@ describe "Cypress API", ->
         cy
           .server()
           .route("GET", /.*/, response).as("fetch")
-          .window().then (win) =>
+          .window().then (win) ->
             win.$.get("/foo")
           .wait("@fetch").then (xhr) ->
             obj = JSON.parse(xhr.responseText)
@@ -1908,9 +1908,25 @@ describe "Cypress API", ->
         beforeEach ->
           @sandbox.stub cy.runner, "uncaught"
 
-        it "throws when alias doesnt match a route"
+        it "throws when alias doesnt match a route", (done) ->
+          cy.on "fail", (err) ->
+            expect(err.message).to.include "cy.wait() can only accept aliases for routes.  The alias: 'b' did not match a route."
+            done()
 
-        it "throws when route is never resolved"
+          cy.get("body").as("b").wait("@b")
+
+        it  "throws when route is never resolved", (done) ->
+          cy.on "fail", (err) ->
+            expect(err.message).to.include "cy.wait() timed out waiting for a response to the route: 'fetch'. No response ever occured."
+            done()
+
+          cy
+            .server()
+            .route("GET", /.*/, {}).as("fetch")
+            .then ->
+              ## reduce the timeout to speed up tests!
+              cy._timeout(100)
+            .wait("@fetch")
 
   context "#_retry", ->
     it "returns a nested cancellable promise", (done) ->

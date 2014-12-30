@@ -24,6 +24,7 @@ do (Cypress, _) ->
 
   Cypress.addDualCommand
 
+    ## break this up into private methods using Cypress.extend
     wait: (subject, msOrFnOrAlias, options = {}) ->
       msOrFnOrAlias ?= 1e9
 
@@ -61,13 +62,16 @@ do (Cypress, _) ->
           ## until we find the response xhr object
           ## by its alias
           {alias, command} = alias
-          if command.name is "route"
-            if xhr = @getResponseByAlias(alias)
-              return xhr
-            else
-              retry = ->
-                @invoke2(@prop("current"), alias, options)
-              @_retry(retry, options)
+
+          @throwErr("cy.wait() can only accept aliases for routes.  The alias: '#{alias}' did not match a route.") if command.name isnt "route"
+
+          if xhr = @getResponseByAlias(alias)
+            return xhr
+          else
+            retry = ->
+              options.error ?= "cy.wait() timed out waiting for a response to the route: '#{alias}'. No response ever occured."
+              @invoke2(@prop("current"), msOrFnOrAlias, options)
+            return @_retry(retry, options)
 
         else
           @throwErr "wait() must be invoked with either a number, a function, or an alias for a route!"
