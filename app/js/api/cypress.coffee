@@ -497,20 +497,20 @@ window.Cypress = do ($, _) ->
         args.hasSubject or= true
         args
 
-      wrap = (fn, args) ->
+      wrap = (fn) ->
         switch type
           when "parent"
             return fn
 
           when "dual"
-            _.wrap fn, (orig) ->
+            _.wrap fn, (orig, args...) ->
               subject = @prop("subject")
               args = prepareSubject(subject, args)
 
               return orig.apply(@, args)
 
           when "child"
-            _.wrap fn, (orig) ->
+            _.wrap fn, (orig, args...) ->
               @throwErr("cy.#{key}() is a child command which operates on an existing subject.  Child commands must be called after a parent command!") if not @prop("current").prev
 
               ## push the subject into the args
@@ -521,11 +521,11 @@ window.Cypress = do ($, _) ->
               return ret ? subject
 
       Cypress.prototype[key] = (args...) ->
-        @enqueue(key, wrap(fn, args), args, type)
+        @enqueue(key, wrap(fn), args, type)
 
       ## reference a synchronous version of this function
       Cypress.prototype.sync[key] = (args...) ->
-        wrap(fn, args).apply(Cypress.cy, args)
+        wrap(fn).apply(Cypress.cy, args)
 
     ## remove all of the partialed functions from Cypress prototype
     @unpatch = (fns) ->
