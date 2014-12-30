@@ -15,6 +15,9 @@ do (Cypress, _) ->
           @_findByNgBinding(selector, options)
 
   Cypress.extend
+    ## these are private because only 'ng' should know
+    ## about them.  we're attaching them regardless
+    ## so they're reachable and can be monkey patched
     _findByNgBinding: (binding, options) ->
       selector = ".ng-binding"
 

@@ -1,16 +1,36 @@
 do (Cypress, _) ->
 
+  aliasRe = /^@.+/
+
   Cypress.addChildCommand
-
     as: (subject, str) ->
-      ## make sure the prev object is NOT a modifier
+      prev       = @prop("current").prev
+      prev.alias = str
 
-      ## throwErr if prev object is a modifier
-      ## throwErr if prev object is undefined
-      # @_aliases[str] = @prop("current").prev
-      @_aliases[str] = {subject: subject, command: @prop("current")}
+      @_aliases[str] = {subject: subject, command: prev, alias: str}
 
       return subject
+
+  Cypress.extend
+    ## these are public because its expected other commands
+    ## know about them and are expected to call them
+    getNextAlias: ->
+      next = @prop("current").next
+      if next and next.name is "as"
+        next.args[0]
+
+    getAlias: (name) ->
+      ## bail if the name doesnt reference an alias
+      return if not aliasRe.test(name)
+
+      ## slice off the '@'
+      name = name.slice(1)
+
+      if not alias = @_aliases[name]
+        aliases = _(@_aliases).keys().join(", ")
+        @throwErr "cy.get() could not find a registered alias for: '#{name}'.  Available aliases are: '#{aliases}'."
+
+      return alias
 
     # cy
     #   .server()

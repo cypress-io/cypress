@@ -103,6 +103,7 @@ describe "Cypress API", ->
       defaults = {
         autoRespond: true
         autoRespondAfter: 10
+        afterResponse: ->
       }
 
       @options = (obj) ->
@@ -112,14 +113,14 @@ describe "Cypress API", ->
 
     it "can accept no arguments", (done) ->
       cy.on "end", =>
-        expect(@server.getCall(0).args[1]).to.deep.eq @options({})
+        expect(@server.getCall(0).args[1]).to.have.keys _.keys(@options({}))
         done()
 
       cy.server()
 
     it "can accept an object literal as options", (done) ->
       cy.on "end", =>
-        expect(@server.getCall(0).args[1]).to.deep.eq @options({foo: "foo"})
+        expect(@server.getCall(0).args[1]).to.have.keys _.keys(@options({foo: "foo"}))
         done()
 
       cy.server({foo: "foo"})
@@ -129,7 +130,7 @@ describe "Cypress API", ->
       onResponse = ->
 
       cy.on "end", =>
-        expect(@server.getCall(0).args[1]).to.deep.eq @options({onRequest: onRequest, onResponse, onResponse})
+        expect(@server.getCall(0).args[1]).to.have.keys _.keys(@options({onRequest: onRequest, onResponse, onResponse}))
         done()
 
       cy.server(onRequest, onResponse)
@@ -139,7 +140,7 @@ describe "Cypress API", ->
       onResponse = ->
 
       cy.on "end", =>
-        expect(@server.getCall(0).args[1]).to.deep.eq @options({onRequest: onRequest, onResponse, onResponse})
+        expect(@server.getCall(0).args[1]).to.have.keys _.keys(@options({onRequest: onRequest, onResponse, onResponse}))
         done()
 
       cy.server({onRequest: onRequest, onResponse: onResponse})
@@ -784,10 +785,10 @@ describe "Cypress API", ->
       cy.get("#list li").eq(0).as("firstLi").then ($li) ->
         expect($li).to.match li
 
-  context "#_alias", ->
+  context "#getAlias", ->
     it "retrieves aliases", ->
       cy.on "end", ->
-        expect(cy._alias("@firstInput")).to.be.defined
+        expect(cy.getAlias("@firstInput")).to.be.defined
 
       cy
         .get("body").as("b")
@@ -1494,6 +1495,9 @@ describe "Cypress API", ->
 
           cy.on "fail", -> done()
 
+  context "#then", ->
+    it "assigns prop next if .then was added by mocha"
+
   context "#run", ->
     it "does not call clearTimeout on the runnable if it already has a state", (done) ->
       ## this prevents a bug where if we arent an async test, done() callback
@@ -1887,6 +1891,27 @@ describe "Cypress API", ->
             expect(err.message).to.include "Timed out retrying. Could not continue due to: AssertionError"
             done()
 
+    describe "alias argument", ->
+      it "waits for a route alias to have a response", ->
+        response = {foo: "foo"}
+
+        cy
+          .server()
+          .route("GET", /.*/, response).as("fetch")
+          .window().then (win) =>
+            win.$.get("/foo")
+          .wait("@fetch").then (xhr) ->
+            obj = JSON.parse(xhr.responseText)
+            expect(obj).to.deep.eq response
+
+      describe "errors", ->
+        beforeEach ->
+          @sandbox.stub cy.runner, "uncaught"
+
+        it "throws when alias doesnt match a route"
+
+        it "throws when route is never resolved"
+
   context "#_retry", ->
     it "returns a nested cancellable promise", (done) ->
       i = 0
@@ -1922,6 +1947,7 @@ describe "Cypress API", ->
       fn = ->
       cy._retry(fn, {})
       expect(timeout).to.be.calledWith 1e9
+
       expect(@test.timeout()).to.be.gt prevTimeout
 
   context "nested commands", ->

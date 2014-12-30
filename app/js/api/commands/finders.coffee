@@ -32,14 +32,14 @@ do (Cypress, _) ->
       _.defaults options,
         retry: true
 
-      if alias = @_alias(selector)
+      if alias = @getAlias(selector)
         {subject, command} = alias
         if subject and subject.get and _.isElement(subject.get(0))
           el = subject.get(0)
           if @_contains(el)
             return subject
           else
-            @_replayFrom command.prev
+            @_replayFrom command
             return null
 
       $el = @$(selector)

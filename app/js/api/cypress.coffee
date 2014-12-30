@@ -4,8 +4,6 @@
 ## make this a global to allow attaching / overriding
 window.Cypress = do ($, _) ->
 
-  aliasRe = /^@.+/
-
   class Cypress
     queue: []
     sync: {}
@@ -179,22 +177,8 @@ window.Cypress = do ($, _) ->
           run()
 
     clearTimeout: (id) ->
-      clearTimeout(id) if id
       clearImmediate(id) if id
       return @
-
-    _alias: (name) ->
-      ## bail if the name doesnt reference an alias
-      return if not aliasRe.test(name)
-
-      ## slice off the '@'
-      name = name.slice(1)
-
-      if not alias = @_aliases[name]
-        aliases = _(@_aliases).keys().join(", ")
-        @throwErr "cy.get() could not find a registered alias for: '#{name}'.  Available aliases are: '#{aliases}'."
-
-      return alias
 
     # get: (name) ->
     #   alias = @aliases[name]

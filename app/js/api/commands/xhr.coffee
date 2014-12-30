@@ -2,12 +2,18 @@ do (Cypress, _) ->
 
   validHttpMethodsRe = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/
 
+  responseNamespace = (alias) -> "response_" + alias
+
   Cypress.addParentCommand
 
     server: (args...) ->
       defaults = {
         autoRespond: true
         autoRespondAfter: 10
+        afterResponse: (xhr, alias) =>
+          ## set this response xhr object if we
+          ## have an alias for it
+          @prop(responseNamespace(alias), xhr) if alias
       }
 
       ## server accepts multiple signatures
@@ -99,4 +105,14 @@ do (Cypress, _) ->
       if not validHttpMethodsRe.test(options.method)
         @throwErr "cy.route() was called with an invalid method: '#{o.method}'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"
 
+      ## look ahead to see if this
+      ## command (route) has an alias?
+      if alias = @getNextAlias()
+        options.alias = alias
+
       @prop("server").stub(options)
+
+  Cypress.extend
+    getResponseByAlias: (alias) ->
+      if xhr = @prop(responseNamespace(alias))
+        return xhr

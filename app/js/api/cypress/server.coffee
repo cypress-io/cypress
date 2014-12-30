@@ -7,6 +7,7 @@ Cypress.Server = do (Cypress, _) ->
       @requests   = []
       @responses  = []
       @onRequests = []
+      @afterResponse = options.afterResponse
 
       @autoRespond(options.autoRespond)
       @autoRespondAfter(options.autoRespondAfter)
@@ -98,6 +99,9 @@ Cypress.Server = do (Cypress, _) ->
       ## if there is a real 404 that we submitted
       request.hasResponded = true
 
+      if _.isFunction(@afterResponse)
+        @afterResponse(request, response.alias)
+
       # response.id = @getId()
 
       # @emit
@@ -117,6 +121,7 @@ Cypress.Server = do (Cypress, _) ->
         contentType: "application/json"
         response: {}
         headers: {}
+        alias: null
         onRequest: ->
         onResponse: ->
 
