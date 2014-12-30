@@ -14,7 +14,9 @@ do (Cypress, _) ->
       ## to continue synchronously onto tests (if for instance this
       ## 'then' is called from a hook) - by defering it, we finish
       ## resolving our deferred.
-      if not @prop("current").next and @prop("current").args.length is 3
+      current = @prop("current")
+
+      if not current.next and current.args.length is 2 and (current.args[1].name is "done" or current.args[1].length is 1)
         return @prop("next", fn)
 
       ## we need to wrap this in a try-catch still (even though we're

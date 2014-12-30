@@ -1496,7 +1496,33 @@ describe "Cypress API", ->
           cy.on "fail", -> done()
 
   context "#then", ->
-    it "assigns prop next if .then was added by mocha"
+    it "mocha inserts 2 arguments to then: anonymous fn for invoking done(), and done reference itself", ->
+      ## this puts tests in place to where if mocha
+      ## ever updates and changes how it calls .then
+      ## on the returned object, we will know
+
+      cy.then ->
+        expect(cy.queue.length).to.eq 2
+
+        lastThen = _(cy.queue).last()
+
+        expect(lastThen.args[0]).to.be.a.function
+        expect(lastThen.args[1].length).to.eq 1
+
+        ## if our browser supports the .name property
+        ## of a function, then test it too to make
+        ## sure its called 'done'
+        if name = lastThen.args[1].name
+          expect(name).to.eq "done"
+
+    it "assigns prop next if .then matched what would be added by mocha", (done) ->
+      fn = (err) ->
+
+      cy.on "end", ->
+        expect(cy.prop("next")).not.to.be.undefined
+        done()
+
+      cy.noop().then((->), fn)
 
   context "#run", ->
     it "does not call clearTimeout on the runnable if it already has a state", (done) ->

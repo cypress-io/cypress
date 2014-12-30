@@ -488,7 +488,14 @@ window.Cypress = do ($, _) ->
       prepareSubject = (subject, args) ->
         ## if we already have a subject
         ## then replace the first argument
-        ## with the new subject
+        ## with the new subject.
+        ## i think this is now deprecated
+        ## based on the way args are passed
+        ## it will always be a new array of arguments
+        ## and therefore we dont have to deal with
+        ## the edge case of mutating args with subject
+        ## later.  however theres not enough tests
+        ## around this so we'll leave it in place for now.
         if args.hasSubject
           args.splice(0, 1, subject)
         else
