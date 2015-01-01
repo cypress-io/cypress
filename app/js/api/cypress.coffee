@@ -20,7 +20,7 @@ window.Cypress = do ($, _, Backbone) ->
         delay: 0 ## whether there is a delay in between commands
 
     defaults: ->
-      @props    = {}
+      @props = {}
 
       Cypress.trigger "defaults"
 
@@ -97,8 +97,6 @@ window.Cypress = do ($, _, Backbone) ->
 
         ## trigger end event
         @trigger("end")
-
-        Cypress.trigger "after:run"
 
         ## and we should have a next property which
         ## holds mocha's .then callback fn
