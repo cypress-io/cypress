@@ -25,6 +25,9 @@ do (Cypress, _) ->
       defaults = {
         autoRespond: true
         autoRespondAfter: 10
+        onError: (xhr, err) =>
+          console.warn "Responding to this XHR caused the following error to be thrown!", xhr
+          @fail(err)
         afterResponse: (xhr, alias) =>
           ## set this response xhr object if we
           ## have an alias for it

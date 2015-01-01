@@ -4,10 +4,16 @@ Cypress.Server = do (Cypress, _) ->
 
   class Server
     constructor: (@fakeServer, options) ->
+      ## think about moving these properties to a getter/setter
+      ## system which is cleaned up during restore to
+      ## remove all references.  check if these are being
+      ## GC'd properly
+
       @requests   = []
       @responses  = []
       @onRequests = []
       @afterResponse = options.afterResponse
+      @onError       = options.onError
 
       @autoRespond(options.autoRespond)
       @autoRespondAfter(options.autoRespondAfter)
@@ -42,7 +48,13 @@ Cypress.Server = do (Cypress, _) ->
           _this.invokeOnRequest(xhr)
 
         xhr.respond = _.wrap xhr.respond, (orig, args...) ->
-          orig.apply(@, args)
+          try
+            orig.apply(@, args)
+          catch e
+            if _.isFunction(_this.onError)
+              _this.onError(xhr, e)
+            else
+              throw e
 
           ## after we loop through all of the responses to make sure
           ## something can response to this request, we need to emit
