@@ -32,7 +32,7 @@ do (Cypress, _) ->
       catch e
         throw e
 
-    and: (subject, fn) -> @sync.then(subject, fn)
+    and: (subject, fn) -> @sync.then(fn)
 
   Cypress.addParentCommand
 
