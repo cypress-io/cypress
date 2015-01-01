@@ -2,6 +2,9 @@ do (Cypress, _) ->
 
   aliasRe = /^@.+/
 
+  Cypress.on "defaults", ->
+    @_aliases = {}
+
   Cypress.addChildCommand
     as: (subject, str) ->
       prev       = @prop("current").prev

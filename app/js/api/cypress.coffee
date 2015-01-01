@@ -2,13 +2,17 @@
 ## for some references on creating simulated events
 
 ## make this a global to allow attaching / overriding
-window.Cypress = do ($, _) ->
+window.Cypress = do ($, _, Backbone) ->
 
   class Cypress
     queue: []
     sync: {}
 
     constructor: (@options = {}) ->
+
+    initialize: ->
+      Cypress.trigger "initialize"
+
       @defaults()
 
       _.defaults @options,
@@ -17,8 +21,8 @@ window.Cypress = do ($, _) ->
 
     defaults: ->
       @props    = {}
-      @_aliases = {}
-      @_sandbox = null
+
+      Cypress.trigger "defaults"
 
       return @
 
@@ -93,6 +97,8 @@ window.Cypress = do ($, _) ->
 
         ## trigger end event
         @trigger("end")
+
+        Cypress.trigger "after:run"
 
         ## and we should have a next property which
         ## holds mocha's .then callback fn
@@ -387,13 +393,6 @@ window.Cypress = do ($, _) ->
     command: (name, args...) ->
       Promise.resolve @sync[name].apply(@, args)
 
-    _getSandbox: ->
-      sinon = @sync.window().sinon
-
-      @throwErr("sinon.js was not found in the remote iframe's window.  This may happen if you testing a page you did not directly cy.visit(..).  This happens when you click a regular link.") if not sinon
-
-      @_sandbox ?= sinon.sandbox.create()
-
     defer: (fn) ->
       @clearTimeout(@prop("timerId"))
       # @prop "timerId", _.defer _.bind(fn, @)
@@ -534,16 +533,11 @@ window.Cypress = do ($, _) ->
       Cypress.prototype.sync[key] = (args...) ->
         wrap(fn).apply(Cypress.cy, args)
 
-    ## remove all of the partialed functions from Cypress prototype
-    @unpatch = (fns) ->
-      fns = _(commands).keys().concat("sandbox")
-      _.each (fns), (fn, obj) ->
-        delete Cypress.prototype[fn]
-
     @abort = ->
+      Cypress.trigger "abort"
+
       @cy.$remoteIframe?.off("submit unload load")
       @cy.isReady(false, "abort")
-      @cy.prop("xhr")?.abort()
       @cy.prop("runnable")?.clearTimeout()
 
       promise = @cy.prop("promise")
@@ -561,22 +555,12 @@ window.Cypress = do ($, _) ->
       ## reset the queue to an empty array
       Cypress.prototype.queue = []
 
-      ## restore the sandbox if we've
-      ## created one
-      if sandbox = @cy._sandbox
-        sandbox.restore()
-
-        ## if we have a server, resets
-        ## these references for GC
-        if server = sandbox.server
-          server.requests  = []
-          server.queue     = []
-          server.responses = []
-
       ## remove any outstanding groups
       ## for any open hooks and runnables
       @cy.group(false)
       @cy.group(false)
+
+      Cypress.trigger "after:run"
 
       ## remove any event listeners
       @cy.off()
@@ -592,6 +576,8 @@ window.Cypress = do ($, _) ->
     ## from the cypress instance
     @stop = ->
       @abort().then =>
+        Cypress.trigger "destroy"
+
         _.extend @cy,
           runner:        null
           remoteIframe:  null
@@ -646,6 +632,8 @@ window.Cypress = do ($, _) ->
         channel:       channel
         config:        config
 
+      Cypress.trigger "before:run"
+
       ## anytime setup is called we immediately
       ## set cy to be ready to invoke commands
       ## this prevents a bug where we go into not
@@ -656,12 +644,30 @@ window.Cypress = do ($, _) ->
     @start = ->
       window.cy = @cy = new Cypress
 
-      _.extend @cy, Backbone.Events
+      @cy.initialize()
 
       ## return the class as opposed to the
       ## instance so we dont have to worry about
       ## accidentally chaining the 'then' method
       ## during tests
       return @
+
+    @on = (event, fn) ->
+      return if not _.isFunction(fn)
+
+      @_events ?= []
+      @_events.push {name: event, fn: fn}
+
+    @trigger = (event, args...) ->
+      return if not @_events
+
+      _.chain(@_events)
+        .where({name: event})
+          .each (event) =>
+            event.fn.apply(@cy, args)
+
+      return @
+
+    _.extend Cypress.prototype, Backbone.Events
 
   return Cypress

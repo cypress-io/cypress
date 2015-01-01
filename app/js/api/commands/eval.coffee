@@ -1,7 +1,9 @@
 do (Cypress, _) ->
 
-  Cypress.addParentCommand
+  Cypress.on "abort", ->
+    @prop("xhr")?.abort()
 
+  Cypress.addParentCommand
     eval: (code, options = {}) ->
       _.defaults options,
         timeout: 15000
