@@ -115,6 +115,7 @@ describe "Cypress API", ->
         autoRespond: true
         autoRespondAfter: 10
         afterResponse: ->
+        onError: ->
       }
 
       @options = (obj) ->
