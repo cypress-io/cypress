@@ -739,6 +739,110 @@ describe "Cypress API", ->
         expect(err.message).to.include "cy.fill() must be passed an object literal as its 1st argument!"
         done()
 
+  context "#within", ->
+    it "scopes additional GET finders to the subject", ->
+      input = cy.$("#by-name input:first")
+
+      cy.get("#by-name").within ->
+        cy.get("input:first").then ($input) ->
+          expect($input.get(0)).to.eq input.get(0)
+
+    it "scopes additional CONTAINS finders to the subject", ->
+      span = cy.$("#nested-div span:contains(foo)")
+
+      cy.contains("foo").then ($span) ->
+        expect($span.get(0)).not.to.eq span.get(0)
+
+      cy.get("#nested-div").within ->
+        cy.contains("foo").then ($span) ->
+          expect($span.get(0)).to.eq span.get(0)
+
+    it "does not change the subject", ->
+      form = cy.$("#by-name")
+
+      cy.get("#by-name").within(->).then ($form) ->
+        expect($form.get(0)).to.eq form.get(0)
+
+    it "can call child commands after within on the same subject", ->
+      input = cy.$("#by-name input:first")
+
+      cy.get("#by-name").within(->).find("input:first").then ($input) ->
+        expect($input.get(0)).to.eq input.get(0)
+
+    it "supports nested withins", ->
+      span = cy.$("#button-text button span")
+
+      cy.get("#button-text").within ->
+        cy.get("button").within ->
+          cy.get("span").then ($span) ->
+            expect($span.get(0)).to.eq span.get(0)
+
+    it "supports complicated nested withins", ->
+      span1 = cy.$("#button-text a span")
+      span2 = cy.$("#button-text button span")
+
+      cy.get("#button-text").within ->
+        cy.get("a").within ->
+          cy.get("span").then ($span) ->
+            expect($span.get(0)).to.eq span1.get(0)
+
+        cy.get("button").within ->
+          cy.get("span").then ($span) ->
+            expect($span.get(0)).to.eq span2.get(0)
+
+    it "clears withinSubject after within is over", ->
+      input = cy.$("input:first")
+      span = cy.$("#button-text button span")
+
+      cy.get("#button-text").within ->
+        cy.get("button").within ->
+          cy.get("span").then ($span) ->
+            expect($span.get(0)).to.eq span.get(0)
+
+      cy.get("input:first").then ($input) ->
+        expect($input.get(0)).to.eq input.get(0)
+
+    it "removes command:start listeners after within is over", ->
+      cy.get("#button-text").within ->
+        cy.get("button").within ->
+          cy.get("span")
+
+      cy.then ->
+        expect(cy._events).not.to.have.property "command:start"
+
+    it "clears withinSubject even if next is null", (done) ->
+      span = cy.$("#button-text button span")
+
+      cy.on "end", ->
+        ## should be defined here because next would have been
+        ## null and withinSubject would not have been cleared
+        expect(cy.prop("withinSubject")).not.to.be.undefined
+
+        _.defer ->
+          expect(cy.prop("withinSubject")).to.be.null
+          done()
+
+      cy.get("#button-text").within ->
+        cy.get("button span").then ($span) ->
+          expect($span.get(0)).to.eq span.get(0)
+
+    describe "errors", ->
+      beforeEach ->
+        @sandbox.stub cy.runner, "uncaught"
+
+      it "throws when not a DOM subject", (done) ->
+        cy.on "fail", (err) -> done()
+
+        cy.noop().within ->
+
+      _.each ["", [], {}, 1, null, undefined], (value) ->
+        it "throws if passed anything other than a function, such as: #{value}", (done) ->
+          cy.on "fail", (err) ->
+            expect(err.message).to.include "cy.within() must be called with a function!"
+            done()
+
+          cy.get("body").within(value)
+
   context "#save", ->
     it "does not change the subject", ->
       cy.noop({}).assign("obj").then (obj) ->
