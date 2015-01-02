@@ -750,7 +750,7 @@ describe "Cypress API", ->
     it "scopes additional CONTAINS finders to the subject", ->
       span = cy.$("#nested-div span:contains(foo)")
 
-      cy.contains("foo").then ($span) ->
+      cy.get("*").contains("foo").then ($span) ->
         expect($span.get(0)).not.to.eq span.get(0)
 
       cy.get("#nested-div").within ->
@@ -1054,59 +1054,88 @@ describe "Cypress API", ->
 
   context "#contains", ->
     it "finds the nearest element by :contains selector", ->
-      cy.contains("li 0").then ($el) ->
+      cy.get("*").contains("li 0").then ($el) ->
         expect($el.length).to.eq(1)
         expect($el).to.match("li")
 
-    it "has an optional filter argument", ->
-      cy.contains("ul", "li 0").then ($el) ->
-        expect($el.length).to.eq(1)
-        expect($el).to.match("ul")
+    it "GET is scoped to the current subject", ->
+      span = cy.$("#click-me a span")
+
+      cy.get("#click-me a").contains("click").then ($span) ->
+        expect($span.length).to.eq(1)
+        expect($span.get(0)).to.eq span.get(0)
 
     it "can find input type=submits by value", ->
-      cy.contains("input contains submit").then ($el) ->
+      cy.get("*").contains("input contains submit").then ($el) ->
         expect($el.length).to.eq(1)
         expect($el).to.match "input[type=submit]"
 
+    it "has an optional filter argument", ->
+      cy.get("*").contains("ul", "li 0").then ($el) ->
+        expect($el.length).to.eq(1)
+        expect($el).to.match("ul")
+
+    it "disregards priority elements when provided a filter", ->
+      form = cy.$("#click-me")
+
+      cy.get("*").contains("form", "click me").then ($form) ->
+        expect($form.get(0)).to.eq form.get(0)
+
     it "favors input type=submit", ->
-      cy.contains("click me").then ($el) ->
+      cy.get("*").contains("click me").then ($el) ->
         expect($el.length).to.eq(1)
         expect($el).to.match("input[type=submit]")
 
     it "favors buttons next", ->
-      cy.contains("click button").then ($el) ->
+      cy.get("*").contains("click button").then ($el) ->
         expect($el.length).to.eq(1)
         expect($el).to.match("button")
 
     it "favors anchors next", ->
-      cy.contains("Home Page").then ($el) ->
+      cy.get("*").contains("Home Page").then ($el) ->
         expect($el.length).to.eq(1)
         expect($el).to.match("a")
+
+    it "reduces right by priority element", ->
+      label = cy.$("#complex-contains label")
+
+      ## it should find label because label is the first priority element
+      ## out of the collection of contains elements
+      cy.get("#complex-contains").contains("nested contains").then ($label) ->
+        expect($label.get(0)).to.eq label.get(0)
 
     it "retries until content is found", ->
       span = $("<span>brand new content</span>")
 
-      _.delay ->
-        cy.$("head").append span
-      , 500
+      ## only append the span after we retry
+      ## three times
+      retry = _.after 3, ->
+        cy.$("body").append span
 
-      cy.contains("brand new content").then ($span) ->
-        expect($span).to.match span
+      cy.on "retry", retry
+
+      cy.get("*").contains("brand new content").then ($span) ->
+        expect($span.get(0)).to.eq span.get(0)
 
     describe "errors", ->
       beforeEach ->
         @sandbox.stub cy.runner, "uncaught"
-        @currentTest.timeout(500)
+        @currentTest.timeout(300)
+
+      it "throws when no DOM subject", (done) ->
+        cy.on "fail", (err) -> done()
+
+        cy.contains("foo")
 
       it "throws any elements when timing out and no filter", (done) ->
-        cy.contains("brand new content")
+        cy.get("*").contains("brand new content")
 
         cy.on "fail", (err) ->
           expect(err.message).to.include "Could not find any elements containing the content: brand new content"
           done()
 
       it "throws specific selector when timing out with a filter", (done) ->
-        cy.contains("span", "brand new content")
+        cy.get("*").contains("span", "brand new content")
 
         cy.on "fail", (err) ->
           expect(err.message).to.include "Could not find the selector: <span> containing the content: brand new content"
@@ -1455,7 +1484,7 @@ describe "Cypress API", ->
         if obj.name is "click"
           @delay = @sandbox.spy Promise.prototype, "delay"
 
-      cy.contains("Home Page").click().then ->
+      cy.get("*").contains("Home Page").click().then ->
         expect(@delay).to.be.calledWith 50
 
     it "can operate on a jquery collection", ->

@@ -1,34 +1,10 @@
 do (Cypress, _) ->
 
   Cypress.addParentCommand
-
-    contains: (filter, text, options = {}) ->
-      switch
-        when _.isObject(text)
-          options = text
-          text = filter
-          filter = ""
-        when _.isUndefined(text)
-          text = filter
-          filter = ""
-
-      word = if filter then "the selector: <#{filter}>" else "any elements"
-      options.error = "Could not find #{word} containing the content: #{text}"
-
-      ## find elements by the :contains psuedo selector
-      ## and any submit inputs with the attributeContainsWord selector
-      selector = "#{filter}:contains('#{text}'), #{filter}[type='submit'][value~='#{text}']"
-
-      @command("get", selector, options).then (elements) ->
-        for filter in ["input[type='submit']", "button", "a"]
-          filtered = elements.filter(filter)
-          return filtered if filtered.length
-
-        return elements.last()
-
     get: (selector, options = {}) ->
       _.defaults options,
         retry: true
+        withinSubject: @prop("withinSubject")
 
       if alias = @getAlias(selector)
         {subject, command} = alias
@@ -40,7 +16,7 @@ do (Cypress, _) ->
             @_replayFrom command
             return null
 
-      $el = @$(selector, @prop("withinSubject"))
+      $el = @$(selector, options.withinSubject)
 
       ## allow retry to be a function which we ensure
       ## returns truthy before returning its
@@ -63,6 +39,37 @@ do (Cypress, _) ->
       @_retry(retry, options)
 
   Cypress.addChildCommand
+    contains: (subject, filter, text, options = {}) ->
+      @ensureDom(subject)
+
+      switch
+        when _.isObject(text)
+          options = text
+          text = filter
+          filter = ""
+        when _.isUndefined(text)
+          text = filter
+          filter = ""
+
+      word = if filter then "the selector: <#{filter}>" else "any elements"
+      options.error = "Could not find #{word} containing the content: #{text}"
+      options.withinSubject = subject
+
+      ## find elements by the :contains psuedo selector
+      ## and any submit inputs with the attributeContainsWord selector
+      selector = "#{filter}:contains('#{text}'), #{filter}[type='submit'][value~='#{text}']"
+
+      @command("get", selector, options).then (elements) ->
+        return elements.first() if filter
+
+        ## iterate on the array of elements in reverse
+        for el in elements.get() by -1
+          ## return the element if it is a priority element
+          el = $(el)
+          return el if el.is("input[type='submit'], button, a, label")
+
+        return elements.last()
+
     within: (subject, fn) ->
       @ensureDom(subject)
 
