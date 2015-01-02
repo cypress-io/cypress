@@ -444,8 +444,9 @@ window.Cypress = do ($, _, Backbone) ->
 
       return @
 
-    $: (selector) ->
-      new $.fn.init selector, @sync.document()
+    $: (selector, context) ->
+      context ?= @sync.document()
+      new $.fn.init selector, context
 
     _: _
 

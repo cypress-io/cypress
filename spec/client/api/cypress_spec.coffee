@@ -38,6 +38,17 @@ describe "Cypress API", ->
   after ->
     Cypress.stop()
 
+  context "#$", ->
+    it "queries the remote document", ->
+      input = cy.$("#by-name input:first")
+      expect(input.length).to.eq 1
+      expect(input.prop("tagName")).to.eq "INPUT"
+
+    it "scopes the selector to context if provided", ->
+      input = cy.$("input:first", cy.$("#by-name"))
+      expect(input.length).to.eq 1
+      expect(input.prop("tagName")).to.eq "INPUT"
+
   context "#url", ->
     it "returns the location href", ->
       cy.url().then (url) ->
