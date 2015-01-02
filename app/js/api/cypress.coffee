@@ -348,7 +348,7 @@ window.Cypress = do ($, _, Backbone) ->
 
       ## we calculate the total time we've been retrying
       ## so we dont exceed the runnables timeout
-      total = (new Date - options.start)
+      options.total = total = (new Date - options.start)
 
       ## if our total exceeds the timeout OR the total + the interval
       ## exceed the runnables timeout, then bail
@@ -358,7 +358,7 @@ window.Cypress = do ($, _, Backbone) ->
         @throwErr "Timed out retrying. " + options.error ? "The last command was: " + @prop("current").name
 
       Promise.delay(options.interval).cancellable().then =>
-        @trigger "retry", fn, options
+        @trigger "retry", options
 
         @log {name: "retry", args: fn}
 

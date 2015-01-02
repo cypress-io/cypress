@@ -422,8 +422,9 @@ describe "Cypress API", ->
   context "#ng", ->
     context "find by binding", ->
       beforeEach ->
-        @currentTest.timeout(800)
-        @loadDom("html/angular").then @setup
+        @loadDom("html/angular").then =>
+          @setup()
+          @currentTest.timeout(300)
 
       it "finds color.name binding elements", ->
         spans = cy.$(".colors span.name")
@@ -453,11 +454,10 @@ describe "Cypress API", ->
           cy.ng("binding", "not-found")
 
         it "cancels additional finds when aborted", (done) ->
-          _.delay ->
+          retry = _.after 2, ->
             Cypress.abort()
-          , 200
 
-          cy.ng("binding", "not-found")
+          cy.on "retry", retry
 
           cy.on "fail", (err) ->
             done(err)
@@ -469,14 +469,17 @@ describe "Cypress API", ->
               done()
             , 100
 
+          cy.ng("binding", "not-found")
+
     context "find by repeater", ->
       ngPrefixes = {"phone in phones": 'ng-', "phone2 in phones": 'ng_', "phone3 in phones": 'data-ng-', "phone4 in phones": 'x-ng-'}
 
       beforeEach ->
         ## make this test timeout quickly so
         ## we dont have to wait so damn long
-        @currentTest.timeout(800)
-        @loadDom("html/angular").then @setup
+        @loadDom("html/angular").then =>
+          @setup()
+          @currentTest.timeout(300)
 
       _.each ngPrefixes, (prefix, attr) ->
         it "finds by #{prefix}repeat", ->
@@ -499,10 +502,9 @@ describe "Cypress API", ->
 
         ## wait until we're ALMOST about to time out before
         ## appending the missingInput
-        _.delay =>
-          cy.$("body").append(missingLi)
-          # debugger
-        , @test.timeout() - 300
+        cy.on "retry", (options) ->
+          if options.total + (options.interval * 3) > options.timeout
+            cy.$("body").append(missingLi)
 
         cy.ng("repeater", "li in lis").then ($li) ->
           expect($li).to.match missingLi
@@ -519,11 +521,10 @@ describe "Cypress API", ->
             done()
 
         it "cancels additional finds when aborted", (done) ->
-          _.delay ->
+          retry = _.after 2, ->
             Cypress.abort()
-          , 200
 
-          cy.ng("repeater", "not-found")
+          cy.on "retry", retry
 
           cy.on "fail", (err) ->
             done(err)
@@ -534,6 +535,8 @@ describe "Cypress API", ->
               expect(retry.callCount).to.eq 0
               done()
             , 100
+
+          cy.ng("repeater", "not-found")
 
         it "throws when cannot find angular", (done) ->
           delete cy.sync.window().angular
@@ -548,8 +551,9 @@ describe "Cypress API", ->
       ngPrefixes = {query: 'ng-', query2: 'ng_', query3: 'data-ng-', query4: 'x-ng-'}
 
       beforeEach ->
-        @currentTest.timeout(800)
-        @loadDom("html/angular").then @setup
+        @loadDom("html/angular").then =>
+          @setup()
+          @currentTest.timeout(300)
 
       _.each ngPrefixes, (prefix, attr) ->
         it "finds element by #{prefix}model", ->
@@ -572,9 +576,9 @@ describe "Cypress API", ->
 
         ## wait until we're ALMOST about to time out before
         ## appending the missingInput
-        _.delay =>
-          cy.$("body").append(missingInput)
-        , @test.timeout() - 300
+        cy.on "retry", (options) ->
+          if options.total + (options.interval * 3) > options.timeout
+            cy.$("body").append(missingInput)
 
         cy.ng("model", "missing-input").then ($input) ->
           expect($input).to.match missingInput
@@ -591,11 +595,10 @@ describe "Cypress API", ->
             done()
 
         it "cancels additional finds when aborted", (done) ->
-          _.delay ->
+          retry = _.after 2, ->
             Cypress.abort()
-          , 200
 
-          cy.ng("model", "not-found")
+          cy.on "retry", retry
 
           cy.on "fail", (err) ->
             done(err)
@@ -606,6 +609,8 @@ describe "Cypress API", ->
               expect(retry.callCount).to.eq 0
               done()
             , 100
+
+          cy.ng("model", "not-found")
 
         it "throws when cannot find angular", (done) ->
           delete cy.sync.window().angular
@@ -703,9 +708,10 @@ describe "Cypress API", ->
     it "retries finding the title", ->
       cy.$("title").remove()
 
-      _.delay ->
+      retry = _.after 2, ->
         cy.$("head").append $("<title>waiting on title</title>")
-      , 500
+
+      cy.on "retry", retry
 
       cy.title().then (text) ->
         expect(text).to.eq "waiting on title"
@@ -713,16 +719,17 @@ describe "Cypress API", ->
     it "retries until it has the correct title", ->
       cy.$("title").text("home page")
 
-      _.delay ->
+      retry = _.after 2, ->
         cy.$("title").text("about page")
-      , 500
+
+      cy.on "retry", retry
 
       cy.inspect().title().until (title) ->
         expect(title).to.eq "about page"
 
     it "throws after timing out", (done) ->
       @sandbox.stub cy.runner, "uncaught"
-      @test.timeout(500)
+      @test.timeout(300)
       cy.$("title").remove()
       cy.title()
       cy.on "fail", (err) ->
@@ -977,7 +984,7 @@ describe "Cypress API", ->
     beforeEach ->
       ## make this test timeout quickly so
       ## we dont have to wait so damn long
-      @currentTest.timeout(800)
+      @currentTest.timeout(300)
 
     it "finds by selector", ->
       list = cy.$("#list")
@@ -990,17 +997,18 @@ describe "Cypress API", ->
 
       ## wait until we're ALMOST about to time out before
       ## appending the missingEl
-      _.delay =>
-        cy.$("body").append(missingEl)
-      , @test.timeout() - 300
+      cy.on "retry", (options) ->
+        if options.total + (options.interval * 3) > options.timeout
+          cy.$("body").append(missingEl)
 
       cy.get("#missing-el").then ($div) ->
         expect($div).to.match missingEl
 
     it "retries until .until resolves to true", ->
-      _.delay =>
+      retry = _.after 3, ->
         cy.$("#list li").last().remove()
-      , @test.timeout() - 300
+
+      cy.on "retry", retry
 
       cy.get("#list li").until ($list) ->
         expect($list.length).to.eq 2
@@ -1930,27 +1938,28 @@ describe "Cypress API", ->
           expect(fn.callCount).to.eq 2
           done()
 
-      it "retries when undefined", (done) ->
-        i = 0
-        fn = ->
-          i += 1
-        fn = @sandbox.spy fn
-        cy.noop({}).then(fn).until (i) ->
-          if i isnt 2 then undefined else true
-        cy.on "end", ->
-          expect(fn.callCount).to.eq 2
-          done()
+      ## until no longer retries when undefined
+      # it "retries when undefined", (done) ->
+      #   i = 0
+      #   fn = ->
+      #     i += 1
+      #   fn = @sandbox.spy fn
+      #   cy.noop({}).then(fn).until (i) ->
+      #     if i isnt 2 then undefined else true
+      #   cy.on "end", ->
+      #     expect(fn.callCount).to.eq 2
+      #     done()
 
     describe "errors thrown", ->
       beforeEach ->
         @uncaught = @sandbox.stub(cy.runner, "uncaught")
 
       it "times out eventually due to false value", (done) ->
-        ## forcibly reduce the timeout to 500 ms
+        ## forcibly reduce the timeout to 100 ms
         ## so we dont have to wait so long
         cy
           .noop()
-          .until (-> false), timeout: 500
+          .until (-> false), timeout: 100
 
         cy.on "fail", (err) ->
           expect(err.message).to.include "The final value was: false"
@@ -1959,7 +1968,7 @@ describe "Cypress API", ->
       it "appends to the err message", (done) ->
         cy
           .noop()
-          .until (-> expect(true).to.be.false), timeout: 500
+          .until (-> expect(true).to.be.false), timeout: 100
 
         cy.on "fail", (err) ->
           expect(err.message).to.include "Timed out retrying. Could not continue due to: AssertionError"
@@ -1969,10 +1978,10 @@ describe "Cypress API", ->
     describe "number argument", ->
       it "passes delay onto Promise", ->
         delay = @sandbox.spy Promise, "delay"
-        cy.wait(100)
+        cy.wait(50)
         cy.on "invoke:end", (obj) ->
           if obj.name is "wait"
-            expect(delay).to.be.calledWith 100
+            expect(delay).to.be.calledWith 50
 
       it "does not change the subject", ->
         cy
@@ -2049,14 +2058,14 @@ describe "Cypress API", ->
         it "times out eventually due to false value", (done) ->
           ## forcibly reduce the timeout to 500 ms
           ## so we dont have to wait so long
-          cy.wait (-> false), timeout: 500
+          cy.wait (-> false), timeout: 100
 
           cy.on "fail", (err) ->
             expect(err.message).to.include "The final value was: false"
             done()
 
         it "appends to the err message", (done) ->
-          cy.wait (-> expect(true).to.be.false), timeout: 500
+          cy.wait (-> expect(true).to.be.false), timeout: 100
 
           cy.on "fail", (err) ->
             expect(err.message).to.include "Timed out retrying. Could not continue due to: AssertionError"
