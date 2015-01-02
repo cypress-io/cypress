@@ -12,30 +12,66 @@
     <script type="text/javascript" src="/lib/public/js/iframe.js"></script>
 
     <script type="text/javascript">
-      before(function(){
-        console.log("root beforeAll")
+      // before(function(){
+        // debugger
+        // console.log("root beforeAll")
+      // })
+
+      // after(function(){
+        // debugger
+      // })
+
+      describe("1suite [s01]", function(){
+        // before(function(){
+        //   console.log("suite before")
+        // })
+
+        // beforeEach(function(){
+        //   console.log("suite beforeEach")
+        // })
+
+        // after(function(){
+        //   debugger
+        // })
+
+        it("test [t01]", function(){})
+        it("test [t02]", function(){})
+        it("test [t03]", function(){})
+
+        context("2nested suite [s02]", function(){
+          // afterEach(function(){
+          //   debugger
+          // })
+
+          // after(function(){
+          //   debugger
+          // })
+
+          it("test [t04]", function(){})
+
+          context("3nested suite [s03]", function(){
+            it("test [t05]", function(){})
+            it("test [t06]", function(){})
+          })
+
+          context("4nested suite [s04]", function(){
+            it("test [t07]", function(){})
+            it("test [t08]", function(){})
+
+            context("5nested nested suite [s05]", function(){
+              it("test [t09]", function(){})
+              it("test [t10]", function(){})
+            })
+          })
+        })
       })
 
-      describe("suite1 [AbC]", function(){
-        before(function(){
-          console.log("suite1 before")
-        })
+      describe("6suite [s06]", function(){
+        // beforeEach(function(){
+        //   console.log("suite beforeEach")
+        // })
 
-        beforeEach(function(){
-          console.log("suite1 beforeEach")
-        })
-
-        it("test1 [656]", function(){})
-        it("test1b [656]", function(){})
-        it("test1c [656]", function(){})
-      })
-
-      describe("suite2 [Abd]", function(){
-        beforeEach(function(){
-          console.log("suite2 beforeEach")
-        })
-
-        it("test2 [364]", function(){})
+        it("test [t11]", function(){})
       })
     </script>
   </head>

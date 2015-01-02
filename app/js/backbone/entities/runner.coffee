@@ -110,6 +110,32 @@
         hooks = @suite["_" + name]
         _this = @
 
+        getAllTests = (suite) ->
+          tests = []
+          suite.eachTest (test) ->
+            ## iterate through each of our suites tests.
+            ## this will iterate through all nested tests
+            ## as well.  and then we add it only if its
+            ## in our grepp'd runner.tests array
+            tests.push(test) if test in runner.tests
+          tests
+
+        ## we have to see if this is the last suite amongst
+        ## its siblings.  but first we have to filter out
+        ## suites which dont have a grepp'd test in them
+        isLastSuite = (suite) ->
+          ## grab all of the suites from our grep'd tests
+          ## including all of their ancestor suites!
+          suites = _.reduce runner.tests, (memo, test) ->
+            while parent = test.parent
+              memo.push(parent)
+              test = parent
+            memo
+          , []
+
+          ## intersect them with our parent suites and see if the last one is us
+          _.chain(suites).uniq().intersection(suite.parent.suites).last().value() is suite
+
         switch name
           when "beforeAll"
             ## if we're the root suite we know to fire
@@ -124,7 +150,7 @@
           when "afterEach"
             ## find all of the grep'd runner tests which share
             ## the same parent suite as our current runner test
-            tests = _(runner.tests).filter (test) -> test.parent is runner.test.parent
+            tests = getAllTests(runner.test.parent)
 
             ## make sure this test isnt the last test overall but also
             ## isnt the last test in our grep'd parent suite's tests array
@@ -138,10 +164,18 @@
             ## the same parent suite as our current runner test
             if runner.test
 
-              tests = _(runner.tests).filter (test) -> test.parent is runner.test.parent
+              tests = getAllTests(runner.test.parent)
 
-              ## if we're the root suite we know to fire
-              if @suite.root or runner.test is _(tests).last()
+              ## if we're the very last test in the entire runner.tests
+              ## we wait until the root suite fires
+              ## else we wait until the very last possible moment by waiting
+              ## until the root suite is the parent of the current suite
+              ## since that will bubble up IF we're the last nested suite
+              ## else if we arent the last nested suite we fire if we're
+              ## the last test
+              if (@suite.root and runner.test is _(runner.tests).last()) or
+                (@suite.parent.root and runner.test is _(tests).last()) or
+                  (not isLastSuite(@suite) and runner.test is _(tests).last())
                 fn = _.wrap fn, (orig, args...) ->
                   _this.emit("test:after:hooks")
                   orig(args...)

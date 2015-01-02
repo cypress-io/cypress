@@ -121,9 +121,11 @@ describe "Runner Entity", ->
 
   context "hook overrides", ->
     beforeEach ->
-      @run = (fn) ->
-        @runnerModel = App.request("start:test:runner")
-        @runnerModel.options.grep = /.*/
+      @run = (grep, fn) ->
+        @runnerModel = App.request "start:test:runner",
+          mocha: @mocha
+          runner: new Mocha.Runner(@mocha.suite)
+        @runnerModel.options.grep = grep
 
         runner = @runnerModel.runner
         emit = @sandbox.spy runner, "emit"
@@ -136,16 +138,26 @@ describe "Runner Entity", ->
         @contentWindow = iframe.contentWindow
         @mocha         = iframe.contentWindow.mocha
 
-    it "emits four test:before:hooks events", (done) ->
-      @run (emit) ->
-        # expect(emit).to.be.calledWith "suite", "test:after:hooks"
+    it "emits exactly same num of test:before:hooks events as there are tests", (done) ->
+      @run /.*/, (emit) =>
         calls = _(emit.getCalls()).filter (call) -> call.args[0] is "test:before:hooks"
-        expect(calls).to.have.length(4)
+        expect(calls).to.have.length @runnerModel.tests.length
         done()
 
-    it "emits four test:after:hooks events", (done) ->
-      @run (emit) ->
-        # expect(emit).to.be.calledWith "suite", "test:after:hooks"
+    it "emits exactly same num of test:after:hooks events are there are tests", (done) ->
+      @run /.*/, (emit) =>
         calls = _(emit.getCalls()).filter (call) -> call.args[0] is "test:after:hooks"
-        expect(calls).to.have.length(4)
+        expect(calls).to.have.length @runnerModel.tests.length
+        done()
+
+    it "emits exactly same num of test:before:hooks events as there are grepp'd tests", (done) ->
+      @run /\[s03\]/, (emit) =>
+        calls = _(emit.getCalls()).filter (call) -> call.args[0] is "test:before:hooks"
+        expect(calls).to.have.length @runnerModel.tests.length
+        done()
+
+    it "emits exactly same num of test:after:hooks events are there are grepp'd tests", (done) ->
+      @run /\[s03\]/, (emit) =>
+        calls = _(emit.getCalls()).filter (call) -> call.args[0] is "test:after:hooks"
+        expect(calls).to.have.length @runnerModel.tests.length
         done()
