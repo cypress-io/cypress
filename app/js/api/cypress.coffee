@@ -140,7 +140,7 @@ window.Cypress = do ($, _, Backbone) ->
           ## over at 0
           @prop("index", index += 1)
 
-          @trigger "command:end"
+          @trigger "command:end", queue
 
           @defer @run
 
@@ -423,6 +423,8 @@ window.Cypress = do ($, _, Backbone) ->
       @clearTimeout @prop("runId")
 
       obj = {name: key, ctx: @, fn: fn, args: args, type: type}
+
+      @trigger "enqueue", obj
 
       @_insert(obj)
 
