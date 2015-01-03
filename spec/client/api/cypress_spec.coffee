@@ -22,7 +22,7 @@ describe "Cypress API", ->
         @iframe.contents().find("body").html(@body)
 
       Cypress.set(@currentTest) if @currentTest
-      Cypress.setup(runner, @iframe, {}, ->)
+      Cypress.setup(runner, @iframe, ->)
 
     ## if we've changed the src by navigating
     ## away (aka cy.visit(...)) then we need

@@ -726,11 +726,10 @@
       return if not remoteIframe.isReadable()
 
       ## this is where we should automatically patch Ecl/Cy proto's
-      ## with the runnable channel, the iframe contentWindow, and
-      ## remote iframe
+      ## with the iframe contentWindow, and remote iframe
       ## as of now we're passing App.confg into cypress but i dont like
       ## leaking this backbone model's details into the cypress API
-      Cypress.setup(@runner, remoteIframe, runnerChannel, App.config.getExternalInterface())
+      Cypress.setup(@runner, remoteIframe, App.config.getExternalInterface())
 
       ## reupdate chosen with the passed in chosenId
       ## this allows us to pass the chosenId around

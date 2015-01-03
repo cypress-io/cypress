@@ -573,7 +573,7 @@ window.Cypress = do ($, _, Backbone) ->
 
       return @
 
-    ## removes channel, remoteIframe, contentWindow
+    ## removes remoteIframe, contentWindow
     ## from the cypress instance
     @stop = ->
       @abort().then =>
@@ -582,7 +582,6 @@ window.Cypress = do ($, _, Backbone) ->
         _.extend @cy,
           runner:        null
           remoteIframe:  null
-          channel:       null
           config:        null
 
         window.cy = @cy = null
@@ -594,9 +593,9 @@ window.Cypress = do ($, _, Backbone) ->
       @cy.prop("runnable", runnable)
 
     ## patches the cypress instance with contentWindow
-    ## remoteIframe and channel
+    ## remoteIframe and config
     ## this should be moved to an instance method and
-    @setup = (runner, $remoteIframe, channel, config) ->
+    @setup = (runner, $remoteIframe, config) ->
       ## we listen for the unload + submit events on
       ## the window, because when we receive them we
       ## tell cy its not ready and this prevents any
@@ -630,7 +629,6 @@ window.Cypress = do ($, _, Backbone) ->
       _.extend @cy,
         runner:        runner
         $remoteIframe: $remoteIframe
-        channel:       channel
         config:        config
 
       Cypress.trigger "before:run"

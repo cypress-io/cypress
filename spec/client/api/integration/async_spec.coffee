@@ -5,7 +5,7 @@ describe "Async Integration Tests", ->
   beforeEach ->
     loadFixture("html/async").done (iframe) =>
       Cypress.set(@currentTest)
-      Cypress.setup(runner, $(iframe), {}, ->)
+      Cypress.setup(runner, $(iframe), ->)
 
   afterEach ->
     Cypress.abort()
