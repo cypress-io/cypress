@@ -694,7 +694,7 @@ window.Cypress = do ($, _, Backbone) ->
 
       return @
 
-    @notify = (obj = {}) ->
+    @log = (obj = {}) ->
       ## throw an error here?
       return if not (@cy and @cy.prop("current"))
 
@@ -706,7 +706,7 @@ window.Cypress = do ($, _, Backbone) ->
       if obj.snapshot
         obj._snapshot = @cy.createSnapshot(obj.$el)
 
-      @trigger "command", obj
+      @trigger "log", obj
 
     _.extend Cypress.prototype, Backbone.Events
 

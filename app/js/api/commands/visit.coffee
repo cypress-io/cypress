@@ -50,5 +50,5 @@ do (Cypress, _) ->
           @$remoteIframe.prop "src", Cypress.Location.createInitialRemoteSrc(url)
 
           ## think about moving this into invoke2 and allowing the ability
-          ## to control notify options from options?
-          Cypress.notify()
+          ## to control log options from options?
+          Cypress.log()

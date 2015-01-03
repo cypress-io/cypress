@@ -2146,45 +2146,53 @@ describe "Cypress API", ->
 
       expect(@test.timeout()).to.be.gt prevTimeout
 
-  context ".notify", ->
+  context ".log", ->
     describe "defaults", ->
       beforeEach ->
         obj = {name: "foo", ctx: cy, fn: (->), args: [1,2,3], type: "parent"}
         cy.prop("current", obj)
 
-      it "sets name to current.name", ->
-        Cypress.on "command", (obj) ->
+      it "sets name to current.name", (done) ->
+        Cypress.on "log", (obj) ->
           expect(obj.name).to.eq "foo"
+          done()
 
-        Cypress.notify({})
+        Cypress.log({})
 
-      it "sets type to current.type", ->
-        Cypress.on "command", (obj) ->
+      it "sets type to current.type", (done) ->
+        Cypress.on "log", (obj) ->
           expect(obj.type).to.eq "parent"
+          done()
 
-        Cypress.notify({})
+        Cypress.log({})
 
-      it "sets args to current.args", ->
-        Cypress.on "command", (obj) ->
+      it "sets args to current.args", (done) ->
+        Cypress.on "log", (obj) ->
           expect(obj.args).to.deep.eq [1,2,3]
+          done()
 
-        Cypress.notify({})
+        Cypress.log({})
 
-      it "omits ctx from current.ctx", ->
-        Cypress.on "command", (obj) ->
+      it "omits ctx from current.ctx", (done) ->
+        Cypress.on "log", (obj) ->
           expect(_.keys(obj)).not.to.include "ctx"
+          done()
 
-        Cypress.notify({})
+        Cypress.log({})
 
-      it "omits fn from current.fn", ->
-        Cypress.on "command", (obj) ->
+      it "omits fn from current.fn", (done) ->
+        Cypress.on "log", (obj) ->
           expect(_.keys(obj)).not.to.include "fn"
+          done()
 
-        Cypress.notify({})
+        Cypress.log({})
 
-      it "sets snapshot to true", ->
-        Cypress.on "command", (obj) ->
+      it "sets snapshot to true", (done) ->
+        Cypress.on "log", (obj) ->
           expect(obj.snapshot).to.be.true
+          done()
+
+        Cypress.log({})
 
         Cypress.notify({})
 
