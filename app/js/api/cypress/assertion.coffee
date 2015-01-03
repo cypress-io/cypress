@@ -24,11 +24,13 @@ do (Cypress, _) ->
 
       _.extend obj,
         name:     "assert"
+        type:     "parent"
         message:  message
         passed:   passed
         selector: value.selector
         onRender: ($row) ->
-          debugger
+          klass = if passed then "passed" else "failed"
+          $row.addClass "command-assertion-#{klass}"
 
       ## think about completely gutting the whole object toString
       ## which chai does by default, its so ugly and worthless

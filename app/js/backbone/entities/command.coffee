@@ -3,6 +3,8 @@
   ## this is another good candidate for a mutator
   ## with stripping out the parent selector
 
+  CYPRESS_ATTRS = "_cypress"
+
   class Entities.Command extends Entities.Model
     defaults: ->
       indent: 0
@@ -40,6 +42,13 @@
     ## TODO: ADD TESTS FOR THIS METHOD
     displayName: ->
       @get("name").replace(/(\s+)/g, "-")
+
+    ## call the associated cypress command callback
+    ## pass along the args with the context of our
+    ## private cypress attrs
+    triggerCommandCallback: (name, args...) ->
+      if _.isFunction(fn = @[CYPRESS_ATTRS][name])
+        fn.apply(@[CYPRESS_ATTRS], args)
 
     highlight: (init) ->
       @set "highlight", init
@@ -477,24 +486,22 @@
     getCommandByType2: (attrs) ->
       ## what about attrs.$el?
 
-      privateProps = {}
-      publicProps = {}
+      publicAttrs = {}
 
       ## split up public from private properties
       _.each attrs, (value, key) ->
-        ## if this isnt a string OR if it is a string
-        ## and its first character is a: _
-        ## then its a private property
-        if not _.isString(value) or (_.isString(value) and value[0] is "_")
-          privateProps[key] = value
-        else
-          ## else its a public property
-          publicProps[key] = value
+        ## if this is a function
+        ## OR if the first character of the key is a: _
+        ## OR it has a DOM element
 
-      command = new Entities.Command publicProps
+        ## do not add it to the publicAttrs
+        ## --extract this to a method--
+        if not (_.isFunction(value) or key[0] is "_" or (value and value[0] and _.isElement(value[0])))
+          publicAttrs[key] = value
 
-      ## perhaps assign this private key to a constant?
-      command.private = privateProps
+      command = new Entities.Command publicAttrs
+
+      command[CYPRESS_ATTRS] = attrs
 
       return command
 

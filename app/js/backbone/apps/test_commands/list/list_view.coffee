@@ -47,7 +47,7 @@
 
       #   when "assertion"
       #     klass = if @model.get("passed") then "passed" else "failed"
-      #     @$el.addClass "command-type-assertion-#{klass}"
+      #     @$el.addClass "command-assertion-#{klass}"
 
       @ui.method.css "padding-left", @model.get("indent")
 
@@ -57,6 +57,8 @@
         @$el.addClass "command-parent"
 
       @$el.addClass "command-cloned" if @model.isCloned()
+
+      @model.triggerCommandCallback("onRender", @$el)
 
     clicked: (e) ->
       e.stopPropagation()
