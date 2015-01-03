@@ -1,18 +1,19 @@
 @App.module "TestCommandsApp.List", (List, App, Backbone, Marionette, $, _) ->
 
   class List.Command extends App.Views.ItemView
-    getTemplate: ->
-      switch @model.get("type")
-        when "xhr"          then "test_commands/list/_xhr"
-        when "dom"          then "test_commands/list/_dom"
-        when "assertion"    then "test_commands/list/_assertion"
-        when "server"       then "test_commands/list/_server"
-        when "spy"          then "test_commands/list/_spy"
-        when "stub"         then "test_commands/list/_stub"
-        when "visit"        then "test_commands/list/_visit"
-        when "localStorage" then "test_commands/list/_local_storage"
-        else
-          throw new Error("Command .type did not match any template")
+    template: "test_commands/list/_default"
+    # getTemplate: ->
+    #   switch @model.get("type")
+    #     when "xhr"          then "test_commands/list/_xhr"
+    #     when "dom"          then "test_commands/list/_dom"
+    #     when "assertion"    then "test_commands/list/_assertion"
+    #     when "server"       then "test_commands/list/_server"
+    #     when "spy"          then "test_commands/list/_spy"
+    #     when "stub"         then "test_commands/list/_stub"
+    #     when "visit"        then "test_commands/list/_visit"
+    #     when "localStorage" then "test_commands/list/_local_storage"
+    #     else
+    #       throw new Error("Command .type did not match any template")
 
     ui:
       wrapper:  ".command-wrapper"
@@ -35,16 +36,18 @@
       "click"               : "clicked"
 
     onShow: ->
-      @$el.addClass "command-type-#{@model.get("type")}"
+      @$el
+        .addClass("command-type-#{@model.get("type")}")
+        .addClass("command-name-#{@model.displayName()}")
 
-      switch @model.get("type")
-        when "dom"
-          ## quick hack to get sub types
-          @$el.addClass "command-type-dom-action" if not @model.isParent()
+      # switch @model.get("type")
+      #   when "dom"
+      #     ## quick hack to get sub types
+      #     @$el.addClass "command-type-dom-action" if not @model.isParent()
 
-        when "assertion"
-          klass = if @model.get("passed") then "passed" else "failed"
-          @$el.addClass "command-type-assertion-#{klass}"
+      #   when "assertion"
+      #     klass = if @model.get("passed") then "passed" else "failed"
+      #     @$el.addClass "command-type-assertion-#{klass}"
 
       @ui.method.css "padding-left", @model.get("indent")
 

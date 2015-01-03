@@ -37,6 +37,10 @@
     initialize: ->
       new Backbone.Chooser(@)
 
+    ## TODO: ADD TESTS FOR THIS METHOD
+    displayName: ->
+      @get("name").replace(/(\s+)/g, "-")
+
     highlight: (init) ->
       @set "highlight", init
 
