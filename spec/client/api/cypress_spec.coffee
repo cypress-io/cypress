@@ -2173,9 +2173,9 @@ describe "Cypress API", ->
 
         Cypress.log({})
 
-      it "sets args to stringified args", (done) ->
+      it "sets message to stringified args", (done) ->
         Cypress.on "log", (obj) ->
-          expect(obj.args).to.deep.eq "1, 2, 3"
+          expect(obj.message).to.deep.eq "1, 2, 3"
           done()
 
         Cypress.log({})

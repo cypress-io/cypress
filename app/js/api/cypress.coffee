@@ -705,8 +705,8 @@ window.Cypress = do ($, _, Backbone) ->
       _.defaults obj,
         snapshot: true
         testId:   @cy.prop("runnable").cid
+        message:  _(current.args).invoke("toString").join(", ")
         _args:    current.args
-        args:     _(current.args).invoke("toString").join(", ")
 
       if obj.snapshot
         obj._snapshot = @cy.createSnapshot(obj.$el)

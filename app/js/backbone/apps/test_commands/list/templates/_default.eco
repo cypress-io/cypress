@@ -4,7 +4,7 @@
   </span>
   <span class="command-method"><%= @name %></span>
   <span class="command-message">
-    <%= @args %>
+    <%= @message %>
   </span>
   <% if @error: %>
     <span class="command-error"><%= @error %></span>
