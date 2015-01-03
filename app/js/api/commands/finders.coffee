@@ -18,14 +18,21 @@ do (Cypress, _) ->
 
       $el = @$(selector, options.withinSubject)
 
+      log = ($el) ->
+        Cypress.log({$el: $el})
+
       ## allow retry to be a function which we ensure
       ## returns truthy before returning its
       if _.isFunction(options.retry)
-        return ret if ret = options.retry.call(@, $el)
+        if ret = options.retry.call(@, $el)
+          log($el)
+          return ret
       else
         ## return the el if it has a length or we've explicitly
         ## disabled retrying
-        return $el if $el.length or options.retry is false
+        if $el.length or options.retry is false
+          log($el)
+          return $el
 
       retry = ->
         @command("get", selector, options)

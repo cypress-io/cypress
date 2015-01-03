@@ -19,5 +19,8 @@ do (Cypress, _) ->
       ## and then unset the references
       Cypress.LocalStorage.unsetStorages()
 
+      Cypress.log
+        name: "clear ls"
+
       ## return the remote local storage object
       return remote
