@@ -2166,9 +2166,16 @@ describe "Cypress API", ->
 
         Cypress.log({})
 
-      it "sets args to current.args", (done) ->
+      it "sets _args to current.args", (done) ->
         Cypress.on "log", (obj) ->
-          expect(obj.args).to.deep.eq [1,2,3]
+          expect(obj._args).to.deep.eq [1,2,3]
+          done()
+
+        Cypress.log({})
+
+      it "sets args to stringified args", (done) ->
+        Cypress.on "log", (obj) ->
+          expect(obj.args).to.deep.eq "1, 2, 3"
           done()
 
         Cypress.log({})
@@ -2194,7 +2201,15 @@ describe "Cypress API", ->
 
         Cypress.log({})
 
-        Cypress.notify({})
+      it "sets testId to runnable.cid", (done) ->
+        cy.prop("runnable", {cid: 123})
+
+        Cypress.on "log", (obj) ->
+          expect(obj.testId).to.eq 123
+          cy.prop("runnable", null)
+          done()
+
+        Cypress.log({})
 
   context "nested commands", ->
     beforeEach ->

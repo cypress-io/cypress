@@ -696,12 +696,17 @@ window.Cypress = do ($, _, Backbone) ->
 
     @log = (obj = {}) ->
       ## throw an error here?
-      return if not (@cy and @cy.prop("current"))
+      current = @cy.prop("current")
 
-      _.defaults obj, _(@cy.prop("current")).pick("name", "args", "type")
+      return if not (@cy and current)
+
+      _.defaults obj, _(current).pick("name", "type")
 
       _.defaults obj,
         snapshot: true
+        testId:   @cy.prop("runnable").cid
+        _args:    current.args
+        args:     _(current.args).invoke("toString").join(", ")
 
       if obj.snapshot
         obj._snapshot = @cy.createSnapshot(obj.$el)
