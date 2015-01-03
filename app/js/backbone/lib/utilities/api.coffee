@@ -74,7 +74,7 @@
         ## off to Ecl.assert if it exists (which it wont in our
         ## own test mode)
 
-        if Ecl and Ecl.assert
+        if Cypress and Cypress.log
           passed    = utils.test(@, args)
           value     = utils.flag(@, "object")
           expected  = args[3]
@@ -92,7 +92,7 @@
 
           actual    = utils.getActual(@, args)
 
-          Ecl.assert passed, message, value, actual, expected
+          Cypress.assert passed, message, value, actual, expected
 
         orig.apply(@, args)
 
