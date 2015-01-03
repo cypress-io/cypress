@@ -48,3 +48,7 @@ do (Cypress, _) ->
 
           # ## any existing global variables will get nuked after it navigates
           @$remoteIframe.prop "src", Cypress.Location.createInitialRemoteSrc(url)
+
+          ## think about moving this into invoke2 and allowing the ability
+          ## to control notify options from options?
+          Cypress.notify()

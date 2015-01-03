@@ -470,9 +470,33 @@
 
       return command
 
-    add: (attrs, type, id, hook) ->
+    getCommandByType2: (attrs) ->
+      ## what about attrs.$el?
+
+      privateProps = {}
+      publicProps = {}
+
+      ## split up public from private properties
+      _.each attrs, (value, key) ->
+        ## if this isnt a string OR if it is a string
+        ## and its first character is a: _
+        ## then its a private property
+        if not _.isString(value) or (_.isString(value) and value[0] is "_")
+          privateProps[key] = value
+        else
+          ## else its a public property
+          publicProps[key] = value
+
+      command = new Entities.Command publicProps
+
+      ## perhaps assign this private key to a constant?
+      command.private = privateProps
+
+      return command
+
+    add: (attrs, hook) ->
       command = attrs
-      options = type
+      options = hook
 
       ## if we have both of these methods assume this is
       ## a backbone model
@@ -486,14 +510,12 @@
 
       return if _.isEmpty attrs
 
-      _.extend attrs,
-        type: type
-        testId: id
-        hook: hook
+      # _.extend attrs,
+      #   type: type
+      #   testId: id
+      #   hook: hook
 
-      command = @getCommandByType(attrs)
-
-      super command
+      super @getCommandByType2(attrs)
 
     reset: ->
       @_maxNumber = 0

@@ -2146,6 +2146,48 @@ describe "Cypress API", ->
 
       expect(@test.timeout()).to.be.gt prevTimeout
 
+  context ".notify", ->
+    describe "defaults", ->
+      beforeEach ->
+        obj = {name: "foo", ctx: cy, fn: (->), args: [1,2,3], type: "parent"}
+        cy.prop("current", obj)
+
+      it "sets name to current.name", ->
+        Cypress.on "command", (obj) ->
+          expect(obj.name).to.eq "foo"
+
+        Cypress.notify({})
+
+      it "sets type to current.type", ->
+        Cypress.on "command", (obj) ->
+          expect(obj.type).to.eq "parent"
+
+        Cypress.notify({})
+
+      it "sets args to current.args", ->
+        Cypress.on "command", (obj) ->
+          expect(obj.args).to.deep.eq [1,2,3]
+
+        Cypress.notify({})
+
+      it "omits ctx from current.ctx", ->
+        Cypress.on "command", (obj) ->
+          expect(_.keys(obj)).not.to.include "ctx"
+
+        Cypress.notify({})
+
+      it "omits fn from current.fn", ->
+        Cypress.on "command", (obj) ->
+          expect(_.keys(obj)).not.to.include "fn"
+
+        Cypress.notify({})
+
+      it "sets snapshot to true", ->
+        Cypress.on "command", (obj) ->
+          expect(obj.snapshot).to.be.true
+
+        Cypress.notify({})
+
   context "nested commands", ->
     beforeEach ->
       @setup = (fn = ->) =>
