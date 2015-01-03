@@ -1,13 +1,17 @@
 <div class="command-wrapper">
   <span class="command-number">
-    <%= @number %>
+    <span><%= @number %></span>
   </span>
-  <span class="command-method"><%= @name %></span>
+  <span class="command-method">
+    <span><%= @name %></span>
+  </span>
   <span class="command-message">
-    <%= @message %>
+    <span><%= @message %></span>
   </span>
   <% if @error: %>
-    <span class="command-error"><%= @error %></span>
+    <span class="command-error">
+      <span><%= @error %></span>
+    </span>
   <% end %>
   <% if @shouldDisplayControls: %>
     <span class="command-controls">

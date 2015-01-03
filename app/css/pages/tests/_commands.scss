@@ -179,7 +179,7 @@
     }
   }
 
-  .command-type-assertion {
+  .command-name-assert {
     .command-method {
       span {
         border-radius: 2px;
@@ -192,7 +192,7 @@
     }
   }
 
-  .command-type-assertion-failed {
+  .command-assertion-failed {
     & .command-method {
       & span {
         background-color: $fail;
@@ -205,7 +205,7 @@
     }
   }
 
-  .command-type-assertion-passed {
+  .command-assertion-passed {
     & .command-method {
       color: $pass;
 
