@@ -11,6 +11,13 @@ do (Cypress, _) ->
       ## as #get where we potentially retry several times?
       $el = subject[proxy].apply(subject, args)
 
-      Cypress.log($el: $el)
+      Cypress.log
+        $el: $el
+        onConsole: ->
+          "Prev Subject": subject
+          "Command":      proxy
+          "Selector":     args.join(", ")
+          "Returned":     $el
+          "Elements":     $el.length
 
       return $el

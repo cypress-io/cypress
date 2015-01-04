@@ -67,10 +67,7 @@
 
       console.clear?()
 
-      _.each @model.getPrimaryObjects(), (obj, index) ->
-        return if not obj
-
-        obj = if _.isArray(obj) then obj else [obj]
+      @model.getConsoleDisplay (obj) ->
         console.log obj...
 
     displayConsoleMessage: ->

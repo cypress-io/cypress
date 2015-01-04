@@ -288,6 +288,8 @@ window.Cypress = do ($, _, Backbone) ->
         if ret is @ then null else ret
 
       .then (subject, options = {}) =>
+        obj.subject = subject
+
         ## trigger an event here so we know our
         ## command has been successfully applied
         ## and we've potentially altered the subject
@@ -708,6 +710,10 @@ window.Cypress = do ($, _, Backbone) ->
         testId:   @cy.prop("runnable").cid
         message:  _(current.args).invoke("toString").join(", ")
         _args:    current.args
+        onRender: ->
+        onConsole: ->
+          "Command":  current.name
+          "Returned": current.subject
 
       if obj.snapshot
         obj._snapshot = @cy.createSnapshot(obj.$el)

@@ -114,6 +114,35 @@
     getEl: ->
       @[CYPRESS_ATTRS].$el
 
+    getConsoleDisplay: (fn) ->
+      obj = @triggerCommandCallback("onConsole", @[CYPRESS_ATTRS])
+
+      return if _.isEmpty(obj)
+
+      obj = @formatForConsole(obj)
+
+      _.each obj, (value, key) ->
+        fn ["%c" + key, "font-weight: bold;", value] unless _.isBlank(value)
+
+    formatForConsole: (obj) ->
+      ## figure out the max key length
+      maxKeyLength = @getMaxKeyLength(obj)
+
+      ## format each key by right padding it
+      ## with white space and appending a colon
+      ## taking into account the lenth of what
+      ## we're appending
+      _.reduce obj, (memo, value, key) ->
+        append = ": "
+        key = _(key + append).rpad(maxKeyLength + append.length, " ")
+        memo[key] = value
+        memo
+      , {}
+
+    getMaxKeyLength: (obj) ->
+      lengths = _.chain(obj).keys().map( (key) -> key.length ).value()
+      Math.max.apply(Math, lengths)
+
     convertToArray: (obj) ->
       _.reduce obj, (memo, value, key) ->
         memo.push ["%c" + key, "font-weight: bold;", value] unless _.isBlank(value)
@@ -495,8 +524,6 @@
     #   return command
 
     createCommand: (attrs) ->
-      ## what about attrs.$el?
-
       publicAttrs = {}
 
       ## split up public from private properties
