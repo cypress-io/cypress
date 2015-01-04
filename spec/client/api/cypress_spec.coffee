@@ -1163,6 +1163,33 @@ describe "Cypress API", ->
       cy.get("*").contains("brand new content").then ($span) ->
         expect($span.get(0)).to.eq span.get(0)
 
+    describe ".log", ->
+      beforeEach ->
+        Cypress.on "log", (@log) =>
+
+      it "silences internal cy.get() log", ->
+        log = @sandbox.spy Cypress, "log"
+
+        ## GOOD: [ {name: get} , {name: contains} ]
+        ## BAD:  [ {name: get} , {name: get} , {name: contains} ]
+        cy.get("#complex-contains").contains("nested contains").then ($label) ->
+          expect(log.firstCall).to.be.calledWithMatch {name: "get"}
+          expect(log.secondCall).to.be.calledWithMatch {name: "contains"}
+
+      it "passes in $el", ->
+        cy.get("#complex-contains").contains("nested contains").then ($label) ->
+          expect(@log.$el).to.eq $label
+
+      it "#onConsole", ->
+        cy.get("#complex-contains").contains("nested contains").then ($label) ->
+          expect(@log.onConsole()).to.deep.eq {
+            "Prev Subject": _(cy.queue).findWhere({name: "get"}).subject
+            Command: "contains"
+            Content: "nested contains"
+            Returned: $label
+            Elements: 1
+          }
+
     describe "errors", ->
       beforeEach ->
         @sandbox.stub cy.runner, "uncaught"

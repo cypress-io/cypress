@@ -7,6 +7,8 @@ do (Cypress, _) ->
         withinSubject: @prop("withinSubject")
 
       log = ($el) ->
+        return if options.log is false
+
         Cypress.log
           $el: $el
           onConsole: ->
@@ -68,23 +70,38 @@ do (Cypress, _) ->
           filter = ""
 
       word = if filter then "the selector: <#{filter}>" else "any elements"
-      options.error = "Could not find #{word} containing the content: #{text}"
-      options.withinSubject = subject
+
+      _.extend options,
+        error: "Could not find #{word} containing the content: #{text}"
+        withinSubject: subject
+        log: false
 
       ## find elements by the :contains psuedo selector
       ## and any submit inputs with the attributeContainsWord selector
       selector = "#{filter}:contains('#{text}'), #{filter}[type='submit'][value~='#{text}']"
 
+      log = ($el) ->
+        Cypress.log
+          $el: $el
+          onConsole: ->
+            "Prev Subject": subject
+            "Command": "contains"
+            "Content": text
+            "Returned": $el
+            "Elements": $el.length
+
+        return $el
+
       @command("get", selector, options).then (elements) ->
-        return elements.first() if filter
+        return log(elements.first()) if filter
 
         ## iterate on the array of elements in reverse
         for el in elements.get() by -1
           ## return the element if it is a priority element
           el = $(el)
-          return el if el.is("input[type='submit'], button, a, label")
+          return log(el) if el.is("input[type='submit'], button, a, label")
 
-        return elements.last()
+        return log(elements.last())
 
     within: (subject, fn) ->
       @ensureDom(subject)
