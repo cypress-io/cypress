@@ -104,6 +104,7 @@ do (Cypress, _) ->
 
       ## allow the el we're typing into to be
       ## changed by options
+      ## why are we setting options.el??
       _.defaults options,
         el: subject
 
@@ -118,7 +119,12 @@ do (Cypress, _) ->
 
       options.el.simulate "key-sequence", options
 
-      Cypress.log()
+      Cypress.log
+        $el: options.el
+        onConsole: ->
+          "Command": "type"
+          "Typed": sequence
+          "Applied To": options.el
 
       return subject
 

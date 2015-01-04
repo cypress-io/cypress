@@ -1281,6 +1281,22 @@ describe "Cypress API", ->
       cy.get("input:text:first").type(" bar").then ($input) ->
         expect($input).to.have.value("foo bar")
 
+    describe ".log", ->
+      beforeEach ->
+        Cypress.on "log", (@log) =>
+
+      it "passes in $el", ->
+        cy.get("input:first").type("foobar").then ($input) ->
+          expect(@log.$el).to.eq $input
+
+      it "#onConsole", ->
+        cy.get("input:first").type("foobar").then ($input) ->
+          expect(@log.onConsole()).to.deep.eq {
+            Command: "type"
+            Typed: "foobar"
+            "Applied To": $input
+          }
+
     describe "errors", ->
       beforeEach ->
         @sandbox.stub cy.runner, "uncaught"
