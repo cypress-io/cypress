@@ -274,56 +274,56 @@
       ## incremental by one
       @_maxNumber += 1
 
-    ## check to see if the last parent command
-    ## is the passed in parent
-    lastParentCommandIsNotParent: (parent, command) ->
-      ## loop through this in reverse
-      ## cannot reverse the models array
-      ## and use _.find because .clone()
-      ## is throwing an error
-      for model in @models by -1
-        ## exclude ourselves since we recursively check
-        ## up the parent chains
-        if model.get("canBeParent")
-          return model isnt parent
+    # ## check to see if the last parent command
+    # ## is the passed in parent
+    # lastParentCommandIsNotParent: (parent, command) ->
+    #   ## loop through this in reverse
+    #   ## cannot reverse the models array
+    #   ## and use _.find because .clone()
+    #   ## is throwing an error
+    #   for model in @models by -1
+    #     ## exclude ourselves since we recursively check
+    #     ## up the parent chains
+    #     if model.get("canBeParent")
+    #       return model isnt parent
 
-    lastParentsAreNotXhr: (parent, command) ->
-      for model in @models by -1
-        ## if any of the parents arent xhr's return true
-        return true if model.get("type") isnt "xhr"
+    # lastParentsAreNotXhr: (parent, command) ->
+    #   for model in @models by -1
+    #     ## if any of the parents arent xhr's return true
+    #     return true if model.get("type") isnt "xhr"
 
-        ## if we eventually make it to our parent then
-        ## return false
-        return false if model is parent
+    #     ## if we eventually make it to our parent then
+    #     ## return false
+    #     return false if model is parent
 
-    cloneParent: (parent) ->
-      ## get a clone of our parent but reset its id
-      clone = parent.clone()
+    # cloneParent: (parent) ->
+    #   ## get a clone of our parent but reset its id
+    #   clone = parent.clone()
 
-      ## also remove its number
-      clone.unset "number"
+    #   ## also remove its number
+    #   clone.unset "number"
 
-      clone.set
-        id: _.uniqueId("cloneId")
-        isCloned: true
-        clonedFrom: parent.id
+    #   clone.set
+    #     id: _.uniqueId("cloneId")
+    #     isCloned: true
+    #     clonedFrom: parent.id
 
-      _.each ["el", "xhr", "response", "parent"], (prop) ->
-        clone[prop] = parent[prop]
+    #   _.each ["el", "xhr", "response", "parent"], (prop) ->
+    #     clone[prop] = parent[prop]
 
-      @add clone
+    #   @add clone
 
-    getCommandByType: (attrs) ->
-      switch attrs.type
-        when "dom"          then @addDom attrs
-        when "xhr"          then @addXhr attrs
-        when "assertion"    then @addAssertion attrs
-        when "server"       then @addServer attrs
-        when "spy"          then @addSpy attrs
-        when "stub"         then @addStub attrs
-        when "visit"        then @addVisit attrs
-        when "localStorage" then @addLocalStorage attrs
-        else throw new Error("Command .type did not match anything")
+    # getCommandByType: (attrs) ->
+    #   switch attrs.type
+    #     when "dom"          then @addDom attrs
+    #     when "xhr"          then @addXhr attrs
+    #     when "assertion"    then @addAssertion attrs
+    #     when "server"       then @addServer attrs
+    #     when "spy"          then @addSpy attrs
+    #     when "stub"         then @addStub attrs
+    #     when "visit"        then @addVisit attrs
+    #     when "localStorage" then @addLocalStorage attrs
+    #     else throw new Error("Command .type did not match anything")
 
     # insertParents: (command, parentId, options = {}) ->
     #   if parent = @parentExistsFor(parentId)
@@ -345,10 +345,10 @@
     #     command.indent()
     #     options.onSetParent.call(@, parent) if options.onSetParent
 
-    getIndexByParent: (command) ->
-      return if not command.hasParent()
+    # getIndexByParent: (command) ->
+    #   return if not command.hasParent()
 
-      @getCommandIndex(command.parent)
+    #   @getCommandIndex(command.parent)
 
     anyFailed: ->
       @any (command) -> command.get("error")
@@ -356,143 +356,143 @@
     getTotalNumber: ->
       @_maxNumber
 
-    getXhrOptions: (command, options) ->
-      ## at the very last minute we splice in this
-      ## new command by figuring out what its parents
-      ## index is (if this is an xhr)
+    # getXhrOptions: (command, options) ->
+    #   ## at the very last minute we splice in this
+    #   ## new command by figuring out what its parents
+    #   ## index is (if this is an xhr)
 
-      index = @getIndexByParent(command)
-      options.at = index if index
-      options
+    #   index = @getIndexByParent(command)
+    #   options.at = index if index
+    #   options
 
-    addSpy: (attrs) ->
-      {spy, spyCall, spyObj, snapshot} = attrs
+    # addSpy: (attrs) ->
+    #   {spy, spyCall, spyObj, snapshot} = attrs
 
-      attrs = _(attrs).omit "spy", "spyCall", "snapshot", "spyObj"
+    #   attrs = _(attrs).omit "spy", "spyCall", "snapshot", "spyObj"
 
-      command = new Entities.Command attrs
-      command.spy = spy
-      command.spyCall = spyCall
-      command.spyObj = spyObj
-      command.snapshot = snapshot
+    #   command = new Entities.Command attrs
+    #   command.spy = spy
+    #   command.spyCall = spyCall
+    #   command.spyObj = spyObj
+    #   command.snapshot = snapshot
 
-      @insertParents command, attrs.parent,
-        if: (parent, cmd) ->
-          @lastParentCommandIsNotParent(parent, cmd)
+    #   @insertParents command, attrs.parent,
+    #     if: (parent, cmd) ->
+    #       @lastParentCommandIsNotParent(parent, cmd)
 
-      return command
+    #   return command
 
-    addStub: (attrs) ->
-      {stub, stubCall, stubObj, snapshot} = attrs
+    # addStub: (attrs) ->
+    #   {stub, stubCall, stubObj, snapshot} = attrs
 
-      attrs = _(attrs).omit "stub", "stubCall", "snapshot", "stubObj"
+    #   attrs = _(attrs).omit "stub", "stubCall", "snapshot", "stubObj"
 
-      command = new Entities.Command attrs
-      command.stub = stub
-      command.stubCall = stubCall
-      command.stubObj = stubObj
-      command.snapshot = snapshot
+    #   command = new Entities.Command attrs
+    #   command.stub = stub
+    #   command.stubCall = stubCall
+    #   command.stubObj = stubObj
+    #   command.snapshot = snapshot
 
-      @insertParents command, attrs.parent,
-        if: (parent, cmd) ->
-          @lastParentCommandIsNotParent(parent, cmd)
+    #   @insertParents command, attrs.parent,
+    #     if: (parent, cmd) ->
+    #       @lastParentCommandIsNotParent(parent, cmd)
 
-      return command
+    #   return command
 
-    addAssertion: (attrs) ->
-      {snapshot, el, actual, expected, subject} = attrs
+    # addAssertion: (attrs) ->
+    #   {snapshot, el, actual, expected, subject} = attrs
 
-      attrs = _(attrs).omit "snapshot", "el", "actual", "expected", "subject"
+    #   attrs = _(attrs).omit "snapshot", "el", "actual", "expected", "subject"
 
-      ## instantiate the new model
-      command = new Entities.Command attrs
-      command.snapshot = snapshot
-      command.el = el
-      command.actual = actual
-      command.expected = expected
-      command.subject = subject
+    #   ## instantiate the new model
+    #   command = new Entities.Command attrs
+    #   command.snapshot = snapshot
+    #   command.el = el
+    #   command.actual = actual
+    #   command.expected = expected
+    #   command.subject = subject
 
-      return command
+    #   return command
 
-    addDom: (attrs) ->
-      {el, snapshot} = attrs
+    # addDom: (attrs) ->
+    #   {el, snapshot} = attrs
 
-      attrs = _(attrs).omit "el", "snapshot"
+    #   attrs = _(attrs).omit "el", "snapshot"
 
-      ## instantiate the new model
-      command = new Entities.Command attrs
-      command.snapshot = snapshot
-      command.el = el
+    #   ## instantiate the new model
+    #   command = new Entities.Command attrs
+    #   command.snapshot = snapshot
+    #   command.el = el
 
-      ## if we're chained to an existing id
-      ## that means we have a parent
-      @insertParents command, attrs.parent,
+    #   ## if we're chained to an existing id
+    #   ## that means we have a parent
+    #   @insertParents command, attrs.parent,
 
-        ## insert a parent if the last parent command
-        ## is not these arguments
-        if: (parent, cmd) ->
-          @lastParentCommandIsNotParent(parent, cmd)
+    #     ## insert a parent if the last parent command
+    #     ## is not these arguments
+    #     if: (parent, cmd) ->
+    #       @lastParentCommandIsNotParent(parent, cmd)
 
-      return command
+    #   return command
 
-    addXhr: (attrs) ->
-      {xhr, response, snapshot} = attrs
+    # addXhr: (attrs) ->
+    #   {xhr, response, snapshot} = attrs
 
-      attrs = _(attrs).omit "xhr", "response", "snapshot"
+    #   attrs = _(attrs).omit "xhr", "response", "snapshot"
 
-      ## instantiate the new model
-      command = new Entities.Command attrs
-      command.xhr = xhr
-      command.snapshot = snapshot
-      command.setResponse(response) if response
+    #   ## instantiate the new model
+    #   command = new Entities.Command attrs
+    #   command.xhr = xhr
+    #   command.snapshot = snapshot
+    #   command.setResponse(response) if response
 
-      # @insertParents command, attrs.parent,
-        ## insert a parent if the last parent commands
-        ## are not xhr types
-        # if: (parent, cmd) ->
-          # @lastParentsAreNotXhr(parent, cmd)
+    #   # @insertParents command, attrs.parent,
+    #     ## insert a parent if the last parent commands
+    #     ## are not xhr types
+    #     # if: (parent, cmd) ->
+    #       # @lastParentsAreNotXhr(parent, cmd)
 
-        ## when the parent is set on this child command
-        ## set the response for it
-        # onSetParent: (parent) ->
-          # command.setResponse response
+    #     ## when the parent is set on this child command
+    #     ## set the response for it
+    #     # onSetParent: (parent) ->
+    #       # command.setResponse response
 
 
-      return command
+    #   return command
 
-    addServer: (attrs) ->
-      {snapshot, requests, responses, server} = attrs
+    # addServer: (attrs) ->
+    #   {snapshot, requests, responses, server} = attrs
 
-      attrs = _(attrs).omit "requests", "responses", "server"
+    #   attrs = _(attrs).omit "requests", "responses", "server"
 
-      command = new Entities.Command attrs
-      command.snapshot       = snapshot
-      command.requests  = requests
-      command.responses = responses
-      command.server    = server
+    #   command = new Entities.Command attrs
+    #   command.snapshot       = snapshot
+    #   command.requests  = requests
+    #   command.responses = responses
+    #   command.server    = server
 
-      return command
+    #   return command
 
-    addVisit: (attrs) ->
-      {page} = attrs
+    # addVisit: (attrs) ->
+    #   {page} = attrs
 
-      attrs = _(attrs).omit "page"
+    #   attrs = _(attrs).omit "page"
 
-      command = new Entities.Command attrs
-      command.page = page
+    #   command = new Entities.Command attrs
+    #   command.page = page
 
-      return command
+    #   return command
 
-    addLocalStorage: (attrs) ->
-      {snapshot} = attrs
+    # addLocalStorage: (attrs) ->
+    #   {snapshot} = attrs
 
-      attrs = _(attrs).omit "snapshot"
+    #   attrs = _(attrs).omit "snapshot"
 
-      ## instantiate the new model
-      command = new Entities.Command attrs
-      command.snapshot = snapshot
+    #   ## instantiate the new model
+    #   command = new Entities.Command attrs
+    #   command.snapshot = snapshot
 
-      return command
+    #   return command
 
     createCommand: (attrs) ->
       ## what about attrs.$el?
