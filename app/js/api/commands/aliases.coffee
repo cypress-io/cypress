@@ -12,6 +12,16 @@ do (Cypress, _) ->
 
       @_aliases[str] = {subject: subject, command: prev, alias: str}
 
+      allAliases = _(@_aliases).keys().join(", ")
+
+      Cypress.log
+        onConsole: ->
+          "Command": "as"
+          "Alias": str
+          "Returned": subject
+          "Elements": subject.length
+          "All Aliases": allAliases
+
       return subject
 
   Cypress.extend

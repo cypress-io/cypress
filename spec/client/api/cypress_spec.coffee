@@ -909,6 +909,19 @@ describe "Cypress API", ->
       cy.get("#list li").eq(0).as("firstLi").then ($li) ->
         expect($li).to.match li
 
+    describe ".log", ->
+      it "#onConsole", ->
+        Cypress.on "log", (@log) =>
+
+        cy.get("body").as("b").then ($body) ->
+          expect(@log.onConsole()).to.deep.eq {
+            Command: "as"
+            Alias: "b"
+            Returned: $body
+            Elements: 1
+            "All Aliases": "b"
+          }
+
   context "#getAlias", ->
     it "retrieves aliases", ->
       cy.on "end", ->
