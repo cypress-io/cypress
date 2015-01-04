@@ -7,7 +7,6 @@ chai        = require('chai')
 expect      = chai.expect
 _           = require('lodash')
 
-nock.disableNetConnect()
 
 chai
 .use(require('sinon-chai'))
@@ -15,6 +14,7 @@ chai
 
 describe "remote proxy", ->
   beforeEach ->
+    nock.disableNetConnect()
     @baseUrl      = "http://www.x.com"
     @remoteProxy  = new RemoteProxy
     @res = through2.obj((cnk, enc, cb) -> cb(null, cnk))
@@ -36,6 +36,7 @@ describe "remote proxy", ->
 
   afterEach ->
     nock.cleanAll()
+    nock.enableNetConnect()
 
   it "throws without a session.remote", ->
     expect(-> @remoteProxy.handle({

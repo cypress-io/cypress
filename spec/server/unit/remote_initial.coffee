@@ -5,12 +5,13 @@ through       = require("through")
 nock          = require('nock')
 sinon         = require('sinon')
 
-nock.disableNetConnect()
-
 describe "Remote Loader", ->
-  afterEach -> nock.cleanAll()
+  afterEach ->
+    nock.cleanAll()
+    nock.enableNetConnect()
 
   beforeEach ->
+    nock.disableNetConnect()
     @remoteLoader = new RemoteInitial
     @res = through (d) ->
     @res.send = ->
