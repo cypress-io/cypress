@@ -43,6 +43,12 @@
     displayName: ->
       @get("name").replace(/(\s+)/g, "-")
 
+    increment: (num) ->
+      @set "number", num
+
+    is: (type) ->
+      @get("type") is type
+
     ## call the associated cypress command callback
     ## pass along the args with the context of our
     ## private cypress attrs
@@ -103,10 +109,10 @@
       _([objs]).flatten(true)
 
     getSnapshot: ->
-      @snapshot
+      @[CYPRESS_ATTRS]._snapshot
 
     getEl: ->
-      @el
+      @[CYPRESS_ATTRS].$el
 
     convertToArray: (obj) ->
       _.reduce obj, (memo, value, key) ->
@@ -247,14 +253,19 @@
     getOriginalByClone: (command) ->
       @get command.get("clonedFrom")
 
-    parentExistsFor: (id) ->
-      @get(id)
+    parentExistsFor: (command) ->
+      getLastParent = =>
+        _.last @where({type: "parent"})
+
+      switch
+        ## if command is a child return the last parent command
+        when command.is("child") then getLastParent()
+
+        ## if command is a dual return the last if we have any at all
+        when command.is("dual") then getLastParent() if @length
 
     getCommandIndex: (command) ->
       @indexOf(command) + 1
-
-    increment: (command) ->
-      command.set "number", @maxNumber()
 
     maxNumber: ->
       ## set to 0 if its undefined
@@ -314,25 +325,25 @@
         when "localStorage" then @addLocalStorage attrs
         else throw new Error("Command .type did not match anything")
 
-    insertParents: (command, parentId, options = {}) ->
-      if parent = @parentExistsFor(parentId)
+    # insertParents: (command, parentId, options = {}) ->
+    #   if parent = @parentExistsFor(parentId)
 
-        ## make sure the last command is our parent, if its not
-        ## then re-insert it (as a new model) and reset which
-        ## one is our parent
+    #     ## make sure the last command is our parent, if its not
+    #     ## then re-insert it (as a new model) and reset which
+    #     ## one is our parent
 
-        ## right here we need to potentially insert multiple parents
-        ## in case we've referenced an ecl object way down the line
-        if options.if and options.if.call(@, parent, command)
-          ## recursively walk up the parent chain by ensuring we insert
-          ## as many parents as necessary to get back to the root command
-          @insertParents(parent, parent.parent.id, options) if parent.hasParent()
+    #     ## right here we need to potentially insert multiple parents
+    #     ## in case we've referenced an ecl object way down the line
+    #     if options.if and options.if.call(@, parent, command)
+    #       ## recursively walk up the parent chain by ensuring we insert
+    #       ## as many parents as necessary to get back to the root command
+    #       @insertParents(parent, parent.parent.id, options) if parent.hasParent()
 
-          parent = @cloneParent(parent)
+    #       parent = @cloneParent(parent)
 
-        command.setParent parent
-        command.indent()
-        options.onSetParent.call(@, parent) if options.onSetParent
+    #     command.setParent parent
+    #     command.indent()
+    #     options.onSetParent.call(@, parent) if options.onSetParent
 
     getIndexByParent: (command) ->
       return if not command.hasParent()
@@ -483,7 +494,7 @@
 
       return command
 
-    getCommandByType2: (attrs) ->
+    createCommand: (attrs) ->
       ## what about attrs.$el?
 
       publicAttrs = {}
@@ -515,7 +526,11 @@
         options = @getXhrOptions(command, options) if command.get("type") is "xhr"
 
         ## increment the number if its not cloned
-        @increment(command) unless command.isCloned()
+        command.increment(@maxNumber()) unless command.isCloned()
+
+        if parent = @parentExistsFor(command)
+          command.setParent(parent)
+          command.indent()
 
         return super(command, options)
 
@@ -526,7 +541,7 @@
       #   testId: id
       #   hook: hook
 
-      super @getCommandByType2(attrs)
+      super @createCommand(attrs)
 
     reset: ->
       @_maxNumber = 0
