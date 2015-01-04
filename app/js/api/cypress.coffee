@@ -681,11 +681,40 @@ window.Cypress = do ($, _, Backbone) ->
       ## during tests
       return @
 
+    ## TODO: write tests for this
+    @off = (name, fn) ->
+      ## nuke all events if we dont
+      ## have a specific named event
+      ## or we dont have _events
+      if not (name and @_events)
+        @_events = []
+        return @
+
+      splice = (index) =>
+        @_events.splice(index, 1)
+
+      ## loop in reverse since we are
+      ## destructively modifying _events
+      for event, index in @_events by -1
+        if event.name is name
+          if fn
+            ## if we have a passed in fn argument
+            ## make sure our event has the same fn
+            splice(index) if event.fn is fn
+          else
+            ## else always splice it out since
+            ## it matches the name
+            splice(index)
+
+      return @
+
     @on = (event, fn) ->
       return if not _.isFunction(fn)
 
       @_events ?= []
       @_events.push {name: event, fn: fn}
+
+      return @
 
     @trigger = (event, args...) ->
       return if not @_events

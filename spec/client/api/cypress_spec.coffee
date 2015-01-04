@@ -33,6 +33,7 @@ describe "Cypress API", ->
       @loadDom().then @setup
 
   afterEach ->
+    Cypress.off("log")
     Cypress.abort()
 
   after ->
@@ -2262,4 +2263,28 @@ describe "Cypress API", ->
         .inspect()
         .multiple()
         .then ->
-          expect(getNames(cy.queue)).to.deep.eq ["inspect", "multiple", "url", "location", "noop", "then", "then"]
+          expect(getNames(cy.queue)).to.deep.eq ["inspect", "multiple", "url", "location", "noop", "then", "then"]  context.only ".off", ->
+    beforeEach ->
+      @eventByName = (name) ->
+        _(Cypress._events).where({name: name})
+
+    it "can remove event by name", ->
+      Cypress.on "foo", ->
+
+      expect(@eventByName("foo")).to.have.length(1)
+
+      Cypress.off "foo"
+
+      expect(@eventByName("foo")).to.have.length(0)
+
+    it "can remove event by name + callback fn", ->
+      fn = ->
+
+      Cypress.on "foo", ->
+      Cypress.on "foo", fn
+
+      expect(@eventByName("foo")).to.have.length(2)
+
+      Cypress.off "foo", fn
+
+      expect(@eventByName("foo")).to.have.length(1)
