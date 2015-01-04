@@ -6,20 +6,21 @@ do (Cypress, _) ->
         retry: true
         withinSubject: @prop("withinSubject")
 
+      log = ($el) ->
+        Cypress.log({$el: $el})
+
       if alias = @getAlias(selector)
         {subject, command} = alias
         if subject and subject.get and _.isElement(subject.get(0))
           el = subject.get(0)
           if @_contains(el)
+            log(subject)
             return subject
           else
             @_replayFrom command
             return null
 
       $el = @$(selector, options.withinSubject)
-
-      log = ($el) ->
-        Cypress.log({$el: $el})
 
       ## allow retry to be a function which we ensure
       ## returns truthy before returning its

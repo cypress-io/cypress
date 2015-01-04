@@ -118,6 +118,8 @@ do (Cypress, _) ->
 
       options.el.simulate "key-sequence", options
 
+      Cypress.log()
+
       return subject
 
     clear: (subject, options = {}) ->

@@ -9,4 +9,8 @@ do (Cypress, _) ->
       ## instead of applying directly to the subject
       ## shouldnt modifiers go through the same logic
       ## as #get where we potentially retry several times?
-      subject[proxy].apply(subject, args)
+      $el = subject[proxy].apply(subject, args)
+
+      Cypress.log($el: $el)
+
+      return $el
