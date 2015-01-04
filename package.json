@@ -4,9 +4,9 @@
   "description": "Javascript Test Studio",
   "main": "index.js",
   "scripts": {
-    "test-server": "mocha --opts spec/server/mocha.opts",
-    "test-server-dev": "mocha --opts spec/server/mocha.opts --watch",
-    "build": "gulp compile"
+    "build": "gulp compile",
+    "test-server": "NODE_ENV=test mocha --opts spec/server/mocha.opts",
+    "test-server-dev": "NODE_ENV=test mocha --opts spec/server/mocha.opts --watch"
   },
   "repository": {
     "type": "git",
@@ -88,6 +88,7 @@
     "method-override": "^2.3.1",
     "open": "0.0.5",
     "fs-extra": "0.13.0",
-    "promise-semaphore": "0.2.0"
+    "promise-semaphore": "0.2.0",
+    "request-promise": "^0.3.2"
   }
 }
