@@ -8,6 +8,9 @@
   <span class="command-message">
     <span><%= @message %></span>
   </span>
+  <% if @numElements > 1: %>
+    <label title="<%= @numElements %> matched elements" class="label label-default"><%= @numElements %></label>
+  <% end %>
   <% if @error: %>
     <span class="command-error">
       <span><%= @error %></span>

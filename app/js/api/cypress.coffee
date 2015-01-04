@@ -711,6 +711,9 @@ window.Cypress = do ($, _, Backbone) ->
       if obj.snapshot
         obj._snapshot = @cy.createSnapshot(obj.$el)
 
+      if obj.$el
+        obj.numElements = obj.$el.length
+
       @trigger "log", obj
 
     _.extend Cypress.prototype, Backbone.Events

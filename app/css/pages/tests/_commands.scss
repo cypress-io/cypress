@@ -135,6 +135,12 @@
       border-radius: 3px;
       padding: 0 4px;
     }
+
+    .label {
+      font-weight: normal;
+      padding: 1px 5px;
+      border-radius: 5px;
+    }
   }
 
   .command-number {
@@ -169,14 +175,6 @@
     position: absolute;
     top: 0;
     right: 20px;
-  }
-
-  .command-type-dom {
-    .label {
-      font-weight: normal;
-      padding: 1px 5px;
-      border-radius: 5px;
-    }
   }
 
   .command-name-assert {
