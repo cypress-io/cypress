@@ -737,7 +737,7 @@ window.Cypress = do ($, _, Backbone) ->
       _.defaults obj,
         snapshot: true
         testId:   @cy.prop("runnable").cid
-        message:  _(current.args).invoke("toString").join(", ")
+        message:  _.chain(current.args).compact().invoke("toString").value().join(", ")
         _args:    current.args
         onRender: ->
         onConsole: ->
