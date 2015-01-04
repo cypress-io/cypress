@@ -7,7 +7,15 @@ do (Cypress, _) ->
         withinSubject: @prop("withinSubject")
 
       log = ($el) ->
-        Cypress.log({$el: $el})
+        Cypress.log
+          $el: $el
+          onConsole: ->
+            obj = {"Command":  "get"}
+            key = if alias then "Alias" else "Selector"
+            obj[key] = selector
+            _.extend obj,
+              "Returned": $el
+              "Elements": $el.length
 
       if alias = @getAlias(selector)
         {subject, command} = alias

@@ -1018,6 +1018,30 @@ describe "Cypress API", ->
       cy.get("#missing-el", {retry: false}).then ($el) ->
         expect($el).not.to.exist
 
+    describe ".log", ->
+      it "#onConsole", ->
+        Cypress.on "log", (@log) =>
+
+        cy.get("body").then ($body) ->
+          expect(@log.onConsole()).to.deep.eq {
+            Command: "get"
+            Selector: "body"
+            Returned: $body
+            Elements: 1
+          }
+
+      it "#onConsole with an alias", ->
+        Cypress.on "log", (@log) =>
+
+        cy.get("body").as("b").get("@b").then ($body) ->
+          expect(@log.onConsole()).to.deep.eq {
+            Command: "get"
+            Alias: "@b"
+            Returned: $body
+            Elements: 1
+          }
+
+
     describe "alias references", ->
       it "re-queries for an existing alias", ->
         body = cy.$("body")
@@ -2263,7 +2287,9 @@ describe "Cypress API", ->
         .inspect()
         .multiple()
         .then ->
-          expect(getNames(cy.queue)).to.deep.eq ["inspect", "multiple", "url", "location", "noop", "then", "then"]  context.only ".off", ->
+          expect(getNames(cy.queue)).to.deep.eq ["inspect", "multiple", "url", "location", "noop", "then", "then"]
+
+  context ".off", ->
     beforeEach ->
       @eventByName = (name) ->
         _(Cypress._events).where({name: name})
