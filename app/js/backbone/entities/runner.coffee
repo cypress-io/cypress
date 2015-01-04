@@ -58,7 +58,7 @@
 
       highlightEl: (command, init = true) ->
         @trigger "highlight:el", command.getEl(),
-          id: command.id
+          id: command.cid
           init: init
 
       switchToBrowser: (browser, version) ->
