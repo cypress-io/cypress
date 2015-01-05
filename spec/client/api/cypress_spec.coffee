@@ -442,7 +442,7 @@ describe "Cypress API", ->
           delete cy.sync.window().angular
 
           cy.on "fail", (err) ->
-            expect(err.message).to.include "Angular global was not found in your window! You cannot use .ng() methods without angular."
+            expect(err.message).to.include "Angular global (window.angular) was not found in your window! You cannot use .ng() methods without angular."
             done()
 
           cy.ng("binding", "phone")
@@ -543,7 +543,7 @@ describe "Cypress API", ->
           delete cy.sync.window().angular
 
           cy.on "fail", (err) ->
-            expect(err.message).to.include "Angular global was not found in your window! You cannot use .ng() methods without angular."
+            expect(err.message).to.include "Angular global (window.angular) was not found in your window! You cannot use .ng() methods without angular."
             done()
 
           cy.ng("repeater", "phone in phones")
@@ -617,7 +617,7 @@ describe "Cypress API", ->
           delete cy.sync.window().angular
 
           cy.on "fail", (err) ->
-            expect(err.message).to.include "Angular global was not found in your window! You cannot use .ng() methods without angular."
+            expect(err.message).to.include "Angular global (window.angular) was not found in your window! You cannot use .ng() methods without angular."
             done()
 
           cy.ng("model", "query")

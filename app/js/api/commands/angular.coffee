@@ -4,7 +4,12 @@ do (Cypress, _) ->
 
   Cypress.addParentCommand
     ng: (type, selector, options = {}) ->
-      @throwErr "Angular global was not found in your window! You cannot use .ng() methods without angular." if not @sync.window().angular
+      ## what about requirejs / browserify?
+      ## we need to intelligently check to see if we're using those
+      ## and if angular is available through them.  throw a very specific
+      ## error message here that's different depending on what module
+      ## system you're using
+      @throwErr "Angular global (window.angular) was not found in your window! You cannot use .ng() methods without angular." if not @sync.window().angular
 
       switch type
         when "model"
