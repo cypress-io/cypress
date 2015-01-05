@@ -8,7 +8,7 @@
   _.extend Overrides,
 
     ## still need to do should here...
-    overloadMochaRunnableEmit = ->
+    overloadMochaRunnableEmit: ->
       ## if app evironment is development we need to list to errors
       ## emitted from all Runnable inherited objects (like hooks)
       ## this makes tracking down Eclectus related App errors much easier
@@ -18,7 +18,7 @@
 
         orig.call(@, event, err)
 
-    overloadMochaRunnerEmit = ->
+    overloadMochaRunnerEmit: ->
       Mocha.Runner::emit = _.wrap runnerEmit, (orig, args...) ->
         event = args[0]
 
@@ -37,7 +37,7 @@
 
         orig.apply(@, args)
 
-    overloadMochaRunnerUncaught = ->
+    overloadMochaRunnerUncaught: ->
       ## if app environment is development we need to listen to
       ## uncaught exceptions (else it makes tracking down bugs hard)
       Mocha.Runner::uncaught = _.wrap uncaught, (orig, err) ->
