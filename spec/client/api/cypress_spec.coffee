@@ -1739,7 +1739,7 @@ describe "Cypress API", ->
             cy.get("#list")[name](arg).then ($el) ->
               expect(@log.onConsole()).to.deep.eq {
                 Command: name
-                Selector: _([].concat(arg)).concat().join(", ")
+                Selector: [].concat(arg).join(", ")
                 "Applied To": getFirstSubjectByName("get")
                 Returned: $el
                 Elements: $el.length
