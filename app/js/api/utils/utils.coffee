@@ -1,6 +1,9 @@
 do (Cypress, _) ->
 
-  Cypress.utils =
+  Cypress.addUtil
+    hasElement: (obj) ->
+      !!(obj and obj[0] and _.isElement(obj[0]))
+
     stringifyElement: (el) ->
       el = if _.isElement(el) then $(el) else el
       el.clone().empty().prop("outerHTML")

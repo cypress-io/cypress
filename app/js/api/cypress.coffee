@@ -482,6 +482,19 @@ window.Cypress = do ($, _, Backbone) ->
 
     _: _
 
+    @addUtil = (key, fn) ->
+      if _.isObject(key)
+        _.each key, (fn, name) =>
+          @util(name, fn)
+        return @
+
+      @util(key, fn)
+
+    @util = (key, fn) ->
+      Cypress.Utils ?= {}
+
+      Cypress.Utils[key] = fn
+
     @extend = (key, fn) ->
       ## allow object signature
       if _.isObject(key)

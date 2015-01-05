@@ -8,10 +8,10 @@ do (Cypress, _) ->
       subject.each (index, el) =>
         origEl = el
         el = $(el)
-        node = Cypress.utils.stringifyElement(el)
+        node = Cypress.Utils.stringifyElement(el)
 
         if not el.is("form")
-          word = Cypress.utils.plural(subject, "contains", "is")
+          word = Cypress.Utils.plural(subject, "contains", "is")
           @throwErr(".submit() can only be called on a <form>! Your subject #{word} a: #{node}")
 
         submit = new Event("submit")
@@ -30,10 +30,10 @@ do (Cypress, _) ->
       ## isnt a checkbox or radio
       subject.each (index, el) =>
         el = $(el)
-        node = Cypress.utils.stringifyElement(el)
+        node = Cypress.Utils.stringifyElement(el)
 
         if not el.is(":checkbox,:radio")
-          word = Cypress.utils.plural(subject, "contains", "is")
+          word = Cypress.Utils.plural(subject, "contains", "is")
           @throwErr(".check() can only be called on :checkbox and :radio! Your subject #{word} a: #{node}")
 
         return if el.prop("checked")
@@ -53,10 +53,10 @@ do (Cypress, _) ->
       ## isnt a checkbox
       subject.each (index, el) =>
         el = $(el)
-        node = Cypress.utils.stringifyElement(el)
+        node = Cypress.Utils.stringifyElement(el)
 
         if not el.is(":checkbox")
-          word = Cypress.utils.plural(subject, "contains", "is")
+          word = Cypress.Utils.plural(subject, "contains", "is")
           @throwErr(".uncheck() can only be called on :checkbox! Your subject #{word} a: #{node}")
 
         return if not el.prop("checked")
@@ -109,7 +109,7 @@ do (Cypress, _) ->
         el: subject
 
       if not subject.is("textarea,:text")
-        node = Cypress.utils.stringifyElement(options.el)
+        node = Cypress.Utils.stringifyElement(options.el)
         @throwErr(".type() can only be called on textarea or :text! Your subject is a: #{node}")
 
       if (num = subject.length) and num > 1
@@ -138,10 +138,10 @@ do (Cypress, _) ->
       ## isnt a textarea or :text
       subject.each (index, el) =>
         el = $(el)
-        node = Cypress.utils.stringifyElement(el)
+        node = Cypress.Utils.stringifyElement(el)
 
         if not el.is("textarea,:text")
-          word = Cypress.utils.plural(subject, "contains", "is")
+          word = Cypress.Utils.plural(subject, "contains", "is")
           @throwErr(".clear() can only be called on textarea or :text! Your subject #{word} a: #{node}")
 
         @sync.type("{selectall}{del}", {el: el})
@@ -161,7 +161,7 @@ do (Cypress, _) ->
       ## behavior
 
       if not subject.is("select")
-        node = Cypress.utils.stringifyElement(subject)
+        node = Cypress.Utils.stringifyElement(subject)
         @throwErr ".select() can only be called on a <select>! Your subject is a: #{node}"
 
       if (num = subject.length) and num > 1
