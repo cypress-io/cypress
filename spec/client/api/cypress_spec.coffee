@@ -1,6 +1,9 @@
 getNames = (queue) ->
   _(queue).pluck("name")
 
+getFirstSubjectByName = (name) ->
+  _(cy.queue).findWhere({name: name}).subject
+
 describe "Cypress API", ->
   before ->
     Cypress.start()
@@ -1032,9 +1035,10 @@ describe "Cypress API", ->
         expect($el).not.to.exist
 
     describe ".log", ->
-      it "#onConsole", ->
+      beforeEach ->
         Cypress.on "log", (@log) =>
 
+      it "#onConsole", ->
         cy.get("body").then ($body) ->
           expect(@log.onConsole()).to.deep.eq {
             Command: "get"
@@ -1044,8 +1048,6 @@ describe "Cypress API", ->
           }
 
       it "#onConsole with an alias", ->
-        Cypress.on "log", (@log) =>
-
         cy.get("body").as("b").get("@b").then ($body) ->
           expect(@log.onConsole()).to.deep.eq {
             Command: "get"
@@ -1185,7 +1187,7 @@ describe "Cypress API", ->
           expect(@log.onConsole()).to.deep.eq {
             Command: "contains"
             Content: "nested contains"
-            "Applied To": _(cy.queue).findWhere({name: "get"}).subject
+            "Applied To": getFirstSubjectByName("get")
             Returned: $label
             Elements: 1
           }
@@ -1728,6 +1730,20 @@ describe "Cypress API", ->
           cy.noop({})[name](arg)
 
           cy.on "fail", -> done()
+
+        describe ".log", ->
+          beforeEach ->
+            Cypress.on "log", (@log) =>
+
+          it "#onConsole", ->
+            cy.get("#list")[name](arg).then ($el) ->
+              expect(@log.onConsole()).to.deep.eq {
+                Command: name
+                Selector: _([].concat(arg)).concat().join(", ")
+                "Applied To": getFirstSubjectByName("get")
+                Returned: $el
+                Elements: $el.length
+              }
 
   context "#then", ->
     it "mocha inserts 2 arguments to then: anonymous fn for invoking done(), and done reference itself", ->
