@@ -1183,9 +1183,9 @@ describe "Cypress API", ->
       it "#onConsole", ->
         cy.get("#complex-contains").contains("nested contains").then ($label) ->
           expect(@log.onConsole()).to.deep.eq {
-            "Prev Subject": _(cy.queue).findWhere({name: "get"}).subject
             Command: "contains"
             Content: "nested contains"
+            "Applied To": _(cy.queue).findWhere({name: "get"}).subject
             Returned: $label
             Elements: 1
           }

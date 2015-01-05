@@ -741,8 +741,13 @@ window.Cypress = do ($, _, Backbone) ->
         _args:    current.args
         onRender: ->
         onConsole: ->
-          "Command":  current.name
           "Returned": current.subject
+
+      ## re-wrap onConsole to set Command + Error defaults
+      obj.onConsole = _.wrap obj.onConsole, (orig, args...) ->
+        ## do error stuff here too!
+        defaults = {Command: current.name}
+        _.extend defaults, orig.apply(obj, args)
 
       if obj.snapshot
         obj._snapshot = @cy.createSnapshot(obj.$el)

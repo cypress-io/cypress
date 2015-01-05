@@ -84,9 +84,8 @@ do (Cypress, _) ->
         Cypress.log
           $el: $el
           onConsole: ->
-            "Prev Subject": subject
-            "Command": "contains"
             "Content": text
+            "Applied To": subject
             "Returned": $el
             "Elements": $el.length
 

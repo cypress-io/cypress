@@ -14,9 +14,8 @@ do (Cypress, _) ->
       Cypress.log
         $el: $el
         onConsole: ->
-          "Prev Subject": subject
-          "Command":      proxy
           "Selector":     args.join(", ")
+          "Applied To":   subject
           "Returned":     $el
           "Elements":     $el.length
 
