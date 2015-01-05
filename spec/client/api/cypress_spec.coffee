@@ -2401,6 +2401,41 @@ describe "Cypress API", ->
         it "is false on: #{typeof value}", ->
           expect(Cypress.Utils.hasElement(value)).to.be.false
 
-    describe "#stringifyElement"
+    describe "#stringifyElement", ->
+      context "long form", ->
+        it "includes wraps element in gt/ls", ->
+          input = $("<input />")
+          cy.$("body").append(input)
 
-    describe "#plural"
+          str = Cypress.Utils.stringifyElement(input)
+          expect(str).to.eq "<input>"
+
+      context "short form", ->
+        it "returns element", ->
+          body = cy.$("body")
+
+          str = Cypress.Utils.stringifyElement(body, "short")
+          expect(str).to.eq "body"
+
+        it "returns element + id", ->
+          div = $("<div id='id' />")
+          cy.$("body").append(div)
+
+          str = Cypress.Utils.stringifyElement(div, "short")
+          expect(str).to.eq "div#id"
+
+        it "uses element class", ->
+          div = $("<div class='class foo bar' />")
+          cy.$("body").append(div)
+
+          str = Cypress.Utils.stringifyElement(div, "short")
+          expect(str).to.eq "div.class.foo.bar"
+
+        it "uses name, id, and class", ->
+          div = $("<div id='baz' class='foo' />")
+          cy.$("body").append(div)
+
+          str = Cypress.Utils.stringifyElement(div, "short")
+          expect(str).to.eq "div#baz.foo"
+
+    describe "#plural", ->
