@@ -2439,3 +2439,65 @@ describe "Cypress API", ->
           expect(str).to.eq "div#baz.foo"
 
     describe "#plural", ->
+
+  context "Chai", ->
+    before ->
+      @onAssert = (fn) =>
+        Cypress.on "log", (obj) =>
+          if obj.name is "assert"
+            ## restore so we dont create an endless loop
+            ## due to Cypress.assert being called again
+            Cypress.Chai.restore()
+            fn.call(@, obj)
+
+    beforeEach ->
+      Cypress.Chai.override()
+
+    afterEach ->
+      Cypress.Chai.restore()
+
+    describe "#patchAssert", ->
+
+      it "wraps \#{this} and \#{exp} in \#{b}", (done) ->
+        @onAssert (obj) ->
+          expect(obj.message).to.eq "expected [b]foo[\\b] to equal [b]foo[\\b]"
+          done()
+
+        cy.then ->
+          expect("foo").to.eq "foo"
+
+      describe "jQuery elements", ->
+        it "sets _obj to selector", (done) ->
+          @onAssert (obj) ->
+            expect(obj.message).to.eq "expected [b]body[\\b] to exist"
+            done()
+
+          cy.get("body").then ($body) ->
+            expect($body).to.exist
+
+        describe "without selector", ->
+          it "exists", (done) ->
+            @onAssert (obj) ->
+              expect(obj.message).to.eq "expected [b]div[\\b] to exist"
+              done()
+
+            ## prepend an empty div so it has no id or class
+            cy.$("body").prepend $("<div />")
+
+            cy.get("div").eq(0).then ($div) ->
+              # expect($div).to.match("div")
+              expect($div).to.exist
+
+          it "uses element name", (done) ->
+            @onAssert (obj) ->
+              expect(obj.message).to.eq "expected [b]input[\\b] to match [b]input[\\b]"
+              done()
+
+            ## prepend an empty div so it has no id or class
+            cy.$("body").prepend $("<input />")
+
+            cy.get("input").eq(0).then ($div) ->
+              expect($div).to.match("input")
+
+      # describe ".log", ->
+        # it "#onConsole"
