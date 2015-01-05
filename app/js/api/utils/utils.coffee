@@ -2,7 +2,7 @@ do (Cypress, _) ->
 
   Cypress.addUtil
     hasElement: (obj) ->
-      !!(obj and obj[0] and _.isElement(obj[0]))
+      !!(obj and obj[0] and _.isElement(obj[0])) or _.isElement(obj)
 
     stringifyElement: (el) ->
       el = if _.isElement(el) then $(el) else el

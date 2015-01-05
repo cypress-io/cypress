@@ -2386,10 +2386,15 @@ describe "Cypress API", ->
       Cypress.off "foo", fn
 
       expect(@eventByName("foo")).to.have.length(1)
+
   context "Utils", ->
     describe "#hasElement", ->
       it "is true on jQuery objects", ->
         body = cy.$("body")
+        expect(Cypress.Utils.hasElement(body)).to.be.true
+
+      it "is true on DOM objects", ->
+        body = cy.$("body").get(0)
         expect(Cypress.Utils.hasElement(body)).to.be.true
 
       _.each [{}, [], [{}], 1, "", true], (value) ->
