@@ -30,7 +30,7 @@
     "chai": "~1.9.1",
     "sinon": "http://sinonjs.org/releases/sinon-1.12.2.js",
     "jsuri": "~1.2.2",
-    "chai-jquery": "~1.2.2",
+    "chai-jquery": "2.0.0",
     "jquery-simulate-ext": "~1.3.0",
     "bililiteRange": "~2.5.1",
     "backbone.mutators": "~0.4.1",
