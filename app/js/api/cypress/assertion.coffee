@@ -9,22 +9,14 @@ do (Cypress, _) ->
       ## also just think about slicing off everything after a comma?
       message = message.split("but").join("and") if message and passed
 
-      # if value instanceof $
-        ## store the $el
-        # @$el = value
-
       obj = @parseValueActualAndExpected(value, actual, expected)
 
-      # console.warn "value: ", value
-      # console.warn "actual: ", actual
-      # console.warn "expected: ", expected
-      # console.warn "message: ", message
-      # console.warn "obj: ", obj
-      # console.info "----------------------"
+      if value and value[0] and _.isElement(value[0])
+        obj.$el = value
 
       _.extend obj,
         name:     "assert"
-        type:     "parent"
+        type:     "assertion"
         message:  message
         passed:   passed
         selector: value.selector
