@@ -187,6 +187,11 @@
     }
     .command-message {
       color: #565554;
+
+      strong {
+        font-weight: 600;
+        font-size: 105%;
+      }
     }
   }
 
@@ -200,6 +205,10 @@
     }
     & .command-message {
       color: $fail;
+
+      strong {
+        color: darken($fail, 10%);
+      }
     }
   }
 
@@ -210,11 +219,14 @@
       span {
         background-color: $pass;
         color: white;
-
       }
     }
     & .command-message {
       color: $pass;
+
+      strong {
+        color: darken($pass, 10%);
+      }
     }
   }
 

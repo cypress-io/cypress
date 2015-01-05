@@ -2,6 +2,10 @@
 
 do (Cypress, _) ->
 
+  bRe          = /(\[b\])(.+)(\[\\b\])/
+  bTagOpen     = /\[b\]/g
+  bTagClosed   = /\[\\b\]/g
+
   Cypress.Assertion = {
     assert: (passed, message, value, actual, expected) ->
       ## if this is a jquery object and its true
@@ -20,9 +24,12 @@ do (Cypress, _) ->
         message:  message
         passed:   passed
         selector: value.selector
-        onRender: ($row) ->
+        onRender: ($row) =>
           klass = if passed then "passed" else "failed"
           $row.addClass "command-assertion-#{klass}"
+
+          ## converts [b] string tags into real elements
+          @convertTags($row)
 
       ## think about completely gutting the whole object toString
       ## which chai does by default, its so ugly and worthless
@@ -30,6 +37,18 @@ do (Cypress, _) ->
       Cypress.log obj
 
       return Cypress
+
+    convertTags: ($row) ->
+      html = $row.html()
+
+      ## if matches were found
+      if bRe.test(html)
+        html = html
+          .replace(bTagOpen, ": <strong>")
+          .replace(bTagClosed, "</strong>")
+          .split(" :").join(":")
+
+        $row.html(html)
 
     ## Rules:
     ## 1. always remove value
