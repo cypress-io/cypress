@@ -2415,28 +2415,28 @@ describe "Cypress API", ->
           body = cy.$("body")
 
           str = Cypress.Utils.stringifyElement(body, "short")
-          expect(str).to.eq "body"
+          expect(str).to.eq "<body>"
 
         it "returns element + id", ->
           div = $("<div id='id' />")
           cy.$("body").append(div)
 
           str = Cypress.Utils.stringifyElement(div, "short")
-          expect(str).to.eq "div#id"
+          expect(str).to.eq "<div#id>"
 
         it "uses element class", ->
           div = $("<div class='class foo bar' />")
           cy.$("body").append(div)
 
           str = Cypress.Utils.stringifyElement(div, "short")
-          expect(str).to.eq "div.class.foo.bar"
+          expect(str).to.eq "<div.class.foo.bar>"
 
         it "uses name, id, and class", ->
           div = $("<div id='baz' class='foo' />")
           cy.$("body").append(div)
 
           str = Cypress.Utils.stringifyElement(div, "short")
-          expect(str).to.eq "div#baz.foo"
+          expect(str).to.eq "<div#baz.foo>"
 
     describe "#plural", ->
 
@@ -2476,7 +2476,7 @@ describe "Cypress API", ->
       describe "jQuery elements", ->
         it "sets _obj to selector", (done) ->
           @onAssert (obj) ->
-            expect(obj.message).to.eq "expected [b]body[\\b] to exist"
+            expect(obj.message).to.eq "expected [b]<body>[\\b] to exist"
             done()
 
           cy.get("body").then ($body) ->
@@ -2485,7 +2485,7 @@ describe "Cypress API", ->
         describe "without selector", ->
           it "exists", (done) ->
             @onAssert (obj) ->
-              expect(obj.message).to.eq "expected [b]div[\\b] to exist"
+              expect(obj.message).to.eq "expected [b]<div>[\\b] to exist"
               done()
 
             ## prepend an empty div so it has no id or class
@@ -2497,7 +2497,7 @@ describe "Cypress API", ->
 
           it "uses element name", (done) ->
             @onAssert (obj) ->
-              expect(obj.message).to.eq "expected [b]input[\\b] to match [b]input[\\b]"
+              expect(obj.message).to.eq "expected [b]<input>[\\b] to match [b]input[\\b]"
               done()
 
             ## prepend an empty div so it has no id or class

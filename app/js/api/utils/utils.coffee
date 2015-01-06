@@ -20,7 +20,7 @@ do (Cypress, _) ->
           if klass = el.prop("class")
             str += "." + klass.split(/\s+/).join(".")
 
-          str
+          "<#{str}>"
 
     plural: (obj, plural, singular) ->
       obj = if _.isNumber(obj) then obj else obj.length
