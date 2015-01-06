@@ -745,24 +745,16 @@ window.Cypress = do ($, _, Backbone) ->
 
       return if not (@cy and current)
 
-      ## attempt to stringify the arguments but
-      ## disregard any errors raised
+      ## stringify the arguments
       stringify = (array) ->
-        _(array).reduce (memo, value) ->
-          try
-            value = value.toString()
-            memo.push(value)
-          catch e
-
-          memo
-        , []
+        _(array).map( (value) -> "" + value).join(", ")
 
       _.defaults obj, _(current).pick("name", "type")
 
       _.defaults obj,
         snapshot: true
         testId:   @cy.prop("runnable").cid
-        message:  stringify(current.args).join(", ")
+        message:  stringify(current.args)
         _args:    current.args
         onRender: ->
         onConsole: ->
