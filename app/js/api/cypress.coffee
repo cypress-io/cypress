@@ -339,8 +339,7 @@ window.Cypress = do ($, _, Backbone) ->
           ## and we can add Applied To if there is a prev command
           ## and it is a parent
           if current.type isnt "parent" and prev = current.prev
-            if prev.type is "parent"
-              obj["Applied To"] = prev.subject
+            obj["Applied To"] = prev.subject
 
           obj
 

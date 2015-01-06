@@ -2451,6 +2451,19 @@ describe "Cypress", ->
 
         cy.get("button").contains("asdfasdfasdfasdf")
 
+      it "#onConsole for nested children commands", (done) ->
+        Cypress.on "log", (obj) ->
+          if obj.name is "contains"
+            expect(obj.onConsole()).to.deep.eq {
+              Command: "contains"
+              "Applied To": getFirstSubjectByName("eq")
+              Error: obj._error
+              Stack: obj._error.stack
+            }
+            done()
+
+        cy.get("button").eq(0).contains("asdfasdfasdfasdf")
+
   context "nested commands", ->
     beforeEach ->
       @setup = (fn = ->) =>
