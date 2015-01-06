@@ -4,7 +4,7 @@ getNames = (queue) ->
 getFirstSubjectByName = (name) ->
   _(cy.queue).findWhere({name: name}).subject
 
-describe "Cypress API", ->
+describe "Cypress", ->
   before ->
     Cypress.start()
 
@@ -1657,6 +1657,32 @@ describe "Cypress API", ->
         cy.click()
 
         cy.on "fail", -> done()
+
+    describe ".log", ->
+      it "returns only the $el for the element of the subject that was clicked", ->
+        clicks = []
+
+        ## append two buttons
+        button = -> $("<button class='clicks'>click</button")
+        cy.$("body").append(button()).append(button())
+
+        Cypress.on "log", (obj) ->
+          clicks.push(obj) if obj.name is "click"
+
+        cy.get("button.clicks").click().then ($buttons) ->
+          expect($buttons.length).to.eq(2)
+          expect(clicks.length).to.eq(2)
+          expect(clicks[1].$el.get(0)).to.eq $buttons.last().get(0)
+
+      it "#onConsole", ->
+        Cypress.on "log", (@log) =>
+
+        cy.get("button").first().click().then ($button) ->
+          expect(@log.onConsole()).to.deep.eq {
+            Command: "click"
+            "Applied To": @log.$el
+            Elements: 1
+          }
 
   context "invoke", ->
     it "waits for isReady before invoking command", (done) ->

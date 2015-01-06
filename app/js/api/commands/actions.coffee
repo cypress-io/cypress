@@ -70,10 +70,18 @@ do (Cypress, _) ->
       @ensureDom(subject)
 
       click = (memo, el, index) =>
-        wait = if $(el).is("a") then 50 else 10
+        $el = $(el)
+
+        wait = if $el.is("a") then 50 else 10
 
         memo.then =>
           el.click()
+
+          Cypress.log
+            $el: $el
+            onConsole: ->
+              "Applied To":   $el
+              "Elements":     $el.length
 
           ## we want to add this wait delta to our
           ## runnables timeout so we prevent it from
