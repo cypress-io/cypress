@@ -52,7 +52,7 @@
 
       revertDom: (command) ->
         @trigger "revert:dom", command.getSnapshot(),
-          id:   command.id
+          id:   command.cid
           el:   command.getEl()
           attr: command.get("highlightAttr")
 

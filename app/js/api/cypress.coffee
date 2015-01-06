@@ -780,7 +780,8 @@ window.Cypress = do ($, _, Backbone) ->
         obj._snapshot = @cy.createSnapshot(obj.$el)
 
       if obj.$el
-        obj.numElements = obj.$el.length
+        obj.highlightAttr = @cy.highlightAttr
+        obj.numElements   = obj.$el.length
 
       if obj.error
         obj._error = obj.error

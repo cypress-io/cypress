@@ -2334,6 +2334,25 @@ describe "Cypress", ->
 
         Cypress.log({})
 
+      it "sets numElements if $el", (done) ->
+        $el = cy.$("body")
+
+        Cypress.on "log", (obj) ->
+          expect(obj.numElements).to.eq 1
+          done()
+
+        Cypress.log($el: $el)
+
+      it "sets highlightAttr if $el", (done) ->
+        $el = cy.$("body")
+
+        Cypress.on "log", (obj) ->
+          expect(obj.highlightAttr).not.to.be.undefined
+          expect(obj.highlightAttr).to.eq cy.highlightAttr
+          done()
+
+        Cypress.log($el: $el)
+
     it "displays 0 argument", (done) ->
       Cypress.on "log", (obj) ->
         if obj.name is "eq"
