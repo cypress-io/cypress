@@ -2466,6 +2466,13 @@ describe "Cypress API", ->
         cy.then ->
           expect("foo").to.eq "foo"
 
+      it "doesnt mutate error message", ->
+        cy.then ->
+          try
+            expect(true).to.eq false
+          catch e
+            expect(e.message).to.eq "expected true to equal false"
+
       describe "jQuery elements", ->
         it "sets _obj to selector", (done) ->
           @onAssert (obj) ->

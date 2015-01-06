@@ -48,9 +48,9 @@ do (Cypress, _, chai) ->
           if Cypress.Utils.hasElement(value)
             @_obj = Cypress.Utils.stringifyElement(value, "short")
 
-          args = _this.replaceArgMessages(args, @_obj)
+          customArgs = _this.replaceArgMessages(args, @_obj)
 
-          message   = utils.getMessage(@, args)
+          message   = utils.getMessage(@, customArgs)
 
           ## remove any single quotes between our [b] tags
           # message = message.replace /(\[b\])(.+)(\[\\b\])/, (match, b1, word, b2) ->
@@ -61,7 +61,7 @@ do (Cypress, _, chai) ->
           ## if it was mutated
           @_obj = value if @_obj isnt value
 
-          actual    = utils.getActual(@, args)
+          actual    = utils.getActual(@, customArgs)
 
           Cypress.assert passed, message, value, actual, expected
 
