@@ -190,7 +190,10 @@
 
       strong {
         font-weight: 600;
-        font-size: 105%;
+        font-family: Menlo, monospace;
+        font-size: 97%;
+        margin: 0 3px;
+        border-bottom: 1px dotted #AAA;
       }
     }
   }
@@ -222,7 +225,7 @@
       }
     }
     & .command-message {
-      color: $pass;
+      color: darken($pass, 3%);
 
       strong {
         color: darken($pass, 10%);
