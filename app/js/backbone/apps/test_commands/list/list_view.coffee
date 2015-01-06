@@ -67,8 +67,8 @@
 
       console.clear?()
 
-      @model.getConsoleDisplay (obj) ->
-        console.log obj...
+      @model.getConsoleDisplay (args) ->
+        console.log.apply(console, args)
 
     displayConsoleMessage: ->
       width  = @$el.outerWidth()
