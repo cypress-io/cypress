@@ -2506,5 +2506,62 @@ describe "Cypress API", ->
             cy.get("input").eq(0).then ($div) ->
               expect($div).to.match("input")
 
-      # describe ".log", ->
-        # it "#onConsole"
+  describe "#assert", ->
+    describe ".log", ->
+      before ->
+        @onAssert = (fn) =>
+          Cypress.on "log", (obj) =>
+            if obj.name is "assert"
+              ## restore so we dont create an endless loop
+              ## due to Cypress.assert being called again
+              Cypress.Chai.restore()
+              fn.call(@, obj)
+
+      beforeEach ->
+        Cypress.Chai.override()
+
+      afterEach ->
+        Cypress.Chai.restore()
+
+      it "#onConsole for regular objects", (done) ->
+        @onAssert (obj) ->
+          expect(obj.onConsole()).to.deep.eq {
+            Command: "assert"
+            expected: 1
+            actual: 1
+            Message: "expected 1 to equal 1"
+          }
+          done()
+
+        cy
+          .then ->
+            expect(1).to.eq 1
+
+      it "#onConsole for DOM objects", (done) ->
+        @onAssert (obj) ->
+          expect(obj.onConsole()).to.deep.eq {
+            Command: "assert"
+            subject: getFirstSubjectByName("get")
+            Message: "expected <body> to match body"
+          }
+          done()
+
+        cy
+          .get("body").then ($body) ->
+            expect($body).to.match "body"
+
+      it "#onConsole for errors", (done) ->
+        @sandbox.stub cy.runner, "uncaught"
+
+        @onAssert (obj) ->
+          expect(obj.onConsole()).to.deep.eq {
+            Command: "assert"
+            expected: false
+            actual: true
+            Message: "expected true to be false"
+            Error:    obj._error
+          }
+          done()
+
+        cy.then ->
+          expect(true).to.be.false
