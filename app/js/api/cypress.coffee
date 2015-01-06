@@ -327,8 +327,23 @@ window.Cypress = do ($, _, Backbone) ->
       @trigger "cancel", obj
 
     fail: (err) ->
-      obj = @prop("current")
-      @log {name: "Failed: #{obj.name}", args: err.message}, "danger"
+      current = @prop("current")
+      @log {name: "Failed: #{current.name}", args: err.message}, "danger" if current
+
+      Cypress.log
+        error: err
+        onConsole: ->
+          obj = {}
+
+          ## if type isnt parent then we know its dual or child
+          ## and we can add Applied To if there is a prev command
+          ## and it is a parent
+          if current.type isnt "parent" and prev = current.prev
+            if prev.type is "parent"
+              obj["Applied To"] = prev.subject
+
+          obj
+
       @runner.uncaught(err)
       @trigger "fail", err
 
@@ -785,7 +800,7 @@ window.Cypress = do ($, _, Backbone) ->
 
       if obj.error
         obj._error = obj.error
-        obj.error = obj.error.message
+        obj.error = true
 
       @trigger "log", obj
 

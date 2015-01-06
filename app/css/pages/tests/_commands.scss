@@ -165,16 +165,23 @@
   }
 
   .command-error {
-    background-color: darken(#eb5849, 5%);
-    color: #fff;
-    border-radius: 5px;
-    float: left;
-    padding: 0 4px;
-    font-size: 10px;
-    text-transform: uppercase;
-    position: absolute;
-    top: 0;
-    right: 20px;
+    padding-left: 3px;
+    border-left: 2px solid $fail;
+    background-color: lighten($fail, 30%);
+
+    .command-number,
+    .command-method,
+    .command-message {
+      color: $fail;
+    }
+    // border-radius: 5px;
+    // float: left;
+    // padding: 0 4px;
+    // font-size: 10px;
+    // text-transform: uppercase;
+    // position: absolute;
+    // top: 0;
+    // right: 20px;
   }
 
   .command-name-assert {

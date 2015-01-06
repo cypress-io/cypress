@@ -58,6 +58,8 @@
 
       @$el.addClass "command-cloned" if @model.isCloned()
 
+      @$el.addClass "command-error" if @model.get("error")
+
       @model.triggerCommandCallback("onRender", @$el)
 
     clicked: (e) ->

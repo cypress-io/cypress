@@ -854,6 +854,57 @@ describe "Cypress", ->
 
           cy.get("body").within(value)
 
+  context "#fail", ->
+    it "passes err to runner.uncaught", ->
+      uncaught = @sandbox.stub cy.runner, "uncaught"
+
+      err = new Error
+      cy.fail(err)
+      expect(uncaught).to.be.calledWith err
+
+    it "calls #fail on error", (done) ->
+      @sandbox.stub cy.runner, "uncaught"
+
+      cy.on "command:start", ->
+        @_timeout(100)
+
+      cy.on "fail", -> done()
+
+      cy.get("foo")
+
+    context "command error bubbling", ->
+      beforeEach ->
+        @uncaught = @sandbox.stub(cy.runner, "uncaught")
+
+      it "does not emit command:end when a command fails", (done) ->
+        cy.then ->
+          trigger = @sandbox.spy cy, "trigger"
+
+          _.defer ->
+            expect(trigger).not.to.be.calledWith("command:end")
+            done()
+          throw new Error("err")
+
+      it "emits fail and passes up err", (done) ->
+        err = null
+        cy.then ->
+          err = new Error("err")
+          throw err
+
+        cy.on "fail", (e) ->
+          expect(e).to.eq err
+          done()
+
+      it "passes the full stack trace to mocha", (done) ->
+        err = null
+        cy.then ->
+          err = new Error("err")
+          throw err
+
+        cy.on "fail", (e) =>
+          expect(@uncaught).to.be.calledWith(err)
+          done()
+
   context "#save", ->
     it "does not change the subject", ->
       cy.noop({}).assign("obj").then (obj) ->
@@ -1920,39 +1971,6 @@ describe "Cypress", ->
             expect(_then).not.to.be.called
             done()
 
-  context "command error bubbling", ->
-    beforeEach ->
-      @uncaught = @sandbox.stub(cy.runner, "uncaught")
-
-    it "does not emit command:end when a command fails", (done) ->
-      cy.then ->
-        trigger = @sandbox.spy cy, "trigger"
-
-        _.defer ->
-          expect(trigger).not.to.be.calledWith("command:end")
-          done()
-        throw new Error("err")
-
-    it "emits fail and passes up err", (done) ->
-      err = null
-      cy.then ->
-        err = new Error("err")
-        throw err
-
-      cy.on "fail", (e) ->
-        expect(e).to.eq err
-        done()
-
-    it "passes the full stack trace to mocha", (done) ->
-      err = null
-      cy.then ->
-        err = new Error("err")
-        throw err
-
-      cy.on "fail", (e) =>
-        expect(@uncaught).to.be.calledWith(err)
-        done()
-
   context ".restore", ->
     it "removes bound events", ->
       cy.on "foo", ->
@@ -2360,6 +2378,78 @@ describe "Cypress", ->
           done()
 
       cy.get("div").eq(0)
+
+    describe "errors", ->
+      beforeEach ->
+        @sandbox.stub cy.runner, "uncaught"
+
+        cy.on "command:start", ->
+          @_timeout(100)
+
+        ## prevent accidentally adding a .then to cy
+        return null
+
+      it "preserves errors", (done) ->
+        Cypress.on "log", (@log) =>
+
+        cy.on "fail", (err) =>
+          expect(@log.name).to.eq "get"
+          expect(@log.message).to.eq "foo"
+          expect(@log._error).to.eq err
+          expect(@log.error).to.eq true
+          done()
+
+        cy.get("foo")
+
+      it "#onConsole for parent commands", (done) ->
+        Cypress.on "log", (obj) ->
+          expect(obj.onConsole()).to.deep.eq {
+            Command: "get"
+            Error: obj._error
+            Stack: obj._error.stack
+          }
+          done()
+
+        cy.get("foo")
+
+      it "#onConsole for dual commands as a parent", (done) ->
+        Cypress.on "log", (obj) ->
+          expect(obj.onConsole()).to.deep.eq {
+            Command: "wait"
+            Error: obj._error
+            Stack: obj._error.stack
+          }
+          done()
+
+        cy.wait ->
+          expect(true).to.be.false
+
+      it "#onConsole for dual commands as a child", (done) ->
+        Cypress.on "log", (obj) ->
+          if obj.name is "wait"
+            expect(obj.onConsole()).to.deep.eq {
+              Command: "wait"
+              "Applied To": getFirstSubjectByName("get")
+              Error: obj._error
+              Stack: obj._error.stack
+            }
+            done()
+
+        cy.get("button").wait ->
+          expect(true).to.be.false
+
+      it "#onConsole for children commands", (done) ->
+        Cypress.on "log", (obj) ->
+          if obj.name is "contains"
+            expect(obj.onConsole()).to.deep.eq {
+              Command: "contains"
+              "Applied To": getFirstSubjectByName("get")
+              Error: obj._error
+              Stack: obj._error.stack
+            }
+            done()
+
+        cy.get("button").contains("asdfasdfasdfasdf")
 
   context "nested commands", ->
     beforeEach ->

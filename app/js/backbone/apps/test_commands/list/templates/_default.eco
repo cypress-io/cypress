@@ -11,11 +11,6 @@
   <% if @numElements > 1: %>
     <label title="<%= @numElements %> matched elements" class="label label-default"><%= @numElements %></label>
   <% end %>
-  <% if @error: %>
-    <span class="command-error">
-      <span><%= @error %></span>
-    </span>
-  <% end %>
   <% if @shouldDisplayControls: %>
     <span class="command-controls">
       <!-- <i class="fa fa-pause"></i> -->
