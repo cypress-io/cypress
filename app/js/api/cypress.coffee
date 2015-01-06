@@ -758,15 +758,29 @@ window.Cypress = do ($, _, Backbone) ->
 
       ## re-wrap onConsole to set Command + Error defaults
       obj.onConsole = _.wrap obj.onConsole, (orig, args...) ->
-        ## do error stuff here too!
-        defaults = {Command: current.name}
-        _.extend defaults, orig.apply(obj, args)
+        ## grab the Command name by default
+        consoleObj = {Command: current.name}
+
+        ## merge in the other properties from onConsole
+        _.extend consoleObj, orig.apply(obj, args)
+
+        ## and finally add error if one exists
+        if obj._error
+          _.extend consoleObj,
+            Error: obj._error
+            Stack: obj._error.stack
+
+        return consoleObj
 
       if obj.snapshot
         obj._snapshot = @cy.createSnapshot(obj.$el)
 
       if obj.$el
         obj.numElements = obj.$el.length
+
+      if obj.error
+        obj._error = obj.error
+        obj.error = obj.error.message
 
       @trigger "log", obj
 
