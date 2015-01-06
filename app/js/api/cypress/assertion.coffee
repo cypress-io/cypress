@@ -29,6 +29,10 @@ do (Cypress, _) ->
           klass = if passed then "passed" else "failed"
           $row.addClass "command-assertion-#{klass}"
 
+          ## remove any command errors since we already
+          ## display those
+          $row.find(".command-error").remove()
+
           ## converts [b] string tags into real elements
           @convertTags($row)
         onConsole: =>
