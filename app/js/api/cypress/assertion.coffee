@@ -41,14 +41,15 @@ do (Cypress, _) ->
     convertTags: ($row) ->
       html = $row.html()
 
-      ## if matches were found
-      if bRe.test(html)
-        html = html
-          .replace(bTagOpen, ": <strong>")
-          .replace(bTagClosed, "</strong>")
-          .split(" :").join(":")
+      ## bail if matches werent found
+      return if not bRe.test(html)
 
-        $row.html(html)
+      html = html
+        .replace(bTagOpen, ": <strong>")
+        .replace(bTagClosed, "</strong>")
+        .split(" :").join(":")
+
+      $row.html(html)
 
     ## Rules:
     ## 1. always remove value
