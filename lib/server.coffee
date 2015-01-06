@@ -28,7 +28,7 @@ getEclectusJson = ->
   ## passing or failing
 
   _.defaults obj,
-    commandTimeout: 5000
+    commandTimeout: 4000
     port: 3000
 
 ## set the eclectus config from the eclectus.json file
