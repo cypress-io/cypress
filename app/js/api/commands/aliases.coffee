@@ -16,7 +16,6 @@ do (Cypress, _) ->
 
       Cypress.log
         onConsole: ->
-          "Command": "as"
           "Alias": str
           "Returned": subject
           "Elements": subject.length

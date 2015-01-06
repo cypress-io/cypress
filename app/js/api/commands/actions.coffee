@@ -122,7 +122,6 @@ do (Cypress, _) ->
       Cypress.log
         $el: options.el
         onConsole: ->
-          "Command": "type"
           "Typed": sequence
           "Applied To": options.el
 
