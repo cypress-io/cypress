@@ -124,9 +124,6 @@
       if test.err
         test.err = @parseErrorFromString(test.err) if _.isString(test.err)
 
-        ## output the error to the console to receive stack trace
-        console.error(test.err.stack)
-
         ## backup the original error to output to the console
         @originalError = test.err
 
