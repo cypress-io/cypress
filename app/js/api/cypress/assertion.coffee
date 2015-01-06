@@ -7,7 +7,7 @@ do (Cypress, _) ->
   bTagClosed   = /\[\\b\]/g
 
   Cypress.Assertion = {
-    assert: (passed, message, value, actual, expected) ->
+    assert: (passed, message, value, actual, expected, error) ->
       ## if this is a jquery object and its true
       ## then remove all the 'but's and replace with 'and'
       ## also just think about slicing off everything after a comma?
@@ -24,12 +24,20 @@ do (Cypress, _) ->
         message:  message
         passed:   passed
         selector: value.selector
+        error:    error
         onRender: ($row) =>
           klass = if passed then "passed" else "failed"
           $row.addClass "command-assertion-#{klass}"
 
           ## converts [b] string tags into real elements
           @convertTags($row)
+        onConsole: =>
+          obj = {Command: "assert"}
+
+          _.extend obj, @parseValueActualAndExpected(value, actual, expected)
+
+          _.extend obj,
+            Message: message.replace(bTagOpen, "").replace(bTagClosed, "")
 
       ## think about completely gutting the whole object toString
       ## which chai does by default, its so ugly and worthless

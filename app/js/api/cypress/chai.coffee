@@ -63,9 +63,14 @@ do (Cypress, _, chai) ->
 
           actual    = utils.getActual(@, customArgs)
 
-          Cypress.assert passed, message, value, actual, expected
+          try
+            orig.apply(@, args)
+          catch e
+            error = e
 
-          orig.apply(@, args)
+          Cypress.assert passed, message, value, actual, expected, error
+
+          throw(error) if error
 
         return @
 
