@@ -134,7 +134,7 @@
       ## we're appending
       _.reduce obj, (memo, value, key) ->
         append = ": "
-        key = _(key + append).rpad(maxKeyLength + append.length, " ")
+        key = _.chain(key + append).capitalize().rpad(maxKeyLength + append.length, " ").value()
         memo[key] = value
         memo
       , {}
