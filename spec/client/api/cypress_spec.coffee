@@ -2567,7 +2567,8 @@ describe "Cypress API", ->
             expected: false
             actual: true
             Message: "expected true to be false"
-            Error:    obj._error
+            Error: obj._error
+            Stack: obj._error.stack
           }
           done()
 
