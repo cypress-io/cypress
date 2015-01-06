@@ -98,13 +98,13 @@
 
     getPrimaryObjects: ->
       objs = switch @get("type")
-        when "dom"        then @getDomObject()
-        when "assertion"  then @getAssertion()
+        # when "dom"        then @getDomObject()
+        # when "assertion"  then @getAssertion()
         when "server"     then @getServer()
         when "xhr"        then @getXhrObject()
         when "spy"        then @getSpyObject()
         when "stub"       then @getStubObject()
-        when "visit"      then @getVisitObject()
+        # when "visit"      then @getVisitObject()
 
       _([objs]).flatten(true)
 
@@ -149,26 +149,26 @@
         memo
       , []
 
-    getDomObject: ->
-      ## we want to get all the .click() .type() commands here
-      ## rename this method to something like actions / traversal vs finders
-      return @getSequenceObject() if @get("sequence") or not @get("selector")
+    # getDomObject: ->
+    #   ## we want to get all the .click() .type() commands here
+    #   ## rename this method to something like actions / traversal vs finders
+    #   return @getSequenceObject() if @get("sequence") or not @get("selector")
+    #
+    #   @convertToArray
+    #     "Prev Obj:   ": if @hasParent() then @parent.el
+    #     "Command:    ": @get("method")
+    #     "Selector:   ": @get("selector")
+    #     "Returned:   ": @el
+    #     "Elements:   ": @get("length")
+    #     "Error:      ": @get("error")
 
-      @convertToArray
-        "Prev Obj:   ": if @hasParent() then @parent.el
-        "Command:    ": @get("method")
-        "Selector:   ": @get("selector")
-        "Returned:   ": @el
-        "Elements:   ": @get("length")
-        "Error:      ": @get("error")
-
-    getSequenceObject: ->
-      @convertToArray
-        "Command:    ": @get("method")
-        "Sequence:   ": @get("sequence")
-        "Applied To: ": if @hasParent() then @parent.el
-        "Elements:   ": @get("length")
-        "Error:      ": @get("error")
+    # getSequenceObject: ->
+    #   @convertToArray
+    #     "Command:    ": @get("method")
+    #     "Sequence:   ": @get("sequence")
+    #     "Applied To: ": if @hasParent() then @parent.el
+    #     "Elements:   ": @get("length")
+    #     "Error:      ": @get("error")
 
     getStubObject: ->
       stub = @stub
@@ -196,11 +196,11 @@
         "Spy Obj: ": spyObj
         "Calls:   ": spy.callCount
 
-    getVisitObject: ->
-      @convertToArray
-        "Command:  ": @get("method")
-        "URL:      ": @get("message")
-        "Page:     ": @page.contents()
+    # getVisitObject: ->
+    #   @convertToArray
+    #     "Command:  ": @get("method")
+    #     "URL:      ": @get("message")
+    #     "Page:     ": @page.contents()
 
     logSpyOrStubTableProperties: (spyOrStub, spyOrStubCall) ->
       count = spyOrStub.callCount
@@ -254,14 +254,14 @@
         "Request:    ": @xhr
         "Response:   ": response
 
-    getAssertion: ->
-      @convertToArray
-        "Command:  ": @get("method")
-        "Selector  ": @get("selector")
-        "Subject:  ": @subject
-        "Expected: ": @expected
-        "Actual:   ": @actual
-        "Message:  ": @get("message")
+    # getAssertion: ->
+    #   @convertToArray
+    #     "Command:  ": @get("method")
+    #     "Selector  ": @get("selector")
+    #     "Subject:  ": @subject
+    #     "Expected: ": @expected
+    #     "Actual:   ": @actual
+    #     "Message:  ": @get("message")
 
     getServer: ->
       @convertToArray
