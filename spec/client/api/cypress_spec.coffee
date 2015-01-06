@@ -2308,6 +2308,14 @@ describe "Cypress API", ->
 
         Cypress.log({})
 
+    it "displays 0 argument", (done) ->
+      Cypress.on "log", (obj) ->
+        if obj.name is "eq"
+          expect(obj.message).to.eq "0"
+          done()
+
+      cy.get("div").eq(0)
+
   context "nested commands", ->
     beforeEach ->
       @setup = (fn = ->) =>
