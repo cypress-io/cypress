@@ -124,12 +124,19 @@ do (Cypress, _) ->
       if not validHttpMethodsRe.test(options.method)
         @throwErr "cy.route() was called with an invalid method: '#{o.method}'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"
 
+      ## convert to wildcard regex
+      if options.url is "*"
+        options.originalUrl = "*"
+        options.url = /.*/
+
       ## look ahead to see if this
       ## command (route) has an alias?
       if alias = @getNextAlias()
         options.alias = alias
 
       @prop("server").stub(options)
+      getUrl = (options) ->
+        options.originalUrl or options.url
 
   Cypress.extend
     getResponseByAlias: (alias) ->

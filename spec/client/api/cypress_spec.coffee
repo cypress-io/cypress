@@ -325,6 +325,21 @@ describe "Cypress", ->
       cy.route(opts).then ->
         @expectOptionsToBe(opts)
 
+    it "can accept wildcard * as URL and converts to /.*/ regex", ->
+      opts = {
+        url: "*"
+        response: {}
+      }
+
+      cy.route(opts).then ->
+        @expectOptionsToBe({
+          method: "GET"
+          status: 200
+          url: /.*/
+          originalUrl: "*"
+          response: {}
+        })
+
     it "can explicitly done() in onRequest function", (done) ->
       onRequest = -> done()
 
