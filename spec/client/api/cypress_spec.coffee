@@ -2759,6 +2759,39 @@ describe "Cypress", ->
       afterEach ->
         Cypress.Chai.restore()
 
+      it "replaces instances of word: 'but' with 'and' for passing assertion", (done) ->
+        ## chai jquery adds 2 assertions here so
+        ## we bind to the 2nd one
+        Cypress.on "log", (obj) ->
+          if obj.name is "assert"
+            assert(obj)
+
+        assert = _.after 2, (obj) ->
+          Cypress.Chai.restore()
+
+          expect(obj.message).to.eq "expected [b]<a>[\\b] to have a [b]<a>[\\b] attribute with the value [b]#[\\b], and the value was [b]#[\\b]"
+          done()
+
+        cy.get("a").then ($a) ->
+          expect($a).to.have.attr "href", "#"
+
+      it "does not replaces instances of word: 'but' with 'and' for failing assertion", (done) ->
+        @sandbox.stub cy.runner, "uncaught"
+
+        ## chai jquery adds 2 assertions here so
+        ## we bind to the 2nd one
+        Cypress.on "log", (obj) ->
+          if obj.name is "assert"
+            assert(obj)
+
+        assert = _.after 2, (obj) ->
+          Cypress.Chai.restore()
+          expect(obj.message).to.eq "expected [b]<a>[\\b] to have a [b]<a>[\\b] attribute with the value [b]asdf[\\b], but the value was [b]#[\\b]"
+          done()
+
+        cy.get("a").then ($a) ->
+          expect($a).to.have.attr "href", "asdf"
+
       it "#onConsole for regular objects", (done) ->
         @onAssert (obj) ->
           expect(obj.onConsole()).to.deep.eq {
