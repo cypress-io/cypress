@@ -28,9 +28,10 @@ describe "id generation", ->
 
     nock("http://#{API_URL}")
     .post("/projects/6b9a82d7-3020-4f5b-a85d-14311d70b05a/keys")
+    .once()
     .reply(200, {
       start: 0,
-      end: 100
+      end: 10
     })
 
   afterEach ->
@@ -42,7 +43,7 @@ describe "id generation", ->
   it "generates a single id", (done) ->
     idGenerator.getId(@specData)
     .then (id) ->
-      expect(id).to.eql('000')
+      expect(id).to.eql('001')
       done()
     .catch (err) ->
       done(err)
@@ -56,6 +57,21 @@ describe "id generation", ->
     idGenerator.getId(@specData)
     idGenerator.getId(@specData)
     idGenerator.getId(@specData).then((d) ->
-      expect(d).to.eql('007')
+      expect(d).to.eql('008')
       done()
     )
+
+  it "requests a new range when the current range is expired", (done) ->
+    _.times(10, idGenerator.getId.bind(@, @specData))
+
+    nock("http://#{API_URL}")
+    .post("/projects/6b9a82d7-3020-4f5b-a85d-14311d70b05a/keys")
+    .once()
+    .reply(200, {
+      start: 11,
+      end: 20
+    })
+
+    idGenerator.getId(@specData).then (d) ->
+      expect(d).to.eql('00c')
+      done()

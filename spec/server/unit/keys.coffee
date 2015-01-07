@@ -24,7 +24,7 @@ describe "key generation", ->
 
     @keyGen.nextKey(@appStub)
     .then (id) ->
-      expect(id).to.eql('000')
+      expect(id).to.eql('001')
       done()
 
   it "should bump the range after a test", (done) ->

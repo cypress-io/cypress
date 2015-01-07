@@ -4,38 +4,37 @@ path     = require 'path'
 Request  = require 'request-promise'
 fs       = Promise.promisifyAll(require('fs'))
 API_URL  = process.env.API_URL or 'localhost:1234'
-
-console.log path.resolve(process.cwd(), "eclectus.json")
+Settings = require('./util/settings')
 
 updateSettings = (settings) ->
-  fs.readFileAsync("eclectus.json", "utf8")
-  .then (obj) ->
-    JSON.parse(obj)
+  Settings.read()
   .then (obj) ->
     settings.eclectus = _.extend(obj.eclectus, settings.eclectus)
     settings
   .then (obj) ->
-    fs.writeFileAsync("eclectus.json", obj)
+    fs.writeFileAsync("eclectus.json", JSON.stringify(obj))
     .then -> obj.eclectus
 
 class Keys
   ## Set up offline local id sync location
   _initOfflineSync: (keyCountLocation) ->
     fs.mkdirAsync(path.dirname(keyCountLocation))
-    .then(@_getInitialRange)
+    .then(@_getNewKeyRange)
     .then (range) ->
       fs.writeFileAsync(keyCountLocation, range, "utf8")
 
   _getProjectID: ->
-    if (projectID = app.get('eclectus').projectID)
-      return projectID
+    Settings.read()
+    .then (settings) ->
+      if (settings.eclectus.projectID)
+        return settings.eclectus.projectID
 
-    Request.post("http://#{API_URL}/projects")
-    .then (attrs) ->
-      updateSettings(eclectus: {projectID: JSON.parse(attrs).uuid})
-    .then (settings) -> settings.projectID
+      Request.post("http://#{API_URL}/projects")
+      .then (attrs) ->
+        updateSettings(eclectus: {projectID: JSON.parse(attrs).uuid})
+      .then (settings) -> settings.projectID
 
-  _getInitialRange: =>
+  _getNewKeyRange: =>
     @_getProjectID()
     .then (projectID) ->
       Request.post("http://#{API_URL}/projects/#{projectID}/keys")
@@ -45,12 +44,16 @@ class Keys
   _getNextTestNumber: (keyCountLocation) ->
     @_getOfflineContents(keyCountLocation)
     .then (range) =>
+      range = JSON.parse(range) if typeof range is "string"
       next = range.start
       range.start++
-      range.end += 100 if (range.start > range.end)
-
+      if (range.start is range.end)
+        return @_getNewKeyRange()
+      range
+    .then (range) =>
+      range = JSON.parse(range) if typeof range is "string"
       @_updateOfflineContents(range, keyCountLocation)
-      .then -> next
+      .then -> range.start
 
   _convertToId: (index) ->
     ival = index.toString(36)
