@@ -76,20 +76,31 @@ do (Cypress, _) ->
         withinSubject: subject
         log: false
 
-      ## find elements by the :contains psuedo selector
-      ## and any submit inputs with the attributeContainsWord selector
-      selector = "#{filter}:contains('#{text}'), #{filter}[type='submit'][value~='#{text}']"
-
       log = ($el) ->
-        Cypress.log
+        Cypress.log({
           $el: $el
           onConsole: ->
             "Content": text
             "Applied To": subject
             "Returned": $el
             "Elements": $el.length
-
+        })
         return $el
+
+      ## if subject has absolutely no children then instead of doing another get
+      ## we simply search its .text() for the content, and if we find it we
+      ## just return back the subject.  this allows for doing queries on
+      ## elements which literally contain the text node content but nothing else
+      ## explain this edge case which is why .contains takes an optional filter
+      if subject.children().length is 0
+        return log(subject.first()) if _.str.include(subject.text(), text)
+
+        node = Cypress.Utils.stringifyElement(subject, "short")
+        @throwErr "The element: #{node} did not contain the content: #{text}!"
+
+      ## find elements by the :contains psuedo selector
+      ## and any submit inputs with the attributeContainsWord selector
+      selector = "#{filter}:contains('#{text}'), #{filter}[type='submit'][value~='#{text}']"
 
       @command("get", selector, options).then (elements) ->
         return log(elements.first()) if filter

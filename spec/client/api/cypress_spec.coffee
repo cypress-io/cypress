@@ -1216,6 +1216,20 @@ describe "Cypress", ->
       cy.get("*").contains("brand new content").then ($span) ->
         expect($span.get(0)).to.eq span.get(0)
 
+    describe "subject contains no children", ->
+      it "searches for content within subject", ->
+        badge = cy.$("#edge-case-contains .badge:contains(5)")
+
+        cy.get("#edge-case-contains").find(".badge").contains(5).then ($badge) ->
+          expect($badge.get(0)).to.eq badge.get(0)
+
+      it "returns the first element when subject contains multiple elements", ->
+        badge = cy.$("#edge-case-contains .badge-multi:contains(1)")
+
+        cy.get("#edge-case-contains").find(".badge-multi").contains(1).then ($badge) ->
+          expect($badge.length).to.eq(1)
+          expect($badge.get(0)).to.eq badge.get(0)
+
     describe ".log", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
@@ -1266,6 +1280,13 @@ describe "Cypress", ->
         cy.on "fail", (err) ->
           expect(err.message).to.include "Could not find the selector: <span> containing the content: brand new content"
           done()
+
+      it "throws specific error message when subject has no children and content was not found inside subject", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "The element: <div.badge> did not contain the content: 0"
+          done()
+
+        cy.get("#edge-case-contains").find(".badge").contains(0)
 
   context "#select", ->
     it "does not change the subject", ->
