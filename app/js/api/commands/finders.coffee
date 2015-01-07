@@ -30,7 +30,17 @@ do (Cypress, _) ->
             @_replayFrom command
             return null
 
+      ## attempt to query for the elements by withinSubject context
       $el = @$(selector, options.withinSubject)
+
+      ## if that didnt find anything and we have a within subject
+      ## and we have been explictly told to filter
+      ## then just attempt to filter out elements from our within subject
+      if not $el.length and options.withinSubject and options.filter
+        filtered = options.withinSubject.filter(selector)
+
+        ## reset $el if this found anything
+        $el = filtered if filtered.length
 
       ## allow retry to be a function which we ensure
       ## returns truthy before returning its
@@ -56,9 +66,12 @@ do (Cypress, _) ->
 
       @_retry(retry, options)
 
-  Cypress.addChildCommand
+  Cypress.addDualCommand
     contains: (subject, filter, text, options = {}) ->
-      @ensureDom(subject)
+      ## nuke our subject if its present but not an element
+      ## since we want contains to operate as a parent command
+      if subject and not Cypress.Utils.hasElement(subject)
+        subject = null
 
       switch
         when _.isObject(text)
@@ -69,16 +82,25 @@ do (Cypress, _) ->
           text = filter
           filter = ""
 
-      word = if filter then "the selector: <#{filter}>" else "any elements"
+      phrase = switch
+        when filter
+          "within the selector: '#{filter}'"
+        when subject
+          node = Cypress.Utils.stringifyElement(subject, "short")
+          "within the element: #{node}"
+        else
+          "in any elements"
 
       _.extend options,
-        error: "Could not find #{word} containing the content: #{text}"
+        error: "Could not find any content: '#{text}' #{phrase}"
         withinSubject: subject
+        filter: true
         log: false
 
       log = ($el) ->
         Cypress.log({
           $el: $el
+          type: if subject then "child" else "parent"
           onConsole: ->
             "Content": text
             "Applied To": subject
@@ -86,17 +108,6 @@ do (Cypress, _) ->
             "Elements": $el.length
         })
         return $el
-
-      ## if subject has absolutely no children then instead of doing another get
-      ## we simply search its .text() for the content, and if we find it we
-      ## just return back the subject.  this allows for doing queries on
-      ## elements which literally contain the text node content but nothing else
-      ## explain this edge case which is why .contains takes an optional filter
-      if subject.children().length is 0
-        return log(subject.first()) if _.str.include(subject.text(), text)
-
-        node = Cypress.Utils.stringifyElement(subject, "short")
-        @throwErr "The element: #{node} did not contain the content: #{text}!"
 
       ## find elements by the :contains psuedo selector
       ## and any submit inputs with the attributeContainsWord selector
@@ -113,6 +124,7 @@ do (Cypress, _) ->
 
         return log(elements.last())
 
+  Cypress.addChildCommand
     within: (subject, fn) ->
       @ensureDom(subject)
 

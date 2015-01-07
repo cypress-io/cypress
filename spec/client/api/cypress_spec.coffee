@@ -1153,7 +1153,7 @@ describe "Cypress", ->
 
   context "#contains", ->
     it "finds the nearest element by :contains selector", ->
-      cy.get("*").contains("li 0").then ($el) ->
+      cy.contains("li 0").then ($el) ->
         expect($el.length).to.eq(1)
         expect($el).to.match("li")
 
@@ -1216,7 +1216,7 @@ describe "Cypress", ->
       cy.get("*").contains("brand new content").then ($span) ->
         expect($span.get(0)).to.eq span.get(0)
 
-    describe "subject contains no children", ->
+    describe "subject contains text nodes", ->
       it "searches for content within subject", ->
         badge = cy.$("#edge-case-contains .badge:contains(5)")
 
@@ -1229,6 +1229,44 @@ describe "Cypress", ->
         cy.get("#edge-case-contains").find(".badge-multi").contains(1).then ($badge) ->
           expect($badge.length).to.eq(1)
           expect($badge.get(0)).to.eq badge.get(0)
+
+      it "returns the subject when it has a text node of matching content", ->
+        count = cy.$("#edge-case-contains .count:contains(2)")
+
+        cy.get("#edge-case-contains").find(".count").contains(2).then ($count) ->
+          expect($count.length).to.eq(1)
+          expect($count.get(0)).to.eq count.get(0)
+
+      it "retries until it finds the subject has the matching text node", (done) ->
+        count = $("<span class='count'>100</span>")
+
+        ## make sure it retries 3 times!
+        retry = _.after 3, ->
+          cy.$("#edge-case-contains").append(count)
+
+          cy.then ($count) ->
+            expect($count.length).to.eq(1)
+            expect($count.get(0)).to.eq count.get(0)
+            done()
+
+        cy.on "retry", retry
+
+        cy.get("#edge-case-contains").contains(100)
+
+      it "retries until it finds a filtered contains has the matching text node", (done) ->
+        count = $("<span class='count'>100</span>")
+
+        retry = _.after 3, ->
+          cy.$("#edge-case-contains").append(count)
+
+          cy.then ($count) ->
+            expect($count.length).to.eq(1)
+            expect($count.get(0)).to.eq count.get(0)
+            done()
+
+        cy.on "retry", retry
+
+        cy.get("#edge-case-contains").contains(".count", 100)
 
     describe ".log", ->
       beforeEach ->
@@ -1247,6 +1285,18 @@ describe "Cypress", ->
         cy.get("#complex-contains").contains("nested contains").then ($label) ->
           expect(@log.$el).to.eq $label
 
+      it "sets type to parent when used as a parent command", ->
+        cy.contains("foo").then ->
+          expect(@log.type).to.eq "parent"
+
+      it "sets type to parent when subject doesnt have an element", ->
+        cy.noop({}).contains("foo").then ->
+          expect(@log.type).to.eq "parent"
+
+      it "sets type to child when used as a child command", ->
+        cy.get("body").contains("foo").then ->
+          expect(@log.type).to.eq "child"
+
       it "#onConsole", ->
         cy.get("#complex-contains").contains("nested contains").then ($label) ->
           expect(@log.onConsole()).to.deep.eq {
@@ -1262,31 +1312,33 @@ describe "Cypress", ->
         @sandbox.stub cy.runner, "uncaught"
         @currentTest.timeout(300)
 
-      it "throws when no DOM subject", (done) ->
-        cy.on "fail", (err) -> done()
-
-        cy.contains("foo")
-
-      it "throws any elements when timing out and no filter", (done) ->
-        cy.get("*").contains("brand new content")
-
-        cy.on "fail", (err) ->
-          expect(err.message).to.include "Could not find any elements containing the content: brand new content"
-          done()
-
-      it "throws specific selector when timing out with a filter", (done) ->
+      it "throws when there is a filter", (done) ->
         cy.get("*").contains("span", "brand new content")
 
         cy.on "fail", (err) ->
-          expect(err.message).to.include "Could not find the selector: <span> containing the content: brand new content"
+          expect(err.message).to.include "Could not find any content: 'brand new content' within the selector: 'span'"
           done()
 
-      it "throws specific error message when subject has no children and content was not found inside subject", (done) ->
+      it "throws when there is no filter and no subject", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "The element: <div.badge> did not contain the content: 0"
+          expect(err.message).to.include "Could not find any content: 'brand new content' in any elements"
+          done()
+
+        cy.contains("brand new content")
+
+      it "throws when there is no filter but there is a subject", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "Could not find any content: '0' within the element: <div.badge>"
           done()
 
         cy.get("#edge-case-contains").find(".badge").contains(0)
+
+      it "throws when there is a no filter but there is a multi subject", (done) ->
+        cy.get("*").contains("brand new content")
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "Could not find any content: 'brand new content' within the element: <html>"
+          done()
 
   context "#select", ->
     it "does not change the subject", ->
