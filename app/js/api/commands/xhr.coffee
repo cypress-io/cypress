@@ -64,7 +64,7 @@ do (Cypress, _) ->
 
     route: (args...) ->
       ## bail if we dont have a server prop
-      @throwErr("cy.route() cannot be invoked before starting the cy.server()") if not @prop("server")
+      @throwErr("cy.route() cannot be invoked before starting the cy.server()") if not server = @prop("server")
 
       defaults = {
         method: "GET"
@@ -134,9 +134,38 @@ do (Cypress, _) ->
       if alias = @getNextAlias()
         options.alias = alias
 
-      @prop("server").stub(options)
+      server.stub(options)
+
       getUrl = (options) ->
         options.originalUrl or options.url
+
+      getMessage = (options) ->
+        [
+          options.method,
+          "[i]" + options.status + "[/i]",
+          ""
+        ].join(" - ")
+
+      Cypress.log
+        message: getMessage(options)
+        onConsole: ->
+          Method: options.method
+          URL: getUrl(options)
+          Status: options.status
+          Response: options.response
+        onRender: ($row) ->
+          html = $row.html()
+          html = Cypress.Utils.convertHtmlTags(html)
+
+          ## append the URL separately so we dont
+          ## accidentally convert a regex to an html tag
+          $row
+            .html(html)
+              .find(".command-message")
+                .children()
+                  .append("<samp>" + getUrl(options) + "</samp>")
+
+      return server
 
   Cypress.extend
     getResponseByAlias: (alias) ->

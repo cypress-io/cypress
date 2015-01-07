@@ -412,6 +412,35 @@ describe "Cypress", ->
 
         cy.route("post", "/foo")
 
+    describe ".log", ->
+      beforeEach ->
+        Cypress.on "log", (@log) =>
+
+      it "has name of route", ->
+        cy.route("/foo", {}).then ->
+          expect(@log.name).to.eq "route"
+
+      it "calls log with custom message", ->
+        cy.route("/foo", {}).then ->
+          expect(@log.message).to.eq "GET - [i]200[/i] - "
+
+      it "uses the wildcard URL", ->
+        cy.route("*", {}).then ->
+            expect(@log.message).to.eq("GET - [i]200[/i] - ")
+
+      it "#onConsole", ->
+        cy.route("*", {foo: "bar"}).then ->
+          expect(@log.onConsole()).to.deep.eq {
+            Command: "route"
+            Method: "GET"
+            URL: "*"
+            Status: 200
+            Response: {foo: "bar"}
+            # Responded: 1 time
+            # "-------": ""
+
+          }
+
   context "#clearLocalStorage", ->
     it "is defined", ->
       expect(cy.clearLocalStorage).to.be.defined
