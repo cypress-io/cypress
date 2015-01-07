@@ -2759,6 +2759,30 @@ describe "Cypress", ->
       afterEach ->
         Cypress.Chai.restore()
 
+      it "sets type to child when assertion involved current subject", (done) ->
+        @onAssert (obj) ->
+          expect(obj.type).to.eq "child"
+          done()
+
+        cy.get("body").then ->
+          expect(cy.prop("subject")).to.match "body"
+
+      it "sets type to child current command had arguments", (done) ->
+        @onAssert (obj) ->
+          expect(obj.type).to.eq "child"
+          done()
+
+        cy.get("body").then ($body) ->
+          expect($body).to.match "body"
+
+      it "sets type to parent when assertion did not involve current subject and didnt have arguments", (done) ->
+        @onAssert (obj) ->
+          expect(obj.type).to.eq "parent"
+          done()
+
+        cy.get("body").then ->
+          expect(true).to.be.true
+
       it "replaces instances of word: 'but' with 'and' for passing assertion", (done) ->
         ## chai jquery adds 2 assertions here so
         ## we bind to the 2nd one

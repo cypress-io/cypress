@@ -19,13 +19,24 @@ do (Cypress, _) ->
       if value and value[0] and _.isElement(value[0])
         obj.$el = value
 
+      functionHadArguments = (fn) ->
+        fn and _.isFunction(fn) and fn.length > 0
+
       _.extend obj,
         name:     "assert"
-        type:     "assertion"
         message:  message
         passed:   passed
         selector: value.selector
         error:    error
+        type: (current, subject) ->
+          ## if our current command has arguments assume
+          ## we are an assertion that's involving the current
+          ## subject or our value is the current subject
+          if value is subject or functionHadArguments(current.args[0])
+            "child"
+          else
+            "parent"
+
         onRender: ($row) =>
           klass = if passed then "passed" else "failed"
           $row.addClass "command-assertion-#{klass}"

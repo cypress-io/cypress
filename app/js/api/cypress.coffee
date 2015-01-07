@@ -790,6 +790,12 @@ window.Cypress = do ($, _, Backbone) ->
 
         return consoleObj
 
+      ## allow type to by a dynamic function
+      ## so it can conditionally return either
+      ## parent or child (useful in assertions)
+      if _.isFunction(obj.type)
+        obj.type = obj.type.call(@cy, current, @cy.prop("subject"))
+
       if obj.snapshot
         obj._snapshot = @cy.createSnapshot(obj.$el)
 
