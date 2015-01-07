@@ -1681,6 +1681,23 @@ describe "Cypress", ->
 
         cy.get("input").submit()
 
+    describe ".log", ->
+      beforeEach ->
+        Cypress.on "log", (@log) =>
+
+      it "provides $el", ->
+        cy.get("form").first().submit().then ($form) ->
+          expect(@log.name).to.eq "submit"
+          expect(@log.$el).to.match $form
+
+      it "#onConsole", ->
+        cy.get("form").first().submit().then ($form) ->
+          expect(@log.onConsole()).to.deep.eq {
+            Command: "submit"
+            "Applied To": @log.$el
+            Elements: 1
+          }
+
   context "#click", ->
     it "sends a click event", (done) ->
       cy.$("#button").click -> done()

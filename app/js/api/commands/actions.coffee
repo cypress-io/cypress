@@ -7,15 +7,21 @@ do (Cypress, _) ->
 
       subject.each (index, el) =>
         origEl = el
-        el = $(el)
+        $el = $(el)
         node = Cypress.Utils.stringifyElement(el)
 
-        if not el.is("form")
+        if not $el.is("form")
           word = Cypress.Utils.plural(subject, "contains", "is")
           @throwErr(".submit() can only be called on a <form>! Your subject #{word} a: #{node}")
 
         submit = new Event("submit")
         origEl.dispatchEvent(submit)
+
+        Cypress.log
+          $el: $el
+          onConsole: ->
+            "Applied To": $el
+            Elements: $el.length
 
     fill: (subject, obj, options = {}) ->
       @throwErr "cy.fill() must be passed an object literal as its 1st argument!" if not _.isObject(obj)
