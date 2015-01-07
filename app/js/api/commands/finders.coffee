@@ -109,6 +109,10 @@ do (Cypress, _) ->
         })
         return $el
 
+      containsTextNode = ($el, text) ->
+        contents = $el.contents().filter( -> @nodeType is 3).text()
+        _.str.include(contents, text)
+
       ## find elements by the :contains psuedo selector
       ## and any submit inputs with the attributeContainsWord selector
       selector = "#{filter}:contains('#{text}'), #{filter}[type='submit'][value~='#{text}']"
@@ -119,10 +123,12 @@ do (Cypress, _) ->
         ## iterate on the array of elements in reverse
         for el in elements.get() by -1
           ## return the element if it is a priority element
-          el = $(el)
-          return log(el) if el.is("input[type='submit'], button, a, label")
+          $el = $(el)
+          return log($el) if $el.is("input[type='submit'], button, a, label")
 
-        return log(elements.last())
+        for el in elements.get()
+          $el = $(el)
+          return log($el) if containsTextNode($el, text)
 
   Cypress.addChildCommand
     within: (subject, fn) ->

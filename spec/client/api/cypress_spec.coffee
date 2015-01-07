@@ -1268,6 +1268,13 @@ describe "Cypress", ->
 
         cy.get("#edge-case-contains").contains(".count", 100)
 
+      it "returns the first matched element when multiple match and there is no filter", ->
+        icon = cy.$("#edge-case-contains i:contains(25)")
+
+        cy.get("#edge-case-contains").contains(25).then ($icon) ->
+          expect($icon.length).to.eq(1)
+          expect($icon.get(0)).to.eq icon.get(0)
+
     describe ".log", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
