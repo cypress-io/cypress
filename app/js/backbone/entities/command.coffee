@@ -283,23 +283,8 @@
       @get command.get("clonedFrom")
 
     parentExistsFor: (command) ->
-      getLastParent = =>
+      if command.is("child")
         _.last @where({type: "parent"})
-
-      switch
-        ## if command is a child return the last parent command
-        when command.is("child") then getLastParent()
-
-        ## if command is a dual return the last if we have any at all
-        when command.is("dual") then getLastParent() if @length
-
-        ## if command is an assertion and it has an el
-        ## and its el matches the previous command
-        ## return the last parent command
-        when command.is("assertion")
-          el = command.getEl()
-          if el and el is @last()?.getEl()
-            getLastParent()
 
     getCommandIndex: (command) ->
       @indexOf(command) + 1
