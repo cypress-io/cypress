@@ -358,6 +358,7 @@ window.Cypress = do ($, _, Backbone) ->
         runnableTimeout: prevTimeout
         start: new Date
         interval: 50
+        retries: 0
 
       ## we always want to make sure we timeout before our runnable does
       ## so take its current timeout, subtract the total time its already
@@ -367,6 +368,9 @@ window.Cypress = do ($, _, Backbone) ->
       ## we calculate the total time we've been retrying
       ## so we dont exceed the runnables timeout
       options.total = total = (new Date - options.start)
+
+      ## increment retries
+      options.retries += 1
 
       ## if our total exceeds the timeout OR the total + the interval
       ## exceed the runnables timeout, then bail

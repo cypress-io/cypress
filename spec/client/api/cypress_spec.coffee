@@ -2209,11 +2209,8 @@ describe "Cypress", ->
           .get("input")
           .then ($input) ->
             @$input = $input
-          .wait(10)
-
-        cy.on "invoke:end", (obj) =>
-          if obj.name is "wait"
-            expect(cy.prop("subject")).to.eq @$input
+          .wait(10).then ($input) ->
+            expect($input).to.eq @$input
 
       it "does not time out the runnable", ->
         timer = @sandbox.useFakeTimers("setTimeout")
@@ -2328,6 +2325,64 @@ describe "Cypress", ->
               ## reduce the timeout to speed up tests!
               cy._timeout(100)
             .wait("@fetch")
+
+    describe ".log", ->
+      beforeEach ->
+        Cypress.on "log", (@log) =>
+
+      it "is a type: child if subject", ->
+        cy.noop({}).wait(10).then ->
+          expect(@log.type).to.eq "child"
+
+      it "is a type: child if subject is false", ->
+        cy.noop(false).wait(10).then ->
+          expect(@log.type).to.eq "child"
+
+      it "is a type: parent if subject is null or undefined", ->
+        cy.wait(10).then ->
+          expect(@log.type).to.eq "parent"
+
+      describe "number argument", ->
+        it "#onConsole", ->
+          cy.wait(10).then ->
+            expect(@log.onConsole()).to.deep.eq {
+              Command: "wait"
+              "Waited For": "10ms before continuing"
+            }
+
+      describe "alias argument", ->
+        it "#onConsole", ->
+          cy
+            .server()
+            .route(/foo/, {}).as("getFoo")
+            .window().then (win) ->
+              win.$.get("foo")
+            .wait("@getFoo").then (xhr) ->
+              expect(@log.onConsole()).to.deep.eq {
+                Command: "wait"
+                "Waited For": "alias: 'getFoo' to have a response"
+                Alias: xhr
+              }
+
+      describe "function argument", ->
+        it "#onConsole", ->
+          retriedThreeTimes = false
+
+          retry = _.after 3, ->
+            retriedThreeTimes = true
+
+          cy.on "retry", retry
+
+          fn = ->
+            expect(retriedThreeTimes).to.be.true;
+
+          cy
+            .wait(fn).then ->
+              expect(@log.onConsole()).to.deep.eq {
+                Command: "wait"
+                "Waited For": _.str.clean(fn.toString())
+                Retried: "3 times"
+              }
 
   context "#_retry", ->
     it "returns a nested cancellable promise", (done) ->
@@ -2767,13 +2822,13 @@ describe "Cypress", ->
         cy.get("body").then ->
           expect(cy.prop("subject")).to.match "body"
 
-      it "sets type to child current command had arguments", (done) ->
+      it "sets type to child current command had arguments but does not match subject", (done) ->
         @onAssert (obj) ->
           expect(obj.type).to.eq "child"
           done()
 
         cy.get("body").then ($body) ->
-          expect($body).to.match "body"
+          expect($body.length).to.eq(1)
 
       it "sets type to parent when assertion did not involve current subject and didnt have arguments", (done) ->
         @onAssert (obj) ->

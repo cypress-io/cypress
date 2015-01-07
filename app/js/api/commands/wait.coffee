@@ -28,13 +28,21 @@ do (Cypress, _) ->
     wait: (subject, msOrFnOrAlias, options = {}) ->
       msOrFnOrAlias ?= 1e9
 
+      log = (obj) ->
+        Cypress.log
+          type: if subject? then "child" else "parent"
+          onConsole: -> obj
+
       switch
         when _.isNumber(msOrFnOrAlias)
           ms = msOrFnOrAlias
 
           ## increase the timeout by the delta
           @_timeout(ms, true)
-          return Promise.delay(ms)
+
+          log({"Waited For": "#{ms}ms before continuing"})
+
+          return Promise.delay(ms).return(subject)
 
         when _.isFunction(msOrFnOrAlias)
           fn = msOrFnOrAlias
@@ -42,10 +50,18 @@ do (Cypress, _) ->
           retry = ->
             @invoke2(@prop("current"), fn, options)
 
+          stringify = (fn) ->
+            _.str.clean fn.toString()
+
           try
             ## invoke fn and make sure its not strictly false
             options.value = fn.call(@prop("runnable").ctx, subject)
-            return subject if options.value
+            if options.value
+              log({
+                "Waited For": stringify(fn)
+                Retried: options.retries + " times"
+              })
+              return subject
           catch e
             options.error = "Could not continue due to: " + e
             return @_retry(retry, options)
@@ -66,6 +82,11 @@ do (Cypress, _) ->
           @throwErr("cy.wait() can only accept aliases for routes.  The alias: '#{alias}' did not match a route.") if command.name isnt "route"
 
           if xhr = @getResponseByAlias(alias)
+            log({
+              "Waited For": "alias: '#{alias}' to have a response"
+              Alias: xhr
+            })
+
             return xhr
           else
             retry = ->
