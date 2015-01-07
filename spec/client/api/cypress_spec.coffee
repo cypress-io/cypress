@@ -2746,6 +2746,15 @@ describe "Cypress", ->
           str = Cypress.Utils.stringifyElement(div, "short")
           expect(str).to.eq "<div#baz.foo>"
 
+      context "#convertHtmlTags", ->
+        it "converts opening brackets to tags", ->
+          html = Cypress.Utils.convertHtmlTags "[strong]foo"
+          expect(html).to.eq "<strong>foo"
+
+        it "converts closing brackets to tags", ->
+          html = Cypress.Utils.convertHtmlTags "foo[/strong]"
+          expect(html).to.eq "foo</strong>"
+
     describe "#plural", ->
 
   context "Chai", ->

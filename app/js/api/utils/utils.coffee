@@ -1,5 +1,8 @@
 do (Cypress, _) ->
 
+  tagOpen     = /\[([a-z]+)\]/g
+  tagClosed   = /\[\/([a-z]+)\]/g
+
   Cypress.addUtil
     hasElement: (obj) ->
       !!(obj and obj[0] and _.isElement(obj[0])) or _.isElement(obj)
@@ -25,3 +28,8 @@ do (Cypress, _) ->
     plural: (obj, plural, singular) ->
       obj = if _.isNumber(obj) then obj else obj.length
       if obj > 1 then plural else singular
+
+    convertHtmlTags: (html) ->
+      html
+        .replace(tagOpen, "<$1>")
+        .replace(tagClosed, "</$1>")
