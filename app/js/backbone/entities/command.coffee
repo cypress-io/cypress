@@ -517,6 +517,9 @@
     #   return command
 
     createCommand: (attrs) ->
+      if attrs.type not in ["parent", "child"]
+        throw new Error("Commands may only have type of 'parent' or 'child'.  Command was: {name: #{attrs.name}, type: #{attrs.type}}")
+
       publicAttrs = {}
 
       ## split up public from private properties
