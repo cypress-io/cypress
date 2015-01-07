@@ -68,6 +68,7 @@ do (Cypress, _) ->
 
       defaults = {
         method: "GET"
+        status: 200
       }
 
       options = o = {}

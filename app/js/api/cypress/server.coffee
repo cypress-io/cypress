@@ -128,10 +128,7 @@ Cypress.Server = do (Cypress, _) ->
       options = _(options).clone()
 
       _.defaults options,
-        url: /.*/
-        status: 200
         contentType: "application/json"
-        response: {}
         headers: {}
         alias: null
         onRequest: ->

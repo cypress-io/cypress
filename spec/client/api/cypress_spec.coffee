@@ -208,6 +208,7 @@ describe "Cypress", ->
       cy.route("/foo", {}).then ->
         @expectOptionsToBe({
           method: "GET"
+          status: 200
           url: "/foo"
           response: {}
           onRequest: undefined
@@ -218,6 +219,7 @@ describe "Cypress", ->
       cy.route(/foo/, {}).then ->
         @expectOptionsToBe({
           method: "GET"
+          status: 200
           url: /foo/
           response: {}
           onRequest: undefined
@@ -230,6 +232,7 @@ describe "Cypress", ->
       cy.route("/foo", {}, onRequest).then ->
         @expectOptionsToBe({
           method: "GET"
+          status: 200
           url: "/foo"
           response: {}
           onRequest: onRequest
@@ -243,6 +246,7 @@ describe "Cypress", ->
       cy.route("/foo", {}, onRequest, onResponse).then ->
         @expectOptionsToBe({
           method: "GET"
+          status: 200
           url: "/foo"
           response: {}
           onRequest: onRequest
@@ -253,6 +257,7 @@ describe "Cypress", ->
       cy.route("GET", "/foo", {}).then ->
         @expectOptionsToBe({
           method: "GET"
+          status: 200
           url: "/foo"
           response: {}
           onRequest: undefined
@@ -266,6 +271,7 @@ describe "Cypress", ->
         @expectOptionsToBe({
           method: "GET"
           url: "/foo"
+          status: 200
           response: {}
           onRequest: onRequest
           onResponse: undefined
@@ -279,6 +285,7 @@ describe "Cypress", ->
         @expectOptionsToBe({
           method: "GET"
           url: "/foo"
+          status: 200
           response: {}
           onRequest: onRequest
           onResponse: onResponse
@@ -288,6 +295,7 @@ describe "Cypress", ->
       cy.route("get", "/foo", {}).then ->
         @expectOptionsToBe({
           method: "GET"
+          status: 200
           url: "/foo"
           response: {}
         })
@@ -296,6 +304,7 @@ describe "Cypress", ->
       cy.route("get", /.*/, {}).then ->
         @expectOptionsToBe({
           method: "GET"
+          status: 200
           url: /.*/
           response: {}
         })
@@ -307,6 +316,7 @@ describe "Cypress", ->
       opts = {
         method: "PUT"
         url: "/foo"
+        status: 200
         response: {}
         onRequest: onRequest
         onResponse: onResponse
