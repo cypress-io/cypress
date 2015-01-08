@@ -45,11 +45,12 @@
   }
 
   .nav-tabs > li > a {
-    padding: 5px 10px;
+    padding: 5px 0;
     font-size: 11px;
     margin-right: 0;
-    min-width: 80px;
+    min-width: 68px;
     text-align: center;
+    color: #888;
   }
 
   .nav-tabs > li > a:hover, .nav-tabs > li > a:active {
@@ -60,6 +61,7 @@
   }
 
   .nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
+    color: #666;
     background-color: #f5f5f5;
     border-top: 1px solid #43A0F2;
     border-radius: 0;
