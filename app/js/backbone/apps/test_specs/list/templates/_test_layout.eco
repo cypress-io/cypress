@@ -1,5 +1,6 @@
 <div class="runnable-wrapper">
   <div class="runnable-content-region"></div>
+  <div class="runnable-instruments-region"></div>
   <div class="runnable-commands-region hidden"></div>
   <span class="hook"></span>
   <pre class="test-error"></pre>

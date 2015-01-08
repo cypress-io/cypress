@@ -1,0 +1,101 @@
+.instruments-container {
+  margin: 5px 10px 5px 5px;
+  padding-left: 10px;
+  border-left: 1px dotted #DDD;
+
+  table {
+    margin-bottom: 0;
+
+    th {
+      font-weight: 200;
+    }
+
+    td {
+      font-family: Consolas, Monaco, 'Andale Mono', monospace;
+      font-size: 12px;
+    }
+  }
+
+  .routes-table {
+    float: left;
+    width: 38%;
+  }
+
+  .requests-table {
+    float: left;
+    width: 62%;
+
+    tr {
+      border-left: 2px solid #eee;
+    }
+  }
+
+  .nav-tabs {
+    border-bottom: 1px solid transparent;
+  }
+
+  .nav-tabs > li {
+    font-size: 14px;
+    margin-right: 2px;
+  }
+
+  .nav-tabs > li.active {
+    position: relative;
+    background-color: #f5f5f5;
+  }
+
+  .nav-tabs > li > a {
+    padding: 5px 10px;
+    font-size: 13px;
+    margin-right: 0;
+    min-width: 80px;
+    text-align: center;
+  }
+
+  .nav-tabs > li > a:hover, .nav-tabs > li > a:active {
+    background-color: #f5f5f5;
+    border: 1px solid transparent;
+    color: #333;
+    border-radius: 2px 2px 0 0;
+  }
+
+  .nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
+    background-color: #f5f5f5;
+    border-top: 2px solid #43A0F2;
+    border-radius: 0;
+    border-bottom: 0;
+    // padding-bottom: 10px;
+    // padding-top: 8px;
+    box-shadow: 1px -3px 4px -3px rgba(0, 0, 0, 0.08);
+    border-left: 1px solid #ECECEC;
+    border-right: 1px solid #ECECEC;
+    position: static;
+  }
+
+  .nav-tabs > li.active > a:after, .nav-tabs > li.active > a:hover:after, .nav-tabs > li.active > a:focus:after {
+    content: "";
+    display: block;
+    height: 2px;
+    background: #43A0F2;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+
+  .tab-content {
+    background-color: #f5f5f5;
+    padding: 5px 12px;
+    border-bottom: 1px solid #E2E2E2;
+    border-left: 1px solid #ECECEC;
+    border-radius: 0 3px 3px;
+    border-right: 1px solid #ECECEC;
+    box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.04);
+    margin-bottom: 10px;
+    overflow: auto;
+  }
+
+  .tab-content h3, h2, h1:first-child {
+    margin-top: 0;
+  }
+}

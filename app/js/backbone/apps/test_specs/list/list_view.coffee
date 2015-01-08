@@ -71,9 +71,10 @@
       class: @model.get("type") + " runnable"
 
     regions:
-      contentRegion:    ".runnable-content-region"
-      commandsRegion:   ".runnable-commands-region"
-      runnablesRegion:  ".runnables-region"
+      contentRegion:     ".runnable-content-region"
+      instrumentsRegion: ".runnable-instruments-region"
+      commandsRegion:    ".runnable-commands-region"
+      runnablesRegion:   ".runnables-region"
 
     ui:
       wrapper:    ".runnable-wrapper"

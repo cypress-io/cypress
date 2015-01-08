@@ -16,6 +16,7 @@
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/forms";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/grid";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/labels";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/navs";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/progress-bars";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/scaffolding";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/tables";
@@ -40,6 +41,7 @@
 // Independent Pages
 @import "pages/tests/commands";
 @import "pages/tests/iframe";
+@import "pages/tests/instruments";
 @import "pages/tests/jobs";
 @import "pages/tests/runnables";
 @import "pages/tests/stats";
