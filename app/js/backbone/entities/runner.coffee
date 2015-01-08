@@ -337,7 +337,7 @@
       setListenersForWeb: ->
         socket = App.request "socket:entity"
 
-        @listenTo Cypress, "log", (obj) =>
+        @listenTo Cypress, "command", (obj) =>
           ## think about moving this line
           ## back into Cypress
           obj.hook = @hook

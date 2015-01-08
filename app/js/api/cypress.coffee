@@ -330,7 +330,7 @@ window.Cypress = do ($, _, Backbone) ->
       current = @prop("current")
       @log {name: "Failed: #{current.name}", args: err.message}, "danger" if current
 
-      Cypress.log
+      Cypress.command
         error: err
         onConsole: ->
           obj = {}
@@ -757,8 +757,7 @@ window.Cypress = do ($, _, Backbone) ->
 
       return @
 
-    @log = (obj = {}) ->
-      ## throw an error here?
+    @command = (obj = {}) ->
       current = @cy.prop("current")
 
       return if not (@cy and current)
@@ -771,28 +770,11 @@ window.Cypress = do ($, _, Backbone) ->
 
       _.defaults obj,
         snapshot: true
-        testId:   @cy.prop("runnable").cid
         message:  stringify(current.args)
         _args:    current.args
         onRender: ->
         onConsole: ->
           "Returned": current.subject
-
-      ## re-wrap onConsole to set Command + Error defaults
-      obj.onConsole = _.wrap obj.onConsole, (orig, args...) ->
-        ## grab the Command name by default
-        consoleObj = {Command: current.name}
-
-        ## merge in the other properties from onConsole
-        _.extend consoleObj, orig.apply(obj, args)
-
-        ## and finally add error if one exists
-        if obj._error
-          _.extend consoleObj,
-            Error: obj._error
-            Stack: obj._error.stack
-
-        return consoleObj
 
       ## allow type to by a dynamic function
       ## so it can conditionally return either
@@ -811,7 +793,41 @@ window.Cypress = do ($, _, Backbone) ->
         obj._error = obj.error
         obj.error = true
 
-      @trigger "log", obj
+      @log("command", obj)
+
+    @route = (obj = {}) ->
+      return if not @cy
+
+      _.defaults obj,
+        name: "route"
+
+      @log("route", obj)
+
+    @log = (event, obj) ->
+      _.defaults obj,
+        testId: @cy.prop("runnable").cid
+        alias: null
+        aliased: @cy.getNextAlias()
+        onRender: ->
+        onConsole: ->
+
+      ## re-wrap onConsole to set Command + Error defaults
+      obj.onConsole = _.wrap obj.onConsole, (orig, args...) ->
+        ## grab the Command name by default
+        consoleObj = {Command: obj.name}
+
+        ## merge in the other properties from onConsole
+        _.extend consoleObj, orig.apply(obj, args)
+
+        ## and finally add error if one exists
+        if obj._error
+          _.extend consoleObj,
+            Error: obj._error
+            Stack: obj._error.stack
+
+        return consoleObj
+
+      @trigger event, obj
 
     _.extend Cypress.prototype, Backbone.Events
 

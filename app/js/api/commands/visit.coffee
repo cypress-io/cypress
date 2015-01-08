@@ -51,4 +51,4 @@ do (Cypress, _) ->
 
           ## think about moving this into invoke2 and allowing the ability
           ## to control log options from options?
-          Cypress.log()
+          Cypress.command()

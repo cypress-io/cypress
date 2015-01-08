@@ -2504,49 +2504,49 @@ describe "Cypress", ->
           expect(obj.name).to.eq "foo"
           done()
 
-        Cypress.log({})
+        Cypress.command({})
 
       it "sets type to current.type", (done) ->
         Cypress.on "log", (obj) ->
           expect(obj.type).to.eq "parent"
           done()
 
-        Cypress.log({})
+        Cypress.command({})
 
       it "sets _args to current.args", (done) ->
         Cypress.on "log", (obj) ->
           expect(obj._args).to.deep.eq [1,2,3]
           done()
 
-        Cypress.log({})
+        Cypress.command({})
 
       it "sets message to stringified args", (done) ->
         Cypress.on "log", (obj) ->
           expect(obj.message).to.deep.eq "1, 2, 3"
           done()
 
-        Cypress.log({})
+        Cypress.command({})
 
       it "omits ctx from current.ctx", (done) ->
         Cypress.on "log", (obj) ->
           expect(_.keys(obj)).not.to.include "ctx"
           done()
 
-        Cypress.log({})
+        Cypress.command({})
 
       it "omits fn from current.fn", (done) ->
         Cypress.on "log", (obj) ->
           expect(_.keys(obj)).not.to.include "fn"
           done()
 
-        Cypress.log({})
+        Cypress.command({})
 
       it "sets snapshot to true", (done) ->
         Cypress.on "log", (obj) ->
           expect(obj.snapshot).to.be.true
           done()
 
-        Cypress.log({})
+        Cypress.command({})
 
       it "sets testId to runnable.cid", (done) ->
         cy.prop("runnable", {cid: 123})
@@ -2556,7 +2556,7 @@ describe "Cypress", ->
           cy.prop("runnable", null)
           done()
 
-        Cypress.log({})
+        Cypress.command({})
 
       it "sets numElements if $el", (done) ->
         $el = cy.$("body")
@@ -2565,7 +2565,7 @@ describe "Cypress", ->
           expect(obj.numElements).to.eq 1
           done()
 
-        Cypress.log($el: $el)
+        Cypress.command($el: $el)
 
       it "sets highlightAttr if $el", (done) ->
         $el = cy.$("body")
@@ -2575,7 +2575,7 @@ describe "Cypress", ->
           expect(obj.highlightAttr).to.eq cy.highlightAttr
           done()
 
-        Cypress.log($el: $el)
+        Cypress.command($el: $el)
 
     it "displays 0 argument", (done) ->
       Cypress.on "log", (obj) ->

@@ -139,31 +139,37 @@ do (Cypress, _) ->
       getUrl = (options) ->
         options.originalUrl or options.url
 
-      getMessage = (options) ->
-        [
-          options.method,
-          "[i]" + options.status + "[/i]",
-          ""
-        ].join(" - ")
+      # getMessage = (options) ->
+      #   [
+      #     options.method,
+      #     "[i]" + options.status + "[/i]",
+      #     ""
+      #   ].join(" - ")
 
-      Cypress.log
-        message: getMessage(options)
+      Cypress.route
+        method:   options.method
+        url:      getUrl(options)
+        status:   options.status
+        response: options.response
+        alias:    options.alias
         onConsole: ->
-          Method: options.method
-          URL: getUrl(options)
-          Status: options.status
+          Method:   options.method
+          URL:      getUrl(options)
+          Status:   options.status
           Response: options.response
+          Alias:    options.alias
         onRender: ($row) ->
-          html = $row.html()
-          html = Cypress.Utils.convertHtmlTags(html)
+          debugger
+        #   html = $row.html()
+        #   html = Cypress.Utils.convertHtmlTags(html)
 
-          ## append the URL separately so we dont
-          ## accidentally convert a regex to an html tag
-          $row
-            .html(html)
-              .find(".command-message")
-                .children()
-                  .append("<samp>" + getUrl(options) + "</samp>")
+        #   ## append the URL separately so we dont
+        #   ## accidentally convert a regex to an html tag
+        #   $row
+        #     .html(html)
+        #       .find(".command-message")
+        #         .children()
+        #           .append("<samp>" + getUrl(options) + "</samp>")
 
       return server
 

@@ -54,7 +54,7 @@ do (Cypress, _) ->
       ## think about completely gutting the whole object toString
       ## which chai does by default, its so ugly and worthless
 
-      Cypress.log obj
+      Cypress.command obj
 
       return Cypress
 

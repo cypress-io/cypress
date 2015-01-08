@@ -9,8 +9,10 @@ do (Cypress, _) ->
       log = ($el) ->
         return if options.log is false
 
-        Cypress.log
+        Cypress.command
           $el: $el
+          alias: alias?.alias
+          aliasType: "dom"
           onConsole: ->
             obj = {"Command":  "get"}
             key = if alias then "Alias" else "Selector"
@@ -18,6 +20,11 @@ do (Cypress, _) ->
             _.extend obj,
               "Returned": $el
               "Elements": $el.length
+          # onRender: ($row) ->
+          #   if alias
+          #     $row
+          #       .find(".command-message")
+          #         .html("<span class='command-alias'>@#{alias.alias}</span>")
 
       if alias = @getAlias(selector)
         {subject, command} = alias
@@ -98,7 +105,7 @@ do (Cypress, _) ->
         log: false
 
       log = ($el) ->
-        Cypress.log({
+        Cypress.command({
           $el: $el
           type: if subject then "child" else "parent"
           onConsole: ->

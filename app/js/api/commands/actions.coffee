@@ -17,7 +17,7 @@ do (Cypress, _) ->
         submit = new Event("submit")
         origEl.dispatchEvent(submit)
 
-        Cypress.log
+        Cypress.command
           $el: $el
           onConsole: ->
             "Applied To": $el
@@ -83,7 +83,7 @@ do (Cypress, _) ->
         memo.then =>
           el.click()
 
-          Cypress.log
+          Cypress.command
             $el: $el
             onConsole: ->
               "Applied To":   $el
@@ -133,7 +133,7 @@ do (Cypress, _) ->
 
       options.el.simulate "key-sequence", options
 
-      Cypress.log
+      Cypress.command
         $el: options.el
         onConsole: ->
           "Typed": sequence

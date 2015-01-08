@@ -29,7 +29,9 @@ do (Cypress, _) ->
       msOrFnOrAlias ?= 1e9
 
       log = (obj) ->
-        Cypress.log
+        Cypress.command
+          alias: alias
+          aliasType: "route"
           type: if subject? then "child" else "parent"
           onConsole: -> obj
 
