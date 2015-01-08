@@ -77,11 +77,11 @@
       runnablesRegion:   ".runnables-region"
 
     ui:
-      wrapper:    ".runnable-wrapper"
-      runnables:  ".runnables-region"
-      commands:   ".runnable-commands-region"
-      hook:       ".hook"
-      pre:        "pre"
+      wrapper:     ".runnable-wrapper"
+      runnables:   ".runnables-region"
+      instruments: ".runnable-instruments"
+      hook:        ".hook"
+      pre:         "pre"
 
     events:
       "mouseover"         : "mouseover"
@@ -143,8 +143,8 @@
       @applyIndent(value)
 
     openChanged: (model, value, options) ->
-      ## hide or show the commands or runnables
-      el = if @model.is("test") then @ui.commands else @ui.runnables
+      ## hide or show the instruments or runnables
+      el = if @model.is("test") then @ui.instruments else @ui.runnables
       el.toggleClass("hidden")
 
     errorChanged: (model, value, options) ->

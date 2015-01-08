@@ -1,10 +1,11 @@
 <ul class="hooks-container">
   <li class="hook-item">
     <span class="hook-name">
-      <i class="fa fa-caret-down"></i>
-      Routes (4)
+      <i class="fa fa-caret-right"></i>
+      Routes (<span data-js='total'></span>)
+      <i class="fa fa-ellipsis-h"></i>
     </span>
-    <div class="server-container">
+    <div class="server-container hidden">
       <div class="tab-content">
         <div class="tab-pane active">
           <table class="table table-condensed">
@@ -12,7 +13,7 @@
               <tr>
                 <th>Method</th>
                 <th>Url</th>
-                <th colspan="2">Response Will Be</th>
+                <th>Status</th>
                 <th>Alias</th>
                 <th>#</th>
               </tr>

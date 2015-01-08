@@ -13,3 +13,6 @@
       target.env = App.config.env()
 
       _mixinTemplateHelpers.call(@, target)
+
+    stopProp: (e) ->
+      e.stopPropagation()

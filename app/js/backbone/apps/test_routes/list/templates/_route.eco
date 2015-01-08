@@ -3,7 +3,6 @@
   <%= @urlFormatted %>
 </td>
 <td><%= @status %></td>
-<td>{...}</td>
 <td>
   <% if @alias: %>
     <span class="route-alias" title="Aliased this route as: <%= @alias %>">
