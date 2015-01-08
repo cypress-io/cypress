@@ -1,0 +1,26 @@
+<ul class="hooks-container">
+  <li class="hook-item">
+    <span class="hook-name">
+      <i class="fa fa-caret-down"></i>
+      Routes (4)
+    </span>
+    <div class="server-container">
+      <div class="tab-content">
+        <div class="tab-pane active">
+          <table class="table table-condensed">
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Url</th>
+                <th colspan="2">Response Will Be</th>
+                <th>Alias</th>
+                <th>#</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </li>
+</ul>

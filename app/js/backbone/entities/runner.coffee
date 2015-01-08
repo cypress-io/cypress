@@ -16,6 +16,7 @@
       initialize: ->
         @hooks            = App.request "hook:entities"
         @commands         = App.request "command:entities"
+        @routes           = App.request "route:entities"
         @satelliteEvents  = App.request "satellite:events"
         @hostEvents       = App.request "host:events"
         @passThruEvents   = App.request "pass:thru:events"
@@ -269,6 +270,9 @@
       getCommands: ->
         @commands
 
+      getRoutes: ->
+        @routes
+
       changeRunnableTimeout: (runnable) ->
         runnable.timeout App.config.get("commandTimeout")
 
@@ -345,6 +349,9 @@
             socket.emit "command:add", attrs
           else
             @commands.add obj
+
+        @listenTo Cypress, "route", (obj) =>
+          @routes.add obj
 
         ## mocha has begun running the specs per iframe
         @runner.on "start", =>
@@ -510,6 +517,7 @@
       stop: ->
         ## clear out the commands
         @commands.reset([], {silent: true})
+        @routes.reset([], {silent: true})
 
         ## remove all the listeners from EventEmitter
         @runner.removeAllListeners()
@@ -529,6 +537,7 @@
         @iframe         = null
         @hooks          = null
         @commands       = null
+        @routes         = null
         @chosen         = null
         @hook           = null
         @test           = null

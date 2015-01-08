@@ -72,7 +72,7 @@
 
     regions:
       contentRegion:     ".runnable-content-region"
-      instrumentsRegion: ".runnable-instruments-region"
+      routesRegion:      ".runnable-routes-region"
       commandsRegion:    ".runnable-commands-region"
       runnablesRegion:   ".runnables-region"
 

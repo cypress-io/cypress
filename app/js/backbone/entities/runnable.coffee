@@ -9,6 +9,7 @@
       hook: null
       children:  new Entities.RunnableCollection
       hooks: App.request("hook:entities")
+      routes: App.request("route:entities")
 
     initialize: ->
       new Backbone.Chooser(@)
@@ -67,6 +68,9 @@
     addCommand: (command, options = {}) ->
       hook = command.get("hook")
       @get("hooks").addCommandToHook hook, command, options
+
+    addRoute: (route, options = {}) ->
+      @get("routes").add(route)
 
     is: (type) ->
       @get("type") is type

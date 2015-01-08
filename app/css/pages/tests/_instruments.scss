@@ -1,7 +1,7 @@
 .instruments-container {
-  margin: 5px 10px 5px 5px;
-  padding-left: 10px;
-  border-left: 1px dotted #DDD;
+  // margin: 5px 10px 5px 5px;
+  // padding-left: 10px;
+  // border-left: 1px dotted #DDD;
 
   table {
     margin-bottom: 0;
@@ -16,19 +16,19 @@
     }
   }
 
-  .routes-table {
-    float: left;
-    width: 45%;
-  }
+  // .routes-table {
+  //   float: left;
+  //   width: 45%;
+  // }
 
-  .requests-table {
-    float: left;
-    width: 55%;
+  // .requests-table {
+  //   float: left;
+  //   width: 55%;
 
-    tr {
-      border-left: 2px solid #eee;
-    }
-  }
+  //   tr {
+  //     border-left: 2px solid #eee;
+  //   }
+  // }
 
   .nav-tabs {
     border-bottom: 1px solid transparent;
@@ -86,9 +86,9 @@
   }
 
   .tab-content {
-    background-color: #f5f5f5;
-    padding: 5px 12px;
-    border-bottom: 1px solid #E2E2E2;
+    background-color: #eef1f4;
+    padding: 3px 10px;
+    border-bottom: 1px solid #d9d9d9;
     border-left: 1px solid #ECECEC;
     border-radius: 0 3px 3px;
     border-right: 1px solid #ECECEC;

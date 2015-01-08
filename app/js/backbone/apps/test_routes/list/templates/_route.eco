@@ -1,0 +1,8 @@
+<td><%= @method %></td>
+<td>
+  <%= @urlFormatted %>
+</td>
+<td><%= @status %></td>
+<td>{...}</td>
+<td><%= @alias %></td>
+<td><%= @numResponses %></td>
