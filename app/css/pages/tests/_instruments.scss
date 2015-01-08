@@ -46,7 +46,7 @@
 
   .nav-tabs > li > a {
     padding: 5px 10px;
-    font-size: 13px;
+    font-size: 11px;
     margin-right: 0;
     min-width: 80px;
     text-align: center;
@@ -61,9 +61,9 @@
 
   .nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
     background-color: #f5f5f5;
-    border-top: 2px solid #43A0F2;
+    border-top: 1px solid #43A0F2;
     border-radius: 0;
-    border-bottom: 0;
+    // border-bottom: 1px;
     // padding-bottom: 10px;
     // padding-top: 8px;
     box-shadow: 1px -3px 4px -3px rgba(0, 0, 0, 0.08);
@@ -75,7 +75,7 @@
   .nav-tabs > li.active > a:after, .nav-tabs > li.active > a:hover:after, .nav-tabs > li.active > a:focus:after {
     content: "";
     display: block;
-    height: 2px;
+    height: 1px;
     background: #43A0F2;
     position: absolute;
     top: 0;

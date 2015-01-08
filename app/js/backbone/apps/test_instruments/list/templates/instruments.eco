@@ -3,6 +3,9 @@
     <a class="active" href="#">Server</a>
   </li>
   <li>
+    <a href="#">Log</a>
+  </li>
+  <li>
     <a href="#">Info</a>
   </li>
 </ul>
@@ -21,7 +24,7 @@
         <tbody>
           <tr>
             <td>GET</td>
-            <td>/users</td>
+            <td>"/users"</td>
             <td>allUsers</td>
             <td>2</td>
           </tr>
