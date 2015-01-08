@@ -14,28 +14,33 @@
           <tr>
             <th>Routes</th>
             <th></th>
-            <th>Count</th>
+            <th>Alias</th>
+            <th>#</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>GET</td>
             <td>/users</td>
+            <td>allUsers</td>
             <td>2</td>
           </tr>
           <tr>
             <td>GET</td>
             <td>/users/\d+/</td>
+            <td>bob</td>
             <td>1</td>
           </tr>
           <tr>
             <td>PUT</td>
             <td>/users/\d+/</td>
+            <td>validation</td>
             <td>1</td>
           </tr>
           <tr>
             <td>PUT</td>
             <td>/users/\d+/</td>
+            <td>updateBob</td>
             <td>1</td>
           </tr>
         </tbody>
