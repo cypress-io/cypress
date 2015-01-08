@@ -14,12 +14,12 @@ do (Cypress, _) ->
 
       allAliases = _(@_aliases).keys().join(", ")
 
-      Cypress.log
-        onConsole: ->
-          "Alias": str
-          "Returned": subject
-          "Elements": subject.length
-          "All Aliases": allAliases
+      # Cypress.command
+      #   onConsole: ->
+      #     "Alias": str
+      #     "Returned": subject
+      #     "Elements": subject.length
+      #     "All Aliases": allAliases
 
       return subject
 

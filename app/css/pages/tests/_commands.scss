@@ -48,6 +48,8 @@
 }
 
 .commands-container {
+  font-family: Consolas, Monaco, 'Andale Mono', monospace;
+
   background-color: #eef1f4;
   padding: 0;
   // padding-bottom: 4px;
@@ -140,6 +142,22 @@
       font-weight: normal;
       padding: 1px 5px;
       border-radius: 5px;
+    }
+
+    .command-alias {
+      border-radius: 10px;
+      background-color: darken(#D4EAFF, 3%);
+      color: #777888;
+      padding: 0px 5px;
+      display: inline-block;
+
+      &.route {
+        background-color: lighten(#FFB61C, 25%);
+      }
+
+      &.dom {
+
+      }
     }
   }
 
@@ -294,6 +312,11 @@
       visibility: hidden;
     }
 
+    .command-alias {
+      font-family: 'Open Sans', sans-serif;
+      font-size: 10px;
+      line-height: 1.5;
+    }
 
     i:hover {
       cursor: pointer;

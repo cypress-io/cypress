@@ -4,5 +4,11 @@
 </td>
 <td><%= @status %></td>
 <td>{...}</td>
-<td><%= @alias %></td>
+<td>
+  <% if @alias: %>
+    <span class="route-alias" title="Aliased this route as: <%= @alias %>">
+      <%= @alias %>
+    </span>
+  <% end %>
+</td>
 <td><%= @numResponses %></td>

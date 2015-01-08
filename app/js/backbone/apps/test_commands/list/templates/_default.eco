@@ -6,13 +6,22 @@
     <span><%= @name %></span>
   </span>
   <span class="command-message">
-    <span><%= @message %></span>
+    <% if @alias: %>
+      <span class="command-alias <%= @aliasType %>" title="Found an alias for: '<%= @alias %>'">@<%= @alias %></span>
+    <% else: %>
+      <span><%= @message %></span>
+    <% end %>
   </span>
   <% if @numElements > 1: %>
     <label title="<%= @numElements %> matched elements" class="label label-default"><%= @numElements %></label>
   <% end %>
   <% if @shouldDisplayControls: %>
     <span class="command-controls">
+      <% if @aliased: %>
+        <span class="command-alias" title="<%= @message %> aliased as: '<%= @aliased %>'">
+          <%= @aliased %>
+        </span>
+      <% end %>
       <!-- <i class="fa fa-pause"></i> -->
       <i class="fa fa-search fa-flip-horizontal"></i>
     </span>
