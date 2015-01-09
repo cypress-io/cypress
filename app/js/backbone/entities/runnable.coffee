@@ -50,7 +50,7 @@
       sort = model.hasChanged("index") and !!model.collection
 
       ## reset its indent
-      model.set "indent", @get("indent") + 20
+      model.set "indent", @get("indent") + 15
 
       ## add the model, which if it exists will simply merge
       ## in the model attribute changes
