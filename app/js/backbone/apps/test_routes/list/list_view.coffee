@@ -3,6 +3,9 @@
   class List.Route extends App.Views.ItemView
     template: "test_routes/list/_route"
 
+    modelEvents:
+      "change:numResponses" : "render"
+
   class List.Routes extends App.Views.CompositeView
     template: "test_routes/list/routes"
     childView: List.Route

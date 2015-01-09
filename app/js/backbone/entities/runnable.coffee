@@ -72,6 +72,9 @@
     addRoute: (route, options = {}) ->
       @get("routes").add(route)
 
+    incrementRoute: (route) ->
+      @get("routes").increment(route)
+
     is: (type) ->
       @get("type") is type
 

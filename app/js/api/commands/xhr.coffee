@@ -32,28 +32,26 @@ do (Cypress, _) ->
         catch
           xhr.responseText
 
-      log = (xhr, options, err) =>
-        alias = options.alias or null
+      log = (xhr, route, err) =>
+        alias = route.alias or null
 
-        if options.noMatch
+        if _.isEmpty(route)
           availableUrls = @prop("availableUrls") or []
 
         Cypress.command
           name:      "request"
-          method:    xhr.method
-          url:       "/" + xhr.url.replace(/^\//g, "")
-          status:    xhr.status
           message:   null
           aliased:   alias
           alias:     null
           aliasType: "route"
           type:      "parent"
           error:     err
+          _route:    route
           onConsole: =>
             consoleObj = {
               Method:        xhr.method
               URL:           xhr.url
-              "Matched URL": options.url
+              "Matched URL": route.url
               Status:        xhr.status
               Response:      getResponse(xhr)
               Alias:         alias
@@ -61,13 +59,12 @@ do (Cypress, _) ->
             }
 
             ## TODO: TEST THIS
-            if options.noMatch
+            if _.isEmpty(route)
               _.extend consoleObj,
                 Reason: "The URL for request did not match any of your route(s).  It's response was automatically sent back a 404."
                 "Route URLs": availableUrls
 
             consoleObj
-
           onRender: ($row) ->
             $row.find(".command-message").html ->
               [
@@ -92,8 +89,8 @@ do (Cypress, _) ->
               log(xhr, options, err)
 
           @fail(err)
-        afterResponse: (xhr, options) =>
-          alias = options.alias or null
+        afterResponse: (xhr, route = {}) =>
+          alias = route.alias or null
 
           ## set this response xhr object if we
           ## have an alias for it
@@ -106,7 +103,7 @@ do (Cypress, _) ->
             delete xhr.loggedFailure
             return
 
-          log(xhr, options)
+          log(xhr, route)
       }
 
       ## server accepts multiple signatures
@@ -232,6 +229,7 @@ do (Cypress, _) ->
         status:   options.status
         response: options.response
         alias:    options.alias
+        _route:   options
         onConsole: ->
           Method:   options.method
           URL:      getUrl(options)

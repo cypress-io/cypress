@@ -33,8 +33,7 @@
     reset: ->
       @clear(silent: true)
       @clear(silent: true)
-      _.each ["assert", "spy", "spyCall", "spyObj", "stub", "stubCall", "stubObj", "el", "server", "subject", "expected", "actual", "xhr", "snapshot", "requests", "responses", "response"], (attr) =>
-        delete @[attr]
+      @[CYPRESS_ATTRS] = {}
 
     initialize: ->
       new Backbone.Chooser(@)
@@ -113,6 +112,9 @@
 
     getEl: ->
       @[CYPRESS_ATTRS].$el
+
+    getRoute: ->
+      @[CYPRESS_ATTRS]._route
 
     getConsoleDisplay: (fn) ->
       obj = @triggerCommandCallback("onConsole", @[CYPRESS_ATTRS])

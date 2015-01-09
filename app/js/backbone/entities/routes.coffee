@@ -9,8 +9,25 @@
         url = @get("url")
         if _.isString(url) then '"' + url + '"' else url
 
+    hasRoute: (route) ->
+      @_route is route
+
+    increment: ->
+      @set "numResponses", @get("numResponses") + 1
+
   class Entities.RoutesCollection extends Entities.Collection
     model: Entities.Route
+
+    increment: (routeObj) ->
+      route = @find (route) ->
+        route.hasRoute(routeObj)
+
+      route.increment() if route
+
+    createRoute: (attrs) ->
+      route         = new Entities.Route(attrs)
+      route._route  = attrs._route
+      route
 
     add: (attrs, options) ->
       route = attrs
@@ -26,7 +43,7 @@
 
       return if _.isEmpty attrs
 
-      super attrs
+      super @createRoute(attrs)
 
   App.reqres.setHandler "route:entities", ->
     new Entities.RoutesCollection

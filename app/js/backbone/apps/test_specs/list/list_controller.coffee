@@ -21,7 +21,14 @@
       ## and then add this command model to the runnable model
       @listenTo commands, "add", (command, commands, options) ->
         model = container.get command.get("testId")
-        model.addCommand(command, options) if model
+        return if not model
+
+        command = model.addCommand(command, options)
+
+        ## if this command is a request then
+        ## lets update our routes
+        if route = command.getRoute()
+          model.incrementRoute(route)
 
       @listenTo routes, "add", (route, routes, options) ->
         model = container.get route.get("testId")

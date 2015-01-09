@@ -53,11 +53,11 @@ Cypress.Server = do (Cypress, _) ->
           ## a 404 if nothing matched and sinon slurped up this request
           ## and simply output its default 404 response
           if _this.requestDidNotMatchAnyResponses(xhr, args)
-            _this.respondToRequest xhr,
+            _this.respondToRequest xhr, {
               status: 404
               headers: {}
               response: ""
-              noMatch: true
+            }
 
         return xhr
 
@@ -94,7 +94,7 @@ Cypress.Server = do (Cypress, _) ->
 
       status is 404 and _.isEqual(headers, {}) and body is ""
 
-    respondToRequest: (request, response) =>
+    respondToRequest: (request, response, originalOptions) =>
       ## since we emit the options as the response
       ## lets push this into our responses for accessibility
       ## and testability
@@ -105,7 +105,7 @@ Cypress.Server = do (Cypress, _) ->
       request.hasResponded = true
 
       if _.isFunction(@afterResponse)
-        @afterResponse(request, response)
+        @afterResponse(request, originalOptions)
 
       # response.id = @getId()
 
@@ -117,8 +117,8 @@ Cypress.Server = do (Cypress, _) ->
       #   canBeParent:    true
       #   id:             response.id
 
-    stub: (options = {}) ->
-      options = _(options).clone()
+    stub: (originalOptions = {}) ->
+      options = _(originalOptions).clone()
 
       _.defaults options,
         contentType: "application/json"
@@ -131,7 +131,7 @@ Cypress.Server = do (Cypress, _) ->
         return if request.readyState is 4
 
         if @requestMatchesResponse request, options
-          request.matchedResponse = options
+          request.matchedResponse = originalOptions
 
           ## if we're looking up the options for a matching response
           ## then bail early and return the options into our callback
@@ -146,7 +146,7 @@ Cypress.Server = do (Cypress, _) ->
 
           request.respond(response.status, response.headers, response.body)
 
-          @respondToRequest request, options
+          @respondToRequest request, options, originalOptions
 
     requestMatchesResponse: (request, options) ->
       request.method is options.method and
