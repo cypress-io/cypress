@@ -336,6 +336,10 @@ window.Cypress = do ($, _, Backbone) ->
       ## allow for our own custom onFail function
       if err.onFail
         err.onFail.call(@, err)
+
+        ## clean up this onFail callback
+        ## after its been called
+        delete err.onFail
       else
         Cypress.command
           error: err
