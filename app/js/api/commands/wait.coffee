@@ -28,13 +28,18 @@ do (Cypress, _) ->
     wait: (subject, msOrFnOrAlias, options = {}) ->
       msOrFnOrAlias ?= 1e9
 
-      log = (obj) ->
-        Cypress.command
+      log = (onConsole, error) ->
+        obj = {
           alias: alias
           aliasType: "route"
           type: if subject? then "child" else "parent"
           numRetries: options.retries
-          onConsole: -> obj
+          onConsole: -> onConsole
+        }
+
+        obj.error = error if error
+
+        Cypress.command(obj)
 
       switch
         when _.isNumber(msOrFnOrAlias)
@@ -89,15 +94,17 @@ do (Cypress, _) ->
           @throwErr("cy.wait() can only accept aliases for routes.  The alias: '#{alias}' did not match a route.") if command.name isnt "route"
 
           if xhr = @getResponseByAlias(alias)
-            # log({
-            #   "Waited For": "alias: '#{alias}' to have a response"
-            #   Alias: xhr
-            # })
-
             return xhr
           else
             retry = ->
+              options.onFail ?= (err) ->
+                log({
+                  "Waited For": "alias: '#{alias}' to have a response"
+                  Alias: xhr
+                }, err)
+
               options.error ?= "cy.wait() timed out waiting for a response to the route: '#{alias}'. No response ever occured."
+
               @invoke2(@prop("current"), msOrFnOrAlias, options)
             return @_retry(retry, options)
 

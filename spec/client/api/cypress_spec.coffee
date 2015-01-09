@@ -2437,7 +2437,39 @@ describe "Cypress", ->
             }
 
       describe "alias argument errors", ->
-        it ".log"
+        beforeEach ->
+          @sandbox.stub cy.runner, "uncaught"
+
+        it ".log", (done) ->
+          numRetries = 0
+
+          cy.on "fail", (err) =>
+            obj = {
+              name: "wait"
+              alias: "getFoo"
+              aliasType: "route"
+              type: "child"
+              error: true
+              _error: err
+              event: "command"
+              message: "@getFoo"
+              numRetries: numRetries + 1
+            }
+            _.each obj, (value, key) =>
+              expect(@log[key]).deep.eq(value, "expected key: #{key} to eq value: #{value}")
+
+            done()
+
+          cy.on "command:start", ->
+            @_timeout(150)
+
+          cy.on "retry", ->
+            numRetries += 1
+
+          cy
+            .server()
+            .route(/foo/, {}).as("getFoo")
+            .noop({}).wait("@getFoo")
 
         it "#onConsole"
 

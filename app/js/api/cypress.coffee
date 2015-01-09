@@ -315,9 +315,11 @@ window.Cypress = do ($, _, Backbone) ->
 
         return subject
 
-    throwErr: (err) ->
+    throwErr: (err, onFail) ->
       if _.isString(err)
         err = new Error(err)
+
+      err.onFail = onFail if onFail
 
       throw err
 
@@ -330,18 +332,22 @@ window.Cypress = do ($, _, Backbone) ->
       current = @prop("current")
       @log {name: "Failed: #{current.name}", args: err.message}, "danger" if current
 
-      Cypress.command
-        error: err
-        onConsole: ->
-          obj = {}
+      ## allow for our own custom onFail function
+      if err.onFail
+        err.onFail.call(@, err)
+      else
+        Cypress.command
+          error: err
+          onConsole: ->
+            obj = {}
 
-          ## if type isnt parent then we know its dual or child
-          ## and we can add Applied To if there is a prev command
-          ## and it is a parent
-          if current.type isnt "parent" and prev = current.prev
-            obj["Applied To"] = prev.subject
+            ## if type isnt parent then we know its dual or child
+            ## and we can add Applied To if there is a prev command
+            ## and it is a parent
+            if current.type isnt "parent" and prev = current.prev
+              obj["Applied To"] = prev.subject
 
-          obj
+            obj
 
       @runner.uncaught(err)
       @trigger "fail", err
@@ -377,7 +383,8 @@ window.Cypress = do ($, _, Backbone) ->
       @log "Retrying after: #{options.interval}ms. Total: #{total}, Timeout At: #{options.timeout}, RunnableTimeout: #{options.runnableTimeout}", "warning"
 
       if total >= options.timeout or (total + options.interval >= options.runnableTimeout)
-        @throwErr "Timed out retrying. " + options.error ? "The last command was: " + @prop("current").name
+        err = "Timed out retrying. " + options.error ? "The last command was: " + @prop("current").name
+        @throwErr err, options.onFail
 
       Promise.delay(options.interval).cancellable().then =>
         @trigger "retry", options
