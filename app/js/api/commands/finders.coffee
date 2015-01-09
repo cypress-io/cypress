@@ -13,6 +13,7 @@ do (Cypress, _) ->
           $el: $el
           alias: alias?.alias
           aliasType: "dom"
+          numRetries: options.retries
           onConsole: ->
             obj = {"Command":  "get"}
             key = if alias then "Alias" else "Selector"
@@ -108,6 +109,7 @@ do (Cypress, _) ->
         Cypress.command({
           $el: $el
           type: if subject then "child" else "parent"
+          numRetries: options.retries
           onConsole: ->
             "Content": text
             "Applied To": subject
@@ -157,6 +159,10 @@ do (Cypress, _) ->
       @prop("withinSubject", subject)
 
       fn.call @prop("runnable").ctx
+
+      Cypress.command
+        $el: subject
+        message: ""
 
       stop = =>
         @off "command:start", setWithinSubject

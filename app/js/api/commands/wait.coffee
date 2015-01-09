@@ -33,6 +33,7 @@ do (Cypress, _) ->
           alias: alias
           aliasType: "route"
           type: if subject? then "child" else "parent"
+          numRetries: options.retries
           onConsole: -> obj
 
       switch
