@@ -22,16 +22,67 @@ do (Cypress, _) ->
 
   Cypress.addParentCommand
     server: (args...) ->
+      getResponse = (xhr) ->
+        ## if request was for JSON
+        ## and this isnt valid JSON then
+        ## we should prob throw a very
+        ## specific error
+        try
+          JSON.parse(xhr.responseText)
+        catch
+          xhr.responseText
+
       defaults = {
         autoRespond: true
         autoRespondAfter: 10
         onError: (xhr, err) =>
           console.warn "Responding to this XHR caused the following error to be thrown!", xhr
           @fail(err)
-        afterResponse: (xhr, alias) =>
+        afterResponse: (xhr, options) =>
+          alias = options.alias or null
           ## set this response xhr object if we
           ## have an alias for it
           @prop(responseNamespace(alias), xhr) if alias
+
+          if options.noMatch
+            availableUrls = @prop("availableUrls") or []
+
+          Cypress.command
+            name:      "request"
+            method:    xhr.method
+            url:       "/" + xhr.url.replace(/^\//g, "")
+            status:    xhr.status
+            message:   null
+            aliased:   alias
+            alias:     null
+            aliasType: "route"
+            type:      "parent"
+            onConsole: =>
+              consoleObj = {
+                Method:        xhr.method
+                URL:           xhr.url
+                "Matched URL": options.url
+                Status:        xhr.status
+                Response:      getResponse(xhr)
+                Alias:         alias
+                Request:       xhr
+              }
+
+              ## TODO: TEST THIS
+              if options.noMatch
+                _.extend consoleObj,
+                  Reason: "The URL for request did not match any of your route(s).  It's response was automatically sent back a 404."
+                  "Route URLs": availableUrls
+
+              consoleObj
+
+            onRender: ($row) ->
+              $row.find(".command-message").html ->
+                [
+                  "<i class='fa fa-circle'></i>" + xhr.method,
+                  xhr.status,
+                  _.truncate(xhr.url, "20")
+                ].join(" ")
       }
 
       ## server accepts multiple signatures
@@ -145,6 +196,11 @@ do (Cypress, _) ->
       #     "[i]" + options.status + "[/i]",
       #     ""
       #   ].join(" - ")
+
+      ## do not mutate existing availableUrls
+      urls = @prop("availableUrls") ? []
+      urls = urls.concat getUrl(options)
+      @prop "availableUrls", urls
 
       Cypress.route
         method:   options.method

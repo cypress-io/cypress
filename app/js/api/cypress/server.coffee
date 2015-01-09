@@ -65,6 +65,7 @@ Cypress.Server = do (Cypress, _) ->
               status: 404
               headers: {}
               response: ""
+              noMatch: true
 
         return xhr
 
@@ -112,7 +113,7 @@ Cypress.Server = do (Cypress, _) ->
       request.hasResponded = true
 
       if _.isFunction(@afterResponse)
-        @afterResponse(request, response.alias)
+        @afterResponse(request, response)
 
       # response.id = @getId()
 

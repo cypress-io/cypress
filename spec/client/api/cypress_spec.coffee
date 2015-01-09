@@ -412,6 +412,10 @@ describe "Cypress", ->
 
         cy.route("post", "/foo")
 
+      it "catches errors caused by the XHR response"
+
+
+
     describe ".log", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
@@ -438,6 +442,32 @@ describe "Cypress", ->
             # Responses: []
 
           }
+
+      describe "responses", ->
+        beforeEach ->
+          cy
+            .route(/foo/, {})
+            .window().then (win) ->
+              win.$.get("foo_bar")
+
+        it "logs obj", ->
+          obj = {
+            name: "request"
+            method: "GET"
+            url: "/foo_bar"
+            status: 200
+            message: null
+            type: "parent"
+            aliasType: "route"
+            alias: null
+            aliased: null
+          }
+
+          _.each obj, (value, key) =>
+            expect(@log[key]).to.deep.eq(value, "expected key: #{key} to eq value: #{value}")
+
+        it "#onConsole", ->
+
 
   context "#clearLocalStorage", ->
     it "is defined", ->
@@ -2406,39 +2436,51 @@ describe "Cypress", ->
               "Waited For": "10ms before continuing"
             }
 
-      describe "alias argument", ->
-        it "#onConsole", ->
-          cy
-            .server()
-            .route(/foo/, {}).as("getFoo")
-            .window().then (win) ->
-              win.$.get("foo")
-            .wait("@getFoo").then (xhr) ->
-              expect(@log.onConsole()).to.deep.eq {
-                Command: "wait"
-                "Waited For": "alias: 'getFoo' to have a response"
-                Alias: xhr
-              }
+      describe "alias argument errors", ->
+        it ".log"
 
-      describe "function argument", ->
-        it "#onConsole", ->
-          retriedThreeTimes = false
+        it "#onConsole"
 
-          retry = _.after 3, ->
-            retriedThreeTimes = true
+      describe "function argument errors", ->
+        it ".log"
 
-          cy.on "retry", retry
+        it "#onConsole"
 
-          fn = ->
-            expect(retriedThreeTimes).to.be.true;
+      ## at this moment we've removed wait for logging out
+      ## when its an alias or a function argument
+      # describe "alias argument", ->
+      #   it "#onConsole", ->
+      #     cy
+      #       .server()
+      #       .route(/foo/, {}).as("getFoo")
+      #       .window().then (win) ->
+      #         win.$.get("foo")
+      #       .wait("@getFoo").then (xhr) ->
+      #         expect(@log.onConsole()).to.deep.eq {
+      #           Command: "wait"
+      #           "Waited For": "alias: 'getFoo' to have a response"
+      #           Alias: xhr
+      #         }
 
-          cy
-            .wait(fn).then ->
-              expect(@log.onConsole()).to.deep.eq {
-                Command: "wait"
-                "Waited For": _.str.clean(fn.toString())
-                Retried: "3 times"
-              }
+      # describe "function argument", ->
+      #   it "#onConsole", ->
+      #     retriedThreeTimes = false
+
+      #     retry = _.after 3, ->
+      #       retriedThreeTimes = true
+
+      #     cy.on "retry", retry
+
+      #     fn = ->
+      #       expect(retriedThreeTimes).to.be.true;
+
+      #     cy
+      #       .wait(fn).then ->
+      #         expect(@log.onConsole()).to.deep.eq {
+      #           Command: "wait"
+      #           "Waited For": _.str.clean(fn.toString())
+      #           Retried: "3 times"
+      #         }
 
   context "#_retry", ->
     it "returns a nested cancellable promise", (done) ->
@@ -2494,13 +2536,6 @@ describe "Cypress", ->
       it "sets type to current.type", (done) ->
         Cypress.on "log", (obj) ->
           expect(obj.type).to.eq "parent"
-          done()
-
-        Cypress.command({})
-
-      it "sets _args to current.args", (done) ->
-        Cypress.on "log", (obj) ->
-          expect(obj._args).to.deep.eq [1,2,3]
           done()
 
         Cypress.command({})
@@ -2793,6 +2828,10 @@ describe "Cypress", ->
         it "converts closing brackets to tags", ->
           html = Cypress.Utils.convertHtmlTags "foo[/strong]"
           expect(html).to.eq "foo</strong>"
+
+        it "converts opening brackets with attrs", ->
+          html = Cypress.Utils.convertHtmlTags "[i class='fa-circle']foo"
+          expect(html).to.eq "<i class='fa-circle'>foo"
 
     describe "#plural", ->
 
