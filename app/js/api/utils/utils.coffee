@@ -1,6 +1,6 @@
 do (Cypress, _) ->
 
-  tagOpen     = /\[([a-z]+)\]/g
+  tagOpen     = /\[([a-z\s='"-]+)\]/g
   tagClosed   = /\[\/([a-z]+)\]/g
 
   Cypress.addUtil
