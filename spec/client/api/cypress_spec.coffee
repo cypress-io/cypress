@@ -193,6 +193,36 @@ describe "Cypress", ->
 
           cy.server(arg)
 
+      describe ".log", ->
+        beforeEach ->
+          Cypress.on "log", (@log) =>
+
+        it "provides specific #onFail", (done) ->
+          cy.on "fail", (err) =>
+            obj = {
+              name: "request"
+              alias: null
+              aliased: "getFoo"
+              aliasType: "route"
+              type: "parent"
+              error: true
+              _error: err
+              event: "command"
+              message: null
+            }
+            _.each obj, (value, key) =>
+              expect(@log[key]).deep.eq(value, "expected key: #{key} to eq value: #{value}")
+
+            done()
+
+          cy
+            .server()
+            .route(/foo/, {}).as("getFoo")
+            .window().then (win) ->
+              win.$.get("/foo").done ->
+                throw new Error("specific ajax error")
+
+
   context "#route", ->
     beforeEach ->
       @expectOptionsToBe = (opts) =>

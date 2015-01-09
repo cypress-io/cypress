@@ -34,14 +34,6 @@ Cypress.Server = do (Cypress, _) ->
           ## call the original so sinon does its thing
           orig.call(@)
 
-          # xhr.id          = _this.getId()
-
-          # _this.emit
-          #   method:  xhr.method
-          #   url:     xhr.url
-          #   id:      xhr.id
-          #   xhr:     xhr
-
           ## invokes onRequest callback function on any matching responses
           ## and then also calls this on any global onRequest methods on
           ## our server
@@ -139,6 +131,7 @@ Cypress.Server = do (Cypress, _) ->
         return if request.readyState is 4
 
         if @requestMatchesResponse request, options
+          request.matchedResponse = options
 
           ## if we're looking up the options for a matching response
           ## then bail early and return the options into our callback
@@ -168,16 +161,6 @@ Cypress.Server = do (Cypress, _) ->
 
     respond: ->
       @fakeServer.respond()
-
-      # @emit
-      #   method:       "respond"
-      #   server:       @fakeServer
-      #   requests:     @requests
-      #   responses:    @responses
-      #   canBeParent:  true
-      #   finished:     true
-      #   id:           @getId()
-      #   type:         "server"
 
     onRequest: (fn) ->
       @onRequests.push fn

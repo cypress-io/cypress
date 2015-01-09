@@ -32,57 +32,81 @@ do (Cypress, _) ->
         catch
           xhr.responseText
 
+      log = (xhr, options, err) =>
+        alias = options.alias or null
+
+        if options.noMatch
+          availableUrls = @prop("availableUrls") or []
+
+        Cypress.command
+          name:      "request"
+          method:    xhr.method
+          url:       "/" + xhr.url.replace(/^\//g, "")
+          status:    xhr.status
+          message:   null
+          aliased:   alias
+          alias:     null
+          aliasType: "route"
+          type:      "parent"
+          error:     err
+          onConsole: =>
+            consoleObj = {
+              Method:        xhr.method
+              URL:           xhr.url
+              "Matched URL": options.url
+              Status:        xhr.status
+              Response:      getResponse(xhr)
+              Alias:         alias
+              Request:       xhr
+            }
+
+            ## TODO: TEST THIS
+            if options.noMatch
+              _.extend consoleObj,
+                Reason: "The URL for request did not match any of your route(s).  It's response was automatically sent back a 404."
+                "Route URLs": availableUrls
+
+            consoleObj
+
+          onRender: ($row) ->
+            $row.find(".command-message").html ->
+              [
+                "<i class='fa fa-circle'></i>" + xhr.method,
+                xhr.status,
+                _.truncate(xhr.url, "20")
+              ].join(" ")
+
       defaults = {
         autoRespond: true
         autoRespondAfter: 10
         onError: (xhr, err) =>
-          console.warn "Responding to this XHR caused the following error to be thrown!", xhr
+          if options = xhr.matchedResponse
+
+            xhr.loggedFailure = true
+
+            ## remove this reference from the xhr
+            ## since we already have it as a variable
+            delete xhr.matchedResponse
+
+            err.onFail = ->
+              log(xhr, options, err)
+
           @fail(err)
         afterResponse: (xhr, options) =>
           alias = options.alias or null
+
           ## set this response xhr object if we
           ## have an alias for it
           @prop(responseNamespace(alias), xhr) if alias
 
-          if options.noMatch
-            availableUrls = @prop("availableUrls") or []
+          ## don't relog afterResponse
+          ## if we've already logged the
+          ## XHR's failure
+          if xhr.loggedFailure
+            delete xhr.loggedFailure
+            return
 
-          Cypress.command
-            name:      "request"
-            method:    xhr.method
-            url:       "/" + xhr.url.replace(/^\//g, "")
-            status:    xhr.status
-            message:   null
-            aliased:   alias
-            alias:     null
-            aliasType: "route"
-            type:      "parent"
-            onConsole: =>
-              consoleObj = {
-                Method:        xhr.method
-                URL:           xhr.url
-                "Matched URL": options.url
-                Status:        xhr.status
-                Response:      getResponse(xhr)
-                Alias:         alias
-                Request:       xhr
-              }
-
-              ## TODO: TEST THIS
-              if options.noMatch
-                _.extend consoleObj,
-                  Reason: "The URL for request did not match any of your route(s).  It's response was automatically sent back a 404."
-                  "Route URLs": availableUrls
-
-              consoleObj
-
-            onRender: ($row) ->
-              $row.find(".command-message").html ->
-                [
-                  "<i class='fa fa-circle'></i>" + xhr.method,
-                  xhr.status,
-                  _.truncate(xhr.url, "20")
-                ].join(" ")
+          log(xhr, options)
       }
 
       ## server accepts multiple signatures
