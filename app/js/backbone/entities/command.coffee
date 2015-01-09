@@ -122,7 +122,7 @@
       obj = @formatForConsole(obj)
 
       _.each obj, (value, key) ->
-        fn ["%c" + key, "font-weight: bold;", value] unless _.isBlank(value)
+        fn ["%c" + key, "font-weight: bold;", value] unless _.isBlank(value) and value isnt ""
 
     formatForConsole: (obj) ->
       ## figure out the max key length
