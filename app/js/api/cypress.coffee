@@ -771,7 +771,6 @@ window.Cypress = do ($, _, Backbone) ->
       _.defaults obj,
         snapshot: true
         message:  stringify(current.args)
-        _args:    current.args
         onRender: ->
         onConsole: ->
           "Returned": current.subject
