@@ -318,6 +318,7 @@ window.Cypress = do ($, _, Backbone) ->
     throwErr: (err, onFail) ->
       if _.isString(err)
         err = new Error(err)
+        err.name = "CypressError"
 
       err.onFail = onFail if onFail
 

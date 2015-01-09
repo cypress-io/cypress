@@ -954,6 +954,12 @@ describe "Cypress", ->
 
       cy.get("foo")
 
+    it "has an err.name of CypressError", ->
+      try
+        cy.throwErr("foo")
+      catch e
+        expect(e.name).to.eq "CypressError"
+
     context "command error bubbling", ->
       beforeEach ->
         @uncaught = @sandbox.stub(cy.runner, "uncaught")
