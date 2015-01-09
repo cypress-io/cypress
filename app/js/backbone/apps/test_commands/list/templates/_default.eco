@@ -15,7 +15,7 @@
   <% if @shouldDisplayControls: %>
     <span class="command-controls">
       <% if @aliased: %>
-        <span class="command-alias" title="<%= @message %> aliased as: '<%= @aliased %>'">
+        <span class="command-alias <%= @aliasType %>" title="<%= @message %> aliased as: '<%= @aliased %>'">
           <%= @aliased %>
         </span>
       <% end %>
