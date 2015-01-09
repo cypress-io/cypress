@@ -60,10 +60,14 @@ do (Cypress, _) ->
             ## invoke fn and make sure its not strictly false
             options.value = fn.call(@prop("runnable").ctx, subject)
             if options.value
-              log({
-                "Waited For": stringify(fn)
-                Retried: options.retries + " times"
-              })
+              ## do not think we need to log out waits
+              ## just like we dont log out cy.thens
+              ## if wait blows up and fails then handle that
+              ## at that time
+              # log({
+              #   "Waited For": stringify(fn)
+              #   Retried: options.retries + " times"
+              # })
               return subject
           catch e
             options.error = "Could not continue due to: " + e
@@ -85,10 +89,10 @@ do (Cypress, _) ->
           @throwErr("cy.wait() can only accept aliases for routes.  The alias: '#{alias}' did not match a route.") if command.name isnt "route"
 
           if xhr = @getResponseByAlias(alias)
-            log({
-              "Waited For": "alias: '#{alias}' to have a response"
-              Alias: xhr
-            })
+            # log({
+            #   "Waited For": "alias: '#{alias}' to have a response"
+            #   Alias: xhr
+            # })
 
             return xhr
           else
