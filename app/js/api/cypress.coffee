@@ -827,7 +827,9 @@ window.Cypress = do ($, _, Backbone) ->
 
         return consoleObj
 
-      @trigger event, obj
+      obj.event = event
+
+      @trigger "log", obj
 
     _.extend Cypress.prototype, Backbone.Events
 

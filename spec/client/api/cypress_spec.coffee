@@ -420,24 +420,22 @@ describe "Cypress", ->
         cy.route("/foo", {}).then ->
           expect(@log.name).to.eq "route"
 
-      it "calls log with custom message", ->
-        cy.route("/foo", {}).then ->
-          expect(@log.message).to.eq "GET - [i]200[/i] - "
-
       it "uses the wildcard URL", ->
         cy.route("*", {}).then ->
-            expect(@log.message).to.eq("GET - [i]200[/i] - ")
+          expect(@log.url).to.eq("*")
 
       it "#onConsole", ->
-        cy.route("*", {foo: "bar"}).then ->
+        cy.route("*", {foo: "bar"}).as("foo").then ->
           expect(@log.onConsole()).to.deep.eq {
             Command: "route"
             Method: "GET"
             URL: "*"
             Status: 200
             Response: {foo: "bar"}
+            Alias: "foo"
             # Responded: 1 time
             # "-------": ""
+            # Responses: []
 
           }
 
@@ -1017,19 +1015,6 @@ describe "Cypress", ->
       cy.get("#list li").eq(0).as("firstLi").then ($li) ->
         expect($li).to.match li
 
-    describe ".log", ->
-      it "#onConsole", ->
-        Cypress.on "log", (@log) =>
-
-        cy.get("body").as("b").then ($body) ->
-          expect(@log.onConsole()).to.deep.eq {
-            Command: "as"
-            Alias: "b"
-            Returned: $body
-            Elements: 1
-            "All Aliases": "b"
-          }
-
   context "#getAlias", ->
     it "retrieves aliases", ->
       cy.on "end", ->
@@ -1339,8 +1324,8 @@ describe "Cypress", ->
         ## GOOD: [ {name: get} , {name: contains} ]
         ## BAD:  [ {name: get} , {name: get} , {name: contains} ]
         cy.get("#complex-contains").contains("nested contains").then ($label) ->
-          expect(log.firstCall).to.be.calledWithMatch {name: "get"}
-          expect(log.secondCall).to.be.calledWithMatch {name: "contains"}
+          expect(log.firstCall).to.be.calledWithMatch "command", {name: "get"}
+          expect(log.secondCall).to.be.calledWithMatch "command", {name: "contains"}
 
       it "passes in $el", ->
         cy.get("#complex-contains").contains("nested contains").then ($label) ->

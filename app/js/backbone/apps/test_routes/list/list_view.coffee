@@ -25,8 +25,8 @@
     events:
       "click @ui.hook" : "hideOrShow"
       "click"          : "stopProp"
-      "mouseover"    : "stopProp"
-      "mouseout"     : "stopProp"
+      "mouseover"      : "stopProp"
+      "mouseout"       : "stopProp"
 
     changeIconDirection: (bool) ->
       klass = if bool then "right" else "down"

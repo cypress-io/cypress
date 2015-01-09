@@ -337,21 +337,26 @@
       setListenersForWeb: ->
         socket = App.request "socket:entity"
 
-        @listenTo Cypress, "command", (obj) =>
-          ## think about moving this line
-          ## back into Cypress
-          obj.hook = @hook
+        @listenTo Cypress, "log", (obj) =>
+          switch obj.event
+            when "command"
+              ## think about moving this line
+              ## back into Cypress
+              obj.hook = @hook
 
-          ## if we're in satellite mode then we need to
-          ## broadcast this through websockets
-          if App.config.env("satellite")
-            attrs = @transformEmitAttrs(attrs)
-            socket.emit "command:add", attrs
-          else
-            @commands.add obj
+              ## if we're in satellite mode then we need to
+              ## broadcast this through websockets
+              if App.config.env("satellite")
+                attrs = @transformEmitAttrs(attrs)
+                socket.emit "command:add", attrs
+              else
+                @commands.add obj
 
-        @listenTo Cypress, "route", (obj) =>
-          @routes.add obj
+            when "route"
+              @routes.add obj
+
+            else
+              throw new Error("Cypress.log() emitted an unknown event: #{obj.event}")
 
         ## mocha has begun running the specs per iframe
         @runner.on "start", =>
