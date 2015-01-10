@@ -10,4 +10,12 @@
     </span>
   <% end %>
 </td>
-<td><%= @numResponses %></td>
+<td>
+  <% if @numResponses is 0: %>
+  <span class="text-fail">
+    -
+  </span>
+  <% else: %>
+    <%= @numResponses %>
+    <% end %>
+</td>

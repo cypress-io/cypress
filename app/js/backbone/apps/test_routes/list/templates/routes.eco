@@ -15,7 +15,7 @@
                 <th>Url</th>
                 <th>Status</th>
                 <th>Alias</th>
-                <th>#</th>
+                <th title="Number of responses which matched this route">#</th>
               </tr>
             </thead>
             <tbody></tbody>
