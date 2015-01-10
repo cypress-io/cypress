@@ -91,12 +91,18 @@ do (Cypress, _) ->
       return ret
 
     title: (options = {}) ->
+      options.log = false
+
       ## using call here to invoke the 'text' method on the
       ## title's jquery object
 
       ## we're chaining off the promise so we need to go through
       ## the command method which returns a promise
-      @command("get", "title", options).call("text")
+      @command("get", "title", options).call("text").then (text) ->
+        Cypress.command
+          message: text
+
+        return text
 
     window: ->
       @throwErr "The remote iframe is undefined!" if not @$remoteIframe

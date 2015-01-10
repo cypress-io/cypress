@@ -797,7 +797,7 @@ describe "Cypress", ->
     describe ".log", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
-          if @log.name isnt "url"
+          if @log.name is "location"
             throw new Error("cy.location() should not have logged out.")
 
       it "logs obj", ->
@@ -825,7 +825,7 @@ describe "Cypress", ->
     describe ".log", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
-          if @log.name isnt "hash"
+          if @log.name is "location"
             throw new Error("cy.location() should not have logged out.")
 
       it "logs obj", ->
@@ -945,6 +945,29 @@ describe "Cypress", ->
       cy.on "fail", (err) ->
         expect(err.message).to.include "Could not find element: title"
         done()
+
+    describe ".log", ->
+      beforeEach ->
+        Cypress.on "log", (@log) =>
+          if @log.name is "get"
+            throw new Error("cy.get() should not have logged out.")
+
+      it "logs obj", ->
+        cy.title().then ->
+          obj = {
+            name: "title"
+            message: "DOM Fixture"
+          }
+
+          _.each obj, (value, key) =>
+            expect(@log[key]).to.deep.eq value
+
+      it "#onConsole", ->
+        cy.title().then ->
+          expect(@log.onConsole()).to.deep.eq {
+            Command: "title"
+            Returned: "DOM Fixture"
+          }
 
   context "#fill", ->
     it "requires an object literal", (done) ->
