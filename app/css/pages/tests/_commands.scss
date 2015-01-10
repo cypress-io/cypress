@@ -179,6 +179,8 @@
     min-width: 80px;
     font-weight: 600;
     color: #565554;
+    position: relative;
+    top: 1px;
     // @include text-overflow;
   }
 
@@ -208,6 +210,8 @@
         border-radius: 2px;
         padding: 0 3px;
         font-size: 10px;
+        display: inline-block;
+        height: 14px;
       }
     }
     .command-message {
