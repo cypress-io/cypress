@@ -44,22 +44,51 @@ do (Cypress, _) ->
     noop: (obj) -> obj
 
     url: ->
-      @sync.location("href")
+      href = @sync.location("href", {log: false})
 
-    location: (key) ->
+      Cypress.command
+        message: href
+
+      return href
+
+    hash: ->
+      hash = @sync.location("hash", {log: false})
+
+      Cypress.command
+        message: hash
+
+      return hash
+
+    location: (key, options) ->
+      ## normalize arguments allowing key + options to be undefined
+      ## key can represent the options
+      if _.isObject(key) and _.isUndefined(options)
+        options = key
+
+      options ?= {}
+
+      _.defaults options,
+        log: true
+
       currentUrl = window.location.toString()
       remoteUrl  = @sync.window().location.toString()
       remoteOrigin = @config("remoteOrigin")
 
       location = Cypress.location(currentUrl, remoteUrl, remoteOrigin)
 
-      if key
+      ret = if _.isString(key)
         ## use existential here because we only want to throw
         ## on null or undefined values (and not empty strings)
         location[key] ?
           @throwErr("Location object does have not have key: #{key}")
       else
         location
+
+      if options.log
+        Cypress.command
+          message: key ? null
+
+      return ret
 
     title: (options = {}) ->
       ## using call here to invoke the 'text' method on the

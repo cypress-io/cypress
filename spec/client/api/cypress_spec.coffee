@@ -53,11 +53,6 @@ describe "Cypress", ->
       expect(input.length).to.eq 1
       expect(input.prop("tagName")).to.eq "INPUT"
 
-  context "#url", ->
-    it "returns the location href", ->
-      cy.url().then (url) ->
-        expect(url).to.eq "/fixtures/html/dom.html"
-
   context "#_sandbox", ->
     it "creates a new sandbox", ->
       expect(cy._sandbox).to.be.null
@@ -221,7 +216,6 @@ describe "Cypress", ->
             .window().then (win) ->
               win.$.get("/foo").done ->
                 throw new Error("specific ajax error")
-
 
   context "#route", ->
     beforeEach ->
@@ -444,8 +438,6 @@ describe "Cypress", ->
 
       it "catches errors caused by the XHR response"
 
-
-
     describe ".log", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
@@ -483,9 +475,6 @@ describe "Cypress", ->
         it "logs obj", ->
           obj = {
             name: "request"
-            method: "GET"
-            url: "/foo_bar"
-            status: 200
             message: null
             type: "parent"
             aliasType: "route"
@@ -497,7 +486,6 @@ describe "Cypress", ->
             expect(@log[key]).to.deep.eq(value, "expected key: #{key} to eq value: #{value}")
 
         it "#onConsole", ->
-
 
   context "#clearLocalStorage", ->
     it "is defined", ->
@@ -800,6 +788,112 @@ describe "Cypress", ->
     it "aborts any existing xhr?"
 
     it "removes the current xhr on success?"
+
+  context "#url", ->
+    it "returns the location href", ->
+      cy.url().then (url) ->
+        expect(url).to.eq "/fixtures/html/dom.html"
+
+    describe ".log", ->
+      beforeEach ->
+        Cypress.on "log", (@log) =>
+          if @log.name isnt "url"
+            throw new Error("cy.location() should not have logged out.")
+
+      it "logs obj", ->
+        cy.url().then ->
+          obj = {
+            name: "url"
+            message: "/fixtures/html/dom.html"
+          }
+
+          _.each obj, (value, key) =>
+            expect(@log[key]).to.deep.eq value
+
+      it "#onConsole", ->
+        cy.url().then ->
+          expect(@log.onConsole()).to.deep.eq {
+            Command: "url"
+            Returned: "/fixtures/html/dom.html"
+          }
+
+  context "#hash", ->
+    it "returns the location hash", ->
+      cy.hash().then (hash) ->
+        expect(hash).to.eq ""
+
+    describe ".log", ->
+      beforeEach ->
+        Cypress.on "log", (@log) =>
+          if @log.name isnt "hash"
+            throw new Error("cy.location() should not have logged out.")
+
+      it "logs obj", ->
+        cy.hash().then ->
+          obj = {
+            name: "hash"
+            message: ""
+          }
+
+          _.each obj, (value, key) =>
+            expect(@log[key]).to.deep.eq value
+
+      it "#onConsole", ->
+        cy.hash().then ->
+          expect(@log.onConsole()).to.deep.eq {
+            Command: "hash"
+            Returned: ""
+          }
+
+  context "#location", ->
+    it "returns the location object", ->
+      cy.location().then (loc) ->
+        keys = _.keys loc
+        expect(keys).to.deep.eq ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "toString"]
+
+    it "returns a specific key from location object", ->
+      cy.location("href").then (href) ->
+        expect(href).to.eq "/fixtures/html/dom.html"
+
+    describe ".log", ->
+      beforeEach ->
+        Cypress.on "log", (@log) =>
+
+      it "does not emit when {log: false} as options", ->
+        cy.location("href", {log: false}).then ->
+          expect(@log).to.be.undefined
+
+      it "does not emit when {log: false} as key", ->
+        cy.location({log: false}).then ->
+          expect(@log).to.be.undefined
+
+      it "logs obj without a message", ->
+        cy.location().then ->
+          obj = {
+            name: "location"
+            message: null
+          }
+
+          _.each obj, (value, key) =>
+            expect(@log[key]).to.deep.eq value
+
+      it "logs obj with a message", ->
+        cy.location("origin").then ->
+          obj = {
+            name: "location"
+            message: "origin"
+          }
+
+          _.each obj, (value, key) =>
+            expect(@log[key]).to.deep.eq value
+
+      it "#onConsole", ->
+        cy.location().then ->
+          onConsole = @log.onConsole()
+
+          expect(_(onConsole).keys()).to.deep.eq ["Command", "Returned"]
+          expect(onConsole.Command).to.eq "location"
+          expect(_(onConsole.Returned).keys()).to.deep.eq ["hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "toString"]
 
   context "#window", ->
     it "returns the remote window", ->

@@ -211,11 +211,11 @@ window.Cypress = do ($, _, Backbone) ->
       ## JS users are using pushstate since there is no hash
       ## TODO. need to listen to pushstate events here which
       ## will act as the isReady() the same way load events do
-      location = @sync.location()
+      location = @sync.location({log: false})
       @prop "href", location.href.replace(location.hash, "")
 
     _hrefChanged: ->
-      location = @sync.location()
+      location = @sync.location({log: false})
       @prop("href") isnt location.href.replace(location.hash, "")
 
     _subject: ->
