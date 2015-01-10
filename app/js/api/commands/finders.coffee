@@ -11,7 +11,7 @@ do (Cypress, _) ->
 
         Cypress.command
           $el: $el
-          alias: alias?.alias
+          referencesAlias: alias?.alias
           aliasType: "dom"
           numRetries: options.retries
           onConsole: ->

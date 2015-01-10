@@ -30,9 +30,8 @@ do (Cypress, _) ->
 
       log = (onConsole, error) ->
         obj = {
-          alias: alias
+          referencesAlias: alias
           aliasType: "route"
-          type: if subject? then "child" else "parent"
           numRetries: options.retries
           onConsole: -> onConsole
         }

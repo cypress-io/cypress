@@ -780,12 +780,26 @@ window.Cypress = do ($, _, Backbone) ->
 
       _.defaults obj, _(current).pick("name", "type")
 
+      ## force duals to become either parents or childs
+      ## normally this would be handled by the command itself
+      ## but in cases where the command purposely does not log
+      ## then it could still be logged during a failure, which
+      ## is why we normalize its type value
+      if obj.type is "dual"
+        obj.type = if current.prev then "child" else "parent"
+
+      ## does this object represent the current command cypress
+      ## is processing?
+      obj.isCurrent = obj.name is current.name
+
       _.defaults obj,
         snapshot: true
-        message:  stringify(current.args)
         onRender: ->
         onConsole: ->
           "Returned": current.subject
+
+      if obj.isCurrent
+        _.defaults obj, {message: stringify(current.args)}
 
       ## allow type to by a dynamic function
       ## so it can conditionally return either
@@ -802,7 +816,7 @@ window.Cypress = do ($, _, Backbone) ->
 
       if obj.error
         obj._error = obj.error
-        obj.error = true
+        obj.error  = true
 
       @log("command", obj)
 
@@ -816,11 +830,15 @@ window.Cypress = do ($, _, Backbone) ->
 
     @log = (event, obj) ->
       _.defaults obj,
-        testId: @cy.prop("runnable").cid
-        alias: null
-        aliased: @cy.getNextAlias()
+        testId:           @cy.prop("runnable").cid
+        referencesAlias:  undefined
+        alias:            undefined
+        message:          undefined
         onRender: ->
         onConsole: ->
+
+      if obj.isCurrent
+        _.defaults obj, {alias: @cy.getNextAlias()}
 
       ## re-wrap onConsole to set Command + Error defaults
       obj.onConsole = _.wrap obj.onConsole, (orig, args...) ->

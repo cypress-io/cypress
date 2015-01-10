@@ -196,14 +196,14 @@ describe "Cypress", ->
           cy.on "fail", (err) =>
             obj = {
               name: "request"
-              alias: null
-              aliased: "getFoo"
+              referencesAlias: undefined
+              alias: "getFoo"
               aliasType: "route"
               type: "parent"
               error: true
               _error: err
               event: "command"
-              message: null
+              message: undefined
             }
             _.each obj, (value, key) =>
               expect(@log[key]).deep.eq(value, "expected key: #{key} to eq value: #{value}")
@@ -475,11 +475,11 @@ describe "Cypress", ->
         it "logs obj", ->
           obj = {
             name: "request"
-            message: null
+            message: undefined
             type: "parent"
             aliasType: "route"
-            alias: null
-            aliased: null
+            referencesAlias: undefined
+            alias: undefined
           }
 
           _.each obj, (value, key) =>
@@ -1310,6 +1310,20 @@ describe "Cypress", ->
     describe ".log", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
+
+      it "logs obj", ->
+        cy.get("body").as("b").then ($body) ->
+          obj = {
+            name: "get"
+            message: "body"
+            alias: "b"
+            aliasType: "dom"
+            referencesAlias: undefined
+            $el: $body
+          }
+
+          _.each obj, (value, key) =>
+            expect(@log[key]).deep.eq(value, "expected key: #{key} to eq value: #{value}")
 
       it "#onConsole", ->
         cy.get("body").then ($body) ->
@@ -2789,6 +2803,28 @@ describe "Cypress", ->
           done()
 
       cy.get("div").eq(0)
+
+    it "sets type to 'parent' dual commands when first command", (done) ->
+      @sandbox.stub cy.runner, "uncaught"
+
+      Cypress.on "log", (obj) ->
+        if obj.name is "then"
+          expect(obj.type).to.eq "parent"
+          done()
+
+      cy.then ->
+        throw new Error("then failure")
+
+    it "sets type to 'child' dual commands when first command", (done) ->
+      @sandbox.stub cy.runner, "uncaught"
+
+      Cypress.on "log", (obj) ->
+        if obj.name is "then"
+          expect(obj.type).to.eq "child"
+          done()
+
+      cy.noop({}).then ->
+        throw new Error("then failure")
 
     describe "errors", ->
       beforeEach ->

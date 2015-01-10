@@ -33,16 +33,14 @@ do (Cypress, _) ->
           xhr.responseText
 
       log = (xhr, route, err) =>
-        alias = route.alias or null
+        alias = route.alias
 
         if _.isEmpty(route)
           availableUrls = @prop("availableUrls") or []
 
         Cypress.command
           name:      "request"
-          message:   null
-          aliased:   alias
-          alias:     null
+          alias:     alias
           aliasType: "route"
           type:      "parent"
           error:     err
@@ -90,7 +88,7 @@ do (Cypress, _) ->
 
           @fail(err)
         afterResponse: (xhr, route = {}) =>
-          alias = route.alias or null
+          alias = route.alias
 
           ## set this response xhr object if we
           ## have an alias for it
