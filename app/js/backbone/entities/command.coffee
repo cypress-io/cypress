@@ -518,6 +518,10 @@
 
     #   return command
 
+    attrsHaveErrorWhichMathchesLastCommandError: (attrs) ->
+      err = attrs._error
+      err and @last() and err is @last()[CYPRESS_ATTRS]._error
+
     createCommand: (attrs) ->
       if attrs.type not in ["parent", "child"]
         throw new Error("Commands may only have type of 'parent' or 'child'.  Command was: {name: #{attrs.name}, type: #{attrs.type}}")
@@ -545,10 +549,18 @@
       command = attrs
       options = hook
 
+      ## bail if our attrs contain the EXACT same error object
+      ## as our previous command.  this prevents double showing
+      ## an assertion error + a failed command.  we handle this
+      ## inside of the app as opposed to cypress, because our app
+      ## maintains the state of all commands, and this will continue
+      ## to work even if users add their own assertion library
+      ## and its coupled to chai, an error type, or anything like that
+      return if @attrsHaveErrorWhichMathchesLastCommandError(attrs)
+
       ## if we have both of these methods assume this is
       ## a backbone model
       if command and command.set and command.get
-        options = @getXhrOptions(command, options) if command.get("type") is "xhr"
 
         ## increment the number if its not cloned
         command.increment(@maxNumber()) unless command.isCloned()

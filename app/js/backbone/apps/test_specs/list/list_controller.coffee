@@ -27,7 +27,7 @@
 
         ## if this command is a request then
         ## lets update our routes
-        if route = command.getRoute()
+        if route = command and command.getRoute()
           model.incrementRoute(route)
 
       @listenTo routes, "add", (route, routes, options) ->
