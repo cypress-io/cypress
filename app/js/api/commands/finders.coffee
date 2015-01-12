@@ -127,7 +127,7 @@ do (Cypress, _) ->
       selector = "#{filter}:contains('#{text}'), #{filter}[type='submit'][value~='#{text}']"
 
       @command("get", selector, options).then (elements) ->
-        return log(elements.first()) if filter
+        return log(elements.last()) if filter
 
         ## iterate on the array of elements in reverse
         for el in elements.get() by -1

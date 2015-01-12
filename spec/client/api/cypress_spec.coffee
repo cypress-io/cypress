@@ -1452,6 +1452,11 @@ describe "Cypress", ->
       cy.get("*").contains("brand new content").then ($span) ->
         expect($span.get(0)).to.eq span.get(0)
 
+    it "finds the furthest descendent when filter matches more than 1 element", ->
+      cy
+        .get("#contains-multiple-filter-match").contains("li", "Maintenance").then ($row) ->
+          expect($row).to.have.class("active")
+
     describe "subject contains text nodes", ->
       it "searches for content within subject", ->
         badge = cy.$("#edge-case-contains .badge:contains(5)")
@@ -2613,7 +2618,7 @@ describe "Cypress", ->
           cy.on "fail", (err) =>
             obj = {
               name: "wait"
-              alias: "getFoo"
+              referencesAlias: "getFoo"
               aliasType: "route"
               type: "child"
               error: true
