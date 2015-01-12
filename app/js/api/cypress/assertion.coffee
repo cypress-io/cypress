@@ -26,7 +26,7 @@ do (Cypress, _) ->
         name:     "assert"
         message:  message
         passed:   passed
-        selector: value.selector
+        selector: value?.selector
         error:    error
         type: (current, subject) ->
           ## if our current command has arguments assume
