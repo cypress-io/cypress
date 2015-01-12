@@ -43,7 +43,7 @@ window.Cypress = do ($, _, Backbone) ->
       ## if its an object or array, just say Object or Array
       ## but if its a primitive, just print out its value like
       ## true, false, 0, 1, 3, "foo", "bar"
-      if not (subject and subject.get and _.isElement(subject.get(0)))
+      if not Cypress.Utils.hasElement(subject)
         console.warn("Subject is currently: ", subject)
         @throwErr("Cannot call .#{method}() on a non-DOM subject!")
 

@@ -16,7 +16,7 @@ do (Cypress, _) ->
 
       obj = @parseValueActualAndExpected(value, actual, expected)
 
-      if value and value[0] and _.isElement(value[0])
+      if Cypress.Utils.hasElement(value)
         obj.$el = value
 
       functionHadArguments = (fn) ->
