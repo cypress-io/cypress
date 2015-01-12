@@ -31,7 +31,6 @@ vendor:
   - app/js/vendor/simulate.coffee
 
 cypress:
-  - app/js/api/iframe.coffee
   - app/js/api/cypress.coffee
   - app/js/api/cypress/**
   - app/js/api/utils/**
