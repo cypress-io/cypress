@@ -6,6 +6,11 @@ getFirstSubjectByName = (name) ->
 
 describe "Cypress", ->
   before ->
+    ## set the jquery engine to be our window so we dont have to juggle
+    ## the gazillions of edge cases caused by the remote $ elements being
+    ## juggled throughout our expectations
+    Cypress.option("jQuery", $)
+
     ## this immediately restores the chai.Assertion::assert else
     ## all of our expect messages would be completely foobar'd
     ## since the modified assert literally modifies the expectation
