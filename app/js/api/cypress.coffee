@@ -512,6 +512,23 @@ window.Cypress = do ($, _, Backbone) ->
 
     _: _
 
+    ## TODO
+    ## write tests for the options interface
+    ## including resetting these in between test runs
+    @options = (obj) ->
+      @_options ?= {}
+
+      _.extend @_options, obj
+
+    @option = (key, val) ->
+      @_options ?= {}
+
+      if not val
+        # _.result(@_options, key)
+        @_options[key]
+      else
+        @_options[key] = val
+
     @addUtil = (key, fn) ->
       if _.isObject(key)
         _.each key, (fn, name) =>
@@ -658,6 +675,9 @@ window.Cypress = do ($, _, Backbone) ->
           config:        null
 
         window.cy = @cy = null
+
+        ## reset options back to object literal
+        Cypress.options = {}
 
     ## sets the runnable onto the cy instance
     @set = (runnable, hook) ->
