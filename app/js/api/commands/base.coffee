@@ -77,7 +77,7 @@ do (Cypress, _, $) ->
         @throwErr("cy.invoke() returned 'undefined' after invoking the #{word}: #{fn}")
 
       Cypress.command
-        message: value
+        message: if _.isFunction(prop) then ".#{fn}()" else ".#{fn}"
         onConsole: ->
           obj = {}
 

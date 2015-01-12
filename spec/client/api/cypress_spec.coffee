@@ -2320,7 +2320,7 @@ describe "Cypress", ->
     describe ".log", ->
       beforeEach ->
         @obj = {
-          foo: "foo"
+          foo: "foo bar baz"
           num: 123
           bar: -> "bar"
           sum: (args...) ->
@@ -2331,11 +2331,21 @@ describe "Cypress", ->
 
         Cypress.on "log", (@log) =>
 
-      it "logs obj", ->
+      it "logs obj as a property", ->
         cy.noop(@obj).invoke("foo").then ->
           obj = {
             name: "invoke"
-            message: "foo"
+            message: ".foo"
+          }
+
+          _.each obj, (value, key) =>
+            expect(@log[key]).to.deep.eq value
+
+      it "logs obj as a function", ->
+        cy.noop(@obj).invoke("bar").then ->
+          obj = {
+            name: "invoke"
+            message: ".bar()"
           }
 
           _.each obj, (value, key) =>
