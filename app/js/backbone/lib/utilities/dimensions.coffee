@@ -90,7 +90,8 @@
       ## around el
       @attr = (attr) ->
         ## nuke anything thats not a number
-        num = el.css(attr).replace /[^0-9\.]+/, ""
+        ## or a negative symbol
+        num = el.css(attr).replace /[^0-9\.-]+/, ""
 
         throw new Error("Element attr did not return a valid number") if not _.isFinite(num)
 

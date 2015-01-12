@@ -1,17 +1,20 @@
 describe "Element Dimensions Utility", ->
   before ->
+    Cypress.start()
+
     loadFixture("html/dimensions").done (iframe) =>
-      ## need to patch here because chai 'expects' are automatically
-      ## patched to emit events.  should probably think
-      ## about restructuring this logic to prevent
-      ## assertions from either being overridden
-      ## or potentially "unpatched" from within these parent specs
-      Eclectus.patch {$remoteIframe: $(iframe)}
-      @html = $(iframe).contents()
+      @iframe = $(iframe)
+
+  beforeEach ->
+    Cypress.set(@currentTest) if @currentTest
+    Cypress.setup(runner, @iframe, ->)
+
+  after ->
+    Cypress.stop()
 
   context "square", ->
     beforeEach ->
-      @square      = @html.find("#square")
+      @square      = cy.$("#square")
       @dimensions  = App.request "element:dimensions", @square
 
     it "returns an object containing dimensions", ->
@@ -25,7 +28,7 @@ describe "Element Dimensions Utility", ->
 
   context "square with padding", ->
     beforeEach ->
-      @square      = @html.find("#square-padding")
+      @square      = cy.$("#square-padding")
       @dimensions  = App.request "element:dimensions", @square
 
     it "sets height to 20", ->
@@ -53,14 +56,14 @@ describe "Element Dimensions Utility", ->
       expect(@dimensions).to.have.property "widthWithPadding", 40
 
     it "layers padding div", ->
-      @layer = App.request "element:box:model:layers", @square, @html.find("body")
+      @layer = App.request "element:box:model:layers", @square, cy.$("body")
       style = @layer.find("[data-layer='Padding']").prop("style")
       expect(style).to.have.property("height", "30px")
       expect(style).to.have.property("width", "40px")
 
   context "square with border", ->
     beforeEach ->
-      @square      = @html.find("#square-border")
+      @square      = cy.$("#square-border")
       @dimensions  = App.request "element:dimensions", @square
 
     it "sets height to 20", ->
@@ -88,14 +91,14 @@ describe "Element Dimensions Utility", ->
       expect(@dimensions).to.have.property "widthWithBorder", 24
 
     it "layers border div", ->
-      @layer = App.request "element:box:model:layers", @square, @html.find("body")
+      @layer = App.request "element:box:model:layers", @square, cy.$("body")
       style = @layer.find("[data-layer='Border']").prop("style")
       expect(style).to.have.property("height", "24px")
       expect(style).to.have.property("width", "24px")
 
   context "square with margin", ->
     beforeEach ->
-      @square      = @html.find("#square-margin")
+      @square      = cy.$("#square-margin")
       @dimensions  = App.request "element:dimensions", @square
 
     it "sets height to 20", ->
@@ -123,17 +126,25 @@ describe "Element Dimensions Utility", ->
       expect(@dimensions).to.have.property "widthWithMargin", 32
 
     it "layers margin div", ->
-      @layer = App.request "element:box:model:layers", @square, @html.find("body")
+      @layer = App.request "element:box:model:layers", @square, cy.$("body")
       style = @layer.find("[data-layer='Margin']").prop("style")
       expect(style).to.have.property("height", "36px")
       expect(style).to.have.property("width", "32px")
 
   context "square with margin, border, padding", ->
     beforeEach ->
-      @square      = @html.find("#square-margin-border-padding")
+      @square      = cy.$("#square-margin-border-padding")
 
     it "layers content div", ->
-      @layer = App.request "element:box:model:layers", @square, @html.find("body")
+      @layer = App.request "element:box:model:layers", @square, cy.$("body")
       style = @layer.find("[data-layer='Content']").prop("style")
       expect(style).to.have.property("height", "20px")
       expect(style).to.have.property("width", "20px")
+
+  context "negative margin, padding", ->
+    beforeEach ->
+      @square = cy.$("#square-negative-margin-padding")
+
+    it "does not throw on negative margins or negative padding", ->
+      fn = => App.request("element:dimensions", @square)
+      expect(fn).not.to.throw(Error)
