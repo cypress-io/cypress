@@ -101,21 +101,13 @@ do (Cypress, _, chai) ->
       patchMethod: (value, key) ->
         chai[key] = _.wrap value, (orig, args...) ->
 
-          try
-            switch
-              ## shift the expectation to use the $el on
-              ## the command
-              when args[0] and args[0].isCommand?()
-                args[0] = args[0]._$el
+          args = _.map args, (arg) ->
+            ## if the object in the arguments has a cypress namespace
+            ## then swap it out for that object
+            if obj = Cypress.Utils.getCypressNamespace(arg)
+              return obj
 
-              ## chai-jquery hard codes checking instanceof's
-              ## and would always return false if we're receiving
-              ## a child jQuery object -- so we need to reset
-              ## this object to a jQuery instance that the parent
-              ## window controls
-              when args[0] instanceof $("iframe#iframe-remote")[0]?.contentWindow.$
-                args[0] = $(args[0])
-          catch e
+            return arg
 
           orig.apply(@, args)
 

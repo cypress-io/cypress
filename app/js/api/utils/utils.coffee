@@ -3,6 +3,8 @@ do (Cypress, _) ->
   tagOpen     = /\[([a-z\s='"-]+)\]/g
   tagClosed   = /\[\/([a-z]+)\]/g
 
+  CYPRESS_OBJECT_NAMESPACE = "_cypressObj"
+
   Cypress.addUtil
     hasElement: (obj) ->
       !!(obj and obj[0] and _.isElement(obj[0])) or _.isElement(obj)
@@ -33,3 +35,17 @@ do (Cypress, _) ->
       html
         .replace(tagOpen, "<$1>")
         .replace(tagClosed, "</$1>")
+
+    isInstanceOf: (instance, constructor) ->
+      try
+        instance instanceof constructor
+      catch e
+        false
+
+    getCypressNamespace: (obj) ->
+      obj and obj[CYPRESS_OBJECT_NAMESPACE]
+
+    ## backs up an original object to another
+    ## by going through the cypress object namespace
+    setCypressNamespace: (obj, original) ->
+      obj[CYPRESS_OBJECT_NAMESPACE] = original
