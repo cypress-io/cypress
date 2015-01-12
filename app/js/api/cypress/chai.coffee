@@ -12,7 +12,7 @@ do (Cypress, _, chai) ->
       restore: ->
         chai.expect = expect
         chai.assert = assert
-        chai.Assertion::assert = assertProto
+        @restoreAssert()
 
         return @
 
@@ -31,6 +31,10 @@ do (Cypress, _, chai) ->
         contentWindow.should         = chai.should()
         contentWindow.assert         = chai.assert
         contentWindow.assertOriginal = assert
+
+      restoreAssert: ->
+        chai.Assertion::assert = assertProto
+
       patchAssert: ->
         _this = @
 

@@ -6,6 +6,10 @@ getFirstSubjectByName = (name) ->
 
 describe "Cypress", ->
   before ->
+    ## this immediately restores the chai.Assertion::assert else
+    ## all of our expect messages would be completely foobar'd
+    ## since the modified assert literally modifies the expectation
+    Cypress.Chai.restoreAssert()
     Cypress.start()
 
     @loadDom = (fixture = "html/dom") =>
