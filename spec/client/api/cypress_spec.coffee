@@ -2246,6 +2246,151 @@ describe "Cypress", ->
           .then ($input) ->
             expectOriginal($input.selector).to.eq "input:first"
 
+  context "#invoke", ->
+    beforeEach ->
+      ## set the jquery path back to our
+      ## remote window
+      Cypress.option "jQuery", @iframe.prop("contentWindow").$
+
+      cy.window().assign("remoteWindow")
+
+    afterEach ->
+      ## restore back to the global $
+      Cypress.option "jQuery", $
+
+    describe "remote DOM subjects", ->
+      it "is invoked on the remote DOM subject", ->
+        @remoteWindow.$.fn.foo = -> "foo"
+
+        cy.get("input:first").invoke("foo").then (str) ->
+          expect(str).to.eq "foo"
+
+      it "re-wraps the remote element if its returned", ->
+        parent = cy.$("input:first").parent()
+        expect(parent).to.exist
+
+        cy.get("input:first").invoke("parent").then ($parent) ->
+          expectOriginal($parent).to.be.instanceof @remoteWindow.$
+          expect(cy.prop("subject")).to.match parent
+
+    describe "function property", ->
+      beforeEach ->
+        @obj = {
+          foo: -> "foo"
+          bar: (num1, num2) -> num1 + num2
+          err: -> throw new Error("fn.err failed!")
+          baz: 10
+        }
+
+      it "changes subject to function invocation", ->
+        cy.noop(@obj).invoke("foo").then (str) ->
+          expect(str).to.eq "foo"
+
+      it "forwards any additional arguments", ->
+        cy.noop(@obj).invoke("bar", 1, 2).then (num) ->
+          expect(num).to.eq 3
+
+      describe "errors", ->
+        beforeEach ->
+          @sandbox.stub cy.runner, "uncaught"
+
+        it "bubbles up automatically", (done) ->
+          cy.on "fail", (err) ->
+            expect(err.message).to.eq "fn.err failed!"
+            done()
+
+          cy.noop(@obj).invoke("err")
+
+    describe "regular property", ->
+      beforeEach ->
+        @obj = {
+          baz: 10
+        }
+
+      it "returns property", ->
+        cy.noop(@obj).invoke("baz").then (num) ->
+          expect(num).to.eq @obj.baz
+
+      it "returns property on remote subject", ->
+        @remoteWindow.$.fn.baz = 123
+
+        cy.get("div:first").invoke("baz").then (num) ->
+          expect(num).to.eq 123
+
+    describe ".log", ->
+      beforeEach ->
+        @obj = {
+          foo: "foo"
+          num: 123
+          bar: -> "bar"
+          sum: (args...) ->
+            _.reduce args, (memo, num) ->
+              memo + num
+            , 0
+        }
+
+        Cypress.on "log", (@log) =>
+
+      it "logs obj", ->
+        cy.noop(@obj).invoke("foo").then ->
+          obj = {
+            name: "invoke"
+            message: "foo"
+          }
+
+          _.each obj, (value, key) =>
+            expect(@log[key]).to.deep.eq value
+
+      it "#onConsole as a regular property", ->
+        cy.noop(@obj).invoke("num").then ->
+          expect(@log.onConsole()).to.deep.eq {
+            Command:  "invoke"
+            Property: ".num"
+            On:       @obj
+            Returned: 123
+          }
+
+      it "#onConsole as a function property without args", ->
+        cy.noop(@obj).invoke("bar").then ->
+          expect(@log.onConsole()).to.deep.eq {
+            Command:  "invoke"
+            Function: ".bar()"
+            On:       @obj
+            Returned: "bar"
+          }
+
+      it "#onConsole as a function property with args", ->
+        cy.noop(@obj).invoke("sum", 1, 2, 3).then ->
+          expect(@log.onConsole()).to.deep.eq {
+            Command:  "invoke"
+            Function: ".sum()"
+            "With Arguments": [1,2,3]
+            On:       @obj
+            Returned: 6
+          }
+
+    describe "errors", ->
+      beforeEach ->
+        @sandbox.stub cy.runner, "uncaught"
+
+      it "throws when property is undefined", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.eq "cy.invoke() returned 'undefined' after invoking the property: foo"
+          done()
+
+        cy.noop({}).invoke("foo")
+
+      it "throws when function is undefined", (done) ->
+        obj = {
+          bar: -> undefined
+        }
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.eq "cy.invoke() returned 'undefined' after invoking the function: bar"
+          done()
+
+        cy.noop(obj).invoke("bar")
+
   context "#run", ->
     it "does not call clearTimeout on the runnable if it already has a state", (done) ->
       ## this prevents a bug where if we arent an async test, done() callback

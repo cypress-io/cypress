@@ -1,5 +1,8 @@
 do (Cypress, _, $) ->
 
+  remoteJQueryisNotSameAsGlobal = (remoteJQuery) ->
+    remoteJQuery and (remoteJQuery isnt $)
+
   Cypress.addDualCommand
 
     ## thens can return more "thenables" which are not resolved
@@ -19,12 +22,8 @@ do (Cypress, _, $) ->
       if not current.next and current.args.length is 2 and (current.args[1].name is "done" or current.args[1].length is 1)
         return @prop("next", fn)
 
-      remoteJQueryisSameGlobal = ->
-        remoteJQuery is $
-
       remoteJQuery = @_getRemoteJQuery()
-      if remoteJQuery and (not remoteJQueryisSameGlobal()) and Cypress.Utils.hasElement(subject)
-        window.remoteJquery = remoteJQuery
+      if Cypress.Utils.hasElement(subject) and remoteJQueryisNotSameAsGlobal(remoteJQuery)
         remoteSubject = remoteJQuery(subject)
         Cypress.Utils.setCypressNamespace(remoteSubject, subject)
 
@@ -36,8 +35,8 @@ do (Cypress, _, $) ->
         ret = fn.call @prop("runnable").ctx, (remoteSubject or subject)
 
         ## if ret is a DOM element
-        ## and its an instance of the remoteJquery
-        if ret and Cypress.Utils.hasElement(ret) and (not remoteJQueryisSameGlobal()) and Cypress.Utils.isInstanceOf(ret, remoteJQuery)
+        ## and its an instance of the remoteJQuery
+        if ret and Cypress.Utils.hasElement(ret) and remoteJQueryisNotSameAsGlobal(remoteJQuery) and Cypress.Utils.isInstanceOf(ret, remoteJQuery)
           ## set it back to our own jquery object
           ## to prevent it from being passed downstream
           ret = cy.$(ret)
@@ -49,6 +48,52 @@ do (Cypress, _, $) ->
         throw e
 
     and: (subject, fn) -> @sync.then(fn)
+
+  Cypress.addChildCommand
+    invoke: (subject, fn, args...) ->
+      remoteJQuery = @_getRemoteJQuery()
+      if Cypress.Utils.hasElement(subject) and remoteJQueryisNotSameAsGlobal(remoteJQuery)
+        remoteSubject = remoteJQuery(subject)
+        Cypress.Utils.setCypressNamespace(remoteSubject, subject)
+
+      prop = (remoteSubject or subject)[fn]
+
+      invoke = ->
+        if _.isFunction(prop)
+          ret = prop.apply (remoteSubject or subject), args
+
+          if ret and Cypress.Utils.hasElement(ret) and remoteJQueryisNotSameAsGlobal(remoteJQuery) and Cypress.Utils.isInstanceOf(ret, remoteJQuery)
+            return cy.$(ret)
+
+          return ret
+
+        else
+          prop
+
+      value = invoke()
+
+      if _.isUndefined(value)
+        word = if _.isFunction(prop) then "function" else "property"
+        @throwErr("cy.invoke() returned 'undefined' after invoking the #{word}: #{fn}")
+
+      Cypress.command
+        message: value
+        onConsole: ->
+          obj = {}
+
+          if _.isFunction(prop)
+            obj["Function"] = ".#{fn}()"
+            obj["With Arguments"] = args if args.length
+          else
+            obj["Property"] = ".#{fn}"
+
+          _.extend obj,
+            On: remoteSubject or subject
+            Returned: value
+
+          obj
+
+      return value
 
   Cypress.addParentCommand
 
