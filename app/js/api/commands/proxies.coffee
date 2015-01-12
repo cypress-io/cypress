@@ -14,9 +14,12 @@ do (Cypress, _) ->
       Cypress.command
         $el: $el
         onConsole: ->
-          "Selector":     args.join(", ")
-          "Applied To":   subject
-          "Returned":     $el
-          "Elements":     $el.length
+          obj = {}
+          obj.Selector = args.join(", ") if not _(args).any(_.isFunction)
+
+          _.extend obj,
+            "Applied To":   subject
+            "Returned":     $el
+            "Elements":     $el.length
 
       return $el

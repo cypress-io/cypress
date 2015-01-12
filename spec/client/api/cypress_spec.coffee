@@ -2161,13 +2161,16 @@ describe "Cypress", ->
 
           it "#onConsole", ->
             cy.get("#list")[name](arg).then ($el) ->
-              expect(@log.onConsole()).to.deep.eq {
-                Command: name
-                Selector: [].concat(arg).join(", ")
+              obj = {Command: name}
+              obj.Selector = [].concat(arg).join(", ") unless _.isFunction(arg)
+
+              _.extend obj, {
                 "Applied To": getFirstSubjectByName("get")
                 Returned: $el
                 Elements: $el.length
               }
+
+              expect(@log.onConsole()).to.deep.eq obj
 
   context "#then", ->
     it "mocha inserts 2 arguments to then: anonymous fn for invoking done(), and done reference itself", ->
