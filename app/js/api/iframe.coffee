@@ -9,11 +9,8 @@ do (parent = window.opener or window.parent) ->
   $ = parent.$
 
   ## proxy chai from our parent
-  if parent.chai
-    window.chai   = parent.chai
-    window.expect = chai.expect
-    window.should = chai.should()
-    window.assert = chai.assert
+  if parent.chai and Cypress
+    Cypress.Chai.setGlobals(window)
 
   ## create our own mocha objects from our parents if its not already defined
   window.Mocha ?= parent.Mocha

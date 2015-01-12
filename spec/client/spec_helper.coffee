@@ -1,11 +1,10 @@
-window.expect = chai.expect
-
 before ->
   @sandbox = sinon.sandbox.create()
 
 beforeEach ->
   App.config = App.request "new:config:entity", {}
   App.config.setEnv("ui")
+  Cypress.Chai.setGlobals(window)
 
 afterEach ->
   @sandbox.restore()

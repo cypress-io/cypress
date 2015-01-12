@@ -24,6 +24,13 @@ do (Cypress, _, chai) ->
 
         return @
 
+      setGlobals: (contentWindow) ->
+        contentWindow.chai           = chai
+        contentWindow.expect         = chai.expect
+        contentWindow.expectOriginal = expect
+        contentWindow.should         = chai.should()
+        contentWindow.assert         = chai.assert
+        contentWindow.assertOriginal = assert
       patchAssert: ->
         _this = @
 

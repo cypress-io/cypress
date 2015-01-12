@@ -329,6 +329,7 @@
           src: @src
           id: "iframe-spec"
           load: ->
+            Cypress.Chai.setGlobals(@contentWindow)
             iframeLoaded.resolve(@contentWindow)
             view.$el.show()
             view.calcWidth()
