@@ -419,6 +419,12 @@ window.Cypress = do ($, _, Backbone) ->
     _contains: (el) ->
       $.contains(@sync.document().get(0), el)
 
+    _getRemoteJQuery: ->
+      if opt = Cypress.option("jQuery")
+        return opt
+      else
+        @sync.window().$
+
     ## the command method is useful for synchronously
     ## calling another command but wrapping it in a
     ## promise

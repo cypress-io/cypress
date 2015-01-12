@@ -1,4 +1,4 @@
-do (Cypress, _) ->
+do (Cypress, _, $) ->
 
   Cypress.addDualCommand
 
@@ -19,12 +19,28 @@ do (Cypress, _) ->
       if not current.next and current.args.length is 2 and (current.args[1].name is "done" or current.args[1].length is 1)
         return @prop("next", fn)
 
+      remoteJQueryisSameGlobal = ->
+        remoteJQuery is $
+
+      remoteJQuery = @_getRemoteJQuery()
+      if remoteJQuery and (not remoteJQueryisSameGlobal()) and Cypress.Utils.hasElement(subject)
+        window.remoteJquery = remoteJQuery
+        remoteSubject = remoteJQuery(subject)
+        Cypress.Utils.setCypressNamespace(remoteSubject, subject)
+
       ## we need to wrap this in a try-catch still (even though we're
       ## using bluebird) because we want to handle the return by
       ## allow the 'then' to change the subject to the return value
       ## if its a non null/undefined value else to return the subject
       try
-        ret = fn.call @prop("runnable").ctx, subject
+        ret = fn.call @prop("runnable").ctx, (remoteSubject or subject)
+
+        ## if ret is a DOM element
+        ## and its an instance of the remoteJquery
+        if ret and Cypress.Utils.hasElement(ret) and (not remoteJQueryisSameGlobal()) and Cypress.Utils.isInstanceOf(ret, remoteJQuery)
+          ## set it back to our own jquery object
+          ## to prevent it from being passed downstream
+          ret = cy.$(ret)
 
         ## then will resolve with the fn's
         ## return or just pass along the subject

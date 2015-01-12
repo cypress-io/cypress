@@ -2193,6 +2193,51 @@ describe "Cypress", ->
 
       cy.noop().then((->), fn)
 
+    describe "yields to remote jQuery subject", ->
+      beforeEach ->
+        ## set the jquery path back to our
+        ## remote window
+        Cypress.option "jQuery", @iframe.prop("contentWindow").$
+
+        cy.window().assign("remoteWindow")
+
+      afterEach ->
+        ## restore back to the global $
+        Cypress.option "jQuery", $
+
+      it "calls the callback function with the remote jQuery subject", ->
+        @remoteWindow.$.fn.foo = fn = ->
+
+        cy
+          .get("input:first").then ($input) ->
+            expectOriginal($input).to.be.instanceof @remoteWindow.$
+            expectOriginal($input).to.have.property "foo", fn
+
+      it "continues to pass the remote jQuery object downstream", ->
+        cy
+          .get("input:first").then ($input) ->
+            expectOriginal($input).to.be.instanceof @remoteWindow.$
+            return $input
+          .then ($input) ->
+            expectOriginal($input).to.be.instanceof @remoteWindow.$
+
+      it "does not store the remote jquery object as the subject", ->
+        cy
+          .get("input:first").then ($input) ->
+            expectOriginal($input).to.be.instanceof @remoteWindow.$
+            return $input
+          .then ($input) ->
+            expectOriginal(cy.prop("subject")).not.to.be.instanceof @remoteWindow.$
+            expectOriginal(cy.prop("subject")).to.be.instanceof window.$
+
+      it "does not nuke selector properties", ->
+        cy
+          .get("input:first").then ($input) ->
+            expectOriginal($input.selector).to.eq "input:first"
+            return $input
+          .then ($input) ->
+            expectOriginal($input.selector).to.eq "input:first"
+
   context "#run", ->
     it "does not call clearTimeout on the runnable if it already has a state", (done) ->
       ## this prevents a bug where if we arent an async test, done() callback
