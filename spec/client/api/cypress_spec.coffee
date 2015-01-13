@@ -3256,6 +3256,20 @@ describe "Cypress", ->
 
         cy.noop(false).to("be.true")
 
+      it "throws err when not available chaninable", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.eq "The chainer: 'dee' was not found. Building implicit expectation failed."
+          done()
+
+        cy.noop({}).to("dee.eq", {})
+
+      it "throws err when ends with a non available chaninable", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.eq "The chainer: 'eq2' was not found. Building implicit expectation failed."
+          done()
+
+        cy.noop({}).to("deep.eq2", {})
+
   context "Utils", ->
     describe "#hasElement", ->
       it "is true on jQuery objects", ->
