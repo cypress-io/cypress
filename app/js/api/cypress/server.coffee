@@ -107,16 +107,6 @@ Cypress.Server = do (Cypress, _) ->
       if _.isFunction(@afterResponse)
         @afterResponse(request, originalOptions)
 
-      # response.id = @getId()
-
-      # @emit
-      #   method:         "#{request.method} response"
-      #   xhr:            request
-      #   response:       response
-      #   # parent:       request.id
-      #   canBeParent:    true
-      #   id:             response.id
-
     stub: (originalOptions = {}) ->
       options = _(originalOptions).clone()
 
@@ -133,6 +123,8 @@ Cypress.Server = do (Cypress, _) ->
         if @requestMatchesResponse request, options
           request.matchedResponse = originalOptions
 
+          @setRequestJSON(request)
+
           ## if we're looking up the options for a matching response
           ## then bail early and return the options into our callback
           return fn(options) if fn
@@ -147,6 +139,12 @@ Cypress.Server = do (Cypress, _) ->
           request.respond(response.status, response.headers, response.body)
 
           @respondToRequest request, options, originalOptions
+
+    setRequestJSON: (request) ->
+      return if not _.str.include(request.requestHeaders.Accept, "application/json")
+
+      try
+        request.requestJSON = JSON.parse(request.requestBody)
 
     requestMatchesResponse: (request, options) ->
       request.method is options.method and

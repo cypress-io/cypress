@@ -401,6 +401,25 @@ describe "Cypress", ->
         .then ->
           expect(cy._sandbox.server.responses).to.have.length(2)
 
+    describe "request JSON parsing", ->
+      it "adds requestJSON if requesting JSON", (done) ->
+        cy
+          .route({
+            method: "POST"
+            url: /foo/
+            response: {}
+            onRequest: (xhr) ->
+              expect(xhr).to.have.property("requestJSON")
+              expect(xhr.requestJSON).to.deep.eq {foo: "bar"}
+              done()
+          })
+          .then ->
+            cy.sync.window().$.ajax
+              type: "POST"
+              url: "/foo"
+              data: JSON.stringify({foo: "bar"})
+              dataType: "json"
+
     describe "errors", ->
       beforeEach ->
         @sandbox.stub cy.runner, "uncaught"
