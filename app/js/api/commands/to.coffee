@@ -19,3 +19,6 @@ do (Cypress, _) ->
       , exp
 
       return subject
+
+    should: (subject, args...) ->
+      @sync.to.apply(@, args)

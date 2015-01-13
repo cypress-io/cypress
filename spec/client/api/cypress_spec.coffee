@@ -3270,6 +3270,10 @@ describe "Cypress", ->
 
         cy.noop({}).to("deep.eq2", {})
 
+  context "#should", ->
+    it "proxies to #to", ->
+      cy.noop({foo: "bar"}).should("deep.eq", {foo: "bar"})
+
   context "Utils", ->
     describe "#hasElement", ->
       it "is true on jQuery objects", ->
