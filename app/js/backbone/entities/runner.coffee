@@ -528,7 +528,9 @@
         @runner.removeAllListeners()
 
         ## cleanup any of our handlers
-        @stopListening()
+        socket = App.request "socket:entity"
+        @stopListening(socket)
+        @stopListening(Cypress, "log")
 
         ## remove all references to other objects
         ## clear twice to nuke _previousAttributes
