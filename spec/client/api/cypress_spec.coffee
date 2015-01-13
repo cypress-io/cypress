@@ -2101,7 +2101,7 @@ describe "Cypress", ->
             Elements: 1
           }
 
-  context "invoke", ->
+  context "#invoke2", ->
     it "waits for isReady before invoking command", (done) ->
       ## when we are isReady false that means we should
       ## never begin invoking our commands
@@ -3088,8 +3088,7 @@ describe "Cypress", ->
         Cypress.on "log", (obj) ->
           expect(obj.onConsole()).to.deep.eq {
             Command: "get"
-            Error: obj._error
-            Stack: obj._error.stack
+            Error: obj._error.stack
           }
           done()
 
@@ -3099,8 +3098,7 @@ describe "Cypress", ->
         Cypress.on "log", (obj) ->
           expect(obj.onConsole()).to.deep.eq {
             Command: "wait"
-            Error: obj._error
-            Stack: obj._error.stack
+            Error: obj._error.stack
           }
           done()
 
@@ -3113,8 +3111,7 @@ describe "Cypress", ->
             expect(obj.onConsole()).to.deep.eq {
               Command: "wait"
               "Applied To": getFirstSubjectByName("get")
-              Error: obj._error
-              Stack: obj._error.stack
+              Error: obj._error.stack
             }
             done()
 
@@ -3127,8 +3124,7 @@ describe "Cypress", ->
             expect(obj.onConsole()).to.deep.eq {
               Command: "contains"
               "Applied To": getFirstSubjectByName("get")
-              Error: obj._error
-              Stack: obj._error.stack
+              Error: obj._error.stack
             }
             done()
 
@@ -3140,8 +3136,7 @@ describe "Cypress", ->
             expect(obj.onConsole()).to.deep.eq {
               Command: "contains"
               "Applied To": getFirstSubjectByName("eq")
-              Error: obj._error
-              Stack: obj._error.stack
+              Error: obj._error.stack
             }
             done()
 
@@ -3468,8 +3463,7 @@ describe "Cypress", ->
             expected: false
             actual: true
             Message: "expected true to be false"
-            Error: obj._error
-            Stack: obj._error.stack
+            Error: obj._error.stack
           }
           done()
 
