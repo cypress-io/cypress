@@ -51,7 +51,9 @@
       logResults: (test) ->
         @trigger "test:results:ready", test
 
-      revertDom: (command) ->
+      revertDom: (command, init = true) ->
+        return @trigger "restore:dom" if not init
+
         @trigger "revert:dom", command.getSnapshot(),
           id:   command.cid
           el:   command.getEl()

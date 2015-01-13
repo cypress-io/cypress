@@ -91,9 +91,43 @@
       ## when the drop down is closed to clean up references
       @$iframe.contents().off eventNamespace
 
+    restoreDom: ->
+      return if not @originalBody
+
+      do =>
+        ## backup the current command's detachedId
+        previousDetachedId = @detachedId
+
+        ## we're using a setImmediate here because mouseleave will fire
+        ## before mouseenter.  and we dont want to restore the dom if we're
+        ## able to be hovering over a different command, else that would
+        ## be a huge waste.
+        setImmediate =>
+          ## we want to only restore the dom if we havent hovered over
+          ## to another command by the time this setImmediate function runs
+          return if previousDetachedId isnt @detachedId
+
+          @$el.find("#iframe-remote").contents().find("body").replaceWith(@originalBody)
+
+          @removeRevertMessage()
+
+          @detachedId = null
+
     revertToDom: (dom, options) ->
       ## replaces the iframes body with the dom object
-      dom.replaceAll @$el.find("#iframe-remote").contents().find("body")
+      contents = @$remote.contents()
+
+      if not @originalBody
+        @originalBody = contents.find("body").detach()
+      else
+        contents.find("body").remove()
+
+      @detachedId = options.id
+
+      ## potentially think about making this setImmediate for
+      ## either perf reason or if we want the screen to "blink"
+      ## after its removed above
+      contents.find("html").append(dom)
 
       @addRevertMessage(options)
 
@@ -107,6 +141,10 @@
       @reverted = true
       @ui.message.text("DOM has been reverted").show()
 
+    removeRevertMessage: ->
+      @reverted = false
+      @ui.message.empty().hide()
+
     getZIndex: (el) ->
       if /^(auto|0)$/.test el.css("zIndex") then 1000 else Number el.css("zIndex")
 
@@ -114,14 +152,12 @@
       _.defaults options,
         init: true
 
-      @$remote.contents().find("[data-highlight-el]").remove() if not @reverted
+      @$remote.contents().find("[data-highlight-el]").remove()
 
-      return if not options.init
-
-      ## if we're not currently reverted
-      ## and init is false then nuke the currently highlighted el
+      # # if we're not currently reverted
+      # # and init is false then nuke the currently highlighted el
       # if not @reverted and not options.init
-        # return @$iframe.contents().find("[data-highlight-el='#{options.id}']").remove()
+      #   return @$iframe.contents().find("[data-highlight-el='#{options.id}']").remove()
 
       if options.dom
         dom = options.dom
@@ -143,7 +179,7 @@
         ## dont show anything if our element displaces nothing
         return if dimensions.width is 0 or dimensions.height is 0
 
-        _.defer =>
+        setImmediate =>
           div = App.request("element:box:model:layers", el, dom)
           div.attr("data-highlight-el", options.id)
 
@@ -211,9 +247,11 @@
       @$iframe?.remove()
       @$remote?.remove()
 
-      @$remote = null
-      @$iframe = null
-      @fn      = null
+      @$remote      = null
+      @$iframe      = null
+      @fn           = null
+      @detachedBody = null
+      @originalBody = null
 
     removeIframeWindowListeners: ->
       $(@$remote.prop("contentWindow")).off "hashchange", @updateRemoteUrl

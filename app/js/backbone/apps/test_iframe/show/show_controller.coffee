@@ -25,6 +25,9 @@
       @listenTo runner, "highlight:el", (el, options) ->
         view.highlightEl el, options
 
+      @listenTo runner, "restore:dom", ->
+        view.restoreDom()
+
       @show view
 
     loadIframe: (view, runner, iframe, options) ->

@@ -27,14 +27,14 @@
         return @highlightClone(hooks, command) if command.isCloned()
 
         return if not command.getEl()
-        runner.highlightEl(command)
+        runner.revertDom(command)
 
       @listenTo commandsView, "childview:childview:command:mouseleave", (iv, iv2, args) ->
         command = args.model
         return @highlightClone(hooks, command, false) if command.isCloned()
 
         return if not command.getEl()
-        runner.highlightEl(command, false)
+        runner.revertDom(command, false)
 
       @show commandsView
 
