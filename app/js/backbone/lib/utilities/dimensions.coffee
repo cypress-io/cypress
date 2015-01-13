@@ -64,7 +64,7 @@
           position: "absolute"
           zIndex: @getZIndex(el)
           backgroundColor: color
-          opacity: 0.7
+          opacity: 0.6
         .attr("data-layer", attr)
         .prependTo(container)
 
