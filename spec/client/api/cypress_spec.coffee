@@ -3221,6 +3221,41 @@ describe "Cypress", ->
 
       expect(@eventByName("foo")).to.have.length(1)
 
+  context "#to", ->
+    it "returns the subject for chainability", ->
+      cy.noop({foo: "bar"}).to("deep.eq", {foo: "bar"}).then (obj) ->
+        expect(obj).to.deep.eq {foo: "bar"}
+
+    it "can use negation", ->
+      cy.noop(false).to("not.be.true")
+
+    it "works with jquery chai", ->
+      div = $("<div class='foo'>asdf</div>")
+
+      cy.$("body").append(div)
+
+      cy
+        .get("div.foo").to("have.class", "foo").then ($div) ->
+          expect($div).to.match div
+          $div.remove()
+
+    it "can chain multiple assertions", ->
+      cy
+        .get("body")
+          .to("contain", "DOM Fixture")
+          .to("have.property", "length", 1)
+
+    describe "errors", ->
+      beforeEach ->
+        @sandbox.stub cy.runner, "uncaught"
+
+      it "should not be true", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.eq "expected false to be true"
+          done()
+
+        cy.noop(false).to("be.true")
+
   context "Utils", ->
     describe "#hasElement", ->
       it "is true on jQuery objects", ->
@@ -3352,6 +3387,13 @@ describe "Cypress", ->
 
             cy.get("input").eq(0).then ($div) ->
               expect($div).to.match("input")
+
+    describe "#expect", ->
+      it "proxies to chai.expect", ->
+        exp = @sandbox.spy chai, "expect"
+        Cypress.Chai.expect(true).to.eq.true
+
+        expectOriginal(exp).to.be.calledWith(true)
 
   describe "#assert", ->
     describe ".log", ->

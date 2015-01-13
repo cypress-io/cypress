@@ -9,6 +9,8 @@ do (Cypress, _, chai) ->
     assertProto  = chai.Assertion::assert
 
     Cypress.Chai = {
+      expect: -> chai.expect.apply(chai, arguments)
+
       restore: ->
         chai.expect = expect
         chai.assert = assert
