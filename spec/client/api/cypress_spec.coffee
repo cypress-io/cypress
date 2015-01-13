@@ -3212,7 +3212,7 @@ describe "Cypress", ->
     it "can remove event by name + callback fn", ->
       fn = ->
 
-      Cypress.on "foo", ->
+      Cypress.on "foo", -> "foo"
       Cypress.on "foo", fn
 
       expect(@eventByName("foo")).to.have.length(2)
@@ -3220,6 +3220,31 @@ describe "Cypress", ->
       Cypress.off "foo", fn
 
       expect(@eventByName("foo")).to.have.length(1)
+
+      Cypress.off "foo"
+
+  context ".on", ->
+    beforeEach ->
+      @eventByName = (name) ->
+        _(Cypress._events).where({name: name})
+
+    it "replaces existing events if function matches", ->
+      fn = ->
+
+      Cypress.on "foo", fn
+      Cypress.on "foo", fn
+
+      expect(@eventByName("foo")).to.have.length(1)
+
+      Cypress.off "foo", fn
+
+    it "replaces existing events if function.toString() matches", ->
+      Cypress.on "foo", -> "foo bar baz"
+      Cypress.on "foo", -> "foo bar baz"
+
+      expect(@eventByName("foo")).to.have.length(1)
+
+      Cypress.off "foo"
 
   context "#to", ->
     it "returns the subject for chainability", ->

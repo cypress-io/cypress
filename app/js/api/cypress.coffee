@@ -762,6 +762,9 @@ window.Cypress = do ($, _, Backbone) ->
       splice = (index) =>
         @_events.splice(index, 1)
 
+      functionsMatch = (fn1, fn2) ->
+        fn1 is fn2 or ("" + fn1 is "" + fn2)
+
       ## loop in reverse since we are
       ## destructively modifying _events
       for event, index in @_events by -1
@@ -769,7 +772,7 @@ window.Cypress = do ($, _, Backbone) ->
           if fn
             ## if we have a passed in fn argument
             ## make sure our event has the same fn
-            splice(index) if event.fn is fn
+            splice(index) if functionsMatch(event.fn, fn)
           else
             ## else always splice it out since
             ## it matches the name
@@ -781,6 +784,8 @@ window.Cypress = do ($, _, Backbone) ->
       return if not _.isFunction(fn)
 
       @_events ?= []
+
+      @off(event, fn)
       @_events.push {name: event, fn: fn}
 
       return @
