@@ -1425,6 +1425,26 @@ describe "Cypress", ->
 
       it "throws when using an alias that does not exist"
 
+      it "throws after timing out after a .wait() alias reference", (done) ->
+        cy.$("#get-json").click ->
+          cy._timeout(1000)
+
+          retry = _.after 3, _.once ->
+            cy.sync.window().$.getJSON("/json")
+
+          cy.on "retry", retry
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "Could not find element: getJsonButton"
+          done()
+
+        cy
+          .server()
+          .route(/json/, {foo: "foo"}).as("getJSON")
+          .get("#get-json").as("getJsonButton").click()
+          .wait("@getJSON")
+          .get("getJsonButton")
+
   context "#contains", ->
     it "finds the nearest element by :contains selector", ->
       cy.contains("li 0").then ($el) ->
@@ -2800,6 +2820,20 @@ describe "Cypress", ->
           .wait("@fetch").then (xhr) ->
             obj = JSON.parse(xhr.responseText)
             expect(obj).to.deep.eq response
+
+      it "resets the timeout after waiting", ->
+        prevTimeout = cy._timeout()
+
+        retry = _.after 3, _.once ->
+          cy.sync.window().$.get("/foo")
+
+        cy.on "retry", retry
+
+        cy
+          .server()
+          .route("GET", /.*/, {}).as("fetch")
+          .wait("@fetch").then ->
+            expect(cy._timeout()).to.eq prevTimeout
 
       describe "errors", ->
         beforeEach ->

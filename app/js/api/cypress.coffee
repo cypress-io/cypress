@@ -109,13 +109,13 @@ window.Cypress = do ($, _, Backbone) ->
         return @
 
       ## store the previous timeout
-      prevTimeout = runnable.timeout()
+      prevTimeout = @_timeout()
 
       ## prior to running set the runnables
       ## timeout to 30s. this is useful
       ## because we may have to wait to begin
       ## running such as the case in angular
-      runnable.timeout(30000)
+      @_timeout(30000)
 
       run = =>
         ## bail if we've changed runnables by the
@@ -123,7 +123,7 @@ window.Cypress = do ($, _, Backbone) ->
         return if @prop("runnable") isnt runnable
 
         ## reset the timeout to what it used to be
-        runnable.timeout(prevTimeout)
+        @_timeout(prevTimeout)
 
         @trigger "command:start", queue
 
@@ -133,7 +133,7 @@ window.Cypress = do ($, _, Backbone) ->
           ## unless we already have a state.  if we have a state
           ## then we're already done and resetting would cause a
           ## timeout to happen in a few seconds
-          runnable.resetTimeout() if not runnable.state
+          @_timeout(prevTimeout) if not runnable.state
 
           ## mutate index by incrementing it
           ## this allows us to keep the proper index
