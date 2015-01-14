@@ -1250,6 +1250,16 @@ describe "Cypress", ->
           .get("input:first").as("firstInput")
           .get("@lastDiv")
 
+      it "throws when alias is missing '@' but matches an available alias", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.eq "Invalid alias: 'getAny'. You forgot the '@'. It should be written as: '@getAny'."
+          done()
+
+        cy
+          .server()
+          .route("*", {}).as("getAny")
+          .wait("getAny").then ->
+
   context "#_replayFrom", ->
     describe "subject in document", ->
       it "returns if subject is still in the document", (done) ->
@@ -2802,7 +2812,7 @@ describe "Cypress", ->
 
           cy.get("body").as("b").wait("@b")
 
-        it  "throws when route is never resolved", (done) ->
+        it "throws when route is never resolved", (done) ->
           cy.on "fail", (err) ->
             expect(err.message).to.include "cy.wait() timed out waiting for a response to the route: 'fetch'. No response ever occured."
             done()
@@ -2814,6 +2824,16 @@ describe "Cypress", ->
               ## reduce the timeout to speed up tests!
               cy._timeout(100)
             .wait("@fetch")
+
+        it "throws when alias is missing '@' but matches an available alias", (done) ->
+          cy.on "fail", (err) ->
+            expect(err.message).to.eq "Invalid alias: 'getAny'. You forgot the '@'. It should be written as: '@getAny'."
+            done()
+
+          cy
+            .server()
+            .route("*", {}).as("getAny")
+            .wait("getAny").then ->
 
     describe ".log", ->
       beforeEach ->

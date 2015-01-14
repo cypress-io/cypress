@@ -1,6 +1,7 @@
 do (Cypress, _) ->
 
   aliasRe = /^@.+/
+  aliasDisplayRe = /^([@]+)/
 
   Cypress.on "defaults", ->
     @_aliases = {}
@@ -36,14 +37,27 @@ do (Cypress, _) ->
       return if not aliasRe.test(name)
 
       ## slice off the '@'
-      name = name.slice(1)
-
-      if not alias = @_aliases[name]
-        aliases = _(@_aliases).keys().join(", ")
-        currentCommand = @prop("current").name
-        @throwErr "cy.#{currentCommand}() could not find a registered alias for: '#{name}'.  Available aliases are: '#{aliases}'."
+      if not alias = @_aliases[name.slice(1)]
+        @aliasNotFoundFor(name)
 
       return alias
+
+    _aliasDisplayName: (name) ->
+      name.replace(aliasDisplayRe, "")
+
+    _getAvailableAliases: ->
+      _(@_aliases).keys()
+
+    aliasNotFoundFor: (name) ->
+      availableAliases = @_getAvailableAliases()
+
+      ## throw a very specific error if our alias isnt in the right
+      ## format, but its word is found in the availableAliases
+      if (not aliasRe.test(name)) and (name in availableAliases)
+        @throwErr "Invalid alias: '#{name}'. You forgot the '@'. It should be written as: '@#{@_aliasDisplayName(name)}'."
+
+      currentCommand = @prop("current").name
+      @throwErr "cy.#{currentCommand}() could not find a registered alias for: '#{@_aliasDisplayName(name)}'.  Available aliases are: '#{availableAliases.join(", ")}'."
 
     # cy
     #   .server()

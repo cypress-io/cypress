@@ -83,14 +83,16 @@ do (Cypress, _) ->
           return @_retry(retry, options) if _.isNull(options.value) or options.value is false
 
         when _.isString(msOrFnOrAlias)
-          alias = @getAlias(msOrFnOrAlias)
+          if not alias = @getAlias(msOrFnOrAlias)
+            @aliasNotFoundFor(msOrFnOrAlias)
 
           ## if this alias is for a route then poll
           ## until we find the response xhr object
           ## by its alias
           {alias, command} = alias
 
-          @throwErr("cy.wait() can only accept aliases for routes.  The alias: '#{alias}' did not match a route.") if command.name isnt "route"
+          if command.name isnt "route"
+            @throwErr("cy.wait() can only accept aliases for routes.  The alias: '#{alias}' did not match a route.")
 
           if xhr = @getResponseByAlias(alias)
             return xhr
