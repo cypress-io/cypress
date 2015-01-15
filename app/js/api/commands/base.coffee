@@ -108,19 +108,25 @@ do (Cypress, _, $) ->
 
     noop: (obj) -> obj
 
-    url: ->
+    url: (options = {}) ->
+      _.defaults options, {log: true}
+
       href = @sync.location("href", {log: false})
 
-      Cypress.command
-        message: href
+      if options.log
+        Cypress.command
+          message: href
 
       return href
 
-    hash: ->
+    hash: (options = {}) ->
+      _.defaults options, {log: true}
+
       hash = @sync.location("hash", {log: false})
 
-      Cypress.command
-        message: hash
+      if options.log
+        Cypress.command
+          message: hash
 
       return hash
 

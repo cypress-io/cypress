@@ -28,7 +28,7 @@ do (Cypress, _) ->
         ## if we're visiting a page and we're not currently
         ## on about:blank then we need to nuke the window
         ## and after its nuked then visit the url
-        if @sync.url() isnt "about:blank"
+        if @sync.url({log: false}) isnt "about:blank"
           win.location.href = "about:blank"
 
           @$remoteIframe.one "load", =>

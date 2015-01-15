@@ -845,6 +845,9 @@ describe "Cypress", ->
           if @log.name is "location"
             throw new Error("cy.location() should not have logged out.")
 
+      afterEach ->
+        delete @log
+
       it "logs obj", ->
         cy.url().then ->
           obj = {
@@ -854,6 +857,10 @@ describe "Cypress", ->
 
           _.each obj, (value, key) =>
             expect(@log[key]).to.deep.eq value
+
+      it "does not emit when {log: false}", ->
+        cy.url({log: false}).then ->
+          expect(@log).to.be.undefined
 
       it "#onConsole", ->
         cy.url().then ->
@@ -873,6 +880,9 @@ describe "Cypress", ->
           if @log.name is "location"
             throw new Error("cy.location() should not have logged out.")
 
+      afterEach ->
+        delete @log
+
       it "logs obj", ->
         cy.hash().then ->
           obj = {
@@ -882,6 +892,10 @@ describe "Cypress", ->
 
           _.each obj, (value, key) =>
             expect(@log[key]).to.deep.eq value
+
+      it "does not emit when {log: false}", ->
+        cy.hash({log: false}).then ->
+          expect(@log).to.be.undefined
 
       it "#onConsole", ->
         cy.hash().then ->
