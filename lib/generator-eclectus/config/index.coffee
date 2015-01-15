@@ -29,7 +29,7 @@ class ConfigGenerator extends Eclectus.Base
         message: "What is the root folder your assets should be served from? By default it is your root project directory."
         default: ""
       },{
-        name: "defaultPage"
+        name: "defaultUrl"
         message: "What is the path to your default page? Any valid relative path or http will work."
         default: "tests/support/index.html"
       },{
@@ -81,6 +81,6 @@ class ConfigGenerator extends Eclectus.Base
     ## bail if we're not supposed to create an example test html file
     return if not @exampleTestHtml
 
-    @template "index.html", @config.get("defaultPage")
+    @template "index.html", @config.get("defaultUrl")
 
 module.exports = ConfigGenerator

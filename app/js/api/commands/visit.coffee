@@ -8,12 +8,12 @@ do (Cypress, _) ->
         onBeforeLoad: ->
         onLoad: ->
 
+      rootUrl = @config("rootUrl")
+      url     = Cypress.Location.getRemoteUrl(url, rootUrl)
+
       ## trigger that the remoteIframing is visiting
       ## an external URL
       @$remoteIframe.trigger "visit:start", url
-
-      rootUrl = @config("rootUrl")
-      url     = Cypress.Location.getRemoteUrl(url, rootUrl)
 
       ## backup the previous runnable timeout
       ## and the hook's previous timeout
