@@ -95,6 +95,10 @@ do (Cypress, _, $) ->
 
       return value
 
+    its: (subject, fn, args...) ->
+      args.unshift(fn)
+      @sync.invoke.apply(@, args)
+
   Cypress.addParentCommand
 
     options: (options = {}) ->

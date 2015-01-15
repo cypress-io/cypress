@@ -2467,6 +2467,10 @@ describe "Cypress", ->
 
         cy.noop(obj).invoke("bar")
 
+  context "#its", ->
+    it "proxies to #invoke", ->
+      cy.noop({foo: -> "bar"}).its("foo").should("eq", "bar")
+
   context "#run", ->
     it "does not call clearTimeout on the runnable if it already has a state", (done) ->
       ## this prevents a bug where if we arent an async test, done() callback
