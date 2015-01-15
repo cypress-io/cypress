@@ -60,11 +60,17 @@ do (Cypress, _) ->
 
       error += selectors.join(", ") + "."
 
+      cancelAll = ->
+        _(finds).invoke("cancel")
+
       Promise
         .any(finds)
         .cancellable()
+        .then (subject) ->
+          cancelAll()
+          return subject
         .catch Promise.CancellationError, (err) =>
-          _(finds).invoke("cancel")
+          cancelAll()
           throw err
         .catch Promise.AggregateError, (err) =>
           @throwErr error

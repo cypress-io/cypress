@@ -715,6 +715,23 @@ describe "Cypress", ->
         cy.ng("model", "missing-input").then ($input) ->
           expect($input).to.match missingInput
 
+      it "cancels other retries when one resolves", ->
+        _retry = @sandbox.spy cy, "_retry"
+
+        missingInput = $("<input />", "data-ng-model": "missing-input")
+
+        retry = _.after 6, _.once =>
+          cy.$("body").append(missingInput)
+
+        cy.on "retry", retry
+
+        ## we want to make sure that the ng promises do not continue
+        ## to retry after the first one resolves
+        cy.inspect().ng("model", "missing-input").then ->
+          _retry.reset()
+        .wait(100).then ->
+          expect(_retry.callCount).to.eq 0
+
       describe "errors", ->
         beforeEach ->
           @sandbox.stub cy.runner, "uncaught"
