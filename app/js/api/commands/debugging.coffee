@@ -30,4 +30,4 @@ do (Cypress, _) ->
       if _.isString(obj)
         obj = {name: obj, args: ""}
 
-      console.log "%c#{obj.name}", "color: #{color}", _.truncate(obj.args, 50)
+      console.log "%c#{obj.name}", "color: #{color}", _.truncate(obj.args, 75)

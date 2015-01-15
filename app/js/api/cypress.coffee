@@ -370,6 +370,7 @@ window.Cypress = do ($, _, Backbone) ->
         start: new Date
         interval: 50
         retries: 0
+        name: @prop("current")?.name
 
       ## we always want to make sure we timeout before our runnable does
       ## so take its current timeout, subtract the total time its already
@@ -388,13 +389,13 @@ window.Cypress = do ($, _, Backbone) ->
       @log "Retrying after: #{options.interval}ms. Total: #{total}, Timeout At: #{options.timeout}, RunnableTimeout: #{options.runnableTimeout}", "warning"
 
       if total >= options.timeout or (total + options.interval >= options.runnableTimeout)
-        err = "Timed out retrying. " + options.error ? "The last command was: " + @prop("current").name
+        err = "Timed out retrying. " + options.error ? "The last command was: " + options.name
         @throwErr err, options.onFail
 
       Promise.delay(options.interval).cancellable().then =>
         @trigger "retry", options
 
-        @log {name: "retry", args: fn}
+        @log {name: "retry(#{options.name})", args: fn}
 
         ## invoke the passed in retry fn
         fn.call(@)
