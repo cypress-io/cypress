@@ -43,8 +43,7 @@
     "js-yaml": "3.1.0",
     "morgan": "1.3.0",
     "nodemon": "1.2.1",
-    "sinon": "1.10.3",
-    "sinon-chai": "2.6.0"
+    "sinon": "1.10.3"
   },
   "dependencies": {
     "bluebird": "2.3.4",
