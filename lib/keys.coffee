@@ -12,7 +12,7 @@ updateSettings = (settings) ->
     settings.eclectus = _.extend(obj.eclectus, settings.eclectus)
     settings
   .then (obj) ->
-    fs.writeFileAsync("eclectus.json", JSON.stringify(obj))
+    fs.writeFileAsync("eclectus.json", JSON.stringify(obj, null, 2))
     .then -> obj.eclectus
 
 class Keys
