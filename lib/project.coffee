@@ -5,11 +5,7 @@ Request  = require 'request-promise'
 fs       = Promise.promisifyAll(require('fs'))
 API_URL  = process.env.API_URL or 'localhost:1234'
 
-class Project extends require('events').EventEmitter
-  constructor: ->
-    @on 'verbose', ->
-      console.log ':VERBOSE:', Array::slice.apply(arguments).join(' ')
-
+class Project extends require('./logger')
   ## A simple helper method
   ## to create a project ID if we do not already
   ## have one

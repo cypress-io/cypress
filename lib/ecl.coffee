@@ -4,7 +4,7 @@ nodemon   = require 'nodemon'
 pkg       = require '../package.json'
 
 module.exports =
-  class extends require('events').EventEmitter
+  class extends require('./logger')
     constructor: (args)->
       super
       @initialize.apply(@, args);

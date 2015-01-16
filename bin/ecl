@@ -3,13 +3,6 @@ require("coffee-script/register");
 
 var ecl = new (require('../lib/ecl'));
 
-// Enable Verbose logging of ECL
-if (~process.argv.indexOf('--verbose')) {
-  ecl.on('verbose', function() {
-    console.log.call(console, ":VERBOSE: ", Array.prototype.slice.call(arguments).join(' '));
-  });
-}
-
 // Kick it all off
 ecl.parseCliArguments(
   // Clone to argv just in case someone decides

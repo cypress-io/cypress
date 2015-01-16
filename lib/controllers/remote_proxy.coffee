@@ -13,7 +13,7 @@ httpProxy   = require 'http-proxy'
 escapeRegExp = (str) ->
   str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
-module.exports = class extends require('events').EventEmitter
+module.exports = class extends require('../logger')
   handle: (req, res, next) =>
     ## strip out the /__remote/ from the req.url
     if not req.session.remote?

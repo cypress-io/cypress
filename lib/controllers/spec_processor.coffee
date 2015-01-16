@@ -10,7 +10,7 @@ Domain      = require 'domain'
 Snockets    = require 'snockets'
 requirejs   = require 'requirejs'
 
-module.exports = class extends require('events').EventEmitter
+module.exports = class extends require('../logger')
   browserify: (opts, fileStream) ->
     browserify([fileStream], opts)
     .transform({}, coffeeify)

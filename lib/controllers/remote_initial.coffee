@@ -9,7 +9,7 @@ through       = require 'through'
 Url           = require 'url'
 UrlMerge      = require '../util/url_merge'
 
-module.exports = class extends require('events').EventEmitter
+module.exports = class extends require('../logger')
   handle: (req, res, opts = {}) =>
     uri = req.url.split("/__remote/").join("")
     @emit "verbose", "handling request for #{uri}"
