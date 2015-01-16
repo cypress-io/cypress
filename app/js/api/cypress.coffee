@@ -176,9 +176,18 @@ window.Cypress = do ($, _, Backbone) ->
         angular = @sync.window().angular
 
         if angular and angular.getTestability
-          root = @$("[ng-app]").get(0)
-          run = _.bind(run, @)
-          angular.getTestability(root).whenStable(run)
+          run            = _.bind(run, @)
+
+          root           = @$("[ng-app]").get(0)
+          $timeout       = angular.element(root).injector().get("$timeout")
+          angularPromise = $timeout =>
+            angular.getTestability(root).whenStable(run)
+            @prop "angularCancelTimeout", null
+
+          @prop "angularCancelTimeout", ->
+            $timeout.cancel(angularPromise)
+
+          return null
         else
           run()
 
@@ -649,6 +658,8 @@ window.Cypress = do ($, _, Backbone) ->
     @restore = ->
       @cy.clearTimeout @cy.prop("runId")
       @cy.clearTimeout @cy.prop("timerId")
+
+      @cy.prop("angularCancelTimeout")?()
 
       ## reset the queue to an empty array
       Cypress.prototype.queue = []
