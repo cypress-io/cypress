@@ -106,3 +106,4 @@ gulp.task "test", ->
   require("../spec/server.coffee")
 
 gulp.task "default", ["bower", "css", "img", "fonts", "js", "html", "watch"]
+gulp.task "compile", ["bower", "css", "img", "fonts", "js", "html"]
