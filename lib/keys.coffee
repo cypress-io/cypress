@@ -4,16 +4,7 @@ path     = require 'path'
 Request  = require 'request-promise'
 fs       = Promise.promisifyAll(require('fs'))
 API_URL  = process.env.API_URL or 'localhost:1234'
-Settings = require('./util/settings')
-
-updateSettings = (settings) ->
-  Settings.read()
-  .then (obj) ->
-    settings.eclectus = _.extend(obj.eclectus, settings.eclectus)
-    settings
-  .then (obj) ->
-    fs.writeFileAsync("eclectus.json", JSON.stringify(obj, null, 2))
-    .then -> obj.eclectus
+Project  = new (require './project')()
 
 class Keys
   ## Set up offline local id sync location
@@ -23,19 +14,8 @@ class Keys
     .then (range) ->
       fs.writeFileAsync(keyCountLocation, range, "utf8")
 
-  _getProjectID: ->
-    Settings.read()
-    .then (settings) ->
-      if (settings.eclectus.projectID)
-        return settings.eclectus.projectID
-
-      Request.post("http://#{API_URL}/projects")
-      .then (attrs) ->
-        updateSettings(eclectus: {projectID: JSON.parse(attrs).uuid})
-      .then (settings) -> settings.projectID
-
   _getNewKeyRange: =>
-    @_getProjectID()
+    Project.ensureProjectId()
     .then (projectID) ->
       Request.post("http://#{API_URL}/projects/#{projectID}/keys")
 
