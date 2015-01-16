@@ -54,5 +54,8 @@
     updateTotal: ->
       @ui.total.text @collection.length
 
+      method = if @collection.length then "show" else "hide"
+      @$el[method]()
+
     onShow: ->
       @updateTotal()

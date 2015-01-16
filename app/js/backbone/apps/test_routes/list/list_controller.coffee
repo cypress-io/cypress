@@ -4,7 +4,7 @@
     initialize: (options) ->
       { test, runner } = options
 
-      window.routes = @routes = routes = test.get("routes")
+      @routes = routes = test.get("routes")
 
       routesView = @getRoutesView routes
 
