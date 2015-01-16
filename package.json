@@ -71,7 +71,7 @@
     "node-phantom-simple": "1.2.0",
     "node-uuid": "1.4.1",
     "open": "0.0.5",
-    "phantomjs": "1.9.7-15",
+    "phantomjs": "samccone/mocha-phantomjs#fbe8f0f9f99a4b699d6e84d10b80dfbd16df12be",
     "requirejs": "2.1.15",
     "sauce-connect-launcher": "0.9.3",
     "setimmediate": "^1.0.2",
