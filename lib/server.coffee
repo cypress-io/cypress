@@ -7,6 +7,7 @@ _           = require 'underscore'
 _.str       = require 'underscore.string'
 minimist    = require 'minimist'
 idGenerator = require './id_generator.coffee'
+Project     = new (require './project.coffee')
 
 argv = minimist(process.argv.slice(2), boolean: true)
 
@@ -70,8 +71,9 @@ require('./routes')(app)
 server.listen app.get("port"), ->
   console.log 'Express server listening on port ' + app.get('port')
 
+  Project.ensureProjectId()
   ## open phantom if ids are true (which they are by default)
-  idGenerator.openPhantom()
+  .then(idGenerator.openPhantom)
   .then ->
     if !app.get('eclectus').preventOpen
       require('open')("http://localhost:#{app.get('port')}")
