@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test-server": "mocha --opts spec/server/mocha.opts",
-    "test-server-dev": "mocha --opts spec/server/mocha.opts --watch"
+    "test-server-dev": "mocha --opts spec/server/mocha.opts --watch",
+    "build": "gulp compile"
   },
   "repository": {
     "type": "git",
