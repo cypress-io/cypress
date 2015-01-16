@@ -73,7 +73,7 @@
     "open": "0.0.5",
     "phantomjs": "1.9.7-15",
     "requirejs": "2.1.15",
-    "sauce-connect-launcher": "0.7.0",
+    "sauce-connect-launcher": "0.9.3",
     "setimmediate": "^1.0.2",
     "sinon-chai": "2.6.0",
     "snockets": "1.3.8",
