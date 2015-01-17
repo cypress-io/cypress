@@ -38,7 +38,6 @@ describe "spec processor", ->
         browserify:
           basedir: FixturesRoot
 
-
     fs.writeFileSync(path.join(FixturesRoot, '/sample.js'), ';')
 
   it "sets the correct content type", ->
@@ -50,10 +49,24 @@ describe "spec processor", ->
   it "handles snocket includes", (done) ->
     @opts.spec = 'snocket_root.js'
     @specProcessor.handle @opts, {}, @res, =>
+    @results = ""
 
-    @res.pipe through (d) ->
-      expect(d.toString()).eql('console.log(\"hello\");\n//= require snocket_dep\n')
-      done()
+    ## We have to manually catch the error here
+    ## because this stream is in a domain, thus
+    ## mocha will not pick up the error since wille
+    ## are handling it within the controller
+
+    @res.pipe(through (d) =>
+      @results += d.toString()
+    )
+    .on('end', =>
+      try
+        expect(@results.indexOf('console.log(\"hello\");\n//= require snocket_dep\n')).to.not.eql(-1);
+        done()
+      catch e
+        done(e)
+    )
+    .on('error', done)
 
   context 'coffeescript', ->
     beforeEach ->
@@ -66,23 +79,28 @@ describe "spec processor", ->
 
     it "compiles coffeescript", (done) ->
       @opts.spec = 'sample.coffee'
-
-      @res.pipe(through (d) ->
+      @results = ""
+      @res.pipe(through (d) => @results+=d.toString())
+      .on('error', (e) -> done(e))
+      .on('end', (e) =>
         ## We have to manually catch the error here
         ## because this stream is in a domain, thus
-        ## mocha will not pick up the error since we
+        ## mocha will not pick up the error since wille
         ## are handling it within the controller
         try
-          expect(d.toString()).to.eql("(function() {\n  (function() {});\n\n}).call(this);\n")
+          expect(
+            @results
+            .indexOf("(function() {\n  (function() {});\n\n}).call(this);\n"))
+          .to.not.eql(-1)
           done()
         catch e
-          this.emit('error', e)
-      ).on('error', (e) -> done(e))
+          done(e)
+      )
 
       @specProcessor.handle @opts, {}, @res, =>
 
   context 'browserify', ->
-    it.only "handles commonjs requires", (done) ->
+    it "handles commonjs requires", (done) ->
       streamOutput = ''
 
       @opts.spec = 'commonjs_root.js'
