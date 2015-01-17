@@ -34,7 +34,10 @@ describe "spec processor", ->
           return {
             projectRoot: ''
           }
-        {}
+
+        browserify:
+          basedir: FixturesRoot
+
 
     fs.writeFileSync(path.join(FixturesRoot, '/sample.js'), ';')
 
@@ -81,12 +84,6 @@ describe "spec processor", ->
   context 'browserify', ->
     it.only "handles commonjs requires", (done) ->
       streamOutput = ''
-
-      global.app =
-        get: -> {
-          browserify:
-            basedir: FixturesRoot
-        }
 
       @opts.spec = 'commonjs_root.js'
       @specProcessor.handle @opts, {}, @res, (e) => done(e)
