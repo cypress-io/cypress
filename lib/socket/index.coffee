@@ -7,7 +7,7 @@ jQuery      = require 'jquery-deferred'
 chokidar    = require 'chokidar'
 idGenerator = require '../id_generator.coffee'
 
-module.exports = (io, app) ->
+module.exports = (io, app, config) ->
   io.on "connection", (socket) ->
     console.log "socket connected"
 
@@ -92,7 +92,7 @@ module.exports = (io, app) ->
 
         sauce options, df
 
-  watchTestFiles = chokidar.watch app.get('eclectus').testFolder, ignored: (path, stats) ->
+  watchTestFiles = chokidar.watch path.join(config.projectRoot, app.get('eclectus').testFolder), ignored: (path, stats) ->
     ## this fn gets called twice, once with the directory
     ## which does not have a stats argument
     ## we always return false to include directories

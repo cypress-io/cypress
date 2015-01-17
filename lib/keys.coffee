@@ -2,11 +2,14 @@ _        = require 'lodash'
 Promise  = require 'bluebird'
 path     = require 'path'
 Request  = require 'request-promise'
+Project  = require './project'
 fs       = Promise.promisifyAll(require('fs'))
 API_URL  = process.env.API_URL or 'localhost:1234'
-Project  = new (require './project')()
 
 class Keys
+  constructor: ->
+    @Project = new Project(app.get('config'))
+
   ## Set up offline local id sync location
   _initOfflineSync: (keyCountLocation) ->
     fs.mkdirAsync(path.dirname(keyCountLocation))
@@ -15,7 +18,7 @@ class Keys
       fs.writeFileAsync(keyCountLocation, range, "utf8")
 
   _getNewKeyRange: =>
-    Project.ensureProjectId()
+    @Project.ensureProjectId()
     .then (projectID) ->
       Request.post("http://#{API_URL}/projects/#{projectID}/keys")
 
@@ -57,7 +60,15 @@ class Keys
 
   nextKey: (app) ->
     testFolder       = app.get("eclectus").testFolder
-    keyCountLocation = path.resolve(path.join(testFolder, '/.ecl/', 'key_count'))
+    projectRoot      = app.get("config").projectRoot
+    keyCountLocation = path.resolve(
+      path.join(
+        projectRoot,
+        testFolder,
+        '/.ecl/',
+        'key_count'
+      )
+    )
 
     @_ensureOfflineCache(keyCountLocation)
     .then => @_getNextTestNumber(keyCountLocation)

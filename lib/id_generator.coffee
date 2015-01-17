@@ -3,7 +3,6 @@ path            = require 'path'
 gutil           = require 'gulp-util'
 phantom         = require 'node-phantom-simple'
 Promise         = require 'bluebird'
-keys            = new (require('./keys'))
 fs              = Promise.promisifyAll(require('fs'))
 PSemaphore      = require('promise-semaphore')
 
@@ -41,6 +40,8 @@ appendTestId = (spec, title, id) ->
       , 1000
 
 nextId = (data) ->
+  keys = new (require('./keys'))
+
   keys.nextKey(app)
   .then((id) ->
     appendTestId(data.spec, data.title, id)
@@ -116,9 +117,10 @@ visitIdPage = (page) ->
       resolve()
 
 openPhantom = ->
-  createPhantom()
-  .then(createPhantomPage)
-  .then(visitIdPage)
+  Promise.resolve()
+  # createPhantom()
+  # .then(createPhantomPage)
+  # .then(visitIdPage)
   # , {parameters: "remote-debugger-port": "9000", "remote-debugger-autorun": "yes"}
 
 module.exports =

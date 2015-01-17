@@ -25,7 +25,11 @@ module.exports = class extends require('../logger')
 
     {testFolder, spec} = opts
 
-    filePath = path.join(testFolder, spec)
+    filePath = path.join(
+      app.get('config').projectRoot,
+      testFolder,
+      spec
+    )
 
     config =
       baseUrl: process.cwd()

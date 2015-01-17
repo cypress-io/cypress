@@ -2,7 +2,7 @@
   "name": "eclectus",
   "version": "0.0.0",
   "description": "Javascript Test Studio",
-  "main": "index.js",
+  "main": "index.html",
   "scripts": {
     "build": "gulp compile",
     "test-server": "NODE_ENV=test mocha --opts spec/server/mocha.opts",

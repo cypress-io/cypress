@@ -18,7 +18,13 @@ describe "id generation", ->
     fs.writeFileSync("eclectus.json", '{"eclectus": {}}', 'utf8');
 
     global.app =
-      get: => testFolder: @rootPath
+      get: (type) =>
+        if (type is 'config')
+          return {
+            projectRoot: ''
+          }
+
+        testFolder: @rootPath
 
     nock("http://#{API_URL}")
     .post("/projects")

@@ -1,9 +1,13 @@
 Promise  = require 'bluebird'
+path     = require 'path'
 fs       = Promise.promisifyAll(require('fs'))
 
 module.exports =
-  read: ->
-    fs.readFileAsync("eclectus.json", "utf8")
+  read: (config) ->
+    fs.readFileAsync(
+      path.join(config.projectRoot, "eclectus.json"),
+      "utf8"
+    )
     .then (obj) ->
       JSON.parse(obj)
 

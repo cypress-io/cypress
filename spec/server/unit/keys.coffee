@@ -8,7 +8,13 @@ describe "key generation", ->
   beforeEach ->
     @keyGen = new Keys
     @appStub =
-      get: -> {testFolder: "zap"}
+      get: (type) ->
+        if (type is 'config')
+          return {
+            projectRoot: ''
+          }
+
+        {testFolder: "zap"}
 
   it "should generate offline file if not present", (done) ->
     sinon.stub @keyGen, '_getOfflineContents', -> Promise.resolve({"start":0,"end":99})

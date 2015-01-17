@@ -12,12 +12,16 @@ module.exports = (app) ->
 
   getTestFiles = ->
     testFolder = app.get("eclectus").testFolder
+    testFolderPath = path.join(
+      app.get('config').projectRoot,
+      testFolder
+    )
 
     ## grab all the js and coffee files
-    files = glob.sync "#{testFolder}/**/*.+(js|coffee)"
+    files = glob.sync "#{testFolderPath}/**/*.+(js|coffee)"
 
     ## slice off the testFolder directory(ies) (which is our test folder)
-    testFolderLength = testFolder.split("/").length
+    testFolderLength = testFolderPath.split("/").length
     _(files).map (file) -> {name: file.split("/").slice(testFolderLength).join("/")}
 
   getSpecs = (test) ->
