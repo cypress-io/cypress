@@ -21,7 +21,7 @@ module.exports = (config) ->
   getEclectusJson = ->
     obj = JSON.parse(
       fs.readFileSync(
-        path.join(process.env.PWD, "eclectus.json"),
+        path.join(config.projectRoot, "eclectus.json"),
         encoding: "utf8"
       )
     ).eclectus
