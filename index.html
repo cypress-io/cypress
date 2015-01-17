@@ -1,15 +1,9 @@
 <html>
-  <h1> hello world </h1>
+  <head>
+    <script type="text/javascript" src="nw/js/main.js"></script>
+  </head>
+  <h1>Cypress</h1>
+  <button onclick="checkUpdates()">check updates</button>
   <button onClick="runProject()">run project</button>
-  <pre>
-  </pre>
-  <script>
-    require("coffee-script/register");
-
-    function runProject() {
-      require('./lib/server')({
-        projectRoot: '/Users/sam/Desktop/repos/eclectus_examples/todomvc/backbone_marionette'
-      })
-    }
-  </script>
+  <button onClick="idGenerator()">id generator</button>
 </html>
