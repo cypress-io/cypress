@@ -54,7 +54,10 @@ module.exports = class extends require('../logger')
         throw new Error "Unable to handle type #{type}"
 
   getRelativeFileContent: (p) ->
-    fs.createReadStream(path.join(process.cwd(), p.split('?')[0]), 'utf8')
+    fs.createReadStream(path.join(
+      app.get('config').projectRoot,
+      p.split('?')[0]
+    ), 'utf8')
 
   getFileContent: (p) ->
     fs.createReadStream(p.slice(7).split('?')[0], 'utf8')

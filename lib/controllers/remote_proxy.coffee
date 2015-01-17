@@ -107,7 +107,11 @@ module.exports = class extends require('../logger')
 
     res.contentType(mime.lookup(baseUri))
 
-    args = _.compact([process.cwd(), app.get("eclectus").rootFolder, baseUri])
+    args = _.compact([
+      app.get('config').projectRoot,
+      app.get("eclectus").rootFolder,
+      baseUri
+    ])
 
     fs.createReadStream(
       path.join(args...)
