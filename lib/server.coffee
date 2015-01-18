@@ -39,6 +39,9 @@ module.exports = (config) ->
       commandTimeout: 4000
       port: 3000
 
+    _.defaults obj,
+      idGeneratorPath: "http://localhost:#{obj.port}/id_generator"
+
   app.set "config", config
   ## set the eclectus config from the eclectus.json file
   app.set "eclectus", getEclectusJson()

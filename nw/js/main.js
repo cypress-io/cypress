@@ -45,9 +45,11 @@ var gui, Updater;
 
 })()
 
-var idGenerator = function(port) {
-  port = port || 3000
-  idWin = gui.Window.open("http://localhost:" + port + "/id_generator")
+var idGenerator = function(path) {
+  if(!path){
+    throw new Error("Missing http path to ID Generator.  Cannot start ID Generator.")
+  }
+  idWin = gui.Window.open(path)
   idWin.hide()
 }
 
@@ -59,6 +61,6 @@ var runProject = function() {
   require('./lib/server')({
     projectRoot: '/Users/bmann/Dev/WebApp-Node'
   }).then(function(config){
-    idGenerator(config.port)
+    idGenerator(config.idGeneratorPath)
   })
 }
