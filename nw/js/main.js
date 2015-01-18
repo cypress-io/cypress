@@ -11,9 +11,10 @@ var gui, Updater;
 
   var win = gui.Window.get()
 
-  var width = win.width
-
+  // prevent from flickering on boot
   win.hide()
+
+  var width = win.width
 
   window.tray = new gui.Tray({ title: 'Cy' })
 
@@ -44,8 +45,9 @@ var gui, Updater;
 
 })()
 
-var idGenerator = function() {
-  idWin = gui.Window.open("http://localhost:3000/id_generator")
+var idGenerator = function(port) {
+  port = port || 3000
+  idWin = gui.Window.open("http://localhost:" + port + "/id_generator")
   idWin.hide()
 }
 
@@ -55,6 +57,8 @@ var checkUpdates = function(){
 
 var runProject = function() {
   require('./lib/server')({
-    projectRoot: '/Users/bmann/Dev/eclectus_examples/todomvc/backbone_marionette'
+    projectRoot: '/Users/bmann/Dev/WebApp-Node'
+  }).then(function(config){
+    idGenerator(config.port)
   })
 }
