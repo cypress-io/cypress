@@ -88,6 +88,7 @@ module.exports = (config) ->
       .then ->
         if !app.get('eclectus').preventOpen
           require('open')("http://localhost:#{app.get('port')}")
+      .return(app.get("eclectus"))
       .then(res)
       .catch(rej)
 
