@@ -13,7 +13,8 @@
   "scripts": {
     "build": "gulp compile",
     "test-server": "NODE_ENV=test mocha --opts spec/server/mocha.opts",
-    "test-server-dev": "NODE_ENV=test mocha --opts spec/server/mocha.opts --watch"
+    "test-server-dev": "NODE_ENV=test mocha --opts spec/server/mocha.opts --watch",
+    "test-server-dev-debug": "NODE_ENV=test node-debug _mocha --opts spec/server/mocha.opts --watch"
   },
   "repository": {
     "type": "git",
