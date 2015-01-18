@@ -1,13 +1,15 @@
 require("coffee-script/register")
 // require("./js/main.coffee");
 
-var gui, Updater;
+var gui, Updater, Server;
 
 (function(){
   var fs         = require("fs")
   var AutoLaunch = require('auto-launch')
+
+  Server         = require('../lib/server')
   gui            = require('nw.gui')
-  Updater        = require("./nw/js/updater.js")
+  Updater        = require("./js/updater.js")
 
   var win = gui.Window.get()
 
@@ -57,9 +59,11 @@ var checkUpdates = function(){
   Updater.check()
 }
 
+process.argv = process.argv.concat(gui.App.argv)
+
 var runProject = function() {
-  require('./lib/server')({
-    projectRoot: '/Users/bmann/Dev/WebApp-Node'
+  Server({
+    projectRoot: '/Users/sam/Desktop/repos/eclectus_examples/todomvc/backbone_marionette'
   }).then(function(config){
     idGenerator(config.idGeneratorPath)
   })
