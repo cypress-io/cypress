@@ -12,10 +12,9 @@ escapeRegExp = (str) ->
   str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
 appendTestId = (spec, title, id) ->
-  fs.readFileAsync(
-    path.join(app.get("config").projectRoot, spec),
-     "utf8"
-  )
+  normalizedPath = path.join(app.get("config").projectRoot, spec)
+
+  fs.readFileAsync(normalizedPath, "utf8")
   .then (contents) ->
     re = new RegExp "['\"](" + escapeRegExp(title) + ")['\"]"
 
@@ -34,7 +33,7 @@ appendTestId = (spec, title, id) ->
     app.enable("editFileMode")
 
     ## write the actual contents to the file
-    fs.writeFileAsync(spec, contents).then ->
+    fs.writeFileAsync(normalizedPath, contents).then ->
       ## remove the editFileMode so we emit file changes again
       ## if we're still in edit file mode then wait 1 second and disable it
       ## chokidar doesnt instantly see file changes so we have to wait
