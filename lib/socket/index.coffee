@@ -24,7 +24,7 @@ module.exports = class extends require("../logger")
     @io.emit "generate:ids:for:test", filepath, strippedPath
 
   startListening: ->
-    @io.on "connection", (socket) ->
+    @io.on "connection", (socket) =>
       console.log "socket connected"
 
       socket.on "generate:test:id", (data, fn) ->
