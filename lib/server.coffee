@@ -7,6 +7,7 @@ module.exports = (config) ->
   _           = require 'underscore'
   _.str       = require 'underscore.string'
   minimist    = require 'minimist'
+  Promise     = require 'bluebird'
   idGenerator = require './id_generator.coffee'
   Project     = new (require './project.coffee')(config)
 
@@ -77,12 +78,16 @@ module.exports = (config) ->
 
   require('./routes')(app)
 
-  server.listen app.get("port"), ->
-    console.log 'Express server listening on port ' + app.get('port')
+  new Promise (res, rej) ->
+    server.listen app.get("port"), ->
+      console.log 'Express server listening on port ' + app.get('port')
 
-    Project.ensureProjectId()
-    ## open phantom if ids are true (which they are by default)
-    .then(idGenerator.openPhantom)
-    .then ->
-      if !app.get('eclectus').preventOpen
-        require('open')("http://localhost:#{app.get('port')}")
+      Project.ensureProjectId()
+      ## open phantom if ids are true (which they are by default)
+      .then(idGenerator.openPhantom)
+      .then ->
+        if !app.get('eclectus').preventOpen
+          require('open')("http://localhost:#{app.get('port')}")
+      .then(res)
+      .catch(rej)
+
