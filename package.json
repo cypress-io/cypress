@@ -27,7 +27,8 @@
   },
   "bin": {
     "ecl": "./bin/ecl",
-    "eclectus": "./bin/ecl"
+    "eclectus": "./bin/ecl",
+    "ecl_key_clean": "./bin/remove_keys.js"
   },
   "homepage": "https://github.com/brian-mann/eclectus",
   "devDependencies": {
