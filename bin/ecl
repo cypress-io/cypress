@@ -1,11 +1,14 @@
 #!/usr/bin/env node
-require("coffee-script/register");
 
-var ecl = new (require('../lib/ecl'));
+nodemon = require('nodemon')
+path = require('path')
 
-// Kick it all off
-ecl.parseCliArguments(
-  // Clone to argv just in case someone decides
-  // to be evil and mutate them somewhere.
-  Array.prototype.slice.call(process.argv)
-);
+eclRoot = path.join(__dirname, "..", "lib");
+eclServer = path.join(__dirname, "server_boot.js");
+
+str = "--verbose --watch " + eclRoot + "/**/*.coffee " + eclServer + " " + process.cwd();
+
+nodemon('-e "coffee js" --watch ' + eclRoot + " " + eclServer + " " + process.cwd())
+.on("start", function() {
+  console.log(":: nodemon started")
+})
