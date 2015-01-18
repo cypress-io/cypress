@@ -6,9 +6,7 @@ path = require('path')
 eclRoot = path.join(__dirname, "..", "lib");
 eclServer = path.join(__dirname, "server_boot.js");
 
-str = "--verbose --watch " + eclRoot + "/**/*.coffee " + eclServer + " " + process.cwd();
-
-nodemon('-e "coffee js" --watch ' + eclRoot + " " + eclServer + " " + process.cwd())
+nodemon('-e "coffee js" --watch ' + eclRoot + " " + eclServer + " " + process.cwd() + " verbose")
 .on("start", function() {
   console.log(":: nodemon started")
 })
