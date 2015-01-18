@@ -72,7 +72,9 @@ module.exports = (config) ->
   ## errorhandler
   app.use require("errorhandler")()
 
-  require('./socket')(io, app, config)
+  socket = new (require("./socket"))(io, app)
+  socket.startListening()
+
   require('./routes')(app)
 
   server.listen app.get("port"), ->

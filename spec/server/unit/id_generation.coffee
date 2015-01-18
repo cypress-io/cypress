@@ -3,6 +3,8 @@ expect      = require('chai').expect
 fs          = require 'fs-extra'
 _           = require 'lodash'
 nock        = require('nock')
+Socket      = require("../../../lib/socket")
+sinon       = require("sinon")
 API_URL     = process.env.API_URL or 'localhost:1234'
 
 describe "id generation", ->
@@ -81,3 +83,23 @@ describe "id generation", ->
     idGenerator.getId(@specData).then (d) ->
       expect(d).to.eql('00c')
       done()
+
+  context "generate:ids:for:test", ->
+    beforeEach ->
+      @projectRoot = "/Users/bmann/Dev/eclectus_examples/todomvc/backbone_marionette"
+
+      @io =
+        on: ->
+        emit: sinon.stub()
+
+      app =
+        enabled: -> false
+        get: =>
+          testFolder: "tests"
+          projectRoot: @projectRoot
+
+      @socket = new Socket(@io, app)
+
+    it "strips projectRoot out of filepath", ->
+      @socket.onTestFileChange "#{@projectRoot}/tests/cypress_api.coffee"
+      expect(@io.emit).to.be.calledWith "generate:ids:for:test", "tests/cypress_api.coffee", "cypress_api.coffee"

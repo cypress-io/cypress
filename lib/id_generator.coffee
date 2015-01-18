@@ -12,7 +12,10 @@ escapeRegExp = (str) ->
   str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
 appendTestId = (spec, title, id) ->
-  fs.readFileAsync(spec, "utf8")
+  fs.readFileAsync(
+    path.join(app.get("config").projectRoot, spec),
+     "utf8"
+  )
   .then (contents) ->
     re = new RegExp "['\"](" + escapeRegExp(title) + ")['\"]"
 
