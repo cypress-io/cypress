@@ -121,7 +121,7 @@ module.exports = (app) ->
   ## this serves the html file which is stripped down
   ## to generate the id's for the test files
   app.get "/id_generator", (req, res) ->
-    res.sendFile path.join(__dirname, "../", "public", "id_generator.html")
+    res.sendFile path.join(__dirname, "../", "public", "id_generator.html"), {etag: false}
 
   ## unfound paths we assume we want to pass on through
   ## to the origin proxyUrl

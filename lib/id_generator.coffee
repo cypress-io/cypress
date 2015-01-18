@@ -79,41 +79,41 @@ createPhantom = ->
 
       resolve(ph)
 
-createPhantomPage = (ph) ->
-  new Promise (resolve, reject) ->
-    ph.createPage (err, page) ->
-      return reject(err) if err
+# createPhantomPage = (ph) ->
+#   new Promise (resolve, reject) ->
+#     ph.createPage (err, page) ->
+#       return reject(err) if err
 
-      resolve(page)
+#       resolve(page)
 
-visitIdPage = (page) ->
-  new Promise (resolve, reject) ->
-    t = Date.now()
-    rootPath = "http://localhost:#{app.get('port')}/"
-    pathToPage = rootPath + "id_generator"
-    console.log "PhantomJS opened: ", pathToPage
+# visitIdPage = (page) ->
+#   new Promise (resolve, reject) ->
+#     t = Date.now()
+#     rootPath = "http://localhost:#{app.get('port')}/"
+#     pathToPage = rootPath + "id_generator"
+#     console.log "PhantomJS opened: ", pathToPage
 
-    # page.onConsoleMessage = (msg, lineNum, sourceId) ->
-    #   debugger
+#     # page.onConsoleMessage = (msg, lineNum, sourceId) ->
+#     #   debugger
 
-    page.onError = (msg, trace) ->
-      gutil.beep()
-      stack = parseStackTrace(trace)
-      file = parseFileFromStackTrace(trace, rootPath)
+#     page.onError = (msg, trace) ->
+#       gutil.beep()
+#       stack = parseStackTrace(trace)
+#       file = parseFileFromStackTrace(trace, rootPath)
 
-      ## need to convert this into a function so we can automatically
-      ## log out the total length of the errors and generate the bar wrappers
-      ## around them
-      console.log ""
-      console.log "========================================"
-      console.log gutil.colors.yellow("An error occured generating ids in file: "), gutil.colors.blue(file)
-      console.log gutil.colors.red(msg)
-      console.log(stack.join("\n")) if stack.length
-      console.log "========================================"
+#       ## need to convert this into a function so we can automatically
+#       ## log out the total length of the errors and generate the bar wrappers
+#       ## around them
+#       console.log ""
+#       console.log "========================================"
+#       console.log gutil.colors.yellow("An error occured generating ids in file: "), gutil.colors.blue(file)
+#       console.log gutil.colors.red(msg)
+#       console.log(stack.join("\n")) if stack.length
+#       console.log "========================================"
 
-    page.open pathToPage, (err, status) ->
-      return reject(err) if err
-      console.log "PhantomJS done! status: #{status}, time: #{Date.now() - t}"
+#     page.open pathToPage, (err, status) ->
+#       return reject(err) if err
+#       console.log "PhantomJS done! status: #{status}, time: #{Date.now() - t}"
       resolve()
 
 openPhantom = ->

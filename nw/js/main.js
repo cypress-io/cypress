@@ -1,12 +1,12 @@
 require("coffee-script/register")
 // require("./js/main.coffee");
 
-var Updater
+var gui, Updater;
 
 (function(){
   var fs         = require("fs")
-  var gui        = require('nw.gui')
   var AutoLaunch = require('auto-launch')
+  gui            = require('nw.gui')
   Updater        = require("./nw/js/updater.js")
 
   var win = gui.Window.get()
@@ -45,7 +45,8 @@ var Updater
 })()
 
 var idGenerator = function() {
-
+  idWin = gui.Window.open("http://localhost:3000/id_generator")
+  idWin.hide()
 }
 
 var checkUpdates = function(){
@@ -54,6 +55,6 @@ var checkUpdates = function(){
 
 var runProject = function() {
   require('./lib/server')({
-    projectRoot: '/Users/bmann/Dev/eclectus_examples/todomvc/backbone_marionette/'
+    projectRoot: '/Users/bmann/Dev/eclectus_examples/todomvc/backbone_marionette'
   })
 }
