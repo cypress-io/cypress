@@ -7,6 +7,7 @@ _           = require 'lodash'
 nock        = require('nock')
 Socket      = require("#{root}lib/socket")
 sinon       = require("sinon")
+rimraf      = require('rimraf')
 API_URL     = process.env.API_URL or 'localhost:1234'
 
 describe "id generation", ->
@@ -48,13 +49,13 @@ describe "id generation", ->
     nock.cleanAll()
     nock.enableNetConnect()
     fs.removeSync(@rootPath);
-    fs.removeSync(path.join(__dirname, root, ".ecl"));
+    rimraf.sync(path.join(__dirname, root, ".cy"))
     fs.removeSync("eclectus.json");
 
   it "generates a single id", (done) ->
     idGenerator.getId(@specData)
     .then (id) ->
-      expect(id).to.eql('001')
+      expect(id).to.eql('000')
       done()
     .catch (err) ->
       done(err)
@@ -68,7 +69,7 @@ describe "id generation", ->
     idGenerator.getId(@specData)
     idGenerator.getId(@specData)
     idGenerator.getId(@specData).then((d) ->
-      expect(d).to.eql('008')
+      expect(d).to.eql('007')
       done()
     )
 
@@ -84,7 +85,7 @@ describe "id generation", ->
     })
 
     idGenerator.getId(@specData).then (d) ->
-      expect(d).to.eql('00c')
+      expect(d).to.eql('00b')
       done()
 
   context "generate:ids:for:test", ->

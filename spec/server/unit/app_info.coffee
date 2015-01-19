@@ -1,0 +1,101 @@
+root          = '../../../'
+path          = require 'path'
+info          = path.join(__dirname, root, '/.cy/', 'local.info')
+Promise       = require 'bluebird'
+expect        = require('chai').expect
+Keys          = require "#{root}lib/keys"
+AppInfo       = require "#{root}lib/app_info"
+fs            = Promise.promisifyAll(require('fs'))
+nock          = require 'nock'
+rimraf        = require 'rimraf'
+sinon         = require('sinon')
+
+require('chai')
+.use(require('sinon-chai'))
+.use(require("chai-as-promised"))
+.should()
+
+describe "local cache", ->
+  beforeEach ->
+    nock.disableNetConnect()
+    @appInfo = new AppInfo
+
+  afterEach (done)->
+    nock.cleanAll()
+    nock.enableNetConnect()
+    rimraf(path.dirname(info), (e) -> done(e))
+
+  it "creates an offline cache if not present", (done) ->
+    @appInfo.ensureExists()
+    .then =>
+      fs.statAsync(info)
+    .then => done()
+    .catch(done)
+
+  it "returns true when already exists", (done) ->
+    @appInfo.ensureExists()
+    .then =>
+      @appInfo.ensureExists()
+      .should.eventually.eql(true)
+      .then(=>done())
+    .catch(done)
+
+  context "validators", ->
+    it "creates an empty PROJECTS key", (done) ->
+      @appInfo.ensureExists()
+      .then => @appInfo._read()
+      .then (contents) ->
+        contents.should.eql({PROJECTS: {}})
+        done()
+      .catch(done)
+
+    it "creates an empty RANGE key for a Project", (done) ->
+      @appInfo.ensureExists()
+      .then => @appInfo.addProject("FOO")
+      .then => @appInfo._read()
+      .then (contents) =>
+        contents.should.eql({
+          PROJECTS: {FOO: {RANGE: {}}}
+        })
+        done()
+      .catch(done)
+
+  context "projects", ->
+    beforeEach ->
+      @appInfo.ensureExists()
+
+    it "throws an error when a project is not found", (done) ->
+      @appInfo.getProject("FOO")
+      .catch (err) ->
+        err.message.should.eql("Project FOO not found")
+        done()
+
+    it "returns the project when exists", (done) ->
+      @appInfo.addProject("FOO")
+      .then =>
+        @appInfo.getProject("FOO")
+      .then (val) ->
+        val.should.be.defined
+        done()
+      .catch(done)
+
+    it "can add a single project", (done) ->
+      @appInfo.addProject("FOO")
+      .then => done()
+      .catch(done)
+
+    it "can update a single project", (done) ->
+      @appInfo.addProject("FOO")
+      .then => @appInfo.updateProject("FOO", {wow: 1})
+      .then (c) => c.should.eql({wow: 1}); done()
+      .catch(done)
+
+    it "can update a project range", (done) ->
+      @appInfo.addProject("FOO")
+      .then => @appInfo.updateRange("FOO", {start: 1, end: 2})
+      .then (p) =>
+        p.should.eql({RANGE: {start:1,end:2}}); done()
+      .catch(done)
+
+  context "utilities", ->
+    it "can remove a single project"
