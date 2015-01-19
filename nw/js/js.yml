@@ -12,9 +12,6 @@ vendor:
   - bower_components/underscore.string/lib/underscore.string.js
   - bower_components/jsuri/Uri.js
 
-uri:
-  - bower_components/jsuri/Uri.js
-
 app:
   - nw/js/config/**
   - nw/js/backbone/app.coffee

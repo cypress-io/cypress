@@ -1,11 +1,8 @@
 <!doctype html>
 <html>
   <head>
-    <script type="text/javascript" src="js/uri.js"></script>
     <script type="text/javascript">
-      var code = new Uri(location.toString()).getQueryParamValue("code")
-
-      global.App.vent.trigger("logging:in", code)
+      global.App.vent.trigger("logging:in", location.toString())
 
       require('nw.gui').Window.get().close()
     </script>

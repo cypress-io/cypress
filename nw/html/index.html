@@ -2,14 +2,10 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html;charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cypress NW</title>
-
-    <link href="data:;base64,=" rel="icon">
 
     <link rel="stylesheet" href="css/cypress.css">
 
-    <script type="text/javascript" src="js/gui.js"></script>
     <script type="text/javascript" src="js/vendor.js"></script>
     <script type="text/javascript" src="js/app.js"></script>
   </head>
@@ -17,7 +13,8 @@
     <div id="main-region"></div>
     <script type="text/javascript">
       $(function(){
-        App.start();
+        var opts = require("nw.gui").App.argv
+        App.start(opts);
       })
     </script>
   </body>
