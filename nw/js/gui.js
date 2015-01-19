@@ -8,7 +8,7 @@ var gui, Updater, Server;
 
   Server         = require('../../lib/server')
   gui            = require('nw.gui')
-  Updater        = require("updater.js")
+  Updater        = require("./js/updater.js")
 
   var win = gui.Window.get()
 
@@ -25,7 +25,10 @@ var gui, Updater, Server;
     win.show()
   })
 
-  win.on("blur", win.hide)
+  win.on("blur", function(){
+    if(App.fileDialogOpened) return;
+    win.hide()
+  })
 
   var autoLaunch = function(title){
     var nwAppLauncher = new AutoLaunch({
@@ -46,24 +49,8 @@ var gui, Updater, Server;
 
 })()
 
-var idGenerator = function(path) {
-  if(!path){
-    throw new Error("Missing http path to ID Generator.  Cannot start ID Generator.")
-  }
-  idWin = gui.Window.open(path)
-  idWin.hide()
-}
-
 var checkUpdates = function(){
   Updater.check()
 }
 
 process.argv = process.argv.concat(gui.App.argv)
-
-var runProject = function() {
-  Server({
-    projectRoot: '/Users/sam/Desktop/repos/eclectus_examples/todomvc/backbone_marionette'
-  }).then(function(config){
-    idGenerator(config.idGeneratorPath)
-  })
-}

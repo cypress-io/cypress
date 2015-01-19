@@ -27,6 +27,13 @@
       background-color: #EEE;
     }
 
+    small {
+      font-size: 70%;
+      display: block;
+      margin-top: 5px;
+      @include text-overflow;
+    }
+
     i {
       font-size: 20px;
       position: absolute;

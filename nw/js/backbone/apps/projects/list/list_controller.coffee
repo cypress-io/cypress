@@ -7,6 +7,12 @@
 
       projectsView = @getProjectsView(projects)
 
+      @listenTo projectsView, "project:added", (path) ->
+        projects.add(path: path)
+
+      @listenTo projectsView, "childview:project:clicked", (iv, obj) ->
+        App.execute "run:project", obj.model.get("path")
+
       @show projectsView
 
     getProjectsView: (projects) ->

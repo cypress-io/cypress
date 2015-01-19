@@ -1,19 +1,21 @@
 @App.module "Entities", (Entities, App, Backbone, Marionette, $, _) ->
 
   class Entities.Project extends Entities.Model
+    initialize: ->
+      @setName()
+
+    setName: ->
+      @set name: @getNameFromPath()
+
+    getNameFromPath: ->
+      _(@get("path").split("/")).last()
 
   class Entities.ProjectsCollection extends Entities.Collection
     model: Entities.Project
 
-    url: "/projects"
-
   API =
     getProjects: ->
-      new Entities.ProjectsCollection [
-        {name: "2Sigma"}
-        {name: "WebApp-Node"}
-        {name: "Cypress GUI"}
-      ]
+      new Entities.ProjectsCollection
 
   App.reqres.setHandler "project:entities", ->
     API.getProjects()
