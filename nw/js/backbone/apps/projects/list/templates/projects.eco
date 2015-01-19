@@ -1,0 +1,10 @@
+<div id="projects">
+  <header>
+    <p>
+      <i class="fa fa-user"></i>
+      Hi, &lt;user&gt;
+    </p>
+    <button class="btn btn-default">+ Add</button>
+  </header>
+  <ul class="list-unstyled"></ul>
+</div>

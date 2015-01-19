@@ -1,0 +1,37 @@
+#projects {
+  header {
+    border-bottom: 1px solid #EEE;
+    padding: 10px;
+    overflow: auto;
+    width: 100%;
+    line-height: 32px;
+
+    p {
+      float: left;
+      margin: 0 0 0 0;
+    }
+
+    button {
+      float: right;
+      padding: 5px 10px;
+    }
+  }
+
+  li {
+    padding: 5px 20px;
+    border-bottom: 1px solid #EEE;
+    position: relative;
+
+    &:hover {
+      cursor: pointer;
+      background-color: #EEE;
+    }
+
+    i {
+      font-size: 20px;
+      position: absolute;
+      right: 10px;
+      top: 14px;
+    }
+  }
+}

@@ -21,9 +21,6 @@ log = (obj = {}) ->
   $.util.beep()
 
 transform = (paths, options = {}) ->
-  _.defaults options,
-    destination: "./lib/public/js"
-
   df = jQuery.Deferred()
 
   gulp.src(paths)
@@ -33,7 +30,7 @@ transform = (paths, options = {}) ->
       t.through($.coffee, []) if isCoffee(file)
 
     .pipe $.tap (file, t) ->
-      t.through($.eco, [basePath: "app/js"])  if isEco(file)
+      t.through($.eco, [basePath: options.basePath])  if isEco(file)
 
     .pipe if options.concat then $.concat(options.concat + ".js", newLine: "; \r\n") else $.util.noop()
 
@@ -46,20 +43,36 @@ transform = (paths, options = {}) ->
 isCoffee  = (file) -> file.isBuffer() and /.coffee$/.test(file.path)
 isEco     = (file) -> file.isBuffer() and /.eco$/.test(file.path)
 
-gulp.task "css", ->
-  gulp.src("app/css/**/*.scss")
+compileCss = (source, dest) ->
+  gulp.src("#{source}/css/**/*.scss")
     .pipe $.rubySass
       trace: true
       compass: true
       cacheLocation: ".tmp/.sass-cache"
     .on "error", log
-    .pipe gulp.dest "lib/public/css"
+    .pipe gulp.dest "#{dest}/public/css"
+
+compileJs = (source, options, cb) ->
+  bundles = yaml.load(fs.readFileSync("#{source}/js/js.yml", "utf8"))
+
+  tasks = _.reduce bundles, (memo, files, name) ->
+    obj = _.extend {}, options, {concat: name}
+    memo.push transform(files, obj)
+    memo
+  , []
+
+  jQuery.when(tasks...).done cb
+
+gulp.task "app:css", -> compileCss("app", "lib")
+
+gulp.task "nw:css", -> compileCss("nw", "nw")
 
 gulp.task "fonts", ->
   gulp.src("bower_components/font-awesome/fonts/**")
     .pipe gulp.dest "lib/public/css/fonts"
+    .pipe gulp.dest "nw/public/css/fonts"
 
-gulp.task "img", ["vendor:img", "project:img"]
+gulp.task "app:img", ["vendor:img", "project:img"]
 
 gulp.task "vendor:img", ->
   gulp.src("bower_components/jquery-ui/themes/smoothness/images/**")
@@ -69,41 +82,58 @@ gulp.task "project:img", ->
   gulp.src("app/img/**/*")
     .pipe gulp.dest "lib/public/img"
 
-gulp.task "js", (cb) ->
-  bundles = yaml.load(fs.readFileSync("./lib/js.yml", "utf8"))
+gulp.task "app:js", (cb) ->
+  options =
+    destination: "./lib/public/js"
+    basePath: "app/js"
 
-  tasks = _.reduce bundles, (memo, files, name) ->
-    memo.push transform(files, {concat: name})
-    memo
-  , []
+  compileJs("app", options, cb)
+  return false
 
-  jQuery.when(tasks...).done cb
+gulp.task "nw:js", (cb) ->
+  options =
+    destination: "nw/public/js"
+    basePath: "nw/js"
 
+  compileJs("nw", options, cb)
   return false
 
 gulp.task "bower", ->
   $.bower()
 
-gulp.task "html", ->
+gulp.task "app:html", ->
   gulp.src(["app/html/index.html", "app/html/id_generator.html"])
     .pipe gulp.dest("lib/public")
 
-gulp.task "watch", ["watch:css", "watch:js", "watch:html"]
+gulp.task "nw:html", ->
+  gulp.src("nw/html/index.html")
+    .pipe gulp.dest("nw/public")
 
-gulp.task "watch:css", ->
-  gulp.watch "app/css/**", ["css"]
+gulp.task "app:watch", ["watch:app:css", "watch:app:js", "watch:app:html"]
+gulp.task "nw:watch",  ["watch:nw:css",  "watch:nw:js",  "watch:nw:html"]
 
-gulp.task "watch:js", ->
-  gulp.watch "app/js/**/*", ["js"]
+gulp.task "watch:app:css", ->
+  gulp.watch "app/css/**", ["app:css"]
 
-gulp.task "watch:html", ->
-  gulp.watch "app/html/index.html", ["html"]
+gulp.task "watch:app:js", ->
+  gulp.watch "app/js/**/*", ["app:js"]
 
-gulp.task "server", ->
-  require("./server.coffee")
+gulp.task "watch:nw:css", ->
+  gulp.watch "nw/css/**", ["nw:css"]
 
-gulp.task "test", ->
-  require("../spec/server.coffee")
+gulp.task "watch:nw:js", ->
+  gulp.watch "nw/js/**/*", ["nw:js"]
 
-gulp.task "default", ["bower", "css", "img", "fonts", "js", "html", "watch"]
-gulp.task "compile", ["bower", "css", "img", "fonts", "js", "html"]
+gulp.task "watch:app:html", ->
+  gulp.watch "app/html/index.html", ["app:html"]
+
+gulp.task "watch:nw:html", ->
+  gulp.watch "nw/html/index.html", ["nw:html"]
+
+gulp.task "server", -> require("./server.coffee")
+
+gulp.task "test", -> require("../spec/server.coffee")
+
+gulp.task "default", ["bower", "app:css", "app:img", "fonts", "app:js", "app:html", "app:watch"]
+gulp.task "compile", ["bower", "app:css", "app:img", "fonts", "app:js", "app:html"]
+gulp.task "nw",      ["bower", "nw:css",             "fonts", "nw:js",  "nw:html",  "nw:watch"]

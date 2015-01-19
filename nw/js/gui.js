@@ -1,5 +1,4 @@
 require("coffee-script/register")
-// require("./js/main.coffee");
 
 var gui, Updater, Server;
 
@@ -7,9 +6,9 @@ var gui, Updater, Server;
   var fs         = require("fs")
   var AutoLaunch = require('auto-launch')
 
-  Server         = require('../lib/server')
+  Server         = require('../../lib/server')
   gui            = require('nw.gui')
-  Updater        = require("./js/updater.js")
+  Updater        = require("updater.js")
 
   var win = gui.Window.get()
 

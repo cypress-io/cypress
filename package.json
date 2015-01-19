@@ -2,7 +2,7 @@
   "name": "eclectus",
   "version": "0.0.0",
   "description": "Javascript Test Studio",
-  "main": "nw/index.html",
+  "main": "nw/public/index.html",
   "manifestUrl": "http://localhost:8000/package.json",
   "window": {
     "frame": true,
