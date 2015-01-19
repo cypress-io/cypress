@@ -11,7 +11,7 @@
 
 var gui     = window.require('nw.gui')
 var fs      = window.require("fs")
-var pkg     = JSON.parse(fs.readFileSync("package.json", "utf8")) // Insert your app's manifest here
+var pkg     = gui.App.manifest // Insert your app's manifest here
 var updater = window.require('node-webkit-updater')
 var upd     = new updater(pkg)
 

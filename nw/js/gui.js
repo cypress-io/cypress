@@ -12,8 +12,10 @@ var gui, Updater, Server;
 
   var win = gui.Window.get()
 
-  // prevent from flickering on boot
-  win.hide()
+  win.showDevTools()
+  win.setAlwaysOnTop()
+
+  win.show()
 
   var width = win.width
 
@@ -25,14 +27,14 @@ var gui, Updater, Server;
     win.show()
   })
 
-  win.on("blur", function(){
-    if(App.fileDialogOpened) return;
-    win.hide()
-  })
+  // win.on("blur", function(){
+  //   if(App.fileDialogOpened) return;
+  //   win.hide()
+  // })
 
   var autoLaunch = function(title){
     var nwAppLauncher = new AutoLaunch({
-        name: JSON.parse(fs.readFileSync("package.json", "utf8")).name
+        name: gui.App.manifest.name
     })
 
     nwAppLauncher.isEnabled(function(enabled){

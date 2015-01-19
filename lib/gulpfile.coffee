@@ -106,7 +106,7 @@ gulp.task "app:html", ->
     .pipe gulp.dest("lib/public")
 
 gulp.task "nw:html", ->
-  gulp.src("nw/html/index.html")
+  gulp.src("nw/html/*")
     .pipe gulp.dest("nw/public")
 
 gulp.task "app:watch", ["watch:app:css", "watch:app:js", "watch:app:html"]
@@ -128,7 +128,7 @@ gulp.task "watch:app:html", ->
   gulp.watch "app/html/index.html", ["app:html"]
 
 gulp.task "watch:nw:html", ->
-  gulp.watch "nw/html/index.html", ["nw:html"]
+  gulp.watch "nw/html/**", ["nw:html"]
 
 gulp.task "server", -> require("./server.coffee")
 

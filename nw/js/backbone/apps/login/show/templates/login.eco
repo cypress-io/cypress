@@ -1,0 +1,11 @@
+<div id="login">
+  <h3>
+    <p>Cypress.io</p>
+  </h3>
+  <div class="well well-lg">
+    <button class="btn btn-default">
+      <i class="fa fa-github"></i>
+      Login with Github
+    </button>
+  </div>
+</div>

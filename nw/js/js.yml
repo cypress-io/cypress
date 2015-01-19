@@ -10,6 +10,10 @@ vendor:
   - bower_components/backbone/backbone.js
   - bower_components/marionette/lib/backbone.marionette.js
   - bower_components/underscore.string/lib/underscore.string.js
+  - bower_components/jsuri/Uri.js
+
+uri:
+  - bower_components/jsuri/Uri.js
 
 app:
   - nw/js/config/**
