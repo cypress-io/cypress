@@ -41,6 +41,9 @@ appendTestId = (spec, title, id) ->
         app.disable("editFileMode")
       , 1000
 
+getId = (data) ->
+  pSemaphore.add(nextId.bind(this, data))
+
 nextId = (data) ->
   keys = new (require('./keys'))
 
@@ -56,8 +59,6 @@ nextId = (data) ->
 
     throw e
 
-getId = (data) ->
-  pSemaphore.add(nextId.bind(this, data))
 
 parseStackTrace = (trace) ->
   _.reduce trace, (memo, obj) ->
