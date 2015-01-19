@@ -9,7 +9,8 @@
   global.App = App
 
   App.addRegions
-    mainRegion:  "#main-region"
+    mainRegion:   "#main-region"
+    footerRegion: "#footer-region"
 
   ## store the default region as the main region
   App.reqres.setHandler "default:region", -> App.mainRegion
@@ -29,7 +30,10 @@
         ## else login
         App.vent.trigger "start:login:app"
 
+      ## display the footer
+      App.vent.trigger "start:footer:app"
+
       ## display the GUI
-    App.execute "gui:display"
+      App.execute "gui:display"
 
   return App

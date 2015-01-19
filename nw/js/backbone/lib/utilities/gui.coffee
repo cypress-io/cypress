@@ -16,6 +16,7 @@
       win = gui.Window.get()
 
       if App.config.env("dev")
+        gui.App.clearCache()
         @show(win)
       else
         win.hide()

@@ -28,6 +28,10 @@
 // Fonts
 @import "font-awesome/scss/font-awesome";
 
+// Elements
+@import "elements/body";
+
 // Independent Pages
+@import "pages/footer";
 @import "pages/login";
 @import "pages/projects";
