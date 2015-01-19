@@ -11,21 +11,25 @@ class AppInfo extends require('./logger')
       @_ensureProjectRangeKey
     ]
 
-  _ensureProjectKey: (contents) ->
+  _ensureProjectKey: (contents) =>
+    @emit 'verbose', 'ensuring project key'
     if !contents.PROJECTS?
       contents.PROJECTS = {}
 
     Promise.resolve(contents)
 
-  _ensureProjectRangeKey: (contents) ->
+  _ensureProjectRangeKey: (contents) =>
+    @emit 'verbose', 'ensuring project range key'
     _.each contents.PROJECTS, (p) ->
       if !p.RANGE?
         p.RANGE = {}
+
     Promise.resolve(contents)
 
   ## Reads the contents of the local file
   ## returns a JSON object
-  _read: ->
+  _read: =>
+    @emit 'verbose', 'reading from .cy info'
     fs.readFileAsync(LOCATION, 'utf8')
     .then(JSON.parse)
     .then (contents) =>
@@ -37,6 +41,7 @@ class AppInfo extends require('./logger')
   ## takes in an object and serializes it into JSON
   ## finally returning the JSON object that was written
   _write: (obj={}) =>
+    @emit 'verbose', 'writing to .cy info'
     fs.writeFileAsync(
       LOCATION,
       JSON.stringify(obj),
@@ -45,6 +50,7 @@ class AppInfo extends require('./logger')
 
   ## Creates the local info directory and file
   _initLocalInfo: =>
+    @emit 'verbose', 'creating initial .cy info'
     fs.mkdirAsync(
       path.dirname(LOCATION)
     )
@@ -53,12 +59,14 @@ class AppInfo extends require('./logger')
   ## Checks to make sure if the local file is already there
   ## if so returns true;
   ## otherwise it inits an empty JSON config file
-  ensureExists: ->
+  ensureExists: =>
+    @emit 'verbose', 'checking existence of .cy info'
     fs.statAsync(LOCATION)
     .then(-> true)
     .catch(@_initLocalInfo)
 
-  updateRange: (id, range) ->
+  updateRange: (id, range) =>
+    @emit 'verbose', "updating range of project #{id} with #{JSON.stringify(range)}"
     @getProject(id)
     .then (p) ->
       p.RANGE = range
@@ -67,19 +75,22 @@ class AppInfo extends require('./logger')
        @updateProject(id, p)
        .then(p)
 
-  updateProject: (id, data) ->
+  updateProject: (id, data) =>
+    @emit 'verbose', "updating project #{id} with #{JSON.stringify(data)}"
     @_read()
     .then (contents) =>
       contents.PROJECTS[id] = data
       @_write(contents)
       .then -> data
 
-  ensureProject: (id) ->
+  ensureProject: (id) =>
+    @emit 'verbose', "ensuring that project #{id} exists"
     @getProject(id)
     .then(id)
     .catch(=> @addProject(id))
 
-  getProject: (id) ->
+  getProject: (id) =>
+    @emit 'verbose', "reading from project #{id}"
     @_read()
     .then (contents) =>
       if (p = contents.PROJECTS[id])
@@ -87,7 +98,8 @@ class AppInfo extends require('./logger')
 
       throw new Error("Project #{id} not found")
 
-  addProject: (id) ->
+  addProject: (id) =>
+    @emit 'verbose', "adding project #{id}"
     @_read()
     .then (contents) =>
 
