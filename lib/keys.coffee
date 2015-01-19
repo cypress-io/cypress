@@ -5,17 +5,12 @@ Request  = require 'request-promise'
 Project  = require './project'
 fs       = Promise.promisifyAll(require('fs'))
 API_URL  = process.env.API_URL or 'localhost:1234'
+AppInfo  = require './app_info'
 
 class Keys
   constructor: ->
+    @AppInfo = new AppInfo
     @Project = new Project(app.get('config'))
-
-  ## Set up offline local id sync location
-  _initOfflineSync: (keyCountLocation) ->
-    fs.mkdirAsync(path.dirname(keyCountLocation))
-    .then(@_getNewKeyRange)
-    .then (range) ->
-      fs.writeFileAsync(keyCountLocation, range, "utf8")
 
   _getNewKeyRange: =>
     @Project.ensureProjectId()
@@ -24,54 +19,40 @@ class Keys
 
   ## Lookup the next Test integer and update
   ## offline location of sync
-  _getNextTestNumber: (keyCountLocation) ->
-    @_getOfflineContents(keyCountLocation)
-    .then (range) =>
-      range = JSON.parse(range) if typeof range is "string"
-      next = range.start
-      range.start++
-      if (range.start is range.end)
-        return @_getNewKeyRange()
-      range
-    .then (range) =>
-      range = JSON.parse(range) if typeof range is "string"
-      @_updateOfflineContents(range, keyCountLocation)
-      .then -> range.start
+  _getNextTestNumber: =>
+    @Project.ensureProjectId()
+    .then (projectId) =>
+      @_getProjectKeyRange(projectId)
+      .then (range) =>
+        if (range.start is range.end)
+          return @_getNewKeyRange()
+
+        next = range.start
+        range.start++
+
+        if (range.start is range.end)
+          return @_getNewKeyRange()
+        range
+      .then (range) =>
+        range = JSON.parse(range) if typeof range is "string"
+        @AppInfo.updateRange(projectId, range)
+        .then -> range.start
 
   _convertToId: (index) ->
     ival = index.toString(36)
     ## 0 pad number to ensure three digits
     [0,0,0].slice(ival.length).join("")+ival
 
-  _updateOfflineContents: (range, keyCountLocation) ->
-    fs.writeFileAsync(
-      keyCountLocation,
-      JSON.stringify(range),
-      "utf8"
-    )
-
-  _getOfflineContents: (keyCountLocation)->
-    fs.readFileAsync(keyCountLocation, "utf8")
-    .then(JSON.parse)
-
-  _ensureOfflineCache: (keyCountLocation) ->
-    fs.openAsync(keyCountLocation, 'r')
-    .catch => @_initOfflineSync(keyCountLocation)
+  _getProjectKeyRange: (id) ->
+    @AppInfo.getProject(id)
+    .then (project) -> project.RANGE
 
   nextKey: (app) ->
-    testFolder       = app.get("eclectus").testFolder
-    projectRoot      = app.get("config").projectRoot
-    keyCountLocation = path.resolve(
-      path.join(
-        projectRoot,
-        testFolder,
-        '/.ecl/',
-        'key_count'
-      )
-    )
-
-    @_ensureOfflineCache(keyCountLocation)
-    .then => @_getNextTestNumber(keyCountLocation)
-    .then @_convertToId
+    @Project.ensureProjectId()
+    .then (projectId) =>
+      @AppInfo.ensureExists()
+      .then => @AppInfo.ensureProject(projectId)
+      .then @_getNextTestNumber
+      .then @_convertToId
 
 module.exports = Keys

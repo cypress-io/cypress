@@ -5,3 +5,5 @@ bower_components
 build/css
 lib/public
 .DS_Store
+npm-debug.log
+.cy/
