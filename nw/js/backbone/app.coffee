@@ -1,8 +1,8 @@
 @App = do (Backbone, Marionette) ->
 
-  parseArgv = (argv) ->
-    _.defaults {},
-      env: if "--dev" in argv then "dev" else "prod"
+  parseArgv = (options) ->
+    _.defaults options,
+      env: if "--dev" in options.argv then "dev" else "prod"
 
   App = new Marionette.Application
 
@@ -14,20 +14,22 @@
   ## store the default region as the main region
   App.reqres.setHandler "default:region", -> App.mainRegion
 
-  App.on "start", (argv) ->
-    options = parseArgv(argv)
+  App.on "start", (options) ->
+    options = parseArgv(options)
 
     ## create a App.config model from the passed in options
     App.config = App.request("config:entity", options)
 
+    App.config.getSessionId().then (id) ->
+      ## check cache store for session id
+      if id
+        ## if have it, start projects
+        App.vent.trigger "start:projects:app"
+      else
+        ## else login
+        App.vent.trigger "start:login:app"
 
-    ## check cache store for session id
-
-    ## if have it, start projects
-
-    ## else login
-    App.vent.trigger "start:login:app"
-
+      ## display the GUI
     App.execute "gui:display"
 
   return App

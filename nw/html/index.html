@@ -12,8 +12,11 @@
   <body>
     <div id="main-region"></div>
     <script type="text/javascript">
+      require("coffee-script/register")
+
       $(function(){
         var opts = require("nw.gui").App.argv
+        opts.AppInfo = require("../../lib/app_info")
         App.start(opts);
       })
     </script>

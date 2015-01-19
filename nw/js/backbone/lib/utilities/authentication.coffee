@@ -24,18 +24,24 @@
         position: "center"
         focus: true
 
+    loggingIn: (url) ->
+      ## display logging in loading spinner here
+
+      App.execute "gui:focus"
+
+      App.config.setSessionId("foobarbaz123").then ->
+        App.vent.trigger "start:projects:app"
+
+      # code = new Uri(url).getQueryParamValue("code")
+
+      # Request.post("http://#{API_URL}/sessions?code=#{code}").then (res, err) ->
+      #   ## call into cache to store session
+      #   debugger
+      # .catch ->
+      #   debugger
+
+      # App.vent.trigger "start:projects:app"
+
   App.commands.setHandler "login:request", -> API.loginRequest()
 
-  App.vent.on "logging:in", (url) ->
-    App.execute "gui:focus"
-
-    code = new Uri(url).getQueryParamValue("code")
-
-    ## display logging in loading spinner
-    Request.post("http://#{API_URL}/sessions?code=#{code}").then (res, err) ->
-      ## call into cache to store session
-      debugger
-    .catch ->
-      debugger
-
-    # App.vent.trigger "start:projects:app"
+  App.vent.on "logging:in", (url) -> API.loggingIn(url)
