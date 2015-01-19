@@ -1,9 +1,11 @@
-idGenerator = require '../../../lib/id_generator'
+root        = '../../../'
+path        = require 'path'
+idGenerator = require "#{root}lib/id_generator"
 expect      = require('chai').expect
 fs          = require 'fs-extra'
 _           = require 'lodash'
 nock        = require('nock')
-Socket      = require("../../../lib/socket")
+Socket      = require("#{root}lib/socket")
 sinon       = require("sinon")
 API_URL     = process.env.API_URL or 'localhost:1234'
 
@@ -46,6 +48,7 @@ describe "id generation", ->
     nock.cleanAll()
     nock.enableNetConnect()
     fs.removeSync(@rootPath);
+    fs.removeSync(path.join(__dirname, root, ".ecl"));
     fs.removeSync("eclectus.json");
 
   it "generates a single id", (done) ->

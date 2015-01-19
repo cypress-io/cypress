@@ -63,8 +63,8 @@ class Keys
     projectRoot      = app.get("config").projectRoot
     keyCountLocation = path.resolve(
       path.join(
-        projectRoot,
-        testFolder,
+        __dirname,
+        '../'
         '/.ecl/',
         'key_count'
       )

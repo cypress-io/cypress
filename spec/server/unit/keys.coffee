@@ -1,8 +1,10 @@
+root          = '../../../'
 Promise       = require('bluebird')
 expect        = require('chai').expect
 sinon         = require('sinon')
 sinonChai     = require('sinon-chai')
-Keys          = require('../../../lib/keys')
+Keys          = require("#{root}lib/keys")
+fs            = require('fs')
 
 describe "key generation", ->
   beforeEach ->
