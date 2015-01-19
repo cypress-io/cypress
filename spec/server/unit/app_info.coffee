@@ -64,38 +64,99 @@ describe "local cache", ->
     beforeEach ->
       @appInfo.ensureExists()
 
-    it "throws an error when a project is not found", (done) ->
-      @appInfo.getProject("FOO")
-      .catch (err) ->
-        err.message.should.eql("Project FOO not found")
-        done()
+    describe "#getProject", ->
+      it "returns the project by id", (done) ->
+        @appInfo.addProject("FOO").then (project) =>
+          @appInfo.getProject("FOO").then (project) ->
+            expect(project).to.deep.eq {RANGE: {}}
+            done()
+        .catch(done)
 
-    it "returns the project when exists", (done) ->
-      @appInfo.addProject("FOO")
-      .then =>
+      it "throws an error when a project is not found", (done) ->
         @appInfo.getProject("FOO")
-      .then (val) ->
-        val.should.be.defined
-        done()
-      .catch(done)
+        .catch (err) ->
+          err.message.should.eql("Project FOO not found")
+          done()
 
-    it "can add a single project", (done) ->
-      @appInfo.addProject("FOO")
-      .then => done()
-      .catch(done)
+    describe "#addProject", ->
+      it "returns the project when exists", (done) ->
+        @appInfo.addProject("FOO")
+        .then =>
+          @appInfo.getProject("FOO")
+        .then (val) ->
+          val.should.be.defined
+          done()
+        .catch(done)
 
-    it "can update a single project", (done) ->
-      @appInfo.addProject("FOO")
-      .then => @appInfo.updateProject("FOO", {wow: 1})
-      .then (c) => c.should.eql({wow: 1}); done()
-      .catch(done)
+      it "can add a single project", (done) ->
+        @appInfo.addProject("FOO")
+        .then => done()
+        .catch(done)
 
-    it "can update a project range", (done) ->
-      @appInfo.addProject("FOO")
-      .then => @appInfo.updateRange("FOO", {start: 1, end: 2})
-      .then (p) =>
-        p.should.eql({RANGE: {start:1,end:2}}); done()
-      .catch(done)
+      it "does not override existing properties", (done) ->
+        @appInfo._set("qwerty", 1234).then (contents) =>
+          @appInfo.addProject("DOES_NOT_EXIST")
+        .then (contents) ->
+          expect(contents).to.have.property("qwerty", 1234)
+          expect(contents).to.have.property("PROJECTS")
+          done()
+        .catch(done)
+
+    describe "#updateProject", ->
+      beforeEach ->
+        @appInfo.addProject("BAR")
+
+      it "can update a single project", (done) ->
+        @appInfo.updateProject("BAR", {wow: 1})
+        .then (c) => c.should.eql({RANGE: {}, wow: 1}); done()
+        .catch(done)
+
+      it "can update a project range", (done) ->
+        @appInfo.updateRange("BAR", {start: 1, end: 2})
+        .then (p) =>
+          p.should.eql({RANGE: {start:1,end:2}}); done()
+        .catch(done)
+
+      it "overrides only conflicting properties", (done) ->
+        @appInfo.updateProject("BAR", {bar: "bar", foo: "foo"}).then =>
+          @appInfo.updateProject("BAR", {bar: "baz"}).then (project) =>
+            expect(project).to.have.property("foo", "foo")
+            expect(project).to.have.property("bar", "baz")
+            done()
+        .catch(done)
 
   context "utilities", ->
     it "can remove a single project"
+
+  context "#getSessionId", ->
+    beforeEach ->
+      @appInfo.ensureExists()
+
+    it "returns session id", (done) ->
+      @appInfo.setSessionId(1234).then =>
+        @appInfo.getSessionId().then (id) ->
+          expect(id).to.eq 1234
+          done()
+      .catch(done)
+
+  context "#setSessionId", ->
+    beforeEach ->
+      @appInfo.ensureExists()
+
+    it "sets SESSION_ID into .cy", (done) ->
+      @appInfo.setSessionId(1234).then (contents) ->
+        expect(contents.SESSION_ID).to.eq 1234
+        done()
+      .catch(done)
+
+  context "#_set", ->
+    beforeEach ->
+      @appInfo.ensureExists()
+
+    it "does not override existing properties", (done) ->
+      @appInfo._write({foo: "foo"}).then (contents) =>
+        @appInfo._set({bar: "bar"}).then (contents) ->
+          expect(contents.foo).to.eq "foo"
+          expect(contents.bar).to.eq "bar"
+          done()
+      .catch(done)

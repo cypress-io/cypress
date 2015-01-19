@@ -5,7 +5,7 @@ fs        = Promise.promisifyAll(require('fs'))
 LOCATION  = path.join(__dirname, '../', '.cy/', 'local.info')
 
 class AppInfo extends require('./logger')
-  READ_VALIDATIONS: =>
+  READ_VALIDATIONS: ->
     [
       @_ensureProjectKey
       @_ensureProjectRangeKey
@@ -31,8 +31,9 @@ class AppInfo extends require('./logger')
   _read: =>
     @emit 'verbose', 'reading from .cy info'
     fs.readFileAsync(LOCATION, 'utf8')
+    .bind(@)
     .then(JSON.parse)
-    .then (contents) =>
+    .then (contents) ->
       Promise.reduce(@READ_VALIDATIONS(), (memo, fn) ->
         fn(memo)
       , contents)
@@ -40,75 +41,112 @@ class AppInfo extends require('./logger')
   ## Writes over the contents of the local file
   ## takes in an object and serializes it into JSON
   ## finally returning the JSON object that was written
-  _write: (obj={}) =>
+  _write: (obj={}) ->
     @emit 'verbose', 'writing to .cy info'
     fs.writeFileAsync(
       LOCATION,
       JSON.stringify(obj),
       'utf8'
-    ).then(obj)
+    ).bind(@).return(obj)
+
+  _normalizeObj: (key, val) ->
+    return key if _.isObject(key)
+
+    obj = {}
+    obj[key] = val
+    obj
+
+  _set: (key, val) ->
+    obj = @_normalizeObj(key, val)
+
+    @emit 'verbose', 'merging into .cy'
+
+    @_read().then (contents) ->
+      @_write(_.extend contents, obj)
+
+  _get: (key) ->
+    @_read().then (contents) ->
+      contents[key]
 
   ## Creates the local info directory and file
-  _initLocalInfo: =>
+  _initLocalInfo: ->
     @emit 'verbose', 'creating initial .cy info'
     fs.mkdirAsync(
       path.dirname(LOCATION)
     )
+    .bind(@)
     .then(@_write)
 
   ## Checks to make sure if the local file is already there
   ## if so returns true;
   ## otherwise it inits an empty JSON config file
-  ensureExists: =>
+  ensureExists: ->
     @emit 'verbose', 'checking existence of .cy info'
     fs.statAsync(LOCATION)
-    .then(-> true)
+    .bind(@)
+    .return(true)
     .catch(@_initLocalInfo)
 
-  updateRange: (id, range) =>
+  updateRange: (id, range) ->
     @emit 'verbose', "updating range of project #{id} with #{JSON.stringify(range)}"
     @getProject(id)
     .then (p) ->
       p.RANGE = range
       p
-    .then (p) =>
+    .then (p) ->
        @updateProject(id, p)
        .then(p)
 
-  updateProject: (id, data) =>
+  updateProject: (id, data) ->
     @emit 'verbose', "updating project #{id} with #{JSON.stringify(data)}"
-    @_read()
-    .then (contents) =>
-      contents.PROJECTS[id] = data
-      @_write(contents)
-      .then -> data
+    @getProjects().then (projects) ->
+      @getProject(id).then (project) ->
+        projects[id] = _.extend(project, data)
+        @_set "PROJECTS", projects
+        .return(project)
 
-  ensureProject: (id) =>
+  ensureProject: (id) ->
     @emit 'verbose', "ensuring that project #{id} exists"
     @getProject(id)
     .then(id)
-    .catch(=> @addProject(id))
+    .catch(-> @addProject(id))
 
-  getProject: (id) =>
+  getProject: (id) ->
     @emit 'verbose', "reading from project #{id}"
-    @_read()
-    .then (contents) =>
-      if (p = contents.PROJECTS[id])
-        return p
+
+    @getProjects().then (projects) ->
+      if (project = projects[id])
+        return project
 
       throw new Error("Project #{id} not found")
 
-  addProject: (id) =>
-    @emit 'verbose', "adding project #{id}"
-    @_read()
-    .then (contents) =>
+  getProjects: ->
+    @emit "verbose", "reading from all projects"
 
+    @_get("PROJECTS")
+
+  addProject: (id) ->
+    @emit 'verbose', "adding project #{id}"
+
+    @getProjects().then (projects) ->
       ## If we already have a project entry
       ## return the file contents
-      if (contents.PROJECTS[id])
-        return contents
+      if (project = projects[id])
+        return project
 
-      contents.PROJECTS[id] = {}
-      @_write(contents)
+      ## create an empty nested object
+      obj = {}
+      obj[id] = {}
+      @_set("PROJECTS", obj)
+
+  getSessionId: ->
+    @emit "verbose", "getting session id"
+
+    @_get("SESSION_ID")
+
+  setSessionId: (id) ->
+    @emit "verbose", "setting session id: #{id}"
+
+    @_set("SESSION_ID", id)
 
 module.exports = AppInfo
