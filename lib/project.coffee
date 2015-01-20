@@ -7,8 +7,7 @@ fs       = Promise.promisifyAll(require('fs'))
 API_URL  = process.env.API_URL or 'localhost:1234'
 
 class Project extends require('./logger')
-  constructor: (config) ->
-    @config = config
+  constructor: (@config) ->
     super
 
   ## A simple helper method
@@ -30,8 +29,8 @@ class Project extends require('./logger')
     @emit "verbose", "Looking up project ID"
     Settings.read(@config)
     .then (settings) ->
-      if (settings.eclectus.projectID)
-        return settings.eclectus.projectID
+      if (id = settings.eclectus.projectID)
+        return id
       throw new Error("No project ID found")
 
   updateSettings: (settings) =>

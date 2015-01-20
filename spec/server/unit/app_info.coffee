@@ -4,6 +4,7 @@ info          = path.join(__dirname, root, '/.cy/', 'local.info')
 Promise       = require 'bluebird'
 expect        = require('chai').expect
 Keys          = require "#{root}lib/keys"
+Project       = require "#{root}lib/project"
 AppInfo       = require "#{root}lib/app_info"
 fs            = Promise.promisifyAll(require('fs'))
 nock          = require 'nock'
@@ -18,11 +19,13 @@ require('chai')
 describe "local cache", ->
   beforeEach ->
     nock.disableNetConnect()
+    @sandbox = sinon.sandbox.create()
     @appInfo = new AppInfo
 
   afterEach (done)->
     nock.cleanAll()
     nock.enableNetConnect()
+    @sandbox.restore()
     rimraf(path.dirname(info), (e) -> done(e))
 
   it "creates an offline cache if not present", (done) ->
@@ -51,7 +54,7 @@ describe "local cache", ->
 
     it "creates an empty RANGE key for a Project", (done) ->
       @appInfo.ensureExists()
-      .then => @appInfo.addProject("FOO")
+      .then => @appInfo.insertProject("FOO")
       .then => @appInfo._read()
       .then (contents) =>
         contents.should.eql({
@@ -66,7 +69,7 @@ describe "local cache", ->
 
     describe "#getProject", ->
       it "returns the project by id", (done) ->
-        @appInfo.addProject("FOO").then (project) =>
+        @appInfo.insertProject("FOO").then (project) =>
           @appInfo.getProject("FOO").then (project) ->
             expect(project).to.deep.eq {RANGE: {}}
             done()
@@ -78,33 +81,69 @@ describe "local cache", ->
           err.message.should.eql("Project FOO not found")
           done()
 
-    describe "#addProject", ->
-      it "returns the project when exists", (done) ->
-        @appInfo.addProject("FOO")
+    describe "#insertProject", ->
+      it "throws without an id", ->
+        fn = => @appInfo.insertProject(null)
+        expect(fn).to.throw("Cannot insert a project without an id!")
+
+      it "inserts project by id", (done) ->
+        @appInfo.insertProject(12345).then =>
+          @appInfo.getProject(12345).then (project) ->
+            expect(project).to.deep.eq {RANGE: {}}
+            done()
+
+      it "is a noop if project already exists by id", (done) ->
+        @appInfo.insertProject(12345)
         .then =>
-          @appInfo.getProject("FOO")
-        .then (val) ->
-          val.should.be.defined
-          done()
-        .catch(done)
+          @appInfo.updateProject(12345, {foo: "foo"}).then (@project) =>
+            expect(@project).to.deep.eq {RANGE: {}, foo: "foo"}
+        .then =>
+          @appInfo.insertProject(12345).then =>
+            expect(@project).to.deep.eq {RANGE: {}, foo: "foo"}
+            done()
 
-      it "can add a single project", (done) ->
-        @appInfo.addProject("FOO")
-        .then => done()
-        .catch(done)
+    describe "#addProject", ->
+      context "with existing id", ->
+        beforeEach ->
+          @sandbox.stub(Project.prototype, "getProjectId").returns(Promise.resolve("abc-123"))
 
-      it "does not override existing properties", (done) ->
-        @appInfo._set("qwerty", 1234).then (contents) =>
-          @appInfo.addProject("DOES_NOT_EXIST")
-        .then (contents) ->
-          expect(contents).to.have.property("qwerty", 1234)
-          expect(contents).to.have.property("PROJECTS")
-          done()
-        .catch(done)
+        it "inserts project", (done) ->
+          @appInfo.addProject("/Users/brian/app").then (project) ->
+            expect(project).to.deep.eq({RANGE: {}, PATH: "/Users/brian/app"})
+            done()
+
+        it "updates its path without affecting other keys", (done) ->
+          @appInfo.insertProject("abc-123").then =>
+            @appInfo.updateProject("abc-123", {foo: "foo", PATH: "/Users/dev/foo"}).then (project) ->
+              expect(project).to.deep.eq({RANGE: {}, foo: "foo", PATH: "/Users/dev/foo"})
+          .then =>
+            @appInfo.addProject("/Users/brian/app").then (project) ->
+              expect(project).to.deep.eq({RANGE: {}, foo: "foo", PATH: "/Users/brian/app"})
+              done()
+
+        it "returns the project when exists", (done) ->
+          @appInfo.addProject("/Users/brian/app").then (project) ->
+            expect(project.PATH).to.eq "/Users/brian/app"
+            done()
+
+      context "without existing id", ->
+        beforeEach ->
+          @sandbox.stub(Project.prototype, "createProjectId").returns("foo-bar-baz-123")
+
+        it "inserts projects", (done) ->
+          @appInfo.addProject("/Users/brian/app").then =>
+            @appInfo.getProjects().then (projects) ->
+              expect(projects).to.have.property("foo-bar-baz-123")
+              done()
+
+        it "inserts project path", (done) ->
+          @appInfo.addProject("/Users/brian/app").then (project) ->
+            expect(project).to.deep.eq({RANGE: {}, PATH: "/Users/brian/app"})
+            done()
 
     describe "#updateProject", ->
       beforeEach ->
-        @appInfo.addProject("BAR")
+        @appInfo.insertProject("BAR")
 
       it "can update a single project", (done) ->
         @appInfo.updateProject("BAR", {wow: 1})

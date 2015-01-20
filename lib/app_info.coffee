@@ -1,6 +1,7 @@
 _         = require 'lodash'
 Promise   = require 'bluebird'
 path      = require 'path'
+Project   = require './project'
 fs        = Promise.promisifyAll(require('fs'))
 LOCATION  = path.join(__dirname, '../', '.cy/', 'local.info')
 
@@ -111,6 +112,20 @@ class AppInfo extends require('./logger')
     .then(id)
     .catch(-> @addProject(id))
 
+  insertProject: (id) ->
+    throw new Error("Cannot insert a project without an id!") if not id
+
+    @getProjects().then (projects) ->
+      ## bail if we already have a project
+      return if projects[id]
+
+      @emit 'verbose', "inserting project id: #{id}"
+
+      ## create an empty nested object
+      obj = {}
+      obj[id] = {}
+      @_set("PROJECTS", obj)
+
   getProject: (id) ->
     @emit 'verbose', "reading from project #{id}"
 
@@ -125,19 +140,18 @@ class AppInfo extends require('./logger')
 
     @_get("PROJECTS")
 
-  addProject: (id) ->
-    @emit 'verbose', "adding project #{id}"
+  addProject: (path) ->
+    @emit "verbose", "adding project from path: #{path}"
 
-    @getProjects().then (projects) ->
-      ## If we already have a project entry
-      ## return the file contents
-      if (project = projects[id])
-        return project
+    project = new Project({projectRoot: path})
 
-      ## create an empty nested object
-      obj = {}
-      obj[id] = {}
-      @_set("PROJECTS", obj)
+    ## make sure we either have or receive an id
+    project.ensureProjectId().then (id) =>
+      ## make sure we've written it to the local .cy file
+      @insertProject(id).then =>
+
+        ## and make sure we have the correct path
+        @updateProject(id, {PATH: path})
 
   getSessionId: ->
     @emit "verbose", "getting session id"
