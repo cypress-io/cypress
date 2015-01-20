@@ -23,6 +23,8 @@
       App.execute "gui:open", @createUrl(),
         position: "center"
         focus: true
+        width: 900
+        height: 500
 
     loggingIn: (url) ->
       ## display logging in loading spinner here
