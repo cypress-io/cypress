@@ -21,7 +21,8 @@
       appInfo.ensureExists().then(function(){
         var opts = {
           argv:    require("nw.gui").App.argv,
-          appInfo: appInfo
+          appInfo: appInfo,
+          Server:  require("../../lib/server")
         }
 
         $(function(){
