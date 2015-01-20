@@ -152,29 +152,6 @@ class AppInfo extends require('./logger')
 
     @_set {PROJECTS: projects}
 
-  _removeAnyProjectNotFound: ->
-    orginalProjects = null
-
-    @getProjects().then (projects) ->
-      orginalProjects = projects
-
-      projects =  _.reduce orginalProjects, (memo, key, project) ->
-
-
-      Promise.reduce projects, (memo, key, project) ->
-        fs.statAsync(project.PATH).then ->
-          memo[key] = project
-        .return(memo)
-
-      , {}
-    .then (projects) ->
-      ## noop if these are equal
-      if _.isEqual(orginalProjects, projects)
-        return projects
-      else
-        ## remove the old projects not found
-        @_set {PROJECTS: projects}
-
   getProjectPaths: ->
     @getProjects().then (projects) ->
       paths = _.pluck(projects, "PATH")
