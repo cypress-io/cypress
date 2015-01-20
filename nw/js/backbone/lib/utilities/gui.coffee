@@ -65,7 +65,7 @@
   App.commands.setHandler "gui:focus", ->
     API.focus()
 
-  App.commands.setHandler "gui:open", (url, options = {}) ->
+  App.reqres.setHandler "gui:open", (url, options = {}) ->
     API.open(url, options)
 
   App.commands.setHandler "gui:reload", ->

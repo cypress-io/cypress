@@ -19,11 +19,16 @@
     getProjectPaths: ->
       @appInfo.getProjectPaths()
 
+    runProject: (path) ->
+      @Server(projectRoot: path)
+
   class Entities.ProjectsCollection extends Entities.Collection
     model: Entities.Project
 
   App.reqres.setHandler "config:entity", (attrs = {}) ->
     appInfo = attrs.appInfo
-    config = new Entities.Config _(attrs).omit("appInfo")
+    Server = attrs.Server
+    config = new Entities.Config _(attrs).omit("appInfo", "Server")
     config.appInfo = appInfo
+    config.Server = Server
     config
