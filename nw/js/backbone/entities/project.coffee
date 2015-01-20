@@ -10,6 +10,9 @@
     getNameFromPath: ->
       _(@get("path").split("/")).last()
 
+    setClientUrl: (url) ->
+      @set clientUrl: url
+
   class Entities.ProjectsCollection extends Entities.Collection
     model: Entities.Project
 

@@ -43,3 +43,18 @@
     }
   }
 }
+
+#project {
+  text-align: center;
+
+  h3 {
+    @include text-overflow;
+  }
+
+  a {
+    padding-top: 5px;
+    margin-top: 5px;
+    border-top: 1px dashed #999;
+    display: inline-block;
+  }
+}

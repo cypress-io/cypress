@@ -12,8 +12,7 @@
           projects.add(path: path)
 
       @listenTo projectsView, "childview:project:clicked", (iv, obj) ->
-        App.config.runProject(obj.model.get("path")).then (config) ->
-          App.execute "start:id:generator", config.idGeneratorPath
+        App.vent.trigger "project:clicked", obj.model
 
       @show projectsView
 
