@@ -21,20 +21,28 @@
       else
         win.hide()
 
-      width = win.width
-
-      nativeMenuBar = new gui.Menu({ type: "menubar" })
+      nativeMenuBar = new gui.Menu(type: "menubar")
       nativeMenuBar.createMacBuiltin "Cypress.io"
 
       win.menu = nativeMenuBar
 
-      tray = new gui.Tray({ title: 'Cy' })
+      tray = new gui.Tray(title: "Cy")
+
+      ## go this from NW custom tray menu
+      iconWidth = 13
+
+      translate = (coords) ->
+        coords.x -= Math.floor(win.width / 2 - iconWidth)
+        coords.y += 8
+        coords
 
       tray.on "click", (coords) =>
+        coords = translate(coords)
+
         win.moveTo(coords.x, coords.y)
-        win.moveBy(-(width / 2), 5)
 
         @show(win)
+        @focus()
 
       win.on "blur", ->
         return if App.fileDialogOpened or App.config.env("dev")
