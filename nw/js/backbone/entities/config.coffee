@@ -21,6 +21,10 @@
 
     runProject: (path) ->
       @Server(projectRoot: path)
+      @Server.open()
+
+    closeProject: ->
+      @Server.close()
 
   class Entities.ProjectsCollection extends Entities.Collection
     model: Entities.Project

@@ -1,4 +1,4 @@
-module.exports = (config) ->
+Server = (config) ->
   express     = require 'express'
   http        = require 'http'
   path        = require 'path'
@@ -15,9 +15,9 @@ module.exports = (config) ->
 
   _.mixin _.str.exports()
 
-  global.app  = express()
-  server      = http.createServer(app)
-  io          = require("socket.io")(server, {path: "/__socket.io"})
+  global.app    = express()
+  Server.server = server = http.createServer(app)
+  io            = require("socket.io")(server, {path: "/__socket.io"})
 
   getEclectusJson = ->
     obj = JSON.parse(
@@ -40,7 +40,10 @@ module.exports = (config) ->
       port: 3000
 
     _.defaults obj,
-      idGeneratorPath: "http://localhost:#{obj.port}/id_generator"
+      clientUrl: "http://localhost:#{obj.port}"
+
+    _.defaults obj,
+      idGeneratorPath: "#{obj.clientUrl}/id_generator"
 
   app.set "config", config
   ## set the eclectus config from the eclectus.json file
@@ -81,17 +84,25 @@ module.exports = (config) ->
 
   require('./routes')(app)
 
-  new Promise (res, rej) ->
-    server.listen app.get("port"), ->
-      console.log 'Express server listening on port ' + app.get('port')
+  Server.open = ->
+    new Promise (res, rej) ->
+      Server.server.listen app.get("port"), ->
+        console.log 'Express server listening on port ' + app.get('port')
 
-      Project.ensureProjectId()
-      ## open phantom if ids are true (which they are by default)
-      .then(idGenerator.openPhantom)
-      .then ->
-        if !app.get('eclectus').preventOpen
-          require('open')("http://localhost:#{app.get('port')}")
-      .return(app.get("eclectus"))
-      .then(res)
-      .catch(rej)
+        Project.ensureProjectId()
+        ## open phantom if ids are true (which they are by default)
+        .then(idGenerator.openPhantom)
+        .then ->
+          if app.get('eclectus').autoOpen
+            require('open')("http://localhost:#{app.get('port')}")
+        .return(app.get("eclectus"))
+        .then(res)
+        .catch(rej)
 
+  Server.close = ->
+    Server.server.close ->
+      console.log "Express server closed!"
+
+  return Server
+
+module.exports = Server
