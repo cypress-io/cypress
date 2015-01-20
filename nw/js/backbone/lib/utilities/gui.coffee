@@ -56,6 +56,9 @@
     console: ->
       gui.Window.get().showDevTools()
 
+    external: (url) ->
+      gui.Shell.openExternal(url)
+
   App.commands.setHandler "gui:display", ->
     API.displayGui()
 
@@ -73,3 +76,6 @@
 
   App.commands.setHandler "gui:console", ->
     API.console()
+
+  App.commands.setHandler "gui:external:open", (url) ->
+    API.external(url)
