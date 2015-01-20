@@ -4,7 +4,9 @@
       <i class="fa fa-user"></i>
       Hi, &lt;user&gt;
     </p>
-    <button class="btn btn-default">+ Add</button>
+    <button class="btn btn-default">
+      <i class="fa fa-plus"></i>
+    </button>
     <input type="file" nwdirectory class="hidden" />
   </header>
   <ul class="list-unstyled"></ul>

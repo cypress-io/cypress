@@ -1,6 +1,7 @@
 #projects {
   header {
-    border-bottom: 1px solid #EEE;
+    background-color: #EEE;
+    border-bottom: 1px solid #CCC;
     padding: 10px;
     overflow: auto;
     width: 100%;
@@ -14,8 +15,13 @@
     button {
       float: right;
       padding: 5px 10px;
+
+      &:focus {
+        outline: 0;
+      }
     }
   }
+
 
   li {
     padding: 5px 20px;
