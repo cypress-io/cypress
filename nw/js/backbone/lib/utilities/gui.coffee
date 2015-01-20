@@ -23,7 +23,10 @@
 
       width = win.width
 
-      window.tray = new gui.Tray({ title: 'Cy' })
+      nativeMenuBar = new gui.Menu({ type: "menubar" })
+      nativeMenuBar.createMacBuiltin "Cypress.io"
+
+      win.menu = nativeMenuBar
 
       tray.on "click", (coords) =>
         win.moveTo(coords.x, coords.y)
