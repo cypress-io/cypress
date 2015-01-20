@@ -15,7 +15,10 @@
 
   API =
     getProjects: ->
-      new Entities.ProjectsCollection
+      projects = new Entities.ProjectsCollection
+      App.config.getProjectPaths().then (paths) ->
+        projects.add _(paths).map (path) -> {path: path}
+      projects
 
   App.reqres.setHandler "project:entities", ->
     API.getProjects()

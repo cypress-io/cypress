@@ -13,7 +13,11 @@
     setSessionId: (id) ->
       @appInfo.setSessionId(id)
 
-    addProject: ->
+    addProject: (path) ->
+      @appInfo.addProject(path)
+
+    getProjectPaths: ->
+      @appInfo.getProjectPaths()
 
   class Entities.ProjectsCollection extends Entities.Collection
     model: Entities.Project
