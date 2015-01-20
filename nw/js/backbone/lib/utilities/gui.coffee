@@ -28,6 +28,8 @@
 
       win.menu = nativeMenuBar
 
+      tray = new gui.Tray({ title: 'Cy' })
+
       tray.on "click", (coords) =>
         win.moveTo(coords.x, coords.y)
         win.moveBy(-(width / 2), 5)
@@ -48,6 +50,12 @@
     open: (url, options) ->
       new gui.Window.open(url, options)
 
+    reload: ->
+      gui.Window.get().reloadDev()
+
+    console: ->
+      gui.Window.get().showDevTools()
+
   App.commands.setHandler "gui:display", ->
     API.displayGui()
 
@@ -59,3 +67,9 @@
 
   App.commands.setHandler "gui:open", (url, options = {}) ->
     API.open(url, options)
+
+  App.commands.setHandler "gui:reload", ->
+    API.reload()
+
+  App.commands.setHandler "gui:console", ->
+    API.console()

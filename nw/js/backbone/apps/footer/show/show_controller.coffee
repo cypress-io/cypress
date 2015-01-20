@@ -8,6 +8,12 @@
       @listenTo footerView, "login:clicked", (view, obj) ->
         App.execute "login:request"
 
+      @listenTo footerView, "reload:clicked", ->
+        App.execute "gui:reload"
+
+      @listenTo footerView, "console:clicked", ->
+        App.execute "gui:console"
+
       @show footerView
 
     getFooterView: ->

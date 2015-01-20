@@ -9,5 +9,10 @@
 
       @$el.toggleWrapper options, @cid, init
 
+    mixinTemplateHelpers: (target) ->
+      target.env = App.config.env()
+
+      _mixinTemplateHelpers.call(@, target)
+
     stopProp: (e) ->
       e.stopPropagation()

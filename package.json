@@ -5,8 +5,8 @@
   "main": "app://app/nw/public/index.html",
   "manifestUrl": "http://localhost:8000/package.json",
   "window": {
-    "frame": true,
-    "toolbar": true,
+    "frame": false,
+    "toolbar": false,
     "show": false,
     "height": 400,
     "width": 300

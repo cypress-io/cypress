@@ -2,13 +2,18 @@
 
   class Entities.Config extends Entities.Model
     env: (str) ->
-      @get("env") is str
+      env = @get("env")
+      switch
+        when _.isString(str) then env is str
+        else env
 
     getSessionId: ->
       @appInfo.getSessionId()
 
     setSessionId: (id) ->
       @appInfo.setSessionId(id)
+
+    addProject: ->
 
   class Entities.ProjectsCollection extends Entities.Collection
     model: Entities.Project

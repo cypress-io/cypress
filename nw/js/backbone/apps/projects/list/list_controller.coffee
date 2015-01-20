@@ -8,6 +8,7 @@
       projectsView = @getProjectsView(projects)
 
       @listenTo projectsView, "project:added", (path) ->
+        App.config.addProject(path)
         projects.add(path: path)
 
       @listenTo projectsView, "childview:project:clicked", (iv, obj) ->

@@ -1,5 +1,13 @@
 <div id="footer">
-  <span>
+  <% if @env is "dev": %>
+    <span class="pull-left">
+      <i class="fa fa-repeat"></i>
+    </span>
+    <span class="pull-left">
+      <i class="fa fa-terminal"></i>
+    </span>
+  <% end %>
+  <span class="pull-right">
     <i class="fa fa-cog"></i>
   </span>
 </div>
