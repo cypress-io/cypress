@@ -145,9 +145,55 @@ class AppInfo extends require('./logger')
 
     @_get("PROJECTS")
 
+  _removeProjectByPath: (projects, path) ->
+
+    projects = _.omit projects, (project, key) ->
+      project.PATH is path
+
+    @_set {PROJECTS: projects}
+
+  _removeAnyProjectNotFound: ->
+    orginalProjects = null
+
+    @getProjects().then (projects) ->
+      orginalProjects = projects
+
+      projects =  _.reduce orginalProjects, (memo, key, project) ->
+
+
+      Promise.reduce projects, (memo, key, project) ->
+        fs.statAsync(project.PATH).then ->
+          memo[key] = project
+        .return(memo)
+
+      , {}
+    .then (projects) ->
+      ## noop if these are equal
+      if _.isEqual(orginalProjects, projects)
+        return projects
+      else
+        ## remove the old projects not found
+        @_set {PROJECTS: projects}
+
   getProjectPaths: ->
     @getProjects().then (projects) ->
-      _.pluck(projects, "PATH")
+      paths = _.pluck(projects, "PATH")
+
+      pathsToRemove = Promise.reduce paths, (memo, path) ->
+        fs.statAsync(path)
+        .catch ->
+          memo.push(path)
+        .return(memo)
+      , []
+
+      pathsToRemove.then (removedPaths) =>
+        process.nextTick =>
+          Promise.each removedPaths, (path) =>
+            @_removeProjectByPath(projects, path)
+
+        ## return our paths without the ones we're
+        ## about to remove
+        return _.without(paths, removedPaths...)
 
   addProject: (path) ->
     @emit "verbose", "adding project from path: #{path}"

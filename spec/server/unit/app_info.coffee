@@ -9,7 +9,8 @@ AppInfo       = require "#{root}lib/app_info"
 fs            = Promise.promisifyAll(require('fs'))
 nock          = require 'nock'
 rimraf        = require 'rimraf'
-sinon         = require('sinon')
+sinon         = require 'sinon'
+sinonPromise  = require 'sinon-as-promised'
 
 require('chai')
 .use(require('sinon-chai'))
@@ -119,7 +120,7 @@ describe "local cache", ->
     describe "#addProject", ->
       context "with existing id", ->
         beforeEach ->
-          @sandbox.stub(Project.prototype, "getProjectId").returns(Promise.resolve("abc-123"))
+          @sandbox.stub(Project.prototype, "getProjectId").resolves("abc-123")
 
         it "inserts project", (done) ->
           @appInfo.addProject("/Users/brian/app").then (project) ->
@@ -182,7 +183,8 @@ describe "local cache", ->
       it "returns an array of paths", (done) ->
         stubId = (id) =>
           @sandbox.restore()
-          @sandbox.stub(Project.prototype, "getProjectId").returns(Promise.resolve(id))
+          @sandbox.stub(Project.prototype, "getProjectId").resolves(id)
+          @sandbox.stub(fs, "statAsync").resolves()
 
         stubId("abc-123")
         @appInfo.addProject("/Users/brian/app").then =>
@@ -192,6 +194,40 @@ describe "local cache", ->
               expect(paths).to.deep.eq ["/Users/brian/app", "/Users/sam/app2"]
               done()
         .catch(done)
+
+      it "removes any paths which no longer exist on the filesystem", (done) ->
+        stubId = (id) =>
+          @sandbox.restore()
+          @sandbox.stub(Project.prototype, "getProjectId").resolves(id)
+          @sandbox.stub(fs, "statAsync")
+            .withArgs("/Users/brian/app").resolves()
+            .withArgs("/Users/sam/app2").rejects()
+
+        stubId("abc-123")
+        @appInfo.addProject("/Users/brian/app").then =>
+          stubId("foo-bar-456")
+          @appInfo.addProject("/Users/sam/app2").then =>
+            @appInfo.getProjectPaths().then (paths) ->
+              expect(paths).to.deep.eq ["/Users/brian/app"]
+              done()
+        .catch(done)
+
+    describe "#_removeProjectByPath", ->
+      it "removes projects by path", (done) ->
+        stubId = (id) =>
+          @sandbox.restore()
+          @sandbox.stub(Project.prototype, "getProjectId").resolves(id)
+
+        stubId(123)
+        @appInfo.addProject("/Users/brian/app").then =>
+          stubId(456)
+          @appInfo.addProject("/Users/sam/app2").then =>
+            @appInfo.getProjects().then (projects) =>
+              @appInfo._removeProjectByPath(projects, "/Users/sam/app2").then =>
+                @appInfo.getProjects().then (projects) ->
+                  expect(projects).not.to.have.property(456)
+                  done()
+          .catch(done)
 
   context "utilities", ->
     it "can remove a single project"

@@ -50,7 +50,8 @@
     "js-yaml": "3.1.0",
     "nodemon": "1.2.1",
     "rimraf": "2.2.8",
-    "sinon": "1.10.3"
+    "sinon": "1.10.3",
+    "sinon-as-promised": "^2.0.3"
   },
   "dependencies": {
     "auto-launch": "^0.1.14",
