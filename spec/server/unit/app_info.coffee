@@ -28,33 +28,35 @@ describe "local cache", ->
     @sandbox.restore()
     rimraf(path.dirname(info), (e) -> done(e))
 
-  it "creates an offline cache if not present", (done) ->
-    @appInfo.ensureExists()
-    .then =>
-      fs.statAsync(info)
-    .then => done()
-    .catch(done)
-
-  it "returns true when already exists", (done) ->
-    @appInfo.ensureExists()
-    .then =>
+  context "#ensureExists", ->
+    it "creates an offline cache if not present", (done) ->
       @appInfo.ensureExists()
-      .should.eventually.eql(true)
-      .then(=>done())
-    .catch(done)
+      .then =>
+        fs.statAsync(info)
+      .then => done()
+      .catch(done)
+
+    it "returns true when already exists", (done) ->
+      @appInfo.ensureExists()
+      .then =>
+        @appInfo.ensureExists()
+        .should.eventually.eql(true)
+        .then(=>done())
+      .catch(done)
 
   context "validators", ->
-    it "creates an empty PROJECTS key", (done) ->
+    beforeEach ->
       @appInfo.ensureExists()
-      .then => @appInfo._read()
+
+    it "creates an empty PROJECTS key", (done) ->
+      @appInfo._read()
       .then (contents) ->
         contents.should.eql({PROJECTS: {}})
         done()
       .catch(done)
 
     it "creates an empty RANGE key for a Project", (done) ->
-      @appInfo.ensureExists()
-      .then => @appInfo.insertProject("FOO")
+      @appInfo.insertProject("FOO")
       .then => @appInfo._read()
       .then (contents) =>
         contents.should.eql({
@@ -101,6 +103,18 @@ describe "local cache", ->
           @appInfo.insertProject(12345).then =>
             expect(@project).to.deep.eq {RANGE: {}, foo: "foo"}
             done()
+
+      it "can insert multiple projects", (done) ->
+        insert = (id) =>
+          @appInfo.insertProject(id)
+
+        insert(123).then =>
+          insert(456).then =>
+            insert(789).then =>
+              @appInfo.getProjects().then (projects) ->
+                expect(projects).to.have.keys ["123", "456", "789"]
+                done()
+        .catch(done)
 
     describe "#addProject", ->
       context "with existing id", ->
@@ -164,38 +178,55 @@ describe "local cache", ->
             done()
         .catch(done)
 
+    describe "#getProjectPaths", ->
+      it "returns an array of paths", (done) ->
+        stubId = (id) =>
+          @sandbox.restore()
+          @sandbox.stub(Project.prototype, "getProjectId").returns(Promise.resolve(id))
+
+        stubId("abc-123")
+        @appInfo.addProject("/Users/brian/app").then =>
+          stubId("foo-bar-456")
+          @appInfo.addProject("/Users/sam/app2").then =>
+            @appInfo.getProjectPaths().then (paths) ->
+              expect(paths).to.deep.eq ["/Users/brian/app", "/Users/sam/app2"]
+              done()
+        .catch(done)
+
   context "utilities", ->
     it "can remove a single project"
 
-  context "#getSessionId", ->
-    beforeEach ->
-      @appInfo.ensureExists()
+  context "sessions", ->
+    describe "#getSessionId", ->
+      beforeEach ->
+        @appInfo.ensureExists()
 
-    it "returns session id", (done) ->
-      @appInfo.setSessionId(1234).then =>
-        @appInfo.getSessionId().then (id) ->
-          expect(id).to.eq 1234
+      it "returns session id", (done) ->
+        @appInfo.setSessionId(1234).then =>
+          @appInfo.getSessionId().then (id) ->
+            expect(id).to.eq 1234
+            done()
+        .catch(done)
+
+    describe "#setSessionId", ->
+      beforeEach ->
+        @appInfo.ensureExists()
+
+      it "sets SESSION_ID into .cy", (done) ->
+        @appInfo.setSessionId(1234).then (contents) ->
+          expect(contents.SESSION_ID).to.eq 1234
           done()
-      .catch(done)
+        .catch(done)
 
-  context "#setSessionId", ->
-    beforeEach ->
-      @appInfo.ensureExists()
+  context "setters + getters", ->
+    describe "#_set", ->
+      beforeEach ->
+        @appInfo.ensureExists()
 
-    it "sets SESSION_ID into .cy", (done) ->
-      @appInfo.setSessionId(1234).then (contents) ->
-        expect(contents.SESSION_ID).to.eq 1234
-        done()
-      .catch(done)
-
-  context "#_set", ->
-    beforeEach ->
-      @appInfo.ensureExists()
-
-    it "does not override existing properties", (done) ->
-      @appInfo._write({foo: "foo"}).then (contents) =>
-        @appInfo._set({bar: "bar"}).then (contents) ->
-          expect(contents.foo).to.eq "foo"
-          expect(contents.bar).to.eq "bar"
-          done()
-      .catch(done)
+      it "does not override existing properties", (done) ->
+        @appInfo._write({foo: "foo"}).then (contents) =>
+          @appInfo._set({bar: "bar"}).then (contents) ->
+            expect(contents.foo).to.eq "foo"
+            expect(contents.bar).to.eq "bar"
+            done()
+        .catch(done)

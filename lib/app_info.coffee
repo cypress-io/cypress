@@ -50,20 +50,25 @@ class AppInfo extends require('./logger')
       'utf8'
     ).bind(@).return(obj)
 
-  _normalizeObj: (key, val) ->
-    return key if _.isObject(key)
+  _mergeOrWrite: (contents, key, val) ->
+    switch
+      when _.isString(key)
+        ## if key is a string then we need to merge
+        ## its value into key
+        contents[key] ?= {}
+        _.extend(contents[key], val)
+      when _.isObject(key)
+        ## else merge key/val directly into
+        ## contents potentially overwriting data
+        _.extend contents, key
 
-    obj = {}
-    obj[key] = val
-    obj
+    @_write contents
 
   _set: (key, val) ->
-    obj = @_normalizeObj(key, val)
-
     @emit 'verbose', 'merging into .cy'
 
     @_read().then (contents) ->
-      @_write(_.extend contents, obj)
+      @_mergeOrWrite(contents, key, val)
 
   _get: (key) ->
     @_read().then (contents) ->
@@ -140,6 +145,10 @@ class AppInfo extends require('./logger')
 
     @_get("PROJECTS")
 
+  getProjectPaths: ->
+    @getProjects().then (projects) ->
+      _.pluck(projects, "PATH")
+
   addProject: (path) ->
     @emit "verbose", "adding project from path: #{path}"
 
@@ -161,6 +170,6 @@ class AppInfo extends require('./logger')
   setSessionId: (id) ->
     @emit "verbose", "setting session id: #{id}"
 
-    @_set("SESSION_ID", id)
+    @_set {SESSION_ID: id}
 
 module.exports = AppInfo
