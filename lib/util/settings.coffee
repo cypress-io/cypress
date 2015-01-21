@@ -10,5 +10,8 @@ module.exports =
     )
     .then (obj) ->
       JSON.parse(obj)
+    .catch (err) ->
+      console.error err
+      debugger
 
   update: ->

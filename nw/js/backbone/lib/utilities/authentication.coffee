@@ -20,7 +20,7 @@
       url.toString()
 
     loginRequest: ->
-      App.execute "gui:open", @createUrl(),
+      App.request "gui:open", @createUrl(),
         position: "center"
         focus: true
         width: 900
