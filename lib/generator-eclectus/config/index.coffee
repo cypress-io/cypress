@@ -29,9 +29,9 @@ class ConfigGenerator extends Eclectus.Base
         message: "What is the root folder your assets should be served from? By default it is your root project directory."
         default: ""
       },{
-        name: "defaultUrl"
-        message: "What is the path to your default page? Any valid relative path or http will work."
-        default: "tests/support/index.html"
+        name: "baseUrl"
+        message: "What is the url to the server hosting your app?"
+        default: "http://localhost:3000/app"
       },{
         name: "exampleTestHtml"
         type: "confirm"

@@ -17,8 +17,8 @@ module.exports = class extends require('../logger')
   handle: (req, res, next) =>
     ## strip out the /__remote/ from the req.url
     if not req.session.remote?
-      if r = app.get('eclectus').rootUrl
-        req.session.remote = r
+      if b = app.get('eclectus').baseUrl
+        req.session.remote = b
       else
         throw new Error("™ Session Proxy not yet set! ™")
 

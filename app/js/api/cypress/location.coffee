@@ -145,19 +145,19 @@ Cypress.Location = do (Cypress, _, Uri) ->
     @isFullyQualifiedUrl = (url) ->
       reHttp.test(url)
 
-    @getRemoteUrl = (url, rootUrl) ->
+    @getRemoteUrl = (url, baseUrl) ->
       ## if we have a root url and our url isnt full qualified
-      if rootUrl and not @isFullyQualifiedUrl(url)
+      if baseUrl and not @isFullyQualifiedUrl(url)
         ## prepend the root url to it
-        return @prependRootUrl(url, rootUrl)
+        return @prependBaseUrl(url, baseUrl)
 
       return url
 
-    @prependRootUrl = (url, rootUrl) ->
-      ## prepends the rootUrl to the url and
+    @prependBaseUrl = (url, baseUrl) ->
+      ## prepends the baseUrl to the url and
       ## joins by / after trimming url for leading
       ## forward slashes
-      [rootUrl, _.ltrim(url, "/")].join("/")
+      [baseUrl, _.ltrim(url, "/")].join("/")
 
   Cypress.location = (current, remote, defaultOrigin) ->
     location = new Location(current, remote, defaultOrigin)

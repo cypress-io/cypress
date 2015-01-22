@@ -27,9 +27,9 @@ Server = (config) ->
       )
     ).eclectus
 
-    if url = obj.rootUrl
+    if url = obj.baseUrl
       ## always strip trailing slashes
-      obj.rootUrl = _.rtrim(url, "/")
+      obj.baseUrl = _.rtrim(url, "/")
 
     ## commandTimeout should be in the eclectus.json file
     ## since it has a significant impact on the tests

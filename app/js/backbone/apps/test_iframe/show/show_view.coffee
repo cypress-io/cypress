@@ -309,29 +309,11 @@
       #   fn(@$iframe)
 
 
-      ## we first need to resolve the remote iframe
-      ## because if we've set a defaultUrl that means
-      ## it needs to be in the DOM before we load our iframe
-      ## which may reference the remote window
-      ## if we don't have a defaultUrl we just immediately
-      ## resolve the remote iframe so either way it works
       remoteLoaded = $.Deferred()
       iframeLoaded = $.Deferred()
 
       remoteOpts =
         id: "iframe-remote"
-
-      ## if our config model has configured defaultUrl
-      ## then we need to immediately load that
-      ## as our remote iframe and wait for it to load
-      if defaultUrl = @model.get("defaultUrl")
-        rootUrl = @model.get("rootUrl")
-        url     = Cypress.Location.getRemoteUrl(defaultUrl, rootUrl)
-
-        _.extend remoteOpts,
-          src: Cypress.Location.createInitialRemoteSrc(url)
-          load: ->
-            remoteLoaded.resolve(view.$remote)
 
       @$remote = $("<iframe />", remoteOpts).appendTo(@ui.size)
 
@@ -359,13 +341,9 @@
         $(@$remote.prop("contentWindow")).on "popstate",   @updateRemoteUrl
         # $(@$remote.prop("contentWindow")).on "unload",     -> #debugger
 
-      ## if our config model hasnt been configured with defaultUrl
-      ## then we immediately resolve our remote iframe
-      ## and push the default message content into it
-      if not defaultUrl
-        contents = Marionette.Renderer.render("test_iframe/show/_default_message")
-        view.$remote.contents().find("body").append(contents)
-        remoteLoaded.resolve(view.$remote)
+      contents = Marionette.Renderer.render("test_iframe/show/_default_message")
+      view.$remote.contents().find("body").append(contents)
+      remoteLoaded.resolve(view.$remote)
 
       remoteLoaded.done =>
         @$iframe = $ "<iframe />",
