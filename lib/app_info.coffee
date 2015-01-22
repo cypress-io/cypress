@@ -115,7 +115,7 @@ class AppInfo extends require('./logger')
     @emit 'verbose', "ensuring that project #{id} exists"
     @getProject(id)
     .then(id)
-    .catch(-> @addProject(id))
+    .catch(-> @insertProject(id))
 
   insertProject: (id) ->
     throw new Error("Cannot insert a project without an id!") if not id
