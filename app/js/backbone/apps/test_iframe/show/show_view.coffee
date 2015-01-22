@@ -118,7 +118,9 @@
       contents = @$remote.contents()
 
       if not @originalBody
-        @originalBody = contents.find("body").detach()
+        body = contents.find("body").clone()
+        body.find("script").remove()
+        @originalBody = body.detach()
       else
         contents.find("body").remove()
 
