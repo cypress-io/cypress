@@ -7,7 +7,7 @@ projectRoot = process.argv[2];
 
 require('../lib/server')({
   projectRoot: projectRoot
-}).then(function() {
+}).open().then(function() {
   return settings.read({projectRoot: projectRoot})
 })
 .then(function(settings) {
