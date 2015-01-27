@@ -12,13 +12,23 @@ Settings    = require './util/settings'
 ## currently not making use of event emitter
 ## but may do so soon
 class Server #extends require('./logger')
-  constructor: ->
-    @app    = null
+  constructor: (projectRoot) ->
+    if not (@ instanceof Server)
+      return new Server(projectRoot)
+
+    if not projectRoot
+      throw new Error("Instantiating lib/server requires a projectRoot!")
+
+    @app    = express()
     @server = null
     @io     = null
 
+    @initialize(projectRoot)
+
   initialize: (projectRoot) ->
     @config = @getCypressJson(projectRoot)
+
+    @app.set "cypress", @config
 
   getCypressJson: (projectRoot) ->
     obj = Settings.readSync(projectRoot)
@@ -45,7 +55,6 @@ class Server #extends require('./logger')
 
   configureApplication: ->
     ## set the cypress config from the cypress.json file
-    @app.set "cypress",     @config
     @app.set "port",        @config.port
     @app.set "view engine", "html"
     @app.engine "html",     hbs.__express
@@ -70,8 +79,7 @@ class Server #extends require('./logger')
     @app.use require("errorhandler")()
 
   open: ->
-    @app       = global.app = express()
-    @server    = http.createServer(app)
+    @server    = http.createServer(@app)
     @io        = require("socket.io")(@server, {path: "/__socket.io"})
     @project   = new Project(@config.projectRoot)
 
@@ -108,13 +116,7 @@ class Server #extends require('./logger')
         console.log "Express server closed!"
         resolve()
 
-module.exports = (projectRoot) ->
-  if not projectRoot
-    throw new Error("Instantiating lib/server requires a projectRoot!")
-
-  server = new Server()
-  server.initialize(projectRoot)
-  server
+module.exports = Server
 
 # Server = (config) ->
 #   argv = minimist(process.argv.slice(2), boolean: true)
