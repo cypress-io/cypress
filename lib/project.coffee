@@ -7,7 +7,7 @@ fs       = Promise.promisifyAll(require('fs'))
 API_URL  = process.env.API_URL or 'localhost:1234'
 
 class Project extends require('./logger')
-  constructor: (@config) ->
+  constructor: (@projectRoot) ->
     super
 
   ## A simple helper method
@@ -22,28 +22,27 @@ class Project extends require('./logger')
     @emit "verbose", "Creating project ID"
     Request.post("http://#{API_URL}/projects")
     .then (attrs) =>
-      @updateSettings(eclectus: {projectID: JSON.parse(attrs).uuid})
+      @updateSettings(cypress: {projectID: JSON.parse(attrs).uuid})
     .then (settings) -> settings.projectID
 
   getProjectId: ->
     @emit "verbose", "Looking up project ID"
-    Settings.read(@config)
+    Settings.read(@projectRoot)
     .then (settings) ->
-      if (id = settings.eclectus.projectID)
+      if (id = settings.projectID)
         return id
       throw new Error("No project ID found")
 
   updateSettings: (settings) =>
     @emit "verbose", "Updating Project settings with #{JSON.stringify(settings, null, 4)}"
-    Settings.read(@config)
+    Settings.read(@projectRoot)
     .then (obj) =>
-      settings.eclectus = _.extend(obj.eclectus, settings.eclectus)
-      settings
+      _.extend(obj, settings.cypress)
     .then (obj) =>
       fs.writeFileAsync(
-        path.join(@config.projectRoot, "eclectus.json"),
+        path.join(@projectRoot, "cypress.json"),
         JSON.stringify(obj, null, 2)
       )
-      .then -> obj.eclectus
+      .then -> obj
 
 module.exports = Project

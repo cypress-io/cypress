@@ -14,7 +14,7 @@
   "scripts": {
     "build": "gulp compile",
     "test-server": "NODE_ENV=test mocha --opts spec/server/mocha.opts --watch",
-    "test-server-debug": "NODE_ENV=test node-debug _mocha --opts spec/server/mocha.opts --watch",
+    "test-server-debug": "NODE_ENV=test node-debug --hidden=node_modules _mocha --opts spec/server/mocha.opts --watch",
     "test-server-ci": "NODE_ENV=test mocha --opts spec/server/mocha.opts"
   },
   "repository": {

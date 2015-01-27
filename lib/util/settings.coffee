@@ -3,15 +3,21 @@ path     = require 'path'
 fs       = Promise.promisifyAll(require('fs'))
 
 module.exports =
-  read: (config) ->
-    fs.readFileAsync(
-      path.join(config.projectRoot, "eclectus.json"),
+  _get: (projectRoot, method) ->
+    fs[method](
+      path.join(projectRoot, "cypress.json"),
       "utf8"
     )
-    .then (obj) ->
-      JSON.parse(obj)
+    .then(JSON.parse)
+    .get("cypress")
     .catch (err) ->
       console.error err
       debugger
+
+  read: (projectRoot) ->
+    @_get(projectRoot, "readFileAsync")
+
+  readSync: (projectRoot) ->
+    @_get(projectRoot, "readFileSync")
 
   update: ->

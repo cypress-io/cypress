@@ -18,8 +18,8 @@ module.exports = class extends require("../logger")
     return if @app.enabled("editFileMode")
 
     ## strip out our testFolder path from the filepath, and any leading forward slashes
-    filepath      = filepath.split(@app.get("config").projectRoot).join("").replace(leadingSlashes, "")
-    strippedPath  = filepath.replace(@app.get('eclectus').testFolder, "").replace(leadingSlashes, "")
+    filepath      = filepath.split(@app.get("cypress").projectRoot).join("").replace(leadingSlashes, "")
+    strippedPath  = filepath.replace(@app.get("cypress").testFolder, "").replace(leadingSlashes, "")
 
     @io.emit "generate:ids:for:test", filepath, strippedPath
 
@@ -55,7 +55,7 @@ module.exports = class extends require("../logger")
         ## spec by setting custom-data on the job object
         batchId = Date.now()
 
-        jobName = @app.get("eclectus").testFolder + "/" + spec
+        jobName = @app.get("cypress").testFolder + "/" + spec
         fn(jobName, batchId)
 
         ## need to handle platform/browser/version incompatible configurations
@@ -108,7 +108,7 @@ module.exports = class extends require("../logger")
 
           sauce options, df
 
-    watchTestFiles = chokidar.watch path.join(@app.get("config").projectRoot, app.get('eclectus').testFolder), ignored: (path, stats) ->
+    watchTestFiles = chokidar.watch path.join(@app.get("cypress").projectRoot, app.get("cypress").testFolder), ignored: (path, stats) ->
       ## this fn gets called twice, once with the directory
       ## which does not have a stats argument
       ## we always return false to include directories
