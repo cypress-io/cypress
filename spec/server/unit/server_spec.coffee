@@ -9,7 +9,7 @@ Socket        = require "#{root}lib/socket"
 Project       = require "#{root}lib/project"
 Settings      = require "#{root}lib/util/settings"
 
-describe.only "Server Interface", ->
+describe "Server Interface", ->
   beforeEach ->
     @sandbox = sinon.sandbox.create()
     @sandbox.stub(Socket.prototype, "startListening")
@@ -50,10 +50,9 @@ describe.only "Server Interface", ->
 
     it "creates global app object"
 
-    it "stores cypress.json config and yields it", (done) ->
+    it "stores cypress.json config and yields it", ->
       @server.open().then (config) ->
         expect(app.get("cypress")).to.deep.eq config
-        done()
 
     it "returns a promise", ->
       expect(@server.open()).to.be.instanceof Promise
