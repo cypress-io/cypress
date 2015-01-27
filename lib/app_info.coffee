@@ -42,7 +42,7 @@ class AppInfo extends require('./logger')
   ## Writes over the contents of the local file
   ## takes in an object and serializes it into JSON
   ## finally returning the JSON object that was written
-  _write: (obj={}) ->
+  _write: (obj = {}) ->
     @emit 'verbose', 'writing to .cy info'
     fs.writeFileAsync(
       LOCATION,
@@ -175,7 +175,7 @@ class AppInfo extends require('./logger')
   addProject: (path) ->
     @emit "verbose", "adding project from path: #{path}"
 
-    project = new Project({projectRoot: path})
+    project = new Project(path)
 
     ## make sure we either have or receive an id
     project.ensureProjectId().then (id) =>
