@@ -14,7 +14,7 @@ describe "Server Interface", ->
     @sandbox = sinon.sandbox.create()
     @sandbox.stub(Socket.prototype, "startListening")
     @sandbox.stub(Project.prototype, "ensureProjectId").resolves({})
-    @readSync = @sandbox.stub(Settings, "readSync").returns({})
+    @sandbox.stub(Settings, "readSync").returns({})
     @server = Server("/Users/brian/app")
 
   afterEach ->
@@ -51,8 +51,8 @@ describe "Server Interface", ->
     it "creates global app object"
 
     it "stores cypress.json config and yields it", ->
-      @server.open().then (config) ->
-        expect(app.get("cypress")).to.deep.eq config
+      @server.open().then (config) =>
+        expect(@server.app.get("cypress")).to.deep.eq config
 
     it "returns a promise", ->
       expect(@server.open()).to.be.instanceof Promise
@@ -66,7 +66,7 @@ describe "Server Interface", ->
       beforeEach ->
         @defaults = (prop, value, json = {}) =>
 
-          @readSync.returns(json)
+          Settings.readSync.returns(json)
 
           @server = Server("/Users/brian/app")
 
