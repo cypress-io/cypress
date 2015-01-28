@@ -80,7 +80,7 @@ class Server #extends require('./logger')
   open: ->
     @server    = http.createServer(@app)
     @io        = require("socket.io")(@server, {path: "/__socket.io"})
-    @project   = new Project(@config.projectRoot)
+    @project   = Project(@config.projectRoot)
 
     @configureApplication()
 

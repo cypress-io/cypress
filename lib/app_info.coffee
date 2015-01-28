@@ -175,7 +175,7 @@ class AppInfo extends require('./logger')
   addProject: (path) ->
     @emit "verbose", "adding project from path: #{path}"
 
-    project = new Project(path)
+    project = Project(path)
 
     ## make sure we either have or receive an id
     project.ensureProjectId().then (id) =>
