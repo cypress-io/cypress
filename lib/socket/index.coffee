@@ -5,11 +5,12 @@ uuid        = require 'node-uuid'
 sauce       = require '../sauce/sauce.coffee'
 jQuery      = require 'jquery-deferred'
 chokidar    = require 'chokidar'
-idGenerator = require '../id_generator.coffee'
+IdGenerator = require '../id_generator.coffee'
 leadingSlashes = /^\/+/
 
 module.exports = class extends require("../logger")
   constructor: (@io, @app) ->
+    @idGenerator = IdGenerator(@app)
     super
 
   onTestFileChange: (filepath, stats) =>
@@ -27,9 +28,9 @@ module.exports = class extends require("../logger")
     @io.on "connection", (socket) =>
       console.log "socket connected"
 
-      socket.on "generate:test:id", (data, fn) ->
+      socket.on "generate:test:id", (data, fn) =>
         console.log("generate:test:id", data)
-        idGenerator.getId(data)
+        @idGenerator.getId(data)
         .then(fn)
         .catch (err) ->
           console.log "\u0007", err.details, err.message

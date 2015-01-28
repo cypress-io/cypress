@@ -5,7 +5,6 @@ hbs         = require 'hbs'
 _           = require 'underscore'
 _.str       = require 'underscore.string'
 Promise     = require 'bluebird'
-idGenerator = require './id_generator.coffee'
 Project     = require "./project.coffee"
 Settings    = require './util/settings'
 
@@ -97,8 +96,6 @@ class Server #extends require('./logger')
         console.log "Express server listening on port: #{@config.port}"
 
         @project.ensureProjectId().bind(@)
-        ## open phantom if ids are true (which they are by default)
-        .then(idGenerator.openPhantom)
         .then ->
           require('open')(@config.clientUrl) if @config.autoOpen
         .return(@config)
