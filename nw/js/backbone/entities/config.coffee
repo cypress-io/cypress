@@ -8,16 +8,16 @@
         else env
 
     getSessionId: ->
-      @appInfo.getSessionId()
+      @cache.getSessionId()
 
     setSessionId: (id) ->
-      @appInfo.setSessionId(id)
+      @cache.setSessionId(id)
 
     addProject: (path) ->
-      @appInfo.addProject(path)
+      @cache.addProject(path)
 
     getProjectPaths: ->
-      @appInfo.getProjectPaths()
+      @cache.getProjectPaths()
 
     runProject: (path) ->
       @Server(projectRoot: path)
@@ -30,9 +30,9 @@
     model: Entities.Project
 
   App.reqres.setHandler "config:entity", (attrs = {}) ->
-    appInfo = attrs.appInfo
+    cache = attrs.cache
     Server = attrs.Server
-    config = new Entities.Config _(attrs).omit("appInfo", "Server")
-    config.appInfo = appInfo
+    config = new Entities.Config _(attrs).omit("cache", "Server")
+    config.cache = cache
     config.Server = Server
     config

@@ -40,7 +40,7 @@ describe "Keys", ->
 
       ## we need to force the range to resolve with a start and end
       ## else it would POST out to receive a project keys range
-      @sandbox.stub(@keys.appInfo, "getProject").resolves({RANGE: {start: 0, end: 100}})
+      @sandbox.stub(@keys.cache, "getProject").resolves({RANGE: {start: 0, end: 100}})
 
     it "ensures project id exists", ->
       ensureProjectId = @sandbox.spy @keys.project, "ensureProjectId"
@@ -48,21 +48,21 @@ describe "Keys", ->
       @keys.nextKey().then ->
         expect(ensureProjectId).to.be.calledOnce
 
-    it "ensures appInfo exists", ->
-      ensureExists = @sandbox.spy @keys.appInfo, "ensureExists"
+    it "ensures cache exists", ->
+      ensureExists = @sandbox.spy @keys.cache, "ensureExists"
 
       @keys.nextKey().then ->
         expect(ensureExists).to.be.calledOnce
 
-    it "ensures appInfo has project", ->
-      ensureProject = @sandbox.spy @keys.appInfo, "ensureProject"
+    it "ensures cache has project", ->
+      ensureProject = @sandbox.spy @keys.cache, "ensureProject"
 
       @keys.nextKey().then =>
-        @keys.appInfo.ensureProject
+        @keys.cache.ensureProject
         expect(ensureProject).to.be.calledOnce
 
     it "gets next test number", ->
-      @keys.appInfo.getProject.resolves {RANGE: {start: 9, end: 100}}
+      @keys.cache.getProject.resolves {RANGE: {start: 9, end: 100}}
 
       @keys.nextKey().then (id) ->
         expect(id).to.eq "00a"
@@ -87,8 +87,8 @@ describe "Keys", ->
       @keys = Keys("/Users/brian/app")
 
       @existingRangeIs = (obj = {}) =>
-        @sandbox.stub(@keys.appInfo, "getProject").resolves({RANGE: obj})
-        @sandbox.stub(@keys.appInfo, "updateRange").resolves({})
+        @sandbox.stub(@keys.cache, "getProject").resolves({RANGE: obj})
+        @sandbox.stub(@keys.cache, "updateRange").resolves({})
 
     afterEach ->
       nock.cleanAll()
@@ -131,10 +131,10 @@ describe "Keys", ->
               expect(num).to.eq 54
               expect(@rangeRequest.isDone()).to.be.false
 
-    it "updates the appInfo range", ->
+    it "updates the cache range", ->
       @existingRangeIs({start: 5, end: 10})
 
-      updateRange = @keys.appInfo.updateRange
+      updateRange = @keys.cache.updateRange
 
       @keys.getNextTestNumber("abc-123-foo-bar").then (num) ->
         expect(num).to.eq 6

@@ -5,7 +5,7 @@ Project   = require './project'
 fs        = Promise.promisifyAll(require('fs'))
 LOCATION  = path.join(__dirname, '../', '.cy/', 'local.info')
 
-class AppInfo extends require('./logger')
+class Cache extends require('./logger')
   READ_VALIDATIONS: ->
     [
       @_ensureProjectKey
@@ -195,4 +195,4 @@ class AppInfo extends require('./logger')
 
     @_set {SESSION_ID: id}
 
-module.exports = AppInfo
+module.exports = Cache

@@ -4,7 +4,7 @@ path     = require 'path'
 Request  = require 'request-promise'
 Project  = require './project'
 API_URL  = process.env.API_URL or 'localhost:1234'
-AppInfo  = require './app_info'
+Cache    = require './cache'
 
 class Keys
   constructor: (projectRoot) ->
@@ -14,7 +14,7 @@ class Keys
     if not projectRoot
       throw new Error("Instantiating lib/keys requires a projectRoot!")
 
-    @appInfo     = new AppInfo
+    @cache     = new Cache
     @project     = Project(projectRoot)
 
   _getNewKeyRange: (projectId) ->
@@ -26,7 +26,7 @@ class Keys
     [0,0,0].slice(ival.length).join("") + ival
 
   _getProjectKeyRange: (id) ->
-    @appInfo.getProject(id).get("RANGE")
+    @cache.getProject(id).get("RANGE")
 
   ## Lookup the next Test integer and update
   ## offline location of sync
@@ -39,14 +39,14 @@ class Keys
       range
     .then (range) =>
       range = JSON.parse(range) if _.isString(range)
-      @appInfo.updateRange(projectId, range)
+      @cache.updateRange(projectId, range)
       .return(range.start)
 
   nextKey: ->
     @project.ensureProjectId().bind(@)
     .then (projectId) ->
-      @appInfo.ensureExists().bind(@)
-      .then -> @appInfo.ensureProject(projectId)
+      @cache.ensureExists().bind(@)
+      .then -> @cache.ensureProject(projectId)
       .then -> @getNextTestNumber(projectId)
       .then @_convertToId
 

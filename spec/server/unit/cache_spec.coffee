@@ -5,7 +5,7 @@ Promise       = require 'bluebird'
 expect        = require('chai').expect
 Keys          = require "#{root}lib/keys"
 Project       = require "#{root}lib/project"
-AppInfo       = require "#{root}lib/app_info"
+Cache         = require "#{root}lib/cache"
 fs            = Promise.promisifyAll(require('fs'))
 nock          = require 'nock'
 rimraf        = require 'rimraf'
@@ -21,7 +21,7 @@ describe "App Info (local cache)", ->
   beforeEach ->
     nock.disableNetConnect()
     @sandbox = sinon.sandbox.create()
-    @appInfo = new AppInfo
+    @cache = new Cache
 
   afterEach (done)->
     nock.cleanAll()
@@ -31,34 +31,34 @@ describe "App Info (local cache)", ->
 
   context "#ensureExists", ->
     it "creates an offline cache if not present", (done) ->
-      @appInfo.ensureExists()
+      @cache.ensureExists()
       .then =>
         fs.statAsync(info)
       .then => done()
       .catch(done)
 
     it "returns true when already exists", (done) ->
-      @appInfo.ensureExists()
+      @cache.ensureExists()
       .then =>
-        @appInfo.ensureExists()
+        @cache.ensureExists()
         .should.eventually.eql(true)
         .then(=>done())
       .catch(done)
 
   context "validators", ->
     beforeEach ->
-      @appInfo.ensureExists()
+      @cache.ensureExists()
 
     it "creates an empty PROJECTS key", (done) ->
-      @appInfo._read()
+      @cache._read()
       .then (contents) ->
         contents.should.eql({PROJECTS: {}})
         done()
       .catch(done)
 
     it "creates an empty RANGE key for a Project", (done) ->
-      @appInfo.insertProject("FOO")
-      .then => @appInfo._read()
+      @cache.insertProject("FOO")
+      .then => @cache._read()
       .then (contents) =>
         contents.should.eql({
           PROJECTS: {FOO: {RANGE: {}}}
@@ -68,67 +68,67 @@ describe "App Info (local cache)", ->
 
   context "#ensureProject", ->
     it "returns project id if existing", ->
-      @sandbox.stub(@appInfo, "getProject").resolves({"123-abc-foo-bar-baz": {}})
-      insertProject = @sandbox.spy @appInfo, "insertProject"
+      @sandbox.stub(@cache, "getProject").resolves({"123-abc-foo-bar-baz": {}})
+      insertProject = @sandbox.spy @cache, "insertProject"
 
-      @appInfo.ensureProject("123-abc-foo-bar-baz").then (project) ->
+      @cache.ensureProject("123-abc-foo-bar-baz").then (project) ->
         expect(project).to.deep.eq {"123-abc-foo-bar-baz": {}}
         expect(insertProject).not.to.be.called
 
     it "inserts project and returns id if not existing", ->
-      @sandbox.stub(@appInfo, "getProject").rejects()
-      insertProject = @sandbox.stub(@appInfo, "insertProject")
+      @sandbox.stub(@cache, "getProject").rejects()
+      insertProject = @sandbox.stub(@cache, "insertProject")
 
-      @appInfo.ensureProject("123-abc-foo-bar-baz").then ->
+      @cache.ensureProject("123-abc-foo-bar-baz").then ->
         expect(insertProject).to.be.calledOnce
 
   context "projects", ->
     beforeEach ->
-      @appInfo.ensureExists()
+      @cache.ensureExists()
 
     describe "#getProject", ->
       it "returns the project by id", (done) ->
-        @appInfo.insertProject("FOO").then (project) =>
-          @appInfo.getProject("FOO").then (project) ->
+        @cache.insertProject("FOO").then (project) =>
+          @cache.getProject("FOO").then (project) ->
             expect(project).to.deep.eq {RANGE: {}}
             done()
         .catch(done)
 
       it "throws an error when a project is not found", (done) ->
-        @appInfo.getProject("FOO")
+        @cache.getProject("FOO")
         .catch (err) ->
           err.message.should.eql("Project FOO not found")
           done()
 
     describe "#insertProject", ->
       it "throws without an id", ->
-        fn = => @appInfo.insertProject(null)
+        fn = => @cache.insertProject(null)
         expect(fn).to.throw("Cannot insert a project without an id!")
 
       it "inserts project by id", (done) ->
-        @appInfo.insertProject(12345).then =>
-          @appInfo.getProject(12345).then (project) ->
+        @cache.insertProject(12345).then =>
+          @cache.getProject(12345).then (project) ->
             expect(project).to.deep.eq {RANGE: {}}
             done()
 
       it "is a noop if project already exists by id", (done) ->
-        @appInfo.insertProject(12345)
+        @cache.insertProject(12345)
         .then =>
-          @appInfo.updateProject(12345, {foo: "foo"}).then (@project) =>
+          @cache.updateProject(12345, {foo: "foo"}).then (@project) =>
             expect(@project).to.deep.eq {RANGE: {}, foo: "foo"}
         .then =>
-          @appInfo.insertProject(12345).then =>
+          @cache.insertProject(12345).then =>
             expect(@project).to.deep.eq {RANGE: {}, foo: "foo"}
             done()
 
       it "can insert multiple projects", (done) ->
         insert = (id) =>
-          @appInfo.insertProject(id)
+          @cache.insertProject(id)
 
         insert(123).then =>
           insert(456).then =>
             insert(789).then =>
-              @appInfo.getProjects().then (projects) ->
+              @cache.getProjects().then (projects) ->
                 expect(projects).to.have.keys ["123", "456", "789"]
                 done()
         .catch(done)
@@ -139,21 +139,21 @@ describe "App Info (local cache)", ->
           @sandbox.stub(Project.prototype, "getProjectId").resolves("abc-123")
 
         it "inserts project", (done) ->
-          @appInfo.addProject("/Users/brian/app").then (project) ->
+          @cache.addProject("/Users/brian/app").then (project) ->
             expect(project).to.deep.eq({RANGE: {}, PATH: "/Users/brian/app"})
             done()
 
         it "updates its path without affecting other keys", (done) ->
-          @appInfo.insertProject("abc-123").then =>
-            @appInfo.updateProject("abc-123", {foo: "foo", PATH: "/Users/dev/foo"}).then (project) ->
+          @cache.insertProject("abc-123").then =>
+            @cache.updateProject("abc-123", {foo: "foo", PATH: "/Users/dev/foo"}).then (project) ->
               expect(project).to.deep.eq({RANGE: {}, foo: "foo", PATH: "/Users/dev/foo"})
           .then =>
-            @appInfo.addProject("/Users/brian/app").then (project) ->
+            @cache.addProject("/Users/brian/app").then (project) ->
               expect(project).to.deep.eq({RANGE: {}, foo: "foo", PATH: "/Users/brian/app"})
               done()
 
         it "returns the project when exists", (done) ->
-          @appInfo.addProject("/Users/brian/app").then (project) ->
+          @cache.addProject("/Users/brian/app").then (project) ->
             expect(project.PATH).to.eq "/Users/brian/app"
             done()
 
@@ -162,34 +162,34 @@ describe "App Info (local cache)", ->
           @sandbox.stub(Project.prototype, "createProjectId").returns("foo-bar-baz-123")
 
         it "inserts projects", (done) ->
-          @appInfo.addProject("/Users/brian/app").then =>
-            @appInfo.getProjects().then (projects) ->
+          @cache.addProject("/Users/brian/app").then =>
+            @cache.getProjects().then (projects) ->
               expect(projects).to.have.property("foo-bar-baz-123")
               done()
 
         it "inserts project path", (done) ->
-          @appInfo.addProject("/Users/brian/app").then (project) ->
+          @cache.addProject("/Users/brian/app").then (project) ->
             expect(project).to.deep.eq({RANGE: {}, PATH: "/Users/brian/app"})
             done()
 
     describe "#updateProject", ->
       beforeEach ->
-        @appInfo.insertProject("BAR")
+        @cache.insertProject("BAR")
 
       it "can update a single project", (done) ->
-        @appInfo.updateProject("BAR", {wow: 1})
+        @cache.updateProject("BAR", {wow: 1})
         .then (c) => c.should.eql({RANGE: {}, wow: 1}); done()
         .catch(done)
 
       it "can update a project range", (done) ->
-        @appInfo.updateRange("BAR", {start: 1, end: 2})
+        @cache.updateRange("BAR", {start: 1, end: 2})
         .then (p) =>
           p.should.eql({RANGE: {start:1,end:2}}); done()
         .catch(done)
 
       it "overrides only conflicting properties", (done) ->
-        @appInfo.updateProject("BAR", {bar: "bar", foo: "foo"}).then =>
-          @appInfo.updateProject("BAR", {bar: "baz"}).then (project) =>
+        @cache.updateProject("BAR", {bar: "bar", foo: "foo"}).then =>
+          @cache.updateProject("BAR", {bar: "baz"}).then (project) =>
             expect(project).to.have.property("foo", "foo")
             expect(project).to.have.property("bar", "baz")
             done()
@@ -203,10 +203,10 @@ describe "App Info (local cache)", ->
           @sandbox.stub(fs, "statAsync").resolves()
 
         stubId("abc-123")
-        @appInfo.addProject("/Users/brian/app").then =>
+        @cache.addProject("/Users/brian/app").then =>
           stubId("foo-bar-456")
-          @appInfo.addProject("/Users/sam/app2").then =>
-            @appInfo.getProjectPaths().then (paths) ->
+          @cache.addProject("/Users/sam/app2").then =>
+            @cache.getProjectPaths().then (paths) ->
               expect(paths).to.deep.eq ["/Users/brian/app", "/Users/sam/app2"]
               done()
         .catch(done)
@@ -220,10 +220,10 @@ describe "App Info (local cache)", ->
             .withArgs("/Users/sam/app2").rejects()
 
         stubId("abc-123")
-        @appInfo.addProject("/Users/brian/app").then =>
+        @cache.addProject("/Users/brian/app").then =>
           stubId("foo-bar-456")
-          @appInfo.addProject("/Users/sam/app2").then =>
-            @appInfo.getProjectPaths().then (paths) ->
+          @cache.addProject("/Users/sam/app2").then =>
+            @cache.getProjectPaths().then (paths) ->
               expect(paths).to.deep.eq ["/Users/brian/app"]
               done()
         .catch(done)
@@ -235,12 +235,12 @@ describe "App Info (local cache)", ->
           @sandbox.stub(Project.prototype, "getProjectId").resolves(id)
 
         stubId(123)
-        @appInfo.addProject("/Users/brian/app").then =>
+        @cache.addProject("/Users/brian/app").then =>
           stubId(456)
-          @appInfo.addProject("/Users/sam/app2").then =>
-            @appInfo.getProjects().then (projects) =>
-              @appInfo._removeProjectByPath(projects, "/Users/sam/app2").then =>
-                @appInfo.getProjects().then (projects) ->
+          @cache.addProject("/Users/sam/app2").then =>
+            @cache.getProjects().then (projects) =>
+              @cache._removeProjectByPath(projects, "/Users/sam/app2").then =>
+                @cache.getProjects().then (projects) ->
                   expect(projects).not.to.have.property(456)
                   done()
           .catch(done)
@@ -251,21 +251,21 @@ describe "App Info (local cache)", ->
   context "sessions", ->
     describe "#getSessionId", ->
       beforeEach ->
-        @appInfo.ensureExists()
+        @cache.ensureExists()
 
       it "returns session id", (done) ->
-        @appInfo.setSessionId(1234).then =>
-          @appInfo.getSessionId().then (id) ->
+        @cache.setSessionId(1234).then =>
+          @cache.getSessionId().then (id) ->
             expect(id).to.eq 1234
             done()
         .catch(done)
 
     describe "#setSessionId", ->
       beforeEach ->
-        @appInfo.ensureExists()
+        @cache.ensureExists()
 
       it "sets SESSION_ID into .cy", (done) ->
-        @appInfo.setSessionId(1234).then (contents) ->
+        @cache.setSessionId(1234).then (contents) ->
           expect(contents.SESSION_ID).to.eq 1234
           done()
         .catch(done)
@@ -273,11 +273,11 @@ describe "App Info (local cache)", ->
   context "setters + getters", ->
     describe "#_set", ->
       beforeEach ->
-        @appInfo.ensureExists()
+        @cache.ensureExists()
 
       it "does not override existing properties", (done) ->
-        @appInfo._write({foo: "foo"}).then (contents) =>
-          @appInfo._set({bar: "bar"}).then (contents) ->
+        @cache._write({foo: "foo"}).then (contents) =>
+          @cache._set({bar: "bar"}).then (contents) ->
             expect(contents.foo).to.eq "foo"
             expect(contents.bar).to.eq "bar"
             done()

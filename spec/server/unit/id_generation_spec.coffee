@@ -79,7 +79,7 @@ describe "IdGenerator", ->
   context "#getId", ->
     beforeEach ->
       @sandbox.stub(@idGenerator, "appendTestId").resolves({})
-      @sandbox.stub(@idGenerator.keys.appInfo, "getProject").resolves({RANGE: {start: 0, end: 100}})
+      @sandbox.stub(@idGenerator.keys.cache, "getProject").resolves({RANGE: {start: 0, end: 100}})
 
     it "queues multiple ids through promise semaphore", ->
         @idGenerator.getId({})

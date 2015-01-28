@@ -16,12 +16,12 @@
 
     <script type="text/javascript">
       require("coffee-script/register")
-      var appInfo = new (require("../../lib/app_info"))
+      var cache = new (require("../../lib/cache"))
 
-      appInfo.ensureExists().then(function(){
+      cache.ensureExists().then(function(){
         var opts = {
           argv:    require("nw.gui").App.argv,
-          appInfo: appInfo,
+          cache: cache,
           Server:  require("../../lib/server")
         }
 
