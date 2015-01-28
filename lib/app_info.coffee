@@ -95,7 +95,7 @@ class AppInfo extends require('./logger')
 
   updateRange: (id, range) ->
     @emit 'verbose', "updating range of project #{id} with #{JSON.stringify(range)}"
-    @getProject(id)
+    @getProject(id).bind(@)
     .then (p) ->
       p.RANGE = range
       p
@@ -106,7 +106,7 @@ class AppInfo extends require('./logger')
   updateProject: (id, data) ->
     @emit 'verbose', "updating project #{id} with #{JSON.stringify(data)}"
     @getProjects().then (projects) ->
-      @getProject(id).then (project) ->
+      @getProject(id).then (project) =>
         projects[id] = _.extend(project, data)
         @_set "PROJECTS", projects
         .return(project)
@@ -114,7 +114,7 @@ class AppInfo extends require('./logger')
   ensureProject: (id) ->
     @emit 'verbose', "ensuring that project #{id} exists"
     @getProject(id)
-    .then(id)
+    .bind(@)
     .catch(-> @insertProject(id))
 
   insertProject: (id) ->

@@ -66,6 +66,22 @@ describe "App Info (local cache)", ->
         done()
       .catch(done)
 
+  context "#ensureProject", ->
+    it "returns project id if existing", ->
+      @sandbox.stub(@appInfo, "getProject").resolves({"123-abc-foo-bar-baz": {}})
+      insertProject = @sandbox.spy @appInfo, "insertProject"
+
+      @appInfo.ensureProject("123-abc-foo-bar-baz").then (project) ->
+        expect(project).to.deep.eq {"123-abc-foo-bar-baz": {}}
+        expect(insertProject).not.to.be.called
+
+    it "inserts project and returns id if not existing", ->
+      @sandbox.stub(@appInfo, "getProject").rejects()
+      insertProject = @sandbox.stub(@appInfo, "insertProject")
+
+      @appInfo.ensureProject("123-abc-foo-bar-baz").then ->
+        expect(insertProject).to.be.calledOnce
+
   context "projects", ->
     beforeEach ->
       @appInfo.ensureExists()
