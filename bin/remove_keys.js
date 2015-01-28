@@ -8,7 +8,7 @@ var basePath= process.argv[2];
 var matcher = new RegExp(/\s+\[.*\]('|")/g)
 
 if (!basePath) {
-  console.log("pass a path to your ecl project");
+  console.log("pass a path to your cy project");
   process.exit(1);
 }
 
