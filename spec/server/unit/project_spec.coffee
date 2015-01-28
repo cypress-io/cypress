@@ -9,7 +9,7 @@ Settings     = require "#{root}lib/util/settings"
 
 API_URL  = process.env.API_URL or 'localhost:1234'
 
-describe.only "Project Interface", ->
+describe "Project Interface", ->
   beforeEach ->
     @sandbox = sinon.sandbox.create()
 
