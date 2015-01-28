@@ -3,8 +3,8 @@ Promise  = require 'bluebird'
 path     = require 'path'
 Request  = require 'request-promise'
 Project  = require './project'
-API_URL  = process.env.API_URL or 'localhost:1234'
 Cache    = require './cache'
+API_URL  = process.env.API_URL or 'localhost:1234'
 
 class Keys
   constructor: (projectRoot) ->

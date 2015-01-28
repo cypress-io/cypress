@@ -17,7 +17,7 @@ require('chai')
 .use(require("chai-as-promised"))
 .should()
 
-describe "App Info (local cache)", ->
+describe "Cache", ->
   beforeEach ->
     nock.disableNetConnect()
     @sandbox = sinon.sandbox.create()
