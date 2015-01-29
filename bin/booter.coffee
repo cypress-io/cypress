@@ -45,11 +45,14 @@ class Booter
 
     send(projectRoot: @projectRoot)
 
-    server = Server(@projectRoot)
+    @server = Server(@projectRoot)
 
-    server.open()
+    @server.open().bind(@)
     .then (settings) ->
-      {server: server, settings: settings}
+      {server: @server, settings: settings}
+
+  close: ->
+    @server.close()
 
 send = (obj) ->
   if process.send
