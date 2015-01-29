@@ -1,12 +1,23 @@
 #!/usr/bin/env node
+require("coffee-script/register")
 
-nodemon = require('nodemon')
-path = require('path')
+var nodemon = require('nodemon')
+var path    = require('path')
 
-eclRoot = path.join(__dirname, "..", "lib");
-eclServer = path.join(__dirname, "server_boot.js");
+cyRoot   = path.join(__dirname, "..", "lib");
+cyServer = path.join(__dirname, "booter.coffee");
 
-nodemon('-e "coffee js" --debug --watch ' + eclRoot + " " + eclServer + " " + process.cwd() + " verbose")
+var args = '-e "coffee js" --debug --watch ' + cyRoot + " " + cyServer + " " + process.argv[2] + " id_generator verbose"
+
+nodemon(args)
 .on("start", function() {
   console.log(":: nodemon started")
 })
+
+
+// 1. public website
+// 2. express server + proxy
+// 3. node webkit + auto updates
+// 4. api.cypress.io
+// 5. client backbone app
+// 6. Cypress client API

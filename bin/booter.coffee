@@ -58,6 +58,9 @@ send = (obj) ->
   if process.send
     process.send(obj)
 
+isRunningFromCli = ->
+  not module.parent
+
 ## are we a child process
 ## by verifying we have the cyFork
 ## env and we are not in debugger
@@ -66,13 +69,19 @@ isChildProcess = ->
   !!(process.send and not process.execArgv.length)
 
 ## if we are a child process
-if isChildProcess()
+## or if we are being run from the command
+## line directly from node (like nodemon)
+if isChildProcess() or isRunningFromCli()
   projectRoot = process.argv[2]
 
   ## boot the server and then send this
   ## to our parent process
   Booter(projectRoot).boot().then (obj) ->
     obj.settings.done = true
+
+    if process.argv[3] is "id_generator"
+      open(obj.settings.idGeneratorPath)
+
     send(obj.settings)
 
 module.exports = Booter
