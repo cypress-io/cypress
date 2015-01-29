@@ -8,16 +8,22 @@ module.exports =
     path.join(projectRoot, "cypress.json")
 
   _logErr: (projectRoot) ->
-    console.log "Could not read file from: '#{projectRoot}/cypress.json'"
+    throw new Error "Error reading from: #{projectRoot}/cypress.json"
+
+    # console.log "Could not read file from: '#{projectRoot}/cypress.json'"
 
   _get: (method, projectRoot) ->
     if not projectRoot
       throw new Error("Settings requires projectRoot to be defined!")
 
-    fs[method](
-      @_pathToCypressJson(projectRoot),
-      "utf8"
-    )
+    file = @_pathToCypressJson(projectRoot)
+
+    ## should synchronously check to see if cypress.json exists
+    ## and if not, create an empty one
+    if not fs.existsSync(file)
+      fs.writeFileSync(file, JSON.stringify({cypress: {wizard: true}}))
+
+    fs[method](file, "utf8")
 
   read: (projectRoot) ->
     @_get("readFileAsync", projectRoot)

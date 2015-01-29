@@ -45,6 +45,7 @@ class Server #extends require('./logger')
       commandTimeout: 4000
       port: 3000
       autoOpen: false
+      wizard: false
       projectRoot: projectRoot
 
     _.defaults obj,
