@@ -11,8 +11,8 @@
         App.execute "gui:external:open", project.get("clientUrl")
 
       @listenTo projectView, "stop:clicked", ->
-        App.config.closeProject()
-        App.vent.trigger "start:projects:app"
+        App.config.closeProject().then ->
+          App.vent.trigger "start:projects:app"
 
       @show projectView
 
