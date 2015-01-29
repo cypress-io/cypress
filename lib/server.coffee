@@ -1,12 +1,13 @@
-express     = require 'express'
-http        = require 'http'
-fs          = require 'fs'
-hbs         = require 'hbs'
-_           = require 'underscore'
-_.str       = require 'underscore.string'
-Promise     = require 'bluebird'
-Project     = require "./project.coffee"
-Settings    = require './util/settings'
+express      = require 'express'
+http         = require 'http'
+fs           = require 'fs'
+hbs          = require 'hbs'
+_            = require 'underscore'
+_.str        = require 'underscore.string'
+allowDestroy = require "server-destroy"
+Promise      = require 'bluebird'
+Project      = require "./project.coffee"
+Settings     = require './util/settings'
 
 ## currently not making use of event emitter
 ## but may do so soon
@@ -82,6 +83,8 @@ class Server #extends require('./logger')
     @io        = require("socket.io")(@server, {path: "/__socket.io"})
     @project   = Project(@config.projectRoot)
 
+    allowDestroy(@server)
+
     @configureApplication()
 
     ## refactor this class
@@ -108,7 +111,7 @@ class Server #extends require('./logger')
       ## currently listening
       return resolve() if not @server or not @isListening
 
-      @server.close =>
+      @server.destroy =>
         @isListening = false
         console.log "Express server closed!"
         resolve()
