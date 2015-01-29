@@ -20,19 +20,19 @@
       @cache.getProjectPaths()
 
     runProject: (path) ->
-      @Server(projectRoot: path)
-      @Server.open()
+      @booter(path).get("settings")
+      # @Server.open()
 
     closeProject: ->
-      @Server.close()
+      # @Server.close()
 
   class Entities.ProjectsCollection extends Entities.Collection
     model: Entities.Project
 
   App.reqres.setHandler "config:entity", (attrs = {}) ->
     cache = attrs.cache
-    Server = attrs.Server
-    config = new Entities.Config _(attrs).omit("cache", "Server")
+    booter = attrs.booter
+    config = new Entities.Config _(attrs).omit("cache", "booter")
     config.cache = cache
-    config.Server = Server
+    config.booter = booter
     config

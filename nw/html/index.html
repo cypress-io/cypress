@@ -21,8 +21,8 @@
       cache.ensureExists().then(function(){
         var opts = {
           argv:    require("nw.gui").App.argv,
-          cache: cache,
-          Server:  require("../../lib/server")
+          cache:   cache,
+          booter:  require("../../bin/booter")
         }
 
         $(function(){

@@ -109,7 +109,7 @@ module.exports = class extends require("../logger")
 
           sauce options, df
 
-    watchTestFiles = chokidar.watch path.join(@app.get("cypress").projectRoot, app.get("cypress").testFolder), ignored: (path, stats) ->
+    watchTestFiles = chokidar.watch path.join(@app.get("cypress").projectRoot, @app.get("cypress").testFolder), ignored: (path, stats) ->
       ## this fn gets called twice, once with the directory
       ## which does not have a stats argument
       ## we always return false to include directories
