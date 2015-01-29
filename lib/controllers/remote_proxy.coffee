@@ -17,7 +17,7 @@ module.exports = class extends require('../logger')
   handle: (req, res, next) =>
     ## strip out the /__remote/ from the req.url
     if not req.session.remote?
-      if b = app.get('eclectus').baseUrl
+      if b = app.get("cypress").baseUrl
         req.session.remote = b
       else
         throw new Error("™ Session Proxy not yet set! ™")
@@ -108,8 +108,8 @@ module.exports = class extends require('../logger')
     res.contentType(mime.lookup(baseUri))
 
     args = _.compact([
-      app.get('config').projectRoot,
-      app.get("eclectus").rootFolder,
+      app.get("cypress").projectRoot,
+      app.get("cypress").rootFolder,
       baseUri
     ])
 

@@ -20,14 +20,14 @@ module.exports = class extends require('../logger')
   #   requirejs opts, (buildResponse) ->
   #     debugger
 
-  handle: (opts, req, res, next) =>
+  handle: (app, spec, req, res, next) =>
     res.type "js"
 
-    {testFolder, spec} = opts
+    settings = app.get("cypress")
 
     filePath = path.join(
-      app.get('config').projectRoot,
-      testFolder,
+      settings.projectRoot,
+      settings.testFolder,
       spec
     )
 
@@ -36,7 +36,7 @@ module.exports = class extends require('../logger')
       name: filePath
       out: "main.js"
 
-    if app.get("eclectus").requirejs
+    if settings.requirejs
       requirejs.optimize config, (buildResponse) ->
         ## need to wrap these contents with almond so we dont
         ## have to add the require.js script tag (which is huge)
@@ -70,10 +70,10 @@ module.exports = class extends require('../logger')
       gutil.beep()
       next arguments...
     domain.run =>
-      if opts = app.get("eclectus").browserify
+      if opts = settings.browserify
         @browserify(opts, stream)
         .pipe(res)
-      # if opts = app.get("eclectus").requirejs
+      # if opts = settings.requirejs
         # @requirejs(opts, stream)
         # .pipe(res)
       else

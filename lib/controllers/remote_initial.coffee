@@ -55,7 +55,7 @@ module.exports = class extends require('../logger')
 
   getRelativeFileContent: (p) ->
     fs.createReadStream(path.join(
-      app.get('config').projectRoot,
+      app.get("cypress").projectRoot,
       p.split('?')[0]
     ), 'utf8')
 
