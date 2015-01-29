@@ -9,7 +9,7 @@ Socket         = require "#{root}lib/socket"
 Settings       = require "#{root}lib/util/settings"
 Booter             = require "#{root}/bin/booter"
 
-describe.only "Booter", ->
+describe "Booter", ->
   beforeEach ->
     @sandbox = sinon.sandbox.create()
     @sandbox.stub(Socket.prototype, "startListening")
