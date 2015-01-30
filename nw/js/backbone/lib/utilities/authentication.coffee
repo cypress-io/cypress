@@ -2,7 +2,7 @@
 
   Request        = require("request-promise")
 
-  API_URL        = "http://api.cypress.io"
+  API_URL        = "http://localhost:1234"
   GITHUB_OAUTH   = "https://github.com/login/oauth/authorize"
   GITHUB_PARAMS  =
     client_id:    "71bdc3730cd85d30955a"
@@ -31,18 +31,10 @@
 
       App.execute "gui:focus"
 
-      App.config.setSessionId("foobarbaz123").then ->
+      code = new Uri(url).getQueryParamValue("code")
+
+      App.config.logIn("#{API_URL}/signin?code=#{code}").then ->
         App.vent.trigger "start:projects:app"
-
-      # code = new Uri(url).getQueryParamValue("code")
-
-      # Request.post("http://#{API_URL}/sessions?code=#{code}").then (res, err) ->
-      #   ## call into cache to store session
-      #   debugger
-      # .catch ->
-      #   debugger
-
-      # App.vent.trigger "start:projects:app"
 
   App.commands.setHandler "login:request", -> API.loginRequest()
 

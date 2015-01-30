@@ -28,11 +28,23 @@
       @project.close().bind(@).then ->
         delete @project
 
+    logIn: (url) ->
+      @request.post(url).then (res, err) ->
+        debugger
+      .catch ->
+        debugger
+      # App.config.setSessionId("foobarbaz123").then ->
+
+
   class Entities.ProjectsCollection extends Entities.Collection
     model: Entities.Project
 
   App.reqres.setHandler "config:entity", (attrs = {}) ->
-    config = new Entities.Config _(attrs).omit("cache", "booter")
-    config.cache = attrs.cache
-    config.booter = attrs.booter
+    props = ["cache", "booter", "request"]
+
+    config = new Entities.Config _(attrs).omit props...
+
+    _.each props, (prop) ->
+      config[prop] = attrs[prop]
+
     config
