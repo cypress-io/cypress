@@ -5,7 +5,11 @@
       if !path
         throw new Error("Missing http path to ID Generator.  Cannot start ID Generator.")
 
-      App.request "gui:open", path,
+      ## close the previous id generator
+      ## if one exists
+      @idGenerator?.close()
+
+      @idGenerator = App.request "gui:open", path,
         show: false
 
   App.commands.setHandler "start:id:generator", (path) ->
