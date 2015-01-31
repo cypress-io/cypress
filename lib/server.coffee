@@ -7,6 +7,7 @@ _.str        = require 'underscore.string'
 allowDestroy = require "server-destroy"
 Promise      = require 'bluebird'
 Project      = require "./project.coffee"
+Socket       = require "./socket.coffee"
 Settings     = require './util/settings'
 
 ## currently not making use of event emitter
@@ -89,7 +90,7 @@ class Server #extends require('./logger')
     @configureApplication()
 
     ## refactor this class
-    socket = new (require("./socket"))(@io, @app)
+    socket = Socket(@io, @app)
     socket.startListening()
 
     require("./routes")(@app)
