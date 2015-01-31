@@ -36,6 +36,14 @@
       App.config.logIn("#{API_URL}/signin?code=#{code}").then ->
         App.vent.trigger "start:projects:app"
 
-  App.commands.setHandler "login:request", -> API.loginRequest()
+  App.commands.setHandler "login:request", ->
+    API.loginRequest()
 
-  App.vent.on "logging:in", (url) -> API.loggingIn(url)
+  App.vent.on "logging:in", (url) ->
+    API.loggingIn(url)
+
+  App.reqres.setHandler "current:user", ->
+    App.currentUser or throw new Error("No current user set on App!")
+
+  App.commands.setHandler "set:current:user", (attrs = {}) ->
+    App.currentUser = App.request("new:user:entity", attrs)

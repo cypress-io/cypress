@@ -29,15 +29,16 @@
         delete @project
 
     logIn: (url) ->
-      @request.post(url).then (res, err) ->
+      @request.post(url).promise().bind(@)
+      .then(JSON.parse)
+      .then (json) ->
+        @setSessionId(json.session_token)
+        App.execute "set:current:user", json
+      .catch (err) ->
+        ## ...could not log in...
         debugger
-      .catch ->
-        debugger
-      # App.config.setSessionId("foobarbaz123").then ->
-
-
-  class Entities.ProjectsCollection extends Entities.Collection
-    model: Entities.Project
+        console.log("Error logging in!")
+        throw err
 
   App.reqres.setHandler "config:entity", (attrs = {}) ->
     props = ["cache", "booter", "request"]

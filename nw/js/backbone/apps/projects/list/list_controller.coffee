@@ -5,7 +5,9 @@
     initialize: ->
       projects = App.request "project:entities"
 
-      projectsView = @getProjectsView(projects)
+      user = App.request "current:user"
+
+      projectsView = @getProjectsView(projects, user)
 
       @listenTo projectsView, "project:added", (path) ->
         App.config.addProject(path).then ->
@@ -16,6 +18,7 @@
 
       @show projectsView
 
-    getProjectsView: (projects) ->
+    getProjectsView: (projects, user) ->
       new List.Projects
         collection: projects
+        model: user
