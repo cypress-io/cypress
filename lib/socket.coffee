@@ -2,16 +2,26 @@ fs          = require 'fs'
 _           = require 'underscore'
 path        = require 'path'
 uuid        = require 'node-uuid'
-sauce       = require '../sauce/sauce.coffee'
+# sauce       = require '../sauce/sauce.coffee'
 jQuery      = require 'jquery-deferred'
 chokidar    = require 'chokidar'
-IdGenerator = require '../id_generator.coffee'
+IdGenerator = require './id_generator.coffee'
 leadingSlashes = /^\/+/
 
-module.exports = class extends require("../logger")
-  constructor: (@io, @app) ->
+class Socket
+  constructor: (io, app) ->
+    if not (@ instanceof Socket)
+      return new Socket(io, app)
+
+    if not app
+      throw new Error("Instantiating lib/socket requires an app!")
+
+    if not io
+      throw new Error("Instantiating lib/socket requires an io instance!")
+
+    @app         = app
+    @io          = io
     @idGenerator = IdGenerator(@app)
-    super
 
   onTestFileChange: (filepath, stats) =>
     ## simple solution for preventing firing test:changed events
@@ -122,7 +132,7 @@ module.exports = class extends require("../logger")
 
     watchTestFiles.on "change", @onTestFileChange
 
-    watchCssFiles = chokidar.watch path.join(__dirname, "../", "public", "css"), ignored: (path, stats) ->
+    watchCssFiles = chokidar.watch path.join(__dirname, "public", "css"), ignored: (path, stats) ->
       return false if fs.statSync(path).isDirectory()
 
       not /\.css$/.test path
@@ -131,3 +141,5 @@ module.exports = class extends require("../logger")
     watchCssFiles.on "change", (filepath, stats) =>
       filepath = path.basename(filepath)
       @io.emit "eclectus:css:changed", file: filepath
+
+module.exports = Socket

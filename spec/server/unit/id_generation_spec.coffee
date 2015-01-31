@@ -5,7 +5,7 @@ expect       = require('chai').expect
 fs           = require 'fs-extra'
 # _            = require 'lodash'
 # nock         = require('nock')
-Socket       = require "#{root}lib/socket"
+# Socket       = require "#{root}lib/socket"
 Server       = require "#{root}lib/server"
 Keys         = require "#{root}lib/keys"
 Settings     = require "#{root}lib/util/settings"
@@ -93,25 +93,3 @@ describe "IdGenerator", ->
 
   context "#appendTestId", ->
     it "inserts id into test"
-
-  ## TODO: move this test out of here.
-  ## its not the id generator's concern at all
-  # context "generate:ids:for:test", ->
-  #   beforeEach ->
-  #     @projectRoot = "/Users/bmann/Dev/eclectus_examples/todomvc/backbone_marionette"
-
-  #     @io =
-  #       on: ->
-  #       emit: sinon.stub()
-
-  #     app =
-  #       enabled: -> false
-  #       get: =>
-  #         testFolder: "tests"
-  #         projectRoot: @projectRoot
-
-  #     @socket = new Socket(@io, app)
-
-  #   it "strips projectRoot out of filepath", ->
-  #     @socket.onTestFileChange "#{@projectRoot}/tests/cypress_api.coffee"
-  #     expect(@io.emit).to.be.calledWith "generate:ids:for:test", "tests/cypress_api.coffee", "cypress_api.coffee"
