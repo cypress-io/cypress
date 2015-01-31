@@ -1,9 +1,11 @@
+global.config ?= require("konfig")()
+
 _         = require 'lodash'
 Promise   = require 'bluebird'
 path      = require 'path'
 Project   = require './project'
 fs        = Promise.promisifyAll(require('fs'))
-CACHE     = path.join(__dirname, '../', '.cy/', 'cache')
+CACHE     = path.join(__dirname, '../', config.app.cache_path)
 
 class Cache extends require('./logger')
   READ_VALIDATIONS: ->

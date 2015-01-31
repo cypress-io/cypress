@@ -1,8 +1,12 @@
+defaults:
+  cache_path: ".cy/cache"
+
 development: &development
   api_url: "http://localhost:1234"
 
 test:
   <<: *development
+  cache_path: ".cy/test_cache"
 
 production:
   api_url: "http://api.cypress.io"

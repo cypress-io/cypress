@@ -1,6 +1,7 @@
+global.config ?= require("konfig")()
 root          = '../../../'
 path          = require 'path'
-CACHE         = path.join(__dirname, root, '/.cy/', 'cache')
+CACHE         = path.join(__dirname, root, config.app.cache_path)
 Promise       = require 'bluebird'
 expect        = require('chai').expect
 Keys          = require "#{root}lib/keys"
