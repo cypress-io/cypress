@@ -20,3 +20,6 @@ module.exports =
   ## in the tmpDir
   project: (name) ->
     path.join tmpDir, name
+
+  get: (fixture) ->
+    fs.readFileSync path.join(root, "spec", "fixtures", fixture)

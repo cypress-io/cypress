@@ -1,4 +1,5 @@
 _               = require 'underscore'
+_.str           = require 'underscore.string'
 path            = require 'path'
 gutil           = require 'gulp-util'
 phantom         = require 'node-phantom-simple'
@@ -24,35 +25,45 @@ class IdGenerator
   escapeRegExp: (str) ->
     str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
+  read: (path) ->
+    fs.readFileAsync(path, "utf8")
+
   appendTestId: (spec, title, id) ->
     normalizedPath = path.join(@projectRoot, spec)
 
-    fs.readFileAsync(normalizedPath, "utf8").bind(@)
+    @read(normalizedPath).bind(@)
     .then (contents) ->
-      re = new RegExp "['\"](" + @escapeRegExp(title) + ")['\"]"
-
-      # ## if the string is found and it doesnt have an id
-      matches = re.exec contents
-
-      ## matches[1] will be the captured group which is the title
-      return if not matches
-
-      ## position is the string index where we first find the capture
-      ## group and include its length, so we insert right after it
-      position = matches.index + matches[1].length + 1
-      contents = _(contents).insert position, " [#{id}]"
-
+      @insertId(contents, title, id)
+    .then (contents) ->
       ## enable editFileMode which prevents us from sending out test:changed events
       @app.enable("editFileMode")
 
-      ## write the actual contents to the file
-      fs.writeFileAsync(normalizedPath, contents).then ->
-        ## remove the editFileMode so we emit file changes again
-        ## if we're still in edit file mode then wait 1 second and disable it
-        ## chokidar doesnt instantly see file changes so we have to wait
-        _.delay =>
-          @app.disable("editFileMode")
-        , 1000
+      ## write the new content back to the file
+      @write(normalizedPath, contents)
+    .then ->
+      ## remove the editFileMode so we emit file changes again
+      ## if we're still in edit file mode then wait 1 second and disable it
+      ## chokidar doesnt instantly see file changes so we have to wait
+      _.delay =>
+        @app.disable("editFileMode")
+      , 1000
+
+  insertId: (contents, title, id) ->
+    re = new RegExp "['\"](" + @escapeRegExp(title) + ")['\"]"
+
+    # ## if the string is found and it doesnt have an id
+    matches = re.exec contents
+
+    ## matches[1] will be the captured group which is the title
+    return if not matches
+
+    ## position is the string index where we first find the capture
+    ## group and include its length, so we insert right after it
+    position = matches.index + matches[1].length + 1
+    _.str.insert contents, position, " [#{id}]"
+
+  write: (path, contents) ->
+    fs.writeFileAsync(path, contents)
 
   getId: (data) ->
     pSemaphore.add =>

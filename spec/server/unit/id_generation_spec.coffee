@@ -1,17 +1,13 @@
 root         = '../../../'
 path         = require 'path'
-IdGenerator  = require "#{root}lib/id_generator"
 expect       = require('chai').expect
-fs           = require 'fs-extra'
-# _            = require 'lodash'
-# nock         = require('nock')
-# Socket       = require "#{root}lib/socket"
+sinon        = require "sinon"
+sinonPromise = require 'sinon-as-promised'
 Server       = require "#{root}lib/server"
 Keys         = require "#{root}lib/keys"
 Settings     = require "#{root}lib/util/settings"
-sinon        = require "sinon"
-sinonPromise = require 'sinon-as-promised'
-# rimraf       = require('rimraf')
+IdGenerator  = require "#{root}lib/id_generator"
+Fixtures     = require "#{root}/spec/server/helpers/fixtures"
 
 describe "IdGenerator", ->
   beforeEach ->
@@ -19,37 +15,11 @@ describe "IdGenerator", ->
     @sandbox.stub(Settings, "read").resolves({projectId: "abc-123-foo-bar"})
     @sandbox.stub(Settings, "readSync").returns({})
 
-    # @rootPath = "fake"
-    # @specData =
-    #   title: "test 1"
-    #   spec: "#{@rootPath}/spec.js"
-
-    # fs.mkdirSync(@rootPath);
-    # fs.writeFileSync("#{@rootPath}/spec.js", '', 'utf8');
-    # fs.writeFileSync("cypress.json", '{"cypress": {}}', 'utf8');
-
     @server      = Server(process.cwd())
     @idGenerator = IdGenerator(@server.app)
 
-    # nock(config.app.api_url)
-    # .post("/projects")
-    # .reply(200, {
-    #   uuid: "6b9a82d7-3020-4f5b-a85d-14311d70b05a"
-    # })
-
-    # nock(config.app.api_url)
-    # .post("/projects/6b9a82d7-3020-4f5b-a85d-14311d70b05a/keys")
-    # .once()
-    # .reply(200, {
-    #   start: 0,
-    #   end: 10
-    # })
-
   afterEach ->
     @sandbox.restore()
-    # nock.cleanAll()
-    # fs.removeSync(@rootPath);
-    # rimraf.sync(path.join(__dirname, root, ".cy"))
 
   it "stores app", ->
     expect(@idGenerator.app).to.eq @server.app
@@ -92,4 +62,22 @@ describe "IdGenerator", ->
           expect(num).to.eql("008")
 
   context "#appendTestId", ->
+    beforeEach ->
+      @sandbox.stub(@idGenerator, "write").resolves
+
     it "inserts id into test"
+
+    it "enables editFileMode"
+
+    it "disables editFileMode after 1 second"
+
+    it "writes back the updated content"
+
+    it "reads original content"
+      ## content should be sent to #insertId
+
+  context "#insertId", ->
+    it "inserts id into the string content", ->
+      contents = Fixtures.get("ids/simple.coffee")
+      newContent = @idGenerator.insertId contents, "foos", "0ab"
+      expect(newContent).to.eq 'it "foos [0ab]", ->'
