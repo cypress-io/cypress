@@ -3,7 +3,7 @@ Promise   = require 'bluebird'
 path      = require 'path'
 Project   = require './project'
 fs        = Promise.promisifyAll(require('fs'))
-LOCATION  = path.join(__dirname, '../', '.cy/', 'local.info')
+CACHE     = path.join(__dirname, '../', '.cy/', 'cache')
 
 class Cache extends require('./logger')
   READ_VALIDATIONS: ->
@@ -31,7 +31,7 @@ class Cache extends require('./logger')
   ## returns a JSON object
   _read: =>
     @emit 'verbose', 'reading from .cy info'
-    fs.readFileAsync(LOCATION, 'utf8')
+    fs.readFileAsync(CACHE, 'utf8')
     .bind(@)
     .then(JSON.parse)
     .then (contents) ->
@@ -45,7 +45,7 @@ class Cache extends require('./logger')
   _write: (obj = {}) ->
     @emit 'verbose', 'writing to .cy info'
     fs.writeFileAsync(
-      LOCATION,
+      CACHE,
       JSON.stringify(obj),
       'utf8'
     ).bind(@).return(obj)
@@ -78,7 +78,7 @@ class Cache extends require('./logger')
   _initLocalInfo: ->
     @emit 'verbose', 'creating initial .cy info'
     fs.mkdirAsync(
-      path.dirname(LOCATION)
+      path.dirname(CACHE)
     )
     .bind(@)
     .then(@_write)
@@ -88,7 +88,7 @@ class Cache extends require('./logger')
   ## otherwise it inits an empty JSON config file
   ensureExists: ->
     @emit 'verbose', 'checking existence of .cy info'
-    fs.statAsync(LOCATION)
+    fs.statAsync(CACHE)
     .bind(@)
     .return(true)
     .catch(@_initLocalInfo)

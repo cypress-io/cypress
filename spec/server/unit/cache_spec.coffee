@@ -1,11 +1,12 @@
 root          = '../../../'
 path          = require 'path'
-info          = path.join(__dirname, root, '/.cy/', 'local.info')
+CACHE         = path.join(__dirname, root, '/.cy/', 'cache')
 Promise       = require 'bluebird'
 expect        = require('chai').expect
 Keys          = require "#{root}lib/keys"
 Project       = require "#{root}lib/project"
 Cache         = require "#{root}lib/cache"
+Settings      = require "#{root}lib/util/settings"
 fs            = Promise.promisifyAll(require('fs'))
 nock          = require 'nock'
 rimraf        = require 'rimraf'
@@ -23,17 +24,17 @@ describe "Cache", ->
     @sandbox = sinon.sandbox.create()
     @cache = new Cache
 
-  afterEach (done)->
+  afterEach ->
     nock.cleanAll()
     nock.enableNetConnect()
     @sandbox.restore()
-    rimraf(path.dirname(info), (e) -> done(e))
+    rimraf.sync path.dirname(CACHE)
 
   context "#ensureExists", ->
     it "creates an offline cache if not present", (done) ->
       @cache.ensureExists()
       .then =>
-        fs.statAsync(info)
+        fs.statAsync(CACHE)
       .then => done()
       .catch(done)
 
@@ -160,6 +161,7 @@ describe "Cache", ->
       context "without existing id", ->
         beforeEach ->
           @sandbox.stub(Project.prototype, "createProjectId").returns("foo-bar-baz-123")
+          @sandbox.stub(Settings, "read").resolves({})
 
         it "inserts projects", (done) ->
           @cache.addProject("/Users/brian/app").then =>
