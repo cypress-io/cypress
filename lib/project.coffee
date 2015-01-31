@@ -4,7 +4,8 @@ Promise  = require 'bluebird'
 Request  = require 'request-promise'
 path     = require 'path'
 fs       = Promise.promisifyAll(require('fs'))
-API_URL  = process.env.API_URL or 'localhost:1234'
+
+config   = require("konfig")()
 
 class Project extends require('./logger')
   constructor: (projectRoot) ->
@@ -28,7 +29,7 @@ class Project extends require('./logger')
 
   createProjectId: ->
     @emit "verbose", "Creating project ID"
-    Request.post("http://#{API_URL}/projects")
+    Request.post("#{config.app.api_url}/projects")
     .then (attrs) =>
       Settings.write(@projectRoot, {projectId: JSON.parse(attrs).uuid})
     .get("projectId")

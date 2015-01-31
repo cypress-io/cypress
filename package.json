@@ -75,6 +75,7 @@
     "http-proxy": "1.7.0",
     "hyperdirect": "0.0.0",
     "hyperquest": "1.0.1",
+    "konfig": "^0.2.0",
     "lodash": "2.4.1",
     "method-override": "^2.3.1",
     "mime": "1.2.11",

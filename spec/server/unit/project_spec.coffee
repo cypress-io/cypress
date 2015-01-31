@@ -7,7 +7,7 @@ fs           = require "fs-extra"
 Project      = require "#{root}lib/project"
 Settings     = require "#{root}lib/util/settings"
 
-API_URL  = process.env.API_URL or 'localhost:1234'
+config       = require("konfig")()
 
 describe "Project Interface", ->
   beforeEach ->
@@ -44,7 +44,7 @@ describe "Project Interface", ->
     beforeEach ->
       @project = Project process.cwd()
 
-      @createProject = nock("http://#{API_URL}")
+      @createProject = nock(config.app.api_url)
       .post("/projects")
       .reply(200, {
         uuid: "abc-1234-foo-bar-baz"
@@ -71,7 +71,7 @@ describe "Project Interface", ->
     beforeEach ->
       @project = Project process.cwd()
 
-      @createProject = nock("http://#{API_URL}")
+      @createProject = nock(config.app.api_url)
       .post("/projects")
       .reply(200, {
         uuid: "abc-1234-foo-bar-baz"

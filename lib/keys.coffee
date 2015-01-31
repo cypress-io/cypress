@@ -4,7 +4,8 @@ path     = require 'path'
 Request  = require 'request-promise'
 Project  = require './project'
 Cache    = require './cache'
-API_URL  = process.env.API_URL or 'localhost:1234'
+
+config   = require("konfig")()
 
 class Keys
   constructor: (projectRoot) ->
@@ -18,7 +19,7 @@ class Keys
     @project     = Project(projectRoot)
 
   _getNewKeyRange: (projectId) ->
-    Request.post("http://#{API_URL}/projects/#{projectId}/keys")
+    Request.post("#{config.app.api_url}/projects/#{projectId}/keys")
 
   _convertToId: (index) ->
     ival = index.toString(36)

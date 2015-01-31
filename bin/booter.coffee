@@ -4,6 +4,8 @@ Settings       = require("../lib/util/settings")
 Server         = require("../lib/server")
 Promise        = require('bluebird')
 
+global.config  = require("konfig")()
+
 class Booter
   constructor: (projectRoot) ->
     if not (@ instanceof Booter)

@@ -12,7 +12,6 @@ Settings     = require "#{root}lib/util/settings"
 sinon        = require "sinon"
 sinonPromise = require 'sinon-as-promised'
 # rimraf       = require('rimraf')
-API_URL      = process.env.API_URL or 'localhost:1234'
 
 describe "IdGenerator", ->
   beforeEach ->
@@ -32,13 +31,13 @@ describe "IdGenerator", ->
     @server      = Server(process.cwd())
     @idGenerator = IdGenerator(@server.app)
 
-    # nock("http://#{API_URL}")
+    # nock(config.app.api_url)
     # .post("/projects")
     # .reply(200, {
     #   uuid: "6b9a82d7-3020-4f5b-a85d-14311d70b05a"
     # })
 
-    # nock("http://#{API_URL}")
+    # nock(config.app.api_url)
     # .post("/projects/6b9a82d7-3020-4f5b-a85d-14311d70b05a/keys")
     # .once()
     # .reply(200, {

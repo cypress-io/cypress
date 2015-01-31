@@ -9,8 +9,6 @@ Project      = require "#{root}lib/project"
 Settings     = require "#{root}lib/util/settings"
 Keys         = require "#{root}lib/keys"
 
-API_URL      = process.env.API_URL or 'localhost:1234'
-
 describe "Keys", ->
   beforeEach ->
     @sandbox = sinon.sandbox.create()
@@ -77,7 +75,7 @@ describe "Keys", ->
 
   context "#getNextTestNumber", ->
     beforeEach ->
-      @rangeRequest = nock("http://#{API_URL}")
+      @rangeRequest = nock(config.app.api_url)
       .post("/projects/abc-123-foo-bar/keys")
       .reply(200, {
         start: 0,

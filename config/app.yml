@@ -1,0 +1,8 @@
+development: &development
+  api_url: "http://localhost:1234"
+
+test:
+  <<: *development
+
+production:
+  api_url: "http://api.cypress.io"
