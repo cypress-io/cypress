@@ -2,7 +2,8 @@
 
   Request        = require("request-promise")
 
-  API_URL        = "http://localhost:1234"
+  ## these all need to move to .env variables
+  API_URL        = "http://api.cypress.io"
   GITHUB_OAUTH   = "https://github.com/login/oauth/authorize"
   GITHUB_PARAMS  =
     client_id:    "71bdc3730cd85d30955a"
