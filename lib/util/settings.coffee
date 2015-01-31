@@ -51,3 +51,6 @@ module.exports =
       .return(settings)
 
   writeSync: ->
+
+  remove: (projectRoot) ->
+    fs.unlinkSync @_pathToCypressJson(projectRoot)
