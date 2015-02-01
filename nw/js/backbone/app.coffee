@@ -21,9 +21,12 @@
     ## create a App.config model from the passed in options
     App.config = App.request("config:entity", options)
 
-    App.config.getSessionId().then (id) ->
+    App.config.getUser().then (user) ->
       ## check cache store for session id
-      if id
+      if user
+        ## set the current user
+        App.execute "set:current:user", user
+
         ## if have it, start projects
         App.vent.trigger "start:projects:app"
       else

@@ -3,7 +3,9 @@ global.config ?= require("konfig")()
 _         = require 'lodash'
 Promise   = require 'bluebird'
 path      = require 'path'
+request   = require "request-promise"
 Project   = require './project'
+Routes    = require "./util/routes"
 fs        = Promise.promisifyAll(require('fs'))
 CACHE     = path.join(__dirname, '../', config.app.cache_path)
 
@@ -187,14 +189,18 @@ class Cache extends require('./logger')
         ## and make sure we have the correct path
         @updateProject(id, {PATH: path})
 
-  getSessionId: ->
-    @emit "verbose", "getting session id"
+  getUser: ->
+    @emit "verbose", "getting user"
 
-    @_get("SESSION_ID")
+    @_get("USER")
 
-  setSessionId: (id) ->
-    @emit "verbose", "setting session id: #{id}"
+  setUser: (user) ->
+    @emit "verbose", "setting user: #{user}"
 
-    @_set {SESSION_ID: id}
+    @_set {USER: user}
+
+  logIn: (code) ->
+    url = Routes.signup({code: code})
+    request.post(url).then(JSON.parse)
 
 module.exports = Cache

@@ -7,11 +7,11 @@
         when _.isString(str) then env is str
         else env
 
-    getSessionId: ->
-      @cache.getSessionId()
+    getUser: ->
+      @cache.getUser()
 
-    setSessionId: (id) ->
-      @cache.setSessionId(id)
+    setUser: (user) ->
+      @cache.setUser(user)
 
     addProject: (path) ->
       @cache.addProject(path)
@@ -28,12 +28,11 @@
       @project.close().bind(@).then ->
         delete @project
 
-    logIn: (url) ->
-      @request.post(url).promise().bind(@)
-      .then(JSON.parse)
-      .then (json) ->
-        @setSessionId(json.session_token)
-        App.execute "set:current:user", json
+    logIn: (code) ->
+      @cache.logIn(code).bind(@)
+      .then (user) ->
+        @setUser(user)
+        App.execute "set:current:user", user
       .catch (err) ->
         ## ...could not log in...
         debugger

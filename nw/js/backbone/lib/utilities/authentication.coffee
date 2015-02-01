@@ -3,7 +3,6 @@
   Request        = require("request-promise")
 
   ## these all need to move to .env variables
-  API_URL        = "http://api.cypress.io"
   GITHUB_OAUTH   = "https://github.com/login/oauth/authorize"
   GITHUB_PARAMS  =
     client_id:    "71bdc3730cd85d30955a"
@@ -34,7 +33,7 @@
 
       code = new Uri(url).getQueryParamValue("code")
 
-      App.config.logIn("#{API_URL}/signin?code=#{code}").then ->
+      App.config.logIn(code).then ->
         App.vent.trigger "start:projects:app"
 
   App.commands.setHandler "login:request", ->

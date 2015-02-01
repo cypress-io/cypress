@@ -8,6 +8,7 @@ Keys          = require "#{root}lib/keys"
 Project       = require "#{root}lib/project"
 Cache         = require "#{root}lib/cache"
 Settings      = require "#{root}lib/util/settings"
+Routes        = require "#{root}lib/util/routes"
 fs            = Promise.promisifyAll(require('fs'))
 nock          = require 'nock'
 rimraf        = require 'rimraf'
@@ -252,26 +253,24 @@ describe "Cache", ->
     it "can remove a single project"
 
   context "sessions", ->
-    describe "#getSessionId", ->
+    describe "#getUser", ->
       beforeEach ->
         @cache.ensureExists()
 
-      it "returns session id", (done) ->
-        @cache.setSessionId(1234).then =>
-          @cache.getSessionId().then (id) ->
-            expect(id).to.eq 1234
-            done()
-        .catch(done)
+      it "returns session id", ->
+        setUser = {id: 1, name: "brian", email: "a@b.com", session_token: "abc"}
+        @cache.setUser(setUser).then =>
+          @cache.getUser().then (user) ->
+            expect(user).to.deep.eq setUser
 
-    describe "#setSessionId", ->
+    describe "#setUser", ->
       beforeEach ->
         @cache.ensureExists()
 
-      it "sets SESSION_ID into .cy", (done) ->
-        @cache.setSessionId(1234).then (contents) ->
-          expect(contents.SESSION_ID).to.eq 1234
-          done()
-        .catch(done)
+      it "sets USER into .cy", ->
+        setUser = {id: 1, name: "brian", email: "a@b.com", session_token: "abc"}
+        @cache.setUser(setUser).then (contents) ->
+          expect(contents.USER).to.eq setUser
 
   context "setters + getters", ->
     describe "#_set", ->
@@ -285,3 +284,24 @@ describe "Cache", ->
             expect(contents.bar).to.eq "bar"
             done()
         .catch(done)
+
+  context "#logIn", ->
+    beforeEach ->
+      @user = {
+        id: 1
+        name: "brian"
+        email: "a@b.com"
+        session_token: "1111-2222-3333-4444"
+      }
+
+      @signup = nock(Routes.api())
+      .post("/signup?code=abc123")
+      .reply(200, @user)
+
+    it "requests to api /signup", ->
+      @cache.logIn("abc123").bind(@).then ->
+        @signup.done()
+
+    it "parses the resulting JSON", ->
+      @cache.logIn("abc123").bind(@).then (user) ->
+        expect(user).to.deep.eq(@user)
