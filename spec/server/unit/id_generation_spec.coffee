@@ -90,6 +90,14 @@ describe "IdGenerator", ->
         @clock.tick(1000)
         expect(@server.app.get("editFileMode")).to.be.false
 
+      it "#write is never called when hasExistingId", ->
+        contents = Fixtures.get("ids/existing.coffee")
+        @read.resolves(contents)
+        @write.reset()
+
+        @idGenerator.appendTestId("", "foobars", "abc").then ->
+          expect(@write).not.to.be.called
+
     describe "integration", ->
       beforeEach ->
         Fixtures.scaffold("todos")
