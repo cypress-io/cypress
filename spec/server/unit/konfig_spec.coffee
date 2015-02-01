@@ -1,7 +1,7 @@
 expect = require("chai").expect
 konfig = require("konfig")
 
-describe.only "Konfig", ->
+describe "Konfig", ->
   beforeEach ->
     @setup = (env) =>
       process.env["NODE_ENV"] = env
