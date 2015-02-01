@@ -1,4 +1,4 @@
-defaults:
+default:
   cache_path: ".cy/cache"
 
 development: &development
