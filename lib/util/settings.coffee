@@ -21,7 +21,7 @@ module.exports =
     ## should synchronously check to see if cypress.json exists
     ## and if not, create an empty one
     if not fs.existsSync(file)
-      fs.writeFileSync(file, JSON.stringify({cypress: {wizard: true}}))
+      fs.writeFileSync(file, JSON.stringify({cypress: {wizard: true}}, null, 2))
 
     fs[method](file, "utf8")
 
