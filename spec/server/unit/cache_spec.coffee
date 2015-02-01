@@ -294,13 +294,13 @@ describe "Cache", ->
         session_token: "1111-2222-3333-4444"
       }
 
-      @signup = nock(Routes.api())
-      .post("/signup?code=abc123")
+      @signin = nock(Routes.api())
+      .post("/signin?code=abc123")
       .reply(200, @user)
 
-    it "requests to api /signup", ->
+    it "requests to api /signin", ->
       @cache.logIn("abc123").bind(@).then ->
-        @signup.done()
+        @signin.done()
 
     it "parses the resulting JSON", ->
       @cache.logIn("abc123").bind(@).then (user) ->

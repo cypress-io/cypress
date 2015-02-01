@@ -200,7 +200,7 @@ class Cache extends require('./logger')
     @_set {USER: user}
 
   logIn: (code) ->
-    url = Routes.signup({code: code})
+    url = Routes.signin({code: code})
     request.post(url).then(JSON.parse)
 
 module.exports = Cache
