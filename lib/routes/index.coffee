@@ -17,12 +17,9 @@ module.exports = (app) ->
       if /^\//.test(files) then files else "/" + files
 
   getTestFiles = ->
-    console.log "sending test files: ", app._rand
-
-    testFolder = app.get("cypress").testFolder
     testFolderPath = path.join(
       app.get("cypress").projectRoot,
-      testFolder
+      app.get("cypress").testFolder
     )
 
     ## grab all the js and coffee files
@@ -30,7 +27,10 @@ module.exports = (app) ->
 
     ## slice off the testFolder directory(ies) (which is our test folder)
     testFolderLength = testFolderPath.split("/").length
-    _(files).map (file) -> {name: file.split("/").slice(testFolderLength).join("/")}
+
+    files = _(files).map (file) -> {name: file.split("/").slice(testFolderLength).join("/")}
+    files.path = testFolderPath
+    files
 
   getSpecs = (test) ->
     ## grab all of the specs if this is ci
@@ -72,7 +72,9 @@ module.exports = (app) ->
     controllers.SpecProcessor.call(@, app, test, req, res, next)
 
   app.get "/files", (req, res) ->
-    res.json getTestFiles()
+    files = getTestFiles()
+    res.set "X-Files-Path", files.path
+    res.json files
 
   ## routing for the dynamic iframe html
   app.get "/iframes/*", (req, res) ->
