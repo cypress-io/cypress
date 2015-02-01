@@ -10,6 +10,14 @@ PSemaphore      = require('promise-semaphore')
 
 pSemaphore       = new PSemaphore()
 
+hasExistingId = (e) ->
+  e.idFound
+
+idFound = ->
+  e = new Error
+  e.idFound = true
+  throw e
+
 class IdGenerator
   constructor: (app) ->
     if not (@ instanceof IdGenerator)
@@ -47,6 +55,8 @@ class IdGenerator
       _.delay =>
         @app.disable("editFileMode")
       , 1000
+    .catch hasExistingId, (err) ->
+      ## do nothing when the ID is existing
 
   insertId: (contents, title, id) ->
     re = new RegExp "['\"](" + @escapeRegExp(title) + ")['\"]"
@@ -55,7 +65,7 @@ class IdGenerator
     matches = re.exec contents
 
     ## matches[1] will be the captured group which is the title
-    return if not matches
+    return idFound() if not matches
 
     ## position is the string index where we first find the capture
     ## group and include its length, so we insert right after it

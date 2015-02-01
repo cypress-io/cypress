@@ -22,4 +22,4 @@ module.exports =
     path.join tmpDir, name
 
   get: (fixture) ->
-    fs.readFileSync path.join(root, "spec", "fixtures", fixture)
+    fs.readFileSync path.join(root, "spec", "fixtures", fixture), "utf8"

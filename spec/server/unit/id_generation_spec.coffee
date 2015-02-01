@@ -1,5 +1,6 @@
 root         = '../../../'
 path         = require 'path'
+fs           = require 'fs'
 expect       = require('chai').expect
 sinon        = require "sinon"
 sinonPromise = require 'sinon-as-promised'
@@ -62,22 +63,53 @@ describe "IdGenerator", ->
           expect(num).to.eql("008")
 
   context "#appendTestId", ->
-    beforeEach ->
-      @sandbox.stub(@idGenerator, "write").resolves
+    describe "unit", ->
+      beforeEach ->
+        @clock    = @sandbox.useFakeTimers()
+        @contents = Fixtures.get("ids/app.coffee")
+        @read     = @sandbox.stub(@idGenerator, "read").resolves(@contents)
+        @write    = @sandbox.stub(@idGenerator, "write").resolves()
+        @insertId = @sandbox.spy(@idGenerator, "insertId")
+        @idGenerator.appendTestId "tests/app/foo.js", "starts up", "w0w"
 
-    it "inserts id into test"
+      it "calls #read with normalizedPath", ->
+        expect(@read).to.be.calledWith process.cwd() + "/tests/app/foo.js"
 
-    it "enables editFileMode"
+      it "passes #read contents, title, and id to insertId", ->
+        expect(@insertId).to.be.calledWith @contents, "starts up", "w0w"
 
-    it "disables editFileMode after 1 second"
+      it "enables editFileMode", ->
+        expect(@server.app.get("editFileMode")).to.be.true
 
-    it "writes back the updated content"
+      it "calls #write with normalizedPath and new content", ->
+        newContents = @idGenerator.insertId @contents, "starts up", "w0w"
+        expect(@write).to.be.calledWith process.cwd() + "/tests/app/foo.js", newContents
 
-    it "reads original content"
-      ## content should be sent to #insertId
+      it "disables editFileMode after 1 second", ->
+        expect(@server.app.get("editFileMode")).to.be.true
+        @clock.tick(1000)
+        expect(@server.app.get("editFileMode")).to.be.false
+
+    describe "integration", ->
+      beforeEach ->
+        Fixtures.scaffold("todos")
+        @projectRoot = @idGenerator.projectRoot = Fixtures.project("todos")
+
+      afterEach ->
+        Fixtures.remove()
+
+      it "inserts id into test", ->
+        @idGenerator.appendTestId("tests/test1.js", "is truthy", "123").then ->
+          contents = fs.readFileSync path.join(@projectRoot, "tests", "test1.js"), "utf8"
+          expect(contents).to.eq Fixtures.get("ids/todos_test1_expected.js")
 
   context "#insertId", ->
     it "inserts id into the string content", ->
       contents = Fixtures.get("ids/simple.coffee")
       newContent = @idGenerator.insertId contents, "foos", "0ab"
       expect(newContent).to.eq 'it "foos [0ab]", ->'
+
+    it "throws special idFound error when id exists", ->
+      contents = Fixtures.get("ids/existing.coffee")
+      fn = => @idGenerator.insertId contents, "foobars", "abc"
+      expect(fn).to.throw(Error)
