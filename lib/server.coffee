@@ -48,6 +48,7 @@ class Server #extends require('./logger')
       autoOpen: false
       wizard: false
       projectRoot: projectRoot
+      testFolder: "tests"
 
     _.defaults obj,
       clientUrl: "http://localhost:#{obj.port}"
