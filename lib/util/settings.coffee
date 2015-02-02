@@ -12,6 +12,9 @@ module.exports =
 
     # console.log "Could not read file from: '#{projectRoot}/cypress.json'"
 
+  _stringify: (obj) ->
+    JSON.stringify(obj, null, 2)
+
   _get: (method, projectRoot) ->
     if not projectRoot
       throw new Error("Settings requires projectRoot to be defined!")
@@ -21,7 +24,7 @@ module.exports =
     ## should synchronously check to see if cypress.json exists
     ## and if not, create an empty one
     if not fs.existsSync(file)
-      fs.writeFileSync(file, JSON.stringify({cypress: {wizard: true}}, null, 2))
+      fs.writeFileSync(file, @_stringify({cypress: {wizard: true}}))
 
     fs[method](file, "utf8")
 
@@ -46,7 +49,7 @@ module.exports =
 
       fs.writeFileAsync(
         @_pathToCypressJson(projectRoot),
-        JSON.stringify({cypress: settings})
+        @_stringify({cypress: settings})
       )
       .return(settings)
 
