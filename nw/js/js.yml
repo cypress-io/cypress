@@ -11,6 +11,7 @@ vendor:
   - bower_components/marionette/lib/backbone.marionette.js
   - bower_components/underscore.string/lib/underscore.string.js
   - bower_components/jsuri/Uri.js
+  - bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/dropdown.js
 
 app:
   - nw/js/config/**

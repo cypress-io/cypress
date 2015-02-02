@@ -12,3 +12,6 @@
       "click @ui.reload"   : "reload:clicked"
       "click @ui.console"  : "console:clicked"
       "click @ui.settings" : "settings:clicked"
+
+    onRender: ->
+      @ui.settings.dropdown()

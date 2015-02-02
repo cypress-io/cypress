@@ -8,6 +8,27 @@
     </span>
   <% end %>
   <span class="pull-right">
-    <i class="fa fa-cog"></i>
+    <div class="dropup">
+      <i class="fa fa-cog dropdown-toggle" data-toggle="dropdown"></i>
+      <ul class="dropdown-menu dropdown-menu-right">
+        <li>
+          <a href="#">About</a>
+        </li>
+        <li>
+          <a href="#">Debug Console</a>
+        </li>
+        <li>
+          <a href="#">Check for updates</a>
+        </li>
+        <li class="divider"></li>
+        <li>
+          <a href="#">Preferences...</a>
+        </li>
+        <li class="divider"></li>
+        <li>
+          <a href="#">Quit</a>
+        </li>
+      </ul>
+    </div>
   </span>
 </div>
