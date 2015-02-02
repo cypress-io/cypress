@@ -2,7 +2,6 @@ _               = require 'underscore'
 _.str           = require 'underscore.string'
 path            = require 'path'
 gutil           = require 'gulp-util'
-phantom         = require 'node-phantom-simple'
 Promise         = require 'bluebird'
 fs              = Promise.promisifyAll(require('fs'))
 Keys            = require("./keys")
@@ -118,14 +117,14 @@ class IdGenerator
 
     trace[0].file.replace(rootPath, "")
 
-  createPhantom: ->
-    new Promise (resolve, reject) ->
-      phantom.create (err, ph) ->
-        console.log "PhantomJS ready..."
+  # createPhantom: ->
+  #   new Promise (resolve, reject) ->
+  #     phantom.create (err, ph) ->
+  #       console.log "PhantomJS ready..."
 
-        return reject(err) if err
+  #       return reject(err) if err
 
-        resolve(ph)
+  #       resolve(ph)
 
   # createPhantomPage = (ph) ->
   #   new Promise (resolve, reject) ->
