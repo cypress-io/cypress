@@ -25,7 +25,7 @@
           <a href="#">Preferences...</a>
         </li>
         <li class="divider"></li>
-        <li>
+        <li data-quit>
           <a href="#">Quit</a>
         </li>
       </ul>

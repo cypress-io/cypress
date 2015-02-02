@@ -67,6 +67,9 @@
     external: (url) ->
       gui.Shell.openExternal(url)
 
+    quit: ->
+      gui.App.quit()
+
   App.commands.setHandler "gui:display", ->
     API.displayGui()
 
@@ -87,3 +90,6 @@
 
   App.commands.setHandler "gui:external:open", (url) ->
     API.external(url)
+
+  App.commands.setHandler "gui:quit", ->
+    API.quit()

@@ -6,7 +6,7 @@
     </p>
     <div class="dropdown pull-left">
       <a href="#" data-toggle="dropdown">
-        <%= @name %>!
+        <%= @name %>
         <i class="fa fa-caret-down"></i>
       </a>
       <ul class="dropdown-menu">

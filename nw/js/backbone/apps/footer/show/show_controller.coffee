@@ -14,6 +14,9 @@
       @listenTo footerView, "console:clicked", ->
         App.execute "gui:console"
 
+      @listenTo footerView, "quit:clicked", ->
+        App.execute "gui:quit"
+
       @show footerView
 
     getFooterView: ->
