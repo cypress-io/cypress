@@ -206,11 +206,22 @@ class Cache extends require('./logger')
     request.post(url).then(JSON.parse)
 
   logOut: (token) ->
+    nukeSession = (resolve, reject) ->
+      @_get("USER")
+      .then (user = {}) =>
+        user.session_token = null
+        @_set({USER: user})
+      .then(resolve)
+      .catch(reject)
+
     url = Routes.signout()
     headers = {"X-Session": token}
-    request.post({url: url, headers: headers}).promise().bind(@).then ->
-      @_get("USER").then (user = {}) ->
-        user.session_token = null
-        @_set {USER: user}
+
+    new Promise (resolve, reject) =>
+      nukeSession = _.bind(nukeSession, @, resolve, reject)
+
+      request.post({url: url, headers: headers})
+        .then(nukeSession)
+        .catch(nukeSession)
 
 module.exports = Cache

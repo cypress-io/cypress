@@ -325,3 +325,15 @@ describe "Cache", ->
         @cache.logOut("abc123").bind(@).then ->
           @cache.getUser().then (user) ->
             expect(user.session_token).to.be.null
+
+    it "nukes session_token from cache even on error", ->
+      @signout = nock(Routes.api())
+      .post("/signout")
+      .matchHeader("X-Session", "abc123")
+      .reply(401)
+
+      setUser = {id: 1, name: "brian", email: "a@b.com", session_token: "abc123"}
+      @cache.setUser(setUser).bind(@).then ->
+        @cache.logOut("abc123").bind(@).then ->
+          @cache.getUser().then (user) ->
+            expect(user.session_token).to.be.null

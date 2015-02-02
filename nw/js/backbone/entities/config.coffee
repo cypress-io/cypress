@@ -40,7 +40,8 @@
         throw err
 
     logOut: (user) ->
-      @cache.logOut(user.get("session_token")).catch (err) ->
+      @cache.logOut(user.get("session_token"))
+      .catch (err) ->
         debugger
         console.log("Error logging out!")
         throw err
