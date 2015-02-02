@@ -305,3 +305,14 @@ describe "Cache", ->
     it "parses the resulting JSON", ->
       @cache.logIn("abc123").bind(@).then (user) ->
         expect(user).to.deep.eq(@user)
+
+  context "#logOut", ->
+    beforeEach ->
+      @signout = nock(Routes.api())
+      .post("/signout")
+      .matchHeader("X-Session", "abc123")
+      .reply(200)
+
+    it "requests to api /signout", ->
+      @cache.logOut("abc123").then =>
+        @signout.done()

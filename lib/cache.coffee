@@ -199,8 +199,15 @@ class Cache extends require('./logger')
 
     @_set {USER: user}
 
+  ## move this to an auth module
+  ## and update NW references
   logIn: (code) ->
     url = Routes.signin({code: code})
     request.post(url).then(JSON.parse)
+
+  logOut: (token) ->
+    url = Routes.signout()
+    headers = {"X-Session": token}
+    request.post({url: url, headers: headers})
 
 module.exports = Cache
