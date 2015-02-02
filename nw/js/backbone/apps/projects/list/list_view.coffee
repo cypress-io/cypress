@@ -6,10 +6,16 @@
     triggers:
       "click" : "project:clicked"
 
+  class List.Empty extends App.Views.ItemView
+    template: "projects/list/_empty"
+    tagName: "li"
+    className: "empty"
+
   class List.Projects extends App.Views.CompositeView
     template: "projects/list/projects"
     childView: List.Project
     childViewContainer: "ul"
+    emptyView: List.Empty
 
     ui:
       "button" : "button"
