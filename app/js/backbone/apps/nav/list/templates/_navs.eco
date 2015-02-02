@@ -1,5 +1,5 @@
 <div class="collapse-container">
-  <div class="pull-left logo">Eclectus</div>
+  <div class="pull-left logo">Cypress</div>
   <div class="pull-right">
     <button class="btn btn-default" id="sidebar-collapse">
       <i></i>

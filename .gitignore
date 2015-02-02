@@ -7,3 +7,4 @@ lib/public
 .DS_Store
 npm-debug.log
 .cy/
+nw/public

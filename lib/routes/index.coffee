@@ -4,6 +4,12 @@ path        = require 'path'
 controllers = require '../controllers'
 
 module.exports = (app) ->
+  ## hack at the moment before we refactor
+  ## so our controllers have access to app
+  global.app = app
+
+  console.log "including routes: ", app._rand
+
   convertToAbsolutePath = (files) ->
     ## make sure its an array and remap to an absolute path
     files = _([files]).flatten()
@@ -11,10 +17,9 @@ module.exports = (app) ->
       if /^\//.test(files) then files else "/" + files
 
   getTestFiles = ->
-    testFolder = app.get("eclectus").testFolder
     testFolderPath = path.join(
-      app.get('config').projectRoot,
-      testFolder
+      app.get("cypress").projectRoot,
+      app.get("cypress").testFolder
     )
 
     ## grab all the js and coffee files
@@ -22,7 +27,10 @@ module.exports = (app) ->
 
     ## slice off the testFolder directory(ies) (which is our test folder)
     testFolderLength = testFolderPath.split("/").length
-    _(files).map (file) -> {name: file.split("/").slice(testFolderLength).join("/")}
+
+    files = _(files).map (file) -> {name: file.split("/").slice(testFolderLength).join("/")}
+    files.path = testFolderPath
+    files
 
   getSpecs = (test) ->
     ## grab all of the specs if this is ci
@@ -36,22 +44,22 @@ module.exports = (app) ->
     _(specs).map (spec) -> "/tests/#{spec}"
 
   getStylesheets = ->
-    convertToAbsolutePath app.get("eclectus").stylesheets
+    convertToAbsolutePath app.get("cypress").stylesheets
 
   getJavascripts = ->
-    convertToAbsolutePath app.get("eclectus").javascripts
+    convertToAbsolutePath app.get("cypress").javascripts
 
   getUtilities = ->
     utils = ["iframe"]
     # utils = ["jquery", "iframe"]
 
     ## push sinon into utilities if enabled
-    utils.push "sinon" if app.get("eclectus").sinon
-    # utils.push "chai-jquery" if app.get("eclectus")["chai-jquery"]
+    utils.push "sinon" if app.get("cypress").sinon
+    # utils.push "chai-jquery" if app.get("cypress")["chai-jquery"]
 
     ## i believe fixtures can be moved to the parent since
     ## its not actually mutated within the specs
-    utils.push "fixtures" if app.get("eclectus").fixtures
+    utils.push "fixtures" if app.get("cypress").fixtures
 
     utils.map (util) -> "/eclectus/js/#{util}.js"
 
@@ -61,15 +69,12 @@ module.exports = (app) ->
   app.get "/tests/*", (req, res, next) ->
     test = req.params[0]
 
-    controllers.SpecProcessor.apply(
-      this, [{
-        spec: test,
-        testFolder: app.get("eclectus").testFolder
-      }].concat(arguments...)
-    )
+    controllers.SpecProcessor.call(@, app, test, req, res, next)
 
   app.get "/files", (req, res) ->
-    res.json getTestFiles()
+    files = getTestFiles()
+    res.set "X-Files-Path", files.path
+    res.json files
 
   ## routing for the dynamic iframe html
   app.get "/iframes/*", (req, res) ->
@@ -97,20 +102,20 @@ module.exports = (app) ->
     else
       controllers.RemoteProxy.apply(@, arguments)
 
-  ## we've namespaced the initial sending down of our eclectus
+  ## we've namespaced the initial sending down of our cypress
   ## app as '__'  this route shouldn't ever be used by servers
   ## and therefore should not conflict
   app.get "/__", (req, res) ->
     req.session.host = req.get("host")
 
     res.render path.join(__dirname, "../", "public", "index.html"), {
-      config: JSON.stringify(app.get("eclectus"))
+      config: JSON.stringify(app.get("cypress"))
     }
 
-  ## serve the real eclectus JS app when we're at root
+  ## serve the real cypress JS app when we're at root
   app.get "/", (req, res) ->
     ## if we dont have a req.session that means we're initially
-    ## requesting the eclectus app and we need to redirect to the
+    ## requesting the cypress app and we need to redirect to the
     ## root path that serves the app
     if not req.session.remote
       res.redirect("/__/")

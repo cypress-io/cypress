@@ -39,6 +39,10 @@
 
     #   # 0
 
+    parse: (resp, opts) ->
+      @path = opts.xhr.getResponseHeader("X-Files-Path")
+      resp
+
     findByName: (path) ->
       @findWhere name: path
 

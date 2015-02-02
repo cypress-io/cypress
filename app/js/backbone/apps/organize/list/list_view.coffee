@@ -20,7 +20,16 @@
     onShow: ->
       @$el.addClass("file") if not @model.hasChildren()
 
+  class List.Empty extends App.Views.ItemView
+    template: "organize/list/_empty"
+
+    serializeData: ->
+      path: @options.path
+
   class List.Files extends App.Views.CollectionView
     childView: List.File
+    emptyView: List.Empty
+    emptyViewOptions: ->
+      path: @collection.path
     tagName: "ul"
     className: "outer-files-container"

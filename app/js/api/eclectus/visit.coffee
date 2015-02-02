@@ -14,7 +14,7 @@ Eclectus.Visit = do ($, _, Eclectus) ->
     fullyQualifiedUrl: (url) ->
       reHttp.test(url)
 
-    prependRootUrl: (url, root) ->
+    prependBaseUrl: (url, root) ->
       ## prepends the root to the url and
       ## joins by / after trimming url for leading
       ## forward slashes
@@ -27,9 +27,9 @@ Eclectus.Visit = do ($, _, Eclectus) ->
         onLoad: ->
 
       ## if we have a root url and our url isnt full qualified
-      if options.rootUrl and not @fullyQualifiedUrl(url)
+      if options.baseUrl and not @fullyQualifiedUrl(url)
         ## prepend the root url to it
-        url = @prependRootUrl(url, options.rootUrl)
+        url = @prependBaseUrl(url, options.baseUrl)
 
       ## backup the previous runnable timeout
       ## and the hook's previous timeout

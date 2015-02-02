@@ -4,47 +4,42 @@ Promise  = require 'bluebird'
 Request  = require 'request-promise'
 path     = require 'path'
 fs       = Promise.promisifyAll(require('fs'))
-API_URL  = process.env.API_URL or 'localhost:1234'
+
+config   = require("konfig")()
 
 class Project extends require('./logger')
-  constructor: (config) ->
-    @config = config
+  constructor: (projectRoot) ->
+    if not (@ instanceof Project)
+      return new Project(projectRoot)
+
+    if not projectRoot
+      throw new Error("Instantiating lib/projects requires a projectRoot!")
+
+    @projectRoot = projectRoot
+
     super
 
   ## A simple helper method
   ## to create a project ID if we do not already
   ## have one
-  ensureProjectId: =>
+  ensureProjectId: ->
     @emit "verbose", "Ensuring project ID"
-    @getProjectId()
+    @getProjectId().bind(@)
     .catch(@createProjectId)
 
-  createProjectId: =>
+  createProjectId: ->
     @emit "verbose", "Creating project ID"
-    Request.post("http://#{API_URL}/projects")
+    Request.post("#{config.app.api_url}/projects")
     .then (attrs) =>
-      @updateSettings(eclectus: {projectID: JSON.parse(attrs).uuid})
-    .then (settings) -> settings.projectID
+      Settings.write(@projectRoot, {projectId: JSON.parse(attrs).uuid})
+    .get("projectId")
 
   getProjectId: ->
     @emit "verbose", "Looking up project ID"
-    Settings.read(@config)
+    Settings.read(@projectRoot)
     .then (settings) ->
-      if (settings.eclectus.projectID)
-        return settings.eclectus.projectID
+      if (id = settings.projectId)
+        return id
       throw new Error("No project ID found")
-
-  updateSettings: (settings) =>
-    @emit "verbose", "Updating Project settings with #{JSON.stringify(settings, null, 4)}"
-    Settings.read(@config)
-    .then (obj) =>
-      settings.eclectus = _.extend(obj.eclectus, settings.eclectus)
-      settings
-    .then (obj) =>
-      fs.writeFileAsync(
-        path.join(@config.projectRoot, "eclectus.json"),
-        JSON.stringify(obj, null, 2)
-      )
-      .then -> obj.eclectus
 
 module.exports = Project

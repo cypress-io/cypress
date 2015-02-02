@@ -1,0 +1,27 @@
+gui:
+  - nw/js/gui.js
+
+updater:
+  - nw/js/updater.js
+
+vendor:
+  - bower_components/jquery/dist/jquery.js
+  - bower_components/underscore/underscore.js
+  - bower_components/backbone/backbone.js
+  - bower_components/marionette/lib/backbone.marionette.js
+  - bower_components/underscore.string/lib/underscore.string.js
+  - bower_components/jsuri/Uri.js
+  - bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/dropdown.js
+
+app:
+  - nw/js/config/**
+  - nw/js/backbone/app.coffee
+  - nw/js/backbone/lib/templates/**
+  - nw/js/backbone/lib/entities/**
+  - nw/js/backbone/lib/utilities/**
+  - nw/js/backbone/lib/views/**
+  - nw/js/backbone/lib/controllers/**
+  - nw/js/backbone/lib/components/**
+  - nw/js/backbone/lib/routers/**
+  - nw/js/backbone/entities/**
+  - nw/js/backbone/apps/**

@@ -8,14 +8,14 @@ var basePath= process.argv[2];
 var matcher = new RegExp(/\s+\[.*\]('|")/g)
 
 if (!basePath) {
-  console.log("pass a path to your ecl project");
+  console.log("pass a path to your cy project");
   process.exit(1);
 }
 
-fs.readFileAsync(path.join(basePath, 'eclectus.json'), 'utf8')
+fs.readFileAsync(path.join(basePath, 'cypress.json'), 'utf8')
 .then(JSON.parse)
 .then(function(d) {
-  return path.resolve(path.join(basePath, '/', d.eclectus.testFolder))
+  return path.resolve(path.join(basePath, '/', d.cypress.testFolder))
 })
 .then(function(testFolderPath) {
   return new Promise(function(res, rej) {

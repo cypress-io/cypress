@@ -2,20 +2,20 @@
   "name": "eclectus",
   "version": "0.0.0",
   "description": "Javascript Test Studio",
-  "main": "nw/index.html",
+  "main": "app://app/nw/public/index.html",
   "manifestUrl": "http://localhost:8000/package.json",
   "window": {
-    "frame": true,
-    "toolbar": true,
+    "frame": false,
+    "toolbar": false,
     "show": false,
     "height": 400,
     "width": 300
   },
   "scripts": {
     "build": "gulp compile",
-    "test-server": "NODE_ENV=test mocha --opts spec/server/mocha.opts",
-    "test-server-dev": "NODE_ENV=test mocha --opts spec/server/mocha.opts --watch",
-    "test-server-dev-debug": "NODE_ENV=test node-debug _mocha --opts spec/server/mocha.opts --watch"
+    "test-server": "NODE_ENV=test BLUEBIRD_DEBUG=1 mocha --opts spec/server/mocha.opts --watch",
+    "test-server-debug": "NODE_ENV=test BLUEBIRD_DEBUG=1 node-debug --hidden=node_modules --no-preload _mocha --opts spec/server/mocha.opts --watch",
+    "test-server-ci": "NODE_ENV=test BLUEBIRD_DEBUG=1 mocha --opts spec/server/mocha.opts"
   },
   "repository": {
     "type": "git",
@@ -27,9 +27,8 @@
     "url": "https://github.com/brian-mann/eclectus/issues"
   },
   "bin": {
-    "ecl": "./bin/ecl",
-    "eclectus": "./bin/ecl",
-    "ecl_key_clean": "./bin/remove_keys.js"
+    "cy": "./bin/cy",
+    "cy_key_clean": "./bin/remove_keys.js"
   },
   "homepage": "https://github.com/brian-mann/eclectus",
   "devDependencies": {
@@ -50,7 +49,8 @@
     "js-yaml": "3.1.0",
     "nodemon": "1.2.1",
     "rimraf": "2.2.8",
-    "sinon": "1.10.3"
+    "sinon": "1.10.3",
+    "sinon-as-promised": "^2.0.3"
   },
   "dependencies": {
     "auto-launch": "^0.1.14",
@@ -75,6 +75,8 @@
     "http-proxy": "1.7.0",
     "hyperdirect": "0.0.0",
     "hyperquest": "1.0.1",
+    "jsuri": "^1.3.0",
+    "konfig": "^0.2.0",
     "lodash": "2.4.1",
     "method-override": "^2.3.1",
     "mime": "1.2.11",
@@ -90,9 +92,10 @@
     "open": "0.0.5",
     "phantomjs": "1.9.7-15",
     "promise-semaphore": "0.2.1",
-    "request-promise": "^0.3.2",
+    "request-promise": "0.3.3",
     "requirejs": "2.1.15",
     "sauce-connect-launcher": "0.9.3",
+    "server-destroy": "^1.0.0",
     "setimmediate": "^1.0.2",
     "sinon-chai": "2.6.0",
     "snockets": "1.3.8",

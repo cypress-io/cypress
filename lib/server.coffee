@@ -1,97 +1,129 @@
-module.exports = (config) ->
-  express     = require 'express'
-  http        = require 'http'
-  path        = require 'path'
-  fs          = require 'fs'
-  hbs         = require 'hbs'
-  _           = require 'underscore'
-  _.str       = require 'underscore.string'
-  minimist    = require 'minimist'
-  Promise     = require 'bluebird'
-  idGenerator = require './id_generator.coffee'
-  Project     = new (require './project.coffee')(config)
+express      = require 'express'
+http         = require 'http'
+fs           = require 'fs'
+hbs          = require 'hbs'
+_            = require 'underscore'
+_.str        = require 'underscore.string'
+allowDestroy = require "server-destroy"
+Promise      = require 'bluebird'
+Project      = require "./project.coffee"
+Socket       = require "./socket.coffee"
+Settings     = require './util/settings'
 
-  argv = minimist(process.argv.slice(2), boolean: true)
+## currently not making use of event emitter
+## but may do so soon
+class Server #extends require('./logger')
+  constructor: (projectRoot) ->
+    if not (@ instanceof Server)
+      return new Server(projectRoot)
 
-  _.mixin _.str.exports()
+    if not projectRoot
+      throw new Error("Instantiating lib/server requires a projectRoot!")
 
-  global.app  = express()
-  server      = http.createServer(app)
-  io          = require("socket.io")(server, {path: "/__socket.io"})
+    @app    = express()
+    @server = null
+    @io     = null
 
-  getEclectusJson = ->
-    obj = JSON.parse(
-      fs.readFileSync(
-        path.join(config.projectRoot, "eclectus.json"),
-        encoding: "utf8"
-      )
-    ).eclectus
+    @initialize(projectRoot)
 
-    if url = obj.rootUrl
+  initialize: (projectRoot) ->
+    @config = @getCypressJson(projectRoot)
+
+    @app.set "cypress", @config
+
+  getCypressJson: (projectRoot) ->
+    obj = Settings.readSync(projectRoot)
+
+    if url = obj.baseUrl
       ## always strip trailing slashes
-      obj.rootUrl = _.rtrim(url, "/")
+      obj.baseUrl = _.str.rtrim(url, "/")
 
-    ## commandTimeout should be in the eclectus.json file
+    ## commandTimeout should be in the cypress.json file
     ## since it has a significant impact on the tests
     ## passing or failing
 
     _.defaults obj,
       commandTimeout: 4000
       port: 3000
+      autoOpen: false
+      wizard: false
+      projectRoot: projectRoot
+      testFolder: "tests"
 
     _.defaults obj,
-      idGeneratorPath: "http://localhost:#{obj.port}/id_generator"
+      clientUrl: "http://localhost:#{obj.port}"
 
-  app.set "config", config
-  ## set the eclectus config from the eclectus.json file
-  app.set "eclectus", getEclectusJson()
+    _.defaults obj,
+      idGeneratorPath: "#{obj.clientUrl}/id_generator"
 
-  ## set the locals up here so we dont have to process them on every request
-  { testFiles, testFolder } = app.get("eclectus")
+  configureApplication: ->
+    ## set the cypress config from the cypress.json file
+    @app.set "port",        @config.port
+    @app.set "view engine", "html"
+    @app.engine "html",     hbs.__express
 
-  testFiles = new RegExp(testFiles)
+    @app.use require("cookie-parser")()
+    @app.use require("compression")()
+    @app.use require("morgan")("dev")
+    @app.use require("body-parser").json()
+    @app.use require('express-session')({
+      secret: "marionette is cool"
+      saveUninitialized: true
+      resave: true
+      name: "__cypress.sid"
+    })
 
-  ## all environments
-  app.set 'port', argv.port or app.get("eclectus").port
+    ## serve static file from public when route is /eclectus
+    ## this is to namespace the static eclectus files away from
+    ## the real application by separating the root from the files
+    @app.use "/eclectus", express.static(__dirname + "/public")
 
-  app.set "view engine", "html"
-  app.engine "html", hbs.__express
+    ## errorhandler
+    @app.use require("errorhandler")()
 
-  app.use require("cookie-parser")()
-  app.use require("compression")()
-  app.use require("morgan")("dev")
-  app.use require("body-parser").json()
-  app.use require('express-session')(
-    secret: "marionette is cool"
-    saveUninitialized: true
-    resave: true
-    name: "__cypress.sid"
-  )
+  open: ->
+    @server    = http.createServer(@app)
+    @io        = require("socket.io")(@server, {path: "/__socket.io"})
+    @project   = Project(@config.projectRoot)
 
-  ## serve static file from public when route is /eclectus
-  ## this is to namespace the static eclectus files away from
-  ## the real application by separating the root from the files
-  app.use "/eclectus", express.static(__dirname + "/public")
+    allowDestroy(@server)
 
-  ## errorhandler
-  app.use require("errorhandler")()
+    @configureApplication()
 
-  socket = new (require("./socket"))(io, app)
-  socket.startListening()
+    ## refactor this class
+    socket = Socket(@io, @app)
+    socket.startListening()
 
-  require('./routes')(app)
+    require("./routes")(@app)
 
-  new Promise (res, rej) ->
-    server.listen app.get("port"), ->
-      console.log 'Express server listening on port ' + app.get('port')
+    new Promise (resolve, reject) =>
+      @server.listen @config.port, =>
+        @isListening = true
+        console.log "Express server listening on port: #{@config.port}"
 
-      Project.ensureProjectId()
-      ## open phantom if ids are true (which they are by default)
-      .then(idGenerator.openPhantom)
-      .then ->
-        if !app.get('eclectus').preventOpen
-          require('open')("http://localhost:#{app.get('port')}")
-      .return(app.get("eclectus"))
-      .then(res)
-      .catch(rej)
+        @project.ensureProjectId().bind(@)
+        .then ->
+          require('open')(@config.clientUrl) if @config.autoOpen
+        .return(@config)
+        .then(resolve)
+        .catch(reject)
 
+  close: ->
+    new Promise (resolve) =>
+      ## bail early we dont have a server or we're not
+      ## currently listening
+      return resolve() if not @server or not @isListening
+
+      @server.destroy =>
+        @isListening = false
+        console.log "Express server closed!"
+        resolve()
+
+module.exports = Server
+
+# Server = (config) ->
+#   argv = minimist(process.argv.slice(2), boolean: true)
+
+#   return Server
+
+# module.exports = Server

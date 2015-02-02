@@ -18,5 +18,8 @@ do (Cypress, _) ->
       xhr = @prop "xhr", $.getJSON("/eval", {code: code})
       Promise.resolve(xhr)
         .then (response) =>
+          try
+            response = JSON.parse(response)
           @_timeout(prevTimeout)
+
           return response

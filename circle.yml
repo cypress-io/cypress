@@ -4,7 +4,7 @@ test:
     - npm run build
 
   override:
-    - npm run test-server
+    - npm run test-server-ci
     # - ./node_modules/.bin/gulp test:
     #     background: true
     # - sleep 6

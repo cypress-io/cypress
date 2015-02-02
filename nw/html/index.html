@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <title>Cypress NW</title>
+
+    <link rel="stylesheet" href="css/cypress.css">
+
+    <script type="text/javascript" src="js/vendor.js"></script>
+    <script type="text/javascript" src="js/app.js"></script>
+  </head>
+  <body>
+    <!-- <div class="arrow-box"></div> -->
+    <div id="main-region"></div>
+    <div id="footer-region"></div>
+
+    <script type="text/javascript">
+      require("coffee-script/register")
+      var cache = new (require("../../lib/cache"))
+
+      cache.ensureExists().then(function(){
+        var opts = {
+          argv:    require("nw.gui").App.argv,
+          cache:   cache,
+          booter:  require("../../bin/booter")
+        }
+
+        $(function(){
+          App.start(opts);
+        })
+      })
+    </script>
+  </body>
+</html>

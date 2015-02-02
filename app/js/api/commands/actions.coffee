@@ -122,7 +122,7 @@ do (Cypress, _) ->
       _.defaults options,
         el: subject
 
-      if not subject.is("textarea,:text")
+      if not subject.is("textarea,:text,:password")
         node = Cypress.Utils.stringifyElement(options.el)
         @throwErr(".type() can only be called on textarea or :text! Your subject is a: #{node}")
 

@@ -183,6 +183,7 @@ window.Cypress = do ($, _, Backbone) ->
           angularPromise = $timeout =>
             angular.getTestability(root).whenStable(run)
             @prop "angularCancelTimeout", null
+          , 20
 
           @prop "angularCancelTimeout", ->
             $timeout.cancel(angularPromise)

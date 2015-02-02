@@ -15,7 +15,6 @@ describe "spec processor", ->
   afterEach ->
     try
       fs.unlinkSync(path.join(FixturesRoot, '/sample.js'))
-    catch
 
   beforeEach ->
     @specProcessor = new SpecProcessor
@@ -23,32 +22,23 @@ describe "spec processor", ->
 
     @res.type = sinon.stub()
 
-    @opts = {
-      testFolder: FixturesRoot
-      spec: 'sample.js'
-    }
-
     global.app =
       get: (type) ->
-        if (type is 'config')
-          return {
-            projectRoot: ''
-          }
-
+        projectRoot: ""
+        testFolder: FixturesRoot
         browserify:
           basedir: FixturesRoot
 
     fs.writeFileSync(path.join(FixturesRoot, '/sample.js'), ';')
 
   it "sets the correct content type", ->
-    @specProcessor.handle @opts, {}, @res, =>
+    @specProcessor.handle app, "sample.js", {}, @res, =>
 
     expect(@res.type).to.have.been.calledOnce
     .and.to.have.been.calledWith('js')
 
   it "handles snocket includes", (done) ->
-    @opts.spec = 'snocket_root.js'
-    @specProcessor.handle @opts, {}, @res, =>
+    @specProcessor.handle app, 'snocket_root.js', {}, @res, =>
     @results = ""
 
     ## We have to manually catch the error here
@@ -78,7 +68,6 @@ describe "spec processor", ->
       catch
 
     it "compiles coffeescript", (done) ->
-      @opts.spec = 'sample.coffee'
       @results = ""
       @res.pipe(through (d) => @results+=d.toString())
       .on('error', (e) -> done(e))
@@ -97,14 +86,13 @@ describe "spec processor", ->
           done(e)
       )
 
-      @specProcessor.handle @opts, {}, @res, =>
+      @specProcessor.handle app, 'sample.coffee', {}, @res, =>
 
   context 'browserify', ->
     it "handles commonjs requires", (done) ->
       streamOutput = ''
 
-      @opts.spec = 'commonjs_root.js'
-      @specProcessor.handle @opts, {}, @res, (e) => done(e)
+      @specProcessor.handle app, 'commonjs_root.js', {}, @res, (e) => done(e)
 
       @res.pipe(through (d) ->
         streamOutput += d.toString()

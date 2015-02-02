@@ -1,0 +1,35 @@
+#footer {
+  background-color: #DDD;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  border-top: 1px solid #AAA;
+
+  span:hover, .dropup.open {
+    cursor: pointer;
+
+    i {
+      color: #333;
+    }
+  }
+
+  i {
+    color: #777;
+    font-size: 24px;
+    line-height: $footer-height;
+    margin: 0 10px 0 5px;
+  }
+
+  .dropdown-menu {
+    margin-right: 5px;
+    margin-bottom: -10px;
+  }
+
+  &:before {
+    content: "";
+    position: absolute;
+    height: 1px;
+    width: 100%;
+    background-color: #fff;
+  }
+}

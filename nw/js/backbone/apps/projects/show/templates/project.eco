@@ -1,0 +1,19 @@
+<div id="project">
+  <h3>
+    <p><%= @name %></p>
+  </h3>
+  <% if @clientUrl: %>
+    <div class="well well-lg">
+      <div>Server Running</div>
+      <div>
+        <a href="#"><%= @clientUrl %></a>
+      </div>
+    </div>
+    <button class="btn btn-danger">Stop</button>
+  <% else: %>
+    <span>
+      <i class="fa fa-spinner fa-spin"></i>
+      Starting Server...
+    </span>
+  <% end %>
+</div>

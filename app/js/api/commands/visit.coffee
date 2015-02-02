@@ -8,8 +8,8 @@ do (Cypress, _) ->
         onBeforeLoad: ->
         onLoad: ->
 
-      rootUrl = @config("rootUrl")
-      url     = Cypress.Location.getRemoteUrl(url, rootUrl)
+      baseUrl = @config("baseUrl")
+      url     = Cypress.Location.getRemoteUrl(url, baseUrl)
 
       ## trigger that the remoteIframing is visiting
       ## an external URL
