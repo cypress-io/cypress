@@ -11,3 +11,6 @@ describe "Routes", ->
 
   it "api", ->
     expect(Routes.api()).to.eq "http://localhost:1234"
+
+  it "signout", ->
+    expect(Routes.signout()).to.eq "http://localhost:1234/signout"

@@ -7,6 +7,7 @@ api_url = config.app.api_url
 routes = {
   api: ""
   signin: "signin"
+  signout: "signout"
 }
 
 addQueryParams = (url, params) ->
