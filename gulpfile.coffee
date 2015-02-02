@@ -63,16 +63,16 @@ compileJs = (source, options, cb) ->
 
   jQuery.when(tasks...).done cb
 
-gulp.task "app:css", -> compileCss("app", "lib")
+gulp.task "client:css", -> compileCss("app", "lib")
 
 gulp.task "nw:css", -> compileCss("nw", "nw")
 
-gulp.task "fonts", ->
+gulp.task "client:fonts", ->
   gulp.src("bower_components/font-awesome/fonts/**")
     .pipe gulp.dest "lib/public/css/fonts"
     .pipe gulp.dest "nw/public/css/fonts"
 
-gulp.task "app:img", ["vendor:img", "project:img"]
+gulp.task "client:img", ["vendor:img", "project:img"]
 
 gulp.task "vendor:img", ->
   gulp.src("bower_components/jquery-ui/themes/smoothness/images/**")
@@ -82,9 +82,9 @@ gulp.task "project:img", ->
   gulp.src("app/img/**/*")
     .pipe gulp.dest "lib/public/img"
 
-gulp.task "app:js", (cb) ->
+gulp.task "client:js", (cb) ->
   options =
-    destination: "./lib/public/js"
+    destination: "lib/public/js"
     basePath: "app/js"
 
   compileJs("app", options, cb)
@@ -101,7 +101,7 @@ gulp.task "nw:js", (cb) ->
 gulp.task "bower", ->
   $.bower()
 
-gulp.task "app:html", ->
+gulp.task "client:html", ->
   gulp.src(["app/html/index.html", "app/html/id_generator.html"])
     .pipe gulp.dest("lib/public")
 
@@ -109,14 +109,14 @@ gulp.task "nw:html", ->
   gulp.src("nw/html/*")
     .pipe gulp.dest("nw/public")
 
-gulp.task "app:watch", ["watch:app:css", "watch:app:js", "watch:app:html"]
+gulp.task "client:watch", ["watch:client:css", "watch:client:js", "watch:client:html"]
 gulp.task "nw:watch",  ["watch:nw:css",  "watch:nw:js",  "watch:nw:html"]
 
-gulp.task "watch:app:css", ->
-  gulp.watch "app/css/**", ["app:css"]
+gulp.task "watch:client:css", ->
+  gulp.watch "app/css/**", ["client:css"]
 
-gulp.task "watch:app:js", ->
-  gulp.watch "app/js/**/*", ["app:js"]
+gulp.task "watch:client:js", ->
+  gulp.watch "app/js/**/*", ["client:js"]
 
 gulp.task "watch:nw:css", ->
   gulp.watch "nw/css/**", ["nw:css"]
@@ -124,8 +124,8 @@ gulp.task "watch:nw:css", ->
 gulp.task "watch:nw:js", ->
   gulp.watch "nw/js/**/*", ["nw:js"]
 
-gulp.task "watch:app:html", ->
-  gulp.watch "app/html/index.html", ["app:html"]
+gulp.task "watch:client:html", ->
+  gulp.watch "app/html/index.html", ["client:html"]
 
 gulp.task "watch:nw:html", ->
   gulp.watch "nw/html/**", ["nw:html"]
@@ -134,6 +134,12 @@ gulp.task "server", -> require("./server.coffee")
 
 gulp.task "test", -> require("../spec/server.coffee")
 
-gulp.task "default", ["bower", "app:css", "app:img", "fonts", "app:js", "app:html", "app:watch"]
-gulp.task "compile", ["bower", "app:css", "app:img", "fonts", "app:js", "app:html"]
-gulp.task "nw",      ["bower", "nw:css",             "fonts", "nw:js",  "nw:html",  "nw:watch"]
+gulp.task "deploy", (cb) ->
+  require("./lib/deploy")(cb)
+
+# gulp.task "default", ["bower", "client:css", "client:img", "client:fonts", "client:js", "client:html", "client:watch"]
+# gulp.task "compile", ["bower", "client:css", "client:img", "client:fonts", "client:js", "client:html"]
+gulp.task "nw",      ["bower", "nw:css",             "client:fonts", "nw:js",  "nw:html",  "nw:watch"]
+
+gulp.task "client:build", ["bower", "client:css", "client:img", "client:fonts", "client:js", "client:html"]
+gulp.task "nw:build",     ["bower", "nw:css", "client:fonts", "nw:js", "nw:html"]

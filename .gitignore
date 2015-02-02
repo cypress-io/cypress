@@ -8,3 +8,4 @@ lib/public
 npm-debug.log
 .cy/
 nw/public
+dist
