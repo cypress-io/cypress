@@ -39,6 +39,10 @@
 
         App.vent.trigger "start:projects:app"
 
+    logOut: (user) ->
+      App.config.logOut(user).then ->
+        App.vent.trigger "start:login:app"
+
   App.commands.setHandler "login:request", ->
     API.loginRequest()
 
@@ -50,3 +54,6 @@
 
   App.commands.setHandler "set:current:user", (attrs = {}) ->
     App.currentUser = App.request("new:user:entity", attrs)
+
+  App.vent.on "log:out", (user) ->
+    API.logOut(user)

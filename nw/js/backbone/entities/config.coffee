@@ -39,6 +39,12 @@
         console.log("Error logging in!")
         throw err
 
+    logOut: (user) ->
+      @cache.logOut(user.get("session_token")).catch (err) ->
+        debugger
+        console.log("Error logging out!")
+        throw err
+
   App.reqres.setHandler "config:entity", (attrs = {}) ->
     props = ["cache", "booter", "request"]
 

@@ -13,6 +13,9 @@
         App.config.addProject(path).then ->
           projects.add(path: path)
 
+      @listenTo projectsView, "sign:out:clicked", ->
+        App.vent.trigger "log:out", user
+
       @listenTo projectsView, "childview:project:clicked", (iv, obj) ->
         App.vent.trigger "project:clicked", obj.model
 

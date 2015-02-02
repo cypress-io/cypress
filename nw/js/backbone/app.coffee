@@ -27,7 +27,8 @@
       ## set the current user
       App.execute "set:current:user", user
 
-      if user
+      ## make sure we have a current session
+      if user.session_token
         ## if have it, start projects
         App.vent.trigger "start:projects:app"
       else

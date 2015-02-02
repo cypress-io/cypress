@@ -208,6 +208,9 @@ class Cache extends require('./logger')
   logOut: (token) ->
     url = Routes.signout()
     headers = {"X-Session": token}
-    request.post({url: url, headers: headers})
+    request.post({url: url, headers: headers}).promise().bind(@).then ->
+      @_get("USER").then (user = {}) ->
+        user.session_token = null
+        @_set {USER: user}
 
 module.exports = Cache

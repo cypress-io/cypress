@@ -313,6 +313,15 @@ describe "Cache", ->
       .matchHeader("X-Session", "abc123")
       .reply(200)
 
+      @cache.ensureExists()
+
     it "requests to api /signout", ->
       @cache.logOut("abc123").then =>
         @signout.done()
+
+    it "nukes session_token from cache", ->
+      setUser = {id: 1, name: "brian", email: "a@b.com", session_token: "abc123"}
+      @cache.setUser(setUser).bind(@).then ->
+        @cache.logOut("abc123").bind(@).then ->
+          @cache.getUser().then (user) ->
+            expect(user.session_token).to.be.null
