@@ -28,12 +28,15 @@
 
     loggingIn: (url) ->
       ## display logging in loading spinner here
+      App.currentUser.loggingIn()
 
       App.execute "gui:focus"
 
       code = new Uri(url).getQueryParamValue("code")
 
-      App.config.logIn(code).then ->
+      App.config.logIn(code).then (user) ->
+        App.currentUser.loggedIn(user)
+
         App.vent.trigger "start:projects:app"
 
   App.commands.setHandler "login:request", ->

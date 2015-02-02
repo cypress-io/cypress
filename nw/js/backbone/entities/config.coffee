@@ -32,7 +32,7 @@
       @cache.logIn(code).bind(@)
       .then (user) ->
         @setUser(user)
-        App.execute "set:current:user", user
+        .return(user)
       .catch (err) ->
         ## ...could not log in...
         debugger

@@ -4,4 +4,10 @@
   h3 {
     margin-bottom: 20px;
   }
+
+  button {
+    &:active, &:focus {
+      outline: 0
+    }
+  }
 }

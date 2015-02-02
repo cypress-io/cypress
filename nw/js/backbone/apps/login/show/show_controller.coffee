@@ -3,12 +3,15 @@
   class Show.Controller extends App.Controllers.Application
 
     initialize: ->
-      loginView = @getLoginView()
+      user = App.request "current:user"
+
+      loginView = @getLoginView(user)
 
       @listenTo loginView, "login:clicked", (view, obj) ->
         App.execute "login:request"
 
       @show loginView
 
-    getLoginView: ->
+    getLoginView: (user) ->
       new Show.Login
+        model: user

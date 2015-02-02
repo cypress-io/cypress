@@ -22,11 +22,12 @@
     App.config = App.request("config:entity", options)
 
     App.config.getUser().then (user) ->
-      ## check cache store for session id
-      if user
-        ## set the current user
-        App.execute "set:current:user", user
+      ## check cache store for user
 
+      ## set the current user
+      App.execute "set:current:user", user
+
+      if user
         ## if have it, start projects
         App.vent.trigger "start:projects:app"
       else

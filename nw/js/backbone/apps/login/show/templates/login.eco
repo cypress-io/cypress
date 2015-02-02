@@ -8,4 +8,10 @@
       Login with Github
     </button>
   </div>
+  <% if @loggingIn: %>
+    <span>
+      <i class="fa fa-spinner fa-spin"></i>
+      Logging in...
+    </span>
+  <% end %>
 </div>

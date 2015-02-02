@@ -8,3 +8,10 @@
 
     triggers:
       "click @ui.button" : "login:clicked"
+
+    modelEvents:
+      "change:loggingIn" : "render"
+
+    onRender: ->
+      loggingIn = @model.get("loggingIn")
+      @ui.button.toggleClass("disabled", loggingIn).attr("disabled", loggingIn)
