@@ -2,6 +2,8 @@
 
   class List.Project extends App.Views.ItemView
     template: "projects/list/_project"
+    tagName: "li"
+    className: "project"
 
     triggers:
       "click" : "project:clicked"
@@ -14,16 +16,22 @@
   class List.Projects extends App.Views.CompositeView
     template: "projects/list/projects"
     childView: List.Project
-    childViewContainer: "ul"
     emptyView: List.Empty
+    childViewContainer: "ul#projects-container"
 
     ui:
-      "button" : "button"
-      "input"  : "input"
+      "button"  : "button"
+      "input"   : "input"
+      "signout" : "li[data-signout]"
 
     events:
-      "click @ui.button" : "buttonClicked"
-      "change @ui.input" : "inputChanged"
+      "mousedown @ui.signout": "signOutClicked"
+      # "click @ui.signout" : "signOutClicked"
+      "click @ui.button"  : "buttonClicked"
+      "change @ui.input"  : "inputChanged"
+
+    signOutClicked: (e) ->
+      @trigger "sign:out:clicked"
 
     buttonClicked: (e) ->
       App.fileDialogOpened = true
@@ -32,3 +40,6 @@
     inputChanged: (e) ->
       App.fileDialogOpened = null
       @trigger "project:added", @ui.input.val()
+
+    onRender: ->
+      @ui.signout.dropdown()

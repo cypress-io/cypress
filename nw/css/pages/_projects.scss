@@ -3,13 +3,23 @@
     background-color: #EEE;
     border-bottom: 1px solid #CCC;
     padding: 10px;
-    overflow: auto;
+    // overflow: auto;
+    float: left;
     width: 100%;
     line-height: 32px;
 
     p {
       float: left;
-      margin: 0 0 0 0;
+      margin: 0 5px 0 0;
+    }
+
+    ul.dropdown-menu {
+      min-width: 50px;
+      margin-top: -5px;
+    }
+
+    a:focus, a:active {
+      outline: 0
     }
 
     button {
@@ -22,30 +32,43 @@
     }
   }
 
+  ul#projects-container {
+    float: left;
+    width: 100%;
 
-  li {
-    padding: 5px 20px;
-    border-bottom: 1px solid #EEE;
-    position: relative;
+    li.empty {
+      margin: 25px;
+      text-align: center;
 
-    &:hover {
-      cursor: pointer;
-      background-color: #EEE;
+      p {
+        margin-bottom: 0;
+      }
     }
 
-    small {
-      font-size: 70%;
-      display: block;
-      margin-top: 5px;
-      @include text-overflow;
-    }
+    li.project {
+      padding: 5px 20px;
+      border-bottom: 1px solid #EEE;
+      position: relative;
 
-    i {
-      font-size: 20px;
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      margin-top: -13px;
+      &:hover {
+        cursor: pointer;
+        background-color: #EEE;
+      }
+
+      small {
+        font-size: 70%;
+        display: block;
+        margin-top: 5px;
+        @include text-overflow;
+      }
+
+      i {
+        font-size: 20px;
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        margin-top: -13px;
+      }
     }
   }
 }
