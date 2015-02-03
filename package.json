@@ -70,7 +70,6 @@
     "errorhandler": "1.1.1",
     "express": "4.9.0",
     "express-session": "1.9.1",
-    "foreachasync": "^3.0.0",
     "fs-extra": "0.13.0",
     "gaze": "0.6.4",
     "glob": "4.0.5",
