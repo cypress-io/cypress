@@ -1,10 +1,29 @@
-gulp      = require 'gulp'
-$         = require('gulp-load-plugins')()
-path      = require 'path'
-_         = require 'underscore'
-fs        = require 'fs'
-yaml      = require 'js-yaml'
-jQuery    = require 'jquery-deferred'
+gulp          = require 'gulp'
+$             = require('gulp-load-plugins')()
+path          = require 'path'
+_             = require 'underscore'
+fs            = require 'fs'
+yaml          = require 'js-yaml'
+jQuery        = require 'jquery-deferred'
+child_process = require "child_process"
+
+gulp.task "build:secret:sauce", ->
+  gulp.src("lib/secret_sauce.coffee")
+    .pipe($.coffee({bare: true}))
+    .pipe gulp.dest("lib")
+
+gulp.task "snapshot:secret:sauce", (cb) ->
+  child_process.exec "./nwsnapshot --extra_code lib/secret_sauce.js lib/secret_sauce.bin", (err, stdout, stderr) ->
+    console.log("stdout:", stdout)
+    console.log("stderr:", stderr)
+
+    if err
+      console.log("err with nwsnapshot:", err)
+
+    ## cleanup any v8 logs and remove secret sauce.js
+    gulp.src(["lib/secret_sauce.js", "isolate-*.log"])
+      .pipe($.clean())
+      .on "end", cb
 
 log = (obj = {}) ->
   args = [
@@ -142,3 +161,5 @@ gulp.task "nw",            ["nw:build", "nw:watch"]
 
 gulp.task "client:build",  ["bower", "client:css", "client:img", "client:fonts", "client:js", "client:html"]
 gulp.task "nw:build",      ["bower", "nw:css", "client:fonts", "nw:js", "nw:html"]
+
+gulp.task "snapshot", ["build:secret:sauce", "snapshot:secret:sauce"]
