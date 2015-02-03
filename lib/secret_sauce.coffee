@@ -49,6 +49,8 @@ SecretSauce.Socket =
     @io.emit "generate:ids:for:test", filepath, strippedPath
 
   _startListening: (chokidar, path, fs) ->
+    { _ } = SecretSauce
+
     @io.on "connection", (socket) =>
       console.log "socket connected"
 
@@ -144,16 +146,17 @@ SecretSauce.Socket =
       ## a js or coffee files
       not /\.(js|coffee)$/.test path
 
-    watchTestFiles.on "change", SecretSauce._.bind(@onTestFileChange, @)
+    watchTestFiles.on "change", _.bind(@onTestFileChange, @)
 
-    watchCssFiles = chokidar.watch path.join(__dirname, "public", "css"), ignored: (path, stats) ->
-      return false if fs.statSync(path).isDirectory()
+    ## BREAKING DUE TO __DIRNAME
+    # watchCssFiles = chokidar.watch path.join(__dirname, "public", "css"), ignored: (path, stats) ->
+    #   return false if fs.statSync(path).isDirectory()
 
-      not /\.css$/.test path
+    #   not /\.css$/.test path
 
-    # watchCssFiles.on "add", (path) -> console.log "added css:", path
-    watchCssFiles.on "change", (filepath, stats) =>
-      filepath = path.basename(filepath)
-      @io.emit "eclectus:css:changed", file: filepath
+    # # watchCssFiles.on "add", (path) -> console.log "added css:", path
+    # watchCssFiles.on "change", (filepath, stats) =>
+    #   filepath = path.basename(filepath)
+    #   @io.emit "eclectus:css:changed", file: filepath
 
 module?.exports = SecretSauce
