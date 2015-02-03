@@ -4,6 +4,9 @@
 
 [Visit the Wiki](https://github.com/brian-mann/eclectus/wiki)
 
+### While Developing
+  `npm run watch`
+
 ### Booting with node-webkit
   `nwk <path_to_ecl_root>`
 
