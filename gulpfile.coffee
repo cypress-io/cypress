@@ -7,24 +7,6 @@ yaml          = require 'js-yaml'
 jQuery        = require 'jquery-deferred'
 child_process = require "child_process"
 
-gulp.task "build:secret:sauce", ->
-  gulp.src("lib/secret_sauce.coffee")
-    .pipe($.coffee({bare: true}))
-    .pipe gulp.dest("lib")
-
-gulp.task "snapshot:secret:sauce", (cb) ->
-  child_process.exec "./nwsnapshot --extra_code lib/secret_sauce.js lib/secret_sauce.bin", (err, stdout, stderr) ->
-    console.log("stdout:", stdout)
-    console.log("stderr:", stderr)
-
-    if err
-      console.log("err with nwsnapshot:", err)
-
-    ## cleanup any v8 logs and remove secret sauce.js
-    gulp.src(["lib/secret_sauce.js", "isolate-*.log"])
-      .pipe($.clean())
-      .on "end", cb
-
 log = (obj = {}) ->
   args = [
     "\n{",
@@ -120,6 +102,27 @@ gulp.task "nw:js", (cb) ->
 gulp.task "bower", ->
   $.bower()
 
+gulp.task "build:secret:sauce", (cb) ->
+  ## convert to js from coffee (with bare: true)
+  gulp.src("lib/secret_sauce.coffee")
+    .pipe($.coffee({bare: true}))
+    .pipe gulp.dest("lib")
+    .on "end", ->
+      ## when thats done, lets create the secret_sauce snapshot .bin
+      child_process.exec "./nwsnapshot --extra_code lib/secret_sauce.js lib/secret_sauce.bin", (err, stdout, stderr) ->
+        console.log("stdout:", stdout)
+        console.log("stderr:", stderr)
+
+        if err
+          console.log("err with nwsnapshot:", err)
+
+        ## finally cleanup any v8 logs and remove secret sauce.js
+        gulp.src(["lib/secret_sauce.js", "isolate-*.log"])
+          .on "end", cb
+          .pipe($.clean())
+
+  return false
+
 gulp.task "client:html", ->
   gulp.src(["app/html/index.html", "app/html/id_generator.html"])
     .pipe gulp.dest("lib/public")
@@ -129,7 +132,7 @@ gulp.task "nw:html", ->
     .pipe gulp.dest("nw/public")
 
 gulp.task "client:watch", ["watch:client:css", "watch:client:js", "watch:client:html"]
-gulp.task "nw:watch",  ["watch:nw:css",  "watch:nw:js",  "watch:nw:html"]
+gulp.task "nw:watch",  ["watch:nw:css",  "watch:nw:js",  "watch:nw:html", "watch:nw:secret:sauce"]
 
 gulp.task "watch:client:css", ->
   gulp.watch "app/css/**", ["client:css"]
@@ -149,6 +152,9 @@ gulp.task "watch:client:html", ->
 gulp.task "watch:nw:html", ->
   gulp.watch "nw/html/**", ["nw:html"]
 
+gulp.task "watch:nw:secret:sauce", ->
+  gulp.watch "lib/secret_sauce.coffee", ["nw:snapshot"]
+
 gulp.task "server", -> require("./server.coffee")
 
 gulp.task "test", -> require("../spec/server.coffee")
@@ -160,6 +166,6 @@ gulp.task "client",        ["client:build", "client:watch"]
 gulp.task "nw",            ["nw:build", "nw:watch"]
 
 gulp.task "client:build",  ["bower", "client:css", "client:img", "client:fonts", "client:js", "client:html"]
-gulp.task "nw:build",      ["bower", "nw:css", "client:fonts", "nw:js", "nw:html"]
+gulp.task "nw:build",      ["bower", "nw:css", "client:fonts", "nw:js", "nw:html", "nw:snapshot"]
 
-gulp.task "snapshot", ["build:secret:sauce", "snapshot:secret:sauce"]
+gulp.task "nw:snapshot",   ["build:secret:sauce"]
