@@ -137,8 +137,8 @@ gulp.task "test", -> require("../spec/server.coffee")
 gulp.task "deploy", [], ->
   require("./lib/deploy")()
 
-gulp.task "client",        ["bower", "client:css", "client:img", "client:fonts", "client:js", "client:html", "client:watch"]
-gulp.task "nw",            ["bower", "nw:css", "client:fonts", "nw:js", "nw:html", "nw:watch"]
+gulp.task "client",        ["client:build", "client:watch"]
+gulp.task "nw",            ["nw:build", "nw:watch"]
 
 gulp.task "client:build",  ["bower", "client:css", "client:img", "client:fonts", "client:js", "client:html"]
 gulp.task "nw:build",      ["bower", "nw:css", "client:fonts", "nw:js", "nw:html"]
