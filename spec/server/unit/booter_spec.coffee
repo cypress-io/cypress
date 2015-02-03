@@ -46,6 +46,7 @@ describe "Booter", ->
 
   context "required with {fork: true}", ->
     beforeEach ->
+      @currentTest.timeout(10000)
       Fixtures.scaffold()
 
       @fork = @sandbox.spy child_process, "fork"
