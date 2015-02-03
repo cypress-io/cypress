@@ -134,7 +134,7 @@ gulp.task "server", -> require("./server.coffee")
 
 gulp.task "test", -> require("../spec/server.coffee")
 
-gulp.task "deploy", [], ->
+gulp.task "deploy", ["client:build", "nw:build"], ->
   require("./lib/deploy")()
 
 gulp.task "client",        ["client:build", "client:watch"]
