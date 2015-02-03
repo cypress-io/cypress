@@ -1,5 +1,4 @@
 fs        = require 'fs'
-phantom   = require 'node-phantom-simple'
 spawn     = require('child_process').spawn
 
 eclectus = JSON.parse(fs.readFileSync("eclectus.json", encoding: "utf8")).eclectus
