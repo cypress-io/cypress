@@ -9,3 +9,4 @@ npm-debug.log
 .cy/
 nw/public
 dist
+lib/secret_sauce.bin
