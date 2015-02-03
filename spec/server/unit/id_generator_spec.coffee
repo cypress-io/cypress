@@ -51,16 +51,19 @@ describe "IdGenerator", ->
       @sandbox.stub(@idGenerator, "appendTestId").resolves({})
       @sandbox.stub(@idGenerator.keys.cache, "getProject").resolves({RANGE: {start: 0, end: 100}})
 
+    afterEach ->
+      @idGenerator.keys.cache.remove()
+
     it "queues multiple ids through promise semaphore", ->
-        @idGenerator.getId({})
-        @idGenerator.getId({})
-        @idGenerator.getId({})
-        @idGenerator.getId({})
-        @idGenerator.getId({})
-        @idGenerator.getId({})
-        @idGenerator.getId({})
-        @idGenerator.getId({}).then (num) ->
-          expect(num).to.eql("008")
+      @idGenerator.getId({})
+      @idGenerator.getId({})
+      @idGenerator.getId({})
+      @idGenerator.getId({})
+      @idGenerator.getId({})
+      @idGenerator.getId({})
+      @idGenerator.getId({})
+      @idGenerator.getId({}).then (num) ->
+        expect(num).to.eql("008")
 
   context "#appendTestId", ->
     describe "unit", ->
