@@ -12,7 +12,7 @@
     "width": 300
   },
   "scripts": {
-    "build": "gulp compile",
+    "build": "gulp client:build nw:build",
     "test-server": "NODE_ENV=test BLUEBIRD_DEBUG=1 mocha --opts spec/server/mocha.opts --watch",
     "test-server-debug": "NODE_ENV=test BLUEBIRD_DEBUG=1 node-debug --hidden=node_modules --no-preload _mocha --opts spec/server/mocha.opts --watch",
     "test-server-ci": "NODE_ENV=test BLUEBIRD_DEBUG=1 mocha --opts spec/server/mocha.opts"
