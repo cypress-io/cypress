@@ -27,34 +27,28 @@ module.exports = (cb) ->
   fs.copySync("./lib/project.coffee", distDir + "/lib/project.coffee")
   fs.copySync("./lib/server.coffee", distDir + "/lib/server.coffee")
   fs.copySync("./lib/socket.coffee", distDir + "/lib/socket.coffee")
+  fs.copySync("./lib/public", distDir + "/lib/public")
+  fs.copySync("./nw/public", distDir + "/nw/public")
 
-  client = new Promise (resolve) ->
-    gulp.start "client:build", ->
-      fs.copySync("./lib/public", distDir + "/lib/public")
-      resolve()
+  deploy = new Promise (resolve, reject) ->
+    attempts = 0
 
-  nw = new Promise (resolve) ->
-    gulp.start "nw:build", ->
-      fs.copySync("./nw/public", distDir + "/nw/public")
-      resolve()
+    npmInstall = ->
+      attempts += 1
 
-  attempts = 0
+      child_process.exec "npm install --production", {cwd: distDir}, (err, stdout, stderr) ->
+        if err
+          return reject(err) if attempts is 3
 
-  npmInstall = (resolve, reject) ->
-    attempts += 1
-    child_process.exec "npm install --production", {cwd: distDir}, (err, stdout, stderr) ->
-      if err
-        return reject(err) if attempts is 3
+          console.log gutil.colors.red("'npm install' failed, retrying")
+          return npmInstall()
+        else
+          console.log gutil.colors.yellow("done 'npm install'")
+        resolve()
 
-        return npmInstall(resolve, reject)
-
-      console.log gutil.colors.yellow("done 'npm install'")
-      resolve()
-
-  install = new Promise (resolve, reject) ->
     console.log gutil.colors.yellow("running 'npm install'")
     npmInstall(resolve, reject)
 
-  Promise.all([client, nw, install]).then ->
+  deploy.then ->
     console.log gutil.colors.green("Done Deploying!")
-  .then(cb)
+    cb?()

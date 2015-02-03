@@ -15,7 +15,6 @@ describe "Deploy", ->
   beforeEach ->
     @sandbox = sinon.sandbox.create()
     @sandbox.stub(child_process, "exec").callsArg(2)
-    @sandbox.stub(gulp, "start").callsArg(1)
 
   afterEach ->
     process.chdir(prevCwd)
@@ -84,23 +83,13 @@ describe "Deploy", ->
     deploy().then ->
       expect(fs.statSync(distDir + "/lib/socket.coffee").isFile()).to.be.true
 
-  context "client app build", ->
-    it "calls gulp task: 'client:build'", ->
-      deploy().then ->
-        expect(gulp.start).to.be.calledWith "client:build"
+  it "copies lib/public to dist", ->
+    deploy().then ->
+      expect(fs.statSync(distDir + "/lib/public").isDirectory()).to.be.true
 
-    it "copies lib/public to dist", ->
-      deploy().then ->
-        expect(fs.statSync(distDir + "/lib/public").isDirectory()).to.be.true
-
-  context "nw app build", ->
-    it "calls gulp task: 'nw:build'", ->
-      deploy().then ->
-        expect(gulp.start).to.be.calledWith "nw:build"
-
-    it "copies lib/public to dist", ->
-      deploy().then ->
-        expect(fs.statSync(distDir + "/nw/public").isDirectory()).to.be.true
+  it "copies nw/public to dist", ->
+    deploy().then ->
+      expect(fs.statSync(distDir + "/nw/public").isDirectory()).to.be.true
 
   context "npm install", ->
     it "exec 'npm install'", ->
