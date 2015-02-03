@@ -6,7 +6,7 @@ development: &development
 
 test:
   <<: *development
-  cache_path: ".cy/test_cache"
+  cache_path: ".cy_test/cache"
 
 production:
   api_url: "http://api.cypress.io"

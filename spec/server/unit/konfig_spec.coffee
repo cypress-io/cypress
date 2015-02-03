@@ -26,7 +26,7 @@ describe "Konfig", ->
       @setup("test")
 
     it "cache_path", ->
-      @eq("cache_path", ".cy/test_cache")
+      @eq("cache_path", ".cy_test/cache")
 
     it "api_url", ->
       @eq("api_url", "http://localhost:1234")
