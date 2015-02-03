@@ -2,7 +2,6 @@ root         = '../../../'
 expect       = require('chai').expect
 sinon        = require 'sinon'
 sinonPromise = require 'sinon-as-promised'
-rimraf       = require 'rimraf'
 path         = require "path"
 nock         = require "nock"
 Project      = require "#{root}lib/project"
@@ -17,8 +16,6 @@ describe "Keys", ->
 
   afterEach ->
     @sandbox.restore()
-
-    rimraf.sync(path.join(__dirname, root, ".cy"))
 
   it "returns a keys instance", ->
     keys = Keys("/Users/brian/app")
@@ -39,6 +36,9 @@ describe "Keys", ->
       ## we need to force the range to resolve with a start and end
       ## else it would POST out to receive a project keys range
       @sandbox.stub(@keys.cache, "getProject").resolves({RANGE: {start: 0, end: 100}})
+
+    afterEach ->
+      @keys.cache.remove()
 
     it "ensures project id exists", ->
       ensureProjectId = @sandbox.spy @keys.project, "ensureProjectId"
@@ -90,6 +90,8 @@ describe "Keys", ->
 
     afterEach ->
       nock.cleanAll()
+
+      @keys.cache.remove()
 
     it "requests a new range when missing 'start' and 'end'", ->
       @existingRangeIs()

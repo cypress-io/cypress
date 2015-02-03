@@ -6,7 +6,7 @@ path      = require 'path'
 request   = require "request-promise"
 Project   = require './project'
 Routes    = require "./util/routes"
-fs        = Promise.promisifyAll(require('fs'))
+fs        = Promise.promisifyAll(require('fs-extra'))
 CACHE     = path.join(__dirname, '../', config.app.cache_path)
 
 class Cache extends require('./logger')
@@ -48,6 +48,8 @@ class Cache extends require('./logger')
   ## finally returning the JSON object that was written
   _write: (obj = {}) ->
     @emit 'verbose', 'writing to .cy info'
+    @emit "write", obj
+
     fs.writeFileAsync(
       CACHE,
       JSON.stringify(obj),
@@ -91,11 +93,16 @@ class Cache extends require('./logger')
   ## if so returns true;
   ## otherwise it inits an empty JSON config file
   ensureExists: ->
-    @emit 'verbose', 'checking existence of .cy info'
+    @emit 'verbose', 'checking existence of .cy cache'
     fs.statAsync(CACHE)
     .bind(@)
     .return(true)
     .catch(@_initLocalInfo)
+
+  exists: ->
+    @ensureExists().return(true).catch(false)
+
+  cache_path: CACHE
 
   updateRange: (id, range) ->
     @emit 'verbose', "updating range of project #{id} with #{JSON.stringify(range)}"
@@ -150,7 +157,6 @@ class Cache extends require('./logger')
     @_get("PROJECTS")
 
   _removeProjectByPath: (projects, path) ->
-
     projects = _.omit projects, (project, key) ->
       project.PATH is path
 
@@ -198,6 +204,9 @@ class Cache extends require('./logger')
     @emit "verbose", "setting user: #{user}"
 
     @_set {USER: user}
+
+  remove: ->
+    fs.removeSync(path.dirname(CACHE))
 
   ## move this to an auth module
   ## and update NW references
