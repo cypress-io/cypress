@@ -58,7 +58,8 @@
     "setimmediate": "^1.0.2",
     "sinon": "1.10.3",
     "sinon-as-promised": "^2.0.3",
-    "sinon-chai": "2.6.0"
+    "sinon-chai": "2.6.0",
+    "supertest": "^0.15.0"
   },
   "dependencies": {
     "auto-launch": "^0.1.14",
