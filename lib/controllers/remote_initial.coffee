@@ -76,6 +76,7 @@ class RemoteInitial extends Controller
     @_resolveRedirects(url, res, req)
 
   errorHandler: (e, res, url) ->
+    console.error(e.stack)
     res.status(500)
     .send("Error getting #{url} <pre>#{e.message}</pre>")
 
@@ -83,8 +84,6 @@ class RemoteInitial extends Controller
     thr = through((d) -> this.queue(d))
 
     rq = hyperquest.get url, {}, (err, incomingRes) =>
-      console.log(url, req.url)
-      debugger
       if err?
         return thr.emit("error", err)
 
@@ -92,6 +91,8 @@ class RemoteInitial extends Controller
         newUrl = UrlHelpers.merge(url, incomingRes.headers.location)
         res.redirect("/__remote/" + newUrl)
       else
+        if not incomingRes.headers["content-type"]
+          throw new Error("Missing header: 'content-type'")
         res.contentType(incomingRes.headers['content-type'])
 
         ## reset the session to the latest redirected URL
