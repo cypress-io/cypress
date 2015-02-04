@@ -13,9 +13,11 @@ requirejs   = require 'requirejs'
 Controller  = require "./controller"
 
 class SpecProcessor extends Controller
-  constructor: ->
+  constructor: (app) ->
     if not (@ instanceof SpecProcessor)
-      return new SpecProcessor
+      return new SpecProcessor(app)
+
+    @app = app
 
     super
 

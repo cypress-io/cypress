@@ -1,31 +1,42 @@
-RemoteInitial  = require('../../../lib/controllers/remote_initial')
+root          = "../../../"
+Server        = require("#{root}lib/server")
+RemoteInitial = require("#{root}lib/controllers/remote_initial")
 Readable      = require("stream").Readable
 expect        = require("chai").expect
 through       = require("through")
 nock          = require('nock')
 sinon         = require('sinon')
 
-describe "Remote Loader", ->
-  afterEach ->
-    nock.cleanAll()
-    nock.enableNetConnect()
-
+describe "Remote Initial", ->
   beforeEach ->
     nock.disableNetConnect()
-    @remoteInitial = RemoteInitial()
+
+    @sandbox = sinon.sandbox.create()
+    @sandbox.stub(Server.prototype, "getCypressJson").returns({})
+
+    @app = Server("/Users/brian/app").app
+    @app.set("cypress", {
+      projectRoot: "/Users/brian/app"
+    })
+
+    @remoteInitial = RemoteInitial(@app)
     @res = through (d) ->
     @res.send = ->
     @res.redirect = ->
     @res.contentType = ->
     @res.status = => @res
-    @next = ->
     @baseUrl = "http://foo.com"
     @redirectUrl  = "http://x.com"
+
+  afterEach ->
+    @sandbox.restore()
+    nock.cleanAll()
+    nock.enableNetConnect()
 
   it "returns a new instance", ->
     expect(@remoteInitial).to.be.instanceOf(RemoteInitial)
 
-  it 'injects content', (done) ->
+  it "injects content", (done) ->
     readable = new Readable
 
     readable.push('<head></head><body></body>')
@@ -34,6 +45,20 @@ describe "Remote Loader", ->
     readable.pipe(RemoteInitial::injectContent("wow"))
     .pipe through (d) ->
       expect(d.toString()).to.eq("<head> wow</head><body></body>")
+      done()
+
+  it "bubbles up 500 on fetch error", (done) ->
+    @req =
+      url: "/__remote/#{@baseUrl}"
+      session: {}
+
+    @remoteInitial.handle(@req, @res)
+
+    @res.send = (d) ->
+      expect(d).to.eql(
+        "Error getting http://foo.com <pre>Nock: Not allow net connect for \"foo.com:80\"</pre>"
+      )
+
       done()
 
   describe "redirects", ->
@@ -51,7 +76,7 @@ describe "Remote Loader", ->
 
       @res.redirect = (loc) =>
         @req.url = loc
-        @remoteInitial.handle(@req, @res, @next)
+        @remoteInitial.handle(@req, @res)
 
     it "redirects on 301", (done) ->
       nock(@redirectUrl)
@@ -60,7 +85,7 @@ describe "Remote Loader", ->
         done()
       )
 
-      @remoteInitial.handle(@req, @res, @next)
+      @remoteInitial.handle(@req, @res)
 
     it "resets session remote after a redirect", (done) ->
       nock(@redirectUrl)
@@ -70,7 +95,7 @@ describe "Remote Loader", ->
         done()
       )
 
-      @remoteInitial.handle(@req, @res, @next)
+      @remoteInitial.handle(@req, @res)
 
   context "setting session", ->
     beforeEach ->
@@ -87,7 +112,7 @@ describe "Remote Loader", ->
         url: "/__remote/#{@baseUrl}"
         session: {}
 
-      @remoteInitial.handle(@req, @res, @next)
+      @remoteInitial.handle(@req, @res)
 
       expect(@req.session.remote).to.eql(@baseUrl)
 
@@ -96,22 +121,8 @@ describe "Remote Loader", ->
         url: "/__remote/#{@baseUrl}?foo=bar"
         session: {}
 
-      @remoteInitial.handle(@req, @res, @next)
+      @remoteInitial.handle(@req, @res)
       expect(@req.session.remote).to.eql(@baseUrl)
-
-  it "bubbles up 500 on fetch error", (done) ->
-    @req =
-      url: "/__remote/#{@baseUrl}"
-      session: {}
-
-    @remoteInitial.handle(@req, @res, @next)
-
-    @res.send = (d) ->
-      expect(d).to.eql(
-        "Error getting http://foo.com <pre>Nock: Not allow net connect for \"foo.com:80\"</pre>"
-      )
-
-      done()
 
   context "relative files", ->
 

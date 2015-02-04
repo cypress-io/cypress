@@ -11,9 +11,14 @@ UrlHelpers    = require "../util/url_helpers"
 Controller  = require "./controller"
 
 class RemoteInitial extends Controller
-  constructor: ->
+  constructor: (app) ->
     if not (@ instanceof RemoteInitial)
-      return new RemoteInitial()
+      return new RemoteInitial(app)
+
+    if not app
+      throw new Error("Instantiating controllers/remote_initial requires an app!")
+
+    @app = app
 
     super
 
@@ -54,20 +59,20 @@ class RemoteInitial extends Controller
 
   getContent: (url, res, req) ->
     switch scheme = UrlHelpers.detectScheme(url)
-      when "absolute" then @getRelativeFileContent(url)
-      when "file"     then @getFileContent(url)
-      when "url"      then @getUrlContent(url, res, req)
+      when "relative" then @getRelativeFileContent(url)
+      when "absolute"  then @getAbsoluteContent(url, res, req)
+      # when "file"     then @getFileContent(url)
 
   getRelativeFileContent: (p) ->
     fs.createReadStream(path.join(
-      app.get("cypress").projectRoot,
+      @app.get("cypress").projectRoot,
       p.split('?')[0]
     ), 'utf8')
 
   getFileContent: (p) ->
     fs.createReadStream(p.slice(7).split('?')[0], 'utf8')
 
-  getUrlContent: (url, res, req) ->
+  getAbsoluteContent: (url, res, req) ->
     @_resolveRedirects(url, res, req)
 
   errorHandler: (e, res, url) ->
@@ -78,6 +83,8 @@ class RemoteInitial extends Controller
     thr = through((d) -> this.queue(d))
 
     rq = hyperquest.get url, {}, (err, incomingRes) =>
+      console.log(url, req.url)
+      debugger
       if err?
         return thr.emit("error", err)
 

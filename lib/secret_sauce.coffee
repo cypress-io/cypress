@@ -213,4 +213,132 @@ SecretSauce.IdGenerator =
     position = matches.index + matches[1].length + 1
     @str.insert contents, position, " [#{id}]"
 
+SecretSauce.RemoteProxy =
+  _handle: (req, res, next, Domain, httpProxy) ->
+    ## strip out the /__remote/ from the req.url
+    if not req.session.remote?
+      if b = @app.get("cypress").baseUrl
+        req.session.remote = b
+      else
+        throw new Error("™ Session Proxy not yet set! ™")
+
+    proxy = httpProxy.createProxyServer({})
+
+    domain = Domain.create()
+
+    domain.on('error', next)
+
+    domain.run =>
+      @getContentStream({
+        uri: req.url.split("/__remote/").join(""),
+        remote: req.session.remote,
+        req: req
+        res: res
+        proxy: proxy
+      })
+      .on('error', (e) -> throw e)
+      .pipe(res)
+
+  getContentStream: (opts) ->
+    # console.log opts.remote, opts.uri, opts.req.url
+    switch type = @UrlHelpers.detectScheme(opts.uri)
+      when "relative" then @pipeRelativeContent(opts)
+      when "absolute" then @pipeAbsoluteContent(opts)
+      # when "file"     then @pipeFileContent(opts.uri, opts.res)
+
+  pipeAbsoluteContent: (opts) ->
+    remote = @url.parse(opts.uri)
+
+    opts.req.url = opts.uri
+
+    remote.path = "/"
+    remote.pathname = "/"
+    remote.query = ""
+    remote.search = ""
+
+    opts.proxy.web(opts.req, opts.res, {
+      target: remote.format()
+      changeOrigin: true,
+      hostRewrite: opts.req.session.host
+    })
+
+    opts.res
+
+  pipeRelativeContent: (opts) ->
+    { _ } = SecretSauce
+
+    @emit "verbose", "piping url content #{opts.uri}, #{opts.uri.split(opts.remote)[1]}"
+
+    remote = @url.parse(opts.remote)
+
+    opts.req.url = opts.req.url.replace(/\/__remote\//, "")
+    opts.req.url = @url.resolve(opts.remote, opts.req.url or "")
+
+    remote.path = "/"
+    remote.pathname = "/"
+
+    ## If the path is relative from root
+    ## like foo.com/../
+    ## we need to handle when it walks up past the root host and into
+    ## the http:// part, so we need to fix the request url to contain
+    ## the correct root.
+
+    requestUrlBase = @url.parse(opts.req.url)
+    requestUrlBase = _.extend(requestUrlBase, {
+      path: "/"
+      pathname: "/"
+      query: ""
+      search: ""
+    })
+
+    requestUrlBase = @escapeRegExp(requestUrlBase.format())
+
+    unless (remote.format().match(///^#{requestUrlBase}///))
+      basePath = @url.parse(opts.req.url).path
+      basePath = basePath.replace /\/$/, ""
+      opts.req.url = remote.format() + @url.parse(opts.req.url).host + basePath
+
+    opts.proxy.web(opts.req, opts.res, {
+      target: remote.format()
+      changeOrigin: true,
+      hostRewrite: opts.req.session.host
+    })
+
+    opts.res
+
+  # pipeAbsoluteFileContent: (uri, res) ->
+  #   @emit "verbose", "piping url content #{uri}"
+  #   @pipeFileUriContents.apply(this, arguments)
+
+
+  # pipeFileContent: (uri, res) ->
+  #   @emit "verbose", "piping url content #{uri}"
+  #   if (~uri.indexOf('file://'))
+  #     uri = uri.split('file://')[1]
+
+  #   @pipeFileUriContents.apply(this, arguments)
+
+  ## creates a read stream to a file stored on the users filesystem
+  ## taking into account if they've chosen a specific rootFolder
+  ## that their project files exist in
+  # pipeFileUriContents: (uri, res) ->
+  #   { _ } = SecretSauce
+
+  #   ## strip off any query params from our req's url
+  #   ## since we're pulling this from the file system
+  #   ## it does not understand query params
+  #   baseUri = @url.parse(uri).pathname
+
+  #   res.contentType(mime.lookup(baseUri))
+
+  #   args = _.compact([
+  #     app.get("cypress").projectRoot,
+  #     app.get("cypress").rootFolder,
+  #     baseUri
+  #   ])
+
+  #   fs.createReadStream(
+  #     path.join(args...)
+  #   )
+
 module?.exports = SecretSauce

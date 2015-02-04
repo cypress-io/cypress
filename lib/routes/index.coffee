@@ -1,12 +1,9 @@
 _           = require 'underscore'
 glob        = require 'glob'
 path        = require 'path'
-controllers = require('../controllers')
 
 module.exports = (app) ->
-  ## hack at the moment before we refactor
-  ## so our controllers have access to app
-  global.app = app
+  controllers = require('../controllers')(app)
 
   convertToAbsolutePath = (files) ->
     ## make sure its an array and remap to an absolute path
@@ -67,7 +64,7 @@ module.exports = (app) ->
   app.get "/tests/*", (req, res, next) ->
     test = req.params[0]
 
-    controllers.specProcessor.handle.call(@, app, test, req, res, next)
+    controllers.specProcessor.handle(app, test, req, res, next)
 
   app.get "/files", (req, res) ->
     files = getTestFiles()
@@ -92,13 +89,12 @@ module.exports = (app) ->
 
   app.get "/__remote/*", (req, res, next) ->
     ## might want to use cookies here instead of the query string
-
     if req.query.__initial
       controllers.remoteInitial.handle(req, res, {
         inject: "<script type='text/javascript' src='/eclectus/js/sinon.js'></script>"
       })
     else
-      controllers.remoteProxy.handle.apply(@, arguments)
+      controllers.remoteProxy.handle(req, res, next)
 
   ## we've namespaced the initial sending down of our cypress
   ## app as '__'  this route shouldn't ever be used by servers
@@ -111,7 +107,7 @@ module.exports = (app) ->
     }
 
   ## serve the real cypress JS app when we're at root
-  app.get "/", (req, res) ->
+  app.get "/", (req, res, next) ->
     ## if we dont have a req.session that means we're initially
     ## requesting the cypress app and we need to redirect to the
     ## root path that serves the app
@@ -119,11 +115,11 @@ module.exports = (app) ->
       res.redirect("/__/")
     else
       ## else pass through as normal
-      controllers.remoteProxy.handle.apply(@, arguments)
+      controllers.remoteProxy.handle(req, res, next)
 
   ## this serves the html file which is stripped down
   ## to generate the id's for the test files
-  app.get "/id_generator", (req, res) ->
+  app.get "/id_generator", (req, res, next) ->
     res.sendFile path.join(__dirname, "../", "public", "id_generator.html"), {etag: false}
 
   ## unfound paths we assume we want to pass on through

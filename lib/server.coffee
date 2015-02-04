@@ -81,6 +81,11 @@ class Server #extends require('./logger')
     ## errorhandler
     @app.use require("errorhandler")()
 
+    @createRoutes()
+
+  createRoutes: ->
+    require("./routes")(@app)
+
   open: ->
     @server    = http.createServer(@app)
     @io        = require("socket.io")(@server, {path: "/__socket.io"})
@@ -93,8 +98,6 @@ class Server #extends require('./logger')
     ## refactor this class
     socket = Socket(@io, @app)
     socket.startListening()
-
-    require("./routes")(@app)
 
     new Promise (resolve, reject) =>
       @server.listen @config.port, =>
