@@ -4,10 +4,9 @@ through2      = require 'through2'
 _             = require 'lodash'
 path          = require 'path'
 Domain        = require 'domain'
-fsUtil        = new (require("../util/file_helpers"))
 through       = require 'through'
 Url           = require 'url'
-UrlMerge      = require '../util/url_merge'
+UrlHelpers    = require "../util/url_helpers"
 
 Controller  = require "./controller"
 
@@ -54,12 +53,10 @@ class RemoteInitial extends Controller
       cb(null, src)
 
   getContent: (url, res, req) ->
-    switch type = fsUtil.detectType(url)
+    switch scheme = UrlHelpers.detectScheme(url)
       when "absolute" then @getRelativeFileContent(url)
       when "file"     then @getFileContent(url)
       when "url"      then @getUrlContent(url, res, req)
-      else
-        throw new Error "Unable to handle type #{type}"
 
   getRelativeFileContent: (p) ->
     fs.createReadStream(path.join(
@@ -85,7 +82,7 @@ class RemoteInitial extends Controller
         return thr.emit("error", err)
 
       if /^30(1|2|7|8)$/.test(incomingRes.statusCode)
-        newUrl = UrlMerge(url, incomingRes.headers.location)
+        newUrl = UrlHelpers.merge(url, incomingRes.headers.location)
         res.redirect("/__remote/" + newUrl)
       else
         res.contentType(incomingRes.headers['content-type'])

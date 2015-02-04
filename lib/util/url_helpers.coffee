@@ -1,0 +1,34 @@
+_   = require 'lodash'
+Url = require 'url'
+
+httpRe = /:\/\//
+fileRe = /^file:\/\//
+
+module.exports =
+  isFile: (url) ->
+    fileRe.test(url)
+
+  isAbsolute: (url) ->
+    httpRe.test(url) and not @isFile(url)
+
+  isRelative: (url) ->
+    not @isAbsolute(url) and not @isFile(url)
+
+  ## if url is defined we assume its an absolute url
+  detectScheme: (url = "") ->
+    switch
+      when @isFile(url)     then "file"
+      when @isAbsolute(url) then "absolute"
+      when @isRelative(url) then "relative"
+      else
+        throw new Error("Url: #{url} did not match 'absolute', 'relative', or 'file' scheme.")
+
+  merge: (origin, redirect) ->
+    originUrl   = Url.parse(origin)
+    redirectUrl = Url.parse(redirect)
+
+    _.each redirectUrl, (value, key) ->
+      if not value?
+        redirectUrl[key] = originUrl[key]
+
+    redirectUrl.format()
