@@ -10,11 +10,19 @@ fsUtil      = new (require('../util/file_helpers'))
 UrlMerge    = require '../util/url_merge'
 httpProxy   = require 'http-proxy'
 
+Controller  = require "./controller"
+
 escapeRegExp = (str) ->
   str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
-module.exports = class extends require('../logger')
-  handle: (req, res, next) =>
+class RemoteProxy extends Controller
+  constructor: ->
+    if not (@ instanceof RemoteProxy)
+      return new RemoteProxy()
+
+    super
+
+  handle: (req, res, next) ->
     ## strip out the /__remote/ from the req.url
     if not req.session.remote?
       if b = app.get("cypress").baseUrl
@@ -131,3 +139,5 @@ module.exports = class extends require('../logger')
         @pipeAbsoluteFileContent(opts.uri, res)
       else
         throw new Error "Unable to handle path for '#{type}': " + JSON.stringify(opts)
+
+module.exports = RemoteProxy

@@ -1,4 +1,4 @@
 module.exports =
-  RemoteProxy:   new (require('./remote_proxy'))().handle
-  RemoteInitial: new (require('./remote_initial'))().handle
-  SpecProcessor: new (require('./spec_processor'))().handle
+  remoteProxy:    require("./remote_proxy")()
+  remoteInitial:  require("./remote_initial")()
+  specProcessor:  require("./spec_processor")()

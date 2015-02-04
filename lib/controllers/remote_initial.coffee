@@ -9,8 +9,16 @@ through       = require 'through'
 Url           = require 'url'
 UrlMerge      = require '../util/url_merge'
 
-module.exports = class extends require('../logger')
-  handle: (req, res, opts = {}) =>
+Controller  = require "./controller"
+
+class RemoteInitial extends Controller
+  constructor: ->
+    if not (@ instanceof RemoteInitial)
+      return new RemoteInitial()
+
+    super
+
+  handle: (req, res, opts = {}) ->
     uri = req.url.split("/__remote/").join("")
     @emit "verbose", "handling request for #{uri}"
 
@@ -93,3 +101,5 @@ module.exports = class extends require('../logger')
       rq.setHeader key, val
 
     thr
+
+module.exports = RemoteInitial

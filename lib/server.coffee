@@ -120,10 +120,3 @@ class Server #extends require('./logger')
         resolve()
 
 module.exports = Server
-
-# Server = (config) ->
-#   argv = minimist(process.argv.slice(2), boolean: true)
-
-#   return Server
-
-# module.exports = Server

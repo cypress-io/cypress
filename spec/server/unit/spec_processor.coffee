@@ -17,7 +17,7 @@ describe "spec processor", ->
       fs.unlinkSync(path.join(FixturesRoot, '/sample.js'))
 
   beforeEach ->
-    @specProcessor = new SpecProcessor
+    @specProcessor = SpecProcessor()
     @res = through2.obj (chunk, enc, cb) -> cb(null, chunk)
 
     @res.type = sinon.stub()
@@ -30,6 +30,9 @@ describe "spec processor", ->
           basedir: FixturesRoot
 
     fs.writeFileSync(path.join(FixturesRoot, '/sample.js'), ';')
+
+  it "returns a new instance", ->
+    expect(@specProcessor).to.be.instanceOf(SpecProcessor)
 
   it "sets the correct content type", ->
     @specProcessor.handle app, "sample.js", {}, @res, =>

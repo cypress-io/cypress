@@ -12,7 +12,7 @@ describe "Remote Loader", ->
 
   beforeEach ->
     nock.disableNetConnect()
-    @remoteLoader = new RemoteInitial
+    @remoteInitial = RemoteInitial()
     @res = through (d) ->
     @res.send = ->
     @res.redirect = ->
@@ -21,6 +21,9 @@ describe "Remote Loader", ->
     @next = ->
     @baseUrl = "http://foo.com"
     @redirectUrl  = "http://x.com"
+
+  it "returns a new instance", ->
+    expect(@remoteInitial).to.be.instanceOf(RemoteInitial)
 
   it 'injects content', (done) ->
     readable = new Readable
@@ -48,7 +51,7 @@ describe "Remote Loader", ->
 
       @res.redirect = (loc) =>
         @req.url = loc
-        @remoteLoader.handle(@req, @res, @next)
+        @remoteInitial.handle(@req, @res, @next)
 
     it "redirects on 301", (done) ->
       nock(@redirectUrl)
@@ -57,7 +60,7 @@ describe "Remote Loader", ->
         done()
       )
 
-      @remoteLoader.handle(@req, @res, @next)
+      @remoteInitial.handle(@req, @res, @next)
 
     it "resets session remote after a redirect", (done) ->
       nock(@redirectUrl)
@@ -67,7 +70,7 @@ describe "Remote Loader", ->
         done()
       )
 
-      @remoteLoader.handle(@req, @res, @next)
+      @remoteInitial.handle(@req, @res, @next)
 
   context "setting session", ->
     beforeEach ->
@@ -84,7 +87,7 @@ describe "Remote Loader", ->
         url: "/__remote/#{@baseUrl}"
         session: {}
 
-      @remoteLoader.handle(@req, @res, @next)
+      @remoteInitial.handle(@req, @res, @next)
 
       expect(@req.session.remote).to.eql(@baseUrl)
 
@@ -93,7 +96,7 @@ describe "Remote Loader", ->
         url: "/__remote/#{@baseUrl}?foo=bar"
         session: {}
 
-      @remoteLoader.handle(@req, @res, @next)
+      @remoteInitial.handle(@req, @res, @next)
       expect(@req.session.remote).to.eql(@baseUrl)
 
   it "bubbles up 500 on fetch error", (done) ->
@@ -101,7 +104,7 @@ describe "Remote Loader", ->
       url: "/__remote/#{@baseUrl}"
       session: {}
 
-    @remoteLoader.handle(@req, @res, @next)
+    @remoteInitial.handle(@req, @res, @next)
 
     @res.send = (d) ->
       expect(d).to.eql(

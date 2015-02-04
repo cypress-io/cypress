@@ -1,14 +1,12 @@
 _           = require 'underscore'
 glob        = require 'glob'
 path        = require 'path'
-controllers = require '../controllers'
+controllers = require('../controllers')
 
 module.exports = (app) ->
   ## hack at the moment before we refactor
   ## so our controllers have access to app
   global.app = app
-
-  console.log "including routes: ", app._rand
 
   convertToAbsolutePath = (files) ->
     ## make sure its an array and remap to an absolute path
@@ -69,7 +67,7 @@ module.exports = (app) ->
   app.get "/tests/*", (req, res, next) ->
     test = req.params[0]
 
-    controllers.SpecProcessor.call(@, app, test, req, res, next)
+    controllers.specProcessor.handle.call(@, app, test, req, res, next)
 
   app.get "/files", (req, res) ->
     files = getTestFiles()
@@ -96,11 +94,11 @@ module.exports = (app) ->
     ## might want to use cookies here instead of the query string
 
     if req.query.__initial
-      controllers.RemoteInitial(req, res, {
+      controllers.remoteInitial.handle(req, res, {
         inject: "<script type='text/javascript' src='/eclectus/js/sinon.js'></script>"
       })
     else
-      controllers.RemoteProxy.apply(@, arguments)
+      controllers.remoteProxy.handle.apply(@, arguments)
 
   ## we've namespaced the initial sending down of our cypress
   ## app as '__'  this route shouldn't ever be used by servers
@@ -121,7 +119,7 @@ module.exports = (app) ->
       res.redirect("/__/")
     else
       ## else pass through as normal
-      controllers.RemoteProxy.apply(@, arguments)
+      controllers.remoteProxy.handle.apply(@, arguments)
 
   ## this serves the html file which is stripped down
   ## to generate the id's for the test files
@@ -130,4 +128,4 @@ module.exports = (app) ->
 
   ## unfound paths we assume we want to pass on through
   ## to the origin proxyUrl
-  app.all "*", controllers.RemoteProxy
+  app.all "*", controllers.remoteProxy.handle

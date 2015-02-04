@@ -10,7 +10,15 @@ Domain      = require 'domain'
 Snockets    = require 'snockets'
 requirejs   = require 'requirejs'
 
-module.exports = class extends require('../logger')
+Controller  = require "./controller"
+
+class SpecProcessor extends Controller
+  constructor: ->
+    if not (@ instanceof SpecProcessor)
+      return new SpecProcessor
+
+    super
+
   browserify: (opts, fileStream) ->
     browserify([fileStream], opts)
     .transform({}, coffeeify)
@@ -20,7 +28,7 @@ module.exports = class extends require('../logger')
   #   requirejs opts, (buildResponse) ->
   #     debugger
 
-  handle: (app, spec, req, res, next) =>
+  handle: (app, spec, req, res, next) ->
     res.type "js"
 
     settings = app.get("cypress")
@@ -78,3 +86,5 @@ module.exports = class extends require('../logger')
         # .pipe(res)
       else
         stream.pipe(res)
+
+module.exports = SpecProcessor

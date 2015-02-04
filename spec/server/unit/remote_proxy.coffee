@@ -16,7 +16,7 @@ describe "remote proxy", ->
   beforeEach ->
     nock.disableNetConnect()
     @baseUrl      = "http://www.x.com"
-    @remoteProxy  = new RemoteProxy
+    @remoteProxy  = RemoteProxy()
     @res = through2.obj((cnk, enc, cb) -> cb(null, cnk))
     @res = _.extend(@res,
       statusCode: 200
@@ -37,6 +37,9 @@ describe "remote proxy", ->
   afterEach ->
     nock.cleanAll()
     nock.enableNetConnect()
+
+  it "returns a new instance", ->
+    expect(@remoteProxy).to.be.instanceOf(RemoteProxy)
 
   it "throws without a session.remote", ->
     expect(-> @remoteProxy.handle({
