@@ -160,8 +160,6 @@ SecretSauce.Socket =
     #   @io.emit "eclectus:css:changed", file: filepath
 
 SecretSauce.IdGenerator =
-  reSymbols: /[-\/\\^$*+?.()|[\]{}]/g
-
   hasExistingId: (e) ->
     e.idFound
 
@@ -169,9 +167,6 @@ SecretSauce.IdGenerator =
     e = new Error
     e.idFound = true
     throw e
-
-  escapeRegExp: (str) ->
-    str.replace(@reSymbols, '\\$&');
 
   nextId: (data) ->
     @keys.nextKey().bind(@)

@@ -7,10 +7,13 @@ fs              = Promise.promisifyAll(require('fs'))
 Keys            = require "./keys"
 SecretSauce     = require "./util/secret_sauce_loader"
 PSemaphore      = require 'promise-semaphore'
+escapeRegExp    = require "./util/escape_regexp"
 
 pSemaphore       = new PSemaphore()
 
 class IdGenerator
+  escapeRegExp: escapeRegExp
+
   constructor: (app) ->
     if not (@ instanceof IdGenerator)
       return new IdGenerator(app)
