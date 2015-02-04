@@ -11,7 +11,7 @@ nock        = require('nock')
 
 baseUrl     = "http://www.x.com"
 
-describe.only "RemoteProxy", ->
+describe "RemoteProxy", ->
   beforeEach ->
     @sandbox = sinon.sandbox.create()
     @sandbox.stub(Server.prototype, "getCypressJson").returns({})
