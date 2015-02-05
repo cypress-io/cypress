@@ -159,6 +159,37 @@ describe "Remote Initial", ->
           .expect(200, "hello from bar!")
           .end(done)
 
+      it "omits forwarding host header", (done) ->
+        nock(@baseUrl)
+        .matchHeader "host", (val) ->
+          val isnt "demo.com"
+        .get("/bar?__initial=true")
+        .reply 200, "hello from bar!", {
+          "Content-Type": "text/html"
+        }
+
+        supertest(@app)
+          .get("/__remote/#{@baseUrl}/bar?__initial=true")
+          .set("host", "demo.com")
+          .expect(200, "hello from bar!")
+          .end(done)
+
+      it "omits forwarding accept-encoding", (done) ->
+        nock(@baseUrl)
+        .matchHeader "accept-encoding", (val) ->
+          val isnt "foo"
+        .get("/bar?__initial=true")
+        .reply 200, "hello from bar!", {
+          "Content-Type": "text/html"
+        }
+
+        supertest(@app)
+          .get("/__remote/#{@baseUrl}/bar?__initial=true")
+          .set("host", "demo.com")
+          .set("accept-encoding", "foo")
+          .expect(200, "hello from bar!")
+          .end(done)
+
   context "relative files", ->
 
   context "absolute files", ->

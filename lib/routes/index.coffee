@@ -124,4 +124,4 @@ module.exports = (app) ->
 
   ## unfound paths we assume we want to pass on through
   ## to the origin proxyUrl
-  app.all "*", controllers.remoteProxy.handle
+  app.all "*", _.bind(controllers.remoteProxy.handle, controllers.remoteProxy)
