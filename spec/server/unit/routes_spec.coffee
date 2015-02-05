@@ -1,5 +1,6 @@
 root          = "../../../"
 Server        = require("#{root}lib/server")
+Fixtures      = require "#{root}/spec/server/helpers/fixtures"
 expect        = require("chai").expect
 nock          = require('nock')
 sinon         = require('sinon')
@@ -27,6 +28,36 @@ describe "Routes", ->
     @session.destroy()
     @sandbox.restore()
     nock.cleanAll()
+
+  context "GET /files", ->
+    beforeEach ->
+      Fixtures.scaffold("todos")
+
+      @app.set "cypress", {
+        projectRoot: Fixtures.project("todos")
+        testFolder: "tests"
+      }
+
+    afterEach ->
+      Fixtures.remove("todos")
+
+    it "returns base json file path objects", (done) ->
+      supertest(@app)
+        .get("/files")
+        .expect(200, [
+          { name: "test1.js" },
+          { name: "test2.coffee" }
+        ])
+        .end(done)
+
+    it "sets X-Files-Path header to the length of files", (done) ->
+      filesPath = Fixtures.project("todos") + "/" + "tests"
+
+      supertest(@app)
+        .get("/files")
+        .expect(200)
+        .expect("X-Files-Path", filesPath)
+        .end(done)
 
   context "GET /__remote/*", ->
     describe "?__initial=true", ->

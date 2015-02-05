@@ -1,5 +1,4 @@
 _           = require 'underscore'
-glob        = require 'glob'
 path        = require 'path'
 
 convertToAbsolutePath = (files) ->
@@ -7,22 +6,6 @@ convertToAbsolutePath = (files) ->
   files = _([files]).flatten()
   files.map (files) ->
     if /^\//.test(files) then files else "/" + files
-
-getTestFiles = ->
-  testFolderPath = path.join(
-    app.get("cypress").projectRoot,
-    app.get("cypress").testFolder
-  )
-
-  ## grab all the js and coffee files
-  files = glob.sync "#{testFolderPath}/**/*.+(js|coffee)"
-
-  ## slice off the testFolder directory(ies) (which is our test folder)
-  testFolderLength = testFolderPath.split("/").length
-
-  files = _(files).map (file) -> {name: file.split("/").slice(testFolderLength).join("/")}
-  files.path = testFolderPath
-  files
 
 getSpecs = (test) ->
   ## grab all of the specs if this is ci
@@ -35,10 +18,10 @@ getSpecs = (test) ->
   ## return the specs prefixed with /tests/
   _(specs).map (spec) -> "/tests/#{spec}"
 
-getStylesheets = ->
+getStylesheets = (app) ->
   convertToAbsolutePath app.get("cypress").stylesheets
 
-getJavascripts = ->
+getJavascripts = (app) ->
   convertToAbsolutePath app.get("cypress").javascripts
 
 getUtilities = ->
@@ -66,9 +49,7 @@ module.exports = (app) ->
     controllers.specProcessor.handle(app, test, req, res, next)
 
   app.get "/files", (req, res) ->
-    files = getTestFiles()
-    res.set "X-Files-Path", files.path
-    res.json files
+    controllers.files.handle(req, res)
 
   ## routing for the dynamic iframe html
   app.get "/iframes/*", (req, res) ->
@@ -79,8 +60,8 @@ module.exports = (app) ->
 
     res.render filePath, {
       title:        req.params.test
-      stylesheets:  getStylesheets()
-      javascripts:  getJavascripts()
+      stylesheets:  getStylesheets(app)
+      javascripts:  getJavascripts(app)
       utilities:    getUtilities()
       specs:        getSpecs(test)
     }
