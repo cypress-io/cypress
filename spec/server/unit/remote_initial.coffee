@@ -6,7 +6,6 @@ expect        = require("chai").expect
 through       = require("through")
 nock          = require('nock')
 sinon         = require('sinon')
-supertest     = require("supertest")
 
 describe "Remote Initial", ->
   beforeEach ->
@@ -127,80 +126,6 @@ describe "Remote Initial", ->
 
         @remoteInitial.handle(@req, @res)
         expect(@req.session.remote).to.eql(@baseUrl)
-
-  context.only "integration", ->
-    beforeEach ->
-      @server.configureApplication()
-
-    it "basic 200 html response", (done) ->
-      nock(@baseUrl)
-      .get("/bar?__initial=true")
-      .reply 200, "hello from bar!", {
-        "Content-Type": "text/html"
-      }
-
-      supertest(@app)
-        .get("/__remote/#{@baseUrl}/bar?__initial=true")
-        .expect(200, "hello from bar!")
-        .end(done)
-
-    it "injects sinon content into head", (done) ->
-      nock(@baseUrl)
-      .get("/bar?__initial=true")
-      .reply 200, "<body>hello from bar!</body>", {
-        "Content-Type": "text/html"
-      }
-
-      supertest(@app)
-        .get("/__remote/#{@baseUrl}/bar?__initial=true")
-        .expect(200, "<body><script type='text/javascript' src='/eclectus/js/sinon.js'></script>hello from bar!</body>")
-        .end(done)
-
-    describe "headers", ->
-      it "forwards headers on outgoing requests", (done) ->
-        nock(@baseUrl)
-        .get("/bar?__initial=true")
-        .matchHeader("x-custom", "value")
-        .reply 200, "hello from bar!", {
-          "Content-Type": "text/html"
-        }
-
-        supertest(@app)
-          .get("/__remote/#{@baseUrl}/bar?__initial=true")
-          .set("x-custom", "value")
-          .expect(200, "hello from bar!")
-          .end(done)
-
-      it "omits forwarding host header", (done) ->
-        nock(@baseUrl)
-        .matchHeader "host", (val) ->
-          val isnt "demo.com"
-        .get("/bar?__initial=true")
-        .reply 200, "hello from bar!", {
-          "Content-Type": "text/html"
-        }
-
-        supertest(@app)
-          .get("/__remote/#{@baseUrl}/bar?__initial=true")
-          .set("host", "demo.com")
-          .expect(200, "hello from bar!")
-          .end(done)
-
-      it "omits forwarding accept-encoding", (done) ->
-        nock(@baseUrl)
-        .matchHeader "accept-encoding", (val) ->
-          val isnt "foo"
-        .get("/bar?__initial=true")
-        .reply 200, "hello from bar!", {
-          "Content-Type": "text/html"
-        }
-
-        supertest(@app)
-          .get("/__remote/#{@baseUrl}/bar?__initial=true")
-          .set("host", "demo.com")
-          .set("accept-encoding", "foo")
-          .expect(200, "hello from bar!")
-          .end(done)
 
   context "relative files", ->
 
