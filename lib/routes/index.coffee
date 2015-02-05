@@ -1,42 +1,4 @@
-_           = require 'underscore'
 path        = require 'path'
-
-convertToAbsolutePath = (files) ->
-  ## make sure its an array and remap to an absolute path
-  files = _([files]).flatten()
-  files.map (files) ->
-    if /^\//.test(files) then files else "/" + files
-
-getSpecs = (test) ->
-  ## grab all of the specs if this is ci
-  if test is "ci"
-    specs = _(getTestFiles()).pluck "name"
-  else
-    ## return just this single test
-    specs = [test]
-
-  ## return the specs prefixed with /tests/
-  _(specs).map (spec) -> "/tests/#{spec}"
-
-getStylesheets = (app) ->
-  convertToAbsolutePath app.get("cypress").stylesheets
-
-getJavascripts = (app) ->
-  convertToAbsolutePath app.get("cypress").javascripts
-
-getUtilities = ->
-  utils = ["iframe"]
-  # utils = ["jquery", "iframe"]
-
-  ## push sinon into utilities if enabled
-  utils.push "sinon" if app.get("cypress").sinon
-  # utils.push "chai-jquery" if app.get("cypress")["chai-jquery"]
-
-  ## i believe fixtures can be moved to the parent since
-  ## its not actually mutated within the specs
-  utils.push "fixtures" if app.get("cypress").fixtures
-
-  utils.map (util) -> "/eclectus/js/#{util}.js"
 
 module.exports = (app) ->
   controllers = require('../controllers')(app)
@@ -48,24 +10,13 @@ module.exports = (app) ->
 
     controllers.specProcessor.handle(test, req, res, next)
 
+  ## routing for /files JSON endpoint
   app.get "/files", (req, res) ->
-    controllers.files.handle(req, res)
+    controllers.files.handleFiles(req, res)
 
   ## routing for the dynamic iframe html
   app.get "/iframes/*", (req, res) ->
-
-    test = req.params[0]
-
-    filePath = path.join(__dirname, "../", "../",  "app/html/empty_inject.html")
-
-    res.render filePath, {
-      title:        req.params.test
-      stylesheets:  getStylesheets(app)
-      javascripts:  getJavascripts(app)
-      utilities:    getUtilities()
-      specs:        getSpecs(test)
-    }
-
+    controllers.files.handleIframe(req, res)
 
   app.get "/__remote/*", (req, res, next) ->
     ## might want to use cookies here instead of the query string

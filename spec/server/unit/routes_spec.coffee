@@ -6,6 +6,7 @@ nock          = require('nock')
 sinon         = require('sinon')
 supertest     = require("supertest")
 Session       = require("supertest-session")
+str           = require("underscore.string")
 
 describe "Routes", ->
   beforeEach ->
@@ -57,6 +58,38 @@ describe "Routes", ->
         .get("/files")
         .expect(200)
         .expect("X-Files-Path", filesPath)
+        .end(done)
+
+  context "GET /iframes/*", ->
+    beforeEach ->
+      Fixtures.scaffold("todos")
+
+      @app.set "cypress", {
+        projectRoot: Fixtures.project("todos")
+        testFolder: "tests"
+        stylesheets: []
+        javascripts: []
+        sinon: false
+        fixtures: false
+      }
+
+    afterEach ->
+      Fixtures.remove("todos")
+
+    it "renders empty inject with variables passed in", (done) ->
+      removeWhitespace = (c) ->
+        c = str.clean(c)
+        c = str.lines().join(" ")
+        c
+
+      contents = removeWhitespace Fixtures.get("server/expected_empty_inject.html")
+
+      supertest(@app)
+        .get("/iframes/test2.coffee")
+        .expect 200, (res) ->
+          body = removeWhitespace(res.body)
+          expect(body).to.eq contents
+          null
         .end(done)
 
   context "GET /__remote/*", ->
