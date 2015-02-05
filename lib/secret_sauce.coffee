@@ -389,7 +389,7 @@ SecretSauce.RemoteInitial =
       # when "file"     then @getFileContent(url)
 
   getRelativeFileContent: (p) ->
-    @fs.createReadStream(path.join(
+    @fs.createReadStream(@path.join(
       @app.get("cypress").projectRoot,
       p.split('?')[0]
     ), 'utf8')

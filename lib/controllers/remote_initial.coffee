@@ -1,3 +1,4 @@
+path          = require "path"
 fs            = require 'fs'
 hyperquest    = require 'hyperquest'
 path          = require 'path'
@@ -14,6 +15,7 @@ class RemoteInitial extends Controller
   through2: through2
   UrlHelpers: UrlHelpers
   hyperquest: hyperquest
+  path: path
   fs: fs
 
   constructor: (app) ->
