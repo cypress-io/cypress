@@ -2,62 +2,61 @@ _           = require 'underscore'
 glob        = require 'glob'
 path        = require 'path'
 
+convertToAbsolutePath = (files) ->
+  ## make sure its an array and remap to an absolute path
+  files = _([files]).flatten()
+  files.map (files) ->
+    if /^\//.test(files) then files else "/" + files
+
+getTestFiles = ->
+  testFolderPath = path.join(
+    app.get("cypress").projectRoot,
+    app.get("cypress").testFolder
+  )
+
+  ## grab all the js and coffee files
+  files = glob.sync "#{testFolderPath}/**/*.+(js|coffee)"
+
+  ## slice off the testFolder directory(ies) (which is our test folder)
+  testFolderLength = testFolderPath.split("/").length
+
+  files = _(files).map (file) -> {name: file.split("/").slice(testFolderLength).join("/")}
+  files.path = testFolderPath
+  files
+
+getSpecs = (test) ->
+  ## grab all of the specs if this is ci
+  if test is "ci"
+    specs = _(getTestFiles()).pluck "name"
+  else
+    ## return just this single test
+    specs = [test]
+
+  ## return the specs prefixed with /tests/
+  _(specs).map (spec) -> "/tests/#{spec}"
+
+getStylesheets = ->
+  convertToAbsolutePath app.get("cypress").stylesheets
+
+getJavascripts = ->
+  convertToAbsolutePath app.get("cypress").javascripts
+
+getUtilities = ->
+  utils = ["iframe"]
+  # utils = ["jquery", "iframe"]
+
+  ## push sinon into utilities if enabled
+  utils.push "sinon" if app.get("cypress").sinon
+  # utils.push "chai-jquery" if app.get("cypress")["chai-jquery"]
+
+  ## i believe fixtures can be moved to the parent since
+  ## its not actually mutated within the specs
+  utils.push "fixtures" if app.get("cypress").fixtures
+
+  utils.map (util) -> "/eclectus/js/#{util}.js"
+
 module.exports = (app) ->
   controllers = require('../controllers')(app)
-
-  convertToAbsolutePath = (files) ->
-    ## make sure its an array and remap to an absolute path
-    files = _([files]).flatten()
-    files.map (files) ->
-      if /^\//.test(files) then files else "/" + files
-
-  getTestFiles = ->
-    testFolderPath = path.join(
-      app.get("cypress").projectRoot,
-      app.get("cypress").testFolder
-    )
-
-    ## grab all the js and coffee files
-    files = glob.sync "#{testFolderPath}/**/*.+(js|coffee)"
-
-    ## slice off the testFolder directory(ies) (which is our test folder)
-    testFolderLength = testFolderPath.split("/").length
-
-    files = _(files).map (file) -> {name: file.split("/").slice(testFolderLength).join("/")}
-    files.path = testFolderPath
-    files
-
-  getSpecs = (test) ->
-    ## grab all of the specs if this is ci
-    if test is "ci"
-      specs = _(getTestFiles()).pluck "name"
-    else
-      ## return just this single test
-      specs = [test]
-
-    ## return the specs prefixed with /tests/
-    _(specs).map (spec) -> "/tests/#{spec}"
-
-  getStylesheets = ->
-    convertToAbsolutePath app.get("cypress").stylesheets
-
-  getJavascripts = ->
-    convertToAbsolutePath app.get("cypress").javascripts
-
-  getUtilities = ->
-    utils = ["iframe"]
-    # utils = ["jquery", "iframe"]
-
-    ## push sinon into utilities if enabled
-    utils.push "sinon" if app.get("cypress").sinon
-    # utils.push "chai-jquery" if app.get("cypress")["chai-jquery"]
-
-    ## i believe fixtures can be moved to the parent since
-    ## its not actually mutated within the specs
-    utils.push "fixtures" if app.get("cypress").fixtures
-
-    utils.map (util) -> "/eclectus/js/#{util}.js"
-
 
   ## routing for the actual specs which are processed automatically
   ## this could be just a regular .js file or a .coffee file
@@ -126,4 +125,3 @@ module.exports = (app) ->
   ## to the origin proxyUrl
   app.all "*", (req, res, next) ->
     controllers.remoteProxy.handle(req, res, next)
-   #_.bind(controllers.remoteProxy.handle, controllers.remoteProxy)
