@@ -89,9 +89,7 @@ module.exports = (app) ->
   app.get "/__remote/*", (req, res, next) ->
     ## might want to use cookies here instead of the query string
     if req.query.__initial
-      controllers.remoteInitial.handle(req, res, {
-        inject: "<script type='text/javascript' src='/eclectus/js/sinon.js'></script>"
-      })
+      controllers.remoteInitial.handle(req, res)
     else
       controllers.remoteProxy.handle(req, res, next)
 
