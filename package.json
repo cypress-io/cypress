@@ -59,7 +59,8 @@
     "sinon": "1.10.3",
     "sinon-as-promised": "^2.0.3",
     "sinon-chai": "2.6.0",
-    "supertest": "^0.15.0"
+    "supertest": "^0.15.0",
+    "supertest-session": "0.0.7"
   },
   "dependencies": {
     "auto-launch": "^0.1.14",
