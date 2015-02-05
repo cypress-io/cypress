@@ -17,17 +17,17 @@ describe "spec processor", ->
       fs.unlinkSync(path.join(FixturesRoot, '/sample.js'))
 
   beforeEach ->
-    @specProcessor = SpecProcessor()
-    @res = through2.obj (chunk, enc, cb) -> cb(null, chunk)
-
-    @res.type = sinon.stub()
-
-    global.app =
+    app =
       get: (type) ->
         projectRoot: ""
         testFolder: FixturesRoot
         browserify:
           basedir: FixturesRoot
+
+    @specProcessor = SpecProcessor(app)
+    @res = through2.obj (chunk, enc, cb) -> cb(null, chunk)
+
+    @res.type = sinon.stub()
 
     fs.writeFileSync(path.join(FixturesRoot, '/sample.js'), ';')
 
@@ -35,13 +35,13 @@ describe "spec processor", ->
     expect(@specProcessor).to.be.instanceOf(SpecProcessor)
 
   it "sets the correct content type", ->
-    @specProcessor.handle app, "sample.js", {}, @res, =>
+    @specProcessor.handle "sample.js", {}, @res, =>
 
     expect(@res.type).to.have.been.calledOnce
     .and.to.have.been.calledWith('js')
 
   it "handles snocket includes", (done) ->
-    @specProcessor.handle app, 'snocket_root.js', {}, @res, =>
+    @specProcessor.handle 'snocket_root.js', {}, @res, =>
     @results = ""
 
     ## We have to manually catch the error here
@@ -89,13 +89,13 @@ describe "spec processor", ->
           done(e)
       )
 
-      @specProcessor.handle app, 'sample.coffee', {}, @res, =>
+      @specProcessor.handle 'sample.coffee', {}, @res, =>
 
   context 'browserify', ->
     it "handles commonjs requires", (done) ->
       streamOutput = ''
 
-      @specProcessor.handle app, 'commonjs_root.js', {}, @res, (e) => done(e)
+      @specProcessor.handle 'commonjs_root.js', {}, @res, (e) => done(e)
 
       @res.pipe(through (d) ->
         streamOutput += d.toString()

@@ -46,7 +46,7 @@ module.exports = (app) ->
   app.get "/tests/*", (req, res, next) ->
     test = req.params[0]
 
-    controllers.specProcessor.handle(app, test, req, res, next)
+    controllers.specProcessor.handle(test, req, res, next)
 
   app.get "/files", (req, res) ->
     controllers.files.handle(req, res)

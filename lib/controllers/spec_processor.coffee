@@ -30,10 +30,10 @@ class SpecProcessor extends Controller
   #   requirejs opts, (buildResponse) ->
   #     debugger
 
-  handle: (app, spec, req, res, next) ->
+  handle: (spec, req, res, next) ->
     res.type "js"
 
-    settings = app.get("cypress")
+    settings = @app.get("cypress")
 
     filePath = path.join(
       settings.projectRoot,
