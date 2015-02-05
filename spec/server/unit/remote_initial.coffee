@@ -144,6 +144,18 @@ describe "Remote Initial", ->
         .expect(200, "hello from bar!")
         .end(done)
 
+    it "injects sinon content into head", (done) ->
+      nock(@baseUrl)
+      .get("/bar?__initial=true")
+      .reply 200, "<body>hello from bar!</body>", {
+        "Content-Type": "text/html"
+      }
+
+      supertest(@app)
+        .get("/__remote/#{@baseUrl}/bar?__initial=true")
+        .expect(200, "<body><script type='text/javascript' src='/eclectus/js/sinon.js'></script>hello from bar!</body>")
+        .end(done)
+
     describe "headers", ->
       it "forwards headers on outgoing requests", (done) ->
         nock(@baseUrl)

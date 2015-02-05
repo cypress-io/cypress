@@ -102,7 +102,10 @@ class RemoteInitial extends Controller
     ## set the headers on the hyperquest request
     ## this will naturally forward cookies or auth tokens
     ## or anything else which should be proxied
-    _.each req.headers, (val, key) ->
+    ## for some reason adding host / accept-encoding / accept-language
+    ## would completely bork getbootstrap.com
+    headers = _.omit(req.headers, "host", "accept-encoding", "accept-language")
+    _.each headers, (val, key) ->
       rq.setHeader key, val
 
     thr
