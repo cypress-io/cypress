@@ -44,7 +44,7 @@ describe "Cache", ->
     it "creates an empty PROJECTS key", (done) ->
       @cache._read()
       .then (contents) ->
-        contents.should.eql({PROJECTS: {}})
+        expect(contents).to.deep.eq({PROJECTS: {}})
         done()
       .catch(done)
 
@@ -52,7 +52,7 @@ describe "Cache", ->
       @cache.insertProject("FOO")
       .then => @cache._read()
       .then (contents) =>
-        contents.should.eql({
+        expect(contents).to.deep.eq({
           PROJECTS: {FOO: {RANGE: {}}}
         })
         done()
@@ -89,7 +89,7 @@ describe "Cache", ->
       it "throws an error when a project is not found", (done) ->
         @cache.getProject("FOO")
         .catch (err) ->
-          err.message.should.eql("Project FOO not found")
+          expect(err.message).to.eq("Project FOO not found")
           done()
 
     describe "#insertProject", ->
@@ -171,13 +171,16 @@ describe "Cache", ->
 
       it "can update a single project", (done) ->
         @cache.updateProject("BAR", {wow: 1})
-        .then (c) => c.should.eql({RANGE: {}, wow: 1}); done()
+        .then (c) ->
+          expect(c).to.deep.eq({RANGE: {}, wow: 1})
+          done()
         .catch(done)
 
       it "can update a project range", (done) ->
         @cache.updateRange("BAR", {start: 1, end: 2})
         .then (p) =>
-          p.should.eql({RANGE: {start:1,end:2}}); done()
+          expect(p).to.deep.eq({RANGE: {start:1,end:2}})
+          done()
         .catch(done)
 
       it "overrides only conflicting properties", (done) ->

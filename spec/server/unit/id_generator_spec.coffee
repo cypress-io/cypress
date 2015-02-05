@@ -1,14 +1,18 @@
 root         = '../../../'
 path         = require 'path'
 fs           = require 'fs'
-expect       = require('chai').expect
+chai         = require 'chai'
 sinon        = require "sinon"
 sinonPromise = require 'sinon-as-promised'
+sinonChai    = require 'sinon-chai'
 Server       = require "#{root}lib/server"
 Keys         = require "#{root}lib/keys"
 Settings     = require "#{root}lib/util/settings"
 IdGenerator  = require "#{root}lib/id_generator"
 Fixtures     = require "#{root}/spec/server/helpers/fixtures"
+
+expect       = chai.expect
+chai.use(sinonChai)
 
 describe "IdGenerator", ->
   beforeEach ->
