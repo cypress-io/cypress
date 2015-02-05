@@ -127,7 +127,7 @@ describe "Remote Initial", ->
       @remoteInitial.handle(@req, @res)
       expect(@req.session.remote).to.eql(@baseUrl)
 
-  context.only "relative files", ->
+  context "relative files", ->
     it "#getRelativeFileContent", ->
       createReadStream = @sandbox.stub(fs, "createReadStream")
       @remoteInitial.getRelativeFileContent("index.html?__initial=true")

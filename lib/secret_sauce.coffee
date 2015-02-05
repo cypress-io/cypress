@@ -241,7 +241,7 @@ SecretSauce.RemoteProxy =
 
   getContentStream: (opts) ->
     # console.log opts.remote, opts.uri, opts.req.url
-    switch type = @UrlHelpers.detectScheme(opts.uri)
+    switch @UrlHelpers.detectScheme(opts.uri)
       when "relative" then @pipeRelativeContent(opts)
       when "absolute" then @pipeAbsoluteContent(opts)
       # when "file"     then @pipeFileContent(opts.uri, opts.res)
@@ -265,6 +265,34 @@ SecretSauce.RemoteProxy =
     opts.res
 
   pipeRelativeContent: (opts) ->
+    switch @UrlHelpers.detectScheme(opts.remote)
+      when "relative" then @fromFile(opts)
+      when "aboslute" then @fromUrl(opts)
+
+  # creates a read stream to a file stored on the users filesystem
+  # taking into account if they've chosen a specific rootFolder
+  # that their project files exist in
+  fromFile: (opts) ->
+    { _ } = SecretSauce
+
+    ## strip off any query params from our req's url
+    ## since we're pulling this from the file system
+    ## it does not understand query params
+    baseUri = @url.parse(opts.uri).pathname
+
+    opts.res.contentType(@mime.lookup(baseUri))
+
+    args = _.compact([
+      @app.get("cypress").projectRoot,
+      @app.get("cypress").rootFolder,
+      baseUri
+    ])
+
+    @fs.createReadStream(
+      @path.join(args...)
+    )
+
+  fromUrl: (opts) ->
     { _ } = SecretSauce
 
     @emit "verbose", "piping url content #{opts.uri}, #{opts.uri.split(opts.remote)[1]}"
@@ -318,29 +346,6 @@ SecretSauce.RemoteProxy =
 
   #   @pipeFileUriContents.apply(this, arguments)
 
-  ## creates a read stream to a file stored on the users filesystem
-  ## taking into account if they've chosen a specific rootFolder
-  ## that their project files exist in
-  # pipeFileUriContents: (uri, res) ->
-  #   { _ } = SecretSauce
-
-  #   ## strip off any query params from our req's url
-  #   ## since we're pulling this from the file system
-  #   ## it does not understand query params
-  #   baseUri = @url.parse(uri).pathname
-
-  #   res.contentType(mime.lookup(baseUri))
-
-  #   args = _.compact([
-  #     app.get("cypress").projectRoot,
-  #     app.get("cypress").rootFolder,
-  #     baseUri
-  #   ])
-
-  #   fs.createReadStream(
-  #     path.join(args...)
-  #   )
-
 SecretSauce.RemoteInitial =
   _handle: (req, res, opts, Domain) ->
     { _ } = SecretSauce
@@ -389,10 +394,15 @@ SecretSauce.RemoteInitial =
       # when "file"     then @getFileContent(url)
 
   getRelativeFileContent: (p) ->
-    @fs.createReadStream(@path.join(
+    { _ } = SecretSauce
+
+    args = _.compact([
       @app.get("cypress").projectRoot,
+      @app.get("cypress").rootFolder,
       p.split('?')[0]
-    ), 'utf8')
+    ])
+
+    @fs.createReadStream(@path.join(args...), "utf8")
 
   getFileContent: (p) ->
     @fs.createReadStream(p.slice(7).split('?')[0], 'utf8')

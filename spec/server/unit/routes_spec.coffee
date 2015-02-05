@@ -187,35 +187,66 @@ describe "Routes", ->
             .end(done)
 
     describe "when session is already set", ->
-      beforeEach (done) ->
-        @baseUrl = "http://getbootstrap.com"
+      context "absolute baseUrl", ->
+        beforeEach (done) ->
+          @baseUrl = "http://getbootstrap.com"
 
-        ## make an initial request to set the
-        ## session proxy!
-        nock(@baseUrl)
-          .get("/css?__initial=true")
-          .reply 200, "css content page", {
-            "Content-Type": "text/html"
-          }
+          ## make an initial request to set the
+          ## session proxy!
+          nock("/__remote/#{@baseUrl}")
+            .get("/css?__initial=true")
+            .reply 200, "content page", {
+              "Content-Type": "text/html"
+            }
 
-        @session
-          .get("/__remote/#{@baseUrl}/css?__initial=true")
-          .expect (res) ->
-            expect(res.get("set-cookie")[0]).to.include("__cypress.sid")
-            null
-          .end(done)
+          @session
+            .get("/__remote/#{@baseUrl}/css?__initial=true")
+            .expect (res) ->
+              expect(res.get("set-cookie")[0]).to.include("__cypress.sid")
+              null
+            .end(done)
 
-      it "proxies absolute requests", (done) ->
-        nock(@baseUrl)
-          .get("/assets/css/application.css")
-          .reply 200, "html { color: #333 }", {
-            "Content-Type": "text/css"
-          }
+        it "proxies absolute requests", (done) ->
+          nock(@baseUrl)
+            .get("/assets/css/application.css")
+            .reply 200, "html { color: #333 }", {
+              "Content-Type": "text/css"
+            }
 
-        @session
-          .get("/__remote/#{@baseUrl}/assets/css/application.css")
-          .expect(200, "html { color: #333 }")
-          .end(done)
+          @session
+            .get("/__remote/#{@baseUrl}/assets/css/application.css")
+            .expect(200, "html { color: #333 }")
+            .end(done)
+
+      context "relative baseUrl", ->
+        beforeEach (done) ->
+          @baseUrl = "index.html"
+
+          Fixtures.scaffold("no-server")
+
+          @app.set("cypress", {
+            projectRoot: Fixtures.project("no-server")
+            rootFolder: "dev"
+            testFolder: "my-tests"
+          })
+
+          @session
+            .get("/__remote/#{@baseUrl}?__initial=true")
+            .expect(200)
+            .expect(/index.html content/)
+            .expect (res) ->
+              expect(res.get("set-cookie")[0]).to.include("__cypress.sid")
+              null
+            .end(done)
+
+        afterEach ->
+          Fixtures.remove("no-server")
+
+        it "streams from file system", (done) ->
+          @session
+            .get("/__remote/assets/app.css")
+            .expect(200, "html { color: black; }")
+            .end(done)
 
   context "GET *", ->
     beforeEach (done) ->

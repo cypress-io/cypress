@@ -14,7 +14,10 @@ SecretSauce  = require "../util/secret_sauce_loader"
 Controller  = require "./controller"
 
 class RemoteProxy extends Controller
+  fs: fs
   url: url
+  mime: mime
+  path: path
   UrlHelpers: UrlHelpers
   escapeRegExp: escapeRegExp
 
