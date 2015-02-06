@@ -267,7 +267,7 @@ SecretSauce.RemoteProxy =
   pipeRelativeContent: (opts) ->
     switch @UrlHelpers.detectScheme(opts.remote)
       when "relative" then @fromFile(opts)
-      when "aboslute" then @fromUrl(opts)
+      when "absolute" then @fromUrl(opts)
 
   # creates a read stream to a file stored on the users filesystem
   # taking into account if they've chosen a specific rootFolder
