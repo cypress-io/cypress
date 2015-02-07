@@ -56,7 +56,6 @@ describe "Keys", ->
       ensureProject = @sandbox.spy @keys.cache, "ensureProject"
 
       @keys.nextKey().then =>
-        @keys.cache.ensureProject
         expect(ensureProject).to.be.calledOnce
 
     it "gets next test number", ->
