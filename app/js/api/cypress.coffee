@@ -502,6 +502,7 @@ window.Cypress = do ($, _, Backbone) ->
       obj = {name: key, ctx: @, fn: fn, args: args, type: type}
 
       @trigger "enqueue", obj
+      Cypress.trigger "enqueue", obj
 
       @_insert(obj)
 

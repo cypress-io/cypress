@@ -1,6 +1,7 @@
 @App.module "Utilities.Overrides", (Overrides, App, Backbone, Marionette, $, _) ->
 
   runnableEmit  = Mocha.Runnable::emit
+  runnableRun   = Mocha.Runnable::run
   runnerEmit    = Mocha.Runner::emit
   hook          = Mocha.Runner::hook
   uncaught      = Mocha.Runner::uncaught
@@ -44,3 +45,38 @@
         console.error(err.stack)
 
         orig.call(@, err)
+
+    overloadMochaRunnableRun: (Cypress) ->
+      Mocha.Runnable::run = _.wrap runnableRun, (orig, args...) ->
+        runnable = @
+
+        ## if cy was enqueued within the test
+        ## then we know we should forcibly return cy
+        invokedCy = _.once ->
+          runnable._invokedCy = true
+
+        @fn = _.wrap @fn, (orig) ->
+          Cypress.on "enqueue", invokedCy
+
+          unbind = ->
+            Cypress.off "enqueue", invokedCy
+
+          try
+            ## call the original function with
+            ## our called ctx (from mocha)
+            result = orig.call(@)
+
+            unbind()
+
+            ## if we invoked cy in this function
+            ## then forcibly return cy if its not
+            ## already returned
+            if _.isUndefined(result) and runnable._invokedCy
+              return Cypress.cy
+
+            return result
+          catch e
+            unbind()
+            return e
+
+        orig.apply(@, args)
