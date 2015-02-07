@@ -69,11 +69,11 @@
             unbind()
 
             ## if we invoked cy in this function
-            ## then forcibly return cy if its not
-            ## already returned
-            if _.isUndefined(result) and runnable._invokedCy
+            ## then forcibly return cy
+            if runnable._invokedCy
               return Cypress.cy
 
+            ## else return regular result
             return result
           catch e
             unbind()
