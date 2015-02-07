@@ -2,7 +2,12 @@
 <div class="container">
   <div class="jumbotron text-center">
     <h1><i class="fa fa-home"></i></h1>
-    <p>This is the default page.</p>
-    <p>Ecl.visit(...) to your server to start testing!</p>
+    <p class="lead">This is the default blank page.</p>
+    <p>To test your web application:</p>
+    <ul class="list-unstyled">
+      <li>Start your webserver</li>
+      <li>cy.visit("/index.html")</li>
+      <li>Begin writing tests</li>
+    </ul>
   </div>
 </div>

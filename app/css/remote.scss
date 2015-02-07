@@ -18,4 +18,20 @@
 
 .jumbotron {
   margin-top: 20px;
+
+  ul {
+    text-align: left;
+    margin-right: 25%;
+    margin-left: 25%;
+    padding: 20px 20px 20px 40px;
+    list-style: none;
+    background-color: #ddd;
+    border-radius: 10px;
+
+    li {
+      list-style: decimal;
+      list-style-position: outside;
+      margin: 4px 0;
+    }
+  }
 }
