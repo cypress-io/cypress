@@ -157,7 +157,7 @@ gulp.task "watch:nw:secret:sauce", ->
 
 gulp.task "server", -> require("./server.coffee")
 
-gulp.task "test", -> require("../spec/server.coffee")
+gulp.task "test", -> require("./spec/server.coffee")
 
 gulp.task "deploy", ["client:build", "nw:build"], ->
   require("./lib/deploy")()
