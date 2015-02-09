@@ -16,6 +16,13 @@ npm run build
 npm run watch
 ```
 
+##### Start the Key Server
+
+```bash
+cd cypress-api
+npm run dev
+```
+
 ### Booting NW
 Alias 'nw' in your `.bash_profile`
 
