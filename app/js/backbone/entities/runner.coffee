@@ -285,6 +285,8 @@
 
       setListenersForAll: ->
         @runner.on "test:before:hooks", (hook, suite) =>
+          Cypress.LocalStorage.clear([], window.localStorage, @$remoteIframe.prop("contentWindow").localStorage)
+
           ## if we dont have a test already set then go
           ## find it from the hook
           @test = @getTestFromHook(hook, suite) if not @test
