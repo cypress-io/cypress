@@ -46,6 +46,7 @@
 
         orig.call(@, err)
 
+    ## need to write tests around this function
     overloadMochaRunnableRun: (Cypress) ->
       Mocha.Runnable::run = _.wrap runnableRun, (orig, args...) ->
         runnable = @
@@ -77,6 +78,6 @@
             return result
           catch e
             unbind()
-            return e
+            throw e
 
         orig.apply(@, args)
