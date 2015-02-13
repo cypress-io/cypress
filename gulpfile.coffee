@@ -6,6 +6,7 @@ fs            = require 'fs'
 yaml          = require 'js-yaml'
 jQuery        = require 'jquery-deferred'
 child_process = require "child_process"
+runSequence   = require "run-sequence"
 
 log = (obj = {}) ->
   args = [
@@ -159,8 +160,20 @@ gulp.task "server", -> require("./server.coffee")
 
 gulp.task "test", -> require("./spec/server.coffee")
 
-gulp.task "deploy", ["client:build", "nw:build"], ->
-  require("./lib/deploy")()
+gulp.task "clean:dist", ->
+  gulp.src("./dist").pipe($.clean())
+
+gulp.task "clean:build", ->
+  gulp.src("./build").pipe($.clean())
+
+gulp.task "dist", ["clean:dist"], ->
+  require("./lib/deploy").dist()
+
+gulp.task "compile", ["clean:build"], ->
+  require("./lib/deploy").compile()
+
+gulp.task "deploy", (cb) ->
+  runSequence ["client:build", "nw:build"], "dist", cb
 
 gulp.task "client",        ["client:build", "client:watch"]
 gulp.task "nw",            ["nw:build", "nw:watch"]
