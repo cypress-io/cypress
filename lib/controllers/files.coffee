@@ -25,7 +25,7 @@ class Files extends Controller
   handleIframe: (req, res) ->
     test = req.params[0]
 
-    filePath = path.join(process.cwd(), "app/html/empty_inject.html")
+    filePath = path.join(process.cwd(), "lib/html/empty_inject.html")
 
     @getSpecs(test).bind(@).then (specs) ->
       res.render filePath, {
