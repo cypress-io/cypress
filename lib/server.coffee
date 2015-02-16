@@ -6,8 +6,8 @@ _            = require 'underscore'
 _.str        = require 'underscore.string'
 allowDestroy = require "server-destroy"
 Promise      = require 'bluebird'
-Project      = require "./project.coffee"
-Socket       = require "./socket.coffee"
+Project      = require "./project"
+Socket       = require "./socket"
 Settings     = require './util/settings'
 
 ## currently not making use of event emitter

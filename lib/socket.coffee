@@ -5,7 +5,7 @@ uuid          = require 'node-uuid'
 # sauce         = require '../sauce/sauce.coffee'
 jQuery        = require 'jquery-deferred'
 chokidar      = require 'chokidar'
-IdGenerator   = require './id_generator.coffee'
+IdGenerator   = require './id_generator'
 SecretSauce   = require "../lib/util/secret_sauce_loader"
 
 class Socket
