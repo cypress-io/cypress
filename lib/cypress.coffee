@@ -1,7 +1,11 @@
+pkg = process.cwd() + "/package.json"
+process.env["NODE_ENV"] ?= require("fs-extra").readJsonSync(pkg).env
+
 child_process  = require("child_process")
 open           = require('open')
 Settings       = require("../lib/util/settings")
 Server         = require("../lib/server")
+Cache          = require("../lib/cache")
 Promise        = require('bluebird')
 
 global.config  = require("konfig")()
@@ -56,12 +60,17 @@ class Booter
   close: ->
     @server.close()
 
+  ## attach to Booter class
+  @Cache = Cache
+
 send = (obj) ->
   if process.send
     process.send(obj)
 
 isRunningFromCli = ->
-  not module.parent
+  ## make sure we're not being loaded from a parent module
+  ## and that we're not in production!
+  (not module.parent) and (process.env["NODE_ENV"] isnt "production")
 
 ## are we a child process
 ## by verifying we have the cyFork
