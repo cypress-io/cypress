@@ -7,9 +7,9 @@ Server         = require "#{root}lib/server"
 Project        = require "#{root}lib/project"
 Socket         = require "#{root}lib/socket"
 Settings       = require "#{root}lib/util/settings"
-Booter             = require "#{root}/bin/booter"
+Cypress        = require "#{root}/lib/cypress"
 
-describe "Booter", ->
+describe "Cypress", ->
   beforeEach ->
     @sandbox = sinon.sandbox.create()
     @sandbox.stub(Socket.prototype, "startListening")
@@ -19,13 +19,13 @@ describe "Booter", ->
   afterEach ->
     @sandbox.restore()
 
-    delete require.cache[require.resolve("#{root}bin/booter")]
+    delete require.cache[require.resolve("#{root}lib/cypress")]
 
   context "required as a module", ->
     beforeEach ->
       @open = @sandbox.spy Server.prototype, "open"
 
-      @booter = Booter("/Users/brian/app")
+      @booter = Cypress("/Users/brian/app")
 
       @booter.boot().then (obj) =>
         {@server, @settings} = obj
@@ -53,7 +53,7 @@ describe "Booter", ->
 
       @todos = Fixtures.project("todos")
 
-      @booter = Booter(@todos)
+      @booter = Cypress(@todos)
 
     afterEach (done) ->
       Fixtures.remove()
@@ -68,5 +68,5 @@ describe "Booter", ->
 
     it "forks booter with the proper projectRoot argument", ->
       @booter.boot({fork: true}).then (settings) =>
-        expect(@fork).to.be.calledWith require.resolve("#{root}bin/booter"), [@todos]
+        expect(@fork).to.be.calledWith require.resolve("#{root}lib/cypress"), [@todos]
         expect(settings.projectRoot).to.eq @todos
