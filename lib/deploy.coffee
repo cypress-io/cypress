@@ -2,10 +2,11 @@ path           = require("path")
 fs             = require("fs-extra")
 Promise        = require("bluebird")
 child_process  = require("child_process")
-glob           = require "glob"
+glob           = require("glob")
 gulp           = require("gulp")
 $              = require('gulp-load-plugins')()
 gutil          = require("gulp-util")
+inquirer       = require("inquirer")
 NwBuilder      = require("node-webkit-builder")
 
 fs = Promise.promisifyAll(fs)
@@ -16,7 +17,7 @@ distDir = path.join(process.cwd(), "dist")
 
 module.exports =
   prepare: ->
-    new Promise (resolve, reject) ->
+    p = new Promise (resolve, reject) ->
       ## clean/setup dist directories
       fs.removeSync(distDir)
       fs.ensureDirSync(distDir)
@@ -41,7 +42,14 @@ module.exports =
       fs.copySync("./lib/server.coffee", distDir + "/src/lib/server.coffee")
       fs.copySync("./lib/socket.coffee", distDir + "/src/lib/socket.coffee")
 
+      ## copy test files
+      # fs.copySync("./spec/server/unit/konfig_spec.coffee", distDir + "/spec/server/unit/konfig_spec.coffee")
+      # fs.copySync("./spec/server/unit/url_helpers_spec.coffee", distDir + "/spec/server/unit/url_helpers_spec.coffee")
+      # fs.removeSync(distDir + "/spec/server/unit/deploy_spec.coffee")
+
       resolve()
+
+    p.bind(@)
 
   convertToJs: ->
     ## grab everything in src
@@ -73,16 +81,23 @@ module.exports =
 
         resolve(obfuscated)
 
-  cleanup: ->
+  cleanupSrc: ->
     ## delete src
     fs.removeAsync(distDir + "/src")
 
+  runTests: ->
+    new Promise (resolve, reject) ->
+      ## change into our distDir as process.cwd()
+      process.chdir(distDir)
 
-    # deploy = new Promise (resolve, reject) =>
-    #   @npmInstall(distDir, resolve, reject)
-    # deploy.then =>
-    #   @updatePackage()
-    # deploy
+      ## require cypress to get the require path's cached
+      require(distDir + "/lib/cypress")
+
+      ## run all of our tests
+      gulp.src(distDir + "/spec/server/unit/**/*")
+        .pipe $.mocha()
+        .on "error", reject
+        .on "end", resolve
 
   dist: (cb) ->
     Promise.bind(@)
@@ -90,9 +105,10 @@ module.exports =
       .then(@updatePackage)
       .then(@convertToJs)
       .then(@obfuscate)
-      .then(@cleanup)
+      .then(@cleanupSrc)
       # .then(@npmCopy)
       .then(@npmInstall)
+      .then(@runTests)
       .then ->
         console.log gutil.colors.green("Done Dist!")
         cb?()
@@ -101,21 +117,53 @@ module.exports =
         console.log err
         console.log gutil.colors.red("Dist Failed!")
 
+  getQuestions: (version) ->
+    [{
+      name: "publish"
+      type: "confirm"
+      message: "Publish a new version?"
+      default: true
+    },{
+      name: "version"
+      type: "input"
+      message: "Bump version? (current is: #{version})"
+      default: ->
+        a = version.split(".")
+        v = a[a.length - 1]
+        v = Number(v) + 1
+        a.splice(a.length - 1, 1, v)
+        a.join(".")
+      when: (answers) ->
+        answers.publish
+    }]
+
   ## add tests around this method
   updatePackage: ->
-    json = distDir + "/package.json"
-    pkg  = fs.readJsonSync(json)
-    pkg.env = "production"
-    delete pkg.devDependencies
-    delete pkg.bin
+    new Promise (resolve, reject) =>
+      json = distDir + "/package.json"
+      pkg  = fs.readJsonSync(json)
+      pkg.env = "production"
 
-    if process.argv[3] is "--bin"
-      pkg.snapshot = "lib/secret_sauce.bin"
-      fs.copySync("./lib/secret_sauce.bin", distDir + "/lib/secret_sauce.bin")
-    else
-      fs.copySync("./lib/secret_sauce.coffee", distDir + "/src/lib/secret_sauce.coffee")
+      ## publish a new version?
+      ## if yes then prompt to increment the package version number
+      ## display existing number + offer to increment by 1
+      inquirer.prompt @getQuestions(pkg.version), (answers) ->
+        ## set the new version if we're publishing!
+        if answers.publish
+          pkg.version = answers.version
 
-    fs.writeJsonSync(json, pkg, null, 2)
+        delete pkg.devDependencies
+        delete pkg.bin
+
+        if process.argv[3] is "--bin"
+          pkg.snapshot = "lib/secret_sauce.bin"
+          fs.copySync("./lib/secret_sauce.bin", distDir + "/lib/secret_sauce.bin")
+        else
+          fs.copySync("./lib/secret_sauce.coffee", distDir + "/src/lib/secret_sauce.coffee")
+
+        fs.writeJsonSync(json, pkg, null, 2)
+
+        resolve()
 
   npmCopy: ->
     fs.copyAsync("./node_modules", distDir + "/node_modules")

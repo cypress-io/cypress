@@ -9,6 +9,8 @@ glob          = require "glob"
 sinon         = require "sinon"
 sinonPromise  = require "sinon-as-promised"
 child_process = require "child_process"
+_             = require "lodash"
+inquirer      = require "inquirer"
 
 fs       = Promise.promisifyAll(fs)
 prevCwd  = process.cwd()
@@ -94,6 +96,16 @@ describe "Deploy", ->
       @prepare().then ->
         expect(fs.statSync(distDir + "/nw/public").isDirectory()).to.be.true
 
+    # it "copies spec/server to dist", ->
+    #   @prepare().then ->
+    #     expect(fs.statSync(distDir + "/spec/server").isDirectory()).to.be.true
+
+    # it "omits deploy_spec from dist", (done) ->
+    #   @prepare().then ->
+    #     fs.statAsync(distDir + "/spec/server/unit/deploy_spec.coffee")
+    #       .then -> done("should not find deploy_spec.coffee")
+    #       .catch -> done()
+
   context "#convertToJs", ->
     beforeEach ->
       Deploy.prepare()
@@ -117,39 +129,74 @@ describe "Deploy", ->
         expect(cypress.isFile()).to.be.true
         expect(obfuscated.length).to.be.gt(0)
 
-  context "#cleanup", ->
+  context "#cleanupSrc", ->
     beforeEach ->
       Deploy.prepare()
 
     it "removes /dist/src", (done) ->
       ## we want to be sure statAsync throws
       ## because this should not be a directory
-      Deploy.cleanup().then ->
+      Deploy.cleanupSrc().then ->
         fs.statAsync(distDir + "/src")
           .then -> done("should have caught error")
           .catch -> done()
 
   context "#updatePackage", ->
     beforeEach ->
-      Deploy.prepare().then(Deploy.updatePackage).then =>
-        @pkg = fs.readJsonSync(distDir + "/package.json")
+      @setup = (obj = {}) =>
+        @sandbox.stub(inquirer, "prompt").callsArgWith(1, obj)
+
+        Deploy.prepare().then(Deploy.updatePackage).then =>
+          @pkg = fs.readJsonSync(distDir + "/package.json")
 
     it "is a valid json object", ->
-      expect(@pkg).to.be.an("Object")
+      @setup().then =>
+        expect(@pkg).to.be.an("Object")
 
     it "deletes bin", ->
-      expect(@pkg.bin).to.be.undefined
+      @setup().then =>
+        expect(@pkg.bin).to.be.undefined
 
     it "deletes devDependencies", ->
-      expect(@pkg.devDependencies).to.be.undefined
+      @setup().then =>
+        expect(@pkg.devDependencies).to.be.undefined
 
     it "copies lib/secret_sauce when not in prod", ->
-      fs.statAsync(distDir + "/src/lib/secret_sauce.coffee")
+      @setup().then =>
+        fs.statAsync(distDir + "/src/lib/secret_sauce.coffee")
 
     it "sets env to production", ->
-      expect(@pkg.env).to.eq "production"
+      @setup().then =>
+        expect(@pkg.env).to.eq "production"
+
+    it "sets package version to answer object", ->
+      @setup({publish: true, version: "1.2.3"}).then =>
+        expect(@pkg.version).to.eq "1.2.3"
+
+    it "does not set version if publish is false", ->
+      @setup({publish: false, version: "3.2.1"}).then =>
+        expect(@pkg.version).not.to.eq "3.2.1"
+
+  context "#getQuestions", ->
+    it "bumps version", ->
+      version = _.findWhere Deploy.getQuestions("1.2.30"), {name: "version"}
+      expect(version.default()).to.eq "1.2.31"
+
+  # context "#runTests", ->
+  #   beforeEach ->
+  #     Deploy.prepare()
+  #       .then(Deploy.updatePackage)
+  #       .then(Deploy.convertToJs)
+  #       .then(Deploy.obfuscate)
+  #       # .then(Deploy.cleanupSrc)
+
+  #   it "runs mocha tests", ->
+  #     Deploy.runTests().then ->
 
   context "#dist", ->
+    beforeEach ->
+      @sandbox.stub(inquirer, "prompt").callsArgWith(1, {})
+
     it "calls prepare", ->
       prepare = @sandbox.spy Deploy, "prepare"
 
@@ -174,11 +221,11 @@ describe "Deploy", ->
       Deploy.dist().then ->
         expect(obfuscate).to.be.called
 
-    it "calls cleanup", ->
-      cleanup = @sandbox.spy Deploy, "cleanup"
+    it "calls cleanupSrc", ->
+      cleanupSrc = @sandbox.spy Deploy, "cleanupSrc"
 
       Deploy.dist().then ->
-        expect(cleanup).to.be.called
+        expect(cleanupSrc).to.be.called
 
     it "calls npmInstall", ->
       npmInstall = @sandbox.spy Deploy, "npmInstall"
