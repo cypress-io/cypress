@@ -31,7 +31,7 @@ module.exports = (app) ->
   app.get "/__", (req, res) ->
     req.session.host = req.get("host")
 
-    res.render path.join(__dirname, "../", "public", "index.html"), {
+    res.render path.join(process.cwd(), "lib", "public", "index.html"), {
       config: JSON.stringify(app.get("cypress"))
     }
 
@@ -49,7 +49,7 @@ module.exports = (app) ->
   ## this serves the html file which is stripped down
   ## to generate the id's for the test files
   app.get "/id_generator", (req, res, next) ->
-    res.sendFile path.join(__dirname, "../", "public", "id_generator.html"), {etag: false}
+    res.sendFile path.join(process.cwd(), "lib", "public", "id_generator.html"), {etag: false}
 
   ## unfound paths we assume we want to pass on through
   ## to the origin proxyUrl
