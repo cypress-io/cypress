@@ -1,7 +1,7 @@
 {
   "name": "eclectus",
   "version": "0.1.0",
-  "description": "Javascript Test Studio",
+  "description": "Javascript Test Engine",
   "main": "app://app/nw/public/index.html",
   "manifestUrl": "http://localhost:8000/package.json",
   "window": {
@@ -54,6 +54,7 @@
     "node-webkit-builder": "1.0.8",
     "node-webkit-updater": "^0.2.4",
     "nodemon": "1.2.1",
+    "obfuscator": "^0.5.0",
     "rimraf": "2.2.8",
     "run-sequence": "^1.0.2",
     "setimmediate": "^1.0.2",
