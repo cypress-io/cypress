@@ -2,84 +2,144 @@ path           = require("path")
 fs             = require("fs-extra")
 Promise        = require("bluebird")
 child_process  = require("child_process")
+glob           = require "glob"
 gulp           = require("gulp")
+$              = require('gulp-load-plugins')()
 gutil          = require("gulp-util")
 NwBuilder      = require("node-webkit-builder")
+
+fs = Promise.promisifyAll(fs)
 
 require path.join(process.cwd(), "gulpfile.coffee")
 
 distDir = path.join(process.cwd(), "dist")
 
 module.exports =
+  prepare: ->
+    new Promise (resolve, reject) ->
+      ## clean/setup dist directories
+      fs.removeSync(distDir)
+      fs.ensureDirSync(distDir)
+
+      ## copy root files
+      fs.copySync("./package.json", distDir + "/package.json")
+      fs.copySync("./config/app.yml", distDir + "/config/app.yml")
+      fs.copySync("./lib/html", distDir + "/lib/html")
+      fs.copySync("./lib/public", distDir + "/lib/public")
+      fs.copySync("./nw/public", distDir + "/nw/public")
+
+      ## copy coffee src files
+      fs.copySync("./lib/cypress.coffee", distDir + "/src/lib/cypress.coffee")
+      fs.copySync("./lib/controllers", distDir + "/src/lib/controllers")
+      fs.copySync("./lib/util", distDir + "/src/lib/util")
+      fs.copySync("./lib/routes", distDir + "/src/lib/routes")
+      fs.copySync("./lib/cache.coffee", distDir + "/src/lib/cache.coffee")
+      fs.copySync("./lib/id_generator.coffee", distDir + "/src/lib/id_generator.coffee")
+      fs.copySync("./lib/keys.coffee", distDir + "/src/lib/keys.coffee")
+      fs.copySync("./lib/logger.coffee", distDir + "/src/lib/logger.coffee")
+      fs.copySync("./lib/project.coffee", distDir + "/src/lib/project.coffee")
+      fs.copySync("./lib/server.coffee", distDir + "/src/lib/server.coffee")
+      fs.copySync("./lib/socket.coffee", distDir + "/src/lib/socket.coffee")
+
+      resolve()
+
+  convertToJs: ->
+    ## grab everything in src
+    ## convert to js
+    new Promise (resolve, reject) ->
+      gulp.src(distDir + "/src/**/*.coffee")
+        .pipe $.coffee()
+        .pipe gulp.dest(distDir + "/src")
+        .on "end", resolve
+        .on "error", reject
+
+  obfuscate: ->
+    ## obfuscate all the js files
+    new Promise (resolve, reject) ->
+      ## grab all of the js files
+      files = glob.sync(distDir + "/src/**/*.js")
+
+      ## root is src
+      ## entry is cypress.js
+      ## files are all the js files
+      opts = {root: distDir + "/src", entry: distDir + "/src/lib/cypress.js", files: files}
+
+      obfuscator = require('obfuscator').obfuscator
+      obfuscator opts, (err, obfuscated) ->
+        return reject(err) if err
+
+        ## move to lib
+        fs.writeFileSync(distDir + "/lib/cypress.js", obfuscated)
+
+        resolve(obfuscated)
+
+  cleanup: ->
+    ## delete src
+    fs.removeAsync(distDir + "/src")
+
+
+    # deploy = new Promise (resolve, reject) =>
+    #   @npmInstall(distDir, resolve, reject)
+    # deploy.then =>
+    #   @updatePackage()
+    # deploy
+
   dist: (cb) ->
-    fs.removeSync(distDir)
-    fs.ensureDirSync(distDir)
-
-    fs.copySync("./package.json", distDir + "/package.json")
-    # fs.copySync("./bower.json", distDir + "/bower.json")
-    fs.copySync("./bin/booter.coffee", distDir + "/bin/booter.coffee")
-    fs.copySync("./config/app.yml", distDir + "/config/app.yml")
-    fs.copySync("./lib/html", distDir + "/lib/html")
-    fs.copySync("./lib/controllers", distDir + "/lib/controllers")
-    fs.copySync("./lib/util", distDir + "/lib/util")
-    fs.copySync("./lib/routes", distDir + "/lib/routes")
-    fs.copySync("./lib/cache.coffee", distDir + "/lib/cache.coffee")
-    fs.copySync("./lib/id_generator.coffee", distDir + "/lib/id_generator.coffee")
-    fs.copySync("./lib/keys.coffee", distDir + "/lib/keys.coffee")
-    fs.copySync("./lib/logger.coffee", distDir + "/lib/logger.coffee")
-    fs.copySync("./lib/project.coffee", distDir + "/lib/project.coffee")
-    fs.copySync("./lib/server.coffee", distDir + "/lib/server.coffee")
-    fs.copySync("./lib/socket.coffee", distDir + "/lib/socket.coffee")
-    fs.copySync("./lib/public", distDir + "/lib/public")
-    fs.copySync("./nw/public", distDir + "/nw/public")
-
-    deploy = new Promise (resolve, reject) =>
-      @npmInstall(distDir, resolve, reject)
-    deploy.then =>
-      @updatePackage()
-    deploy.then ->
-      console.log gutil.colors.green("Done Dist!")
-      cb?()
-    deploy.catch (err) ->
-      console.log gutil.colors.red("Dist Failed!")
-      console.log err
-      console.log gutil.colors.red("Dist Failed!")
+    Promise.bind(@)
+      .then(@prepare)
+      .then(@updatePackage)
+      .then(@convertToJs)
+      .then(@obfuscate)
+      .then(@cleanup)
+      # .then(@npmCopy)
+      .then(@npmInstall)
+      .then ->
+        console.log gutil.colors.green("Done Dist!")
+        cb?()
+      .catch (err) ->
+        console.log gutil.colors.red("Dist Failed!")
+        console.log err
+        console.log gutil.colors.red("Dist Failed!")
 
   ## add tests around this method
   updatePackage: ->
-    if process.argv[3] is "--prod"
-      json = distDir + "/package.json"
-      pkg = fs.readJsonSync(json)
+    json = distDir + "/package.json"
+    pkg  = fs.readJsonSync(json)
+    pkg.env = "production"
+    delete pkg.devDependencies
+    delete pkg.bin
+
+    if process.argv[3] is "--bin"
       pkg.snapshot = "lib/secret_sauce.bin"
-
-      delete pkg.devDependencies
-      delete pkg.bin
-
-      fs.writeJsonSync(json, pkg, null, 2)
-
       fs.copySync("./lib/secret_sauce.bin", distDir + "/lib/secret_sauce.bin")
     else
-      fs.copySync("./lib/secret_sauce.coffee", distDir + "/lib/secret_sauce.coffee")
+      fs.copySync("./lib/secret_sauce.coffee", distDir + "/src/lib/secret_sauce.coffee")
 
-  npmInstall: (cwd, resolve, reject) ->
-    attempts = 0
+    fs.writeJsonSync(json, pkg, null, 2)
 
-    npmInstall = ->
-      attempts += 1
+  npmCopy: ->
+    fs.copyAsync("./node_modules", distDir + "/node_modules")
 
-      child_process.exec "npm install --production", {cwd: cwd}, (err, stdout, stderr) ->
-        if err
-          return reject(err) if attempts is 3
+  npmInstall: ->
+    new Promise (resolve, reject) ->
+      attempts = 0
 
-          console.log gutil.colors.red("'npm install' failed, retrying")
-          return npmInstall()
-        else
-          console.log gutil.colors.yellow("done 'npm install'")
-          fs.writeFileSync(cwd + "/npm-install.log", stdout)
-        resolve()
+      npmInstall = ->
+        attempts += 1
 
-    console.log gutil.colors.yellow("running 'npm install'")
-    npmInstall(resolve, reject)
+        child_process.exec "npm install --production", {cwd: distDir}, (err, stdout, stderr) ->
+          if err
+            return reject(err) if attempts is 3
+
+            console.log gutil.colors.red("'npm install' failed, retrying")
+            return npmInstall()
+          else
+            console.log gutil.colors.yellow("done 'npm install'")
+            fs.writeFileSync(distDir + "/npm-install.log", stdout)
+          resolve()
+
+      console.log gutil.colors.yellow("running 'npm install'")
+      npmInstall()
 
   compile: (cb) ->
     compile = new Promise (resolve, reject) =>
