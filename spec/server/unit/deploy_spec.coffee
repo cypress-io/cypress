@@ -1,7 +1,7 @@
 root          = "../../../"
 path          = require "path"
 expect        = require("chai").expect
-deploy        = require("#{root}lib/deploy")()
+Deploy        = require("#{root}lib/deploy")
 Promise       = require "bluebird"
 fs            = require "fs-extra"
 gulp          = require "gulp"
@@ -17,8 +17,11 @@ prevCwd  = process.cwd()
 distDir  = path.join(process.cwd(), "dist")
 buildDir = path.join(process.cwd(), "build")
 
-describe.only "Deploy", ->
+deploy = null
+
+describe "Deploy", ->
   beforeEach ->
+    deploy = Deploy()
     @sandbox = sinon.sandbox.create()
     @sandbox.stub(child_process, "exec").callsArg(2)
 
@@ -239,7 +242,7 @@ describe.only "Deploy", ->
           .catch(done)
 
   context "#dist", ->
-    fns = ["prepare", "updatePackage", "setVersion", "convertToJs", "obfuscate", "cleanupSrc", "npmInstall", "package", "cleanupDist", "zipPackage"]
+    fns = ["prepare", "updatePackage", "setVersion", "convertToJs", "obfuscate", "cleanupSrc", "npmInstall", "package", "cleanupDist", "zipPackage", "uploadToS3", "updateS3Manifest"]
 
     beforeEach ->
       @sandbox.stub(inquirer, "prompt").callsArgWith(1, {})
@@ -272,14 +275,57 @@ describe.only "Deploy", ->
       @currentTest.timeout(5000)
       deploy.version = "test-1.1.1"
       fs.ensureFileSync(buildDir + "/test-1.1.1/cypress.zip")
+      deploy.getPublisher()
+      @publish = @sandbox.spy(deploy.publisher, "publish")
 
-    it "sets Cache-Control to 'no-cache'"
+    it "sets Cache-Control to 'no-cache'", ->
+      deploy.publisherOptions = {simulate: true}
+      deploy.uploadToS3().then =>
+        expect(@publish.getCall(0).args[0]).to.deep.eq({
+          "Cache-Control": "no-cache"
+          "x-amz-acl": "public-read"
+        })
 
     it "renames to include the version as dirname"
 
     it "srcs ./build/test-1.1.1/cypress.zip", ->
+      deploy.publisherOptions = {simulate: true}
       src = @sandbox.spy gulp, "src"
       deploy.uploadToS3().then ->
         expect(src).to.be.calledWith "./build/test-1.1.1/cypress.zip"
 
-    it "publishes to s3"
+    it "publishes to s3", (done) ->
+      deploy.uploadToS3().then ->
+        params = {Bucket: "dist.cypress.io", Key: "test-1.1.1/cypress.zip"}
+        deploy.publisher.client.headObject params, (err, data) ->
+          done(err)
+
+  context "#createRemoteManifest", ->
+    beforeEach ->
+      deploy.version = "5.6.7"
+      deploy.getPublisher()
+      deploy.publisherOptions = {simulate: true}
+      @publish = @sandbox.spy(deploy.publisher, "publish")
+
+    it "creates /builds/manifest.json", (done) ->
+      deploy.createRemoteManifest().then ->
+        fs.statAsync(buildDir + "/manifest.json")
+          .then -> done()
+          .catch(done)
+
+    it "returns the src to manifest.json", ->
+      deploy.createRemoteManifest().then (src) ->
+        expect(src).to.eq "./build/manifest.json"
+
+    it "writes the correct JSON", ->
+      deploy.createRemoteManifest().then (src) ->
+        json = fs.readJsonSync(src)
+        expect(json).to.deep.eq {
+          name: "cypress"
+          version: "5.6.7"
+          packages: {
+            mac: "https://s3.amazonaws.com/dist.cypress.io/5.6.7/cypress.zip"
+            win: "https://s3.amazonaws.com/dist.cypress.io/5.6.7/cypress.zip"
+            linux: "https://s3.amazonaws.com/dist.cypress.io/5.6.7/cypress.zip"
+          }
+        }

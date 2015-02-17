@@ -21,14 +21,22 @@ class Deploy
     if not (@ instanceof Deploy)
       return new Deploy()
 
-    @version = null
-    @zip     = "cypress.zip"
+    @version          = null
+    @publisher        = null
+    @publisherOptions = {}
+    @zip              = "cypress.zip"
 
   getVersion: ->
     @version ? throw new Error("Deploy#version was not defined!")
 
   setVersion: ->
     @version = fs.readJsonSync(distDir + "/package.json").version
+
+  getPublisher: ->
+    @publisher ?= $.awspublish.create
+      bucket:          config.app.s3.bucket
+      accessKeyId:     config.app.s3.access_key
+      secretAccessKey: config.app.s3.secret_key
 
   prepare: ->
     p = new Promise (resolve, reject) ->
@@ -166,6 +174,7 @@ class Deploy
       ## display existing number + offer to increment by 1
       inquirer.prompt @getQuestions(pkg.version), (answers) ->
         ## set the new version if we're publishing!
+        ## update our own local package.json as well
         if answers.publish
           pkg.version = answers.version
 
@@ -199,11 +208,9 @@ class Deploy
             console.log gutil.colors.red("'npm install' failed, retrying")
             return npmInstall()
           else
-            console.log gutil.colors.yellow("done 'npm install'")
             fs.writeFileSync(distDir + "/npm-install.log", stdout)
           resolve()
 
-      console.log gutil.colors.yellow("running 'npm install'")
       npmInstall()
 
   compile: (cb) ->
@@ -239,10 +246,8 @@ class Deploy
 
   uploadToS3: ->
     new Promise (resolve, reject) =>
-      publisher = $.awspublish.create
-        bucket:          config.app.s3.bucket
-        accessKeyId:     config.app.s3.access_key
-        secretAccessKey: config.app.s3.secret_key
+      publisher = @getPublisher()
+      options = @publisherOptions
 
       headers = {}
       headers["Cache-Control"] = "no-cache"
@@ -253,31 +258,84 @@ class Deploy
         .pipe $.rename (p) ->
           p.dirname = version + "/"
           p
-        .pipe publisher.publish(headers)
+        .pipe publisher.publish(headers, options)
         .pipe $.awspublish.reporter()
         .on "error", reject
         .on "end", resolve
 
+  createRemoteManifest: ->
+    ## this isnt yet taking into account the os
+    ## because we're only handling mac right now
+    client = @getPublisher().client
+
+    getUrl = (os) =>
+      client.endpoint.href + [config.app.s3.bucket, @version, @zip].join("/")
+
+    obj = {
+      name: "cypress"
+      version: @getVersion()
+      packages: {
+        mac: getUrl("mac")
+        win: getUrl("win")
+        linux: getUrl("linux")
+      }
+    }
+
+    src = "./build/manifest.json"
+    fs.outputJsonAsync(src, obj).return(src)
+
+  updateS3Manifest: ->
+    publisher = @getPublisher()
+    options = @publisherOptions
+
+    headers = {}
+    headers["Cache-Control"] = "no-cache"
+
+    new Promise (resolve, reject) =>
+      @createRemoteManifest().then (src) ->
+        gulp.src(src)
+          .pipe publisher.publish(headers, options)
+          .pipe $.awspublish.reporter()
+          .on "error", reject
+          .on "end", resolve
+
   dist: (cb) ->
+    log = (msg, color = "yellow") ->
+      console.log gutil.colors[color](msg)
+
     Promise.bind(@)
+      .then -> log("#prepare")
       .then(@prepare)
+      .then -> log("#updatePackage")
       .then(@updatePackage)
+      .then -> log("#setVersion")
       .then(@setVersion)
+      .then -> log("#convertToJs")
       .then(@convertToJs)
+      .then -> log("#obfuscate")
       .then(@obfuscate)
+      .then -> log("#cleanupSrc")
       .then(@cleanupSrc)
+      .then -> log("#npmInstall")
       # .then(@npmCopy)
       .then(@npmInstall)
       # .then(@runTests)
+      .then -> log("#package")
       .then(@package)
+      .then -> log("#cleanupDist")
       .then(@cleanupDist)
+      .then -> log("#zipPackage")
       .then(@zipPackage)
+      .then -> log("#uploadToS3")
       .then(@uploadToS3)
+      .then -> log("#updateS3Manifest")
+      .then(@updateS3Manifest)
+      # .then(@cleanBuild)
       .then ->
-        console.log gutil.colors.green("Done Dist!")
+        log("Dist Complete!", "green")
         cb?()
       .catch (err) ->
-        console.log gutil.colors.red("Dist Failed!")
+        log("Dist Failed!", "red")
         console.log err
 
 module.exports = Deploy
