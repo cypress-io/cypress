@@ -266,3 +266,20 @@ describe.only "Deploy", ->
         opts = child_process.exec.getCall(0).args[1]
         expect(cmd).to.eq "npm install --production"
         expect(opts).to.deep.eq {cwd: distDir}
+
+  context "#uploadToS3", ->
+    beforeEach ->
+      @currentTest.timeout(5000)
+      deploy.version = "test-1.1.1"
+      fs.ensureFileSync(buildDir + "/test-1.1.1/cypress.zip")
+
+    it "sets Cache-Control to 'no-cache'"
+
+    it "renames to include the version as dirname"
+
+    it "srcs ./build/test-1.1.1/cypress.zip", ->
+      src = @sandbox.spy gulp, "src"
+      deploy.uploadToS3().then ->
+        expect(src).to.be.calledWith "./build/test-1.1.1/cypress.zip"
+
+    it "publishes to s3"

@@ -1,3 +1,4 @@
+config         = require("konfig")()
 path           = require("path")
 fs             = require("fs-extra")
 Promise        = require("bluebird")
@@ -21,6 +22,7 @@ class Deploy
       return new Deploy()
 
     @version = null
+    @zip     = "cypress.zip"
 
   getVersion: ->
     @version ? throw new Error("Deploy#version was not defined!")
@@ -127,7 +129,7 @@ class Deploy
     new Promise (resolve, reject) =>
       version = @getVersion()
       gulp.src("./build/#{version}/**/*")
-        .pipe $.zip("cypress.zip")
+        .pipe $.zip(@zip)
         .pipe gulp.dest("./build/#{version}")
         .on "error", reject
         .on "end", resolve
@@ -235,6 +237,27 @@ class Deploy
         console.log err
         console.log gutil.colors.red("Compiling Failed!")
 
+  uploadToS3: ->
+    new Promise (resolve, reject) =>
+      publisher = $.awspublish.create
+        bucket:          config.app.s3.bucket
+        accessKeyId:     config.app.s3.access_key
+        secretAccessKey: config.app.s3.secret_key
+
+      headers = {}
+      headers["Cache-Control"] = "no-cache"
+
+      version = @getVersion()
+
+      gulp.src("./build/#{version}/#{@zip}")
+        .pipe $.rename (p) ->
+          p.dirname = version + "/"
+          p
+        .pipe publisher.publish(headers)
+        .pipe $.awspublish.reporter()
+        .on "error", reject
+        .on "end", resolve
+
   dist: (cb) ->
     Promise.bind(@)
       .then(@prepare)
@@ -249,12 +272,12 @@ class Deploy
       .then(@package)
       .then(@cleanupDist)
       .then(@zipPackage)
+      .then(@uploadToS3)
       .then ->
         console.log gutil.colors.green("Done Dist!")
         cb?()
       .catch (err) ->
         console.log gutil.colors.red("Dist Failed!")
         console.log err
-        console.log gutil.colors.red("Dist Failed!")
 
 module.exports = Deploy

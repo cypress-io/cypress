@@ -1,5 +1,9 @@
 default:
   cache_path: ".cy/cache"
+  s3:
+    access_key: AKIAJOVFAAUWYWSTJ6DQ
+    secret_key: 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
+    bucket: dist.cypress.io
 
 development: &development
   api_url: "http://localhost:1234"
