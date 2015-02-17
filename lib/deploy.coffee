@@ -15,7 +15,19 @@ require path.join(process.cwd(), "gulpfile.coffee")
 
 distDir = path.join(process.cwd(), "dist")
 
-module.exports =
+class Deploy
+  constructor: ->
+    if not (@ instanceof Deploy)
+      return new Deploy()
+
+    @version = null
+
+  getVersion: ->
+    @version ? throw new Error("Deploy#version was not defined!")
+
+  setVersion: ->
+    @version = fs.readJsonSync(distDir + "/package.json").version
+
   prepare: ->
     p = new Promise (resolve, reject) ->
       ## clean/setup dist directories
@@ -85,6 +97,9 @@ module.exports =
     ## delete src
     fs.removeAsync(distDir + "/src")
 
+  cleanupDist: ->
+    fs.removeAsync(distDir)
+
   runTests: ->
     new Promise (resolve, reject) ->
       ## change into our distDir as process.cwd()
@@ -99,23 +114,23 @@ module.exports =
         .on "error", reject
         .on "end", resolve
 
-  dist: (cb) ->
-    Promise.bind(@)
-      .then(@prepare)
-      .then(@updatePackage)
-      .then(@convertToJs)
-      .then(@obfuscate)
-      .then(@cleanupSrc)
-      # .then(@npmCopy)
-      .then(@npmInstall)
-      .then(@runTests)
-      .then ->
-        console.log gutil.colors.green("Done Dist!")
-        cb?()
-      .catch (err) ->
-        console.log gutil.colors.red("Dist Failed!")
-        console.log err
-        console.log gutil.colors.red("Dist Failed!")
+  package: ->
+    new Promise (resolve, reject) =>
+      version = @getVersion()
+      fs.removeSync("./build")
+      fs.copySync("./cache/0.11.6/osx64/node-webkit.app", "./build/#{version}/cypress.app")
+      fs.copySync(distDir, "./build/#{version}/cypress.app/Contents/Resources/app.nw")
+
+      resolve()
+
+  zipPackage: ->
+    new Promise (resolve, reject) =>
+      version = @getVersion()
+      gulp.src("./build/#{version}/**/*")
+        .pipe $.zip("cypress.zip")
+        .pipe gulp.dest("./build/#{version}")
+        .on "error", reject
+        .on "end", resolve
 
   getQuestions: (version) ->
     [{
@@ -219,3 +234,27 @@ module.exports =
         console.log gutil.colors.red("Compiling Failed!")
         console.log err
         console.log gutil.colors.red("Compiling Failed!")
+
+  dist: (cb) ->
+    Promise.bind(@)
+      .then(@prepare)
+      .then(@updatePackage)
+      .then(@setVersion)
+      .then(@convertToJs)
+      .then(@obfuscate)
+      .then(@cleanupSrc)
+      # .then(@npmCopy)
+      .then(@npmInstall)
+      # .then(@runTests)
+      .then(@package)
+      .then(@cleanupDist)
+      .then(@zipPackage)
+      .then ->
+        console.log gutil.colors.green("Done Dist!")
+        cb?()
+      .catch (err) ->
+        console.log gutil.colors.red("Dist Failed!")
+        console.log err
+        console.log gutil.colors.red("Dist Failed!")
+
+module.exports = Deploy

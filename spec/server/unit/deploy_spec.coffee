@@ -1,7 +1,7 @@
 root          = "../../../"
 path          = require "path"
 expect        = require("chai").expect
-Deploy        = require "#{root}lib/deploy"
+deploy        = require("#{root}lib/deploy")()
 Promise       = require "bluebird"
 fs            = require "fs-extra"
 gulp          = require "gulp"
@@ -15,8 +15,9 @@ inquirer      = require "inquirer"
 fs       = Promise.promisifyAll(fs)
 prevCwd  = process.cwd()
 distDir  = path.join(process.cwd(), "dist")
+buildDir = path.join(process.cwd(), "build")
 
-describe "Deploy", ->
+describe.only "Deploy", ->
   beforeEach ->
     @sandbox = sinon.sandbox.create()
     @sandbox.stub(child_process, "exec").callsArg(2)
@@ -24,12 +25,13 @@ describe "Deploy", ->
   afterEach ->
     process.chdir(prevCwd)
     fs.removeSync(distDir)
+    fs.removeSync(buildDir)
 
     @sandbox.restore()
 
   context "#prepare", ->
     beforeEach ->
-      @prepare = Deploy.prepare
+      @prepare = deploy.prepare
 
     it "creates dist folder", ->
       @prepare().then ->
@@ -108,10 +110,10 @@ describe "Deploy", ->
 
   context "#convertToJs", ->
     beforeEach ->
-      Deploy.prepare()
+      deploy.prepare()
 
     it "converts .coffee to .js", ->
-      Deploy.convertToJs().then ->
+      deploy.convertToJs().then ->
         coffeeFiles = glob.sync(distDir + "/src/**/*.coffee")
         jsFiles     = glob.sync(distDir + "/src/**/*.js")
 
@@ -121,23 +123,35 @@ describe "Deploy", ->
 
   context "#obfuscate", ->
     beforeEach ->
-      Deploy.prepare().then(Deploy.convertToJs)
+      deploy.prepare().then(deploy.convertToJs)
 
     it "writes obfuscated js to dist/lib/cypress.js", ->
-      Deploy.obfuscate().then (obfuscated) ->
+      deploy.obfuscate().then (obfuscated) ->
         cypress = fs.statSync(distDir + "/lib/cypress.js")
         expect(cypress.isFile()).to.be.true
         expect(obfuscated.length).to.be.gt(0)
 
   context "#cleanupSrc", ->
     beforeEach ->
-      Deploy.prepare()
+      deploy.prepare()
 
     it "removes /dist/src", (done) ->
       ## we want to be sure statAsync throws
       ## because this should not be a directory
-      Deploy.cleanupSrc().then ->
+      deploy.cleanupSrc().then ->
         fs.statAsync(distDir + "/src")
+          .then -> done("should have caught error")
+          .catch -> done()
+
+  context "#cleanupDist", ->
+    beforeEach ->
+      deploy.prepare()
+
+    it "removes /dist", (done) ->
+      ## we want to be sure statAsync throws
+      ## because this should not be a directory
+      deploy.cleanupDist().then ->
+        fs.statAsync(distDir)
           .then -> done("should have caught error")
           .catch -> done()
 
@@ -146,7 +160,7 @@ describe "Deploy", ->
       @setup = (obj = {}) =>
         @sandbox.stub(inquirer, "prompt").callsArgWith(1, obj)
 
-        Deploy.prepare().then(Deploy.updatePackage).then =>
+        deploy.prepare().then(deploy.updatePackage).then =>
           @pkg = fs.readJsonSync(distDir + "/package.json")
 
     it "is a valid json object", ->
@@ -179,66 +193,75 @@ describe "Deploy", ->
 
   context "#getQuestions", ->
     it "bumps version", ->
-      version = _.findWhere Deploy.getQuestions("1.2.30"), {name: "version"}
+      version = _.findWhere deploy.getQuestions("1.2.30"), {name: "version"}
       expect(version.default()).to.eq "1.2.31"
 
   # context "#runTests", ->
   #   beforeEach ->
-  #     Deploy.prepare()
-  #       .then(Deploy.updatePackage)
-  #       .then(Deploy.convertToJs)
-  #       .then(Deploy.obfuscate)
-  #       # .then(Deploy.cleanupSrc)
+  #     deploy.prepare()
+  #       .then(deploy.updatePackage)
+  #       .then(deploy.convertToJs)
+  #       .then(deploy.obfuscate)
+  #       # .then(deploy.cleanupSrc)
 
   #   it "runs mocha tests", ->
-  #     Deploy.runTests().then ->
+  #     deploy.runTests().then ->
+
+  context "#package", ->
+    beforeEach ->
+      deploy.version = "1.0.2"
+      deploy.prepare().then(deploy.package)
+
+    it "copies to build/{version}/", (done) ->
+      fs.statAsync(buildDir + "/1.0.2")
+        .then -> done()
+        .catch(done)
+
+    it "copies dist to app.nw", (done) ->
+      fs.statAsync(buildDir + "/1.0.2/cypress.app/Contents/Resources/app.nw")
+        .then -> done()
+        .catch(done)
+
+  context "#zipPackage", ->
+    beforeEach ->
+      deploy.version = "1.1.1"
+      fs.ensureFileSync(buildDir + "/1.1.1/file.txt")
+
+    it "srcs the version'ed build directory", ->
+      src = @sandbox.spy gulp, "src"
+      deploy.zipPackage().then ->
+        expect(src).to.be.calledWith "./build/1.1.1/**/*"
+
+    it "creates 'cypress.zip'", (done) ->
+      deploy.zipPackage().then ->
+        fs.statAsync(buildDir + "/1.1.1/cypress.zip")
+          .then -> done()
+          .catch(done)
 
   context "#dist", ->
+    fns = ["prepare", "updatePackage", "setVersion", "convertToJs", "obfuscate", "cleanupSrc", "npmInstall", "package", "cleanupDist", "zipPackage"]
+
     beforeEach ->
       @sandbox.stub(inquirer, "prompt").callsArgWith(1, {})
+      _.each fns, (fn) => @sandbox.stub(deploy, fn).resolves()
+      return null
 
-    it "calls prepare", ->
-      prepare = @sandbox.spy Deploy, "prepare"
+    _.each fns, (fn) =>
+      it "calls #{fn}", ->
+        deploy.dist().then ->
+          expect(deploy[fn]).to.be.called
 
-      Deploy.dist().then ->
-        expect(prepare).to.be.called
-
-    it "calls updatePackage", ->
-      updatePackage = @sandbox.spy Deploy, "updatePackage"
-
-      Deploy.dist().then ->
-        expect(updatePackage).to.be.called
-
-    it "calls convertToJs", ->
-      convertToJs = @sandbox.spy Deploy, "convertToJs"
-
-      Deploy.dist().then ->
-        expect(convertToJs).to.be.called
-
-    it "calls obfuscate", ->
-      obfuscate = @sandbox.spy Deploy, "obfuscate"
-
-      Deploy.dist().then ->
-        expect(obfuscate).to.be.called
-
-    it "calls cleanupSrc", ->
-      cleanupSrc = @sandbox.spy Deploy, "cleanupSrc"
-
-      Deploy.dist().then ->
-        expect(cleanupSrc).to.be.called
-
-    it "calls npmInstall", ->
-      npmInstall = @sandbox.spy Deploy, "npmInstall"
-
-      Deploy.dist().then ->
-        expect(npmInstall).to.be.called
+    it "calls methods in the right order", ->
+      deploy.dist().then ->
+        spies = _.map fns, (fn) -> deploy[fn]
+        sinon.assert.callOrder.apply(sinon, spies)
 
   context "#npmInstall", ->
     beforeEach ->
-      Deploy.prepare()
+      deploy.prepare()
 
     it "exec 'npm install'", ->
-      Deploy.npmInstall().then ->
+      deploy.npmInstall().then ->
         cmd = child_process.exec.getCall(0).args[0]
         opts = child_process.exec.getCall(0).args[1]
         expect(cmd).to.eq "npm install --production"

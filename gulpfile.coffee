@@ -167,7 +167,7 @@ gulp.task "clean:build", ->
   gulp.src("./build").pipe($.clean())
 
 gulp.task "dist", ->
-  require("./lib/deploy").dist()
+  require("./lib/deploy")().dist()
 
 gulp.task "compile", ["clean:build"], ->
   require("./lib/deploy").compile()
