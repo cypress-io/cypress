@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "description": "Javascript Test Engine",
   "main": "app://app/nw/public/index.html",
-  "manifestUrl": "http://localhost:8000/package.json",
   "window": {
     "frame": false,
     "toolbar": false,
@@ -55,6 +54,7 @@
     "jquery-deferred": "0.3.0",
     "js-yaml": "3.1.0",
     "mocha-phantomjs": "samccone/mocha-phantomjs#9440a35304b0ad73097e72b359bd28a1f8759468",
+    "mock-fs": "^2.5.0",
     "node-webkit-builder": "1.0.8",
     "node-webkit-updater": "^0.2.4",
     "nodemon": "1.2.1",
