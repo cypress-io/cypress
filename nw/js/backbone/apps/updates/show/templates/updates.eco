@@ -1,0 +1,6 @@
+<div id="updates">
+  <span>
+    <i class="fa fa-spinner fa-spin"></i>
+    Checking for updates...
+  </span>
+</div>

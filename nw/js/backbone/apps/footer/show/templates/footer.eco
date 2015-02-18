@@ -17,7 +17,7 @@
         <li>
           <a href="#">Debug Console</a>
         </li>
-        <li>
+        <li data-updates>
           <a href="#">Check for updates</a>
         </li>
         <li class="divider"></li>

@@ -8,12 +8,14 @@
       console:  ".fa-terminal"
       settings: ".fa-cog"
       quit:     "[data-quit]"
+      updates:  "[data-updates]"
 
     triggers:
       "click @ui.quit"     : "quit:clicked"
       "click @ui.reload"   : "reload:clicked"
       "click @ui.console"  : "console:clicked"
       "click @ui.settings" : "settings:clicked"
+      "click @ui.updates"  : "updates:clicked"
 
     onRender: ->
       @ui.settings.dropdown()

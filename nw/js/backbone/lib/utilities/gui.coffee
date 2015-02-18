@@ -70,6 +70,34 @@
     quit: ->
       gui.App.quit()
 
+    updates: ->
+      updates = App.request "gui:open", "app://app/nw/public/updates.html",
+        position: "center"
+        width: 300
+        height: 200
+        # frame: false
+        toolbar: false
+
+      updates.once "loaded", ->
+        updates.showDevTools() if App.config.env("dev")
+
+        ## grab the updates region from other window
+        $el = $("#updates-region", updates.window.document)
+
+        ## attach to the app as a custom region object
+        App.addRegions
+          updatesRegion: Marionette.Region.extend(el: $el)
+
+        App.vent.trigger "start:updates:app", App.updatesRegion
+
+      updates.once "close", ->
+        ## remove app region when this is closed down
+        App.removeRegion("updatesRegion")
+
+        ## really shut down the window!
+        @close(true)
+
+
   App.commands.setHandler "gui:display", ->
     API.displayGui()
 
@@ -93,3 +121,6 @@
 
   App.commands.setHandler "gui:quit", ->
     API.quit()
+
+  App.commands.setHandler "gui:check:for:updates", ->
+    API.updates()

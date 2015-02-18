@@ -17,6 +17,10 @@
       @listenTo footerView, "quit:clicked", ->
         App.execute "gui:quit"
 
+      @listenTo footerView, "updates:clicked", ->
+        App.execute "gui:check:for:updates"
+        # App.config.checkForUpdates()
+
       @show footerView
 
     getFooterView: ->

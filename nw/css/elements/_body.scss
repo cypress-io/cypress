@@ -1,6 +1,15 @@
 html {
   position: relative;
   height: 100%;
+
+  &.updates {
+    background-color: #EDEDED;
+
+    body {
+      background-color: #EDEDED;
+      margin-bottom: 0;
+    }
+  }
 }
 
 body {
