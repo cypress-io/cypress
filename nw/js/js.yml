@@ -1,9 +1,6 @@
 gui:
   - nw/js/gui.js
 
-updater:
-  - nw/js/updater.js
-
 vendor:
   - bower_components/jquery/dist/jquery.js
   - bower_components/underscore/underscore.js
