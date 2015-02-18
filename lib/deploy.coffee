@@ -70,6 +70,7 @@ class Deploy
       fs.copySync("./lib/project.coffee", distDir + "/src/lib/project.coffee")
       fs.copySync("./lib/server.coffee", distDir + "/src/lib/server.coffee")
       fs.copySync("./lib/socket.coffee", distDir + "/src/lib/socket.coffee")
+      fs.copySync("./lib/updater.coffee", distDir + "/src/lib/updater.coffee")
 
       ## copy test files
       # fs.copySync("./spec/server/unit/konfig_spec.coffee", distDir + "/spec/server/unit/konfig_spec.coffee")
