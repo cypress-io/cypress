@@ -5,6 +5,7 @@ child_process  = require("child_process")
 open           = require('open')
 Settings       = require("../lib/util/settings")
 Server         = require("../lib/server")
+Updater        = require("../lib/updater")
 Cache          = require("../lib/cache")
 Promise        = require('bluebird')
 
@@ -62,6 +63,9 @@ class Booter
 
   ## attach to Booter class
   @Cache = Cache
+
+  ## attach to Booter class
+  @Updater = Updater
 
 send = (obj) ->
   if process.send
