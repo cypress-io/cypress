@@ -31,6 +31,8 @@ class Deploy
     @version ? throw new Error("Deploy#version was not defined!")
 
   setVersion: ->
+    @log("#setVersion")
+
     @version = fs.readJsonSync(distDir + "/package.json").version
 
   getPublisher: ->
@@ -42,6 +44,8 @@ class Deploy
       secretAccessKey: aws.secret
 
   prepare: ->
+    @log("#prepare")
+
     p = new Promise (resolve, reject) ->
       ## clean/setup dist directories
       fs.removeSync(distDir)
@@ -77,6 +81,8 @@ class Deploy
     p.bind(@)
 
   convertToJs: ->
+    @log("#convertToJs")
+
     ## grab everything in src
     ## convert to js
     new Promise (resolve, reject) ->
@@ -87,6 +93,8 @@ class Deploy
         .on "error", reject
 
   obfuscate: ->
+    @log("#obfuscate")
+
     ## obfuscate all the js files
     new Promise (resolve, reject) ->
       ## grab all of the js files
@@ -107,13 +115,18 @@ class Deploy
         resolve(obfuscated)
 
   cleanupSrc: ->
-    ## delete src
+    @log("#cleanupSrc")
+
     fs.removeAsync(distDir + "/src")
 
   cleanupDist: ->
+    @log("#cleanupDist")
+
     fs.removeAsync(distDir)
 
   cleanupBuild: ->
+    @log("#cleanupBuild")
+
     fs.removeAsync(buildDir)
 
   runTests: ->
@@ -131,6 +144,8 @@ class Deploy
         .on "end", resolve
 
   build: ->
+    @log("#build")
+
     new Promise (resolve, reject) =>
       version = @getVersion()
       fs.removeSync(buildDir)
@@ -140,6 +155,8 @@ class Deploy
       resolve()
 
   zipBuild: ->
+    @log("#zipBuild")
+
     new Promise (resolve, reject) =>
       version = @getVersion()
       gulp.src("#{buildDir}/#{version}/**/*")
@@ -178,6 +195,8 @@ class Deploy
 
   ## add tests around this method
   updatePackages: ->
+    @log("#updatePackages")
+
     new Promise (resolve, reject) =>
       json = distDir + "/package.json"
       pkg  = fs.readJsonSync(json)
@@ -210,6 +229,8 @@ class Deploy
     fs.copyAsync("./node_modules", distDir + "/node_modules")
 
   npmInstall: ->
+    @log("#npmInstall")
+
     new Promise (resolve, reject) ->
       attempts = 0
 
@@ -259,7 +280,9 @@ class Deploy
         console.log err
         console.log gutil.colors.red("Compiling Failed!")
 
-  uploadToS3: ->
+  uploadToS3: (dirname) ->
+    @log("#uploadToS3")
+
     new Promise (resolve, reject) =>
       publisher = @getPublisher()
       options = @publisherOptions
@@ -271,18 +294,25 @@ class Deploy
 
       gulp.src("#{buildDir}/#{version}/#{@zip}")
         .pipe $.rename (p) ->
-          p.dirname = version + "/"
+          p.dirname = (dirname or version) + "/"
           p
         .pipe publisher.publish(headers, options)
         .pipe $.awspublish.reporter()
         .on "error", reject
         .on "end", resolve
 
+  uploadFixtureToS3: ->
+    @log("#uploadFixtureToS3")
+
+    @uploadToS3("fixture")
+
   createRemoteManifest: ->
     ## this isnt yet taking into account the os
     ## because we're only handling mac right now
     getUrl = (os) =>
-      [config.app.s3.path, config.app.s3.bucket, @version, @zip].join("/")
+      {
+        url: [config.app.s3.path, config.app.s3.bucket, @version, @zip].join("/")
+      }
 
     obj = {
       name: "cypress"
@@ -298,6 +328,8 @@ class Deploy
     fs.outputJsonAsync(src, obj).return(src)
 
   updateS3Manifest: ->
+    @log("#updateS3Manifest")
+
     publisher = @getPublisher()
     options = @publisherOptions
 
@@ -312,44 +344,53 @@ class Deploy
           .on "error", reject
           .on "end", resolve
 
-  dist: (cb) ->
-    log = (msg, color = "yellow") ->
-      console.log gutil.colors[color](msg)
-
+  fixture: (cb) ->
     Promise.bind(@)
-      .then -> log("#prepare")
       .then(@prepare)
-      .then -> log("#updatePackages")
       .then(@updatePackages)
-      .then -> log("#setVersion")
       .then(@setVersion)
-      .then -> log("#convertToJs")
       .then(@convertToJs)
-      .then -> log("#obfuscate")
       .then(@obfuscate)
-      .then -> log("#cleanupSrc")
       .then(@cleanupSrc)
-      .then -> log("#npmInstall")
+      .then(@npmInstall)
+      .then(@build)
+      .then(@cleanupDist)
+      .then(@zipBuild)
+      .then(@uploadFixtureToS3)
+      .then(@cleanupBuild)
+      .then ->
+        @log("Fixture Complete!", "green")
+        cb?()
+      .catch (err) ->
+        @log("Fixture Failed!", "red")
+        console.log err
+
+  log: (msg, color = "yellow") ->
+    return if process.env["NODE_ENV"] is "test"
+    console.log gutil.colors[color](msg)
+
+  dist: (cb) ->
+    Promise.bind(@)
+      .then(@prepare)
+      .then(@updatePackages)
+      .then(@setVersion)
+      .then(@convertToJs)
+      .then(@obfuscate)
+      .then(@cleanupSrc)
       # .then(@npmCopy)
       .then(@npmInstall)
       # .then(@runTests)
-      .then -> log("#build")
       .then(@build)
-      .then -> log("#cleanupDist")
       .then(@cleanupDist)
-      .then -> log("#zipBuild")
       .then(@zipBuild)
-      .then -> log("#uploadToS3")
       .then(@uploadToS3)
-      .then -> log("#updateS3Manifest")
       .then(@updateS3Manifest)
-      .then -> log("#cleanupBuild")
       .then(@cleanupBuild)
       .then ->
-        log("Dist Complete!", "green")
+        @log("Dist Complete!", "green")
         cb?()
       .catch (err) ->
-        log("Dist Failed!", "red")
+        @log("Dist Failed!", "red")
         console.log err
 
 module.exports = Deploy

@@ -33,72 +33,69 @@ describe "Deploy", ->
     @sandbox.restore()
 
   context "#prepare", ->
-    beforeEach ->
-      @prepare = deploy.prepare
-
     it "creates dist folder", ->
-      @prepare().then ->
+      deploy.prepare().then ->
         isDir = fs.statSync(distDir).isDirectory()
         expect(isDir).to.be.true
 
     it "copies package.json to dist", ->
-      @prepare().then ->
+      deploy.prepare().then ->
         expect(fs.statSync(distDir + "/package.json").isFile()).to.be.true
 
     it "copies config/app.yml to dist", ->
-      @prepare().then ->
+      deploy.prepare().then ->
         expect(fs.statSync(distDir + "/config/app.yml").isFile()).to.be.true
 
     it "copies lib/cypress to dist src", ->
-      @prepare().then ->
+      deploy.prepare().then ->
         expect(fs.statSync(distDir + "/src/lib/cypress.coffee").isFile()).to.be.true
 
     it "copies lib/controllers to dist src", ->
-      @prepare().then ->
+      deploy.prepare().then ->
         expect(fs.statSync(distDir + "/src/lib/controllers").isDirectory()).to.be.true
 
     it "copies lib/util to dist src", ->
-      @prepare().then ->
+      deploy.prepare().then ->
         expect(fs.statSync(distDir + "/src/lib/util").isDirectory()).to.be.true
 
     it "copies lib/routes to dist src", ->
-      @prepare().then ->
+      deploy.prepare().then ->
         expect(fs.statSync(distDir + "/src/lib/routes").isDirectory()).to.be.true
 
     it "copies lib/cache to dist src", ->
-      @prepare().then ->
+      deploy.prepare().then ->
         expect(fs.statSync(distDir + "/src/lib/cache.coffee").isFile()).to.be.true
 
     it "copies lib/id_generator to dist src", ->
-      @prepare().then ->
+      deploy.prepare().then ->
         expect(fs.statSync(distDir + "/src/lib/id_generator.coffee").isFile()).to.be.true
 
     it "copies lib/keys to dist src", ->
-      @prepare().then ->
+      deploy.prepare().then ->
         expect(fs.statSync(distDir + "/src/lib/keys.coffee").isFile()).to.be.true
 
     it "copies lib/logger to dist src", ->
-      @prepare().then ->
+      deploy.prepare().then ->
         expect(fs.statSync(distDir + "/src/lib/logger.coffee").isFile()).to.be.true
 
     it "copies lib/project to dist src", ->
-      @prepare().then ->
+      deploy.prepare().then ->
         expect(fs.statSync(distDir + "/src/lib/project.coffee").isFile()).to.be.true
 
     it "copies lib/server to dist src", ->
-      @prepare().then ->
+      deploy.prepare().then ->
         expect(fs.statSync(distDir + "/src/lib/server.coffee").isFile()).to.be.true
 
     it "copies lib/socket to dist src", ->
-      @prepare().then ->
+      deploy.prepare().then ->
         expect(fs.statSync(distDir + "/src/lib/socket.coffee").isFile()).to.be.true
 
     it "copies lib/public to dist", ->
-      @prepare().then ->
+      deploy.prepare().then ->
         expect(fs.statSync(distDir + "/lib/public").isDirectory()).to.be.true
 
     it "copies nw/public to dist", ->
-      @prepare().then ->
+      deploy.prepare().then ->
         expect(fs.statSync(distDir + "/nw/public").isDirectory()).to.be.true
 
     # it "copies spec/server to dist", ->
@@ -352,8 +349,8 @@ describe "Deploy", ->
           name: "cypress"
           version: "5.6.7"
           packages: {
-            mac: "https://s3.amazonaws.com/dist.cypress.io/5.6.7/cypress.zip"
-            win: "https://s3.amazonaws.com/dist.cypress.io/5.6.7/cypress.zip"
-            linux: "https://s3.amazonaws.com/dist.cypress.io/5.6.7/cypress.zip"
+            mac:   {url: "https://s3.amazonaws.com/dist.cypress.io/5.6.7/cypress.zip"}
+            win:   {url: "https://s3.amazonaws.com/dist.cypress.io/5.6.7/cypress.zip"}
+            linux: {url: "https://s3.amazonaws.com/dist.cypress.io/5.6.7/cypress.zip"}
           }
         }
