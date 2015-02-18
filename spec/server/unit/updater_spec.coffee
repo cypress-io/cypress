@@ -9,16 +9,21 @@ root        = '../../../'
 expect      = require('chai').expect
 fs          = require "fs-extra"
 Updater     = require "#{root}lib/updater"
+Fixtures    = require "#{root}/spec/server/helpers/fixtures"
 mock        = require "mock-fs"
-sinon        = require "sinon"
+nock        = require 'nock'
+sinon       = require "sinon"
 
-describe.only "Updater", ->
+describe "Updater", ->
   beforeEach ->
     @sandbox = sinon.sandbox.create()
+    nock.disableNetConnect()
 
   afterEach ->
     @sandbox.restore()
     mock.restore()
+    nock.enableNetConnect()
+    nock.cleanAll()
 
   context "interface", ->
     it "returns an updater instance", ->
@@ -61,12 +66,14 @@ describe.only "Updater", ->
 
   context "#run", ->
     beforeEach ->
-      @updater = Updater({})
+      @updater = Updater({quit: @sandbox.spy()})
       @updater.getClient()
       @checkNewVersion = @sandbox.stub(@updater.client, "checkNewVersion")
-      @download        = @sandbox.stub(@updater,        "download")
 
     describe "client#checkNewVersion", ->
+      beforeEach ->
+        @download = @sandbox.stub(@updater, "download")
+
       it "is called once", ->
         @updater.run()
         expect(@checkNewVersion).to.be.calledOnce
@@ -92,8 +99,85 @@ describe.only "Updater", ->
         expect(@download).not.to.be.called
 
     describe "#download", ->
+      beforeEach ->
+        @sandbox.stub(@updater.client, "download")
+        @sandbox.stub(@updater, "unpack")
 
-  context "integration", ->
-    ## use fs mock here to force a lower package.json version number
-    ## use nock here to forcibly return a manifest with a higher semver
-    ## make sure the updater client does all the things its supposed to do
+      it "calls unpack with destinationPath and manifest", ->
+        @updater.client.download.callsArgWith(0, null, "/Users/bmann/app")
+        @updater.download({})
+        expect(@updater.unpack).to.be.calledOnce.and.to.be.calledWith("/Users/bmann/app", {})
+
+      it "does not call unpack on error", ->
+        @updater.client.download.callsArgWith(0, (new Error), "/Users/bmann/app")
+        @updater.download({})
+        expect(@updater.unpack).not.to.be.called
+
+    describe "#unpack", ->
+      beforeEach ->
+        @sandbox.stub(@updater.client, "unpack")
+        @sandbox.stub(@updater, "install")
+
+      it "calls install with newAppPath", ->
+        @updater.client.unpack.callsArgWith(1, null, "/Users/bmann/app")
+        @updater.unpack("/some/path", {})
+        expect(@updater.install).to.be.calledOnce.and.to.be.calledWith("/Users/bmann/app")
+
+      it "does not call install on error", ->
+        @updater.client.unpack.callsArgWith(1, (new Error), "/Users/bmann/app")
+        @updater.unpack("/some/path", {})
+        expect(@updater.install).not.to.be.called
+
+    describe "#install", ->
+      beforeEach ->
+        @sandbox.stub(@updater.client, "runInstaller")
+
+      it "calls quit on the App", ->
+        @updater.install("/Users/bmann/newApp")
+        expect(@updater.App.quit).to.be.calledOnce
+
+      it "calls runInstaller on the client", ->
+        c = @updater.client
+        @updater.install("/Users/bmann/newApp")
+        expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec()], {})
+
+  context.only "integration", ->
+    before ->
+      ## 10 min timeout
+      @timeout(10 * 60 * 1000)
+
+      ## ensure we have the cypress.zip fixture
+      Fixtures.ensureNwZip()
+
+    beforeEach ->
+      ## force a lower package.json version
+      mock({
+        "package.json": JSON.stringify(version: "0.0.1")
+      })
+
+      ## force a manifest.json response here to be a slightly higher version
+      nock("https://s3.amazonaws.com")
+        .get("/dist.cypress.io/manifest.json")
+        .reply 200, {
+          name: "cypress"
+          version: "0.0.2"
+          packages: {
+            mac: {
+              url: "https://s3.amazonaws.com/dist.cypress.io/0.0.2/cypress.zip"
+            }
+            win: {
+              url: "https://s3.amazonaws.com/dist.cypress.io/0.0.2/cypress.zip"
+            }
+            linux: {
+              url: "https://s3.amazonaws.com/dist.cypress.io/0.0.2/cypress.zip"
+            }
+          }
+        }
+        .get("/dist.cypress.io/0.0.2/cypress.zip")
+        .reply 200, ->
+          mock.restore()
+          fs.createReadStream Fixtures.path("nw/cypress.zip")
+
+    it "runs", ->
+      @updater = Updater({quit: @sandbox.spy()})
+      @updater.run()

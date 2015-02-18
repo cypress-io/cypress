@@ -22,17 +22,37 @@ class Updater
   getClient: ->
     @client ?= new NwUpdater @getPackage()
 
-  unpack: (destinationPath) ->
+  install: (newAppPath) ->
+    debugger
+    console.log "updater installing!"
+    console.log "newAppPath:", newAppPath
+    console.log "getAppPath:", c.getAppPath()
+    console.log "getAppExec:", c.getAppExec()
+
+    c = @getClient()
+    c.runInstaller(newAppPath, [c.getAppPath(), c.getAppExec()], {})
+
+    @App.quit()
+
+  unpack: (destinationPath, manifest) ->
+    debugger
+    console.log "updater unpacking!"
+    fn = (err, newAppPath) =>
+      @install(newAppPath) if not err
+
+    @getClient().unpack(destinationPath, fn, manifest)
 
   download: (manifest) ->
+    debugger
+    console.log "updater download!", manifest
     fn = (err, destinationPath) =>
-      debugger
-      @unpack(destinationPath)
+      @unpack(destinationPath, manifest) if not err
 
     @getClient().download(fn, manifest)
 
   run: ->
     @getClient().checkNewVersion (err, newVersionExists, manifest) =>
+      debugger
       @download(manifest) if not err and newVersionExists
 
 module.exports = Updater
