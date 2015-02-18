@@ -34,10 +34,12 @@ class Deploy
     @version = fs.readJsonSync(distDir + "/package.json").version
 
   getPublisher: ->
+    aws = fs.readJsonSync("./aws-credentials.json")
+
     @publisher ?= $.awspublish.create
       bucket:          config.app.s3.bucket
-      accessKeyId:     config.app.s3.access_key
-      secretAccessKey: config.app.s3.secret_key
+      accessKeyId:     aws.key
+      secretAccessKey: aws.secret
 
   prepare: ->
     p = new Promise (resolve, reject) ->
@@ -279,10 +281,8 @@ class Deploy
   createRemoteManifest: ->
     ## this isnt yet taking into account the os
     ## because we're only handling mac right now
-    client = @getPublisher().client
-
     getUrl = (os) =>
-      client.endpoint.href + [config.app.s3.bucket, @version, @zip].join("/")
+      [config.app.s3.path, config.app.s3.bucket, @version, @zip].join("/")
 
     obj = {
       name: "cypress"
