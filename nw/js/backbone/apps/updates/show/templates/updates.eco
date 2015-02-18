@@ -1,6 +1,15 @@
 <div id="updates">
-  <span>
-    <i class="fa fa-spinner fa-spin"></i>
-    Checking for updates...
-  </span>
+  <% if @version: %>
+    <p class="version">
+      <b>Current Version: </b>
+      <span><%= @version %></span>
+    </p>
+    <span>
+      <i class="fa fa-spinner fa-spin"></i>
+      Checking for updates...
+    </span>
+  <% end %>
+  <% if @done: %>
+    <button class="btn btn-primary">Close</button>
+  <% end %>
 </div>

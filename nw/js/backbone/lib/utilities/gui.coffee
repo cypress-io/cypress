@@ -70,6 +70,9 @@
     quit: ->
       gui.App.quit()
 
+    manifest: ->
+      gui.App.manifest
+
     updates: ->
       updates = App.request "gui:open", "app://app/nw/public/updates.html",
         position: "center"
@@ -77,6 +80,7 @@
         height: 200
         # frame: false
         toolbar: false
+        title: ""
 
       updates.once "loaded", ->
         updates.showDevTools() if App.config.env("dev")
@@ -124,3 +128,6 @@
 
   App.commands.setHandler "gui:check:for:updates", ->
     API.updates()
+
+  App.reqres.setHandler "gui:manifest", ->
+    API.manifest()
