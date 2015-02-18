@@ -14,7 +14,8 @@ fs = Promise.promisifyAll(fs)
 
 require path.join(process.cwd(), "gulpfile.coffee")
 
-distDir = path.join(process.cwd(), "dist")
+distDir  = path.join(process.cwd(), "dist")
+buildDir = path.join(process.cwd(), "build")
 
 class Deploy
   constructor: ->
@@ -110,6 +111,9 @@ class Deploy
   cleanupDist: ->
     fs.removeAsync(distDir)
 
+  cleanupBuild: ->
+    fs.removeAsync(buildDir)
+
   runTests: ->
     new Promise (resolve, reject) ->
       ## change into our distDir as process.cwd()
@@ -124,21 +128,21 @@ class Deploy
         .on "error", reject
         .on "end", resolve
 
-  package: ->
+  build: ->
     new Promise (resolve, reject) =>
       version = @getVersion()
-      fs.removeSync("./build")
-      fs.copySync("./cache/0.11.6/osx64/node-webkit.app", "./build/#{version}/cypress.app")
-      fs.copySync(distDir, "./build/#{version}/cypress.app/Contents/Resources/app.nw")
+      fs.removeSync(buildDir)
+      fs.copySync("./cache/0.11.6/osx64/node-webkit.app", "#{buildDir}/#{version}/cypress.app")
+      fs.copySync(distDir, "#{buildDir}/#{version}/cypress.app/Contents/Resources/app.nw")
 
       resolve()
 
-  zipPackage: ->
+  zipBuild: ->
     new Promise (resolve, reject) =>
       version = @getVersion()
-      gulp.src("./build/#{version}/**/*")
+      gulp.src("#{buildDir}/#{version}/**/*")
         .pipe $.zip(@zip)
-        .pipe gulp.dest("./build/#{version}")
+        .pipe gulp.dest("#{buildDir}/#{version}")
         .on "error", reject
         .on "end", resolve
 
@@ -162,8 +166,16 @@ class Deploy
         answers.publish
     }]
 
+  updateLocalPackageJson: (version) ->
+    json = fs.readJsonSync("./package.json")
+    json.version = version
+    @writeJsonSync("./package.json", json)
+
+  writeJsonSync: (path, obj) ->
+    fs.writeJsonSync(path, obj, null, 2)
+
   ## add tests around this method
-  updatePackage: ->
+  updatePackages: ->
     new Promise (resolve, reject) =>
       json = distDir + "/package.json"
       pkg  = fs.readJsonSync(json)
@@ -172,11 +184,12 @@ class Deploy
       ## publish a new version?
       ## if yes then prompt to increment the package version number
       ## display existing number + offer to increment by 1
-      inquirer.prompt @getQuestions(pkg.version), (answers) ->
+      inquirer.prompt @getQuestions(pkg.version), (answers) =>
         ## set the new version if we're publishing!
         ## update our own local package.json as well
         if answers.publish
           pkg.version = answers.version
+          @updateLocalPackageJson(answers.version)
 
         delete pkg.devDependencies
         delete pkg.bin
@@ -187,7 +200,7 @@ class Deploy
         else
           fs.copySync("./lib/secret_sauce.coffee", distDir + "/src/lib/secret_sauce.coffee")
 
-        fs.writeJsonSync(json, pkg, null, 2)
+        @writeJsonSync(json, pkg)
 
         resolve()
 
@@ -231,8 +244,8 @@ class Deploy
       #     fs.copySync("./node_modules", "./build/eclectus - v0.1.0/osx64/eclectus.app/Contents/Resources/app.nw/node_modules")
       #   .then(resolve)
       #   .catch(reject)
-      fs.copySync("./cache/0.11.6/osx64/node-webkit.app", "./build/cypress.app")
-      fs.copySync("./dist", "./build/cypress.app/Contents/Resources/app.nw")
+      fs.copySync("./cache/0.11.6/osx64/node-webkit.app", "#{buildDir}/cypress.app")
+      fs.copySync("./dist", "#{buildDir}/cypress.app/Contents/Resources/app.nw")
       resolve()
 
     compile
@@ -254,7 +267,7 @@ class Deploy
 
       version = @getVersion()
 
-      gulp.src("./build/#{version}/#{@zip}")
+      gulp.src("#{buildDir}/#{version}/#{@zip}")
         .pipe $.rename (p) ->
           p.dirname = version + "/"
           p
@@ -281,7 +294,7 @@ class Deploy
       }
     }
 
-    src = "./build/manifest.json"
+    src = "#{buildDir}/manifest.json"
     fs.outputJsonAsync(src, obj).return(src)
 
   updateS3Manifest: ->
@@ -306,8 +319,8 @@ class Deploy
     Promise.bind(@)
       .then -> log("#prepare")
       .then(@prepare)
-      .then -> log("#updatePackage")
-      .then(@updatePackage)
+      .then -> log("#updatePackages")
+      .then(@updatePackages)
       .then -> log("#setVersion")
       .then(@setVersion)
       .then -> log("#convertToJs")
@@ -320,17 +333,18 @@ class Deploy
       # .then(@npmCopy)
       .then(@npmInstall)
       # .then(@runTests)
-      .then -> log("#package")
-      .then(@package)
+      .then -> log("#build")
+      .then(@build)
       .then -> log("#cleanupDist")
       .then(@cleanupDist)
-      .then -> log("#zipPackage")
-      .then(@zipPackage)
+      .then -> log("#zipBuild")
+      .then(@zipBuild)
       .then -> log("#uploadToS3")
       .then(@uploadToS3)
       .then -> log("#updateS3Manifest")
       .then(@updateS3Manifest)
-      # .then(@cleanBuild)
+      .then -> log("#cleanupBuild")
+      .then(@cleanupBuild)
       .then ->
         log("Dist Complete!", "green")
         cb?()

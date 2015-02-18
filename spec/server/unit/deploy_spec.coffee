@@ -158,12 +158,25 @@ describe "Deploy", ->
           .then -> done("should have caught error")
           .catch -> done()
 
-  context "#updatePackage", ->
+  context "#cleanupBuild", ->
+    beforeEach ->
+      fs.ensureFileSync(buildDir + "/1.1.1/file.txt")
+
+    it "removes /build", (done) ->
+      ## we want to be sure statAsync throws
+      ## because this should not be a directory
+      deploy.cleanupBuild().then ->
+        fs.statAsync(buildDir)
+          .then -> done("should have caught error")
+          .catch -> done()
+
+  context "#updatePackages", ->
     beforeEach ->
       @setup = (obj = {}) =>
         @sandbox.stub(inquirer, "prompt").callsArgWith(1, obj)
+        @sandbox.stub(deploy, "updateLocalPackageJson")
 
-        deploy.prepare().then(deploy.updatePackage).then =>
+        deploy.prepare().then(deploy.updatePackages).then =>
           @pkg = fs.readJsonSync(distDir + "/package.json")
 
     it "is a valid json object", ->
@@ -190,9 +203,24 @@ describe "Deploy", ->
       @setup({publish: true, version: "1.2.3"}).then =>
         expect(@pkg.version).to.eq "1.2.3"
 
+    it "calls #updateLocalPackageJson if answer publish is true", ->
+      @setup({publish: true}).then ->
+        expect(deploy.updateLocalPackageJson).to.be.calledOnce
+
     it "does not set version if publish is false", ->
       @setup({publish: false, version: "3.2.1"}).then =>
         expect(@pkg.version).not.to.eq "3.2.1"
+
+  context "#updateLocalPackageJson", ->
+    it "updates the local package.json with the new version", ->
+      @sandbox.stub(fs, "writeJsonSync")
+      @sandbox.spy deploy, "writeJsonSync"
+
+      deploy.updateLocalPackageJson("4.5.6")
+
+      args = deploy.writeJsonSync.getCall(0).args
+      expect(args[0]).to.eq "./package.json"
+      expect(args[1].version).to.eq "4.5.6"
 
   context "#getQuestions", ->
     it "bumps version", ->
@@ -202,7 +230,7 @@ describe "Deploy", ->
   # context "#runTests", ->
   #   beforeEach ->
   #     deploy.prepare()
-  #       .then(deploy.updatePackage)
+  #       .then(deploy.updatePackages)
   #       .then(deploy.convertToJs)
   #       .then(deploy.obfuscate)
   #       # .then(deploy.cleanupSrc)
@@ -210,10 +238,10 @@ describe "Deploy", ->
   #   it "runs mocha tests", ->
   #     deploy.runTests().then ->
 
-  context "#package", ->
+  context "#build", ->
     beforeEach ->
       deploy.version = "1.0.2"
-      deploy.prepare().then(deploy.package)
+      deploy.prepare().then(deploy.build)
 
     it "copies to build/{version}/", (done) ->
       fs.statAsync(buildDir + "/1.0.2")
@@ -225,24 +253,24 @@ describe "Deploy", ->
         .then -> done()
         .catch(done)
 
-  context "#zipPackage", ->
+  context "#zipBuild", ->
     beforeEach ->
       deploy.version = "1.1.1"
       fs.ensureFileSync(buildDir + "/1.1.1/file.txt")
 
     it "srcs the version'ed build directory", ->
       src = @sandbox.spy gulp, "src"
-      deploy.zipPackage().then ->
-        expect(src).to.be.calledWith "./build/1.1.1/**/*"
+      deploy.zipBuild().then ->
+        expect(src).to.be.calledWith "#{buildDir}/1.1.1/**/*"
 
     it "creates 'cypress.zip'", (done) ->
-      deploy.zipPackage().then ->
+      deploy.zipBuild().then ->
         fs.statAsync(buildDir + "/1.1.1/cypress.zip")
           .then -> done()
           .catch(done)
 
   context "#dist", ->
-    fns = ["prepare", "updatePackage", "setVersion", "convertToJs", "obfuscate", "cleanupSrc", "npmInstall", "package", "cleanupDist", "zipPackage", "uploadToS3", "updateS3Manifest"]
+    fns = ["prepare", "updatePackages", "setVersion", "convertToJs", "obfuscate", "cleanupSrc", "npmInstall", "build", "cleanupDist", "zipBuild", "uploadToS3", "updateS3Manifest", "cleanupBuild"]
 
     beforeEach ->
       @sandbox.stub(inquirer, "prompt").callsArgWith(1, {})
@@ -288,11 +316,11 @@ describe "Deploy", ->
 
     it "renames to include the version as dirname"
 
-    it "srcs ./build/test-1.1.1/cypress.zip", ->
+    it "srcs #{buildDir}/test-1.1.1/cypress.zip", ->
       deploy.publisherOptions = {simulate: true}
       src = @sandbox.spy gulp, "src"
       deploy.uploadToS3().then ->
-        expect(src).to.be.calledWith "./build/test-1.1.1/cypress.zip"
+        expect(src).to.be.calledWith "#{buildDir}/test-1.1.1/cypress.zip"
 
     it "publishes to s3", (done) ->
       deploy.uploadToS3().then ->
@@ -315,7 +343,7 @@ describe "Deploy", ->
 
     it "returns the src to manifest.json", ->
       deploy.createRemoteManifest().then (src) ->
-        expect(src).to.eq "./build/manifest.json"
+        expect(src).to.eq "#{buildDir}/manifest.json"
 
     it "writes the correct JSON", ->
       deploy.createRemoteManifest().then (src) ->
