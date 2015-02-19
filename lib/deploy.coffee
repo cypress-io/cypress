@@ -10,6 +10,7 @@ $              = require('gulp-load-plugins')()
 gutil          = require("gulp-util")
 inquirer       = require("inquirer")
 NwBuilder      = require("node-webkit-builder")
+yazl           = require("yazl")
 
 fs = Promise.promisifyAll(fs)
 
@@ -149,13 +150,33 @@ class Deploy
   zipBuild: (platform) ->
     @log("#zipBuild: #{platform}")
 
-    new Promise (resolve, reject) =>
-      version = @getVersion()
-      gulp.src("#{buildDir}/#{version}/#{platform}/**/*")
-        .pipe $.zip(@zip)
-        .pipe gulp.dest("#{buildDir}/#{version}/#{platform}")
-        .on "error", reject
-        .on "end", resolve
+    ## change this to something manual if you're using
+    ## the task: gulp dist:zip
+    version = @getVersion()
+
+    zip = new yazl.ZipFile()
+
+    root = "#{buildDir}/#{version}/#{platform}"
+
+    files = glob.sync("#{root}/**/*", nodir: true)
+
+    getFiles = ->
+      _.map files, (file) ->
+        fs.statAsync(file).then (c) ->
+          ## dont add anything thats not a file!
+          return if not c.isFile()
+
+          ## make the name relative from the platform
+          name = path.relative(root, file)
+          zip.addFile(file, name)
+
+    Promise.all(getFiles()).then =>
+
+      new Promise (resolve, reject) =>
+        output = zip.outputStream.pipe(fs.createWriteStream("#{root}/#{@zip}"))
+        output.on "close", resolve
+
+        zip.end()
 
   zipBuilds: ->
     @log("#zipBuilds")
@@ -353,7 +374,6 @@ class Deploy
       .then(@build)
       .then(@npmInstall)
       .then(@cleanupDist)
-      .then(@zipBuilds)
 
   fixture: (cb) ->
     @dist()
