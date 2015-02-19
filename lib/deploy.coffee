@@ -153,7 +153,7 @@ class Deploy
       version = @getVersion()
       gulp.src("#{buildDir}/#{version}/#{platform}/**/*")
         .pipe $.zip(@zip)
-        .pipe gulp.dest("#{buildDir}/#{version}")
+        .pipe gulp.dest("#{buildDir}/#{version}/#{platform}")
         .on "error", reject
         .on "end", resolve
 
@@ -231,7 +231,7 @@ class Deploy
     new Promise (resolve, reject) ->
       attempts = 0
 
-      pathToPackageDir = ->
+      pathToPackageDir = _.once ->
         ## return the path to the directory containing the package.json
         packages = glob.sync(buildDir + "/**/package.json", {nodir: true})
         path.dirname(packages[0])
@@ -246,7 +246,12 @@ class Deploy
             console.log gutil.colors.red("'npm install' failed, retrying")
             return npmInstall()
           else
-            fs.writeFileSync(distDir + "/npm-install.log", stdout)
+            fs.writeFileSync(pathToPackageDir() + "/npm-install.log", stdout)
+
+          ## promise-semaphore has a weird '/'' file which causes zipping to bomb
+          ## so we must remove that file!
+          fs.removeSync(pathToPackageDir() + "/node_modules/promise-semaphore/\\")
+
           resolve()
 
       npmInstall()
@@ -278,7 +283,7 @@ class Deploy
 
       version = @getVersion()
 
-      gulp.src("#{buildDir}/#{version}/#{@zip}")
+      gulp.src("#{buildDir}/#{version}/#{platform}/#{@zip}")
         .pipe $.rename (p) =>
           p.dirname = @getUploadDirName(version, platform, override)
           p
@@ -297,7 +302,7 @@ class Deploy
   uploadFixtureToS3: ->
     @log("#uploadFixtureToS3")
 
-    @uploadToS3(null, "fixture")
+    @uploadToS3("osx64", "fixture")
 
   createRemoteManifest: ->
     ## this isnt yet taking into account the os

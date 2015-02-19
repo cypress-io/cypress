@@ -50,7 +50,7 @@
     "gulp-ruby-sass": "0.5.0",
     "gulp-tap": "0.1.1",
     "gulp-util": "3.0.0",
-    "gulp-zip": "^2.0.2",
+    "gulp-zip": "kevva/gulp-zip#ba293b7985c4395e78ca7df228cac07c51ff2e54",
     "inquirer": "^0.8.0",
     "jquery-deferred": "0.3.0",
     "js-yaml": "3.1.0",

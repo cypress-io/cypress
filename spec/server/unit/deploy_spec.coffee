@@ -266,7 +266,7 @@ describe "Deploy", ->
 
     it "creates 'cypress.zip'", (done) ->
       deploy.zipBuilds().then ->
-        fs.statAsync(buildDir + "/1.1.1/cypress.zip")
+        fs.statAsync(buildDir + "/1.1.1/osx64/cypress.zip")
           .then -> done()
           .catch(done)
 
@@ -304,7 +304,7 @@ describe "Deploy", ->
     beforeEach ->
       @currentTest.timeout(5000)
       deploy.version = "test-1.1.1"
-      fs.ensureFileSync(buildDir + "/test-1.1.1/cypress.zip")
+      fs.ensureFileSync(buildDir + "/test-1.1.1/osx64/cypress.zip")
       deploy.getPublisher()
       @publish = @sandbox.spy(deploy.publisher, "publish")
 
@@ -324,11 +324,11 @@ describe "Deploy", ->
 
     it "renames to include the version as dirname"
 
-    it "srcs #{buildDir}/test-1.1.1/cypress.zip", ->
+    it "srcs #{buildDir}/test-1.1.1/osx64/cypress.zip", ->
       deploy.publisherOptions = {simulate: true}
       src = @sandbox.spy gulp, "src"
-      deploy.uploadToS3().then ->
-        expect(src).to.be.calledWith "#{buildDir}/test-1.1.1/cypress.zip"
+      deploy.uploadToS3("osx64").then ->
+        expect(src).to.be.calledWith "#{buildDir}/test-1.1.1/osx64/cypress.zip"
 
     it "publishes to s3", (done) ->
       deploy.uploadToS3().then ->
