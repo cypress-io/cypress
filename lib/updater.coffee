@@ -1,6 +1,7 @@
 global.config ?= require("konfig")()
 fs             = require("fs-extra")
 path           = require("path")
+Promise        = require("bluebird")
 
 class Updater
   constructor: (App) ->
@@ -25,33 +26,32 @@ class Updater
     @client ?= new NwUpdater @getPackage()
 
   install: (newAppPath) ->
-    debugger
     c = @getClient()
-    console.log "updater installing!"
-    console.log "newAppPath:", newAppPath
-    console.log "getAppPath:", c.getAppPath()
-    console.log "getAppExec:", c.getAppExec()
 
-    c.runInstaller(newAppPath, [c.getAppPath(), c.getAppExec()], {})
+    c.runInstaller(newAppPath, [c.getAppPath(), c.getAppExec(), "--dev", "--updating"], {})
 
-    debugger
     @App.quit()
 
   unpack: (destinationPath, manifest) ->
-    # debugger
-    console.log "updater unpacking!"
     @trigger("apply")
+
     fn = (err, newAppPath) =>
-      @install(newAppPath) if not err
+      return @trigger("error", err) if err
+
+      @install(newAppPath)
 
     @getClient().unpack(destinationPath, fn, manifest)
 
   download: (manifest) ->
-    # debugger
-    @trigger("download")
-    console.log "updater download!", manifest
+    @trigger("download", manifest.version)
+
     fn = (err, destinationPath) =>
-      @unpack(destinationPath, manifest) if not err
+      return @trigger("error", err) if err
+
+      ## fixes issue with updater failing during unpack
+      setTimeout =>
+        @unpack(destinationPath, manifest)
+      , 1000
 
     @getClient().download(fn, manifest)
 
@@ -63,6 +63,7 @@ class Updater
 
   run: (@callbacks = {}) ->
     @trigger("start")
+
     @getClient().checkNewVersion (err, newVersionExists, manifest) =>
       return @trigger("error", err) if err
 
@@ -70,5 +71,10 @@ class Updater
         @download(manifest)
       else
         @trigger("none")
+
+  runInstaller: (newAppPath) ->
+    setTimeout =>
+      @install(newAppPath)
+    , 2000
 
 module.exports = Updater

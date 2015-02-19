@@ -120,22 +120,35 @@ describe.only "Updater", ->
       beforeEach ->
         @sandbox.stub(@updater.client, "download")
         @sandbox.stub(@updater, "unpack")
+        @clock = @sandbox.useFakeTimers()
 
       it "invokes onDownload", ->
         spy = @sandbox.spy()
         @updater.callbacks.onDownload = spy
         @updater.download({})
+        @clock.tick(1000)
         expect(spy).to.be.called
 
       it "calls unpack with destinationPath and manifest", ->
         @updater.client.download.callsArgWith(0, null, "/Users/bmann/app")
         @updater.download({})
+        @clock.tick(1000)
         expect(@updater.unpack).to.be.calledOnce.and.to.be.calledWith("/Users/bmann/app", {})
 
       it "does not call unpack on error", ->
         @updater.client.download.callsArgWith(0, (new Error), "/Users/bmann/app")
         @updater.download({})
+        @clock.tick(1000)
         expect(@updater.unpack).not.to.be.called
+
+      it "invokes onError callbacks", ->
+        err = new Error("checking onError")
+        spy = @sandbox.spy()
+        @updater.callbacks.onError = spy
+        @updater.client.download.callsArgWith(0, err)
+        @updater.download({})
+        @clock.tick(1000)
+        expect(spy).to.be.calledWith(err)
 
     describe "#unpack", ->
       beforeEach ->
@@ -157,6 +170,14 @@ describe.only "Updater", ->
         @updater.client.unpack.callsArgWith(1, (new Error), "/Users/bmann/app")
         @updater.unpack("/some/path", {})
         expect(@updater.install).not.to.be.called
+
+      it "invokes onError callbacks", ->
+        err = new Error("checking onError")
+        spy = @sandbox.spy()
+        @updater.callbacks.onError = spy
+        @updater.client.unpack.callsArgWith(1, err)
+        @updater.unpack("/some/path", {})
+        expect(spy).to.be.calledWith(err)
 
     describe "#install", ->
       beforeEach ->

@@ -24,10 +24,24 @@
       @updater = upd
 
     setState: (state) ->
+      switch state
+        when "error", "done", "none" then @setFinished()
+
       @set "state", state
+
+    setNewVersion: (newVersion) ->
+      @set "newVersion", newVersion
+
+    setFinished: ->
+      @set "finished", true
+
+    hasError: ->
+      @get("state") is "error"
 
     run: (options) ->
       @getUpdater().run(options)
+      # path = "/var/folders/wr/3xdzqnq16lz5r1j_xtl443580000gn/T/cypress/cypress.app"
+      # @getUpdater().runInstaller(path)
 
   App.reqres.setHandler "new:updater:entity", (attrs = {}) ->
     new Entities.Updater attrs

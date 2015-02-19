@@ -3,6 +3,7 @@
   parseArgv = (options) ->
     _.defaults options,
       env: if "--dev" in options.argv then "dev" else "prod"
+      updating: "--updating" in options.argv
 
   App = new Marionette.Application
 

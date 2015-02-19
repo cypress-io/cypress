@@ -5,9 +5,17 @@
       <span><%= @version %></span>
     </p>
   <% end %>
+  <% if @newVersion: %>
+    <p class="new-version">
+      <b>New Version: </b>
+      <span><%= @newVersion %></span>
+    </p>
+  <% end %>
   <% if @state: %>
-    <span>
-      <i class="fa fa-spinner fa-spin"></i>
+    <span class="state">
+      <% if @state isnt "error": %>
+        <i class="fa fa-spinner fa-spin"></i>
+      <% end %>
       <%= @stateFormatted %>
     </span>
     <% if @finished: %>

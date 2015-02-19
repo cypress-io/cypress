@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Javascript Test Engine",
   "main": "app://app/nw/public/index.html",
+  "single-instance": false,
   "window": {
     "frame": false,
     "toolbar": false,

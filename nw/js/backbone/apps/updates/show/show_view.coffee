@@ -3,8 +3,12 @@
   class Show.Updates extends App.Views.ItemView
     template: "updates/show/updates"
 
+    ui:
+      ".state" : "state"
+
     modelEvents:
       "change:state" : "render"
 
     onRender: ->
-      console.log "updates rendering", @model.get("state"), @model.get("stateFormatted")
+      if @model.hasError()
+        @ui.state.addClass("text-danger")

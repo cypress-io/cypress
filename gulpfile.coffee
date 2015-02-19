@@ -169,14 +169,14 @@ gulp.task "clean:build", ->
 gulp.task "dist", ->
   require("./lib/deploy")().dist()
 
-gulp.task "dist:fixture", ->
+gulp.task "deploy:fixture", ->
   require("./lib/deploy")().fixture()
+
+gulp.task "deploy", ->
+  require("./lib/deploy")().deploy()
 
 gulp.task "compile", ["clean:build"], ->
   require("./lib/deploy").compile()
-
-gulp.task "deploy", (cb) ->
-  runSequence ["client:build", "nw:build"], "dist", cb
 
 gulp.task "client",        ["client:build", "client:watch"]
 gulp.task "nw",            ["nw:build", "nw:watch"]
