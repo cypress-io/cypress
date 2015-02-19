@@ -345,7 +345,7 @@ class Deploy
           .on "error", reject
           .on "end", resolve
 
-  fixture: (cb) ->
+  dist: ->
     Promise.bind(@)
       .then(@prepare)
       .then(@updatePackages)
@@ -356,6 +356,9 @@ class Deploy
       .then(@npmInstall)
       .then(@build)
       .then(@cleanupDist)
+
+  fixture: (cb) ->
+    @dist()
       .then(@zipBuild)
       .then(@uploadFixtureToS3)
       .then(@cleanupBuild)
@@ -370,19 +373,8 @@ class Deploy
     return if process.env["NODE_ENV"] is "test"
     console.log gutil.colors[color](msg)
 
-  dist: (cb) ->
-    Promise.bind(@)
-      .then(@prepare)
-      .then(@updatePackages)
-      .then(@setVersion)
-      .then(@convertToJs)
-      .then(@obfuscate)
-      .then(@cleanupSrc)
-      # .then(@npmCopy)
-      .then(@npmInstall)
-      # .then(@runTests)
-      .then(@build)
-      .then(@cleanupDist)
+  deploy: (cb) ->
+    @dist()
       .then(@zipBuild)
       .then(@uploadToS3)
       .then(@updateS3Manifest)
