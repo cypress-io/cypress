@@ -1,5 +1,6 @@
 config         = require("konfig")()
 path           = require("path")
+_              = require("lodash")
 fs             = require("fs-extra")
 Promise        = require("bluebird")
 child_process  = require("child_process")
@@ -25,6 +26,7 @@ class Deploy
     @version          = null
     @publisher        = null
     @publisherOptions = {}
+    @platforms        = ["osx64"]
     @zip              = "cypress.zip"
 
   getVersion: ->
@@ -144,27 +146,21 @@ class Deploy
         .on "error", reject
         .on "end", resolve
 
-  build: ->
-    @log("#build")
+  zipBuild: (platform) ->
+    @log("#zipBuild: #{platform}")
 
     new Promise (resolve, reject) =>
       version = @getVersion()
-      fs.removeSync(buildDir)
-      fs.copySync("./cache/0.11.6/osx64/node-webkit.app", "#{buildDir}/#{version}/cypress.app")
-      fs.copySync(distDir, "#{buildDir}/#{version}/cypress.app/Contents/Resources/app.nw")
-
-      resolve()
-
-  zipBuild: ->
-    @log("#zipBuild")
-
-    new Promise (resolve, reject) =>
-      version = @getVersion()
-      gulp.src("#{buildDir}/#{version}/**/*")
+      gulp.src("#{buildDir}/#{version}/#{platform}/**/*")
         .pipe $.zip(@zip)
         .pipe gulp.dest("#{buildDir}/#{version}")
         .on "error", reject
         .on "end", resolve
+
+  zipBuilds: ->
+    @log("#zipBuilds")
+
+    Promise.all _.map(@platforms, _.bind(@zipBuild, @))
 
   getQuestions: (version) ->
     [{
@@ -235,10 +231,15 @@ class Deploy
     new Promise (resolve, reject) ->
       attempts = 0
 
+      pathToPackageDir = ->
+        ## return the path to the directory containing the package.json
+        packages = glob.sync(buildDir + "/**/package.json", {nodir: true})
+        path.dirname(packages[0])
+
       npmInstall = ->
         attempts += 1
 
-        child_process.exec "npm install --production", {cwd: distDir}, (err, stdout, stderr) ->
+        child_process.exec "npm install --production", {cwd: pathToPackageDir()}, (err, stdout, stderr) ->
           if err
             return reject(err) if attempts is 3
 
@@ -250,40 +251,24 @@ class Deploy
 
       npmInstall()
 
-  compile: (cb) ->
-    compile = new Promise (resolve, reject) =>
-      # nw = new NwBuilder
-      #   files: distDir + "/**/**"
-      #   platforms: ["osx64"]
-      #   buildType: "versioned"
-      #   version: "0.11.6"
+  build: ->
+    @log("#build")
 
-      # nw.on "log", console.log
+    nw = new NwBuilder
+      files: distDir + "/**/*"
+      platforms: @platforms
+      buildDir: buildDir
+      version: "0.11.6"
+      buildType: => @getVersion()
 
-      # nw
-      #   .build()
-      #   .then =>
-      #     # console.log nw
-      #     # @npmInstall("./build/eclectus%20-%20v0.1.0/osx64/eclectus.app/Contents/Resources/app.nw", resolve, reject)
-      #     fs.copySync("./node_modules", "./build/eclectus - v0.1.0/osx64/eclectus.app/Contents/Resources/app.nw/node_modules")
-      #   .then(resolve)
-      #   .catch(reject)
-      fs.copySync("./cache/0.11.6/osx64/node-webkit.app", "#{buildDir}/cypress.app")
-      fs.copySync("./dist", "#{buildDir}/cypress.app/Contents/Resources/app.nw")
-      resolve()
+    nw.on "log", console.log
 
-    compile
-      .then ->
-        console.log gutil.colors.green("Done Compiling!")
-      .then(cb)
-      .catch (err) ->
-        console.log gutil.colors.red("Compiling Failed!")
-        console.log err
-        console.log gutil.colors.red("Compiling Failed!")
+    nw.build()
 
-  uploadToS3: (dirname) ->
-    @log("#uploadToS3")
+  getUploadDirName: (version, platform, override) ->
+    (override or (version + "/" + platform)) + "/"
 
+  uploadToS3: (platform, override) ->
     new Promise (resolve, reject) =>
       publisher = @getPublisher()
       options = @publisherOptions
@@ -294,34 +279,41 @@ class Deploy
       version = @getVersion()
 
       gulp.src("#{buildDir}/#{version}/#{@zip}")
-        .pipe $.rename (p) ->
-          p.dirname = (dirname or version) + "/"
+        .pipe $.rename (p) =>
+          p.dirname = @getUploadDirName(version, platform, override)
           p
         .pipe publisher.publish(headers, options)
         .pipe $.awspublish.reporter()
         .on "error", reject
         .on "end", resolve
 
+  uploadsToS3: (dirname) ->
+    @log("#uploadToS3")
+
+    uploadToS3 = _.partialRight(@uploadToS3, dirname)
+
+    Promise.all _.map(@platforms, _.bind(uploadToS3, @))
+
   uploadFixtureToS3: ->
     @log("#uploadFixtureToS3")
 
-    @uploadToS3("fixture")
+    @uploadToS3(null, "fixture")
 
   createRemoteManifest: ->
     ## this isnt yet taking into account the os
     ## because we're only handling mac right now
     getUrl = (os) =>
       {
-        url: [config.app.s3.path, config.app.s3.bucket, @version, @zip].join("/")
+        url: [config.app.s3.path, config.app.s3.bucket, @version, os, @zip].join("/")
       }
 
     obj = {
       name: "cypress"
       version: @getVersion()
       packages: {
-        mac: getUrl("mac")
-        win: getUrl("win")
-        linux: getUrl("linux")
+        mac: getUrl("osx64")
+        win: getUrl("win64")
+        linux64: getUrl("linux64")
       }
     }
 
@@ -353,13 +345,14 @@ class Deploy
       .then(@convertToJs)
       .then(@obfuscate)
       .then(@cleanupSrc)
-      .then(@npmInstall)
       .then(@build)
+      .then(@npmInstall)
       .then(@cleanupDist)
+      .then(@zipBuilds)
 
   fixture: (cb) ->
     @dist()
-      .then(@zipBuild)
+      .then(@zipBuilds)
       .then(@uploadFixtureToS3)
       .then(@cleanupBuild)
       .then ->
@@ -375,8 +368,8 @@ class Deploy
 
   deploy: (cb) ->
     @dist()
-      .then(@zipBuild)
-      .then(@uploadToS3)
+      .then(@zipBuilds)
+      .then(@uploadsToS3)
       .then(@updateS3Manifest)
       .then(@cleanupBuild)
       .then ->

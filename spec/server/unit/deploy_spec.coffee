@@ -245,33 +245,33 @@ describe "Deploy", ->
       deploy.prepare().then(deploy.build)
 
     it "copies to build/{version}/", (done) ->
-      fs.statAsync(buildDir + "/1.0.2")
+      fs.statAsync(buildDir + "/1.0.2/osx64")
         .then -> done()
         .catch(done)
 
     it "copies dist to app.nw", (done) ->
-      fs.statAsync(buildDir + "/1.0.2/cypress.app/Contents/Resources/app.nw")
+      fs.statAsync(buildDir + "/1.0.2/osx64/cypress.app/Contents/Resources/app.nw")
         .then -> done()
         .catch(done)
 
-  context "#zipBuild", ->
+  context "#zipBuilds", ->
     beforeEach ->
       deploy.version = "1.1.1"
-      fs.ensureFileSync(buildDir + "/1.1.1/file.txt")
+      fs.ensureFileSync(buildDir + "/1.1.1/osx64/file.txt")
 
     it "srcs the version'ed build directory", ->
       src = @sandbox.spy gulp, "src"
-      deploy.zipBuild().then ->
-        expect(src).to.be.calledWith "#{buildDir}/1.1.1/**/*"
+      deploy.zipBuilds().then ->
+        expect(src).to.be.calledWith "#{buildDir}/1.1.1/osx64/**/*"
 
     it "creates 'cypress.zip'", (done) ->
-      deploy.zipBuild().then ->
+      deploy.zipBuilds().then ->
         fs.statAsync(buildDir + "/1.1.1/cypress.zip")
           .then -> done()
           .catch(done)
 
-  context "#dist", ->
-    fns = ["prepare", "updatePackages", "setVersion", "convertToJs", "obfuscate", "cleanupSrc", "npmInstall", "build", "cleanupDist", "zipBuild", "uploadToS3", "updateS3Manifest", "cleanupBuild"]
+  context "#deploy", ->
+    fns = ["prepare", "updatePackages", "setVersion", "convertToJs", "obfuscate", "cleanupSrc", "build", "npmInstall", "cleanupDist", "zipBuilds", "uploadsToS3", "updateS3Manifest", "cleanupBuild"]
 
     beforeEach ->
       @sandbox.stub(inquirer, "prompt").callsArgWith(1, {})
@@ -280,24 +280,25 @@ describe "Deploy", ->
 
     _.each fns, (fn) =>
       it "calls #{fn}", ->
-        deploy.dist().then ->
+        deploy.deploy().then ->
           expect(deploy[fn]).to.be.called
 
     it "calls methods in the right order", ->
-      deploy.dist().then ->
+      deploy.deploy().then ->
         spies = _.map fns, (fn) -> deploy[fn]
         sinon.assert.callOrder.apply(sinon, spies)
 
   context "#npmInstall", ->
     beforeEach ->
-      deploy.prepare()
+      deploy.version = "1.0.2"
+      deploy.prepare().then(deploy.build)
 
     it "exec 'npm install'", ->
       deploy.npmInstall().then ->
         cmd = child_process.exec.getCall(0).args[0]
         opts = child_process.exec.getCall(0).args[1]
         expect(cmd).to.eq "npm install --production"
-        expect(opts).to.deep.eq {cwd: distDir}
+        expect(opts.cwd).to.include("/build/1.0.2/osx64/cypress.app/Contents/Resources/app.nw")
 
   context "#uploadToS3", ->
     beforeEach ->
@@ -306,6 +307,12 @@ describe "Deploy", ->
       fs.ensureFileSync(buildDir + "/test-1.1.1/cypress.zip")
       deploy.getPublisher()
       @publish = @sandbox.spy(deploy.publisher, "publish")
+
+    it "calls #getUploadDirName", ->
+      @sandbox.spy(deploy, "getUploadDirName")
+      deploy.publisherOptions = {simulate: true}
+      deploy.uploadToS3("osx64").then ->
+        expect(deploy.getUploadDirName).to.be.calledWith("test-1.1.1", "osx64")
 
     it "sets Cache-Control to 'no-cache'", ->
       deploy.publisherOptions = {simulate: true}
@@ -353,8 +360,17 @@ describe "Deploy", ->
           name: "cypress"
           version: "5.6.7"
           packages: {
-            mac:   {url: "https://s3.amazonaws.com/dist.cypress.io/5.6.7/cypress.zip"}
-            win:   {url: "https://s3.amazonaws.com/dist.cypress.io/5.6.7/cypress.zip"}
-            linux: {url: "https://s3.amazonaws.com/dist.cypress.io/5.6.7/cypress.zip"}
+            mac:     {url: "https://s3.amazonaws.com/dist.cypress.io/5.6.7/osx64/cypress.zip"}
+            win:     {url: "https://s3.amazonaws.com/dist.cypress.io/5.6.7/win64/cypress.zip"}
+            linux64: {url: "https://s3.amazonaws.com/dist.cypress.io/5.6.7/linux64/cypress.zip"}
           }
         }
+
+  context "#getUploadDirName", ->
+    it "uses platform + version", ->
+      d = deploy.getUploadDirName("3.2.3", "osx64")
+      expect(d).to.eq "3.2.3/osx64/"
+
+    it "uses override if truthy", ->
+      d = deploy.getUploadDirName("3.2.3", "osx64", "fixture")
+      expect(d).to.eq "fixture/"

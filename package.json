@@ -1,5 +1,5 @@
 {
-  "name": "eclectus",
+  "name": "cypress",
   "version": "0.1.0",
   "description": "Javascript Test Engine",
   "main": "app://app/nw/public/index.html",
@@ -56,7 +56,7 @@
     "js-yaml": "3.1.0",
     "mocha-phantomjs": "samccone/mocha-phantomjs#9440a35304b0ad73097e72b359bd28a1f8759468",
     "mock-fs": "^2.5.0",
-    "node-webkit-builder": "1.0.8",
+    "node-webkit-builder": "^1.0.8",
     "node-webkit-updater": "^0.2.4",
     "nodemon": "1.2.1",
     "obfuscator": "^0.5.0",

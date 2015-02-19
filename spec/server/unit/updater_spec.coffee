@@ -14,7 +14,7 @@ mock        = require "mock-fs"
 nock        = require 'nock'
 sinon       = require "sinon"
 
-describe.only "Updater", ->
+describe "Updater", ->
   beforeEach ->
     @sandbox = sinon.sandbox.create()
     nock.disableNetConnect()
