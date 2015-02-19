@@ -10,13 +10,20 @@
 
       updatesView = @getUpdatesView(updater)
 
+      set = (state) ->
+        debugger
+        updater.setState(state)
+
       @listenTo updatesView, "show", ->
         ## add all of the
         updater.run
-          onError: ->
-          onDone: ->
-          onAlways: ->
-          onDownload: ->
+          onStart: ->    set("checking")
+          onDownload: -> set("downloading")
+          onApply: ->    set("applying")
+          onDone: ->     set("done")
+          onNone: ->     set("none")
+          onError: ->    set("error")
+          # onAlways: ->
 
       @show updatesView
 

@@ -7,6 +7,7 @@ vendor:
   - bower_components/backbone/backbone.js
   - bower_components/marionette/lib/backbone.marionette.js
   - bower_components/underscore.string/lib/underscore.string.js
+  - bower_components/backbone.mutators/backbone.mutators.js
   - bower_components/jsuri/Uri.js
   - bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/dropdown.js
 

@@ -14,7 +14,7 @@ mock        = require "mock-fs"
 nock        = require 'nock'
 sinon       = require "sinon"
 
-describe "Updater", ->
+describe.only "Updater", ->
   beforeEach ->
     @sandbox = sinon.sandbox.create()
     nock.disableNetConnect()
@@ -70,6 +70,11 @@ describe "Updater", ->
       @updater.getClient()
       @checkNewVersion = @sandbox.stub(@updater.client, "checkNewVersion")
 
+    it "invokes onRun", ->
+      spy = @sandbox.spy()
+      @updater.run({onStart: spy})
+      expect(spy).to.be.called
+
     describe "client#checkNewVersion", ->
       beforeEach ->
         @download = @sandbox.stub(@updater, "download")
@@ -93,15 +98,34 @@ describe "Updater", ->
         @updater.run()
         expect(@download).not.to.be.called
 
+      it "invokes onNone when there isnt a new version", ->
+        spy = @sandbox.spy()
+        @checkNewVersion.callsArgWith(0, null, false)
+        @updater.run({onNone: spy})
+        expect(spy).to.be.called
+
       it "does not call #download if there is an error", ->
         @checkNewVersion.callsArgWith(0, (new Error), true, {foo: "bar"})
         @updater.run()
         expect(@download).not.to.be.called
 
+      it "invokes onError callbacks", ->
+        err = new Error("checking onError")
+        spy = @sandbox.spy()
+        @checkNewVersion.callsArgWith(0, err)
+        @updater.run({onError: spy})
+        expect(spy).to.be.calledWith(err)
+
     describe "#download", ->
       beforeEach ->
         @sandbox.stub(@updater.client, "download")
         @sandbox.stub(@updater, "unpack")
+
+      it "invokes onDownload", ->
+        spy = @sandbox.spy()
+        @updater.callbacks.onDownload = spy
+        @updater.download({})
+        expect(spy).to.be.called
 
       it "calls unpack with destinationPath and manifest", ->
         @updater.client.download.callsArgWith(0, null, "/Users/bmann/app")
@@ -117,6 +141,12 @@ describe "Updater", ->
       beforeEach ->
         @sandbox.stub(@updater.client, "unpack")
         @sandbox.stub(@updater, "install")
+
+      it "invokes onApply", ->
+        spy = @sandbox.spy()
+        @updater.callbacks.onApply = spy
+        @updater.unpack("/some/path", {})
+        expect(spy).to.be.called
 
       it "calls install with newAppPath", ->
         @updater.client.unpack.callsArgWith(1, null, "/Users/bmann/app")
@@ -141,7 +171,7 @@ describe "Updater", ->
         @updater.install("/Users/bmann/newApp")
         expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec()], {})
 
-  context.only "integration", ->
+  context "integration", ->
     before ->
       ## 10 min timeout
       @timeout(10 * 60 * 1000)
@@ -178,6 +208,6 @@ describe "Updater", ->
           mock.restore()
           fs.createReadStream Fixtures.path("nw/cypress.zip")
 
-    it "runs", ->
-      @updater = Updater({quit: @sandbox.spy()})
-      @updater.run()
+    # it "runs", ->
+    #   @updater = Updater({quit: @sandbox.spy()})
+    #   @updater.run()

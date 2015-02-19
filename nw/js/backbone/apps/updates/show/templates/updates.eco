@@ -4,12 +4,14 @@
       <b>Current Version: </b>
       <span><%= @version %></span>
     </p>
+  <% end %>
+  <% if @state: %>
     <span>
       <i class="fa fa-spinner fa-spin"></i>
-      Checking for updates...
+      <%= @stateFormatted %>
     </span>
-  <% end %>
-  <% if @done: %>
-    <button class="btn btn-primary">Close</button>
+    <% if @finished: %>
+      <button class="btn btn-primary"><%= @buttonFormatted %></button>
+    <% end %>
   <% end %>
 </div>
