@@ -49,7 +49,6 @@
     "gulp-rename": "^1.2.0",
     "gulp-ruby-sass": "0.5.0",
     "gulp-tap": "0.1.1",
-    "gulp-util": "3.0.0",
     "inquirer": "^0.8.0",
     "js-yaml": "3.1.0",
     "mocha-phantomjs": "samccone/mocha-phantomjs#9440a35304b0ad73097e72b359bd28a1f8759468",
@@ -69,6 +68,7 @@
     "yazl": "^2.1.0"
   },
   "dependencies": {
+    "gulp-util": "3.0.0",
     "auto-launch": "^0.1.14",
     "bluebird": "2.8.0",
     "body-parser": "1.8.1",
