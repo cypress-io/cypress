@@ -153,7 +153,7 @@ describe "Updater", ->
     describe "#unpack", ->
       beforeEach ->
         @sandbox.stub(@updater.client, "unpack")
-        @sandbox.stub(@updater, "install")
+        @sandbox.stub(@updater, "runInstaller")
 
       it "invokes onApply", ->
         spy = @sandbox.spy()
@@ -161,15 +161,15 @@ describe "Updater", ->
         @updater.unpack("/some/path", {})
         expect(spy).to.be.called
 
-      it "calls install with newAppPath", ->
+      it "calls runInstaller with newAppPath", ->
         @updater.client.unpack.callsArgWith(1, null, "/Users/bmann/app")
         @updater.unpack("/some/path", {})
-        expect(@updater.install).to.be.calledOnce.and.to.be.calledWith("/Users/bmann/app")
+        expect(@updater.runInstaller).to.be.calledOnce.and.to.be.calledWith("/Users/bmann/app")
 
-      it "does not call install on error", ->
+      it "does not call runInstaller on error", ->
         @updater.client.unpack.callsArgWith(1, (new Error), "/Users/bmann/app")
         @updater.unpack("/some/path", {})
-        expect(@updater.install).not.to.be.called
+        expect(@updater.runInstaller).not.to.be.called
 
       it "invokes onError callbacks", ->
         err = new Error("checking onError")
@@ -179,18 +179,24 @@ describe "Updater", ->
         @updater.unpack("/some/path", {})
         expect(spy).to.be.calledWith(err)
 
-    describe "#install", ->
+    describe "#runInstaller", ->
       beforeEach ->
         @sandbox.stub(@updater.client, "runInstaller")
 
       it "calls quit on the App", ->
-        @updater.install("/Users/bmann/newApp")
+        @updater.runInstaller("/Users/bmann/newApp")
         expect(@updater.App.quit).to.be.calledOnce
 
       it "calls runInstaller on the client", ->
         c = @updater.client
-        @updater.install("/Users/bmann/newApp")
-        expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec()], {})
+        @updater.runInstaller("/Users/bmann/newApp")
+        expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec(), "--updating"], {})
+
+      it "passes along additional App argv", ->
+        @updater.App.argv = ["--debug"]
+        c = @updater.client
+        @updater.runInstaller("/Users/bmann/newApp")
+        expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec(), "--updating", "--debug"], {})
 
   context "integration", ->
     before ->

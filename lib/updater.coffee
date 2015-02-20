@@ -15,6 +15,12 @@ class Updater
     @client     = null
     @callbacks  = {}
 
+    @patchAppPath()
+
+  patchAppPath: ->
+    if process.env["NODE_ENV"] isnt "production"
+      @getClient().getAppPath = ->  process.cwd()
+
   getPackage: ->
     pkg = fs.readJsonSync path.join(process.cwd(), "package.json")
     pkg.manifestUrl = [config.app.s3.path, config.app.s3.bucket, config.app.s3.manifest].join("/")
@@ -25,10 +31,20 @@ class Updater
     NwUpdater = require("node-webkit-updater")
     @client ?= new NwUpdater @getPackage()
 
-  install: (newAppPath) ->
+  install: (appPath, execPath) ->
     c = @getClient()
 
-    c.runInstaller(newAppPath, [c.getAppPath(), c.getAppExec(), "--dev", "--updating"], {})
+    c.install appPath, (err) =>
+      c.run(execPath, null)
+
+      @App.quit()
+
+  runInstaller: (newAppPath) ->
+    c = @getClient()
+
+    args = [c.getAppPath(), c.getAppExec(), "--updating"].concat(@App.argv ? [])
+
+    c.runInstaller(newAppPath, args, {})
 
     @App.quit()
 
@@ -38,7 +54,7 @@ class Updater
     fn = (err, newAppPath) =>
       return @trigger("error", err) if err
 
-      @install(newAppPath)
+      @runInstaller(newAppPath)
 
     @getClient().unpack(destinationPath, fn, manifest)
 
@@ -71,10 +87,5 @@ class Updater
         @download(manifest)
       else
         @trigger("none")
-
-  runInstaller: (newAppPath) ->
-    setTimeout =>
-      @install(newAppPath)
-    , 2000
 
 module.exports = Updater
