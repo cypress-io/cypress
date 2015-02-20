@@ -3,10 +3,7 @@
   class Show.Controller extends App.Controllers.Application
 
     initialize: ->
-      manifest = App.request "gui:manifest"
-
-      updater = App.request "new:updater:entity", {version: manifest.version}
-      updater.setUpdater App.config.getUpdater()
+      updater = App.request "new:updater:entity"
 
       updatesView = @getUpdatesView(updater)
 

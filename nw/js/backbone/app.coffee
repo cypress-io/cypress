@@ -6,6 +6,13 @@
       debug: "--debug" in options.argv
       updating: "--updating" in options.argv
 
+    if options.updating
+      _.extend options,
+        appPath:  options.argv[0]
+        execPath: options.argv[1]
+
+    return options
+
   App = new Marionette.Application
 
   global.App = App
@@ -22,6 +29,13 @@
 
     ## create a App.config model from the passed in options
     App.config = App.request("config:entity", options)
+
+    ## if we are updating then do not start the app
+    ## or display any UI. just finish installing the updates
+    if options.updating
+      updater = App.request "new:updater:entity"
+      updater.install(options.appPath, options.execPath)
+      return
 
     App.config.getUser().then (user) ->
       ## check cache store for user

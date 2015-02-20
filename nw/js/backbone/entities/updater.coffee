@@ -23,6 +23,9 @@
     setUpdater: (upd) ->
       @updater = upd
 
+      ## pull off additional properties
+      ## like the tmpDestination, appPath, execPath, etc
+
     setState: (state) ->
       switch state
         when "error", "done", "none" then @setFinished()
@@ -43,5 +46,16 @@
       # path = "/var/folders/wr/3xdzqnq16lz5r1j_xtl443580000gn/T/cypress/cypress.app"
       # @getUpdater().runInstaller(path)
 
+    install: (appPath, execPath) ->
+      @getUpdater().install(appPath, execPath)
+
+  API =
+    newUpdater: (attrs) ->
+      manifest = App.request "gui:manifest"
+
+      updater = new Entities.Updater _.extend(attrs, {version: manifest.version})
+      updater.setUpdater App.config.getUpdater()
+      updater
+
   App.reqres.setHandler "new:updater:entity", (attrs = {}) ->
-    new Entities.Updater attrs
+    API.newUpdater(attrs)
