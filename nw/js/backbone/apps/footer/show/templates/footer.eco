@@ -1,5 +1,5 @@
 <div id="footer">
-  <% if @env is "dev": %>
+  <% if @debug: %>
     <span class="pull-left">
       <i class="fa fa-repeat"></i>
     </span>

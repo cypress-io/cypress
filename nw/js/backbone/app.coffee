@@ -2,7 +2,8 @@
 
   parseArgv = (options) ->
     _.defaults options,
-      env: if "--dev" in options.argv then "dev" else "prod"
+      env: process.env["NODE_ENV"]
+      debug: "--debug" in options.argv
       updating: "--updating" in options.argv
 
   App = new Marionette.Application

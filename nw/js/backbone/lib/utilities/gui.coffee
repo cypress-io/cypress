@@ -6,7 +6,7 @@
 
   API =
     show: (win) ->
-      if App.config.env("dev")
+      if App.config.get("debug")
         win.showDevTools() unless win.isDevToolsOpen()
         win.setAlwaysOnTop()
 
@@ -15,7 +15,7 @@
     displayGui: ->
       win = gui.Window.get()
 
-      if App.config.env("dev")
+      if App.config.env("development")
         gui.App.clearCache()
         @show(win)
       else
@@ -45,7 +45,7 @@
         @focus()
 
       win.on "blur", ->
-        return if App.fileDialogOpened or App.config.env("dev")
+        return if App.fileDialogOpened or App.config.env("development")
 
         win.hide()
 
@@ -83,7 +83,7 @@
         title: ""
 
       updates.once "loaded", ->
-        updates.showDevTools() if App.config.env("dev")
+        updates.showDevTools() if App.config.get("debug")
 
         ## grab the updates region from other window
         $el = $("#updates-region", updates.window.document)
