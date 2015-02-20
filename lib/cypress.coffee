@@ -1,15 +1,13 @@
-pkg = process.cwd() + "/package.json"
-process.env["NODE_ENV"] ?= require("fs-extra").readJsonSync(pkg).env
-
-child_process  = require("child_process")
-open           = require('open')
-Settings       = require("../lib/util/settings")
-Server         = require("../lib/server")
-Updater        = require("../lib/updater")
-Cache          = require("../lib/cache")
-Promise        = require('bluebird')
+require("./environment")
 
 global.config  = require("konfig")()
+Settings       = require("./util/settings")
+Server         = require("./server")
+Updater        = require("./updater")
+Cache          = require("./cache")
+child_process  = require("child_process")
+open           = require('open')
+Promise        = require('bluebird')
 
 class Booter
   constructor: (projectRoot) ->
