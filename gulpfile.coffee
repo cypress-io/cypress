@@ -172,6 +172,9 @@ gulp.task "dist", ->
 gulp.task "deploy:fixture", ->
   require("./lib/deploy")().fixture()
 
+gulp.task "deploy:manifest", ->
+  require("./lib/deploy")().manifest()
+
 gulp.task "deploy", ->
   require("./lib/deploy")().deploy()
 

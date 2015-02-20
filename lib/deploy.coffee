@@ -74,6 +74,7 @@ class Deploy
       fs.copySync("./lib/server.coffee", distDir + "/src/lib/server.coffee")
       fs.copySync("./lib/socket.coffee", distDir + "/src/lib/socket.coffee")
       fs.copySync("./lib/updater.coffee", distDir + "/src/lib/updater.coffee")
+      fs.copySync("./lib/environment.coffee", distDir + "/src/lib/environment.coffee")
 
       ## copy test files
       # fs.copySync("./spec/server/unit/konfig_spec.coffee", distDir + "/spec/server/unit/konfig_spec.coffee")
@@ -396,6 +397,13 @@ class Deploy
   log: (msg, color = "yellow") ->
     return if process.env["NODE_ENV"] is "test"
     console.log gutil.colors[color](msg)
+
+  manifest: ->
+    Promise.bind(@)
+      .then(@prepare)
+      .then(@setVersion)
+      .then(@updateS3Manifest)
+      .then(@cleanupDist)
 
   deploy: (cb) ->
     @dist()

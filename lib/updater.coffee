@@ -2,6 +2,7 @@ global.config ?= require("konfig")()
 fs             = require("fs-extra")
 path           = require("path")
 Promise        = require("bluebird")
+_              = require("lodash")
 
 class Updater
   constructor: (App) ->
@@ -34,8 +35,11 @@ class Updater
   install: (appPath, execPath) ->
     c = @getClient()
 
+    args = @App.argv ? []
+    args = _.without(args, "--updating")
+
     c.install appPath, (err) =>
-      c.run(execPath, null)
+      c.run(execPath, args)
 
       @App.quit()
 

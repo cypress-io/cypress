@@ -54,7 +54,6 @@
     "mocha-phantomjs": "samccone/mocha-phantomjs#9440a35304b0ad73097e72b359bd28a1f8759468",
     "mock-fs": "^2.5.0",
     "node-webkit-builder": "^1.0.8",
-    "node-webkit-updater": "^0.2.4",
     "nodemon": "1.2.1",
     "obfuscator": "^0.5.0",
     "rimraf": "2.2.8",
@@ -68,6 +67,7 @@
     "yazl": "^2.1.0"
   },
   "dependencies": {
+    "node-webkit-updater": "^0.2.4",
     "gulp-util": "3.0.0",
     "auto-launch": "^0.1.14",
     "bluebird": "2.8.0",

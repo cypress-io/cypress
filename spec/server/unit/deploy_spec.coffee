@@ -94,6 +94,10 @@ describe "Deploy", ->
       deploy.prepare().then ->
         expect(fs.statSync(distDir + "/src/lib/updater.coffee").isFile()).to.be.true
 
+    it "copies lib/environment to dist src", ->
+      deploy.prepare().then ->
+        expect(fs.statSync(distDir + "/src/lib/environment.coffee").isFile()).to.be.true
+
     it "copies lib/public to dist", ->
       deploy.prepare().then ->
         expect(fs.statSync(distDir + "/lib/public").isDirectory()).to.be.true
