@@ -4,7 +4,7 @@ path          = require 'path'
 _             = require 'underscore'
 fs            = require 'fs'
 yaml          = require 'js-yaml'
-jQuery        = require 'jquery-deferred'
+Promise       = require "bluebird"
 child_process = require "child_process"
 runSequence   = require "run-sequence"
 
@@ -23,24 +23,23 @@ log = (obj = {}) ->
   $.util.beep()
 
 transform = (paths, options = {}) ->
-  df = jQuery.Deferred()
+  new Promise (resolve, reject) ->
+    gulp.src(paths)
+      .pipe $.plumber errorHandler: log
 
-  gulp.src(paths)
-    .pipe $.plumber errorHandler: log
+      .pipe $.tap (file, t) ->
+        t.through($.coffee, []) if isCoffee(file)
 
-    .pipe $.tap (file, t) ->
-      t.through($.coffee, []) if isCoffee(file)
+      .pipe $.tap (file, t) ->
+        t.through($.eco, [basePath: options.basePath])  if isEco(file)
 
-    .pipe $.tap (file, t) ->
-      t.through($.eco, [basePath: options.basePath])  if isEco(file)
+      .pipe if options.concat then $.concat(options.concat + ".js", newLine: "; \r\n") else $.util.noop()
 
-    .pipe if options.concat then $.concat(options.concat + ".js", newLine: "; \r\n") else $.util.noop()
+      .pipe gulp.dest(options.destination)
 
-    .pipe gulp.dest(options.destination)
+      .on "error", reject
 
-    .on "end", df.resolve
-
-  return df
+      .on "end", resolve
 
 isCoffee  = (file) -> file.isBuffer() and /.coffee$/.test(file.path)
 isEco     = (file) -> file.isBuffer() and /.eco$/.test(file.path)
@@ -63,7 +62,7 @@ compileJs = (source, options, cb) ->
     memo
   , []
 
-  jQuery.when(tasks...).done cb
+  Promise.all(tasks)
 
 gulp.task "client:css", -> compileCss("app", "lib")
 
@@ -90,7 +89,6 @@ gulp.task "client:js", (cb) ->
     basePath: "app/js"
 
   compileJs("app", options, cb)
-  return false
 
 gulp.task "nw:js", (cb) ->
   options =
@@ -98,7 +96,6 @@ gulp.task "nw:js", (cb) ->
     basePath: "nw/js"
 
   compileJs("nw", options, cb)
-  return false
 
 gulp.task "bower", ->
   $.bower()
