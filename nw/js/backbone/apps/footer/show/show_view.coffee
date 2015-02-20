@@ -1,7 +1,13 @@
 @App.module "FooterApp.Show", (Show, App, Backbone, Marionette, $, _) ->
 
-  class Show.Footer extends App.Views.ItemView
-    template: "footer/show/footer"
+  class Show.Layout extends App.Views.LayoutView
+    template: "footer/show/layout"
+
+  class Show.Update extends App.Views.ItemView
+    template: "footer/show/_update"
+
+  class Show.Bottom extends App.Views.ItemView
+    template: "footer/show/_bottom"
 
     ui:
       reload:   ".fa-repeat"

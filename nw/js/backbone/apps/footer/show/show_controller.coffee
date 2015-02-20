@@ -3,25 +3,47 @@
   class Show.Controller extends App.Controllers.Application
 
     initialize: ->
-      footerView = @getFooterView()
+      layoutView = @getLayoutView()
 
-      @listenTo footerView, "login:clicked", (view, obj) ->
+      @listenTo layoutView, "show", ->
+        @updateRegion(layoutView.updateRegion)
+        @bottomRegion(layoutView.bottomRegion)
+
+      @show layoutView
+
+    updateRegion: (region) ->
+      updater = App.updater
+
+      updateView = @getUpdateView(updater)
+
+      @show updateView, region: region
+
+    bottomRegion: (region) ->
+      bottomView = @getBottomView()
+
+      @listenTo bottomView, "login:clicked", (view, obj) ->
         App.execute "login:request"
 
-      @listenTo footerView, "reload:clicked", ->
+      @listenTo bottomView, "reload:clicked", ->
         App.execute "gui:reload"
 
-      @listenTo footerView, "console:clicked", ->
+      @listenTo bottomView, "console:clicked", ->
         App.execute "gui:console"
 
-      @listenTo footerView, "quit:clicked", ->
+      @listenTo bottomView, "quit:clicked", ->
         App.execute "gui:quit"
 
-      @listenTo footerView, "updates:clicked", ->
+      @listenTo bottomView, "updates:clicked", ->
         App.execute "gui:check:for:updates"
         # App.config.checkForUpdates()
 
-      @show footerView
+      @show bottomView, region: region
 
-    getFooterView: ->
-      new Show.Footer
+    getLayoutView: ->
+      new Show.Layout
+
+    getUpdateView: ->
+      new Show.Update
+
+    getBottomView: ->
+      new Show.Bottom

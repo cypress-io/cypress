@@ -30,6 +30,9 @@
     ## create a App.config model from the passed in options
     App.config = App.request("config:entity", options)
 
+    ## create an App.updater model which is shared across the app
+    # App.updater = App.request "new:updater:entity"
+
     ## if we are updating then do not start the app
     ## or display any UI. just finish installing the updates
     if options.updating

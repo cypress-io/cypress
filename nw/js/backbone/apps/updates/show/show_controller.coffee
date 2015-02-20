@@ -5,7 +5,7 @@
     initialize: (options = {}) ->
       { window } = options
 
-      updater = App.request "new:updater:entity"
+      updater = App.updater
 
       updatesView = @getUpdatesView(updater)
 
