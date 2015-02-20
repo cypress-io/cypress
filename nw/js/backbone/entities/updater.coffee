@@ -41,10 +41,11 @@
     hasError: ->
       @get("state") is "error"
 
+    isDone: ->
+      @get("state") is "done"
+
     run: (options) ->
       @getUpdater().run(options)
-      # path = "/var/folders/wr/3xdzqnq16lz5r1j_xtl443580000gn/T/cypress/cypress.app"
-      # @getUpdater().runInstaller(path)
 
     install: (appPath, execPath) ->
       @getUpdater().install(appPath, execPath)
