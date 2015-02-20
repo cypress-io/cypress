@@ -2,10 +2,15 @@
 
   class Show.Controller extends App.Controllers.Application
 
-    initialize: ->
+    initialize: (options = {}) ->
+      { window } = options
+
       updater = App.request "new:updater:entity"
 
       updatesView = @getUpdatesView(updater)
+
+      @listenTo updatesView, "button:clicked", ->
+        window.close()
 
       set = (state) ->
         updater.setState(state)

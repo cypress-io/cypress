@@ -4,7 +4,11 @@
     template: "updates/show/updates"
 
     ui:
-      ".state" : "state"
+      "state"  : ".state"
+      "button" : "button"
+
+    triggers:
+      "click @ui.button" : "button:clicked"
 
     modelEvents:
       "change:state" : "render"

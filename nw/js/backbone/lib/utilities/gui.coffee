@@ -92,7 +92,7 @@
         App.addRegions
           updatesRegion: Marionette.Region.extend(el: $el)
 
-        App.vent.trigger "start:updates:app", App.updatesRegion
+        App.vent.trigger "start:updates:app", App.updatesRegion, updates
 
       updates.once "close", ->
         ## remove app region when this is closed down

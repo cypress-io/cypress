@@ -302,7 +302,10 @@ class Deploy
     (override or (version + "/" + platform)) + "/"
 
   uploadToS3: (platform, override) ->
+    @log("#uploadToS3: #{platform}")
+
     new Promise (resolve, reject) =>
+
       publisher = @getPublisher()
       options = @publisherOptions
 
@@ -321,7 +324,7 @@ class Deploy
         .on "end", resolve
 
   uploadsToS3: (dirname) ->
-    @log("#uploadToS3")
+    @log("#uploadsToS3")
 
     uploadToS3 = _.partialRight(@uploadToS3, dirname)
 

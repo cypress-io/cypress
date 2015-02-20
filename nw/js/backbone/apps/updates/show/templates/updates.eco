@@ -12,14 +12,16 @@
     </p>
   <% end %>
   <% if @state: %>
-    <span class="state">
-      <% if @state isnt "error": %>
+    <p class="state">
+      <% if not @finished: %>
         <i class="fa fa-spinner fa-spin"></i>
       <% end %>
       <%= @stateFormatted %>
-    </span>
+    </p>
     <% if @finished: %>
-      <button class="btn btn-primary"><%= @buttonFormatted %></button>
+      <div>
+        <button class="btn btn-default"><%= @buttonFormatted %></button>
+      </div>
     <% end %>
   <% end %>
 </div>
