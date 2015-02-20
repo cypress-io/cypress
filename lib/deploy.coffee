@@ -186,13 +186,19 @@ class Deploy
   getQuestions: (version) ->
     [{
       name: "publish"
-      type: "confirm"
-      message: "Publish a new version?"
-      default: true
+      type: "list"
+      message: "Publish a new version? (currently: #{version})"
+      choices: [{
+        name: "Yes: set a new version and update remote manifest."
+        value: true
+      },{
+        name: "No:  just override the current deploy’ed version."
+        value: false
+      }]
     },{
       name: "version"
       type: "input"
-      message: "Bump version? (current is: #{version})"
+      message: "Bump version to...? (currently: #{version})"
       default: ->
         a = version.split(".")
         v = a[a.length - 1]
@@ -374,10 +380,10 @@ class Deploy
       .then(@build)
       .then(@npmInstall)
       .then(@cleanupDist)
+      .then(@zipBuilds)
 
   fixture: (cb) ->
     @dist()
-      .then(@zipBuilds)
       .then(@uploadFixtureToS3)
       .then(@cleanupBuild)
       .then ->
@@ -393,7 +399,6 @@ class Deploy
 
   deploy: (cb) ->
     @dist()
-      .then(@zipBuilds)
       .then(@uploadsToS3)
       .then(@updateS3Manifest)
       .then(@cleanupBuild)
