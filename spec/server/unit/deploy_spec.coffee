@@ -264,9 +264,9 @@ describe "Deploy", ->
       fs.ensureFileSync(buildDir + "/1.1.1/osx64/file.txt")
 
     it "srcs the version'ed build directory", ->
-      src = @sandbox.spy gulp, "src"
+      sync = @sandbox.spy glob, "sync"
       deploy.zipBuilds().then ->
-        expect(src).to.be.calledWith "#{buildDir}/1.1.1/osx64/**/*"
+        expect(sync).to.be.calledWith "#{buildDir}/1.1.1/osx64/**/*"
 
     it "creates 'cypress.zip'", (done) ->
       deploy.zipBuilds().then ->
