@@ -67,8 +67,6 @@
     "yazl": "^2.1.0"
   },
   "dependencies": {
-    "node-webkit-updater": "^0.2.4",
-    "gulp-util": "3.0.0",
     "auto-launch": "^0.1.14",
     "bluebird": "2.8.0",
     "body-parser": "1.8.1",
@@ -86,6 +84,7 @@
     "gaze": "0.6.4",
     "glob": "4.0.5",
     "grunt-cli": "0.1.13",
+    "gulp-util": "3.0.0",
     "hbs": "2.7.0",
     "http-proxy": "1.8.1",
     "hyperdirect": "0.0.0",
@@ -101,6 +100,7 @@
     "morgan": "1.3.0",
     "nock": "0.48.1",
     "node-uuid": "1.4.1",
+    "node-webkit-updater": "^0.2.4",
     "open": "0.0.5",
     "promise-semaphore": "0.2.1",
     "request-promise": "0.3.3",
@@ -113,6 +113,7 @@
     "through2": "0.6.3",
     "underscore": "1.6.0",
     "underscore.string": "2.3.3",
+    "winston": "^0.9.0",
     "yeoman-generator": "0.17.1"
   }
 }
