@@ -14,15 +14,25 @@
     updateRegion: (region) ->
       updater = App.updater
 
+      check = ->
+        updater.check()
+
       updateView = @getUpdateView(updater)
 
       @listenTo updateView, "show", ->
-        updater.check()
+        ## check for updates every 5 minutes
+        @checkId = setInterval check, (5 * 60 * 1000)
+        check()
 
       @listenTo updateView, "strong:clicked", ->
         App.execute "gui:check:for:updates"
 
       @show updateView, region: region
+
+    onDestroy: ->
+      ## make sure we clear the constant checking
+      ## when our controller is nuked (if ever)
+      clearInterval(@checkId)
 
     bottomRegion: (region) ->
       bottomView = @getBottomView()
