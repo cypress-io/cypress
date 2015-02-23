@@ -1,4 +1,5 @@
 root    = "../../../"
+config  = require("konfig")()
 Log     = require "#{root}/lib/log"
 winston = require "winston"
 fs      = require "fs-extra"
@@ -10,11 +11,16 @@ expect  = require("chai").expect
 fs = Promise.promisifyAll(fs)
 
 describe "Winston Logger", ->
-  afterEach ->
-    files = _.map Log.transports, (value, key) ->
-      fs.removeAsync path.join(value.dirname, value.filename)
+  beforeEach ->
+    Log.forceLogger = true
+    Log.clearLogs()
 
-    Promise.all(files)
+  afterEach ->
+    Log.removeAllListeners("logging")
+
+  after ->
+    delete Log.forceLogger
+    fs.removeAsync(config.app.log_path)
 
   it "has 4 transports", ->
     expect(Log.transports).to.have.keys("all", "info", "error", "profile")
@@ -28,6 +34,50 @@ describe "Winston Logger", ->
         done()
 
     Log.info("foo!", {foo: "bar"})
+
+  describe "#onLog", ->
+    it "calls back with log", (done) ->
+      Log.onLog "all", (log) ->
+        expect(log.level).to.eq("info")
+        expect(log.message).to.eq("foo")
+        expect(log.data).to.deep.eq({foo: "bar"})
+        done()
+
+      Log.info("foo", {foo: "bar"})
+
+    it "slices type out of data", (done) ->
+      Log.onLog "all", (log) ->
+        expect(log.level).to.eq("info")
+        expect(log.message).to.eq("foo")
+        expect(log.data).to.deep.eq({foo: "bar"})
+        expect(log.type).to.eq("native")
+        done()
+
+      Log.info("foo", {foo: "bar", type: "native"})
+
+  describe "#getLogs", ->
+    beforeEach (done) ->
+      Log.onLog "all", (log) ->
+        done()
+
+      Log.info("foo", {foo: "bar"})
+
+    it "resolves with logs", ->
+      Log.getLogs("all").then (logs) ->
+        expect(logs).to.have.length(1)
+
+  describe "#getData", ->
+    it "nests data object in each log", ->
+      obj = {level: "info", message: "foo", type: "native", foo: "bar"}
+
+      expect(Log.getData(obj)).to.deep.eq {
+        level: "info"
+        message: "foo"
+        type: "native"
+        data: {
+          foo: "bar"
+        }
+      }
 
   # it "logs to error", (done) ->
   #   # debugger
