@@ -46,10 +46,17 @@
         console.log("Error logging out!")
         throw err
 
+    log: (text, data = {}) ->
+      data.code = "native"
+      @getLog().log("info", text, data)
+
+    getLog: ->
+      @Log ? throw new Error("config#Log is not defined!")
+
     getUpdater: -> @updater
 
   App.reqres.setHandler "config:entity", (attrs = {}) ->
-    props = ["cache", "booter", "updater"]
+    props = ["cache", "booter", "updater", "Log"]
 
     config = new Entities.Config _(attrs).omit props...
 

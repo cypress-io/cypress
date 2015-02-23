@@ -24,6 +24,7 @@
       cache.ensureExists().then(function(){
         var opts = {
           argv:    NwApp.argv,
+          Log:     booter.Log,
           cache:   cache,
           updater: updater,
           booter:  booter

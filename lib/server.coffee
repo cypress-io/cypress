@@ -6,6 +6,7 @@ _            = require 'underscore'
 _.str        = require 'underscore.string'
 allowDestroy = require "server-destroy"
 Promise      = require 'bluebird'
+Log          = require "./log"
 Project      = require "./project"
 Socket       = require "./socket"
 Settings     = require './util/settings'
@@ -102,7 +103,7 @@ class Server #extends require('./logger')
     new Promise (resolve, reject) =>
       @server.listen @config.port, =>
         @isListening = true
-        console.log "Express server listening on port: #{@config.port}"
+        Log.info("Server listening", {code: "server", port: @config.port})
 
         @project.ensureProjectId().bind(@)
         .then ->
@@ -112,14 +113,16 @@ class Server #extends require('./logger')
         .catch(reject)
 
   close: ->
-    new Promise (resolve) =>
+    promise = new Promise (resolve) =>
       ## bail early we dont have a server or we're not
       ## currently listening
       return resolve() if not @server or not @isListening
 
       @server.destroy =>
         @isListening = false
-        console.log "Express server closed!"
         resolve()
+
+    promise.then ->
+      Log.info "Server closed", {code: "server"}
 
 module.exports = Server

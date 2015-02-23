@@ -5,6 +5,7 @@ Settings       = require("./util/settings")
 Server         = require("./server")
 Updater        = require("./updater")
 Cache          = require("./cache")
+Log            = require("./log")
 child_process  = require("child_process")
 open           = require('open')
 Promise        = require('bluebird')
@@ -64,6 +65,9 @@ class Booter
 
   ## attach to Booter class
   @Updater = Updater
+
+  ## attach to Booter class
+  @Log = Log
 
 send = (obj) ->
   if process.send
