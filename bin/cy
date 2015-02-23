@@ -5,10 +5,11 @@ var nodemon = require('nodemon')
 var path    = require('path')
 
 cyRoot   = path.join(__dirname, "..", "lib");
-cyServer = path.join(__dirname, "booter.coffee");
+cyServer = path.join(__dirname, "..", "lib", "cypress.coffee");
 
 var args = '-e "coffee js" --debug --watch ' + cyRoot + " " + cyServer + " " + process.argv[2] + " id_generator verbose"
 
+console.log(args)
 nodemon(args)
 .on("start", function() {
   console.log(":: nodemon started")

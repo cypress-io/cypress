@@ -1,3 +1,22 @@
+#updates-available {
+  text-align: center;
+  background-color: #D9EDF7;
+  position: absolute;
+  bottom: $footer-height;
+  width: 100%;
+  color: #3A87AD;
+  line-height: $footer-height;
+
+  strong {
+    margin-left: 10px;
+
+    &:hover {
+      color: darken(#3A87AD, 15%);
+      cursor: pointer;
+    }
+  }
+}
+
 #footer {
   background-color: #DDD;
   position: absolute;

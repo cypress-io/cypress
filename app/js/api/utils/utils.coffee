@@ -7,7 +7,10 @@ do (Cypress, _) ->
 
   Cypress.addUtil
     hasElement: (obj) ->
-      !!(obj and obj[0] and _.isElement(obj[0])) or _.isElement(obj)
+      try
+        !!(obj and obj[0] and _.isElement(obj[0])) or _.isElement(obj)
+      catch
+        false
 
     ## short form css-inlines the element
     ## long form returns the outerHTML

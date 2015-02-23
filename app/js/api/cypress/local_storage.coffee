@@ -16,18 +16,22 @@ Cypress.LocalStorage = do (_) ->
     # initialize: ->
     #   @canBeParent = false
 
-    clear: (keys) ->
-      throw new Error("Cypress.LocalStorage is missing local and remote storage references!") if not @localStorage or not @remoteStorage
+    clear: (keys, local, remote) ->
+      # throw new Error("Cypress.LocalStorage is missing local and remote storage references!") if not @localStorage or not @remoteStorage
 
       ## make sure we always have an array here with all falsy values removed
       keys = _.compact [].concat(keys)
+
+      local ?= @localStorage
+      remote ?= @remoteStorage
+
+      storages = _.compact([local, remote])
 
       ## we have to iterate over both our remoteIframes localStorage
       ## and our window localStorage to remove items from it
       ## due to a bug in IE that does not properly propogate
       ## changes to an iframes localStorage
-      _.each [@remoteStorage, @localStorage], (storage) =>
-
+      _.each storages, (storage) =>
         _.chain(storage)
         .keys()
         .reject(@_isSpecialKeyword)

@@ -1,9 +1,10 @@
-_        = require 'lodash'
-Promise  = require 'bluebird'
-path     = require 'path'
-Request  = require 'request-promise'
-Project  = require './project'
-Cache    = require './cache'
+_             = require 'lodash'
+Promise       = require 'bluebird'
+path          = require 'path'
+Request       = require 'request-promise'
+Project       = require './project'
+Cache         = require './cache'
+SecretSauce   = require "../lib/util/secret_sauce_loader"
 
 config   = require("konfig")()
 
@@ -16,39 +17,11 @@ class Keys
       throw new Error("Instantiating lib/keys requires a projectRoot!")
 
     @cache     = new Cache
-    @project     = Project(projectRoot)
+    @project   = Project(projectRoot)
 
   _getNewKeyRange: (projectId) ->
     Request.post("#{config.app.api_url}/projects/#{projectId}/keys")
 
-  _convertToId: (index) ->
-    ival = index.toString(36)
-    ## 0 pad number to ensure three digits
-    [0,0,0].slice(ival.length).join("") + ival
-
-  _getProjectKeyRange: (id) ->
-    @cache.getProject(id).get("RANGE")
-
-  ## Lookup the next Test integer and update
-  ## offline location of sync
-  getNextTestNumber: (projectId) ->
-    @_getProjectKeyRange(projectId)
-    .then (range) =>
-      return @_getNewKeyRange(projectId) if range.start is range.end
-
-      range.start += 1
-      range
-    .then (range) =>
-      range = JSON.parse(range) if _.isString(range)
-      @cache.updateRange(projectId, range)
-      .return(range.start)
-
-  nextKey: ->
-    @project.ensureProjectId().bind(@)
-    .then (projectId) ->
-      @cache.ensureExists().bind(@)
-      .then -> @cache.ensureProject(projectId)
-      .then -> @getNextTestNumber(projectId)
-      .then @_convertToId
+SecretSauce.mixin("Keys", Keys)
 
 module.exports = Keys

@@ -2,7 +2,16 @@
 
   parseArgv = (options) ->
     _.defaults options,
-      env: if "--dev" in options.argv then "dev" else "prod"
+      env: process.env["NODE_ENV"]
+      debug: "--debug" in options.argv
+      updating: "--updating" in options.argv
+
+    if options.updating
+      _.extend options,
+        appPath:  options.argv[0]
+        execPath: options.argv[1]
+
+    return options
 
   App = new Marionette.Application
 
@@ -20,6 +29,14 @@
 
     ## create a App.config model from the passed in options
     App.config = App.request("config:entity", options)
+
+    ## create an App.updater model which is shared across the app
+    App.updater = App.request "new:updater:entity"
+
+    ## if we are updating then do not start the app
+    ## or display any UI. just finish installing the updates
+    if options.updating
+      return App.updater.install(options.appPath, options.execPath)
 
     App.config.getUser().then (user) ->
       ## check cache store for user

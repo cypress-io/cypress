@@ -1,7 +1,5 @@
-global.config ?= require("konfig")()
 root          = '../../../'
 path          = require 'path'
-CACHE         = path.join(__dirname, root, config.app.cache_path)
 Promise       = require 'bluebird'
 expect        = require('chai').expect
 Keys          = require "#{root}lib/keys"
@@ -9,16 +7,10 @@ Project       = require "#{root}lib/project"
 Cache         = require "#{root}lib/cache"
 Settings      = require "#{root}lib/util/settings"
 Routes        = require "#{root}lib/util/routes"
-fs            = Promise.promisifyAll(require('fs'))
+fs            = require 'fs-extra'
 nock          = require 'nock'
-rimraf        = require 'rimraf'
 sinon         = require 'sinon'
 sinonPromise  = require 'sinon-as-promised'
-
-require('chai')
-.use(require('sinon-chai'))
-.use(require("chai-as-promised"))
-.should()
 
 describe "Cache", ->
   beforeEach ->
@@ -30,23 +22,20 @@ describe "Cache", ->
     nock.cleanAll()
     nock.enableNetConnect()
     @sandbox.restore()
-    rimraf.sync path.dirname(CACHE)
+    @cache.remove()
 
   context "#ensureExists", ->
     it "creates an offline cache if not present", (done) ->
       @cache.ensureExists()
       .then =>
-        fs.statAsync(CACHE)
+        fs.statAsync(@cache.cache_path)
       .then => done()
       .catch(done)
 
-    it "returns true when already exists", (done) ->
-      @cache.ensureExists()
-      .then =>
-        @cache.ensureExists()
-        .should.eventually.eql(true)
-        .then(=>done())
-      .catch(done)
+    it "returns true when already exists", ->
+      @cache.ensureExists().then =>
+        @cache.exists().then (bool) ->
+          expect(bool).to.be.true
 
   context "validators", ->
     beforeEach ->
@@ -55,7 +44,7 @@ describe "Cache", ->
     it "creates an empty PROJECTS key", (done) ->
       @cache._read()
       .then (contents) ->
-        contents.should.eql({PROJECTS: {}})
+        expect(contents).to.deep.eq({PROJECTS: {}})
         done()
       .catch(done)
 
@@ -63,7 +52,7 @@ describe "Cache", ->
       @cache.insertProject("FOO")
       .then => @cache._read()
       .then (contents) =>
-        contents.should.eql({
+        expect(contents).to.deep.eq({
           PROJECTS: {FOO: {RANGE: {}}}
         })
         done()
@@ -100,7 +89,7 @@ describe "Cache", ->
       it "throws an error when a project is not found", (done) ->
         @cache.getProject("FOO")
         .catch (err) ->
-          err.message.should.eql("Project FOO not found")
+          expect(err.message).to.eq("Project FOO not found")
           done()
 
     describe "#insertProject", ->
@@ -182,13 +171,16 @@ describe "Cache", ->
 
       it "can update a single project", (done) ->
         @cache.updateProject("BAR", {wow: 1})
-        .then (c) => c.should.eql({RANGE: {}, wow: 1}); done()
+        .then (c) ->
+          expect(c).to.deep.eq({RANGE: {}, wow: 1})
+          done()
         .catch(done)
 
       it "can update a project range", (done) ->
         @cache.updateRange("BAR", {start: 1, end: 2})
         .then (p) =>
-          p.should.eql({RANGE: {start:1,end:2}}); done()
+          expect(p).to.deep.eq({RANGE: {start:1,end:2}})
+          done()
         .catch(done)
 
       it "overrides only conflicting properties", (done) ->
@@ -227,17 +219,18 @@ describe "Cache", ->
         @cache.addProject("/Users/brian/app").then =>
           stubId("foo-bar-456")
           @cache.addProject("/Users/sam/app2").then =>
-            @cache.getProjectPaths().then (paths) ->
+            @cache.getProjectPaths().then (paths) =>
               expect(paths).to.deep.eq ["/Users/brian/app"]
-              done()
-        .catch(done)
+
+              ## we have to wait on the write event because
+              ## of process.nextTick
+              @cache.on "write", -> done()
 
     describe "#_removeProjectByPath", ->
       it "removes projects by path", (done) ->
         stubId = (id) =>
           @sandbox.restore()
           @sandbox.stub(Project.prototype, "getProjectId").resolves(id)
-
         stubId(123)
         @cache.addProject("/Users/brian/app").then =>
           stubId(456)

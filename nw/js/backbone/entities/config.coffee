@@ -46,8 +46,10 @@
         console.log("Error logging out!")
         throw err
 
+    getUpdater: -> @updater
+
   App.reqres.setHandler "config:entity", (attrs = {}) ->
-    props = ["cache", "booter", "request"]
+    props = ["cache", "booter", "updater"]
 
     config = new Entities.Config _(attrs).omit props...
 

@@ -11,6 +11,7 @@
 
     mixinTemplateHelpers: (target) ->
       target.env = App.config.env()
+      target.debug = App.config.get("debug")
 
       _mixinTemplateHelpers.call(@, target)
 

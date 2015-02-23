@@ -444,7 +444,7 @@ window.Cypress = do ($, _, Backbone) ->
 
     createSnapshot: ($el) ->
       ## create a unique selector for this el
-      $el.attr(@highlightAttr, true) if $el
+      $el.attr(@highlightAttr, true) if $el?.attr
 
       ## clone the body and strip out any script tags
       body = @$("body").clone()
@@ -464,7 +464,7 @@ window.Cypress = do ($, _, Backbone) ->
       ## which would reduce memory, and some CPU operations
 
       ## now remove it after we clone
-      $el.removeAttr(@highlightAttr) if $el
+      $el.removeAttr(@highlightAttr) if $el?.removeAttr
 
       return body
 
@@ -502,6 +502,7 @@ window.Cypress = do ($, _, Backbone) ->
       obj = {name: key, ctx: @, fn: fn, args: args, type: type}
 
       @trigger "enqueue", obj
+      Cypress.trigger "enqueue", obj
 
       @_insert(obj)
 

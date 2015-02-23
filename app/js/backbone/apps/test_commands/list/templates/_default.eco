@@ -20,7 +20,7 @@
         </span>
       <% end %>
       <!-- <i class="fa fa-pause"></i> -->
-      <i class="fa fa-eye-slash shown"></i>
+      <!-- <i class="fa fa-eye-slash shown"></i> -->
       <label class="label label-warning"><%= @numRetries %></label>
       <% if @numElements > 1: %>
         <label title="<%= @numElements %> matched elements" class="label label-default"><%= @numElements %></label>

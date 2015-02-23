@@ -8,7 +8,7 @@ do (Cypress, _) ->
         @throwErr("cy.clearLocalStorage() must be called with either a string or regular expression!")
 
       local = window.localStorage
-      remote = cy.sync.window().localStorage
+      remote = @sync.window().localStorage
 
       ## set our localStorage and the remote localStorage
       Cypress.LocalStorage.setStorages(local, remote)

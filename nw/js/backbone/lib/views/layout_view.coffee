@@ -25,7 +25,7 @@
       , []
 
       regions = _.reduce selectors, (memo, region) ->
-        memo[_.camelize(region)] = "#" + region
+        memo[_.str.camelize(region)] = "#" + region
         memo
       , {}
 

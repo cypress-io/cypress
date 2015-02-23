@@ -6,7 +6,7 @@
 
   API =
     show: (win) ->
-      if App.config.env("dev")
+      if App.config.get("debug")
         win.showDevTools() unless win.isDevToolsOpen()
         win.setAlwaysOnTop()
 
@@ -15,7 +15,7 @@
     displayGui: ->
       win = gui.Window.get()
 
-      if App.config.env("dev")
+      if App.config.env("development")
         gui.App.clearCache()
         @show(win)
       else
@@ -45,7 +45,7 @@
         @focus()
 
       win.on "blur", ->
-        return if App.fileDialogOpened or App.config.env("dev")
+        return if App.fileDialogOpened or App.config.env("development")
 
         win.hide()
 
@@ -70,6 +70,38 @@
     quit: ->
       gui.App.quit()
 
+    manifest: ->
+      gui.App.manifest
+
+    updates: ->
+      updates = App.request "gui:open", "app://app/nw/public/updates.html",
+        position: "center"
+        width: 300
+        height: 200
+        # frame: false
+        toolbar: false
+        title: ""
+
+      updates.once "loaded", ->
+        updates.showDevTools() if App.config.get("debug")
+
+        ## grab the updates region from other window
+        $el = $("#updates-region", updates.window.document)
+
+        ## attach to the app as a custom region object
+        App.addRegions
+          updatesRegion: Marionette.Region.extend(el: $el)
+
+        App.vent.trigger "start:updates:app", App.updatesRegion, updates
+
+      updates.once "close", ->
+        ## remove app region when this is closed down
+        App.removeRegion("updatesRegion")
+
+        ## really shut down the window!
+        @close(true)
+
+
   App.commands.setHandler "gui:display", ->
     API.displayGui()
 
@@ -93,3 +125,9 @@
 
   App.commands.setHandler "gui:quit", ->
     API.quit()
+
+  App.commands.setHandler "gui:check:for:updates", ->
+    API.updates()
+
+  App.reqres.setHandler "gui:manifest", ->
+    API.manifest()

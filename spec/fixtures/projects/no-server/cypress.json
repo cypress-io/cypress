@@ -1,0 +1,6 @@
+{
+  "cypress": {
+    "testFolder": "my-tests",
+    "rootFolder": "dev"
+  }
+}

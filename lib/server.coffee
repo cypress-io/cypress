@@ -6,8 +6,8 @@ _            = require 'underscore'
 _.str        = require 'underscore.string'
 allowDestroy = require "server-destroy"
 Promise      = require 'bluebird'
-Project      = require "./project.coffee"
-Socket       = require "./socket.coffee"
+Project      = require "./project"
+Socket       = require "./socket"
 Settings     = require './util/settings'
 
 ## currently not making use of event emitter
@@ -81,6 +81,11 @@ class Server #extends require('./logger')
     ## errorhandler
     @app.use require("errorhandler")()
 
+    @createRoutes()
+
+  createRoutes: ->
+    require("./routes")(@app)
+
   open: ->
     @server    = http.createServer(@app)
     @io        = require("socket.io")(@server, {path: "/__socket.io"})
@@ -93,8 +98,6 @@ class Server #extends require('./logger')
     ## refactor this class
     socket = Socket(@io, @app)
     socket.startListening()
-
-    require("./routes")(@app)
 
     new Promise (resolve, reject) =>
       @server.listen @config.port, =>
@@ -120,10 +123,3 @@ class Server #extends require('./logger')
         resolve()
 
 module.exports = Server
-
-# Server = (config) ->
-#   argv = minimist(process.argv.slice(2), boolean: true)
-
-#   return Server
-
-# module.exports = Server
