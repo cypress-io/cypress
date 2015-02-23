@@ -245,6 +245,9 @@ describe "Deploy", ->
 
   context "#build", ->
     beforeEach ->
+      ## 10 min timeout
+      @timeout(10 * 60 * 1000)
+
       deploy.version = "1.0.2"
       deploy.prepare().then(deploy.build)
 
@@ -294,6 +297,9 @@ describe "Deploy", ->
 
   context "#npmInstall", ->
     beforeEach ->
+      ## 10 min timeout
+      @timeout(10 * 60 * 1000)
+
       deploy.version = "1.0.2"
       deploy.prepare().then(deploy.build)
 
