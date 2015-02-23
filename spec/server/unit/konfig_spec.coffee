@@ -21,6 +21,9 @@ describe "Konfig", ->
     it "api_url", ->
       @eq("api_url", "http://localhost:1234")
 
+    it "log_path", ->
+      @eq("log_path", ".cy/logs")
+
   context "test", ->
     beforeEach ->
       @setup("test")
@@ -30,6 +33,9 @@ describe "Konfig", ->
 
     it "api_url", ->
       @eq("api_url", "http://localhost:1234")
+
+    it "log_path", ->
+      @eq("log_path", ".cy_test/logs")
 
   context "production", ->
     beforeEach ->
