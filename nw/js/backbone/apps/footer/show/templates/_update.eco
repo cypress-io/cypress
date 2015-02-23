@@ -1,3 +1,9 @@
-<div id="update">
-  updates are available
-</div>
+<% if @updatesAvailable: %>
+  <div id="updates-available">
+    New Updates are available.
+    <strong>
+      <i class="fa fa-download"></i>
+      Update
+    </strong>
+  </div>
+<% end %>

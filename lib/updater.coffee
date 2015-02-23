@@ -81,15 +81,23 @@ class Updater
     if cb = @callbacks[event]
       cb.apply(@, args)
 
-  run: (@callbacks = {}) ->
-    @trigger("start")
-
+  check: (options = {}) ->
     @getClient().checkNewVersion (err, newVersionExists, manifest) =>
       return @trigger("error", err) if err
 
       if newVersionExists
-        @download(manifest)
+        options.onNewVersion?(manifest)
       else
+        options.onNoNewVersion?()
+
+  run: (@callbacks = {}) ->
+    @trigger("start")
+
+    @check
+      onNewVersion: (manifest) =>
+        @download(manifest)
+
+      onNoNewVersion: =>
         @trigger("none")
 
 module.exports = Updater

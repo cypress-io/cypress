@@ -6,6 +6,12 @@
   class Show.Update extends App.Views.ItemView
     template: "footer/show/_update"
 
+    triggers:
+      "click strong" : "strong:clicked"
+
+    modelEvents:
+      "change:updatesAvailable" : "render"
+
   class Show.Bottom extends App.Views.ItemView
     template: "footer/show/_bottom"
 

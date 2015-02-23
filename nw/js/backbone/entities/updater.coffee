@@ -3,6 +3,7 @@
   class Entities.Updater extends Entities.Model
     defaults: ->
       finished: false
+      updatesAvailable: false
 
     mutators:
       stateFormatted: ->
@@ -43,6 +44,14 @@
 
     isDone: ->
       @get("state") is "done"
+
+    updatesAvailable: (bool = true) ->
+      @set "updatesAvailable", bool
+
+    check: ->
+      @getUpdater().check
+        onNewVersion:   => @updatesAvailable()
+        onNoNewVersion: => @updatesAvailable(false)
 
     run: (options) ->
       @getUpdater().run(options)

@@ -16,6 +16,12 @@
 
       updateView = @getUpdateView(updater)
 
+      @listenTo updateView, "show", ->
+        updater.check()
+
+      @listenTo updateView, "strong:clicked", ->
+        App.execute "gui:check:for:updates"
+
       @show updateView, region: region
 
     bottomRegion: (region) ->
@@ -42,8 +48,9 @@
     getLayoutView: ->
       new Show.Layout
 
-    getUpdateView: ->
+    getUpdateView: (updater) ->
       new Show.Update
+        model: updater
 
     getBottomView: ->
       new Show.Bottom

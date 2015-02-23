@@ -238,3 +238,29 @@ describe "Updater", ->
     # it "runs", ->
     #   @updater = Updater({quit: @sandbox.spy()})
     #   @updater.run()
+
+  context "#check", ->
+    beforeEach ->
+      @updater = Updater({quit: @sandbox.spy()})
+      @updater.getClient()
+      @sandbox.stub(@updater.client, "checkNewVersion")
+
+    it "calls checkNewVersion", ->
+      @updater.check()
+      expect(@updater.client.checkNewVersion).to.be.called
+
+    it "calls optsions.newVersionExists when there is a no version", ->
+      @updater.client.checkNewVersion.callsArgWith(0, null, true, {})
+
+      options = {onNewVersion: @sandbox.spy()}
+      @updater.check(options)
+
+      expect(options.onNewVersion).to.be.calledWith({})
+
+    it "calls optsions.newVersionExists when there is a no version", ->
+      @updater.client.checkNewVersion.callsArgWith(0, null, false)
+
+      options = {onNoNewVersion: @sandbox.spy()}
+      @updater.check(options)
+
+      expect(options.onNoNewVersion).to.be.called
