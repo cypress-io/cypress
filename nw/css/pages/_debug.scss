@@ -1,0 +1,30 @@
+#debug {
+  padding: 15px;
+
+  .panel {
+    overflow: auto;
+    margin-bottom: 10px;
+  }
+
+  #code {
+    color: #777;
+    background-color: white;
+    font-size: 11px;
+
+    td:nth-of-type(1) {
+      width: 6%;
+    }
+
+    td:nth-of-type(2) {
+      width: 40%;
+    }
+
+    td:nth-of-type(2) {
+      width: 54%;
+    }
+
+    .data {
+      @include text-overflow();
+    }
+  }
+}

@@ -5,9 +5,15 @@
     initialize: (options = {}) ->
       { window } = options
 
-      debugView = @getDebugView()
+      logs = App.request "log:entities"
+
+      debugView = @getDebugView(logs)
+
+      @listenTo debugView, "clear:clicked", ->
+        logs.clear()
 
       @show debugView
 
-    getDebugView: ->
+    getDebugView: (logs) ->
       new Show.Debug
+        collection: logs

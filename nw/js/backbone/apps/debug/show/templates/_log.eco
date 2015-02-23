@@ -1,0 +1,3 @@
+<td><%= @type %></td>
+<td><%= @message %></td>
+<td class="data"><%= @dataFormatted %></td>

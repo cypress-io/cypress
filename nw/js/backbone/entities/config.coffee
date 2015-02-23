@@ -47,11 +47,20 @@
         throw err
 
     log: (text, data = {}) ->
-      data.code = "native"
+      data.type = "native"
       @getLog().log("info", text, data)
 
     getLog: ->
       @Log ? throw new Error("config#Log is not defined!")
+
+    getLogs: (transport) ->
+      @getLog().getLogs(transport)
+
+    onLog: (fn) ->
+      @getLog().onLog(fn)
+
+    clearLogs: ->
+      @getLog().clearLogs()
 
     getUpdater: -> @updater
 

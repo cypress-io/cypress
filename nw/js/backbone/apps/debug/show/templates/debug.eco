@@ -1,1 +1,15 @@
-debug app
+<div id="debug">
+  <div class="panel">
+    <div class="btn-group btn-group-sm">
+      <button class="btn btn-default">All</button>
+      <button class="btn btn-default">Info</button>
+      <button class="btn btn-default">Error</button>
+    </div>
+    <button data-clear class="btn btn-sm btn-danger pull-right">Clear</button>
+  </div>
+  <div id="code">
+    <table class="table table-bordered table-condensed">
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
