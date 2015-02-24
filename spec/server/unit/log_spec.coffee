@@ -27,7 +27,7 @@ describe "Winston Logger", ->
     Log.on "logging", (transport, level, msg, data) ->
       expect(level).to.eq("info")
       expect(msg).to.eq("foo!")
-      expect(data).to.deep.eq({foo: "bar"})
+      expect(data).to.deep.eq({foo: "bar", type: "server"})
       done()
 
     Log.info("foo!", {foo: "bar"})

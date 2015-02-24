@@ -20,6 +20,7 @@ createFile = (name, level, opts = {}) ->
     filename: getPathToLog(name)
     colorize: true
     tailable: true
+    maxsize: 1000000 ## 1mb
   }
 
   if level
@@ -84,9 +85,15 @@ logger.clearLogs = ->
 
   Promise.all(files)
 
-# logger.log = _.wrap logger.log, (orig, args...) ->
+logger.log = _.wrap logger.log, (orig, args...) ->
 #   return if (logger.forceLogger isnt true) and (process.env["NODE_ENV"] is "test")
 
-#   orig.apply(@, args)
+  last = _.last(args)
+
+  if _.isObject(last)
+    _.defaults last,
+      type: "server"
+
+  orig.apply(@, args)
 
 module.exports = logger
