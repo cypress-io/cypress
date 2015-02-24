@@ -24,19 +24,6 @@ describe "Cache", ->
     @sandbox.restore()
     @cache.remove()
 
-  context "#ensureExists", ->
-    it "creates an offline cache if not present", (done) ->
-      @cache.ensureExists()
-      .then =>
-        fs.statAsync(@cache.cache_path)
-      .then => done()
-      .catch(done)
-
-    it "returns true when already exists", ->
-      @cache.ensureExists().then =>
-        @cache.exists().then (bool) ->
-          expect(bool).to.be.true
-
   context "validators", ->
     beforeEach ->
       @cache.ensureExists()

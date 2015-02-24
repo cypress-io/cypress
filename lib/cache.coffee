@@ -7,7 +7,7 @@ request   = require "request-promise"
 Project   = require './project'
 Routes    = require "./util/routes"
 fs        = Promise.promisifyAll(require('fs-extra'))
-CACHE     = path.join(__dirname, '../', config.app.cache_path)
+CACHE     = path.join("..", config.app.cache_path)
 
 class Cache extends require('./logger')
   READ_VALIDATIONS: ->
@@ -50,7 +50,7 @@ class Cache extends require('./logger')
     @emit 'verbose', 'writing to .cy info'
     @emit "write", obj
 
-    fs.writeFileAsync(
+    fs.outputFileAsync(
       CACHE,
       JSON.stringify(obj),
       'utf8'
@@ -80,15 +80,6 @@ class Cache extends require('./logger')
     @_read().then (contents) ->
       contents[key]
 
-  ## Creates the local info directory and file
-  _initLocalInfo: ->
-    @emit 'verbose', 'creating initial .cy info'
-    fs.mkdirAsync(
-      path.dirname(CACHE)
-    )
-    .bind(@)
-    .then(@_write)
-
   ## Checks to make sure if the local file is already there
   ## if so returns true;
   ## otherwise it inits an empty JSON config file
@@ -97,7 +88,7 @@ class Cache extends require('./logger')
     fs.statAsync(CACHE)
     .bind(@)
     .return(true)
-    .catch(@_initLocalInfo)
+    .catch -> @_write()
 
   exists: ->
     @ensureExists().return(true).catch(false)

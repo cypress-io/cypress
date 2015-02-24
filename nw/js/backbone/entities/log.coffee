@@ -18,10 +18,10 @@
       App.config.clearLogs().then => @reset()
 
   API =
-    getLogs: (transport = "all") ->
+    getLogs: ->
       logs = new Entities.LogsCollection
 
-      App.config.getLogs(transport).then (array) ->
+      App.config.getLogs().then (array) ->
         logs.add(array)
 
       App.config.onLog (log) ->

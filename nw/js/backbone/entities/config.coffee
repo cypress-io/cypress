@@ -53,8 +53,8 @@
     getLog: ->
       @Log ? throw new Error("config#Log is not defined!")
 
-    getLogs: (transport) ->
-      @getLog().getLogs(transport)
+    getLogs: ->
+      @getLog().getLogs()
 
     onLog: (fn) ->
       @getLog().onLog(fn)

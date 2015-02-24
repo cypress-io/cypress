@@ -32,9 +32,6 @@ createFile = (name, level, opts = {}) ->
 logger = new (winston.Logger)({
   transports: [
     createFile("all", null, {handleExceptions: true})
-    createFile("info", "info")
-    createFile("error", "error", {handleExceptions: true})
-    createFile("profile", "profile")
   ]
   exitOnError: false
 })
@@ -54,7 +51,9 @@ logger.getData = (obj) ->
 logger.normalize = (logs = []) ->
   _.map logs, logger.getData
 
-logger.getLogs = (transport) ->
+logger.getLogs = ->
+  transport = "all"
+
   new Promise (resolve, reject) ->
     opts = {}
 
@@ -65,7 +64,9 @@ logger.getLogs = (transport) ->
 
       resolve logger.normalize(results)
 
-logger.onLog = (name, fn) ->
+logger.onLog = (fn) ->
+  name = "all"
+
   logger.removeAllListeners("logging")
 
   logger.on "logging", (transport, level, msg, data) ->
@@ -83,9 +84,9 @@ logger.clearLogs = ->
 
   Promise.all(files)
 
-logger.log = _.wrap logger.log, (orig, args...) ->
-  return if (logger.forceLogger isnt true) and (process.env["NODE_ENV"] is "test")
+# logger.log = _.wrap logger.log, (orig, args...) ->
+#   return if (logger.forceLogger isnt true) and (process.env["NODE_ENV"] is "test")
 
-  orig.apply(@, args)
+#   orig.apply(@, args)
 
 module.exports = logger

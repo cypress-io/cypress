@@ -12,32 +12,29 @@ fs = Promise.promisifyAll(fs)
 
 describe "Winston Logger", ->
   beforeEach ->
-    Log.forceLogger = true
     Log.clearLogs()
 
   afterEach ->
     Log.removeAllListeners("logging")
 
   after ->
-    delete Log.forceLogger
     fs.removeAsync(config.app.log_path)
 
-  it "has 4 transports", ->
-    expect(Log.transports).to.have.keys("all", "info", "error", "profile")
+  it "has 1 transport", ->
+    expect(Log.transports).to.have.keys("all")
 
   it "logs to all", (done) ->
     Log.on "logging", (transport, level, msg, data) ->
-      if transport.name is "all"
-        expect(level).to.eq("info")
-        expect(msg).to.eq("foo!")
-        expect(data).to.deep.eq({foo: "bar"})
-        done()
+      expect(level).to.eq("info")
+      expect(msg).to.eq("foo!")
+      expect(data).to.deep.eq({foo: "bar"})
+      done()
 
     Log.info("foo!", {foo: "bar"})
 
   describe "#onLog", ->
     it "calls back with log", (done) ->
-      Log.onLog "all", (log) ->
+      Log.onLog (log) ->
         expect(log.level).to.eq("info")
         expect(log.message).to.eq("foo")
         expect(log.data).to.deep.eq({foo: "bar"})
@@ -46,7 +43,7 @@ describe "Winston Logger", ->
       Log.info("foo", {foo: "bar"})
 
     it "slices type out of data", (done) ->
-      Log.onLog "all", (log) ->
+      Log.onLog (log) ->
         expect(log.level).to.eq("info")
         expect(log.message).to.eq("foo")
         expect(log.data).to.deep.eq({foo: "bar"})
@@ -57,7 +54,7 @@ describe "Winston Logger", ->
 
   describe "#getLogs", ->
     beforeEach (done) ->
-      Log.onLog "all", (log) ->
+      Log.onLog (log) ->
         done()
 
       Log.info("foo", {foo: "bar"})
