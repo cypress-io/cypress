@@ -10,7 +10,7 @@ cache         = require("#{root}lib/cache")
 Routes        = require("#{root}lib/util/routes")
 Settings      = require("#{root}lib/util/settings")
 
-describe.only "Exceptions", ->
+describe "Exceptions", ->
   beforeEach ->
     nock.disableNetConnect()
     @sandbox = sinon.sandbox.create()

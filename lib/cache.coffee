@@ -21,13 +21,13 @@ class Cache extends require("events").EventEmitter
       @_ensureProjectRangeKey
     ]
 
-  _ensureProjectKey: (contents) =>
+  _ensureProjectKey: (contents) ->
     if !contents.PROJECTS?
       contents.PROJECTS = {}
 
     Promise.resolve(contents)
 
-  _ensureProjectRangeKey: (contents) =>
+  _ensureProjectRangeKey: (contents) ->
     _.each contents.PROJECTS, (p) ->
       if !p.RANGE?
         p.RANGE = {}
@@ -36,13 +36,14 @@ class Cache extends require("events").EventEmitter
 
   ## Reads the contents of the local file
   ## returns a JSON object
-  _read: =>
-    fs.readJsonAsync(CACHE, 'utf8')
-    .bind(@)
-    .then (contents) ->
-      Promise.reduce(@READ_VALIDATIONS(), (memo, fn) ->
-        fn(memo)
-      , contents)
+  read: ->
+    @ensureExists().bind(@).then ->
+      fs.readJsonAsync(CACHE, 'utf8')
+      .bind(@)
+      .then (contents) ->
+        Promise.reduce(@READ_VALIDATIONS(), (memo, fn) ->
+          fn(memo)
+        , contents)
 
   ## Writes over the contents of the local file
   ## takes in an object and serializes it into JSON
@@ -71,11 +72,11 @@ class Cache extends require("events").EventEmitter
     @_write contents
 
   _set: (key, val) ->
-    @_read().then (contents) ->
+    @read().then (contents) ->
       @_mergeOrWrite(contents, key, val)
 
   _get: (key) ->
-    @_read().then (contents) ->
+    @read().then (contents) ->
       contents[key]
 
   ## Checks to make sure if the local file is already there
@@ -87,7 +88,7 @@ class Cache extends require("events").EventEmitter
     fs.statAsync(CACHE)
     .bind(@)
     .return(true)
-    .catch -> @_write()
+    .catch => @_write()
 
   exists: ->
     @ensureExists().return(true).catch(false)

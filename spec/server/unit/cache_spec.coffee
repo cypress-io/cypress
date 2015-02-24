@@ -39,7 +39,7 @@ describe "Cache", ->
       @cache.ensureExists()
 
     it "creates an empty PROJECTS key", (done) ->
-      @cache._read()
+      @cache.read()
       .then (contents) ->
         expect(contents).to.deep.eq({PROJECTS: {}})
         done()
@@ -47,7 +47,7 @@ describe "Cache", ->
 
     it "creates an empty RANGE key for a Project", (done) ->
       @cache.insertProject("FOO")
-      .then => @cache._read()
+      .then => @cache.read()
       .then (contents) =>
         expect(contents).to.deep.eq({
           PROJECTS: {FOO: {RANGE: {}}}
@@ -208,6 +208,7 @@ describe "Cache", ->
         stubId = (id) =>
           @sandbox.restore()
           @sandbox.stub(Project.prototype, "getProjectId").resolves(id)
+          @sandbox.stub(@cache, "ensureExists").resolves()
           @sandbox.stub(fs, "statAsync")
             .withArgs("/Users/brian/app").resolves()
             .withArgs("/Users/sam/app2").rejects()
