@@ -57,8 +57,6 @@ logger.defaultErrorHandler = (err) ->
       console.error(err)
       exit()
 
-  ## need to add a promise timeout here to automatically
-  ## fail within 3 seconds or so
   require("./exception").create(err).then(handleErr).catch(handleErr)
 
   ## do not exit on error, let us

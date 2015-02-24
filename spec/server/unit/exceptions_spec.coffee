@@ -4,6 +4,7 @@ nock          = require("nock")
 sinon         = require("sinon")
 sinonPromise  = require("sinon-as-promised")
 winston       = require("winston")
+Promise       = require("bluebird")
 Exception     = require("#{root}lib/exception")
 Log           = require("#{root}lib/log")
 cache         = require("#{root}lib/cache")
@@ -122,7 +123,26 @@ describe "Exceptions", ->
           true
         .matchHeader("X-Session", "abc123")
         .matchHeader("accept", "application/json")
-        .reply(200)
 
     it "requests with correct url, body, headers, and json", ->
+      @exceptions.reply(200)
       Exception.create().then(@exceptions.done)
+
+    it "times out after 3 seconds", (done) ->
+      @timeout(10000)
+
+      ## setup the clock so we can coerce time
+      clock = @sandbox.useFakeTimers()
+
+      @exceptions.reply(200)
+
+      Exception.create()
+        .then ->
+          done("errored: it did not catch the timeout error!")
+        .catch Promise.TimeoutError, ->
+          done()
+
+      process.nextTick ->
+        ## automatically move ahead 5 seconds which
+        ## should cause our promise to timeout!
+        clock.tick(5000)

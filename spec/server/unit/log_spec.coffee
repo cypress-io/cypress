@@ -1,21 +1,26 @@
-root    = "../../../"
-config  = require("konfig")()
-Log     = require "#{root}/lib/log"
-winston = require "winston"
-fs      = require "fs-extra"
-Promise = require "bluebird"
-_       = require "lodash"
-path    = require "path"
-expect  = require("chai").expect
+root          = "../../../"
+config        = require("konfig")()
+Log           = require "#{root}/lib/log"
+Exception     = require "#{root}/lib/exception"
+winston       = require "winston"
+sinon         = require("sinon")
+sinonPromise  = require("sinon-as-promised")
+fs            = require "fs-extra"
+Promise       = require "bluebird"
+_             = require "lodash"
+path          = require "path"
+expect        = require("chai").expect
 
 fs = Promise.promisifyAll(fs)
 
 describe "Winston Logger", ->
   beforeEach ->
     Log.clearLogs()
+    @sandbox = sinon.sandbox.create()
 
   afterEach ->
     Log.removeAllListeners("logging")
+    @sandbox.restore()
 
   after ->
     fs.removeAsync(config.app.log_path)
@@ -75,6 +80,61 @@ describe "Winston Logger", ->
           foo: "bar"
         }
       }
+
+  describe "#exitOnError", ->
+    it "invokes logger.defaultErrorHandler", ->
+      err = new Error
+      defaultErrorHandler = @sandbox.stub(Log, "defaultErrorHandler")
+      Log.exitOnError(err)
+      expect(defaultErrorHandler).to.be.calledWith err
+
+  describe "#defaultErrorHandler", ->
+    beforeEach ->
+      @err    = new Error
+      @exit   = @sandbox.stub(process, "exit")
+      @create = @sandbox.stub(Exception, "create").resolves()
+
+    it "calls Exception.create(err)", ->
+      Log.defaultErrorHandler(@err)
+      expect(@create).to.be.calledWith(@err)
+
+    it "returns false", ->
+      expect(Log.defaultErrorHandler(@err)).to.be.false
+
+    context "handleErr", ->
+      it "is called after resolving", (done) ->
+        Log.defaultErrorHandler(@err)
+        process.nextTick =>
+          expect(@exit).to.be.called
+          done()
+
+      it "is called after rejecting", (done) ->
+        @create.rejects()
+        Log.defaultErrorHandler(@err)
+        process.nextTick =>
+          expect(@exit).to.be.called
+          done()
+
+      it "calls process.exit(1)", (done) ->
+        Log.defaultErrorHandler(@err)
+        process.nextTick =>
+          expect(@exit).to.be.calledWith(1)
+          done()
+
+      it "calls Log#errorhandler", (done) ->
+        fn = @sandbox.spy()
+        Log.setErrorHandler(fn)
+        Log.defaultErrorHandler(@err)
+        process.nextTick ->
+          expect(fn).to.be.called
+          done()
+
+      it "calls exit if Log#errorhandler returns true", (done) ->
+        Log.setErrorHandler -> true
+        Log.defaultErrorHandler(@err)
+        process.nextTick =>
+          expect(@exit).to.be.called
+          done()
 
   # it "logs to error", (done) ->
   #   # debugger
