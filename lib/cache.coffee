@@ -5,11 +5,16 @@ Promise   = require 'bluebird'
 path      = require 'path'
 request   = require "request-promise"
 Project   = require './project'
+Log       = require "./log"
 Routes    = require "./util/routes"
-fs        = Promise.promisifyAll(require('fs-extra'))
-CACHE     = path.join("..", config.app.cache_path)
+fs        = require 'fs-extra'
+CACHE     = config.app.cache_path
 
-class Cache extends require('./logger')
+fs = Promise.promisifyAll(fs)
+
+class Cache extends require("events").EventEmitter
+  path: CACHE
+
   READ_VALIDATIONS: ->
     [
       @_ensureProjectKey
@@ -17,14 +22,12 @@ class Cache extends require('./logger')
     ]
 
   _ensureProjectKey: (contents) =>
-    @emit 'verbose', 'ensuring project key'
     if !contents.PROJECTS?
       contents.PROJECTS = {}
 
     Promise.resolve(contents)
 
   _ensureProjectRangeKey: (contents) =>
-    @emit 'verbose', 'ensuring project range key'
     _.each contents.PROJECTS, (p) ->
       if !p.RANGE?
         p.RANGE = {}
@@ -34,10 +37,8 @@ class Cache extends require('./logger')
   ## Reads the contents of the local file
   ## returns a JSON object
   _read: =>
-    @emit 'verbose', 'reading from .cy info'
-    fs.readFileAsync(CACHE, 'utf8')
+    fs.readJsonAsync(CACHE, 'utf8')
     .bind(@)
-    .then(JSON.parse)
     .then (contents) ->
       Promise.reduce(@READ_VALIDATIONS(), (memo, fn) ->
         fn(memo)
@@ -47,13 +48,12 @@ class Cache extends require('./logger')
   ## takes in an object and serializes it into JSON
   ## finally returning the JSON object that was written
   _write: (obj = {}) ->
-    @emit 'verbose', 'writing to .cy info'
-    @emit "write", obj
+    Log.info("writing to .cy cache", cache: obj)
 
+    @emit "write", obj
     fs.outputFileAsync(
       CACHE,
       JSON.stringify(obj),
-      'utf8'
     ).bind(@).return(obj)
 
   _mergeOrWrite: (contents, key, val) ->
@@ -71,8 +71,6 @@ class Cache extends require('./logger')
     @_write contents
 
   _set: (key, val) ->
-    @emit 'verbose', 'merging into .cy'
-
     @_read().then (contents) ->
       @_mergeOrWrite(contents, key, val)
 
@@ -84,7 +82,8 @@ class Cache extends require('./logger')
   ## if so returns true;
   ## otherwise it inits an empty JSON config file
   ensureExists: ->
-    @emit 'verbose', 'checking existence of .cy cache'
+    Log.info "checking existence of .cy cache", path: CACHE
+
     fs.statAsync(CACHE)
     .bind(@)
     .return(true)
@@ -96,7 +95,8 @@ class Cache extends require('./logger')
   cache_path: CACHE
 
   updateRange: (id, range) ->
-    @emit 'verbose', "updating range of project #{id} with #{JSON.stringify(range)}"
+    Log.info "updating range of project #{id}", {range: range}
+
     @getProject(id).bind(@)
     .then (p) ->
       p.RANGE = range
@@ -106,7 +106,8 @@ class Cache extends require('./logger')
        .then(p)
 
   updateProject: (id, data) ->
-    @emit 'verbose', "updating project #{id} with #{JSON.stringify(data)}"
+    Log.info "updating project #{id}", project: data
+
     @getProjects().then (projects) ->
       @getProject(id).then (project) =>
         projects[id] = _.extend(project, data)
@@ -114,7 +115,6 @@ class Cache extends require('./logger')
         .return(project)
 
   ensureProject: (id) ->
-    @emit 'verbose', "ensuring that project #{id} exists"
     @getProject(id)
     .bind(@)
     .catch(-> @insertProject(id))
@@ -126,16 +126,12 @@ class Cache extends require('./logger')
       ## bail if we already have a project
       return if projects[id]
 
-      @emit 'verbose', "inserting project id: #{id}"
-
       ## create an empty nested object
       obj = {}
       obj[id] = {}
       @_set("PROJECTS", obj)
 
   getProject: (id) ->
-    @emit 'verbose', "reading from project #{id}"
-
     @getProjects().then (projects) ->
       if (project = projects[id])
         return project
@@ -143,8 +139,6 @@ class Cache extends require('./logger')
       throw new Error("Project #{id} not found")
 
   getProjects: ->
-    @emit "verbose", "reading from all projects"
-
     @_get("PROJECTS")
 
   _removeProjectByPath: (projects, path) ->
@@ -174,7 +168,7 @@ class Cache extends require('./logger')
         return _.without(paths, removedPaths...)
 
   addProject: (path) ->
-    @emit "verbose", "adding project from path: #{path}"
+    Log.info "adding project from path", path: path
 
     project = Project(path)
 
@@ -187,17 +181,17 @@ class Cache extends require('./logger')
         @updateProject(id, {PATH: path})
 
   getUser: ->
-    @emit "verbose", "getting user"
+    Log.info "getting user"
 
     @_get("USER")
 
   setUser: (user) ->
-    @emit "verbose", "setting user: #{user}"
+    Log.info "setting user", user: user
 
     @_set {USER: user}
 
   remove: ->
-    fs.removeSync(path.dirname(CACHE))
+    fs.removeSync CACHE
 
   ## move this to an auth module
   ## and update NW references

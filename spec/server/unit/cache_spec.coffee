@@ -24,6 +24,16 @@ describe "Cache", ->
     @sandbox.restore()
     @cache.remove()
 
+  context "#ensureExists", ->
+    it "creates empty cache file", ->
+      @cache.ensureExists().then =>
+        fs.readJsonAsync(@cache.path).then (json) ->
+          expect(json).to.deep.eq {}
+
+    it "creates cache file in root/.cy/{environment}/cache", ->
+      @cache.ensureExists().then ->
+        fs.statAsync(path.join(process.cwd(), ".cy", process.env["NODE_ENV"], "cache"))
+
   context "validators", ->
     beforeEach ->
       @cache.ensureExists()
