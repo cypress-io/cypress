@@ -34,8 +34,18 @@ logger = new (winston.Logger)({
   transports: [
     createFile("all", null, {handleExceptions: true})
   ]
-  exitOnError: false
+
+  exitOnError: (err) ->
+    if e = logger.errorHandler
+      return e(err)
+
+    else
+      console.error(err)
+      return true
 })
+
+logger.setErrorHandler = (fn) ->
+  logger.errorHandler = fn
 
 logger.getData = (obj) ->
   keys = ["level", "message", "timestamp", "type"]

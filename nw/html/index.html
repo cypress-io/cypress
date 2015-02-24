@@ -16,15 +16,17 @@
 
     <script type="text/javascript">
       require("coffee-script/register")
+
       var NwApp   = require("nw.gui").App
       var booter  = require("../../lib/cypress")
       var updater = booter.Updater(NwApp)
+      var Log     = booter.Log
       var cache   = new (booter.Cache)
 
       cache.ensureExists().then(function(){
         var opts = {
           argv:    NwApp.argv,
-          Log:     booter.Log,
+          Log:     Log,
           cache:   cache,
           updater: updater,
           booter:  booter
