@@ -4,6 +4,7 @@ _              = require("lodash")
 fs             = require("fs-extra")
 Promise        = require("bluebird")
 winston        = require("winston")
+Exception      = require("./exception")
 
 ## make sure the log folder is available
 fs.ensureDirSync(config.app.log_path)
@@ -36,13 +37,34 @@ logger = new (winston.Logger)({
   ]
 
   exitOnError: (err) ->
+    ## cannot use a reference here since
+    ## defaultErrorHandler does not exist yet
+    logger.defaultErrorHandler(err)
+
+})
+
+logger.defaultErrorHandler = (err) ->
+  exit = ->
+    process.exit(1)
+
+  handleErr = ->
     if e = logger.errorHandler
-      return e(err)
+      ret = e(err)
+
+      if ret is true
+        exit()
 
     else
       console.error(err)
-      return true
-})
+      exit()
+
+  ## need to add a promise timeout here to automatically
+  ## fail within 3 seconds or so
+  Exception.create(err).then(handleErr).catch(handleErr)
+
+  ## do not exit on error, let us
+  ## handle it manually
+  return false
 
 logger.setErrorHandler = (fn) ->
   logger.errorHandler = fn
@@ -66,7 +88,10 @@ logger.getLogs = ->
   transport = "all"
 
   new Promise (resolve, reject) ->
-    opts = {}
+    opts = {
+      limit: 500
+      order: "desc"
+    }
 
     t = logger.transports[transport] ? throw new Error("Log transport: '#{transport}' does not exist!")
 

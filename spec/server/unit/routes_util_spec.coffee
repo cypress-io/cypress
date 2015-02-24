@@ -2,7 +2,7 @@ root   = "../../../"
 expect = require("chai").expect
 Routes = require("#{root}/lib/util/routes")
 
-describe "Routes", ->
+describe "Routes Util", ->
   it "signin", ->
     expect(Routes.signin()).to.eq "http://localhost:1234/signin"
 
@@ -14,3 +14,6 @@ describe "Routes", ->
 
   it "signout", ->
     expect(Routes.signout()).to.eq "http://localhost:1234/signout"
+
+  it "exceptions", ->
+    expect(Routes.exceptions()).to.eq "http://localhost:1234/exceptions"
