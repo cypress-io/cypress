@@ -218,4 +218,4 @@ class Cache extends require("events").EventEmitter
         .then(nukeSession)
         .catch(nukeSession)
 
-module.exports = Cache
+module.exports = new Cache

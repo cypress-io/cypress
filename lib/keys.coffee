@@ -3,7 +3,7 @@ Promise       = require 'bluebird'
 path          = require 'path'
 Request       = require 'request-promise'
 Project       = require './project'
-Cache         = require './cache'
+cache         = require './cache'
 SecretSauce   = require "../lib/util/secret_sauce_loader"
 
 config   = require("konfig")()
@@ -16,7 +16,7 @@ class Keys
     if not projectRoot
       throw new Error("Instantiating lib/keys requires a projectRoot!")
 
-    @cache     = new Cache
+    @cache     = cache
     @project   = Project(projectRoot)
 
   _getNewKeyRange: (projectId) ->

@@ -4,7 +4,6 @@ _              = require("lodash")
 fs             = require("fs-extra")
 Promise        = require("bluebird")
 winston        = require("winston")
-Exception      = require("./exception")
 
 ## make sure the log folder is available
 fs.ensureDirSync(config.app.log_path)
@@ -60,7 +59,7 @@ logger.defaultErrorHandler = (err) ->
 
   ## need to add a promise timeout here to automatically
   ## fail within 3 seconds or so
-  Exception.create(err).then(handleErr).catch(handleErr)
+  require("./exception").create(err).then(handleErr).catch(handleErr)
 
   ## do not exit on error, let us
   ## handle it manually

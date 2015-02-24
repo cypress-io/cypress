@@ -21,7 +21,7 @@
       var booter  = require("../../lib/cypress")
       var updater = booter.Updater(NwApp)
       var Log     = booter.Log
-      var cache   = new (booter.Cache)
+      var cache   = booter.cache
 
       cache.ensureExists().then(function(){
         var opts = {

@@ -4,7 +4,7 @@ Promise       = require 'bluebird'
 expect        = require('chai').expect
 Keys          = require "#{root}lib/keys"
 Project       = require "#{root}lib/project"
-Cache         = require "#{root}lib/cache"
+cache         = require "#{root}lib/cache"
 Settings      = require "#{root}lib/util/settings"
 Routes        = require "#{root}lib/util/routes"
 fs            = require 'fs-extra'
@@ -16,7 +16,7 @@ describe "Cache", ->
   beforeEach ->
     nock.disableNetConnect()
     @sandbox = sinon.sandbox.create()
-    @cache = new Cache
+    @cache = cache
 
   afterEach ->
     nock.cleanAll()
@@ -221,7 +221,7 @@ describe "Cache", ->
 
               ## we have to wait on the write event because
               ## of process.nextTick
-              @cache.on "write", -> done()
+              @cache.once "write", -> done()
 
     describe "#_removeProjectByPath", ->
       it "removes projects by path", (done) ->
