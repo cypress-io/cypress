@@ -1,6 +1,7 @@
 root          = "../../../"
 expect        = require("chai").expect
 nock          = require("nock")
+mock          = require("mock-fs")
 sinon         = require("sinon")
 sinonPromise  = require("sinon-as-promised")
 winston       = require("winston")
@@ -17,6 +18,7 @@ describe "Exceptions", ->
     @sandbox = sinon.sandbox.create()
 
   afterEach ->
+    mock.restore()
     nock.cleanAll()
     nock.enableNetConnect()
     @sandbox.restore()
@@ -71,11 +73,23 @@ describe "Exceptions", ->
         expect(obj.info).to.be.an("object")
         expect(getAllInfo).to.be.calledWith(@err)
 
+  context "#getVersion", ->
+    it "returns version from package.json", ->
+      mock({
+        "package.json": JSON.stringify(version: "0.1.2")
+      })
+
+      Exception.getVersion().then (v) ->
+        expect(v).to.eq("0.1.2")
+
   context "#getBody", ->
     beforeEach ->
       @sandbox.stub(cache, "read").resolves({foo: "foo"})
       @sandbox.stub(Log, "getLogs").resolves([])
       @err = new Error
+      mock({
+        "package.json": JSON.stringify(version: "0.1.2")
+      })
 
     it "sets err", ->
       Exception.getBody(@err).then (body) ->
@@ -90,13 +104,12 @@ describe "Exceptions", ->
         expect(body.logs).to.deep.eq []
 
     it "sets settings", ->
-      settings = {projectId: "abc123", version: "0.1.2"}
+      settings = {projectId: "abc123"}
       Exception.getBody(@err, settings).then (body) ->
         expect(body.settings).to.eq settings
 
     it "sets version", ->
-      settings = {version: "0.1.2"}
-      Exception.getBody(@err, settings).then (body) ->
+      Exception.getBody(@err).then (body) ->
         expect(body.version).to.eq "0.1.2"
 
   context "#create", ->

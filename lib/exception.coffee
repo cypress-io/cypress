@@ -1,6 +1,7 @@
 request  = require("request-promise")
 Promise  = require("bluebird")
 winston  = require("winston")
+fs       = require("fs-extra")
 cache    = require("./cache")
 Log      = require("./log")
 Settings = require("./util/settings")
@@ -32,15 +33,18 @@ Exception = {
       info: winston.exception.getAllInfo(err)
     }
 
+  getVersion: ->
+    fs.readJsonAsync("./package.json").get("version")
+
   getBody: (err, settings) ->
     body = {err: @getErr(err)}
 
-    Promise.all([@getCache(), @getLogs()])
-      .spread (cache, logs) ->
+    Promise.all([@getCache(), @getLogs(), @getVersion()])
+      .spread (cache, logs, version) ->
         body.cache    = cache
         body.logs     = logs
         body.settings = settings
-        body.version  = settings?.version
+        body.version  = version
       .return(body)
 
   getHeaders: ->
