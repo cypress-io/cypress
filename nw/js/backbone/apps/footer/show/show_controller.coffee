@@ -53,6 +53,9 @@
         App.execute "gui:check:for:updates"
         # App.config.checkForUpdates()
 
+      @listenTo bottomView, "debug:clicked", ->
+        App.execute "gui:debug"
+
       @show bottomView, region: region
 
     getLayoutView: ->

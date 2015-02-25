@@ -50,7 +50,7 @@ describe "Keys", ->
       ensureExists = @sandbox.spy @keys.cache, "ensureExists"
 
       @keys.nextKey().then ->
-        expect(ensureExists).to.be.calledOnce
+        expect(ensureExists).to.be.called
 
     it "ensures cache has project", ->
       ensureProject = @sandbox.spy @keys.cache, "ensureProject"

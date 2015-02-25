@@ -4,7 +4,7 @@ Promise       = require 'bluebird'
 expect        = require('chai').expect
 Keys          = require "#{root}lib/keys"
 Project       = require "#{root}lib/project"
-Cache         = require "#{root}lib/cache"
+cache         = require "#{root}lib/cache"
 Settings      = require "#{root}lib/util/settings"
 Routes        = require "#{root}lib/util/routes"
 fs            = require 'fs-extra'
@@ -16,7 +16,7 @@ describe "Cache", ->
   beforeEach ->
     nock.disableNetConnect()
     @sandbox = sinon.sandbox.create()
-    @cache = new Cache
+    @cache = cache
 
   afterEach ->
     nock.cleanAll()
@@ -25,24 +25,21 @@ describe "Cache", ->
     @cache.remove()
 
   context "#ensureExists", ->
-    it "creates an offline cache if not present", (done) ->
-      @cache.ensureExists()
-      .then =>
-        fs.statAsync(@cache.cache_path)
-      .then => done()
-      .catch(done)
-
-    it "returns true when already exists", ->
+    it "creates empty cache file", ->
       @cache.ensureExists().then =>
-        @cache.exists().then (bool) ->
-          expect(bool).to.be.true
+        fs.readJsonAsync(@cache.path).then (json) ->
+          expect(json).to.deep.eq {}
+
+    it "creates cache file in root/.cy/{environment}/cache", ->
+      @cache.ensureExists().then ->
+        fs.statAsync(path.join(process.cwd(), ".cy", process.env["NODE_ENV"], "cache"))
 
   context "validators", ->
     beforeEach ->
       @cache.ensureExists()
 
     it "creates an empty PROJECTS key", (done) ->
-      @cache._read()
+      @cache.read()
       .then (contents) ->
         expect(contents).to.deep.eq({PROJECTS: {}})
         done()
@@ -50,7 +47,7 @@ describe "Cache", ->
 
     it "creates an empty RANGE key for a Project", (done) ->
       @cache.insertProject("FOO")
-      .then => @cache._read()
+      .then => @cache.read()
       .then (contents) =>
         expect(contents).to.deep.eq({
           PROJECTS: {FOO: {RANGE: {}}}
@@ -211,6 +208,7 @@ describe "Cache", ->
         stubId = (id) =>
           @sandbox.restore()
           @sandbox.stub(Project.prototype, "getProjectId").resolves(id)
+          @sandbox.stub(@cache, "ensureExists").resolves()
           @sandbox.stub(fs, "statAsync")
             .withArgs("/Users/brian/app").resolves()
             .withArgs("/Users/sam/app2").rejects()
@@ -224,7 +222,7 @@ describe "Cache", ->
 
               ## we have to wait on the write event because
               ## of process.nextTick
-              @cache.on "write", -> done()
+              @cache.once "write", -> done()
 
     describe "#_removeProjectByPath", ->
       it "removes projects by path", (done) ->

@@ -103,7 +103,7 @@ class Server #extends require('./logger')
     new Promise (resolve, reject) =>
       @server.listen @config.port, =>
         @isListening = true
-        Log.info("Server listening", {code: "server", port: @config.port})
+        Log.info("Server listening", {type: "server", port: @config.port})
 
         @project.ensureProjectId().bind(@)
         .then ->
@@ -123,6 +123,6 @@ class Server #extends require('./logger')
         resolve()
 
     promise.then ->
-      Log.info "Server closed", {code: "server"}
+      Log.info "Server closed", {type: "server"}
 
 module.exports = Server

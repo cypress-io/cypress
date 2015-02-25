@@ -1,0 +1,10 @@
+<div id="debug">
+  <div class="panel">
+    <button data-clear class="btn btn-sm btn-danger pull-right">Clear</button>
+  </div>
+  <div id="code">
+    <table class="table table-bordered table-condensed">
+      <tbody></tbody>
+    </table>
+  </div>
+</div>

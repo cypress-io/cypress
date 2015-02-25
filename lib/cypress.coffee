@@ -4,7 +4,7 @@ global.config  = require("konfig")()
 Settings       = require("./util/settings")
 Server         = require("./server")
 Updater        = require("./updater")
-Cache          = require("./cache")
+cache          = require("./cache")
 Log            = require("./log")
 child_process  = require("child_process")
 open           = require('open')
@@ -61,7 +61,7 @@ class Booter
     @server.close()
 
   ## attach to Booter class
-  @Cache = Cache
+  @cache = cache
 
   ## attach to Booter class
   @Updater = Updater

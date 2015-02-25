@@ -29,8 +29,7 @@ SecretSauce.Keys =
   nextKey: ->
     @project.ensureProjectId().bind(@)
     .then (projectId) ->
-      @cache.ensureExists().bind(@)
-      .then -> @cache.ensureProject(projectId)
+      @cache.ensureProject(projectId).bind(@)
       .then -> @getNextTestNumber(projectId)
       .then @_convertToId
 

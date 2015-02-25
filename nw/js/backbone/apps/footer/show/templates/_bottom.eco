@@ -14,7 +14,7 @@
         <li>
           <a href="#">About</a>
         </li>
-        <li>
+        <li data-debug>
           <a href="#">Debug Console</a>
         </li>
         <li data-updates>

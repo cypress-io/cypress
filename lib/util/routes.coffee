@@ -8,6 +8,7 @@ routes = {
   api: ""
   signin: "signin"
   signout: "signout"
+  exceptions: "exceptions"
 }
 
 addQueryParams = (url, params) ->

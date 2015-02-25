@@ -1,6 +1,6 @@
 default:
-  cache_path: ".cy/cache"
-  log_path: ".cy/logs"
+  cache_path: ".cy/#{process.env.NODE_ENV}/cache"
+  log_path: ".cy/#{process.env.NODE_ENV}"
   s3:
     path: "https://s3.amazonaws.com"
     bucket: dist.cypress.io
@@ -11,8 +11,6 @@ development: &development
 
 test:
   <<: *development
-  cache_path: ".cy_test/cache"
-  log_path: ".cy_test/logs"
 
 production:
   api_url: "http://api.cypress.io"

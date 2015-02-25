@@ -47,13 +47,33 @@
         throw err
 
     log: (text, data = {}) ->
-      data.code = "native"
+      data.type = "native"
       @getLog().log("info", text, data)
 
     getLog: ->
       @Log ? throw new Error("config#Log is not defined!")
 
+    getLogs: ->
+      @getLog().getLogs()
+
+    onLog: (fn) ->
+      @getLog().onLog(fn)
+
+    clearLogs: ->
+      @getLog().clearLogs()
+
     getUpdater: -> @updater
+
+    setErrorHandler: ->
+      @getLog().setErrorHandler (err) =>
+        ## exit if we're in production (blow up)
+        return true if @env("production")
+
+        ## else log out the err stack
+        console.error(err)
+
+        ## and go into debug mode if we should
+        debugger if @get("debug")
 
   App.reqres.setHandler "config:entity", (attrs = {}) ->
     props = ["cache", "booter", "updater", "Log"]
@@ -62,5 +82,7 @@
 
     _.each props, (prop) ->
       config[prop] = attrs[prop]
+
+    config.setErrorHandler()
 
     config

@@ -101,6 +101,33 @@
         ## really shut down the window!
         @close(true)
 
+    debug: ->
+      debug = App.request "gui:open", "app://app/nw/public/debug.html",
+        position: "center"
+        width: 600
+        height: 400
+        # frame: false
+        toolbar: false
+        title: ""
+
+      debug.once "loaded", ->
+        debug.showDevTools() if App.config.get("debug")
+
+        ## grab the debug region from other window
+        $el = $("#debug-region", debug.window.document)
+
+        ## attach to the app as a custom region object
+        App.addRegions
+          debugRegion: Marionette.Region.extend(el: $el)
+
+        App.vent.trigger "start:debug:app", App.debugRegion, debug
+
+      debug.once "close", ->
+        ## remove app region when this is closed down
+        App.removeRegion("debugRegion")
+
+        ## really shut down the window!
+        @close(true)
 
   App.commands.setHandler "gui:display", ->
     API.displayGui()
@@ -131,3 +158,6 @@
 
   App.reqres.setHandler "gui:manifest", ->
     API.manifest()
+
+  App.commands.setHandler "gui:debug", ->
+    API.debug()

@@ -16,33 +16,36 @@ describe "Konfig", ->
       @setup("development")
 
     it "cache_path", ->
-      @eq("cache_path", ".cy/cache")
+      @eq("cache_path", ".cy/development/cache")
 
     it "api_url", ->
       @eq("api_url", "http://localhost:1234")
 
     it "log_path", ->
-      @eq("log_path", ".cy/logs")
+      @eq("log_path", ".cy/development")
 
   context "test", ->
     beforeEach ->
       @setup("test")
 
     it "cache_path", ->
-      @eq("cache_path", ".cy_test/cache")
+      @eq("cache_path", ".cy/test/cache")
 
     it "api_url", ->
       @eq("api_url", "http://localhost:1234")
 
     it "log_path", ->
-      @eq("log_path", ".cy_test/logs")
+      @eq("log_path", ".cy/test")
 
   context "production", ->
     beforeEach ->
       @setup("production")
 
     it "cache_path", ->
-      @eq("cache_path", ".cy/cache")
+      @eq("cache_path", ".cy/production/cache")
+
+    it "log_path", ->
+      @eq("log_path", ".cy/production")
 
     it "api_url", ->
       @eq("api_url", "http://api.cypress.io")
