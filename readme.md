@@ -47,3 +47,9 @@ nw . --dev
 ```bash
 cy
 ```
+
+### Deplying
+
+```bash
+npm run deploy
+```
