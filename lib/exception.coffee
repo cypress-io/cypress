@@ -24,9 +24,6 @@ Exception = {
   getLogs: ->
     Log.getLogs()
 
-  getSettings: ->
-    Settings.read()
-
   getErr: (err) ->
     {
       name: err.name
@@ -35,11 +32,11 @@ Exception = {
       info: winston.exception.getAllInfo(err)
     }
 
-  getBody: (err) ->
+  getBody: (err, settings) ->
     body = {err: @getErr(err)}
 
-    Promise.all([@getCache(), @getLogs(), @getSettings()])
-      .spread (cache, logs, settings) ->
+    Promise.all([@getCache(), @getLogs()])
+      .spread (cache, logs) ->
         body.cache    = cache
         body.logs     = logs
         body.settings = settings
@@ -52,8 +49,10 @@ Exception = {
       obj["x-session"] = user.session_token if user.session_token
       obj
 
-  create: (err) ->
-    Promise.all([@getBody(err), @getHeaders()])
+  create: (err, settings) ->
+    return Promise.resolve() if process.env["NODE_ENV"] isnt "production"
+
+    Promise.all([@getBody(err, settings), @getHeaders()])
       .bind(@)
       .spread (body, headers) ->
         request.post({

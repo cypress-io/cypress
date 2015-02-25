@@ -7,6 +7,7 @@ sinonPromise  = require 'sinon-as-promised'
 Server        = require "#{root}lib/server"
 Socket        = require "#{root}lib/socket"
 Project       = require "#{root}lib/project"
+Log           = require "#{root}lib/log"
 Settings      = require "#{root}lib/util/settings"
 
 describe "Server Interface", ->
@@ -30,6 +31,9 @@ describe "Server Interface", ->
     fn = -> Server()
     expect(fn).to.throw "Instantiating lib/server requires a projectRoot!"
 
+  it "sets settings on Log", ->
+    expect(Log.getSettings()).to.eq(@server.config)
+
   context "#close", ->
     it "returns a promise", ->
       expect(@server.close()).to.be.instanceof Promise
@@ -42,6 +46,11 @@ describe "Server Interface", ->
       @server.open().bind(@).then ->
         @server.close().bind(@).then ->
           expect(@server.isListening).to.be.false
+
+    it "clears settings from Log", ->
+      Log.setSettings({})
+      @server.close().then ->
+        expect(Log.getSettings()).to.be.undefined
 
   context "#open", ->
     it "creates http server"

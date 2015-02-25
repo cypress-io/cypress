@@ -57,11 +57,21 @@ logger.defaultErrorHandler = (err) ->
       console.error(err)
       exit()
 
-  require("./exception").create(err).then(handleErr).catch(handleErr)
+  settings = logger.getSettings()
+  require("./exception").create(err, settings).then(handleErr).catch(handleErr)
 
   ## do not exit on error, let us
   ## handle it manually
   return false
+
+logger.setSettings = (obj) ->
+  logger._settings = obj
+
+logger.getSettings = ->
+  logger._settings
+
+logger.unsetSettings = ->
+  delete logger._settings
 
 logger.setErrorHandler = (fn) ->
   logger.errorHandler = fn

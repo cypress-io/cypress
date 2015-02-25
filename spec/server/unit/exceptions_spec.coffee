@@ -75,7 +75,6 @@ describe "Exceptions", ->
     beforeEach ->
       @sandbox.stub(cache, "read").resolves({foo: "foo"})
       @sandbox.stub(Log, "getLogs").resolves([])
-      @sandbox.stub(Settings, "read").resolves({projectId: "abc123", version: "0.1.2"})
       @err = new Error
 
     it "sets err", ->
@@ -91,58 +90,76 @@ describe "Exceptions", ->
         expect(body.logs).to.deep.eq []
 
     it "sets settings", ->
-      Exception.getBody(@err).then (body) ->
-        expect(body.settings).to.deep.eq {projectId: "abc123", version: "0.1.2"}
+      settings = {projectId: "abc123", version: "0.1.2"}
+      Exception.getBody(@err, settings).then (body) ->
+        expect(body.settings).to.eq settings
 
     it "sets version", ->
-      Exception.getBody(@err).then (body) ->
+      settings = {version: "0.1.2"}
+      Exception.getBody(@err, settings).then (body) ->
         expect(body.version).to.eq "0.1.2"
 
   context "#create", ->
     beforeEach ->
-      err = {name: "ReferenceError", message: "undefined is not a function", stack: "asfd"}
+      @env = process.env["NODE_ENV"]
 
-      @sandbox.stub(Exception, "getBody").resolves({
-        err: err
-        cache: {}
-        logs: []
-        settings: {}
-        version: "0.1.2"
-      })
+    afterEach ->
+      process.env["NODE_ENV"] = @env
 
-      @sandbox.stub(Exception, "getHeaders").resolves({"x-session": "abc123"})
+    describe "development", ->
+      beforeEach ->
+        process.env["NODE_ENV"] = "development"
 
-      @exceptions = nock(Routes.api())
-        .log(console.log)
-        .post "/exceptions", (body) ->
-          expect(body.err).to.deep.eq(err)
-          expect(body.cache).to.deep.eq({})
-          expect(body.logs).to.deep.eq([])
-          expect(body.settings).to.deep.eq({})
-          expect(body.version).to.eq("0.1.2")
-          true
-        .matchHeader("X-Session", "abc123")
-        .matchHeader("accept", "application/json")
+      it "immediately resolves", ->
+        Exception.create()
 
-    it "requests with correct url, body, headers, and json", ->
-      @exceptions.reply(200)
-      Exception.create().then(@exceptions.done)
+    describe "production", ->
+      beforeEach ->
+        process.env["NODE_ENV"] = "production"
 
-    it "times out after 3 seconds", (done) ->
-      @timeout(10000)
+        err = {name: "ReferenceError", message: "undefined is not a function", stack: "asfd"}
 
-      ## setup the clock so we can coerce time
-      clock = @sandbox.useFakeTimers()
+        @sandbox.stub(Exception, "getBody").resolves({
+          err: err
+          cache: {}
+          logs: []
+          settings: {}
+          version: "0.1.2"
+        })
 
-      @exceptions.reply(200)
+        @sandbox.stub(Exception, "getHeaders").resolves({"x-session": "abc123"})
 
-      Exception.create()
-        .then ->
-          done("errored: it did not catch the timeout error!")
-        .catch Promise.TimeoutError, ->
-          done()
+        @exceptions = nock(Routes.api())
+          .log(console.log)
+          .post "/exceptions", (body) ->
+            expect(body.err).to.deep.eq(err)
+            expect(body.cache).to.deep.eq({})
+            expect(body.logs).to.deep.eq([])
+            expect(body.settings).to.deep.eq({})
+            expect(body.version).to.eq("0.1.2")
+            true
+          .matchHeader("X-Session", "abc123")
+          .matchHeader("accept", "application/json")
 
-      process.nextTick ->
-        ## automatically move ahead 5 seconds which
-        ## should cause our promise to timeout!
-        clock.tick(5000)
+      it "requests with correct url, body, headers, and json", ->
+        @exceptions.reply(200)
+        Exception.create().then(@exceptions.done)
+
+      it "times out after 3 seconds", (done) ->
+        @timeout(10000)
+
+        ## setup the clock so we can coerce time
+        clock = @sandbox.useFakeTimers()
+
+        @exceptions.reply(200)
+
+        Exception.create()
+          .then ->
+            done("errored: it did not catch the timeout error!")
+          .catch Promise.TimeoutError, ->
+            done()
+
+        process.nextTick ->
+          ## automatically move ahead 5 seconds which
+          ## should cause our promise to timeout!
+          clock.tick(5000)

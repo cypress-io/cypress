@@ -29,6 +29,7 @@ class Server #extends require('./logger')
 
   initialize: (projectRoot) ->
     @config = @getCypressJson(projectRoot)
+    Log.setSettings(@config)
 
     @app.set "cypress", @config
 
@@ -103,7 +104,7 @@ class Server #extends require('./logger')
     new Promise (resolve, reject) =>
       @server.listen @config.port, =>
         @isListening = true
-        Log.info("Server listening", {type: "server", port: @config.port})
+        Log.info("Server listening", {port: @config.port})
 
         @project.ensureProjectId().bind(@)
         .then ->
@@ -114,6 +115,8 @@ class Server #extends require('./logger')
 
   close: ->
     promise = new Promise (resolve) =>
+      Log.unsetSettings()
+
       ## bail early we dont have a server or we're not
       ## currently listening
       return resolve() if not @server or not @isListening
@@ -123,6 +126,6 @@ class Server #extends require('./logger')
         resolve()
 
     promise.then ->
-      Log.info "Server closed", {type: "server"}
+      Log.info "Server closed"
 
 module.exports = Server

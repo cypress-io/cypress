@@ -90,13 +90,23 @@ describe "Winston Logger", ->
 
   describe "#defaultErrorHandler", ->
     beforeEach ->
+      Log.unsetSettings()
+
       @err    = new Error
       @exit   = @sandbox.stub(process, "exit")
       @create = @sandbox.stub(Exception, "create").resolves()
 
+    afterEach ->
+      Log.unsetSettings()
+
     it "calls Exception.create(err)", ->
       Log.defaultErrorHandler(@err)
-      expect(@create).to.be.calledWith(@err)
+      expect(@create).to.be.calledWith(@err, undefined)
+
+    it "calls Exception.create(err, {})", ->
+      Log.setSettings({foo: "bar"})
+      Log.defaultErrorHandler(@err)
+      expect(@create).to.be.calledWith(@err, {foo: "bar"})
 
     it "returns false", ->
       expect(Log.defaultErrorHandler(@err)).to.be.false
