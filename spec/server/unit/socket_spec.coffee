@@ -1,9 +1,11 @@
 root         = '../../../'
 sinon        = require "sinon"
 expect       = require('chai').expect
+fs           = require "fs-extra"
 Socket       = require "#{root}lib/socket"
 Server       = require "#{root}lib/server"
 Settings     = require "#{root}lib/util/settings"
+Fixtures     = require "#{root}/spec/server/helpers/fixtures"
 
 describe "Socket", ->
   beforeEach ->
@@ -33,15 +35,32 @@ describe "Socket", ->
     expect(fn).to.throw "Instantiating lib/socket requires an app!"
 
   context "#startListening", ->
-    describe "generate:ids:for:test", ->
-      beforeEach ->
-        @socket = Socket(@io, @app)
+    beforeEach ->
+      @socket = Socket(@io, @app)
+      Fixtures.scaffold()
 
-        @app.set("cypress", {
-          projectRoot: "/Users/brian/app"
-          testFolder: "test_specs"
-        })
+    afterEach ->
+      Fixtures.remove()
 
-      it "strips projectRoot out of filepath", ->
-        @socket.onTestFileChange "/Users/brian/app/test_specs/cypress_api.coffee"
-        expect(@io.emit).to.be.calledWith "generate:ids:for:test", "test_specs/cypress_api.coffee", "cypress_api.coffee"
+    it "creates testFolder if does not exist", ->
+      @app.set "cypress", {
+        projectRoot: Fixtures.project("todos")
+        testFolder: "does-not-exist"
+      }
+
+      @socket.startListening().then ->
+        dir = fs.statSync(Fixtures.project("todos") + "/does-not-exist")
+        expect(dir.isDirectory()).to.be.true
+
+  context "generate:ids:for:test", ->
+    beforeEach ->
+      @socket = Socket(@io, @app)
+
+      @app.set("cypress", {
+        projectRoot: "/Users/brian/app"
+        testFolder: "test_specs"
+      })
+
+    it "strips projectRoot out of filepath", ->
+      @socket.onTestFileChange "/Users/brian/app/test_specs/cypress_api.coffee"
+      expect(@io.emit).to.be.calledWith "generate:ids:for:test", "test_specs/cypress_api.coffee", "cypress_api.coffee"

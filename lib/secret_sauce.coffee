@@ -134,18 +134,22 @@ SecretSauce.Socket =
 
           sauce options, df
 
-    watchTestFiles = chokidar.watch path.join(@app.get("cypress").projectRoot, @app.get("cypress").testFolder), ignored: (path, stats) ->
-      ## this fn gets called twice, once with the directory
-      ## which does not have a stats argument
-      ## we always return false to include directories
-      ## until we implement ignoring specific directories
-      return false if fs.statSync(path).isDirectory()
+    testsDir = path.join(@app.get("cypress").projectRoot, @app.get("cypress").testFolder)
 
-      ## else if this is a file make sure its ignored if its not
-      ## a js or coffee files
-      not /\.(js|coffee)$/.test path
+    fs.ensureDirAsync(testsDir).bind(@)
+      .then ->
+        watchTestFiles = chokidar.watch testsDir, ignored: (path, stats) ->
+          ## this fn gets called twice, once with the directory
+          ## which does not have a stats argument
+          ## we always return false to include directories
+          ## until we implement ignoring specific directories
+          return false if fs.statSync(path).isDirectory()
 
-    watchTestFiles.on "change", _.bind(@onTestFileChange, @)
+          ## else if this is a file make sure its ignored if its not
+          ## a js or coffee files
+          not /\.(js|coffee)$/.test path
+
+        watchTestFiles.on "change", _.bind(@onTestFileChange, @)
 
     ## BREAKING DUE TO __DIRNAME
     # watchCssFiles = chokidar.watch path.join(__dirname, "public", "css"), ignored: (path, stats) ->

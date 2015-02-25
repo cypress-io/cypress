@@ -1,5 +1,4 @@
-fs            = require 'fs'
-_             = require 'underscore'
+fs            = require "fs-extra"
 path          = require 'path'
 uuid          = require 'node-uuid'
 # sauce         = require '../sauce/sauce.coffee'
