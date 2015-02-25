@@ -43,6 +43,8 @@ logger = new (winston.Logger)({
 })
 
 logger.defaultErrorHandler = (err) ->
+  logger.info("caught error", error: err)
+
   exit = ->
     process.exit(1)
 
