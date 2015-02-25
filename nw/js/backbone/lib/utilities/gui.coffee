@@ -96,7 +96,7 @@
 
       updates.once "close", ->
         ## remove app region when this is closed down
-        App.removeRegion("updatesRegion")
+        App.removeRegion("updatesRegion") if App.updatesRegion
 
         ## really shut down the window!
         @close(true)
@@ -124,7 +124,7 @@
 
       debug.once "close", ->
         ## remove app region when this is closed down
-        App.removeRegion("debugRegion")
+        App.removeRegion("debugRegion") if App.debugRegion
 
         ## really shut down the window!
         @close(true)
