@@ -357,7 +357,7 @@ SecretSauce.RemoteInitial =
       inject: "<script type='text/javascript' src='/eclectus/js/sinon.js'></script>"
 
     uri = req.url.split("/__remote/").join("")
-    @emit "verbose", "handling request for #{uri}"
+    @Log.info "handling initial request", uri: uri
 
     ## initially set the session to this url
     ## in case we aren't grabbing url content
@@ -379,7 +379,9 @@ SecretSauce.RemoteInitial =
       .pipe(res)
 
   setSessionRemoteUrl: (req, url) ->
-    req.session.remote  = url.split("?")[0]
+    remote = url.split("?")[0]
+    @Log.info "setting remote session url", url: url
+    req.session.remote = remote
 
   injectContent: (toInject) ->
     toInject ?= ""
@@ -405,12 +407,17 @@ SecretSauce.RemoteInitial =
       p.split('?')[0]
     ])
 
-    @fs.createReadStream(@path.join(args...), "utf8")
+    file = @path.join(args...)
+
+    @Log.info "getting relative file content", file: file
+
+    @fs.createReadStream(file, "utf8")
 
   getFileContent: (p) ->
     @fs.createReadStream(p.slice(7).split('?')[0], 'utf8')
 
   getAbsoluteContent: (url, res, req) ->
+    @Log.info "getting absolute file content", url: url
     @_resolveRedirects(url, res, req)
 
   errorHandler: (e, res, url) ->
@@ -429,10 +436,12 @@ SecretSauce.RemoteInitial =
 
       if /^30(1|2|7|8)$/.test(incomingRes.statusCode)
         newUrl = @UrlHelpers.merge(url, incomingRes.headers.location)
+        @Log.info "redirecting to new url", url: newUrl
         res.redirect("/__remote/" + newUrl)
       else
         if not incomingRes.headers["content-type"]
           throw new Error("Missing header: 'content-type'")
+        @Log.info "received absolute file content"
         res.contentType(incomingRes.headers['content-type'])
 
         ## reset the session to the latest redirected URL

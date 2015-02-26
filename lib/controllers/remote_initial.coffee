@@ -5,6 +5,7 @@ path          = require 'path'
 Domain        = require 'domain'
 through       = require 'through'
 through2      = require 'through2'
+Log           = require "../log"
 UrlHelpers    = require "../util/url_helpers"
 SecretSauce   = require "../util/secret_sauce_loader"
 
@@ -17,6 +18,7 @@ class RemoteInitial extends Controller
   hyperquest: hyperquest
   path: path
   fs: fs
+  Log: Log
 
   constructor: (app) ->
     if not (@ instanceof RemoteInitial)
