@@ -401,7 +401,7 @@ SecretSauce.RemoteInitial =
 
     args = _.compact([
       @app.get("cypress").projectRoot,
-      @app.get("cypress").rootFolder,
+      # @app.get("cypress").rootFolder,
       p.split('?')[0]
     ])
 

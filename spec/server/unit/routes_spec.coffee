@@ -220,7 +220,11 @@ describe "Routes", ->
 
       context "relative baseUrl", ->
         beforeEach (done) ->
-          @baseUrl = "index.html"
+          ## we no longer server initial content from the rootFolder
+          ## and it would be suggested for this project to be configured
+          ## with a baseUrl of "dev/", which would automatically be
+          ## appended to cy.visit("/index.html")
+          @baseUrl = "dev/index.html"
 
           Fixtures.scaffold("no-server")
 
