@@ -271,12 +271,12 @@ class Deploy
 
         child_process.exec "npm install --production", {cwd: pathToPackageDir()}, (err, stdout, stderr) ->
           if err
-            return reject(err) if attempts is 3
+            if attempts is 3
+              fs.writeFileSync(pathToPackageDir() + "/npm-install.log", stdout)
+              return reject(err)
 
             console.log gutil.colors.red("'npm install' failed, retrying")
             return npmInstall()
-          else
-            fs.writeFileSync(pathToPackageDir() + "/npm-install.log", stdout)
 
           ## promise-semaphore has a weird '/'' file which causes zipping to bomb
           ## so we must remove that file!
