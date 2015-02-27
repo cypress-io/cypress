@@ -3,6 +3,7 @@ fs             = require("fs-extra")
 path           = require("path")
 Promise        = require("bluebird")
 _              = require("lodash")
+Log            = require("./log")
 
 class Updater
   constructor: (App) ->
@@ -38,21 +39,38 @@ class Updater
     args = @App.argv ? []
     args = _.without(args, "--updating")
 
+    Log.info "installing updated app", appPath: appPath, execPath: execPath
+
     c.install appPath, (err) =>
+      Log.info "running updated app", args: args
+
       c.run(execPath, args)
 
       @App.quit()
 
+  ## copies .cy to the new app path
+  ## so we dont lose our cache, logs, etc
+  copyCyDataTo: (newAppPath) ->
+    Log.info "copying .cy to tmp", destination: newAppPath
+
+    fs.copyAsync path.join(process.cwd(), config.app.cy_path), path.join(newAppPath, config.app.cy_path)
+
   runInstaller: (newAppPath) ->
-    c = @getClient()
+    @copyCyDataTo(newAppPath).bind(@).then ->
 
-    args = [c.getAppPath(), c.getAppExec(), "--updating"].concat(@App.argv ? [])
+      c = @getClient()
 
-    c.runInstaller(newAppPath, args, {})
+      args = [c.getAppPath(), c.getAppExec(), "--updating"].concat(@App.argv ? [])
 
-    @App.quit()
+      Log.info "running installer from tmp", destination: newAppPath, args: args
+
+      c.runInstaller(newAppPath, args, {})
+
+      @App.quit()
 
   unpack: (destinationPath, manifest) ->
+    Log.info "unpacking new version", destination: destinationPath
+
     @trigger("apply")
 
     fn = (err, newAppPath) =>
@@ -63,6 +81,8 @@ class Updater
     @getClient().unpack(destinationPath, fn, manifest)
 
   download: (manifest) ->
+    Log.info "downloading new version", version: manifest.version
+
     @trigger("download", manifest.version)
 
     fn = (err, destinationPath) =>
@@ -82,12 +102,16 @@ class Updater
       cb.apply(@, args)
 
   check: (options = {}) ->
+    Log.info "checking for new version"
+
     @getClient().checkNewVersion (err, newVersionExists, manifest) =>
       return @trigger("error", err) if err
 
       if newVersionExists
+        Log.info "new version exists", version: manifest.version
         options.onNewVersion?(manifest)
       else
+        Log.info "new version does not exist", version: manifest?.version
         options.onNoNewVersion?()
 
   run: (@callbacks = {}) ->

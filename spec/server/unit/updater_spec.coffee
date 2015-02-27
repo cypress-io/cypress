@@ -182,21 +182,42 @@ describe "Updater", ->
     describe "#runInstaller", ->
       beforeEach ->
         @sandbox.stub(@updater.client, "runInstaller")
+        @sandbox.stub(@updater,        "copyCyDataTo").resolves()
+
+      it "calls copyCyDataTo and passes newAppPath", ->
+        @updater.runInstaller("/Users/bmann/newApp").then =>
+          expect(@updater.copyCyDataTo).to.be.calledWith("/Users/bmann/newApp")
 
       it "calls quit on the App", ->
-        @updater.runInstaller("/Users/bmann/newApp")
-        expect(@updater.App.quit).to.be.calledOnce
+        @updater.runInstaller("/Users/bmann/newApp").then =>
+          expect(@updater.App.quit).to.be.calledOnce
 
       it "calls runInstaller on the client", ->
         c = @updater.client
-        @updater.runInstaller("/Users/bmann/newApp")
-        expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec(), "--updating"], {})
+        @updater.runInstaller("/Users/bmann/newApp").then =>
+          expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec(), "--updating"], {})
 
       it "passes along additional App argv", ->
         @updater.App.argv = ["--debug"]
         c = @updater.client
-        @updater.runInstaller("/Users/bmann/newApp")
-        expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec(), "--updating", "--debug"], {})
+        @updater.runInstaller("/Users/bmann/newApp").then =>
+          expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec(), "--updating", "--debug"], {})
+
+    describe "#copyCyDataTo", ->
+      beforeEach ->
+        fs.outputJsonAsync(".cy/cache", {foo: "bar"}).then ->
+          fs.outputFile(".cy/foo/bar.txt", "foo!")
+
+      afterEach ->
+        fs.removeAsync("new").then ->
+          fs.removeAsync(".cy/foo")
+
+      it "copies .cy folder to new app path", ->
+        @updater.copyCyDataTo("new/app/path").then ->
+          expect(fs.statSync("new/app/path/.cy").isDirectory()).to.be.true
+          expect(fs.statSync("new/app/path/.cy/foo/bar.txt").isFile()).to.be.true
+          fs.readJsonAsync("new/app/path/.cy/cache").then (obj) ->
+            expect(obj).to.deep.eq {foo: "bar"}
 
   context "integration", ->
     before ->

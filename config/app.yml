@@ -1,4 +1,5 @@
 default:
+  cy_path: ".cy"
   cache_path: ".cy/#{process.env.NODE_ENV}/cache"
   log_path: ".cy/#{process.env.NODE_ENV}"
   s3:
