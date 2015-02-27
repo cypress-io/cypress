@@ -206,7 +206,8 @@ describe "Updater", ->
     describe "#copyCyDataTo", ->
       beforeEach ->
         fs.outputJsonAsync(".cy/cache", {foo: "bar"}).then ->
-          fs.outputFile(".cy/foo/bar.txt", "foo!")
+          fs.outputFileAsync(".cy/foo/bar.txt", "foo!").then ->
+            fs.outputJsonAsync("new/app/path/Contents/Resources/app.nw/package.json", {})
 
       afterEach ->
         fs.removeAsync("new").then ->
@@ -214,9 +215,9 @@ describe "Updater", ->
 
       it "copies .cy folder to new app path", ->
         @updater.copyCyDataTo("new/app/path").then ->
-          expect(fs.statSync("new/app/path/.cy").isDirectory()).to.be.true
-          expect(fs.statSync("new/app/path/.cy/foo/bar.txt").isFile()).to.be.true
-          fs.readJsonAsync("new/app/path/.cy/cache").then (obj) ->
+          expect(fs.statSync("new/app/path/Contents/Resources/app.nw/.cy").isDirectory()).to.be.true
+          expect(fs.statSync("new/app/path/Contents/Resources/app.nw/.cy/foo/bar.txt").isFile()).to.be.true
+          fs.readJsonAsync("new/app/path/Contents/Resources/app.nw/.cy/cache").then (obj) ->
             expect(obj).to.deep.eq {foo: "bar"}
 
   context "integration", ->

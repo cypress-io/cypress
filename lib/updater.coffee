@@ -3,6 +3,7 @@ fs             = require("fs-extra")
 path           = require("path")
 Promise        = require("bluebird")
 _              = require("lodash")
+glob           = require("glob")
 Log            = require("./log")
 
 class Updater
@@ -51,9 +52,18 @@ class Updater
   ## copies .cy to the new app path
   ## so we dont lose our cache, logs, etc
   copyCyDataTo: (newAppPath) ->
-    Log.info "copying .cy to tmp", destination: newAppPath
+    p = new Promise (resolve, reject) ->
+      glob "**/app.nw/package.json", {cwd: newAppPath}, (err, files) ->
+        return reject(err) if err
 
-    fs.copyAsync path.join(process.cwd(), config.app.cy_path), path.join(newAppPath, config.app.cy_path)
+        appRoot = path.join(newAppPath, path.dirname(files[0]), config.app.cy_path)
+
+        Log.info "copying .cy to tmp destination", destination: appRoot
+
+        resolve(appRoot)
+
+    p.then (appRoot) ->
+      fs.copyAsync(path.join(process.cwd(), config.app.cy_path), appRoot)
 
   runInstaller: (newAppPath) ->
     @copyCyDataTo(newAppPath).bind(@).then ->
