@@ -10,6 +10,7 @@ $              = require('gulp-load-plugins')()
 gutil          = require("gulp-util")
 inquirer       = require("inquirer")
 NwBuilder      = require("node-webkit-builder")
+request        = require("request-promise")
 yazl           = require("yazl")
 
 fs = Promise.promisifyAll(fs)
@@ -357,6 +358,11 @@ class Deploy
 
     src = "#{buildDir}/manifest.json"
     fs.outputJsonAsync(src, obj).return(src)
+
+  getManifest: ->
+    url = [config.app.s3.path, config.app.s3.bucket, "manifest.json"].join("/")
+    request(url).then (resp) ->
+      console.log resp
 
   updateS3Manifest: ->
     @log("#updateS3Manifest")

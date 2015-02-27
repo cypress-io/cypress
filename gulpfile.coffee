@@ -175,6 +175,9 @@ gulp.task "deploy:fixture", ->
 gulp.task "deploy:manifest", ->
   require("./lib/deploy")().manifest()
 
+gulp.task "get:manifest", ->
+  require("./lib/deploy")().getManifest()
+
 gulp.task "deploy", ->
   require("./lib/deploy")().deploy()
 
