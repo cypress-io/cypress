@@ -46,6 +46,7 @@ describe "Routes", ->
       supertest(@app)
         .get("/files")
         .expect(200, [
+          { name: "sub/sub_test.coffee" },
           { name: "test1.js" },
           { name: "test2.coffee" }
         ])

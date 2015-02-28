@@ -7,6 +7,8 @@ IdGenerator   = require './id_generator'
 SecretSauce   = require "../lib/util/secret_sauce_loader"
 
 class Socket
+  fs: fs
+
   constructor: (io, app) ->
     if not (@ instanceof Socket)
       return new Socket(io, app)
@@ -22,7 +24,7 @@ class Socket
     @idGenerator = IdGenerator(@app)
 
   startListening: ->
-    @_startListening(chokidar, path, fs)
+    @_startListening(chokidar, path)
 
 SecretSauce.mixin("Socket", Socket)
 

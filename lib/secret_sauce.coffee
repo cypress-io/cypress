@@ -41,13 +41,20 @@ SecretSauce.Socket =
     ## when we are making modifications to our own files
     return if @app.enabled("editFileMode")
 
-    ## strip out our testFolder path from the filepath, and any leading forward slashes
-    filepath      = filepath.split(@app.get("cypress").projectRoot).join("").replace(@leadingSlashes, "")
-    strippedPath  = filepath.replace(@app.get("cypress").testFolder, "").replace(@leadingSlashes, "")
+    ## return if we're not a js or coffee file.
+    ## this will weed out directories as well
+    return if not /\.(js|coffee)$/.test filepath
 
-    @io.emit "generate:ids:for:test", filepath, strippedPath
+    @fs.statAsync(filepath).bind(@)
+      .then ->
+        ## strip out our testFolder path from the filepath, and any leading forward slashes
+        filepath      = filepath.split(@app.get("cypress").projectRoot).join("").replace(@leadingSlashes, "")
+        strippedPath  = filepath.replace(@app.get("cypress").testFolder, "").replace(@leadingSlashes, "")
 
-  _startListening: (chokidar, path, fs) ->
+        @io.emit "generate:ids:for:test", filepath, strippedPath
+      .catch(->)
+
+  _startListening: (chokidar, path) ->
     { _ } = SecretSauce
 
     @io.on "connection", (socket) =>
@@ -136,18 +143,9 @@ SecretSauce.Socket =
 
     testsDir = path.join(@app.get("cypress").projectRoot, @app.get("cypress").testFolder)
 
-    fs.ensureDirAsync(testsDir).bind(@)
+    @fs.ensureDirAsync(testsDir).bind(@)
       .then ->
-        watchTestFiles = chokidar.watch testsDir, ignored: (path, stats) ->
-          ## this fn gets called twice, once with the directory
-          ## which does not have a stats argument
-          ## we always return false to include directories
-          ## until we implement ignoring specific directories
-          return false if fs.statSync(path).isDirectory()
-
-          ## else if this is a file make sure its ignored if its not
-          ## a js or coffee files
-          not /\.(js|coffee)$/.test path
+        watchTestFiles = chokidar.watch testsDir#, ignored: (path, stats) ->
 
         watchTestFiles.on "change", _.bind(@onTestFileChange, @)
 

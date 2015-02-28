@@ -52,15 +52,42 @@ describe "Socket", ->
         dir = fs.statSync(Fixtures.project("todos") + "/does-not-exist")
         expect(dir.isDirectory()).to.be.true
 
-  context "generate:ids:for:test", ->
-    beforeEach ->
-      @socket = Socket(@io, @app)
+    describe "#onTestFileChange", ->
+      beforeEach ->
+        @statAsync = @sandbox.spy(fs, "statAsync")
 
-      @app.set("cypress", {
-        projectRoot: "/Users/brian/app"
-        testFolder: "test_specs"
-      })
+        @app.set "cypress", {
+          projectRoot: Fixtures.project("todos")
+          testFolder: "tests"
+        }
 
-    it "strips projectRoot out of filepath", ->
-      @socket.onTestFileChange "/Users/brian/app/test_specs/cypress_api.coffee"
-      expect(@io.emit).to.be.calledWith "generate:ids:for:test", "test_specs/cypress_api.coffee", "cypress_api.coffee"
+      it "does not emit if in editFileMode", ->
+        @app.enable("editFileMode")
+
+        @socket.onTestFileChange("foo/bar/baz")
+        expect(@statAsync).not.to.be.called
+
+      it "does not emit if not a js or coffee files", ->
+        @socket.onTestFileChange("foo/bar")
+        expect(@statAsync).not.to.be.called
+
+      it "does not emit if a tmp file", ->
+        @socket.onTestFileChange("foo/subl-123.js.tmp")
+        expect(@statAsync).not.to.be.called
+
+      it "calls statAsync on .js file", ->
+        @socket.onTestFileChange("foo/bar.js").catch(->).then =>
+          expect(@statAsync).to.be.calledWith("foo/bar.js")
+
+      it "calls statAsync on .coffee file", ->
+        @socket.onTestFileChange("foo/bar.coffee").then =>
+          expect(@statAsync).to.be.calledWith("foo/bar.coffee")
+
+      it "does not emit if stat throws", ->
+        @socket.onTestFileChange("foo/bar.js").then =>
+          expect(@io.emit).not.to.be.called
+
+      it "emits 'generate:ids:for:test'", ->
+        p = Fixtures.project("todos") + "/tests/test1.js"
+        @socket.onTestFileChange(p).then =>
+          expect(@io.emit).to.be.calledWith("generate:ids:for:test", "tests/test1.js", "test1.js")
