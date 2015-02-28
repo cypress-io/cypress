@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Javascript Test Engine",
   "main": "app://app/nw/public/index.html",
   "single-instance": false,
@@ -53,7 +53,6 @@
     "inquirer": "^0.8.0",
     "js-yaml": "3.1.0",
     "mocha": "2.1.0",
-    "mocha-phantomjs": "samccone/mocha-phantomjs#9440a35304b0ad73097e72b359bd28a1f8759468",
     "mock-fs": "^2.5.0",
     "nock": "^0.59.1",
     "node-webkit-builder": "1.0.10",
@@ -84,7 +83,6 @@
     "express": "4.9.0",
     "express-session": "1.9.1",
     "fs-extra": "0.13.0",
-    "gaze": "0.6.4",
     "glob": "4.0.5",
     "grunt-cli": "0.1.13",
     "gulp-util": "3.0.0",

@@ -273,7 +273,7 @@ class Deploy
         child_process.exec "npm install --production", {cwd: pathToPackageDir()}, (err, stdout, stderr) ->
           if err
             if attempts is 3
-              fs.writeFileSync(pathToPackageDir() + "/npm-install.log", stdout)
+              fs.writeFileSync("./npm-install.log", stderr)
               return reject(err)
 
             console.log gutil.colors.red("'npm install' failed, retrying")
@@ -294,7 +294,7 @@ class Deploy
       files: distDir + "/**/*"
       platforms: @platforms
       buildDir: buildDir
-      version: "0.11.6"
+      version: "0.12.0-rc1"
       buildType: => @getVersion()
 
     nw.on "log", console.log
