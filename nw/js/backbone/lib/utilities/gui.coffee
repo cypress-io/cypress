@@ -4,6 +4,8 @@
 
   process.argv = process.argv.concat(gui.App.argv)
 
+  windows = {}
+
   API =
     show: (win) ->
       if App.config.get("debug")
@@ -74,7 +76,10 @@
       gui.App.manifest
 
     updates: ->
-      updates = App.request "gui:open", "app://app/nw/public/updates.html",
+      if updates = windows.updates
+        return updates.focus()
+
+      windows.updates = updates = App.request "gui:open", "app://app/nw/public/updates.html",
         position: "center"
         width: 300
         height: 200
@@ -98,11 +103,16 @@
         ## remove app region when this is closed down
         App.removeRegion("updatesRegion") if App.updatesRegion
 
+        delete windows.updates
+
         ## really shut down the window!
         @close(true)
 
     debug: ->
-      debug = App.request "gui:open", "app://app/nw/public/debug.html",
+      if debug = windows.debug
+        return debug.focus()
+
+      windows.debug = debug = App.request "gui:open", "app://app/nw/public/debug.html",
         position: "center"
         width: 600
         height: 400
@@ -125,6 +135,8 @@
       debug.once "close", ->
         ## remove app region when this is closed down
         App.removeRegion("debugRegion") if App.debugRegion
+
+        delete windows.debug
 
         ## really shut down the window!
         @close(true)

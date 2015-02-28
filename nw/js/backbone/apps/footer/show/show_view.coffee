@@ -31,5 +31,11 @@
       "click @ui.updates"  : "updates:clicked"
       "click @ui.debug"    : "debug:clicked"
 
+    events:
+      "click .dropdown-menu a" : "aClicked"
+
     onRender: ->
       @ui.settings.dropdown()
+
+    aClicked: ->
+      @ui.settings.dropdown("toggle")
