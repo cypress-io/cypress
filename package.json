@@ -62,7 +62,7 @@
     "run-sequence": "^1.0.2",
     "setimmediate": "^1.0.2",
     "sinon": "1.12.2",
-    "sinon-as-promised": "^2.0.3",
+    "sinon-as-promised": "bendrucker/sinon-as-promised",
     "sinon-chai": "^2.7.0",
     "supertest": "^0.15.0",
     "supertest-session": "0.0.7",

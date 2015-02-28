@@ -104,7 +104,7 @@ class Cache extends require("events").EventEmitter
       p
     .then (p) ->
        @updateProject(id, p)
-       .then(p)
+       .return(p)
 
   updateProject: (id, data) ->
     Log.info "updating project #{id}", project: data
