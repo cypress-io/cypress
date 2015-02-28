@@ -114,20 +114,20 @@ describe "Winston Logger", ->
     context "handleErr", ->
       it "is called after resolving", (done) ->
         Log.defaultErrorHandler(@err)
-        process.nextTick =>
+        _.defer =>
           expect(@exit).to.be.called
           done()
 
       it "is called after rejecting", (done) ->
         @create.rejects()
         Log.defaultErrorHandler(@err)
-        process.nextTick =>
+        _.defer =>
           expect(@exit).to.be.called
           done()
 
       it "calls process.exit(1)", (done) ->
         Log.defaultErrorHandler(@err)
-        process.nextTick =>
+        _.defer =>
           expect(@exit).to.be.calledWith(1)
           done()
 
@@ -135,14 +135,14 @@ describe "Winston Logger", ->
         fn = @sandbox.spy()
         Log.setErrorHandler(fn)
         Log.defaultErrorHandler(@err)
-        process.nextTick ->
+        _.defer ->
           expect(fn).to.be.called
           done()
 
       it "calls exit if Log#errorhandler returns true", (done) ->
         Log.setErrorHandler -> true
         Log.defaultErrorHandler(@err)
-        process.nextTick =>
+        _.defer =>
           expect(@exit).to.be.called
           done()
 

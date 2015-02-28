@@ -155,16 +155,16 @@ describe "Exceptions", ->
           .matchHeader("accept", "application/json")
 
       it "requests with correct url, body, headers, and json", ->
-        @exceptions.reply(200)
-        Exception.create().then(@exceptions.done)
+        e = @exceptions.reply(200)
+        Exception.create().then(e.done)
 
       it "times out after 3 seconds", (done) ->
-        @timeout(10000)
+        @timeout(6000)
 
         ## setup the clock so we can coerce time
-        clock = @sandbox.useFakeTimers()
+        # clock = @sandbox.useFakeTimers("setTimeout")
 
-        @exceptions.reply(200)
+        @exceptions.delayConnection(5000).reply(200)
 
         Exception.create()
           .then ->
@@ -173,6 +173,4 @@ describe "Exceptions", ->
             done()
 
         process.nextTick ->
-          ## automatically move ahead 5 seconds which
-          ## should cause our promise to timeout!
-          clock.tick(5000)
+          # clock.tick(5000)
