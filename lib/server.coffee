@@ -88,6 +88,11 @@ class Server #extends require('./logger')
   createRoutes: ->
     require("./routes")(@app)
 
+  portInUseErr: (port) ->
+    e = new Error("Port: '#{port}' is already in use.")
+    e.portInUse = true
+    e
+
   open: ->
     @server    = http.createServer(@app)
     @io        = require("socket.io")(@server, {path: "/__socket.io"})
@@ -102,6 +107,13 @@ class Server #extends require('./logger')
     socket.startListening()
 
     new Promise (resolve, reject) =>
+      @server.once "error", (err) ->
+        ## if the server bombs before starting
+        ## and the err no is EADDRINUSE
+        ## then we know to display the custom err message
+        if err.errno is "EADDRINUSE"
+          reject @portInUseErr(@config.port)
+
       @server.listen @config.port, =>
         @isListening = true
         Log.info("Server listening", {port: @config.port})

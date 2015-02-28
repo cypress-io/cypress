@@ -5,7 +5,9 @@
 
     modelEvents:
       "change:clientUrl" : "render"
+      "change:error"     : "render"
 
     triggers:
-      "click a"       : "client:url:clicked"
-      "click button"  : "stop:clicked"
+      "click a"              : "client:url:clicked"
+      "click [data-js-stop]" : "stop:clicked"
+      "click [data-js-ok]"   : "ok:clicked"

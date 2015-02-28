@@ -13,6 +13,12 @@
     setClientUrl: (url) ->
       @set clientUrl: url
 
+    setError: (err) ->
+      if err.portInUse
+        @set("portInUse", true)
+
+      @set "error", err.toString()
+
   class Entities.ProjectsCollection extends Entities.Collection
     model: Entities.Project
 
