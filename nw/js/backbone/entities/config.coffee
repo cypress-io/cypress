@@ -33,18 +33,9 @@
       .then (user) ->
         @setUser(user)
         .return(user)
-      .catch (err) ->
-        ## ...could not log in...
-        debugger
-        console.log("Error logging in!")
-        throw err
 
     logOut: (user) ->
       @cache.logOut(user.get("session_token"))
-      .catch (err) ->
-        debugger
-        console.log("Error logging out!")
-        throw err
 
     log: (text, data = {}) ->
       data.type = "native"

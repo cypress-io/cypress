@@ -198,7 +198,11 @@ class Cache extends require("events").EventEmitter
   ## and update NW references
   logIn: (code) ->
     url = Routes.signin({code: code})
-    request.post(url).then(JSON.parse)
+    request.post(url)
+      .then(JSON.parse)
+      .catch (err) ->
+        ## normalize the error object
+        throw (err.error or err)
 
   logOut: (token) ->
     nukeSession = (resolve, reject) ->

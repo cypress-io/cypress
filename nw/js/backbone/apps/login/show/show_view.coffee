@@ -4,14 +4,16 @@
     template: "login/show/login"
 
     ui:
-      button: "button"
+      login: "[data-login]"
+      retry: "[data-retry]"
 
     triggers:
-      "click @ui.button" : "login:clicked"
+      "click @ui.login" : "login:clicked"
 
     modelEvents:
       "change:loggingIn" : "render"
+      "change:error"     : "render"
 
     onRender: ->
       loggingIn = @model.get("loggingIn")
-      @ui.button.toggleClass("disabled", loggingIn).attr("disabled", loggingIn)
+      @ui.login.toggleClass("disabled", loggingIn).attr("disabled", loggingIn)

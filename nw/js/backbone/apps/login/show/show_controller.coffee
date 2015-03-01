@@ -8,6 +8,7 @@
       loginView = @getLoginView(user)
 
       @listenTo loginView, "login:clicked", (view, obj) ->
+        user.unset("error")
         App.execute "login:request"
 
       @show loginView

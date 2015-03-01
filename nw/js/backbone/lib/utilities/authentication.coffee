@@ -34,10 +34,12 @@
 
       code = new Uri(url).getQueryParamValue("code")
 
-      App.config.logIn(code).then (user) ->
-        App.currentUser.loggedIn(user)
-
-        App.vent.trigger "start:projects:app"
+      App.config.logIn(code)
+        .then (user) ->
+          App.currentUser.loggedIn(user)
+          App.vent.trigger "start:projects:app"
+        .catch (err) ->
+          App.currentUser.setLoginError(err)
 
     logOut: (user) ->
       App.config.logOut(user).then ->

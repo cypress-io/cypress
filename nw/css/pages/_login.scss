@@ -5,6 +5,10 @@
     margin-bottom: 20px;
   }
 
+  p.bg-danger {
+    padding: 5px;
+  }
+
   button {
     &:active, &:focus {
       outline: 0

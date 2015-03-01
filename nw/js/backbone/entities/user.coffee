@@ -11,5 +11,9 @@
       @set "loggingIn", false
       @set attrs
 
+    setLoginError: (err) ->
+      @set "loggingIn", false, {silent: true}
+      @set "error", err.toString()
+
   App.reqres.setHandler "new:user:entity", (attrs = {}) ->
     new Entities.User attrs

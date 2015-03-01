@@ -17,7 +17,7 @@
         </ul>
       </div>
     <% end %>
-    <button data-js-ok class="btn btn-info">Ok</button>
+    <button data-ok class="btn btn-info">Ok</button>
   <% else: %>
     <% if @clientUrl: %>
       <div class="well well-lg">
@@ -26,7 +26,7 @@
           <a href="#"><%= @clientUrl %></a>
         </div>
       </div>
-      <button data-js-stop class="btn btn-danger">Stop</button>
+      <button data-stop class="btn btn-danger">Stop</button>
     <% else: %>
       <span>
         <i class="fa fa-spinner fa-spin"></i>

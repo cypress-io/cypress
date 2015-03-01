@@ -3,11 +3,18 @@
     <p>Cypress.io</p>
   </h3>
   <div class="well well-lg">
-    <button class="btn btn-default">
+    <button data-login class="btn btn-default">
       <i class="fa fa-github"></i>
       Login with Github
     </button>
   </div>
+  <% if @error: %>
+    <p class="text-danger">Could not log in!</p>
+    <p class="bg-danger">
+      <i class="fa fa-warning"></i>
+      <%= @error %>
+    </p>
+  <% end %>
   <% if @loggingIn: %>
     <span>
       <i class="fa fa-spinner fa-spin"></i>

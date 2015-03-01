@@ -8,6 +8,6 @@
       "change:error"     : "render"
 
     triggers:
-      "click a"              : "client:url:clicked"
-      "click [data-js-stop]" : "stop:clicked"
-      "click [data-js-ok]"   : "ok:clicked"
+      "click a"           : "client:url:clicked"
+      "click [data-stop]" : "stop:clicked"
+      "click [data-ok]"   : "ok:clicked"
