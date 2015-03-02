@@ -5,6 +5,7 @@ path          = require 'path'
 Domain        = require 'domain'
 through       = require 'through'
 through2      = require 'through2'
+jsUri         = require "jsuri"
 Log           = require "../log"
 UrlHelpers    = require "../util/url_helpers"
 SecretSauce   = require "../util/secret_sauce_loader"
@@ -19,6 +20,7 @@ class RemoteInitial extends Controller
   path: path
   fs: fs
   Log: Log
+  jsUri: jsUri
 
   constructor: (app) ->
     if not (@ instanceof RemoteInitial)

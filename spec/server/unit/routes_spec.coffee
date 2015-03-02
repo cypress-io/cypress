@@ -103,7 +103,7 @@ describe "Routes", ->
 
       it "basic 200 html response", (done) ->
         nock(@baseUrl)
-          .get("/bar?__initial=true")
+          .get("/bar")
           .reply 200, "hello from bar!", {
             "Content-Type": "text/html"
           }
@@ -115,7 +115,7 @@ describe "Routes", ->
 
       it "injects sinon content into head", (done) ->
         nock(@baseUrl)
-          .get("/bar?__initial=true")
+          .get("/bar")
           .reply 200, "<head><title>foo</title></head><body>hello from bar!</body>", {
             "Content-Type": "text/html"
           }
@@ -128,7 +128,7 @@ describe "Routes", ->
       context "headers", ->
         it "forwards headers on outgoing requests", (done) ->
           nock(@baseUrl)
-          .get("/bar?__initial=true")
+          .get("/bar")
           .matchHeader("x-custom", "value")
           .reply 200, "hello from bar!", {
             "Content-Type": "text/html"
@@ -144,7 +144,7 @@ describe "Routes", ->
           nock(@baseUrl)
           .matchHeader "host", (val) ->
             val isnt "demo.com"
-          .get("/bar?__initial=true")
+          .get("/bar")
           .reply 200, "hello from bar!", {
             "Content-Type": "text/html"
           }
@@ -159,7 +159,7 @@ describe "Routes", ->
           nock(@baseUrl)
           .matchHeader "accept-encoding", (val) ->
             val isnt "foo"
-          .get("/bar?__initial=true")
+          .get("/bar")
           .reply 200, "hello from bar!", {
             "Content-Type": "text/html"
           }
@@ -175,7 +175,7 @@ describe "Routes", ->
           nock(@baseUrl)
           .matchHeader "accept-language", (val) ->
             val isnt "utf-8"
-          .get("/bar?__initial=true")
+          .get("/bar")
           .reply 200, "hello from bar!", {
             "Content-Type": "text/html"
           }
@@ -195,7 +195,7 @@ describe "Routes", ->
           ## make an initial request to set the
           ## session proxy!
           nock("/__remote/#{@baseUrl}")
-            .get("/css?__initial=true")
+            .get("/css")
             .reply 200, "content page", {
               "Content-Type": "text/html"
             }
@@ -260,7 +260,7 @@ describe "Routes", ->
       ## make an initial request to set the
       ## session proxy!
       nock(@baseUrl)
-        .get("/css?__initial=true")
+        .get("/css")
         .reply 200, "css content page", {
           "Content-Type": "text/html"
         }

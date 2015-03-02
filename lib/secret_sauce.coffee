@@ -354,32 +354,39 @@ SecretSauce.RemoteInitial =
     _.defaults opts,
       inject: "<script type='text/javascript' src='/eclectus/js/sinon.js'></script>"
 
-    uri = req.url.split("/__remote/").join("")
-    @Log.info "handling initial request", uri: uri
+    url = @parseReqUrl(req.url)
+    @Log.info "handling initial request", url: url
 
     ## initially set the session to this url
     ## in case we aren't grabbing url content
     ## this may later be overridden if we're
     ## going to to the web and following redirects
-    @setSessionRemoteUrl(req, uri)
+    @setSessionRemoteUrl(req, url)
 
     d = Domain.create()
 
-    d.on 'error', (e) => @errorHandler(e, res, uri)
+    d.on 'error', (e) => @errorHandler(e, res, url)
 
     d.run =>
-      content = @getContent(uri, res, req)
+      content = @getContent(url, res, req)
 
-      content.on "error", (e) => @errorHandler(e, res, uri)
+      content.on "error", (e) => @errorHandler(e, res, url)
 
       content
       .pipe(@injectContent(opts.inject))
       .pipe(res)
 
+  parseReqUrl: (url) ->
+    ## strip out /__remote/ and the ?__initial query params
+    ## and any trailing slashes
+    url = new @jsUri url.split("/__remote/").join("")
+    url.deleteQueryParam("__initial")
+    url.toString().replace(/\/+$/, "")
+
   setSessionRemoteUrl: (req, url) ->
-    remote = url.split("?")[0]
+    url = url.split("?")[0].replace(/\/+$/, "")
     @Log.info "setting remote session url", url: url
-    req.session.remote = remote
+    req.session.remote = url
 
   injectContent: (toInject) ->
     toInject ?= ""
@@ -402,7 +409,7 @@ SecretSauce.RemoteInitial =
     args = _.compact([
       @app.get("cypress").projectRoot,
       # @app.get("cypress").rootFolder,
-      p.split('?')[0]
+      p
     ])
 
     file = @path.join(args...)

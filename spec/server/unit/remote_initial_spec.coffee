@@ -94,11 +94,28 @@ describe "Remote Initial", ->
       nock(@redirectUrl)
       .get("/")
       .reply(200, =>
-        expect(@req.session.remote).to.eql("http://x.com/")
+        expect(@req.session.remote).to.eql("http://x.com")
         done()
       )
 
       @remoteInitial.handle(@req, @res)
+
+  context "#parseReqUrl", ->
+    it "removes /__remote/", ->
+      url = @remoteInitial.parseReqUrl("/__remote/www.github.com")
+      expect(url).to.eq "www.github.com"
+
+    it "removes __initial query param", ->
+      url = @remoteInitial.parseReqUrl("/__remote/www.github.com?__initial=true")
+      expect(url).to.eq "www.github.com"
+
+    it "leaves other query params", ->
+      url = @remoteInitial.parseReqUrl("/__remote/www.github.com?__initial=true&foo=bar")
+      expect(url).to.eq "www.github.com/?foo=bar"
+
+    it "strips trailing slashes", ->
+      url = @remoteInitial.parseReqUrl("/__remote/www.github.com/")
+      expect(url).to.eq "www.github.com"
 
   context "setting session", ->
     beforeEach ->
@@ -130,7 +147,7 @@ describe "Remote Initial", ->
   context "relative files", ->
     it "#getRelativeFileContent", ->
       createReadStream = @sandbox.stub(fs, "createReadStream")
-      @remoteInitial.getRelativeFileContent("index.html?__initial=true")
+      @remoteInitial.getRelativeFileContent("index.html")
       expect(createReadStream).to.be.calledWith("/Users/brian/app/index.html")
 
   context "absolute files", ->
