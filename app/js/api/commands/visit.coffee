@@ -44,8 +44,11 @@ do (Cypress, _) ->
             @_storeHref()
             @_timeout(prevTimeout)
             options.onLoad?(win)
-            resolve(win)
-            Cypress.command()
+            if cy.$("[data-cypress-visit-error]").length
+              reject(new Error("Could not load the remote page: #{url}"))
+            else
+              resolve(win)
+              Cypress.command()
 
           # ## any existing global variables will get nuked after it navigates
           @$remoteIframe.prop "src", Cypress.Location.createInitialRemoteSrc(url)

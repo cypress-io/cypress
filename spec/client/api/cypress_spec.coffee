@@ -807,6 +807,10 @@ describe "Cypress", ->
 
       cy.visit("/foo")
 
+    it "rejects the promise if data-cypress-visit-error is in the body"
+
+    it "rejects with error: ...something..."
+
     it "extends the runnables timeout before visit"
 
     it "resets the runnables timeout after visit"
