@@ -21,6 +21,7 @@ describe "Remote Initial", ->
 
     @remoteInitial = RemoteInitial(@app)
     @res = through (d) ->
+    @res.render = ->
     @res.send = ->
     @res.redirect = ->
     @res.contentType = ->
@@ -48,20 +49,6 @@ describe "Remote Initial", ->
     readable.pipe(@remoteInitial.injectContent("wow"))
     .pipe through (d) ->
       expect(d.toString()).to.eq("<head> wow</head><body></body>")
-      done()
-
-  it "bubbles up 500 on fetch error", (done) ->
-    @req =
-      url: "/__remote/#{@baseUrl}"
-      session: {}
-
-    @remoteInitial.handle(@req, @res)
-
-    @res.send = (d) ->
-      expect(d).to.eql(
-        "Error getting http://foo.com <pre>Nock: Not allow net connect for \"foo.com:80\"</pre>"
-      )
-
       done()
 
   describe "redirects", ->

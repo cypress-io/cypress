@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Cypress Error</title>
+    <link rel="stylesheet" href="/eclectus/css/remote.css">
+  </head>
+  <body>
+    <div class="container">
+      <div class="jumbotron text-center bg-warning">
+        <h1><i class="fa fa-warning"></i></h1>
+        <p class="lead">Could not load the remote page:</p>
+        <p>
+          <strong>
+            <a href="{{url}}" target="_blank">{{url}}</a>
+          </strong>
+        </p>
+        <p>Did you forget to start your web server?</p>
+      </div>
+    </div>
+    <span data-cypress-visit-error></span>
+  </body>
+</html>

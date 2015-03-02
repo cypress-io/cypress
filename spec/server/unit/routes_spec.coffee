@@ -125,6 +125,29 @@ describe "Routes", ->
           .expect(200, "<head> <script type='text/javascript' src='/eclectus/js/sinon.js'></script><title>foo</title></head><body>hello from bar!</body>")
           .end(done)
 
+      context "error handling", ->
+        it "status code 500", (done) ->
+          nock(@baseUrl)
+            .get("/index.html")
+            .reply(500)
+
+          supertest(@app)
+            .get("/__remote/#{@baseUrl}/index.html?__initial=true")
+            .expect(500)
+            .end(done)
+
+        it "sends back initial_500 content", (done) ->
+          nock(@baseUrl)
+            .get("/index.html")
+            .reply(500)
+
+          supertest(@app)
+            .get("/__remote/#{@baseUrl}/index.html?__initial=true")
+            .expect (res) ->
+              expect(res.text).to.include("<span data-cypress-visit-error></span>")
+              null
+            .end(done)
+
       context "headers", ->
         it "forwards headers on outgoing requests", (done) ->
           nock(@baseUrl)

@@ -426,9 +426,12 @@ SecretSauce.RemoteInitial =
     @_resolveRedirects(url, res, req)
 
   errorHandler: (e, res, url) ->
-    console.error(e.stack)
-    res.status(500)
-    .send("Error getting #{url} <pre>#{e.message}</pre>")
+    @Log.info "error handling initial request", url: url, error: e
+
+    filePath = @path.join(process.cwd(), "lib/html/initial_500.html")
+    res.status(500).render(filePath, {
+      url: url
+    })
 
   _resolveRedirects: (url, res, req) ->
     { _ } = SecretSauce
