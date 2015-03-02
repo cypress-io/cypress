@@ -141,6 +141,12 @@
         ## really shut down the window!
         @close(true)
 
+    get: ->
+      gui.Window.get()
+
+  App.reqres.setHandler "gui:get", ->
+    API.get()
+
   App.commands.setHandler "gui:display", ->
     API.displayGui()
 
