@@ -107,16 +107,20 @@ class Server #extends require('./logger')
     socket.startListening()
 
     new Promise (resolve, reject) =>
-      @server.once "error", (err) ->
+      onError = (err) =>
         ## if the server bombs before starting
         ## and the err no is EADDRINUSE
         ## then we know to display the custom err message
         if err.errno is "EADDRINUSE"
           reject @portInUseErr(@config.port)
 
+      @server.once "error", onError
+
       @server.listen @config.port, =>
         @isListening = true
         Log.info("Server listening", {port: @config.port})
+
+        @server.removeListener "error", onError
 
         @project.ensureProjectId().bind(@)
         .then ->
