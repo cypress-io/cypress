@@ -3,9 +3,10 @@ Cypress is a test engine that runs unit and integration tests in your browser.
 
 ## Core Concepts
 * [commands]
-* [extensions]
+* [customizations]
 * [tools]
 * [debugging]
+* [analytics]
 
 ## Getting Started
 * [configuration]
@@ -22,95 +23,95 @@ Cypress is a test engine that runs unit and integration tests in your browser.
 
 ## API
 ##### Querying
-* [get](../../wiki/api/get)
-* [contains](../../wiki/api/contains)
-* [within](../../wiki/api/within)
-* [root](../../wiki/api/root)
+* [get](../../wiki/get)
+* [contains](../../wiki/contains)
+* [within](../../wiki/within)
+* [root](../../wiki/root)
 
 ##### Connectors
-* [then](../../wiki/api/then)
-* [and](../../wiki/api/and)
-* [invoke](../../wiki/api/invoke)
-* [its](../../wiki/api/its)
+* [then](../../wiki/then)
+* [and](../../wiki/and)
+* [invoke](../../wiki/invoke)
+* [its](../../wiki/its)
 
 ##### Assertions
-* [should](../../wiki/api/should)
-* [to](../../wiki/api/to)
+* [should](../../wiki/should)
+* [to](../../wiki/to)
 
 #### Navigation
-* [visit](../../wiki/api/visit)
-* [navigate](../../wiki/api/navigate)
+* [visit](../../wiki/visit)
+* [navigate](../../wiki/navigate)
 
 ##### AJAX / XHR
-* [server](../../wiki/api/server)
-* [route](../../wiki/api/route)
+* [server](../../wiki/server)
+* [route](../../wiki/route)
 
 ##### Spies / Stubs / Mocks
-* [spy](../../wiki/api/spy)
-* [stub](../../wiki/api/stub)
-* [mock](../../wiki/api/mock)
+* [spy](../../wiki/spy)
+* [stub](../../wiki/stub)
+* [mock](../../wiki/mock)
 
 ##### Alerts / Confirms
-* [alert](../../wiki/api/alert)
-* [confirm](../../wiki/api/confirm)
+* [alert](../../wiki/alert)
+* [confirm](../../wiki/confirm)
 
 ##### Location (URL)
-* [location](../../wiki/api/location)
-* [url](../../wiki/api/url)
-* [hash](../../wiki/api/hash)
+* [location](../../wiki/location)
+* [url](../../wiki/url)
+* [hash](../../wiki/hash)
 
 ##### Window
-* [window](../../wiki/api/window)
-* [title](../../wiki/api/title)
-* [document](../../wiki/api/document)
+* [window](../../wiki/window)
+* [title](../../wiki/title)
+* [document](../../wiki/document)
 
 ##### Actions
-* [type](../../wiki/api/type)
-* [click](../../wiki/api/click)
-* [dblclick](../../wiki/api/dblclick)
-* [submit](../../wiki/api/submit)
-* [hover](../../wiki/api/hover)
-* [drag](../../wiki/api/drag)
-* [check](../../wiki/api/check)
-* [uncheck](../../wiki/api/uncheck)
-* [fill](../../wiki/api/fill)
-* [clear](../../wiki/api/clear)
+* [type](../../wiki/type)
+* [click](../../wiki/click)
+* [dblclick](../../wiki/dblclick)
+* [submit](../../wiki/submit)
+* [hover](../../wiki/hover)
+* [drag](../../wiki/drag)
+* [check](../../wiki/check)
+* [uncheck](../../wiki/uncheck)
+* [fill](../../wiki/fill)
+* [clear](../../wiki/clear)
 
 ##### Aliasing
-* [as](../../wiki/api/as)
-* [assign](../../wiki/api/assign)
+* [as](../../wiki/as)
+* [assign](../../wiki/assign)
 
 ##### Waiting
-* [wait](../../wiki/api/wait)
-* [until](../../wiki/api/until)
+* [wait](../../wiki/wait)
+* [until](../../wiki/until)
 
 ##### Angular
-* [ng (model)](../../wiki/api/ng_model)
-* [ng (repeater)](../../wiki/api/ng_repeater)
-* [ng (binding)](../../wiki/api/ng_binding)
+* [ng (model)](../../wiki/ng_model)
+* [ng (repeater)](../../wiki/ng_repeater)
+* [ng (binding)](../../wiki/ng_binding)
 
 ##### DOM Traversal
-* [find](../../wiki/api/find)
-* [each](../../wiki/api/each)
-* [map](../../wiki/api/map)
-* [filter](../../wiki/api/filter)
-* [children](../../wiki/api/children)
-* [eq](../../wiki/api/eq)
-* [closest](../../wiki/api/closest)
-* [first](../../wiki/api/first)
-* [last](../../wiki/api/last)
-* [next](../../wiki/api/next)
-* [parent](../../wiki/api/parent)
-* [parents](../../wiki/api/parents)
-* [prev](../../wiki/api/prev)
-* [siblings](../../wiki/api/siblings)
+* [find](../../wiki/find)
+* [each](../../wiki/each)
+* [map](../../wiki/map)
+* [filter](../../wiki/filter)
+* [children](../../wiki/children)
+* [eq](../../wiki/eq)
+* [closest](../../wiki/closest)
+* [first](../../wiki/first)
+* [last](../../wiki/last)
+* [next](../../wiki/next)
+* [parent](../../wiki/parent)
+* [parents](../../wiki/parents)
+* [prev](../../wiki/prev)
+* [siblings](../../wiki/siblings)
 
 ##### Local Storage
-* [clearLocalStorage](../../wiki/api/clearLocalStorage)
+* [clearLocalStorage](../../wiki/clearLocalStorage)
 
 ##### Cookies
-* [clearCookies](../../wiki/api/clearCookies)
+* [clearCookies](../../wiki/clearCookies)
 
 ##### Misc
-* [eval](../../wiki/api/eval)
-* [options](../../wiki/api/options)
+* [eval](../../wiki/eval)
+* [options](../../wiki/options)
