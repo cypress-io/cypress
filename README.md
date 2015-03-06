@@ -2,17 +2,41 @@
 Cypress is a test engine that runs unit and integration tests in your browser.
 
 ## Core Concepts
+* [overview]
 * [commands]
-* [customizations]
+  - async everything
+  - subjects
+  - framework
+  - event simulation
+  - customizing / extending
+* [assertions]
+  - explicit
+  - implicit
+  - customizing
+* [aliasing]
+  - hooks
+  - macros
 * [tools]
+  - mocha
+  - chai
+  - jquery-chai
+  - sinon
+  - sinon-chai
 * [debugging]
 * [analytics]
 
 ## Getting Started
+* [installation]
 * [configuration]
+* [writing specs]
+  - browserify
+  - require.js
+  - snockets
+* [running tests]
+* [continuous integration]
 
 ## Examples
-* [todoMVC]
+* [TodoMVC]
 * [angular phonecat]
 * [rails tutorial]
 * [ember demo]
@@ -31,12 +55,12 @@ Cypress is a test engine that runs unit and integration tests in your browser.
 ##### Connectors
 * [then](../../wiki/then)
 * [and](../../wiki/and)
-* [invoke](../../wiki/invoke)
 * [its](../../wiki/its)
+* [invoke](../../wiki/invoke)
 
 ##### Assertions
 * [should](../../wiki/should)
-* [to](../../wiki/to)
+* [eventually](../../wiki/eventually)
 
 #### Navigation
 * [visit](../../wiki/visit)
@@ -111,6 +135,10 @@ Cypress is a test engine that runs unit and integration tests in your browser.
 
 ##### Cookies
 * [clearCookies](../../wiki/clearCookies)
+
+##### Debugging
+* [debug](../../wiki/debug)
+* [inspect](../../wiki/inspect)
 
 ##### Misc
 * [eval](../../wiki/eval)
