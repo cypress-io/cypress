@@ -18,8 +18,8 @@
       <script src="/{{this}}.js"></script>
     {{/each}}
     <script>
-      if (mochaPhantomJS) {
-        window.runner = mochaPhantomJS.run();
+      if (window.mochaPhantomJS) {
+        window.runner = window.mochaPhantomJS.run();
       }
       else {
         window.runner = mocha.run();
