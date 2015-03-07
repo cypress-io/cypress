@@ -882,6 +882,12 @@ window.Cypress = do ($, _, Backbone) ->
       @log("agent", obj)
 
     @log = (event, obj) ->
+      getError = (err) ->
+        if err.name is "CypressError"
+          err.toString()
+        else
+          err.stack
+
       _.defaults obj,
         testId:           @cy.prop("runnable").cid
         referencesAlias:  undefined
@@ -905,7 +911,7 @@ window.Cypress = do ($, _, Backbone) ->
         if obj._error
           _.defaults consoleObj,
             # Error: obj._error.toString()
-            Error: obj._error.stack
+            Error: getError(obj._error)
 
         return consoleObj
 

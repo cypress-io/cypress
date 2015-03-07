@@ -157,9 +157,10 @@
 
       e.stopPropagation()
 
-      @displayConsoleMessage()
+      if @model.originalError.name isnt "CypressError"
+        @displayConsoleMessage()
 
-      console.error(@model.originalError.stack)
+        console.error(@model.originalError.stack)
 
     displayConsoleMessage: ->
       width  = @ui.pre.outerWidth()
