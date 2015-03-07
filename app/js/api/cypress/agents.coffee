@@ -1,7 +1,5 @@
 Cypress.Agents = do (Cypress, _) ->
 
-  # fnRe = /function (.{1,})\(/
-
   class Agents
     constructor: (@sandbox, @options) ->
 
@@ -30,18 +28,14 @@ Cypress.Agents = do (Cypress, _) ->
         catch e
           error = e
 
-        ## create a num property on our lastCall
-        ## so we know which call # this is
-        lastCall     = agent.lastCall
-        lastCall.num = agent.callCount
-
         props =
-          name:     type
-          message:  _this._getMessage(method, args)
-          agent:    agent
-          obj:      obj
-          call:     lastCall
-          error:    error
+          name:      type
+          message:   _this._getMessage(method, args)
+          obj:       obj
+          agent:     agent
+          call:      agent.lastCall
+          callCount: agent.callCount
+          error:     error
 
         _this.options.onInvoke(props)
 
@@ -53,12 +47,6 @@ Cypress.Agents = do (Cypress, _) ->
         ## of the spy
         return returned
 
-    # _getClassName: (obj) ->
-    #   return "" if not obj?
-
-    #   results = fnRe.exec obj.constructor.toString()
-    #   (results and results[1]) or ""
-
     spy: (obj, method) ->
       spy = @sandbox.spy(obj, method)
 
@@ -66,7 +54,6 @@ Cypress.Agents = do (Cypress, _) ->
 
       @options.onCreate
         type: "spy"
-        # className: @_getClassName(obj)
         functionName: method
 
       return spy
@@ -75,6 +62,10 @@ Cypress.Agents = do (Cypress, _) ->
       stub = @sandbox.stub(obj, method)
 
       @_wrap("stub", stub, obj, method)
+
+      @options.onCreate
+        type: "spy"
+        functionName: method
 
       return stub
 

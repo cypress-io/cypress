@@ -95,18 +95,6 @@
       @set "url", @xhr.url
       @response = response
 
-    getPrimaryObjects: ->
-      objs = switch @get("type")
-        # when "dom"        then @getDomObject()
-        # when "assertion"  then @getAssertion()
-        when "server"     then @getServer()
-        when "xhr"        then @getXhrObject()
-        when "spy"        then @getSpyObject()
-        when "stub"       then @getStubObject()
-        # when "visit"      then @getVisitObject()
-
-      _([objs]).flatten(true)
-
     getSnapshot: ->
       @[CYPRESS_ATTRS]._snapshot
 
@@ -121,10 +109,31 @@
 
       return if _.isEmpty(obj)
 
+      groups = @formatGroupsForConsole(obj)
+
       obj = @formatForConsole(obj)
 
       _.each obj, (value, key) ->
         fn ["%c" + key, "font-weight: bold;", value] unless _.isBlank(value) and value isnt ""
+
+      if groups
+        _.each groups, (group) ->
+          console.group(group.name)
+
+          _.each group.items, (value, key) ->
+            fn ["%c" + key, "color: blue", value]
+
+          console.groupEnd()
+
+    formatGroupsForConsole: (obj) ->
+      return if not obj.groups
+
+      if groups = _.result(obj, "groups")
+        delete obj.groups
+
+        _.map groups, (group) =>
+          group.items = @formatForConsole(group.items)
+          group
 
     formatForConsole: (obj) ->
       ## figure out the max key length
@@ -144,33 +153,6 @@
     getMaxKeyLength: (obj) ->
       lengths = _.chain(obj).keys().map( (key) -> key.length ).value()
       Math.max.apply(Math, lengths)
-
-    convertToArray: (obj) ->
-      _.reduce obj, (memo, value, key) ->
-        memo.push ["%c" + key, "font-weight: bold;", value] unless _.isBlank(value)
-        memo
-      , []
-
-    # getDomObject: ->
-    #   ## we want to get all the .click() .type() commands here
-    #   ## rename this method to something like actions / traversal vs finders
-    #   return @getSequenceObject() if @get("sequence") or not @get("selector")
-    #
-    #   @convertToArray
-    #     "Prev Obj:   ": if @hasParent() then @parent.el
-    #     "Command:    ": @get("method")
-    #     "Selector:   ": @get("selector")
-    #     "Returned:   ": @el
-    #     "Elements:   ": @get("length")
-    #     "Error:      ": @get("error")
-
-    # getSequenceObject: ->
-    #   @convertToArray
-    #     "Command:    ": @get("method")
-    #     "Sequence:   ": @get("sequence")
-    #     "Applied To: ": if @hasParent() then @parent.el
-    #     "Elements:   ": @get("length")
-    #     "Error:      ": @get("error")
 
     getStubObject: ->
       stub = @stub
@@ -198,12 +180,6 @@
         "Spy Obj: ": spyObj
         "Calls:   ": spy.callCount
 
-    # getVisitObject: ->
-    #   @convertToArray
-    #     "Command:  ": @get("method")
-    #     "URL:      ": @get("message")
-    #     "Page:     ": @page.contents()
-
     logSpyOrStubTableProperties: (spyOrStub, spyOrStubCall) ->
       count = spyOrStub.callCount
       return if count is 0
@@ -216,23 +192,6 @@
       else
         for i in [0..count - 1]
           @logSpyOrStubCall(spyOrStub, i)
-
-    logSpyOrStubCall: (spyOrStub, index) ->
-      console.group("Call ##{index + 1}:")
-      # console.log.apply(console, @getSpyArgsForCall(spyOrStub, i))
-      @logSpyProperty("Arguments:  %O", spyOrStub.args[index])
-      @logSpyProperty("Context:   ", spyOrStub.thisValues[index])
-      @logSpyProperty("Returned:  ", spyOrStub.returnValues[index])
-
-      exception = spyOrStub.exceptions[index]
-      if exception
-        @logSpyProperty("Error:     ", exception)
-        @logSpyProperty("Stack:     ", exception.stack)
-
-      console.groupEnd()
-
-    logSpyProperty: (key, value) ->
-      console.log "%c#{key}", "color: blue", value
 
     getXhrObject: ->
       ## return the primary xhr object
@@ -255,15 +214,6 @@
         "Matched URL:": @response.url
         "Request:    ": @xhr
         "Response:   ": response
-
-    # getAssertion: ->
-    #   @convertToArray
-    #     "Command:  ": @get("method")
-    #     "Selector  ": @get("selector")
-    #     "Subject:  ": @subject
-    #     "Expected: ": @expected
-    #     "Actual:   ": @actual
-    #     "Message:  ": @get("message")
 
     getServer: ->
       @convertToArray
