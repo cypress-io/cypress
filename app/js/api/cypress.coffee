@@ -903,7 +903,7 @@ window.Cypress = do ($, _, Backbone) ->
 
         ## and finally add error if one exists
         if obj._error
-          _.extend consoleObj,
+          _.defaults consoleObj,
             # Error: obj._error.toString()
             Error: obj._error.stack
 
