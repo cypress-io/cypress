@@ -352,7 +352,14 @@ SecretSauce.RemoteInitial =
     { _ } = SecretSauce
 
     _.defaults opts,
-      inject: "<script type='text/javascript' src='/eclectus/js/sinon.js'></script>"
+      inject: "
+        <script type='text/javascript' src='/eclectus/js/sinon.js'></script>
+        <script type='text/javascript'>
+          window.onerror = function(){
+            parent.onerror.apply(parent, arguments)
+          }
+        </script>
+      "
 
     url = @parseReqUrl(req.url)
     @Log.info "handling initial request", url: url
