@@ -13,8 +13,7 @@
               <tr>
                 <th>Type</th>
                 <th>Function</th>
-                <th>Class Name</th>
-                <th title="Number of times called">#</th>
+                <th># Calls</th>
               </tr>
             </thead>
             <tbody></tbody>

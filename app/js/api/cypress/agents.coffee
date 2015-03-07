@@ -1,9 +1,11 @@
 Cypress.Agents = do (Cypress, _) ->
 
+  # fnRe = /function (.{1,})\(/
+
   class Agents
     constructor: (@sandbox, @options) ->
 
-    _getMessage: (obj, method, args) ->
+    _getMessage: (method, args) ->
       method ?= "function"
 
       getArgs = ->
@@ -12,10 +14,10 @@ Cypress.Agents = do (Cypress, _) ->
 
       method + "(" + getArgs() + ")"
 
-    _wrap: (type, obj, method) ->
+    _wrap: (type, agent, obj, method) ->
       _this = @
 
-      obj.invoke = _.wrap obj.invoke, (orig, func, thisValue, args) ->
+      agent.invoke = _.wrap agent.invoke, (orig, func, thisValue, args) ->
         error = null
         returned = null
 
@@ -30,48 +32,41 @@ Cypress.Agents = do (Cypress, _) ->
 
         ## create a num property on our lastCall
         ## so we know which call # this is
-        lastCall     = obj.lastCall
-        lastCall.num = obj.callCount
+        lastCall     = agent.lastCall
+        lastCall.num = agent.callCount
 
         props =
           name:     type
-          message:  _this._getMessage(obj, method, args)
-          # id:           _this.getId()
-          # method:       "call ##{lastCall.num}"
-          # message:      "#{args.length} arguments"
-          # spy:          obj
-          # spyCall:      lastCall
-          # spyObj:       obj
-          # parent:       _this.id
-          # canBeParent:  false
-
-        props.error = "exception thrown" if error
+          message:  _this._getMessage(method, args)
+          agent:    agent
+          obj:      obj
+          call:     lastCall
+          error:    error
 
         _this.options.onInvoke(props)
 
-        # _this.emit props
-
         ## if an error did exist then we need
-        ## to throw it right now
-        # throw(error) if error
+        ## to bubble it up
+        _this.options.onError(error) if error
 
         ## make sure we return the invoked return value
         ## of the spy
         return returned
 
-    _getClassName: (obj) ->
-      return "" if not obj?
+    # _getClassName: (obj) ->
+    #   return "" if not obj?
 
-      obj.constructor?.name
+    #   results = fnRe.exec obj.constructor.toString()
+    #   (results and results[1]) or ""
 
     spy: (obj, method) ->
       spy = @sandbox.spy(obj, method)
 
-      @_wrap("spy", spy, method)
+      @_wrap("spy", spy, obj, method)
 
       @options.onCreate
         type: "spy"
-        className: @_getClassName(obj)
+        # className: @_getClassName(obj)
         functionName: method
 
       return spy
@@ -79,7 +74,7 @@ Cypress.Agents = do (Cypress, _) ->
     stub: (obj, method) ->
       stub = @sandbox.stub(obj, method)
 
-      @_wrap("stub", stub)
+      @_wrap("stub", stub, obj, method)
 
       return stub
 
