@@ -10,11 +10,12 @@ do (Cypress, _) ->
     agents: ->
       new Cypress.Agents @_getSandbox(),
         onCreate: (obj) =>
+          obj.type = [obj.type, obj.count].join("-")
           Cypress.agent(obj)
 
         onInvoke: (obj) =>
           Cypress.command
-            name:    obj.name
+            name:    [obj.name, obj.count].join("-")
             message: obj.message
             error:   obj.error
             type:    "parent"

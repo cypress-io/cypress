@@ -2,6 +2,7 @@ Cypress.Agents = do (Cypress, _) ->
 
   class Agents
     constructor: (@sandbox, @options) ->
+      @count = 0
 
     _getMessage: (method, args) ->
       method ?= "function"
@@ -14,6 +15,8 @@ Cypress.Agents = do (Cypress, _) ->
 
     _wrap: (type, agent, obj, method) ->
       _this = @
+
+      agent._cy = _this.count
 
       agent.invoke = _.wrap agent.invoke, (orig, func, thisValue, args) ->
         error = null
@@ -29,6 +32,7 @@ Cypress.Agents = do (Cypress, _) ->
           error = e
 
         props =
+          count:     agent._cy
           name:      type
           message:   _this._getMessage(method, args)
           obj:       obj
@@ -50,22 +54,24 @@ Cypress.Agents = do (Cypress, _) ->
     spy: (obj, method) ->
       spy = @sandbox.spy(obj, method)
 
-      @_wrap("spy", spy, obj, method)
-
       @options.onCreate
         type: "spy"
         functionName: method
+        count: @count += 1
+
+      @_wrap("spy", spy, obj, method)
 
       return spy
 
     stub: (obj, method) ->
       stub = @sandbox.stub(obj, method)
 
-      @_wrap("stub", stub, obj, method)
-
       @options.onCreate
-        type: "spy"
+        type: "stub"
         functionName: method
+        count: @count += 1
+
+      @_wrap("stub", stub, obj, method)
 
       return stub
 
