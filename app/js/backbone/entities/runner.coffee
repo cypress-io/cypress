@@ -406,7 +406,9 @@
           @trigger "test:start", test
 
         @runner.on "test end", (test) =>
-          @trigger "test:end", test
+          ## dont retrigger this event if its failedFromHook
+          ## in that case we've already captured it
+          @trigger("test:end", test) unless test.failedFromHook
 
           ## remove the hook reference from the test
           test.removeAllListeners()
