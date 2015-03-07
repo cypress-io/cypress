@@ -515,6 +515,37 @@ describe "Cypress", ->
 
         it "#onConsole", ->
 
+  context "#agents", ->
+    beforeEach ->
+      @agents = cy.agents()
+
+    it "is synchronous", ->
+      expect(@agents).to.have.keys("sandbox", "options")
+
+    it "uses existing sandbox"
+
+    describe "#spy", ->
+      it "proxies to sinon spy", ->
+        spy = @agents.spy()
+        spy()
+        expect(spy.callCount).to.eq(1)
+
+      describe ".log", ->
+        beforeEach ->
+          Cypress.on "log", (@log) =>
+
+          cy.noop({})
+
+        it "logs obj", ->
+          spy = @agents.spy()
+          spy("foo", "bar")
+
+          expect(@log.name).to.eq("spy")
+          expect(@log.message).to.eq("spy(arg1, arg2)")
+          expect(@log.type).to.eq("parent")
+
+        context "#onConsole", ->
+
   context "#clearLocalStorage", ->
     it "is defined", ->
       expect(cy.clearLocalStorage).to.be.defined
