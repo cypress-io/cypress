@@ -72,6 +72,7 @@
 
     regions:
       contentRegion:     ".runnable-content-region"
+      agentsRegion:      ".runnable-agents-region"
       routesRegion:      ".runnable-routes-region"
       commandsRegion:    ".runnable-commands-region"
       runnablesRegion:   ".runnables-region"

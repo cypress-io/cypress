@@ -873,6 +873,14 @@ window.Cypress = do ($, _, Backbone) ->
 
       @log("route", obj)
 
+    @agent = (obj = {}) ->
+      return if not @cy
+
+      _.defaults obj,
+        name: "agent"
+
+      @log("agent", obj)
+
     @log = (event, obj) ->
       _.defaults obj,
         testId:           @cy.prop("runnable").cid

@@ -1,0 +1,12 @@
+<td><%= @type %></td>
+<td><%= @functionName %></td>
+<td><%= @className %></td>
+<td>
+  <% if @numCalls is 0: %>
+    <span class="text-fail">
+      -
+    </span>
+  <% else: %>
+    <%= @numCalls %>
+  <% end %>
+</td>

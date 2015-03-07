@@ -1,0 +1,26 @@
+<ul class="hooks-container">
+  <li class="hook-item">
+    <span class="hook-name">
+      <i class="fa fa-caret-right"></i>
+      Spies / Stubs / Mocks (<span data-js='total'></span>)
+      <i class="fa fa-ellipsis-h"></i>
+    </span>
+    <div class="agents-container hidden">
+      <div class="tab-content">
+        <div class="tab-pane active">
+          <table class="table table-condensed">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Function</th>
+                <th>Class Name</th>
+                <th title="Number of times called">#</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </li>
+</ul>

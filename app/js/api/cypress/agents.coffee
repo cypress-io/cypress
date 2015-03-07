@@ -3,8 +3,8 @@ Cypress.Agents = do (Cypress, _) ->
   class Agents
     constructor: (@sandbox, @options) ->
 
-    getMessage: (obj, method, args) ->
-      method ?= "spy"
+    _getMessage: (obj, method, args) ->
+      method ?= "function"
 
       getArgs = ->
         calls = _.map args, (arg, i) -> "arg#{i + 1}"
@@ -35,7 +35,7 @@ Cypress.Agents = do (Cypress, _) ->
 
         props =
           name:     type
-          message:  _this.getMessage(obj, method, args)
+          message:  _this._getMessage(obj, method, args)
           # id:           _this.getId()
           # method:       "call ##{lastCall.num}"
           # message:      "#{args.length} arguments"
@@ -59,10 +59,20 @@ Cypress.Agents = do (Cypress, _) ->
         ## of the spy
         return returned
 
+    _getClassName: (obj) ->
+      return "" if not obj?
+
+      obj.constructor?.name
+
     spy: (obj, method) ->
       spy = @sandbox.spy(obj, method)
 
       @_wrap("spy", spy, method)
+
+      @options.onCreate
+        type: "spy"
+        className: @_getClassName(obj)
+        functionName: method
 
       return spy
 

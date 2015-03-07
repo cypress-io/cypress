@@ -13,8 +13,8 @@
 
       ## grab the commands collection from the runner
       commands = runner.getCommands()
-
-      routes = runner.getRoutes()
+      routes   = runner.getRoutes()
+      agents   = runner.getAgents()
 
       ## when commands are added to this collection
       ## we need to find the runnable model by its cid
@@ -33,6 +33,10 @@
       @listenTo routes, "add", (route, routes, options) ->
         model = container.get route.get("testId")
         model.addRoute(route, options) if model
+
+      @listenTo agents, "add", (agent, agents, options) ->
+        model = container.get agent.get("testId")
+        model.addAgent(agent, options) if model
 
       ## always make the first two arguments the root model + container collection
       @addRunnable = _.partial(@addRunnable, root, container)
@@ -144,6 +148,8 @@
         @show contentView, region: layout.contentRegion
 
         if model.is("test")
+          App.execute "list:test:agents", model, runner, layout.agentsRegion
+
           App.execute "list:test:routes", model, runner, layout.routesRegion
 
           ## and pass up the commands collection (via hooks) and the commands region

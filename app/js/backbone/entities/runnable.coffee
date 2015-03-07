@@ -10,6 +10,7 @@
       children:  new Entities.RunnableCollection
       hooks: App.request("hook:entities")
       routes: App.request("route:entities")
+      agents: App.request("agent:entities")
 
     initialize: ->
       new Backbone.Chooser(@)
@@ -71,6 +72,9 @@
 
     addRoute: (route, options = {}) ->
       @get("routes").add(route)
+
+    addAgent: (agent, options = {}) ->
+      @get("agents").add(agent)
 
     incrementRoute: (route) ->
       @get("routes").increment(route)

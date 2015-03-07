@@ -17,6 +17,7 @@
         @hooks            = App.request "hook:entities"
         @commands         = App.request "command:entities"
         @routes           = App.request "route:entities"
+        @agents           = App.request "agent:entities"
         @satelliteEvents  = App.request "satellite:events"
         @hostEvents       = App.request "host:events"
         @passThruEvents   = App.request "pass:thru:events"
@@ -275,6 +276,9 @@
       getRoutes: ->
         @routes
 
+      getAgents: ->
+        @agents
+
       changeRunnableTimeout: (runnable) ->
         runnable.timeout App.config.get("commandTimeout")
 
@@ -358,6 +362,9 @@
 
             when "route"
               @routes.add obj
+
+            when "agent"
+              @agents.add obj
 
             else
               throw new Error("Cypress.log() emitted an unknown event: #{obj.event}")
@@ -527,6 +534,7 @@
         ## clear out the commands
         @commands.reset([], {silent: true})
         @routes.reset([], {silent: true})
+        @agents.reset([], {silent: true})
 
         ## remove all the listeners from EventEmitter
         @runner.removeAllListeners()
@@ -549,6 +557,7 @@
         @hooks          = null
         @commands       = null
         @routes         = null
+        @agents         = null
         @chosen         = null
         @hook           = null
         @test           = null
