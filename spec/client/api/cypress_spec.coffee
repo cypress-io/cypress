@@ -2100,6 +2100,140 @@ describe "Cypress", ->
             Elements: 1
           }
 
+  context.only "#dblclick", ->
+    it "sends a dblclick event", (done) ->
+      cy.$("#button").dblclick (e) -> done()
+
+      cy.get("#button").dblclick()
+
+    it "returns the original subject", ->
+      button = cy.$("#button")
+
+      cy.get("#button").dblclick().then ($button) ->
+        expect($button).to.match button
+
+    it "inserts artificial delay of 10ms", ->
+      cy.on "invoke:start", (obj) =>
+        if obj.name is "dblclick"
+          @delay = @sandbox.spy Promise.prototype, "delay"
+
+      cy.get("#button").dblclick().then ->
+        expect(@delay).to.be.calledWith 10
+
+    it "inserts artificial delay of 50ms for anchors", ->
+      cy.on "invoke:start", (obj) =>
+        if obj.name is "dblclick"
+          @delay = @sandbox.spy Promise.prototype, "delay"
+
+      cy.get("*").contains("Home Page").dblclick().then ->
+        expect(@delay).to.be.calledWith 50
+
+    it "can operate on a jquery collection", ->
+      dblclicks = 0
+      buttons = cy.$("button")
+      buttons.dblclick ->
+        dblclicks += 1
+        return false
+
+      ## make sure we have more than 1 button
+      expect(buttons.length).to.be.gt 1
+
+      ## make sure each button received its dblclick event
+      cy.get("button").dblclick().then ($buttons) ->
+        expect($buttons.length).to.eq dblclicks
+
+    it "can cancel multiple dblclicks", (done) ->
+      dblclicks = 0
+
+      spy = @sandbox.spy ->
+        Cypress.abort()
+
+      ## abort after the 3rd dblclick
+      dblclicked = _.after 3, spy
+
+      anchors = cy.$("#sequential-clicks a")
+      anchors.dblclick ->
+        dblclicks += 1
+        dblclicked()
+
+      ## make sure we have at least 5 anchor links
+      expect(anchors.length).to.be.gte 5
+
+      cy.on "cancel", ->
+        _.delay ->
+          ## abort should only have been called once
+          expect(spy.callCount).to.eq 1
+
+          ## and we should have stopped dblclicking after 3
+          expect(dblclicks).to.eq 3
+          done()
+        , 200
+
+      cy.get("#sequential-clicks a").dblclick()
+
+    it "serially dblclicks a collection", ->
+      dblclicks = 0
+
+      ## create a throttled dblclick function
+      ## which proves we are dblclicking serially
+      throttled = _.throttle ->
+        dblclicks += 1
+      , 40, {leading: false}
+
+      anchors = cy.$("#sequential-clicks a")
+      anchors.dblclick throttled
+
+      ## make sure we're dblclicking multiple anchors
+      expect(anchors.length).to.be.gt 1
+      cy.get("#sequential-clicks a").dblclick().then ($anchors) ->
+        expect($anchors.length).to.eq dblclicks
+
+    it "increases the timeout delta after each dblclick", (done) ->
+      prevTimeout = @test.timeout()
+
+      count = cy.$("button").length
+
+      cy.on "invoke:end", (obj) =>
+        if obj.name is "dblclick"
+          expect(@test.timeout()).to.eq (count * 10) + prevTimeout
+          done()
+
+      cy.get("button").dblclick()
+
+    describe "errors", ->
+      it "throws when not a dom subject", (done) ->
+        @sandbox.stub cy.runner, "uncaught"
+
+        cy.dblclick()
+
+        cy.on "fail", -> done()
+
+    describe ".log", ->
+      it "returns only the $el for the element of the subject that was dblclicked", ->
+        dblclicks = []
+
+        ## append two buttons
+        button = -> $("<button class='dblclicks'>dblclick</button")
+        cy.$("body").append(button()).append(button())
+
+        Cypress.on "log", (obj) ->
+          dblclicks.push(obj) if obj.name is "dblclick"
+
+        cy.get("button.dblclicks").dblclick().then ($buttons) ->
+          expect($buttons.length).to.eq(2)
+          expect(dblclicks.length).to.eq(2)
+          expect(dblclicks[1].$el.get(0)).to.eq $buttons.last().get(0)
+
+      it "#onConsole", ->
+        Cypress.on "log", (@log) =>
+
+        cy.get("button").first().dblclick().then ($button) ->
+          expect(@log.onConsole()).to.deep.eq {
+            Command: "dblclick"
+            "Applied To": @log.$el
+            Elements: 1
+          }
+
   context "#click", ->
     it "sends a click event", (done) ->
       cy.$("#button").click -> done()

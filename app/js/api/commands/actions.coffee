@@ -72,6 +72,42 @@ do (Cypress, _) ->
         if not values.length or el.val() in values
           el.prop("checked", false).trigger("change")
 
+    dblclick: (subject) ->
+      @ensureDom(subject)
+
+      dblclick = (memo, el, index) =>
+        $el = $(el)
+
+        wait = if $el.is("a") then 50 else 10
+
+        memo.then =>
+          $el.cySimulate("dblclick")
+
+          Cypress.command
+            $el: $el
+            onConsole: ->
+              "Applied To":   $el
+              "Elements":     $el.length
+
+          ## we want to add this wait delta to our
+          ## runnables timeout so we prevent it from
+          ## timing out from multiple clicks
+          @_timeout(wait, true)
+
+          ## need to return null here to prevent
+          ## chaining thenable promises
+          return null
+
+        .delay(wait)
+
+      ## create a new promise and chain off of it using reduce to insert
+      ## the artificial delays.  we have to set this as cancellable for it
+      ## to propogate since this is an "inner" promise
+      dblclicks = _.reduce subject.toArray(), dblclick, Promise.resolve().cancellable()
+
+      ## return our original subject when our promise resolves
+      dblclicks.return(subject)
+
     click: (subject) ->
       @ensureDom(subject)
 
