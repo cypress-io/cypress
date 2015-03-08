@@ -5,7 +5,8 @@ window.Simulate = do ($, _) ->
       Simulate.create(el, event, options)
 
   events = [
-    {event: "click", type: "MouseEvents", bubbles: true, cancelable: true}
+    {event: "click",    type: "MouseEvents", bubbles: true, cancelable: true}
+    {event: "dblclick", type: "MouseEvents", bubbles: true, cancelable: true}
   ]
 
   Simulate = {
@@ -37,7 +38,8 @@ window.Simulate = do ($, _) ->
       method = @getEventMethodByType(obj.type)
       method.call @, el, obj, options
 
-    dispatchEvent: (el, eventObj) ->
+    dispatchEvent: (el, event) ->
+      el.dispatchEvent(event)
 
     lookupEventObj: (event) ->
       _(events).findWhere({event: event}) or
@@ -53,6 +55,8 @@ window.Simulate = do ($, _) ->
       $doc   = $(@document)
 
       _.defaults options,
+        bubbles: obj.bubbles
+        cancelable: obj.cancelable
         view: @window
         detail: 1
         screenX: 0
@@ -69,21 +73,22 @@ window.Simulate = do ($, _) ->
       switch
         when document.createEvent
           ## https://developer.mozilla.org/en-US/docs/Web/API/event.initMouseEvent
-          event = document.createEvent("MouseEvents")
-          event.initMouseEvent.apply event, [
-            obj.event, ## type (click / dblclick / mousedown / mouseup)
-            obj.bubbles,
-            obj.cancelable,
-            options.view,
-            options.detail,
-            options.screenX
-            options.screenY
-          ]
+          # event = document.createEvent("MouseEvents")
+          event = new MouseEvent(obj.event, options)
+          # event.initMouseEvent.apply event, [
+          #   obj.event, ## type (click / dblclick / mousedown / mouseup)
+          #   obj.bubbles,
+          #   obj.cancelable,
+          #   options.view,
+          #   options.detail,
+          #   options.screenX
+          #   options.screenY
+          # ]
 
           ## need to research what other properties should
           ## be added to the event object
-          event.pageX = offset.left
-          event.pageY = offset.top
+          # event.pageX = offset.left
+          # event.pageY = offset.top
 
         when document.createEventObject then ""
 
