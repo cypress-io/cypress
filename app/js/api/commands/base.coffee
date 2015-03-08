@@ -49,6 +49,9 @@ do (Cypress, _, $) ->
 
     and: (subject, fn) -> @sync.then(fn)
 
+    end: ->
+      null
+
   Cypress.addChildCommand
     invoke: (subject, fn, args...) ->
       remoteJQuery = @_getRemoteJQuery()

@@ -1376,6 +1376,11 @@ describe "Cypress", ->
             $li.remove()
           .get("@firstLi")
 
+  context "#end", ->
+    it "nulls out the subject", ->
+      cy.noop({}).end().then (subject) ->
+        expect(subject).to.be.null
+
   context "#root", ->
     it "returns document", ->
       doc = cy.sync.document()
