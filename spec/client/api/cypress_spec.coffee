@@ -520,7 +520,9 @@ describe "Cypress", ->
       @agents = cy.agents()
 
     it "is synchronous", ->
-      expect(@agents).to.have.keys("sandbox", "options")
+      expect(@agents).to.have.property("spy")
+      expect(@agents).to.have.property("stub")
+      expect(@agents).to.have.property("mock")
 
     it "uses existing sandbox"
 
@@ -540,8 +542,8 @@ describe "Cypress", ->
           spy = @agents.spy()
           spy("foo", "bar")
 
-          expect(@log.name).to.eq("spy")
-          expect(@log.message).to.eq("spy(arg1, arg2)")
+          expect(@log.name).to.eq("spy-1")
+          expect(@log.message).to.eq("function(arg1, arg2)")
           expect(@log.type).to.eq("parent")
 
         context "#onConsole", ->
