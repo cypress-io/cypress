@@ -1382,11 +1382,11 @@ describe "Cypress", ->
         expect(subject).to.be.null
 
   context "#root", ->
-    it "returns document", ->
-      doc = cy.sync.document()
+    it "returns html", ->
+      html = cy.$("html")
 
-      cy.root().then ($doc) ->
-        expect($doc.get(0)).to.eq doc.get(0)
+      cy.root().then ($html) ->
+        expect($html.get(0)).to.eq html.get(0)
 
     it "returns withinSubject if exists", ->
       form = cy.$("form")
@@ -1402,10 +1402,10 @@ describe "Cypress", ->
         Cypress.on "log", (@log) =>
 
       it "sets $el to document", ->
-        doc = cy.sync.document()
+        html = cy.$("html")
 
         cy.root().then ->
-          expect(@log.$el.get(0)).to.eq(doc.get(0))
+          expect(@log.$el.get(0)).to.eq(html.get(0))
 
       it "sets $el to withinSubject", ->
         form = cy.$("form")
@@ -2105,7 +2105,7 @@ describe "Cypress", ->
             Elements: 1
           }
 
-  context.only "#dblclick", ->
+  context "#dblclick", ->
     it "sends a dblclick event", (done) ->
       cy.$("#button").dblclick (e) -> done()
 

@@ -82,15 +82,15 @@ do (Cypress, _) ->
 
       withinSubject = @prop("withinSubject")
 
-      log(withinSubject)
+      if withinSubject
+        log(withinSubject)
 
-      return withinSubject if withinSubject
+        return withinSubject
 
-      doc = @sync.document()
+      @command("get", "html", {log: false}).then ($html) ->
+        log($html)
 
-      log(doc)
-
-      return doc
+        return $html
 
   Cypress.addDualCommand
     contains: (subject, filter, text, options = {}) ->
