@@ -1374,6 +1374,41 @@ describe "Cypress", ->
             $li.remove()
           .get("@firstLi")
 
+  context "#root", ->
+    it "returns document", ->
+      doc = cy.sync.document()
+
+      cy.root().then ($doc) ->
+        expect($doc.get(0)).to.eq doc.get(0)
+
+    it "returns withinSubject if exists", ->
+      form = cy.$("form")
+
+      cy.get("form").within ->
+        cy
+          .get("input")
+          .root().then ($root) ->
+            expect($root.get(0)).to.eq form.get(0)
+
+    describe ".log", ->
+      beforeEach ->
+        Cypress.on "log", (@log) =>
+
+      it "sets $el to document", ->
+        doc = cy.sync.document()
+
+        cy.root().then ->
+          expect(@log.$el.get(0)).to.eq(doc.get(0))
+
+      it "sets $el to withinSubject", ->
+        form = cy.$("form")
+
+        cy.get("form").within ->
+          cy
+            .get("input")
+            .root().then ($root) ->
+              expect(@log.$el.get(0)).to.eq(form.get(0))
+
   context "#get", ->
     beforeEach ->
       ## make this test timeout quickly so

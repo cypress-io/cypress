@@ -74,6 +74,24 @@ do (Cypress, _) ->
 
       @_retry(retry, options)
 
+    root: ->
+      log = ($el) ->
+        Cypress.command
+          $el: $el
+          message: ""
+
+      withinSubject = @prop("withinSubject")
+
+      log(withinSubject)
+
+      return withinSubject if withinSubject
+
+      doc = @sync.document()
+
+      log(doc)
+
+      return doc
+
   Cypress.addDualCommand
     contains: (subject, filter, text, options = {}) ->
       ## nuke our subject if its present but not an element
