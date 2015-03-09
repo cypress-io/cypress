@@ -100,7 +100,6 @@
       "change:chosen"   : "chosenChanged"
       "change:open"     : "openChanged"
       "change:error"    : "errorChanged"
-      "change:hook"     : "hookChanged"
 
     onBeforeRender: ->
       @$el.addClass @model.get("state")
@@ -182,12 +181,6 @@
 
     mouseoverPre: (e) ->
       e.stopPropagation()
-
-    hookChanged: (model, value, options) ->
-      if value
-        @ui.hook.text(value + " failed")
-      else
-        @ui.hook.empty()
 
   class List.Empty extends App.Views.ItemView
     template: "test_specs/list/_empty"
