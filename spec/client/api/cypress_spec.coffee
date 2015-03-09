@@ -2207,6 +2207,70 @@ describe "Cypress", ->
           expect(err.message).to.include ".focus() can only be called on a single element! Your subject contained #{@num} elements!"
           done()
 
+  context "#blur", ->
+    it "sends a blur event", (done) ->
+      # cy.$("input:text:first").get(0).addEventListener "blur", -> done()
+      cy.$("input:first").blur -> done()
+
+      cy.get("input:first").focus().blur()
+
+    it "returns the original subject", ->
+      input = cy.$("input:first")
+
+      cy.get("input:first").focus().blur().then ($input) ->
+        expect($input).to.match input
+
+    describe ".log", ->
+      beforeEach ->
+        Cypress.on "log", (@log) =>
+
+      it "passes in $el", ->
+        cy.get("input:first").focus().blur().then ($input) ->
+          expect(@log.$el).to.eq $input
+
+      it "#onConsole", ->
+        cy.get("input:first").focus().blur().then ($input) ->
+          expect(@log.onConsole()).to.deep.eq {
+            Command: "blur"
+            "Applied To": $input
+          }
+
+    describe "errors", ->
+      beforeEach ->
+        @sandbox.stub cy.runner, "uncaught"
+
+      it "throws when not a dom subject", (done) ->
+        cy.noop({}).blur()
+
+        cy.on "fail", -> done()
+
+      it "throws when subject is a collection of elements", (done) ->
+        cy
+          .get("textarea,:text").then ($inputs) ->
+            @num = $inputs.length
+            return $inputs
+          .blur()
+
+        cy.on "fail", (err) =>
+          expect(err.message).to.include ".blur() can only be called on a single element! Your subject contained #{@num} elements!"
+          done()
+
+      it "throws when there isnt an activeElement", (done) ->
+        cy.get("form:first").blur()
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include ".blur() can only be called when there is a currently focused element."
+          done()
+
+      it "throws when blur is called on a non-active element", (done) ->
+        cy
+          .get("input:first").focus()
+          .get("#button").blur()
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include ".blur() can only be called on the focused element. Currently the focused element is a: <input id=\"input\">"
+          done()
+
   context "#dblclick", ->
     it "sends a dblclick event", (done) ->
       cy.$("#button").dblclick (e) -> done()

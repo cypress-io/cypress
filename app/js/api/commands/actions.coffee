@@ -128,6 +128,52 @@ do (Cypress, _) ->
         return if options.error is false
 
         @throwErr ".focus() timed out because your browser did not receive any focus events. This is a known bug in Chrome when it is not the currently focused window."
+
+    blur: (subject) ->
+      @ensureDom(subject)
+
+      if (num = subject.length) and num > 1
+        @throwErr(".blur() can only be called on a single element! Your subject contained #{num} elements!")
+
+      @command("focused", {log: false}).then ($focused) =>
+        if not $focused
+          @throwErr(".blur() can only be called when there is a currently focused element.")
+
+        if subject.get(0) isnt $focused.get(0)
+          node = Cypress.Utils.stringifyElement($focused)
+          @throwErr(".blur() can only be called on the focused element. Currently the focused element is a: #{node}")
+
+        timeout = @_timeout() / 2
+
+        cleanup = null
+
+        promise = new Promise (resolve) ->
+          ## we need to bind to the blur event here
+          ## because some browsers will not ever fire
+          ## the blur event if the window itself is not
+          ## currently focused. so we have to tell our users
+          ## to do just that!
+          cleanup = ->
+            subject.off("blur", blurred)
+
+          blurred = ->
+            cleanup()
+
+            Cypress.command
+              $el: subject
+              onConsole: ->
+                "Applied To": subject
+
+            resolve(subject)
+
+          subject.on("blur", blurred)
+
+          subject.get(0).blur()
+
+        promise.timeout(timeout).catch Promise.TimeoutError, (err) =>
+          cleanup()
+          @throwErr ".blur() timed out because your browser did not receive any blur events. This is a known bug in Chrome when it is not the currently focused window."
+
     dblclick: (subject) ->
       @ensureDom(subject)
 
