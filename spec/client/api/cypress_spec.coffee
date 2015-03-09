@@ -3810,6 +3810,10 @@ describe "Cypress", ->
           .to("contain", "DOM Fixture")
           .to("have.property", "length", 1)
 
+    it "can change the subject", ->
+      cy.get("input:first").should("have.property", "length").to("eq", 1).then (num) ->
+        expect(num).to.eq(1)
+
     describe "errors", ->
       beforeEach ->
         @sandbox.stub cy.runner, "uncaught"
