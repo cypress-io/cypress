@@ -37,6 +37,8 @@ SecretSauce.Socket =
   leadingSlashes: /^\/+/
 
   onTestFileChange: (filepath, stats) ->
+    @Log.info "onTestFileChange", filepath: filepath
+
     ## simple solution for preventing firing test:changed events
     ## when we are making modifications to our own files
     return if @app.enabled("editFileMode")
@@ -51,6 +53,7 @@ SecretSauce.Socket =
         filepath      = filepath.split(@app.get("cypress").projectRoot).join("").replace(@leadingSlashes, "")
         strippedPath  = filepath.replace(@app.get("cypress").testFolder, "").replace(@leadingSlashes, "")
 
+        @Log.info "generate:ids:for:test", filepath: filepath, strippedPath: strippedPath
         @io.emit "generate:ids:for:test", filepath, strippedPath
       .catch(->)
 
@@ -58,10 +61,11 @@ SecretSauce.Socket =
     { _ } = SecretSauce
 
     @io.on "connection", (socket) =>
-      console.log "socket connected"
+      @Log.info "socket connected"
 
       socket.on "generate:test:id", (data, fn) =>
-        console.log("generate:test:id", data)
+        @Log.info "generate:test:id", data: data
+
         @idGenerator.getId(data)
         .then(fn)
         .catch (err) ->
@@ -69,7 +73,7 @@ SecretSauce.Socket =
           fn(message: err.message)
 
       socket.on "finished:generating:ids:for:test", (strippedPath) =>
-        console.log "finished:generating:ids:for:test", strippedPath
+        @Log.info "finished:generating:ids:for:test", strippedPath: strippedPath
         @io.emit "test:changed", file: strippedPath
 
       _.each "load:iframe command:add runner:start runner:end before:run before:add after:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test".split(" "), (event) ->
@@ -353,12 +357,12 @@ SecretSauce.RemoteInitial =
 
     _.defaults opts,
       inject: "
-        <script type='text/javascript' src='/eclectus/js/sinon.js'></script>
         <script type='text/javascript'>
           window.onerror = function(){
             parent.onerror.apply(parent, arguments)
           }
         </script>
+        <script type='text/javascript' src='/eclectus/js/sinon.js'></script>
       "
 
     url = @parseReqUrl(req.url)

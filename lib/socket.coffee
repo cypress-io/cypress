@@ -4,10 +4,12 @@ uuid          = require 'node-uuid'
 # sauce         = require '../sauce/sauce.coffee'
 chokidar      = require 'chokidar'
 IdGenerator   = require './id_generator'
+Log           = require "./log"
 SecretSauce   = require "../lib/util/secret_sauce_loader"
 
 class Socket
   fs: fs
+  Log: Log
 
   constructor: (io, app) ->
     if not (@ instanceof Socket)
