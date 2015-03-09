@@ -2136,6 +2136,77 @@ describe "Cypress", ->
             Command: "focused"
             "Returned": $input
           }
+
+  context "#focus", ->
+    it "sends a focus event", (done) ->
+      cy.$("#button").get(0).addEventListener "focus", -> done()
+      # cy.$("#button").focus -> done()
+
+      cy.get("#button").focus()
+
+    it "matches cy.focused()", ->
+      button = cy.$("#button")
+
+      cy.get("#button").focus().focused().then ($focused) ->
+        expect($focused.get(0)).to.eq button.get(0)
+
+    it "returns the original subject", ->
+      button = cy.$("#button")
+
+      cy.get("#button").focus().then ($button) ->
+        expect($button).to.match button
+
+    it "causes first focused element to receive blur", (done) ->
+      cy.$("input:first").blur ->
+        console.log "first blurred"
+        done()
+
+      cy
+        .get("input:first").focus()
+        .get("input:last").focus()
+
+    describe ".log", ->
+      beforeEach ->
+        Cypress.on "log", (@log) =>
+
+      it "passes in $el", ->
+        cy.get("input:first").focus().then ($input) ->
+          expect(@log.$el).to.eq $input
+
+      it "#onConsole", ->
+        cy.get("input:first").focus().then ($input) ->
+          expect(@log.onConsole()).to.deep.eq {
+            Command: "focus"
+            "Applied To": $input
+          }
+
+    describe "errors", ->
+      beforeEach ->
+        @sandbox.stub cy.runner, "uncaught"
+
+      it "throws when not a dom subject", (done) ->
+        cy.noop({}).focus()
+
+        cy.on "fail", -> done()
+
+      it "throws when not a[href],link[href],button,input,select,textarea,[tabindex]", (done) ->
+        cy.get("form").focus()
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include ".focus() can only be called on a valid focusable element! Your subject is a: <form id=\"by-id\"></form>"
+          done()
+
+      it "throws when subject is a collection of elements", (done) ->
+        cy
+          .get("textarea,:text").then ($inputs) ->
+            @num = $inputs.length
+            return $inputs
+          .focus()
+
+        cy.on "fail", (err) =>
+          expect(err.message).to.include ".focus() can only be called on a single element! Your subject contained #{@num} elements!"
+          done()
+
   context "#dblclick", ->
     it "sends a dblclick event", (done) ->
       cy.$("#button").dblclick (e) -> done()

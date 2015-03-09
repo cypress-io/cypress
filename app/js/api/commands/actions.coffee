@@ -72,6 +72,62 @@ do (Cypress, _) ->
         if not values.length or el.val() in values
           el.prop("checked", false).trigger("change")
 
+    focus: (subject, options = {}) ->
+      @ensureDom(subject)
+
+      ## we should throw errors by default!
+      ## but allow them to be silenced
+      _.defaults options,
+        $el: subject
+        error: true
+
+      ## http://www.w3.org/TR/html5/editing.html#specially-focusable
+      ## ensure there is only 1 dom element in the subject
+      ## make sure its allowed to be focusable
+      if not options.$el.is("a[href],link[href],button,input,select,textarea,[tabindex]")
+        return if options.error is false
+
+        node = Cypress.Utils.stringifyElement(options.$el)
+        @throwErr(".focus() can only be called on a valid focusable element! Your subject is a: #{node}")
+
+      if (num = options.$el.length) and num > 1
+        return if options.error is false
+
+        @throwErr(".focus() can only be called on a single element! Your subject contained #{num} elements!")
+
+      timeout = @_timeout() / 2
+
+      cleanup = null
+
+      promise = new Promise (resolve) ->
+        ## we need to bind to the focus event here
+        ## because some browsers will not ever fire
+        ## the focus event if the window itself is not
+        ## currently focused. so we have to tell our users
+        ## to do just that!
+        cleanup = ->
+          options.$el.off("focus", focused)
+
+        focused = ->
+          cleanup()
+
+          Cypress.command
+            $el: options.$el
+            onConsole: ->
+              "Applied To": options.$el
+
+          resolve(options.$el)
+
+        subject.on("focus", focused)
+
+        subject.get(0).focus()
+
+      promise.timeout(timeout).catch Promise.TimeoutError, (err) =>
+        cleanup()
+
+        return if options.error is false
+
+        @throwErr ".focus() timed out because your browser did not receive any focus events. This is a known bug in Chrome when it is not the currently focused window."
     dblclick: (subject) ->
       @ensureDom(subject)
 
