@@ -8,6 +8,11 @@ supertest     = require("supertest")
 Session       = require("supertest-session")
 str           = require("underscore.string")
 
+removeWhitespace = (c) ->
+  c = str.clean(c)
+  c = str.lines(c).join(" ")
+  c
+
 describe "Routes", ->
   beforeEach ->
     @sandbox = sinon.sandbox.create()
@@ -78,17 +83,12 @@ describe "Routes", ->
       Fixtures.remove("todos")
 
     it "renders empty inject with variables passed in", (done) ->
-      removeWhitespace = (c) ->
-        c = str.clean(c)
-        c = str.lines().join(" ")
-        c
-
       contents = removeWhitespace Fixtures.get("server/expected_empty_inject.html")
 
       supertest(@app)
         .get("/iframes/test2.coffee")
         .expect 200, (res) ->
-          body = removeWhitespace(res.body)
+          body = removeWhitespace(res.text)
           expect(body).to.eq contents
           null
         .end(done)
@@ -114,15 +114,21 @@ describe "Routes", ->
           .end(done)
 
       it "injects sinon content into head", (done) ->
+        contents = removeWhitespace Fixtures.get("server/expected_sinon_inject.html")
+
         nock(@baseUrl)
           .get("/bar")
-          .reply 200, "<head><title>foo</title></head><body>hello from bar!</body>", {
+          .reply 200, "<html> <head> <title>foo</title> </head> <body>hello from bar!</body> </html>", {
             "Content-Type": "text/html"
           }
 
         supertest(@app)
           .get("/__remote/#{@baseUrl}/bar?__initial=true")
-          .expect(200, "<head> <script type='text/javascript' src='/eclectus/js/sinon.js'></script><title>foo</title></head><body>hello from bar!</body>")
+          .expect(200)
+          .expect (res) ->
+            body = removeWhitespace(res.text)
+            expect(body).to.eq contents
+            null
           .end(done)
 
       context "error handling", ->
