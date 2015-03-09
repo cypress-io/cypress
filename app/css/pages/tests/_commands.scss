@@ -284,47 +284,10 @@
   }
 
 
-  .command-selector,
-  .command-sequence,
-  .command-request,
-  .command-response,
   .command-message {
     display: inline-block;
     margin-left: 0;
     width: 63%;
-  }
-
-  .command-request {
-    color: #565554;
-    height: 17px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-
-    &:before {
-      content: ''; /* IE9 ellipsis fix */
-    }
-  }
-
-  .command-response {
-
-    .command-status {
-      font-weight: 700;
-      color: #565554;
-      margin-right: 3px;
-    }
-
-    .command-body {
-      color: #565554;
-    }
-
-    .fa-circle.successful {
-      color: #428BCA;
-
-    }
-    .fa-circle.bad {
-      color: #F0AD4E;
-    }
   }
 
   .command-controls {

@@ -2,18 +2,6 @@
 
   class List.Command extends App.Views.ItemView
     template: "test_commands/list/_default"
-    # getTemplate: ->
-    #   switch @model.get("type")
-    #     when "xhr"          then "test_commands/list/_xhr"
-    #     when "dom"          then "test_commands/list/_dom"
-    #     when "assertion"    then "test_commands/list/_assertion"
-    #     when "server"       then "test_commands/list/_server"
-    #     when "spy"          then "test_commands/list/_spy"
-    #     when "stub"         then "test_commands/list/_stub"
-    #     when "visit"        then "test_commands/list/_visit"
-    #     when "localStorage" then "test_commands/list/_local_storage"
-    #     else
-    #       throw new Error("Command .type did not match any template")
 
     ui:
       wrapper:  ".command-wrapper"
