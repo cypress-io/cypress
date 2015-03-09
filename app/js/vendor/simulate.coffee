@@ -7,6 +7,8 @@ window.Simulate = do ($, _) ->
   events = [
     {event: "click",    type: "MouseEvents", bubbles: true, cancelable: true}
     {event: "dblclick", type: "MouseEvents", bubbles: true, cancelable: true}
+    {event: "blur",     type: "FocusEvents", bubbles: false, cancelable: false}
+    {event: "focus",    type: "FocusEvents", bubbles: false, cancelable: false}
   ]
 
   Simulate = {
@@ -49,6 +51,13 @@ window.Simulate = do ($, _) ->
       method = "on" + type
       throw new Error("Event method: #{method} does not exist on Simulate") if not @[method]
       @[method]
+
+    onFocusEvents: (el, obj, options) ->
+      _.defaults options,
+        bubbles: obj.bubbles
+        cancelable: obj.cancelable
+
+      new FocusEvent(obj.event, options)
 
     onMouseEvents: (el, obj, options) ->
       offset = $(el).offset()

@@ -2144,6 +2144,38 @@ describe "Cypress", ->
 
       cy.get("#button").focus()
 
+    # it.only "sends a focus event", (done) ->
+    #   @timeout(5000)
+
+    #   cy.$("#focus input").get(0).addEventListener "focusin", ->
+    #     ##
+    #     console.log("#focus input => focusin")
+
+    #   cy.$("#focus input").get(0).addEventListener "focus", (e) ->
+    #     ##
+    #     console.log("#focus input => focus")
+
+    #   cy.$("#focus").get(0).addEventListener "focusin", (e) ->
+    #     ##
+    #     console.log("#focus => focusin")
+
+    #   cy.$("#focus").get(0).addEventListener "focus", (e) ->
+    #     console.log("#focus => focus")
+
+    #   cy.$("#focus input").on "focusin", ->
+    #     console.info("#focus input => focusin")
+
+    #   cy.$("#focus input").on "focus", (e) ->
+    #     console.info("#focus input => focus")
+
+    #   cy.$("#focus").on "focusin", (e) ->
+    #     console.info("#focus => focusin")
+
+    #   cy.$("#focus").on "focus", (e) ->
+    #     console.info("#focus => focus")
+
+    #   cy.get("#focus input").focus()
+
     it "matches cy.focused()", ->
       button = cy.$("#button")
 

@@ -120,7 +120,13 @@ do (Cypress, _) ->
 
         subject.on("focus", focused)
 
+        # hasFocus = ($el) ->
+          # $el.get(0).hasFocus()
+
+        # console.log "hasFocus?", hasFocus($(document)), hasFocus(cy.sync.document())
         subject.get(0).focus()
+        # subject.simulate("focus")
+        # subject.cySimulate("focus")
 
       promise.timeout(timeout).catch Promise.TimeoutError, (err) =>
         cleanup()
