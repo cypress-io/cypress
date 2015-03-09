@@ -2105,6 +2105,37 @@ describe "Cypress", ->
             Elements: 1
           }
 
+  context "#focused", ->
+    it "returns the activeElement", ->
+      button = cy.$("#button")
+      button.get(0).focus()
+
+      cy.focused().then ($focused) ->
+        expect($focused.get(0)).to.eq(button.get(0))
+
+    it "returns null if no activeElement", ->
+      button = cy.$("#button")
+      button.get(0).focus()
+      button.get(0).blur()
+
+      cy.focused().then ($focused) ->
+        expect($focused).to.be.null
+
+    describe ".log", ->
+      beforeEach ->
+        cy.$("input:first").get(0).focus()
+        Cypress.on "log", (@log) =>
+
+      it "passes in $el", ->
+        cy.get("input:first").focused().then ($input) ->
+          expect(@log.$el).to.eq $input
+
+      it "#onConsole", ->
+        cy.get("input:first").focused().then ($input) ->
+          expect(@log.onConsole()).to.deep.eq {
+            Command: "focused"
+            "Returned": $input
+          }
   context "#dblclick", ->
     it "sends a dblclick event", (done) ->
       cy.$("#button").dblclick (e) -> done()
