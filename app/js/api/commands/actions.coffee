@@ -219,22 +219,23 @@ do (Cypress, _) ->
         wait = if $el.is("a") then 50 else 10
 
         memo.then =>
-          el.click()
+          @command("focus", {el: $el, error: false}).then =>
+            el.click()
 
-          Cypress.command
-            $el: $el
-            onConsole: ->
-              "Applied To":   $el
-              "Elements":     $el.length
+            Cypress.command
+              $el: $el
+              onConsole: ->
+                "Applied To":   $el
+                "Elements":     $el.length
 
-          ## we want to add this wait delta to our
-          ## runnables timeout so we prevent it from
-          ## timing out from multiple clicks
-          @_timeout(wait, true)
+            ## we want to add this wait delta to our
+            ## runnables timeout so we prevent it from
+            ## timing out from multiple clicks
+            @_timeout(wait, true)
 
-          ## need to return null here to prevent
-          ## chaining thenable promises
-          return null
+            ## need to return null here to prevent
+            ## chaining thenable promises
+            return null
 
         .delay(wait)
 
