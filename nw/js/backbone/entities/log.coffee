@@ -7,9 +7,13 @@
 
         try
           data = JSON.stringify(@get("data"))
-          _.str.truncate(data, 60)
+          _.str.truncate(data, 80)
         catch
           ""
+
+      timestampFormatted: ->
+        if date = @get("timestamp")
+          global.moment(date).fromNow(true)
 
   class Entities.LogsCollection extends Entities.Collection
     model: Entities.Log
