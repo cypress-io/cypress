@@ -2283,6 +2283,27 @@ describe "Cypress", ->
       cy.get("#button").dblclick().then ($button) ->
         expect($button).to.match button
 
+    it "causes focusable elements to receive focus", (done) ->
+      text = cy.$(":text:first")
+
+      text.focus -> done()
+
+      cy.get(":text:first").dblclick()
+
+    it "silences errors on onfocusable elements", ->
+      div = cy.$("div:first")
+
+      cy.get("div:first").dblclick()
+
+    it "causes first focused element to receive blur", (done) ->
+      cy.$("input:first").blur ->
+        console.log "input:first blurred"
+        done()
+
+      cy
+        .get("input:first").focus()
+        .get("input:text:last").dblclick()
+
     it "inserts artificial delay of 10ms", ->
       cy.on "invoke:start", (obj) =>
         if obj.name is "dblclick"
