@@ -294,7 +294,7 @@ class Deploy
       files: distDir + "/**/*"
       platforms: @platforms
       buildDir: buildDir
-      version: "0.12.0-rc1"
+      version: "0.12.0"
       buildType: => @getVersion()
 
     nw.on "log", console.log
