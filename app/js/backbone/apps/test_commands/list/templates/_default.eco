@@ -9,7 +9,7 @@
     <% if @referencesAlias: %>
       <span class="command-alias <%= @aliasType %>" title="Found an alias for: '<%= @referencesAlias %>'">@<%= @referencesAlias %></span>
     <% else: %>
-      <span><%= @message %></span>
+      <span><%= @messageTruncated %></span>
     <% end %>
   </span>
   <% if @shouldDisplayControls: %>
