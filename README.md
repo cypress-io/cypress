@@ -100,6 +100,8 @@ Cypress is a test engine that runs unit and integration tests in your browser.
 * [uncheck](../../wiki/uncheck)
 * [fill](../../wiki/fill)
 * [clear](../../wiki/clear)
+* [focus](../../focus)
+* [blur](../../blur)
 
 ##### Aliasing
 * [as](../../wiki/as)
@@ -141,5 +143,7 @@ Cypress is a test engine that runs unit and integration tests in your browser.
 * [inspect](../../wiki/inspect)
 
 ##### Misc
+* [focused](../../wiki/focused)
+* [end](../../wiki/end)
 * [eval](../../wiki/eval)
 * [options](../../wiki/options)
