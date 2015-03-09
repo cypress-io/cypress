@@ -48,9 +48,11 @@ do (Cypress, _) ->
 
             consoleObj
           onRender: ($row) ->
+            klass = if /^2/.test(xhr.status) then "successful" else "bad"
+
             $row.find(".command-message").html ->
               [
-                "<i class='fa fa-circle'></i>" + xhr.method,
+                "<i class='fa fa-circle #{klass}'></i>" + xhr.method,
                 xhr.status,
                 _.truncate(xhr.url, "20")
               ].join(" ")

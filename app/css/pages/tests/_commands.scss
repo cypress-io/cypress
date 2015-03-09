@@ -204,6 +204,28 @@
     // right: 20px;
   }
 
+  .command-name-request {
+    .command-message {
+      .command-status {
+        font-weight: 700;
+        color: #565554;
+        margin-right: 3px;
+      }
+
+      .command-body {
+        color: #565554;
+      }
+
+      .fa-circle.successful {
+        color: #428BCA;
+
+      }
+      .fa-circle.bad {
+        color: #F0AD4E;
+      }
+    }
+  }
+
   .command-name-assert {
     .command-method {
       span {
