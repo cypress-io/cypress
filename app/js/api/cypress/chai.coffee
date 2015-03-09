@@ -2,6 +2,16 @@
 
 do (Cypress, _, chai) ->
 
+  ## all words between single quotes which are at
+  ## the end of the string
+  allPropertyWordsBetweenSingleQuotes = /('.*?')$/g
+
+  ## grab all words between single quotes except
+  ## when the single quote word is the LAST word
+  allWordsBetweenSingleQuotes = /('.*?')(.+)/g
+
+  allWordsBetweenCurlyBraces  = /(#{.+?})/g
+
   chai.use (chai, utils) ->
 
     expect       = chai.expect
@@ -91,8 +101,9 @@ do (Cypress, _, chai) ->
         _.reduce args, (memo, value, index) =>
           if _.isString(value)
             value = value
-              .replace(/('.*?')/g, "[b]#{str}[\\b]")
-              .replace(/(#{.+?})/g, "[b]$1[\\b]")
+              .replace(allWordsBetweenCurlyBraces,          "[b]$1[\\b]")
+              .replace(allWordsBetweenSingleQuotes,         "[b]#{str}[\\b]$2")
+              .replace(allPropertyWordsBetweenSingleQuotes, "[b]$1[\\b]")
             memo.push value
           else
             memo.push value

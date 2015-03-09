@@ -3975,6 +3975,14 @@ describe "Cypress", ->
             cy.get("input").eq(0).then ($div) ->
               expect($div).to.match("input")
 
+        describe "property assertions", ->
+          it "has property", (done) ->
+            @onAssert (obj) ->
+              expect(obj.message).to.eq "expected [b]<form#by-id>[\\b] to have a property [b]length[\\b]"
+              done()
+
+            cy.get("form").should("have.property", "length")
+
     describe "#expect", ->
       it "proxies to chai.expect", ->
         exp = @sandbox.spy chai, "expect"
