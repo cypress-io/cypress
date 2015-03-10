@@ -5,6 +5,7 @@ gutil           = require 'gulp-util'
 Promise         = require 'bluebird'
 fs              = Promise.promisifyAll(require('fs'))
 Keys            = require "./keys"
+Log             = require "./log"
 SecretSauce     = require "./util/secret_sauce_loader"
 PSemaphore      = require 'promise-semaphore'
 escapeRegExp    = require "./util/escape_regexp"
@@ -12,6 +13,7 @@ escapeRegExp    = require "./util/escape_regexp"
 pSemaphore       = new PSemaphore()
 
 class IdGenerator
+  Log: Log
   escapeRegExp: escapeRegExp
 
   constructor: (app) ->

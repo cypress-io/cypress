@@ -23,6 +23,7 @@ SecretSauce.Keys =
       range
     .then (range) =>
       range = JSON.parse(range) if SecretSauce._.isString(range)
+      @Log.info "Received key range", {range: range}
       @cache.updateRange(projectId, range)
       .return(range.start)
 
@@ -176,6 +177,7 @@ SecretSauce.IdGenerator =
   nextId: (data) ->
     @keys.nextKey().bind(@)
     .then((id) ->
+      @Log.info "Appending ID to Spec", {id: id, spec: data.spec, title: data.title}
       @appendTestId(data.spec, data.title, id)
       .return(id)
     )

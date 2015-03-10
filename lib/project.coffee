@@ -1,13 +1,16 @@
 _        = require 'lodash'
-Settings = require './util/settings'
 Promise  = require 'bluebird'
 Request  = require 'request-promise'
+fs       = require 'fs'
 path     = require 'path'
-fs       = Promise.promisifyAll(require('fs'))
+Log      = require "./log"
+Settings = require './util/settings'
+
+fs       = Promise.promisifyAll(fs)
 
 config   = require("konfig")()
 
-class Project extends require('./logger')
+class Project
   constructor: (projectRoot) ->
     if not (@ instanceof Project)
       return new Project(projectRoot)
@@ -17,29 +20,31 @@ class Project extends require('./logger')
 
     @projectRoot = projectRoot
 
-    super
-
   ## A simple helper method
   ## to create a project ID if we do not already
   ## have one
   ensureProjectId: ->
-    @emit "verbose", "Ensuring project ID"
     @getProjectId().bind(@)
     .catch(@createProjectId)
 
   createProjectId: ->
-    @emit "verbose", "Creating project ID"
+    Log.info "Creating Project ID"
+
     Request.post("#{config.app.api_url}/projects")
     .then (attrs) =>
-      Settings.write(@projectRoot, {projectId: JSON.parse(attrs).uuid})
+      attrs = {projectId: JSON.parse(attrs).uuid}
+      Log.info "Writing Project ID", _.clone(attrs)
+      Settings.write(@projectRoot, attrs)
     .get("projectId")
 
   getProjectId: ->
-    @emit "verbose", "Looking up project ID"
     Settings.read(@projectRoot)
     .then (settings) ->
       if (id = settings.projectId)
+        Log.info "Returning Project ID", {id: id}
         return id
+
+      Log.info "No Project ID found"
       throw new Error("No project ID found")
 
 module.exports = Project

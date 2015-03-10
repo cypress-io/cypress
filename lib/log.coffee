@@ -134,6 +134,8 @@ logger.log = _.wrap logger.log, (orig, args...) ->
 
   last = _.last(args)
 
+  ## should be cloning this last object
+  ## and not mutating it directly!
   if _.isObject(last)
     _.defaults last,
       type: "server"
