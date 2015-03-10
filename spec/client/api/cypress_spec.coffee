@@ -2215,6 +2215,19 @@ describe "Cypress", ->
         cy.get("input:first").focus().then ($input) ->
           expect(@log.$el).to.eq $input
 
+      it "logs 2 focus event", ->
+        logs = []
+
+        Cypress.on "log", (log) ->
+          logs.push(log)
+
+        cy
+          .get("input:first").focus()
+          .get("button:first").focus().then ->
+            names = _(logs).pluck("name")
+            expect(logs).to.have.length(4)
+            expect(names).to.deep.eq ["get", "focus", "get", "focus"]
+
       it "#onConsole", ->
         cy.get("input:first").focus().then ($input) ->
           expect(@log.onConsole()).to.deep.eq {
@@ -2297,6 +2310,18 @@ describe "Cypress", ->
       it "passes in $el", ->
         cy.get("input:first").focus().blur().then ($input) ->
           expect(@log.$el).to.eq $input
+
+      it "logs 1 blur event", ->
+        logs = []
+
+        Cypress.on "log", (log) ->
+          logs.push(log)
+
+        cy
+          .get("input:first").focus().blur().then ->
+            names = _(logs).pluck("name")
+            expect(logs).to.have.length(3)
+            expect(names).to.deep.eq ["get", "focus", "blur"]
 
       it "#onConsole", ->
         cy.get("input:first").focus().blur().then ($input) ->
@@ -2486,6 +2511,15 @@ describe "Cypress", ->
           expect(dblclicks.length).to.eq(2)
           expect(dblclicks[1].$el.get(0)).to.eq $buttons.last().get(0)
 
+      it "logs only 1 dblclick event", ->
+        logs = []
+
+        Cypress.on "log", (log) ->
+          logs.push(log) if log.name is "dblclick"
+
+        cy.get("button:first").dblclick().then ->
+          expect(logs).to.have.length(1)
+
       it "#onConsole", ->
         Cypress.on "log", (@log) =>
 
@@ -2640,6 +2674,15 @@ describe "Cypress", ->
           expect($buttons.length).to.eq(2)
           expect(clicks.length).to.eq(2)
           expect(clicks[1].$el.get(0)).to.eq $buttons.last().get(0)
+
+      it "logs only 1 click event", ->
+        logs = []
+
+        Cypress.on "log", (log) ->
+          logs.push(log) if log.name is "click"
+
+        cy.get("button:first").click().then ->
+          expect(logs).to.have.length(1)
 
       it "#onConsole", ->
         Cypress.on "log", (@log) =>

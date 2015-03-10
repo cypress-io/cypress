@@ -78,6 +78,7 @@ do (Cypress, _) ->
       _.defaults options,
         $el: subject
         error: true
+        log: true
 
       @ensureDom(options.$el)
 
@@ -119,10 +120,11 @@ do (Cypress, _) ->
 
           cleanup()
 
-          Cypress.command
-            $el: options.$el
-            onConsole: ->
-              "Applied To": options.$el
+          if options.log
+            Cypress.command
+              $el: options.$el
+              onConsole: ->
+                "Applied To": options.$el
 
           resolve(options.$el)
 
@@ -145,7 +147,7 @@ do (Cypress, _) ->
             ## only blur if we have a focused element AND its not
             ## currently ourselves!
             if $focused and $focused.get(0) isnt options.$el.get(0)
-              @command("blur", {$el: $focused, error: false}).then =>
+              @command("blur", {$el: $focused, error: false, log: false}).then =>
                 simulate()
             else
               simulate()
@@ -163,6 +165,7 @@ do (Cypress, _) ->
       _.defaults options,
         $el: subject
         error: true
+        log: true
 
       @ensureDom(options.$el)
 
@@ -207,10 +210,11 @@ do (Cypress, _) ->
 
             cleanup()
 
-            Cypress.command
-              $el: options.$el
-              onConsole: ->
-                "Applied To": options.$el
+            if options.log
+              Cypress.command
+                $el: options.$el
+                onConsole: ->
+                  "Applied To": options.$el
 
             resolve(options.$el)
 
@@ -244,7 +248,7 @@ do (Cypress, _) ->
         wait = if $el.is("a") then 50 else 10
 
         memo.then =>
-          @command("focus", {el: $el, error: false}).then =>
+          @command("focus", {el: $el, error: false, log: false}).then =>
             $el.cySimulate("dblclick")
 
             Cypress.command
@@ -281,7 +285,7 @@ do (Cypress, _) ->
         wait = if $el.is("a") then 50 else 10
 
         memo.then =>
-          @command("focus", {el: $el, error: false}).then =>
+          @command("focus", {el: $el, error: false, log: false}).then =>
             el.click()
 
             Cypress.command
