@@ -39,10 +39,16 @@
         orig.apply(@, args)
 
     overloadMochaRunnerUncaught: ->
-      ## if app environment is development we need to listen to
+      ## if app environment isnt production we need to listen to
       ## uncaught exceptions (else it makes tracking down bugs hard)
       Mocha.Runner::uncaught = _.wrap uncaught, (orig, err) ->
-        console.error(err.stack)
+        if not App.config.env("production")
+
+          ## debugger if this isnt an AssertionError or CypressError
+          ## because that means we prob f'd up something
+          if not /(AssertionError|CypressError)/.test(err.name)
+            console.error(err.stack)
+            debugger
 
         orig.call(@, err)
 
