@@ -79,7 +79,7 @@ describe "Server Interface", ->
 
           @server = Server("/Users/brian/app")
 
-          expect(@server.config[prop]).to.eq(value)
+          expect(@server.config[prop]).to.deep.eq(value)
 
       it "port=3000", ->
         @defaults "port", 3000
@@ -100,4 +100,7 @@ describe "Server Interface", ->
 
       it "projectRoot=/Users/brian/app", ->
         @defaults "projectRoot", "/Users/brian/app"
+
+      it "javascripts=[]", ->
+        @defaults "javascripts", []
 

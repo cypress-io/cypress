@@ -13,7 +13,7 @@ Settings     = require './util/settings'
 
 ## currently not making use of event emitter
 ## but may do so soon
-class Server #extends require('./logger')
+class Server
   constructor: (projectRoot) ->
     if not (@ instanceof Server)
       return new Server(projectRoot)
@@ -29,13 +29,17 @@ class Server #extends require('./logger')
 
   initialize: (projectRoot) ->
     @config = @getCypressJson(projectRoot)
-    Log.setSettings(@config)
 
-    @app.set "cypress", @config
+    @setCypressJson(@config)
+
+    Log.setSettings(@config)
 
   getCypressJson: (projectRoot) ->
     obj = Settings.readSync(projectRoot)
+    obj.projectRoot = projectRoot
+    obj
 
+  setCypressDefaults: (obj = {}) ->
     if url = obj.baseUrl
       ## always strip trailing slashes
       obj.baseUrl = _.str.rtrim(url, "/")
@@ -49,14 +53,22 @@ class Server #extends require('./logger')
       port: 3000
       autoOpen: false
       wizard: false
-      projectRoot: projectRoot
       testFolder: "tests"
+      javascripts: []
 
     _.defaults obj,
       clientUrl: "http://localhost:#{obj.port}"
 
     _.defaults obj,
       idGeneratorPath: "#{obj.clientUrl}/id_generator"
+
+  ## go through this method for all tests because
+  ## it handles setting the defaults up automatically
+  ## which gives more accurate testing results
+  setCypressJson: (obj) ->
+    @setCypressDefaults(obj)
+
+    @app.set "cypress", obj
 
   configureApplication: ->
     ## set the cypress config from the cypress.json file

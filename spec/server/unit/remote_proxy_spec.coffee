@@ -18,10 +18,10 @@ describe "RemoteProxy", ->
 
     @server = Server("/Users/brian/app")
     @app    = @server.app
-    @app.set("cypress", {
+    @server.setCypressJson {
       projectRoot: "/Users/brian/app"
       baseUrl: "http://localhost:8000"
-    })
+    }
 
     @remoteProxy  = RemoteProxy(@app)
 

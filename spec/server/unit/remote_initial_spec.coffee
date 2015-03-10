@@ -15,9 +15,9 @@ describe "Remote Initial", ->
 
     @server = Server("/Users/brian/app")
     @app    = @server.app
-    @app.set("cypress", {
+    @server.setCypressJson {
       projectRoot: "/Users/brian/app"
-    })
+    }
 
     @remoteInitial = RemoteInitial(@app)
     @res = through (d) ->

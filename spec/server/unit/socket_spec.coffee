@@ -15,7 +15,8 @@ describe "Socket", ->
       on: @sandbox.stub()
       emit: @sandbox.stub()
 
-    @app = Server(process.cwd()).app
+    @server = Server(process.cwd())
+    @app    = @server.app
 
   afterEach ->
     @sandbox.restore()
@@ -43,7 +44,7 @@ describe "Socket", ->
       Fixtures.remove()
 
     it "creates testFolder if does not exist", ->
-      @app.set "cypress", {
+      @server.setCypressJson {
         projectRoot: Fixtures.project("todos")
         testFolder: "does-not-exist"
       }
@@ -56,7 +57,7 @@ describe "Socket", ->
       beforeEach ->
         @statAsync = @sandbox.spy(fs, "statAsync")
 
-        @app.set "cypress", {
+        @server.setCypressJson {
           projectRoot: Fixtures.project("todos")
           testFolder: "tests"
         }

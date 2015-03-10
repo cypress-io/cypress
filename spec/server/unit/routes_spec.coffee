@@ -22,9 +22,9 @@ describe "Routes", ->
     @server.configureApplication()
 
     @app    = @server.app
-    @app.set("cypress", {
+    @server.setCypressJson {
       projectRoot: "/Users/brian/app"
-    })
+    }
 
     ## create a session which will store cookies
     ## in between session requests :-)
@@ -39,7 +39,7 @@ describe "Routes", ->
     beforeEach ->
       Fixtures.scaffold("todos")
 
-      @app.set "cypress", {
+      @server.setCypressJson {
         projectRoot: Fixtures.project("todos")
         testFolder: "tests"
       }
@@ -70,11 +70,9 @@ describe "Routes", ->
     beforeEach ->
       Fixtures.scaffold("todos")
 
-      @app.set "cypress", {
+      @server.setCypressJson {
         projectRoot: Fixtures.project("todos")
         testFolder: "tests"
-        stylesheets: []
-        javascripts: []
         sinon: false
         fixtures: false
       }
@@ -87,7 +85,8 @@ describe "Routes", ->
 
       supertest(@app)
         .get("/iframes/test2.coffee")
-        .expect 200, (res) ->
+        .expect(200)
+        .expect (res) ->
           body = removeWhitespace(res.text)
           expect(body).to.eq contents
           null
@@ -258,11 +257,11 @@ describe "Routes", ->
 
           Fixtures.scaffold("no-server")
 
-          @app.set("cypress", {
+          @server.setCypressJson {
             projectRoot: Fixtures.project("no-server")
             rootFolder: "dev"
             testFolder: "my-tests"
-          })
+          }
 
           @session
             .get("/__remote/#{@baseUrl}?__initial=true")
