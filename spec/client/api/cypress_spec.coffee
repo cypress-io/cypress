@@ -2971,7 +2971,7 @@ describe "Cypress", ->
 
         cy.noop({}).invoke("foo")
 
-      it.only "throws without a subject (even as a dual command)", (done) ->
+      it "throws without a subject (even as a dual command)", (done) ->
         cy.on "invoke:start", (obj) =>
           obj.prev = null
 
