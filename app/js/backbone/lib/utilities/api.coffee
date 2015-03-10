@@ -10,9 +10,9 @@
       ## create the global cy variable
       Cypress.start()
 
-      Utilities.Overrides.overloadMochaRunnableEmit() if not App.config.env("ci")
+      Utilities.Overrides.overloadMochaRunnableEmit() if not App.config.ui("ci")
       Utilities.Overrides.overloadMochaRunnerEmit()
-      Utilities.Overrides.overloadMochaRunnerUncaught() if not App.config.env("ci")
+      Utilities.Overrides.overloadMochaRunnerUncaught() if not App.config.ui("ci")
       Utilities.Overrides.overloadMochaRunnableRun(Cypress)
 
       Cypress.Chai.override()
@@ -28,7 +28,7 @@
 
     getRunner: ->
       ## start running the tests
-      if App.config.env("ci")
+      if App.config.ui("ci")
         runner = window.mochaPhantomJS.run()
       else
         ## set global mocha with our custom reporter

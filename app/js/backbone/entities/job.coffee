@@ -38,7 +38,7 @@
 
       url: ->
         Routes.create "#" + @get("name"),
-          __env:  "host"
+          __ui:  "host"
           browser: @get("browser")
           version: @get("version")
 

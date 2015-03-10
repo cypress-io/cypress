@@ -17,22 +17,22 @@
 
     updateAppEnv: (params) ->
       ## store whether this was existing
-      existing = !!params.__env
+      existing = !!params.__ui
 
-      ## always set the __env on our params
+      ## always set the __ui on our params
       ## this allows the user to change the URL
-      ## to switch our __env mode
+      ## to switch our __ui mode
       ## or if unchanged will just match our current environment
-      params.__env ?= App.getCurrentEnvironment()
+      params.__ui ?= App.getCurrentUI()
 
       ## always attempt to reset the env as well
       ## which will fire change events if necessary
-      App.config.setEnv(params.__env)
+      App.config.setUI(params.__ui)
 
       ## clear out the env from params
       ## if it didnt exist before so its not
       ## displayed in our URL
-      delete params.__env if not existing
+      delete params.__ui if not existing
 
     actions:
       show: ->
@@ -49,6 +49,6 @@
       _.extend obj,
         browser: browser
         version: version
-        __env:   "host"
+        __ui:   "host"
 
     router.to "show", obj

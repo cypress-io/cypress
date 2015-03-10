@@ -10,7 +10,7 @@
       @$el.toggleWrapper options, @cid, init
 
     mixinTemplateHelpers: (target) ->
-      target.env = App.config.env()
+      target.ui = App.config.get("ui")
 
       _mixinTemplateHelpers.call(@, target)
 

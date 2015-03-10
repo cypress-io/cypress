@@ -29,7 +29,9 @@
     ## start listening to socket io
     App.execute "socket:start"
 
-    App.config.setEnv App.getCurrentEnvironment()
+    App.config.setEnv options.env
+
+    App.config.setUI App.getCurrentUI()
 
     App.module("NavApp").start(App.navs)
 

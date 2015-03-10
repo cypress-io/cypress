@@ -1,4 +1,4 @@
-<% if @env isnt "satellite": %>
+<% if @ui isnt "satellite": %>
   <header>
     <div id="url-container" class="pull-left">
       <i class="fa fa-arrow-left"></i>

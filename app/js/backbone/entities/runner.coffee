@@ -86,12 +86,12 @@
         ## proxy this to everyone else
         @listenTo socket, "test:changed", @triggerLoadIframe
 
-        if App.config.env("satellite")
+        if App.config.ui("satellite")
           _.each @hostEvents, (event) =>
             @listenTo socket, event, (args...) =>
               @trigger event, args...
 
-        if App.config.env("host")
+        if App.config.ui("host")
           _.each @satelliteEvents, (event) =>
             @listenTo socket, event, (args...) =>
               @trigger event, args...
@@ -185,7 +185,7 @@
           orig.call(@, name, fn)
 
         ## dont overload the runSuite fn if we're in CI mode
-        return @ if App.config.env("ci")
+        return @ if App.config.ui("ci")
 
         @runner.runSuite = _.wrap @runner.runSuite, (runSuite, rootSuite, fn) ->
           ## the runSuite function is recursively called for each individual suite
@@ -284,8 +284,8 @@
 
       startListening: ->
         @setListenersForAll()
-        @setListenersForCI() if App.config.env("ci")
-        @setListenersForWeb() if not App.config.env("ci")
+        @setListenersForCI() if App.config.ui("ci")
+        @setListenersForWeb() if not App.config.ui("ci")
 
       setListenersForAll: ->
         @runner.on "test:before:hooks", (hook, suite) =>
@@ -354,7 +354,7 @@
 
               ## if we're in satellite mode then we need to
               ## broadcast this through websockets
-              if App.config.env("satellite")
+              if App.config.ui("satellite")
                 attrs = @transformEmitAttrs(attrs)
                 socket.emit "command:add", attrs
               else
@@ -426,13 +426,13 @@
 
         ## if we're in satellite mode and our event is
         ## a satellite event then emit over websockets
-        if App.config.env("satellite") and event in @satelliteEvents
+        if App.config.ui("satellite") and event in @satelliteEvents
           args   = @transformRunnableArgs(args)
           return socket.emit event, args...
 
         ## if we're in host mode and our event is a
         ## satellite event AND we have a remoteIrame defined
-        if App.config.env("host") and event in @hostEvents and @$remoteIframe
+        if App.config.ui("host") and event in @hostEvents and @$remoteIframe
           return socket.emit event, args...
 
         ## else just do the normal trigger and

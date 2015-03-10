@@ -55,6 +55,7 @@ class Server
       wizard: false
       testFolder: "tests"
       javascripts: []
+      env: process.env["NODE_ENV"]
 
     _.defaults obj,
       clientUrl: "http://localhost:#{obj.port}"

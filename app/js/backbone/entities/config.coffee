@@ -19,15 +19,23 @@
         default: 300
         type: "number"
 
-    env: (stringOrRegExp) ->
-      env = @get("env")
+    testProp: (prop, stringOrRegExp) ->
       switch
-        when _.isString(stringOrRegExp) then stringOrRegExp is env
-        when _.isRegExp(stringOrRegExp) then stringOrRegExp.test(env)
-        else env
+        when _.isString(stringOrRegExp) then stringOrRegExp is prop
+        when _.isRegExp(stringOrRegExp) then stringOrRegExp.test(prop)
+        else prop
+
+    env: (stringOrRegExp) ->
+      @testProp @get("env"), stringOrRegExp
+
+    ui: (stringOrRegExp) ->
+      @testProp @get("ui"), stringOrRegExp
 
     setEnv: (env) ->
       @set "env", env
+
+    setUI: (ui) ->
+      @set "ui", ui
 
     toggleCollapse: ->
       @set "collapsed", !@get("collapsed")

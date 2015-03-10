@@ -272,7 +272,7 @@
 
       @$el.hide()
 
-      if App.config.env("host")
+      if App.config.ui("host")
         @loadSatelitteIframe(src, options, fn)
       else
         @loadRegularIframes(src, options, fn)
@@ -280,13 +280,13 @@
     loadSatelitteIframe: (src, options, fn) ->
       view = @
 
-      url = encodeURIComponent("http://tunnel.browserling.com:55573/#tests/#{src}?__env=satellite")
+      url = encodeURIComponent("http://tunnel.browserling.com:55573/#tests/#{src}?__ui=satellite")
 
       src = if options.browser and options.version
         @browserChanged options.browser, options.version
         "https://browserling.com/browse/#{options.browser}/#{options.version}/#{url}"
       else
-        "http://localhost:3000/#tests/#{src}?__env=satellite"
+        "http://localhost:3000/#tests/#{src}?__ui=satellite"
 
       remoteOpts =
         id: "iframe-remote"
