@@ -12,7 +12,7 @@ do (Cypress, _) ->
 
     debug: ->
       console.log "\n%c------------------------Cypress Command Info------------------------", "font-weight: bold;"
-      _.each ["options", "subject", "runnable", "queue", "index"], (item) =>
+      _.each ["options", "runnable", "subject"], (item) =>
         console.log "#{item}: ", (@prop(item) or @[item])
       debugger
 
