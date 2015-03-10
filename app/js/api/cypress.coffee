@@ -28,7 +28,7 @@ window.Cypress = do ($, _, Backbone) ->
       return @
 
     prop: (key, val) ->
-      if _.isUndefined(val)
+      if arguments.length is 1
         @props[key]
       else
         @props[key] = val

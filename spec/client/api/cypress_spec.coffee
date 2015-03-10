@@ -3101,7 +3101,7 @@ describe "Cypress", ->
       Cypress.restore()
       expect(cy._events).to.be.undefined
 
-  context "property registry", ->
+  context "#prop", ->
     beforeEach ->
       Cypress.restore()
 
@@ -3126,6 +3126,7 @@ describe "Cypress", ->
         @set = (key, val) ->
           cy.prop(key, val)
           expect(cy.prop(key)).to.eq val
+          expect(_.keys(cy.props)).to.have.length(1)
 
       it "sets zero", ->
         @set "zero", 0
@@ -3135,6 +3136,9 @@ describe "Cypress", ->
 
       it "sets empty string", ->
         @set "string", ""
+
+      it "sets undefined", ->
+        @set "undefined", undefined
 
     describe "sets each prop in the registry to null", ->
       beforeEach ->
