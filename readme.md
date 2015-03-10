@@ -5,10 +5,10 @@
 [Visit the Wiki](https://github.com/brian-mann/eclectus/wiki)
 
 ### Before Running NW
-The `lib/secret_sauce.bin` file is required to run NW.  You can either run the `npm run watch` command, or run a one-off build with:
+The `lib/secret_sauce.bin` file is required to run NW.  You can either run the `npm run watch` command, or run a one-off dist with:
 
 ```bash
-npm run build
+npm run dist
 ```
 
 ### While Developing
@@ -27,7 +27,7 @@ npm run dev
 Alias 'nw' in your `.bash_profile`
 
 ```bash
-alias nw="/Applications/node-webkit.app/Contents/MacOS/node-webkit"
+alias nw="/Applications/nwjs.app/Contents/MacOS/nwjs"
 ```
 
 Boot NW
@@ -36,10 +36,10 @@ Boot NW
 nw .
 ```
 
-With Chrome Dev Tools (needs to be changed to --debug)
+With Chrome Dev Tools
 
 ```bash
-nw . --dev
+nw . --debug
 ```
 
 ### Booting via the CLI
