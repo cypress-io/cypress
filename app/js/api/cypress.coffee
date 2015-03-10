@@ -325,6 +325,12 @@ window.Cypress = do ($, _, Backbone) ->
 
         return subject
 
+    ensureSubject: ->
+      current = @prop("current")
+
+      if not current.prev
+        @throwErr("cy.#{current.name}() is a child command which operates on an existing subject.  Child commands must be called after a parent command!")
+
     throwErr: (err, onFail) ->
       if _.isString(err)
         err = new Error(err)
@@ -626,7 +632,7 @@ window.Cypress = do ($, _, Backbone) ->
 
           when "child"
             _.wrap fn, (orig, args...) ->
-              @throwErr("cy.#{key}() is a child command which operates on an existing subject.  Child commands must be called after a parent command!") if not @prop("current").prev
+              @ensureSubject()
 
               ## push the subject into the args
               subject = @prop("subject")

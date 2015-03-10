@@ -2859,6 +2859,14 @@ describe "Cypress", ->
         cy.noop(@obj).invoke("bar", 1, 2).then (num) ->
           expect(num).to.eq 3
 
+      it "changes subject to undefined", ->
+        obj = {
+          bar: -> undefined
+        }
+
+        cy.noop(obj).invoke("bar").then (val) ->
+          expect(val).to.be.undefined
+
       describe "errors", ->
         beforeEach ->
           @sandbox.stub cy.runner, "uncaught"
@@ -2875,6 +2883,10 @@ describe "Cypress", ->
         @obj = {
           baz: 10
         }
+
+      it "returns undefined", ->
+        cy.noop({foo: undefined}).invoke("foo").then (val) ->
+          expect(val).to.be.undefined
 
       it "returns property", ->
         cy.noop(@obj).invoke("baz").then (num) ->
@@ -2952,23 +2964,22 @@ describe "Cypress", ->
       beforeEach ->
         @sandbox.stub cy.runner, "uncaught"
 
-      it "throws when property is undefined", (done) ->
+      it "throws when property does not exist on the subject", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.eq "cy.invoke() returned 'undefined' after invoking the property: foo"
+          expect(err.message).to.eq "cy.invoke() errored because the property: 'foo' does not exist on your subject."
           done()
 
         cy.noop({}).invoke("foo")
 
-      it "throws when function is undefined", (done) ->
-        obj = {
-          bar: -> undefined
-        }
+      it.only "throws without a subject (even as a dual command)", (done) ->
+        cy.on "invoke:start", (obj) =>
+          obj.prev = null
 
         cy.on "fail", (err) ->
-          expect(err.message).to.eq "cy.invoke() returned 'undefined' after invoking the function: bar"
+          expect(err.message).to.eq "cy.invoke() is a child command which operates on an existing subject.  Child commands must be called after a parent command!"
           done()
 
-        cy.noop(obj).invoke("bar")
+        cy.invoke("queue")
 
   context "#its", ->
     it "proxies to #invoke", ->

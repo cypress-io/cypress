@@ -52,12 +52,23 @@ do (Cypress, _, $) ->
     end: ->
       null
 
-  Cypress.addChildCommand
+    ## making this a dual command due to child commands
+    ## automatically returning their subject when their
+    ## return values are undefined.  prob should rethink
+    ## this and investigate why that is the default behavior
+    ## of child commands
     invoke: (subject, fn, args...) ->
+      @ensureSubject()
+
       remoteJQuery = @_getRemoteJQuery()
       if Cypress.Utils.hasElement(subject) and remoteJQueryisNotSameAsGlobal(remoteJQuery)
         remoteSubject = remoteJQuery(subject)
         Cypress.Utils.setCypressNamespace(remoteSubject, subject)
+
+      ## if the property does not EXIST on the subject
+      ## then throw a specific error message
+      if fn not of (remoteSubject or subject)
+        @throwErr("cy.invoke() errored because the property: '#{fn}' does not exist on your subject.")
 
       prop = (remoteSubject or subject)[fn]
 
@@ -74,10 +85,6 @@ do (Cypress, _, $) ->
           prop
 
       value = invoke()
-
-      if _.isUndefined(value)
-        word = if _.isFunction(prop) then "function" else "property"
-        @throwErr("cy.invoke() returned 'undefined' after invoking the #{word}: #{fn}")
 
       Cypress.command
         message: if _.isFunction(prop) then ".#{fn}()" else ".#{fn}"
