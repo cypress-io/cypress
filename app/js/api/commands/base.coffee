@@ -52,36 +52,6 @@ do (Cypress, _, $) ->
     end: ->
       null
 
-    focused: (subject, options = {}) ->
-      log = ($el) ->
-        return if options.log is false
-
-        Cypress.command
-          $el: $el
-
-      try
-        d = @sync.document()
-        el = d.get(0).activeElement
-
-        ## return null if we have an el but
-        ## the el is body
-        if el
-          el = $(el)
-
-          if el.is("body")
-            log(null)
-            return null
-
-          log(el)
-          return el
-        else
-          log(null)
-          return null
-
-      catch
-        log(null)
-        return null
-
   Cypress.addChildCommand
     invoke: (subject, fn, args...) ->
       remoteJQuery = @_getRemoteJQuery()

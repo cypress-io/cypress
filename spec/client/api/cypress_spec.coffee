@@ -2121,6 +2121,22 @@ describe "Cypress", ->
       cy.focused().then ($focused) ->
         expect($focused).to.be.null
 
+    it "uses forceFocusedEl if set", ->
+      input = cy.$("input:first")
+      cy.prop("forceFocusedEl", input.get(0))
+
+      cy.focused().then ($focused) ->
+        expect($focused.get(0)).to.eq input.get(0)
+
+    it "refuses to use blacklistFocusedEl", ->
+      input = cy.$("input:first")
+      cy.prop("blacklistFocusedEl", input.get(0))
+
+      cy
+        .get("input:first").focus()
+        .focused().then ($focused) ->
+          expect($focused).to.be.null
+
     describe ".log", ->
       beforeEach ->
         cy.$("input:first").get(0).focus()
@@ -2139,42 +2155,36 @@ describe "Cypress", ->
 
   context "#focus", ->
     it "sends a focus event", (done) ->
-      cy.$("#button").get(0).addEventListener "focus", -> done()
-      # cy.$("#button").focus -> done()
+      cy.$("#focus input").focus -> done()
 
-      cy.get("#button").focus()
+      cy.get("#focus input").focus()
 
-    # it.only "sends a focus event", (done) ->
-    #   @timeout(5000)
+    it "bubbles focusin event", (done) ->
+      cy.$("#focus").focusin -> done()
 
-    #   cy.$("#focus input").get(0).addEventListener "focusin", ->
-    #     ##
-    #     console.log("#focus input => focusin")
+      cy.get("#focus input").focus()
 
-    #   cy.$("#focus input").get(0).addEventListener "focus", (e) ->
-    #     ##
-    #     console.log("#focus input => focus")
+    it "manually blurs focused subject as a fallback", (done) ->
+      cy.$("input:first").blur -> done()
 
-    #   cy.$("#focus").get(0).addEventListener "focusin", (e) ->
-    #     ##
-    #     console.log("#focus => focusin")
+      cy
+        .get("input:first").focus()
+        .get("#focus input").focus()
 
-    #   cy.$("#focus").get(0).addEventListener "focus", (e) ->
-    #     console.log("#focus => focus")
+    it "sets forceFocusedEl", ->
+      input = cy.$("#focus input")
 
-    #   cy.$("#focus input").on "focusin", ->
-    #     console.info("#focus input => focusin")
+      cy
+        .get("#focus input").focus()
+        .focused().then ($focused) ->
+          expect($focused.get(0)).to.eq(input.get(0))
 
-    #   cy.$("#focus input").on "focus", (e) ->
-    #     console.info("#focus input => focus")
-
-    #   cy.$("#focus").on "focusin", (e) ->
-    #     console.info("#focus => focusin")
-
-    #   cy.$("#focus").on "focus", (e) ->
-    #     console.info("#focus => focus")
-
-    #   cy.get("#focus input").focus()
+          ## make sure we have either set the property
+          ## or havent
+          if document.hasFocus()
+            expect(cy.prop("forceFocusedEl")).not.to.be.ok
+          else
+            expect(cy.prop("forceFocusedEl")).to.eq(input.get(0))
 
     it "matches cy.focused()", ->
       button = cy.$("#button")
@@ -2239,7 +2249,35 @@ describe "Cypress", ->
           expect(err.message).to.include ".focus() can only be called on a single element! Your subject contained #{@num} elements!"
           done()
 
-  context "#blur", ->
+  context.only "#blur", ->
+    it "should blur the originally focused element", (done) ->
+      cy.$("#focus input").blur -> done()
+
+      cy.get("#focus").within ->
+        cy
+          .get("input").focus()
+          .get("button").focus()
+
+    it "black lists the focused element", ->
+      input = cy.$("#focus input")
+
+      cy
+        .get("#focus input").focus().blur()
+        .focused().then ($focused) ->
+          expect($focused).to.be.null
+
+          ## make sure we have either set the property
+          ## or havent
+          if document.hasFocus()
+            expect(cy.prop("blacklistFocusedEl")).not.to.be.ok
+          else
+            expect(cy.prop("blacklistFocusedEl")).to.eq(input.get(0))
+
+    it "sends a focusout event", (done) ->
+      cy.$("#focus").focusout -> done()
+
+      cy.get("#focus input").focus().blur()
+
     it "sends a blur event", (done) ->
       # cy.$("input:text:first").get(0).addEventListener "blur", -> done()
       cy.$("input:first").blur -> done()

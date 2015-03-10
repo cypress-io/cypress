@@ -9,6 +9,8 @@ window.Simulate = do ($, _) ->
     {event: "dblclick", type: "MouseEvents", bubbles: true, cancelable: true}
     {event: "blur",     type: "FocusEvents", bubbles: false, cancelable: false}
     {event: "focus",    type: "FocusEvents", bubbles: false, cancelable: false}
+    {event: "focusin",  type: "FocusEvents", bubbles: true, cancelable: false}
+    {event: "focusout", type: "FocusEvents", bubbles: true, cancelable: false}
   ]
 
   Simulate = {

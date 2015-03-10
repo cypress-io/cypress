@@ -73,13 +73,13 @@ do (Cypress, _) ->
           el.prop("checked", false).trigger("change")
 
     focus: (subject, options = {}) ->
-      @ensureDom(subject)
-
       ## we should throw errors by default!
       ## but allow them to be silenced
       _.defaults options,
         $el: subject
         error: true
+
+      @ensureDom(options.$el)
 
       ## http://www.w3.org/TR/html5/editing.html#specially-focusable
       ## ensure there is only 1 dom element in the subject
@@ -98,8 +98,9 @@ do (Cypress, _) ->
       timeout = @_timeout() / 2
 
       cleanup = null
+      hasFocused = false
 
-      promise = new Promise (resolve) ->
+      promise = new Promise (resolve) =>
         ## we need to bind to the focus event here
         ## because some browsers will not ever fire
         ## the focus event if the window itself is not
@@ -108,7 +109,14 @@ do (Cypress, _) ->
         cleanup = ->
           options.$el.off("focus", focused)
 
-        focused = ->
+        focused = =>
+          hasFocused = true
+
+          ## set this back to null unless we are
+          ## force focused ourselves during this command
+          forceFocusedEl = @prop("forceFocusedEl")
+          @prop("forceFocusedEl", null) unless forceFocusedEl is options.$el.get(0)
+
           cleanup()
 
           Cypress.command
@@ -118,15 +126,29 @@ do (Cypress, _) ->
 
           resolve(options.$el)
 
-        subject.on("focus", focused)
+        options.$el.on("focus", focused)
 
-        # hasFocus = ($el) ->
-          # $el.get(0).hasFocus()
+        options.$el.get(0).focus()
 
-        # console.log "hasFocus?", hasFocus($(document)), hasFocus(cy.sync.document())
-        subject.get(0).focus()
-        # subject.simulate("focus")
-        # subject.cySimulate("focus")
+        @defer =>
+          ## fallback if our focus event never fires
+          ## to simulate the focus + focusin
+          return if hasFocused
+
+          simulate = =>
+            @prop("forceFocusedEl", options.$el.get(0))
+
+            options.$el.cySimulate("focus")
+            options.$el.cySimulate("focusin")
+
+          @command("focused", {log: false}).then ($focused) =>
+            ## only blur if we have a focused element AND its not
+            ## currently ourselves!
+            if $focused and $focused.get(0) isnt options.$el.get(0)
+              @command("blur", {$el: $focused, error: false}).then =>
+                simulate()
+            else
+              simulate()
 
       promise.timeout(timeout).catch Promise.TimeoutError, (err) =>
         cleanup()
@@ -135,49 +157,82 @@ do (Cypress, _) ->
 
         @throwErr ".focus() timed out because your browser did not receive any focus events. This is a known bug in Chrome when it is not the currently focused window."
 
-    blur: (subject) ->
-      @ensureDom(subject)
+    blur: (subject, options = {}) ->
+      ## we should throw errors by default!
+      ## but allow them to be silenced
+      _.defaults options,
+        $el: subject
+        error: true
 
-      if (num = subject.length) and num > 1
+      @ensureDom(options.$el)
+
+      if (num = options.$el.length) and num > 1
+        return if options.error is false
+
         @throwErr(".blur() can only be called on a single element! Your subject contained #{num} elements!")
 
       @command("focused", {log: false}).then ($focused) =>
         if not $focused
+          return if options.error is false
+
           @throwErr(".blur() can only be called when there is a currently focused element.")
 
-        if subject.get(0) isnt $focused.get(0)
+        if options.$el.get(0) isnt $focused.get(0)
+          return if options.error is false
+
           node = Cypress.Utils.stringifyElement($focused)
           @throwErr(".blur() can only be called on the focused element. Currently the focused element is a: #{node}")
 
         timeout = @_timeout() / 2
 
         cleanup = null
+        hasBlurred = false
 
-        promise = new Promise (resolve) ->
+        promise = new Promise (resolve) =>
           ## we need to bind to the blur event here
           ## because some browsers will not ever fire
           ## the blur event if the window itself is not
           ## currently focused. so we have to tell our users
           ## to do just that!
           cleanup = ->
-            subject.off("blur", blurred)
+            options.$el.off("blur", blurred)
 
-          blurred = ->
+          blurred = =>
+            hasBlurred = true
+
+            ## set this back to null unless we are
+            ## force blurring ourselves during this command
+            blacklistFocusedEl = @prop("blacklistFocusedEl")
+            @prop("blacklistFocusedEl", null) unless blacklistFocusedEl is options.$el.get(0)
+
             cleanup()
 
             Cypress.command
-              $el: subject
+              $el: options.$el
               onConsole: ->
-                "Applied To": subject
+                "Applied To": options.$el
 
-            resolve(subject)
+            resolve(options.$el)
 
-          subject.on("blur", blurred)
+          options.$el.on("blur", blurred)
 
-          subject.get(0).blur()
+          options.$el.get(0).blur()
+
+          @defer =>
+            ## fallback if our blur event never fires
+            ## to simulate the blur + focusout
+            return if hasBlurred
+
+            @prop("blacklistFocusedEl", options.$el.get(0))
+
+            options.$el.cySimulate("blur")
+            options.$el.cySimulate("focusout")
 
         promise.timeout(timeout).catch Promise.TimeoutError, (err) =>
           cleanup()
+
+          return if options.error is false
+
           @throwErr ".blur() timed out because your browser did not receive any blur events. This is a known bug in Chrome when it is not the currently focused window."
 
     dblclick: (subject) ->
@@ -370,3 +425,36 @@ do (Cypress, _) ->
       subject.get(0).dispatchEvent(event)
 
       return subject
+
+
+  Cypress.addDualCommand
+    focused: (subject, options = {}) ->
+      log = ($el) ->
+        return if options.log is false
+
+        Cypress.command
+          $el: $el
+
+      try
+        d = @sync.document()
+        el = @prop("forceFocusedEl") or d.get(0).activeElement
+
+        ## return null if we have an el but
+        ## the el is body or the el is currently the
+        ## blacklist focused el
+        if el and el isnt @prop("blacklistFocusedEl")
+          el = $(el)
+
+          if el.is("body")
+            log(null)
+            return null
+
+          log(el)
+          return el
+        else
+          log(null)
+          return null
+
+      catch
+        log(null)
+        return null
