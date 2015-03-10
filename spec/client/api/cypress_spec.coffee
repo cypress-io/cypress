@@ -2249,7 +2249,7 @@ describe "Cypress", ->
           expect(err.message).to.include ".focus() can only be called on a single element! Your subject contained #{@num} elements!"
           done()
 
-  context.only "#blur", ->
+  context "#blur", ->
     it "should blur the originally focused element", (done) ->
       cy.$("#focus input").blur -> done()
 
