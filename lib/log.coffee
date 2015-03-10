@@ -109,10 +109,13 @@ logger.getLogs = ->
 
       resolve logger.normalize(results)
 
+logger.off = ->
+  logger.removeAllListeners("logging")
+
 logger.onLog = (fn) ->
   name = "all"
 
-  logger.removeAllListeners("logging")
+  logger.off()
 
   logger.on "logging", (transport, level, msg, data) ->
     if transport.name is name

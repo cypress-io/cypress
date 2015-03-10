@@ -114,7 +114,7 @@
 
       windows.debug = debug = App.request "gui:open", "app://app/nw/public/debug.html",
         position: "center"
-        width: 600
+        width: 800
         height: 400
         # frame: false
         toolbar: false

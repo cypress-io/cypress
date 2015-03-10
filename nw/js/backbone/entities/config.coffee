@@ -53,6 +53,9 @@
     clearLogs: ->
       @getLog().clearLogs()
 
+    offLog: ->
+      @getLog().off()
+
     getUpdater: -> @updater
 
     setErrorHandler: ->

@@ -18,6 +18,17 @@
   class Entities.LogsCollection extends Entities.Collection
     model: Entities.Log
 
+    offLog: ->
+      App.config.offLog()
+
+    refresh: ->
+      @reset()
+      _.defer => @fetch()
+
+    fetch: ->
+      App.config.getLogs().then (array) =>
+        @add(array)
+
     clear: ->
       App.config.clearLogs().then => @reset()
 
@@ -25,8 +36,7 @@
     getLogs: ->
       logs = new Entities.LogsCollection
 
-      App.config.getLogs().then (array) ->
-        logs.add(array)
+      logs.fetch()
 
       App.config.onLog (log) ->
         logs.add(log)

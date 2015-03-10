@@ -13,7 +13,9 @@
     childViewContainer: "tbody"
 
     ui:
-      "clear" : "[data-clear]"
+      "clear"   : "[data-clear]"
+      "refresh" : "[data-refresh]"
 
     triggers:
-      "click @ui.clear" : "clear:clicked"
+      "click @ui.clear"   : "clear:clicked"
+      "click @ui.refresh" : "refresh:clicked"
