@@ -41,7 +41,7 @@
         @statsRegion(runner)          if not config.env("satellite")
         @iframeRegion(runner)
         @specsRegion(runner, spec)    if not config.env("satellite")
-        @panelsRegion(runner, config) if not config.env("satellite")
+        # @panelsRegion(runner, config) if not config.env("satellite")
 
         ## start running the tests
         ## and load the iframe

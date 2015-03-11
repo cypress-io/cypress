@@ -10,7 +10,7 @@
 
     storageConfig:
       collapsed:
-        default: false
+        default: true
         type: "boolean"
       panels:
         default: {}
