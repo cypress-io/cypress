@@ -5,7 +5,7 @@ do (Cypress, _) ->
   bRe          = /(\[b\])(.+)(\[\\b\])/
   bTagOpen     = /\[b\]/g
   bTagClosed   = /\[\\b\]/g
-  allButs      = /\bbut/g
+  allButs      = /\bbut\b/g
 
   Cypress.Assertion = {
     assert: (passed, message, value, actual, expected, error) ->

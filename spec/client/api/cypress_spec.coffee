@@ -4348,6 +4348,22 @@ describe "Cypress", ->
         cy.get("a").then ($a) ->
           expect($a).to.have.attr "href", "asdf"
 
+      it "does not replace 'button' with 'andton'", (done) ->
+        ## chai jquery adds 2 assertions here so
+        ## we bind to the 2nd one
+        Cypress.on "log", (obj) ->
+          if obj.name is "assert"
+            assert(obj)
+
+        assert = _.after 1, (obj) ->
+          Cypress.Chai.restore()
+
+          expect(obj.message).to.eq "expected [b]<button#button>[\\b] to be visible"
+          done()
+
+        cy.get("#button").then ($button) ->
+          expect($button).to.be.visible
+
       it "#onConsole for regular objects", (done) ->
         @onAssert (obj) ->
           expect(obj.onConsole()).to.deep.eq {
