@@ -1559,6 +1559,16 @@ describe "Cypress", ->
         expect($el.length).to.eq(1)
         expect($el).to.match("li")
 
+    it "resets the subject between chain invocations", ->
+      span = cy.$(".k-in:contains(Quality Control):last")
+      label = cy.$("#complex-contains label")
+
+      cy.get("#complex-contains").contains("nested contains").then ($label) ->
+        expect($label.get(0)).to.eq label.get(0)
+        return $label
+      cy.contains("Quality Control").then ($span) ->
+        expect($span.get(0)).to.eq span.get(0)
+
     it "GET is scoped to the current subject", ->
       span = cy.$("#click-me a span")
 
@@ -1651,7 +1661,7 @@ describe "Cypress", ->
         retry = _.after 3, ->
           cy.$("#edge-case-contains").append(count)
 
-          cy.then ($count) ->
+          cy.chain().then ($count) ->
             expect($count.length).to.eq(1)
             expect($count.get(0)).to.eq count.get(0)
             done()
@@ -1666,7 +1676,7 @@ describe "Cypress", ->
         retry = _.after 3, ->
           cy.$("#edge-case-contains").append(count)
 
-          cy.then ($count) ->
+          cy.chain().then ($count) ->
             expect($count.length).to.eq(1)
             expect($count.get(0)).to.eq count.get(0)
             done()
@@ -3095,6 +3105,35 @@ describe "Cypress", ->
 
       cy.get("body").foo()
 
+    describe "nuking subject when chainerId doesnt match", ->
+      it "parent commands", ->
+        Cypress.addParentCommand "foo", ->
+          expect(cy.prop("subject")).not.to.be.ok
+          return {foo: "bar"}
+
+        cy.foo()
+        cy.foo()
+
+      it "dual commands", (done) ->
+        Cypress.addDualCommand "foo", (subject) ->
+          expect(subject).to.be.null
+          done()
+
+        cy.get("body")
+        cy.foo()
+
+      it "child commands", (done) ->
+        @sandbox.stub cy.runner, "uncaught"
+
+        Cypress.addChildCommand "foo", (subject) ->
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.eq "Subject is null!  You cannot call .find() without a subject."
+          done()
+
+        cy.get("body")
+        cy.find("div")
+
     describe "errors", ->
       beforeEach ->
         @sandbox.stub cy.runner, "uncaught"
@@ -3782,13 +3821,14 @@ describe "Cypress", ->
     beforeEach ->
       @setup = (fn = ->) =>
         Cypress.addParentCommand "nested", ->
-          cy.url()
+          cy.chain().url()
 
         cy
           .inspect()
           .nested()
           .noop()
-          .then -> fn()
+          .then ->
+            fn()
 
     it "queues in the correct order", ->
       @setup ->

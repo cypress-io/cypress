@@ -119,7 +119,7 @@ do (Cypress, _) ->
 
       _.extend options,
         error: "Could not find any content: '#{text}' #{phrase}"
-        withinSubject: subject
+        withinSubject: subject or @prop("withinSubject")
         filter: true
         log: false
 
