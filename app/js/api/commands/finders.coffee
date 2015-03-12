@@ -5,6 +5,8 @@ do (Cypress, _) ->
       _.defaults options,
         retry: true
         withinSubject: @prop("withinSubject")
+        visible: true
+        exist: true
 
       log = ($el) ->
         return if options.log is false
@@ -21,11 +23,6 @@ do (Cypress, _) ->
             _.extend obj,
               "Returned": $el
               "Elements": $el.length
-          # onRender: ($row) ->
-          #   if alias
-          #     $row
-          #       .find(".command-message")
-          #         .html("<span class='command-alias'>@#{alias.alias}</span>")
 
       if alias = @getAlias(selector)
         {subject, command} = alias
@@ -57,20 +54,50 @@ do (Cypress, _) ->
           log($el)
           return ret
       else
-        ## return the el if it has a length or we've explicitly
-        ## disabled retrying
-        if $el.length or options.retry is false
-          log($el)
-          return $el
+        ## go into non-existing mode if we've forced ourselves
+        ## not to find the element!
+        switch
+          when options.exist is false
+            ## return if we didnt find anything and our options have asked
+            ## us for the element not to exist
+            if not $el.length
+              log(null)
+              return null
+
+          when options.visible is false
+            if $el.length and not $el.is(":visible")
+              log($el)
+              return $el
+
+          else
+            ## return the el if it has a length or we've explicitly
+            ## disabled retrying
+            if ($el.length and $el.is(":visible")) or options.retry is false
+              log($el)
+              return $el
 
       retry = ->
         @command("get", selector, options)
+
+      getErr = ->
+        err = switch
+          when options.exist is false #and not $el.length
+            "Found existing element:"
+          when options.visible is false and $el.length
+            "Found visible element:"
+          else
+            if not $el.length
+              "Could not find element:"
+            else
+              "Could not find visible element:"
+
+        err += " #{selector}"
 
       ## if we REALLY want to be helpful and intelligent then
       ## if we time out, we should look at our aliases and see
       ## if our selector matches any aliases without the '@'
       ## if it did, then perhaps the user forgot to write '@'
-      options.error ?= "Could not find element: #{selector}"
+      options.error ?= getErr()
 
       @_retry(retry, options)
 

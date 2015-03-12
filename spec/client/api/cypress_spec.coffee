@@ -1453,6 +1453,44 @@ describe "Cypress", ->
       cy.get("#missing-el", {retry: false}).then ($el) ->
         expect($el).not.to.exist
 
+    describe "{exist: false}", ->
+      it "returns null when cannot find element", ->
+        cy.get("#missing-el", {exist: false}).then ($el) ->
+          expect($el).to.be.null
+
+      it "retries until cannot find element", ->
+        ## add 500ms to the delta
+        cy._timeout(500, true)
+
+        retry = _.after 3, ->
+          cy.$("#list li:last").remove()
+
+        cy.on "retry", retry
+
+        cy.get("#list li:last", {exist: false}).then ($el) ->
+          expect($el).to.be.null
+
+    describe "{visible: false}", ->
+      it "returns invisible element", ->
+        button = cy.$("#button").hide()
+
+        cy.get("#button", {visible: false}).then ($button) ->
+          expect($button.get(0)).to.eq button.get(0)
+
+      it "retries until element is invisible", ->
+        ## add 500ms to the delta
+        cy._timeout(500, true)
+
+        button = null
+
+        retry = _.after 3, ->
+          button = cy.$("#button").hide()
+
+        cy.on "retry", retry
+
+        cy.get("#button", {visible: false}).then ($button) ->
+          expect($button.get(0)).to.eq button.get(0)
+
     describe ".log", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
@@ -1488,7 +1526,6 @@ describe "Cypress", ->
             Returned: $body
             Elements: 1
           }
-
 
     describe "alias references", ->
       it "re-queries for an existing alias", ->
@@ -1552,6 +1589,29 @@ describe "Cypress", ->
           .get("#get-json").as("getJsonButton").click()
           .wait("@getJSON")
           .get("getJsonButton")
+
+      it "throws after timing out while not trying to find an element", (done) ->
+        cy.get("div:first", {exist: false})
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "Found existing element: div:first"
+          done()
+
+      it "throws after timing out while trying to find an invisible element", (done) ->
+        cy.get("div:first", {visible: false})
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "Found visible element: div:first"
+          done()
+
+      it "throws after timing out trying to find a visible element", (done) ->
+        cy.$("#button").hide()
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "Could not find visible element: #button"
+          done()
+
+        cy.get("#button")
 
   context "#contains", ->
     it "finds the nearest element by :contains selector", ->
