@@ -7,6 +7,10 @@ do (Cypress, _) ->
         withinSubject: @prop("withinSubject")
         visible: true
         exist: true
+        exists: true
+
+      ## normalize these two options
+      options.exist = options.exists and options.exist
 
       log = ($el) ->
         return if options.log is false

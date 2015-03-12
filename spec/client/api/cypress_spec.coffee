@@ -1453,10 +1453,13 @@ describe "Cypress", ->
       cy.get("#missing-el", {retry: false}).then ($el) ->
         expect($el).not.to.exist
 
-    describe "{exist: false}", ->
-      it "returns null when cannot find element", ->
-        cy.get("#missing-el", {exist: false}).then ($el) ->
-          expect($el).to.be.null
+    _.each ["exist", "exists"], (key) ->
+      describe "{#{key}: false}", ->
+        it "returns null when cannot find element", ->
+          options = {}
+          options[key] = false
+          cy.get("#missing-el", options).then ($el) ->
+            expect($el).to.be.null
 
       it "retries until cannot find element", ->
         ## add 500ms to the delta
