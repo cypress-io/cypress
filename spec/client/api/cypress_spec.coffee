@@ -1461,17 +1461,19 @@ describe "Cypress", ->
           cy.get("#missing-el", options).then ($el) ->
             expect($el).to.be.null
 
-      it "retries until cannot find element", ->
-        ## add 500ms to the delta
-        cy._timeout(500, true)
+        it "retries until cannot find element", ->
+          ## add 500ms to the delta
+          cy._timeout(500, true)
 
-        retry = _.after 3, ->
-          cy.$("#list li:last").remove()
+          retry = _.after 3, ->
+            cy.$("#list li:last").remove()
 
-        cy.on "retry", retry
+          cy.on "retry", retry
 
-        cy.get("#list li:last", {exist: false}).then ($el) ->
-          expect($el).to.be.null
+          options = {}
+          options[key] = false
+          cy.get("#list li:last", options).then ($el) ->
+            expect($el).to.be.null
 
     describe "{visible: false}", ->
       it "returns invisible element", ->
@@ -2830,10 +2832,51 @@ describe "Cypress", ->
 
   context "jquery proxy methods", ->
     fns = [
-      {find: "*"}
       {each: -> $(@).removeClass().addClass("foo")}
-      {filter: ":first"}
       {map: -> $(@).text()}
+    ]
+    _.each fns, (fn) ->
+      ## normalize string vs object
+      if _.isObject(fn)
+        name = _.keys(fn)[0]
+        arg = fn[name]
+      else
+        name = fn
+
+      context "##{name}", ->
+        it "proxies through to jquery and returns new subject", ->
+          el = cy.$("#list")[name](arg)
+          cy.get("#list")[name](arg).then ($el) ->
+            expect($el).to.match el
+
+        it "errors without a dom element", (done) ->
+          @sandbox.stub cy.runner, "uncaught"
+
+          cy.noop({})[name](arg)
+
+          cy.on "fail", -> done()
+
+        describe ".log", ->
+          beforeEach ->
+            Cypress.on "log", (@log) =>
+
+          it "#onConsole", ->
+            cy.get("#list")[name](arg).then ($el) ->
+              obj = {Command: name}
+              obj.Selector = [].concat(arg).join(", ") unless _.isFunction(arg)
+
+              _.extend obj, {
+                "Applied To": getFirstSubjectByName("get")
+                Returned: $el
+                Elements: $el.length
+              }
+
+              expect(@log.onConsole()).to.deep.eq obj
+
+  context "jquery traversal methods", ->
+    fns = [
+      {find: "*"}
+      {filter: ":first"}
       {eq: 0}
       {closest: "body"}
       "children", "first", "last", "next", "parent", "parents", "prev", "siblings"
@@ -2875,6 +2918,29 @@ describe "Cypress", ->
               }
 
               expect(@log.onConsole()).to.deep.eq obj
+
+    it "retries until it finds", ->
+      li = cy.$("#list li:last")
+      span = $("<span>foo</span>")
+
+      retry = _.after 3, ->
+        li.append(span)
+
+      cy.on "retry", retry
+
+      cy.get("#list li:last").find("span").then ($span) ->
+        expect($span.get(0)).to.eq(span.get(0))
+
+    it "errors after timing out not finding element", (done) ->
+      @sandbox.stub cy.runner, "uncaught"
+
+      cy._timeout(300)
+
+      cy.on "fail", (err) ->
+        expect(err.message).to.include "Could not find element: span"
+        done()
+
+      cy.get("#list li:last").find("span")
 
   context "#then", ->
     it "mocha inserts 2 arguments to then: anonymous fn for invoking done(), and done reference itself", ->
