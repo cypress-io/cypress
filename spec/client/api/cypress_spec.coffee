@@ -3724,7 +3724,7 @@ describe "Cypress", ->
         Cypress.on "log", (obj) ->
           expect(obj.onConsole()).to.deep.eq {
             Command: "get"
-            Error: obj._error.stack
+            Error: obj._error.toString()
           }
           done()
 
@@ -3734,7 +3734,7 @@ describe "Cypress", ->
         Cypress.on "log", (obj) ->
           expect(obj.onConsole()).to.deep.eq {
             Command: "wait"
-            Error: obj._error.stack
+            Error: obj._error.toString()
           }
           done()
 
@@ -3747,7 +3747,7 @@ describe "Cypress", ->
             expect(obj.onConsole()).to.deep.eq {
               Command: "wait"
               "Applied To": getFirstSubjectByName("get")
-              Error: obj._error.stack
+              Error: obj._error.toString()
             }
             done()
 
@@ -3760,7 +3760,7 @@ describe "Cypress", ->
             expect(obj.onConsole()).to.deep.eq {
               Command: "contains"
               "Applied To": getFirstSubjectByName("get")
-              Error: obj._error.stack
+              Error: obj._error.toString()
             }
             done()
 
@@ -3772,7 +3772,7 @@ describe "Cypress", ->
             expect(obj.onConsole()).to.deep.eq {
               Command: "contains"
               "Applied To": getFirstSubjectByName("eq")
-              Error: obj._error.stack
+              Error: obj._error.toString()
             }
             done()
 
