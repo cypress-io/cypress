@@ -59,6 +59,8 @@ class IdGenerator
     ## then the actual error instance will be e.error
     e = if e instanceof Error then e else e.error
 
+    @Log.info "Error Generating Id", {error: e}
+
     console.log ""
     console.log "========================================"
     console.log gutil.colors.yellow("An error occured generating ids in file: "), gutil.colors.blue(filepath)

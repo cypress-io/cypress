@@ -1,5 +1,10 @@
 do (Cypress, _) ->
 
+  $.simulate.prototype.simulateKeySequence.defaults["{esc}"] = (rng, char, options) ->
+    keyOpts = {keyCode: 27, charCode: 27, which: 27}
+    _.each ["keydown", "keypress", "keyup"], (event) ->
+      options.el.simulate event, keyOpts
+
   Cypress.addChildCommand
 
     submit: (subject) ->

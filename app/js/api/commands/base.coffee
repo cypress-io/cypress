@@ -173,6 +173,7 @@ do (Cypress, _, $) ->
 
     title: (options = {}) ->
       options.log = false
+      options.visible = false
 
       ## using call here to invoke the 'text' method on the
       ## title's jquery object

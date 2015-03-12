@@ -1086,7 +1086,7 @@ describe "Cypress", ->
     it "scopes additional CONTAINS finders to the subject", ->
       span = cy.$("#nested-div span:contains(foo)")
 
-      cy.get("*").contains("foo").then ($span) ->
+      cy.contains("foo").then ($span) ->
         expect($span.get(0)).not.to.eq span.get(0)
 
       cy.get("#nested-div").within ->
@@ -1453,6 +1453,49 @@ describe "Cypress", ->
       cy.get("#missing-el", {retry: false}).then ($el) ->
         expect($el).not.to.exist
 
+    _.each ["exist", "exists"], (key) ->
+      describe "{#{key}: false}", ->
+        it "returns null when cannot find element", ->
+          options = {}
+          options[key] = false
+          cy.get("#missing-el", options).then ($el) ->
+            expect($el).to.be.null
+
+        it "retries until cannot find element", ->
+          ## add 500ms to the delta
+          cy._timeout(500, true)
+
+          retry = _.after 3, ->
+            cy.$("#list li:last").remove()
+
+          cy.on "retry", retry
+
+          options = {}
+          options[key] = false
+          cy.get("#list li:last", options).then ($el) ->
+            expect($el).to.be.null
+
+    describe "{visible: false}", ->
+      it "returns invisible element", ->
+        button = cy.$("#button").hide()
+
+        cy.get("#button", {visible: false}).then ($button) ->
+          expect($button.get(0)).to.eq button.get(0)
+
+      it "retries until element is invisible", ->
+        ## add 500ms to the delta
+        cy._timeout(500, true)
+
+        button = null
+
+        retry = _.after 3, ->
+          button = cy.$("#button").hide()
+
+        cy.on "retry", retry
+
+        cy.get("#button", {visible: false}).then ($button) ->
+          expect($button.get(0)).to.eq button.get(0)
+
     describe ".log", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
@@ -1488,7 +1531,6 @@ describe "Cypress", ->
             Returned: $body
             Elements: 1
           }
-
 
     describe "alias references", ->
       it "re-queries for an existing alias", ->
@@ -1553,11 +1595,44 @@ describe "Cypress", ->
           .wait("@getJSON")
           .get("getJsonButton")
 
+      it "throws after timing out while not trying to find an element", (done) ->
+        cy.get("div:first", {exist: false})
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "Found existing element: div:first"
+          done()
+
+      it "throws after timing out while trying to find an invisible element", (done) ->
+        cy.get("div:first", {visible: false})
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "Found visible element: div:first"
+          done()
+
+      it "throws after timing out trying to find a visible element", (done) ->
+        cy.$("#button").hide()
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "Could not find visible element: #button"
+          done()
+
+        cy.get("#button")
+
   context "#contains", ->
     it "finds the nearest element by :contains selector", ->
       cy.contains("li 0").then ($el) ->
         expect($el.length).to.eq(1)
         expect($el).to.match("li")
+
+    it "resets the subject between chain invocations", ->
+      span = cy.$(".k-in:contains(Quality Control):last")
+      label = cy.$("#complex-contains label")
+
+      cy.get("#complex-contains").contains("nested contains").then ($label) ->
+        expect($label.get(0)).to.eq label.get(0)
+        return $label
+      cy.contains("Quality Control").then ($span) ->
+        expect($span.get(0)).to.eq span.get(0)
 
     it "GET is scoped to the current subject", ->
       span = cy.$("#click-me a span")
@@ -1567,33 +1642,33 @@ describe "Cypress", ->
         expect($span.get(0)).to.eq span.get(0)
 
     it "can find input type=submits by value", ->
-      cy.get("*").contains("input contains submit").then ($el) ->
+      cy.contains("input contains submit").then ($el) ->
         expect($el.length).to.eq(1)
         expect($el).to.match "input[type=submit]"
 
     it "has an optional filter argument", ->
-      cy.get("*").contains("ul", "li 0").then ($el) ->
+      cy.contains("ul", "li 0").then ($el) ->
         expect($el.length).to.eq(1)
         expect($el).to.match("ul")
 
     it "disregards priority elements when provided a filter", ->
       form = cy.$("#click-me")
 
-      cy.get("*").contains("form", "click me").then ($form) ->
+      cy.contains("form", "click me").then ($form) ->
         expect($form.get(0)).to.eq form.get(0)
 
     it "favors input type=submit", ->
-      cy.get("*").contains("click me").then ($el) ->
+      cy.contains("click me").then ($el) ->
         expect($el.length).to.eq(1)
         expect($el).to.match("input[type=submit]")
 
     it "favors buttons next", ->
-      cy.get("*").contains("click button").then ($el) ->
+      cy.contains("click button").then ($el) ->
         expect($el.length).to.eq(1)
         expect($el).to.match("button")
 
     it "favors anchors next", ->
-      cy.get("*").contains("Home Page").then ($el) ->
+      cy.contains("Home Page").then ($el) ->
         expect($el.length).to.eq(1)
         expect($el).to.match("a")
 
@@ -1615,13 +1690,25 @@ describe "Cypress", ->
 
       cy.on "retry", retry
 
-      cy.get("*").contains("brand new content").then ($span) ->
+      cy.contains("brand new content").then ($span) ->
         expect($span.get(0)).to.eq span.get(0)
 
     it "finds the furthest descendent when filter matches more than 1 element", ->
       cy
         .get("#contains-multiple-filter-match").contains("li", "Maintenance").then ($row) ->
           expect($row).to.have.class("active")
+
+    describe "{exist: false}", ->
+      it "returns null when no content exists", ->
+        cy.contains("alksjdflkasjdflkajsdf", {exist: false}).then ($el) ->
+          expect($el).to.be.null
+
+    describe "{visible: false}", ->
+      it "returns invisible element", ->
+        span = cy.$("#not-hidden").hide()
+
+        cy.contains("span", "my hidden content", {visible: false}).then ($span) ->
+          expect($span.get(0)).to.eq span.get(0)
 
     describe "subject contains text nodes", ->
       it "searches for content within subject", ->
@@ -1651,7 +1738,7 @@ describe "Cypress", ->
         retry = _.after 3, ->
           cy.$("#edge-case-contains").append(count)
 
-          cy.then ($count) ->
+          cy.chain().then ($count) ->
             expect($count.length).to.eq(1)
             expect($count.get(0)).to.eq count.get(0)
             done()
@@ -1666,7 +1753,7 @@ describe "Cypress", ->
         retry = _.after 3, ->
           cy.$("#edge-case-contains").append(count)
 
-          cy.then ($count) ->
+          cy.chain().then ($count) ->
             expect($count.length).to.eq(1)
             expect($count.get(0)).to.eq count.get(0)
             done()
@@ -1727,7 +1814,7 @@ describe "Cypress", ->
         @currentTest.timeout(300)
 
       it "throws when there is a filter", (done) ->
-        cy.get("*").contains("span", "brand new content")
+        cy.contains("span", "brand new content")
 
         cy.on "fail", (err) ->
           expect(err.message).to.include "Could not find any content: 'brand new content' within the selector: 'span'"
@@ -1748,11 +1835,18 @@ describe "Cypress", ->
         cy.get("#edge-case-contains").find(".badge").contains(0)
 
       it "throws when there is a no filter but there is a multi subject", (done) ->
-        cy.get("*").contains("brand new content")
+        cy.contains("brand new content")
 
         cy.on "fail", (err) ->
-          expect(err.message).to.include "Could not find any content: 'brand new content' within the element: <html>"
+          expect(err.message).to.include "Could not find any content: 'brand new content' in any elements"
           done()
+
+      it "throws after timing out while not trying to find an element that contains content", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "Found content: 'button' within any existing elements"
+          done()
+
+        cy.contains("button", {exist:false})
 
   context "#select", ->
     it "does not change the subject", ->
@@ -2412,7 +2506,7 @@ describe "Cypress", ->
         if obj.name is "dblclick"
           @delay = @sandbox.spy Promise.prototype, "delay"
 
-      cy.get("*").contains("Home Page").dblclick().then ->
+      cy.contains("Home Page").dblclick().then ->
         expect(@delay).to.be.calledWith 50
 
     it "can operate on a jquery collection", ->
@@ -2576,7 +2670,7 @@ describe "Cypress", ->
         if obj.name is "click"
           @delay = @sandbox.spy Promise.prototype, "delay"
 
-      cy.get("*").contains("Home Page").click().then ->
+      cy.contains("Home Page").click().then ->
         expect(@delay).to.be.calledWith 50
 
     it "can operate on a jquery collection", ->
@@ -2738,10 +2832,51 @@ describe "Cypress", ->
 
   context "jquery proxy methods", ->
     fns = [
-      {find: "*"}
       {each: -> $(@).removeClass().addClass("foo")}
-      {filter: ":first"}
       {map: -> $(@).text()}
+    ]
+    _.each fns, (fn) ->
+      ## normalize string vs object
+      if _.isObject(fn)
+        name = _.keys(fn)[0]
+        arg = fn[name]
+      else
+        name = fn
+
+      context "##{name}", ->
+        it "proxies through to jquery and returns new subject", ->
+          el = cy.$("#list")[name](arg)
+          cy.get("#list")[name](arg).then ($el) ->
+            expect($el).to.match el
+
+        it "errors without a dom element", (done) ->
+          @sandbox.stub cy.runner, "uncaught"
+
+          cy.noop({})[name](arg)
+
+          cy.on "fail", -> done()
+
+        describe ".log", ->
+          beforeEach ->
+            Cypress.on "log", (@log) =>
+
+          it "#onConsole", ->
+            cy.get("#list")[name](arg).then ($el) ->
+              obj = {Command: name}
+              obj.Selector = [].concat(arg).join(", ") unless _.isFunction(arg)
+
+              _.extend obj, {
+                "Applied To": getFirstSubjectByName("get")
+                Returned: $el
+                Elements: $el.length
+              }
+
+              expect(@log.onConsole()).to.deep.eq obj
+
+  context "jquery traversal methods", ->
+    fns = [
+      {find: "*"}
+      {filter: ":first"}
       {eq: 0}
       {closest: "body"}
       "children", "first", "last", "next", "parent", "parents", "prev", "siblings"
@@ -2783,6 +2918,29 @@ describe "Cypress", ->
               }
 
               expect(@log.onConsole()).to.deep.eq obj
+
+    it "retries until it finds", ->
+      li = cy.$("#list li:last")
+      span = $("<span>foo</span>")
+
+      retry = _.after 3, ->
+        li.append(span)
+
+      cy.on "retry", retry
+
+      cy.get("#list li:last").find("span").then ($span) ->
+        expect($span.get(0)).to.eq(span.get(0))
+
+    it "errors after timing out not finding element", (done) ->
+      @sandbox.stub cy.runner, "uncaught"
+
+      cy._timeout(300)
+
+      cy.on "fail", (err) ->
+        expect(err.message).to.include "Could not find element: span"
+        done()
+
+      cy.get("#list li:last").find("span")
 
   context "#then", ->
     it "mocha inserts 2 arguments to then: anonymous fn for invoking done(), and done reference itself", ->
@@ -3094,6 +3252,35 @@ describe "Cypress", ->
         done()
 
       cy.get("body").foo()
+
+    describe "nuking subject when chainerId doesnt match", ->
+      it "parent commands", ->
+        Cypress.addParentCommand "foo", ->
+          expect(cy.prop("subject")).not.to.be.ok
+          return {foo: "bar"}
+
+        cy.foo()
+        cy.foo()
+
+      it "dual commands", (done) ->
+        Cypress.addDualCommand "foo", (subject) ->
+          expect(subject).to.be.null
+          done()
+
+        cy.get("body")
+        cy.foo()
+
+      it "child commands", (done) ->
+        @sandbox.stub cy.runner, "uncaught"
+
+        Cypress.addChildCommand "foo", (subject) ->
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.eq "Subject is null!  You cannot call .find() without a subject."
+          done()
+
+        cy.get("body")
+        cy.find("div")
 
     describe "errors", ->
       beforeEach ->
@@ -3724,7 +3911,7 @@ describe "Cypress", ->
         Cypress.on "log", (obj) ->
           expect(obj.onConsole()).to.deep.eq {
             Command: "get"
-            Error: obj._error.stack
+            Error: obj._error.toString()
           }
           done()
 
@@ -3734,7 +3921,7 @@ describe "Cypress", ->
         Cypress.on "log", (obj) ->
           expect(obj.onConsole()).to.deep.eq {
             Command: "wait"
-            Error: obj._error.stack
+            Error: obj._error.toString()
           }
           done()
 
@@ -3747,7 +3934,7 @@ describe "Cypress", ->
             expect(obj.onConsole()).to.deep.eq {
               Command: "wait"
               "Applied To": getFirstSubjectByName("get")
-              Error: obj._error.stack
+              Error: obj._error.toString()
             }
             done()
 
@@ -3760,7 +3947,7 @@ describe "Cypress", ->
             expect(obj.onConsole()).to.deep.eq {
               Command: "contains"
               "Applied To": getFirstSubjectByName("get")
-              Error: obj._error.stack
+              Error: obj._error.toString()
             }
             done()
 
@@ -3772,7 +3959,7 @@ describe "Cypress", ->
             expect(obj.onConsole()).to.deep.eq {
               Command: "contains"
               "Applied To": getFirstSubjectByName("eq")
-              Error: obj._error.stack
+              Error: obj._error.toString()
             }
             done()
 
@@ -3782,13 +3969,14 @@ describe "Cypress", ->
     beforeEach ->
       @setup = (fn = ->) =>
         Cypress.addParentCommand "nested", ->
-          cy.url()
+          cy.chain().url()
 
         cy
           .inspect()
           .nested()
           .noop()
-          .then -> fn()
+          .then ->
+            fn()
 
     it "queues in the correct order", ->
       @setup ->
@@ -4159,6 +4347,22 @@ describe "Cypress", ->
 
         cy.get("a").then ($a) ->
           expect($a).to.have.attr "href", "asdf"
+
+      it "does not replace 'button' with 'andton'", (done) ->
+        ## chai jquery adds 2 assertions here so
+        ## we bind to the 2nd one
+        Cypress.on "log", (obj) ->
+          if obj.name is "assert"
+            assert(obj)
+
+        assert = _.after 1, (obj) ->
+          Cypress.Chai.restore()
+
+          expect(obj.message).to.eq "expected [b]<button#button>[\\b] to be visible"
+          done()
+
+        cy.get("#button").then ($button) ->
+          expect($button).to.be.visible
 
       it "#onConsole for regular objects", (done) ->
         @onAssert (obj) ->

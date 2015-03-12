@@ -5,6 +5,12 @@ do (Cypress, _) ->
       _.defaults options,
         retry: true
         withinSubject: @prop("withinSubject")
+        visible: true
+        exist: true
+        exists: true
+
+      ## normalize these two options
+      options.exist = options.exists and options.exist
 
       log = ($el) ->
         return if options.log is false
@@ -18,14 +24,10 @@ do (Cypress, _) ->
             obj = {"Command":  "get"}
             key = if alias then "Alias" else "Selector"
             obj[key] = selector
+
             _.extend obj,
               "Returned": $el
-              "Elements": $el.length
-          # onRender: ($row) ->
-          #   if alias
-          #     $row
-          #       .find(".command-message")
-          #         .html("<span class='command-alias'>@#{alias.alias}</span>")
+              "Elements": $el?.length
 
       if alias = @getAlias(selector)
         {subject, command} = alias
@@ -57,20 +59,54 @@ do (Cypress, _) ->
           log($el)
           return ret
       else
-        ## return the el if it has a length or we've explicitly
-        ## disabled retrying
-        if $el.length or options.retry is false
-          log($el)
-          return $el
+        ## go into non-existing mode if we've forced ourselves
+        ## not to find the element!
+        length = $el.length
+
+        switch
+          when options.exist is false
+            ## return if we didnt find anything and our options have asked
+            ## us for the element not to exist
+            if not length
+              log(null)
+              return null
+
+          when options.visible is false
+            ## make sure all the $el's are hidden
+            if length and length is $el.filter(":hidden").length
+              log($el)
+              return $el
+
+          else
+            ## return the el if it has a length or we've explicitly
+            ## disabled retrying
+            ## make sure all of the $el's are visible!
+            if (length and length is $el.filter(":visible").length) or options.retry is false
+              log($el)
+              return $el
 
       retry = ->
         @command("get", selector, options)
+
+      getErr = ->
+        err = switch
+          when options.exist is false #and not $el.length
+            "Found existing element:"
+          when options.visible is false and $el.length
+            "Found visible element:"
+          else
+            if not $el.length
+              "Could not find element:"
+            else
+              "Could not find visible element:"
+
+        err += " #{selector}"
 
       ## if we REALLY want to be helpful and intelligent then
       ## if we time out, we should look at our aliases and see
       ## if our selector matches any aliases without the '@'
       ## if it did, then perhaps the user forgot to write '@'
-      options.error ?= "Could not find element: #{selector}"
+      options.error ?= getErr()
 
       @_retry(retry, options)
 
@@ -113,13 +149,32 @@ do (Cypress, _) ->
           "within the selector: '#{filter}'"
         when subject
           node = Cypress.Utils.stringifyElement(subject, "short")
-          "within the element: #{node}"
+          if options.exist is false
+            "within an existing element: #{node}"
+          else
+            "within the element: #{node}"
         else
-          "in any elements"
+          if options.exist is false
+            "within any existing elements"
+          else
+            "in any elements"
+
+      getErr = (text, phrase) ->
+        err = switch
+          when options.exist is false
+            "Found content:"
+
+          when options.visible is false
+            "Found visible content:"
+
+          else
+            "Could not find any content:"
+
+        err += " '#{text}' #{phrase}"
 
       _.extend options,
-        error: "Could not find any content: '#{text}' #{phrase}"
-        withinSubject: subject
+        error: getErr(text, phrase)
+        withinSubject: subject or @prop("withinSubject")
         filter: true
         log: false
 
@@ -132,7 +187,7 @@ do (Cypress, _) ->
             "Content": text
             "Applied To": subject
             "Returned": $el
-            "Elements": $el.length
+            "Elements": $el?.length
         })
         return $el
 
@@ -145,6 +200,8 @@ do (Cypress, _) ->
       selector = "#{filter}:contains('#{text}'), #{filter}[type='submit'][value~='#{text}']"
 
       @command("get", selector, options).then (elements) ->
+        return log(null) if not elements
+
         return log(elements.last()) if filter
 
         ## iterate on the array of elements in reverse

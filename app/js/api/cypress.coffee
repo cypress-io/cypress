@@ -291,11 +291,11 @@ window.Cypress = do ($, _, Backbone) ->
         if _.isFunction(args[0]) and args[0]._invokeImmediately
           args[0] = args[0].call(@)
 
-        ## we cannot pass our cypress instance back into
-        ## bluebird else it will create a thenable which
-        ## is never resolved
+        ## we cannot pass our cypress instance or our chainer
+        ## back into bluebird else it will create a thenable
+        ## which is never resolved
         ret = obj.fn.apply(obj.ctx, args)
-        if ret is @ then null else ret
+        if (ret is @ or ret is @chain()) then null else ret
 
       .then (subject, options = {}) =>
         obj.subject = subject
@@ -442,6 +442,23 @@ window.Cypress = do ($, _, Backbone) ->
       else
         @sync.window().$
 
+    _checkForNewChain: (chainerId) ->
+      ## dont do anything if this isnt even defined
+      return if _.isUndefined(chainerId)
+
+      ## if we dont have a current chainerId
+      ## then set one
+      if not id = @prop("chainerId")
+        @prop("chainerId", chainerId)
+      else
+        ## else if we have one currently and
+        ## it doesnt match then nuke our subject
+        ## since we've started a new chain
+        ## and reset our chainerId
+        if id isnt chainerId
+          @prop("chainerId", chainerId)
+          @prop("subject", null)
+
     ## the command method is useful for synchronously
     ## calling another command but wrapping it in a
     ## promise
@@ -501,6 +518,12 @@ window.Cypress = do ($, _, Backbone) ->
 
       ## start a group by the name
       console.group(name)
+
+    ## returns the current chain so you can continue
+    ## chaining off of cy without breaking the current
+    ## subject
+    chain: ->
+      @prop("chain")
 
     enqueue: (key, fn, args, type) ->
       @clearTimeout @prop("runId")
@@ -618,10 +641,11 @@ window.Cypress = do ($, _, Backbone) ->
         args.hasSubject or= true
         args
 
-      wrap = (fn) ->
-        switch type
+      wrap = (fn, chainerId) ->
+
+        fn = switch type
           when "parent"
-            return fn
+            fn
 
           when "dual"
             _.wrap fn, (orig, args...) ->
@@ -641,12 +665,30 @@ window.Cypress = do ($, _, Backbone) ->
               ret = orig.apply(@, args)
               return ret ? subject
 
+        ## rewrap all functions by checking
+        ## the chainer id before running each
+        _.wrap fn, (orig, args...) ->
+          @_checkForNewChain(chainerId)
+          return orig.apply(@, args)
+
       Cypress.prototype[key] = (args...) ->
-        @enqueue(key, wrap(fn), args, type)
+        ## this is the first call on cypress
+        ## so create a new chainer instance
+        chain = Cypress.Chainer.create(@, key, args)
+
+        ## store the chain so we can access it later
+        @prop("chain", chain)
+
+        return chain
 
       ## reference a synchronous version of this function
+      ## fix this for synchronous chainer version!
       Cypress.prototype.sync[key] = (args...) ->
-        wrap(fn).apply(Cypress.cy, args)
+        wrap.call(Cypress.cy, fn).apply(Cypress.cy, args)
+
+      ## add this function to our chainer class
+      Cypress.Chainer.inject key, (chainerId, args) ->
+        @enqueue(key, wrap.call(@, fn, chainerId), args, type)
 
     @abort = ->
       Cypress.trigger "abort"
