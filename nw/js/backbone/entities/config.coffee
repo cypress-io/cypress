@@ -16,6 +16,9 @@
     addProject: (path) ->
       @cache.addProject(path)
 
+    removeProject: (path) ->
+      @cache.removeProject(path)
+
     getProjectPaths: ->
       @cache.getProjectPaths()
 

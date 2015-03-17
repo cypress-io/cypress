@@ -1,4 +1,8 @@
 #projects {
+  #context-menu .dropdown-menu {
+    min-width: inherit;
+  }
+
   header {
     background-color: #EEE;
     border-bottom: 1px solid #CCC;
@@ -46,6 +50,8 @@
     }
 
     li.project {
+      @include user-select(none);
+
       padding: 5px 20px;
       border-bottom: 1px solid #EEE;
       position: relative;

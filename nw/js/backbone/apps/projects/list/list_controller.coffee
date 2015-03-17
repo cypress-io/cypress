@@ -19,6 +19,10 @@
       @listenTo projectsView, "childview:project:clicked", (iv, obj) ->
         App.vent.trigger "project:clicked", obj.model
 
+      @listenTo projectsView, "childview:project:remove:clicked", (iv, project) ->
+        App.config.removeProject(project.get("path"))
+        projects.remove(project)
+
       @show projectsView
 
     getProjectsView: (projects, user) ->

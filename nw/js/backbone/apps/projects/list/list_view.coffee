@@ -8,6 +8,20 @@
     triggers:
       "click" : "project:clicked"
 
+    onRender: ->
+      @$el.contextmenu
+        target: @options.contextMenu
+        onItem: =>
+          _.defer =>
+            @trigger "project:remove:clicked", @model
+
+    onDestroy: ->
+      ## destroy the contextmenu so it cleans
+      ## up the memory, research into jquery
+      ## plugins to see if a destroy method is
+      ## automatically invoked with $el is removed?
+      @$el.contextmenu("destroy")
+
   class List.Empty extends App.Views.ItemView
     template: "projects/list/_empty"
     tagName: "li"
@@ -18,6 +32,8 @@
     childView: List.Project
     emptyView: List.Empty
     childViewContainer: "ul#projects-container"
+    childViewOptions:
+      "contextMenu" : "#context-menu"
 
     ui:
       "button"  : "button"
