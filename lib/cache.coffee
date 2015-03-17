@@ -181,6 +181,12 @@ class Cache extends require("events").EventEmitter
         ## and make sure we have the correct path
         @updateProject(id, {PATH: path})
 
+  removeProject: (path) ->
+    Log.info "removing project from path", path: path
+
+    @getProjects().then (projects) ->
+      @_removeProjectByPath(projects, path)
+
   getUser: ->
     Log.info "getting user"
 

@@ -162,6 +162,17 @@ describe "Cache", ->
             expect(project).to.deep.eq({RANGE: {}, PATH: "/Users/brian/app"})
             done()
 
+    describe "#removeProject", ->
+      beforeEach ->
+        @sandbox.stub(Project.prototype, "createProjectId").returns("foo-bar-baz-123")
+        @sandbox.stub(Settings, "read").resolves({})
+
+      it "removes project by path", ->
+        @cache.addProject("/Users/brian/app").then (project) =>
+          @cache.removeProject("/Users/brian/app").then =>
+            @cache.getProjects().then (projects) ->
+              expect(projects).to.deep.eq {}
+
     describe "#updateProject", ->
       beforeEach ->
         @cache.insertProject("BAR")
