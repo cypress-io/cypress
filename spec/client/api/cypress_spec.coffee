@@ -4105,6 +4105,13 @@ describe "Cypress", ->
       cy.get("input:first").should("have.property", "length").to("eq", 1).then (num) ->
         expect(num).to.eq(1)
 
+    it "changes the subject with chai-jquery", ->
+      cy.get("input:first").should("have.attr", "id").to("eq", "input")
+
+    it "changes the subject with JSON", ->
+      obj = {requestJSON: {teamIds: [2]}}
+      cy.noop(obj).its("requestJSON").should("have.property", "teamIds").to("deep.eq", [2])
+
     describe "errors", ->
       beforeEach ->
         @sandbox.stub cy.runner, "uncaught"
