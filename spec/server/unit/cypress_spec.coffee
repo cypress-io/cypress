@@ -42,7 +42,7 @@ describe "Cypress", ->
     it "stores projectRoot on cy", ->
       expect(@booter.projectRoot).to.eq "/Users/brian/app"
 
-    it "auto opens idGeneratorPath"
+    it "auto opens idGeneratorUrl"
 
   context "required with {fork: true}", ->
     beforeEach ->

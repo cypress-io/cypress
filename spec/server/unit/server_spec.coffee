@@ -90,8 +90,8 @@ describe "Server Interface", ->
       it "clientUrl=http://localhost:3000", ->
         @defaults "clientUrl", "http://localhost:3000"
 
-      it "idGeneratorPath=http://localhost:3000/id_generator", ->
-        @defaults "idGeneratorPath", "http://localhost:3000/id_generator"
+      it "idGeneratorUrl=http://localhost:3000/id_generator", ->
+        @defaults "idGeneratorUrl", "http://localhost:3000/id_generator"
 
       it "baseUrl=http://localhost:8000/app", ->
         @defaults "baseUrl", "http://localhost:8000/app", {

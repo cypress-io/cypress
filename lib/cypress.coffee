@@ -97,7 +97,7 @@ if isChildProcess() or isRunningFromCli()
     obj.settings.done = true
 
     if process.argv[3] is "id_generator"
-      open(obj.settings.idGeneratorPath)
+      open(obj.settings.idGeneratorUrl)
 
     send(obj.settings)
 

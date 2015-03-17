@@ -61,7 +61,7 @@ class Server
       clientUrl: "http://localhost:#{obj.port}"
 
     _.defaults obj,
-      idGeneratorPath: "#{obj.clientUrl}/id_generator"
+      idGeneratorUrl: rootUrl + "/id_generator"
 
   ## go through this method for all tests because
   ## it handles setting the defaults up automatically

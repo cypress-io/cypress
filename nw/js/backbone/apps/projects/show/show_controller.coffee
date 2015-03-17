@@ -20,7 +20,7 @@
         App.config.runProject(project.get("path"))
           .then (config) ->
             project.setClientUrl(config.clientUrl)
-            App.execute "start:id:generator", config.idGeneratorPath
+            App.execute "start:id:generator", config.idGeneratorUrl
           .catch (err) ->
             project.setError(err)
 
