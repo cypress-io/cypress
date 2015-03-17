@@ -15,7 +15,7 @@ do (Cypress, _) ->
       options ?= {}
 
       _.defaults options,
-        visible: true
+        visible: null
         exist: true
         exists: true
 
@@ -60,11 +60,15 @@ do (Cypress, _) ->
           if length and length is $el.filter(":hidden").length
             return log($el)
 
+        when options.visible is true
+          if length and length is $el.filter(":visible").length
+            return log($el)
+
         else
           ## return the el if it has a length or we've explicitly
           ## disabled retrying
           ## make sure all of the $el's are visible!
-          if (length and length is $el.filter(":visible").length) or options.retry is false
+          if length or options.retry is false
             return log($el)
 
       retry = ->

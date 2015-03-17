@@ -1475,6 +1475,13 @@ describe "Cypress", ->
           cy.get("#list li:last", options).then ($el) ->
             expect($el).to.be.null
 
+    describe "{visible: null}", ->
+      it "finds invisible elements by default", ->
+        button = cy.$("#button").hide()
+
+        cy.get("#button").then ($button) ->
+          expect($button.get(0)).to.eq button.get(0)
+
     describe "{visible: false}", ->
       it "returns invisible element", ->
         button = cy.$("#button").hide()
@@ -1494,6 +1501,27 @@ describe "Cypress", ->
         cy.on "retry", retry
 
         cy.get("#button", {visible: false}).then ($button) ->
+          expect($button.get(0)).to.eq button.get(0)
+
+    describe "{visible: true}", ->
+      it "returns visible element", ->
+        button = cy.$("#button")
+
+        cy.get("#button", {visible: true}).then ($button) ->
+          expect($button.get(0)).to.eq button.get(0)
+
+      it "retries until element is visible", ->
+        ## add 500ms to the delta
+        cy._timeout(500, true)
+
+        button = cy.$("#button").hide()
+
+        retry = _.after 3, ->
+          button.show()
+
+        cy.on "retry", retry
+
+        cy.get("#button", {visible: true}).then ($button) ->
           expect($button.get(0)).to.eq button.get(0)
 
     describe ".log", ->
@@ -1616,7 +1644,7 @@ describe "Cypress", ->
           expect(err.message).to.include "Could not find visible element: #button"
           done()
 
-        cy.get("#button")
+        cy.get("#button", {visible: true})
 
   context "#contains", ->
     it "finds the nearest element by :contains selector", ->
@@ -2830,7 +2858,7 @@ describe "Cypress", ->
 
       cy.noop({})
 
-  context "jquery proxy methods", ->
+  context "proxyies", ->
     fns = [
       {each: -> $(@).removeClass().addClass("foo")}
       {map: -> $(@).text()}
@@ -2873,7 +2901,7 @@ describe "Cypress", ->
 
               expect(@log.onConsole()).to.deep.eq obj
 
-  context "jquery traversal methods", ->
+  context "traversals", ->
     fns = [
       {find: "*"}
       {filter: ":first"}
