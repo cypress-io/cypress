@@ -3099,6 +3099,18 @@ describe "Cypress", ->
         cy.get("div:first").invoke("baz").then (num) ->
           expect(num).to.eq 123
 
+      it "handles string subjects", ->
+        str = "foobarbaz"
+
+        cy.noop(str).invoke("length").then (num) ->
+          expect(num).to.eq str.length
+
+      it "handles properties on the prototype", ->
+        num = new Number(10)
+
+        cy.noop(num).invoke("valueOf").then (num) ->
+          expect(num).to.eq 10
+
     describe ".log", ->
       beforeEach ->
         @obj = {

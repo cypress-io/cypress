@@ -68,12 +68,21 @@ do (Cypress, _, $) ->
         remoteSubject = remoteJQuery(subject)
         Cypress.Utils.setCypressNamespace(remoteSubject, subject)
 
-      ## if the property does not EXIST on the subject
-      ## then throw a specific error message
-      if fn not of (remoteSubject or subject)
+      prop = (remoteSubject or subject)[fn]
+
+      fail = =>
         @throwErr("cy.invoke() errored because the property: '#{fn}' does not exist on your subject.")
 
-      prop = (remoteSubject or subject)[fn]
+      ## if the property does not EXIST on the subject
+      ## then throw a specific error message
+      try
+        fail() if fn not of (remoteSubject or subject)
+      catch e
+        # if not Object.prototype.hasOwnProperty.call((remoteSubject or subject), fn)
+        ## fallback to a second attempt at finding the property on the subject
+        ## in case our subject isnt object-like
+        ## think about using the hasOwnProperty
+        fail() if _.isUndefined(prop)
 
       invoke = ->
         if _.isFunction(prop)
