@@ -35,6 +35,24 @@ describe "Routes", ->
     @sandbox.restore()
     nock.cleanAll()
 
+  context "GET /", ->
+    it "redirects to config.clientRoute", (done) ->
+      supertest(@app)
+      .get("/")
+      .expect(302)
+      .expect (res) ->
+        expect(res.headers.location).to.eq "/__/"
+        null
+      .end(done)
+
+  context "GET /__", ->
+    it "routes config.clientRoute to serve cypress client app html", (done) ->
+      supertest(@app)
+        .get("/__")
+        .expect(200)
+        .expect(/App.start\(.+\)/)
+        .end(done)
+
   context "GET /files", ->
     beforeEach ->
       Fixtures.scaffold("todos")

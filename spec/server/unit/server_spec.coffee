@@ -87,8 +87,11 @@ describe "Server Interface", ->
       it "autoOpen=false", ->
         @defaults "autoOpen", false
 
-      it "clientUrl=http://localhost:3000", ->
-        @defaults "clientUrl", "http://localhost:3000"
+      it "clientUrl=http://localhost:3000/__/", ->
+        @defaults "clientUrl", "http://localhost:3000/__/"
+
+      it "clientUrlDisplay=http://localhost:3000", ->
+        @defaults "clientUrlDisplay", "http://localhost:3000"
 
       it "idGeneratorUrl=http://localhost:3000/id_generator", ->
         @defaults "idGeneratorUrl", "http://localhost:3000/id_generator"

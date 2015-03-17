@@ -23,7 +23,7 @@
       <div class="well well-lg">
         <div>Server Running</div>
         <div>
-          <a href="#"><%= @clientUrl %></a>
+          <a href="#"><%= @clientUrlDisplay %></a>
         </div>
       </div>
       <button data-stop class="btn btn-danger">Stop</button>

@@ -19,7 +19,7 @@
       _.defer ->
         App.config.runProject(project.get("path"))
           .then (config) ->
-            project.setClientUrl(config.clientUrl)
+            project.setClientUrl(config.clientUrl, config.clientUrlDisplay)
             App.execute "start:id:generator", config.idGeneratorUrl
           .catch (err) ->
             project.setError(err)

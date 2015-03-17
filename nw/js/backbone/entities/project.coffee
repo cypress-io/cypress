@@ -10,8 +10,10 @@
     getNameFromPath: ->
       _(@get("path").split("/")).last()
 
-    setClientUrl: (url) ->
-      @set clientUrl: url
+    setClientUrl: (url, display) ->
+      @set
+        clientUrl: url
+        clientUrlDisplay: display
 
     setError: (err) ->
       if err.portInUse

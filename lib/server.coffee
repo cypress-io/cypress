@@ -49,6 +49,7 @@ class Server
     ## passing or failing
 
     _.defaults obj,
+      clientRoute: "/__/"
       commandTimeout: 4000
       port: 3000
       autoOpen: false
@@ -57,8 +58,11 @@ class Server
       javascripts: []
       env: process.env["NODE_ENV"]
 
+    rootUrl = "http://localhost:" + obj.port
+
     _.defaults obj,
-      clientUrl: "http://localhost:#{obj.port}"
+      clientUrlDisplay: rootUrl
+      clientUrl: rootUrl + obj.clientRoute
 
     _.defaults obj,
       idGeneratorUrl: rootUrl + "/id_generator"

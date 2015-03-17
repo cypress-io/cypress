@@ -28,7 +28,7 @@ module.exports = (app) ->
   ## we've namespaced the initial sending down of our cypress
   ## app as '__'  this route shouldn't ever be used by servers
   ## and therefore should not conflict
-  app.get "/__", (req, res) ->
+  app.get app.get("cypress").clientRoute, (req, res) ->
     req.session.host = req.get("host")
 
     res.render path.join(process.cwd(), "lib", "public", "index.html"), {
@@ -41,7 +41,7 @@ module.exports = (app) ->
     ## requesting the cypress app and we need to redirect to the
     ## root path that serves the app
     if not req.session.remote
-      res.redirect("/__/")
+      res.redirect app.get("cypress").clientRoute
     else
       ## else pass through as normal
       controllers.remoteProxy.handle(req, res, next)
