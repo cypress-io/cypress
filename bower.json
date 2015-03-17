@@ -21,7 +21,6 @@
     "labjs": "*",
     "bootstrap-sass-official": "3.2.0+1",
     "font-awesome": "~4.2.0",
-    "marionette": "~2.1.0",
     "backbone": "~1.1.2",
     "spin.js": "~2.0.1",
     "underscore.string": "~2.3.3",
@@ -39,5 +38,6 @@
     "jquery-simulate": "~1.0.0",
     "bluebird": "2.3.11",
     "angular": "1.3.1"
+    "backbone.marionette": "~2.4.1"
   }
 }
