@@ -1952,6 +1952,17 @@ describe "Cypress", ->
           expect(err.message).to.include ".select() was called with an array of arguments but does not have a 'multiple' attribute set!"
           done()
 
+      it "throws when the subject isnt visible", (done) ->
+        select = cy.$("select:first").show().hide()
+
+        node = Cypress.Utils.stringifyElement(select)
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.eq "cy.select() cannot be called on the non-visible element: #{node}"
+          done()
+
+        cy.get("select:first").select("foo")
+
   context "#type", ->
     it "does not change the subject", ->
       input = cy.$("input:first")
@@ -2026,6 +2037,17 @@ describe "Cypress", ->
           expect(err.message).to.include ".type() can only be called on a single textarea or :text! Your subject contained #{@num} elements!"
           done()
 
+      it "throws when the subject isnt visible", (done) ->
+        input = cy.$("input:text:first").show().hide()
+
+        node = Cypress.Utils.stringifyElement(input)
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.eq "cy.type() cannot be called on the non-visible element: #{node}"
+          done()
+
+        cy.get("input:text:first").type("foo")
+
   context "#clear", ->
     it "does not change the subject", ->
       textarea = cy.$("textarea")
@@ -2079,6 +2101,17 @@ describe "Cypress", ->
         cy.on "fail", (err) ->
           expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <input type=\"checkbox\" name=\"colors\" value=\"blue\">"
           done()
+
+      it "throws when the subject isnt visible", (done) ->
+        input = cy.$("input:text:first").show().hide()
+
+        node = Cypress.Utils.stringifyElement(input)
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.eq "cy.clear() cannot be called on the non-visible element: #{node}"
+          done()
+
+        cy.get("input:text:first").clear()
 
   context "#check", ->
     it "does not change the subject", ->
@@ -2144,6 +2177,17 @@ describe "Cypress", ->
           expect(err.message).to.include ".check() can only be called on :checkbox and :radio! Your subject contains a: <textarea id=\"comments\"></textarea>"
           done()
 
+      it "throws when any member of the subject isnt visible", (done) ->
+        chk = cy.$(":checkbox").show().last().hide()
+
+        node = Cypress.Utils.stringifyElement(chk)
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.eq "cy.check() cannot be called on the non-visible element: #{node}"
+          done()
+
+        cy.get(":checkbox").check()
+
   context "#uncheck", ->
     it "unchecks a checkbox", ->
       cy.get("[name=birds][value=cockatoo]").uncheck().then ($checkbox) ->
@@ -2181,6 +2225,18 @@ describe "Cypress", ->
         cy.noop({}).uncheck()
 
         cy.on "fail", -> done()
+
+      it "throws when any member of the subject isnt visible", (done) ->
+        chk = cy.$(":checkbox").show().last()
+
+        cy.on "fail", (err) ->
+          node = Cypress.Utils.stringifyElement(chk)
+          expect(err.message).to.eq "cy.uncheck() cannot be called on the non-visible element: #{node}"
+          done()
+
+        cy
+          .get(":checkbox").check().last().invoke("hide")
+          .get(":checkbox").uncheck()
 
   context "#submit", ->
     it "does not change the subject", ->
@@ -2610,12 +2666,24 @@ describe "Cypress", ->
       cy.get("button").dblclick()
 
     describe "errors", ->
-      it "throws when not a dom subject", (done) ->
+      beforeEach ->
         @sandbox.stub cy.runner, "uncaught"
+
+      it "throws when not a dom subject", (done) ->
+        cy.on "fail", -> done()
 
         cy.dblclick()
 
-        cy.on "fail", -> done()
+      it "throws when any member of the subject isnt visible", (done) ->
+        btn = cy.$("button").show().last().hide()
+
+        node = Cypress.Utils.stringifyElement(btn)
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.eq "cy.dblclick() cannot be called on the non-visible element: #{node}"
+          done()
+
+        cy.get("button").dblclick()
 
     describe ".log", ->
       it "returns only the $el for the element of the subject that was dblclicked", ->
@@ -2774,12 +2842,24 @@ describe "Cypress", ->
       cy.get("button").click()
 
     describe "errors", ->
-      it "throws when not a dom subject", (done) ->
+      beforeEach ->
         @sandbox.stub cy.runner, "uncaught"
+
+      it "throws when not a dom subject", (done) ->
+        cy.on "fail", -> done()
 
         cy.click()
 
-        cy.on "fail", -> done()
+      it "throws when any member of the subject isnt visible", (done) ->
+        btn = cy.$("button").show().last().hide()
+
+        node = Cypress.Utils.stringifyElement(btn)
+
+        cy.on "fail", (err) ->
+          expect(err.message).to.eq "cy.click() cannot be called on the non-visible element: #{node}"
+          done()
+
+        cy.get("button").click()
 
     describe ".log", ->
       it "returns only the $el for the element of the subject that was clicked", ->

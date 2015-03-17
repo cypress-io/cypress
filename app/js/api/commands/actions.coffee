@@ -40,19 +40,21 @@ do (Cypress, _) ->
       ## blow up if any member of the subject
       ## isnt a checkbox or radio
       subject.each (index, el) =>
-        el = $(el)
-        node = Cypress.Utils.stringifyElement(el)
+        $el = $(el)
+        node = Cypress.Utils.stringifyElement($el)
 
-        if not el.is(":checkbox,:radio")
+        @ensureVisibility($el)
+
+        if not $el.is(":checkbox,:radio")
           word = Cypress.Utils.plural(subject, "contains", "is")
           @throwErr(".check() can only be called on :checkbox and :radio! Your subject #{word} a: #{node}")
 
-        return if el.prop("checked")
+        return if $el.prop("checked")
 
         ## if we didnt pass in any values or our
         ## el's value is in the array then check it
-        if not values.length or el.val() in values
-          el.prop("checked", true).trigger("change")
+        if not values.length or $el.val() in values
+          $el.prop("checked", true).trigger("change")
 
     uncheck: (subject, values = []) ->
       @ensureDom(subject)
@@ -63,19 +65,21 @@ do (Cypress, _) ->
       ## blow up if any member of the subject
       ## isnt a checkbox
       subject.each (index, el) =>
-        el = $(el)
+        $el = $(el)
         node = Cypress.Utils.stringifyElement(el)
 
-        if not el.is(":checkbox")
+        @ensureVisibility($el)
+
+        if not $el.is(":checkbox")
           word = Cypress.Utils.plural(subject, "contains", "is")
           @throwErr(".uncheck() can only be called on :checkbox! Your subject #{word} a: #{node}")
 
-        return if not el.prop("checked")
+        return if not $el.prop("checked")
 
         ## if we didnt pass in any values or our
-        ## el's value is in the array then check it
-        if not values.length or el.val() in values
-          el.prop("checked", false).trigger("change")
+        ## $el's value is in the array then check it
+        if not values.length or $el.val() in values
+          $el.prop("checked", false).trigger("change")
 
     focus: (subject, options = {}) ->
       ## we should throw errors by default!
@@ -250,6 +254,8 @@ do (Cypress, _) ->
       dblclick = (memo, el, index) =>
         $el = $(el)
 
+        @ensureVisibility($el)
+
         wait = if $el.is("a") then 50 else 10
 
         memo.then =>
@@ -286,6 +292,8 @@ do (Cypress, _) ->
 
       click = (memo, el, index) =>
         $el = $(el)
+
+        @ensureVisibility($el)
 
         wait = if $el.is("a") then 50 else 10
 
@@ -327,16 +335,17 @@ do (Cypress, _) ->
       @ensureDom(subject)
 
       ## allow the el we're typing into to be
-      ## changed by options
-      ## why are we setting options.el??
+      ## changed by options -- used by cy.clear()
       _.defaults options,
         el: subject
 
-      if not subject.is("textarea,:text,:password")
+      @ensureVisibility(options.el)
+
+      if not options.el.is("textarea,:text,:password")
         node = Cypress.Utils.stringifyElement(options.el)
         @throwErr(".type() can only be called on textarea or :text! Your subject is a: #{node}")
 
-      if (num = subject.length) and num > 1
+      if (num = options.el.length) and num > 1
         @throwErr(".type() can only be called on a single textarea or :text! Your subject contained #{num} elements!")
 
       options.sequence = sequence
@@ -367,7 +376,7 @@ do (Cypress, _) ->
           word = Cypress.Utils.plural(subject, "contains", "is")
           @throwErr(".clear() can only be called on textarea or :text! Your subject #{word} a: #{node}")
 
-        @sync.type("{selectall}{del}", {el: el})
+        @command("type", "{selectall}{del}", {el: el})
 
     select: (subject, valueOrText, options = {}) ->
       @ensureDom(subject)
@@ -389,6 +398,8 @@ do (Cypress, _) ->
 
       if (num = subject.length) and num > 1
         @throwErr ".select() can only be called on a single <select>! Your subject contained #{num} elements!"
+
+      @ensureVisibility(subject)
 
       ## normalize valueOrText if its not an array
       valueOrText = [].concat(valueOrText)
@@ -434,7 +445,6 @@ do (Cypress, _) ->
       subject.get(0).dispatchEvent(event)
 
       return subject
-
 
   Cypress.addDualCommand
     focused: (subject, options = {}) ->

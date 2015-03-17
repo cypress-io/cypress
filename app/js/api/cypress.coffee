@@ -33,6 +33,15 @@ window.Cypress = do ($, _, Backbone) ->
       else
         @props[key] = val
 
+    ensureVisibility: (subject, method) ->
+      subject ?= @_subject()
+
+      method ?= @prop("current").name
+
+      if not (subject.length is subject.filter(":visible").length)
+        node = Cypress.Utils.stringifyElement(subject)
+        @throwErr("cy.#{method}() cannot be called on the non-visible element: #{node}")
+
     ensureDom: (subject, method) ->
       subject ?= @_subject()
 
