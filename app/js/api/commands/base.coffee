@@ -60,6 +60,9 @@ do (Cypress, _, $) ->
     invoke: (subject, fn, args...) ->
       @ensureSubject()
 
+      if not _.isString(fn)
+        @throwErr("cy.invoke() only accepts a string as the first argument.")
+
       remoteJQuery = @_getRemoteJQuery()
       if Cypress.Utils.hasElement(subject) and remoteJQueryisNotSameAsGlobal(remoteJQuery)
         remoteSubject = remoteJQuery(subject)

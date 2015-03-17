@@ -3182,6 +3182,13 @@ describe "Cypress", ->
 
         cy.invoke("queue")
 
+      it "throws when first argument isnt a string", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.eq "cy.invoke() only accepts a string as the first argument."
+          done()
+
+        cy.noop({}).invoke({})
+
   context "#its", ->
     it "proxies to #invoke", ->
       cy.noop({foo: -> "bar"}).its("foo").should("eq", "bar")
