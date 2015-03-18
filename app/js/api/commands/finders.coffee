@@ -32,8 +32,7 @@ do (Cypress, _) ->
       if alias = @getAlias(selector)
         {subject, command} = alias
         if Cypress.Utils.hasElement(subject)
-          el = subject.get(0)
-          if @_contains(el)
+          if @_contains(subject)
             log(subject)
             return subject
           else

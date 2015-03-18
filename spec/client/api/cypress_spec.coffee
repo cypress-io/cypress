@@ -1567,6 +1567,23 @@ describe "Cypress", ->
         cy.get("body").as("b").get("@b").then ($body) ->
           expect($body.get(0)).to.eq body.get(0)
 
+      it "re-queries the dom if any element in an alias isnt in the document", ->
+        inputs = cy.$("input")
+
+        cy
+          .get("input").as("inputs").then ($inputs) ->
+            @length = $inputs.length
+
+            ## remove the last input
+            $inputs.last().remove()
+
+            ## return original subject
+            return $inputs
+          .get("@inputs").then ($inputs) ->
+            ## we should have re-queried for these inputs
+            ## which should have reduced their length by 1
+            expect($inputs).to.have.length(@length - 1)
+
       ## these other tests are for .save
       # it "will resolve deferred arguments", ->
       #   df = $.Deferred()
