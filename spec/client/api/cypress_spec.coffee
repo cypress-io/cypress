@@ -2151,6 +2151,15 @@ describe "Cypress", ->
         expect($inputs.filter(":checked").length).to.eq 2
         expect($inputs.filter("[value=blue],[value=green]")).to.be.checked
 
+    describe "events", ->
+      it "emits click event", (done) ->
+        cy.$("[name=colors][value=blue]").click -> done()
+        cy.get("[name=colors]").check("blue")
+
+      it "emits change event", (done) ->
+        cy.$("[name=colors][value=blue]").change -> done()
+        cy.get("[name=colors]").check("blue")
+
     describe "errors", ->
       beforeEach ->
         @sandbox.stub cy.runner, "uncaught"
@@ -2188,6 +2197,33 @@ describe "Cypress", ->
 
         cy.get(":checkbox").check()
 
+    describe ".log", ->
+      beforeEach ->
+        Cypress.on "log", (@log) =>
+
+      it "logs only 1 check event", ->
+        logs = []
+        checks = []
+
+        Cypress.on "log", (log) ->
+          logs.push(log)
+          checks.push(log) if log.name is "check"
+
+        cy.get("[name=colors][value=blue]").check().then ->
+          expect(logs).to.have.length(2)
+          expect(checks).to.have.length(1)
+
+      it "passes in $el", ->
+        cy.get("[name=colors][value=blue]").check().then ($input) ->
+          expect(@log.$el.get(0)).to.eq $input.get(0)
+
+      it "#onConsole", ->
+        cy.get("[name=colors][value=blue]").check().then ($input) ->
+          expect(@log.onConsole()).to.deep.eq {
+            Command: "check"
+            "Applied To": @log.$el
+          }
+
   context "#uncheck", ->
     it "unchecks a checkbox", ->
       cy.get("[name=birds][value=cockatoo]").uncheck().then ($checkbox) ->
@@ -2209,6 +2245,15 @@ describe "Cypress", ->
         done("should not fire change event")
       cy.get(checkbox).uncheck()
       cy.on "end", -> done()
+
+    describe "events", ->
+      it "emits click event", (done) ->
+        cy.$("[name=colors][value=blue]").prop("checked", true).click -> done()
+        cy.get("[name=colors]").uncheck("blue")
+
+      it "emits change event", (done) ->
+        cy.$("[name=colors][value=blue]").prop("checked", true).change -> done()
+        cy.get("[name=colors]").uncheck("blue")
 
     describe "errors", ->
       beforeEach ->
@@ -2237,6 +2282,35 @@ describe "Cypress", ->
         cy
           .get(":checkbox").check().last().invoke("hide")
           .get(":checkbox").uncheck()
+
+    describe ".log", ->
+      beforeEach ->
+        cy.$("[name=colors][value=blue]").prop("checked", true)
+
+        Cypress.on "log", (@log) =>
+
+      it "logs only 1 check event", ->
+        logs = []
+        unchecks = []
+
+        Cypress.on "log", (log) ->
+          logs.push(log)
+          unchecks.push(log) if log.name is "uncheck"
+
+        cy.get("[name=colors][value=blue]").uncheck().then ->
+          expect(logs).to.have.length(2)
+          expect(unchecks).to.have.length(1)
+
+      it "passes in $el", ->
+        cy.get("[name=colors][value=blue]").uncheck().then ($input) ->
+          expect(@log.$el.get(0)).to.eq $input.get(0)
+
+      it "#onConsole", ->
+        cy.get("[name=colors][value=blue]").uncheck().then ($input) ->
+          expect(@log.onConsole()).to.deep.eq {
+            Command: "uncheck"
+            "Applied To": @log.$el
+          }
 
   context "#submit", ->
     it "does not change the subject", ->

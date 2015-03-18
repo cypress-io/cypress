@@ -39,22 +39,32 @@ do (Cypress, _) ->
 
       ## blow up if any member of the subject
       ## isnt a checkbox or radio
-      subject.each (index, el) =>
-        $el = $(el)
-        node = Cypress.Utils.stringifyElement($el)
+      check = (memo, el, index) =>
+        memo.then =>
+          $el = $(el)
+          node = Cypress.Utils.stringifyElement($el)
 
-        @ensureVisibility($el)
+          @ensureVisibility($el)
 
-        if not $el.is(":checkbox,:radio")
-          word = Cypress.Utils.plural(subject, "contains", "is")
-          @throwErr(".check() can only be called on :checkbox and :radio! Your subject #{word} a: #{node}")
+          if not $el.is(":checkbox,:radio")
+            word = Cypress.Utils.plural(subject, "contains", "is")
+            @throwErr(".check() can only be called on :checkbox and :radio! Your subject #{word} a: #{node}")
 
-        return if $el.prop("checked")
+          return if $el.prop("checked")
 
-        ## if we didnt pass in any values or our
-        ## el's value is in the array then check it
-        if not values.length or $el.val() in values
-          $el.prop("checked", true).trigger("change")
+          ## if we didnt pass in any values or our
+          ## el's value is in the array then check it
+          if not values.length or $el.val() in values
+            @command("click", {el: $el, log: false}).then ->
+              Cypress.command
+                $el: $el
+                onConsole: ->
+                  "Applied To": $el
+
+      checks = _.reduce subject.toArray(), check, Promise.resolve().cancellable()
+
+      ## return our original subject when our promise resolves
+      checks.return(subject)
 
     uncheck: (subject, values = []) ->
       @ensureDom(subject)
@@ -64,22 +74,32 @@ do (Cypress, _) ->
 
       ## blow up if any member of the subject
       ## isnt a checkbox
-      subject.each (index, el) =>
-        $el = $(el)
-        node = Cypress.Utils.stringifyElement(el)
+      uncheck = (memo, el, index) =>
+        memo.then =>
+          $el = $(el)
+          node = Cypress.Utils.stringifyElement(el)
 
-        @ensureVisibility($el)
+          @ensureVisibility($el)
 
-        if not $el.is(":checkbox")
-          word = Cypress.Utils.plural(subject, "contains", "is")
-          @throwErr(".uncheck() can only be called on :checkbox! Your subject #{word} a: #{node}")
+          if not $el.is(":checkbox")
+            word = Cypress.Utils.plural(subject, "contains", "is")
+            @throwErr(".uncheck() can only be called on :checkbox! Your subject #{word} a: #{node}")
 
-        return if not $el.prop("checked")
+          return if not $el.prop("checked")
 
-        ## if we didnt pass in any values or our
-        ## $el's value is in the array then check it
-        if not values.length or $el.val() in values
-          $el.prop("checked", false).trigger("change")
+          ## if we didnt pass in any values or our
+          ## $el's value is in the array then check it
+          if not values.length or $el.val() in values
+            @command("click", {el: $el, log: false}).then ->
+              Cypress.command
+                $el: $el
+                onConsole: ->
+                  "Applied To": $el
+
+      unchecks = _.reduce subject.toArray(), uncheck, Promise.resolve().cancellable()
+
+      ## return our original subject when our promise resolves
+      unchecks.return(subject)
 
     focus: (subject, options = {}) ->
       ## we should throw errors by default!
@@ -287,8 +307,12 @@ do (Cypress, _) ->
       ## return our original subject when our promise resolves
       dblclicks.return(subject)
 
-    click: (subject) ->
-      @ensureDom(subject)
+    click: (subject, options = {}) ->
+      _.defaults options,
+        el: subject
+        log: true
+
+      @ensureDom(options.el)
 
       click = (memo, el, index) =>
         $el = $(el)
@@ -301,11 +325,12 @@ do (Cypress, _) ->
           @command("focus", {el: $el, error: false, log: false}).then =>
             el.click()
 
-            Cypress.command
-              $el: $el
-              onConsole: ->
-                "Applied To":   $el
-                "Elements":     $el.length
+            if options.log
+              Cypress.command
+                $el: $el
+                onConsole: ->
+                  "Applied To":   $el
+                  "Elements":     $el.length
 
             ## we want to add this wait delta to our
             ## runnables timeout so we prevent it from
@@ -321,10 +346,10 @@ do (Cypress, _) ->
       ## create a new promise and chain off of it using reduce to insert
       ## the artificial delays.  we have to set this as cancellable for it
       ## to propogate since this is an "inner" promise
-      clicks = _.reduce subject.toArray(), click, Promise.resolve().cancellable()
+      clicks = _.reduce options.el.toArray(), click, Promise.resolve().cancellable()
 
       ## return our original subject when our promise resolves
-      clicks.return(subject)
+      clicks.return(options.el)
 
       ## -- this does not work but may work in the future -- ##
       # Promise
