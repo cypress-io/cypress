@@ -442,8 +442,19 @@ window.Cypress = do ($, _, Backbone) ->
       else
         insert()
 
-    _contains: (el) ->
-      $.contains(@sync.document().get(0), el)
+    _contains: ($el) ->
+      doc = @sync.document().get(0)
+
+      contains = (el) ->
+        $.contains(doc, el)
+
+      ## either see if the raw element itself
+      ## is contained in the document
+      if _.isElement($el)
+        contains($el)
+      else
+        ## or all the elements in the collection
+        _.all $el.toArray(), contains
 
     _getRemoteJQuery: ->
       if opt = Cypress.option("jQuery")

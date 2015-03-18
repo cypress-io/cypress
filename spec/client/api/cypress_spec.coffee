@@ -3624,6 +3624,28 @@ describe "Cypress", ->
 
       expect(fn).to.throw(Error)
 
+  context "#_contains", ->
+    it "returns true if the document contains the element", ->
+      btn = cy.$("#button").get(0)
+
+      expect(cy._contains(btn)).to.be.true
+
+    it "returns false if the document does not contain the element", ->
+      btn = cy.$("#button").remove().get(0)
+
+      expect(cy._contains(btn)).to.be.false
+
+    it "returns true if all elements in the collection are in the document", ->
+      inputs = cy.$("input")
+
+      expect(cy._contains(inputs)).to.be.true
+
+    it "returns false if any elemen isnt in the document", ->
+      inputs = cy.$("input")
+      inputs.last().remove()
+
+      expect(cy._contains(inputs)).to.be.false
+
   context "#until", ->
     describe "it retries the previous command", ->
       it "retries when false", (done) ->
