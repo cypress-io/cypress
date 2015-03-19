@@ -2081,13 +2081,197 @@ describe "Cypress", ->
     describe "{enter}", ->
       beforeEach ->
         @forms = cy.$("#form-submits")
+        @forms.find("form").off("submit")
 
-      it "triggers form submit when 1 input and no 'submit' elements", (done) ->
-        @forms.find("#single-input").submit -> done()
+      context "1 input, no 'submit' elements", ->
+        it "triggers form submit", (done) ->
+          @forms.find("#single-input").submit (e) ->
+            e.preventDefault()
+            done()
 
-        cy.get("#single-input input").type("foo").type("{enter}")
+          cy.get("#single-input input").type("foo{enter}")
 
-      it "only logs 1 type event"
+        it "triggers form submit synchronously before type logs or resolves", ->
+          events = []
+
+          cy.on "invoke:start", (obj) ->
+            events.push "#{obj.name}:start"
+
+          @forms.find("#single-input").submit (e) ->
+            e.preventDefault()
+            events.push "submit"
+
+          Cypress.on "log", (log) ->
+            events.push "#{log.name}:log"
+
+          cy.on "invoke:end", (obj) ->
+            events.push "#{obj.name}:end"
+
+          cy.get("#single-input input").type("f{enter}").then ->
+            expect(events).to.deep.eq [
+              "get:start", "get:log", "get:end", "type:start", "submit", "type:log", "type:end", "then:start"
+            ]
+
+        it "triggers 2 form submit event", ->
+          submits = 0
+
+          @forms.find("#single-input").submit (e) ->
+            e.preventDefault()
+            submits += 1
+
+          cy.get("#single-input input").type("f{enter}{enter}").then ->
+            expect(submits).to.eq 2
+
+        it "unbinds from form submit event", ->
+          submits = 0
+
+          form = @forms.find("#single-input").submit ->
+            submits += 1
+
+          cy.get("#single-input input").type("f{enter}{enter}").then ->
+            ## simulate another enter event which should not issue another
+            ## submit event because we should have cleaned up the events
+            form.find("input").simulate "key-sequence", sequence: "b{enter}"
+            expect(submits).to.eq 2
+
+        it "does not submit when keydown is defaultPrevented on input", (done) ->
+          form = @forms.find("#single-input").submit -> done("err: should not have submitted")
+          form.find("input").keydown (e) -> e.preventDefault()
+
+          cy.get("#single-input input").type("f").type("f{enter}").then -> done()
+
+        it "does not submit when keydown is defaultPrevented on wrapper", (done) ->
+          form = @forms.find("#single-input").submit -> done("err: should not have submitted")
+          form.find("div").keydown (e) -> e.preventDefault()
+
+          cy.get("#single-input input").type("f").type("f{enter}").then -> done()
+
+        it "does not submit when keydown is defaultPrevented on form", (done) ->
+          form = @forms.find("#single-input").submit -> done("err: should not have submitted")
+          form.keydown (e) -> e.preventDefault()
+
+          cy.get("#single-input input").type("f").type("f{enter}").then -> done()
+
+        it "does not submit when keypress is defaultPrevented on input", (done) ->
+          form = @forms.find("#single-input").submit -> done("err: should not have submitted")
+          form.find("input").keypress (e) -> e.preventDefault()
+
+          cy.get("#single-input input").type("f").type("f{enter}").then -> done()
+
+        it "does not submit when keypress is defaultPrevented on wrapper", (done) ->
+          form = @forms.find("#single-input").submit -> done("err: should not have submitted")
+          form.find("div").keypress (e) -> e.preventDefault()
+
+          cy.get("#single-input input").type("f").type("f{enter}").then -> done()
+
+        it "does not submit when keypress is defaultPrevented on form", (done) ->
+          form = @forms.find("#single-input").submit -> done("err: should not have submitted")
+          form.keypress (e) -> e.preventDefault()
+
+          cy.get("#single-input input").type("f").type("f{enter}").then -> done()
+
+      context "2 inputs, no 'submit' elements", ->
+        it "does not trigger submit event", (done) ->
+          form = @forms.find("#no-buttons").submit -> done("err: should not have submitted")
+
+          cy.get("#no-buttons input:first").type("f").type("{enter}").then -> done()
+
+      context "2 inputs, no 'submit' elements but 1 button[type=button]", ->
+        it "does not trigger submit event", (done) ->
+          form = @forms.find("#one-button-type-button").submit -> done("err: should not have submitted")
+
+          cy.get("#one-button-type-button input:first").type("f").type("{enter}").then -> done()
+
+      context "2 inputs, 1 'submit' element input[type=submit]", ->
+        it "triggers form submit", (done) ->
+          @forms.find("#multiple-inputs-and-input-submit").submit (e) ->
+            e.preventDefault()
+            done()
+
+          cy.get("#multiple-inputs-and-input-submit input:first").type("foo{enter}")
+
+        it "causes click event on the input[type=submit]", (done) ->
+          @forms.find("#multiple-inputs-and-input-submit input[type=submit]").click -> done()
+
+          cy.get("#multiple-inputs-and-input-submit input:first").type("foo{enter}")
+
+        it "does not cause click event on the input[type=submit] if keydown is defaultPrevented on input", (done) ->
+          form = @forms.find("#multiple-inputs-and-input-submit").submit -> done("err: should not have submitted")
+          form.find("input").keypress (e) -> e.preventDefault()
+
+          cy.get("#multiple-inputs-and-input-submit input:first").type("f{enter}").then -> done()
+
+      context "2 inputs, 1 'submit' element button[type=submit]", ->
+        it "triggers form submit", (done) ->
+          @forms.find("#multiple-inputs-and-button-submit").submit (e) ->
+            e.preventDefault()
+            done()
+
+          cy.get("#multiple-inputs-and-button-submit input:first").type("foo{enter}")
+
+        it "causes click event on the button[type=submit]", (done) ->
+          @forms.find("#multiple-inputs-and-button-submit button[type=submit]").click -> done()
+
+          cy.get("#multiple-inputs-and-button-submit input:first").type("foo{enter}")
+
+        it "does not cause click event on the button[type=submit] if keydown is defaultPrevented on input", (done) ->
+          form = @forms.find("#multiple-inputs-and-button-submit").submit ->
+            done("err: should not have submitted")
+          form.find("input").keypress (e) -> e.preventDefault()
+
+          cy.get("#multiple-inputs-and-button-submit input:first").type("f{enter}").then -> done()
+
+      context "2 inputs, 1 'submit' element button", ->
+        it "triggers form submit", (done) ->
+          @forms.find("#multiple-inputs-and-button-with-no-type").submit (e) ->
+            e.preventDefault()
+            done()
+
+          cy.get("#multiple-inputs-and-button-with-no-type input:first").type("foo{enter}")
+
+        it "causes click event on the button", (done) ->
+          @forms.find("#multiple-inputs-and-button-with-no-type button").click -> done()
+
+          cy.get("#multiple-inputs-and-button-with-no-type input:first").type("foo{enter}")
+
+        it "does not cause click event on the button if keydown is defaultPrevented on input", (done) ->
+          form = @forms.find("#multiple-inputs-and-button-with-no-type").submit -> done("err: should not have submitted")
+          form.find("input").keypress (e) -> e.preventDefault()
+
+          cy.get("#multiple-inputs-and-button-with-no-type input:first").type("f{enter}").then -> done()
+
+      context "2 inputs, 2 'submit' elements", ->
+        it "triggers form submit", (done) ->
+          @forms.find("#multiple-inputs-and-multiple-submits").submit (e) ->
+            e.preventDefault()
+            done()
+
+          cy.get("#multiple-inputs-and-multiple-submits input:first").type("foo{enter}")
+
+        it "causes click event on the button", (done) ->
+          @forms.find("#multiple-inputs-and-multiple-submits button").click -> done()
+
+          cy.get("#multiple-inputs-and-multiple-submits input:first").type("foo{enter}")
+
+        it "does not cause click event on the button if keydown is defaultPrevented on input", (done) ->
+          form = @forms.find("#multiple-inputs-and-multiple-submits").submit -> done("err: should not have submitted")
+          form.find("input").keypress (e) -> e.preventDefault()
+
+          cy.get("#multiple-inputs-and-multiple-submits input:first").type("f{enter}").then -> done()
+
+      context "disabled default button", ->
+        beforeEach ->
+          @forms.find("#multiple-inputs-and-multiple-submits").find("button").prop("disabled", true)
+
+        it "will not receive click event", (done) ->
+          @forms.find("#multiple-inputs-and-multiple-submits button").click -> done("err: should not receive click event")
+
+          cy.get("#multiple-inputs-and-multiple-submits input:first").type("foo{enter}").then -> done()
+
+        it "will not submit the form", (done) ->
+          @forms.find("#multiple-inputs-and-multiple-submits").submit -> done("err: should not receive submit event")
+
+          cy.get("#multiple-inputs-and-multiple-submits input:first").type("foo{enter}").then -> done()
 
     describe ".log", ->
       beforeEach ->
@@ -2104,6 +2288,18 @@ describe "Cypress", ->
             Typed: "foobar"
             "Applied To": $input
           }
+
+      it "logs only one type event", ->
+        logs = []
+        types = []
+
+        Cypress.on "log", (log) ->
+          logs.push(log)
+          types.push(log) if log.name is "type"
+
+        cy.get(":text:first").type("foo").then ->
+          expect(logs).to.have.length(2)
+          expect(types).to.have.length(1)
 
     describe "errors", ->
       beforeEach ->

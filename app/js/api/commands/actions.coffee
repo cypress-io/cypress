@@ -390,32 +390,103 @@ do (Cypress, _) ->
       ## is out of focus
       @command("click", {el: options.el, log: false}).then =>
 
-      simulateSubmit = =>
-        form = options.el.parents("form")
+        multipleInputsAndNoSubmitElements = (form) ->
+          inputs  = form.find("input")
+          submits = form.find("input[type=submit], button[type!=button]")
 
-        return if not form.length
+          inputs.length > 1 and submits.length is 0
 
-        ## throw an error here if there are multiple form parents
+        clickedDefaultButton = (button) ->
+          ## find the 'default button' as per HTML spec and click it natively
+          ## do not issue mousedown / mouseup since this is supposed to be synthentic
+          if button.length
+            button.get(0).click()
+            true
+          else
+            false
 
-        ## need to do the crazy logic associated with knowing when
-        ## to trigger the form submit event and when to also trigger
-        ## the click event on the first 'submit' like element
-        @command("submit", {log: false, el: form})
+        getDefaultButton = (form) ->
+          form.find("input[type=submit], button[type!=button]").first()
 
-      log = ->
-        Cypress.command
-          $el: options.el
-          onConsole: ->
-            "Typed": sequence
-            "Applied To": options.el
+        defaultButtonisDisabled = (button) ->
+          button.prop("disabled")
 
-      ## handle submit event here if we pressed enter
-      if pressedEnter.test(sequence)
-        Promise.resolve(simulateSubmit()).then(log)
-      else
+        simulateSubmitHandler = =>
+          form = options.el.parents("form")
+
+          return if not form.length
+
+          ## throw an error here if there are multiple form parents
+
+          ## bail if we have multiple inputs and no submit elements
+          return if multipleInputsAndNoSubmitElements(form)
+
+          keydownPrevented  = false
+          keypressPrevented = false
+
+          ## there are edge cases where this logic is broken
+          ## we are currently not following the spec in regards
+          ## to NOT firing keypress events when the keydown
+          ## event is preventDefault() or stopPropagation()
+          ## our simulation lib is firing keypress no matter what
+
+          keydown = (e) ->
+            if e.which is 13 and e.isDefaultPrevented()
+              keydownPrevented = true
+
+          keypress = (e) =>
+            if e.which is 13
+              if e.isDefaultPrevented()
+                keypressPrevented = true
+
+              ## keypress happens after keydown so we can just simulate the
+              ## submit event now if both events were NOT prevented!
+              if keydownPrevented is false and keypressPrevented is false
+                defaultButton = getDefaultButton(form)
+
+                ## bail if the default button is in a 'disabled' state
+                return if defaultButtonisDisabled(defaultButton)
+
+                ## issue the click event to the 'default button' of the form
+                ## we need this to be synchronous so not going through our
+                ## own click command
+                ## as of now, at least in Chrome, causing the click event
+                ## on the button will indeed trigger the form submit event
+                ## so we dont need to fire it manually anymore!
+                if not clickedDefaultButton(defaultButton)
+                  ## if we werent able to click the default button
+                  ## then synchronously fire the submit event
+                  @command("submit", {log: false, el: form})
+
+          form.on "keydown", keydown
+          form.on "keypress", keypress
+
+          @once "invoke:end", ->
+            form.off "keydown", keydown
+            form.off "keypress", keypress
+
+          ## need to do the crazy logic associated with knowing when
+          ## to trigger the form submit event and when to also trigger
+          ## the click event on the first 'submit' like element
+
+        log = ->
+          Cypress.command
+            $el: options.el
+            onConsole: ->
+              "Typed": sequence
+              "Applied To": options.el
+
+        ## handle submit event handler here if we are pressing enter
+        simulateSubmitHandler() if pressedEnter.test(sequence)
+
+        options.el.simulate "key-sequence", options
+
+        ## submit events should be finished at this point!
+        ## so we can log out the current state of the DOM
+
         log()
 
-      return subject
+        return subject
 
     clear: (subject, options = {}) ->
       ## what about other types of inputs besides just text?

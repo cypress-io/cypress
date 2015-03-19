@@ -123,7 +123,9 @@
 
       <div id="form-submits">
         <form id="single-input">
-          <input name="fname" />
+          <div>
+            <input name="fname" />
+          </div>
         </form>
 
         <form id="no-buttons">
@@ -131,16 +133,35 @@
           <input name="lname" />
         </form>
 
-        <form id="multiple-inputs-and-submit">
+        <form id="one-button-type-button">
+          <input name="fname" />
+          <input name="lname" />
+          <button type="button">submit me</button>
+        </form>
+
+        <form id="multiple-inputs-and-input-submit">
           <input name="fname" />
           <input name="lname" />
           <input type="submit" value="submit me" />
         </form>
 
-        <form id="multiple-inputs-and-button">
+        <form id="multiple-inputs-and-button-submit">
           <input name="fname" />
           <input name="lname" />
           <button type="submit">submit me</button>
+        </form>
+
+        <form id="multiple-inputs-and-button-with-no-type">
+          <input name="fname" />
+          <input name="lname" />
+          <button>submit me</button>
+        </form>
+
+        <form id="multiple-inputs-and-multiple-submits">
+          <input name="fname" />
+          <input name="lname" />
+          <button>submit me</button>
+          <input type="submit" value ="submit me2" />
         </form>
       </div>
 
