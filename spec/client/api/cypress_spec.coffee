@@ -2081,7 +2081,6 @@ describe "Cypress", ->
     describe "{enter}", ->
       beforeEach ->
         @forms = cy.$("#form-submits")
-        @forms.find("form").off("submit")
 
       context "1 input, no 'submit' elements", ->
         it "triggers form submit", (done) ->

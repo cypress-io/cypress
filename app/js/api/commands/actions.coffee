@@ -496,7 +496,7 @@ do (Cypress, _) ->
 
       ## blow up if any member of the subject
       ## isnt a textarea or :text
-      subject.each (index, el) =>
+      clear = (memo, el, index) =>
         el = $(el)
         node = Cypress.Utils.stringifyElement(el)
 
@@ -505,6 +505,11 @@ do (Cypress, _) ->
           @throwErr(".clear() can only be called on textarea or :text! Your subject #{word} a: #{node}")
 
         @command("type", "{selectall}{del}", {el: el})
+
+      clears = _.reduce subject.toArray(), clear, Promise.resolve().cancellable()
+
+      ## return our original subject when our promise resolves
+      clears.return(subject)
 
     select: (subject, valueOrText, options = {}) ->
       @ensureDom(subject)
