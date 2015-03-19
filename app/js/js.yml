@@ -26,7 +26,7 @@ vendor:
   - bower_components/jquery-ui/ui/mouse.js
   - bower_components/jquery-ui/ui/slider.js
   - bower_components/jsuri/Uri.js
-  - app/js/vendor/bluebird-custom.js
+  - bower_components/bluebird/js/browser/bluebird.js
   - app/js/vendor/backbone-chooser.coffee
   - app/js/vendor/simulate.coffee
 
