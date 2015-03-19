@@ -2060,6 +2060,24 @@ describe "Cypress", ->
       cy.get("input:text:first").type(" bar").then ($input) ->
         expect($input).to.have.value("foo bar")
 
+    it "triggers focus event on the input", (done) ->
+      cy.$("input:text:first").focus -> done()
+
+      cy.get("input:text:first").type("bar")
+
+    it "lists the input as the focused element", ->
+      input = cy.$("input:text:first")
+
+      cy.get("input:text:first").type("bar").focused().then ($focused) ->
+        expect($focused.get(0)).to.eq input.get(0)
+
+    it "causes previous input to receive blur", (done) ->
+      cy.$("input:text:first").blur -> done()
+
+      cy
+        .get("input:text:first").type("foo")
+        .get("input:text:last").type("bar")
+
     describe "{enter}", ->
       beforeEach ->
         @forms = cy.$("#form-submits")

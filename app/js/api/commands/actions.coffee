@@ -385,7 +385,10 @@ do (Cypress, _) ->
 
       options.sequence = sequence
 
-      options.el.simulate "key-sequence", options
+      ## click the element first to simulate focus
+      ## and typical user behavior in case the window
+      ## is out of focus
+      @command("click", {el: options.el, log: false}).then =>
 
       simulateSubmit = =>
         form = options.el.parents("form")
