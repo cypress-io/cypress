@@ -120,10 +120,12 @@ describe "Cypress", ->
   context "#server", ->
     beforeEach ->
       defaults = {
+        ignore: true
         autoRespond: true
         autoRespondAfter: 10
         afterResponse: ->
         onError: ->
+        onFilter: ->
       }
 
       @options = (obj) ->
@@ -168,6 +170,14 @@ describe "Cypress", ->
     it "starts the fake XHR server", ->
       cy.server().then ->
         expect(cy._sandbox.server).to.be.defined
+
+    it "sets ignore=true by default", ->
+      cy.server().then ->
+        expect(cy._sandbox.server.xhr.useFilters).to.be.true
+
+    it "can set ignore=false", ->
+      cy.server({ignore: false}).then ->
+        expect(cy._sandbox.server.xhr.useFilters).to.be.false
 
     it "sets autoRespond=true by default", ->
       cy.server().then ->
@@ -419,6 +429,28 @@ describe "Cypress", ->
               url: "/foo"
               data: JSON.stringify({foo: "bar"})
               dataType: "json"
+
+    describe "filtering requests", ->
+      beforeEach ->
+        cy.server()
+
+      extensions = {
+        html: "ajax html"
+        js: "{foo: \"bar\"}"
+        css: "body {}"
+      }
+
+      _.each extensions, (val, ext) ->
+        it "filters out non ajax requests by default for extension: .#{ext}", (done) ->
+          cy.sync.window().$.get("/fixtures/ajax/app.#{ext}").done (res) ->
+            expect(res).to.eq val
+            done()
+
+      it "can disable default filtering", (done) ->
+        ## this should throw since it should return 404 when no
+        ## route matches it
+        cy.server({ignore: false}).window().then (w) ->
+          Promise.resolve(w.$.get("/fixtures/ajax/app.html")).catch -> done()
 
     describe "errors", ->
       beforeEach ->
@@ -1583,6 +1615,23 @@ describe "Cypress", ->
             ## we should have re-queried for these inputs
             ## which should have reduced their length by 1
             expect($inputs).to.have.length(@length - 1)
+
+      # it.only "re-queries the dom if any element in an alias isnt visible", ->
+      #   inputs = cy.$("input")
+      #   inputs.hide()
+
+      #   cy
+      #     .get("input", {visible: false}).as("inputs").then ($inputs) ->
+      #       @length = $inputs.length
+
+      #       ## show the inputs
+      #       $inputs.show()
+
+      #       return $inputs
+      #     .get("@inputs").then ($inputs) ->
+      #       ## we should have re-queried for these inputs
+      #       ## which should have increased their length by 1
+      #       expect($inputs).to.have.length(@length)
 
       ## these other tests are for .save
       # it "will resolve deferred arguments", ->

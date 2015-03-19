@@ -15,6 +15,8 @@ Cypress.Server = do (Cypress, _) ->
       @afterResponse = options.afterResponse
       @onError       = options.onError
 
+      @ignore(options.ignore)
+      @onFilter(options.onFilter)
       @autoRespond(options.autoRespond)
       @autoRespondAfter(options.autoRespondAfter)
 
@@ -168,6 +170,12 @@ Cypress.Server = do (Cypress, _) ->
 
     autoRespondAfter: (ms) ->
       @fakeServer.autoRespondAfter = ms
+
+    ignore: (bool) ->
+      @fakeServer.xhr.useFilters = bool
+
+    onFilter: (fn) ->
+      @fakeServer.xhr.addFilter(fn)
 
   Cypress.server = (server, options) ->
     new Server(server, options)

@@ -1,6 +1,7 @@
 do (Cypress, _) ->
 
   validHttpMethodsRe = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/
+  nonAjaxAssets      = /\.(js|html|css)$/
 
   responseNamespace = (alias) -> "response_" + alias
 
@@ -58,8 +59,13 @@ do (Cypress, _) ->
               ].join(" ")
 
       defaults = {
+        ignore: true
         autoRespond: true
         autoRespondAfter: 10
+        onFilter: (method, url, async, username, password) ->
+          ## filter out this request (let it go through)
+          ## if this is a GET for a nonAjaxAsset
+          method is "GET" and nonAjaxAssets.test(url)
         onError: (xhr, err) =>
           if options = xhr.matchedResponse
 
