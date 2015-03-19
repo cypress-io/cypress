@@ -391,10 +391,9 @@ SecretSauce.RemoteInitial =
 
   parseReqUrl: (url) ->
     ## strip out /__remote/ and the ?__initial query params
-    ## and any trailing slashes
     url = new @jsUri url.split("/__remote/").join("")
     url.deleteQueryParam("__initial")
-    url.toString().replace(/\/+$/, "")
+    url.toString()
 
   setSessionRemoteUrl: (req, url) ->
     url = url.split("?")[0].replace(/\/+$/, "")
@@ -446,6 +445,15 @@ SecretSauce.RemoteInitial =
       url: url
     })
 
+  prepareUrlForRedirect: (currentUrl, newUrl) ->
+    newUrl = @UrlHelpers.merge(currentUrl, newUrl)
+
+    ## add the __initial true back to the url so
+    ## it goes back through our remote_initial controller
+    newUrl = new @jsUri(newUrl)
+    newUrl.addQueryParam("__initial", true)
+    newUrl = "/__remote/" + newUrl.toString()
+
   _resolveRedirects: (url, res, req) ->
     { _ } = SecretSauce
 
@@ -456,9 +464,12 @@ SecretSauce.RemoteInitial =
         return thr.emit("error", err)
 
       if /^30(1|2|7|8)$/.test(incomingRes.statusCode)
-        newUrl = @UrlHelpers.merge(url, incomingRes.headers.location)
-        @Log.info "redirecting to new url", url: newUrl
-        res.redirect("/__remote/" + newUrl)
+        newUrl = @prepareUrlForRedirect(url, incomingRes.headers.location)
+
+        @Log.info "redirecting to new url", status: incomingRes.statusCode, url: newUrl
+
+        ## finally redirect our user agent back here
+        res.redirect(newUrl)
       else
         if not incomingRes.headers["content-type"]
           throw new Error("Missing header: 'content-type'")

@@ -15,6 +15,8 @@ removeWhitespace = (c) ->
 
 describe "Routes", ->
   beforeEach ->
+    nock.enableNetConnect()
+
     @sandbox = sinon.sandbox.create()
     @sandbox.stub(Server.prototype, "getCypressJson").returns({})
 
@@ -147,6 +149,36 @@ describe "Routes", ->
             expect(body).to.eq contents
             null
           .end(done)
+
+      it "injects sinon content after following redirect", (done) ->
+        contents = removeWhitespace Fixtures.get("server/expected_sinon_inject.html")
+
+        nock(@baseUrl)
+          .log(console.log)
+          .get("/bar")
+          .reply 302, undefined, {
+            "Location": @baseUrl + "/foo"
+          }
+          .get("/foo")
+          .reply 200, "<html> <head> <title>foo</title> </head> <body>hello from bar!</body> </html>", {
+            "Content-Type": "text/html"
+          }
+
+        supertest(@app)
+          .get("/__remote/#{@baseUrl}/bar?__initial=true")
+          .expect(302)
+          .expect "location", "/__remote/http://www.github.com/foo?__initial=true"
+          .end (err, res) =>
+            return done(err) if err
+
+            supertest(@app)
+              .get(res.headers.location)
+              .expect(200)
+              .expect (res) ->
+                body = removeWhitespace(res.text)
+                expect(body).to.eq contents
+                null
+              .end(done)
 
       context "error handling", ->
         it "status code 500", (done) ->

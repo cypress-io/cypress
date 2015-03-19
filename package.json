@@ -54,7 +54,7 @@
     "js-yaml": "3.1.0",
     "mocha": "2.1.0",
     "mock-fs": "^2.5.0",
-    "nock": "^0.59.1",
+    "nock": "1.2.0",
     "node-webkit-builder": "1.0.10",
     "nodemon": "1.2.1",
     "obfuscator": "^0.5.0",

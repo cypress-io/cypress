@@ -100,9 +100,26 @@ describe "Remote Initial", ->
       url = @remoteInitial.parseReqUrl("/__remote/www.github.com?__initial=true&foo=bar")
       expect(url).to.eq "www.github.com/?foo=bar"
 
-    it "strips trailing slashes", ->
+    it "doesnt strip trailing slashes", ->
       url = @remoteInitial.parseReqUrl("/__remote/www.github.com/")
-      expect(url).to.eq "www.github.com"
+      expect(url).to.eq "www.github.com/"
+
+  context "#prepareUrlForRedirect", ->
+    it "prepends with /__remote/ and adds __initial=true query param", ->
+      url = @remoteInitial.prepareUrlForRedirect("www.github.com", "www.github.com/bar")
+      expect(url).to.eq "/__remote/www.github.com/bar?__initial=true"
+
+    it "doesnt strip leading slashes", ->
+      url = @remoteInitial.prepareUrlForRedirect("www.github.com", "www.github.com/")
+      expect(url).to.eq "/__remote/www.github.com/?__initial=true"
+
+    it "handles url leading slashes", ->
+      url = @remoteInitial.prepareUrlForRedirect("www.github.com/foo", "www.github.com/foo/")
+      expect(url).to.eq "/__remote/www.github.com/foo/?__initial=true"
+
+    it "handles existing query params", ->
+      url = @remoteInitial.prepareUrlForRedirect("www.github.com", "www.github.com/foo?bar=baz")
+      expect(url).to.eq "/__remote/www.github.com/foo?bar=baz&__initial=true"
 
   context "setting session", ->
     beforeEach ->
