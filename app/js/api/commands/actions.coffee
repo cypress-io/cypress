@@ -16,6 +16,10 @@ do (Cypress, _) ->
 
       @ensureDom(options.el)
 
+      ## changing this to a promise .map() causes submit events
+      ## to break when they need to be triggered synchronously
+      ## like with type {enter}.  either convert type to a promise
+      ## to just create a synchronous submit function
       options.el.each (index, el) =>
         origEl = el
         $el = $(el)
@@ -49,32 +53,32 @@ do (Cypress, _) ->
 
       ## blow up if any member of the subject
       ## isnt a checkbox or radio
-      check = (memo, el, index) =>
-        memo.then =>
-          $el = $(el)
-          node = Cypress.Utils.stringifyElement($el)
+      check = (el, index) =>
+        $el = $(el)
+        node = Cypress.Utils.stringifyElement($el)
 
-          @ensureVisibility($el)
+        @ensureVisibility($el)
 
-          if not $el.is(":checkbox,:radio")
-            word = Cypress.Utils.plural(subject, "contains", "is")
-            @throwErr(".check() can only be called on :checkbox and :radio! Your subject #{word} a: #{node}")
+        if not $el.is(":checkbox,:radio")
+          word = Cypress.Utils.plural(subject, "contains", "is")
+          @throwErr(".check() can only be called on :checkbox and :radio! Your subject #{word} a: #{node}")
 
-          return if $el.prop("checked")
+        return if $el.prop("checked")
 
-          ## if we didnt pass in any values or our
-          ## el's value is in the array then check it
-          if not values.length or $el.val() in values
-            @command("click", {el: $el, log: false}).then ->
-              Cypress.command
-                $el: $el
-                onConsole: ->
-                  "Applied To": $el
-
-      checks = _.reduce subject.toArray(), check, Promise.resolve().cancellable()
+        ## if we didnt pass in any values or our
+        ## el's value is in the array then check it
+        if not values.length or $el.val() in values
+          @command("click", {el: $el, log: false}).then ->
+            Cypress.command
+              $el: $el
+              onConsole: ->
+                "Applied To": $el
 
       ## return our original subject when our promise resolves
-      checks.return(subject)
+      Promise
+        .map(subject.toArray(), check, {concurrency: 1})
+        .cancellable()
+        .return(subject)
 
     uncheck: (subject, values = []) ->
       @ensureDom(subject)
@@ -84,32 +88,31 @@ do (Cypress, _) ->
 
       ## blow up if any member of the subject
       ## isnt a checkbox
-      uncheck = (memo, el, index) =>
-        memo.then =>
-          $el = $(el)
-          node = Cypress.Utils.stringifyElement(el)
+      uncheck = (el, index) =>
+        $el = $(el)
+        node = Cypress.Utils.stringifyElement(el)
 
-          @ensureVisibility($el)
+        @ensureVisibility($el)
 
-          if not $el.is(":checkbox")
-            word = Cypress.Utils.plural(subject, "contains", "is")
-            @throwErr(".uncheck() can only be called on :checkbox! Your subject #{word} a: #{node}")
+        if not $el.is(":checkbox")
+          word = Cypress.Utils.plural(subject, "contains", "is")
+          @throwErr(".uncheck() can only be called on :checkbox! Your subject #{word} a: #{node}")
 
-          return if not $el.prop("checked")
+        return if not $el.prop("checked")
 
-          ## if we didnt pass in any values or our
-          ## $el's value is in the array then check it
-          if not values.length or $el.val() in values
-            @command("click", {el: $el, log: false}).then ->
-              Cypress.command
-                $el: $el
-                onConsole: ->
-                  "Applied To": $el
+        ## if we didnt pass in any values or our
+        ## $el's value is in the array then check it
+        if not values.length or $el.val() in values
+          @command("click", {el: $el, log: false}).then ->
+            Cypress.command
+              $el: $el
+              onConsole: ->
+                "Applied To": $el
 
-      unchecks = _.reduce subject.toArray(), uncheck, Promise.resolve().cancellable()
-
-      ## return our original subject when our promise resolves
-      unchecks.return(subject)
+      Promise
+        .map(subject.toArray(), uncheck, {concurrency: 1})
+        .cancellable()
+        .return(subject)
 
     focus: (subject, options = {}) ->
       ## we should throw errors by default!
@@ -281,41 +284,42 @@ do (Cypress, _) ->
     dblclick: (subject) ->
       @ensureDom(subject)
 
-      dblclick = (memo, el, index) =>
+      dblclick = (el, index) =>
         $el = $(el)
 
         @ensureVisibility($el)
 
         wait = if $el.is("a") then 50 else 10
 
-        memo.then =>
-          @command("focus", {el: $el, error: false, log: false}).then =>
-            $el.cySimulate("dblclick")
+        @command("focus", {el: $el, error: false, log: false}).then =>
+          $el.cySimulate("dblclick")
 
-            Cypress.command
-              $el: $el
-              onConsole: ->
-                "Applied To":   $el
-                "Elements":     $el.length
+          Cypress.command
+            $el: $el
+            onConsole: ->
+              "Applied To":   $el
+              "Elements":     $el.length
 
-            ## we want to add this wait delta to our
-            ## runnables timeout so we prevent it from
-            ## timing out from multiple clicks
-            @_timeout(wait, true)
+          ## we want to add this wait delta to our
+          ## runnables timeout so we prevent it from
+          ## timing out from multiple clicks
+          @_timeout(wait, true)
 
-            ## need to return null here to prevent
-            ## chaining thenable promises
-            return null
+          ## need to return null here to prevent
+          ## chaining thenable promises
+          return null
 
         .delay(wait)
 
       ## create a new promise and chain off of it using reduce to insert
       ## the artificial delays.  we have to set this as cancellable for it
       ## to propogate since this is an "inner" promise
-      dblclicks = _.reduce subject.toArray(), dblclick, Promise.resolve().cancellable()
 
       ## return our original subject when our promise resolves
-      dblclicks.return(subject)
+      Promise
+        .map(subject.toArray(), dblclick, {concurrency: 1})
+        .cancellable()
+        .return(subject)
 
     click: (subject, options = {}) ->
       _.defaults options,
@@ -324,42 +328,39 @@ do (Cypress, _) ->
 
       @ensureDom(options.el)
 
-      click = (memo, el, index) =>
+      click = (el, index) =>
         $el = $(el)
 
         @ensureVisibility($el)
 
         wait = if $el.is("a") then 50 else 10
 
-        memo.then =>
-          @command("focus", {el: $el, error: false, log: false}).then =>
-            el.click()
+        @command("focus", {el: $el, error: false, log: false}).then =>
+          el.click()
 
-            if options.log
-              Cypress.command
-                $el: $el
-                onConsole: ->
-                  "Applied To":   $el
-                  "Elements":     $el.length
+          if options.log
+            Cypress.command
+              $el: $el
+              onConsole: ->
+                "Applied To":   $el
+                "Elements":     $el.length
 
-            ## we want to add this wait delta to our
-            ## runnables timeout so we prevent it from
-            ## timing out from multiple clicks
-            @_timeout(wait, true)
+          ## we want to add this wait delta to our
+          ## runnables timeout so we prevent it from
+          ## timing out from multiple clicks
+          @_timeout(wait, true)
 
-            ## need to return null here to prevent
-            ## chaining thenable promises
-            return null
+          ## need to return null here to prevent
+          ## chaining thenable promises
+          return null
 
         .delay(wait)
 
-      ## create a new promise and chain off of it using reduce to insert
-      ## the artificial delays.  we have to set this as cancellable for it
-      ## to propogate since this is an "inner" promise
-      clicks = _.reduce options.el.toArray(), click, Promise.resolve().cancellable()
-
       ## return our original subject when our promise resolves
-      clicks.return(options.el)
+      Promise
+        .map(options.el.toArray(), click, {concurrency: 1})
+        .cancellable()
+        .return(options.el)
 
       ## -- this does not work but may work in the future -- ##
       # Promise
@@ -456,6 +457,9 @@ do (Cypress, _) ->
                 if not clickedDefaultButton(defaultButton)
                   ## if we werent able to click the default button
                   ## then synchronously fire the submit event
+                  ## currently this is sync but if we use a waterfall
+                  ## promise in the submit command it will break again
+                  ## consider changing type to a Promise and juggle logging
                   @command("submit", {log: false, el: form})
 
           form.on "keydown", keydown
@@ -496,7 +500,7 @@ do (Cypress, _) ->
 
       ## blow up if any member of the subject
       ## isnt a textarea or :text
-      clear = (memo, el, index) =>
+      clear = (el, index) =>
         el = $(el)
         node = Cypress.Utils.stringifyElement(el)
 
@@ -506,10 +510,10 @@ do (Cypress, _) ->
 
         @command("type", "{selectall}{del}", {el: el})
 
-      clears = _.reduce subject.toArray(), clear, Promise.resolve().cancellable()
-
-      ## return our original subject when our promise resolves
-      clears.return(subject)
+      Promise
+        .map(subject.toArray(), clear, {concurrency: 1})
+        .cancellable()
+        .return(subject)
 
     select: (subject, valueOrText, options = {}) ->
       @ensureDom(subject)

@@ -711,11 +711,11 @@ describe "Cypress", ->
           @sandbox.stub cy.runner, "uncaught"
 
         it "throws when repeater cannot be found", (done) ->
-          cy.ng("repeater", "not-found")
-
           cy.on "fail", (err) ->
             expect(err.message).to.include "Could not find element for repeater: 'not-found'.  Searched [ng-repeat*='not-found'], [ng_repeat*='not-found'], [data-ng-repeat*='not-found'], [x-ng-repeat*='not-found']."
             done()
+
+          cy.ng("repeater", "not-found")
 
         it "cancels additional finds when aborted", (done) ->
           retry = _.after 2, ->
@@ -727,6 +727,7 @@ describe "Cypress", ->
             done(err)
 
           cy.on "cancel", =>
+
             retry = @sandbox.spy cy, "_retry"
             _.delay ->
               expect(retry.callCount).to.eq 0
@@ -841,7 +842,7 @@ describe "Cypress", ->
       expect(promise).to.be.instanceOf(Promise)
 
     it "triggers visit:start on the remote iframe", (done) ->
-      $("iframe").on "visit:start", (e, url) ->
+      $("iframe").one "visit:start", (e, url) ->
         expect(url).to.eq "/foo"
         done()
 
@@ -3198,14 +3199,14 @@ describe "Cypress", ->
     it "increases the timeout delta after each click", (done) ->
       prevTimeout = @test.timeout()
 
-      count = cy.$("button").length
+      count = cy.$("#three-buttons button").length
 
       cy.on "invoke:end", (obj) =>
         if obj.name is "click"
           expect(@test.timeout()).to.eq (count * 10) + prevTimeout
           done()
 
-      cy.get("button").click()
+      cy.get("#three-buttons button").click()
 
     describe "errors", ->
       beforeEach ->
@@ -3217,7 +3218,7 @@ describe "Cypress", ->
         cy.click()
 
       it "throws when any member of the subject isnt visible", (done) ->
-        btn = cy.$("button").show().last().hide()
+        btn = cy.$("#three-buttons button").show().last().hide()
 
         node = Cypress.Utils.stringifyElement(btn)
 
@@ -3225,7 +3226,7 @@ describe "Cypress", ->
           expect(err.message).to.eq "cy.click() cannot be called on the non-visible element: #{node}"
           done()
 
-        cy.get("button").click()
+        cy.get("#three-buttons button").click()
 
     describe ".log", ->
       it "returns only the $el for the element of the subject that was clicked", ->
@@ -3277,7 +3278,7 @@ describe "Cypress", ->
     it "updates the stored href", ->
       cy
         .then ->
-          expect(cy.prop("href")).to.eq "/fixtures/html/dom.html"
+          expect(cy.prop("href")).to.include "/fixtures/html/dom.html"
         .visit("/foo").then ->
           expect(cy.prop("href")).to.eq "foo"
 
@@ -3290,9 +3291,10 @@ describe "Cypress", ->
     it "resolves the deferred when ready", (done) ->
       cy.isReady(false)
       cy.isReady(true)
-      cy.on "ready", (bool) ->
+      cy.once "ready", (bool) ->
         expect(cy.prop("ready").promise.isResolved()).to.be.true
         done()
+      null
 
     it "prevents a bug creating an additional .then promise", (done) ->
       cy.isReady(false)
@@ -3715,7 +3717,7 @@ describe "Cypress", ->
   context "#_storeHref", ->
     it "sets prop href", ->
       cy._storeHref()
-      expect(cy.prop("href")).to.eq "/fixtures/html/dom.html"
+      expect(cy.prop("href")).to.include "/fixtures/html/dom.html"
 
     it "strips the hash from the href", ->
       @sandbox.stub(cy.sync, "location").returns

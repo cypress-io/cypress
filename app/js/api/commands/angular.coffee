@@ -57,6 +57,8 @@ do (Cypress, _) ->
         selectors.push(selector)
 
         @command("get", selector, options)
+          .cancellable()
+          .catch Promise.CancellationError (err) ->
 
       error += selectors.join(", ") + "."
 
@@ -69,7 +71,7 @@ do (Cypress, _) ->
         .then (subject) ->
           cancelAll()
           return subject
-        .catch Promise.CancellationError, (err) =>
+        .catch Promise.CancellationError, (err) ->
           cancelAll()
           throw err
         .catch Promise.AggregateError, (err) =>
