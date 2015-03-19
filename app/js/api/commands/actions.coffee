@@ -1,5 +1,7 @@
 do (Cypress, _) ->
 
+  pressedEnter = /\{enter\}/
+
   $.simulate.prototype.simulateKeySequence.defaults["{esc}"] = (rng, char, options) ->
     keyOpts = {keyCode: 27, charCode: 27, which: 27}
     _.each ["keydown", "keypress", "keyup"], (event) ->
@@ -7,26 +9,34 @@ do (Cypress, _) ->
 
   Cypress.addChildCommand
 
-    submit: (subject) ->
-      @ensureDom(subject)
+    submit: (subject, options = {}) ->
+      _.defaults options,
+        log: true
+        el: subject
 
-      subject.each (index, el) =>
+      @ensureDom(options.el)
+
+      options.el.each (index, el) =>
         origEl = el
         $el = $(el)
         node = Cypress.Utils.stringifyElement(el)
 
         if not $el.is("form")
-          word = Cypress.Utils.plural(subject, "contains", "is")
+          word = Cypress.Utils.plural(options.el, "contains", "is")
           @throwErr(".submit() can only be called on a <form>! Your subject #{word} a: #{node}")
 
+        ## do more research here but see if we can
+        ## use the native submit event first and
+        ## fall back to simulating it second
         submit = new Event("submit")
         origEl.dispatchEvent(submit)
 
-        Cypress.command
-          $el: $el
-          onConsole: ->
-            "Applied To": $el
-            Elements: $el.length
+        if options.log
+          Cypress.command
+            $el: $el
+            onConsole: ->
+              "Applied To": $el
+              Elements: $el.length
 
     fill: (subject, obj, options = {}) ->
       @throwErr "cy.fill() must be passed an object literal as its 1st argument!" if not _.isObject(obj)
@@ -377,11 +387,30 @@ do (Cypress, _) ->
 
       options.el.simulate "key-sequence", options
 
-      Cypress.command
-        $el: options.el
-        onConsole: ->
-          "Typed": sequence
-          "Applied To": options.el
+      simulateSubmit = =>
+        form = options.el.parents("form")
+
+        return if not form.length
+
+        ## throw an error here if there are multiple form parents
+
+        ## need to do the crazy logic associated with knowing when
+        ## to trigger the form submit event and when to also trigger
+        ## the click event on the first 'submit' like element
+        @command("submit", {log: false, el: form})
+
+      log = ->
+        Cypress.command
+          $el: options.el
+          onConsole: ->
+            "Typed": sequence
+            "Applied To": options.el
+
+      ## handle submit event here if we pressed enter
+      if pressedEnter.test(sequence)
+        Promise.resolve(simulateSubmit()).then(log)
+      else
+        log()
 
       return subject
 

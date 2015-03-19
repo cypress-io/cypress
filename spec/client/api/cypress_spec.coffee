@@ -2060,6 +2060,17 @@ describe "Cypress", ->
       cy.get("input:text:first").type(" bar").then ($input) ->
         expect($input).to.have.value("foo bar")
 
+    describe "{enter}", ->
+      beforeEach ->
+        @forms = cy.$("#form-submits")
+
+      it "triggers form submit when 1 input and no 'submit' elements", (done) ->
+        @forms.find("#single-input").submit -> done()
+
+        cy.get("#single-input input").type("foo").type("{enter}")
+
+      it "only logs 1 type event"
+
     describe ".log", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
@@ -2113,6 +2124,8 @@ describe "Cypress", ->
           done()
 
         cy.get("input:text:first").type("foo")
+
+      it "throws when submitting within nested forms"
 
   context "#clear", ->
     it "does not change the subject", ->
