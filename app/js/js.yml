@@ -6,9 +6,9 @@ vendor:
   - bower_components/chai/chai.js
   - bower_components/chai-jquery/chai-jquery.js ## need to conditionally load this
   - bower_components/sinon-chai/lib/sinon-chai.js ## need to conditionally load this
-  # - bower_components/jquery-simulate/jquery.simulate.js
   - bower_components/bililiteRange/bililiteRange.js
-  - bower_components/jquery-simulate-ext/libs/jquery.simulate.js
+  - bower_components/jquery-simulate/jquery.simulate.js
+  # - bower_components/jquery-simulate-ext/libs/jquery.simulate.js
   - bower_components/jquery-simulate-ext/src/jquery.simulate.ext.js
   - bower_components/jquery-simulate-ext/src/jquery.simulate.drag-n-drop.js
   - bower_components/jquery-simulate-ext/src/jquery.simulate.key-sequence.js
