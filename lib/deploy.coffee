@@ -158,29 +158,14 @@ class Deploy
     ## the task: gulp dist:zip
     version = @getVersion()
 
-    zip = new yazl.ZipFile()
-
     root = "#{buildDir}/#{version}/#{platform}"
 
-    files = glob.sync("#{root}/**/*", nodir: true)
+    new Promise (resolve, reject) =>
+      zip = "ditto -c -k --sequesterRsrc --keepParent #{root}/cypress.app #{root}/#{@zip}"
+      child_process.exec zip, (err, stdout, stderr) ->
+        return reject(err) if err
 
-    getFiles = ->
-      _.map files, (file) ->
-        fs.statAsync(file).then (c) ->
-          ## dont add anything thats not a file!
-          return if not c.isFile()
-
-          ## make the name relative from the platform
-          name = path.relative(root, file)
-          zip.addFile(file, name)
-
-    Promise.all(getFiles()).then =>
-
-      new Promise (resolve, reject) =>
-        output = zip.outputStream.pipe(fs.createWriteStream("#{root}/#{@zip}"))
-        output.on "close", resolve
-
-        zip.end()
+        resolve()
 
   zipBuilds: ->
     @log("#zipBuilds")
