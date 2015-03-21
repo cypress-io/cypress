@@ -1,6 +1,8 @@
 # Cypress.io
 Cypress is a test engine that runs unit and integration tests in your browser.
 
+## [Changelog](../../wiki/Changelog)
+
 ## Core Concepts
 * [overview]
 * [commands]
