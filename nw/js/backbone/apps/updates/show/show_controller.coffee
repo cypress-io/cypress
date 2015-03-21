@@ -12,6 +12,10 @@
       @listenTo updatesView, "button:clicked", ->
         window.close()
 
+      @listenTo updatesView, "changelog:clicked", ->
+        ## this needs to be moved to an .env variable
+        App.execute "gui:external:open", "https://github.com/cypress-io/cypress/wiki/Changelog"
+
       set = (state) ->
         updater.setState(state)
 

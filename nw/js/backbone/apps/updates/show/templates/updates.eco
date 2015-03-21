@@ -1,4 +1,9 @@
 <div id="updates">
+  <p>
+    <a data-changelog href="#">
+      View Changelog
+    </a>
+  </p>
   <% if @version: %>
     <p class="version">
       <b>Current Version: </b>

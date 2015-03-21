@@ -4,11 +4,13 @@
     template: "updates/show/updates"
 
     ui:
-      "state"  : ".state"
-      "button" : "button"
+      "state"     : ".state"
+      "button"    : "button"
+      "changelog" : "[data-changelog]"
 
     triggers:
-      "click @ui.button" : "button:clicked"
+      "click @ui.button"    : "button:clicked"
+      "click @ui.changelog" : "changelog:clicked"
 
     modelEvents:
       "change:state" : "render"
