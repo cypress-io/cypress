@@ -133,7 +133,7 @@ Cypress.Location = do (Cypress, _, Uri) ->
     @createInitialRemoteSrc = (url) ->
       ## prepend /__remote/ and strip any
       ## leading forward slashes
-      url = "/__remote/" + _.ltrim(url, "/")
+      url = "/__remote/" + _.trim(url, "/") + "/"
       url = new Uri(url)
 
       ## add the __intitial=true query param

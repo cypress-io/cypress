@@ -113,3 +113,8 @@ describe "Location API", ->
     it "can invoke toString function", ->
       obj = Cypress.location(urls.cypress, urls.signin)
       expect(obj.toString()).to.eq "http://localhost:8000/signin"
+
+  context ".createInitialRemoteSrc", ->
+    it "trims and appends trailing slash", ->
+      url = Cypress.Location.createInitialRemoteSrc("http://localhost:4200/app")
+      expect(url).to.eq "/__remote/http://localhost:4200/app/?__initial=true"
