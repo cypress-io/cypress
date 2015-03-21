@@ -221,6 +221,8 @@ SecretSauce.IdGenerator =
     @str.insert contents, position, " [#{id}]"
 
 SecretSauce.RemoteProxy =
+  badHttpScheme: /(https?:)\/([a-zA-Z0-9]+.+\.map)$/
+
   _handle: (req, res, next, Domain, httpProxy) ->
     ## strip out the /__remote/ from the req.url
     if not req.session.remote?
@@ -237,14 +239,20 @@ SecretSauce.RemoteProxy =
 
     domain.run =>
       @getContentStream({
-        uri: req.url.split("/__remote/").join(""),
-        remote: req.session.remote,
+        uri: @getRequestUrl(req.url)
+        remote: req.session.remote
         req: req
         res: res
         proxy: proxy
       })
       .on('error', (e) -> throw e)
       .pipe(res)
+
+  getRequestUrl: (url) ->
+    url = url.split("/__remote/").join("")
+    if @badHttpScheme.test(url)
+      url = url.replace @badHttpScheme, "$1//$2"
+    url
 
   getContentStream: (opts) ->
     # console.log opts.remote, opts.uri, opts.req.url

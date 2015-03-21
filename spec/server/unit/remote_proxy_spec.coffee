@@ -140,6 +140,19 @@ describe "RemoteProxy", ->
       it "GETs /__remote/http://bob/tom/george.html ==> http://bob/tom/george.html", ->
         @absolute "/__remote/http://bob/tom/george.html", "http://bob", "/tom/george.html"
 
+    context "#getRequestUrl", ->
+      it "inserts two forward slashes for bad http protocols", ->
+        url = @remoteProxy.getRequestUrl("/__remote/http:/localhost:8000/app.css.map")
+        expect(url).to.eq "http://localhost:8000/app.css.map"
+
+      it "works with https prototcols", ->
+        url = @remoteProxy.getRequestUrl("/__remote/https:/localhost:8000/app.css.map")
+        expect(url).to.eq "https://localhost:8000/app.css.map"
+
+      it "does not alter non .map files", ->
+        url = @remoteProxy.getRequestUrl("/__remote/https:/localhost:8000/app.css")
+        expect(url).to.eq "https:/localhost:8000/app.css"
+
   context "integration", ->
     beforeEach ->
       @server.configureApplication()
