@@ -11,7 +11,6 @@ gutil          = require("gulp-util")
 inquirer       = require("inquirer")
 NwBuilder      = require("node-webkit-builder")
 request        = require("request-promise")
-yazl           = require("yazl")
 
 fs = Promise.promisifyAll(fs)
 
