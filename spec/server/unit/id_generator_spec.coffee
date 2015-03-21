@@ -128,3 +128,10 @@ describe "IdGenerator", ->
       contents = Fixtures.get("ids/existing.coffee")
       fn = => @idGenerator.insertId contents, "foobars", "abc"
       expect(fn).to.throw(Error)
+
+    describe "abnormal characters", ->
+      ["|", "^", "&", "@", "*", ">", "<", ":", "!", "#", "$", "%", "(", ")", ",", ".", "]", "[", "}", "{"].forEach (char) ->
+        it "escapes char: #{char}", ->
+          contents = "it 'char #{char} here', ->"
+          newContent = @idGenerator.insertId contents, "char #{char} here", "123"
+          expect(newContent).to.eq "it 'char #{char} here [123]', ->"
