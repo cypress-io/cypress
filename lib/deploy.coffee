@@ -366,7 +366,20 @@ class Deploy
           .on "error", reject
           .on "end", resolve
 
-  dist: ->
+  codeSign: ->
+    @log("#codeSign")
+
+    appPath = path.join buildDir, @getVersion(), "osx64", "cypress.app"
+
+    new Promise (resolve, reject) ->
+      child_process.exec "sh codesign.sh #{appPath}", (err, stdout, stderr) ->
+        return reject(err) if err
+
+        # console.log "stdout is", stdout
+
+        resolve()
+
+  buildApp: ->
     Promise.bind(@)
       .then(@prepare)
       .then(@updatePackages)
@@ -376,6 +389,10 @@ class Deploy
       .then(@cleanupSrc)
       .then(@build)
       .then(@npmInstall)
+      .then(@codeSign)
+
+  dist: ->
+    @buildApp()
       .then(@cleanupDist)
       .then(@zipBuilds)
 

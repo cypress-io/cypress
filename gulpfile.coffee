@@ -157,11 +157,8 @@ gulp.task "server", -> require("./server.coffee")
 
 gulp.task "test", -> require("./spec/server.coffee")
 
-gulp.task "clean:dist", ->
-  gulp.src("./dist").pipe($.clean())
-
-gulp.task "clean:build", ->
-  gulp.src("./build").pipe($.clean())
+gulp.task "build", ->
+  require("./lib/deploy")().buildApp()
 
 gulp.task "dist:zip", ->
   require("./lib/deploy")().zipBuilds()
