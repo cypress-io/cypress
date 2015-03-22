@@ -77,6 +77,7 @@ class Deploy
       fs.copySync("./lib/environment.coffee", distDir + "/src/lib/environment.coffee")
       fs.copySync("./lib/log.coffee", distDir + "/src/lib/log.coffee")
       fs.copySync("./lib/exception.coffee", distDir + "/src/lib/exception.coffee")
+      fs.copySync("./lib/secret_sauce.bin", distDir + "/lib/secret_sauce.bin")
 
       ## copy test files
       # fs.copySync("./spec/server/unit/konfig_spec.coffee", distDir + "/spec/server/unit/konfig_spec.coffee")
@@ -227,11 +228,11 @@ class Deploy
         delete pkg.devDependencies
         delete pkg.bin
 
-        if process.argv[3] is "--bin"
-          pkg.snapshot = "lib/secret_sauce.bin"
-          fs.copySync("./lib/secret_sauce.bin", distDir + "/lib/secret_sauce.bin")
-        else
-          fs.copySync("./lib/secret_sauce.coffee", distDir + "/src/lib/secret_sauce.coffee")
+        # if process.argv[3] is "--bin"
+        #   pkg.snapshot = "lib/secret_sauce.bin"
+        #   fs.copySync("./lib/secret_sauce.bin", distDir + "/lib/secret_sauce.bin")
+        # else
+        #   fs.copySync("./lib/secret_sauce.coffee", distDir + "/src/lib/secret_sauce.coffee")
 
         @writeJsonSync(json, pkg)
 

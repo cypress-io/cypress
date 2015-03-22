@@ -17,6 +17,9 @@
     <script type="text/javascript">
       require("coffee-script/register")
 
+      require("nw.gui").Window.get().evalNWBin(null, "lib/secret_sauce.bin")
+      global.SecretSauce = window.SecretSauce
+
       var NwApp   = require("nw.gui").App
       var booter  = require("../../lib/cypress")
       var updater = booter.Updater(NwApp)
