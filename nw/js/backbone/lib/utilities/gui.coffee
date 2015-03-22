@@ -12,6 +12,7 @@
         win.showDevTools() unless win.isDevToolsOpen()
         win.setAlwaysOnTop()
 
+      win.isShown = true
       win.show()
 
     displayGui: ->
@@ -20,8 +21,7 @@
       if App.config.env("development")
         gui.App.clearCache()
         @show(win)
-      else
-        win.hide()
+        @focus(win)
 
       nativeMenuBar = new gui.Menu(type: "menubar")
       nativeMenuBar.createMacBuiltin "Cypress.io"
@@ -46,19 +46,28 @@
 
         win.moveTo(coords.x, coords.y)
 
-        @show(win)
-        @focus()
+        if win.isShown
+          @hide(win)
+        else
+          @show(win)
+          @focus(win)
 
-      win.on "blur", ->
-        return if App.fileDialogOpened or App.config.env("development")
+      win.on "blur", =>
+        return if App.fileDialogOpened
 
-        win.hide()
+        @hide(win)
+
+    hide: (win) ->
+      win = gui.Window.get()
+      win.isShown = false
+      win.hide()
 
     whitelist: (domain) ->
       gui.App.addOriginAccessWhitelistEntry(domain, 'app', 'app', true)
 
-    focus: ->
-      gui.Window.get().focus()
+    focus: (win) ->
+      win ?= gui.Window.get()
+      win.focus()
 
     open: (url, options) ->
       new gui.Window.open(url, options)
@@ -85,7 +94,7 @@
       windows.updates = updates = App.request "gui:open", "app://app/nw/public/updates.html",
         position: "center"
         width: 300
-        height: 200
+        height: 210
         # frame: false
         toolbar: false
         title: ""
