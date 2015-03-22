@@ -123,15 +123,15 @@ gulp.task "build:secret:sauce", (cb) ->
     .pipe gulp.dest("lib")
     .on "end", ->
       ## when thats done, lets create the secret_sauce snapshot .bin
-      child_process.exec "./nwsnapshot --extra_code lib/secret_sauce.js lib/secret_sauce.bin", (err, stdout, stderr) ->
+      child_process.exec "./nwjc lib/secret_sauce.js lib/secret_sauce.bin", (err, stdout, stderr) ->
         console.log("stdout:", stdout)
         console.log("stderr:", stderr)
 
         if err
-          console.log("err with nwsnapshot:", err)
+          console.log("err with nwjc:", err)
 
         ## finally cleanup any v8 logs and remove secret sauce.js
-        gulp.src(["lib/secret_sauce.js", "isolate-*.log"])
+        gulp.src(["lib/secret_sauce.js", "v8.log"])
           .on "end", cb
           .pipe($.clean())
 
