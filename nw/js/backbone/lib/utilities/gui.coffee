@@ -28,7 +28,10 @@
 
       win.menu = nativeMenuBar
 
-      tray = new gui.Tray(title: "Cy")
+      tray = new gui.Tray
+        # title:   "Cy"
+        icon:    "nw/public/img/tray/mac-normal@2x.png"
+        alticon: "nw/public/img/tray/mac-normal-inverse@2x.png"
 
       ## go this from NW custom tray menu
       iconWidth = 13

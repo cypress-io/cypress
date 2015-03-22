@@ -280,6 +280,7 @@ class Deploy
       buildDir: buildDir
       version: "0.12.0"
       buildType: => @getVersion()
+      macIcns: "nw/public/img/cypress.icns"
 
     nw.on "log", console.log
 

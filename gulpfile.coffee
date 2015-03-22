@@ -75,6 +75,22 @@ gulp.task "client:fonts", ->
 
 gulp.task "client:img", ["vendor:img", "project:img"]
 
+gulp.task "nw:img", ["nw:icns", "nw:tray"]
+
+gulp.task "nw:tray", ->
+  gulp.src("nw/img/tray/**/*")
+    .pipe gulp.dest "nw/public/img/tray"
+
+gulp.task "nw:icns", ->
+  p = new Promise (resolve, reject) ->
+    child_process.exec "iconutil -c icns nw/img/cypress.iconset", (err, stdout, stderr) ->
+      return reject(err) if err
+
+      resolve()
+  p.then ->
+    gulp.src("nw/img/cypress.icns")
+      .pipe gulp.dest "nw/public/img"
+
 gulp.task "vendor:img", ->
   gulp.src("bower_components/jquery-ui/themes/smoothness/images/**")
     .pipe gulp.dest "lib/public/css/images"
@@ -185,6 +201,6 @@ gulp.task "client",        ["client:build", "client:watch"]
 gulp.task "nw",            ["nw:build", "nw:watch"]
 
 gulp.task "client:build",  ["bower", "client:css", "client:img", "client:fonts", "client:js", "client:html"]
-gulp.task "nw:build",      ["bower", "nw:css", "client:fonts", "nw:js", "nw:html", "nw:snapshot"]
+gulp.task "nw:build",      ["bower", "nw:css", "nw:img", "client:fonts", "nw:js", "nw:html", "nw:snapshot"]
 
 gulp.task "nw:snapshot",   ["build:secret:sauce"]
