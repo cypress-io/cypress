@@ -17,8 +17,17 @@ do (Cypress, _) ->
       ## normalize these two options
       options.exist = options.exists and options.exist
 
+      start = ->
+        return if options.log is false
+
+        options.command ?= Cypress.command
+          referencesAlias: alias?.alias
+          aliasType: "dom"
+
       log = ($el) ->
         return if options.log is false
+
+        start() if not options.command
 
         options.command.set
           $el: $el
@@ -44,10 +53,7 @@ do (Cypress, _) ->
             @_replayFrom command
             return null
 
-      if options.log
-        options.command ?= Cypress.command
-          referencesAlias: alias?.alias
-          aliasType: "dom"
+      start()
 
       ## attempt to query for the elements by withinSubject context
       $el = @$(selector, options.withinSubject)
