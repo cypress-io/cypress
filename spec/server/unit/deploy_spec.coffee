@@ -12,6 +12,7 @@ child_process = require "child_process"
 _             = require "lodash"
 inquirer      = require "inquirer"
 nock          = require "nock"
+os            = require "os"
 
 fs       = Promise.promisifyAll(fs)
 prevCwd  = process.cwd()
@@ -281,6 +282,9 @@ describe "Deploy", ->
         expect(child_process.exec).to.be.calledWith str
 
     it "creates 'cypress.zip'", (done) ->
+      ## dont try to create the cypress.zip if we arent on a mac
+      return done() if os.platform() isnt "darwin"
+
       child_process.exec.restore()
       deploy.zipBuilds().then ->
         fs.statAsync(buildDir + "/1.1.1/osx64/cypress.zip")
