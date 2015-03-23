@@ -11,6 +11,7 @@ gutil          = require("gulp-util")
 inquirer       = require("inquirer")
 NwBuilder      = require("node-webkit-builder")
 request        = require("request-promise")
+os             = require("os")
 
 fs = Promise.promisifyAll(fs)
 
@@ -160,6 +161,9 @@ class Deploy
     root = "#{buildDir}/#{version}/#{platform}"
 
     new Promise (resolve, reject) =>
+      ## bail if we arent on a mac else `ditto` will fail
+      return resolve() if os.platform() isnt "darwin"
+
       zip = "ditto -c -k --sequesterRsrc --keepParent #{root}/cypress.app #{root}/#{@zip}"
       child_process.exec zip, {}, (err, stdout, stderr) ->
         return reject(err) if err
