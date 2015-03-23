@@ -98,6 +98,9 @@
       @set "url", @xhr.url
       @response = response
 
+    hasSnapshot: ->
+      !!@getLog().get("snapshot")
+
     getSnapshot: ->
       @getLog().get("snapshot")
 

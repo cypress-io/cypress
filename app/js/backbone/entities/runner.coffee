@@ -55,6 +55,8 @@
       revertDom: (command, init = true) ->
         return @trigger "restore:dom" if not init
 
+        return if not command.hasSnapshot()
+
         @trigger "revert:dom", command.getSnapshot(),
           id:   command.cid
           el:   command.getEl()

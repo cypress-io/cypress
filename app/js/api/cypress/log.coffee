@@ -83,7 +83,6 @@ Cypress.Log = do (Cypress, _, Backbone) ->
       obj.isCurrent = obj.name is current.name
 
       _.defaults obj,
-        snapshot: true
         onRender: ->
         onConsole: ->
           "Returned": current.subject
