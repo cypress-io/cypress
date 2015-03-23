@@ -855,7 +855,7 @@ describe "Cypress", ->
     it "changes the src of the iframe to the initial src", ->
       cy.visit("/foo").then ->
         src = $("iframe").attr("src")
-        expect(src).to.eq "/__remote/foo?__initial=true"
+        expect(src).to.eq "/__remote/foo/?__initial=true"
 
     it "immediately updates the stored href on load", (done) ->
       _storeHref = @sandbox.spy cy, "_storeHref"
@@ -3290,7 +3290,7 @@ describe "Cypress", ->
         .then ->
           expect(cy.prop("href")).to.include "/fixtures/html/dom.html"
         .visit("/foo").then ->
-          expect(cy.prop("href")).to.eq "foo"
+          expect(cy.prop("href")).to.eq "foo/"
 
   context "#isReady", ->
     it "creates a deferred when not ready", ->
