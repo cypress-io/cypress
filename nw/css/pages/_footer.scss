@@ -19,10 +19,11 @@
 
 #footer {
   background-color: #DDD;
-  position: absolute;
-  bottom: 0;
+  position: fixed;
   width: 100%;
   border-top: 1px solid #AAA;
+  z-index: 10;
+  bottom: 0;
 
   span:hover, .dropup.open {
     cursor: pointer;
