@@ -7,6 +7,7 @@ yaml          = require 'js-yaml'
 Promise       = require "bluebird"
 child_process = require "child_process"
 runSequence   = require "run-sequence"
+os            = require "os"
 
 log = (obj = {}) ->
   args = [
@@ -83,6 +84,9 @@ gulp.task "nw:tray", ->
 
 gulp.task "nw:icns", ->
   p = new Promise (resolve, reject) ->
+    ## bail if we arent on a mac else `iconutil` will fail
+    return resolve() if os.platform() isnt "darwin"
+
     child_process.exec "iconutil -c icns nw/img/cypress.iconset", (err, stdout, stderr) ->
       return reject(err) if err
 
