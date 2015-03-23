@@ -8,6 +8,11 @@ do (Cypress, _) ->
         visible: null
         exist: true
         exists: true
+        log: true
+        command: null
+        onFail: (err) ->
+          if c = options.command
+            c.error(err)
 
       ## normalize these two options
       options.exist = options.exists and options.exist
@@ -15,10 +20,8 @@ do (Cypress, _) ->
       log = ($el) ->
         return if options.log is false
 
-        Cypress.command
+        options.command.set
           $el: $el
-          referencesAlias: alias?.alias
-          aliasType: "dom"
           numRetries: options.retries
           onConsole: ->
             obj = {"Command":  "get"}
@@ -29,6 +32,8 @@ do (Cypress, _) ->
               "Returned": $el
               "Elements": $el?.length
 
+        options.command.snapshot().end()
+
       if alias = @getAlias(selector)
         {subject, command} = alias
         if Cypress.Utils.hasElement(subject)
@@ -38,6 +43,11 @@ do (Cypress, _) ->
           else
             @_replayFrom command
             return null
+
+      if options.log
+        options.command ?= Cypress.command
+          referencesAlias: alias?.alias
+          aliasType: "dom"
 
       ## attempt to query for the elements by withinSubject context
       $el = @$(selector, options.withinSubject)

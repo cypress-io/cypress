@@ -3,6 +3,8 @@ do (Cypress, _) ->
   Cypress.addParentCommand
 
     visit: (url, options = {}) ->
+      command = Cypress.command()
+
       _.defaults options,
         timeout: 15000
         onBeforeLoad: ->
@@ -45,10 +47,12 @@ do (Cypress, _) ->
             @_timeout(prevTimeout)
             options.onLoad?(win)
             if cy.$("[data-cypress-visit-error]").length
-              reject(new Error("Could not load the remote page: #{url}"))
+              err = @cypressErr("Could not load the remote page: #{url}")
+              command.error(err)
+              reject(err)
             else
+              command.snapshot().end()
               resolve(win)
-              Cypress.command()
 
           # ## any existing global variables will get nuked after it navigates
           @$remoteIframe.prop "src", Cypress.Location.createInitialRemoteSrc(url)
