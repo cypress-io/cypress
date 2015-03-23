@@ -2079,6 +2079,16 @@ describe "Cypress", ->
         .get("input:text:first").type("foo")
         .get("input:text:last").type("bar")
 
+    describe "input types", ->
+      _.each ["password", "email", "number", "date", "week", "month", "time", "datetime", "datetime-local", "search", "url"], (type) ->
+        it "accepts input [type=#{type}]", ->
+          input = cy.$("<input type='#{type}' id='input-type-#{type}' />")
+
+          cy.$("body").append(input)
+
+          cy.get("#input-type-#{type}").type("1234").then ($input) ->
+            expect($input.get(0)).to.eq input.get(0)
+
     describe "{enter}", ->
       beforeEach ->
         @forms = cy.$("#form-submits")

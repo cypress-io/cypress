@@ -377,7 +377,7 @@ do (Cypress, _) ->
 
       @ensureVisibility(options.el)
 
-      if not options.el.is("textarea,:text,:password")
+      if not options.el.is("textarea,:text,[type=password],[type=email],[type=number],[type=date],[type=week],[type=month],[type=time],[type=datetime],[type=datetime-local],[type=search],[type=url]")
         node = Cypress.Utils.stringifyElement(options.el)
         @throwErr(".type() can only be called on textarea or :text! Your subject is a: #{node}")
 
