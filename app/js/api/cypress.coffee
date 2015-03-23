@@ -339,10 +339,14 @@ window.Cypress = do ($, _, Backbone) ->
       if not current.prev
         @throwErr("cy.#{current.name}() is a child command which operates on an existing subject.  Child commands must be called after a parent command!")
 
+    cypressErr: (err) ->
+      err = new Error(err)
+      err.name = "CypressError"
+      err
+
     throwErr: (err, onFail) ->
       if _.isString(err)
-        err = new Error(err)
-        err.name = "CypressError"
+        err = @cypressErr(err)
 
       err.onFail = onFail if onFail
 
