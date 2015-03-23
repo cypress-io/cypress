@@ -161,7 +161,7 @@ class Deploy
 
     new Promise (resolve, reject) =>
       zip = "ditto -c -k --sequesterRsrc --keepParent #{root}/cypress.app #{root}/#{@zip}"
-      child_process.exec zip, (err, stdout, stderr) ->
+      child_process.exec zip, {}, (err, stdout, stderr) ->
         return reject(err) if err
 
         resolve()
