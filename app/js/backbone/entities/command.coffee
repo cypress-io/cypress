@@ -3,16 +3,17 @@
   ## this is another good candidate for a mutator
   ## with stripping out the parent selector
 
-  CYPRESS_ATTRS = "_cypress"
-
   class Entities.Command extends Entities.Model
     defaults: ->
       indent: 0
+      number: 0
       pause: false
       revert: false
-      number: 0
 
     mutators:
+      isPending: ->
+        @state("pending")
+
       selector: ->
         _.trim @stripParentSelector()
 
@@ -30,10 +31,12 @@
         return if not message = @get("message")
         _(message).truncate(100, " ")
 
+    state: (state) ->
+      @get("state") is state
+
     reset: ->
       @clear(silent: true)
       @clear(silent: true)
-      @[CYPRESS_ATTRS] = {}
 
     initialize: ->
       new Backbone.Chooser(@)
@@ -52,8 +55,8 @@
     ## pass along the args with the context of our
     ## private cypress attrs
     triggerCommandCallback: (name, args...) ->
-      if _.isFunction(fn = @[CYPRESS_ATTRS][name])
-        fn.apply(@[CYPRESS_ATTRS], args)
+      if _.isFunction(fn = @getLog().get(name))
+        fn.apply(@getLog().attributes, args)
 
     highlight: (init) ->
       @set "highlight", init
@@ -96,16 +99,19 @@
       @response = response
 
     getSnapshot: ->
-      @[CYPRESS_ATTRS]._snapshot
+      @getLog().get("snapshot")
 
     getEl: ->
-      @[CYPRESS_ATTRS].$el
+      @getLog().get("$el")
 
     getRoute: ->
-      @[CYPRESS_ATTRS]._route
+      @getLog().get("_route")
+
+    getLog: ->
+      @log or throw new Error("Command is missing its log reference!")
 
     getConsoleDisplay: (fn) ->
-      obj = @triggerCommandCallback("onConsole", @[CYPRESS_ATTRS])
+      obj = @triggerCommandCallback("onConsole", @getLog().attributes)
 
       return if _.isEmpty(obj)
 
@@ -248,269 +254,37 @@
       ## incremental by one
       @_maxNumber += 1
 
-    # ## check to see if the last parent command
-    # ## is the passed in parent
-    # lastParentCommandIsNotParent: (parent, command) ->
-    #   ## loop through this in reverse
-    #   ## cannot reverse the models array
-    #   ## and use _.find because .clone()
-    #   ## is throwing an error
-    #   for model in @models by -1
-    #     ## exclude ourselves since we recursively check
-    #     ## up the parent chains
-    #     if model.get("canBeParent")
-    #       return model isnt parent
-
-    # lastParentsAreNotXhr: (parent, command) ->
-    #   for model in @models by -1
-    #     ## if any of the parents arent xhr's return true
-    #     return true if model.get("type") isnt "xhr"
-
-    #     ## if we eventually make it to our parent then
-    #     ## return false
-    #     return false if model is parent
-
-    # cloneParent: (parent) ->
-    #   ## get a clone of our parent but reset its id
-    #   clone = parent.clone()
-
-    #   ## also remove its number
-    #   clone.unset "number"
-
-    #   clone.set
-    #     id: _.uniqueId("cloneId")
-    #     isCloned: true
-    #     clonedFrom: parent.id
-
-    #   _.each ["el", "xhr", "response", "parent"], (prop) ->
-    #     clone[prop] = parent[prop]
-
-    #   @add clone
-
-    # getCommandByType: (attrs) ->
-    #   switch attrs.type
-    #     when "dom"          then @addDom attrs
-    #     when "xhr"          then @addXhr attrs
-    #     when "assertion"    then @addAssertion attrs
-    #     when "server"       then @addServer attrs
-    #     when "spy"          then @addSpy attrs
-    #     when "stub"         then @addStub attrs
-    #     when "visit"        then @addVisit attrs
-    #     when "localStorage" then @addLocalStorage attrs
-    #     else throw new Error("Command .type did not match anything")
-
-    # insertParents: (command, parentId, options = {}) ->
-    #   if parent = @parentExistsFor(parentId)
-
-    #     ## make sure the last command is our parent, if its not
-    #     ## then re-insert it (as a new model) and reset which
-    #     ## one is our parent
-
-    #     ## right here we need to potentially insert multiple parents
-    #     ## in case we've referenced an ecl object way down the line
-    #     if options.if and options.if.call(@, parent, command)
-    #       ## recursively walk up the parent chain by ensuring we insert
-    #       ## as many parents as necessary to get back to the root command
-    #       @insertParents(parent, parent.parent.id, options) if parent.hasParent()
-
-    #       parent = @cloneParent(parent)
-
-    #     command.setParent parent
-    #     command.indent()
-    #     options.onSetParent.call(@, parent) if options.onSetParent
-
-    # getIndexByParent: (command) ->
-    #   return if not command.hasParent()
-
-    #   @getCommandIndex(command.parent)
-
     anyFailed: ->
       @any (command) -> command.get("error")
 
     getTotalNumber: ->
       @_maxNumber
 
-    # getXhrOptions: (command, options) ->
-    #   ## at the very last minute we splice in this
-    #   ## new command by figuring out what its parents
-    #   ## index is (if this is an xhr)
+    createCommand: (log) ->
+      if log.get("type") not in ["parent", "child"]
+        throw new Error("Commands may only have type of 'parent' or 'child'.  Command was: {name: #{log.get('name')}, type: #{log.get('type')}}")
 
-    #   index = @getIndexByParent(command)
-    #   options.at = index if index
-    #   options
+      attrs = ["state", "testId", "hook", "type", "name", "alias", "aliasType", "referencesAlias", "message", "numElements", "numRetries"]
 
-    # addSpy: (attrs) ->
-    #   {spy, spyCall, spyObj, snapshot} = attrs
+      command = new Entities.Command log.pick.apply(log, attrs)
+      command.log = log
 
-    #   attrs = _(attrs).omit "spy", "spyCall", "snapshot", "spyObj"
-
-    #   command = new Entities.Command attrs
-    #   command.spy = spy
-    #   command.spyCall = spyCall
-    #   command.spyObj = spyObj
-    #   command.snapshot = snapshot
-
-    #   @insertParents command, attrs.parent,
-    #     if: (parent, cmd) ->
-    #       @lastParentCommandIsNotParent(parent, cmd)
-
-    #   return command
-
-    # addStub: (attrs) ->
-    #   {stub, stubCall, stubObj, snapshot} = attrs
-
-    #   attrs = _(attrs).omit "stub", "stubCall", "snapshot", "stubObj"
-
-    #   command = new Entities.Command attrs
-    #   command.stub = stub
-    #   command.stubCall = stubCall
-    #   command.stubObj = stubObj
-    #   command.snapshot = snapshot
-
-    #   @insertParents command, attrs.parent,
-    #     if: (parent, cmd) ->
-    #       @lastParentCommandIsNotParent(parent, cmd)
-
-    #   return command
-
-    # addAssertion: (attrs) ->
-    #   {snapshot, el, actual, expected, subject} = attrs
-
-    #   attrs = _(attrs).omit "snapshot", "el", "actual", "expected", "subject"
-
-    #   ## instantiate the new model
-    #   command = new Entities.Command attrs
-    #   command.snapshot = snapshot
-    #   command.el = el
-    #   command.actual = actual
-    #   command.expected = expected
-    #   command.subject = subject
-
-    #   return command
-
-    # addDom: (attrs) ->
-    #   {el, snapshot} = attrs
-
-    #   attrs = _(attrs).omit "el", "snapshot"
-
-    #   ## instantiate the new model
-    #   command = new Entities.Command attrs
-    #   command.snapshot = snapshot
-    #   command.el = el
-
-    #   ## if we're chained to an existing id
-    #   ## that means we have a parent
-    #   @insertParents command, attrs.parent,
-
-    #     ## insert a parent if the last parent command
-    #     ## is not these arguments
-    #     if: (parent, cmd) ->
-    #       @lastParentCommandIsNotParent(parent, cmd)
-
-    #   return command
-
-    # addXhr: (attrs) ->
-    #   {xhr, response, snapshot} = attrs
-
-    #   attrs = _(attrs).omit "xhr", "response", "snapshot"
-
-    #   ## instantiate the new model
-    #   command = new Entities.Command attrs
-    #   command.xhr = xhr
-    #   command.snapshot = snapshot
-    #   command.setResponse(response) if response
-
-    #   # @insertParents command, attrs.parent,
-    #     ## insert a parent if the last parent commands
-    #     ## are not xhr types
-    #     # if: (parent, cmd) ->
-    #       # @lastParentsAreNotXhr(parent, cmd)
-
-    #     ## when the parent is set on this child command
-    #     ## set the response for it
-    #     # onSetParent: (parent) ->
-    #       # command.setResponse response
-
-
-    #   return command
-
-    # addServer: (attrs) ->
-    #   {snapshot, requests, responses, server} = attrs
-
-    #   attrs = _(attrs).omit "requests", "responses", "server"
-
-    #   command = new Entities.Command attrs
-    #   command.snapshot       = snapshot
-    #   command.requests  = requests
-    #   command.responses = responses
-    #   command.server    = server
-
-    #   return command
-
-    # addVisit: (attrs) ->
-    #   {page} = attrs
-
-    #   attrs = _(attrs).omit "page"
-
-    #   command = new Entities.Command attrs
-    #   command.page = page
-
-    #   return command
-
-    # addLocalStorage: (attrs) ->
-    #   {snapshot} = attrs
-
-    #   attrs = _(attrs).omit "snapshot"
-
-    #   ## instantiate the new model
-    #   command = new Entities.Command attrs
-    #   command.snapshot = snapshot
-
-    #   return command
-
-    attrsHaveErrorWhichMathchesLastCommandError: (attrs) ->
-      err = attrs._error
-      err and @last() and err is @last()[CYPRESS_ATTRS]._error
-
-    createCommand: (attrs) ->
-      if attrs.type not in ["parent", "child"]
-        throw new Error("Commands may only have type of 'parent' or 'child'.  Command was: {name: #{attrs.name}, type: #{attrs.type}}")
-
-      publicAttrs = {}
-
-      ## split up public from private properties
-      _.each attrs, (value, key) ->
-        ## if this is a function
-        ## OR if the first character of the key is a: _
-        ## OR it has a DOM element
-
-        ## do not add it to the publicAttrs
-        ## --extract this to a method--
-        if not (_.isFunction(value) or key[0] is "_" or (value and value[0] and _.isElement(value[0])))
-          publicAttrs[key] = value
-
-      command = new Entities.Command publicAttrs
-
-      command[CYPRESS_ATTRS] = attrs
+      command.listenTo log, "state:change", (state) ->
+        command.set "state", state
 
       return command
+
+    isModelInstance: (command) ->
+      try
+        command instanceof Entities.Command
+      catch
+        false
 
     add: (attrs, hook) ->
       command = attrs
       options = hook
 
-      ## bail if our attrs contain the EXACT same error object
-      ## as our previous command.  this prevents double showing
-      ## an assertion error + a failed command.  we handle this
-      ## inside of the app as opposed to cypress, because our app
-      ## maintains the state of all commands, and this will continue
-      ## to work even if users add their own assertion library
-      ## and its coupled to chai, an error type, or anything like that
-      return if @attrsHaveErrorWhichMathchesLastCommandError(attrs)
-
-      ## if we have both of these methods assume this is
-      ## a backbone model
-      if command and command.set and command.get
+      if @isModelInstance(command)
 
         ## increment the number if its not cloned
         command.increment(@maxNumber()) unless command.isCloned()
@@ -522,11 +296,6 @@
         return super(command, options)
 
       return if _.isEmpty attrs
-
-      # _.extend attrs,
-      #   type: type
-      #   testId: id
-      #   hook: hook
 
       super @createCommand(attrs)
 
