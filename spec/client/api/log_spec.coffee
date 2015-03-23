@@ -37,6 +37,30 @@ describe "Cypress.Log API", ->
 
       expect(createSnapshot).to.be.calledWith {}
 
+    it "#error", ->
+      err = new Error
+      @log.error(err)
+      expect(@log.get("state")).to.eq "error"
+      expect(@log.get("error")).to.eq err
+
+    it "#error triggers state:change", (done) ->
+      @log.on "state:change", (state) ->
+        expect(state).to.eq "error"
+        done()
+
+      @log.error({})
+
+    it "#end", ->
+      @log.end()
+      expect(@log.get("state")).to.eq "success"
+
+    it "#end triggers state:change", (done) ->
+      @log.on "state:change", (state) ->
+        expect(state).to.eq "success"
+        done()
+
+      @log.end()
+
     describe "#publicInterface", ->
       beforeEach ->
         @interface = @log.publicInterface()

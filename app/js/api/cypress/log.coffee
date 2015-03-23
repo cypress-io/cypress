@@ -42,17 +42,18 @@ Cypress.Log = do (Cypress, _, Backbone) ->
       return @
 
     error: (err) ->
-      @set "error", err
-      @state = "error"
+      @set
+        error: err
+        state: "error"
 
-      @trigger "state:change", @state
+      @trigger "state:change", @get("state")
 
       return @
 
     end: ->
-      @state = "success"
+      @set "state", "success"
 
-      @trigger "state:change", @state
+      @trigger "state:change", @get("state")
 
       return @
 
