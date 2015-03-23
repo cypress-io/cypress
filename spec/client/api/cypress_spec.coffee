@@ -219,13 +219,12 @@ describe "Cypress", ->
               alias: "getFoo"
               aliasType: "route"
               type: "parent"
-              error: true
-              _error: err
+              error: err
               event: "command"
               message: undefined
             }
             _.each obj, (value, key) =>
-              expect(@log[key]).deep.eq(value, "expected key: #{key} to eq value: #{value}")
+              expect(@log.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
 
             done()
 
@@ -504,15 +503,15 @@ describe "Cypress", ->
 
       it "has name of route", ->
         cy.route("/foo", {}).then ->
-          expect(@log.name).to.eq "route"
+          expect(@log.get("name")).to.eq "route"
 
       it "uses the wildcard URL", ->
         cy.route("*", {}).then ->
-          expect(@log.url).to.eq("*")
+          expect(@log.get("url")).to.eq("*")
 
       it "#onConsole", ->
         cy.route("*", {foo: "bar"}).as("foo").then ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "route"
             Method: "GET"
             URL: "*"
@@ -543,7 +542,7 @@ describe "Cypress", ->
           }
 
           _.each obj, (value, key) =>
-            expect(@log[key]).to.deep.eq(value, "expected key: #{key} to eq value: #{value}")
+            expect(@log.get(key)).to.deep.eq(value, "expected key: #{key} to eq value: #{value}")
 
         it "#onConsole", ->
 
@@ -574,9 +573,9 @@ describe "Cypress", ->
           spy = @agents.spy()
           spy("foo", "bar")
 
-          expect(@log.name).to.eq("spy-1")
-          expect(@log.message).to.eq("function(arg1, arg2)")
-          expect(@log.type).to.eq("parent")
+          expect(@log.get("name")).to.eq("spy-1")
+          expect(@log.get("message")).to.eq("function(arg1, arg2)")
+          expect(@log.get("type")).to.eq("parent")
 
         context "#onConsole", ->
 
@@ -912,7 +911,7 @@ describe "Cypress", ->
     describe ".log", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
-          if @log.name is "location"
+          if @log.get("name") is "location"
             throw new Error("cy.location() should not have logged out.")
 
       afterEach ->
@@ -926,7 +925,7 @@ describe "Cypress", ->
           }
 
           _.each obj, (value, key) =>
-            expect(@log[key]).to.deep.eq value
+            expect(@log.get(key)).to.deep.eq value
 
       it "does not emit when {log: false}", ->
         cy.url({log: false}).then ->
@@ -934,7 +933,7 @@ describe "Cypress", ->
 
       it "#onConsole", ->
         cy.url().then ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "url"
             Returned: "/fixtures/html/dom.html"
           }
@@ -947,7 +946,7 @@ describe "Cypress", ->
     describe ".log", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
-          if @log.name is "location"
+          if @log.get("name") is "location"
             throw new Error("cy.location() should not have logged out.")
 
       afterEach ->
@@ -961,7 +960,7 @@ describe "Cypress", ->
           }
 
           _.each obj, (value, key) =>
-            expect(@log[key]).to.deep.eq value
+            expect(@log.get(key)).to.deep.eq value
 
       it "does not emit when {log: false}", ->
         cy.hash({log: false}).then ->
@@ -969,7 +968,7 @@ describe "Cypress", ->
 
       it "#onConsole", ->
         cy.hash().then ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "hash"
             Returned: ""
           }
@@ -1004,7 +1003,7 @@ describe "Cypress", ->
           }
 
           _.each obj, (value, key) =>
-            expect(@log[key]).to.deep.eq value
+            expect(@log.get(key)).to.deep.eq value
 
       it "logs obj with a message", ->
         cy.location("origin").then ->
@@ -1014,11 +1013,11 @@ describe "Cypress", ->
           }
 
           _.each obj, (value, key) =>
-            expect(@log[key]).to.deep.eq value
+            expect(@log.get(key)).to.deep.eq value
 
       it "#onConsole", ->
         cy.location().then ->
-          onConsole = @log.onConsole()
+          onConsole = @log.attributes.onConsole()
 
           expect(_(onConsole).keys()).to.deep.eq ["Command", "Returned"]
           expect(onConsole.Command).to.eq "location"
@@ -1078,7 +1077,7 @@ describe "Cypress", ->
     describe ".log", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
-          if @log.name is "get"
+          if @log.get("name") is "get"
             throw new Error("cy.get() should not have logged out.")
 
       it "logs obj", ->
@@ -1089,11 +1088,11 @@ describe "Cypress", ->
           }
 
           _.each obj, (value, key) =>
-            expect(@log[key]).to.deep.eq value
+            expect(@log.get(key)).to.deep.eq value
 
       it "#onConsole", ->
         cy.title().then ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "title"
             Returned: "DOM Fixture"
           }
@@ -1438,7 +1437,7 @@ describe "Cypress", ->
         html = cy.$("html")
 
         cy.root().then ->
-          expect(@log.$el.get(0)).to.eq(html.get(0))
+          expect(@log.get("$el").get(0)).to.eq(html.get(0))
 
       it "sets $el to withinSubject", ->
         form = cy.$("form")
@@ -1447,7 +1446,7 @@ describe "Cypress", ->
           cy
             .get("input")
             .root().then ($root) ->
-              expect(@log.$el.get(0)).to.eq(form.get(0))
+              expect(@log.get("$el").get(0)).to.eq(form.get(0))
 
   context "#get", ->
     beforeEach ->
@@ -1561,9 +1560,21 @@ describe "Cypress", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
 
-      it "logs obj", ->
+      it "logs immediately before resolving", (done) ->
+        Cypress.on "log", (log) ->
+          expect(log.pick("state", "referencesAlias", "aliasType")).to.deep.eq {
+            state: "pending"
+            referencesAlias: undefined
+            aliasType: "dom"
+          }
+          done()
+
+        cy.get("body")
+
+      it "logs obj once complete", ->
         cy.get("body").as("b").then ($body) ->
           obj = {
+            state: "success"
             name: "get"
             message: "body"
             alias: "b"
@@ -1573,11 +1584,11 @@ describe "Cypress", ->
           }
 
           _.each obj, (value, key) =>
-            expect(@log[key]).deep.eq(value, "expected key: #{key} to eq value: #{value}")
+            expect(@log.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
 
       it "#onConsole", ->
         cy.get("body").then ($body) ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "get"
             Selector: "body"
             Returned: $body
@@ -1586,7 +1597,7 @@ describe "Cypress", ->
 
       it "#onConsole with an alias", ->
         cy.get("body").as("b").get("@b").then ($body) ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "get"
             Alias: "@b"
             Returned: $body
@@ -1712,6 +1723,16 @@ describe "Cypress", ->
           done()
 
         cy.get("#button", {visible: true})
+
+      it "sets error command state", (done) ->
+        Cypress.on "log", (@log) =>
+
+        cy.on "fail", (err) =>
+          expect(@log.get("state")).to.eq "error"
+          expect(@log.get("error")).to.eq err
+          done()
+
+        cy.get("foobar")
 
   context "#contains", ->
     it "finds the nearest element by :contains selector", ->
@@ -1879,23 +1900,23 @@ describe "Cypress", ->
 
       it "passes in $el", ->
         cy.get("#complex-contains").contains("nested contains").then ($label) ->
-          expect(@log.$el).to.eq $label
+          expect(@log.get("$el")).to.eq $label
 
       it "sets type to parent when used as a parent command", ->
         cy.contains("foo").then ->
-          expect(@log.type).to.eq "parent"
+          expect(@log.get("type")).to.eq "parent"
 
       it "sets type to parent when subject doesnt have an element", ->
         cy.noop({}).contains("foo").then ->
-          expect(@log.type).to.eq "parent"
+          expect(@log.get("type")).to.eq "parent"
 
       it "sets type to child when used as a child command", ->
         cy.get("body").contains("foo").then ->
-          expect(@log.type).to.eq "child"
+          expect(@log.get("type")).to.eq "child"
 
       it "#onConsole", ->
         cy.get("#complex-contains").contains("nested contains").then ($label) ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "contains"
             Content: "nested contains"
             "Applied To": getFirstSubjectByName("get")
@@ -2289,11 +2310,11 @@ describe "Cypress", ->
 
       it "passes in $el", ->
         cy.get("input:first").type("foobar").then ($input) ->
-          expect(@log.$el).to.eq $input
+          expect(@log.get("$el")).to.eq $input
 
       it "#onConsole", ->
         cy.get("input:first").type("foobar").then ($input) ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "type"
             Typed: "foobar"
             "Applied To": $input
@@ -2518,13 +2539,13 @@ describe "Cypress", ->
 
       it "passes in $el", ->
         cy.get("[name=colors][value=blue]").check().then ($input) ->
-          expect(@log.$el.get(0)).to.eq $input.get(0)
+          expect(@log.get("$el").get(0)).to.eq $input.get(0)
 
       it "#onConsole", ->
         cy.get("[name=colors][value=blue]").check().then ($input) ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "check"
-            "Applied To": @log.$el
+            "Applied To": @log.get("$el")
           }
 
   context "#uncheck", ->
@@ -2606,13 +2627,13 @@ describe "Cypress", ->
 
       it "passes in $el", ->
         cy.get("[name=colors][value=blue]").uncheck().then ($input) ->
-          expect(@log.$el.get(0)).to.eq $input.get(0)
+          expect(@log.get("$el").get(0)).to.eq $input.get(0)
 
       it "#onConsole", ->
         cy.get("[name=colors][value=blue]").uncheck().then ($input) ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "uncheck"
-            "Applied To": @log.$el
+            "Applied To": @log.get("$el")
           }
 
   context "#submit", ->
@@ -2649,14 +2670,14 @@ describe "Cypress", ->
 
       it "provides $el", ->
         cy.get("form").first().submit().then ($form) ->
-          expect(@log.name).to.eq "submit"
-          expect(@log.$el).to.match $form
+          expect(@log.get("name")).to.eq "submit"
+          expect(@log.get("$el")).to.match $form
 
       it "#onConsole", ->
         cy.get("form").first().submit().then ($form) ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "submit"
-            "Applied To": @log.$el
+            "Applied To": @log.get("$el")
             Elements: 1
           }
 
@@ -2699,11 +2720,11 @@ describe "Cypress", ->
 
       it "passes in $el", ->
         cy.get("input:first").focused().then ($input) ->
-          expect(@log.$el).to.eq $input
+          expect(@log.get("$el")).to.eq $input
 
       it "#onConsole", ->
         cy.get("input:first").focused().then ($input) ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "focused"
             "Returned": $input
           }
@@ -2768,7 +2789,7 @@ describe "Cypress", ->
 
       it "passes in $el", ->
         cy.get("input:first").focus().then ($input) ->
-          expect(@log.$el).to.eq $input
+          expect(@log.get("$el")).to.eq $input
 
       it "logs 2 focus event", ->
         logs = []
@@ -2785,7 +2806,7 @@ describe "Cypress", ->
 
       it "#onConsole", ->
         cy.get("input:first").focus().then ($input) ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "focus"
             "Applied To": $input
           }
@@ -2864,7 +2885,7 @@ describe "Cypress", ->
 
       it "passes in $el", ->
         cy.get("input:first").focus().blur().then ($input) ->
-          expect(@log.$el).to.eq $input
+          expect(@log.get("$el")).to.eq $input
 
       it "logs 1 blur event", ->
         logs = []
@@ -2880,7 +2901,7 @@ describe "Cypress", ->
 
       it "#onConsole", ->
         cy.get("input:first").focus().blur().then ($input) ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "blur"
             "Applied To": $input
           }
@@ -3091,9 +3112,9 @@ describe "Cypress", ->
         Cypress.on "log", (@log) =>
 
         cy.get("button").first().dblclick().then ($button) ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "dblclick"
-            "Applied To": @log.$el
+            "Applied To": @log.get("$el")
             Elements: 1
           }
 
@@ -3267,9 +3288,9 @@ describe "Cypress", ->
         Cypress.on "log", (@log) =>
 
         cy.get("button").first().click().then ($button) ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "click"
-            "Applied To": @log.$el
+            "Applied To": @log.get("$el")
             Elements: 1
           }
 
@@ -3357,7 +3378,7 @@ describe "Cypress", ->
                 Elements: $el.length
               }
 
-              expect(@log.onConsole()).to.deep.eq obj
+              expect(@log.attributes.onConsole()).to.deep.eq obj
 
   context "traversals", ->
     fns = [
@@ -3403,7 +3424,7 @@ describe "Cypress", ->
                 Elements: $el.length
               }
 
-              expect(@log.onConsole()).to.deep.eq obj
+              expect(@log.attributes.onConsole()).to.deep.eq obj
 
     it "retries until it finds", ->
       li = cy.$("#list li:last")
@@ -3619,7 +3640,7 @@ describe "Cypress", ->
           }
 
           _.each obj, (value, key) =>
-            expect(@log[key]).to.deep.eq value
+            expect(@log.get(key)).to.deep.eq value
 
       it "logs obj as a function", ->
         cy.noop(@obj).invoke("bar").then ->
@@ -3629,11 +3650,11 @@ describe "Cypress", ->
           }
 
           _.each obj, (value, key) =>
-            expect(@log[key]).to.deep.eq value
+            expect(@log.get(key)).to.deep.eq value
 
       it "#onConsole as a regular property", ->
         cy.noop(@obj).invoke("num").then ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command:  "invoke"
             Property: ".num"
             On:       @obj
@@ -3642,7 +3663,7 @@ describe "Cypress", ->
 
       it "#onConsole as a function property without args", ->
         cy.noop(@obj).invoke("bar").then ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command:  "invoke"
             Function: ".bar()"
             On:       @obj
@@ -3651,7 +3672,7 @@ describe "Cypress", ->
 
       it "#onConsole as a function property with args", ->
         cy.noop(@obj).invoke("sum", 1, 2, 3).then ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command:  "invoke"
             Function: ".sum()"
             "With Arguments": [1,2,3]
@@ -4171,20 +4192,20 @@ describe "Cypress", ->
 
       it "is a type: child if subject", ->
         cy.noop({}).wait(10).then ->
-          expect(@log.type).to.eq "child"
+          expect(@log.get("type")).to.eq "child"
 
       it "is a type: child if subject is false", ->
         cy.noop(false).wait(10).then ->
-          expect(@log.type).to.eq "child"
+          expect(@log.get("type")).to.eq "child"
 
       it "is a type: parent if subject is null or undefined", ->
         cy.wait(10).then ->
-          expect(@log.type).to.eq "parent"
+          expect(@log.get("type")).to.eq "parent"
 
       describe "number argument", ->
         it "#onConsole", ->
           cy.wait(10).then ->
-            expect(@log.onConsole()).to.deep.eq {
+            expect(@log.attributes.onConsole()).to.deep.eq {
               Command: "wait"
               "Waited For": "10ms before continuing"
             }
@@ -4209,7 +4230,7 @@ describe "Cypress", ->
               numRetries: numRetries + 1
             }
             _.each obj, (value, key) =>
-              expect(@log[key]).deep.eq(value, "expected key: #{key} to eq value: #{value}")
+              expect(@log.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
 
             done()
 
@@ -4241,7 +4262,7 @@ describe "Cypress", ->
       #       .window().then (win) ->
       #         win.$.get("foo")
       #       .wait("@getFoo").then (xhr) ->
-      #         expect(@log.onConsole()).to.deep.eq {
+      #         expect(@log.attributes.onConsole()).to.deep.eq {
       #           Command: "wait"
       #           "Waited For": "alias: 'getFoo' to have a response"
       #           Alias: xhr
@@ -4261,7 +4282,7 @@ describe "Cypress", ->
 
       #     cy
       #       .wait(fn).then ->
-      #         expect(@log.onConsole()).to.deep.eq {
+      #         expect(@log.attributes.onConsole()).to.deep.eq {
       #           Command: "wait"
       #           "Waited For": _.str.clean(fn.toString())
       #           Retried: "3 times"
@@ -4426,7 +4447,7 @@ describe "Cypress", ->
         Cypress.on "log", (@log) =>
 
         cy.on "fail", (err) =>
-          expect(@log.name).to.eq "get"
+          expect(@log.get("name")).to.eq "get"
           expect(@log.message).to.eq "foo"
           expect(@log._error).to.eq err
           expect(@log.error).to.eq true
