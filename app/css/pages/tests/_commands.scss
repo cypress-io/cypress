@@ -184,6 +184,18 @@
     // @include text-overflow;
   }
 
+  .command-pending {
+    padding-left: 3px;
+    border-left: 2px solid $pending;
+    background-color: lighten($pending, 40%);
+
+    .command-number,
+    .command-method,
+    .command-message {
+      color: lighten($pending, 15%);
+    }
+  }
+
   .command-error {
     padding-left: 3px;
     border-left: 2px solid $fail;
@@ -217,7 +229,7 @@
       }
 
       .fa-circle.successful {
-        color: #428BCA;
+        color: $pending;
 
       }
       .fa-circle.bad {
