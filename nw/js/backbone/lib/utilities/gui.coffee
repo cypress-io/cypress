@@ -53,7 +53,7 @@
           @focus(win)
 
       win.on "blur", =>
-        return if App.fileDialogOpened
+        return if App.fileDialogOpened or App.config.env("development")
 
         @hide(win)
 
