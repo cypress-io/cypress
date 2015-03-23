@@ -131,7 +131,7 @@ gulp.task "build:secret:sauce", (cb) ->
           console.log("err with nwjc:", err)
 
         ## finally cleanup any v8 logs and remove secret sauce.js
-        gulp.src(["lib/secret_sauce.js", "v8.log"])
+        gulp.src(["lib/secret_sauce.js", "./v8.log"])
           .on "end", cb
           .pipe($.clean())
 
