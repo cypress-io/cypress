@@ -2986,6 +2986,23 @@ describe "Cypress", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
 
+      it "logs immediately before resolving", (done) ->
+        input = cy.$(":text:first")
+
+        Cypress.on "log", (log) ->
+          if log.get("name") is "focus"
+            expect(log.get("state")).to.eq("pending")
+            expect(log.get("$el").get(0)).to.eq input.get(0)
+            done()
+
+        cy.get(":text:first").focus()
+
+      it "snapshots after clicking", ->
+        Cypress.on "log", (@log) =>
+
+        cy.get(":text:first").focus().then ->
+          expect(@log.get("snapshot")).to.be.an("object")
+
       it "passes in $el", ->
         cy.get("input:first").focus().then ($input) ->
           expect(@log.get("$el")).to.eq $input
@@ -3037,6 +3054,19 @@ describe "Cypress", ->
           expect(err.message).to.include ".focus() can only be called on a single element! Your subject contained #{@num} elements!"
           done()
 
+      it "logs once when not dom subject", (done) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(1)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        cy.focus()
+
   context "#blur", ->
     it "should blur the originally focused element", (done) ->
       cy.$("#focus input").blur -> done()
@@ -3081,6 +3111,23 @@ describe "Cypress", ->
     describe ".log", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
+
+      it "logs immediately before resolving", (done) ->
+        input = cy.$(":text:first")
+
+        Cypress.on "log", (log) ->
+          if log.get("name") is "blur"
+            expect(log.get("state")).to.eq("pending")
+            expect(log.get("$el").get(0)).to.eq input.get(0)
+            done()
+
+        cy.get(":text:first").focus().blur()
+
+      it "snapshots after clicking", ->
+        Cypress.on "log", (@log) =>
+
+        cy.get(":text:first").focus().blur().then ->
+          expect(@log.get("snapshot")).to.be.an("object")
 
       it "passes in $el", ->
         cy.get("input:first").focus().blur().then ($input) ->
@@ -3140,6 +3187,19 @@ describe "Cypress", ->
         cy.on "fail", (err) ->
           expect(err.message).to.include ".blur() can only be called on the focused element. Currently the focused element is a: <input id=\"input\">"
           done()
+
+      it "logs once when not dom subject", (done) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(1)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        cy.blur()
 
   context "#dblclick", ->
     it "sends a dblclick event", (done) ->

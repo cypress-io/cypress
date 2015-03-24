@@ -63,6 +63,12 @@ do (Cypress, _) ->
 
       @ensureDom(options.$el)
 
+      if options.log
+        command = Cypress.command
+          $el: options.$el
+          onConsole: ->
+            "Applied To": options.$el
+
       ## http://www.w3.org/TR/html5/editing.html#specially-focusable
       ## ensure there is only 1 dom element in the subject
       ## make sure its allowed to be focusable
@@ -70,12 +76,12 @@ do (Cypress, _) ->
         return if options.error is false
 
         node = Cypress.Utils.stringifyElement(options.$el)
-        @throwErr(".focus() can only be called on a valid focusable element! Your subject is a: #{node}")
+        @throwErr(".focus() can only be called on a valid focusable element! Your subject is a: #{node}", command)
 
       if (num = options.$el.length) and num > 1
         return if options.error is false
 
-        @throwErr(".focus() can only be called on a single element! Your subject contained #{num} elements!")
+        @throwErr(".focus() can only be called on a single element! Your subject contained #{num} elements!", command)
 
       timeout = @_timeout() / 2
 
@@ -101,11 +107,7 @@ do (Cypress, _) ->
 
           cleanup()
 
-          if options.log
-            Cypress.command
-              $el: options.$el
-              onConsole: ->
-                "Applied To": options.$el
+          command.snapshot().end() if command
 
           resolve(options.$el)
 
@@ -138,7 +140,7 @@ do (Cypress, _) ->
 
         return if options.error is false
 
-        @throwErr ".focus() timed out because your browser did not receive any focus events. This is a known bug in Chrome when it is not the currently focused window."
+        @throwErr ".focus() timed out because your browser did not receive any focus events. This is a known bug in Chrome when it is not the currently focused window.", command
 
     blur: (subject, options = {}) ->
       ## we should throw errors by default!
@@ -150,22 +152,28 @@ do (Cypress, _) ->
 
       @ensureDom(options.$el)
 
+      if options.log
+        command = Cypress.command
+          $el: options.$el
+          onConsole: ->
+            "Applied To": options.$el
+
       if (num = options.$el.length) and num > 1
         return if options.error is false
 
-        @throwErr(".blur() can only be called on a single element! Your subject contained #{num} elements!")
+        @throwErr(".blur() can only be called on a single element! Your subject contained #{num} elements!", command)
 
       @command("focused", {log: false}).then ($focused) =>
         if not $focused
           return if options.error is false
 
-          @throwErr(".blur() can only be called when there is a currently focused element.")
+          @throwErr(".blur() can only be called when there is a currently focused element.", command)
 
         if options.$el.get(0) isnt $focused.get(0)
           return if options.error is false
 
           node = Cypress.Utils.stringifyElement($focused)
-          @throwErr(".blur() can only be called on the focused element. Currently the focused element is a: #{node}")
+          @throwErr(".blur() can only be called on the focused element. Currently the focused element is a: #{node}", command)
 
         timeout = @_timeout() / 2
 
@@ -191,11 +199,7 @@ do (Cypress, _) ->
 
             cleanup()
 
-            if options.log
-              Cypress.command
-                $el: options.$el
-                onConsole: ->
-                  "Applied To": options.$el
+            command.snapshot().end() if command
 
             resolve(options.$el)
 
@@ -218,7 +222,7 @@ do (Cypress, _) ->
 
           return if options.error is false
 
-          @throwErr ".blur() timed out because your browser did not receive any blur events. This is a known bug in Chrome when it is not the currently focused window."
+          @throwErr ".blur() timed out because your browser did not receive any blur events. This is a known bug in Chrome when it is not the currently focused window.", command
 
     dblclick: (subject, options = {}) ->
       _.defaults options,
