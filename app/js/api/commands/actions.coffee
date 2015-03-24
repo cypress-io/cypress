@@ -25,11 +25,18 @@ do (Cypress, _) ->
       options.el.each (index, el) =>
         origEl = el
         $el = $(el)
-        node = Cypress.Utils.stringifyElement(el)
+
+        if options.log
+          command = Cypress.command
+            $el: $el
+            onConsole: ->
+              "Applied To": $el
+              Elements: $el.length
 
         if not $el.is("form")
+          node = Cypress.Utils.stringifyElement(el)
           word = Cypress.Utils.plural(options.el, "contains", "is")
-          @throwErr(".submit() can only be called on a <form>! Your subject #{word} a: #{node}")
+          @throwErr(".submit() can only be called on a <form>! Your subject #{word} a: #{node}", command)
 
         ## do more research here but see if we can
         ## use the native submit event first and
@@ -37,12 +44,7 @@ do (Cypress, _) ->
         submit = new Event("submit")
         origEl.dispatchEvent(submit)
 
-        if options.log
-          Cypress.command
-            $el: $el
-            onConsole: ->
-              "Applied To": $el
-              Elements: $el.length
+        command.snapshot().end() if command
 
     fill: (subject, obj, options = {}) ->
       @throwErr "cy.fill() must be passed an object literal as its 1st argument!" if not _.isObject(obj)
@@ -551,6 +553,8 @@ do (Cypress, _) ->
 
         Cypress.command
           $el: $el
+          # end: true
+          # snapshot: true
 
       try
         d = @sync.document()

@@ -2921,15 +2921,52 @@ describe "Cypress", ->
         cy.noop({}).submit()
 
       it "throws when subject isnt a form", (done) ->
-        cy.on "fail", (err) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(2)
+          expect(@log.get("error")).to.eq(err)
           expect(err.message).to.include ".submit() can only be called on a <form>! Your subject contains a: <input id=\"input\">"
           done()
 
         cy.get("input").submit()
 
+      it "logs once when not dom subject", (done) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(1)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        cy.submit()
+
     describe ".log", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
+
+      it "logs immediately before resolving", (done) ->
+        form = cy.$("form:first")
+
+        Cypress.on "log", (log) ->
+          if log.get("name") is "submit"
+            expect(log.get("state")).to.eq("pending")
+            expect(log.get("$el").get(0)).to.eq form.get(0)
+            done()
+
+        cy.get("form:first").submit()
+
+      it "snapshots after clicking", ->
+        Cypress.on "log", (@log) =>
+
+        cy.get("form:first").submit().then ($input) ->
+          expect(@log.get("snapshot")).to.be.an("object")
 
       it "provides $el", ->
         cy.get("form").first().submit().then ($form) ->
