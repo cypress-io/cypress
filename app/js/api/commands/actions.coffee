@@ -47,74 +47,11 @@ do (Cypress, _) ->
     fill: (subject, obj, options = {}) ->
       @throwErr "cy.fill() must be passed an object literal as its 1st argument!" if not _.isObject(obj)
 
-    check: (subject, values = []) ->
-      @ensureDom(subject)
+    check: (subject, values, options) ->
+      @_check_or_uncheck("check", subject, values, options)
 
-      ## make sure we're an array of values
-      values = [].concat(values)
-
-      ## blow up if any member of the subject
-      ## isnt a checkbox or radio
-      check = (el, index) =>
-        $el = $(el)
-        node = Cypress.Utils.stringifyElement($el)
-
-        @ensureVisibility($el)
-
-        if not $el.is(":checkbox,:radio")
-          word = Cypress.Utils.plural(subject, "contains", "is")
-          @throwErr(".check() can only be called on :checkbox and :radio! Your subject #{word} a: #{node}")
-
-        return if $el.prop("checked")
-
-        ## if we didnt pass in any values or our
-        ## el's value is in the array then check it
-        if not values.length or $el.val() in values
-          @command("click", {el: $el, log: false}).then ->
-            Cypress.command
-              $el: $el
-              onConsole: ->
-                "Applied To": $el
-
-      ## return our original subject when our promise resolves
-      Promise
-        .map(subject.toArray(), check, {concurrency: 1})
-        .cancellable()
-        .return(subject)
-
-    uncheck: (subject, values = []) ->
-      @ensureDom(subject)
-
-      ## make sure we're an array of values
-      values = [].concat(values)
-
-      ## blow up if any member of the subject
-      ## isnt a checkbox
-      uncheck = (el, index) =>
-        $el = $(el)
-        node = Cypress.Utils.stringifyElement(el)
-
-        @ensureVisibility($el)
-
-        if not $el.is(":checkbox")
-          word = Cypress.Utils.plural(subject, "contains", "is")
-          @throwErr(".uncheck() can only be called on :checkbox! Your subject #{word} a: #{node}")
-
-        return if not $el.prop("checked")
-
-        ## if we didnt pass in any values or our
-        ## $el's value is in the array then check it
-        if not values.length or $el.val() in values
-          @command("click", {el: $el, log: false}).then ->
-            Cypress.command
-              $el: $el
-              onConsole: ->
-                "Applied To": $el
-
-      Promise
-        .map(subject.toArray(), uncheck, {concurrency: 1})
-        .cancellable()
-        .return(subject)
+    uncheck: (subject, values, options) ->
+      @_check_or_uncheck("uncheck", subject, values, options)
 
     focus: (subject, options = {}) ->
       ## we should throw errors by default!
@@ -299,8 +236,7 @@ do (Cypress, _) ->
               "Applied To":   $el
               "Elements":     $el.length
 
-        @ensureVisibility $el, (err) ->
-          command.error(err) if command
+        @ensureVisibility $el, command
 
         wait = if $el.is("a") then 50 else 10
 
@@ -348,8 +284,7 @@ do (Cypress, _) ->
               "Applied To":   $el
               "Elements":     $el.length
 
-        @ensureVisibility $el, (err) ->
-          command.error(err) if command
+        @ensureVisibility $el, command
 
         wait = if $el.is("a") then 50 else 10
 
@@ -526,8 +461,7 @@ do (Cypress, _) ->
 
         if not $el.is(textLike)
           word = Cypress.Utils.plural(subject, "contains", "is")
-          @throwErr ".clear() can only be called on textarea or :text! Your subject #{word} a: #{node}", (err) ->
-            command.error(err)
+          @throwErr ".clear() can only be called on textarea or :text! Your subject #{word} a: #{node}", command
 
         @command("type", "{selectall}{del}", {el: $el, log: false}).then ->
           command.snapshot().end() if command
@@ -639,3 +573,72 @@ do (Cypress, _) ->
       catch
         log(null)
         return null
+
+  Cypress.extend
+    _check_or_uncheck: (type, subject, values = [], options = {}) ->
+      _.defaults options,
+        el: subject
+        log: true
+
+      @ensureDom(options.el)
+
+      ## make sure we're an array of values
+      values = [].concat(values)
+
+      isNoop = ($el) ->
+        switch type
+          when "check"
+            $el.prop("checked")
+          when "uncheck"
+            not $el.prop("checked")
+
+      isAcceptableElement = ($el) ->
+        switch type
+          when "check"
+            $el.is(":checkbox,:radio")
+          when "uncheck"
+            $el.is(":checkbox")
+
+      ## blow up if any member of the subject
+      ## isnt a checkbox or radio
+      checkOrUncheck = (el, index) =>
+        $el = $(el)
+
+        onConsole =
+          "Applied To":   $el
+          "Elements":     $el.length
+
+        if options.log
+          command = Cypress.command
+            $el: $el
+            onConsole: -> onConsole
+
+        @ensureVisibility $el, command
+
+        if not isAcceptableElement($el)
+          node   = Cypress.Utils.stringifyElement($el)
+          word   = Cypress.Utils.plural(options.el, "contains", "is")
+          phrase = if type is "check" then " and :radio" else ""
+          @throwErr ".#{type}() can only be called on :checkbox#{phrase}! Your subject #{word} a: #{node}", command
+
+        ## if the checkbox was already checked
+        ## then notify the user of this note
+        ## and bail
+        if isNoop($el)
+          onConsole.Note = "This checkbox was already #{type}ed. No operation took place."
+          return
+
+        ## if we didnt pass in any values or our
+        ## el's value is in the array then check it
+        if not values.length or $el.val() in values
+          @command("click", {el: $el, log: false}).then ->
+            command.snapshot().end() if command
+
+            return null
+
+      ## return our original subject when our promise resolves
+      Promise
+        .resolve(options.el.toArray())
+        .each(checkOrUncheck)
+        .cancellable()
+        .return(options.el)

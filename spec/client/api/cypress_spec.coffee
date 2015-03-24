@@ -2549,19 +2549,57 @@ describe "Cypress", ->
           done()
 
       it "throws when any member of the subject isnt visible", (done) ->
-        chk = cy.$(":checkbox").show().last().hide()
+        chk = cy.$(":checkbox")
+        chk.show().last().hide()
 
-        node = Cypress.Utils.stringifyElement(chk)
+        node = Cypress.Utils.stringifyElement(chk.last())
 
-        cy.on "fail", (err) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(chk.length + 1)
+          expect(@log.get("error")).to.eq(err)
           expect(err.message).to.eq "cy.check() cannot be called on the non-visible element: #{node}"
           done()
 
         cy.get(":checkbox").check()
 
+        it "logs once when not dom subject", (done) ->
+          logs = []
+
+          Cypress.on "log", (@log) =>
+            logs.push @log
+
+          cy.on "fail", (err) =>
+            expect(logs).to.have.length(1)
+            expect(@log.get("error")).to.eq(err)
+            done()
+
+          cy.check()
+
     describe ".log", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
+
+      it "logs immediately before resolving", (done) ->
+        chk = cy.$(":checkbox:first")
+
+        Cypress.on "log", (log) ->
+          if log.get("name") is "check"
+            expect(log.get("state")).to.eq("pending")
+            expect(log.get("$el").get(0)).to.eq chk.get(0)
+            done()
+
+        cy.get(":checkbox:first").check()
+
+      it "snapshots after clicking", ->
+        Cypress.on "log", (@log) =>
+
+        cy.get(":checkbox:first").check().then ->
+          expect(@log.get("snapshot")).to.be.an("object")
 
       it "logs only 1 check event", ->
         logs = []
@@ -2569,7 +2607,7 @@ describe "Cypress", ->
 
         Cypress.on "log", (log) ->
           logs.push(log)
-          checks.push(log) if log.name is "check"
+          checks.push(log) if log.get("name") is "check"
 
         cy.get("[name=colors][value=blue]").check().then ->
           expect(logs).to.have.length(2)
@@ -2584,6 +2622,16 @@ describe "Cypress", ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "check"
             "Applied To": @log.get("$el")
+            Elements: 1
+          }
+
+      it "#onConsole when checkbox is already checked", ->
+        cy.get("[name=colors][value=blue]").check().check().then ($input) ->
+          expect(@log.attributes.onConsole()).to.deep.eq {
+            Command: "check"
+            "Applied To": @log.get("$el")
+            Elements: 1
+            Note: "This checkbox was already checked. No operation took place."
           }
 
   context "#uncheck", ->
@@ -2634,16 +2682,38 @@ describe "Cypress", ->
         cy.on "fail", -> done()
 
       it "throws when any member of the subject isnt visible", (done) ->
-        chk = cy.$(":checkbox").show().last()
+        ## grab the first 3 checkboxes!
+        chk = cy.$(":checkbox").slice(0, 3).show()
 
-        cy.on "fail", (err) ->
-          node = Cypress.Utils.stringifyElement(chk)
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          node = Cypress.Utils.stringifyElement(chk.last())
+          len  = (chk.length * 2) + 6
+          expect(logs).to.have.length(len)
+          expect(@log.get("error")).to.eq(err)
           expect(err.message).to.eq "cy.uncheck() cannot be called on the non-visible element: #{node}"
           done()
 
         cy
-          .get(":checkbox").check().last().invoke("hide")
-          .get(":checkbox").uncheck()
+          .get(":checkbox").invoke("slice", 0, 3).check().last().invoke("hide")
+          .get(":checkbox").invoke("slice", 0, 3).uncheck()
+
+      it "logs once when not dom subject", (done) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(1)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        cy.uncheck()
 
     describe ".log", ->
       beforeEach ->
@@ -2651,13 +2721,30 @@ describe "Cypress", ->
 
         Cypress.on "log", (@log) =>
 
+      it "logs immediately before resolving", (done) ->
+        chk = cy.$(":checkbox:first")
+
+        Cypress.on "log", (log) ->
+          if log.get("name") is "uncheck"
+            expect(log.get("state")).to.eq("pending")
+            expect(log.get("$el").get(0)).to.eq chk.get(0)
+            done()
+
+        cy.get(":checkbox:first").check().uncheck()
+
+      it "snapshots after clicking", ->
+        Cypress.on "log", (@log) =>
+
+        cy.get(":checkbox:first").check().uncheck().then ->
+          expect(@log.get("snapshot")).to.be.an("object")
+
       it "logs only 1 check event", ->
         logs = []
         unchecks = []
 
         Cypress.on "log", (log) ->
           logs.push(log)
-          unchecks.push(log) if log.name is "uncheck"
+          unchecks.push(log) if log.get("name") is "uncheck"
 
         cy.get("[name=colors][value=blue]").uncheck().then ->
           expect(logs).to.have.length(2)
@@ -2672,6 +2759,16 @@ describe "Cypress", ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "uncheck"
             "Applied To": @log.get("$el")
+            Elements: 1
+          }
+
+      it "#onConsole when checkbox is already unchecked", ->
+        cy.get("[name=colors][value=blue]").invoke("prop", "checked", false).uncheck().then ($input) ->
+          expect(@log.attributes.onConsole()).to.deep.eq {
+            Command: "uncheck"
+            "Applied To": @log.get("$el")
+            Elements: 1
+            Note: "This checkbox was already unchecked. No operation took place."
           }
 
   context "#submit", ->
