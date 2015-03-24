@@ -30,6 +30,8 @@ do (Cypress, _) ->
 
       log = (onConsole, error) ->
         obj = {
+          end: true
+          snapshot: true
           referencesAlias: alias
           aliasType: "route"
           numRetries: options.retries

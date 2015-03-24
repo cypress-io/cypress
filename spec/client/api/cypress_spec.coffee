@@ -4753,6 +4753,15 @@ describe "Cypress", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
 
+      it "immediately ends", ->
+        cy.noop({}).wait(10).then ->
+          expect(@log.get("state")).to.eq "success"
+
+      it "immediately snapshots", ->
+        it "immediately ends command", ->
+          cy.noop({}).wait(10).then ->
+            expect(@log.get("snapshot")).to.be.an("object")
+
       it "is a type: child if subject", ->
         cy.noop({}).wait(10).then ->
           expect(@log.get("type")).to.eq "child"
