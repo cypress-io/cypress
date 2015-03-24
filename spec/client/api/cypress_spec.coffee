@@ -4597,42 +4597,35 @@ describe "Cypress", ->
 
       it "sets name to current.name", (done) ->
         Cypress.on "log", (obj) ->
-          expect(obj.name).to.eq "foo"
+          expect(obj.get("name")).to.eq "foo"
           done()
 
         Cypress.command({})
 
       it "sets type to current.type", (done) ->
         Cypress.on "log", (obj) ->
-          expect(obj.type).to.eq "parent"
+          expect(obj.get("type")).to.eq "parent"
           done()
 
         Cypress.command({})
 
       it "sets message to stringified args", (done) ->
         Cypress.on "log", (obj) ->
-          expect(obj.message).to.deep.eq "1, 2, 3"
+          expect(obj.get("message")).to.deep.eq "1, 2, 3"
           done()
 
         Cypress.command({})
 
       it "omits ctx from current.ctx", (done) ->
         Cypress.on "log", (obj) ->
-          expect(_.keys(obj)).not.to.include "ctx"
+          expect(obj.get("ctx")).not.to.exist
           done()
 
         Cypress.command({})
 
       it "omits fn from current.fn", (done) ->
         Cypress.on "log", (obj) ->
-          expect(_.keys(obj)).not.to.include "fn"
-          done()
-
-        Cypress.command({})
-
-      it "sets snapshot to true", (done) ->
-        Cypress.on "log", (obj) ->
-          expect(obj.snapshot).to.be.true
+          expect(obj.get("fn")).not.to.exist
           done()
 
         Cypress.command({})
@@ -4641,7 +4634,7 @@ describe "Cypress", ->
         cy.prop("runnable", {cid: 123})
 
         Cypress.on "log", (obj) ->
-          expect(obj.testId).to.eq 123
+          expect(obj.get("testId")).to.eq 123
           cy.prop("runnable", null)
           done()
 
@@ -4651,7 +4644,7 @@ describe "Cypress", ->
         $el = cy.$("body")
 
         Cypress.on "log", (obj) ->
-          expect(obj.numElements).to.eq 1
+          expect(obj.get("numElements")).to.eq 1
           done()
 
         Cypress.command($el: $el)
@@ -4660,16 +4653,16 @@ describe "Cypress", ->
         $el = cy.$("body")
 
         Cypress.on "log", (obj) ->
-          expect(obj.highlightAttr).not.to.be.undefined
-          expect(obj.highlightAttr).to.eq cy.highlightAttr
+          expect(obj.get("highlightAttr")).not.to.be.undefined
+          expect(obj.get("highlightAttr")).to.eq Cypress.highlightAttr
           done()
 
         Cypress.command($el: $el)
 
     it "displays 0 argument", (done) ->
       Cypress.on "log", (obj) ->
-        if obj.name is "eq"
-          expect(obj.message).to.eq "0"
+        if obj.get("name") is "eq"
+          expect(obj.get("message")).to.eq "0"
           done()
 
       cy.get("div").eq(0)
@@ -4678,8 +4671,8 @@ describe "Cypress", ->
       @sandbox.stub cy.runner, "uncaught"
 
       Cypress.on "log", (obj) ->
-        if obj.name is "then"
-          expect(obj.type).to.eq "parent"
+        if obj.get("name") is "then"
+          expect(obj.get("type")).to.eq "parent"
           done()
 
       cy.then ->
@@ -4689,8 +4682,8 @@ describe "Cypress", ->
       @sandbox.stub cy.runner, "uncaught"
 
       Cypress.on "log", (obj) ->
-        if obj.name is "then"
-          expect(obj.type).to.eq "child"
+        if obj.get("name") is "then"
+          expect(obj.get("type")).to.eq "child"
           done()
 
       cy.noop({}).then ->
@@ -4711,28 +4704,32 @@ describe "Cypress", ->
 
         cy.on "fail", (err) =>
           expect(@log.get("name")).to.eq "get"
-          expect(@log.message).to.eq "foo"
-          expect(@log._error).to.eq err
-          expect(@log.error).to.eq true
+          expect(@log.get("message")).to.eq "foo"
+          expect(@log.get("error")).to.eq err
           done()
 
         cy.get("foo")
 
       it "#onConsole for parent commands", (done) ->
-        Cypress.on "log", (obj) ->
-          expect(obj.onConsole()).to.deep.eq {
+        Cypress.on "log", (@log) =>
+
+        cy.on "fail", (err) =>
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "get"
-            Error: obj._error.toString()
+            Returned: undefined
+            Error: @log.get("error").toString()
           }
           done()
 
         cy.get("foo")
 
       it "#onConsole for dual commands as a parent", (done) ->
-        Cypress.on "log", (obj) ->
-          expect(obj.onConsole()).to.deep.eq {
+        Cypress.on "log", (@log) =>
+
+        cy.on "fail", (err) =>
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "wait"
-            Error: obj._error.toString()
+            Error: @log.get("error").toString()
           }
           done()
 
@@ -4740,12 +4737,14 @@ describe "Cypress", ->
           expect(true).to.be.false
 
       it "#onConsole for dual commands as a child", (done) ->
-        Cypress.on "log", (obj) ->
-          if obj.name is "wait"
-            expect(obj.onConsole()).to.deep.eq {
+        Cypress.on "log", (@log) =>
+
+        cy.on "fail", (err) =>
+          if @log.get("name") is "wait"
+            expect(@log.attributes.onConsole()).to.deep.eq {
               Command: "wait"
               "Applied To": getFirstSubjectByName("get")
-              Error: obj._error.toString()
+              Error: @log.get("error").toString()
             }
             done()
 
@@ -4753,24 +4752,28 @@ describe "Cypress", ->
           expect(true).to.be.false
 
       it "#onConsole for children commands", (done) ->
-        Cypress.on "log", (obj) ->
-          if obj.name is "contains"
-            expect(obj.onConsole()).to.deep.eq {
+        Cypress.on "log", (@log) =>
+
+        cy.on "fail", (err) =>
+          if @log.get("name") is "contains"
+            expect(@log.attributes.onConsole()).to.deep.eq {
               Command: "contains"
               "Applied To": getFirstSubjectByName("get")
-              Error: obj._error.toString()
+              Error: @log.get("error").toString()
             }
             done()
 
         cy.get("button").contains("asdfasdfasdfasdf")
 
       it "#onConsole for nested children commands", (done) ->
-        Cypress.on "log", (obj) ->
-          if obj.name is "contains"
-            expect(obj.onConsole()).to.deep.eq {
+        Cypress.on "log", (@log) =>
+
+        cy.on "fail", (err) =>
+          if @log.get("name") is "contains"
+            expect(@log.attributes.onConsole()).to.deep.eq {
               Command: "contains"
               "Applied To": getFirstSubjectByName("eq")
-              Error: obj._error.toString()
+              Error: @log.get("error").toString()
             }
             done()
 
@@ -5015,7 +5018,7 @@ describe "Cypress", ->
     before ->
       @onAssert = (fn) =>
         Cypress.on "log", (obj) =>
-          if obj.name is "assert"
+          if obj.get("name") is "assert"
             ## restore so we dont create an endless loop
             ## due to Cypress.assert being called again
             Cypress.Chai.restore()
@@ -5097,7 +5100,7 @@ describe "Cypress", ->
       before ->
         @onAssert = (fn) =>
           Cypress.on "log", (obj) =>
-            if obj.name is "assert"
+            if obj.get("name") is "assert"
               ## restore so we dont create an endless loop
               ## due to Cypress.assert being called again
               Cypress.Chai.restore()
@@ -5111,7 +5114,7 @@ describe "Cypress", ->
 
       it "sets type to child when assertion involved current subject", (done) ->
         @onAssert (obj) ->
-          expect(obj.type).to.eq "child"
+          expect(obj.get("type")).to.eq "child"
           done()
 
         cy.get("body").then ->
@@ -5119,7 +5122,7 @@ describe "Cypress", ->
 
       it "sets type to child current command had arguments but does not match subject", (done) ->
         @onAssert (obj) ->
-          expect(obj.type).to.eq "child"
+          expect(obj.get("type")).to.eq "child"
           done()
 
         cy.get("body").then ($body) ->
@@ -5127,7 +5130,7 @@ describe "Cypress", ->
 
       it "sets type to parent when assertion did not involve current subject and didnt have arguments", (done) ->
         @onAssert (obj) ->
-          expect(obj.type).to.eq "parent"
+          expect(obj.get("type")).to.eq "parent"
           done()
 
         cy.get("body").then ->
@@ -5137,7 +5140,7 @@ describe "Cypress", ->
         ## chai jquery adds 2 assertions here so
         ## we bind to the 2nd one
         Cypress.on "log", (obj) ->
-          if obj.name is "assert"
+          if obj.get("name") is "assert"
             assert(obj)
 
         assert = _.after 2, (obj) ->
@@ -5155,7 +5158,7 @@ describe "Cypress", ->
         ## chai jquery adds 2 assertions here so
         ## we bind to the 2nd one
         Cypress.on "log", (obj) ->
-          if obj.name is "assert"
+          if obj.get("name") is "assert"
             assert(obj)
 
         assert = _.after 2, (obj) ->
@@ -5170,7 +5173,7 @@ describe "Cypress", ->
         ## chai jquery adds 2 assertions here so
         ## we bind to the 2nd one
         Cypress.on "log", (obj) ->
-          if obj.name is "assert"
+          if obj.get("name") is "assert"
             assert(obj)
 
         assert = _.after 1, (obj) ->
