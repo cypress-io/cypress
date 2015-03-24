@@ -5358,3 +5358,35 @@ describe "Cypress", ->
 
         cy.then ->
           expect(true).to.be.false
+
+  describe "Mocha", ->
+    beforeEach ->
+      Cypress.Mocha.override()
+
+    afterEach ->
+      Cypress.Mocha.restore()
+
+    context "#override", ->
+      beforeEach ->
+        @chain = cy.noop({foo: "foo"}).assign("foo")
+
+        ## simulate not returning cy from beforeEach
+        return null
+
+      it "forcibly returns cy chainer", ->
+        ## foo should still be defined since
+        ## the beforeEach should have waited
+        ## for cy to complete!
+        expect(@foo).to.deep.eq {foo: "foo"}
+
+      it "does not create a new chainer", ->
+        ## mocha will attach a .then() to the coerced
+        ## return value from the override.  if we dont
+        ## return the chain, then mocha will automatically
+        ## create a new chainer by attaching this to cy.then()
+        ## instead of the correct cy.chain().then()
+        ## we can verify this by ensuring the last chain
+        ## is what is carried over to the test
+        expect(@chain.id).to.eq(cy.chain().id)
+
+

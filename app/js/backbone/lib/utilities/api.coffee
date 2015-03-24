@@ -13,7 +13,8 @@
       Utilities.Overrides.overloadMochaRunnableEmit() if not App.config.ui("ci")
       Utilities.Overrides.overloadMochaRunnerEmit()
       Utilities.Overrides.overloadMochaRunnerUncaught() if not App.config.ui("ci")
-      Utilities.Overrides.overloadMochaRunnableRun(Cypress)
+
+      Cypress.Mocha.override()
 
       Cypress.Chai.override()
 
