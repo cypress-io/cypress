@@ -432,7 +432,9 @@ SecretSauce.RemoteInitial =
       p
     ])
 
-    file = @path.join(args...)
+    ## strip trailing slashes because no file
+    ## ever has one
+    file = @path.join(args...).replace(/\/+$/, "")
 
     @Log.info "getting relative file content", file: file
 
