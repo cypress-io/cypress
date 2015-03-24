@@ -277,12 +277,6 @@
 
       return command
 
-    isModelInstance: (command) ->
-      try
-        command instanceof Entities.Command
-      catch
-        false
-
     add: (attrs, hook) ->
       command = attrs
       options = hook
