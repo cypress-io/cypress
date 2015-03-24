@@ -61,6 +61,21 @@ describe "Cypress.Log API", ->
 
       @log.end()
 
+    describe "#constructor", ->
+      it "snapshots if snapshot attr is true", ->
+        createSnapshot = @sandbox.stub Cypress, "createSnapshot"
+
+        new Cypress.Log snapshot: true
+
+        expect(createSnapshot).to.be.called
+
+      it "ends if end attr is true", ->
+        end = @sandbox.stub Cypress.Log.prototype, "end"
+
+        new Cypress.Log end: true
+
+        expect(end).to.be.called
+
     describe "#publicInterface", ->
       beforeEach ->
         @interface = @log.publicInterface()

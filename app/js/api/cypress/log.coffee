@@ -9,6 +9,14 @@ Cypress.Log = do (Cypress, _, Backbone) ->
 
       @attributes = obj
 
+      ## if snapshot was passed
+      ## in, go ahead and snapshot
+      @snapshot() if @get("snapshot")
+
+      ## if end was passed in
+      ## go ahead and end
+      @end() if @get("end")
+
     get: (attr) ->
       @attributes[attr]
 
@@ -41,7 +49,7 @@ Cypress.Log = do (Cypress, _, Backbone) ->
         attributes: @attributes
       }
 
-    snapshot: ($el) ->
+    snapshot: ->
       @set "snapshot", Cypress.createSnapshot @get("$el")
 
       return @

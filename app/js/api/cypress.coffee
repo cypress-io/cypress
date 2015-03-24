@@ -367,6 +367,8 @@ window.Cypress = do ($, _, Backbone) ->
       current = @prop("current")
 
       Cypress.command
+        end: true
+        snapshot: true
         error: err
         onConsole: ->
           obj = {}
