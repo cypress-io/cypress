@@ -27,16 +27,16 @@
         .addClass("command-type-#{@model.get("type")}")
         .addClass("command-name-#{@model.displayName()}")
 
-      @ui.method.css "padding-left", @model.get("indent")
-
       if @model.hasParent()
-        @ui.wrapper.addClass "command-child"
+        @$el.removeClass("command-parent").addClass("command-child")
       else
-        @$el.addClass "command-parent"
+        @$el.removeClass("command-child").addClass("command-parent")
 
       @$el.addClass "command-cloned" if @model.isCloned()
 
     onRender: ->
+      @ui.method.css "padding-left", @model.get("indent")
+
       ## add or remove command-pending whether we're in pending state
       @$el.toggleClass "command-pending", @model.state("pending")
 
