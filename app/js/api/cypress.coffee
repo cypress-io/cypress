@@ -348,6 +348,16 @@ window.Cypress = do ($, _, Backbone) ->
       if _.isString(err)
         err = @cypressErr(err)
 
+      ## assume onFail is a command if
+      ## onFail is present and isnt a function
+      if onFail and not _.isFunction(onFail)
+        command = onFail
+
+        ## redefine onFail and automatically
+        ## hook this into our command
+        onFail = (err) ->
+          command.error(err)
+
       err.onFail = onFail if onFail
 
       throw err
