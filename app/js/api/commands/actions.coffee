@@ -2,6 +2,8 @@ do (Cypress, _) ->
 
   pressedEnter = /\{enter\}/
 
+  textLike = "textarea,:text,[type=password],[type=email],[type=number],[type=date],[type=week],[type=month],[type=time],[type=datetime],[type=datetime-local],[type=search],[type=url]"
+
   $.simulate.prototype.simulateKeySequence.defaults["{esc}"] = (rng, char, options) ->
     keyOpts = {keyCode: 27, charCode: 27, which: 27}
     _.each ["keydown", "keypress", "keyup"], (event) ->
@@ -374,16 +376,16 @@ do (Cypress, _) ->
         .return(options.el)
 
     type: (subject, sequence, options = {}) ->
-      @ensureDom(subject)
-
       ## allow the el we're typing into to be
       ## changed by options -- used by cy.clear()
       _.defaults options,
         el: subject
 
+      @ensureDom(options.el)
+
       @ensureVisibility(options.el)
 
-      if not options.el.is("textarea,:text,[type=password],[type=email],[type=number],[type=date],[type=week],[type=month],[type=time],[type=datetime],[type=datetime-local],[type=search],[type=url]")
+      if not options.el.is(textLike)
         node = Cypress.Utils.stringifyElement(options.el)
         @throwErr(".type() can only be called on textarea or :text! Your subject is a: #{node}")
 
@@ -480,6 +482,8 @@ do (Cypress, _) ->
           ## the click event on the first 'submit' like element
 
         log = ->
+          return if options.log is false
+
           Cypress.command
             $el: options.el
             onConsole: ->
@@ -501,23 +505,38 @@ do (Cypress, _) ->
     clear: (subject, options = {}) ->
       ## what about other types of inputs besides just text?
       ## what about the new HTML5 ones?
+      _.defaults options,
+        log: true
 
       @ensureDom(subject)
 
       ## blow up if any member of the subject
       ## isnt a textarea or :text
       clear = (el, index) =>
-        el = $(el)
-        node = Cypress.Utils.stringifyElement(el)
+        $el = $(el)
 
-        if not el.is("textarea,:text")
+        if options.log
+          command = Cypress.command
+            $el: $el
+            onConsole: ->
+              "Applied To": $el
+              "Elements":   $el.length
+
+        node = Cypress.Utils.stringifyElement($el)
+
+        if not $el.is(textLike)
           word = Cypress.Utils.plural(subject, "contains", "is")
-          @throwErr(".clear() can only be called on textarea or :text! Your subject #{word} a: #{node}")
+          @throwErr ".clear() can only be called on textarea or :text! Your subject #{word} a: #{node}", (err) ->
+            command.error(err)
 
-        @command("type", "{selectall}{del}", {el: el})
+        @command("type", "{selectall}{del}", {el: $el, log: false}).then ->
+          command.snapshot().end() if command
+
+          return null
 
       Promise
-        .map(subject.toArray(), clear, {concurrency: 1})
+        .resolve(subject.toArray())
+        .each(clear)
         .cancellable()
         .return(subject)
 

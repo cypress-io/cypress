@@ -2394,37 +2394,44 @@ describe "Cypress", ->
         @sandbox.stub cy.runner, "uncaught"
 
       it "throws when not a dom subject", (done) ->
-        cy.noop({}).clear()
-
         cy.on "fail", (err) -> done()
 
-      it "throws if any subject isnt a textarea", (done) ->
-        cy.get("textarea,form").clear()
+        cy.noop({}).clear()
 
-        cy.on "fail", (err) ->
-          expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <form id=\"by-id\"></form>"
+      it "throws if any subject isnt a textarea", (done) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(3)
+          expect(@log.get("error")).to.eq(err)
+          expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <form id=\"checkboxes\"></form>"
           done()
 
-      it "throws if any subject isnt a :text", (done) ->
-        cy.get("div").clear()
+        cy.get("textarea:first,form#checkboxes").clear()
 
+      it "throws if any subject isnt a :text", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <div id=\"dom\"></div>"
           done()
 
-      it "throws on an input radio", (done) ->
-        cy.get(":radio").clear()
+        cy.get("div").clear()
 
+      it "throws on an input radio", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <input type=\"radio\" name=\"gender\" value=\"male\">"
           done()
 
-      it "throws on an input checkbox", (done) ->
-        cy.get(":checkbox").clear()
+        cy.get(":radio").clear()
 
+      it "throws on an input checkbox", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <input type=\"checkbox\" name=\"colors\" value=\"blue\">"
           done()
+
+        cy.get(":checkbox").clear()
 
       it "throws when the subject isnt visible", (done) ->
         input = cy.$("input:text:first").show().hide()
@@ -2436,6 +2443,37 @@ describe "Cypress", ->
           done()
 
         cy.get("input:text:first").clear()
+
+      it "logs once when not dom subject", (done) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(1)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        cy.clear()
+
+    describe ".log", ->
+      it "logs immediately before resolving", (done) ->
+        input = cy.$("input:first")
+
+        Cypress.on "log", (log) ->
+          if log.get("name") is "clear"
+            expect(log.get("state")).to.eq("pending")
+            expect(log.get("$el").get(0)).to.eq input.get(0)
+            done()
+
+        cy.get("input:first").clear()
+
+      it "snapshots after clicking", ->
+        Cypress.on "log", (@log) =>
+
+        cy.get("input:first").clear().then ($input) ->
+          expect(@log.get("snapshot")).to.be.an("object")
 
   context "#check", ->
     it "does not change the subject", ->
