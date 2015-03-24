@@ -315,17 +315,25 @@ do (Cypress, _) ->
       ## changed by options -- used by cy.clear()
       _.defaults options,
         el: subject
+        log: true
 
       @ensureDom(options.el)
 
-      @ensureVisibility(options.el)
+      if options.log
+        command = Cypress.command
+          $el: options.el
+          onConsole: ->
+            "Typed":      sequence
+            "Applied To": options.el
+
+      @ensureVisibility(options.el, command)
 
       if not options.el.is(textLike)
         node = Cypress.Utils.stringifyElement(options.el)
-        @throwErr(".type() can only be called on textarea or :text! Your subject is a: #{node}")
+        @throwErr(".type() can only be called on textarea or :text! Your subject is a: #{node}", command)
 
       if (num = options.el.length) and num > 1
-        @throwErr(".type() can only be called on a single textarea or :text! Your subject contained #{num} elements!")
+        @throwErr(".type() can only be called on a single textarea or :text! Your subject contained #{num} elements!", command)
 
       options.sequence = sequence
 
@@ -416,26 +424,16 @@ do (Cypress, _) ->
           ## to trigger the form submit event and when to also trigger
           ## the click event on the first 'submit' like element
 
-        log = ->
-          return if options.log is false
-
-          Cypress.command
-            $el: options.el
-            onConsole: ->
-              "Typed": sequence
-              "Applied To": options.el
-
         ## handle submit event handler here if we are pressing enter
         simulateSubmitHandler() if pressedEnter.test(sequence)
 
         options.el.simulate "key-sequence", options
 
         ## submit events should be finished at this point!
-        ## so we can log out the current state of the DOM
+        ## so we can snapshot the current state of the DOM
+        command.snapshot().end() if command
 
-        log()
-
-        return subject
+        return options.el
 
     clear: (subject, options = {}) ->
       ## what about other types of inputs besides just text?

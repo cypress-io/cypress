@@ -2133,14 +2133,20 @@ describe "Cypress", ->
             events.push "submit"
 
           Cypress.on "log", (log) ->
-            events.push "#{log.name}:log"
+            state = log.get("state")
+
+            if state is "pending"
+              log.on "state:changed", (state) ->
+                events.push "#{log.get('name')}:log:#{state}"
+
+              events.push "#{log.get('name')}:log:#{state}"
 
           cy.on "invoke:end", (obj) ->
             events.push "#{obj.name}:end"
 
           cy.get("#single-input input").type("f{enter}").then ->
             expect(events).to.deep.eq [
-              "get:start", "get:log", "get:end", "type:start", "submit", "type:log", "type:end", "then:start"
+              "get:start", "get:log:pending", "get:end", "type:start", "type:log:pending", "submit", "type:end", "then:start"
             ]
 
         it "triggers 2 form submit event", ->
@@ -2326,11 +2332,28 @@ describe "Cypress", ->
 
         Cypress.on "log", (log) ->
           logs.push(log)
-          types.push(log) if log.name is "type"
+          types.push(log) if log.get("name") is "type"
 
         cy.get(":text:first").type("foo").then ->
           expect(logs).to.have.length(2)
           expect(types).to.have.length(1)
+
+      it "logs immediately before resolving", (done) ->
+        input = cy.$(":text:first")
+
+        Cypress.on "log", (log) ->
+          if log.get("name") is "type"
+            expect(log.get("state")).to.eq("pending")
+            expect(log.get("$el").get(0)).to.eq input.get(0)
+            done()
+
+        cy.get(":text:first").type("foo")
+
+      it "snapshots after clicking", ->
+        Cypress.on "log", (@log) =>
+
+        cy.get(":text:first").type("foo").then ->
+          expect(@log.get("snapshot")).to.be.an("object")
 
     describe "errors", ->
       beforeEach ->
@@ -2364,13 +2387,33 @@ describe "Cypress", ->
 
         node = Cypress.Utils.stringifyElement(input)
 
-        cy.on "fail", (err) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(2)
+          expect(@log.get("error")).to.eq(err)
           expect(err.message).to.eq "cy.type() cannot be called on the non-visible element: #{node}"
           done()
 
         cy.get("input:text:first").type("foo")
 
       it "throws when submitting within nested forms"
+
+      it "logs once when not dom subject", (done) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(1)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        cy.type("foobar")
 
   context "#clear", ->
     it "does not change the subject", ->
@@ -2935,7 +2978,7 @@ describe "Cypress", ->
         cy
           .get("input:first").focus()
           .get("button:first").focus().then ->
-            names = _(logs).pluck("name")
+            names = _(logs).map (log) -> log.get("name")
             expect(logs).to.have.length(4)
             expect(names).to.deep.eq ["get", "focus", "get", "focus"]
 
@@ -3030,7 +3073,7 @@ describe "Cypress", ->
 
         cy
           .get("input:first").focus().blur().then ->
-            names = _(logs).pluck("name")
+            names = _(logs).map (log) -> log.get("name")
             expect(logs).to.have.length(3)
             expect(names).to.deep.eq ["get", "focus", "blur"]
 
@@ -4443,12 +4486,12 @@ describe "Cypress", ->
               referencesAlias: "getFoo"
               aliasType: "route"
               type: "child"
-              error: true
-              _error: err
+              error: err
               event: "command"
               message: "@getFoo"
               numRetries: numRetries + 1
             }
+
             _.each obj, (value, key) =>
               expect(@log.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
 
