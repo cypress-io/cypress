@@ -143,6 +143,8 @@ do (Cypress, _, $) ->
       if options.log
         Cypress.command
           message: href
+          end: true
+          snapshot: true
 
       return href
 
@@ -154,6 +156,8 @@ do (Cypress, _, $) ->
       if options.log
         Cypress.command
           message: hash
+          end: true
+          snapshot: true
 
       return hash
 
@@ -185,6 +189,8 @@ do (Cypress, _, $) ->
       if options.log
         Cypress.command
           message: key ? null
+          end: true
+          snapshot: true
 
       return ret
 

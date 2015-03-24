@@ -553,8 +553,8 @@ do (Cypress, _) ->
 
         Cypress.command
           $el: $el
-          # end: true
-          # snapshot: true
+          end: true
+          snapshot: true
 
       try
         d = @sync.document()

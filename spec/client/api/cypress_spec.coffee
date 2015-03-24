@@ -546,6 +546,13 @@ describe "Cypress", ->
 
         it "#onConsole", ->
 
+        it "ends immediately", ->
+          expect(@log.get("end")).to.be.tru
+          expect(@log.get("state")).to.eq("success")
+
+        it "snapshots immediately", ->
+          expect(@log.get("snapshot")).to.be.an("object")
+
   context "#agents", ->
     beforeEach ->
       @agents = cy.agents()
@@ -614,6 +621,19 @@ describe "Cypress", ->
           done()
 
         cy.clearLocalStorage({})
+
+    describe ".log", ->
+      beforeEach ->
+        Cypress.on "log", (@log) =>
+
+      it "ends immediately", ->
+        cy.clearLocalStorage().then ->
+          expect(@log.get("end")).to.be.true
+          expect(@log.get("state")).to.eq("success")
+
+      it "snapshots immediately", ->
+        cy.clearLocalStorage().then ->
+          expect(@log.get("snapshot")).to.be.an("object")
 
   context "#ng", ->
     context "find by binding", ->
@@ -917,6 +937,15 @@ describe "Cypress", ->
       afterEach ->
         delete @log
 
+      it "ends immediately", ->
+        cy.url().then ->
+          expect(@log.get("end")).to.be.true
+          expect(@log.get("state")).to.eq("success")
+
+      it "snapshots immediately", ->
+        cy.url().then ->
+          expect(@log.get("snapshot")).to.be.an("object")
+
       it "logs obj", ->
         cy.url().then ->
           obj = {
@@ -952,6 +981,15 @@ describe "Cypress", ->
       afterEach ->
         delete @log
 
+      it "ends immediately", ->
+        cy.hash().then ->
+          expect(@log.get("end")).to.be.true
+          expect(@log.get("state")).to.eq("success")
+
+      it "snapshots immediately", ->
+        cy.hash().then ->
+          expect(@log.get("snapshot")).to.be.an("object")
+
       it "logs obj", ->
         cy.hash().then ->
           obj = {
@@ -986,6 +1024,18 @@ describe "Cypress", ->
     describe ".log", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
+
+      afterEach ->
+        delete @log
+
+      it "ends immediately", ->
+        cy.location("href").then ->
+          expect(@log.get("end")).to.be.true
+          expect(@log.get("state")).to.eq("success")
+
+      it "snapshots immediately", ->
+        cy.location("href").then ->
+          expect(@log.get("snapshot")).to.be.an("object")
 
       it "does not emit when {log: false} as options", ->
         cy.location("href", {log: false}).then ->
@@ -3018,6 +3068,15 @@ describe "Cypress", ->
         cy.$("input:first").get(0).focus()
         Cypress.on "log", (@log) =>
 
+      it "ends immediately", ->
+        cy.focused().then ->
+          expect(@log.get("end")).to.be.true
+          expect(@log.get("state")).to.eq("success")
+
+      it "snapshots immediately", ->
+        cy.focused().then ->
+          expect(@log.get("snapshot")).to.be.an("object")
+
       it "passes in $el", ->
         cy.get("input:first").focused().then ($input) ->
           expect(@log.get("$el")).to.eq $input
@@ -3811,6 +3870,15 @@ describe "Cypress", ->
         describe ".log", ->
           beforeEach ->
             Cypress.on "log", (@log) =>
+
+          it "ends immediately", ->
+            cy.get("#list")[name](arg).then ->
+              expect(@log.get("end")).to.be.true
+              expect(@log.get("state")).to.eq("success")
+
+          it "snapshots immediately", ->
+            cy.get("#list")[name](arg).then ->
+              expect(@log.get("snapshot")).to.be.an("object")
 
           it "#onConsole", ->
             cy.get("#list")[name](arg).then ($el) ->

@@ -12,6 +12,8 @@ do (Cypress, _) ->
       ## let them go through using the old interface
       Cypress.command
         $el: $el
+        end: true
+        snapshot: true
         onConsole: ->
           obj = {}
           obj.Selector = args.join(", ") if not _(args).any(_.isFunction)

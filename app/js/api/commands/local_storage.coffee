@@ -21,6 +21,8 @@ do (Cypress, _) ->
 
       Cypress.command
         name: "clear ls"
+        snapshot: true
+        end: true
 
       ## return the remote local storage object
       return remote
