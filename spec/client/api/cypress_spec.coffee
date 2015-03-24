@@ -3992,6 +3992,19 @@ describe "Cypress", ->
 
         Cypress.on "log", (@log) =>
 
+      it "logs immediately before resolving", (done) ->
+        Cypress.on "log", (log) ->
+          if log.get("name") is "invoke"
+            expect(log.get("state")).to.eq("pending")
+            expect(log.get("message")).to.eq "foo"
+            done()
+
+        cy.noop({foo: "foo"}).invoke("foo")
+
+      it "snapshots after clicking", ->
+        cy.noop({foo: "foo"}).invoke("foo").then ->
+          expect(@log.get("snapshot")).to.be.an("object")
+
       it "logs obj as a property", ->
         cy.noop(@obj).invoke("foo").then ->
           obj = {
@@ -4045,8 +4058,11 @@ describe "Cypress", ->
         @sandbox.stub cy.runner, "uncaught"
 
       it "throws when property does not exist on the subject", (done) ->
-        cy.on "fail", (err) ->
+        Cypress.on "log", (@log) =>
+
+        cy.on "fail", (err) =>
           expect(err.message).to.eq "cy.invoke() errored because the property: 'foo' does not exist on your subject."
+          expect(@log.get("error")).to.eq err
           done()
 
         cy.noop({}).invoke("foo")
@@ -4062,11 +4078,27 @@ describe "Cypress", ->
         cy.invoke("queue")
 
       it "throws when first argument isnt a string", (done) ->
-        cy.on "fail", (err) ->
+        Cypress.on "log", (@log) =>
+
+        cy.on "fail", (err) =>
           expect(err.message).to.eq "cy.invoke() only accepts a string as the first argument."
+          expect(@log.get("error")).to.eq err
           done()
 
         cy.noop({}).invoke({})
+
+      it "logs once when not dom subject", (done) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(1)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        cy.invoke({})
 
   context "#its", ->
     it "proxies to #invoke", ->

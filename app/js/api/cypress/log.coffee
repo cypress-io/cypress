@@ -21,6 +21,11 @@ Cypress.Log = do (Cypress, _, Backbone) ->
 
       _.extend @attributes, obj
 
+      ## if we have an onConsole function
+      ## then re-wrap it
+      if obj and _.isFunction(obj.onConsole)
+        @wrapOnConsole()
+
       return @
 
     pick: (args...) ->
@@ -56,6 +61,31 @@ Cypress.Log = do (Cypress, _, Backbone) ->
       @trigger "state:change", @get("state")
 
       return @
+
+    getError: (err) ->
+      if err.name is "CypressError"
+        err.toString()
+      else
+        err.stack
+
+    wrapOnConsole: ->
+      _this = @
+
+      ## re-wrap onConsole to set Command + Error defaults
+      @attributes.onConsole = _.wrap @attributes.onConsole, (orig, args...) ->
+
+        ## grab the Command name by default
+        consoleObj = {Command: _this.get("name")}
+
+        ## merge in the other properties from onConsole
+        _.extend consoleObj, orig.apply(@, args)
+
+        ## and finally add error if one exists
+        if err = _this.get("error")
+          _.defaults consoleObj,
+            Error: _this.getError(err)
+
+        return consoleObj
 
   _.extend Log.prototype, Backbone.Events
 
@@ -123,12 +153,6 @@ Cypress.Log = do (Cypress, _, Backbone) ->
       @log("agent", obj)
 
     log: (event, obj) ->
-      getError = (err) ->
-        if err.name is "CypressError"
-          err.toString()
-        else
-          err.stack
-
       _.defaults obj,
         testId:           @cy.prop("runnable").cid
         referencesAlias:  undefined
@@ -140,24 +164,10 @@ Cypress.Log = do (Cypress, _, Backbone) ->
       if obj.isCurrent
         _.defaults obj, {alias: @cy.getNextAlias()}
 
-      ## re-wrap onConsole to set Command + Error defaults
-      obj.onConsole = _.wrap obj.onConsole, (orig, args...) ->
-        ## grab the Command name by default
-        consoleObj = {Command: obj.name}
-
-        ## merge in the other properties from onConsole
-        _.extend consoleObj, orig.apply(obj, args)
-
-        ## and finally add error if one exists
-        if obj.error
-          _.defaults consoleObj,
-            Error: getError(obj.error)
-
-        return consoleObj
-
       obj.event = event
 
       log = new Log(obj)
+      log.wrapOnConsole()
 
       @trigger "log", log
 
