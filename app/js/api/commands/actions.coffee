@@ -281,24 +281,31 @@ do (Cypress, _) ->
 
           @throwErr ".blur() timed out because your browser did not receive any blur events. This is a known bug in Chrome when it is not the currently focused window."
 
-    dblclick: (subject) ->
+    dblclick: (subject, options = {}) ->
+      _.defaults options,
+        log: true
+
       @ensureDom(subject)
 
       dblclick = (el, index) =>
         $el = $(el)
 
-        @ensureVisibility($el)
+        if options.log
+          command = Cypress.command
+            $el: $el
+            onConsole: ->
+              "Applied To":   $el
+              "Elements":     $el.length
+
+        @ensureVisibility $el, (err) ->
+          command.error(err) if command
 
         wait = if $el.is("a") then 50 else 10
 
         @command("focus", {el: $el, error: false, log: false}).then =>
           $el.cySimulate("dblclick")
 
-          Cypress.command
-            $el: $el
-            onConsole: ->
-              "Applied To":   $el
-              "Elements":     $el.length
+          command.snapshot().end() if command
 
           ## we want to add this wait delta to our
           ## runnables timeout so we prevent it from
@@ -317,7 +324,8 @@ do (Cypress, _) ->
 
       ## return our original subject when our promise resolves
       Promise
-        .map(subject.toArray(), dblclick, {concurrency: 1})
+        .resolve(subject.toArray())
+        .each(dblclick)
         .cancellable()
         .return(subject)
 
@@ -331,19 +339,22 @@ do (Cypress, _) ->
       click = (el, index) =>
         $el = $(el)
 
-        @ensureVisibility($el)
+        if options.log
+          command = Cypress.command
+            $el: $el
+            onConsole: ->
+              "Applied To":   $el
+              "Elements":     $el.length
+
+        @ensureVisibility $el, (err) ->
+          command.error(err) if command
 
         wait = if $el.is("a") then 50 else 10
 
         @command("focus", {el: $el, error: false, log: false}).then =>
           el.click()
 
-          if options.log
-            Cypress.command
-              $el: $el
-              onConsole: ->
-                "Applied To":   $el
-                "Elements":     $el.length
+          command.snapshot().end() if command
 
           ## we want to add this wait delta to our
           ## runnables timeout so we prevent it from
@@ -356,16 +367,11 @@ do (Cypress, _) ->
 
         .delay(wait)
 
-      ## return our original subject when our promise resolves
       Promise
-        .map(options.el.toArray(), click, {concurrency: 1})
+        .resolve(options.el.toArray())
+        .each(click)
         .cancellable()
         .return(options.el)
-
-      ## -- this does not work but may work in the future -- ##
-      # Promise
-      #   .each subject.toArray(), click
-      #   .return(subject)
 
     type: (subject, sequence, options = {}) ->
       @ensureDom(subject)

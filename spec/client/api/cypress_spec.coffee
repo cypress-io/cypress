@@ -3083,7 +3083,55 @@ describe "Cypress", ->
 
         cy.get("button").dblclick()
 
+      it "logs once when not dom subject", (done) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(1)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        cy.dblclick()
+
+      it "throws when any member of the subject isnt visible", (done) ->
+        btn = cy.$("#three-buttons button").show().last().hide()
+
+        node = Cypress.Utils.stringifyElement(btn)
+
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(4)
+          expect(@log.get("error")).to.eq(err)
+          expect(err.message).to.eq "cy.dblclick() cannot be called on the non-visible element: #{node}"
+          done()
+
+        cy.get("#three-buttons button").dblclick()
+
     describe ".log", ->
+      it "logs immediately before resolving", (done) ->
+        button = cy.$("button:first")
+
+        Cypress.on "log", (log) ->
+          if log.get("name") is "dblclick"
+            expect(log.get("state")).to.eq("pending")
+            expect(log.get("$el").get(0)).to.eq button.get(0)
+            done()
+
+        cy.get("button:first").dblclick()
+
+      it "snapshots after clicking", ->
+        Cypress.on "log", (@log) =>
+
+        cy.get("button:first").dblclick().then ($button) ->
+          expect(@log.get("snapshot")).to.be.an("object")
+
       it "returns only the $el for the element of the subject that was dblclicked", ->
         dblclicks = []
 
@@ -3092,18 +3140,18 @@ describe "Cypress", ->
         cy.$("body").append(button()).append(button())
 
         Cypress.on "log", (obj) ->
-          dblclicks.push(obj) if obj.name is "dblclick"
+          dblclicks.push(obj) if obj.get("name") is "dblclick"
 
         cy.get("button.dblclicks").dblclick().then ($buttons) ->
           expect($buttons.length).to.eq(2)
           expect(dblclicks.length).to.eq(2)
-          expect(dblclicks[1].$el.get(0)).to.eq $buttons.last().get(0)
+          expect(dblclicks[1].get("$el").get(0)).to.eq $buttons.last().get(0)
 
       it "logs only 1 dblclick event", ->
         logs = []
 
         Cypress.on "log", (log) ->
-          logs.push(log) if log.name is "dblclick"
+          logs.push(log) if log.get("name") is "dblclick"
 
         cy.get("button:first").dblclick().then ->
           expect(logs).to.have.length(1)
@@ -3248,18 +3296,55 @@ describe "Cypress", ->
 
         cy.click()
 
+      it "logs once when not dom subject", (done) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(1)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        cy.click()
+
       it "throws when any member of the subject isnt visible", (done) ->
         btn = cy.$("#three-buttons button").show().last().hide()
 
         node = Cypress.Utils.stringifyElement(btn)
 
-        cy.on "fail", (err) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(4)
+          expect(@log.get("error")).to.eq(err)
           expect(err.message).to.eq "cy.click() cannot be called on the non-visible element: #{node}"
           done()
 
         cy.get("#three-buttons button").click()
 
     describe ".log", ->
+      it "logs immediately before resolving", (done) ->
+        button = cy.$("button:first")
+
+        Cypress.on "log", (log) ->
+          if log.get("name") is "click"
+            expect(log.get("state")).to.eq("pending")
+            expect(log.get("$el").get(0)).to.eq button.get(0)
+            done()
+
+        cy.get("button:first").click()
+
+      it "snapshots after clicking", ->
+        Cypress.on "log", (@log) =>
+
+        cy.get("button:first").click().then ($button) ->
+          expect(@log.get("snapshot")).to.be.an("object")
+
       it "returns only the $el for the element of the subject that was clicked", ->
         clicks = []
 
@@ -3268,18 +3353,18 @@ describe "Cypress", ->
         cy.$("body").append(button()).append(button())
 
         Cypress.on "log", (obj) ->
-          clicks.push(obj) if obj.name is "click"
+          clicks.push(obj) if obj.get("name") is "click"
 
         cy.get("button.clicks").click().then ($buttons) ->
           expect($buttons.length).to.eq(2)
           expect(clicks.length).to.eq(2)
-          expect(clicks[1].$el.get(0)).to.eq $buttons.last().get(0)
+          expect(clicks[1].get("$el").get(0)).to.eq $buttons.last().get(0)
 
       it "logs only 1 click event", ->
         logs = []
 
         Cypress.on "log", (log) ->
-          logs.push(log) if log.name is "click"
+          logs.push(log) if log.get("name") is "click"
 
         cy.get("button:first").click().then ->
           expect(logs).to.have.length(1)
