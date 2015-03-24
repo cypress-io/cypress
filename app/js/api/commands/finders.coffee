@@ -10,9 +10,6 @@ do (Cypress, _) ->
         exists: true
         log: true
         command: null
-        onFail: (err) ->
-          if c = options.command
-            c.error(err)
 
       ## normalize these two options
       options.exist = options.exists and options.exist
@@ -150,6 +147,9 @@ do (Cypress, _) ->
 
   Cypress.addDualCommand
     contains: (subject, filter, text, options = {}) ->
+      _.defaults options,
+        log: true
+
       ## nuke our subject if its present but not an element
       ## since we want contains to operate as a parent command
       if subject and not Cypress.Utils.hasElement(subject)
@@ -192,6 +192,16 @@ do (Cypress, _) ->
 
         err += " '#{text}' #{phrase}"
 
+      if options.log
+        onConsole = {
+          Content: text
+          "Applied To": subject or @prop("withinSubject")
+        }
+
+        options.command = Cypress.command
+          type: if subject then "child" else "parent"
+          onConsole: -> onConsole
+
       _.extend options,
         error: getErr(text, phrase)
         withinSubject: subject or @prop("withinSubject")
@@ -199,16 +209,15 @@ do (Cypress, _) ->
         log: false
 
       log = ($el) ->
-        Cypress.command({
-          $el: $el
-          type: if subject then "child" else "parent"
-          numRetries: options.retries
-          onConsole: ->
-            "Content": text
-            "Applied To": subject
-            "Returned": $el
-            "Elements": $el?.length
-        })
+        return $el if not options.command
+
+        onConsole.Returned = $el
+        onConsole.Elements = $el?.length
+
+        options.command.set({$el: $el})
+
+        options.command.snapshot().end()
+
         return $el
 
       containsTextNode = ($el, text) ->

@@ -1889,14 +1889,35 @@ describe "Cypress", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
 
+      it "logs immediately before resolving", (done) ->
+        Cypress.on "log", (log) ->
+          if log.get("name") is "contains"
+            expect(log.pick("state", "type")).to.deep.eq {
+              state: "pending"
+              type: "child"
+            }
+            done()
+
+        cy.get("body").contains("foo")
+
+      it "snapshots after finding element", ->
+        Cypress.on "log", (@log) =>
+
+        cy.contains("foo").then ->
+          expect(@log.get("snapshot")).to.be.an("object")
+
       it "silences internal cy.get() log", ->
-        log = @sandbox.spy Cypress, "log"
+        logs = []
+
+        Cypress.on "log", (log) ->
+          logs.push log
 
         ## GOOD: [ {name: get} , {name: contains} ]
         ## BAD:  [ {name: get} , {name: get} , {name: contains} ]
         cy.get("#complex-contains").contains("nested contains").then ($label) ->
-          expect(log.firstCall).to.be.calledWithMatch "command", {name: "get"}
-          expect(log.secondCall).to.be.calledWithMatch "command", {name: "contains"}
+          names = _(logs).map (log) -> log.get("name")
+          expect(logs).to.have.length(2)
+          expect(names).to.deep.eq ["get", "contains"]
 
       it "passes in $el", ->
         cy.get("#complex-contains").contains("nested contains").then ($label) ->
@@ -4717,7 +4738,7 @@ describe "Cypress", ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "get"
             Returned: undefined
-            Error: @log.get("error").toString()
+            Error: err.toString()
           }
           done()
 
@@ -4729,7 +4750,7 @@ describe "Cypress", ->
         cy.on "fail", (err) =>
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "wait"
-            Error: @log.get("error").toString()
+            Error: err.toString()
           }
           done()
 
@@ -4744,7 +4765,7 @@ describe "Cypress", ->
             expect(@log.attributes.onConsole()).to.deep.eq {
               Command: "wait"
               "Applied To": getFirstSubjectByName("get")
-              Error: @log.get("error").toString()
+              Error: err.toString()
             }
             done()
 
@@ -4758,8 +4779,9 @@ describe "Cypress", ->
           if @log.get("name") is "contains"
             expect(@log.attributes.onConsole()).to.deep.eq {
               Command: "contains"
+              Content: "asdfasdfasdfasdf"
               "Applied To": getFirstSubjectByName("get")
-              Error: @log.get("error").toString()
+              Error: err.toString()
             }
             done()
 
@@ -4772,8 +4794,9 @@ describe "Cypress", ->
           if @log.get("name") is "contains"
             expect(@log.attributes.onConsole()).to.deep.eq {
               Command: "contains"
+              Content: "asdfasdfasdfasdf"
               "Applied To": getFirstSubjectByName("eq")
-              Error: @log.get("error").toString()
+              Error: err.toString()
             }
             done()
 
@@ -5034,7 +5057,7 @@ describe "Cypress", ->
 
       it "wraps \#{this} and \#{exp} in \#{b}", (done) ->
         @onAssert (obj) ->
-          expect(obj.message).to.eq "expected [b]foo[\\b] to equal [b]foo[\\b]"
+          expect(obj.get("message")).to.eq "expected [b]foo[\\b] to equal [b]foo[\\b]"
           done()
 
         cy.then ->
@@ -5050,7 +5073,7 @@ describe "Cypress", ->
       describe "jQuery elements", ->
         it "sets _obj to selector", (done) ->
           @onAssert (obj) ->
-            expect(obj.message).to.eq "expected [b]<body>[\\b] to exist"
+            expect(obj.get("message")).to.eq "expected [b]<body>[\\b] to exist"
             done()
 
           cy.get("body").then ($body) ->
@@ -5059,7 +5082,7 @@ describe "Cypress", ->
         describe "without selector", ->
           it "exists", (done) ->
             @onAssert (obj) ->
-              expect(obj.message).to.eq "expected [b]<div>[\\b] to exist"
+              expect(obj.get("message")).to.eq "expected [b]<div>[\\b] to exist"
               done()
 
             ## prepend an empty div so it has no id or class
@@ -5071,7 +5094,7 @@ describe "Cypress", ->
 
           it "uses element name", (done) ->
             @onAssert (obj) ->
-              expect(obj.message).to.eq "expected [b]<input>[\\b] to match [b]input[\\b]"
+              expect(obj.get("message")).to.eq "expected [b]<input>[\\b] to match [b]input[\\b]"
               done()
 
             ## prepend an empty div so it has no id or class
@@ -5083,7 +5106,7 @@ describe "Cypress", ->
         describe "property assertions", ->
           it "has property", (done) ->
             @onAssert (obj) ->
-              expect(obj.message).to.eq "expected [b]<form#by-id>[\\b] to have a property [b]length[\\b]"
+              expect(obj.get("message")).to.eq "expected [b]<form#by-id>[\\b] to have a property [b]length[\\b]"
               done()
 
             cy.get("form").should("have.property", "length")
@@ -5146,7 +5169,7 @@ describe "Cypress", ->
         assert = _.after 2, (obj) ->
           Cypress.Chai.restore()
 
-          expect(obj.message).to.eq "expected [b]<a>[\\b] to have a [b]<a>[\\b] attribute with the value [b]#[\\b], and the value was [b]#[\\b]"
+          expect(obj.get("message")).to.eq "expected [b]<a>[\\b] to have a [b]<a>[\\b] attribute with the value [b]#[\\b], and the value was [b]#[\\b]"
           done()
 
         cy.get("a").then ($a) ->
@@ -5163,7 +5186,7 @@ describe "Cypress", ->
 
         assert = _.after 2, (obj) ->
           Cypress.Chai.restore()
-          expect(obj.message).to.eq "expected [b]<a>[\\b] to have a [b]<a>[\\b] attribute with the value [b]asdf[\\b], but the value was [b]#[\\b]"
+          expect(obj.get("message")).to.eq "expected [b]<a>[\\b] to have a [b]<a>[\\b] attribute with the value [b]asdf[\\b], but the value was [b]#[\\b]"
           done()
 
         cy.get("a").then ($a) ->
@@ -5179,7 +5202,7 @@ describe "Cypress", ->
         assert = _.after 1, (obj) ->
           Cypress.Chai.restore()
 
-          expect(obj.message).to.eq "expected [b]<button#button>[\\b] to be visible"
+          expect(obj.get("message")).to.eq "expected [b]<button#button>[\\b] to be visible"
           done()
 
         cy.get("#button").then ($button) ->
@@ -5187,7 +5210,7 @@ describe "Cypress", ->
 
       it "#onConsole for regular objects", (done) ->
         @onAssert (obj) ->
-          expect(obj.onConsole()).to.deep.eq {
+          expect(obj.attributes.onConsole()).to.deep.eq {
             Command: "assert"
             expected: 1
             actual: 1
@@ -5201,7 +5224,7 @@ describe "Cypress", ->
 
       it "#onConsole for DOM objects", (done) ->
         @onAssert (obj) ->
-          expect(obj.onConsole()).to.deep.eq {
+          expect(obj.attributes.onConsole()).to.deep.eq {
             Command: "assert"
             subject: getFirstSubjectByName("get")
             Message: "expected <body> to match body"
@@ -5216,12 +5239,12 @@ describe "Cypress", ->
         @sandbox.stub cy.runner, "uncaught"
 
         @onAssert (obj) ->
-          expect(obj.onConsole()).to.deep.eq {
+          expect(obj.attributes.onConsole()).to.deep.eq {
             Command: "assert"
             expected: false
             actual: true
             Message: "expected true to be false"
-            Error: obj._error.stack
+            Error: obj.get("error").stack
           }
           done()
 

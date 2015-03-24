@@ -432,7 +432,7 @@ window.Cypress = do ($, _, Backbone) ->
 
       if total >= options.timeout or (total + options.interval >= options.runnableTimeout)
         err = "Timed out retrying. " + options.error ? "The last command was: " + options.name
-        @throwErr err, options.onFail
+        @throwErr err, (options.onFail or options.command)
 
       Promise.delay(options.interval).cancellable().then =>
         @trigger "retry", options
