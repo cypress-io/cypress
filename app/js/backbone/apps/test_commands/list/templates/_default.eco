@@ -1,6 +1,10 @@
 <div class="command-wrapper">
   <span class="command-number">
-    <span><%= @number %></span>
+    <% if @isPending: %>
+      <i class="fa fa-spinner fa-spin"></i>
+    <% else: %>
+      <span><%= @number %></span>
+    <% end %>
   </span>
   <span class="command-method">
     <span><%= @name %></span>
@@ -19,13 +23,11 @@
           <%= @alias %>
         </span>
       <% end %>
-      <!-- <i class="fa fa-pause"></i> -->
       <!-- <i class="fa fa-eye-slash shown"></i> -->
-      <label class="label label-warning"><%= @numRetries %></label>
       <% if @numElements > 1: %>
         <label title="<%= @numElements %> matched elements" class="label label-default"><%= @numElements %></label>
       <% end %>
-      <i class="fa fa-search fa-flip-horizontal"></i>
+      <!-- <i class="fa fa-pause"></i> -->
     </span>
   <% end %>
 </div>

@@ -13,9 +13,11 @@
 
     #   route.increment() if route
 
-    createAgent: (attrs) ->
-      agent         = new Entities.Agent(attrs)
-      # agent._agent  = attrs._agent
+    createAgent: (log) ->
+      attrs = ["testId", "hook", "type", "functionName", "numCalls"]
+
+      agent = new Entities.Agent log.pick.apply(log, attrs)
+      agent.log = log
       agent
 
     add: (attrs, options) ->
@@ -23,7 +25,7 @@
 
       ## if we have both of these methods assume this is
       ## a backbone model
-      if agent and agent.set and agent.get
+      if @isModelInstance(agent)
 
         ## increment the number if its not cloned
         # agent.increment(@maxNumber())

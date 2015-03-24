@@ -9,8 +9,11 @@
         url = @get("url")
         if _.isString(url) then '"' + url + '"' else url
 
+    getLog: ->
+      @log or throw new Error("Route is missing its log reference!")
+
     hasRoute: (route) ->
-      @_route is route
+      @getLog().get("_route")
 
     increment: ->
       @set "numResponses", @get("numResponses") + 1
@@ -24,9 +27,11 @@
 
       route.increment() if route
 
-    createRoute: (attrs) ->
-      route         = new Entities.Route(attrs)
-      route._route  = attrs._route
+    createRoute: (log) ->
+      attrs = ["testId", "hook", "type", "method", "name", "url", "status", "alias"]
+
+      route     = new Entities.Route log.pick.apply(log, attrs)
+      route.log = log
       route
 
     add: (attrs, options) ->
@@ -34,7 +39,7 @@
 
       ## if we have both of these methods assume this is
       ## a backbone model
-      if route and route.set and route.get
+      if @isModelInstance(route)
 
         ## increment the number if its not cloned
         # route.increment(@maxNumber())

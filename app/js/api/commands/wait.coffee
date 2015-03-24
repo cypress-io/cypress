@@ -28,8 +28,17 @@ do (Cypress, _) ->
     wait: (subject, msOrFnOrAlias, options = {}) ->
       msOrFnOrAlias ?= 1e9
 
+      ## WHEN WE RETRY A WAIT, WE NEED TO IMMEDIATELY LOG
+      ## OUT THE COMMAND SO USERS CAN SEE THAT WE'RE REATTEMPTING
+      ## SOMETHING.
+      ## WHEN ITS SUCCESSFUL THEN REMOVE THIS COMMAND
+      ## WHEN IT ERRORS, YOU'LL STILL SEE IT
+      ## ADDITIONALLY NEED TO LOG OUT WAIT FOR NUMBER ARGUMENTS
+
       log = (onConsole, error) ->
         obj = {
+          end: true
+          snapshot: true
           referencesAlias: alias
           aliasType: "route"
           numRetries: options.retries

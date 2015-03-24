@@ -24,6 +24,8 @@ do (Cypress, _) ->
 
       _.extend obj,
         name:     "assert"
+        end:      true
+        snapshot: true
         message:  message
         passed:   passed
         selector: value?.selector

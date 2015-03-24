@@ -19,6 +19,8 @@ do (Cypress, _) ->
             message: obj.message
             error:   obj.error
             type:    "parent"
+            end:     true
+            snapshot: true
             onConsole: ->
               console = {}
               console.Command = null

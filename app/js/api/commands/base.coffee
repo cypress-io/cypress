@@ -60,8 +60,10 @@ do (Cypress, _, $) ->
     invoke: (subject, fn, args...) ->
       @ensureSubject()
 
+      command = Cypress.command()
+
       if not _.isString(fn)
-        @throwErr("cy.invoke() only accepts a string as the first argument.")
+        @throwErr("cy.invoke() only accepts a string as the first argument.", command)
 
       remoteJQuery = @_getRemoteJQuery()
       if Cypress.Utils.hasElement(subject) and remoteJQueryisNotSameAsGlobal(remoteJQuery)
@@ -71,7 +73,7 @@ do (Cypress, _, $) ->
       prop = (remoteSubject or subject)[fn]
 
       fail = =>
-        @throwErr("cy.invoke() errored because the property: '#{fn}' does not exist on your subject.")
+        @throwErr("cy.invoke() errored because the property: '#{fn}' does not exist on your subject.", command)
 
       ## if the property does not EXIST on the subject
       ## then throw a specific error message
@@ -98,22 +100,25 @@ do (Cypress, _, $) ->
 
       value = invoke()
 
-      Cypress.command
-        message: if _.isFunction(prop) then ".#{fn}()" else ".#{fn}"
-        onConsole: ->
-          obj = {}
+      if command
+        command.set
+          message: if _.isFunction(prop) then ".#{fn}()" else ".#{fn}"
+          onConsole: ->
+            obj = {}
 
-          if _.isFunction(prop)
-            obj["Function"] = ".#{fn}()"
-            obj["With Arguments"] = args if args.length
-          else
-            obj["Property"] = ".#{fn}"
+            if _.isFunction(prop)
+              obj["Function"] = ".#{fn}()"
+              obj["With Arguments"] = args if args.length
+            else
+              obj["Property"] = ".#{fn}"
 
-          _.extend obj,
-            On: remoteSubject or subject
-            Returned: value
+            _.extend obj,
+              On: remoteSubject or subject
+              Returned: value
 
-          obj
+            obj
+
+        command.snapshot().end()
 
       return value
 
@@ -138,6 +143,8 @@ do (Cypress, _, $) ->
       if options.log
         Cypress.command
           message: href
+          end: true
+          snapshot: true
 
       return href
 
@@ -149,6 +156,8 @@ do (Cypress, _, $) ->
       if options.log
         Cypress.command
           message: hash
+          end: true
+          snapshot: true
 
       return hash
 
@@ -180,6 +189,8 @@ do (Cypress, _, $) ->
       if options.log
         Cypress.command
           message: key ? null
+          end: true
+          snapshot: true
 
       return ret
 
@@ -187,14 +198,17 @@ do (Cypress, _, $) ->
       options.log = false
       options.visible = false
 
+      command = Cypress.command()
+
       ## using call here to invoke the 'text' method on the
       ## title's jquery object
 
       ## we're chaining off the promise so we need to go through
       ## the command method which returns a promise
       @command("get", "title", options).call("text").then (text) ->
-        Cypress.command
-          message: text
+        command.set({message: text})
+
+        command.snapshot().end()
 
         return text
 

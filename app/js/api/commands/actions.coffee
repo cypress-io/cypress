@@ -2,6 +2,8 @@ do (Cypress, _) ->
 
   pressedEnter = /\{enter\}/
 
+  textLike = "textarea,:text,[type=password],[type=email],[type=number],[type=date],[type=week],[type=month],[type=time],[type=datetime],[type=datetime-local],[type=search],[type=url]"
+
   $.simulate.prototype.simulateKeySequence.defaults["{esc}"] = (rng, char, options) ->
     keyOpts = {keyCode: 27, charCode: 27, which: 27}
     _.each ["keydown", "keypress", "keyup"], (event) ->
@@ -23,11 +25,18 @@ do (Cypress, _) ->
       options.el.each (index, el) =>
         origEl = el
         $el = $(el)
-        node = Cypress.Utils.stringifyElement(el)
+
+        if options.log
+          command = Cypress.command
+            $el: $el
+            onConsole: ->
+              "Applied To": $el
+              Elements: $el.length
 
         if not $el.is("form")
+          node = Cypress.Utils.stringifyElement(el)
           word = Cypress.Utils.plural(options.el, "contains", "is")
-          @throwErr(".submit() can only be called on a <form>! Your subject #{word} a: #{node}")
+          @throwErr(".submit() can only be called on a <form>! Your subject #{word} a: #{node}", command)
 
         ## do more research here but see if we can
         ## use the native submit event first and
@@ -35,84 +44,16 @@ do (Cypress, _) ->
         submit = new Event("submit")
         origEl.dispatchEvent(submit)
 
-        if options.log
-          Cypress.command
-            $el: $el
-            onConsole: ->
-              "Applied To": $el
-              Elements: $el.length
+        command.snapshot().end() if command
 
     fill: (subject, obj, options = {}) ->
       @throwErr "cy.fill() must be passed an object literal as its 1st argument!" if not _.isObject(obj)
 
-    check: (subject, values = []) ->
-      @ensureDom(subject)
+    check: (subject, values, options) ->
+      @_check_or_uncheck("check", subject, values, options)
 
-      ## make sure we're an array of values
-      values = [].concat(values)
-
-      ## blow up if any member of the subject
-      ## isnt a checkbox or radio
-      check = (el, index) =>
-        $el = $(el)
-        node = Cypress.Utils.stringifyElement($el)
-
-        @ensureVisibility($el)
-
-        if not $el.is(":checkbox,:radio")
-          word = Cypress.Utils.plural(subject, "contains", "is")
-          @throwErr(".check() can only be called on :checkbox and :radio! Your subject #{word} a: #{node}")
-
-        return if $el.prop("checked")
-
-        ## if we didnt pass in any values or our
-        ## el's value is in the array then check it
-        if not values.length or $el.val() in values
-          @command("click", {el: $el, log: false}).then ->
-            Cypress.command
-              $el: $el
-              onConsole: ->
-                "Applied To": $el
-
-      ## return our original subject when our promise resolves
-      Promise
-        .map(subject.toArray(), check, {concurrency: 1})
-        .cancellable()
-        .return(subject)
-
-    uncheck: (subject, values = []) ->
-      @ensureDom(subject)
-
-      ## make sure we're an array of values
-      values = [].concat(values)
-
-      ## blow up if any member of the subject
-      ## isnt a checkbox
-      uncheck = (el, index) =>
-        $el = $(el)
-        node = Cypress.Utils.stringifyElement(el)
-
-        @ensureVisibility($el)
-
-        if not $el.is(":checkbox")
-          word = Cypress.Utils.plural(subject, "contains", "is")
-          @throwErr(".uncheck() can only be called on :checkbox! Your subject #{word} a: #{node}")
-
-        return if not $el.prop("checked")
-
-        ## if we didnt pass in any values or our
-        ## $el's value is in the array then check it
-        if not values.length or $el.val() in values
-          @command("click", {el: $el, log: false}).then ->
-            Cypress.command
-              $el: $el
-              onConsole: ->
-                "Applied To": $el
-
-      Promise
-        .map(subject.toArray(), uncheck, {concurrency: 1})
-        .cancellable()
-        .return(subject)
+    uncheck: (subject, values, options) ->
+      @_check_or_uncheck("uncheck", subject, values, options)
 
     focus: (subject, options = {}) ->
       ## we should throw errors by default!
@@ -124,6 +65,12 @@ do (Cypress, _) ->
 
       @ensureDom(options.$el)
 
+      if options.log
+        command = Cypress.command
+          $el: options.$el
+          onConsole: ->
+            "Applied To": options.$el
+
       ## http://www.w3.org/TR/html5/editing.html#specially-focusable
       ## ensure there is only 1 dom element in the subject
       ## make sure its allowed to be focusable
@@ -131,12 +78,12 @@ do (Cypress, _) ->
         return if options.error is false
 
         node = Cypress.Utils.stringifyElement(options.$el)
-        @throwErr(".focus() can only be called on a valid focusable element! Your subject is a: #{node}")
+        @throwErr(".focus() can only be called on a valid focusable element! Your subject is a: #{node}", command)
 
       if (num = options.$el.length) and num > 1
         return if options.error is false
 
-        @throwErr(".focus() can only be called on a single element! Your subject contained #{num} elements!")
+        @throwErr(".focus() can only be called on a single element! Your subject contained #{num} elements!", command)
 
       timeout = @_timeout() / 2
 
@@ -162,11 +109,7 @@ do (Cypress, _) ->
 
           cleanup()
 
-          if options.log
-            Cypress.command
-              $el: options.$el
-              onConsole: ->
-                "Applied To": options.$el
+          command.snapshot().end() if command
 
           resolve(options.$el)
 
@@ -199,7 +142,7 @@ do (Cypress, _) ->
 
         return if options.error is false
 
-        @throwErr ".focus() timed out because your browser did not receive any focus events. This is a known bug in Chrome when it is not the currently focused window."
+        @throwErr ".focus() timed out because your browser did not receive any focus events. This is a known bug in Chrome when it is not the currently focused window.", command
 
     blur: (subject, options = {}) ->
       ## we should throw errors by default!
@@ -211,22 +154,28 @@ do (Cypress, _) ->
 
       @ensureDom(options.$el)
 
+      if options.log
+        command = Cypress.command
+          $el: options.$el
+          onConsole: ->
+            "Applied To": options.$el
+
       if (num = options.$el.length) and num > 1
         return if options.error is false
 
-        @throwErr(".blur() can only be called on a single element! Your subject contained #{num} elements!")
+        @throwErr(".blur() can only be called on a single element! Your subject contained #{num} elements!", command)
 
       @command("focused", {log: false}).then ($focused) =>
         if not $focused
           return if options.error is false
 
-          @throwErr(".blur() can only be called when there is a currently focused element.")
+          @throwErr(".blur() can only be called when there is a currently focused element.", command)
 
         if options.$el.get(0) isnt $focused.get(0)
           return if options.error is false
 
           node = Cypress.Utils.stringifyElement($focused)
-          @throwErr(".blur() can only be called on the focused element. Currently the focused element is a: #{node}")
+          @throwErr(".blur() can only be called on the focused element. Currently the focused element is a: #{node}", command)
 
         timeout = @_timeout() / 2
 
@@ -252,11 +201,7 @@ do (Cypress, _) ->
 
             cleanup()
 
-            if options.log
-              Cypress.command
-                $el: options.$el
-                onConsole: ->
-                  "Applied To": options.$el
+            command.snapshot().end() if command
 
             resolve(options.$el)
 
@@ -279,26 +224,32 @@ do (Cypress, _) ->
 
           return if options.error is false
 
-          @throwErr ".blur() timed out because your browser did not receive any blur events. This is a known bug in Chrome when it is not the currently focused window."
+          @throwErr ".blur() timed out because your browser did not receive any blur events. This is a known bug in Chrome when it is not the currently focused window.", command
 
-    dblclick: (subject) ->
+    dblclick: (subject, options = {}) ->
+      _.defaults options,
+        log: true
+
       @ensureDom(subject)
 
       dblclick = (el, index) =>
         $el = $(el)
 
-        @ensureVisibility($el)
+        if options.log
+          command = Cypress.command
+            $el: $el
+            onConsole: ->
+              "Applied To":   $el
+              "Elements":     $el.length
+
+        @ensureVisibility $el, command
 
         wait = if $el.is("a") then 50 else 10
 
         @command("focus", {el: $el, error: false, log: false}).then =>
           $el.cySimulate("dblclick")
 
-          Cypress.command
-            $el: $el
-            onConsole: ->
-              "Applied To":   $el
-              "Elements":     $el.length
+          command.snapshot().end() if command
 
           ## we want to add this wait delta to our
           ## runnables timeout so we prevent it from
@@ -317,7 +268,8 @@ do (Cypress, _) ->
 
       ## return our original subject when our promise resolves
       Promise
-        .map(subject.toArray(), dblclick, {concurrency: 1})
+        .resolve(subject.toArray())
+        .each(dblclick)
         .cancellable()
         .return(subject)
 
@@ -331,19 +283,21 @@ do (Cypress, _) ->
       click = (el, index) =>
         $el = $(el)
 
-        @ensureVisibility($el)
+        if options.log
+          command = Cypress.command
+            $el: $el
+            onConsole: ->
+              "Applied To":   $el
+              "Elements":     $el.length
+
+        @ensureVisibility $el, command
 
         wait = if $el.is("a") then 50 else 10
 
         @command("focus", {el: $el, error: false, log: false}).then =>
           el.click()
 
-          if options.log
-            Cypress.command
-              $el: $el
-              onConsole: ->
-                "Applied To":   $el
-                "Elements":     $el.length
+          command.snapshot().end() if command
 
           ## we want to add this wait delta to our
           ## runnables timeout so we prevent it from
@@ -356,33 +310,36 @@ do (Cypress, _) ->
 
         .delay(wait)
 
-      ## return our original subject when our promise resolves
       Promise
-        .map(options.el.toArray(), click, {concurrency: 1})
+        .resolve(options.el.toArray())
+        .each(click)
         .cancellable()
         .return(options.el)
 
-      ## -- this does not work but may work in the future -- ##
-      # Promise
-      #   .each subject.toArray(), click
-      #   .return(subject)
-
     type: (subject, sequence, options = {}) ->
-      @ensureDom(subject)
-
       ## allow the el we're typing into to be
       ## changed by options -- used by cy.clear()
       _.defaults options,
         el: subject
+        log: true
 
-      @ensureVisibility(options.el)
+      @ensureDom(options.el)
 
-      if not options.el.is("textarea,:text,[type=password],[type=email],[type=number],[type=date],[type=week],[type=month],[type=time],[type=datetime],[type=datetime-local],[type=search],[type=url]")
+      if options.log
+        command = Cypress.command
+          $el: options.el
+          onConsole: ->
+            "Typed":      sequence
+            "Applied To": options.el
+
+      @ensureVisibility(options.el, command)
+
+      if not options.el.is(textLike)
         node = Cypress.Utils.stringifyElement(options.el)
-        @throwErr(".type() can only be called on textarea or :text! Your subject is a: #{node}")
+        @throwErr(".type() can only be called on textarea or :text! Your subject is a: #{node}", command)
 
       if (num = options.el.length) and num > 1
-        @throwErr(".type() can only be called on a single textarea or :text! Your subject contained #{num} elements!")
+        @throwErr(".type() can only be called on a single textarea or :text! Your subject contained #{num} elements!", command)
 
       options.sequence = sequence
 
@@ -473,45 +430,51 @@ do (Cypress, _) ->
           ## to trigger the form submit event and when to also trigger
           ## the click event on the first 'submit' like element
 
-        log = ->
-          Cypress.command
-            $el: options.el
-            onConsole: ->
-              "Typed": sequence
-              "Applied To": options.el
-
         ## handle submit event handler here if we are pressing enter
         simulateSubmitHandler() if pressedEnter.test(sequence)
 
         options.el.simulate "key-sequence", options
 
         ## submit events should be finished at this point!
-        ## so we can log out the current state of the DOM
+        ## so we can snapshot the current state of the DOM
+        command.snapshot().end() if command
 
-        log()
-
-        return subject
+        return options.el
 
     clear: (subject, options = {}) ->
       ## what about other types of inputs besides just text?
       ## what about the new HTML5 ones?
+      _.defaults options,
+        log: true
 
       @ensureDom(subject)
 
       ## blow up if any member of the subject
       ## isnt a textarea or :text
       clear = (el, index) =>
-        el = $(el)
-        node = Cypress.Utils.stringifyElement(el)
+        $el = $(el)
 
-        if not el.is("textarea,:text")
+        if options.log
+          command = Cypress.command
+            $el: $el
+            onConsole: ->
+              "Applied To": $el
+              "Elements":   $el.length
+
+        node = Cypress.Utils.stringifyElement($el)
+
+        if not $el.is(textLike)
           word = Cypress.Utils.plural(subject, "contains", "is")
-          @throwErr(".clear() can only be called on textarea or :text! Your subject #{word} a: #{node}")
+          @throwErr ".clear() can only be called on textarea or :text! Your subject #{word} a: #{node}", command
 
-        @command("type", "{selectall}{del}", {el: el})
+        @command("type", "{selectall}{del}", {el: $el, log: false}).then ->
+          command.snapshot().end() if command
+
+          return null
 
       Promise
-        .map(subject.toArray(), clear, {concurrency: 1})
+        .resolve(subject.toArray())
+        .each(clear)
         .cancellable()
         .return(subject)
 
@@ -590,6 +553,8 @@ do (Cypress, _) ->
 
         Cypress.command
           $el: $el
+          end: true
+          snapshot: true
 
       try
         d = @sync.document()
@@ -614,3 +579,72 @@ do (Cypress, _) ->
       catch
         log(null)
         return null
+
+  Cypress.extend
+    _check_or_uncheck: (type, subject, values = [], options = {}) ->
+      _.defaults options,
+        el: subject
+        log: true
+
+      @ensureDom(options.el)
+
+      ## make sure we're an array of values
+      values = [].concat(values)
+
+      isNoop = ($el) ->
+        switch type
+          when "check"
+            $el.prop("checked")
+          when "uncheck"
+            not $el.prop("checked")
+
+      isAcceptableElement = ($el) ->
+        switch type
+          when "check"
+            $el.is(":checkbox,:radio")
+          when "uncheck"
+            $el.is(":checkbox")
+
+      ## blow up if any member of the subject
+      ## isnt a checkbox or radio
+      checkOrUncheck = (el, index) =>
+        $el = $(el)
+
+        onConsole =
+          "Applied To":   $el
+          "Elements":     $el.length
+
+        if options.log
+          command = Cypress.command
+            $el: $el
+            onConsole: -> onConsole
+
+        @ensureVisibility $el, command
+
+        if not isAcceptableElement($el)
+          node   = Cypress.Utils.stringifyElement($el)
+          word   = Cypress.Utils.plural(options.el, "contains", "is")
+          phrase = if type is "check" then " and :radio" else ""
+          @throwErr ".#{type}() can only be called on :checkbox#{phrase}! Your subject #{word} a: #{node}", command
+
+        ## if the checkbox was already checked
+        ## then notify the user of this note
+        ## and bail
+        if isNoop($el)
+          onConsole.Note = "This checkbox was already #{type}ed. No operation took place."
+          return
+
+        ## if we didnt pass in any values or our
+        ## el's value is in the array then check it
+        if not values.length or $el.val() in values
+          @command("click", {el: $el, log: false}).then ->
+            command.snapshot().end() if command
+
+            return null
+
+      ## return our original subject when our promise resolves
+      Promise
+        .resolve(options.el.toArray())
+        .each(checkOrUncheck)
+        .cancellable()
+        .return(options.el)

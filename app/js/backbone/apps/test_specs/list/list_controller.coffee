@@ -27,6 +27,7 @@
 
         ## if this command is a request then
         ## lets update our routes
+        ## TODO REFACTOR THIS INTO NEW LOG INTERFACE
         if route = command and command.getRoute()
           model.incrementRoute(route)
 

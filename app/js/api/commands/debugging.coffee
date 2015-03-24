@@ -14,6 +14,7 @@ do (Cypress, _) ->
       console.log "\n%c------------------------Cypress Command Info------------------------", "font-weight: bold;"
       _.each ["options", "runnable", "subject"], (item) =>
         console.log "#{item}: ", (@prop(item) or @[item])
+      console.log "Available Aliases: ", @_getAvailableAliases()
       debugger
 
   Cypress.extend

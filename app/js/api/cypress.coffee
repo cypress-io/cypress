@@ -5,7 +5,6 @@
 window.Cypress = do ($, _, Backbone) ->
 
   class Cypress
-    highlightAttr: "data-cypress-el"
     queue: []
     sync: {}
 
@@ -33,14 +32,14 @@ window.Cypress = do ($, _, Backbone) ->
       else
         @props[key] = val
 
-    ensureVisibility: (subject, method) ->
+    ensureVisibility: (subject, onFail) ->
       subject ?= @_subject()
 
-      method ?= @prop("current").name
+      method = @prop("current").name
 
       if not (subject.length is subject.filter(":visible").length)
         node = Cypress.Utils.stringifyElement(subject)
-        @throwErr("cy.#{method}() cannot be called on the non-visible element: #{node}")
+        @throwErr("cy.#{method}() cannot be called on the non-visible element: #{node}", onFail)
 
     ensureDom: (subject, method) ->
       subject ?= @_subject()
@@ -340,14 +339,45 @@ window.Cypress = do ($, _, Backbone) ->
       if not current.prev
         @throwErr("cy.#{current.name}() is a child command which operates on an existing subject.  Child commands must be called after a parent command!")
 
+    cypressErr: (err) ->
+      err = new Error(err)
+      err.name = "CypressError"
+      err
+
     throwErr: (err, onFail) ->
       if _.isString(err)
-        err = new Error(err)
-        err.name = "CypressError"
+        err = @cypressErr(err)
+
+      ## assume onFail is a command if
+      ## onFail is present and isnt a function
+      if onFail and not _.isFunction(onFail)
+        command = onFail
+
+        ## redefine onFail and automatically
+        ## hook this into our command
+        onFail = (err) ->
+          command.error(err)
 
       err.onFail = onFail if onFail
 
       throw err
+
+    ## submit a generic command error
+    commandErr: (err) ->
+      current = @prop("current")
+
+      Cypress.command
+        end: true
+        snapshot: true
+        error: err
+        onConsole: ->
+          obj = {}
+          ## if type isnt parent then we know its dual or child
+          ## and we can add Applied To if there is a prev command
+          ## and it is a parent
+          if current.type isnt "parent" and prev = current.prev
+            obj["Applied To"] = prev.subject
+            obj
 
     cancel: (err) ->
       obj = @prop("current")
@@ -366,18 +396,7 @@ window.Cypress = do ($, _, Backbone) ->
         ## after its been called
         delete err.onFail
       else
-        Cypress.command
-          error: err
-          onConsole: ->
-            obj = {}
-
-            ## if type isnt parent then we know its dual or child
-            ## and we can add Applied To if there is a prev command
-            ## and it is a parent
-            if current.type isnt "parent" and prev = current.prev
-              obj["Applied To"] = prev.subject
-
-            obj
+        @commandErr(err)
 
       @runner.uncaught(err)
       @trigger "fail", err
@@ -415,7 +434,7 @@ window.Cypress = do ($, _, Backbone) ->
 
       if total >= options.timeout or (total + options.interval >= options.runnableTimeout)
         err = "Timed out retrying. " + options.error ? "The last command was: " + options.name
-        @throwErr err, options.onFail
+        @throwErr err, (options.onFail or options.command)
 
       Promise.delay(options.interval).cancellable().then =>
         @trigger "retry", options
@@ -484,32 +503,6 @@ window.Cypress = do ($, _, Backbone) ->
     ## promise
     command: (name, args...) ->
       Promise.resolve @sync[name].apply(@, args)
-
-    createSnapshot: ($el) ->
-      ## create a unique selector for this el
-      $el.attr(@highlightAttr, true) if $el?.attr
-
-      ## clone the body and strip out any script tags
-      body = @$("body").clone()
-      body.find("script").remove()
-
-      ## here we need to figure out if we're in a remote manual environment
-      ## if so we need to stringify the DOM:
-      ## 1. grab all inputs / textareas / options and set their value on the element
-      ## 2. convert DOM to string: body.prop("outerHTML")
-      ## 3. send this string via websocket to our server
-      ## 4. server rebroadcasts this to our client and its stored as a property
-
-      ## its also possible for us to store the DOM string completely on the server
-      ## without ever sending it back to the browser (until its requests).
-      ## we could just store it in memory and wipe it out intelligently.
-      ## this would also prevent having to store the DOM structure on the client,
-      ## which would reduce memory, and some CPU operations
-
-      ## now remove it after we clone
-      $el.removeAttr(@highlightAttr) if $el?.removeAttr
-
-      return body
 
     defer: (fn) ->
       @clearTimeout(@prop("timerId"))
@@ -831,161 +824,6 @@ window.Cypress = do ($, _, Backbone) ->
       ## accidentally chaining the 'then' method
       ## during tests
       return @
-
-    ## TODO: write tests for this
-    @off = (name, fn) ->
-      ## nuke all events if we dont
-      ## have a specific named event
-      ## or we dont have _events
-      if not (name and @_events)
-        @_events = []
-        return @
-
-      splice = (index) =>
-        @_events.splice(index, 1)
-
-      functionsMatch = (fn1, fn2) ->
-        fn1 is fn2 or ("" + fn1 is "" + fn2)
-
-      ## loop in reverse since we are
-      ## destructively modifying _events
-      for event, index in @_events by -1
-        if event.name is name
-          if fn
-            ## if we have a passed in fn argument
-            ## make sure our event has the same fn
-            splice(index) if functionsMatch(event.fn, fn)
-          else
-            ## else always splice it out since
-            ## it matches the name
-            splice(index)
-
-      return @
-
-    @on = (event, fn) ->
-      return if not _.isFunction(fn)
-
-      @_events ?= []
-
-      @off(event, fn)
-      @_events.push {name: event, fn: fn}
-
-      return @
-
-    @trigger = (event, args...) ->
-      return if not @_events
-
-      _.chain(@_events)
-        .where({name: event})
-          .each (event) =>
-            event.fn.apply(@cy, args)
-
-      return @
-
-    @command = (obj = {}) ->
-      current = @cy.prop("current")
-
-      return if not (@cy and current)
-
-      ## stringify the arguments
-      stringify = (array) ->
-        _(array).map( (value) -> "" + value).join(", ")
-
-      _.defaults obj, _(current).pick("name", "type")
-
-      ## force duals to become either parents or childs
-      ## normally this would be handled by the command itself
-      ## but in cases where the command purposely does not log
-      ## then it could still be logged during a failure, which
-      ## is why we normalize its type value
-      if obj.type is "dual"
-        obj.type = if current.prev then "child" else "parent"
-
-      ## does this object represent the current command cypress
-      ## is processing?
-      obj.isCurrent = obj.name is current.name
-
-      _.defaults obj,
-        snapshot: true
-        onRender: ->
-        onConsole: ->
-          "Returned": current.subject
-
-      if obj.isCurrent
-        _.defaults obj, {message: stringify(current.args)}
-
-      ## allow type to by a dynamic function
-      ## so it can conditionally return either
-      ## parent or child (useful in assertions)
-      if _.isFunction(obj.type)
-        obj.type = obj.type.call(@cy, current, @cy.prop("subject"))
-
-      if obj.snapshot
-        obj._snapshot = @cy.createSnapshot(obj.$el)
-
-      if obj.$el
-        obj.highlightAttr = @cy.highlightAttr
-        obj.numElements   = obj.$el.length
-
-      if obj.error
-        obj._error = obj.error
-        obj.error  = true
-
-      @log("command", obj)
-
-    @route = (obj = {}) ->
-      return if not @cy
-
-      _.defaults obj,
-        name: "route"
-
-      @log("route", obj)
-
-    @agent = (obj = {}) ->
-      return if not @cy
-
-      _.defaults obj,
-        name: "agent"
-
-      @log("agent", obj)
-
-    @log = (event, obj) ->
-      getError = (err) ->
-        if err.name is "CypressError"
-          err.toString()
-        else
-          err.stack
-
-      _.defaults obj,
-        testId:           @cy.prop("runnable").cid
-        referencesAlias:  undefined
-        alias:            undefined
-        message:          undefined
-        onRender: ->
-        onConsole: ->
-
-      if obj.isCurrent
-        _.defaults obj, {alias: @cy.getNextAlias()}
-
-      ## re-wrap onConsole to set Command + Error defaults
-      obj.onConsole = _.wrap obj.onConsole, (orig, args...) ->
-        ## grab the Command name by default
-        consoleObj = {Command: obj.name}
-
-        ## merge in the other properties from onConsole
-        _.extend consoleObj, orig.apply(obj, args)
-
-        ## and finally add error if one exists
-        if obj._error
-          _.defaults consoleObj,
-            # Error: obj._error.toString()
-            Error: getError(obj._error)
-
-        return consoleObj
-
-      obj.event = event
-
-      @trigger "log", obj
 
     _.extend Cypress.prototype, Backbone.Events
 

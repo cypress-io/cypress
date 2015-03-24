@@ -17,11 +17,6 @@
 
       commandsView = @getCommandsView hooks
 
-      @listenTo commandsView, "childview:childview:revert:clicked", (iv, iv2, args) ->
-        command = args.model
-        command.choose()
-        runner.revertDom(command)
-
       @listenTo commandsView, "childview:childview:command:mouseenter", (iv, iv2, args) ->
         command = args.model
         # return @highlightClone(hooks, command) if command.isCloned()

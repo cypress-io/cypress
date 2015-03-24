@@ -18,6 +18,7 @@ do (Cypress, _) ->
         visible: null
         exist: true
         exists: true
+        log: true
 
       ## normalize these two options
       options.exist = options.exists and options.exist
@@ -27,17 +28,25 @@ do (Cypress, _) ->
         args = _(args).without(null, undefined)
         args.join(", ")
 
-      log = ($el) ->
-        Cypress.command
-          $el: $el
-          onConsole: ->
-            obj = {}
-            obj.Selector = getSelector()
+      onConsole = {
+        Selector: getSelector()
+        "Applied To": subject
+      }
 
-            _.extend obj,
-              "Applied To":   subject
-              "Returned":     $el
-              "Elements":     $el?.length
+      if options.log
+        options.command ?= Cypress.command
+          onConsole: -> onConsole
+
+      log = ($el) ->
+        return if not options.command
+
+        _.extend onConsole,
+          "Returned": $el
+          "Elements": $el?.length
+
+        options.command.set({$el: $el})
+
+        options.command.snapshot().end()
 
         return $el
 

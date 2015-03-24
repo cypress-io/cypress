@@ -219,13 +219,12 @@ describe "Cypress", ->
               alias: "getFoo"
               aliasType: "route"
               type: "parent"
-              error: true
-              _error: err
+              error: err
               event: "command"
               message: undefined
             }
             _.each obj, (value, key) =>
-              expect(@log[key]).deep.eq(value, "expected key: #{key} to eq value: #{value}")
+              expect(@log.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
 
             done()
 
@@ -504,15 +503,15 @@ describe "Cypress", ->
 
       it "has name of route", ->
         cy.route("/foo", {}).then ->
-          expect(@log.name).to.eq "route"
+          expect(@log.get("name")).to.eq "route"
 
       it "uses the wildcard URL", ->
         cy.route("*", {}).then ->
-          expect(@log.url).to.eq("*")
+          expect(@log.get("url")).to.eq("*")
 
       it "#onConsole", ->
         cy.route("*", {foo: "bar"}).as("foo").then ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "route"
             Method: "GET"
             URL: "*"
@@ -543,9 +542,16 @@ describe "Cypress", ->
           }
 
           _.each obj, (value, key) =>
-            expect(@log[key]).to.deep.eq(value, "expected key: #{key} to eq value: #{value}")
+            expect(@log.get(key)).to.deep.eq(value, "expected key: #{key} to eq value: #{value}")
 
         it "#onConsole", ->
+
+        it "ends immediately", ->
+          expect(@log.get("end")).to.be.tru
+          expect(@log.get("state")).to.eq("success")
+
+        it "snapshots immediately", ->
+          expect(@log.get("snapshot")).to.be.an("object")
 
   context "#agents", ->
     beforeEach ->
@@ -574,9 +580,11 @@ describe "Cypress", ->
           spy = @agents.spy()
           spy("foo", "bar")
 
-          expect(@log.name).to.eq("spy-1")
-          expect(@log.message).to.eq("function(arg1, arg2)")
-          expect(@log.type).to.eq("parent")
+          expect(@log.get("name")).to.eq("spy-1")
+          expect(@log.get("message")).to.eq("function(arg1, arg2)")
+          expect(@log.get("type")).to.eq("parent")
+          expect(@log.get("state")).to.eq("success")
+          expect(@log.get("snapshot")).to.be.an("object")
 
         context "#onConsole", ->
 
@@ -615,6 +623,19 @@ describe "Cypress", ->
           done()
 
         cy.clearLocalStorage({})
+
+    describe ".log", ->
+      beforeEach ->
+        Cypress.on "log", (@log) =>
+
+      it "ends immediately", ->
+        cy.clearLocalStorage().then ->
+          expect(@log.get("end")).to.be.true
+          expect(@log.get("state")).to.eq("success")
+
+      it "snapshots immediately", ->
+        cy.clearLocalStorage().then ->
+          expect(@log.get("snapshot")).to.be.an("object")
 
   context "#ng", ->
     context "find by binding", ->
@@ -912,11 +933,20 @@ describe "Cypress", ->
     describe ".log", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
-          if @log.name is "location"
+          if @log.get("name") is "location"
             throw new Error("cy.location() should not have logged out.")
 
       afterEach ->
         delete @log
+
+      it "ends immediately", ->
+        cy.url().then ->
+          expect(@log.get("end")).to.be.true
+          expect(@log.get("state")).to.eq("success")
+
+      it "snapshots immediately", ->
+        cy.url().then ->
+          expect(@log.get("snapshot")).to.be.an("object")
 
       it "logs obj", ->
         cy.url().then ->
@@ -926,7 +956,7 @@ describe "Cypress", ->
           }
 
           _.each obj, (value, key) =>
-            expect(@log[key]).to.deep.eq value
+            expect(@log.get(key)).to.deep.eq value
 
       it "does not emit when {log: false}", ->
         cy.url({log: false}).then ->
@@ -934,7 +964,7 @@ describe "Cypress", ->
 
       it "#onConsole", ->
         cy.url().then ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "url"
             Returned: "/fixtures/html/dom.html"
           }
@@ -947,11 +977,20 @@ describe "Cypress", ->
     describe ".log", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
-          if @log.name is "location"
+          if @log.get("name") is "location"
             throw new Error("cy.location() should not have logged out.")
 
       afterEach ->
         delete @log
+
+      it "ends immediately", ->
+        cy.hash().then ->
+          expect(@log.get("end")).to.be.true
+          expect(@log.get("state")).to.eq("success")
+
+      it "snapshots immediately", ->
+        cy.hash().then ->
+          expect(@log.get("snapshot")).to.be.an("object")
 
       it "logs obj", ->
         cy.hash().then ->
@@ -961,7 +1000,7 @@ describe "Cypress", ->
           }
 
           _.each obj, (value, key) =>
-            expect(@log[key]).to.deep.eq value
+            expect(@log.get(key)).to.deep.eq value
 
       it "does not emit when {log: false}", ->
         cy.hash({log: false}).then ->
@@ -969,7 +1008,7 @@ describe "Cypress", ->
 
       it "#onConsole", ->
         cy.hash().then ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "hash"
             Returned: ""
           }
@@ -988,6 +1027,18 @@ describe "Cypress", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
 
+      afterEach ->
+        delete @log
+
+      it "ends immediately", ->
+        cy.location("href").then ->
+          expect(@log.get("end")).to.be.true
+          expect(@log.get("state")).to.eq("success")
+
+      it "snapshots immediately", ->
+        cy.location("href").then ->
+          expect(@log.get("snapshot")).to.be.an("object")
+
       it "does not emit when {log: false} as options", ->
         cy.location("href", {log: false}).then ->
           expect(@log).to.be.undefined
@@ -1004,7 +1055,7 @@ describe "Cypress", ->
           }
 
           _.each obj, (value, key) =>
-            expect(@log[key]).to.deep.eq value
+            expect(@log.get(key)).to.deep.eq value
 
       it "logs obj with a message", ->
         cy.location("origin").then ->
@@ -1014,11 +1065,11 @@ describe "Cypress", ->
           }
 
           _.each obj, (value, key) =>
-            expect(@log[key]).to.deep.eq value
+            expect(@log.get(key)).to.deep.eq value
 
       it "#onConsole", ->
         cy.location().then ->
-          onConsole = @log.onConsole()
+          onConsole = @log.attributes.onConsole()
 
           expect(_(onConsole).keys()).to.deep.eq ["Command", "Returned"]
           expect(onConsole.Command).to.eq "location"
@@ -1078,8 +1129,24 @@ describe "Cypress", ->
     describe ".log", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
-          if @log.name is "get"
+          if @log.get("name") is "get"
             throw new Error("cy.get() should not have logged out.")
+
+      it "logs immediately before resolving", (done) ->
+        input = cy.$(":text:first")
+
+        Cypress.on "log", (log) ->
+          if log.get("name") is "title"
+            expect(log.get("state")).to.eq("pending")
+            done()
+
+        cy.title()
+
+      it "snapshots after clicking", ->
+        Cypress.on "log", (@log) =>
+
+        cy.title().then ->
+          expect(@log.get("snapshot")).to.be.an("object")
 
       it "logs obj", ->
         cy.title().then ->
@@ -1089,11 +1156,11 @@ describe "Cypress", ->
           }
 
           _.each obj, (value, key) =>
-            expect(@log[key]).to.deep.eq value
+            expect(@log.get(key)).to.deep.eq value
 
       it "#onConsole", ->
         cy.title().then ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "title"
             Returned: "DOM Fixture"
           }
@@ -1195,9 +1262,42 @@ describe "Cypress", ->
         cy.get("button span").then ($span) ->
           expect($span.get(0)).to.eq span.get(0)
 
+    describe ".log", ->
+      it "logs immediately before resolving", (done) ->
+        div = cy.$("div:first")
+
+        Cypress.on "log", (log) ->
+          if log.get("name") is "within"
+            expect(log.get("state")).to.eq("pending")
+            expect(log.get("message")).to.eq("")
+            expect(log.get("$el").get(0)).to.eq div.get(0)
+            done()
+
+        cy.get("div:first").within ->
+
+      it "snapshots after clicking", ->
+        Cypress.on "log", (@log) =>
+
+        cy.get("div:first").within ->
+          cy.then ->
+            expect(@log.get("snapshot")).to.be.an("object")
+
     describe "errors", ->
       beforeEach ->
         @sandbox.stub cy.runner, "uncaught"
+
+      it "logs once when not dom subject", (done) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(1)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        cy.noop().within ->
 
       it "throws when not a DOM subject", (done) ->
         cy.on "fail", (err) -> done()
@@ -1434,11 +1534,26 @@ describe "Cypress", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
 
+      it "logs immediately before resolving", (done) ->
+        Cypress.on "log", (log) ->
+          if log.get("name") is "root"
+            expect(log.get("state")).to.eq("pending")
+            expect(log.get("message")).to.eq("")
+            done()
+
+        cy.root()
+
+      it "snapshots after clicking", ->
+        Cypress.on "log", (@log) =>
+
+        cy.root().then ->
+          expect(@log.get("snapshot")).to.be.an("object")
+
       it "sets $el to document", ->
         html = cy.$("html")
 
         cy.root().then ->
-          expect(@log.$el.get(0)).to.eq(html.get(0))
+          expect(@log.get("$el").get(0)).to.eq(html.get(0))
 
       it "sets $el to withinSubject", ->
         form = cy.$("form")
@@ -1447,7 +1562,7 @@ describe "Cypress", ->
           cy
             .get("input")
             .root().then ($root) ->
-              expect(@log.$el.get(0)).to.eq(form.get(0))
+              expect(@log.get("$el").get(0)).to.eq(form.get(0))
 
   context "#get", ->
     beforeEach ->
@@ -1561,9 +1676,21 @@ describe "Cypress", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
 
-      it "logs obj", ->
+      it "logs immediately before resolving", (done) ->
+        Cypress.on "log", (log) ->
+          expect(log.pick("state", "referencesAlias", "aliasType")).to.deep.eq {
+            state: "pending"
+            referencesAlias: undefined
+            aliasType: "dom"
+          }
+          done()
+
+        cy.get("body")
+
+      it "logs obj once complete", ->
         cy.get("body").as("b").then ($body) ->
           obj = {
+            state: "success"
             name: "get"
             message: "body"
             alias: "b"
@@ -1573,11 +1700,11 @@ describe "Cypress", ->
           }
 
           _.each obj, (value, key) =>
-            expect(@log[key]).deep.eq(value, "expected key: #{key} to eq value: #{value}")
+            expect(@log.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
 
       it "#onConsole", ->
         cy.get("body").then ($body) ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "get"
             Selector: "body"
             Returned: $body
@@ -1586,7 +1713,7 @@ describe "Cypress", ->
 
       it "#onConsole with an alias", ->
         cy.get("body").as("b").get("@b").then ($body) ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "get"
             Alias: "@b"
             Returned: $body
@@ -1712,6 +1839,16 @@ describe "Cypress", ->
           done()
 
         cy.get("#button", {visible: true})
+
+      it "sets error command state", (done) ->
+        Cypress.on "log", (@log) =>
+
+        cy.on "fail", (err) =>
+          expect(@log.get("state")).to.eq "error"
+          expect(@log.get("error")).to.eq err
+          done()
+
+        cy.get("foobar")
 
   context "#contains", ->
     it "finds the nearest element by :contains selector", ->
@@ -1868,34 +2005,55 @@ describe "Cypress", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
 
+      it "logs immediately before resolving", (done) ->
+        Cypress.on "log", (log) ->
+          if log.get("name") is "contains"
+            expect(log.pick("state", "type")).to.deep.eq {
+              state: "pending"
+              type: "child"
+            }
+            done()
+
+        cy.get("body").contains("foo")
+
+      it "snapshots after finding element", ->
+        Cypress.on "log", (@log) =>
+
+        cy.contains("foo").then ->
+          expect(@log.get("snapshot")).to.be.an("object")
+
       it "silences internal cy.get() log", ->
-        log = @sandbox.spy Cypress, "log"
+        logs = []
+
+        Cypress.on "log", (log) ->
+          logs.push log
 
         ## GOOD: [ {name: get} , {name: contains} ]
         ## BAD:  [ {name: get} , {name: get} , {name: contains} ]
         cy.get("#complex-contains").contains("nested contains").then ($label) ->
-          expect(log.firstCall).to.be.calledWithMatch "command", {name: "get"}
-          expect(log.secondCall).to.be.calledWithMatch "command", {name: "contains"}
+          names = _(logs).map (log) -> log.get("name")
+          expect(logs).to.have.length(2)
+          expect(names).to.deep.eq ["get", "contains"]
 
       it "passes in $el", ->
         cy.get("#complex-contains").contains("nested contains").then ($label) ->
-          expect(@log.$el).to.eq $label
+          expect(@log.get("$el")).to.eq $label
 
       it "sets type to parent when used as a parent command", ->
         cy.contains("foo").then ->
-          expect(@log.type).to.eq "parent"
+          expect(@log.get("type")).to.eq "parent"
 
       it "sets type to parent when subject doesnt have an element", ->
         cy.noop({}).contains("foo").then ->
-          expect(@log.type).to.eq "parent"
+          expect(@log.get("type")).to.eq "parent"
 
       it "sets type to child when used as a child command", ->
         cy.get("body").contains("foo").then ->
-          expect(@log.type).to.eq "child"
+          expect(@log.get("type")).to.eq "child"
 
       it "#onConsole", ->
         cy.get("#complex-contains").contains("nested contains").then ($label) ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "contains"
             Content: "nested contains"
             "Applied To": getFirstSubjectByName("get")
@@ -2112,14 +2270,20 @@ describe "Cypress", ->
             events.push "submit"
 
           Cypress.on "log", (log) ->
-            events.push "#{log.name}:log"
+            state = log.get("state")
+
+            if state is "pending"
+              log.on "state:changed", (state) ->
+                events.push "#{log.get('name')}:log:#{state}"
+
+              events.push "#{log.get('name')}:log:#{state}"
 
           cy.on "invoke:end", (obj) ->
             events.push "#{obj.name}:end"
 
           cy.get("#single-input input").type("f{enter}").then ->
             expect(events).to.deep.eq [
-              "get:start", "get:log", "get:end", "type:start", "submit", "type:log", "type:end", "then:start"
+              "get:start", "get:log:pending", "get:end", "type:start", "type:log:pending", "submit", "type:end", "then:start"
             ]
 
         it "triggers 2 form submit event", ->
@@ -2289,11 +2453,11 @@ describe "Cypress", ->
 
       it "passes in $el", ->
         cy.get("input:first").type("foobar").then ($input) ->
-          expect(@log.$el).to.eq $input
+          expect(@log.get("$el")).to.eq $input
 
       it "#onConsole", ->
         cy.get("input:first").type("foobar").then ($input) ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "type"
             Typed: "foobar"
             "Applied To": $input
@@ -2305,11 +2469,28 @@ describe "Cypress", ->
 
         Cypress.on "log", (log) ->
           logs.push(log)
-          types.push(log) if log.name is "type"
+          types.push(log) if log.get("name") is "type"
 
         cy.get(":text:first").type("foo").then ->
           expect(logs).to.have.length(2)
           expect(types).to.have.length(1)
+
+      it "logs immediately before resolving", (done) ->
+        input = cy.$(":text:first")
+
+        Cypress.on "log", (log) ->
+          if log.get("name") is "type"
+            expect(log.get("state")).to.eq("pending")
+            expect(log.get("$el").get(0)).to.eq input.get(0)
+            done()
+
+        cy.get(":text:first").type("foo")
+
+      it "snapshots after clicking", ->
+        Cypress.on "log", (@log) =>
+
+        cy.get(":text:first").type("foo").then ->
+          expect(@log.get("snapshot")).to.be.an("object")
 
     describe "errors", ->
       beforeEach ->
@@ -2343,13 +2524,33 @@ describe "Cypress", ->
 
         node = Cypress.Utils.stringifyElement(input)
 
-        cy.on "fail", (err) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(2)
+          expect(@log.get("error")).to.eq(err)
           expect(err.message).to.eq "cy.type() cannot be called on the non-visible element: #{node}"
           done()
 
         cy.get("input:text:first").type("foo")
 
       it "throws when submitting within nested forms"
+
+      it "logs once when not dom subject", (done) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(1)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        cy.type("foobar")
 
   context "#clear", ->
     it "does not change the subject", ->
@@ -2373,37 +2574,44 @@ describe "Cypress", ->
         @sandbox.stub cy.runner, "uncaught"
 
       it "throws when not a dom subject", (done) ->
-        cy.noop({}).clear()
-
         cy.on "fail", (err) -> done()
 
-      it "throws if any subject isnt a textarea", (done) ->
-        cy.get("textarea,form").clear()
+        cy.noop({}).clear()
 
-        cy.on "fail", (err) ->
-          expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <form id=\"by-id\"></form>"
+      it "throws if any subject isnt a textarea", (done) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(3)
+          expect(@log.get("error")).to.eq(err)
+          expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <form id=\"checkboxes\"></form>"
           done()
 
-      it "throws if any subject isnt a :text", (done) ->
-        cy.get("div").clear()
+        cy.get("textarea:first,form#checkboxes").clear()
 
+      it "throws if any subject isnt a :text", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <div id=\"dom\"></div>"
           done()
 
-      it "throws on an input radio", (done) ->
-        cy.get(":radio").clear()
+        cy.get("div").clear()
 
+      it "throws on an input radio", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <input type=\"radio\" name=\"gender\" value=\"male\">"
           done()
 
-      it "throws on an input checkbox", (done) ->
-        cy.get(":checkbox").clear()
+        cy.get(":radio").clear()
 
+      it "throws on an input checkbox", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <input type=\"checkbox\" name=\"colors\" value=\"blue\">"
           done()
+
+        cy.get(":checkbox").clear()
 
       it "throws when the subject isnt visible", (done) ->
         input = cy.$("input:text:first").show().hide()
@@ -2415,6 +2623,37 @@ describe "Cypress", ->
           done()
 
         cy.get("input:text:first").clear()
+
+      it "logs once when not dom subject", (done) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(1)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        cy.clear()
+
+    describe ".log", ->
+      it "logs immediately before resolving", (done) ->
+        input = cy.$("input:first")
+
+        Cypress.on "log", (log) ->
+          if log.get("name") is "clear"
+            expect(log.get("state")).to.eq("pending")
+            expect(log.get("$el").get(0)).to.eq input.get(0)
+            done()
+
+        cy.get("input:first").clear()
+
+      it "snapshots after clicking", ->
+        Cypress.on "log", (@log) =>
+
+        cy.get("input:first").clear().then ($input) ->
+          expect(@log.get("snapshot")).to.be.an("object")
 
   context "#check", ->
     it "does not change the subject", ->
@@ -2490,19 +2729,57 @@ describe "Cypress", ->
           done()
 
       it "throws when any member of the subject isnt visible", (done) ->
-        chk = cy.$(":checkbox").show().last().hide()
+        chk = cy.$(":checkbox")
+        chk.show().last().hide()
 
-        node = Cypress.Utils.stringifyElement(chk)
+        node = Cypress.Utils.stringifyElement(chk.last())
 
-        cy.on "fail", (err) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(chk.length + 1)
+          expect(@log.get("error")).to.eq(err)
           expect(err.message).to.eq "cy.check() cannot be called on the non-visible element: #{node}"
           done()
 
         cy.get(":checkbox").check()
 
+        it "logs once when not dom subject", (done) ->
+          logs = []
+
+          Cypress.on "log", (@log) =>
+            logs.push @log
+
+          cy.on "fail", (err) =>
+            expect(logs).to.have.length(1)
+            expect(@log.get("error")).to.eq(err)
+            done()
+
+          cy.check()
+
     describe ".log", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
+
+      it "logs immediately before resolving", (done) ->
+        chk = cy.$(":checkbox:first")
+
+        Cypress.on "log", (log) ->
+          if log.get("name") is "check"
+            expect(log.get("state")).to.eq("pending")
+            expect(log.get("$el").get(0)).to.eq chk.get(0)
+            done()
+
+        cy.get(":checkbox:first").check()
+
+      it "snapshots after clicking", ->
+        Cypress.on "log", (@log) =>
+
+        cy.get(":checkbox:first").check().then ->
+          expect(@log.get("snapshot")).to.be.an("object")
 
       it "logs only 1 check event", ->
         logs = []
@@ -2510,7 +2787,7 @@ describe "Cypress", ->
 
         Cypress.on "log", (log) ->
           logs.push(log)
-          checks.push(log) if log.name is "check"
+          checks.push(log) if log.get("name") is "check"
 
         cy.get("[name=colors][value=blue]").check().then ->
           expect(logs).to.have.length(2)
@@ -2518,13 +2795,23 @@ describe "Cypress", ->
 
       it "passes in $el", ->
         cy.get("[name=colors][value=blue]").check().then ($input) ->
-          expect(@log.$el.get(0)).to.eq $input.get(0)
+          expect(@log.get("$el").get(0)).to.eq $input.get(0)
 
       it "#onConsole", ->
         cy.get("[name=colors][value=blue]").check().then ($input) ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "check"
-            "Applied To": @log.$el
+            "Applied To": @log.get("$el")
+            Elements: 1
+          }
+
+      it "#onConsole when checkbox is already checked", ->
+        cy.get("[name=colors][value=blue]").check().check().then ($input) ->
+          expect(@log.attributes.onConsole()).to.deep.eq {
+            Command: "check"
+            "Applied To": @log.get("$el")
+            Elements: 1
+            Note: "This checkbox was already checked. No operation took place."
           }
 
   context "#uncheck", ->
@@ -2575,16 +2862,38 @@ describe "Cypress", ->
         cy.on "fail", -> done()
 
       it "throws when any member of the subject isnt visible", (done) ->
-        chk = cy.$(":checkbox").show().last()
+        ## grab the first 3 checkboxes!
+        chk = cy.$(":checkbox").slice(0, 3).show()
 
-        cy.on "fail", (err) ->
-          node = Cypress.Utils.stringifyElement(chk)
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          node = Cypress.Utils.stringifyElement(chk.last())
+          len  = (chk.length * 2) + 6
+          expect(logs).to.have.length(len)
+          expect(@log.get("error")).to.eq(err)
           expect(err.message).to.eq "cy.uncheck() cannot be called on the non-visible element: #{node}"
           done()
 
         cy
-          .get(":checkbox").check().last().invoke("hide")
-          .get(":checkbox").uncheck()
+          .get(":checkbox").invoke("slice", 0, 3).check().last().invoke("hide")
+          .get(":checkbox").invoke("slice", 0, 3).uncheck()
+
+      it "logs once when not dom subject", (done) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(1)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        cy.uncheck()
 
     describe ".log", ->
       beforeEach ->
@@ -2592,13 +2901,30 @@ describe "Cypress", ->
 
         Cypress.on "log", (@log) =>
 
+      it "logs immediately before resolving", (done) ->
+        chk = cy.$(":checkbox:first")
+
+        Cypress.on "log", (log) ->
+          if log.get("name") is "uncheck"
+            expect(log.get("state")).to.eq("pending")
+            expect(log.get("$el").get(0)).to.eq chk.get(0)
+            done()
+
+        cy.get(":checkbox:first").check().uncheck()
+
+      it "snapshots after clicking", ->
+        Cypress.on "log", (@log) =>
+
+        cy.get(":checkbox:first").check().uncheck().then ->
+          expect(@log.get("snapshot")).to.be.an("object")
+
       it "logs only 1 check event", ->
         logs = []
         unchecks = []
 
         Cypress.on "log", (log) ->
           logs.push(log)
-          unchecks.push(log) if log.name is "uncheck"
+          unchecks.push(log) if log.get("name") is "uncheck"
 
         cy.get("[name=colors][value=blue]").uncheck().then ->
           expect(logs).to.have.length(2)
@@ -2606,13 +2932,23 @@ describe "Cypress", ->
 
       it "passes in $el", ->
         cy.get("[name=colors][value=blue]").uncheck().then ($input) ->
-          expect(@log.$el.get(0)).to.eq $input.get(0)
+          expect(@log.get("$el").get(0)).to.eq $input.get(0)
 
       it "#onConsole", ->
         cy.get("[name=colors][value=blue]").uncheck().then ($input) ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "uncheck"
-            "Applied To": @log.$el
+            "Applied To": @log.get("$el")
+            Elements: 1
+          }
+
+      it "#onConsole when checkbox is already unchecked", ->
+        cy.get("[name=colors][value=blue]").invoke("prop", "checked", false).uncheck().then ($input) ->
+          expect(@log.attributes.onConsole()).to.deep.eq {
+            Command: "uncheck"
+            "Applied To": @log.get("$el")
+            Elements: 1
+            Note: "This checkbox was already unchecked. No operation took place."
           }
 
   context "#submit", ->
@@ -2637,26 +2973,63 @@ describe "Cypress", ->
         cy.noop({}).submit()
 
       it "throws when subject isnt a form", (done) ->
-        cy.on "fail", (err) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(2)
+          expect(@log.get("error")).to.eq(err)
           expect(err.message).to.include ".submit() can only be called on a <form>! Your subject contains a: <input id=\"input\">"
           done()
 
         cy.get("input").submit()
 
+      it "logs once when not dom subject", (done) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(1)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        cy.submit()
+
     describe ".log", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
 
+      it "logs immediately before resolving", (done) ->
+        form = cy.$("form:first")
+
+        Cypress.on "log", (log) ->
+          if log.get("name") is "submit"
+            expect(log.get("state")).to.eq("pending")
+            expect(log.get("$el").get(0)).to.eq form.get(0)
+            done()
+
+        cy.get("form:first").submit()
+
+      it "snapshots after clicking", ->
+        Cypress.on "log", (@log) =>
+
+        cy.get("form:first").submit().then ($input) ->
+          expect(@log.get("snapshot")).to.be.an("object")
+
       it "provides $el", ->
         cy.get("form").first().submit().then ($form) ->
-          expect(@log.name).to.eq "submit"
-          expect(@log.$el).to.match $form
+          expect(@log.get("name")).to.eq "submit"
+          expect(@log.get("$el")).to.match $form
 
       it "#onConsole", ->
         cy.get("form").first().submit().then ($form) ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "submit"
-            "Applied To": @log.$el
+            "Applied To": @log.get("$el")
             Elements: 1
           }
 
@@ -2697,13 +3070,22 @@ describe "Cypress", ->
         cy.$("input:first").get(0).focus()
         Cypress.on "log", (@log) =>
 
+      it "ends immediately", ->
+        cy.focused().then ->
+          expect(@log.get("end")).to.be.true
+          expect(@log.get("state")).to.eq("success")
+
+      it "snapshots immediately", ->
+        cy.focused().then ->
+          expect(@log.get("snapshot")).to.be.an("object")
+
       it "passes in $el", ->
         cy.get("input:first").focused().then ($input) ->
-          expect(@log.$el).to.eq $input
+          expect(@log.get("$el")).to.eq $input
 
       it "#onConsole", ->
         cy.get("input:first").focused().then ($input) ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "focused"
             "Returned": $input
           }
@@ -2766,9 +3148,26 @@ describe "Cypress", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
 
+      it "logs immediately before resolving", (done) ->
+        input = cy.$(":text:first")
+
+        Cypress.on "log", (log) ->
+          if log.get("name") is "focus"
+            expect(log.get("state")).to.eq("pending")
+            expect(log.get("$el").get(0)).to.eq input.get(0)
+            done()
+
+        cy.get(":text:first").focus()
+
+      it "snapshots after clicking", ->
+        Cypress.on "log", (@log) =>
+
+        cy.get(":text:first").focus().then ->
+          expect(@log.get("snapshot")).to.be.an("object")
+
       it "passes in $el", ->
         cy.get("input:first").focus().then ($input) ->
-          expect(@log.$el).to.eq $input
+          expect(@log.get("$el")).to.eq $input
 
       it "logs 2 focus event", ->
         logs = []
@@ -2779,13 +3178,13 @@ describe "Cypress", ->
         cy
           .get("input:first").focus()
           .get("button:first").focus().then ->
-            names = _(logs).pluck("name")
+            names = _(logs).map (log) -> log.get("name")
             expect(logs).to.have.length(4)
             expect(names).to.deep.eq ["get", "focus", "get", "focus"]
 
       it "#onConsole", ->
         cy.get("input:first").focus().then ($input) ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "focus"
             "Applied To": $input
           }
@@ -2816,6 +3215,19 @@ describe "Cypress", ->
         cy.on "fail", (err) =>
           expect(err.message).to.include ".focus() can only be called on a single element! Your subject contained #{@num} elements!"
           done()
+
+      it "logs once when not dom subject", (done) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(1)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        cy.focus()
 
   context "#blur", ->
     it "should blur the originally focused element", (done) ->
@@ -2862,9 +3274,26 @@ describe "Cypress", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
 
+      it "logs immediately before resolving", (done) ->
+        input = cy.$(":text:first")
+
+        Cypress.on "log", (log) ->
+          if log.get("name") is "blur"
+            expect(log.get("state")).to.eq("pending")
+            expect(log.get("$el").get(0)).to.eq input.get(0)
+            done()
+
+        cy.get(":text:first").focus().blur()
+
+      it "snapshots after clicking", ->
+        Cypress.on "log", (@log) =>
+
+        cy.get(":text:first").focus().blur().then ->
+          expect(@log.get("snapshot")).to.be.an("object")
+
       it "passes in $el", ->
         cy.get("input:first").focus().blur().then ($input) ->
-          expect(@log.$el).to.eq $input
+          expect(@log.get("$el")).to.eq $input
 
       it "logs 1 blur event", ->
         logs = []
@@ -2874,13 +3303,13 @@ describe "Cypress", ->
 
         cy
           .get("input:first").focus().blur().then ->
-            names = _(logs).pluck("name")
+            names = _(logs).map (log) -> log.get("name")
             expect(logs).to.have.length(3)
             expect(names).to.deep.eq ["get", "focus", "blur"]
 
       it "#onConsole", ->
         cy.get("input:first").focus().blur().then ($input) ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "blur"
             "Applied To": $input
           }
@@ -2920,6 +3349,19 @@ describe "Cypress", ->
         cy.on "fail", (err) ->
           expect(err.message).to.include ".blur() can only be called on the focused element. Currently the focused element is a: <input id=\"input\">"
           done()
+
+      it "logs once when not dom subject", (done) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(1)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        cy.blur()
 
   context "#dblclick", ->
     it "sends a dblclick event", (done) ->
@@ -3062,7 +3504,55 @@ describe "Cypress", ->
 
         cy.get("button").dblclick()
 
+      it "logs once when not dom subject", (done) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(1)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        cy.dblclick()
+
+      it "throws when any member of the subject isnt visible", (done) ->
+        btn = cy.$("#three-buttons button").show().last().hide()
+
+        node = Cypress.Utils.stringifyElement(btn)
+
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(4)
+          expect(@log.get("error")).to.eq(err)
+          expect(err.message).to.eq "cy.dblclick() cannot be called on the non-visible element: #{node}"
+          done()
+
+        cy.get("#three-buttons button").dblclick()
+
     describe ".log", ->
+      it "logs immediately before resolving", (done) ->
+        button = cy.$("button:first")
+
+        Cypress.on "log", (log) ->
+          if log.get("name") is "dblclick"
+            expect(log.get("state")).to.eq("pending")
+            expect(log.get("$el").get(0)).to.eq button.get(0)
+            done()
+
+        cy.get("button:first").dblclick()
+
+      it "snapshots after clicking", ->
+        Cypress.on "log", (@log) =>
+
+        cy.get("button:first").dblclick().then ($button) ->
+          expect(@log.get("snapshot")).to.be.an("object")
+
       it "returns only the $el for the element of the subject that was dblclicked", ->
         dblclicks = []
 
@@ -3071,18 +3561,18 @@ describe "Cypress", ->
         cy.$("body").append(button()).append(button())
 
         Cypress.on "log", (obj) ->
-          dblclicks.push(obj) if obj.name is "dblclick"
+          dblclicks.push(obj) if obj.get("name") is "dblclick"
 
         cy.get("button.dblclicks").dblclick().then ($buttons) ->
           expect($buttons.length).to.eq(2)
           expect(dblclicks.length).to.eq(2)
-          expect(dblclicks[1].$el.get(0)).to.eq $buttons.last().get(0)
+          expect(dblclicks[1].get("$el").get(0)).to.eq $buttons.last().get(0)
 
       it "logs only 1 dblclick event", ->
         logs = []
 
         Cypress.on "log", (log) ->
-          logs.push(log) if log.name is "dblclick"
+          logs.push(log) if log.get("name") is "dblclick"
 
         cy.get("button:first").dblclick().then ->
           expect(logs).to.have.length(1)
@@ -3091,9 +3581,9 @@ describe "Cypress", ->
         Cypress.on "log", (@log) =>
 
         cy.get("button").first().dblclick().then ($button) ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "dblclick"
-            "Applied To": @log.$el
+            "Applied To": @log.get("$el")
             Elements: 1
           }
 
@@ -3227,18 +3717,55 @@ describe "Cypress", ->
 
         cy.click()
 
+      it "logs once when not dom subject", (done) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(1)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        cy.click()
+
       it "throws when any member of the subject isnt visible", (done) ->
         btn = cy.$("#three-buttons button").show().last().hide()
 
         node = Cypress.Utils.stringifyElement(btn)
 
-        cy.on "fail", (err) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(4)
+          expect(@log.get("error")).to.eq(err)
           expect(err.message).to.eq "cy.click() cannot be called on the non-visible element: #{node}"
           done()
 
         cy.get("#three-buttons button").click()
 
     describe ".log", ->
+      it "logs immediately before resolving", (done) ->
+        button = cy.$("button:first")
+
+        Cypress.on "log", (log) ->
+          if log.get("name") is "click"
+            expect(log.get("state")).to.eq("pending")
+            expect(log.get("$el").get(0)).to.eq button.get(0)
+            done()
+
+        cy.get("button:first").click()
+
+      it "snapshots after clicking", ->
+        Cypress.on "log", (@log) =>
+
+        cy.get("button:first").click().then ($button) ->
+          expect(@log.get("snapshot")).to.be.an("object")
+
       it "returns only the $el for the element of the subject that was clicked", ->
         clicks = []
 
@@ -3247,18 +3774,18 @@ describe "Cypress", ->
         cy.$("body").append(button()).append(button())
 
         Cypress.on "log", (obj) ->
-          clicks.push(obj) if obj.name is "click"
+          clicks.push(obj) if obj.get("name") is "click"
 
         cy.get("button.clicks").click().then ($buttons) ->
           expect($buttons.length).to.eq(2)
           expect(clicks.length).to.eq(2)
-          expect(clicks[1].$el.get(0)).to.eq $buttons.last().get(0)
+          expect(clicks[1].get("$el").get(0)).to.eq $buttons.last().get(0)
 
       it "logs only 1 click event", ->
         logs = []
 
         Cypress.on "log", (log) ->
-          logs.push(log) if log.name is "click"
+          logs.push(log) if log.get("name") is "click"
 
         cy.get("button:first").click().then ->
           expect(logs).to.have.length(1)
@@ -3267,9 +3794,9 @@ describe "Cypress", ->
         Cypress.on "log", (@log) =>
 
         cy.get("button").first().click().then ($button) ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "click"
-            "Applied To": @log.$el
+            "Applied To": @log.get("$el")
             Elements: 1
           }
 
@@ -3346,6 +3873,15 @@ describe "Cypress", ->
           beforeEach ->
             Cypress.on "log", (@log) =>
 
+          it "ends immediately", ->
+            cy.get("#list")[name](arg).then ->
+              expect(@log.get("end")).to.be.true
+              expect(@log.get("state")).to.eq("success")
+
+          it "snapshots immediately", ->
+            cy.get("#list")[name](arg).then ->
+              expect(@log.get("snapshot")).to.be.an("object")
+
           it "#onConsole", ->
             cy.get("#list")[name](arg).then ($el) ->
               obj = {Command: name}
@@ -3357,7 +3893,7 @@ describe "Cypress", ->
                 Elements: $el.length
               }
 
-              expect(@log.onConsole()).to.deep.eq obj
+              expect(@log.attributes.onConsole()).to.deep.eq obj
 
   context "traversals", ->
     fns = [
@@ -3392,6 +3928,22 @@ describe "Cypress", ->
           beforeEach ->
             Cypress.on "log", (@log) =>
 
+          it "logs immediately before resolving", (done) ->
+            Cypress.on "log", (log) ->
+              if log.get("name") is name
+                expect(log.pick("state")).to.deep.eq {
+                  state: "pending"
+                }
+                done()
+
+            cy.get("#list")[name](arg)
+
+          it "snapshots after finding element", ->
+            Cypress.on "log", (@log) =>
+
+            cy.get("#list")[name](arg).then ->
+              expect(@log.get("snapshot")).to.be.an("object")
+
           it "#onConsole", ->
             cy.get("#list")[name](arg).then ($el) ->
               obj = {Command: name}
@@ -3403,7 +3955,7 @@ describe "Cypress", ->
                 Elements: $el.length
               }
 
-              expect(@log.onConsole()).to.deep.eq obj
+              expect(@log.attributes.onConsole()).to.deep.eq obj
 
     it "retries until it finds", ->
       li = cy.$("#list li:last")
@@ -3611,6 +4163,19 @@ describe "Cypress", ->
 
         Cypress.on "log", (@log) =>
 
+      it "logs immediately before resolving", (done) ->
+        Cypress.on "log", (log) ->
+          if log.get("name") is "invoke"
+            expect(log.get("state")).to.eq("pending")
+            expect(log.get("message")).to.eq "foo"
+            done()
+
+        cy.noop({foo: "foo"}).invoke("foo")
+
+      it "snapshots after clicking", ->
+        cy.noop({foo: "foo"}).invoke("foo").then ->
+          expect(@log.get("snapshot")).to.be.an("object")
+
       it "logs obj as a property", ->
         cy.noop(@obj).invoke("foo").then ->
           obj = {
@@ -3619,7 +4184,7 @@ describe "Cypress", ->
           }
 
           _.each obj, (value, key) =>
-            expect(@log[key]).to.deep.eq value
+            expect(@log.get(key)).to.deep.eq value
 
       it "logs obj as a function", ->
         cy.noop(@obj).invoke("bar").then ->
@@ -3629,11 +4194,11 @@ describe "Cypress", ->
           }
 
           _.each obj, (value, key) =>
-            expect(@log[key]).to.deep.eq value
+            expect(@log.get(key)).to.deep.eq value
 
       it "#onConsole as a regular property", ->
         cy.noop(@obj).invoke("num").then ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command:  "invoke"
             Property: ".num"
             On:       @obj
@@ -3642,7 +4207,7 @@ describe "Cypress", ->
 
       it "#onConsole as a function property without args", ->
         cy.noop(@obj).invoke("bar").then ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command:  "invoke"
             Function: ".bar()"
             On:       @obj
@@ -3651,7 +4216,7 @@ describe "Cypress", ->
 
       it "#onConsole as a function property with args", ->
         cy.noop(@obj).invoke("sum", 1, 2, 3).then ->
-          expect(@log.onConsole()).to.deep.eq {
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command:  "invoke"
             Function: ".sum()"
             "With Arguments": [1,2,3]
@@ -3664,8 +4229,11 @@ describe "Cypress", ->
         @sandbox.stub cy.runner, "uncaught"
 
       it "throws when property does not exist on the subject", (done) ->
-        cy.on "fail", (err) ->
+        Cypress.on "log", (@log) =>
+
+        cy.on "fail", (err) =>
           expect(err.message).to.eq "cy.invoke() errored because the property: 'foo' does not exist on your subject."
+          expect(@log.get("error")).to.eq err
           done()
 
         cy.noop({}).invoke("foo")
@@ -3681,11 +4249,27 @@ describe "Cypress", ->
         cy.invoke("queue")
 
       it "throws when first argument isnt a string", (done) ->
-        cy.on "fail", (err) ->
+        Cypress.on "log", (@log) =>
+
+        cy.on "fail", (err) =>
           expect(err.message).to.eq "cy.invoke() only accepts a string as the first argument."
+          expect(@log.get("error")).to.eq err
           done()
 
         cy.noop({}).invoke({})
+
+      it "logs once when not dom subject", (done) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(1)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        cy.invoke({})
 
   context "#its", ->
     it "proxies to #invoke", ->
@@ -4169,22 +4753,31 @@ describe "Cypress", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
 
+      it "immediately ends", ->
+        cy.noop({}).wait(10).then ->
+          expect(@log.get("state")).to.eq "success"
+
+      it "immediately snapshots", ->
+        it "immediately ends command", ->
+          cy.noop({}).wait(10).then ->
+            expect(@log.get("snapshot")).to.be.an("object")
+
       it "is a type: child if subject", ->
         cy.noop({}).wait(10).then ->
-          expect(@log.type).to.eq "child"
+          expect(@log.get("type")).to.eq "child"
 
       it "is a type: child if subject is false", ->
         cy.noop(false).wait(10).then ->
-          expect(@log.type).to.eq "child"
+          expect(@log.get("type")).to.eq "child"
 
       it "is a type: parent if subject is null or undefined", ->
         cy.wait(10).then ->
-          expect(@log.type).to.eq "parent"
+          expect(@log.get("type")).to.eq "parent"
 
       describe "number argument", ->
         it "#onConsole", ->
           cy.wait(10).then ->
-            expect(@log.onConsole()).to.deep.eq {
+            expect(@log.attributes.onConsole()).to.deep.eq {
               Command: "wait"
               "Waited For": "10ms before continuing"
             }
@@ -4202,14 +4795,14 @@ describe "Cypress", ->
               referencesAlias: "getFoo"
               aliasType: "route"
               type: "child"
-              error: true
-              _error: err
+              error: err
               event: "command"
               message: "@getFoo"
               numRetries: numRetries + 1
             }
+
             _.each obj, (value, key) =>
-              expect(@log[key]).deep.eq(value, "expected key: #{key} to eq value: #{value}")
+              expect(@log.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
 
             done()
 
@@ -4241,7 +4834,7 @@ describe "Cypress", ->
       #       .window().then (win) ->
       #         win.$.get("foo")
       #       .wait("@getFoo").then (xhr) ->
-      #         expect(@log.onConsole()).to.deep.eq {
+      #         expect(@log.attributes.onConsole()).to.deep.eq {
       #           Command: "wait"
       #           "Waited For": "alias: 'getFoo' to have a response"
       #           Alias: xhr
@@ -4261,7 +4854,7 @@ describe "Cypress", ->
 
       #     cy
       #       .wait(fn).then ->
-      #         expect(@log.onConsole()).to.deep.eq {
+      #         expect(@log.attributes.onConsole()).to.deep.eq {
       #           Command: "wait"
       #           "Waited For": _.str.clean(fn.toString())
       #           Retried: "3 times"
@@ -4313,42 +4906,35 @@ describe "Cypress", ->
 
       it "sets name to current.name", (done) ->
         Cypress.on "log", (obj) ->
-          expect(obj.name).to.eq "foo"
+          expect(obj.get("name")).to.eq "foo"
           done()
 
         Cypress.command({})
 
       it "sets type to current.type", (done) ->
         Cypress.on "log", (obj) ->
-          expect(obj.type).to.eq "parent"
+          expect(obj.get("type")).to.eq "parent"
           done()
 
         Cypress.command({})
 
       it "sets message to stringified args", (done) ->
         Cypress.on "log", (obj) ->
-          expect(obj.message).to.deep.eq "1, 2, 3"
+          expect(obj.get("message")).to.deep.eq "1, 2, 3"
           done()
 
         Cypress.command({})
 
       it "omits ctx from current.ctx", (done) ->
         Cypress.on "log", (obj) ->
-          expect(_.keys(obj)).not.to.include "ctx"
+          expect(obj.get("ctx")).not.to.exist
           done()
 
         Cypress.command({})
 
       it "omits fn from current.fn", (done) ->
         Cypress.on "log", (obj) ->
-          expect(_.keys(obj)).not.to.include "fn"
-          done()
-
-        Cypress.command({})
-
-      it "sets snapshot to true", (done) ->
-        Cypress.on "log", (obj) ->
-          expect(obj.snapshot).to.be.true
+          expect(obj.get("fn")).not.to.exist
           done()
 
         Cypress.command({})
@@ -4357,7 +4943,7 @@ describe "Cypress", ->
         cy.prop("runnable", {cid: 123})
 
         Cypress.on "log", (obj) ->
-          expect(obj.testId).to.eq 123
+          expect(obj.get("testId")).to.eq 123
           cy.prop("runnable", null)
           done()
 
@@ -4367,7 +4953,7 @@ describe "Cypress", ->
         $el = cy.$("body")
 
         Cypress.on "log", (obj) ->
-          expect(obj.numElements).to.eq 1
+          expect(obj.get("numElements")).to.eq 1
           done()
 
         Cypress.command($el: $el)
@@ -4376,16 +4962,16 @@ describe "Cypress", ->
         $el = cy.$("body")
 
         Cypress.on "log", (obj) ->
-          expect(obj.highlightAttr).not.to.be.undefined
-          expect(obj.highlightAttr).to.eq cy.highlightAttr
+          expect(obj.get("highlightAttr")).not.to.be.undefined
+          expect(obj.get("highlightAttr")).to.eq Cypress.highlightAttr
           done()
 
         Cypress.command($el: $el)
 
     it "displays 0 argument", (done) ->
       Cypress.on "log", (obj) ->
-        if obj.name is "eq"
-          expect(obj.message).to.eq "0"
+        if obj.get("name") is "eq"
+          expect(obj.get("message")).to.eq "0"
           done()
 
       cy.get("div").eq(0)
@@ -4394,8 +4980,8 @@ describe "Cypress", ->
       @sandbox.stub cy.runner, "uncaught"
 
       Cypress.on "log", (obj) ->
-        if obj.name is "then"
-          expect(obj.type).to.eq "parent"
+        if obj.get("name") is "then"
+          expect(obj.get("type")).to.eq "parent"
           done()
 
       cy.then ->
@@ -4405,8 +4991,8 @@ describe "Cypress", ->
       @sandbox.stub cy.runner, "uncaught"
 
       Cypress.on "log", (obj) ->
-        if obj.name is "then"
-          expect(obj.type).to.eq "child"
+        if obj.get("name") is "then"
+          expect(obj.get("type")).to.eq "child"
           done()
 
       cy.noop({}).then ->
@@ -4426,29 +5012,33 @@ describe "Cypress", ->
         Cypress.on "log", (@log) =>
 
         cy.on "fail", (err) =>
-          expect(@log.name).to.eq "get"
-          expect(@log.message).to.eq "foo"
-          expect(@log._error).to.eq err
-          expect(@log.error).to.eq true
+          expect(@log.get("name")).to.eq "get"
+          expect(@log.get("message")).to.eq "foo"
+          expect(@log.get("error")).to.eq err
           done()
 
         cy.get("foo")
 
       it "#onConsole for parent commands", (done) ->
-        Cypress.on "log", (obj) ->
-          expect(obj.onConsole()).to.deep.eq {
+        Cypress.on "log", (@log) =>
+
+        cy.on "fail", (err) =>
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "get"
-            Error: obj._error.toString()
+            Returned: undefined
+            Error: err.toString()
           }
           done()
 
         cy.get("foo")
 
       it "#onConsole for dual commands as a parent", (done) ->
-        Cypress.on "log", (obj) ->
-          expect(obj.onConsole()).to.deep.eq {
+        Cypress.on "log", (@log) =>
+
+        cy.on "fail", (err) =>
+          expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "wait"
-            Error: obj._error.toString()
+            Error: err.toString()
           }
           done()
 
@@ -4456,12 +5046,14 @@ describe "Cypress", ->
           expect(true).to.be.false
 
       it "#onConsole for dual commands as a child", (done) ->
-        Cypress.on "log", (obj) ->
-          if obj.name is "wait"
-            expect(obj.onConsole()).to.deep.eq {
+        Cypress.on "log", (@log) =>
+
+        cy.on "fail", (err) =>
+          if @log.get("name") is "wait"
+            expect(@log.attributes.onConsole()).to.deep.eq {
               Command: "wait"
               "Applied To": getFirstSubjectByName("get")
-              Error: obj._error.toString()
+              Error: err.toString()
             }
             done()
 
@@ -4469,24 +5061,30 @@ describe "Cypress", ->
           expect(true).to.be.false
 
       it "#onConsole for children commands", (done) ->
-        Cypress.on "log", (obj) ->
-          if obj.name is "contains"
-            expect(obj.onConsole()).to.deep.eq {
+        Cypress.on "log", (@log) =>
+
+        cy.on "fail", (err) =>
+          if @log.get("name") is "contains"
+            expect(@log.attributes.onConsole()).to.deep.eq {
               Command: "contains"
+              Content: "asdfasdfasdfasdf"
               "Applied To": getFirstSubjectByName("get")
-              Error: obj._error.toString()
+              Error: err.toString()
             }
             done()
 
         cy.get("button").contains("asdfasdfasdfasdf")
 
       it "#onConsole for nested children commands", (done) ->
-        Cypress.on "log", (obj) ->
-          if obj.name is "contains"
-            expect(obj.onConsole()).to.deep.eq {
+        Cypress.on "log", (@log) =>
+
+        cy.on "fail", (err) =>
+          if @log.get("name") is "contains"
+            expect(@log.attributes.onConsole()).to.deep.eq {
               Command: "contains"
+              Content: "asdfasdfasdfasdf"
               "Applied To": getFirstSubjectByName("eq")
-              Error: obj._error.toString()
+              Error: err.toString()
             }
             done()
 
@@ -4731,7 +5329,7 @@ describe "Cypress", ->
     before ->
       @onAssert = (fn) =>
         Cypress.on "log", (obj) =>
-          if obj.name is "assert"
+          if obj.get("name") is "assert"
             ## restore so we dont create an endless loop
             ## due to Cypress.assert being called again
             Cypress.Chai.restore()
@@ -4747,7 +5345,7 @@ describe "Cypress", ->
 
       it "wraps \#{this} and \#{exp} in \#{b}", (done) ->
         @onAssert (obj) ->
-          expect(obj.message).to.eq "expected [b]foo[\\b] to equal [b]foo[\\b]"
+          expect(obj.get("message")).to.eq "expected [b]foo[\\b] to equal [b]foo[\\b]"
           done()
 
         cy.then ->
@@ -4763,7 +5361,7 @@ describe "Cypress", ->
       describe "jQuery elements", ->
         it "sets _obj to selector", (done) ->
           @onAssert (obj) ->
-            expect(obj.message).to.eq "expected [b]<body>[\\b] to exist"
+            expect(obj.get("message")).to.eq "expected [b]<body>[\\b] to exist"
             done()
 
           cy.get("body").then ($body) ->
@@ -4772,7 +5370,7 @@ describe "Cypress", ->
         describe "without selector", ->
           it "exists", (done) ->
             @onAssert (obj) ->
-              expect(obj.message).to.eq "expected [b]<div>[\\b] to exist"
+              expect(obj.get("message")).to.eq "expected [b]<div>[\\b] to exist"
               done()
 
             ## prepend an empty div so it has no id or class
@@ -4784,7 +5382,7 @@ describe "Cypress", ->
 
           it "uses element name", (done) ->
             @onAssert (obj) ->
-              expect(obj.message).to.eq "expected [b]<input>[\\b] to match [b]input[\\b]"
+              expect(obj.get("message")).to.eq "expected [b]<input>[\\b] to match [b]input[\\b]"
               done()
 
             ## prepend an empty div so it has no id or class
@@ -4796,7 +5394,7 @@ describe "Cypress", ->
         describe "property assertions", ->
           it "has property", (done) ->
             @onAssert (obj) ->
-              expect(obj.message).to.eq "expected [b]<form#by-id>[\\b] to have a property [b]length[\\b]"
+              expect(obj.get("message")).to.eq "expected [b]<form#by-id>[\\b] to have a property [b]length[\\b]"
               done()
 
             cy.get("form").should("have.property", "length")
@@ -4813,7 +5411,7 @@ describe "Cypress", ->
       before ->
         @onAssert = (fn) =>
           Cypress.on "log", (obj) =>
-            if obj.name is "assert"
+            if obj.get("name") is "assert"
               ## restore so we dont create an endless loop
               ## due to Cypress.assert being called again
               Cypress.Chai.restore()
@@ -4825,25 +5423,42 @@ describe "Cypress", ->
       afterEach ->
         Cypress.Chai.restore()
 
+      it "ends immediately", (done) ->
+        @onAssert (log) ->
+          expect(log.get("end")).to.be.true
+          expect(log.get("state")).to.eq("success")
+          done()
+
+        cy.get("body").then ->
+          expect(cy.prop("subject")).to.match "body"
+
+      it "snapshots immediately", (done) ->
+        @onAssert (log) ->
+          expect(log.get("snapshot")).to.be.an("object")
+          done()
+
+        cy.get("body").then ->
+          expect(cy.prop("subject")).to.match "body"
+
       it "sets type to child when assertion involved current subject", (done) ->
-        @onAssert (obj) ->
-          expect(obj.type).to.eq "child"
+        @onAssert (log) ->
+          expect(log.get("type")).to.eq "child"
           done()
 
         cy.get("body").then ->
           expect(cy.prop("subject")).to.match "body"
 
       it "sets type to child current command had arguments but does not match subject", (done) ->
-        @onAssert (obj) ->
-          expect(obj.type).to.eq "child"
+        @onAssert (log) ->
+          expect(log.get("type")).to.eq "child"
           done()
 
         cy.get("body").then ($body) ->
           expect($body.length).to.eq(1)
 
       it "sets type to parent when assertion did not involve current subject and didnt have arguments", (done) ->
-        @onAssert (obj) ->
-          expect(obj.type).to.eq "parent"
+        @onAssert (log) ->
+          expect(log.get("type")).to.eq "parent"
           done()
 
         cy.get("body").then ->
@@ -4852,14 +5467,14 @@ describe "Cypress", ->
       it "replaces instances of word: 'but' with 'and' for passing assertion", (done) ->
         ## chai jquery adds 2 assertions here so
         ## we bind to the 2nd one
-        Cypress.on "log", (obj) ->
-          if obj.name is "assert"
-            assert(obj)
+        Cypress.on "log", (log) ->
+          if log.get("name") is "assert"
+            assert(log)
 
         assert = _.after 2, (obj) ->
           Cypress.Chai.restore()
 
-          expect(obj.message).to.eq "expected [b]<a>[\\b] to have a [b]<a>[\\b] attribute with the value [b]#[\\b], and the value was [b]#[\\b]"
+          expect(obj.get("message")).to.eq "expected [b]<a>[\\b] to have a [b]<a>[\\b] attribute with the value [b]#[\\b], and the value was [b]#[\\b]"
           done()
 
         cy.get("a").then ($a) ->
@@ -4871,12 +5486,12 @@ describe "Cypress", ->
         ## chai jquery adds 2 assertions here so
         ## we bind to the 2nd one
         Cypress.on "log", (obj) ->
-          if obj.name is "assert"
+          if obj.get("name") is "assert"
             assert(obj)
 
         assert = _.after 2, (obj) ->
           Cypress.Chai.restore()
-          expect(obj.message).to.eq "expected [b]<a>[\\b] to have a [b]<a>[\\b] attribute with the value [b]asdf[\\b], but the value was [b]#[\\b]"
+          expect(obj.get("message")).to.eq "expected [b]<a>[\\b] to have a [b]<a>[\\b] attribute with the value [b]asdf[\\b], but the value was [b]#[\\b]"
           done()
 
         cy.get("a").then ($a) ->
@@ -4886,13 +5501,13 @@ describe "Cypress", ->
         ## chai jquery adds 2 assertions here so
         ## we bind to the 2nd one
         Cypress.on "log", (obj) ->
-          if obj.name is "assert"
+          if obj.get("name") is "assert"
             assert(obj)
 
         assert = _.after 1, (obj) ->
           Cypress.Chai.restore()
 
-          expect(obj.message).to.eq "expected [b]<button#button>[\\b] to be visible"
+          expect(obj.get("message")).to.eq "expected [b]<button#button>[\\b] to be visible"
           done()
 
         cy.get("#button").then ($button) ->
@@ -4900,7 +5515,7 @@ describe "Cypress", ->
 
       it "#onConsole for regular objects", (done) ->
         @onAssert (obj) ->
-          expect(obj.onConsole()).to.deep.eq {
+          expect(obj.attributes.onConsole()).to.deep.eq {
             Command: "assert"
             expected: 1
             actual: 1
@@ -4914,7 +5529,7 @@ describe "Cypress", ->
 
       it "#onConsole for DOM objects", (done) ->
         @onAssert (obj) ->
-          expect(obj.onConsole()).to.deep.eq {
+          expect(obj.attributes.onConsole()).to.deep.eq {
             Command: "assert"
             subject: getFirstSubjectByName("get")
             Message: "expected <body> to match body"
@@ -4929,14 +5544,46 @@ describe "Cypress", ->
         @sandbox.stub cy.runner, "uncaught"
 
         @onAssert (obj) ->
-          expect(obj.onConsole()).to.deep.eq {
+          expect(obj.attributes.onConsole()).to.deep.eq {
             Command: "assert"
             expected: false
             actual: true
             Message: "expected true to be false"
-            Error: obj._error.stack
+            Error: obj.get("error").stack
           }
           done()
 
         cy.then ->
           expect(true).to.be.false
+
+  describe "Mocha", ->
+    beforeEach ->
+      Cypress.Mocha.override()
+
+    afterEach ->
+      Cypress.Mocha.restore()
+
+    context "#override", ->
+      beforeEach ->
+        @chain = cy.noop({foo: "foo"}).assign("foo")
+
+        ## simulate not returning cy from beforeEach
+        return null
+
+      it "forcibly returns cy chainer", ->
+        ## foo should still be defined since
+        ## the beforeEach should have waited
+        ## for cy to complete!
+        expect(@foo).to.deep.eq {foo: "foo"}
+
+      it "does not create a new chainer", ->
+        ## mocha will attach a .then() to the coerced
+        ## return value from the override.  if we dont
+        ## return the chain, then mocha will automatically
+        ## create a new chainer by attaching this to cy.then()
+        ## instead of the correct cy.chain().then()
+        ## we can verify this by ensuring the last chain
+        ## is what is carried over to the test
+        expect(@chain.id).to.eq(cy.chain().id)
+
+

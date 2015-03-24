@@ -30,6 +30,8 @@ do (Cypress, _) ->
           type:      "parent"
           error:     err
           _route:    route
+          end:       true
+          snapshot:  true
           onConsole: =>
             consoleObj = {
               Method:        xhr.method

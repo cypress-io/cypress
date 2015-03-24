@@ -8,17 +8,26 @@ do (Cypress, _) ->
         visible: null
         exist: true
         exists: true
+        log: true
+        command: null
 
       ## normalize these two options
       options.exist = options.exists and options.exist
 
+      start = ->
+        return if options.log is false
+
+        options.command ?= Cypress.command
+          referencesAlias: alias?.alias
+          aliasType: "dom"
+
       log = ($el) ->
         return if options.log is false
 
-        Cypress.command
+        start() if not options.command
+
+        options.command.set
           $el: $el
-          referencesAlias: alias?.alias
-          aliasType: "dom"
           numRetries: options.retries
           onConsole: ->
             obj = {"Command":  "get"}
@@ -29,6 +38,8 @@ do (Cypress, _) ->
               "Returned": $el
               "Elements": $el?.length
 
+        options.command.snapshot().end()
+
       if alias = @getAlias(selector)
         {subject, command} = alias
         if Cypress.Utils.hasElement(subject)
@@ -38,6 +49,8 @@ do (Cypress, _) ->
           else
             @_replayFrom command
             return null
+
+      start()
 
       ## attempt to query for the elements by withinSubject context
       $el = @$(selector, options.withinSubject)
@@ -115,25 +128,26 @@ do (Cypress, _) ->
       @_retry(retry, options)
 
     root: ->
+      command = Cypress.command({message: ""})
+
       log = ($el) ->
-        Cypress.command
-          $el: $el
-          message: ""
+        command.set({$el: $el}).snapshot().end()
+
+        return $el
 
       withinSubject = @prop("withinSubject")
 
       if withinSubject
-        log(withinSubject)
-
-        return withinSubject
+        return log(withinSubject)
 
       @command("get", "html", {log: false}).then ($html) ->
         log($html)
 
-        return $html
-
   Cypress.addDualCommand
     contains: (subject, filter, text, options = {}) ->
+      _.defaults options,
+        log: true
+
       ## nuke our subject if its present but not an element
       ## since we want contains to operate as a parent command
       if subject and not Cypress.Utils.hasElement(subject)
@@ -176,6 +190,16 @@ do (Cypress, _) ->
 
         err += " '#{text}' #{phrase}"
 
+      if options.log
+        onConsole = {
+          Content: text
+          "Applied To": subject or @prop("withinSubject")
+        }
+
+        options.command ?= Cypress.command
+          type: if subject then "child" else "parent"
+          onConsole: -> onConsole
+
       _.extend options,
         error: getErr(text, phrase)
         withinSubject: subject or @prop("withinSubject")
@@ -183,16 +207,15 @@ do (Cypress, _) ->
         log: false
 
       log = ($el) ->
-        Cypress.command({
-          $el: $el
-          type: if subject then "child" else "parent"
-          numRetries: options.retries
-          onConsole: ->
-            "Content": text
-            "Applied To": subject
-            "Returned": $el
-            "Elements": $el?.length
-        })
+        return $el if not options.command
+
+        onConsole.Returned = $el
+        onConsole.Elements = $el?.length
+
+        options.command.set({$el: $el})
+
+        options.command.snapshot().end()
+
         return $el
 
       containsTextNode = ($el, text) ->
@@ -222,7 +245,11 @@ do (Cypress, _) ->
     within: (subject, fn) ->
       @ensureDom(subject)
 
-      @throwErr("cy.within() must be called with a function!") if not _.isFunction(fn)
+      command = Cypress.command
+        $el: subject
+        message: ""
+
+      @throwErr("cy.within() must be called with a function!", command) if not _.isFunction(fn)
 
       ## reference the next command after this
       ## within.  when that command runs we'll
@@ -239,9 +266,7 @@ do (Cypress, _) ->
 
       fn.call @prop("runnable").ctx
 
-      Cypress.command
-        $el: subject
-        message: ""
+      command.snapshot().end()
 
       stop = =>
         @off "command:start", setWithinSubject
