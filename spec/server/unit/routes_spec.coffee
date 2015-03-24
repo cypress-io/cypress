@@ -198,8 +198,22 @@ describe "Routes", ->
 
           supertest(@app)
             .get("/__remote/#{@baseUrl}/index.html?__initial=true")
-            .expect (res) ->
+            .expect (res) =>
               expect(res.text).to.include("<span data-cypress-visit-error></span>")
+              expect(res.text).to.include("<a href=\"#{@baseUrl}/index.html\" target=\"_blank\">#{@baseUrl}/index.html</a>")
+              expect(res.text).to.include("Did you forget to start your web server?")
+              null
+            .end(done)
+
+        it "sends back 500 when file does not exist locally", (done) ->
+          baseUrl = "foo/views/test/index.html"
+
+          supertest(@app)
+            .get("/__remote/#{baseUrl}/?__initial=true")
+            .expect (res) =>
+              expect(res.text).to.include("<span data-cypress-visit-error></span>")
+              expect(res.text).to.include("file://")
+              expect(res.text).to.include("This file could not be served from your file system.")
               null
             .end(done)
 

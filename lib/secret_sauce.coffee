@@ -386,12 +386,12 @@ SecretSauce.RemoteInitial =
 
     d = Domain.create()
 
-    d.on 'error', (e) => @errorHandler(e, res, url)
+    d.on 'error', (e) => @errorHandler(e, res, url, req)
 
     d.run =>
       content = @getContent(url, res, req)
 
-      content.on "error", (e) => @errorHandler(e, res, url)
+      content.on "error", (e) => @errorHandler(e, res, url, req)
 
       content
       .pipe(@injectContent(opts.inject))
@@ -419,22 +419,24 @@ SecretSauce.RemoteInitial =
 
   getContent: (url, res, req) ->
     switch scheme = @UrlHelpers.detectScheme(url)
-      when "relative" then @getRelativeFileContent(url)
+      when "relative" then @getRelativeFileContent(url, req)
       when "absolute" then @getAbsoluteContent(url, res, req)
       # when "file"     then @getFileContent(url)
 
-  getRelativeFileContent: (p) ->
+  getRelativeFileContent: (url, req) ->
     { _ } = SecretSauce
 
     args = _.compact([
       @app.get("cypress").projectRoot,
       # @app.get("cypress").rootFolder,
-      p
+      url
     ])
 
     ## strip trailing slashes because no file
     ## ever has one
     file = @path.join(args...).replace(/\/+$/, "")
+
+    req.formattedUrl = file
 
     @Log.info "getting relative file content", file: file
 
@@ -447,12 +449,21 @@ SecretSauce.RemoteInitial =
     @Log.info "getting absolute file content", url: url
     @_resolveRedirects(url, res, req)
 
-  errorHandler: (e, res, url) ->
+  errorHandler: (e, res, url, req) ->
     @Log.info "error handling initial request", url: url, error: e
 
-    filePath = @path.join(process.cwd(), "lib/html/initial_500.html")
-    res.status(500).render(filePath, {
-      url: url
+    filePath = switch
+      when f = req.formattedUrl
+        "file://#{f}"
+      else
+        url
+
+    ## using req here to give us an opportunity to
+    ## write to req.formattedUrl
+    htmlPath = @path.join(process.cwd(), "lib/html/initial_500.html")
+    res.status(500).render(htmlPath, {
+      url: filePath
+      fromFile: !!req.formattedUrl
     })
 
   prepareUrlForRedirect: (currentUrl, newUrl) ->

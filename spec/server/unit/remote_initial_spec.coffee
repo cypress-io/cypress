@@ -151,7 +151,7 @@ describe "Remote Initial", ->
   context "relative files", ->
     it "#getRelativeFileContent strips trailing slashes", ->
       createReadStream = @sandbox.stub(fs, "createReadStream")
-      @remoteInitial.getRelativeFileContent("index.html/")
+      @remoteInitial.getRelativeFileContent("index.html/", {})
       expect(createReadStream).to.be.calledWith("/Users/brian/app/index.html")
 
   context "absolute files", ->
