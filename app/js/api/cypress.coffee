@@ -32,14 +32,14 @@ window.Cypress = do ($, _, Backbone) ->
       else
         @props[key] = val
 
-    ensureVisibility: (subject, method) ->
+    ensureVisibility: (subject, onFail) ->
       subject ?= @_subject()
 
-      method ?= @prop("current").name
+      method = @prop("current").name
 
       if not (subject.length is subject.filter(":visible").length)
         node = Cypress.Utils.stringifyElement(subject)
-        @throwErr("cy.#{method}() cannot be called on the non-visible element: #{node}")
+        @throwErr("cy.#{method}() cannot be called on the non-visible element: #{node}", onFail)
 
     ensureDom: (subject, method) ->
       subject ?= @_subject()
@@ -352,6 +352,21 @@ window.Cypress = do ($, _, Backbone) ->
 
       throw err
 
+    ## submit a generic command error
+    commandErr: (err) ->
+      current = @prop("current")
+
+      Cypress.command
+        error: err
+        onConsole: ->
+          obj = {}
+          ## if type isnt parent then we know its dual or child
+          ## and we can add Applied To if there is a prev command
+          ## and it is a parent
+          if current.type isnt "parent" and prev = current.prev
+            obj["Applied To"] = prev.subject
+            obj
+
     cancel: (err) ->
       obj = @prop("current")
       @log {name: "Cancelled: #{obj.name}", args: err.message}, "danger"
@@ -368,6 +383,8 @@ window.Cypress = do ($, _, Backbone) ->
         ## clean up this onFail callback
         ## after its been called
         delete err.onFail
+      else
+        @commandErr(err)
 
       @runner.uncaught(err)
       @trigger "fail", err
