@@ -8,6 +8,8 @@ do (Cypress, _) ->
 
       $el = subject[proxy].apply(subject, args)
 
+      ## these commands cannot possibly fail so
+      ## let them go through using the old interface
       Cypress.command
         $el: $el
         onConsole: ->

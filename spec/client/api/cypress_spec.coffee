@@ -3697,6 +3697,22 @@ describe "Cypress", ->
           beforeEach ->
             Cypress.on "log", (@log) =>
 
+          it "logs immediately before resolving", (done) ->
+            Cypress.on "log", (log) ->
+              if log.get("name") is name
+                expect(log.pick("state")).to.deep.eq {
+                  state: "pending"
+                }
+                done()
+
+            cy.get("#list")[name](arg)
+
+          it "snapshots after finding element", ->
+            Cypress.on "log", (@log) =>
+
+            cy.get("#list")[name](arg).then ->
+              expect(@log.get("snapshot")).to.be.an("object")
+
           it "#onConsole", ->
             cy.get("#list")[name](arg).then ($el) ->
               obj = {Command: name}

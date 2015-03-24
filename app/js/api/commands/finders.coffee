@@ -198,7 +198,7 @@ do (Cypress, _) ->
           "Applied To": subject or @prop("withinSubject")
         }
 
-        options.command = Cypress.command
+        options.command ?= Cypress.command
           type: if subject then "child" else "parent"
           onConsole: -> onConsole
 
