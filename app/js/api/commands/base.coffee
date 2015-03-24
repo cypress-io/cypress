@@ -192,14 +192,17 @@ do (Cypress, _, $) ->
       options.log = false
       options.visible = false
 
+      command = Cypress.command()
+
       ## using call here to invoke the 'text' method on the
       ## title's jquery object
 
       ## we're chaining off the promise so we need to go through
       ## the command method which returns a promise
       @command("get", "title", options).call("text").then (text) ->
-        Cypress.command
-          message: text
+        command.set({message: text})
+
+        command.snapshot().end()
 
         return text
 

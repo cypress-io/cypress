@@ -1080,6 +1080,22 @@ describe "Cypress", ->
           if @log.get("name") is "get"
             throw new Error("cy.get() should not have logged out.")
 
+      it "logs immediately before resolving", (done) ->
+        input = cy.$(":text:first")
+
+        Cypress.on "log", (log) ->
+          if log.get("name") is "title"
+            expect(log.get("state")).to.eq("pending")
+            done()
+
+        cy.title()
+
+      it "snapshots after clicking", ->
+        Cypress.on "log", (@log) =>
+
+        cy.title().then ->
+          expect(@log.get("snapshot")).to.be.an("object")
+
       it "logs obj", ->
         cy.title().then ->
           obj = {
@@ -1194,9 +1210,42 @@ describe "Cypress", ->
         cy.get("button span").then ($span) ->
           expect($span.get(0)).to.eq span.get(0)
 
+    describe ".log", ->
+      it "logs immediately before resolving", (done) ->
+        div = cy.$("div:first")
+
+        Cypress.on "log", (log) ->
+          if log.get("name") is "within"
+            expect(log.get("state")).to.eq("pending")
+            expect(log.get("message")).to.eq("")
+            expect(log.get("$el").get(0)).to.eq div.get(0)
+            done()
+
+        cy.get("div:first").within ->
+
+      it "snapshots after clicking", ->
+        Cypress.on "log", (@log) =>
+
+        cy.get("div:first").within ->
+          cy.then ->
+            expect(@log.get("snapshot")).to.be.an("object")
+
     describe "errors", ->
       beforeEach ->
         @sandbox.stub cy.runner, "uncaught"
+
+      it "logs once when not dom subject", (done) ->
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(1)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        cy.noop().within ->
 
       it "throws when not a DOM subject", (done) ->
         cy.on "fail", (err) -> done()
@@ -1432,6 +1481,21 @@ describe "Cypress", ->
     describe ".log", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
+
+      it "logs immediately before resolving", (done) ->
+        Cypress.on "log", (log) ->
+          if log.get("name") is "root"
+            expect(log.get("state")).to.eq("pending")
+            expect(log.get("message")).to.eq("")
+            done()
+
+        cy.root()
+
+      it "snapshots after clicking", ->
+        Cypress.on "log", (@log) =>
+
+        cy.root().then ->
+          expect(@log.get("snapshot")).to.be.an("object")
 
       it "sets $el to document", ->
         html = cy.$("html")

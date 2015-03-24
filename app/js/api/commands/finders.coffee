@@ -128,22 +128,20 @@ do (Cypress, _) ->
       @_retry(retry, options)
 
     root: ->
+      command = Cypress.command({message: ""})
+
       log = ($el) ->
-        Cypress.command
-          $el: $el
-          message: ""
+        command.set({$el: $el}).snapshot().end()
+
+        return $el
 
       withinSubject = @prop("withinSubject")
 
       if withinSubject
-        log(withinSubject)
-
-        return withinSubject
+        return log(withinSubject)
 
       @command("get", "html", {log: false}).then ($html) ->
         log($html)
-
-        return $html
 
   Cypress.addDualCommand
     contains: (subject, filter, text, options = {}) ->
@@ -247,7 +245,11 @@ do (Cypress, _) ->
     within: (subject, fn) ->
       @ensureDom(subject)
 
-      @throwErr("cy.within() must be called with a function!") if not _.isFunction(fn)
+      command = Cypress.command
+        $el: subject
+        message: ""
+
+      @throwErr("cy.within() must be called with a function!", command) if not _.isFunction(fn)
 
       ## reference the next command after this
       ## within.  when that command runs we'll
@@ -264,9 +266,7 @@ do (Cypress, _) ->
 
       fn.call @prop("runnable").ctx
 
-      Cypress.command
-        $el: subject
-        message: ""
+      command.snapshot().end()
 
       stop = =>
         @off "command:start", setWithinSubject
