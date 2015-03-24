@@ -5412,25 +5412,42 @@ describe "Cypress", ->
       afterEach ->
         Cypress.Chai.restore()
 
+      it "ends immediately", (done) ->
+        @onAssert (log) ->
+          expect(log.get("end")).to.be.true
+          expect(log.get("state")).to.eq("success")
+          done()
+
+        cy.get("body").then ->
+          expect(cy.prop("subject")).to.match "body"
+
+      it "snapshots immediately", (done) ->
+        @onAssert (log) ->
+          expect(log.get("snapshot")).to.be.an("object")
+          done()
+
+        cy.get("body").then ->
+          expect(cy.prop("subject")).to.match "body"
+
       it "sets type to child when assertion involved current subject", (done) ->
-        @onAssert (obj) ->
-          expect(obj.get("type")).to.eq "child"
+        @onAssert (log) ->
+          expect(log.get("type")).to.eq "child"
           done()
 
         cy.get("body").then ->
           expect(cy.prop("subject")).to.match "body"
 
       it "sets type to child current command had arguments but does not match subject", (done) ->
-        @onAssert (obj) ->
-          expect(obj.get("type")).to.eq "child"
+        @onAssert (log) ->
+          expect(log.get("type")).to.eq "child"
           done()
 
         cy.get("body").then ($body) ->
           expect($body.length).to.eq(1)
 
       it "sets type to parent when assertion did not involve current subject and didnt have arguments", (done) ->
-        @onAssert (obj) ->
-          expect(obj.get("type")).to.eq "parent"
+        @onAssert (log) ->
+          expect(log.get("type")).to.eq "parent"
           done()
 
         cy.get("body").then ->
@@ -5439,9 +5456,9 @@ describe "Cypress", ->
       it "replaces instances of word: 'but' with 'and' for passing assertion", (done) ->
         ## chai jquery adds 2 assertions here so
         ## we bind to the 2nd one
-        Cypress.on "log", (obj) ->
-          if obj.get("name") is "assert"
-            assert(obj)
+        Cypress.on "log", (log) ->
+          if log.get("name") is "assert"
+            assert(log)
 
         assert = _.after 2, (obj) ->
           Cypress.Chai.restore()
