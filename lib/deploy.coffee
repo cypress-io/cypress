@@ -40,7 +40,7 @@ class Deploy
     @version = fs.readJsonSync(distDir + "/package.json").version
 
   getPublisher: ->
-    aws = fs.readJsonSync("./aws-credentials.json")
+    aws = fs.readJsonSync("./support/aws-credentials.json")
 
     @publisher ?= $.awspublish.create
       bucket:          config.app.s3.bucket
