@@ -642,7 +642,7 @@ describe "Cypress", ->
       beforeEach ->
         @loadDom("html/angular").then =>
           @setup()
-          @currentTest.timeout(300)
+          @currentTest.timeout(400)
 
       it "finds color.name binding elements", ->
         spans = cy.$(".colors span.name")
@@ -697,7 +697,7 @@ describe "Cypress", ->
         ## we dont have to wait so damn long
         @loadDom("html/angular").then =>
           @setup()
-          @currentTest.timeout(300)
+          @currentTest.timeout(400)
 
       _.each ngPrefixes, (prefix, attr) ->
         it "finds by #{prefix}repeat", ->
@@ -772,7 +772,7 @@ describe "Cypress", ->
       beforeEach ->
         @loadDom("html/angular").then =>
           @setup()
-          @currentTest.timeout(300)
+          @currentTest.timeout(400)
 
       _.each ngPrefixes, (prefix, attr) ->
         it "finds element by #{prefix}model", ->
@@ -1744,7 +1744,7 @@ describe "Cypress", ->
             ## which should have reduced their length by 1
             expect($inputs).to.have.length(@length - 1)
 
-      # it.only "re-queries the dom if any element in an alias isnt visible", ->
+      # it "re-queries the dom if any element in an alias isnt visible", ->
       #   inputs = cy.$("input")
       #   inputs.hide()
 
