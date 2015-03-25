@@ -262,6 +262,10 @@ window.Cypress = do ($, _, Backbone) ->
         if _.isFunction(args[0]) and args[0]._invokeImmediately
           args[0] = args[0].call(@)
 
+        ## rewrap all functions by checking
+        ## the chainer id before running its fn
+        @_checkForNewChain(obj.chainerId)
+
         ## we cannot pass our cypress instance or our chainer
         ## back into bluebird else it will create a thenable
         ## which is never resolved
@@ -347,8 +351,13 @@ window.Cypress = do ($, _, Backbone) ->
     ## recursively inserts previous objects
     ## up until it finds a parent command
     _replayFrom: (current, memo = []) ->
+      ## reset each chainerId to the
+      ## current value
+      chainerId = @prop("chainerId")
+
       insert = =>
         _.each memo, (obj) =>
+          obj.chainerId = chainerId
           @_insert(obj)
 
       if current
@@ -395,6 +404,7 @@ window.Cypress = do ($, _, Backbone) ->
         ## since we've started a new chain
         ## and reset our chainerId
         if id isnt chainerId
+          # debugger
           @prop("chainerId", chainerId)
           @prop("subject", null)
 
@@ -556,11 +566,10 @@ window.Cypress = do ($, _, Backbone) ->
         args.hasSubject or= true
         args
 
-      wrap = (fn, chainerId) ->
-
-        fn = switch type
+      wrap = (fn) ->
+        switch type
           when "parent"
-            fn
+            return fn
 
           when "dual"
             _.wrap fn, (orig, args...) ->
@@ -580,12 +589,6 @@ window.Cypress = do ($, _, Backbone) ->
               ret = orig.apply(@, args)
               return ret ? subject
 
-        ## rewrap all functions by checking
-        ## the chainer id before running each
-        _.wrap fn, (orig, args...) ->
-          @_checkForNewChain(chainerId)
-          return orig.apply(@, args)
-
       Cypress.prototype[key] = (args...) ->
         ## this is the first call on cypress
         ## so create a new chainer instance
@@ -599,11 +602,11 @@ window.Cypress = do ($, _, Backbone) ->
       ## reference a synchronous version of this function
       ## fix this for synchronous chainer version!
       Cypress.prototype.sync[key] = (args...) ->
-        wrap.call(Cypress.cy, fn).apply(Cypress.cy, args)
+        wrap(fn).apply(Cypress.cy, args)
 
       ## add this function to our chainer class
       Cypress.Chainer.inject key, (chainerId, args) ->
-        @enqueue(key, wrap.call(@, fn, chainerId), args, type, chainerId)
+        @enqueue(key, wrap.call(@, fn), args, type, chainerId)
 
     @abort = ->
       Cypress.trigger "abort"

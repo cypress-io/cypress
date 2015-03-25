@@ -1509,6 +1509,21 @@ describe "Cypress", ->
             $li.remove()
           .get("@firstLi")
 
+      it "resets the chainerId allow subjects to be carried on", ->
+        cy
+          .get("#dom").find("#button").as("button").then ($button) ->
+            $button.remove()
+
+            cy.$("#dom").append $("<button />", id: "button")
+
+            null
+
+        ## when cy is a separate chainer there *was* a bug
+        ## that cause the subject to null because of different
+        ## chainer id's
+        cy.get("@button").then ($button) ->
+          expect($button).to.have.id("button")
+
   context "#end", ->
     it "nulls out the subject", ->
       cy.noop({}).end().then (subject) ->
