@@ -10,8 +10,11 @@
       @listenTo runner, "suite:start", ->
         stats.startCounting()
 
-      @listenTo runner, "suite:stop", ->
+      @listenTo runner, "runner:end", ->
         stats.stopCounting()
+
+      @listenTo runner, "test:end", ->
+        stats.setDuration()
 
       @listenTo runner, "test:results:ready", (test) ->
         stats.countTestState(test)
