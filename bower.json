@@ -25,7 +25,7 @@
     "spin.js": "~2.0.1",
     "underscore.string": "~2.3.3",
     "backbone-query-parameters": "~0.3.0",
-    "mocha": "~1.20.1",
+    "mocha": "2.2.1",
     "chai": "~1.9.1",
     "sinon": "http://sinonjs.org/releases/sinon-1.12.2.js",
     "jsuri": "~1.2.2",
