@@ -373,7 +373,7 @@ class Deploy
     appPath = path.join buildDir, @getVersion(), "osx64", "cypress.app"
 
     new Promise (resolve, reject) ->
-      child_process.exec "sh codesign.sh #{appPath}", (err, stdout, stderr) ->
+      child_process.exec "sh ./support/codesign.sh #{appPath}", (err, stdout, stderr) ->
         return reject(err) if err
 
         # console.log "stdout is", stdout
