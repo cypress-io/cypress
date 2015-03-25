@@ -441,10 +441,10 @@ window.Cypress = do ($, _, Backbone) ->
     chain: ->
       @prop("chain")
 
-    enqueue: (key, fn, args, type) ->
+    enqueue: (key, fn, args, type, chainerId) ->
       @clearTimeout @prop("runId")
 
-      obj = {name: key, ctx: @, fn: fn, args: args, type: type}
+      obj = {name: key, ctx: @, fn: fn, args: args, type: type, chainerId: chainerId}
 
       @trigger "enqueue", obj
       Cypress.trigger "enqueue", obj
@@ -604,7 +604,7 @@ window.Cypress = do ($, _, Backbone) ->
 
       ## add this function to our chainer class
       Cypress.Chainer.inject key, (chainerId, args) ->
-        @enqueue(key, wrap.call(@, fn, chainerId), args, type)
+        @enqueue(key, wrap.call(@, fn, chainerId), args, type, chainerId)
 
     @abort = ->
       Cypress.trigger "abort"
