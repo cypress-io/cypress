@@ -113,10 +113,7 @@ window.Cypress = do ($, _, Backbone) ->
         promise = @set(queue, @queue[index - 1], @queue[index + 1]).then =>
           ## each successful command invocation should
           ## always reset the timeout for the current runnable
-          ## unless we already have a state.  if we have a state
-          ## then we're already done and resetting would cause a
-          ## timeout to happen in a few seconds
-          @_timeout(prevTimeout) if not runnable.state
+          @_timeout(prevTimeout)
 
           ## mutate index by incrementing it
           ## this allows us to keep the proper index

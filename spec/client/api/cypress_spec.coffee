@@ -4283,22 +4283,6 @@ describe "Cypress", ->
       cy.noop({foo: -> "bar"}).its("foo").should("eq", "bar")
 
   context "#run", ->
-    it "does not call clearTimeout on the runnable if it already has a state", (done) ->
-      ## this prevents a bug where if we arent an async test, done() callback
-      ## will be invoked first, giving our runnable a state.  if we didnt
-      ## check against this state then we would resetTimeout again, and in
-      ## 5 seconds it would time out again
-
-      cy.on "command:start", =>
-        @ct = @sandbox.spy cy.prop("runnable"), "clearTimeout"
-
-      cy.on "command:end", =>
-        expect(@ct.callCount).to.eq 0
-        done()
-
-      cy.then ->
-        cy.prop("runnable").state = "foo"
-
     it "calls prop next() on end if exists", (done) ->
       fn = -> done()
 
@@ -4621,7 +4605,7 @@ describe "Cypress", ->
       it "does not time out the runnable", ->
         timer = @sandbox.useFakeTimers("setTimeout")
         trigger = @sandbox.spy(cy, "trigger")
-        cy._timeout(100)
+        cy._timeout(1000)
         cy.wait()
         timer.tick()
         timer.tick(5000)
