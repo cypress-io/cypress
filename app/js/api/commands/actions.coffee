@@ -481,7 +481,7 @@ do (Cypress, _) ->
     select: (subject, valueOrText, options = {}) ->
       @ensureDom(subject)
 
-      ## if @_subject() is a <select> el assume we are filtering down its
+      ## if subject is a <select> el assume we are filtering down its
       ## options to a specific option first by value and then by text
       ## we'll throw if more than one is found AND the select
       ## element is multiple=multiple

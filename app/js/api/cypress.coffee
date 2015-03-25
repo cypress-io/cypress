@@ -32,31 +32,6 @@ window.Cypress = do ($, _, Backbone) ->
       else
         @props[key] = val
 
-    ensureVisibility: (subject, onFail) ->
-      subject ?= @_subject()
-
-      method = @prop("current").name
-
-      if not (subject.length is subject.filter(":visible").length)
-        node = Cypress.Utils.stringifyElement(subject)
-        @throwErr("cy.#{method}() cannot be called on the non-visible element: #{node}", onFail)
-
-    ensureDom: (subject, method) ->
-      subject ?= @_subject()
-
-      method ?= @prop("current").name
-
-      ## think about dropping the 'method' part
-      ## and adding exactly what the subject is
-      ## if its an object or array, just say Object or Array
-      ## but if its a primitive, just print out its value like
-      ## true, false, 0, 1, 3, "foo", "bar"
-      if not Cypress.Utils.hasElement(subject)
-        console.warn("Subject is currently: ", subject)
-        @throwErr("Cannot call .#{method}() on a non-DOM subject!")
-
-      return subject
-
     ## global options applicable to all cy instances
     ## and restores
     options: (options = {}) ->
@@ -236,15 +211,6 @@ window.Cypress = do ($, _, Backbone) ->
       location = @sync.location({log: false})
       @prop("href") isnt location.href.replace(location.hash, "")
 
-    _subject: ->
-      subject = @prop("subject")
-
-      if not subject?
-        name = @prop("current").name
-        @throwErr("Subject is #{subject}!  You cannot call .#{name}() without a subject.")
-
-      return subject
-
     _timeout: (ms, delta = false) ->
       runnable = @prop("runnable")
       @throwErr("Cannot call .timeout() without a currently running test!") if not runnable
@@ -332,12 +298,6 @@ window.Cypress = do ($, _, Backbone) ->
         @trigger "invoke:end", obj
 
         return subject
-
-    ensureSubject: ->
-      current = @prop("current")
-
-      if not current.prev
-        @throwErr("cy.#{current.name}() is a child command which operates on an existing subject.  Child commands must be called after a parent command!")
 
     cypressErr: (err) ->
       err = new Error(err)
@@ -669,7 +629,7 @@ window.Cypress = do ($, _, Backbone) ->
 
           when "child"
             _.wrap fn, (orig, args...) ->
-              @ensureSubject()
+              @ensureParent()
 
               ## push the subject into the args
               subject = @prop("subject")
