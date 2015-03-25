@@ -43,6 +43,8 @@
       ## restore chai to the normal expect / assert
       Cypress.Chai.restore()
 
+      Cypress.Mocha.restore()
+
       ## resets cypress to remove all references to other objects
       ## including cy
       Cypress.stop()
