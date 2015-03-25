@@ -127,7 +127,7 @@ gulp.task "build:secret:sauce", (cb) ->
     .pipe gulp.dest("lib")
     .on "end", ->
       ## when thats done, lets create the secret_sauce snapshot .bin
-      child_process.exec "./nwjc lib/secret_sauce.js lib/secret_sauce.bin", (err, stdout, stderr) ->
+      child_process.exec "./support/nwjc lib/secret_sauce.js lib/secret_sauce.bin", (err, stdout, stderr) ->
         console.log("stdout:", stdout)
         console.log("stderr:", stderr)
 
