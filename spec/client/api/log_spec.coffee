@@ -76,6 +76,15 @@ describe "Cypress.Log API", ->
 
         expect(end).to.be.called
 
+      it "errors if error attr is defined", ->
+        error = @sandbox.stub Cypress.Log.prototype, "error"
+
+        err = new Error
+
+        new Cypress.Log error: err
+
+        expect(error).to.be.calledWith err
+
     describe "#publicInterface", ->
       beforeEach ->
         @interface = @log.publicInterface()

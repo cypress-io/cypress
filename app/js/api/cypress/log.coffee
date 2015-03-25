@@ -17,6 +17,9 @@ Cypress.Log = do (Cypress, _, Backbone) ->
       ## go ahead and end
       @end() if @get("end")
 
+      if err = @get("error")
+        @error(err)
+
     get: (attr) ->
       @attributes[attr]
 
