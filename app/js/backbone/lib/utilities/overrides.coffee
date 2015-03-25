@@ -29,13 +29,13 @@
           ## if the end event was triggered by mocha
           ## then back it up and wait for our own
           ## runner to fire the eclectus end event
-          when "end"
-            return
+          # when "end"
+            # return
 
           ## when our runner fires this custom event
           ## then we know we're truly done and should
           ## callback the original end event
-          when "eclectus end"
+          when "cypress end"
             orig.call(@, "end")
 
         orig.apply(@, args)

@@ -785,7 +785,7 @@
           ## trigger the after run event
           @trigger "after:run"
 
-          @runner.emit "eclectus end"
+          @runner.emit "cypress end"
 
           console.log "finished running the iframes suite!", new Date - t
 
