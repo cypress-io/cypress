@@ -475,6 +475,8 @@ window.Cypress = do ($, _, Backbone) ->
 
     _: _
 
+    Promise: Promise
+
     ## TODO
     ## write tests for the options interface
     ## including resetting these in between test runs
