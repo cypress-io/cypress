@@ -58,6 +58,7 @@ do (Cypress, _, $) ->
     ## this and investigate why that is the default behavior
     ## of child commands
     invoke: (subject, fn, args...) ->
+      @ensureParent()
       @ensureSubject()
 
       command = Cypress.command()

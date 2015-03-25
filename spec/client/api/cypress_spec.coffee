@@ -4271,6 +4271,13 @@ describe "Cypress", ->
 
         cy.invoke({})
 
+      it "ensures subject", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.eq "Subject is undefined!  You cannot call .its() without a subject."
+          done()
+
+        cy.noop(undefined).its("attr", "src")
+
   context "#its", ->
     it "proxies to #invoke", ->
       cy.noop({foo: -> "bar"}).its("foo").should("eq", "bar")
