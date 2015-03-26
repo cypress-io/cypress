@@ -1,15 +1,18 @@
 do (Cypress, _, Mocha) ->
 
   runnerRun   = Mocha.Runner::run
+  runnerFail  = Mocha.Runner::fail
   runnableRun = Mocha.Runnable::run
 
   Cypress.Mocha = {
     restore: ->
       Mocha.Runner::run   = runnerRun
+      Mocha.Runner::fail  = runnerFail
       Mocha.Runnable::run = runnableRun
 
     override: ->
       @patchRunnerRun()
+      @patchRunnerFail()
       @patchRunnableRun()
 
     patchRunnerRun: ->
@@ -28,6 +31,22 @@ do (Cypress, _, Mocha) ->
           orig.call(_this, fn)
 
         return @
+
+    patchRunnerFail: ->
+      ## matching the current Mocha.Runner.prototype.fail except
+      ## changing the logic for determing whether this is a valid err
+      Mocha.Runner::fail = _.wrap runnerFail, (orig, test, err) ->
+        ## if this isnt a correct error object then just bail
+        ## and call the original function
+        if Object.prototype.toString.call(err) isnt "[object Error]"
+          return orig.call(@, test, err)
+
+        ## else replicate the normal mocha functionality
+        ++@failures
+
+        test.state = "failed"
+
+        @emit("fail", test, err)
 
     patchRunnableRun: ->
       Mocha.Runnable::run = _.wrap runnableRun, (orig, args...) ->
