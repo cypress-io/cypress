@@ -1401,6 +1401,49 @@ describe "Cypress", ->
 
           cy.noop({}).assign(val)
 
+  context "#assign", ->
+    beforeEach ->
+      cy.noop("foo").assign("foo")
+
+    afterEach ->
+      if not @foo
+        @test.error new Error("this.foo not defined")
+
+      if not @noop
+        @test.error new Error("this.noop not defined")
+
+    it "assigns subject to runnable ctx", ->
+      cy
+        .noop({}).assign("noop").then (obj) ->
+          expect(@noop).to.eq obj
+
+    describe "nested hooks", ->
+      afterEach ->
+        if not @bar
+          @test.error new Error("this.bar not defined")
+
+        if not @foo
+          @test.error new Error("this.foo not defined")
+
+        if not @noop
+          @test.error new Error("this.noop not defined")
+
+      it "assigns bar", ->
+        cy.noop("bar").assign("bar")
+
+    describe "nested functions", ->
+      beforeEach ->
+        @assign = =>
+          cy.noop("baz").assign("baz")
+
+      afterEach ->
+        if not @baz
+          @test.error new Error("this.baz not defined")
+
+      it "shares this ctx with hooks", ->
+        @assign().then ->
+          expect(@baz).to.eq("baz")
+
   context "#as", ->
     it "does not change the subject", ->
       body = cy.$("body")
