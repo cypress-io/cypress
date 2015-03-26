@@ -5433,6 +5433,31 @@ describe "Cypress", ->
       afterEach ->
         Cypress.Chai.restore()
 
+      it "has custom onFail on err", (done) ->
+        @sandbox.stub cy.runner, "uncaught"
+
+        @onAssert (log) ->
+          expect(log.get("error").onFail).to.be.a("function")
+          done()
+
+        cy.then ->
+          expect(true).to.be.false
+
+      it "does not output should logs on failures", (done) ->
+        @sandbox.stub cy.runner, "uncaught"
+
+        logs = []
+
+        Cypress.on "log", (log) ->
+          logs.push log
+
+        cy.on "fail", ->
+          Cypress.Chai.restore()
+          expect(logs).to.have.length(1)
+          done()
+
+        cy.noop({}).should("have.property", "foo")
+
       it "ends immediately", (done) ->
         @onAssert (log) ->
           expect(log.get("end")).to.be.true

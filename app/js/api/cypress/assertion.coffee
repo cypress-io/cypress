@@ -56,6 +56,9 @@ do (Cypress, _) ->
       ## think about completely gutting the whole object toString
       ## which chai does by default, its so ugly and worthless
 
+      if error
+        error.onFail = (err) ->
+
       Cypress.command obj
 
       return Cypress
