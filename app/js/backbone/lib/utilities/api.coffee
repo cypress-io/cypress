@@ -21,23 +21,27 @@
       ## get the runner and mocha variables if they're not
       ## passed into our options.  options will normally be
       ## null, but its helpful in testing
-      runner = options.runner ?= API.getRunner()
-      mocha  = options.mocha ?= window.mocha
+      # runner = options.runner ?= API.getMocha()
+      # mocha  = options.mocha ?= window.mocha
+      mocha = options.mocha ?= API.getMocha()
 
       ## return our runner entity
-      return App.request("runner:entity", runner, mocha.options)
+      return App.request("runner:entity", mocha)
 
-    getRunner: ->
-      ## start running the tests
-      if App.config.ui("ci")
-        runner = window.mochaPhantomJS.run()
-      else
-        ## set global mocha with our custom reporter
-        window.mocha = new Mocha reporter: Reporter
+    getMocha: ->
+      window.mocha = new Mocha reporter: Reporter
 
-        runner = mocha.run()
+    # getRunner: ->
+    #   ## start running the tests
+    #   if App.config.ui("ci")
+    #     runner = window.mochaPhantomJS.run()
+    #   else
+    #     ## set global mocha with our custom reporter
+    #     window.mocha = new Mocha reporter: Reporter
 
-      return runner
+    #     runner = mocha.run()
+
+    #   return runner
 
     stop: (runner) ->
       ## restore chai to the normal expect / assert

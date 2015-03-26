@@ -29,7 +29,7 @@
 
       setIframe: (@iframe) ->
 
-      setOptions: (@options) ->
+      setOptions: (@mocha, @options) ->
 
       runSauce: ->
         socket = App.request "socket:entity"
@@ -75,13 +75,7 @@
           browser: browser
           version: version
 
-      setMochaRunner: (runner) ->
-        ## store the test runner as a property on ourselves
-        @runner = runner
-
-        ## override the runSuite function on our runner instance
-        ## this is used to generate properly unique regex's for grepping
-        ## through a specific test
+      setSocketListeners: ->
         socket = App.request "socket:entity"
 
         ## whenever our socket fires 'test:changed' we want to
@@ -104,6 +98,47 @@
               @commands.add args...
             else
               @trigger event, args...
+
+        @listenTo Cypress, "log", (log) =>
+          switch log.get("event")
+            when "command"
+              ## think about moving this line
+              ## back into Cypress
+              log.set "hook", @hook
+
+              ## if we're in satellite mode then we need to
+              ## broadcast this through websockets
+              if App.config.ui("satellite")
+                attrs = @transformEmitAttrs(attrs)
+                socket.emit "command:add", attrs
+              else
+                @commands.add log
+
+            when "route"
+              @routes.add log
+
+            when "agent"
+              @agents.add log
+
+            else
+              throw new Error("Cypress.log() emitted an unknown event: #{log.get('event')}")
+
+      setMochaRunner: ->
+        throw new Error("Runner#mocha is missing!") if not @mocha
+
+        ## nuke the previous runner's listeners if we have one
+        @runner.removeAllListeners() if @runner
+
+        ## store the test runner as a property on ourselves
+        @runner = @mocha.run()
+
+        ## start listening the gazillion
+        ## runner emit events
+        @startListening()
+
+        ## override the runSuite function on our runner instance
+        ## this is used to generate properly unique regex's for grepping
+        ## through a specific test
 
         runner = @
 
@@ -345,32 +380,6 @@
       setListenersForCI: ->
 
       setListenersForWeb: ->
-        socket = App.request "socket:entity"
-
-        @listenTo Cypress, "log", (log) =>
-          switch log.get("event")
-            when "command"
-              ## think about moving this line
-              ## back into Cypress
-              log.set "hook", @hook
-
-              ## if we're in satellite mode then we need to
-              ## broadcast this through websockets
-              if App.config.ui("satellite")
-                attrs = @transformEmitAttrs(attrs)
-                socket.emit "command:add", attrs
-              else
-                @commands.add log
-
-            when "route"
-              @routes.add log
-
-            when "agent"
-              @agents.add log
-
-            else
-              throw new Error("Cypress.log() emitted an unknown event: #{log.get('event')}")
-
         ## mocha has begun running the specs per iframe
         @runner.on "start", =>
           ## wipe out all listeners on our private runner bus
@@ -554,6 +563,7 @@
         @clear()
 
         ## null out these properties
+        @mocha          = null
         @runner         = null
         @contentWindow  = null
         @$remoteIframe  = null
@@ -590,24 +600,6 @@
         ## by mocha
         @options.grep = /.*/
 
-        ## set any outstanding test to pending and stopped
-        ## so we bypass all old ones
-        @runner.suite.eachTest (test) ->
-          test.pending = true
-          test.stopped = true
-
-          ## doesnt this while loop look buggy?
-          ## obj = obj.parent yet we are looping
-          ## on test.parent ??
-          ## this while loop should be an instance
-          ## method since we walk up the parent chain
-          ## in other areas.  refactor plz
-          while obj = test.parent
-            return if obj.stopped
-            obj.pending = true
-            obj.stopped = true
-            obj = obj.parent
-
         ## start the abort process since we're about
         ## to load up in case we're running any tests
         ## right this moment
@@ -618,6 +610,26 @@
 
           ## tells the iframe view to load up a new iframe
           @trigger "load:iframe", @iframe, opts
+
+        ## set any outstanding test to pending and stopped
+        ## so we bypass all old ones if we currently have
+        ## a runner
+        if @runner
+          @runner.suite.eachTest (test) ->
+            test.pending = true
+            test.stopped = true
+
+            ## doesnt this while loop look buggy?
+            ## obj = obj.parent yet we are looping
+            ## on test.parent ??
+            ## this while loop should be an instance
+            ## method since we walk up the parent chain
+            ## in other areas.  refactor plz
+            while obj = test.parent
+              return if obj.stopped
+              obj.pending = true
+              obj.stopped = true
+              obj = obj.parent
 
       hasChosen: ->
         !!@get("chosenId")
@@ -724,6 +736,8 @@
 
       ## tell our runner to run our iframes mocha suite
       runIframeSuite: (iframe, contentWindow, remoteIframe, options, fn) ->
+        @setMochaRunner()
+
         ## options are optional and so if fn is undefined
         ## we automatically set it to options
         ## this allows consumers to pass a fn
@@ -746,8 +760,9 @@
         ## grep so we can remove existing tests
         @trigger "exclusive:test" if not @isDefaultGrep(@options.grep)
 
-        ## reset our runner's tests to an empty array
-        @runner.tests = []
+        ## shouldnt have to do this anymore since the tests and suites
+        ## are rebuilt for each runner instance
+        # @runner.tests = []
 
         ## we need to reset the runner.test to undefined
         ## when the user clicks the reload button, mocha
@@ -776,7 +791,10 @@
         ## through each test and give it a unique id
         t = new Date
 
-        @runner.runSuite contentWindow.mocha.suite, (err) =>
+        @runner.suite = contentWindow.mocha.suite
+
+        @runner.once "end", =>
+        # @runner.runSuite contentWindow.mocha.suite, (err) =>
           ## its possible there is no runner when this
           ## finishes if the user navigated away from
           ## the tests
@@ -785,19 +803,18 @@
           ## trigger the after run event
           @trigger "after:run"
 
-          @runner.emit "cypress end"
-
           console.log "finished running the iframes suite!", new Date - t
 
           fn?(err)
 
-  App.reqres.setHandler "runner:entity", (mochaRunner, options) ->
+        @runner.startRunner()
+
+  App.reqres.setHandler "runner:entity", (mocha) ->
     ## always set grep if its not already set
-    options.grep ?= /.*/
+    mocha.options.grep ?= /.*/
 
     ## store the actual mochaRunner on ourselves
     runner = new Entities.Runner
-    runner.setMochaRunner mochaRunner
-    runner.setOptions options
-    runner.startListening()
+    runner.setSocketListeners()
+    runner.setOptions mocha, mocha.options
     runner

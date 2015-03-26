@@ -22,23 +22,13 @@
         orig.call(@, event, err)
 
     overloadMochaRunnerEmit: ->
-      Mocha.Runner::emit = _.wrap runnerEmit, (orig, args...) ->
-        event = args[0]
+      ## uncomment this to see the runner emits
+      # Mocha.Runner::emit = _.wrap runnerEmit, (orig, args...) ->
+      #   event = args[0]
 
-        switch event
-          ## if the end event was triggered by mocha
-          ## then back it up and wait for our own
-          ## runner to fire the eclectus end event
-          # when "end"
-            # return
+      #   console.log event
 
-          ## when our runner fires this custom event
-          ## then we know we're truly done and should
-          ## callback the original end event
-          when "cypress end"
-            orig.call(@, "end")
-
-        orig.apply(@, args)
+      #   orig.apply(@, args)
 
     overloadMochaRunnerUncaught: ->
       ## if app environment isnt production we need to listen to
