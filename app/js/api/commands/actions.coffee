@@ -546,7 +546,7 @@ do (Cypress, _) ->
 
       return subject
 
-  Cypress.addDualCommand
+  Cypress.addParentCommand
     focused: (subject, options = {}) ->
       log = ($el) ->
         return if options.log is false

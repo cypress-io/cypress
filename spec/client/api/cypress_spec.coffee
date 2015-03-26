@@ -3085,6 +3085,10 @@ describe "Cypress", ->
         cy.$("input:first").get(0).focus()
         Cypress.on "log", (@log) =>
 
+      it "is a parent command", ->
+        cy.get("body").focused().then ->
+          expect(@log.get("type")).to.eq "parent"
+
       it "ends immediately", ->
         cy.focused().then ->
           expect(@log.get("end")).to.be.true
