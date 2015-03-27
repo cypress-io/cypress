@@ -272,8 +272,8 @@
       command = new Entities.Command log.pick.apply(log, attrs)
       command.log = log
 
-      command.listenTo log, "state:change", (state) ->
-        command.set "state", state
+      command.listenTo log, "attrs:changed", (attrs) ->
+        command.set attrs
 
       return command
 

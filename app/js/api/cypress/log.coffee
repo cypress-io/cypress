@@ -37,6 +37,7 @@ Cypress.Log = do (Cypress, _, Backbone) ->
       if obj and _.isFunction(obj.onConsole)
         @wrapOnConsole()
 
+      @trigger "attrs:changed", @attributes
       return @
 
     pick: (args...) ->
@@ -62,14 +63,10 @@ Cypress.Log = do (Cypress, _, Backbone) ->
         error: err
         state: "error"
 
-      @trigger "state:change", @get("state")
-
       return @
 
     end: ->
       @set "state", "success"
-
-      @trigger "state:change", @get("state")
 
       return @
 

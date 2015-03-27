@@ -7,14 +7,6 @@ describe "Cypress.Log API", ->
     it "sets state to pending by default", ->
       expect(@log.attributes).to.deep.eq {state: "pending"}
 
-    it "#set string", ->
-      @log.set "foo", "bar"
-      expect(@log.attributes.foo).to.eq "bar"
-
-    it "#set object", ->
-      @log.set {foo: "bar", baz: "quux"}
-      expect(@log.attributes).to.deep.eq {foo: "bar", baz: "quux", state: "pending"}
-
     it "#get", ->
       @log.set "bar", "baz"
       expect(@log.get("bar")).to.eq "baz"
@@ -43,9 +35,9 @@ describe "Cypress.Log API", ->
       expect(@log.get("state")).to.eq "error"
       expect(@log.get("error")).to.eq err
 
-    it "#error triggers state:change", (done) ->
-      @log.on "state:change", (state) ->
-        expect(state).to.eq "error"
+    it "#error triggers attrs:changed", (done) ->
+      @log.on "attrs:changed", (attrs) ->
+        expect(attrs.state).to.eq "error"
         done()
 
       @log.error({})
@@ -54,13 +46,30 @@ describe "Cypress.Log API", ->
       @log.end()
       expect(@log.get("state")).to.eq "success"
 
-    it "#end triggers state:change", (done) ->
-      @log.on "state:change", (state) ->
-        expect(state).to.eq "success"
+    it "#end triggers attrs:changed", (done) ->
+      @log.on "attrs:changed", (attrs) ->
+        expect(attrs.state).to.eq "success"
         done()
 
       @log.end()
 
+    describe "#set", ->
+      it "string", ->
+        @log.set "foo", "bar"
+        expect(@log.attributes.foo).to.eq "bar"
+
+      it "object", ->
+        @log.set {foo: "bar", baz: "quux"}
+        expect(@log.attributes).to.deep.eq {foo: "bar", baz: "quux", state: "pending"}
+
+      it "triggers attrs:changed with attribues", (done) ->
+        @log.on "attrs:changed", (attrs) =>
+          expect(attrs.foo).to.eq "bar"
+          expect(attrs.baz).to.eq "quux"
+          expect(attrs).to.deep.eq @log.attributes
+          done()
+
+        @log.set {foo: "bar", baz: "quux"}
     describe "#constructor", ->
       it "snapshots if snapshot attr is true", ->
         createSnapshot = @sandbox.stub Cypress, "createSnapshot"
