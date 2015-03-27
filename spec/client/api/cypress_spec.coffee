@@ -2059,6 +2059,14 @@ describe "Cypress", ->
           expect($icon.length).to.eq(1)
           expect($icon.get(0)).to.eq icon.get(0)
 
+    describe "special characters", ->
+      _.each "' \" [ ] { } ! @ # $ % ^ & * ( ) , ; :".split(" "), (char) ->
+        it "finds content with character: #{char}", ->
+          span = $("<span>special char #{char} content</span>").appendTo cy.$("body")
+
+          cy.contains("span", char).then ($span) ->
+            expect($span.get(0)).to.eq span.get(0)
+
     describe ".log", ->
       beforeEach ->
         Cypress.on "log", (@log) =>
@@ -2117,6 +2125,7 @@ describe "Cypress", ->
             "Applied To": getFirstSubjectByName("get")
             Returned: $label
             Elements: 1
+
           }
 
     describe "errors", ->

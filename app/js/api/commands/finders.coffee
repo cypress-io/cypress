@@ -222,6 +222,8 @@ do (Cypress, _) ->
         contents = $el.contents().filter( -> @nodeType is 3).text()
         _.str.include(contents, text)
 
+      text = text.toString().replace /('|")/g, "\\$1"
+
       ## find elements by the :contains psuedo selector
       ## and any submit inputs with the attributeContainsWord selector
       selector = "#{filter}:contains('#{text}'), #{filter}[type='submit'][value~='#{text}']"
