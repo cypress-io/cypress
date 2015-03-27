@@ -47,9 +47,10 @@ do (Cypress, _) ->
             @_timeout(prevTimeout)
             options.onLoad?(win)
             if cy.$("[data-cypress-visit-error]").length
-              err = @cypressErr("Could not load the remote page: #{url}")
-              command.error(err)
-              reject(err)
+              try
+                @throwErr("Could not load the remote page: #{url}", command)
+              catch e
+                reject(e)
             else
               command.snapshot().end()
               resolve(win)

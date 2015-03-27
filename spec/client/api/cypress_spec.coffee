@@ -935,6 +935,9 @@ describe "Cypress", ->
 
         @urlIs "home", "http://localhost:3000/#/home"
 
+      it "http://github.com/foo/bar#/home => http://github.com/foo/bar/#/home", ->
+        @urlIs "http://github.com/foo/bar#/home", "http://github.com/foo/bar/#/home"
+
       it "foo/bar?baz=quux => http://0.0.0.0:8000/foo/bar/?baz=quux", ->
         @baseUrl "http://0.0.0.0:8000"
 
@@ -948,6 +951,72 @@ describe "Cypress", ->
 
       it "127.0.0.1:8000 => http://127.0.0.1:8000/", ->
         @urlIs "127.0.0.1:8000", "http://127.0.0.1:8000/"
+
+    describe ".log", ->
+      beforeEach ->
+        Cypress.on "log", (@log) =>
+
+      it "logs immediately before resolving", (done) ->
+        Cypress.on "log", (log) ->
+          expect(log.pick("name", "message")).to.deep.eq {
+            name: "visit"
+            message: "localhost:4200/app/foo#/hash"
+          }
+          done()
+
+        cy.visit("localhost:4200/app/foo#/hash")
+
+      it "logs obj once complete", ->
+        cy.visit("index.html").then ->
+          obj = {
+            state: "success"
+            name: "visit"
+            message: "index.html"
+          }
+
+          _.each obj, (value, key) =>
+            expect(@log.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
+
+    describe "errors", ->
+      beforeEach ->
+        @sandbox.stub cy.runner, "uncaught"
+
+        @failVisit = =>
+          cy$ = cy.$
+
+          ## act as if we have this node
+          error = @sandbox.stub cy, "$", (selector) ->
+            if selector is "[data-cypress-visit-error]"
+              error.restore()
+              return {length: 1}
+            else
+              cy$.apply(@, arguments)
+
+      it "sets error command state", (done) ->
+        Cypress.on "log", (@log) =>
+
+        cy.on "fail", (err) =>
+          expect(@log.get("state")).to.eq "error"
+          expect(@log.get("error")).to.eq err
+          done()
+
+        @failVisit()
+
+        cy.visit("index.html")
+
+      it "logs once on error", (done) ->
+        logs = []
+
+        Cypress.on "log", (log) ->
+          logs.push log
+
+        @failVisit()
+
+        cy.on "fail", (err) ->
+          expect(logs).to.have.length(1)
+          done()
+
+        cy.visit("index.html")
 
   context "#eval", ->
     beforeEach ->
