@@ -864,7 +864,7 @@ describe "Cypress", ->
 
     it "triggers visit:start on the remote iframe", (done) ->
       $("iframe").one "visit:start", (e, url) ->
-        expect(url).to.eq "/foo"
+        expect(url).to.eq "foo/"
         done()
 
       cy.visit("/foo")
@@ -904,6 +904,50 @@ describe "Cypress", ->
 
     it "invokes onLoad callback"
     it "invokes onBeforeLoad callback"
+
+    describe "visit:start", ->
+      beforeEach ->
+        trigger = @sandbox.stub $.fn, "trigger"
+
+        @baseUrl = (baseUrl) =>
+          @sandbox.stub(cy, "config").withArgs("baseUrl").returns(baseUrl)
+
+        @urlIs = (source, destination) =>
+          cy.visit(source).then ->
+            expect(trigger).to.be.calledWith "visit:start", destination
+
+      it "index.html => index.html/", ->
+        @urlIs "index.html", "index.html/"
+
+      it "http://github.com => http://github.com/", ->
+        @urlIs "http://github.com", "http://github.com/"
+
+      it "http://localhost:4000/#/home", ->
+        @urlIs "http://localhost:4000/#/home", "http://localhost:4000/#/home"
+
+      it "home => http://localhost:3000/home/", ->
+        @baseUrl "http://localhost:3000"
+
+        @urlIs "home", "http://localhost:3000/home/"
+
+      it "home => http://localhost:3000/#/home", ->
+        @baseUrl "http://localhost:3000/#/"
+
+        @urlIs "home", "http://localhost:3000/#/home"
+
+      it "foo/bar?baz=quux => http://0.0.0.0:8000/foo/bar/?baz=quux", ->
+        @baseUrl "http://0.0.0.0:8000"
+
+        @urlIs "foo/bar?baz=quux", "http://0.0.0.0:8000/foo/bar/?baz=quux"
+
+      it "localhost:8000 => http://localhost:8000/", ->
+        @urlIs "localhost:8000", "http://localhost:8000/"
+
+      it "0.0.0.0:8000 => http://0.0.0.0:8000/", ->
+        @urlIs "0.0.0.0:8000", "http://0.0.0.0:8000/"
+
+      it "127.0.0.1:8000 => http://127.0.0.1:8000/", ->
+        @urlIs "127.0.0.1:8000", "http://127.0.0.1:8000/"
 
   context "#eval", ->
     beforeEach ->

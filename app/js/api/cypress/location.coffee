@@ -11,6 +11,8 @@ Cypress.Location = do (Cypress, _, Uri) ->
 
   reHttp = /^http/
 
+  reLocalHost = /^(localhost|0\.0\.0\.0|127\.0\.0\.1)/
+
   class Location
     constructor: (current, remote = "", defaultOrigin) ->
       current  = new Uri(current)
@@ -131,33 +133,66 @@ Cypress.Location = do (Cypress, _, Uri) ->
     ## constants which our server sends us during
     ## initial boot.
     @createInitialRemoteSrc = (url) ->
-      ## prepend /__remote/ and strip any
-      ## leading forward slashes
-      url = "/__remote/" + _.trim(url, "/") + "/"
       url = new Uri(url)
 
       ## add the __intitial=true query param
       url.addQueryParam("__initial", true)
 
+      ## prepend /__remote/ and
       ## return the full href
-      url.toString()
+      "/__remote/" + url.toString()
 
     @isFullyQualifiedUrl = (url) ->
       reHttp.test(url)
+
+    @missingProtocolAndHostIsLocal = (url) ->
+      ## normalize the host for 'localhost'
+      ## and then check if we are missing
+      ## http and our host is
+      ## localhost / 127.0.0.1 / 0.0.0.0
+      return false if not reLocalHost.test url.toString()
+
+      switch url.protocol()
+        when ""
+          return true
+        when "localhost"
+          ## port will be contained in host()
+          ## host will be contained in protocol()
+          url.setPort url.host()
+          url.setHost url.protocol()
+          return true
+        else
+          return false
+
+    @normalizeUrl = (url) ->
+      ## normalize the url be automatically appending
+      ## a trailing slash to the PATH
+      ## this will ignore query params / hash, etc
+      url = _.trim(url, "/")
+      url = new Uri(url)
+
+      ## automatically insert http:// if url host
+      ## is localhost, 0.0.0.0, or 127.0.0.1
+      ## and there isnt a protocol
+      if @missingProtocolAndHostIsLocal(url)
+        url.setProtocol "http"
+
+      url.addTrailingSlash()
+      url.toString()
 
     @getRemoteUrl = (url, baseUrl) ->
       ## if we have a root url and our url isnt full qualified
       if baseUrl and not @isFullyQualifiedUrl(url)
         ## prepend the root url to it
-        return @prependBaseUrl(url, baseUrl)
+        url = @prependBaseUrl(url, baseUrl)
 
-      return url
+      return @normalizeUrl(url)
 
     @prependBaseUrl = (url, baseUrl) ->
       ## prepends the baseUrl to the url and
       ## joins by / after trimming url for leading
       ## forward slashes
-      [baseUrl, _.ltrim(url, "/")].join("/")
+      [_.trim(baseUrl, "/"), _.trim(url, "/")].join("/")
 
   Cypress.location = (current, remote, defaultOrigin) ->
     location = new Location(current, remote, defaultOrigin)

@@ -114,7 +114,55 @@ describe "Location API", ->
       obj = Cypress.location(urls.cypress, urls.signin)
       expect(obj.toString()).to.eq "http://localhost:8000/signin"
 
+  context ".normalizeUrl", ->
+    beforeEach ->
+      @url = (source, expected) ->
+        url = Cypress.Location.normalizeUrl(source)
+        expect(url).to.eq(expected)
+
+    describe "http urls", ->
+      it "trims url", ->
+        @url "/http://github.com/foo/", "http://github.com/foo/"
+
+      it "adds trailing slash", ->
+        @url "https://localhost:4200", "https://localhost:4200/"
+
+      it "adds trailing slash with hash", ->
+        @url "http://0.0.0.0:3000#foo/bar", "http://0.0.0.0:3000/#foo/bar"
+
+      it "adds trailing slash with path", ->
+        @url "http://localhost:3000/foo/bar", "http://localhost:3000/foo/bar/"
+
+    describe "http-less urls", ->
+      it "trims url", ->
+        @url "/index.html/", "index.html/"
+
+    describe "localhost, 0.0.0.0, 127.0.0.1", ->
+      _.each ["localhost", "0.0.0.0", "127.0.0.1"], (host) =>
+        it "inserts http:// automatically for #{host}", ->
+          @url "#{host}:4200", "http://#{host}:4200/"
+
+    describe "localhost", ->
+      it "keeps path / query params / hash around", ->
+        @url "localhost:4200/foo/bar?quux=asdf#/main", "http://localhost:4200/foo/bar/?quux=asdf#/main"
+
+
   context ".createInitialRemoteSrc", ->
+    beforeEach ->
+      @normalizeUrl = (url) ->
+        Cypress.Location.normalizeUrl(url)
+
     it "trims and appends trailing slash", ->
-      url = Cypress.Location.createInitialRemoteSrc("http://localhost:4200/app")
+      url = @normalizeUrl("http://localhost:4200/app")
+      url = Cypress.Location.createInitialRemoteSrc(url)
       expect(url).to.eq "/__remote/http://localhost:4200/app/?__initial=true"
+
+    it "does not append a trailing slash to url with hash", ->
+      url = @normalizeUrl("http://localhost:4000/#/home")
+      url = Cypress.Location.createInitialRemoteSrc(url)
+      expect(url).to.eq "/__remote/http://localhost:4000/?__initial=true#/home"
+
+    it "handles urls without a host", ->
+      url = @normalizeUrl("index.html")
+      url = Cypress.Location.createInitialRemoteSrc(url)
+      expect(url).to.eq "/__remote/index.html/?__initial=true"
