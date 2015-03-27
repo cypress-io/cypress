@@ -70,6 +70,42 @@ describe "Cypress.Log API", ->
           done()
 
         @log.set {foo: "bar", baz: "quux"}
+
+    describe "#setElAttrs", ->
+      beforeEach ->
+        @$el = $("<div />").appendTo($("body"))
+
+      afterEach ->
+        @$el.remove()
+
+      it "is called if $el is passed during construction", ->
+        setElAttrs = @sandbox.stub Cypress.Log.prototype, "setElAttrs"
+
+        new Cypress.Log $el: {}
+
+        expect(setElAttrs).to.be.called
+
+      it "is called if $el is passed during #set", ->
+        setElAttrs = @sandbox.stub Cypress.Log.prototype, "setElAttrs"
+
+        log = new Cypress.Log
+        log.set $el: {}
+
+        expect(setElAttrs).to.be.called
+
+      it "sets $el", ->
+        log = new Cypress.Log $el: @$el
+        expect(log.get("$el")).to.eq @$el
+
+      it "sets highlightAttr", ->
+        @log.set($el: @$el)
+        expect(@log.get("highlightAttr")).to.be.ok
+        expect(@log.get("highlightAttr")).to.eq Cypress.highlightAttr
+
+      it "sets numElements", ->
+        @log.set($el: @$el)
+        expect(@log.get("numElements")).to.eq @$el.length
+
     describe "#constructor", ->
       it "snapshots if snapshot attr is true", ->
         createSnapshot = @sandbox.stub Cypress, "createSnapshot"

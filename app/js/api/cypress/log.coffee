@@ -7,7 +7,7 @@ Cypress.Log = do (Cypress, _, Backbone) ->
       _.defaults obj,
         state: "pending"
 
-      @attributes = obj
+      @set(obj)
 
       ## if snapshot was passed
       ## in, go ahead and snapshot
@@ -30,6 +30,9 @@ Cypress.Log = do (Cypress, _, Backbone) ->
       else
         obj = key
 
+      ## ensure attributes are an empty {}
+      @attributes ?= {}
+
       _.extend @attributes, obj
 
       ## if we have an onConsole function
@@ -37,7 +40,11 @@ Cypress.Log = do (Cypress, _, Backbone) ->
       if obj and _.isFunction(obj.onConsole)
         @wrapOnConsole()
 
+      if obj and obj.$el
+        @setElAttrs()
+
       @trigger "attrs:changed", @attributes
+
       return @
 
     pick: (args...) ->
@@ -75,6 +82,18 @@ Cypress.Log = do (Cypress, _, Backbone) ->
         err.toString()
       else
         err.stack
+
+    setElAttrs: ->
+      $el = @get("$el")
+
+      return if not $el
+
+      obj = {
+        highlightAttr: Cypress.highlightAttr
+        numElements:   $el.length
+      }
+
+      @set obj
 
     wrapOnConsole: ->
       _this = @
@@ -137,10 +156,6 @@ Cypress.Log = do (Cypress, _, Backbone) ->
 
       # if obj.snapshot
         # obj._snapshot = @cy.createSnapshot(obj.$el)
-
-      if obj.$el
-        obj.highlightAttr = Cypress.highlightAttr
-        obj.numElements   = obj.$el.length
 
       @log("command", obj)
 

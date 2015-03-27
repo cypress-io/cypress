@@ -4130,10 +4130,12 @@ describe "Cypress", ->
             cy.get("#list")[name](arg)
 
           it "snapshots after finding element", ->
-            Cypress.on "log", (@log) =>
-
             cy.get("#list")[name](arg).then ->
               expect(@log.get("snapshot")).to.be.an("object")
+
+          it "has the $el", ->
+            cy.get("#list")[name](arg).then ($el) ->
+              expect(@log.get("$el").get(0)).to.eq $el.get(0)
 
           it "#onConsole", ->
             cy.get("#list")[name](arg).then ($el) ->
