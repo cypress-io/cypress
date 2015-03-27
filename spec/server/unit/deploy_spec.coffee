@@ -144,6 +144,8 @@ describe "Deploy", ->
       deploy.prepare().then(deploy.convertToJs)
 
     it "writes obfuscated js to dist/lib/cypress.js", ->
+      @timeout(5000)
+
       deploy.obfuscate().then (obfuscated) ->
         cypress = fs.statSync(distDir + "/lib/cypress.js")
         expect(cypress.isFile()).to.be.true
