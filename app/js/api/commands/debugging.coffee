@@ -17,6 +17,9 @@ do (Cypress, _) ->
       console.log "Available Aliases: ", @_getAvailableAliases()
       debugger
 
+      ## return the subject
+      cy.prop("subject")
+
   Cypress.extend
     log: (obj, type) ->
       return if not @prop("inspect")
