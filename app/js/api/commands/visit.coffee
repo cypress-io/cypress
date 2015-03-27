@@ -3,6 +3,9 @@ do (Cypress, _) ->
   Cypress.addParentCommand
 
     visit: (url, options = {}) ->
+      if not _.isString(url)
+        @throwErr("cy.visit() must be called with a string as its 1st argument")
+
       command = Cypress.command()
 
       _.defaults options,

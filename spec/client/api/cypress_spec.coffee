@@ -1018,6 +1018,13 @@ describe "Cypress", ->
 
         cy.visit("index.html")
 
+      it "throws when url isnt a string", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.eq "cy.visit() must be called with a string as its 1st argument"
+          done()
+
+        cy.visit()
+
   context "#eval", ->
     beforeEach ->
       @server = @sandbox.useFakeServer()
