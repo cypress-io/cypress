@@ -66,7 +66,8 @@
     "sinon-as-promised": "bendrucker/sinon-as-promised",
     "sinon-chai": "^2.7.0",
     "supertest": "^0.15.0",
-    "supertest-session": "0.0.7"
+    "supertest-session": "0.0.7",
+    "touch": "0.0.3"
   },
   "dependencies": {
     "bluebird": "2.9.13",
