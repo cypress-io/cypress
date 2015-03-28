@@ -3,6 +3,7 @@ sinon        = require "sinon"
 chokidar     = require "chokidar"
 expect       = require('chai').expect
 fs           = require "fs-extra"
+touch        = require "touch"
 Socket       = require "#{root}lib/socket"
 Server       = require "#{root}lib/server"
 Settings     = require "#{root}lib/util/settings"
@@ -12,8 +13,11 @@ describe "Socket", ->
   beforeEach ->
     @sandbox = sinon.sandbox.create()
 
-    @io =
+    @ioSocket =
       on: @sandbox.stub()
+
+    @io =
+      on: @sandbox.stub().callsArgWith(1, @ioSocket)
       emit: @sandbox.stub()
       close: @sandbox.stub()
 
@@ -46,12 +50,64 @@ describe "Socket", ->
       expect(@io.close).to.be.called
 
     it "calls close on the watchedFiles", ->
-      @socket.startListening().then (watchedFiles) =>
-        close = @sandbox.spy watchedFiles, "close"
+      @socket.startListening().then =>
+        closeWatchers = @sandbox.spy @socket, "closeWatchers"
 
-        @socket.close(watchedFiles)
+        @socket.close()
 
-        expect(close).to.be.called
+        expect(closeWatchers).to.be.called
+
+  context "#closeWatchers", ->
+    beforeEach ->
+      @socket = Socket(@io, @app)
+
+    it "calls close on #watchedTestFile", ->
+      close = @sandbox.stub()
+      @socket.watchedTestFile = {close: close}
+      @socket.closeWatchers()
+      expect(close).to.be.calledOnce
+
+    it "is noop without #watchedTestFile", ->
+      expect(@socket.closeWatchers()).to.be.undefined
+
+  context "#watchTestFileByPath", ->
+    beforeEach ->
+      @socket          = Socket(@io, @app)
+      @socket.testsDir = Fixtures.project "todos/tests"
+      @filePath        = @socket.testsDir + "/test1.js"
+
+      Fixtures.scaffold()
+
+    afterEach ->
+      @socket.close()
+      Fixtures.remove()
+
+    it "returns undefined if #testFilePath matches arguments", ->
+      @socket.testFilePath = @filePath
+      expect(@socket.watchTestFileByPath("test1.js")).to.be.undefined
+
+    it "closes existing watchedTestFile", ->
+      close = @sandbox.stub()
+      @socket.watchedTestFile = {close: close}
+      @socket.watchTestFileByPath "test1.js"
+      expect(close).to.be.called
+
+    it "sets #testFilePath", ->
+      @socket.watchTestFileByPath("test1.js")
+      expect(@socket.testFilePath).to.eq @filePath
+
+    it "can normalizes leading slash", ->
+      @socket.watchTestFileByPath("/test1.js")
+      expect(@socket.testFilePath).to.eq @filePath
+
+    it "watches file by path", (done) ->
+      ## chokidar may take 100ms to pick up the file changes
+      ## so we just override onTestFileChange and whenever
+      ## its invoked we finish the test
+      onTestFileChange = @sandbox.stub @socket, "onTestFileChange", -> done()
+
+      @socket.watchTestFileByPath("test1.js").bind(@).then ->
+        touch @filePath
 
   context "#startListening", ->
     beforeEach ->
@@ -59,6 +115,7 @@ describe "Socket", ->
       Fixtures.scaffold()
 
     afterEach ->
+      @socket.close()
       Fixtures.remove()
 
     it "creates testFolder if does not exist", ->
@@ -71,19 +128,36 @@ describe "Socket", ->
         dir = fs.statSync(Fixtures.project("todos") + "/does-not-exist")
         expect(dir.isDirectory()).to.be.true
 
+    it "sets #testsDir", ->
+      @server.setCypressJson {
+        projectRoot: Fixtures.project("todos")
+        testFolder: "does-not-exist"
+      }
+
+      @socket.startListening().then ->
+        expect(@testsDir).to.eq Fixtures.project("todos/does-not-exist")
+
     it "listens for app close event once", ->
       close = @sandbox.spy @socket, "close"
 
-      @socket.startListening().then (watchedFiles) ->
+      @socket.startListening().then ->
         @app.emit("close")
         @app.emit("close")
 
         expect(close).to.be.calledOnce
-        expect(close).to.be.calledWith(watchedFiles)
 
-    it "returns watched files chokidar instance", ->
-      @socket.startListening().then (watchedFiles) ->
-        expect(watchedFiles).to.be.instanceof chokidar.FSWatcher
+    describe "watch:test:file", ->
+      it "listens for watch:test:file event", ->
+        @socket.startListening().then =>
+          expect(@ioSocket.on).to.be.calledWith("watch:test:file")
+
+      it "passes filePath to #watchTestFileByPath", ->
+        watchTestFileByPath = @sandbox.stub @socket, "watchTestFileByPath"
+
+        @ioSocket.on.withArgs("watch:test:file").callsArgWith(1, "foo/bar/baz")
+
+        @socket.startListening().then =>
+          expect(watchTestFileByPath).to.be.calledWith "foo/bar/baz"
 
     describe "#onTestFileChange", ->
       beforeEach ->

@@ -5,6 +5,8 @@
     initialize: (options) ->
       { id, browser, version } = options
 
+      socket = App.request "socket:entity"
+
       config = App.request "app:config:entity"
 
       ## this is for any existing controllers which haven't been
@@ -42,6 +44,8 @@
         @iframeRegion(runner)
         @specsRegion(runner, spec)    if not config.env("satellite")
         # @panelsRegion(runner, config) if not config.env("satellite")
+
+        socket.emit "watch:test:file", id
 
         ## start running the tests
         ## and load the iframe

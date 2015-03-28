@@ -37,8 +37,8 @@ SecretSauce.Keys =
 SecretSauce.Socket =
   leadingSlashes: /^\/+/
 
-  onTestFileChange: (filepath, stats) ->
-    @Log.info "onTestFileChange", filepath: filepath
+  onTestFileChange: (filePath, stats) ->
+    @Log.info "onTestFileChange", filePath: filePath
 
     ## simple solution for preventing firing test:changed events
     ## when we are making modifications to our own files
@@ -46,23 +46,55 @@ SecretSauce.Socket =
 
     ## return if we're not a js or coffee file.
     ## this will weed out directories as well
-    return if not /\.(js|coffee)$/.test filepath
+    return if not /\.(js|coffee)$/.test filePath
 
-    @fs.statAsync(filepath).bind(@)
+    @fs.statAsync(filePath).bind(@)
       .then ->
-        ## strip out our testFolder path from the filepath, and any leading forward slashes
-        filepath      = filepath.split(@app.get("cypress").projectRoot).join("").replace(@leadingSlashes, "")
-        strippedPath  = filepath.replace(@app.get("cypress").testFolder, "").replace(@leadingSlashes, "")
+        ## strip out our testFolder path from the filePath, and any leading forward slashes
+        filePath      = filePath.split(@app.get("cypress").projectRoot).join("").replace(@leadingSlashes, "")
+        strippedPath  = filePath.replace(@app.get("cypress").testFolder, "").replace(@leadingSlashes, "")
 
-        @Log.info "generate:ids:for:test", filepath: filepath, strippedPath: strippedPath
-        @io.emit "generate:ids:for:test", filepath, strippedPath
+        @Log.info "generate:ids:for:test", filePath: filePath, strippedPath: strippedPath
+        @io.emit "generate:ids:for:test", filePath, strippedPath
       .catch(->)
+
+  closeWatchers: ->
+    if f = @watchedTestFile
+      f.close()
+
+  watchTestFileByPath: (testFilePath) ->
+    ## normalize the testFilePath
+    testFilePath = @path.join(@testsDir, testFilePath)
+
+    ## bail if we're already watching this
+    ## exact file
+    return if testFilePath is @testFilePath
+
+    @Log.info "watching test file", {path: testFilePath}
+
+    ## store this location
+    @testFilePath = testFilePath
+
+    ## close existing watchedTestFile(s)
+    ## since we're now watching a different path
+    @closeWatchers()
+
+    new @Promise (resolve, reject) =>
+      @watchedTestFile = @chokidar.watch testFilePath
+      @watchedTestFile.on "change", @onTestFileChange.bind(@)
+      @watchedTestFile.on "ready", =>
+        resolve @watchedTestFile
+      @watchedTestFile.on "error", (err) =>
+        reject err
 
   _startListening: (chokidar, path) ->
     { _ } = SecretSauce
 
     @io.on "connection", (socket) =>
       @Log.info "socket connected"
+
+      socket.on "watch:test:file", (filePath) =>
+        @watchTestFileByPath(filePath)
 
       socket.on "generate:test:id", (data, fn) =>
         @Log.info "generate:test:id", data: data
@@ -146,15 +178,9 @@ SecretSauce.Socket =
 
           sauce options, df
 
-    testsDir = path.join(@app.get("cypress").projectRoot, @app.get("cypress").testFolder)
+    @testsDir = path.join(@app.get("cypress").projectRoot, @app.get("cypress").testFolder)
 
-    @fs.ensureDirAsync(testsDir).bind(@)
-      .then ->
-        watchTestFiles = chokidar.watch testsDir#, ignored: (path, stats) ->
-
-        watchTestFiles.on "change", @onTestFileChange.bind(@)
-
-        watchTestFiles
+    @fs.ensureDirAsync(@testsDir).bind(@)
 
     ## BREAKING DUE TO __DIRNAME
     # watchCssFiles = chokidar.watch path.join(__dirname, "public", "css"), ignored: (path, stats) ->
@@ -163,9 +189,9 @@ SecretSauce.Socket =
     #   not /\.css$/.test path
 
     # # watchCssFiles.on "add", (path) -> console.log "added css:", path
-    # watchCssFiles.on "change", (filepath, stats) =>
-    #   filepath = path.basename(filepath)
-    #   @io.emit "eclectus:css:changed", file: filepath
+    # watchCssFiles.on "change", (filePath, stats) =>
+    #   filePath = path.basename(filePath)
+    #   @io.emit "eclectus:css:changed", file: filePath
 
 SecretSauce.IdGenerator =
   hasExistingId: (e) ->

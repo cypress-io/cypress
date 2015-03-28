@@ -3,6 +3,7 @@ path          = require 'path'
 uuid          = require 'node-uuid'
 # sauce         = require '../sauce/sauce.coffee'
 chokidar      = require 'chokidar'
+Promise       = require "bluebird"
 IdGenerator   = require './id_generator'
 Log           = require "./log"
 SecretSauce   = require "../lib/util/secret_sauce_loader"
@@ -10,6 +11,9 @@ SecretSauce   = require "../lib/util/secret_sauce_loader"
 class Socket
   fs: fs
   Log: Log
+  chokidar: chokidar
+  Promise: Promise
+  path: path
 
   constructor: (io, app) ->
     if not (@ instanceof Socket)
@@ -26,18 +30,14 @@ class Socket
     @idGenerator = IdGenerator(@app)
 
   startListening: ->
-    @_startListening(chokidar, path).then (watchedFiles) =>
+    @app.once "close", @close.bind(@)
 
-      ## when our app closes lets nuke the
-      ## watched files and close down io
-      @app.once "close", @close.bind(@, watchedFiles)
-
-      return watchedFiles
+    @_startListening(chokidar, path)
 
   close: (watchedFiles) ->
     @io.close()
 
-    watchedFiles.close() if watchedFiles
+    @closeWatchers()
 
 SecretSauce.mixin("Socket", Socket)
 
