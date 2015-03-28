@@ -152,7 +152,9 @@ SecretSauce.Socket =
       .then ->
         watchTestFiles = chokidar.watch testsDir#, ignored: (path, stats) ->
 
-        watchTestFiles.on "change", _.bind(@onTestFileChange, @)
+        watchTestFiles.on "change", @onTestFileChange.bind(@)
+
+        watchTestFiles
 
     ## BREAKING DUE TO __DIRNAME
     # watchCssFiles = chokidar.watch path.join(__dirname, "public", "css"), ignored: (path, stats) ->

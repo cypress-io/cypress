@@ -154,6 +154,10 @@ class Server
       ## currently listening
       return resolve() if not @server or not @isListening
 
+      Log.info("Server closing")
+
+      @app.emit("close")
+
       @server.destroy =>
         @isListening = false
         resolve()

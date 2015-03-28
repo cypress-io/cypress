@@ -52,6 +52,13 @@ describe "Server Interface", ->
       @server.close().then ->
         expect(Log.getSettings()).to.be.undefined
 
+    it "app fires close event", ->
+      emit = @sandbox.spy @server.app, "emit"
+
+      @server.open().bind(@).then ->
+        @server.close().then ->
+          expect(emit).to.be.calledWith "close"
+
   context "#open", ->
     it "creates http server"
 

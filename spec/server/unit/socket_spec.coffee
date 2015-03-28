@@ -1,5 +1,6 @@
 root         = '../../../'
 sinon        = require "sinon"
+chokidar     = require "chokidar"
 expect       = require('chai').expect
 fs           = require "fs-extra"
 Socket       = require "#{root}lib/socket"
@@ -14,6 +15,7 @@ describe "Socket", ->
     @io =
       on: @sandbox.stub()
       emit: @sandbox.stub()
+      close: @sandbox.stub()
 
     @server = Server(process.cwd())
     @app    = @server.app
@@ -35,6 +37,22 @@ describe "Socket", ->
     fn = => Socket(@io, null)
     expect(fn).to.throw "Instantiating lib/socket requires an app!"
 
+  context "#close", ->
+    beforeEach ->
+      @socket = Socket(@io, @app)
+
+    it "calls close on #io", ->
+      @socket.close()
+      expect(@io.close).to.be.called
+
+    it "calls close on the watchedFiles", ->
+      @socket.startListening().then (watchedFiles) =>
+        close = @sandbox.spy watchedFiles, "close"
+
+        @socket.close(watchedFiles)
+
+        expect(close).to.be.called
+
   context "#startListening", ->
     beforeEach ->
       @socket = Socket(@io, @app)
@@ -52,6 +70,20 @@ describe "Socket", ->
       @socket.startListening().then ->
         dir = fs.statSync(Fixtures.project("todos") + "/does-not-exist")
         expect(dir.isDirectory()).to.be.true
+
+    it "listens for app close event once", ->
+      close = @sandbox.spy @socket, "close"
+
+      @socket.startListening().then (watchedFiles) ->
+        @app.emit("close")
+        @app.emit("close")
+
+        expect(close).to.be.calledOnce
+        expect(close).to.be.calledWith(watchedFiles)
+
+    it "returns watched files chokidar instance", ->
+      @socket.startListening().then (watchedFiles) ->
+        expect(watchedFiles).to.be.instanceof chokidar.FSWatcher
 
     describe "#onTestFileChange", ->
       beforeEach ->

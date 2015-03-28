@@ -26,7 +26,18 @@ class Socket
     @idGenerator = IdGenerator(@app)
 
   startListening: ->
-    @_startListening(chokidar, path)
+    @_startListening(chokidar, path).then (watchedFiles) =>
+
+      ## when our app closes lets nuke the
+      ## watched files and close down io
+      @app.once "close", @close.bind(@, watchedFiles)
+
+      return watchedFiles
+
+  close: (watchedFiles) ->
+    @io.close()
+
+    watchedFiles.close() if watchedFiles
 
 SecretSauce.mixin("Socket", Socket)
 
