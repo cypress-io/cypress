@@ -80,7 +80,7 @@
 
         ## whenever our socket fires 'test:changed' we want to
         ## proxy this to everyone else
-        @listenTo socket, "test:changed", @triggerLoadIframe
+        @listenTo socket, "test:changed", @reRun
 
         if App.config.ui("satellite")
           _.each @hostEvents, (event) =>
@@ -581,6 +581,12 @@
 
         @triggerLoadIframe @iframe
 
+      reRun: (iframe, opts = {}) ->
+        ## when we are re-running we first
+        ## need to abort cypress
+        Cypress.abort().then =>
+          @triggerLoadIframe(iframe, opts)
+
       triggerLoadIframe: (iframe, opts = {}) ->
         ## first we want to make sure that our last stored
         ## iframe matches the one we're receiving
@@ -603,13 +609,13 @@
         ## start the abort process since we're about
         ## to load up in case we're running any tests
         ## right this moment
-        Cypress.abort().then =>
-          ## tells different areas of the app to prepare
-          ## for the resetting of the test run
-          @trigger "reset:test:run"
 
-          ## tells the iframe view to load up a new iframe
-          @trigger "load:iframe", @iframe, opts
+        ## tells different areas of the app to prepare
+        ## for the resetting of the test run
+        @trigger "reset:test:run"
+
+        ## tells the iframe view to load up a new iframe
+        @trigger "load:iframe", @iframe, opts
 
       hasChosen: ->
         !!@get("chosenId")
@@ -630,7 +636,7 @@
         @updateChosen(runnable?.id)
 
         ## always reload the iframe
-        @triggerLoadIframe @iframe
+        @reRun @iframe
 
       ## this recursively loops through all tests / suites
       ## plucking out their cid's and returning those
