@@ -14,6 +14,9 @@
       Utilities.Overrides.overloadMochaRunnerEmit()
       Utilities.Overrides.overloadMochaRunnerUncaught() if not App.config.ui("ci")
 
+      ## these overrides need to move into
+      ## Cypress itself and should not be
+      ## controlled outside of here
       Cypress.Mocha.override()
 
       Cypress.Chai.override()
@@ -45,6 +48,10 @@
 
     stop: (runner) ->
       ## restore chai to the normal expect / assert
+
+      ## these restores need to move into
+      ## Cypress itself and should not be
+      ## controlled outside of here
       Cypress.Chai.restore()
 
       Cypress.Mocha.restore()
