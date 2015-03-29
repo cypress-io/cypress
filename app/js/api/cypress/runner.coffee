@@ -22,6 +22,81 @@ Cypress.Runner = do (Cypress, _) ->
     abort: ->
       @runner.abort()
 
+    run: (fn) ->
+      @runner.startRunner(fn)
+
+    getRunnables: (options = {}) ->
+      _.defaults options,
+        onSuite: ->
+        onTest: ->
+
+      @iterateThroughRunnables(@runner.suite, options)
+
+    ## iterates through both the runnables tests + suites if it has any
+    iterateThroughRunnables: (runnable, options) ->
+      _.each [runnable.tests, runnable.suites], (array) =>
+        _.each array, (runnable) =>
+          @process runnable, options
+
+    ## generates an id for each runnable and then continues iterating
+    ## on children tests + suites
+    process: (runnable, options) ->
+      ## iterating on both the test and its parent (the suite)
+      ## bail if we're the root runnable
+      ## or we've already processed this tests parent
+      return if runnable.root or runnable.added
+
+      ## dont fire duplicate events if this is already fired
+      ## its 'been added' event
+      return if runnable.added
+
+      runnable.added = true
+
+      ## tests have a runnable of 'test' whereas suites do not have a runnable property
+      runnable.type = runnable.type ? "suite"
+
+      ## we need to change our strategy of displaying runnables
+      ## if grep is set (runner.options.grep)  that means the user
+      ## has written a .only on a suite or a test, and in that case
+      ## we dont want to display the tests or suites unless they match
+      ## our grep.
+      grep = @options?.grep
+
+      ## grep will always be set to something here... even /.*/
+
+      ## trigger the add events so our UI can begin displaying
+      ## the tests + suites
+      if grep and runnable.type is "suite"
+        count = 0
+        runnable.eachTest (test) ->
+          count += 1 if grep.test(test.fullTitle())
+        options.onRunnable(runnable) if count > 0
+        # runner.trigger "suite:add", runnable if count > 0
+
+      if grep and runnable.type is "test"
+        if grep.test(runnable.fullTitle())
+          runner.tests.push(runnable)
+          # runner.trigger "test:add", runnable
+          options.onRunnable(runnable) if count > 0
+
+      ## recursively apply to all tests / suites of this runnable
+      @iterateThroughRunnables(runnable)
+
+      return runnable
+
+    ignore: (runnable) ->
+      ## for mocha we just need to set
+      ## it to pending so mocha does not
+      ## attempt to run this runnable
+      runnable.pending = true
+
+      ## what about suites here? test what happens
+      ## if they dont have an id.  i don't believe
+      ## you can set a suite to pending!
+      ## i think if this is a suite we should just
+      ## iterate through all of its nested tests
+      ## and set them all to pending!
+
     override: ->
       @_abort = @abort
       @abort = ->
@@ -32,7 +107,9 @@ Cypress.Runner = do (Cypress, _) ->
         @abort = @_abort
       @
 
-    @create = (runner) ->
+    @create = (mocha, specWindow) ->
+      runner = mocha.run()
+      runner.suite = specWindow.mocha.suite
       Cypress._runner = new Runner(runner)
 
   Cypress.getRunner = ->

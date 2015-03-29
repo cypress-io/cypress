@@ -224,27 +224,27 @@
         ## dont overload the runSuite fn if we're in CI mode
         return @ if App.config.ui("ci")
 
-        @runner.runSuite = _.wrap @runner.runSuite, (runSuite, rootSuite, fn) ->
-          ## the runSuite function is recursively called for each individual suite
-          ## since we iterate through all tests and all suites initially we need
-          ## to bail early if this isnt the root suite
-          return runSuite.call(@, rootSuite, fn) if not rootSuite.root
+        # @runner.runSuite = _.wrap @runner.runSuite, (runSuite, rootSuite, fn) ->
+        #   ## the runSuite function is recursively called for each individual suite
+        #   ## since we iterate through all tests and all suites initially we need
+        #   ## to bail early if this isnt the root suite
+        #   return runSuite.call(@, rootSuite, fn) if not rootSuite.root
 
-          runner.trigger "before:add"
+        #   runner.trigger "before:add"
 
-          runner.iterateThroughRunnables rootSuite
+        #   runner.iterateThroughRunnables rootSuite
 
-          runner.trigger "after:add"
+        #   runner.trigger "after:add"
 
-          ## grep for the correct test / suite by its id if chosenId is set
-          ## or all the tests
-          ## we need to grep at the last possible moment because if we've chosenId
-          ## a runnable but then deleted it afterwards, then we'll incorrectly
-          ## continue to grep for it.  instead we need to do a check to ensure
-          ## we still have the runnable's cid which matches our chosenId id
-          @grep runner.getGrep(rootSuite)
+        #   ## grep for the correct test / suite by its id if chosenId is set
+        #   ## or all the tests
+        #   ## we need to grep at the last possible moment because if we've chosenId
+        #   ## a runnable but then deleted it afterwards, then we'll incorrectly
+        #   ## continue to grep for it.  instead we need to do a check to ensure
+        #   ## we still have the runnable's cid which matches our chosenId id
+        #   @grep runner.getGrep(rootSuite)
 
-          runSuite.call(@, rootSuite, fn)
+        #   runSuite.call(@, rootSuite, fn)
 
         return @
 
@@ -767,6 +767,8 @@
         ## leaking this backbone model's details into the cypress API
         Cypress.setup(@runner, remoteIframe, App.config.getExternalInterface())
 
+        r = Cypress.runner(@runner)
+
         ## reupdate chosen with the passed in chosenId
         ## this allows us to pass the chosenId around
         ## through websockets
@@ -792,6 +794,12 @@
           console.log "finished running the iframes suite!", new Date - t
 
           fn?(err)
+
+        @trigger "before:add"
+
+        @runner.iterateThroughRunnables rootSuite
+
+        @trigger "after:add"
 
         @runner.startRunner()
 

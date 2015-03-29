@@ -27,7 +27,8 @@ do (Cypress, _, Mocha) ->
 
         ## create a new function which will
         ## actually invoke the original runner
-        @startRunner = ->
+        @startRunner = (fn2) ->
+          fn = fn2 ? fn
           orig.call(_this, fn)
 
         return @

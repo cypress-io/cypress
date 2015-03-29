@@ -636,7 +636,7 @@ window.Cypress = do ($, _, Backbone) ->
       @cy.group(false)
       @cy.group(false)
 
-      Cypress.trigger "after:run"
+      Cypress.trigger "restore"
 
       ## remove any event listeners
       @cy.off()
@@ -652,10 +652,12 @@ window.Cypress = do ($, _, Backbone) ->
     ## from the cypress instance
     @stop = ->
       @abort().then =>
+        Cypress.Chai.restore()
+        Cypress.Mocha.restore()
+
         Cypress.trigger "destroy"
 
         _.extend @cy,
-          # runner:        null
           remoteIframe:  null
           config:        null
 
@@ -673,7 +675,7 @@ window.Cypress = do ($, _, Backbone) ->
     ## patches the cypress instance with contentWindow
     ## remoteIframe and config
     ## this should be moved to an instance method and
-    @setup = (runner, $remoteIframe, config) ->
+    @setup = (specWindow, $remoteIframe, config) ->
       ## we listen for the unload + submit events on
       ## the window, because when we receive them we
       ## tell cy its not ready and this prevents any
@@ -704,14 +706,11 @@ window.Cypress = do ($, _, Backbone) ->
         bindEvents()
         @cy.isReady(true, "load")
 
-      Cypress.Runner.create(runner)
+      Cypress.Runner.create(@_mocha, specWindow)
 
       _.extend @cy,
-        # runner:        runner
         $remoteIframe: $remoteIframe
         config:        config
-
-      Cypress.trigger "before:run"
 
       ## anytime setup is called we immediately
       ## set cy to be ready to invoke commands
@@ -720,7 +719,17 @@ window.Cypress = do ($, _, Backbone) ->
       ## our tests are re-run
       @cy.isReady(true, "setup")
 
-    @start = ->
+      Cypress.trigger "setup"
+
+    @run = (fn) ->
+      Cypress.getRunner().run(fn)
+
+    @init = (@_mocha) ->
+      throw new Error("Cypress.init requires mocha instance") if not @_mocha
+
+      Cypress.Mocha.override()
+      Cypress.Chai.override()
+
       window.cy = @cy = new Cypress
 
       @cy.initialize()

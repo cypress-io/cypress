@@ -7,29 +7,20 @@
     ## the ability to run tests based on our test framework
     ## ATM its hard coded to work with Mocha
     start: (options) ->
+      ## get the runner and mocha variables if they're not
+      ## passed into our options.  options will normally be
+      ## null, but its helpful in testing
+      mocha = options.mocha ?= API.getMocha()
+
       ## create the global cy variable
-      Cypress.start()
+      Cypress.init(mocha)
 
       Utilities.Overrides.overloadMochaRunnableEmit() if not App.config.ui("ci")
       Utilities.Overrides.overloadMochaRunnerEmit()
       Utilities.Overrides.overloadMochaRunnerUncaught() if not App.config.ui("ci")
 
-      ## these overrides need to move into
-      ## Cypress itself and should not be
-      ## controlled outside of here
-      Cypress.Mocha.override()
-
-      Cypress.Chai.override()
-
-      ## get the runner and mocha variables if they're not
-      ## passed into our options.  options will normally be
-      ## null, but its helpful in testing
-      # runner = options.runner ?= API.getMocha()
-      # mocha  = options.mocha ?= window.mocha
-      mocha = options.mocha ?= API.getMocha()
-
       ## return our runner entity
-      return App.request("runner:entity", mocha)
+      return App.request("runner:entity")
 
     getMocha: ->
       window.mocha = new Mocha reporter: Reporter
@@ -47,14 +38,9 @@
     #   return runner
 
     stop: (runner) ->
+      ## TODO MOVE ALL OF THIS LOGIC INTO CYPRESS!!!!
+
       ## restore chai to the normal expect / assert
-
-      ## these restores need to move into
-      ## Cypress itself and should not be
-      ## controlled outside of here
-      Cypress.Chai.restore()
-
-      Cypress.Mocha.restore()
 
       ## resets cypress to remove all references to other objects
       ## including cy
