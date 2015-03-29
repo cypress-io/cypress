@@ -404,7 +404,6 @@ window.Cypress = do ($, _, Backbone) ->
         ## since we've started a new chain
         ## and reset our chainerId
         if id isnt chainerId
-          # debugger
           @prop("chainerId", chainerId)
           @prop("subject", null)
 
@@ -656,7 +655,7 @@ window.Cypress = do ($, _, Backbone) ->
         Cypress.trigger "destroy"
 
         _.extend @cy,
-          runner:        null
+          # runner:        null
           remoteIframe:  null
           config:        null
 
@@ -705,8 +704,10 @@ window.Cypress = do ($, _, Backbone) ->
         bindEvents()
         @cy.isReady(true, "load")
 
+      Cypress.Runner.create(runner)
+
       _.extend @cy,
-        runner:        runner
+        # runner:        runner
         $remoteIframe: $remoteIframe
         config:        config
 

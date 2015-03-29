@@ -55,5 +55,5 @@ do (Cypress, _) ->
       else
         @commandErr(err)
 
-      @runner.uncaught(err)
+      Cypress.trigger "fail", err
       @trigger "fail", err

@@ -611,26 +611,6 @@
           ## tells the iframe view to load up a new iframe
           @trigger "load:iframe", @iframe, opts
 
-        ## set any outstanding test to pending and stopped
-        ## so we bypass all old ones if we currently have
-        ## a runner
-        if @runner
-          @runner.suite.eachTest (test) ->
-            test.pending = true
-            test.stopped = true
-
-            ## doesnt this while loop look buggy?
-            ## obj = obj.parent yet we are looping
-            ## on test.parent ??
-            ## this while loop should be an instance
-            ## method since we walk up the parent chain
-            ## in other areas.  refactor plz
-            while obj = test.parent
-              return if obj.stopped
-              obj.pending = true
-              obj.stopped = true
-              obj = obj.parent
-
       hasChosen: ->
         !!@get("chosenId")
 
