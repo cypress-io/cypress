@@ -541,7 +541,7 @@
         test.state = "failed"
         test.hook = @getHookName(hook)
         test.failedFromHook = true
-        @trigger "test:end", test.parent.tests[0]
+        @trigger "test:end", test
 
       stop: ->
         ## clear out the commands
