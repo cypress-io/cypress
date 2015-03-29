@@ -2,6 +2,9 @@ before ->
   @sandbox = sinon.sandbox.create()
 
 beforeEach ->
+  @allowErrors = =>
+    @sandbox.stub Cypress.getRunner(), "fail"
+
   App.config = App.request "new:config:entity", {}
   App.config.setEnv("ui")
   Cypress.Chai.setGlobals(window)

@@ -36,6 +36,11 @@ describe "Cypress", ->
       Cypress.set(@currentTest) if @currentTest
       Cypress.setup(runner, @iframe, ->)
 
+      ## do not allow our runner to be aborted
+      ## else this would automatically prevent any
+      ## additional tests from running!
+      @r = Cypress.getRunner().override()
+
     ## if we've changed the src by navigating
     ## away (aka cy.visit(...)) then we need
     ## to reload the fixture again and then setup
@@ -49,7 +54,7 @@ describe "Cypress", ->
     Cypress.abort()
 
   after ->
-    Cypress.stop()
+    Cypress.stop().then => @r.restore()
 
   context "#$", ->
     it "queries the remote document", ->
@@ -197,7 +202,7 @@ describe "Cypress", ->
 
     describe "errors", ->
       beforeEach ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
 
       _.each ["asdf", 123, null, undefined], (arg) ->
         it "throws on bad argument: #{arg}", (done) ->
@@ -453,7 +458,7 @@ describe "Cypress", ->
 
     describe "errors", ->
       beforeEach ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
 
       it "throws if cy.server() hasnt been invoked", (done) ->
         Cypress.restore()
@@ -615,7 +620,7 @@ describe "Cypress", ->
 
     describe "errors", ->
       beforeEach ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
 
       it "throws when being passed a non string or regexp", (done) ->
         cy.on "fail", (err) ->
@@ -653,7 +658,7 @@ describe "Cypress", ->
 
       describe "errors", ->
         beforeEach ->
-          @sandbox.stub cy.runner, "uncaught"
+          @allowErrors()
 
         it "throws when cannot find angular", (done) ->
           delete cy.sync.window().angular
@@ -721,7 +726,7 @@ describe "Cypress", ->
         ## wait until we're ALMOST about to time out before
         ## appending the missingInput
         cy.on "retry", (options) ->
-          if options.total + (options.interval * 3) > options.timeout
+          if options.total + (options.interval * 4) > options.timeout
             cy.$("body").append(missingLi)
 
         cy.ng("repeater", "li in lis").then ($li) ->
@@ -729,7 +734,7 @@ describe "Cypress", ->
 
       describe "errors", ->
         beforeEach ->
-          @sandbox.stub cy.runner, "uncaught"
+          @allowErrors()
 
         it "throws when repeater cannot be found", (done) ->
           cy.on "fail", (err) ->
@@ -796,7 +801,7 @@ describe "Cypress", ->
         ## wait until we're ALMOST about to time out before
         ## appending the missingInput
         cy.on "retry", (options) ->
-          if options.total + (options.interval * 3) > options.timeout
+          if options.total + (options.interval * 4) > options.timeout
             cy.$("body").append(missingInput)
 
         cy.ng("model", "missing-input").then ($input) ->
@@ -821,7 +826,7 @@ describe "Cypress", ->
 
       describe "errors", ->
         beforeEach ->
-          @sandbox.stub cy.runner, "uncaught"
+          @allowErrors()
 
         it "throws when model cannot be found", (done) ->
           cy.ng("model", "not-found")
@@ -979,7 +984,7 @@ describe "Cypress", ->
 
     describe "errors", ->
       beforeEach ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
 
         @failVisit = =>
           cy$ = cy.$
@@ -1238,7 +1243,7 @@ describe "Cypress", ->
         expect(title).to.eq "about page"
 
     it "throws after timing out", (done) ->
-      @sandbox.stub cy.runner, "uncaught"
+      @allowErrors()
       @test.timeout(300)
       cy.$("title").remove()
       cy.title()
@@ -1287,7 +1292,7 @@ describe "Cypress", ->
 
   context "#fill", ->
     it "requires an object literal", (done) ->
-      @sandbox.stub cy.runner, "uncaught"
+      @allowErrors()
 
       cy.get("form").fill("")
 
@@ -1404,7 +1409,7 @@ describe "Cypress", ->
 
     describe "errors", ->
       beforeEach ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
 
       it "logs once when not dom subject", (done) ->
         logs = []
@@ -1434,14 +1439,14 @@ describe "Cypress", ->
 
   context "#fail", ->
     it "passes err to runner.uncaught", ->
-      uncaught = @sandbox.stub cy.runner, "uncaught"
+      uncaught = @allowErrors()
 
       err = new Error
       cy.fail(err)
       expect(uncaught).to.be.calledWith err
 
     it "calls #fail on error", (done) ->
-      @sandbox.stub cy.runner, "uncaught"
+      @allowErrors()
 
       cy.on "command:start", ->
         @_timeout(100)
@@ -1458,7 +1463,7 @@ describe "Cypress", ->
 
     context "command error bubbling", ->
       beforeEach ->
-        @uncaught = @sandbox.stub(cy.runner, "uncaught")
+        @uncaught = @allowErrors()
 
       it "does not emit command:end when a command fails", (done) ->
         cy.then ->
@@ -1500,7 +1505,7 @@ describe "Cypress", ->
 
     describe "errors", ->
       beforeEach ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
 
       it "is a child command", (done) ->
         cy.on "fail", -> done()
@@ -1602,7 +1607,7 @@ describe "Cypress", ->
 
     describe "errors", ->
       beforeEach ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
 
       it "throws when an alias cannot be found", (done) ->
         cy.on "fail", (err) ->
@@ -1760,7 +1765,7 @@ describe "Cypress", ->
       ## wait until we're ALMOST about to time out before
       ## appending the missingEl
       cy.on "retry", (options) ->
-        if options.total + (options.interval * 3) > options.timeout
+        if options.total + (options.interval * 4) > options.timeout
           cy.$("body").append(missingEl)
 
       cy.get("#missing-el").then ($div) ->
@@ -1964,7 +1969,7 @@ describe "Cypress", ->
 
     describe "errors", ->
       beforeEach ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
 
       it "throws after timing out not finding element", (done) ->
         cy.get("#missing-el")
@@ -2250,7 +2255,7 @@ describe "Cypress", ->
 
     describe "errors", ->
       beforeEach ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
         @currentTest.timeout(300)
 
       it "throws when there is a filter", (done) ->
@@ -2325,7 +2330,7 @@ describe "Cypress", ->
 
     describe "errors", ->
       beforeEach ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
 
       it "throws when not a dom subject", (done) ->
         cy.noop({}).select("foo")
@@ -2681,7 +2686,7 @@ describe "Cypress", ->
 
     describe "errors", ->
       beforeEach ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
 
       it "throws when not a dom subject", (done) ->
         cy.noop({}).type("foo")
@@ -2758,7 +2763,7 @@ describe "Cypress", ->
 
     describe "errors", ->
       beforeEach ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
 
       it "throws when not a dom subject", (done) ->
         cy.on "fail", (err) -> done()
@@ -2891,7 +2896,7 @@ describe "Cypress", ->
 
     describe "errors", ->
       beforeEach ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
 
       it "throws when subject isnt dom", (done) ->
         cy.noop({}).check()
@@ -3034,7 +3039,7 @@ describe "Cypress", ->
 
     describe "errors", ->
       beforeEach ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
 
       it "throws specifically on a radio", (done) ->
         cy.get(":radio").uncheck()
@@ -3147,7 +3152,7 @@ describe "Cypress", ->
 
     describe "errors", ->
       beforeEach ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
 
       it "is a child command", (done) ->
         cy.on "fail", -> done()
@@ -3382,7 +3387,7 @@ describe "Cypress", ->
 
     describe "errors", ->
       beforeEach ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
 
       it "throws when not a dom subject", (done) ->
         cy.noop({}).focus()
@@ -3507,7 +3512,7 @@ describe "Cypress", ->
 
     describe "errors", ->
       beforeEach ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
 
       it "throws when not a dom subject", (done) ->
         cy.noop({}).blur()
@@ -3677,7 +3682,7 @@ describe "Cypress", ->
 
     describe "errors", ->
       beforeEach ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
 
       it "throws when not a dom subject", (done) ->
         cy.on "fail", -> done()
@@ -3901,7 +3906,7 @@ describe "Cypress", ->
 
     describe "errors", ->
       beforeEach ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
 
       it "throws when not a dom subject", (done) ->
         cy.on "fail", -> done()
@@ -4054,7 +4059,7 @@ describe "Cypress", ->
             expect($el).to.match el
 
         it "errors without a dom element", (done) ->
-          @sandbox.stub cy.runner, "uncaught"
+          @allowErrors()
 
           cy.noop({})[name](arg)
 
@@ -4109,7 +4114,7 @@ describe "Cypress", ->
             expect($el).to.match el
 
         it "errors without a dom element", (done) ->
-          @sandbox.stub cy.runner, "uncaught"
+          @allowErrors()
 
           cy.noop({})[name](arg)
 
@@ -4163,7 +4168,7 @@ describe "Cypress", ->
         expect($span.get(0)).to.eq(span.get(0))
 
     it "errors after timing out not finding element", (done) ->
-      @sandbox.stub cy.runner, "uncaught"
+      @allowErrors()
 
       cy._timeout(300)
 
@@ -4301,7 +4306,7 @@ describe "Cypress", ->
 
       describe "errors", ->
         beforeEach ->
-          @sandbox.stub cy.runner, "uncaught"
+          @allowErrors()
 
         it "bubbles up automatically", (done) ->
           cy.on "fail", (err) ->
@@ -4419,7 +4424,7 @@ describe "Cypress", ->
 
     describe "errors", ->
       beforeEach ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
 
       it "throws when property does not exist on the subject", (done) ->
         Cypress.on "log", (@log) =>
@@ -4544,7 +4549,7 @@ describe "Cypress", ->
         cy.foo()
 
       it "child commands", (done) ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
 
         Cypress.addChildCommand "foo", (subject) ->
 
@@ -4557,7 +4562,7 @@ describe "Cypress", ->
 
     describe "errors", ->
       beforeEach ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
 
       it "throws without a subject", (done) ->
         Cypress.addChildCommand "foo", ->
@@ -4756,7 +4761,7 @@ describe "Cypress", ->
 
     describe "errors thrown", ->
       beforeEach ->
-        @uncaught = @sandbox.stub(cy.runner, "uncaught")
+        @uncaught = @allowErrors()
 
       it "times out eventually due to false value", (done) ->
         ## forcibly reduce the timeout to 100 ms
@@ -4854,7 +4859,7 @@ describe "Cypress", ->
 
       describe "errors thrown", ->
         beforeEach ->
-          @uncaught = @sandbox.stub(cy.runner, "uncaught")
+          @uncaught = @allowErrors()
 
         it "times out eventually due to false value", (done) ->
           ## forcibly reduce the timeout to 500 ms
@@ -4901,7 +4906,7 @@ describe "Cypress", ->
 
       describe "errors", ->
         beforeEach ->
-          @sandbox.stub cy.runner, "uncaught"
+          @allowErrors()
 
         it "throws when alias doesnt match a route", (done) ->
           cy.on "fail", (err) ->
@@ -4968,7 +4973,7 @@ describe "Cypress", ->
 
       describe "alias argument errors", ->
         beforeEach ->
-          @sandbox.stub cy.runner, "uncaught"
+          @allowErrors()
 
         it ".log", (done) ->
           numRetries = 0
@@ -5161,7 +5166,7 @@ describe "Cypress", ->
       cy.get("div").eq(0)
 
     it "sets type to 'parent' dual commands when first command", (done) ->
-      @sandbox.stub cy.runner, "uncaught"
+      @allowErrors()
 
       Cypress.on "log", (obj) ->
         if obj.get("name") is "then"
@@ -5172,7 +5177,7 @@ describe "Cypress", ->
         throw new Error("then failure")
 
     it "sets type to 'child' dual commands when first command", (done) ->
-      @sandbox.stub cy.runner, "uncaught"
+      @allowErrors()
 
       Cypress.on "log", (obj) ->
         if obj.get("name") is "then"
@@ -5184,7 +5189,7 @@ describe "Cypress", ->
 
     describe "errors", ->
       beforeEach ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
 
         cy.on "command:start", ->
           @_timeout(100)
@@ -5416,7 +5421,7 @@ describe "Cypress", ->
 
     describe "errors", ->
       beforeEach ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
 
       it "should not be true", (done) ->
         cy.on "fail", (err) ->
@@ -5608,7 +5613,7 @@ describe "Cypress", ->
         Cypress.Chai.restore()
 
       it "has custom onFail on err", (done) ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
 
         @onAssert (log) ->
           expect(log.get("error").onFail).to.be.a("function")
@@ -5618,7 +5623,7 @@ describe "Cypress", ->
           expect(true).to.be.false
 
       it "does not output should logs on failures", (done) ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
 
         logs = []
 
@@ -5690,7 +5695,7 @@ describe "Cypress", ->
           expect($a).to.have.attr "href", "#"
 
       it "does not replaces instances of word: 'but' with 'and' for failing assertion", (done) ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
 
         ## chai jquery adds 2 assertions here so
         ## we bind to the 2nd one
@@ -5750,7 +5755,7 @@ describe "Cypress", ->
             expect($body).to.match "body"
 
       it "#onConsole for errors", (done) ->
-        @sandbox.stub cy.runner, "uncaught"
+        @allowErrors()
 
         @onAssert (obj) ->
           expect(obj.attributes.onConsole()).to.deep.eq {
