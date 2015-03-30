@@ -5,15 +5,28 @@ do (Cypress, _, Mocha) ->
   runnableRun = Mocha.Runnable::run
 
   Cypress.Mocha = {
-    restore: ->
+    restore: (items) ->
+      @restoreRunnerRun()
+      @restoreRunnerFail()
+      @restoreRunnableRun()
+
+      return @
+
+    restoreRunnerRun: ->
       Mocha.Runner::run   = runnerRun
+
+    restoreRunnerFail: ->
       Mocha.Runner::fail  = runnerFail
+
+    restoreRunnableRun: ->
       Mocha.Runnable::run = runnableRun
 
     override: ->
       @patchRunnerRun()
       @patchRunnerFail()
       @patchRunnableRun()
+
+      return @
 
     patchRunnerRun: ->
       ## for the moment just hack this together by making
@@ -51,6 +64,7 @@ do (Cypress, _, Mocha) ->
 
     patchRunnableRun: ->
       Mocha.Runnable::run = _.wrap runnableRun, (orig, args...) ->
+
         runnable = @
 
         ## if cy was enqueued within the test
@@ -58,7 +72,7 @@ do (Cypress, _, Mocha) ->
         invokedCy = _.once ->
           runnable._invokedCy = true
 
-        @fn = _.wrap @fn, (orig) ->
+        @fn = _.wrap @fn, (orig, args...) ->
           Cypress.on "enqueue", invokedCy
 
           unbind = ->
@@ -67,7 +81,9 @@ do (Cypress, _, Mocha) ->
           try
             ## call the original function with
             ## our called ctx (from mocha)
-            result = orig.call(@)
+            ## and apply the new args in case
+            ## we have a done callback
+            result = orig.apply(@, args)
 
             unbind()
 

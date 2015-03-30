@@ -5775,7 +5775,7 @@ describe "Cypress", ->
       Cypress.Mocha.override()
 
     afterEach ->
-      Cypress.Mocha.restore()
+      Cypress.Mocha.restoreRunnableRun()
 
     context "#override", ->
       beforeEach ->
@@ -5799,5 +5799,15 @@ describe "Cypress", ->
         ## we can verify this by ensuring the last chain
         ## is what is carried over to the test
         expect(@chain.id).to.eq(cy.chain().id)
+
+    context "#patchRunnableRun", ->
+      it "does not break async tests", (done) ->
+        expect(done).to.be.a("function")
+        done()
+
+      it "does not break async tests with cy invoked", (done) ->
+        cy.noop({}).then ->
+          expect(done).to.be.a("function")
+          done()
 
 
