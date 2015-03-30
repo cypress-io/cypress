@@ -30,7 +30,7 @@
       ## either locate the runnable (if it exists) by the previous runnable
       ## ids or create a real runnable model from the original framework runnable
       ## this ensures we are working with the same model and not generating a new one
-      model = @getPreviousById(runnable.cid) or App.request("runnable:entity", type)
+      model = @getPreviousById(runnable.id) or App.request("runnable:entity", type)
 
       ## push the model into our current runnables array
       @currentRunnables.push model

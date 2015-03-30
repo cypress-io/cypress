@@ -39,9 +39,9 @@
 
     setAttrsFromRunnable: (runnable, index) ->
       @set
-        id: runnable.cid
+        id: runnable.id
         title: _.result(runnable, "originalTitle")
-        parentId: runnable.parent.cid
+        parentId: runnable.parent.id
         parentRoot: runnable.parent.root
         index: index
 
