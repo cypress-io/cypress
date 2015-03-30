@@ -39,19 +39,6 @@
         socket.emit "run:sauce", @iframe, (jobName, batchId) =>
           @trigger "sauce:running", jobName, batchId
 
-      getTestCid: (test) ->
-        ## grab the test id from the test's title
-        matches = testIdRegExp.exec(test.title)
-
-        ## use the captured group if there was a match
-        matches and matches[1]
-
-      getIdToAppend: (cid) ->
-        " [" + cid + "]"
-
-      logResults: (test) ->
-        @trigger "test:results:ready", test
-
       revertDom: (command, init = true) ->
         return @trigger "restore:dom" if not init
 
@@ -490,67 +477,20 @@
         @hook           = null
         @test           = null
 
-      start: (iframe) ->
-        @setIframe iframe
+      # triggerLoadIframe: (iframe, opts = {}) ->
+      #   _.defaults opts,
+      #     chosenId: @get("chosenId")
+      #     browser:  @get("browser")
+      #     version:  @get("version")
 
-        @triggerLoadIframe @iframe
+      #   ## clear out the commands
+      #   @commands.reset([], {silent: true})
 
-      reRun: (iframe, opts = {}) ->
-        ## when we are re-running we first
-        ## need to abort cypress
-        Cypress.abort().then =>
-          @triggerLoadIframe(iframe, opts)
-
-      triggerLoadIframe: (iframe, opts = {}) ->
-        ## first we want to make sure that our last stored
-        ## iframe matches the one we're receiving
-        return if iframe isnt @iframe
-
-        _.defaults opts,
-          chosenId: @get("chosenId")
-          browser:  @get("browser")
-          version:  @get("version")
-
-        ## clear out the commands
-        @commands.reset([], {silent: true})
-
-        ## always reset @options.grep to /.*/ so we know
-        ## if the user has removed a .only in between runs
-        ## if they havent, it will just be picked back up
-        ## by mocha
-        @options.grep = /.*/
-
-        ## start the abort process since we're about
-        ## to load up in case we're running any tests
-        ## right this moment
-
-        ## tells different areas of the app to prepare
-        ## for the resetting of the test run
-        @trigger "reset:test:run"
-
-        ## tells the iframe view to load up a new iframe
-        @trigger "load:iframe", @iframe, opts
-
-      hasChosen: ->
-        !!@get("chosenId")
-
-      getChosen: ->
-        @chosen
-
-      updateChosen: (id) ->
-        ## set chosenId as runnable if present else unset
-        if id then @set("chosenId", id) else @unset("chosenId")
-
-      setChosen: (runnable) ->
-        if runnable
-          @chosen = runnable
-        else
-          @chosen = null
-
-        @updateChosen(runnable?.id)
-
-        ## always reload the iframe
-        @reRun @iframe
+      #   ## always reset @options.grep to /.*/ so we know
+      #   ## if the user has removed a .only in between runs
+      #   ## if they havent, it will just be picked back up
+      #   ## by mocha
+      #   @options.grep = /.*/
 
       ## this recursively loops through all tests / suites
       ## plucking out their cid's and returning those

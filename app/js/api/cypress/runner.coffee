@@ -12,6 +12,8 @@ Cypress.Runner = do (Cypress, _) ->
 
   class Runner
     constructor: (@runner) ->
+      ## hold onto the tests for faster lookup later
+      @tests = []
 
     fail: (err, runnable) ->
       runnable.err = err
@@ -38,13 +40,25 @@ Cypress.Runner = do (Cypress, _) ->
       @runner.on "end", =>
         Cypress.trigger "run:end"
 
-      @runner.on "test", (test) =>
-        Cypress.set(test, @hook)
+      @runner.on "suite", (suite) ->
+        Cypress.trigger "suite:start", suite
 
-        Cypress.trigger "test:start", test
+      @runner.on "suite end", (suite) ->
+        Cypress.trigger "suite:end", suite
 
       @runner.on "hook", (hook) =>
         Cypress.set(hook, @hook)
+        Cypress.trigger "hook:start", hook
+
+      @runner.on "hook end", (hook) ->
+        Cypress.trigger "hook:end", hook
+
+      @runner.on "test", (test) =>
+        Cypress.set(test, @hook)
+        Cypress.trigger "test:start", test
+
+      @runner.on "test end", (test) ->
+        Cypress.trigger "test:end", test
 
     getRunnables: (options = {}) ->
       _.defaults options,
@@ -67,10 +81,6 @@ Cypress.Runner = do (Cypress, _) ->
       ## or we've already processed this tests parent
       return if runnable.root or runnable.added
 
-      ## dont fire duplicate events if this is already fired
-      ## its 'been added' event
-      return if runnable.added
-
       runnable.added = true
 
       ## tests have a runnable of 'test' whereas suites do not have a runnable property
@@ -81,25 +91,29 @@ Cypress.Runner = do (Cypress, _) ->
       ## has written a .only on a suite or a test, and in that case
       ## we dont want to display the tests or suites unless they match
       ## our grep.
-      grep = @options?.grep
-
-      ## grep will always be set to something here... even /.*/
+      grep = @grep()
 
       ## trigger the add events so our UI can begin displaying
       ## the tests + suites
-      if grep and runnable.type is "suite"
+      if runnable.type is "suite"
         count = 0
         runnable.eachTest (test) ->
           count += 1 if grep.test(test.fullTitle())
         options.onRunnable(runnable) if count > 0
 
-      if grep and runnable.type is "test"
+      if runnable.type is "test"
         if grep.test(runnable.fullTitle())
-          runner.tests.push(runnable)
-          options.onRunnable(runnable) if count > 0
+          @tests.push(runnable)
+          options.onRunnable(runnable)
 
       ## recursively apply to all tests / suites of this runnable
-      @iterateThroughRunnables(runnable)
+      @iterateThroughRunnables(runnable, options)
+
+    grep: ->
+      ## grab grep from the mocha runner
+      ## or just set it to all in case
+      ## there is a mocha regression
+      @runner._grep ? /.*/
 
     ignore: (runnable) ->
       ## for mocha we just need to set
@@ -124,10 +138,14 @@ Cypress.Runner = do (Cypress, _) ->
         @abort = @_abort
       @
 
+    @runner = (runner) ->
+      Cypress._runner = new Runner(runner)
+
     @create = (mocha, specWindow) ->
+      mocha.reporter(->)
       runner = mocha.run()
       runner.suite = specWindow.mocha.suite
-      Cypress._runner = new Runner(runner)
+      @runner(runner)
 
   Cypress.getRunner = ->
     @_runner ? throw new Error("Cypress._runner instance not found!")

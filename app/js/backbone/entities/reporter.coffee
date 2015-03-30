@@ -4,20 +4,63 @@
 
     runnableIdRegExp = /\[(.{3})\]$/
 
+    CypressEvents = "run:start run:end suite:start suite:end hook:start hook:end test:start test:end".split(" ")
+
     class Entities.Reporter extends Entities.Model
       initialize: ->
-        @listenTo Cypress, "before:run", ->
-          @trigger "before:run"
+        @commands         = App.request "command:entities"
+        @routes           = App.request "route:entities"
+        @agents           = App.request "agent:entities"
 
-        @listenTo Cypress, "setup", @receivedRunner
+        _.each CypressEvents, (event) =>
+          @listenTo Cypress, event, (args...) =>
+            @trigger event, args...
 
-      start: (specPath) ->
-        # @setIframe specPath
+        @listenTo Cypress, "setup", _.bind(@receivedRunner, @)
 
-        @triggerLoadSpecFrame specPath
+      start: (@specPath) ->
+        @triggerLoadSpecFrame @specPath
 
       stop: ->
         @stopListening(Cypress)
+
+      getChosen: ->
+        @chosen
+
+      hasChosen: ->
+        !!@get("chosenId")
+
+      updateChosen: (id) ->
+        ## set chosenId as runnable if present else unset
+        if id then @set("chosenId", id) else @unset("chosenId")
+
+      setChosen: (runnable) ->
+        if runnable
+          @chosen = runnable
+        else
+          @chosen = null
+
+        @updateChosen(runnable?.id)
+
+        ## always reload the iframe
+        @reRun @specPath
+
+      logResults: (test) ->
+        @trigger "test:results:ready", test
+
+      reRun: (specPath, options = {}) ->
+        ## when we are re-running we first
+        ## need to abort cypress
+        Cypress.abort().then =>
+          ## start the abort process since we're about
+          ## to load up in case we're running any tests
+          ## right this moment
+
+          ## tells different areas of the app to prepare
+          ## for the resetting of the test run
+          @trigger "reset:test:run"
+
+          @triggerLoadSpecFrame(specPath, options)
 
       triggerLoadSpecFrame: (specPath, options = {}) ->
         _.defaults options,
@@ -26,28 +69,20 @@
           version:  @get("version")
 
         ## clear out the commands
-        @commands.reset([], {silent: true})
+        # @commands.reset([], {silent: true})
 
         ## always reset @options.grep to /.*/ so we know
         ## if the user has removed a .only in between runs
         ## if they havent, it will just be picked back up
         ## by mocha
-        @options.grep = /.*/
-
-        ## start the abort process since we're about
-        ## to load up in case we're running any tests
-        ## right this moment
-
-        ## tells different areas of the app to prepare
-        ## for the resetting of the test run
-        @trigger "reset:test:run"
+        # @options.grep = /.*/
 
         ## tells the iframe view to load up a new iframe
         @trigger "load:spec:iframe", specPath, options
 
       getRunnableId: (runnable) ->
-        ## grab the test id from the test's title
-        matches = runnableIdRegExp.exec(test.title)
+        ## grab the runnable id from the runnable's title
+        matches = runnableIdRegExp.exec(runnable.title)
 
         ## use the captured group if there was a match
         matches and matches[1]
@@ -57,12 +92,9 @@
 
       ## strip out the id suffix from the runnable title
       originalTitle: (runnable) ->
-        _.rtrim runnable.title @idSuffix(runnable.id)
+        _.rtrim runnable.title, @idSuffix(runnable.id)
 
       receivedRunner: (runner, fn) ->
-        ## dont trigger anything if we're in CI mode
-        return @ if App.config.ui("ci")
-
         @trigger "before:add"
 
         runner.getRunnables
@@ -84,6 +116,9 @@
 
       ## used to be called runIframeSuite
       run: (iframe, specWindow, remoteIframe, options, fn) ->
+        ## trigger before:run prior to setting up the runner
+        @trigger "before:run"
+
         ## this is where we should automatically patch Ecl/Cy proto's
         ## with the iframe specWindow, and remote iframe
         ## as of now we're passing App.confg into cypress but i dont like
@@ -97,3 +132,4 @@
           fn?(err)
 
     App.reqres.setHandler "reporter:entity", ->
+      new Entities.Reporter
