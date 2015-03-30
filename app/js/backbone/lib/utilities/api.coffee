@@ -1,7 +1,5 @@
 @App.module "Utilities", (Utilities, App, Backbone, Marionette, $, _) ->
 
-  class Reporter
-
   API =
     ## the start method will be responsible for setting up
     ## the ability to run tests based on our test framework
@@ -19,11 +17,11 @@
       Utilities.Overrides.overloadMochaRunnerEmit()
       Utilities.Overrides.overloadMochaRunnerUncaught() if not App.config.ui("ci")
 
-      ## return our runner entity
-      return App.request("runner:entity")
+      ## return our reporter entity
+      return App.request("reporter:entity")
 
     getMocha: ->
-      window.mocha = new Mocha reporter: Reporter
+      window.mocha = new Mocha
 
     # getRunner: ->
     #   ## start running the tests

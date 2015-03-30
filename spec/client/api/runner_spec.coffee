@@ -1,22 +1,27 @@
 describe "Runner API", ->
-  beforeEach ->
-    Cypress.start()
+  before ->
+    Cypress.init({})
+    Cypress.Chai.restore()
+    Cypress.Mocha.restore()
+
+  after ->
+    Cypress.stop()
 
   context "interface", ->
     it "returns runner instance", ->
-      r = Cypress.Runner.create({})
+      r = Cypress.Runner.runner({})
       expect(r).to.be.instanceof Cypress.Runner
 
     it ".getRunner errors without a runner", ->
       expect(Cypress.getRunner).to.throw "Cypress._runner instance not found!"
 
     it ".getRunner returns runner instance", ->
-      r = Cypress.Runner.create({})
+      r = Cypress.Runner.runner({})
       expect(Cypress.getRunner()).to.eq r
 
   context "Cypress events", ->
     beforeEach ->
-      @runner = Cypress.Runner.create({})
+      @runner = Cypress.Runner.runner({})
 
     it "fail", ->
       fail = @sandbox.stub @runner, "fail"
@@ -36,7 +41,7 @@ describe "Runner API", ->
 
   context "#constructor", ->
     it "stores mocha runner instance", ->
-      r = Cypress.Runner.create({})
+      r = Cypress.Runner.runner({})
       expect(r.runner).to.deep.eq({})
 
   context "#abort", ->
@@ -65,7 +70,7 @@ describe "Runner API", ->
 
       @mochaRunner = new Mocha.Runner(@mochaSuite)
 
-      @runner = Cypress.Runner.create(@mochaRunner)
+      @runner = Cypress.Runner.runner(@mochaRunner)
 
     afterEach ->
       @runner.runner.removeAllListeners()

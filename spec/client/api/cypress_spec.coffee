@@ -11,17 +11,30 @@ describe "Cypress", ->
     ## juggled throughout our expectations
     Cypress.option("jQuery", $)
 
+    Cypress.init(mocha)
+
     ## this immediately restores the chai.Assertion::assert else
     ## all of our expect messages would be completely foobar'd
     ## since the modified assert literally modifies the expectation
-    Cypress.Chai.restoreAssert()
-    Cypress.start()
+    Cypress.Chai.restore()
+
+    ## dont force cy to be returned from each runnable
+    ## let our tests choose what we want returned!
+    Cypress.Mocha.restoreRunnableRun()
+    # Cypress.Mocha.restoreRunnableRun()
 
     @loadDom = (fixture = "html/dom") =>
       loadFixture(fixture).done (iframe) =>
         @iframe = $(iframe)
         @head = @iframe.contents().find("head").children().prop("outerHTML")
         @body = @iframe.contents().find("body").children().prop("outerHTML")
+
+        Cypress.setup(window, @iframe, ->)
+
+        ## do not allow our runner to be aborted
+        ## else this would automatically prevent any
+        ## additional tests from running!
+        @r = Cypress.getRunner().override()
 
     @loadDom()
 
@@ -34,12 +47,6 @@ describe "Cypress", ->
         @iframe.contents().find("body").html(@body)
 
       Cypress.set(@currentTest) if @currentTest
-      Cypress.setup(runner, @iframe, ->)
-
-      ## do not allow our runner to be aborted
-      ## else this would automatically prevent any
-      ## additional tests from running!
-      @r = Cypress.getRunner().override()
 
     ## if we've changed the src by navigating
     ## away (aka cy.visit(...)) then we need
