@@ -1,7 +1,7 @@
 Cypress.Runner = do (Cypress, _) ->
 
-  Cypress.on "fail", (err) ->
-    Cypress.getRunner().fail(err)
+  Cypress.on "fail", (err, runnable) ->
+    Cypress.getRunner().fail(err, runnable)
 
   Cypress.on "abort", ->
     Cypress.getRunner().abort()
@@ -13,17 +13,38 @@ Cypress.Runner = do (Cypress, _) ->
   class Runner
     constructor: (@runner) ->
 
-    fail: (err) ->
+    fail: (err, runnable) ->
+      runnable.err = err
+
       @runner.uncaught(err)
 
     destroy: ->
-      ## stop listening here to all events?
+      @runner.removeAllListeners()
 
     abort: ->
       @runner.abort()
 
     run: (fn) ->
+      @setListeners()
+
       @runner.startRunner(fn)
+
+    setListeners: ->
+      ## mocha has begun running the tests
+      @runner.on "start", =>
+        Cypress.trigger "run:start"
+
+      ## mocha has finished running the tests
+      @runner.on "end", =>
+        Cypress.trigger "run:end"
+
+      @runner.on "test", (test) =>
+        Cypress.set(test, @hook)
+
+        Cypress.trigger "test:start", test
+
+      @runner.on "hook", (hook) =>
+        Cypress.set(hook, @hook)
 
     getRunnables: (options = {}) ->
       _.defaults options,
@@ -71,18 +92,14 @@ Cypress.Runner = do (Cypress, _) ->
         runnable.eachTest (test) ->
           count += 1 if grep.test(test.fullTitle())
         options.onRunnable(runnable) if count > 0
-        # runner.trigger "suite:add", runnable if count > 0
 
       if grep and runnable.type is "test"
         if grep.test(runnable.fullTitle())
           runner.tests.push(runnable)
-          # runner.trigger "test:add", runnable
           options.onRunnable(runnable) if count > 0
 
       ## recursively apply to all tests / suites of this runnable
       @iterateThroughRunnables(runnable)
-
-      return runnable
 
     ignore: (runnable) ->
       ## for mocha we just need to set

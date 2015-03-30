@@ -221,92 +221,6 @@
 
           orig.call(@, name, fn)
 
-        ## dont overload the runSuite fn if we're in CI mode
-        return @ if App.config.ui("ci")
-
-        # @runner.runSuite = _.wrap @runner.runSuite, (runSuite, rootSuite, fn) ->
-        #   ## the runSuite function is recursively called for each individual suite
-        #   ## since we iterate through all tests and all suites initially we need
-        #   ## to bail early if this isnt the root suite
-        #   return runSuite.call(@, rootSuite, fn) if not rootSuite.root
-
-        #   runner.trigger "before:add"
-
-        #   runner.iterateThroughRunnables rootSuite
-
-        #   runner.trigger "after:add"
-
-        #   ## grep for the correct test / suite by its id if chosenId is set
-        #   ## or all the tests
-        #   ## we need to grep at the last possible moment because if we've chosenId
-        #   ## a runnable but then deleted it afterwards, then we'll incorrectly
-        #   ## continue to grep for it.  instead we need to do a check to ensure
-        #   ## we still have the runnable's cid which matches our chosenId id
-        #   @grep runner.getGrep(rootSuite)
-
-        #   runSuite.call(@, rootSuite, fn)
-
-        return @
-
-      ## iterates through both the runnables tests + suites if it has any
-      iterateThroughRunnables: (runnable) ->
-        _.each [runnable.tests, runnable.suites], (array) =>
-          _.each array, (runnable) =>
-            @generateId runnable
-
-      ## generates an id for each runnable and then continues iterating
-      ## on children tests + suites
-      generateId: (runnable) ->
-        ## iterating on both the test and its parent (the suite)
-        ## bail if we're the root runnable
-        ## or we've already processed this tests parent
-        return if runnable.root or runnable.added
-
-        runner = @
-
-        ## parse the cid out of the title if it exists
-        runnable.cid ?= runner.getTestCid(runnable)
-
-        ## allow to get the original title
-        runnable.originalTitle = ->
-          @title.replace runner.getIdToAppend(runnable.cid), ""
-
-        ## dont fire duplicate events if this is already fired
-        ## its 'been added' event
-        return if runnable.added
-
-        runnable.added = true
-
-        ## tests have a runnable of 'test' whereas suites do not have a runnable property
-        event = runnable.type or "suite"
-
-        ## we need to change our strategy of displaying runnables
-        ## if grep is set (runner.options.grep)  that means the user
-        ## has written a .only on a suite or a test, and in that case
-        ## we dont want to display the tests or suites unless they match
-        ## our grep.
-        grep = runner.options?.grep
-
-        ## grep will always be set to something here... even /.*/
-
-        ## trigger the add events so our UI can begin displaying
-        ## the tests + suites
-        if grep and event is "suite"
-          count = 0
-          runnable.eachTest (test) ->
-            count += 1 if grep.test(test.fullTitle())
-          runner.trigger "suite:add", runnable if count > 0
-
-        if grep and event is "test"
-          if grep.test(runnable.fullTitle())
-            runner.tests.push(runnable)
-            runner.trigger "test:add", runnable
-
-        ## recursively apply to all tests / suites of this runnable
-        runner.iterateThroughRunnables(runnable)
-
-        return runnable
-
       getCommands: ->
         @commands
 
@@ -773,35 +687,6 @@
         ## this allows us to pass the chosenId around
         ## through websockets
         @updateChosen(options.chosenId)
-
-        ## run the suite for the iframe
-        ## right before we run the root runner's suite we iterate
-        ## through each test and give it a unique id
-        t = new Date
-
-        @runner.suite = contentWindow.mocha.suite
-
-        @runner.once "end", =>
-        # @runner.runSuite contentWindow.mocha.suite, (err) =>
-          ## its possible there is no runner when this
-          ## finishes if the user navigated away from
-          ## the tests
-          return if not @runner
-
-          ## trigger the after run event
-          @trigger "after:run"
-
-          console.log "finished running the iframes suite!", new Date - t
-
-          fn?(err)
-
-        @trigger "before:add"
-
-        @runner.iterateThroughRunnables rootSuite
-
-        @trigger "after:add"
-
-        @runner.startRunner()
 
   App.reqres.setHandler "runner:entity", (mocha) ->
     ## always set grep if its not already set
