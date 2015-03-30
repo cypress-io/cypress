@@ -54,6 +54,9 @@ iframe:
 sinon:
   - bower_components/sinon/index.js
 
+sinon-as-promised:
+  - app/js/vendor/sinon-as-promised.js
+
 id_generator:
   - bower_components/jquery/dist/jquery.js
   - bower_components/underscore/underscore.js
