@@ -5384,6 +5384,14 @@ describe "Cypress", ->
 
       Cypress.off "foo"
 
+  context ".setup", ->
+    it "returns the runner instance", (done) ->
+      Cypress.on "setup", (runner) ->
+        expect(runner).to.eq Cypress.getRunner()
+        done()
+
+      @loadDom()
+
   context "#to", ->
     it "returns the subject for chainability", ->
       cy.noop({foo: "bar"}).to("deep.eq", {foo: "bar"}).then (obj) ->

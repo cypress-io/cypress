@@ -719,7 +719,7 @@ window.Cypress = do ($, _, Backbone) ->
       ## our tests are re-run
       @cy.isReady(true, "setup")
 
-      Cypress.trigger "setup"
+      Cypress.trigger "setup", Cypress.getRunner()
 
     @run = (fn) ->
       Cypress.getRunner().run(fn)
