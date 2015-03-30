@@ -2557,7 +2557,9 @@ describe "Cypress", ->
           cy.get("#multiple-inputs-and-input-submit input:first").type("foo{enter}")
 
         it "causes click event on the input[type=submit]", (done) ->
-          @forms.find("#multiple-inputs-and-input-submit input[type=submit]").click -> done()
+          @forms.find("#multiple-inputs-and-input-submit input[type=submit]").click (e) ->
+            e.preventDefault()
+            done()
 
           cy.get("#multiple-inputs-and-input-submit input:first").type("foo{enter}")
 
@@ -2576,7 +2578,9 @@ describe "Cypress", ->
           cy.get("#multiple-inputs-and-button-submit input:first").type("foo{enter}")
 
         it "causes click event on the button[type=submit]", (done) ->
-          @forms.find("#multiple-inputs-and-button-submit button[type=submit]").click -> done()
+          @forms.find("#multiple-inputs-and-button-submit button[type=submit]").click (e) ->
+            e.preventDefault()
+            done()
 
           cy.get("#multiple-inputs-and-button-submit input:first").type("foo{enter}")
 
@@ -2596,7 +2600,9 @@ describe "Cypress", ->
           cy.get("#multiple-inputs-and-button-with-no-type input:first").type("foo{enter}")
 
         it "causes click event on the button", (done) ->
-          @forms.find("#multiple-inputs-and-button-with-no-type button").click -> done()
+          @forms.find("#multiple-inputs-and-button-with-no-type button").click (e) ->
+            e.preventDefault()
+            done()
 
           cy.get("#multiple-inputs-and-button-with-no-type input:first").type("foo{enter}")
 
