@@ -67,7 +67,7 @@
       # @listenTo reporter, "suite:start", (suite) ->
         # @addRunnable(suite, "suite")
 
-      @listenTo reporter, "suite:stop", (suite) ->
+      @listenTo reporter, "suite:end", (suite) ->
         return if suite.root
 
         ## when our suite stop update its state
