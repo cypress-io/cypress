@@ -4,8 +4,12 @@ describe "Runner API", ->
     Cypress.Chai.restore()
     Cypress.Mocha.restore()
 
+    ## allow our own cypress errors to bubble up!
+    App.Utilities.Overrides.overloadMochaRunnerUncaught()
+
   after ->
     Cypress.stop()
+    App.Utilities.Overrides.restore()
 
   context "interface", ->
     it "returns runner instance", ->
@@ -38,6 +42,72 @@ describe "Runner API", ->
       Cypress.trigger "destroy"
       expect(destroy).to.be.calledOnce
       expect(Cypress.getRunner).to.throw
+
+  context "#setListeners", ->
+    beforeEach ->
+      runner = Fixtures.createRunnables
+        hooks: ["beforeEach"]
+        tests: ["one"]
+      @runner = Cypress.Runner.runner(runner)
+      @runner.setListeners()
+
+    describe "runner.on('fail')", ->
+      it "sets err on runnable", (done) ->
+        err = new Error("err!")
+        test = @runner.getTestByTitle("one")
+        test.fn = ->
+          throw err
+
+        @runner.runner.run ->
+          expect(test.err).to.eq err
+          done()
+
+      it "calls hookFailed if test.type is hook", (done) ->
+        hookFailed = @sandbox.stub @runner, "hookFailed"
+
+        err = new Error("err!")
+        hook = @runner.runner.suite._beforeEach[0]
+        hook.fn = ->
+          throw err
+
+        @runner.runner.run ->
+          expect(hookFailed).to.be.calledWith
+          done()
+
+  context "#hookFailed", ->
+    beforeEach (done) ->
+      runner = Fixtures.createRunnables
+        hooks: ["beforeEach"]
+        tests: ["one"]
+
+      @runner = Cypress.Runner.runner(runner)
+      @runner.setListeners()
+
+      @hook = @runner.runner.suite._beforeEach[0]
+      @hook.fn = ->
+        throw new Error("hook failed!")
+
+      ## we're additionally testing that Cypress
+      ## fires this test:end event since thats
+      ## how we actually get our test!
+      Cypress.on "test:end", (@relatedTest) =>
+
+      @runner.runner.run -> done()
+
+    afterEach ->
+      Cypress.off "test:end"
+
+    it "sets test err to hook err", ->
+      expect(@relatedTest.err).to.eq @hook.err
+
+    it "sets test state to failed", ->
+      expect(@relatedTest.state).to.eq "failed"
+
+    it "sets test hook to hook", ->
+      expect(@relatedTest.hookName).to.eq "before each"
+
+    it "sets test failedFromHook", ->
+      expect(@relatedTest.failedFromHook).to.be.true
 
   context "#constructor", ->
     it "stores mocha runner instance", ->

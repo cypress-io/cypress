@@ -20,8 +20,6 @@ Cypress.Runner = do (Cypress, _) ->
       @getRunnables() if @runner.suite
 
     fail: (err, runnable) ->
-      runnable.err = err
-
       @runner.uncaught(err)
 
     destroy: ->
@@ -66,6 +64,39 @@ Cypress.Runner = do (Cypress, _) ->
 
       @runner.on "test end", (test) ->
         Cypress.trigger "test:end", test
+
+      @runner.on "fail", (runnable, err) =>
+        runnable.err = err
+
+        @hookFailed(runnable, err) if runnable.type is "hook"
+
+    getHookName: (hook) ->
+      ## find the name of the hook by parsing its
+      ## title and pulling out whats between the quotes
+      name = hook.title.match(/\"(.+)\"/)
+      name and name[1]
+
+    hookFailed: (hook, err) ->
+      ## finds the test by returning the first test from
+      ## the parent or looping through the suites until
+      ## it finds the first test
+      test = @getTestFromHook(hook, hook.parent)
+      test.err = err
+      test.state = "failed"
+      test.hookName = @getHookName(hook)
+      test.failedFromHook = true
+      Cypress.trigger "test:end", test
+
+    getTestByTitle: (title) ->
+      @firstTest @runner.suite, (test) ->
+        test.title is title
+
+    firstTest: (suite, fn) ->
+      for test in suite.tests
+        return test if fn(test)
+
+      for suite in suite.suites
+        return test if test = @firstTest(suite, fn)
 
     ## returns each runnable to the callback function
     ## if it matches the current grep
