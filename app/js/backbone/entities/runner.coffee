@@ -593,24 +593,6 @@
         ## pass this along to our Eclectus methods
         @setContentWindow contentWindow, remoteIframe
 
-        ## trigger the before run event
-        @trigger "before:run"
-
-        ## trigger this event if we're not using the default
-        ## grep so we can remove existing tests
-        @trigger "exclusive:test" if not @isDefaultGrep(@options.grep)
-
-        ## shouldnt have to do this anymore since the tests and suites
-        ## are rebuilt for each runner instance
-        # @runner.tests = []
-
-        ## we need to reset the runner.test to undefined
-        ## when the user clicks the reload button, mocha
-        ## will think that the currentTest is really the
-        ## last test that was run.  so we always reset
-        ## the state of the runner to prevent problems
-        @runner.test = undefined
-
         ## don't attempt to run any tests if we're in manual
         ## testing mode and our iframe is not readable
         return if not remoteIframe.isReadable()
