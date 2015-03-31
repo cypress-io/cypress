@@ -32,10 +32,17 @@ window.Fixtures = do ->
         when "suites"
           @createSuites(suite, value)
 
+        when "hooks"
+          @createHooks(suite, value)
+
     if arguments.length is 1
       new Mocha.Runner(suite)
     else
       suite
+
+  createHooks: (suite, hooks = []) ->
+    _.each hooks, (hook) ->
+      suite[hook] ->
 
   createTests: (suite, tests = []) ->
     _.each tests, (test) ->
