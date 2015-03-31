@@ -129,11 +129,14 @@ Cypress.Runner = do (Cypress, _) ->
       ## else return false
       return false
 
-    grep: ->
-      ## grab grep from the mocha runner
-      ## or just set it to all in case
-      ## there is a mocha regression
-      @runner._grep ?= /.*/
+    grep: (re) ->
+      if arguments.length
+        @runner._grep = re
+      else
+        ## grab grep from the mocha runner
+        ## or just set it to all in case
+        ## there is a mocha regression
+        @runner._grep ?= /.*/
 
     ignore: (runnable) ->
       ## for mocha we just need to set

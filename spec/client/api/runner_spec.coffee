@@ -48,6 +48,19 @@ describe "Runner API", ->
       r = Cypress.Runner.runner({})
       expect(r.runnables).to.deep.eq []
 
+  context "#grep", ->
+    beforeEach ->
+      @runner = Cypress.Runner.runner({})
+
+    it "set /.*/ by default", ->
+      @runner.grep()
+      expect(@runner.runner._grep).to.match /.*/
+
+    it "can set to another RegExp", ->
+      re = /.+/
+      @runner.grep(re)
+      expect(@runner.runner._grep).to.eq re
+
   context "#anyTest", ->
     beforeEach ->
       runner = Fixtures.createRunnables {
