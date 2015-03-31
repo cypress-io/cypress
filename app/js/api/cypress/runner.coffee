@@ -71,6 +71,12 @@ Cypress.Runner = do (Cypress, _) ->
       @runner.on "test end", (test) ->
         Cypress.trigger "test:end", test
 
+      ## if a test is pending mocha will only
+      ## emit the pending event instead of the test
+      ## so we normalize the pending / test events
+      @runner.on "pending", (test) ->
+        @emit "test", test
+
       @runner.on "fail", (runnable, err) =>
         runnable.err = err
 

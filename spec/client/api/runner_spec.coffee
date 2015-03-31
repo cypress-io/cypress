@@ -169,6 +169,17 @@ describe "Runner API", ->
           expect(@trigger).to.be.calledWith "test:end", @test
           done()
 
+    describe "runner.on('pending')", ->
+      it "emits test with test", (done) ->
+        test = @runner.getTestByTitle("one")
+        test.pending = true
+
+        @runner.runner.on "pending", (@test) =>
+
+        @runner.runner.run =>
+          expect(@trigger).to.be.calledWith "test:start", @test
+          done()
+
     describe "runner.on('fail')", ->
       it "sets err on runnable", (done) ->
         err = new Error("err!")
@@ -267,16 +278,6 @@ describe "Runner API", ->
       test = @runner.getTestFromHook undefined, @runner.runner.suite
       expect(test.title).to.eq "one"
 
-    # it "sets test if exists in hook.ctx.currentTest", (done) ->
-    #   Cypress.on "test:before:hooks", (test) ->
-    #     expect(test.title).to.eq "two"
-    #     done()
-
-    #   @runner.grep /two/
-    #   @runner.runner.run ->
-
-      # @runner.getTestFromHook
-
   context "#patchHookEvents", ->
     afterEach ->
       Cypress.off "test:before:hooks"
@@ -311,12 +312,6 @@ describe "Runner API", ->
       it "triggers 'test:after:hooks' two times", (done) ->
         runner = Fixtures.createRunnables
           tests: ["one", "two"]
-          # suites:
-            # "suite 1":
-              # tests: ["two", "three", "four"]
-              # suites:
-                # "suite 2":
-                  # tests: ["five"]
 
         @runner = Cypress.Runner.runner(runner)
 
