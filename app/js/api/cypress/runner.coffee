@@ -12,8 +12,8 @@ Cypress.Runner = do (Cypress, _) ->
 
   class Runner
     constructor: (@runner) ->
-      ## hold onto the tests for faster lookup later
-      @tests = []
+      ## hold onto the runnables for faster lookup later
+      @runnables = []
 
     fail: (err, runnable) ->
       runnable.err = err
@@ -62,8 +62,13 @@ Cypress.Runner = do (Cypress, _) ->
 
     getRunnables: (options = {}) ->
       _.defaults options,
-        onSuite: ->
-        onTest: ->
+        onRunnable: ->
+
+        ## if grep is set (runner.options.grep)  that means the user
+        ## has written a .only on a suite or a test, and in that case
+        ## we dont want to display the tests or suites unless they match
+        ## our grep.
+        grep: @grep()
 
       @iterateThroughRunnables(@runner.suite, options)
 
@@ -84,36 +89,51 @@ Cypress.Runner = do (Cypress, _) ->
       runnable.added = true
 
       ## tests have a runnable of 'test' whereas suites do not have a runnable property
-      runnable.type = runnable.type ? "suite"
+      runnable.type ?= "suite"
 
-      ## we need to change our strategy of displaying runnables
-      ## if grep is set (runner.options.grep)  that means the user
-      ## has written a .only on a suite or a test, and in that case
-      ## we dont want to display the tests or suites unless they match
-      ## our grep.
-      grep = @grep()
+      ## hold onto all of the runnables in a flat array
+      ## so we can look this up much faster in the future
+      @runnables.push(runnable)
+
+      ## we have optimized this iteration to the maximum.
+      ## we memoize the existential matchesGrep property
+      ## so we dont do N+1 ops
+      matchesGrep = (runnable, grep) ->
+        runnable.matchesGrep ?= grep.test(runnable.fullTitle())
 
       ## trigger the add events so our UI can begin displaying
       ## the tests + suites
-      if runnable.type is "suite"
-        count = 0
-        runnable.eachTest (test) ->
-          count += 1 if grep.test(test.fullTitle())
-        options.onRunnable(runnable) if count > 0
+      switch runnable.type
+        when "suite"
+          any = @anyTest runnable, (test) ->
+            matchesGrep(test, options.grep)
 
-      if runnable.type is "test"
-        if grep.test(runnable.fullTitle())
-          @tests.push(runnable)
-          options.onRunnable(runnable)
+          options.onRunnable(runnable) if any
+
+        when "test"
+          if matchesGrep(runnable, options.grep)
+            options.onRunnable(runnable)
 
       ## recursively apply to all tests / suites of this runnable
       @iterateThroughRunnables(runnable, options)
+
+    ## optimized iteration which loops through
+    ## all tests until we explicitly return true
+    anyTest: (suite, fn) ->
+      for test in suite.tests
+        return true if fn(test) is true
+
+      for suite in suite.suites
+        return true if @anyTest(suite, fn) is true
+
+      ## else return false
+      return false
 
     grep: ->
       ## grab grep from the mocha runner
       ## or just set it to all in case
       ## there is a mocha regression
-      @runner._grep ? /.*/
+      @runner._grep ?= /.*/
 
     ignore: (runnable) ->
       ## for mocha we just need to set

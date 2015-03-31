@@ -44,39 +44,137 @@ describe "Runner API", ->
       r = Cypress.Runner.runner({})
       expect(r.runner).to.deep.eq({})
 
+    it "stores runnables array", ->
+      r = Cypress.Runner.runner({})
+      expect(r.runnables).to.deep.eq []
+
+  context "#anyTest", ->
+    beforeEach ->
+      runner = Fixtures.createRunnables {
+        tests: ["root test 1"]
+        suites: {
+          "suite 1": {
+            tests: ["suite 1, test 1", "suite 1, test 2"]
+            suites: {
+              "suite 2": {
+                tests: ["suite 2, test 1"]
+              }
+            }
+          }
+        }
+      }
+
+      @runner = Cypress.Runner.runner(runner)
+
+    it "iterates through all of the tests of a suite", ->
+      tests = []
+
+      ## start from the root suite
+      @runner.anyTest @runner.runner.suite, (test) ->
+        tests.push(test)
+
+      allTests = _(tests).all (test) -> test.type is "test"
+      expect(allTests).to.be.true
+      expect(tests).to.have.length(4)
+
+    it "can bail by returning true", ->
+      iterator = @sandbox.spy _.after 2, ->
+        ## return early by returning true after
+        ## the second invocation
+        return true
+
+      @runner.anyTest @runner.runner.suite, iterator
+
+      expect(iterator.callCount).to.eq(2)
+
+    it "returns true if any iterator returns true", ->
+      iterator = _.after 2, -> return true
+
+      ret = @runner.anyTest @runner.runner.suite, iterator
+      expect(ret).to.be.true
+
+    it "returns false if not any iterator returns true", ->
+      iterator = -> return false
+
+      ret = @runner.anyTest @runner.runner.suite, iterator
+      expect(ret).to.be.false
+
+  context "#getRunnables", ->
+    beforeEach ->
+      runner = Fixtures.createRunnables {
+        tests: ["one"]
+        suites: {
+          "suite 1": {
+            tests: ["suite 1, two", "suite 1, three"]
+            suites: {
+              "suite 2": {
+                tests: ["suite 2, four"]
+              }
+            }
+          }
+        }
+      }
+
+      @runner = Cypress.Runner.runner(runner)
+
+    it "pushes runnable into runnables array", ->
+      ## 2 suites + 4 tests = 6 total
+      @runner.getRunnables()
+      expect(@runner.runnables).to.have.length(6)
+
+    it "sets runnable type", ->
+      @runner.getRunnables()
+      types = _.pluck @runner.runnables, "type"
+      expect(types).to.deep.eq ["test", "suite", "test", "test", "suite", "test"]
+
+    it "sets runnable.added", ->
+      allAdded = _(@runnable.runnables).all (runnable) -> runnable.added is true
+      expect(allAdded).to.be.true
+
+    it "calls options.onRunnable", ->
+      runnables = []
+
+      @runner.getRunnables
+        onRunnable: (runnable) ->
+          runnables.push(runnable)
+
+      expect(runnables.length).to.eq(6)
+
+    it "does not call options.onRunnable if no test in a suite matches grep", ->
+      runnables = []
+
+      @runner.getRunnables
+        onRunnable: (runnable) ->
+          runnables.push(runnable)
+        grep: /four/
+
+      titles = _(runnables).pluck "title"
+
+      expect(titles).to.deep.eq [
+        "suite 1", "suite 2", "suite 2, four"
+      ]
+
   context "#abort", ->
     beforeEach ->
-      ## think about building this into a helper method which
-      ## takes an object + array of object nested structure
-      ## and automatically builds these tests for us
-      # {
-      #   tests: ["root test 1", "root test 2"]
-      #   suites: {
-      #     "suite 1": ["suite 1, test 1", "suite 1, test 2"]
-      #     "suite 2": []
-      #   }
-      # }
+      runner = Fixtures.createRunnables {
+        tests: ["root test 1", "root test 2"]
+        suites: {
+          "suite 1": {
+            tests: ["suite 1, test 1", "suite 1, test 2"]
+          }
+          "suite 2": {
+            tests: ["suite 2, test 1"]
+          }
+        }
+      }
 
-      @mochaSuite = new Mocha.Suite('', new Mocha.Context)
-      @mochaSuite.addTest new Mocha.Test "root test 1", ->
-      @mochaSuite.addTest new Mocha.Test "root test 2", ->
-
-      s1 = Mocha.Suite.create @mochaSuite, "first nested suite"
-      s1.addTest new Mocha.Test "suite 1, test 1", ->
-      s1.addTest new Mocha.Test "suite 1, test 2", ->
-
-      s2 = Mocha.Suite.create @mochaSuite, "second nested suite"
-      s2.addTest new Mocha.Test "suite 2, test1", ->
-
-      @mochaRunner = new Mocha.Runner(@mochaSuite)
-
-      @runner = Cypress.Runner.runner(@mochaRunner)
+      @runner = Cypress.Runner.runner(runner)
 
     afterEach ->
       @runner.runner.removeAllListeners()
 
     it "aborts the mocha runner", ->
-      abort = @sandbox.spy @mochaRunner, "abort"
+      abort = @sandbox.spy @runner.runner, "abort"
       @runner.abort()
       expect(abort).to.be.calledOnce
 
