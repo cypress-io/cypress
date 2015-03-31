@@ -563,7 +563,7 @@ describe "Runner API", ->
       it "only tests the grep once for each test runnable", ->
         @runner.runnables = []
 
-        grep = /.*/
+        grep = /\w+/
         test = @sandbox.spy grep, "test"
 
         @runner.getRunnables({grep: grep})
@@ -574,7 +574,7 @@ describe "Runner API", ->
       it "regreps the tests if grep has changed between iterations", ->
         @runner.runnables = []
 
-        grep = @runner.grep()
+        grep = @runner.grep /\w+/
         test = @sandbox.spy @runner.runner._grep, "test"
         @runner.getRunnables()
 
