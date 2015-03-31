@@ -79,10 +79,6 @@
         ## add the test to the container collection of runnables
         @addRunnable(test, "test")
 
-      # @listenTo reporter, "test:start", (test) ->
-        ## add the test to the container collection of runnables
-        # @addRunnable(test, "test")
-
       @listenTo reporter, "test:end", (test) ->
         ## find the client runnable model by the test's ide
         runnable = container.get(test.id)
