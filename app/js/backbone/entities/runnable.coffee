@@ -32,7 +32,7 @@
 
     checkForFailedHook: ->
       ## bail if our hook property is falsy
-      return if not name = @get("hook")
+      return if not name = @get("hookName")
 
       ## else continue to fail the hook by name
       @failHookByName(name)
@@ -67,7 +67,7 @@
       @collection.remove(@)
 
     addCommand: (command, options = {}) ->
-      hook = command.get("hook")
+      hook = command.get("hookName")
       @get("hooks").addCommandToHook hook, command, options
 
     addRoute: (route, options = {}) ->
@@ -141,9 +141,9 @@
         ## set the err on the attrs
         attrs.error = _.result test.err, "toString"
 
-        ## get the hook type (beforeEach, afterEach, etc)
+        ## get the hook name (beforeEach, afterEach, etc)
         ## if the test failed from a hook
-        attrs.hook = test.hook if test.failedFromHook
+        attrs.hookName = test.hookName if test.failedFromHook
       else
         ## remove the original error in case it exists
         @removeOriginalError()
@@ -153,7 +153,7 @@
         attrs.error = null
 
         ## remove the hook as well
-        attrs.hook = null
+        attrs.hookName = null
 
       ## set the private _slow and _timeout
       ## based on the result of these methods
