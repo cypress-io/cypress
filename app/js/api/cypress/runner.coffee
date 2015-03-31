@@ -95,6 +95,7 @@ Cypress.Runner = do (Cypress, _) ->
       test = @getTestFromHook(hook, hook.parent)
       test.err = err
       test.state = "failed"
+      test.duration = hook.duration
       test.hookName = @getHookName(hook)
       test.failedFromHook = true
       Cypress.trigger "test:end", test

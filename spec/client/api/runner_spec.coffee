@@ -232,6 +232,9 @@ describe "Runner API", ->
     it "sets test state to failed", ->
       expect(@relatedTest.state).to.eq "failed"
 
+    it "sets test duration to hook duration", ->
+      expect(@relatedTest.duration).to.eq @hook.duration
+
     it "sets test hook to hook", ->
       expect(@relatedTest.hookName).to.eq "before each"
 
