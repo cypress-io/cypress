@@ -2,6 +2,33 @@ describe "Reporter Entity", ->
   beforeEach ->
     @reporter = App.request("reporter:entity")
 
+  context "#receivedRunner", ->
+    it "triggers before:add"
+
+    it "triggers after:add"
+
+    describe "no chosen id", ->
+      it "triggers add events"
+
+    describe "a chosen id", ->
+      it "doesnt initially trigger add events"
+
+      context "when id is found", ->
+        it "sets the only on the runner"
+
+        it "triggers add events"
+
+        it "doesnt pushIds"
+
+        it "doesnt pushRunnables"
+
+      context "when id isnt found", ->
+        it "removes chosenId"
+
+        it "triggers add events"
+
+        it "does not getRunnables again"
+
   context "#run", ->
     beforeEach ->
       @setup   = @sandbox.stub Cypress, "setup"
@@ -19,6 +46,7 @@ describe "Reporter Entity", ->
     it "triggers after:run as the Cypress.run callback", ->
       @run.callsArg(0)
       @reporter.run()
+
       expect(@trigger).to.be.calledWith "after:run"
 
   context "#triggerLoadSpecFrame", ->

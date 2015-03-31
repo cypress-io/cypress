@@ -97,18 +97,76 @@
       receivedRunner: (runner, fn) ->
         @trigger "before:add"
 
-        runner.getRunnables
-          onRunnable: (runnable) =>
-            runnable.id ?= @getRunnableId(runnable)
+        runnables = []
+        ids = []
 
-            ## force our runner to ignore running this
-            ## test if it doesnt have an id!
-            runner.ignore(runnable) if not runnable.id
+        triggerAddEvent: (runnable) =>
+          @trigger("#{runnable.type}:add", runnable)
 
-            ## allow to get the original title without the id
-            runnable.originalTitle = @originalTitle(runnable)
+        getRunnables = (options = {}) =>
+          _.defaults options,
+            pushIds: true
+            pushRunnables: true
+            triggerAddEvent: true
 
-            @trigger "#{runnable.type}:add", runnable
+          ## on the first iteration we want to simply collect
+          ## all of the runnable ids, and filter out any runnables
+          ## which dont have an id (or a duplicate id?)
+          runner.getRunnables
+            onRunnable: (runnable) =>
+              runnables.push(runnable) if options.pushRunnables
+
+              runnable.id ?= @getRunnableId(runnable)
+
+              ids.push(runnable.id) if options.pushIds
+
+              ## force our runner to ignore running this
+              ## test if it doesnt have an id!
+              ## or if it has a duplicate id, nuke it including
+              ## any children.
+              ## just remove the children if its a suite
+              # runner.ignore(runnable) if not runnable.id
+
+              ## allow to get the original title without the id
+              runnable.originalTitle ?= @originalTitle(runnable)
+
+              triggerAddEvent(runnable) if options.triggerAddEvent
+
+        ## if we have a chosen id
+        if @hasChosen()
+          id = @get("chosenId")
+
+          ## get our runnables now
+          getRunnables({triggerAddEvent: false})
+
+          ## and its an id within our runnables.
+          ## we do this to ensure that the user
+          ## didnt previously select this test
+          ## and then modify the spec and remove
+          ## this specific id
+          if id in ids
+            ## runner knows how to escape this?
+            runner.setDotOnly(id)
+
+            ## get the runnables again since we now
+            ## have to iterate through them again
+            ## to see which ones should be added
+            ## we dont need to push the ids or push
+            ## the runnables since its a temp var anyway
+            getRunnables({pushIds: false, pushRunnables: false})
+          else
+            ## remove the chosen id since its not
+            ## longer in the spec file!
+            @updateChosen()
+
+            ## trigger the triggerAddEvent on all of
+            ## our existing runnables!
+            _.each runnables, triggerAddEvent
+        else
+          ## if we havent chosen anything to begin with
+          ## then just iterate through all the runnables
+          ## and fire away!
+          getRunnables()
 
         @trigger "after:add"
 
