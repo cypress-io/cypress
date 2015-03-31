@@ -140,10 +140,6 @@ describe "Runner API", ->
       types = _.pluck @runner.runnables, "type"
       expect(types).to.deep.eq ["test", "suite", "test", "test", "suite", "test"]
 
-    it "sets runnable.added", ->
-      allAdded = _(@runnable.runnables).all (runnable) -> runnable.added is true
-      expect(allAdded).to.be.true
-
     it "calls options.onRunnable", ->
       runnables = []
 
@@ -166,6 +162,55 @@ describe "Runner API", ->
       expect(titles).to.deep.eq [
         "suite 1", "suite 2", "suite 2, four"
       ]
+
+    it "prefers .runnables on subsequent iterations", ->
+      @runner.getRunnables()
+
+      ## grab the top 4 runnables
+      @runner.runnables = @runner.runnables.slice(0, 4)
+
+      runnables = []
+
+      @runner.getRunnables
+        onRunnable: (runnable) ->
+          runnables.push(runnable)
+
+      expect(runnables).to.have.length(4)
+
+    it "never invokes #iterateThroughRunnables", ->
+      @runner.getRunnables()
+      iterateThroughRunnables = @sandbox.spy @runner, "iterateThroughRunnables"
+      @runner.getRunnables()
+      expect(iterateThroughRunnables).not.to.be.called
+
+    it "does not continue to push into .runnables or mutate them", ->
+      @runner.getRunnables()
+      runnables = @runner.runnables
+      expect(runnables).to.have.length(6)
+      @runner.getRunnables()
+      expect(@runner.runnables).to.have.length(6)
+      expect(@runner.runnables).to.eq(runnables)
+
+    it "only tests the grep once for each test runnable", ->
+      grep = /.*/
+      test = @sandbox.spy grep, "test"
+
+      @runner.getRunnables({grep: grep})
+
+      ## we have 4 tests, thats how many should have been grepp'd!
+      expect(test.callCount).to.eq 4
+
+    it "regreps the tests if grep has changed between iterations", ->
+      grep = @runner.grep()
+      test = @sandbox.spy @runner.runner._grep, "test"
+      @runner.getRunnables()
+
+      grep2 = @runner.grep /.+/
+      test2 = @sandbox.spy @runner.runner._grep, "test"
+      @runner.getRunnables()
+
+      ## should grep each of the tests twice
+      expect(test.callCount + test2.callCount).to.eq 8
 
   context "#abort", ->
     beforeEach ->

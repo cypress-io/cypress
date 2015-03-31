@@ -60,17 +60,35 @@ Cypress.Runner = do (Cypress, _) ->
       @runner.on "test end", (test) ->
         Cypress.trigger "test:end", test
 
+    ## returns each runnable to the callback function
+    ## if it matches the current grep
+    ## subsequent runnable iterations are optimized
     getRunnables: (options = {}) ->
+      ## when grep isnt /.*/, it means a user has written a .only
+      ## on a suite or a test, and in that case we dont want to
+      ## call onRunnable unless they match our grep.
       _.defaults options,
+        grep: @grep()
+        iterate: true
+        pushRunnables: true
         onRunnable: ->
 
-        ## if grep is set (runner.options.grep)  that means the user
-        ## has written a .only on a suite or a test, and in that case
-        ## we dont want to display the tests or suites unless they match
-        ## our grep.
-        grep: @grep()
+      ## if we already have runnables then just
+      ## prefer these instead of the deep iteration
+      ## this is simply faster performance
+      if @runnables.length
+        _.extend options,
+          iterate: false
+          pushRunnables: false
 
-      @iterateThroughRunnables(@runner.suite, options)
+        for runnable in @runnables
+          @process(runnable, options)
+
+        return null
+
+      else
+        ## go through the normal iteration off of the root suite
+        @iterateThroughRunnables(@runner.suite, options)
 
     ## iterates through both the runnables tests + suites if it has any
     iterateThroughRunnables: (runnable, options) ->
@@ -84,22 +102,28 @@ Cypress.Runner = do (Cypress, _) ->
       ## iterating on both the test and its parent (the suite)
       ## bail if we're the root runnable
       ## or we've already processed this tests parent
-      return if runnable.root or runnable.added
-
-      runnable.added = true
+      return if runnable.root
 
       ## tests have a runnable of 'test' whereas suites do not have a runnable property
       runnable.type ?= "suite"
 
       ## hold onto all of the runnables in a flat array
       ## so we can look this up much faster in the future
-      @runnables.push(runnable)
+      @runnables.push(runnable) if options.pushRunnables
 
       ## we have optimized this iteration to the maximum.
       ## we memoize the existential matchesGrep property
       ## so we dont do N+1 ops
+      ## also if we are testing against a NEW grep then
+      ## nuke
       matchesGrep = (runnable, grep) ->
-        runnable.matchesGrep ?= grep.test(runnable.fullTitle())
+        ## we want to make sure this is the grep pattern we previously
+        ## matched against
+        if (not runnable.matchesGrep?) or (not _.isEqual(runnable.grepRe, grep))
+          runnable.grepRe      = grep
+          runnable.matchesGrep = grep.test(runnable.fullTitle())
+
+        runnable.matchesGrep
 
       ## trigger the add events so our UI can begin displaying
       ## the tests + suites
@@ -115,7 +139,8 @@ Cypress.Runner = do (Cypress, _) ->
             options.onRunnable(runnable)
 
       ## recursively apply to all tests / suites of this runnable
-      @iterateThroughRunnables(runnable, options)
+      ## unless we've been told not to iterate (during optimized loop)
+      @iterateThroughRunnables(runnable, options) if options.iterate
 
     ## optimized iteration which loops through
     ## all tests until we explicitly return true
