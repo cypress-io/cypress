@@ -263,15 +263,10 @@ Cypress.Runner = do (Cypress, _) ->
       ## the hooks surrounding a test runnable
       runner = @
 
-      # count = 0
       @runner.hook = _.wrap @runner.hook, (orig, name, fn) ->
-        # if name is "afterAll"
-        #   count += 1
-        #   console.log name + ": #{count}"
-        # debugger
         hooks = @suite["_" + name]
 
-        getAllTests = (suite) ->
+        getAllSiblingTests = (suite) ->
           tests = []
           suite.eachTest (test) ->
             ## iterate through each of our suites tests.
@@ -294,8 +289,8 @@ Cypress.Runner = do (Cypress, _) ->
             memo
           , []
 
-        #   ## intersect them with our parent suites and see if the last one is us
-        #   _.chain(suites).uniq().intersection(suite.parent.suites).last().value() is suite
+          ## intersect them with our parent suites and see if the last one is us
+          _.chain(suites).uniq().intersection(suite.parent.suites).last().value() is suite
 
         testBeforeHooks = (hook, suite) ->
           runner.test = runner.getTestFromHook(hook, suite) if not runner.test
@@ -304,10 +299,12 @@ Cypress.Runner = do (Cypress, _) ->
           Cypress.trigger "test:before:hooks", runner.test
 
         testAfterHooks = ->
-          Cypress.trigger "test:after:hooks", runner.test
+          test = runner.test
 
-          @test     = null
-          @hookName = null
+          runner.test     = null
+          runner.hookName = null
+
+          Cypress.trigger "test:after:hooks", test
 
           Cypress.restore()
 
@@ -324,7 +321,7 @@ Cypress.Runner = do (Cypress, _) ->
           when "afterEach"
             ## find all of the grep'd runner tests which share
             ## the same parent suite as our current runner test
-            tests = getAllTests(runner.test.parent)
+            tests = getAllSiblingTests(runner.test.parent)
 
             ## make sure this test isnt the last test overall but also
             ## isnt the last test in our grep'd parent suite's tests array
@@ -337,8 +334,7 @@ Cypress.Runner = do (Cypress, _) ->
             ## find all of the grep'd runner tests which share
             ## the same parent suite as our current runner test
             if runner.test
-
-              tests = getAllTests(runner.test.parent)
+              tests = getAllSiblingTests(runner.test.parent)
 
               ## if we're the very last test in the entire runner.tests
               ## we wait until the root suite fires

@@ -267,7 +267,7 @@ describe "Runner API", ->
       test = @runner.getTestFromHook undefined, @runner.runner.suite
       expect(test.title).to.eq "one"
 
-    # it.only "sets test if exists in hook.ctx.currentTest", (done) ->
+    # it "sets test if exists in hook.ctx.currentTest", (done) ->
     #   Cypress.on "test:before:hooks", (test) ->
     #     expect(test.title).to.eq "two"
     #     done()
@@ -278,81 +278,123 @@ describe "Runner API", ->
       # @runner.getTestFromHook
 
   context "#patchHookEvents", ->
-    beforeEach ->
-      runner = Fixtures.createRunnables
-        tests: ["one", "two", "three"]
-        suites:
-          "suite 1":
-            tests: ["suite 1, four", "suite 1, five", "suite 1, six"]
-            suites:
-              "suite 2":
-                tests: ["suite 2, seven"]
-                suites:
-                  "suite 3":
-                    tests: ["suite 3, eight"]
-                  "suite 4":
-                    tests: ["suite 4, nine", "suite 4, ten"]
-                    suites:
-                      "suite 5":
-                        tests: ["suite 5, eleven", "suite 5, twelve"]
-          "suite 7":
-            tests: ["suite 7, thirteen"]
-
-      @runner = Cypress.Runner.runner(runner)
-
     afterEach ->
       Cypress.off "test:before:hooks"
       Cypress.off "test:after:hooks"
 
-    it "has 13 tests", ->
-      expect(@runner.runner.total).to.eq 13
+    describe "many tests", ->
+      beforeEach ->
+        runner = Fixtures.createRunnables
+          tests: ["one", "two", "three"]
+          suites:
+            "suite 1":
+              tests: ["suite 1, four", "suite 1, five", "suite 1, six"]
+              suites:
+                "suite 2":
+                  tests: ["suite 2, seven"]
+                  suites:
+                    "suite 3":
+                      tests: ["suite 3, eight"]
+                    "suite 4":
+                      tests: ["suite 4, nine", "suite 4, ten"]
+                      suites:
+                        "suite 5":
+                          tests: ["suite 5, eleven", "suite 5, twelve"]
+            "suite 7":
+              tests: ["suite 7, thirteen"]
 
-    # it "restores Cypress between each test", (done) ->
-    #   ## we have 13 tests, so 13 restore's should happen!
-    #   restore = @sandbox.spy Cypress, "restore"
-    #   @runner.runner.run ->
-    #     expect(restore.callCount).to.eq 13
+        @runner = Cypress.Runner.runner(runner)
 
-    # it "beforeAll triggers test:before:hook event once on the root suite", (done) ->
-    #   ## 1 event should be triggered here because we only have 1 root suite
-    #   events = []
+      it "has 13 tests", ->
+        expect(@runner.runner.total).to.eq 13
 
-    #   Cypress.on "test:before:hooks", (hook, suite) ->
-    #     events.push({hook: hook, suite: suite})
+      it "triggers 'test:after:hooks' two times", (done) ->
+        runner = Fixtures.createRunnables
+          tests: ["one", "two"]
+          # suites:
+            # "suite 1":
+              # tests: ["two", "three", "four"]
+              # suites:
+                # "suite 2":
+                  # tests: ["five"]
 
-    #   @runner.runner.run ->
-    #     expect(events).to.have.length(1)
-    #     done()
+        @runner = Cypress.Runner.runner(runner)
 
-    # it "beforeEach triggers test:before:hook", (done) ->
-    #   ## 1 event should be triggered here because we only have 1 root suite
-    #   events = []
+        trigger = @sandbox.spy Cypress, "trigger"
 
-    #   Cypress.on "test:before:hooks", (hook, suite) ->
-    #     events.push({hook: hook, suite: suite})
-
-    #   @runner.runner.run ->
-    #     expect(events).to.have.length(1)
-    #     done()
-
-    describe "when grepped", ->
-      it "triggers test:before:hooks on test 'two'", (done) ->
-        Cypress.on "test:before:hooks", (test) ->
-          expect(test.title).to.eq "two"
+        @runner.runner.run ->
+          calls = _(trigger.getCalls()).filter (call) -> call.args[0] is "test:after:hooks"
+          expect(calls.length).to.eq(2)
           done()
 
-        @runner.grep /two/
-        @runner.getRunnables()
-        @runner.runner.run()
-
-      it "triggers test:before:hooks on test 'ten'", (done) ->
-        Cypress.on "test:before:hooks", (test) ->
-          expect(test.title).to.eq "suite 4, ten"
+      it "restores Cypress between each test", (done) ->
+        ## we have 13 tests, so 13 restore's should happen!
+        restore = @sandbox.spy Cypress, "restore"
+        @runner.runner.run ->
+          expect(restore.callCount).to.eq 13
           done()
 
-        @runner.grep /ten/
-        @runner.getRunnables()
+      describe "when grepped", ->
+        it "triggers test:before:hooks on test 'two'", (done) ->
+          Cypress.on "test:before:hooks", (@curTest) =>
+
+          @runner.grep /two/
+          @runner.getRunnables()
+          @runner.runner.run =>
+            expect(@curTest.title).to.eq "two"
+            done()
+
+        it "triggers test:before:hooks on test 'ten'", (done) ->
+          Cypress.on "test:before:hooks", (@curTest) =>
+
+          @runner.grep /ten/
+          @runner.getRunnables()
+          @runner.runner.run =>
+            expect(@curTest.title).to.eq "suite 4, ten"
+            done()
+
+    describe "one test", ->
+      beforeEach ->
+        runner = Fixtures.createRunnables
+          tests: ["one"]
+
+        @runner = Cypress.Runner.runner(runner)
+
+      it "null out test", (done) ->
+        Cypress.on "test:after:hooks", (test) =>
+          expect(@runner.test).to.be.null
+          done()
+
         @runner.runner.run()
+
+      it "nulls out hookName", (done) ->
+        Cypress.on "test:after:hooks", (test) =>
+          expect(@runner.hookName).to.be.null
+          done()
+
+        @runner.runner.run()
+
+      it "calls Cypress.restore()", (done) ->
+        restore = @sandbox.spy Cypress, "restore"
+
+        @runner.runner.run ->
+          expect(restore).to.be.calledOnce
+          done()
+
+      it "triggers 'test:after:hooks' with the test", (done) ->
+        Cypress.on "test:after:hooks", (test) =>
+          expect(test).to.eq @runner.getTestByTitle "one"
+          done()
+
+        @runner.runner.run()
+
+      it "triggers 'test:after:hooks' only once", (done) ->
+        trigger = @sandbox.spy Cypress, "trigger"
+
+        @runner.runner.run ->
+          calls = _(trigger.getCalls()).filter (call) -> call.args[0] is "test:after:hooks"
+          expect(calls).to.have.length(1)
+          done()
 
   context "#grep", ->
     beforeEach ->
