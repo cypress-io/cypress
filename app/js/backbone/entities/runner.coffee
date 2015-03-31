@@ -150,35 +150,22 @@
 
           ## if we dont have a test already set then go
           ## find it from the hook
-          @test = @getTestFromHook(hook, suite) if not @test
-
-        @runner.on "test:after:hooks", =>
-          ## restore the cy instance between tests
-          Cypress.restore()
-
-          ## we want to clear any set hook + test
-          ## since this is the last event that will be fired
-          ## until we either move onto the next test or quit
-          @hook = null
-          @test = null
-
-        @runner.on "suite", (suite) =>
-          @trigger "suite:start", suite
+          # @test = @getTestFromHook(hook, suite) if not @test
 
         @runner.on "test", (test) =>
           @changeRunnableTimeout(test)
 
-          @test = test
-          @hook = "test"
+          # @test = test
+          # @hook = "test"
 
           test.group = test.title
 
-          Cypress.set(test, @hook)
+          # Cypress.set(test, @hook)
 
         @runner.on "hook", (hook) =>
           @changeRunnableTimeout(hook)
 
-          @hook = @getHookName(hook)
+          # @hook = @getHookName(hook)
 
           ## if the hook is already associated to the test
           ## just use that, else go find it
@@ -187,54 +174,20 @@
           hook.group = test.title
 
           ## set the hook as our current runnable
-          Cypress.set(hook, @hook)
-
-        ## when a hook ends we want to re-set Cypress
-        ## with the test runnable (if one exists) since
-        ## the way mocha fires events for beforeEach's
-        @runner.on "hook end", (hook) =>
-          if test = hook.ctx.currentTest
-            @hook = "test"
-            Cypress.set(test)
+          # Cypress.set(hook, @hook)
 
       setListenersForCI: ->
 
       setListenersForWeb: ->
-        ## mocha has begun running the specs per iframe
-        @runner.on "start", =>
-          ## wipe out all listeners on our private runner bus
-          @trigger "runner:start"
-
-        @runner.on "end", =>
-          @trigger "runner:end"
-
         @runner.on "suite end", (suite) =>
           suite.removeAllListeners()
-          @trigger "suite:stop", suite
-
-        # @runner.on "suite end", (suite) ->
-        #   console.warn "suite end", suite
-
-        @runner.on "fail", (test, err) =>
-          console.warn("runner has failed", test, err)
-
-          ## set the AssertionError on the test
-          test.err = err
-
-          ## if this is a hook then we need to make sure
-          ## we still submit the test:end event and since
-          ## this is a hook we know its related to the first
-          ## test of our parent suite
-          @hookFailed(test, err) if test.type is "hook"
+          # @trigger "suite:stop", suite
 
         ## if a test is pending mocha will only
         ## emit the pending event instead of the test
         ## so we normalize the pending / test events
         @runner.on "pending", (test) =>
           @trigger "test", test
-
-        @runner.on "test", (test) =>
-          @trigger "test:start", test
 
         @runner.on "test end", (test) =>
           ## dont retrigger this event if its failedFromHook
@@ -319,50 +272,6 @@
 
           obj
 
-      ## recursively tries to find the test associated
-      ## with the hook
-      getTestFromHook: (hook, suite) ->
-        ## if theres already a currentTest use that
-        return test if test = hook?.ctx.currentTest
-
-        ## there is a bug where if you have set an 'only'
-        ## and you're running a visit within a hook
-        ## then this will return the incorrect test
-        ## it will return the very first test instead of
-        ## our actual running test.  i've looked through
-        ## mocha's source and cannot find any way to figure
-        ## out which test is running in this scenario.
-        ## so i think the only solution is to look at the grep
-        ## and grep for the first test that matches it
-        grep = @runner._grep
-        if grep.toString() isnt "/.*/"
-          return test if test = @getFirstTestByFn suite, (test) ->
-            grep.test _.result(test, "fullTitle")
-
-        ## else go look for the test because our suite
-        ## is most likely the root suite (which does not share a ctx)
-        if suite.tests.length
-          return suite.tests[0]
-        else
-          @getTestFromHook(hook, suite.suites[0])
-
-      getHookName: (hook) ->
-        ## find the name of the hook by parsing its
-        ## title and pulling out whats between the quotes
-        name = hook.title.match(/\"(.+)\"/)
-        name and name[1]
-
-      hookFailed: (hook, err) ->
-        ## finds the test by returning the first test from
-        ## the parent or looping through the suites until
-        ## it finds the first test
-        test = @getTestFromHook(hook, hook.parent)
-        test.err = err
-        test.state = "failed"
-        test.hook = @getHookName(hook)
-        test.failedFromHook = true
-        @trigger "test:end", test
-
       stop: ->
         ## clear out the commands
         @commands.reset([], {silent: true})
@@ -395,51 +304,6 @@
         @chosen         = null
         @hook           = null
         @test           = null
-
-      # triggerLoadIframe: (iframe, opts = {}) ->
-      #   _.defaults opts,
-      #     chosenId: @get("chosenId")
-      #     browser:  @get("browser")
-      #     version:  @get("version")
-
-      #   ## clear out the commands
-      #   @commands.reset([], {silent: true})
-
-      #   ## always reset @options.grep to /.*/ so we know
-      #   ## if the user has removed a .only in between runs
-      #   ## if they havent, it will just be picked back up
-      #   ## by mocha
-      #   @options.grep = /.*/
-
-      ## this recursively loops through all tests / suites
-      ## plucking out their cid's and returning those
-      ## this should be refactored since it creates an N+1 loop
-      ## through all runnables.  instead this should happen during
-      ## the original loop through to ensure we have cid's
-      getRunnableCids: (root, ids) ->
-        ids ?= []
-
-        ## make sure we push our own cid in here
-        ## when we're a suite but not the root!
-        ids.push root.cid if root.cid
-
-        _.each root.tests, (test) ->
-          ids.push test.cid
-
-        _.each root.suites, (suite) =>
-          @getRunnableCids suite, ids
-
-        ids
-
-      getFirstTestByFn: (root, fn) ->
-        ## loop through each test applying
-        ## the fn and return the first that matches
-        for test in root.tests
-          return test if fn(test)
-
-        ## return recursively
-        for suite in root.suites
-          return test if test = @getFirstTestByFn(suite, fn)
 
       ## tell our runner to run our iframes mocha suite
       runIframeSuite: (iframe, contentWindow, remoteIframe, options, fn) ->

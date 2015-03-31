@@ -35,7 +35,7 @@ Cypress.Runner = do (Cypress, _) ->
 
     setListeners: ->
       ## mocha has begun running the tests
-      @runner.on "start", =>
+      @runner.on "start", ->
         Cypress.trigger "run:start"
 
       ## mocha has finished running the tests
@@ -49,10 +49,16 @@ Cypress.Runner = do (Cypress, _) ->
         Cypress.trigger "suite:end", suite
 
       @runner.on "hook", (hook) =>
+        @hookName = @getHookName(hook)
+
         Cypress.set(hook, @hookName)
         Cypress.trigger "hook:start", hook
 
-      @runner.on "hook end", (hook) ->
+      @runner.on "hook end", (hook) =>
+        if test = hook.ctx.currentTest
+          @hookName = "test"
+          Cypress.set(test, @hookName)
+
         Cypress.trigger "hook:end", hook
 
       @runner.on "test", (test) =>

@@ -50,6 +50,124 @@ describe "Runner API", ->
         tests: ["one"]
       @runner = Cypress.Runner.runner(runner)
       @runner.setListeners()
+      @trigger = @sandbox.spy Cypress, "trigger"
+
+    describe "runner.on('start')", ->
+      it "Cypress triggers run:start", (done) ->
+        @runner.runner.run =>
+          expect(@trigger).to.be.calledWith "run:start"
+          done()
+
+    describe "runner.on('end')", ->
+      it "Cypress triggers run:end", (done) ->
+        @runner.runner.run =>
+          expect(@trigger).to.be.calledWith "run:end"
+          done()
+
+    describe "runner.on('suite')", ->
+      it "Cypress triggers suite:start", (done) ->
+        @runner.runner.on "suite", (@suite) =>
+
+        @runner.runner.run =>
+          expect(@trigger).to.be.calledWith "suite:start", @suite
+          done()
+
+    describe "runner.on('suite end')", ->
+      it "Cypress triggers suite:end", (done) ->
+        @runner.runner.on "suite end", (@suite) =>
+
+        @runner.runner.run =>
+          expect(@trigger).to.be.calledWith "suite:end", @suite
+          done()
+
+    describe "runner.on('hook')", ->
+      it "Cypress triggers hook:start", (done) ->
+        @runner.runner.on "hook", (@hook) =>
+
+        @runner.runner.run =>
+          expect(@trigger).to.be.calledWith "hook:start", @hook
+          done()
+
+      it "sets this.hookName", (done) ->
+        @runner.runner.on "hook", (hook) =>
+          expect(@runner.hookName).to.eq "before each"
+          done()
+
+        @runner.runner.run()
+
+      it "calls Cypress.set with the test + hookName", (done) ->
+        set = @sandbox.spy Cypress, "set"
+
+        @runner.runner.on "hook", (hook) ->
+          expect(set).to.be.calledWith hook, "before each"
+          done()
+
+        @runner.runner.run()
+
+    describe "runner.on('hook end')", ->
+      it "Cypress triggers hook:end", (done) ->
+        @runner.runner.on "hook end", (@hook) =>
+
+        @runner.runner.run =>
+          expect(@trigger).to.be.calledWith "hook:end", @hook
+          done()
+
+      it "sets hookName back to test", (done) ->
+        @runner.runner.on "hook end", (hook) =>
+          expect(@runner.hookName).to.eq "test"
+          done()
+
+        @runner.runner.run()
+
+      it "calls Cypress.set with the test + hookName", (done) ->
+        set = @sandbox.spy Cypress, "set"
+
+        @runner.runner.on "hook end", (hook) ->
+          expect(set).to.be.calledWith hook.ctx.currentTest, "test"
+          done()
+
+        @runner.runner.run()
+
+    describe "runner.on('test')", ->
+      it "Cypress triggers test:start", (done) ->
+        @runner.runner.on "test", (@test) =>
+
+        @runner.runner.run =>
+          expect(@trigger).to.be.calledWith "test:start", @test
+          done()
+
+      it "sets this.test", (done) ->
+        @runner.runner.on "test", (test) =>
+          expect(@runner.test).to.eq test
+          done()
+
+        @runner.runner.run()
+
+      it "sets this.hookName", (done) ->
+        ## when our test is running we always
+        ## set the hookName to test!
+        @runner.runner.on "test", (test) =>
+          expect(@runner.hookName).to.eq "test"
+          done()
+
+        @runner.runner.run()
+
+      it "calls Cypress.set with the test + hookName", (done) ->
+        set = @sandbox.spy Cypress, "set"
+
+        @runner.runner.on "test", (test) ->
+          expect(set).to.be.calledWith test, "test"
+          done()
+
+        @runner.runner.run()
+
+    describe "runner.on('test end')", ->
+      it "Cypress triggers test:end", (done) ->
+        @runner.runner.on "test", (@test) =>
+
+        @runner.runner.run =>
+          expect(@trigger).to.be.calledWith "test:end", @test
+          done()
 
     describe "runner.on('fail')", ->
       it "sets err on runnable", (done) ->

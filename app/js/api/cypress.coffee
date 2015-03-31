@@ -667,9 +667,9 @@ window.Cypress = do ($, _, Backbone) ->
         Cypress.options = {}
 
     ## sets the runnable onto the cy instance
-    @set = (runnable, hook) ->
+    @set = (runnable, hookName) ->
       runnable.startedAt = new Date
-      @cy.hook(hook)
+      @cy.hook(hookName)
       @cy.prop("runnable", runnable)
 
     ## patches the cypress instance with contentWindow
