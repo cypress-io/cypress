@@ -86,30 +86,6 @@
             else
               @trigger event, args...
 
-        @listenTo Cypress, "log", (log) =>
-          switch log.get("event")
-            when "command"
-              ## think about moving this line
-              ## back into Cypress
-              log.set "hook", @hook
-
-              ## if we're in satellite mode then we need to
-              ## broadcast this through websockets
-              if App.config.ui("satellite")
-                attrs = @transformEmitAttrs(attrs)
-                socket.emit "command:add", attrs
-              else
-                @commands.add log
-
-            when "route"
-              @routes.add log
-
-            when "agent"
-              @agents.add log
-
-            else
-              throw new Error("Cypress.log() emitted an unknown event: #{log.get('event')}")
-
       setMochaRunner: ->
         throw new Error("Runner#mocha is missing!") if not @mocha
 
@@ -182,12 +158,6 @@
         @runner.on "suite end", (suite) =>
           suite.removeAllListeners()
           # @trigger "suite:stop", suite
-
-        ## if a test is pending mocha will only
-        ## emit the pending event instead of the test
-        ## so we normalize the pending / test events
-        @runner.on "pending", (test) =>
-          @trigger "test", test
 
         @runner.on "test end", (test) =>
           ## dont retrigger this event if its failedFromHook

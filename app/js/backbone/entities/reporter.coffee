@@ -18,6 +18,23 @@
 
         @listenTo Cypress, "setup", _.bind(@receivedRunner, @)
 
+        @listenTo Cypress, "log", (log) =>
+          switch log.get("event")
+            when "command"
+              ## think about moving this line
+              ## back into Cypress
+              # log.set "hook", @hookName
+              @commands.add log
+
+            when "route"
+              @routes.add log
+
+            when "agent"
+              @agents.add log
+
+            else
+              throw new Error("Cypress.log() emitted an unknown event: #{log.get('event')}")
+
       start: (@specPath) ->
         @triggerLoadSpecFrame @specPath
 
