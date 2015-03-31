@@ -17,7 +17,7 @@ Cypress.Runner = do (Cypress, _) ->
 
       @patchHookEvents()
 
-      @getRunnables()
+      @getRunnables() if @runner.suite
 
     fail: (err, runnable) ->
       runnable.err = err
@@ -217,6 +217,10 @@ Cypress.Runner = do (Cypress, _) ->
       #   @getTestFromHook(hook, suite.suites[0])
 
     patchHookEvents: ->
+      ## bail if our runner doesnt have a hook
+      ## useful in tests
+      return if not @runner.hook
+
       ## monkey patch the hook event so we can wrap
       ## 'test:before:hooks' and 'test:after:hooks' around all of
       ## the hooks surrounding a test runnable

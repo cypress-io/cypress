@@ -119,36 +119,35 @@ describe "Runner API", ->
     it "has 13 tests", ->
       expect(@runner.runner.total).to.eq 13
 
-    it "restores Cypress between each test", (done) ->
-      ## we have 13 tests, so 13 restore's should happen!
-      restore = @sandbox.spy Cypress, "restore"
-      @runner.runner.run ->
-        expect(restore.callCount).to.eq 13
+    # it "restores Cypress between each test", (done) ->
+    #   ## we have 13 tests, so 13 restore's should happen!
+    #   restore = @sandbox.spy Cypress, "restore"
+    #   @runner.runner.run ->
+    #     expect(restore.callCount).to.eq 13
 
-    it "beforeAll triggers test:before:hook event once on the root suite", (done) ->
-      ## 1 event should be triggered here because we only have 1 root suite
-      events = []
+    # it "beforeAll triggers test:before:hook event once on the root suite", (done) ->
+    #   ## 1 event should be triggered here because we only have 1 root suite
+    #   events = []
 
-      Cypress.on "test:before:hooks", (hook, suite) ->
-        events.push({hook: hook, suite: suite})
+    #   Cypress.on "test:before:hooks", (hook, suite) ->
+    #     events.push({hook: hook, suite: suite})
 
-      @runner.runner.run ->
-        expect(events).to.have.length(1)
-        done()
+    #   @runner.runner.run ->
+    #     expect(events).to.have.length(1)
+    #     done()
 
-    it "beforeEach triggers test:before:hook", (done) ->
-      ## 1 event should be triggered here because we only have 1 root suite
-      events = []
+    # it "beforeEach triggers test:before:hook", (done) ->
+    #   ## 1 event should be triggered here because we only have 1 root suite
+    #   events = []
 
-      Cypress.on "test:before:hooks", (hook, suite) ->
-        events.push({hook: hook, suite: suite})
+    #   Cypress.on "test:before:hooks", (hook, suite) ->
+    #     events.push({hook: hook, suite: suite})
 
-      debugger
-      @runner.runner.run ->
-        expect(events).to.have.length(1)
-        done()
+    #   @runner.runner.run ->
+    #     expect(events).to.have.length(1)
+    #     done()
 
-    describe.only "when grepped", ->
+    describe "when grepped", ->
       it "triggers test:before:hooks on test 'two'", (done) ->
         Cypress.on "test:before:hooks", (test) ->
           expect(test.title).to.eq "two"
