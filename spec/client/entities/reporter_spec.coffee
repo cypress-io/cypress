@@ -3,31 +3,96 @@ describe "Reporter Entity", ->
     @reporter = App.request("reporter:entity")
 
   context "#receivedRunner", ->
-    it "triggers before:add"
+    beforeEach ->
+      runner = Fixtures.createRunnables
+        tests: ["one"]
+        suites:
+          "suite 1":
+            tests: ["suite 1, two [0a3]", "suite 1, three"]
+            suites:
+              "suite 2":
+                tests: ["suite 2, four"]
 
-    it "triggers after:add"
+      @runner       = Cypress.Runner.runner(runner)
+      @trigger      = @sandbox.spy @reporter, "trigger"
+
+      ## filter out other trigger events except for
+      ## the test:add and suite:add
+      @getAddEventCalls = ->
+        _.filter @trigger.getCalls(), (call) ->
+          /(test:add|suite:add)/.test call.args[0]
+
+    it "triggers before:add", ->
+      @reporter.receivedRunner @runner
+      expect(@trigger).to.be.calledWith "before:add"
+
+    it "triggers after:add", ->
+      @reporter.receivedRunner @runner
+      expect(@trigger).to.be.calledWith "after:add"
 
     describe "no chosen id", ->
-      it "triggers add events"
+      it "triggers add events, with runnable as 1st argument", ->
+        @reporter.set "chosenId", null, silent: true
+        @reporter.receivedRunner @runner
+
+        calls = @getAddEventCalls()
+
+        ## there should be 1 call for each runnable
+        expect(calls).to.have.length @runner.runnables.length
+
+        _.each @runner.runnables, (runnable, index) ->
+          expect(calls[index]).to.be.calledWith "#{runnable.type}:add", runnable
 
     describe "a chosen id", ->
-      it "doesnt initially trigger add events"
+      it "doesnt initially trigger add events", ->
+        @reporter.set "chosenId", 123, silent: true
+
+        ## allow the first getRunnables call to pass
+        ## through but then stub the rest
+        @getRunnables = @runner.getRunnables
+        stub = @sandbox.stub @runner, "getRunnables", ->
+          if stub.callCount is 0
+            @getRunnables.apply(@runner, arguments)
+
+        @reporter.receivedRunner @runner
+
+        calls = @getAddEventCalls()
+        expect(calls).to.have.length(0)
 
       context "when id is found", ->
-        it "sets the only on the runner"
+        it "sets the grep on the runner", ->
+          @reporter.set "chosenId", "0a3", silent: true
+          grep = @sandbox.spy @runner, "grep"
+          @reporter.receivedRunner @runner
+          expect(grep).to.be.calledWith /\[0a3\]/
 
-        it "triggers add events"
+        it "triggers add events on matching grep'd tests", ->
+          @reporter.set "chosenId", "0a3", silent: true
+          @reporter.receivedRunner @runner
 
-        it "doesnt pushIds"
-
-        it "doesnt pushRunnables"
+          ## only suite1 and test two should be added
+          ## because our chosenId grep's filters out
+          ## the rest
+          calls = @getAddEventCalls()
+          expect(calls).to.have.length(2)
 
       context "when id isnt found", ->
-        it "removes chosenId"
+        it "removes chosenId", ->
+          @reporter.set "chosenId", "abc", silent: true
+          @reporter.receivedRunner @runner
+          expect(@reporter.get("chosenId")).to.be.undefined
 
-        it "triggers add events"
+        it "triggers add events", ->
+          @reporter.set "chosenId", "abc", silent: true
+          @reporter.receivedRunner @runner
+          calls = @getAddEventCalls()
+          expect(calls).to.have.length(6)
 
-        it "does not getRunnables again"
+        it "does not getRunnables again", ->
+          @reporter.set "chosenId", "abc", silent: true
+          getRunnables = @sandbox.spy @runner, "getRunnables"
+          @reporter.receivedRunner @runner
+          expect(getRunnables).to.be.calledOnce
 
   context "#run", ->
     beforeEach ->

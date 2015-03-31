@@ -94,13 +94,13 @@
       originalTitle: (runnable) ->
         _.rtrim runnable.title, @idSuffix(runnable.id)
 
-      receivedRunner: (runner, fn) ->
+      receivedRunner: (runner) ->
         @trigger "before:add"
 
         runnables = []
         ids = []
 
-        triggerAddEvent: (runnable) =>
+        triggerAddEvent = (runnable) =>
           @trigger("#{runnable.type}:add", runnable)
 
         getRunnables = (options = {}) =>
@@ -145,8 +145,8 @@
           ## and then modify the spec and remove
           ## this specific id
           if id in ids
-            ## runner knows how to escape this?
-            runner.setDotOnly(id)
+            ## make the runner grep for just this unique id!
+            runner.grep @escapeRegExp("[" + id + "]")
 
             ## get the runnables again since we now
             ## have to iterate through them again
@@ -171,6 +171,9 @@
         @trigger "after:add"
 
         return @
+
+      escapeRegExp: (str) ->
+        new RegExp str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
 
       ## used to be called runIframeSuite
       run: (iframe, specWindow, remoteIframe, options, fn) ->
