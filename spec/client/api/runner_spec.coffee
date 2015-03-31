@@ -48,6 +48,125 @@ describe "Runner API", ->
       r = Cypress.Runner.runner({})
       expect(r.runnables).to.deep.eq []
 
+  context "#getTestFromHook", ->
+    beforeEach ->
+      runner = Fixtures.createRunnables
+        tests: ["one", "two", "three"]
+        suites:
+          "suite 1":
+            tests: ["suite 1, four", "suite 1, five", "suite 1, six"]
+            suites:
+              "suite 2":
+                tests: ["suite 2, seven"]
+                suites:
+                  "suite 3":
+                    tests: ["suite 3, eight"]
+                  "suite 4":
+                    tests: ["suite 4, nine", "suite 4, ten"]
+                    suites:
+                      "suite 5":
+                        tests: ["suite 5, eleven", "suite 5, twelve"]
+          "suite 7":
+            tests: ["suite 7, thirteen"]
+
+      @runner = Cypress.Runner.runner(runner)
+      @runner.setListeners()
+
+    it "gets first test during initial root suite with undefined hook", ->
+      ## when our first beforeAll fires, hook is undefined and our
+      ## suite is the root suite
+      ## this should return test "one"
+      test = @runner.getTestFromHook undefined, @runner.runner.suite
+      expect(test.title).to.eq "one"
+
+    # it.only "sets test if exists in hook.ctx.currentTest", (done) ->
+    #   Cypress.on "test:before:hooks", (test) ->
+    #     expect(test.title).to.eq "two"
+    #     done()
+
+    #   @runner.grep /two/
+    #   @runner.runner.run ->
+
+      # @runner.getTestFromHook
+
+  context "#patchHookEvents", ->
+    beforeEach ->
+      runner = Fixtures.createRunnables
+        tests: ["one", "two", "three"]
+        suites:
+          "suite 1":
+            tests: ["suite 1, four", "suite 1, five", "suite 1, six"]
+            suites:
+              "suite 2":
+                tests: ["suite 2, seven"]
+                suites:
+                  "suite 3":
+                    tests: ["suite 3, eight"]
+                  "suite 4":
+                    tests: ["suite 4, nine", "suite 4, ten"]
+                    suites:
+                      "suite 5":
+                        tests: ["suite 5, eleven", "suite 5, twelve"]
+          "suite 7":
+            tests: ["suite 7, thirteen"]
+
+      @runner = Cypress.Runner.runner(runner)
+
+    afterEach ->
+      Cypress.off "test:before:hooks"
+      Cypress.off "test:after:hooks"
+
+    it "has 13 tests", ->
+      expect(@runner.runner.total).to.eq 13
+
+    it "restores Cypress between each test", (done) ->
+      ## we have 13 tests, so 13 restore's should happen!
+      restore = @sandbox.spy Cypress, "restore"
+      @runner.runner.run ->
+        expect(restore.callCount).to.eq 13
+
+    it "beforeAll triggers test:before:hook event once on the root suite", (done) ->
+      ## 1 event should be triggered here because we only have 1 root suite
+      events = []
+
+      Cypress.on "test:before:hooks", (hook, suite) ->
+        events.push({hook: hook, suite: suite})
+
+      @runner.runner.run ->
+        expect(events).to.have.length(1)
+        done()
+
+    it "beforeEach triggers test:before:hook", (done) ->
+      ## 1 event should be triggered here because we only have 1 root suite
+      events = []
+
+      Cypress.on "test:before:hooks", (hook, suite) ->
+        events.push({hook: hook, suite: suite})
+
+      debugger
+      @runner.runner.run ->
+        expect(events).to.have.length(1)
+        done()
+
+    describe.only "when grepped", ->
+      it "triggers test:before:hooks on test 'two'", (done) ->
+        Cypress.on "test:before:hooks", (test) ->
+          expect(test.title).to.eq "two"
+          done()
+
+        @runner.grep /two/
+        @runner.getRunnables()
+        @runner.runner.run()
+
+      it "triggers test:before:hooks on test 'ten'", (done) ->
+        Cypress.on "test:before:hooks", (test) ->
+          expect(test.title).to.eq "suite 4, ten"
+          done()
+
+        @runner.grep /ten/
+        @runner.getRunnables()
+        @runner.runner.run()
+
   context "#grep", ->
     beforeEach ->
       @runner = Cypress.Runner.runner({})
@@ -59,6 +178,7 @@ describe "Runner API", ->
     it "can set to another RegExp", ->
       re = /.+/
       @runner.grep(re)
+
       expect(@runner.runner._grep).to.eq re
 
   context "#anyTest", ->
@@ -132,11 +252,24 @@ describe "Runner API", ->
 
     it "pushes runnable into runnables array", ->
       ## 2 suites + 4 tests = 6 total
-      @runner.getRunnables()
       expect(@runner.runnables).to.have.length(6)
 
-    it "sets runnable type", ->
+    it "pushes tests into tests array", ->
+      ## 4 tests
+      expect(@runner.tests).to.have.length(4)
+
+    it "only pushes matching grep tests", ->
+      ## with 4 existing tests
+      expect(@runner.tests).to.have.length(4)
+
+      @runner.grep(/four/)
+
       @runner.getRunnables()
+
+      ## only 1 test should have matched the grep
+      expect(@runner.tests).to.have.length(1)
+
+    it "sets runnable type", ->
       types = _.pluck @runner.runnables, "type"
       expect(types).to.deep.eq ["test", "suite", "test", "test", "suite", "test"]
 
@@ -164,8 +297,6 @@ describe "Runner API", ->
       ]
 
     it "prefers .runnables on subsequent iterations", ->
-      @runner.getRunnables()
-
       ## grab the top 4 runnables
       @runner.runnables = @runner.runnables.slice(0, 4)
 
@@ -177,40 +308,53 @@ describe "Runner API", ->
 
       expect(runnables).to.have.length(4)
 
-    it "never invokes #iterateThroughRunnables", ->
-      @runner.getRunnables()
-      iterateThroughRunnables = @sandbox.spy @runner, "iterateThroughRunnables"
-      @runner.getRunnables()
-      expect(iterateThroughRunnables).not.to.be.called
+    context "runnable optimizations", ->
+      beforeEach ->
+        ## make sure we reset our runnables
+        ## so it appears as if this is a clean
+        ## run!
+        @runner.runnables = []
 
-    it "does not continue to push into .runnables or mutate them", ->
-      @runner.getRunnables()
-      runnables = @runner.runnables
-      expect(runnables).to.have.length(6)
-      @runner.getRunnables()
-      expect(@runner.runnables).to.have.length(6)
-      expect(@runner.runnables).to.eq(runnables)
+      it "never invokes #iterateThroughRunnables", ->
+        @runner.runnables = []
+        @runner.getRunnables()
+        iterateThroughRunnables = @sandbox.spy @runner, "iterateThroughRunnables"
+        @runner.getRunnables()
+        expect(iterateThroughRunnables).not.to.be.called
 
-    it "only tests the grep once for each test runnable", ->
-      grep = /.*/
-      test = @sandbox.spy grep, "test"
+      it "does not continue to push into .runnables or mutate them", ->
+        @runner.runnables = []
+        @runner.getRunnables()
+        runnables = @runner.runnables
+        expect(runnables).to.have.length(6)
+        @runner.getRunnables()
+        expect(@runner.runnables).to.have.length(6)
+        expect(@runner.runnables).to.eq(runnables)
 
-      @runner.getRunnables({grep: grep})
+      it "only tests the grep once for each test runnable", ->
+        @runner.runnables = []
 
-      ## we have 4 tests, thats how many should have been grepp'd!
-      expect(test.callCount).to.eq 4
+        grep = /.*/
+        test = @sandbox.spy grep, "test"
 
-    it "regreps the tests if grep has changed between iterations", ->
-      grep = @runner.grep()
-      test = @sandbox.spy @runner.runner._grep, "test"
-      @runner.getRunnables()
+        @runner.getRunnables({grep: grep})
 
-      grep2 = @runner.grep /.+/
-      test2 = @sandbox.spy @runner.runner._grep, "test"
-      @runner.getRunnables()
+        ## we have 4 tests, thats how many should have been grepp'd!
+        expect(test.callCount).to.eq 4
 
-      ## should grep each of the tests twice
-      expect(test.callCount + test2.callCount).to.eq 8
+      it "regreps the tests if grep has changed between iterations", ->
+        @runner.runnables = []
+
+        grep = @runner.grep()
+        test = @sandbox.spy @runner.runner._grep, "test"
+        @runner.getRunnables()
+
+        grep2 = @runner.grep /.+/
+        test2 = @sandbox.spy @runner.runner._grep, "test"
+        @runner.getRunnables()
+
+        ## should grep each of the tests twice
+        expect(test.callCount + test2.callCount).to.eq 8
 
   context "#abort", ->
     beforeEach ->
