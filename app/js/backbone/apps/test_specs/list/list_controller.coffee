@@ -173,7 +173,7 @@
       ## we also can't use the normal backbone-chooser because
       ## we have unlimited nested / fragmented collections
       ## so we have to handle this logic ourselves
-      @listenTo model, "model:double:clicked", ->
+      @listenTo model, "model:refresh:clicked", ->
         ## always unchoose all other models
         container.each (runnable) ->
           runnable.collapse()
