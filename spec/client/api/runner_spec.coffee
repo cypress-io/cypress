@@ -216,6 +216,11 @@ describe "Runner API", ->
       @hook.fn = ->
         throw new Error("hook failed!")
 
+      @runner.runner.on "test end", (test) ->
+        ## this should never fire
+        ## else we would receive 2 test:end events
+        done(test)
+
       ## we're additionally testing that Cypress
       ## fires this test:end event since thats
       ## how we actually get our test!
