@@ -7,23 +7,14 @@
     class Entities.Runner extends Entities.Model
       defaults: ->
         iframes: []
-        browser: null
-        version: null
 
     ## need to compose this runner with models for each panel
     ## DOM / XHR / LOG
     ## and partial each test (on test run) if its chosenId...?
       initialize: ->
-        @hooks            = App.request "hook:entities"
-        @commands         = App.request "command:entities"
-        @routes           = App.request "route:entities"
-        @agents           = App.request "agent:entities"
         @satelliteEvents  = App.request "satellite:events"
         @hostEvents       = App.request "host:events"
         @passThruEvents   = App.request "pass:thru:events"
-        @tests            = [] ## not sure why we're setting this since tests are set on the mocha runner not on our runner model
-        @hook             = null
-        @test             = null
 
       setContentWindow: (@contentWindow, @$remoteIframe) ->
 
@@ -70,32 +61,6 @@
               @commands.add args...
             else
               @trigger event, args...
-
-      setMochaRunner: ->
-        throw new Error("Runner#mocha is missing!") if not @mocha
-
-        ## nuke the previous runner's listeners if we have one
-        @runner.removeAllListeners() if @runner
-
-        ## store the test runner as a property on ourselves
-        @runner = @mocha.run()
-
-        ## start listening the gazillion
-        ## runner emit events
-        @startListening()
-
-        ## override the runSuite function on our runner instance
-        ## this is used to generate properly unique regex's for grepping
-        ## through a specific test
-
-      getCommands: ->
-        @commands
-
-      getRoutes: ->
-        @routes
-
-      getAgents: ->
-        @agents
 
       changeRunnableTimeout: (runnable) ->
         runnable.timeout App.config.get("commandTimeout")
@@ -226,39 +191,6 @@
             obj[fn] = _.result(arg, fn)
 
           obj
-
-      stop: ->
-        ## clear out the commands
-        @commands.reset([], {silent: true})
-        @routes.reset([], {silent: true})
-        @agents.reset([], {silent: true})
-
-        ## remove all the listeners from EventEmitter
-        @runner.removeAllListeners()
-
-        ## cleanup any of our handlers
-        socket = App.request "socket:entity"
-        @stopListening(socket)
-        @stopListening(Cypress, "log")
-
-        ## remove all references to other objects
-        ## clear twice to nuke _previousAttributes
-        @clear()
-        @clear()
-
-        ## null out these properties
-        @mocha          = null
-        @runner         = null
-        @contentWindow  = null
-        @$remoteIframe  = null
-        @iframe         = null
-        @hooks          = null
-        @commands       = null
-        @routes         = null
-        @agents         = null
-        @chosen         = null
-        @hook           = null
-        @test           = null
 
       ## tell our runner to run our iframes mocha suite
       runIframeSuite: (iframe, contentWindow, remoteIframe, options, fn) ->

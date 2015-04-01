@@ -2,6 +2,53 @@ describe "Reporter Entity", ->
   beforeEach ->
     @reporter = App.request("reporter:entity")
 
+  context "#defaults", ->
+    it "sets browser to null", ->
+      expect(@reporter.get("browser")).to.be.null
+
+    it "sets version to null", ->
+      expect(@reporter.get("version")).to.be.null
+
+  context "#stop", ->
+    it "calls #restore", ->
+      restore = @sandbox.spy @reporter, "restore"
+      @reporter.stop()
+      expect(restore).to.be.calledOnce
+
+    it "stops listening to Cypress", ->
+      stopListening = @sandbox.spy @reporter, "stopListening"
+      @reporter.stop()
+      expect(stopListening).to.be.calledOnce
+
+  context "#restore", ->
+    beforeEach ->
+      @reset = @sandbox.stub @reporter, "reset"
+
+    it "calls reset", ->
+      @reporter.restore()
+      expect(@reset).to.be.calledOnce
+
+    it "nulls out references", ->
+      refs = ["commands", "routes", "agents", "chosen", "specPath"]
+
+      _.each refs, (ref) =>
+        @reporter[ref] = "foo"
+
+      @reporter.restore()
+
+      _.each refs, (ref) =>
+        expect(@reporter[ref]).to.be.null
+
+  context "#reset", ->
+    it "calls reset on each collection", ->
+      @resets = _.map ["commands", "routes", "agents"], (collection) =>
+        @sandbox.spy @reporter[collection], "reset"
+
+      @reporter.reset()
+
+      _.each @resets, (reset) ->
+        expect(reset).to.be.calledWithMatch [], {silent: true}
+
   context "#receivedRunner", ->
     beforeEach ->
       runner = Fixtures.createRunnables
@@ -132,6 +179,11 @@ describe "Reporter Entity", ->
       @reporter.triggerLoadSpecFrame "app_spec.coffee", obj
 
       expect(obj).to.deep.eq attrs
+
+    it "calls #reset", ->
+      reset = @sandbox.stub @reporter, "reset"
+      @reporter.triggerLoadSpecFrame "app_spec.coffee"
+      expect(reset).to.be.calledOnce
 
     it "triggers 'load:spec:iframe' with specPath and options", ->
       options = {chosenId: "", browser: "", version: ""}

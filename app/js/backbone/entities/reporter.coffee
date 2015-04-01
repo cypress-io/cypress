@@ -7,6 +7,10 @@
     CypressEvents = "run:start run:end suite:start suite:end hook:start hook:end test:start test:end".split(" ")
 
     class Entities.Reporter extends Entities.Model
+      defaults:
+        browser: null
+        version: null
+
       initialize: ->
         @commands         = App.request "command:entities"
         @routes           = App.request "route:entities"
@@ -39,7 +43,25 @@
         @triggerLoadSpecFrame @specPath
 
       stop: ->
-        @stopListening(Cypress)
+        @restore()
+
+        ## stop listening to everything
+        ## currently we're only listening to Cypress
+        ## but its fine in case we listen to other
+        ## objects in the future
+        @stopListening()
+
+      restore: ->
+        ## reset the entities
+        @reset()
+
+        ## and remove actual references to them
+        _.each ["commands", "routes", "agents", "chosen", "specPath"], (obj) =>
+          @[obj] = null
+
+      reset: ->
+        _.each [@commands, @routes, @agents], (collection) ->
+          collection.reset([], {silent: true})
 
       getChosen: ->
         @chosen
@@ -85,14 +107,8 @@
           browser:  @get("browser")
           version:  @get("version")
 
-        ## clear out the commands
-        # @commands.reset([], {silent: true})
-
-        ## always reset @options.grep to /.*/ so we know
-        ## if the user has removed a .only in between runs
-        ## if they havent, it will just be picked back up
-        ## by mocha
-        # @options.grep = /.*/
+        ## reset our collection entities
+        @reset()
 
         ## tells the iframe view to load up a new iframe
         @trigger "load:spec:iframe", specPath, options
