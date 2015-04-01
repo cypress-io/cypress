@@ -2,7 +2,22 @@
 ## to the Cypress class
 do (Cypress, _) ->
 
+  splice = (index) ->
+    @_events.splice(index, 1)
+
   _.extend Cypress,
+    removeEvents: (name) ->
+      events = []
+
+      for event, index in @_events by -1
+        if event.name is name
+          events.push splice.call(@, index)[0]
+
+      return events
+
+    setEvents: (events) ->
+      @_events = @_events.concat(events)
+
     ## TODO: write tests for this
     off: (name, fn) ->
       ## nuke all events if we dont
@@ -11,9 +26,6 @@ do (Cypress, _) ->
       if not (name and @_events)
         @_events = []
         return @
-
-      splice = (index) =>
-        @_events.splice(index, 1)
 
       functionsMatch = (fn1, fn2) ->
         fn1 is fn2 or ("" + fn1 is "" + fn2)
@@ -25,11 +37,11 @@ do (Cypress, _) ->
           if fn
             ## if we have a passed in fn argument
             ## make sure our event has the same fn
-            splice(index) if functionsMatch(event.fn, fn)
+            splice.call(@, index) if functionsMatch(event.fn, fn)
           else
             ## else always splice it out since
             ## it matches the name
-            splice(index)
+            splice.call(@, index)
 
       return @
 

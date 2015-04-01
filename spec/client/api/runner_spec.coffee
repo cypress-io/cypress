@@ -4,10 +4,18 @@ describe "Runner API", ->
     Cypress.Chai.restore()
     Cypress.Mocha.restore()
 
+    ## maybe instead of backing these up manually
+    ## we can just clone all of the existing events
+    ## then remove them and restore after?
+    ## backup these existing events
+    @testBeforeHooks = Cypress.removeEvents("test:before:hooks")
+
     ## allow our own cypress errors to bubble up!
     App.Utilities.Overrides.overloadMochaRunnerUncaught()
 
   after ->
+    ## restore existing events
+    Cypress.setEvents(@testBeforeHooks)
     Cypress.stop()
     App.Utilities.Overrides.restore()
 

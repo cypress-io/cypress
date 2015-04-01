@@ -310,7 +310,6 @@ Cypress.Runner = do (Cypress, _) ->
         testBeforeHooks = (hook, suite) ->
           runner.test = runner.getTestFromHook(hook, suite) if not runner.test
 
-          # debugger
           Cypress.trigger "test:before:hooks", runner.test
 
         testAfterHooks = ->

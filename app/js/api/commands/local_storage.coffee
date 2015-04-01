@@ -13,7 +13,7 @@ do (Cypress, _) ->
     ## and then unset the references
     Cypress.LocalStorage.unsetStorages()
 
-    ## return the remove localStorage object
+    ## return the remote localStorage object
     return remote
 
   Cypress.on "test:before:hooks", ->
