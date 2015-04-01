@@ -5405,6 +5405,20 @@ describe "Cypress", ->
 
       @loadDom()
 
+  context.only ".set", ->
+    it "sets prop(hookName)", ->
+      r = cy.prop("runnable")
+      Cypress.set({}, "foobar")
+      cy.prop("runnable", r)
+      expect(cy.prop("hookName")).to.eq "foobar"
+
+    it "sets startedAt on the runnable", ->
+      obj = {}
+      r = cy.prop("runnable")
+      Cypress.set(obj, "test")
+      cy.prop("runnable", r)
+      expect(obj.startedAt).to.be.a("date")
+
   context "#to", ->
     it "returns the subject for chainability", ->
       cy.noop({foo: "bar"}).to("deep.eq", {foo: "bar"}).then (obj) ->

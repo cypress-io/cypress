@@ -42,6 +42,10 @@ Cypress.Runner = do (Cypress, _) ->
       @runner.on "end", =>
         Cypress.trigger "run:end"
 
+        ## maybe right here we should
+        ## unbind from all runnables
+        ## and the runner itself?
+
       @runner.on "suite", (suite) ->
         Cypress.trigger "suite:start", suite
 
@@ -49,23 +53,19 @@ Cypress.Runner = do (Cypress, _) ->
         Cypress.trigger "suite:end", suite
 
       @runner.on "hook", (hook) =>
-        @hookName = @getHookName(hook)
-
-        Cypress.set(hook, @hookName)
+        Cypress.set(hook, @getHookName(hook))
         Cypress.trigger "hook:start", hook
 
       @runner.on "hook end", (hook) =>
         if test = hook.ctx.currentTest
-          @hookName = "test"
-          Cypress.set(test, @hookName)
+          Cypress.set(test, "test")
 
         Cypress.trigger "hook:end", hook
 
       @runner.on "test", (test) =>
         @test     = test
-        @hookName = "test"
 
-        Cypress.set(test, @hookName)
+        Cypress.set(test, "test")
         Cypress.trigger "test:start", test
 
       @runner.on "test end", (test) ->
@@ -309,7 +309,6 @@ Cypress.Runner = do (Cypress, _) ->
           test = runner.test
 
           runner.test     = null
-          runner.hookName = null
 
           Cypress.trigger "test:after:hooks", test
 

@@ -88,13 +88,6 @@ describe "Runner API", ->
           expect(@trigger).to.be.calledWith "hook:start", @hook
           done()
 
-      it "sets this.hookName", (done) ->
-        @runner.runner.on "hook", (hook) =>
-          expect(@runner.hookName).to.eq "before each"
-          done()
-
-        @runner.runner.run()
-
       it "calls Cypress.set with the test + hookName", (done) ->
         set = @sandbox.spy Cypress, "set"
 
@@ -111,13 +104,6 @@ describe "Runner API", ->
         @runner.runner.run =>
           expect(@trigger).to.be.calledWith "hook:end", @hook
           done()
-
-      it "sets hookName back to test", (done) ->
-        @runner.runner.on "hook end", (hook) =>
-          expect(@runner.hookName).to.eq "test"
-          done()
-
-        @runner.runner.run()
 
       it "calls Cypress.set with the test + hookName", (done) ->
         set = @sandbox.spy Cypress, "set"
@@ -139,15 +125,6 @@ describe "Runner API", ->
       it "sets this.test", (done) ->
         @runner.runner.on "test", (test) =>
           expect(@runner.test).to.eq test
-          done()
-
-        @runner.runner.run()
-
-      it "sets this.hookName", (done) ->
-        ## when our test is running we always
-        ## set the hookName to test!
-        @runner.runner.on "test", (test) =>
-          expect(@runner.hookName).to.eq "test"
           done()
 
         @runner.runner.run()
@@ -366,13 +343,6 @@ describe "Runner API", ->
       it "null out test", (done) ->
         Cypress.on "test:after:hooks", (test) =>
           expect(@runner.test).to.be.null
-          done()
-
-        @runner.runner.run()
-
-      it "nulls out hookName", (done) ->
-        Cypress.on "test:after:hooks", (test) =>
-          expect(@runner.hookName).to.be.null
           done()
 
         @runner.runner.run()

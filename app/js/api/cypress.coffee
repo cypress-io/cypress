@@ -419,6 +419,8 @@ window.Cypress = do ($, _, Backbone) ->
       @prop "timerId", setImmediate _.bind(fn, @)
 
     hook: (name) ->
+      @prop("hookName", name)
+
       return if not @prop("inspect")
 
       return console.groupEnd() if not name
