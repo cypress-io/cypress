@@ -5431,6 +5431,14 @@ describe "Cypress", ->
       cy.prop("runnable", r)
       expect(obj.startedAt).to.be.a("date")
 
+    it "sets runnable timeout to config.commandTimeout", ->
+      r = cy.prop("runnable")
+      timeout = @sandbox.spy r, "timeout"
+      @sandbox.stub cy, "config", -> 1000
+      Cypress.set(r)
+      expect(timeout).to.be.calledWith 1000
+      expect(r._timeout).to.eq 1000
+
   context "#to", ->
     it "returns the subject for chainability", ->
       cy.noop({foo: "bar"}).to("deep.eq", {foo: "bar"}).then (obj) ->

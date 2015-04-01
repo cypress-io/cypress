@@ -15,10 +15,6 @@ window.Cypress = do ($, _, Backbone) ->
 
       @defaults()
 
-      _.defaults @options,
-        commandTimeout: 2000
-        delay: 0 ## whether there is a delay in between commands
-
     defaults: ->
       @props = {}
 
@@ -670,7 +666,14 @@ window.Cypress = do ($, _, Backbone) ->
 
     ## sets the runnable onto the cy instance
     @set = (runnable, hookName) ->
+      ## think about moving the cy.config object
+      ## to Cypress so it doesnt need to be reset.
+      ## also our options are "global" whereas
+      ## options on @cy are local to that specific
+      ## test run
       runnable.startedAt = new Date
+      runnable.timeout @cy.config("commandTimeout") if @cy.config
+
       @cy.hook(hookName)
       @cy.prop("runnable", runnable)
 
