@@ -625,6 +625,18 @@ describe "Cypress", ->
       cy.clearLocalStorage().then ->
         expect(unsetStorages).to.be.called
 
+    it "sets subject to remote localStorage", ->
+      ls = cy.sync.window().localStorage
+
+      cy.clearLocalStorage().then (remote) ->
+        expect(remote).to.eq ls
+
+    describe "test:before:hooks", ->
+      it "clears localStorage before each test run", ->
+        clear = @sandbox.spy Cypress.LocalStorage, "clear"
+        Cypress.trigger "test:before:hooks"
+        expect(clear).to.be.calledWith []
+
     describe "errors", ->
       beforeEach ->
         @allowErrors()
@@ -5405,7 +5417,7 @@ describe "Cypress", ->
 
       @loadDom()
 
-  context.only ".set", ->
+  context ".set", ->
     it "sets prop(hookName)", ->
       r = cy.prop("runnable")
       Cypress.set({}, "foobar")
