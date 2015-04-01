@@ -64,6 +64,13 @@ describe "Runner API", ->
           expect(@trigger).to.be.calledWith "run:end"
           done()
 
+      it "calls #destroy", (done) ->
+        destroy = @sandbox.spy @runner, "destroy"
+
+        @runner.runner.run =>
+          expect(destroy).to.be.called
+          done()
+
     describe "runner.on('suite')", ->
       it "Cypress triggers suite:start", (done) ->
         @runner.runner.on "suite", (@suite) =>
@@ -557,6 +564,48 @@ describe "Runner API", ->
 
         ## should grep each of the tests twice
         expect(test.callCount + test2.callCount).to.eq 8
+
+  context "#destroy", ->
+    beforeEach ->
+      runner = Fixtures.createRunnables
+        hooks: ["beforeEach"]
+        tests: ["root test 1", "root test 2"]
+        suites:
+          "suite 1":
+            tests: ["suite 1, test 1", "suite 1, test 2"]
+          "suite 2":
+            tests: ["suite 2, test 1"]
+
+      @runner = Cypress.Runner.runner(runner)
+
+    it "unbinds runnables", (done) ->
+      @runner.runner.on "end", =>
+        @removeAllListeners = _.map @runner.runnables, (r) =>
+          @sandbox.spy r, "removeAllListeners"
+
+      @runner.setListeners()
+
+      @runner.runner.run =>
+        _.each @removeAllListeners, (r) ->
+          expect(r).to.be.calledOnce
+        done()
+
+    it "unbinds runner", (done) ->
+      @runner.runner.on "end", =>
+        @removeAllListeners = @sandbox.spy @runner.runner, "removeAllListeners"
+
+      @runner.setListeners()
+
+      @runner.runner.run =>
+        expect(@removeAllListeners).to.be.calledOnce
+        done()
+
+    it "resets runnables", (done) ->
+      @runner.setListeners()
+
+      @runner.runner.run =>
+        expect(@runner.runnables).to.deep.eq []
+        done()
 
   context "#abort", ->
     beforeEach ->

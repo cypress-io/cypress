@@ -12,8 +12,7 @@ Cypress.Runner = do (Cypress, _) ->
 
   class Runner
     constructor: (@runner) ->
-      ## hold onto the runnables for faster lookup later
-      @runnables = []
+      @init()
 
       @patchHookEvents()
 
@@ -22,8 +21,19 @@ Cypress.Runner = do (Cypress, _) ->
     fail: (err, runnable) ->
       @runner.uncaught(err)
 
+    init: ->
+      ## hold onto the runnables for faster lookup later
+      @runnables = []
+
     destroy: ->
-      @runner.removeAllListeners()
+      _.each [@runnables, @runner], (obj) =>
+        @unbind(obj)
+
+      @init()
+
+    unbind: (obj) ->
+      array = [].concat(obj)
+      _.invoke array, "removeAllListeners"
 
     abort: ->
       @runner.abort()
@@ -42,9 +52,7 @@ Cypress.Runner = do (Cypress, _) ->
       @runner.on "end", =>
         Cypress.trigger "run:end"
 
-        ## maybe right here we should
-        ## unbind from all runnables
-        ## and the runner itself?
+        @destroy()
 
       @runner.on "suite", (suite) ->
         Cypress.trigger "suite:start", suite
