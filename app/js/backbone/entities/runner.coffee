@@ -39,21 +39,6 @@
         socket.emit "run:sauce", @iframe, (jobName, batchId) =>
           @trigger "sauce:running", jobName, batchId
 
-      revertDom: (command, init = true) ->
-        return @trigger "restore:dom" if not init
-
-        return if not command.hasSnapshot()
-
-        @trigger "revert:dom", command.getSnapshot(),
-          id:   command.cid
-          el:   command.getEl()
-          attr: command.get("highlightAttr")
-
-      highlightEl: (command, init = true) ->
-        @trigger "highlight:el", command.getEl(),
-          id: command.cid
-          init: init
-
       switchToBrowser: (browser, version) ->
         @trigger "switch:to:manual:browser", browser, version
 

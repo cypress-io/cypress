@@ -2,7 +2,7 @@
 
   class List.Controller extends App.Controllers.Application
     initialize: (options) ->
-      { test, runner } = options
+      { test } = options
 
       @agents = agents = test.get("agents")
 

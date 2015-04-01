@@ -19,13 +19,13 @@
       @listenTo runner, "load:spec:iframe", (iframe, options) ->
         @loadIframe view, runner, iframe, options
 
-      @listenTo runner, "revert:dom", (dom, options) ->
+      @listenTo config, "revert:dom", (dom, options) ->
         view.revertToDom dom, options
 
-      @listenTo runner, "highlight:el", (el, options) ->
+      @listenTo config, "highlight:el", (el, options) ->
         view.highlightEl el, options
 
-      @listenTo runner, "restore:dom", ->
+      @listenTo config, "restore:dom", ->
         view.restoreDom()
 
       @show view

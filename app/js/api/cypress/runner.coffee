@@ -63,7 +63,7 @@ Cypress.Runner = do (Cypress, _) ->
         Cypress.trigger "hook:end", hook
 
       @runner.on "test", (test) =>
-        @test     = test
+        @test = test
 
         Cypress.set(test, "test")
         Cypress.trigger "test:start", test

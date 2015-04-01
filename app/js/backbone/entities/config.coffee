@@ -100,5 +100,20 @@
 
       _.bind(get, @)
 
+    revertDom: (command, init = true) ->
+      return @trigger "restore:dom" if not init
+
+      return if not command.hasSnapshot()
+
+      @trigger "revert:dom", command.getSnapshot(),
+        id:   command.cid
+        el:   command.getEl()
+        attr: command.get("highlightAttr")
+
+    highlightEl: (command, init = true) ->
+      @trigger "highlight:el", command.getEl(),
+        id: command.cid
+        init: init
+
   App.reqres.setHandler "new:config:entity", (attrs = {}) ->
     new Entities.Config attrs

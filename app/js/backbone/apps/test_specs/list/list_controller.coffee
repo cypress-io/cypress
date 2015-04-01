@@ -141,12 +141,12 @@
         @show contentView, region: layout.contentRegion
 
         if model.is("test")
-          App.execute "list:test:agents", model, reporter, layout.agentsRegion
+          App.execute "list:test:agents", model, layout.agentsRegion
 
-          App.execute "list:test:routes", model, reporter, layout.routesRegion
+          App.execute "list:test:routes", model, layout.routesRegion
 
           ## and pass up the commands collection (via hooks) and the commands region
-          App.execute "list:test:commands", model, reporter, layout.commandsRegion
+          App.execute "list:test:commands", model, layout.commandsRegion
         else
           region = layout.runnablesRegion
 
