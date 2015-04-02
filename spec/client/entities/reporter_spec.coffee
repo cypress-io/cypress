@@ -152,6 +152,26 @@ describe "Reporter Entity", ->
           @reporter.receivedRunner @runner
           expect(getRunnables).to.be.calledOnce
 
+  context "#getRunnableId", ->
+    it "uses id from runnable title", ->
+      r = {title: "foo bar baz [123]"}
+      expect(@reporter.getRunnableId(r)).to.eq "123"
+
+    it "generates a random id if one doesnt exist", ->
+      r = {title: "does not have an id"}
+      id = @reporter.getRunnableId(r)
+      expect(id).to.be.ok
+      expect(id).to.match /[a-zA-Z0-9]{3}/
+
+  context "#createUniqueRunnableId", ->
+    it "generates random ids until its unique", ->
+      ids = ["123"]
+      r = {title: "has a duplicate id [123]"}
+      id = @reporter.createUniqueRunnableId(r, ids)
+      expect(id).to.be.ok
+      expect(id).not.to.eq "123"
+      expect(id).to.match /[a-zA-Z0-9]{3}/
+
   context "#run", ->
     beforeEach ->
       @setup   = @sandbox.stub Cypress, "setup"
@@ -169,6 +189,7 @@ describe "Reporter Entity", ->
     it "triggers after:run as the Cypress.run callback", ->
       @run.callsArg(0)
       @reporter.run()
+
 
       expect(@trigger).to.be.calledWith "after:run"
 

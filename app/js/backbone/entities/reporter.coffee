@@ -6,6 +6,8 @@
 
     CypressEvents = "run:start run:end suite:start suite:end hook:start hook:end test:start test:end".split(" ")
 
+    alphabet = "abcdefghijklmnopqrstuvwxyz0123456789"
+
     class Entities.Reporter extends Entities.Model
       defaults:
         browser: null
@@ -125,14 +127,32 @@
         matches = runnableIdRegExp.exec(runnable.title)
 
         ## use the captured group if there was a match
-        matches and matches[1]
+        (matches and matches[1]) or @generateId()
 
-      idSuffix: (id) ->
-        " [" + id + "]"
+      idSuffix: (title) ->
+        matches = title.match runnableIdRegExp
+        matches and matches[0]
+        # " [" + id + "]"
+
+      generateId: ->
+        ids = _(3).times => @getRandom(alphabet)
+        ids.join("")
+
+      getRandom: (alphabet) ->
+        index = Math.floor(Math.random() * alphabet.length)
+        alphabet[index]
 
       ## strip out the id suffix from the runnable title
       originalTitle: (runnable) ->
-        _.rtrim runnable.title, @idSuffix(runnable.id)
+        _.rtrim runnable.title, @idSuffix(runnable.title)
+
+      createUniqueRunnableId: (runnable, ids) ->
+        id = runnable.id ?= @getRunnableId(runnable)
+
+        until id not in ids
+          id = @generateId()
+
+        return runnable.id = id
 
       receivedRunner: (runner) ->
         @trigger "before:add"
@@ -156,9 +176,9 @@
             onRunnable: (runnable) =>
               runnables.push(runnable) if options.pushRunnables
 
-              runnable.id ?= @getRunnableId(runnable)
+              id = @createUniqueRunnableId(runnable, ids)
 
-              ids.push(runnable.id) if options.pushIds
+              ids.push(id) if options.pushIds
 
               ## force our runner to ignore running this
               ## test if it doesnt have an id!
