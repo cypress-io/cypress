@@ -10,12 +10,12 @@
       ## null, but its helpful in testing
       Mocha = options.Mocha ?= window.Mocha
 
-      ## create the global cy variable
-      Cypress.init(Mocha)
-
       Utilities.Overrides.overloadMochaRunnableEmit() if not App.config.ui("ci")
       Utilities.Overrides.overloadMochaRunnerEmit()
       Utilities.Overrides.overloadMochaRunnerUncaught() if not App.config.ui("ci")
+
+      ## create the global cy variable
+      Cypress.init(Mocha)
 
       ## return our reporter entity
       return App.request("reporter:entity")
@@ -44,14 +44,17 @@
       ## call the stop method which cleans up any listeners
       runner.stop()
 
+      ## THIS CURRENTLY NEEDS TESTS AND IS BREAKING!
+      ## REFACTOR THIS INTO THE CYPRESS.MOCHA MODULE
+
       ## remove any listeners from the mocha.suite
-      mocha.suite.removeAllListeners()
+      Cypress._mocha.suite.removeAllListeners()
 
       ## null it out to break any references
-      mocha.suite = null
+      Cypress._mocha.suite = null
 
       ## delete the globals to cleanup memory
-      delete window.mocha
+      delete Cypress._mocha
 
   App.reqres.setHandler "start:test:runner", (options = {}) ->
     API.start options

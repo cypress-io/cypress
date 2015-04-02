@@ -14,9 +14,10 @@
         version: null
 
       initialize: ->
-        @commands         = App.request "command:entities"
-        @routes           = App.request "route:entities"
-        @agents           = App.request "agent:entities"
+        @commands  = App.request "command:entities"
+        @routes    = App.request "route:entities"
+        @agents    = App.request "agent:entities"
+        @socket    = App.request "socket:entity"
 
         _.each CypressEvents, (event) =>
           @listenTo Cypress, event, (args...) =>
@@ -41,26 +42,25 @@
             else
               throw new Error("Cypress.log() emitted an unknown event: #{log.get('event')}")
 
-        @listenTo App.request("socket:entity"), "test:changed", @reRun
+        @listenTo @socket, "test:changed", @reRun
 
       start: (specPath) ->
         @triggerLoadSpecFrame specPath
 
       stop: ->
-        @restore()
+        @stopListening(@socket)
+        _.each CypressEvents.concat("setup", "log"), (event) =>
+          @stopListening(Cypress, event)
 
-        ## stop listening to everything
-        ## currently we're only listening to Cypress
-        ## but its fine in case we listen to other
-        ## objects in the future
-        @stopListening()
+
+        @restore()
 
       restore: ->
         ## reset the entities
         @reset()
 
         ## and remove actual references to them
-        _.each ["commands", "routes", "agents", "chosen", "specPath"], (obj) =>
+        _.each ["commands", "routes", "agents", "chosen", "specPath", "socket"], (obj) =>
           @[obj] = null
 
       reset: ->
