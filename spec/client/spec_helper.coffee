@@ -5,9 +5,11 @@ before ->
   @sandbox = sinon.sandbox.create()
 
 beforeEach ->
+  stubSocketIo.call(@)
   App.config = App.request "new:config:entity", {}
   App.config.setEnv("ui")
   Cypress.Chai.setGlobals(window)
+  App.execute "socket:start"
 
 afterEach ->
   @sandbox.restore()
@@ -17,6 +19,12 @@ afterEach ->
   @sandbox.server?.requests = []
   @sandbox.server?.queue = []
   @sandbox.server?.responses = []
+
+stubSocketIo = ->
+  window.io =
+    connect: @sandbox.spy =>
+      on: @sandbox.stub()
+      emit: @sandbox.stub()
 
 window.Fixtures = do ->
   createRunnables: (obj, suite) ->
