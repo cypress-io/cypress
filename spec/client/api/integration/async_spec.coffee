@@ -6,12 +6,13 @@ describe "Async Integration Tests", ->
     loadFixture("html/async").done (iframe) =>
       Cypress.set(@currentTest)
       Cypress.setup(runner, $(iframe), ->)
+      @r = Cypress.getRunner().override()
 
   afterEach ->
     Cypress.abort()
 
   after ->
-    Cypress.stop()
+    Cypress.stop().then => @r.restore()
 
   it "will find 'form success' message by default (after retrying)", ->
     cy
@@ -23,7 +24,7 @@ describe "Async Integration Tests", ->
         expect($span).to.contain("form success!")
 
   it "fails without an explicit wait when an element is immediately found", (done) ->
-    @sandbox.stub cy.runner, "uncaught"
+    @allowErrors()
 
     cy.on "fail", (err) ->
       done()

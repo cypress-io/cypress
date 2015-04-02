@@ -10,7 +10,7 @@
       @listenTo runner, "suite:start", ->
         stats.startCounting()
 
-      @listenTo runner, "runner:end", ->
+      @listenTo runner, "after:run", ->
         stats.stopCounting()
 
       @listenTo runner, "test:end", ->
@@ -28,7 +28,7 @@
         ## we reset our stats back to 0
         stats.reset()
 
-      @listenTo runner, "runner:end", ->
+      @listenTo runner, "after:run", ->
         stats.setGlobally()
 
       @layout = @getLayoutView()

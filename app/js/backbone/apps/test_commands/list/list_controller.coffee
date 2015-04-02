@@ -2,7 +2,7 @@
 
   class List.Controller extends App.Controllers.Application
     initialize: (options) ->
-      { test, runner } = options
+      { test } = options
 
       @hooks = hooks = test.get("hooks")
 
@@ -21,13 +21,13 @@
         command = args.model
         # return @highlightClone(hooks, command) if command.isCloned()
 
-        runner.revertDom(command)
+        App.config.revertDom(command)
 
       @listenTo commandsView, "childview:childview:command:mouseleave", (iv, iv2, args) ->
         command = args.model
         # return @highlightClone(hooks, command, false) if command.isCloned()
 
-        runner.revertDom(command, false)
+        App.config.revertDom(command, false)
 
       @show commandsView
 

@@ -177,7 +177,8 @@ Cypress.Log = do (Cypress, _, Backbone) ->
 
     log: (event, obj) ->
       _.defaults obj,
-        testId:           @cy.prop("runnable").cid
+        hookName:         @cy.prop("hookName")
+        testId:           @cy.prop("runnable").id
         referencesAlias:  undefined
         alias:            undefined
         message:          undefined

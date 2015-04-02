@@ -5,7 +5,7 @@ do (Cypress, _) ->
     ## instead of going through @prop(...) ?
     @_sandbox = null
 
-  Cypress.on "after:run", ->
+  Cypress.on "restore", ->
     ## restore the sandbox if we've
     ## created one
     if sandbox = @_sandbox

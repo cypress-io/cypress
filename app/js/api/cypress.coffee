@@ -15,10 +15,6 @@ window.Cypress = do ($, _, Backbone) ->
 
       @defaults()
 
-      _.defaults @options,
-        commandTimeout: 2000
-        delay: 0 ## whether there is a delay in between commands
-
     defaults: ->
       @props = {}
 
@@ -140,6 +136,12 @@ window.Cypress = do ($, _, Backbone) ->
 
         .catch (err) =>
           @fail(err)
+
+          ## reset the nestedIndex back to null
+          @prop("nestedIndex", null)
+
+          ## also reset recentlyReady back to null
+          @prop("recentlyReady", null)
 
           return err
         ## signify we are at the end of the chain and do not
@@ -287,6 +289,8 @@ window.Cypress = do ($, _, Backbone) ->
         if @prop("recentlyReady") is null
           @isReady(false, "href changed") if @_hrefChanged()
 
+        # @onInvokeEnd(subject)
+
         ## reset the nestedIndex back to null
         @prop("nestedIndex", null)
 
@@ -404,7 +408,6 @@ window.Cypress = do ($, _, Backbone) ->
         ## since we've started a new chain
         ## and reset our chainerId
         if id isnt chainerId
-          # debugger
           @prop("chainerId", chainerId)
           @prop("subject", null)
 
@@ -420,6 +423,8 @@ window.Cypress = do ($, _, Backbone) ->
       @prop "timerId", setImmediate _.bind(fn, @)
 
     hook: (name) ->
+      @prop("hookName", name)
+
       return if not @prop("inspect")
 
       return console.groupEnd() if not name
@@ -609,6 +614,12 @@ window.Cypress = do ($, _, Backbone) ->
         @enqueue(key, wrap.call(@, fn), args, type, chainerId)
 
     @abort = ->
+      ## during abort we always want to reset
+      ## the mocha instance grep to all
+      ## so its picked back up by mocha
+      ## naturally when the iframe spec reloads
+      Cypress._mocha.grep /.*/
+
       Cypress.trigger "abort"
 
       @cy.$remoteIframe?.off("submit unload load")
@@ -637,7 +648,7 @@ window.Cypress = do ($, _, Backbone) ->
       @cy.group(false)
       @cy.group(false)
 
-      Cypress.trigger "after:run"
+      Cypress.trigger "restore"
 
       ## remove any event listeners
       @cy.off()
@@ -653,10 +664,12 @@ window.Cypress = do ($, _, Backbone) ->
     ## from the cypress instance
     @stop = ->
       @abort().then =>
+        Cypress.Chai.restore()
+        Cypress.Mocha.restore()
+
         Cypress.trigger "destroy"
 
         _.extend @cy,
-          runner:        null
           remoteIframe:  null
           config:        null
 
@@ -666,15 +679,24 @@ window.Cypress = do ($, _, Backbone) ->
         Cypress.options = {}
 
     ## sets the runnable onto the cy instance
-    @set = (runnable, hook) ->
+    @set = (runnable, hookName) ->
+      ## think about moving the cy.config object
+      ## to Cypress so it doesnt need to be reset.
+      ## also our options are "global" whereas
+      ## options on @cy are local to that specific
+      ## test run
       runnable.startedAt = new Date
-      @cy.hook(hook)
+
+      if @cy.config and _.isFinite(timeout = @cy.config("commandTimeout"))
+        runnable.timeout timeout
+
+      @cy.hook(hookName)
       @cy.prop("runnable", runnable)
 
     ## patches the cypress instance with contentWindow
     ## remoteIframe and config
     ## this should be moved to an instance method and
-    @setup = (runner, $remoteIframe, config) ->
+    @setup = (specWindow, $remoteIframe, config) ->
       ## we listen for the unload + submit events on
       ## the window, because when we receive them we
       ## tell cy its not ready and this prevents any
@@ -705,12 +727,11 @@ window.Cypress = do ($, _, Backbone) ->
         bindEvents()
         @cy.isReady(true, "load")
 
+      Cypress.Runner.create(@_mocha, specWindow)
+
       _.extend @cy,
-        runner:        runner
         $remoteIframe: $remoteIframe
         config:        config
-
-      Cypress.trigger "before:run"
 
       ## anytime setup is called we immediately
       ## set cy to be ready to invoke commands
@@ -719,7 +740,24 @@ window.Cypress = do ($, _, Backbone) ->
       ## our tests are re-run
       @cy.isReady(true, "setup")
 
-    @start = ->
+      Cypress.trigger "setup", Cypress.getRunner()
+
+    @run = (fn) ->
+      Cypress.getRunner().run(fn)
+
+    @init = (@_Mocha) ->
+      throw new Error("Cypress.init requires mocha global") if not @_Mocha
+
+      ## by default mocha creates a mocha global
+      delete window.mocha
+
+      ## we want to move this out of the global namespace
+      ## and create our own mocha instance within Cypres
+      Cypress._mocha = new @_Mocha reporter: ->
+
+      Cypress.Mocha.override()
+      Cypress.Chai.override()
+
       window.cy = @cy = new Cypress
 
       @cy.initialize()

@@ -14,7 +14,7 @@ do (parent = window.opener or window.parent) ->
 
   ## create our own mocha objects from our parents if its not already defined
   window.Mocha ?= parent.Mocha
-  window.mocha ?= parent.mocha
+  window.mocha ?= (parent.mocha or parent.Cypress._mocha)
 
   ## remove all of the listeners from the previous root suite
   mocha.suite.removeAllListeners()

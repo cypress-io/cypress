@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "0.3.15",
+  "version": "0.4.0",
   "description": "Javascript Test Engine",
   "main": "app://app/nw/public/index.html",
   "single-instance": false,

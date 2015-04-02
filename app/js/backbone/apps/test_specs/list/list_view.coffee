@@ -34,7 +34,7 @@
 
     repeatClicked: (e) ->
       e.stopPropagation()
-      @model.trigger "model:double:clicked"
+      @model.trigger "model:refresh:clicked"
 
     stateChanged: (model, value, options) ->
       if @model.get("type") is "test"
@@ -87,7 +87,6 @@
     events:
       "mouseover"         : "mouseover"
       "mouseout"          : "mouseout"
-      # "dblclick"        : "dblClicked"
       "click"             : "clicked"
       "click @ui.pre"     : "preClicked"
       "mouseover @ui.pre" : "mouseoverPre"
@@ -118,10 +117,6 @@
     commandsMouseover: (e) ->
       e.stopPropagation()
       @$el.removeClass("hover")
-
-    dblClicked: (e) ->
-      e.stopPropagation()
-      @model.trigger "model:double:clicked"
 
     clicked: (e) ->
       e.stopPropagation()

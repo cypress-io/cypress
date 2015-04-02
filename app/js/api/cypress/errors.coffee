@@ -55,5 +55,7 @@ do (Cypress, _) ->
       else
         @commandErr(err)
 
-      @runner.uncaught(err)
-      @trigger "fail", err
+      runnable = @prop("runnable")
+
+      Cypress.trigger "fail", err, runnable
+      @trigger "fail", err, runnable

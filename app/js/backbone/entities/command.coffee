@@ -267,7 +267,7 @@
       if log.get("type") not in ["parent", "child"]
         throw new Error("Commands may only have type of 'parent' or 'child'.  Command was: {name: #{log.get('name')}, type: #{log.get('type')}}")
 
-      attrs = ["state", "testId", "hook", "type", "highlightAttr", "name", "alias", "aliasType", "referencesAlias", "message", "numElements", "numRetries"]
+      attrs = ["state", "testId", "hookName", "type", "highlightAttr", "name", "alias", "aliasType", "referencesAlias", "message", "numElements", "numRetries"]
 
       command = new Entities.Command log.pick.apply(log, attrs)
       command.log = log
