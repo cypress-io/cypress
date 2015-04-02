@@ -165,7 +165,6 @@
 
         getRunnables = (options = {}) =>
           _.defaults options,
-            pushIds: true
             pushRunnables: true
             triggerAddEvent: true
 
@@ -178,7 +177,7 @@
 
               id = @createUniqueRunnableId(runnable, ids)
 
-              ids.push(id) if options.pushIds
+              ids.push(id)
 
               ## force our runner to ignore running this
               ## test if it doesnt have an id!
@@ -205,6 +204,11 @@
           ## and then modify the spec and remove
           ## this specific id
           if id in ids
+            ## reset ids at the end to prevent
+            ## accidentally generating random ids
+            ## due to ids closure in onRunnable
+            ids = []
+
             ## make the runner grep for just this unique id!
             runner.grep @escapeRegExp("[" + id + "]")
 
@@ -213,7 +217,7 @@
             ## to see which ones should be added
             ## we dont need to push the ids or push
             ## the runnables since its a temp var anyway
-            getRunnables({pushIds: false, pushRunnables: false})
+            getRunnables({pushRunnables: false})
           else
             ## remove the chosen id since its not
             ## longer in the spec file!

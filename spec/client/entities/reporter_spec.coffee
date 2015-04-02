@@ -172,6 +172,12 @@ describe "Reporter Entity", ->
       expect(id).not.to.eq "123"
       expect(id).to.match /[a-zA-Z0-9]{3}/
 
+    it "doesnt generate random ids if id is already unique", ->
+      ids = ["123"]
+      r = {title: "has id [456]"}
+      id = @reporter.createUniqueRunnableId(r, ids)
+      expect(id).to.eq "456"
+
   context "#run", ->
     beforeEach ->
       @setup   = @sandbox.stub Cypress, "setup"
