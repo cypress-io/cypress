@@ -23,6 +23,9 @@ describe "Cypress", ->
     Cypress.Mocha.restoreRunnableRun()
     # Cypress.Mocha.restoreRunnableRun()
 
+    ## allow our own cypress errors to bubble up!
+    App.Utilities.Overrides.overloadMochaRunnerUncaught()
+
     @loadDom = (fixture = "html/dom") =>
       loadFixture(fixture).done (iframe) =>
         @iframe = $(iframe)
@@ -1261,14 +1264,32 @@ describe "Cypress", ->
       cy.inspect().title().until (title) ->
         expect(title).to.eq "about page"
 
-    it "throws after timing out", (done) ->
-      @allowErrors()
-      @test.timeout(300)
-      cy.$("title").remove()
-      cy.title()
-      cy.on "fail", (err) ->
-        expect(err.message).to.include "Could not find element: title"
-        done()
+    describe "errors", ->
+      beforeEach ->
+        @currentTest.timeout(300)
+        @allowErrors()
+
+      it "throws after timing out", (done) ->
+        cy.$("title").remove()
+        cy.title()
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "Could not find element: title"
+          done()
+
+      it "only logs once", (done) ->
+        cy.$("title").remove()
+
+        logs = []
+
+        Cypress.on "log", (@log) =>
+          logs.push @log
+
+        cy.on "fail", (err) =>
+          expect(logs).to.have.length(1)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        cy.title()
 
     describe ".log", ->
       beforeEach ->
