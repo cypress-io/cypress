@@ -672,7 +672,9 @@ window.Cypress = do ($, _, Backbone) ->
       ## options on @cy are local to that specific
       ## test run
       runnable.startedAt = new Date
-      runnable.timeout @cy.config("commandTimeout") if @cy.config
+
+      if @cy.config and _.isFinite(timeout = @cy.config("commandTimeout"))
+        runnable.timeout timeout
 
       @cy.hook(hookName)
       @cy.prop("runnable", runnable)

@@ -5153,8 +5153,18 @@ describe "Cypress", ->
 
         Cypress.command({})
 
-      it "sets testId to runnable.cid", (done) ->
-        cy.prop("runnable", {cid: 123})
+      it "sets hookName to prop hookName", (done) ->
+        cy.prop("hookName", "beforeEach")
+
+        Cypress.on "log", (obj) ->
+          expect(obj.get("hookName")).to.eq "beforeEach"
+          cy.prop("hookName", null)
+          done()
+
+        Cypress.command({})
+
+      it "sets testId to runnable.id", (done) ->
+        cy.prop("runnable", {id: 123})
 
         Cypress.on "log", (obj) ->
           expect(obj.get("testId")).to.eq 123
