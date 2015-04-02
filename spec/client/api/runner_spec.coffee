@@ -122,6 +122,26 @@ describe "Runner API", ->
 
         @runner.runner.run()
 
+      it.only "sets hook.id to associated test.id given multiple grepp'd tests", (done) ->
+        runner = Fixtures.createRunnables
+          hooks: ["beforeEach"]
+          tests: ["one"]
+          suites:
+            "suite 1":
+              hooks: ["beforeAll"]
+              tests: ["two"]
+
+        runner = Cypress.Runner.runner(runner)
+        runner.setListeners()
+
+        test    = runner.getTestByTitle "two"
+        test.id = "a0e"
+        hook    = runner.runner.suite.suites[0]._beforeAll[0]
+
+        runner.runner.run =>
+          expect(hook.id).to.eq("a0e")
+          done()
+
     describe "runner.on('hook end')", ->
       it "Cypress triggers hook:end", (done) ->
         @runner.runner.on "hook end", (@hook) =>

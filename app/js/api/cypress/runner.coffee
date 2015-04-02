@@ -61,6 +61,7 @@ Cypress.Runner = do (Cypress, _) ->
         Cypress.trigger "suite:end", suite
 
       @runner.on "hook", (hook) =>
+        debugger
         ## set the hook's id from the test because
         ## hooks do not have their own id, their
         ## commands need to grouped with the test
@@ -256,6 +257,7 @@ Cypress.Runner = do (Cypress, _) ->
       ## and set them all to pending!
 
     getTestFromHook: (hook, suite) ->
+      # debugger
       ## if theres already a currentTest use that
       return test if test = hook?.ctx.currentTest
 

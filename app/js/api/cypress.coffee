@@ -137,6 +137,12 @@ window.Cypress = do ($, _, Backbone) ->
         .catch (err) =>
           @fail(err)
 
+          ## reset the nestedIndex back to null
+          @prop("nestedIndex", null)
+
+          ## also reset recentlyReady back to null
+          @prop("recentlyReady", null)
+
           return err
         ## signify we are at the end of the chain and do not
         ## continue chaining anymore
@@ -282,6 +288,8 @@ window.Cypress = do ($, _, Backbone) ->
         # then we're no longer ready to proceed with the next command
         if @prop("recentlyReady") is null
           @isReady(false, "href changed") if @_hrefChanged()
+
+        # @onInvokeEnd(subject)
 
         ## reset the nestedIndex back to null
         @prop("nestedIndex", null)
