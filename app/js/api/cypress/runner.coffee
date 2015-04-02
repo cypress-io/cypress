@@ -72,7 +72,14 @@ Cypress.Runner = do (Cypress, _) ->
         Cypress.trigger "hook:start", hook
 
       @runner.on "hook end", (hook) =>
-        if test = hook.ctx.currentTest
+        hookName = @getHookName(hook)
+
+        ## because mocha fires a 'test' event first and then
+        ## subsequently fires a beforeEach immediately after
+        ## we have to re-set our test runnable after the
+        ## beforeEach hook ends! every other hook is fine
+        ## we do not need to re-set for any other type!
+        if hookName is "before each" and test = hook.ctx.currentTest
           Cypress.set(test, "test")
 
         Cypress.trigger "hook:end", hook
@@ -249,31 +256,12 @@ Cypress.Runner = do (Cypress, _) ->
       ## and set them all to pending!
 
     getTestFromHook: (hook, suite) ->
-      # debugger
       ## if theres already a currentTest use that
       return test if test = hook?.ctx.currentTest
 
-      ## there is a bug where if you have set an 'only'
-      ## and you're running a visit within a hook
-      ## then this will return the incorrect test
-      ## it will return the very first test instead of
-      ## our actual running test.  i've looked through
-      ## mocha's source and cannot find any way to figure
-      ## out which test is running in this scenario.
-      ## so i think the only solution is to look at the grep
-      ## and grep for the first test that matches it
-      # grep = @runner._grep
-      # if grep.toString() isnt "/.*/"
-      #   return test if test = @getFirstTestByFn suite, (test) ->
-      #     grep.test _.result(test, "fullTitle")
+      ## else we have to be on the very first test
+      ## which matches the current grep
       @tests[0]
-
-      ## else go look for the test because our suite
-      ## is most likely the root suite (which does not share a ctx)
-      # if suite.tests.length
-      #   return suite.tests[0]
-      # else
-      #   @getTestFromHook(hook, suite.suites[0])
 
     patchHookEvents: ->
       ## bail if our runner doesnt have a hook

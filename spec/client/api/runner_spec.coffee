@@ -130,14 +130,33 @@ describe "Runner API", ->
           expect(@trigger).to.be.calledWith "hook:end", @hook
           done()
 
-      it "calls Cypress.set with the test + hookName", (done) ->
+      it "does not call Cypress.set if hook isnt before each", (done) ->
+        runner = Fixtures.createRunnables
+          hooks: ["beforeAll", "afterEach", "afterAll"]
+          tests: ["one"]
+        runner = Cypress.Runner.runner(runner)
+        runner.setListeners()
+
+        test = runner.getTestByTitle "one"
         set = @sandbox.spy Cypress, "set"
 
-        @runner.runner.on "hook end", (hook) ->
-          expect(set).to.be.calledWith hook.ctx.currentTest, "test"
+        runner.runner.run ->
+          expect(set).to.be.calledWith test
           done()
 
-        @runner.runner.run()
+      it "calls Cypress.set with the test + hookName if hook is before each", (done) ->
+        set = @sandbox.spy Cypress, "set"
+
+        @runner.runner.on "hook end", (@hook) =>
+
+        ## we expect 3 calls here
+        ## 1 hook (beforeEach)
+        ## 1 test
+        ## 1 test (on hook end - for the beforeEach)
+        @runner.runner.run =>
+          expect(set.callCount).to.eq 3
+          expect(set.thirdCall).to.be.calledWith @hook.ctx.test, "test"
+          done()
 
     describe "runner.on('test')", ->
       it "Cypress triggers test:start", (done) ->
