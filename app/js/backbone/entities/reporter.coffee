@@ -39,8 +39,10 @@
             else
               throw new Error("Cypress.log() emitted an unknown event: #{log.get('event')}")
 
-      start: (@specPath) ->
-        @triggerLoadSpecFrame @specPath
+        @listenTo App.request("socket:entity"), "test:changed", @reRun
+
+      start: (specPath) ->
+        @triggerLoadSpecFrame specPath
 
       stop: ->
         @restore()
@@ -88,6 +90,11 @@
         @trigger "test:results:ready", test
 
       reRun: (specPath, options = {}) ->
+        ## abort if we're being told to rerun
+        ## tests for a specPath we're not
+        ## currently watching
+        return if specPath isnt @specPath
+
         ## when we are re-running we first
         ## need to abort cypress
         Cypress.abort().then =>
@@ -101,7 +108,7 @@
 
           @triggerLoadSpecFrame(specPath, options)
 
-      triggerLoadSpecFrame: (specPath, options = {}) ->
+      triggerLoadSpecFrame: (@specPath, options = {}) ->
         _.defaults options,
           chosenId: @get("chosenId")
           browser:  @get("browser")
@@ -111,7 +118,7 @@
         @reset()
 
         ## tells the iframe view to load up a new iframe
-        @trigger "load:spec:iframe", specPath, options
+        @trigger "load:spec:iframe", @specPath, options
 
       getRunnableId: (runnable) ->
         ## grab the runnable id from the runnable's title

@@ -9,6 +9,17 @@ describe "Reporter Entity", ->
     it "sets version to null", ->
       expect(@reporter.get("version")).to.be.null
 
+  context "#initialize", ->
+    it "listens to test:changed events and calls reRun", ->
+      reRun = @sandbox.stub @reporter, "reRun"
+
+      ## need to reinitialize due to function reference
+      @reporter.initialize()
+      socket = App.request "socket:entity"
+      socket.trigger "test:changed", "entities/user_spec.coffee"
+
+      expect(reRun).to.be.calledWith "entities/user_spec.coffee"
+
   context "#stop", ->
     it "calls #restore", ->
       restore = @sandbox.spy @reporter, "restore"
@@ -203,6 +214,7 @@ describe "Reporter Entity", ->
   context "#reRun", ->
     beforeEach ->
       @abort = @sandbox.stub(Cypress, "abort").resolves()
+      @reporter.specPath = "app_spec.coffee"
 
     it "calls Cypress.abort()", ->
       @reporter.reRun "app_spec.coffee"
@@ -217,6 +229,9 @@ describe "Reporter Entity", ->
       triggerLoadSpecFrame = @sandbox.stub(@reporter, "triggerLoadSpecFrame")
       @reporter.reRun("app_spec.coffee", {foo: "bar"}).then ->
         expect(triggerLoadSpecFrame).to.be.calledWith "app_spec.coffee", {foo: "bar"}
+
+    it "returns undefined if specPath doesnt match this.specPath", ->
+      expect(@reporter.reRun("foo_spec.coffee")).to.be.undefined
 
   context "#logResults", ->
     it "triggers 'test:results:ready'", ->
