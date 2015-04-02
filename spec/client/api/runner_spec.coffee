@@ -122,7 +122,7 @@ describe "Runner API", ->
 
         @runner.runner.run()
 
-      it.only "sets hook.id to associated test.id given multiple grepp'd tests", (done) ->
+      it "sets hook.id to associated test.id given multiple grepp'd tests", (done) ->
         runner = Fixtures.createRunnables
           hooks: ["beforeEach"]
           tests: ["one"]

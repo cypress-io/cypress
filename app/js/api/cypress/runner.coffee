@@ -61,15 +61,24 @@ Cypress.Runner = do (Cypress, _) ->
         Cypress.trigger "suite:end", suite
 
       @runner.on "hook", (hook) =>
-        debugger
+        hookName = @getHookName(hook)
+
+        ## mocha incorrectly sets currentTest on before all's.
+        ## if there is a nested suite with a before, then
+        ## currentTest will refer to the previous test run
+        ## and not our current
+        if hookName is "before all" and hook.ctx.currentTest
+          delete hook.ctx.currentTest
+
         ## set the hook's id from the test because
         ## hooks do not have their own id, their
         ## commands need to grouped with the test
         ## and we can only associate them by this id
         test = @getTestFromHook(hook, hook.parent)
         hook.id = test.id
+        hook.ctx.currentTest = test
 
-        Cypress.set(hook, @getHookName(hook))
+        Cypress.set(hook, hookName)
         Cypress.trigger "hook:start", hook
 
       @runner.on "hook end", (hook) =>
@@ -122,17 +131,6 @@ Cypress.Runner = do (Cypress, _) ->
       test.hookName = @getHookName(hook)
       test.failedFromHook = true
       Cypress.trigger "test:end", test
-
-    getTestByTitle: (title) ->
-      @firstTest @runner.suite, (test) ->
-        test.title is title
-
-    firstTest: (suite, fn) ->
-      for test in suite.tests
-        return test if fn(test)
-
-      for suite in suite.suites
-        return test if test = @firstTest(suite, fn)
 
     ## returns each runnable to the callback function
     ## if it matches the current grep
@@ -222,6 +220,17 @@ Cypress.Runner = do (Cypress, _) ->
       ## unless we've been told not to iterate (during optimized loop)
       @iterateThroughRunnables(runnable, options) if options.iterate
 
+    getTestByTitle: (title) ->
+      @firstTest @runner.suite, (test) ->
+        test.title is title
+
+    firstTest: (suite, fn) ->
+      for test in suite.tests
+        return test if fn(test)
+
+      for suite in suite.suites
+        return test if test = @firstTest(suite, fn)
+
     ## optimized iteration which loops through
     ## all tests until we explicitly return true
     anyTest: (suite, fn) ->
@@ -257,13 +266,15 @@ Cypress.Runner = do (Cypress, _) ->
       ## and set them all to pending!
 
     getTestFromHook: (hook, suite) ->
-      # debugger
       ## if theres already a currentTest use that
       return test if test = hook?.ctx.currentTest
 
-      ## else we have to be on the very first test
-      ## which matches the current grep
-      @tests[0]
+      ## returns us the very first test
+      ## which is in our grepped tests array
+      ## based on walking down the current suite
+      ## iterating through each test until it matches
+      @firstTest suite, (test) =>
+        test in @tests
 
     patchHookEvents: ->
       ## bail if our runner doesnt have a hook
