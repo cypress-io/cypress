@@ -61,6 +61,13 @@ Cypress.Runner = do (Cypress, _) ->
         Cypress.trigger "suite:end", suite
 
       @runner.on "hook", (hook) =>
+        ## set the hook's id from the test because
+        ## hooks do not have their own id, their
+        ## commands need to grouped with the test
+        ## and we can only associate them by this id
+        test = @getTestFromHook(hook, hook.parent)
+        hook.id = test.id
+
         Cypress.set(hook, @getHookName(hook))
         Cypress.trigger "hook:start", hook
 

@@ -112,6 +112,16 @@ describe "Runner API", ->
 
         @runner.runner.run()
 
+      it "sets hook.id to associated test.id", (done) ->
+        test = @runner.getTestByTitle("one")
+        test.id = 123
+
+        @runner.runner.on "hook", (@hook) =>
+          expect(@hook.id).to.eq 123
+          done()
+
+        @runner.runner.run()
+
     describe "runner.on('hook end')", ->
       it "Cypress triggers hook:end", (done) ->
         @runner.runner.on "hook end", (@hook) =>
