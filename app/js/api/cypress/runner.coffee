@@ -387,7 +387,6 @@ Cypress.Runner = do (Cypress, _) ->
       Cypress._runner = new Runner(runner)
 
     @create = (mocha, specWindow) ->
-      mocha.reporter(->)
       runner = mocha.run()
       runner.suite = specWindow.mocha.suite
       @runner(runner)

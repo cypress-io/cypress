@@ -614,6 +614,12 @@ window.Cypress = do ($, _, Backbone) ->
         @enqueue(key, wrap.call(@, fn), args, type, chainerId)
 
     @abort = ->
+      ## during abort we always want to reset
+      ## the mocha instance grep to all
+      ## so its picked back up by mocha
+      ## naturally when the iframe spec reloads
+      Cypress._mocha.grep /.*/
+
       Cypress.trigger "abort"
 
       @cy.$remoteIframe?.off("submit unload load")
@@ -739,8 +745,15 @@ window.Cypress = do ($, _, Backbone) ->
     @run = (fn) ->
       Cypress.getRunner().run(fn)
 
-    @init = (@_mocha) ->
-      throw new Error("Cypress.init requires mocha instance") if not @_mocha
+    @init = (@_Mocha) ->
+      throw new Error("Cypress.init requires mocha global") if not @_Mocha
+
+      ## by default mocha creates a mocha global
+      delete window.mocha
+
+      ## we want to move this out of the global namespace
+      ## and create our own mocha instance within Cypres
+      Cypress._mocha = new @_Mocha reporter: ->
 
       Cypress.Mocha.override()
       Cypress.Chai.override()

@@ -1,6 +1,6 @@
 describe "Runner API", ->
   before ->
-    Cypress.init({})
+    Cypress.init(Mocha)
     Cypress.Chai.restore()
     Cypress.Mocha.restore()
 

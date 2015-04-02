@@ -8,10 +8,10 @@
       ## get the runner and mocha variables if they're not
       ## passed into our options.  options will normally be
       ## null, but its helpful in testing
-      mocha = options.mocha ?= API.getMocha()
+      Mocha = options.Mocha ?= window.Mocha
 
       ## create the global cy variable
-      Cypress.init(mocha)
+      Cypress.init(Mocha)
 
       Utilities.Overrides.overloadMochaRunnableEmit() if not App.config.ui("ci")
       Utilities.Overrides.overloadMochaRunnerEmit()
@@ -19,9 +19,6 @@
 
       ## return our reporter entity
       return App.request("reporter:entity")
-
-    getMocha: ->
-      window.mocha = new Mocha
 
     # getRunner: ->
     #   ## start running the tests

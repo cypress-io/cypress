@@ -11,7 +11,7 @@ describe "Cypress", ->
     ## juggled throughout our expectations
     Cypress.option("jQuery", $)
 
-    Cypress.init(mocha)
+    Cypress.init(Mocha)
 
     ## this immediately restores the chai.Assertion::assert else
     ## all of our expect messages would be completely foobar'd
