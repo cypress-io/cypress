@@ -1,6 +1,6 @@
 describe "Runner API", ->
   before ->
-    Cypress.init(Mocha)
+    Cypress.init()
     Cypress.Chai.restore()
     Cypress.Mocha.restore()
 
@@ -16,8 +16,9 @@ describe "Runner API", ->
   after ->
     ## restore existing events
     Cypress.setEvents(@testBeforeHooks)
-    Cypress.stop()
-    App.Utilities.Overrides.restore()
+    Cypress.Mocha.create()
+    Cypress.stop().then ->
+      App.Utilities.Overrides.restore()
 
   context "interface", ->
     it "returns runner instance", ->
@@ -41,6 +42,7 @@ describe "Runner API", ->
       expect(fail).to.be.calledOnce
 
     it "abort", ->
+      @sandbox.stub(Cypress, "getMocha").returns({grep: ->})
       abort = @sandbox.stub @runner, "abort"
       Cypress.trigger "abort"
       expect(abort).to.be.calledOnce
