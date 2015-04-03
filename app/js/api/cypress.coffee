@@ -614,12 +614,6 @@ window.Cypress = do ($, _, Backbone) ->
         @enqueue(key, wrap.call(@, fn), args, type, chainerId)
 
     @abort = ->
-      ## during abort we always want to reset
-      ## the mocha instance grep to all
-      ## so its picked back up by mocha
-      ## naturally when the iframe spec reloads
-      Cypress._mocha.grep /.*/
-
       Cypress.trigger "abort"
 
       @cy.$remoteIframe?.off("submit unload load")

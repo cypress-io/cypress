@@ -8,12 +8,29 @@ describe "Mocha API", ->
     ## restore mocha global
     window.mocha = m
 
+  context ".on('abort')", ->
+    beforeEach ->
+      Cypress.init()
+
+    afterEach ->
+      Cypress.stop()
+
+    it "resets mocha grep to all", ->
+      @sandbox.stub(Cypress, "getRunner").returns
+        abort: ->
+        destroy: ->
+
+      Cypress.getMocha().grep /\w+/
+      Cypress.trigger "abort"
+      expect(Cypress.getMocha()._grep).to.match /.*/
+
   context ".getMocha", ->
     it "returns mocha instance", ->
       Cypress.Mocha.create()
       expect(Cypress.getMocha()).to.be.instanceof Mocha
 
     it "throws without mocha instance", ->
+
       expect(Cypress.getMocha).to.throw "Cypress._mocha instance not found!"
 
   context "#create", ->
