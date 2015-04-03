@@ -1,21 +1,13 @@
 @App.module "Utilities", (Utilities, App, Backbone, Marionette, $, _) ->
 
   API =
-    ## the start method will be responsible for setting up
-    ## the ability to run tests based on our test framework
-    ## ATM its hard coded to work with Mocha
     start: (options) ->
-      ## get the runner and mocha variables if they're not
-      ## passed into our options.  options will normally be
-      ## null, but its helpful in testing
-      Mocha = options.Mocha ?= window.Mocha
-
       Utilities.Overrides.overloadMochaRunnableEmit() if not App.config.ui("ci")
       Utilities.Overrides.overloadMochaRunnerEmit()
       Utilities.Overrides.overloadMochaRunnerUncaught() if not App.config.ui("ci")
 
       ## create the global cy variable
-      Cypress.init(Mocha)
+      Cypress.init()
 
       ## return our reporter entity
       return App.request("reporter:entity")
@@ -46,15 +38,6 @@
 
       ## THIS CURRENTLY NEEDS TESTS AND IS BREAKING!
       ## REFACTOR THIS INTO THE CYPRESS.MOCHA MODULE
-
-      ## remove any listeners from the mocha.suite
-      Cypress._mocha.suite.removeAllListeners()
-
-      ## null it out to break any references
-      Cypress._mocha.suite = null
-
-      ## delete the globals to cleanup memory
-      delete Cypress._mocha
 
   App.reqres.setHandler "start:test:runner", (options = {}) ->
     API.start options

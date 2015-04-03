@@ -4,8 +4,70 @@ do (Cypress, _, Mocha) ->
   runnerFail  = Mocha.Runner::fail
   runnableRun = Mocha.Runnable::run
 
+  Cypress.getMocha = ->
+    @_mocha ? throw new Error("Cypress._mocha instance not found!")
+
   Cypress.Mocha = {
+    create: ->
+      ## we dont want the default global mocha instance on our window
+      delete window.mocha
+
+      ## instantiate mocha instance and hold onto this like runner does
+      Cypress._mocha = new Mocha reporter: ->
+
+      ## start up our overrides
+      @override()
+
+    set: (contentWindow) ->
+      ## create our own mocha objects from our parents if its not already defined
+      contentWindow.Mocha ?= Mocha
+      contentWindow.mocha ?= Cypress.getMocha()
+
+      @clone(contentWindow)
+
+      ## this needs to be part of the configuration of eclectus.json
+      ## we can't just forcibly use bdd
+      @ui(contentWindow, "bdd")
+
+    clone: (contentWindow) ->
+      mocha = contentWindow.mocha
+
+      ## remove all of the listeners from the previous root suite
+      mocha.suite.removeAllListeners()
+
+      ## We clone the outermost root level suite - and replace
+      ## the existing root suite with a new one. this wipes out
+      ## all references to hooks / tests / suites and thus
+      ## prevents holding reference to old suites / tests
+      mocha.suite = mocha.suite.clone()
+
+    ui: (contentWindow, name) ->
+      mocha = contentWindow.mocha
+
+      ## Override mocha.ui so that the pre-require event is emitted
+      ## with the iframe's `window` reference, rather than the parent's.
+      mocha.ui = (name) ->
+        @_ui = Mocha.interfaces[name]
+        throw new Error('invalid interface "' + name + '"') if not @_ui
+        @_ui = @_ui(@suite)
+        @suite.emit 'pre-require', contentWindow, null, @
+        return @
+
+      mocha.ui name
+
+    stop: ->
+      ## remove any listeners from the mocha.suite
+      Cypress.getMocha().suite.removeAllListeners()
+
+      ## null it out to break any references
+      Cypress.getMocha().suite = null
+
+      ## delete the globals to cleanup memory
+      delete Cypress._mocha
+
     restore: (items) ->
+      @stop()
+
       @restoreRunnerRun()
       @restoreRunnerFail()
       @restoreRunnableRun()
