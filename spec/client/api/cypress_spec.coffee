@@ -11,7 +11,7 @@ describe "Cypress", ->
     ## juggled throughout our expectations
     Cypress.option("jQuery", $)
 
-    Cypress.init(Mocha)
+    Cypress.init()
 
     ## this immediately restores the chai.Assertion::assert else
     ## all of our expect messages would be completely foobar'd
@@ -5469,6 +5469,57 @@ describe "Cypress", ->
       Cypress.set(r)
       expect(timeout).to.be.calledWith 1000
       expect(r._timeout).to.eq 1000
+
+  context ".stop", ->
+    beforeEach ->
+      @extend       = @sandbox.stub _, "extend"
+      @trigger      = @sandbox.stub Cypress, "trigger"
+      @chaiRestore  = @sandbox.stub Cypress.Chai, "restore"
+      @mochaRestore = @sandbox.stub Cypress.Mocha, "restore"
+
+    afterEach ->
+      @extend.restore()
+      @chaiRestore.restore()
+      Cypress.option("jQuery", $)
+      Cypress.init()
+      Cypress.Chai.restore()
+      Cypress.Mocha.restoreRunnableRun()
+      Cypress.setup(window, @iframe, ->)
+
+    it "calls .abort()", ->
+      abort = @sandbox.stub(Cypress, "abort").resolves()
+      Cypress.stop().then ->
+        expect(abort).to.be.called
+
+    it "nukes $remoteIframe and config off of cy", ->
+      cy = Cypress.cy
+
+      Cypress.stop().then =>
+        expect(@extend).to.be.calledWith cy, {
+          $remoteIframe: null
+          config: null
+        }
+
+    it "nukes cy from window + from Cypress object", ->
+      expect(window.cy).to.be.ok
+      expect(Cypress.cy).to.be.ok
+
+      Cypress.stop().then ->
+        expect(window.cy).to.be.null
+        expect(Cypress.cy).to.be.null
+
+    it "restores chai", ->
+      Cypress.stop().then =>
+        expect(@chaiRestore).to.be.calledOnce
+
+    it "restores mocha", ->
+      Cypress.stop().then =>
+        expect(@mochaRestore).to.be.calledOnce
+
+    it "resets Cypress options", ->
+      Cypress.options = {foo: "bar"}
+      Cypress.stop().then ->
+        expect(Cypress.options).to.deep.eq {}
 
   context "#to", ->
     it "returns the subject for chainability", ->

@@ -670,7 +670,7 @@ window.Cypress = do ($, _, Backbone) ->
         Cypress.trigger "destroy"
 
         _.extend @cy,
-          remoteIframe:  null
+          $remoteIframe: null
           config:        null
 
         window.cy = @cy = null
