@@ -9,7 +9,6 @@ do (Cypress, _, Mocha) ->
     ## the mocha instance grep to all
     ## so its picked back up by mocha
     ## naturally when the iframe spec reloads
-    debugger
     Cypress.getMocha().grep /.*/
 
   Cypress.getMocha = ->
