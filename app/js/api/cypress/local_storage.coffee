@@ -1,6 +1,6 @@
 ## attach to Cypress global
 
-Cypress.LocalStorage = do (_) ->
+$Cypress.LocalStorage = do (_) ->
 
   eclRegExp = /^ecl-/
 

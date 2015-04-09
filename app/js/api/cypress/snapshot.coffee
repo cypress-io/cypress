@@ -1,6 +1,6 @@
-do (Cypress, _) ->
+do ($Cypress, _) ->
 
-  _.extend Cypress,
+  $Cypress.extend
     highlightAttr: "data-cypress-el"
 
     createSnapshot: ($el) ->

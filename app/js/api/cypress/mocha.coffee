@@ -1,119 +1,59 @@
-do (Cypress, _, Mocha) ->
+$Cypress.Mocha = do ($Cypress, _, Mocha) ->
 
   runnerRun   = Mocha.Runner::run
   runnerFail  = Mocha.Runner::fail
   runnableRun = Mocha.Runnable::run
 
-  Cypress.on "abort", ->
-    ## during abort we always want to reset
-    ## the mocha instance grep to all
-    ## so its picked back up by mocha
-    ## naturally when the iframe spec reloads
-    Cypress.getMocha().grep /.*/
+  class $Mocha
+    constructor: (@Cypress, specWindow) ->
+      @mocha = new Mocha reporter: ->
 
-  Cypress.getMocha = ->
-    @_mocha ? throw new Error("Cypress._mocha instance not found!")
-
-  Cypress.Mocha = {
-    create: ->
-      ## we dont want the default global mocha instance on our window
-      delete window.mocha
-
-      ## instantiate mocha instance and hold onto this like runner does
-      Cypress._mocha = new Mocha reporter: ->
-
-      ## start up our overrides
       @override()
+      @listeners()
 
-    set: (contentWindow) ->
-      ## create our own mocha objects from our parents if its not already defined
-      contentWindow.Mocha ?= Mocha
-      contentWindow.mocha ?= Cypress.getMocha()
-
-      @clone(contentWindow)
-
-      ## this needs to be part of the configuration of eclectus.json
-      ## we can't just forcibly use bdd
-      @ui(contentWindow, "bdd")
-
-    clone: (contentWindow) ->
-      mocha = contentWindow.mocha
-
-      ## remove all of the listeners from the previous root suite
-      mocha.suite.removeAllListeners()
-
-      ## We clone the outermost root level suite - and replace
-      ## the existing root suite with a new one. this wipes out
-      ## all references to hooks / tests / suites and thus
-      ## prevents holding reference to old suites / tests
-      mocha.suite = mocha.suite.clone()
-
-    ui: (contentWindow, name) ->
-      mocha = contentWindow.mocha
-
-      ## Override mocha.ui so that the pre-require event is emitted
-      ## with the iframe's `window` reference, rather than the parent's.
-      mocha.ui = (name) ->
-        @_ui = Mocha.interfaces[name]
-        throw new Error('invalid interface "' + name + '"') if not @_ui
-        @_ui = @_ui(@suite)
-        @suite.emit 'pre-require', contentWindow, null, @
-        return @
-
-      mocha.ui name
-
-    stop: ->
-      ## remove any listeners from the mocha.suite
-      Cypress.getMocha().suite.removeAllListeners()
-
-      ## null it out to break any references
-      Cypress.getMocha().suite = null
-
-      ## delete the globals to cleanup memory
-      delete Cypress._mocha
-
-    restore: (items) ->
-      @stop()
-
-      @restoreRunnerRun()
-      @restoreRunnerFail()
-      @restoreRunnableRun()
-
-      return @
-
-    restoreRunnerRun: ->
-      Mocha.Runner::run   = runnerRun
-
-    restoreRunnerFail: ->
-      Mocha.Runner::fail  = runnerFail
-
-    restoreRunnableRun: ->
-      Mocha.Runnable::run = runnableRun
+      @set(specWindow)
 
     override: ->
-      @patchRunnerRun()
+      ## these should probably be class methods
+      ## since they alter the global Mocha and
+      ## are not localized to this mocha instance
       @patchRunnerFail()
       @patchRunnableRun()
 
       return @
 
-    patchRunnerRun: ->
-      ## for the moment just hack this together by making
-      ## this.suite lookup dynamic
-      ## refactor this in the upcoming days as per notes
-      ## on instantiating mocha + the runner on each test go-around
-      ## instead of calling into runSuite directly
-      ## expand the interface between the client app + Cypress.Mocha
-      Mocha.Runner::run = _.wrap runnerRun, (orig, fn) ->
-        _this = @
+    listeners: ->
+      @Cypress.on "abort", =>
+        ## during abort we always want to reset
+        ## the mocha instance grep to all
+        ## so its picked back up by mocha
+        ## naturally when the iframe spec reloads
+        @grep /.*/
 
-        ## create a new function which will
-        ## actually invoke the original runner
-        @startRunner = (fn2) ->
-          fn = fn2 ? fn
-          orig.call(_this, fn)
+      @Cypress.on "stop", => @stop()
 
+      return @
+
+    ## pass our options down to the runner
+    options: (runner) ->
+      runner.options(@mocha.options)
+
+    grep: (re) ->
+      @mocha.grep(re)
+
+    getRunner: ->
+      _this = @
+
+      Mocha.Runner::run = ->
+        ## reset our runner#run function
+        ## so the next time we call it
+        ## its normal again!
+        _this.restoreRunnerRun()
+
+        ## return the runner instance
         return @
+
+      @mocha.run()
 
     patchRunnerFail: ->
       ## matching the current Mocha.Runner.prototype.fail except
@@ -132,6 +72,8 @@ do (Cypress, _, Mocha) ->
         @emit("fail", test, err)
 
     patchRunnableRun: ->
+      Cypress = @Cypress
+
       Mocha.Runnable::run = _.wrap runnableRun, (orig, args...) ->
 
         runnable = @
@@ -168,4 +110,77 @@ do (Cypress, _, Mocha) ->
             throw e
 
         orig.apply(@, args)
-  }
+
+    set: (contentWindow) ->
+      ## create our own mocha objects from our parents if its not already defined
+      ## Mocha is needed for the id generator
+      contentWindow.Mocha ?= Mocha
+      contentWindow.mocha ?= @mocha
+
+      @clone(contentWindow)
+
+      ## this needs to be part of the configuration of eclectus.json
+      ## we can't just forcibly use bdd
+      @ui(contentWindow, "bdd")
+
+    clone: (contentWindow) ->
+      mocha = contentWindow.mocha
+
+      ## remove all of the listeners from the previous root suite
+      @mocha.suite.removeAllListeners()
+
+      ## We clone the outermost root level suite - and replace
+      ## the existing root suite with a new one. this wipes out
+      ## all references to hooks / tests / suites and thus
+      ## prevents holding reference to old suites / tests
+      @mocha.suite = mocha.suite.clone()
+
+    ui: (contentWindow, name) ->
+      mocha = contentWindow.mocha
+
+      ## Override mocha.ui so that the pre-require event is emitted
+      ## with the iframe's `window` reference, rather than the parent's.
+      mocha.ui = (name) ->
+        @_ui = Mocha.interfaces[name]
+        throw new Error('invalid interface "' + name + '"') if not @_ui
+        @_ui = @_ui(@suite)
+        @suite.emit 'pre-require', contentWindow, null, @
+        return @
+
+      mocha.ui name
+
+    stop: ->
+      @restore()
+
+      ## remove any listeners from the mocha.suite
+      @mocha.suite.removeAllListeners()
+
+      ## null it out to break any references
+      @mocha.suite = null
+
+      @Cypress.mocha = null
+
+      return @
+
+    restore: ->
+      @restoreRunnerRun()
+      @restoreRunnerFail()
+      @restoreRunnableRun()
+
+      return @
+
+    restoreRunnerRun: ->
+      Mocha.Runner::run   = runnerRun
+
+    restoreRunnerFail: ->
+      Mocha.Runner::fail  = runnerFail
+
+    restoreRunnableRun: ->
+      Mocha.Runnable::run = runnableRun
+
+    @create = (Cypress, specWindow) ->
+      ## we dont want the default global mocha instance on our window
+      delete window.mocha
+      Cypress.mocha = new $Mocha Cypress, specWindow
+
+  return $Mocha

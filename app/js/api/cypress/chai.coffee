@@ -1,6 +1,4 @@
-## attach to Cypress global
-
-do (Cypress, _, chai) ->
+do ($Cypress, _, chai) ->
 
   ## all words between single quotes which are at
   ## the end of the string
@@ -18,8 +16,22 @@ do (Cypress, _, chai) ->
     assert       = chai.assert
     assertProto  = chai.Assertion::assert
 
-    Cypress.Chai = {
-      expect: -> chai.expect.apply(chai, arguments)
+    class Chai
+      constructor: (@Cypress, specWindow) ->
+        @override()
+        @listeners()
+
+        Chai.setGlobals(specWindow)
+
+      listeners: ->
+        @Cypress.on "stop", => @stop()
+
+        return @
+
+      stop: ->
+        @restore()
+        @Cypress.chai = null
+        return @
 
       restore: ->
         chai.expect = expect
@@ -35,14 +47,6 @@ do (Cypress, _, chai) ->
         @patchAssert()
 
         return @
-
-      setGlobals: (contentWindow) ->
-        contentWindow.chai           = chai
-        contentWindow.expect         = chai.expect
-        contentWindow.expectOriginal = expect
-        # contentWindow.should         = chai.should()
-        contentWindow.assert         = chai.assert
-        contentWindow.assertOriginal = assert
 
       restoreAssert: ->
         chai.Assertion::assert = assertProto
@@ -68,8 +72,8 @@ do (Cypress, _, chai) ->
           ## need to override the args because chai-jquery
           ## does not properly handle .exist methods because
           ## it already uses obj.selector (which it may not have)
-          if Cypress.Utils.hasElement(value)
-            @_obj = Cypress.Utils.stringifyElement(value, "short")
+          if $Cypress.Utils.hasElement(value)
+            @_obj = $Cypress.Utils.stringifyElement(value, "short")
 
           customArgs = _this.replaceArgMessages(args, @_obj)
 
@@ -91,7 +95,7 @@ do (Cypress, _, chai) ->
           catch e
             error = e
 
-          Cypress.assert passed, message, value, actual, expected, error
+          _this.Cypress.cy.assert passed, message, value, actual, expected, error
 
           throw(error) if error
 
@@ -117,7 +121,7 @@ do (Cypress, _, chai) ->
           args = _.map args, (arg) ->
             ## if the object in the arguments has a cypress namespace
             ## then swap it out for that object
-            if obj = Cypress.Utils.getCypressNamespace(arg)
+            if obj = $Cypress.Utils.getCypressNamespace(arg)
               return obj
 
             return arg
@@ -125,4 +129,18 @@ do (Cypress, _, chai) ->
           orig.apply(@, args)
 
         return @
-    }
+
+      @expect = -> chai.expect.apply(chai, arguments)
+
+      @setGlobals = (contentWindow) ->
+        contentWindow.chai           = chai
+        contentWindow.expect         = chai.expect
+        contentWindow.expectOriginal = expect
+        # contentWindow.should         = chai.should()
+        contentWindow.assert         = chai.assert
+        contentWindow.assertOriginal = assert
+
+      @create = (Cypress, specWindow) ->
+        Cypress.chai = new Chai Cypress, specWindow
+
+    $Cypress.Chai = Chai

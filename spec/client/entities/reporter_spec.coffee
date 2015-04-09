@@ -1,6 +1,7 @@
 describe "Reporter Entity", ->
   beforeEach ->
     @reporter = App.request("reporter:entity")
+    @Cypress  = @reporter.Cypress
 
   context "#defaults", ->
     it "sets browser to null", ->
@@ -20,16 +21,28 @@ describe "Reporter Entity", ->
 
       expect(reRun).to.be.calledWith "entities/user_spec.coffee"
 
+    it "listens to Cypress.initialized", ->
+      receivedRunner = @sandbox.stub @reporter, "receivedRunner"
+      @Cypress.trigger "initialized", {runner: runner = {}}
+      expect(receivedRunner).to.be.calledWith runner
+
   context "#stop", ->
+    beforeEach ->
+      @stop = @sandbox.stub(@Cypress, "stop").resolves()
+
     it "calls #restore", ->
       restore = @sandbox.spy @reporter, "restore"
-      @reporter.stop()
-      expect(restore).to.be.calledOnce
+      @reporter.stop().then ->
+        expect(restore).to.be.calledOnce
 
-    it "stops listening to Cypress", ->
+    it "stops listening", ->
       stopListening = @sandbox.spy @reporter, "stopListening"
-      @reporter.stop()
-      expect(stopListening).to.be.calledOnce
+      @reporter.stop().then ->
+        expect(stopListening).to.be.calledOnce
+
+    it "calls Cypress#stop", ->
+      @reporter.stop().then =>
+        expect(@stop).to.be.calledOnce
 
   context "#restore", ->
     beforeEach ->
@@ -40,7 +53,7 @@ describe "Reporter Entity", ->
       expect(@reset).to.be.calledOnce
 
     it "nulls out references", ->
-      refs = ["commands", "routes", "agents", "chosen", "specPath"]
+      refs = ["commands", "routes", "agents", "chosen", "specPath", "socket", "Cypress"]
 
       _.each refs, (ref) =>
         @reporter[ref] = "foo"
@@ -71,7 +84,7 @@ describe "Reporter Entity", ->
               "suite 2":
                 tests: ["suite 2, four"]
 
-      @runner       = Cypress.Runner.runner(runner)
+      @runner       = $Cypress.Runner.runner(@Cypress, runner)
       @trigger      = @sandbox.spy @reporter, "trigger"
 
       ## filter out other trigger events except for
@@ -180,22 +193,21 @@ describe "Reporter Entity", ->
 
   context "#run", ->
     beforeEach ->
-      @setup   = @sandbox.stub Cypress, "setup"
-      @run     = @sandbox.stub Cypress, "run"
+      @init    = @sandbox.stub @Cypress, "initialize"
+      @run     = @sandbox.stub @Cypress, "run"
       @trigger = @sandbox.spy @reporter, "trigger"
 
     it "triggers before:run", ->
       @reporter.run()
       expect(@trigger).to.be.calledWith "before:run"
 
-    it "triggers before:run before calling Cypress.setup()", ->
+    it "triggers before:run before calling Cypress.initialize()", ->
       @reporter.run()
-      expect(@setup).to.be.calledBefore(@run)
+      expect(@init).to.be.calledBefore(@run)
 
     it "triggers after:run as the Cypress.run callback", ->
       @run.callsArg(0)
       @reporter.run()
-
 
       expect(@trigger).to.be.calledWith "after:run"
 
@@ -240,7 +252,7 @@ describe "Reporter Entity", ->
 
   context "#reRun", ->
     beforeEach ->
-      @abort = @sandbox.stub(Cypress, "abort").resolves()
+      @abort = @sandbox.stub(@Cypress, "abort").resolves()
       @reporter.specPath = "app_spec.coffee"
 
     it "calls Cypress.abort()", ->

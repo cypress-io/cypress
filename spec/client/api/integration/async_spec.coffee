@@ -1,47 +1,40 @@
 describe "Async Integration Tests", ->
-  before ->
-    Cypress.start()
+  enterCommandTestingMode("html/async")
 
-  beforeEach ->
-    loadFixture("html/async").done (iframe) =>
-      Cypress.set(@currentTest)
-      Cypress.setup(runner, $(iframe), ->)
-      @r = Cypress.getRunner().override()
+  context "waiting", ->
+    beforeEach ->
+      @loadDom("html/async").then =>
+        @setup({replaceIframeContents: false})
+        @Cypress.set @currentTest
 
-  afterEach ->
-    Cypress.abort()
+    it "will find 'form success' message by default (after retrying)", ->
+      @cy
+        .server()
+        .route("POST", "/users", {})
+        .get("input[name=name]").type("brian")
+        .get("#submit").click()
+        .get("form span").then ($span) ->
+          expect($span).to.contain("form success!")
 
-  after ->
-    Cypress.stop().then => @r.restore()
+    it "fails without an explicit wait when an element is immediately found", (done) ->
+      @allowErrors()
 
-  it "will find 'form success' message by default (after retrying)", ->
-    cy
-      .server()
-      .route("POST", "/users", {})
-      .get("input[name=name]").type("brian")
-      .get("#submit").click()
-      .get("form span").then ($span) ->
-        expect($span).to.contain("form success!")
+      @cy.on "fail", (err) ->
+        done()
 
-  it "fails without an explicit wait when an element is immediately found", (done) ->
-    @allowErrors()
+      @cy
+        .server()
+        .route("POST", "/users", {})
+        .get("input[name=name]").type("brian")
+        .get("#submit").click()
+        .get("form").then ($form) ->
+          expect($form).to.contain("form success!")
 
-    cy.on "fail", (err) ->
-      done()
-
-    cy
-      .server()
-      .route("POST", "/users", {})
-      .get("input[name=name]").type("brian")
-      .get("#submit").click()
-      .get("form").then ($form) ->
-        expect($form).to.contain("form success!")
-
-  it "needs an explicit wait when an element is immediately found", ->
-    cy
-      .server()
-      .route("POST", "/users", {})
-      .get("input[name=name]").type("brian")
-      .get("#submit").click()
-      .get("form").wait ($form) ->
-        expect($form).to.contain("form success!")
+    it "needs an explicit wait when an element is immediately found", ->
+      @cy
+        .server()
+        .route("POST", "/users", {})
+        .get("input[name=name]").type("brian")
+        .get("#submit").click()
+        .get("form").wait ($form) ->
+          expect($form).to.contain("form success!")

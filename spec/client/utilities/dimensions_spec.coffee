@@ -1,150 +1,145 @@
 describe "Element Dimensions Utility", ->
-  before ->
-    Cypress.start()
+  enterCommandTestingMode("html/dimensions")
 
-    loadFixture("html/dimensions").done (iframe) =>
-      @iframe = $(iframe)
-
-  beforeEach ->
-    Cypress.set(@currentTest) if @currentTest
-    Cypress.setup(runner, @iframe, ->)
-
-  after ->
-    Cypress.stop()
-
-  context "square", ->
+  context "dimensions", ->
     beforeEach ->
-      @square      = cy.$("#square")
-      @dimensions  = App.request "element:dimensions", @square
+      @loadDom("html/dimensions").then =>
+        @setup({replaceIframeContents: false})
+        @Cypress.set @currentTest
 
-    it "returns an object containing dimensions", ->
-      expect(@dimensions).to.be.an "object"
+    context "square", ->
+      beforeEach ->
+        @square      = @cy.$("#square")
+        @dimensions  = App.request "element:dimensions", @square
 
-    it "sets height to 20", ->
-      expect(@dimensions).to.have.property "height", 20
+      it "returns an object containing dimensions", ->
+        expect(@dimensions).to.be.an "object"
 
-    it "sets width to 20", ->
-      expect(@dimensions).to.have.property "width", 20
+      it "sets height to 20", ->
+        expect(@dimensions).to.have.property "height", 20
 
-  context "square with padding", ->
-    beforeEach ->
-      @square      = cy.$("#square-padding")
-      @dimensions  = App.request "element:dimensions", @square
+      it "sets width to 20", ->
+        expect(@dimensions).to.have.property "width", 20
 
-    it "sets height to 20", ->
-      expect(@dimensions).to.have.property "height", 20
+    context "square with padding", ->
+      beforeEach ->
+        @square      = @cy.$("#square-padding")
+        @dimensions  = App.request "element:dimensions", @square
 
-    it "sets width to 20", ->
-      expect(@dimensions).to.have.property "width", 20
+      it "sets height to 20", ->
+        expect(@dimensions).to.have.property "height", 20
 
-    it "sets paddingTop to 5", ->
-      expect(@dimensions).to.have.property "paddingTop", 5
+      it "sets width to 20", ->
+        expect(@dimensions).to.have.property "width", 20
 
-    it "sets paddingRight to 10", ->
-      expect(@dimensions).to.have.property "paddingRight", 10
+      it "sets paddingTop to 5", ->
+        expect(@dimensions).to.have.property "paddingTop", 5
 
-    it "sets paddingBottom to 5", ->
-      expect(@dimensions).to.have.property "paddingBottom", 5
+      it "sets paddingRight to 10", ->
+        expect(@dimensions).to.have.property "paddingRight", 10
 
-    it "sets paddingLeft to 10", ->
-      expect(@dimensions).to.have.property "paddingLeft", 10
+      it "sets paddingBottom to 5", ->
+        expect(@dimensions).to.have.property "paddingBottom", 5
 
-    it "sets heightWithPadding to 30", ->
-      expect(@dimensions).to.have.property "heightWithPadding", 30
+      it "sets paddingLeft to 10", ->
+        expect(@dimensions).to.have.property "paddingLeft", 10
 
-    it "sets widthWithPadding to 40", ->
-      expect(@dimensions).to.have.property "widthWithPadding", 40
+      it "sets heightWithPadding to 30", ->
+        expect(@dimensions).to.have.property "heightWithPadding", 30
 
-    it "layers padding div", ->
-      @layer = App.request "element:box:model:layers", @square, cy.$("body")
-      style = @layer.find("[data-layer='Padding']").prop("style")
-      expect(style).to.have.property("height", "30px")
-      expect(style).to.have.property("width", "40px")
+      it "sets widthWithPadding to 40", ->
+        expect(@dimensions).to.have.property "widthWithPadding", 40
 
-  context "square with border", ->
-    beforeEach ->
-      @square      = cy.$("#square-border")
-      @dimensions  = App.request "element:dimensions", @square
+      it "layers padding div", ->
+        @layer = App.request "element:box:model:layers", @square, @cy.$("body")
+        style = @layer.find("[data-layer='Padding']").prop("style")
+        expect(style).to.have.property("height", "30px")
+        expect(style).to.have.property("width", "40px")
 
-    it "sets height to 20", ->
-      expect(@dimensions).to.have.property "height", 20
+    context "square with border", ->
+      beforeEach ->
+        @square      = @cy.$("#square-border")
+        @dimensions  = App.request "element:dimensions", @square
 
-    it "sets width to 20", ->
-      expect(@dimensions).to.have.property "width", 20
+      it "sets height to 20", ->
+        expect(@dimensions).to.have.property "height", 20
 
-    it "sets borderTop to 2", ->
-      expect(@dimensions).to.have.property "borderTop", 2
+      it "sets width to 20", ->
+        expect(@dimensions).to.have.property "width", 20
 
-    it "sets borderRight to 2", ->
-      expect(@dimensions).to.have.property "borderRight", 2
+      it "sets borderTop to 2", ->
+        expect(@dimensions).to.have.property "borderTop", 2
 
-    it "sets borderBottom to 2", ->
-      expect(@dimensions).to.have.property "borderBottom", 2
+      it "sets borderRight to 2", ->
+        expect(@dimensions).to.have.property "borderRight", 2
 
-    it "sets borderLeft to 2", ->
-      expect(@dimensions).to.have.property "borderLeft", 2
+      it "sets borderBottom to 2", ->
+        expect(@dimensions).to.have.property "borderBottom", 2
 
-    it "sets heightWithBorder to 24", ->
-      expect(@dimensions).to.have.property "heightWithBorder", 24
+      it "sets borderLeft to 2", ->
+        expect(@dimensions).to.have.property "borderLeft", 2
 
-    it "sets widthWithBorder to 24", ->
-      expect(@dimensions).to.have.property "widthWithBorder", 24
+      it "sets heightWithBorder to 24", ->
+        expect(@dimensions).to.have.property "heightWithBorder", 24
 
-    it "layers border div", ->
-      @layer = App.request "element:box:model:layers", @square, cy.$("body")
-      style = @layer.find("[data-layer='Border']").prop("style")
-      expect(style).to.have.property("height", "24px")
-      expect(style).to.have.property("width", "24px")
+      it "sets widthWithBorder to 24", ->
+        expect(@dimensions).to.have.property "widthWithBorder", 24
 
-  context "square with margin", ->
-    beforeEach ->
-      @square      = cy.$("#square-margin")
-      @dimensions  = App.request "element:dimensions", @square
+      it "layers border div", ->
+        @layer = App.request "element:box:model:layers", @square, @cy.$("body")
+        style = @layer.find("[data-layer='Border']").prop("style")
+        expect(style).to.have.property("height", "24px")
+        expect(style).to.have.property("width", "24px")
 
-    it "sets height to 20", ->
-      expect(@dimensions).to.have.property "height", 20
+    context "square with margin", ->
+      beforeEach ->
+        @square      = @cy.$("#square-margin")
+        @dimensions  = App.request "element:dimensions", @square
 
-    it "sets width to 20", ->
-      expect(@dimensions).to.have.property "width", 20
+      it "sets height to 20", ->
+        expect(@dimensions).to.have.property "height", 20
 
-    it "sets marginTop to 8", ->
-      expect(@dimensions).to.have.property "marginTop", 8
+      it "sets width to 20", ->
+        expect(@dimensions).to.have.property "width", 20
 
-    it "sets marginRight to 6", ->
-      expect(@dimensions).to.have.property "marginRight", 6
+      it "sets marginTop to 8", ->
+        expect(@dimensions).to.have.property "marginTop", 8
 
-    it "sets marginBottom to 8", ->
-      expect(@dimensions).to.have.property "marginBottom", 8
+      it "sets marginRight to 6", ->
+        expect(@dimensions).to.have.property "marginRight", 6
 
-    it "sets marginLeft to 6", ->
-      expect(@dimensions).to.have.property "marginLeft", 6
+      it "sets marginBottom to 8", ->
+        expect(@dimensions).to.have.property "marginBottom", 8
 
-    it "sets heightWithMargin to 36", ->
-      expect(@dimensions).to.have.property "heightWithMargin", 36
+      it "sets marginLeft to 6", ->
+        expect(@dimensions).to.have.property "marginLeft", 6
 
-    it "sets widthWithMargin to 32", ->
-      expect(@dimensions).to.have.property "widthWithMargin", 32
+      it "sets heightWithMargin to 36", ->
+        expect(@dimensions).to.have.property "heightWithMargin", 36
 
-    it "layers margin div", ->
-      @layer = App.request "element:box:model:layers", @square, cy.$("body")
-      style = @layer.find("[data-layer='Margin']").prop("style")
-      expect(style).to.have.property("height", "36px")
-      expect(style).to.have.property("width", "32px")
+      it "sets widthWithMargin to 32", ->
+        expect(@dimensions).to.have.property "widthWithMargin", 32
 
-  context "square with margin, border, padding", ->
-    beforeEach ->
-      @square      = cy.$("#square-margin-border-padding")
+      it "layers margin div", ->
+        @layer = App.request "element:box:model:layers", @square, @cy.$("body")
+        style = @layer.find("[data-layer='Margin']").prop("style")
+        expect(style).to.have.property("height", "36px")
+        expect(style).to.have.property("width", "32px")
 
-    it "layers content div", ->
-      @layer = App.request "element:box:model:layers", @square, cy.$("body")
-      style = @layer.find("[data-layer='Content']").prop("style")
-      expect(style).to.have.property("height", "20px")
-      expect(style).to.have.property("width", "20px")
+    context "square with margin, border, padding", ->
+      beforeEach ->
+        @square      = @cy.$("#square-margin-border-padding")
 
-  context "negative margin, padding", ->
-    beforeEach ->
-      @square = cy.$("#square-negative-margin-padding")
+      it "layers content div", ->
+        @layer = App.request "element:box:model:layers", @square, @cy.$("body")
+        style = @layer.find("[data-layer='Content']").prop("style")
+        expect(style).to.have.property("height", "20px")
+        expect(style).to.have.property("width", "20px")
 
-    it "does not throw on negative margins or negative padding", ->
-      fn = => App.request("element:dimensions", @square)
-      expect(fn).not.to.throw(Error)
+    context "negative margin, padding", ->
+      beforeEach ->
+        @square = @cy.$("#square-negative-margin-padding")
+
+      it "does not throw on negative margins or negative padding", ->
+        fn = => App.request("element:dimensions", @square)
+        expect(fn).not.to.throw(Error)

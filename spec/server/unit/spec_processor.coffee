@@ -35,13 +35,13 @@ describe "spec processor", ->
     expect(@specProcessor).to.be.instanceOf(SpecProcessor)
 
   it "sets the correct content type", ->
-    @specProcessor.handle "sample.js", {}, @res, =>
+    @specProcessor.handle "#{FixturesRoot}/sample.js", {}, @res, =>
 
     expect(@res.type).to.have.been.calledOnce
     .and.to.have.been.calledWith('js')
 
   it "handles snocket includes", (done) ->
-    @specProcessor.handle 'snocket_root.js', {}, @res, =>
+    @specProcessor.handle "#{FixturesRoot}/snocket_root.js", {}, @res, =>
     @results = ""
 
     ## We have to manually catch the error here
@@ -89,13 +89,13 @@ describe "spec processor", ->
           done(e)
       )
 
-      @specProcessor.handle 'sample.coffee', {}, @res, =>
+      @specProcessor.handle "#{FixturesRoot}/sample.coffee", {}, @res, =>
 
   context 'browserify', ->
     it "handles commonjs requires", (done) ->
       streamOutput = ''
 
-      @specProcessor.handle 'commonjs_root.js', {}, @res, (e) => done(e)
+      @specProcessor.handle "#{FixturesRoot}/commonjs_root.js", {}, @res, (e) => done(e)
 
       @res.pipe(through (d) ->
         streamOutput += d.toString()

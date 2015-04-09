@@ -1,49 +1,43 @@
-Cypress.Runner = do (Cypress, _) ->
+$Cypress.Runner = do ($Cypress, _) ->
 
-  Cypress.on "fail", (err, runnable) ->
-    Cypress.getRunner().fail(err, runnable)
+  class $Runner
+    constructor: (@Cypress, @runner) ->
+      @initialize()
 
-  Cypress.on "abort", ->
-    Cypress.getRunner().abort()
-
-  Cypress.on "destroy", ->
-    Cypress.getRunner().destroy()
-    Cypress._runner = null
-
-  class Runner
-    constructor: (@runner) ->
-      @init()
-
-      @patchHookEvents()
-
+      @listeners()
+      @override()
       @getRunnables() if @runner.suite
 
     fail: (err, runnable) ->
       @runner.uncaught(err)
 
-    init: ->
+    initialize: ->
       ## hold onto the runnables for faster lookup later
       @runnables = []
 
-    destroy: ->
-      _.each [@runnables, @runner], (obj) =>
-        @unbind(obj)
+    listeners: ->
+      ## bail if we've already set our listeners
+      return if @setListeners
 
-      @init()
+      @setListeners = true
 
-    unbind: (obj) ->
-      array = [].concat(obj)
-      _.invoke array, "removeAllListeners"
+      @Cypress.on "fail", (err, runnable) =>
+        @fail(err, runnable)
 
-    abort: ->
-      @runner.abort()
+      @Cypress.on "abort", => @abort()
 
-    run: (fn) ->
-      @setListeners()
+      @Cypress.on "stop", => @stop()
 
-      @runner.startRunner(fn)
+      return @
 
-    setListeners: ->
+    runnerListeners: ->
+      ## bail if we've already set our runner listeners
+      return if @setRunnerListeners
+
+      @setRunnerListeners = true
+
+      Cypress = @Cypress
+
       ## mocha has begun running the tests
       @runner.on "start", ->
         Cypress.trigger "run:start"
@@ -52,7 +46,7 @@ Cypress.Runner = do (Cypress, _) ->
       @runner.on "end", =>
         Cypress.trigger "run:end"
 
-        @destroy()
+        @restore()
 
       @runner.on "suite", (suite) ->
         Cypress.trigger "suite:start", suite
@@ -114,6 +108,43 @@ Cypress.Runner = do (Cypress, _) ->
 
         @hookFailed(runnable, err) if runnable.type is "hook"
 
+    restore: ->
+      _.each [@runnables, @runner], (obj) =>
+        @unbind(obj)
+
+      @initialize()
+
+    stop: ->
+      @restore()
+
+      @Cypress.runner = null
+
+      return @
+
+    unbind: (obj) ->
+      array = [].concat(obj)
+      _.invoke array, "removeAllListeners"
+
+    abort: ->
+      ## we dont need to restore here
+      ## because the end event will fire
+      ## (which abort causes) and thus
+      ## restore is naturally called
+      @runner.abort()
+
+    options: (options = {}) ->
+      ## TODO
+      ## need to handle
+      ## ignoreLeaks, asyncOnly, globals
+
+      if re = options.grep
+        @grep(re)
+
+    run: (fn) ->
+      @runnerListeners()
+
+      @runner.run(fn)
+
     getHookName: (hook) ->
       ## find the name of the hook by parsing its
       ## title and pulling out whats between the quotes
@@ -130,7 +161,7 @@ Cypress.Runner = do (Cypress, _) ->
       test.duration = hook.duration
       test.hookName = @getHookName(hook)
       test.failedFromHook = true
-      Cypress.trigger "test:end", test
+      @Cypress.trigger "test:end", test
 
     ## returns each runnable to the callback function
     ## if it matches the current grep
@@ -276,15 +307,17 @@ Cypress.Runner = do (Cypress, _) ->
       @firstTest suite, (test) =>
         test in @tests
 
-    patchHookEvents: ->
+    override: ->
       ## bail if our runner doesnt have a hook
       ## useful in tests
       return if not @runner.hook
 
+      Cypress = @Cypress
+
       ## monkey patch the hook event so we can wrap
       ## 'test:before:hooks' and 'test:after:hooks' around all of
       ## the hooks surrounding a test runnable
-      runner = @
+      _this = @
 
       @runner.hook = _.wrap @runner.hook, (orig, name, fn) ->
         hooks = @suite["_" + name]
@@ -295,8 +328,8 @@ Cypress.Runner = do (Cypress, _) ->
             ## iterate through each of our suites tests.
             ## this will iterate through all nested tests
             ## as well.  and then we add it only if its
-            ## in our grepp'd runner.tests array
-            tests.push(test) if test in runner.tests
+            ## in our grepp'd _this.tests array
+            tests.push(test) if test in _this.tests
           tests
 
         ## we have to see if this is the last suite amongst
@@ -305,7 +338,7 @@ Cypress.Runner = do (Cypress, _) ->
         isLastSuite = (suite) ->
           ## grab all of the suites from our grep'd tests
           ## including all of their ancestor suites!
-          suites = _.reduce runner.tests, (memo, test) ->
+          suites = _.reduce _this.tests, (memo, test) ->
             while parent = test.parent
               memo.push(parent)
               test = parent
@@ -316,14 +349,14 @@ Cypress.Runner = do (Cypress, _) ->
           _.chain(suites).uniq().intersection(suite.parent.suites).last().value() is suite
 
         testBeforeHooks = (hook, suite) ->
-          runner.test = runner.getTestFromHook(hook, suite) if not runner.test
+          _this.test = _this.getTestFromHook(hook, suite) if not _this.test
 
-          Cypress.trigger "test:before:hooks", runner.test
+          Cypress.trigger "test:before:hooks", _this.test
 
         testAfterHooks = ->
-          test = runner.test
+          test = _this.test
 
-          runner.test     = null
+          _this.test     = null
 
           Cypress.trigger "test:after:hooks", test
 
@@ -336,62 +369,49 @@ Cypress.Runner = do (Cypress, _) ->
               testBeforeHooks(hooks[0], @suite)
 
           when "beforeEach"
-            if @suite.root and runner.test isnt runner.tests[0]
+            if @suite.root and _this.test isnt _this.tests[0]
               testBeforeHooks(hooks[0], @suite)
 
           when "afterEach"
-            ## find all of the grep'd runner tests which share
-            ## the same parent suite as our current runner test
-            tests = getAllSiblingTests(runner.test.parent)
+            ## find all of the grep'd _this tests which share
+            ## the same parent suite as our current _this test
+            tests = getAllSiblingTests(_this.test.parent)
 
             ## make sure this test isnt the last test overall but also
             ## isnt the last test in our grep'd parent suite's tests array
-            if @suite.root and (runner.test isnt _(runner.tests).last()) and (runner.test isnt _(tests).last())
+            if @suite.root and (_this.test isnt _(_this.tests).last()) and (_this.test isnt _(tests).last())
               fn = _.wrap fn, (orig, args...) ->
                 testAfterHooks()
                 orig(args...)
 
           when "afterAll"
-            ## find all of the grep'd runner tests which share
-            ## the same parent suite as our current runner test
-            if runner.test
-              tests = getAllSiblingTests(runner.test.parent)
+            ## find all of the grep'd _this tests which share
+            ## the same parent suite as our current _this test
+            if _this.test
+              tests = getAllSiblingTests(_this.test.parent)
 
-              ## if we're the very last test in the entire runner.tests
+              ## if we're the very last test in the entire _this.tests
               ## we wait until the root suite fires
               ## else we wait until the very last possible moment by waiting
               ## until the root suite is the parent of the current suite
               ## since that will bubble up IF we're the last nested suite
               ## else if we arent the last nested suite we fire if we're
               ## the last test
-              if (@suite.root and runner.test is _(runner.tests).last()) or
-                (@suite.parent.root and runner.test is _(tests).last()) or
-                  (not isLastSuite(@suite) and runner.test is _(tests).last())
+              if (@suite.root and _this.test is _(_this.tests).last()) or
+                (@suite.parent.root and _this.test is _(tests).last()) or
+                  (not isLastSuite(@suite) and _this.test is _(tests).last())
                 fn = _.wrap fn, (orig, args...) ->
                   testAfterHooks()
                   orig(args...)
 
         orig.call(@, name, fn)
 
-    override: ->
-      @_abort = @abort
-      @abort = ->
-      @
+    @runner = (Cypress, runner) ->
+      Cypress.runner = new $Runner Cypress, runner
 
-    restore: ->
-      if @_abort
-        @abort = @_abort
-      @
-
-    @runner = (runner) ->
-      Cypress._runner = new Runner(runner)
-
-    @create = (mocha, specWindow) ->
-      runner = mocha.run()
+    @create = (Cypress, specWindow, mocha) ->
+      runner = mocha.getRunner()
       runner.suite = specWindow.mocha.suite
-      @runner(runner)
+      @runner(Cypress, runner)
 
-  Cypress.getRunner = ->
-    @_runner ? throw new Error("Cypress._runner instance not found!")
-
-  return Runner
+  return $Runner

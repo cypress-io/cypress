@@ -1,6 +1,8 @@
 do ($, _, io) ->
   testIdRegExp  = /\[(.{3})\]$/
 
+  $Cypress.create()
+
   run           = Mocha.prototype.run
 
   channel       = io.connect({path: "/__socket.io"})

@@ -7,6 +7,7 @@ sinon         = require('sinon')
 supertest     = require("supertest")
 Session       = require("supertest-session")
 str           = require("underscore.string")
+coffee        = require("coffee-script")
 
 removeWhitespace = (c) ->
   c = str.clean(c)
@@ -86,6 +87,45 @@ describe "Routes", ->
         .expect("X-Files-Path", filesPath)
         .end(done)
 
+  context "GET /tests", ->
+    beforeEach ->
+      Fixtures.scaffold("todos")
+
+      @server.setCypressJson {
+        projectRoot: Fixtures.project("todos")
+        testFolder: "tests"
+        javascripts: ["support/spec_helper.coffee"]
+        sinon: false
+        fixtures: false
+      }
+
+    afterEach ->
+      Fixtures.remove("todos")
+
+    it "processes sub/sub_test.coffee spec", (done) ->
+      file = Fixtures.get("projects/todos/tests/sub/sub_test.coffee")
+      file = coffee.compile(file)
+
+      supertest(@app)
+        .get("/tests?p=tests/sub/sub_test.coffee")
+        .expect(200)
+        .expect (res) ->
+          expect(res.text).to.eq file
+          null
+        .end(done)
+
+    it "processes support/spec_helper.coffee javascripts", (done) ->
+      file = Fixtures.get("projects/todos/support/spec_helper.coffee")
+      file = coffee.compile(file)
+
+      supertest(@app)
+        .get("/tests?p=support/spec_helper.coffee")
+        .expect(200)
+        .expect (res) ->
+          expect(res.text).to.eq file
+          null
+        .end(done)
+
   context "GET /iframes/*", ->
     beforeEach ->
       Fixtures.scaffold("todos")
@@ -93,6 +133,7 @@ describe "Routes", ->
       @server.setCypressJson {
         projectRoot: Fixtures.project("todos")
         testFolder: "tests"
+        javascripts: ["support/spec_helper.coffee"]
         sinon: false
         fixtures: false
       }

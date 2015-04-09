@@ -1,22 +1,24 @@
 ## adds a custom lightweight event bus
 ## to the Cypress class
-do (Cypress, _) ->
+do ($Cypress, _) ->
 
   splice = (index) ->
     @_events.splice(index, 1)
 
-  _.extend Cypress,
-    removeEvents: (name) ->
-      events = []
+  $Cypress.extend
+    event: (name) ->
+      return if not @_events
 
-      for event, index in @_events by -1
-        if event.name is name
-          events.push splice.call(@, index)[0]
+      _.chain(@_events)
+        .where({name: name})
+          .pluck("fn")
+            .value()
 
-      return events
+    invoke: (name, args...) ->
+      return if not events = @event(name)
 
-    setEvents: (events) ->
-      @_events = @_events.concat(events)
+      _.map events, (event) =>
+        event.apply(@cy, args)
 
     ## TODO: write tests for this
     off: (name, fn) ->
@@ -28,7 +30,7 @@ do (Cypress, _) ->
         return @
 
       functionsMatch = (fn1, fn2) ->
-        fn1 is fn2 or ("" + fn1 is "" + fn2)
+        fn1 is fn2
 
       ## loop in reverse since we are
       ## destructively modifying _events

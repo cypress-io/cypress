@@ -1,6 +1,6 @@
 @App.module "Entities", (Entities, App, Backbone, Marionette, $, _) ->
 
-  do (Cypress) ->
+  do ($Cypress) ->
 
     runnableIdRegExp = /\[(.{3})\]$/
 
@@ -14,18 +14,21 @@
         version: null
 
       initialize: ->
+        @Cypress   = $Cypress.create({loadModules: true})
+
         @commands  = App.request "command:entities"
         @routes    = App.request "route:entities"
         @agents    = App.request "agent:entities"
         @socket    = App.request "socket:entity"
 
         _.each CypressEvents, (event) =>
-          @listenTo Cypress, event, (args...) =>
+          @listenTo @Cypress, event, (args...) =>
             @trigger event, args...
 
-        @listenTo Cypress, "setup", _.bind(@receivedRunner, @)
+        @listenTo @Cypress, "initialized", (obj) =>
+          @receivedRunner(obj.runner)
 
-        @listenTo Cypress, "log", (log) =>
+        @listenTo @Cypress, "log", (log) =>
           switch log.get("event")
             when "command"
               ## think about moving this line
@@ -48,19 +51,21 @@
         @triggerLoadSpecFrame specPath
 
       stop: ->
-        @stopListening(@socket)
-        _.each CypressEvents.concat("setup", "log"), (event) =>
-          @stopListening(Cypress, event)
+        ## shut down Cypress
+        ## wait for promise to resolve
+        @Cypress.stop().then =>
+          ## remove our listeners
+          ## for socket + Cypress
+          @stopListening()
 
-
-        @restore()
+          @restore()
 
       restore: ->
         ## reset the entities
         @reset()
 
         ## and remove actual references to them
-        _.each ["commands", "routes", "agents", "chosen", "specPath", "socket"], (obj) =>
+        _.each ["commands", "routes", "agents", "chosen", "specPath", "socket", "Cypress"], (obj) =>
           @[obj] = null
 
       reset: ->
@@ -98,8 +103,8 @@
         return if specPath isnt @specPath
 
         ## when we are re-running we first
-        ## need to abort cypress
-        Cypress.abort().then =>
+        ## need to abort cypress always
+        @Cypress.abort().then =>
           ## start the abort process since we're about
           ## to load up in case we're running any tests
           ## right this moment
@@ -244,13 +249,11 @@
         ## trigger before:run prior to setting up the runner
         @trigger "before:run"
 
-        ## this is where we should automatically patch Ecl/Cy proto's
-        ## with the iframe specWindow, and remote iframe
-        ## as of now we're passing App.confg into cypress but i dont like
-        ## leaking this backbone model's details into the cypress API
-        Cypress.setup(specWindow, remoteIframe, App.config.getExternalInterface())
+        ## initialize the helper objects for Cypress to be able
+        ## to run tests
+        @Cypress.initialize(specWindow, remoteIframe, App.config.getExternalInterface())
 
-        Cypress.run (err) =>
+        @Cypress.run (err) =>
           ## trigger the after run event
           @trigger "after:run"
 

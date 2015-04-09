@@ -2,6 +2,7 @@
 
   ECL_ATTRIBUTE = "ecl-"
 
+
   class Entities.Config extends Entities.Model
     defaults: ->
       collapsed:  @getConfig("collapsed")
@@ -89,7 +90,7 @@
       _.compact([@get("testFolder"), id]).join("/")
 
     setRemoteOrigin: (current, remote) ->
-      location = Cypress.location(current, remote)
+      location = $Cypress.Location.create(current, remote)
       @set "remoteOrigin", location.origin
 
     ## returns a function bound to this model

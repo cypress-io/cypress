@@ -1,9 +1,9 @@
 ## adds class methods for command, route, and agent logging
-## including the intermediate Log interface
-Cypress.Log = do (Cypress, _, Backbone) ->
+## including the intermediate $Log interface
+$Cypress.Log = do (_, Backbone) ->
 
-  class Log
-    constructor: (obj = {}) ->
+  class $Log
+    constructor: (@Cypress, obj = {}) ->
       _.defaults obj,
         state: "pending"
 
@@ -61,7 +61,7 @@ Cypress.Log = do (Cypress, _, Backbone) ->
       }
 
     snapshot: ->
-      @set "snapshot", Cypress.createSnapshot @get("$el")
+      @set "snapshot", @Cypress.createSnapshot @get("$el")
 
       return @
 
@@ -89,7 +89,7 @@ Cypress.Log = do (Cypress, _, Backbone) ->
       return if not $el
 
       obj = {
-        highlightAttr: Cypress.highlightAttr
+        highlightAttr: @Cypress.highlightAttr
         numElements:   $el.length
       }
 
@@ -114,9 +114,12 @@ Cypress.Log = do (Cypress, _, Backbone) ->
 
         return consoleObj
 
-  _.extend Log.prototype, Backbone.Events
+    @create = (Cypress, obj) ->
+      new $Log(Cypress, obj)
 
-  _.extend Cypress,
+  _.extend $Log.prototype, Backbone.Events
+
+  $Cypress.extend
     command: (obj = {}) ->
       current = @cy.prop("current")
 
@@ -190,11 +193,12 @@ Cypress.Log = do (Cypress, _, Backbone) ->
 
       obj.event = event
 
-      log = new Log(obj)
+      log = $Log.create(@, obj)
+      # log = new $Log(obj)
       log.wrapOnConsole()
 
       @trigger "log", log
 
       return log
 
-  return Log
+  return $Log

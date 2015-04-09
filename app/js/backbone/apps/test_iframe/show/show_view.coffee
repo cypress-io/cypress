@@ -350,7 +350,6 @@
           src: @src
           id: "iframe-spec"
           load: ->
-            Cypress.Chai.setGlobals(@contentWindow)
             iframeLoaded.resolve(@contentWindow)
             view.$el.show()
             view.calcWidth()
@@ -379,7 +378,7 @@
         currentUrl    = window.location.toString()
         defaultOrigin = App.config.get("remoteOrigin")
 
-        location = Cypress.location(currentUrl, remoteUrl, defaultOrigin)
+        location = $Cypress.Location.create(currentUrl, remoteUrl, defaultOrigin)
 
       @ui.url.val(location.href)
 

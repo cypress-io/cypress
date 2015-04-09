@@ -1,4 +1,5 @@
 _       = require "underscore"
+_.str   = require "underscore.string"
 path    = require "path"
 glob    = require "glob"
 Promise = require "bluebird"
@@ -30,7 +31,7 @@ class Files extends Controller
     @getSpecs(test).bind(@).then (specs) ->
       res.render filePath, {
         title:        test
-        stylesheets:  @getStylesheets()
+        # stylesheets:  @getStylesheets()
         javascripts:  @getJavascripts()
         utilities:    @getUtilities()
         specs:        specs
@@ -42,24 +43,37 @@ class Files extends Controller
     files.map (files) ->
       if /^\//.test(files) then files else "/" + files
 
-  getSpecs: (test) ->
-    ## return the specs prefixed with /tests/
-    map = (specs) ->
-      _(specs).map (spec) -> "/tests/#{spec}"
+  convertToSpecPath: (specs, options = {}) ->
+    _.defaults options,
+      test: true
 
+    ## return the specs prefixed with /tests?p=spec
+    _(specs).map (spec) ->
+      if options.test
+        ## prepend with tests path
+        spec = "tests/#{spec}"
+      else
+        ## make sure we have no leading
+        ## or trailing forward slashes
+        spec = _.str.trim(spec, "/")
+
+      "/tests?p=#{spec}"
+
+  getSpecs: (test) ->
     ## grab all of the specs if this is ci
     if test is "ci"
-      @getTestFiles().then (specs) ->
-        map _(specs).pluck("name")
+      @getTestFiles().then (specs) =>
+        @convertToSpecPath _(specs).pluck("name")
     else
       ## return just this single test
-      Promise.resolve map([test])
+      Promise.resolve @convertToSpecPath([test])
 
   getStylesheets: ->
     @convertToAbsolutePath @app.get("cypress").stylesheets
 
   getJavascripts: ->
-    @convertToAbsolutePath @app.get("cypress").javascripts
+    paths = @convertToAbsolutePath @app.get("cypress").javascripts
+    @convertToSpecPath(paths, false)
 
   getUtilities: ->
     utils = ["iframe"]

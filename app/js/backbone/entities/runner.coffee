@@ -1,6 +1,6 @@
 @App.module "Entities", (Entities, App, Backbone, Marionette, $, _) ->
 
-  do (Cypress) ->
+  do ($Cypress) ->
 
     testIdRegExp = /\[(.{3})\]$/
 

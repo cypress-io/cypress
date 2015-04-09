@@ -7,13 +7,13 @@
 ## turns it into about://blank
 
 ## attach to global
-Cypress.Location = do (Cypress, _, Uri) ->
+$Cypress.Location = do ($Cypress, _, Uri) ->
 
   reHttp = /^http/
 
   reLocalHost = /^(localhost|0\.0\.0\.0|127\.0\.0\.1)/
 
-  class Location
+  class $Location
     constructor: (current, remote = "", defaultOrigin) ->
       current  = new Uri(current)
 
@@ -194,8 +194,8 @@ Cypress.Location = do (Cypress, _, Uri) ->
       ## forward slashes
       [_.trim(baseUrl, "/"), _.trim(url, "/")].join("/")
 
-  Cypress.location = (current, remote, defaultOrigin) ->
-    location = new Location(current, remote, defaultOrigin)
-    location.getObject()
+    @create = (current, remote, defaultOrigin) ->
+      location = new $Location(current, remote, defaultOrigin)
+      location.getObject()
 
-  return Location
+  return $Location
