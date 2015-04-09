@@ -60,14 +60,14 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       return @
 
     listeners: ->
-      @Cypress.on "initialize", (obj) =>
+      @listenTo Cypress, "initialize", (obj) =>
         @initialize(obj)
 
       ## why arent we listening to "defaults" here?
       ## instead we are manually hard coding them
-      @Cypress.on "stop",       => @stop()
-      @Cypress.on "restore",    => @restore()
-      @Cypress.on "abort",      => @abort()
+      @listenTo Cypress, "stop",       => @stop()
+      @listenTo Cypress, "restore",    => @restore()
+      @listenTo Cypress, "abort",      => @abort()
 
     abort: ->
       @$remoteIframe?.off("submit unload load")
@@ -196,7 +196,6 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
           ## and we reset the timeout again, it will always
           ## cause a timeout later no matter what.  by this time
           ## mocha expects the test to be done
-          # debugger if runnable.title is "does not reset the timeout on completetion when a runnable has a state already"
           @_timeout(prevTimeout) if not runnable.state
 
           ## mutate index by incrementing it
@@ -539,6 +538,11 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       cy.setRunnable(runnable, hookName)
 
     @create = (Cypress, specWindow) ->
+      ## clear out existing listeners
+      ## if we already exist!
+      if existing = Cypress.cy
+        existing.stopListening()
+
       Cypress.cy = window.cy = new $Cy Cypress, specWindow
 
   return $Cy

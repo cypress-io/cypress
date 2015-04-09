@@ -57,6 +57,20 @@ describe "$Cypress.Mocha API", ->
         @Cypress.trigger("stop")
         expect(stop).to.be.calledOnce
 
+    it "unbinds previous mocha listeners on Cypress", ->
+      totalEvents = =>
+        _.reduce @Cypress._events, (memo, value, key) ->
+          memo += value.length
+        , 0
+
+      count = totalEvents()
+
+      ## after instantiating another mocha
+      $Cypress.Mocha.create(@Cypress, @iframe)
+
+      ## we shouldn't have any additional events
+      expect(totalEvents()).not.to.be.gt count
+
   context "#stop", ->
     beforeEach ->
       @mocha = $Cypress.Mocha.create(@Cypress, @iframe)

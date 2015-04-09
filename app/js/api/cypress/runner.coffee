@@ -21,12 +21,12 @@ $Cypress.Runner = do ($Cypress, _) ->
 
       @setListeners = true
 
-      @Cypress.on "fail", (err, runnable) =>
+      @listenTo @Cypress, "fail", (err, runnable) =>
         @fail(err, runnable)
 
-      @Cypress.on "abort", => @abort()
+      @listenTo @Cypress, "abort", => @abort()
 
-      @Cypress.on "stop", => @stop()
+      @listenTo @Cypress, "stop", => @stop()
 
       return @
 
@@ -110,7 +110,7 @@ $Cypress.Runner = do ($Cypress, _) ->
 
     restore: ->
       _.each [@runnables, @runner], (obj) =>
-        @unbind(obj)
+        @removeAllListeners(obj)
 
       @initialize()
 
@@ -121,7 +121,7 @@ $Cypress.Runner = do ($Cypress, _) ->
 
       return @
 
-    unbind: (obj) ->
+    removeAllListeners: (obj) ->
       array = [].concat(obj)
       _.invoke array, "removeAllListeners"
 
@@ -406,7 +406,14 @@ $Cypress.Runner = do ($Cypress, _) ->
 
         orig.call(@, name, fn)
 
+    _.extend $Runner.prototype, Backbone.Events
+
     @runner = (Cypress, runner) ->
+      ## clear out existing listeners
+      ## if we already exist!
+      if existing = Cypress.runner
+        existing.stopListening()
+
       Cypress.runner = new $Runner Cypress, runner
 
     @create = (Cypress, specWindow, mocha) ->

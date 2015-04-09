@@ -16,15 +16,15 @@ do ($Cypress, _, chai) ->
     assert       = chai.assert
     assertProto  = chai.Assertion::assert
 
-    class Chai
+    class $Chai
       constructor: (@Cypress, specWindow) ->
         @override()
         @listeners()
 
-        Chai.setGlobals(specWindow)
+        $Chai.setGlobals(specWindow)
 
       listeners: ->
-        @Cypress.on "stop", => @stop()
+        @listenTo Cypress, "stop", => @stop()
 
         return @
 
@@ -130,6 +130,8 @@ do ($Cypress, _, chai) ->
 
         return @
 
+      _.extend $Chai.prototype, Backbone.Events
+
       @expect = -> chai.expect.apply(chai, arguments)
 
       @setGlobals = (contentWindow) ->
@@ -141,6 +143,11 @@ do ($Cypress, _, chai) ->
         contentWindow.assertOriginal = assert
 
       @create = (Cypress, specWindow) ->
-        Cypress.chai = new Chai Cypress, specWindow
+        ## clear out existing listeners
+        ## if we already exist!
+        if existing = Cypress.chai
+          existing.stopListening()
 
-    $Cypress.Chai = Chai
+        Cypress.chai = new $Chai Cypress, specWindow
+
+    $Cypress.Chai = $Chai

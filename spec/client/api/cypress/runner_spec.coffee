@@ -38,6 +38,20 @@ describe "$Cypress.Runner API", ->
       @Cypress.trigger "stop"
       expect(stop).to.be.calledOnce
 
+    it "unbinds previous runner listeners on Cypress", ->
+      totalEvents = =>
+        _.reduce @Cypress._events, (memo, value, key) ->
+          memo += value.length
+        , 0
+
+      count = totalEvents()
+
+      ## after instantiating another runner
+      $Cypress.Runner.runner(@Cypress, {})
+
+      ## we shouldn't have any additional events
+      expect(totalEvents()).not.to.be.gt count
+
   context "#runnerListeners", ->
     beforeEach ->
       runner = Fixtures.createRunnables
@@ -616,18 +630,17 @@ describe "$Cypress.Runner API", ->
 
       @runner = $Cypress.Runner.runner(@Cypress, runner)
 
-    it "unbinds runnables", (done) ->
+    it "removeAllListeners runnables", (done) ->
       @runner.runner.on "end", =>
         @removeAllListeners = _.map @runner.runnables, (r) =>
           @sandbox.spy r, "removeAllListeners"
-
 
       @runner.run =>
         _.each @removeAllListeners, (r) ->
           expect(r).to.be.calledOnce
         done()
 
-    it "unbinds runner", (done) ->
+    it "removeAllListeners runner", (done) ->
       @runner.runner.on "end", =>
         @removeAllListeners = @sandbox.spy @runner.runner, "removeAllListeners"
 

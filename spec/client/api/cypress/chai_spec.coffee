@@ -14,6 +14,21 @@ describe "$Cypress.Chai API", ->
       @Cypress.trigger("stop")
       expect(stop).to.be.calledOnce
 
+    it "unbinds previous chai listeners on Cypress", ->
+      totalEvents = =>
+        _.reduce @Cypress._events, (memo, value, key) ->
+          memo += value.length
+        , 0
+
+      count = totalEvents()
+
+      ## after instantiating another chai
+      chai = $Cypress.Chai.create(@Cypress, {})
+      chai.restore()
+
+      ## we shouldn't have any additional events
+      expect(totalEvents()).not.to.be.gt count
+
   context "#stop", ->
     it "calls restore", ->
       restore = @sandbox.spy @chai, "restore"

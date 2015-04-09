@@ -23,14 +23,14 @@ $Cypress.Mocha = do ($Cypress, _, Mocha) ->
       return @
 
     listeners: ->
-      @Cypress.on "abort", =>
+      @listenTo Cypress, "abort", =>
         ## during abort we always want to reset
         ## the mocha instance grep to all
         ## so its picked back up by mocha
         ## naturally when the iframe spec reloads
         @grep /.*/
 
-      @Cypress.on "stop", => @stop()
+      @listenTo Cypress, "stop", => @stop()
 
       return @
 
@@ -72,6 +72,7 @@ $Cypress.Mocha = do ($Cypress, _, Mocha) ->
         @emit("fail", test, err)
 
     patchRunnableRun: ->
+      _this = @
       Cypress = @Cypress
 
       Mocha.Runnable::run = _.wrap runnableRun, (orig, args...) ->
@@ -84,10 +85,10 @@ $Cypress.Mocha = do ($Cypress, _, Mocha) ->
           runnable._invokedCy = true
 
         @fn = _.wrap @fn, (orig, args...) ->
-          Cypress.on "enqueue", invokedCy
+          _this.listenTo Cypress, "enqueue", invokedCy
 
           unbind = ->
-            Cypress.off "enqueue", invokedCy
+            _this.stopListening Cypress, "enqueue", invokedCy
 
           try
             ## call the original function with
@@ -178,7 +179,14 @@ $Cypress.Mocha = do ($Cypress, _, Mocha) ->
     restoreRunnableRun: ->
       Mocha.Runnable::run = runnableRun
 
+    _.extend $Mocha.prototype, Backbone.Events
+
     @create = (Cypress, specWindow) ->
+      ## clear out existing listeners
+      ## if we already exist!
+      if existing = Cypress.mocha
+        existing.stopListening()
+
       ## we dont want the default global mocha instance on our window
       delete window.mocha
       Cypress.mocha = new $Mocha Cypress, specWindow
