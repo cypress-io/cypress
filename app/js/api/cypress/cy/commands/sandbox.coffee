@@ -19,9 +19,13 @@ $Cypress.register "Sandbox", (Cypress, _, $) ->
         server.responses = []
 
   $Cypress.Cy.extend
+    ## think about making this "public" so
+    ## users can utilize the root sandbox
+    ## for clocks / special XHRs / etc
     _getSandbox: ->
       sinon = @sync.window().sinon
 
-      @throwErr("sinon.js was not found in the remote iframe's window.  This may happen if you testing a page you did not directly cy.visit(..).  This happens when you click a regular link.") if not sinon
+      if not sinon
+        @throwErr("Could not access the Server, Routes, Stub, Spies, or Mocks. Check to see if your application is loaded and is visible. Please open an issue if you see this message.")
 
       @_sandbox ?= sinon.sandbox.create()

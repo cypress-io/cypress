@@ -51,7 +51,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
         fn = => @cy._getSandbox()
 
-        expect(fn).to.throw "sinon.js was not found in the remote iframe's window."
+        expect(fn).to.throw "Could not access the Server, Routes, Stub, Spies, or Mocks. Check to see if your application is loaded and is visible. Please open an issue if you see this message."
 
         ## restore after the test
         @cy.sync.window().sinon = sinon
