@@ -63,6 +63,7 @@ window.$Cypress = do ($, _, Backbone) ->
     onBeforeLoad: (contentWindow) ->
       return if not @cy
 
+      @cy.checkForServer(contentWindow)
       @cy.onBeforeLoad(contentWindow)
 
     ## TODO: TEST THIS

@@ -3,7 +3,71 @@ $Cypress.register "XHR", (Cypress, _, $) ->
   validHttpMethodsRe = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/
   nonAjaxAssets      = /\.(js|html|css)$/
 
+  SERVER     = "server"
+  TMP_SERVER = "tmpServer"
+  TMP_ROUTES = "tmpRoutes"
+
   responseNamespace = (alias) -> "response_" + alias
+
+  startServer = (options) ->
+    ## get a handle on our sandbox
+    sandbox = @_getSandbox()
+
+    ## start up the fake server to slurp up
+    ## any XHR requests from here on out
+    server = sandbox.useFakeServer()
+
+    ## pass in our server + options and store this
+    ## this server so we can access it later
+    @prop SERVER, Cypress.Server.create(server, options)
+
+  stubRoute = (options, server) ->
+    server ?= @prop(SERVER)
+
+    server.stub(options)
+
+    getUrl = (options) ->
+      options.originalUrl or options.url
+
+    # getMessage = (options) ->
+    #   [
+    #     options.method,
+    #     "[i]" + options.status + "[/i]",
+    #     ""
+    #   ].join(" - ")
+
+    ## do not mutate existing availableUrls
+    urls = @prop("availableUrls") ? []
+    urls = urls.concat getUrl(options)
+    @prop "availableUrls", urls
+
+    Cypress.route
+      method:   options.method
+      url:      getUrl(options)
+      status:   options.status
+      response: options.response
+      alias:    options.alias
+      _route:   options
+      onConsole: ->
+        Method:   options.method
+        URL:      getUrl(options)
+        Status:   options.status
+        Response: options.response
+        Alias:    options.alias
+      onRender: ($row) ->
+        debugger
+      #   html = $row.html()
+      #   html = $Cypress.Utils.convertHtmlTags(html)
+
+      #   ## append the URL separately so we dont
+      #   ## accidentally convert a regex to an html tag
+      #   $row
+      #     .html(html)
+      #       .find(".command-message")
+      #         .children()
+      #           .append("<samp>" + getUrl(options) + "</samp>")
+
+    return server
 
   Cypress.addParentCommand
     server: (args...) ->
@@ -115,20 +179,18 @@ $Cypress.register "XHR", (Cypress, _, $) ->
 
       _.defaults options, defaults
 
-      ## get a handle on our sandbox
-      sandbox = @_getSandbox()
+      try
+        startServer.call(@, options)
+      catch
+        @prop TMP_SERVER, =>
+          startServer.call(@, options)
 
-      ## start up the fake server to slurp up
-      ## any XHR requests from here on out
-      server = sandbox.useFakeServer()
-
-      ## pass in our server + options and store this
-      ## this server so we can access it later
-      @prop "server", Cypress.Server.create(server, options)
+        return null
 
     route: (args...) ->
-      ## bail if we dont have a server prop
-      @throwErr("cy.route() cannot be invoked before starting the cy.server()") if not server = @prop("server")
+      ## bail if we dont have a server prop or a tmpServer prop
+      if not server = @prop("server") or tmpServer = @prop(TMP_SERVER)
+        @throwErr("cy.route() cannot be invoked before starting the cy.server()")
 
       defaults = {
         method: "GET"
@@ -198,52 +260,35 @@ $Cypress.register "XHR", (Cypress, _, $) ->
       if alias = @getNextAlias()
         options.alias = alias
 
-      server.stub(options)
+      ## if we have a tmpServer
+      if tmpServer
+        ## make sure we have tmpRoutes
+        tmpRoutes = @prop(TMP_ROUTES)
 
-      getUrl = (options) ->
-        options.originalUrl or options.url
+        if not tmpRoutes
+          ## if we dont make them an array
+          tmpRoutes = @prop(TMP_ROUTES, [])
 
-      # getMessage = (options) ->
-      #   [
-      #     options.method,
-      #     "[i]" + options.status + "[/i]",
-      #     ""
-      #   ].join(" - ")
-
-      ## do not mutate existing availableUrls
-      urls = @prop("availableUrls") ? []
-      urls = urls.concat getUrl(options)
-      @prop "availableUrls", urls
-
-      Cypress.route
-        method:   options.method
-        url:      getUrl(options)
-        status:   options.status
-        response: options.response
-        alias:    options.alias
-        _route:   options
-        onConsole: ->
-          Method:   options.method
-          URL:      getUrl(options)
-          Status:   options.status
-          Response: options.response
-          Alias:    options.alias
-        onRender: ($row) ->
-          debugger
-        #   html = $row.html()
-        #   html = $Cypress.Utils.convertHtmlTags(html)
-
-        #   ## append the URL separately so we dont
-        #   ## accidentally convert a regex to an html tag
-        #   $row
-        #     .html(html)
-        #       .find(".command-message")
-        #         .children()
-        #           .append("<samp>" + getUrl(options) + "</samp>")
-
-      return server
+        ## push a new callback function
+        ## which stubs the routes as soon
+        ## as we we have a server
+        tmpRoutes.push =>
+          stubRoute.call(@, options)
+      else
+        stubRoute.call(@, options, server)
 
   $Cypress.Cy.extend
+    checkForServer: (contentWindow) ->
+      if fn = @prop(TMP_SERVER)
+        fn()
+
+      if routes = @prop(TMP_ROUTES)
+        _.each routes, (route) -> route()
+
+      _.each [TMP_SERVER, TMP_ROUTES], (attr) =>
+        ## nuke these from cy
+        @prop(attr, null)
+
     getResponseByAlias: (alias) ->
       if xhr = @prop(responseNamespace(alias))
         return xhr

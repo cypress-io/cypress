@@ -134,6 +134,50 @@ describe "$Cypress.Cy XHR Commands", ->
       @cy.server({autoRespondAfter: 100}).then ->
         expect(@cy._sandbox.server.autoRespondAfter).to.eq 100
 
+    describe "without sinon present", ->
+      beforeEach ->
+        ## force us to start from blank window
+        @cy.$remoteIframe.prop("src", "about:blank")
+
+      it "can start server with no errors", ->
+        @cy
+          .server()
+          .visit("fixtures/html/sinon.html")
+
+      it "can add routes with no errors", ->
+        @cy
+          .server()
+          .route(/foo/, {})
+          .visit("fixtures/html/sinon.html")
+
+      it "routes xhr requests", ->
+        @cy
+          .server()
+          .route(/foo/, {foo: "bar"})
+          .visit("fixtures/html/sinon.html")
+          .window().then (w) ->
+            w.$.get("/foo")
+          .then (resp) ->
+            expect(resp).to.deep.eq {foo: "bar"}
+
+      it "works with aliases", ->
+        @cy
+          .server()
+          .route(/foo/, {foo: "bar"}).as("getFoo")
+          .visit("fixtures/html/sinon.html")
+          .window().then (w) ->
+            w.$.get("/foo")
+          .wait("@getFoo").then (xhr) ->
+            expect(xhr.responseText).to.eq JSON.stringify({foo: "bar"})
+
+      it "prevents XHR's from going out from sinon.html", ->
+        @cy
+          .server()
+          .route(/bar/, {bar: "baz"}).as("getBar")
+          .visit("fixtures/html/sinon.html")
+          .wait("@getBar").then (xhr) ->
+            expect(xhr.responseText).to.eq JSON.stringify({bar: "baz"})
+
     describe "errors", ->
       beforeEach ->
         @allowErrors()
@@ -491,3 +535,20 @@ describe "$Cypress.Cy XHR Commands", ->
 
         it "snapshots immediately", ->
           expect(@log.get("snapshot")).to.be.an("object")
+
+  context "#checkForServer", ->
+    beforeEach ->
+      ## force us to start from blank window
+      @cy.$remoteIframe.prop("src", "about:blank")
+
+    it "nukes TMP_SERVER and TMP_ROUTES", ->
+      @cy
+        .server()
+        .route(/foo/, {foo: "bar"})
+        .then ->
+          expect(@cy.prop("tmpServer")).to.be.a("function")
+          expect(@cy.prop("tmpRoutes")).to.be.a("array")
+        .visit("fixtures/html/sinon.html")
+        .then ->
+          expect(@cy.prop("tmpServer")).to.be.null
+          expect(@cy.prop("tmpRoutes")).to.be.null
