@@ -47,14 +47,18 @@ class Files extends Controller
     _.defaults options,
       test: true
 
+    {testFolder, rootFolder} = @app.get("cypress")
+
     ## return the specs prefixed with /tests?p=spec
     _(specs).map (spec) ->
       if options.test
         ## prepend with tests path
-        spec = "tests/#{spec}"
+        spec = "#{testFolder}/#{spec}"
       else
         ## make sure we have no leading
         ## or trailing forward slashes
+        spec = _.compact([rootFolder, spec])
+        spec = path.join(spec...)
         spec = _.str.trim(spec, "/")
 
       "/tests?p=#{spec}"
@@ -73,7 +77,7 @@ class Files extends Controller
 
   getJavascripts: ->
     paths = @convertToAbsolutePath @app.get("cypress").javascripts
-    @convertToSpecPath(paths, false)
+    @convertToSpecPath paths, {test: false}
 
   getUtilities: ->
     utils = ["iframe"]

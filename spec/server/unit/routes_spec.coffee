@@ -88,70 +88,140 @@ describe "Routes", ->
         .end(done)
 
   context "GET /tests", ->
-    beforeEach ->
-      Fixtures.scaffold("todos")
+    describe "todos", ->
+      beforeEach ->
+        Fixtures.scaffold("todos")
 
-      @server.setCypressJson {
-        projectRoot: Fixtures.project("todos")
-        testFolder: "tests"
-        javascripts: ["support/spec_helper.coffee"]
-        sinon: false
-        fixtures: false
-      }
+        @server.setCypressJson {
+          projectRoot: Fixtures.project("todos")
+          testFolder: "tests"
+          javascripts: ["support/spec_helper.coffee"]
+          sinon: false
+          fixtures: false
+        }
 
-    afterEach ->
-      Fixtures.remove("todos")
+      afterEach ->
+        Fixtures.remove("todos")
 
-    it "processes sub/sub_test.coffee spec", (done) ->
-      file = Fixtures.get("projects/todos/tests/sub/sub_test.coffee")
-      file = coffee.compile(file)
+      it "processes sub/sub_test.coffee spec", (done) ->
+        file = Fixtures.get("projects/todos/tests/sub/sub_test.coffee")
+        file = coffee.compile(file)
 
-      supertest(@app)
-        .get("/tests?p=tests/sub/sub_test.coffee")
-        .expect(200)
-        .expect (res) ->
-          expect(res.text).to.eq file
-          null
-        .end(done)
+        supertest(@app)
+          .get("/tests?p=tests/sub/sub_test.coffee")
+          .expect(200)
+          .expect (res) ->
+            expect(res.text).to.eq file
+            null
+          .end(done)
 
-    it "processes support/spec_helper.coffee javascripts", (done) ->
-      file = Fixtures.get("projects/todos/support/spec_helper.coffee")
-      file = coffee.compile(file)
+      it "processes support/spec_helper.coffee javascripts", (done) ->
+        file = Fixtures.get("projects/todos/support/spec_helper.coffee")
+        file = coffee.compile(file)
 
-      supertest(@app)
-        .get("/tests?p=support/spec_helper.coffee")
-        .expect(200)
-        .expect (res) ->
-          expect(res.text).to.eq file
-          null
-        .end(done)
+        supertest(@app)
+          .get("/tests?p=support/spec_helper.coffee")
+          .expect(200)
+          .expect (res) ->
+            expect(res.text).to.eq file
+            null
+          .end(done)
+
+    describe "no-server", ->
+      beforeEach ->
+        Fixtures.scaffold("no-server")
+
+        @server.setCypressJson {
+          projectRoot: Fixtures.project("no-server")
+          testFolder: "my-tests"
+          javascripts: ["helpers/includes.js"]
+          sinon: false
+          fixtures: false
+        }
+
+      afterEach ->
+        Fixtures.remove("no-server")
+
+      it "processes my-tests/test1.js spec", (done) ->
+        file = Fixtures.get("projects/no-server/my-tests/test1.js")
+
+        supertest(@app)
+          .get("/tests?p=my-tests/test1.js")
+          .expect(200)
+          .expect (res) ->
+            expect(res.text).to.eq file
+            null
+          .end(done)
+
+      it "processes helpers/includes.js javascripts", (done) ->
+        file = Fixtures.get("projects/no-server/helpers/includes.js")
+
+        supertest(@app)
+          .get("/tests?p=helpers/includes.js")
+          .expect(200)
+          .expect (res) ->
+            expect(res.text).to.eq file
+            null
+          .end(done)
 
   context "GET /iframes/*", ->
-    beforeEach ->
-      Fixtures.scaffold("todos")
+    describe "todos", ->
+      beforeEach ->
+        Fixtures.scaffold("todos")
 
-      @server.setCypressJson {
-        projectRoot: Fixtures.project("todos")
-        testFolder: "tests"
-        javascripts: ["support/spec_helper.coffee"]
-        sinon: false
-        fixtures: false
-      }
+        @server.setCypressJson {
+          projectRoot: Fixtures.project("todos")
+          testFolder: "tests"
+          javascripts: ["support/spec_helper.coffee"]
+          sinon: false
+          fixtures: false
+        }
 
-    afterEach ->
-      Fixtures.remove("todos")
+      afterEach ->
+        Fixtures.remove("todos")
 
-    it "renders empty inject with variables passed in", (done) ->
-      contents = removeWhitespace Fixtures.get("server/expected_empty_inject.html")
+      it "renders empty inject with variables passed in", (done) ->
+        contents = removeWhitespace Fixtures.get("server/expected_empty_inject.html")
 
-      supertest(@app)
-        .get("/iframes/test2.coffee")
-        .expect(200)
-        .expect (res) ->
-          body = removeWhitespace(res.text)
-          expect(body).to.eq contents
-          null
-        .end(done)
+        supertest(@app)
+          .get("/iframes/test2.coffee")
+          .expect(200)
+          .expect (res) ->
+            body = removeWhitespace(res.text)
+            expect(body).to.eq contents
+            null
+          .end(done)
+
+    describe.only "no-server", ->
+      beforeEach ->
+        Fixtures.scaffold("no-server")
+
+        @server.setCypressJson {
+          projectRoot: Fixtures.project("no-server")
+          testFolder: "my-tests"
+          javascripts: ["helpers/includes.js"]
+          ## even though there are no files here
+          ## we just add this because it should
+          ## be added to all support files by default
+          rootFolder: "foo"
+          sinon: false
+          fixtures: false
+        }
+
+      afterEach ->
+        Fixtures.remove("no-server")
+
+      it "renders empty inject with variables passed in", (done) ->
+        contents = removeWhitespace Fixtures.get("server/expected_no_server_empty_inject.html")
+
+        supertest(@app)
+          .get("/iframes/test1.js")
+          .expect(200)
+          .expect (res) ->
+            body = removeWhitespace(res.text)
+            expect(body).to.eq contents
+            null
+          .end(done)
 
   context "GET /__remote/*", ->
     describe "?__initial=true", ->
