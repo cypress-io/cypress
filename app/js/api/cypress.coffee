@@ -41,6 +41,13 @@ window.$Cypress = do ($, _, Backbone) ->
       @runner.run(fn)
 
     ## TODO: TEST THIS
+    ## restore our on callback
+    ## after the run completes
+    after: (err) ->
+      @on = @_on if @_on
+      @
+
+    ## TODO: TEST THIS
     set: (runnable, hookName) ->
       $Cypress.Cy.set(@, runnable, hookName)
 
@@ -49,6 +56,35 @@ window.$Cypress = do ($, _, Backbone) ->
       chai   = $Cypress.Chai.create(@, specWindow)
       mocha  = $Cypress.Mocha.create(@, specWindow)
       runner = $Cypress.Runner.create(@, specWindow, mocha)
+
+      ## TODO: TEST THIS
+      @prepareForSpecEvents()
+
+    ## TODO: TEST THIS
+    ## we need to specially handle spec events coming
+    ## from spec windows.  they will listen to cypress
+    ## events so we slurp them up when they happen
+    ## and then restore them before binding them
+    ## again
+    prepareForSpecEvents: ->
+      @_specEvents ?= _.extend {}, Backbone.Events
+
+      ## anytime we prepare for spec events
+      ## we unbind previous listeners
+      @_specEvents.stopListening()
+
+      @_on  = @on
+      _this = @
+
+      @on = _.wrap @on, (orig, name, callback, context) ->
+        ## if we have context then call through because
+        ## that has happened from the specEvents.listenTo
+        if context
+          orig.call(@, name, callback, context)
+        else
+          _this._specEvents.listenTo _this, name, callback
+
+        return @
 
     defaults: ->
       @trigger "defaults"
@@ -80,6 +116,8 @@ window.$Cypress = do ($, _, Backbone) ->
       @trigger "restore"
       @defaults()
       return @
+
+    _.extend $Cypress.prototype, Backbone.Events
 
     @create = (options = {}) ->
       _.defaults options,

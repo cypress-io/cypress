@@ -254,6 +254,8 @@
         @Cypress.initialize(specWindow, remoteIframe, App.config.getExternalInterface())
 
         @Cypress.run (err) =>
+          @Cypress.after(err)
+
           ## trigger the after run event
           @trigger "after:run"
 
