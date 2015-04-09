@@ -192,7 +192,7 @@ describe "Routes", ->
             null
           .end(done)
 
-    describe.only "no-server", ->
+    describe "no-server", ->
       beforeEach ->
         Fixtures.scaffold("no-server")
 
