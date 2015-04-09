@@ -201,8 +201,8 @@ describe "Routes", ->
           testFolder: "my-tests"
           javascripts: ["helpers/includes.js"]
           ## even though there are no files here
-          ## we just add this because it should
-          ## be added to all support files by default
+          ## we are adding rootFolder to test that
+          ## only the support files receive this value
           rootFolder: "foo"
           sinon: false
           fixtures: false
