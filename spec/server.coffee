@@ -58,6 +58,11 @@ app.get "/specs/*", (req, res) ->
         specs: getSpecPath(req.path)
       }
 
+app.get "/__remote/*", (req, res) ->
+  file = req.params[0].replace(/\/+$/, "")
+  res.sendFile file,
+    root: __dirname
+
 app.get "/bower_components/*", (req, res) ->
   res.sendFile path.join("bower_components", req.params[0]),
     root: path.join(__dirname, "..")
