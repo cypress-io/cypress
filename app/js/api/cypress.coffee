@@ -60,6 +60,11 @@ window.$Cypress = do ($, _, Backbone) ->
       ## TODO: TEST THIS
       @prepareForSpecEvents()
 
+    onBeforeLoad: (contentWindow) ->
+      return if not @cy
+
+      @cy.onBeforeLoad(contentWindow)
+
     ## TODO: TEST THIS
     ## we need to specially handle spec events coming
     ## from spec windows.  they will listen to cypress

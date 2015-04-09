@@ -1,5 +1,14 @@
 $Cypress.register "Navigation", (Cypress, _, $) ->
 
+  Cypress.Cy.extend
+    onBeforeLoad: (contentWindow) ->
+      current = @prop("current")
+
+      return if current.name isnt "visit"
+
+      options = _.last(current.args)
+      options.onBeforeLoad?(contentWindow)
+
   Cypress.addParentCommand
 
     visit: (url, options = {}) ->

@@ -47,7 +47,18 @@ describe "$Cypress.Cy Navigation Commands", ->
     it "resets the runnables timeout after visit"
 
     it "invokes onLoad callback"
-    it "invokes onBeforeLoad callback"
+
+    it "invokes onBeforeLoad callback", (done) ->
+      @cy.visit("fixtures/html/sinon.html", {
+        onBeforeLoad: (contentWindow) ->
+          expect(contentWindow.sinon).to.be.defined
+          done()
+      })
+
+    it "does not error without an onBeforeLoad callback", ->
+      @cy.visit("fixtures/html/sinon.html").then ->
+        prev = @cy.prop("current").prev
+        expect(prev.args).to.have.length(1)
 
     describe "visit:start", ->
       beforeEach ->
