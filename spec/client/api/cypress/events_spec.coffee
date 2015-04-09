@@ -2,40 +2,29 @@ describe "$Cypress Events Extension", ->
   beforeEach ->
     @Cypress = $Cypress.create()
 
-  context ".off", ->
-    it "can remove event by name", ->
+  context ".trigger", ->
+    it "forces ctx to by @cy", (done) ->
+      cy = @Cypress.cy = {}
       @Cypress.on "foo", ->
+        expect(@).to.eq cy
+        done()
 
-      expect(@Cypress.event("foo")).to.have.length(1)
+      @Cypress.trigger "foo"
 
-      @Cypress.off "foo"
+    it "still triggers twice", ->
+      count = 0
 
-      expect(@Cypress.event("foo")).to.have.length(0)
+      @Cypress.on "foo", ->
+        count += 1
 
-    it "can remove event by name + callback fn", ->
-      fn = ->
+      @Cypress.on "foo", ->
+        count += 1
 
-      @Cypress.on "foo", -> "foo"
-      @Cypress.on "foo", fn
+      @Cypress.trigger("foo")
+      expect(count).to.eq 2
 
-      expect(@Cypress.event("foo")).to.have.length(2)
-
-      @Cypress.off "foo", fn
-
-      expect(@Cypress.event("foo")).to.have.length(1)
-
-      @Cypress.off "foo"
-
-  context ".on", ->
-    it "replaces existing events if function matches", ->
-      fn = ->
-
-      @Cypress.on "foo", fn
-      @Cypress.on "foo", fn
-
-      expect(@Cypress.event("foo")).to.have.length(1)
-
-      @Cypress.off "foo", fn
+    it "does not throw if there are no _events", ->
+      @Cypress.trigger("foobar")
 
   context ".event", ->
     it "gets all callsbacks by name", ->
