@@ -32,7 +32,7 @@
     overloadMochaRunnerUncaught: ->
       ## if app environment isnt production we need to listen to
       ## uncaught exceptions (else it makes tracking down bugs hard)
-      return if not App.config.env("production")
+      return if App.config.env("production")
 
       Mocha.Runner::uncaught = _.wrap uncaught, (orig, err) ->
         ## debugger if this isnt an AssertionError or CypressError
