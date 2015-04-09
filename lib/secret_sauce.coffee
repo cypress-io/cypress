@@ -397,10 +397,17 @@ SecretSauce.RemoteInitial =
       inject: "
         <script type='text/javascript'>
           window.onerror = function(){
-            parent.onerror.apply(parent, arguments)
+            parent.onerror.apply(parent, arguments);
           }
         </script>
         <script type='text/javascript' src='/eclectus/js/sinon.js'></script>
+        <script type='text/javascript'>
+          var Cypress = parent.Cypress;
+          if (!Cypress){
+            throw new Error('Cypress must exist in the parent window!');
+          };
+          Cypress.onBeforeLoad(window);
+        </script>
       "
 
     url = @parseReqUrl(req.url)
