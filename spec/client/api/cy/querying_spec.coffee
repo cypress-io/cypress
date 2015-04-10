@@ -89,6 +89,9 @@ describe "$Cypress.Cy Querying Commands", ->
           expect($span.get(0)).to.eq span.get(0)
 
     describe ".log", ->
+      beforeEach ->
+        @Cypress.on "log", (@log) =>
+
       it "logs immediately before resolving", (done) ->
         div = @cy.$("div:first")
 
@@ -102,11 +105,15 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy.get("div:first").within ->
 
       it "snapshots after clicking", ->
-        @Cypress.on "log", (@log) =>
-
         @cy.get("div:first").within ->
           @cy.then ->
             expect(@log.get("snapshot")).to.be.an("object")
+
+      it "logs out deltaOptions with message", ->
+        button = @cy.$("#button").hide()
+
+        @cy.get("#button", {visible: false}).then ($el) ->
+          expect(@log.get("message")).to.eq "#button, {visible: false}"
 
     describe "errors", ->
       beforeEach ->
@@ -331,6 +338,7 @@ describe "$Cypress.Cy Querying Commands", ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "get"
             Selector: "body"
+            Options: undefined
             Returned: $body
             Elements: 1
           }
@@ -340,6 +348,7 @@ describe "$Cypress.Cy Querying Commands", ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "get"
             Alias: "@b"
+            Options: undefined
             Returned: $body
             Elements: 1
           }

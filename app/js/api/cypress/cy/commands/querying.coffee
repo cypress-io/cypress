@@ -14,10 +14,14 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       ## normalize these two options
       options.exist = options.exists and options.exist
 
+      ## figure out the options which actually change the behavior of traversals
+      deltaOptions = $Cypress.Utils.filterDelta(options, {visible: null, exist: true})
+
       start = ->
         return if options.log is false
 
         options.command ?= Cypress.command
+          message: [selector, deltaOptions]
           referencesAlias: alias?.alias
           aliasType: "dom"
 
@@ -35,8 +39,9 @@ $Cypress.register "Querying", (Cypress, _, $) ->
             obj[key] = selector
 
             _.extend obj,
-              "Returned": $el
-              "Elements": $el?.length
+              Options:  deltaOptions
+              Returned: $el
+              Elements: $el?.length
 
         options.command.snapshot().end()
 
