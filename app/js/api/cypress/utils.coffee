@@ -29,6 +29,9 @@ $Cypress.Utils = do ($Cypress, _) ->
 
     _stringify: (value) ->
       switch
+        when @hasElement(value)
+          @stringifyElement(value, "short")
+
         when _.isFunction(value)
           "function(){}"
 

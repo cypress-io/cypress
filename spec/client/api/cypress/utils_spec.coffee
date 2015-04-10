@@ -51,6 +51,11 @@ describe "$Cypress.Utils API", ->
         o = (foo, bar, baz) ->
         expect(@str(o)).to.eq "function(){}"
 
+    context "Elements", ->
+      it "stringifyElement", ->
+        o = $("div:first")
+        expect(@str(o)).to.eq "<div#mocha>"
+
   describe "#hasElement", ->
     it "is true on jQuery objects", ->
       body = @cy.$("body")
