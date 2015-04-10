@@ -125,10 +125,6 @@ $Cypress.Log = do (_, Backbone) ->
 
       return if not (@cy and current)
 
-      ## stringify the arguments
-      stringify = (array) ->
-        _(array).map( (value) -> "" + value).join(", ")
-
       _.defaults obj, _(current).pick("name", "type")
 
       ## force duals to become either parents or childs
@@ -149,7 +145,8 @@ $Cypress.Log = do (_, Backbone) ->
           "Returned": current.subject
 
       if obj.isCurrent
-        _.defaults obj, {message: stringify(current.args)}
+        ## stringify the obj.message (if it exists) or current.args
+        obj.message = $Cypress.Utils.stringify(obj.message ? current.args)
 
       ## allow type to by a dynamic function
       ## so it can conditionally return either
