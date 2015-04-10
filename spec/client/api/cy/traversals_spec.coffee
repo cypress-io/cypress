@@ -4,6 +4,7 @@ describe "$Cypress.Cy Traversal Commands", ->
   fns = [
     {find: "*"}
     {filter: ":first"}
+    {not: "div"}
     {eq: 0}
     {closest: "body"}
     "children", "first", "last", "next", "parent", "parents", "prev", "siblings"
@@ -22,12 +23,35 @@ describe "$Cypress.Cy Traversal Commands", ->
         @cy.get("#list")[name](arg).then ($el) ->
           expect($el).to.match el
 
-      it "errors without a dom element", (done) ->
-        @allowErrors()
+      describe "errors", ->
+        beforeEach ->
+          @allowErrors()
 
-        @cy.noop({})[name](arg)
+        it "without a dom element", (done) ->
+          @cy.noop({})[name](arg)
+          @cy.on "fail", -> done()
 
-        @cy.on "fail", -> done()
+        it "returns no elements", (done) ->
+          @cy._timeout(100)
+
+          errIncludes = (el, node) =>
+            node = $Cypress.Utils.stringifyElement cy.$(node), "short"
+
+            @cy.on "fail", (err) ->
+              expect(err.message).to.include "Could not find element: #{el} from #{node}"
+              done()
+
+          switch name
+            when "not"
+              errIncludes(":checkbox", ":checkbox")
+              @cy.get(":checkbox").not(":checkbox")
+
+            ## these cannot error
+            when "first", "last" then done()
+
+            else
+              errIncludes(".no-class-like-this-exists", "div:first")
+              @cy.get("div:first")[name](".no-class-like-this-exists")
 
       describe ".log", ->
         beforeEach ->
@@ -86,3 +110,7 @@ describe "$Cypress.Cy Traversal Commands", ->
       done()
 
     @cy.get("#list li:last").find("span")
+
+  # describe "errors", ->
+
+    # context "from traversals", ->

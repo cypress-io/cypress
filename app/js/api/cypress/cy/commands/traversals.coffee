@@ -1,6 +1,6 @@
 $Cypress.register "Traversals", (Cypress, _, $) ->
 
-  traversals = "find filter children eq closest first last next parent parents prev siblings".split(" ")
+  traversals = "find filter not children eq closest first last next parent parents prev siblings".split(" ")
 
   _.each traversals, (traversal) ->
     Cypress.addChildCommand traversal, (subject, arg1, arg2, options) ->
@@ -95,7 +95,8 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
             else
               "Could not find visible element:"
 
-        err += " " + getSelector()
+        node = $Cypress.Utils.stringifyElement(subject, "short")
+        err += " " + getSelector() + " from #{node}"
 
       options.error ?= getErr()
 
