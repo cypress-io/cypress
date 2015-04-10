@@ -11,3 +11,14 @@ $Cypress.register "Misc", (Cypress, _, $) ->
       ## or anything else here...
 
     noop: (obj) -> obj
+
+    wrap: (obj) ->
+      options =
+        end: true
+        snapshot: true
+
+      options.$el = obj if $Cypress.Utils.hasElement(obj)
+
+      Cypress.command(options)
+
+      obj
