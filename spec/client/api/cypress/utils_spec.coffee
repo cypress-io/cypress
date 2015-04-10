@@ -9,6 +9,48 @@ describe "$Cypress.Utils API", ->
     it "returns undefined if nothing is different", ->
       obj = $Cypress.Utils.filterDelta {foo: "foo", bar: "bar"}, {foo: "foo"}
       expect(obj).to.be.undefined
+
+  describe "#stringify", ->
+    beforeEach ->
+      @str = (str) ->
+        $Cypress.Utils.stringify(str)
+
+    context "Values", ->
+      it "string", ->
+        expect(@str("foo bar baz")).to.eq "foo bar baz"
+
+      it "number", ->
+        expect(@str(1234)).to.eq "1234"
+
+      it "null", ->
+        expect(@str(null)).to.eq "null"
+
+      it "undefined", ->
+        expect(@str(undefined)).to.eq ""
+
+    context "Arrays", ->
+      it "length <= 3", ->
+        a = [["one", 2, "three"]]
+        expect(@str(a)).to.eq "[one, 2, three]"
+
+      it "length > 3", ->
+        a = [[1,2,3,4,5]]
+        expect(@str(a)).to.eq "Array[5]"
+
+    context "Objects", ->
+      it "keys <= 2", ->
+        o = {visible: null, exists: true}
+        expect(@str(o)).to.eq "{visible: null, exists: true}"
+
+      it "keys > 2", ->
+        o = {foo: "foo", bar: "baz", baz: "baz"}
+        expect(@str(o)).to.eq "Object{3}"
+
+    context "Functions", ->
+      it "function(){}", ->
+        o = (foo, bar, baz) ->
+        expect(@str(o)).to.eq "function(){}"
+
   describe "#hasElement", ->
     it "is true on jQuery objects", ->
       body = @cy.$("body")

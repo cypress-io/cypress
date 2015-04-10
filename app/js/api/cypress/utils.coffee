@@ -18,6 +18,52 @@ $Cypress.Utils = do ($Cypress, _) ->
       , {}
 
       if _.isEmpty(obj) then undefined else obj
+
+    _stringifyObj: (obj) ->
+      str = _.reduce obj, (memo, value, key) =>
+        memo.push key + ": " + @_stringify(value)
+        memo
+      , []
+
+      "{" + str.join(", ") + "}"
+
+    _stringify: (value) ->
+      switch
+        when _.isFunction(value)
+          "function(){}"
+
+        when _.isArray(value)
+          len = value.length
+          if len > 3
+            "Array[#{len}]"
+          else
+            "[" + _.map(value, _.bind(@_stringify, @)).join(", ") + "]"
+
+        when _.isObject(value)
+          len = _.keys(value).length
+          if len > 2
+            "Object{#{len}}"
+          else
+            @_stringifyObj(value)
+
+        when _.isUndefined(value)
+          undefined
+
+        else
+          "" + value
+
+    stringify: (values) ->
+      ## if we already have an array
+      ## then nest it again so that
+      ## its formatted properly
+      values = [].concat(values)
+
+      _.chain(values)
+        .map(_.bind(@_stringify, @))
+          .without(undefined)
+            .value()
+              .join(", ")
+
     hasElement: (obj) ->
       try
         !!(obj and obj[0] and _.isElement(obj[0])) or _.isElement(obj)
