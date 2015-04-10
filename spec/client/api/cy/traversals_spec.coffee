@@ -75,6 +75,11 @@ describe "$Cypress.Cy Traversal Commands", ->
           @cy.get("#list")[name](arg).then ($el) ->
             expect(@log.get("$el").get(0)).to.eq $el.get(0)
 
+        it "has a custom message", ->
+          @cy.get("#list")[name](arg).then ->
+            arg = if _.isUndefined(arg) then "" else arg.toString()
+            expect(@log.get("message")).to.eq arg
+
         it "#onConsole", ->
           @cy.get("#list")[name](arg).then ($el) ->
             obj = {Command: name}
@@ -82,6 +87,7 @@ describe "$Cypress.Cy Traversal Commands", ->
 
             _.extend obj, {
               "Applied To": getFirstSubjectByName.call(@, "get")
+              Options: undefined
               Returned: $el
               Elements: $el.length
             }
@@ -111,6 +117,23 @@ describe "$Cypress.Cy Traversal Commands", ->
 
     @cy.get("#list li:last").find("span")
 
-  # describe "errors", ->
+  context "delta options", ->
+    beforeEach ->
+      @Cypress.on "log", (@log) =>
 
-    # context "from traversals", ->
+    it "logs out to message", ->
+      @cy.get("#list").find("li:first", {visible: true}).then ->
+        expect(@log.get("message")).to.eq "li:first, {visible: true}"
+
+    it "has options onConsole", ->
+      @cy.get("#list").find("li:first", {visible: true}).then ($el) ->
+        obj = {
+          Command: "find"
+          Selector: "li:first"
+          Options: {visible: true}
+          "Applied To": getFirstSubjectByName.call(@, "get")
+          Returned: $el
+          Elements: $el.length
+        }
+
+        expect(@log.attributes.onConsole()).to.deep.eq obj

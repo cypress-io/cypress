@@ -23,18 +23,23 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
       ## normalize these two options
       options.exist = options.exists and options.exist
 
+      ## figure out the options which actually change the behavior of traversals
+      deltaOptions = $Cypress.Utils.filterDelta(options, {visible: null, exist: true})
+
       getSelector = ->
-        args = _([arg1, arg2]).chain().reject(_.isFunction).value()
+        args = _([arg1, arg2]).chain().reject(_.isFunction).reject(_.isObject).value()
         args = _(args).without(null, undefined)
         args.join(", ")
 
       onConsole = {
         Selector: getSelector()
+        Options: deltaOptions
         "Applied To": subject
       }
 
       if options.log
         options.command ?= Cypress.command
+          message: [getSelector(), deltaOptions]
           onConsole: -> onConsole
 
       log = ($el) ->
