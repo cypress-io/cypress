@@ -1,6 +1,14 @@
 describe "$Cypress.Utils API", ->
   enterCommandTestingMode()
 
+  describe "#filterDelta", ->
+    it "returns new obj based on the delta from the filter", ->
+      obj = $Cypress.Utils.filterDelta {visible: true, exist: false, foo: "bar"}, {visible: null, exist: false}
+      expect(obj).to.deep.eq {visible: true}
+
+    it "returns undefined if nothing is different", ->
+      obj = $Cypress.Utils.filterDelta {foo: "foo", bar: "bar"}, {foo: "foo"}
+      expect(obj).to.be.undefined
   describe "#hasElement", ->
     it "is true on jQuery objects", ->
       body = @cy.$("body")

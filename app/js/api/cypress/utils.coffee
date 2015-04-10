@@ -6,6 +6,18 @@ $Cypress.Utils = do ($Cypress, _) ->
   CYPRESS_OBJECT_NAMESPACE = "_cypressObj"
 
   return {
+    ## return a new object if the obj
+    ## contains the properties of filter
+    ## and the values are different
+    filterDelta: (obj, filter) ->
+      obj = _.reduce filter, (memo, value, key) ->
+        if obj[key] isnt value
+          memo[key] = obj[key]
+
+        memo
+      , {}
+
+      if _.isEmpty(obj) then undefined else obj
     hasElement: (obj) ->
       try
         !!(obj and obj[0] and _.isElement(obj[0])) or _.isElement(obj)
