@@ -54,7 +54,7 @@ $Cypress.register "Location", (Cypress, _, $) ->
 
       if options.log
         Cypress.command
-          message: key ? null
+          message: key ? ""
           end: true
           snapshot: true
 

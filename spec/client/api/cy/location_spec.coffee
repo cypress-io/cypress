@@ -127,7 +127,7 @@ describe "$Cypress.Cy Location Commands", ->
         @cy.location().then ->
           obj = {
             name: "location"
-            message: null
+            message: ""
           }
 
           _.each obj, (value, key) =>
