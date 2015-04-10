@@ -192,6 +192,9 @@ $Cypress.register "XHR", (Cypress, _, $) ->
       if not server = @prop("server") or tmpServer = @prop(TMP_SERVER)
         @throwErr("cy.route() cannot be invoked before starting the cy.server()")
 
+      responseMissing = =>
+        @throwErr "cy.route() must be called with a response."
+
       defaults = {
         method: "GET"
         status: 200
@@ -202,6 +205,10 @@ $Cypress.register "XHR", (Cypress, _, $) ->
       switch
         when _.isObject(args[0]) and not _.isRegExp(args[0])
           _.extend options, args[0]
+        when args.length is 0
+          @throwErr "cy.route() must be given a method, url, and response."
+        when args.length is 1
+          responseMissing()
         when args.length is 2
           o.url        = args[0]
           o.response   = args[1]
@@ -209,7 +216,7 @@ $Cypress.register "XHR", (Cypress, _, $) ->
           ## if our url actually matches an http method
           ## then we know the user omitted response
           if _.isString(o.url) and validHttpMethodsRe.test(o.url.toUpperCase())
-            @throwErr "cy.route() must be called with a response."
+            responseMissing()
         when args.length is 3
           if _.isFunction _(args).last()
             o.url       = args[0]

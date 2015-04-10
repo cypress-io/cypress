@@ -448,13 +448,6 @@ describe "$Cypress.Cy XHR Commands", ->
 
         @cy.route()
 
-      it "requires url", (done) ->
-        @cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.route() must be called with a url. It can be a string or regular expression."
-          done()
-
-        @cy.route()
-
       it "url must be a string or regexp", (done) ->
         @cy.on "fail", (err) ->
           expect(err.message).to.include "cy.route() was called with a invalid url. Url must be either a string or regular expression."
@@ -477,6 +470,27 @@ describe "$Cypress.Cy XHR Commands", ->
           done()
 
         @cy.route("post", "/foo")
+
+      it "requires a url when given a response", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "cy.route() must be called with a url. It can be a string or regular expression."
+          done()
+
+        @cy.route({})
+
+      it "requires a response with no method", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "cy.route() must be called with a response."
+          done()
+
+        @cy.route(/foo/)
+
+      it "requires arguments", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "cy.route() must be given a method, url, and response."
+          done()
+
+        @cy.route()
 
       it "catches errors caused by the XHR response"
 
