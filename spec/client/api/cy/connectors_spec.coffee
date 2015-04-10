@@ -176,6 +176,10 @@ describe "$Cypress.Cy Connectors Commands", ->
           foo: "foo bar baz"
           num: 123
           bar: -> "bar"
+          attr: (key, value) ->
+            obj = {}
+            obj[key] = value
+            obj
           sum: (args...) ->
             _.reduce args, (memo, num) ->
               memo + num
@@ -217,6 +221,17 @@ describe "$Cypress.Cy Connectors Commands", ->
           _.each obj, (value, key) =>
             expect(@log.get(key)).to.deep.eq value
 
+      it "logs obj with arguments", ->
+        @cy.noop(@obj).invoke("attr", "numbers", [1,2,3]).then ->
+          expect(@log.attributes.onConsole()).to.deep.eq {
+            Command:  "invoke"
+            Function: ".attr(numbers, [1, 2, 3])"
+            "With Arguments": ["numbers", [1,2,3]]
+            On:       @obj
+            Returned: {numbers: [1,2,3]}
+          }
+
+
       it "#onConsole as a regular property", ->
         @cy.noop(@obj).invoke("num").then ->
           expect(@log.attributes.onConsole()).to.deep.eq {
@@ -239,7 +254,7 @@ describe "$Cypress.Cy Connectors Commands", ->
         @cy.noop(@obj).invoke("sum", 1, 2, 3).then ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command:  "invoke"
-            Function: ".sum()"
+            Function: ".sum(1, 2, 3)"
             "With Arguments": [1,2,3]
             On:       @obj
             Returned: 6
@@ -302,3 +317,17 @@ describe "$Cypress.Cy Connectors Commands", ->
   context "#its", ->
     it "proxies to #invoke", ->
       @cy.noop({foo: -> "bar"}).its("foo").should("eq", "bar")
+
+    describe "errors", ->
+      beforeEach ->
+        @allowErrors()
+
+      it "throws when property does not exist on the subject", (done) ->
+        @Cypress.on "log", (@log) =>
+
+        @cy.on "fail", (err) =>
+          expect(err.message).to.eq "cy.its() errored because the property: 'foo' does not exist on your subject."
+          expect(@log.get("error")).to.eq err
+          done()
+
+        @cy.noop({}).its("foo")

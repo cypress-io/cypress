@@ -60,8 +60,11 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
 
       command = Cypress.command()
 
+      ## name could be invoke or its!
+      name = @prop("current").name
+
       if not _.isString(fn)
-        @throwErr("cy.invoke() only accepts a string as the first argument.", command)
+        @throwErr("cy.#{name}() only accepts a string as the first argument.", command)
 
       remoteJQuery = @_getRemoteJQuery()
       if $Cypress.Utils.hasElement(subject) and remoteJQueryisNotSameAsGlobal(remoteJQuery)
@@ -71,7 +74,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
       prop = (remoteSubject or subject)[fn]
 
       fail = =>
-        @throwErr("cy.invoke() errored because the property: '#{fn}' does not exist on your subject.", command)
+        @throwErr("cy.#{name}() errored because the property: '#{fn}' does not exist on your subject.", command)
 
       ## if the property does not EXIST on the subject
       ## then throw a specific error message
@@ -96,19 +99,27 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
         else
           prop
 
+      getMessage = ->
+        if _.isFunction(prop)
+          ".#{fn}(" + $Cypress.Utils.stringify(args) + ")"
+        else
+          ".#{fn}"
+
       value = invoke()
 
       if command
+        message = getMessage()
+
         command.set
-          message: if _.isFunction(prop) then ".#{fn}()" else ".#{fn}"
+          message: message
           onConsole: ->
             obj = {}
 
             if _.isFunction(prop)
-              obj["Function"] = ".#{fn}()"
+              obj["Function"] = message
               obj["With Arguments"] = args if args.length
             else
-              obj["Property"] = ".#{fn}"
+              obj["Property"] = message
 
             _.extend obj,
               On: remoteSubject or subject
