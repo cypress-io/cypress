@@ -50,6 +50,12 @@
 
       return model
 
+    hasOnlyOneTest: ->
+      ## if we have only 1 single test
+      ## retun that test or undefined
+      tests = @filter (r) -> r.is("test")
+      tests.length is 1 and tests[0]
+
     getIndex: (model) ->
       _.indexOf @currentRunnables, model
 
@@ -87,7 +93,7 @@
         root.addRunnable model
 
   ## mixin underscore methods
-  _.each ["each", "pluck", "indexOf", "isEmpty"], (method) ->
+  _.each ["each", "pluck", "indexOf", "isEmpty", "filter", "where"], (method) ->
     Entities.Container.prototype[method] = (args...) ->
       args.unshift(@currentRunnables)
       _[method].apply(_, args)

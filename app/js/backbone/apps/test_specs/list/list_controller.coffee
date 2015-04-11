@@ -62,6 +62,11 @@
           runnablesView.renderEmpty = true
           runnablesView.render()
 
+        ## if theres only 1 single test we always
+        ## want to choose it so its open by default
+        if model = container.hasOnlyOneTest()
+          model.open()
+
       @listenTo reporter, "suite:add", (suite) ->
         @addRunnable(suite, "suite")
       # @listenTo reporter, "suite:start", (suite) ->
@@ -93,20 +98,11 @@
 
       @listenTo reporter, "reset:test:run", ->
         ## when our reporter says to reset the test run
-        ## if nothing is chosen -- reset everything
-        ## if just a test is chosen -- just clear/reset its attributes
-        ## if a suite is chosen -- reset all of the children runnable attrs
-
         ## we do this so our tests go into the 'reset' state prior to the iframe
         ## loading -- so it visually looks like things are moving along faster
         ## and it gives a more accurate portrayal of whats about to happen
         ## your tests are going to re-run!
-        if reporter.hasChosen()
-          container.each (model) =>
-            if model.isChosen()
-              model.reset()
-        else
-          root.reset()
+        root.reset()
 
       runnablesView = @getRunnablesView root, spec
 
@@ -176,6 +172,7 @@
           runnable.unchoose()
 
         ## choose this model
+        model.reset({silent: false})
         model.choose()
 
         ## pass this id along to reporter

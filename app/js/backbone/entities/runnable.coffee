@@ -91,28 +91,38 @@
 
     ## always open the commands when a test is chosen
     onChoose: ->
-      @set "open", true if @is("test")
+      @open() if @is("test")
+
+    open: ->
+      @set "open", true
 
     ## when our tests are unchosen we want to close their open state
     collapse: ->
       @set "open", false if @is("test")
 
-    reset: ->
-      @resetRunnable()
+    reset: (options = {}) ->
+      @resetRunnable(options)
       @get("children").invoke("reset")
 
     anyCommandsFailed: ->
       @get("hooks").anyFailed()
 
-    resetRunnable: ->
+    resetRunnable: (options) ->
+      _.defaults options,
+        silent: true
+
       @removeOriginalError()
+
+      ## make sure we collapse up again
+      ## if we are open!
+      @collapse() if @get("open")
 
       ## reset these specific attributes
       _.each ["state", "duration", "error", "hook"], (key) =>
         @unset key
 
       ## remove the models within our commands collection
-      @get("hooks").reset([], {silent: true})
+      @get("hooks").reset([], options)
 
       ## merge in the defaults unless we already have them set
       defaults = _(@).result "defaults"
@@ -161,6 +171,9 @@
       @_timeout = _.result test, "timeout"
 
       @set attrs
+
+      ## open up if we have an error!
+      @open() if @get("error")
 
       ## check to see if we have a failed hook
       @checkForFailedHook()
