@@ -23,7 +23,9 @@
           <%= @alias %>
         </span>
       <% end %>
-      <!-- <i class="fa fa-eye-slash shown"></i> -->
+      <% if not @visible: %>
+        <i class="fa fa-eye-slash" title="<%= @visibleMessage %>"></i>
+      <% end %>
       <% if @numElements > 1: %>
         <label title="<%= @numElements %> matched elements" class="label label-default"><%= @numElements %></label>
       <% end %>

@@ -24,11 +24,12 @@ describe "$Cypress.Log API", ->
     it "#snapshot", ->
       createSnapshot = @sandbox.stub @Cypress, "createSnapshot"
 
-      @log.set "$el", {}
+      div = $("<div />")
+      @log.set "$el", div
 
       @log.snapshot()
 
-      expect(createSnapshot).to.be.calledWith {}
+      expect(createSnapshot).to.be.calledWith div
 
     it "#error", ->
       err = new Error
@@ -106,6 +107,27 @@ describe "$Cypress.Log API", ->
       it "sets numElements", ->
         @log.set($el: @$el)
         expect(@log.get("numElements")).to.eq @$el.length
+
+      it "sets visible to true", ->
+        @log.set($el: @$el)
+        expect(@log.get("visible")).to.be.true
+
+      it "sets visible to false", ->
+        @$el.hide()
+        @log.set($el: @$el)
+        expect(@log.get("visible")).to.be.false
+
+      it "sets visible to false if any $el is not visible", ->
+        $btn1 = $("<button>one</button>").appendTo($("body"))
+        $btn2 = $("<button>two</button>").appendTo($("body")).hide()
+
+        $el = $btn1.add($btn2)
+        expect($el.length).to.eq 2
+
+        @log.set($el: $el)
+
+        expect(@log.get("visible")).to.be.false
+        $el.remove()
 
     describe "#constructor", ->
       it "snapshots if snapshot attr is true", ->

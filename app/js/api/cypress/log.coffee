@@ -88,9 +88,11 @@ $Cypress.Log = do (_, Backbone) ->
 
       return if not $el
 
+      ## make sure all $el elements are visible!
       obj = {
         highlightAttr: @Cypress.highlightAttr
         numElements:   $el.length
+        visible:       $el.length is $el.filter(":visible").length
       }
 
       @set obj

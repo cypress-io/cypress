@@ -9,6 +9,7 @@
       number: 0
       pause: false
       revert: false
+      visible: true
 
     mutators:
       isPending: ->
@@ -30,6 +31,14 @@
       messageTruncated: ->
         return if not message = @get("message")
         _(message).truncate(100, " ")
+
+      visibleMessage: ->
+        return if @get("visible")
+
+        if @get("numElements") > 1
+          "One or more matched elements are not visible."
+        else
+          "This element is not visible."
 
     state: (state) ->
       @get("state") is state
@@ -267,7 +276,7 @@
       if log.get("type") not in ["parent", "child"]
         throw new Error("Commands may only have type of 'parent' or 'child'.  Command was: {name: #{log.get('name')}, type: #{log.get('type')}}")
 
-      attrs = ["state", "testId", "hookName", "type", "highlightAttr", "name", "alias", "aliasType", "referencesAlias", "message", "numElements", "numRetries"]
+      attrs = ["state", "testId", "hookName", "type", "highlightAttr", "name", "alias", "aliasType", "referencesAlias", "message", "numElements", "numRetries", "visible"]
 
       command = new Entities.Command log.pick.apply(log, attrs)
       command.log = log
