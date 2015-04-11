@@ -148,5 +148,6 @@ Cypress is a test engine that runs unit and integration tests in your browser.
 ##### Misc
 * [focused](../../wiki/focused)
 * [end](../../wiki/end)
+* [wrap](../../wiki/wrap)
 * [eval](../../wiki/eval)
 * [options](../../wiki/options)
