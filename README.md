@@ -2,6 +2,6 @@
 
 Cypress is a test engine that runs unit and integration tests in your browser.
 
-- #### [Changelog](../../wiki/Changelog)
+- #### [Changelog](../../wiki/changelog)
 
 - #### [Documentation](https://github.com/cypress-io/cypress/wiki)
