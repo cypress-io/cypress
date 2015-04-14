@@ -18,7 +18,7 @@
     displayGui: ->
       win = gui.Window.get()
 
-      if App.config.env("development")
+      if not App.config.env("production")
         gui.App.clearCache()
         @show(win)
         @focus(win)
@@ -53,7 +53,7 @@
           @focus(win)
 
       win.on "blur", =>
-        return if App.fileDialogOpened or App.config.env("development")
+        return if App.fileDialogOpened or not App.config.env("production")
 
         @hide(win)
 
@@ -85,7 +85,10 @@
       gui.App.quit()
 
     manifest: ->
-      gui.App.manifest
+      try
+        gui.App.manifest
+      catch
+        App.config.getManifest()
 
     updates: ->
       if updates = windows.updates
