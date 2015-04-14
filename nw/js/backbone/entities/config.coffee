@@ -61,6 +61,8 @@
 
     getUpdater: -> @updater
 
+    getManifest: -> @booter.manifest
+
     setErrorHandler: ->
       @getLog().setErrorHandler (err) =>
         ## exit if we're in production (blow up)
