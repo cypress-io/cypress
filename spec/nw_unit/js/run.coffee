@@ -1,6 +1,7 @@
 Promise    = require("bluebird")
 chai       = require("chai")
 chaiJquery = require("chai-jquery")
+fs         = require("fs-extra")
 nwSpec     = require("../tests/nw_spec.coffee")
 
 moveWindow = (gui, window, left) ->
@@ -49,7 +50,6 @@ module.exports = (parentWindow, gui) ->
   loadIframe = ->
     p = new Promise (resolve, reject) ->
       openWindow = ->
-        console.log "pathToIndex", pathToIndex
         currentWindow = gui.Window.open pathToIndex,
           height: 400
           width: 300
@@ -103,8 +103,8 @@ module.exports = (parentWindow, gui) ->
     ## tell mocha to run since we have now
     ## built our suite / test structure
     mocha.run (failures) ->
-      argv = gui.App.argv
-      if "--headless" in argv
-        process.exit(1)
+      if "--headless" in gui.App.argv
+        fs.writeJson(process.cwd() + "/spec/results.json", failures).then ->
+          gui.App.quit()
 
   runTests()

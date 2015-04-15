@@ -139,11 +139,28 @@ class Deploy
 
   nwTests: ->
     new Promise (resolve, reject) =>
-      tests = "nw ./spec/nw_unit --headless --index=../../dist/nw/public/index.html"
-      child_process.exec tests, {}, (err, stdout, stderr) ->
-        console.log err.code
+      retries = 0
 
-        resolve()
+      nwTests = ->
+        retries += 1
+
+        tests = "nw ./spec/nw_unit --headless --index=../../dist/nw/public/index.html"
+        child_process.exec tests, (err, stdout, stderr) ->
+          failures = fs.readJsonSync("./spec/results.json")
+
+          if failures is 0
+            fs.removeSync("./spec/results.json")
+
+            resolve()
+          else
+            if retries is 3
+              err = new Error("Mocha failed with '#{failures}' failures")
+              return reject(err)
+
+            console.log gutil.colors.red("'nwTests' failed, retrying")
+            return nwTests()
+
+      nwTests()
 
   # runTests: ->
   #   new Promise (resolve, reject) ->
@@ -405,6 +422,7 @@ class Deploy
 
   dist: ->
     @buildApp()
+      .then(@runTests)
       .then(@cleanupDist)
       .then(@zipBuilds)
 
