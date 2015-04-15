@@ -150,8 +150,11 @@ class Deploy
         tests = "nw ./spec/nw_unit --headless --index=../../dist/nw/public/index.html"
         child_process.exec tests, (err, stdout, stderr) ->
           retry = (failures) ->
-            if retries is 3
-              err = new Error("Mocha failed with '#{failures}' failures")
+            if retries is 5
+              if _.isError(failures)
+                err = failures
+              else
+                err = new Error("Mocha failed with '#{failures}' failures")
               return reject(err)
 
             console.log gutil.colors.red("'nwTests' failed, retrying")
@@ -166,7 +169,7 @@ class Deploy
                 resolve()
               else
                 retry(failures)
-            .catch -> retry(failures)
+            .catch(retry)
 
       nwTests()
 
