@@ -149,7 +149,7 @@ class Deploy
 
         tests = "nw ./spec/nw_unit --headless --index=../../dist/nw/public/index.html"
         child_process.exec tests, (err, stdout, stderr) ->
-          retry = ->
+          retry = (failures) ->
             if retries is 3
               err = new Error("Mocha failed with '#{failures}' failures")
               return reject(err)
@@ -162,11 +162,11 @@ class Deploy
               if failures is 0
                 fs.removeSync("./spec/results.json")
 
-                console.log gutil.colors.green("'nwTests' passed with #{failures} failtures")
+                console.log gutil.colors.green("'nwTests' passed with #{failures} failures")
                 resolve()
               else
-                retry()
-            .catch(retry)
+                retry(failures)
+            .catch -> retry(failures)
 
       nwTests()
 
