@@ -11,6 +11,7 @@ gutil          = require("gulp-util")
 inquirer       = require("inquirer")
 NwBuilder      = require("node-webkit-builder")
 request        = require("request-promise")
+os             = require("os")
 
 fs = Promise.promisifyAll(fs)
 
@@ -39,7 +40,7 @@ class Deploy
     @version = fs.readJsonSync(distDir + "/package.json").version
 
   getPublisher: ->
-    aws = fs.readJsonSync("./aws-credentials.json")
+    aws = fs.readJsonSync("./support/aws-credentials.json")
 
     @publisher ?= $.awspublish.create
       bucket:          config.app.s3.bucket
@@ -137,19 +138,51 @@ class Deploy
 
     fs.removeAsync(buildDir)
 
-  runTests: ->
-    new Promise (resolve, reject) ->
-      ## change into our distDir as process.cwd()
-      process.chdir(distDir)
+  nwTests: ->
+    @log("#nwTests")
 
-      ## require cypress to get the require path's cached
-      require(distDir + "/lib/cypress")
+    new Promise (resolve, reject) =>
+      retries = 0
 
-      ## run all of our tests
-      gulp.src(distDir + "/spec/server/unit/**/*")
-        .pipe $.mocha()
-        .on "error", reject
-        .on "end", resolve
+      nwTests = ->
+        retries += 1
+
+        tests = "nw ./spec/nw_unit --headless --index=../../dist/nw/public/index.html"
+        child_process.exec tests, (err, stdout, stderr) ->
+          retry = ->
+            if retries is 3
+              err = new Error("Mocha failed with '#{failures}' failures")
+              return reject(err)
+
+            console.log gutil.colors.red("'nwTests' failed, retrying")
+            nwTests()
+
+          fs.readJsonAsync("./spec/results.json")
+            .then (failures) ->
+              if failures is 0
+                fs.removeSync("./spec/results.json")
+
+                console.log gutil.colors.green("'nwTests' passed with #{failures} failtures")
+                resolve()
+              else
+                retry()
+            .catch(retry)
+
+      nwTests()
+
+  # runTests: ->
+  #   new Promise (resolve, reject) ->
+  #     ## change into our distDir as process.cwd()
+  #     process.chdir(distDir)
+
+  #     ## require cypress to get the require path's cached
+  #     require(distDir + "/lib/cypress")
+
+  #     ## run all of our tests
+  #     gulp.src(distDir + "/spec/server/unit/**/*")
+  #       .pipe $.mocha()
+  #       .on "error", reject
+  #       .on "end", resolve
 
   zipBuild: (platform) ->
     @log("#zipBuild: #{platform}")
@@ -162,7 +195,7 @@ class Deploy
 
     new Promise (resolve, reject) =>
       zip = "ditto -c -k --sequesterRsrc --keepParent #{root}/cypress.app #{root}/#{@zip}"
-      child_process.exec zip, (err, stdout, stderr) ->
+      child_process.exec zip, {}, (err, stdout, stderr) ->
         return reject(err) if err
 
         resolve()
@@ -373,7 +406,7 @@ class Deploy
     appPath = path.join buildDir, @getVersion(), "osx64", "cypress.app"
 
     new Promise (resolve, reject) ->
-      child_process.exec "sh codesign.sh #{appPath}", (err, stdout, stderr) ->
+      child_process.exec "sh ./support/codesign.sh #{appPath}", (err, stdout, stderr) ->
         return reject(err) if err
 
         # console.log "stdout is", stdout
@@ -392,8 +425,12 @@ class Deploy
       .then(@npmInstall)
       .then(@codeSign)
 
+  runTests: ->
+    Promise.bind(@).then(@nwTests)
+
   dist: ->
     @buildApp()
+      .then(@runTests)
       .then(@cleanupDist)
       .then(@zipBuilds)
 

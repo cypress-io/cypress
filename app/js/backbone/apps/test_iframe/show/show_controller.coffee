@@ -15,26 +15,26 @@
       @listenTo view, "close:browser:clicked", ->
         # runner.switchToBrowser()
 
-      ## when the runner triggers load:iframe we load the iframe
-      @listenTo runner, "load:iframe", (iframe, options) ->
+      ## when the runner triggers load:spec:iframe we load the iframe
+      @listenTo runner, "load:spec:iframe", (iframe, options) ->
         @loadIframe view, runner, iframe, options
 
-      @listenTo runner, "revert:dom", (dom, options) ->
+      @listenTo config, "revert:dom", (dom, options) ->
         view.revertToDom dom, options
 
-      @listenTo runner, "highlight:el", (el, options) ->
+      @listenTo config, "highlight:el", (el, options) ->
         view.highlightEl el, options
 
-      @listenTo runner, "restore:dom", ->
+      @listenTo config, "restore:dom", ->
         view.restoreDom()
 
       @show view
 
-    loadIframe: (view, runner, iframe, options) ->
-      view.loadIframe iframe, options, (contentWindow, remoteIframe) ->
+    loadIframe: (view, runner, specPath, options) ->
+      view.loadIframe specPath, options, (contentWindow, remoteIframe) ->
         ## once its loaded we receive the contentWindow
-        ## and tell our runner to run the iframe's suite
-        runner.runIframeSuite(iframe, contentWindow, remoteIframe, options)
+        ## and tell our runner to run the specPath's suite
+        runner.run(specPath, contentWindow, remoteIframe, options)
 
     getView: (config) ->
       new Show.Iframe

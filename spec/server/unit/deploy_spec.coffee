@@ -11,6 +11,8 @@ sinonPromise  = require "sinon-as-promised"
 child_process = require "child_process"
 _             = require "lodash"
 inquirer      = require "inquirer"
+nock          = require "nock"
+os            = require "os"
 
 fs       = Promise.promisifyAll(fs)
 prevCwd  = process.cwd()
@@ -142,6 +144,8 @@ describe "Deploy", ->
       deploy.prepare().then(deploy.convertToJs)
 
     it "writes obfuscated js to dist/lib/cypress.js", ->
+      @timeout(5000)
+
       deploy.obfuscate().then (obfuscated) ->
         cypress = fs.statSync(distDir + "/lib/cypress.js")
         expect(cypress.isFile()).to.be.true
@@ -272,21 +276,25 @@ describe "Deploy", ->
   context "#zipBuilds", ->
     beforeEach ->
       deploy.version = "1.1.1"
-      fs.ensureFileSync(buildDir + "/1.1.1/osx64/file.txt")
+      fs.ensureFileSync(buildDir + "/1.1.1/osx64/cypress.app/file.txt")
 
     it "srcs the version'ed build directory", ->
-      sync = @sandbox.spy glob, "sync"
       deploy.zipBuilds().then ->
-        expect(sync).to.be.calledWith "#{buildDir}/1.1.1/osx64/**/*"
+        str = "ditto -c -k --sequesterRsrc --keepParent #{buildDir}/1.1.1/osx64/cypress.app #{buildDir}/1.1.1/osx64/cypress.zip"
+        expect(child_process.exec).to.be.calledWith str
 
     it "creates 'cypress.zip'", (done) ->
+      ## dont try to create the cypress.zip if we arent on a mac
+      return done() if os.platform() isnt "darwin"
+
+      child_process.exec.restore()
       deploy.zipBuilds().then ->
         fs.statAsync(buildDir + "/1.1.1/osx64/cypress.zip")
           .then -> done()
           .catch(done)
 
   context "#deploy", ->
-    fns = ["prepare", "updatePackages", "setVersion", "convertToJs", "obfuscate", "cleanupSrc", "build", "npmInstall", "cleanupDist", "zipBuilds", "uploadsToS3", "updateS3Manifest", "cleanupBuild"]
+    fns = ["prepare", "updatePackages", "setVersion", "convertToJs", "obfuscate", "cleanupSrc", "build", "npmInstall", "codeSign", "cleanupDist", "zipBuilds", "uploadsToS3", "updateS3Manifest", "cleanupBuild"]
 
     beforeEach ->
       @sandbox.stub(inquirer, "prompt").callsArgWith(1, {})
@@ -349,6 +357,7 @@ describe "Deploy", ->
         expect(src).to.be.calledWith "#{buildDir}/test-1.1.1/osx64/cypress.zip"
 
     it "publishes to s3", (done) ->
+      nock.enableNetConnect "s3.amazonaws.com"
       deploy.uploadToS3().then ->
         params = {Bucket: "dist.cypress.io", Key: "test-1.1.1/cypress.zip"}
         deploy.publisher.client.headObject params, (err, data) ->

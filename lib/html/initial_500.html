@@ -15,7 +15,13 @@
             <a href="{{url}}" target="_blank">{{url}}</a>
           </strong>
         </p>
-        <p>Did you forget to start your web server?</p>
+        <p>
+          {{#if fromFile}}
+            This file could not be served from your file system.
+          {{else}}
+            Did you forget to start your web server?
+          {{/if}}
+        </p>
       </div>
     </div>
     <span data-cypress-visit-error></span>

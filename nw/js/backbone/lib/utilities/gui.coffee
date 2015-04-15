@@ -18,7 +18,7 @@
     displayGui: ->
       win = gui.Window.get()
 
-      if App.config.env("development")
+      if not App.config.env("production")
         gui.App.clearCache()
         @show(win)
         @focus(win)
@@ -28,6 +28,14 @@
 
       win.menu = nativeMenuBar
 
+      @displayTray(win) unless App.config.env("test")
+
+      win.on "blur", =>
+        return if App.fileDialogOpened or not App.config.env("production")
+
+        @hide(win)
+
+    displayTray: (win) ->
       tray = new gui.Tray
         # title:   "Cy"
         icon:    "nw/public/img/tray/mac-normal@2x.png"
@@ -51,11 +59,6 @@
         else
           @show(win)
           @focus(win)
-
-      win.on "blur", =>
-        return if App.fileDialogOpened
-
-        @hide(win)
 
     hide: (win) ->
       win = gui.Window.get()
@@ -85,7 +88,10 @@
       gui.App.quit()
 
     manifest: ->
-      gui.App.manifest
+      try
+        gui.App.manifest
+      catch
+        App.config.getManifest()
 
     updates: ->
       if updates = windows.updates

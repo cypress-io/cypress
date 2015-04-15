@@ -18,11 +18,20 @@
       window.eclectusResults = if bool then @attributes else null
 
     startCounting: ->
-      @stopCounting() if @intervalId
-      @intervalId = setInterval _.bind(@increment, @, "duration"), 100
+      ## bail if we've already started counting!
+      return if @get("start")
+
+      @set "start", Date.now()
+
+      # @stopCounting() if @intervalId
+      # @intervalId = setInterval _.bind(@increment, @, "duration"), 100
 
     stopCounting: ->
-      clearInterval @intervalId
+      @set "end", Date.now()
+      # clearInterval @intervalId
+
+    setDuration: ->
+      @set "duration", new Date - @get("start")
 
     increment: (state) ->
       @set state, @get(state) + 1
@@ -32,8 +41,7 @@
 
     ## should be using a mutator here
     getDurationFormatted: ->
-      duration = @get("duration")
-      (duration / 10)
+      (@get("duration") / 1000).toFixed(2)
 
   App.reqres.setHandler "stats:entity", ->
     new Entities.Stats

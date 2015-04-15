@@ -1,42 +1,10 @@
 do (parent = window.opener or window.parent) ->
-  ## proxy Ecl from the parent
-  window.Ecl     = parent.Ecl
   window.Cypress = parent.Cypress
-  window.cy      = parent.cy
 
-  ## proxy jQuery from the parent
-  ## dont rely on our iframe having jQuery otherwise
-  $ = parent.$
+  if not Cypress
+    throw new Error("Tests cannot run without a reference to Cypress!")
 
-  ## proxy chai from our parent
-  if parent.chai and Cypress
-    Cypress.Chai.setGlobals(window)
-
-  ## create our own mocha objects from our parents if its not already defined
-  window.Mocha ?= parent.Mocha
-  window.mocha ?= parent.mocha
-
-  ## remove all of the listeners from the previous root suite
-  mocha.suite.removeAllListeners()
-
-  ## We clone the outermost root level suite - and replace
-  ## the existing root suite with a new one. this wipes out
-  ## all references to hooks / tests / suites and thus
-  ## prevents holding reference to old suites / tests
-  mocha.suite = mocha.suite.clone()
-
-  ## Override mocha.ui so that the pre-require event is emitted
-  ## with the iframe's `window` reference, rather than the parent's.
-  mocha.ui = (name) ->
-    @_ui = Mocha.interfaces[name]
-    throw new Error('invalid interface "' + name + '"') if not @_ui
-    @_ui = @_ui(@suite)
-    @suite.emit 'pre-require', window, null, @
-    return @
-
-  ## this needs to be part of the configuration of eclectus.json
-  ## we can't just forcibly use bdd
-  mocha.ui "bdd"
+  Cypress.window(window)
 
   window.proxyRemoteGlobals = (globals) ->
     throw new Error("Remote iframe window has not been loaded!") if not window.remote

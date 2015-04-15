@@ -7,6 +7,7 @@ yaml          = require 'js-yaml'
 Promise       = require "bluebird"
 child_process = require "child_process"
 runSequence   = require "run-sequence"
+os            = require "os"
 
 log = (obj = {}) ->
   args = [
@@ -83,6 +84,9 @@ gulp.task "nw:tray", ->
 
 gulp.task "nw:icns", ->
   p = new Promise (resolve, reject) ->
+    ## bail if we arent on a mac else `iconutil` will fail
+    return resolve() if os.platform() isnt "darwin"
+
     child_process.exec "iconutil -c icns nw/img/cypress.iconset", (err, stdout, stderr) ->
       return reject(err) if err
 
@@ -123,7 +127,7 @@ gulp.task "build:secret:sauce", (cb) ->
     .pipe gulp.dest("lib")
     .on "end", ->
       ## when thats done, lets create the secret_sauce snapshot .bin
-      child_process.exec "./nwjc lib/secret_sauce.js lib/secret_sauce.bin", (err, stdout, stderr) ->
+      child_process.exec "./support/nwjc lib/secret_sauce.js lib/secret_sauce.bin", (err, stdout, stderr) ->
         console.log("stdout:", stdout)
         console.log("stderr:", stderr)
 
@@ -131,7 +135,7 @@ gulp.task "build:secret:sauce", (cb) ->
           console.log("err with nwjc:", err)
 
         ## finally cleanup any v8 logs and remove secret sauce.js
-        gulp.src(["lib/secret_sauce.js", "v8.log"])
+        gulp.src(["lib/secret_sauce.js", "./v8.log"])
           .on "end", cb
           .pipe($.clean())
 
@@ -172,6 +176,9 @@ gulp.task "watch:nw:secret:sauce", ->
 gulp.task "server", -> require("./server.coffee")
 
 gulp.task "test", -> require("./spec/server.coffee")
+
+gulp.task "run:tests", ->
+  require("./lib/deploy")().runTests()
 
 gulp.task "build", ->
   require("./lib/deploy")().buildApp()

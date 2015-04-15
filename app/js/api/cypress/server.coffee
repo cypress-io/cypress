@@ -1,8 +1,8 @@
 ## attach to Cypress global
 
-Cypress.Server = do (Cypress, _) ->
+$Cypress.Server = do ($Cypress, _) ->
 
-  class Server
+  class $Server
     constructor: (@fakeServer, options) ->
       ## think about moving these properties to a getter/setter
       ## system which is cleaned up during restore to
@@ -177,7 +177,7 @@ Cypress.Server = do (Cypress, _) ->
     onFilter: (fn) ->
       @fakeServer.xhr.addFilter(fn)
 
-  Cypress.server = (server, options) ->
-    new Server(server, options)
+    @create = (server, options) ->
+      new $Server(server, options)
 
-  return Server
+  return $Server

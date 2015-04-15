@@ -5,8 +5,8 @@ module.exports = (app) ->
 
   ## routing for the actual specs which are processed automatically
   ## this could be just a regular .js file or a .coffee file
-  app.get "/tests/*", (req, res, next) ->
-    test = req.params[0]
+  app.get "/tests", (req, res, next) ->
+    test = req.query.p
 
     controllers.specProcessor.handle(test, req, res, next)
 

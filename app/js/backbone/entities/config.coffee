@@ -2,6 +2,7 @@
 
   ECL_ATTRIBUTE = "ecl-"
 
+
   class Entities.Config extends Entities.Model
     defaults: ->
       collapsed:  @getConfig("collapsed")
@@ -89,7 +90,7 @@
       _.compact([@get("testFolder"), id]).join("/")
 
     setRemoteOrigin: (current, remote) ->
-      location = Cypress.location(current, remote)
+      location = $Cypress.Location.create(current, remote)
       @set "remoteOrigin", location.origin
 
     ## returns a function bound to this model
@@ -99,6 +100,21 @@
         @get(attr)
 
       _.bind(get, @)
+
+    revertDom: (command, init = true) ->
+      return @trigger "restore:dom" if not init
+
+      return if not command.hasSnapshot()
+
+      @trigger "revert:dom", command.getSnapshot(),
+        id:   command.cid
+        el:   command.getEl()
+        attr: command.get("highlightAttr")
+
+    highlightEl: (command, init = true) ->
+      @trigger "highlight:el", command.getEl(),
+        id: command.cid
+        init: init
 
   App.reqres.setHandler "new:config:entity", (attrs = {}) ->
     new Entities.Config attrs

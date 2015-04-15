@@ -8,6 +8,7 @@ cache          = require("./cache")
 Log            = require("./log")
 child_process  = require("child_process")
 open           = require('open')
+fs             = require("fs-extra")
 Promise        = require('bluebird')
 
 class Booter
@@ -68,6 +69,9 @@ class Booter
 
   ## attach to Booter class
   @Log = Log
+
+  ## attach to Booter class
+  @manifest = fs.readJsonSync(process.cwd() + "/package.json")
 
 send = (obj) ->
   if process.send

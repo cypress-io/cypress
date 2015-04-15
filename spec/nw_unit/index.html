@@ -1,0 +1,47 @@
+<html>
+  <head>
+    <link href="../../bower_components/mocha/mocha.css" rel="stylesheet">
+    <!-- <link href="css/mocha.css" rel="stylesheet"> -->
+    <script type="text/javascript" src="../../bower_components/jquery/dist/jquery.js"></script>
+    <script type="text/javascript" charset="utf-8">
+      // Remove symbols of node-webkit to avoid conficts with mocha in browser.
+      var nodeRequire = require;
+      var nodeGlobal = global;
+      var nodeProcess = process;
+      require = undefined;
+      global = undefined;
+      process = undefined;
+    </script>
+    <!--
+    Use the browser version of mocha, the node version of mocha will
+    run tests in node contex, which make it imposssible to test nw.gui.
+    -->
+    <script type="text/javascript" src="../../bower_components/mocha/mocha.js"></script>
+    <script type="text/javascript" charset="utf-8">
+      // Restore default node-webkit environment.
+      require = nodeRequire;
+      global = nodeGlobal;
+      process = nodeProcess;
+
+      mocha.setup({
+        ui: "bdd",
+        timeout: 5000
+      })
+
+      // change the process.cwd() back
+      // to what our real app expects!
+      process.chdir("../../")
+
+      // set to test env
+      process.env["NODE_ENV"] = "test"
+    </script>
+  </head>
+  <body>
+    <div id="mocha"></div>
+
+    <script type="text/javascript">
+      require("coffee-script/register")
+      require("./js/run.coffee")(window, require("nw.gui"))
+    </script>
+  </body>
+</html>

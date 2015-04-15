@@ -37,7 +37,6 @@ class SpecProcessor extends Controller
 
     filePath = path.join(
       settings.projectRoot,
-      settings.testFolder,
       spec
     )
 

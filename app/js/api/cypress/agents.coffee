@@ -1,6 +1,6 @@
-Cypress.Agents = do (Cypress, _) ->
+$Cypress.Agents = do (_) ->
 
-  class Agents
+  class $Agents
     constructor: (@sandbox, @options) ->
       @count = 0
 
@@ -79,7 +79,7 @@ Cypress.Agents = do (Cypress, _) ->
 
     useFakeTimers: ->
 
-  Cypress.agents = (sandbox, options) ->
-    new Agents(sandbox, options)
+    @create = (sandbox, options) ->
+      new $Agents(sandbox, options)
 
-  return Agents
+  return $Agents

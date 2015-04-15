@@ -1,0 +1,10 @@
+{
+  "name": "nw-unit-tests",
+  "version": "0.1.0",
+  "main": "index.html",
+  "window": {
+    "show": false
+  },
+  "dev-dependencies": {},
+  "devDependencies": {}
+}

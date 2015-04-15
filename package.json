@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "0.3.7",
+  "version": "0.4.7",
   "description": "Javascript Test Engine",
   "main": "app://app/nw/public/index.html",
   "single-instance": false,
@@ -38,6 +38,7 @@
   "devDependencies": {
     "chai": "2.1.0",
     "chai-as-promised": "^4.2.0",
+    "chai-jquery": "^2.0.0",
     "commander": "2.3.0",
     "gulp": "3.8.8",
     "gulp-awspublish": "^1.0.1",
@@ -66,7 +67,8 @@
     "sinon-as-promised": "bendrucker/sinon-as-promised",
     "sinon-chai": "^2.7.0",
     "supertest": "^0.15.0",
-    "supertest-session": "0.0.7"
+    "supertest-session": "0.0.7",
+    "touch": "0.0.3"
   },
   "dependencies": {
     "bluebird": "2.9.13",

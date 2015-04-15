@@ -7,46 +7,42 @@
       wrapper:  ".command-wrapper"
       method:   ".command-method"
       # pause:    ".fa-pause"
-      revert:   ".fa-search"
 
     modelEvents:
+      "change:state"     : "render"
       "change:response"  : "render"
+      "change:visible"   : "render"
       "change:chosen"    : "chosenChanged"
       "change:highlight" : "highlightChanged"
 
     triggers:
-      "click @ui.pause"   : "pause:clicked"
-      "click @ui.revert"  : "revert:clicked"
+      # "click @ui.pause"   : "pause:clicked"
       "mouseenter"        : "command:mouseenter"
       "mouseleave"        : "command:mouseleave"
 
     events:
-      "click"               : "clicked"
+      "click"             : "clicked"
 
     onShow: ->
       @$el
         .addClass("command-type-#{@model.get("type")}")
         .addClass("command-name-#{@model.displayName()}")
 
-      # switch @model.get("type")
-      #   when "dom"
-      #     ## quick hack to get sub types
-      #     @$el.addClass "command-type-dom-action" if not @model.isParent()
-
-      #   when "assertion"
-      #     klass = if @model.get("passed") then "passed" else "failed"
-      #     @$el.addClass "command-assertion-#{klass}"
-
-      @ui.method.css "padding-left", @model.get("indent")
-
       if @model.hasParent()
-        @ui.wrapper.addClass "command-child"
+        @$el.removeClass("command-parent").addClass("command-child")
       else
-        @$el.addClass "command-parent"
+        @$el.removeClass("command-child").addClass("command-parent")
 
       @$el.addClass "command-cloned" if @model.isCloned()
 
-      @$el.addClass "command-error" if @model.get("error")
+    onRender: ->
+      @ui.method.css "padding-left", @model.get("indent")
+
+      ## add or remove command-pending whether we're in pending state
+      @$el.toggleClass "command-pending", @model.state("pending")
+
+      ## add or remove command-error whether we have an error
+      @$el.toggleClass "command-error", @model.state("error")
 
       @model.triggerCommandCallback("onRender", @$el)
 
@@ -83,6 +79,11 @@
 
     highlightChanged: (model, value, options) ->
       @$el.toggleClass "highlight", value
+
+    onDestroy: ->
+      ## stop the model from listening
+      ## to its command log's events
+      @model.stopListening()
 
   class List.Hook extends App.Views.CompositeView
     template: "test_commands/list/_hook"

@@ -32,16 +32,16 @@
 
     checkForFailedHook: ->
       ## bail if our hook property is falsy
-      return if not name = @get("hook")
+      return if not name = @get("hookName")
 
       ## else continue to fail the hook by name
       @failHookByName(name)
 
     setAttrsFromRunnable: (runnable, index) ->
       @set
-        id: runnable.cid
+        id: runnable.id
         title: _.result(runnable, "originalTitle")
-        parentId: runnable.parent.cid
+        parentId: runnable.parent.id
         parentRoot: runnable.parent.root
         index: index
 
@@ -67,7 +67,7 @@
       @collection.remove(@)
 
     addCommand: (command, options = {}) ->
-      hook = command.get("hook")
+      hook = command.get("hookName")
       @get("hooks").addCommandToHook hook, command, options
 
     addRoute: (route, options = {}) ->
@@ -91,28 +91,38 @@
 
     ## always open the commands when a test is chosen
     onChoose: ->
-      @set "open", true if @is("test")
+      @open() if @is("test")
+
+    open: ->
+      @set "open", true
 
     ## when our tests are unchosen we want to close their open state
     collapse: ->
       @set "open", false if @is("test")
 
-    reset: ->
-      @resetRunnable()
+    reset: (options = {}) ->
+      @resetRunnable(options)
       @get("children").invoke("reset")
 
     anyCommandsFailed: ->
       @get("hooks").anyFailed()
 
-    resetRunnable: ->
+    resetRunnable: (options) ->
+      _.defaults options,
+        silent: true
+
       @removeOriginalError()
+
+      ## make sure we collapse up again
+      ## if we are open!
+      @collapse() if @get("open")
 
       ## reset these specific attributes
       _.each ["state", "duration", "error", "hook"], (key) =>
         @unset key
 
       ## remove the models within our commands collection
-      @get("hooks").reset([], {silent: true})
+      @get("hooks").reset([], options)
 
       ## merge in the defaults unless we already have them set
       defaults = _(@).result "defaults"
@@ -141,9 +151,9 @@
         ## set the err on the attrs
         attrs.error = _.result test.err, "toString"
 
-        ## get the hook type (beforeEach, afterEach, etc)
+        ## get the hook name (beforeEach, afterEach, etc)
         ## if the test failed from a hook
-        attrs.hook = test.hook if test.failedFromHook
+        attrs.hookName = test.hookName if test.failedFromHook
       else
         ## remove the original error in case it exists
         @removeOriginalError()
@@ -153,7 +163,7 @@
         attrs.error = null
 
         ## remove the hook as well
-        attrs.hook = null
+        attrs.hookName = null
 
       ## set the private _slow and _timeout
       ## based on the result of these methods
@@ -161,6 +171,9 @@
       @_timeout = _.result test, "timeout"
 
       @set attrs
+
+      ## open up if we have an error!
+      @open() if @get("error")
 
       ## check to see if we have a failed hook
       @checkForFailedHook()

@@ -5,6 +5,8 @@
     initialize: (options) ->
       { id, browser, version } = options
 
+      socket = App.request "socket:entity"
+
       config = App.request "app:config:entity"
 
       ## this is for any existing controllers which haven't been
@@ -18,14 +20,13 @@
       @listenTo config, "change:panels", ->
         @layout.resizePanels()
 
-      @onDestroy = _.partial(@onDestroy, config)
-
       ## request and receive the runner entity
       ## which is the mediator of all test framework events
       ## store this as a property on ourselves
-      @runner = runner = App.request("start:test:runner")
-
+      runner = App.request("start:test:runner")
       runner.setBrowserAndVersion(browser, version) if browser and version
+
+      @onDestroy = _.partial(@onDestroy, config, runner)
 
       @listenTo runner, "switch:to:manual:browser", (browser, version) ->
         App.execute "switch:to:manual:browser", id, browser, version
@@ -42,6 +43,8 @@
         @iframeRegion(runner)
         @specsRegion(runner, spec)    if not config.env("satellite")
         # @panelsRegion(runner, config) if not config.env("satellite")
+
+        socket.emit "watch:test:file", id
 
         ## start running the tests
         ## and load the iframe
@@ -71,10 +74,9 @@
         xhrRegion: @layout.xhrRegion
         logRegion: @layout.logRegion
 
-    onDestroy: (config) ->
+    onDestroy: (config, runner) ->
       config.trigger "close:test:panels"
-      App.request "stop:test:runner", @runner
-      delete @runner
+      App.request "stop:test:runner", runner
 
     getLayoutView: (config) ->
       new Show.Layout

@@ -149,9 +149,9 @@ describe "Remote Initial", ->
       expect(@req.session.remote).to.eql(@baseUrl)
 
   context "relative files", ->
-    it "#getRelativeFileContent", ->
+    it "#getRelativeFileContent strips trailing slashes", ->
       createReadStream = @sandbox.stub(fs, "createReadStream")
-      @remoteInitial.getRelativeFileContent("index.html")
+      @remoteInitial.getRelativeFileContent("index.html/", {})
       expect(createReadStream).to.be.calledWith("/Users/brian/app/index.html")
 
   context "absolute files", ->

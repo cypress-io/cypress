@@ -37,8 +37,8 @@ SecretSauce.Keys =
 SecretSauce.Socket =
   leadingSlashes: /^\/+/
 
-  onTestFileChange: (filepath, stats) ->
-    @Log.info "onTestFileChange", filepath: filepath
+  onTestFileChange: (filePath, stats) ->
+    @Log.info "onTestFileChange", filePath: filePath
 
     ## simple solution for preventing firing test:changed events
     ## when we are making modifications to our own files
@@ -46,23 +46,55 @@ SecretSauce.Socket =
 
     ## return if we're not a js or coffee file.
     ## this will weed out directories as well
-    return if not /\.(js|coffee)$/.test filepath
+    return if not /\.(js|coffee)$/.test filePath
 
-    @fs.statAsync(filepath).bind(@)
+    @fs.statAsync(filePath).bind(@)
       .then ->
-        ## strip out our testFolder path from the filepath, and any leading forward slashes
-        filepath      = filepath.split(@app.get("cypress").projectRoot).join("").replace(@leadingSlashes, "")
-        strippedPath  = filepath.replace(@app.get("cypress").testFolder, "").replace(@leadingSlashes, "")
+        ## strip out our testFolder path from the filePath, and any leading forward slashes
+        filePath      = filePath.split(@app.get("cypress").projectRoot).join("").replace(@leadingSlashes, "")
+        strippedPath  = filePath.replace(@app.get("cypress").testFolder, "").replace(@leadingSlashes, "")
 
-        @Log.info "generate:ids:for:test", filepath: filepath, strippedPath: strippedPath
-        @io.emit "generate:ids:for:test", filepath, strippedPath
+        @Log.info "generate:ids:for:test", filePath: filePath, strippedPath: strippedPath
+        @io.emit "generate:ids:for:test", filePath, strippedPath
       .catch(->)
+
+  closeWatchers: ->
+    if f = @watchedTestFile
+      f.close()
+
+  watchTestFileByPath: (testFilePath) ->
+    ## normalize the testFilePath
+    testFilePath = @path.join(@testsDir, testFilePath)
+
+    ## bail if we're already watching this
+    ## exact file
+    return if testFilePath is @testFilePath
+
+    @Log.info "watching test file", {path: testFilePath}
+
+    ## store this location
+    @testFilePath = testFilePath
+
+    ## close existing watchedTestFile(s)
+    ## since we're now watching a different path
+    @closeWatchers()
+
+    new @Promise (resolve, reject) =>
+      @watchedTestFile = @chokidar.watch testFilePath
+      @watchedTestFile.on "change", @onTestFileChange.bind(@)
+      @watchedTestFile.on "ready", =>
+        resolve @watchedTestFile
+      @watchedTestFile.on "error", (err) =>
+        reject err
 
   _startListening: (chokidar, path) ->
     { _ } = SecretSauce
 
     @io.on "connection", (socket) =>
       @Log.info "socket connected"
+
+      socket.on "watch:test:file", (filePath) =>
+        @watchTestFileByPath(filePath)
 
       socket.on "generate:test:id", (data, fn) =>
         @Log.info "generate:test:id", data: data
@@ -77,7 +109,7 @@ SecretSauce.Socket =
         @Log.info "finished:generating:ids:for:test", strippedPath: strippedPath
         @io.emit "test:changed", file: strippedPath
 
-      _.each "load:iframe command:add runner:start runner:end before:run before:add after:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test".split(" "), (event) ->
+      _.each "load:spec:iframe command:add runner:start runner:end before:run before:add after:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test".split(" "), (event) ->
         socket.on event, (args...) =>
           args = _.chain(args).compact().reject(_.isFunction).value()
           @io.emit event, args...
@@ -146,13 +178,9 @@ SecretSauce.Socket =
 
           sauce options, df
 
-    testsDir = path.join(@app.get("cypress").projectRoot, @app.get("cypress").testFolder)
+    @testsDir = path.join(@app.get("cypress").projectRoot, @app.get("cypress").testFolder)
 
-    @fs.ensureDirAsync(testsDir).bind(@)
-      .then ->
-        watchTestFiles = chokidar.watch testsDir#, ignored: (path, stats) ->
-
-        watchTestFiles.on "change", _.bind(@onTestFileChange, @)
+    @fs.ensureDirAsync(@testsDir).bind(@)
 
     ## BREAKING DUE TO __DIRNAME
     # watchCssFiles = chokidar.watch path.join(__dirname, "public", "css"), ignored: (path, stats) ->
@@ -161,9 +189,9 @@ SecretSauce.Socket =
     #   not /\.css$/.test path
 
     # # watchCssFiles.on "add", (path) -> console.log "added css:", path
-    # watchCssFiles.on "change", (filepath, stats) =>
-    #   filepath = path.basename(filepath)
-    #   @io.emit "eclectus:css:changed", file: filepath
+    # watchCssFiles.on "change", (filePath, stats) =>
+    #   filePath = path.basename(filePath)
+    #   @io.emit "eclectus:css:changed", file: filePath
 
 SecretSauce.IdGenerator =
   hasExistingId: (e) ->
@@ -369,10 +397,17 @@ SecretSauce.RemoteInitial =
       inject: "
         <script type='text/javascript'>
           window.onerror = function(){
-            parent.onerror.apply(parent, arguments)
+            parent.onerror.apply(parent, arguments);
           }
         </script>
         <script type='text/javascript' src='/eclectus/js/sinon.js'></script>
+        <script type='text/javascript'>
+          var Cypress = parent.Cypress;
+          if (!Cypress){
+            throw new Error('Cypress must exist in the parent window!');
+          };
+          Cypress.onBeforeLoad(window);
+        </script>
       "
 
     url = @parseReqUrl(req.url)
@@ -386,12 +421,12 @@ SecretSauce.RemoteInitial =
 
     d = Domain.create()
 
-    d.on 'error', (e) => @errorHandler(e, res, url)
+    d.on 'error', (e) => @errorHandler(e, res, url, req)
 
     d.run =>
       content = @getContent(url, res, req)
 
-      content.on "error", (e) => @errorHandler(e, res, url)
+      content.on "error", (e) => @errorHandler(e, res, url, req)
 
       content
       .pipe(@injectContent(opts.inject))
@@ -419,20 +454,24 @@ SecretSauce.RemoteInitial =
 
   getContent: (url, res, req) ->
     switch scheme = @UrlHelpers.detectScheme(url)
-      when "relative" then @getRelativeFileContent(url)
+      when "relative" then @getRelativeFileContent(url, req)
       when "absolute" then @getAbsoluteContent(url, res, req)
       # when "file"     then @getFileContent(url)
 
-  getRelativeFileContent: (p) ->
+  getRelativeFileContent: (url, req) ->
     { _ } = SecretSauce
 
     args = _.compact([
       @app.get("cypress").projectRoot,
       # @app.get("cypress").rootFolder,
-      p
+      url
     ])
 
-    file = @path.join(args...)
+    ## strip trailing slashes because no file
+    ## ever has one
+    file = @path.join(args...).replace(/\/+$/, "")
+
+    req.formattedUrl = file
 
     @Log.info "getting relative file content", file: file
 
@@ -445,12 +484,21 @@ SecretSauce.RemoteInitial =
     @Log.info "getting absolute file content", url: url
     @_resolveRedirects(url, res, req)
 
-  errorHandler: (e, res, url) ->
+  errorHandler: (e, res, url, req) ->
     @Log.info "error handling initial request", url: url, error: e
 
-    filePath = @path.join(process.cwd(), "lib/html/initial_500.html")
-    res.status(500).render(filePath, {
-      url: url
+    filePath = switch
+      when f = req.formattedUrl
+        "file://#{f}"
+      else
+        url
+
+    ## using req here to give us an opportunity to
+    ## write to req.formattedUrl
+    htmlPath = @path.join(process.cwd(), "lib/html/initial_500.html")
+    res.status(500).render(htmlPath, {
+      url: filePath
+      fromFile: !!req.formattedUrl
     })
 
   prepareUrlForRedirect: (currentUrl, newUrl) ->

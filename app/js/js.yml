@@ -25,16 +25,14 @@ vendor:
   - bower_components/jquery-ui/ui/widget.js
   - bower_components/jquery-ui/ui/mouse.js
   - bower_components/jquery-ui/ui/slider.js
-  - bower_components/jsuri/Uri.js
   - bower_components/bluebird/js/browser/bluebird.js
   - app/js/vendor/backbone-chooser.coffee
   - app/js/vendor/simulate.coffee
 
 cypress:
   - app/js/api/cypress.coffee
-  - app/js/api/cypress/**
-  - app/js/api/utils/**
-  - app/js/api/commands/**
+  - app/js/api/cypress/*
+  - app/js/api/cypress/cy/**/*
 
 app:
   - app/js/config/**
@@ -55,10 +53,17 @@ iframe:
 sinon:
   - bower_components/sinon/index.js
 
+sinon-as-promised:
+  - app/js/vendor/sinon-as-promised.js
+
 id_generator:
   - bower_components/jquery/dist/jquery.js
   - bower_components/underscore/underscore.js
   - bower_components/backbone/backbone.js
+  - bower_components/jsuri/Uri.js
   - bower_components/mocha/mocha.js
+  - bower_components/chai/chai.js
   - app/js/api/cypress.coffee
+  - app/js/api/cypress/*
+  - app/js/api/cypress/cy/**/*
   - app/js/id_generator/**

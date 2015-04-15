@@ -249,16 +249,16 @@
 
       &.pending > .runnable-wrapper {
         // .suite-state {
-        //   color: lighten(#428BCA, 20%);
+        //   color: lighten($pending, 20%);
         // }
 
         .test-title {
-          color: lighten(#428BCA, 25%);
+          color: lighten($pending, 25%);
         }
 
         .test-state i {
           @extend .#{$fa-css-prefix}-circle-o-notch;
-          color: lighten(#428BCA, 20%);
+          color: lighten($pending, 20%);
         }
       }
     }

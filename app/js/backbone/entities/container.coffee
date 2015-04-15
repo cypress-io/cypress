@@ -30,7 +30,7 @@
       ## either locate the runnable (if it exists) by the previous runnable
       ## ids or create a real runnable model from the original framework runnable
       ## this ensures we are working with the same model and not generating a new one
-      model = @getPreviousById(runnable.cid) or App.request("runnable:entity", type)
+      model = @getPreviousById(runnable.id) or App.request("runnable:entity", type)
 
       ## push the model into our current runnables array
       @currentRunnables.push model
@@ -49,6 +49,12 @@
       @currentIds[model.id] = model
 
       return model
+
+    hasOnlyOneTest: ->
+      ## if we have only 1 single test
+      ## retun that test or undefined
+      tests = @filter (r) -> r.is("test")
+      tests.length is 1 and tests[0]
 
     getIndex: (model) ->
       _.indexOf @currentRunnables, model
@@ -87,7 +93,7 @@
         root.addRunnable model
 
   ## mixin underscore methods
-  _.each ["each", "pluck", "indexOf", "isEmpty"], (method) ->
+  _.each ["each", "pluck", "indexOf", "isEmpty", "filter", "where"], (method) ->
     Entities.Container.prototype[method] = (args...) ->
       args.unshift(@currentRunnables)
       _[method].apply(_, args)

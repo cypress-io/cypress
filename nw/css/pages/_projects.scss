@@ -7,10 +7,12 @@
     background-color: #EEE;
     border-bottom: 1px solid #CCC;
     padding: 10px;
-    // overflow: auto;
+    position: fixed;
     float: left;
     width: 100%;
     line-height: 32px;
+    height: $header-height;
+    z-index: 10;
 
     p {
       float: left;
@@ -37,6 +39,8 @@
   }
 
   ul#projects-container {
+    margin-top: $header-height;
+    margin-bottom: $footer-height;
     float: left;
     width: 100%;
 

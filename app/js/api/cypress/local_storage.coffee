@@ -1,6 +1,6 @@
 ## attach to Cypress global
 
-Cypress.LocalStorage = do (_) ->
+$Cypress.LocalStorage = do (_) ->
 
   eclRegExp = /^ecl-/
 
@@ -9,12 +9,6 @@ Cypress.LocalStorage = do (_) ->
   return {
     localStorage: null
     remoteStorage: null
-
-    # config:
-      # type: "localStorage"
-
-    # initialize: ->
-    #   @canBeParent = false
 
     clear: (keys, local, remote) ->
       # throw new Error("Cypress.LocalStorage is missing local and remote storage references!") if not @localStorage or not @remoteStorage
@@ -42,10 +36,6 @@ Cypress.LocalStorage = do (_) ->
               @_removeItem(storage, key)
           else
             @_removeItem(storage, item)
-
-      # @emit
-      #   method: "clear"
-      #   message: keys.join(", ")
 
     setStorages: (local, remote) ->
       @localStorage = local
