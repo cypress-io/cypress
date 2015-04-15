@@ -1,56 +1,95 @@
-Promise = require("bluebird")
-nwSpec  = require("../tests/nw_spec.coffee")
+Promise    = require("bluebird")
+chai       = require("chai")
+chaiJquery = require("chai-jquery")
+nwSpec     = require("../tests/nw_spec.coffee")
+
+moveWindow = (gui, window, left) ->
+  screens = gui.Screen.screens
+
+  if screens.length > 1
+    ## move the window over to the 2nd screen
+    ## and add 20px padding-left
+    window.x = screens[1].work_area.x + left
+
+  window.show()
+
+displayRunner = (gui) ->
+  runner = gui.Window.get()
+  runner.setAlwaysOnTop(true)
+  runner.height = 500
+  runner.width = 700
+  runner.title = "Cypress NW Tests"
+
+  moveWindow(gui, runner, 20)
+
+  return runner
 
 module.exports = (parentWindow, gui) ->
-
   currentWindow = null
 
-  loadIframe = (parentWindow, gui) ->
-    {$} = parentWindow
+  gui.Screen.Init()
+  runner = displayRunner(gui)
 
-    ## remove any existing iframes
-    # $("iframe").remove()
-
+  closeCurrentWindow = ->
     currentWindow.close(true) if currentWindow
 
-    new Promise (resolve, reject) ->
+  ## when the running is reloading due to UI
+  ## close the currentWindow if it exists
+  runner.on "loading", closeCurrentWindow
 
+  runner.on "close", ->
+    closeCurrentWindow()
+    runner.close(true)
+
+  loadIframe = ->
+    p = new Promise (resolve, reject) ->
       openWindow = ->
         currentWindow = gui.Window.open "../../nw/public/index.html",
           height: 400
           width: 300
+          show: false
 
-        currentWindow.on "loaded", ->
+        currentWindow.once "loaded", ->
           resolve(currentWindow.window)
 
-      ## if we have a currentWindow then bind to its
-      ## closed event and open a new one
       if currentWindow
-        currentWindow.on("closed", openWindow)
-        currentWindow.close()
+        currentWindow.once "closed", openWindow
+
+        currentWindow.close(true)
       else
         ## else just open up a new window!
         openWindow()
 
-      # iframe = $ "<iframe nwfaketop />",
-      #   src: "../../nw/public/index.html",
-      #   load: ->
-      #     resolve(@contentWindow)
-      #     runTests(mocha, parentWindow, @contentWindow)
+    p.then (win) ->
+      left = runner.x + 500
+      currentWindow.x = 20
+      currentWindow.show()
+      currentWindow.showDevTools()
+      # moveWindow(gui, currentWindow, left)
 
-      # $("body").append(iframe)
+      Promise.delay(100).return(win)
 
-  runTests = (parentWindow, gui) ->
-    {mocha} = parentWindow
+  runTests = ->
+    {mocha, Mocha} = parentWindow
 
     ## proxy all of the global mocha functions
-    for fn in ["describe", "it", "before", "beforeEach", "afterEach", "after"]
+    for fn in ["describe", "context", "it", "before", "beforeEach", "afterEach", "after"]
       global[fn] = parentWindow[fn]
 
+    fail = Mocha.Runner::fail
+    Mocha.Runner::fail = (test, error) ->
+      console.error error.stack
+      debugger
+
+      fail.call(@, test, error)
+
     loadApp = (ctx) ->
-      loadIframe(parentWindow, gui).then (contentWindow) ->
+      loadIframe().then (contentWindow) ->
         ctx.$   = contentWindow.$
         ctx.App = contentWindow.App
+
+        chai.use (chai, utils) ->
+          chaiJquery(chai, utils, ctx.$)
 
     ## pass our remoteWindow into the spec function
     nwSpec(parentWindow, loadApp)
@@ -59,4 +98,4 @@ module.exports = (parentWindow, gui) ->
     ## built our suite / test structure
     mocha.run()
 
-  runTests(parentWindow, gui)
+  runTests()

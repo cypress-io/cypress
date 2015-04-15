@@ -3,10 +3,7 @@
   "version": "0.1.0",
   "main": "index.html",
   "window": {
-    "position": "center",
-    "always-on-top": true,
-    "height": 600,
-    "width": 1000
+    "show": false
   },
   "dev-dependencies": {},
   "devDependencies": {}

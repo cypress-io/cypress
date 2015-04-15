@@ -28,6 +28,14 @@
 
       win.menu = nativeMenuBar
 
+      @displayTray(win) unless App.config.env("test")
+
+      win.on "blur", =>
+        return if App.fileDialogOpened or not App.config.env("production")
+
+        @hide(win)
+
+    displayTray: (win) ->
       tray = new gui.Tray
         # title:   "Cy"
         icon:    "nw/public/img/tray/mac-normal@2x.png"
@@ -51,11 +59,6 @@
         else
           @show(win)
           @focus(win)
-
-      win.on "blur", =>
-        return if App.fileDialogOpened or not App.config.env("production")
-
-        @hide(win)
 
     hide: (win) ->
       win = gui.Window.get()

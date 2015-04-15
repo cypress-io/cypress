@@ -38,6 +38,7 @@
   "devDependencies": {
     "chai": "2.1.0",
     "chai-as-promised": "^4.2.0",
+    "chai-jquery": "^2.0.0",
     "commander": "2.3.0",
     "gulp": "3.8.8",
     "gulp-awspublish": "^1.0.1",
