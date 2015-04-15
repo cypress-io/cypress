@@ -53,3 +53,8 @@ cy
 ```bash
 npm run deploy
 ```
+
+### Rolling back
+1. Open `package.json`
+2. Reduce version to what we want to roll back to
+3. run `gulp deploy:manifest` to push this change live
