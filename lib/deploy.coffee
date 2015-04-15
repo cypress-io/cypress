@@ -138,6 +138,8 @@ class Deploy
     fs.removeAsync(buildDir)
 
   nwTests: ->
+    @log("#nwTests")
+
     new Promise (resolve, reject) =>
       retries = 0
 
@@ -146,19 +148,24 @@ class Deploy
 
         tests = "nw ./spec/nw_unit --headless --index=../../dist/nw/public/index.html"
         child_process.exec tests, (err, stdout, stderr) ->
-          failures = fs.readJsonSync("./spec/results.json")
-
-          if failures is 0
-            fs.removeSync("./spec/results.json")
-
-            resolve()
-          else
+          retry = ->
             if retries is 3
               err = new Error("Mocha failed with '#{failures}' failures")
               return reject(err)
 
             console.log gutil.colors.red("'nwTests' failed, retrying")
-            return nwTests()
+            nwTests()
+
+          fs.readJsonAsync("./spec/results.json")
+            .then (failures) ->
+              if failures is 0
+                fs.removeSync("./spec/results.json")
+
+                console.log gutil.colors.green("'nwTests' passed with #{failures} failtures")
+                resolve()
+              else
+                retry()
+            .catch(retry)
 
       nwTests()
 
