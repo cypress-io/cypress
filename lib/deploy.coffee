@@ -78,6 +78,7 @@ class Deploy
       fs.copySync("./lib/environment.coffee", distDir + "/src/lib/environment.coffee")
       fs.copySync("./lib/log.coffee", distDir + "/src/lib/log.coffee")
       fs.copySync("./lib/exception.coffee", distDir + "/src/lib/exception.coffee")
+      fs.copySync("./lib/secret_sauce.bin", distDir + "/lib/secret_sauce.bin")
 
       ## copy test files
       # fs.copySync("./spec/server/unit/konfig_spec.coffee", distDir + "/spec/server/unit/konfig_spec.coffee")
@@ -148,7 +149,7 @@ class Deploy
 
         tests = "nw ./spec/nw_unit --headless --index=../../dist/nw/public/index.html"
         child_process.exec tests, (err, stdout, stderr) ->
-          retry = ->
+          retry = (failures) ->
             if retries is 3
               err = new Error("Mocha failed with '#{failures}' failures")
               return reject(err)
@@ -161,11 +162,11 @@ class Deploy
               if failures is 0
                 fs.removeSync("./spec/results.json")
 
-                console.log gutil.colors.green("'nwTests' passed with #{failures} failtures")
+                console.log gutil.colors.green("'nwTests' passed with #{failures} failures")
                 resolve()
               else
-                retry()
-            .catch(retry)
+                retry(failures)
+            .catch -> retry(failures)
 
       nwTests()
 
@@ -260,11 +261,11 @@ class Deploy
         delete pkg.devDependencies
         delete pkg.bin
 
-        if process.argv[3] is "--bin"
-          pkg.snapshot = "lib/secret_sauce.bin"
-          fs.copySync("./lib/secret_sauce.bin", distDir + "/lib/secret_sauce.bin")
-        else
-          fs.copySync("./lib/secret_sauce.coffee", distDir + "/src/lib/secret_sauce.coffee")
+        # if process.argv[3] is "--bin"
+        #   pkg.snapshot = "lib/secret_sauce.bin"
+        #   fs.copySync("./lib/secret_sauce.bin", distDir + "/lib/secret_sauce.bin")
+        # else
+        #   fs.copySync("./lib/secret_sauce.coffee", distDir + "/src/lib/secret_sauce.coffee")
 
         @writeJsonSync(json, pkg)
 

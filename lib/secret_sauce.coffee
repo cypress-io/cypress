@@ -547,4 +547,7 @@ SecretSauce.RemoteInitial =
 
     thr
 
-module?.exports = SecretSauce
+if module?
+  module.exports = SecretSauce
+else
+  SecretSauce
