@@ -30,6 +30,11 @@ module.exports = (parentWindow, gui) ->
   gui.Screen.Init()
   runner = displayRunner(gui)
 
+  if matches = /--index=(\S+)/.exec gui.App.argv
+    pathToIndex = matches[1]
+  else
+    pathToIndex = "../../nw/public/index.html"
+
   closeCurrentWindow = ->
     currentWindow.close(true) if currentWindow
 
@@ -44,7 +49,8 @@ module.exports = (parentWindow, gui) ->
   loadIframe = ->
     p = new Promise (resolve, reject) ->
       openWindow = ->
-        currentWindow = gui.Window.open "../../nw/public/index.html",
+        console.log "pathToIndex", pathToIndex
+        currentWindow = gui.Window.open pathToIndex,
           height: 400
           width: 300
           show: false
@@ -96,6 +102,9 @@ module.exports = (parentWindow, gui) ->
 
     ## tell mocha to run since we have now
     ## built our suite / test structure
-    mocha.run()
+    mocha.run (failures) ->
+      argv = gui.App.argv
+      if "--headless" in argv
+        process.exit(1)
 
   runTests()

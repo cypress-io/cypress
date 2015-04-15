@@ -137,19 +137,27 @@ class Deploy
 
     fs.removeAsync(buildDir)
 
-  runTests: ->
-    new Promise (resolve, reject) ->
-      ## change into our distDir as process.cwd()
-      process.chdir(distDir)
+  nwTests: ->
+    new Promise (resolve, reject) =>
+      tests = "nw ./spec/nw_unit --headless --index=../../dist/nw/public/index.html"
+      child_process.exec tests, {}, (err, stdout, stderr) ->
+        console.log err.code
 
-      ## require cypress to get the require path's cached
-      require(distDir + "/lib/cypress")
+        resolve()
 
-      ## run all of our tests
-      gulp.src(distDir + "/spec/server/unit/**/*")
-        .pipe $.mocha()
-        .on "error", reject
-        .on "end", resolve
+  # runTests: ->
+  #   new Promise (resolve, reject) ->
+  #     ## change into our distDir as process.cwd()
+  #     process.chdir(distDir)
+
+  #     ## require cypress to get the require path's cached
+  #     require(distDir + "/lib/cypress")
+
+  #     ## run all of our tests
+  #     gulp.src(distDir + "/spec/server/unit/**/*")
+  #       .pipe $.mocha()
+  #       .on "error", reject
+  #       .on "end", resolve
 
   zipBuild: (platform) ->
     @log("#zipBuild: #{platform}")
@@ -391,6 +399,9 @@ class Deploy
       .then(@build)
       .then(@npmInstall)
       .then(@codeSign)
+
+  runTests: ->
+    Promise.bind(@).then(@nwTests)
 
   dist: ->
     @buildApp()

@@ -177,6 +177,9 @@ gulp.task "server", -> require("./server.coffee")
 
 gulp.task "test", -> require("./spec/server.coffee")
 
+gulp.task "run:tests", ->
+  require("./lib/deploy")().runTests()
+
 gulp.task "build", ->
   require("./lib/deploy")().buildApp()
 
