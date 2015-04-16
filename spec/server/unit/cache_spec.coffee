@@ -10,7 +10,7 @@ Routes        = require "#{root}lib/util/routes"
 fs            = require 'fs-extra'
 nock          = require 'nock'
 sinon         = require 'sinon'
-sinonPromise  = require 'sinon-as-promised'
+sinonPromise  = require('sinon-as-promised')(Promise)
 
 describe "Cache", ->
   beforeEach ->
