@@ -141,6 +141,8 @@ class Deploy
   nwTests: ->
     @log("#nwTests")
 
+    @version ?= @setVersion()
+
     ## make sure we are testing the BUILT app and not our dist
     ## this tests to ensure secret_sauce.bin along with obfuscated js
     ## and newly built node_modules are all working
@@ -152,11 +154,15 @@ class Deploy
       nwTests = ->
         retries += 1
 
-        tests = "nw ./spec/nw_unit --headless --index=#{indexPath}"
+        tests = "node_modules/.bin/nw ./spec/nw_unit --headless --index=#{indexPath}"
         child_process.exec tests, (err, stdout, stderr) ->
+          console.log "err", err
+          console.log "stdout", stdout
+          console.log "stderr", stderr
+
           retry = (failures) ->
             if retries is 5
-              if _.isError(failures)
+              if failures instanceof Error
                 err = failures
               else
                 err = new Error("Mocha failed with '#{failures}' failures")
