@@ -17,7 +17,7 @@
     "build": "gulp client:build nw:build",
     "watch": "gulp client nw",
     "deploy": "gulp deploy",
-    "test-nw": "nw ./spec/nw_unit",
+    "test-nw": "node_modules/.bin/nw ./spec/nw_unit",
     "test-server": "NODE_ENV=test BLUEBIRD_DEBUG=1 mocha --opts spec/server/mocha.opts --watch",
     "test-server-debug": "NODE_ENV=test BLUEBIRD_DEBUG=1 node-debug --hidden=node_modules --no-preload _mocha --opts spec/server/mocha.opts --watch",
     "test-server-ci": "NODE_ENV=test BLUEBIRD_DEBUG=1 mocha --opts spec/server/mocha.opts"
@@ -60,6 +60,7 @@
     "nock": "1.2.0",
     "node-webkit-builder": "1.0.11",
     "nodemon": "1.2.1",
+    "nw": "0.12.1",
     "obfuscator": "^0.5.0",
     "rimraf": "2.2.8",
     "run-sequence": "^1.0.2",
