@@ -317,7 +317,7 @@ class Deploy
       files: distDir + "/**/*"
       platforms: @platforms
       buildDir: buildDir
-      version: "0.12.0"
+      version: "0.12.1"
       buildType: => @getVersion()
       macIcns: "nw/public/img/cypress.icns"
 
