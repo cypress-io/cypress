@@ -108,6 +108,10 @@ describe "Deploy", ->
       deploy.prepare().then ->
         expect(fs.statSync(distDir + "/src/lib/exception.coffee").isFile()).to.be.true
 
+    it "copires lib/secret_sauce.bin to dist src", ->
+      deploy.prepare().then ->
+        expect(fs.statSync(distDir + "/src/lib/secret_sauce.bin").isFile()).to.be.true
+
     it "copies lib/public to dist", ->
       deploy.prepare().then ->
         expect(fs.statSync(distDir + "/lib/public").isDirectory()).to.be.true
@@ -208,10 +212,6 @@ describe "Deploy", ->
       @setup().then =>
         expect(@pkg.devDependencies).to.be.undefined
 
-    it "copies lib/secret_sauce when not in prod", ->
-      @setup().then =>
-        fs.statAsync(distDir + "/src/lib/secret_sauce.coffee")
-
     it "sets env to production", ->
       @setup().then =>
         expect(@pkg.env).to.eq "production"
@@ -294,11 +294,13 @@ describe "Deploy", ->
           .catch(done)
 
   context "#deploy", ->
-    fns = ["prepare", "updatePackages", "setVersion", "convertToJs", "obfuscate", "cleanupSrc", "build", "npmInstall", "codeSign", "cleanupDist", "zipBuilds", "uploadsToS3", "updateS3Manifest", "cleanupBuild"]
+    fns = ["cleanupBuild", "prepare", "updatePackages", "setVersion", "convertToJs", "obfuscate", "cleanupSrc", "build", "npmInstall", "codeSign", "runTests", "cleanupDist", "zipBuilds", "uploadsToS3", "updateS3Manifest", "cleanupBuild"]
 
     beforeEach ->
       @sandbox.stub(inquirer, "prompt").callsArgWith(1, {})
-      _.each fns, (fn) => @sandbox.stub(deploy, fn).resolves()
+      _.each fns, (fn) =>
+        if not deploy[fn].restore
+          @sandbox.stub(deploy, fn).resolves()
       return null
 
     _.each fns, (fn) =>
