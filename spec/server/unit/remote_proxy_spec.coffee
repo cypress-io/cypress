@@ -104,6 +104,8 @@ describe "RemoteProxy", ->
     context "#pipeAbsoluteContent", ->
       beforeEach ->
         @absolute = (requestUrl, baseUrl, externalUrl) =>
+          @req.session.remote = baseUrl
+
           new Promise (resolve, reject) =>
             nock(baseUrl)
             .get(externalUrl)
@@ -142,16 +144,37 @@ describe "RemoteProxy", ->
 
     context "#getRequestUrl", ->
       it "inserts two forward slashes for bad http protocols", ->
-        url = @remoteProxy.getRequestUrl("/__remote/http:/localhost:8000/app.css.map")
+        url = @remoteProxy.getRequestUrl("/__remote/http:/localhost:8000/app.css.map", "http://localhost:8000")
         expect(url).to.eq "http://localhost:8000/app.css.map"
 
       it "works with https prototcols", ->
-        url = @remoteProxy.getRequestUrl("/__remote/https:/localhost:8000/app.css.map")
+        url = @remoteProxy.getRequestUrl("/__remote/https:/localhost:8000/app.css.map", "https://localhost:8000")
         expect(url).to.eq "https://localhost:8000/app.css.map"
 
-      it "does not alter non .map files", ->
-        url = @remoteProxy.getRequestUrl("/__remote/https:/localhost:8000/app.css")
-        expect(url).to.eq "https:/localhost:8000/app.css"
+      describe "bad http normalization from relative paths", ->
+        beforeEach ->
+          @relative = (source, destination) =>
+            if source.includes("https")
+              remoteHost = "https://getbootstrap.com"
+            else
+              remoteHost = "http://getbootstrap.com"
+            url = @remoteProxy.getRequestUrl "/__remote/#{source}", remoteHost
+            expect(url).to.eq destination
+
+        it "http://dist/css/bootstrap", ->
+          @relative "http://dist/css/bootstrap", "http://getbootstrap.com/dist/css/bootstrap"
+
+        it "http:/dist/css/bootstrap", ->
+          @relative "http:/dist/css/bootstrap", "http://getbootstrap.com/dist/css/bootstrap"
+
+        it "https://dist/css/bootstrap", ->
+          @relative "https://dist/css/bootstrap", "https://getbootstrap.com/dist/css/bootstrap"
+
+        it "https:/dist/css/bootstrap", ->
+          @relative "https:/dist/css/bootstrap", "https://getbootstrap.com/dist/css/bootstrap"
+
+        it "dist/css/bootstrap", ->
+          @relative "dist/css/bootstrap", "dist/css/bootstrap"
 
   context "integration", ->
     beforeEach ->

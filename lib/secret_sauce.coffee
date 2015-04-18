@@ -249,7 +249,10 @@ SecretSauce.IdGenerator =
     @str.insert contents, position, " [#{id}]"
 
 SecretSauce.RemoteProxy =
-  badHttpScheme: /(https?:)\/([a-zA-Z0-9]+.+\.map)$/
+  badHttpSchemeWithRemote: /https?:\/?\/?/
+  badHttpSchemeWithMap: /(https?:)\/([a-zA-Z0-9]+.+\.map)$/
+  httpUpToPathName: /https?:\/?\/?/
+
 
   _handle: (req, res, next, Domain, httpProxy) ->
     ## strip out the /__remote/ from the req.url
@@ -265,10 +268,12 @@ SecretSauce.RemoteProxy =
 
     domain.on('error', next)
 
+    remote = req.session.remote
+
     domain.run =>
       @getContentStream({
-        uri: @getRequestUrl(req.url)
-        remote: req.session.remote
+        uri: @getRequestUrl(req.url, remote)
+        remote: remote
         req: req
         res: res
         proxy: proxy
@@ -276,10 +281,26 @@ SecretSauce.RemoteProxy =
       .on('error', (e) -> throw e)
       .pipe(res)
 
-  getRequestUrl: (url) ->
-    url = url.split("/__remote/").join("")
-    if @badHttpScheme.test(url)
-      url = url.replace @badHttpScheme, "$1//$2"
+  getRequestUrl: (url, remoteUrl) ->
+    if remoteUrl
+      remoteUrl = @url.parse(remoteUrl)
+      remoteHost = remoteUrl.protocol + "//" + remoteUrl.host + "/"
+    else
+      remoteHost = ""
+
+    if @badHttpSchemeWithMap.test(url)
+      url = url.replace @badHttpSchemeWithMap, "$1//$2"
+
+    ## normalize relative paths using the path segment ../
+    ## normally the browser will not allow you to reach above
+    ## the host, but since we're being served from /remote/ its
+    ## technically possible to have happen.
+    ## so we detect abnormal url's and rewrite them to be correct
+    if url.includes("/__remote/") and not url.includes(remoteHost)
+      url = url.split("/__remote/").join("").replace(@httpUpToPathName, remoteHost)
+    else
+      url = url.split("/__remote/").join("")
+
     url
 
   getContentStream: (opts) ->
