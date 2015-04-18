@@ -398,13 +398,13 @@ describe "Routes", ->
           ## make an initial request to set the
           ## session proxy!
           nock("/__remote/#{@baseUrl}")
-            .get("/css")
+            .get("/components")
             .reply 200, "content page", {
               "Content-Type": "text/html"
             }
 
           @session
-            .get("/__remote/#{@baseUrl}/css?__initial=true")
+            .get("/__remote/#{@baseUrl}/components?__initial=true")
             .expect (res) ->
               expect(res.get("set-cookie")[0]).to.include("__cypress.sid")
               null

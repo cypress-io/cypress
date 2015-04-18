@@ -106,6 +106,13 @@ module.exports = (parentWindow, loadApp) ->
       well = @$(".well p.lead")
       expect(well).to.contain("No projects have been added.")
 
+  describe "Secret Sauce", ->
+    beforeEach ->
+      loadApp(@)
+
+    it "has SecretSauce defined globally", ->
+      expect(@contentWindow.SecretSauce).to.be.an("object")
+
   ## other tests which need writing
   ## 1. logging in (stub the github response)
   ## 2. adding a new project through the UI

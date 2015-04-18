@@ -61,6 +61,7 @@ class Deploy
       fs.copySync("./lib/html", distDir + "/lib/html")
       fs.copySync("./lib/public", distDir + "/lib/public")
       fs.copySync("./nw/public", distDir + "/nw/public")
+      fs.copySync("./lib/secret_sauce.bin", distDir + "/lib/secret_sauce.bin")
 
       ## copy coffee src files
       fs.copySync("./lib/cypress.coffee", distDir + "/src/lib/cypress.coffee")
@@ -78,7 +79,6 @@ class Deploy
       fs.copySync("./lib/environment.coffee", distDir + "/src/lib/environment.coffee")
       fs.copySync("./lib/log.coffee", distDir + "/src/lib/log.coffee")
       fs.copySync("./lib/exception.coffee", distDir + "/src/lib/exception.coffee")
-      fs.copySync("./lib/secret_sauce.bin", distDir + "/src/lib/secret_sauce.bin")
 
       ## copy test files
       # fs.copySync("./spec/server/unit/konfig_spec.coffee", distDir + "/spec/server/unit/konfig_spec.coffee")
