@@ -108,9 +108,9 @@ describe "Deploy", ->
       deploy.prepare().then ->
         expect(fs.statSync(distDir + "/src/lib/exception.coffee").isFile()).to.be.true
 
-    it "copires lib/secret_sauce.bin to dist src", ->
+    it "copires lib/secret_sauce.bin to dist", ->
       deploy.prepare().then ->
-        expect(fs.statSync(distDir + "/src/lib/secret_sauce.bin").isFile()).to.be.true
+        expect(fs.statSync(distDir + "/lib/secret_sauce.bin").isFile()).to.be.true
 
     it "copies lib/public to dist", ->
       deploy.prepare().then ->
@@ -263,15 +263,14 @@ describe "Deploy", ->
       deploy.version = "1.0.2"
       deploy.prepare().then(deploy.build)
 
-    it "copies to build/{version}/", (done) ->
+    it "copies to build/{version}/", ->
       fs.statAsync(buildDir + "/1.0.2/osx64")
-        .then -> done()
-        .catch(done)
 
-    it "copies dist to app.nw", (done) ->
+    it "copies dist to app.nw", ->
       fs.statAsync(buildDir + "/1.0.2/osx64/cypress.app/Contents/Resources/app.nw")
-        .then -> done()
-        .catch(done)
+
+    it "includes secret_sauce.bin", ->
+      fs.statAsync(buildDir + "/1.0.2/osx64/cypress.app/Contents/Resources/app.nw/lib/secret_sauce.bin")
 
   context "#zipBuilds", ->
     beforeEach ->

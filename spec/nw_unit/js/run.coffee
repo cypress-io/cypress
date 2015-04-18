@@ -93,6 +93,7 @@ module.exports = (parentWindow, gui) ->
       loadIframe().then (contentWindow) ->
         ctx.$   = contentWindow.$
         ctx.App = contentWindow.App
+        ctx.contentWindow = contentWindow
 
         chai.use (chai, utils) ->
           chaiJquery(chai, utils, ctx.$)
