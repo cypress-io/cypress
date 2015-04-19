@@ -555,6 +555,9 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           $el: $el
           end: true
           snapshot: true
+          onConsole: ->
+            Returned: $el ? "--nothing--"
+            Elements: $el?.length ? 0
 
       try
         d = @sync.document()

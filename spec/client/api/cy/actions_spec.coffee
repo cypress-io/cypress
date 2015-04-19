@@ -997,7 +997,16 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("input:first").focused().then ($input) ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "focused"
-            "Returned": $input
+            Returned: $input
+            Elements: 1
+          }
+
+      it "#onConsole with null element", ->
+        @cy.focused().blur().focused().then ->
+          expect(@log.attributes.onConsole()).to.deep.eq {
+            Command: "focused"
+            Returned: "--nothing--"
+            Elements: 0
           }
 
   context "#focus", ->
