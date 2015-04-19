@@ -708,6 +708,33 @@ describe "$Cypress.Cy Querying Commands", ->
         @allowErrors()
         @currentTest.timeout(300)
 
+      _.each [undefined, null], (val) ->
+        it "throws when text is #{val}", (done) ->
+          @cy.on "fail", (err) ->
+            expect(err.message).to.eq("cy.contains() can only accept a string or number!")
+            done()
+
+          @cy.contains(val)
+
+      it "throws on a blank string", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "cy.contains() cannot be passed an empty string!"
+          done()
+
+        @cy.contains("")
+
+      it "logs once on error", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push log
+
+        @cy.on "fail", (err) ->
+          expect(logs).to.have.length(1)
+          done()
+
+        @cy.contains(undefined)
+
       it "throws when there is a filter", (done) ->
         @cy.contains("span", "brand new content")
 

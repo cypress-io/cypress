@@ -167,6 +167,9 @@ $Cypress.register "Querying", (Cypress, _, $) ->
           text = filter
           filter = ""
 
+      @throwErr "cy.contains() can only accept a string or number!" if not (_.isString(text) or _.isFinite(text))
+      @throwErr "cy.contains() cannot be passed an empty string!" if _.isBlank(text)
+
       phrase = switch
         when filter
           "within the selector: '#{filter}'"
