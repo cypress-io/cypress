@@ -39,4 +39,7 @@ do ($Cypress, _) ->
         console.warn("Subject is currently: ", subject)
         @throwErr("Cannot call .#{method}() on a non-DOM subject!")
 
+      if not @_contains(subject)
+        @throwErr("Cannot call .#{method}() because the current subject has been removed or detached from the DOM.")
+
       return subject

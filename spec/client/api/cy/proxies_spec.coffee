@@ -27,6 +27,18 @@ describe "$Cypress.Cy Proxy Commands", ->
 
           @cy.on "fail", -> done()
 
+        it "throws when subject is not in the document", (done) ->
+          @allowErrors()
+
+          @cy.on "command:end", =>
+            @cy.$("#list").remove()
+
+          @cy.on "fail", (err) ->
+            expect(err.message).to.eq "Cannot call .#{name}() because the current subject has been removed or detached from the DOM."
+            done()
+
+          @cy.get("#list")[name](arg)
+
         describe ".log", ->
           beforeEach ->
             @Cypress.on "log", (@log) =>

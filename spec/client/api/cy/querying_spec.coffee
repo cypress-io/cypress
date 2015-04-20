@@ -145,6 +145,16 @@ describe "$Cypress.Cy Querying Commands", ->
 
           @cy.get("body").within(value)
 
+      it "throws when subject is not in the document", (done) ->
+        @cy.on "command:end", =>
+          @cy.$("#list").remove()
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "Cannot call .within() because the current subject has been removed or detached from the DOM."
+          done()
+
+        @cy.get("#list").within ->
+
   context "#root", ->
     it "returns html", ->
       html = @cy.$("html")

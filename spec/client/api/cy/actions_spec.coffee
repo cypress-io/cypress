@@ -45,6 +45,20 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", -> done()
 
+      it "throws when subject is not in the document", (done) ->
+        selected = 0
+
+        select = @cy.$("select:first").change (e) ->
+          selected += 1
+          select.remove()
+
+        @cy.on "fail", (err) ->
+          expect(selected).to.eq 1
+          expect(err.message).to.eq "Cannot call .select() because the current subject has been removed or detached from the DOM."
+          done()
+
+        @cy.get("select:first").select("de_dust2").select("de_aztec")
+
       it "throws when more than 1 element in the collection", (done) ->
         @cy
           .get("select").then ($selects) ->
@@ -407,6 +421,20 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", -> done()
 
+      it "throws when subject is not in the document", (done) ->
+        typed = 0
+
+        input = @cy.$("input:first").keypress (e) ->
+          typed += 1
+          input.remove()
+
+        @cy.on "fail", (err) ->
+          expect(typed).to.eq 1
+          expect(err.message).to.eq "Cannot call .type() because the current subject has been removed or detached from the DOM."
+          done()
+
+        @cy.get("input:first").type("a").type("b")
+
       it "throws when not textarea or :text", (done) ->
         @cy.get("form").type("foo")
 
@@ -483,6 +511,20 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.on "fail", (err) -> done()
 
         @cy.noop({}).clear()
+
+      it "throws when subject is not in the document", (done) ->
+        cleared = 0
+
+        input = @cy.$("input:first").val("123").keydown (e) ->
+          cleared += 1
+          input.remove()
+
+        @cy.on "fail", (err) ->
+          expect(cleared).to.eq 1
+          expect(err.message).to.eq "Cannot call .clear() because the current subject has been removed or detached from the DOM."
+          done()
+
+        @cy.get("input:first").clear().clear()
 
       it "throws if any subject isnt a textarea", (done) ->
         logs = []
@@ -616,6 +658,21 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.noop({}).check()
 
         @cy.on "fail", (err) -> done()
+
+      it "throws when subject is not in the document", (done) ->
+        checked = 0
+
+        checkbox = @cy.$(":checkbox:first").click (e) ->
+          checked += 1
+          checkbox.remove()
+          return false
+
+        @cy.on "fail", (err) ->
+          expect(checked).to.eq 1
+          expect(err.message).to.eq "Cannot call .check() because the current subject has been removed or detached from the DOM."
+          done()
+
+        @cy.get(":checkbox:first").check().check()
 
       it "throws when subject isnt a checkbox or radio", (done) ->
         ## this will find multiple forms
@@ -801,6 +858,22 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.uncheck()
 
+      it "throws when subject is not in the document", (done) ->
+        unchecked = 0
+
+        checkbox = @cy.$(":checkbox:first").prop("checked", true).click (e) ->
+          unchecked += 1
+          checkbox.prop("checked", true)
+          checkbox.remove()
+          return false
+
+        @cy.on "fail", (err) ->
+          expect(unchecked).to.eq 1
+          expect(err.message).to.eq "Cannot call .uncheck() because the current subject has been removed or detached from the DOM."
+          done()
+
+        @cy.get(":checkbox:first").uncheck().uncheck()
+
     describe ".log", ->
       beforeEach ->
         @cy.$("[name=colors][value=blue]").prop("checked", true)
@@ -891,6 +964,21 @@ describe "$Cypress.Cy Actions Commands", ->
           done()
 
         @cy.get("input").submit()
+
+      it "throws when subject is not in the document", (done) ->
+        submitted = 0
+
+        form = @cy.$("form:first").submit (e) ->
+          submitted += 1
+          form.remove()
+          return false
+
+        @cy.on "fail", (err) ->
+          expect(submitted).to.eq 1
+          expect(err.message).to.eq "Cannot call .submit() because the current subject has been removed or detached from the DOM."
+          done()
+
+        @cy.get("form:first").submit().submit()
 
       it "logs once when not dom subject", (done) ->
         logs = []
@@ -1117,6 +1205,21 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", -> done()
 
+      it "throws when subject is not in the document", (done) ->
+        focused = 0
+
+        input = @cy.$("input:first").focus (e) ->
+          focused += 1
+          input.remove()
+          return false
+
+        @cy.on "fail", (err) ->
+          expect(focused).to.eq 1
+          expect(err.message).to.eq "Cannot call .focus() because the current subject has been removed or detached from the DOM."
+          done()
+
+        @cy.get("input:first").focus().focus()
+
       it "throws when not a[href],link[href],button,input,select,textarea,[tabindex]", (done) ->
         @cy.get("form").focus()
 
@@ -1241,6 +1344,23 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.noop({}).blur()
 
         @cy.on "fail", -> done()
+
+      it "throws when subject is not in the document", (done) ->
+        blurred = 0
+
+        input = @cy.$("input:first").blur (e) ->
+          blurred += 1
+          input.focus ->
+            input.remove()
+            return false
+          return false
+
+        @cy.on "fail", (err) ->
+          expect(blurred).to.eq 1
+          expect(err.message).to.eq "Cannot call .blur() because the current subject has been removed or detached from the DOM."
+          done()
+
+        @cy.get("input:first").focus().blur().focus().blur()
 
       it "throws when subject is a collection of elements", (done) ->
         @cy
@@ -1411,6 +1531,21 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.on "fail", -> done()
 
         @cy.dblclick()
+
+      it "throws when subject is not in the document", (done) ->
+        dblclicked = 0
+
+        button = @cy.$("button:first").dblclick (e) ->
+          dblclicked += 1
+          button.remove()
+          return false
+
+        @cy.on "fail", (err) ->
+          expect(dblclicked).to.eq 1
+          expect(err.message).to.eq "Cannot call .dblclick() because the current subject has been removed or detached from the DOM."
+          done()
+
+        @cy.get("button:first").dblclick().dblclick()
 
       it "throws when any member of the subject isnt visible", (done) ->
         btn = @cy.$("button").show().last().hide()
@@ -1635,6 +1770,21 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.on "fail", -> done()
 
         @cy.click()
+
+      it "throws when subject is not in the document", (done) ->
+        clicked = 0
+
+        checkbox = @cy.$(":checkbox:first").click (e) ->
+          clicked += 1
+          checkbox.remove()
+          return false
+
+        @cy.on "fail", (err) ->
+          expect(clicked).to.eq 1
+          expect(err.message).to.eq "Cannot call .click() because the current subject has been removed or detached from the DOM."
+          done()
+
+        @cy.get(":checkbox:first").click().click()
 
       it "logs once when not dom subject", (done) ->
         logs = []

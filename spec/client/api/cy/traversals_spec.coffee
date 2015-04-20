@@ -31,6 +31,16 @@ describe "$Cypress.Cy Traversal Commands", ->
           @cy.noop({})[name](arg)
           @cy.on "fail", -> done()
 
+        it "throws when subject is not in the document", (done) ->
+          @cy.on "command:end", =>
+            @cy.$("#list").remove()
+
+          @cy.on "fail", (err) ->
+            expect(err.message).to.eq "Cannot call .#{name}() because the current subject has been removed or detached from the DOM."
+            done()
+
+          @cy.get("#list")[name](arg)
+
         it "returns no elements", (done) ->
           @cy._timeout(100)
 
