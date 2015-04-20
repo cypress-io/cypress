@@ -36,6 +36,17 @@ describe "$Cypress.Cy Assertion Commands", ->
       obj = {requestJSON: {teamIds: [2]}}
       @cy.noop(obj).its("requestJSON").should("have.property", "teamIds").should("deep.eq", [2])
 
+    describe "eventually chainer", ->
+      it "retries assertion until true", ->
+        button = @cy.$("button:first")
+
+        retry = _.after 3, ->
+          button.addClass("new-class")
+
+        @cy.on "retry", retry
+
+        @cy.get("button:first").should("eventually.have.class", "new-class")
+
     describe "errors", ->
       beforeEach ->
         @allowErrors()
@@ -60,6 +71,22 @@ describe "$Cypress.Cy Assertion Commands", ->
           done()
 
         @cy.noop({}).should("deep.eq2", {})
+
+      it "throws when eventually times out", (done) ->
+        @cy._timeout(200)
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "Timed out retrying. AssertionError: expected <button id=\"button\">button</button> to have class 'does-not-have-class'"
+          done()
+
+        @cy.get("button:first").should("eventually.have.class", "does-not-have-class")
+
+      it "throws when using eventually and non available chainer", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "The chainer: 'eq2' was not found. Building implicit assertion failed."
+          done()
+
+        @cy.noop({}).should("eventually.deep.eq2", {})
 
   context "#and", ->
     it "proxies to #should", ->

@@ -36,6 +36,10 @@ $Cypress.register "Assertions", (Cypress, _, $) ->
 
   Cypress.addChildCommand
     should: (subject, chainers, args...) ->
+      ## should doesnt support options here
+      ## so we cant use the wait command
+      ## we must use @_retry directly
+
       exp = $Cypress.Chai.expect(subject).to
 
       chainers = chainers.split(".")
@@ -44,24 +48,45 @@ $Cypress.register "Assertions", (Cypress, _, $) ->
       ## backup the original assertion subject
       originalObj = exp._obj
 
-      _.reduce chainers, (memo, value) =>
-        if value not of memo
-          @throwErr("The chainer: '#{value}' was not found. Building implicit assertion failed.")
+      eventually = false
 
+      options = {}
+
+      applyChainer = (memo, value) ->
         if value is lastChainer
           if _.isFunction(memo[value])
             memo[value].apply(memo, args)
         else
           memo[value]
-      , exp
 
-      ## if the _obj has been mutated then we
-      ## are chaining assertion properties and
-      ## should return this new subject
-      if originalObj isnt exp._obj
-        return exp._obj
+      applyChainers = =>
+        _.reduce chainers, (memo, value) =>
+          if value is "eventually"
+            eventually = true
+            return memo
 
-      return subject
+          if value not of memo
+            @throwErr("The chainer: '#{value}' was not found. Building implicit assertion failed.")
+
+          if eventually
+            try
+              applyChainer(memo, value)
+            catch e
+              options.error = e
+              @_retry(applyChainers, options)
+          else
+            applyChainer(memo, value)
+
+        , exp
+
+      Promise.resolve(applyChainers()).then ->
+        ## if the _obj has been mutated then we
+        ## are chaining assertion properties and
+        ## should return this new subject
+        if originalObj isnt exp._obj
+          return exp._obj
+
+        return subject
 
     and: (subject, args...) ->
       @sync.should.apply(@, args)
