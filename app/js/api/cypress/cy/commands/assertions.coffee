@@ -35,7 +35,7 @@ $Cypress.register "Assertions", (Cypress, _, $) ->
     obj
 
   Cypress.addChildCommand
-    to: (subject, chainers, args...) ->
+    should: (subject, chainers, args...) ->
       exp = $Cypress.Chai.expect(subject).to
 
       chainers = chainers.split(".")
@@ -46,7 +46,7 @@ $Cypress.register "Assertions", (Cypress, _, $) ->
 
       _.reduce chainers, (memo, value) =>
         if value not of memo
-          @throwErr("The chainer: '#{value}' was not found. Building implicit expectation failed.")
+          @throwErr("The chainer: '#{value}' was not found. Building implicit assertion failed.")
 
         if value is lastChainer
           if _.isFunction(memo[value])
@@ -63,8 +63,8 @@ $Cypress.register "Assertions", (Cypress, _, $) ->
 
       return subject
 
-    should: (subject, args...) ->
-      @sync.to.apply(@, args)
+    and: (subject, args...) ->
+      @sync.should.apply(@, args)
 
   $Cypress.Cy.extend
     assert: (passed, message, value, actual, expected, error) ->

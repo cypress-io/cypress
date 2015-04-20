@@ -47,8 +47,6 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
       catch e
         throw e
 
-    and: (subject, fn) -> @sync.then(fn)
-
     ## making this a dual command due to child commands
     ## automatically returning their subject when their
     ## return values are undefined.  prob should rethink

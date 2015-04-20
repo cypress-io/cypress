@@ -1,13 +1,13 @@
 describe "$Cypress.Cy Assertion Commands", ->
   enterCommandTestingMode()
 
-  context "#to", ->
+  context "#should", ->
     it "returns the subject for chainability", ->
-      @cy.noop({foo: "bar"}).to("deep.eq", {foo: "bar"}).then (obj) ->
+      @cy.noop({foo: "bar"}).should("deep.eq", {foo: "bar"}).then (obj) ->
         expect(obj).to.deep.eq {foo: "bar"}
 
     it "can use negation", ->
-      @cy.noop(false).to("not.be.true")
+      @cy.noop(false).should("not.be.true")
 
     it "works with jquery chai", ->
       div = $("<div class='foo'>asdf</div>")
@@ -15,26 +15,26 @@ describe "$Cypress.Cy Assertion Commands", ->
       @cy.$("body").append(div)
 
       @cy
-        .get("div.foo").to("have.class", "foo").then ($div) ->
+        .get("div.foo").should("have.class", "foo").then ($div) ->
           expect($div).to.match div
           $div.remove()
 
     it "can chain multiple assertions", ->
       @cy
         .get("body")
-          .to("contain", "DOM Fixture")
-          .to("have.property", "length", 1)
+          .should("contain", "DOM Fixture")
+          .should("have.property", "length", 1)
 
     it "can change the subject", ->
-      @cy.get("input:first").should("have.property", "length").to("eq", 1).then (num) ->
+      @cy.get("input:first").should("have.property", "length").should("eq", 1).then (num) ->
         expect(num).to.eq(1)
 
     it "changes the subject with chai-jquery", ->
-      @cy.get("input:first").should("have.attr", "id").to("eq", "input")
+      @cy.get("input:first").should("have.attr", "id").should("eq", "input")
 
     it "changes the subject with JSON", ->
       obj = {requestJSON: {teamIds: [2]}}
-      @cy.noop(obj).its("requestJSON").should("have.property", "teamIds").to("deep.eq", [2])
+      @cy.noop(obj).its("requestJSON").should("have.property", "teamIds").should("deep.eq", [2])
 
     describe "errors", ->
       beforeEach ->
@@ -45,25 +45,25 @@ describe "$Cypress.Cy Assertion Commands", ->
           expect(err.message).to.eq "expected false to be true"
           done()
 
-        @cy.noop(false).to("be.true")
+        @cy.noop(false).should("be.true")
 
       it "throws err when not available chaninable", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "The chainer: 'dee' was not found. Building implicit expectation failed."
+          expect(err.message).to.eq "The chainer: 'dee' was not found. Building implicit assertion failed."
           done()
 
-        @cy.noop({}).to("dee.eq", {})
+        @cy.noop({}).should("dee.eq", {})
 
       it "throws err when ends with a non available chaninable", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "The chainer: 'eq2' was not found. Building implicit expectation failed."
+          expect(err.message).to.eq "The chainer: 'eq2' was not found. Building implicit assertion failed."
           done()
 
-        @cy.noop({}).to("deep.eq2", {})
+        @cy.noop({}).should("deep.eq2", {})
 
-  context "#should", ->
-    it "proxies to #to", ->
-      @cy.noop({foo: "bar"}).should("deep.eq", {foo: "bar"})
+  context "#and", ->
+    it "proxies to #should", ->
+      @cy.noop({foo: "bar"}).should("have.property", "foo").and("eq", "bar")
 
   context "#assert", ->
     before ->
