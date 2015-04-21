@@ -58,6 +58,11 @@ app.get "/specs/*", (req, res) ->
         specs: getSpecPath(req.path)
       }
 
+app.get "/__remote/timeout/*", (req, res) ->
+  setTimeout ->
+    res.send "<html></html>"
+  , req.query.ms
+
 app.get "/__remote/*", (req, res) ->
   file = req.params[0].replace(/\/+$/, "")
   res.sendFile file,
