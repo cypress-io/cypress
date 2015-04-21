@@ -159,6 +159,7 @@ describe "$Cypress.Cy Actions Commands", ->
           @cy.$("body").append(input)
 
           @cy.get("#input-type-#{type}").type("1234").then ($input) ->
+            expect($input).to.have.value "1234"
             expect($input.get(0)).to.eq input.get(0)
 
     describe "{enter}", ->
