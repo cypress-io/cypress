@@ -35,6 +35,10 @@
 
         @hide(win)
 
+      win.on "focus", ->
+        ## focus the other windows if they're open
+        _.invoke windows, "focus"
+
     displayTray: (win) ->
       tray = new gui.Tray
         # title:   "Cy"
