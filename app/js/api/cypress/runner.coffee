@@ -9,6 +9,11 @@ $Cypress.Runner = do ($Cypress, _) ->
       @getRunnables() if @runner.suite
 
     fail: (err, runnable) ->
+      ## if runnable.state is passed then we've
+      ## probably failed in an afterEach and need
+      ## to update the runnable to failed status
+      @afterEachFailed(runnable, err) if runnable.state is "passed"
+
       @runner.uncaught(err)
 
     initialize: ->
@@ -150,6 +155,11 @@ $Cypress.Runner = do ($Cypress, _) ->
       ## title and pulling out whats between the quotes
       name = hook.title.match(/\"(.+)\"/)
       name and name[1]
+
+    afterEachFailed: (test, err) ->
+      test.state = "failed"
+      test.err = err
+      @Cypress.trigger "test:end", test
 
     hookFailed: (hook, err) ->
       ## finds the test by returning the first test from

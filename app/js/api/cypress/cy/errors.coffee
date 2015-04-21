@@ -41,6 +41,14 @@ do ($Cypress, _) ->
             obj["Applied To"] = prev.subject
             obj
 
+    endedEarlyErr: ->
+      ## return if we already have an error
+      return if @prop("err")
+
+      err = @cypressErr("Cypress detected your test ended early before all of the commands have run. This can happen if you explicitly done() a test before all of the commands have finished.")
+      err.onFail = ->
+      @fail(err)
+
     fail: (err) ->
       current = @prop("current")
       @log {name: "Failed: #{current.name}", args: err.message}, "danger" if current
@@ -56,6 +64,8 @@ do ($Cypress, _) ->
         @commandErr(err)
 
       runnable = @prop("runnable")
+
+      @prop("err", err)
 
       @Cypress.trigger "fail", err, runnable
       @trigger "fail", err, runnable

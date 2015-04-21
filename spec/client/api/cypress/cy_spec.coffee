@@ -119,6 +119,13 @@ describe "$Cypress.Cy API", ->
         @Cypress.trigger("restore")
         expect(@cy.queue).to.deep.eq []
 
+      it "calls endedEarlyErr if index > 0 and < queue.length", ->
+        endedEarlyErr = @sandbox.stub @cy, "endedEarlyErr"
+        @cy.prop("index", 2)
+        @cy.queue = [1,2,3,4]
+        @cy.restore()
+        expect(endedEarlyErr).to.be.calledOnce
+
     describe "#abort", ->
       beforeEach ->
         @cy = $Cypress.Cy.create(@Cypress, @specWindow)

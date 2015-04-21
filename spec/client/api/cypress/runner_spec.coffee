@@ -722,3 +722,51 @@ describe "$Cypress.Runner API", ->
       re = /.+/
       @runner.options grep: re
       expect(grep).to.be.calledWith re
+
+  context "#fail", ->
+    beforeEach ->
+      @runner = $Cypress.Runner.runner(@Cypress, {uncaught: ->})
+
+    it "calls runner.uncaught with err", ->
+      uncaught = @sandbox.stub @runner.runner, "uncaught"
+
+      err = new Error
+      @Cypress.trigger("fail", err, {})
+
+      expect(uncaught).to.be.calledWith(err)
+
+    it "calls afterEachFailed if runnable state is passed", ->
+      afterEachFailed = @sandbox.spy @runner, "afterEachFailed"
+
+      err = new Error
+      runnable = {state: "passed"}
+      @Cypress.trigger "fail", err, runnable
+
+      expect(afterEachFailed).to.be.calledWith runnable, err
+
+    it "does not call afterEachFailed if runnable state isnt passed", ->
+      afterEachFailed = @sandbox.spy @runner, "afterEachFailed"
+
+      err = new Error
+      @Cypress.trigger "fail", err, {}
+
+      expect(afterEachFailed).not.to.be.called
+
+  context "#afterEachFailed", ->
+    beforeEach ->
+      @runner = $Cypress.Runner.runner(@Cypress, {})
+      @_test = {}
+      @err = new Error
+
+    it "sets state to failed", ->
+      @runner.afterEachFailed(@_test, @err)
+      expect(@_test.state).to.eq "failed"
+
+    it "sets err to err", ->
+      @runner.afterEachFailed(@_test, @err)
+      expect(@_test.err).to.eq @err
+
+    it "triggers test:end", ->
+      trigger = @sandbox.spy @Cypress, "trigger"
+      @runner.afterEachFailed(@_test, @err)
+      expect(trigger).to.be.calledWith "test:end", @_test
