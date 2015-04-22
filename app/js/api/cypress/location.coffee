@@ -195,7 +195,7 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
 
       ## if we have a protocol but we dont
       ## have a path, then ensure there is a
-      ## trailing slash at the end
+      ## trailing slash at the end of the host
       if url.protocol() and not url.path()
         url.addTrailingSlash()
 
