@@ -31,6 +31,10 @@ describe "$Cypress.Mocha API", ->
       mocha = $Cypress.Mocha.create(@Cypress, @iframe)
       expect(mocha.mocha._reporter.length).to.eq 0
 
+    it "sets enableTimeouts to false", ->
+      mocha = $Cypress.Mocha.create(@Cypress, @iframe)
+      expect(mocha.mocha.options.enableTimeouts).to.be.false
+
     it "calls #override", ->
       override = @sandbox.spy $Cypress.Mocha.prototype, "override"
       $Cypress.Mocha.create(@Cypress, @iframe)
@@ -206,6 +210,11 @@ describe "$Cypress.Mocha API", ->
       @mocha.restore()
       expect(restoreRunnableRun).to.be.calledOnce
 
+    it "calls #restoreRunnableResetTimeout", ->
+      restoreRunnableResetTimeout = @sandbox.spy @mocha, "restoreRunnableResetTimeout"
+      @mocha.restore()
+      expect(restoreRunnableResetTimeout).to.be.calledOnce
+
   context "#override", ->
 
   context "#patchRunnerRun", ->
@@ -213,6 +222,61 @@ describe "$Cypress.Mocha API", ->
   context "#patchRunnerFail", ->
 
   context "#patchRunnableRun", ->
+
+  context "#patchRunnableResetTimeout", ->
+    beforeEach ->
+      @mocha = $Cypress.Mocha.create(@Cypress, @iframe)
+      @mocha.restore()
+      @mocha.patchRunnableResetTimeout()
+      @t = new Mocha.Runnable
+      @t.callback = @sandbox.stub()
+
+    afterEach ->
+      @t.clearTimeout()
+      @mocha.restore()
+
+    it "sets timer", ->
+      @t.resetTimeout()
+      expect(@t.timer).to.be.a("number")
+
+    context "timer", ->
+      it "sets setTimeout to default timeout ms of 2000", ->
+        setTimeout = @sandbox.spy window, "setTimeout"
+        @t.resetTimeout()
+        expect(setTimeout.getCall(0).args[1]).to.eq 2000
+
+      it "sets setTimeout to custom timeout ms of 5000", ->
+        setTimeout = @sandbox.spy window, "setTimeout"
+        @t.timeout(5000)
+        @t.resetTimeout()
+        expect(setTimeout.getCall(0).args[1]).to.eq 5000
+
+      it "calls clearTimeout", ->
+        clearTimeout = @sandbox.spy @t, "clearTimeout"
+        @t.resetTimeout()
+        expect(clearTimeout).to.be.calledOnce
+
+    context "setTimeout", ->
+      beforeEach ->
+        @clock = @sandbox.useFakeTimers()
+
+      it "sets timedOut to true", ->
+        @t.resetTimeout()
+        @clock.tick(2000)
+        expect(@t.timedOut).to.be.true
+
+      it "calls callback with error message when not async", ->
+        @t.resetTimeout()
+        @clock.tick(2000)
+        err = @t.callback.getCall(0).args[0]
+        expect(err.message).to.eq "Cypress command timeout of '2000ms' exceeded."
+
+      it "calls callback with error message when async", ->
+        @t.async = true
+        @t.resetTimeout()
+        @clock.tick(2000)
+        err = @t.callback.getCall(0).args[0]
+        expect(err.message).to.eq "Timed out after '2000ms'. The done() callback was never invoked!"
 
   context "#options", ->
     beforeEach ->

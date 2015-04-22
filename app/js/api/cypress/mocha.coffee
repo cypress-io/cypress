@@ -1,12 +1,15 @@
 $Cypress.Mocha = do ($Cypress, _, Mocha) ->
 
-  runnerRun   = Mocha.Runner::run
-  runnerFail  = Mocha.Runner::fail
-  runnableRun = Mocha.Runnable::run
+  runnerRun            = Mocha.Runner::run
+  runnerFail           = Mocha.Runner::fail
+  runnableRun          = Mocha.Runnable::run
+  runnableResetTimeout = Mocha.Runnable::resetTimeout
 
   class $Mocha
     constructor: (@Cypress, specWindow) ->
-      @mocha = new Mocha reporter: ->
+      @mocha = new Mocha
+        reporter: ->
+        enableTimeouts: false
 
       @override()
       @listeners()
@@ -19,6 +22,7 @@ $Cypress.Mocha = do ($Cypress, _, Mocha) ->
       ## are not localized to this mocha instance
       @patchRunnerFail()
       @patchRunnableRun()
+      @patchRunnableResetTimeout()
 
       return @
 
@@ -112,6 +116,26 @@ $Cypress.Mocha = do ($Cypress, _, Mocha) ->
 
         orig.apply(@, args)
 
+    patchRunnableResetTimeout: ->
+      Mocha.Runnable::resetTimeout = _.wrap runnableResetTimeout, (orig) ->
+        runnable = @
+
+        ms = @timeout() or 1e9
+
+        @clearTimeout()
+
+        getMsg = ->
+          ## we've yield an explicit done callback
+          if runnable.async
+            "Timed out after '#{ms}ms'. The done() callback was never invoked!"
+          else
+            "Cypress command timeout of '#{ms}ms' exceeded."
+
+        @timer = setTimeout ->
+          runnable.callback new Error getMsg()
+          runnable.timedOut = true
+        , ms
+
     set: (contentWindow) ->
       ## create our own mocha objects from our parents if its not already defined
       ## Mocha is needed for the id generator
@@ -167,14 +191,18 @@ $Cypress.Mocha = do ($Cypress, _, Mocha) ->
       @restoreRunnerRun()
       @restoreRunnerFail()
       @restoreRunnableRun()
+      @restoreRunnableResetTimeout()
 
       return @
 
+    restoreRunnableResetTimeout: ->
+      Mocha.Runnable::resetTimeout = runnableResetTimeout
+
     restoreRunnerRun: ->
-      Mocha.Runner::run   = runnerRun
+      Mocha.Runner::run = runnerRun
 
     restoreRunnerFail: ->
-      Mocha.Runner::fail  = runnerFail
+      Mocha.Runner::fail = runnerFail
 
     restoreRunnableRun: ->
       Mocha.Runnable::run = runnableRun
