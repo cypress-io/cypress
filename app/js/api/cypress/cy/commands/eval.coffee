@@ -1,4 +1,4 @@
-do (Cypress, _) ->
+$Cypress.register "Eval", (Cypress, _, $) ->
 
   Cypress.on "abort", ->
     @prop("xhr")?.abort()
