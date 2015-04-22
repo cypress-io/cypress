@@ -10,6 +10,7 @@
 $Cypress.Location = do ($Cypress, _, Uri) ->
 
   reHttp = /^http/
+  reWww = /^www/
 
   reLocalHost = /^(localhost|0\.0\.0\.0|127\.0\.0\.1)/
 
@@ -133,24 +134,27 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
     ## constants which our server sends us during
     ## initial boot.
     @createInitialRemoteSrc = (url) ->
-      url = new Uri(url)
+      if reHttp.test(url)
+        url = new Uri(url)
+      else
+        url = (new Uri()).setPath(url)
 
       ## add the __intitial=true query param
       url.addQueryParam("__initial", true)
 
       ## prepend /__remote/ and
       ## return the full href
-      "/__remote/" + url.toString()
+      "/__remote/" + _.ltrim url.toString(), "/"
 
     @isFullyQualifiedUrl = (url) ->
       reHttp.test(url)
 
-    @missingProtocolAndHostIsLocal = (url) ->
+    @missingProtocolAndHostIsLocalOrWww = (url) ->
       ## normalize the host for 'localhost'
       ## and then check if we are missing
       ## http and our host is
       ## localhost / 127.0.0.1 / 0.0.0.0
-      return false if not reLocalHost.test url.toString()
+      return false if not (reLocalHost.test(url.toString()) or reWww.test(url.toString()))
 
       switch url.protocol()
         when ""
@@ -165,19 +169,36 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
           return false
 
     @normalizeUrl = (url) ->
-      ## normalize the url be automatically appending
-      ## a trailing slash to the PATH
-      ## this will ignore query params / hash, etc
-      url = _.trim(url, "/")
+      ## A properly formed URL will always have a trailing
+      ## slash at the end of it
+      ## http://localhost:8000/
+      ##
+      ## A url with a path (sub folder) does not necessarily
+      ## have a trailing slash after it
+      ## http://localhost:8000/app
+      ##
+      ## If the webserver redirects us we will follow those
+      ## correctly
+      ## http://getbootstrap.com/css => 301 http://getbootstrap.com/css/
+      ##
+      ## A file being served by the file system never has a leading slash
+      ## index.html NOT index.html/
+      ##
+      url = _.ltrim(url, "/")
       url = new Uri(url)
 
       ## automatically insert http:// if url host
       ## is localhost, 0.0.0.0, or 127.0.0.1
       ## and there isnt a protocol
-      if @missingProtocolAndHostIsLocal(url)
+      if @missingProtocolAndHostIsLocalOrWww(url)
         url.setProtocol "http"
 
-      url.addTrailingSlash()
+      ## if we have a protocol but we dont
+      ## have a path, then ensure there is a
+      ## trailing slash at the end
+      if url.protocol() and not url.path()
+        url.addTrailingSlash()
+
       url.toString()
 
     @getRemoteUrl = (url, baseUrl) ->
