@@ -2,10 +2,6 @@ describe "$Cypress.Cy Navigation Commands", ->
   enterCommandTestingMode()
 
   context "#visit", ->
-    it "returns a promise", ->
-      promise = @cy.command("visit", "/foo")
-      expect(promise).to.be.instanceOf(Promise)
-
     it "triggers visit:start on the remote iframe", (done) ->
       $("iframe").one "visit:start", (e, url) ->
         expect(url).to.eq "foo/"
@@ -59,12 +55,6 @@ describe "$Cypress.Cy Navigation Commands", ->
       @cy.visit("fixtures/html/sinon.html").then ->
         prev = @cy.prop("current").prev
         expect(prev.args).to.have.length(1)
-
-    it "can change the timeout", ->
-      timeout = @sandbox.spy @cy.prop("runnable"), "timeout"
-
-      @cy.visit("fixtures/html/sinon.html", {timeout: 30000}).then ->
-        expect(timeout).to.be.calledWith 30000
 
     describe "visit:start", ->
       beforeEach ->

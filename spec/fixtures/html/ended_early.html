@@ -8,7 +8,7 @@
     <script type="text/javascript">
       describe("ending early [001]", function(){
         beforeEach(function(){
-          cy.visit("fixtures/html/generic.html")
+          cy.inspect().visit("fixtures/html/generic.html", {timeout: 2000})
         })
 
         it("does not end early [002]", function(){
@@ -16,7 +16,15 @@
         })
 
         it("does end early [003]", function(done){
-          cy.then(function(){})
+          // for some bizarre reason, when the console in chrome
+          // is closed our commands are being processed BEFORE
+          // the done() callback (which makes no sense)
+          // so we are just returning an actual promise in the
+          // then function which prevents the noop functions
+          // from being called thus ensuring our test ends early
+          cy
+            .then(function(){ cy.Promise.delay(1000) })
+            .noop({}).noop({})
 
           done()
         })

@@ -18,7 +18,7 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
       command = Cypress.command()
 
       _.defaults options,
-        timeout: 15000
+        timeout: 20000
         onBeforeLoad: ->
         onLoad: ->
 

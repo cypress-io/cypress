@@ -1,5 +1,5 @@
 describe "Timeout Integration Tests", ->
-  enterIntegrationTestingMode("html/timeout")
+  enterIntegrationTestingMode("html/timeout", {silent: true})
 
   context "timeouts", ->
     it "has disabled all runnable timeouts", ->
@@ -14,13 +14,4 @@ describe "Timeout Integration Tests", ->
 
       @Cypress.run (failures) ->
         expect(failures).to.eq 0
-        done()
-
-    it "can time out", (done) ->
-      ## only run one test
-      @Cypress.runner.grep(/can fail visiting/)
-
-      @Cypress.run (failures) =>
-        test = @Cypress.runner.getTestByTitle("can fail visiting")
-        expect(test.err.message).to.eq "Cypress command timeout of '500ms' exceeded."
         done()
