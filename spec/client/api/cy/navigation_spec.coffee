@@ -187,11 +187,22 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       it "throws when visit times out", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "cy.visit() timed out after waiting '500ms' for your remote page to load."
+          expect(err.message).to.eq "Timed out after waiting '500ms' for your remote page to load."
           done()
 
         @cy.visit("timeout?ms=5000", {timeout: 500})
 
       it "unbinds remoteIframe load event"
 
-      it "only logs once on error"
+      it "only logs once on error", (done) ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push @log
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq(1)
+          expect(@log.get("error")).to.eq(err)
+          done()
+
+        @cy.visit("timeout?ms=5000", {timeout: 500})

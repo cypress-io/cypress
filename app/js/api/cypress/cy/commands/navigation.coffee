@@ -74,4 +74,4 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
         .timeout(options.timeout)
         .catch Promise.TimeoutError, (err) =>
           @$remoteIframe.off("load")
-          @throwErr "cy.visit() timed out after waiting '#{options.timeout}ms' for your remote page to load."
+          @throwErr "Timed out after waiting '#{options.timeout}ms' for your remote page to load.", command
