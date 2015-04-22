@@ -4,7 +4,7 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
     onBeforeLoad: (contentWindow) ->
       current = @prop("current")
 
-      return if current.name isnt "visit"
+      return if current?.name isnt "visit"
 
       options = _.last(current.args)
       options.onBeforeLoad?(contentWindow)
@@ -31,14 +31,14 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
 
       ## backup the previous runnable timeout
       ## and the hook's previous timeout
-      prevTimeout     = @_timeout()
+      prevTimeout = @_timeout()
 
-      ## reset the timeout to our options
-      @_timeout(options.timeout)
+      ## clear the current timeout
+      @_clearTimeout()
 
       win = @sync.window()
 
-      new Promise (resolve, reject) =>
+      p = new Promise (resolve, reject) =>
         ## if we're visiting a page and we're not currently
         ## on about:blank then we need to nuke the window
         ## and after its nuked then visit the url
@@ -69,3 +69,9 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
 
           # ## any existing global variables will get nuked after it navigates
           @$remoteIframe.prop "src", $Cypress.Location.createInitialRemoteSrc(url)
+
+      p
+        .timeout(options.timeout)
+        .catch Promise.TimeoutError, (err) =>
+          @$remoteIframe.off("load")
+          @throwErr "cy.visit() timed out after waiting '#{options.timeout}ms' for your remote page to load."

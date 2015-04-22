@@ -60,6 +60,12 @@ describe "$Cypress.Cy Navigation Commands", ->
         prev = @cy.prop("current").prev
         expect(prev.args).to.have.length(1)
 
+    it "can change the timeout", ->
+      timeout = @sandbox.spy @cy.prop("runnable"), "timeout"
+
+      @cy.visit("fixtures/html/sinon.html", {timeout: 30000}).then ->
+        expect(timeout).to.be.calledWith 30000
+
     describe "visit:start", ->
       beforeEach ->
         trigger = @sandbox.stub $.fn, "trigger"
@@ -178,3 +184,14 @@ describe "$Cypress.Cy Navigation Commands", ->
           done()
 
         @cy.visit()
+
+      it "throws when visit times out", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "cy.visit() timed out after waiting '500ms' for your remote page to load."
+          done()
+
+        @cy.visit("timeout?ms=5000", {timeout: 500})
+
+      it "unbinds remoteIframe load event"
+
+      it "only logs once on error"
