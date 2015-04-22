@@ -42,7 +42,10 @@ window.getNames = (queue) ->
 window.getFirstSubjectByName = (name) ->
   _(@cy.queue).findWhere({name: name}).subject
 
-window.enterIntegrationTestingMode = (fixture) ->
+window.enterIntegrationTestingMode = (fixture, options = {}) ->
+  _.defaults options,
+    silent: false
+
   before ->
     @loadDom = _.bind(loadDom, @)
 
@@ -50,8 +53,9 @@ window.enterIntegrationTestingMode = (fixture) ->
     ## load all of the modules
     @Cypress = $Cypress.create({loadModules: true})
 
-    @Cypress.on "fail", (err) ->
-      console.error(err.stack)
+    if options.silent is false
+      @Cypress.on "fail", (err) ->
+        console.error(err.stack)
 
     @loadDom(fixture).then =>
       @Cypress.initialize @iframe.prop("contentWindow"), @iframe, ->
