@@ -4,6 +4,9 @@ do ($Cypress, _) ->
   aliasDisplayRe = /^([@]+)/
 
   $Cypress.Cy.extend
+    assign: (str, obj) ->
+      @prop("runnable").ctx[str] = obj
+
     ## these are public because its expected other commands
     ## know about them and are expected to call them
     getNextAlias: ->
@@ -70,41 +73,6 @@ do ($Cypress, _) ->
     #   .find("div").find("span:first").find("input").as("i2")
     #   .within "@b", ->
     #     cy.query("button").as("btn")
-
-    # cy.get("div").notFind("input")
-    # cy.get("body").not ->
-      # cy.get("")
-    # cy.not ->
-      # cy.find("body")
-
-    # cy.query("body")
-    # cy.qc("foo bar baz")
-    # cy.queryContaining("asdfasdf")
-    # cy.get
-    # cy.getContent("afwefe")
-
-    ## how to handle NOT?
-
-    ## notGet / notGetContent
-
-    ## root commands start a chain over
-    ## ignore any previous subjects, begins a new chain of commands
-    ## server / route / get / getContent / within / withinContent
-    ## title / url / location / window / document
-    ## eval / visit / ng / clearLocalStorage
-
-    ## chainable modifiers
-    ## work off of existing subject and changes to new subject
-    ## should modifiers go through the same retry logic as #get?
-    ## containing / find / prev / next / eq / children / parent / parents / filter
-
-    ## chainable actions
-    ## work off of existing subject and returns the same subject
-    ## check / uncheck / click / select / fill / drag / drop / type / clearLocalStorage
-
-    ## chainable utilities
-    ## work off of existing subject and can optionally return a new subject
-    ## wait / until / as / not
 
     ## DIFFICULT ALIASING SCENARIOS
     ## 1. You have a row of 5 todos.  You alias the last row. You insert

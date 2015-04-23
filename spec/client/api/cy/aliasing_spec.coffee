@@ -1,49 +1,6 @@
 describe "$Cypress.Cy Aliasing Commands", ->
   enterCommandTestingMode()
 
-  context "#assign", ->
-    beforeEach ->
-      @cy.noop("foo").assign("foo")
-
-    afterEach ->
-      if not @foo
-        @test.error new Error("this.foo not defined")
-
-      if not @noop
-        @test.error new Error("this.noop not defined")
-
-    it "assigns subject to runnable ctx", ->
-      @cy
-        .noop({}).assign("noop").then (obj) ->
-          expect(@noop).to.eq obj
-
-    describe "nested hooks", ->
-      afterEach ->
-        if not @bar
-          @test.error new Error("this.bar not defined")
-
-        if not @foo
-          @test.error new Error("this.foo not defined")
-
-        if not @noop
-          @test.error new Error("this.noop not defined")
-
-      it "assigns bar", ->
-        @cy.noop("bar").assign("bar")
-
-    describe "nested functions", ->
-      beforeEach ->
-        @assign = =>
-          @cy.noop("baz").assign("baz")
-
-      afterEach ->
-        if not @baz
-          @test.error new Error("this.baz not defined")
-
-      it "shares this ctx with hooks", ->
-        @assign().then ->
-          expect(@baz).to.eq("baz")
-
   context "#as", ->
     it "does not change the subject", ->
       body = @cy.$("body")
@@ -69,6 +26,76 @@ describe "$Cypress.Cy Aliasing Commands", ->
 
       @cy.get("#list li").eq(0).as("firstLi").then ($li) ->
         expect($li).to.match li
+
+    context "#assign", ->
+      beforeEach ->
+        @cy.noop("foo").as("foo")
+
+      afterEach ->
+        if not @foo
+          @test.error new Error("this.foo not defined")
+
+        if not @noop
+          @test.error new Error("this.noop not defined")
+
+      it "assigns subject to runnable ctx", ->
+        @cy
+          .noop({}).as("noop").then (obj) ->
+            expect(@noop).to.eq obj
+
+      describe "nested hooks", ->
+        afterEach ->
+          if not @bar
+            @test.error new Error("this.bar not defined")
+
+          if not @foo
+            @test.error new Error("this.foo not defined")
+
+          if not @noop
+            @test.error new Error("this.noop not defined")
+
+        it "assigns bar", ->
+          @cy.noop("bar").as("bar")
+
+      describe "nested functions", ->
+        beforeEach ->
+          @assign = =>
+            @cy.noop("baz").as("baz")
+
+        afterEach ->
+          if not @baz
+            @test.error new Error("this.baz not defined")
+
+        it "shares this ctx with hooks", ->
+          @assign().then ->
+            expect(@baz).to.eq("baz")
+
+    describe "errors", ->
+      beforeEach ->
+        @allowErrors()
+
+      _.each [null, undefined, {}, [], 123], (value) =>
+        it "throws if when passed: #{value}", (done) ->
+          @cy.on "fail", (err) ->
+            expect(err.message).to.eq "cy.as() can only accept a string!"
+            done()
+
+          @cy.get("div:first").as(value)
+
+      it "throws on blank string", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "cy.as() cannot be passed an empty string!"
+          done()
+
+        @cy.get("div:first").as("")
+
+      _.each ["test", "runnable", "timeout", "slow", "skip", "inspect"], (blacklist) ->
+        it "throws on a blacklisted word: #{blacklist}", (done) ->
+          @cy.on "fail", (err) ->
+            expect(err.message).to.eq "cy.as() cannot be aliased as: '#{blacklist}'. This word is reserved."
+            done()
+
+          @cy.get("div:first").as(blacklist)
 
   context "#_replayFrom", ->
     describe "subject in document", ->

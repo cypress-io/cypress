@@ -1,16 +1,30 @@
 $Cypress.register "Aliasing", (Cypress, _, $) ->
 
+  blacklist = ["test", "runnable", "timeout", "slow", "skip", "inspect"]
+
   Cypress.on "defaults", ->
     @_aliases = {}
 
   Cypress.addChildCommand
     as: (subject, str) ->
+      if not _.isString(str)
+        @throwErr "cy.as() can only accept a string!"
+
+      if _.isBlank(str)
+        @throwErr "cy.as() cannot be passed an empty string!"
+
+      if str in blacklist
+        @throwErr "cy.as() cannot be aliased as: '#{str}'. This word is reserved."
+
       prev       = @prop("current").prev
       prev.alias = str
 
       @_aliases[str] = {subject: subject, command: prev, alias: str}
 
-      allAliases = _(@_aliases).keys().join(", ")
+      ## assign the subject to our runnable ctx
+      @assign(str, subject)
+
+      # allAliases = _(@_aliases).keys().join(", ")
 
       # Cypress.command
       #   onConsole: ->
@@ -20,11 +34,3 @@ $Cypress.register "Aliasing", (Cypress, _, $) ->
       #     "All Aliases": allAliases
 
       return subject
-
-    ## this should now save the subject
-    ## as a property on the runnable ctx
-    assign: (subject, str) ->
-      @throwErr "cy.assign() can only accept a string or number!" if not (_.isString(str) or _.isFinite(str))
-      @throwErr "cy.assign() cannot be passed an empty argument!" if _.isBlank(str)
-
-      @prop("runnable").ctx[str] = subject
