@@ -1051,6 +1051,24 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.focused().then ($focused) ->
         expect($focused.get(0)).to.eq input.get(0)
 
+    it "does not use forceFocusedEl if that el is not in the document", ->
+      input = @cy.$("input:first")
+
+      @cy
+        .get("input:first").focus().focused().then ->
+          input.remove()
+        .focused().then ($el) ->
+          expect($el).to.be.null
+
+    it "nulls forceFocusedEl if that el is not in the document", ->
+      input = @cy.$("input:first")
+
+      @cy
+        .get("input:first").focus().focused().then ->
+          input.remove()
+        .focused().then ($el) ->
+          expect(cy.prop("forceFocusedEl")).to.be.null
+
     it "refuses to use blacklistFocusedEl", ->
       input = @cy.$("input:first")
       @cy.prop("blacklistFocusedEl", input.get(0))
@@ -1251,6 +1269,35 @@ describe "$Cypress.Cy Actions Commands", ->
           done()
 
         @cy.focus()
+
+      ## theres no way to automatically make this test fail
+      ## except to force it using a stub. you could force the
+      ## command("blur") method to reject with sinon-as-promised
+      ## but we'll allow the other commands to go through
+      it "slurps up failed promises", (done) ->
+        ctx = @
+
+        @cy.command = _.wrap @cy.command, (orig, args...) ->
+          if args[0] is "blur"
+            ## force contains to return false here to
+            ## simulate the element we're trying to blur
+            ## isnt in the DOM
+            ctx.sandbox.stub(ctx.cy, "_contains").returns(false)
+
+          orig.apply(@, args)
+
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "Cannot call .blur() because the current subject has been removed or detached from the DOM."
+          done()
+
+        ## we remove the first element and then
+        ## focus on the 2nd.  the 2nd focus causes
+        ## a blur on the 1st element, which should
+        ## cause an error because its no longer in the DOM
+        @cy
+          .get("input:first").focus()
+          .get("input:last").focus()
 
   context "#blur", ->
     it "should blur the originally focused element", (done) ->

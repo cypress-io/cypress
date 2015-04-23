@@ -63,7 +63,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         error: true
         log: true
 
-      @ensureDom(options.$el)
+      @ensureDom(options.$el, "focus")
 
       if options.log
         command = Cypress.command
@@ -90,7 +90,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       cleanup = null
       hasFocused = false
 
-      promise = new Promise (resolve) =>
+      promise = new Promise (resolve, reject) =>
         ## we need to bind to the focus event here
         ## because some browsers will not ever fire
         ## the focus event if the window itself is not
@@ -132,10 +132,16 @@ $Cypress.register "Actions", (Cypress, _, $) ->
             ## only blur if we have a focused element AND its not
             ## currently ourselves!
             if $focused and $focused.get(0) isnt options.$el.get(0)
+
               @command("blur", {$el: $focused, error: false, log: false}).then =>
                 simulate()
             else
               simulate()
+
+          ## need to catch potential errors from blur
+          ## here and reject the promise
+          .catch (err) ->
+            reject(err)
 
       promise.timeout(timeout).catch Promise.TimeoutError, (err) =>
         cleanup()
@@ -152,7 +158,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         error: true
         log: true
 
-      @ensureDom(options.$el)
+      @ensureDom(options.$el, "blur")
 
       if options.log
         command = Cypress.command
@@ -561,7 +567,14 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
       try
         d = @sync.document()
-        el = @prop("forceFocusedEl") or d.get(0).activeElement
+        forceFocusedEl = @prop("forceFocusedEl")
+        if forceFocusedEl
+          if @_contains(forceFocusedEl)
+            el = forceFocusedEl
+          else
+            @prop("forceFocusedEl", null)
+        else
+          el = d.get(0).activeElement
 
         ## return null if we have an el but
         ## the el is body or the el is currently the
