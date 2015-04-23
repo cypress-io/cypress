@@ -17,36 +17,51 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       ## figure out the options which actually change the behavior of traversals
       deltaOptions = $Cypress.Utils.filterDelta(options, {visible: null, exist: true})
 
-      start = ->
+      start = (aliasType) ->
         return if options.log is false
 
         options.command ?= Cypress.command
           message: [selector, deltaOptions]
           referencesAlias: alias?.alias
-          aliasType: "dom"
+          aliasType: aliasType
 
-      log = ($el) ->
+      log = (value, aliasType = "dom") ->
         return if options.log is false
 
-        start() if not options.command
+        start(aliasType) if not options.command
 
-        options.command.set
-          $el: $el
-          numRetries: options.retries
+        obj = {}
+
+        if aliasType is "dom"
+          _.extend obj,
+            $el: value
+            numRetries: options.retries
+
+        _.extend obj,
           onConsole: ->
-            obj = {"Command":  "get"}
+            obj2 = {"Command":  "get"}
             key = if alias then "Alias" else "Selector"
-            obj[key] = selector
+            obj2[key] = selector
 
-            _.extend obj,
-              Options:  deltaOptions
-              Returned: $el
-              Elements: $el?.length
+            switch aliasType
+              when "dom"
+                _.extend obj2,
+                  Options:  deltaOptions
+                  Returned: value
+                  Elements: value?.length
 
-        options.command.snapshot().end()
+              when "primitive"
+                _.extend obj2,
+                  Returned: value
+
+            return obj2
+
+        options.command.set(obj).snapshot().end()
 
       if alias = @getAlias(selector)
         {subject, command} = alias
+
+        ## if this is a DOM element
         if $Cypress.Utils.hasElement(subject)
           if @_contains(subject)
             log(subject)
@@ -54,8 +69,12 @@ $Cypress.register "Querying", (Cypress, _, $) ->
           else
             @_replayFrom command
             return null
+        else
+          ## log as primitive
+          log(subject, "primitive")
+          return subject
 
-      start()
+      start("dom")
 
       ## attempt to query for the elements by withinSubject context
       $el = @$(selector, options.withinSubject)

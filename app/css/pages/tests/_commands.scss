@@ -146,7 +146,6 @@
 
     .command-alias {
       border-radius: 10px;
-      background-color: darken(#D4EAFF, 3%);
       color: #777888;
       padding: 0px 5px;
       display: inline-block;
@@ -156,7 +155,11 @@
       }
 
       &.dom {
+        background-color: darken(#D4EAFF, 3%);
+      }
 
+      &.primitive {
+        background-color: darken(#FFE0DE, 3%);
       }
     }
   }

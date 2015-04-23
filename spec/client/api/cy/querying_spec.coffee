@@ -317,6 +317,18 @@ describe "$Cypress.Cy Querying Commands", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
 
+      it "logs primitive aliases", (done) ->
+        @Cypress.on "log", (log) ->
+          expect(log.pick("$el", "numRetries", "referencesAlias", "aliasType")).to.deep.eq {
+            referencesAlias: "f"
+            aliasType: "primitive"
+          }
+          done()
+
+        @cy
+          .noop("foo").as("f")
+          .get("@f")
+
       it "logs immediately before resolving", (done) ->
         @Cypress.on "log", (log) ->
           expect(log.pick("state", "referencesAlias", "aliasType")).to.deep.eq {
@@ -363,7 +375,29 @@ describe "$Cypress.Cy Querying Commands", ->
             Elements: 1
           }
 
+      it "#onConsole with a primitive alias", ->
+        @cy.noop({foo: "foo"}).as("obj").get("@obj").then (obj) ->
+          expect(@log.attributes.onConsole()).to.deep.eq {
+            Command: "get"
+            Alias: "@obj"
+            Returned: obj
+          }
+
     describe "alias references", ->
+      it "can get alias primitives", ->
+        cy
+          .noop("foo").as("f")
+          .get("@f").then (foo) ->
+            expect(foo).to.eq "foo"
+
+      it "can get alias objects", ->
+        cy
+          .noop({}).as("obj")
+          .get("@obj").then (obj) ->
+            expect(obj).to.deep.eq {}
+
+      it "can get route aliases"
+
       it "re-queries for an existing alias", ->
         body = @cy.$("body")
 
