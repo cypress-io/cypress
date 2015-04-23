@@ -137,7 +137,7 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
       if reHttp.test(url)
         url = new Uri(url)
       else
-        url = (new Uri()).setPath(url)
+        url = @handleRelativeUrl(url)
 
       ## add the __intitial=true query param
       url.addQueryParam("__initial", true)
@@ -150,11 +150,13 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
       reHttp.test(url)
 
     @missingProtocolAndHostIsLocalOrWww = (url) ->
+      str = url.toString()
+
       ## normalize the host for 'localhost'
       ## and then check if we are missing
       ## http and our host is
       ## localhost / 127.0.0.1 / 0.0.0.0
-      return false if not (reLocalHost.test(url.toString()) or reWww.test(url.toString()))
+      return false if not (reLocalHost.test(str) or reWww.test(str) or @isUrlLike(str))
 
       switch url.protocol()
         when ""
@@ -167,6 +169,29 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
           return true
         else
           return false
+
+    @isUrlLike = (url) ->
+      ## beta.cypress.io
+      ## aws.amazon.com/bucket/foo
+      ## foo.bar.co.uk
+      ## foo.bar.co.uk/asdf
+      url = url.split("/")[0].split(".")
+      url.length is 3 or url.length is 4
+
+    @handleRelativeUrl = (url) ->
+      ## Uri will assume the host incorrectly
+      ## when we omit a protocol and simply provide
+      ## the 'path' as the string
+      ## so we have to shift this back to the path
+      ## to properly handle query params later
+      ## and also juggle path potentially just being
+      ## a forward slash
+      url = new Uri(url)
+      p = url.path()
+      p = if p isnt "/" then p else ""
+      url.setPath(url.host() + p)
+      url.setHost("")
+      url
 
     @normalizeUrl = (url) ->
       ## A properly formed URL will always have a trailing
@@ -182,10 +207,15 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
       ## http://getbootstrap.com/css => 301 http://getbootstrap.com/css/
       ##
       ## A file being served by the file system never has a leading slash
-      ## index.html NOT index.html/
+      ## or a trailing slash
+      ## index.html NOT index.html/ or /index.html
       ##
       url = _.ltrim(url, "/")
-      url = new Uri(url)
+
+      if reHttp.test(url) or reWww.test(url) or reLocalHost.test(url) or @isUrlLike(url)
+        url = new Uri(url)
+      else
+        url = @handleRelativeUrl(url)
 
       ## automatically insert http:// if url host
       ## is localhost, 0.0.0.0, or 127.0.0.1
@@ -199,7 +229,7 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
       if url.protocol() and not url.path()
         url.addTrailingSlash()
 
-      url.toString()
+      _.ltrim url.toString(), "/"
 
     @getRemoteUrl = (url, baseUrl) ->
       ## if we have a root url and our url isnt full qualified

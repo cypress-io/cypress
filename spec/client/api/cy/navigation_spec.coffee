@@ -4,7 +4,7 @@ describe "$Cypress.Cy Navigation Commands", ->
   context "#visit", ->
     it "triggers visit:start on the remote iframe", (done) ->
       $("iframe").one "visit:start", (e, url) ->
-        expect(url).to.eq "foo/"
+        expect(url).to.eq "foo"
         done()
 
       @cy.visit("/foo")
@@ -16,7 +16,7 @@ describe "$Cypress.Cy Navigation Commands", ->
     it "changes the src of the iframe to the initial src", ->
       @cy.visit("/foo").then ->
         src = $("iframe").attr("src")
-        expect(src).to.eq "/__remote/foo/?__initial=true"
+        expect(src).to.eq "/__remote/foo?__initial=true"
 
     it "immediately updates the stored href on load", (done) ->
       _storeHref = @sandbox.spy @cy, "_storeHref"
@@ -67,8 +67,8 @@ describe "$Cypress.Cy Navigation Commands", ->
           @cy.visit(source).then ->
             expect(trigger).to.be.calledWith "visit:start", destination
 
-      it "index.html => index.html/", ->
-        @urlIs "index.html", "index.html/"
+      it "index.html => index.html", ->
+        @urlIs "index.html", "index.html"
 
       it "http://github.com => http://github.com/", ->
         @urlIs "http://github.com", "http://github.com/"
@@ -79,7 +79,7 @@ describe "$Cypress.Cy Navigation Commands", ->
       it "home => http://localhost:3000/home/", ->
         @baseUrl "http://localhost:3000"
 
-        @urlIs "home", "http://localhost:3000/home/"
+        @urlIs "home", "http://localhost:3000/home"
 
       it "home => http://localhost:3000/#/home", ->
         @baseUrl "http://localhost:3000/#/"
@@ -87,12 +87,12 @@ describe "$Cypress.Cy Navigation Commands", ->
         @urlIs "home", "http://localhost:3000/#/home"
 
       it "http://github.com/foo/bar#/home => http://github.com/foo/bar/#/home", ->
-        @urlIs "http://github.com/foo/bar#/home", "http://github.com/foo/bar/#/home"
+        @urlIs "http://github.com/foo/bar#/home", "http://github.com/foo/bar#/home"
 
       it "foo/bar?baz=quux => http://0.0.0.0:8000/foo/bar/?baz=quux", ->
         @baseUrl "http://0.0.0.0:8000"
 
-        @urlIs "foo/bar?baz=quux", "http://0.0.0.0:8000/foo/bar/?baz=quux"
+        @urlIs "foo/bar?baz=quux", "http://0.0.0.0:8000/foo/bar?baz=quux"
 
       it "localhost:8000 => http://localhost:8000/", ->
         @urlIs "localhost:8000", "http://localhost:8000/"

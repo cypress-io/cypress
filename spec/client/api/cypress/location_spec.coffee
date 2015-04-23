@@ -132,7 +132,28 @@ describe "$Cypress.Location API", ->
 
     describe "http-less urls", ->
       it "trims url", ->
-        @url "/index.html/", "index.html/"
+        @url "/index.html/", "index.html"
+
+      it "does not add trailing slash with query params", ->
+        @url "timeout?ms=1000", "timeout?ms=1000"
+
+      it "does not strip path segments", ->
+        @url "fixtures/html/sinon.html", "fixtures/html/sinon.html"
+
+      it "formats urls with domains", ->
+        @url "beta.cypress.io", "http://beta.cypress.io/"
+
+      it "formats urls with domains and query params", ->
+        @url "beta.cypress.io?foo=bar", "http://beta.cypress.io/?foo=bar"
+
+      it "formats urls with 3 segments and path", ->
+        @url "aws.amazon.com/s3/bucket", "http://aws.amazon.com/s3/bucket"
+
+      it "formats urls with 4 segments", ->
+        @url "foo.bar.co.uk", "http://foo.bar.co.uk/"
+
+      it "formats urls with 4 segments and path", ->
+        @url "foo.bar.co.uk/baz/quux", "http://foo.bar.co.uk/baz/quux"
 
     describe "localhost, 0.0.0.0, 127.0.0.1", ->
       _.each ["localhost", "0.0.0.0", "127.0.0.1"], (host) =>
@@ -171,3 +192,13 @@ describe "$Cypress.Location API", ->
     it "does not insert trailing slash without a host", ->
       url = $Cypress.Location.createInitialRemoteSrc("index.html")
       expect(url).to.eq "/__remote/index.html?__initial=true"
+
+    it "handles no host + query params", ->
+      url = @normalizeUrl("timeout?ms=1000")
+      url = $Cypress.Location.createInitialRemoteSrc(url)
+      expect(url).to.eq "/__remote/timeout?ms=1000&__initial=true"
+
+    it "does not strip off path", ->
+      url = @normalizeUrl("fixtures/html/sinon.html")
+      url = $Cypress.Location.createInitialRemoteSrc(url)
+      expect(url).to.eq "/__remote/fixtures/html/sinon.html?__initial=true"
