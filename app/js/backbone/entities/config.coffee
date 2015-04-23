@@ -2,7 +2,6 @@
 
   ECL_ATTRIBUTE = "ecl-"
 
-
   class Entities.Config extends Entities.Model
     defaults: ->
       collapsed:  @getConfig("collapsed")
@@ -101,7 +100,23 @@
 
       _.bind(get, @)
 
+    run: (bool = true) ->
+      @set("running", bool)
+
+    isRunning: ->
+      !!@get("running")
+
+    ## should probably rename this to be something like
+    ## 'command:hovered'.  Since our App.config is dictating
+    ## interpreting the behavior and then dictating what
+    ## exactly should happen.  The other areas are simply
+    ## broadcasting events.  This should move out of App.config
+    ## as well to something else. Perhaps an app or a utility.
     revertDom: (command, init = true) ->
+      ## dont revert, instead fire a completely different
+      ## message
+      return @trigger("cannot:revert:dom", init) if @isRunning()
+
       return @trigger "restore:dom" if not init
 
       return if not command.hasSnapshot()

@@ -246,6 +246,8 @@
 
       ## used to be called runIframeSuite
       run: (iframe, specWindow, remoteIframe, options, fn) ->
+        App.config.run()
+
         ## trigger before:run prior to setting up the runner
         @trigger "before:run"
 
@@ -254,6 +256,8 @@
         @Cypress.initialize(specWindow, remoteIframe, App.config.getExternalInterface())
 
         @Cypress.run (err) =>
+          App.config.run(false)
+
           @Cypress.after(err)
 
           ## trigger the after run event

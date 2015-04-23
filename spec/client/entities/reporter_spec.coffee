@@ -211,6 +211,19 @@ describe "Reporter Entity", ->
 
       expect(@trigger).to.be.calledWith "after:run"
 
+    it "calls App.config.run() before run", ->
+      configRun = @sandbox.spy App.config, "run"
+
+      @reporter.run()
+      expect(configRun).to.be.calledOnce
+
+    it "calls App.config.run(false) after run", ->
+      configRun = @sandbox.spy App.config, "run"
+
+      @run.callsArg(0)
+      @reporter.run()
+      expect(configRun).to.be.calledWith(false)
+
   context "#triggerLoadSpecFrame", ->
     beforeEach ->
       @trigger = @sandbox.spy(@reporter, "trigger")

@@ -113,6 +113,12 @@
 
           @detachedId = null
 
+    cannotRevertDom: (init) ->
+      if init
+        @ui.message.text("Cannot revert DOM while tests are running").addClass("cannot-revert").show()
+      else
+        @removeRevertMessage()
+
     revertToDom: (dom, options) ->
       ## replaces the iframes body with the dom object
       contents = @$remote.contents()
@@ -145,7 +151,7 @@
 
     removeRevertMessage: ->
       @reverted = false
-      @ui.message.empty().hide()
+      @ui.message.removeClass("cannot-revert").empty().hide()
 
     getZIndex: (el) ->
       if /^(auto|0)$/.test el.css("zIndex") then 1000 else Number el.css("zIndex")

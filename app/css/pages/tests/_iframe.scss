@@ -53,6 +53,10 @@
       &:empty {
         display: none;
       }
+
+      &.cannot-revert {
+        background-color: $fail;
+      }
     }
 
     header {

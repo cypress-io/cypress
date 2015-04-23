@@ -19,6 +19,9 @@
       @listenTo runner, "load:spec:iframe", (iframe, options) ->
         @loadIframe view, runner, iframe, options
 
+      @listenTo config, "cannot:revert:dom", (init) ->
+        view.cannotRevertDom(init)
+
       @listenTo config, "revert:dom", (dom, options) ->
         view.revertToDom dom, options
 
