@@ -151,16 +151,16 @@ describe "$Cypress.Cy Actions Commands", ->
         .get("input:text:first").type("foo")
         .get("input:text:last").type("bar")
 
-    describe "input types", ->
-      _.each ["password", "email", "number", "date", "week", "month", "time", "datetime", "datetime-local", "search", "url"], (type) ->
-        it "accepts input [type=#{type}]", ->
-          input = @cy.$("<input type='#{type}' id='input-type-#{type}' />")
+    # describe "input types", ->
+    #   _.each ["password", "email", "number", "date", "week", "month", "time", "datetime", "datetime-local", "search", "url"], (type) ->
+    #     it "accepts input [type=#{type}]", ->
+    #       input = @cy.$("<input type='#{type}' id='input-type-#{type}' />")
 
-          @cy.$("body").append(input)
+    #       @cy.$("body").append(input)
 
-          @cy.get("#input-type-#{type}").type("1234").then ($input) ->
-            expect($input).to.have.value "1234"
-            expect($input.get(0)).to.eq input.get(0)
+    #       @cy.get("#input-type-#{type}").type("1234").then ($input) ->
+    #         expect($input).to.have.value "1234"
+    #         expect($input.get(0)).to.eq input.get(0)
 
     describe "{enter}", ->
       beforeEach ->
