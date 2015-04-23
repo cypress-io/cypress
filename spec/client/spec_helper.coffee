@@ -88,6 +88,13 @@ window.enterCommandTestingMode = (fixture = "html/dom") ->
       ## and Runner and Chai overrides
       @cy = $Cypress.Cy.create(@Cypress, {})
 
+      ## lets prevent getting a ton of noise
+      ## from ending early. we need to do that
+      ## in test mode, and this wont affect our
+      ## tests around this method (since thats
+      ## tested in integration mode)
+      @sandbox.stub(@cy, "endedEarlyErr")
+
       @Cypress.trigger "initialize",
         $remoteIframe: @iframe
         config: ->
