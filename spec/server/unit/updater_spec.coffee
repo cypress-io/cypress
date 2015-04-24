@@ -226,6 +226,53 @@ describe "Updater", ->
               expect(stdout).to.eq "0755\n"
               done()
 
+    describe "#trash", ->
+      beforeEach ->
+        fs.outputFileAsync("random/dirs/and/file.txt", "foobarbaz!")
+
+      it "moves directory to trash", (done) ->
+        @updater.trash("random").then ->
+          fs.statAsync("random")
+            .then -> done("random should not exist!")
+            .catch -> done()
+
+    describe "#install", ->
+      beforeEach ->
+        @install = @sandbox.stub(@updater.client, "install").callsArgWith(1, null)
+        @trash   = @sandbox.stub(@updater, "trash").resolves()
+
+      it "trashes current appPath", ->
+        @updater.install("/Users/bmann/app_path", "/Users/bmann/app_exec_path").then =>
+          expect(@trash).to.be.calledWith("/Users/bmann/app_path")
+
+      it "calls client#install with appPath", ->
+        @updater.install("/Users/bmann/app_path", "/Users/bmann/app_exec_path").then =>
+          expect(@updater.client.install).to.be.calledWith "/Users/bmann/app_path"
+
+      it "calls App.quit", ->
+        @updater.install("/Users/bmann/app_path", "/Users/bmann/app_exec_path").then =>
+          expect(@updater.App.quit).to.be.calledOnce
+
+      context "args", ->
+        beforeEach ->
+          @run     = @sandbox.stub(@updater.client, "run")
+
+        it "uses args from App.argv", ->
+          args = ["--foo", "--bar"]
+          @updater.App.argv = args
+          @updater.install("/Users/bmann/app_path", "/Users/bmann/app_exec_path").then =>
+            expect(@run).to.be.calledWith("/Users/bmann/app_exec_path", args)
+
+        it "uses empty array with no args from App.argv", ->
+          @updater.App.argv = null
+          @updater.install("/Users/bmann/app_path", "/Users/bmann/app_exec_path").then =>
+            expect(@run).to.be.calledWith("/Users/bmann/app_exec_path", [])
+
+        it "passes args except for --updating", ->
+          @updater.App.argv = ["--updating", "--foo"]
+          @updater.install("/Users/bmann/app_path", "/Users/bmann/app_exec_path").then =>
+            expect(@run).to.be.calledWith("/Users/bmann/app_exec_path", ["--foo"])
+
   context "integration", ->
     before ->
       ## 10 min timeout

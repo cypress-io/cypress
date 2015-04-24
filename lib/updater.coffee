@@ -5,7 +5,11 @@ Promise        = require("bluebird")
 _              = require("lodash")
 glob           = require("glob")
 chmodr         = require("chmodr")
+trash          = require("trash")
 Log            = require("./log")
+
+trash  = Promise.promisify(trash)
+chmodr = Promise.promisify(chmodr)
 
 class Updater
   constructor: (App) ->
@@ -35,20 +39,28 @@ class Updater
     NwUpdater = require("node-webkit-updater")
     @client ?= new NwUpdater @getPackage()
 
+  trash: (appPath) ->
+    ## moves the current appPath to the trash
+    ## this is the path to the existing app
+    Log.info "trashing current app", appPath: appPath
+
+    trash([appPath])
+
   install: (appPath, execPath) ->
     c = @getClient()
 
     args = @App.argv ? []
     args = _.without(args, "--updating")
 
-    Log.info "installing updated app", appPath: appPath, execPath: execPath
+    @trash(appPath).then =>
+      Log.info "installing updated app", appPath: appPath, execPath: execPath
 
-    c.install appPath, (err) =>
-      Log.info "running updated app", args: args
+      c.install appPath, (err) =>
+        Log.info "running updated app", args: args
 
-      c.run(execPath, args)
+        c.run(execPath, args)
 
-      @App.quit()
+        @App.quit()
 
   ## copies .cy to the new app path
   ## so we dont lose our cache, logs, etc
@@ -68,7 +80,7 @@ class Updater
       fs.copyAsync(cyConfigPath, newAppConfigPath).then ->
 
         ## change all the permissions recursively to 0755
-        Promise.promisify(chmodr)(newAppConfigPath, 0o755)
+        chmodr(newAppConfigPath, 0o755)
 
   runInstaller: (newAppPath) ->
     @copyCyDataTo(newAppPath).bind(@).then ->
