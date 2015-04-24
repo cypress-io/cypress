@@ -44,6 +44,9 @@
       ## display the GUI
       App.execute "gui:display"
 
+      ## focus this updating app
+      App.execute "gui:focus"
+
       ## start the updates being applied app so the user knows its still a-happen-ning
       return App.execute "start:updates:applied:app", options.appPath, options.execPath
 
