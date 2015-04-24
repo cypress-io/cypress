@@ -300,7 +300,7 @@ describe "$Cypress.Mocha API", ->
 
       context "cy chain", ->
         beforeEach ->
-          @chain = @cy.noop({foo: "foo"}).assign("foo")
+          @chain = @cy.noop({foo: "foo"}).as("foo")
 
           ## simulate not returning cy from beforeEach
           return null
