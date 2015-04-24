@@ -8,20 +8,29 @@
 
 root = "../../../"
 
-Promise    = require("bluebird")
-expect     = require("chai").expect
-# Cypress    = require("#{root}lib/cypress")
-cache      = require("#{root}lib/cache")
-Log        = require("#{root}lib/log")
-Fixtures   = require "#{root}/spec/server/helpers/fixtures"
+Promise      = require("bluebird")
+chai         = require("chai")
+# Cypress      = require("#{root}lib/cypress")
+cache        = require("#{root}lib/cache")
+Log          = require("#{root}lib/log")
+sinon        = require("sinon")
+sinonChai    = require("sinon-chai")
+sinonPromise = require("sinon-as-promised")
+Fixtures     = require("#{root}/spec/server/helpers/fixtures")
 
-module.exports = (parentWindow, loadApp) ->
+chai.use(sinonChai)
+
+expect = chai.expect
+
+module.exports = (parentWindow, gui, loadApp) ->
 
   beforeEach ->
+    @sandbox = sinon.sandbox.create()
     cache.remove()
     Log.clearLogs()
 
   afterEach ->
+    @sandbox.restore()
     Promise.delay(100)
 
   ## Project must be the very first test because
@@ -112,6 +121,21 @@ module.exports = (parentWindow, loadApp) ->
 
     it "has SecretSauce defined globally", ->
       expect(@contentWindow.SecretSauce).to.be.an("object")
+
+  describe "Applying Updates", ->
+    beforeEach ->
+      loadApp(@, {start: false}).then =>
+        @App.vent.on "app:entities:ready", =>
+          @sandbox.stub @App.updater, "install"
+
+        ## trick the argv into thinking we are updating!
+        @App.start argv: ["path/to/app_path", "path/to/exec_path", "--updating"]
+
+    it "passes appPath and execPath to install", ->
+      expect(@App.updater.install).to.be.calledWith "path/to/app_path", "path/to/exec_path"
+
+    it "informs the user we are applying updates!", ->
+      expect(@$(".well")).to.contain("Applying Updates and Restarting...")
 
   ## other tests which need writing
   ## 1. logging in (stub the github response)

@@ -2,6 +2,7 @@ Promise    = require("bluebird")
 chai       = require("chai")
 chaiJquery = require("chai-jquery")
 fs         = require("fs-extra")
+_          = require("lodash")
 nwSpec     = require("../tests/nw_spec.coffee")
 
 moveWindow = (gui, window, left) ->
@@ -47,13 +48,28 @@ module.exports = (parentWindow, gui) ->
     closeCurrentWindow()
     runner.close(true)
 
-  loadIframe = ->
+  loadIframe = (startApp) ->
     p = new Promise (resolve, reject) ->
       openWindow = ->
         currentWindow = gui.Window.open pathToIndex,
           height: 400
           width: 300
           show: false
+
+        if startApp is false
+          currentWindow.once "document-end", ->
+            App   = currentWindow.window.App
+            start = App.start
+
+            opts = null
+
+            App.start = (options = {}) ->
+              ## preverse our options here
+              opts = options
+
+              App.start = (overrides = {}) ->
+                _.extend opts, overrides
+                start.call(App, opts)
 
         currentWindow.once "loaded", ->
           resolve(currentWindow.window)
@@ -89,8 +105,11 @@ module.exports = (parentWindow, gui) ->
 
       fail.call(@, test, error)
 
-    loadApp = (ctx) ->
-      loadIframe().then (contentWindow) ->
+    loadApp = (ctx, options = {}) ->
+      _.defaults options,
+        start: true
+
+      loadIframe(options.start).then (contentWindow) ->
         ctx.$   = contentWindow.$
         ctx.App = contentWindow.App
         ctx.contentWindow = contentWindow
@@ -98,8 +117,9 @@ module.exports = (parentWindow, gui) ->
         chai.use (chai, utils) ->
           chaiJquery(chai, utils, ctx.$)
 
-    ## pass our remoteWindow into the spec function
-    nwSpec(parentWindow, loadApp)
+    ## pass our parent's contentWindow
+    ## the nw gui and the loadApp function
+    nwSpec(parentWindow, gui, loadApp)
 
     ## tell mocha to run since we have now
     ## built our suite / test structure
