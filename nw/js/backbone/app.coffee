@@ -35,10 +35,17 @@
     ## create an App.updater model which is shared across the app
     App.updater = App.request "new:updater:entity"
 
+    ## our config + updater are ready
+    App.vent.trigger "app:entities:ready", App
+
     ## if we are updating then do not start the app
     ## or display any UI. just finish installing the updates
     if options.updating
-      return App.updater.install(options.appPath, options.execPath)
+      ## display the GUI
+      App.execute "gui:display"
+
+      ## start the updates being applied app so the user knows its still a-happen-ning
+      return App.execute "start:updates:applied:app", options.appPath, options.execPath
 
     App.config.getUser().then (user) ->
       ## check cache store for user
