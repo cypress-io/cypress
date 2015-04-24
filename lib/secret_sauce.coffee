@@ -85,6 +85,7 @@ SecretSauce.Socket =
       @watchedTestFile.on "ready", =>
         resolve @watchedTestFile
       @watchedTestFile.on "error", (err) =>
+        @Log.info "watching test file failed", {error: err, path: testFilePath}
         reject err
 
   _startListening: (chokidar, path) ->
