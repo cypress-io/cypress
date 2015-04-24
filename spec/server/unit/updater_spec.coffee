@@ -213,12 +213,18 @@ describe "Updater", ->
         fs.removeAsync("new").then ->
           fs.removeAsync(".cy/foo")
 
-      it "copies .cy folder to new app path", ->
+      it "copies .cy folder to new app path", (done) ->
         @updater.copyCyDataTo("new/app/path").then ->
           expect(fs.statSync("new/app/path/Contents/Resources/app.nw/.cy").isDirectory()).to.be.true
           expect(fs.statSync("new/app/path/Contents/Resources/app.nw/.cy/foo/bar.txt").isFile()).to.be.true
           fs.readJsonAsync("new/app/path/Contents/Resources/app.nw/.cy/cache").then (obj) ->
             expect(obj).to.deep.eq {foo: "bar"}
+
+            ## make sure we have 0755 permissions!
+            require("child_process").exec "stat -f %Mp%Lp new/app/path/Contents/Resources/app.nw/.cy/foo/bar.txt", (err, stdout, stderr) ->
+              done(err) if err
+              expect(stdout).to.eq "0755\n"
+              done()
 
   context "integration", ->
     before ->
@@ -279,7 +285,7 @@ describe "Updater", ->
 
       expect(options.onNewVersion).to.be.calledWith({})
 
-    it "calls optsions.newVersionExists when there is a no version", ->
+    it "calls options.newVersionExists when there is a no version", ->
       @updater.client.checkNewVersion.callsArgWith(0, null, false)
 
       options = {onNoNewVersion: @sandbox.spy()}

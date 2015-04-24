@@ -4,6 +4,7 @@ path           = require("path")
 Promise        = require("bluebird")
 _              = require("lodash")
 glob           = require("glob")
+chmodr         = require("chmodr")
 Log            = require("./log")
 
 class Updater
@@ -56,14 +57,18 @@ class Updater
       glob "**/app.nw/package.json", {cwd: newAppPath}, (err, files) ->
         return reject(err) if err
 
-        appRoot = path.join(newAppPath, path.dirname(files[0]), config.app.cy_path)
+        newAppConfigPath = path.join(newAppPath, path.dirname(files[0]), config.app.cy_path)
 
-        Log.info "copying .cy to tmp destination", destination: appRoot
+        Log.info "copying .cy to tmp destination", destination: newAppConfigPath
 
-        resolve(appRoot)
+        resolve(newAppConfigPath)
 
-    p.then (appRoot) ->
-      fs.copyAsync(path.join(process.cwd(), config.app.cy_path), appRoot)
+    p.then (newAppConfigPath) ->
+      cyConfigPath  = path.join(process.cwd(), config.app.cy_path)
+      fs.copyAsync(cyConfigPath, newAppConfigPath).then ->
+
+        ## change all the permissions recursively to 0755
+        Promise.promisify(chmodr)(newAppConfigPath, 0o755)
 
   runInstaller: (newAppPath) ->
     @copyCyDataTo(newAppPath).bind(@).then ->
