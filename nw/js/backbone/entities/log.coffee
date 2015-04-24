@@ -18,6 +18,10 @@
   class Entities.LogsCollection extends Entities.Collection
     model: Entities.Log
 
+    comparator: (log) ->
+      if date = log.get("timestamp")
+        -global.moment(date).unix()
+
     offLog: ->
       App.config.offLog()
 
