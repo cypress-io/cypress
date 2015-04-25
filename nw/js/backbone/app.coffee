@@ -1,10 +1,18 @@
 @App = do (Backbone, Marionette) ->
 
+  parseCoords = (args) ->
+    coords = _.find args, (arg) -> _.str.startsWith(arg, "--coords")
+
+    return if not coords
+    [x, y] = coords.split("=")[1].split("x")
+    {x: x, y: y}
+
   parseArgv = (options) ->
     _.defaults options,
       env: process.env["NODE_ENV"]
       debug: "--debug" in options.argv
       updating: "--updating" in options.argv
+      coords: parseCoords(options.argv)
 
     if options.updating
       _.extend options,
@@ -30,7 +38,7 @@
     ## create a App.config model from the passed in options
     App.config = App.request("config:entity", options)
 
-    App.config.log("Starting Native App")
+    App.config.log("Starting Desktop App", options: options)
 
     ## create an App.updater model which is shared across the app
     App.updater = App.request "new:updater:entity"
@@ -42,10 +50,7 @@
     ## or display any UI. just finish installing the updates
     if options.updating
       ## display the GUI
-      App.execute "gui:display"
-
-      ## focus this updating app
-      App.execute "gui:focus"
+      App.execute "gui:display", options.coords
 
       ## start the updates being applied app so the user knows its still a-happen-ning
       return App.execute "start:updates:applied:app", options.appPath, options.execPath
@@ -68,6 +73,6 @@
       App.vent.trigger "start:footer:app"
 
       ## display the GUI
-      App.execute "gui:display"
+      App.execute "gui:display", options.coords
 
   return App

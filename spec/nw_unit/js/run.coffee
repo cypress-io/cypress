@@ -72,7 +72,7 @@ module.exports = (parentWindow, gui) ->
                 start.call(App, opts)
 
         currentWindow.once "loaded", ->
-          resolve(currentWindow.window)
+          resolve(currentWindow)
 
       if currentWindow
         currentWindow.once "closed", openWindow
@@ -109,10 +109,13 @@ module.exports = (parentWindow, gui) ->
       _.defaults options,
         start: true
 
-      loadIframe(options.start).then (contentWindow) ->
+      loadIframe(options.start).then (currentWindow) ->
+        contentWindow = currentWindow.window
+
         ctx.$   = contentWindow.$
         ctx.App = contentWindow.App
         ctx.contentWindow = contentWindow
+        ctx.currentWindow = currentWindow
 
         chai.use (chai, utils) ->
           chaiJquery(chai, utils, ctx.$)

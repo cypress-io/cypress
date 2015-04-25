@@ -64,6 +64,27 @@ describe "Updater", ->
       client2 = u.getClient()
       expect(client).to.eq(client2)
 
+  context "#getCoords", ->
+    beforeEach ->
+      @updater = Updater({})
+
+    it "returns undefined without coords", ->
+      expect(@updater.getCoords()).to.be.undefined
+
+    it "returns --coords=800x600", ->
+      @updater.setCoords {x: 800, y: 600}
+      expect(@updater.getCoords()).to.eq "--coords=800x600"
+
+  context "#getArgs", ->
+    beforeEach ->
+      @updater = Updater({})
+      @updater.getClient()
+      @sandbox.stub(@updater.client, "getAppPath").returns("foo")
+      @sandbox.stub(@updater.client, "getAppExec").returns("bar")
+
+    it "compacts null values", ->
+      expect(@updater.getArgs()).to.deep.eq ["foo", "bar", "--updating"]
+
   context "#run", ->
     beforeEach ->
       @updater = Updater({quit: @sandbox.spy()})
@@ -202,6 +223,13 @@ describe "Updater", ->
         c = @updater.client
         @updater.runInstaller("/Users/bmann/newApp").then =>
           expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec(), "--updating", "--debug"], {})
+
+      it "passes along App.coords if they exist", ->
+        @updater.setCoords {x: 600, y: 1200}
+        @updater.App.argv = ["--debug"]
+        c = @updater.client
+        @updater.runInstaller("/Users/bmann/newApp").then =>
+          expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec(), "--updating", "--coords=600x1200", "--debug"], {})
 
     describe "#copyCyDataTo", ->
       beforeEach ->

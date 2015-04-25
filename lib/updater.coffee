@@ -21,13 +21,26 @@ class Updater
 
     @App        = App
     @client     = null
+    @coords     = null
     @callbacks  = {}
 
     @patchAppPath()
 
+  setCoords: (@coords) ->
+
+  getCoords: ->
+    return if not c = @coords
+
+    "--coords=#{c.x}x#{c.y}"
+
+  getArgs: ->
+    c = @getClient()
+
+    _.compact [c.getAppPath(), c.getAppExec(), "--updating", @getCoords()].concat(@App.argv)
+
   patchAppPath: ->
     if process.env["NODE_ENV"] isnt "production"
-      @getClient().getAppPath = ->  process.cwd()
+      @getClient().getAppPath = -> process.cwd()
 
   getPackage: ->
     pkg = fs.readJsonSync path.join(process.cwd(), "package.json")
@@ -85,13 +98,11 @@ class Updater
   runInstaller: (newAppPath) ->
     @copyCyDataTo(newAppPath).bind(@).then ->
 
-      c = @getClient()
-
-      args = [c.getAppPath(), c.getAppExec(), "--updating"].concat(@App.argv ? [])
+      args = @getArgs()
 
       Log.info "running installer from tmp", destination: newAppPath, args: args
 
-      c.runInstaller(newAppPath, args, {})
+      @getClient().runInstaller(newAppPath, args, {})
 
       @App.quit()
 

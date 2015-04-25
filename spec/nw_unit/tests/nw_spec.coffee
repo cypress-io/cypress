@@ -126,16 +126,20 @@ module.exports = (parentWindow, gui, loadApp) ->
     beforeEach ->
       loadApp(@, {start: false}).then =>
         @App.vent.on "app:entities:ready", =>
-          @sandbox.stub @App.updater, "install"
+          @moveTo  = @sandbox.spy @currentWindow, "moveTo"
+          @install = @sandbox.stub @App.updater, "install"
 
         ## trick the argv into thinking we are updating!
-        @App.start argv: ["path/to/app_path", "path/to/exec_path", "--updating"]
+        @App.start argv: ["path/to/app_path", "path/to/exec_path", "--updating", "--coords=1136x30"]
 
     it "passes appPath and execPath to install", ->
-      expect(@App.updater.install).to.be.calledWith "path/to/app_path", "path/to/exec_path"
+      expect(@install).to.be.calledWith "path/to/app_path", "path/to/exec_path"
 
     it "informs the user we are applying updates!", ->
       expect(@$(".well")).to.contain("Applying Updates and Restarting...")
+
+    it "moves the window to the coords arguments", ->
+      expect(@moveTo).to.be.calledWith "1136", "30"
 
   ## other tests which need writing
   ## 1. logging in (stub the github response)

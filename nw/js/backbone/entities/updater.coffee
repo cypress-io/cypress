@@ -59,6 +59,9 @@
     install: (appPath, execPath) ->
       @getUpdater().install(appPath, execPath)
 
+    setCoords: (coords = {}) ->
+      @getUpdater().setCoords(coords)
+
   API =
     newUpdater: (attrs) ->
       manifest = App.request "gui:manifest"

@@ -15,8 +15,14 @@
       win.isShown = true
       win.show()
 
-    displayGui: ->
+    displayGui: (coords) ->
       win = gui.Window.get()
+
+      ## if we have coords then automatically
+      ## move the window to this
+      if coords and coords.x and coords.y
+        win.moveTo(coords.x, coords.y)
+        @show(win)
 
       if not App.config.env("production")
         gui.App.clearCache()
@@ -55,6 +61,9 @@
 
       tray.on "click", (coords) =>
         coords = translate(coords)
+
+        ## set these coords on the updater
+        App.updater.setCoords(coords) if App.updater
 
         win.moveTo(coords.x, coords.y)
 
@@ -169,8 +178,8 @@
   App.reqres.setHandler "gui:get", ->
     API.get()
 
-  App.commands.setHandler "gui:display", ->
-    API.displayGui()
+  App.commands.setHandler "gui:display", (coords) ->
+    API.displayGui coords
 
   App.commands.setHandler "gui:whitelist", (domain) ->
     API.whitelist domain
