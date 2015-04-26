@@ -24,7 +24,6 @@ $Cypress.register "Waiting", (Cypress, _, $) ->
 
   Cypress.addDualCommand
 
-    ## break this up into private methods using Cypress.extend
     wait: (subject, msOrFnOrAlias, options = {}) ->
       msOrFnOrAlias ?= 1e9
 
