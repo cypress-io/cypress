@@ -2,10 +2,19 @@ $Cypress.register "XHR", (Cypress, _, $) ->
 
   validHttpMethodsRe = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/
   nonAjaxAssets      = /\.(js|html|css)$/
+  validAliasApi      = /^(\d+|all)$/
 
   SERVER     = "server"
   TMP_SERVER = "tmpServer"
   TMP_ROUTES = "tmpRoutes"
+
+  ## need to upgrade our server
+  ## to allow for a setRequest hook
+  ## to get the difference between
+  ## pending and not pending we just
+  ## need to look at the diff between
+  ## prop(requests) and prop(responses)
+  setRequest = (xhr, alias) ->
 
   setResponse = (xhr, alias) ->
     alias ?= "anonymous"
@@ -321,3 +330,29 @@ $Cypress.register "XHR", (Cypress, _, $) ->
         if !response.hasBeenWaitedOn and response.alias is alias
           response.hasBeenWaitedOn = true
           return response
+
+    ## this should actually be getRequestsByAlias
+    ## since this will return all requests and not
+    ## responses
+    getResponsesByAlias: (alias) ->
+      [alias, prop] = alias.split(".")
+
+      if prop and not validAliasApi.test(prop)
+        @throwErr "'#{prop}' is not a valid alias property. Only 'numbers' or 'all' is permitted."
+
+      if prop is "0"
+        @throwErr "'0' is not a valid alias property. Are you trying to ask for the first response? If so write @#{alias}.1"
+
+      # matching = _.where @prop("requests"), {alias: alias}
+      matching = _.where @prop("responses"), {alias: alias}
+
+      ## return the whole array if prop is all
+      return matching if prop is "all"
+
+      ## else if prop its a digit and we need to return
+      ## the 1-based response from the array
+      return matching[_.toNumber(prop) - 1] if prop
+
+      ## else return the last matching response
+      return _.last(matching)
+

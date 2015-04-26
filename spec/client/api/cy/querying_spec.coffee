@@ -317,6 +317,19 @@ describe "$Cypress.Cy Querying Commands", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
 
+      it "logs route aliases", ->
+        @cy
+          .server()
+          .route(/users/, {}).as("getUsers")
+          .window().then (win) ->
+            win.$.get("/users")
+          .get("@getUsers").then ->
+            expect(@log.pick("message", "referencesAlias", "aliasType")).to.deep.eq {
+              message: "@getUsers"
+              referencesAlias: "getUsers"
+              aliasType: "route"
+            }
+
       it "logs primitive aliases", (done) ->
         @Cypress.on "log", (log) ->
           expect(log.pick("$el", "numRetries", "referencesAlias", "aliasType")).to.deep.eq {
@@ -383,6 +396,19 @@ describe "$Cypress.Cy Querying Commands", ->
             Returned: obj
           }
 
+      it "#onConsole with a route alias", ->
+        @cy
+          .server()
+          .route(/users/, {}).as("getUsers")
+          .window().then (win) ->
+            win.$.get("/users")
+          .get("@getUsers").then (obj) ->
+            expect(@log.attributes.onConsole()).to.deep.eq {
+              Command: "get"
+              Alias: "@getUsers"
+              Returned: obj
+            }
+
     describe "alias references", ->
       it "can get alias primitives", ->
         cy
@@ -395,8 +421,6 @@ describe "$Cypress.Cy Querying Commands", ->
           .noop({}).as("obj")
           .get("@obj").then (obj) ->
             expect(obj).to.deep.eq {}
-
-      it "can get route aliases"
 
       it "re-queries for an existing alias", ->
         body = @cy.$("body")
@@ -420,6 +444,65 @@ describe "$Cypress.Cy Querying Commands", ->
             ## we should have re-queried for these inputs
             ## which should have reduced their length by 1
             expect($inputs).to.have.length(@length - 1)
+
+      describe "route aliases", ->
+        it "returns the xhr", ->
+          @cy
+            .server()
+            .route(/users/, {}).as("getUsers")
+            .window().then (win) ->
+              win.$.get("/users")
+            .get("@getUsers").then (xhr) ->
+              expect(xhr.url).to.eq "/users"
+
+        it "returns null if no xhr is found", ->
+          @cy
+            .server()
+            .route(/users/, {}).as("getUsers")
+            .get("@getUsers").then (xhr) ->
+              expect(xhr).to.be.null
+
+        it "returns an array of xhrs", ->
+          @cy
+            .server()
+            .route(/users/, {}).as("getUsers")
+            .window().then (win) ->
+              win.$.get("/users", {num: 1})
+              win.$.get("/users", {num: 2})
+            .get("@getUsers.all").then (xhrs) ->
+              expect(xhrs).to.be.an("array")
+              expect(xhrs[0].url).to.eq "/users?num=1"
+              expect(xhrs[1].url).to.eq "/users?num=2"
+
+        it "returns the 1st xhr", ->
+          @cy
+            .server()
+            .route(/users/, {}).as("getUsers")
+            .window().then (win) ->
+              win.$.get("/users", {num: 1})
+              win.$.get("/users", {num: 2})
+            .get("@getUsers.1").then (xhr1) ->
+              expect(xhr1.url).to.eq "/users?num=1"
+
+        it "returns the 2nd xhr", ->
+          @cy
+            .server()
+            .route(/users/, {}).as("getUsers")
+            .window().then (win) ->
+              win.$.get("/users", {num: 1})
+              win.$.get("/users", {num: 2})
+            .get("@getUsers.2").then (xhr2) ->
+              expect(xhr2.url).to.eq "/users?num=2"
+
+        it "returns the 3rd xhr as null", ->
+          @cy
+            .server()
+            .route(/users/, {}).as("getUsers")
+            .window().then (win) ->
+              win.$.get("/users", {num: 1})
+              win.$.get("/users", {num: 2})
+            .get("@getUsers.3").then (xhr3) ->
+              expect(xhr3).to.be.null
 
       # it "re-queries the dom if any element in an alias isnt visible", ->
       #   inputs = @cy.$("input")
@@ -526,6 +609,36 @@ describe "$Cypress.Cy Querying Commands", ->
           done()
 
         @cy.get("foobar")
+
+      it "throws when alias property is '0'", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "'0' is not a valid alias property. Are you trying to ask for the first response? If so write @getUsers.1"
+          done()
+
+        @cy
+          .server()
+          .route(/users/, {}).as("getUsers")
+          .get("@getUsers.0")
+
+      it "throws when alias property isnt just a digit", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "'1b' is not a valid alias property. Only 'numbers' or 'all' is permitted."
+          done()
+
+        @cy
+          .server()
+          .route(/users/, {}).as("getUsers")
+          .get("@getUsers.1b")
+
+      it "throws when alias property isnt a digit or 'all'", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "'all ' is not a valid alias property. Only 'numbers' or 'all' is permitted."
+          done()
+
+        @cy
+          .server()
+          .route(/users/, {}).as("getUsers")
+          .get("@getUsers.all ")
 
   context "#contains", ->
     it "finds the nearest element by :contains selector", ->

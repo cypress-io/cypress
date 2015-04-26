@@ -22,7 +22,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
         options.command ?= Cypress.command
           message: [selector, deltaOptions]
-          referencesAlias: alias?.alias
+          referencesAlias: aliasObj?.alias
           aliasType: aliasType
 
       log = (value, aliasType = "dom") ->
@@ -40,7 +40,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
         _.extend obj,
           onConsole: ->
             obj2 = {"Command":  "get"}
-            key = if alias then "Alias" else "Selector"
+            key = if aliasObj then "Alias" else "Selector"
             obj2[key] = selector
 
             switch aliasType
@@ -54,25 +54,39 @@ $Cypress.register "Querying", (Cypress, _, $) ->
                 _.extend obj2,
                   Returned: value
 
+              when "route"
+                _.extend obj2,
+                  Returned: value
+
             return obj2
 
         options.command.set(obj).snapshot().end()
 
-      if alias = @getAlias(selector)
-        {subject, command} = alias
+      ## we always want to strip everything after the first '.'
+      ## since we support alias propertys like '1' or 'all'
+      if aliasObj = @getAlias(selector.split(".")[0])
+        {subject, alias, command} = aliasObj
 
-        ## if this is a DOM element
-        if $Cypress.Utils.hasElement(subject)
-          if @_contains(subject)
-            log(subject)
-            return subject
+        switch
+          ## if this is a DOM element
+          when $Cypress.Utils.hasElement(subject)
+            if @_contains(subject)
+              log(subject)
+              return subject
+            else
+              @_replayFrom command
+              return null
+
+          ## if this is a route command
+          when command.name is "route"
+            alias = _.compact([alias, selector.split(".")[1]]).join(".")
+            responses = @getResponsesByAlias(alias) ? null
+            log(responses, "route")
+            return responses
           else
-            @_replayFrom command
-            return null
-        else
-          ## log as primitive
-          log(subject, "primitive")
-          return subject
+            ## log as primitive
+            log(subject, "primitive")
+            return subject
 
       start("dom")
 
