@@ -106,6 +106,15 @@ $Cypress.register "Waiting", (Cypress, _, $) ->
 
     _waitString: (subject, str, options) ->
 
+      getNumRequests = (alias) =>
+        requests = @prop("aliasRequests") ? {}
+        requests[alias] ?= 0
+        requests[alias] += 1
+
+        @prop("aliasRequests", requests)
+
+        _.ordinalize requests[alias]
+
       checkForXhr = (alias, options) ->
         xhr = @getLastResponseByAlias(alias)
 
@@ -118,9 +127,14 @@ $Cypress.register "Waiting", (Cypress, _, $) ->
             Alias: xhr
           }, alias, options.retries, err)
 
-        options.error ?= "cy.wait() timed out waiting for a response to the route: '#{alias}'. No response ever occured."
+        options.error ?= "cy.wait() timed out waiting for the #{getNumRequests(alias)} response to the route: '#{alias}'. No response ever occured."
 
+        ## store the current runnable timeout here
+        ## and manage it ourselves
         options.runnableTimeout ?= @_timeout()
+
+        ## prevent the runnable from timing out entirely
+        @_clearTimeout()
 
         @_retry ->
           checkForXhr.call(@, alias, options)

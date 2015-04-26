@@ -198,7 +198,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           @cy._timeout(200)
 
           @cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting for a response to the route: 'fetch'. No response ever occured."
+            expect(err.message).to.include "cy.wait() timed out waiting for the 1st response to the route: 'fetch'. No response ever occured."
             done()
 
           @cy
@@ -258,7 +258,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           @cy._timeout(200)
 
           @cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting for a response to the route: 'foo'. No response ever occured."
+            expect(err.message).to.include "cy.wait() timed out waiting for the 1st response to the route: 'foo'. No response ever occured."
             done()
 
           @cy
@@ -271,7 +271,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           @cy._timeout(200)
 
           @cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting for a response to the route: 'bar'. No response ever occured."
+            expect(err.message).to.include "cy.wait() timed out waiting for the 1st response to the route: 'bar'. No response ever occured."
             done()
 
           @cy.on "retry", _.once =>
@@ -291,7 +291,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           @cy._timeout(200)
 
           @cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting for a response to the route: 'foo'. No response ever occured."
+            expect(err.message).to.include "cy.wait() timed out waiting for the 1st response to the route: 'foo'. No response ever occured."
             done()
 
           @cy.on "retry", _.once =>
@@ -353,7 +353,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           @cy.on "fail", (err) =>
             @cy.on "retry", -> done("should not have retried!")
 
-            expect(err.message).to.include "cy.wait() timed out waiting for a response to the route: 'bar'. No response ever occured."
+            expect(err.message).to.include "cy.wait() timed out waiting for the 1st response to the route: 'bar'. No response ever occured."
             _.delay ->
               done()
             , 500
@@ -388,6 +388,51 @@ describe "$Cypress.Cy Waiting Commands", ->
             .route(/foo/, {foo: "foo"}).as("foo")
             .route(/bar/, {bar: "bar"}).as("bar")
             .wait(["@foo", "@bar"])
+
+        it "throws waiting for the 3rd response", (done) ->
+          resp = {foo: "foo"}
+          response = 0
+
+          @cy._timeout(300)
+
+          @cy.on "fail", (err) ->
+            expect(err.message).to.include "cy.wait() timed out waiting for the 3rd response to the route: 'getUsers'. No response ever occured."
+            done()
+
+          @cy.on "retry", =>
+            response += 1
+
+            ## dont send the 3rd response
+            return @cy.off("retry") if response is 3
+            win = @cy.sync.window()
+            win.$.get("/users", {num: response})
+
+          @cy
+            .server()
+            .route(/users/, resp).as("getUsers")
+            .wait(["@getUsers", "@getUsers", "@getUsers"])
+
+        it "throws waiting for the 2nd response", (done) ->
+          resp = {foo: "foo"}
+          response = 0
+
+          @cy._timeout(300)
+
+          @cy.on "fail", (err) ->
+            expect(err.message).to.include "cy.wait() timed out waiting for the 2nd response to the route: 'getUsers'. No response ever occured."
+            done()
+
+          ## dont send the 2nd response
+          @cy.on "retry", _.once =>
+            response += 1
+            win = @cy.sync.window()
+            win.$.get("/users", {num: response})
+
+          @cy
+            .server()
+            .route(/users/, resp).as("getUsers")
+            .wait("@getUsers")
+            .wait("@getUsers")
 
     describe "multiple alias arguments", ->
       it "can wait for all requests to have a response", ->
@@ -449,6 +494,13 @@ describe "$Cypress.Cy Waiting Commands", ->
           .wait("@getUsers").then (xhr) ->
             expect(xhr.url).to.eq "/users?num=4"
             expect(xhr.responseText).to.eq JSON.stringify(resp)
+
+      describe "errors", ->
+        beforeEach ->
+          @allowErrors()
+
+        it "throws and includes the incremented alias number"
+          ## use underscore string here for formatting the number
 
     describe ".log", ->
       beforeEach ->
