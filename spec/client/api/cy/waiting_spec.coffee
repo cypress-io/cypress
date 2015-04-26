@@ -184,6 +184,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
       describe "errors", ->
         beforeEach ->
+          @currentTest.enableTimeouts(false)
           @allowErrors()
 
         it "throws when alias doesnt match a route", (done) ->
@@ -194,6 +195,8 @@ describe "$Cypress.Cy Waiting Commands", ->
           @cy.get("body").as("b").wait("@b")
 
         it "throws when route is never resolved", (done) ->
+          @cy._timeout(200)
+
           @cy.on "fail", (err) ->
             expect(err.message).to.include "cy.wait() timed out waiting for a response to the route: 'fetch'. No response ever occured."
             done()
@@ -201,9 +204,6 @@ describe "$Cypress.Cy Waiting Commands", ->
           @cy
             .server()
             .route("GET", /.*/, {}).as("fetch")
-            .then ->
-              ## reduce the timeout to speed up tests!
-              @cy._timeout(100)
             .wait("@fetch")
 
         it "throws when alias is missing '@' but matches an available alias", (done) ->
@@ -215,6 +215,200 @@ describe "$Cypress.Cy Waiting Commands", ->
             .server()
             .route("*", {}).as("getAny")
             .wait("getAny").then ->
+
+        it "throws when 2nd alias doesnt match any registered alias", (done) ->
+          @cy.on "fail", (err) ->
+            expect(err.message).to.eq "cy.wait() could not find a registered alias for: 'bar'.  Available aliases are: 'foo'."
+            done()
+
+          @cy
+            .server()
+            .route(/foo/, {}).as("foo")
+            .window().then (win) ->
+              win.$.get("/foo")
+            .wait(["@foo", "@bar"])
+
+        it "throws when 2nd alias is missing '@' but matches an available alias", (done) ->
+          @cy.on "fail", (err) ->
+            expect(err.message).to.eq "Invalid alias: 'bar'. You forgot the '@'. It should be written as: '@bar'."
+            done()
+
+          @cy
+            .server()
+            .route(/foo/, {}).as("foo")
+            .route(/bar/, {}).as("bar")
+            .window().then (win) ->
+              win.$.get("/foo")
+            .wait(["@foo", "bar"])
+
+        it "throws when 2nd alias isnt a route alias", (done) ->
+          @cy.on "fail", (err) ->
+            expect(err.message).to.include "cy.wait() can only accept aliases for routes.  The alias: 'bar' did not match a route."
+            done()
+
+          @cy
+            .server()
+            .route(/foo/, {}).as("foo")
+            .get("body").as("bar")
+            .window().then (win) ->
+              win.$.get("/foo")
+            .wait(["@foo", "@bar"])
+
+        it "throws whenever an alias times out", (done) ->
+          @cy._timeout(200)
+
+          @cy.on "fail", (err) ->
+            expect(err.message).to.include "cy.wait() timed out waiting for a response to the route: 'foo'. No response ever occured."
+            done()
+
+          @cy
+            .server()
+            .route(/foo/, {}).as("foo")
+            .route(/bar/, {}).as("bar")
+            .wait(["@foo", "@bar"])
+
+        it "throws when bar cannot resolve", (done) ->
+          @cy._timeout(200)
+
+          @cy.on "fail", (err) ->
+            expect(err.message).to.include "cy.wait() timed out waiting for a response to the route: 'bar'. No response ever occured."
+            done()
+
+          @cy.on "retry", _.once =>
+            win = @cy.sync.window()
+            win.$.get("/foo")
+            null
+
+          @cy
+            .server()
+            .route(/foo/, {foo: "foo"}).as("foo")
+            .route(/bar/, {bar: "bar"}).as("bar")
+            .wait(["@foo", "@bar"])
+
+        it "throws when foo cannot resolve", (done) ->
+          @enableTimeouts(false)
+
+          @cy._timeout(200)
+
+          @cy.on "fail", (err) ->
+            expect(err.message).to.include "cy.wait() timed out waiting for a response to the route: 'foo'. No response ever occured."
+            done()
+
+          @cy.on "retry", _.once =>
+            win = @cy.sync.window()
+            win.$.get("/bar")
+            null
+
+          @cy
+            .server()
+            .route(/foo/, {foo: "foo"}).as("foo")
+            .route(/bar/, {bar: "bar"}).as("bar")
+            .wait(["@foo", "@bar"])
+
+        it "does not throw another timeout error when 2nd alias is missing @", (done) ->
+          Promise.onPossiblyUnhandledRejection (err) ->
+            done(err)
+
+          @cy._timeout(500)
+
+          @cy.on "fail", (err) ->
+            expect(err.message).to.eq "Invalid alias: 'bar'. You forgot the '@'. It should be written as: '@bar'."
+            _.delay ->
+              done()
+            , 500
+
+          @cy
+            .server()
+            .route(/foo/, {}).as("foo")
+            .route(/bar/, {}).as("bar")
+            .wait(["@foo", "bar"])
+
+        it "does not throw again when 2nd alias doesnt reference a route", (done) ->
+          Promise.onPossiblyUnhandledRejection done
+
+          @cy._timeout(300)
+
+          @cy.on "fail", (err) ->
+            expect(err.message).to.eq "cy.wait() can only accept aliases for routes.  The alias: 'bar' did not match a route."
+            _.delay ->
+              done()
+            , 500
+
+          @cy
+            .server()
+            .route(/foo/, {}).as("foo")
+            .get("body").as("bar")
+            .wait(["@foo", "@bar"])
+
+        it "does not throw twice when both aliases time out", (done) ->
+          Promise.onPossiblyUnhandledRejection done
+
+          @cy._timeout(200)
+
+          @cy.on "retry", (options) ->
+            ## force bar to time out before foo
+            if /bar/.test options.error
+              options.runnableTimeout = 0
+
+          @cy.on "fail", (err) =>
+            @cy.on "retry", -> done("should not have retried!")
+
+            expect(err.message).to.include "cy.wait() timed out waiting for a response to the route: 'bar'. No response ever occured."
+            _.delay ->
+              done()
+            , 500
+
+          @cy
+            .server()
+            .route(/foo/, {foo: "foo"}).as("foo")
+            .route(/bar/, {bar: "bar"}).as("bar")
+            .wait(["@foo", "@bar"])
+
+        it "does not retry after 1 alias times out", (done) ->
+          Promise.onPossiblyUnhandledRejection done
+
+          @cy._timeout(500)
+
+          @cy.on "retry", (options) ->
+            ## force bar to time out before foo
+            if /bar/.test options.error
+              options.runnableTimeout = 0
+
+          @cy.on "fail", (err) =>
+            ## should not retry waiting for 'foo'
+            ## because bar has timed out
+            @cy.on "retry", -> done("should not have retried!")
+
+            _.delay ->
+              done()
+            , 500
+
+          @cy
+            .server()
+            .route(/foo/, {foo: "foo"}).as("foo")
+            .route(/bar/, {bar: "bar"}).as("bar")
+            .wait(["@foo", "@bar"])
+
+    describe "multiple alias arguments", ->
+      it "can waits for all requests to have a response", ->
+        resp1 = {foo: "foo"}
+        resp2 = {bar: "bar"}
+
+        ## what if we pass the same alias 3 times
+        ## to wait?
+
+        @cy
+          .server()
+          .route(/users/, resp1).as("getUsers")
+          .route(/posts/, resp2).as("getPosts")
+          .window().then (win) ->
+            win.$.get("/users")
+            win.$.get("/posts")
+          .wait(["@getUsers", "@getPosts"]).spread (xhr1, xhr2) ->
+            obj1 = JSON.parse(xhr1.responseText)
+            obj2 = JSON.parse(xhr2.responseText)
+            expect(obj1).to.deep.eq resp1
+            expect(obj2).to.deep.eq resp2
 
     describe ".log", ->
       beforeEach ->
@@ -254,6 +448,10 @@ describe "$Cypress.Cy Waiting Commands", ->
           @allowErrors()
 
         it ".log", (done) ->
+          @enableTimeouts(false)
+
+          @cy._timeout(200)
+
           numRetries = 0
 
           @cy.on "fail", (err) =>
@@ -272,9 +470,6 @@ describe "$Cypress.Cy Waiting Commands", ->
               expect(@log.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
 
             done()
-
-          @cy.on "command:start", ->
-            @_timeout(150)
 
           @cy.on "retry", ->
             numRetries += 1
@@ -326,3 +521,4 @@ describe "$Cypress.Cy Waiting Commands", ->
       #           "Waited For": _.str.clean(fn.toString())
       #           Retried: "3 times"
       #         }
+

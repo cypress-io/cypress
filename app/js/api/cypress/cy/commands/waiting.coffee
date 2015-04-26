@@ -28,6 +28,11 @@ $Cypress.register "Waiting", (Cypress, _, $) ->
     wait: (subject, msOrFnOrAlias, options = {}) ->
       msOrFnOrAlias ?= 1e9
 
+      ## check to ensure options is an object
+      ## if its a string the user most likely is trying
+      ## to wait on multiple aliases and forget to make this
+      ## an array
+
       ## WHEN WE RETRY A WAIT, WE NEED TO IMMEDIATELY LOG
       ## OUT THE COMMAND SO USERS CAN SEE THAT WE'RE REATTEMPTING
       ## SOMETHING.
@@ -35,13 +40,13 @@ $Cypress.register "Waiting", (Cypress, _, $) ->
       ## WHEN IT ERRORS, YOU'LL STILL SEE IT
       ## ADDITIONALLY NEED TO LOG OUT WAIT FOR NUMBER ARGUMENTS
 
-      options.log ?= (onConsole, alias, error) ->
+      options.log ?= (onConsole, alias, retries, error) ->
         obj = {
           end: true
           snapshot: true
           referencesAlias: alias
           aliasType: "route"
-          numRetries: options.retries
+          numRetries: retries
           onConsole: -> onConsole
         }
 
@@ -55,12 +60,12 @@ $Cypress.register "Waiting", (Cypress, _, $) ->
         when _.isNumber(msOrFnOrAlias)   then @_waitNumber.apply(@, args)
         when _.isFunction(msOrFnOrAlias) then @_waitFunction.apply(@, args)
         when _.isString(msOrFnOrAlias)   then @_waitString.apply(@, args)
+        when _.isArray(msOrFnOrAlias)    then @_waitString.apply(@, args)
         else
           @throwErr "wait() must be invoked with either a number, a function, or an alias for a route!"
 
   Cypress.Cy.extend
     _waitNumber: (subject, ms, options) ->
-      debugger
       ## increase the timeout by the delta
       @_timeout(ms, true)
 
@@ -100,30 +105,60 @@ $Cypress.register "Waiting", (Cypress, _, $) ->
       @_retry(retry, options) if _.isNull(options.value) or options.value is false
 
     _waitString: (subject, str, options) ->
-      if not alias = @getAlias(str)
-        @aliasNotFoundFor(str)
 
-      ## if this alias is for a route then poll
-      ## until we find the response xhr object
-      ## by its alias
-      {alias, command} = alias
+      checkForXhr = (alias, options) ->
+        xhr = @getResponseByAlias(alias)
 
-      if command.name isnt "route"
-        @throwErr("cy.wait() can only accept aliases for routes.  The alias: '#{alias}' did not match a route.")
+        ## return our xhr object
+        return xhr if xhr
 
-      xhr = @getResponseByAlias(alias)
-
-      return xhr if xhr
-
-      retry = ->
         options.onFail ?= (err) ->
           options.log({
             "Waited For": "alias: '#{alias}' to have a response"
             Alias: xhr
-          }, alias, err)
+          }, alias, options.retries, err)
 
         options.error ?= "cy.wait() timed out waiting for a response to the route: '#{alias}'. No response ever occured."
 
-        @invoke2(@prop("current"), str, options)
+        options.runnableTimeout ?= @_timeout()
 
-      @_retry(retry, options)
+        @_retry ->
+          checkForXhr.call(@, alias, options)
+        , options
+
+      waitForXhr = (str) ->
+        if not aliasObj = @getAlias(str)
+          return @aliasNotFoundFor(str)
+
+        ## if this alias is for a route then poll
+        ## until we find the response xhr object
+        ## by its alias
+        {alias, command} = aliasObj
+
+        if command.name isnt "route"
+          @throwErr("cy.wait() can only accept aliases for routes.  The alias: '#{alias}' did not match a route.")
+
+        ## create shallow copy of each options object
+        checkForXhr.call(@, alias, _.clone(options))
+
+
+      ## we have to juggle a separate array of promises
+      ## in order to cancel them when one bombs
+      ## so they dont just keep retrying and retrying
+      xhrs = []
+
+      Promise
+        .map [].concat(str), (str) =>
+          ## we may get back an xhr value instead
+          ## of a promise, so we have to wrap this
+          ## in another promise :-(
+          xhr = Promise.resolve waitForXhr.call(@, str)
+          xhrs.push(xhr)
+          xhr
+        .then (responses) ->
+          ## if we only asked to wait for one alias
+          ## then return that, else return the array of xhr responses
+          if responses.length is 1 then responses[0] else responses
+        .catch (err) ->
+          _(xhrs).invoke("cancel")
+          throw err
