@@ -390,12 +390,9 @@ describe "$Cypress.Cy Waiting Commands", ->
             .wait(["@foo", "@bar"])
 
     describe "multiple alias arguments", ->
-      it "can waits for all requests to have a response", ->
+      it "can wait for all requests to have a response", ->
         resp1 = {foo: "foo"}
         resp2 = {bar: "bar"}
-
-        ## what if we pass the same alias 3 times
-        ## to wait?
 
         @cy
           .server()
@@ -409,6 +406,49 @@ describe "$Cypress.Cy Waiting Commands", ->
             obj2 = JSON.parse(xhr2.responseText)
             expect(obj1).to.deep.eq resp1
             expect(obj2).to.deep.eq resp2
+
+    describe "multiple separate alias waits", ->
+      it "waits for a 3rd request before resolving", ->
+        resp = {foo: "foo"}
+        response = 0
+
+        @cy.on "retry", =>
+          response += 1
+          win = @cy.sync.window()
+          win.$.get("/users", {num: response})
+
+        @cy
+          .server()
+          .route(/users/, resp).as("getUsers")
+          .wait("@getUsers").then (xhr) ->
+            expect(xhr.url).to.eq "/users?num=1"
+            expect(xhr.responseText).to.eq JSON.stringify(resp)
+          .wait("@getUsers").then (xhr) ->
+            expect(xhr.url).to.eq "/users?num=2"
+            expect(xhr.responseText).to.eq JSON.stringify(resp)
+          .wait("@getUsers").then (xhr) ->
+            expect(xhr.url).to.eq "/users?num=3"
+            expect(xhr.responseText).to.eq JSON.stringify(resp)
+
+      it "waits for the 4th request before resolving", ->
+        resp = {foo: "foo"}
+        response = 0
+
+        @cy.on "retry", =>
+          response += 1
+          win = @cy.sync.window()
+          win.$.get("/users", {num: response})
+
+        @cy
+          .server()
+          .route(/users/, resp).as("getUsers")
+          .wait(["@getUsers", "@getUsers", "@getUsers"]).spread (xhr1, xhr2, xhr3) ->
+            expect(xhr1.url).to.eq "/users?num=1"
+            expect(xhr2.url).to.eq "/users?num=2"
+            expect(xhr3.url).to.eq "/users?num=3"
+          .wait("@getUsers").then (xhr) ->
+            expect(xhr.url).to.eq "/users?num=4"
+            expect(xhr.responseText).to.eq JSON.stringify(resp)
 
     describe ".log", ->
       beforeEach ->

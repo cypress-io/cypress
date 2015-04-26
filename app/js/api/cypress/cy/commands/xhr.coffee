@@ -7,7 +7,19 @@ $Cypress.register "XHR", (Cypress, _, $) ->
   TMP_SERVER = "tmpServer"
   TMP_ROUTES = "tmpRoutes"
 
-  responseNamespace = (alias) -> "response_" + alias
+  setResponse = (xhr, alias) ->
+    alias ?= "anonymous"
+    responses = @prop("responses") ? []
+
+    xhr.alias = alias
+    responses.push(xhr)
+
+    @prop("responses", responses)
+
+  ## need to catalog both requests + responses
+  ## so we know how many are pending, whether
+  ## a request has had a response, etc
+  # responseNamespace = (alias) -> "response_" + alias
 
   startServer = (options) ->
     ## get a handle on our sandbox
@@ -150,7 +162,8 @@ $Cypress.register "XHR", (Cypress, _, $) ->
 
           ## set this response xhr object if we
           ## have an alias for it
-          @prop(responseNamespace(alias), xhr) if alias
+          setResponse.call(@, xhr, alias) #if alias
+          # @prop(responseNamespace(alias), xhr) if alias
 
           ## don't relog afterResponse
           ## if we've already logged the
@@ -296,6 +309,15 @@ $Cypress.register "XHR", (Cypress, _, $) ->
         ## nuke these from cy
         @prop(attr, null)
 
-    getResponseByAlias: (alias) ->
-      if xhr = @prop(responseNamespace(alias))
-        return xhr
+    getLastResponseByAlias: (alias) ->
+      ## find the last response which hasnt already
+      ## been used.
+      responses = @prop("responses") ? []
+
+      for response in responses
+
+        ## we want to return the first response which has
+        ## not already been waited on, and if its alias matches ours
+        if !response.hasBeenWaitedOn and response.alias is alias
+          response.hasBeenWaitedOn = true
+          return response

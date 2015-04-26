@@ -107,7 +107,7 @@ $Cypress.register "Waiting", (Cypress, _, $) ->
     _waitString: (subject, str, options) ->
 
       checkForXhr = (alias, options) ->
-        xhr = @getResponseByAlias(alias)
+        xhr = @getLastResponseByAlias(alias)
 
         ## return our xhr object
         return xhr if xhr
@@ -140,7 +140,6 @@ $Cypress.register "Waiting", (Cypress, _, $) ->
 
         ## create shallow copy of each options object
         checkForXhr.call(@, alias, _.clone(options))
-
 
       ## we have to juggle a separate array of promises
       ## in order to cancel them when one bombs
