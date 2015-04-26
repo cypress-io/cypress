@@ -1,6 +1,24 @@
 describe "$Cypress.Cy Connectors Commands", ->
   enterCommandTestingMode()
 
+  context "#spread", ->
+    it "spreads an array into individual arguments", ->
+      cy.noop([1,2,3]).spread (one, two, three) ->
+        expect(one).to.eq(1)
+        expect(two).to.eq(2)
+        expect(three).to.eq(3)
+
+    describe "errors", ->
+      beforeEach ->
+        @allowErrors()
+
+      it "throws when subject isn't an array", (done) ->
+        @cy.on "fail", (err) =>
+          expect(err.message).to.eq "cy.spread() requires the existing subject be an array!"
+          done()
+
+        @cy.noop({}).spread ->
+
   context "#then", ->
     it "mocha inserts 2 arguments to then: anonymous fn for invoking done(), and done reference itself", ->
       ## this puts tests in place to where if mocha

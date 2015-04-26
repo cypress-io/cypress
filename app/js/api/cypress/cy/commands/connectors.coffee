@@ -3,6 +3,16 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
   remoteJQueryisNotSameAsGlobal = (remoteJQuery) ->
     remoteJQuery and (remoteJQuery isnt $)
 
+  Cypress.addChildCommand
+    spread: (subject, fn) ->
+      ## if this isnt an array blow up right here
+      if not _.isArray(subject)
+        @throwErr("cy.spread() requires the existing subject be an array!")
+
+      subject._spreadArray = true
+
+      @sync.then.call(@, fn)
+
   Cypress.addDualCommand
 
     ## thens can return more "thenables" which are not resolved
@@ -32,7 +42,11 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
       ## allow the 'then' to change the subject to the return value
       ## if its a non null/undefined value else to return the subject
       try
-        ret = fn.call @prop("runnable").ctx, (remoteSubject or subject)
+
+        args = remoteSubject or subject
+        args = if args?._spreadArray then args else [args]
+
+        ret = fn.apply @prop("runnable").ctx, args
 
         ## if ret is a DOM element
         ## and its an instance of the remoteJQuery
