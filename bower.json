@@ -41,6 +41,7 @@
     "bootstrap-contextmenu": "~0.3.2",
     "backbone.marionette": "~2.3.2",
     "moment": "~2.9.0",
-    "sinon-as-promised": "~2.0.3"
+    "sinon-as-promised": "~2.0.3",
+    "underscore.inflection": "~1.2.0"
   }
 }

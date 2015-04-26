@@ -15,6 +15,7 @@ vendor:
   - bower_components/backbone/backbone.js
   - bower_components/backbone.marionette/lib/backbone.marionette.js
   - bower_components/underscore.string/lib/underscore.string.js
+  - bower_components/underscore.inflection/lib/underscore.inflection.js
   - bower_components/spin.js/spin.js
   - bower_components/backbone-query-parameters/backbone.queryparams.js
   - bower_components/backbone.mutators/backbone.mutators.js
