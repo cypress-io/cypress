@@ -60,8 +60,8 @@ describe "$Cypress.Cy XHR Commands", ->
     beforeEach ->
       defaults = {
         ignore: true
-        autoRespond: true
-        autoRespondAfter: 10
+        respond: true
+        delay: 10
         afterResponse: ->
         onError: ->
         onFilter: ->
@@ -123,7 +123,7 @@ describe "$Cypress.Cy XHR Commands", ->
         expect(@cy._sandbox.server.autoRespond).to.be.true
 
     it "can set autoRespond=false", ->
-      @cy.server({autoRespond: false}).then ->
+      @cy.server({respond: false}).then ->
         expect(@cy._sandbox.server.autoRespond).to.be.false
 
     it "sets autoRespondAfter to 10ms by default", ->
@@ -131,8 +131,21 @@ describe "$Cypress.Cy XHR Commands", ->
         expect(@cy._sandbox.server.autoRespondAfter).to.eq 10
 
     it "can set autoRespondAfter to 100ms", ->
-      @cy.server({autoRespondAfter: 100}).then ->
+      @cy.server({delay: 100}).then ->
         expect(@cy._sandbox.server.autoRespondAfter).to.eq 100
+
+    it.only "delay prevents a response from immediately responding", ->
+      clock = @sandbox.useFakeTimers("setTimeout")
+
+      @cy
+        .server({delay: 5000})
+        .route(/users/, {})
+        .window().then (win) ->
+          win.$.get("/users")
+          clock.tick(4000)
+          request = @cy._getSandbox().server.requests[0]
+          debugger
+          expect(request.readyState).to.eq(1)
 
     describe "without sinon present", ->
       beforeEach ->

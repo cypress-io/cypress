@@ -147,8 +147,8 @@ $Cypress.register "XHR", (Cypress, _, $) ->
 
       defaults = {
         ignore: true
-        autoRespond: true
-        autoRespondAfter: 10
+        respond: true
+        delay: 10
         onFilter: (method, url, async, username, password) ->
           ## filter out this request (let it go through)
           ## if this is a GET for a nonAjaxAsset
@@ -220,6 +220,8 @@ $Cypress.register "XHR", (Cypress, _, $) ->
       defaults = {
         method: "GET"
         status: 200
+        # delay: false
+        # respond: true
       }
 
       options = o = {}

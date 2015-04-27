@@ -9,16 +9,18 @@ $Cypress.Server = do ($Cypress, _) ->
       ## remove all references.  check if these are being
       ## GC'd properly
 
+      @queue      = []
       @requests   = []
       @responses  = []
       @onRequests = []
+
       @afterResponse = options.afterResponse
       @onError       = options.onError
+      @delay         = options.delay
 
       @ignore(options.ignore)
       @onFilter(options.onFilter)
-      @autoRespond(options.autoRespond)
-      @autoRespondAfter(options.autoRespondAfter)
+      @respondImmediately(options.respond)
 
       _this = @
 
@@ -42,26 +44,40 @@ $Cypress.Server = do ($Cypress, _) ->
           _this.invokeOnRequest(xhr)
 
         xhr.respond = _.wrap xhr.respond, (orig, args...) ->
-          try
-            orig.apply(@, args)
-          catch e
-            if _.isFunction(_this.onError)
-              _this.onError(xhr, e)
-            else
-              throw e
+          ## if xhr has a delay here we need to wait that
+          ## period of time before attempting to respond
 
-          ## after we loop through all of the responses to make sure
-          ## something can response to this request, we need to emit
-          ## a 404 if nothing matched and sinon slurped up this request
-          ## and simply output its default 404 response
-          if _this.requestDidNotMatchAnyResponses(xhr, args)
-            _this.respondToRequest xhr, {
-              status: 404
-              headers: {}
-              response: ""
-            }
+          _this.queue.push Promise
+            .delay(_this.fakeServer.autoRespondAfter)
+            .cancellable()
+            .then =>
+              try
+                orig.apply(@, args)
+              catch e
+                if _.isFunction(_this.onError)
+                  _this.onError(xhr, e)
+                else
+                  throw e
+
+              ## after we loop through all of the responses to make sure
+              ## something can response to this request, we need to emit
+              ## a 404 if nothing matched and sinon slurped up this request
+              ## and simply output its default 404 response
+              if _this.requestDidNotMatchAnyResponses(xhr, args)
+                _this.respondToRequest xhr, {
+                  status: 404
+                  headers: {}
+                  response: ""
+                }
+
+            ## continue to bubble up errors
+            ## if they happen
+            .catch (err) -> throw err
 
         return xhr
+
+    cancel: ->
+      _.invoke @queue, "cancel"
 
     ## need to find the onRequest based on the matching response
     ## this loops through all the responses, finds the matching one
@@ -119,6 +135,8 @@ $Cypress.Server = do ($Cypress, _) ->
         onRequest: ->
         onResponse: ->
 
+      # @fakeServer.processRequest = _.wrap @fakeServer.processRequest (orig, request) ->
+
       @fakeServer.respondWith (request, fn) =>
         return if request.readyState is 4
 
@@ -165,11 +183,11 @@ $Cypress.Server = do ($Cypress, _) ->
     onRequest: (fn) ->
       @onRequests.push fn
 
-    autoRespond: (bool = true) ->
-      @fakeServer.autoRespond = bool
+    respondImmediately: (bool = true) ->
+      @fakeServer.respondImmediately = bool
 
-    autoRespondAfter: (ms) ->
-      @fakeServer.autoRespondAfter = ms
+    # autoRespondAfter: (ms) ->
+      # @fakeServer.autoRespondAfter = ms
 
     ignore: (bool) ->
       @fakeServer.xhr.useFilters = bool
