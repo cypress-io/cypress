@@ -127,22 +127,20 @@ describe "$Cypress.Cy Server API", ->
       $.get("/users")
       expect(delay).to.be.calledWith 50
 
-    it "returns if isResponding is true", (done) ->
+    it "returns if isResponding is true", ->
       @setup()
-      @server.onRequest (xhr) ->
-        expect(xhr.respond()).to.be.undefined
-        done()
-
+      @server.onRequest (@xhr) =>
       @server.stub url: /users/, response: {}, method: "GET", delay: 50
       $.get("/users")
+      expect(@xhr.isResponding).to.be.true
+      expect(@xhr.respond()).to.be.undefined
 
-    it "returns if isResponding is true on a 404 route", (done) ->
+    it "returns if isResponding is true on a 404 route", ->
       @setup({delay: 100})
-      @server.onRequest (xhr) ->
-        expect(xhr.respond()).to.be.undefined
-        done()
-
+      @server.onRequest (@xhr) =>
       $.get("/users")
+      expect(@xhr.isResponding).to.be.true
+      expect(@xhr.respond()).to.be.undefined
 
     it "does not delay when {respond: false} is on the server", ->
       delay = @sandbox.spy Promise, "delay"
@@ -264,3 +262,23 @@ describe "$Cypress.Cy Server API", ->
 
       @server.queue[0].then (xhr) =>
         expect(onError).to.be.calledWith xhr, undefined, err
+
+  context "#beforeRequest", ->
+    beforeEach ->
+      @fakeServer = @sandbox.useFakeServer()
+      @server = $Cypress.Server.create(@fakeServer, {delay: 10, respond: true, beforeRequest: ->})
+
+    it "invokes beforeRequest with matched route", (done) ->
+      beforeRequest = @sandbox.spy(@server, "beforeRequest")
+      @server.stub url: /users/, response: {}, method: "GET", status: 201
+      @server.onRequest (xhr) ->
+        expect(beforeRequest).to.be.calledWithMatch xhr, xhr.matchedRoute
+        done()
+      $.get("/users")
+
+    it "invokes beforeRequest when 404", (done) ->
+      beforeRequest = @sandbox.spy(@server, "beforeRequest")
+      @server.onRequest (xhr) ->
+        expect(beforeRequest).to.be.calledWithMatch xhr, undefined
+        done()
+      $.get("/users")

@@ -14,6 +14,7 @@ $Cypress.Server = do ($Cypress, _) ->
       @responses  = []
       @onRequests = []
 
+      @beforeRequest = options.beforeRequest
       @afterResponse = options.afterResponse
       @onError       = options.onError
       @_delay        = options.delay
@@ -51,13 +52,13 @@ $Cypress.Server = do ($Cypress, _) ->
           ## push this into our requests array
           _this.requests.push xhr
 
-          ## call the original so sinon does its thing
-          orig.call(@)
-
           ## invokes onRequest callback function on any matching responses
           ## and then also calls this on any global onRequest methods on
           ## our server
           _this.invokeOnRequest(xhr)
+
+          ## call the original so sinon does its thing
+          orig.call(@)
 
         xhr.respond = _.wrap xhr.respond, (orig, args...) ->
           ## return here if we have already responded
@@ -86,18 +87,8 @@ $Cypress.Server = do ($Cypress, _) ->
             .delay(delay)
             .cancellable()
             .then ->
-              try
-                orig.apply(respondCtx, args)
-              catch e
-                if _.isFunction(_this.onError)
-                  _this.onError(xhr, matchedRoute, e)
-                else
-                  throw e
-
-              ## after we loop through all of the responses to make sure
-              ## something can response to this request, we need to emit
-              ## a 404 if nothing matched and sinon slurped up this request
-              ## and simply output its default 404 response
+              orig.apply(respondCtx, args)
+            .then ->
               if _this.requestDidNotMatchAnyResponses(xhr, args)
                 status  = 404
                 headers = {}
@@ -111,15 +102,24 @@ $Cypress.Server = do ($Cypress, _) ->
                 body: body
               }
 
-            .return(xhr)
-
             ## abort xhr's on cancel
             .catch Promise.CancellationError, (err) ->
               xhr.abort()
 
             ## continue to bubble up errors
             ## if they happen
-            .catch (err) -> throw err
+            .catch (err) ->
+              if _.isFunction(_this.onError)
+                _this.onError(xhr, matchedRoute, err)
+              else
+                throw err
+
+              ## return null here so our callback
+              ## functions do not return a new promise
+              null
+
+            ## always return back the xhr
+            .return(xhr)
 
           ## this promise becomes accessible not only to our tests
           ## but also allows us to cancel outstanding responses
@@ -133,6 +133,11 @@ $Cypress.Server = do ($Cypress, _) ->
     ## and calls onRequest on it
     ## also invokes onRequest on our global server object
     invokeOnRequest: (xhr) ->
+
+      beforeRequest = (xhr, route) =>
+        if _.isFunction @beforeRequest
+          @beforeRequest(xhr, route)
+
       ## have to do this ugly variable juggling to bail
       ## out of the loop early so our onRequest is called
       ## only 1 time in case multiple requests match
@@ -146,9 +151,14 @@ $Cypress.Server = do ($Cypress, _) ->
       for response in (@fakeServer.responses or []) by -1
         break if found
 
-        response.response xhr, (options) ->
+        response.response xhr, (route) ->
           found = true
-          options.onRequest.call(xhr, xhr)
+          beforeRequest(xhr, route)
+          route.onRequest.call(xhr, xhr)
+
+      ## else we didnt find anything
+      if not found
+        beforeRequest(xhr)
 
       ## call each onRequest callback with our xhr object
       _.each @onRequests, (onRequest) ->

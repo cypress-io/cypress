@@ -107,47 +107,66 @@ $Cypress.register "XHR", (Cypress, _, $) ->
           xhr.responseText
 
       log = (xhr, route, err) =>
-        alias = route.alias
+        ## does the xhr already
+        ## have a previous command log
+        ## reference?
+        if l = xhr.log
+          ## if we have an error just return
+          return if l.get("error")
 
-        if _.isEmpty(route)
-          availableUrls = @prop("availableUrls") or []
+          ## resnapshot
+          l.snapshot()
 
-        Cypress.command
-          name:      "request"
-          alias:     alias
-          aliasType: "route"
-          type:      "parent"
-          error:     err
-          _route:    route
-          end:       true
-          snapshot:  true
-          onConsole: =>
-            consoleObj = {
-              Method:        xhr.method
-              URL:           xhr.url
-              "Matched URL": route.url
-              Status:        xhr.status
-              Response:      getResponse(xhr)
-              Alias:         alias
-              Request:       xhr
-            }
+          ## err if we have an error
+          ## else just ends
+          if err
+            l.error(err)
+          else
+            l.end()
 
-            ## TODO: TEST THIS
-            if _.isEmpty(route)
-              _.extend consoleObj,
-                Reason: "The URL for request did not match any of your route(s).  It's response was automatically sent back a 404."
-                "Route URLs": availableUrls
+        else
+          alias = route.alias
 
-            consoleObj
-          onRender: ($row) ->
-            klass = if /^2/.test(xhr.status) then "successful" else "bad"
+          if _.isEmpty(route)
+            availableUrls = @prop("availableUrls") or []
 
-            $row.find(".command-message").html ->
-              [
-                "<i class='fa fa-circle #{klass}'></i>" + xhr.method,
-                xhr.status,
-                _.truncate(xhr.url, "20")
-              ].join(" ")
+          ## assign this existing command
+          ## to the xhr so we can reuse it later
+          xhr.log = Cypress.command
+            name:      "request"
+            alias:     alias
+            aliasType: "route"
+            type:      "parent"
+            error:     err
+            _route:    route
+            snapshot:  true
+            onConsole: =>
+              consoleObj = {
+                Method:        xhr.method
+                URL:           xhr.url
+                "Matched URL": route.url
+                Status:        xhr.status
+                Response:      getResponse(xhr)
+                Alias:         alias
+                Request:       xhr
+              }
+
+              ## TODO: TEST THIS
+              if _.isEmpty(route)
+                _.extend consoleObj,
+                  Reason: "The URL for request did not match any of your route(s).  It's response was automatically sent back a 404."
+                  "Route URLs": availableUrls
+
+              consoleObj
+            onRender: ($row) ->
+              klass = if /^2/.test(xhr.status) then "successful" else "bad"
+
+              $row.find(".command-message").html ->
+                [
+                  "<i class='fa fa-circle #{klass}'></i>" + xhr.method,
+                  xhr.status,
+                  _.truncate(xhr.url, "20")
+                ].join(" ")
 
       defaults = {
         ignore: true
@@ -157,28 +176,24 @@ $Cypress.register "XHR", (Cypress, _, $) ->
           ## filter out this request (let it go through)
           ## if this is a GET for a nonAjaxAsset
           method is "GET" and nonAjaxAssets.test(url)
-        onError: (xhr, route, err) =>
-          if route
-            xhr.loggedFailure = true
 
-            err.onFail = ->
-              log(xhr, route, err)
+        onError: (xhr, route, err) =>
+          err.onFail = ->
+
+          log(xhr, route, err)
 
           @fail(err)
+
+        beforeRequest: (xhr, route = {}) =>
+          ## log out this request immediately
+          log(xhr, route)
+
         afterResponse: (xhr, route = {}) =>
           alias = route.alias
 
           ## set this response xhr object if we
           ## have an alias for it
           setResponse.call(@, xhr, alias) #if alias
-          # @prop(responseNamespace(alias), xhr) if alias
-
-          ## don't relog afterResponse
-          ## if we've already logged the
-          ## XHR's failure
-          if xhr.loggedFailure
-            delete xhr.loggedFailure
-            return
 
           log(xhr, route)
       }
