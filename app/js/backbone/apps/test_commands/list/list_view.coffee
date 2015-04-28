@@ -10,7 +10,6 @@
 
     modelEvents:
       "change:state"     : "render"
-      "change:response"  : "render"
       "change:visible"   : "render"
       "change:chosen"    : "chosenChanged"
       "change:highlight" : "highlightChanged"

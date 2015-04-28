@@ -100,13 +100,6 @@
       ## replace only the first occurance of the parent selector
       selector.replace parent, ""
 
-    setResponse: (response) ->
-      @set "status", @xhr.status
-      @set "response", _(@xhr.responseText).truncate(40, " ")
-      @set "requestMethod", @xhr.method
-      @set "url", @xhr.url
-      @response = response
-
     hasSnapshot: ->
       !!@getLog().get("snapshot")
 
@@ -171,75 +164,6 @@
     getMaxKeyLength: (obj) ->
       lengths = _.chain(obj).keys().map( (key) -> key.length ).value()
       Math.max.apply(Math, lengths)
-
-    getStubObject: ->
-      stub = @stub
-      stubCall = @stubCall
-      stubObj = @stubObj
-
-      _.defer =>
-        @logSpyOrStubTableProperties(stub, stubCall)
-
-      @convertToArray
-        "Stub:         %O": stub
-        "Stubbed Obj: ": stubObj
-        "Calls:       ": stub.callCount
-
-    getSpyObject: ->
-      spy = @spy
-      spyCall = @spyCall
-      spyObj = @spyObj
-
-      _.defer =>
-        @logSpyOrStubTableProperties(spy, spyCall)
-
-      @convertToArray
-        "Spy:      %O": spy
-        "Spy Obj: ": spyObj
-        "Calls:   ": spy.callCount
-
-    logSpyOrStubTableProperties: (spyOrStub, spyOrStubCall) ->
-      count = spyOrStub.callCount
-      return if count is 0
-
-      ## if spyOrStubCall is passed in just log out this
-      ## specific spyOrStubCall as opposed to all of them
-      ## use its num - 1 for 0 based indexes
-      if spyOrStubCall
-        @logSpyOrStubCall(spyOrStub, spyOrStubCall.num - 1)
-      else
-        for i in [0..count - 1]
-          @logSpyOrStubCall(spyOrStub, i)
-
-    getXhrObject: ->
-      ## return the primary xhr object
-      ## if we dont have a response
-      if not @get("response")
-        return @convertToArray
-          "Command: ": @get("method")
-          "URL:     ": @xhr.url
-          "Request: ": @xhr
-
-      response = @xhr.responseText
-
-      try
-        response = JSON.parse response
-
-      @convertToArray
-        "Command:    ": @get("method")
-        "Status:     ": @xhr.status
-        "URL:        ": @xhr.url
-        "Matched URL:": @response.url
-        "Request:    ": @xhr
-        "Response:   ": response
-
-    getServer: ->
-      @convertToArray
-        "Command:   ": @get("method")
-        "Server:    ": @server
-        "Requests:  ": @requests
-        "Responses: ": @responses
-        "Queue:     ": (@requests.length - @responses.length)
 
   class Entities.CommandsCollection extends Entities.Collection
     model: Entities.Command
