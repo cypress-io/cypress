@@ -19,6 +19,11 @@ $Cypress.register "XHR", (Cypress, _, $) ->
   ## need to look at the diff between
   ## prop(requests) and prop(responses)
   setRequest = (xhr, alias) ->
+    requests = @prop("requests") ? []
+
+    requests.push(xhr)
+
+    @prop("requests", requests)
 
   setResponse = (xhr, alias) ->
     alias ?= "anonymous"
@@ -191,6 +196,8 @@ $Cypress.register "XHR", (Cypress, _, $) ->
           @fail(err)
 
         beforeRequest: (xhr, route = {}) =>
+          setRequest.call(@, xhr, route)
+
           ## log out this request immediately
           log(xhr, route)
 
@@ -329,6 +336,16 @@ $Cypress.register "XHR", (Cypress, _, $) ->
         stubRoute.call(@, options, server)
 
   $Cypress.Cy.extend
+    getPendingRequests: ->
+      return [] if not requests = @prop("requests")
+
+      return requests if not responses = @prop("responses")
+
+      _.difference requests, responses
+
+    getCompletedRequests: ->
+      @prop("responses") ? []
+
     checkForServer: (contentWindow) ->
       if fn = @prop(TMP_SERVER)
         fn()

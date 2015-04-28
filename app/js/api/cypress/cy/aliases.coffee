@@ -27,11 +27,11 @@ do ($Cypress, _) ->
     _aliasDisplayName: (name) ->
       name.replace(aliasDisplayRe, "")
 
-    _getAvailableAliases: ->
+    getAvailableAliases: ->
       _(@_aliases).keys()
 
     aliasNotFoundFor: (name) ->
-      availableAliases = @_getAvailableAliases()
+      availableAliases = @getAvailableAliases()
 
       ## throw a very specific error if our alias isnt in the right
       ## format, but its word is found in the availableAliases

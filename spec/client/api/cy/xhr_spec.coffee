@@ -611,10 +611,31 @@ describe "$Cypress.Cy XHR Commands", ->
     it "calls server#abort", (done) ->
       abort = null
 
-      @Cypress.on "abort", ->
+      @Cypress.once "abort", ->
         expect(abort).to.be.called
         done()
 
       @cy.server().then ->
         abort = @sandbox.spy @cy.prop("server"), "abort"
         @Cypress.trigger "abort"
+
+  context "#getPendingRequests", ->
+    it "returns [] if not requests", ->
+      expect(@cy.getPendingRequests()).to.deep.eq []
+
+    it "returns requests if not responses", ->
+      @cy.prop("requests", ["foo", "bar"])
+      expect(@cy.getPendingRequests()).to.deep.eq ["foo", "bar"]
+
+    it "returns diff between requests + responses", ->
+      @cy.prop("requests", ["foo", "bar", "baz"])
+      @cy.prop("responses", ["bar"])
+      expect(@cy.getPendingRequests()).to.deep.eq ["foo", "baz"]
+
+  # context "#getCompletedRequests", ->
+  #   it "returns [] if not responses", ->
+  #     expect(@cy.getCompletedRequests()).to.deep.eq []
+
+  #   it "returns responses", ->
+  #     @cy.prop("responses", ["foo"])
+  #     expect(@cy.getCompletedRequests()).to.deep.eq ["foo"]
