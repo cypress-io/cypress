@@ -8,6 +8,10 @@ $Cypress.register "XHR", (Cypress, _, $) ->
   TMP_SERVER = "tmpServer"
   TMP_ROUTES = "tmpRoutes"
 
+  Cypress.on "abort", ->
+    if server = @prop("server")
+      server.abort()
+
   ## need to upgrade our server
   ## to allow for a setRequest hook
   ## to get the difference between
@@ -153,17 +157,12 @@ $Cypress.register "XHR", (Cypress, _, $) ->
           ## filter out this request (let it go through)
           ## if this is a GET for a nonAjaxAsset
           method is "GET" and nonAjaxAssets.test(url)
-        onError: (xhr, err) =>
-          if options = xhr.matchedResponse
-
+        onError: (xhr, route, err) =>
+          if route
             xhr.loggedFailure = true
 
-            ## remove this reference from the xhr
-            ## since we already have it as a variable
-            delete xhr.matchedResponse
-
             err.onFail = ->
-              log(xhr, options, err)
+              log(xhr, route, err)
 
           @fail(err)
         afterResponse: (xhr, route = {}) =>
@@ -220,7 +219,7 @@ $Cypress.register "XHR", (Cypress, _, $) ->
       defaults = {
         method: "GET"
         status: 200
-        # delay: false
+        # delay: null
         # respond: true
       }
 

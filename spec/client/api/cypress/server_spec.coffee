@@ -3,3 +3,264 @@ describe "$Cypress.Cy Server API", ->
     fakeServer = @sandbox.useFakeServer()
     server = $Cypress.Server.create(fakeServer, {})
     expect(server).to.be.instanceof $Cypress.Server
+
+  context ".constructor", ->
+    beforeEach ->
+      @fakeServer = @sandbox.useFakeServer()
+      @server = $Cypress.Server.create(@fakeServer, {delay: 10})
+
+    it "sets queue to []", ->
+      expect(@server.queue).to.deep.eq []
+
+    it "has a a reference to sinon's fakeServer", ->
+      expect(@server.fakeServer).to.eq @fakeServer
+
+    it "sets respondImmediately to true by default", ->
+      expect(@fakeServer.respondImmediately).to.be.true
+
+    it "sets delay to 10", ->
+      expect(@server._delay).to.eq 10
+
+  context "#respondImmediately", ->
+    beforeEach ->
+      @setup = (opts = {}) =>
+        _.defaults opts, delay: 10
+        @fakeServer = @sandbox.useFakeServer()
+        @server = $Cypress.Server.create(@fakeServer, opts)
+
+    it "by default calls fakeServer.respond", ->
+      @setup()
+      respond = @sandbox.spy @fakeServer, "respond"
+      $.get("/users")
+      expect(respond).to.be.calledOnce
+
+    it "does not call fakeServer.respond when respondImmediately is false", ->
+      @setup({respond: false})
+      respond = @sandbox.spy @fakeServer, "respond"
+      $.get("/users")
+      expect(respond).not.to.be.called
+
+  context "#server.respond", ->
+    describe "with {respond: false}", ->
+      beforeEach ->
+        @fakeServer = @sandbox.useFakeServer()
+        @server = $Cypress.Server.create(@fakeServer, delay: 10, respond: false)
+
+      it "can forcibly respond to all requests in the queue", ->
+        @server.stub url: /users/, response: {}, method: "GET", respond: false
+        $.get("/users")
+        request = @fakeServer.requests[0]
+        @sandbox.spy request, "respond"
+        @server.respond()
+        expect(request.respond).to.be.called
+
+      it "ignores delay", ->
+        delay = @sandbox.spy Promise, "delay"
+        @server.stub url: /users/, response: {}, method: "GET", delay: 50
+        $.get("/users")
+        @server.respond()
+        expect(delay).to.be.calledWith 0
+
+    describe "with {respond: true}", ->
+      beforeEach ->
+        @fakeServer = @sandbox.useFakeServer()
+        @server = $Cypress.Server.create(@fakeServer, {delay: 10, respond: true})
+
+      it "does not respond to an xhr which has {respond: false} when respondImmediately is true", (done) ->
+        @server.stub url: /users/, response: {}, method: "GET", respond: false
+        $.get("/users")
+
+        ## should not have pushed a promise into our queue
+        expect(@server.queue).to.have.length(0)
+        _.delay =>
+          ## and should not have responded to the request
+          expect(@fakeServer.requests[0].readyState).to.eq 1
+          done()
+        , 100
+
+      it "xhr is put back into the fakeServer queue if its not responded to", ->
+        expect(@fakeServer.queue).to.be.undefined
+        @server.stub url: /users/, response: {}, method: "GET", respond: false
+        $.get("/users")
+        expect(@fakeServer.queue).to.have.length(1)
+
+      it "initially doesnt respond then forcefully responds later", (done) ->
+        @server.stub url: /users/, response: {}, method: "GET", respond: false
+        $.get("/users")
+        _.delay =>
+          request = @fakeServer.requests[0]
+          expect(request.readyState).to.eq 1
+
+          ## now forcefully respond here
+          @server.respond()
+
+          _.delay =>
+            expect(request.readyState).to.eq 4
+            done()
+          , 100
+        , 100
+
+  context "#xhr.respond", ->
+    beforeEach ->
+      @setup = (opts = {}) =>
+        _.defaults opts, delay: 10, respond: true
+        @fakeServer = @sandbox.useFakeServer()
+        @server = $Cypress.Server.create(@fakeServer, opts)
+
+    it "pushes the promise into server.queue", ->
+      @setup()
+      expect(@server.queue).to.have.length(0)
+      $.get("/users")
+      expect(@server.queue).to.have.length(1)
+
+    it "inherits its delay from server.delay", ->
+      delay = @sandbox.spy Promise, "delay"
+      @setup({delay: 100})
+      @server.stub url: /users/, response: {}, method: "GET"
+      $.get("/users")
+      expect(delay).to.be.calledWith 100
+
+    it "can have a specific delay itself", ->
+      delay = @sandbox.spy Promise, "delay"
+      @setup({delay: 20})
+      @server.stub url: /users/, response: {}, method: "GET", delay: 50
+      $.get("/users")
+      expect(delay).to.be.calledWith 50
+
+    it "returns if isResponding is true", (done) ->
+      @setup()
+      @server.onRequest (xhr) ->
+        expect(xhr.respond()).to.be.undefined
+        done()
+
+      @server.stub url: /users/, response: {}, method: "GET", delay: 50
+      $.get("/users")
+
+    it "returns if isResponding is true on a 404 route", (done) ->
+      @setup({delay: 100})
+      @server.onRequest (xhr) ->
+        expect(xhr.respond()).to.be.undefined
+        done()
+
+      $.get("/users")
+
+    it "does not delay when {respond: false} is on the server", ->
+      delay = @sandbox.spy Promise, "delay"
+      @setup({delay: 20, respond: false})
+      @server.stub url: /users/, response: {}, method: "GET", delay: 50
+      $.get("/users")
+      @server.respond()
+      expect(delay).to.be.calledWith 0
+
+    it "does not delay when {respond: false} is set on the xhr", ->
+      delay = @sandbox.spy Promise, "delay"
+      @setup({delay: 20})
+      @server.stub url: /users/, response: {}, method: "GET", delay: 50, respond: false
+      $.get("/users")
+      @server.respond()
+      expect(delay).to.be.calledWith 0
+
+    it "does not delay when {respond: false} is on the server and no stub", ->
+      delay = @sandbox.spy Promise, "delay"
+      @setup({delay: 20, respond: false})
+      $.get("/users")
+      @server.respond()
+      expect(delay).to.be.calledWith 0
+
+  context "#abort", ->
+    beforeEach ->
+      @fakeServer = @sandbox.useFakeServer()
+      @server = $Cypress.Server.create(@fakeServer, {delay: 200, respond: true})
+
+    it "can cancel promises in the queue", (done) ->
+      @server.stub url: /users/, response: {}, method: "GET"
+      @server.stub url: /posts/, response: {}, method: "GET"
+      @server.stub url: /messages/, response: {}, method: "GET"
+      $.get("/users")
+      $.get("/posts")
+      $.get("/messages")
+      expect(@server.queue).to.have.length(3)
+      @server.abort()
+      _.delay =>
+        _.each @fakeServer.requests, (request) ->
+          expect(request.aborted).to.be.true
+          expect(request.readyState).to.eq 0
+        done()
+      , 300
+
+  context "#handleAfterResponse", ->
+    beforeEach ->
+      @fakeServer = @sandbox.useFakeServer()
+      @server = $Cypress.Server.create(@fakeServer, {delay: 10, respond: true, afterResponse: ->})
+
+    it "is called after successful response", ->
+      handleAfterResponse = @sandbox.spy(@server, "handleAfterResponse")
+      @server.stub url: /users/, response: {}, method: "GET", status: 201
+      $.get("/users")
+
+      ## tap into the promise
+      @server.queue[0].then (xhr) =>
+        expect(handleAfterResponse).to.be.calledWith xhr, {status: xhr.status, headers: xhr.responseHeaders, body: xhr.responseText}
+
+    it "is called after 404 response", ->
+      handleAfterResponse = @sandbox.spy(@server, "handleAfterResponse")
+      $.get("/users")
+
+      ## tap into the promise
+      @server.queue[0].then (xhr) =>
+        expect(handleAfterResponse).to.be.calledWith xhr, {status: 404, headers: {}, body: ""}
+
+    it "pushes the response into server.responses", ->
+      handleAfterResponse = @sandbox.spy(@server, "handleAfterResponse")
+      @server.stub url: /users/, response: {}, method: "GET", status: 201
+      $.get("/users")
+
+      ## tap into the promise
+      @server.queue[0].then (xhr) =>
+        expect(@server.responses).to.have.length(1)
+        expect(@server.responses[0]).to.deep.eq {status: 201, headers: {"Content-Type": "application/json"}, body: "{}"}
+
+    it "calls afterResponse with request and request.matchedRoute", ->
+      afterResponse = @sandbox.spy(@server, "afterResponse")
+      @server.stub url: /users/, response: {}, method: "GET", status: 201
+      $.get("/users")
+
+      ## tap into the promise
+      @server.queue[0].then (xhr) =>
+        expect(afterResponse).to.be.calledWith xhr, xhr.matchedRoute
+
+  context "#onError", ->
+    beforeEach ->
+      @fakeServer = @sandbox.useFakeServer()
+      @server = $Cypress.Server.create(@fakeServer, {delay: 10, respond: true, onError: ->})
+
+    it "invokes onError with matchedRoute", ->
+      onError = @sandbox.spy @server, "onError"
+      err = null
+      @server.stub url: /users/, response: {}, method: "GET", status: 201
+
+      ## cause an error related to the xhr
+      $.get("/users").done ->
+        try
+          foo.bar()
+        catch e
+          err = e
+          throw e
+
+      @server.queue[0].then (xhr) =>
+        expect(onError).to.be.calledWith xhr, xhr.matchedRoute, err
+
+    it "invokes onError without matched route on 404", ->
+      onError = @sandbox.spy @server, "onError"
+      err = null
+
+      ## cause an error related to the xhr
+      $.get("/users").fail ->
+        try
+          foo.bar()
+        catch e
+          err = e
+          throw e
+
+      @server.queue[0].then (xhr) =>
+        expect(onError).to.be.calledWith xhr, undefined, err

@@ -118,23 +118,23 @@ describe "$Cypress.Cy XHR Commands", ->
       @cy.server({ignore: false}).then ->
         expect(@cy._sandbox.server.xhr.useFilters).to.be.false
 
-    it "sets autoRespond=true by default", ->
+    it "sets respond=true by default", ->
       @cy.server().then ->
-        expect(@cy._sandbox.server.autoRespond).to.be.true
+        expect(@cy.prop("server")._autoRespond).to.be.true
 
-    it "can set autoRespond=false", ->
+    it "can set respond=false", ->
       @cy.server({respond: false}).then ->
-        expect(@cy._sandbox.server.autoRespond).to.be.false
+        expect(@cy.prop("server")._autoRespond).to.be.false
 
-    it "sets autoRespondAfter to 10ms by default", ->
+    it "sets delay to 10ms by default", ->
       @cy.server().then ->
-        expect(@cy._sandbox.server.autoRespondAfter).to.eq 10
+        expect(@cy.prop("server")._delay).to.eq 10
 
-    it "can set autoRespondAfter to 100ms", ->
+    it "can set delay to 100ms", ->
       @cy.server({delay: 100}).then ->
-        expect(@cy._sandbox.server.autoRespondAfter).to.eq 100
+        expect(@cy.prop("server")._delay).to.eq 100
 
-    it.only "delay prevents a response from immediately responding", ->
+    it "delay prevents a response from immediately responding", ->
       clock = @sandbox.useFakeTimers("setTimeout")
 
       @cy
@@ -144,7 +144,6 @@ describe "$Cypress.Cy XHR Commands", ->
           win.$.get("/users")
           clock.tick(4000)
           request = @cy._getSandbox().server.requests[0]
-          debugger
           expect(request.readyState).to.eq(1)
 
     describe "without sinon present", ->
@@ -235,6 +234,7 @@ describe "$Cypress.Cy XHR Commands", ->
     beforeEach ->
       @expectOptionsToBe = (opts) =>
         options = @stub.getCall(0).args[0]
+        _.defaults opts, {delay: 10, respond: true}
         _.each options, (value, key) ->
           expect(options[key]).to.deep.eq(opts[key], "failed on property: (#{key})")
 
@@ -579,3 +579,15 @@ describe "$Cypress.Cy XHR Commands", ->
         .then ->
           expect(@cy.prop("tmpServer")).to.be.null
           expect(@cy.prop("tmpRoutes")).to.be.null
+
+  context "#abort", ->
+    it "calls server#abort", (done) ->
+      abort = null
+
+      @Cypress.on "abort", ->
+        expect(abort).to.be.called
+        done()
+
+      @cy.server().then ->
+        abort = @sandbox.spy @cy.prop("server"), "abort"
+        @Cypress.trigger "abort"
