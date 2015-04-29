@@ -81,7 +81,8 @@ $Cypress.Server = do ($Cypress, _) ->
             ## if auto respond is true, set a delay, else do not add any additional delay
             delay = if matchedRoute.respond then matchedRoute.delay else 0
           else
-            delay = if @_autoRespond then @_delay else 0
+            ## this is used for 404 routes so they are delayed like regular routes
+            delay = if _this._autoRespond then _this._delay else 0
 
           p = Promise
             .delay(delay)

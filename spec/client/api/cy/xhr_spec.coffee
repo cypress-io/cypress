@@ -632,10 +632,48 @@ describe "$Cypress.Cy XHR Commands", ->
       @cy.prop("responses", ["bar"])
       expect(@cy.getPendingRequests()).to.deep.eq ["foo", "baz"]
 
-  # context "#getCompletedRequests", ->
-  #   it "returns [] if not responses", ->
-  #     expect(@cy.getCompletedRequests()).to.deep.eq []
+  context "#getCompletedRequests", ->
+    it "returns [] if not responses", ->
+      expect(@cy.getCompletedRequests()).to.deep.eq []
 
-  #   it "returns responses", ->
-  #     @cy.prop("responses", ["foo"])
-  #     expect(@cy.getCompletedRequests()).to.deep.eq ["foo"]
+    it "returns responses", ->
+      @cy.prop("responses", ["foo"])
+      expect(@cy.getCompletedRequests()).to.deep.eq ["foo"]
+
+  context "#respond", ->
+    it "calls server#respond", ->
+      respond = null
+
+      @cy
+        .server({delay: 1000}).then (server) ->
+          respond = @sandbox.spy server, "respond"
+        .window().then (win) ->
+          win.$.get("/users")
+          null
+        .respond().then ->
+          expect(respond).to.be.calledOnce
+
+    describe "errors", ->
+      beforeEach ->
+        @allowErrors()
+
+      it "errors without a server", (done) ->
+        @cy.on "fail", (err) =>
+          expect(err.message).to.eq "cy.respond() cannot be invoked before starting the cy.server()"
+          done()
+
+        @cy.respond()
+
+      it "errors with no pending requests", (done) ->
+        @cy.on "fail", (err) =>
+          expect(err.message).to.eq "cy.respond() did not find any pending requests to respond to!"
+          done()
+
+        @cy
+          .server()
+          .route(/users/, {})
+          .window().then (win) ->
+            ## this is waited on to be resolved
+            ## because of jquery promise thenable
+            win.$.get("/users")
+          .respond()

@@ -127,6 +127,12 @@ describe "$Cypress.Cy Server API", ->
       $.get("/users")
       expect(delay).to.be.calledWith 50
 
+    it "inherits its delay from server.delay on a 404", ->
+      delay = @sandbox.spy Promise, "delay"
+      @setup({delay: 100})
+      $.get("/users")
+      expect(delay).to.be.calledWith 100
+
     it "returns if isResponding is true", ->
       @setup()
       @server.onRequest (@xhr) =>

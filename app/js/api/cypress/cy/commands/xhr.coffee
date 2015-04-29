@@ -339,6 +339,16 @@ $Cypress.register "XHR", (Cypress, _, $) ->
       else
         stubRoute.call(@, options, server)
 
+    respond: ->
+      ## bail if we dont have a server prop or a tmpServer prop
+      if not server = @prop("server")
+        @throwErr("cy.respond() cannot be invoked before starting the cy.server()")
+
+      if not @getPendingRequests().length
+        @throwErr("cy.respond() did not find any pending requests to respond to!")
+
+      server.respond()
+
   $Cypress.Cy.extend
     getPendingRequests: ->
       return [] if not requests = @prop("requests")
