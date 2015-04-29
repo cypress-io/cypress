@@ -97,6 +97,18 @@ describe "$Cypress.Cy Aliasing Commands", ->
 
           @cy.get("div:first").as(blacklist)
 
+    describe "log", ->
+      beforeEach ->
+        @Cypress.on "log", (@log) =>
+
+      it "sets aliasType to 'primitive'", ->
+        @cy.wrap({}).as("obj").then ->
+          expect(@log.get("aliasType")).to.eq "primitive"
+
+      it "sets aliasType to 'dom'", ->
+        @cy.get("body").find("div:first").click().as("div").then ->
+          expect(@log.get("aliasType")).to.eq "dom"
+
   context "#_replayFrom", ->
     describe "subject in document", ->
       it "returns if subject is still in the document", (done) ->

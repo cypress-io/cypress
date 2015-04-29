@@ -30,6 +30,11 @@ $Cypress.Log = do (_, Backbone) ->
       else
         obj = key
 
+      ## if we have an alias automatically
+      ## figure out what type of alias it is
+      if obj.alias
+        _.defaults obj, {aliasType: if obj.$el then "dom" else "primitive"}
+
       ## ensure attributes are an empty {}
       @attributes ?= {}
 
@@ -183,17 +188,17 @@ $Cypress.Log = do (_, Backbone) ->
         testId:           @cy.prop("runnable").id
         referencesAlias:  undefined
         alias:            undefined
+        aliasType:        undefined
         message:          undefined
         onRender: ->
         onConsole: ->
 
       if obj.isCurrent
-        _.defaults obj, {alias: @cy.getNextAlias()}
+        _.defaults obj, alias: @cy.getNextAlias()
 
       obj.event = event
 
       log = $Log.create(@, obj)
-      # log = new $Log(obj)
       log.wrapOnConsole()
 
       @trigger "log", log
