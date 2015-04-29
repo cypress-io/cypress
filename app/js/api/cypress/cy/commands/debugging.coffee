@@ -12,9 +12,11 @@ $Cypress.register "Debugging", (Cypress, _, $) ->
 
     debug: ->
       console.log "\n%c------------------------Cypress Command Info------------------------", "font-weight: bold;"
-      _.each ["options", "runnable", "subject"], (item) =>
-        console.log "#{item}: ", (@prop(item) or @[item])
-      console.log "Available Aliases: ", @_getAvailableAliases()
+      console.log "Runnable:           ", @prop("runnable")
+      console.log "Subject:            ", @prop("subject")
+      console.log "Available Aliases:  ", @getAvailableAliases()
+      console.log "Pending Requests:   ", @getPendingRequests()
+      console.log "Completed Requests: ", @getCompletedRequests()
       debugger
 
       ## return the subject

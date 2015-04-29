@@ -9,21 +9,40 @@ $Cypress.Server = do ($Cypress, _) ->
       ## remove all references.  check if these are being
       ## GC'd properly
 
+      @queue      = []
       @requests   = []
       @responses  = []
       @onRequests = []
+
+      @beforeRequest = options.beforeRequest
       @afterResponse = options.afterResponse
       @onError       = options.onError
+      @_delay        = options.delay
+      @_autoRespond  = options.respond
 
       @ignore(options.ignore)
       @onFilter(options.onFilter)
-      @autoRespond(options.autoRespond)
-      @autoRespondAfter(options.autoRespondAfter)
+      @respondImmediately(options.respond)
 
       _this = @
 
-      @fakeServer.addRequest = _.wrap @fakeServer.addRequest, (orig, xhr) ->
+      ## override the processRequest method
+      @fakeServer.processRequest = (xhr) ->
+        ## bail if xhr has been aborted
+        return if xhr.aborted
 
+        for response in (@responses or []) by -1
+          ## response.response holds the function we are
+          ## testing against
+          return if response.response.call(@, xhr)
+
+        ## if the request didnt match any
+        ## response then we need to send it 404
+        xhr.respond 404, {}, ""
+
+        return @
+
+      @fakeServer.addRequest = _.wrap @fakeServer.addRequest, (orig, xhr) ->
         ## call the original addRequest method
         orig.call @, xhr
 
@@ -33,33 +52,80 @@ $Cypress.Server = do ($Cypress, _) ->
           ## push this into our requests array
           _this.requests.push xhr
 
-          ## call the original so sinon does its thing
-          orig.call(@)
-
           ## invokes onRequest callback function on any matching responses
           ## and then also calls this on any global onRequest methods on
           ## our server
           _this.invokeOnRequest(xhr)
 
-        xhr.respond = _.wrap xhr.respond, (orig, args...) ->
-          try
-            orig.apply(@, args)
-          catch e
-            if _.isFunction(_this.onError)
-              _this.onError(xhr, e)
-            else
-              throw e
+          ## call the original so sinon does its thing
+          orig.call(@)
 
-          ## after we loop through all of the responses to make sure
-          ## something can response to this request, we need to emit
-          ## a 404 if nothing matched and sinon slurped up this request
-          ## and simply output its default 404 response
-          if _this.requestDidNotMatchAnyResponses(xhr, args)
-            _this.respondToRequest xhr, {
-              status: 404
-              headers: {}
-              response: ""
-            }
+        xhr.respond = _.wrap xhr.respond, (orig, args...) ->
+          ## return here if we have already responded
+          ## this can happen if we are delaying the actual
+          ## response but call respond multiple times
+          return if xhr.isResponding
+
+          ## we are now responding to this xhr
+          ## so do not allow a 2nd respond to come through
+          ## on this request
+          xhr.isResponding = true
+
+          respondCtx = @
+
+          ## if we have a matched route go through that
+          ## else just look at the default server options
+          ## we may not have a matched route here in case
+          ## of a 404 where we did not stub that route
+          if matchedRoute = xhr.matchedRoute
+            ## if auto respond is true, set a delay, else do not add any additional delay
+            delay = if matchedRoute.respond then matchedRoute.delay else 0
+          else
+            ## this is used for 404 routes so they are delayed like regular routes
+            delay = if _this._autoRespond then _this._delay else 0
+
+          p = Promise
+            .delay(delay)
+            .cancellable()
+            .then ->
+              orig.apply(respondCtx, args)
+            .then ->
+              if _this.requestDidNotMatchAnyResponses(xhr, args)
+                status  = 404
+                headers = {}
+                body    = ""
+              else
+                [status, headers, body] = args
+
+              _this.handleAfterResponse xhr, {
+                status: status
+                headers: headers
+                body: body
+              }
+
+            ## abort xhr's on cancel
+            .catch Promise.CancellationError, (err) ->
+              xhr.abort()
+
+            ## continue to bubble up errors
+            ## if they happen
+            .catch (err) ->
+              if _.isFunction(_this.onError)
+                _this.onError(xhr, matchedRoute, err)
+              else
+                throw err
+
+              ## return null here so our callback
+              ## functions do not return a new promise
+              null
+
+            ## always return back the xhr
+            .return(xhr)
+
+          ## this promise becomes accessible not only to our tests
+          ## but also allows us to cancel outstanding responses
+          ## when we abort cypress
+          _this.queue.push(p)
 
         return xhr
 
@@ -68,6 +134,11 @@ $Cypress.Server = do ($Cypress, _) ->
     ## and calls onRequest on it
     ## also invokes onRequest on our global server object
     invokeOnRequest: (xhr) ->
+
+      beforeRequest = (xhr, route) =>
+        if _.isFunction @beforeRequest
+          @beforeRequest(xhr, route)
+
       ## have to do this ugly variable juggling to bail
       ## out of the loop early so our onRequest is called
       ## only 1 time in case multiple requests match
@@ -81,35 +152,38 @@ $Cypress.Server = do ($Cypress, _) ->
       for response in (@fakeServer.responses or []) by -1
         break if found
 
-        response.response xhr, (options) ->
+        response.response xhr, (route) ->
           found = true
-          options.onRequest.call(xhr, xhr)
+          beforeRequest(xhr, route)
+          route.onRequest.call(xhr, xhr)
+
+      ## else we didnt find anything
+      if not found
+        beforeRequest(xhr)
 
       ## call each onRequest callback with our xhr object
       _.each @onRequests, (onRequest) ->
         onRequest.call(xhr, xhr)
 
     requestDidNotMatchAnyResponses: (request, args) ->
-      return if request.hasResponded
-
       [status, headers, body] = args
 
       status is 404 and _.isEqual(headers, {}) and body is ""
 
-    respondToRequest: (request, response, originalOptions) =>
+    handleAfterResponse: (request, response) =>
       ## since we emit the options as the response
       ## lets push this into our responses for accessibility
       ## and testability
       @responses.push response
 
-      ## set this to true so we avoid emitting twice
-      ## if there is a real 404 that we submitted
-      request.hasResponded = true
-
       if _.isFunction(@afterResponse)
-        @afterResponse(request, originalOptions)
+        @afterResponse(request, request.matchedRoute)
 
     stub: (originalOptions = {}) ->
+      _.defaults originalOptions,
+        delay: @_delay
+        respond: @_autoRespond
+
       options = _(originalOptions).clone()
 
       _.defaults options,
@@ -123,7 +197,7 @@ $Cypress.Server = do ($Cypress, _) ->
         return if request.readyState is 4
 
         if @requestMatchesResponse request, options
-          request.matchedResponse = originalOptions
+          request.matchedRoute = originalOptions
 
           @setRequestJSON(request)
 
@@ -133,14 +207,14 @@ $Cypress.Server = do ($Cypress, _) ->
 
           headers = _.extend options.headers, { "Content-Type": options.contentType }
 
-          response =
-            status: options.status
-            headers: headers
-            body: @parseResponse(options)
+          ## only respond to the request if respond is true
+          ## or if we've forcibly told our server to respond
+          if @forceRespond or originalOptions.respond
+            request.respond(options.status, headers, @parseResponse(options))
+          else
+            @fakeServer.queue.push(request)
 
-          request.respond(response.status, response.headers, response.body)
-
-          @respondToRequest request, options, originalOptions
+          return true
 
     setRequestJSON: (request) ->
       return if not _.str.include(request.requestHeaders.Accept, "application/json")
@@ -160,22 +234,24 @@ $Cypress.Server = do ($Cypress, _) ->
       JSON.stringify(response)
 
     respond: ->
+      @forceRespond = true
       @fakeServer.respond()
+      @forceRespond = false
 
     onRequest: (fn) ->
       @onRequests.push fn
 
-    autoRespond: (bool = true) ->
-      @fakeServer.autoRespond = bool
-
-    autoRespondAfter: (ms) ->
-      @fakeServer.autoRespondAfter = ms
+    respondImmediately: (bool = true) ->
+      @fakeServer.respondImmediately = bool
 
     ignore: (bool) ->
       @fakeServer.xhr.useFilters = bool
 
     onFilter: (fn) ->
       @fakeServer.xhr.addFilter(fn)
+
+    abort: ->
+      _.invoke @queue, "cancel"
 
     @create = (server, options) ->
       new $Server(server, options)

@@ -104,6 +104,8 @@ $Cypress.register "Waiting", (Cypress, _, $) ->
       @_retry(retry, options) if _.isNull(options.value) or options.value is false
 
     _waitString: (subject, str, options) ->
+      if _.isString(options)
+        @throwErr("cy.wait() was passed invalid arguments. You cannot pass multiple strings. If you're trying to wait for multiple routes, use an array.")
 
       getNumRequests = (alias) =>
         requests = @prop("aliasRequests") ? {}
@@ -112,21 +114,24 @@ $Cypress.register "Waiting", (Cypress, _, $) ->
 
         @prop("aliasRequests", requests)
 
+
         _.ordinalize requests[alias]
 
-      checkForXhr = (alias, options) ->
-        xhr = @getLastResponseByAlias(alias)
+      checkForXhr = (alias, str, options) ->
+        xhr = @getLastXhrByAlias(alias)
+
+        word = @getXhrTypeByAlias(alias)
 
         ## return our xhr object
         return xhr if xhr
 
         options.onFail ?= (err) ->
           options.log({
-            "Waited For": "alias: '#{alias}' to have a response"
+            "Waited For": "alias: '#{str}' to have a #{word}"
             Alias: xhr
-          }, alias, options.retries, err)
+          }, str, options.retries, err)
 
-        options.error ?= "cy.wait() timed out waiting for the #{getNumRequests(alias)} response to the route: '#{alias}'. No response ever occured."
+        options.error ?= "cy.wait() timed out waiting for the #{getNumRequests(alias)} #{word} to the route: '#{str}'. No #{word} ever occured."
 
         ## store the current runnable timeout here
         ## and manage it ourselves
@@ -136,10 +141,14 @@ $Cypress.register "Waiting", (Cypress, _, $) ->
         @_clearTimeout()
 
         @_retry ->
-          checkForXhr.call(@, alias, options)
+          checkForXhr.call(@, alias, str, options)
         , options
 
       waitForXhr = (str) ->
+        ## we always want to strip everything after the first '.'
+        ## since we support alias property 'request'
+        [str, str2] = str.split(".")
+
         if not aliasObj = @getAlias(str)
           return @aliasNotFoundFor(str)
 
@@ -148,11 +157,13 @@ $Cypress.register "Waiting", (Cypress, _, $) ->
         ## by its alias
         {alias, command} = aliasObj
 
+        str = _.compact([alias, str2]).join(".")
+
         if command.name isnt "route"
           @throwErr("cy.wait() can only accept aliases for routes.  The alias: '#{alias}' did not match a route.")
 
         ## create shallow copy of each options object
-        checkForXhr.call(@, alias, _.clone(options))
+        checkForXhr.call(@, str, alias, _.clone(options))
 
       ## we have to juggle a separate array of promises
       ## in order to cancel them when one bombs

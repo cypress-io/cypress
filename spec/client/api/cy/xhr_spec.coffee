@@ -60,8 +60,9 @@ describe "$Cypress.Cy XHR Commands", ->
     beforeEach ->
       defaults = {
         ignore: true
-        autoRespond: true
-        autoRespondAfter: 10
+        respond: true
+        delay: 10
+        beforeRequest: ->
         afterResponse: ->
         onError: ->
         onFilter: ->
@@ -118,21 +119,33 @@ describe "$Cypress.Cy XHR Commands", ->
       @cy.server({ignore: false}).then ->
         expect(@cy._sandbox.server.xhr.useFilters).to.be.false
 
-    it "sets autoRespond=true by default", ->
+    it "sets respond=true by default", ->
       @cy.server().then ->
-        expect(@cy._sandbox.server.autoRespond).to.be.true
+        expect(@cy.prop("server")._autoRespond).to.be.true
 
-    it "can set autoRespond=false", ->
-      @cy.server({autoRespond: false}).then ->
-        expect(@cy._sandbox.server.autoRespond).to.be.false
+    it "can set respond=false", ->
+      @cy.server({respond: false}).then ->
+        expect(@cy.prop("server")._autoRespond).to.be.false
 
-    it "sets autoRespondAfter to 10ms by default", ->
+    it "sets delay to 10ms by default", ->
       @cy.server().then ->
-        expect(@cy._sandbox.server.autoRespondAfter).to.eq 10
+        expect(@cy.prop("server")._delay).to.eq 10
 
-    it "can set autoRespondAfter to 100ms", ->
-      @cy.server({autoRespondAfter: 100}).then ->
-        expect(@cy._sandbox.server.autoRespondAfter).to.eq 100
+    it "can set delay to 100ms", ->
+      @cy.server({delay: 100}).then ->
+        expect(@cy.prop("server")._delay).to.eq 100
+
+    it "delay prevents a response from immediately responding", ->
+      clock = @sandbox.useFakeTimers("setTimeout")
+
+      @cy
+        .server({delay: 5000})
+        .route(/users/, {})
+        .window().then (win) ->
+          win.$.get("/users")
+          clock.tick(4000)
+          request = @cy._getSandbox().server.requests[0]
+          expect(request.readyState).to.eq(1)
 
     describe "without sinon present", ->
       beforeEach ->
@@ -222,6 +235,7 @@ describe "$Cypress.Cy XHR Commands", ->
     beforeEach ->
       @expectOptionsToBe = (opts) =>
         options = @stub.getCall(0).args[0]
+        _.defaults opts, {delay: 10, respond: true}
         _.each options, (value, key) ->
           expect(options[key]).to.deep.eq(opts[key], "failed on property: (#{key})")
 
@@ -492,7 +506,19 @@ describe "$Cypress.Cy XHR Commands", ->
 
         @cy.route()
 
-      it "catches errors caused by the XHR response"
+      it "sets err on log when caused by the XHR response", (done) ->
+        @Cypress.on "log", (@log) =>
+
+        @cy.on "fail", (err) =>
+          expect(@log.get("error")).to.be.ok
+          expect(@log.get("error")).to.eq err
+          done()
+
+        @cy
+          .route(/foo/, {}).as("getFoo")
+          .window().then (win) ->
+            win.$.get("foo_bar").done ->
+              foo.bar()
 
     describe ".log", ->
       beforeEach ->
@@ -521,12 +547,27 @@ describe "$Cypress.Cy XHR Commands", ->
 
           }
 
+      describe "requests", ->
+        it "immediately logs request obj", ->
+          @cy
+            .route(/foo/, {}).as("getFoo")
+            .window().then (win) =>
+              win.$.get("foo")
+              expect(@log.pick("name", "alias", "aliasType", "state")).to.deep.eq {
+                name: "request"
+                alias: "getFoo"
+                aliasType: "route"
+                state: "pending"
+              }
+              expect(@log.get("snapshot")).to.be.ok
+
       describe "responses", ->
         beforeEach ->
           @cy
-            .route(/foo/, {})
+            .route(/foo/, {}).as("getFoo")
             .window().then (win) ->
               win.$.get("foo_bar")
+            .wait("@getFoo")
 
         it "logs obj", ->
           obj = {
@@ -535,7 +576,7 @@ describe "$Cypress.Cy XHR Commands", ->
             type: "parent"
             aliasType: "route"
             referencesAlias: undefined
-            alias: undefined
+            alias: "getFoo"
           }
 
           _.each obj, (value, key) =>
@@ -543,11 +584,10 @@ describe "$Cypress.Cy XHR Commands", ->
 
         it "#onConsole", ->
 
-        it "ends immediately", ->
-          expect(@log.get("end")).to.be.tru
+        it "ends", ->
           expect(@log.get("state")).to.eq("success")
 
-        it "snapshots immediately", ->
+        it "snapshots again", ->
           expect(@log.get("snapshot")).to.be.an("object")
 
   context "#checkForServer", ->
@@ -566,3 +606,74 @@ describe "$Cypress.Cy XHR Commands", ->
         .then ->
           expect(@cy.prop("tmpServer")).to.be.null
           expect(@cy.prop("tmpRoutes")).to.be.null
+
+  context "#abort", ->
+    it "calls server#abort", (done) ->
+      abort = null
+
+      @Cypress.once "abort", ->
+        expect(abort).to.be.called
+        done()
+
+      @cy.server().then ->
+        abort = @sandbox.spy @cy.prop("server"), "abort"
+        @Cypress.trigger "abort"
+
+  context "#getPendingRequests", ->
+    it "returns [] if not requests", ->
+      expect(@cy.getPendingRequests()).to.deep.eq []
+
+    it "returns requests if not responses", ->
+      @cy.prop("requests", ["foo", "bar"])
+      expect(@cy.getPendingRequests()).to.deep.eq ["foo", "bar"]
+
+    it "returns diff between requests + responses", ->
+      @cy.prop("requests", ["foo", "bar", "baz"])
+      @cy.prop("responses", ["bar"])
+      expect(@cy.getPendingRequests()).to.deep.eq ["foo", "baz"]
+
+  context "#getCompletedRequests", ->
+    it "returns [] if not responses", ->
+      expect(@cy.getCompletedRequests()).to.deep.eq []
+
+    it "returns responses", ->
+      @cy.prop("responses", ["foo"])
+      expect(@cy.getCompletedRequests()).to.deep.eq ["foo"]
+
+  context "#respond", ->
+    it "calls server#respond", ->
+      respond = null
+
+      @cy
+        .server({delay: 1000}).then (server) ->
+          respond = @sandbox.spy server, "respond"
+        .window().then (win) ->
+          win.$.get("/users")
+          null
+        .respond().then ->
+          expect(respond).to.be.calledOnce
+
+    describe "errors", ->
+      beforeEach ->
+        @allowErrors()
+
+      it "errors without a server", (done) ->
+        @cy.on "fail", (err) =>
+          expect(err.message).to.eq "cy.respond() cannot be invoked before starting the cy.server()"
+          done()
+
+        @cy.respond()
+
+      it "errors with no pending requests", (done) ->
+        @cy.on "fail", (err) =>
+          expect(err.message).to.eq "cy.respond() did not find any pending requests to respond to!"
+          done()
+
+        @cy
+          .server()
+          .route(/users/, {})
+          .window().then (win) ->
+            ## this is waited on to be resolved
+            ## because of jquery promise thenable
+            win.$.get("/users")
+          .respond()

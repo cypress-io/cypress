@@ -3,10 +3,15 @@ $Cypress.register "XHR", (Cypress, _, $) ->
   validHttpMethodsRe = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/
   nonAjaxAssets      = /\.(js|html|css)$/
   validAliasApi      = /^(\d+|all)$/
+  requestXhr         = /\.request$/
 
   SERVER     = "server"
   TMP_SERVER = "tmpServer"
   TMP_ROUTES = "tmpRoutes"
+
+  Cypress.on "abort", ->
+    if server = @prop("server")
+      server.abort()
 
   ## need to upgrade our server
   ## to allow for a setRequest hook
@@ -15,6 +20,12 @@ $Cypress.register "XHR", (Cypress, _, $) ->
   ## need to look at the diff between
   ## prop(requests) and prop(responses)
   setRequest = (xhr, alias) ->
+    requests = @prop("requests") ? []
+
+    xhr.alias = alias
+    requests.push(xhr)
+
+    @prop("requests", requests)
 
   setResponse = (xhr, alias) ->
     alias ?= "anonymous"
@@ -103,83 +114,103 @@ $Cypress.register "XHR", (Cypress, _, $) ->
           xhr.responseText
 
       log = (xhr, route, err) =>
-        alias = route.alias
+        ## does the xhr already
+        ## have a previous command log
+        ## reference?
+        if l = xhr.log
+          ## if we have an error just return
+          return if l.get("error")
 
-        if _.isEmpty(route)
-          availableUrls = @prop("availableUrls") or []
+          ## resnapshot
+          l.snapshot()
 
-        Cypress.command
-          name:      "request"
-          alias:     alias
-          aliasType: "route"
-          type:      "parent"
-          error:     err
-          _route:    route
-          end:       true
-          snapshot:  true
-          onConsole: =>
-            consoleObj = {
-              Method:        xhr.method
-              URL:           xhr.url
-              "Matched URL": route.url
-              Status:        xhr.status
-              Response:      getResponse(xhr)
-              Alias:         alias
-              Request:       xhr
-            }
+          ## err if we have an error
+          ## else just ends
+          if err
+            l.error(err)
+          else
+            l.end()
 
-            ## TODO: TEST THIS
-            if _.isEmpty(route)
-              _.extend consoleObj,
-                Reason: "The URL for request did not match any of your route(s).  It's response was automatically sent back a 404."
-                "Route URLs": availableUrls
+        else
+          alias = route.alias
 
-            consoleObj
-          onRender: ($row) ->
-            klass = if /^2/.test(xhr.status) then "successful" else "bad"
+          if _.isEmpty(route)
+            availableUrls = @prop("availableUrls") or []
 
-            $row.find(".command-message").html ->
-              [
-                "<i class='fa fa-circle #{klass}'></i>" + xhr.method,
-                xhr.status,
-                _.truncate(xhr.url, "20")
-              ].join(" ")
+          ## assign this existing command
+          ## to the xhr so we can reuse it later
+          xhr.log = Cypress.command
+            name:      "request"
+            alias:     alias
+            aliasType: "route"
+            type:      "parent"
+            error:     err
+            _route:    route
+            snapshot:  true
+            onConsole: =>
+              consoleObj = {
+                Method:        xhr.method
+                URL:           xhr.url
+                "Matched URL": route.url
+                Status:        xhr.status
+                Response:      getResponse(xhr)
+                Alias:         alias
+                Request:       xhr
+              }
+
+              ## TODO: TEST THIS
+              if _.isEmpty(route)
+                _.extend consoleObj,
+                  Reason: "The URL for request did not match any of your route(s).  It's response was automatically sent back a 404."
+                  "Route URLs": availableUrls
+
+              consoleObj
+            onRender: ($row) ->
+              status = if xhr.status > 0 then xhr.status else "---"
+
+              klass = switch status
+                when "---"
+                  "pending"
+                else
+                  if /^2/.test(status) then "successful" else "bad"
+
+              $row.find(".command-message").html ->
+                [
+                  "<i class='fa fa-circle #{klass}'></i>" + xhr.method,
+                  status,
+                  _.truncate(xhr.url, "20")
+                ].join(" ")
 
       defaults = {
         ignore: true
-        autoRespond: true
-        autoRespondAfter: 10
+        respond: true
+        delay: 10
         onFilter: (method, url, async, username, password) ->
           ## filter out this request (let it go through)
           ## if this is a GET for a nonAjaxAsset
           method is "GET" and nonAjaxAssets.test(url)
-        onError: (xhr, err) =>
-          if options = xhr.matchedResponse
 
-            xhr.loggedFailure = true
+        onError: (xhr, route, err) =>
+          err.onFail = ->
 
-            ## remove this reference from the xhr
-            ## since we already have it as a variable
-            delete xhr.matchedResponse
-
-            err.onFail = ->
-              log(xhr, options, err)
+          log(xhr, route, err)
 
           @fail(err)
+
+        beforeRequest: (xhr, route = {}) =>
+          alias = route.alias
+
+          setRequest.call(@, xhr, alias)
+
+          ## log out this request immediately
+          log(xhr, route)
+
         afterResponse: (xhr, route = {}) =>
           alias = route.alias
 
           ## set this response xhr object if we
           ## have an alias for it
           setResponse.call(@, xhr, alias) #if alias
-          # @prop(responseNamespace(alias), xhr) if alias
-
-          ## don't relog afterResponse
-          ## if we've already logged the
-          ## XHR's failure
-          if xhr.loggedFailure
-            delete xhr.loggedFailure
-            return
 
           log(xhr, route)
       }
@@ -220,6 +251,8 @@ $Cypress.register "XHR", (Cypress, _, $) ->
       defaults = {
         method: "GET"
         status: 200
+        # delay: null
+        # respond: true
       }
 
       options = o = {}
@@ -306,7 +339,27 @@ $Cypress.register "XHR", (Cypress, _, $) ->
       else
         stubRoute.call(@, options, server)
 
+    respond: ->
+      ## bail if we dont have a server prop or a tmpServer prop
+      if not server = @prop("server")
+        @throwErr("cy.respond() cannot be invoked before starting the cy.server()")
+
+      if not @getPendingRequests().length
+        @throwErr("cy.respond() did not find any pending requests to respond to!")
+
+      server.respond()
+
   $Cypress.Cy.extend
+    getPendingRequests: ->
+      return [] if not requests = @prop("requests")
+
+      return requests if not responses = @prop("responses")
+
+      _.difference requests, responses
+
+    getCompletedRequests: ->
+      @prop("responses") ? []
+
     checkForServer: (contentWindow) ->
       if fn = @prop(TMP_SERVER)
         fn()
@@ -318,18 +371,21 @@ $Cypress.register "XHR", (Cypress, _, $) ->
         ## nuke these from cy
         @prop(attr, null)
 
-    getLastResponseByAlias: (alias) ->
-      ## find the last response which hasnt already
-      ## been used.
-      responses = @prop("responses") ? []
+    _getLastXhrByAlias: (alias, prop) ->
+      ## find the last request or response
+      ## which hasnt already been used.
+      xhrs = @prop(prop) ? []
 
-      for response in responses
+      ## allow us to handle waiting on both
+      ## the request or the response part of the xhr
+      privateProp = "_has#{prop}BeenWaitedOn"
 
-        ## we want to return the first response which has
+      for xhr in xhrs
+        ## we want to return the first xhr which has
         ## not already been waited on, and if its alias matches ours
-        if !response.hasBeenWaitedOn and response.alias is alias
-          response.hasBeenWaitedOn = true
-          return response
+        if !xhr[privateProp] and xhr.alias is alias
+          xhr[privateProp] = true
+          return xhr
 
     ## this should actually be getRequestsByAlias
     ## since this will return all requests and not
@@ -355,4 +411,20 @@ $Cypress.register "XHR", (Cypress, _, $) ->
 
       ## else return the last matching response
       return _.last(matching)
+
+    getLastXhrByAlias: (alias) ->
+      [str, prop] = alias.split(".")
+
+      if prop
+        if prop is "request"
+          return @_getLastXhrByAlias(str, "requests")
+        else
+          @throwErr "'#{prop}' is not a valid alias property. Are you trying to ask for the first request? If so write @#{str}.request"
+
+      @_getLastXhrByAlias(alias, "responses")
+
+    getXhrTypeByAlias: (alias) ->
+      if requestXhr.test(alias) then "request" else "response"
+
+
 

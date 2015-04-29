@@ -168,6 +168,35 @@ describe "$Cypress.Cy Waiting Commands", ->
             obj = JSON.parse(xhr.responseText)
             expect(obj).to.deep.eq response
 
+      it "waits for the route alias to have a request", ->
+        @cy.on "retry", _.once =>
+          win = @cy.sync.window()
+          win.$.get("/users")
+          null
+
+        @cy
+          .server({delay: 1000})
+          .route(/users/, {}).as("getUsers")
+          .wait("@getUsers.request").then (xhr) ->
+            expect(xhr.url).to.eq "/users"
+            expect(xhr.readyState).to.eq 1
+
+      it "waits for the route alias to have a request + response", ->
+        @cy.on "retry", _.once =>
+          win = @cy.sync.window()
+          win.$.get("/users")
+          null
+
+        @cy
+          .server({delay: 200})
+          .route(/users/, {}).as("getUsers")
+          .wait("@getUsers.request").then (xhr) ->
+            expect(xhr.url).to.eq "/users"
+            expect(xhr.readyState).to.eq 1
+          .wait("@getUsers").then (xhr) ->
+            expect(xhr.readyState).to.eq 4
+            expect(xhr.responseText).to.eq "{}"
+
       it "resets the timeout after waiting", ->
         prevTimeout = @cy._timeout()
 
@@ -205,6 +234,18 @@ describe "$Cypress.Cy Waiting Commands", ->
             .server()
             .route("GET", /.*/, {}).as("fetch")
             .wait("@fetch")
+
+        it "throws when alias is never requested", (done) ->
+          @cy._timeout(200)
+
+          @cy.on "fail", (err) ->
+            expect(err.message).to.include "cy.wait() timed out waiting for the 1st request to the route: 'foo'. No request ever occured."
+            done()
+
+          @cy
+            .server()
+            .route(/foo/, {}).as("foo")
+            .wait("@foo.request")
 
         it "throws when alias is missing '@' but matches an available alias", (done) ->
           @cy.on "fail", (err) ->
@@ -433,6 +474,35 @@ describe "$Cypress.Cy Waiting Commands", ->
             .route(/users/, resp).as("getUsers")
             .wait("@getUsers")
             .wait("@getUsers")
+
+        it "throws waiting for the 2nd request", (done) ->
+          resp = {foo: "foo"}
+          request = 0
+
+          @cy._timeout(300)
+
+          @cy.on "fail", (err) ->
+            expect(err.message).to.include "cy.wait() timed out waiting for the 2nd request to the route: 'getUsers'. No request ever occured."
+            done()
+
+          ## dont send the 2nd request
+          @cy.on "retry", _.once =>
+            request += 1
+            win = @cy.sync.window()
+            win.$.get("/users", {num: request})
+
+          @cy
+            .server()
+            .route(/users/, resp).as("getUsers")
+            .wait("@getUsers.request")
+            .wait("@getUsers.request")
+
+        it "throws when passed multiple string arguments", (done) ->
+          @cy.on "fail", (err) ->
+            expect(err.message).to.eq "cy.wait() was passed invalid arguments. You cannot pass multiple strings. If you're trying to wait for multiple routes, use an array."
+            done()
+
+          @cy.wait("@foo", "@bar")
 
     describe "multiple alias arguments", ->
       it "can wait for all requests to have a response", ->
