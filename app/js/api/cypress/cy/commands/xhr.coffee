@@ -3,6 +3,7 @@ $Cypress.register "XHR", (Cypress, _, $) ->
   validHttpMethodsRe = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/
   nonAjaxAssets      = /\.(js|html|css)$/
   validAliasApi      = /^(\d+|all)$/
+  requestXhr         = /\.request$/
 
   SERVER     = "server"
   TMP_SERVER = "tmpServer"
@@ -21,6 +22,7 @@ $Cypress.register "XHR", (Cypress, _, $) ->
   setRequest = (xhr, alias) ->
     requests = @prop("requests") ? []
 
+    xhr.alias = alias
     requests.push(xhr)
 
     @prop("requests", requests)
@@ -196,7 +198,9 @@ $Cypress.register "XHR", (Cypress, _, $) ->
           @fail(err)
 
         beforeRequest: (xhr, route = {}) =>
-          setRequest.call(@, xhr, route)
+          alias = route.alias
+
+          setRequest.call(@, xhr, alias)
 
           ## log out this request immediately
           log(xhr, route)
@@ -357,18 +361,21 @@ $Cypress.register "XHR", (Cypress, _, $) ->
         ## nuke these from cy
         @prop(attr, null)
 
-    getLastResponseByAlias: (alias) ->
-      ## find the last response which hasnt already
-      ## been used.
-      responses = @prop("responses") ? []
+    _getLastXhrByAlias: (alias, prop) ->
+      ## find the last request or response
+      ## which hasnt already been used.
+      xhrs = @prop(prop) ? []
 
-      for response in responses
+      ## allow us to handle waiting on both
+      ## the request or the response part of the xhr
+      privateProp = "_has#{prop}BeenWaitedOn"
 
-        ## we want to return the first response which has
+      for xhr in xhrs
+        ## we want to return the first xhr which has
         ## not already been waited on, and if its alias matches ours
-        if !response.hasBeenWaitedOn and response.alias is alias
-          response.hasBeenWaitedOn = true
-          return response
+        if !xhr[privateProp] and xhr.alias is alias
+          xhr[privateProp] = true
+          return xhr
 
     ## this should actually be getRequestsByAlias
     ## since this will return all requests and not
@@ -394,4 +401,20 @@ $Cypress.register "XHR", (Cypress, _, $) ->
 
       ## else return the last matching response
       return _.last(matching)
+
+    getLastXhrByAlias: (alias) ->
+      [str, prop] = alias.split(".")
+
+      if prop
+        if prop is "request"
+          return @_getLastXhrByAlias(str, "requests")
+        else
+          @throwErr "'#{prop}' is not a valid alias property. Are you trying to ask for the first request? If so write @#{str}.request"
+
+      @_getLastXhrByAlias(alias, "responses")
+
+    getXhrTypeByAlias: (alias) ->
+      if requestXhr.test(alias) then "request" else "response"
+
+
 
