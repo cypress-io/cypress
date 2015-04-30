@@ -27,14 +27,14 @@ $Cypress.Mocha = do ($Cypress, _, Mocha) ->
       return @
 
     listeners: ->
-      @listenTo Cypress, "abort", =>
+      @listenTo @Cypress, "abort", =>
         ## during abort we always want to reset
         ## the mocha instance grep to all
         ## so its picked back up by mocha
         ## naturally when the iframe spec reloads
         @grep /.*/
 
-      @listenTo Cypress, "stop", => @stop()
+      @listenTo @Cypress, "stop", => @stop()
 
       return @
 

@@ -24,7 +24,7 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
       options.exist = options.exists and options.exist
 
       ## figure out the options which actually change the behavior of traversals
-      deltaOptions = $Cypress.Utils.filterDelta(options, {visible: null, exist: true})
+      deltaOptions = Cypress.Utils.filterDelta(options, {visible: null, exist: true})
 
       getSelector = ->
         args = _([arg1, arg2]).chain().reject(_.isFunction).reject(_.isObject).value()
@@ -100,7 +100,7 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
             else
               "Could not find visible element:"
 
-        node = $Cypress.Utils.stringifyElement(subject, "short")
+        node = Cypress.Utils.stringifyElement(subject, "short")
         err += " " + getSelector() + " from #{node}"
 
       options.error ?= getErr()

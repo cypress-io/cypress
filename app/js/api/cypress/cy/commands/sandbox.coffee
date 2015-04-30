@@ -18,7 +18,7 @@ $Cypress.register "Sandbox", (Cypress, _, $) ->
         server.queue     = []
         server.responses = []
 
-  $Cypress.Cy.extend
+  Cypress.Cy.extend
     ## think about making this "public" so
     ## users can utilize the root sandbox
     ## for clocks / special XHRs / etc

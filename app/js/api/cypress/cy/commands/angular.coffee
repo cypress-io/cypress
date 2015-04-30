@@ -19,7 +19,7 @@ $Cypress.register "Angular", (Cypress, _, $) ->
         when "binding"
           @_findByNgBinding(selector, options)
 
-  $Cypress.Cy.extend
+  Cypress.Cy.extend
     ## these are private because only 'ng' should know
     ## about them.  we're attaching them regardless
     ## so they're reachable and can be monkey patched

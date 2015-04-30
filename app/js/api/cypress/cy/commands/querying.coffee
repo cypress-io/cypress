@@ -15,7 +15,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       options.exist = options.exists and options.exist
 
       ## figure out the options which actually change the behavior of traversals
-      deltaOptions = $Cypress.Utils.filterDelta(options, {visible: null, exist: true})
+      deltaOptions = Cypress.Utils.filterDelta(options, {visible: null, exist: true})
 
       start = (aliasType) ->
         return if options.log is false
@@ -69,7 +69,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
         switch
           ## if this is a DOM element
-          when $Cypress.Utils.hasElement(subject)
+          when Cypress.Utils.hasElement(subject)
             if @_contains(subject)
               log(subject)
               return subject
@@ -188,7 +188,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
       ## nuke our subject if its present but not an element
       ## since we want contains to operate as a parent command
-      if subject and not $Cypress.Utils.hasElement(subject)
+      if subject and not Cypress.Utils.hasElement(subject)
         subject = null
 
       switch
@@ -207,7 +207,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
         when filter
           "within the selector: '#{filter}'"
         when subject
-          node = $Cypress.Utils.stringifyElement(subject, "short")
+          node = Cypress.Utils.stringifyElement(subject, "short")
           if options.exist is false
             "within an existing element: #{node}"
           else

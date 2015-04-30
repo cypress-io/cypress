@@ -23,7 +23,7 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
         onLoad: ->
 
       baseUrl = @config("baseUrl")
-      url     = $Cypress.Location.getRemoteUrl(url, baseUrl)
+      url     = Cypress.Location.getRemoteUrl(url, baseUrl)
 
       ## trigger that the remoteIframing is visiting
       ## an external URL
@@ -68,7 +68,7 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
               resolve(win)
 
           # ## any existing global variables will get nuked after it navigates
-          @$remoteIframe.prop "src", $Cypress.Location.createInitialRemoteSrc(url)
+          @$remoteIframe.prop "src", Cypress.Location.createInitialRemoteSrc(url)
 
       p
         .timeout(options.timeout)

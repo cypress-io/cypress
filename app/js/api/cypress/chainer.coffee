@@ -1,4 +1,4 @@
-$Cypress.Chainer = do (_) ->
+$Cypress.Chainer = do ($Cypress, _) ->
 
   class $Chainer
 

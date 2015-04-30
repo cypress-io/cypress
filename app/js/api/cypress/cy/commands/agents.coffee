@@ -6,7 +6,7 @@ $Cypress.register "Agents", (Cypress, _, $) ->
       when "stub" then "Stubbed Obj"
       when "mock" then "Mocked Obj"
 
-  $Cypress.Cy.extend
+  Cypress.Cy.extend
     agents: ->
       Cypress.Agents.create @_getSandbox(),
         onCreate: (obj) =>

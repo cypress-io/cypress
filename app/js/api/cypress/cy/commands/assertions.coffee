@@ -50,7 +50,7 @@ $Cypress.register "Assertions", (Cypress, _, $) ->
       ## so we cant use the wait command
       ## we must use @_retry directly
 
-      exp = $Cypress.Chai.expect(subject).to
+      exp = Cypress.Chai.expect(subject).to
 
       ## are we doing an existance assertion?
       if reExistance.test(chainers)
@@ -81,7 +81,7 @@ $Cypress.register "Assertions", (Cypress, _, $) ->
         ## need to continually apply this check due
         ## to eventually
         if not exp.isCheckingExistance
-          @ensureDom(subject) if $Cypress.Utils.hasElement(subject)
+          @ensureDom(subject) if Cypress.Utils.hasElement(subject)
 
         _.reduce chainers, (memo, value) =>
           if value is "eventually"
@@ -114,7 +114,7 @@ $Cypress.register "Assertions", (Cypress, _, $) ->
     and: (subject, args...) ->
       @sync.should.apply(@, args)
 
-  $Cypress.Cy.extend
+  Cypress.Cy.extend
     assert: (passed, message, value, actual, expected, error) ->
       ## if this is a jquery object and its true
       ## then remove all the 'but's and replace with 'and'
@@ -123,7 +123,7 @@ $Cypress.register "Assertions", (Cypress, _, $) ->
 
       obj = parseValueActualAndExpected(value, actual, expected)
 
-      if $Cypress.Utils.hasElement(value)
+      if Cypress.Utils.hasElement(value)
         obj.$el = value
 
       functionHadArguments = (fn) ->

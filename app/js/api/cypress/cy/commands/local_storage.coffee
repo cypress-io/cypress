@@ -5,13 +5,13 @@ $Cypress.register "LocalStorage", (Cypress, _, $) ->
     remote = @sync.window().localStorage
 
     ## set our localStorage and the remote localStorage
-    $Cypress.LocalStorage.setStorages(local, remote)
+    Cypress.LocalStorage.setStorages(local, remote)
 
     ## clear the keys
-    $Cypress.LocalStorage.clear(keys)
+    Cypress.LocalStorage.clear(keys)
 
     ## and then unset the references
-    $Cypress.LocalStorage.unsetStorages()
+    Cypress.LocalStorage.unsetStorages()
 
     ## return the remote localStorage object
     return remote

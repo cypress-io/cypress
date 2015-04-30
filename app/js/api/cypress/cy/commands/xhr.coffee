@@ -89,7 +89,7 @@ $Cypress.register "XHR", (Cypress, _, $) ->
       onRender: ($row) ->
         debugger
       #   html = $row.html()
-      #   html = $Cypress.Utils.convertHtmlTags(html)
+      #   html = Cypress.Utils.convertHtmlTags(html)
 
       #   ## append the URL separately so we dont
       #   ## accidentally convert a regex to an html tag
@@ -351,7 +351,7 @@ $Cypress.register "XHR", (Cypress, _, $) ->
       ## pass the resolved promises around
       server.respond().return(null)
 
-  $Cypress.Cy.extend
+  Cypress.Cy.extend
     getPendingRequests: ->
       return [] if not requests = @prop("requests")
 

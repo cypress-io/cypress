@@ -1,4 +1,4 @@
-$Cypress.Agents = do (_) ->
+$Cypress.Agents = do ($Cypress, _) ->
 
   class $Agents
     constructor: (@sandbox, @options) ->

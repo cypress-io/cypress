@@ -43,7 +43,7 @@ do ($Cypress, _, chai) ->
           )
 
       listeners: ->
-        @listenTo Cypress, "stop", => @stop()
+        @listenTo @Cypress, "stop", => @stop()
 
 
         return @

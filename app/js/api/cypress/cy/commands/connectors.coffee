@@ -33,9 +33,9 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
         return @prop("next", fn)
 
       remoteJQuery = @_getRemoteJQuery()
-      if $Cypress.Utils.hasElement(subject) and remoteJQueryisNotSameAsGlobal(remoteJQuery)
+      if Cypress.Utils.hasElement(subject) and remoteJQueryisNotSameAsGlobal(remoteJQuery)
         remoteSubject = remoteJQuery(subject)
-        $Cypress.Utils.setCypressNamespace(remoteSubject, subject)
+        Cypress.Utils.setCypressNamespace(remoteSubject, subject)
 
       ## we need to wrap this in a try-catch still (even though we're
       ## using bluebird) because we want to handle the return by
@@ -50,7 +50,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
 
         ## if ret is a DOM element
         ## and its an instance of the remoteJQuery
-        if ret and $Cypress.Utils.hasElement(ret) and remoteJQueryisNotSameAsGlobal(remoteJQuery) and $Cypress.Utils.isInstanceOf(ret, remoteJQuery)
+        if ret and Cypress.Utils.hasElement(ret) and remoteJQueryisNotSameAsGlobal(remoteJQuery) and Cypress.Utils.isInstanceOf(ret, remoteJQuery)
           ## set it back to our own jquery object
           ## to prevent it from being passed downstream
           ret = Cypress.cy.$(ret)
@@ -79,9 +79,9 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
         @throwErr("cy.#{name}() only accepts a string as the first argument.", command)
 
       remoteJQuery = @_getRemoteJQuery()
-      if $Cypress.Utils.hasElement(subject) and remoteJQueryisNotSameAsGlobal(remoteJQuery)
+      if Cypress.Utils.hasElement(subject) and remoteJQueryisNotSameAsGlobal(remoteJQuery)
         remoteSubject = remoteJQuery(subject)
-        $Cypress.Utils.setCypressNamespace(remoteSubject, subject)
+        Cypress.Utils.setCypressNamespace(remoteSubject, subject)
 
       prop = (remoteSubject or subject)[fn]
 
@@ -103,7 +103,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
         if _.isFunction(prop)
           ret = prop.apply (remoteSubject or subject), args
 
-          if ret and $Cypress.Utils.hasElement(ret) and remoteJQueryisNotSameAsGlobal(remoteJQuery) and $Cypress.Utils.isInstanceOf(ret, remoteJQuery)
+          if ret and Cypress.Utils.hasElement(ret) and remoteJQueryisNotSameAsGlobal(remoteJQuery) and Cypress.Utils.isInstanceOf(ret, remoteJQuery)
             return Cypress.cy.$(ret)
 
           return ret
@@ -113,7 +113,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
 
       getMessage = ->
         if _.isFunction(prop)
-          ".#{fn}(" + $Cypress.Utils.stringify(args) + ")"
+          ".#{fn}(" + Cypress.Utils.stringify(args) + ")"
         else
           ".#{fn}"
 

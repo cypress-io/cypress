@@ -17,7 +17,7 @@ $Cypress.register "Misc", (Cypress, _, $) ->
         end: true
         snapshot: true
 
-      options.$el = obj if $Cypress.Utils.hasElement(obj)
+      options.$el = obj if Cypress.Utils.hasElement(obj)
 
       Cypress.command(options)
 

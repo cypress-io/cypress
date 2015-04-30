@@ -1,6 +1,6 @@
 ## adds class methods for command, route, and agent logging
 ## including the intermediate $Log interface
-$Cypress.Log = do (_, Backbone) ->
+$Cypress.Log = do ($Cypress, _, Backbone) ->
 
   class $Log
     constructor: (@Cypress, obj = {}) ->

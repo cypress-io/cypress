@@ -60,14 +60,14 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       return @
 
     listeners: ->
-      @listenTo Cypress, "initialize", (obj) =>
+      @listenTo @Cypress, "initialize", (obj) =>
         @initialize(obj)
 
       ## why arent we listening to "defaults" here?
       ## instead we are manually hard coding them
-      @listenTo Cypress, "stop",       => @stop()
-      @listenTo Cypress, "restore",    => @restore()
-      @listenTo Cypress, "abort",      => @abort()
+      @listenTo @Cypress, "stop",       => @stop()
+      @listenTo @Cypress, "restore",    => @restore()
+      @listenTo @Cypress, "abort",      => @abort()
 
     abort: ->
       @$remoteIframe?.off("submit unload load")

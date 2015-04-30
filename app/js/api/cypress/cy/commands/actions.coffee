@@ -34,8 +34,8 @@ $Cypress.register "Actions", (Cypress, _, $) ->
               Elements: $el.length
 
         if not $el.is("form")
-          node = $Cypress.Utils.stringifyElement(el)
-          word = $Cypress.Utils.plural(options.el, "contains", "is")
+          node = Cypress.Utils.stringifyElement(el)
+          word = Cypress.Utils.plural(options.el, "contains", "is")
           @throwErr(".submit() can only be called on a <form>! Your subject #{word} a: #{node}", command)
 
         ## do more research here but see if we can
@@ -77,7 +77,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       if not options.$el.is("a[href],link[href],button,input,select,textarea,[tabindex]")
         return if options.error is false
 
-        node = $Cypress.Utils.stringifyElement(options.$el)
+        node = Cypress.Utils.stringifyElement(options.$el)
         @throwErr(".focus() can only be called on a valid focusable element! Your subject is a: #{node}", command)
 
       if (num = options.$el.length) and num > 1
@@ -180,7 +180,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         if options.$el.get(0) isnt $focused.get(0)
           return if options.error is false
 
-          node = $Cypress.Utils.stringifyElement($focused)
+          node = Cypress.Utils.stringifyElement($focused)
           @throwErr(".blur() can only be called on the focused element. Currently the focused element is a: #{node}", command)
 
         timeout = @_timeout() / 2
@@ -341,7 +341,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       @ensureVisibility(options.el, command)
 
       if not options.el.is(textLike)
-        node = $Cypress.Utils.stringifyElement(options.el)
+        node = Cypress.Utils.stringifyElement(options.el)
         @throwErr(".type() can only be called on textarea or :text! Your subject is a: #{node}", command)
 
       if (num = options.el.length) and num > 1
@@ -467,10 +467,10 @@ $Cypress.register "Actions", (Cypress, _, $) ->
               "Applied To": $el
               "Elements":   $el.length
 
-        node = $Cypress.Utils.stringifyElement($el)
+        node = Cypress.Utils.stringifyElement($el)
 
         if not $el.is(textLike)
-          word = $Cypress.Utils.plural(subject, "contains", "is")
+          word = Cypress.Utils.plural(subject, "contains", "is")
           @throwErr ".clear() can only be called on textarea or :text! Your subject #{word} a: #{node}", command
 
         @command("type", "{selectall}{del}", {el: $el, log: false}).then ->
@@ -499,7 +499,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       ## behavior
 
       if not subject.is("select")
-        node = $Cypress.Utils.stringifyElement(subject)
+        node = Cypress.Utils.stringifyElement(subject)
         @throwErr ".select() can only be called on a <select>! Your subject is a: #{node}"
 
       if (num = subject.length) and num > 1
@@ -596,7 +596,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         log(null)
         return null
 
-  $Cypress.Cy.extend
+  Cypress.Cy.extend
     _check_or_uncheck: (type, subject, values = [], options = {}) ->
       _.defaults options,
         el: subject
@@ -638,8 +638,8 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         @ensureVisibility $el, command
 
         if not isAcceptableElement($el)
-          node   = $Cypress.Utils.stringifyElement($el)
-          word   = $Cypress.Utils.plural(options.el, "contains", "is")
+          node   = Cypress.Utils.stringifyElement($el)
+          word   = Cypress.Utils.plural(options.el, "contains", "is")
           phrase = if type is "check" then " and :radio" else ""
           @throwErr ".#{type}() can only be called on :checkbox#{phrase}! Your subject #{word} a: #{node}", command
 
