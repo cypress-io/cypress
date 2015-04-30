@@ -4,6 +4,10 @@ $Cypress.register "Assertions", (Cypress, _, $) ->
   bTagOpen     = /\[b\]/g
   bTagClosed   = /\[\\b\]/g
   allButs      = /\bbut\b/g
+  reExistance  = /exist/
+
+  Cypress.on "assert", ->
+    @assert.apply(@, arguments)
 
   convertTags = ($row) ->
     html = $row.html()
@@ -42,6 +46,11 @@ $Cypress.register "Assertions", (Cypress, _, $) ->
 
       exp = $Cypress.Chai.expect(subject).to
 
+      ## are we doing an existance assertion?
+      if reExistance.test(chainers)
+        chainers = chainers.split("exist").join("existInDocument")
+        exp.isCheckingExistance = true
+
       chainers = chainers.split(".")
       lastChainer = _(chainers).last()
 
@@ -60,6 +69,14 @@ $Cypress.register "Assertions", (Cypress, _, $) ->
           memo[value]
 
       applyChainers = =>
+        ## if we're not doing existance assertions
+        ## then check to ensure the subject exists
+        ## in the DOM if its a DOM subject
+        ## need to continually apply this check due
+        ## to eventually
+        if not exp.isCheckingExistance
+          @ensureDom(subject) if $Cypress.Utils.hasElement(subject)
+
         _.reduce chainers, (memo, value) =>
           if value is "eventually"
             eventually = true

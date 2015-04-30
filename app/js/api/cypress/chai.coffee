@@ -22,9 +22,29 @@ do ($Cypress, _, chai) ->
         @listeners()
 
         $Chai.setGlobals(specWindow)
+        @addCustomProperties()
+
+      addCustomProperties: ->
+        _this = @
+
+        ## I dont like directly talking to cy here and directly
+        ## calling the _contains method but I don't know of another
+        ## way to do this, since we need to talk to the remoteDocument
+        chai.Assertion.addProperty "existInDocument", ->
+          if not cy = _this.Cypress.cy
+            throw new Error("cy must be running to use this assertion.")
+
+          obj = @_obj
+
+          @assert(
+            cy._contains(obj),
+            "expected #{utils.inspect(obj.selector)} to exist in the document",
+            "expected #{utils.inspect(obj.selector)} not to exist in the document"
+          )
 
       listeners: ->
         @listenTo Cypress, "stop", => @stop()
+
 
         return @
 
@@ -95,7 +115,7 @@ do ($Cypress, _, chai) ->
           catch e
             error = e
 
-          _this.Cypress.cy.assert passed, message, value, actual, expected, error
+          _this.Cypress.trigger "assert", passed, message, value, actual, expected, error
 
           throw(error) if error
 

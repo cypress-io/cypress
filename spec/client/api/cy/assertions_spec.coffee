@@ -36,6 +36,27 @@ describe "$Cypress.Cy Assertion Commands", ->
       obj = {requestJSON: {teamIds: [2]}}
       @cy.noop(obj).its("requestJSON").should("have.property", "teamIds").should("deep.eq", [2])
 
+    describe "not.exist", ->
+      beforeEach ->
+        @chai = $Cypress.Chai.create(@Cypress, {})
+
+      afterEach ->
+        @chai.restore()
+
+      it "does not throw when subject leaves dom", ->
+        @cy.$("button:first").click ->
+          $(@).remove()
+
+        @cy.get("button:first").click().should("not.exist")
+
+      it "throws when the subject eventually isnt in the DOM", ->
+        button = @cy.$("button:first")
+
+        @cy.on "retry", _.after 2, _.once ->
+          button.remove()
+
+        @cy.get("button:first").click().should("eventually.not.exist")
+
     describe "eventually chainer", ->
       it "retries assertion until true", ->
         button = @cy.$("button:first")
@@ -87,6 +108,30 @@ describe "$Cypress.Cy Assertion Commands", ->
           done()
 
         @cy.noop({}).should("eventually.deep.eq2", {})
+
+      it "throws when the subject isnt in the DOM", (done) ->
+        @cy.$("button:first").click ->
+          $(@).addClass("foo").remove()
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "Cannot call .should() because the current subject has been removed or detached from the DOM."
+          done()
+
+        @cy.get("button:first").click().should("have.class", "foo").then ->
+          done("cy.should was supposed to fail")
+
+      it "throws when the subject eventually isnt in the DOM", (done) ->
+        button = @cy.$("button:first")
+
+        @cy.on "retry", _.after 2, _.once ->
+          button.addClass("foo").remove()
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "Cannot call .should() because the current subject has been removed or detached from the DOM."
+          done()
+
+        @cy.get("button:first").click().should("eventually.have.class", "foo").then ->
+          done("cy.should was supposed to fail")
 
   context "#and", ->
     it "proxies to #should", ->
