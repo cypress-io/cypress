@@ -347,7 +347,9 @@ $Cypress.register "XHR", (Cypress, _, $) ->
       if not @getPendingRequests().length
         @throwErr("cy.respond() did not find any pending requests to respond to!")
 
-      server.respond()
+      ## forcibly return null so we dont
+      ## pass the resolved promises around
+      server.respond().return(null)
 
   $Cypress.Cy.extend
     getPendingRequests: ->

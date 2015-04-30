@@ -41,13 +41,24 @@ describe "$Cypress.Cy Server API", ->
       expect(respond).not.to.be.called
 
   context "#server.respond", ->
+    it "does not resolve until all responses have resolved", ->
+      @fakeServer = @sandbox.useFakeServer()
+      @server = $Cypress.Server.create(@fakeServer, respond: false)
+      $.get("/users")
+      $.get("/users")
+      $.get("/users")
+      @server.respond().then (xhrs) ->
+        statuses = _.pluck(xhrs, "status")
+        expect(xhrs).to.have.length(3)
+        expect(statuses).to.deep.eq [404, 404, 404]
+
     describe "with {respond: false}", ->
       beforeEach ->
         @fakeServer = @sandbox.useFakeServer()
         @server = $Cypress.Server.create(@fakeServer, delay: 10, respond: false)
 
       it "can forcibly respond to all requests in the queue", ->
-        @server.stub url: /users/, response: {}, method: "GET", respond: false
+        @server.stub url: /users/, response: {}, method: "GET"
         $.get("/users")
         request = @fakeServer.requests[0]
         @sandbox.spy request, "respond"

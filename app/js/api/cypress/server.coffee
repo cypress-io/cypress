@@ -238,6 +238,8 @@ $Cypress.Server = do ($Cypress, _) ->
       @fakeServer.respond()
       @forceRespond = false
 
+      Promise.all(@queue)
+
     onRequest: (fn) ->
       @onRequests.push fn
 
