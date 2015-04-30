@@ -133,6 +133,20 @@ describe "$Cypress.Cy Assertion Commands", ->
         @cy.get("button:first").click().should("eventually.have.class", "foo").then ->
           done("cy.should was supposed to fail")
 
+      it "throws when using eventually.have.length", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "'eventually.have.length' is NOT a supported assertion. Use the command options: '{length: 3}' implicit assertion instead."
+          done()
+
+        @cy.get("button:first").should("eventually.have.length", 3)
+
+      it "thows when using eventually.have.length without providing a number", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "'eventually.have.length' is NOT a supported assertion. Use the command options: '{length: n}' implicit assertion instead."
+          done()
+
+        @cy.get("button:first").should("eventually.have.length")
+
   context "#and", ->
     it "proxies to #should", ->
       @cy.noop({foo: "bar"}).should("have.property", "foo").and("eq", "bar")

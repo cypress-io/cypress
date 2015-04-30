@@ -1,10 +1,11 @@
 $Cypress.register "Assertions", (Cypress, _, $) ->
 
-  bRe          = /(\[b\])(.+)(\[\\b\])/
-  bTagOpen     = /\[b\]/g
-  bTagClosed   = /\[\\b\]/g
-  allButs      = /\bbut\b/g
-  reExistance  = /exist/
+  bRe            = /(\[b\])(.+)(\[\\b\])/
+  bTagOpen       = /\[b\]/g
+  bTagClosed     = /\[\\b\]/g
+  allButs        = /\bbut\b/g
+  reExistance    = /exist/
+  reEvHaveLength = /eventually.+length/
 
   Cypress.on "assert", ->
     @assert.apply(@, arguments)
@@ -40,6 +41,11 @@ $Cypress.register "Assertions", (Cypress, _, $) ->
 
   Cypress.addChildCommand
     should: (subject, chainers, args...) ->
+      ## if we're using eventually.have.length blow up
+      if reEvHaveLength.test(chainers)
+        num = args[0] ? "n"
+        @throwErr("'eventually.have.length' is NOT a supported assertion. Use the command options: '{length: #{num}}' implicit assertion instead.")
+
       ## should doesnt support options here
       ## so we cant use the wait command
       ## we must use @_retry directly
