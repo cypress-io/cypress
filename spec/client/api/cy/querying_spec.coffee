@@ -313,6 +313,26 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy.get("#button", {visible: true}).then ($button) ->
           expect($button.get(0)).to.eq button.get(0)
 
+    describe "{length: n}", ->
+      it "resolves once length equals n", ->
+        forms = @cy.$("form")
+
+        @cy.get("form", {length: forms.length}).then ($forms) ->
+          expect($forms.length).to.eq forms.length
+
+      it "retries until length equals n", ->
+        buttons = @cy.$("button")
+
+        length = buttons.length - 2
+
+        @cy.on "retry", _.after 2, =>
+          buttons.last().remove()
+          buttons = @cy.$("button")
+
+        ## should resolving after removing 2 buttons
+        @cy.get("button", {length: length}).then ($buttons) ->
+          expect($buttons.length).to.eq length
+
     describe ".log", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
@@ -547,6 +567,31 @@ describe "$Cypress.Cy Querying Commands", ->
     describe "errors", ->
       beforeEach ->
         @allowErrors()
+
+      it "throws when options.length isnt a number", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "options.length must be a number"
+          done()
+
+        @cy.get("button", {length: "asdf"})
+
+      it "throws on too many elements after timing out waiting for length", (done) ->
+        buttons = @cy.$("button")
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "Too many elements found. Found '#{buttons.length}', expected '#{buttons.length - 1}': button"
+          done()
+
+        @cy.get("button", {length: buttons.length - 1})
+
+      it "throws on too few elements after timing out waiting for length", (done) ->
+        buttons = @cy.$("button")
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "Not enough elements found. Found '#{buttons.length}', expected '#{buttons.length + 1}': button"
+          done()
+
+        @cy.get("button", {length: buttons.length + 1})
 
       it "throws after timing out not finding element", (done) ->
         @cy.get("#missing-el")

@@ -15,6 +15,7 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
       options ?= {}
 
       _.defaults options,
+        length: null
         visible: null
         exist: true
         exists: true
@@ -63,6 +64,13 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
       length = $el.length
 
       switch
+        when options.length isnt null
+          if not _.isFinite(options.length)
+            @throwErr("options.length must be a number")
+
+          if length is options.length
+            log($el)
+
         when options.exist is false
           ## return if we didnt find anything and our options have asked
           ## us for the element not to exist
@@ -90,6 +98,11 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
 
       getErr = ->
         err = switch
+          when options.length isnt null
+            if $el.length > options.length
+              "Too many elements found. Found '#{$el.length}', expected '#{options.length}':"
+            else
+              "Not enough elements found. Found '#{$el.length}', expected '#{options.length}':"
           when options.exist is false #and not $el.length
             "Found existing element:"
           when options.visible is false and $el.length

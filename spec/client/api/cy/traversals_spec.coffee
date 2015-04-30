@@ -25,7 +25,37 @@ describe "$Cypress.Cy Traversal Commands", ->
 
       describe "errors", ->
         beforeEach ->
+          @currentTest.timeout(150)
           @allowErrors()
+
+        it "throws when options.length isnt a number", (done) ->
+          @cy.on "fail", (err) ->
+            expect(err.message).to.include "options.length must be a number"
+            done()
+
+          @cy.get("#list")[name](arg, {length: "asdf"})
+
+        it "throws on too many elements after timing out waiting for length", (done) ->
+          el = @cy.$("#list")[name](arg)
+
+          node = $Cypress.Utils.stringifyElement @cy.$("#list"), "short"
+
+          @cy.on "fail", (err) ->
+            expect(err.message).to.include "Too many elements found. Found '#{el.length}', expected '#{el.length - 1}': #{arg ? ''} from #{node}"
+            done()
+
+          @cy.get("#list")[name](arg, {length: el.length - 1})
+
+        it "throws on too few elements after timing out waiting for length", (done) ->
+          el = @cy.$("#list")[name](arg)
+
+          node = $Cypress.Utils.stringifyElement @cy.$("#list"), "short"
+
+          @cy.on "fail", (err) ->
+            expect(err.message).to.include "Not enough elements found. Found '#{el.length}', expected '#{el.length + 1}': #{arg ? ''} from #{node}"
+            done()
+
+          @cy.get("#list")[name](arg, {length: el.length + 1})
 
         it "without a dom element", (done) ->
           @cy.noop({})[name](arg)
@@ -45,7 +75,7 @@ describe "$Cypress.Cy Traversal Commands", ->
           @cy._timeout(100)
 
           errIncludes = (el, node) =>
-            node = $Cypress.Utils.stringifyElement cy.$(node), "short"
+            node = $Cypress.Utils.stringifyElement @cy.$(node), "short"
 
             @cy.on "fail", (err) ->
               expect(err.message).to.include "Could not find element: #{el} from #{node}"
