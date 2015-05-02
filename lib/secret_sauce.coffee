@@ -91,8 +91,22 @@ SecretSauce.Socket =
   _startListening: (chokidar, path) ->
     { _ } = SecretSauce
 
+    messages = {}
+
     @io.on "connection", (socket) =>
       @Log.info "socket connected"
+
+      socket.on "client:request", (message, cb) =>
+        id = @uuid.v4()
+
+        messages[id] = cb
+
+        @io.emit "remote:request", id, message
+
+      socket.on "remote:response", (id, response) ->
+        if message = messages[id]
+          delete messages[id]
+          message(response)
 
       socket.on "watch:test:file", (filePath) =>
         @watchTestFileByPath(filePath)
