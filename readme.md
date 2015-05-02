@@ -45,7 +45,7 @@ nw . --debug
 ### Booting via the CLI
 
 ```bash
-cy
+bin/cy <path-to-the-project-you-want-to-test>
 ```
 
 ### Deplying
