@@ -10,7 +10,7 @@
       view = @getView(config)
 
       @listenTo view, "browser:clicked", (browser, version) ->
-        # runner.switchToBrowser(browser, version)
+        runner.switchToBrowser(browser, version)
 
       @listenTo view, "close:browser:clicked", ->
         # runner.switchToBrowser()

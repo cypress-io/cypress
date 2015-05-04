@@ -244,6 +244,14 @@
       escapeRegExp: (str) ->
         new RegExp str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
 
+      switchToBrowser: (browser, version) ->
+        @trigger "switch:to:manual:browser", browser, version
+
+      setBrowserAndVersion: (browser, version) ->
+        @set
+          browser: browser
+          version: version
+
       ## used to be called runIframeSuite
       run: (iframe, specWindow, remoteIframe, options, fn) ->
         App.config.run()

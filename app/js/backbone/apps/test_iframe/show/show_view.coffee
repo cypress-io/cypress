@@ -288,21 +288,49 @@
 
       url = encodeURIComponent("http://tunnel.browserling.com:55573/#tests/#{src}?__ui=satellite")
 
-      src = if options.browser and options.version
-        @browserChanged options.browser, options.version
-        "https://browserling.com/browse/#{options.browser}/#{options.version}/#{url}"
-      else
-        "http://localhost:3000/#tests/#{src}?__ui=satellite"
+      insertIframe = =>
+        browserling = new Browserling("29051e55f59c35e17a571bcf3f145910")
+        browserling.configure
+          browser: options.browser
+          version: options.version
+          url: url
 
-      remoteOpts =
-        id: "iframe-remote"
-        src: src
-        load: ->
-          fn(null, view.$remote)
-          view.$el.show()
+        $iframe = $(browserling.iframe())
+
+        $iframe.prop("id", "iframe-remote")
+        $iframe.load ->
           view.calcWidth()
+          view.$el.show()
+          fn(null, view.$remote)
 
-      @$remote = $("<iframe />", remoteOpts).appendTo(@ui.size)
+        @$remote = $iframe.appendTo(@ui.size)
+
+        # iframe).appendTo(@ui.size)
+
+
+
+        # src = if options.browser and options.version
+        #   @browserChanged options.browser, options.version
+        #   "https://browserling.com/browse/#{options.browser}/#{options.version}/#{url}"
+        # else
+        #   "http://localhost:3000/#tests/#{src}?__ui=satellite"
+
+        # remoteOpts =
+        #   id: "iframe-remote"
+        #   src: src
+        #   load: ->
+        #     fn(null, view.$remote)
+        #     view.$el.show()
+        #     view.calcWidth()
+
+        # @$remote = $("<iframe />", remoteOpts).appendTo(@ui.size)
+
+      if not window.Browserling
+        $.getScript("https://api.browserling.com/v1/browserling.js").done ->
+          insertIframe()
+
+      else
+        insertIframe()
 
     loadRegularIframes: (src, options, fn) ->
       view = @
