@@ -78,6 +78,18 @@ open ~/Desktop/cypress.app --args /Users/bmann/Dev/eclectus/build/0.5.8/osx64/cy
 
 ## Remote Server Communication
 
+### To Connect
+
+Remote servers need to connect to the `/remote` room.
+
+In `node.js` my client connects with this:
+
+```js
+socket = require("socket.io-client")("http://localhost:3000/remote", {path: "/__socket.io"})
+```
+
+### How messages are passed in and out
+
 Client requests a message:
 
 ```js
