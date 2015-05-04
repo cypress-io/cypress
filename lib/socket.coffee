@@ -14,6 +14,7 @@ class Socket
   chokidar: chokidar
   Promise: Promise
   path: path
+  uuid: uuid
 
   constructor: (io, app) ->
     if not (@ instanceof Socket)

@@ -91,8 +91,32 @@ SecretSauce.Socket =
   _startListening: (chokidar, path) ->
     { _ } = SecretSauce
 
+    messages = {}
+
+    @io.of("remote").on "connection", (socket) =>
+      socket.on "remote:response", (id, response) ->
+        if message = messages[id]
+          delete messages[id]
+          message(response)
+
     @io.on "connection", (socket) =>
       @Log.info "socket connected"
+
+      socket.on "client:request", (message, data, cb) =>
+        ## if cb isnt a function then we know
+        ## data is really the cb, so reassign it
+        ## and set data to null
+        if not _.isFunction(cb)
+          cb = data
+          data = null
+
+        id = @uuid.v4()
+
+        if _.keys(@io.of("remote").connected).length > 0
+          messages[id] = cb
+          @io.of("remote").emit "remote:request", id, message, data
+        else
+          cb({__error: "Could not process '#{message}'. No remote servers connected."})
 
       socket.on "watch:test:file", (filePath) =>
         @watchTestFileByPath(filePath)
