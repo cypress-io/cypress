@@ -17,6 +17,7 @@ describe "Socket", ->
       on: @sandbox.stub()
 
     @io =
+      of: @sandbox.stub().returns({on: ->})
       on: @sandbox.stub().callsArgWith(1, @ioSocket)
       emit: @sandbox.stub()
       close: @sandbox.stub()
