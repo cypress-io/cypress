@@ -92,7 +92,12 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       start("dom")
 
       ## attempt to query for the elements by withinSubject context
-      $el = @$(selector, options.withinSubject)
+      ## and catch any sizzle errors!
+      try
+        $el = @$(selector, options.withinSubject)
+      catch e
+        e.onFail = -> options.command.error(e)
+        throw e
 
       ## if that didnt find anything and we have a within subject
       ## and we have been explictly told to filter

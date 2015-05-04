@@ -56,10 +56,12 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
 
         return $el
 
-      ## instead of applying directly to the subject
-      ## shouldnt modifiers go through the same logic
-      ## as #get where we potentially retry several times?
-      $el = subject[traversal].call(subject, arg1, arg2)
+      ## catch sizzle errors here
+      try
+        $el = subject[traversal].call(subject, arg1, arg2)
+      catch e
+        e.onFail = -> options.command.error(e)
+        throw e
 
       length = $el.length
 

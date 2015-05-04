@@ -157,6 +157,20 @@ describe "$Cypress.Cy Traversal Commands", ->
 
     @cy.get("#list li:last").find("span")
 
+  it "throws once when incorrect sizzle selector", (done) ->
+    @allowErrors()
+
+    logs = []
+
+    @Cypress.on "log", (log) ->
+      logs.push(log)
+
+    @cy.on "fail", (err) ->
+      expect(logs.length).to.eq 2
+      done()
+
+    @cy.get("div:first").find(".spinner'")
+
   context "delta + options", ->
     beforeEach ->
       @Cypress.on "log", (@log) =>

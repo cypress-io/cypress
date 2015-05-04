@@ -568,6 +568,18 @@ describe "$Cypress.Cy Querying Commands", ->
       beforeEach ->
         @allowErrors()
 
+      it "throws once when incorrect sizzle selector", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) ->
+          expect(logs.length).to.eq 1
+          done()
+
+        @cy.get(".spinner'")
+
       it "throws when options.length isnt a number", (done) ->
         @cy.on "fail", (err) ->
           expect(err.message).to.include "options.length must be a number"
