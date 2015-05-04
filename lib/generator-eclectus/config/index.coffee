@@ -31,7 +31,7 @@ class ConfigGenerator extends Eclectus.Base
       },{
         name: "baseUrl"
         message: "What is the url to the server hosting your app?"
-        default: "http://localhost:3000/app"
+        default: "http://localhost:2020/app"
       },{
         name: "exampleTestHtml"
         type: "confirm"
@@ -56,7 +56,7 @@ class ConfigGenerator extends Eclectus.Base
       },{
         name: "port"
         message: "What port should I run the server on?"
-        default: 3000
+        default: 2020
       }
     ]
 

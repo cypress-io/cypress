@@ -88,20 +88,20 @@ describe "Server Interface", ->
 
           expect(@server.config[prop]).to.deep.eq(value)
 
-      it "port=3000", ->
-        @defaults "port", 3000
+      it "port=2020", ->
+        @defaults "port", 2020
 
       it "autoOpen=false", ->
         @defaults "autoOpen", false
 
-      it "clientUrl=http://localhost:3000/__/", ->
-        @defaults "clientUrl", "http://localhost:3000/__/"
+      it "clientUrl=http://localhost:2020/__/", ->
+        @defaults "clientUrl", "http://localhost:2020/__/"
 
-      it "clientUrlDisplay=http://localhost:3000", ->
-        @defaults "clientUrlDisplay", "http://localhost:3000"
+      it "clientUrlDisplay=http://localhost:2020", ->
+        @defaults "clientUrlDisplay", "http://localhost:2020"
 
-      it "idGeneratorUrl=http://localhost:3000/id_generator", ->
-        @defaults "idGeneratorUrl", "http://localhost:3000/id_generator"
+      it "idGeneratorUrl=http://localhost:2020/id_generator", ->
+        @defaults "idGeneratorUrl", "http://localhost:2020/id_generator"
 
       it "baseUrl=http://localhost:8000/app", ->
         @defaults "baseUrl", "http://localhost:8000/app", {

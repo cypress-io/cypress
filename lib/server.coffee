@@ -51,7 +51,7 @@ class Server
     _.defaults obj,
       clientRoute: "/__/"
       commandTimeout: 4000
-      port: 3000
+      port: 2020
       autoOpen: false
       wizard: false
       testFolder: "tests"

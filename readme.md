@@ -85,7 +85,7 @@ Remote servers need to connect to the `/remote` room.
 In `node.js` my client connects with this:
 
 ```js
-socket = require("socket.io-client")("http://localhost:3000/remote", {path: "/__socket.io"})
+socket = require("socket.io-client")("http://localhost:2020/remote", {path: "/__socket.io"})
 ```
 
 ### How messages are passed in and out

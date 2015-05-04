@@ -20,7 +20,7 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
 
       remote = @stripOrigin(current, remote)
       ## first strip off the current origin from the remote
-      ## this will strip off http://0.0.0.0:3000
+      ## this will strip off http://0.0.0.0:2020
       ## location.origin isn't supported everywhere so we'll
       ## do it manually with Uri
 

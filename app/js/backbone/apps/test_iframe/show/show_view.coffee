@@ -292,7 +292,8 @@
         @browserChanged options.browser, options.version
         "https://browserling.com/browse/#{options.browser}/#{options.version}/#{url}"
       else
-        "http://localhost:3000/#tests/#{src}?__ui=satellite"
+        ## this needs to be a dynamic port!
+        "http://localhost:2020/#tests/#{src}?__ui=satellite"
 
       remoteOpts =
         id: "iframe-remote"

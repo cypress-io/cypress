@@ -91,7 +91,7 @@ module.exports = (options = {}, df) ->
   # .nodeify(@quit)
 
 # browser.get "http://nodejs.org/", ->
-# browser.get "http://0.0.0.0:3000/#tests/real_spec.coffee", ->
+# browser.get "http://0.0.0.0:2020/#tests/real_spec.coffee", ->
   # console.log "got path"
   # browser.eval "window.location.href", (e, href) ->
     # console.log "href", href
