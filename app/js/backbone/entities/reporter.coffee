@@ -25,6 +25,9 @@
           @listenTo @Cypress, event, (args...) =>
             @trigger event, args...
 
+        @listenTo @Cypress, "message", (msg, data, cb) =>
+          @socket.emit "client:request", msg, data, cb
+
         @listenTo @Cypress, "initialized", (obj) =>
           @receivedRunner(obj.runner)
 

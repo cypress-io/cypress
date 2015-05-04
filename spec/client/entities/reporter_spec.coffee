@@ -26,6 +26,12 @@ describe "Reporter Entity", ->
       @Cypress.trigger "initialized", {runner: runner = {}}
       expect(receivedRunner).to.be.calledWith runner
 
+    it "listens to Cypress.message", ->
+      emit = @sandbox.stub @reporter.socket, "emit"
+      fn = @sandbox.stub()
+      @Cypress.trigger "message", "create:user", {foo: "bar"}, fn
+      expect(emit).to.be.calledWith "client:request", "create:user", {foo: "bar"}, fn
+
   context "#stop", ->
     beforeEach ->
       @stop = @sandbox.stub(@Cypress, "stop").resolves()
