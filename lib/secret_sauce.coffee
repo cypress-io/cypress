@@ -93,20 +93,23 @@ SecretSauce.Socket =
 
     messages = {}
 
+    @io.of("remote").on "connection", (socket) =>
+      socket.on "remote:response", (id, response) ->
+        if message = messages[id]
+          delete messages[id]
+          message(response)
+
     @io.on "connection", (socket) =>
       @Log.info "socket connected"
 
       socket.on "client:request", (message, cb) =>
         id = @uuid.v4()
 
-        messages[id] = cb
-
-        @io.emit "remote:request", id, message
-
-      socket.on "remote:response", (id, response) ->
-        if message = messages[id]
-          delete messages[id]
-          message(response)
+        if _.keys(@io.of("remote").connected).length > 0
+          messages[id] = cb
+          @io.of("remote").emit "remote:request", id, message
+        else
+          cb({__error: "Could not process '#{message}'. No remote servers connected."})
 
       socket.on "watch:test:file", (filePath) =>
         @watchTestFileByPath(filePath)
