@@ -157,9 +157,13 @@ describe "$Cypress.Cy Traversal Commands", ->
 
     @cy.get("#list li:last").find("span")
 
-  context "delta options", ->
+  context "delta + options", ->
     beforeEach ->
       @Cypress.on "log", (@log) =>
+
+    it "compacts message without a selector", ->
+      @cy.get("#list").children({visible: true}).then ->
+        expect(@log.get("message")).to.eq "{visible: true}"
 
     it "logs out to message", ->
       @cy.get("#list").find("li:first", {visible: true}).then ->

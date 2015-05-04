@@ -40,7 +40,7 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
 
       if options.log
         options.command ?= Cypress.command
-          message: [getSelector(), deltaOptions]
+          message: _.compact([getSelector(), deltaOptions])
           onConsole: -> onConsole
 
       log = ($el) ->

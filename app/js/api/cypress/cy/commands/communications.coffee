@@ -10,8 +10,8 @@ $Cypress.register "Communications", (Cypress, _, $) ->
       new Promise (resolve, reject) =>
 
         command = Cypress.command
-          name: "msg"
-          message: [msg, data]
+          name: "message"
+          message: Cypress.Utils.stringify([msg, data])
 
         Cypress.trigger "message", msg, data, (response) =>
           if err = response.__error
@@ -22,8 +22,9 @@ $Cypress.register "Communications", (Cypress, _, $) ->
           else
             command.set
               onConsole: -> {
-                Message: command.get("message")
-                Returned: response
+                Message: msg
+                "Data Sent": data
+                "Data Returned": response
               }
 
             command.snapshot().end()

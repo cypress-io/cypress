@@ -99,8 +99,8 @@ describe "$Cypress.Cy Communications Commands", ->
       it "logs immediately", (done) ->
           @Cypress.on "log", (log) ->
             expect(log.pick("name", "message", "state")).to.deep.eq {
-              name: "msg"
-              message: ["create:user", {foo: "bar"}]
+              name: "message"
+              message: "create:user, {foo: bar}"
               state: "pending"
             }
             done()
@@ -111,11 +111,11 @@ describe "$Cypress.Cy Communications Commands", ->
         @Cypress.on "message", (msg, data, cb) ->
           cb({baz: "quux"})
 
-        @cy.message("create:user", {foo: "bar"}).then ->
+        @cy.message("create:user").then ->
           obj = {
             state: "success"
-            name: "msg"
-            message: ["create:user", {foo: "bar"}]
+            name: "message"
+            message: "create:user"
           }
 
           _.each obj, (value, key) =>
@@ -127,7 +127,8 @@ describe "$Cypress.Cy Communications Commands", ->
 
         @cy.message("create:user", {foo: "bar"}).then ->
           expect(@log.attributes.onConsole()).to.deep.eq {
-            Command: "msg"
-            Message: ["create:user", {foo: "bar"}]
-            Returned: {baz: "quux"}
+            Command: "message"
+            Message: "create:user"
+            "Data Sent": {foo: "bar"}
+            "Data Returned": {baz: "quux"}
           }
