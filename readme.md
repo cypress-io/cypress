@@ -78,14 +78,14 @@ open ~/Desktop/cypress.app --args /Users/bmann/Dev/eclectus/build/0.5.8/osx64/cy
 
 ## Remote Server Communication
 
-1. Client requests a message:
+Client requests a message:
 
 ```js
 // passes in a message and optionally some JSON data
 cy.message("create:user", {some: "data"})
 ```
 
-2. Desktop App requests message from remote:
+Desktop App requests message from remote:
 
 ```js
 // an unique guid ID is generated for this message
@@ -93,7 +93,7 @@ cy.message("create:user", {some: "data"})
 // and passes the ID, message, and optional data params
 io.emit("remote:request", "123-a-guid-as-an-id", "create:user", {some: "data"})
 ```
-3. Remote Server responds:
+Remote Server responds:
 
 ```js
 // the remote server performs the work as per the message implementation
