@@ -95,9 +95,12 @@ window.enterCommandTestingMode = (fixture = "html/dom") ->
       ## tested in integration mode)
       @sandbox.stub(@cy, "endedEarlyErr")
 
-      @Cypress.trigger "initialize",
+      obj =
         $remoteIframe: @iframe
         config: ->
+
+      ## set initiallyBind to true for our iframe
+      @Cypress.trigger "initialize", obj, true
 
       ## must call defaults manually because
       ## this is naturally called in initialize

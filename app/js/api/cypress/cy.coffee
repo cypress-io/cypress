@@ -12,7 +12,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
 
       specWindow.cy = @
 
-    initialize: (obj) ->
+    initialize: (obj, initiallyBind = false) ->
       @defaults()
 
       {@$remoteIframe, @config} = obj
@@ -34,6 +34,16 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
 
           @isReady(false, "submit")
 
+        win.off("beforeunload").on "beforeunload", (e) =>
+          ## bail if we've cancelled this event (from another source)
+          ## or we've set a returnValue on the original event
+          return if e.isDefaultPrevented() or @_eventHasReturnValue(e)
+
+          @isReady(false, "beforeunload")
+
+          ## return undefined so
+          return undefined
+
         win.off("unload").on "unload", =>
           ## put cy in a waiting state now that
           ## we've unloaded
@@ -46,6 +56,12 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       @$remoteIframe.on "load", =>
         bindEvents()
         @isReady(true, "load")
+
+      ## in testing we set initiallyBind to
+      ## true because our iframe has already
+      ## loaded. because its already loaded
+      ## the bindEvents() function is never called
+      bindEvents() if initiallyBind
 
       ## anytime initialize is called we immediately
       ## set cy to be ready to invoke commands
@@ -60,8 +76,8 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       return @
 
     listeners: ->
-      @listenTo @Cypress, "initialize", (obj) =>
-        @initialize(obj)
+      @listenTo @Cypress, "initialize", (obj, bool) =>
+        @initialize(obj, bool)
 
       ## why arent we listening to "defaults" here?
       ## instead we are manually hard coding them
@@ -120,6 +136,16 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
     ## global options applicable to all cy instances
     ## and restores
     options: (options = {}) ->
+
+    _eventHasReturnValue: (e) ->
+      val = e.originalEvent.returnValue
+
+      ## return false if val is an empty string
+      ## of if its undinefed
+      return false if val is "" or _.isUndefined(val)
+
+      ## else return true
+      return true
 
     isReady: (bool = true, event) ->
       if bool
@@ -301,6 +327,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
 
     _hrefChanged: ->
       location = @sync.location({log: false})
+      console.log "command is", @prop("current").name, "href is", @prop("href"), "location href is", location.href
       @prop("href") isnt location.href.replace(location.hash, "")
 
     set: (obj, prev, next) ->
@@ -367,8 +394,10 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
         # explicitly disabled checking for location changes
         # and if our href has changed in between running the commands then
         # then we're no longer ready to proceed with the next command
-        if @prop("recentlyReady") is null
-          @isReady(false, "href changed") if @_hrefChanged()
+        # if @prop("recentlyReady") is null
+        #   if @_hrefChanged()
+        #     debugger
+        #     @isReady(false, "href changed")
 
         # @onInvokeEnd(subject)
 
