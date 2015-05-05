@@ -11,7 +11,7 @@ do ($Cypress, _) ->
 
       ## clone the body and strip out any script tags
       body = @cy.$("body").clone()
-      body.find("script").remove()
+      body.find("script,iframe,link[rel='stylesheet']").remove()
 
       ## here we need to figure out if we're in a remote manual environment
       ## if so we need to stringify the DOM:
