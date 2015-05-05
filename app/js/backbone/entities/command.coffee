@@ -109,9 +109,6 @@
     getEl: ->
       @getLog().get("$el")
 
-    getRoute: ->
-      @getLog().get("_route")
-
     getLog: ->
       @log or throw new Error("Command is missing its log reference!")
 

@@ -236,7 +236,7 @@ describe "$Cypress.Cy XHR Commands", ->
       @expectOptionsToBe = (opts) =>
         options = @stub.getCall(0).args[0]
         _.defaults opts, {delay: 10, respond: true}
-        _.each options, (value, key) ->
+        _.each _(options).omit("log"), (value, key) ->
           expect(options[key]).to.deep.eq(opts[key], "failed on property: (#{key})")
 
       @cy.server().then ->
@@ -589,6 +589,33 @@ describe "$Cypress.Cy XHR Commands", ->
 
         it "snapshots again", ->
           expect(@log.get("snapshot")).to.be.an("object")
+
+      describe "numResponses", ->
+        it "is initially 0", ->
+          @cy.route(/foo/, {}).then =>
+            expect(@log.get("numResponses")).to.eq 0
+
+        it "is incremented to 2", ->
+          @cy
+            .route(/foo/, {}).then ->
+              @route = @log
+            .window().then (win) ->
+              win.$.get("/foo")
+            .then ->
+              expect(@route.get("numResponses")).to.eq 1
+
+        it "is incremented for each matching request", ->
+          @cy
+            .route(/foo/, {}).then ->
+              @route = @log
+            .window().then (win) ->
+              @cy.Promise.all [
+                win.$.get("/foo")
+                win.$.get("/foo")
+                win.$.get("/foo")
+              ]
+            .then ->
+              expect(@route.get("numResponses")).to.eq 3
 
   context "#checkForServer", ->
     beforeEach ->

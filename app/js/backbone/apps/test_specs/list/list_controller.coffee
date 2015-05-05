@@ -23,12 +23,6 @@
 
         command = model.addCommand(command, options)
 
-        ## if this command is a request then
-        ## lets update our routes
-        ## TODO REFACTOR THIS INTO NEW LOG INTERFACE
-        if route = command and command.getRoute()
-          model.incrementRoute(route)
-
       @listenTo routes, "add", (route, routes, options) ->
         model = container.get route.get("testId")
         model.addRoute(route, options) if model

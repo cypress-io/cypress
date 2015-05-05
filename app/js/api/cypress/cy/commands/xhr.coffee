@@ -73,13 +73,13 @@ $Cypress.register "XHR", (Cypress, _, $) ->
     urls = urls.concat getUrl(options)
     @prop "availableUrls", urls
 
-    Cypress.route
+    options.log = Cypress.route
       method:   options.method
       url:      getUrl(options)
       status:   options.status
       response: options.response
       alias:    options.alias
-      _route:   options
+      numResponses: 0
       onConsole: ->
         Method:   options.method
         URL:      getUrl(options)
@@ -124,6 +124,12 @@ $Cypress.register "XHR", (Cypress, _, $) ->
           ## resnapshot
           l.snapshot()
 
+          ## increment the associated ROUTE LOG numResponses by 1
+          ## (this increments the route instrument)
+          if rl = route.log
+            numResponses = rl.get("numResponses")
+            rl.set "numResponses", numResponses + 1
+
           ## err if we have an error
           ## else just ends
           if err
@@ -145,7 +151,6 @@ $Cypress.register "XHR", (Cypress, _, $) ->
             aliasType: "route"
             type:      "parent"
             error:     err
-            _route:    route
             snapshot:  true
             onConsole: =>
               consoleObj = {

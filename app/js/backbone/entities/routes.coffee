@@ -1,9 +1,6 @@
 @App.module "Entities", (Entities, App, Backbone, Marionette, $, _) ->
 
   class Entities.Route extends Entities.Model
-    defaults: ->
-      numResponses: 0
-
     mutators:
       urlFormatted: ->
         url = @get("url")
@@ -12,26 +9,18 @@
     getLog: ->
       @log or throw new Error("Route is missing its log reference!")
 
-    hasRoute: (route) ->
-      @getLog().get("_route")
-
-    increment: ->
-      @set "numResponses", @get("numResponses") + 1
-
   class Entities.RoutesCollection extends Entities.Collection
     model: Entities.Route
 
-    increment: (routeObj) ->
-      route = @find (route) ->
-        route.hasRoute(routeObj)
-
-      route.increment() if route
-
     createRoute: (log) ->
-      attrs = ["testId", "hook", "type", "method", "name", "url", "status", "alias"]
+      attrs = ["testId", "hook", "type", "method", "name", "url", "status", "alias", "numResponses"]
 
       route     = new Entities.Route log.pick.apply(log, attrs)
       route.log = log
+
+      route.listenTo log, "attrs:changed", (attrs) ->
+        route.set attrs
+
       route
 
     add: (attrs, options) ->
