@@ -103,6 +103,11 @@ describe "$Cypress.Cy Navigation Commands", ->
       it "127.0.0.1:8000 => http://127.0.0.1:8000/", ->
         @urlIs "127.0.0.1:8000", "http://127.0.0.1:8000/"
 
+      it "overrides baseUrl with fully qualified url", ->
+        @baseUrl "http://localhost:3000"
+
+        @urlIs "http://www.github.com", "http://www.github.com/"
+
     describe ".log", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
