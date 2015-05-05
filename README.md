@@ -2,6 +2,20 @@
 
 Cypress is a test engine that runs unit and integration tests in your browser.
 
+### What's in this repo?
+
+Currently this repo is used to house all of the Cypress documentation, the issues (from early adopters), changelog, and current progress. Eventually this will all move to the public website.
+
 - #### [Changelog](../../wiki/changelog)
 
 - #### [Documentation](https://github.com/cypress-io/cypress/wiki)
+
+### Where's the code?
+
+When Cypress releases its public beta, it will open source the majority of the code base. This will primarily consist of the `cypress-driver`, and backend adapters. The `desktop app` which integrates our `web services` will not be released as open source.
+
+### How do I get Cypress?
+
+Right now you have to be an early adopter to get a hold of Cypress. Visit [http://www.cypress.io](cypress.io) and get on our mailing list. We send periodic emails asking for additional adopters until we are ready for a public beta.
+
+The public beta is on track for later in 2015.
