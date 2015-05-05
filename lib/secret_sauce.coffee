@@ -93,14 +93,19 @@ SecretSauce.Socket =
 
     messages = {}
 
-    @io.of("remote").on "connection", (socket) =>
-      socket.on "remote:response", (id, response) ->
-        if message = messages[id]
-          delete messages[id]
-          message(response)
-
     @io.on "connection", (socket) =>
       @Log.info "socket connected"
+
+      socket.on "remote:connected", ->
+        return if socket.inRemoteRoom
+
+        socket.inRemoteRoom = true
+        socket.join("remote")
+
+        socket.on "remote:response", (id, response) ->
+          if message = messages[id]
+            delete messages[id]
+            message(response)
 
       socket.on "client:request", (message, data, cb) =>
         ## if cb isnt a function then we know
@@ -112,9 +117,9 @@ SecretSauce.Socket =
 
         id = @uuid.v4()
 
-        if _.keys(@io.of("remote").connected).length > 0
+        if _.keys(@io.sockets.adapter.rooms.remote).length > 0
           messages[id] = cb
-          @io.of("remote").emit "remote:request", id, message, data
+          @io.to("remote").emit "remote:request", id, message, data
         else
           cb({__error: "Could not process '#{message}'. No remote servers connected."})
 
