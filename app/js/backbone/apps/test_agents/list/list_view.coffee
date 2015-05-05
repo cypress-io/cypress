@@ -4,7 +4,7 @@
     template: "test_agents/list/_agent"
 
     modelEvents:
-      "change:numResponses" : "render"
+      "change:callCount" : "render"
 
   class List.Agents extends App.Views.CompositeView
     template: "test_agents/list/agents"

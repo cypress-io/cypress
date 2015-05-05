@@ -13,7 +13,7 @@ $Cypress.Agents = do ($Cypress, _) ->
 
       method + "(" + getArgs() + ")"
 
-    _wrap: (type, agent, obj, method) ->
+    _wrap: (type, agent, obj, method, log) ->
       _this = @
 
       agent._cy = _this.count
@@ -40,6 +40,7 @@ $Cypress.Agents = do ($Cypress, _) ->
           call:      agent.lastCall
           callCount: agent.callCount
           error:     error
+          log:       log
 
         _this.options.onInvoke(props)
 
@@ -54,28 +55,29 @@ $Cypress.Agents = do ($Cypress, _) ->
     spy: (obj, method) ->
       spy = @sandbox.spy(obj, method)
 
-      @options.onCreate
+      log = @options.onCreate
         type: "spy"
         functionName: method
         count: @count += 1
 
-      @_wrap("spy", spy, obj, method)
+      @_wrap("spy", spy, obj, method, log)
 
       return spy
 
     stub: (obj, method) ->
       stub = @sandbox.stub(obj, method)
 
-      @options.onCreate
+      log = @options.onCreate
         type: "stub"
         functionName: method
         count: @count += 1
 
-      @_wrap("stub", stub, obj, method)
+      @_wrap("stub", stub, obj, method, log)
 
       return stub
 
     mock: ->
+      throw new Error("Not yet implemented!")
 
     useFakeTimers: ->
 

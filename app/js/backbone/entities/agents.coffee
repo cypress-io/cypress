@@ -1,8 +1,6 @@
 @App.module "Entities", (Entities, App, Backbone, Marionette, $, _) ->
 
   class Entities.Agent extends Entities.Model
-    defaults: ->
-      numCalls: 0
 
   class Entities.AgentsCollection extends Entities.Collection
     model: Entities.Agent
@@ -14,10 +12,14 @@
     #   route.increment() if route
 
     createAgent: (log) ->
-      attrs = ["testId", "hook", "type", "functionName", "numCalls"]
+      attrs = ["testId", "hook", "type", "functionName", "callCount"]
 
       agent = new Entities.Agent log.pick.apply(log, attrs)
       agent.log = log
+
+      agent.listenTo log, "attrs:changed", (attrs) ->
+        agent.set attrs
+
       agent
 
     add: (attrs, options) ->

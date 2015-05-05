@@ -34,4 +34,15 @@ describe "$Cypress.Cy Agents Commands", ->
           expect(@log.get("state")).to.eq("success")
           expect(@log.get("snapshot")).to.be.an("object")
 
+        it "increments callCount", ->
+          spy = @agents.spy()
+
+          @agent = @log
+
+          expect(@agent.get("callCount")).to.eq 0
+          spy("foo", "bar")
+          expect(@agent.get("callCount")).to.eq 1
+          spy("foo", "baz")
+          expect(@agent.get("callCount")).to.eq 2
+
         context "#onConsole", ->
