@@ -56,6 +56,40 @@ describe "$Cypress.Cy Navigation Commands", ->
         prev = @cy.prop("current").prev
         expect(prev.args).to.have.length(1)
 
+    describe "location getter overrides", ->
+      beforeEach ->
+        @eq = (attr, str) =>
+          expect(@win.location[attr]).to.eq str
+
+        @cy
+          .visit("fixtures/html/sinon.html?foo=bar#dashboard?baz=quux")
+          .window().as("win").then (win) ->
+            ## ensure href always returns the full path
+            ## so our tests guarantee that in fact we are
+            ## overriding the location getters
+            expect(win.location.href).to.include "__remote/fixtures/html/sinon.html?foo=bar&__initial=true#dashboard?baz=quux"
+
+      it "hash", ->
+        @eq "hash", "#dashboard?baz=quux"
+
+      it "hostname", ->
+        @eq "hostname", "localhost"
+
+      it "origin", ->
+        @eq "origin", "http://localhost:3500"
+
+      it "pathname", ->
+        @eq "pathname", "/fixtures/html/sinon.html"
+
+      it "port", ->
+        @eq "port", "3500"
+
+      it "protocol", ->
+        @eq "protocol", "http:"
+
+      it "search", ->
+        @eq "search", "?foo=bar"
+
     describe "visit:start", ->
       beforeEach ->
         trigger = @sandbox.stub $.fn, "trigger"

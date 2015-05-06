@@ -18,6 +18,9 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
     constructor: (current, remote = "", defaultOrigin) ->
       current  = new Uri(current)
 
+      ## use defaultOrigin or the origin from our current url
+      defaultOrigin or= current.origin()
+
       remote = @stripOrigin(current, remote)
       ## first strip off the current origin from the remote
       ## this will strip off http://0.0.0.0:2020
@@ -27,12 +30,19 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
       ## remove any __remote
       remote = @stripRemotePath(remote)
 
+      ## if AFTER we strip out the current origin
+      ## and we strip out the __remote pathname
+      ## we still DONT have a real origin
+      ## then just use the current's origin.
+      ## this happens when we use cypress as
+      ## our web server, and since we're servering
+      ## files directly from it, its really our origin
+      remote = $Location.getRemoteUrl(remote, defaultOrigin)
+
       ## convert to Uri instance
       ## from here on out we mutate
       ## this object directly
       @remote = new Uri(remote)
-
-      @applyDefaultOrigin(defaultOrigin)
 
       ## remove the __initial=true query param
       @stripInitial()
@@ -48,17 +58,6 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
 
     stripInitial: ->
       @remote.deleteQueryParam("__initial")
-
-    applyDefaultOrigin: (origin) ->
-      ## bail if we already have a remote origin
-      return if @remote.origin()
-
-      origin = new Uri(origin)
-
-      @remote
-        .setProtocol(origin.protocol())
-        .setPort(origin.port())
-        .setHost(origin.host())
 
     getHash: ->
       if hash = @remote.anchor()
@@ -127,6 +126,15 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
         search: @getSearch()
         toString: _.bind(@getToString, @)
       }
+
+    ## override pathname + query here
+    @override = (win, location) ->
+      _.each ["hash", "host", "hostname", "origin", "pathname", "port", "protocol", "search"], (attr) ->
+        try
+          Object.defineProperty win.location, attr, {
+            get: ->
+              location(attr)
+          }
 
     ## think about moving this method out of Cypress
     ## and into our app, since it kind of leaks the

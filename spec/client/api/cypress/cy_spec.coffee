@@ -342,7 +342,7 @@ describe "$Cypress.Cy API", ->
           .then ->
             expect(@cy.prop("href")).to.include "/fixtures/html/dom.html"
           .visit("/foo").then ->
-            expect(@cy.prop("href")).to.eq "foo"
+            expect(@cy.prop("href")).to.include "foo"
 
     context "#isReady", ->
       it "creates a deferred when not ready", ->

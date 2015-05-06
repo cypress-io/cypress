@@ -1,7 +1,16 @@
 $Cypress.register "Navigation", (Cypress, _, $) ->
 
+  overrideRemoteLocationGetters = (cy, contentWindow) ->
+    location = (attr) ->
+      cy.sync.location(attr, {log: false})
+
+    Cypress.Location.override(contentWindow, location)
+
   Cypress.Cy.extend
     onBeforeLoad: (contentWindow) ->
+      ## override the remote iframe getters
+      overrideRemoteLocationGetters(@, contentWindow)
+
       current = @prop("current")
 
       return if current?.name isnt "visit"

@@ -6,6 +6,7 @@ urls =
   ember:    "http://0.0.0.0:3000/__remote/index.html?__initial=true#/posts"
   app:      "http://localhost:3000/app/#posts/1"
   search:   "http://localhost:3000/search?q=books"
+  pathname: "app/index.html"
 
 describe "$Cypress.Location API", ->
   beforeEach ->
@@ -35,7 +36,11 @@ describe "$Cypress.Location API", ->
 
     it "does not apply a leading slash after removing query params", ->
       str = @setup("ember").getHref()
-      expect(str).to.eq "index.html#/posts"
+      expect(str).to.eq "http://0.0.0.0:3000/index.html#/posts"
+
+    it "applies default origin to ember", ->
+      str = @setup("ember", "http://ember.com").getHref()
+      expect(str).to.eq "http://ember.com/index.html#/posts"
 
   context "#getHost", ->
     it "returns port if port is present", ->
@@ -68,6 +73,10 @@ describe "$Cypress.Location API", ->
     it "returns a / with no path", ->
       str = @setup("google").getPathName()
       expect(str).to.eq "/"
+
+    it "returns the full pathname without a host", ->
+      str = @setup("pathname").getPathName()
+      expect(str).to.eq "/app/index.html"
 
   context "#getPort", ->
     it "returns the port", ->

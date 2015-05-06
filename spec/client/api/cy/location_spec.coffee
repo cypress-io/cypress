@@ -1,10 +1,12 @@
 describe "$Cypress.Cy Location Commands", ->
   enterCommandTestingMode()
 
+  origin = window.location.origin
+
   context "#url", ->
     it "returns the location href", ->
       @cy.url().then (url) ->
-        expect(url).to.eq "/fixtures/html/dom.html"
+        expect(url).to.eq origin + "/fixtures/html/dom.html"
 
     describe ".log", ->
       beforeEach ->
@@ -28,7 +30,7 @@ describe "$Cypress.Cy Location Commands", ->
         @cy.url().then ->
           obj = {
             name: "url"
-            message: "/fixtures/html/dom.html"
+            message: origin + "/fixtures/html/dom.html"
           }
 
           _.each obj, (value, key) =>
@@ -42,7 +44,7 @@ describe "$Cypress.Cy Location Commands", ->
         @cy.url().then ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "url"
-            Returned: "/fixtures/html/dom.html"
+            Returned: origin + "/fixtures/html/dom.html"
           }
 
   context "#hash", ->
@@ -97,7 +99,7 @@ describe "$Cypress.Cy Location Commands", ->
 
     it "returns a specific key from location object", ->
       @cy.location("href").then (href) ->
-        expect(href).to.eq "/fixtures/html/dom.html"
+        expect(href).to.eq origin + "/fixtures/html/dom.html"
 
     describe ".log", ->
       beforeEach ->
