@@ -90,6 +90,22 @@ describe "$Cypress.Cy Navigation Commands", ->
       it "search", ->
         @eq "search", "?foo=bar"
 
+    describe "history method overrides", ->
+      beforeEach ->
+        @cy
+          .visit("fixtures/html/sinon.html")
+          .window().as("win")
+          .then ->
+            @trigger = @sandbox.stub @cy.$remoteIframe, "trigger"
+
+      _.each ["back", "forward", "go", "pushState", "replaceState"], (attr) =>
+        it "fires 'history:event' on attr: '#{attr}'", ->
+          if attr is "go"
+            arg = -1
+
+          @win.history[attr](arg)
+          expect(@trigger).to.be.calledWith "history:event"
+
     describe "visit:start", ->
       beforeEach ->
         trigger = @sandbox.stub $.fn, "trigger"

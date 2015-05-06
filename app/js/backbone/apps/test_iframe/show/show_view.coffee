@@ -324,6 +324,10 @@
 
       @$remote = $("<iframe />", remoteOpts).appendTo(@ui.size)
 
+      ## when apps go through the history object
+      ## and change the url, update it now
+      @$remote.on "history:event", @updateRemoteUrl
+
       ## when the remote iframe visits an external URL
       ## we want to update our header's input
       @$remote.on "visit:start", (e, url) =>

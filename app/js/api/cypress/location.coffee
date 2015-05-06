@@ -128,7 +128,20 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
       }
 
     ## override pathname + query here
-    @override = (win, location) ->
+    @override = (win, location, navigated) ->
+      ## history does not fire events until a click or back has happened
+      ## so we have to know when they do manually
+      _.each ["back", "forward", "go", "pushState", "replaceState"], (attr) ->
+        ## dont use underscore wrap here because its potentially very
+        ## confusing for users and this manually override is faster anyway
+        return if not orig = win.history?[attr]
+
+        win.history[attr] = ->
+          orig.apply(@, arguments)
+
+          ## let our function know we've navigated
+          navigated()
+
       _.each ["hash", "host", "hostname", "origin", "pathname", "port", "protocol", "search"], (attr) ->
         try
           Object.defineProperty win.location, attr, {

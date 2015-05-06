@@ -1,10 +1,13 @@
 $Cypress.register "Navigation", (Cypress, _, $) ->
 
   overrideRemoteLocationGetters = (cy, contentWindow) ->
+    navigated = ->
+      cy.$remoteIframe.trigger("history:event")
+
     location = (attr) ->
       cy.sync.location(attr, {log: false})
 
-    Cypress.Location.override(contentWindow, location)
+    Cypress.Location.override(contentWindow, location, navigated)
 
   Cypress.Cy.extend
     onBeforeLoad: (contentWindow) ->
