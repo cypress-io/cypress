@@ -390,6 +390,42 @@ describe "Routes", ->
             .expect(200, "hello from bar!")
             .end(done)
 
+      context "absolute url rewriting", ->
+        it "rewrites anchor href", (done) ->
+          nock(@baseUrl)
+            .log(console.log)
+            .get("/bar")
+            .reply 200, "<html><body><a href='http://www.google.com'>google</a></body></html>",
+              "Content-Type": "text/html"
+
+          supertest(@app)
+            .get("/__remote/#{@baseUrl}/bar?__initial=true")
+            .expect(200)
+            .expect (res) ->
+              body = res.text
+              expect(body).to.eq '<html><body><a href="/http://www.google.com">google</a></body></html>'
+              null
+            .end(done)
+
+        it "rewrites multiple anchors", (done) ->
+          contents = removeWhitespace Fixtures.get("server/absolute_url.html")
+          expected = removeWhitespace Fixtures.get("server/absolute_url_expected.html")
+
+          nock(@baseUrl)
+            .log(console.log)
+            .get("/bar")
+            .reply 200, contents,
+              "Content-Type": "text/html"
+
+          supertest(@app)
+            .get("/__remote/#{@baseUrl}/bar?__initial=true")
+            .expect(200)
+            .expect (res) ->
+              body = res.text
+              expect(body).to.eq expected
+              null
+            .end(done)
+
     describe "when session is already set", ->
       context "absolute baseUrl", ->
         beforeEach (done) ->

@@ -564,6 +564,16 @@ SecretSauce.RemoteInitial =
   _resolveRedirects: (url, res, req) ->
     { _ } = SecretSauce
 
+    tr = @trumpet()
+
+    tr.selectAll "form[action^=http]", (elem) ->
+      elem.getAttribute "action", (action) ->
+        elem.setAttribute "action", "/" + action
+
+    tr.selectAll "a[href^=http]", (elem) ->
+      elem.getAttribute "href", (href) ->
+        elem.setAttribute "href", "/" + href
+
     thr = @through((d) -> @queue(d))
 
     rq = @hyperquest.get url, {}, (err, incomingRes) =>
@@ -585,7 +595,7 @@ SecretSauce.RemoteInitial =
 
         ## reset the session to the latest redirected URL
         @setSessionRemoteUrl(req, url)
-        rq.pipe(thr)
+        rq.pipe(tr).pipe(thr)
 
     ## set the headers on the hyperquest request
     ## this will naturally forward cookies or auth tokens
