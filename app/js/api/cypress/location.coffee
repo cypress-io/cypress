@@ -142,12 +142,13 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
           ## let our function know we've navigated
           navigated()
 
-      _.each ["hash", "host", "hostname", "origin", "pathname", "port", "protocol", "search"], (attr) ->
-        try
-          Object.defineProperty win.location, attr, {
-            get: ->
-              location(attr)
-          }
+      # _.each ["hash", "host", "hostname", "origin", "pathname", "port", "protocol", "search"], (attr) ->
+      #   try
+      #     Object.defineProperty win.location, attr, {
+      #       get: ->
+      #         location(attr)
+
+      #     }
 
     ## think about moving this method out of Cypress
     ## and into our app, since it kind of leaks the

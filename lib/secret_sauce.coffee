@@ -595,7 +595,8 @@ SecretSauce.RemoteInitial =
 
         ## reset the session to the latest redirected URL
         @setSessionRemoteUrl(req, url)
-        rq.pipe(tr).pipe(thr)
+        rq.pipe(thr)
+        # rq.pipe(tr).pipe(thr)
 
     ## set the headers on the hyperquest request
     ## this will naturally forward cookies or auth tokens
