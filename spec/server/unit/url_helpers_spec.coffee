@@ -50,3 +50,9 @@ describe "Url helpers", ->
 
     it "detects relative paths", ->
       expect(UrlHelpers.detectScheme('/usr/lib/dogecoin/vault.txt')).to.eq('relative')
+
+  describe "#replaceHost", ->
+    it "replaces original host with remoteHost", ->
+      original = "http://localhost:2020/foo/bar.html?q=asdf#foo"
+      remoteHost = "https://www.github.com"
+      expect(UrlHelpers.replaceHost(original, remoteHost)).to.eq "https://www.github.com/foo/bar.html?q=asdf#foo"

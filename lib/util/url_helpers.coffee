@@ -1,5 +1,6 @@
-_   = require 'lodash'
-Url = require 'url'
+_     = require 'lodash'
+Url   = require 'url'
+jsUri = require "jsuri"
 
 httpRe = /:\/\//
 fileRe = /^file:\/\//
@@ -32,3 +33,13 @@ module.exports =
         redirectUrl[key] = originUrl[key]
 
     redirectUrl.format()
+
+  replaceHost: (original, remoteHost) ->
+    original = new jsUri(original)
+    remoteHost = new jsUri(remoteHost)
+
+    original.setProtocol(remoteHost.protocol())
+    original.setHost(remoteHost.host())
+    original.setPort(remoteHost.port())
+
+    original.toString()
