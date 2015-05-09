@@ -443,7 +443,6 @@ SecretSauce.RemoteProxy =
 SecretSauce.RemoteInitial =
   _handle: (req, res, opts, Domain) ->
     { _ } = SecretSauce
-
     _.defaults opts,
       inject: "
         <script type='text/javascript'>
@@ -490,7 +489,7 @@ SecretSauce.RemoteInitial =
       ## serve from the file system because
       ## we are using cypress as our weberver
       when "<root>"
-        @getFileContent(req, res)
+        @getFileContent(req, res, remoteHost)
 
       ## else go make an HTTP request to the
       ## real server!
@@ -498,10 +497,6 @@ SecretSauce.RemoteInitial =
         @getHttpContent(req, res, remoteHost)
 
   getHttpContent: (req, res, remoteHost) ->
-    # process.on "uncaughtException", (err) ->
-    #   console.log "UNCAUGHT EXCEPTION!!"
-    #   console.log err
-
     { _ } = SecretSauce
 
     ## replace the req's origin with the remoteHost origin
@@ -551,7 +546,7 @@ SecretSauce.RemoteInitial =
         @Log.info "received absolute file content"
         res.contentType(incomingRes.headers['content-type'])
 
-        ## turn off __cypress.initial true here
+        ## turn off __cypress.initial by setting false here
         setCookies(false, remoteHost)
 
         rq.pipe(tr).pipe(thr)
@@ -570,10 +565,6 @@ SecretSauce.RemoteInitial =
 
     thr
 
-  getFileContent: (req, res) ->
-    ## just use the pathname
-    # req.path
-
   injectContent: (toInject) ->
     toInject ?= ""
 
@@ -583,13 +574,13 @@ SecretSauce.RemoteInitial =
 
       cb(null, src)
 
-  getRelativeFileContent: (url, req) ->
+  getFileContent: (req, res, remoteHost) ->
     { _ } = SecretSauce
 
     args = _.compact([
       @app.get("cypress").projectRoot,
       # @app.get("cypress").rootFolder,
-      url
+      req.url
     ])
 
     ## strip trailing slashes because no file
@@ -600,23 +591,27 @@ SecretSauce.RemoteInitial =
 
     @Log.info "getting relative file content", file: file
 
+    res.cookie("__cypress.initial", false)
+    res.cookie("__cypress.remoteHost", remoteHost)
+
     @fs.createReadStream(file, "utf8")
 
-  # getFileContent: (p) ->
-  #   @fs.createReadStream(p.slice(7).split('?')[0], 'utf8')
-
   errorHandler: (e, req, res) ->
+    remoteHost = req.cookies["__cypress.remoteHost"]
+
+    url = @url.resolve(remoteHost, req.url)
+
     if process.env["NODE_ENV"] isnt "production"
       console.error(e.stack)
       debugger
 
-    @Log.info "error handling initial request", url: req.url, error: e
+    @Log.info "error handling initial request", url: url, error: e
 
     filePath = switch
       when f = req.formattedUrl
         "file://#{f}"
       else
-        req.url
+        url
 
     ## using req here to give us an opportunity to
     ## write to req.formattedUrl

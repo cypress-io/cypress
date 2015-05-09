@@ -7,6 +7,7 @@ through       = require 'through'
 through2      = require 'through2'
 jsUri         = require "jsuri"
 trumpet       = require "trumpet"
+url           = require "url"
 Log           = require "../log"
 UrlHelpers    = require "../util/url_helpers"
 SecretSauce   = require "../util/secret_sauce_loader"
@@ -23,6 +24,7 @@ class RemoteInitial extends Controller
   Log: Log
   jsUri: jsUri
   trumpet: trumpet
+  url: url
 
   constructor: (app) ->
     if not (@ instanceof RemoteInitial)

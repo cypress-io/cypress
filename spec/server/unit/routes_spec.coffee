@@ -51,19 +51,18 @@ describe "Routes", ->
         null
       .end(done)
 
-    # it.only "does not redirect with __cypress.remoteHost cookie", (done) ->
-    #   nock("http://www.github.com")
-    #     .get("/")
-    #     .reply(200)
+    it "does not redirect with __cypress.remoteHost cookie", (done) ->
+      nock("http://www.github.com")
+        .get("/")
+        .reply(200, "<html></html>", {
+          "Content-Type": "text/html"
+        })
 
-    #   supertest(@app)
-    #     .get("/")
-    #     .set("Cookie", "__cypress.remoteHost=http://www.github.com")
-    #     # .expect(200)
-    #     .expect (res) ->
-    #       console.log res.text
-    #       null
-    #     .end(done)
+      supertest(@app)
+        .get("/")
+        .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+        .expect(200)
+        .end(done)
 
     it "basic 200 html response", (done) ->
       nock(@baseUrl)
@@ -97,7 +96,7 @@ describe "Routes", ->
           null
         .end(done)
 
-    it.only "injects sinon content after following redirect", (done) ->
+    it "injects sinon content after following redirect", (done) ->
       contents = removeWhitespace Fixtures.get("server/expected_sinon_inject.html")
 
       nock(@baseUrl)
@@ -133,6 +132,183 @@ describe "Routes", ->
               expect(body).to.eq contents
               null
             .end(done)
+
+    context "error handling", ->
+      it "status code 500", (done) ->
+        nock(@baseUrl)
+          .get("/index.html")
+          .reply(500)
+
+        supertest(@app)
+          .get("/index.html")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+          .expect(500)
+          .end(done)
+
+      it "sends back initial_500 content", (done) ->
+        nock(@baseUrl)
+          .get("/index.html")
+          .reply(500)
+
+        supertest(@app)
+          .get("/index.html")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+          .expect (res) =>
+            expect(res.text).to.include("<span data-cypress-visit-error></span>")
+            expect(res.text).to.include("<a href=\"#{@baseUrl}/index.html\" target=\"_blank\">#{@baseUrl}/index.html</a>")
+            expect(res.text).to.include("Did you forget to start your web server?")
+            null
+          .end(done)
+
+      # it "sends back 500 when file does not exist locally", (done) ->
+      #   baseUrl = "foo/views/test/index.html"
+
+      #   supertest(@app)
+      #     .get("/__remote/#{baseUrl}/?__initial=true")
+      #     .expect (res) =>
+      #       expect(res.text).to.include("<span data-cypress-visit-error></span>")
+      #       expect(res.text).to.include("file://")
+      #       expect(res.text).to.include("This file could not be served from your file system.")
+      #       null
+      #     .end(done)
+
+    context "headers", ->
+      it "forwards headers on outgoing requests", (done) ->
+        nock(@baseUrl)
+        .get("/bar")
+        .matchHeader("x-custom", "value")
+        .reply 200, "hello from bar!", {
+          "Content-Type": "text/html"
+        }
+
+        supertest(@app)
+          .get("/bar")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+          .set("x-custom", "value")
+          .expect(200, "hello from bar!")
+          .end(done)
+
+      it "omits forwarding host header", (done) ->
+        nock(@baseUrl)
+        .matchHeader "host", (val) ->
+          val isnt "demo.com"
+        .get("/bar")
+        .reply 200, "hello from bar!", {
+          "Content-Type": "text/html"
+        }
+
+        supertest(@app)
+          .get("/bar")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+          .set("host", "demo.com")
+          .expect(200, "hello from bar!")
+          .end(done)
+
+      it "omits forwarding accept-encoding", (done) ->
+        nock(@baseUrl)
+        .matchHeader "accept-encoding", (val) ->
+          val isnt "foo"
+        .get("/bar")
+        .reply 200, "hello from bar!", {
+          "Content-Type": "text/html"
+        }
+
+        supertest(@app)
+          .get("/bar")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+          .set("host", "demo.com")
+          .set("accept-encoding", "foo")
+          .expect(200, "hello from bar!")
+          .end(done)
+
+      it "omits forwarding accept-language", (done) ->
+        nock(@baseUrl)
+        .matchHeader "accept-language", (val) ->
+          val isnt "utf-8"
+        .get("/bar")
+        .reply 200, "hello from bar!", {
+          "Content-Type": "text/html"
+        }
+
+        supertest(@app)
+          .get("/bar")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+          .set("host", "demo.com")
+          .set("accept-language", "utf-8")
+          .expect(200, "hello from bar!")
+          .end(done)
+
+    context "absolute url rewriting", ->
+      it "rewrites anchor href", (done) ->
+        nock(@baseUrl)
+          .log(console.log)
+          .get("/bar")
+          .reply 200, "<html><body><a href='http://www.google.com'>google</a></body></html>",
+            "Content-Type": "text/html"
+
+        supertest(@app)
+          .get("/bar")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+          .expect(200)
+          .expect (res) ->
+            body = res.text
+            expect(body).to.eq '<html><body><a href="/http://www.google.com">google</a></body></html>'
+            null
+          .end(done)
+
+      it "rewrites multiple anchors", (done) ->
+        contents = removeWhitespace Fixtures.get("server/absolute_url.html")
+        expected = removeWhitespace Fixtures.get("server/absolute_url_expected.html")
+
+        nock(@baseUrl)
+          .log(console.log)
+          .get("/bar")
+          .reply 200, contents,
+            "Content-Type": "text/html"
+
+        supertest(@app)
+          .get("/bar")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+          .expect(200)
+          .expect (res) ->
+            body = res.text
+            expect(body).to.eq expected
+            null
+          .end(done)
+
+    context.only "relative baseUrl", ->
+      beforeEach (done) ->
+        ## we no longer server initial content from the rootFolder
+        ## and it would be suggested for this project to be configured
+        ## with a baseUrl of "dev/", which would automatically be
+        ## appended to cy.visit("/index.html")
+        @baseUrl = "/dev/index.html"
+
+        Fixtures.scaffold("no-server")
+
+        @server.setCypressJson {
+          projectRoot: Fixtures.project("no-server")
+          rootFolder: "dev"
+          testFolder: "my-tests"
+        }
+
+        @session
+          .get(@baseUrl)
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=<root>")
+          .expect(200)
+          .expect(/index.html content/)
+          .expect(/sinon.js/)
+          .expect "set-cookie", /initial=false/
+          .end(done)
+
+      afterEach ->
+        Fixtures.remove("no-server")
+
+      it "streams from file system", (done) ->
+        @session
+          .get("/assets/app.css")
+          .expect(200, "html { color: black; }")
+          .end(done)
 
   context "GET /__", ->
     it "routes config.clientRoute to serve cypress client app html", (done) ->
@@ -310,150 +486,6 @@ describe "Routes", ->
           .end(done)
 
   context "GET /__remote/*", ->
-    describe "?__initial=true", ->
-      beforeEach ->
-        ## reconfigure app routes each test
-        @server.configureApplication()
-
-        @baseUrl = "http://www.github.com"
-
-
-
-      context "error handling", ->
-        it "status code 500", (done) ->
-          nock(@baseUrl)
-            .get("/index.html")
-            .reply(500)
-
-          supertest(@app)
-            .get("/__remote/#{@baseUrl}/index.html?__initial=true")
-            .expect(500)
-            .end(done)
-
-        it "sends back initial_500 content", (done) ->
-          nock(@baseUrl)
-            .get("/index.html")
-            .reply(500)
-
-          supertest(@app)
-            .get("/__remote/#{@baseUrl}/index.html?__initial=true")
-            .expect (res) =>
-              expect(res.text).to.include("<span data-cypress-visit-error></span>")
-              expect(res.text).to.include("<a href=\"#{@baseUrl}/index.html\" target=\"_blank\">#{@baseUrl}/index.html</a>")
-              expect(res.text).to.include("Did you forget to start your web server?")
-              null
-            .end(done)
-
-        it "sends back 500 when file does not exist locally", (done) ->
-          baseUrl = "foo/views/test/index.html"
-
-          supertest(@app)
-            .get("/__remote/#{baseUrl}/?__initial=true")
-            .expect (res) =>
-              expect(res.text).to.include("<span data-cypress-visit-error></span>")
-              expect(res.text).to.include("file://")
-              expect(res.text).to.include("This file could not be served from your file system.")
-              null
-            .end(done)
-
-      context "headers", ->
-        it "forwards headers on outgoing requests", (done) ->
-          nock(@baseUrl)
-          .get("/bar")
-          .matchHeader("x-custom", "value")
-          .reply 200, "hello from bar!", {
-            "Content-Type": "text/html"
-          }
-
-          supertest(@app)
-            .get("/__remote/#{@baseUrl}/bar?__initial=true")
-            .set("x-custom", "value")
-            .expect(200, "hello from bar!")
-            .end(done)
-
-        it "omits forwarding host header", (done) ->
-          nock(@baseUrl)
-          .matchHeader "host", (val) ->
-            val isnt "demo.com"
-          .get("/bar")
-          .reply 200, "hello from bar!", {
-            "Content-Type": "text/html"
-          }
-
-          supertest(@app)
-            .get("/__remote/#{@baseUrl}/bar?__initial=true")
-            .set("host", "demo.com")
-            .expect(200, "hello from bar!")
-            .end(done)
-
-        it "omits forwarding accept-encoding", (done) ->
-          nock(@baseUrl)
-          .matchHeader "accept-encoding", (val) ->
-            val isnt "foo"
-          .get("/bar")
-          .reply 200, "hello from bar!", {
-            "Content-Type": "text/html"
-          }
-
-          supertest(@app)
-            .get("/__remote/#{@baseUrl}/bar?__initial=true")
-            .set("host", "demo.com")
-            .set("accept-encoding", "foo")
-            .expect(200, "hello from bar!")
-            .end(done)
-
-        it "omits forwarding accept-language", (done) ->
-          nock(@baseUrl)
-          .matchHeader "accept-language", (val) ->
-            val isnt "utf-8"
-          .get("/bar")
-          .reply 200, "hello from bar!", {
-            "Content-Type": "text/html"
-          }
-
-          supertest(@app)
-            .get("/__remote/#{@baseUrl}/bar?__initial=true")
-            .set("host", "demo.com")
-            .set("accept-language", "utf-8")
-            .expect(200, "hello from bar!")
-            .end(done)
-
-      context "absolute url rewriting", ->
-        it "rewrites anchor href", (done) ->
-          nock(@baseUrl)
-            .log(console.log)
-            .get("/bar")
-            .reply 200, "<html><body><a href='http://www.google.com'>google</a></body></html>",
-              "Content-Type": "text/html"
-
-          supertest(@app)
-            .get("/__remote/#{@baseUrl}/bar?__initial=true")
-            .expect(200)
-            .expect (res) ->
-              body = res.text
-              expect(body).to.eq '<html><body><a href="/http://www.google.com">google</a></body></html>'
-              null
-            .end(done)
-
-        it "rewrites multiple anchors", (done) ->
-          contents = removeWhitespace Fixtures.get("server/absolute_url.html")
-          expected = removeWhitespace Fixtures.get("server/absolute_url_expected.html")
-
-          nock(@baseUrl)
-            .log(console.log)
-            .get("/bar")
-            .reply 200, contents,
-              "Content-Type": "text/html"
-
-          supertest(@app)
-            .get("/__remote/#{@baseUrl}/bar?__initial=true")
-            .expect(200)
-            .expect (res) ->
-              body = res.text
-              expect(body).to.eq expected
-              null
-            .end(done)
-
     describe "when session is already set", ->
       context "absolute baseUrl", ->
         beforeEach (done) ->
@@ -486,39 +518,7 @@ describe "Routes", ->
             .expect(200, "html { color: #333 }")
             .end(done)
 
-      context "relative baseUrl", ->
-        beforeEach (done) ->
-          ## we no longer server initial content from the rootFolder
-          ## and it would be suggested for this project to be configured
-          ## with a baseUrl of "dev/", which would automatically be
-          ## appended to cy.visit("/index.html")
-          @baseUrl = "dev/index.html"
 
-          Fixtures.scaffold("no-server")
-
-          @server.setCypressJson {
-            projectRoot: Fixtures.project("no-server")
-            rootFolder: "dev"
-            testFolder: "my-tests"
-          }
-
-          @session
-            .get("/__remote/#{@baseUrl}?__initial=true")
-            .expect(200)
-            .expect(/index.html content/)
-            .expect (res) ->
-              expect(res.get("set-cookie")[0]).to.include("__cypress.sid")
-              null
-            .end(done)
-
-        afterEach ->
-          Fixtures.remove("no-server")
-
-        it "streams from file system", (done) ->
-          @session
-            .get("/__remote/assets/app.css")
-            .expect(200, "html { color: black; }")
-            .end(done)
 
   context "GET *", ->
     beforeEach (done) ->
