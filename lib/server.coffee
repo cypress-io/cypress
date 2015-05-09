@@ -57,6 +57,7 @@ class Server
       testFolder: "tests"
       javascripts: []
       env: process.env["NODE_ENV"]
+      namespace: "__cypress"
 
     rootUrl = "http://localhost:" + obj.port
 
@@ -85,12 +86,6 @@ class Server
     @app.use require("compression")()
     @app.use require("morgan")("dev")
     @app.use require("body-parser").json()
-    @app.use require('express-session')({
-      secret: "marionette is cool"
-      saveUninitialized: true
-      resave: true
-      name: "__cypress.sid"
-    })
 
     ## serve static file from public when route is /eclectus
     ## this is to namespace the static eclectus files away from

@@ -100,6 +100,9 @@ describe "Server Interface", ->
       it "clientUrlDisplay=http://localhost:2020", ->
         @defaults "clientUrlDisplay", "http://localhost:2020"
 
+      it "namespace=__cypress", ->
+        @defaults "namespace", "__cypress"
+
       it "idGeneratorUrl=http://localhost:2020/id_generator", ->
         @defaults "idGeneratorUrl", "http://localhost:2020/id_generator"
 
