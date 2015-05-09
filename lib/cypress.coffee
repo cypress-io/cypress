@@ -100,7 +100,7 @@ if isChildProcess() or isRunningFromCli()
   Booter(projectRoot).boot().then (obj) ->
     obj.settings.done = true
 
-    if process.argv[3] is "id_generator"
+    if "id_generator" in process.argv
       open(obj.settings.idGeneratorUrl)
 
     send(obj.settings)
