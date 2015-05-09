@@ -283,162 +283,75 @@ SecretSauce.RemoteProxy =
   badHttpSchemeWithMap: /(https?:)\/([a-zA-Z0-9]+.+\.map)$/
   httpUpToPathName: /https?:\/?\/?/
 
-
   _handle: (req, res, next, Domain, httpProxy) ->
-    ## strip out the /__remote/ from the req.url
-    if not req.session.remote?
-      if b = @app.get("cypress").baseUrl
-        req.session.remote = b
-      else
-        throw new Error("™ Session Proxy not yet set! ™")
+    remoteHost = req.cookies["__cypress.remoteHost"]
+
+    ## we must have the remoteHost cookie
+    if not remoteHost
+      throw new Error("Missing remoteHost cookie!")
 
     proxy = httpProxy.createProxyServer({})
 
     domain = Domain.create()
 
-    domain.on('error', next)
-
-    remote = req.session.remote
+    domain.on 'error', next
 
     domain.run =>
-      @getContentStream({
-        uri: @getRequestUrl(req.url, remote)
-        remote: remote
-        req: req
-        res: res
-        proxy: proxy
-      })
-      .on('error', (e) -> throw e)
+      @getContentStream(req, res, remoteHost, proxy)
+      .on 'error', (e) ->
+        if process.env["NODE_ENV"] isnt "production"
+          console.error(e.stack)
+          debugger
+        else
+          throw e
       .pipe(res)
 
-  getRequestUrl: (url, remoteUrl) ->
-    if remoteUrl
-      remoteUrl = @url.parse(remoteUrl)
-      remoteHost = remoteUrl.protocol + "//" + remoteUrl.host + "/"
-    else
-      remoteHost = ""
+  getContentStream: (req, res, remoteHost, proxy) ->
+    switch remoteHost
+      ## serve from the file system because
+      ## we are using cypress as our weberver
+      when "<root>"
+        @getFileStream(req, res, remoteHost)
 
-    if @badHttpSchemeWithMap.test(url)
-      url = url.replace @badHttpSchemeWithMap, "$1//$2"
-
-    ## normalize relative paths using the path segment ../
-    ## normally the browser will not allow you to reach above
-    ## the host, but since we're being served from /remote/ its
-    ## technically possible to have happen.
-    ## so we detect abnormal url's and rewrite them to be correct
-    if url.includes("/__remote/") and not url.includes(remoteHost)
-      url = url.split("/__remote/").join("").replace(@httpUpToPathName, remoteHost)
-    else
-      url = url.split("/__remote/").join("")
-
-    url
-
-  getContentStream: (opts) ->
-    # console.log opts.remote, opts.uri, opts.req.url
-    switch @UrlHelpers.detectScheme(opts.uri)
-      when "relative" then @pipeRelativeContent(opts)
-      when "absolute" then @pipeAbsoluteContent(opts)
-      # when "file"     then @pipeFileContent(opts.uri, opts.res)
-
-  pipeAbsoluteContent: (opts) ->
-    remote = @url.parse(opts.uri)
-
-    opts.req.url = opts.uri
-
-    remote.path = "/"
-    remote.pathname = "/"
-    remote.query = ""
-    remote.search = ""
-
-    opts.proxy.web(opts.req, opts.res, {
-      target: remote.format()
-      changeOrigin: true,
-      hostRewrite: opts.req.session.host
-    })
-
-    opts.res
-
-  pipeRelativeContent: (opts) ->
-    switch @UrlHelpers.detectScheme(opts.remote)
-      when "relative" then @fromFile(opts)
-      when "absolute" then @fromUrl(opts)
+      ## else go make an HTTP request to the
+      ## real server!
+      else
+        @getHttpStream(req, res, remoteHost, proxy)
 
   # creates a read stream to a file stored on the users filesystem
   # taking into account if they've chosen a specific rootFolder
   # that their project files exist in
-  fromFile: (opts) ->
+  getFileStream: (req, res, remoteHost) ->
     { _ } = SecretSauce
 
     ## strip off any query params from our req's url
     ## since we're pulling this from the file system
     ## it does not understand query params
-    baseUri = @url.parse(opts.uri).pathname
+    pathname = @url.parse(req.url).pathname
 
-    opts.res.contentType(@mime.lookup(baseUri))
+    res.contentType(@mime.lookup(pathname))
 
     args = _.compact([
       @app.get("cypress").projectRoot,
       @app.get("cypress").rootFolder,
-      baseUri
+      pathname
     ])
 
-    @fs.createReadStream(
-      @path.join(args...)
-    )
+    @fs.createReadStream  @path.join(args...)
 
-  fromUrl: (opts) ->
+  getHttpStream: (req, res, remoteHost, proxy) ->
     { _ } = SecretSauce
 
-    @emit "verbose", "piping url content #{opts.uri}, #{opts.uri.split(opts.remote)[1]}"
+    # @emit "verbose", "piping url content #{opts.uri}, #{opts.uri.split(opts.remote)[1]}"
+    @Log.info "piping http url content", url: req.url, remoteHost: remoteHost
 
-    remote = @url.parse(opts.remote)
-
-    opts.req.url = opts.req.url.replace(/\/__remote\//, "")
-    opts.req.url = @url.resolve(opts.remote, opts.req.url or "")
-
-    remote.path = "/"
-    remote.pathname = "/"
-
-    ## If the path is relative from root
-    ## like foo.com/../
-    ## we need to handle when it walks up past the root host and into
-    ## the http:// part, so we need to fix the request url to contain
-    ## the correct root.
-
-    requestUrlBase = @url.parse(opts.req.url)
-    requestUrlBase = _.extend(requestUrlBase, {
-      path: "/"
-      pathname: "/"
-      query: ""
-      search: ""
-    })
-
-    requestUrlBase = @escapeRegExp(requestUrlBase.format())
-
-    unless (remote.format().match(///^#{requestUrlBase}///))
-      basePath = @url.parse(opts.req.url).path
-      basePath = basePath.replace /\/$/, ""
-      opts.req.url = remote.format() + @url.parse(opts.req.url).host + basePath
-
-    opts.proxy.web(opts.req, opts.res, {
-      target: remote.format()
+    proxy.web(req, res, {
+      target: remoteHost
       changeOrigin: true,
-      hostRewrite: opts.req.session.host
+      hostRewrite: req.get("host")
     })
 
-    opts.res
-
-  # pipeAbsoluteFileContent: (uri, res) ->
-  #   @emit "verbose", "piping url content #{uri}"
-  #   @pipeFileUriContents.apply(this, arguments)
-
-
-  # pipeFileContent: (uri, res) ->
-  #   @emit "verbose", "piping url content #{uri}"
-  #   if (~uri.indexOf('file://'))
-  #     uri = uri.split('file://')[1]
-
-  #   @pipeFileUriContents.apply(this, arguments)
+    return res
 
 SecretSauce.RemoteInitial =
   _handle: (req, res, opts, Domain) ->
@@ -503,7 +416,8 @@ SecretSauce.RemoteInitial =
     ## http://localhost:2020/foo/bar.index
     ## ...to...
     ## http://localhost:8080/foo/bar.index
-    remoteUrl = @UrlHelpers.replaceHost(req.url, remoteHost)
+    # remoteUrl = @UrlHelpers.replaceHost(req.url, remoteHost)
+    remoteUrl = @url.resolve(remoteHost, req.url)
 
     tr = @trumpet()
 
@@ -601,7 +515,9 @@ SecretSauce.RemoteInitial =
 
     url = @url.resolve(remoteHost, req.url)
 
-    if process.env["NODE_ENV"] isnt "production"
+    ## disregard ENOENT errors (that means the file wasnt found)
+    ## which is a perfectly acceptable error (we account for that)
+    if process.env["NODE_ENV"] isnt "production" and e.code isnt "ENOENT"
       console.error(e.stack)
       debugger
 

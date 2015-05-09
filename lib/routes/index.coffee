@@ -34,10 +34,6 @@ module.exports = (app) ->
   ## app as '__'  this route shouldn't ever be used by servers
   ## and therefore should not conflict
   app.get app.get("cypress").clientRoute, (req, res) ->
-    ## host would be is: localhost:2020
-    ## req.hostname
-    # req.session.host = req.get("host")
-
     res.render path.join(process.cwd(), "lib", "public", "index.html"), {
       config: JSON.stringify(app.get("cypress"))
     }

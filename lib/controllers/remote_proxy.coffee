@@ -7,6 +7,7 @@ path         = require 'path'
 _            = require 'lodash'
 fs           = require 'fs'
 httpProxy    = require 'http-proxy'
+Log          = require "../log"
 UrlHelpers   = require '../util/url_helpers'
 escapeRegExp = require "../util/escape_regexp"
 SecretSauce  = require "../util/secret_sauce_loader"
@@ -18,6 +19,7 @@ class RemoteProxy extends Controller
   url: url
   mime: mime
   path: path
+  Log: Log
   UrlHelpers: UrlHelpers
   escapeRegExp: escapeRegExp
 
