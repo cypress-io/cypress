@@ -90,6 +90,21 @@ describe "$Cypress.Cy Navigation Commands", ->
       it "search", ->
         @eq "search", "?foo=bar"
 
+    # describe.only "location setter overrides", ->
+    #   beforeEach ->
+    #     @cy
+    #       .visit("fixtures/html/sinon.html?foo=bar#dashboard?baz=quux")
+    #       .window().as("win")
+
+    #   it "can set hash", ->
+    #     @win.location.hash = "foo"
+    #     expect(@win.location.hash).to.eq "#foo"
+
+    #   it "can set search", ->
+    #     # debugger
+    #     @win.location.search = "bar=baz"
+    #     expect(@win.location.search).to.eq "?bar=baz"
+
     describe "history method overrides", ->
       beforeEach ->
         @cy

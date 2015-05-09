@@ -161,12 +161,17 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
       else
         url = @handleRelativeUrl(url)
 
+      Cookies.set "__cypress.initial", true, {path: "/"}
+      Cookies.set "__cypress.remoteHost", "http://gistbook.loc:3344/", {path: "/"}
+
+      "/about"
+
       ## add the __intitial=true query param
-      url.addQueryParam("__initial", true)
+      # url.addQueryParam("__initial", true)
 
       ## prepend /__remote/ and
       ## return the full href
-      "/__remote/" + _.ltrim url.toString(), "/"
+      # "/__remote/" + _.ltrim url.toString(), "/"
 
     @isFullyQualifiedUrl = (url) ->
       reHttp.test(url)

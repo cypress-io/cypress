@@ -461,38 +461,143 @@ SecretSauce.RemoteInitial =
         </script>
       "
 
-    url = @parseReqUrl(req.url)
-    @Log.info "handling initial request", url: url
+    # url = @parseReqUrl(req.url)
+    #
 
     ## initially set the session to this url
     ## in case we aren't grabbing url content
     ## this may later be overridden if we're
     ## going to to the web and following redirects
-    @setSessionRemoteUrl(req, url)
+    # @setSessionRemoteUrl(req, url)
 
     d = Domain.create()
 
-    d.on 'error', (e) => @errorHandler(e, res, url, req)
+    d.on 'error', (e) => @errorHandler(e, req, res)
 
     d.run =>
-      content = @getContent(url, res, req)
+      remoteHost = req.cookies["__cypress.remoteHost"]
 
-      content.on "error", (e) => @errorHandler(e, res, url, req)
+      @Log.info "handling initial request", url: req.url, remoteHost: remoteHost
+
+      ## we must have the remoteHost which tell us where
+      ## we should request the initial HTML payload from
+      if not remoteHost
+        throw new Error("Missing remoteHost cookie!")
+
+      # @overrideReqUrl(req, remoteHost)
+
+      content = @getContent(req, res, remoteHost)
+
+      content.on "error", (e) => @errorHandler(e, req, res)
 
       content
       .pipe(@injectContent(opts.inject))
       .pipe(res)
 
-  parseReqUrl: (url) ->
-    ## strip out /__remote/ and the ?__initial query params
-    url = new @jsUri url.split("/__remote/").join("")
-    url.deleteQueryParam("__initial")
-    url.toString()
+  getContent: (req, res, remoteHost) ->
+    switch remoteHost
+      ## serve from the file system because
+      ## we are using cypress as our weberver
+      when "<root>"
+        @getFileContent(req, res)
 
-  setSessionRemoteUrl: (req, url) ->
-    url = url.split("?")[0].replace(/\/+$/, "")
-    @Log.info "setting remote session url", url: url
-    req.session.remote = url
+      ## else go make an HTTP request to the
+      ## real server!
+      else
+        @getHttpContent(req, res, remoteHost)
+
+  getHttpContent: (req, res, remoteHost) ->
+    # process.on "uncaughtException", (err) ->
+    #   console.log "UNCAUGHT EXCEPTION!!"
+    #   console.log err
+
+    { _ } = SecretSauce
+
+    ## override req.url here
+    ## by slicing out our host
+    ## and inserting remoteHost
+    url = @getRemoteUrl(req.url, remoteHost)
+
+    tr = @trumpet()
+
+    tr.selectAll "form[action^=http]", (elem) ->
+      elem.getAttribute "action", (action) ->
+        elem.setAttribute "action", "/" + action
+
+    tr.selectAll "a[href^=http]", (elem) ->
+      elem.getAttribute "href", (href) ->
+        elem.setAttribute "href", "/" + href
+
+    thr = @through (d) -> @queue(d)
+
+    rq = @hyperquest.get url, {}, (err, incomingRes) =>
+      if err?
+        return thr.emit("error", err)
+
+      if /^30(1|2|7|8)$/.test(incomingRes.statusCode)
+        # newUrl = @prepareUrlForRedirect(url, incomingRes.headers.location)
+        newUrl = incomingRes.headers.location
+
+        @Log.info "redirecting to new url", status: incomingRes.statusCode, url: newUrl
+
+        console.log "newUrl", newUrl
+
+        ## finally redirect our user agent back here
+        res.redirect(newUrl)
+      else
+        if not incomingRes.headers["content-type"]
+          throw new Error("Missing header: 'content-type'")
+        @Log.info "received absolute file content"
+        res.contentType(incomingRes.headers['content-type'])
+
+        ## reset the session to the latest redirected URL
+        # @setSessionRemoteUrl(req, url)
+
+        ## turn off __cypress.initial true here
+        res.cookie("__cypress.initial", false)
+
+        rq.pipe(thr)
+        # rq.pipe(tr).pipe(thr)
+
+    ## set the headers on the hyperquest request
+    ## this will naturally forward cookies or auth tokens
+    ## or anything else which should be proxied
+    ## for some reason adding host / accept-encoding / accept-language
+    ## would completely bork getbootstrap.com
+    headers = _.omit(req.headers, "host", "accept-encoding", "accept-language")
+
+    ## need to additionally omit __cypress headers
+    ## but add them back to the response headers
+    _.each headers, (val, key) ->
+      rq.setHeader key, val
+
+    thr
+
+  getRemoteUrl: (url, remoteHost) ->
+    ## replace the req's origin with the remoteHost origin
+    ## http://localhost:2020/foo/bar.index
+    ## ...to...
+    ## http://localhost:8080/foo/bar.index
+    @UrlHelpers.replaceHost(url, remoteHost)
+
+  getFileContent: (req, res) ->
+    ## just use the pathname
+    # req.path
+
+  # parseReqUrl: (url) ->
+  #   url = "http://gistbook.loc:3344" + url
+  #   ## strip out /__remote/ and the ?__initial query params
+  #   url = new @jsUri url.split("/__remote/").join("")
+  #   url.deleteQueryParam("__initial")
+  #   url.toString()
+
+  # setSessionRemoteUrl: (req, url) ->
+  #   # remote = req.cookies["__cypress.remote"]
+  #   url = url.split("?")[0].replace(/\/+$/, "")
+  #   @Log.info "setting remote session url", url: url
+  #   req.session.remote = url
+  #   # if remote
+    # req.session.remote = remote.replace(/\/+$/, "")
 
   injectContent: (toInject) ->
     toInject ?= ""
@@ -503,10 +608,12 @@ SecretSauce.RemoteInitial =
 
       cb(null, src)
 
-  getContent: (url, res, req) ->
-    switch scheme = @UrlHelpers.detectScheme(url)
-      when "relative" then @getRelativeFileContent(url, req)
-      when "absolute" then @getAbsoluteContent(url, res, req)
+  # getContent: (req, res) ->
+    # url = req.url
+
+    # switch scheme = @UrlHelpers.detectScheme(url)
+    #   when "relative" then @getRelativeFileContent(url, req)
+    #   when "absolute" then @getAbsoluteContent(url, res, req)
       # when "file"     then @getFileContent(url)
 
   getRelativeFileContent: (url, req) ->
@@ -528,21 +635,25 @@ SecretSauce.RemoteInitial =
 
     @fs.createReadStream(file, "utf8")
 
-  getFileContent: (p) ->
-    @fs.createReadStream(p.slice(7).split('?')[0], 'utf8')
+  # getFileContent: (p) ->
+  #   @fs.createReadStream(p.slice(7).split('?')[0], 'utf8')
 
   getAbsoluteContent: (url, res, req) ->
     @Log.info "getting absolute file content", url: url
     @_resolveRedirects(url, res, req)
 
-  errorHandler: (e, res, url, req) ->
-    @Log.info "error handling initial request", url: url, error: e
+  errorHandler: (e, req, res) ->
+    if process.env["NODE_ENV"] isnt "production"
+      console.error(e.stack)
+      debugger
+
+    @Log.info "error handling initial request", url: req.url, error: e
 
     filePath = switch
       when f = req.formattedUrl
         "file://#{f}"
       else
-        url
+        req.url
 
     ## using req here to give us an opportunity to
     ## write to req.formattedUrl
@@ -595,6 +706,10 @@ SecretSauce.RemoteInitial =
 
         ## reset the session to the latest redirected URL
         @setSessionRemoteUrl(req, url)
+
+        ## turn off __cypress.initial true here
+        res.cookie("__cypress.initial", false)
+
         rq.pipe(thr)
         # rq.pipe(tr).pipe(thr)
 
