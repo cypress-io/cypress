@@ -104,10 +104,12 @@ describe "Routes", ->
         .log(console.log)
         .get("/bar")
         .reply 302, undefined, {
-          "Location": @baseUrl + "/foo"
+          ## redirect us to google.com!
+          "Location": "http://www.google.com/foo"
         }
+      nock("http://www.google.com")
         .get("/foo")
-        .reply 200, "<html> <head> <title>foo</title> </head> <body>hello from foo!</body> </html>", {
+        .reply 200, "<html> <head> <title>foo</title> </head> <body>hello from bar!</body> </html>", {
           "Content-Type": "text/html"
         }
 
@@ -115,27 +117,22 @@ describe "Routes", ->
         .get("/bar")
         .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
         .expect(302)
-        # .expect "location", "http://www.github.com/foo"
+        .expect "location", "/foo"
+        .expect "set-cookie", /initial=true/
+        .expect "set-cookie", /remoteHost=.+www\.google\.com/
         .end (err, res) =>
-          # console.log "res", res.headers.location
           return done(err) if err
 
           @session
             .get(res.headers.location)
             .expect(200)
-            .end (err, res) =>
-              console.log "PENDING NOCKS"
-              nock.pendingMocks()
-            #   debugger
+            .expect "set-cookie", /initial=false/
+            .expect "set-cookie", /remoteHost=.+www\.google\.com/
+            .expect (res) ->
+              body = removeWhitespace(res.text)
+              expect(body).to.eq contents
+              null
             .end(done)
-            # .end(done)
-            # .end (err, res) =>
-              # debugger
-            # .expect (res) ->
-            #   body = removeWhitespace(res.text)
-            #   expect(body).to.eq contents
-            #   null
-            # .end(done)
 
   context "GET /__", ->
     it "routes config.clientRoute to serve cypress client app html", (done) ->
