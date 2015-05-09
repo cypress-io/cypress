@@ -10,3 +10,9 @@ describe "App", ->
     it "sets to web if not window.mochaPhantomJS", ->
       ui = App.getCurrentUI()
       expect(ui).to.eq "web"
+
+  context "before:start", ->
+    it "calls clearCookies with options.namespace", ->
+      clearCookies = @sandbox.spy App, "clearCookies"
+      App.trigger("before:start", {namespace: "foo"})
+      expect(clearCookies).to.be.calledWith "foo"
