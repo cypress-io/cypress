@@ -9,7 +9,7 @@
 </td>
 <td>
   <div class="image-wrapper">
-    <img src="/eclectus/img/<%= @browser %>_32x32.png" />
+    <img src="/__cypress/static/img/<%= @browser %>_32x32.png" />
   </div>
   <%= @browser %> <%= @version %>
 </td>

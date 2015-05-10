@@ -1,7 +1,7 @@
 {
-  "name": "eclectus",
+  "name": "cypress",
   "version": "0.0.0",
-  "homepage": "https://github.com/brian-mann/eclectus",
+  "homepage": "https://github.com/cypress-io/cypress",
   "authors": [
     "brian.mann86@gmail.com"
   ],

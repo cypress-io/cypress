@@ -87,10 +87,10 @@ class Server
     @app.use require("morgan")("dev")
     @app.use require("body-parser").json()
 
-    ## serve static file from public when route is /eclectus
-    ## this is to namespace the static eclectus files away from
+    ## serve static file from public when route is /__cypress/static
+    ## this is to namespace the static cypress files away from
     ## the real application by separating the root from the files
-    @app.use "/eclectus", express.static(__dirname + "/public")
+    @app.use "/__cypress/static", express.static(__dirname + "/public")
 
     ## errorhandler
     @app.use require("errorhandler")()

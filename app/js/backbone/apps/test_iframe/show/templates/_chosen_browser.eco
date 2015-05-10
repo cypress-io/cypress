@@ -1,5 +1,5 @@
 <span id="chosen-browser-info">
-  <img src="/eclectus/img/<%= @browser %>_16x16.png" />
+  <img src="/__cypress/static/img/<%= @browser %>_16x16.png" />
   <span class="browser-name"><%= @browser %></span>
   <span class="browser-version"><%= @version %></span>
   <i class="fa fa-times-circle"></i>

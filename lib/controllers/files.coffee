@@ -91,7 +91,7 @@ class Files extends Controller
     ## its not actually mutated within the specs
     utils.push "fixtures" if @app.get("cypress").fixtures
 
-    utils.map (util) -> "/eclectus/js/#{util}.js"
+    utils.map (util) -> "/__cypress/static/js/#{util}.js"
 
   getTestFiles: ->
     testFolderPath = path.join(
