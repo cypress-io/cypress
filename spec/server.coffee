@@ -58,15 +58,10 @@ app.get "/specs/*", (req, res) ->
         specs: getSpecPath(req.path)
       }
 
-app.get "/__remote/timeout", (req, res) ->
+app.get "/timeout", (req, res) ->
   setTimeout ->
     res.send "<html></html>"
   , req.query.ms
-
-app.get "/__remote/*", (req, res) ->
-  file = req.params[0].replace(/\/+$/, "")
-  res.sendFile file,
-    root: __dirname
 
 app.get "/bower_components/*", (req, res) ->
   res.sendFile path.join("bower_components", req.params[0]),
@@ -84,6 +79,11 @@ app.get "/", (req, res) ->
   res.render path.join(__dirname, "views", "index.html"), {
     specs: getAllSpecs()
   }
+
+app.get "*", (req, res) ->
+  file = req.params[0].replace(/\/+$/, "")
+  res.sendFile file,
+    root: __dirname
 
 ## errorhandler
 app.use require("errorhandler")()

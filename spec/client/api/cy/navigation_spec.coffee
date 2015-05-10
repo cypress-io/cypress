@@ -16,7 +16,7 @@ describe "$Cypress.Cy Navigation Commands", ->
     it "changes the src of the iframe to the initial src", ->
       @cy.visit("/foo").then ->
         src = $("iframe").attr("src")
-        expect(src).to.eq "/__remote/foo?__initial=true"
+        expect(src).to.eq "/foo"
 
     it "immediately updates the stored href on load", (done) ->
       _storeHref = @sandbox.spy @cy, "_storeHref"
@@ -67,7 +67,7 @@ describe "$Cypress.Cy Navigation Commands", ->
             ## ensure href always returns the full path
             ## so our tests guarantee that in fact we are
             ## overriding the location getters
-            expect(win.location.href).to.include "__remote/fixtures/html/sinon.html?foo=bar&__initial=true#dashboard?baz=quux"
+            expect(win.location.href).to.include "fixtures/html/sinon.html?foo=bar#dashboard?baz=quux"
 
       it "hash", ->
         @eq "hash", "#dashboard?baz=quux"
