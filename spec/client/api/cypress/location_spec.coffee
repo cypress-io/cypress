@@ -175,39 +175,47 @@ describe "$Cypress.Location API", ->
 
   context ".createInitialRemoteSrc", ->
     beforeEach ->
+      @setInitialRequest = @sandbox.spy $Cypress.Cookies, "setInitialRequest"
       @normalizeUrl = (url) ->
         $Cypress.Location.normalizeUrl(url)
 
     it "does not append trailing slash on a sub directory", ->
       url = @normalizeUrl("http://localhost:4200/app")
       url = $Cypress.Location.createInitialRemoteSrc(url)
-      expect(url).to.eq "/__remote/http://localhost:4200/app?__initial=true"
+
+      expect(url).to.eq "/app"
 
     it "does not append a trailing slash to url with hash", ->
       url = @normalizeUrl("http://localhost:4000/#/home")
       url = $Cypress.Location.createInitialRemoteSrc(url)
-      expect(url).to.eq "/__remote/http://localhost:4000/?__initial=true#/home"
+      expect(@setInitialRequest).to.be.calledWith "http://localhost:4000"
+      expect(url).to.eq "/#/home"
 
     it "does not append a trailing slash to protocol-less url with hash", ->
       url = @normalizeUrl("www.github.com/#/home")
       url = $Cypress.Location.createInitialRemoteSrc(url)
-      expect(url).to.eq "/__remote/http://www.github.com/?__initial=true#/home"
+      expect(@setInitialRequest).to.be.calledWith "http://www.github.com"
+      expect(url).to.eq "/#/home"
 
     it "handles urls without a host", ->
       url = @normalizeUrl("index.html")
       url = $Cypress.Location.createInitialRemoteSrc(url)
-      expect(url).to.eq "/__remote/index.html?__initial=true"
+      expect(@setInitialRequest).to.be.calledWith "<root>"
+      expect(url).to.eq "/index.html"
 
     it "does not insert trailing slash without a host", ->
       url = $Cypress.Location.createInitialRemoteSrc("index.html")
-      expect(url).to.eq "/__remote/index.html?__initial=true"
+      expect(@setInitialRequest).to.be.calledWith "<root>"
+      expect(url).to.eq "/index.html"
 
     it "handles no host + query params", ->
       url = @normalizeUrl("timeout?ms=1000")
       url = $Cypress.Location.createInitialRemoteSrc(url)
-      expect(url).to.eq "/__remote/timeout?ms=1000&__initial=true"
+      expect(@setInitialRequest).to.be.calledWith "<root>"
+      expect(url).to.eq "/timeout?ms=1000"
 
     it "does not strip off path", ->
       url = @normalizeUrl("fixtures/html/sinon.html")
       url = $Cypress.Location.createInitialRemoteSrc(url)
-      expect(url).to.eq "/__remote/fixtures/html/sinon.html?__initial=true"
+      expect(@setInitialRequest).to.be.calledWith "<root>"
+      expect(url).to.eq "/fixtures/html/sinon.html"

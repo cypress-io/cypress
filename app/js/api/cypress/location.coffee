@@ -159,26 +159,9 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
         url = url.toString().replace(remoteHost, "")
 
       ## setup the cookies for remoteHost + initial
-      Cypress.Cookies.setInitialRequest(remoteHost)
+      $Cypress.Cookies.setInitialRequest(remoteHost)
 
       return "/" + _.ltrim(url, "/")
-
-    #   if reHttp.test(url)
-    #     url = new Uri(url)
-    #   else
-    #     url = @handleRelativeUrl(url)
-
-    #   Cookies.set "__cypress.initial", true, {path: "/"}
-    #   Cookies.set "__cypress.remoteHost", "http://gistbook.loc:3344/", {path: "/"}
-
-    #   "/about"
-
-      ## add the __intitial=true query param
-      # url.addQueryParam("__initial", true)
-
-      ## prepend /__remote/ and
-      ## return the full href
-      # "/__remote/" + _.ltrim url.toString(), "/"
 
     @isFullyQualifiedUrl = (url) ->
       reHttp.test(url)
@@ -271,8 +254,7 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
         ## prepend the root url to it
         url = @prependBaseUrl(url, baseUrl)
 
-      return url
-      # return @normalizeUrl(url)
+      return @normalizeUrl(url)
 
     @prependBaseUrl = (url, baseUrl) ->
       ## prepends the baseUrl to the url and
