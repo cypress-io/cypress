@@ -1,3 +1,7 @@
+## THESE TESTS ARE COMMENTED OUT BECAUSE ALL OF REMOTE_PROXY
+## WAS REFACTORED AND MOST DO NOT APPLY.
+## WILL ADD UNIT TESTS AS PROBLEMS ARISE (IF THEY ARISE)
+
 # root        = "../../../"
 # Server      = require("#{root}lib/server")
 # RemoteProxy = require("#{root}lib/controllers/remote_proxy")

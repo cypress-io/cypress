@@ -440,11 +440,15 @@ SecretSauce.RemoteInitial =
         return thr.emit("error", err)
 
       if /^30(1|2|7|8)$/.test(incomingRes.statusCode)
-        ## the whole problem is, we cannot redirect them to an external site
+        ## we cannot redirect them to an external site
         ## instead we need to reset the __cypress.remoteHost cookie to
         ## the location headers, and then redirect the user to the remaining
         ## url but back to ourselves!
-        newUrl = new @jsUri incomingRes.headers.location
+
+        ## we go through this merge because the spec states that the location
+        ## header may not be a FQDN. If it's not (sometimes its just a /) then
+        ## we need to merge in the missing url parts
+        newUrl = new @jsUri @UrlHelpers.merge(remoteUrl, incomingRes.headers.location)
 
         ## set cookies to initial=true and our new remoteHost origin
         setCookies(true, newUrl.origin())

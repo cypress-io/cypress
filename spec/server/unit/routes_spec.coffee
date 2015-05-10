@@ -312,6 +312,26 @@ describe "Routes", ->
               null
             .end(done)
 
+    context "redirects", ->
+      ## this simulates being handed back a header.location of '/'
+      it "requests FQDN remoteHost when provided a relative location header", (done) ->
+        nock("http://getbootstrap.com")
+          .get("/")
+          .reply 302, undefined, {
+            "Location": "/"
+          }
+          .get("/")
+          .reply 200, "<html></html", {
+            "Content-Type": "text/html"
+          }
+
+        @session
+          .get("/")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://getbootstrap.com")
+          .expect(302)
+          .expect "set-cookie", /remoteHost=.+getbootstrap\.com/
+          .end(done)
+
     context "error handling", ->
       it "status code 500", (done) ->
         nock(@baseUrl)
