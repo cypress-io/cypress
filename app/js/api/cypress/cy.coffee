@@ -54,6 +54,8 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
           return true
 
       @$remoteIframe.on "load", =>
+        @urlChanged()
+
         bindEvents()
         @isReady(true, "load")
 

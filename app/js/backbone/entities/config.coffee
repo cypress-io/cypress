@@ -37,6 +37,9 @@
     setUI: (ui) ->
       @set "ui", ui
 
+    setUrl: (url) ->
+      @set "url", url
+
     toggleCollapse: ->
       @set "collapsed", !@get("collapsed")
 

@@ -8,9 +8,17 @@ $Cypress.Cookies = do ($Cypress, _) ->
 
       Cookies.set name, value, {path: "/"}
 
+    get: (name) ->
+      name = "__cypress.#{name}"
+
+      Cookies.get(name)
+
     setInitialRequest: (remoteHost) ->
       @set "initial", true
       @set "remoteHost", remoteHost
       @
+
+    getRemoteHost: ->
+      @get "remoteHost"
 
   }

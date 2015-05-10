@@ -10,6 +10,7 @@ before ->
 beforeEach ->
   ## allow our own cypress errors to bubble up!
   stubSocketIo.call(@)
+  App.clearCookies("__cypress")
   App.config = App.request "new:config:entity", {}
   App.config.setEnv("test")
   App.execute "socket:start"
