@@ -128,7 +128,7 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
       }
 
     ## override pathname + query here
-    @override = (win, location, navigated) ->
+    @override = (win, navigated) ->
       ## history does not fire events until a click or back has happened
       ## so we have to know when they do manually
       _.each ["back", "forward", "go", "pushState", "replaceState"], (attr) ->
@@ -142,29 +142,36 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
           ## let our function know we've navigated
           navigated()
 
-      # _.each ["hash", "host", "hostname", "origin", "pathname", "port", "protocol", "search"], (attr) ->
-      #   try
-      #     Object.defineProperty win.location, attr, {
-      #       get: ->
-      #         location(attr)
-
-      #     }
-
     ## think about moving this method out of Cypress
     ## and into our app, since it kind of leaks the
     ## remote + initial concerns, which could become
     ## constants which our server sends us during
     ## initial boot.
     @createInitialRemoteSrc = (url) ->
-      if reHttp.test(url)
-        url = new Uri(url)
+      if not reHttp.test(url)
+        remoteHost = "<root>"
       else
-        url = @handleRelativeUrl(url)
+        url = new Uri(url)
+        remoteHost = url.origin()
 
-      Cookies.set "__cypress.initial", true, {path: "/"}
-      Cookies.set "__cypress.remoteHost", "http://gistbook.loc:3344/", {path: "/"}
+        ## strip out the origin because we cannot
+        ## request a cross domain frame, it has to be proxied
+        url = url.toString().replace(remoteHost, "")
 
-      "/about"
+      ## setup the cookies for remoteHost + initial
+      Cypress.Cookies.setInitialRequest(remoteHost)
+
+      return "/" + _.ltrim(url, "/")
+
+    #   if reHttp.test(url)
+    #     url = new Uri(url)
+    #   else
+    #     url = @handleRelativeUrl(url)
+
+    #   Cookies.set "__cypress.initial", true, {path: "/"}
+    #   Cookies.set "__cypress.remoteHost", "http://gistbook.loc:3344/", {path: "/"}
+
+    #   "/about"
 
       ## add the __intitial=true query param
       # url.addQueryParam("__initial", true)
@@ -264,7 +271,8 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
         ## prepend the root url to it
         url = @prependBaseUrl(url, baseUrl)
 
-      return @normalizeUrl(url)
+      return url
+      # return @normalizeUrl(url)
 
     @prependBaseUrl = (url, baseUrl) ->
       ## prepends the baseUrl to the url and

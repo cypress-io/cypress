@@ -4,10 +4,7 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
     navigated = ->
       cy.$remoteIframe.trigger("history:event")
 
-    location = (attr) ->
-      cy.sync.location(attr, {log: false})
-
-    Cypress.Location.override(contentWindow, location, navigated)
+    Cypress.Location.override(contentWindow, navigated)
 
   Cypress.Cy.extend
     onBeforeLoad: (contentWindow) ->
@@ -79,7 +76,7 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
               command.snapshot().end()
               resolve(win)
 
-          # ## any existing global variables will get nuked after it navigates
+          ## any existing global variables will get nuked after it navigates
           @$remoteIframe.prop "src", Cypress.Location.createInitialRemoteSrc(url)
 
       p

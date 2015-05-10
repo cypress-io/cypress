@@ -133,7 +133,7 @@ window.$Cypress = do ($, _, Backbone) ->
 
       ## attach each of the classes
       ## to the Cypress instance
-      for klass in "Cy Log Utils Chai Mocha Runner Agents Server Chainer Location LocalStorage".split(" ")
+      for klass in "Cy Log Utils Chai Mocha Runner Agents Server Chainer Location LocalStorage Cookies".split(" ")
         Cypress[klass] = $Cypress[klass]
 
       ## copy the modules by reference too
