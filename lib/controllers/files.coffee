@@ -61,7 +61,7 @@ class Files extends Controller
         spec = path.join(spec...)
         spec = _.str.trim(spec, "/")
 
-      "/tests?p=#{spec}"
+      "/__cypress/tests?p=#{spec}"
 
   getSpecs: (test) ->
     ## grab all of the specs if this is ci

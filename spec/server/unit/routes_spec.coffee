@@ -72,7 +72,27 @@ describe "Routes", ->
         .expect(/App.start\(.+\)/)
         .end(done)
 
-  context "GET /files", ->
+  context "GET /__cypress/id_generator", ->
+    it "renders id_generator.html", (done) ->
+      ## it may seem silly to use an 'expected fixture'
+      ## here, but because this is such a critical component
+      ## we need to "anchor" or "hard code" our expected result
+      ## else our test would always pass due to any changes
+      ## to the id_generator.html page.  By hard coding it
+      ## we can independently verify that the content meets
+      ## a rigid standard.
+      contents = removeWhitespace Fixtures.get("server/id_generator_expected.html")
+
+      supertest(@app)
+        .get("/__cypress/id_generator")
+        .expect(200)
+        .expect (res) ->
+          body = removeWhitespace(res.text)
+          expect(body).to.eq contents
+          null
+        .end(done)
+
+  context "GET /__cypress/files", ->
     beforeEach ->
       Fixtures.scaffold("todos")
 
@@ -86,7 +106,7 @@ describe "Routes", ->
 
     it "returns base json file path objects", (done) ->
       supertest(@app)
-        .get("/files")
+        .get("/__cypress/files")
         .expect(200, [
           { name: "sub/sub_test.coffee" },
           { name: "test1.js" },
@@ -98,12 +118,12 @@ describe "Routes", ->
       filesPath = Fixtures.project("todos") + "/" + "tests"
 
       supertest(@app)
-        .get("/files")
+        .get("/__cypress/files")
         .expect(200)
         .expect("X-Files-Path", filesPath)
         .end(done)
 
-  context "GET /tests", ->
+  context "GET /__cypress/tests", ->
     describe "todos", ->
       beforeEach ->
         Fixtures.scaffold("todos")
@@ -124,7 +144,7 @@ describe "Routes", ->
         file = coffee.compile(file)
 
         supertest(@app)
-          .get("/tests?p=tests/sub/sub_test.coffee")
+          .get("/__cypress/tests?p=tests/sub/sub_test.coffee")
           .expect(200)
           .expect (res) ->
             expect(res.text).to.eq file
@@ -136,7 +156,7 @@ describe "Routes", ->
         file = coffee.compile(file)
 
         supertest(@app)
-          .get("/tests?p=support/spec_helper.coffee")
+          .get("/__cypress/tests?p=support/spec_helper.coffee")
           .expect(200)
           .expect (res) ->
             expect(res.text).to.eq file
@@ -162,7 +182,7 @@ describe "Routes", ->
         file = Fixtures.get("projects/no-server/my-tests/test1.js")
 
         supertest(@app)
-          .get("/tests?p=my-tests/test1.js")
+          .get("/__cypress/tests?p=my-tests/test1.js")
           .expect(200)
           .expect (res) ->
             expect(res.text).to.eq file
@@ -173,14 +193,14 @@ describe "Routes", ->
         file = Fixtures.get("projects/no-server/helpers/includes.js")
 
         supertest(@app)
-          .get("/tests?p=helpers/includes.js")
+          .get("/__cypress/tests?p=helpers/includes.js")
           .expect(200)
           .expect (res) ->
             expect(res.text).to.eq file
             null
           .end(done)
 
-  context "GET /iframes/*", ->
+  context "GET /__cypress/iframes/*", ->
     describe "todos", ->
       beforeEach ->
         Fixtures.scaffold("todos")
@@ -200,7 +220,7 @@ describe "Routes", ->
         contents = removeWhitespace Fixtures.get("server/expected_empty_inject.html")
 
         supertest(@app)
-          .get("/iframes/test2.coffee")
+          .get("/__cypress/iframes/test2.coffee")
           .expect(200)
           .expect (res) ->
             body = removeWhitespace(res.text)
@@ -231,7 +251,7 @@ describe "Routes", ->
         contents = removeWhitespace Fixtures.get("server/expected_no_server_empty_inject.html")
 
         supertest(@app)
-          .get("/iframes/test1.js")
+          .get("/__cypress/iframes/test1.js")
           .expect(200)
           .expect (res) ->
             body = removeWhitespace(res.text)

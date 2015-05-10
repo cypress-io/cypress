@@ -103,8 +103,8 @@ describe "Server Interface", ->
       it "namespace=__cypress", ->
         @defaults "namespace", "__cypress"
 
-      it "idGeneratorUrl=http://localhost:2020/id_generator", ->
-        @defaults "idGeneratorUrl", "http://localhost:2020/id_generator"
+      it "idGeneratorUrl=http://localhost:2020/__cypress/id_generator", ->
+        @defaults "idGeneratorUrl", "http://localhost:2020/__cypress/id_generator"
 
       it "baseUrl=http://localhost:8000/app", ->
         @defaults "baseUrl", "http://localhost:8000/app", {

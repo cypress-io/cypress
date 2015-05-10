@@ -66,7 +66,7 @@ class Server
       clientUrl: rootUrl + obj.clientRoute
 
     _.defaults obj,
-      idGeneratorUrl: rootUrl + "/id_generator"
+      idGeneratorUrl: rootUrl + "/__cypress/id_generator"
 
   ## go through this method for all tests because
   ## it handles setting the defaults up automatically

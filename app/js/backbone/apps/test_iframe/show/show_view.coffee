@@ -308,7 +308,7 @@
     loadRegularIframes: (src, options, fn) ->
       view = @
 
-      @src = "/iframes/" + src
+      @src = "/__cypress/iframes/" + src
       @fn = fn
 
       # @$iframe = window.open(@src, "testIframeWindow", "titlebar=no,menubar=no,toolbar=no,location=no,personalbar=no,status=no")
