@@ -18,6 +18,8 @@
   App.vent.on "main:nav:choose", (nav) -> App.navs.chooseByName nav
 
   App.on "before:start", (options = {}) ->
+    App.clearCookiesBeforeUnload(options.namespace)
+
     App.clearCookies(options.namespace)
 
     ## before we start lets receive the options passed to our app

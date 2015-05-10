@@ -1,4 +1,11 @@
 describe "Cookies", ->
+  context "clearCookiesBeforeUnload", ->
+    it "calls App.clearCookies with namespace", ->
+      clearCookies = @sandbox.spy App, "clearCookies"
+      App.clearCookiesBeforeUnload("foo")
+      $(window).trigger "beforeunload"
+      expect(clearCookies).to.be.calledWith "foo"
+
   context "clearCookies", ->
     beforeEach ->
       Cookies.set("__cypress.initial", true, {path: "/"})
