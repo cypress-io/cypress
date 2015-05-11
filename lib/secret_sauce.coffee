@@ -285,7 +285,7 @@ SecretSauce.RemoteProxy =
 
   _handle: (req, res, next, Domain, httpProxy) ->
     ## TODO TEST THIS BASEURL FALLBACK
-    remoteHost = req.cookies["__cypress.remoteHost"] ? @app.get("cypress").baseUrl
+    remoteHost = @getOriginFromFqdnUrl(req) ? req.cookies["__cypress.remoteHost"] ? @app.get("cypress").baseUrl
 
     ## we must have the remoteHost cookie
     if not remoteHost
@@ -306,6 +306,17 @@ SecretSauce.RemoteProxy =
         else
           throw e
       .pipe(res)
+
+  getOriginFromFqdnUrl: (req) ->
+    ## if we find an origin from this req.url
+    ## then return it, and reset our req.url
+    ## after stripping out the origin and ensuring
+    ## our req.url starts with only 1 leading slash
+    if origin = @UrlHelpers.getOriginFromFqdnUrl(req.url)
+      req.url = "/" + req.url.replace(origin, "").replace(/^\/+/, "")
+
+      ## return the origin
+      return origin
 
   getContentStream: (req, res, remoteHost, proxy) ->
     switch remoteHost

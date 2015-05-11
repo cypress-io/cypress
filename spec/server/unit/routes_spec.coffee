@@ -627,3 +627,38 @@ describe "Routes", ->
             expect(res.text).to.eq "OK"
             null
           .end(done)
+
+      it "fetches remote proxy content", (done) ->
+        nock("http://localhost:3000")
+          .get("/app.css")
+          .reply 200, "{}", {
+            "Content-Type": "text/html"
+          }
+
+        supertest(@app)
+          .get("/http://localhost:3000/app.css")
+          .set("Cookie", "__cypress.initial=false; __cypress.remoteHost=http://www.github.com")
+          .expect(200)
+          .expect (res) ->
+            expect(res.text).to.eq "{}"
+            null
+          .end(done)
+
+      it.only "falls back to baseUrl when no FQDN and no remoteHost", (done) ->
+        @server.setCypressJson({
+          baseUrl: "http://www.google.com"
+        })
+
+        nock("http://www.google.com")
+          .get("/app.css")
+          .reply 200, "{}", {
+            "Content-Type": "text/html"
+          }
+
+        supertest(@app)
+          .get("/app.css")
+          .expect(200)
+          .expect (res) ->
+            expect(res.text).to.eq "{}"
+            null
+          .end(done)
