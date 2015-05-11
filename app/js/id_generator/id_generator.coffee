@@ -10,7 +10,7 @@ do ($, _, io) ->
     $("iframe").remove()
 
     iframe = $("<iframe>", {
-      src: "/iframes/" + strippedPath
+      src: "/__cypress/iframes/" + strippedPath
       load: ->
         mocha = @contentWindow.mocha
         @contentWindow.Mocha.prototype.run.call mocha, filePath, channel, ->
