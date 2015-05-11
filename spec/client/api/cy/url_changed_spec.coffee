@@ -61,12 +61,14 @@ describe "$Cypress Url:Changed Events", ->
         @cy.visit(url).then ->
           @urlIs url
 
-    context "cy.visit()", ->
-      it "fires before resolving", ->
-        url = "http://www.google.com/app"
-        urlChanged = @sandbox.spy @cy, "urlChanged"
-        cy.visit(url).then ->
-          expect(urlChanged).to.be.calledWith url
+    ## cy.visit no longer fires urlChanged before
+    ## resolving
+    # context "cy.visit()", ->
+    #   it "fires before resolving", ->
+    #     url = "http://www.google.com/app"
+    #     urlChanged = @sandbox.spy @cy, "urlChanged"
+    #     cy.visit(url).then ->
+    #       expect(urlChanged).to.be.calledWith url
 
     context "pushState events", ->
       it "fires when pushState is invoked", ->

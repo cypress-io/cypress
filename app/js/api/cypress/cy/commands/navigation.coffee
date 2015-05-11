@@ -34,8 +34,6 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
       baseUrl = @config("baseUrl")
       url     = Cypress.Location.getRemoteUrl(url, baseUrl)
 
-      @urlChanged(url)
-
       ## backup the previous runnable timeout
       ## and the hook's previous timeout
       prevTimeout = @_timeout()
