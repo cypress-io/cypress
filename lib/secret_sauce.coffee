@@ -284,11 +284,12 @@ SecretSauce.RemoteProxy =
   httpUpToPathName: /https?:\/?\/?/
 
   _handle: (req, res, next, Domain, httpProxy) ->
-    remoteHost = req.cookies["__cypress.remoteHost"]
+    ## TODO TEST THIS BASEURL FALLBACK
+    remoteHost = req.cookies["__cypress.remoteHost"] ? @app.get("cypress").baseUrl
 
     ## we must have the remoteHost cookie
     if not remoteHost
-      throw new Error("Missing remoteHost cookie!")
+      throw new Error("Missing remoteHost!")
 
     proxy = httpProxy.createProxyServer({})
 
@@ -378,7 +379,11 @@ SecretSauce.RemoteInitial =
     d.on 'error', (e) => @errorHandler(e, req, res)
 
     d.run =>
-      remoteHost = req.cookies["__cypress.remoteHost"]
+      ## first check to see if this url contains a FQDN
+      ## if it does then its been rewritten from an absolute-domain
+      ## into a absolute-path-relative link, and we should extract the
+      ## remoteHost from this URL
+      remoteHost = @getOriginFromFqdnUrl(req) ? req.cookies["__cypress.remoteHost"]
 
       @Log.info "handling initial request", url: req.url, remoteHost: remoteHost
 
@@ -391,11 +396,22 @@ SecretSauce.RemoteInitial =
 
       content = @getContent(req, res, remoteHost)
 
-      content.on "error", (e) => @errorHandler(e, req, res)
+      content.on "error", (e) => @errorHandler(e, req, res, remoteHost)
 
       content
       .pipe(@injectContent(opts.inject))
       .pipe(res)
+
+  getOriginFromFqdnUrl: (req) ->
+    ## if we find an origin from this req.url
+    ## then return it, and reset our req.url
+    ## after stripping out the origin and ensuring
+    ## our req.url starts with only 1 leading slash
+    if origin = @UrlHelpers.getOriginFromFqdnUrl(req.url)
+      req.url = "/" + req.url.replace(origin, "").replace(/^\/+/, "")
+
+      ## return the origin
+      return origin
 
   getContent: (req, res, remoteHost) ->
     switch remoteHost
@@ -515,8 +531,8 @@ SecretSauce.RemoteInitial =
 
     @fs.createReadStream(file, "utf8")
 
-  errorHandler: (e, req, res) ->
-    remoteHost = req.cookies["__cypress.remoteHost"]
+  errorHandler: (e, req, res, remoteHost) ->
+    remoteHost ?= req.cookies["__cypress.remoteHost"]
 
     url = @url.resolve(remoteHost, req.url)
 

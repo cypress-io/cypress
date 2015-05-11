@@ -43,3 +43,13 @@ module.exports =
     original.setPort(remoteHost.port())
 
     original.toString()
+
+  getOriginFromFqdnUrl: (url) ->
+    ## the first character will always be a '/'
+    ## so lets slice that off
+    url = Url.parse(url.slice(1))
+    if url.protocol and url.host
+      url.pathname = ""
+      url.search = ""
+      url.hash = ""
+      url.format()

@@ -587,3 +587,43 @@ describe "Routes", ->
           .set("Cookie", "__cypress.remoteHost=#{@baseUrl}")
           .expect(200, "html { color: #333 }")
           .end(done)
+
+    context "FQDN's which were rewritten to be absolute-path-relative", ->
+      ## these urls happen when we re-write FQDN path's to be
+      ## absolute-path-relative, and these requests are made
+
+      beforeEach ->
+        @url = "/http://localhost:3000/about"
+
+      it "can initially fetch content", (done) ->
+        nock("http://localhost:3000")
+          .get("/about")
+          .reply 200, "OK", {
+            "Content-Type": "text/html"
+          }
+
+        supertest(@app)
+          .get(@url)
+          .set("Cookie", "__cypress.initial=true")
+          .expect(200)
+          .expect (res) ->
+            expect(res.text).to.eq "OK"
+            null
+          .end(done)
+
+      it "resets remoteHost to FQDN", (done) ->
+        nock("http://localhost:3000")
+          .get("/about")
+          .reply 200, "OK", {
+            "Content-Type": "text/html"
+          }
+
+        supertest(@app)
+          .get(@url)
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+          .expect(200)
+          .expect "set-cookie", /remoteHost=.+localhost.+3000/
+          .expect (res) ->
+            expect(res.text).to.eq "OK"
+            null
+          .end(done)

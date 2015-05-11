@@ -2,28 +2,28 @@
 ## WAS REFACTORED AND MOST DO NOT APPLY.
 ## WILL ADD UNIT TESTS AS PROBLEMS ARISE (IF THEY ARISE)
 
-# root          = "../../../"
-# Server        = require("#{root}lib/server")
-# RemoteInitial = require("#{root}lib/controllers/remote_initial")
-# Readable      = require("stream").Readable
-# expect        = require("chai").expect
-# through       = require("through")
-# nock          = require('nock')
-# sinon         = require('sinon')
-# fs            = require('fs')
+root          = "../../../"
+Server        = require("#{root}lib/server")
+RemoteInitial = require("#{root}lib/controllers/remote_initial")
+Readable      = require("stream").Readable
+expect        = require("chai").expect
+through       = require("through")
+nock          = require('nock')
+sinon         = require('sinon')
+fs            = require('fs')
 
-# describe "Remote Initial", ->
-#   beforeEach ->
-#     @sandbox = sinon.sandbox.create()
-#     @sandbox.stub(Server.prototype, "getCypressJson").returns({})
+describe "Remote Initial", ->
+  beforeEach ->
+    @sandbox = sinon.sandbox.create()
+    @sandbox.stub(Server.prototype, "getCypressJson").returns({})
 
-#     @server = Server("/Users/brian/app")
-#     @app    = @server.app
-#     @server.setCypressJson {
-#       projectRoot: "/Users/brian/app"
-#     }
+    @server = Server("/Users/brian/app")
+    @app    = @server.app
+    @server.setCypressJson {
+      projectRoot: "/Users/brian/app"
+    }
 
-#     @remoteInitial = RemoteInitial(@app)
+    @remoteInitial = RemoteInitial(@app)
 #     @res = through (d) ->
 #     @res.render = ->
 #     @res.send = ->
@@ -36,13 +36,30 @@
 
 #     nock.disableNetConnect()
 
-#   afterEach ->
-#     @sandbox.restore()
+  afterEach ->
+    @sandbox.restore()
 #     nock.cleanAll()
 #     nock.enableNetConnect()
 
-#   it "returns a new instance", ->
-#     expect(@remoteInitial).to.be.instanceOf(RemoteInitial)
+  it "returns a new instance", ->
+    expect(@remoteInitial).to.be.instanceOf(RemoteInitial)
+
+  context "#getOriginFromFqdnUrl", ->
+    beforeEach ->
+      @urlIs = (url, remoteHost, reqUrl) ->
+        @req = {url: url}
+        url = @remoteInitial.getOriginFromFqdnUrl(@req)
+        expect(url).to.eq remoteHost
+        expect(@req.url).to.eq reqUrl
+
+    it "returns origin from a FQDN url", ->
+      @urlIs "/http://www.google.com", "http://www.google.com", "/"
+
+    it "omits pathname, search, hash", ->
+      @urlIs "/http://www.google.com/my/path?foo=bar#hash/baz", "http://www.google.com", "/my/path?foo=bar#hash/baz"
+
+    it "does not alter req.url if not FQDN url", ->
+      @urlIs "/foo/bar?baz=quux#hash/foo", undefined, "/foo/bar?baz=quux#hash/foo"
 
 #   it "injects content", (done) ->
 #     readable = new Readable
