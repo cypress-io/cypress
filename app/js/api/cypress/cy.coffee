@@ -49,6 +49,9 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
           ## we've unloaded
           @isReady(false, "unload")
 
+        win.off("hashchange").on "hashchange", =>
+          @urlChanged()
+
         win.get(0).confirm = (message) ->
           console.info "Confirming 'true' to: ", message
           return true
@@ -88,7 +91,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       @listenTo @Cypress, "abort",      => @abort()
 
     abort: ->
-      @$remoteIframe?.off("submit unload load")
+      @$remoteIframe?.off("submit unload load hashchange")
       @isReady(false, "abort")
       @prop("runnable")?.clearTimeout()
 

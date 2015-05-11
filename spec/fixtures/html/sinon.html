@@ -21,9 +21,15 @@
     <div id="xhr">
       Sinon Fixture
     </div>
+    <button id="pushState">pushstate</button>
+    <a id="hashchange" href="#hashchange">hashchange</a>
     <script type="text/javascript">
       $(function(){
         $.get("/bar")
+
+        $("button#pushState").click(function(){
+          window.history.pushState({foo: "bar"}, null, "pushState.html")
+        })
       })
     </script>
   </body>

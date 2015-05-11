@@ -2,7 +2,7 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
 
   overrideRemoteLocationGetters = (cy, contentWindow) ->
     navigated = ->
-      cy.$remoteIframe.trigger("history:event")
+      cy.urlChanged()
 
     Cypress.Location.override(contentWindow, navigated)
 
@@ -34,9 +34,7 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
       baseUrl = @config("baseUrl")
       url     = Cypress.Location.getRemoteUrl(url, baseUrl)
 
-      ## trigger that the remoteIframing is visiting
-      ## an external URL
-      @$remoteIframe.trigger "visit:start", url
+      @urlChanged(url)
 
       ## backup the previous runnable timeout
       ## and the hook's previous timeout
