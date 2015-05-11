@@ -14,9 +14,6 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
 
   reLocalHost = /^(localhost|0\.0\.0\.0|127\.0\.0\.1)/
 
-  ## ADD THE LOCATION.CREATE CONSTRUCTOR TESTS
-  ## FOR THIS LOGIC HANDLING
-
   class $Location
     constructor: (remote) ->
       ## need to handle <root> here
@@ -27,7 +24,12 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
 
 
       ## get the remoteHost from our cookies
-      remoteHost = new Uri $Cypress.Cookies.getRemoteHost()
+      remoteHost = $Cypress.Cookies.getRemoteHost()
+
+      if remoteHost is "<root>"
+        remoteHost = new Uri ""
+      else
+        remoteHost = new Uri remoteHost
 
       ## and just replace the current origin with
       ## the remoteHost origin
@@ -37,50 +39,6 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
       remote.setPort remoteHost.port()
 
       @remote = remote
-
-    # constructor: (current, remote = "", defaultOrigin) ->
-    #   current  = new Uri(current)
-
-    #   ## use defaultOrigin or the origin from our current url
-    #   defaultOrigin or= current.origin()
-
-    #   remote = @stripOrigin(current, remote)
-    #   ## first strip off the current origin from the remote
-    #   ## this will strip off http://0.0.0.0:2020
-    #   ## location.origin isn't supported everywhere so we'll
-    #   ## do it manually with Uri
-
-    #   ## remove any __remote
-    #   remote = @stripRemotePath(remote)
-
-    #   ## if AFTER we strip out the current origin
-    #   ## and we strip out the __remote pathname
-    #   ## we still DONT have a real origin
-    #   ## then just use the current's origin.
-    #   ## this happens when we use cypress as
-    #   ## our web server, and since we're servering
-    #   ## files directly from it, its really our origin
-    #   remote = $Location.getRemoteUrl(remote, defaultOrigin)
-
-    #   ## convert to Uri instance
-    #   ## from here on out we mutate
-    #   ## this object directly
-    #   @remote = new Uri(remote)
-
-    #   ## remove the __initial=true query param
-    #   @stripInitial()
-
-    ## remove the current locations origin
-    ## from our remote origin
-    # stripOrigin: (current, remote) ->
-    #   origin = current.origin()
-    #   remote.split(origin).join("")
-
-    # stripRemotePath: (remote) ->
-    #   remote.split("/__remote/").join("")
-
-    # stripInitial: ->
-    #   @remote.deleteQueryParam("__initial")
 
     getHash: ->
       if hash = @remote.anchor()

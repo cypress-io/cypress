@@ -1,17 +1,20 @@
 urls =
-  cypress:  "http://0.0.0.0:3000/__/#/tests/app.coffee"
-  signin:   "http://0.0.0.0:3000/__remote/http://localhost:8000/signin?__initial=true"
-  users:    "http://0.0.0.0:3000/users/1"
-  google:   "http://0.0.0.0:3000/__remote/https://www.google.com"
-  ember:    "http://0.0.0.0:3000/__remote/index.html?__initial=true#/posts"
-  app:      "http://localhost:3000/app/#posts/1"
-  search:   "http://localhost:3000/search?q=books"
-  pathname: "app/index.html"
+  cypress:  "http://0.0.0.0:2020/__/#/tests/app.coffee"
+  signin:   "http://localhost:2020/signin"
+  users:    "http://localhost:2020/users/1"
+  google:   "https://www.google.com"
+  ember:    "http://localhost:2020/index.html#/posts"
+  app:      "http://localhost:2020/app/#posts/1"
+  search:   "http://localhost:2020/search?q=books"
+  pathname: "http://localhost:2020/app/index.html"
 
 describe "$Cypress.Location API", ->
   beforeEach ->
-    @setup = (remote, defaultOrigin) ->
-      new $Cypress.Location(urls.cypress, urls[remote], defaultOrigin)
+    @setup = (remote, remoteHost) =>
+      if remoteHost
+        @sandbox.stub($Cypress.Cookies, "getRemoteHost").returns(remoteHost)
+
+      new $Cypress.Location(urls[remote])
 
   it "class is defined", ->
     expect($Cypress.Location).to.be.defined
@@ -27,16 +30,16 @@ describe "$Cypress.Location API", ->
 
   context "#getHref", ->
     it "returns the full url", ->
-      str = @setup("signin").getHref()
+      str = @setup("signin", "http://localhost:8000").getHref()
       expect(str).to.eq "http://localhost:8000/signin"
 
-    it "applies a default origin if none is set", ->
-      str = @setup("users", "http://localhost:4000").getHref()
-      expect(str).to.eq "http://localhost:4000/users/1"
+    it "does not apply origin if <root> is the remoteHost", ->
+      str = @setup("users", "<root>").getHref()
+      expect(str).to.eq "/users/1"
 
     it "does not apply a leading slash after removing query params", ->
-      str = @setup("ember").getHref()
-      expect(str).to.eq "http://0.0.0.0:3000/index.html#/posts"
+      str = @setup("ember", "http://localhost:3000").getHref()
+      expect(str).to.eq "http://localhost:3000/index.html#/posts"
 
     it "applies default origin to ember", ->
       str = @setup("ember", "http://ember.com").getHref()
@@ -44,25 +47,25 @@ describe "$Cypress.Location API", ->
 
   context "#getHost", ->
     it "returns port if port is present", ->
-      str = @setup("signin").getHost()
+      str = @setup("signin", "http://localhost:8000").getHost()
       expect(str).to.eq "localhost:8000"
 
     it "omits port if port is blank", ->
-      str = @setup("google").getHost()
+      str = @setup("google", "http://www.google.com").getHost()
       expect(str).to.eq "www.google.com"
 
   context "#getHostName", ->
     it "returns host without port", ->
-      str = @setup("signin").getHostName()
+      str = @setup("signin", "http://localhost:3000").getHostName()
       expect(str).to.eq "localhost"
 
   context "#getOrigin", ->
     it "returns the origin including port", ->
-      str = @setup("signin").getOrigin()
+      str = @setup("signin", "http://localhost:8000").getOrigin()
       expect(str).to.eq "http://localhost:8000"
 
     it "returns the origin without port", ->
-      str = @setup("google").getOrigin()
+      str = @setup("google", "https://www.google.com").getOrigin()
       expect(str).to.eq "https://www.google.com"
 
   context "#getPathName", ->
@@ -80,20 +83,20 @@ describe "$Cypress.Location API", ->
 
   context "#getPort", ->
     it "returns the port", ->
-      str = @setup("signin").getPort()
+      str = @setup("signin", "http://localhost:8000").getPort()
       expect(str).to.eq "8000"
 
     it "returns empty string if port is blank", ->
-      str = @setup("google").getPort()
+      str = @setup("google", "http://www.google.com").getPort()
       expect(str).to.eq ""
 
   context "#getProtocol", ->
     it "returns the http protocol", ->
-      str = @setup("signin").getProtocol()
+      str = @setup("signin", "http://localhost:2020").getProtocol()
       expect(str).to.eq "http:"
 
     it "returns the https protocol", ->
-      str = @setup("google").getProtocol()
+      str = @setup("google", "https://www.google.com").getProtocol()
       expect(str).to.eq "https:"
 
   context "#getSearch", ->
@@ -107,7 +110,7 @@ describe "$Cypress.Location API", ->
 
   context "#getToString", ->
     it "returns the toString function", ->
-      str = @setup("signin").getToString()
+      str = @setup("signin", "http://localhost:8000").getToString()
       expect(str).to.eq "http://localhost:8000/signin"
 
   context ".create", ->
@@ -117,7 +120,8 @@ describe "$Cypress.Location API", ->
       expect(obj).to.have.keys(keys)
 
     it "can invoke toString function", ->
-      obj = $Cypress.Location.create(urls.cypress, urls.signin)
+      @sandbox.stub($Cypress.Cookies, "getRemoteHost").returns("http://localhost:8000")
+      obj = $Cypress.Location.create(urls.signin)
       expect(obj.toString()).to.eq "http://localhost:8000/signin"
 
   context ".normalizeUrl", ->
