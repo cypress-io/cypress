@@ -7,6 +7,7 @@ urls =
   app:      "http://localhost:2020/app/#posts/1"
   search:   "http://localhost:2020/search?q=books"
   pathname: "http://localhost:2020/app/index.html"
+  origin:   "http://localhost:2020/http://localhost:3000/about"
 
 describe "$Cypress.Location API", ->
   beforeEach ->
@@ -44,6 +45,14 @@ describe "$Cypress.Location API", ->
     it "applies default origin to ember", ->
       str = @setup("ember", "http://ember.com").getHref()
       expect(str).to.eq "http://ember.com/index.html#/posts"
+
+    it "identifies origin based urls", ->
+      str = @setup("origin").getHref()
+      expect(str).to.eq "http://localhost:3000/about"
+
+    it "ignores remoteHost", ->
+      str = @setup("origin", "http://ember.com").getHref()
+      expect(str).to.eq "http://localhost:3000/about"
 
   context "#getHost", ->
     it "returns port if port is present", ->

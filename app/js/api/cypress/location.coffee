@@ -9,7 +9,7 @@
 ## attach to global
 $Cypress.Location = do ($Cypress, _, Uri) ->
 
-  reHttp = /^http/
+  reHttp = /^https?:\/\//
   reWww = /^www/
 
   reLocalHost = /^(localhost|0\.0\.0\.0|127\.0\.0\.1)/
@@ -22,23 +22,41 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
       ## else just strip out the origin and replace
       ## it with the remoteHost
 
-
-      ## get the remoteHost from our cookies
-      remoteHost = $Cypress.Cookies.getRemoteHost()
-
-      if remoteHost is "<root>"
-        remoteHost = new Uri ""
-      else
-        remoteHost = new Uri remoteHost
-
-      ## and just replace the current origin with
-      ## the remoteHost origin
       remote = new Uri remote
-      remote.setProtocol remoteHost.protocol()
-      remote.setHost remoteHost.host()
-      remote.setPort remoteHost.port()
+
+      ## if our URL has a FQDN in its
+      ## path http://localhost:2020/http://localhost:3000/about
+      ## then dont handle anything with the remoteHost
+      if fqdn = @getFqdn(remote)
+        remote = new Uri fqdn
+      else
+        ## get the remoteHost from our cookies
+        remoteHost = $Cypress.Cookies.getRemoteHost()
+
+        if remoteHost is "<root>"
+          remoteHost = new Uri ""
+        else
+          remoteHost = new Uri remoteHost
+
+        ## and just replace the current origin with
+        ## the remoteHost origin
+        remote.setProtocol remoteHost.protocol()
+        remote.setHost remoteHost.host()
+        remote.setPort remoteHost.port()
 
       @remote = remote
+
+    getFqdn: (url) ->
+      url = new Uri url
+
+      ## strip off the initial leading slash
+      ## since path always begins with that
+      path = url.path().slice(1)
+
+      ## if this path matches http its a FQDN
+      ## and we can return it
+      if reHttp.test(path)
+        return path
 
     getHash: ->
       if hash = @remote.anchor()
