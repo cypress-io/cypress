@@ -1,13 +1,38 @@
 describe "$Cypress Url:Changed Events", ->
   enterCommandTestingMode()
 
+  describe "pageChanged", ->
+    beforeEach ->
+      @trigger = @sandbox.spy @Cypress, "trigger"
+
+    it "triggers on page unload event", (done) ->
+      ## when this finishes loading
+      @cy.$remoteIframe.on "load", =>
+        expect(@trigger).to.be.calledWith("page:loading", true)
+        done()
+
+      ## cause the unload event to fire
+      @cy.$remoteIframe.prop("contentWindow").location.href = "about:blank"
+
+    it "triggers after page load event", ->
+      @cy.$remoteIframe.trigger("load")
+      expect(@trigger).to.be.calledWith("page:loading", false)
+
   describe "urlChanged", ->
+    beforeEach ->
+      @trigger = @sandbox.spy @Cypress, "trigger"
+
     it "triggers url:changed", ->
       url     = "http://localhost:3000/app.html"
-      trigger = @sandbox.spy @Cypress, "trigger"
       @sandbox.stub(@cy.sync, "url").returns(url)
       @cy.urlChanged()
-      expect(trigger).to.be.calledWith "url:changed", url
+      expect(@trigger).to.be.calledWith "url:changed", url
+
+    it "doesnt trigger if url is ''", ->
+      ## this happens on about:blank
+      @sandbox.stub(@cy.sync, "url").returns("")
+      @cy.urlChanged()
+      expect(@trigger).not.to.be.called
 
   describe "url:changed events", ->
     beforeEach ->

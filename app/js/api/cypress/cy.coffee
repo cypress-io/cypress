@@ -48,6 +48,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
           ## put cy in a waiting state now that
           ## we've unloaded
           @isReady(false, "unload")
+          @pageLoading()
 
         win.off("hashchange").on "hashchange", =>
           @urlChanged()
@@ -58,6 +59,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
 
       @$remoteIframe.on "load", =>
         @urlChanged()
+        @pageLoading(false)
 
         bindEvents()
         @isReady(true, "load")

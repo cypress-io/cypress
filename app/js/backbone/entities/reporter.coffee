@@ -34,6 +34,9 @@
         @listenTo @Cypress, "url:changed", (url) ->
           App.config.setUrl(url)
 
+        @listenTo @Cypress, "page:loading", (bool) ->
+          App.config.setPageLoading(bool)
+
         @listenTo @Cypress, "log", (log) =>
           switch log.get("event")
             when "command"

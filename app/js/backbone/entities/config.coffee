@@ -40,6 +40,9 @@
     setUrl: (url) ->
       @set "url", url
 
+    setPageLoading: (bool = true) ->
+      @set "pageLoading", bool
+
     toggleCollapse: ->
       @set "collapsed", !@get("collapsed")
 
@@ -91,9 +94,9 @@
     getPathToSpec: (id) ->
       _.compact([@get("testFolder"), id]).join("/")
 
-    setRemoteOrigin: (current, remote) ->
-      location = $Cypress.Location.create(current, remote)
-      @set "remoteOrigin", location.origin
+    # setRemoteOrigin: (current, remote) ->
+    #   location = $Cypress.Location.create(current, remote)
+    #   @set "remoteOrigin", location.origin
 
     ## returns a function bound to this model
     ## which acts as a getter

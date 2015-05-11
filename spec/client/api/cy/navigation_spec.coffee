@@ -111,7 +111,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           .visit("fixtures/html/sinon.html")
           .window().as("win")
           .then ->
-            @trigger = @sandbox.stub @cy.$remoteIframe, "trigger"
+            @urlChanged = @sandbox.spy @cy, "urlChanged"
 
       _.each ["back", "forward", "go", "pushState", "replaceState"], (attr) =>
         it "fires 'history:event' on attr: '#{attr}'", ->
@@ -119,7 +119,7 @@ describe "$Cypress.Cy Navigation Commands", ->
             arg = -1
 
           @win.history[attr](arg)
-          expect(@trigger).to.be.calledWith "history:event"
+          expect(@urlChanged).to.be.called
 
     describe "visit:start", ->
       beforeEach ->
