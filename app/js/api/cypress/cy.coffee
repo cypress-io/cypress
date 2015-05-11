@@ -41,6 +41,8 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
 
           @isReady(false, "beforeunload")
 
+          @Cypress.Cookies.setInitial()
+
           ## return undefined so
           return undefined
 

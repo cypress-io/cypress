@@ -13,9 +13,12 @@ $Cypress.Cookies = do ($Cypress, _) ->
 
       Cookies.get(name)
 
-    setInitialRequest: (remoteHost) ->
+    setInitial: ->
       @set "initial", true
+
+    setInitialRequest: (remoteHost) ->
       @set "remoteHost", remoteHost
+      @setInitial()
       @
 
     getRemoteHost: ->

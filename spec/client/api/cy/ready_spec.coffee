@@ -20,3 +20,8 @@ describe "$Cypress.Cy Ready Events", ->
       ## the beforeunload event which we then set isReady to false
       @cy.inspect().get("a#change-page").click().then ->
         expect(@isReady).not.to.be.calledWith false
+
+    it "sets initial cookies", ->
+      setInitial = @sandbox.stub @Cypress.Cookies, "setInitial"
+      @cy.get("a#change-page").click().then ->
+        expect(setInitial).to.be.called
