@@ -37,7 +37,7 @@ describe "Reporter Entity", ->
       @Cypress.trigger "url:changed", "http://localhost:3000/users/1"
       expect(setUrl).to.be.calledWith "http://localhost:3000/users/1"
 
-    it.only "listens to Cypress.page:loading", ->
+    it "listens to Cypress.page:loading", ->
       setPageLoading = @sandbox.spy App.config, "setPageLoading"
       @Cypress.trigger "page:loading", true
       expect(setPageLoading).to.be.calledWith true
