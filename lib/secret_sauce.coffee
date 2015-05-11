@@ -363,7 +363,7 @@ SecretSauce.RemoteInitial =
             parent.onerror.apply(parent, arguments);
           }
         </script>
-        <script type='text/javascript' src='/eclectus/js/sinon.js'></script>
+        <script type='text/javascript' src='/__cypress/static/js/sinon.js'></script>
         <script type='text/javascript'>
           var Cypress = parent.Cypress;
           if (!Cypress){
@@ -476,8 +476,9 @@ SecretSauce.RemoteInitial =
     ## would completely bork getbootstrap.com
     headers = _.omit(req.headers, "host", "accept-encoding", "accept-language")
 
-    ## need to additionally omit __cypress headers
-    ## but add them back to the response headers
+    ## proxy each of the headers include cookie, which will contain
+    ## our cypress cookies. thats okay though because we always
+    ## add them afterwards
     _.each headers, (val, key) ->
       rq.setHeader key, val
 
