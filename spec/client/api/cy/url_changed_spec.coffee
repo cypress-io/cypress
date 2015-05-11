@@ -5,6 +5,9 @@ describe "$Cypress Url:Changed Events", ->
     beforeEach ->
       @trigger = @sandbox.spy @Cypress, "trigger"
 
+    afterEach ->
+      @loadDom("html/dom")
+
     it "triggers on page unload event", (done) ->
       ## when this finishes loading
       @cy.$remoteIframe.on "load", =>
