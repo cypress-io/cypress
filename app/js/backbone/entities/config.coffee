@@ -94,10 +94,6 @@
     getPathToSpec: (id) ->
       _.compact([@get("testFolder"), id]).join("/")
 
-    # setRemoteOrigin: (current, remote) ->
-    #   location = $Cypress.Location.create(current, remote)
-    #   @set "remoteOrigin", location.origin
-
     ## returns a function bound to this model
     ## which acts as a getter
     getExternalInterface: ->
