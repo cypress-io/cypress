@@ -421,39 +421,39 @@ describe "Routes", ->
           .expect(200, "hello from bar!")
           .end(done)
 
-      it "omits forwarding accept-encoding", (done) ->
-        nock(@baseUrl)
-        .matchHeader "accept-encoding", (val) ->
-          val isnt "foo"
-        .get("/bar")
-        .reply 200, "hello from bar!", {
-          "Content-Type": "text/html"
-        }
+      # it.only "omits forwarding accept-encoding", (done) ->
+      #   nock(@baseUrl)
+      #   .matchHeader "accept-encoding", (val) ->
+      #     val isnt "foo"
+      #   .get("/bar")
+      #   .reply 200, "hello from bar!", {
+      #     "Content-Type": "text/html"
+      #   }
 
-        supertest(@app)
-          .get("/bar")
-          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
-          .set("host", "demo.com")
-          .set("accept-encoding", "foo")
-          .expect(200, "hello from bar!")
-          .end(done)
+      #   supertest(@app)
+      #     .get("/bar")
+      #     .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+      #     .set("host", "demo.com")
+      #     .set("accept-encoding", "foo")
+      #     .expect(200, "hello from bar!")
+      #     .end(done)
 
-      it "omits forwarding accept-language", (done) ->
-        nock(@baseUrl)
-        .matchHeader "accept-language", (val) ->
-          val isnt "utf-8"
-        .get("/bar")
-        .reply 200, "hello from bar!", {
-          "Content-Type": "text/html"
-        }
+      # it "omits forwarding accept-language", (done) ->
+      #   nock(@baseUrl)
+      #   .matchHeader "accept-language", (val) ->
+      #     val isnt "utf-8"
+      #   .get("/bar")
+      #   .reply 200, "hello from bar!", {
+      #     "Content-Type": "text/html"
+      #   }
 
-        supertest(@app)
-          .get("/bar")
-          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
-          .set("host", "demo.com")
-          .set("accept-language", "utf-8")
-          .expect(200, "hello from bar!")
-          .end(done)
+      #   supertest(@app)
+      #     .get("/bar")
+      #     .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+      #     .set("host", "demo.com")
+      #     .set("accept-language", "utf-8")
+      #     .expect(200, "hello from bar!")
+      #     .end(done)
 
     context "FQDN rewriting", ->
       it "rewrites anchor href", (done) ->
@@ -682,6 +682,8 @@ describe "Routes", ->
         supertest(@app)
           .get(@url)
           .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+          .expect (res) ->
+            console.log res.text
           .expect(200)
           .expect "set-cookie", /remoteHost=.+localhost.+3000/
           .expect (res) ->
@@ -735,3 +737,57 @@ describe "Routes", ->
       #   .get("/www.cdnjs.com/backbone.js")
       #   .expect(200)
       #   .end(done)
+
+  context "POST *", ->
+    beforeEach ->
+      @baseUrl = "http://localhost:8000"
+
+    it "processes POST + redirect on remote proxy", (done) ->
+      nock(@baseUrl)
+        .post("/login", {
+          username: "brian@cypress.io"
+          password: "foobar"
+        })
+        .reply 302, undefined, {
+          "Location": "/dashboard"
+        }
+        .get("/dashboard")
+        .reply 200, "OK", {
+          "Content-Type" : "text/html"
+        }
+
+      supertest(@app)
+        .post("/login")
+        .set("Cookie", "__cypress.initial=false; __cypress.remoteHost=http://localhost:8000")
+        .type("form")
+        .send({username: "brian@cypress.io", password: "foobar"})
+        .expect(302)
+        .expect "location", /dashboard/
+        .end(done)
+
+    ## this happens on a real form submit because beforeunload fires
+    ## and initial=true gets set
+    it "processes POST + redirect on remote initial", (done) ->
+      nock(@baseUrl)
+        .post("/login", {
+          username: "brian@cypress.io"
+          password: "foobar"
+        })
+        .reply 302, undefined, {
+          "Location": "/dashboard"
+        }
+        .get("/dashboard")
+        .reply 200, "OK", {
+          "Content-Type" : "text/html"
+        }
+
+      supertest(@app)
+        .post("/login")
+        .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://localhost:8000")
+        .type("form")
+        .send({username: "brian@cypress.io", password: "foobar"})
+        .expect (res) ->
+          console.log res.text
+        # .expect(302)
+        # .expect "location", /dashboard/
+        .end(done)

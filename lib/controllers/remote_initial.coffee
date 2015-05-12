@@ -1,6 +1,6 @@
 path          = require "path"
 fs            = require 'fs'
-hyperquest    = require 'hyperquest'
+request       = require 'request'
 path          = require 'path'
 Domain        = require 'domain'
 through       = require 'through'
@@ -18,7 +18,7 @@ class RemoteInitial extends Controller
   through: through
   through2: through2
   UrlHelpers: UrlHelpers
-  hyperquest: hyperquest
+  request: request
   path: path
   fs: fs
   Log: Log

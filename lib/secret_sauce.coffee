@@ -357,6 +357,9 @@ SecretSauce.RemoteProxy =
     # @emit "verbose", "piping url content #{opts.uri}, #{opts.uri.split(opts.remote)[1]}"
     @Log.info "piping http url content", url: req.url, remoteHost: remoteHost
 
+    ## hostRewrite: rewrites location header on redirects back to
+    ## ourselves (localhost:2020) so the client will automatically
+    ## re-request this back on ourselves so we can proxy it again
     proxy.web(req, res, {
       target: remoteHost
       changeOrigin: true,
@@ -473,10 +476,31 @@ SecretSauce.RemoteInitial =
 
     thr = @through (d) -> @queue(d)
 
-    rq = @hyperquest.get remoteUrl, {}, (err, incomingRes) =>
-      if err?
-        return thr.emit("error", err)
+    ## set the headers on the request
+    ## this will naturally forward cookies or auth tokens
+    ## or anything else which should be proxied
+    ## for some reason adding host / accept-encoding / accept-language
+    ## would completely bork getbootstrap.com
+    # headers = _.omit(req.headers, "host", "accept-encoding", "accept-language")
 
+    ## proxy each of the headers include cookie, which will contain
+    ## our cypress cookies. thats okay though because we always
+    ## add them afterwards
+
+    # opts = {url: remoteUrl, headers: headers, followRedirect: false}
+    opts = {url: remoteUrl, followRedirect: false}
+    # opts = {url: remoteUrl, method: req.method, gzip: true, headers: headers}
+
+    ## pass on the form values from our body
+    # if req.method is "POST"
+      # opts.form = req.body
+
+    rq = @request(opts)
+
+    rq.on "error", (err) ->
+      thr.emit("error", err)
+
+    rq.on "response", (incomingRes) =>
       if /^30(1|2|7|8)$/.test(incomingRes.statusCode)
         ## we cannot redirect them to an external site
         ## instead we need to reset the __cypress.remoteHost cookie to
@@ -507,18 +531,9 @@ SecretSauce.RemoteInitial =
 
         rq.pipe(tr).pipe(thr)
 
-    ## set the headers on the hyperquest request
-    ## this will naturally forward cookies or auth tokens
-    ## or anything else which should be proxied
-    ## for some reason adding host / accept-encoding / accept-language
-    ## would completely bork getbootstrap.com
-    headers = _.omit(req.headers, "host", "accept-encoding", "accept-language")
-
-    ## proxy each of the headers include cookie, which will contain
-    ## our cypress cookies. thats okay though because we always
-    ## add them afterwards
-    _.each headers, (val, key) ->
-      rq.setHeader key, val
+    ## proxy the request body, content-type, headers
+    ## to the new rq
+    req.pipe(rq)
 
     thr
 
