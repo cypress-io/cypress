@@ -299,7 +299,6 @@ describe "Routes", ->
       contents = removeWhitespace Fixtures.get("server/expected_sinon_inject.html")
 
       nock(@baseUrl)
-        .log(console.log)
         .get("/bar")
         .reply 302, undefined, {
           ## redirect us to google.com!
@@ -456,10 +455,9 @@ describe "Routes", ->
           .expect(200, "hello from bar!")
           .end(done)
 
-    context "absolute url rewriting", ->
+    context "FQDN rewriting", ->
       it "rewrites anchor href", (done) ->
         nock(@baseUrl)
-          .log(console.log)
           .get("/bar")
           .reply 200, "<html><body><a href='http://www.google.com'>google</a></body></html>",
             "Content-Type": "text/html"
@@ -474,12 +472,27 @@ describe "Routes", ->
             null
           .end(done)
 
-      it "rewrites multiple anchors", (done) ->
+      it "rewrites link tags", (done) ->
+        nock(@baseUrl)
+          .get("/bar")
+          .reply 200, "<html><body><link rel='stylesheet' href='http://cdn.com/reset.css'></body></html>",
+            "Content-Type": "text/html"
+
+        supertest(@app)
+          .get("/bar")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+          .expect(200)
+          .expect (res) ->
+            body = res.text
+            expect(body).to.eq '<html><body><link rel="stylesheet" href="/http://cdn.com/reset.css"></body></html>'
+            null
+          .end(done)
+
+      it "rewrites multiple elements", (done) ->
         contents = removeWhitespace Fixtures.get("server/absolute_url.html")
         expected = removeWhitespace Fixtures.get("server/absolute_url_expected.html")
 
         nock(@baseUrl)
-          .log(console.log)
           .get("/bar")
           .reply 200, contents,
             "Content-Type": "text/html"
@@ -491,6 +504,54 @@ describe "Routes", ->
           .expect (res) ->
             body = res.text
             expect(body).to.eq expected
+            null
+          .end(done)
+
+      it "rewrites protocol-less urls", (done) ->
+        nock(@baseUrl)
+          .get("/bar")
+          .reply 200, "<html><body><link rel='stylesheet' href='//cdn.com/reset.css'></body></html>",
+            "Content-Type": "text/html"
+
+        supertest(@app)
+          .get("/bar")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+          .expect(200)
+          .expect (res) ->
+            body = res.text
+            expect(body).to.eq '<html><body><link rel="stylesheet" href="/http://cdn.com/reset.css"></body></html>'
+            null
+          .end(done)
+
+      it "rewrites protocol-less forms", (done) ->
+        nock(@baseUrl)
+          .get("/bar")
+          .reply 200, "<html><body><form action='//external.domain.com/bar/index.php'>form</form></body></html>",
+            "Content-Type": "text/html"
+
+        supertest(@app)
+          .get("/bar")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+          .expect(200)
+          .expect (res) ->
+            body = res.text
+            expect(body).to.eq '<html><body><form action="/http://external.domain.com/bar/index.php">form</form></body></html>'
+            null
+          .end(done)
+
+      it "rewrites urls which match the remoteHost", (done)->
+        nock(@baseUrl)
+          .get("/bar")
+          .reply 200, "<html><body><a href='http://www.github.com/foo/bar'>github</a></body></html>",
+            "Content-Type": "text/html"
+
+        supertest(@app)
+          .get("/bar")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+          .expect(200)
+          .expect (res) ->
+            body = res.text
+            expect(body).to.eq '<html><body><a href="/foo/bar">github</a></body></html>'
             null
           .end(done)
 
@@ -644,7 +705,7 @@ describe "Routes", ->
             null
           .end(done)
 
-      it.only "falls back to baseUrl when no FQDN and no remoteHost", (done) ->
+      it "falls back to baseUrl when no FQDN and no remoteHost", (done) ->
         @server.setCypressJson({
           baseUrl: "http://www.google.com"
         })
@@ -662,3 +723,15 @@ describe "Routes", ->
             expect(res.text).to.eq "{}"
             null
           .end(done)
+
+      # it "handles protocol-less proxies", (done) ->
+      #   nock("http://www.cdnjs.com")
+      #     .get("backbone.js")
+      #     .reply 200, "var foo;", {
+      #       "Content-Type" : "text/javascript"
+      #     }
+
+      #   supertest(@app)
+      #   .get("/www.cdnjs.com/backbone.js")
+      #   .expect(200)
+      #   .end(done)

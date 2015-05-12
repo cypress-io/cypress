@@ -439,22 +439,33 @@ SecretSauce.RemoteInitial =
   getHttpContent: (req, res, remoteHost) ->
     { _ } = SecretSauce
 
-    ## replace the req's origin with the remoteHost origin
-    ## http://localhost:2020/foo/bar.index
-    ## ...to...
-    ## http://localhost:8080/foo/bar.index
-    # remoteUrl = @UrlHelpers.replaceHost(req.url, remoteHost)
+    ## prepends req.url with remoteHost
     remoteUrl = @url.resolve(remoteHost, req.url)
 
     tr = @trumpet()
 
-    tr.selectAll "form[action^=http]", (elem) ->
-      elem.getAttribute "action", (action) ->
-        elem.setAttribute "action", "/" + action
+    rewrite = (selector, attr, fn) ->
+      tr.selectAll selector, (elem) ->
+        elem.getAttribute attr, (val) ->
+          elem.setAttribute attr, fn(val)
 
-    tr.selectAll "a[href^=http]", (elem) ->
-      elem.getAttribute "href", (href) ->
-        elem.setAttribute "href", "/" + href
+    rewrite "[href^='//']", "href", (href) ->
+      "/" + req.protocol + ":" + href
+
+    rewrite "form[action^='//']", "action", (action) ->
+      "/" + req.protocol + ":" + action
+
+    rewrite "form[action^='http']", "action", (action) ->
+      if action.startsWith(remoteHost)
+        action.replace(remoteHost, "")
+      else
+        "/" + action
+
+    rewrite "[href^='http']", "href", (href) ->
+      if href.startsWith(remoteHost)
+        href.replace(remoteHost, "")
+      else
+        "/" + href
 
     setCookies = (initial, remoteHost) ->
       res.cookie("__cypress.initial", initial)
