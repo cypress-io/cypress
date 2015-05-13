@@ -72,6 +72,15 @@ describe "Routes", ->
         .expect(/App.start\(.+\)/)
         .end(done)
 
+    it "omits x-powered-by", (done) ->
+      supertest(@app)
+        .get("/__")
+        .expect(200)
+        .expect (res) ->
+          expect(res.headers["x-powered-by"]).not.to.exist
+          null
+        .end(done)
+
   context "GET /__cypress/id_generator", ->
     it "renders id_generator.html", (done) ->
       ## it may seem silly to use an 'expected fixture'

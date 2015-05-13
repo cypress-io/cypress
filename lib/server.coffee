@@ -95,6 +95,9 @@ class Server
     ## errorhandler
     @app.use require("errorhandler")()
 
+    ## remove the express powered-by header
+    @app.disable("x-powered-by")
+
     @createRoutes()
 
   createRoutes: ->
