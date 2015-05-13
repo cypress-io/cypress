@@ -37,8 +37,8 @@ class RemoteInitial extends Controller
 
     super
 
-  handle: (req, res, opts = {}) ->
-    @_handle(req, res, opts, Domain)
+  handle: (req, res, next) ->
+    @_handle(req, res, next, Domain)
 
 SecretSauce.mixin("RemoteInitial", RemoteInitial)
 

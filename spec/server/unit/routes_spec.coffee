@@ -285,60 +285,17 @@ describe "Routes", ->
         .expect(200, "hello from bar!")
         .end(done)
 
-    it "injects sinon content into head", (done) ->
-      contents = removeWhitespace Fixtures.get("server/expected_sinon_inject.html")
+    context "304 Not Modified", ->
+      it "sends back a 304", (done) ->
+        nock("http://localhost:8080")
+          .get("/assets/app.js")
+          .reply(304)
 
-      nock(@baseUrl)
-        .get("/bar")
-        .reply 200, "<html> <head> <title>foo</title> </head> <body>hello from bar!</body> </html>", {
-          "Content-Type": "text/html"
-        }
-
-      supertest(@app)
-        .get("/bar")
-        .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
-        .expect(200)
-        .expect (res) ->
-          body = removeWhitespace(res.text)
-          expect(body).to.eq contents
-          null
-        .end(done)
-
-    it "injects sinon content after following redirect", (done) ->
-      contents = removeWhitespace Fixtures.get("server/expected_sinon_inject.html")
-
-      nock(@baseUrl)
-        .get("/bar")
-        .reply 302, undefined, {
-          ## redirect us to google.com!
-          "Location": "http://www.google.com/foo"
-        }
-      nock("http://www.google.com")
-        .get("/foo")
-        .reply 200, "<html> <head> <title>foo</title> </head> <body>hello from bar!</body> </html>", {
-          "Content-Type": "text/html"
-        }
-
-      @session
-        .get("/bar")
-        .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
-        .expect(302)
-        .expect "location", "/foo"
-        .expect "set-cookie", /initial=true/
-        .expect "set-cookie", /remoteHost=.+www\.google\.com/
-        .end (err, res) =>
-          return done(err) if err
-
-          @session
-            .get(res.headers.location)
-            .expect(200)
-            .expect "set-cookie", /initial=false/
-            .expect "set-cookie", /remoteHost=.+www\.google\.com/
-            .expect (res) ->
-              body = removeWhitespace(res.text)
-              expect(body).to.eq contents
-              null
-            .end(done)
+        supertest(@app)
+          .get("/assets/app.js")
+          .set("Cookie", "__cypress.initial=false; __cypress.remoteHost=http://localhost:8080")
+          .expect(304)
+          .end(done)
 
     context "redirects", ->
       ## this simulates being handed back a header.location of '/'
@@ -360,6 +317,42 @@ describe "Routes", ->
           .expect "set-cookie", /remoteHost=.+getbootstrap\.com/
           .end(done)
 
+      ## our location header should be local not the external getBootstrap
+      it "rewrites the location header to our host", (done) ->
+        nock("http://foobar.com")
+          .get("/css")
+          .reply 302, undefined, {
+            "Location": "http://foobar.com/css/"
+          }
+
+        supertest(@app)
+          .get("/css")
+          .set("Cookie", "__cypress.initial=false; __cypress.remoteHost=http://foobar.com")
+          .expect(302)
+          .expect "location", "/http://foobar.com/css/"
+          .end(done)
+
+      ## we need to shift the external origin into the redirect if it
+      ## doesnt match our current remoteHost, and re-proxy the request
+      ## so we end up reaching the proper external origin
+      it "adds the external origin if it doesnt match the remoteHost", (done) ->
+        nock("http://foobar.com")
+          .get("/css")
+          .reply 302, undefined, {
+            "Location": "http://foobar.com/css/"
+          }
+
+        supertest(@app)
+          .get("/http://foobar.com/css")
+          .set("Cookie", "__cypress.initial=false; __cypress.remoteHost=http://localhost:8080")
+          .expect(302)
+          .expect "location", "/http://foobar.com/css/"
+          .end(done)
+
+      # it "doesnt proxy x-powered-by header"
+
+      # it "doesnt proxy other bad headers"
+
     context "error handling", ->
       it "status code 500", (done) ->
         nock(@baseUrl)
@@ -372,14 +365,18 @@ describe "Routes", ->
           .expect(500)
           .end(done)
 
+      ## allow nock to throw here
+      it "does not send back initial_500 content on error when initial is false"
+
       it "sends back initial_500 content", (done) ->
         nock(@baseUrl)
           .get("/index.html")
-          .reply(500)
+          .reply(500, "FAIL WAIL")
 
         supertest(@app)
           .get("/index.html")
           .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+          .expect(500)
           .expect (res) =>
             expect(res.text).to.include("<span data-cypress-visit-error></span>")
             expect(res.text).to.include("<a href=\"#{@baseUrl}/index.html\" target=\"_blank\">#{@baseUrl}/index.html</a>")
@@ -399,13 +396,130 @@ describe "Routes", ->
           .end(done)
 
     context "headers", ->
-      it "forwards headers on outgoing requests", (done) ->
+      describe "when initial is true", ->
+        it "sets back to false", (done) ->
+          nock("http://localhost:8080")
+            .get("/app.html")
+            .reply 200, "OK", {
+              "Content-Type" : "text/html"
+            }
+
+          supertest(@app)
+            .get("/app.html")
+            .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://localhost:8080")
+            .expect(200)
+            .expect "set-cookie", /initial=false/
+            .end(done)
+
+        it "sets remoteHost to the passed in remoteHost", (done) ->
+          nock("http://localhost:8080")
+            .get("/app.html")
+            .reply 200, "OK", {
+              "Content-Type" : "text/html"
+            }
+
+          supertest(@app)
+            .get("/app.html")
+            .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://localhost:8080")
+            .expect(200)
+            .expect "set-cookie", /remoteHost=.+localhost/
+            .end(done)
+
+      describe "when initial is false", ->
+        it "does not reset initial or remoteHost", (done) ->
+          nock("http://localhost:8080")
+            .get("/app.html")
+            .reply 200, "OK", {
+              "Content-Type" : "text/html"
+            }
+
+          supertest(@app)
+            .get("/app.html")
+            .set("Cookie", "__cypress.initial=false; __cypress.remoteHost=http://localhost:8080")
+            .expect(200)
+            .expect (res) ->
+              ## there shouldnt be any cookies set here by us
+              expect(res.headers["set-cookie"]).not.to.exist
+              null
+            .end(done)
+
+      it "forwards cookies from incoming responses", (done) ->
+        nock("http://localhost:8080")
+          .get("/login")
+          .reply 200, "OK", {
+            "set-cookie" : "userId=123"
+          }
+
+        supertest(@app)
+          .get("/login")
+          .set("Cookie", "__cypress.initial=false; __cypress.remoteHost=http://localhost:8080")
+          .expect(200)
+          .expect "set-cookie", /userId=123/
+          .end(done)
+
+      it "appends to previous cookies from incoming responses", (done) ->
+        nock("http://localhost:8080")
+          .get("/login")
+          .reply 200, "OK", {
+            "set-cookie" : "userId=123; Path=/"
+          }
+
+        supertest(@app)
+          .get("/login")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://localhost:8080")
+          .expect(200)
+          .expect (res) ->
+            expect(res.headers["set-cookie"]).to.deep.eq [
+              "userId=123; Path=/"
+              "__cypress.initial=false; Path=/"
+              "__cypress.remoteHost=#{encodeURIComponent("http://localhost:8080")}; Path=/"
+            ]
+            null
+          .end(done)
+
+      it "appends cookies on redirects", (done) ->
+        nock("http://localhost:8080")
+          .get("/login")
+          .reply 302, undefined, {
+            "location": "/dashboard"
+            "set-cookie" : "userId=123; Path=/"
+          }
+
+        supertest(@app)
+          .get("/login")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://localhost:8080")
+          .expect(302)
+          .expect("location", "/http://localhost:8080/dashboard")
+          .expect (res) ->
+            expect(res.headers["set-cookie"]).to.deep.eq [
+              "userId=123; Path=/"
+              "__cypress.initial=true; Path=/"
+              "__cypress.remoteHost=#{encodeURIComponent("http://localhost:8080")}; Path=/"
+            ]
+            null
+          .end(done)
+
+      it "forwards other headers from incoming responses", (done) ->
+        nock("http://localhost:8080")
+          .get("/auth")
+          .reply 200, "OK", {
+            "x-token" : "abc-123"
+          }
+
+        supertest(@app)
+          .get("/auth")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://localhost:8080")
+          .expect(200)
+          .expect("x-token", "abc-123")
+          .end(done)
+
+      it "forwards headers to outgoing requests", (done) ->
         nock(@baseUrl)
-        .get("/bar")
-        .matchHeader("x-custom", "value")
-        .reply 200, "hello from bar!", {
-          "Content-Type": "text/html"
-        }
+          .get("/bar")
+          .matchHeader("x-custom", "value")
+          .reply 200, "hello from bar!", {
+            "Content-Type": "text/html"
+          }
 
         supertest(@app)
           .get("/bar")
@@ -414,23 +528,38 @@ describe "Routes", ->
           .expect(200, "hello from bar!")
           .end(done)
 
-      it "omits forwarding host header", (done) ->
-        nock(@baseUrl)
-        .matchHeader "host", (val) ->
-          val isnt "demo.com"
-        .get("/bar")
-        .reply 200, "hello from bar!", {
-          "Content-Type": "text/html"
-        }
+      ## this changes the host header from being a local host (127.0.0.1)
+      ## to being the host origin of the target
+      ## so to the target it appears the request came from them
+      it "changes the host origin to match the target", (done) ->
+        nock("http://foobar.com")
+          .get("/css")
+          .matchHeader "host", "foobar.com"
+          .reply(200)
 
         supertest(@app)
-          .get("/bar")
-          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
-          .set("host", "demo.com")
-          .expect(200, "hello from bar!")
+          .get("/css")
+          .set("Cookie", "__cypress.initial=false; __cypress.remoteHost=http://foobar.com")
+          .expect(200)
           .end(done)
 
-      # it.only "omits forwarding accept-encoding", (done) ->
+      # it "omits forwarding host header", (done) ->
+      #   nock(@baseUrl)
+      #   .matchHeader "host", (val) ->
+      #     val isnt "demo.com"
+      #   .get("/bar")
+      #   .reply 200, "hello from bar!", {
+      #     "Content-Type": "text/html"
+      #   }
+
+      #   supertest(@app)
+      #     .get("/bar")
+      #     .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+      #     .set("host", "demo.com")
+      #     .expect(200, "hello from bar!")
+      #     .end(done)
+
+      # it "omits forwarding accept-encoding", (done) ->
       #   nock(@baseUrl)
       #   .matchHeader "accept-encoding", (val) ->
       #     val isnt "foo"
@@ -464,7 +593,93 @@ describe "Routes", ->
       #     .expect(200, "hello from bar!")
       #     .end(done)
 
+    context "content injection", ->
+      it "injects sinon content into head", (done) ->
+        contents = removeWhitespace Fixtures.get("server/expected_sinon_inject.html")
+
+        nock(@baseUrl)
+          .get("/bar")
+          .reply 200, "<html> <head> <title>foo</title> </head> <body>hello from bar!</body> </html>", {
+            "Content-Type": "text/html"
+          }
+
+        supertest(@app)
+          .get("/bar")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+          .expect(200)
+          .expect (res) ->
+            body = removeWhitespace(res.text)
+            expect(body).to.eq contents
+            null
+          .end(done)
+
+      it "injects sinon content after following redirect", (done) ->
+        contents = removeWhitespace Fixtures.get("server/expected_sinon_inject.html")
+
+        nock(@baseUrl)
+          .get("/bar")
+          .reply 302, undefined, {
+            ## redirect us to google.com!
+            "Location": "http://www.google.com/foo"
+          }
+        nock("http://www.google.com")
+          .get("/foo")
+          .reply 200, "<html> <head> <title>foo</title> </head> <body>hello from bar!</body> </html>", {
+            "Content-Type": "text/html"
+          }
+
+        @session
+          .get("/bar")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+          .expect(302)
+          .expect "location", "/http://www.google.com/foo"
+          .expect "set-cookie", /initial=true/
+          .expect "set-cookie", /remoteHost=.+www\.google\.com/
+          .end (err, res) =>
+            return done(err) if err
+
+            @session
+              .get(res.headers.location)
+              .expect(200)
+              .expect "set-cookie", /initial=false/
+              .expect "set-cookie", /remoteHost=.+www\.google\.com/
+              .expect (res) ->
+                body = removeWhitespace(res.text)
+                expect(body).to.eq contents
+                null
+              .end(done)
+
+      it "does not inject when not initial", (done) ->
+        nock(@baseUrl)
+          .get("/bar")
+          .reply 200, "<html><head></head></html>", {
+            "Content-Type": "text/html"
+          }
+
+        supertest(@app)
+          .get("/bar")
+          .set("Cookie", "__cypress.initial=false; __cypress.remoteHost=http://www.github.com")
+          .expect(200)
+          .expect("<html><head></head></html>")
+          .end(done)
+
     context "FQDN rewriting", ->
+      it "does not rewrite html with not initial", (done) ->
+        nock(@baseUrl)
+          .get("/bar")
+          .reply 200, "<html><body><a href='http://www.google.com'>google</a></body></html>",
+            "Content-Type": "text/html"
+
+        supertest(@app)
+          .get("/bar")
+          .set("Cookie", "__cypress.initial=false; __cypress.remoteHost=http://www.github.com")
+          .expect(200)
+          .expect (res) ->
+            body = res.text
+            expect(body).to.eq "<html><body><a href='http://www.google.com'>google</a></body></html>"
+            null
+          .end(done)
+
       it "rewrites anchor href", (done) ->
         nock(@baseUrl)
           .get("/bar")
@@ -576,7 +791,7 @@ describe "Routes", ->
 
         @server.setCypressJson {
           projectRoot: Fixtures.project("no-server")
-          rootFolder: "dev"
+          rootFolder: "dev-123-abc" ## we have this here to ensure we are ignoring this option
           testFolder: "my-tests"
         }
 
@@ -594,7 +809,7 @@ describe "Routes", ->
 
       it "streams from file system", (done) ->
         @session
-          .get("/assets/app.css")
+          .get("/dev/assets/app.css")
           .expect(200, "html { color: black; }")
           .end(done)
 
@@ -800,3 +1015,5 @@ describe "Routes", ->
         # .expect(302)
         # .expect "location", /dashboard/
         .end(done)
+
+    it "hands back 201 status codes"

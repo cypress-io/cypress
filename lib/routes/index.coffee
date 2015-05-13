@@ -45,9 +45,4 @@ module.exports = (app) ->
   ## unfound paths we assume we want to pass on through
   ## to the origin proxyUrl
   app.all "*", (req, res, next) ->
-    ## if initial is set in our cookies then we know
-    ## this request needs to be dynamically injected
-    if req.cookies["__cypress.initial"] is "true"
-      controllers.remoteInitial.handle(req, res)
-    else
-      controllers.remoteProxy.handle(req, res, next)
+    controllers.remoteInitial.handle(req, res, next)
