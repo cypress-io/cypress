@@ -566,17 +566,6 @@ SecretSauce.RemoteInitial =
       res.cookie("__cypress.initial", initial)
       res.cookie("__cypress.remoteHost", remoteHost)
 
-    ## set the headers on the request
-    ## this will naturally forward cookies or auth tokens
-    ## or anything else which should be proxied
-    ## for some reason adding host / accept-encoding / accept-language
-    ## would completely bork getbootstrap.com
-    # headers = _.omit(req.headers, "host", "accept-encoding", "accept-language")
-
-    ## proxy each of the headers include cookie, which will contain
-    ## our cypress cookies. thats okay though because we always
-    ## add them afterwards
-
     # opts = {url: remoteUrl, headers: headers, followRedirect: false}
     opts = {url: remoteUrl, gzip: true, followRedirect: false}
     # opts = {url: remoteUrl, method: req.method, gzip: true, headers: headers}
@@ -661,13 +650,17 @@ SecretSauce.RemoteInitial =
       req.url
     ])
 
-    ## strip trailing slashes because no file
-    ## ever has one
-    file = @path.join(args...).replace(/\/+$/, "")
+    ## strip off any query params from our req's url
+    ## since we're pulling this from the file system
+    ## it does not understand query params
+    file = @url.parse(@path.join(args...)).pathname
 
     req.formattedUrl = file
 
     @Log.info "getting relative file content", file: file
+
+    ## set the content-type based on the file extension
+    res.contentType(@mime.lookup(file))
 
     res.cookie("__cypress.initial", false)
     res.cookie("__cypress.remoteHost", remoteHost)

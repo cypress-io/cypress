@@ -963,6 +963,19 @@ describe "Routes", ->
           .expect(200, "html { color: black; }")
           .end(done)
 
+      it "sets content-type", (done) ->
+        @session
+          .get("/dev/assets/app.css")
+          .expect(200)
+          .expect("content-type", /text\/css/)
+          .end(done)
+
+      it "disregards anything past the pathname", (done) ->
+        @session
+          .get("/dev/assets/app.css?foo=bar#hash")
+          .expect(200, "html { color: black; }")
+          .end(done)
+
     context "http file serving", ->
       beforeEach (done) ->
         @baseUrl = "http://getbootstrap.com"

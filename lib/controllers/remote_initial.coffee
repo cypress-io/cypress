@@ -1,6 +1,7 @@
 path          = require "path"
 fs            = require 'fs'
 request       = require 'request'
+mime          = require 'mime'
 path          = require 'path'
 Domain        = require 'domain'
 through       = require 'through'
@@ -28,6 +29,7 @@ class RemoteInitial extends Controller
   jsUri: jsUri
   harmon: harmon
   trumpet: trumpet
+  mime: mime
   url: url
 
   constructor: (app) ->
