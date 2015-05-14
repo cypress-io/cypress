@@ -318,6 +318,27 @@ describe "Routes", ->
           .expect(200)
           .end(done)
 
+      ## okay so the reason this test is valuable is the following:
+      ## superagent WILL automatically decode the requests if content-encoding: gzip
+      ## if our response was NOT a gzip, then it would explode
+      ## because its properly gzipped then our response is unzipped and we get the
+      ## normal string content.
+      it "does not UNZIP gzipped responses when streaming back the response", (done) ->
+        nock(@baseUrl)
+          .get("/gzip")
+          .matchHeader "accept-encoding", "gzip"
+          .replyWithFile 200, Fixtures.path("server/gzip.html.gz"), {
+            "Content-Type": "text/html"
+            "Content-Encoding": "gzip"
+          }
+
+        supertest(@app)
+          .get("/gzip")
+          .set("Accept-Encoding", "gzip")
+          .set("Cookie", "__cypress.initial=false; __cypress.remoteHost=http://www.github.com")
+          .expect(200, "<html>gzip</html>")
+          .end(done)
+
     context "304 Not Modified", ->
       it "sends back a 304", (done) ->
         nock("http://localhost:8080")

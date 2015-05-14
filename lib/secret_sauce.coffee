@@ -566,15 +566,19 @@ SecretSauce.RemoteInitial =
       res.cookie("__cypress.initial", initial)
       res.cookie("__cypress.remoteHost", remoteHost)
 
-    # opts = {url: remoteUrl, headers: headers, followRedirect: false}
-    opts = {url: remoteUrl, gzip: true, followRedirect: false}
-    # opts = {url: remoteUrl, method: req.method, gzip: true, headers: headers}
+    ## we are setting gzip to false here to prevent automatic
+    ## decompression of the response since we dont need to transform
+    ## it and we can just hand it back to the client. DO NOT BE CONFUSED
+    ## our request will still have 'accept-encoding' and therefore
+    ## responses WILL be gzipped! Responses will simply not be unzipped!
+    opts = {url: remoteUrl, gzip: false, followRedirect: false}
 
     ## do not accept gzip if this is initial
-    ## since we have to rewrite html
+    ## since we have to rewrite html and we dont
+    ## want to go through unzipping it, but we may
+    ## do this later
     if req.cookies["__cypress.initial"] is "true"
       delete req.headers["accept-encoding"]
-      opts.gzip = false
 
     ## rewrite problematic custom headers referencing
     ## the wrong host
