@@ -7,6 +7,7 @@ through       = require 'through'
 through2      = require 'through2'
 jsUri         = require "jsuri"
 trumpet       = require "trumpet"
+harmon        = require "harmon"
 url           = require "url"
 Log           = require "../log"
 UrlHelpers    = require "../util/url_helpers"
@@ -23,6 +24,7 @@ class RemoteInitial extends Controller
   fs: fs
   Log: Log
   jsUri: jsUri
+  harmon: harmon
   trumpet: trumpet
   url: url
 

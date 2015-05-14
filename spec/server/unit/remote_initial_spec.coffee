@@ -61,6 +61,36 @@ describe "Remote Initial", ->
     it "does not alter req.url if not FQDN url", ->
       @urlIs "/foo/bar?baz=quux#hash/foo", undefined, "/foo/bar?baz=quux#hash/foo"
 
+  context "#stripCookieParams", ->
+    it "doesnt require proper white space", ->
+      cookies = @remoteInitial.stripCookieParams(["user=brian;path=/;expires=123;HttpOnly"])
+      expect(cookies).to.deep.eq ["user=brian; path=/; expires=123"]
+
+    it "strips HttpOnly", ->
+      cookies = @remoteInitial.stripCookieParams(["user=brian; path=/; HttpOnly"])
+      expect(cookies).to.deep.eq ["user=brian; path=/"]
+
+    it "strips httponly", ->
+      cookies = @remoteInitial.stripCookieParams(["user=brian; path=/; httponly"])
+      expect(cookies).to.deep.eq ["user=brian; path=/"]
+
+    it "strips Secure", ->
+      cookies = @remoteInitial.stripCookieParams(["user=brian; path=/; Secure"])
+      expect(cookies).to.deep.eq ["user=brian; path=/"]
+
+    it "strips secure", ->
+      cookies = @remoteInitial.stripCookieParams(["user=brian; path=/; secure"])
+      expect(cookies).to.deep.eq ["user=brian; path=/"]
+
+    it "strips HttpOnly and Secure", ->
+      cookies = @remoteInitial.stripCookieParams(["user=brian; path=/; Secure; HttpOnly"])
+      expect(cookies).to.deep.eq ["user=brian; path=/"]
+
+    it "strips Secure and HttpOnly", ->
+      cookies = @remoteInitial.stripCookieParams(["user=brian; path=/; HttpOnly; Secure"])
+      expect(cookies).to.deep.eq ["user=brian; path=/"]
+
+
 #   it "injects content", (done) ->
 #     readable = new Readable
 

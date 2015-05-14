@@ -285,6 +285,39 @@ describe "Routes", ->
         .expect(200, "hello from bar!")
         .end(done)
 
+    context "gzip", ->
+      it "does not send accept-encoding headers when initial=true", (done) ->
+        nock(@baseUrl)
+          .get("/gzip")
+          .matchHeader "accept-encoding", (val) ->
+            val isnt "gzip"
+          # .replyWithFile 200, Fixtures.path("server/gzip.html.gz"), {
+          #   "Content-Type": "text/html"
+          #   "Content-Encoding": "gzip"
+          # }
+          .reply(200)
+
+        supertest(@app)
+          .get("/gzip")
+          .set("Accept-Encoding", "gzip")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+          # .expect(200, "<html>gzip</html>")
+          .expect(200)
+          .end(done)
+
+      it "does send accept-encoding headers when initial=false", (done) ->
+        nock(@baseUrl)
+          .get("/gzip")
+          .matchHeader "accept-encoding", "gzip"
+          .reply(200)
+
+        supertest(@app)
+          .get("/gzip")
+          .set("Accept-Encoding", "gzip")
+          .set("Cookie", "__cypress.initial=false; __cypress.remoteHost=http://www.github.com")
+          .expect(200)
+          .end(done)
+
     context "304 Not Modified", ->
       it "sends back a 304", (done) ->
         nock("http://localhost:8080")
@@ -526,6 +559,48 @@ describe "Routes", ->
           .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
           .set("x-custom", "value")
           .expect(200, "hello from bar!")
+          .end(done)
+
+      it "omits x-frame-options", (done) ->
+        nock(@baseUrl)
+          .get("/bar")
+          .reply 200, "OK", {
+            "Content-Type": "text/html"
+            "x-frame-options": "SAMEORIGIN"
+          }
+
+        supertest(@app)
+          .get("/bar")
+          .set("Cookie", "__cypress.initial=false; __cypress.remoteHost=http://www.github.com")
+          .expect(200)
+          .expect (res) ->
+            expect(res.headers).not.to.have.keys("x-frame-options")
+            null
+          .end(done)
+
+      it "strips HttpOnly and Secure from all cookies", (done) ->
+        nock(@baseUrl)
+          .get("/bar")
+          .reply 200, "OK", {
+            "Content-Type": "text/html"
+            "set-cookie": [
+              "user=brian; path=/; HttpOnly"
+              "foo=bar; path=/"
+              "token=abc-123; path=/; Secure"
+            ]
+          }
+
+        supertest(@app)
+          .get("/bar")
+          .set("Cookie", "__cypress.initial=false; __cypress.remoteHost=http://www.github.com")
+          .expect(200)
+          .expect (res) ->
+            expect(res.headers["set-cookie"]).to.deep.eq [
+              "user=brian; path=/"
+              "foo=bar; path=/"
+              "token=abc-123; path=/"
+            ]
+            null
           .end(done)
 
       ## this changes the host header from being a local host (127.0.0.1)

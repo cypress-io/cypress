@@ -347,6 +347,19 @@ SecretSauce.RemoteProxy =
   getHttpStream: (req, res, remoteHost, httpProxy) ->
     { _ } = SecretSauce
 
+    write     = res.write
+    writeHead = res.writeHead
+
+    res.writeHead = (code, headers) ->
+      console.log "writeHead", code, headers
+
+      writeHead.apply(res, arguments)
+
+    res.write = (data, encoding) ->
+      console.log "write", data, encoding
+
+      write.apply(res, arguments)
+
     # @emit "verbose", "piping url content #{opts.uri}, #{opts.uri.split(opts.remote)[1]}"
     @Log.info "piping http url content", url: req.url, remoteHost: remoteHost
 
@@ -421,20 +434,20 @@ SecretSauce.RemoteProxy =
 
     ## we pass an empty function as next()
     ## because we arent using harmon as middleware
-    # h(req, res, ->)
+    h(req, res, ->)
 
     proxy = httpProxy.createProxyServer({})
 
-    proxy.once "error", (err) =>
-      if req.cookies["__cypress.initial"] is "true"
-        @errorHandler err, req, res, remoteHost
-      else
-        throw err
+    # proxy.once "error", (err) =>
+    #   if req.cookies["__cypress.initial"] is "true"
+    #     @errorHandler err, req, res, remoteHost
+    #   else
+    #     throw err
 
-    proxy.once "proxyRes", (proxyRes, req, res) =>
-      if req.cookies["__cypress.initial"] is "true"
-        if not @okStatus.test proxyRes.statusCode
-          @errorHandler null, req, res, remoteHost, proxyRes
+    # proxy.once "proxyRes", (proxyRes, req, res) =>
+    #   if req.cookies["__cypress.initial"] is "true"
+    #     if not @okStatus.test proxyRes.statusCode
+    #       @errorHandler null, req, res, remoteHost, proxyRes
 
     # proxy.once "proxyReq", (proxyReq, req, res) ->
 
@@ -447,10 +460,9 @@ SecretSauce.RemoteProxy =
       autoRewrite: true
     })
 
-    return req.pipe(t)
+    return res#.pipe(t)
 
   errorHandler: (e, req, res, remoteHost, proxyRes) ->
-    # debugger
     remoteHost ?= req.cookies["__cypress.remoteHost"]
 
     url = @url.resolve(remoteHost, req.url)
@@ -489,6 +501,7 @@ SecretSauce.RemoteProxy =
 
 SecretSauce.RemoteInitial =
   okStatus: /^[2|3]\d+$/
+  badCookieParam: /^(httponly|secure)$/i
 
   _handle: (req, res, next, Domain) ->
     { _ } = SecretSauce
@@ -565,12 +578,14 @@ SecretSauce.RemoteInitial =
     ## add them afterwards
 
     # opts = {url: remoteUrl, headers: headers, followRedirect: false}
-    opts = {url: remoteUrl, followRedirect: false}
+    opts = {url: remoteUrl, gzip: true, followRedirect: false}
     # opts = {url: remoteUrl, method: req.method, gzip: true, headers: headers}
 
-    ## pass on the form values from our body
-    # if req.method is "POST"
-      # opts.form = req.body
+    ## do not accept gzip if this is initial
+    ## since we have to rewrite html
+    if req.cookies["__cypress.initial"] is "true"
+      delete req.headers["accept-encoding"]
+      opts.gzip = false
 
     rq = @request(opts)
 
@@ -578,16 +593,14 @@ SecretSauce.RemoteInitial =
       thr.emit("error", err)
 
     rq.on "response", (incomingRes) =>
-      headers = _.omit incomingRes.headers, "set-cookie"
+      headers = _.omit incomingRes.headers, "set-cookie", "x-frame-options"
 
       ## proxy the headers
       res.set(headers)
 
-      res.set("x-code", incomingRes.statusCode)
-
       ## always proxy the cookies coming from the incomingRes
       if cookies = incomingRes.headers["set-cookie"]
-        res.append("Set-Cookie", cookies)
+        res.append("Set-Cookie", @stripCookieParams(cookies))
 
       if /^30(1|2|7|8)$/.test(incomingRes.statusCode)
         ## we cannot redirect them to an external site
@@ -609,6 +622,7 @@ SecretSauce.RemoteInitial =
         ## by making this an absolute-path-relative redirect
         res.redirect "/" + newUrl.toString()#.replace(newUrl.origin(), "")
       else
+        ## set the status to whatever the incomingRes statusCode is
         res.status(incomingRes.statusCode)
 
         if not @okStatus.test incomingRes.statusCode
@@ -624,6 +638,8 @@ SecretSauce.RemoteInitial =
         setCookies(false, remoteHost)
 
         if req.cookies["__cypress.initial"] is "true"
+          # @rewrite(req, res, remoteHost)
+          # res.isHtml = true
           rq.pipe(@rewrite(req, res, remoteHost)).pipe(thr)
         else
           rq.pipe(thr)
@@ -632,16 +648,7 @@ SecretSauce.RemoteInitial =
     ## to the new rq
     req.pipe(rq)
 
-    thr
-
-  # injectContent: (toInject) ->
-  #   toInject ?= ""
-
-  #   @through2.obj (chunk, enc, cb) ->
-  #     src = chunk.toString()
-  #           .replace(/<head>/, "<head> #{toInject}")
-
-  #     cb(null, src)
+    return thr
 
   getFileContent: (thr, req, res, remoteHost) ->
     { _ } = SecretSauce
@@ -698,6 +705,95 @@ SecretSauce.RemoteInitial =
       url: filePath
       fromFile: !!req.formattedUrl
     })
+
+  stripCookieParams: (cookies) ->
+    { _ } = SecretSauce
+
+    stripHttpOnlyAndSecure = (cookie) =>
+      ## trim out whitespace
+      parts = _.invoke cookie.split(";"), "trim"
+
+      ## reject any part that is httponly or secure
+      parts = _.reject parts, (part) =>
+        @badCookieParam.test(part)
+
+      ## join back up with proper whitespace
+      parts.join("; ")
+
+    ## normalize cookies into single dimensional array
+     _.map [].concat(cookies), stripHttpOnlyAndSecure
+
+  # rewrite: (req, res, remoteHost) ->
+  #   { _ } = SecretSauce
+
+  # write     = res.write
+  # writeHead = res.writeHead
+
+  # res.writeHead = (code, headers) ->
+  #   console.log "writeHead", code, headers
+
+  #   writeHead.apply(res, arguments)
+
+  # res.write = (data, encoding) ->
+  #   console.log "write", data, encoding
+
+  #   write.apply(res, arguments)
+
+  #   through = @through
+
+  #   selectors = []
+
+  #   rewrite = (selector, type, attr, fn) ->
+  #     if _.isFunction(attr)
+  #       fn   = attr
+  #       attr = null
+
+  #     selectors.push {
+  #       query: selector
+  #       func: (elem) ->
+  #         switch type
+  #           when "attr"
+  #             elem.getAttribute attr, (val) ->
+  #               elem.setAttribute attr, fn(val)
+  #           when "html"
+  #             stream = elem.createStream({outer: true})
+  #             stream.pipe(through (buf) ->
+  #               @queue fn(buf.toString())
+  #             ).pipe(stream)
+  #     }
+
+  #   rewrite "head", "html", (str) =>
+  #     str.replace("<head>", "<head> #{@getHeadContent()}")
+
+  #   rewrite "[href^='//']", "attr", "href", (href) ->
+  #     "/" + req.protocol + ":" + href
+
+  #   rewrite "form[action^='//']", "attr", "action", (action) ->
+  #     "/" + req.protocol + ":" + action
+
+  #   rewrite "form[action^='http']", "attr", "action", (action) ->
+  #     if action.startsWith(remoteHost)
+  #       action.replace(remoteHost, "")
+  #     else
+  #       "/" + action
+
+  #   rewrite "[href^='http']", "attr", "href", (href) ->
+  #     if href.startsWith(remoteHost)
+  #       href.replace(remoteHost, "")
+  #     else
+  #       "/" + href
+
+  #   h = @harmon([], selectors, true)
+  #   h(req, res, ->)
+
+  #   # ## for harmon........ ugh
+  #   # if ct = res.get("content-type")
+  #   #   if ct and ct.includes("text/html")
+  #   #     res.isHtml = true
+
+  #   # if ce = res.get("content-encoding")
+  #   #   if ce and ce.toLowerCase() is "gzip"
+  #   #     res.isGziped = true
 
   rewrite: (req, res, remoteHost) ->
     { _ } = SecretSauce
