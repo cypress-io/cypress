@@ -695,55 +695,37 @@ describe "Routes", ->
           .expect(200)
           .end(done)
 
-      # it "omits forwarding host header", (done) ->
-      #   nock(@baseUrl)
-      #   .matchHeader "host", (val) ->
-      #     val isnt "demo.com"
-      #   .get("/bar")
-      #   .reply 200, "hello from bar!", {
-      #     "Content-Type": "text/html"
-      #   }
+      it "swaps out custom x-* request headers referencing our current host", (done) ->
+        nock("http://localhost:8080")
+          .get("/")
+          .matchHeader "x-xhr-referer", "http://localhost:8080"
+          .reply(200, "OK", {
+            "Content-Type": "text/html"
+          })
 
-      #   supertest(@app)
-      #     .get("/bar")
-      #     .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
-      #     .set("host", "demo.com")
-      #     .expect(200, "hello from bar!")
-      #     .end(done)
+        supertest(@app)
+          .get("/")
+          .set("host", "http://localhost:2020")
+          .set("x-xhr-referer", "http://localhost:2020")
+          .set("Cookie", "__cypress.initial=false; __cypress.remoteHost=http://localhost:8080")
+          .expect(200, "OK")
+          .end(done)
 
-      # it "omits forwarding accept-encoding", (done) ->
-      #   nock(@baseUrl)
-      #   .matchHeader "accept-encoding", (val) ->
-      #     val isnt "foo"
-      #   .get("/bar")
-      #   .reply 200, "hello from bar!", {
-      #     "Content-Type": "text/html"
-      #   }
+      it "swaps out custom x-* response headers referencing the remote host", (done) ->
+        nock("http://localhost:8080")
+          .get("/")
+          .matchHeader "x-xhr-referer", "http://localhost:8080"
+          .reply(200, "OK", {
+            "Content-Type": "text/html"
+          })
 
-      #   supertest(@app)
-      #     .get("/bar")
-      #     .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
-      #     .set("host", "demo.com")
-      #     .set("accept-encoding", "foo")
-      #     .expect(200, "hello from bar!")
-      #     .end(done)
-
-      # it "omits forwarding accept-language", (done) ->
-      #   nock(@baseUrl)
-      #   .matchHeader "accept-language", (val) ->
-      #     val isnt "utf-8"
-      #   .get("/bar")
-      #   .reply 200, "hello from bar!", {
-      #     "Content-Type": "text/html"
-      #   }
-
-      #   supertest(@app)
-      #     .get("/bar")
-      #     .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
-      #     .set("host", "demo.com")
-      #     .set("accept-language", "utf-8")
-      #     .expect(200, "hello from bar!")
-      #     .end(done)
+        supertest(@app)
+          .get("/")
+          .set("host", "http://localhost:2020")
+          .set("x-xhr-referer", "http://localhost:2020")
+          .set("Cookie", "__cypress.initial=false; __cypress.remoteHost=http://localhost:8080")
+          .expect(200, "OK")
+          .end(done)
 
     context "content injection", ->
       it "injects sinon content into head", (done) ->

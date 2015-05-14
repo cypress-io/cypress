@@ -90,6 +90,21 @@ describe "Remote Initial", ->
       cookies = @remoteInitial.stripCookieParams(["user=brian; path=/; HttpOnly; Secure"])
       expect(cookies).to.deep.eq ["user=brian; path=/"]
 
+  context "#mapHeaders", ->
+    it "rewrites x-xhr-referer", ->
+      req = {headers: {"x-xhr-referer": "http://localhost:2020"}}
+      headers = @remoteInitial.mapHeaders(req.headers, "http://localhost:2020", "http://localhost:8080")
+      expect(headers).to.deep.eq {"x-xhr-referer": "http://localhost:8080"}
+
+    it "is case insensitive", ->
+      req = {headers: {"X-XHR-REFERER": "http://LOCALHOST:2020"}}
+      headers = @remoteInitial.mapHeaders(req.headers, "http://localhost:2020", "http://localhost:8080")
+      expect(headers).to.deep.eq {"X-XHR-REFERER": "http://localhost:8080"}
+
+    it "rewrites multiple x-* headers", ->
+      req = {headers: {"x-xhr-referer": "http://localhost:2020", "x-host": "http://localhost:2020/foo"}}
+      headers = @remoteInitial.mapHeaders(req.headers, "http://localhost:2020", "http://localhost:8080")
+      expect(headers).to.deep.eq {"x-xhr-referer": "http://localhost:8080", "x-host": "http://localhost:8080/foo"}
 
 #   it "injects content", (done) ->
 #     readable = new Readable

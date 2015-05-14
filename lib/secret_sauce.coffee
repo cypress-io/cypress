@@ -587,16 +587,17 @@ SecretSauce.RemoteInitial =
       delete req.headers["accept-encoding"]
       opts.gzip = false
 
+    ## rewrite problematic custom headers referencing
+    ## the wrong host
+    req.headers = @mapHeaders(req.headers, req.get("host"), remoteHost)
+
     rq = @request(opts)
 
     rq.on "error", (err) ->
       thr.emit("error", err)
 
     rq.on "response", (incomingRes) =>
-      headers = _.omit incomingRes.headers, "set-cookie", "x-frame-options", "content-length"
-
-      ## proxy the headers
-      res.set(headers)
+      @setResHeaders(req, res, incomingRes, remoteHost)
 
       ## always proxy the cookies coming from the incomingRes
       if cookies = incomingRes.headers["set-cookie"]
@@ -706,6 +707,37 @@ SecretSauce.RemoteInitial =
       url: filePath
       fromFile: !!req.formattedUrl
     })
+
+  mapHeaders: (headers, currentHost, remoteHost) ->
+    { _ } = SecretSauce
+
+    ## change out custom X-* headers referencing
+    ## the wrong host
+    hostRe = new RegExp(@escapeRegExp(currentHost), "ig")
+
+    _.mapValues headers, (value, key) ->
+      ## if we have a custom header then swap
+      ## out any values referencing our currentHost
+      ## with the remoteHost
+      if key.toLowerCase().startsWith("x-")
+        value.replace(hostRe, remoteHost)
+      else
+        ## just return the value
+        value
+
+  setResHeaders: (req, res, incomingRes, remoteHost) ->
+    { _ } = SecretSauce
+
+    ## omit problematic headers
+    headers = _.omit incomingRes.headers, "set-cookie", "x-frame-options", "content-length"
+
+    ## rewrite custom headers which reference the wrong host
+    ## if our host is localhost:8080 we need to
+    ## rewrite back to our current host localhost:2020
+    headers = @mapHeaders(headers, remoteHost, req.get("host"))
+
+    ## proxy the headers
+    res.set(headers)
 
   getUrlForRedirect: (newUrl, remoteHostCookie, isInitial) ->
     ## if isInitial is true, then we're requesting initial content

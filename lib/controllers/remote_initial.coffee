@@ -11,11 +11,13 @@ harmon        = require "harmon"
 url           = require "url"
 Log           = require "../log"
 UrlHelpers    = require "../util/url_helpers"
+escapeRegExp = require "../util/escape_regexp"
 SecretSauce   = require "../util/secret_sauce_loader"
 
 Controller  = require "./controller"
 
 class RemoteInitial extends Controller
+  escapeRegExp: escapeRegExp
   through: through
   through2: through2
   UrlHelpers: UrlHelpers
