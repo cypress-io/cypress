@@ -13,6 +13,6 @@ describe "App", ->
 
   context "before:start", ->
     it "calls clearCookies with options.namespace", ->
-      clearCookies = @sandbox.spy App, "clearCookies"
+      clearAllCookies = @sandbox.spy App, "clearAllCookies"
       App.trigger("before:start", {namespace: "foo"})
-      expect(clearCookies).to.be.calledWith "foo"
+      expect(clearAllCookies).to.be.called

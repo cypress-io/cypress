@@ -2,22 +2,18 @@
 
   _.extend App,
 
-    clearCookiesBeforeUnload: (namespace) ->
+    clearAllCookiesBeforeUnload: ->
       ## when our window triggers beforeunload
       ## we know we've change the URL and we need
       ## to clear our cookies!
       $(window).on "beforeunload", =>
-        @clearCookies(namespace)
+        @clearAllCookies()
 
         return undefined
 
     ## clear all the cypress specific cookies
     ## whenever our app starts
     ## and additional when we stop running our tests
-    clearCookies: (namespace) ->
+    clearAllCookies: ->
       _.each Cookies.get(), (value, key) ->
-        ## our cookies key starts with the cypress
-        ## namespace:
-        ## DEFAULT: __cypress
-        if _(key).startsWith(namespace)
-          Cookies.remove(key, {path: "/"})
+        Cookies.remove(key, {path: "/"})

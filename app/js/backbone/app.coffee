@@ -18,9 +18,11 @@
   App.vent.on "main:nav:choose", (nav) -> App.navs.chooseByName nav
 
   App.on "before:start", (options = {}) ->
-    App.clearCookiesBeforeUnload(options.namespace)
+    ## and nuke them all on beforeunload
+    App.clearAllCookiesBeforeUnload()
 
-    App.clearCookies(options.namespace)
+    ## nuke all of our cookies
+    App.clearAllCookies()
 
     ## before we start lets receive the options passed to our app
     ## and setup some global application config
