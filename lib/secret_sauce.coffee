@@ -603,10 +603,9 @@ SecretSauce.RemoteInitial =
         res.append("Set-Cookie", @stripCookieParams(cookies))
 
       if /^30(1|2|7|8)$/.test(incomingRes.statusCode)
-        ## we cannot redirect them to an external site
-        ## instead we need to reset the __cypress.remoteHost cookie to
-        ## the location headers, and then redirect the user to the remaining
-        ## url but back to ourselves!
+        ## redirection is extremely complicated and there are several use-cases
+        ## we are encompassing. read the routes_spec for each situation and
+        ## why we have to check on so many things.
 
         ## we go through this merge because the spec states that the location
         ## header may not be a FQDN. If it's not (sometimes its just a /) then
@@ -618,9 +617,11 @@ SecretSauce.RemoteInitial =
 
         @Log.info "redirecting to new url", status: incomingRes.statusCode, url: newUrl.toString()
 
+        isInitial = req.cookies["__cypress.initial"] is "true"
+
         ## finally redirect our user agent back to our domain
         ## by making this an absolute-path-relative redirect
-        res.redirect "/" + newUrl.toString()#.replace(newUrl.origin(), "")
+        res.redirect @getUrlForRedirect(newUrl, req.cookies["__cypress.remoteHost"], isInitial)
       else
         ## set the status to whatever the incomingRes statusCode is
         res.status(incomingRes.statusCode)
@@ -705,6 +706,23 @@ SecretSauce.RemoteInitial =
       url: filePath
       fromFile: !!req.formattedUrl
     })
+
+  getUrlForRedirect: (newUrl, remoteHostCookie, isInitial) ->
+    ## if isInitial is true, then we're requesting initial content
+    ## and we dont care if newUrl and remoteHostCookie matches because
+    ## we've already rewritten the remoteHostCookie above
+    ##
+    ## if the origin of our newUrl matches the current remoteHostCookie
+    ## then we're redirecting back to ourselves and we can make
+    ## this an absolute-path-relative url to ourselves
+    if isInitial or (newUrl.origin() is remoteHostCookie)
+      newUrl.toString().replace(newUrl.origin(), "")
+    else
+      ## if we're not requesting initial content or these
+      ## dont match then just prepend with a leading slash
+      ## so we retain the remoteHostCookie in the newUrl (like how
+      ## our original request came in!)
+      "/" + newUrl.toString()
 
   stripCookieParams: (cookies) ->
     { _ } = SecretSauce

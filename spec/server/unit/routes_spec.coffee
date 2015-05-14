@@ -334,7 +334,7 @@ describe "Routes", ->
       ## this simulates being handed back a header.location of '/'
       it "requests FQDN remoteHost when provided a relative location header", (done) ->
         nock("http://getbootstrap.com")
-          .get("/")
+          .get("/foo")
           .reply 302, undefined, {
             "Location": "/"
           }
@@ -344,14 +344,15 @@ describe "Routes", ->
           }
 
         @session
-          .get("/")
+          .get("/foo")
           .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://getbootstrap.com")
           .expect(302)
+          .expect "location", "/"
           .expect "set-cookie", /remoteHost=.+getbootstrap\.com/
           .end(done)
 
-      ## our location header should be local not the external getBootstrap
-      it "rewrites the location header to our host", (done) ->
+      ## our location header should be local not the external foobar.com
+      it "rewrites the location header locally to our current host", (done) ->
         nock("http://foobar.com")
           .get("/css")
           .reply 302, undefined, {
@@ -362,29 +363,70 @@ describe "Routes", ->
           .get("/css")
           .set("Cookie", "__cypress.initial=false; __cypress.remoteHost=http://foobar.com")
           .expect(302)
-          .expect "location", "/http://foobar.com/css/"
+          .expect "location", "/css/"
           .end(done)
 
-      ## we need to shift the external origin into the redirect if it
-      ## doesnt match our current remoteHost, and re-proxy the request
-      ## so we end up reaching the proper external origin
-      it "adds the external origin if it doesnt match the remoteHost", (done) ->
-        nock("http://foobar.com")
-          .get("/css")
-          .reply 302, undefined, {
-            "Location": "http://foobar.com/css/"
-          }
+      ## this simulates when we reach a redirect and the redirect origin
+      ## matches what our current remoteHost is.  In other words, if we were
+      ## to log in and be redirected to say http://localhost:8080/users/1 if
+      ## that origin matches our current remoteHost of 'localhost:8080' we will
+      ## just redirect to /users/1 instead of /localhost:8080/users/1
+      it "redirects locally if Location header origin matches remoteHost", (done) ->
+        nock("http://localhost:8080")
+          .get("/login")
+          .reply(302, undefined, {
+            Location: "http://localhost:8080/users/1"
+          })
 
         supertest(@app)
-          .get("/http://foobar.com/css")
-          .set("Cookie", "__cypress.initial=false; __cypress.remoteHost=http://localhost:8080")
+          .get("/login")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://localhost:8080")
           .expect(302)
-          .expect "location", "/http://foobar.com/css/"
+          .expect "location", "/users/1"
           .end(done)
 
-      # it "doesnt proxy x-powered-by header"
+      ## this can happen when we are logging into a SSO system where the auth endpoint
+      ## is on a cross domain (like auth.example.com)
+      ## we first navigate to auth.example.com, and then after logging in we are 302
+      ## back to (app.example.com)
+      ## our remoteHost would first be http://auth.example.com and then needs to
+      ## move to http://app.example.com due to the redirect
+      it "redirects externally and resets remoteHost if Location header origin doesnt match remoteHost", (done) ->
+        nock("http://auth.example.com")
+          .get("/login")
+          .reply(302, undefined, {
+            Location: "http://app.example.com/users/1"
+          })
 
-      # it "doesnt proxy other bad headers"
+        supertest(@app)
+          .get("/login")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://auth.example.com")
+          .expect(302)
+          .expect "location", "/users/1"
+          .expect "set-cookie", /initial=true/
+          .expect "set-cookie", /remoteHost=.+app\.example\.com/
+          .end(done)
+
+      ## this happens when we're fetching regular content like .js or .css files on a CND
+      ## if our remoteInitial isnt true then we know we're not fetching HTML content and
+      ## therefore do not need to reset our remoteHost. instead we just fetch the content
+      ## through our proxy using absolute-path-relative fetching
+      it "doesnt reset remoteHost if remoteInitial is false and remoteHost doenst match header Location origin", (done) ->
+        nock("http://cdnjs.com")
+          .get("/backbone.js")
+          .reply(302, undefined, {
+            Location: "http://cdnjs.com/assets/backbone.js"
+          })
+
+        supertest(@app)
+          .get("/http://cdnjs.com/backbone.js") ## simulate rewritten html content
+          .set("Cookie", "__cypress.initial=false; __cypress.remoteHost=http://localhost:8080")
+          .expect(302)
+          .expect "location", "/http://cdnjs.com/assets/backbone.js"
+          .expect (res) ->
+            expect(res.headers).not.to.have.keys("set-cookie")
+            null
+          .end(done)
 
     context "error handling", ->
       it "status code 500", (done) ->
@@ -557,7 +599,7 @@ describe "Routes", ->
           .get("/login")
           .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://localhost:8080")
           .expect(302)
-          .expect("location", "/http://localhost:8080/dashboard")
+          .expect("location", "/dashboard")
           .expect (res) ->
             expect(res.headers["set-cookie"]).to.deep.eq [
               "userId=123; Path=/"
@@ -742,7 +784,7 @@ describe "Routes", ->
           .get("/bar")
           .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
           .expect(302)
-          .expect "location", "/http://www.google.com/foo"
+          .expect "location", "/foo"
           .expect "set-cookie", /initial=true/
           .expect "set-cookie", /remoteHost=.+www\.google\.com/
           .end (err, res) =>
