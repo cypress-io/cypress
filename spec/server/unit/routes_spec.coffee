@@ -727,6 +727,22 @@ describe "Routes", ->
           .expect(200, "OK")
           .end(done)
 
+      it "swaps out req referer header", (done) ->
+        nock("http://localhost:8080")
+          .get("/foo")
+          .matchHeader "referer", "http://localhost:8080"
+          .reply(200, "OK", {
+            "Content-Type": "text/html"
+          })
+
+        supertest(@app)
+          .get("/foo")
+          .set("host", "http://localhost:2020")
+          .set("referer", "http://localhost:2020")
+          .set("Cookie", "__cypress.initial=false; __cypress.remoteHost=http://localhost:8080")
+          .expect(200, "OK")
+          .end(done)
+
     context "content injection", ->
       it "injects sinon content into head", (done) ->
         contents = removeWhitespace Fixtures.get("server/expected_sinon_inject.html")

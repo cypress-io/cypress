@@ -719,7 +719,8 @@ SecretSauce.RemoteInitial =
       ## if we have a custom header then swap
       ## out any values referencing our currentHost
       ## with the remoteHost
-      if key.toLowerCase().startsWith("x-")
+      key = key.toLowerCase()
+      if key is "referer" or key.startsWith("x-")
         value.replace(hostRe, remoteHost)
       else
         ## just return the value
