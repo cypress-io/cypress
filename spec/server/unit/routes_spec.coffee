@@ -476,6 +476,41 @@ describe "Routes", ->
               null
             .end(done)
 
+      it "sends with Transfer-Encoding: chunked without Content-Length", (done) ->
+        nock("http://localhost:8080")
+          .get("/login")
+          .reply 200, new Buffer("foo"), {
+            "Content-Type": "text/html"
+          }
+
+        supertest(@app)
+          .get("/login")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://localhost:8080")
+          .expect(200, "foo")
+          .expect("transfer-encoding", "chunked")
+          .expect (res) ->
+            expect(res.headers).not.to.have.keys("content-length")
+            null
+          .end(done)
+
+      it "does not have Content-Length", (done) ->
+        nock("http://localhost:8080")
+          .get("/login")
+          .reply 200, "foo", {
+            "Content-Type": "text/html"
+            "Content-Length": 123
+          }
+
+        supertest(@app)
+          .get("/login")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://localhost:8080")
+          .expect(200, "foo")
+          .expect("transfer-encoding", "chunked")
+          .expect (res) ->
+            expect(res.headers).not.to.have.keys("content-length")
+            null
+          .end(done)
+
       it "forwards cookies from incoming responses", (done) ->
         nock("http://localhost:8080")
           .get("/login")

@@ -347,18 +347,18 @@ SecretSauce.RemoteProxy =
   getHttpStream: (req, res, remoteHost, httpProxy) ->
     { _ } = SecretSauce
 
-    write     = res.write
-    writeHead = res.writeHead
+    # write     = res.write
+    # writeHead = res.writeHead
 
-    res.writeHead = (code, headers) ->
-      console.log "writeHead", code, headers
+    # res.writeHead = (code, headers) ->
+    #   console.log "writeHead", code, headers
 
-      writeHead.apply(res, arguments)
+    #   writeHead.apply(res, arguments)
 
-    res.write = (data, encoding) ->
-      console.log "write", data, encoding
+    # res.write = (data, encoding) ->
+    #   console.log "write", data, encoding
 
-      write.apply(res, arguments)
+    #   write.apply(res, arguments)
 
     # @emit "verbose", "piping url content #{opts.uri}, #{opts.uri.split(opts.remote)[1]}"
     @Log.info "piping http url content", url: req.url, remoteHost: remoteHost
@@ -593,7 +593,7 @@ SecretSauce.RemoteInitial =
       thr.emit("error", err)
 
     rq.on "response", (incomingRes) =>
-      headers = _.omit incomingRes.headers, "set-cookie", "x-frame-options"
+      headers = _.omit incomingRes.headers, "set-cookie", "x-frame-options", "content-length"
 
       ## proxy the headers
       res.set(headers)
