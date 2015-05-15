@@ -159,6 +159,14 @@ describe "$Cypress.Cy Traversal Commands", ->
     @cy.root().find("button", {length: length}).then ($buttons) ->
       expect($buttons.length).to.eq length
 
+  ## https://github.com/cypress-io/cypress/issues/38
+  it "works with checkboxes", ->
+    @cy.on "retry", _.after 2, =>
+      c = @cy.$("[name=colors]").slice(0, 2)
+      c.prop("checked", true)
+
+    @cy.get("#by-name").find(":checked", {length: 2})
+
   it "errors after timing out not finding element", (done) ->
     @allowErrors()
 
