@@ -128,9 +128,9 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
   $Cypress.extend
     command: (obj = {}) ->
-      current = @cy.prop("current")
+      return if not @cy
 
-      return if not (@cy and current)
+      current = @cy.prop("current") ? {}
 
       _.defaults obj, _(current).pick("name", "type")
 

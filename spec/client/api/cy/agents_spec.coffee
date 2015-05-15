@@ -46,3 +46,19 @@ describe "$Cypress.Cy Agents Commands", ->
           expect(@agent.get("callCount")).to.eq 2
 
         context "#onConsole", ->
+
+    describe ".log", ->
+      it "logs even without cy current", ->
+        spy = @agents.spy()
+
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push log
+
+        spy("foo")
+
+        commands = _(logs).filter (log) ->
+          log.get("event") is "command"
+
+        expect(commands).to.have.length(1)
