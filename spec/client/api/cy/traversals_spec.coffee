@@ -146,6 +146,19 @@ describe "$Cypress.Cy Traversal Commands", ->
     @cy.get("#list li:last").find("span").then ($span) ->
       expect($span.get(0)).to.eq(span.get(0))
 
+  it "retries until length equals n", ->
+    buttons = @cy.$("button")
+
+    length = buttons.length - 2
+
+    @cy.on "retry", _.after 2, =>
+      buttons.last().remove()
+      buttons = @cy.$("button")
+
+    ## should resolving after removing 2 buttons
+    @cy.root().find("button", {length: length}).then ($buttons) ->
+      expect($buttons.length).to.eq length
+
   it "errors after timing out not finding element", (done) ->
     @allowErrors()
 

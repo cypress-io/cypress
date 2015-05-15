@@ -71,7 +71,7 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
             @throwErr("options.length must be a number")
 
           if length is options.length
-            log($el)
+            return log($el)
 
         when options.exist is false
           ## return if we didnt find anything and our options have asked
