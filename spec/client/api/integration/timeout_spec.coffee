@@ -2,6 +2,9 @@ describe "Timeout Integration Tests", ->
   enterIntegrationTestingMode("html/timeout", {silent: true})
 
   context "timeouts", ->
+    beforeEach ->
+      @Cypress.chai.restore()
+
     it "has disabled all runnable timeouts", ->
       enableTimeouts = @Cypress.mocha.mocha.options.enableTimeouts
       expect(enableTimeouts).to.be.false

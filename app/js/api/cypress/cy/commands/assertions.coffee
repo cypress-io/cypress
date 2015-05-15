@@ -126,7 +126,8 @@ $Cypress.register "Assertions", (Cypress, _, $) ->
       if Cypress.Utils.hasElement(value)
         obj.$el = value
 
-      functionHadArguments = (fn) ->
+      functionHadArguments = (current) ->
+        fn = current.args and current.args[0]
         fn and _.isFunction(fn) and fn.length > 0
 
       _.extend obj,
@@ -141,7 +142,7 @@ $Cypress.register "Assertions", (Cypress, _, $) ->
           ## if our current command has arguments assume
           ## we are an assertion that's involving the current
           ## subject or our value is the current subject
-          if value is subject or functionHadArguments(current.args[0])
+          if value is subject or functionHadArguments(current)
             "child"
           else
             "parent"
