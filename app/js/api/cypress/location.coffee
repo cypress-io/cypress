@@ -1,7 +1,7 @@
 ## TODO:
 ## 1. test these method implementations using encoded characters
 ## look at the spec to figure out whether we SHOULD be decoding them
-## or leaving them as encoded.  also look at jsuri to see what it does
+## or leaving them as encoded.  also look at Uri to see what it does
 ##
 ## 2. there is a bug when handling about:blank which borks it and
 ## turns it into about://blank
@@ -9,55 +9,54 @@
 ## attach to global
 $Cypress.Location = do ($Cypress, _, Uri) ->
 
-  reHttp = /^http/
+  reHttp = /^https?:\/\//
   reWww = /^www/
 
   reLocalHost = /^(localhost|0\.0\.0\.0|127\.0\.0\.1)/
 
   class $Location
-    constructor: (current, remote = "", defaultOrigin) ->
-      current  = new Uri(current)
+    constructor: (remote) ->
+      ## need to handle <root> here
+      ## if its root then we need to strip the origin
+      ## to make the URL look relative
+      ## else just strip out the origin and replace
+      ## it with the remoteHost
 
-      ## use defaultOrigin or the origin from our current url
-      defaultOrigin or= current.origin()
+      remote = new Uri remote
 
-      remote = @stripOrigin(current, remote)
-      ## first strip off the current origin from the remote
-      ## this will strip off http://0.0.0.0:2020
-      ## location.origin isn't supported everywhere so we'll
-      ## do it manually with Uri
+      ## if our URL has a FQDN in its
+      ## path http://localhost:2020/http://localhost:3000/about
+      ## then dont handle anything with the remoteHost
+      if fqdn = @getFqdn(remote)
+        remote = new Uri fqdn
+      else
+        ## get the remoteHost from our cookies
+        remoteHost = $Cypress.Cookies.getRemoteHost()
 
-      ## remove any __remote
-      remote = @stripRemotePath(remote)
+        if remoteHost is "<root>"
+          remoteHost = new Uri ""
+        else
+          remoteHost = new Uri remoteHost
 
-      ## if AFTER we strip out the current origin
-      ## and we strip out the __remote pathname
-      ## we still DONT have a real origin
-      ## then just use the current's origin.
-      ## this happens when we use cypress as
-      ## our web server, and since we're servering
-      ## files directly from it, its really our origin
-      remote = $Location.getRemoteUrl(remote, defaultOrigin)
+        ## and just replace the current origin with
+        ## the remoteHost origin
+        remote.setProtocol remoteHost.protocol()
+        remote.setHost remoteHost.host()
+        remote.setPort remoteHost.port()
 
-      ## convert to Uri instance
-      ## from here on out we mutate
-      ## this object directly
-      @remote = new Uri(remote)
+      @remote = remote
 
-      ## remove the __initial=true query param
-      @stripInitial()
+    getFqdn: (url) ->
+      url = new Uri url
 
-    ## remove the current locations origin
-    ## from our remote origin
-    stripOrigin: (current, remote) ->
-      origin = current.origin()
-      remote.split(origin).join("")
+      ## strip off the initial leading slash
+      ## since path always begins with that
+      path = url.path().slice(1)
 
-    stripRemotePath: (remote) ->
-      remote.split("/__remote/").join("")
-
-    stripInitial: ->
-      @remote.deleteQueryParam("__initial")
+      ## if this path matches http its a FQDN
+      ## and we can return it
+      if reHttp.test(path)
+        return path
 
     getHash: ->
       if hash = @remote.anchor()
@@ -128,7 +127,7 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
       }
 
     ## override pathname + query here
-    @override = (win, location, navigated) ->
+    @override = (win, navigated) ->
       ## history does not fire events until a click or back has happened
       ## so we have to know when they do manually
       _.each ["back", "forward", "go", "pushState", "replaceState"], (attr) ->
@@ -142,31 +141,26 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
           ## let our function know we've navigated
           navigated()
 
-      # _.each ["hash", "host", "hostname", "origin", "pathname", "port", "protocol", "search"], (attr) ->
-      #   try
-      #     Object.defineProperty win.location, attr, {
-      #       get: ->
-      #         location(attr)
-
-      #     }
-
     ## think about moving this method out of Cypress
     ## and into our app, since it kind of leaks the
     ## remote + initial concerns, which could become
     ## constants which our server sends us during
     ## initial boot.
     @createInitialRemoteSrc = (url) ->
-      if reHttp.test(url)
-        url = new Uri(url)
+      if not reHttp.test(url)
+        remoteHost = "<root>"
       else
-        url = @handleRelativeUrl(url)
+        url = new Uri(url)
+        remoteHost = url.origin()
 
-      ## add the __intitial=true query param
-      url.addQueryParam("__initial", true)
+        ## strip out the origin because we cannot
+        ## request a cross domain frame, it has to be proxied
+        url = url.toString().replace(remoteHost, "")
 
-      ## prepend /__remote/ and
-      ## return the full href
-      "/__remote/" + _.ltrim url.toString(), "/"
+      ## setup the cookies for remoteHost + initial
+      $Cypress.Cookies.setInitialRequest(remoteHost)
+
+      return "/" + _.ltrim(url, "/")
 
     @isFullyQualifiedUrl = (url) ->
       reHttp.test(url)
@@ -267,8 +261,12 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
       ## forward slashes
       [_.trim(baseUrl, "/"), _.trim(url, "/")].join("/")
 
-    @create = (current, remote, defaultOrigin) ->
-      location = new $Location(current, remote, defaultOrigin)
+    # @create = (current, remote, defaultOrigin) ->
+    #   location = new $Location(current, remote, defaultOrigin)
+    #   location.getObject()
+
+    @create = (remote) ->
+      location = new $Location(remote)
       location.getObject()
 
   return $Location

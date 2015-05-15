@@ -275,12 +275,6 @@ class Deploy
         delete pkg.devDependencies
         delete pkg.bin
 
-        # if process.argv[3] is "--bin"
-        #   pkg.snapshot = "lib/secret_sauce.bin"
-        #   fs.copySync("./lib/secret_sauce.bin", distDir + "/lib/secret_sauce.bin")
-        # else
-        #   fs.copySync("./lib/secret_sauce.coffee", distDir + "/src/lib/secret_sauce.coffee")
-
         @writeJsonSync(json, pkg)
 
         resolve()

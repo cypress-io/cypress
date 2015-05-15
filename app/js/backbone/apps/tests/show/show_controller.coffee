@@ -75,6 +75,8 @@
         logRegion: @layout.logRegion
 
     onDestroy: (config, runner) ->
+      ## nuke our cookies when we leave
+      App.clearAllCookies()
       config.trigger "close:test:panels"
       App.request "stop:test:runner", runner
 

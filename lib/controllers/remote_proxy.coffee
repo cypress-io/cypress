@@ -1,12 +1,14 @@
 Domain       = require 'domain'
 url          = require 'url'
-Through      = require 'through'
-hyperquest   = require 'hyperquest'
 mime         = require 'mime'
 path         = require 'path'
 _            = require 'lodash'
 fs           = require 'fs'
+harmon       = require "harmon"
+through      = require 'through'
 httpProxy    = require 'http-proxy'
+# trumpet      = require "trumpet"
+Log          = require "../log"
 UrlHelpers   = require '../util/url_helpers'
 escapeRegExp = require "../util/escape_regexp"
 SecretSauce  = require "../util/secret_sauce_loader"
@@ -18,6 +20,10 @@ class RemoteProxy extends Controller
   url: url
   mime: mime
   path: path
+  Log: Log
+  # trumpet: trumpet
+  harmon: harmon
+  through: through
   UrlHelpers: UrlHelpers
   escapeRegExp: escapeRegExp
 

@@ -50,3 +50,24 @@ describe "Url helpers", ->
 
     it "detects relative paths", ->
       expect(UrlHelpers.detectScheme('/usr/lib/dogecoin/vault.txt')).to.eq('relative')
+
+  describe "#replaceHost", ->
+    it "replaces original host with remoteHost", ->
+      original = "http://localhost:2020/foo/bar.html?q=asdf#foo"
+      remoteHost = "https://www.github.com"
+      expect(UrlHelpers.replaceHost(original, remoteHost)).to.eq "https://www.github.com/foo/bar.html?q=asdf#foo"
+
+  describe "#getOriginFromFqdnUrl", ->
+    beforeEach ->
+      @urlIs = (url, expected) ->
+        url = UrlHelpers.getOriginFromFqdnUrl(url)
+        expect(url).to.eq expected
+
+    it "returns origin from a FQDN url", ->
+      @urlIs "/http://www.google.com", "http://www.google.com"
+
+    it "omits pathname, search, hash", ->
+      @urlIs "/http://www.google.com/my/path?foo=bar#hash/baz", "http://www.google.com"
+
+    it "returns undefined if not FQDN url", ->
+      @urlIs "/foo/bar?baz=quux#hash/foo", undefined

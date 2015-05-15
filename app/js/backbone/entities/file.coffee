@@ -13,7 +13,7 @@
   class Entities.FilesCollection extends Entities.Collection
     model: Entities.File
 
-    url: "/files"
+    url: "/__cypress/files"
 
     # comparator: (a, b) ->
     #   ## if a.children.length is 0 and b.children.length is 0

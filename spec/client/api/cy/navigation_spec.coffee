@@ -2,13 +2,6 @@ describe "$Cypress.Cy Navigation Commands", ->
   enterCommandTestingMode()
 
   context "#visit", ->
-    it "triggers visit:start on the remote iframe", (done) ->
-      $("iframe").one "visit:start", (e, url) ->
-        expect(url).to.eq "foo"
-        done()
-
-      @cy.visit("/foo")
-
     it "resolves the subject to the remote iframe window", ->
       @cy.visit("/foo").then (win) ->
         expect(win).to.eq $("iframe").prop("contentWindow")
@@ -16,7 +9,7 @@ describe "$Cypress.Cy Navigation Commands", ->
     it "changes the src of the iframe to the initial src", ->
       @cy.visit("/foo").then ->
         src = $("iframe").attr("src")
-        expect(src).to.eq "/__remote/foo?__initial=true"
+        expect(src).to.eq "/foo"
 
     it "immediately updates the stored href on load", (done) ->
       _storeHref = @sandbox.spy @cy, "_storeHref"
@@ -67,7 +60,7 @@ describe "$Cypress.Cy Navigation Commands", ->
             ## ensure href always returns the full path
             ## so our tests guarantee that in fact we are
             ## overriding the location getters
-            expect(win.location.href).to.include "__remote/fixtures/html/sinon.html?foo=bar&__initial=true#dashboard?baz=quux"
+            expect(win.location.href).to.include "fixtures/html/sinon.html?foo=bar#dashboard?baz=quux"
 
       it "hash", ->
         @eq "hash", "#dashboard?baz=quux"
@@ -96,7 +89,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           .visit("fixtures/html/sinon.html")
           .window().as("win")
           .then ->
-            @trigger = @sandbox.stub @cy.$remoteIframe, "trigger"
+            @urlChanged = @sandbox.spy @cy, "urlChanged"
 
       _.each ["back", "forward", "go", "pushState", "replaceState"], (attr) =>
         it "fires 'history:event' on attr: '#{attr}'", ->
@@ -104,59 +97,7 @@ describe "$Cypress.Cy Navigation Commands", ->
             arg = -1
 
           @win.history[attr](arg)
-          expect(@trigger).to.be.calledWith "history:event"
-
-    describe "visit:start", ->
-      beforeEach ->
-        trigger = @sandbox.stub $.fn, "trigger"
-
-        @baseUrl = (baseUrl) =>
-          @sandbox.stub(@cy, "config").withArgs("baseUrl").returns(baseUrl)
-
-        @urlIs = (source, destination) =>
-          @cy.visit(source).then ->
-            expect(trigger).to.be.calledWith "visit:start", destination
-
-      it "index.html => index.html", ->
-        @urlIs "index.html", "index.html"
-
-      it "http://github.com => http://github.com/", ->
-        @urlIs "http://github.com", "http://github.com/"
-
-      it "http://localhost:4000/#/home", ->
-        @urlIs "http://localhost:4000/#/home", "http://localhost:4000/#/home"
-
-      it "home => http://localhost:3000/home/", ->
-        @baseUrl "http://localhost:3000"
-
-        @urlIs "home", "http://localhost:3000/home"
-
-      it "home => http://localhost:3000/#/home", ->
-        @baseUrl "http://localhost:3000/#/"
-
-        @urlIs "home", "http://localhost:3000/#/home"
-
-      it "http://github.com/foo/bar#/home => http://github.com/foo/bar/#/home", ->
-        @urlIs "http://github.com/foo/bar#/home", "http://github.com/foo/bar#/home"
-
-      it "foo/bar?baz=quux => http://0.0.0.0:8000/foo/bar/?baz=quux", ->
-        @baseUrl "http://0.0.0.0:8000"
-
-        @urlIs "foo/bar?baz=quux", "http://0.0.0.0:8000/foo/bar?baz=quux"
-
-      it "localhost:8000 => http://localhost:8000/", ->
-        @urlIs "localhost:8000", "http://localhost:8000/"
-
-      it "0.0.0.0:8000 => http://0.0.0.0:8000/", ->
-        @urlIs "0.0.0.0:8000", "http://0.0.0.0:8000/"
-
-      it "127.0.0.1:8000 => http://127.0.0.1:8000/", ->
-        @urlIs "127.0.0.1:8000", "http://127.0.0.1:8000/"
-
-      it "overrides baseUrl with fully qualified url", ->
-        @baseUrl "http://localhost:3000"
-
-        @urlIs "http://www.github.com", "http://www.github.com/"
+          expect(@urlChanged).to.be.called
 
     describe ".log", ->
       beforeEach ->

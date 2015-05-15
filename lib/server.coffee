@@ -57,6 +57,7 @@ class Server
       testFolder: "tests"
       javascripts: []
       env: process.env["NODE_ENV"]
+      namespace: "__cypress"
 
     rootUrl = "http://localhost:" + obj.port
 
@@ -65,7 +66,7 @@ class Server
       clientUrl: rootUrl + obj.clientRoute
 
     _.defaults obj,
-      idGeneratorUrl: rootUrl + "/id_generator"
+      idGeneratorUrl: rootUrl + "/__cypress/id_generator"
 
   ## go through this method for all tests because
   ## it handles setting the defaults up automatically
@@ -85,20 +86,17 @@ class Server
     @app.use require("compression")()
     @app.use require("morgan")("dev")
     @app.use require("body-parser").json()
-    @app.use require('express-session')({
-      secret: "marionette is cool"
-      saveUninitialized: true
-      resave: true
-      name: "__cypress.sid"
-    })
 
-    ## serve static file from public when route is /eclectus
-    ## this is to namespace the static eclectus files away from
+    ## serve static file from public when route is /__cypress/static
+    ## this is to namespace the static cypress files away from
     ## the real application by separating the root from the files
-    @app.use "/eclectus", express.static(__dirname + "/public")
+    @app.use "/__cypress/static", express.static(__dirname + "/public")
 
     ## errorhandler
     @app.use require("errorhandler")()
+
+    ## remove the express powered-by header
+    @app.disable("x-powered-by")
 
     @createRoutes()
 

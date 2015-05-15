@@ -38,11 +38,11 @@ $Cypress.register "Location", (Cypress, _, $) ->
       _.defaults options,
         log: true
 
-      currentUrl = window.location.toString()
+      # currentUrl = window.location.toString()
       remoteUrl  = @sync.window().location.toString()
-      remoteOrigin = @config("remoteOrigin")
+      # remoteOrigin = @config("remoteOrigin")
 
-      location = Cypress.Location.create(currentUrl, remoteUrl, remoteOrigin)
+      location = Cypress.Location.create(remoteUrl)
 
       ret = if _.isString(key)
         ## use existential here because we only want to throw

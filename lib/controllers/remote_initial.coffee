@@ -1,28 +1,36 @@
 path          = require "path"
 fs            = require 'fs'
-hyperquest    = require 'hyperquest'
+request       = require 'request'
+mime          = require 'mime'
 path          = require 'path'
 Domain        = require 'domain'
 through       = require 'through'
 through2      = require 'through2'
 jsUri         = require "jsuri"
 trumpet       = require "trumpet"
+harmon        = require "harmon"
+url           = require "url"
 Log           = require "../log"
 UrlHelpers    = require "../util/url_helpers"
+escapeRegExp = require "../util/escape_regexp"
 SecretSauce   = require "../util/secret_sauce_loader"
 
 Controller  = require "./controller"
 
 class RemoteInitial extends Controller
+  escapeRegExp: escapeRegExp
   through: through
   through2: through2
   UrlHelpers: UrlHelpers
-  hyperquest: hyperquest
+  request: request
   path: path
   fs: fs
   Log: Log
   jsUri: jsUri
+  harmon: harmon
   trumpet: trumpet
+  mime: mime
+  url: url
 
   constructor: (app) ->
     if not (@ instanceof RemoteInitial)
@@ -35,8 +43,8 @@ class RemoteInitial extends Controller
 
     super
 
-  handle: (req, res, opts = {}) ->
-    @_handle(req, res, opts, Domain)
+  handle: (req, res, next) ->
+    @_handle(req, res, next, Domain)
 
 SecretSauce.mixin("RemoteInitial", RemoteInitial)
 

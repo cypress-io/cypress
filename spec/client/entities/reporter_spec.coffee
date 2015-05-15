@@ -32,6 +32,16 @@ describe "Reporter Entity", ->
       @Cypress.trigger "message", "create:user", {foo: "bar"}, fn
       expect(emit).to.be.calledWith "client:request", "create:user", {foo: "bar"}, fn
 
+    it "listens to Cypress.url:changed", ->
+      setUrl = @sandbox.spy App.config, "setUrl"
+      @Cypress.trigger "url:changed", "http://localhost:3000/users/1"
+      expect(setUrl).to.be.calledWith "http://localhost:3000/users/1"
+
+    it "listens to Cypress.page:loading", ->
+      setPageLoading = @sandbox.spy App.config, "setPageLoading"
+      @Cypress.trigger "page:loading", true
+      expect(setPageLoading).to.be.calledWith true
+
   context "#stop", ->
     beforeEach ->
       @stop = @sandbox.stub(@Cypress, "stop").resolves()

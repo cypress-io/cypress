@@ -4,7 +4,7 @@ describe "$Cypress.Cy Ready Events", ->
   describe "beforeunload", ->
     beforeEach ->
       @isReady = @sandbox.spy @cy, "isReady"
-      @a = $("<a id='change-page' href='/__remote/timeout?ms=200'>foo</a>").appendTo @cy.$("body")
+      @a = $("<a id='change-page' href='/timeout?ms=200'>foo</a>").appendTo @cy.$("body")
 
     it "sets isReady to false", ->
       ## when we click the a it should synchronously fire
@@ -20,3 +20,8 @@ describe "$Cypress.Cy Ready Events", ->
       ## the beforeunload event which we then set isReady to false
       @cy.inspect().get("a#change-page").click().then ->
         expect(@isReady).not.to.be.calledWith false
+
+    it "sets initial cookies", ->
+      setInitial = @sandbox.stub @Cypress.Cookies, "setInitial"
+      @cy.get("a#change-page").click().then ->
+        expect(setInitial).to.be.called

@@ -2,7 +2,7 @@
 
 ## Docs / API
 
-[Visit the Wiki](https://github.com/brian-mann/eclectus/wiki)
+[Visit the Wiki](https://github.com/cypress-io/cypress-app/wiki)
 
 ### Before Running NW
 The `lib/secret_sauce.bin` file is required to run NW.  You can either run the `npm run watch` command, or run a one-off dist with:
@@ -73,7 +73,7 @@ open <path-to-new-cypress.app> --args <path-to-existing-app-path> <path-to-exist
 Real example with paths:
 
 ```bash
-open ~/Desktop/cypress.app --args /Users/bmann/Dev/eclectus/build/0.5.8/osx64/cypress.app /Users/bmann/Dev/eclectus/build/0.5.8/osx64/cypress.app --updating
+open ~/Desktop/cypress.app --args /Users/bmann/Dev/cypress-app/build/0.5.8/osx64/cypress.app /Users/bmann/Dev/cypress-app/build/0.5.8/osx64/cypress.app --updating
 ```
 
 ## Remote Server Communication

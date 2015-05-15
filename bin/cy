@@ -1,24 +1,45 @@
 #!/usr/bin/env node
 require("coffee-script/register")
 
-var nodemon = require('nodemon')
+// var nodemon = require('nodemon')
 var path    = require('path')
+var spawn   = require("child_process").spawn
+var open    = require("open")
 
-cyRoot   = path.join(__dirname, "..", "lib");
-cyServer = path.join(__dirname, "..", "lib", "cypress.coffee");
+// console.log("args are", process.argv)
 
-var args = '-e "coffee js" --debug --watch ' + cyRoot + " " + cyServer + " " + process.argv[2] + " id_generator verbose"
+var cyRoot   = path.join(__dirname, "..", "lib");
+var cyServer = path.join(__dirname, "..", "lib", "cypress.coffee");
 
-console.log(args)
-nodemon(args)
-.on("start", function() {
-  console.log(":: nodemon started")
-})
+// need to add --debug here
 
+var getArgs = function(){
+  var args = ["--", process.argv[2], "verbose"]
 
-// 1. public website
-// 2. express server + proxy
-// 3. node webkit + auto updates
-// 4. api.cypress.io
-// 5. client backbone app
-// 6. Cypress client API
+  if (process.argv[3] != "--no-ids")
+    args.push("id_generator")
+
+  return args
+}
+
+var opts = {
+  debug: "--debug",
+  script: cyServer,
+  watch: ["--watch", cyRoot],
+  ignore: ["--ignore", "lib/public"],
+  verbose: "--verbose",
+  exts: ["-e", "coffee,js"],
+  args: getArgs()
+}
+
+var args = []
+
+for (key in opts)
+  args = args.concat(opts[key])
+
+spawn("node-inspector", [], {stdio: "inherit"})
+spawn("nodemon", args, {stdio: "inherit"})
+
+open("http://127.0.0.1:8080/debug?ws=127.0.0.1:8080&port=5858")
+
+// nodemon(cyServer)

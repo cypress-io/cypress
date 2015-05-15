@@ -31,12 +31,15 @@
         @listenTo @Cypress, "initialized", (obj) =>
           @receivedRunner(obj.runner)
 
+        @listenTo @Cypress, "url:changed", (url) ->
+          App.config.setUrl(url)
+
+        @listenTo @Cypress, "page:loading", (bool) ->
+          App.config.setPageLoading(bool)
+
         @listenTo @Cypress, "log", (log) =>
           switch log.get("event")
             when "command"
-              ## think about moving this line
-              ## back into Cypress
-              # log.set "hook", @hookName
               @commands.add log
 
             when "route"

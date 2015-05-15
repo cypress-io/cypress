@@ -41,6 +41,8 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
 
           @isReady(false, "beforeunload")
 
+          @Cypress.Cookies.setInitial()
+
           ## return undefined so
           return undefined
 
@@ -48,12 +50,19 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
           ## put cy in a waiting state now that
           ## we've unloaded
           @isReady(false, "unload")
+          @pageLoading()
+
+        win.off("hashchange").on "hashchange", =>
+          @urlChanged()
 
         win.get(0).confirm = (message) ->
           console.info "Confirming 'true' to: ", message
           return true
 
       @$remoteIframe.on "load", =>
+        @urlChanged()
+        @pageLoading(false)
+
         bindEvents()
         @isReady(true, "load")
 
@@ -86,7 +95,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       @listenTo @Cypress, "abort",      => @abort()
 
     abort: ->
-      @$remoteIframe?.off("submit unload load")
+      @$remoteIframe?.off("submit unload load hashchange")
       @isReady(false, "abort")
       @prop("runnable")?.clearTimeout()
 

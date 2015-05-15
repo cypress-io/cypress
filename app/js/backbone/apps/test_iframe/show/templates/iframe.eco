@@ -25,7 +25,7 @@
             <div class="container-fluid">
               <div class="row">
                 <div class="col-xs-3">
-                  <img src="/eclectus/img/chrome_16x16.png" />
+                  <img src="/__cypress/static/img/chrome_16x16.png" />
                   <ul class="browser-versions list-unstyled"  data-browser="chrome">
                     <li>37</li>
                     <li>36</li>
@@ -34,7 +34,7 @@
                   </ul>
                 </div>
                 <div class="col-xs-3">
-                  <img src="/eclectus/img/firefox_16x16.png" />
+                  <img src="/__cypress/static/img/firefox_16x16.png" />
                   <ul class="browser-versions list-unstyled" data-browser="firefox">
                     <li>32</li>
                     <li>31</li>
@@ -43,7 +43,7 @@
                   </ul>
                 </div>
                 <div class="col-xs-3">
-                  <img src="/eclectus/img/safari_16x16.png" />
+                  <img src="/__cypress/static/img/safari_16x16.png" />
                   <ul class="browser-versions list-unstyled" data-browser="safari">
                     <li>5.1</li>
                     <li>5.0.5</li>
@@ -51,7 +51,7 @@
                   </ul>
                 </div>
                 <div class="col-xs-3">
-                  <img src="/eclectus/img/ie_16x16.png" />
+                  <img src="/__cypress/static/img/ie_16x16.png" />
                   <ul class="browser-versions list-unstyled" data-browser="ie">
                     <li>11</li>
                     <li>10</li>

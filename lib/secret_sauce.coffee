@@ -279,263 +279,416 @@ SecretSauce.IdGenerator =
     @str.insert contents, position, " [#{id}]"
 
 SecretSauce.RemoteProxy =
-  badHttpSchemeWithRemote: /https?:\/?\/?/
-  badHttpSchemeWithMap: /(https?:)\/([a-zA-Z0-9]+.+\.map)$/
-  httpUpToPathName: /https?:\/?\/?/
-
+  okStatus: /^[2|3]\d+$/
 
   _handle: (req, res, next, Domain, httpProxy) ->
-    ## strip out the /__remote/ from the req.url
-    if not req.session.remote?
-      if b = @app.get("cypress").baseUrl
-        req.session.remote = b
-      else
-        throw new Error("™ Session Proxy not yet set! ™")
+    ## TODO TEST THIS BASEURL FALLBACK
+    remoteHost = @getOriginFromFqdnUrl(req) ? req.cookies["__cypress.remoteHost"] ? @app.get("cypress").baseUrl
 
-    proxy = httpProxy.createProxyServer({})
+    ## we must have the remoteHost cookie
+    if not remoteHost
+      throw new Error("Missing remoteHost!")
 
     domain = Domain.create()
 
-    domain.on('error', next)
-
-    remote = req.session.remote
+    domain.on 'error', (err) =>
+      @errorHandler(err, req, res, remoteHost)
 
     domain.run =>
-      @getContentStream({
-        uri: @getRequestUrl(req.url, remote)
-        remote: remote
-        req: req
-        res: res
-        proxy: proxy
-      })
-      .on('error', (e) -> throw e)
+      @getContentStream(req, res, remoteHost, httpProxy)
+      .on 'error', (err) =>
+        @errorHandler(err, req, res, remoteHost)
       .pipe(res)
 
-  getRequestUrl: (url, remoteUrl) ->
-    if remoteUrl
-      remoteUrl = @url.parse(remoteUrl)
-      remoteHost = remoteUrl.protocol + "//" + remoteUrl.host + "/"
-    else
-      remoteHost = ""
+  getOriginFromFqdnUrl: (req) ->
+    ## if we find an origin from this req.url
+    ## then return it, and reset our req.url
+    ## after stripping out the origin and ensuring
+    ## our req.url starts with only 1 leading slash
+    if origin = @UrlHelpers.getOriginFromFqdnUrl(req.url)
+      req.url = "/" + req.url.replace(origin, "").replace(/^\/+/, "")
 
-    if @badHttpSchemeWithMap.test(url)
-      url = url.replace @badHttpSchemeWithMap, "$1//$2"
+      ## return the origin
+      return origin
 
-    ## normalize relative paths using the path segment ../
-    ## normally the browser will not allow you to reach above
-    ## the host, but since we're being served from /remote/ its
-    ## technically possible to have happen.
-    ## so we detect abnormal url's and rewrite them to be correct
-    if url.includes("/__remote/") and not url.includes(remoteHost)
-      url = url.split("/__remote/").join("").replace(@httpUpToPathName, remoteHost)
-    else
-      url = url.split("/__remote/").join("")
+  getContentStream: (req, res, remoteHost, httpProxy) ->
+    switch remoteHost
+      ## serve from the file system because
+      ## we are using cypress as our weberver
+      when "<root>"
+        @getFileStream(req, res, remoteHost)
 
-    url
-
-  getContentStream: (opts) ->
-    # console.log opts.remote, opts.uri, opts.req.url
-    switch @UrlHelpers.detectScheme(opts.uri)
-      when "relative" then @pipeRelativeContent(opts)
-      when "absolute" then @pipeAbsoluteContent(opts)
-      # when "file"     then @pipeFileContent(opts.uri, opts.res)
-
-  pipeAbsoluteContent: (opts) ->
-    remote = @url.parse(opts.uri)
-
-    opts.req.url = opts.uri
-
-    remote.path = "/"
-    remote.pathname = "/"
-    remote.query = ""
-    remote.search = ""
-
-    opts.proxy.web(opts.req, opts.res, {
-      target: remote.format()
-      changeOrigin: true,
-      hostRewrite: opts.req.session.host
-    })
-
-    opts.res
-
-  pipeRelativeContent: (opts) ->
-    switch @UrlHelpers.detectScheme(opts.remote)
-      when "relative" then @fromFile(opts)
-      when "absolute" then @fromUrl(opts)
+      ## else go make an HTTP request to the
+      ## real server!
+      else
+        @getHttpStream(req, res, remoteHost, httpProxy)
 
   # creates a read stream to a file stored on the users filesystem
   # taking into account if they've chosen a specific rootFolder
   # that their project files exist in
-  fromFile: (opts) ->
+  getFileStream: (req, res, remoteHost) ->
     { _ } = SecretSauce
 
     ## strip off any query params from our req's url
     ## since we're pulling this from the file system
     ## it does not understand query params
-    baseUri = @url.parse(opts.uri).pathname
+    pathname = @url.parse(req.url).pathname
 
-    opts.res.contentType(@mime.lookup(baseUri))
+    res.contentType(@mime.lookup(pathname))
 
     args = _.compact([
       @app.get("cypress").projectRoot,
       @app.get("cypress").rootFolder,
-      baseUri
+      pathname
     ])
 
-    @fs.createReadStream(
-      @path.join(args...)
-    )
+    @fs.createReadStream  @path.join(args...)
 
-  fromUrl: (opts) ->
+  getHttpStream: (req, res, remoteHost, httpProxy) ->
     { _ } = SecretSauce
 
-    @emit "verbose", "piping url content #{opts.uri}, #{opts.uri.split(opts.remote)[1]}"
+    # write     = res.write
+    # writeHead = res.writeHead
 
-    remote = @url.parse(opts.remote)
+    # res.writeHead = (code, headers) ->
+    #   console.log "writeHead", code, headers
 
-    opts.req.url = opts.req.url.replace(/\/__remote\//, "")
-    opts.req.url = @url.resolve(opts.remote, opts.req.url or "")
+    #   writeHead.apply(res, arguments)
 
-    remote.path = "/"
-    remote.pathname = "/"
+    # res.write = (data, encoding) ->
+    #   console.log "write", data, encoding
 
-    ## If the path is relative from root
-    ## like foo.com/../
-    ## we need to handle when it walks up past the root host and into
-    ## the http:// part, so we need to fix the request url to contain
-    ## the correct root.
+    #   write.apply(res, arguments)
 
-    requestUrlBase = @url.parse(opts.req.url)
-    requestUrlBase = _.extend(requestUrlBase, {
-      path: "/"
-      pathname: "/"
-      query: ""
-      search: ""
+    # @emit "verbose", "piping url content #{opts.uri}, #{opts.uri.split(opts.remote)[1]}"
+    @Log.info "piping http url content", url: req.url, remoteHost: remoteHost
+
+    selectors = []
+
+    # tr = @trumpet()
+
+    thr = @through
+
+    t = @through (d) -> @queue(d)
+
+    toInject = "
+      <script type='text/javascript'>
+        window.onerror = function(){
+          parent.onerror.apply(parent, arguments);
+        }
+      </script>
+      <script type='text/javascript' src='/__cypress/static/js/sinon.js'></script>
+      <script type='text/javascript'>
+        var Cypress = parent.Cypress;
+        if (!Cypress){
+          throw new Error('Cypress must exist in the parent window!');
+        };
+        Cypress.onBeforeLoad(window);
+      </script>
+    "
+
+    rewrite = (selector, type, attr, fn) ->
+      if _.isFunction(attr)
+        fn   = attr
+        attr = null
+
+      selectors.push {
+        query: selector
+        func: (elem) ->
+          switch type
+            when "attr"
+              elem.getAttribute attr, (val) ->
+                elem.setAttribute attr, fn(val)
+            when "html"
+              stream = elem.createStream({outer: true})
+              stream.pipe(thr (buf) ->
+                @queue fn(buf.toString())
+              ).pipe(stream)
+      }
+      # tr.selectAll selector, (elem) ->
+        # elem.getAttribute attr, (val) ->
+        #   elem.setAttribute attr, fn(val)
+
+    rewrite "head", "html", (str) ->
+      str.replace(/<head>/, "<head> #{toInject}")
+
+    rewrite "[href^='//']", "attr", "href", (href) ->
+      "/" + req.protocol + ":" + href
+
+    rewrite "form[action^='//']", "attr", "action", (action) ->
+      "/" + req.protocol + ":" + action
+
+    rewrite "form[action^='http']", "attr", "action", (action) ->
+      if action.startsWith(remoteHost)
+        action.replace(remoteHost, "")
+      else
+        "/" + action
+
+    rewrite "[href^='http']", "attr", "href", (href) ->
+      if href.startsWith(remoteHost)
+        href.replace(remoteHost, "")
+      else
+        "/" + href
+
+    h = @harmon([], selectors, true)
+
+    ## we pass an empty function as next()
+    ## because we arent using harmon as middleware
+    h(req, res, ->)
+
+    proxy = httpProxy.createProxyServer({})
+
+    # proxy.once "error", (err) =>
+    #   if req.cookies["__cypress.initial"] is "true"
+    #     @errorHandler err, req, res, remoteHost
+    #   else
+    #     throw err
+
+    # proxy.once "proxyRes", (proxyRes, req, res) =>
+    #   if req.cookies["__cypress.initial"] is "true"
+    #     if not @okStatus.test proxyRes.statusCode
+    #       @errorHandler null, req, res, remoteHost, proxyRes
+
+    # proxy.once "proxyReq", (proxyReq, req, res) ->
+
+    ## hostRewrite: rewrites location header on redirects back to
+    ## ourselves (localhost:2020) so the client will automatically
+    ## re-request this back on ourselves so we can proxy it again
+    proxy.web(req, res, {
+      target: remoteHost
+      changeOrigin: true
+      autoRewrite: true
     })
 
-    requestUrlBase = @escapeRegExp(requestUrlBase.format())
+    return res#.pipe(t)
 
-    unless (remote.format().match(///^#{requestUrlBase}///))
-      basePath = @url.parse(opts.req.url).path
-      basePath = basePath.replace /\/$/, ""
-      opts.req.url = remote.format() + @url.parse(opts.req.url).host + basePath
+  errorHandler: (e, req, res, remoteHost, proxyRes) ->
+    remoteHost ?= req.cookies["__cypress.remoteHost"]
 
-    opts.proxy.web(opts.req, opts.res, {
-      target: remote.format()
-      changeOrigin: true,
-      hostRewrite: opts.req.session.host
-    })
+    url = @url.resolve(remoteHost, req.url)
 
-    opts.res
+    ## disregard ENOENT errors (that means the file wasnt found)
+    ## which is a perfectly acceptable error (we account for that)
+    if process.env["NODE_ENV"] isnt "production" and e and e.code isnt "ENOENT"
+      console.error(e.stack)
+      debugger
 
-  # pipeAbsoluteFileContent: (uri, res) ->
-  #   @emit "verbose", "piping url content #{uri}"
-  #   @pipeFileUriContents.apply(this, arguments)
+    @Log.info "error handling request", url: url, error: e
 
+    filePath = switch
+      when f = req.formattedUrl
+        "file://#{f}"
+      else
+        url
 
-  # pipeFileContent: (uri, res) ->
-  #   @emit "verbose", "piping url content #{uri}"
-  #   if (~uri.indexOf('file://'))
-  #     uri = uri.split('file://')[1]
-
-  #   @pipeFileUriContents.apply(this, arguments)
+    ## using req here to give us an opportunity to
+    ## write to req.formattedUrl
+    htmlPath = @path.join(process.cwd(), "lib/html/initial_500.html")
+    # console.log "res status"
+    # res.writeHead 501, {
+      # "Content-Type": "text/plain"
+    # }
+    # res.end("DIE!")
+    # res.end("WTF!")
+    # res.status(501).render(htmlPath, {
+      # url: filePath
+      # fromFile: !!req.formattedUrl
+    # }#, (err, html) ->
+    #   proxyRes.writeHead 501, {"Content-Type": "text/html"}
+    #   proxyRes.end(html)
+    # )
+    # res.end()
 
 SecretSauce.RemoteInitial =
-  _handle: (req, res, opts, Domain) ->
+  okStatus: /^[2|3]\d+$/
+  badCookieParam: /^(httponly|secure)$/i
+
+  _handle: (req, res, next, Domain) ->
     { _ } = SecretSauce
-
-    _.defaults opts,
-      inject: "
-        <script type='text/javascript'>
-          window.onerror = function(){
-            parent.onerror.apply(parent, arguments);
-          }
-        </script>
-        <script type='text/javascript' src='/eclectus/js/sinon.js'></script>
-        <script type='text/javascript'>
-          var Cypress = parent.Cypress;
-          if (!Cypress){
-            throw new Error('Cypress must exist in the parent window!');
-          };
-          Cypress.onBeforeLoad(window);
-        </script>
-      "
-
-    url = @parseReqUrl(req.url)
-    @Log.info "handling initial request", url: url
-
-    ## initially set the session to this url
-    ## in case we aren't grabbing url content
-    ## this may later be overridden if we're
-    ## going to to the web and following redirects
-    @setSessionRemoteUrl(req, url)
 
     d = Domain.create()
 
-    d.on 'error', (e) => @errorHandler(e, res, url, req)
+    d.on 'error', (e) => @errorHandler(e, req, res)
 
     d.run =>
-      content = @getContent(url, res, req)
+      ## first check to see if this url contains a FQDN
+      ## if it does then its been rewritten from an absolute-domain
+      ## into a absolute-path-relative link, and we should extract the
+      ## remoteHost from this URL
+      remoteHost = @getOriginFromFqdnUrl(req) ? req.cookies["__cypress.remoteHost"] ? @app.get("cypress").baseUrl
 
-      content.on "error", (e) => @errorHandler(e, res, url, req)
+      @Log.info "handling initial request", url: req.url, remoteHost: remoteHost
 
-      content
-      .pipe(@injectContent(opts.inject))
-      .pipe(res)
+      ## we must have the remoteHost which tell us where
+      ## we should request the initial HTML payload from
+      if not remoteHost
+        throw new Error("Missing remoteHost cookie!")
 
-  parseReqUrl: (url) ->
-    ## strip out /__remote/ and the ?__initial query params
-    url = new @jsUri url.split("/__remote/").join("")
-    url.deleteQueryParam("__initial")
-    url.toString()
+      thr = @through (d) -> @queue(d)
 
-  setSessionRemoteUrl: (req, url) ->
-    url = url.split("?")[0].replace(/\/+$/, "")
-    @Log.info "setting remote session url", url: url
-    req.session.remote = url
+      @getContent(thr, req, res, remoteHost)
+        .on "error", (e) => @errorHandler(e, req, res, remoteHost)
+        .pipe(res)
 
-  injectContent: (toInject) ->
-    toInject ?= ""
+  getOriginFromFqdnUrl: (req) ->
+    ## if we find an origin from this req.url
+    ## then return it, and reset our req.url
+    ## after stripping out the origin and ensuring
+    ## our req.url starts with only 1 leading slash
+    if origin = @UrlHelpers.getOriginFromFqdnUrl(req.url)
+      req.url = "/" + req.url.replace(origin, "").replace(/^\/+/, "")
 
-    @through2.obj (chunk, enc, cb) ->
-      src = chunk.toString()
-            .replace(/<head>/, "<head> #{toInject}")
+      ## return the origin
+      return origin
 
-      cb(null, src)
+  getContent: (thr, req, res, remoteHost) ->
+    switch remoteHost
+      ## serve from the file system because
+      ## we are using cypress as our weberver
+      when "<root>"
+        @getFileContent(thr, req, res, remoteHost)
 
-  getContent: (url, res, req) ->
-    switch scheme = @UrlHelpers.detectScheme(url)
-      when "relative" then @getRelativeFileContent(url, req)
-      when "absolute" then @getAbsoluteContent(url, res, req)
-      # when "file"     then @getFileContent(url)
+      ## else go make an HTTP request to the
+      ## real server!
+      else
+        @getHttpContent(thr, req, res, remoteHost)
 
-  getRelativeFileContent: (url, req) ->
+  getHttpContent: (thr, req, res, remoteHost) ->
+    { _ } = SecretSauce
+
+    ## prepends req.url with remoteHost
+    remoteUrl = @url.resolve(remoteHost, req.url)
+
+    setCookies = (initial, remoteHost) ->
+      ## dont set the cookies if we're not on the initial request
+      return if req.cookies["__cypress.initial"] isnt "true"
+
+      res.cookie("__cypress.initial", initial)
+      res.cookie("__cypress.remoteHost", remoteHost)
+
+    ## we are setting gzip to false here to prevent automatic
+    ## decompression of the response since we dont need to transform
+    ## it and we can just hand it back to the client. DO NOT BE CONFUSED
+    ## our request will still have 'accept-encoding' and therefore
+    ## responses WILL be gzipped! Responses will simply not be unzipped!
+    opts = {url: remoteUrl, gzip: false, followRedirect: false}
+
+    ## do not accept gzip if this is initial
+    ## since we have to rewrite html and we dont
+    ## want to go through unzipping it, but we may
+    ## do this later
+    if req.cookies["__cypress.initial"] is "true"
+      delete req.headers["accept-encoding"]
+
+    ## rewrite problematic custom headers referencing
+    ## the wrong host
+    req.headers = @mapHeaders(req.headers, req.get("host"), remoteHost)
+
+    rq = @request(opts)
+
+    rq.on "error", (err) ->
+      thr.emit("error", err)
+
+    rq.on "response", (incomingRes) =>
+      @setResHeaders(req, res, incomingRes, remoteHost)
+
+      ## always proxy the cookies coming from the incomingRes
+      if cookies = incomingRes.headers["set-cookie"]
+        res.append("Set-Cookie", @stripCookieParams(cookies))
+
+      if /^30(1|2|7|8)$/.test(incomingRes.statusCode)
+        ## redirection is extremely complicated and there are several use-cases
+        ## we are encompassing. read the routes_spec for each situation and
+        ## why we have to check on so many things.
+
+        ## we go through this merge because the spec states that the location
+        ## header may not be a FQDN. If it's not (sometimes its just a /) then
+        ## we need to merge in the missing url parts
+        newUrl = new @jsUri @UrlHelpers.merge(remoteUrl, incomingRes.headers.location)
+
+        ## set cookies to initial=true and our new remoteHost origin
+        setCookies(true, newUrl.origin())
+
+        @Log.info "redirecting to new url", status: incomingRes.statusCode, url: newUrl.toString()
+
+        isInitial = req.cookies["__cypress.initial"] is "true"
+
+        ## finally redirect our user agent back to our domain
+        ## by making this an absolute-path-relative redirect
+        res.redirect @getUrlForRedirect(newUrl, req.cookies["__cypress.remoteHost"], isInitial)
+      else
+        ## set the status to whatever the incomingRes statusCode is
+        res.status(incomingRes.statusCode)
+
+        if not @okStatus.test incomingRes.statusCode
+          return @errorHandler(null, req, res, remoteHost)
+
+        @Log.info "received absolute file content"
+        # if ct = incomingRes.headers["content-type"]
+          # res.contentType(ct)
+          # throw new Error("Missing header: 'content-type'")
+        # res.contentType(incomingRes.headers['content-type'])
+
+        ## turn off __cypress.initial by setting false here
+        setCookies(false, remoteHost)
+
+        if req.cookies["__cypress.initial"] is "true"
+          # @rewrite(req, res, remoteHost)
+          # res.isHtml = true
+          rq.pipe(@rewrite(req, res, remoteHost)).pipe(thr)
+        else
+          rq.pipe(thr)
+
+    ## proxy the request body, content-type, headers
+    ## to the new rq
+    req.pipe(rq)
+
+    return thr
+
+  getFileContent: (thr, req, res, remoteHost) ->
     { _ } = SecretSauce
 
     args = _.compact([
       @app.get("cypress").projectRoot,
-      # @app.get("cypress").rootFolder,
-      url
+      @app.get("cypress").rootFolder,
+      req.url
     ])
 
-    ## strip trailing slashes because no file
-    ## ever has one
-    file = @path.join(args...).replace(/\/+$/, "")
+    ## strip off any query params from our req's url
+    ## since we're pulling this from the file system
+    ## it does not understand query params
+    file = @url.parse(@path.join(args...)).pathname
 
     req.formattedUrl = file
 
     @Log.info "getting relative file content", file: file
 
-    @fs.createReadStream(file, "utf8")
+    ## set the content-type based on the file extension
+    res.contentType(@mime.lookup(file))
 
-  getFileContent: (p) ->
-    @fs.createReadStream(p.slice(7).split('?')[0], 'utf8')
+    res.cookie("__cypress.initial", false)
+    res.cookie("__cypress.remoteHost", remoteHost)
 
-  getAbsoluteContent: (url, res, req) ->
-    @Log.info "getting absolute file content", url: url
-    @_resolveRedirects(url, res, req)
+    stream = @fs.createReadStream(file, "utf8")
 
-  errorHandler: (e, res, url, req) ->
+    if req.cookies["__cypress.initial"] is "true"
+      stream.pipe(@rewrite(req, res, remoteHost)).pipe(thr)
+    else
+      stream.pipe(thr)
+
+    return thr
+
+  errorHandler: (e, req, res, remoteHost) ->
+    remoteHost ?= req.cookies["__cypress.remoteHost"]
+
+    url = @url.resolve(remoteHost, req.url)
+
+    ## disregard ENOENT errors (that means the file wasnt found)
+    ## which is a perfectly acceptable error (we account for that)
+    if process.env["NODE_ENV"] isnt "production" and e and e.code isnt "ENOENT"
+      console.error(e.stack)
+      debugger
+
     @Log.info "error handling initial request", url: url, error: e
 
     filePath = switch
@@ -552,62 +705,210 @@ SecretSauce.RemoteInitial =
       fromFile: !!req.formattedUrl
     })
 
-  prepareUrlForRedirect: (currentUrl, newUrl) ->
-    newUrl = @UrlHelpers.merge(currentUrl, newUrl)
-
-    ## add the __initial true back to the url so
-    ## it goes back through our remote_initial controller
-    newUrl = new @jsUri(newUrl)
-    newUrl.addQueryParam("__initial", true)
-    newUrl = "/__remote/" + newUrl.toString()
-
-  _resolveRedirects: (url, res, req) ->
+  mapHeaders: (headers, currentHost, remoteHost) ->
     { _ } = SecretSauce
+
+    ## change out custom X-* headers referencing
+    ## the wrong host
+    hostRe = new RegExp(@escapeRegExp(currentHost), "ig")
+
+    _.mapValues headers, (value, key) ->
+      ## if we have a custom header then swap
+      ## out any values referencing our currentHost
+      ## with the remoteHost
+      key = key.toLowerCase()
+      if key is "referer" or key.startsWith("x-")
+        value.replace(hostRe, remoteHost)
+      else
+        ## just return the value
+        value
+
+  setResHeaders: (req, res, incomingRes, remoteHost) ->
+    { _ } = SecretSauce
+
+    ## omit problematic headers
+    headers = _.omit incomingRes.headers, "set-cookie", "x-frame-options", "content-length"
+
+    ## rewrite custom headers which reference the wrong host
+    ## if our host is localhost:8080 we need to
+    ## rewrite back to our current host localhost:2020
+    headers = @mapHeaders(headers, remoteHost, req.get("host"))
+
+    ## proxy the headers
+    res.set(headers)
+
+  getUrlForRedirect: (newUrl, remoteHostCookie, isInitial) ->
+    ## if isInitial is true, then we're requesting initial content
+    ## and we dont care if newUrl and remoteHostCookie matches because
+    ## we've already rewritten the remoteHostCookie above
+    ##
+    ## if the origin of our newUrl matches the current remoteHostCookie
+    ## then we're redirecting back to ourselves and we can make
+    ## this an absolute-path-relative url to ourselves
+    if isInitial or (newUrl.origin() is remoteHostCookie)
+      newUrl.toString().replace(newUrl.origin(), "")
+    else
+      ## if we're not requesting initial content or these
+      ## dont match then just prepend with a leading slash
+      ## so we retain the remoteHostCookie in the newUrl (like how
+      ## our original request came in!)
+      "/" + newUrl.toString()
+
+  stripCookieParams: (cookies) ->
+    { _ } = SecretSauce
+
+    stripHttpOnlyAndSecure = (cookie) =>
+      ## trim out whitespace
+      parts = _.invoke cookie.split(";"), "trim"
+
+      ## reject any part that is httponly or secure
+      parts = _.reject parts, (part) =>
+        @badCookieParam.test(part)
+
+      ## join back up with proper whitespace
+      parts.join("; ")
+
+    ## normalize cookies into single dimensional array
+     _.map [].concat(cookies), stripHttpOnlyAndSecure
+
+  # rewrite: (req, res, remoteHost) ->
+  #   { _ } = SecretSauce
+
+  # write     = res.write
+  # writeHead = res.writeHead
+
+  # res.writeHead = (code, headers) ->
+  #   console.log "writeHead", code, headers
+
+  #   writeHead.apply(res, arguments)
+
+  # res.write = (data, encoding) ->
+  #   console.log "write", data, encoding
+
+  #   write.apply(res, arguments)
+
+  #   through = @through
+
+  #   selectors = []
+
+  #   rewrite = (selector, type, attr, fn) ->
+  #     if _.isFunction(attr)
+  #       fn   = attr
+  #       attr = null
+
+  #     selectors.push {
+  #       query: selector
+  #       func: (elem) ->
+  #         switch type
+  #           when "attr"
+  #             elem.getAttribute attr, (val) ->
+  #               elem.setAttribute attr, fn(val)
+  #           when "html"
+  #             stream = elem.createStream({outer: true})
+  #             stream.pipe(through (buf) ->
+  #               @queue fn(buf.toString())
+  #             ).pipe(stream)
+  #     }
+
+  #   rewrite "head", "html", (str) =>
+  #     str.replace("<head>", "<head> #{@getHeadContent()}")
+
+  #   rewrite "[href^='//']", "attr", "href", (href) ->
+  #     "/" + req.protocol + ":" + href
+
+  #   rewrite "form[action^='//']", "attr", "action", (action) ->
+  #     "/" + req.protocol + ":" + action
+
+  #   rewrite "form[action^='http']", "attr", "action", (action) ->
+  #     if action.startsWith(remoteHost)
+  #       action.replace(remoteHost, "")
+  #     else
+  #       "/" + action
+
+  #   rewrite "[href^='http']", "attr", "href", (href) ->
+  #     if href.startsWith(remoteHost)
+  #       href.replace(remoteHost, "")
+  #     else
+  #       "/" + href
+
+  #   h = @harmon([], selectors, true)
+  #   h(req, res, ->)
+
+  #   # ## for harmon........ ugh
+  #   # if ct = res.get("content-type")
+  #   #   if ct and ct.includes("text/html")
+  #   #     res.isHtml = true
+
+  #   # if ce = res.get("content-encoding")
+  #   #   if ce and ce.toLowerCase() is "gzip"
+  #   #     res.isGziped = true
+
+  rewrite: (req, res, remoteHost) ->
+    { _ } = SecretSauce
+
+    through = @through
 
     tr = @trumpet()
 
-    tr.selectAll "form[action^=http]", (elem) ->
-      elem.getAttribute "action", (action) ->
-        elem.setAttribute "action", "/" + action
+       # tr.selectAll selector, (elem) ->
+        # elem.getAttribute attr, (val) ->
+        #   elem.setAttribute attr, fn(val)
 
-    tr.selectAll "a[href^=http]", (elem) ->
-      elem.getAttribute "href", (href) ->
-        elem.setAttribute "href", "/" + href
+    rewrite = (selector, type, attr, fn) ->
+      if _.isFunction(attr)
+        fn   = attr
+        attr = null
 
-    thr = @through((d) -> @queue(d))
+      tr.selectAll selector, (elem) ->
+        switch type
+          when "attr"
+            elem.getAttribute attr, (val) ->
+              elem.setAttribute attr, fn(val)
+          when "html"
+            stream = elem.createStream({outer: true})
+            stream.pipe(through (buf) ->
+              @queue fn(buf.toString())
+            ).pipe(stream)
 
-    rq = @hyperquest.get url, {}, (err, incomingRes) =>
-      if err?
-        return thr.emit("error", err)
+    rewrite "head", "html", (str) =>
+      str.replace("<head>", "<head> #{@getHeadContent()}")
 
-      if /^30(1|2|7|8)$/.test(incomingRes.statusCode)
-        newUrl = @prepareUrlForRedirect(url, incomingRes.headers.location)
+    rewrite "[href^='//']", "attr", "href", (href) ->
+      "/" + req.protocol + ":" + href
 
-        @Log.info "redirecting to new url", status: incomingRes.statusCode, url: newUrl
+    rewrite "form[action^='//']", "attr", "action", (action) ->
+      "/" + req.protocol + ":" + action
 
-        ## finally redirect our user agent back here
-        res.redirect(newUrl)
+    rewrite "form[action^='http']", "attr", "action", (action) ->
+      if action.startsWith(remoteHost)
+        action.replace(remoteHost, "")
       else
-        if not incomingRes.headers["content-type"]
-          throw new Error("Missing header: 'content-type'")
-        @Log.info "received absolute file content"
-        res.contentType(incomingRes.headers['content-type'])
+        "/" + action
 
-        ## reset the session to the latest redirected URL
-        @setSessionRemoteUrl(req, url)
-        rq.pipe(thr)
-        # rq.pipe(tr).pipe(thr)
+    rewrite "[href^='http']", "attr", "href", (href) ->
+      if href.startsWith(remoteHost)
+        href.replace(remoteHost, "")
+      else
+        "/" + href
 
-    ## set the headers on the hyperquest request
-    ## this will naturally forward cookies or auth tokens
-    ## or anything else which should be proxied
-    ## for some reason adding host / accept-encoding / accept-language
-    ## would completely bork getbootstrap.com
-    headers = _.omit(req.headers, "host", "accept-encoding", "accept-language")
-    _.each headers, (val, key) ->
-      rq.setHeader key, val
+    return tr
 
-    thr
+  getHeadContent: ->
+    "
+      <script type='text/javascript'>
+        window.onerror = function(){
+          parent.onerror.apply(parent, arguments);
+        }
+      </script>
+      <script type='text/javascript' src='/__cypress/static/js/sinon.js'></script>
+      <script type='text/javascript'>
+        var Cypress = parent.Cypress;
+        if (!Cypress){
+          throw new Error('Cypress must exist in the parent window!');
+        };
+        Cypress.onBeforeLoad(window);
+      </script>
+    "
 
 if module?
   module.exports = SecretSauce

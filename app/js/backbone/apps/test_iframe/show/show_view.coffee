@@ -29,6 +29,17 @@
       "hide.bs.dropdown"        : "dropdownHide"
     #   "click #perf"         : "perfClicked"
 
+    modelEvents:
+      "change:url"         : "urlChanged"
+      "change:pageLoading" : "pageLoadingChanged"
+
+    urlChanged: (model, value, options) ->
+      @ui.url.val(value)
+
+    pageLoadingChanged: (model, value, options) ->
+      ## hides or shows the loading indicator
+      @ui.url.parent().toggleClass("loading", value)
+
     # perfClicked: (e) ->
     #   s = @$remote.contents().find("body").remove("script")
     #   t = Date.now()
@@ -248,8 +259,6 @@
       # _.each ["Ecl", "$", "jQuery", "parent", "chai", "expect", "should", "assert", "Mocha", "mocha"], (global) =>
       #   delete @$iframe[0].contentWindow[global]
 
-      @removeIframeWindowListeners() if @$remote?.isReadable()
-
       @$iframe?[0].contentWindow.remote = null
 
       @$iframe?.remove()
@@ -261,18 +270,10 @@
       @detachedBody = null
       @originalBody = null
 
-    removeIframeWindowListeners: ->
-      $(@$remote.prop("contentWindow")).off "hashchange", @updateRemoteUrl
-      $(@$remote.prop("contentWindow")).off "popstate",   @updateRemoteUrl
-
     loadIframe: (src, options, fn) ->
       ## remove any existing iframes
       @reverted = false
       @ui.message.hide().empty()
-
-      ## if we have a remote iframe then remove any
-      ## listeners for load and unload
-      @$remote?.off("load").off("unload")
 
       @resetReferences()
 
@@ -308,7 +309,7 @@
     loadRegularIframes: (src, options, fn) ->
       view = @
 
-      @src = "/iframes/" + src
+      @src = "/__cypress/iframes/" + src
       @fn = fn
 
       # @$iframe = window.open(@src, "testIframeWindow", "titlebar=no,menubar=no,toolbar=no,location=no,personalbar=no,status=no")
@@ -323,34 +324,6 @@
         id: "iframe-remote"
 
       @$remote = $("<iframe />", remoteOpts).appendTo(@ui.size)
-
-      ## when apps go through the history object
-      ## and change the url, update it now
-      @$remote.on "history:event", @updateRemoteUrl
-
-      ## when the remote iframe visits an external URL
-      ## we want to update our header's input
-      @$remote.on "visit:start", (e, url) =>
-        @showSpinner()
-        @updateRemoteUrl(url)
-        @setRemoteOrigin(url)
-
-        ## remove any existing hashchange and popstate listeners
-        ## whenever we visit we will lose these listeners anyway
-        ## and will need to re-add them later
-        @removeIframeWindowListeners()
-
-      @$remote.on "load", =>
-        @showSpinner(false)
-        @updateRemoteUrl()
-
-        @removeIframeWindowListeners()
-
-        ## must re-wrap the contentWindow to get the hashchange/popstate event
-        ## any time our remote window loads we need to bind to these events
-        $(@$remote.prop("contentWindow")).on "hashchange", @updateRemoteUrl
-        $(@$remote.prop("contentWindow")).on "popstate",   @updateRemoteUrl
-        # $(@$remote.prop("contentWindow")).on "unload",     -> #debugger
 
       contents = Marionette.Renderer.render("test_iframe/show/_default_message")
       view.$remote.contents().find("body").append(contents)
@@ -375,34 +348,6 @@
         ## yes these args are supposed to be reversed
         ## TODO FIX THIS
         fn(iframe, remote)
-
-    setRemoteOrigin: (url) ->
-      currentUrl = window.location.toString()
-      App.config.setRemoteOrigin(currentUrl, url)
-
-    updateRemoteUrl: (remoteUrl) =>
-      remoteUrl = if _.isString(remoteUrl) then remoteUrl else @$remote.prop("contentWindow").location.toString()
-
-      if remoteUrl is "about:blank"
-        location = {href: "about:blank"}
-      else
-        currentUrl    = window.location.toString()
-        defaultOrigin = App.config.get("remoteOrigin")
-
-        location = $Cypress.Location.create(currentUrl, remoteUrl, defaultOrigin)
-
-      @ui.url.val(location.href)
-
-    parseHashChangeUrl: (url) ->
-      ## returns the very last part
-      ## of the url split by the hash
-      ## think about figuring out what the base
-      ## URL is if we've set a defaultUrl file
-      "#" + _.last(url.split("#"))
-
-    showSpinner: (bool = true) ->
-      ## hides or shows the loading indicator
-      @ui.url.parent().toggleClass("loading", bool)
 
     expandClicked: (e) ->
       @ui.expand.hide()

@@ -1,7 +1,7 @@
 {
-  "name": "eclectus",
+  "name": "cypress",
   "version": "0.0.0",
-  "homepage": "https://github.com/brian-mann/eclectus",
+  "homepage": "https://github.com/cypress-io/cypress",
   "authors": [
     "brian.mann86@gmail.com"
   ],
@@ -42,6 +42,7 @@
     "backbone.marionette": "~2.3.2",
     "moment": "~2.9.0",
     "sinon-as-promised": "~2.0.3",
-    "underscore.inflection": "~1.2.0"
+    "underscore.inflection": "~1.2.0",
+    "js-cookie": "~1.5.1"
   }
 }
