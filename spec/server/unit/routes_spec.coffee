@@ -952,17 +952,13 @@ describe "Routes", ->
 
     context "<root> file serving", ->
       beforeEach (done) ->
-        ## we no longer server initial content from the rootFolder
-        ## and it would be suggested for this project to be configured
-        ## with a baseUrl of "dev/", which would automatically be
-        ## appended to cy.visit("/index.html")
-        @baseUrl = "/dev/index.html"
+        @baseUrl = "/index.html"
 
         Fixtures.scaffold("no-server")
 
         @server.setCypressJson {
           projectRoot: Fixtures.project("no-server")
-          rootFolder: "dev-123-abc" ## we have this here to ensure we are ignoring this option
+          rootFolder: "dev"
           testFolder: "my-tests"
         }
 
@@ -980,20 +976,20 @@ describe "Routes", ->
 
       it "streams from file system", (done) ->
         @session
-          .get("/dev/assets/app.css")
+          .get("/assets/app.css")
           .expect(200, "html { color: black; }")
           .end(done)
 
       it "sets content-type", (done) ->
         @session
-          .get("/dev/assets/app.css")
+          .get("/assets/app.css")
           .expect(200)
           .expect("content-type", /text\/css/)
           .end(done)
 
       it "disregards anything past the pathname", (done) ->
         @session
-          .get("/dev/assets/app.css?foo=bar#hash")
+          .get("/assets/app.css?foo=bar#hash")
           .expect(200, "html { color: black; }")
           .end(done)
 
