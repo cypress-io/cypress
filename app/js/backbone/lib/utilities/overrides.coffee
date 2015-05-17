@@ -35,9 +35,9 @@
       return if App.config.env("production")
 
       Mocha.Runner::uncaught = _.wrap uncaught, (orig, err) ->
-        ## debugger if this isnt an AssertionError or CypressError
+        ## debugger if this isnt an AssertionError or CypressError or a message err
         ## because that means we prob f'd up something
-        if not /(AssertionError|CypressError)/.test(err.name)
+        if not /(AssertionError|CypressError)/.test(err.name) and not err.__isMessage
           console.error(err.stack)
           debugger
 

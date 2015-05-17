@@ -18,6 +18,9 @@ $Cypress.register "Communications", (Cypress, _, $) ->
             try
               @throwErr(err, command)
             catch e
+              e.__isMessage = true
+              e.name = response.__name if response.__name
+              e.stack = response.__stack if response.__stack
               reject(e)
           else
             command.set
