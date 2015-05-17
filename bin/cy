@@ -37,9 +37,12 @@ var args = []
 for (key in opts)
   args = args.concat(opts[key])
 
-spawn("node-inspector", [], {stdio: "inherit"})
 spawn("nodemon", args, {stdio: "inherit"})
 
-open("http://127.0.0.1:8080/debug?ws=127.0.0.1:8080&port=5858")
+if (process.argv.indexOf("--no-debug") === -1){
+  spawn("node-inspector", [], {stdio: "inherit"})
+
+  open("http://127.0.0.1:8080/debug?ws=127.0.0.1:8080&port=5858")
+}
 
 // nodemon(cyServer)

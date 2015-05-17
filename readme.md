@@ -46,6 +46,15 @@ nw . --debug
 
 ```bash
 bin/cy <path-to-the-project-you-want-to-test>
+
+## turn off id generation
+bin/cy <path-to-the-project-you-want-to-test> --no-ids
+
+## turn off debugging
+bin/cy <path-to-the-project-you-want-to-test> --no-debug
+
+## turn off both
+bin/cy <path-to-the-project-you-want-to-test> --no-ids --no-debug
 ```
 
 ### Deplying
