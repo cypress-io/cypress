@@ -80,13 +80,25 @@ open ~/Desktop/cypress.app --args /Users/bmann/Dev/cypress-app/build/0.5.8/osx64
 
 ### To Connect
 
-Remote servers need to connect to the `/remote` room.
+Remote servers need to connect to the web socket server:
 
 In `node.js` my client connects with this:
 
 ```js
-socket = require("socket.io-client")("http://localhost:2020/remote", {path: "/__socket.io"})
+socket = require("socket.io-client")("http://localhost:2020", {path: "/__socket.io"})
 ```
+
+### Connecting to the `remote` room
+
+Upon connecting to the websocket server you'll need to request to be put in the `remote` room. This allows the websocket server to know you're listening to requests.
+
+To do that, emit a `remote:connected` message.
+
+```js
+socket.emit("remote:connected")
+```
+
+You are now connected properly and ready to receive messages.
 
 ### How messages are passed in and out
 
