@@ -96,15 +96,18 @@ SecretSauce.Socket =
     @io.on "connection", (socket) =>
       @Log.info "socket connected"
 
-      socket.on "remote:connected", ->
+      socket.on "remote:connected", =>
+        @Log.info "remote:connected"
+
         return if socket.inRemoteRoom
 
         socket.inRemoteRoom = true
         socket.join("remote")
 
-        socket.on "remote:response", (id, response) ->
+        socket.on "remote:response", (id, response) =>
           if message = messages[id]
             delete messages[id]
+            @Log.info "remote:response", id: id, response: response
             message(response)
 
       socket.on "client:request", (message, data, cb) =>
@@ -116,6 +119,8 @@ SecretSauce.Socket =
           data = null
 
         id = @uuid.v4()
+
+        @Log.info "client:request", id: id, msg: message, data: data
 
         if _.keys(@io.sockets.adapter.rooms.remote).length > 0
           messages[id] = cb
