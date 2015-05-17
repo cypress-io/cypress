@@ -82,7 +82,7 @@ open ~/Desktop/cypress.app --args /Users/bmann/Dev/cypress-app/build/0.5.8/osx64
 
 Remote servers need to connect to the web socket server:
 
-In `node.js` my client connects with this:
+In my `node.js` adapter, the remote server with this:
 
 ```js
 socket = require("socket.io-client")("http://localhost:2020", {path: "/__socket.io"})
@@ -109,7 +109,7 @@ Client requests a message:
 cy.message("create:user", {some: "data"})
 ```
 
-Desktop App requests message from remote:
+Desktop App requests message from remote server:
 
 ```js
 // an unique guid ID is generated for this message
@@ -117,7 +117,7 @@ Desktop App requests message from remote:
 // and passes the ID, message, and optional data params
 io.emit("remote:request", "123-a-guid-as-an-id", "create:user", {some: "data"})
 ```
-Remote Server responds:
+Remote server responds:
 
 ```js
 // the remote server performs the work as per the message implementation
