@@ -204,6 +204,18 @@ describe "$Cypress.Cy Traversal Commands", ->
       @cy.get("#list").find("li:first", {visible: true}).then ->
         expect(@log.get("message")).to.eq "li:first, {visible: true}"
 
+    it "logs command option: length", ->
+      @cy.on "retry", _.after 2, =>
+        c = @cy.$("[name=colors]").slice(0, 2)
+        c.prop("checked", true)
+
+      @cy.get("#by-name").find(":checked", {length: 2}).then ->
+        expect(@log.get("message")).to.eq ":checked, {length: 2}"
+
+    it "logs exist: false", ->
+      @cy.get("div:first").find("#does-not-exist", {exist: false}).then ->
+        expect(@log.get("message")).to.eq "#does-not-exist, {exist: false}"
+
     it "has options onConsole", ->
       @cy.get("#list").find("li:first", {visible: true}).then ($el) ->
         obj = {

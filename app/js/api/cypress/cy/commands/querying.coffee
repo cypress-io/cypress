@@ -16,7 +16,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       options.exist = options.exists and options.exist
 
       ## figure out the options which actually change the behavior of traversals
-      deltaOptions = Cypress.Utils.filterDelta(options, {visible: null, exist: true})
+      deltaOptions = Cypress.Utils.filterDelta(options, {visible: null, exist: true, length: null})
 
       start = (aliasType) ->
         return if options.log is false

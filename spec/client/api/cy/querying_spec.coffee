@@ -337,6 +337,23 @@ describe "$Cypress.Cy Querying Commands", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
 
+      it "logs command option: length", ->
+        buttons = @cy.$("button")
+
+        length = buttons.length - 2
+
+        @cy.on "retry", _.after 2, =>
+          buttons.last().remove()
+          buttons = @cy.$("button")
+
+        ## should resolving after removing 2 buttons
+        @cy.get("button", {length: length}).then ($buttons) ->
+          expect(@log.get("message")).to.eq "button, {length: #{length}}"
+
+      it "logs exist: false", ->
+        @cy.get("#does-not-exist", {exist: false}).then ->
+          expect(@log.get("message")).to.eq "#does-not-exist, {exist: false}"
+
       it "logs route aliases", ->
         @cy
           .server()

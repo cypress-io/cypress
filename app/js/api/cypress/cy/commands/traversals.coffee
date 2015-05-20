@@ -25,7 +25,7 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
       options.exist = options.exists and options.exist
 
       ## figure out the options which actually change the behavior of traversals
-      deltaOptions = Cypress.Utils.filterDelta(options, {visible: null, exist: true})
+      deltaOptions = Cypress.Utils.filterDelta(options, {visible: null, exist: true, length: null})
 
       getSelector = ->
         args = _([arg1, arg2]).chain().reject(_.isFunction).reject(_.isObject).value()
