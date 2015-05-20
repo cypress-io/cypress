@@ -202,9 +202,6 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
   Cypress.addDualCommand
     contains: (subject, filter, text, options = {}) ->
-      _.defaults options,
-        log: true
-
       ## nuke our subject if its present but not an element
       ## since we want contains to operate as a parent command
       if subject and not Cypress.Utils.hasElement(subject)
@@ -218,6 +215,9 @@ $Cypress.register "Querying", (Cypress, _, $) ->
         when _.isUndefined(text)
           text = filter
           filter = ""
+
+      _.defaults options,
+        log: true
 
       @throwErr "cy.contains() can only accept a string or number!" if not (_.isString(text) or _.isFinite(text))
       @throwErr "cy.contains() cannot be passed an empty string!" if _.isBlank(text)
@@ -256,7 +256,11 @@ $Cypress.register "Querying", (Cypress, _, $) ->
           "Applied To": subject or @prop("withinSubject")
         }
 
+        ## figure out the options which actually change the behavior of traversals
+        deltaOptions = Cypress.Utils.filterDelta(options, {visible: null, exist: true, length: null})
+
         options.command ?= Cypress.command
+          message: _.compact([filter, text, deltaOptions])
           type: if subject then "child" else "parent"
           onConsole: -> onConsole
 

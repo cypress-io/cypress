@@ -923,6 +923,14 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy.get("body").contains("foo").then ->
           expect(@log.get("type")).to.eq "child"
 
+      it "logs command option: {exist: false}", ->
+        @cy.contains("does-not-exist", {exist: false}).then ->
+          expect(@log.get("message")).to.eq "does-not-exist, {exist: false}"
+
+      it "logs command option: {visible: true} with filter", ->
+        @cy.contains("div", "Nested Find", {visible: true}).then ->
+          expect(@log.get("message")).to.eq "div, Nested Find, {visible: true}"
+
       it "#onConsole", ->
         @cy.get("#complex-contains").contains("nested contains").then ($label) ->
           expect(@log.attributes.onConsole()).to.deep.eq {

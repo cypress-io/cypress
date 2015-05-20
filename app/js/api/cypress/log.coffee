@@ -161,9 +161,6 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       if _.isFunction(obj.type)
         obj.type = obj.type.call(@cy, current, @cy.prop("subject"))
 
-      # if obj.snapshot
-        # obj._snapshot = @cy.createSnapshot(obj.$el)
-
       @log("command", obj)
 
     route: (obj = {}) ->
