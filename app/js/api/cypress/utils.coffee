@@ -6,12 +6,25 @@ $Cypress.Utils = do ($Cypress, _) ->
   CYPRESS_OBJECT_NAMESPACE = "_cypressObj"
 
   return {
+    normalizeObjWithLength: (obj) ->
+      ## underscore shits the bed if our object has a 'length'
+      ## property so we have to normalize that
+      if _(obj).has("length")
+        obj.Length = obj.length
+        delete obj.length
+
+      obj
+
     ## return a new object if the obj
     ## contains the properties of filter
     ## and the values are different
     filterDelta: (obj, filter) ->
+      filter = @normalizeObjWithLength(filter)
+
       obj = _.reduce filter, (memo, value, key) ->
-        if obj[key] isnt value
+        key = key.toLowerCase()
+
+        if _(obj).has(key) and obj[key] isnt value
           memo[key] = obj[key]
 
         memo
@@ -20,11 +33,7 @@ $Cypress.Utils = do ($Cypress, _) ->
       if _.isEmpty(obj) then undefined else obj
 
     _stringifyObj: (obj) ->
-      ## underscore shits the bed if our object has a 'length'
-      ## property so we have to normalize that
-      if _(obj).has("length")
-        obj.Length = obj.length
-        delete obj.length
+      obj = @normalizeObjWithLength(obj)
 
       str = _.reduce obj, (memo, value, key) =>
         memo.push key.toLowerCase() + ": " + @_stringify(value)

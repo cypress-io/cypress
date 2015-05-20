@@ -10,6 +10,10 @@ describe "$Cypress.Utils API", ->
       obj = $Cypress.Utils.filterDelta {foo: "foo", bar: "bar"}, {foo: "foo"}
       expect(obj).to.be.undefined
 
+    it "normalizes objects with length property", ->
+      obj = $Cypress.Utils.filterDelta {exist: true}, {visible: null, exist: false, length: null}
+      expect(obj).to.deep.eq {exist: true}
+
   describe "#stringify", ->
     beforeEach ->
       @str = (str) ->
