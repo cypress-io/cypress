@@ -46,6 +46,10 @@ describe "$Cypress.Utils API", ->
         o = {foo: "foo", bar: "baz", baz: "baz"}
         expect(@str(o)).to.eq "Object{3}"
 
+      it "can have length property", ->
+        o = {length: 10, foo: "bar"}
+        expect(@str(o)).to.eq "{foo: bar, length: 10}"
+
     context "Functions", ->
       it "function(){}", ->
         o = (foo, bar, baz) ->

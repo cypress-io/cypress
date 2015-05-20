@@ -20,8 +20,14 @@ $Cypress.Utils = do ($Cypress, _) ->
       if _.isEmpty(obj) then undefined else obj
 
     _stringifyObj: (obj) ->
+      ## underscore shits the bed if our object has a 'length'
+      ## property so we have to normalize that
+      if _(obj).has("length")
+        obj.Length = obj.length
+        delete obj.length
+
       str = _.reduce obj, (memo, value, key) =>
-        memo.push key + ": " + @_stringify(value)
+        memo.push key.toLowerCase() + ": " + @_stringify(value)
         memo
       , []
 
