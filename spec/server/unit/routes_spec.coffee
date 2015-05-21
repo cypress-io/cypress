@@ -372,6 +372,65 @@ describe "Routes", ->
           .expect "set-cookie", /remoteHost=.+getbootstrap\.com/
           .end(done)
 
+      ## this fixes improper url merge where we took query params
+      ## and added them needlessly
+      it "doesnt redirect with query params or hashes which werent in location header", (done) ->
+        nock("http://getbootstrap.com")
+          .get("/foo?bar=baz")
+          .reply 302, undefined, {
+            "Location": "/css"
+          }
+          .get("/")
+          .reply 200, "<html></html", {
+            "Content-Type": "text/html"
+          }
+
+        @session
+          .get("/foo?bar=baz")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://getbootstrap.com")
+          .expect(302)
+          .expect "location", "/css"
+          .expect "set-cookie", /remoteHost=.+getbootstrap\.com/
+          .end(done)
+
+      it "does redirect with query params if location header includes them", (done) ->
+        nock("http://getbootstrap.com")
+          .get("/foo?bar=baz")
+          .reply 302, undefined, {
+            "Location": "/css?q=search"
+          }
+          .get("/")
+          .reply 200, "<html></html", {
+            "Content-Type": "text/html"
+          }
+
+        @session
+          .get("/foo?bar=baz")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://getbootstrap.com")
+          .expect(302)
+          .expect "location", "/css?q=search"
+          .expect "set-cookie", /remoteHost=.+getbootstrap\.com/
+          .end(done)
+
+      it "does redirect with query params to external domain if location header includes them", (done) ->
+        nock("http://getbootstrap.com")
+          .get("/foo?bar=baz")
+          .reply 302, undefined, {
+            "Location": "https://www.google.com/search?q=cypress"
+          }
+          .get("/")
+          .reply 200, "<html></html", {
+            "Content-Type": "text/html"
+          }
+
+        @session
+          .get("/foo?bar=baz")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://getbootstrap.com")
+          .expect(302)
+          .expect "location", "/search?q=cypress"
+          .expect "set-cookie", /remoteHost=.+google\.com/
+          .end(done)
+
       ## our location header should be local not the external foobar.com
       it "rewrites the location header locally to our current host", (done) ->
         nock("http://foobar.com")

@@ -616,7 +616,7 @@ SecretSauce.RemoteInitial =
         ## we go through this merge because the spec states that the location
         ## header may not be a FQDN. If it's not (sometimes its just a /) then
         ## we need to merge in the missing url parts
-        newUrl = new @jsUri @UrlHelpers.merge(remoteUrl, incomingRes.headers.location)
+        newUrl = new @jsUri @UrlHelpers.mergeOrigin(remoteUrl, incomingRes.headers.location)
 
         ## set cookies to initial=true and our new remoteHost origin
         setCookies(true, newUrl.origin())

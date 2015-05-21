@@ -24,9 +24,20 @@ module.exports =
       else
         throw new Error("Url: #{url} did not match 'absolute', 'relative', or 'file' scheme.")
 
-  merge: (origin, redirect) ->
+  ## merges in everything except for query params + hashes
+  mergeOrigin: (origin, redirect) ->
     originUrl   = Url.parse(origin)
     redirectUrl = Url.parse(redirect)
+
+    _.each _.pick(redirectUrl, "protocol", "auth", "hostname", "port", "pathname"), (value, key) ->
+      if not value?
+        redirectUrl[key] = originUrl[key]
+
+    redirectUrl.format()
+
+  merge: (origin, redirect) ->
+    originUrl   = Url.parse(origin, true)
+    redirectUrl = Url.parse(redirect, true)
 
     _.each redirectUrl, (value, key) ->
       if not value?
