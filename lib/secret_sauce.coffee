@@ -576,7 +576,7 @@ SecretSauce.RemoteInitial =
     ## it and we can just hand it back to the client. DO NOT BE CONFUSED
     ## our request will still have 'accept-encoding' and therefore
     ## responses WILL be gzipped! Responses will simply not be unzipped!
-    opts = {url: remoteUrl, gzip: false, followRedirect: false}
+    opts = {url: remoteUrl, gzip: false, followRedirect: false, strictSSL: false}
 
     ## do not accept gzip if this is initial
     ## since we have to rewrite html and we dont
