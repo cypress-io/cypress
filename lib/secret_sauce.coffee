@@ -724,7 +724,7 @@ SecretSauce.RemoteInitial =
       ## out any values referencing our currentHost
       ## with the remoteHost
       key = key.toLowerCase()
-      if key is "referer" or key.startsWith("x-")
+      if key is "referer" or key is "origin" or key.startsWith("x-")
         value.replace(hostRe, remoteHost)
       else
         ## just return the value
