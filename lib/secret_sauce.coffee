@@ -589,7 +589,12 @@ SecretSauce.RemoteInitial =
 
     ## rewrite problematic custom headers referencing
     ## the wrong host
-    req.headers = @mapHeaders(req.headers, req.get("host"), remoteHost)
+    ## we need to use our cookie's remoteHost here and not necessarilly
+    ## the remoteUrl
+    ## this fixes a bug where we accidentally swapped out referer with the domain of the new url
+    ## when it needs to stay as the previous referring remoteHost (from our cookie)
+    ## also the host header NEVER includes the protocol so we need to add it here
+    req.headers = @mapHeaders(req.headers, req.protocol + "://" + req.get("host"), req.cookies["__cypress.remoteHost"])
 
     rq = @request(opts)
 

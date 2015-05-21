@@ -106,6 +106,11 @@ describe "Remote Initial", ->
       headers = @remoteInitial.mapHeaders(req.headers, "http://localhost:2020", "http://localhost:8080")
       expect(headers).to.deep.eq {"x-xhr-referer": "http://localhost:8080", "x-host": "http://localhost:8080/foo"}
 
+    it "rewrites referer header", ->
+      req = {headers: {"referer": "http://localhost:2020/foo"}}
+      headers = @remoteInitial.mapHeaders req.headers, "http://localhost:2020", "https://go.pardot.com"
+      expect(headers).to.deep.eq {"referer": "https://go.pardot.com/foo"}
+
     it "rewrites origin header", ->
       req = {headers: {"origin": "http://localhost:2020"}}
       headers = @remoteInitial.mapHeaders req.headers, "http://localhost:2020", "https://go.pardot.com"

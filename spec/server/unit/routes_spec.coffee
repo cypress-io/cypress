@@ -726,7 +726,7 @@ describe "Routes", ->
 
         supertest(@app)
           .get("/")
-          .set("host", "http://localhost:2020")
+          .set("host", "localhost:2020")
           .set("x-xhr-referer", "http://localhost:2020")
           .set("Cookie", "__cypress.initial=false; __cypress.remoteHost=http://localhost:8080")
           .expect(200, "OK")
@@ -742,7 +742,7 @@ describe "Routes", ->
 
         supertest(@app)
           .get("/")
-          .set("host", "http://localhost:2020")
+          .set("host", "localhost:2020")
           .set("x-xhr-referer", "http://localhost:2020")
           .set("Cookie", "__cypress.initial=false; __cypress.remoteHost=http://localhost:8080")
           .expect(200, "OK")
@@ -758,7 +758,25 @@ describe "Routes", ->
 
         supertest(@app)
           .get("/foo")
-          .set("host", "http://localhost:2020")
+          .set("host", "localhost:2020") ## host headers do not include the protocol!
+          .set("referer", "http://localhost:2020")
+          .set("Cookie", "__cypress.initial=false; __cypress.remoteHost=http://localhost:8080")
+          .expect(200, "OK")
+          .end(done)
+
+      ## this fixes a bug where we accidentally swapped out referer with the domain of the new url
+      ## when it needs to stay as the previous referring remoteHost (from our cookie)
+      it "changes out the referer header with the remoteHost cookie even on a new remoteUrl", (done) ->
+        nock("http://login.google.com")
+          .get("/foo")
+          .matchHeader "referer", "http://localhost:8080"
+          .reply(200, "OK", {
+            "Content-Type": "text/html"
+          })
+
+        supertest(@app)
+          .get("/http://login.google.com/foo")
+          .set("host", "localhost:2020") ## host headers do not include the protocol!
           .set("referer", "http://localhost:2020")
           .set("Cookie", "__cypress.initial=false; __cypress.remoteHost=http://localhost:8080")
           .expect(200, "OK")
