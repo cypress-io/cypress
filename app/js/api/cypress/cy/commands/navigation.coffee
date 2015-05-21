@@ -13,10 +13,43 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
 
       current = @prop("current")
 
-      return if current?.name isnt "visit"
+      return if not current
 
       options = _.last(current.args)
-      options.onBeforeLoad?(contentWindow)
+      options?.onBeforeLoad?(contentWindow)
+
+    loading: (options = {}) ->
+      current = @prop("current")
+
+      ## if we are visiting a page which caused
+      ## the beforeunload, then dont output this command
+      return if current?.name is "visit"
+
+      _.defaults options,
+        timeout: 20000
+
+      command = Cypress.command
+        type: "parent"
+        name: "loading"
+        message: "--waiting for new page to load---"
+
+      prevTimeout = @_timeout()
+
+      @_clearTimeout()
+
+      ready = @prop("ready")
+
+      ready.promise
+        .timeout(options.timeout)
+        .then =>
+          @_storeHref()
+          @_timeout(prevTimeout)
+          command.snapshot().end()
+        .catch Promise.TimeoutError, (err) =>
+          try
+            @throwErr "Timed out after waiting '#{options.timeout}ms' for your remote page to load.", command
+          catch err
+            ready.reject(err)
 
   Cypress.addParentCommand
 
@@ -44,36 +77,21 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
       win = @sync.window()
 
       p = new Promise (resolve, reject) =>
-        ## if we're visiting a page and we're not currently
-        ## on about:blank then we need to nuke the window
-        ## and after its nuked then visit the url
-        if @sync.url({log: false}) isnt "about:blank"
-          win.location.href = "about:blank"
+        @$remoteIframe.one "load", =>
+          @_storeHref()
+          @_timeout(prevTimeout)
+          options.onLoad?(win)
+          if Cypress.cy.$("[data-cypress-visit-error]").length
+            try
+              @throwErr("Could not load the remote page: #{url}", command)
+            catch e
+              reject(e)
+          else
+            command.snapshot().end()
+            resolve(win)
 
-          @$remoteIframe.one "load", =>
-            visit(win, url, options)
-
-        else
-          visit(win, url, options)
-
-        visit = (win, url, options) =>
-          # ## when the remote iframe's load event fires
-          # ## callback fn
-          @$remoteIframe.one "load", =>
-            @_storeHref()
-            @_timeout(prevTimeout)
-            options.onLoad?(win)
-            if Cypress.cy.$("[data-cypress-visit-error]").length
-              try
-                @throwErr("Could not load the remote page: #{url}", command)
-              catch e
-                reject(e)
-            else
-              command.snapshot().end()
-              resolve(win)
-
-          ## any existing global variables will get nuked after it navigates
-          @$remoteIframe.prop "src", Cypress.Location.createInitialRemoteSrc(url)
+        ## any existing global variables will get nuked after it navigates
+        @$remoteIframe.prop "src", Cypress.Location.createInitialRemoteSrc(url)
 
       p
         .timeout(options.timeout)

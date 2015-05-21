@@ -377,6 +377,15 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
 
         @trigger "invoke:end", obj
 
+        ## we must look back at the ready property
+        ## at the end of resolving our command because
+        ## its possible it has become "unready" such
+        ## as beforeunload firing. in that case before
+        ## resolving we need to ensure it finishes first
+        if ready = @prop("ready")
+          if ready.promise.isPending()
+            return Promise.resolve(ready.promise).return(subject)
+
         return subject
 
     cancel: (err) ->

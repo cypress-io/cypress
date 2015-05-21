@@ -192,3 +192,22 @@ describe "$Cypress.Cy Navigation Commands", ->
           done()
 
         @cy.visit("timeout?ms=5000", {timeout: 500})
+
+  context "#loading", ->
+    it "returns if current command is visit"
+
+    it "clears current timeout"
+
+    describe ".log", ->
+      it "is name: loading"
+
+      it "is type: parent"
+
+      it "#onConsole"
+
+    describe "errors", ->
+      it "can time out"
+
+      ## this goes through the same process as visit
+      ## where it errors if cypress sent back an error
+      it "errors if [cypress-error] was found"
