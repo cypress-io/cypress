@@ -12,65 +12,21 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
 
       specWindow.cy = @
 
-    initialize: (obj, initiallyBind = false) ->
+    initialize: (obj) ->
       @defaults()
 
       {@$remoteIframe, @config} = obj
-
-      ## we listen for the unload + submit events on
-      ## the window, because when we receive them we
-      ## tell cy its not ready and this prevents any
-      ## additional invocations of any commands until
-      ## its ready again (which happens after the load
-      ## event)
-      bindEvents = =>
-        win = $(@$remoteIframe.prop("contentWindow"))
-        win.off("submit").on "submit", (e) =>
-          ## if we've prevented the default submit action
-          ## without stopping propagation, we will still
-          ## receive this event even though the form
-          ## did not submit
-          return if e.isDefaultPrevented()
-
-          @isReady(false, "submit")
-
-        win.off("beforeunload").on "beforeunload", (e) =>
-          ## bail if we've cancelled this event (from another source)
-          ## or we've set a returnValue on the original event
-          return if e.isDefaultPrevented() or @_eventHasReturnValue(e)
-
-          @isReady(false, "beforeunload")
-
-          @Cypress.Cookies.setInitial()
-
-          ## return undefined so
-          return undefined
-
-        win.off("unload").on "unload", =>
-          ## put cy in a waiting state now that
-          ## we've unloaded
-          @isReady(false, "unload")
-          @pageLoading()
-
-        win.off("hashchange").on "hashchange", =>
-          @urlChanged()
-
-        win.get(0).confirm = (message) ->
-          console.info "Confirming 'true' to: ", message
-          return true
 
       @$remoteIframe.on "load", =>
         @urlChanged()
         @pageLoading(false)
 
-        bindEvents()
+        ## we reapply window listeners on load even though we
+        ## applied them already during onBeforeLoad. the reason
+        ## is that after load javascript has finished being evaluated
+        ## and we may need to override things like alert + confirm again
+        @bindWindowListeners @$remoteIframe.prop("contentWindow")
         @isReady(true, "load")
-
-      ## in testing we set initiallyBind to
-      ## true because our iframe has already
-      ## loaded. because its already loaded
-      ## the bindEvents() function is never called
-      bindEvents() if initiallyBind
 
       ## anytime initialize is called we immediately
       ## set cy to be ready to invoke commands
@@ -95,7 +51,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       @listenTo @Cypress, "abort",      => @abort()
 
     abort: ->
-      @$remoteIframe?.off("submit unload load hashchange")
+      @$remoteIframe?.off("submit beforeunload unload load hashchange")
       @isReady(false, "abort")
       @prop("runnable")?.clearTimeout()
 

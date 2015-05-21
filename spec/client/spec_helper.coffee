@@ -100,8 +100,14 @@ window.enterCommandTestingMode = (fixture = "html/dom") ->
         $remoteIframe: @iframe
         config: ->
 
-      ## set initiallyBind to true for our iframe
-      @Cypress.trigger "initialize", obj, true
+      ## in testing we manually call bindWindowListeners
+      ## with our iframe's contentWindow because
+      ## our iframe has alreadyloaded. because
+      ## its already loaded these listeners would
+      ## never actually get applied
+      @cy.bindWindowListeners @iframe.prop("contentWindow")
+
+      @Cypress.trigger "initialize", obj
 
       ## must call defaults manually because
       ## this is naturally called in initialize

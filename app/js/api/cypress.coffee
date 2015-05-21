@@ -61,8 +61,11 @@ window.$Cypress = do ($, _, Backbone) ->
       @prepareForSpecEvents()
 
     onBeforeLoad: (contentWindow) ->
+      ## should probably just trigger the "before:load"
+      ## event here, so other commands can tap into that
       return if not @cy
 
+      @cy.bindWindowListeners(contentWindow)
       @cy.checkForServer(contentWindow)
       @cy.onBeforeLoad(contentWindow)
 

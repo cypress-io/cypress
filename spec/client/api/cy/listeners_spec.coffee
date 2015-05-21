@@ -1,0 +1,77 @@
+describe "$Cypress.Cy Listeners Extensions", ->
+  context "iframe load", ->
+    before ->
+      @iframe = $("<iframe />")
+
+    beforeEach ->
+      @Cypress = $Cypress.create({loadModules: true})
+      @cy = $Cypress.Cy.create(@Cypress, {})
+
+      @Cypress.trigger "initialize", {
+        $remoteIframe: @iframe
+        config: ->
+      }
+
+      ## make sure not to accidentally return
+      ## cy else mocha will queue up a .then()
+      null
+
+    after ->
+      @iframe.remove()
+
+    it "applies window listeners when an iframe fires its load event", (done) ->
+      bindWindowListeners = @sandbox.spy @cy, "bindWindowListeners"
+
+      @iframe.on "load", =>
+        expect(bindWindowListeners).to.be.calledOnce
+        expect(bindWindowListeners).to.be.calledWith @iframe.prop("contentWindow")
+        done()
+
+      ## append the iframe at the end so it naturally fires its load event
+      ## which cy should be binding to and call bindWindowListeners
+      @iframe.appendTo $("body")
+
+  context "actual behaviors of events", ->
+    enterCommandTestingMode()
+
+    it "calls bindWindowListeners when remote window fires onBeforeLoad", (done) ->
+      ## ensure bindWindowListeners was called
+      ## before onBeforeLoad
+      bindWindowListeners = @sandbox.spy @cy, "bindWindowListeners"
+
+      @cy.visit("fixtures/html/sinon.html", {
+        onBeforeLoad: (contentWindow) ->
+          expect(bindWindowListeners).to.be.calledWith contentWindow
+          done()
+      })
+
+    describe "beforeunload", ->
+      beforeEach ->
+        @isReady = @sandbox.spy @cy, "isReady"
+        @a = $("<a id='change-page' href='/timeout?ms=200'>foo</a>").appendTo @cy.$("body")
+
+      it "sets isReady to false", ->
+        ## when we click the a it should synchronously fire
+        ## the beforeunload event which we then set isReady to false
+        @cy.inspect().get("a#change-page").click().then ->
+          expect(@isReady).to.be.calledWith false, "beforeunload"
+
+      it "does not set isReady if beforeunload has a return value", ->
+        ## stub this so the actual beforeunload prompt doesnt show up!
+        @sandbox.stub(@cy, "_eventHasReturnValue").returns(true)
+
+        ## when we click the a it should synchronously fire
+        ## the beforeunload event which we then set isReady to false
+        @cy.inspect().get("a#change-page").click().then ->
+          expect(@isReady).not.to.be.calledWith false
+
+      it "sets initial cookies", ->
+        setInitial = @sandbox.stub @Cypress.Cookies, "setInitial"
+        @cy.get("a#change-page").click().then ->
+          expect(setInitial).to.be.called
+
+      it "calls cy#loading", ->
+        loading = @sandbox.stub @cy, "loading"
+        @cy.get("a#change-page").click().then ->
+          expect(loading).to.be.called
+
