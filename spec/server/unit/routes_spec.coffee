@@ -550,6 +550,19 @@ describe "Routes", ->
             null
           .end(done)
 
+      it "does not send back initial 500 content on 4xx errors", (done) ->
+        nock(@baseUrl)
+          .get("/index.html")
+          .reply(404, "404 not found", {
+            "Content-Type": "html/html"
+          })
+
+        supertest(@app)
+          .get("/index.html")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+          .expect(404, "404 not found")
+          .end(done)
+
     context "headers", ->
       describe "when initial is true", ->
         it "sets back to false", (done) ->

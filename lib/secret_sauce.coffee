@@ -505,7 +505,7 @@ SecretSauce.RemoteProxy =
     # res.end()
 
 SecretSauce.RemoteInitial =
-  okStatus: /^[2|3]\d+$/
+  okStatus: /^[2|3|4]\d+$/
   badCookieParam: /^(httponly|secure)$/i
 
   _handle: (req, res, next, Domain) ->
