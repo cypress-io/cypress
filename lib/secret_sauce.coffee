@@ -561,6 +561,8 @@ SecretSauce.RemoteInitial =
   getHttpContent: (thr, req, res, remoteHost) ->
     { _ } = SecretSauce
 
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
+
     ## prepends req.url with remoteHost
     remoteUrl = @url.resolve(remoteHost, req.url)
 
