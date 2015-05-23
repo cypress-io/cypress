@@ -11,14 +11,17 @@ do ($Cypress, _) ->
     bindWindowListeners: (contentWindow) ->
       win = $(contentWindow)
 
-      # win.off("submit").on "submit", (e) =>
-      #   ## if we've prevented the default submit action
-      #   ## without stopping propagation, we will still
-      #   ## receive this event even though the form
-      #   ## did not submit
-      #   return if e.isDefaultPrevented()
+      ## using the native submit method will not trigger a
+      ## beforeunload event synchronously so we must bind
+      ## to the submit event to know we're about to navigate away
+      win.off("submit").on "submit", (e) =>
+        ## if we've prevented the default submit action
+        ## without stopping propagation, we will still
+        ## receive this event even though the form
+        ## did not submit
+        return if e.isDefaultPrevented()
 
-      #   @isReady(false, "submit")
+        @isReady(false, "submit")
 
       win.off("beforeunload").on "beforeunload", (e) =>
         ## bail if we've cancelled this event (from another source)

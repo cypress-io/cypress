@@ -990,6 +990,19 @@ describe "$Cypress.Cy Actions Commands", ->
             return undefined
         .get("form:first").submit()
 
+    ## if we removed our submit handler this would fail!
+    it "does not resolve the submit command because submit event is captured setting isReady to false", ->
+      ## we must rely on isReady already being pending here
+      ## because the submit method does not trigger beforeunload
+      ## synchronously.
+
+      @cy.on "invoke:end", (obj) =>
+        if obj.name is "submit"
+          ## expect our isReady to be pending
+          expect(@cy.prop("ready").promise.isPending()).to.be.true
+
+      @cy.get("form:first").submit()
+
     describe "errors", ->
       beforeEach ->
         @allowErrors()
