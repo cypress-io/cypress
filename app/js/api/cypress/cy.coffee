@@ -129,12 +129,13 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
         @prop("recentlyReady", true)
 
         if ready = @prop("ready")
-          ready.promise.then =>
-            @trigger "ready", true
+          if ready.promise.isPending()
+            ready.promise.then =>
+              @trigger "ready", true
 
-            ## prevent accidential chaining
-            ## .this after isReady resolves
-            return null
+              ## prevent accidential chaining
+              ## .this after isReady resolves
+              return null
 
         return ready?.resolve()
 
