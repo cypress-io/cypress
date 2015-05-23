@@ -217,7 +217,12 @@ describe "$Cypress.Cy Navigation Commands", ->
         cy.get("form#click-me").submit().then ->
           expect(@log.get("type")).to.eq "parent"
 
-      it "#onConsole"
+      describe "#onConsole", ->
+        it "only has Command: loading", ->
+          cy.get("form#click-me").submit().then ->
+            expect(@log.attributes.onConsole()).to.deep.eq {
+              Command: "loading"
+            }
 
     describe "errors", ->
       beforeEach ->

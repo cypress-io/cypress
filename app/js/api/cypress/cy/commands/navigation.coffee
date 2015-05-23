@@ -32,6 +32,7 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
         type: "parent"
         name: "loading"
         message: "--waiting for new page to load---"
+        onConsole: -> {}
 
       prevTimeout = @_timeout()
 
@@ -55,7 +56,9 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
           try
             @throwErr "Timed out after waiting '#{options.timeout}ms' for your remote page to load.", command
           catch e
-            ready.reject(e)
+            ## must directly fail here else we potentially
+            ## get unhandled promise exception
+            @fail(e)
 
   Cypress.addParentCommand
 
