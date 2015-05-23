@@ -194,20 +194,80 @@ describe "$Cypress.Cy Navigation Commands", ->
         @cy.visit("timeout?ms=5000", {timeout: 500})
 
   context "#loading", ->
-    it "returns if current command is visit"
-
     it "clears current timeout"
 
     describe ".log", ->
-      it "is name: loading"
+      beforeEach ->
+        @Cypress.on "log", (@log) =>
 
-      it "is type: parent"
+      it "returns if current command is visit", ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push log
+
+        cy.visit("/fixtures/html/sinon.html").then ->
+          expect(logs).to.have.length(1)
+
+      it "is name: loading", ->
+        cy.get("form#click-me").find("input").click().then ->
+          expect(@log.get("name")).to.eq "loading"
+
+      it "is type: parent", ->
+        cy.get("form#click-me").submit().then ->
+          expect(@log.get("type")).to.eq "parent"
 
       it "#onConsole"
 
     describe "errors", ->
-      it "can time out"
+      beforeEach ->
+        @allowErrors()
+
+      it "can time out", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push log
+
+        @cy.on "fail", (err) ->
+          ## should only log once
+          expect(logs.length).to.eq 1
+          expect(err.message).to.eq "Timed out after waiting '100ms' for your remote page to load."
+          done()
+
+        @cy.on "invoke:end", =>
+          @cy.isReady(false, "testing")
+          @cy.loading({timeout: 100})
+
+        @cy.noop({})
 
       ## this goes through the same process as visit
       ## where it errors if cypress sent back an error
-      it "errors if [cypress-error] was found"
+      it "errors if [cypress-error] was found", (done) ->
+        cy$ = @cy.$
+
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push log
+
+        @cy.on "fail", (err) ->
+          ## should only log once
+          expect(logs.length).to.eq 1
+          expect(err.message).to.eq "Loading the new page failed."
+          done()
+
+        ## act as if we have this node
+        error = @sandbox.stub @cy, "$", (selector) ->
+          if selector is "[data-cypress-visit-error]"
+            error.restore()
+            return {length: 1}
+          else
+            cy$.apply(@, arguments)
+
+        @cy.on "invoke:end", =>
+          @cy.isReady(false, "testing")
+          @cy.loading()
+          @cy.isReady()
+
+        @cy.noop({})

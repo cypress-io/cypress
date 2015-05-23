@@ -44,12 +44,18 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
         .then =>
           @_storeHref()
           @_timeout(prevTimeout)
-          command.snapshot().end()
+          if Cypress.cy.$("[data-cypress-visit-error]").length
+            try
+              @throwErr("Loading the new page failed.", command)
+            catch e
+              @fail(e)
+          else
+            command.snapshot().end()
         .catch Promise.TimeoutError, (err) =>
           try
             @throwErr "Timed out after waiting '#{options.timeout}ms' for your remote page to load.", command
-          catch err
-            ready.reject(err)
+          catch e
+            ready.reject(e)
 
   Cypress.addParentCommand
 
