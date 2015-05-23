@@ -58,6 +58,13 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       promise = @prop("promise")
       promise?.cancel()
 
+      ## ready can potentially be cancellable
+      ## so we need cancel it (if it is)
+      ready = @prop("ready")
+      if ready and readyPromise = ready.promise
+        if readyPromise.isCancellable()
+          readyPromise.cancel()
+
       Promise.resolve(promise)
 
     stop: ->
@@ -384,7 +391,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
         ## resolving we need to ensure it finishes first
         if ready = @prop("ready")
           if ready.promise.isPending()
-            return Promise.resolve(ready.promise).return(subject)
+            return ready.promise.return(subject).catch (err) ->
 
         return subject
 

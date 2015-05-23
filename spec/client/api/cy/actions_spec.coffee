@@ -938,18 +938,24 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("form").submit().then ($form) ->
         expect($form.get(0)).to.eq form.get(0)
 
-    it "works with native event listeners", (done) ->
+    it "works with native event listeners", ->
+      submitted = false
+
       @cy.$("form:first").get(0).addEventListener "submit", ->
-        done()
+        submitted = true
 
-      @cy.get("form:first").submit()
+      @cy.get("form:first").submit().then ->
+        expect(submitted).to.be.true
 
-    it "bubbles up to the window", (done) ->
+    it "bubbles up to the window", ->
+      onsubmitCalled = false
+
       @cy
         .window().then (win) ->
-          win.onsubmit = -> done()
+          win.onsubmit = -> onsubmitCalled = true
           # $(win).on "submit", -> done()
-        .get("form:first").submit()
+        .get("form:first").submit().then ->
+          expect(onsubmitCalled).to.be.true
 
     it "does not submit the form action is prevented default", (done) ->
       @cy.$("form:first").parent().on "submit", (e) ->
@@ -979,16 +985,19 @@ describe "$Cypress.Cy Actions Commands", ->
             return undefined
         .get("form:first").submit().then -> done()
 
-    it "actually submits the form!", (done) ->
+    it "actually submits the form!", ->
+      beforeunload = false
+
       @cy
         .window().then (win) =>
           ## if we reach beforeunload we know the form
           ## has been submitted
           $(win).on "beforeunload", ->
-            done()
+            beforeunload = true
 
             return undefined
-        .get("form:first").submit()
+        .get("form:first").submit().then ->
+          expect(beforeunload).to.be.true
 
     ## if we removed our submit handler this would fail!
     it "does not resolve the submit command because submit event is captured setting isReady to false", ->

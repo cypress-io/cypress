@@ -25,6 +25,16 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
       ## the beforeunload, then dont output this command
       return if current?.name is "visit"
 
+      ## bail if we dont have a runnable
+      ## because beforeunload can happen at any time
+      ## we may no longer be testing and thus dont
+      ## want to fire a new loading event
+      ## TODO
+      ## this may change in the future since we want
+      ## to add debuggability in the chrome console
+      ## which at that point we may keep runnable around
+      return if not @prop("runnable")
+
       _.defaults options,
         timeout: 20000
 
@@ -41,6 +51,7 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
       ready = @prop("ready")
 
       ready.promise
+        .cancellable()
         .timeout(options.timeout)
         .then =>
           @_storeHref()
@@ -52,6 +63,9 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
               @fail(e)
           else
             command.snapshot().end()
+        .catch Promise.CancellationError, (err) ->
+          ## dont do anything on cancellation errors
+          return
         .catch Promise.TimeoutError, (err) =>
           try
             @throwErr "Timed out after waiting '#{options.timeout}ms' for your remote page to load.", command
