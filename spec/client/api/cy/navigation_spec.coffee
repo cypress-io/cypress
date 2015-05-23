@@ -91,12 +91,17 @@ describe "$Cypress.Cy Navigation Commands", ->
           .then ->
             @urlChanged = @sandbox.spy @cy, "urlChanged"
 
-      _.each ["back", "forward", "go", "pushState", "replaceState"], (attr) =>
+      _.each ["back", "forward", "go"], (attr) =>
         it "fires 'history:event' on attr: '#{attr}'", ->
           if attr is "go"
             arg = -1
 
           @win.history[attr](arg)
+          expect(@urlChanged).to.be.called
+
+      _.each ["pushState", "replaceState"], (attr) =>
+        it "fires 'history:event' on attr: '#{attr}'", ->
+          @win.history[attr]({}, "foo")
           expect(@urlChanged).to.be.called
 
     describe ".log", ->
