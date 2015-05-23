@@ -38,11 +38,18 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           word = Cypress.Utils.plural(options.el, "contains", "is")
           @throwErr(".submit() can only be called on a <form>! Your subject #{word} a: #{node}", command)
 
-        ## do more research here but see if we can
-        ## use the native submit event first and
-        ## fall back to simulating it second
-        submit = new Event("submit")
+        ## calling the native submit method will not actually trigger
+        ## a submit event, so we need to dispatch this manually so
+        ## native event listeners and jquery can bind to it
+        submit = new Event("submit", {bubbles: true, cancelable: true})
         origEl.dispatchEvent(submit)
+
+        ## now we need to check to see if we should actually submit
+        ## the form!
+        ## dont submit the form if either the returnValue is false
+        ## or the defaultPrevented value is false
+        if submit.returnValue isnt false and submit.defaultPrevented isnt true
+          origEl.submit()
 
         command.snapshot().end() if command
 

@@ -938,6 +938,58 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("form").submit().then ($form) ->
         expect($form.get(0)).to.eq form.get(0)
 
+    it "works with native event listeners", (done) ->
+      @cy.$("form:first").get(0).addEventListener "submit", ->
+        done()
+
+      @cy.get("form:first").submit()
+
+    it "bubbles up to the window", (done) ->
+      @cy
+        .window().then (win) ->
+          win.onsubmit = -> done()
+          # $(win).on "submit", -> done()
+        .get("form:first").submit()
+
+    it "does not submit the form action is prevented default", (done) ->
+      @cy.$("form:first").parent().on "submit", (e) ->
+        e.preventDefault()
+
+      @cy
+        .window().then (win) =>
+          ## if we reach beforeunload we know the form
+          ## has been submitted
+          $(win).on "beforeunload", ->
+            done("submit event should not submit the form!")
+
+            return undefined
+        .get("form:first").submit().then -> done()
+
+    it "does not submit the form action returned false", (done) ->
+      @cy.$("form:first").parent().on "submit", (e) ->
+        return false
+
+      @cy
+        .window().then (win) =>
+          ## if we reach beforeunload we know the form
+          ## has been submitted
+          $(win).on "beforeunload", ->
+            done("submit event should not submit the form!")
+
+            return undefined
+        .get("form:first").submit().then -> done()
+
+    it "actually submits the form!", (done) ->
+      @cy
+        .window().then (win) =>
+          ## if we reach beforeunload we know the form
+          ## has been submitted
+          $(win).on "beforeunload", ->
+            done()
+
+            return undefined
+        .get("form:first").submit()
+
     describe "errors", ->
       beforeEach ->
         @allowErrors()
@@ -996,16 +1048,17 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @Cypress.on "log", (@log) =>
+        @Cypress.on "log", (log) =>
+          if log.get("name") is "submit"
+            @log = log
 
-      it "logs immediately before resolving", (done) ->
+      it "logs immediately before resolving", ->
         form = @cy.$("form:first")
 
         @Cypress.on "log", (log) ->
           if log.get("name") is "submit"
             expect(log.get("state")).to.eq("pending")
             expect(log.get("$el").get(0)).to.eq form.get(0)
-            done()
 
         @cy.get("form:first").submit()
 
