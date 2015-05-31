@@ -49,6 +49,22 @@ describe "$Cypress.Cy Navigation Commands", ->
         prev = @cy.prop("current").prev
         expect(prev.args).to.have.length(1)
 
+    it "first navigates to about:blank if existing url isnt about:blank", ->
+      cy
+        .window().as("win")
+        .visit("timeout?ms=0").then ->
+          @_href = @sandbox.spy @cy, "_href"
+        .visit("timeout?ms=1").then ->
+          expect(@_href).to.be.calledWith @win, "about:blank"
+
+    it "does not navigate to about:blank if existing url is about:blank", ->
+      @sandbox.stub(@cy.sync, "url").returns("about:blank")
+      _href = @sandbox.spy @cy, "_href"
+
+      cy
+        .visit("timeout?ms=0").then ->
+          expect(_href).not.to.be.called
+
     describe "location getter overrides", ->
       beforeEach ->
         @eq = (attr, str) =>

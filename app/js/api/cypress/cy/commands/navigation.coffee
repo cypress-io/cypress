@@ -18,6 +18,9 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
       options = _.last(current.args)
       options?.onBeforeLoad?(contentWindow)
 
+    _href: (win, url) ->
+      win.location.href = url
+
     loading: (options = {}) ->
       current = @prop("current")
 
@@ -100,21 +103,37 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
       win = @sync.window()
 
       p = new Promise (resolve, reject) =>
-        @$remoteIframe.one "load", =>
-          @_storeHref()
-          @_timeout(prevTimeout)
-          options.onLoad?(win)
-          if Cypress.cy.$("[data-cypress-visit-error]").length
-            try
-              @throwErr("Could not load the remote page: #{url}", command)
-            catch e
-              reject(e)
-          else
-            command.snapshot().end()
-            resolve(win)
+        visit = (win, url, options) =>
+          # ## when the remote iframe's load event fires
+          # ## callback fn
+          @$remoteIframe.one "load", =>
+            @_storeHref()
+            @_timeout(prevTimeout)
+            options.onLoad?(win)
+            if Cypress.cy.$("[data-cypress-visit-error]").length
+              try
+                @throwErr("Could not load the remote page: #{url}", command)
+              catch e
+                reject(e)
+            else
+              command.snapshot().end()
+              resolve(win)
 
-        ## any existing global variables will get nuked after it navigates
-        @$remoteIframe.prop "src", Cypress.Location.createInitialRemoteSrc(url)
+          ## any existing global variables will get nuked after it navigates
+          @$remoteIframe.prop "src", Cypress.Location.createInitialRemoteSrc(url)
+
+
+        ## if we're visiting a page and we're not currently
+        ## on about:blank then we need to nuke the window
+        ## and after its nuked then visit the url
+        if @sync.url({log: false}) isnt "about:blank"
+          @$remoteIframe.one "load", =>
+            visit(win, url, options)
+
+          @_href(win, "about:blank")
+
+        else
+          visit(win, url, options)
 
       p
         .timeout(options.timeout)
