@@ -1772,6 +1772,27 @@ describe "$Cypress.Cy Actions Commands", ->
           }
 
   context "#click", ->
+    it "receives native click event", (done) ->
+      btn = @cy.$("#button")
+
+      coords = @cy.getCenterCoordinates(btn)
+
+      btn.get(0).addEventListener "click", (e) =>
+        obj = _(e).pick("bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which")
+        expect(obj).to.deep.eq {
+          bubbles: true
+          cancelable: true
+          view: @cy.sync.window()
+          clientX: coords.x
+          clientY: coords.y
+          button: 0
+          buttons: 0
+          which: 1
+        }
+        done()
+
+      @cy.get("#button").click()
+
     it "sends a click event", (done) ->
       @cy.$("#button").click -> done()
 

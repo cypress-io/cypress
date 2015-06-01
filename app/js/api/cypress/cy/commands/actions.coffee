@@ -296,32 +296,72 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       click = (el, index) =>
         $el = $(el)
 
+        ## in order to simulate actual user behavior we need to do the following:
+        ## 1. take our element and figure out its center coordinate
+        ## 2. check to figure out the element listed at those coordinates
+        ## 3. if this element is ourself or our descendents, click whatever was returned
+        ## 4. else throw an error because something is covering us up
+
+        coords = @getCoordinates($el)
+
+        $elToClick = @getElementAtCoordinates(coords.x, coords.y)
+
         if options.log
           command = Cypress.command
             $el: $el
+            coords: coords ## display the red dot at these coords
             onConsole: ->
               "Applied To":   $el
               "Elements":     $el.length
 
+              ## only do this if $elToClick isnt $el
+              "First Element Clicked": $elToClick
+
+        ## i think we need to calculate focus here as well
+        ## for instance if there is an <i> within a button, the <i>
+        ## shouldnt receive focus, the button should
+        ## research what elements are focusable. we'll probably need to
+        ## walk up the stack until we find a focusable element and give
+        ## focus to that.
+
+        ## research focus / blur bubbling. there is a spec which explains
+        ## the exact order of events
+
+        ## shouldnt the browser automatically calculate focus as per the default
+        ## action of a mouse click? or do we do this in case the browser isnt in focus?
+
         @ensureVisibility $el, command
+
+        @ensureDescendents $el, $elToClick, command
 
         wait = if $el.is("a") then 50 else 10
 
-        @command("focus", {el: $el, error: false, log: false}).then =>
-          el.click()
+        # @command("focus", {el: $el, error: false, log: false}).then =>
+        # $elToClick.get(0).click()
+        evt = new MouseEvent "click", {
+          bubbles: true
+          cancelable: true
+          view: @sync.window()
+          clientX: coords.x
+          clientY: coords.y
+        }
 
-          command.snapshot().end() if command
+        cancelled = !$elToClick.get(0).dispatchEvent(evt)
 
-          ## we want to add this wait delta to our
-          ## runnables timeout so we prevent it from
-          ## timing out from multiple clicks
-          @_timeout(wait, true)
+        # if cancelled
 
-          ## need to return null here to prevent
-          ## chaining thenable promises
-          return null
+        command.snapshot().end() if command
 
-        .delay(wait)
+        ## we want to add this wait delta to our
+        ## runnables timeout so we prevent it from
+        ## timing out from multiple clicks
+        @_timeout(wait, true)
+
+        ## need to return null here to prevent
+        ## chaining thenable promises
+        return null
+
+        Promise.delay(wait)
 
       Promise
         .resolve(options.el.toArray())
