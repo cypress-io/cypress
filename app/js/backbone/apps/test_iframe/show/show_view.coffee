@@ -184,6 +184,9 @@
       else
         dom = @$remote.contents().find("body")
 
+      ## scroll the bottom of the element into view
+      el.get(0).scrollIntoView(false) if el.get(0)
+
       el.each (index, el) =>
         el = $(el)
 
