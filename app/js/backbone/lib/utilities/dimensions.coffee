@@ -1,6 +1,27 @@
 @App.module "Utilities", (Utilities, App, Backbone, Marionette, $, _) ->
 
   API =
+    getHitBoxLayer: (coords, body) ->
+      body ?= $("body")
+
+      height = 10
+      width = 10
+
+      dotHeight = 4
+      dotWidth = 4
+
+      top  = coords.y - height / 2
+      left = coords.x - width / 2
+
+      dotTop  = height / 2 - dotHeight / 2
+      dotLeft = width / 2 - dotWidth / 2
+
+      box     = $("<div>", style: "position: absolute; top: #{top}px; left: #{left}px; width: #{width}px; height: #{height}px; background-color: red; border-radius: 5px; box-shadow: 0 0 5px #333; z-index: 2147483647;")
+      wrapper = $("<div>", style: "position: relative;").appendTo(box)
+      dot     = $("<div>", style: "position: absolute; top: #{dotTop}px; left: #{dotLeft}px; height: #{dotHeight}px; width: #{dotWidth}px; height: #{dotHeight}px; background-color: pink; border-radius: 5px;").appendTo(wrapper)
+
+      box.appendTo(body)
+
     getElementBoxModelLayers: (el, body) ->
       ## use our own body if one isnt explicitly passed in
       body ?= $("body")
@@ -152,6 +173,9 @@
 
   App.reqres.setHandler "element:dimensions", (el) ->
     API.getElementDimensions(el)
+
+  App.reqres.setHandler "element:hit:box:layer", (coords, body) ->
+    API.getHitBoxLayer(coords, body)
 
   ## return our API object for testability
   App.reqres.setHandler "element:dimensions:api", -> API

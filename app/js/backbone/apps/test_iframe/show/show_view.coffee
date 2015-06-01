@@ -152,9 +152,10 @@
 
       if options.el
         @highlightEl options.el,
-          id:   options.id
-          attr: options.attr
-          dom:  dom
+          coords: options.coords
+          id:     options.id
+          attr:   options.attr
+          dom:    dom
 
     addRevertMessage: (options) ->
       @reverted = true
@@ -171,7 +172,7 @@
       _.defaults options,
         init: true
 
-      @$remote.contents().find("[data-highlight-el]").remove()
+      @$remote.contents().find("[data-highlight-el],[data-highlight-hitbox]").remove()
 
       # # if we're not currently reverted
       # # and init is false then nuke the currently highlighted el
@@ -204,6 +205,10 @@
         setImmediate =>
           div = App.request("element:box:model:layers", el, dom)
           div.attr("data-highlight-el", options.id)
+
+          if coords = options.coords
+            box = App.request("element:hit:box:layer", coords, dom)
+            box.attr("data-highlight-hitbox")
 
     elExistsInDocument: (parent, el) ->
       $.contains parent[0], el[0]
