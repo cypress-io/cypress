@@ -43,3 +43,10 @@ do ($Cypress, _) ->
         @throwErr("Cannot call .#{method}() because the current subject has been removed or detached from the DOM.")
 
       return subject
+
+    ensureDescendents: ($el1, $el2, onFail) ->
+      method = @prop("current").name
+
+      unless $el1.is($el2) or $el1.has($el2)
+        node = $Cypress.Utils.stringifyElement($el2)
+        @throwErr("Cannot call .#{method}() because it is currently being covered by the element: #{node}", onFail)
