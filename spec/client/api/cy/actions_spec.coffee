@@ -1778,7 +1778,7 @@ describe "$Cypress.Cy Actions Commands", ->
       coords = @cy.getCenterCoordinates(btn)
 
       btn.get(0).addEventListener "click", (e) =>
-        obj = _(e).pick("bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which")
+        obj = _(e).pick("bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
         expect(obj).to.deep.eq {
           bubbles: true
           cancelable: true
@@ -1788,50 +1788,90 @@ describe "$Cypress.Cy Actions Commands", ->
           button: 0
           buttons: 0
           which: 1
+          relatedTarget: null
+          altKey: false
+          ctrlKey: false
+          shiftKey: false
+          metaKey: false
+          detail: 1
+          type: "click"
         }
         done()
 
       @cy.get("#button").click()
 
-    it "sends a click event", (done) ->
-      @cy.$("#button").click -> done()
+    it "bubbles up native click event", (done) ->
+      @cy.sync.window().addEventListener "click", (e) -> done()
 
       @cy.get("#button").click()
 
-    it "returns the original subject", ->
-      button = @cy.$("#button")
+    it "sends native mousedown event", (done) ->
+      btn = @cy.$("#button")
 
-      @cy.get("#button").click().then ($button) ->
-        expect($button).to.match button
+      coords = @cy.getCenterCoordinates(btn)
 
-    it "causes focusable elements to receive focus", (done) ->
-      text = @cy.$(":text:first")
-
-      text.focus -> done()
-
-      @cy.get(":text:first").click()
-
-    it "silences errors on onfocusable elements", ->
-      div = @cy.$("div:first")
-
-      @cy.get("div:first").click()
-
-    it "causes first focused element to receive blur", (done) ->
-      @cy.$("input:first").blur ->
-        console.log "input:first blurred"
+      btn.get(0).addEventListener "mousedown", (e) =>
+        obj = _(e).pick("bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
+        expect(obj).to.deep.eq {
+          bubbles: true
+          cancelable: true
+          view: @cy.sync.window()
+          clientX: coords.x
+          clientY: coords.y
+          button: 0
+          buttons: 1
+          which: 1
+          relatedTarget: null
+          altKey: false
+          ctrlKey: false
+          shiftKey: false
+          metaKey: false
+          detail: 1
+          type: "mousedown"
+        }
         done()
 
-      @cy
-        .get("input:first").focus()
-        .get("input:text:last").click()
+      @cy.get("#button").click()
 
-    it "inserts artificial delay of 10ms", ->
-      @cy.on "invoke:start", (obj) =>
-        if obj.name is "click"
-          @delay = @sandbox.spy Promise.prototype, "delay"
+    it "sends native mouseup event", (done) ->
+      btn = @cy.$("#button")
+
+      coords = @cy.getCenterCoordinates(btn)
+
+      btn.get(0).addEventListener "mouseup", (e) =>
+        obj = _(e).pick("bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
+        expect(obj).to.deep.eq {
+          bubbles: true
+          cancelable: true
+          view: @cy.sync.window()
+          clientX: coords.x
+          clientY: coords.y
+          button: 0
+          buttons: 0
+          which: 1
+          relatedTarget: null
+          altKey: false
+          ctrlKey: false
+          shiftKey: false
+          metaKey: false
+          detail: 1
+          type: "mouseup"
+        }
+        done()
+
+      @cy.get("#button").click()
+
+    it "sends mousedown, mouseup, click events in order", ->
+      events = []
+
+      btn = @cy.$("#button")
+
+      _.each "mousedown mouseup click".split(" "), (event) ->
+        btn.get(0).addEventListener event, ->
+          events.push(event)
 
       @cy.get("#button").click().then ->
-        expect(@delay).to.be.calledWith 10
+        expect(events).to.deep.eq ["mousedown", "mouseup", "click"]
 
     it "inserts artificial delay of 50ms for anchors", ->
       @cy.on "invoke:start", (obj) =>

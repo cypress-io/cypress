@@ -287,6 +287,9 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         .return(subject)
 
     click: (subject, options = {}) ->
+      ## TODO handle pointer-events: none
+      ## http://caniuse.com/#feat=pointer-events
+
       _.defaults options,
         el: subject
         log: true
@@ -336,19 +339,52 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
         wait = if $el.is("a") then 50 else 10
 
-        # @command("focus", {el: $el, error: false, log: false}).then =>
-        # $elToClick.get(0).click()
-        evt = new MouseEvent "click", {
+        stopPropagation = MouseEvent.prototype.stopPropagation
+
+        mdownEvt = new MouseEvent "mousedown", {
           bubbles: true
           cancelable: true
           view: @sync.window()
           clientX: coords.x
           clientY: coords.y
+          buttons: 1
+          detail: 1
         }
 
-        cancelled = !$elToClick.get(0).dispatchEvent(evt)
+        mdownEvt.stopPropagation = ->
+          @_hasStoppedPropagation = true
+          stopPropagation.apply(@, arguments)
 
-        # if cancelled
+        mupEvt = new MouseEvent "mouseup", {
+          bubbles: true
+          cancelable: true
+          view: @sync.window()
+          clientX: coords.x
+          clientY: coords.y
+          buttons: 0
+          detail: 1
+        }
+
+        # @command("focus", {el: $el, error: false, log: false}).then =>
+        # $elToClick.get(0).click()
+        clickEvt = new MouseEvent "click", {
+          bubbles: true
+          cancelable: true
+          view: @sync.window()
+          clientX: coords.x
+          clientY: coords.y
+          buttons: 0
+          detail: 1
+        }
+
+        mdownCancelled = !$elToClick.get(0).dispatchEvent(mdownEvt)
+
+        ## chrome will not fire mouseup or click events
+        ## when mousedown is .preventDefault(), or .stopPropagation()
+        ## so if it was 'cancelled', dont fire any more events
+        if not mdownCancelled and not mdownEvt._hasStoppedPropagation
+          mupCancelled   = !$elToClick.get(0).dispatchEvent(mupEvt)
+          clickCancelled = !$elToClick.get(0).dispatchEvent(clickEvt)
 
         command.snapshot().end() if command
 
