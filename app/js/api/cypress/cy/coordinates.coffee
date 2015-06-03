@@ -21,9 +21,24 @@ do ($Cypress, _) ->
       return el
 
     getCenterCoordinates: ($el) ->
-      offset = $el.offset()
-      width  = $el.outerWidth()
-      height = $el.outerHeight()
+      ## getBoundingClientRect ensures rotatation
+      ## is factored into calculations
+      ## which means we dont have to do any math, yay!
+      if Element.prototype.getBoundingClientRect
+        win = @sync.window()
+
+        ## top/left are returned relative to viewport
+        ## so we have to add in the scrolled amount
+        ## to get absolute coordinates
+        offset = $el.get(0).getBoundingClientRect()
+        offset.top  += win.pageYOffset
+        offset.left += win.pageXOffset
+
+        {width, height} = offset
+      else
+        offset = $el.offset()
+        width  = $el.outerWidth()
+        height = $el.outerHeight()
 
       {
         x: offset.left + width / 2
