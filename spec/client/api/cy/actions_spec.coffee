@@ -1976,7 +1976,12 @@ describe "$Cypress.Cy Actions Commands", ->
           .get("#button-covered-in-span").click()
           .focused().should("have.id", "button-covered-in-span")
 
-      # it.only "events", ->
+      it "will give focus to the window if no element is focusable", (done) ->
+        $(@cy.sync.window()).on "focus", -> done()
+
+        @cy.get("#nested-find").click()
+
+      # it "events", ->
       #   btn = @cy.$("button")
       #   win = $(@cy.sync.window())
 

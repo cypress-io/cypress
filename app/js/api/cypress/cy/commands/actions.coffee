@@ -4,6 +4,8 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
   textLike = "textarea,:text,[type=password],[type=email],[type=number],[type=date],[type=week],[type=month],[type=time],[type=datetime],[type=datetime-local],[type=search],[type=url]"
 
+  focusable = "a[href],link[href],button,input,select,textarea,[tabindex]"
+
   $.simulate.prototype.simulateKeySequence.defaults["{esc}"] = (rng, char, options) ->
     keyOpts = {keyCode: 27, charCode: 27, which: 27}
     _.each ["keydown", "keypress", "keyup"], (event) ->
@@ -81,7 +83,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       ## http://www.w3.org/TR/html5/editing.html#specially-focusable
       ## ensure there is only 1 dom element in the subject
       ## make sure its allowed to be focusable
-      if not options.$el.is("a[href],link[href],button,input,select,textarea,[tabindex]")
+      if not (options.$el.is(focusable) or $Cypress.Utils.hasWindow(options.$el))
         return if options.error is false
 
         node = Cypress.Utils.stringifyElement(options.$el)
@@ -393,6 +395,20 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
         @ensureDescendents $el, $elToClick, command
 
+        getFirstFocusableEl = ($el) ->
+          return $el if $el.is(focusable)
+
+          parent = $el.parent()
+
+          ## if we have no parent then just return
+          ## the window since that can receive focus
+          return $(win) if not parent.length
+
+          getFirstFocusableEl($el.parent())
+
+        ## retrieve the first focusable $el in our parent chain
+        $elToFocus = getFirstFocusableEl($elToClick)
+
         wait = 10
 
         stopPropagation = MouseEvent.prototype.stopPropagation
@@ -463,7 +479,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           Promise.resolve(afterMouseDown())
         else
           ## send in a focus event!
-          @command("focus", {$el: $elToClick, error: false, log: false})
+          @command("focus", {$el: $elToFocus, error: false, log: false})
           .then(afterMouseDown)
 
         p.delay(wait)
