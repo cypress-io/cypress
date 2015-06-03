@@ -1801,7 +1801,11 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("#button").click()
 
     it "bubbles up native click event", (done) ->
-      @cy.sync.window().addEventListener "click", (e) -> done()
+      click = (e) =>
+        @cy.sync.window().removeEventListener "click", click
+        done()
+
+      @cy.sync.window().addEventListener "click", click
 
       @cy.get("#button").click()
 
@@ -1873,13 +1877,145 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("#button").click().then ->
         expect(events).to.deep.eq ["mousedown", "mouseup", "click"]
 
-    it "inserts artificial delay of 50ms for anchors", ->
+    it "will send all events even mousedown is defaultPrevented", ->
+      events = []
+
+      btn = @cy.$("#button")
+
+      btn.get(0).addEventListener "mousedown", (e) ->
+        e.preventDefault()
+        expect(e.defaultPrevented).to.be.true
+
+      _.each "mouseup click".split(" "), (event) ->
+        btn.get(0).addEventListener event, ->
+          events.push(event)
+
+      @cy.get("#button").click().then ->
+        expect(events).to.deep.eq ["mouseup", "click"]
+
+    context "mousedown", ->
+      it "gives focus after mousedown", (done) ->
+        input = @cy.$("input:first")
+
+        input.get(0).addEventListener "focus", (e) =>
+          obj = _(e).pick("bubbles", "cancelable", "view", "pageX", "pageY", "which", "relatedTarget", "detail", "type")
+          expect(obj).to.deep.eq {
+            bubbles: false
+            cancelable: false
+            view: @cy.sync.window()
+            pageX: 0
+            pageY: 0
+            which: 0
+            relatedTarget: null
+            detail: 0
+            type: "focus"
+          }
+          done()
+
+        @cy.get("input:first").click()
+
+      it "gives focusin after mousedown", (done) ->
+        input = @cy.$("input:first")
+
+        input.get(0).addEventListener "focusin", (e) =>
+          obj = _(e).pick("bubbles", "cancelable", "view", "pageX", "pageY", "which", "relatedTarget", "detail", "type")
+          expect(obj).to.deep.eq {
+            bubbles: true
+            cancelable: false
+            view: @cy.sync.window()
+            pageX: 0
+            pageY: 0
+            which: 0
+            relatedTarget: null
+            detail: 0
+            type: "focusin"
+          }
+          done()
+
+        @cy.get("input:first").click()
+
+      it "gives all events in order", ->
+        events = []
+
+        input = @cy.$("input:first")
+
+        _.each "focus focusin mousedown mouseup click".split(" "), (event) ->
+          input.get(0).addEventListener event, ->
+            events.push(event)
+
+        @cy.get("input:first").click().then ->
+          expect(events).to.deep.eq ["mousedown", "focus", "focusin", "mouseup", "click"]
+
+      it "does not give focus if mousedown is defaultPrevented", (done) ->
+        input = @cy.$("input:first")
+
+        input.get(0).addEventListener "focus", (e) ->
+          done("should not have recieved focused event")
+
+        input.get(0).addEventListener "mousedown", (e) ->
+          e.preventDefault()
+          expect(e.defaultPrevented).to.be.true
+
+        @cy.get("input:first").click().then -> done()
+
+      # it.only "events", ->
+      #   btn = @cy.$("button")
+      #   win = $(@cy.sync.window())
+
+      #   _.each {"btn": btn, "win": win}, (type, key) ->
+      #     _.each "focus mousedown mouseup click".split(" "), (event) ->
+      #     # _.each "focus focusin focusout mousedown mouseup click".split(" "), (event) ->
+      #       type.get(0).addEventListener event, (e) ->
+      #         if key is "btn"
+      #           # e.preventDefault()
+      #           e.stopPropagation()
+
+      #         console.log "#{key} #{event}", e
+
+        # btn.on "mousedown", (e) ->
+          # console.log("btn mousedown")
+          # e.preventDefault()
+        # win.on "mousedown", -> console.log("win mousedown")
+
+    it "sends a click event", (done) ->
+      @cy.$("#button").click -> done()
+
+      @cy.get("#button").click()
+
+    it "returns the original subject", ->
+      button = @cy.$("#button")
+
+      @cy.get("#button").click().then ($button) ->
+        expect($button).to.match button
+
+    it "causes focusable elements to receive focus", (done) ->
+      text = @cy.$(":text:first")
+
+      text.focus -> done()
+
+      @cy.get(":text:first").click()
+
+    it "silences errors on onfocusable elements", ->
+      div = @cy.$("div:first")
+
+      @cy.get("div:first").click()
+
+    it "causes first focused element to receive blur", (done) ->
+      @cy.$("input:first").blur ->
+        console.log "input:first blurred"
+        done()
+
+      @cy
+        .get("input:first").focus()
+        .get("input:text:last").click()
+
+    it "inserts artificial delay of 10ms", ->
       @cy.on "invoke:start", (obj) =>
         if obj.name is "click"
           @delay = @sandbox.spy Promise.prototype, "delay"
 
-      @cy.contains("Home Page").click().then ->
-        expect(@delay).to.be.calledWith 50
+      @cy.get("#button").click().then ->
+        expect(@delay).to.be.calledWith 10
 
     it "can operate on a jquery collection", ->
       clicks = 0
@@ -1931,7 +2067,7 @@ describe "$Cypress.Cy Actions Commands", ->
       ## which proves we are clicking serially
       throttled = _.throttle ->
         clicks += 1
-      , 40, {leading: false}
+      , 5, {leading: false}
 
       anchors = @cy.$("#sequential-clicks a")
       anchors.click throttled

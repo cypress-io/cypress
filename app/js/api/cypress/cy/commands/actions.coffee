@@ -132,8 +132,27 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           simulate = =>
             @prop("forceFocusedEl", options.$el.get(0))
 
-            options.$el.cySimulate("focus")
-            options.$el.cySimulate("focusin")
+            ## todo handle relatedTarget's per the spec
+            focusinEvt = new FocusEvent "focusin", {
+              bubbles: true
+              view: @sync.window()
+              relatedTarget: null
+            }
+
+            focusEvt = new FocusEvent "focus", {
+              view: @sync.window()
+              relatedTarget: null
+            }
+
+            ## not fired in the correct order per w3c spec
+            ## because chrome chooses to fire focus before focusin
+            ## and since we have a simulation fallback we end up
+            ## doing it how chrome does it
+            ## http://www.w3.org/TR/DOM-Level-3-Events/#h-events-focusevent-event-order
+            options.$el.get(0).dispatchEvent(focusEvt)
+            options.$el.get(0).dispatchEvent(focusinEvt)
+            # options.$el.cySimulate("focus")
+            # options.$el.cySimulate("focusin")
 
           @command("focused", {log: false}).then ($focused) =>
             ## only blur if we have a focused element AND its not
@@ -290,11 +309,15 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       ## TODO handle pointer-events: none
       ## http://caniuse.com/#feat=pointer-events
 
+      ## TODO handle if element is removed during mousedown / mouseup
+
       _.defaults options,
         el: subject
         log: true
 
       @ensureDom(options.el)
+
+      win = @sync.window()
 
       click = (el, index) =>
         $el = $(el)
@@ -307,6 +330,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
         coords = @getCoordinates($el)
 
+        ## must include scroll offset to figure out the element at coordiantes
         $elToClick = @getElementAtCoordinates(coords.x, coords.y)
 
         if options.log
@@ -318,7 +342,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
               "Elements":     $el.length
 
               ## only do this if $elToClick isnt $el
-              "First Element Clicked": $elToClick
+              # "First Element Clicked": $elToClick
 
         ## i think we need to calculate focus here as well
         ## for instance if there is an <i> within a button, the <i>
@@ -337,14 +361,14 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
         @ensureDescendents $el, $elToClick, command
 
-        wait = if $el.is("a") then 50 else 10
+        wait = 10
 
         stopPropagation = MouseEvent.prototype.stopPropagation
 
         mdownEvt = new MouseEvent "mousedown", {
           bubbles: true
           cancelable: true
-          view: @sync.window()
+          view: win
           clientX: coords.x
           clientY: coords.y
           buttons: 1
@@ -358,19 +382,17 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         mupEvt = new MouseEvent "mouseup", {
           bubbles: true
           cancelable: true
-          view: @sync.window()
+          view: win
           clientX: coords.x
           clientY: coords.y
           buttons: 0
           detail: 1
         }
 
-        # @command("focus", {el: $el, error: false, log: false}).then =>
-        # $elToClick.get(0).click()
         clickEvt = new MouseEvent "click", {
           bubbles: true
           cancelable: true
-          view: @sync.window()
+          view: win
           clientX: coords.x
           clientY: coords.y
           buttons: 0
@@ -379,25 +401,32 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
         mdownCancelled = !$elToClick.get(0).dispatchEvent(mdownEvt)
 
-        ## chrome will not fire mouseup or click events
-        ## when mousedown is .preventDefault(), or .stopPropagation()
-        ## so if it was 'cancelled', dont fire any more events
-        if not mdownCancelled and not mdownEvt._hasStoppedPropagation
+        afterMouseDown = =>
           mupCancelled   = !$elToClick.get(0).dispatchEvent(mupEvt)
           clickCancelled = !$elToClick.get(0).dispatchEvent(clickEvt)
 
-        command.snapshot().end() if command
+          command.snapshot().end() if command
 
-        ## we want to add this wait delta to our
-        ## runnables timeout so we prevent it from
-        ## timing out from multiple clicks
-        @_timeout(wait, true)
+          ## we want to add this wait delta to our
+          ## runnables timeout so we prevent it from
+          ## timing out from multiple clicks
+          @_timeout(wait, true)
 
-        ## need to return null here to prevent
-        ## chaining thenable promises
-        return null
+          ## need to return null here to prevent
+          ## chaining thenable promises
+          return null
 
-        Promise.delay(wait)
+        ## if mousedown was cancelled then
+        ## just resolve after mouse down and dont
+        ## send a focus event
+        p = if mdownCancelled
+          Promise.resolve(afterMouseDown())
+        else
+          ## send in a focus event!
+          @command("focus", {el: $elToClick, error: false, log: false})
+          .then(afterMouseDown)
+
+        p.delay(wait)
 
       Promise
         .resolve(options.el.toArray())
