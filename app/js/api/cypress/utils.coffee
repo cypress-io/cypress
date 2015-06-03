@@ -82,6 +82,12 @@ $Cypress.Utils = do ($Cypress, _) ->
             .value()
               .join(", ")
 
+    hasWindow: (obj) ->
+      try
+        !!(obj and $.isWindow(obj[0])) or $.isWindow(obj)
+      catch
+        false
+
     hasElement: (obj) ->
       try
         !!(obj and obj[0] and _.isElement(obj[0])) or _.isElement(obj)
