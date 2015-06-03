@@ -31,6 +31,9 @@ do ($Cypress, _) ->
         ## so we have to add in the scrolled amount
         ## to get absolute coordinates
         offset = $el.get(0).getBoundingClientRect()
+
+        ## we have to convert to a regular object to mutate
+        offset = _(offset).pick("top", "left", "width", "height")
         offset.top  += win.pageYOffset
         offset.left += win.pageXOffset
 
@@ -41,8 +44,8 @@ do ($Cypress, _) ->
         height = $el.outerHeight()
 
       {
-        x: offset.left + width / 2
-        y: offset.top + height / 2
+        x: Math.floor(offset.left + width / 2)
+        y: Math.floor(offset.top + height / 2)
       }
 
     getCoordinates: ($el, position = "center") ->
