@@ -651,6 +651,10 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.$("[name=colors][value=blue]").change -> done()
         @cy.get("[name=colors]").check("blue")
 
+      it "emits focus event", (done) ->
+        @cy.$("[name=colors][value=blue]").focus -> done()
+        @cy.get("[name=colors]").check("blue")
+
     describe "errors", ->
       beforeEach ->
         @allowErrors()

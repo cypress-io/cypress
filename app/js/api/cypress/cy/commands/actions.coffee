@@ -278,7 +278,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
         wait = if $el.is("a") then 50 else 10
 
-        @command("focus", {el: $el, error: false, log: false}).then =>
+        @command("focus", {$el: $el, error: false, log: false}).then =>
           $el.cySimulate("dblclick")
 
           command.snapshot().end() if command
@@ -333,7 +333,6 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
         coords = @getCoordinates($el)
 
-        ## must include scroll offset to figure out the element at coordiantes
         $elToClick = @getElementAtCoordinates(coords.x, coords.y)
 
         if options.log
@@ -464,7 +463,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           Promise.resolve(afterMouseDown())
         else
           ## send in a focus event!
-          @command("focus", {el: $elToClick, error: false, log: false})
+          @command("focus", {$el: $elToClick, error: false, log: false})
           .then(afterMouseDown)
 
         p.delay(wait)
@@ -752,10 +751,10 @@ $Cypress.register "Actions", (Cypress, _, $) ->
   Cypress.Cy.extend
     _check_or_uncheck: (type, subject, values = [], options = {}) ->
       _.defaults options,
-        el: subject
+        $el: subject
         log: true
 
-      @ensureDom(options.el)
+      @ensureDom(options.$el)
 
       ## make sure we're an array of values
       values = [].concat(values)
@@ -792,7 +791,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
         if not isAcceptableElement($el)
           node   = Cypress.Utils.stringifyElement($el)
-          word   = Cypress.Utils.plural(options.el, "contains", "is")
+          word   = Cypress.Utils.plural(options.$el, "contains", "is")
           phrase = if type is "check" then " and :radio" else ""
           @throwErr ".#{type}() can only be called on :checkbox#{phrase}! Your subject #{word} a: #{node}", command
 
@@ -806,14 +805,14 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         ## if we didnt pass in any values or our
         ## el's value is in the array then check it
         if not values.length or $el.val() in values
-          @command("click", {el: $el, log: false}).then ->
+          @command("click", {$el: $el, log: false}).then ->
             command.snapshot().end() if command
 
             return null
 
       ## return our original subject when our promise resolves
       Promise
-        .resolve(options.el.toArray())
+        .resolve(options.$el.toArray())
         .each(checkOrUncheck)
         .cancellable()
-        .return(options.el)
+        .return(options.$el)
