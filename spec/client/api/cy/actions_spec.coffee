@@ -1958,6 +1958,14 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get("input:first").click().then -> done()
 
+      it "still gives focus to the focusable element even when click is issued to child element", ->
+        btn  = $("<button>", id: "button-covered-in-span").prependTo(@cy.$("body"))
+        span = $("<span>span in button</span>").css(padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
+
+        @cy
+          .get("#button-covered-in-span").click()
+          .focused().should("have.id", "button-covered-in-span")
+
       # it.only "events", ->
       #   btn = @cy.$("button")
       #   win = $(@cy.sync.window())
