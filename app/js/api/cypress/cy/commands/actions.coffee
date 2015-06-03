@@ -7,22 +7,22 @@ $Cypress.register "Actions", (Cypress, _, $) ->
   $.simulate.prototype.simulateKeySequence.defaults["{esc}"] = (rng, char, options) ->
     keyOpts = {keyCode: 27, charCode: 27, which: 27}
     _.each ["keydown", "keypress", "keyup"], (event) ->
-      options.el.simulate event, _.extend({}, options.eventProps, keyOpts)
+      options.$el.simulate event, _.extend({}, options.eventProps, keyOpts)
 
   Cypress.addChildCommand
 
     submit: (subject, options = {}) ->
       _.defaults options,
         log: true
-        el: subject
+        $el: subject
 
-      @ensureDom(options.el)
+      @ensureDom(options.$el)
 
       ## changing this to a promise .map() causes submit events
       ## to break when they need to be triggered synchronously
       ## like with type {enter}.  either convert type to a promise
       ## to just create a synchronous submit function
-      options.el.each (index, el) =>
+      options.$el.each (index, el) =>
         origEl = el
         $el = $(el)
 
@@ -35,7 +35,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
         if not $el.is("form")
           node = Cypress.Utils.stringifyElement(el)
-          word = Cypress.Utils.plural(options.el, "contains", "is")
+          word = Cypress.Utils.plural(options.$el, "contains", "is")
           @throwErr(".submit() can only be called on a <form>! Your subject #{word} a: #{node}", command)
 
         ## calling the native submit method will not actually trigger
@@ -312,10 +312,10 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       ## TODO handle if element is removed during mousedown / mouseup
 
       _.defaults options,
-        el: subject
+        $el: subject
         log: true
 
-      @ensureDom(options.el)
+      @ensureDom(options.$el)
 
       win = @sync.window()
 
@@ -469,34 +469,34 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         p.delay(wait)
 
       Promise
-        .resolve(options.el.toArray())
+        .resolve(options.$el.toArray())
         .each(click)
         .cancellable()
-        .return(options.el)
+        .return(options.$el)
 
     type: (subject, sequence, options = {}) ->
       ## allow the el we're typing into to be
       ## changed by options -- used by cy.clear()
       _.defaults options,
-        el: subject
+        $el: subject
         log: true
 
-      @ensureDom(options.el)
+      @ensureDom(options.$el)
 
       if options.log
         command = Cypress.command
-          $el: options.el
+          $el: options.$el
           onConsole: ->
             "Typed":      sequence
-            "Applied To": options.el
+            "Applied To": options.$el
 
-      @ensureVisibility(options.el, command)
+      @ensureVisibility(options.$el, command)
 
-      if not options.el.is(textLike)
-        node = Cypress.Utils.stringifyElement(options.el)
+      if not options.$el.is(textLike)
+        node = Cypress.Utils.stringifyElement(options.$el)
         @throwErr(".type() can only be called on textarea or :text! Your subject is a: #{node}", command)
 
-      if (num = options.el.length) and num > 1
+      if (num = options.$el.length) and num > 1
         @throwErr(".type() can only be called on a single textarea or :text! Your subject contained #{num} elements!", command)
 
       options.sequence = sequence
@@ -504,7 +504,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       ## click the element first to simulate focus
       ## and typical user behavior in case the window
       ## is out of focus
-      @command("click", {el: options.el, log: false}).then =>
+      @command("click", {$el: options.$el, log: false}).then =>
 
         multipleInputsAndNoSubmitElements = (form) ->
           inputs  = form.find("input")
@@ -528,7 +528,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           button.prop("disabled")
 
         simulateSubmitHandler = =>
-          form = options.el.parents("form")
+          form = options.$el.parents("form")
 
           return if not form.length
 
@@ -575,7 +575,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
                   ## currently this is sync but if we use a waterfall
                   ## promise in the submit command it will break again
                   ## consider changing type to a Promise and juggle logging
-                  @command("submit", {log: false, el: form})
+                  @command("submit", {log: false, $el: form})
 
           form.on "keydown", keydown
           form.on "keypress", keypress
@@ -591,13 +591,13 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         ## handle submit event handler here if we are pressing enter
         simulateSubmitHandler() if pressedEnter.test(sequence)
 
-        options.el.simulate "key-sequence", options
+        options.$el.simulate "key-sequence", options
 
         ## submit events should be finished at this point!
         ## so we can snapshot the current state of the DOM
         command.snapshot().end() if command
 
-        return options.el
+        return options.$el
 
     clear: (subject, options = {}) ->
       ## what about other types of inputs besides just text?
@@ -625,7 +625,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           word = Cypress.Utils.plural(subject, "contains", "is")
           @throwErr ".clear() can only be called on textarea or :text! Your subject #{word} a: #{node}", command
 
-        @command("type", "{selectall}{del}", {el: $el, log: false}).then ->
+        @command("type", "{selectall}{del}", {$el: $el, log: false}).then ->
           command.snapshot().end() if command
 
           return null
