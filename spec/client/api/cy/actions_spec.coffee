@@ -765,12 +765,18 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("[name=colors][value=blue]").check().then ($input) ->
           expect(@log.get("$el").get(0)).to.eq $input.get(0)
 
+      it "passes in coords", ->
+        @cy.get("[name=colors][value=blue]").check().then ($input) ->
+          coords = @cy.getCenterCoordinates($input)
+          expect(@log.get("coords")).to.deep.eq coords
+
       it "#onConsole", ->
         @cy.get("[name=colors][value=blue]").check().then ($input) ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "check"
             "Applied To": @log.get("$el")
             Elements: 1
+            Coords: coords
           }
 
       it "#onConsole when checkbox is already checked", ->
@@ -2218,6 +2224,12 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get("button:first").click().then ->
           expect(logs).to.have.length(1)
+
+      it "passes in coords", ->
+        @cy.get("button").first().click().then ($btn) ->
+          $btn.blur() ## blur which removes focus styles which would change coords
+          coords = @cy.getCenterCoordinates($btn)
+          expect(@log.get("coords")).to.deep.eq coords
 
       it "#onConsole", ->
         @cy.get("button").first().click().then ($button) ->

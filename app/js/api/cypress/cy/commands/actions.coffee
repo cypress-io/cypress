@@ -785,6 +785,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         if options.log
           command = Cypress.command
             $el: $el
+            coords: @getCoordinates($el)
             onConsole: -> onConsole
 
         @ensureVisibility $el, command
