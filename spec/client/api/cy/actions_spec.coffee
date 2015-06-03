@@ -2144,6 +2144,26 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get("#three-buttons button").click()
 
+      it "throws when a non-descendent element is covering subject", (done) ->
+        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").prependTo(@cy.$("body"))
+        span = $("<span>span on button</span>").css(position: "absolute", left: btn.offset().left, top: btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+        logs = []
+
+        node = @Cypress.Utils.stringifyElement(span)
+
+        @Cypress.on "log", (@log) =>
+          logs.push log
+
+        @cy.on "fail", (err) =>
+          ## get + click logs
+          expect(logs.length).eq(2)
+          expect(@log.get("error")).to.eq(err)
+          expect(err.message).to.eq "Cannot call .click() on this element because it is being covered by another element: #{node}"
+          done()
+
+        @cy.get("#button-covered-in-span").click()
+
     describe ".log", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>

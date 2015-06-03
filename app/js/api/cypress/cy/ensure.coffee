@@ -47,6 +47,6 @@ do ($Cypress, _) ->
     ensureDescendents: ($el1, $el2, onFail) ->
       method = @prop("current").name
 
-      unless $el1.is($el2) or $el1.has($el2)
+      unless ($el1.get(0) is $el2.get(0)) or $el1.has($el2).length
         node = $Cypress.Utils.stringifyElement($el2)
-        @throwErr("Cannot call .#{method}() because it is currently being covered by the element: #{node}", onFail)
+        @throwErr("Cannot call .#{method}() on this element because it is being covered by another element: #{node}", onFail)
