@@ -776,11 +776,11 @@ describe "$Cypress.Cy Actions Commands", ->
             Command: "check"
             "Applied To": @log.get("$el")
             Elements: 1
-            Coords: coords
           }
 
       it "#onConsole when checkbox is already checked", ->
         @cy.get("[name=colors][value=blue]").check().check().then ($input) ->
+          expect(@log.get("coords")).to.be.undefined
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "check"
             "Applied To": @log.get("$el")

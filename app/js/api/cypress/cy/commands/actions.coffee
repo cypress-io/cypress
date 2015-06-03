@@ -785,7 +785,6 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         if options.log
           command = Cypress.command
             $el: $el
-            coords: @getCoordinates($el)
             onConsole: -> onConsole
 
         @ensureVisibility $el, command
@@ -802,6 +801,10 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         if isNoop($el)
           onConsole.Note = "This checkbox was already #{type}ed. No operation took place."
           return
+        else
+          ## set the coords only if we are actually
+          ## going to go out and click this bad boy
+          command.set "coords", @getCoordinates($el)
 
         ## if we didnt pass in any values or our
         ## el's value is in the array then check it
