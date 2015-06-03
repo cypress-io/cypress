@@ -143,3 +143,18 @@ describe "Element Dimensions Utility", ->
       it "does not throw on negative margins or negative padding", ->
         fn = => App.request("element:dimensions", @square)
         expect(fn).not.to.throw(Error)
+
+    context "rectangle rotated 90deg", ->
+      beforeEach ->
+        @rect = @cy.$("#rect-rotated")
+
+      it "layers rotation correctly", ->
+        @layer = App.request "element:box:model:layers", @rect, @cy.$("body")
+        # expect(@layer.children().offset()).to.deep.eq @rect.offset()
+
+        @layer.children().each (index, el) ->
+          $el = $(el)
+          expect($el.offset()).to.deep.eq {
+            top: $el.data("top")
+            left: $el.data("left")
+          }

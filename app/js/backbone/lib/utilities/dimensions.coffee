@@ -73,19 +73,40 @@
 
       container.appendTo(body)
 
+      container.children().each (index, el) ->
+        $el  = $(el)
+        top  = $el.data("top")
+        left = $el.data("left")
+
+        ## dont ask... for some reason we
+        ## have to run offset twice!
+        for i in [1..2]
+          $el.offset({
+            top: top
+            left: left
+          })
+
       return container
 
     createLayer: (el, attr, color, container, dimensions) ->
+      transform = el.css("transform")
+
+      css = {
+        transform: transform
+        width: dimensions.width
+        height: dimensions.height
+        # top: dimensions.top
+        # left: dimensions.left
+        position: "absolute"
+        zIndex: @getZIndex(el)
+        backgroundColor: color
+        opacity: 0.6
+      }
+
       $("<div>")
-        .css
-          width: dimensions.width
-          height: dimensions.height
-          top: dimensions.top
-          left: dimensions.left
-          position: "absolute"
-          zIndex: @getZIndex(el)
-          backgroundColor: color
-          opacity: 0.6
+        .css(css)
+        .attr("data-top", dimensions.top)
+        .attr("data-left", dimensions.left)
         .attr("data-layer", attr)
         .prependTo(container)
 
