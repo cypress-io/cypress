@@ -2145,6 +2145,9 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("#three-buttons button").click()
 
     describe ".log", ->
+      beforeEach ->
+        @Cypress.on "log", (@log) =>
+
       it "logs immediately before resolving", (done) ->
         button = @cy.$("button:first")
 
@@ -2157,8 +2160,6 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("button:first").click()
 
       it "snapshots after clicking", ->
-        @Cypress.on "log", (@log) =>
-
         @cy.get("button:first").click().then ($button) ->
           expect(@log.get("snapshot")).to.be.an("object")
 
@@ -2187,11 +2188,99 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(logs).to.have.length(1)
 
       it "#onConsole", ->
-        @Cypress.on "log", (@log) =>
-
         @cy.get("button").first().click().then ($button) ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
-            Command: "click"
-            "Applied To": @log.get("$el")
-            Elements: 1
-          }
+          console = @log.attributes.onConsole()
+          expect(console.Command).to.eq "click"
+          expect(console["Applied To"].get(0)).to.eq @log.get("$el").get(0)
+          expect(console.Elements).to.eq 1
+
+      it "#onConsole actual element clicked", ->
+        btn  = $("<button>", id: "button-covered-in-span").prependTo(@cy.$("body"))
+        span = $("<span>span in button</span>").css(padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
+
+        @cy.get("#button-covered-in-span").click().then ->
+          expect(@log.attributes.onConsole()["Actual Element Clicked"].get(0)).to.eq span.get(0)
+
+      it "#onConsole groups MouseDown", ->
+        @cy.$("input:first").mousedown -> return false
+
+        @cy.get("input:first").click().then ->
+          expect(@log.attributes.onConsole().groups()).to.deep.eq [
+            {
+              name: "MouseDown"
+              items: {
+                preventedDefault: true
+                stoppedPropagation: true
+              }
+            },
+            {
+              name: "MouseUp"
+              items: {
+                preventedDefault: false
+                stoppedPropagation: false
+              }
+            },
+            {
+              name: "Click"
+              items: {
+                preventedDefault: false
+                stoppedPropagation: false
+              }
+            }
+          ]
+
+      it "#onConsole groups MouseUp", ->
+        @cy.$("input:first").mouseup -> return false
+
+        @cy.get("input:first").click().then ->
+          expect(@log.attributes.onConsole().groups()).to.deep.eq [
+            {
+              name: "MouseDown"
+              items: {
+                preventedDefault: false
+                stoppedPropagation: false
+              }
+            },
+            {
+              name: "MouseUp"
+              items: {
+                preventedDefault: true
+                stoppedPropagation: true
+              }
+            },
+            {
+              name: "Click"
+              items: {
+                preventedDefault: false
+                stoppedPropagation: false
+              }
+            }
+          ]
+
+      it "#onConsole groups Click", ->
+        @cy.$("input:first").click -> return false
+
+        @cy.get("input:first").click().then ->
+          expect(@log.attributes.onConsole().groups()).to.deep.eq [
+            {
+              name: "MouseDown"
+              items: {
+                preventedDefault: false
+                stoppedPropagation: false
+              }
+            },
+            {
+              name: "MouseUp"
+              items: {
+                preventedDefault: false
+                stoppedPropagation: false
+              }
+            },
+            {
+              name: "Click"
+              items: {
+                preventedDefault: true
+                stoppedPropagation: true
+              }
+            }
+          ]

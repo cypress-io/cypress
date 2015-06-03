@@ -322,6 +322,9 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       click = (el, index) =>
         $el = $(el)
 
+        mdownCancelled = mupCancelled = clickCancelled = null
+        mdownEvt = mupEvt = clickEvt = null
+
         ## in order to simulate actual user behavior we need to do the following:
         ## 1. take our element and figure out its center coordinate
         ## 2. check to figure out the element listed at those coordinates
@@ -338,11 +341,41 @@ $Cypress.register "Actions", (Cypress, _, $) ->
             $el: $el
             coords: coords ## display the red dot at these coords
             onConsole: ->
-              "Applied To":   $el
-              "Elements":     $el.length
+              obj = {
+                "Applied To":   $el
+                "Elements":     $el.length
+              }
 
-              ## only do this if $elToClick isnt $el
-              # "First Element Clicked": $elToClick
+              if $el.get(0) isnt $elToClick.get(0)
+                ## only do this if $elToClick isnt $el
+                obj["Actual Element Clicked"] = $elToClick
+
+              obj.groups = ->
+                [
+                  {
+                    name: "MouseDown"
+                    items: {
+                      preventedDefault: mdownCancelled
+                      stoppedPropagation: !!mdownEvt._hasStoppedPropagation
+                    }
+                  },
+                  {
+                    name: "MouseUp"
+                    items: {
+                      preventedDefault: mupCancelled
+                      stoppedPropagation: !!mupEvt._hasStoppedPropagation
+                    }
+                  }
+                  {
+                    name: "Click"
+                    items: {
+                      preventedDefault: clickCancelled
+                      stoppedPropagation: !!clickEvt._hasStoppedPropagation
+                    }
+                  }
+                ]
+
+              obj
 
         ## i think we need to calculate focus here as well
         ## for instance if there is an <i> within a button, the <i>
@@ -389,6 +422,10 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           detail: 1
         }
 
+        mupEvt.stopPropagation = ->
+          @_hasStoppedPropagation = true
+          stopPropagation.apply(@, arguments)
+
         clickEvt = new MouseEvent "click", {
           bubbles: true
           cancelable: true
@@ -398,6 +435,10 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           buttons: 0
           detail: 1
         }
+
+        clickEvt.stopPropagation = ->
+          @_hasStoppedPropagation = true
+          stopPropagation.apply(@, arguments)
 
         mdownCancelled = !$elToClick.get(0).dispatchEvent(mdownEvt)
 
