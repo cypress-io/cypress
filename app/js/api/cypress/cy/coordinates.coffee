@@ -3,7 +3,22 @@ do ($Cypress, _) ->
   ## move these all to utilities? yeah?
   $Cypress.Cy.extend
     getElementAtCoordinates: (x, y) ->
-      $(@sync.document().get(0).elementFromPoint(x, y))
+      win = @sync.window()
+      doc = @sync.document().get(0)
+
+      prevScrollX = win.pageXOffset
+      prevScrollY = win.pageYOffset
+
+      win.scrollTo(x, y)
+
+      scrollX = x - win.pageXOffset
+      scrollY = y - win.pageYOffset
+
+      el = $(@sync.document().get(0).elementFromPoint(scrollX, scrollY))
+
+      win.scrollTo(prevScrollX, prevScrollY)
+
+      return el
 
     getCenterCoordinates: ($el) ->
       offset = $el.offset()
