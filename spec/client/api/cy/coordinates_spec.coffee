@@ -13,6 +13,9 @@ describe "$Cypress.Cy Coordinates Extensions", ->
         @$button.hide()
         expect(@cy.getElementAtCoordinates(100, 60).get(0)).not.to.eq @$button.get(0)
 
+      it "returns null if no element was found", ->
+        expect(@cy.getElementAtCoordinates(1e9, 1e9)).to.be.null
+
     context "#getCenterCoordinates", ->
       it "returns center x/y including padding", ->
         ## padding is added to the line-height but width includes the padding

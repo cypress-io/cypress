@@ -14,7 +14,11 @@ do ($Cypress, _) ->
       scrollX = x - win.pageXOffset
       scrollY = y - win.pageYOffset
 
-      el = $(@sync.document().get(0).elementFromPoint(scrollX, scrollY))
+      el = @sync.document().get(0).elementFromPoint(scrollX, scrollY)
+
+      ## only wrap el if its non-null
+      if el
+        el = $(el)
 
       win.scrollTo(prevScrollX, prevScrollY)
 
