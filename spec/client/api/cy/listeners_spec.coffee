@@ -34,16 +34,15 @@ describe "$Cypress.Cy Listeners Extensions", ->
   context "actual behaviors of events", ->
     enterCommandTestingMode()
 
-    it "calls bindWindowListeners when remote window fires onBeforeLoad", (done) ->
+    it "calls bindWindowListeners when remote window fires onBeforeLoad", ->
       ## ensure bindWindowListeners was called
       ## before onBeforeLoad
       bindWindowListeners = @sandbox.spy @cy, "bindWindowListeners"
 
       @cy.visit("fixtures/html/sinon.html", {
-        onBeforeLoad: (contentWindow) ->
-          expect(bindWindowListeners).to.be.calledWith contentWindow
-          done()
-      })
+        onBeforeLoad: (@contentWindow) =>
+      }).then ->
+        expect(bindWindowListeners).to.be.calledWith @contentWindow
 
     describe "beforeunload", ->
       beforeEach ->

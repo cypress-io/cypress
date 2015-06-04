@@ -82,11 +82,20 @@ $Cypress.Utils = do ($Cypress, _) ->
             .value()
               .join(", ")
 
+    hasWindow: (obj) ->
+      try
+        !!(obj and $.isWindow(obj[0])) or $.isWindow(obj)
+      catch
+        false
+
     hasElement: (obj) ->
       try
         !!(obj and obj[0] and _.isElement(obj[0])) or _.isElement(obj)
       catch
         false
+
+    isDescendent: ($el1, $el2) ->
+      !!(($el1.get(0) is $el2.get(0)) or $el1.has($el2).length)
 
     ## short form css-inlines the element
     ## long form returns the outerHTML

@@ -4,25 +4,27 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
   textLike = "textarea,:text,[type=password],[type=email],[type=number],[type=date],[type=week],[type=month],[type=time],[type=datetime],[type=datetime-local],[type=search],[type=url]"
 
+  focusable = "a[href],link[href],button,input,select,textarea,[tabindex]"
+
   $.simulate.prototype.simulateKeySequence.defaults["{esc}"] = (rng, char, options) ->
     keyOpts = {keyCode: 27, charCode: 27, which: 27}
     _.each ["keydown", "keypress", "keyup"], (event) ->
-      options.el.simulate event, _.extend({}, options.eventProps, keyOpts)
+      options.$el.simulate event, _.extend({}, options.eventProps, keyOpts)
 
   Cypress.addChildCommand
 
     submit: (subject, options = {}) ->
       _.defaults options,
         log: true
-        el: subject
+        $el: subject
 
-      @ensureDom(options.el)
+      @ensureDom(options.$el)
 
       ## changing this to a promise .map() causes submit events
       ## to break when they need to be triggered synchronously
       ## like with type {enter}.  either convert type to a promise
       ## to just create a synchronous submit function
-      options.el.each (index, el) =>
+      options.$el.each (index, el) =>
         origEl = el
         $el = $(el)
 
@@ -35,7 +37,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
         if not $el.is("form")
           node = Cypress.Utils.stringifyElement(el)
-          word = Cypress.Utils.plural(options.el, "contains", "is")
+          word = Cypress.Utils.plural(options.$el, "contains", "is")
           @throwErr(".submit() can only be called on a <form>! Your subject #{word} a: #{node}", command)
 
         ## calling the native submit method will not actually trigger
@@ -81,7 +83,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       ## http://www.w3.org/TR/html5/editing.html#specially-focusable
       ## ensure there is only 1 dom element in the subject
       ## make sure its allowed to be focusable
-      if not options.$el.is("a[href],link[href],button,input,select,textarea,[tabindex]")
+      if not (options.$el.is(focusable) or $Cypress.Utils.hasWindow(options.$el))
         return if options.error is false
 
         node = Cypress.Utils.stringifyElement(options.$el)
@@ -132,8 +134,27 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           simulate = =>
             @prop("forceFocusedEl", options.$el.get(0))
 
-            options.$el.cySimulate("focus")
-            options.$el.cySimulate("focusin")
+            ## todo handle relatedTarget's per the spec
+            focusinEvt = new FocusEvent "focusin", {
+              bubbles: true
+              view: @sync.window()
+              relatedTarget: null
+            }
+
+            focusEvt = new FocusEvent "focus", {
+              view: @sync.window()
+              relatedTarget: null
+            }
+
+            ## not fired in the correct order per w3c spec
+            ## because chrome chooses to fire focus before focusin
+            ## and since we have a simulation fallback we end up
+            ## doing it how chrome does it
+            ## http://www.w3.org/TR/DOM-Level-3-Events/#h-events-focusevent-event-order
+            options.$el.get(0).dispatchEvent(focusEvt)
+            options.$el.get(0).dispatchEvent(focusinEvt)
+            # options.$el.cySimulate("focus")
+            # options.$el.cySimulate("focusin")
 
           @command("focused", {log: false}).then ($focused) =>
             ## only blur if we have a focused element AND its not
@@ -259,7 +280,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
         wait = if $el.is("a") then 50 else 10
 
-        @command("focus", {el: $el, error: false, log: false}).then =>
+        @command("focus", {$el: $el, error: false, log: false}).then =>
           $el.cySimulate("dblclick")
 
           command.snapshot().end() if command
@@ -287,30 +308,137 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         .return(subject)
 
     click: (subject, options = {}) ->
+      ## TODO handle pointer-events: none
+      ## http://caniuse.com/#feat=pointer-events
+
+      ## TODO handle if element is removed during mousedown / mouseup
+
       _.defaults options,
-        el: subject
+        $el: subject
         log: true
 
-      @ensureDom(options.el)
+      @ensureDom(options.$el)
+
+      win             = @sync.window()
+      wait            = 10
+      stopPropagation = MouseEvent.prototype.stopPropagation
 
       click = (el, index) =>
         $el = $(el)
 
-        if options.log
-          command = Cypress.command
-            $el: $el
-            onConsole: ->
-              "Applied To":   $el
-              "Elements":     $el.length
+        mdownCancelled = mupCancelled = clickCancelled = null
+        mdownEvt = mupEvt = clickEvt = null
 
+        if options.log
+          command = Cypress.command({$el: $el})
+
+        ## in order to simulate actual user behavior we need to do the following:
+        ## 1. take our element and figure out its center coordinate
+        ## 2. check to figure out the element listed at those coordinates
+        ## 3. if this element is ourself or our descendents, click whatever was returned
+        ## 4. else throw an error because something is covering us up
         @ensureVisibility $el, command
 
-        wait = if $el.is("a") then 50 else 10
+        getFirstFocusableEl = ($el) ->
+          return $el if $el.is(focusable)
 
-        @command("focus", {el: $el, error: false, log: false}).then =>
-          el.click()
+          parent = $el.parent()
 
-          command.snapshot().end() if command
+          ## if we have no parent then just return
+          ## the window since that can receive focus
+          return $(win) if not parent.length
+
+          getFirstFocusableEl($el.parent())
+
+        issueMouseDown = ($elToClick, coords) =>
+          mdownEvt = new MouseEvent "mousedown", {
+            bubbles: true
+            cancelable: true
+            view: win
+            clientX: coords.x
+            clientY: coords.y
+            buttons: 1
+            detail: 1
+          }
+
+          mdownEvt.stopPropagation = ->
+            @_hasStoppedPropagation = true
+            stopPropagation.apply(@, arguments)
+
+          mupEvt = new MouseEvent "mouseup", {
+            bubbles: true
+            cancelable: true
+            view: win
+            clientX: coords.x
+            clientY: coords.y
+            buttons: 0
+            detail: 1
+          }
+
+          mupEvt.stopPropagation = ->
+            @_hasStoppedPropagation = true
+            stopPropagation.apply(@, arguments)
+
+          clickEvt = new MouseEvent "click", {
+            bubbles: true
+            cancelable: true
+            view: win
+            clientX: coords.x
+            clientY: coords.y
+            buttons: 0
+            detail: 1
+          }
+
+          clickEvt.stopPropagation = ->
+            @_hasStoppedPropagation = true
+            stopPropagation.apply(@, arguments)
+
+          mdownCancelled = !$elToClick.get(0).dispatchEvent(mdownEvt)
+
+        afterMouseDown = ($elToClick, coords) =>
+          mupCancelled   = !$elToClick.get(0).dispatchEvent(mupEvt)
+          clickCancelled = !$elToClick.get(0).dispatchEvent(clickEvt)
+
+          onConsole = ->
+            obj = {
+              "Applied To":   $el
+              "Elements":     $el.length
+              "Coords":       coords
+            }
+
+            if $el.get(0) isnt $elToClick.get(0)
+              ## only do this if $elToClick isnt $el
+              obj["Actual Element Clicked"] = $elToClick
+
+            obj.groups = ->
+              [
+                {
+                  name: "MouseDown"
+                  items: {
+                    preventedDefault: mdownCancelled
+                    stoppedPropagation: !!mdownEvt._hasStoppedPropagation
+                  }
+                },
+                {
+                  name: "MouseUp"
+                  items: {
+                    preventedDefault: mupCancelled
+                    stoppedPropagation: !!mupEvt._hasStoppedPropagation
+                  }
+                }
+                {
+                  name: "Click"
+                  items: {
+                    preventedDefault: clickCancelled
+                    stoppedPropagation: !!clickEvt._hasStoppedPropagation
+                  }
+                }
+              ]
+
+            obj
+
+          ## display the red dot at these coords
+          command.set({coords: coords, onConsole: onConsole}).snapshot().end() if command
 
           ## we want to add this wait delta to our
           ## runnables timeout so we prevent it from
@@ -321,37 +449,83 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           ## chaining thenable promises
           return null
 
-        .delay(wait)
+        findElByCoordinates = ($el) =>
+
+          getCoords = =>
+            coords = @getCoordinates($el)
+
+            ## accept options which disable actually ensuring the element
+            ## is clickable / in the foreground
+            ## this is helpful during css animations for instance where
+            ## you're trying to click a moving target. in that case we'll
+            ## just 'click' it for you and simulate everything related to
+            ## the click without verifying it is clickable. focus events
+            ## default actions, propagation, etc will still be respected
+            $elToClick = @getElementAtCoordinates(coords.x, coords.y)
+
+            try
+              @ensureDescendents $el, $elToClick, command
+            catch err
+              options.command = command
+              options.error   = err
+              return @_retry(getCoords, options)
+
+            return {
+              coords: coords
+              $elToClick: $elToClick
+            }
+
+          Promise.resolve(getCoords())
+
+        p = findElByCoordinates($el).then (obj) =>
+          {$elToClick, coords} = obj
+
+          issueMouseDown($elToClick, coords)
+
+          ## if mousedown was cancelled then
+          ## just resolve after mouse down and dont
+          ## send a focus event
+          if mdownCancelled
+            afterMouseDown($elToClick, coords)
+          else
+            ## retrieve the first focusable $el in our parent chain
+            $elToFocus = getFirstFocusableEl($elToClick)
+
+            ## send in a focus event!
+            @command("focus", {$el: $elToFocus, error: false, log: false})
+            .then -> afterMouseDown($elToClick, coords)
+
+        p.delay(wait)
 
       Promise
-        .resolve(options.el.toArray())
+        .resolve(options.$el.toArray())
         .each(click)
         .cancellable()
-        .return(options.el)
+        .return(options.$el)
 
     type: (subject, sequence, options = {}) ->
       ## allow the el we're typing into to be
       ## changed by options -- used by cy.clear()
       _.defaults options,
-        el: subject
+        $el: subject
         log: true
 
-      @ensureDom(options.el)
+      @ensureDom(options.$el)
 
       if options.log
         command = Cypress.command
-          $el: options.el
+          $el: options.$el
           onConsole: ->
             "Typed":      sequence
-            "Applied To": options.el
+            "Applied To": options.$el
 
-      @ensureVisibility(options.el, command)
+      @ensureVisibility(options.$el, command)
 
-      if not options.el.is(textLike)
-        node = Cypress.Utils.stringifyElement(options.el)
+      if not options.$el.is(textLike)
+        node = Cypress.Utils.stringifyElement(options.$el)
         @throwErr(".type() can only be called on textarea or :text! Your subject is a: #{node}", command)
 
-      if (num = options.el.length) and num > 1
+      if (num = options.$el.length) and num > 1
         @throwErr(".type() can only be called on a single textarea or :text! Your subject contained #{num} elements!", command)
 
       options.sequence = sequence
@@ -359,7 +533,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       ## click the element first to simulate focus
       ## and typical user behavior in case the window
       ## is out of focus
-      @command("click", {el: options.el, log: false}).then =>
+      @command("click", {$el: options.$el, log: false}).then =>
 
         multipleInputsAndNoSubmitElements = (form) ->
           inputs  = form.find("input")
@@ -383,7 +557,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           button.prop("disabled")
 
         simulateSubmitHandler = =>
-          form = options.el.parents("form")
+          form = options.$el.parents("form")
 
           return if not form.length
 
@@ -430,7 +604,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
                   ## currently this is sync but if we use a waterfall
                   ## promise in the submit command it will break again
                   ## consider changing type to a Promise and juggle logging
-                  @command("submit", {log: false, el: form})
+                  @command("submit", {log: false, $el: form})
 
           form.on "keydown", keydown
           form.on "keypress", keypress
@@ -446,13 +620,13 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         ## handle submit event handler here if we are pressing enter
         simulateSubmitHandler() if pressedEnter.test(sequence)
 
-        options.el.simulate "key-sequence", options
+        options.$el.simulate "key-sequence", options
 
         ## submit events should be finished at this point!
         ## so we can snapshot the current state of the DOM
         command.snapshot().end() if command
 
-        return options.el
+        return options.$el
 
     clear: (subject, options = {}) ->
       ## what about other types of inputs besides just text?
@@ -480,7 +654,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           word = Cypress.Utils.plural(subject, "contains", "is")
           @throwErr ".clear() can only be called on textarea or :text! Your subject #{word} a: #{node}", command
 
-        @command("type", "{selectall}{del}", {el: $el, log: false}).then ->
+        @command("type", "{selectall}{del}", {$el: $el, log: false}).then ->
           command.snapshot().end() if command
 
           return null
@@ -606,10 +780,10 @@ $Cypress.register "Actions", (Cypress, _, $) ->
   Cypress.Cy.extend
     _check_or_uncheck: (type, subject, values = [], options = {}) ->
       _.defaults options,
-        el: subject
+        $el: subject
         log: true
 
-      @ensureDom(options.el)
+      @ensureDom(options.$el)
 
       ## make sure we're an array of values
       values = [].concat(values)
@@ -646,7 +820,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
         if not isAcceptableElement($el)
           node   = Cypress.Utils.stringifyElement($el)
-          word   = Cypress.Utils.plural(options.el, "contains", "is")
+          word   = Cypress.Utils.plural(options.$el, "contains", "is")
           phrase = if type is "check" then " and :radio" else ""
           @throwErr ".#{type}() can only be called on :checkbox#{phrase}! Your subject #{word} a: #{node}", command
 
@@ -656,18 +830,22 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         if isNoop($el)
           onConsole.Note = "This checkbox was already #{type}ed. No operation took place."
           return
+        else
+          ## set the coords only if we are actually
+          ## going to go out and click this bad boy
+          command.set "coords", @getCoordinates($el)
 
         ## if we didnt pass in any values or our
         ## el's value is in the array then check it
         if not values.length or $el.val() in values
-          @command("click", {el: $el, log: false}).then ->
+          @command("click", {$el: $el, log: false}).then ->
             command.snapshot().end() if command
 
             return null
 
       ## return our original subject when our promise resolves
       Promise
-        .resolve(options.el.toArray())
+        .resolve(options.$el.toArray())
         .each(checkOrUncheck)
         .cancellable()
-        .return(options.el)
+        .return(options.$el)

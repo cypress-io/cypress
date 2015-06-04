@@ -651,6 +651,10 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.$("[name=colors][value=blue]").change -> done()
         @cy.get("[name=colors]").check("blue")
 
+      it "emits focus event", (done) ->
+        @cy.$("[name=colors][value=blue]").focus -> done()
+        @cy.get("[name=colors]").check("blue")
+
     describe "errors", ->
       beforeEach ->
         @allowErrors()
@@ -761,6 +765,11 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("[name=colors][value=blue]").check().then ($input) ->
           expect(@log.get("$el").get(0)).to.eq $input.get(0)
 
+      it "passes in coords", ->
+        @cy.get("[name=colors][value=blue]").check().then ($input) ->
+          coords = @cy.getCenterCoordinates($input)
+          expect(@log.get("coords")).to.deep.eq coords
+
       it "#onConsole", ->
         @cy.get("[name=colors][value=blue]").check().then ($input) ->
           expect(@log.attributes.onConsole()).to.deep.eq {
@@ -771,6 +780,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "#onConsole when checkbox is already checked", ->
         @cy.get("[name=colors][value=blue]").check().check().then ($input) ->
+          expect(@log.get("coords")).to.be.undefined
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "check"
             "Applied To": @log.get("$el")
@@ -1772,6 +1782,127 @@ describe "$Cypress.Cy Actions Commands", ->
           }
 
   context "#click", ->
+    it "receives native click event", (done) ->
+      btn = @cy.$("#button")
+
+      coords = @cy.getCenterCoordinates(btn)
+
+      btn.get(0).addEventListener "click", (e) =>
+        obj = _(e).pick("bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
+        expect(obj).to.deep.eq {
+          bubbles: true
+          cancelable: true
+          view: @cy.sync.window()
+          clientX: coords.x
+          clientY: coords.y
+          button: 0
+          buttons: 0
+          which: 1
+          relatedTarget: null
+          altKey: false
+          ctrlKey: false
+          shiftKey: false
+          metaKey: false
+          detail: 1
+          type: "click"
+        }
+        done()
+
+      @cy.get("#button").click()
+
+    it "bubbles up native click event", (done) ->
+      click = (e) =>
+        @cy.sync.window().removeEventListener "click", click
+        done()
+
+      @cy.sync.window().addEventListener "click", click
+
+      @cy.get("#button").click()
+
+    it "sends native mousedown event", (done) ->
+      btn = @cy.$("#button")
+
+      coords = @cy.getCenterCoordinates(btn)
+
+      btn.get(0).addEventListener "mousedown", (e) =>
+        obj = _(e).pick("bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
+        expect(obj).to.deep.eq {
+          bubbles: true
+          cancelable: true
+          view: @cy.sync.window()
+          clientX: coords.x
+          clientY: coords.y
+          button: 0
+          buttons: 1
+          which: 1
+          relatedTarget: null
+          altKey: false
+          ctrlKey: false
+          shiftKey: false
+          metaKey: false
+          detail: 1
+          type: "mousedown"
+        }
+        done()
+
+      @cy.get("#button").click()
+
+    it "sends native mouseup event", (done) ->
+      btn = @cy.$("#button")
+
+      coords = @cy.getCenterCoordinates(btn)
+
+      btn.get(0).addEventListener "mouseup", (e) =>
+        obj = _(e).pick("bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
+        expect(obj).to.deep.eq {
+          bubbles: true
+          cancelable: true
+          view: @cy.sync.window()
+          clientX: coords.x
+          clientY: coords.y
+          button: 0
+          buttons: 0
+          which: 1
+          relatedTarget: null
+          altKey: false
+          ctrlKey: false
+          shiftKey: false
+          metaKey: false
+          detail: 1
+          type: "mouseup"
+        }
+        done()
+
+      @cy.get("#button").click()
+
+    it "sends mousedown, mouseup, click events in order", ->
+      events = []
+
+      btn = @cy.$("#button")
+
+      _.each "mousedown mouseup click".split(" "), (event) ->
+        btn.get(0).addEventListener event, ->
+          events.push(event)
+
+      @cy.get("#button").click().then ->
+        expect(events).to.deep.eq ["mousedown", "mouseup", "click"]
+
+    it "will send all events even mousedown is defaultPrevented", ->
+      events = []
+
+      btn = @cy.$("#button")
+
+      btn.get(0).addEventListener "mousedown", (e) ->
+        e.preventDefault()
+        expect(e.defaultPrevented).to.be.true
+
+      _.each "mouseup click".split(" "), (event) ->
+        btn.get(0).addEventListener event, ->
+          events.push(event)
+
+      @cy.get("#button").click().then ->
+        expect(events).to.deep.eq ["mouseup", "click"]
+
     it "sends a click event", (done) ->
       @cy.$("#button").click -> done()
 
@@ -1811,14 +1942,6 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#button").click().then ->
         expect(@delay).to.be.calledWith 10
-
-    it "inserts artificial delay of 50ms for anchors", ->
-      @cy.on "invoke:start", (obj) =>
-        if obj.name is "click"
-          @delay = @sandbox.spy Promise.prototype, "delay"
-
-      @cy.contains("Home Page").click().then ->
-        expect(@delay).to.be.calledWith 50
 
     it "can operate on a jquery collection", ->
       clicks = 0
@@ -1870,7 +1993,7 @@ describe "$Cypress.Cy Actions Commands", ->
       ## which proves we are clicking serially
       throttled = _.throttle ->
         clicks += 1
-      , 40, {leading: false}
+      , 5, {leading: false}
 
       anchors = @cy.$("#sequential-clicks a")
       anchors.click throttled
@@ -1891,6 +2014,117 @@ describe "$Cypress.Cy Actions Commands", ->
           done()
 
       @cy.get("#three-buttons button").click()
+
+    describe "mousedown", ->
+      it "gives focus after mousedown", (done) ->
+        input = @cy.$("input:first")
+
+        input.get(0).addEventListener "focus", (e) =>
+          obj = _(e).pick("bubbles", "cancelable", "view", "pageX", "pageY", "which", "relatedTarget", "detail", "type")
+          expect(obj).to.deep.eq {
+            bubbles: false
+            cancelable: false
+            view: @cy.sync.window()
+            pageX: 0
+            pageY: 0
+            which: 0
+            relatedTarget: null
+            detail: 0
+            type: "focus"
+          }
+          done()
+
+        @cy.get("input:first").click()
+
+      it "gives focusin after mousedown", (done) ->
+        input = @cy.$("input:first")
+
+        input.get(0).addEventListener "focusin", (e) =>
+          obj = _(e).pick("bubbles", "cancelable", "view", "pageX", "pageY", "which", "relatedTarget", "detail", "type")
+          expect(obj).to.deep.eq {
+            bubbles: true
+            cancelable: false
+            view: @cy.sync.window()
+            pageX: 0
+            pageY: 0
+            which: 0
+            relatedTarget: null
+            detail: 0
+            type: "focusin"
+          }
+          done()
+
+        @cy.get("input:first").click()
+
+      it "gives all events in order", ->
+        events = []
+
+        input = @cy.$("input:first")
+
+        _.each "focus focusin mousedown mouseup click".split(" "), (event) ->
+          input.get(0).addEventListener event, ->
+            events.push(event)
+
+        @cy.get("input:first").click().then ->
+          expect(events).to.deep.eq ["mousedown", "focus", "focusin", "mouseup", "click"]
+
+      it "does not give focus if mousedown is defaultPrevented", (done) ->
+        input = @cy.$("input:first")
+
+        input.get(0).addEventListener "focus", (e) ->
+          done("should not have recieved focused event")
+
+        input.get(0).addEventListener "mousedown", (e) ->
+          e.preventDefault()
+          expect(e.defaultPrevented).to.be.true
+
+        @cy.get("input:first").click().then -> done()
+
+      it "still gives focus to the focusable element even when click is issued to child element", ->
+        btn  = $("<button>", id: "button-covered-in-span").prependTo(@cy.$("body"))
+        span = $("<span>span in button</span>").css(padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
+
+        @cy
+          .get("#button-covered-in-span").click()
+          .focused().should("have.id", "button-covered-in-span")
+
+      it "will give focus to the window if no element is focusable", (done) ->
+        $(@cy.sync.window()).on "focus", -> done()
+
+        @cy.get("#nested-find").click()
+
+      # it "events", ->
+      #   btn = @cy.$("button")
+      #   win = $(@cy.sync.window())
+
+      #   _.each {"btn": btn, "win": win}, (type, key) ->
+      #     _.each "focus mousedown mouseup click".split(" "), (event) ->
+      #     # _.each "focus focusin focusout mousedown mouseup click".split(" "), (event) ->
+      #       type.get(0).addEventListener event, (e) ->
+      #         if key is "btn"
+      #           # e.preventDefault()
+      #           e.stopPropagation()
+
+      #         console.log "#{key} #{event}", e
+
+        # btn.on "mousedown", (e) ->
+          # console.log("btn mousedown")
+          # e.preventDefault()
+        # win.on "mousedown", -> console.log("win mousedown")
+
+    describe "retry support", ->
+      it "eventually clicks when covered up", ->
+        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").prependTo(@cy.$("body"))
+        span = $("<span>span on button</span>").css(position: "absolute", left: btn.offset().left, top: btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+        retried = false
+
+        @cy.on "retry", _.after 3, ->
+          span.hide()
+          retried = true
+
+        @cy.get("#button-covered-in-span").click().then ->
+          expect(retried).to.be.true
 
     describe "errors", ->
       beforeEach ->
@@ -1947,7 +2181,32 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get("#three-buttons button").click()
 
+      it "throws when a non-descendent element is covering subject", (done) ->
+        @cy._timeout(200)
+
+        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").prependTo(@cy.$("body"))
+        span = $("<span>span on button</span>").css(position: "absolute", left: btn.offset().left, top: btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+        logs = []
+
+        node = @Cypress.Utils.stringifyElement(span)
+
+        @Cypress.on "log", (@log) =>
+          logs.push log
+
+        @cy.on "fail", (err) =>
+          ## get + click logs
+          expect(logs.length).eq(2)
+          expect(@log.get("error")).to.eq(err)
+          expect(err.message).to.include "Cannot call .click() on this element because it is being covered by another element: #{node}"
+          done()
+
+        @cy.get("#button-covered-in-span").click()
+
     describe ".log", ->
+      beforeEach ->
+        @Cypress.on "log", (@log) =>
+
       it "logs immediately before resolving", (done) ->
         button = @cy.$("button:first")
 
@@ -1960,8 +2219,6 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("button:first").click()
 
       it "snapshots after clicking", ->
-        @Cypress.on "log", (@log) =>
-
         @cy.get("button:first").click().then ($button) ->
           expect(@log.get("snapshot")).to.be.an("object")
 
@@ -1989,12 +2246,106 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("button:first").click().then ->
           expect(logs).to.have.length(1)
 
-      it "#onConsole", ->
-        @Cypress.on "log", (@log) =>
+      it "passes in coords", ->
+        @cy.get("button").first().click().then ($btn) ->
+          $btn.blur() ## blur which removes focus styles which would change coords
+          coords = @cy.getCenterCoordinates($btn)
+          expect(@log.get("coords")).to.deep.eq coords
 
+      it "#onConsole", ->
         @cy.get("button").first().click().then ($button) ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
-            Command: "click"
-            "Applied To": @log.get("$el")
-            Elements: 1
-          }
+          console = @log.attributes.onConsole()
+          expect(console.Command).to.eq "click"
+          expect(console["Applied To"].get(0)).to.eq @log.get("$el").get(0)
+          expect(console.Elements).to.eq 1
+
+      it "#onConsole actual element clicked", ->
+        btn  = $("<button>", id: "button-covered-in-span").prependTo(@cy.$("body"))
+        span = $("<span>span in button</span>").css(padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
+
+        @cy.get("#button-covered-in-span").click().then ->
+          expect(@log.attributes.onConsole()["Actual Element Clicked"].get(0)).to.eq span.get(0)
+
+      it "#onConsole groups MouseDown", ->
+        @cy.$("input:first").mousedown -> return false
+
+        @cy.get("input:first").click().then ->
+          expect(@log.attributes.onConsole().groups()).to.deep.eq [
+            {
+              name: "MouseDown"
+              items: {
+                preventedDefault: true
+                stoppedPropagation: true
+              }
+            },
+            {
+              name: "MouseUp"
+              items: {
+                preventedDefault: false
+                stoppedPropagation: false
+              }
+            },
+            {
+              name: "Click"
+              items: {
+                preventedDefault: false
+                stoppedPropagation: false
+              }
+            }
+          ]
+
+      it "#onConsole groups MouseUp", ->
+        @cy.$("input:first").mouseup -> return false
+
+        @cy.get("input:first").click().then ->
+          expect(@log.attributes.onConsole().groups()).to.deep.eq [
+            {
+              name: "MouseDown"
+              items: {
+                preventedDefault: false
+                stoppedPropagation: false
+              }
+            },
+            {
+              name: "MouseUp"
+              items: {
+                preventedDefault: true
+                stoppedPropagation: true
+              }
+            },
+            {
+              name: "Click"
+              items: {
+                preventedDefault: false
+                stoppedPropagation: false
+              }
+            }
+          ]
+
+      it "#onConsole groups Click", ->
+        @cy.$("input:first").click -> return false
+
+        @cy.get("input:first").click().then ->
+          expect(@log.attributes.onConsole().groups()).to.deep.eq [
+            {
+              name: "MouseDown"
+              items: {
+                preventedDefault: false
+                stoppedPropagation: false
+              }
+            },
+            {
+              name: "MouseUp"
+              items: {
+                preventedDefault: false
+                stoppedPropagation: false
+              }
+            },
+            {
+              name: "Click"
+              items: {
+                preventedDefault: true
+                stoppedPropagation: true
+              }
+            }
+          ]

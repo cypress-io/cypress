@@ -30,16 +30,25 @@ do ($Cypress, _) ->
 
       method ?= @prop("current").name
 
+      isWindow = $Cypress.Utils.hasWindow(subject)
+
       ## think about dropping the 'method' part
       ## and adding exactly what the subject is
       ## if its an object or array, just say Object or Array
       ## but if its a primitive, just print out its value like
       ## true, false, 0, 1, 3, "foo", "bar"
-      if not $Cypress.Utils.hasElement(subject)
+      if not (isWindow or $Cypress.Utils.hasElement(subject))
         console.warn("Subject is currently: ", subject)
         @throwErr("Cannot call .#{method}() on a non-DOM subject!")
 
-      if not @_contains(subject)
+      if not (isWindow or @_contains(subject))
         @throwErr("Cannot call .#{method}() because the current subject has been removed or detached from the DOM.")
 
       return subject
+
+    ensureDescendents: ($el1, $el2, onFail) ->
+      method = @prop("current").name
+
+      unless $Cypress.Utils.isDescendent($el1, $el2)
+        node = $Cypress.Utils.stringifyElement($el2)
+        @throwErr("Cannot call .#{method}() on this element because it is being covered by another element: #{node}", onFail)

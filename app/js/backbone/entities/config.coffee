@@ -124,9 +124,10 @@
       return if not command.hasSnapshot()
 
       @trigger "revert:dom", command.getSnapshot(),
-        id:   command.cid
-        el:   command.getEl()
-        attr: command.get("highlightAttr")
+        id:     command.cid
+        el:     command.getEl()
+        attr:   command.get("highlightAttr")
+        coords: command.get("coords")
 
     highlightEl: (command, init = true) ->
       @trigger "highlight:el", command.getEl(),
