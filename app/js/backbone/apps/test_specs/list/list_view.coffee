@@ -208,7 +208,8 @@
     resortView: ->
       @collection.each (model, index) =>
         view = @children.findByModel(model)
-        @moveViewToIndex(view, index) if view._index isnt index
+        if view and view._index isnt index
+          @moveViewToIndex(view, index)
 
     moveViewToIndex: (view, index) ->
       view._index = index
