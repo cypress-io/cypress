@@ -188,6 +188,11 @@
       ## scroll the bottom of the element into view
       el.get(0).scrollIntoView(false) if el.get(0)
 
+      setImmediate =>
+        if coords = options.coords
+          box = App.request("element:hit:box:layer", coords, dom)
+          box.attr("data-highlight-hitbox")
+
       el.each (index, el) =>
         el = $(el)
 
@@ -205,10 +210,6 @@
         setImmediate =>
           div = App.request("element:box:model:layers", el, dom)
           div.attr("data-highlight-el", options.id)
-
-          if coords = options.coords
-            box = App.request("element:hit:box:layer", coords, dom)
-            box.attr("data-highlight-hitbox")
 
     elExistsInDocument: (parent, el) ->
       $.contains parent[0], el[0]
