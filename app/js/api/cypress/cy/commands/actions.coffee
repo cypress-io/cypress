@@ -319,7 +319,9 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
       @ensureDom(options.$el)
 
-      win = @sync.window()
+      win             = @sync.window()
+      wait            = 10
+      stopPropagation = MouseEvent.prototype.stopPropagation
 
       click = (el, index) =>
         $el = $(el)
@@ -327,73 +329,15 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         mdownCancelled = mupCancelled = clickCancelled = null
         mdownEvt = mupEvt = clickEvt = null
 
+        if options.log
+          command = Cypress.command({$el: $el})
+
         ## in order to simulate actual user behavior we need to do the following:
         ## 1. take our element and figure out its center coordinate
         ## 2. check to figure out the element listed at those coordinates
         ## 3. if this element is ourself or our descendents, click whatever was returned
         ## 4. else throw an error because something is covering us up
-
-        coords = @getCoordinates($el)
-
-        $elToClick = @getElementAtCoordinates(coords.x, coords.y)
-
-        if options.log
-          command = Cypress.command
-            $el: $el
-            coords: coords ## display the red dot at these coords
-            onConsole: ->
-              obj = {
-                "Applied To":   $el
-                "Elements":     $el.length
-              }
-
-              if $el.get(0) isnt $elToClick.get(0)
-                ## only do this if $elToClick isnt $el
-                obj["Actual Element Clicked"] = $elToClick
-
-              obj.groups = ->
-                [
-                  {
-                    name: "MouseDown"
-                    items: {
-                      preventedDefault: mdownCancelled
-                      stoppedPropagation: !!mdownEvt._hasStoppedPropagation
-                    }
-                  },
-                  {
-                    name: "MouseUp"
-                    items: {
-                      preventedDefault: mupCancelled
-                      stoppedPropagation: !!mupEvt._hasStoppedPropagation
-                    }
-                  }
-                  {
-                    name: "Click"
-                    items: {
-                      preventedDefault: clickCancelled
-                      stoppedPropagation: !!clickEvt._hasStoppedPropagation
-                    }
-                  }
-                ]
-
-              obj
-
-        ## i think we need to calculate focus here as well
-        ## for instance if there is an <i> within a button, the <i>
-        ## shouldnt receive focus, the button should
-        ## research what elements are focusable. we'll probably need to
-        ## walk up the stack until we find a focusable element and give
-        ## focus to that.
-
-        ## research focus / blur bubbling. there is a spec which explains
-        ## the exact order of events
-
-        ## shouldnt the browser automatically calculate focus as per the default
-        ## action of a mouse click? or do we do this in case the browser isnt in focus?
-
         @ensureVisibility $el, command
-
-        @ensureDescendents $el, $elToClick, command
 
         getFirstFocusableEl = ($el) ->
           return $el if $el.is(focusable)
@@ -406,62 +350,95 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
           getFirstFocusableEl($el.parent())
 
-        ## retrieve the first focusable $el in our parent chain
-        $elToFocus = getFirstFocusableEl($elToClick)
+        issueMouseDown = ($elToClick, coords) =>
+          mdownEvt = new MouseEvent "mousedown", {
+            bubbles: true
+            cancelable: true
+            view: win
+            clientX: coords.x
+            clientY: coords.y
+            buttons: 1
+            detail: 1
+          }
 
-        wait = 10
+          mdownEvt.stopPropagation = ->
+            @_hasStoppedPropagation = true
+            stopPropagation.apply(@, arguments)
 
-        stopPropagation = MouseEvent.prototype.stopPropagation
+          mupEvt = new MouseEvent "mouseup", {
+            bubbles: true
+            cancelable: true
+            view: win
+            clientX: coords.x
+            clientY: coords.y
+            buttons: 0
+            detail: 1
+          }
 
-        mdownEvt = new MouseEvent "mousedown", {
-          bubbles: true
-          cancelable: true
-          view: win
-          clientX: coords.x
-          clientY: coords.y
-          buttons: 1
-          detail: 1
-        }
+          mupEvt.stopPropagation = ->
+            @_hasStoppedPropagation = true
+            stopPropagation.apply(@, arguments)
 
-        mdownEvt.stopPropagation = ->
-          @_hasStoppedPropagation = true
-          stopPropagation.apply(@, arguments)
+          clickEvt = new MouseEvent "click", {
+            bubbles: true
+            cancelable: true
+            view: win
+            clientX: coords.x
+            clientY: coords.y
+            buttons: 0
+            detail: 1
+          }
 
-        mupEvt = new MouseEvent "mouseup", {
-          bubbles: true
-          cancelable: true
-          view: win
-          clientX: coords.x
-          clientY: coords.y
-          buttons: 0
-          detail: 1
-        }
+          clickEvt.stopPropagation = ->
+            @_hasStoppedPropagation = true
+            stopPropagation.apply(@, arguments)
 
-        mupEvt.stopPropagation = ->
-          @_hasStoppedPropagation = true
-          stopPropagation.apply(@, arguments)
+          mdownCancelled = !$elToClick.get(0).dispatchEvent(mdownEvt)
 
-        clickEvt = new MouseEvent "click", {
-          bubbles: true
-          cancelable: true
-          view: win
-          clientX: coords.x
-          clientY: coords.y
-          buttons: 0
-          detail: 1
-        }
-
-        clickEvt.stopPropagation = ->
-          @_hasStoppedPropagation = true
-          stopPropagation.apply(@, arguments)
-
-        mdownCancelled = !$elToClick.get(0).dispatchEvent(mdownEvt)
-
-        afterMouseDown = =>
+        afterMouseDown = ($elToClick, coords) =>
           mupCancelled   = !$elToClick.get(0).dispatchEvent(mupEvt)
           clickCancelled = !$elToClick.get(0).dispatchEvent(clickEvt)
 
-          command.snapshot().end() if command
+          onConsole = ->
+            obj = {
+              "Applied To":   $el
+              "Elements":     $el.length
+              "Coords":       coords
+            }
+
+            if $el.get(0) isnt $elToClick.get(0)
+              ## only do this if $elToClick isnt $el
+              obj["Actual Element Clicked"] = $elToClick
+
+            obj.groups = ->
+              [
+                {
+                  name: "MouseDown"
+                  items: {
+                    preventedDefault: mdownCancelled
+                    stoppedPropagation: !!mdownEvt._hasStoppedPropagation
+                  }
+                },
+                {
+                  name: "MouseUp"
+                  items: {
+                    preventedDefault: mupCancelled
+                    stoppedPropagation: !!mupEvt._hasStoppedPropagation
+                  }
+                }
+                {
+                  name: "Click"
+                  items: {
+                    preventedDefault: clickCancelled
+                    stoppedPropagation: !!clickEvt._hasStoppedPropagation
+                  }
+                }
+              ]
+
+            obj
+
+          ## display the red dot at these coords
+          command.set({coords: coords, onConsole: onConsole}).snapshot().end() if command
 
           ## we want to add this wait delta to our
           ## runnables timeout so we prevent it from
@@ -472,15 +449,51 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           ## chaining thenable promises
           return null
 
-        ## if mousedown was cancelled then
-        ## just resolve after mouse down and dont
-        ## send a focus event
-        p = if mdownCancelled
-          Promise.resolve(afterMouseDown())
-        else
-          ## send in a focus event!
-          @command("focus", {$el: $elToFocus, error: false, log: false})
-          .then(afterMouseDown)
+        findElByCoordinates = ($el) =>
+
+          getCoords = =>
+            coords = @getCoordinates($el)
+
+            ## accept options which disable actually ensuring the element
+            ## is clickable / in the foreground
+            ## this is helpful during css animations for instance where
+            ## you're trying to click a moving target. in that case we'll
+            ## just 'click' it for you and simulate everything related to
+            ## the click without verifying it is clickable. focus events
+            ## default actions, propagation, etc will still be respected
+            $elToClick = @getElementAtCoordinates(coords.x, coords.y)
+
+            try
+              @ensureDescendents $el, $elToClick, command
+            catch err
+              options.command = command
+              options.error   = err
+              return @_retry(getCoords, options)
+
+            return {
+              coords: coords
+              $elToClick: $elToClick
+            }
+
+          Promise.resolve(getCoords())
+
+        p = findElByCoordinates($el).then (obj) =>
+          {$elToClick, coords} = obj
+
+          issueMouseDown($elToClick, coords)
+
+          ## if mousedown was cancelled then
+          ## just resolve after mouse down and dont
+          ## send a focus event
+          if mdownCancelled
+            afterMouseDown($elToClick, coords)
+          else
+            ## retrieve the first focusable $el in our parent chain
+            $elToFocus = getFirstFocusableEl($elToClick)
+
+            ## send in a focus event!
+            @command("focus", {$el: $elToFocus, error: false, log: false})
+            .then -> afterMouseDown($elToClick, coords)
 
         p.delay(wait)
 
