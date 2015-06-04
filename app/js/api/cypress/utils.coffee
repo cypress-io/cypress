@@ -94,6 +94,9 @@ $Cypress.Utils = do ($Cypress, _) ->
       catch
         false
 
+    isDescendent: ($el1, $el2) ->
+      !!(($el1.get(0) is $el2.get(0)) or $el1.has($el2).length)
+
     ## short form css-inlines the element
     ## long form returns the outerHTML
     stringifyElement: (el, form = "long") ->
