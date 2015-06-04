@@ -833,7 +833,9 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         else
           ## set the coords only if we are actually
           ## going to go out and click this bad boy
-          command.set "coords", @getCoordinates($el)
+          coords = @getCoordinates($el)
+          onConsole.Coords = coords
+          command.set "coords", coords
 
         ## if we didnt pass in any values or our
         ## el's value is in the array then check it

@@ -772,11 +772,12 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "#onConsole", ->
         @cy.get("[name=colors][value=blue]").check().then ($input) ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
-            Command: "check"
-            "Applied To": @log.get("$el")
-            Elements: 1
-          }
+          coords = @cy.getCenterCoordinates($input)
+          console = @log.attributes.onConsole()
+          expect(console.Command).to.eq "check"
+          expect(console["Applied To"]).to.eq @log.get("$el")
+          expect(console.Elements).to.eq 1
+          expect(console.Coords).to.deep.eq coords
 
       it "#onConsole when checkbox is already checked", ->
         @cy.get("[name=colors][value=blue]").check().check().then ($input) ->
@@ -926,11 +927,12 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "#onConsole", ->
         @cy.get("[name=colors][value=blue]").uncheck().then ($input) ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
-            Command: "uncheck"
-            "Applied To": @log.get("$el")
-            Elements: 1
-          }
+          coords = @cy.getCenterCoordinates($input)
+          console = @log.attributes.onConsole()
+          expect(console.Command).to.eq "uncheck"
+          expect(console["Applied To"]).to.eq @log.get("$el")
+          expect(console.Elements).to.eq 1
+          expect(console.Coords).to.deep.eq coords
 
       it "#onConsole when checkbox is already unchecked", ->
         @cy.get("[name=colors][value=blue]").invoke("prop", "checked", false).uncheck().then ($input) ->
@@ -2255,9 +2257,12 @@ describe "$Cypress.Cy Actions Commands", ->
       it "#onConsole", ->
         @cy.get("button").first().click().then ($button) ->
           console = @log.attributes.onConsole()
+          coords = @cy.getCenterCoordinates($button)
+          expect(@log.get("coords")).to.deep.eq coords
           expect(console.Command).to.eq "click"
           expect(console["Applied To"].get(0)).to.eq @log.get("$el").get(0)
           expect(console.Elements).to.eq 1
+          expect(console.Coords).to.deep.eq coords
 
       it "#onConsole actual element clicked", ->
         btn  = $("<button>", id: "button-covered-in-span").prependTo(@cy.$("body"))
