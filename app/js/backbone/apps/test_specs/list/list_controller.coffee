@@ -55,6 +55,14 @@
         if container.isEmpty()
           runnablesView.renderEmpty = true
           runnablesView.render()
+        else
+          ## reset the renderEmpty variable back to false
+          ## else sometime later when this view is re-rendered
+          ## if it had its renderEmpty variable set to true
+          ## we would see an empty view alongside a non-empty
+          ## view (which was a bug)
+          ## https://github.com/cypress-io/cypress/issues/13
+          runnablesView.renderEmpty = false
 
         ## if theres only 1 single test we always
         ## want to choose it so its open by default
