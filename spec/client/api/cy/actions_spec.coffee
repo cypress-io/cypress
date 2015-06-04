@@ -1903,103 +1903,6 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("#button").click().then ->
         expect(events).to.deep.eq ["mouseup", "click"]
 
-    context "mousedown", ->
-      it "gives focus after mousedown", (done) ->
-        input = @cy.$("input:first")
-
-        input.get(0).addEventListener "focus", (e) =>
-          obj = _(e).pick("bubbles", "cancelable", "view", "pageX", "pageY", "which", "relatedTarget", "detail", "type")
-          expect(obj).to.deep.eq {
-            bubbles: false
-            cancelable: false
-            view: @cy.sync.window()
-            pageX: 0
-            pageY: 0
-            which: 0
-            relatedTarget: null
-            detail: 0
-            type: "focus"
-          }
-          done()
-
-        @cy.get("input:first").click()
-
-      it "gives focusin after mousedown", (done) ->
-        input = @cy.$("input:first")
-
-        input.get(0).addEventListener "focusin", (e) =>
-          obj = _(e).pick("bubbles", "cancelable", "view", "pageX", "pageY", "which", "relatedTarget", "detail", "type")
-          expect(obj).to.deep.eq {
-            bubbles: true
-            cancelable: false
-            view: @cy.sync.window()
-            pageX: 0
-            pageY: 0
-            which: 0
-            relatedTarget: null
-            detail: 0
-            type: "focusin"
-          }
-          done()
-
-        @cy.get("input:first").click()
-
-      it "gives all events in order", ->
-        events = []
-
-        input = @cy.$("input:first")
-
-        _.each "focus focusin mousedown mouseup click".split(" "), (event) ->
-          input.get(0).addEventListener event, ->
-            events.push(event)
-
-        @cy.get("input:first").click().then ->
-          expect(events).to.deep.eq ["mousedown", "focus", "focusin", "mouseup", "click"]
-
-      it "does not give focus if mousedown is defaultPrevented", (done) ->
-        input = @cy.$("input:first")
-
-        input.get(0).addEventListener "focus", (e) ->
-          done("should not have recieved focused event")
-
-        input.get(0).addEventListener "mousedown", (e) ->
-          e.preventDefault()
-          expect(e.defaultPrevented).to.be.true
-
-        @cy.get("input:first").click().then -> done()
-
-      it "still gives focus to the focusable element even when click is issued to child element", ->
-        btn  = $("<button>", id: "button-covered-in-span").prependTo(@cy.$("body"))
-        span = $("<span>span in button</span>").css(padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
-
-        @cy
-          .get("#button-covered-in-span").click()
-          .focused().should("have.id", "button-covered-in-span")
-
-      it "will give focus to the window if no element is focusable", (done) ->
-        $(@cy.sync.window()).on "focus", -> done()
-
-        @cy.get("#nested-find").click()
-
-      # it "events", ->
-      #   btn = @cy.$("button")
-      #   win = $(@cy.sync.window())
-
-      #   _.each {"btn": btn, "win": win}, (type, key) ->
-      #     _.each "focus mousedown mouseup click".split(" "), (event) ->
-      #     # _.each "focus focusin focusout mousedown mouseup click".split(" "), (event) ->
-      #       type.get(0).addEventListener event, (e) ->
-      #         if key is "btn"
-      #           # e.preventDefault()
-      #           e.stopPropagation()
-
-      #         console.log "#{key} #{event}", e
-
-        # btn.on "mousedown", (e) ->
-          # console.log("btn mousedown")
-          # e.preventDefault()
-        # win.on "mousedown", -> console.log("win mousedown")
-
     it "sends a click event", (done) ->
       @cy.$("#button").click -> done()
 
@@ -2111,6 +2014,105 @@ describe "$Cypress.Cy Actions Commands", ->
           done()
 
       @cy.get("#three-buttons button").click()
+
+    context "mousedown", ->
+      it "gives focus after mousedown", (done) ->
+        input = @cy.$("input:first")
+
+        input.get(0).addEventListener "focus", (e) =>
+          obj = _(e).pick("bubbles", "cancelable", "view", "pageX", "pageY", "which", "relatedTarget", "detail", "type")
+          expect(obj).to.deep.eq {
+            bubbles: false
+            cancelable: false
+            view: @cy.sync.window()
+            pageX: 0
+            pageY: 0
+            which: 0
+            relatedTarget: null
+            detail: 0
+            type: "focus"
+          }
+          done()
+
+        @cy.get("input:first").click()
+
+      it "gives focusin after mousedown", (done) ->
+        input = @cy.$("input:first")
+
+        input.get(0).addEventListener "focusin", (e) =>
+          obj = _(e).pick("bubbles", "cancelable", "view", "pageX", "pageY", "which", "relatedTarget", "detail", "type")
+          expect(obj).to.deep.eq {
+            bubbles: true
+            cancelable: false
+            view: @cy.sync.window()
+            pageX: 0
+            pageY: 0
+            which: 0
+            relatedTarget: null
+            detail: 0
+            type: "focusin"
+          }
+          done()
+
+        @cy.get("input:first").click()
+
+      it "gives all events in order", ->
+        events = []
+
+        input = @cy.$("input:first")
+
+        _.each "focus focusin mousedown mouseup click".split(" "), (event) ->
+          input.get(0).addEventListener event, ->
+            events.push(event)
+
+        @cy.get("input:first").click().then ->
+          expect(events).to.deep.eq ["mousedown", "focus", "focusin", "mouseup", "click"]
+
+      it "does not give focus if mousedown is defaultPrevented", (done) ->
+        input = @cy.$("input:first")
+
+        input.get(0).addEventListener "focus", (e) ->
+          done("should not have recieved focused event")
+
+        input.get(0).addEventListener "mousedown", (e) ->
+          e.preventDefault()
+          expect(e.defaultPrevented).to.be.true
+
+        @cy.get("input:first").click().then -> done()
+
+      it "still gives focus to the focusable element even when click is issued to child element", ->
+        btn  = $("<button>", id: "button-covered-in-span").prependTo(@cy.$("body"))
+        span = $("<span>span in button</span>").css(padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
+
+        @cy
+          .get("#button-covered-in-span").click()
+          .focused().should("have.id", "button-covered-in-span")
+
+      it "will give focus to the window if no element is focusable", (done) ->
+        $(@cy.sync.window()).on "focus", -> done()
+
+        @cy.get("#nested-find").click()
+
+      # it "events", ->
+      #   btn = @cy.$("button")
+      #   win = $(@cy.sync.window())
+
+      #   _.each {"btn": btn, "win": win}, (type, key) ->
+      #     _.each "focus mousedown mouseup click".split(" "), (event) ->
+      #     # _.each "focus focusin focusout mousedown mouseup click".split(" "), (event) ->
+      #       type.get(0).addEventListener event, (e) ->
+      #         if key is "btn"
+      #           # e.preventDefault()
+      #           e.stopPropagation()
+
+      #         console.log "#{key} #{event}", e
+
+        # btn.on "mousedown", (e) ->
+          # console.log("btn mousedown")
+          # e.preventDefault()
+        # win.on "mousedown", -> console.log("win mousedown")
+
+
 
     describe "errors", ->
       beforeEach ->
