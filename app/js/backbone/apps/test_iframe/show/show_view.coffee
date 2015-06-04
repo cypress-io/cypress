@@ -325,14 +325,15 @@
       # @$iframe.onload = =>
       #   fn(@$iframe)
 
-
       remoteLoaded = $.Deferred()
       iframeLoaded = $.Deferred()
 
-      remoteOpts =
-        id: "iframe-remote"
+      name = App.config.getProjectName()
 
-      @$remote = $("<iframe />", remoteOpts).appendTo(@ui.size)
+      remoteOpts =
+        id: "Your App: '#{name}' "
+
+      @$remote = $("<iframe>", remoteOpts).appendTo(@ui.size)
 
       contents = Marionette.Renderer.render("test_iframe/show/_default_message")
       view.$remote.contents().find("body").append(contents)
@@ -340,18 +341,18 @@
 
       remoteLoaded.done =>
         @$iframe = $ "<iframe />",
-          src: @src
-          id: "iframe-spec"
-          load: ->
-            iframeLoaded.resolve(@contentWindow)
-            view.$el.show()
-            view.calcWidth()
-            # view.ui.header.show()
+          id: "Your Spec: '#{src}' "
 
         @$iframe.appendTo(@$el)
 
-        ## make a reference between the iframes
-        @$iframe[0].contentWindow.remote = view.$remote[0].contentWindow
+        @$iframe.prop("src", @src).one "load", ->
+          iframeLoaded.resolve(@contentWindow)
+          view.$el.show()
+          view.calcWidth()
+          # view.ui.header.show()
+
+      ## make a reference between the iframes
+      @$iframe[0].contentWindow.remote = view.$remote[0].contentWindow
 
       $.when(remoteLoaded, iframeLoaded).done (remote, iframe) ->
         ## yes these args are supposed to be reversed

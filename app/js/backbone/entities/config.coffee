@@ -94,6 +94,9 @@
     getPathToSpec: (id) ->
       _.compact([@get("testFolder"), id]).join("/")
 
+    getProjectName: ->
+      _.last @get("projectRoot").split("/")
+
     ## returns a function bound to this model
     ## which acts as a getter
     getExternalInterface: ->
