@@ -266,7 +266,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
       _.extend options,
         error: getErr(text, phrase)
-        withinSubject: subject or @prop("withinSubject")
+        withinSubject: subject or @prop("withinSubject") or @$("body")
         filter: true
         log: false
 

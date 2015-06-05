@@ -715,6 +715,10 @@ describe "$Cypress.Cy Querying Commands", ->
           .get("@getUsers.all ")
 
   context "#contains", ->
+    it "is scoped to the body and will not return title elements", ->
+      @cy.contains("DOM Fixture").then ($el) ->
+        expect($el).not.to.match("title")
+
     it "finds the nearest element by :contains selector", ->
       @cy.contains("li 0").then ($el) ->
         expect($el.length).to.eq(1)
