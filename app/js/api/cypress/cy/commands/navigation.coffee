@@ -83,12 +83,14 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
       if not _.isString(url)
         @throwErr("cy.visit() must be called with a string as its 1st argument")
 
-      command = Cypress.command()
-
       _.defaults options,
+        log: true
         timeout: 20000
         onBeforeLoad: ->
         onLoad: ->
+
+      if options.log
+        command = Cypress.command()
 
       baseUrl = @config("baseUrl")
       url     = Cypress.Location.getRemoteUrl(url, baseUrl)
@@ -116,7 +118,7 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
               catch e
                 reject(e)
             else
-              command.snapshot().end()
+              command.snapshot().end() if command
               resolve(win)
 
           ## any existing global variables will get nuked after it navigates

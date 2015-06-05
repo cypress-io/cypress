@@ -144,6 +144,15 @@ describe "$Cypress.Cy Navigation Commands", ->
           _.each obj, (value, key) =>
             expect(@log.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
 
+      it "can turn off logging", ->
+        log = null
+
+        @Cypress.on "log", (l) ->
+          log = l
+
+        @cy.visit("timeout?ms=0", {log: false}).then ->
+          expect(log).to.be.null
+
     describe "errors", ->
       beforeEach ->
         @allowErrors()
