@@ -118,7 +118,7 @@
           ## to another command by the time this setImmediate function runs
           return if previousDetachedId isnt @detachedId
 
-          @$el.find("#iframe-remote").contents().find("body").replaceWith(@originalBody)
+          @$el.find("iframe.iframe-remote").contents().find("body").replaceWith(@originalBody)
 
           @removeRevertMessage()
 
@@ -206,8 +206,8 @@
           div = App.request("element:box:model:layers", el, dom)
           div.attr("data-highlight-el", options.id)
 
-      setImmediate =>
-        if coords = options.coords
+      if coords = options.coords
+        setImmediate =>
           box = App.request("element:hit:box:layer", coords, dom)
           box.attr("data-highlight-hitbox")
 
@@ -332,6 +332,7 @@
 
       remoteOpts =
         id: "Your App: '#{name}' "
+        class: "iframe-remote"
 
       @$remote = $("<iframe>", remoteOpts).appendTo(@ui.size)
 
@@ -342,17 +343,18 @@
       remoteLoaded.done =>
         @$iframe = $ "<iframe />",
           id: "Your Spec: '#{src}' "
+          class: "iframe-spec"
 
         @$iframe.appendTo(@$el)
 
         @$iframe.prop("src", @src).one "load", ->
+          ## make a reference between the iframes
+          @contentWindow.remote = view.$remote[0].contentWindow
+
           iframeLoaded.resolve(@contentWindow)
           view.$el.show()
           view.calcWidth()
           # view.ui.header.show()
-
-      ## make a reference between the iframes
-      @$iframe[0].contentWindow.remote = view.$remote[0].contentWindow
 
       $.when(remoteLoaded, iframeLoaded).done (remote, iframe) ->
         ## yes these args are supposed to be reversed
