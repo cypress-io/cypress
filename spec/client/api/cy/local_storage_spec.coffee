@@ -1,4 +1,4 @@
-describe "$Cypress.Cy XHR Commands", ->
+describe "$Cypress.Cy Local Storage Commands", ->
   enterCommandTestingMode()
 
   context "#clearLocalStorage", ->
