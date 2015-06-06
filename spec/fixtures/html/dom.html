@@ -12,6 +12,16 @@
           background-color: red;
           border: 1px solid black;
         }
+        #overflow-auto-container {
+          width: 100px;
+          height: 50px;
+          border: 1px solid #999;
+          overflow: auto;
+        }
+
+        #overflow-auto-container li {
+          line-height: 33px;
+        }
       </style>
 
       DOM Fixture
@@ -274,6 +284,12 @@
         <button>2</button>
         <button>3</button>
       </div>
+      <ul id="overflow-auto-container">
+        <li>foo</li>
+        <li>bar</li>
+        <li>baz</li>
+        <li>quux</li>
+      </ul>
     </div>
   </body>
 </html>

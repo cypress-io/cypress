@@ -453,6 +453,10 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         findElByCoordinates = ($el) =>
 
           getCoords = =>
+            ## use native scrollIntoView here so scrollable
+            ## containers are automatically handled correctly
+            $el.get(0).scrollIntoView(false)
+
             coords = @getCoordinates($el)
 
             ## if we're forcing this click event
@@ -475,6 +479,11 @@ $Cypress.register "Actions", (Cypress, _, $) ->
             try
               @ensureDescendents $el, $elToClick, command
             catch err
+              command.set onConsole: ->
+                obj = {}
+                obj["Covered By"] = $elToClick.get(0)
+                obj
+
               options.command = command
               options.error   = err
               return @_retry(getCoords, options)

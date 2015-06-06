@@ -2212,9 +2212,27 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(logs.length).eq(2)
           expect(@log.get("error")).to.eq(err)
           expect(err.message).to.include "Cannot call .click() on this element because it is being covered by another element: #{node}"
+
+          console = @log.attributes.onConsole()
+          expect(console["Covered By"]).to.eq span.get(0)
+
           done()
 
         @cy.get("#button-covered-in-span").click()
+
+      it "throws when element is hidden and theres no element specifically covering it", (done) ->
+        ## i cant come up with a way to easily make getElementAtCoordinates
+        ## return null so we are just forcing it to return null to simulate
+        ## the element being "hidden" so to speak but still displacing space
+        @cy._timeout(200)
+
+        @sandbox.stub(@cy, "getElementAtCoordinates").returns(null)
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "Cannot call .click() on this element because it is currently hidden from view."
+          done()
+
+        @cy.get("#overflow-auto-container").contains("quux").click()
 
     describe ".log", ->
       beforeEach ->
