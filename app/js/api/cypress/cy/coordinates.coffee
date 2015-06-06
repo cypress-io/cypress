@@ -1,15 +1,17 @@
 do ($Cypress, _) ->
 
-  ## move these all to utilities? yeah?
   $Cypress.Cy.extend
     getElementAtCoordinates: (x, y) ->
+      ## the coords we receive are absolute coordinates from
+      ## the top of the window, they are not relative to the viewport
+      ## because elementFromPoint returns us elements only relative
+      ## to the viewport, we must subtract the current scroll'd offset
+      ## before applying this calculation
+      ## however this method assumes the element in question IS currently
+      ## in the viewport, and therefore we must ensure to scroll the
+      ## element into view prior to running this method or this will
+      ## return null
       win = @sync.window()
-      doc = @sync.document().get(0)
-
-      prevScrollX = win.pageXOffset
-      prevScrollY = win.pageYOffset
-
-      win.scrollTo(x, y)
 
       scrollX = x - win.pageXOffset
       scrollY = y - win.pageYOffset
@@ -19,8 +21,6 @@ do ($Cypress, _) ->
       ## only wrap el if its non-null
       if el
         el = $(el)
-
-      win.scrollTo(prevScrollX, prevScrollY)
 
       return el
 

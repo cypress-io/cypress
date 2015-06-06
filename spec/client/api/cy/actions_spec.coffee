@@ -2253,7 +2253,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("button:first").click().then ($button) ->
           expect(@log.get("snapshot")).to.be.an("object")
 
-      it.only "returns only the $el for the element of the subject that was clicked", ->
+      it "returns only the $el for the element of the subject that was clicked", ->
         clicks = []
 
         ## append two buttons
