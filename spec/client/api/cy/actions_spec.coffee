@@ -2017,6 +2017,17 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#three-buttons button").click()
 
+    it "can click elements which are hidden until scrolled within parent container", ->
+      @cy.get("#overflow-auto-container").contains("quux").click()
+
+    it "can forcibly click even when being covered by another element", (done) ->
+      btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").prependTo(@cy.$("body"))
+      span = $("<span>span on button</span>").css(position: "absolute", left: btn.offset().left, top: btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+      btn.on "click", -> done()
+
+      @cy.get("#button-covered-in-span").click({force: true})
+
     describe "mousedown", ->
       it "gives focus after mousedown", (done) ->
         input = @cy.$("input:first")

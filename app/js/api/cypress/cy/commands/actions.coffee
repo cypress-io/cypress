@@ -316,6 +316,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       _.defaults options,
         $el: subject
         log: true
+        force: false
 
       @ensureDom(options.$el)
 
@@ -453,6 +454,14 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
           getCoords = =>
             coords = @getCoordinates($el)
+
+            ## if we're forcing this click event
+            ## just immediately send it up
+            if options.force
+              return {
+                coords: coords
+                $elToClick: $el
+              }
 
             ## accept options which disable actually ensuring the element
             ## is clickable / in the foreground
