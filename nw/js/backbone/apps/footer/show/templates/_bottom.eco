@@ -11,6 +11,9 @@
     <div class="dropup">
       <i class="fa fa-cog dropdown-toggle" data-toggle="dropdown"></i>
       <ul class="dropdown-menu dropdown-menu-right">
+        <li data-tests>
+          <a href="#">Tests</a>
+        </li>
         <li>
           <a href="#">About</a>
         </li>

@@ -37,6 +37,19 @@
     bottomRegion: (region) ->
       bottomView = @getBottomView()
 
+      @listenTo bottomView, "tests:clicked", ->
+        tests = App.request "gui:open", "http://localhost:3500/specs/api/cy/cookies_spec",
+          position: "center"
+          height: 1024
+          width: 768
+          show: false
+          frame: false
+          toolbar: false
+          title: ""
+
+        # tests.once "loaded", ->
+          # tests.showDevTools()
+
       @listenTo bottomView, "login:clicked", (view, obj) ->
         App.execute "login:request"
 

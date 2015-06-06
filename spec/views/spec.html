@@ -23,7 +23,9 @@
         window.runner = window.mochaPhantomJS.run();
       }
       else {
-        window.runner = mocha.run();
+        window.runner = mocha.run(function(failures){
+          console.log("Done. Failures: " + failures + " / " + runner.total + ". Duration: " + runner.stats.duration)
+        })
       }
     </script>
   </body>
