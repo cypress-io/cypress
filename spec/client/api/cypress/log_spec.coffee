@@ -356,10 +356,11 @@ describe "$Cypress.Log API", ->
 
           @cy.on "fail", (err) =>
             if @log.get("name") is "contains"
+              btns = getFirstSubjectByName.call(@, "get")
               expect(@log.attributes.onConsole()).to.deep.eq {
                 Command: "contains"
                 Content: "asdfasdfasdfasdf"
-                "Applied To": getFirstSubjectByName.call(@, "get")
+                "Applied To": $Cypress.Utils.getDomElements(btns)
                 Error: err.toString()
               }
               done()
@@ -374,7 +375,7 @@ describe "$Cypress.Log API", ->
               expect(@log.attributes.onConsole()).to.deep.eq {
                 Command: "contains"
                 Content: "asdfasdfasdfasdf"
-                "Applied To": getFirstSubjectByName.call(@, "eq")
+                "Applied To": getFirstSubjectByName.call(@, "eq").get(0)
                 Error: err.toString()
               }
               done()

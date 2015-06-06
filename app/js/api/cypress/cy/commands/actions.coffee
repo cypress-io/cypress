@@ -32,7 +32,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           command = Cypress.command
             $el: $el
             onConsole: ->
-              "Applied To": $el
+              "Applied To": $Cypress.Utils.getDomElements($el)
               Elements: $el.length
 
         if not $el.is("form")
@@ -78,7 +78,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         command = Cypress.command
           $el: options.$el
           onConsole: ->
-            "Applied To": options.$el
+            "Applied To": $Cypress.Utils.getDomElements(options.$el)
 
       ## http://www.w3.org/TR/html5/editing.html#specially-focusable
       ## ensure there is only 1 dom element in the subject
@@ -192,7 +192,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         command = Cypress.command
           $el: options.$el
           onConsole: ->
-            "Applied To": options.$el
+            "Applied To": $Cypress.Utils.getDomElements(options.$el)
 
       if (num = options.$el.length) and num > 1
         return if options.error is false
@@ -273,7 +273,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           command = Cypress.command
             $el: $el
             onConsole: ->
-              "Applied To":   $el
+              "Applied To":   $Cypress.Utils.getDomElements($el)
               "Elements":     $el.length
 
         @ensureVisibility $el, command
@@ -402,14 +402,14 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
           onConsole = ->
             obj = {
-              "Applied To":   $el
+              "Applied To":   $Cypress.Utils.getDomElements($el)
               "Elements":     $el.length
               "Coords":       coords
             }
 
             if $el.get(0) isnt $elToClick.get(0)
               ## only do this if $elToClick isnt $el
-              obj["Actual Element Clicked"] = $elToClick
+              obj["Actual Element Clicked"] = $Cypress.Utils.getDomElements($elToClick)
 
             obj.groups = ->
               [
@@ -481,7 +481,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
             catch err
               command.set onConsole: ->
                 obj = {}
-                obj["Covered By"] = $elToClick.get(0)
+                obj["Covered By"] = $Cypress.Utils.getDomElements($elToClick)
                 obj
 
               options.command = command
@@ -535,7 +535,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           $el: options.$el
           onConsole: ->
             "Typed":      sequence
-            "Applied To": options.$el
+            "Applied To": $Cypress.Utils.getDomElements(options.$el)
 
       @ensureVisibility(options.$el, command)
 
@@ -663,7 +663,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           command = Cypress.command
             $el: $el
             onConsole: ->
-              "Applied To": $el
+              "Applied To": $Cypress.Utils.getDomElements($el)
               "Elements":   $el.length
 
         node = Cypress.Utils.stringifyElement($el)
@@ -761,7 +761,11 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           end: true
           snapshot: true
           onConsole: ->
-            Returned: $el ? "--nothing--"
+            ret = if $el
+              $Cypress.Utils.getDomElements($el)
+            else
+              "--nothing--"
+            Returned: ret
             Elements: $el?.length ? 0
 
       try
@@ -826,7 +830,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         $el = $(el)
 
         onConsole =
-          "Applied To":   $el
+          "Applied To":   $Cypress.Utils.getDomElements($el)
           "Elements":     $el.length
 
         if options.log

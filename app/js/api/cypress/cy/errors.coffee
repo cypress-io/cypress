@@ -38,7 +38,12 @@ do ($Cypress, _) ->
           ## and we can add Applied To if there is a prev command
           ## and it is a parent
           if current.type isnt "parent" and prev = current.prev
-            obj["Applied To"] = prev.subject
+            ret = if $Cypress.Utils.hasElement(prev.subject)
+              $Cypress.Utils.getDomElements(prev.subject)
+            else
+              prev.subject
+
+            obj["Applied To"] = ret
             obj
 
     endedEarlyErr: ->

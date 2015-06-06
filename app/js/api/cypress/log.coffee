@@ -149,7 +149,12 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       _.defaults obj,
         onRender: ->
         onConsole: ->
-          "Returned": current.subject
+          ret = if $Cypress.Utils.hasElement(current.subject)
+            $Cypress.Utils.getDomElements(current.subject)
+          else
+            current.subject
+
+          "Returned": ret
 
       if obj.isCurrent
         ## stringify the obj.message (if it exists) or current.args

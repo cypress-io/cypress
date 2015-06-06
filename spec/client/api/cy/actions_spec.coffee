@@ -381,7 +381,7 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "type"
             Typed: "foobar"
-            "Applied To": $input
+            "Applied To": $input.get(0)
           }
 
       it "logs only one type event", ->
@@ -775,7 +775,7 @@ describe "$Cypress.Cy Actions Commands", ->
           coords = @cy.getCenterCoordinates($input)
           console = @log.attributes.onConsole()
           expect(console.Command).to.eq "check"
-          expect(console["Applied To"]).to.eq @log.get("$el")
+          expect(console["Applied To"]).to.eq @log.get("$el").get(0)
           expect(console.Elements).to.eq 1
           expect(console.Coords).to.deep.eq coords
 
@@ -784,7 +784,7 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@log.get("coords")).to.be.undefined
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "check"
-            "Applied To": @log.get("$el")
+            "Applied To": @log.get("$el").get(0)
             Elements: 1
             Note: "This checkbox was already checked. No operation took place."
           }
@@ -930,7 +930,7 @@ describe "$Cypress.Cy Actions Commands", ->
           coords = @cy.getCenterCoordinates($input)
           console = @log.attributes.onConsole()
           expect(console.Command).to.eq "uncheck"
-          expect(console["Applied To"]).to.eq @log.get("$el")
+          expect(console["Applied To"]).to.eq @log.get("$el").get(0)
           expect(console.Elements).to.eq 1
           expect(console.Coords).to.deep.eq coords
 
@@ -938,7 +938,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("[name=colors][value=blue]").invoke("prop", "checked", false).uncheck().then ($input) ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "uncheck"
-            "Applied To": @log.get("$el")
+            "Applied To": @log.get("$el").get(0)
             Elements: 1
             Note: "This checkbox was already unchecked. No operation took place."
           }
@@ -1111,7 +1111,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("form").first().submit().then ($form) ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "submit"
-            "Applied To": @log.get("$el")
+            "Applied To": @log.get("$el").get(0)
             Elements: 1
           }
 
@@ -1191,7 +1191,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("input:first").focused().then ($input) ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "focused"
-            Returned: $input
+            Returned: $input.get(0)
             Elements: 1
           }
 
@@ -1299,7 +1299,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("input:first").focus().then ($input) ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "focus"
-            "Applied To": $input
+            "Applied To": $input.get(0)
           }
 
     describe "errors", ->
@@ -1475,7 +1475,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("input:first").focus().blur().then ($input) ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "blur"
-            "Applied To": $input
+            "Applied To": $input.get(0)
           }
 
     describe "errors", ->
@@ -1779,7 +1779,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("button").first().dblclick().then ($button) ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "dblclick"
-            "Applied To": @log.get("$el")
+            "Applied To": @log.get("$el").get(0)
             Elements: 1
           }
 
@@ -2253,11 +2253,11 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("button:first").click().then ($button) ->
           expect(@log.get("snapshot")).to.be.an("object")
 
-      it "returns only the $el for the element of the subject that was clicked", ->
+      it.only "returns only the $el for the element of the subject that was clicked", ->
         clicks = []
 
         ## append two buttons
-        button = -> $("<button class='clicks'>click</button")
+        button = -> $("<button class='clicks'>click</button>")
         @cy.$("body").append(button()).append(button())
 
         @Cypress.on "log", (obj) ->
@@ -2291,7 +2291,7 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(logCoords.x).to.be.closeTo(coords.x, 1) ## ensure we are within 1
           expect(logCoords.y).to.be.closeTo(coords.y, 1) ## ensure we are within 1
           expect(console.Command).to.eq "click"
-          expect(console["Applied To"].get(0)).to.eq @log.get("$el").get(0)
+          expect(console["Applied To"]).to.eq @log.get("$el").get(0)
           expect(console.Elements).to.eq 1
           expect(console.Coords.x).to.be.closeTo(coords.x, 1) ## ensure we are within 1
           expect(console.Coords.y).to.be.closeTo(coords.y, 1) ## ensure we are within 1
@@ -2301,7 +2301,7 @@ describe "$Cypress.Cy Actions Commands", ->
         span = $("<span>span in button</span>").css(padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
 
         @cy.get("#button-covered-in-span").click().then ->
-          expect(@log.attributes.onConsole()["Actual Element Clicked"].get(0)).to.eq span.get(0)
+          expect(@log.attributes.onConsole()["Actual Element Clicked"]).to.eq span.get(0)
 
       it "#onConsole groups MouseDown", ->
         @cy.$("input:first").mousedown -> return false

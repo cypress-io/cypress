@@ -411,7 +411,7 @@ describe "$Cypress.Cy Querying Commands", ->
             Command: "get"
             Selector: "body"
             Options: undefined
-            Returned: $body
+            Returned: $body.get(0)
             Elements: 1
           }
 
@@ -421,7 +421,7 @@ describe "$Cypress.Cy Querying Commands", ->
             Command: "get"
             Alias: "@b"
             Options: undefined
-            Returned: $body
+            Returned: $body.get(0)
             Elements: 1
           }
 
@@ -940,8 +940,8 @@ describe "$Cypress.Cy Querying Commands", ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "contains"
             Content: "nested contains"
-            "Applied To": getFirstSubjectByName.call(@, "get")
-            Returned: $label
+            "Applied To": getFirstSubjectByName.call(@, "get").get(0)
+            Returned: $label.get(0)
             Elements: 1
 
           }

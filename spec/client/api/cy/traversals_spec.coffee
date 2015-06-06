@@ -125,10 +125,12 @@ describe "$Cypress.Cy Traversal Commands", ->
             obj = {Command: name}
             obj.Selector = [].concat(arg).join(", ") unless _.isFunction(arg)
 
+            returned = @Cypress.Utils.getDomElements($el)
+
             _.extend obj, {
-              "Applied To": getFirstSubjectByName.call(@, "get")
+              "Applied To": getFirstSubjectByName.call(@, "get").get(0)
               Options: undefined
-              Returned: $el
+              Returned: returned
               Elements: $el.length
             }
 
@@ -222,8 +224,8 @@ describe "$Cypress.Cy Traversal Commands", ->
           Command: "find"
           Selector: "li:first"
           Options: {visible: true}
-          "Applied To": getFirstSubjectByName.call(@, "get")
-          Returned: $el
+          "Applied To": getFirstSubjectByName.call(@, "get").get(0)
+          Returned: $el.get(0)
           Elements: $el.length
         }
 

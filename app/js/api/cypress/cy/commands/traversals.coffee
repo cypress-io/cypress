@@ -35,7 +35,7 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
       onConsole = {
         Selector: getSelector()
         Options: deltaOptions
-        "Applied To": subject
+        "Applied To": $Cypress.Utils.getDomElements(subject)
       }
 
       if options.log
@@ -47,7 +47,7 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
         return if not options.command
 
         _.extend onConsole,
-          "Returned": $el
+          "Returned": $Cypress.Utils.getDomElements($el)
           "Elements": $el?.length
 
         options.command.set({$el: $el})
