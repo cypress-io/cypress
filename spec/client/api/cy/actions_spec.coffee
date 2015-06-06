@@ -2256,13 +2256,16 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "#onConsole", ->
         @cy.get("button").first().click().then ($button) ->
-          console = @log.attributes.onConsole()
-          coords = @cy.getCenterCoordinates($button)
-          expect(@log.get("coords")).to.deep.eq coords
+          console   = @log.attributes.onConsole()
+          coords    = @cy.getCenterCoordinates($button)
+          logCoords = @log.get("coords")
+          expect(logCoords.x).to.be.closeTo(coords.x, 1) ## ensure we are within 1
+          expect(logCoords.y).to.be.closeTo(coords.y, 1) ## ensure we are within 1
           expect(console.Command).to.eq "click"
           expect(console["Applied To"].get(0)).to.eq @log.get("$el").get(0)
           expect(console.Elements).to.eq 1
-          expect(console.Coords).to.deep.eq coords
+          expect(console.Coords.x).to.be.closeTo(coords.x, 1) ## ensure we are within 1
+          expect(console.Coords.y).to.be.closeTo(coords.y, 1) ## ensure we are within 1
 
       it "#onConsole actual element clicked", ->
         btn  = $("<button>", id: "button-covered-in-span").prependTo(@cy.$("body"))
