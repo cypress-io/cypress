@@ -394,6 +394,20 @@ describe "$Cypress.Cy API", ->
             .then ->
               fn()
 
+      it "works when custom command is first command", ->
+        Cypress.addParentCommand "login", (email) =>
+          @cy.get("input:first").type("foo")
+
+        @cy.login().then ->
+          expect(@cy.$("input:first")).to.have.value("foo")
+
+      it "ensures to splice queue correctly on first custom command", ->
+        Cypress.addParentCommand "login", (email) =>
+          @cy.get("input:first").type("foo")
+
+        @cy.login().noop().then ->
+          expect(getNames(@cy.queue)).to.deep.eq ["login", "get", "type", "noop", "then", "then"]
+
       it "queues in the correct order", ->
         @setup =>
           expect(getNames(@cy.queue)).to.deep.eq ["inspect", "nested", "url", "noop", "then", "then"]

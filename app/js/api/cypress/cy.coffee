@@ -499,11 +499,33 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       ## already in a run loop and dont want to create another!
       ## we also reset the .next property to properly reference
       ## our new obj
-      if nestedIndex = @prop("nestedIndex")
+
+      ## we had a bug that would bomb on custom commands when it was the
+      ## first command. this was due to nestedIndex being undefined at that
+      ## time. so we have to ensure to check that its any kind of number (even 0)
+      ## in order to know to splice into the existing array.
+      ## we simplified
+
+      nestedIndex = @prop("nestedIndex")
+
+      ## if this is a number then we know
+      ## we're about to splice this into our queue
+      ## and need to reset next + increment the index
+      if _.isNumber(nestedIndex)
         @queue[nestedIndex].next = obj
-        @queue.splice (@prop("nestedIndex", nestedIndex += 1)), 0, obj
-      else
-        @queue.push(obj)
+        @prop("nestedIndex", nestedIndex += 1)
+
+      ## we look at whether or not nestedIndex is a number, because if it
+      ## is then we need to splice inside of our queue, else just push
+      ## it onto the end of the queu
+      index = if _.isNumber(nestedIndex) then nestedIndex else @queue.length
+
+      @queue.splice(index, 0, obj)
+
+      ## if nestedIndex is either undefined or 0
+      ## then we know we're processing regular commands
+      ## and not splicing in the middle of our queue
+      if not nestedIndex
         @prop "runId", @defer(@run)
 
       return @
