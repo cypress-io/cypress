@@ -341,9 +341,10 @@ describe "$Cypress.Log API", ->
 
           @cy.on "fail", (err) =>
             if @log.get("name") is "wait"
+              btns = getFirstSubjectByName.call(@, "get")
               expect(@log.attributes.onConsole()).to.deep.eq {
                 Command: "wait"
-                "Applied To": getFirstSubjectByName.call(@, "get")
+                "Applied To": $Cypress.Utils.getDomElements(btns)
                 Error: err.toString()
               }
               done()
