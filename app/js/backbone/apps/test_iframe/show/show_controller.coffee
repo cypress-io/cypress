@@ -10,10 +10,10 @@
       view = @getView(config)
 
       @listenTo view, "browser:clicked", (browser, version) ->
-        # runner.switchToBrowser(browser, version)
+        runner.switchToBrowser(browser, version)
 
       @listenTo view, "close:browser:clicked", ->
-        # runner.switchToBrowser()
+        runner.switchToBrowser()
 
       ## when the runner triggers load:spec:iframe we load the iframe
       @listenTo runner, "load:spec:iframe", (iframe, options) ->
