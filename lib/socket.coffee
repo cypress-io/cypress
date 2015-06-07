@@ -1,7 +1,7 @@
 fs            = require "fs-extra"
 path          = require 'path'
 uuid          = require 'node-uuid'
-# sauce         = require '../sauce/sauce.coffee'
+sauce         = require './sauce/sauce.coffee'
 chokidar      = require 'chokidar'
 Promise       = require "bluebird"
 IdGenerator   = require './id_generator'
@@ -15,6 +15,7 @@ class Socket
   Promise: Promise
   path: path
   uuid: uuid
+  sauce: sauce
 
   constructor: (io, app) ->
     if not (@ instanceof Socket)

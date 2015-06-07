@@ -25,6 +25,13 @@
           @listenTo @Cypress, event, (args...) =>
             @trigger event, args...
 
+        _.each App.request("pass:thru:events"), (event) =>
+          @listenTo @socket, event, (args...) =>
+            if event is "command:add"
+              @commands.add args...
+            else
+              @trigger event, args...
+
         @listenTo @Cypress, "message", (msg, data, cb) =>
           @socket.emit "client:request", msg, data, cb
 
@@ -77,6 +84,12 @@
       reset: ->
         _.each [@commands, @routes, @agents], (collection) ->
           collection.reset([], {silent: true})
+
+      runSauce: ->
+        ## when we get a response from the server with
+        ## the jobName we notify all parties
+        @socket.emit "run:sauce", @specPath, (jobName, batchId) =>
+          @trigger "sauce:running", jobName, batchId
 
       getChosen: ->
         @chosen

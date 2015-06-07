@@ -15,6 +15,7 @@ describe "Socket", ->
 
     @ioSocket =
       on: @sandbox.stub()
+      emit: @sandbox.stub()
 
     @io =
       of: @sandbox.stub().returns({on: ->})
@@ -199,3 +200,44 @@ describe "Socket", ->
         p = Fixtures.project("todos") + "/tests/test1.js"
         @socket.onTestFileChange(p).then =>
           expect(@io.emit).to.be.calledWith("generate:ids:for:test", "tests/test1.js", "test1.js")
+
+  context "#_runSauce", ->
+    beforeEach ->
+      @socket = Socket(@io, @app)
+      @sauce  = @sandbox.stub(@socket, "sauce").resolves()
+      @sandbox.stub(Date, "now").returns(10000000)
+      @sandbox.stub(@socket.uuid, "v4").returns("abc123-edfg2323")
+
+    afterEach ->
+      @socket.close()
+
+    it "calls callback with jobName and batchId", ->
+      fn = @sandbox.stub()
+      @socket._runSauce @ioSocket, "app_spec.coffee", fn
+      expect(fn).to.be.calledWith "tests/app_spec.coffee", 10000000
+
+    it "emits 'sauce:job:create' with client options", ->
+      fn = @sandbox.stub()
+      @socket._runSauce @ioSocket, "app_spec.coffee", fn
+      expect(@ioSocket.emit).to.be.calledWith "sauce:job:create", {
+        batchId: 10000000
+        browser: "ie"
+        guid: "abc123-edfg2323"
+        name: "tests/app_spec.coffee"
+        os: "Windows 8.1"
+        version: 11
+      }
+
+    it "passes options to sauce", ->
+      fn = @sandbox.stub()
+      @socket._runSauce @ioSocket, "app_spec.coffee", fn
+      options = @sauce.getCall(0).args[0]
+      expect(options).to.deep.eq {
+        url: "http://localhost:2020/__/#/tests/app_spec.coffee?nav=false"
+        batchId: 10000000
+        guid: "abc123-edfg2323"
+        browserName: options.browserName
+        version:     options.version
+        platform:    options.platform
+        onStart:     options.onStart
+      }

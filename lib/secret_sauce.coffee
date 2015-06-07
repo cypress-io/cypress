@@ -88,6 +88,63 @@ SecretSauce.Socket =
         @Log.info "watching test file failed", {error: err, path: testFilePath}
         reject err
 
+  _runSauce: (socket, spec, fn) ->
+    { _ } = SecretSauce
+
+    ## this will be used to group jobs
+    ## together for the runs related to 1
+    ## spec by setting custom-data on the job object
+    batchId = Date.now()
+
+    jobName = @app.get("cypress").testFolder + "/" + spec
+    fn(jobName, batchId)
+
+    ## need to handle platform/browser/version incompatible configurations
+    ## and throw our own error
+    ## https://saucelabs.com/platforms/webdriver
+    jobs = [
+      { platform: "Windows 8.1", browser: "chrome",  version: 43, resolution: "1024x768" }
+      { platform: "Windows 8.1", browser: "internet explorer",  version: 11, resolution: "1024x768" }
+      # { platform: "Windows 7",   browser: "internet explorer",  version: 10 }
+      # { platform: "Linux",       browser: "chrome",             version: 37 }
+      { platform: "Linux",       browser: "firefox",            version: 33  }
+      { platform: "OS X 10.9",   browser: "safari",             version: 7 }
+    ]
+
+    normalizeJobObject = (obj) ->
+      obj = _.clone obj
+
+      obj.browser = {
+        "internet explorer": "ie"
+      }[obj.browserName] or obj.browserName
+
+      obj.os = obj.platform
+
+      return _.pick obj, "name", "browser", "version", "os", "batchId", "guid"
+
+    _.each jobs, (job) =>
+      options =
+        url:              @app.get("cypress").clientUrl + "#/" + jobName + "?nav=false"
+        batchId:          batchId
+        guid:             @uuid.v4()
+        browserName:      job.browser
+        version:          job.version
+        platform:         job.platform
+        screenResolution: job.resolution ? "1024x768"
+        onStart: (sessionID) ->
+          ## pass up the sessionID to the previous client obj by its guid
+          socket.emit "sauce:job:start", clientObj.guid, sessionID
+
+      clientObj = normalizeJobObject(options)
+      socket.emit "sauce:job:create", clientObj
+
+      @sauce(options)
+        .then (obj) ->
+          {sessionID, runningTime, passed} = obj
+          socket.emit "sauce:job:done", sessionID, runningTime, passed
+        .catch (err) ->
+          socket.emit "sauce:job:fail", clientObj.guid, err
+
   _startListening: (chokidar, path) ->
     { _ } = SecretSauce
 
@@ -155,63 +212,7 @@ SecretSauce.Socket =
       ## we'll embed some additional meta data into
       ## the job name
       socket.on "run:sauce", (spec, fn) =>
-        ## this will be used to group jobs
-        ## together for the runs related to 1
-        ## spec by setting custom-data on the job object
-        batchId = Date.now()
-
-        jobName = @app.get("cypress").testFolder + "/" + spec
-        fn(jobName, batchId)
-
-        ## need to handle platform/browser/version incompatible configurations
-        ## and throw our own error
-        ## https://saucelabs.com/platforms/webdriver
-        jobs = [
-          { platform: "Windows 8.1", browser: "internet explorer",  version: 11 }
-          { platform: "Windows 7",   browser: "internet explorer",  version: 10 }
-          { platform: "Linux",       browser: "chrome",             version: 37 }
-          { platform: "Linux",       browser: "firefox",            version: 33 }
-          { platform: "OS X 10.9",   browser: "safari",             version: 7 }
-        ]
-
-        normalizeJobObject = (obj) ->
-          obj = _(obj).clone()
-
-          obj.browser = {
-            "internet explorer": "ie"
-          }[obj.browserName] or obj.browserName
-
-          obj.os = obj.platform
-
-          _(obj).pick "name", "browser", "version", "os", "batchId", "guid"
-
-        _.each jobs, (job) =>
-          options =
-            host:        "0.0.0.0"
-            port:        @app.get("port")
-            name:        jobName
-            batchId:     batchId
-            guid:        uuid.v4()
-            browserName: job.browser
-            version:     job.version
-            platform:    job.platform
-
-          clientObj = normalizeJobObject(options)
-          socket.emit "sauce:job:create", clientObj
-
-          df = jQuery.Deferred()
-
-          df.progress (sessionID) ->
-            ## pass up the sessionID to the previous client obj by its guid
-            socket.emit "sauce:job:start", clientObj.guid, sessionID
-
-          df.fail (err) ->
-            socket.emit "sauce:job:fail", clientObj.guid, err
-
-          df.done (sessionID, runningTime, passed) ->
-            socket.emit "sauce:job:done", sessionID, runningTime, passed
-
-          sauce options, df
+        @_runSauce(socket, spec, fn)
 
     @testsDir = path.join(@app.get("cypress").projectRoot, @app.get("cypress").testFolder)
 
@@ -527,6 +528,7 @@ SecretSauce.RemoteInitial =
       ## we must have the remoteHost which tell us where
       ## we should request the initial HTML payload from
       if not remoteHost
+        debugger
         throw new Error("Missing remoteHost cookie!")
 
       thr = @through (d) -> @queue(d)

@@ -54,7 +54,7 @@
       configView = @getConfigView()
 
       @listenTo configView, "sauce:labs:clicked", (option) ->
-        # runner.runSauce() if option is "run"
+        runner.runSauce() if option is "run"
 
       @show configView, region: @layout.configRegion
 
