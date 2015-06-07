@@ -103,8 +103,8 @@ SecretSauce.Socket =
     ## and throw our own error
     ## https://saucelabs.com/platforms/webdriver
     jobs = [
-      { platform: "Windows 8.1", browser: "chrome",  version: 43, resolution: "1024x768" }
-      { platform: "Windows 8.1", browser: "internet explorer",  version: 11, resolution: "1024x768" }
+      { platform: "Windows 8.1", browser: "chrome",  version: 43, resolution: "1280x1024" }
+      { platform: "Windows 8.1", browser: "internet explorer",  version: 11, resolution: "1280x1024" }
       # { platform: "Windows 7",   browser: "internet explorer",  version: 10 }
       # { platform: "Linux",       browser: "chrome",             version: 37 }
       { platform: "Linux",       browser: "firefox",            version: 33  }
