@@ -32,6 +32,16 @@
             else
               @trigger event, args...
 
+        if App.config.ui("satellite")
+          _.each App.request("host:events"), (event) =>
+            @listenTo @socket, event, (args...) =>
+              @trigger event, args...
+
+        if App.config.ui("host")
+          _.each App.request("satellite:events"), (event) =>
+            @listenTo @socket, event, (args...) =>
+              @trigger event, args...
+
         @listenTo @Cypress, "message", (msg, data, cb) =>
           @socket.emit "client:request", msg, data, cb
 

@@ -39,10 +39,10 @@
       @layout = @getLayoutView config
 
       @listenTo @layout, "show", =>
-        @statsRegion(runner)          if not config.env("satellite")
+        @statsRegion(runner)          if not config.ui("satellite")
         @iframeRegion(runner)
-        @specsRegion(runner, spec)    if not config.env("satellite")
-        # @panelsRegion(runner, config) if not config.env("satellite")
+        @specsRegion(runner, spec)    if not config.ui("satellite")
+        # @panelsRegion(runner, config) if not config.ui("satellite")
 
         socket.emit "watch:test:file", id
 

@@ -10,8 +10,9 @@ $Cypress.register "XHR", (Cypress, _, $) ->
   TMP_ROUTES = "tmpRoutes"
 
   Cypress.on "abort", ->
-    if server = @prop("server")
-      server.abort()
+    if @prop
+      if server = @prop("server")
+        server.abort()
 
   ## need to upgrade our server
   ## to allow for a setRequest hook
