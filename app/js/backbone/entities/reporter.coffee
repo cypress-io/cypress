@@ -40,14 +40,25 @@
             @listenTo @socket, event, (args...) =>
               @trigger event, args...
 
+          @listenTo @commands, "command:attrs:changed", (attrs) ->
+            attrs = @transformEmitAttrs(attrs)
+            @socket.emit "command:attrs:changed", attrs
+
         if App.config.ui("host")
           _.each @satelliteEvents, (event) =>
             @listenTo @socket, event, (args...) =>
-              if event is "command:add"
-                log = @Cypress.Log.create(@Cypress, args[0])
-                @commands.add log
-              else
-                @trigger event, args...
+              switch event
+                when "command:add"
+                  attrs = args[0]
+                  log = @Cypress.Log.create(@Cypress, attrs)
+                  c = @commands.add log
+                  c.set("id", attrs.id)
+                when "command:attrs:changed"
+                  attrs = args[0]
+                  debugger
+                  @commands.get(attrs.id).set(attrs)
+                else
+                  @trigger event, args...
 
         @listenTo @Cypress, "message", (msg, data, cb) =>
           @socket.emit "client:request", msg, data, cb
@@ -64,13 +75,18 @@
         @listenTo @Cypress, "log", (log) =>
           switch log.get("event")
             when "command"
+              id = _.uniqueId("command")
+
               ## if we're in satellite mode then we need to
               ## broadcast this through websockets
               if App.config.ui("satellite")
                 attrs = @transformEmitAttrs(log.attributes)
+                attrs.id = id
                 @socket.emit "command:add", attrs
-              else
-                @commands.add log
+              # else
+
+              c = @commands.add log
+              c.set "id", id
 
             when "route"
               @routes.add log

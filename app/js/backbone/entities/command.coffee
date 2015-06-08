@@ -205,6 +205,12 @@
       command.listenTo log, "attrs:changed", (attrs) ->
         command.set attrs
 
+        attrs.id = command.id
+
+        ## trigger this so we can get command attrs updates
+        ## when in host / satellite mode
+        @trigger("command:attrs:changed", attrs)
+
       return command
 
     add: (attrs, hook) ->

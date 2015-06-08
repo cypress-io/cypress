@@ -201,7 +201,7 @@ SecretSauce.Socket =
         @Log.info "finished:generating:ids:for:test", strippedPath: strippedPath
         @io.emit "test:changed", file: strippedPath
 
-      _.each "load:spec:iframe command:add runner:start runner:end before:run before:add after:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test".split(" "), (event) =>
+      _.each "load:spec:iframe command:add command:attrs:changed runner:start runner:end before:run before:add after:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test".split(" "), (event) =>
         socket.on event, (args...) =>
           args = _.chain(args).compact().reject(_.isFunction).value()
           @io.emit event, args...
