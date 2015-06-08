@@ -37,7 +37,7 @@
           return key if re.test(os)
 
       url: ->
-        Routes.create "#" + @get("name"),
+        Routes.create @get("manualUrl"),
           __ui:  "host"
           browser: @get("browser")
           version: @get("version")

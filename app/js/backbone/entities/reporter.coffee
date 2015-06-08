@@ -55,7 +55,6 @@
                   c.set("id", attrs.id)
                 when "command:attrs:changed"
                   attrs = args[0]
-                  debugger
                   @commands.get(attrs.id).set(attrs)
                 else
                   @trigger event, args...

@@ -40,7 +40,7 @@ module.exports = (options = {}) ->
         reject(err)
         browser.quit()
 
-      .get(options.url)
+      .get(options.remoteUrl)
 
       .waitFor wd.asserters.jsCondition("window.cypressResults", true), 60*30*1000, 1000, (err, obj) ->
         ## reset passed to false if there are any failures

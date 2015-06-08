@@ -120,11 +120,13 @@ SecretSauce.Socket =
 
       obj.os = obj.platform
 
-      return _.pick obj, "name", "browser", "version", "os", "batchId", "guid"
+      return _.pick obj, "manualUrl", "browser", "version", "os", "batchId", "guid"
 
     _.each jobs, (job) =>
+      url = @app.get("cypress").clientUrl + "#/" + jobName
       options =
-        url:              @app.get("cypress").clientUrl + "#/" + jobName + "?nav=false"
+        manualUrl:        url
+        remoteUrl:        url + "?nav=false"
         batchId:          batchId
         guid:             @uuid.v4()
         browserName:      job.browser
