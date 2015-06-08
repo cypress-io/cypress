@@ -133,6 +133,8 @@
         ## currently watching
         return if specPath isnt @specPath
 
+        options.reRun = true
+
         ## when we are re-running we first
         ## need to abort cypress always
         @Cypress.abort().then =>
@@ -154,6 +156,8 @@
 
         ## reset our collection entities
         @reset()
+
+        return if App.config.ui("host") and options.reRun
 
         ## tells the iframe view to load up a new iframe
         @trigger "load:spec:iframe", @specPath, options
@@ -285,6 +289,11 @@
 
       ## used to be called runIframeSuite
       run: (iframe, specWindow, remoteIframe, options, fn) ->
+        ## dont try to start tests in host mode since our
+        ## satellite is the browser which is actually running
+        ## the tests
+        return if App.config.ui("host")
+
         App.config.run()
 
         ## trigger before:run prior to setting up the runner
