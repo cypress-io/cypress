@@ -16,6 +16,9 @@
       initialize: ->
         @Cypress   = $Cypress.create({loadModules: true})
 
+        @satelliteEvents = App.request("satellite:events")
+        @hostEvents      = App.request("host:events")
+
         @commands  = App.request "command:entities"
         @routes    = App.request "route:entities"
         @agents    = App.request "agent:entities"
@@ -27,20 +30,24 @@
 
         _.each App.request("pass:thru:events"), (event) =>
           @listenTo @socket, event, (args...) =>
-            if event is "command:add"
-              @commands.add args...
-            else
-              @trigger event, args...
+            # if event is "command:add"
+            #   @commands.add args...
+            # else
+            @trigger event, args...
 
         if App.config.ui("satellite")
-          _.each App.request("host:events"), (event) =>
+          _.each @hostEvents, (event) =>
             @listenTo @socket, event, (args...) =>
               @trigger event, args...
 
         if App.config.ui("host")
-          _.each App.request("satellite:events"), (event) =>
+          _.each @satelliteEvents, (event) =>
             @listenTo @socket, event, (args...) =>
-              @trigger event, args...
+              if event is "command:add"
+                log = @Cypress.Log.create(@Cypress, args[0])
+                @commands.add log
+              else
+                @trigger event, args...
 
         @listenTo @Cypress, "message", (msg, data, cb) =>
           @socket.emit "client:request", msg, data, cb
@@ -57,7 +64,13 @@
         @listenTo @Cypress, "log", (log) =>
           switch log.get("event")
             when "command"
-              @commands.add log
+              ## if we're in satellite mode then we need to
+              ## broadcast this through websockets
+              if App.config.ui("satellite")
+                attrs = @transformEmitAttrs(log.attributes)
+                @socket.emit "command:add", attrs
+              else
+                @commands.add log
 
             when "route"
               @routes.add log
@@ -69,6 +82,75 @@
               throw new Error("Cypress.log() emitted an unknown event: #{log.get('event')}")
 
         @listenTo @socket, "test:changed", @reRun
+
+      trigger: (event, args...) ->
+        ## because of defaults the change:iframes event
+        ## fires before our initialize (which is stupid)
+        return if not @socket
+
+        ## if we're in satellite mode and our event is
+        ## a satellite event then emit over websockets
+        if App.config.ui("satellite") and event in @satelliteEvents
+          args = @transformRunnableArgs(args)
+          return @socket.emit event, args...
+
+        ## if we're in host mode and our event is a
+        ## satellite event AND we have a remoteIrame defined
+        if App.config.ui("host") and event in @hostEvents and @$remoteIframe
+          return @socket.emit event, args...
+
+        ## else just do the normal trigger and
+        ## remove the satellite namespace
+        super event, args...
+
+      transformEmitAttrs: (attrs) ->
+        obj = {}
+
+        ## normally we'd use a reduce here but for some reason
+        ## on dom attrs the reduce completely barfs and is not
+        ## able to iterate over the object.
+        for key, value of attrs
+          obj[key] = value if @isWebSocketCompatibleValue(value)
+
+        obj
+
+      ## make sure this value is capable
+      ## of being sent through websockets
+      isWebSocketCompatibleValue: (value) ->
+        switch
+          when _.isElement(value)                           then false
+          when _.isObject(value) and _.isElement(value[0])  then false
+          when _.isFunction(value)                          then false
+          else true
+
+      transformRunnableArgs: (args) ->
+        ## pull off these direct properties
+        props = ["title", "id", "root", "pending", "stopped", "state", "duration", "type"]
+
+        ## pull off these parent props
+        parentProps = ["root", "id"]
+
+        ## fns to invoke
+        fns = ["originalTitle", "fullTitle", "slow", "timeout"]
+
+        _(args).map (arg) =>
+          ## transfer direct props
+          obj = _(arg).pick props...
+
+          ## transfer parent props
+          if parent = arg.parent
+            obj.parent = _(parent).pick parentProps...
+
+          ## transfer the error as JSON
+          if err = arg.err
+            err.host = @$remoteIframe.prop("contentWindow").location.host
+            obj.err = JSON.stringify(err, ["message", "type", "name", "stack", "fileName", "lineNumber", "columnNumber", "host"])
+
+          ## invoke the functions and set those as properties
+          _.each fns, (fn) ->
+            obj[fn] = _.result(arg, fn)
+
+          obj
 
       start: (specPath) ->
         @Cypress.start()
