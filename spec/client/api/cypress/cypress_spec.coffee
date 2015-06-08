@@ -46,6 +46,7 @@ describe "$Cypress API", ->
       @Cypress.stop().then ->
         expect(window.Cypress).to.be.undefined
         Cypress = $Cypress.create()
+        Cypress.start()
         expect(window.Cypress).to.eq Cypress
 
   describe "#loadModule", ->

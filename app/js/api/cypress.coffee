@@ -7,6 +7,7 @@ window.$Cypress = do ($, _, Backbone) ->
       @mocha  = null
       @runner = null
 
+    start: ->
       window.Cypress = @
 
     initialize: (specWindow, $remoteIframe, config) ->
@@ -99,13 +100,19 @@ window.$Cypress = do ($, _, Backbone) ->
       @trigger "defaults"
 
     stop: ->
+      ## we immediately delete Cypress due to
+      ## abort being async. waiting for the async
+      ## event causes problems in other areas in
+      ## the system when we cannot tap into this async
+      ## method. (such as moving from remote manual
+      ## browser back to your own browser)
+      delete window.Cypress
+
       @abort().then =>
 
         @trigger "stop"
 
         @off()
-
-        delete window.Cypress
 
     abort: ->
       ## grab all the abort callbacks
