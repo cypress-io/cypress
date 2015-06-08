@@ -112,8 +112,9 @@
 
         ## if we're in host mode and our event is a
         ## satellite event AND we have a remoteIrame defined
-        if App.config.ui("host") and event in @hostEvents and @$remoteIframe
-          return @socket.emit event, args...
+        # if App.config.ui("host") and event in @hostEvents #and @$remoteIframe
+          # debugger
+          # return @socket.emit event, args...
 
         ## else just do the normal trigger and
         ## remove the satellite namespace
@@ -159,7 +160,9 @@
 
           ## transfer the error as JSON
           if err = arg.err
-            err.host = @$remoteIframe.prop("contentWindow").location.host
+            try
+              err.host = @Cypress.cy.$remoteIframe.prop("contentWindow").location.host
+
             obj.err = JSON.stringify(err, ["message", "type", "name", "stack", "fileName", "lineNumber", "columnNumber", "host"])
 
           ## invoke the functions and set those as properties
