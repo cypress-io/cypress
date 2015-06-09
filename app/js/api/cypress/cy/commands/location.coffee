@@ -8,7 +8,7 @@ $Cypress.register "Location", (Cypress, _, $) ->
 
       if options.log
         Cypress.command
-          message: href
+          message: ""
           end: true
           snapshot: true
 
@@ -21,7 +21,7 @@ $Cypress.register "Location", (Cypress, _, $) ->
 
       if options.log
         Cypress.command
-          message: hash
+          message: ""
           end: true
           snapshot: true
 

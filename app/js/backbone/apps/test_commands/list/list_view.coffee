@@ -32,7 +32,7 @@
       else
         @$el.removeClass("command-child").addClass("command-parent")
 
-      @$el.addClass "command-cloned" if @model.isCloned()
+      @$el.addClass "command-event" if @model.isEvent()
 
     onRender: ->
       @ui.method.css "padding-left", @model.get("indent")

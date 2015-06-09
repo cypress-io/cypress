@@ -18,7 +18,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       {@$remoteIframe, @config} = obj
 
       @$remoteIframe.on "load", =>
-        @urlChanged()
+        @urlChanged(null, {log: false})
         @pageLoading(false)
 
         ## we reapply window listeners on load even though we

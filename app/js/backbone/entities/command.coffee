@@ -18,10 +18,10 @@
       selector: ->
         _.trim @stripParentSelector()
 
-      ## display controls if there isnt an error
-      ## and this isnt a clone
+      ## display controls if this isnt an event
+      ## but a real command
       shouldDisplayControls: ->
-        not @isCloned()
+        not @isEvent()
 
       truncated: ->
         switch @get("type")
@@ -86,8 +86,8 @@
     isParent: ->
       !!@get("isParent")
 
-    isCloned: ->
-      !!@get("isCloned")
+    isEvent: ->
+      !!@get("event")
 
     stripParentSelector: ->
       selector = @attributes.selector ? ""
@@ -197,7 +197,7 @@
       if log.get("type") not in ["parent", "child"]
         throw new Error("Commands may only have type of 'parent' or 'child'.  Command was: {name: #{log.get('name')}, type: #{log.get('type')}}")
 
-      attrs = ["state", "testId", "hookName", "type", "highlightAttr", "name", "alias", "aliasType", "referencesAlias", "message", "numElements", "numRetries", "visible", "coords"]
+      attrs = ["event", "state", "testId", "hookName", "type", "highlightAttr", "name", "alias", "aliasType", "referencesAlias", "message", "numElements", "numRetries", "visible", "coords"]
 
       command = new Entities.Command log.pick.apply(log, attrs)
       command.log = log
@@ -214,7 +214,7 @@
       if @isModelInstance(command)
 
         ## increment the number if its not cloned
-        command.increment(@maxNumber()) unless command.isCloned()
+        command.increment(@maxNumber()) unless command.isEvent()
 
         if parent = @parentExistsFor(command)
           command.setParent(parent)

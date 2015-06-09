@@ -1,8 +1,11 @@
 $Cypress.register "Navigation", (Cypress, _, $) ->
 
   overrideRemoteLocationGetters = (cy, contentWindow) ->
-    navigated = ->
-      cy.urlChanged()
+    navigated = (attr, args) ->
+      cy.urlChanged(null, {
+        by: attr
+        args: args
+      })
 
     Cypress.Location.override(contentWindow, navigated)
 
@@ -43,8 +46,10 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
 
       command = Cypress.command
         type: "parent"
-        name: "loading"
+        name: "page load"
         message: "--waiting for new page to load---"
+        event: true
+        ## add a note here that loading nulled out the current subject?
         onConsole: -> {}
 
       prevTimeout = @_timeout()
@@ -65,7 +70,7 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
             catch e
               @fail(e)
           else
-            command.snapshot().end()
+            command.set("message", "--page loaded--").snapshot().end()
         .then =>
           ## null out our subject again after loading resolves
           ## to prevent chaining since our page is loading

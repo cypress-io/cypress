@@ -139,7 +139,7 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
           orig.apply(@, arguments)
 
           ## let our function know we've navigated
-          navigated()
+          navigated(attr, arguments)
 
     ## think about moving this method out of Cypress
     ## and into our app, since it kind of leaks the
