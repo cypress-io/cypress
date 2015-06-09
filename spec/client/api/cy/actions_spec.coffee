@@ -945,9 +945,9 @@ describe "$Cypress.Cy Actions Commands", ->
 
   context "#submit", ->
     it "does not change the subject", ->
-      form = @cy.$("form")
+      form = @cy.$("form:first")
 
-      @cy.get("form").submit().then ($form) ->
+      @cy.get("form:first").submit().then ($form) ->
         expect($form.get(0)).to.eq form.get(0)
 
     it "works with native event listeners", ->
@@ -1045,7 +1045,7 @@ describe "$Cypress.Cy Actions Commands", ->
           logs.push @log
 
         @cy.on "fail", (err) =>
-          expect(logs).to.have.length(2)
+          expect(logs.length).to.eq(2)
           expect(@log.get("error")).to.eq(err)
           expect(err.message).to.include ".submit() can only be called on a <form>! Your subject contains a: <input id=\"input\">"
           done()
@@ -1066,6 +1066,18 @@ describe "$Cypress.Cy Actions Commands", ->
           done()
 
         @cy.get("form:first").submit().submit()
+
+      it "throws when subject is a collection of elements", (done) ->
+        forms = @cy.$("form")
+
+        ## make sure we have more than 1 form!
+        expect(forms.length).to.be.gt(1)
+
+        @cy.on "fail", (err) =>
+          expect(err.message).to.include ".submit() can only be called on a single form! Your subject contained #{forms.length} form elements!"
+          done()
+
+        @cy.get("form").submit()
 
       it "logs once when not dom subject", (done) ->
         logs = []

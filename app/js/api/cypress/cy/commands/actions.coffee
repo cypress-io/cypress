@@ -24,36 +24,37 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       ## to break when they need to be triggered synchronously
       ## like with type {enter}.  either convert type to a promise
       ## to just create a synchronous submit function
-      options.$el.each (index, el) =>
-        origEl = el
-        $el = $(el)
+      form = options.$el.get(0)
 
-        if options.log
-          command = Cypress.command
-            $el: $el
-            onConsole: ->
-              "Applied To": $Cypress.Utils.getDomElements($el)
-              Elements: $el.length
+      if options.log
+        command = Cypress.command
+          $el: options.$el
+          onConsole: ->
+            "Applied To": $Cypress.Utils.getDomElements(options.$el)
+            Elements: options.$el.length
 
-        if not $el.is("form")
-          node = Cypress.Utils.stringifyElement(el)
-          word = Cypress.Utils.plural(options.$el, "contains", "is")
-          @throwErr(".submit() can only be called on a <form>! Your subject #{word} a: #{node}", command)
+      if not options.$el.is("form")
+        node = Cypress.Utils.stringifyElement(options.$el)
+        word = Cypress.Utils.plural(options.$el, "contains", "is")
+        @throwErr(".submit() can only be called on a <form>! Your subject #{word} a: #{node}", command)
 
-        ## calling the native submit method will not actually trigger
-        ## a submit event, so we need to dispatch this manually so
-        ## native event listeners and jquery can bind to it
-        submit = new Event("submit", {bubbles: true, cancelable: true})
-        origEl.dispatchEvent(submit)
+      if (num = options.$el.length) and num > 1
+        @throwErr(".submit() can only be called on a single form! Your subject contained #{num} form elements!", command)
 
-        ## now we need to check to see if we should actually submit
-        ## the form!
-        ## dont submit the form if either the returnValue is false
-        ## or the defaultPrevented value is false
-        if submit.returnValue isnt false and submit.defaultPrevented isnt true
-          origEl.submit()
+      ## calling the native submit method will not actually trigger
+      ## a submit event, so we need to dispatch this manually so
+      ## native event listeners and jquery can bind to it
+      submit = new Event("submit", {bubbles: true, cancelable: true})
+      !!dispatched = form.dispatchEvent(submit)
 
-        command.snapshot().end() if command
+      ## now we need to check to see if we should actually submit
+      ## the form!
+      ## dont submit the form if our dispatched event was cancelled (false)
+      form.submit() if dispatched
+
+      command.snapshot().end() if command
+
+      return options.$el
 
     fill: (subject, obj, options = {}) ->
       @throwErr "cy.fill() must be passed an object literal as its 1st argument!" if not _.isObject(obj)
