@@ -9,14 +9,25 @@ do ($Cypress, _) ->
       ## want to trigger the url:changed
       return if _.isEmpty(url)
 
+      urls = @prop("urls") ? []
+
+      previousUrl = _.last(urls)
+
+      urls.push(url)
+
+      @prop("urls", urls)
+
       _.defaults options,
         log: true
         attr: null
         args: null
 
-      if options.log
+      ## ensure our new url doesnt match whatever
+      ## the previous was. this prevents logging
+      ## additionally when the url didnt actually change
+      if options.log and (url isnt previousUrl)
         Cypress.command
-          name: "url upd"
+          name: "new url"
           message: url
           event: true
           type: "parent"
