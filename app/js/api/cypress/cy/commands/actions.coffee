@@ -456,7 +456,13 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           getCoords = =>
             ## use native scrollIntoView here so scrollable
             ## containers are automatically handled correctly
-            $el.get(0).scrollIntoView(false)
+
+            ## its possible the center of the element actually isnt
+            ## in view yet so we probably need to factor that in
+            ## and scrollBy the amount of distance between the center
+            ## and the left of the element so it positions the center
+            ## in the viewport
+            $el.get(0).scrollIntoView()
 
             coords = @getCoordinates($el)
 
