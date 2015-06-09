@@ -333,7 +333,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         mdownEvt = mupEvt = clickEvt = null
 
         if options.log
-          options.command ?= Cypress.command({$el: $el})
+          options.command = Cypress.command({$el: $el})
 
         ## in order to simulate actual user behavior we need to do the following:
         ## 1. take our element and figure out its center coordinate

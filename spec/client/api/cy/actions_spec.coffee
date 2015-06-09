@@ -2241,7 +2241,7 @@ describe "$Cypress.Cy Actions Commands", ->
           logs.push @log
 
         @cy.on "fail", (err) =>
-          expect(logs).to.have.length(4)
+          expect(logs.length).to.eq(4)
           expect(@log.get("error")).to.eq(err)
           expect(err.message).to.eq "cy.click() cannot be called on the non-visible element: #{node}"
           done()
