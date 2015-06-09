@@ -539,6 +539,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       _.defaults options,
         $el: subject
         log: true
+        force: false
 
       @ensureDom(options.$el)
 
@@ -563,7 +564,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       ## click the element first to simulate focus
       ## and typical user behavior in case the window
       ## is out of focus
-      @command("click", {$el: options.$el, log: false, command: options.command}).then =>
+      @command("click", {$el: options.$el, log: false, command: options.command, force: options.force}).then =>
 
         multipleInputsAndNoSubmitElements = (form) ->
           inputs  = form.find("input")
@@ -663,6 +664,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       ## what about the new HTML5 ones?
       _.defaults options,
         log: true
+        force: false
 
       @ensureDom(subject)
 
@@ -684,7 +686,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           word = Cypress.Utils.plural(subject, "contains", "is")
           @throwErr ".clear() can only be called on textarea or :text! Your subject #{word} a: #{node}", options.command
 
-        @command("type", "{selectall}{del}", {$el: $el, log: false, command: options.command}).then ->
+        @command("type", "{selectall}{del}", {$el: $el, log: false, command: options.command, force: options.force}).then ->
           options.command.snapshot().end() if options.command
 
           return null
@@ -813,14 +815,24 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
   Cypress.Cy.extend
     _check_or_uncheck: (type, subject, values = [], options = {}) ->
+      ## we're not handling conversion of values to strings
+      ## in case we've received numbers
+
+      ## if we're not an array but we are an object
+      ## reassign options to values
+      if not _.isArray(values) and _.isObject(values)
+        options = values
+        values = []
+      else
+        ## make sure we're an array of values
+        values = [].concat(values)
+
       _.defaults options,
         $el: subject
         log: true
+        force: false
 
       @ensureDom(options.$el)
-
-      ## make sure we're an array of values
-      values = [].concat(values)
 
       isNoop = ($el) ->
         switch type
@@ -874,7 +886,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         ## if we didnt pass in any values or our
         ## el's value is in the array then check it
         if not values.length or $el.val() in values
-          @command("click", {$el: $el, log: false}).then ->
+          @command("click", {$el: $el, log: false, command: command, force: options.force}).then ->
             command.snapshot().end() if command
 
             return null

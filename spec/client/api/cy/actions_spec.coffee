@@ -151,6 +151,14 @@ describe "$Cypress.Cy Actions Commands", ->
         .get("input:text:first").type("foo")
         .get("input:text:last").type("bar")
 
+    it "can forcibly click even when being covered by another element", (done) ->
+      input  = $("<input />").attr("id", "input-covered-in-span").prependTo(@cy.$("body"))
+      span = $("<span>span on input</span>").css(position: "absolute", left: input.offset().left, top: input.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+      input.on "click", -> done()
+
+      @cy.get("#input-covered-in-span").type("foo", {force: true})
+
     # describe "input types", ->
     #   _.each ["password", "email", "number", "date", "week", "month", "time", "datetime", "datetime-local", "search", "url"], (type) ->
     #     it "accepts input [type=#{type}]", ->
@@ -524,6 +532,14 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("#comments").clear().then ($textarea) ->
         expect($textarea).to.have.value("")
 
+    it "can forcibly click even when being covered by another element", (done) ->
+      input  = $("<input />").attr("id", "input-covered-in-span").prependTo(@cy.$("body"))
+      span = $("<span>span on input</span>").css(position: "absolute", left: input.offset().left, top: input.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+      input.on "click", -> done()
+
+      @cy.get("#input-covered-in-span").clear({force: true})
+
     describe "errors", ->
       beforeEach ->
         @allowErrors()
@@ -680,6 +696,14 @@ describe "$Cypress.Cy Actions Commands", ->
         expect($inputs.filter(":checked").length).to.eq 2
         expect($inputs.filter("[value=blue],[value=green]")).to.be.checked
 
+    it "can forcibly click even when being covered by another element", (done) ->
+      checkbox  = $("<input type='checkbox' />").attr("id", "checkbox-covered-in-span").prependTo(@cy.$("body"))
+      span = $("<span>span on checkbox</span>").css(position: "absolute", left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+      checkbox.on "click", -> done()
+
+      @cy.get("#checkbox-covered-in-span").check({force: true})
+
     describe "events", ->
       it "emits click event", (done) ->
         @cy.$("[name=colors][value=blue]").click -> done()
@@ -753,18 +777,36 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get(":checkbox").check()
 
-        it "logs once when not dom subject", (done) ->
-          logs = []
+      it "logs once when not dom subject", (done) ->
+        logs = []
 
-          @Cypress.on "log", (@log) =>
-            logs.push @log
+        @Cypress.on "log", (@log) =>
+          logs.push @log
 
-          @cy.on "fail", (err) =>
-            expect(logs).to.have.length(1)
-            expect(@log.get("error")).to.eq(err)
-            done()
+        @cy.on "fail", (err) =>
+          expect(logs).to.have.length(1)
+          expect(@log.get("error")).to.eq(err)
+          done()
 
-          @cy.check()
+        @cy.check()
+
+      it "throws when input cannot be clicked", (done) ->
+        @cy._timeout(200)
+
+        checkbox  = $("<input type='checkbox' />").attr("id", "checkbox-covered-in-span").prependTo(@cy.$("body"))
+        span = $("<span>span on button</span>").css(position: "absolute", left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq(2)
+          expect(err.message).to.include "Cannot call .check() on this element because it is being covered by another element:"
+          done()
+
+        @cy.get("#checkbox-covered-in-span").check()
 
     describe ".log", ->
       beforeEach ->
@@ -849,6 +891,14 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get(checkbox).uncheck()
       @cy.on "end", -> done()
 
+    it "can forcibly click even when being covered by another element", (done) ->
+      checkbox  = $("<input type='checkbox' />").attr("id", "checkbox-covered-in-span").prop("checked", true).prependTo(@cy.$("body"))
+      span = $("<span>span on checkbox</span>").css(position: "absolute", left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+      checkbox.on "click", -> done()
+
+      @cy.get("#checkbox-covered-in-span").uncheck({force: true})
+
     describe "events", ->
       it "emits click event", (done) ->
         @cy.$("[name=colors][value=blue]").prop("checked", true).click -> done()
@@ -923,6 +973,24 @@ describe "$Cypress.Cy Actions Commands", ->
           done()
 
         @cy.get(":checkbox:first").uncheck().uncheck()
+
+      it "throws when input cannot be clicked", (done) ->
+        @cy._timeout(200)
+
+        checkbox  = $("<input type='checkbox' />").attr("id", "checkbox-covered-in-span").prop("checked", true).prependTo(@cy.$("body"))
+        span = $("<span>span on button</span>").css(position: "absolute", left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq(2)
+          expect(err.message).to.include "Cannot call .uncheck() on this element because it is being covered by another element:"
+          done()
+
+        @cy.get("#checkbox-covered-in-span").uncheck()
 
     describe ".log", ->
       beforeEach ->
