@@ -318,6 +318,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         $el: subject
         log: true
         force: false
+        command: null
 
       @ensureDom(options.$el)
 
@@ -332,14 +333,14 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         mdownEvt = mupEvt = clickEvt = null
 
         if options.log
-          command = Cypress.command({$el: $el})
+          options.command ?= Cypress.command({$el: $el})
 
         ## in order to simulate actual user behavior we need to do the following:
         ## 1. take our element and figure out its center coordinate
         ## 2. check to figure out the element listed at those coordinates
         ## 3. if this element is ourself or our descendents, click whatever was returned
         ## 4. else throw an error because something is covering us up
-        @ensureVisibility $el, command
+        @ensureVisibility $el, options.command
 
         getFirstFocusableEl = ($el) ->
           return $el if $el.is(focusable)
@@ -401,8 +402,11 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           mupCancelled   = !$elToClick.get(0).dispatchEvent(mupEvt)
           clickCancelled = !$elToClick.get(0).dispatchEvent(clickEvt)
 
+          if options.command
+            console = options.command.attributes.onConsole()
+
           onConsole = ->
-            obj = {
+            console = _.defaults console ? {}, {
               "Applied To":   $Cypress.Utils.getDomElements($el)
               "Elements":     $el.length
               "Coords":       coords
@@ -410,9 +414,9 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
             if $el.get(0) isnt $elToClick.get(0)
               ## only do this if $elToClick isnt $el
-              obj["Actual Element Clicked"] = $Cypress.Utils.getDomElements($elToClick)
+              console["Actual Element Clicked"] = $Cypress.Utils.getDomElements($elToClick)
 
-            obj.groups = ->
+            console.groups = ->
               [
                 {
                   name: "MouseDown"
@@ -437,10 +441,11 @@ $Cypress.register "Actions", (Cypress, _, $) ->
                 }
               ]
 
-            obj
+            console
 
           ## display the red dot at these coords
-          command.set({coords: coords, onConsole: onConsole}).snapshot().end() if command
+          if options.command
+            options.command.set({coords: coords, onConsole: onConsole}).snapshot().end()
 
           ## we want to add this wait delta to our
           ## runnables timeout so we prevent it from
@@ -484,14 +489,14 @@ $Cypress.register "Actions", (Cypress, _, $) ->
             $elToClick = @getElementAtCoordinates(coords.x, coords.y)
 
             try
-              @ensureDescendents $el, $elToClick, command
+              @ensureDescendents $el, $elToClick, options.command
             catch err
-              command.set onConsole: ->
-                obj = {}
-                obj["Covered By"] = $Cypress.Utils.getDomElements($elToClick)
-                obj
+              if options.command
+                options.command.set onConsole: ->
+                  obj = {}
+                  obj["Covered By"] = $Cypress.Utils.getDomElements($elToClick)
+                  obj
 
-              options.command = command
               options.error   = err
               return @_retry(getCoords, options)
 
@@ -538,27 +543,27 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       @ensureDom(options.$el)
 
       if options.log
-        command = Cypress.command
+        options.command = Cypress.command
           $el: options.$el
           onConsole: ->
             "Typed":      sequence
             "Applied To": $Cypress.Utils.getDomElements(options.$el)
 
-      @ensureVisibility(options.$el, command)
+      @ensureVisibility(options.$el, options.command)
 
       if not options.$el.is(textLike)
         node = Cypress.Utils.stringifyElement(options.$el)
-        @throwErr(".type() can only be called on textarea or :text! Your subject is a: #{node}", command)
+        @throwErr(".type() can only be called on textarea or :text! Your subject is a: #{node}", options.command)
 
       if (num = options.$el.length) and num > 1
-        @throwErr(".type() can only be called on a single textarea or :text! Your subject contained #{num} elements!", command)
+        @throwErr(".type() can only be called on a single textarea or :text! Your subject contained #{num} elements!", options.command)
 
       options.sequence = sequence
 
       ## click the element first to simulate focus
       ## and typical user behavior in case the window
       ## is out of focus
-      @command("click", {$el: options.$el, log: false}).then =>
+      @command("click", {$el: options.$el, log: false, command: options.command}).then =>
 
         multipleInputsAndNoSubmitElements = (form) ->
           inputs  = form.find("input")
@@ -649,7 +654,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
         ## submit events should be finished at this point!
         ## so we can snapshot the current state of the DOM
-        command.snapshot().end() if command
+        options.command.snapshot().end() if options.command
 
         return options.$el
 
@@ -667,7 +672,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         $el = $(el)
 
         if options.log
-          command = Cypress.command
+          options.command = Cypress.command
             $el: $el
             onConsole: ->
               "Applied To": $Cypress.Utils.getDomElements($el)
@@ -677,10 +682,10 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
         if not $el.is(textLike)
           word = Cypress.Utils.plural(subject, "contains", "is")
-          @throwErr ".clear() can only be called on textarea or :text! Your subject #{word} a: #{node}", command
+          @throwErr ".clear() can only be called on textarea or :text! Your subject #{word} a: #{node}", options.command
 
-        @command("type", "{selectall}{del}", {$el: $el, log: false}).then ->
-          command.snapshot().end() if command
+        @command("type", "{selectall}{del}", {$el: $el, log: false, command: options.command}).then ->
+          options.command.snapshot().end() if options.command
 
           return null
 

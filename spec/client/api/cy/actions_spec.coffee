@@ -378,11 +378,13 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "#onConsole", ->
         @cy.get("input:first").type("foobar").then ($input) ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
-            Command: "type"
-            Typed: "foobar"
-            "Applied To": $input.get(0)
-          }
+          coords = @cy.getCenterCoordinates($input)
+          console = @log.attributes.onConsole()
+          expect(console.Command).to.eq("type")
+          expect(console.Typed).to.eq("foobar")
+          expect(console["Applied To"]).to.eq $input.get(0)
+          expect(console.Coords.x).to.be.closeTo coords.x, 1
+          expect(console.Coords.y).to.be.closeTo coords.y, 1
 
       it "logs only one type event", ->
         logs = []
@@ -487,6 +489,24 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.type("foobar")
 
+      it "throws when input cannot be clicked", (done) ->
+        @cy._timeout(200)
+
+        input  = $("<input />").attr("id", "input-covered-in-span").prependTo(@cy.$("body"))
+        span = $("<span>span on button</span>").css(position: "absolute", left: input.offset().left, top: input.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq(2)
+          expect(err.message).to.include "Cannot call .type() on this element because it is being covered by another element:"
+          done()
+
+        @cy.get("#input-covered-in-span").type("foo")
+
   context "#clear", ->
     it "does not change the subject", ->
       textarea = @cy.$("textarea")
@@ -534,7 +554,7 @@ describe "$Cypress.Cy Actions Commands", ->
           logs.push @log
 
         @cy.on "fail", (err) =>
-          expect(logs).to.have.length(3)
+          expect(logs.length).to.eq(3)
           expect(@log.get("error")).to.eq(err)
           expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <form id=\"checkboxes\"></form>"
           done()
@@ -585,6 +605,24 @@ describe "$Cypress.Cy Actions Commands", ->
           done()
 
         @cy.clear()
+
+      it "throws when input cannot be cleared", (done) ->
+        @cy._timeout(200)
+
+        input  = $("<input />").attr("id", "input-covered-in-span").prependTo(@cy.$("body"))
+        span = $("<span>span on button</span>").css(position: "absolute", left: input.offset().left, top: input.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq(2)
+          expect(err.message).to.include "Cannot call .clear() on this element because it is being covered by another element:"
+          done()
+
+        @cy.get("#input-covered-in-span").clear()
 
     describe ".log", ->
       it "logs immediately before resolving", (done) ->
@@ -2032,6 +2070,11 @@ describe "$Cypress.Cy Actions Commands", ->
     it "can click elements which are hidden until scrolled within parent container", ->
       @cy.get("#overflow-auto-container").contains("quux").click()
 
+    ## this test needs to increase the height + width of the div
+    ## when we implement scrollBy the delta of the left/top
+    it "can click elements which are huge and the center is naturally below the fold", ->
+      @cy.get("#massively-long-div").click()
+
     it "can forcibly click even when being covered by another element", (done) ->
       btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").prependTo(@cy.$("body"))
       span = $("<span>span on button</span>").css(position: "absolute", left: btn.offset().left, top: btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
@@ -2039,6 +2082,19 @@ describe "$Cypress.Cy Actions Commands", ->
       btn.on "click", -> done()
 
       @cy.get("#button-covered-in-span").click({force: true})
+
+    it "eventually clicks when covered up", ->
+      btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").prependTo(@cy.$("body"))
+      span = $("<span>span on button</span>").css(position: "absolute", left: btn.offset().left, top: btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+      retried = false
+
+      @cy.on "retry", _.after 3, ->
+        span.hide()
+        retried = true
+
+      @cy.get("#button-covered-in-span").click().then ->
+        expect(retried).to.be.true
 
     describe "mousedown", ->
       it "gives focus after mousedown", (done) ->
@@ -2137,20 +2193,6 @@ describe "$Cypress.Cy Actions Commands", ->
           # e.preventDefault()
         # win.on "mousedown", -> console.log("win mousedown")
 
-    describe "retry support", ->
-      it "eventually clicks when covered up", ->
-        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").prependTo(@cy.$("body"))
-        span = $("<span>span on button</span>").css(position: "absolute", left: btn.offset().left, top: btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
-
-        retried = false
-
-        @cy.on "retry", _.after 3, ->
-          span.hide()
-          retried = true
-
-        @cy.get("#button-covered-in-span").click().then ->
-          expect(retried).to.be.true
-
     describe "errors", ->
       beforeEach ->
         @allowErrors()
@@ -2241,7 +2283,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @sandbox.stub(@cy, "getElementAtCoordinates").returns(null)
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "Cannot call .click() on this element because it is currently hidden from view."
+          expect(err.message).to.include "Cannot call .click() on this element because its center is currently hidden from view."
           done()
 
         @cy.get("#overflow-auto-container").contains("quux").click()

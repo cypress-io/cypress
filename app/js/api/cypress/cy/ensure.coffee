@@ -54,4 +54,4 @@ do ($Cypress, _) ->
           node = $Cypress.Utils.stringifyElement($el2)
           @throwErr("Cannot call .#{method}() on this element because it is being covered by another element: #{node}", onFail)
         else
-          @throwErr("Cannot call .#{method}() on this element because it is currently hidden from view.")
+          @throwErr("Cannot call .#{method}() on this element because its center is currently hidden from view.", onFail)
