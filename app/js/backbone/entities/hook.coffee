@@ -43,6 +43,11 @@
         if original = hook.get("commands").getOriginalByClone(command)
           return original
 
+    getLastCommandThatMatchesError: (err) ->
+      for hook in @models
+        if command = hook.get("commands").getLastCommandThatMatchesError(err)
+          return command
+
     reset: ->
       @each (hook) ->
         hook.get("commands").reset([], {silent: true})
