@@ -66,6 +66,13 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
               @fail(e)
           else
             command.snapshot().end()
+        .then =>
+          ## null out our subject again after loading resolves
+          ## to prevent chaining since our page is loading
+          @nullSubject()
+
+          ## return null here to prevent further promise chaining
+          null
         .catch Promise.CancellationError, (err) ->
           ## dont do anything on cancellation errors
           return

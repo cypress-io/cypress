@@ -109,6 +109,11 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
     ## and restores
     options: (options = {}) ->
 
+    nullSubject: ->
+      @prop("subject", null)
+
+      return @
+
     _eventHasReturnValue: (e) ->
       val = e.originalEvent.returnValue
 
@@ -436,7 +441,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
         ## and reset our chainerId
         if id isnt chainerId
           @prop("chainerId", chainerId)
-          @prop("subject", null)
+          @nullSubject()
 
     ## the command method is useful for synchronously
     ## calling another command but wrapping it in a

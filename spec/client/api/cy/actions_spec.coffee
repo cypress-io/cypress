@@ -1050,8 +1050,8 @@ describe "$Cypress.Cy Actions Commands", ->
           }
 
   context "#submit", ->
-    it "does not change the subject", ->
-      form = @cy.$("form:first")
+    it "does not change the subject when default actions is prevented", ->
+      form = @cy.$("form:first").on "submit", -> return false
 
       @cy.get("form:first").submit().then ($form) ->
         expect($form.get(0)).to.eq form.get(0)
@@ -1221,6 +1221,8 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@log.get("snapshot")).to.be.an("object")
 
       it "provides $el", ->
+        @cy.$("form:first").submit -> return false
+
         @cy.get("form").first().submit().then ($form) ->
           expect(@log.get("name")).to.eq "submit"
           expect(@log.get("$el")).to.match $form

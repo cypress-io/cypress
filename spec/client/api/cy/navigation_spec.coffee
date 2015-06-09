@@ -226,6 +226,26 @@ describe "$Cypress.Cy Navigation Commands", ->
   context "#loading", ->
     it "clears current timeout"
 
+    it "clears current cy subject", ->
+      input = @cy.$("form#click-me input")
+
+      @cy.get("form#click-me").find("input").click().then (subject) ->
+        expect(getNames(@cy.queue)).to.deep.eq [
+          "get", "find", "click", "then", "then"
+        ]
+        expect(getFirstSubjectByName("click").get(0)).to.eq input.get(0)
+        expect(subject).to.be.null
+
+    it "clears the current subject on submit event as well", ->
+      form = @cy.$("form#click-me")
+
+      @cy.get("form#click-me").submit().then (subject) ->
+        expect(getNames(@cy.queue)).to.deep.eq [
+          "get", "submit", "then", "then"
+        ]
+        expect(getFirstSubjectByName("get").get(0)).to.eq form.get(0)
+        expect(subject).to.be.null
+
     describe ".log", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
@@ -236,20 +256,20 @@ describe "$Cypress.Cy Navigation Commands", ->
         @Cypress.on "log", (log) ->
           logs.push log
 
-        cy.visit("/fixtures/html/sinon.html").then ->
+        @cy.visit("/fixtures/html/sinon.html").then ->
           expect(logs).to.have.length(1)
 
       it "is name: loading", ->
-        cy.get("form#click-me").find("input").click().then ->
+        @cy.get("form#click-me").find("input").click().then ->
           expect(@log.get("name")).to.eq "loading"
 
       it "is type: parent", ->
-        cy.get("form#click-me").submit().then ->
+        @cy.get("form#click-me").submit().then ->
           expect(@log.get("type")).to.eq "parent"
 
       describe "#onConsole", ->
         it "only has Command: loading", ->
-          cy.get("form#click-me").submit().then ->
+          @cy.get("form#click-me").submit().then ->
             expect(@log.attributes.onConsole()).to.deep.eq {
               Command: "loading"
             }
