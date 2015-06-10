@@ -159,6 +159,13 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#input-covered-in-span").type("foo", {force: true})
 
+    it "can type into contenteditable", ->
+      oldText = @cy.$("#contenteditable").text()
+
+      @cy.get("#contenteditable").type("foo").then ($div) ->
+        text = _.clean $div.text()
+        expect(text).to.eq _.clean(oldText + "foo")
+
     # describe "input types", ->
     #   _.each ["password", "email", "number", "date", "week", "month", "time", "datetime", "datetime-local", "search", "url"], (type) ->
     #     it "accepts input [type=#{type}]", ->

@@ -2,7 +2,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
   pressedEnter = /\{enter\}/
 
-  textLike = "textarea,:text,[type=password],[type=email],[type=number],[type=date],[type=week],[type=month],[type=time],[type=datetime],[type=datetime-local],[type=search],[type=url]"
+  textLike = "textarea,:text,[contenteditable],[type=password],[type=email],[type=number],[type=date],[type=week],[type=month],[type=time],[type=datetime],[type=datetime-local],[type=search],[type=url]"
 
   focusable = "a[href],link[href],button,input,select,textarea,[tabindex]"
 
