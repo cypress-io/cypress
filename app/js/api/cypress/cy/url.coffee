@@ -19,7 +19,7 @@ do ($Cypress, _) ->
 
       _.defaults options,
         log: true
-        attr: null
+        by: null
         args: null
 
       ## ensure our new url doesnt match whatever
@@ -35,13 +35,12 @@ do ($Cypress, _) ->
           snapshot: true
           onConsole: ->
             obj = {
-              Command: null
               Event: "url updated"
               "New Url": url
             }
 
-            if options.attr
-              obj["Url Updated By"] = options.attr
+            if options.by
+              obj["Url Updated By"] = options.by
 
             obj.args = options.args
 
