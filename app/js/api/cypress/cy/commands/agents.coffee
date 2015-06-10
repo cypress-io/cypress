@@ -26,6 +26,7 @@ $Cypress.register "Agents", (Cypress, _, $) ->
             type:    "parent"
             end:     true
             snapshot: true
+            event:    true
             onConsole: ->
               console = {}
               console.Command = null

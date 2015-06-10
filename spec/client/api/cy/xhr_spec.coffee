@@ -210,14 +210,15 @@ describe "$Cypress.Cy XHR Commands", ->
         it "provides specific #onFail", (done) ->
           @cy.on "fail", (err) =>
             obj = {
-              name: "request"
+              name: "xhr"
               referencesAlias: undefined
               alias: "getFoo"
               aliasType: "route"
               type: "parent"
               error: err
-              event: "command"
+              instrument: "command"
               message: undefined
+              event: true
             }
             _.each obj, (value, key) =>
               expect(@log.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
@@ -548,13 +549,14 @@ describe "$Cypress.Cy XHR Commands", ->
           }
 
       describe "requests", ->
-        it "immediately logs request obj", ->
+        it "immediately logs xhr obj", ->
           @cy
             .route(/foo/, {}).as("getFoo")
             .window().then (win) =>
               win.$.get("foo")
-              expect(@log.pick("name", "alias", "aliasType", "state")).to.deep.eq {
-                name: "request"
+              expect(@log.pick("name", "event", "alias", "aliasType", "state")).to.deep.eq {
+                name: "xhr"
+                event: true
                 alias: "getFoo"
                 aliasType: "route"
                 state: "pending"
@@ -571,7 +573,8 @@ describe "$Cypress.Cy XHR Commands", ->
 
         it "logs obj", ->
           obj = {
-            name: "request"
+            name: "xhr"
+            event: true
             message: undefined
             type: "parent"
             aliasType: "route"

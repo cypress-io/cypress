@@ -146,12 +146,13 @@ $Cypress.register "XHR", (Cypress, _, $) ->
           ## assign this existing command
           ## to the xhr so we can reuse it later
           xhr.log = Cypress.command
-            name:      "request"
+            name:      "xhr"
             alias:     alias
             aliasType: "route"
             type:      "parent"
             error:     err
             snapshot:  true
+            event:     true
             onConsole: =>
               consoleObj = {
                 Method:        xhr.method

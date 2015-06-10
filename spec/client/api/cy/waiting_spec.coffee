@@ -623,7 +623,7 @@ describe "$Cypress.Cy Waiting Commands", ->
               aliasType: "route"
               type: "child"
               error: err
-              event: "command"
+              instrument: "command"
               message: "@getFoo"
               numRetries: numRetries + 1
             }
