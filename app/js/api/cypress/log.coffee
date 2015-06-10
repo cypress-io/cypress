@@ -108,8 +108,10 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       ## re-wrap onConsole to set Command + Error defaults
       @attributes.onConsole = _.wrap @attributes.onConsole, (orig, args...) ->
 
-        ## grab the Command name by default
-        consoleObj = {Command: _this.get("name")}
+        key = if _this.get("event") then "Event" else "Command"
+
+        consoleObj = {}
+        consoleObj[key] = _this.get("name")
 
         ## merge in the other properties from onConsole
         _.extend consoleObj, orig.apply(@, args)

@@ -153,6 +153,25 @@ describe "$Cypress.Log API", ->
 
         expect(error).to.be.calledWith err
 
+    describe "#wrapOnConsole", ->
+      it "automatically adds Command with name", ->
+        @log.set("name", "foo")
+        @log.set("onConsole", -> {bar: "baz"})
+        @log.wrapOnConsole()
+        expect(@log.attributes.onConsole()).to.deep.eq {
+          Command: "foo"
+          bar: "baz"
+        }
+
+      it "automatically adds Event with name", ->
+        @log.set({name: "foo", event: true})
+        @log.set("onConsole", -> {bar: "baz"})
+        @log.wrapOnConsole()
+        expect(@log.attributes.onConsole()).to.deep.eq {
+          Event: "foo"
+          bar: "baz"
+        }
+
     describe "#publicInterface", ->
       beforeEach ->
         @interface = @log.publicInterface()
