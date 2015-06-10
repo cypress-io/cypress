@@ -190,6 +190,12 @@
     anyFailed: ->
       @any (command) -> command.get("error")
 
+    getLastCommandThatMatchesError: (err) ->
+      for command in @models by -1
+        error = command.get("error")
+        if error and error is err
+          return command
+
     getTotalNumber: ->
       @_maxNumber
 

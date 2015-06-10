@@ -147,14 +147,27 @@
       @ui.pre.text(value)
 
     preClicked: (e) ->
-      return if not @model.originalError
+      ## TODO REFACTOR THIS METHOD TO USE THE VIEWS
+      ## METHOD AND DRY UP CODE
+      return if not err = @model.originalError
 
       e.stopPropagation()
 
-      if @model.originalError.name isnt "CypressError"
+      if err.name is "CypressError"
+        command = @model.getLastCommandThatMatchesError(err)
+
+        return if not command
+
+        ## get command by error
+        console.clear?()
+
         @displayConsoleMessage()
 
-        console.error(@model.originalError.stack)
+        command.getConsoleDisplay (args) ->
+          console.log.apply(console, args)
+      else
+        @displayConsoleMessage()
+        console.error(err.stack)
 
     displayConsoleMessage: ->
       width  = @ui.pre.outerWidth()

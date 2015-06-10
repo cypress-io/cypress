@@ -66,6 +66,9 @@
     remove: ->
       @collection.remove(@)
 
+    getLastCommandThatMatchesError: (err) ->
+      @get("hooks").getLastCommandThatMatchesError(err)
+
     addCommand: (command, options = {}) ->
       hook = command.get("hookName")
       @get("hooks").addCommandToHook hook, command, options
