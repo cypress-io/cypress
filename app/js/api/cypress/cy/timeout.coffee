@@ -2,7 +2,7 @@ do ($Cypress, _) ->
 
   $Cypress.Cy.extend
     _timeout: (ms, delta = false) ->
-      runnable = @prop("runnable")
+      runnable = @private("runnable")
 
       if not runnable
         @throwErr("Cannot call .timeout() without a currently running test!")
@@ -17,7 +17,7 @@ do ($Cypress, _) ->
         runnable.timeout()
 
     _clearTimeout: ->
-      runnable = @prop("runnable")
+      runnable = @private("runnable")
 
       if not runnable
         @throwErr("Cannot call .clearTimeout() without a currently running test!")

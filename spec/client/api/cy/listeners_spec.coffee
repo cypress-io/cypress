@@ -1,7 +1,7 @@
 describe "$Cypress.Cy Listeners Extensions", ->
   context "iframe load", ->
     before ->
-      @iframe = $("<iframe />")
+      @iframe = $("<iframe />").appendTo $("body")
 
     beforeEach ->
       @Cypress = $Cypress.create({loadModules: true})
@@ -19,17 +19,13 @@ describe "$Cypress.Cy Listeners Extensions", ->
     after ->
       @iframe.remove()
 
-    it "applies window listeners when an iframe fires its load event", (done) ->
+    it "applies window listeners when an iframe fires its load event", ->
       bindWindowListeners = @sandbox.spy @cy, "bindWindowListeners"
 
-      @iframe.on "load", =>
-        expect(bindWindowListeners).to.be.calledOnce
-        expect(bindWindowListeners).to.be.calledWith @iframe.prop("contentWindow")
-        done()
+      @iframe.trigger "load"
 
-      ## append the iframe at the end so it naturally fires its load event
-      ## which cy should be binding to and call bindWindowListeners
-      @iframe.appendTo $("body")
+      expect(bindWindowListeners).to.be.calledOnce
+      expect(bindWindowListeners).to.be.calledWith @iframe.prop("contentWindow")
 
   context "actual behaviors of events", ->
     enterCommandTestingMode()

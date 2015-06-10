@@ -359,7 +359,9 @@ describe "$Cypress.Cy Actions Commands", ->
           @cy.get("#multiple-inputs-and-multiple-submits input:first").type("foo{enter}")
 
         it "causes click event on the button", (done) ->
-          @forms.find("#multiple-inputs-and-multiple-submits button").click -> done()
+          @forms.find("#multiple-inputs-and-multiple-submits button").click (e) ->
+            e.preventDefault()
+            done()
 
           @cy.get("#multiple-inputs-and-multiple-submits input:first").type("foo{enter}")
 
@@ -1921,7 +1923,7 @@ describe "$Cypress.Cy Actions Commands", ->
         expect(obj).to.deep.eq {
           bubbles: true
           cancelable: true
-          view: @cy.sync.window()
+          view: @cy.private("window")
           clientX: coords.x
           clientY: coords.y
           button: 0
@@ -1941,10 +1943,10 @@ describe "$Cypress.Cy Actions Commands", ->
 
     it "bubbles up native click event", (done) ->
       click = (e) =>
-        @cy.sync.window().removeEventListener "click", click
+        @cy.private("window").removeEventListener "click", click
         done()
 
-      @cy.sync.window().addEventListener "click", click
+      @cy.private("window").addEventListener "click", click
 
       @cy.get("#button").click()
 
@@ -1958,7 +1960,7 @@ describe "$Cypress.Cy Actions Commands", ->
         expect(obj).to.deep.eq {
           bubbles: true
           cancelable: true
-          view: @cy.sync.window()
+          view: @cy.private("window")
           clientX: coords.x
           clientY: coords.y
           button: 0
@@ -1986,7 +1988,7 @@ describe "$Cypress.Cy Actions Commands", ->
         expect(obj).to.deep.eq {
           bubbles: true
           cancelable: true
-          view: @cy.sync.window()
+          view: @cy.private("window")
           clientX: coords.x
           clientY: coords.y
           button: 0
@@ -2182,7 +2184,7 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(obj).to.deep.eq {
             bubbles: false
             cancelable: false
-            view: @cy.sync.window()
+            view: @cy.private("window")
             pageX: 0
             pageY: 0
             which: 0
@@ -2202,7 +2204,7 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(obj).to.deep.eq {
             bubbles: true
             cancelable: false
-            view: @cy.sync.window()
+            view: @cy.private("window")
             pageX: 0
             pageY: 0
             which: 0
@@ -2247,13 +2249,13 @@ describe "$Cypress.Cy Actions Commands", ->
           .focused().should("have.id", "button-covered-in-span")
 
       it "will give focus to the window if no element is focusable", (done) ->
-        $(@cy.sync.window()).on "focus", -> done()
+        $(@cy.private("window")).on "focus", -> done()
 
         @cy.get("#nested-find").click()
 
       # it "events", ->
       #   btn = @cy.$("button")
-      #   win = $(@cy.sync.window())
+      #   win = $(@cy.private("window"))
 
       #   _.each {"btn": btn, "win": win}, (type, key) ->
       #     _.each "focus mousedown mouseup click".split(" "), (event) ->

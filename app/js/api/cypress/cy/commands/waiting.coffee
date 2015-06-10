@@ -11,7 +11,7 @@ $Cypress.register "Waiting", (Cypress, _, $) ->
 
       try
         ## invoke fn and make sure its not strictly false
-        options.value = fn.call(@prop("runnable").ctx, subject)
+        options.value = fn.call(@private("runnable").ctx, subject)
         return subject if options.value
       catch e
         options.error = "Could not continue due to: " + e
@@ -81,7 +81,7 @@ $Cypress.register "Waiting", (Cypress, _, $) ->
 
       try
         ## invoke fn and make sure its not strictly false
-        options.value = fn.call(@prop("runnable").ctx, subject)
+        options.value = fn.call(@private("runnable").ctx, subject)
         if options.value
           ## do not think we need to log out waits
           ## just like we dont log out cy.thens

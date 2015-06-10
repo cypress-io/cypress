@@ -250,11 +250,11 @@ describe "$Cypress.Log API", ->
           @Cypress.command({})
 
         it "sets testId to runnable.id", (done) ->
-          @cy.prop("runnable", {id: 123})
+          @cy.private("runnable", {id: 123})
 
           @Cypress.on "log", (obj) ->
             expect(obj.get("testId")).to.eq 123
-            @prop("runnable", null)
+            @private("runnable", null)
             done()
 
           @Cypress.command({})

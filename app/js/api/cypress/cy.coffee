@@ -6,6 +6,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
     sync: {}
 
     constructor: (@Cypress, specWindow) ->
+      @privates = {}
       @queue = []
       @defaults()
       @listeners()
@@ -15,9 +16,15 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
     initialize: (obj) ->
       @defaults()
 
-      {@$remoteIframe, @config} = obj
+      {$remoteIframe, @config} = obj
 
-      @$remoteIframe.on "load", =>
+      @private("$remoteIframe", $remoteIframe)
+
+      @_setRemoteIframeProps($remoteIframe)
+
+      $remoteIframe.on "load", =>
+        @_setRemoteIframeProps($remoteIframe)
+
         @urlChanged(null, {log: false})
         @pageLoading(false)
 
@@ -25,7 +32,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
         ## applied them already during onBeforeLoad. the reason
         ## is that after load javascript has finished being evaluated
         ## and we may need to override things like alert + confirm again
-        @bindWindowListeners @$remoteIframe.prop("contentWindow")
+        @bindWindowListeners @private("window")
         @isReady(true, "load")
 
       ## anytime initialize is called we immediately
@@ -51,9 +58,9 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       @listenTo @Cypress, "abort",      => @abort()
 
     abort: ->
-      @$remoteIframe?.off("submit beforeunload unload load hashchange")
+      @private("$remoteIframe")?.off("submit beforeunload unload load hashchange")
       @isReady(false, "abort")
-      @prop("runnable")?.clearTimeout()
+      @private("runnable")?.clearTimeout()
 
       promise = @prop("promise")
       promise?.cancel()
@@ -69,6 +76,8 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
 
     stop: ->
       delete window.cy
+
+      @privates = {}
 
       @Cypress.cy = null
 
@@ -99,11 +108,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       ## instance
       @defaults()
 
-    prop: (key, val) ->
-      if arguments.length is 1
-        @props[key]
-      else
-        @props[key] = val
+      return @
 
     ## global options applicable to all cy instances
     ## and restores
@@ -162,7 +167,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
 
       queue = @queue[index]
 
-      runnable = @prop("runnable")
+      runnable = @private("runnable")
 
       @group(runnable.group)
 
@@ -192,7 +197,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       run = =>
         ## bail if we've changed runnables by the
         ## time this resolves
-        return if @prop("runnable") isnt runnable
+        return if @private("runnable") isnt runnable
 
         ## reset the timeout to what it used to be
         @_timeout(prevTimeout)
@@ -252,7 +257,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       ## automatically defer running each command in succession
       ## so each command is async
       @defer ->
-        angular = @sync.window().angular
+        angular = @private("window").angular
 
         if angular and angular.getTestability
           run            = _.bind(run, @)
@@ -424,7 +429,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       if opt = @Cypress.option("jQuery")
         return opt
       else
-        @sync.window().$
+        @private("window").$
 
     _checkForNewChain: (chainerId) ->
       ## dont do anything if this isnt even defined
@@ -535,7 +540,14 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
 
       return @
 
-    setRunnable: (runnable, hookName) ->
+    _setRemoteIframeProps: ($iframe) ->
+      @private "$remoteIframe", $iframe
+      @private "window", $iframe.prop("contentWindow")
+      @private "document", $iframe.prop("contentDocument")
+
+      return @
+
+    _setRunnable: (runnable, hookName) ->
       ## think about moving the cy.config object
       ## to Cypress so it doesnt need to be reset.
       ## also our options are "global" whereas
@@ -547,12 +559,17 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
         runnable.timeout timeout
 
       @hook(hookName)
-      @prop("runnable", runnable)
+
+      ## we store runnable as a property because
+      ## we can't allow it to be reset with props
+      ## since it is long lived (page events continue)
+      ## after the tests have finished
+      @private "runnable", runnable
 
       return @
 
     $: (selector, context) ->
-      context ?= @sync.document()
+      context ?= @private("document")
       new $.fn.init selector, context
 
     _: _
@@ -567,7 +584,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
     @set = (Cypress, runnable, hookName) ->
       return if not cy = Cypress.cy
 
-      cy.setRunnable(runnable, hookName)
+      cy._setRunnable(runnable, hookName)
 
     @create = (Cypress, specWindow) ->
       ## clear out existing listeners

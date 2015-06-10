@@ -138,12 +138,12 @@ $Cypress.register "Actions", (Cypress, _, $) ->
             ## todo handle relatedTarget's per the spec
             focusinEvt = new FocusEvent "focusin", {
               bubbles: true
-              view: @sync.window()
+              view: @private("window")
               relatedTarget: null
             }
 
             focusEvt = new FocusEvent "focus", {
-              view: @sync.window()
+              view: @private("window")
               relatedTarget: null
             }
 
@@ -322,7 +322,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
       @ensureDom(options.$el)
 
-      win             = @sync.window()
+      win             = @private("window")
       wait            = 10
       stopPropagation = MouseEvent.prototype.stopPropagation
 
@@ -783,7 +783,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
             Elements: $el?.length ? 0
 
       try
-        d = @sync.document()
+        d = @private("document")
         forceFocusedEl = @prop("forceFocusedEl")
         if forceFocusedEl
           if @_contains(forceFocusedEl)
@@ -791,7 +791,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           else
             @prop("forceFocusedEl", null)
         else
-          el = d.get(0).activeElement
+          el = d.activeElement
 
         ## return null if we have an el but
         ## the el is body or the el is currently the

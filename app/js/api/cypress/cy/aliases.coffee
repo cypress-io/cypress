@@ -5,7 +5,7 @@ do ($Cypress, _) ->
 
   $Cypress.Cy.extend
     assign: (str, obj) ->
-      @prop("runnable").ctx[str] = obj
+      @private("runnable").ctx[str] = obj
 
     ## these are public because its expected other commands
     ## know about them and are expected to call them

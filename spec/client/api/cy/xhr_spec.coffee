@@ -47,14 +47,14 @@ describe "$Cypress.Cy XHR Commands", ->
       it "throws when cannot find sinon", ->
         sinon = @cy.private("window").sinon
 
-        delete @cy.sync.window().sinon
+        delete @cy.private("window").sinon
 
         fn = => @cy._getSandbox()
 
         expect(fn).to.throw "Could not access the Server, Routes, Stub, Spies, or Mocks. Check to see if your application is loaded and is visible. Please open an issue if you see this message."
 
         ## restore after the test
-        @cy.sync.window().sinon = sinon
+        @cy.private("window").sinon = sinon
 
   context "#server", ->
     beforeEach ->
@@ -150,7 +150,7 @@ describe "$Cypress.Cy XHR Commands", ->
     describe "without sinon present", ->
       beforeEach ->
         ## force us to start from blank window
-        @cy.$remoteIframe.prop("src", "about:blank")
+        @cy.private("$remoteIframe").prop("src", "about:blank")
 
       it "can start server with no errors", ->
         @cy
@@ -387,7 +387,7 @@ describe "$Cypress.Cy XHR Commands", ->
         .server()
         .route("POST", "/users", {}, onRequest)
         .then ->
-          @cy.sync.window().$.post("/users", "name=brian")
+          @cy.private("window").$.post("/users", "name=brian")
 
     it "can explicitly done() in onRequest function from options", (done) ->
       @cy
@@ -399,7 +399,7 @@ describe "$Cypress.Cy XHR Commands", ->
           onRequest: -> done()
         })
         .then ->
-          @cy.sync.window().$.post("/users", "name=brian")
+          @cy.private("window").$.post("/users", "name=brian")
 
     it "adds multiple routes to the responses array", ->
       @cy
@@ -421,7 +421,7 @@ describe "$Cypress.Cy XHR Commands", ->
               done()
           })
           .then ->
-            @cy.sync.window().$.ajax
+            @cy.private("window").$.ajax
               type: "POST"
               url: "/foo"
               data: JSON.stringify({foo: "bar"})
@@ -439,7 +439,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
       _.each extensions, (val, ext) ->
         it "filters out non ajax requests by default for extension: .#{ext}", (done) ->
-          @cy.sync.window().$.get("/fixtures/ajax/app.#{ext}").done (res) ->
+          @cy.private("window").$.get("/fixtures/ajax/app.#{ext}").done (res) ->
             expect(res).to.eq val
             done()
 
@@ -623,7 +623,7 @@ describe "$Cypress.Cy XHR Commands", ->
   context "#checkForServer", ->
     beforeEach ->
       ## force us to start from blank window
-      @cy.$remoteIframe.prop("src", "about:blank")
+      @cy.private("$remoteIframe").prop("src", "about:blank")
 
     it "nukes TMP_SERVER and TMP_ROUTES", ->
       @cy

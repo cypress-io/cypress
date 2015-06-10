@@ -11,12 +11,12 @@ do ($Cypress, _) ->
       ## in the viewport, and therefore we must ensure to scroll the
       ## element into view prior to running this method or this will
       ## return null
-      win = @sync.window()
+      win = @private("window")
 
       scrollX = x - win.pageXOffset
       scrollY = y - win.pageYOffset
 
-      el = @sync.document().get(0).elementFromPoint(scrollX, scrollY)
+      el = @private("document").elementFromPoint(scrollX, scrollY)
 
       ## only wrap el if its non-null
       if el
@@ -29,7 +29,7 @@ do ($Cypress, _) ->
       ## is factored into calculations
       ## which means we dont have to do any math, yay!
       if Element.prototype.getBoundingClientRect
-        win = @sync.window()
+        win = @private("window")
 
         ## top/left are returned relative to viewport
         ## so we have to add in the scrolled amount

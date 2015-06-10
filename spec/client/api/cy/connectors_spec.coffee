@@ -54,7 +54,7 @@ describe "$Cypress.Cy Connectors Commands", ->
         ## remote window
         @Cypress.option "jQuery", @iframe.prop("contentWindow").$
 
-        @remoteWindow = @cy.sync.window()
+        @remoteWindow = @cy.private("window")
 
       afterEach ->
         ## restore back to the global $
@@ -99,7 +99,7 @@ describe "$Cypress.Cy Connectors Commands", ->
       ## remote window
       @Cypress.option "jQuery", @iframe.prop("contentWindow").$
 
-      @remoteWindow = @cy.sync.window()
+      @remoteWindow = @cy.private("window")
 
     afterEach ->
       ## restore back to the global $

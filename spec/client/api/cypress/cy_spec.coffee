@@ -45,7 +45,7 @@ describe "$Cypress.Cy API", ->
 
       it "sets $remoteIframe", ->
         @Cypress.trigger "initialize", {$remoteIframe: @remoteIframe}
-        expect(cy.$remoteIframe).to.eq @remoteIframe
+        expect(cy.private("$remoteIframe")).to.eq @remoteIframe
 
       it "sets config", ->
         config = {}
@@ -135,26 +135,26 @@ describe "$Cypress.Cy API", ->
         abort = @cy.abort()
         expect(abort).to.be.instanceof Promise
 
-    describe "#setRunnable", ->
+    describe "#_setRunnable", ->
       beforeEach ->
         @cy = $Cypress.Cy.create(@Cypress, @specWindow)
         @cy.config = ->
         null
 
       it "sets prop(hookName)", ->
-        @cy.setRunnable({}, "foobar")
+        @cy._setRunnable({}, "foobar")
         expect(@cy.prop("hookName")).to.eq "foobar"
 
       it "sets startedAt on the runnable", ->
         obj = {}
-        @cy.setRunnable(obj, "test")
+        @cy._setRunnable(obj, "test")
         expect(obj.startedAt).to.be.a("date")
 
       it "sets runnable timeout to config.commandTimeout", ->
         t = @test
         timeout = @sandbox.spy t, "timeout"
         @sandbox.stub @cy, "config", -> 1000
-        @cy.setRunnable(t)
+        @cy._setRunnable(t)
         expect(timeout).to.be.calledWith 1000
         expect(t._timeout).to.eq 1000
 
@@ -197,7 +197,7 @@ describe "$Cypress.Cy API", ->
         ## which means our test receives a state
         ## immediately when the done() is called
         @cy.on "command:start", =>
-          @ct = @sandbox.spy @cy.prop("runnable"), "clearTimeout"
+          @ct = @sandbox.spy @cy.private("runnable"), "clearTimeout"
 
         @cy.on "command:end", =>
           expect(@ct.callCount).to.eq 0
@@ -205,11 +205,11 @@ describe "$Cypress.Cy API", ->
           ## clear the state again else the function done()
           ## inside of mocha (runnable.run) will return
           ## early and not self.clearTimeout()
-          delete @cy.prop("runnable").state
+          delete @cy.private("runnable").state
           done()
 
         @cy.then ->
-          @cy.prop("runnable").state = "passed"
+          @cy.private("runnable").state = "passed"
 
     context "promises", ->
       it "doesnt invoke .then on the cypress instance", (done) ->
@@ -297,7 +297,8 @@ describe "$Cypress.Cy API", ->
         expect(@cy._timeout()).to.eq timeout
 
       it "throws error when no runnable", ->
-        @Cypress.restore()
+        @cy.private("runnable", null)
+
         fn = =>
           @cy._timeout(500)
 

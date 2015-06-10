@@ -68,7 +68,7 @@ do ($Cypress, _) ->
       else
         @commandErr(err)
 
-      runnable = @prop("runnable")
+      runnable = @private("runnable")
 
       @prop("err", err)
 
