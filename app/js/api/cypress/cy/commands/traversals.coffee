@@ -44,7 +44,7 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
           onConsole: -> onConsole
 
       log = ($el) ->
-        return if not options.command
+        return $el if not options.command
 
         _.extend onConsole,
           "Returned": $Cypress.Utils.getDomElements($el)

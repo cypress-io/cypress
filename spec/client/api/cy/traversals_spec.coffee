@@ -194,6 +194,16 @@ describe "$Cypress.Cy Traversal Commands", ->
 
     @cy.get("div:first").find(".spinner'")
 
+  it "does not log using first w/options", ->
+    logs = []
+
+    @Cypress.on "log", (log) ->
+      logs.push log
+
+    @cy.get("button").first({log: false}).then ($button) ->
+      expect($button.length).to.eq(1)
+      expect(logs.length).to.eq(1)
+
   context "delta + options", ->
     beforeEach ->
       @Cypress.on "log", (@log) =>
