@@ -109,15 +109,15 @@ describe "$Cypress.Cy XHR Commands", ->
 
     it "starts the fake XHR server", ->
       @cy.server().then ->
-        expect(@cy._sandbox.server).to.be.defined
+        expect(@cy.prop("sandbox").server).to.be.defined
 
     it "sets ignore=true by default", ->
       @cy.server().then ->
-        expect(@cy._sandbox.server.xhr.useFilters).to.be.true
+        expect(@cy.prop("sandbox").server.xhr.useFilters).to.be.true
 
     it "can set ignore=false", ->
       @cy.server({ignore: false}).then ->
-        expect(@cy._sandbox.server.xhr.useFilters).to.be.false
+        expect(@cy.prop("sandbox").server.xhr.useFilters).to.be.false
 
     it "sets respond=true by default", ->
       @cy.server().then ->
