@@ -139,9 +139,6 @@ describe "$Cypress API", ->
         config: 3
       }
 
-    it "triggers 'defaults'", ->
-      expect(@trigger).to.be.calledWith "defaults"
-
     it "calls mocha#options with runner", ->
       expect(@Cypress.mocha.options).to.be.calledWith {}
 

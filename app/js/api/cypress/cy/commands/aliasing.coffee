@@ -2,11 +2,10 @@ $Cypress.register "Aliasing", (Cypress, _, $) ->
 
   blacklist = ["test", "runnable", "timeout", "slow", "skip", "inspect"]
 
-  Cypress.on "defaults", ->
-    @_aliases = {}
-
   Cypress.addChildCommand
     as: (subject, str) ->
+      aliases = @prop("aliases") ? {}
+
       if not _.isString(str)
         @throwErr "cy.as() can only accept a string!"
 
@@ -19,7 +18,9 @@ $Cypress.register "Aliasing", (Cypress, _, $) ->
       prev       = @prop("current").prev
       prev.alias = str
 
-      @_aliases[str] = {subject: subject, command: prev, alias: str}
+      aliases[str] = {subject: subject, command: prev, alias: str}
+
+      @prop("aliases", aliases)
 
       ## assign the subject to our runnable ctx
       @assign(str, subject)

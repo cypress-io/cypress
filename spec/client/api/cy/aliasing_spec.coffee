@@ -10,13 +10,13 @@ describe "$Cypress.Cy Aliasing Commands", ->
 
     it "stores the lookup as an alias", ->
       @cy.get("body").as("b").then ->
-        expect(@cy._aliases.b).to.be.defined
+        expect(@cy.prop("aliases").b).to.be.defined
 
     it "stores the resulting subject as the alias", (done) ->
       body = @cy.$("body")
 
       @cy.on "end", ->
-        expect(@_aliases.b.subject.get(0)).to.eq body.get(0)
+        expect(@prop("aliases").b.subject.get(0)).to.eq body.get(0)
         done()
 
       @cy.get("body").as("b")

@@ -1,11 +1,11 @@
 describe "$Cypress.Cy XHR Commands", ->
   enterCommandTestingMode()
 
-  context "#_sandbox", ->
+  context "#sandbox", ->
     it "creates a new sandbox", ->
-      expect(@cy._sandbox).to.be.null
+      expect(@cy.prop("sandbox")).to.be.undefined
       @cy._getSandbox()
-      expect(@cy._sandbox).to.be.defined
+      expect(@cy.prop("sandbox")).to.be.defined
 
     it "uses existing sandbox", ->
       sandbox = @cy._getSandbox()
@@ -38,14 +38,14 @@ describe "$Cypress.Cy XHR Commands", ->
         @Cypress.restore()
         expect(sandbox.server).to.have.property(prop).that.deep.eq []
 
-    it "nulls the sandbox reference after restore", ->
+    it "deletes the sandbox reference after restore", ->
       @cy._getSandbox()
       @Cypress.restore()
-      expect(@cy._sandbox).to.be.null
+      expect(@cy.prop("sandbox")).to.be.undefined
 
     describe "#errors", ->
       it "throws when cannot find sinon", ->
-        sinon = @cy.sync.window().sinon
+        sinon = @cy.private("window").sinon
 
         delete @cy.sync.window().sinon
 
@@ -405,7 +405,7 @@ describe "$Cypress.Cy XHR Commands", ->
         .route("foo", {})
         .route("bar", {})
         .then ->
-          expect(@cy._sandbox.server.responses).to.have.length(2)
+          expect(@cy.prop("sandbox").server.responses).to.have.length(2)
 
     describe "request JSON parsing", ->
       it "adds requestJSON if requesting JSON", (done) ->

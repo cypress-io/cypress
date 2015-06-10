@@ -1,14 +1,9 @@
 $Cypress.register "Sandbox", (Cypress, _, $) ->
 
-  Cypress.on "defaults", ->
-    ## why are we using a property here
-    ## instead of going through @prop(...) ?
-    @_sandbox = null
-
   Cypress.on "restore", ->
     ## restore the sandbox if we've
     ## created one
-    if sandbox = @_sandbox
+    if sandbox = @prop("sandbox")
       sandbox.restore()
 
       ## if we have a server, resets
@@ -28,4 +23,6 @@ $Cypress.register "Sandbox", (Cypress, _, $) ->
       if not sinon
         @throwErr("Could not access the Server, Routes, Stub, Spies, or Mocks. Check to see if your application is loaded and is visible. Please open an issue if you see this message.")
 
-      @_sandbox ?= sinon.sandbox.create()
+      sandbox = @prop("sandbox") ? sinon.sandbox.create()
+
+      @prop("sandbox", sandbox)

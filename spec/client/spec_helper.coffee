@@ -112,7 +112,7 @@ window.enterCommandTestingMode = (fixture = "html/dom") ->
       ## must call defaults manually because
       ## this is naturally called in initialize
       ## AFTER we instantiate our helper classes
-      @Cypress.defaults()
+      # @Cypress.defaults()
 
       ## set the jquery engine to be our window so we dont have to juggle
       ## the gazillions of edge cases caused by the remote $ elements being
