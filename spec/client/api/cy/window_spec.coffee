@@ -9,11 +9,11 @@ describe "$Cypress.Cy Window Commands", ->
   context "#document", ->
     it "returns the remote document as a jquery object", ->
       @cy.document().then ($doc) ->
-        expect($doc.get(0)).to.eq $("iframe").prop("contentDocument")
+        expect($doc).to.eq $("iframe").prop("contentDocument")
 
     it "aliases doc to document", ->
       @cy.doc().then ($doc) ->
-        expect($doc.get(0)).to.eq $("iframe").prop("contentDocument")
+        expect($doc).to.eq $("iframe").prop("contentDocument")
 
   context "#title", ->
     it "returns the pages title as a string", ->

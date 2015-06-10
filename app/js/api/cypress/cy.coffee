@@ -407,7 +407,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       @trigger "cancel", obj
 
     _contains: ($el) ->
-      doc = @sync.document().get(0)
+      doc = @private("document")
 
       contains = (el) ->
         $.contains(doc, el)
