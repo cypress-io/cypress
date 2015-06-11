@@ -18,11 +18,6 @@
       selector: ->
         _.trim @stripParentSelector()
 
-      ## display controls if this isnt an event
-      ## but a real command
-      shouldDisplayControls: ->
-        not @isEvent()
-
       truncated: ->
         switch @get("type")
           when "xhr" and @response          then @xhr.responseTextText.length > 40
