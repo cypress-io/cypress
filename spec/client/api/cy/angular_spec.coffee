@@ -18,10 +18,11 @@ describe "$Cypress.Cy Angular Commands", ->
 
       describe "errors", ->
         beforeEach ->
+          @currentTest.enableTimeouts(false)
           @allowErrors()
 
         it "throws when cannot find angular", (done) ->
-          delete @cy.sync.window().angular
+          delete @cy.private("window").angular
 
           @cy.on "fail", (err) ->
             expect(err.message).to.include "Angular global (window.angular) was not found in your window! You cannot use .ng() methods without angular."
@@ -87,6 +88,7 @@ describe "$Cypress.Cy Angular Commands", ->
 
       describe "errors", ->
         beforeEach ->
+          @currentTest.enableTimeouts(false)
           @allowErrors()
 
         it "throws when repeater cannot be found", (done) ->
@@ -116,7 +118,7 @@ describe "$Cypress.Cy Angular Commands", ->
           @cy.ng("repeater", "not-found")
 
         it "throws when cannot find angular", (done) ->
-          delete @cy.sync.window().angular
+          delete @cy.private("window").angular
 
           @cy.on "fail", (err) ->
             expect(err.message).to.include "Angular global (window.angular) was not found in your window! You cannot use .ng() methods without angular."
@@ -174,6 +176,7 @@ describe "$Cypress.Cy Angular Commands", ->
 
       describe "errors", ->
         beforeEach ->
+          @currentTest.enableTimeouts(false)
           @allowErrors()
 
         it "throws when model cannot be found", (done) ->
@@ -202,7 +205,7 @@ describe "$Cypress.Cy Angular Commands", ->
           @cy.ng("model", "not-found")
 
         it "throws when cannot find angular", (done) ->
-          delete @cy.sync.window().angular
+          delete @cy.private("window").angular
 
           @cy.on "fail", (err) ->
             expect(err.message).to.include "Angular global (window.angular) was not found in your window! You cannot use .ng() methods without angular."

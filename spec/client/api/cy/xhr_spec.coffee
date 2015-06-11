@@ -1,11 +1,11 @@
 describe "$Cypress.Cy XHR Commands", ->
   enterCommandTestingMode()
 
-  context "#_sandbox", ->
+  context "#sandbox", ->
     it "creates a new sandbox", ->
-      expect(@cy._sandbox).to.be.null
+      expect(@cy.prop("sandbox")).to.be.undefined
       @cy._getSandbox()
-      expect(@cy._sandbox).to.be.defined
+      expect(@cy.prop("sandbox")).to.be.defined
 
     it "uses existing sandbox", ->
       sandbox = @cy._getSandbox()
@@ -38,23 +38,23 @@ describe "$Cypress.Cy XHR Commands", ->
         @Cypress.restore()
         expect(sandbox.server).to.have.property(prop).that.deep.eq []
 
-    it "nulls the sandbox reference after restore", ->
+    it "deletes the sandbox reference after restore", ->
       @cy._getSandbox()
       @Cypress.restore()
-      expect(@cy._sandbox).to.be.null
+      expect(@cy.prop("sandbox")).to.be.undefined
 
     describe "#errors", ->
       it "throws when cannot find sinon", ->
-        sinon = @cy.sync.window().sinon
+        sinon = @cy.private("window").sinon
 
-        delete @cy.sync.window().sinon
+        delete @cy.private("window").sinon
 
         fn = => @cy._getSandbox()
 
         expect(fn).to.throw "Could not access the Server, Routes, Stub, Spies, or Mocks. Check to see if your application is loaded and is visible. Please open an issue if you see this message."
 
         ## restore after the test
-        @cy.sync.window().sinon = sinon
+        @cy.private("window").sinon = sinon
 
   context "#server", ->
     beforeEach ->
@@ -109,15 +109,15 @@ describe "$Cypress.Cy XHR Commands", ->
 
     it "starts the fake XHR server", ->
       @cy.server().then ->
-        expect(@cy._sandbox.server).to.be.defined
+        expect(@cy.prop("sandbox").server).to.be.defined
 
     it "sets ignore=true by default", ->
       @cy.server().then ->
-        expect(@cy._sandbox.server.xhr.useFilters).to.be.true
+        expect(@cy.prop("sandbox").server.xhr.useFilters).to.be.true
 
     it "can set ignore=false", ->
       @cy.server({ignore: false}).then ->
-        expect(@cy._sandbox.server.xhr.useFilters).to.be.false
+        expect(@cy.prop("sandbox").server.xhr.useFilters).to.be.false
 
     it "sets respond=true by default", ->
       @cy.server().then ->
@@ -150,7 +150,7 @@ describe "$Cypress.Cy XHR Commands", ->
     describe "without sinon present", ->
       beforeEach ->
         ## force us to start from blank window
-        @cy.$remoteIframe.prop("src", "about:blank")
+        @cy.private("$remoteIframe").prop("src", "about:blank")
 
       it "can start server with no errors", ->
         @cy
@@ -210,14 +210,15 @@ describe "$Cypress.Cy XHR Commands", ->
         it "provides specific #onFail", (done) ->
           @cy.on "fail", (err) =>
             obj = {
-              name: "request"
+              name: "xhr"
               referencesAlias: undefined
               alias: "getFoo"
               aliasType: "route"
               type: "parent"
               error: err
-              event: "command"
+              instrument: "command"
               message: undefined
+              event: true
             }
             _.each obj, (value, key) =>
               expect(@log.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
@@ -386,7 +387,7 @@ describe "$Cypress.Cy XHR Commands", ->
         .server()
         .route("POST", "/users", {}, onRequest)
         .then ->
-          @cy.sync.window().$.post("/users", "name=brian")
+          @cy.private("window").$.post("/users", "name=brian")
 
     it "can explicitly done() in onRequest function from options", (done) ->
       @cy
@@ -398,14 +399,14 @@ describe "$Cypress.Cy XHR Commands", ->
           onRequest: -> done()
         })
         .then ->
-          @cy.sync.window().$.post("/users", "name=brian")
+          @cy.private("window").$.post("/users", "name=brian")
 
     it "adds multiple routes to the responses array", ->
       @cy
         .route("foo", {})
         .route("bar", {})
         .then ->
-          expect(@cy._sandbox.server.responses).to.have.length(2)
+          expect(@cy.prop("sandbox").server.responses).to.have.length(2)
 
     describe "request JSON parsing", ->
       it "adds requestJSON if requesting JSON", (done) ->
@@ -420,7 +421,7 @@ describe "$Cypress.Cy XHR Commands", ->
               done()
           })
           .then ->
-            @cy.sync.window().$.ajax
+            @cy.private("window").$.ajax
               type: "POST"
               url: "/foo"
               data: JSON.stringify({foo: "bar"})
@@ -438,7 +439,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
       _.each extensions, (val, ext) ->
         it "filters out non ajax requests by default for extension: .#{ext}", (done) ->
-          @cy.sync.window().$.get("/fixtures/ajax/app.#{ext}").done (res) ->
+          @cy.private("window").$.get("/fixtures/ajax/app.#{ext}").done (res) ->
             expect(res).to.eq val
             done()
 
@@ -548,13 +549,14 @@ describe "$Cypress.Cy XHR Commands", ->
           }
 
       describe "requests", ->
-        it "immediately logs request obj", ->
+        it "immediately logs xhr obj", ->
           @cy
             .route(/foo/, {}).as("getFoo")
             .window().then (win) =>
               win.$.get("foo")
-              expect(@log.pick("name", "alias", "aliasType", "state")).to.deep.eq {
-                name: "request"
+              expect(@log.pick("name", "event", "alias", "aliasType", "state")).to.deep.eq {
+                name: "xhr"
+                event: true
                 alias: "getFoo"
                 aliasType: "route"
                 state: "pending"
@@ -563,15 +565,22 @@ describe "$Cypress.Cy XHR Commands", ->
 
       describe "responses", ->
         beforeEach ->
+          logs = []
+
+          @Cypress.on "log", (log) =>
+            logs.push(log)
+
           @cy
             .route(/foo/, {}).as("getFoo")
             .window().then (win) ->
               win.$.get("foo_bar")
-            .wait("@getFoo")
+            .wait("@getFoo").then ->
+              @log = _(logs).find (l) -> l.get("name") is "xhr"
 
         it "logs obj", ->
           obj = {
-            name: "request"
+            name: "xhr"
+            event: true
             message: undefined
             type: "parent"
             aliasType: "route"
@@ -620,7 +629,7 @@ describe "$Cypress.Cy XHR Commands", ->
   context "#checkForServer", ->
     beforeEach ->
       ## force us to start from blank window
-      @cy.$remoteIframe.prop("src", "about:blank")
+      @cy.private("$remoteIframe").prop("src", "about:blank")
 
     it "nukes TMP_SERVER and TMP_ROUTES", ->
       @cy

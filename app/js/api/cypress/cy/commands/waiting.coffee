@@ -11,7 +11,7 @@ $Cypress.register "Waiting", (Cypress, _, $) ->
 
       try
         ## invoke fn and make sure its not strictly false
-        options.value = fn.call(@prop("runnable").ctx, subject)
+        options.value = fn.call(@private("runnable").ctx, subject)
         return subject if options.value
       catch e
         options.error = "Could not continue due to: " + e
@@ -31,27 +31,11 @@ $Cypress.register "Waiting", (Cypress, _, $) ->
       ## if its a string the user most likely is trying
       ## to wait on multiple aliases and forget to make this
       ## an array
+      if _.isString(options)
+        @throwErr("cy.wait() was passed invalid arguments. You cannot pass multiple strings. If you're trying to wait for multiple routes, use an array.")
 
-      ## WHEN WE RETRY A WAIT, WE NEED TO IMMEDIATELY LOG
-      ## OUT THE COMMAND SO USERS CAN SEE THAT WE'RE REATTEMPTING
-      ## SOMETHING.
-      ## WHEN ITS SUCCESSFUL THEN REMOVE THIS COMMAND
-      ## WHEN IT ERRORS, YOU'LL STILL SEE IT
-      ## ADDITIONALLY NEED TO LOG OUT WAIT FOR NUMBER ARGUMENTS
-
-      options.log ?= (onConsole, alias, retries, error) ->
-        obj = {
-          end: true
-          snapshot: true
-          referencesAlias: alias
-          aliasType: "route"
-          numRetries: retries
-          onConsole: -> onConsole
-        }
-
-        obj.error = error if error
-
-        Cypress.command(obj)
+      _.defaults options,
+        log: true
 
       args = [subject, msOrFnOrAlias, options]
 
@@ -68,9 +52,20 @@ $Cypress.register "Waiting", (Cypress, _, $) ->
       ## increase the timeout by the delta
       @_timeout(ms, true)
 
-      options.log({"Waited For": "#{ms}ms before continuing"})
+      if options.log
+        command = Cypress.command
+          onConsole: -> {
+            "Waited For": "#{ms}ms before continuing"
+            "Returned": subject
+          }
 
-      return Promise.delay(ms).return(subject)
+      Promise
+        .delay(ms)
+        .then ->
+          if command
+            command.snapshot().end()
+
+        .return(subject)
 
     _waitFunction: (subject, fn, options) ->
       retry = ->
@@ -81,7 +76,7 @@ $Cypress.register "Waiting", (Cypress, _, $) ->
 
       try
         ## invoke fn and make sure its not strictly false
-        options.value = fn.call(@prop("runnable").ctx, subject)
+        options.value = fn.call(@private("runnable").ctx, subject)
         if options.value
           ## do not think we need to log out waits
           ## just like we dont log out cy.thens
@@ -104,8 +99,10 @@ $Cypress.register "Waiting", (Cypress, _, $) ->
       @_retry(retry, options) if _.isNull(options.value) or options.value is false
 
     _waitString: (subject, str, options) ->
-      if _.isString(options)
-        @throwErr("cy.wait() was passed invalid arguments. You cannot pass multiple strings. If you're trying to wait for multiple routes, use an array.")
+      if options.log
+        options.command = Cypress.command
+          type: "parent"
+          aliasType: "route"
 
       getNumRequests = (alias) =>
         requests = @prop("aliasRequests") ? {}
@@ -113,7 +110,6 @@ $Cypress.register "Waiting", (Cypress, _, $) ->
         requests[alias] += 1
 
         @prop("aliasRequests", requests)
-
 
         _.ordinalize requests[alias]
 
@@ -124,12 +120,6 @@ $Cypress.register "Waiting", (Cypress, _, $) ->
 
         ## return our xhr object
         return xhr if xhr
-
-        options.onFail ?= (err) ->
-          options.log({
-            "Waited For": "alias: '#{str}' to have a #{word}"
-            Alias: xhr
-          }, str, options.retries, err)
 
         options.error ?= "cy.wait() timed out waiting for the #{getNumRequests(alias)} #{word} to the route: '#{str}'. No #{word} ever occured."
 
@@ -159,8 +149,17 @@ $Cypress.register "Waiting", (Cypress, _, $) ->
 
         str = _.compact([alias, str2]).join(".")
 
+        ## if we have a command then continue to
+        ## build up an array of referencesAlias
+        ## because wait can reference an array of aliases
+        if options.command
+          referencesAlias = options.command.get("referencesAlias") ? []
+          aliases = [].concat(referencesAlias)
+          aliases.push(str)
+          options.command.set "referencesAlias", aliases
+
         if command.name isnt "route"
-          @throwErr("cy.wait() can only accept aliases for routes.  The alias: '#{alias}' did not match a route.")
+          @throwErr("cy.wait() can only accept aliases for routes.  The alias: '#{alias}' did not match a route.", options.command)
 
         ## create shallow copy of each options object
         checkForXhr.call(@, str, alias, _.clone(options))
@@ -181,7 +180,17 @@ $Cypress.register "Waiting", (Cypress, _, $) ->
         .then (responses) ->
           ## if we only asked to wait for one alias
           ## then return that, else return the array of xhr responses
-          if responses.length is 1 then responses[0] else responses
+          ret = if responses.length is 1 then responses[0] else responses
+
+          if options.command
+            options.command.set "onConsole", -> {
+              "Waited For": @referencesAlias.join(", ")
+              "Returned": ret
+            }
+
+            options.command.snapshot().end()
+
+          return ret
         .catch (err) ->
           _(xhrs).invoke("cancel")
           throw err

@@ -259,19 +259,19 @@ describe "$Cypress.Cy Navigation Commands", ->
         @cy.visit("/fixtures/html/sinon.html").then ->
           expect(logs).to.have.length(1)
 
-      it "is name: loading", ->
+      it "is name: page load", ->
         @cy.get("form#click-me").find("input").click().then ->
-          expect(@log.get("name")).to.eq "loading"
+          expect(@log.get("name")).to.eq "page load"
 
       it "is type: parent", ->
         @cy.get("form#click-me").submit().then ->
           expect(@log.get("type")).to.eq "parent"
 
       describe "#onConsole", ->
-        it "only has Command: loading", ->
+        it "only has Event: 'page load'", ->
           @cy.get("form#click-me").submit().then ->
             expect(@log.attributes.onConsole()).to.deep.eq {
-              Command: "loading"
+              Event: "page load"
             }
 
     describe "errors", ->

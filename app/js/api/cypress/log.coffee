@@ -108,8 +108,10 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       ## re-wrap onConsole to set Command + Error defaults
       @attributes.onConsole = _.wrap @attributes.onConsole, (orig, args...) ->
 
-        ## grab the Command name by default
-        consoleObj = {Command: _this.get("name")}
+        key = if _this.get("event") then "Event" else "Command"
+
+        consoleObj = {}
+        consoleObj[key] = _this.get("name")
 
         ## merge in the other properties from onConsole
         _.extend consoleObj, orig.apply(@, args)
@@ -147,6 +149,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       obj.isCurrent = obj.name is current.name
 
       _.defaults obj,
+        event: false
         onRender: ->
         onConsole: ->
           ret = if $Cypress.Utils.hasElement(current.subject)
@@ -184,10 +187,10 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
       @log("agent", obj)
 
-    log: (event, obj) ->
+    log: (instrument, obj) ->
       _.defaults obj,
-        hookName:         @cy.prop("hookName")
-        testId:           @cy.prop("runnable").id
+        hookName:         @cy.private("hookName")
+        testId:           @cy.private("runnable").id
         referencesAlias:  undefined
         alias:            undefined
         aliasType:        undefined
@@ -198,7 +201,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       if obj.isCurrent
         _.defaults obj, alias: @cy.getNextAlias()
 
-      obj.event = event
+      obj.instrument = instrument
 
       log = $Log.create(@, obj)
       log.wrapOnConsole()

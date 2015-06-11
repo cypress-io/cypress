@@ -1,8 +1,11 @@
 $Cypress.register "Navigation", (Cypress, _, $) ->
 
   overrideRemoteLocationGetters = (cy, contentWindow) ->
-    navigated = ->
-      cy.urlChanged()
+    navigated = (attr, args) ->
+      cy.urlChanged(null, {
+        by: attr
+        args: args
+      })
 
     Cypress.Location.override(contentWindow, navigated)
 
@@ -36,15 +39,17 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
       ## this may change in the future since we want
       ## to add debuggability in the chrome console
       ## which at that point we may keep runnable around
-      return if not @prop("runnable")
+      return if not @private("runnable")
 
       _.defaults options,
         timeout: 20000
 
       command = Cypress.command
         type: "parent"
-        name: "loading"
+        name: "page load"
         message: "--waiting for new page to load---"
+        event: true
+        ## add a note here that loading nulled out the current subject?
         onConsole: -> {}
 
       prevTimeout = @_timeout()
@@ -65,7 +70,7 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
             catch e
               @fail(e)
           else
-            command.snapshot().end()
+            command.set("message", "--page loaded--").snapshot().end()
         .then =>
           ## null out our subject again after loading resolves
           ## to prevent chaining since our page is loading
@@ -109,13 +114,14 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
       ## clear the current timeout
       @_clearTimeout()
 
-      win = @sync.window()
+      win           = @private("window")
+      $remoteIframe = @private("$remoteIframe")
 
       p = new Promise (resolve, reject) =>
         visit = (win, url, options) =>
           # ## when the remote iframe's load event fires
           # ## callback fn
-          @$remoteIframe.one "load", =>
+          $remoteIframe.one "load", =>
             @_storeHref()
             @_timeout(prevTimeout)
             options.onLoad?(win)
@@ -129,14 +135,14 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
               resolve(win)
 
           ## any existing global variables will get nuked after it navigates
-          @$remoteIframe.prop "src", Cypress.Location.createInitialRemoteSrc(url)
+          $remoteIframe.prop "src", Cypress.Location.createInitialRemoteSrc(url)
 
 
         ## if we're visiting a page and we're not currently
         ## on about:blank then we need to nuke the window
         ## and after its nuked then visit the url
         if @sync.url({log: false}) isnt "about:blank"
-          @$remoteIframe.one "load", =>
+          $remoteIframe.one "load", =>
             visit(win, url, options)
 
           @_href(win, "about:blank")
@@ -147,5 +153,5 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
       p
         .timeout(options.timeout)
         .catch Promise.TimeoutError, (err) =>
-          @$remoteIframe.off("load")
+          $remoteIframe.off("load")
           @throwErr "Timed out after waiting '#{options.timeout}ms' for your remote page to load.", command

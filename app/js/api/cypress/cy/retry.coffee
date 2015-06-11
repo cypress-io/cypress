@@ -19,7 +19,7 @@ do ($Cypress, _) ->
       ## we always want to make sure we timeout before our runnable does
       ## so take its current timeout, subtract the total time its already
       ## been running
-      options.timeout ?= options.runnableTimeout - (new Date - @prop("runnable").startedAt)
+      options.timeout ?= options.runnableTimeout - (new Date - @private("runnable").startedAt)
 
       ## we calculate the total time we've been retrying
       ## so we dont exceed the runnables timeout

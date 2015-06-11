@@ -82,7 +82,7 @@
     }
   }
 
-  .command-cloned {
+  .command-cloned, .command-event {
     font-style: italic;
 
     span {
@@ -219,7 +219,7 @@
     // right: 20px;
   }
 
-  .command-name-request {
+  .command-name-xhr {
     .command-message {
       .command-status {
         font-weight: 700;

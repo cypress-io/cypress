@@ -50,7 +50,9 @@ do ($Cypress, _) ->
         # @isReady(false, "unload")
 
       win.off("hashchange").on "hashchange", =>
-        @urlChanged()
+        @urlChanged(null, {
+          by: "hashchange"
+        })
 
       win.get(0).confirm = (message) ->
         console.info "Confirming 'true' to: ", message

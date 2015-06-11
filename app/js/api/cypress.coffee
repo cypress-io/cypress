@@ -21,9 +21,6 @@ window.$Cypress = do ($, _, Backbone) ->
         $remoteIframe: $remoteIframe
         config: config
 
-      ## set our defaults
-      @defaults()
-
       ## let the world know we're ready to
       ## rock and roll
       @trigger "initialized",
@@ -95,9 +92,6 @@ window.$Cypress = do ($, _, Backbone) ->
 
         return @
 
-    defaults: ->
-      @trigger "defaults"
-
     stop: ->
       @abort().then =>
 
@@ -123,7 +117,6 @@ window.$Cypress = do ($, _, Backbone) ->
     ## removing additional own instance properties
     restore: ->
       @trigger "restore"
-      @defaults()
       return @
 
     _.extend $Cypress.prototype, Backbone.Events

@@ -636,7 +636,7 @@ describe "$Cypress.Cy Querying Commands", ->
           @cy._timeout(1000)
 
           retry = _.after 3, _.once =>
-            @cy.sync.window().$.getJSON("/json")
+            @cy.private("window").$.getJSON("/json")
 
           @cy.on "retry", retry
 

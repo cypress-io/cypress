@@ -38,7 +38,7 @@
           App.config.setPageLoading(bool)
 
         @listenTo @Cypress, "log", (log) =>
-          switch log.get("event")
+          switch log.get("instrument")
             when "command"
               @commands.add log
 
@@ -49,7 +49,7 @@
               @agents.add log
 
             else
-              throw new Error("Cypress.log() emitted an unknown event: #{log.get('event')}")
+              throw new Error("Cypress.log() emitted an unknown instrument: #{log.get('instrument')}")
 
         @listenTo @socket, "test:changed", @reRun
 

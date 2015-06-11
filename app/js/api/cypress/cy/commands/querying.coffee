@@ -330,7 +330,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       prevWithinSubject = @prop("withinSubject")
       @prop("withinSubject", subject)
 
-      fn.call @prop("runnable").ctx
+      fn.call @private("runnable").ctx
 
       command.snapshot().end()
 

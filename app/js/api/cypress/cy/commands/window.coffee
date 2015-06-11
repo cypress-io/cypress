@@ -19,12 +19,14 @@ $Cypress.register "Window", (Cypress, _, $) ->
         return text
 
     window: ->
-      @throwErr "The remote iframe is undefined!" if not @$remoteIframe
-      @$remoteIframe.prop("contentWindow")
+      window = @private("window")
+      @throwErr "The remote iframe is undefined!" if not window
+
+      return window
 
     document: ->
-      win = @sync.window()
+      win = @private("window")
       @throwErr "The remote iframe's document is undefined!" if not win.document
-      $(win.document)
+      win.document
 
     doc: -> @sync.document()

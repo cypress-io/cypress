@@ -153,6 +153,25 @@ describe "$Cypress.Log API", ->
 
         expect(error).to.be.calledWith err
 
+    describe "#wrapOnConsole", ->
+      it "automatically adds Command with name", ->
+        @log.set("name", "foo")
+        @log.set("onConsole", -> {bar: "baz"})
+        @log.wrapOnConsole()
+        expect(@log.attributes.onConsole()).to.deep.eq {
+          Command: "foo"
+          bar: "baz"
+        }
+
+      it "automatically adds Event with name", ->
+        @log.set({name: "foo", event: true})
+        @log.set("onConsole", -> {bar: "baz"})
+        @log.wrapOnConsole()
+        expect(@log.attributes.onConsole()).to.deep.eq {
+          Event: "foo"
+          bar: "baz"
+        }
+
     describe "#publicInterface", ->
       beforeEach ->
         @interface = @log.publicInterface()
@@ -221,21 +240,21 @@ describe "$Cypress.Log API", ->
           @Cypress.command({})
 
         it "sets hookName to prop hookName", (done) ->
-          @cy.prop("hookName", "beforeEach")
+          @cy.private("hookName", "beforeEach")
 
           @Cypress.on "log", (obj) ->
             expect(obj.get("hookName")).to.eq "beforeEach"
-            @prop("hookName", null)
+            @private("hookName", null)
             done()
 
           @Cypress.command({})
 
         it "sets testId to runnable.id", (done) ->
-          @cy.prop("runnable", {id: 123})
+          @cy.private("runnable", {id: 123})
 
           @Cypress.on "log", (obj) ->
             expect(obj.get("testId")).to.eq 123
-            @prop("runnable", null)
+            @private("runnable", null)
             done()
 
           @Cypress.command({})

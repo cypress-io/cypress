@@ -54,7 +54,7 @@ describe "$Cypress.Cy Connectors Commands", ->
         ## remote window
         @Cypress.option "jQuery", @iframe.prop("contentWindow").$
 
-        @remoteWindow = @cy.sync.window()
+        @remoteWindow = @cy.private("window")
 
       afterEach ->
         ## restore back to the global $
@@ -99,7 +99,7 @@ describe "$Cypress.Cy Connectors Commands", ->
       ## remote window
       @Cypress.option "jQuery", @iframe.prop("contentWindow").$
 
-      @remoteWindow = @cy.sync.window()
+      @remoteWindow = @cy.private("window")
 
     afterEach ->
       ## restore back to the global $
@@ -280,11 +280,10 @@ describe "$Cypress.Cy Connectors Commands", ->
 
     describe "errors", ->
       beforeEach ->
+        @Cypress.on "log", (@log) =>
         @allowErrors()
 
       it "throws when property does not exist on the subject", (done) ->
-        @Cypress.on "log", (@log) =>
-
         @cy.on "fail", (err) =>
           expect(err.message).to.eq "cy.invoke() errored because the property: 'foo' does not exist on your subject."
           expect(@log.get("error")).to.eq err
@@ -303,8 +302,6 @@ describe "$Cypress.Cy Connectors Commands", ->
         @cy.invoke("queue")
 
       it "throws when first argument isnt a string", (done) ->
-        @Cypress.on "log", (@log) =>
-
         @cy.on "fail", (err) =>
           expect(err.message).to.eq "cy.invoke() only accepts a string as the first argument."
           expect(@log.get("error")).to.eq err
@@ -331,6 +328,17 @@ describe "$Cypress.Cy Connectors Commands", ->
           done()
 
         @cy.noop(undefined).its("attr", "src")
+
+      it "onConsole subject", (done) ->
+        @cy.on "fail", (err) =>
+          expect(@log.attributes.onConsole()).to.deep.eq {
+            Command: "its"
+            Error: "CypressError: cy.its() errored because the property: 'baz' does not exist on your subject."
+            Subject: {foo: "bar"}
+          }
+          done()
+
+        @cy.noop({foo: "bar"}).its("baz")
 
   context "#its", ->
     it "proxies to #invoke", ->

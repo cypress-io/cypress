@@ -39,6 +39,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
     describe "errors thrown", ->
       beforeEach ->
+        @currentTest.enableTimeouts(false)
         @uncaught = @allowErrors()
 
       it "times out eventually due to false value", (done) ->
@@ -79,6 +80,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             expect($input).to.eq @$input
 
       it "does not time out the runnable", ->
+        @test.enableTimeouts(false)
         timer = @sandbox.useFakeTimers("setTimeout")
         trigger = @sandbox.spy(@cy, "trigger")
         @cy._timeout(1000)
@@ -137,6 +139,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
       describe "errors thrown", ->
         beforeEach ->
+          @currentTest.enableTimeouts(false)
           @uncaught = @allowErrors()
 
         it "times out eventually due to false value", (done) ->
@@ -170,7 +173,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
       it "waits for the route alias to have a request", ->
         @cy.on "retry", _.once =>
-          win = @cy.sync.window()
+          win = @cy.private("window")
           win.$.get("/users")
           null
 
@@ -183,7 +186,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
       it "waits for the route alias to have a request + response", ->
         @cy.on "retry", _.once =>
-          win = @cy.sync.window()
+          win = @cy.private("window")
           win.$.get("/users")
           null
 
@@ -201,7 +204,7 @@ describe "$Cypress.Cy Waiting Commands", ->
         prevTimeout = @cy._timeout()
 
         retry = _.after 3, _.once =>
-          @cy.sync.window().$.get("/foo")
+          @cy.private("window").$.get("/foo")
 
         @cy.on "retry", retry
 
@@ -316,7 +319,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy.on "retry", _.once =>
-            win = @cy.sync.window()
+            win = @cy.private("window")
             win.$.get("/foo")
             null
 
@@ -336,7 +339,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy.on "retry", _.once =>
-            win = @cy.sync.window()
+            win = @cy.private("window")
             win.$.get("/bar")
             null
 
@@ -445,7 +448,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
             ## dont send the 3rd response
             return @cy.off("retry") if response is 3
-            win = @cy.sync.window()
+            win = @cy.private("window")
             win.$.get("/users", {num: response})
 
           @cy
@@ -466,7 +469,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           ## dont send the 2nd response
           @cy.on "retry", _.once =>
             response += 1
-            win = @cy.sync.window()
+            win = @cy.private("window")
             win.$.get("/users", {num: response})
 
           @cy
@@ -488,7 +491,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           ## dont send the 2nd request
           @cy.on "retry", _.once =>
             request += 1
-            win = @cy.sync.window()
+            win = @cy.private("window")
             win.$.get("/users", {num: request})
 
           @cy
@@ -529,7 +532,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
         @cy.on "retry", =>
           response += 1
-          win = @cy.sync.window()
+          win = @cy.private("window")
           win.$.get("/users", {num: response})
 
         @cy
@@ -551,7 +554,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
         @cy.on "retry", =>
           response += 1
-          win = @cy.sync.window()
+          win = @cy.private("window")
           win.$.get("/users", {num: response})
 
         @cy
@@ -567,6 +570,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
       describe "errors", ->
         beforeEach ->
+          @currentTest.enableTimeouts(false)
           @allowErrors()
 
         it "throws and includes the incremented alias number"
@@ -576,37 +580,64 @@ describe "$Cypress.Cy Waiting Commands", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
 
-      it "immediately ends", ->
-        @cy.noop({}).wait(10).then ->
-          expect(@log.get("state")).to.eq "success"
-
-      it "immediately snapshots", ->
-        it "immediately ends command", ->
-          @cy.noop({}).wait(10).then ->
-            expect(@log.get("snapshot")).to.be.an("object")
-
-      it "is a type: child if subject", ->
-        @cy.noop({}).wait(10).then ->
-          expect(@log.get("type")).to.eq "child"
-
-      it "is a type: child if subject is false", ->
-        @cy.noop(false).wait(10).then ->
-          expect(@log.get("type")).to.eq "child"
-
-      it "is a type: parent if subject is null or undefined", ->
-        @cy.wait(10).then ->
-          expect(@log.get("type")).to.eq "parent"
+      it "can turn off logging", ->
+        cy.wait(10, {log: false}).then ->
+          expect(@log).to.be.undefined
 
       describe "number argument", ->
+        it "does not immediately end", ->
+          log = null
+
+          @Cypress.on "log", (l) =>
+            log = l
+            expect(log.get("state")).not.to.eq "success"
+
+          @cy.noop({}).wait(10).then ->
+            expect(log.get("state")).to.eq "success"
+
+        it "does not immediately snapshot", ->
+          log = null
+
+          @Cypress.on "log", (l) =>
+            log = l
+            expect(log.get("snapshot")).not.to.be.ok
+
+          @cy.noop({}).wait(10).then ->
+            expect(log.get("snapshot")).to.be.an("object")
+
+        it "is a type: child if subject", ->
+          @cy.noop({}).wait(10).then ->
+            expect(@log.get("type")).to.eq "child"
+
+        it "is a type: child if subject is false", ->
+          @cy.noop(false).wait(10).then ->
+            expect(@log.get("type")).to.eq "child"
+
+        it "is a type: parent if subject is null or undefined", ->
+          @cy.wait(10).then ->
+            expect(@log.get("type")).to.eq "parent"
+
         it "#onConsole", ->
           @cy.wait(10).then ->
             expect(@log.attributes.onConsole()).to.deep.eq {
               Command: "wait"
               "Waited For": "10ms before continuing"
+              "Returned": undefined
+            }
+
+        it "#onConsole as a child", ->
+          btn = @cy.$("button:first")
+
+          @cy.get("button:first").wait(10).then ->
+            expect(@log.attributes.onConsole()).to.deep.eq {
+              Command: "wait"
+              "Waited For": "10ms before continuing"
+              "Returned": btn
             }
 
       describe "alias argument errors", ->
         beforeEach ->
+          @currentTest.enableTimeouts(false)
           @allowErrors()
 
         it ".log", (done) ->
@@ -619,13 +650,13 @@ describe "$Cypress.Cy Waiting Commands", ->
           @cy.on "fail", (err) =>
             obj = {
               name: "wait"
-              referencesAlias: "getFoo"
+              referencesAlias: ["getFoo"]
               aliasType: "route"
-              type: "child"
+              type: "parent"
               error: err
-              event: "command"
+              instrument: "command"
               message: "@getFoo"
-              numRetries: numRetries + 1
+              # numRetries: numRetries + 1
             }
 
             _.each obj, (value, key) =>
@@ -641,28 +672,75 @@ describe "$Cypress.Cy Waiting Commands", ->
             .route(/foo/, {}).as("getFoo")
             .noop({}).wait("@getFoo")
 
-        it "#onConsole"
+        it "#onConsole multiple aliases", (done) ->
+          @cy._timeout(200)
+
+          @cy.on "fail", (err) =>
+            expect(@log.get("error")).to.eq err
+            expect(err.message).to.include "cy.wait() timed out waiting for the 1st response to the route: 'getBar'. No response ever occured."
+            done()
+
+          @cy
+            .server()
+            .route(/foo/, {}).as("getFoo")
+            .route(/bar/, {}).as("getBar")
+            .window().then (win) ->
+              win.$.get("foo")
+            .wait(["@getFoo", "@getBar"])
 
       describe "function argument errors", ->
         it ".log"
 
         it "#onConsole"
 
-      ## at this moment we've removed wait for logging out
-      ## when its an alias or a function argument
-      # describe "alias argument", ->
-      #   it "#onConsole", ->
-      #     @cy
-      #       .server()
-      #       .route(/foo/, {}).as("getFoo")
-      #       .window().then (win) ->
-      #         win.$.get("foo")
-      #       .wait("@getFoo").then (xhr) ->
-      #         expect(@log.attributes.onConsole()).to.deep.eq {
-      #           Command: "wait"
-      #           "Waited For": "alias: 'getFoo' to have a response"
-      #           Alias: xhr
-      #         }
+      describe "alias argument", ->
+        it "is a parent command", ->
+          @cy
+            .server()
+            .route(/foo/, {}).as("getFoo")
+            .window().then (win) ->
+              win.$.get("foo")
+            .wait("@getFoo").then ->
+              expect(@log.get("type")).to.eq "parent"
+
+        it "passes as array of referencesAlias", ->
+          @cy
+            .server()
+            .route(/foo/, {}).as("getFoo")
+            .route(/bar/, {}).as("getBar")
+            .window().then (win) ->
+              win.$.get("foo")
+              win.$.get("bar")
+            .wait(["@getFoo", "@getBar"]).then (xhrs) ->
+              expect(@log.get("referencesAlias")).to.deep.eq ["getFoo", "getBar"]
+
+        it "#onConsole waiting on 1 alias", ->
+          @cy
+            .server()
+            .route(/foo/, {}).as("getFoo")
+            .window().then (win) ->
+              win.$.get("foo")
+            .wait("@getFoo").then (xhr) ->
+              expect(@log.attributes.onConsole()).to.deep.eq {
+                Command: "wait"
+                "Waited For": "getFoo"
+                Returned: xhr
+              }
+
+        it "#onConsole waiting on multiple aliases", ->
+          @cy
+            .server()
+            .route(/foo/, {}).as("getFoo")
+            .route(/bar/, {}).as("getBar")
+            .window().then (win) ->
+              win.$.get("foo")
+              win.$.get("bar")
+            .wait(["@getFoo", "@getBar"]).then (xhrs) ->
+              expect(@log.attributes.onConsole()).to.deep.eq {
+                Command: "wait"
+                "Waited For": "getFoo, getBar"
+                Returned: [xhrs[0], xhrs[1]] ## explictly create the array here
+              }
 
       # describe "function argument", ->
       #   it "#onConsole", ->

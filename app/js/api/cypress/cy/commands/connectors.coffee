@@ -46,7 +46,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
         args = remoteSubject or subject
         args = if args?._spreadArray then args else [args]
 
-        ret = fn.apply @prop("runnable").ctx, args
+        ret = fn.apply @private("runnable").ctx, args
 
         ## if ret is a DOM element
         ## and its an instance of the remoteJQuery
@@ -70,7 +70,9 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
       @ensureParent()
       @ensureSubject()
 
-      command = Cypress.command()
+      command = Cypress.command
+        onConsole: ->
+          Subject: subject
 
       ## name could be invoke or its!
       name = @prop("current").name
