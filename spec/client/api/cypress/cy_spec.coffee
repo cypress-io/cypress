@@ -151,6 +151,7 @@ describe "$Cypress.Cy API", ->
         expect(obj.startedAt).to.be.a("date")
 
       it "sets runnable timeout to config.commandTimeout", ->
+        @test.enableTimeouts(false)
         t = @test
         timeout = @sandbox.spy t, "timeout"
         @sandbox.stub @cy, "config", -> 1000

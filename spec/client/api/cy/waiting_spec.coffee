@@ -39,6 +39,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
     describe "errors thrown", ->
       beforeEach ->
+        @currentTest.enableTimeouts(false)
         @uncaught = @allowErrors()
 
       it "times out eventually due to false value", (done) ->
@@ -79,6 +80,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             expect($input).to.eq @$input
 
       it "does not time out the runnable", ->
+        @test.enableTimeouts(false)
         timer = @sandbox.useFakeTimers("setTimeout")
         trigger = @sandbox.spy(@cy, "trigger")
         @cy._timeout(1000)

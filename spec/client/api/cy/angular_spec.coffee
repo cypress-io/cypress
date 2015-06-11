@@ -18,6 +18,7 @@ describe "$Cypress.Cy Angular Commands", ->
 
       describe "errors", ->
         beforeEach ->
+          @currentTest.enableTimeouts(false)
           @allowErrors()
 
         it "throws when cannot find angular", (done) ->
@@ -87,6 +88,7 @@ describe "$Cypress.Cy Angular Commands", ->
 
       describe "errors", ->
         beforeEach ->
+          @currentTest.enableTimeouts(false)
           @allowErrors()
 
         it "throws when repeater cannot be found", (done) ->
@@ -174,6 +176,7 @@ describe "$Cypress.Cy Angular Commands", ->
 
       describe "errors", ->
         beforeEach ->
+          @currentTest.enableTimeouts(false)
           @allowErrors()
 
         it "throws when model cannot be found", (done) ->
