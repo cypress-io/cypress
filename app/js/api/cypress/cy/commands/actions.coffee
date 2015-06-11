@@ -329,6 +329,11 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       click = (el, index) =>
         $el = $(el)
 
+        ## we want to add this wait delta to our
+        ## runnables timeout so we prevent it from
+        ## timing out from multiple clicks
+        @_timeout(wait, true)
+
         mdownCancelled = mupCancelled = clickCancelled = null
         mdownEvt = mupEvt = clickEvt = null
 
@@ -446,11 +451,6 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           ## display the red dot at these coords
           if options.command
             options.command.set({coords: coords, onConsole: onConsole}).snapshot().end()
-
-          ## we want to add this wait delta to our
-          ## runnables timeout so we prevent it from
-          ## timing out from multiple clicks
-          @_timeout(wait, true)
 
           ## need to return null here to prevent
           ## chaining thenable promises
