@@ -70,7 +70,9 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
       @ensureParent()
       @ensureSubject()
 
-      command = Cypress.command()
+      command = Cypress.command
+        onConsole: ->
+          Subject: subject
 
       ## name could be invoke or its!
       name = @prop("current").name
