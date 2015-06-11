@@ -565,11 +565,17 @@ describe "$Cypress.Cy XHR Commands", ->
 
       describe "responses", ->
         beforeEach ->
+          logs = []
+
+          @Cypress.on "log", (log) =>
+            logs.push(log)
+
           @cy
             .route(/foo/, {}).as("getFoo")
             .window().then (win) ->
               win.$.get("foo_bar")
-            .wait("@getFoo")
+            .wait("@getFoo").then ->
+              @log = _(logs).find (l) -> l.get("name") is "xhr"
 
         it "logs obj", ->
           obj = {
