@@ -460,7 +460,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       @prop "timerId", setImmediate _.bind(fn, @)
 
     hook: (name) ->
-      @prop("hookName", name)
+      @private("hookName", name)
 
       return if not @prop("inspect")
 

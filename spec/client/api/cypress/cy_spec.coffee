@@ -143,7 +143,7 @@ describe "$Cypress.Cy API", ->
 
       it "sets prop(hookName)", ->
         @cy._setRunnable({}, "foobar")
-        expect(@cy.prop("hookName")).to.eq "foobar"
+        expect(@cy.private("hookName")).to.eq "foobar"
 
       it "sets startedAt on the runnable", ->
         obj = {}

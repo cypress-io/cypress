@@ -189,7 +189,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
     log: (instrument, obj) ->
       _.defaults obj,
-        hookName:         @cy.prop("hookName")
+        hookName:         @cy.private("hookName")
         testId:           @cy.private("runnable").id
         referencesAlias:  undefined
         alias:            undefined

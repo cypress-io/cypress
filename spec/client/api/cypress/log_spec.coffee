@@ -240,11 +240,11 @@ describe "$Cypress.Log API", ->
           @Cypress.command({})
 
         it "sets hookName to prop hookName", (done) ->
-          @cy.prop("hookName", "beforeEach")
+          @cy.private("hookName", "beforeEach")
 
           @Cypress.on "log", (obj) ->
             expect(obj.get("hookName")).to.eq "beforeEach"
-            @prop("hookName", null)
+            @private("hookName", null)
             done()
 
           @Cypress.command({})
