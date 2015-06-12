@@ -9,3 +9,10 @@ $pending: #428BCA;
 $yellow-lightest: #ffffee;
 
 $header-height: 37px;
+
+// Bootstrap variable overrides
+
+// Overwrite responsive screen sizes so that
+// navbar doesn't de-collapse on smaller screens
+$screen-xs:                  0px !default;
+$screen-sm:                  0px !default;
