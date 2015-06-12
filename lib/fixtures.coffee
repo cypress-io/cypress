@@ -3,10 +3,15 @@ fs        = require "fs-extra"
 path      = require "path"
 jsonlint  = require "jsonlint"
 check     = require "syntax-error"
+coffee    = require "coffee-script"
 pretty    = require("js-object-pretty-print").pretty
 formatter = require("jsonlint/lib/formatter").formatter
 
 fs = Promise.promisifyAll(fs)
+
+extensions = ".json .js .coffee".split(" ")
+
+## TODO: add image conversion to base64
 
 class Fixtures
   constructor: (app) ->
@@ -22,26 +27,42 @@ class Fixtures
   get: (fixture) ->
     p = path.join(@folder, fixture)
 
-    ## if fixture contains an extension
-    ## attempt to immediately read the file in
+    ## if we have an extension go
+    ## ahead adn read in the file
+    if ext = path.extname(fixture)
+      @parseFile(p, fixture, ext)
+    else
+      tryParsingFile = (index) =>
+        ext = extensions[index]
 
-    ## if fixture does not contain an extension
-    ## then scan for all the files and then parse them
-    ## by order of extension importance
+        if not ext
+          throw new Error("No fixture file found with an acceptable extension. Searched in: #{p}")
 
-    fs.statAsync(p)
-      .bind(@)
+        @fileExists(p + ext)
+          .catch ->
+            tryParsingFile(index + 1)
+          .then ->
+            @parseFile(p + ext, fixture, ext)
+
+      Promise.resolve tryParsingFile(0)
+
+  fileExists: (p) ->
+    fs.statAsync(p).bind(@)
+
+  parseFile: (p, fixture, ext) ->
+    @fileExists(p)
       .catch (err) ->
         throw new Error("No file exists at: #{p}")
       .then ->
-        @parseFileByExtension(p, fixture)
+        @parseFileByExtension(p, fixture, ext)
 
-  parseFileByExtension: (p, fixture) ->
-    ext = path.extname(fixture)
+  parseFileByExtension: (p, fixture, ext) ->
+    ext ?= path.extname(fixture)
 
     switch ext
-      when ".json" then @parseJson(p, fixture)
-      when ".js"   then @parseJs(p, fixture)
+      when ".json"   then @parseJson(p, fixture)
+      when ".js"     then @parseJs(p, fixture)
+      when ".coffee" then @parseCoffee(p, fixture)
       else
         throw new Error("Invalid fixture extension: '#{ext}'. Acceptable file extensions are: [json, js, coffee, jpg, jpeg, png, gif, tiff]")
 
@@ -75,6 +96,24 @@ class Fixtures
         str = pretty(obj, 2)
         fs.writeFileAsync(p, str).return(obj)
       .catch (err) ->
-        throw new Error("'#{fixture}' is not a valid JavaScript object literal.#{err.toString()}")
+        throw new Error("'#{fixture}' is not a valid JavaScript object.#{err.toString()}")
+
+  parseCoffee: (p, fixture) ->
+    dc = process.env.NODE_DISABLE_COLORS
+
+    process.env.NODE_DISABLE_COLORS = "0"
+
+    fs.readFileAsync(p, "utf8")
+      .bind(@)
+      .then (str) ->
+        str = coffee.compile(str, {bare: true})
+        eval(str)
+      .then (obj) ->
+        str = pretty(obj, 2)
+        fs.writeFileAsync(p, str).return(obj)
+      .catch (err) ->
+        throw new Error("'#{fixture} is not a valid CoffeeScript object.\n#{err.toString()}")
+      .finally ->
+        process.env.NODE_DISABLE_COLORS = dc
 
 module.exports = Fixtures

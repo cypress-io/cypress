@@ -8,7 +8,7 @@ FixturesHelper = require "#{root}/spec/server/helpers/fixtures"
 
 expect       = chai.expect
 
-describe "Fixtures", ->
+describe.only "Fixtures", ->
   beforeEach ->
     FixturesHelper.scaffold()
 
@@ -24,32 +24,6 @@ describe "Fixtures", ->
   context "#constructor", ->
     it "sets folder to fixturesFolder", ->
       expect(@fixture.folder).to.eq @todos + "/tests/_fixtures"
-
-  context "#get", ->
-    it "returns users.json", ->
-      @fixture.get("users.json").then (str) ->
-        expect(str).to.deep.eq
-        [
-          {
-            id: 1
-            name: "brian"
-          },{
-            id: 2
-            name: "jennifer"
-          }
-
-        ]
-
-    it "returns user.js", ->
-      @fixture.get("user.js").then (str) ->
-        expect(str).to.deep.eq {
-         id: 1,
-         name: "brian",
-         age: 29,
-         posts: []
-       }
-
-  context "order of parsing", ->
 
   context "file not found", ->
     it "throws when file cannot be found", (done) ->
@@ -142,5 +116,59 @@ describe "Fixtures", ->
 
       @fixture.get("bad_js.js")
         .catch (err) =>
-          expect(err.message).to.eq "'bad_js.js' is not a valid JavaScript object literal.\n#{e}"
+          expect(err.message).to.eq "'bad_js.js' is not a valid JavaScript object.\n#{e}"
+          done()
+
+  context "coffee files", ->
+    it "returns valid coffee object", ->
+      @fixture.get("account.coffee").then (account) ->
+        expect(account).to.deep.eq {
+          name: "cypress"
+          users: []
+        }
+
+    it "rewrites file as formatted valid coffee object", ->
+      @fixture.get("no_format.coffee").then =>
+        fs.readFileAsync(@fixture.folder + "/no_format.coffee", "utf8").then (str) ->
+          expect(str).to.eq """
+            [
+              {
+                id: 1
+              },
+              {
+                id: 2
+              }
+            ]
+
+          """
+
+    it "throws on bad coffee object", (done) ->
+      e =
+        """
+        [stdin]:3:16: error: missing }
+          name: "brian"
+                       ^
+        """
+
+      @fixture.get("bad_coffee.coffee")
+        .catch (err) ->
+          expect(err.message).to.eq "'bad_coffee.coffee is not a valid CoffeeScript object.\n#{e}"
+          done()
+
+  context "extension omitted", ->
+    it "#1 finds json", ->
+      @fixture.get("foo").then (obj) ->
+        expect(obj).to.deep.eq [
+          {json: true}
+        ]
+
+    it "#2 finds js", ->
+      @fixture.get("bar").then (obj) ->
+        expect(obj).to.deep.eq {js: true}
+
+    it "throws when no file by any extension can be found", (done) ->
+      @fixture.get("does-not-exist")
+        .catch (err) =>
+          p = @fixture.folder + "/does-not-exist"
+          expect(err.message).to.eq "No fixture file found with an acceptable extension. Searched in: #{p}"
           done()
