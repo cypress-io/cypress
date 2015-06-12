@@ -88,6 +88,12 @@ SecretSauce.Socket =
         @Log.info "watching test file failed", {error: err, path: testFilePath}
         reject err
 
+  onFixture: (fixture, cb) ->
+    @Fixtures(@app).get(fixture)
+      .then(cb)
+      .catch (err) ->
+        cb({__error: err})
+
   _startListening: (chokidar, path) ->
     { _ } = SecretSauce
 
@@ -139,6 +145,9 @@ SecretSauce.Socket =
         .catch (err) ->
           console.log "\u0007", err.details, err.message
           fn(message: err.message)
+
+      socket.on "fixture", =>
+        @onFixture.apply(@, arguments)
 
       socket.on "finished:generating:ids:for:test", (strippedPath) =>
         @Log.info "finished:generating:ids:for:test", strippedPath: strippedPath

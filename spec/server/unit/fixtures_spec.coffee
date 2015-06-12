@@ -8,7 +8,7 @@ FixturesHelper = require "#{root}/spec/server/helpers/fixtures"
 
 expect       = chai.expect
 
-describe.only "Fixtures", ->
+describe "Fixtures", ->
   beforeEach ->
     FixturesHelper.scaffold()
 
