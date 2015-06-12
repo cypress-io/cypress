@@ -144,7 +144,7 @@ $Cypress.Mocha = do ($Cypress, _, Mocha) ->
 
       @clone(contentWindow)
 
-      ## this needs to be part of the configuration of eclectus.json
+      ## this needs to be part of the configuration of cypress.json
       ## we can't just forcibly use bdd
       @ui(contentWindow, "bdd")
 

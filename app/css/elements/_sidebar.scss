@@ -1,13 +1,13 @@
-#ecl-wrapper {
+#cy-wrapper {
   &.collapsed {
-    #ecl-sidebar {
+    #cy-sidebar {
       width: 55px;
 
       .logo {
         display: none !important;
       }
 
-      .ecl-vnavigation {
+      .cy-vnavigation {
         li span {
           display: none;
         }
@@ -15,7 +15,7 @@
     }
   }
 
-  #ecl-sidebar {
+  #cy-sidebar {
     -webkit-transition: width 0.05s ease;
     transition: width 0.05s ease;
     width: 216px;
@@ -26,7 +26,7 @@
     padding-bottom: 49px;
     height: 100%;
 
-    .ecl-vnavigation {
+    .cy-vnavigation {
       margin: 0;
       padding: 0;
       border-top: 1px solid #1a1c20;
@@ -101,7 +101,7 @@
       }
     }
 
-    #ecl-test-panels {
+    #cy-test-panels {
       position: absolute;
       bottom: 0;
       width: 100%;

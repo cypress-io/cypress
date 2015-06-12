@@ -21,6 +21,6 @@
 
   class List.Panels extends App.Views.CollectionView
     tagName: "ul"
-    id: "ecl-test-panels"
-    className: "ecl-vnavigation"
+    id: "cy-test-panels"
+    className: "cy-vnavigation"
     childView: List.Panel
