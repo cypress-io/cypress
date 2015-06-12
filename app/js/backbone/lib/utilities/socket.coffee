@@ -24,8 +24,8 @@
       channel.on "test:changed", (data) ->
         socket.trigger "test:changed", data.file
 
-      channel.on "eclectus:css:changed", (data) ->
-        ## find the eclectus stylesheet
+      channel.on "cypress:css:changed", (data) ->
+        ## find the cypress stylesheet
         link = $("link").filter (index, link) ->
           ## replace a period with 1 back slash
           re = data.file.split(".").join("\\.")
