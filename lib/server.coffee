@@ -55,6 +55,7 @@ class Server
       autoOpen: false
       wizard: false
       testFolder: "tests"
+      fixturesFolder: "tests/_fixtures"
       javascripts: []
       env: process.env["NODE_ENV"]
       namespace: "__cypress"
