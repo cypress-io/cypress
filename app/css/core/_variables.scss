@@ -16,3 +16,17 @@ $header-height: 37px;
 // navbar doesn't de-collapse on smaller screens
 $screen-xs:                  0px !default;
 $screen-sm:                  0px !default;
+
+// Inverted navbar
+// Reset inverted navbar basics
+$navbar-inverse-bg:                         #262a2f !default;
+$navbar-inverse-border:                     darken($navbar-inverse-bg, 5%) !default;
+
+// Inverted navbar links
+$navbar-inverse-link-color:                 #81838d !default;
+$navbar-inverse-link-hover-color:           #c7c9d4 !default;
+$navbar-inverse-link-active-color:          #dcdde3 !default;
+$navbar-inverse-link-active-bg:             #16191d !default;
+
+// Inverted navbar brand label
+$navbar-inverse-brand-color:                #dfe0e5 !default;
