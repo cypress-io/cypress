@@ -56,6 +56,7 @@ describe "Support ", ->
             //         email: email,
             //         password: password
             //       }
+            //     }
             //   })
             //
             //   cy
