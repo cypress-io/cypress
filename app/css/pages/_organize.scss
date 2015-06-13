@@ -41,8 +41,17 @@
       @include responsive-width(25%);
       text-align: right;
       color: #bdc0c5;
-
     }
+  }
+
+  .files-list-header {
+    @include list-columns(75%, 25%);
+    font-weight: bold;
+
+    &>li>div:last-child {
+      text-align: right;
+    }
+
   }
 
 
