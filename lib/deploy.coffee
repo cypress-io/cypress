@@ -82,6 +82,8 @@ class Deploy
           copy("./lib/project.coffee",      "/src/lib/project.coffee")
           copy("./lib/server.coffee",       "/src/lib/server.coffee")
           copy("./lib/socket.coffee",       "/src/lib/socket.coffee")
+          copy("./lib/support.coffee",      "/src/lib/support.coffee")
+          copy("./lib/fixtures.coffee",     "/src/lib/fixtures.coffee")
           copy("./lib/updater.coffee",      "/src/lib/updater.coffee")
           copy("./lib/environment.coffee",  "/src/lib/environment.coffee")
           copy("./lib/log.coffee",          "/src/lib/log.coffee")

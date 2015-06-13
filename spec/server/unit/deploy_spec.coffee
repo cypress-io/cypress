@@ -92,6 +92,14 @@ describe "Deploy", ->
       deploy.prepare().then ->
         expect(fs.statSync(distDir + "/src/lib/socket.coffee").isFile()).to.be.true
 
+    it "copies lib/support to dist src", ->
+      deploy.prepare().then ->
+        expect(fs.statSync(distDir + "/src/lib/support.coffee").isFile()).to.be.true
+
+    it "copies lib/fixtures to dist src", ->
+      deploy.prepare().then ->
+        expect(fs.statSync(distDir + "/src/lib/fixtures.coffee").isFile()).to.be.true
+
     it "copies lib/updater to dist src", ->
       deploy.prepare().then ->
         expect(fs.statSync(distDir + "/src/lib/updater.coffee").isFile()).to.be.true
