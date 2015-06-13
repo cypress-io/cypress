@@ -1,7 +1,9 @@
 <div>
-  <h4>
+  <div>
     <i class="fa fa-folder-o"></i>
     <%= @name %>
-  </h4>
-  <ul></ul>
+  </div>
+  <div>
+    <ul class="list-as-table"></ul>
+  </div>
 </div>

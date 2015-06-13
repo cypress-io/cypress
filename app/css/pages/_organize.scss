@@ -1,41 +1,67 @@
 #organize-page {
-  h4 {
+
+  .outer-files-container {
+    @include list-columns(100%);
     margin-bottom: 0;
-    padding: 5px 0;
-
-    i {
-      font-size: 80%;
-    }
-
   }
 
-  ul {
-    margin-bottom: 0;
+  .list-as-table>.folder {
 
-    &>li {
+    &>div>div:last-child {
+      padding: 0;
+    }
+  }
 
-      &>ul h4 {
-        font-size: 125%;
+  .list-as-table>.file {
+
+    &>div:first-child {
+      @include responsive-width(75%);
+    }
+
+    &>div:last-child {
+      @include responsive-width(25%);
+      text-align: right;
+    }
+  }
+
+
+  // need to refactor to be calculated using sass
+  .outer-files-container.list-as-table>.folder,
+  .outer-files-container.list-as-table>.file {
+
+    &>div>div:first-child {
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+
+    &>div>div:last-child {
+
+      &>.list-as-table>.folder,
+      &>.list-as-table>.file {
+
+        &>div>div:first-child {
+          padding-left: 40px;
+        }
+
+        &>div>div:last-child {
+
+          &>.list-as-table>.folder,
+          &>.list-as-table>.file {
+
+            &>div>div:first-child {
+              padding-left: 60px;
+            }
+
+          }
+
+        }
 
       }
 
     }
 
-  }
+  } // end of folder/files styles
 
-  li {
-    list-style: none;
-    position: relative;
 
-    &>div {
-      padding: 5px 20px;
-    }
 
-  }
-
-  ul.outer-files-container>li {
-    &>div {
-      padding: 0;
-    }
-  }
 }

@@ -22,8 +22,8 @@
 
   class List.File extends App.Views.CompositeView
     childView: List.File
-
     childViewContainer: "ul"
+    tagName: "li"
 
     getTemplate: ->
       if @model.get("children").length
@@ -34,14 +34,17 @@
     initialize: ->
       @collection = @model.get("children")
 
-    onShow: ->
-      @$el.addClass("file") if not @model.hasChildren()
+    onRender: ->
+      if @model.get("children").length
+        @$el.addClass("folder")
+      else
+        @$el.addClass("file")
 
   class List.Files extends App.Views.CompositeView
     template: "organize/list/_files"
     childView: List.File
     emptyView: List.Empty
-    childViewContainer: "ul"
+    childViewContainer: ".outer-files-container"
 
     emptyViewOptions: ->
       path: @collection.path
