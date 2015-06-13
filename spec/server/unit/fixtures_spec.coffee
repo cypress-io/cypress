@@ -172,3 +172,13 @@ describe "Fixtures", ->
           p = @fixture.folder + "/does-not-exist"
           expect(err.message).to.eq "No fixture file found with an acceptable extension. Searched in: #{p}"
           done()
+
+  context "#scaffold", ->
+    it "copies example.json to fixturesFolder", ->
+      @fixture.scaffold().then =>
+        fs.readFileAsync(@fixture.folder + "/example.json", "utf8").then (str) ->
+          expect(str).to.eq """
+          {
+            "example": "fixture"
+          }
+          """

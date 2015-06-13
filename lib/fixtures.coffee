@@ -116,4 +116,9 @@ class Fixtures
       .finally ->
         process.env.NODE_DISABLE_COLORS = dc
 
+  scaffold: ->
+    src  = path.join(process.cwd(), "lib", "scaffold", "example.json")
+    dest = path.join(@app.get("cypress").projectRoot, @app.get("cypress").fixturesFolder, "example.json")
+    fs.copyAsync(src, dest)
+
 module.exports = Fixtures
