@@ -56,8 +56,7 @@ class Server
       wizard: false
       testFolder: "tests"
       fixturesFolder: "tests/_fixtures"
-      supportFolder: "tests/_support"
-      javascripts: []
+      javascripts: ["tests/_support/**/*"]
       env: process.env["NODE_ENV"]
       namespace: "__cypress"
 
