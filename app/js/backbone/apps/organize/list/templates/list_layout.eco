@@ -7,7 +7,8 @@
           <div id="search-region"></div>
         </div>
       </div>
-      <div id="files-region"></div>
+      <div id="recent-files-region"></div>
+      <div id="all-files-region"></div>
     </div>
   </div>
 </div>

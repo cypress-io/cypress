@@ -3,6 +3,23 @@
   class List.Layout extends App.Views.LayoutView
     template: "organize/list/list_layout"
 
+  class List.Search extends App.Views.ItemView
+    template: "organize/list/_search"
+
+  class List.RecentFile extends App.Views.ItemView
+    template: "organize/list/_recent_file"
+
+  class List.RecentFiles extends App.Views.CompositeView
+    template: "organize/list/_recent_files"
+    childView: List.RecentFile
+    childViewContainer: "ul"
+
+  class List.Empty extends App.Views.ItemView
+    template: "organize/list/_empty"
+
+    serializeData: ->
+      path: @options.path
+
   class List.File extends App.Views.CompositeView
     childView: List.File
 
@@ -20,19 +37,11 @@
     onShow: ->
       @$el.addClass("file") if not @model.hasChildren()
 
-  class List.Empty extends App.Views.ItemView
-    template: "organize/list/_empty"
-
-    serializeData: ->
-      path: @options.path
-
-  class List.Files extends App.Views.CollectionView
+  class List.Files extends App.Views.CompositeView
+    template: "organize/list/_files"
     childView: List.File
     emptyView: List.Empty
+    childViewContainer: "ul"
+
     emptyViewOptions: ->
       path: @collection.path
-    tagName: "ul"
-    className: "outer-files-container"
-
-  class List.Search extends App.Views.ItemView
-    template: "organize/list/_search"

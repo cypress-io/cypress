@@ -9,6 +9,7 @@
 
       @listenTo files, "sync", =>
         @searchRegion(files)
+        @recentFilesRegion(files)
         @filesRegion(files)
 
       @show @layout,
@@ -21,19 +22,29 @@
       @show searchView,
         region: @layout.searchRegion
 
+    recentFilesRegion: (files) ->
+      recentFilesView = @getRecentFilesView files
+
+      @show recentFilesView,
+        region: @layout.recentFilesRegion
+
     filesRegion: (files) ->
       files.resetToTreeView()
 
       filesView = @getFilesView files
 
       @show filesView,
-        region: @layout.filesRegion
+        region: @layout.allFilesRegion
 
     getLayoutView: ->
       new List.Layout
 
     getSearchView: (files) ->
       new List.Search
+        collection: files
+
+    getRecentFilesView: (files) ->
+      new List.RecentFiles
         collection: files
 
     getFilesView: (files) ->
