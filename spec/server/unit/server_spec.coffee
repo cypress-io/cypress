@@ -114,6 +114,6 @@ describe "Server Interface", ->
       it "projectRoot=/Users/brian/app", ->
         @defaults "projectRoot", "/Users/brian/app"
 
-      it "javascripts=[]", ->
-        @defaults "javascripts", []
+      it "javascripts=[tests/_support/**/*]", ->
+        @defaults "javascripts", ["tests/_support/**/*"]
 
