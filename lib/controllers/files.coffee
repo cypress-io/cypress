@@ -134,14 +134,21 @@ class Files extends Controller
       "*"
     )
 
+    supportFolderPath = path.join(
+      cypress.projectRoot,
+      cypress.supportFolder,
+      "**",
+      "*"
+    )
+
     ## map all of the javascripts to the project root
     javascriptsPath = _.map cypress.javascripts, (js) ->
       path.join(cypress.projectRoot, js)
 
     new Promise (resolve, reject) ->
-      ## ignore _fixtures + javascripts
+      ## ignore _fixtures + _support + javascripts
       options = {
-        ignore: [].concat(javascriptsPath, fixturesFolderPath)
+        ignore: [].concat(javascriptsPath, supportFolderPath, fixturesFolderPath)
       }
 
       ## grab all the js and coffee files

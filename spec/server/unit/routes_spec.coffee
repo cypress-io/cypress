@@ -111,7 +111,7 @@ describe "Routes", ->
         projectRoot: Fixtures.project("todos")
         testFolder: "tests"
         fixturesFolder: "tests/_fixtures"
-        javascripts: ["tests/_support/**/*", "tests/etc/**/*"]
+        javascripts: ["tests/etc/**/*"]
       }
 
     afterEach ->
@@ -124,14 +124,18 @@ describe "Routes", ->
         ## make sure there are fixtures in here!
         expect(files.length).to.be.gt(0)
 
-        supertest(@app)
-          .get("/__cypress/files")
-          .expect(200, [
-            { name: "sub/sub_test.coffee" },
-            { name: "test1.js" },
-            { name: "test2.coffee" }
-          ])
-          .end(done)
+        glob path.join(Fixtures.project("todos"), "tests", "_support", "**", "*"), (err, files) =>
+          ## make sure there are support files in here!
+          expect(files.length).to.be.gt(0)
+
+          supertest(@app)
+            .get("/__cypress/files")
+            .expect(200, [
+              { name: "sub/sub_test.coffee" },
+              { name: "test1.js" },
+              { name: "test2.coffee" }
+            ])
+            .end(done)
 
     it "sets X-Files-Path header to the length of files", (done) ->
       filesPath = Fixtures.project("todos") + "/" + "tests"
