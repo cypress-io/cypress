@@ -1,6 +1,8 @@
 root          = "../../../"
 Server        = require("#{root}lib/server")
 Fixtures      = require "#{root}/spec/server/helpers/fixtures"
+glob          = require("glob")
+path          = require("path")
 expect        = require("chai").expect
 nock          = require('nock')
 sinon         = require('sinon')
@@ -101,27 +103,35 @@ describe "Routes", ->
           null
         .end(done)
 
-  context "GET /__cypress/files", ->
+  context.only "GET /__cypress/files", ->
     beforeEach ->
       Fixtures.scaffold("todos")
 
       @server.setCypressJson {
         projectRoot: Fixtures.project("todos")
         testFolder: "tests"
+        fixturesFolder: "tests/_fixtures"
+        javascripts: ["tests/_support/**/*", "tests/etc/**/*"]
       }
 
     afterEach ->
       Fixtures.remove("todos")
 
     it "returns base json file path objects", (done) ->
-      supertest(@app)
-        .get("/__cypress/files")
-        .expect(200, [
-          { name: "sub/sub_test.coffee" },
-          { name: "test1.js" },
-          { name: "test2.coffee" }
-        ])
-        .end(done)
+      ## this should omit any _fixture files, _support files and javascripts
+
+      glob path.join(Fixtures.project("todos"), "tests", "_fixtures", "**", "*"), (err, files) =>
+        ## make sure there are fixtures in here!
+        expect(files.length).to.be.gt(0)
+
+        supertest(@app)
+          .get("/__cypress/files")
+          .expect(200, [
+            { name: "sub/sub_test.coffee" },
+            { name: "test1.js" },
+            { name: "test2.coffee" }
+          ])
+          .end(done)
 
     it "sets X-Files-Path header to the length of files", (done) ->
       filesPath = Fixtures.project("todos") + "/" + "tests"

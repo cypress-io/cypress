@@ -94,14 +94,37 @@ class Files extends Controller
     utils.map (util) -> "/__cypress/static/js/#{util}.js"
 
   getTestFiles: ->
+    cypress = @app.get("cypress")
+
     testFolderPath = path.join(
-      @app.get("cypress").projectRoot,
-      @app.get("cypress").testFolder
+      cypress.projectRoot,
+      cypress.testFolder
     )
 
+    ## support files are not automatically
+    ## ignored because only _fixtures are hard
+    ## coded. the rest is simply whatever is in
+    ## the javascripts array
+
+    fixturesFolderPath = path.join(
+      cypress.projectRoot,
+      cypress.fixturesFolder,
+      "**",
+      "*"
+    )
+
+    ## map all of the javascripts to the project root
+    javascriptsPath = _.map cypress.javascripts, (js) ->
+      path.join(cypress.projectRoot, js)
+
     new Promise (resolve, reject) ->
+      ## ignore _fixtures + javascripts
+      options = {
+        ignore: [].concat(javascriptsPath, fixturesFolderPath)
+      }
+
       ## grab all the js and coffee files
-      glob "#{testFolderPath}/**/*.+(js|coffee)", (err, files) ->
+      glob "#{testFolderPath}/**/*.+(js|coffee)", options, (err, files) ->
         reject(err) if err
 
         ## slice off the testFolder directory(ies) (which is our test folder)
