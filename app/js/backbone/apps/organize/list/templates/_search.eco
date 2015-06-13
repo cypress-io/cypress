@@ -1,1 +1,6 @@
-Search here
+<form class="form-inline">
+  <div class="form-group">
+    <label class="sr-only" for="search-files">Search Test Files</label>
+    <input type="search" class="form-control" id="search-files" placeholder="Search files...">
+  </div>
+</form>
