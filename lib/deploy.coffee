@@ -50,44 +50,51 @@ class Deploy
   prepare: ->
     @log("#prepare")
 
-    p = new Promise (resolve, reject) ->
-      ## clean/setup dist directories
-      fs.removeSync(distDir)
-      fs.ensureDirSync(distDir)
+    copy = (src, dest) ->
+      dest ?= src
+      dest = path.join(distDir, dest.slice(1))
 
-      ## copy root files
-      fs.copySync("./package.json", distDir + "/package.json")
-      fs.copySync("./config/app.yml", distDir + "/config/app.yml")
-      fs.copySync("./lib/html", distDir + "/lib/html")
-      fs.copySync("./lib/public", distDir + "/lib/public")
-      fs.copySync("./nw/public", distDir + "/nw/public")
-      fs.copySync("./lib/secret_sauce.bin", distDir + "/lib/secret_sauce.bin")
+      fs.copyAsync(src, dest)
 
-      ## copy coffee src files
-      fs.copySync("./lib/cypress.coffee", distDir + "/src/lib/cypress.coffee")
-      fs.copySync("./lib/controllers", distDir + "/src/lib/controllers")
-      fs.copySync("./lib/util", distDir + "/src/lib/util")
-      fs.copySync("./lib/routes", distDir + "/src/lib/routes")
-      fs.copySync("./lib/cache.coffee", distDir + "/src/lib/cache.coffee")
-      fs.copySync("./lib/id_generator.coffee", distDir + "/src/lib/id_generator.coffee")
-      fs.copySync("./lib/keys.coffee", distDir + "/src/lib/keys.coffee")
-      fs.copySync("./lib/logger.coffee", distDir + "/src/lib/logger.coffee")
-      fs.copySync("./lib/project.coffee", distDir + "/src/lib/project.coffee")
-      fs.copySync("./lib/server.coffee", distDir + "/src/lib/server.coffee")
-      fs.copySync("./lib/socket.coffee", distDir + "/src/lib/socket.coffee")
-      fs.copySync("./lib/updater.coffee", distDir + "/src/lib/updater.coffee")
-      fs.copySync("./lib/environment.coffee", distDir + "/src/lib/environment.coffee")
-      fs.copySync("./lib/log.coffee", distDir + "/src/lib/log.coffee")
-      fs.copySync("./lib/exception.coffee", distDir + "/src/lib/exception.coffee")
+    fs
+      .removeAsync(distDir)
+      .then ->
+        fs.ensureDirAsync(distDir)
+      .then ->
+        [
+          ## copy root files
+          copy("./package.json")
+          copy("./config/app.yml")
+          copy("./lib/html")
+          copy("./lib/public")
+          copy("./nw/public")
+          copy("./lib/secret_sauce.bin")
 
-      ## copy test files
-      # fs.copySync("./spec/server/unit/konfig_spec.coffee", distDir + "/spec/server/unit/konfig_spec.coffee")
-      # fs.copySync("./spec/server/unit/url_helpers_spec.coffee", distDir + "/spec/server/unit/url_helpers_spec.coffee")
-      # fs.removeSync(distDir + "/spec/server/unit/deploy_spec.coffee")
+          ## copy coffee src files
+          copy("./lib/cypress.coffee",      "/src/lib/cypress.coffee")
+          copy("./lib/controllers",         "/src/lib/controllers")
+          copy("./lib/util",                "/src/lib/util")
+          copy("./lib/routes",              "/src/lib/routes")
+          copy("./lib/cache.coffee",        "/src/lib/cache.coffee")
+          copy("./lib/id_generator.coffee", "/src/lib/id_generator.coffee")
+          copy("./lib/keys.coffee",         "/src/lib/keys.coffee")
+          copy("./lib/logger.coffee",       "/src/lib/logger.coffee")
+          copy("./lib/project.coffee",      "/src/lib/project.coffee")
+          copy("./lib/server.coffee",       "/src/lib/server.coffee")
+          copy("./lib/socket.coffee",       "/src/lib/socket.coffee")
+          copy("./lib/updater.coffee",      "/src/lib/updater.coffee")
+          copy("./lib/environment.coffee",  "/src/lib/environment.coffee")
+          copy("./lib/log.coffee",          "/src/lib/log.coffee")
+          copy("./lib/exception.coffee",    "/src/lib/exception.coffee")
 
-      resolve()
-
-    p.bind(@)
+          ## copy test files
+          copy("./spec/server/unit/konfig_spec.coffee",      "/spec/server/unit/konfig_spec.coffee")
+          copy("./spec/server/unit/url_helpers_spec.coffee", "/spec/server/unit/url_helpers_spec.coffee")
+        ]
+      .all()
+      .then ->
+        fs.removeAsync(distDir + "/spec/server/unit/deploy_spec.coffee")
+      .bind(@)
 
   convertToJs: ->
     @log("#convertToJs")
