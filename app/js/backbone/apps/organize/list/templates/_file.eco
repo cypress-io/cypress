@@ -1,0 +1,10 @@
+<div>
+  <div>
+    <a href="#/tests/<%= @fullPath %>"><%= @name %></a>
+  </div>
+</div>
+<div>
+  <div>
+    2 days ago
+  </div>
+</div>
