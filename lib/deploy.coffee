@@ -67,6 +67,7 @@ class Deploy
           copy("./config/app.yml")
           copy("./lib/html")
           copy("./lib/public")
+          copy("./lib/scaffold")
           copy("./nw/public")
           copy("./lib/secret_sauce.bin")
 

@@ -124,6 +124,10 @@ describe "Deploy", ->
       deploy.prepare().then ->
         expect(fs.statSync(distDir + "/lib/public").isDirectory()).to.be.true
 
+    it "copies lib/scaffold to dist", ->
+      deploy.prepare().then ->
+        expect(fs.statSync(distDir + "/lib/scaffold").isDirectory()).to.be.true
+
     it "copies nw/public to dist", ->
       deploy.prepare().then ->
         expect(fs.statSync(distDir + "/nw/public").isDirectory()).to.be.true
