@@ -1,10 +1,8 @@
 <header class="navbar navbar-inverse navbar-fixed-top">
-  <div class="container">
-    <div class="navbar-header">
-      <a class="navbar-brand" href="#">Cypress</a>
-    </div>
-    <nav class="collapse navbar-collapse">
-      <ul class="nav navbar-nav navbar-right cy-vnavigation"></ul>
-    </nav>
+  <div class="navbar-header">
+    <a class="navbar-brand" href="#">Cypress</a>
   </div>
+  <nav class="collapse navbar-collapse cy-nav">
+    <ul class="nav navbar-nav navbar-right cy-vnavigation"></ul>
+  </nav>
 </header>
