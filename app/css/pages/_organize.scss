@@ -40,6 +40,8 @@
     &>div:last-child {
       @include responsive-width(25%);
       text-align: right;
+      color: #bdc0c5;
+
     }
   }
 

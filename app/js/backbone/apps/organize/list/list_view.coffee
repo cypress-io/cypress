@@ -8,6 +8,7 @@
 
   class List.RecentFile extends App.Views.ItemView
     template: "organize/list/_recent_file"
+    className: "file"
 
   class List.RecentFiles extends App.Views.CompositeView
     template: "organize/list/_recent_files"

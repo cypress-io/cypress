@@ -1,5 +1,11 @@
 <div>
   <div>
+    <i class="fa fa-file-o"></i>
     Recent File
+  </div>
+</div>
+<div>
+  <div>
+    /users
   </div>
 </div>
