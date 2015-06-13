@@ -1,6 +1,7 @@
 // @import "bootstrap-sass-official/assets/stylesheets/bootstrap";
 
 @import "core/variables";
+@import "core/mixins";
 
 // Core variables and mixins
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/variables";
@@ -37,6 +38,7 @@
 @import "elements/nav";
 @import "elements/text";
 @import "elements/block-panels";
+@import "elements/lists";
 @import "elements/panels";
 @import "elements/scroll-bars";
 @import "elements/title-bars";
