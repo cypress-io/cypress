@@ -1,1 +1,3 @@
-<a href="#/tests/<%= @fullPath %>"><%= @name %></a>
+<div>
+  <a href="#/tests/<%= @fullPath %>"><%= @name %></a>
+</div>

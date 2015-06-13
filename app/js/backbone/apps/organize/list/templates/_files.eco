@@ -1,2 +1,10 @@
 <h2>All Files</h2>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Last Modified</th>
+    </tr>
+  </thead>
+</table>
 <ul class="outer-files-container"></ul>
