@@ -17,6 +17,13 @@
 
   }
 
+  .file {
+    &:hover {
+      background-color: #f3f7ff;
+      cursor: pointer;
+    }
+  }
+
   .list-as-table>.folder {
 
     &>div>div:last-child {
@@ -37,7 +44,7 @@
   }
 
 
-  // need to refactor to be calculated using sass
+  // need to refactor to be calculated using javascript
   .outer-files-container.list-as-table>.folder,
   .outer-files-container.list-as-table>.file {
 
