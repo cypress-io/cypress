@@ -1,0 +1,13 @@
+.title-bar {
+  overflow: auto;
+  width: 100%;
+  margin-bottom: 20px;
+
+  h1 {
+    float: left;
+  }
+
+  .controls {
+    float: right;
+  }
+}
