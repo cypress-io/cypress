@@ -1,6 +1,7 @@
 <div>
   <div>
-    <a href="#/tests/<%= @fullPath %>"><%= @name %></a>
+    <i class="fa fa-file-o"></i>
+    <%= @name %>
   </div>
 </div>
 <div>

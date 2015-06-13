@@ -5,6 +5,18 @@
     margin-bottom: 0;
   }
 
+  .file, .folder {
+
+    color: #69727e;
+    font-weight: 500;
+
+    i {
+      color: #476fc9;
+      margin-right: 5px;
+    }
+
+  }
+
   .list-as-table>.folder {
 
     &>div>div:last-child {

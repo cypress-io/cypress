@@ -25,6 +25,22 @@
     childViewContainer: "ul"
     tagName: "li"
 
+    events:
+      "click": "checkFolderOrFile"
+
+    checkFolderOrFile: (e) ->
+      e.stopPropagation()
+
+      if @$el.hasClass("file")
+        @goToFile()
+      else
+        @collapseFolder()
+
+    goToFile: ->
+      window.location.hash = "/tests/" + @model.get("fullPath")
+
+    collapseFolder: ->
+
     getTemplate: ->
       if @model.get("children").length
         "organize/list/_folder"
