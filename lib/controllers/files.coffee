@@ -29,13 +29,14 @@ class Files extends Controller
     filePath = path.join(process.cwd(), "lib/html/empty_inject.html")
 
     @getSpecs(test).bind(@).then (specs) ->
-      res.render filePath, {
-        title:        test
-        # stylesheets:  @getStylesheets()
-        javascripts:  @getJavascripts()
-        utilities:    @getUtilities()
-        specs:        specs
-      }
+      @getJavascripts().bind(@).then (js) ->
+        res.render filePath, {
+          title:        test
+          # stylesheets:  @getStylesheets()
+          javascripts:  js
+          utilities:    @getUtilities()
+          specs:        specs
+        }
 
   convertToAbsolutePath: (files) ->
     ## make sure its an array and remap to an absolute path
@@ -77,7 +78,27 @@ class Files extends Controller
 
   getJavascripts: ->
     paths = @convertToAbsolutePath @app.get("cypress").javascripts
-    @convertToSpecPath paths, {test: false}
+
+    {projectRoot} = @app.get("cypress")
+
+    Promise
+      .map paths, (p) ->
+        ## does the path include a globstar?
+        return p if not p.includes("*")
+
+        new Promise (resolve, reject) ->
+          ## ensure we are looking in our projectRoot
+          p = path.join(projectRoot, p)
+          glob p, (err, files) ->
+            reject(err) if err
+            resolve(files)
+      .then (files) ->
+        _.chain(files).flatten().map (file) ->
+          ## slice out the projectRoot from our files again
+          file.replace(projectRoot, "")
+        .value()
+      .then (files) =>
+        @convertToSpecPath(files, {test: false})
 
   getUtilities: ->
     utils = ["iframe"]

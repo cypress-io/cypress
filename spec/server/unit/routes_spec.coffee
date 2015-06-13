@@ -103,7 +103,7 @@ describe "Routes", ->
           null
         .end(done)
 
-  context.only "GET /__cypress/files", ->
+  context "GET /__cypress/files", ->
     beforeEach ->
       Fixtures.scaffold("todos")
 
@@ -227,7 +227,7 @@ describe "Routes", ->
         @server.setCypressJson {
           projectRoot: Fixtures.project("todos")
           testFolder: "tests"
-          javascripts: ["support/spec_helper.coffee"]
+          javascripts: ["tests/_support/**/*", "tests/etc/etc.js"]
           sinon: false
           fixtures: false
         }
