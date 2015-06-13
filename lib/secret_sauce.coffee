@@ -99,6 +99,8 @@ SecretSauce.Socket =
 
     messages = {}
 
+    {projectRoot, testFolder} = @app.get("cypress")
+
     @io.on "connection", (socket) =>
       @Log.info "socket connected"
 
@@ -169,7 +171,7 @@ SecretSauce.Socket =
         ## spec by setting custom-data on the job object
         batchId = Date.now()
 
-        jobName = @app.get("cypress").testFolder + "/" + spec
+        jobName = testFolder + "/" + spec
         fn(jobName, batchId)
 
         ## need to handle platform/browser/version incompatible configurations
@@ -222,7 +224,7 @@ SecretSauce.Socket =
 
           sauce options, df
 
-    @testsDir = path.join(@app.get("cypress").projectRoot, @app.get("cypress").testFolder)
+    @testsDir = path.join(projectRoot, testFolder)
 
     @fs.ensureDirAsync(@testsDir).bind(@)
 
