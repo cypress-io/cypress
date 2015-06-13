@@ -1,6 +1,6 @@
 root         = '../../../'
 path         = require 'path'
-fs           = require 'fs'
+fs           = require 'fs-extra'
 chai         = require 'chai'
 Server         = require "#{root}lib/server"
 Fixtures       = require "#{root}lib/fixtures"
@@ -174,11 +174,22 @@ describe "Fixtures", ->
           done()
 
   context "#scaffold", ->
-    it "copies example.json to fixturesFolder", ->
-      @fixture.scaffold().then =>
-        fs.readFileAsync(@fixture.folder + "/example.json", "utf8").then (str) ->
-          expect(str).to.eq """
-          {
-            "example": "fixture"
-          }
-          """
+    it "creates both fixturesFolder and example.json when fixturesFolder does not exist", ->
+      ## todos has a fixtures folder so let's first nuke it and then scaffold
+      fs.removeAsync(@fixture.folder).then =>
+        @fixture.scaffold().then =>
+          fs.readFileAsync(@fixture.folder + "/example.json", "utf8").then (str) ->
+            expect(str).to.eq """
+            {
+              "example": "fixture"
+            }
+            """
+
+    it "does not create example.json if fixturesFolder already exists", (done) ->
+      ## create the fixturesFolder ourselves manually
+      fs.ensureDirAsync(@fixture.folder).then =>
+        ## now scaffold
+        @fixture.scaffold().then =>
+          ## ensure example.json doesnt exist
+          fs.statAsync(path.join(@fixture.folder, "example.json"))
+            .catch -> done()

@@ -116,9 +116,33 @@ class Fixtures
       .finally ->
         process.env.NODE_DISABLE_COLORS = dc
 
-  scaffold: ->
+  copyExample: (fixturesDir) ->
     src  = path.join(process.cwd(), "lib", "scaffold", "example.json")
-    dest = path.join(@app.get("cypress").projectRoot, @app.get("cypress").fixturesFolder, "example.json")
+    dest = path.join(fixturesDir, "example.json")
     fs.copyAsync(src, dest)
+
+  scaffold: ->
+    ## we want to build out the fixturesFolder + and example file
+    ## but only create the example file if the fixturesFolder doesnt
+    ## exist
+    ##
+    ## this allows us to automatically insert the folder on existing
+    ## projects (whenever they are booted) but allows the user to delete
+    ## the fixtures file and not have it re-generated each time
+    ##
+    ## this is ideal because users who are upgrading to newer cypress version
+    ## will still get the folder support enabled but existing users wont be
+    ## annoyed by new example files coming into their projects unnecessarily
+
+    {projectRoot, fixturesFolder} = @app.get("cypress")
+
+    fixturesDir = path.join(projectRoot, fixturesFolder)
+
+    ## if the fixtures dir doesnt exist
+    ## then create it + the example fixture
+    fs.statAsync(fixturesDir)
+      .bind(@)
+      .catch ->
+        @copyExample(fixturesDir)
 
 module.exports = Fixtures
