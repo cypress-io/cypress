@@ -8,11 +8,18 @@
       @layout = @getLayoutView()
 
       @listenTo files, "sync", =>
+        @searchRegion(files)
         @filesRegion(files)
 
       @show @layout,
         loading:
           entities: files
+
+    searchRegion: (files) ->
+      searchView = @getSearchView files
+
+      @show searchView,
+        region: @layout.searchRegion
 
     filesRegion: (files) ->
       files.resetToTreeView()
@@ -24,6 +31,10 @@
 
     getLayoutView: ->
       new List.Layout
+
+    getSearchView: (files) ->
+      new List.Search
+        collection: files
 
     getFilesView: (files) ->
       new List.Files

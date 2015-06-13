@@ -33,3 +33,6 @@
       path: @collection.path
     tagName: "ul"
     className: "outer-files-container"
+
+  class List.Search extends App.Views.ItemView
+    template: "organize/list/_search"
