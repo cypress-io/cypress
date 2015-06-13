@@ -86,7 +86,7 @@
     "errorhandler": "1.1.1",
     "express": "4.12.3",
     "fs-extra": "0.18.1",
-    "glob": "4.0.5",
+    "glob": "5.0.10",
     "grunt-cli": "0.1.13",
     "gulp-util": "3.0.0",
     "harmon": "^1.3.1",
