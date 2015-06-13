@@ -231,7 +231,7 @@ describe "Routes", ->
         @server.setCypressJson {
           projectRoot: Fixtures.project("todos")
           testFolder: "tests"
-          javascripts: ["tests/_support/**/*", "tests/etc/etc.js"]
+          javascripts: ["tests/etc/etc.js"]
           sinon: false
           fixtures: false
         }

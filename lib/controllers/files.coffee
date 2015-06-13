@@ -77,9 +77,11 @@ class Files extends Controller
     @convertToAbsolutePath @app.get("cypress").stylesheets
 
   getJavascripts: ->
-    paths = @convertToAbsolutePath @app.get("cypress").javascripts
+    {projectRoot, javascripts, supportFolder} = @app.get("cypress")
 
-    {projectRoot} = @app.get("cypress")
+    ## automatically add in our support folder and any javascripts
+    files = [].concat path.join(supportFolder, "**", "*"), javascripts
+    paths = @convertToAbsolutePath _.chain(files).compact().uniq().value()
 
     Promise
       .map paths, (p) ->
