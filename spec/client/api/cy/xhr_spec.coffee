@@ -408,6 +408,22 @@ describe "$Cypress.Cy XHR Commands", ->
         .then ->
           expect(@cy.prop("sandbox").server.responses).to.have.length(2)
 
+    describe "request response alias", ->
+      beforeEach ->
+        @trigger = @sandbox.stub(@Cypress, "trigger").withArgs("fixture").callsArgWith(2, {foo: "bar"})
+
+      it "can pass an alias reference to route", ->
+        @cy
+          .fixture("foo").as("foo")
+          .route(/foo/, "@foo").as("getFoo")
+          .window().then (win) ->
+            win.$.getJSON("foo")
+            null
+          .wait("@getFoo").then (xhr) ->
+            response = JSON.parse(xhr.responseText)
+            expect(response).to.deep.eq {foo: "bar"}
+            expect(response).to.deep.eq @foo
+
     describe "request JSON parsing", ->
       it "adds requestJSON if requesting JSON", (done) ->
         @cy
@@ -520,6 +536,43 @@ describe "$Cypress.Cy XHR Commands", ->
           .window().then (win) ->
             win.$.get("foo_bar").done ->
               foo.bar()
+
+      it "explodes if response alias cannot be found", (done) ->
+        @trigger = @sandbox.stub(@Cypress, "trigger").withArgs("fixture").callsArgWith(2, {foo: "bar"})
+
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push @log
+
+        @cy.on "fail", (err) =>
+          expect(err.message).to.eq "cy.route() could not find a registered alias for: 'baz'. Available aliases are: 'foo, getFoo'."
+
+          ## 2 routes, 1 xhr
+          expect(logs.length).to.eq(3)
+          expect(@log.get("error")).to.eq err
+          expect(@log.get("state")).to.eq "error"
+
+          ## make sure abort is called on the xhr
+          xhr = @log.attributes.onConsole().Request
+          abort = @sandbox.spy(xhr, "abort")
+
+          _.defer =>
+            expect(abort).to.be.called
+            expect(xhr.status).to.eq 0
+            done()
+
+        @cy
+          .fixture("foo").as("foo")
+          .then ->
+            ## restore so trigger works again
+            @Cypress.trigger.restore()
+          .route(/bar/, "bar")
+          .route(/foo/, "@baz").as("getFoo")
+          .window().then (win) ->
+            win.$.getJSON("foo")
+            win.$.get("bar")
+            null
 
     describe ".log", ->
       beforeEach ->

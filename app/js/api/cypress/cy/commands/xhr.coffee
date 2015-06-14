@@ -206,6 +206,20 @@ $Cypress.register "XHR", (Cypress, _, $) ->
         beforeRequest: (xhr, route = {}) =>
           alias = route.alias
 
+          ## if the route's response is a string
+          ## and it matches an alias
+          if _.isString(route.response)
+            try
+              if aliasObj = @getAlias(route.response, "route")
+                ## reset the route's response to be the
+                ## aliases subject
+                route.response = aliasObj.subject
+            catch err
+              err.onFail = ->
+              log(xhr, route, err)
+              @fail(err)
+              return xhr.abort()
+
           setRequest.call(@, xhr, alias)
 
           ## log out this request immediately
