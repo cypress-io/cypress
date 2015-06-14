@@ -44,10 +44,11 @@
 @import "elements/title-bars";
 
 // Independent Pages
+@import "pages/organize";
 @import "pages/tests/commands";
 @import "pages/tests/iframe";
 @import "pages/tests/instruments";
 @import "pages/tests/jobs";
 @import "pages/tests/runnables";
 @import "pages/tests/stats";
-@import "pages/organize";
+@import "pages/settings";

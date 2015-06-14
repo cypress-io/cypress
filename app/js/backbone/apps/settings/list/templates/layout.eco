@@ -1,0 +1,43 @@
+<div id="settings-page">
+  <div class="cy-main-content">
+    <div class="block-panel">
+      <div class="title-bar">
+        <h1>Settings</h1>
+      </div>
+      <hr>
+        <div class="settings-row">
+          <div class="settings-section pull-left">
+            <h3>Command Timeout</h3>
+            4000
+          </div>
+          <div class="settings-section pull-left">
+            <h3>Visit Timeout</h3>
+            20000
+          </div>
+          <div class="settings-section pull-left">
+            <h3>Port</h3>
+            2020
+          </div>
+        </div>
+      <hr>
+        <div class="settings-section">
+          <h3>Test Folder</h3>
+          This directory is automatically scanned and watched
+        </div>
+      <hr>
+        <div class="settings-section">
+          <h3>What's your base url?</h3>
+          This is a string that is automatically prepended to all cy.vists.
+        </div>
+      <hr>
+        <div class="settings-section">
+          <h3>Do you want to use a spec processor?</h3>
+        </div>
+      <hr>
+        <div class="settings-section">
+          <h3>Do you want to specify JavaScripts?</h3>
+        </div>
+      <hr>
+    </div>
+  </div>
+</div>

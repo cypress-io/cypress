@@ -1,0 +1,8 @@
+.settings-row {
+  overflow: auto;
+  @include responsive-width(100%);
+}
+
+.settings-section {
+  padding: 0 20px;
+}
