@@ -262,7 +262,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
         it "throws when 2nd alias doesnt match any registered alias", (done) ->
           @cy.on "fail", (err) ->
-            expect(err.message).to.eq "cy.wait() could not find a registered alias for: 'bar'.  Available aliases are: 'foo'."
+            expect(err.message).to.eq "cy.wait() could not find a registered alias for: 'bar'. Available aliases are: 'foo'."
             done()
 
           @cy
