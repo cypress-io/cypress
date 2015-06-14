@@ -11,18 +11,21 @@
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/normalize";
 
 // Core CSS
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/buttons";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/scaffolding";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/type";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/code";
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/dropdowns";
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/forms";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/grid";
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/labels";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/tables";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/forms";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/buttons";
+
+// Components
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/dropdowns";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/button-groups";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/navs";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/navbar";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/labels";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/progress-bars";
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/scaffolding";
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/tables";
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/type";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/wells";
 
 // Utilities
@@ -32,15 +35,16 @@
 @import "font-awesome/scss/font-awesome";
 
 // Reusable Elements
-@import "elements/general";
+@import "elements/block-panels";
 @import "elements/buttons";
+@import "elements/forms";
+@import "elements/general";
+@import "elements/lists";
 @import "elements/main-content";
 @import "elements/nav";
-@import "elements/text";
-@import "elements/block-panels";
-@import "elements/lists";
 @import "elements/panels";
 @import "elements/scroll-bars";
+@import "elements/text";
 @import "elements/title-bars";
 
 // Independent Pages

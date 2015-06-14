@@ -12,6 +12,14 @@ $header-height: 37px;
 
 // Bootstrap variable overrides
 
+$btn-font-weight: 500 !default;
+$btn-default-color: #4f4f4f !default;
+
+$brand-primary: #476fc9;
+
+$border-radius-base:        2px !default;
+
+
 // Overwrite responsive screen sizes so that
 // navbar doesn't de-collapse on smaller screens
 $screen-xs:                  0px !default;
