@@ -1,9 +1,11 @@
 describe "$Cypress.Cy Fixtures Commands", ->
   enterCommandTestingMode()
 
+  ## call all of the fixture triggers async to simulate
+  ## the real browser environment
   context "#fixture", ->
     beforeEach ->
-      @trigger = @sandbox.stub(@Cypress, "trigger").withArgs("fixture").callsArgWith(2, {foo: "bar"})
+      @trigger = @sandbox.stub(@Cypress, "trigger").withArgs("fixture").callsArgWithAsync(2, {foo: "bar"})
 
     it "triggers 'fixture' on Cypress", ->
       @cy.fixture("foo").then (obj) ->
@@ -18,7 +20,7 @@ describe "$Cypress.Cy Fixtures Commands", ->
     describe "errors", ->
       beforeEach ->
         @allowErrors()
-        @trigger.withArgs("fixture").callsArgWith(2, {__error: "some error"})
+        @trigger.withArgs("fixture").callsArgWithAsync(2, {__error: "some error"})
 
       it "throws if response contains __error key", (done) ->
         @cy.on "fail", (err) ->
@@ -52,8 +54,8 @@ describe "$Cypress.Cy Fixtures Commands", ->
     describe "caching", ->
       beforeEach ->
         @Cypress.trigger.restore()
-        @trigger = @sandbox.stub(@Cypress, "trigger").withArgs("fixture", "foo").callsArgWith(2, {foo: "bar"})
-        @trigger2 = @trigger.withArgs("fixture", "bar").callsArgWith(2, {bar: "baz"})
+        @trigger = @sandbox.stub(@Cypress, "trigger").withArgs("fixture", "foo").callsArgWithAsync(2, {foo: "bar"})
+        @trigger2 = @trigger.withArgs("fixture", "bar").callsArgWithAsync(2, {bar: "baz"})
 
       it "caches fixtures by name", ->
         cy.fixture("foo").then ->
