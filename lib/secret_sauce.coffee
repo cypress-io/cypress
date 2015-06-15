@@ -92,7 +92,7 @@ SecretSauce.Socket =
     @Fixtures(@app).get(fixture)
       .then(cb)
       .catch (err) ->
-        cb({__error: err})
+        cb({__error: err.message})
 
   _startListening: (chokidar, path) ->
     { _ } = SecretSauce

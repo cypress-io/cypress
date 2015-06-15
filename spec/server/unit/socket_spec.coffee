@@ -157,7 +157,7 @@ describe "Socket", ->
       @socket.onFixture("invalid.exe", cb).then ->
         obj = cb.getCall(0).args[0]
         expect(obj).to.have.property("__error")
-        expect(obj.__error.message).to.eq "Invalid fixture extension: '.exe'. Acceptable file extensions are: [json, js, coffee, jpg, jpeg, png, gif, tiff]"
+        expect(obj.__error).to.eq "Invalid fixture extension: '.exe'. Acceptable file extensions are: [json, js, coffee, jpg, jpeg, png, gif, tiff]"
 
   context "#startListening", ->
     beforeEach ->
