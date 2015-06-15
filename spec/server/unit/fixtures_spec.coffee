@@ -35,6 +35,13 @@ describe "Fixtures", ->
 
   context "invalid extension", ->
 
+  context "nested fixtures", ->
+    it "can pass path to nested fixture", ->
+      @fixture.get("nested/fixture.js").then (obj) ->
+        expect(obj).to.deep.eq {
+          nested: "fixture"
+        }
+
   context "json files", ->
     it "throws when json is invalid", (done) ->
       e =
