@@ -57,6 +57,9 @@ $Cypress.Utils = do ($Cypress, _) ->
           else
             "[" + _.map(value, _.bind(@_stringify, @)).join(", ") + "]"
 
+        when _.isRegExp(value)
+          value.toString()
+
         when _.isObject(value)
           len = _.keys(value).length
           if len > 2
