@@ -561,7 +561,7 @@ describe "$Cypress.Cy XHR Commands", ->
             win.$.get("foo_bar").done ->
               foo.bar()
 
-      it.only "explodes if response fixture signature errors", (done) ->
+      it "explodes if response fixture signature errors", (done) ->
         @trigger = @sandbox.stub(@Cypress, "trigger").withArgs("fixture").callsArgWithAsync(2, {__error: "some error"})
 
         logs = []
