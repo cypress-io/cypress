@@ -30,7 +30,7 @@ describe "Fixtures", ->
       @fixture.get("does-not-exist.json")
         .catch (err) =>
           p = @fixture.folder + "/does-not-exist.json"
-          expect(err.message).to.eq "No file exists at: #{p}"
+          expect(err.message).to.eq "No fixture exists at: #{p}"
           done()
 
   context "invalid extension", ->

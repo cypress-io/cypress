@@ -52,7 +52,7 @@ class Fixtures
   parseFile: (p, fixture, ext) ->
     @fileExists(p)
       .catch (err) ->
-        throw new Error("No file exists at: #{p}")
+        throw new Error("No fixture exists at: #{p}")
       .then ->
         @parseFileByExtension(p, fixture, ext)
 
