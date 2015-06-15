@@ -67,3 +67,15 @@ describe "$Cypress.Cy Fixtures Commands", ->
               expect(obj).to.deep.eq {foo: "bar"}
               expect(@trigger).to.be.calledOnce
 
+      it "clones fixtures to prevent accidental mutation", ->
+        cy.fixture("foo").then (obj) ->
+          ## mutate the object
+          obj.baz = "quux"
+
+          cy.fixture("foo").then (obj2) ->
+            obj2.lorem = "ipsum"
+            expect(obj2).not.to.have.property("baz")
+
+            cy.fixture("foo").then (obj3) ->
+              expect(obj3).not.to.have.property("lorem")
+
