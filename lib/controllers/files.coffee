@@ -48,19 +48,24 @@ class Files extends Controller
     _.defaults options,
       test: true
 
-    {testFolder, rootFolder} = @app.get("cypress")
+    {testFolder, rootFolder, supportFolder} = @app.get("cypress")
 
     ## return the specs prefixed with /tests?p=spec
     _(specs).map (spec) ->
-      if options.test
-        ## prepend with tests path
-        spec = "#{testFolder}/#{spec}"
-      else
-        ## make sure we have no leading
-        ## or trailing forward slashes
-        spec = _.compact([rootFolder, spec])
-        spec = path.join(spec...)
+      ## if this is our support folder then
+      ## its already prefixed with the correct path
+      if _.str.contains(spec, supportFolder)
         spec = _.str.trim(spec, "/")
+      else
+        if options.test
+          ## prepend with tests path
+          spec = "#{testFolder}/#{spec}"
+        else
+          ## make sure we have no leading
+          ## or trailing forward slashes
+          spec = _.compact([rootFolder, spec])
+          spec = path.join(spec...)
+          spec = _.str.trim(spec, "/")
 
       "/__cypress/tests?p=#{spec}"
 
