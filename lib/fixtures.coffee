@@ -32,6 +32,9 @@ class Fixtures
     if ext = path.extname(fixture)
       @parseFile(p, fixture, ext)
     else
+      ## change this to first glob for
+      ## the files, and if nothing is found
+      ## throw a better error message
       tryParsingFile = (index) =>
         ext = extensions[index]
 
