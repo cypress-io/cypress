@@ -206,20 +206,6 @@ $Cypress.register "XHR", (Cypress, _, $) ->
         beforeRequest: (xhr, route = {}) =>
           alias = route.alias
 
-          ## if the route's response is a string
-          ## and it matches an alias
-          if _.isString(route.response)
-            try
-              if aliasObj = @getAlias(route.response, "route")
-                ## reset the route's response to be the
-                ## aliases subject
-                route.response = aliasObj.subject
-            catch err
-              err.onFail = ->
-              log(xhr, route, err)
-              @fail(err)
-              return xhr.abort()
-
           setRequest.call(@, xhr, alias)
 
           ## log out this request immediately
@@ -365,15 +351,22 @@ $Cypress.register "XHR", (Cypress, _, $) ->
       ## dont resolve route until we go
       ## fetch our fixture!
       response = options.response
-      if _.isString(response) and @matchesFixture(response)
-        fixture = @parseFixture(response)
-        @sync.fixture(fixture).then (fixture) ->
-          ## assign the fixture to our response
-          options.response = fixture
+      if _.isString(response)
+        if @matchesFixture(response)
+          fixture = @parseFixture(response)
 
-          ## now apply the route
-          applyRoute(options)
+          return @sync.fixture(fixture).then (fixture) ->
+            ## assign the fixture to our response
+            options.response = fixture
+            applyRoute(options)
+        else
+          if aliasObj = @getAlias(response, "route")
+            ## reset the route's response to be the
+            ## aliases subject
+            options.response = aliasObj.subject
 
+        ## now apply the route
+        applyRoute(options)
       else
         applyRoute(options)
 

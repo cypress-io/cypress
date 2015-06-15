@@ -36,9 +36,9 @@ describe "$Cypress.Cy Fixtures Commands", ->
 
         ## we have to restore the trigger when commandErr is called
         ## so that something logs out!
-        @cy.commandErr = _.wrap @cy.commandErr, (orig, args...) ->
+        @cy.commandErr = _.wrap @cy.commandErr, (orig, err) ->
           _this.Cypress.trigger.restore()
-          orig.apply(@, args...)
+          orig.call(@, err)
 
         @Cypress.on "log", (@log) =>
           logs.push log

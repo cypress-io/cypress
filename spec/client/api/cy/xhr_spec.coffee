@@ -408,9 +408,18 @@ describe "$Cypress.Cy XHR Commands", ->
         .then ->
           expect(@cy.prop("sandbox").server.responses).to.have.length(2)
 
+    it "can use regular strings as response", ->
+      @cy
+        .route("foo", "foo bar baz").as("getFoo")
+        .window().then (win) ->
+          win.$.get("foo")
+          null
+        .wait("@getFoo").then (xhr) ->
+          expect(xhr.responseText).to.eq "foo bar baz"
+
     describe "request response fixture", ->
       beforeEach ->
-        @trigger = @sandbox.stub(@Cypress, "trigger").withArgs("fixture").callsArgWith(2, {foo: "bar"})
+        @trigger = @sandbox.stub(@Cypress, "trigger").withArgs("fixture").callsArgWithAsync(2, {foo: "bar"})
 
       _.each ["fx:", "fixture:"], (type) =>
         it "can pass a #{type} reference to route", ->
@@ -425,7 +434,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
     describe "request response alias", ->
       beforeEach ->
-        @trigger = @sandbox.stub(@Cypress, "trigger").withArgs("fixture").callsArgWith(2, {foo: "bar"})
+        @trigger = @sandbox.stub(@Cypress, "trigger").withArgs("fixture").callsArgWithAsync(2, {foo: "bar"})
 
       it "can pass an alias reference to route", ->
         @cy
@@ -552,42 +561,50 @@ describe "$Cypress.Cy XHR Commands", ->
             win.$.get("foo_bar").done ->
               foo.bar()
 
-      it "explodes if response alias cannot be found", (done) ->
-        @trigger = @sandbox.stub(@Cypress, "trigger").withArgs("fixture").callsArgWith(2, {foo: "bar"})
+      it.only "explodes if response fixture signature errors", (done) ->
+        @trigger = @sandbox.stub(@Cypress, "trigger").withArgs("fixture").callsArgWithAsync(2, {__error: "some error"})
 
+        logs = []
+
+        _this = @
+
+        ## we have to restore the trigger when commandErr is called
+        ## so that something logs out!
+        @cy.commandErr = _.wrap @cy.commandErr, (orig, err) ->
+          _this.Cypress.trigger.restore()
+          orig.call(@, err)
+
+        @Cypress.on "log", (@log) =>
+          logs.push @log
+
+        @cy.on "fail", (err) =>
+          expect(err.message).to.eq "some error"
+          expect(logs.length).to.eq(1)
+          expect(@log.get("name")).to.eq "route"
+          expect(@log.get("error")).to.eq err
+          expect(@log.get("message")).to.eq "/foo/, fixture:bar"
+          done()
+
+        @cy
+          .route(/foo/, "fixture:bar")
+
+      it "explodes if response alias cannot be found", (done) ->
         logs = []
 
         @Cypress.on "log", (@log) =>
           logs.push @log
 
         @cy.on "fail", (err) =>
-          expect(err.message).to.eq "cy.route() could not find a registered alias for: 'baz'. Available aliases are: 'foo, getFoo'."
-
-          ## 2 routes, 1 xhr
-          expect(logs.length).to.eq(3)
+          expect(err.message).to.eq "cy.route() could not find a registered alias for: 'bar'. Available aliases are: 'foo'."
+          expect(logs.length).to.eq(2)
+          expect(@log.get("name")).to.eq "route"
           expect(@log.get("error")).to.eq err
-          expect(@log.get("state")).to.eq "error"
-
-          ## make sure abort is called on the xhr
-          xhr = @log.attributes.onConsole().Request
-          abort = @sandbox.spy(xhr, "abort")
-
-          _.defer =>
-            expect(abort).to.be.called
-            expect(xhr.status).to.eq 0
-            done()
+          expect(@log.get("message")).to.eq "/foo/, @bar"
+          done()
 
         @cy
-          .fixture("foo").as("foo")
-          .then ->
-            ## restore so trigger works again
-            @Cypress.trigger.restore()
-          .route(/bar/, "bar")
-          .route(/foo/, "@baz").as("getFoo")
-          .window().then (win) ->
-            win.$.getJSON("foo")
-            win.$.get("bar")
-            null
+          .wrap({foo: "bar"}).as("foo")
+          .route(/foo/, "@bar")
 
     describe ".log", ->
       beforeEach ->
