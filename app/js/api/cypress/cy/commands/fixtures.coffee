@@ -2,6 +2,11 @@ $Cypress.register "Fixtures", (Cypress, _, $) ->
 
   cache = {}
 
+  fixturesRe = /^(fx:|fixture:)/
+
+  clone = (obj) ->
+    JSON.parse(JSON.stringify(obj))
+
   Cypress.addParentCommand
     fixture: (fixture, options = {}) ->
       ## always return a promise here
@@ -31,3 +36,10 @@ $Cypress.register "Fixtures", (Cypress, _, $) ->
 
             ## resolve the cloned response
             resolve clone(response)
+
+  Cypress.Cy.extend
+    matchesFixture: (fixture) ->
+      fixturesRe.test(fixture)
+
+    parseFixture: (fixture) ->
+      fixture.replace(fixturesRe, "")

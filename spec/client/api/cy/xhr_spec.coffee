@@ -408,6 +408,21 @@ describe "$Cypress.Cy XHR Commands", ->
         .then ->
           expect(@cy.prop("sandbox").server.responses).to.have.length(2)
 
+    describe "request response fixture", ->
+      beforeEach ->
+        @trigger = @sandbox.stub(@Cypress, "trigger").withArgs("fixture").callsArgWith(2, {foo: "bar"})
+
+      _.each ["fx:", "fixture:"], (type) =>
+        it "can pass a #{type} reference to route", ->
+          @cy
+            .route(/foo/, "#{type}foo").as("getFoo")
+            .window().then (win) ->
+              win.$.getJSON("foo")
+              null
+            .wait("@getFoo").then (xhr) ->
+              response = JSON.parse(xhr.responseText)
+              expect(response).to.deep.eq {foo: "bar"}
+
     describe "request response alias", ->
       beforeEach ->
         @trigger = @sandbox.stub(@Cypress, "trigger").withArgs("fixture").callsArgWith(2, {foo: "bar"})
