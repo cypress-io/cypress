@@ -88,10 +88,18 @@ SecretSauce.Socket =
         @Log.info "watching test file failed", {error: err, path: testFilePath}
         reject err
 
+  onFixture: (fixture, cb) ->
+    @Fixtures(@app).get(fixture)
+      .then(cb)
+      .catch (err) ->
+        cb({__error: err.message})
+
   _startListening: (chokidar, path) ->
     { _ } = SecretSauce
 
     messages = {}
+
+    {projectRoot, testFolder} = @app.get("cypress")
 
     @io.on "connection", (socket) =>
       @Log.info "socket connected"
@@ -140,6 +148,9 @@ SecretSauce.Socket =
           console.log "\u0007", err.details, err.message
           fn(message: err.message)
 
+      socket.on "fixture", =>
+        @onFixture.apply(@, arguments)
+
       socket.on "finished:generating:ids:for:test", (strippedPath) =>
         @Log.info "finished:generating:ids:for:test", strippedPath: strippedPath
         @io.emit "test:changed", file: strippedPath
@@ -160,7 +171,7 @@ SecretSauce.Socket =
         ## spec by setting custom-data on the job object
         batchId = Date.now()
 
-        jobName = @app.get("cypress").testFolder + "/" + spec
+        jobName = testFolder + "/" + spec
         fn(jobName, batchId)
 
         ## need to handle platform/browser/version incompatible configurations
@@ -213,7 +224,7 @@ SecretSauce.Socket =
 
           sauce options, df
 
-    @testsDir = path.join(@app.get("cypress").projectRoot, @app.get("cypress").testFolder)
+    @testsDir = path.join(projectRoot, testFolder)
 
     @fs.ensureDirAsync(@testsDir).bind(@)
 

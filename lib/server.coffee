@@ -9,6 +9,8 @@ Promise      = require 'bluebird'
 Log          = require "./log"
 Project      = require "./project"
 Socket       = require "./socket"
+Support      = require "./support"
+Fixtures     = require "./fixtures"
 Settings     = require './util/settings'
 
 ## currently not making use of event emitter
@@ -55,6 +57,8 @@ class Server
       autoOpen: false
       wizard: false
       testFolder: "tests"
+      fixturesFolder: "tests/_fixtures"
+      supportFolder: "tests/_support"
       javascripts: []
       env: process.env["NODE_ENV"]
       namespace: "__cypress"
@@ -137,7 +141,17 @@ class Server
 
         @server.removeListener "error", onError
 
-        @project.ensureProjectId().bind(@)
+        Promise.join(
+          ## ensure fixtures dir is created
+          ## and example fixture if dir doesnt exist
+          Fixtures(@app).scaffold(),
+          ## ensure support dir is created
+          ## and example support file if dir doesnt exist
+          Support(@app).scaffold()
+        )
+        .bind(@)
+        .then ->
+          @project.ensureProjectId()
         .then ->
           require('open')(@config.clientUrl) if @config.autoOpen
         .return(@config)

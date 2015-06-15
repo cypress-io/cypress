@@ -188,7 +188,7 @@ describe "$Cypress.Cy Aliasing Commands", ->
 
       it "throws when an alias cannot be found", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.get() could not find a registered alias for: 'lastDiv'.  Available aliases are: 'b, firstInput'."
+          expect(err.message).to.include "cy.get() could not find a registered alias for: 'lastDiv'. Available aliases are: 'b, firstInput'."
           done()
 
         @cy
