@@ -6,7 +6,7 @@ describe "$Cypress.Cy Angular Commands", ->
       @loadDom("html/angular").then =>
         @setup({replaceIframeContents: false})
         @Cypress.set @currentTest
-        @currentTest.timeout(400)
+        @currentTest.timeout(200)
 
     context "find by binding", ->
       it "finds color.name binding elements", ->
@@ -80,10 +80,10 @@ describe "$Cypress.Cy Angular Commands", ->
         ## wait until we're ALMOST about to time out before
         ## appending the missingInput
         @cy.on "retry", (options) =>
-          if options.total + (options.interval * 4) > options.timeout
+          if options.total + (options.interval * 4) > options._timeoutAt
             @cy.$("body").append(missingLi)
 
-        @cy.ng("repeater", "li in lis").then ($li) ->
+        @cy.inspect().ng("repeater", "li in lis").then ($li) ->
           expect($li).to.match missingLi
 
       describe "errors", ->
@@ -151,7 +151,7 @@ describe "$Cypress.Cy Angular Commands", ->
         ## wait until we're ALMOST about to time out before
         ## appending the missingInput
         @cy.on "retry", (options) =>
-          if options.total + (options.interval * 4) > options.timeout
+          if options.total + (options.interval * 4) > options._timeoutAt
             @cy.$("body").append(missingInput)
 
         @cy.ng("model", "missing-input").then ($input) ->

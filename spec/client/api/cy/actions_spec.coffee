@@ -522,7 +522,7 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(err.message).to.include "Cannot call .type() on this element because it is being covered by another element:"
           done()
 
-        @cy.get("#input-covered-in-span").type("foo")
+        @cy.inspect().get("#input-covered-in-span").type("foo")
 
   context "#clear", ->
     it "does not change the subject", ->
