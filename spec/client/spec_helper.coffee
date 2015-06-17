@@ -80,6 +80,9 @@ window.enterCommandTestingMode = (fixture = "html/dom") ->
         @iframe.contents().find("head").html(@head)
         @iframe.contents().find("body").html(@body)
 
+      # debugger
+      # window.mocha.enableTimeouts(false)
+
       ## load all of the modules
       @Cypress = $Cypress.create({loadModules: true})
 
@@ -119,7 +122,9 @@ window.enterCommandTestingMode = (fixture = "html/dom") ->
       ## juggled throughout our expectations
       @Cypress.option("jQuery", $)
 
-      @Cypress.set(@currentTest) if @currentTest
+      if @currentTest
+        @Cypress.set(@currentTest)
+        @currentTest.enableTimeouts(false)
 
       ## handle the fail event ourselves
       ## since we bypass our Runner instance
