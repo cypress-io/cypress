@@ -223,7 +223,7 @@ describe "$Cypress.Cy Querying Commands", ->
       ## wait until we're ALMOST about to time out before
       ## appending the missingEl
       @cy.on "retry", (options) =>
-        if options.total + (options.interval * 4) > options._timeoutAt
+        if options.total + (options.interval * 4) > options._runnableTimeout
           @cy.$("body").append(missingEl)
 
       @cy.get("#missing-el").then ($div) ->
@@ -252,9 +252,8 @@ describe "$Cypress.Cy Querying Commands", ->
         ## make sure runnableTimeout is 10secs
         expect(options._runnableTimeout).to.eq 10000
 
-        ## and make sure timeoutAt is much higher than
-        ## our runnables timeout
-        expect(options._timeoutAt).to.gt @cy._timeout()
+        ## we shouldnt have a timer either
+        expect(@cy.private("runnable")).not.to.have.property("timer")
 
       ## but wait 300ms
       _.delay =>
@@ -262,6 +261,24 @@ describe "$Cypress.Cy Querying Commands", ->
       , 300
 
       @cy.inspect().get("#missing-el", {timeout: 10000})
+
+    it "does not factor in the total time the test has been running", ->
+      missingEl = $("<div />", id: "missing-el")
+
+      @cy.on "retry", _.after 2, =>
+        @cy.$("body").append(missingEl)
+
+      ## in this example our test has been running 200ms
+      ## but the timeout is below this amount, and it
+      ## still passes because the total running time is
+      ## not factored in (which is correct)
+      @cy
+        .wait(200)
+        .get("#missing-el", {timeout: 125})
+        .then ->
+          ## it should reset the timeout back
+          ## to 300 after successfully finished get method
+          expect(@cy._timeout()).to.eq 300
 
     _.each ["exist", "exists"], (key) ->
       describe "{#{key}: false}", ->

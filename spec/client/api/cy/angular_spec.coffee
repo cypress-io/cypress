@@ -80,7 +80,7 @@ describe "$Cypress.Cy Angular Commands", ->
         ## wait until we're ALMOST about to time out before
         ## appending the missingInput
         @cy.on "retry", (options) =>
-          if options.total + (options.interval * 4) > options._timeoutAt
+          if options.total + (options.interval * 4) > options._runnableTimeout
             @cy.$("body").append(missingLi)
 
         @cy.inspect().ng("repeater", "li in lis").then ($li) ->
@@ -151,7 +151,7 @@ describe "$Cypress.Cy Angular Commands", ->
         ## wait until we're ALMOST about to time out before
         ## appending the missingInput
         @cy.on "retry", (options) =>
-          if options.total + (options.interval * 4) > options._timeoutAt
+          if options.total + (options.interval * 4) > options._runnableTimeout
             @cy.$("body").append(missingInput)
 
         @cy.ng("model", "missing-input").then ($input) ->

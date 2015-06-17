@@ -16,11 +16,6 @@ do ($Cypress, _) ->
         retries: 0
         name: @prop("current")?.name
 
-      ## we always want to make sure we timeout before our runnable does
-      ## so take its current timeout, subtract the total time its already
-      ## been running
-      options._timeoutAt ?= options._runnableTimeout - (new Date - @private("runnable").startedAt)
-
       ## we calculate the total time we've been retrying
       ## so we dont exceed the runnables timeout
       options.total = total = (new Date - options.start)
@@ -30,9 +25,9 @@ do ($Cypress, _) ->
 
       ## if our total exceeds the timeout OR the total + the interval
       ## exceed the runnables timeout, then bail
-      @log "Retrying after: #{options.interval}ms. Total: #{total}, Timeout At: #{options._timeoutAt}, RunnableTimeout: #{options._runnableTimeout}", "warning"
+      @log "Retrying after: #{options.interval}ms. Total: #{total}, Timeout At: #{options._runnableTimeout}", "warning"
 
-      if total >= options._timeoutAt or (total + options.interval >= options._runnableTimeout)
+      if total + options.interval >= options._runnableTimeout
         err = "Timed out retrying. " + options.error ? "The last command was: " + options.name
         @throwErr err, (options.onFail or options.command)
 
