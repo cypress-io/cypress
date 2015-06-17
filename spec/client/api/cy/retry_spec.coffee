@@ -28,14 +28,11 @@ describe "$Cypress.Cy Retry Extension", ->
       options = {}
       fn = ->
       @cy._retry(fn, options)
-      expect(options.runnableTimeout).to.eq prevTimeout
+      expect(options._runnableTimeout).to.eq prevTimeout
 
-    it "increases the runnables timeout exponentially", ->
+    it "removes the runnables timeout", ->
       prevTimeout = @test.timeout()
-      timeout = @sandbox.spy @test, "timeout"
+      clearTimeout = @sandbox.spy @test, "clearTimeout"
       fn = ->
       @cy._retry(fn, {})
-      expect(timeout).to.be.calledWith 1e9
-
-      expect(@test.timeout()).to.be.gt prevTimeout
-
+      expect(clearTimeout).to.be.called

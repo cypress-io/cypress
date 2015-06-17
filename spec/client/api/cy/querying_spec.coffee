@@ -242,6 +242,27 @@ describe "$Cypress.Cy Querying Commands", ->
       @cy.get("#missing-el", {retry: false}).then ($el) ->
         expect($el).not.to.exist
 
+    it "can increase the timeout", ->
+      missingEl = $("<div />", id: "missing-el")
+
+      ## make our runnable timeout after 100ms
+      @cy._timeout(100)
+
+      @cy.on "retry", (options) =>
+        ## make sure runnableTimeout is 10secs
+        expect(options._runnableTimeout).to.eq 10000
+
+        ## and make sure timeoutAt is much higher than
+        ## our runnables timeout
+        expect(options._timeoutAt).to.gt @cy._timeout()
+
+      ## but wait 300ms
+      _.delay =>
+        @cy.$("body").append(missingEl)
+      , 300
+
+      @cy.inspect().get("#missing-el", {timeout: 10000})
+
     _.each ["exist", "exists"], (key) ->
       describe "{#{key}: false}", ->
         it "returns null when cannot find element", ->

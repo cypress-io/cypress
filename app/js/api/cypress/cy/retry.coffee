@@ -7,7 +7,6 @@ do ($Cypress, _) ->
       ## want to accidentally time out via mocha
       if not options._runnableTimeout
         runnableTimeout = options.timeout ? @_timeout()
-        # @_timeout(1e9)
         @_clearTimeout()
 
       _.defaults options,
