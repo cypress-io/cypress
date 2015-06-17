@@ -527,18 +527,21 @@ SecretSauce.RemoteInitial =
     d.on 'error', (e) => @errorHandler(e, req, res)
 
     d.run =>
-      ## first check to see if this url contains a FQDN
+      ## 1. first check to see if this url contains a FQDN
       ## if it does then its been rewritten from an absolute-domain
       ## into a absolute-path-relative link, and we should extract the
       ## remoteHost from this URL
-      remoteHost = @getOriginFromFqdnUrl(req) ? req.cookies["__cypress.remoteHost"] ? @app.get("cypress").baseUrl
+      ## 2. or use cookies
+      ## 3. or use baseUrl
+      ## 4. or finally fall back on app instance var
+      remoteHost = @getOriginFromFqdnUrl(req) ? req.cookies["__cypress.remoteHost"] ? @app.get("cypress").baseUrl ? @app.get("__cypress.remoteHost")
 
       @Log.info "handling initial request", url: req.url, remoteHost: remoteHost
 
       ## we must have the remoteHost which tell us where
       ## we should request the initial HTML payload from
       if not remoteHost
-        throw new Error("Missing remoteHost cookie!")
+        throw new Error("Missing remoteHost. Cannot proxy request: #{req.url}")
 
       thr = @through (d) -> @queue(d)
 
@@ -577,12 +580,13 @@ SecretSauce.RemoteInitial =
     ## prepends req.url with remoteHost
     remoteUrl = @url.resolve(remoteHost, req.url)
 
-    setCookies = (initial, remoteHost) ->
+    setCookies = (initial, remoteHost) =>
       ## dont set the cookies if we're not on the initial request
       return if req.cookies["__cypress.initial"] isnt "true"
 
       res.cookie("__cypress.initial", initial)
       res.cookie("__cypress.remoteHost", remoteHost)
+      @app.set("__cypress.remoteHost", remoteHost)
 
     ## we are setting gzip to false here to prevent automatic
     ## decompression of the response since we dont need to transform
@@ -691,6 +695,7 @@ SecretSauce.RemoteInitial =
 
     res.cookie("__cypress.initial", false)
     res.cookie("__cypress.remoteHost", remoteHost)
+    @app.set("__cypress.remoteHost", remoteHost)
 
     stream = @fs.createReadStream(file, "utf8")
 
@@ -917,8 +922,6 @@ SecretSauce.RemoteInitial =
         href.replace(remoteHost, "")
       else
         "/" + href
-
-    rewrite "script", "removeAttr", "crossorigin"
 
     return tr
 

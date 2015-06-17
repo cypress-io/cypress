@@ -299,6 +299,34 @@ describe "Routes", ->
         .expect(200, "hello from bar!")
         .end(done)
 
+    context "remoteHost", ->
+      it "falls back to app __cypress.remoteHost property", (done) ->
+        @app.set("__cypress.remoteHost", "http://localhost:8080")
+
+        nock("http://localhost:8080")
+          .get("/assets/app.js")
+          .reply(200, "foo")
+
+        supertest(@app)
+          .get("/assets/app.js")
+          .expect(200, "foo")
+          .end(done)
+
+      it "falls back to app baseUrl property", (done) ->
+        ## should ignore this since it has least precendence
+        @app.set("__cypress.remoteHost", "http://www.github.com")
+
+        @app.set("cypress", {baseUrl: "http://localhost:8080"})
+
+        nock("http://localhost:8080")
+          .get("/assets/app.js")
+          .reply(200, "foo")
+
+        supertest(@app)
+          .get("/assets/app.js")
+          .expect(200, "foo")
+          .end(done)
+
     context "gzip", ->
       it "does not send accept-encoding headers when initial=true", (done) ->
         nock(@baseUrl)
@@ -623,7 +651,9 @@ describe "Routes", ->
             .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://localhost:8080")
             .expect(200)
             .expect "set-cookie", /remoteHost=.+localhost/
-            .end(done)
+            .end =>
+              expect(@app.get("__cypress.remoteHost")).to.eq "http://localhost:8080"
+              done()
 
       describe "when initial is false", ->
         it "does not reset initial or remoteHost", (done) ->
@@ -1107,7 +1137,9 @@ describe "Routes", ->
           .expect(/index.html content/)
           .expect(/sinon.js/)
           .expect "set-cookie", /initial=false/
-          .end(done)
+          .end =>
+            expect(@app.get("__cypress.remoteHost")).to.eq "<root>"
+            done()
 
       afterEach ->
         Fixtures.remove("no-server")
@@ -1279,37 +1311,6 @@ describe "Routes", ->
       #   .get("/www.cdnjs.com/backbone.js")
       #   .expect(200)
       #   .end(done)
-
-    context "crossorigin script tag attribute removal", ->
-      it "removes crossorigin='anonymous'", (done) ->
-        nock(@baseUrl)
-          .get("/bar")
-          .reply 200, '<html><body><script src="/foo.js" crossorigin="anonymous"></script></body></html>',
-            "Content-Type": "text/html"
-
-        supertest(@app)
-          .get("/bar")
-          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
-          .expect(200)
-          .expect (res) ->
-            expect(res.text).to.eq '<html><body><script src="/foo.js"></script></body></html>'
-            null
-          .end(done)
-
-      it "removes crossOrigin", (done) ->
-        nock(@baseUrl)
-          .get("/bar")
-          .reply 200, '<html><body><script src="/foo.js" crossOrigin foo="bar"></script></body></html>',
-            "Content-Type": "text/html"
-
-        supertest(@app)
-          .get("/bar")
-          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
-          .expect(200)
-          .expect (res) ->
-            expect(res.text).to.eq '<html><body><script src="/foo.js" foo="bar"></script></body></html>'
-            null
-          .end(done)
 
   context "POST *", ->
     beforeEach ->
