@@ -79,6 +79,16 @@ describe "Fixtures", ->
             }
           """
 
+    it "does not remove string whitespace", ->
+      @fixture.get("words.json").then (obj) =>
+        fs.readFileAsync(@fixture.folder + "/words.json", "utf8").then (json) ->
+          expect(json).to.eq """
+            {
+              "some": "multiple space separate words",
+              "that": "should keep their spaces"
+            }
+          """
+
     it "parses json to valid JS object", ->
       @fixture.get("users.json").then (users) ->
         expect(users).to.deep.eq [
