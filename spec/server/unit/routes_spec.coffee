@@ -522,6 +522,23 @@ describe "Routes", ->
             null
           .end(done)
 
+      [301, 302, 303, 307, 308].forEach (code) =>
+        it "handles direct for status code: #{code}", (done) ->
+          nock("http://auth.example.com")
+            .get("/login")
+            .reply(code, undefined, {
+              Location: "http://app.example.com/users/1"
+            })
+
+          supertest(@app)
+            .get("/login")
+            .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://auth.example.com")
+            .expect(302) ## we always send back a 302 instead of the original stutus code
+            .expect "location", "/users/1"
+            .expect "set-cookie", /initial=true/
+            .expect "set-cookie", /remoteHost=.+app\.example\.com/
+            .end(done)
+
     context "error handling", ->
       it "status code 500", (done) ->
         nock(@baseUrl)
@@ -575,6 +592,7 @@ describe "Routes", ->
           .get("/index.html")
           .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
           .expect(404, "404 not found")
+
           .end(done)
 
     context "headers", ->

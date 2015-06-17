@@ -619,7 +619,7 @@ SecretSauce.RemoteInitial =
       if cookies = incomingRes.headers["set-cookie"]
         res.append("Set-Cookie", @stripCookieParams(cookies))
 
-      if /^30(1|2|7|8)$/.test(incomingRes.statusCode)
+      if /^30(1|2|3|7|8)$/.test(incomingRes.statusCode)
         ## redirection is extremely complicated and there are several use-cases
         ## we are encompassing. read the routes_spec for each situation and
         ## why we have to check on so many things.
