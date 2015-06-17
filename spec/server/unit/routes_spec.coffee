@@ -1280,6 +1280,37 @@ describe "Routes", ->
       #   .expect(200)
       #   .end(done)
 
+    context "crossorigin script tag attribute removal", ->
+      it "removes crossorigin='anonymous'", (done) ->
+        nock(@baseUrl)
+          .get("/bar")
+          .reply 200, '<html><body><script src="/foo.js" crossorigin="anonymous"></script></body></html>',
+            "Content-Type": "text/html"
+
+        supertest(@app)
+          .get("/bar")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+          .expect(200)
+          .expect (res) ->
+            expect(res.text).to.eq '<html><body><script src="/foo.js"></script></body></html>'
+            null
+          .end(done)
+
+      it "removes crossOrigin", (done) ->
+        nock(@baseUrl)
+          .get("/bar")
+          .reply 200, '<html><body><script src="/foo.js" crossOrigin foo="bar"></script></body></html>',
+            "Content-Type": "text/html"
+
+        supertest(@app)
+          .get("/bar")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+          .expect(200)
+          .expect (res) ->
+            expect(res.text).to.eq '<html><body><script src="/foo.js" foo="bar"></script></body></html>'
+            null
+          .end(done)
+
   context "POST *", ->
     beforeEach ->
       @baseUrl = "http://localhost:8000"

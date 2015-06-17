@@ -887,6 +887,10 @@ SecretSauce.RemoteInitial =
           when "attr"
             elem.getAttribute attr, (val) ->
               elem.setAttribute attr, fn(val)
+
+          when "removeAttr"
+            elem.removeAttribute(attr)
+
           when "html"
             stream = elem.createStream({outer: true})
             stream.pipe(through (buf) ->
@@ -913,6 +917,8 @@ SecretSauce.RemoteInitial =
         href.replace(remoteHost, "")
       else
         "/" + href
+
+    rewrite "script", "removeAttr", "crossorigin"
 
     return tr
 
