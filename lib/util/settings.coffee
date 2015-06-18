@@ -7,8 +7,8 @@ module.exports =
   _pathToCypressJson: (projectRoot) ->
     path.join(projectRoot, "cypress.json")
 
-  _logErr: (projectRoot) ->
-    throw new Error "Error reading from: #{projectRoot}/cypress.json"
+  _logErr: (projectRoot, err) ->
+    throw new Error "Error reading from: #{projectRoot}/cypress.json\n#{err.message}"
 
     # console.log "Could not read file from: '#{projectRoot}/cypress.json'"
 
@@ -33,15 +33,15 @@ module.exports =
     .then(JSON.parse)
     .get("cypress")
     .catch (err) =>
-      @_logErr(projectRoot)
+      @_logErr(projectRoot, err)
 
   readSync: (projectRoot) ->
     try
       str = @_get("readFileSync", projectRoot)
 
       return JSON.parse(str).cypress
-    catch e
-      @_logErr(projectRoot)
+    catch err
+      @_logErr(projectRoot, err)
 
   write: (projectRoot, obj = {}) ->
     @read(projectRoot).bind(@).then (settings) ->

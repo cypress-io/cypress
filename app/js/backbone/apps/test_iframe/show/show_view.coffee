@@ -152,10 +152,11 @@
 
       if options.el
         @highlightEl options.el,
-          coords: options.coords
-          id:     options.id
-          attr:   options.attr
-          dom:    dom
+          coords:   options.coords
+          id:       options.id
+          attr:     options.attr
+          scrollBy: options.scrollBy
+          dom:      dom
 
     addRevertMessage: (options) ->
       @reverted = true
@@ -186,7 +187,13 @@
         dom = @$remote.contents().find("body")
 
       ## scroll the top of the element into view
-      el.get(0).scrollIntoView() if el.get(0)
+      if el.get(0)
+        el.get(0).scrollIntoView()
+        ## if we have a scrollBy on our command
+        ## then we need to additional scroll the window
+        ## by these offsets
+        if scrollBy = options.scrollBy
+          @$remote.prop("contentWindow").scrollBy(scrollBy.x, scrollBy.y)
 
       el.each (index, el) =>
         el = $(el)

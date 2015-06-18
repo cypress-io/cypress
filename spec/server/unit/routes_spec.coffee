@@ -1,6 +1,8 @@
 root          = "../../../"
 Server        = require("#{root}lib/server")
 Fixtures      = require "#{root}/spec/server/helpers/fixtures"
+glob          = require("glob")
+path          = require("path")
 expect        = require("chai").expect
 nock          = require('nock')
 sinon         = require('sinon')
@@ -108,20 +110,32 @@ describe "Routes", ->
       @server.setCypressJson {
         projectRoot: Fixtures.project("todos")
         testFolder: "tests"
+        fixturesFolder: "tests/_fixtures"
+        javascripts: ["tests/etc/**/*"]
       }
 
     afterEach ->
       Fixtures.remove("todos")
 
     it "returns base json file path objects", (done) ->
-      supertest(@app)
-        .get("/__cypress/files")
-        .expect(200, [
-          { name: "sub/sub_test.coffee" },
-          { name: "test1.js" },
-          { name: "test2.coffee" }
-        ])
-        .end(done)
+      ## this should omit any _fixture files, _support files and javascripts
+
+      glob path.join(Fixtures.project("todos"), "tests", "_fixtures", "**", "*"), (err, files) =>
+        ## make sure there are fixtures in here!
+        expect(files.length).to.be.gt(0)
+
+        glob path.join(Fixtures.project("todos"), "tests", "_support", "**", "*"), (err, files) =>
+          ## make sure there are support files in here!
+          expect(files.length).to.be.gt(0)
+
+          supertest(@app)
+            .get("/__cypress/files")
+            .expect(200, [
+              { name: "sub/sub_test.coffee" },
+              { name: "test1.js" },
+              { name: "test2.coffee" }
+            ])
+            .end(done)
 
     it "sets X-Files-Path header to the length of files", (done) ->
       filesPath = Fixtures.project("todos") + "/" + "tests"
@@ -217,7 +231,7 @@ describe "Routes", ->
         @server.setCypressJson {
           projectRoot: Fixtures.project("todos")
           testFolder: "tests"
-          javascripts: ["support/spec_helper.coffee"]
+          javascripts: ["tests/etc/etc.js"]
           sinon: false
           fixtures: false
         }
@@ -284,6 +298,34 @@ describe "Routes", ->
         .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
         .expect(200, "hello from bar!")
         .end(done)
+
+    context "remoteHost", ->
+      it "falls back to app __cypress.remoteHost property", (done) ->
+        @app.set("__cypress.remoteHost", "http://localhost:8080")
+
+        nock("http://localhost:8080")
+          .get("/assets/app.js")
+          .reply(200, "foo")
+
+        supertest(@app)
+          .get("/assets/app.js")
+          .expect(200, "foo")
+          .end(done)
+
+      it "falls back to app baseUrl property", (done) ->
+        ## should ignore this since it has least precendence
+        @app.set("__cypress.remoteHost", "http://www.github.com")
+
+        @app.set("cypress", {baseUrl: "http://localhost:8080"})
+
+        nock("http://localhost:8080")
+          .get("/assets/app.js")
+          .reply(200, "foo")
+
+        supertest(@app)
+          .get("/assets/app.js")
+          .expect(200, "foo")
+          .end(done)
 
     context "gzip", ->
       it "does not send accept-encoding headers when initial=true", (done) ->
@@ -508,6 +550,23 @@ describe "Routes", ->
             null
           .end(done)
 
+      [301, 302, 303, 307, 308].forEach (code) =>
+        it "handles direct for status code: #{code}", (done) ->
+          nock("http://auth.example.com")
+            .get("/login")
+            .reply(code, undefined, {
+              Location: "http://app.example.com/users/1"
+            })
+
+          supertest(@app)
+            .get("/login")
+            .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://auth.example.com")
+            .expect(302) ## we always send back a 302 instead of the original stutus code
+            .expect "location", "/users/1"
+            .expect "set-cookie", /initial=true/
+            .expect "set-cookie", /remoteHost=.+app\.example\.com/
+            .end(done)
+
     context "error handling", ->
       it "status code 500", (done) ->
         nock(@baseUrl)
@@ -561,6 +620,7 @@ describe "Routes", ->
           .get("/index.html")
           .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
           .expect(404, "404 not found")
+
           .end(done)
 
     context "headers", ->
@@ -591,7 +651,9 @@ describe "Routes", ->
             .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://localhost:8080")
             .expect(200)
             .expect "set-cookie", /remoteHost=.+localhost/
-            .end(done)
+            .end =>
+              expect(@app.get("__cypress.remoteHost")).to.eq "http://localhost:8080"
+              done()
 
       describe "when initial is false", ->
         it "does not reset initial or remoteHost", (done) ->
@@ -1075,7 +1137,9 @@ describe "Routes", ->
           .expect(/index.html content/)
           .expect(/sinon.js/)
           .expect "set-cookie", /initial=false/
-          .end(done)
+          .end =>
+            expect(@app.get("__cypress.remoteHost")).to.eq "<root>"
+            done()
 
       afterEach ->
         Fixtures.remove("no-server")

@@ -147,13 +147,14 @@
       @ui.pre.text(value)
 
     preClicked: (e) ->
-      ## TODO REFACTOR THIS METHOD TO USE THE VIEWS
+      ## TODO: REFACTOR THIS METHOD TO USE THE VIEWS
       ## METHOD AND DRY UP CODE
       return if not err = @model.originalError
 
       e.stopPropagation()
 
-      if err.name is "CypressError"
+      ## TODO: DRY THIS UP
+      if /(AssertionError|CypressError)/.test(err.name)
         command = @model.getLastCommandThatMatchesError(err)
 
         return if not command

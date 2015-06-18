@@ -198,7 +198,7 @@ gulp.task "deploy:manifest", ->
 gulp.task "get:manifest", ->
   require("./lib/deploy")().getManifest()
 
-gulp.task "deploy", ->
+gulp.task "deploy", ["client:build", "nw:build"], ->
   require("./lib/deploy")().deploy()
 
 gulp.task "compile", ["clean:build"], ->

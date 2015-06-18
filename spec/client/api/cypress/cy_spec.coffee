@@ -190,7 +190,7 @@ describe "$Cypress.Cy API", ->
 
         @cy.noop()
 
-      it "does not reset the timeout on completetion when a runnable has a state already", (done) ->
+      it "does not reset the timeout on completion when a runnable has a state already", (done) ->
         ## this happens when using a (done) callback
         ## and using cy commands at the same time!
         ## because mocha detects the test is async

@@ -6,6 +6,8 @@ sinon         = require 'sinon'
 sinonPromise  = require 'sinon-as-promised'
 Server        = require "#{root}lib/server"
 Socket        = require "#{root}lib/socket"
+Support       = require "#{root}lib/support"
+Fixtures      = require "#{root}lib/fixtures"
 Project       = require "#{root}lib/project"
 Log           = require "#{root}lib/log"
 Settings      = require "#{root}lib/util/settings"
@@ -16,6 +18,8 @@ describe "Server Interface", ->
     @sandbox.stub(Socket.prototype, "startListening")
     @sandbox.stub(Project.prototype, "ensureProjectId").resolves({})
     @sandbox.stub(Settings, "readSync").returns({})
+    @sandbox.stub(Support.prototype, "scaffold").resolves({})
+    @sandbox.stub(Fixtures.prototype, "scaffold").resolves({})
     @server = Server("/Users/brian/app")
 
   afterEach ->
@@ -76,6 +80,26 @@ describe "Server Interface", ->
     it "isListening=true", ->
       @server.open().bind(@).then ->
         expect(@server.isListening).to.be.true
+
+    it "calls Fixtures#scaffold", ->
+      @server.open().bind(@).then ->
+        expect(Fixtures::scaffold).to.be.calledOnce
+
+    it "calls Support#scaffold", ->
+      @server.open().bind(@).then ->
+        expect(Support::scaffold).to.be.calledOnce
+
+    context "errors", ->
+      it "rejects when parsing cypress.json fails", (done) ->
+        Settings.readSync.restore()
+
+        fs.writeFileSync("cypress.json", "{'foo': 'bar}")
+
+        @server = Server(process.cwd())
+
+        @server.open()
+          .catch (err) ->
+            done()
 
   context "#getCypressJson", ->
     describe "defaults", ->

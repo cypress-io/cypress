@@ -262,7 +262,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
         it "throws when 2nd alias doesnt match any registered alias", (done) ->
           @cy.on "fail", (err) ->
-            expect(err.message).to.eq "cy.wait() could not find a registered alias for: 'bar'.  Available aliases are: 'foo'."
+            expect(err.message).to.eq "cy.wait() could not find a registered alias for: 'bar'. Available aliases are: 'foo'."
             done()
 
           @cy
@@ -353,7 +353,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           Promise.onPossiblyUnhandledRejection (err) ->
             done(err)
 
-          @cy._timeout(500)
+          @cy._timeout(200)
 
           @cy.on "fail", (err) ->
             expect(err.message).to.eq "Invalid alias: 'bar'. You forgot the '@'. It should be written as: '@bar'."
@@ -370,7 +370,7 @@ describe "$Cypress.Cy Waiting Commands", ->
         it "does not throw again when 2nd alias doesnt reference a route", (done) ->
           Promise.onPossiblyUnhandledRejection done
 
-          @cy._timeout(300)
+          @cy._timeout(200)
 
           @cy.on "fail", (err) ->
             expect(err.message).to.eq "cy.wait() can only accept aliases for routes.  The alias: 'bar' did not match a route."
@@ -392,7 +392,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           @cy.on "retry", (options) ->
             ## force bar to time out before foo
             if /bar/.test options.error
-              options.runnableTimeout = 0
+              options._runnableTimeout = 0
 
           @cy.on "fail", (err) =>
             @cy.on "retry", -> done("should not have retried!")
@@ -411,12 +411,12 @@ describe "$Cypress.Cy Waiting Commands", ->
         it "does not retry after 1 alias times out", (done) ->
           Promise.onPossiblyUnhandledRejection done
 
-          @cy._timeout(500)
+          @cy._timeout(200)
 
           @cy.on "retry", (options) ->
             ## force bar to time out before foo
             if /bar/.test options.error
-              options.runnableTimeout = 0
+              options._runnableTimeout = 0
 
           @cy.on "fail", (err) =>
             ## should not retry waiting for 'foo'
@@ -437,7 +437,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           resp = {foo: "foo"}
           response = 0
 
-          @cy._timeout(300)
+          @cy._timeout(200)
 
           @cy.on "fail", (err) ->
             expect(err.message).to.include "cy.wait() timed out waiting for the 3rd response to the route: 'getUsers'. No response ever occured."
@@ -460,7 +460,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           resp = {foo: "foo"}
           response = 0
 
-          @cy._timeout(300)
+          @cy._timeout(200)
 
           @cy.on "fail", (err) ->
             expect(err.message).to.include "cy.wait() timed out waiting for the 2nd response to the route: 'getUsers'. No response ever occured."
@@ -482,7 +482,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           resp = {foo: "foo"}
           request = 0
 
-          @cy._timeout(300)
+          @cy._timeout(200)
 
           @cy.on "fail", (err) ->
             expect(err.message).to.include "cy.wait() timed out waiting for the 2nd request to the route: 'getUsers'. No request ever occured."

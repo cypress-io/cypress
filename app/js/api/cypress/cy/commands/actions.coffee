@@ -319,6 +319,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         log: true
         force: false
         command: null
+        errorOnSelect: true
 
       @ensureDom(options.$el)
 
@@ -338,14 +339,24 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         mdownEvt = mupEvt = clickEvt = null
 
         if options.log
-          options.command = Cypress.command({$el: $el})
+          ## figure out the options which actually change the behavior of clicks
+          deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: 50})
+
+          options.command = Cypress.command({
+            message: deltaOptions
+            $el: $el
+          })
+
+        if options.errorOnSelect and $el.is("select")
+          @throwErr "Cannot call .click() on a <select> element. Use cy.select() command instead to change the value.", options.command
 
         ## in order to simulate actual user behavior we need to do the following:
         ## 1. take our element and figure out its center coordinate
         ## 2. check to figure out the element listed at those coordinates
         ## 3. if this element is ourself or our descendents, click whatever was returned
         ## 4. else throw an error because something is covering us up
-        @ensureVisibility $el, options.command
+        if options.force isnt true
+          @ensureVisibility $el, options.command
 
         getFirstFocusableEl = ($el) ->
           return $el if $el.is(focusable)
@@ -415,6 +426,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
               "Applied To":   $Cypress.Utils.getDomElements($el)
               "Elements":     $el.length
               "Coords":       coords
+              "Options":      deltaOptions
             }
 
             if $el.get(0) isnt $elToClick.get(0)
@@ -458,6 +470,67 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
         findElByCoordinates = ($el) =>
 
+          coordsObj = (coords, $el) ->
+            {
+              coords: coords
+              $elToClick: $el
+            }
+
+          scrollWindowPastFixedElement = ($fixed) ->
+            height = $fixed.outerHeight()
+            width  = $fixed.outerWidth()
+            win.scrollBy(-width, -height)
+            if options.command
+              ## store the scrollBy to be used later in the iframe view
+              options.command.set "scrollBy", {x: -width, y: -height}
+
+          getElementWithFixedPosition = ($el) ->
+            ## return null if we're at body/html
+            ## cuz that means nothing has fixed position
+            return null if not $el or $el.is("body,html")
+
+            ## if we have fixed position return ourselves
+            if $el.css("position") is "fixed"
+              return $el
+
+            ## else recursively continue to walk up the parent node chain
+            getElementWithFixedPosition($el.parent())
+
+          getElementAtCoordinates = (coords) =>
+            ## accept options which disable actually ensuring the element
+            ## is clickable / in the foreground
+            ## this is helpful during css animations for instance where
+            ## you're trying to click a moving target. in that case we'll
+            ## just 'click' it for you and simulate everything related to
+            ## the click without verifying it is clickable. focus events
+            ## default actions, propagation, etc will still be respected
+            $elToClick = @getElementAtCoordinates(coords.x, coords.y)
+
+            try
+              @ensureDescendents $el, $elToClick, options.command
+            catch err
+              ## if $elToClick isnt a descendent then attempt to nudge the
+              ## window scrollBy based on the height of the covering element
+              ## (if its fixed position) until our element comes into view
+              if $fixed = getElementWithFixedPosition($elToClick)
+                scrollWindowPastFixedElement($fixed)
+
+                ## try again now that we've nudged the window's scroll
+                return getElementAtCoordinates(coords)
+
+              if options.command
+                options.command.snapshot()
+                options.command.set onConsole: ->
+                  obj = {}
+                  obj["Tried to Click"]     = $Cypress.Utils.getDomElements($el)
+                  obj["But its Covered By"] = $Cypress.Utils.getDomElements($elToClick)
+                  obj
+
+              options.error   = err
+              return @_retry(getCoords, options)
+
+            return coordsObj(coords, $elToClick)
+
           getCoords = =>
             ## use native scrollIntoView here so scrollable
             ## containers are automatically handled correctly
@@ -474,36 +547,9 @@ $Cypress.register "Actions", (Cypress, _, $) ->
             ## if we're forcing this click event
             ## just immediately send it up
             if options.force
-              return {
-                coords: coords
-                $elToClick: $el
-              }
+              return coordsObj(coords, $el)
 
-            ## accept options which disable actually ensuring the element
-            ## is clickable / in the foreground
-            ## this is helpful during css animations for instance where
-            ## you're trying to click a moving target. in that case we'll
-            ## just 'click' it for you and simulate everything related to
-            ## the click without verifying it is clickable. focus events
-            ## default actions, propagation, etc will still be respected
-            $elToClick = @getElementAtCoordinates(coords.x, coords.y)
-
-            try
-              @ensureDescendents $el, $elToClick, options.command
-            catch err
-              if options.command
-                options.command.set onConsole: ->
-                  obj = {}
-                  obj["Covered By"] = $Cypress.Utils.getDomElements($elToClick)
-                  obj
-
-              options.error   = err
-              return @_retry(getCoords, options)
-
-            return {
-              coords: coords
-              $elToClick: $elToClick
-            }
+            getElementAtCoordinates(coords)
 
           Promise.resolve(getCoords())
 
@@ -544,13 +590,16 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       @ensureDom(options.$el)
 
       if options.log
+        ## figure out the options which actually change the behavior of clicks
+        deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: 50})
+
         options.command = Cypress.command
+          message: deltaOptions
           $el: options.$el
           onConsole: ->
             "Typed":      sequence
             "Applied To": $Cypress.Utils.getDomElements(options.$el)
-
-      @ensureVisibility(options.$el, options.command)
+            "Options":    deltaOptions
 
       if not options.$el.is(textLike)
         node = Cypress.Utils.stringifyElement(options.$el)
@@ -564,7 +613,14 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       ## click the element first to simulate focus
       ## and typical user behavior in case the window
       ## is out of focus
-      @command("click", {$el: options.$el, log: false, command: options.command, force: options.force}).then =>
+      @command("click", {
+        $el: options.$el
+        log: false
+        command: options.command
+        force: options.force
+        timeout: options.timeout
+        interval: options.interval
+      }).then =>
 
         multipleInputsAndNoSubmitElements = (form) ->
           inputs  = form.find("input")
@@ -674,11 +730,16 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         $el = $(el)
 
         if options.log
+          ## figure out the options which actually change the behavior of clicks
+          deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: 50})
+
           options.command = Cypress.command
+            message: deltaOptions
             $el: $el
             onConsole: ->
               "Applied To": $Cypress.Utils.getDomElements($el)
               "Elements":   $el.length
+              "Options":    deltaOptions
 
         node = Cypress.Utils.stringifyElement($el)
 
@@ -686,7 +747,14 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           word = Cypress.Utils.plural(subject, "contains", "is")
           @throwErr ".clear() can only be called on textarea or :text! Your subject #{word} a: #{node}", options.command
 
-        @command("type", "{selectall}{del}", {$el: $el, log: false, command: options.command, force: options.force}).then ->
+        @command("type", "{selectall}{del}", {
+          $el: $el
+          log: false
+          command: options.command
+          force: options.force
+          timeout: options.timeout
+          interval: options.interval
+        }).then ->
           options.command.snapshot().end() if options.command
 
           return null
@@ -698,7 +766,24 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         .return(subject)
 
     select: (subject, valueOrText, options = {}) ->
-      @ensureDom(subject)
+      _.defaults options,
+        $el: subject
+        log: true
+        force: false
+
+      @ensureDom(options.$el)
+
+      if options.log
+        ## figure out the options which actually change the behavior of clicks
+        deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: 50})
+
+        options.command = Cypress.command
+          message: deltaOptions
+          $el: options.$el
+          onConsole: ->
+            "Selected":   values
+            "Applied To": $Cypress.Utils.getDomElements(options.$el)
+            "Options":    deltaOptions
 
       ## if subject is a <select> el assume we are filtering down its
       ## options to a specific option first by value and then by text
@@ -711,18 +796,16 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       ## or texts and clear the previous selections which matches jQuery's
       ## behavior
 
-      if not subject.is("select")
-        node = Cypress.Utils.stringifyElement(subject)
+      if not options.$el.is("select")
+        node = Cypress.Utils.stringifyElement(options.$el)
         @throwErr ".select() can only be called on a <select>! Your subject is a: #{node}"
 
-      if (num = subject.length) and num > 1
+      if (num = options.$el.length) and num > 1
         @throwErr ".select() can only be called on a single <select>! Your subject contained #{num} elements!"
-
-      @ensureVisibility(subject)
 
       ## normalize valueOrText if its not an array
       valueOrText = [].concat(valueOrText)
-      multiple    = subject.prop("multiple")
+      multiple    = options.$el.prop("multiple")
 
       ## throw if we're not a multiple select and we've
       ## passed an array of values
@@ -730,40 +813,85 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         @throwErr ".select() was called with an array of arguments but does not have a 'multiple' attribute set!"
 
       values  = []
-      options = subject.children().map (index, el) ->
+      optionEls = []
+      optionsObjects = options.$el.children().map (index, el) ->
         ## push the value in values array if its
         ## found within the valueOrText
         value = el.value
-        values.push(value) if value in valueOrText
+        optEl = $(el)
+
+        if value in valueOrText
+          optionEls.push optEl
+          values.push(value)
 
         ## return the elements text + value
         {
           value: value
-          text: $(el).text()
+          text: optEl.text()
+          $el: optEl
         }
 
       ## if we couldn't find anything by value then attempt
       ## to find it by text and insert its value into values arr
       if not values.length
-        _.each options.get(), (obj, index) ->
-          values.push(obj.value) if obj.text in valueOrText
+        _.each optionsObjects.get(), (obj, index) ->
+          if obj.text in valueOrText
+            optionEls.push obj.$el
+            values.push(obj.value)
 
       ## if we didnt set multiple to true and
       ## we have more than 1 option to set then blow up
       if not multiple and values.length > 1
         @throwErr(".select() matched than one option by value or text: #{valueOrText.join(", ")}")
 
-      subject.val(values)
+      @command("click", {
+        $el: options.$el
+        log: false
+        errorOnSelect: false ## prevent click errors since we want the select to be clicked
+        command: options.command
+        force: options.force
+        timeout: options.timeout
+        interval: options.interval
+      }).then( =>
 
-      ## yup manually create this change event
-      ## 1.6.5. HTML event types
-      ## scroll down the 'change'
-      event = document.createEvent("HTMLEvents")
-      event.initEvent("change", true, false)
+        ## TODO:
+        ## 1. test cancellation
+        ## 2. test passing optionEls to each directly
+        ## 3. update other tests using this Promise.each pattern
+        ## 4. test that force is always true
+        ## 5. test that command is not provided (undefined / null)
+        ## 6. test that option actually receives click event
+        ## 7. test that select still has focus (i think it already does have a test)
+        ## 8. test that multiple=true selects receive option event for each selected option
+        Promise
+          .resolve(optionEls) ## why cant we just pass these directly to .each?
+          .each (optEl) =>
+            @command("click", {
+              $el: optEl
+              log: false
+              force: true ## always force the click to happen on the <option>
+              timeout: options.timeout
+              interval: options.interval
+            })
+          .cancellable()
+          .then =>
+            ## reset the selects value after we've
+            ## fired all the proper click events
+            ## for the options
+            options.$el.val(values)
 
-      subject.get(0).dispatchEvent(event)
+            ## yup manually create this change event
+            ## 1.6.5. HTML event types
+            ## scroll down the 'change'
+            event = document.createEvent("HTMLEvents")
+            event.initEvent("change", true, false)
 
-      return subject
+            options.$el.get(0).dispatchEvent(event)
+
+            ## change events should be finished at this point!
+            ## so we can snapshot the current state of the DOM
+            options.command.snapshot().end() if options.command
+      ).return(options.$el)
 
   Cypress.addParentCommand
     focused: (options = {}) ->
@@ -858,11 +986,16 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           "Elements":     $el.length
 
         if options.log
-          command = Cypress.command
-            $el: $el
-            onConsole: -> onConsole
+          ## figure out the options which actually change the behavior of clicks
+          deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: 50})
 
-        @ensureVisibility $el, command
+          command = Cypress.command
+            message: deltaOptions
+            $el: $el
+            onConsole: ->
+              _.extend onConsole, {
+                Options: deltaOptions
+              }
 
         if not isAcceptableElement($el)
           node   = Cypress.Utils.stringifyElement($el)
@@ -874,6 +1007,8 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         ## then notify the user of this note
         ## and bail
         if isNoop($el)
+          ## still ensure visibility even if the command is noop
+          @ensureVisibility $el, command
           onConsole.Note = "This checkbox was already #{type}ed. No operation took place."
           return
         else
@@ -886,7 +1021,14 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         ## if we didnt pass in any values or our
         ## el's value is in the array then check it
         if not values.length or $el.val() in values
-          @command("click", {$el: $el, log: false, command: command, force: options.force}).then ->
+          @command("click", {
+            $el: $el
+            log: false
+            command: command
+            force: options.force
+            timeout: options.timeout
+            interval: options.interval
+          }).then ->
             command.snapshot().end() if command
 
             return null

@@ -2,6 +2,8 @@
 ## including the intermediate $Log interface
 $Cypress.Log = do ($Cypress, _, Backbone) ->
 
+  CypressErrorRe = /(AssertionError|CypressError)/
+
   class $Log
     constructor: (@Cypress, obj = {}) ->
       _.defaults obj,
@@ -83,7 +85,9 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       return @
 
     getError: (err) ->
-      if err.name is "CypressError"
+      ## dont log stack traces on cypress errors
+      ## or assertion errors
+      if CypressErrorRe.test(err.name)
         err.toString()
       else
         err.stack
