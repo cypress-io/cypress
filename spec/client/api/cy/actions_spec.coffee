@@ -177,6 +177,13 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#input-covered-in-span").type("foobar", {timeout: 1000, interval: 60})
 
+    it "can forcibly click even when element is invisible", (done) ->
+      button = @cy.$("button:first").hide()
+
+      button.click -> done()
+
+      @cy.get("button:first").click({force: true})
+
     # describe "input types", ->
     #   _.each ["password", "email", "number", "date", "week", "month", "time", "datetime", "datetime-local", "search", "url"], (type) ->
     #     it "accepts input [type=#{type}]", ->

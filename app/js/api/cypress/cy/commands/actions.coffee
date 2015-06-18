@@ -351,7 +351,8 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         ## 2. check to figure out the element listed at those coordinates
         ## 3. if this element is ourself or our descendents, click whatever was returned
         ## 4. else throw an error because something is covering us up
-        @ensureVisibility $el, options.command
+        if options.force isnt true
+          @ensureVisibility $el, options.command
 
         getFirstFocusableEl = ($el) ->
           return $el if $el.is(focusable)
@@ -561,8 +562,6 @@ $Cypress.register "Actions", (Cypress, _, $) ->
             "Typed":      sequence
             "Applied To": $Cypress.Utils.getDomElements(options.$el)
             "Options":    deltaOptions
-
-      @ensureVisibility(options.$el, options.command)
 
       if not options.$el.is(textLike)
         node = Cypress.Utils.stringifyElement(options.$el)
