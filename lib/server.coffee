@@ -30,11 +30,15 @@ class Server
     @initialize(projectRoot)
 
   initialize: (projectRoot) ->
-    @config = @getCypressJson(projectRoot)
+    try
+      @config = @getCypressJson(projectRoot)
 
-    @setCypressJson(@config)
+      @setCypressJson(@config)
 
-    Log.setSettings(@config)
+      Log.setSettings(@config)
+    catch err
+      err.jsonError = true
+      @config = err
 
   getCypressJson: (projectRoot) ->
     obj = Settings.readSync(projectRoot)
@@ -113,19 +117,22 @@ class Server
     e
 
   open: ->
-    @server    = http.createServer(@app)
-    @io        = require("socket.io")(@server, {path: "/__socket.io"})
-    @project   = Project(@config.projectRoot)
-
-    allowDestroy(@server)
-
-    @configureApplication()
-
-    ## refactor this class
-    socket = Socket(@io, @app)
-    socket.startListening()
-
     new Promise (resolve, reject) =>
+      ## bail if we had a problem reading from cypress.json
+      return reject(@config) if @config.jsonError
+
+      @server    = http.createServer(@app)
+      @io        = require("socket.io")(@server, {path: "/__socket.io"})
+      @project   = Project(@config.projectRoot)
+
+      allowDestroy(@server)
+
+      @configureApplication()
+
+      ## refactor this class
+      socket = Socket(@io, @app)
+      socket.startListening()
+
       onError = (err) =>
         ## if the server bombs before starting
         ## and the err no is EADDRINUSE

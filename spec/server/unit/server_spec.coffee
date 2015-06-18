@@ -89,6 +89,18 @@ describe "Server Interface", ->
       @server.open().bind(@).then ->
         expect(Support::scaffold).to.be.calledOnce
 
+    context "errors", ->
+      it "rejects when parsing cypress.json fails", (done) ->
+        Settings.readSync.restore()
+
+        fs.writeFileSync("cypress.json", "{'foo': 'bar}")
+
+        @server = Server(process.cwd())
+
+        @server.open()
+          .catch (err) ->
+            done()
+
   context "#getCypressJson", ->
     describe "defaults", ->
       beforeEach ->

@@ -6,7 +6,7 @@
     <p class="text-danger">Could not start server!</p>
     <p class="bg-danger">
       <i class="fa fa-warning"></i>
-      <%= @error %>
+      <%- @error.replace("\n", "<br /><br />") %>
     </p>
     <% if @portInUse: %>
       <div class="well well">

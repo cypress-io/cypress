@@ -10,6 +10,7 @@ root = "../../../"
 
 Promise      = require("bluebird")
 chai         = require("chai")
+fs           = require("fs")
 # Cypress      = require("#{root}lib/cypress")
 cache        = require("#{root}lib/cache")
 Log          = require("#{root}lib/log")
@@ -17,6 +18,8 @@ sinon        = require("sinon")
 sinonChai    = require("sinon-chai")
 sinonPromise = require("sinon-as-promised")
 Fixtures     = require("#{root}/spec/server/helpers/fixtures")
+
+fs = Promise.promisifyAll(fs)
 
 chai.use(sinonChai)
 
@@ -80,6 +83,18 @@ module.exports = (parentWindow, gui, loadApp) ->
         expect(@project.find(".well")).to.contain("Server Running")
         expect(@project.find("a")).to.contain("http://localhost:8888")
         expect(@project.find("button[data-stop]")).to.contain("Stop")
+
+    context "boot errors", ->
+      it "cypress.json parse errors", ->
+        fs.writeFileSync @todos + "/cypress.json", "{'foo': 'bar}"
+        @$("#projects-container .project").click()
+
+        Promise.delay(100).then =>
+          project = @$("#project")
+          expect(project.find("p.text-danger")).to.contain("Could not start server!")
+          expect(project.find("p.bg-danger")).to.contain("Error reading from")
+          expect(project.find("p.bg-danger")).to.contain("Unexpected token")
+          expect(project.find("p.bg-danger br")).to.have.length(2)
 
     context "projects list", ->
       it "displays added project", ->
