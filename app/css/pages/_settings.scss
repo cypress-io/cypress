@@ -1,6 +1,19 @@
 .settings-row {
   overflow: auto;
   @include responsive-width(100%);
+
+  .settings-section {
+    @include responsive-width(33.33%);
+    border-top: 1px solid #eee;
+    border-right: 1px solid #eee;
+    padding: 20px;
+
+    &:last-child {
+      border-right: 0;
+    }
+
+  }
+
 }
 
 .settings-section {

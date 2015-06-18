@@ -5,56 +5,57 @@
         <h1>Settings</h1>
       </div>
       <form>
-        <hr>
-          <div class="settings-row">
-            <div class="settings-section pull-left">
-              <h3>Command Timeout</h3>
-              4000
-            </div>
-            <div class="settings-section pull-left">
-              <h3>Visit Timeout</h3>
-              20000
-            </div>
-            <div class="settings-section pull-left">
-              <h3>Port</h3>
-              2020
-            </div>
+        <div class="settings-row">
+          <div class="settings-section pull-left">
+            <h3>Command Timeout</h3>
+            <input type="number" class="form-control" placeholder="4000">
           </div>
-        <hr>
-          <div class="settings-section">
-            <h3>Test Folder</h3>
-            This directory is automatically scanned and watched
-            <div class="upload-container">
-              <span>/tests/</span>
-              <button class="btn btn-default btn-upload">Select Path...</button>
-            </div>
+          <div class="settings-section pull-left">
+            <h3>Visit Timeout</h3>
+            <input type="number" class="form-control" placeholder="2000">
           </div>
-        <hr>
-          <div class="settings-section">
-            <h3>What's your base url?</h3>
-            This is a string that is automatically prepended to all cy.vists.
+          <div class="settings-section pull-left">
+            <h3>Port</h3>
+            <input type="number" class="form-control" placeholder="2020">
           </div>
+        </div>
         <hr>
-          <div class="settings-section">
-            <h3>
-              <label>Do you want to use a spec processor?</label>
-            </h3>
-            <div class="btn-group btn-group-lg btn-group-justified" role="group">
-              <a class="btn btn-default">None</a>
-              <a class="btn btn-default">RequireJS</a>
-              <a class="btn btn-default">Browserify</a>
-            </div>
-            <div class="upload-container">
-              <span>Select your spec processor's configuration file</span>
-              <button class="btn btn-default btn-upload">Select File...</button>
-            </div>
+        <div class="settings-section">
+          <h3>Test Folder</h3>
+          This directory is automatically scanned and watched
+          <div class="upload-container">
+            <span>/tests/</span>
+            <button class="btn btn-default btn-upload">Select Path...</button>
           </div>
+        </div>
         <hr>
-          <div class="settings-section">
-            <h3>Do you want to specify JavaScripts?</h3>
+        <div class="settings-section">
+          <h3>What's your base url?</h3>
+          This is a string that is automatically prepended to all cy.vists.
+        </div>
+        <hr>
+        <div class="settings-section">
+          <h3>
+            <label>Do you want to use a spec processor?</label>
+          </h3>
+          <div class="btn-group btn-group-lg btn-group-justified" role="group">
+            <a class="btn btn-default">None</a>
+            <a class="btn btn-default">RequireJS</a>
+            <a class="btn btn-default">Browserify</a>
+            <a class="btn btn-default">Babel</a>
           </div>
+          <div class="upload-container">
+            <span>Select your spec processor's configuration file</span>
+            <button class="btn btn-default btn-upload">Select File...</button>
+          </div>
+        </div>
+        <hr>
+        <div class="settings-section">
+          <h3>Do you want to specify JavaScripts?</h3>
+        </div>
         <div class="form-footer">
-          <button type="submit" class="btn btn-primary">Update Settings</button>
+          <button type="submit" class="btn btn-primary pull-right">Update Settings</button>
+          <button type="submit" class="btn btn-link pull-right">Cancel</button>
         </div>
       </form>
     </div>
