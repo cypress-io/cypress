@@ -470,6 +470,67 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
         findElByCoordinates = ($el) =>
 
+          coordsObj = (coords, $el) ->
+            {
+              coords: coords
+              $elToClick: $el
+            }
+
+          scrollWindowPastFixedElement = ($fixed) ->
+            height = $fixed.outerHeight()
+            width  = $fixed.outerWidth()
+            win.scrollBy(-width, -height)
+            if options.command
+              ## store the scrollBy to be used later in the iframe view
+              options.command.set "scrollBy", {x: -width, y: -height}
+
+          getElementWithFixedPosition = ($el) ->
+            ## return null if we're at body/html
+            ## cuz that means nothing has fixed position
+            return null if not $el or $el.is("body,html")
+
+            ## if we have fixed position return ourselves
+            if $el.css("position") is "fixed"
+              return $el
+
+            ## else recursively continue to walk up the parent node chain
+            getElementWithFixedPosition($el.parent())
+
+          getElementAtCoordinates = (coords) =>
+            ## accept options which disable actually ensuring the element
+            ## is clickable / in the foreground
+            ## this is helpful during css animations for instance where
+            ## you're trying to click a moving target. in that case we'll
+            ## just 'click' it for you and simulate everything related to
+            ## the click without verifying it is clickable. focus events
+            ## default actions, propagation, etc will still be respected
+            $elToClick = @getElementAtCoordinates(coords.x, coords.y)
+
+            try
+              @ensureDescendents $el, $elToClick, options.command
+            catch err
+              ## if $elToClick isnt a descendent then attempt to nudge the
+              ## window scrollBy based on the height of the covering element
+              ## (if its fixed position) until our element comes into view
+              if $fixed = getElementWithFixedPosition($elToClick)
+                scrollWindowPastFixedElement($fixed)
+
+                ## try again now that we've nudged the window's scroll
+                return getElementAtCoordinates(coords)
+
+              if options.command
+                options.command.snapshot()
+                options.command.set onConsole: ->
+                  obj = {}
+                  obj["Tried to Click"]     = $Cypress.Utils.getDomElements($el)
+                  obj["But its Covered By"] = $Cypress.Utils.getDomElements($elToClick)
+                  obj
+
+              options.error   = err
+              return @_retry(getCoords, options)
+
+            return coordsObj(coords, $elToClick)
+
           getCoords = =>
             ## use native scrollIntoView here so scrollable
             ## containers are automatically handled correctly
@@ -486,36 +547,9 @@ $Cypress.register "Actions", (Cypress, _, $) ->
             ## if we're forcing this click event
             ## just immediately send it up
             if options.force
-              return {
-                coords: coords
-                $elToClick: $el
-              }
+              return coordsObj(coords, $el)
 
-            ## accept options which disable actually ensuring the element
-            ## is clickable / in the foreground
-            ## this is helpful during css animations for instance where
-            ## you're trying to click a moving target. in that case we'll
-            ## just 'click' it for you and simulate everything related to
-            ## the click without verifying it is clickable. focus events
-            ## default actions, propagation, etc will still be respected
-            $elToClick = @getElementAtCoordinates(coords.x, coords.y)
-
-            try
-              @ensureDescendents $el, $elToClick, options.command
-            catch err
-              if options.command
-                options.command.set onConsole: ->
-                  obj = {}
-                  obj["Covered By"] = $Cypress.Utils.getDomElements($elToClick)
-                  obj
-
-              options.error   = err
-              return @_retry(getCoords, options)
-
-            return {
-              coords: coords
-              $elToClick: $elToClick
-            }
+            getElementAtCoordinates(coords)
 
           Promise.resolve(getCoords())
 

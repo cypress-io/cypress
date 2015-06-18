@@ -2537,10 +2537,12 @@ describe "$Cypress.Cy Actions Commands", ->
           ## get + click logs
           expect(logs.length).eq(2)
           expect(@log.get("error")).to.eq(err)
+          expect(@log.get("snapshot")).to.be.an("object") ## still snapshot during an error
           expect(err.message).to.include "Cannot call .click() on this element because it is being covered by another element: #{node}"
 
           console = @log.attributes.onConsole()
-          expect(console["Covered By"]).to.eq span.get(0)
+          expect(console["Tried to Click"]).to.eq btn.get(0)
+          expect(console["But its Covered By"]).to.eq span.get(0)
 
           done()
 
