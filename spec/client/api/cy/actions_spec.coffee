@@ -801,15 +801,33 @@ describe "$Cypress.Cy Actions Commands", ->
           done()
 
       it "throws when any member of the subject isnt a checkbox or radio", (done) ->
-        ## find a textare which should blow up
-        ## the textarea is the last member of the subject
-        @cy.get(":checkbox,:radio,#comments").check()
-
         @cy.on "fail", (err) ->
           expect(err.message).to.include ".check() can only be called on :checkbox and :radio! Your subject contains a: <textarea id=\"comments\"></textarea>"
           done()
 
+        ## find a textare which should blow up
+        ## the textarea is the last member of the subject
+        @cy.get(":checkbox,:radio,#comments").check()
+
       it "throws when any member of the subject isnt visible", (done) ->
+        chk = @cy.$(":checkbox").first().hide()
+
+        node = $Cypress.Utils.stringifyElement(chk.last())
+
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push @log
+
+        @cy.on "fail", (err) =>
+          expect(logs).to.have.length(chk.length + 1)
+          expect(@log.get("error")).to.eq(err)
+          expect(err.message).to.eq "cy.check() cannot be called on the non-visible element: #{node}"
+          done()
+
+        @cy.get(":checkbox:first").check()
+
+      it "still ensures visibility even during a noop", (done) ->
         chk = @cy.$(":checkbox")
         chk.show().last().hide()
 
@@ -918,6 +936,7 @@ describe "$Cypress.Cy Actions Commands", ->
             "Applied To": @log.get("$el").get(0)
             Elements: 1
             Note: "This checkbox was already checked. No operation took place."
+            Options: undefined
           }
 
       it "logs deltaOptions", ->
@@ -1114,6 +1133,7 @@ describe "$Cypress.Cy Actions Commands", ->
             "Applied To": @log.get("$el").get(0)
             Elements: 1
             Note: "This checkbox was already unchecked. No operation took place."
+            Options: undefined
           }
 
       it "logs deltaOptions", ->

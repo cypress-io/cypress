@@ -900,8 +900,6 @@ $Cypress.register "Actions", (Cypress, _, $) ->
                 Options: deltaOptions
               }
 
-        @ensureVisibility $el, command
-
         if not isAcceptableElement($el)
           node   = Cypress.Utils.stringifyElement($el)
           word   = Cypress.Utils.plural(options.$el, "contains", "is")
@@ -912,6 +910,8 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         ## then notify the user of this note
         ## and bail
         if isNoop($el)
+          ## still ensure visibility even if the command is noop
+          @ensureVisibility $el, command
           onConsole.Note = "This checkbox was already #{type}ed. No operation took place."
           return
         else
