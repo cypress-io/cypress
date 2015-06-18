@@ -606,6 +606,14 @@ describe "$Cypress.Cy XHR Commands", ->
           .wrap({foo: "bar"}).as("foo")
           .route(/foo/, "@bar")
 
+      _.each [undefined, null], (val) =>
+        it "requires response not be #{val}", (done) ->
+          @cy.on "fail", (err) ->
+            expect(err.message).to.include "cy.route() cannot accept an undefined or null response. It must be set to something, even an empty string will work."
+            done()
+
+          @cy.route(/foo/, val)
+
     describe ".log", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
