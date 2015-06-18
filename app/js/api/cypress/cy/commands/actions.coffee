@@ -319,6 +319,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         log: true
         force: false
         command: null
+        errorOnSelect: true
 
       @ensureDom(options.$el)
 
@@ -345,6 +346,9 @@ $Cypress.register "Actions", (Cypress, _, $) ->
             message: deltaOptions
             $el: $el
           })
+
+        if options.errorOnSelect and $el.is("select")
+          @throwErr "Cannot call .click() on a <select> element. Use cy.select() command instead to change the value.", options.command
 
         ## in order to simulate actual user behavior we need to do the following:
         ## 1. take our element and figure out its center coordinate
@@ -809,6 +813,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       @command("click", {
         $el: options.$el
         log: false
+        errorOnSelect: false ## prevent click errors since we want the select to be clicked
         command: options.command
         force: options.force
         timeout: options.timeout

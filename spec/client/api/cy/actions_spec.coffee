@@ -73,7 +73,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       select.click -> done()
 
-      @cy.get("select:first").click({force: true})
+      @cy.get("select:first").select("de_dust2", {force: true})
 
     describe "events", ->
       it "emits click event", (done) ->
@@ -2559,6 +2559,19 @@ describe "$Cypress.Cy Actions Commands", ->
           done()
 
         @cy.get("#overflow-auto-container").contains("quux").click()
+
+      it "throws when attempting to click a <select> element", (done) ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push log
+
+        @cy.on "fail", (err) ->
+          expect(logs.length).to.eq(2)
+          expect(err.message).to.eq "Cannot call .click() on a <select> element. Use cy.select() command instead to change the value."
+          done()
+
+        @cy.get("select:first").click()
 
     describe ".log", ->
       beforeEach ->
