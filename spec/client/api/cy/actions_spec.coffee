@@ -36,6 +36,58 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("select[name=movies]").select(["apoc", "br"]).then ($select) ->
         expect($select.val()).to.deep.eq ["apoc", "br"]
 
+    it "lists the input as the focused element", ->
+      select = @cy.$("select:first")
+
+      @cy.get("select:first").select("de_train").focused().then ($focused) ->
+        expect($focused.get(0)).to.eq select.get(0)
+
+    it "causes previous input to receive blur", (done) ->
+      @cy.$("input:text:first").blur -> done()
+
+      @cy
+        .get("input:text:first").type("foo")
+        .get("select:first").select("de_train")
+
+    it "can forcibly click even when being covered by another element", (done) ->
+      select  = $("<select />").attr("id", "select-covered-in-span").prependTo(@cy.$("body"))
+      span = $("<span>span on select</span>").css(position: "absolute", left: select.offset().left, top: select.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+      select.on "click", -> done()
+
+      @cy.get("#select-covered-in-span").select("foo", {force: true})
+
+    it "passes timeout and interval down to click", (done) ->
+      select  = $("<select />").attr("id", "select-covered-in-span").prependTo(@cy.$("body"))
+      span = $("<span>span on select</span>").css(position: "absolute", left: select.offset().left, top: select.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+      @cy.on "retry", (options) ->
+        expect(options.timeout).to.eq 1000
+        expect(options.interval).to.eq 60
+        done()
+
+      @cy.get("#select-covered-in-span").select("foobar", {timeout: 1000, interval: 60})
+
+    it "can forcibly click even when element is invisible", (done) ->
+      select = @cy.$("select:first").hide()
+
+      select.click -> done()
+
+      @cy.get("select:first").click({force: true})
+
+    describe "events", ->
+      it "emits click event", (done) ->
+        @cy.$("select[name=maps]").click -> done()
+        @cy.get("select[name=maps]").select("train")
+
+      it "emits change event", (done) ->
+        @cy.$("select[name=maps]").change -> done()
+        @cy.get("select[name=maps]").select("train")
+
+      it "emits focus event", (done) ->
+        @cy.$("select[name=maps]").one "focus", -> done()
+        @cy.get("select[name=maps]").select("train")
+
     describe "errors", ->
       beforeEach ->
         @allowErrors()
@@ -101,6 +153,57 @@ describe "$Cypress.Cy Actions Commands", ->
           done()
 
         @cy.get("select:first").select("foo")
+
+    describe ".log", ->
+      beforeEach ->
+        @Cypress.on "log", (@log) =>
+
+      it "logs out select", ->
+        @cy.get("select:first").select("de_dust2").then ->
+          expect(@log.get("name")).to.eq "select"
+
+      it "passes in $el", ->
+        @cy.get("select:first").select("de_dust2").then ($select) ->
+          expect(@log.get("$el")).to.eq $select
+
+      it "is not immediately ended", (done) ->
+        @cy.$("select:first").click =>
+          expect(@log.get("state")).to.eq("pending")
+          done()
+
+        @cy.get("select:first").select("de_dust2")
+
+      it "snpahots and ends", ->
+        @cy.get("select:first").select("de_dust2").then ->
+          expect(@log.get("state")).to.eq("success")
+          expect(@log.get("snapshot")).to.be.an("object")
+
+      it "#onConsole", ->
+        @cy.get("select:first").select("de_dust2").then ($select) ->
+          coords = @cy.getCenterCoordinates($select)
+          console = @log.attributes.onConsole()
+          expect(console.Command).to.eq("select")
+          expect(console.Selected).to.deep.eq ["de_dust2"]
+          expect(console["Applied To"]).to.eq $select.get(0)
+          expect(console.Coords.x).to.be.closeTo coords.x, 1
+          expect(console.Coords.y).to.be.closeTo coords.y, 1
+
+      it "logs only one select event", ->
+        logs = []
+        types = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+          types.push(log) if log.get("name") is "select"
+
+        @cy.get("select:first").select("de_dust2").then ->
+          expect(logs).to.have.length(2)
+          expect(types).to.have.length(1)
+
+      it "logs deltaOptions", ->
+        @cy.get("select:first").select("de_dust2", {force: true, timeout: 1000}).then ->
+          expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
+          expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
 
   context "#type", ->
     it "does not change the subject", ->
@@ -178,11 +281,11 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("#input-covered-in-span").type("foobar", {timeout: 1000, interval: 60})
 
     it "can forcibly click even when element is invisible", (done) ->
-      button = @cy.$("button:first").hide()
+      input = @cy.$("input:first").hide()
 
-      button.click -> done()
+      input.click -> done()
 
-      @cy.get("button:first").click({force: true})
+      @cy.get("input:first").click({force: true})
 
     # describe "input types", ->
     #   _.each ["password", "email", "number", "date", "week", "month", "time", "datetime", "datetime-local", "search", "url"], (type) ->

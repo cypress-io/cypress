@@ -728,7 +728,24 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         .return(subject)
 
     select: (subject, valueOrText, options = {}) ->
-      @ensureDom(subject)
+      _.defaults options,
+        $el: subject
+        log: true
+        force: false
+
+      @ensureDom(options.$el)
+
+      if options.log
+        ## figure out the options which actually change the behavior of clicks
+        deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: 50})
+
+        options.command = Cypress.command
+          message: deltaOptions
+          $el: options.$el
+          onConsole: ->
+            "Selected":   values
+            "Applied To": $Cypress.Utils.getDomElements(options.$el)
+            "Options":    deltaOptions
 
       ## if subject is a <select> el assume we are filtering down its
       ## options to a specific option first by value and then by text
@@ -741,18 +758,16 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       ## or texts and clear the previous selections which matches jQuery's
       ## behavior
 
-      if not subject.is("select")
-        node = Cypress.Utils.stringifyElement(subject)
+      if not options.$el.is("select")
+        node = Cypress.Utils.stringifyElement(options.$el)
         @throwErr ".select() can only be called on a <select>! Your subject is a: #{node}"
 
-      if (num = subject.length) and num > 1
+      if (num = options.$el.length) and num > 1
         @throwErr ".select() can only be called on a single <select>! Your subject contained #{num} elements!"
-
-      @ensureVisibility(subject)
 
       ## normalize valueOrText if its not an array
       valueOrText = [].concat(valueOrText)
-      multiple    = subject.prop("multiple")
+      multiple    = options.$el.prop("multiple")
 
       ## throw if we're not a multiple select and we've
       ## passed an array of values
@@ -760,7 +775,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         @throwErr ".select() was called with an array of arguments but does not have a 'multiple' attribute set!"
 
       values  = []
-      options = subject.children().map (index, el) ->
+      optionsObjects = options.$el.children().map (index, el) ->
         ## push the value in values array if its
         ## found within the valueOrText
         value = el.value
@@ -775,7 +790,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       ## if we couldn't find anything by value then attempt
       ## to find it by text and insert its value into values arr
       if not values.length
-        _.each options.get(), (obj, index) ->
+        _.each optionsObjects.get(), (obj, index) ->
           values.push(obj.value) if obj.text in valueOrText
 
       ## if we didnt set multiple to true and
@@ -783,17 +798,30 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       if not multiple and values.length > 1
         @throwErr(".select() matched than one option by value or text: #{valueOrText.join(", ")}")
 
-      subject.val(values)
+      @command("click", {
+        $el: options.$el
+        log: false
+        command: options.command
+        force: options.force
+        timeout: options.timeout
+        interval: options.interval
+      }).then ->
 
-      ## yup manually create this change event
-      ## 1.6.5. HTML event types
-      ## scroll down the 'change'
-      event = document.createEvent("HTMLEvents")
-      event.initEvent("change", true, false)
+        options.$el.val(values)
 
-      subject.get(0).dispatchEvent(event)
+        ## yup manually create this change event
+        ## 1.6.5. HTML event types
+        ## scroll down the 'change'
+        event = document.createEvent("HTMLEvents")
+        event.initEvent("change", true, false)
 
-      return subject
+        options.$el.get(0).dispatchEvent(event)
+
+        ## change events should be finished at this point!
+        ## so we can snapshot the current state of the DOM
+        options.command.snapshot().end() if options.command
+
+        return options.$el
 
   Cypress.addParentCommand
     focused: (options = {}) ->
