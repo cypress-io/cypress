@@ -166,6 +166,17 @@ describe "$Cypress.Cy Actions Commands", ->
         text = _.clean $div.text()
         expect(text).to.eq _.clean(oldText + "foo")
 
+    it "passes timeout and interval down to click", (done) ->
+      input  = $("<input />").attr("id", "input-covered-in-span").prependTo(@cy.$("body"))
+      span = $("<span>span on input</span>").css(position: "absolute", left: input.offset().left, top: input.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+      @cy.on "retry", (options) ->
+        expect(options.timeout).to.eq 1000
+        expect(options.interval).to.eq 60
+        done()
+
+      @cy.get("#input-covered-in-span").type("foobar", {timeout: 1000, interval: 60})
+
     # describe "input types", ->
     #   _.each ["password", "email", "number", "date", "week", "month", "time", "datetime", "datetime-local", "search", "url"], (type) ->
     #     it "accepts input [type=#{type}]", ->
@@ -427,10 +438,13 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get(":text:first").type("foo")
 
       it "snapshots after clicking", ->
-        @Cypress.on "log", (@log) =>
-
         @cy.get(":text:first").type("foo").then ->
           expect(@log.get("snapshot")).to.be.an("object")
+
+      it "logs deltaOptions", ->
+        @cy.get(":text:first").type("foo", {force: true, timeout: 1000}).then ->
+          expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
+          expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
 
     describe "errors", ->
       beforeEach ->
@@ -549,6 +563,17 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#input-covered-in-span").clear({force: true})
 
+    it "passes timeout and interval down to click", (done) ->
+      input  = $("<input />").attr("id", "input-covered-in-span").prependTo(@cy.$("body"))
+      span = $("<span>span on input</span>").css(position: "absolute", left: input.offset().left, top: input.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+      @cy.on "retry", (options) ->
+        expect(options.timeout).to.eq 1000
+        expect(options.interval).to.eq 60
+        done()
+
+      @cy.get("#input-covered-in-span").clear({timeout: 1000, interval: 60})
+
     describe "errors", ->
       beforeEach ->
         @allowErrors()
@@ -650,6 +675,9 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("#input-covered-in-span").clear()
 
     describe ".log", ->
+      beforeEach ->
+        @Cypress.on "log", (@log) =>
+
       it "logs immediately before resolving", (done) ->
         input = @cy.$("input:first")
 
@@ -662,10 +690,13 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("input:first").clear()
 
       it "snapshots after clicking", ->
-        @Cypress.on "log", (@log) =>
-
         @cy.get("input:first").clear().then ($input) ->
           expect(@log.get("snapshot")).to.be.an("object")
+
+      it "logs deltaOptions", ->
+        @cy.get("input:first").clear({force: true, timeout: 1000}).then ->
+          expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
+          expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
 
   context "#check", ->
     it "does not change the subject", ->
@@ -712,6 +743,17 @@ describe "$Cypress.Cy Actions Commands", ->
       checkbox.on "click", -> done()
 
       @cy.get("#checkbox-covered-in-span").check({force: true})
+
+    it "passes timeout and interval down to click", (done) ->
+      checkbox  = $("<input type='checkbox' />").attr("id", "checkbox-covered-in-span").prependTo(@cy.$("body"))
+      span = $("<span>span on checkbox</span>").css(position: "absolute", left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+      @cy.on "retry", (options) ->
+        expect(options.timeout).to.eq 1000
+        expect(options.interval).to.eq 60
+        done()
+
+      @cy.get("#checkbox-covered-in-span").check({timeout: 1000, interval: 60})
 
     describe "events", ->
       it "emits click event", (done) ->
@@ -878,6 +920,11 @@ describe "$Cypress.Cy Actions Commands", ->
             Note: "This checkbox was already checked. No operation took place."
           }
 
+      it "logs deltaOptions", ->
+        @cy.get("[name=colors][value=blue]").check({force: true, timeout: 1000}).then ->
+          expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
+          expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
+
   context "#uncheck", ->
     it "unchecks a checkbox", ->
       @cy.get("[name=birds][value=cockatoo]").uncheck().then ($checkbox) ->
@@ -907,6 +954,17 @@ describe "$Cypress.Cy Actions Commands", ->
       checkbox.on "click", -> done()
 
       @cy.get("#checkbox-covered-in-span").uncheck({force: true})
+
+    it "passes timeout and interval down to click", (done) ->
+      checkbox  = $("<input type='checkbox' />").attr("id", "checkbox-covered-in-span").prop("checked", true).prependTo(@cy.$("body"))
+      span = $("<span>span on checkbox</span>").css(position: "absolute", left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+      @cy.on "retry", (options) ->
+        expect(options.timeout).to.eq 1000
+        expect(options.interval).to.eq 60
+        done()
+
+      @cy.get("#checkbox-covered-in-span").uncheck({timeout: 1000, interval: 60})
 
     describe "events", ->
       it "emits click event", (done) ->
@@ -1057,6 +1115,11 @@ describe "$Cypress.Cy Actions Commands", ->
             Elements: 1
             Note: "This checkbox was already unchecked. No operation took place."
           }
+
+      it "logs deltaOptions", ->
+        @cy.get("[name=colors][value=blue]").check().uncheck({force: true, timeout: 1000}).then ->
+          expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
+          expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
 
   context "#submit", ->
     it "does not change the subject when default actions is prevented", ->
@@ -2519,3 +2582,9 @@ describe "$Cypress.Cy Actions Commands", ->
               }
             }
           ]
+
+      it "logs deltaOptions", ->
+        @cy.get("button:first").click({force: true, timeout: 1000}).then ->
+          expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
+          expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
+

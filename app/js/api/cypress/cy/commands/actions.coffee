@@ -338,7 +338,13 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         mdownEvt = mupEvt = clickEvt = null
 
         if options.log
-          options.command = Cypress.command({$el: $el})
+          ## figure out the options which actually change the behavior of clicks
+          deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: 50})
+
+          options.command = Cypress.command({
+            message: deltaOptions
+            $el: $el
+          })
 
         ## in order to simulate actual user behavior we need to do the following:
         ## 1. take our element and figure out its center coordinate
@@ -415,6 +421,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
               "Applied To":   $Cypress.Utils.getDomElements($el)
               "Elements":     $el.length
               "Coords":       coords
+              "Options":      deltaOptions
             }
 
             if $el.get(0) isnt $elToClick.get(0)
@@ -544,11 +551,16 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       @ensureDom(options.$el)
 
       if options.log
+        ## figure out the options which actually change the behavior of clicks
+        deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: 50})
+
         options.command = Cypress.command
+          message: deltaOptions
           $el: options.$el
           onConsole: ->
             "Typed":      sequence
             "Applied To": $Cypress.Utils.getDomElements(options.$el)
+            "Options":    deltaOptions
 
       @ensureVisibility(options.$el, options.command)
 
@@ -564,7 +576,14 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       ## click the element first to simulate focus
       ## and typical user behavior in case the window
       ## is out of focus
-      @command("click", {$el: options.$el, log: false, command: options.command, force: options.force}).then =>
+      @command("click", {
+        $el: options.$el
+        log: false
+        command: options.command
+        force: options.force
+        timeout: options.timeout
+        interval: options.interval
+      }).then =>
 
         multipleInputsAndNoSubmitElements = (form) ->
           inputs  = form.find("input")
@@ -674,11 +693,16 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         $el = $(el)
 
         if options.log
+          ## figure out the options which actually change the behavior of clicks
+          deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: 50})
+
           options.command = Cypress.command
+            message: deltaOptions
             $el: $el
             onConsole: ->
               "Applied To": $Cypress.Utils.getDomElements($el)
               "Elements":   $el.length
+              "Options":    deltaOptions
 
         node = Cypress.Utils.stringifyElement($el)
 
@@ -686,7 +710,14 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           word = Cypress.Utils.plural(subject, "contains", "is")
           @throwErr ".clear() can only be called on textarea or :text! Your subject #{word} a: #{node}", options.command
 
-        @command("type", "{selectall}{del}", {$el: $el, log: false, command: options.command, force: options.force}).then ->
+        @command("type", "{selectall}{del}", {
+          $el: $el
+          log: false
+          command: options.command
+          force: options.force
+          timeout: options.timeout
+          interval: options.interval
+        }).then ->
           options.command.snapshot().end() if options.command
 
           return null
@@ -858,9 +889,16 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           "Elements":     $el.length
 
         if options.log
+          ## figure out the options which actually change the behavior of clicks
+          deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: 50})
+
           command = Cypress.command
+            message: deltaOptions
             $el: $el
-            onConsole: -> onConsole
+            onConsole: ->
+              _.extend onConsole, {
+                Options: deltaOptions
+              }
 
         @ensureVisibility $el, command
 
@@ -886,7 +924,14 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         ## if we didnt pass in any values or our
         ## el's value is in the array then check it
         if not values.length or $el.val() in values
-          @command("click", {$el: $el, log: false, command: command, force: options.force}).then ->
+          @command("click", {
+            $el: $el
+            log: false
+            command: command
+            force: options.force
+            timeout: options.timeout
+            interval: options.interval
+          }).then ->
             command.snapshot().end() if command
 
             return null
