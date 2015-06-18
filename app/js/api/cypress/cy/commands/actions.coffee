@@ -775,23 +775,31 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         @throwErr ".select() was called with an array of arguments but does not have a 'multiple' attribute set!"
 
       values  = []
+      optionEls = []
       optionsObjects = options.$el.children().map (index, el) ->
         ## push the value in values array if its
         ## found within the valueOrText
         value = el.value
-        values.push(value) if value in valueOrText
+        optEl = $(el)
+
+        if value in valueOrText
+          optionEls.push optEl
+          values.push(value)
 
         ## return the elements text + value
         {
           value: value
-          text: $(el).text()
+          text: optEl.text()
+          $el: optEl
         }
 
       ## if we couldn't find anything by value then attempt
       ## to find it by text and insert its value into values arr
       if not values.length
         _.each optionsObjects.get(), (obj, index) ->
-          values.push(obj.value) if obj.text in valueOrText
+          if obj.text in valueOrText
+            optionEls.push obj.$el
+            values.push(obj.value)
 
       ## if we didnt set multiple to true and
       ## we have more than 1 option to set then blow up
@@ -805,23 +813,46 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         force: options.force
         timeout: options.timeout
         interval: options.interval
-      }).then ->
+      }).then( =>
 
-        options.$el.val(values)
+        ## TODO:
+        ## 1. test cancellation
+        ## 2. test passing optionEls to each directly
+        ## 3. update other tests using this Promise.each pattern
+        ## 4. test that force is always true
+        ## 5. test that command is not provided (undefined / null)
+        ## 6. test that option actually receives click event
+        ## 7. test that select still has focus (i think it already does have a test)
+        ## 8. test that multiple=true selects receive option event for each selected option
+        Promise
+          .resolve(optionEls) ## why cant we just pass these directly to .each?
+          .each (optEl) =>
+            @command("click", {
+              $el: optEl
+              log: false
+              force: true ## always force the click to happen on the <option>
+              timeout: options.timeout
+              interval: options.interval
+            })
+          .cancellable()
+          .then =>
+            ## reset the selects value after we've
+            ## fired all the proper click events
+            ## for the options
+            options.$el.val(values)
 
-        ## yup manually create this change event
-        ## 1.6.5. HTML event types
-        ## scroll down the 'change'
-        event = document.createEvent("HTMLEvents")
-        event.initEvent("change", true, false)
+            ## yup manually create this change event
+            ## 1.6.5. HTML event types
+            ## scroll down the 'change'
+            event = document.createEvent("HTMLEvents")
+            event.initEvent("change", true, false)
 
-        options.$el.get(0).dispatchEvent(event)
+            options.$el.get(0).dispatchEvent(event)
 
-        ## change events should be finished at this point!
-        ## so we can snapshot the current state of the DOM
-        options.command.snapshot().end() if options.command
-
-        return options.$el
+            ## change events should be finished at this point!
+            ## so we can snapshot the current state of the DOM
+            options.command.snapshot().end() if options.command
+      ).return(options.$el)
 
   Cypress.addParentCommand
     focused: (options = {}) ->
