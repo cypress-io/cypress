@@ -836,6 +836,13 @@ describe "$Cypress.Cy Querying Commands", ->
         .get("#contains-multiple-filter-match").contains("li", "Maintenance").then ($row) ->
           expect($row).to.have.class("active")
 
+    it "returns the parent node which contains content spanned across a child element and text node", ->
+      item = @cy.$("#upper .item")
+
+      @cy.contains("New York").then ($item) ->
+        expect($item).to.be.ok
+        expect($item.get(0)).to.eq item.get(0)
+
     describe "{exist: false}", ->
       it "returns null when no content exists", ->
         @cy.contains("alksjdflkasjdflkajsdf", {exist: false}).then ($el) ->

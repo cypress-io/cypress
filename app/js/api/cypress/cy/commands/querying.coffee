@@ -282,9 +282,22 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
         return $el
 
-      containsTextNode = ($el, text) ->
-        contents = $el.contents().filter( -> @nodeType is 3).text()
-        _.str.include(contents, text)
+      getFirstDeepestElement = (elements, index = 0) ->
+        ## iterate through all of the elements in pairs
+        ## and check if the next item in the array is a
+        ## descedent of the current. if it is continue
+        ## to recurse. if not, or there is no next item
+        ## then return the current
+        $current = elements.slice(index,     index + 1)
+        $next    = elements.slice(index + 1, index + 2)
+
+        return $current if not $next
+
+        ## does current contain next?
+        if $.contains($current.get(0), $next.get(0))
+          getFirstDeepestElement(elements, index + 1)
+        else
+          $current
 
       text = text.toString().replace /('|")/g, "\\$1"
 
@@ -303,9 +316,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
           $el = $(el)
           return log($el) if $el.is("input[type='submit'], button, a, label")
 
-        for el in elements.get()
-          $el = $(el)
-          return log($el) if containsTextNode($el, text)
+        return log getFirstDeepestElement(elements)
 
   Cypress.addChildCommand
     within: (subject, fn) ->
