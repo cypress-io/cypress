@@ -22,7 +22,7 @@
         <hr>
         <div class="settings-section">
           <h3>Test Folder</h3>
-          This directory is automatically scanned and watched
+          <span class="help-block">This directory is automatically scanned and watched</span>
           <div class="upload-container">
             <span>/tests/</span>
             <button class="btn btn-default btn-upload">Select Path...</button>
@@ -31,7 +31,8 @@
         <hr>
         <div class="settings-section">
           <h3>What's your base url?</h3>
-          This is a string that is automatically prepended to all cy.vists.
+          <span class="help-block">This is a string that is automatically prepended to all cy.vists.</span>
+          <input type="text" class="form-control" placeholder="http://localhost/app/">
         </div>
         <hr>
         <div class="settings-section">
