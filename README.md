@@ -19,3 +19,7 @@ When Cypress releases its public beta, it will open source the majority of the c
 Right now you have to be an early adopter to get a hold of Cypress. Visit [http://www.cypress.io](http://www.cypress.io) and get on our mailing list. We send periodic emails asking for additional adopters until we are ready for a public beta.
 
 The public beta is on track for later in 2015.
+
+### Contributors
+
+[Code of Conduct](../../wiki/code-of-conduct)
