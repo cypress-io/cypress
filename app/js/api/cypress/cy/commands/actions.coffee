@@ -6,10 +6,10 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
   focusable = "a[href],link[href],button,input,select,textarea,[tabindex]"
 
-  $.simulate.prototype.simulateKeySequence.defaults["{esc}"] = (rng, char, options) ->
-    keyOpts = {keyCode: 27, charCode: 27, which: 27}
-    _.each ["keydown", "keypress", "keyup"], (event) ->
-      options.$el.simulate event, _.extend({}, options.eventProps, keyOpts)
+  # $.simulate.prototype.simulateKeySequence.defaults["{esc}"] = (rng, char, options) ->
+  #   keyOpts = {keyCode: 27, charCode: 27, which: 27}
+  #   _.each ["keydown", "keypress", "keyup"], (event) ->
+  #     options.$el.simulate event, _.extend({}, options.eventProps, keyOpts)
 
   Cypress.addChildCommand
 
@@ -608,6 +608,9 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       if (num = options.$el.length) and num > 1
         @throwErr(".type() can only be called on a single textarea or :text! Your subject contained #{num} elements!", options.command)
 
+      ## blow up if its not finite or not a string?
+      ## allow blank strings for type
+
       options.sequence = sequence
 
       ## click the element first to simulate focus
@@ -707,7 +710,66 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         ## handle submit event handler here if we are pressing enter
         simulateSubmitHandler() if pressedEnter.test(sequence)
 
-        options.$el.simulate "key-sequence", options
+        simulateKey = (el, type, key) =>
+          event = new Event type, {
+            bubbles: true
+            cancelable: true
+          }
+
+          switch type
+            when "keypress"
+              charCodeAt = key.charCodeAt(0)
+
+              charCode = charCodeAt
+              keyCode  = charCodeAt
+              which    = charCodeAt
+            else
+              charCodeAt = key.toUpperCase().charCodeAt(0)
+
+              charCode = 0
+              keyCode  = charCodeAt
+              which    = charCodeAt
+
+          _.extend event, {
+            altKey: false
+            charCode: charCode
+            ctrlKey: false
+            detail: 0
+            keyCode: keyCode
+            layerX: 0
+            layerY: 0
+            location: 0
+            metaKey: false
+            pageX: 0
+            pageY: 0
+            repeat: false
+            shiftKey: false
+            view: @private("window")
+            which: which
+          }
+
+          el.dispatchEvent(event)
+
+        updateValue = (b, key) =>
+          b.text(key, "end")
+
+        typeKey = (el, b, key) ->
+          simulateKey(el, "keydown", key)
+          simulateKey(el, "keypress", key)
+          updateValue(b, key)
+          simulateKey(el, "keyup", key)
+
+        el = options.$el.get(0)
+
+        b = @bililite(el).bounds("selection")
+        if options.$el.is("[type=number]")
+          ## manually shift the caret to
+          ## the end of the element
+          len = b.length()
+          b._bounds = [len, len]
+
+        _.each options.sequence.split(""), (key) ->
+          typeKey(el, b, key)
 
         ## submit events should be finished at this point!
         ## so we can snapshot the current state of the DOM

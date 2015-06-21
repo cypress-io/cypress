@@ -298,6 +298,135 @@ describe "$Cypress.Cy Actions Commands", ->
     #         expect($input).to.have.value "1234"
     #         expect($input.get(0)).to.eq input.get(0)
 
+    describe "events", ->
+      it "receives keydown event", (done) ->
+        input = @cy.$(":text:first")
+
+        input.get(0).addEventListener "keydown", (e) =>
+          obj = _(e).pick("altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which")
+          expect(obj).to.deep.eq {
+            altKey: false
+            bubbles: true
+            cancelable: true
+            charCode: 0 ## deprecated
+            ctrlKey: false
+            detail: 0
+            keyCode: 65 ## deprecated but fired by chrome always uppercase in the ASCII table
+            layerX: 0
+            layerY: 0
+            location: 0
+            metaKey: false
+            pageX: 0
+            pageY: 0
+            repeat: false
+            shiftKey: false
+            type: "keydown"
+            view: @cy.private("window")
+            which: 65 ## deprecated but fired by chrome
+          }
+          done()
+
+        @cy.get(":text:first").type("a")
+
+      it "receives keypress event", (done) ->
+        input = @cy.$(":text:first")
+
+        input.get(0).addEventListener "keypress", (e) =>
+          obj = _(e).pick("altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which")
+          expect(obj).to.deep.eq {
+            altKey: false
+            bubbles: true
+            cancelable: true
+            charCode: 97 ## deprecated
+            ctrlKey: false
+            detail: 0
+            keyCode: 97 ## deprecated
+            layerX: 0
+            layerY: 0
+            location: 0
+            metaKey: false
+            pageX: 0
+            pageY: 0
+            repeat: false
+            shiftKey: false
+            type: "keypress"
+            view: @cy.private("window")
+            which: 97 ## deprecated
+          }
+          done()
+
+        @cy.get(":text:first").type("a")
+
+      it.only "receives keyup event", (done) ->
+        input = @cy.$(":text:first")
+
+        input.get(0).addEventListener "keyup", (e) =>
+          obj = _(e).pick("altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which")
+          expect(obj).to.deep.eq {
+            altKey: false
+            bubbles: true
+            cancelable: true
+            charCode: 0 ## deprecated
+            ctrlKey: false
+            detail: 0
+            keyCode: 65 ## deprecated but fired by chrome always uppercase in the ASCII table
+            layerX: 0
+            layerY: 0
+            location: 0
+            metaKey: false
+            pageX: 0
+            pageY: 0
+            repeat: false
+            shiftKey: false
+            type: "keyup"
+            view: @cy.private("window")
+            which: 65 ## deprecated but fired by chrome
+          }
+          done()
+
+        @cy.get(":text:first").type("a")
+
+      it "fires events in the correct order"
+
+      it "fires events for each key stroke"
+
+      it "does not fire keypress if keydown is defaultPrevented"
+
+    describe "value changing", ->
+      it "changes the elements value", ->
+        @cy.get(":text:first").type("a").then ($text) ->
+          expect($text).to.have.value("a")
+
+      it "changes the elements value for multiple keys", ->
+        @cy.get(":text:first").type("foo").then ($text) ->
+          expect($text).to.have.value("foo")
+
+      it "can change input[type=number] values", ->
+        @cy.get("#input-types [type=number").type("12").then ($text) ->
+          expect($text).to.have.value("12")
+
+      it "inserts text after existing text", ->
+        @cy.get(":text:first").invoke("val", "foo").type(" bar").then ($text) ->
+          expect($text).to.have.value("foo bar")
+
+      it.only "inserts text after existing text on input[type=number]", ->
+        @cy.get("#input-types [type=number").invoke("val", "12").type("34").then ($text) ->
+          expect($text).to.have.value("1234")
+
+      it "does not insert key when keydown is preventedDefault"
+
+      it "does not insert key when keypress is preventedDefault"
+
+    describe "change events fired (on blur)", ->
+      it "fires change event when element is blurred"
+
+      it "does not fire change event if value hasnt actually changed"
+
+    describe "caret position", ->
+      it "leaves caret at the end of the input"
+
+      it "always types at the end of the input"
+
     describe "{enter}", ->
       beforeEach ->
         @forms = @cy.$("#form-submits")

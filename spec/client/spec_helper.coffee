@@ -150,8 +150,8 @@ window.enterCommandTestingMode = (fixture = "html/dom") ->
     @Cypress.abort()
 
   after ->
-    @iframe.remove()
-    @Cypress.stop()
+    # @iframe.remove()
+    # @Cypress.stop()
 
 window.Fixtures = do ->
   createRunnables: (obj, suite) ->
