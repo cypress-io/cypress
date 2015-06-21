@@ -759,10 +759,31 @@ $Cypress.register "Actions", (Cypress, _, $) ->
           updateValue(b, key)
           simulateKey(el, "keyup", key)
 
+        isNothingRange = (b) ->
+          try
+            b._nativeWrap()
+          catch
+            return true
+
+          return false
+
         el = options.$el.get(0)
 
         b = @bililite(el).bounds("selection")
-        if options.$el.is("[type=number]")
+
+        type = options.$el.attr("type")
+
+        ## if our input is one of these, then
+        ## simulate each key stroke, ensure none
+        ## are defaultPrevented, but only change
+        ## the value once everything has been typed
+        # if /date|month|datetime|time/.test(type)
+          ## throw an error if value is invalid
+          ## use a switch/case here
+
+        ## is our bililite instance an instance of
+        ## nothing range?
+        if options.$el.is("input") and isNothingRange(b)
           ## manually shift the caret to
           ## the end of the element
           len = b.length()

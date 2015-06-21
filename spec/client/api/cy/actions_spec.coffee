@@ -402,16 +402,48 @@ describe "$Cypress.Cy Actions Commands", ->
           expect($text).to.have.value("foo")
 
       it "can change input[type=number] values", ->
-        @cy.get("#input-types [type=number").type("12").then ($text) ->
+        @cy.get("#input-types [type=number]").type("12").then ($text) ->
           expect($text).to.have.value("12")
 
       it "inserts text after existing text", ->
         @cy.get(":text:first").invoke("val", "foo").type(" bar").then ($text) ->
           expect($text).to.have.value("foo bar")
 
-      it.only "inserts text after existing text on input[type=number]", ->
-        @cy.get("#input-types [type=number").invoke("val", "12").type("34").then ($text) ->
+      it "inserts text after existing text on input[type=number]", ->
+        @cy.get("#input-types [type=number]").invoke("val", "12").type("34").then ($text) ->
           expect($text).to.have.value("1234")
+
+      it "can change input[type=email] values", ->
+        @cy.get("#input-types [type=email]").type("brian@foo.com").then ($text) ->
+          expect($text).to.have.value("brian@foo.com")
+
+      it "inserts text after existing text on input[type=email]", ->
+        @cy.get("#input-types [type=email]").invoke("val", "brian@foo.c").type("om").then ($text) ->
+          expect($text).to.have.value("brian@foo.com")
+
+      it "can change input[type=password] values", ->
+        @cy.get("#input-types [type=password]").type("password").then ($text) ->
+          expect($text).to.have.value("password")
+
+      it "inserts text after existing text on input[type=password]", ->
+        @cy.get("#input-types [type=password]").invoke("val", "pass").type("word").then ($text) ->
+          expect($text).to.have.value("password")
+
+      it "can change [contenteditable] values", ->
+        @cy.get("#input-types [contenteditable]").type("foo").then ($div) ->
+          expect($div).to.have.text("foo")
+
+      it "inserts text after existing text on [contenteditable]", ->
+        @cy.get("#input-types [contenteditable]").invoke("text", "foo").type(" bar").then ($text) ->
+          expect($text).to.have.text("foo bar")
+
+      # it.only "can change input[type=date] values", ->
+      #   @cy.get("#input-types [type=date").type("1986-03-14").then ($text) ->
+      #     expect($text).to.have.value("1986-03-14")
+
+      # it "inserts text after existing text on input[type=date]", ->
+      #   @cy.get("#input-types [type=date").invoke("val", "pass").type("word").then ($text) ->
+      #     expect($text).to.have.value("date")
 
       it "does not insert key when keydown is preventedDefault"
 
