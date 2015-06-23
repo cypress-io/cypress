@@ -1,4 +1,4 @@
-$Cypress.register "Waiting", (Cypress, _, $) ->
+$Cypress.register "Waiting", (Cypress, _, $, Promise) ->
 
   Cypress.addChildCommand
 

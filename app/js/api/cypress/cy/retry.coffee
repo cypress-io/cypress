@@ -1,4 +1,4 @@
-do ($Cypress, _) ->
+do ($Cypress, _, Promise) ->
 
   $Cypress.Cy.extend
     _retry: (fn, options) ->

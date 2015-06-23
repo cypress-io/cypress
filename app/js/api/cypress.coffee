@@ -1,4 +1,4 @@
-window.$Cypress = do ($, _, Backbone) ->
+window.$Cypress = do ($, _, Backbone, Promise) ->
 
   class $Cypress
     constructor: ->

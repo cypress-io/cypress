@@ -1,4 +1,4 @@
-$Cypress.register "Assertions", (Cypress, _, $) ->
+$Cypress.register "Assertions", (Cypress, _, $, Promise) ->
 
   bRe            = /(\[b\])(.+)(\[\\b\])/
   bTagOpen       = /\[b\]/g

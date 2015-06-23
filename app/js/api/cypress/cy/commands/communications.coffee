@@ -1,4 +1,4 @@
-$Cypress.register "Communications", (Cypress, _, $) ->
+$Cypress.register "Communications", (Cypress, _, $, Promise) ->
 
   Cypress.addParentCommand
     msg: ->

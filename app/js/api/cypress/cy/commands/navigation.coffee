@@ -1,4 +1,4 @@
-$Cypress.register "Navigation", (Cypress, _, $) ->
+$Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
   overrideRemoteLocationGetters = (cy, contentWindow) ->
     navigated = (attr, args) ->

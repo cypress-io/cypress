@@ -1,4 +1,4 @@
-$Cypress.register "Actions", (Cypress, _, $) ->
+$Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
   pressedEnter = /\{enter\}/
 
