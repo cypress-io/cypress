@@ -357,7 +357,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get(":text:first").type("a")
 
-      it.only "receives keyup event", (done) ->
+      it "receives keyup event", (done) ->
         input = @cy.$(":text:first")
 
         input.get(0).addEventListener "keyup", (e) =>
@@ -437,7 +437,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("#input-types [contenteditable]").invoke("text", "foo").type(" bar").then ($text) ->
           expect($text).to.have.text("foo bar")
 
-      # it.only "can change input[type=date] values", ->
+      # it "can change input[type=date] values", ->
       #   @cy.get("#input-types [type=date").type("1986-03-14").then ($text) ->
       #     expect($text).to.have.value("1986-03-14")
 
@@ -445,9 +445,32 @@ describe "$Cypress.Cy Actions Commands", ->
       #   @cy.get("#input-types [type=date").invoke("val", "pass").type("word").then ($text) ->
       #     expect($text).to.have.value("date")
 
-      it "does not insert key when keydown is preventedDefault"
+      it "does not fire keypress when keydown is preventedDefault", (done) ->
+        @cy.$(":text:first").get(0).addEventListener "keypress", (e) ->
+          done("should not have received keypress event")
 
-      it "does not insert key when keypress is preventedDefault"
+        @cy.$(":text:first").get(0).addEventListener "keydown", (e) ->
+          e.preventDefault()
+
+        @cy.get(":text:first").type("foo").then -> done()
+
+      it "does not insert key when keydown is preventedDefault", ->
+        @cy.$(":text:first").get(0).addEventListener "keydown", (e) ->
+          e.preventDefault()
+
+        @cy.get(":text:first").type("foo").then ($text) ->
+          expect($text).to.have.value("")
+
+      it "does not insert key when keypress is preventedDefault", ->
+        @cy.$(":text:first").get(0).addEventListener "keypress", (e) ->
+          e.preventDefault()
+
+        @cy.get(":text:first").type("foo").then ($text) ->
+          expect($text).to.have.value("")
+
+      it.only "can select all the text and delete", ->
+        @cy.get(":text:first").invoke("val", "1234").type("{selectall}{del}").type("foo").then ($text) ->
+          expect($text).to.have.value("foo")
 
     describe "change events fired (on blur)", ->
       it "fires change event when element is blurred"

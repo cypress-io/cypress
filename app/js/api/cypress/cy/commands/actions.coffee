@@ -6,6 +6,22 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
   focusable = "a[href],link[href],button,input,select,textarea,[tabindex]"
 
+  charsBetweenCurlyBraces = /({.+?})/
+
+  ## we need to actually still fire
+  ## the key events for deleting by
+  ## typing the "backspace key"
+  specialChars = {
+    "{selectall}": (b) ->
+      b.bounds('all').select()
+
+    "{del}": (b) ->
+      bounds = b.bounds()
+      if bounds[0] is bounds[1]
+        b.bounds(bounds[0], bounds[0] + 1)
+      b.text("", "end")
+  }
+
   # $.simulate.prototype.simulateKeySequence.defaults["{esc}"] = (rng, char, options) ->
   #   keyOpts = {keyCode: 27, charCode: 27, which: 27}
   #   _.each ["keydown", "keypress", "keyup"], (event) ->
@@ -752,12 +768,28 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
         updateValue = (b, key) =>
           b.text(key, "end")
+          # b.sendkeys(key)
 
         typeKey = (el, b, key) ->
-          simulateKey(el, "keydown", key)
-          simulateKey(el, "keypress", key)
-          updateValue(b, key)
+          if simulateKey(el, "keydown", key)
+            if simulateKey(el, "keypress", key)
+              updateValue(b, key)
           simulateKey(el, "keyup", key)
+
+        typeChars = (el, b, chars) ->
+          if charsBetweenCurlyBraces.test(chars)
+            ## slice off the first and last curly brace
+            handleSpecialChars(b, chars)
+          else
+            _.each chars, (char) ->
+              typeKey(el, b, char)
+
+        handleSpecialChars = (b, chars) =>
+          if fn = specialChars[chars]
+            fn.call(@, b)
+          else
+            seqs = _.keys(specialChars).join(", ")
+            @throwErr("Special character sequence: '#{chars}' is not recognized. Available sequences are: #{seqs}", options.command)
 
         isNothingRange = (b) ->
           try
@@ -783,14 +815,25 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
         ## is our bililite instance an instance of
         ## nothing range?
-        if options.$el.is("input") and isNothingRange(b)
-          ## manually shift the caret to
-          ## the end of the element
-          len = b.length()
-          b._bounds = [len, len]
+        if len = b.length()
+          bounds = [len, len]
+          if not _.isEqual(b._bounds, bounds)
+            el.bililiteRangeSelection = bounds
+            b._bounds = bounds
+        # if options.$el.is("input") and isNothingRange(b)
+        #   ## manually shift the caret to
+        #   ## the end of the element
+        #   len = b.length()
+        #   b._bounds = [len, len]
 
-        _.each options.sequence.split(""), (key) ->
-          typeKey(el, b, key)
+        ## should make each keystroke async to mimic
+        ## how keystrokes come into javascript naturally
+        _.each options.sequence.split(charsBetweenCurlyBraces), (chars) ->
+          typeChars(el, b, chars)
+
+        ## after typing be sure to clear all ranges
+        if sel = @private("window").getSelection()
+          sel.removeAllRanges()
 
         ## submit events should be finished at this point!
         ## so we can snapshot the current state of the DOM
