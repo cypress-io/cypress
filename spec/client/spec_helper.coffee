@@ -65,18 +65,15 @@ window.enterIntegrationTestingMode = (fixture, options = {}) ->
     @iframe.remove()
     @Cypress.stop()
 
-window.enterCommandTestingMode = (fixture = "html/dom") ->
+window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
   before ->
     @loadDom = _.bind(loadDom, @)
 
     @loadDom(fixture)
 
   beforeEach ->
-    @setup = (options = {}) =>
-      _.defaults options,
-        replaceIframeContents: true
-
-      if options.replaceIframeContents
+    @setup = (opts = {}) =>
+      if options.replaceIframeContents isnt false and opts.replaceIframeContents isnt false
         @iframe.contents().find("head").html(@head)
         @iframe.contents().find("body").html(@body)
 

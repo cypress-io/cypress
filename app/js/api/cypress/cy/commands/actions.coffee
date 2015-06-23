@@ -515,8 +515,12 @@ $Cypress.register "Actions", (Cypress, _, $) ->
               if $fixed = getElementWithFixedPosition($elToClick)
                 scrollWindowPastFixedElement($fixed)
 
+                retry = ->
+                  getCoords(false)
+
                 ## try again now that we've nudged the window's scroll
-                return getElementAtCoordinates(coords)
+                # return getElementAtCoordinates(coords)
+                return @_retry(retry, options)
 
               if options.command
                 options.command.snapshot()
@@ -531,7 +535,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
             return coordsObj(coords, $elToClick)
 
-          getCoords = =>
+          getCoords = (scrollIntoView = true) =>
             ## use native scrollIntoView here so scrollable
             ## containers are automatically handled correctly
 
@@ -540,7 +544,7 @@ $Cypress.register "Actions", (Cypress, _, $) ->
             ## and scrollBy the amount of distance between the center
             ## and the left of the element so it positions the center
             ## in the viewport
-            $el.get(0).scrollIntoView()
+            $el.get(0).scrollIntoView() if scrollIntoView
 
             coords = @getCoordinates($el)
 
