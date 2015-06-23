@@ -468,9 +468,13 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get(":text:first").type("foo").then ($text) ->
           expect($text).to.have.value("")
 
-      it.only "can select all the text and delete", ->
+      it "can select all the text and delete", ->
         @cy.get(":text:first").invoke("val", "1234").type("{selectall}{del}").type("foo").then ($text) ->
           expect($text).to.have.value("foo")
+
+      it "can select all [contenteditable] and delete", ->
+        @cy.get("#input-types [contenteditable]").invoke("text", "1234").type("{selectall}{del}").type("foo").then ($text) ->
+          expect($text).to.have.text("foo")
 
     describe "change events fired (on blur)", ->
       it "fires change event when element is blurred"

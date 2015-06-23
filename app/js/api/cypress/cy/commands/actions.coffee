@@ -581,6 +581,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         $el: subject
         log: true
         force: false
+        delay: 10
 
       @ensureDom(options.$el)
 
@@ -702,12 +703,15 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           ## to trigger the form submit event and when to also trigger
           ## the click event on the first 'submit' like element
 
+
+        ## TODO MAKE THIS A SPECIAL CALLBACK FUNCTION ONENTER
         ## handle submit event handler here if we are pressing enter
         # simulateSubmitHandler() if pressedEnter.test(options.chars)
 
         @Cypress.Keyboard.type({
           $el:    options.$el
           chars:  options.chars
+          delay:  options.delay
           window: @private("window")
           onNoMatchingSpecialChars: (chars, allChars) =>
             @throwErr("Special character sequence: '#{chars}' is not recognized. Available sequences are: #{allChars}", options.command)
