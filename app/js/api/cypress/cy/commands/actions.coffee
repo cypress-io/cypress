@@ -6,27 +6,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
   focusable = "a[href],link[href],button,input,select,textarea,[tabindex]"
 
-  charsBetweenCurlyBraces = /({.+?})/
-
-  ## we need to actually still fire
-  ## the key events for deleting by
-  ## typing the "backspace key"
-  specialChars = {
-    "{selectall}": (b) ->
-      b.bounds('all').select()
-
-    "{del}": (b) ->
-      bounds = b.bounds()
-      if bounds[0] is bounds[1]
-        b.bounds(bounds[0], bounds[0] + 1)
-      b.text("", "end")
-  }
-
-  # $.simulate.prototype.simulateKeySequence.defaults["{esc}"] = (rng, char, options) ->
-  #   keyOpts = {keyCode: 27, charCode: 27, which: 27}
-  #   _.each ["keydown", "keypress", "keyup"], (event) ->
-  #     options.$el.simulate event, _.extend({}, options.eventProps, keyOpts)
-
   Cypress.addChildCommand
 
     submit: (subject, options = {}) ->
@@ -595,7 +574,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         .cancellable()
         .return(options.$el)
 
-    type: (subject, sequence, options = {}) ->
+    type: (subject, chars, options = {}) ->
       ## allow the el we're typing into to be
       ## changed by options -- used by cy.clear()
       _.defaults options,
@@ -613,7 +592,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           message: deltaOptions
           $el: options.$el
           onConsole: ->
-            "Typed":      sequence
+            "Typed":      chars
             "Applied To": $Cypress.Utils.getDomElements(options.$el)
             "Options":    deltaOptions
 
@@ -627,7 +606,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       ## blow up if its not finite or not a string?
       ## allow blank strings for type
 
-      options.sequence = sequence
+      options.chars = chars
 
       ## click the element first to simulate focus
       ## and typical user behavior in case the window
@@ -724,122 +703,45 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           ## the click event on the first 'submit' like element
 
         ## handle submit event handler here if we are pressing enter
-        simulateSubmitHandler() if pressedEnter.test(sequence)
+        # simulateSubmitHandler() if pressedEnter.test(options.chars)
 
-        simulateKey = (el, type, key) =>
-          event = new Event type, {
-            bubbles: true
-            cancelable: true
-          }
+        @Cypress.Keyboard.type({
+          $el:    options.$el
+          chars:  options.chars
+          window: @private("window")
+          onNoMatchingSpecialChars: (chars, allChars) =>
+            @throwErr("Special character sequence: '#{chars}' is not recognized. Available sequences are: #{allChars}", options.command)
+        }).then ->
+          ## submit events should be finished at this point!
+          ## so we can snapshot the current state of the DOM
+          options.command.snapshot().end() if options.command
 
-          switch type
-            when "keypress"
-              charCodeAt = key.charCodeAt(0)
+          return options.$el
 
-              charCode = charCodeAt
-              keyCode  = charCodeAt
-              which    = charCodeAt
-            else
-              charCodeAt = key.toUpperCase().charCodeAt(0)
+        # el = options.$el.get(0)
 
-              charCode = 0
-              keyCode  = charCodeAt
-              which    = charCodeAt
+        # b = @bililite(el).bounds("selection")
 
-          _.extend event, {
-            altKey: false
-            charCode: charCode
-            ctrlKey: false
-            detail: 0
-            keyCode: keyCode
-            layerX: 0
-            layerY: 0
-            location: 0
-            metaKey: false
-            pageX: 0
-            pageY: 0
-            repeat: false
-            shiftKey: false
-            view: @private("window")
-            which: which
-          }
-
-          el.dispatchEvent(event)
-
-        updateValue = (b, key) =>
-          b.text(key, "end")
-          # b.sendkeys(key)
-
-        typeKey = (el, b, key) ->
-          if simulateKey(el, "keydown", key)
-            if simulateKey(el, "keypress", key)
-              updateValue(b, key)
-          simulateKey(el, "keyup", key)
-
-        typeChars = (el, b, chars) ->
-          if charsBetweenCurlyBraces.test(chars)
-            ## slice off the first and last curly brace
-            handleSpecialChars(b, chars)
-          else
-            _.each chars, (char) ->
-              typeKey(el, b, char)
-
-        handleSpecialChars = (b, chars) =>
-          if fn = specialChars[chars]
-            fn.call(@, b)
-          else
-            seqs = _.keys(specialChars).join(", ")
-            @throwErr("Special character sequence: '#{chars}' is not recognized. Available sequences are: #{seqs}", options.command)
-
-        isNothingRange = (b) ->
-          try
-            b._nativeWrap()
-          catch
-            return true
-
-          return false
-
-        el = options.$el.get(0)
-
-        b = @bililite(el).bounds("selection")
-
-        type = options.$el.attr("type")
-
-        ## if our input is one of these, then
-        ## simulate each key stroke, ensure none
-        ## are defaultPrevented, but only change
-        ## the value once everything has been typed
-        # if /date|month|datetime|time/.test(type)
-          ## throw an error if value is invalid
-          ## use a switch/case here
+        # type = options.$el.attr("type")
 
         ## is our bililite instance an instance of
         ## nothing range?
-        if len = b.length()
-          bounds = [len, len]
-          if not _.isEqual(b._bounds, bounds)
-            el.bililiteRangeSelection = bounds
-            b._bounds = bounds
+        # if len = b.length()
+        #   bounds = [len, len]
+        #   if not _.isEqual(b._bounds, bounds)
+        #     el.bililiteRangeSelection = bounds
+        #     b._bounds = bounds
         # if options.$el.is("input") and isNothingRange(b)
         #   ## manually shift the caret to
         #   ## the end of the element
         #   len = b.length()
         #   b._bounds = [len, len]
 
-        ## should make each keystroke async to mimic
-        ## how keystrokes come into javascript naturally
-        _.each options.sequence.split(charsBetweenCurlyBraces), (chars) ->
-          typeChars(el, b, chars)
+        # _.each options.sequence.split(charsBetweenCurlyBraces), (chars) ->
+        #   typeChars(el, b, chars)
 
-        ## after typing be sure to clear all ranges
-        if sel = @private("window").getSelection()
-          sel.removeAllRanges()
-
-        ## submit events should be finished at this point!
-        ## so we can snapshot the current state of the DOM
-        options.command.snapshot().end() if options.command
-
-        return options.$el
+        # if sel = @private("window").getSelection()
+          # sel.removeAllRanges()
 
     clear: (subject, options = {}) ->
       ## what about other types of inputs besides just text?
