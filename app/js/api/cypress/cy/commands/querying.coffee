@@ -303,7 +303,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
       ## find elements by the :contains psuedo selector
       ## and any submit inputs with the attributeContainsWord selector
-      selector = "#{filter}:contains('#{text}'), #{filter}[type='submit'][value~='#{text}']"
+      selector = "#{filter}:not(script):contains('#{text}'), #{filter}[type='submit'][value~='#{text}']"
 
       @command("get", selector, options).then (elements) ->
         return log(null) if not elements
