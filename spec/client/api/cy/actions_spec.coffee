@@ -468,13 +468,106 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get(":text:first").type("foo").then ($text) ->
           expect($text).to.have.value("")
 
-      it "can select all the text and delete", ->
-        @cy.get(":text:first").invoke("val", "1234").type("{selectall}{del}").type("foo").then ($text) ->
-          expect($text).to.have.value("foo")
+    describe "specialChars", ->
+      context "{leftarrow}", ->
+        it "can move the cursor from the end to end - 1", ->
+          @cy.get(":text:first").invoke("val", "bar").type("{leftarrow}n").then ($input) ->
+            expect($input).to.have.value("banr")
 
-      it "can select all [contenteditable] and delete", ->
-        @cy.get("#input-types [contenteditable]").invoke("text", "1234").type("{selectall}{del}").type("foo").then ($text) ->
-          expect($text).to.have.text("foo")
+        it "does not move the cursor if already at bounds 0", ->
+          @cy.get(":text:first").invoke("val", "bar").type("{selectall}{leftarrow}n").then ($input) ->
+            expect($input).to.have.value("nbar")
+
+        it "sets the cursor to the left bounds", ->
+          @cy
+            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
+              ## select the 'a' character
+              b = bililiteRange($input.get(0))
+              b.bounds([1, 2]).select()
+            .get(":text:first").type("{leftarrow}n").then ($input) ->
+              expect($input).to.have.value("bnar")
+
+        it "sets the cursor to the very beginning", ->
+          @cy
+            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
+              ## select the 'a' character
+              b = bililiteRange($input.get(0))
+              b.bounds("all").select()
+            .get(":text:first").type("{leftarrow}n").then ($input) ->
+              expect($input).to.have.value("nbar")
+
+      context "{rightarrow}", ->
+        it "can move the cursor from the beginning to beginning + 1", ->
+          @cy.get(":text:first").invoke("val", "bar").focus().then ($input) ->
+            ## select the all characters
+            b = bililiteRange($input.get(0))
+            b.bounds("start").select()
+          .get(":text:first").type("{rightarrow}n").then ($input) ->
+            expect($input).to.have.value("bnar")
+
+        it "does not move the cursor if already at end of bounds", ->
+          @cy.get(":text:first").invoke("val", "bar").type("{selectall}{rightarrow}n").then ($input) ->
+            expect($input).to.have.value("barn")
+
+        it "sets the cursor to the rights bounds", ->
+          @cy
+            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
+              ## select the 'a' character
+              b = bililiteRange($input.get(0))
+              b.bounds([1, 2]).select()
+            .get(":text:first").type("{rightarrow}n").then ($input) ->
+              expect($input).to.have.value("banr")
+
+        it "sets the cursor to the very beginning", ->
+          @cy
+            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
+              ## select the all characters
+              b = bililiteRange($input.get(0))
+              b.bounds("all").select()
+            .get(":text:first").type("{leftarrow}n").then ($input) ->
+              expect($input).to.have.value("nbar")
+
+      context "{selectall}{del}", ->
+        it "can select all the text and delete", ->
+          @cy.get(":text:first").invoke("val", "1234").type("{selectall}{del}").type("foo").then ($text) ->
+            expect($text).to.have.value("foo")
+
+        it "can select all [contenteditable] and delete", ->
+          @cy.get("#input-types [contenteditable]").invoke("text", "1234").type("{selectall}{del}").type("foo").then ($div) ->
+            expect($div).to.have.text("foo")
+
+      context "{enter}", ->
+        it "sets which and keyCode to 13 and prevents EOL insertion", (done) ->
+          @cy.$("#input-types textarea").on "keypress", _.after 2, (e) ->
+            done("should not have received keypress event")
+
+          @cy.$("#input-types textarea").on "keydown", _.after 2, (e) ->
+            expect(e.which).to.eq 13
+            expect(e.keyCode).to.eq 13
+            e.preventDefault()
+
+          @cy.get("#input-types textarea").invoke("val", "foo").type("d{enter}").then ($textarea) ->
+            expect($textarea).to.have.value("food")
+            done()
+
+        it "sets which and keyCode and charCode to 13 and prevents EOL insertion", (done) ->
+          @cy.$("#input-types textarea").on "keypress", _.after 2, (e) ->
+            expect(e.which).to.eq 13
+            expect(e.keyCode).to.eq 13
+            expect(e.charCode).to.eq 13
+            e.preventDefault()
+
+          @cy.get("#input-types textarea").invoke("val", "foo").type("d{enter}").then ($textarea) ->
+            expect($textarea).to.have.value("food")
+            done()
+
+        it "inserts new line into textarea", ->
+          @cy.get("#input-types textarea").invoke("val", "foo").type("bar{enter}baz{enter}quux").then ($textarea) ->
+            expect($textarea).to.have.value("foobar\nbaz\nquux")
+
+        it "inserts new line into [contenteditable]", ->
+          @cy.get("#input-types [contenteditable]").invoke("text", "foo").type("bar{enter}baz{enter}quux").then ($div) ->
+            expect($div).to.have.text("foobar\nbaz\nquux")
 
     describe "change events fired (on blur)", ->
       it "fires change event when element is blurred"
@@ -835,6 +928,8 @@ describe "$Cypress.Cy Actions Commands", ->
           done()
 
         @cy.inspect().get("#input-covered-in-span").type("foo")
+
+      it "throws when special characters dont exist"
 
   context "#clear", ->
     it "does not change the subject", ->

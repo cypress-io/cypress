@@ -4,42 +4,105 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
 
   return {
     specialChars: {
-      "{selectall}": (rng) ->
+      "{selectall}": (el, rng) ->
         rng.bounds('all').select()
 
       ## we need to actually still fire
       ## the key events for deleting by
       ## typing the "backspace key"
-      "{del}": (rng) ->
+      "{del}": (el, rng) ->
         bounds = rng.bounds()
-        if bounds[0] is bounds[1]
+        if @boundsAreEqual(bounds)
           rng.bounds(bounds[0], bounds[0] + 1)
         rng.text("", "end")
+
+      "{backspace}": (el, rng) ->
+
+      "{esc}": (el, rng) ->
+
+      "{tab}": (el, rng) ->
+
+      "{enter}": (el, rng, chars, options) ->
+        options.charCode = 13
+        @ensureKey el, "\n", options, ->
+          rng.insertEOL()
+          #options.onEnterPressed
+
+      "{leftarrow}": (el, rng, chars, options) ->
+        bounds = rng.bounds()
+        options.charCode = 1234
+        @ensureKey el, null, options, ->
+          switch
+            when @boundsAreEqual(bounds)
+              ## if bounds are equal move the caret
+              ## 1 to the left
+              left  = bounds[0] - 1
+              right = left
+            when bounds[0] > 0
+              ## just set the cursor back to the left
+              ## position
+              left = bounds[0]
+              right = left
+            else
+              left = 0
+              right = 0
+
+          rng.bounds([left, right])
+
+      "{rightarrow}": (el, rng, chars, options) ->
+        bounds = rng.bounds()
+        options.charCode = 1234
+        @ensureKey el, null, options, ->
+          switch
+            when @boundsAreEqual(bounds)
+              ## if bounds are equal move the caret
+              ## 1 to the right
+              left  = bounds[0] + 1
+              right = left
+            when bounds[1] > 0
+              ## just set the cursor back to the left
+              ## position
+              right = bounds[1]
+              left = right
+
+          rng.bounds([left, right])
+
+      "{{}": (el, rng) ->
     }
+
+    boundsAreEqual: (bounds) ->
+      bounds[0] is bounds[1]
 
     type: (options = {}) ->
       new Promise (resolve, reject) =>
         _.defaults options,
           delay: 10
           onNoMatchingSpecialChars: ->
+          onEnterPressed: ->
 
         el = options.$el.get(0)
 
+        ## if el does not have this property
+        bililiteRangeSelection = el.bililiteRangeSelection
         rng = bililiteRange(el).bounds("selection")
 
-        ## if our input is one of these, then
-        ## simulate each key stroke, ensure none
-        ## are defaultPrevented, but only change
-        ## the value once everything has been typed
-        # if /date|month|datetime|time/.test(type)
-          ## throw an error if value is invalid
-          ## use a switch/case here
+        ## restore the bounds if our el already has this
+        if bililiteRangeSelection
+          rng.bounds(bililiteRangeSelection)
+        else
+          ## if our input is one of these, then
+          ## simulate each key stroke, ensure none
+          ## are defaultPrevented, but only change
+          ## the value once everything has been typed
+          # if /date|month|datetime|time/.test(type)
+            ## throw an error if value is invalid
+            ## use a switch/case here
 
-        if len = rng.length()
-          bounds = [len, len]
-          if not _.isEqual(rng._bounds, bounds)
-            el.bililiteRangeSelection = bounds
-            rng._bounds = bounds
+          if len = rng.length()
+            bounds = [len, len]
+            if not _.isEqual(rng._bounds, bounds)
+              el.bililiteRangeSelection = bounds
+              rng._bounds = bounds
 
         ## should make each keystroke async to mimic
         ## how keystrokes come into javascript naturally
@@ -55,26 +118,26 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
     typeChars: (el, rng, chars, options) ->
       if charsBetweenCurlyBraces.test(chars)
         ## slice off the first and last curly brace
-        @handleSpecialChars(rng, chars, options)
+        @handleSpecialChars(el, rng, chars, options)
       else
         _.each chars, (char) =>
           @typeKey(el, rng, char, options)
 
-    simulateKey: (el, type, key, options) ->
-      event = new Event type, {
+    simulateKey: (el, eventType, key, options) ->
+      event = new Event eventType, {
         bubbles: true
         cancelable: true
       }
 
-      switch type
+      switch eventType
         when "keypress"
-          charCodeAt = key.charCodeAt(0)
+          charCodeAt = options.charCode ? key.charCodeAt(0)
 
           charCode = charCodeAt
           keyCode  = charCodeAt
           which    = charCodeAt
         else
-          charCodeAt = key.toUpperCase().charCodeAt(0)
+          charCodeAt = options.charCode ? key.toUpperCase().charCodeAt(0)
 
           charCode = 0
           keyCode  = charCodeAt
@@ -105,14 +168,18 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       # rng.sendkeys(key)
 
     typeKey: (el, rng, key, options) ->
+      @ensureKey el, key, options, ->
+        @updateValue(rng, key)
+
+    ensureKey: (el, key, options, fn) ->
       if @simulateKey(el, "keydown", key, options)
         if @simulateKey(el, "keypress", key, options)
-          @updateValue(rng, key)
+          fn.call(@)
       @simulateKey(el, "keyup", key, options)
 
-    handleSpecialChars: (rng, chars, options) ->
+    handleSpecialChars: (el, rng, chars, options) ->
       if fn = @specialChars[chars]
-        fn.call(@, rng)
+        fn.apply(@, arguments)
       else
         allChars = _.keys(@specialChars).join(", ")
         options.onNoMatchingSpecialChars(chars, allChars)
