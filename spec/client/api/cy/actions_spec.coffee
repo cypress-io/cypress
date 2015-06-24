@@ -468,7 +468,77 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get(":text:first").type("foo").then ($text) ->
           expect($text).to.have.value("")
 
-    describe "specialChars", ->
+    describe.only "specialChars", ->
+      context "{backspace}", ->
+        it "backspaces character to the left", ->
+          @cy.get(":text:first").invoke("val", "bar").type("{leftarrow}{backspace}").then ($input) ->
+            expect($input).to.have.value("br")
+
+        it "can backspace a selection range of characters", ->
+          @cy
+            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
+              ## select the 'ar' characters
+              b = bililiteRange($input.get(0))
+              b.bounds([1, 3]).select()
+            .get(":text:first").type("{backspace}").then ($input) ->
+              expect($input).to.have.value("b")
+
+        it "sets which and keyCode to 8 and does not fire keypress events", (done) ->
+          @cy.$(":text:first").on "keypress", ->
+            done("should not have received keypress")
+
+          @cy.$(":text:first").on "keydown", _.after 2, (e) ->
+            expect(e.which).to.eq 8
+            expect(e.keyCode).to.eq 8
+            done()
+
+          @cy.get(":text:first").invoke("val", "ab").type("{leftarrow}{backspace}").then ($input) ->
+            done()
+
+        it "can prevent default backspace movement", (done) ->
+          @cy.$(":text:first").on "keydown", (e) ->
+            if e.keyCode is 8
+              e.preventDefault()
+
+          @cy.get(":text:first").invoke("val", "foo").type("{leftarrow}{backspace}").then ($input) ->
+            expect($input).to.have.value("foo")
+            done()
+
+      context "{del}", ->
+        it "deletes character to the right", ->
+          @cy.get(":text:first").invoke("val", "bar").type("{leftarrow}{del}").then ($input) ->
+            expect($input).to.have.value("ba")
+
+        it "can delete a selection range of characters", ->
+          @cy
+            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
+              ## select the 'ar' characters
+              b = bililiteRange($input.get(0))
+              b.bounds([1, 3]).select()
+            .get(":text:first").type("{del}").then ($input) ->
+              expect($input).to.have.value("b")
+
+        it "sets which and keyCode to 46 and does not fire keypress events", (done) ->
+          @cy.$(":text:first").on "keypress", ->
+            done("should not have received keypress")
+
+          @cy.$(":text:first").on "keydown", _.after 2, (e) ->
+            expect(e.which).to.eq 46
+            expect(e.keyCode).to.eq 46
+            done()
+
+          @cy.get(":text:first").invoke("val", "ab").type("{leftarrow}{del}").then ($input) ->
+            done()
+
+        it "can prevent default del movement", (done) ->
+          @cy.$(":text:first").on "keydown", (e) ->
+            if e.keyCode is 46
+              e.preventDefault()
+
+          @cy.get(":text:first").invoke("val", "foo").type("{leftarrow}{del}").then ($input) ->
+            expect($input).to.have.value("foo")
+            done()
+
       context "{leftarrow}", ->
         it "can move the cursor from the end to end - 1", ->
           @cy.get(":text:first").invoke("val", "bar").type("{leftarrow}n").then ($input) ->
@@ -560,7 +630,7 @@ describe "$Cypress.Cy Actions Commands", ->
           @cy.get(":text:first").invoke("val", "ab").type("{rightarrow}").then ($input) ->
             done()
 
-        it.only "can prevent default left arrow movement", (done) ->
+        it "can prevent default right arrow movement", (done) ->
           @cy.$(":text:first").on "keydown", (e) ->
             if e.keyCode is 39
               e.preventDefault()

@@ -7,16 +7,29 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       "{selectall}": (el, rng) ->
         rng.bounds('all').select()
 
-      ## we need to actually still fire
-      ## the key events for deleting by
-      ## typing the "backspace key"
-      "{del}": (el, rng) ->
+      ## charCode = 46
+      ## no keyPress
+      ## yes input
+      "{del}": (el, rng, options) ->
         bounds = rng.bounds()
         if @boundsAreEqual(bounds)
-          rng.bounds(bounds[0], bounds[0] + 1)
-        rng.text("", "end")
+          rng.bounds([bounds[0], bounds[0] + 1])
+        options.charCode = 46
+        options.keyPress = false
+        @ensureKey el, null, options, ->
+          rng.text("", "end")
 
-      "{backspace}": (el, rng) ->
+      ## charCode = 8
+      ## no keyPress
+      ## yes input
+      "{backspace}": (el, rng, options) ->
+        bounds = rng.bounds()
+        if @boundsAreEqual(bounds)
+          rng.bounds([bounds[0] - 1, bounds[0]])
+        options.charCode = 8
+        options.keyPress = false
+        @ensureKey el, null, options, ->
+          rng.text("", "end")
 
       "{esc}": (el, rng) ->
 
@@ -24,13 +37,13 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
 
       "{{}": (el, rng) ->
 
-      "{enter}": (el, rng, chars, options) ->
+      "{enter}": (el, rng, options) ->
         options.charCode = 13
         @ensureKey el, "\n", options, ->
           rng.insertEOL()
           #options.onEnterPressed
 
-      "{leftarrow}": (el, rng, chars, options) ->
+      "{leftarrow}": (el, rng, options) ->
         bounds = rng.bounds()
         options.charCode = 37
         options.keyPress = false
@@ -52,7 +65,7 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
 
           rng.bounds([left, right])
 
-      "{rightarrow}": (el, rng, chars, options) ->
+      "{rightarrow}": (el, rng, options) ->
         bounds = rng.bounds()
         options.charCode = 39
         options.keyPress = false
@@ -187,7 +200,7 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       options = _.clone(options)
 
       if fn = @specialChars[chars]
-        fn.call(@, el, rng, chars, options)
+        fn.call(@, el, rng, options)
       else
         allChars = _.keys(@specialChars).join(", ")
         options.onNoMatchingSpecialChars(chars, allChars)
