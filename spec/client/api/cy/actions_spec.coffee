@@ -496,6 +496,27 @@ describe "$Cypress.Cy Actions Commands", ->
             .get(":text:first").type("{leftarrow}n").then ($input) ->
               expect($input).to.have.value("nbar")
 
+        it "sets which and keyCode to 37 and does not fire keypress events", (done) ->
+          @cy.$(":text:first").on "keypress", ->
+            done("should not have received keypress")
+
+          @cy.$(":text:first").on "keydown", (e) ->
+            expect(e.which).to.eq 37
+            expect(e.keyCode).to.eq 37
+            done()
+
+          @cy.get(":text:first").invoke("val", "ab").type("{leftarrow}").then ($input) ->
+            done()
+
+        it "can prevent default left arrow movement", (done) ->
+          @cy.$(":text:first").on "keydown", (e) ->
+            if e.keyCode is 37
+              e.preventDefault()
+
+          @cy.get(":text:first").invoke("val", "foo").type("{leftarrow}d").then ($input) ->
+            expect($input).to.have.value("food")
+            done()
+
       context "{rightarrow}", ->
         it "can move the cursor from the beginning to beginning + 1", ->
           @cy.get(":text:first").invoke("val", "bar").focus().then ($input) ->
@@ -526,6 +547,27 @@ describe "$Cypress.Cy Actions Commands", ->
               b.bounds("all").select()
             .get(":text:first").type("{leftarrow}n").then ($input) ->
               expect($input).to.have.value("nbar")
+
+        it "sets which and keyCode to 39 and does not fire keypress events", (done) ->
+          @cy.$(":text:first").on "keypress", ->
+            done("should not have received keypress")
+
+          @cy.$(":text:first").on "keydown", (e) ->
+            expect(e.which).to.eq 39
+            expect(e.keyCode).to.eq 39
+            done()
+
+          @cy.get(":text:first").invoke("val", "ab").type("{rightarrow}").then ($input) ->
+            done()
+
+        it.only "can prevent default left arrow movement", (done) ->
+          @cy.$(":text:first").on "keydown", (e) ->
+            if e.keyCode is 39
+              e.preventDefault()
+
+          @cy.get(":text:first").invoke("val", "foo").type("{leftarrow}{rightarrow}d").then ($input) ->
+            expect($input).to.have.value("fodo")
+            done()
 
       context "{selectall}{del}", ->
         it "can select all the text and delete", ->

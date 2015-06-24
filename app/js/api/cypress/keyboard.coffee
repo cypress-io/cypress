@@ -22,6 +22,8 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
 
       "{tab}": (el, rng) ->
 
+      "{{}": (el, rng) ->
+
       "{enter}": (el, rng, chars, options) ->
         options.charCode = 13
         @ensureKey el, "\n", options, ->
@@ -30,7 +32,8 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
 
       "{leftarrow}": (el, rng, chars, options) ->
         bounds = rng.bounds()
-        options.charCode = 1234
+        options.charCode = 37
+        options.keyPress = false
         @ensureKey el, null, options, ->
           switch
             when @boundsAreEqual(bounds)
@@ -51,7 +54,8 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
 
       "{rightarrow}": (el, rng, chars, options) ->
         bounds = rng.bounds()
-        options.charCode = 1234
+        options.charCode = 39
+        options.keyPress = false
         @ensureKey el, null, options, ->
           switch
             when @boundsAreEqual(bounds)
@@ -59,15 +63,13 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
               ## 1 to the right
               left  = bounds[0] + 1
               right = left
-            when bounds[1] > 0
+            else
               ## just set the cursor back to the left
               ## position
               right = bounds[1]
               left = right
 
           rng.bounds([left, right])
-
-      "{{}": (el, rng) ->
     }
 
     boundsAreEqual: (bounds) ->
@@ -124,6 +126,10 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
           @typeKey(el, rng, char, options)
 
     simulateKey: (el, eventType, key, options) ->
+      ## bail if we've said not to fire a keyPress
+      if eventType is "keypress" and options.keyPress is false
+        return true
+
       event = new Event eventType, {
         bubbles: true
         cancelable: true
@@ -178,8 +184,10 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       @simulateKey(el, "keyup", key, options)
 
     handleSpecialChars: (el, rng, chars, options) ->
+      options = _.clone(options)
+
       if fn = @specialChars[chars]
-        fn.apply(@, arguments)
+        fn.call(@, el, rng, chars, options)
       else
         allChars = _.keys(@specialChars).join(", ")
         options.onNoMatchingSpecialChars(chars, allChars)
