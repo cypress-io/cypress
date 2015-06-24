@@ -773,6 +773,12 @@ describe "$Cypress.Cy Actions Commands", ->
 
           @cy.get(":text:first").invoke("val", "ab").type("{leftarrow}").then -> done()
 
+        it "does not fire input event", (done) ->
+          @cy.$(":text:first").on "input", (e) ->
+            done("input should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{leftarrow}").then -> done()
+
         it "can prevent default left arrow movement", (done) ->
           @cy.$(":text:first").on "keydown", (e) ->
             if e.keyCode is 37
@@ -831,6 +837,12 @@ describe "$Cypress.Cy Actions Commands", ->
 
           @cy.get(":text:first").invoke("val", "ab").type("{rightarrow}").then -> done()
 
+        it "does not fire input event", (done) ->
+          @cy.$(":text:first").on "input", (e) ->
+            done("input should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{rightarrow}").then -> done()
+
         it "can prevent default right arrow movement", (done) ->
           @cy.$(":text:first").on "keydown", (e) ->
             if e.keyCode is 39
@@ -877,6 +889,12 @@ describe "$Cypress.Cy Actions Commands", ->
         it "does not fire textInput event", (done) ->
           @cy.$(":text:first").on "textInput", (e) ->
             done("textInput should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{enter}").then -> done()
+
+        it "does not fire input event", (done) ->
+          @cy.$(":text:first").on "input", (e) ->
+            done("input should not have fired")
 
           @cy.get(":text:first").invoke("val", "ab").type("{enter}").then -> done()
 

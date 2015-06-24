@@ -106,8 +106,9 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       ## no input
       ## yes change (if input is different from last change event)
       "{enter}": (el, rng, options) ->
-        options.charCode = 13
+        options.charCode  = 13
         options.textInput = false
+        options.input     = false
         @ensureKey el, "\n", options, ->
           rng.insertEOL()
           #options.onEnterPressed
@@ -118,9 +119,10 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       ## no input
       "{leftarrow}": (el, rng, options) ->
         bounds = rng.bounds()
-        options.charCode = 37
-        options.keypress = false
+        options.charCode  = 37
+        options.keypress  = false
         options.textInput = false
+        options.input     = false
         @ensureKey el, null, options, ->
           switch
             when @boundsAreEqual(bounds)
@@ -145,9 +147,10 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       ## no input
       "{rightarrow}": (el, rng, options) ->
         bounds = rng.bounds()
-        options.charCode = 39
-        options.keypress = false
+        options.charCode  = 39
+        options.keypress  = false
         options.textInput = false
+        options.input     = false
         @ensureKey el, null, options, ->
           switch
             when @boundsAreEqual(bounds)
