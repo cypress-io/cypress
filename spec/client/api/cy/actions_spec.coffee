@@ -410,11 +410,23 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get(":text:first").type("a")
 
-      it "fires events in the correct order", ->
+      it "receives input event", (done) ->
+        input = @cy.$(":text:first")
+
+        input.get(0).addEventListener "input", (e) =>
+          obj = _(e).pick "bubbles", "cancelable", "type"
+          expect(obj).to.deep.eq {
+            bubbles: true
+            cancelable: false
+            type: "input"
+          }
+          done()
+
+        @cy.get(":text:first").type("a")
+
+      it "fires events in the correct order"
 
       it "fires events for each key stroke"
-
-      it "does not fire keypress if keydown is defaultPrevented"
 
     describe "value changing", ->
       it "changes the elements value", ->
@@ -508,6 +520,22 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get(":text:first").type("foo").then ($text) ->
           expect($text).to.have.value("")
 
+      it "does not fire input when textInput is preventedDefault", (done) ->
+        @cy.$(":text:first").get(0).addEventListener "input", (e) ->
+          done("should not have received input event")
+
+        @cy.$(":text:first").get(0).addEventListener "textInput", (e) ->
+          e.preventDefault()
+
+        @cy.get(":text:first").type("foo").then -> done()
+
+      it "preventing default to input event should not affect anything", ->
+        @cy.$(":text:first").get(0).addEventListener "input", (e) ->
+          e.preventDefault()
+
+        @cy.get(":text:first").type("foo").then ($input) ->
+          expect($input).to.have.value("foo")
+
     describe "specialChars", ->
       context "{{}", ->
         it "sets which and keyCode to 219", (done) ->
@@ -530,6 +558,12 @@ describe "$Cypress.Cy Actions Commands", ->
         it "fires textInput event with e.data", (done) ->
           @cy.$(":text:first").on "textInput", (e) ->
             expect(e.originalEvent.data).to.eq "{"
+            done()
+
+          @cy.get(":text:first").invoke("val", "ab").type("{{}")
+
+        it "fires input event", (done) ->
+          @cy.$(":text:first").on "input", (e) ->
             done()
 
           @cy.get(":text:first").invoke("val", "ab").type("{{}")
@@ -557,6 +591,12 @@ describe "$Cypress.Cy Actions Commands", ->
         it "does not fire textInput event", (done) ->
           @cy.$(":text:first").on "textInput", (e) ->
             done("textInput should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{esc}").then -> done()
+
+        it "does not fire input event", (done) ->
+          @cy.$(":text:first").on "input", (e) ->
+            done("input should not have fired")
 
           @cy.get(":text:first").invoke("val", "ab").type("{esc}").then -> done()
 
@@ -600,6 +640,28 @@ describe "$Cypress.Cy Actions Commands", ->
 
           @cy.get(":text:first").invoke("val", "ab").type("{backspace}").then -> done()
 
+        it "does fire input event when value changes", (done) ->
+          @cy.$(":text:first").on "input", (e) ->
+            done()
+
+          @cy
+            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
+              ## select the 'a' characters
+              b = bililiteRange($input.get(0))
+              b.bounds([1, 2]).select()
+            .get(":text:first").type("{backspace}")
+
+        it "does not fire input event when value does not change", (done) ->
+          @cy.$(":text:first").on "input", (e) ->
+            done("should not have fired input")
+
+          @cy
+            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
+              ## set the range at the beggining
+              b = bililiteRange($input.get(0))
+              b.bounds([0, 0]).select()
+            .get(":text:first").type("{backspace}").then -> done()
+
         it "can prevent default backspace movement", (done) ->
           @cy.$(":text:first").on "keydown", (e) ->
             if e.keyCode is 8
@@ -637,6 +699,23 @@ describe "$Cypress.Cy Actions Commands", ->
         it "does not fire textInput event", (done) ->
           @cy.$(":text:first").on "textInput", (e) ->
             done("textInput should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{del}").then -> done()
+
+        it "does fire input event when value changes", (done) ->
+          @cy.$(":text:first").on "input", (e) ->
+            done()
+
+          @cy
+            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
+              ## select the 'a' characters
+              b = bililiteRange($input.get(0))
+              b.bounds([1, 2]).select()
+            .get(":text:first").type("{del}")
+
+        it "does not fire input event when value does not change", (done) ->
+          @cy.$(":text:first").on "input", (e) ->
+            done("should not have fired input")
 
           @cy.get(":text:first").invoke("val", "ab").type("{del}").then -> done()
 

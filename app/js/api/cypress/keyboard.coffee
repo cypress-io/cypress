@@ -2,8 +2,6 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
 
   charsBetweenCurlyBraces = /({.+?})/
 
-
-
   return {
     charCodeMap: {
       33:  49,  ## ! --- 1
@@ -47,7 +45,7 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       ## charCode = 46
       ## no keyPress
       ## no textInput
-      ## yes input
+      ## yes input (if value is actually changed)
       "{del}": (el, rng, options) ->
         bounds = rng.bounds()
         if @boundsAreEqual(bounds)
@@ -56,30 +54,45 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
         options.keypress = false
         options.textInput = false
         @ensureKey el, null, options, ->
+          prev = rng.all()
           rng.text("", "end")
+
+          ## after applying the {del}
+          ## if our text didnt change
+          ## dont send the input event
+          if prev is rng.all()
+            options.input = false
 
       ## charCode = 8
       ## no keyPress
       ## no textInput
-      ## yes input
+      ## yes input (if value is actually changed)
       "{backspace}": (el, rng, options) ->
         bounds = rng.bounds()
         if @boundsAreEqual(bounds)
           rng.bounds([bounds[0] - 1, bounds[0]])
-        options.charCode = 8
-        options.keypress = false
+        options.charCode  = 8
+        options.keypress  = false
         options.textInput = false
         @ensureKey el, null, options, ->
+          prev = rng.all()
           rng.text("", "end")
+
+          ## after applying the {backspace}
+          ## if our text didnt change
+          ## dont send the input event
+          if prev is rng.all()
+            options.input = false
 
       ## charCode = 27
       ## no keyPress
       ## no textInput
       ## no input
       "{esc}": (el, rng, options) ->
-        options.charCode = 27
-        options.keypress = false
+        options.charCode  = 27
+        options.keypress  = false
         options.textInput = false
+        options.input     = false
         @ensureKey el, null, options
 
       "{tab}": (el, rng) ->
@@ -213,14 +226,22 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       ## in our options
       return true if options[eventType] is false
 
+      keys      = true
       otherKeys = true
 
       event = new Event eventType, {
         bubbles: true
-        cancelable: true
+        cancelable: eventType isnt "input"
       }
 
       switch eventType
+        when "keydown", "keyup"
+          charCodeAt = options.charCode ? @getCharCode(key.toUpperCase())
+
+          charCode = 0
+          keyCode  = charCodeAt
+          which    = charCodeAt
+
         when "keypress"
           charCodeAt = options.charCode ? @getCharCode(key)
 
@@ -238,12 +259,9 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
             data: key
           }
 
-        else
-          charCodeAt = options.charCode ? @getCharCode(key.toUpperCase())
-
-          charCode = 0
-          keyCode  = charCodeAt
-          which    = charCodeAt
+        when "input"
+          keys      = false
+          otherKeys = false
 
       if otherKeys
         _.extend event, {
@@ -255,17 +273,18 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
           shiftKey: false
         }
 
-      _.extend event, {
-        charCode: charCode
-        detail: 0
-        keyCode: keyCode
-        layerX: 0
-        layerY: 0
-        pageX: 0
-        pageY: 0
-        view: options.window
-        which: which
-      }
+      if keys
+        _.extend event, {
+          charCode: charCode
+          detail: 0
+          keyCode: keyCode
+          layerX: 0
+          layerY: 0
+          pageX: 0
+          pageY: 0
+          view: options.window
+          which: which
+        }
 
       el.dispatchEvent(event)
 
@@ -282,6 +301,7 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
         if @simulateKey(el, "keypress", key, options)
           if @simulateKey(el, "textInput", key, options)
             fn.call(@) if fn
+            @simulateKey(el, "input", key, options)
       @simulateKey(el, "keyup", key, options)
 
     handleSpecialChars: (el, rng, chars, options) ->
