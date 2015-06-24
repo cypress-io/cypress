@@ -386,7 +386,31 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get(":text:first").type("a")
 
-      it "fires events in the correct order"
+      it "receives textInput event", (done) ->
+        input = @cy.$(":text:first")
+
+        input.get(0).addEventListener "textInput", (e) =>
+          obj = _(e).pick "bubbles", "cancelable", "charCode", "data", "detail", "keyCode", "layerX", "layerY", "pageX", "pageY", "type", "view", "which"
+          expect(obj).to.deep.eq {
+            bubbles: true
+            cancelable: true
+            charCode: 0
+            data: "a"
+            detail: 0
+            keyCode: 0
+            layerX: 0
+            layerY: 0
+            pageX: 0
+            pageY: 0
+            type: "textInput"
+            view: @cy.private("window")
+            which: 0
+          }
+          done()
+
+        @cy.get(":text:first").type("a")
+
+      it "fires events in the correct order", ->
 
       it "fires events for each key stroke"
 
@@ -468,7 +492,23 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get(":text:first").type("foo").then ($text) ->
           expect($text).to.have.value("")
 
-    describe.only "specialChars", ->
+      it "does not fire textInput when keypress is preventedDefault", (done) ->
+        @cy.$(":text:first").get(0).addEventListener "textInput", (e) ->
+          done("should not have received textInput event")
+
+        @cy.$(":text:first").get(0).addEventListener "keypress", (e) ->
+          e.preventDefault()
+
+        @cy.get(":text:first").type("foo").then -> done()
+
+      it "does not insert key when textInput is preventedDefault", ->
+        @cy.$(":text:first").get(0).addEventListener "textInput", (e) ->
+          e.preventDefault()
+
+        @cy.get(":text:first").type("foo").then ($text) ->
+          expect($text).to.have.value("")
+
+    describe "specialChars", ->
       context "{{}", ->
         it "sets which and keyCode to 219", (done) ->
           @cy.$(":text:first").on "keydown", (e) ->
@@ -483,6 +523,13 @@ describe "$Cypress.Cy Actions Commands", ->
             expect(e.charCode).to.eq 219
             expect(e.which).to.eq 219
             expect(e.keyCode).to.eq 219
+            done()
+
+          @cy.get(":text:first").invoke("val", "ab").type("{{}")
+
+        it "fires textInput event with e.data", (done) ->
+          @cy.$(":text:first").on "textInput", (e) ->
+            expect(e.originalEvent.data).to.eq "{"
             done()
 
           @cy.get(":text:first").invoke("val", "ab").type("{{}")
@@ -506,6 +553,12 @@ describe "$Cypress.Cy Actions Commands", ->
             done()
 
           @cy.get(":text:first").invoke("val", "ab").type("{esc}")
+
+        it "does not fire textInput event", (done) ->
+          @cy.$(":text:first").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{esc}").then -> done()
 
         it "can prevent default esc movement", (done) ->
           @cy.$(":text:first").on "keydown", (e) ->
@@ -541,6 +594,12 @@ describe "$Cypress.Cy Actions Commands", ->
 
           @cy.get(":text:first").invoke("val", "ab").type("{leftarrow}{backspace}")
 
+        it "does not fire textInput event", (done) ->
+          @cy.$(":text:first").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{backspace}").then -> done()
+
         it "can prevent default backspace movement", (done) ->
           @cy.$(":text:first").on "keydown", (e) ->
             if e.keyCode is 8
@@ -574,6 +633,12 @@ describe "$Cypress.Cy Actions Commands", ->
             done()
 
           @cy.get(":text:first").invoke("val", "ab").type("{leftarrow}{del}")
+
+        it "does not fire textInput event", (done) ->
+          @cy.$(":text:first").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{del}").then -> done()
 
         it "can prevent default del movement", (done) ->
           @cy.$(":text:first").on "keydown", (e) ->
@@ -622,6 +687,12 @@ describe "$Cypress.Cy Actions Commands", ->
 
           @cy.get(":text:first").invoke("val", "ab").type("{leftarrow}").then ($input) ->
             done()
+
+        it "does not fire textInput event", (done) ->
+          @cy.$(":text:first").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{leftarrow}").then -> done()
 
         it "can prevent default left arrow movement", (done) ->
           @cy.$(":text:first").on "keydown", (e) ->
@@ -675,6 +746,12 @@ describe "$Cypress.Cy Actions Commands", ->
           @cy.get(":text:first").invoke("val", "ab").type("{rightarrow}").then ($input) ->
             done()
 
+        it "does not fire textInput event", (done) ->
+          @cy.$(":text:first").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{rightarrow}").then -> done()
+
         it "can prevent default right arrow movement", (done) ->
           @cy.$(":text:first").on "keydown", (e) ->
             if e.keyCode is 39
@@ -717,6 +794,12 @@ describe "$Cypress.Cy Actions Commands", ->
           @cy.get("#input-types textarea").invoke("val", "foo").type("d{enter}").then ($textarea) ->
             expect($textarea).to.have.value("food")
             done()
+
+        it "does not fire textInput event", (done) ->
+          @cy.$(":text:first").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{enter}").then -> done()
 
         it "inserts new line into textarea", ->
           @cy.get("#input-types textarea").invoke("val", "foo").type("bar{enter}baz{enter}quux").then ($textarea) ->

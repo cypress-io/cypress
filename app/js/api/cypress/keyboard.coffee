@@ -46,34 +46,40 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
 
       ## charCode = 46
       ## no keyPress
+      ## no textInput
       ## yes input
       "{del}": (el, rng, options) ->
         bounds = rng.bounds()
         if @boundsAreEqual(bounds)
           rng.bounds([bounds[0], bounds[0] + 1])
         options.charCode = 46
-        options.keyPress = false
+        options.keypress = false
+        options.textInput = false
         @ensureKey el, null, options, ->
           rng.text("", "end")
 
       ## charCode = 8
       ## no keyPress
+      ## no textInput
       ## yes input
       "{backspace}": (el, rng, options) ->
         bounds = rng.bounds()
         if @boundsAreEqual(bounds)
           rng.bounds([bounds[0] - 1, bounds[0]])
         options.charCode = 8
-        options.keyPress = false
+        options.keypress = false
+        options.textInput = false
         @ensureKey el, null, options, ->
           rng.text("", "end")
 
       ## charCode = 27
       ## no keyPress
+      ## no textInput
       ## no input
       "{esc}": (el, rng, options) ->
         options.charCode = 27
-        options.keyPress = false
+        options.keypress = false
+        options.textInput = false
         @ensureKey el, null, options
 
       "{tab}": (el, rng) ->
@@ -83,18 +89,25 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
 
       ## charCode = 13
       ## yes keyPress
+      ## no textInput
       ## no input
-      ## yes change
+      ## yes change (if input is different from last change event)
       "{enter}": (el, rng, options) ->
         options.charCode = 13
+        options.textInput = false
         @ensureKey el, "\n", options, ->
           rng.insertEOL()
           #options.onEnterPressed
 
+      ## charCode = 37
+      ## no keyPress
+      ## no textInput
+      ## no input
       "{leftarrow}": (el, rng, options) ->
         bounds = rng.bounds()
         options.charCode = 37
-        options.keyPress = false
+        options.keypress = false
+        options.textInput = false
         @ensureKey el, null, options, ->
           switch
             when @boundsAreEqual(bounds)
@@ -113,10 +126,15 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
 
           rng.bounds([left, right])
 
+      ## charCode = 39
+      ## no keyPress
+      ## no textInput
+      ## no input
       "{rightarrow}": (el, rng, options) ->
         bounds = rng.bounds()
         options.charCode = 39
-        options.keyPress = false
+        options.keypress = false
+        options.textInput = false
         @ensureKey el, null, options, ->
           switch
             when @boundsAreEqual(bounds)
@@ -191,9 +209,11 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       @charCodeMap[code] ? code
 
     simulateKey: (el, eventType, key, options) ->
-      ## bail if we've said not to fire a keyPress
-      if eventType is "keypress" and options.keyPress is false
-        return true
+      ## bail if we've said not to fire this specific event
+      ## in our options
+      return true if options[eventType] is false
+
+      otherKeys = true
 
       event = new Event eventType, {
         bubbles: true
@@ -207,6 +227,17 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
           charCode = charCodeAt
           keyCode  = charCodeAt
           which    = charCodeAt
+
+        when "textInput"
+          charCode  = 0
+          keyCode   = 0
+          which     = 0
+          otherKeys = false
+
+          _.extend event, {
+            data: key
+          }
+
         else
           charCodeAt = options.charCode ? @getCharCode(key.toUpperCase())
 
@@ -214,20 +245,24 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
           keyCode  = charCodeAt
           which    = charCodeAt
 
+      if otherKeys
+        _.extend event, {
+          altKey: false
+          ctrlKey: false
+          location: 0
+          metaKey: false
+          repeat: false
+          shiftKey: false
+        }
+
       _.extend event, {
-        altKey: false
         charCode: charCode
-        ctrlKey: false
         detail: 0
         keyCode: keyCode
         layerX: 0
         layerY: 0
-        location: 0
-        metaKey: false
         pageX: 0
         pageY: 0
-        repeat: false
-        shiftKey: false
         view: options.window
         which: which
       }
@@ -245,7 +280,8 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
     ensureKey: (el, key, options, fn) ->
       if @simulateKey(el, "keydown", key, options)
         if @simulateKey(el, "keypress", key, options)
-          fn.call(@) if fn
+          if @simulateKey(el, "textInput", key, options)
+            fn.call(@) if fn
       @simulateKey(el, "keyup", key, options)
 
     handleSpecialChars: (el, rng, chars, options) ->
