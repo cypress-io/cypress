@@ -469,6 +469,53 @@ describe "$Cypress.Cy Actions Commands", ->
           expect($text).to.have.value("")
 
     describe.only "specialChars", ->
+      context "{{}", ->
+        it "sets which and keyCode to 219", (done) ->
+          @cy.$(":text:first").on "keydown", (e) ->
+            expect(e.which).to.eq 219
+            expect(e.keyCode).to.eq 219
+            done()
+
+          @cy.get(":text:first").invoke("val", "ab").type("{{}")
+
+        it "fires keypress event with 219 charCode", (done) ->
+          @cy.$(":text:first").on "keypress", (e) ->
+            expect(e.charCode).to.eq 219
+            expect(e.which).to.eq 219
+            expect(e.keyCode).to.eq 219
+            done()
+
+          @cy.get(":text:first").invoke("val", "ab").type("{{}")
+
+        it "can prevent default character insertion", ->
+          @cy.$(":text:first").on "keydown", (e) ->
+            if e.keyCode is 219
+              e.preventDefault()
+
+          @cy.get(":text:first").invoke("val", "foo").type("{{}").then ($input) ->
+            expect($input).to.have.value("foo")
+
+      context "{esc}", ->
+        it "sets which and keyCode to 27 and does not fire keypress events", (done) ->
+          @cy.$(":text:first").on "keypress", ->
+            done("should not have received keypress")
+
+          @cy.$(":text:first").on "keydown", (e) ->
+            expect(e.which).to.eq 27
+            expect(e.keyCode).to.eq 27
+            done()
+
+          @cy.get(":text:first").invoke("val", "ab").type("{esc}")
+
+        it "can prevent default esc movement", (done) ->
+          @cy.$(":text:first").on "keydown", (e) ->
+            if e.keyCode is 27
+              e.preventDefault()
+
+          @cy.get(":text:first").invoke("val", "foo").type("d{esc}").then ($input) ->
+            expect($input).to.have.value("food")
+            done()
+
       context "{backspace}", ->
         it "backspaces character to the left", ->
           @cy.get(":text:first").invoke("val", "bar").type("{leftarrow}{backspace}").then ($input) ->
@@ -492,8 +539,7 @@ describe "$Cypress.Cy Actions Commands", ->
             expect(e.keyCode).to.eq 8
             done()
 
-          @cy.get(":text:first").invoke("val", "ab").type("{leftarrow}{backspace}").then ($input) ->
-            done()
+          @cy.get(":text:first").invoke("val", "ab").type("{leftarrow}{backspace}")
 
         it "can prevent default backspace movement", (done) ->
           @cy.$(":text:first").on "keydown", (e) ->
@@ -527,8 +573,7 @@ describe "$Cypress.Cy Actions Commands", ->
             expect(e.keyCode).to.eq 46
             done()
 
-          @cy.get(":text:first").invoke("val", "ab").type("{leftarrow}{del}").then ($input) ->
-            done()
+          @cy.get(":text:first").invoke("val", "ab").type("{leftarrow}{del}")
 
         it "can prevent default del movement", (done) ->
           @cy.$(":text:first").on "keydown", (e) ->

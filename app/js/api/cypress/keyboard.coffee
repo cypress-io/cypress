@@ -2,7 +2,44 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
 
   charsBetweenCurlyBraces = /({.+?})/
 
+
+
   return {
+    charCodeMap: {
+      33:  49,  ## ! --- 1
+      64:  50,  ## @ --- 2
+      35:  51,  ## # --- 3
+      36:  52,  ## $ --- 4
+      37:  53,  ## % --- 5
+      94:  54,  ## ^ --- 6
+      38:  55,  ## & --- 7
+      42:  56,  ## * --- 8
+      40:  57,  ## ( --- 9
+      41:  48,  ## ) --- 0
+      59:  186, ## ; --- 186
+      58:  186, ## : --- 186
+      61:  187, ## = --- 187
+      43:  187, ## + --- 187
+      44:  188, ## , --- 188
+      60:  188, ## < --- 188
+      45:  189, ## - --- 189
+      95:  189, ## _ --- 189
+      46:  190, ## . --- 190
+      62:  190, ## > --- 190
+      47:  191, ## / --- 191
+      63:  191, ## ? --- 191
+      96:  192, ## ` --- 192
+      126: 192, ## ~ --- 192
+      91:  219, ## [ --- 219
+      123: 219, ## { --- 219
+      92:  220, ## \ --- 220
+      124: 220, ## | --- 220
+      93:  221, ## ] --- 221
+      125: 221, ## } --- 221
+      39:  222, ## ' --- 222
+      34:  222  ## " --- 222
+    }
+
     specialChars: {
       "{selectall}": (el, rng) ->
         rng.bounds('all').select()
@@ -31,12 +68,23 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
         @ensureKey el, null, options, ->
           rng.text("", "end")
 
-      "{esc}": (el, rng) ->
+      ## charCode = 27
+      ## no keyPress
+      ## no input
+      "{esc}": (el, rng, options) ->
+        options.charCode = 27
+        options.keyPress = false
+        @ensureKey el, null, options
 
       "{tab}": (el, rng) ->
 
-      "{{}": (el, rng) ->
+      "{{}": (el, rng, options) ->
+        @typeKey(el, rng, "{", options)
 
+      ## charCode = 13
+      ## yes keyPress
+      ## no input
+      ## yes change
       "{enter}": (el, rng, options) ->
         options.charCode = 13
         @ensureKey el, "\n", options, ->
@@ -138,6 +186,10 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
         _.each chars, (char) =>
           @typeKey(el, rng, char, options)
 
+    getCharCode: (key) ->
+      code = key.charCodeAt(0)
+      @charCodeMap[code] ? code
+
     simulateKey: (el, eventType, key, options) ->
       ## bail if we've said not to fire a keyPress
       if eventType is "keypress" and options.keyPress is false
@@ -150,13 +202,13 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
 
       switch eventType
         when "keypress"
-          charCodeAt = options.charCode ? key.charCodeAt(0)
+          charCodeAt = options.charCode ? @getCharCode(key)
 
           charCode = charCodeAt
           keyCode  = charCodeAt
           which    = charCodeAt
         else
-          charCodeAt = options.charCode ? key.toUpperCase().charCodeAt(0)
+          charCodeAt = options.charCode ? @getCharCode(key.toUpperCase())
 
           charCode = 0
           keyCode  = charCodeAt
@@ -193,7 +245,7 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
     ensureKey: (el, key, options, fn) ->
       if @simulateKey(el, "keydown", key, options)
         if @simulateKey(el, "keypress", key, options)
-          fn.call(@)
+          fn.call(@) if fn
       @simulateKey(el, "keyup", key, options)
 
     handleSpecialChars: (el, rng, chars, options) ->
