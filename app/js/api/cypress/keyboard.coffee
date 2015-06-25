@@ -293,7 +293,6 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
 
     updateValue: (rng, key) ->
       rng.text(key, "end")
-      # rng.sendkeys(key)
 
     typeKey: (el, rng, key, options) ->
       @ensureKey el, key, options, ->

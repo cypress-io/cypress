@@ -88,6 +88,21 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.$("select[name=maps]").one "focus", -> done()
         @cy.get("select[name=maps]").select("train")
 
+      it "emits input event", (done) ->
+        @cy.$("select[name=maps]").one "input", -> done()
+        @cy.get("select[name=maps]").select("train")
+
+      it "emits all events in the correct order", ->
+        fired = []
+        events = ["mousedown", "focus", "mouseup", "click", "input", "change"]
+
+        _.each events, (event) =>
+          @cy.$("select[name=maps]").one event, ->
+            fired.push(event)
+
+        @cy.get("select[name=maps]").select("train").then ->
+          expect(fired).to.deep.eq events
+
     describe "errors", ->
       beforeEach ->
         @allowErrors()

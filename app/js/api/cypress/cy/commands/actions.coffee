@@ -914,13 +914,20 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             ## for the options
             options.$el.val(values)
 
+            input = new Event "input", {
+              bubbles: true
+              cancelable: false
+            }
+
+            options.$el.get(0).dispatchEvent(input)
+
             ## yup manually create this change event
             ## 1.6.5. HTML event types
-            ## scroll down the 'change'
-            event = document.createEvent("HTMLEvents")
-            event.initEvent("change", true, false)
+            ## scroll down to 'change'
+            change = document.createEvent("HTMLEvents")
+            change.initEvent("change", true, false)
 
-            options.$el.get(0).dispatchEvent(event)
+            options.$el.get(0).dispatchEvent(change)
 
             ## change events should be finished at this point!
             ## so we can snapshot the current state of the DOM
