@@ -114,6 +114,8 @@
 
       groups = @formatGroupsForConsole(obj)
 
+      table = @formatTableForConsonle(obj)
+
       obj = @formatForConsole(obj)
 
       _.each obj, (value, key) ->
@@ -121,12 +123,28 @@
 
       if groups
         _.each groups, (group) ->
-          console.group(group.name)
+          console.groupCollapsed(group.name)
 
           _.each group.items, (value, key) ->
             fn ["%c" + key, "color: blue", value]
 
           console.groupEnd()
+
+      if table
+        if _.isArray(table)
+          console.table(table)
+        else
+          console.groupCollapsed(table.name)
+          console.table(table.data, table.columns)
+          console.groupEnd()
+
+    formatTableForConsonle: (obj) ->
+      return if not obj.table
+
+      if table = _.result(obj, "table")
+        delete obj.table
+
+        table
 
     formatGroupsForConsole: (obj) ->
       return if not obj.groups

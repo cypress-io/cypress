@@ -619,6 +619,27 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         ## figure out the options which actually change the behavior of clicks
         deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: 50})
 
+        table = {}
+
+        getRow = (id, key, which) ->
+          table[id] or do ->
+            table[id] = (obj = {})
+            if key
+              obj.typed = key
+              obj.which = which if which
+            obj
+
+        updateTable = (id, key, column, value, which) ->
+          row = getRow(id, key, which)
+          row[column] = value or "preventedDefault"
+
+        getTableData = ->
+          ## transform table object into object with zero based index as keys
+          _.reduce _(table).values(), (memo, value, index) ->
+            memo[index + 1] = value
+            memo
+          , {}
+
         options.command = Cypress.command
           message: deltaOptions
           $el: options.$el
@@ -626,6 +647,12 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             "Typed":      chars
             "Applied To": $Cypress.Utils.getDomElements(options.$el)
             "Options":    deltaOptions
+            "table": ->
+              {
+                name: "Key Events Table"
+                data: getTableData()
+                columns: ["typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change"]
+              }
 
       if not options.$el.is(textLike)
         node = Cypress.Utils.stringifyElement(options.$el)
@@ -701,17 +728,24 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             ## consider changing type to a Promise and juggle logging
             @command("submit", {log: false, $el: form})
 
-        dispatchChangeEvent = =>
+        dispatchChangeEvent = (id) =>
           change = document.createEvent("HTMLEvents")
           change.initEvent("change", true, false)
 
-          options.$el.get(0).dispatchEvent(change)
+          dispatched = options.$el.get(0).dispatchEvent(change)
+
+          updateTable.call(@, id, null, "change", dispatched) if id
+
+          return dispatched
 
         @Cypress.Keyboard.type({
           $el:    options.$el
           chars:  options.chars
           delay:  options.delay
           window: @private("window")
+
+          onEvent: =>
+            updateTable.apply(@, arguments)
 
           ## fires only when the 'value'
           ## of input/text/contenteditable
@@ -724,7 +758,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
               dispatchChangeEvent()
               @prop "changeEvent", null
 
-          onEnterPressed: (changed) =>
+          onEnterPressed: (changed, id) =>
             ## dont dispatch change events or handle
             ## submit event if we've pressed enter into
             ## a textarea or contenteditable
@@ -734,7 +768,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             ## element was activated we need to
             ## fire a change event immediately
             if changed
-              dispatchChangeEvent()
+              dispatchChangeEvent(id)
 
             ## handle submit event handler here
             simulateSubmitHandler()
@@ -748,6 +782,18 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           options.command.snapshot().end() if options.command
 
           return options.$el
+
+          # console.table([
+          #   {typed: "a", which: 65, keyDown: true, keyPress: true, textInput: true, input: true, keyUp: true},
+          #   {typed: "{enter}", which: 13, keyDown: true, keyPress: true, change: true, keyUp: true}
+          # ])
+
+          # console.table(
+          #   {
+          #     "a":       {which: 65, keyDown: "defaultPrevented", keyPress: true, textInput: true, input: true, keyUp: true},
+          #     "{enter}": {which: 13, keyDown: true, keyPress: true, change: true, keyUp: true}
+          #   }, ["which", "keyDown", "keyPress", "textInput", "input", "keyUp", "change"]
+          # )
 
     clear: (subject, options = {}) ->
       ## what about other types of inputs besides just text?

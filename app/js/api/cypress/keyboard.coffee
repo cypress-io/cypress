@@ -112,7 +112,7 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
         @ensureKey el, "\n", options, ->
           rng.insertEOL()
           changed = options.prev isnt rng.all()
-          options.onEnterPressed(changed)
+          options.onEnterPressed(changed, options.id)
 
       ## charCode = 37
       ## no keyPress
@@ -175,6 +175,7 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       new Promise (resolve, reject) =>
         _.defaults options,
           delay: 10
+          onEvent: ->
           onTypeChange: ->
           onEnterPressed: ->
           onNoMatchingSpecialChars: ->
@@ -225,6 +226,8 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
         resolve()
 
     typeChars: (el, rng, chars, options) ->
+      options = _.clone(options)
+
       if charsBetweenCurlyBraces.test(chars)
         @handleSpecialChars(el, rng, chars, options)
       else
@@ -239,6 +242,8 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       ## bail if we've said not to fire this specific event
       ## in our options
       return true if options[eventType] is false
+
+      key = options.key ? key
 
       keys      = true
       otherKeys = true
@@ -300,7 +305,15 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
           which: which
         }
 
-      el.dispatchEvent(event)
+      dispatched = el.dispatchEvent(event)
+
+      args = [options.id, key, eventType, dispatched]
+
+      args.push(charCodeAt) if charCodeAt
+
+      options.onEvent.apply(@, args)
+
+      return dispatched
 
     updateValue: (rng, key) ->
       rng.text(key, "end")
@@ -310,6 +323,8 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
         @updateValue(rng, key)
 
     ensureKey: (el, key, options, fn) ->
+      options.id = _.uniqueId("char")
+
       if @simulateKey(el, "keydown", key, options)
         if @simulateKey(el, "keypress", key, options)
           if @simulateKey(el, "textInput", key, options)
@@ -318,9 +333,8 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       @simulateKey(el, "keyup", key, options)
 
     handleSpecialChars: (el, rng, chars, options) ->
-      options = _.clone(options)
-
       if fn = @specialChars[chars]
+        options.key = chars
         fn.call(@, el, rng, options)
       else
         allChars = _.keys(@specialChars).join(", ")

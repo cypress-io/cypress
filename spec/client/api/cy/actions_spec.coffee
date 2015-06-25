@@ -1320,6 +1320,36 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
           expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
 
+      context "#onConsole", ->
+        it "has a table of keys", ->
+          @cy.get(":text:first").type("foo{enter}b{leftarrow}{del}{enter}").then ->
+            table = @log.attributes.onConsole().table()
+            console.table(table.data, table.columns)
+            expect(table.columns).to.deep.eq [
+              "typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change"
+            ]
+            expect(table.name).to.eq "Key Events Table"
+            expect(table.data).to.deep.eq {
+              1: {typed: "f", which: 70, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
+              2: {typed: "o", which: 79, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
+              3: {typed: "o", which: 79, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
+              4: {typed: "{enter}", which: 13, keydown: true, keypress: true, keyup: true, change: true}
+              5: {typed: "b", which: 66, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
+              6: {typed: "{leftarrow}", which: 37, keydown: true, keyup: true}
+              7: {typed: "{del}", which: 46, keydown: true, input: true, keyup: true}
+              8: {typed: "{enter}", which: 13, keydown: true, keypress: true, keyup: true, change: true}
+            }
+
+        it.only "has a table of keys with preventedDefault", ->
+          @cy.$(":text:first").keydown -> return false
+
+          @cy.get(":text:first").type("f").then ->
+            table = @log.attributes.onConsole().table()
+            console.table(table.data, table.columns)
+            expect(table.data).to.deep.eq {
+              1: {typed: "f", which: 70, keydown: "preventedDefault", keyup: true}
+            }
+
     describe "errors", ->
       beforeEach ->
         @allowErrors()
@@ -1411,6 +1441,7 @@ describe "$Cypress.Cy Actions Commands", ->
           done()
 
         @cy.inspect().get("#input-covered-in-span").type("foo")
+
 
       it "throws when special characters dont exist"
 
