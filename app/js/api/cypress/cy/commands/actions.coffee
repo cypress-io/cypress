@@ -253,8 +253,23 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
             @prop("blacklistFocusedEl", options.$el.get(0))
 
-            options.$el.cySimulate("blur")
-            options.$el.cySimulate("focusout")
+            ## todo handle relatedTarget's per the spec
+            focusoutEvt = new FocusEvent "focusout", {
+              bubbles: true
+              cancelable: false
+              view: @private("window")
+              relatedTarget: null
+            }
+
+            blurEvt = new FocusEvent "blur", {
+              bubble: false
+              cancelable: false
+              view: @private("window")
+              relatedTarget: null
+            }
+
+            options.$el.get(0).dispatchEvent(blurEvt)
+            options.$el.get(0).dispatchEvent(focusoutEvt)
 
         promise.timeout(timeout).catch Promise.TimeoutError, (err) =>
           cleanup()
@@ -667,56 +682,24 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           defaultButtonisDisabled = (button) ->
             button.prop("disabled")
 
-          keydownPrevented  = false
-          keypressPrevented = false
+          defaultButton = getDefaultButton(form)
 
-          ## there are edge cases where this logic is broken
-          ## we are currently not following the spec in regards
-          ## to NOT firing keypress events when the keydown
-          ## event is preventDefault() or stopPropagation()
-          ## our simulation lib is firing keypress no matter what
+          ## bail if the default button is in a 'disabled' state
+          return if defaultButtonisDisabled(defaultButton)
 
-          keydown = (e) ->
-            if e.which is 13 and e.isDefaultPrevented()
-              keydownPrevented = true
-
-          keypress = (e) =>
-            if e.which is 13
-              if e.isDefaultPrevented()
-                keypressPrevented = true
-
-              ## keypress happens after keydown so we can just simulate the
-              ## submit event now if both events were NOT prevented!
-              if keydownPrevented is false and keypressPrevented is false
-                defaultButton = getDefaultButton(form)
-
-                ## bail if the default button is in a 'disabled' state
-                return if defaultButtonisDisabled(defaultButton)
-
-                ## issue the click event to the 'default button' of the form
-                ## we need this to be synchronous so not going through our
-                ## own click command
-                ## as of now, at least in Chrome, causing the click event
-                ## on the button will indeed trigger the form submit event
-                ## so we dont need to fire it manually anymore!
-                if not clickedDefaultButton(defaultButton)
-                  ## if we werent able to click the default button
-                  ## then synchronously fire the submit event
-                  ## currently this is sync but if we use a waterfall
-                  ## promise in the submit command it will break again
-                  ## consider changing type to a Promise and juggle logging
-                  @command("submit", {log: false, $el: form})
-
-          form.on "keydown", keydown
-          form.on "keypress", keypress
-
-          @once "invoke:end", ->
-            form.off "keydown", keydown
-            form.off "keypress", keypress
-
-          ## need to do the crazy logic associated with knowing when
-          ## to trigger the form submit event and when to also trigger
-          ## the click event on the first 'submit' like element
+          ## issue the click event to the 'default button' of the form
+          ## we need this to be synchronous so not going through our
+          ## own click command
+          ## as of now, at least in Chrome, causing the click event
+          ## on the button will indeed trigger the form submit event
+          ## so we dont need to fire it manually anymore!
+          if not clickedDefaultButton(defaultButton)
+            ## if we werent able to click the default button
+            ## then synchronously fire the submit event
+            ## currently this is sync but if we use a waterfall
+            ## promise in the submit command it will break again
+            ## consider changing type to a Promise and juggle logging
+            @command("submit", {log: false, $el: form})
 
         dispatchChangeEvent = =>
           change = document.createEvent("HTMLEvents")

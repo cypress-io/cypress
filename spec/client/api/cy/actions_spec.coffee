@@ -921,7 +921,7 @@ describe "$Cypress.Cy Actions Commands", ->
           @cy.get("#input-types [contenteditable]").invoke("text", "foo").type("bar{enter}baz{enter}quux").then ($div) ->
             expect($div).to.have.text("foobar\nbaz\nquux")
 
-    describe.only "change events", ->
+    describe "change events", ->
       it "fires when enter is pressed and value has changed", ->
         changed = 0
 
@@ -982,6 +982,18 @@ describe "$Cypress.Cy Actions Commands", ->
 
       #   @cy.get(":text:first").invoke("val", "foo").type("b{tab}").then ->
       #     expect(changed).to.eq 1
+
+      it "does not fire if {enter} is preventedDefault", ->
+        changed = 0
+
+        @cy.$(":text:first").keypress (e) ->
+          e.preventDefault() if e.which is 13
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy.get(":text:first").invoke("val", "foo").type("b{enter}").then ->
+          expect(changed).to.eq 0
 
       it "does not fire when enter is pressed and value hasnt changed", ->
         changed = 0
@@ -1109,18 +1121,6 @@ describe "$Cypress.Cy Actions Commands", ->
             submits += 1
 
           @cy.get("#single-input input").type("f{enter}{enter}").then ->
-            expect(submits).to.eq 2
-
-        it "unbinds from form submit event", ->
-          submits = 0
-
-          form = @forms.find("#single-input").submit ->
-            submits += 1
-
-          @cy.get("#single-input input").type("f{enter}{enter}").then ->
-            ## simulate another enter event which should not issue another
-            ## submit event because we should have cleaned up the events
-            form.find("input").simulate "key-sequence", sequence: "b{enter}"
             expect(submits).to.eq 2
 
         it "does not submit when keydown is defaultPrevented on input", (done) ->
