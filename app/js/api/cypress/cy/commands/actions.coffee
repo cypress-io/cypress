@@ -4,6 +4,11 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
   focusable = "a[href],link[href],button,input,select,textarea,[tabindex]"
 
+  dispatchPrimedChangeEvents = ->
+    ## if we have a changeEvent, dispatch it
+    if changeEvent = @prop("changeEvent")
+      changeEvent.call(@)
+
   Cypress.addChildCommand
 
     submit: (subject, options = {}) ->
@@ -234,6 +239,10 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             resolve(options.$el)
 
           options.$el.on("blur", blurred)
+
+          ## for simplicity we allow change events
+          ## to be triggered by a manual blur
+          dispatchPrimedChangeEvents.call(@)
 
           options.$el.get(0).blur()
 
@@ -561,6 +570,10 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           if mdownCancelled
             afterMouseDown($elToClick, coords)
           else
+            ## if our mousedown went through then
+            ## dispatch any primed change events
+            dispatchPrimedChangeEvents.call(@)
+
             ## retrieve the first focusable $el in our parent chain
             $elToFocus = getFirstFocusableEl($elToClick)
 
@@ -623,36 +636,36 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         interval: options.interval
       }).then =>
 
-        multipleInputsAndNoSubmitElements = (form) ->
-          inputs  = form.find("input")
-          submits = form.find("input[type=submit], button[type!=button]")
-
-          inputs.length > 1 and submits.length is 0
-
-        clickedDefaultButton = (button) ->
-          ## find the 'default button' as per HTML spec and click it natively
-          ## do not issue mousedown / mouseup since this is supposed to be synthentic
-          if button.length
-            button.get(0).click()
-            true
-          else
-            false
-
-        getDefaultButton = (form) ->
-          form.find("input[type=submit], button[type!=button]").first()
-
-        defaultButtonisDisabled = (button) ->
-          button.prop("disabled")
-
         simulateSubmitHandler = =>
           form = options.$el.parents("form")
 
           return if not form.length
 
+          multipleInputsAndNoSubmitElements = (form) ->
+            inputs  = form.find("input")
+            submits = form.find("input[type=submit], button[type!=button]")
+
+            inputs.length > 1 and submits.length is 0
+
           ## throw an error here if there are multiple form parents
 
           ## bail if we have multiple inputs and no submit elements
           return if multipleInputsAndNoSubmitElements(form)
+
+          clickedDefaultButton = (button) ->
+            ## find the 'default button' as per HTML spec and click it natively
+            ## do not issue mousedown / mouseup since this is supposed to be synthentic
+            if button.length
+              button.get(0).click()
+              true
+            else
+              false
+
+          getDefaultButton = (form) ->
+            form.find("input[type=submit], button[type!=button]").first()
+
+          defaultButtonisDisabled = (button) ->
+            button.prop("disabled")
 
           keydownPrevented  = false
           keypressPrevented = false
@@ -705,49 +718,53 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           ## to trigger the form submit event and when to also trigger
           ## the click event on the first 'submit' like element
 
+        dispatchChangeEvent = =>
+          change = document.createEvent("HTMLEvents")
+          change.initEvent("change", true, false)
 
-        ## TODO MAKE THIS A SPECIAL CALLBACK FUNCTION ONENTER
-        ## handle submit event handler here if we are pressing enter
-        # simulateSubmitHandler() if pressedEnter.test(options.chars)
+          options.$el.get(0).dispatchEvent(change)
 
         @Cypress.Keyboard.type({
           $el:    options.$el
           chars:  options.chars
           delay:  options.delay
           window: @private("window")
+
+          ## fires only when the 'value'
+          ## of input/text/contenteditable
+          ## changes
+          onTypeChange: =>
+            ## never fire any change events for contenteditable
+            return if options.$el.is("[contenteditable]")
+
+            @prop "changeEvent", ->
+              dispatchChangeEvent()
+              @prop "changeEvent", null
+
+          onEnterPressed: (changed) =>
+            ## dont dispatch change events or handle
+            ## submit event if we've pressed enter into
+            ## a textarea or contenteditable
+            return if options.$el.is("textarea,[contenteditable]")
+
+            ## if our value has changed since our
+            ## element was activated we need to
+            ## fire a change event immediately
+            if changed
+              dispatchChangeEvent()
+
+            ## handle submit event handler here
+            simulateSubmitHandler()
+
           onNoMatchingSpecialChars: (chars, allChars) =>
             @throwErr("Special character sequence: '#{chars}' is not recognized. Available sequences are: #{allChars}", options.command)
+
         }).then ->
           ## submit events should be finished at this point!
           ## so we can snapshot the current state of the DOM
           options.command.snapshot().end() if options.command
 
           return options.$el
-
-        # el = options.$el.get(0)
-
-        # b = @bililite(el).bounds("selection")
-
-        # type = options.$el.attr("type")
-
-        ## is our bililite instance an instance of
-        ## nothing range?
-        # if len = b.length()
-        #   bounds = [len, len]
-        #   if not _.isEqual(b._bounds, bounds)
-        #     el.bililiteRangeSelection = bounds
-        #     b._bounds = bounds
-        # if options.$el.is("input") and isNothingRange(b)
-        #   ## manually shift the caret to
-        #   ## the end of the element
-        #   len = b.length()
-        #   b._bounds = [len, len]
-
-        # _.each options.sequence.split(charsBetweenCurlyBraces), (chars) ->
-        #   typeChars(el, b, chars)
-
-        # if sel = @private("window").getSelection()
-          # sel.removeAllRanges()
 
     clear: (subject, options = {}) ->
       ## what about other types of inputs besides just text?

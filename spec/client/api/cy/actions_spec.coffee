@@ -921,10 +921,141 @@ describe "$Cypress.Cy Actions Commands", ->
           @cy.get("#input-types [contenteditable]").invoke("text", "foo").type("bar{enter}baz{enter}quux").then ($div) ->
             expect($div).to.have.text("foobar\nbaz\nquux")
 
-    describe "change events fired (on blur)", ->
-      it "fires change event when element is blurred"
+    describe.only "change events", ->
+      it "fires when enter is pressed and value has changed", ->
+        changed = 0
 
-      it "does not fire change event if value hasnt actually changed"
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy.get(":text:first").invoke("val", "foo").type("bar{enter}").then ->
+          expect(changed).to.eq 1
+
+      it "fires twice when enter is pressed and then again after losing focus", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy.get(":text:first").invoke("val", "foo").type("bar{enter}baz").blur().then ->
+          expect(changed).to.eq 2
+
+      it "fires when element loses focus due to another action (click)", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy
+          .get(":text:first").type("foo").then ->
+            expect(changed).to.eq 0
+          .get("button:first").click().then ->
+            expect(changed).to.eq 1
+
+      it "fires when element loses focus due to another action (type)", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy
+          .get(":text:first").type("foo").then ->
+            expect(changed).to.eq 0
+          .get("textarea:first").type("bar").then ->
+            expect(changed).to.eq 1
+
+      it "fires when element is directly blurred", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy
+          .get(":text:first").type("foo").blur().then ->
+            expect(changed).to.eq 1
+
+      it "fires when element is tabbed away from"#, ->
+      #   changed = 0
+
+      #   @cy.$(":text:first").change ->
+      #     changed += 1
+
+      #   @cy.get(":text:first").invoke("val", "foo").type("b{tab}").then ->
+      #     expect(changed).to.eq 1
+
+      it "does not fire when enter is pressed and value hasnt changed", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy.get(":text:first").invoke("val", "foo").type("b{backspace}{enter}").then ->
+          expect(changed).to.eq 0
+
+      it "does not fire at the end of the type", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy
+          .get(":text:first").type("foo").then ->
+            expect(changed).to.eq 0
+
+      it "does not fire change event if value hasnt actually changed", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy
+          .get(":text:first").invoke("val", "foo").type("{backspace}{backspace}oo{enter}").blur().then ->
+            expect(changed).to.eq 0
+
+      it "does not fire if mousedown is preventedDefault which prevents element from losing focus", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy.$("textarea:first").mousedown -> return false
+
+        @cy
+          .get(":text:first").invoke("val", "foo").type("bar")
+          .get("textarea:first").click().then ->
+            expect(changed).to.eq 0
+
+      it "does not fire hitting {enter} inside of a textarea", ->
+        changed = 0
+
+        @cy.$("textarea:first").change ->
+          changed += 1
+
+        @cy
+          .get("textarea:first").type("foo{enter}bar").then ->
+            expect(changed).to.eq 0
+
+      it "does not fire hitting {enter} inside of [contenteditable]", ->
+        changed = 0
+
+        @cy.$("[contenteditable]:first").change ->
+          changed += 1
+
+        @cy
+          .get("[contenteditable]:first").type("foo{enter}bar").then ->
+            expect(changed).to.eq 0
+
+      ## [contenteditable] does not fire ANY change events ever!
+      it "does not fire at ALL for [contenteditable]", ->
+        changed = 0
+
+        @cy.$("[contenteditable]:first").change ->
+          changed += 1
+
+        @cy
+          .get("[contenteditable]:first").type("foo")
+          .get("button:first").click().then ->
+            expect(changed).to.eq 0
 
     describe "caret position", ->
       it "leaves caret at the end of the input"

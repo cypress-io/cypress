@@ -111,7 +111,8 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
         options.input     = false
         @ensureKey el, "\n", options, ->
           rng.insertEOL()
-          #options.onEnterPressed
+          changed = options.prev isnt rng.all()
+          options.onEnterPressed(changed)
 
       ## charCode = 37
       ## no keyPress
@@ -174,14 +175,20 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       new Promise (resolve, reject) =>
         _.defaults options,
           delay: 10
-          onNoMatchingSpecialChars: ->
+          onTypeChange: ->
           onEnterPressed: ->
+          onNoMatchingSpecialChars: ->
 
         el = options.$el.get(0)
 
         ## if el does not have this property
         bililiteRangeSelection = el.bililiteRangeSelection
         rng = bililiteRange(el).bounds("selection")
+
+        ## store the previous text value
+        ## so we know to fire change events
+        ## and change callbacks
+        options.prev = rng.all()
 
         ## restore the bounds if our el already has this
         if bililiteRangeSelection
@@ -206,6 +213,11 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
         _.each options.chars.split(charsBetweenCurlyBraces), (chars) =>
           @typeChars(el, rng, chars, options)
 
+        ## if after typing we ended up changing
+        ## our value then fire the onTypeChange callback
+        if options.prev isnt rng.all()
+          options.onTypeChange()
+
         ## after typing be sure to clear all ranges
         if sel = options.window.getSelection()
           sel.removeAllRanges()
@@ -214,7 +226,6 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
 
     typeChars: (el, rng, chars, options) ->
       if charsBetweenCurlyBraces.test(chars)
-        ## slice off the first and last curly brace
         @handleSpecialChars(el, rng, chars, options)
       else
         _.each chars, (char) =>
@@ -314,12 +325,4 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       else
         allChars = _.keys(@specialChars).join(", ")
         options.onNoMatchingSpecialChars(chars, allChars)
-
-    isNothingRange: (rng) ->
-      try
-        rng._nativeWrap()
-      catch
-        return true
-
-      return false
   }
