@@ -2457,6 +2457,14 @@ describe "$Cypress.Cy Actions Commands", ->
         .get("input:first").focus()
         .get("input:last").focus()
 
+    it "can focus [contenteditable]", ->
+      ce = @cy.$("[contenteditable]:first")
+
+      @cy
+        .get("[contenteditable]:first").focus()
+        .focused().then ($ce) ->
+          expect($ce.get(0)).to.eq ce.get(0)
+
     describe ".log", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
@@ -2633,6 +2641,13 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("input:first").focus().blur().then ($input) ->
         expect($input).to.match input
+
+    it.only "can blur [contenteditable]", ->
+      ce = @cy.$("[contenteditable]:first")
+
+      @cy
+        .get("[contenteditable]:first").focus().blur().then ($ce) ->
+          expect($ce.get(0)).to.eq ce.get(0)
 
     describe ".log", ->
       beforeEach ->
