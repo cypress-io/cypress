@@ -1,4 +1,4 @@
-$Cypress.register "Angular", (Cypress, _, $) ->
+$Cypress.register "Angular", (Cypress, _, $, Promise) ->
 
   ngPrefixes = ['ng-', 'ng_', 'data-ng-', 'x-ng-']
 

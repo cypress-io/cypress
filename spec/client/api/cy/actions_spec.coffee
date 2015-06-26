@@ -88,6 +88,21 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.$("select[name=maps]").one "focus", -> done()
         @cy.get("select[name=maps]").select("train")
 
+      it "emits input event", (done) ->
+        @cy.$("select[name=maps]").one "input", -> done()
+        @cy.get("select[name=maps]").select("train")
+
+      it "emits all events in the correct order", ->
+        fired = []
+        events = ["mousedown", "focus", "mouseup", "click", "input", "change"]
+
+        _.each events, (event) =>
+          @cy.$("select[name=maps]").one event, ->
+            fired.push(event)
+
+        @cy.get("select[name=maps]").select("train").then ->
+          expect(fired).to.deep.eq events
+
     describe "errors", ->
       beforeEach ->
         @allowErrors()
@@ -236,6 +251,10 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("input:text:first").type(" bar").then ($input) ->
         expect($input).to.have.value("foo bar")
 
+    it "can type numbers", ->
+      @cy.get(":text:first").type(123).then ($text) ->
+        expect($text).to.have.value("123")
+
     it "triggers focus event on the input", (done) ->
       @cy.$("input:text:first").focus -> done()
 
@@ -298,6 +317,793 @@ describe "$Cypress.Cy Actions Commands", ->
     #         expect($input).to.have.value "1234"
     #         expect($input.get(0)).to.eq input.get(0)
 
+    describe "delay", ->
+      beforeEach ->
+        @delay = 10
+
+      it "adds delay to delta for each key sequence", ->
+        @cy._timeout(50)
+
+        timeout = @sandbox.spy @cy, "_timeout"
+
+        @cy.get(":text:first").type("foo{enter}bar{leftarrow}").then ->
+          expect(timeout).to.be.calledWith @delay * 8
+
+      it "can cancel additional keystrokes", (done) ->
+        @cy._timeout(50)
+
+        text = @cy.$(":text:first").keydown _.after 3, ->
+          Cypress.abort()
+
+        @cy.on "cancel", ->
+          _.delay ->
+            expect(text).to.have.value("foo")
+            done()
+          , 50
+
+        @cy.get(":text:first").type("foo{enter}bar{leftarrow}")
+
+    describe "events", ->
+      it "receives keydown event", (done) ->
+        input = @cy.$(":text:first")
+
+        input.get(0).addEventListener "keydown", (e) =>
+          obj = _(e).pick("altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which")
+          expect(obj).to.deep.eq {
+            altKey: false
+            bubbles: true
+            cancelable: true
+            charCode: 0 ## deprecated
+            ctrlKey: false
+            detail: 0
+            keyCode: 65 ## deprecated but fired by chrome always uppercase in the ASCII table
+            layerX: 0
+            layerY: 0
+            location: 0
+            metaKey: false
+            pageX: 0
+            pageY: 0
+            repeat: false
+            shiftKey: false
+            type: "keydown"
+            view: @cy.private("window")
+            which: 65 ## deprecated but fired by chrome
+          }
+          done()
+
+        @cy.get(":text:first").type("a")
+
+      it "receives keypress event", (done) ->
+        input = @cy.$(":text:first")
+
+        input.get(0).addEventListener "keypress", (e) =>
+          obj = _(e).pick("altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which")
+          expect(obj).to.deep.eq {
+            altKey: false
+            bubbles: true
+            cancelable: true
+            charCode: 97 ## deprecated
+            ctrlKey: false
+            detail: 0
+            keyCode: 97 ## deprecated
+            layerX: 0
+            layerY: 0
+            location: 0
+            metaKey: false
+            pageX: 0
+            pageY: 0
+            repeat: false
+            shiftKey: false
+            type: "keypress"
+            view: @cy.private("window")
+            which: 97 ## deprecated
+          }
+          done()
+
+        @cy.get(":text:first").type("a")
+
+      it "receives keyup event", (done) ->
+        input = @cy.$(":text:first")
+
+        input.get(0).addEventListener "keyup", (e) =>
+          obj = _(e).pick("altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which")
+          expect(obj).to.deep.eq {
+            altKey: false
+            bubbles: true
+            cancelable: true
+            charCode: 0 ## deprecated
+            ctrlKey: false
+            detail: 0
+            keyCode: 65 ## deprecated but fired by chrome always uppercase in the ASCII table
+            layerX: 0
+            layerY: 0
+            location: 0
+            metaKey: false
+            pageX: 0
+            pageY: 0
+            repeat: false
+            shiftKey: false
+            type: "keyup"
+            view: @cy.private("window")
+            which: 65 ## deprecated but fired by chrome
+          }
+          done()
+
+        @cy.get(":text:first").type("a")
+
+      it "receives textInput event", (done) ->
+        input = @cy.$(":text:first")
+
+        input.get(0).addEventListener "textInput", (e) =>
+          obj = _(e).pick "bubbles", "cancelable", "charCode", "data", "detail", "keyCode", "layerX", "layerY", "pageX", "pageY", "type", "view", "which"
+          expect(obj).to.deep.eq {
+            bubbles: true
+            cancelable: true
+            charCode: 0
+            data: "a"
+            detail: 0
+            keyCode: 0
+            layerX: 0
+            layerY: 0
+            pageX: 0
+            pageY: 0
+            type: "textInput"
+            view: @cy.private("window")
+            which: 0
+          }
+          done()
+
+        @cy.get(":text:first").type("a")
+
+      it "receives input event", (done) ->
+        input = @cy.$(":text:first")
+
+        input.get(0).addEventListener "input", (e) =>
+          obj = _(e).pick "bubbles", "cancelable", "type"
+          expect(obj).to.deep.eq {
+            bubbles: true
+            cancelable: false
+            type: "input"
+          }
+          done()
+
+        @cy.get(":text:first").type("a")
+
+      it "fires events in the correct order"
+
+      it "fires events for each key stroke"
+
+    describe "value changing", ->
+      it "changes the elements value", ->
+        @cy.get(":text:first").type("a").then ($text) ->
+          expect($text).to.have.value("a")
+
+      it "changes the elements value for multiple keys", ->
+        @cy.get(":text:first").type("foo").then ($text) ->
+          expect($text).to.have.value("foo")
+
+      it "can change input[type=number] values", ->
+        @cy.get("#input-types [type=number]").type("12").then ($text) ->
+          expect($text).to.have.value("12")
+
+      it "inserts text after existing text", ->
+        @cy.get(":text:first").invoke("val", "foo").type(" bar").then ($text) ->
+          expect($text).to.have.value("foo bar")
+
+      it "inserts text after existing text on input[type=number]", ->
+        @cy.get("#input-types [type=number]").invoke("val", "12").type("34").then ($text) ->
+          expect($text).to.have.value("1234")
+
+      it "can change input[type=email] values", ->
+        @cy.get("#input-types [type=email]").type("brian@foo.com").then ($text) ->
+          expect($text).to.have.value("brian@foo.com")
+
+      it "inserts text after existing text on input[type=email]", ->
+        @cy.get("#input-types [type=email]").invoke("val", "brian@foo.c").type("om").then ($text) ->
+          expect($text).to.have.value("brian@foo.com")
+
+      it "can change input[type=password] values", ->
+        @cy.get("#input-types [type=password]").type("password").then ($text) ->
+          expect($text).to.have.value("password")
+
+      it "inserts text after existing text on input[type=password]", ->
+        @cy.get("#input-types [type=password]").invoke("val", "pass").type("word").then ($text) ->
+          expect($text).to.have.value("password")
+
+      it "can change [contenteditable] values", ->
+        @cy.get("#input-types [contenteditable]").type("foo").then ($div) ->
+          expect($div).to.have.text("foo")
+
+      it "inserts text after existing text on [contenteditable]", ->
+        @cy.get("#input-types [contenteditable]").invoke("text", "foo").type(" bar").then ($text) ->
+          expect($text).to.have.text("foo bar")
+
+      # it "can change input[type=date] values", ->
+      #   @cy.get("#input-types [type=date").type("1986-03-14").then ($text) ->
+      #     expect($text).to.have.value("1986-03-14")
+
+      # it "inserts text after existing text on input[type=date]", ->
+      #   @cy.get("#input-types [type=date").invoke("val", "pass").type("word").then ($text) ->
+      #     expect($text).to.have.value("date")
+
+      it "does not fire keypress when keydown is preventedDefault", (done) ->
+        @cy.$(":text:first").get(0).addEventListener "keypress", (e) ->
+          done("should not have received keypress event")
+
+        @cy.$(":text:first").get(0).addEventListener "keydown", (e) ->
+          e.preventDefault()
+
+        @cy.get(":text:first").type("foo").then -> done()
+
+      it "does not insert key when keydown is preventedDefault", ->
+        @cy.$(":text:first").get(0).addEventListener "keydown", (e) ->
+          e.preventDefault()
+
+        @cy.get(":text:first").type("foo").then ($text) ->
+          expect($text).to.have.value("")
+
+      it "does not insert key when keypress is preventedDefault", ->
+        @cy.$(":text:first").get(0).addEventListener "keypress", (e) ->
+          e.preventDefault()
+
+        @cy.get(":text:first").type("foo").then ($text) ->
+          expect($text).to.have.value("")
+
+      it "does not fire textInput when keypress is preventedDefault", (done) ->
+        @cy.$(":text:first").get(0).addEventListener "textInput", (e) ->
+          done("should not have received textInput event")
+
+        @cy.$(":text:first").get(0).addEventListener "keypress", (e) ->
+          e.preventDefault()
+
+        @cy.get(":text:first").type("foo").then -> done()
+
+      it "does not insert key when textInput is preventedDefault", ->
+        @cy.$(":text:first").get(0).addEventListener "textInput", (e) ->
+          e.preventDefault()
+
+        @cy.get(":text:first").type("foo").then ($text) ->
+          expect($text).to.have.value("")
+
+      it "does not fire input when textInput is preventedDefault", (done) ->
+        @cy.$(":text:first").get(0).addEventListener "input", (e) ->
+          done("should not have received input event")
+
+        @cy.$(":text:first").get(0).addEventListener "textInput", (e) ->
+          e.preventDefault()
+
+        @cy.get(":text:first").type("foo").then -> done()
+
+      it "preventing default to input event should not affect anything", ->
+        @cy.$(":text:first").get(0).addEventListener "input", (e) ->
+          e.preventDefault()
+
+        @cy.get(":text:first").type("foo").then ($input) ->
+          expect($input).to.have.value("foo")
+
+    describe "specialChars", ->
+      context "{{}", ->
+        it "sets which and keyCode to 219", (done) ->
+          @cy.$(":text:first").on "keydown", (e) ->
+            expect(e.which).to.eq 219
+            expect(e.keyCode).to.eq 219
+            done()
+
+          @cy.get(":text:first").invoke("val", "ab").type("{{}")
+
+        it "fires keypress event with 219 charCode", (done) ->
+          @cy.$(":text:first").on "keypress", (e) ->
+            expect(e.charCode).to.eq 219
+            expect(e.which).to.eq 219
+            expect(e.keyCode).to.eq 219
+            done()
+
+          @cy.get(":text:first").invoke("val", "ab").type("{{}")
+
+        it "fires textInput event with e.data", (done) ->
+          @cy.$(":text:first").on "textInput", (e) ->
+            expect(e.originalEvent.data).to.eq "{"
+            done()
+
+          @cy.get(":text:first").invoke("val", "ab").type("{{}")
+
+        it "fires input event", (done) ->
+          @cy.$(":text:first").on "input", (e) ->
+            done()
+
+          @cy.get(":text:first").invoke("val", "ab").type("{{}")
+
+        it "can prevent default character insertion", ->
+          @cy.$(":text:first").on "keydown", (e) ->
+            if e.keyCode is 219
+              e.preventDefault()
+
+          @cy.get(":text:first").invoke("val", "foo").type("{{}").then ($input) ->
+            expect($input).to.have.value("foo")
+
+      context "{esc}", ->
+        it "sets which and keyCode to 27 and does not fire keypress events", (done) ->
+          @cy.$(":text:first").on "keypress", ->
+            done("should not have received keypress")
+
+          @cy.$(":text:first").on "keydown", (e) ->
+            expect(e.which).to.eq 27
+            expect(e.keyCode).to.eq 27
+            done()
+
+          @cy.get(":text:first").invoke("val", "ab").type("{esc}")
+
+        it "does not fire textInput event", (done) ->
+          @cy.$(":text:first").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{esc}").then -> done()
+
+        it "does not fire input event", (done) ->
+          @cy.$(":text:first").on "input", (e) ->
+            done("input should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{esc}").then -> done()
+
+        it "can prevent default esc movement", (done) ->
+          @cy.$(":text:first").on "keydown", (e) ->
+            if e.keyCode is 27
+              e.preventDefault()
+
+          @cy.get(":text:first").invoke("val", "foo").type("d{esc}").then ($input) ->
+            expect($input).to.have.value("food")
+            done()
+
+      context "{backspace}", ->
+        it "backspaces character to the left", ->
+          @cy.get(":text:first").invoke("val", "bar").type("{leftarrow}{backspace}").then ($input) ->
+            expect($input).to.have.value("br")
+
+        it "can backspace a selection range of characters", ->
+          @cy
+            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
+              ## select the 'ar' characters
+              b = bililiteRange($input.get(0))
+              b.bounds([1, 3]).select()
+            .get(":text:first").type("{backspace}").then ($input) ->
+              expect($input).to.have.value("b")
+
+        it "sets which and keyCode to 8 and does not fire keypress events", (done) ->
+          @cy.$(":text:first").on "keypress", ->
+            done("should not have received keypress")
+
+          @cy.$(":text:first").on "keydown", _.after 2, (e) ->
+            expect(e.which).to.eq 8
+            expect(e.keyCode).to.eq 8
+            done()
+
+          @cy.get(":text:first").invoke("val", "ab").type("{leftarrow}{backspace}")
+
+        it "does not fire textInput event", (done) ->
+          @cy.$(":text:first").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{backspace}").then -> done()
+
+        it "does fire input event when value changes", (done) ->
+          @cy.$(":text:first").on "input", (e) ->
+            done()
+
+          @cy
+            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
+              ## select the 'a' characters
+              b = bililiteRange($input.get(0))
+              b.bounds([1, 2]).select()
+            .get(":text:first").type("{backspace}")
+
+        it "does not fire input event when value does not change", (done) ->
+          @cy.$(":text:first").on "input", (e) ->
+            done("should not have fired input")
+
+          @cy
+            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
+              ## set the range at the beggining
+              b = bililiteRange($input.get(0))
+              b.bounds([0, 0]).select()
+            .get(":text:first").type("{backspace}").then -> done()
+
+        it "can prevent default backspace movement", (done) ->
+          @cy.$(":text:first").on "keydown", (e) ->
+            if e.keyCode is 8
+              e.preventDefault()
+
+          @cy.get(":text:first").invoke("val", "foo").type("{leftarrow}{backspace}").then ($input) ->
+            expect($input).to.have.value("foo")
+            done()
+
+      context "{del}", ->
+        it "deletes character to the right", ->
+          @cy.get(":text:first").invoke("val", "bar").type("{leftarrow}{del}").then ($input) ->
+            expect($input).to.have.value("ba")
+
+        it "can delete a selection range of characters", ->
+          @cy
+            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
+              ## select the 'ar' characters
+              b = bililiteRange($input.get(0))
+              b.bounds([1, 3]).select()
+            .get(":text:first").type("{del}").then ($input) ->
+              expect($input).to.have.value("b")
+
+        it "sets which and keyCode to 46 and does not fire keypress events", (done) ->
+          @cy.$(":text:first").on "keypress", ->
+            done("should not have received keypress")
+
+          @cy.$(":text:first").on "keydown", _.after 2, (e) ->
+            expect(e.which).to.eq 46
+            expect(e.keyCode).to.eq 46
+            done()
+
+          @cy.get(":text:first").invoke("val", "ab").type("{leftarrow}{del}")
+
+        it "does not fire textInput event", (done) ->
+          @cy.$(":text:first").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{del}").then -> done()
+
+        it "does fire input event when value changes", (done) ->
+          @cy.$(":text:first").on "input", (e) ->
+            done()
+
+          @cy
+            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
+              ## select the 'a' characters
+              b = bililiteRange($input.get(0))
+              b.bounds([1, 2]).select()
+            .get(":text:first").type("{del}")
+
+        it "does not fire input event when value does not change", (done) ->
+          @cy.$(":text:first").on "input", (e) ->
+            done("should not have fired input")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{del}").then -> done()
+
+        it "can prevent default del movement", (done) ->
+          @cy.$(":text:first").on "keydown", (e) ->
+            if e.keyCode is 46
+              e.preventDefault()
+
+          @cy.get(":text:first").invoke("val", "foo").type("{leftarrow}{del}").then ($input) ->
+            expect($input).to.have.value("foo")
+            done()
+
+      context "{leftarrow}", ->
+        it "can move the cursor from the end to end - 1", ->
+          @cy.get(":text:first").invoke("val", "bar").type("{leftarrow}n").then ($input) ->
+            expect($input).to.have.value("banr")
+
+        it "does not move the cursor if already at bounds 0", ->
+          @cy.get(":text:first").invoke("val", "bar").type("{selectall}{leftarrow}n").then ($input) ->
+            expect($input).to.have.value("nbar")
+
+        it "sets the cursor to the left bounds", ->
+          @cy
+            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
+              ## select the 'a' character
+              b = bililiteRange($input.get(0))
+              b.bounds([1, 2]).select()
+            .get(":text:first").type("{leftarrow}n").then ($input) ->
+              expect($input).to.have.value("bnar")
+
+        it "sets the cursor to the very beginning", ->
+          @cy
+            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
+              ## select the 'a' character
+              b = bililiteRange($input.get(0))
+              b.bounds("all").select()
+            .get(":text:first").type("{leftarrow}n").then ($input) ->
+              expect($input).to.have.value("nbar")
+
+        it "sets which and keyCode to 37 and does not fire keypress events", (done) ->
+          @cy.$(":text:first").on "keypress", ->
+            done("should not have received keypress")
+
+          @cy.$(":text:first").on "keydown", (e) ->
+            expect(e.which).to.eq 37
+            expect(e.keyCode).to.eq 37
+            done()
+
+          @cy.get(":text:first").invoke("val", "ab").type("{leftarrow}").then ($input) ->
+            done()
+
+        it "does not fire textInput event", (done) ->
+          @cy.$(":text:first").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{leftarrow}").then -> done()
+
+        it "does not fire input event", (done) ->
+          @cy.$(":text:first").on "input", (e) ->
+            done("input should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{leftarrow}").then -> done()
+
+        it "can prevent default left arrow movement", (done) ->
+          @cy.$(":text:first").on "keydown", (e) ->
+            if e.keyCode is 37
+              e.preventDefault()
+
+          @cy.get(":text:first").invoke("val", "foo").type("{leftarrow}d").then ($input) ->
+            expect($input).to.have.value("food")
+            done()
+
+      context "{rightarrow}", ->
+        it "can move the cursor from the beginning to beginning + 1", ->
+          @cy.get(":text:first").invoke("val", "bar").focus().then ($input) ->
+            ## select the all characters
+            b = bililiteRange($input.get(0))
+            b.bounds("start").select()
+          .get(":text:first").type("{rightarrow}n").then ($input) ->
+            expect($input).to.have.value("bnar")
+
+        it "does not move the cursor if already at end of bounds", ->
+          @cy.get(":text:first").invoke("val", "bar").type("{selectall}{rightarrow}n").then ($input) ->
+            expect($input).to.have.value("barn")
+
+        it "sets the cursor to the rights bounds", ->
+          @cy
+            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
+              ## select the 'a' character
+              b = bililiteRange($input.get(0))
+              b.bounds([1, 2]).select()
+            .get(":text:first").type("{rightarrow}n").then ($input) ->
+              expect($input).to.have.value("banr")
+
+        it "sets the cursor to the very beginning", ->
+          @cy
+            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
+              ## select the all characters
+              b = bililiteRange($input.get(0))
+              b.bounds("all").select()
+            .get(":text:first").type("{leftarrow}n").then ($input) ->
+              expect($input).to.have.value("nbar")
+
+        it "sets which and keyCode to 39 and does not fire keypress events", (done) ->
+          @cy.$(":text:first").on "keypress", ->
+            done("should not have received keypress")
+
+          @cy.$(":text:first").on "keydown", (e) ->
+            expect(e.which).to.eq 39
+            expect(e.keyCode).to.eq 39
+            done()
+
+          @cy.get(":text:first").invoke("val", "ab").type("{rightarrow}").then ($input) ->
+            done()
+
+        it "does not fire textInput event", (done) ->
+          @cy.$(":text:first").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{rightarrow}").then -> done()
+
+        it "does not fire input event", (done) ->
+          @cy.$(":text:first").on "input", (e) ->
+            done("input should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{rightarrow}").then -> done()
+
+        it "can prevent default right arrow movement", (done) ->
+          @cy.$(":text:first").on "keydown", (e) ->
+            if e.keyCode is 39
+              e.preventDefault()
+
+          @cy.get(":text:first").invoke("val", "foo").type("{leftarrow}{rightarrow}d").then ($input) ->
+            expect($input).to.have.value("fodo")
+            done()
+
+      context "{selectall}{del}", ->
+        it "can select all the text and delete", ->
+          @cy.get(":text:first").invoke("val", "1234").type("{selectall}{del}").type("foo").then ($text) ->
+            expect($text).to.have.value("foo")
+
+        it "can select all [contenteditable] and delete", ->
+          @cy.get("#input-types [contenteditable]").invoke("text", "1234").type("{selectall}{del}").type("foo").then ($div) ->
+            expect($div).to.have.text("foo")
+
+      context "{enter}", ->
+        it "sets which and keyCode to 13 and prevents EOL insertion", (done) ->
+          @cy.$("#input-types textarea").on "keypress", _.after 2, (e) ->
+            done("should not have received keypress event")
+
+          @cy.$("#input-types textarea").on "keydown", _.after 2, (e) ->
+            expect(e.which).to.eq 13
+            expect(e.keyCode).to.eq 13
+            e.preventDefault()
+
+          @cy.get("#input-types textarea").invoke("val", "foo").type("d{enter}").then ($textarea) ->
+            expect($textarea).to.have.value("food")
+            done()
+
+        it "sets which and keyCode and charCode to 13 and prevents EOL insertion", (done) ->
+          @cy.$("#input-types textarea").on "keypress", _.after 2, (e) ->
+            expect(e.which).to.eq 13
+            expect(e.keyCode).to.eq 13
+            expect(e.charCode).to.eq 13
+            e.preventDefault()
+
+          @cy.get("#input-types textarea").invoke("val", "foo").type("d{enter}").then ($textarea) ->
+            expect($textarea).to.have.value("food")
+            done()
+
+        it "does not fire textInput event", (done) ->
+          @cy.$(":text:first").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{enter}").then -> done()
+
+        it "does not fire input event", (done) ->
+          @cy.$(":text:first").on "input", (e) ->
+            done("input should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{enter}").then -> done()
+
+        it "inserts new line into textarea", ->
+          @cy.get("#input-types textarea").invoke("val", "foo").type("bar{enter}baz{enter}quux").then ($textarea) ->
+            expect($textarea).to.have.value("foobar\nbaz\nquux")
+
+        it "inserts new line into [contenteditable]", ->
+          @cy.get("#input-types [contenteditable]").invoke("text", "foo").type("bar{enter}baz{enter}quux").then ($div) ->
+            expect($div).to.have.text("foobar\nbaz\nquux")
+
+    describe "change events", ->
+      it "fires when enter is pressed and value has changed", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy.get(":text:first").invoke("val", "foo").type("bar{enter}").then ->
+          expect(changed).to.eq 1
+
+      it "fires twice when enter is pressed and then again after losing focus", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy.get(":text:first").invoke("val", "foo").type("bar{enter}baz").blur().then ->
+          expect(changed).to.eq 2
+
+      it "fires when element loses focus due to another action (click)", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy
+          .get(":text:first").type("foo").then ->
+            expect(changed).to.eq 0
+          .get("button:first").click().then ->
+            expect(changed).to.eq 1
+
+      it "fires when element loses focus due to another action (type)", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy
+          .get(":text:first").type("foo").then ->
+            expect(changed).to.eq 0
+          .get("textarea:first").type("bar").then ->
+            expect(changed).to.eq 1
+
+      it "fires when element is directly blurred", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy
+          .get(":text:first").type("foo").blur().then ->
+            expect(changed).to.eq 1
+
+      it "fires when element is tabbed away from"#, ->
+      #   changed = 0
+
+      #   @cy.$(":text:first").change ->
+      #     changed += 1
+
+      #   @cy.get(":text:first").invoke("val", "foo").type("b{tab}").then ->
+      #     expect(changed).to.eq 1
+
+      it "does not fire if {enter} is preventedDefault", ->
+        changed = 0
+
+        @cy.$(":text:first").keypress (e) ->
+          e.preventDefault() if e.which is 13
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy.get(":text:first").invoke("val", "foo").type("b{enter}").then ->
+          expect(changed).to.eq 0
+
+      it "does not fire when enter is pressed and value hasnt changed", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy.get(":text:first").invoke("val", "foo").type("b{backspace}{enter}").then ->
+          expect(changed).to.eq 0
+
+      it "does not fire at the end of the type", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy
+          .get(":text:first").type("foo").then ->
+            expect(changed).to.eq 0
+
+      it "does not fire change event if value hasnt actually changed", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy
+          .get(":text:first").invoke("val", "foo").type("{backspace}{backspace}oo{enter}").blur().then ->
+            expect(changed).to.eq 0
+
+      it "does not fire if mousedown is preventedDefault which prevents element from losing focus", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy.$("textarea:first").mousedown -> return false
+
+        @cy
+          .get(":text:first").invoke("val", "foo").type("bar")
+          .get("textarea:first").click().then ->
+            expect(changed).to.eq 0
+
+      it "does not fire hitting {enter} inside of a textarea", ->
+        changed = 0
+
+        @cy.$("textarea:first").change ->
+          changed += 1
+
+        @cy
+          .get("textarea:first").type("foo{enter}bar").then ->
+            expect(changed).to.eq 0
+
+      it "does not fire hitting {enter} inside of [contenteditable]", ->
+        changed = 0
+
+        @cy.$("[contenteditable]:first").change ->
+          changed += 1
+
+        @cy
+          .get("[contenteditable]:first").type("foo{enter}bar").then ->
+            expect(changed).to.eq 0
+
+      ## [contenteditable] does not fire ANY change events ever!
+      it "does not fire at ALL for [contenteditable]", ->
+        changed = 0
+
+        @cy.$("[contenteditable]:first").change ->
+          changed += 1
+
+        @cy
+          .get("[contenteditable]:first").type("foo")
+          .get("button:first").click().then ->
+            expect(changed).to.eq 0
+
+    describe "caret position", ->
+      it "leaves caret at the end of the input"
+
+      it "always types at the end of the input"
+
     describe "{enter}", ->
       beforeEach ->
         @forms = @cy.$("#form-submits")
@@ -345,18 +1151,6 @@ describe "$Cypress.Cy Actions Commands", ->
             submits += 1
 
           @cy.get("#single-input input").type("f{enter}{enter}").then ->
-            expect(submits).to.eq 2
-
-        it "unbinds from form submit event", ->
-          submits = 0
-
-          form = @forms.find("#single-input").submit ->
-            submits += 1
-
-          @cy.get("#single-input input").type("f{enter}{enter}").then ->
-            ## simulate another enter event which should not issue another
-            ## submit event because we should have cleaned up the events
-            form.find("input").simulate "key-sequence", sequence: "b{enter}"
             expect(submits).to.eq 2
 
         it "does not submit when keydown is defaultPrevented on input", (done) ->
@@ -556,6 +1350,36 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
           expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
 
+      context "#onConsole", ->
+        it "has a table of keys", ->
+          @cy.get(":text:first").type("foo{enter}b{leftarrow}{del}{enter}").then ->
+            table = @log.attributes.onConsole().table()
+            console.table(table.data, table.columns)
+            expect(table.columns).to.deep.eq [
+              "typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change"
+            ]
+            expect(table.name).to.eq "Key Events Table"
+            expect(table.data).to.deep.eq {
+              1: {typed: "f", which: 70, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
+              2: {typed: "o", which: 79, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
+              3: {typed: "o", which: 79, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
+              4: {typed: "{enter}", which: 13, keydown: true, keypress: true, keyup: true, change: true}
+              5: {typed: "b", which: 66, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
+              6: {typed: "{leftarrow}", which: 37, keydown: true, keyup: true}
+              7: {typed: "{del}", which: 46, keydown: true, input: true, keyup: true}
+              8: {typed: "{enter}", which: 13, keydown: true, keypress: true, keyup: true, change: true}
+            }
+
+        it "has a table of keys with preventedDefault", ->
+          @cy.$(":text:first").keydown -> return false
+
+          @cy.get(":text:first").type("f").then ->
+            table = @log.attributes.onConsole().table()
+            console.table(table.data, table.columns)
+            expect(table.data).to.deep.eq {
+              1: {typed: "f", which: 70, keydown: "preventedDefault", keyup: true}
+            }
+
     describe "errors", ->
       beforeEach ->
         @allowErrors()
@@ -647,6 +1471,62 @@ describe "$Cypress.Cy Actions Commands", ->
           done()
 
         @cy.inspect().get("#input-covered-in-span").type("foo")
+
+      it "throws when special characters dont exist", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq 2
+          allChars = _.keys(@Cypress.Keyboard.specialChars).join(", ")
+          expect(err.message).to.eq "Special character sequence: '{bar}' is not recognized. Available sequences are: #{allChars}"
+          done()
+
+        @cy.get(":text:first").type("foo{bar}")
+
+      it "throws when attemping to type tab", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq 2
+          expect(err.message).to.eq "{tab} isn't a supported character sequence. You'll want to use the command: 'cy.tab()' which is not ready yet, but when it is done that's what you'll use."
+          done()
+
+        @cy.get(":text:first").type("foo{tab}")
+
+      it "throws on an empty string", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq 2
+          expect(err.message).to.eq ".type() cannot accept an empty String! You need to actually type something."
+          done()
+
+        @cy.get(":text:first").type("")
+
+      _.each [NaN, Infinity, [], {}, null, undefined], (val) =>
+        it "throws when trying to type: #{val}", (done) ->
+          logs = []
+
+          @Cypress.on "log", (log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq 2
+            expect(err.message).to.eq ".type() can only accept a String or Number. You passed in: '#{val}'"
+            done()
+
+          @cy.get(":text:first").type(val)
+
+      it "throws when type is cancelled by preventingDefault mousedown"
 
   context "#clear", ->
     it "does not change the subject", ->
@@ -1579,6 +2459,14 @@ describe "$Cypress.Cy Actions Commands", ->
         .get("input:first").focus()
         .get("input:last").focus()
 
+    it "can focus [contenteditable]", ->
+      ce = @cy.$("[contenteditable]:first")
+
+      @cy
+        .get("[contenteditable]:first").focus()
+        .focused().then ($ce) ->
+          expect($ce.get(0)).to.eq ce.get(0)
+
     describe ".log", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
@@ -1756,6 +2644,13 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("input:first").focus().blur().then ($input) ->
         expect($input).to.match input
 
+    it "can blur [contenteditable]", ->
+      ce = @cy.$("[contenteditable]:first")
+
+      @cy
+        .get("[contenteditable]:first").focus().blur().then ($ce) ->
+          expect($ce.get(0)).to.eq ce.get(0)
+
     describe ".log", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
@@ -1907,14 +2802,6 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("#button").dblclick().then ->
         expect(@delay).to.be.calledWith 10
 
-    it "inserts artificial delay of 50ms for anchors", ->
-      @cy.on "invoke:start", (obj) =>
-        if obj.name is "dblclick"
-          @delay = @sandbox.spy Promise.prototype, "delay"
-
-      @cy.contains("Home Page").dblclick().then ->
-        expect(@delay).to.be.calledWith 50
-
     it "can operate on a jquery collection", ->
       dblclicks = 0
       buttons = @cy.$("button")
@@ -1946,13 +2833,21 @@ describe "$Cypress.Cy Actions Commands", ->
       ## make sure we have at least 5 anchor links
       expect(anchors.length).to.be.gte 5
 
-      @cy.on "cancel", ->
+      @cy.on "cancel", =>
+        ## timeout will get called synchronously
+        ## again during a click if the click function
+        ## is called
+        timeout = @sandbox.spy @cy, "_timeout"
+
         _.delay ->
           ## abort should only have been called once
           expect(spy.callCount).to.eq 1
 
           ## and we should have stopped dblclicking after 3
           expect(dblclicks).to.eq 3
+
+          expect(timeout.callCount).to.eq 0
+
           done()
         , 200
 
@@ -1965,7 +2860,7 @@ describe "$Cypress.Cy Actions Commands", ->
       ## which proves we are dblclicking serially
       throttled = _.throttle ->
         dblclicks += 1
-      , 40, {leading: false}
+      , 5, {leading: false}
 
       anchors = @cy.$("#sequential-clicks a")
       anchors.dblclick throttled
@@ -2298,13 +3193,21 @@ describe "$Cypress.Cy Actions Commands", ->
       ## make sure we have at least 5 anchor links
       expect(anchors.length).to.be.gte 5
 
-      @cy.on "cancel", ->
+      @cy.on "cancel", =>
+        ## timeout will get called synchronously
+        ## again during a click if the click function
+        ## is called
+        timeout = @sandbox.spy @cy, "_timeout"
+
         _.delay ->
           ## abort should only have been called once
           expect(spy.callCount).to.eq 1
 
           ## and we should have stopped clicking after 3
           expect(clicks).to.eq 3
+
+          expect(timeout.callCount).to.eq 0
+
           done()
         , 200
 

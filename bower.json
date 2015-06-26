@@ -31,7 +31,7 @@
     "jsuri": "1.3.0",
     "chai-jquery": "2.0.0",
     "jquery-simulate-ext": "~1.3.0",
-    "bililiteRange": "~2.5.1",
+    "bililiteRange": "git://github.com/dwachss/bililiteRange#92fd5149d42c7fb40b4b601cb4fd0bbd3344c749",
     "backbone.mutators": "~0.4.1",
     "sinon-chai": "~2.5.0",
     "jquery-ui": "~1.11.1",

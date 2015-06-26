@@ -1,15 +1,13 @@
-$Cypress.register "Actions", (Cypress, _, $) ->
-
-  pressedEnter = /\{enter\}/
+$Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
   textLike = "textarea,:text,[contenteditable],[type=password],[type=email],[type=number],[type=date],[type=week],[type=month],[type=time],[type=datetime],[type=datetime-local],[type=search],[type=url]"
 
-  focusable = "a[href],link[href],button,input,select,textarea,[tabindex]"
+  focusable = "a[href],link[href],button,input,select,textarea,[tabindex],[contenteditable]"
 
-  $.simulate.prototype.simulateKeySequence.defaults["{esc}"] = (rng, char, options) ->
-    keyOpts = {keyCode: 27, charCode: 27, which: 27}
-    _.each ["keydown", "keypress", "keyup"], (event) ->
-      options.$el.simulate event, _.extend({}, options.eventProps, keyOpts)
+  dispatchPrimedChangeEvents = ->
+    ## if we have a changeEvent, dispatch it
+    if changeEvent = @prop("changeEvent")
+      changeEvent.call(@)
 
   Cypress.addChildCommand
 
@@ -242,6 +240,10 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
           options.$el.on("blur", blurred)
 
+          ## for simplicity we allow change events
+          ## to be triggered by a manual blur
+          dispatchPrimedChangeEvents.call(@)
+
           options.$el.get(0).blur()
 
           @defer =>
@@ -251,8 +253,23 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
             @prop("blacklistFocusedEl", options.$el.get(0))
 
-            options.$el.cySimulate("blur")
-            options.$el.cySimulate("focusout")
+            ## todo handle relatedTarget's per the spec
+            focusoutEvt = new FocusEvent "focusout", {
+              bubbles: true
+              cancelable: false
+              view: @private("window")
+              relatedTarget: null
+            }
+
+            blurEvt = new FocusEvent "blur", {
+              bubble: false
+              cancelable: false
+              view: @private("window")
+              relatedTarget: null
+            }
+
+            options.$el.get(0).dispatchEvent(blurEvt)
+            options.$el.get(0).dispatchEvent(focusoutEvt)
 
         promise.timeout(timeout).catch Promise.TimeoutError, (err) =>
           cleanup()
@@ -267,8 +284,17 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
       @ensureDom(subject)
 
+      wait = 10
+
+      dblclicks = []
+
       dblclick = (el, index) =>
         $el = $(el)
+
+        ## we want to add this wait delta to our
+        ## runnables timeout so we prevent it from
+        ## timing out from multiple clicks
+        @_timeout(wait, true)
 
         if options.log
           command = Cypress.command
@@ -279,23 +305,28 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
         @ensureVisibility $el, command
 
-        wait = if $el.is("a") then 50 else 10
+        p = @command("focus", {$el: $el, error: false, log: false}).then =>
+          event = new MouseEvent "dblclick", {
+            bubbles: true
+            cancelable: true
+          }
 
-        @command("focus", {$el: $el, error: false, log: false}).then =>
-          $el.cySimulate("dblclick")
+          el.dispatchEvent(event)
+
+          # $el.cySimulate("dblclick")
 
           command.snapshot().end() if command
-
-          ## we want to add this wait delta to our
-          ## runnables timeout so we prevent it from
-          ## timing out from multiple clicks
-          @_timeout(wait, true)
 
           ## need to return null here to prevent
           ## chaining thenable promises
           return null
 
         .delay(wait)
+        .cancellable()
+
+        dblclicks.push(p)
+
+        return p
 
       ## create a new promise and chain off of it using reduce to insert
       ## the artificial delays.  we have to set this as cancellable for it
@@ -307,6 +338,9 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         .each(dblclick)
         .cancellable()
         .return(subject)
+        .catch Promise.CancellationError, (err) ->
+          _(dblclicks).invoke("cancel")
+          throw err
 
     click: (subject, options = {}) ->
       ## TODO handle pointer-events: none
@@ -326,6 +360,8 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       win             = @private("window")
       wait            = 10
       stopPropagation = MouseEvent.prototype.stopPropagation
+
+      clicks = []
 
       click = (el, index) =>
         $el = $(el)
@@ -557,39 +593,52 @@ $Cypress.register "Actions", (Cypress, _, $) ->
 
           Promise.resolve(getCoords())
 
-        p = findElByCoordinates($el).then (obj) =>
-          {$elToClick, coords} = obj
+        p = findElByCoordinates($el)
+          .then (obj) =>
+            {$elToClick, coords} = obj
 
-          issueMouseDown($elToClick, coords)
+            issueMouseDown($elToClick, coords)
 
-          ## if mousedown was cancelled then
-          ## just resolve after mouse down and dont
-          ## send a focus event
-          if mdownCancelled
-            afterMouseDown($elToClick, coords)
-          else
-            ## retrieve the first focusable $el in our parent chain
-            $elToFocus = getFirstFocusableEl($elToClick)
+            ## if mousedown was cancelled then
+            ## just resolve after mouse down and dont
+            ## send a focus event
+            if mdownCancelled
+              afterMouseDown($elToClick, coords)
+            else
+              ## if our mousedown went through then
+              ## dispatch any primed change events
+              dispatchPrimedChangeEvents.call(@)
 
-            ## send in a focus event!
-            @command("focus", {$el: $elToFocus, error: false, log: false})
-            .then -> afterMouseDown($elToClick, coords)
+              ## retrieve the first focusable $el in our parent chain
+              $elToFocus = getFirstFocusableEl($elToClick)
 
-        p.delay(wait)
+              ## send in a focus event!
+              @command("focus", {$el: $elToFocus, error: false, log: false})
+              .then -> afterMouseDown($elToClick, coords)
+
+          .delay(wait)
+          .cancellable()
+
+        clicks.push(p)
+
+        return p
 
       Promise
-        .resolve(options.$el.toArray())
-        .each(click)
+        .each(options.$el.toArray(), click)
         .cancellable()
         .return(options.$el)
+        .catch Promise.CancellationError, (err) ->
+          _(clicks).invoke("cancel")
+          throw err
 
-    type: (subject, sequence, options = {}) ->
+    type: (subject, chars, options = {}) ->
       ## allow the el we're typing into to be
       ## changed by options -- used by cy.clear()
       _.defaults options,
         $el: subject
         log: true
         force: false
+        delay: 10
 
       @ensureDom(options.$el)
 
@@ -597,13 +646,40 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         ## figure out the options which actually change the behavior of clicks
         deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: 50})
 
+        table = {}
+
+        getRow = (id, key, which) ->
+          table[id] or do ->
+            table[id] = (obj = {})
+            if key
+              obj.typed = key
+              obj.which = which if which
+            obj
+
+        updateTable = (id, key, column, value, which) ->
+          row = getRow(id, key, which)
+          row[column] = value or "preventedDefault"
+
+        getTableData = ->
+          ## transform table object into object with zero based index as keys
+          _.reduce _(table).values(), (memo, value, index) ->
+            memo[index + 1] = value
+            memo
+          , {}
+
         options.command = Cypress.command
           message: deltaOptions
           $el: options.$el
           onConsole: ->
-            "Typed":      sequence
+            "Typed":      chars
             "Applied To": $Cypress.Utils.getDomElements(options.$el)
             "Options":    deltaOptions
+            "table": ->
+              {
+                name: "Key Events Table"
+                data: getTableData()
+                columns: ["typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change"]
+              }
 
       if not options.$el.is(textLike)
         node = Cypress.Utils.stringifyElement(options.$el)
@@ -612,7 +688,13 @@ $Cypress.register "Actions", (Cypress, _, $) ->
       if (num = options.$el.length) and num > 1
         @throwErr(".type() can only be called on a single textarea or :text! Your subject contained #{num} elements!", options.command)
 
-      options.sequence = sequence
+      if not (_.isString(chars) or _.isFinite(chars))
+        @throwErr(".type() can only accept a String or Number. You passed in: '#{chars}'", options.command)
+
+      if _.isBlank(chars)
+        @throwErr(".type() cannot accept an empty String! You need to actually type something.", options.command)
+
+      options.chars = "" + chars
 
       ## click the element first to simulate focus
       ## and typical user behavior in case the window
@@ -626,98 +708,120 @@ $Cypress.register "Actions", (Cypress, _, $) ->
         interval: options.interval
       }).then =>
 
-        multipleInputsAndNoSubmitElements = (form) ->
-          inputs  = form.find("input")
-          submits = form.find("input[type=submit], button[type!=button]")
-
-          inputs.length > 1 and submits.length is 0
-
-        clickedDefaultButton = (button) ->
-          ## find the 'default button' as per HTML spec and click it natively
-          ## do not issue mousedown / mouseup since this is supposed to be synthentic
-          if button.length
-            button.get(0).click()
-            true
-          else
-            false
-
-        getDefaultButton = (form) ->
-          form.find("input[type=submit], button[type!=button]").first()
-
-        defaultButtonisDisabled = (button) ->
-          button.prop("disabled")
-
         simulateSubmitHandler = =>
           form = options.$el.parents("form")
 
           return if not form.length
+
+          multipleInputsAndNoSubmitElements = (form) ->
+            inputs  = form.find("input")
+            submits = form.find("input[type=submit], button[type!=button]")
+
+            inputs.length > 1 and submits.length is 0
 
           ## throw an error here if there are multiple form parents
 
           ## bail if we have multiple inputs and no submit elements
           return if multipleInputsAndNoSubmitElements(form)
 
-          keydownPrevented  = false
-          keypressPrevented = false
+          clickedDefaultButton = (button) ->
+            ## find the 'default button' as per HTML spec and click it natively
+            ## do not issue mousedown / mouseup since this is supposed to be synthentic
+            if button.length
+              button.get(0).click()
+              true
+            else
+              false
 
-          ## there are edge cases where this logic is broken
-          ## we are currently not following the spec in regards
-          ## to NOT firing keypress events when the keydown
-          ## event is preventDefault() or stopPropagation()
-          ## our simulation lib is firing keypress no matter what
+          getDefaultButton = (form) ->
+            form.find("input[type=submit], button[type!=button]").first()
 
-          keydown = (e) ->
-            if e.which is 13 and e.isDefaultPrevented()
-              keydownPrevented = true
+          defaultButtonisDisabled = (button) ->
+            button.prop("disabled")
 
-          keypress = (e) =>
-            if e.which is 13
-              if e.isDefaultPrevented()
-                keypressPrevented = true
+          defaultButton = getDefaultButton(form)
 
-              ## keypress happens after keydown so we can just simulate the
-              ## submit event now if both events were NOT prevented!
-              if keydownPrevented is false and keypressPrevented is false
-                defaultButton = getDefaultButton(form)
+          ## bail if the default button is in a 'disabled' state
+          return if defaultButtonisDisabled(defaultButton)
 
-                ## bail if the default button is in a 'disabled' state
-                return if defaultButtonisDisabled(defaultButton)
+          ## issue the click event to the 'default button' of the form
+          ## we need this to be synchronous so not going through our
+          ## own click command
+          ## as of now, at least in Chrome, causing the click event
+          ## on the button will indeed trigger the form submit event
+          ## so we dont need to fire it manually anymore!
+          if not clickedDefaultButton(defaultButton)
+            ## if we werent able to click the default button
+            ## then synchronously fire the submit event
+            ## currently this is sync but if we use a waterfall
+            ## promise in the submit command it will break again
+            ## consider changing type to a Promise and juggle logging
+            @command("submit", {log: false, $el: form})
 
-                ## issue the click event to the 'default button' of the form
-                ## we need this to be synchronous so not going through our
-                ## own click command
-                ## as of now, at least in Chrome, causing the click event
-                ## on the button will indeed trigger the form submit event
-                ## so we dont need to fire it manually anymore!
-                if not clickedDefaultButton(defaultButton)
-                  ## if we werent able to click the default button
-                  ## then synchronously fire the submit event
-                  ## currently this is sync but if we use a waterfall
-                  ## promise in the submit command it will break again
-                  ## consider changing type to a Promise and juggle logging
-                  @command("submit", {log: false, $el: form})
+        dispatchChangeEvent = (id) =>
+          change = document.createEvent("HTMLEvents")
+          change.initEvent("change", true, false)
 
-          form.on "keydown", keydown
-          form.on "keypress", keypress
+          dispatched = options.$el.get(0).dispatchEvent(change)
 
-          @once "invoke:end", ->
-            form.off "keydown", keydown
-            form.off "keypress", keypress
+          updateTable.call(@, id, null, "change", dispatched) if id and updateTable
 
-          ## need to do the crazy logic associated with knowing when
-          ## to trigger the form submit event and when to also trigger
-          ## the click event on the first 'submit' like element
+          return dispatched
 
-        ## handle submit event handler here if we are pressing enter
-        simulateSubmitHandler() if pressedEnter.test(sequence)
+        @Cypress.Keyboard.type({
+          $el:    options.$el
+          chars:  options.chars
+          delay:  options.delay
+          window: @private("window")
 
-        options.$el.simulate "key-sequence", options
+          onBeforeType: (totalKeys) =>
+            ## for the total number of keys we're about to
+            ## type, ensure we raise the timeout to account
+            ## for the delay being added to each keystroke
+            @_timeout (totalKeys * options.delay), true
 
-        ## submit events should be finished at this point!
-        ## so we can snapshot the current state of the DOM
-        options.command.snapshot().end() if options.command
+          onEvent: =>
+            updateTable.apply(@, arguments) if updateTable
 
-        return options.$el
+          ## fires only when the 'value'
+          ## of input/text/contenteditable
+          ## changes
+          onTypeChange: =>
+            ## never fire any change events for contenteditable
+            return if options.$el.is("[contenteditable]")
+
+            @prop "changeEvent", ->
+              dispatchChangeEvent()
+              @prop "changeEvent", null
+
+          onEnterPressed: (changed, id) =>
+            ## dont dispatch change events or handle
+            ## submit event if we've pressed enter into
+            ## a textarea or contenteditable
+            return if options.$el.is("textarea,[contenteditable]")
+
+            ## if our value has changed since our
+            ## element was activated we need to
+            ## fire a change event immediately
+            if changed
+              dispatchChangeEvent(id)
+
+            ## handle submit event handler here
+            simulateSubmitHandler()
+
+          onNoMatchingSpecialChars: (chars, allChars) =>
+            if chars is "{tab}"
+              @throwErr("{tab} isn't a supported character sequence. You'll want to use the command: 'cy.tab()' which is not ready yet, but when it is done that's what you'll use.", options.command)
+            else
+              @throwErr("Special character sequence: '#{chars}' is not recognized. Available sequences are: #{allChars}", options.command)
+
+        })
+        .then ->
+          ## submit events should be finished at this point!
+          ## so we can snapshot the current state of the DOM
+          options.command.snapshot().end() if options.command
+
+          return options.$el
 
     clear: (subject, options = {}) ->
       ## what about other types of inputs besides just text?
@@ -884,13 +988,20 @@ $Cypress.register "Actions", (Cypress, _, $) ->
             ## for the options
             options.$el.val(values)
 
+            input = new Event "input", {
+              bubbles: true
+              cancelable: false
+            }
+
+            options.$el.get(0).dispatchEvent(input)
+
             ## yup manually create this change event
             ## 1.6.5. HTML event types
-            ## scroll down the 'change'
-            event = document.createEvent("HTMLEvents")
-            event.initEvent("change", true, false)
+            ## scroll down to 'change'
+            change = document.createEvent("HTMLEvents")
+            change.initEvent("change", true, false)
 
-            options.$el.get(0).dispatchEvent(event)
+            options.$el.get(0).dispatchEvent(change)
 
             ## change events should be finished at this point!
             ## so we can snapshot the current state of the DOM
