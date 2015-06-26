@@ -2769,13 +2769,21 @@ describe "$Cypress.Cy Actions Commands", ->
       ## make sure we have at least 5 anchor links
       expect(anchors.length).to.be.gte 5
 
-      @cy.on "cancel", ->
+      @cy.on "cancel", =>
+        ## timeout will get called synchronously
+        ## again during a click if the click function
+        ## is called
+        timeout = @sandbox.spy @cy, "_timeout"
+
         _.delay ->
           ## abort should only have been called once
           expect(spy.callCount).to.eq 1
 
           ## and we should have stopped dblclicking after 3
           expect(dblclicks).to.eq 3
+
+          expect(timeout.callCount).to.eq 0
+
           done()
         , 200
 

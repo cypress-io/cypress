@@ -284,8 +284,17 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
       @ensureDom(subject)
 
+      wait = 10
+
+      dblclicks = []
+
       dblclick = (el, index) =>
         $el = $(el)
+
+        ## we want to add this wait delta to our
+        ## runnables timeout so we prevent it from
+        ## timing out from multiple clicks
+        @_timeout(wait, true)
 
         if options.log
           command = Cypress.command
@@ -296,23 +305,28 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         @ensureVisibility $el, command
 
-        wait = if $el.is("a") then 50 else 10
+        p = @command("focus", {$el: $el, error: false, log: false}).then =>
+          event = new MouseEvent "dblclick", {
+            bubbles: true
+            cancelable: true
+          }
 
-        @command("focus", {$el: $el, error: false, log: false}).then =>
-          $el.cySimulate("dblclick")
+          el.dispatchEvent(event)
+
+          # $el.cySimulate("dblclick")
 
           command.snapshot().end() if command
-
-          ## we want to add this wait delta to our
-          ## runnables timeout so we prevent it from
-          ## timing out from multiple clicks
-          @_timeout(wait, true)
 
           ## need to return null here to prevent
           ## chaining thenable promises
           return null
 
         .delay(wait)
+        .cancellable()
+
+        dblclicks.push(p)
+
+        return p
 
       ## create a new promise and chain off of it using reduce to insert
       ## the artificial delays.  we have to set this as cancellable for it
@@ -324,6 +338,9 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         .each(dblclick)
         .cancellable()
         .return(subject)
+        .catch Promise.CancellationError, (err) ->
+          _(dblclicks).invoke("cancel")
+          throw err
 
     click: (subject, options = {}) ->
       ## TODO handle pointer-events: none
