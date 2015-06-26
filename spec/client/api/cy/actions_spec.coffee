@@ -1526,6 +1526,8 @@ describe "$Cypress.Cy Actions Commands", ->
 
           @cy.get(":text:first").type(val)
 
+      it "throws when type is cancelled by preventingDefault mousedown"
+
   context "#clear", ->
     it "does not change the subject", ->
       textarea = @cy.$("textarea")
