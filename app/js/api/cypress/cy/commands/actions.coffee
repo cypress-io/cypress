@@ -344,6 +344,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       wait            = 10
       stopPropagation = MouseEvent.prototype.stopPropagation
 
+      clicks = []
+
       click = (el, index) =>
         $el = $(el)
 
@@ -574,35 +576,43 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
           Promise.resolve(getCoords())
 
-        p = findElByCoordinates($el).then (obj) =>
-          {$elToClick, coords} = obj
+        p = findElByCoordinates($el)
+          .then (obj) =>
+            {$elToClick, coords} = obj
 
-          issueMouseDown($elToClick, coords)
+            issueMouseDown($elToClick, coords)
 
-          ## if mousedown was cancelled then
-          ## just resolve after mouse down and dont
-          ## send a focus event
-          if mdownCancelled
-            afterMouseDown($elToClick, coords)
-          else
-            ## if our mousedown went through then
-            ## dispatch any primed change events
-            dispatchPrimedChangeEvents.call(@)
+            ## if mousedown was cancelled then
+            ## just resolve after mouse down and dont
+            ## send a focus event
+            if mdownCancelled
+              afterMouseDown($elToClick, coords)
+            else
+              ## if our mousedown went through then
+              ## dispatch any primed change events
+              dispatchPrimedChangeEvents.call(@)
 
-            ## retrieve the first focusable $el in our parent chain
-            $elToFocus = getFirstFocusableEl($elToClick)
+              ## retrieve the first focusable $el in our parent chain
+              $elToFocus = getFirstFocusableEl($elToClick)
 
-            ## send in a focus event!
-            @command("focus", {$el: $elToFocus, error: false, log: false})
-            .then -> afterMouseDown($elToClick, coords)
+              ## send in a focus event!
+              @command("focus", {$el: $elToFocus, error: false, log: false})
+              .then -> afterMouseDown($elToClick, coords)
 
-        p.delay(wait)
+          .delay(wait)
+          .cancellable()
+
+        clicks.push(p)
+
+        return p
 
       Promise
-        .resolve(options.$el.toArray())
-        .each(click)
+        .each(options.$el.toArray(), click)
         .cancellable()
         .return(options.$el)
+        .catch Promise.CancellationError, (err) ->
+          _(clicks).invoke("cancel")
+          throw err
 
     type: (subject, chars, options = {}) ->
       ## allow the el we're typing into to be
