@@ -313,6 +313,32 @@ describe "$Cypress.Cy Actions Commands", ->
     #         expect($input).to.have.value "1234"
     #         expect($input.get(0)).to.eq input.get(0)
 
+    describe "delay", ->
+      beforeEach ->
+        @delay = 10
+
+      it "adds delay to delta for each key sequence", ->
+        @cy._timeout(50)
+
+        timeout = @sandbox.spy @cy, "_timeout"
+
+        @cy.get(":text:first").type("foo{enter}bar{leftarrow}").then ->
+          expect(timeout).to.be.calledWith @delay * 8
+
+      it "can cancel additional keystrokes", (done) ->
+        @cy._timeout(50)
+
+        text = @cy.$(":text:first").keydown _.after 3, ->
+          Cypress.abort()
+
+        @cy.on "cancel", ->
+          _.delay ->
+            expect(text).to.have.value("foo")
+            done()
+          , 50
+
+        @cy.get(":text:first").type("foo{enter}bar{leftarrow}")
+
     describe "events", ->
       it "receives keydown event", (done) ->
         input = @cy.$(":text:first")
@@ -1340,7 +1366,7 @@ describe "$Cypress.Cy Actions Commands", ->
               8: {typed: "{enter}", which: 13, keydown: true, keypress: true, keyup: true, change: true}
             }
 
-        it.only "has a table of keys with preventedDefault", ->
+        it "has a table of keys with preventedDefault", ->
           @cy.$(":text:first").keydown -> return false
 
           @cy.get(":text:first").type("f").then ->
@@ -3082,6 +3108,7 @@ describe "$Cypress.Cy Actions Commands", ->
       clicks = 0
 
       spy = @sandbox.spy =>
+        console.log "aborting"
         @Cypress.abort()
 
       ## abort after the 3rd click
@@ -3089,6 +3116,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       anchors = @cy.$("#sequential-clicks a")
       anchors.click ->
+        console.log "CLICKED"
         clicks += 1
         clicked()
 
@@ -3096,6 +3124,7 @@ describe "$Cypress.Cy Actions Commands", ->
       expect(anchors.length).to.be.gte 5
 
       @cy.on "cancel", ->
+        console.log "CANCELLED"
         _.delay ->
           ## abort should only have been called once
           expect(spy.callCount).to.eq 1

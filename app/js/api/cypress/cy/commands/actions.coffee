@@ -744,6 +744,12 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           delay:  options.delay
           window: @private("window")
 
+          onBeforeType: (totalKeys) =>
+            ## for the total number of keys we're about to
+            ## type, ensure we raise the timeout to account
+            ## for the delay being added to each keystroke
+            @_timeout (totalKeys * options.delay), true
+
           onEvent: =>
             updateTable.apply(@, arguments)
 
@@ -776,7 +782,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           onNoMatchingSpecialChars: (chars, allChars) =>
             @throwErr("Special character sequence: '#{chars}' is not recognized. Available sequences are: #{allChars}", options.command)
 
-        }).then ->
+        })
+        .then ->
           ## submit events should be finished at this point!
           ## so we can snapshot the current state of the DOM
           options.command.snapshot().end() if options.command

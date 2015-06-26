@@ -98,7 +98,8 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       "{tab}": (el, rng) ->
 
       "{{}": (el, rng, options) ->
-        @typeKey(el, rng, "{", options)
+        options.key = "{"
+        @typeKey(el, rng, options.key, options)
 
       ## charCode = 13
       ## yes keyPress
@@ -172,67 +173,96 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       bounds[0] is bounds[1]
 
     type: (options = {}) ->
-      new Promise (resolve, reject) =>
-        _.defaults options,
-          delay: 10
-          onEvent: ->
-          onTypeChange: ->
-          onEnterPressed: ->
-          onNoMatchingSpecialChars: ->
+      _.defaults options,
+        delay: 10
+        onEvent: ->
+        onBeforeType: ->
+        onTypeChange: ->
+        onEnterPressed: ->
+        onNoMatchingSpecialChars: ->
 
-        el = options.$el.get(0)
+      el = options.$el.get(0)
 
-        ## if el does not have this property
-        bililiteRangeSelection = el.bililiteRangeSelection
-        rng = bililiteRange(el).bounds("selection")
+      ## if el does not have this property
+      bililiteRangeSelection = el.bililiteRangeSelection
+      rng = bililiteRange(el).bounds("selection")
 
-        ## store the previous text value
-        ## so we know to fire change events
-        ## and change callbacks
-        options.prev = rng.all()
+      ## store the previous text value
+      ## so we know to fire change events
+      ## and change callbacks
+      options.prev = rng.all()
 
-        ## restore the bounds if our el already has this
-        if bililiteRangeSelection
-          rng.bounds(bililiteRangeSelection)
+      ## restore the bounds if our el already has this
+      if bililiteRangeSelection
+        rng.bounds(bililiteRangeSelection)
+      else
+        ## if our input is one of these, then
+        ## simulate each key stroke, ensure none
+        ## are defaultPrevented, but only change
+        ## the value once everything has been typed
+        # if /date|month|datetime|time/.test(type)
+          ## throw an error if value is invalid
+          ## use a switch/case here
+
+        if len = rng.length()
+          bounds = [len, len]
+          if not _.isEqual(rng._bounds, bounds)
+            el.bililiteRangeSelection = bounds
+            rng._bounds = bounds
+
+      keys = options.chars.split(charsBetweenCurlyBraces)
+
+      options.onBeforeType @countNumIndividualKeyStrokes(keys)
+
+      promises = []
+
+      ## should make each keystroke async to mimic
+      ## how keystrokes come into javascript naturally
+      Promise
+        .each keys, (key) =>
+          @typeChars(el, rng, key, promises, options)
+        .cancellable()
+        .then ->
+          ## if after typing we ended up changing
+          ## our value then fire the onTypeChange callback
+          if options.prev isnt rng.all()
+            options.onTypeChange()
+
+          ## after typing be sure to clear all ranges
+          if sel = options.window.getSelection()
+            sel.removeAllRanges()
+        .catch Promise.CancellationError, (err) ->
+          _(promises).invoke("cancel")
+          throw err
+
+    countNumIndividualKeyStrokes: (keys) ->
+      _.reduce keys, (memo, chars) ->
+        ## chars in curly braces count as 1 keystroke
+        if charsBetweenCurlyBraces.test(chars)
+          memo + 1
         else
-          ## if our input is one of these, then
-          ## simulate each key stroke, ensure none
-          ## are defaultPrevented, but only change
-          ## the value once everything has been typed
-          # if /date|month|datetime|time/.test(type)
-            ## throw an error if value is invalid
-            ## use a switch/case here
+          memo + chars.length
+      , 0
 
-          if len = rng.length()
-            bounds = [len, len]
-            if not _.isEqual(rng._bounds, bounds)
-              el.bililiteRangeSelection = bounds
-              rng._bounds = bounds
-
-        ## should make each keystroke async to mimic
-        ## how keystrokes come into javascript naturally
-        _.each options.chars.split(charsBetweenCurlyBraces), (chars) =>
-          @typeChars(el, rng, chars, options)
-
-        ## if after typing we ended up changing
-        ## our value then fire the onTypeChange callback
-        if options.prev isnt rng.all()
-          options.onTypeChange()
-
-        ## after typing be sure to clear all ranges
-        if sel = options.window.getSelection()
-          sel.removeAllRanges()
-
-        resolve()
-
-    typeChars: (el, rng, chars, options) ->
+    typeChars: (el, rng, chars, promises, options) ->
       options = _.clone(options)
 
       if charsBetweenCurlyBraces.test(chars)
-        @handleSpecialChars(el, rng, chars, options)
+        p = Promise
+          .resolve @handleSpecialChars(el, rng, chars, options)
+          .delay(options.delay)
+          .cancellable()
+        promises.push(p)
+        p
       else
-        _.each chars, (char) =>
-          @typeKey(el, rng, char, options)
+        Promise
+          .each chars.split(""), (char) =>
+            p = Promise
+              .resolve @typeKey(el, rng, char, options)
+              .delay(options.delay)
+              .cancellable()
+            promises.push(p)
+            p
 
     getCharCode: (key) ->
       code = key.charCodeAt(0)
