@@ -744,7 +744,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
           dispatched = options.$el.get(0).dispatchEvent(change)
 
-          updateTable.call(@, id, null, "change", dispatched) if id
+          updateTable.call(@, id, null, "change", dispatched) if id and updateTable
 
           return dispatched
 
@@ -761,7 +761,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             @_timeout (totalKeys * options.delay), true
 
           onEvent: =>
-            updateTable.apply(@, arguments)
+            updateTable.apply(@, arguments) if updateTable
 
           ## fires only when the 'value'
           ## of input/text/contenteditable
