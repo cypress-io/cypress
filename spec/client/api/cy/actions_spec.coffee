@@ -2644,7 +2644,7 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("input:first").focus().blur().then ($input) ->
         expect($input).to.match input
 
-    it.only "can blur [contenteditable]", ->
+    it "can blur [contenteditable]", ->
       ce = @cy.$("[contenteditable]:first")
 
       @cy
