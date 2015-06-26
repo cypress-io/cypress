@@ -810,7 +810,10 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             simulateSubmitHandler()
 
           onNoMatchingSpecialChars: (chars, allChars) =>
-            @throwErr("Special character sequence: '#{chars}' is not recognized. Available sequences are: #{allChars}", options.command)
+            if chars is "{tab}"
+              @throwErr("{tab} isn't a supported character sequence. You'll want to use the command: 'cy.tab()' which is not ready yet, but when it is done that's what you'll use.", options.command)
+            else
+              @throwErr("Special character sequence: '#{chars}' is not recognized. Available sequences are: #{allChars}", options.command)
 
         })
         .then ->

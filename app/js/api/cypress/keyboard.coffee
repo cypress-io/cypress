@@ -95,7 +95,7 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
         options.input     = false
         @ensureKey el, null, options
 
-      "{tab}": (el, rng) ->
+      # "{tab}": (el, rng) ->
 
       "{{}": (el, rng, options) ->
         options.key = "{"

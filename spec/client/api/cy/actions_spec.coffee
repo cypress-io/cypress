@@ -1472,7 +1472,32 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.inspect().get("#input-covered-in-span").type("foo")
 
-      it "throws when special characters dont exist"
+      it "throws when special characters dont exist", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq 2
+          allChars = _.keys(@Cypress.Keyboard.specialChars).join(", ")
+          expect(err.message).to.eq "Special character sequence: '{bar}' is not recognized. Available sequences are: #{allChars}"
+          done()
+
+        @cy.get(":text:first").type("foo{bar}")
+
+      it "throws when attemping to type tab", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq 2
+          expect(err.message).to.eq "{tab} isn't a supported character sequence. You'll want to use the command: 'cy.tab()' which is not ready yet, but when it is done that's what you'll use."
+          done()
+
+        @cy.get(":text:first").type("foo{tab}")
 
       it "throws on an empty string", (done) ->
         logs = []
