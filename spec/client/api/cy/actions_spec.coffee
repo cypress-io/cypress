@@ -251,6 +251,10 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("input:text:first").type(" bar").then ($input) ->
         expect($input).to.have.value("foo bar")
 
+    it "can type numbers", ->
+      @cy.get(":text:first").type(123).then ($text) ->
+        expect($text).to.have.value("123")
+
     it "triggers focus event on the input", (done) ->
       @cy.$("input:text:first").focus -> done()
 
@@ -1468,8 +1472,34 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.inspect().get("#input-covered-in-span").type("foo")
 
-
       it "throws when special characters dont exist"
+
+      it "throws on an empty string", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq 2
+          expect(err.message).to.eq ".type() cannot accept an empty String! You need to actually type something."
+          done()
+
+        @cy.get(":text:first").type("")
+
+      _.each [NaN, Infinity, [], {}, null, undefined], (val) =>
+        it "throws when trying to type: #{val}", (done) ->
+          logs = []
+
+          @Cypress.on "log", (log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq 2
+            expect(err.message).to.eq ".type() can only accept a String or Number. You passed in: '#{val}'"
+            done()
+
+          @cy.get(":text:first").type(val)
 
   context "#clear", ->
     it "does not change the subject", ->
@@ -2730,14 +2760,6 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("#button").dblclick().then ->
         expect(@delay).to.be.calledWith 10
 
-    it "inserts artificial delay of 50ms for anchors", ->
-      @cy.on "invoke:start", (obj) =>
-        if obj.name is "dblclick"
-          @delay = @sandbox.spy Promise.prototype, "delay"
-
-      @cy.contains("Home Page").dblclick().then ->
-        expect(@delay).to.be.calledWith 50
-
     it "can operate on a jquery collection", ->
       dblclicks = 0
       buttons = @cy.$("button")
@@ -2796,7 +2818,7 @@ describe "$Cypress.Cy Actions Commands", ->
       ## which proves we are dblclicking serially
       throttled = _.throttle ->
         dblclicks += 1
-      , 40, {leading: false}
+      , 5, {leading: false}
 
       anchors = @cy.$("#sequential-clicks a")
       anchors.dblclick throttled

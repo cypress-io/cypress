@@ -688,10 +688,13 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       if (num = options.$el.length) and num > 1
         @throwErr(".type() can only be called on a single textarea or :text! Your subject contained #{num} elements!", options.command)
 
-      ## blow up if its not finite or not a string?
-      ## allow blank strings for type
+      if not (_.isString(chars) or _.isFinite(chars))
+        @throwErr(".type() can only accept a String or Number. You passed in: '#{chars}'", options.command)
 
-      options.chars = chars
+      if _.isBlank(chars)
+        @throwErr(".type() cannot accept an empty String! You need to actually type something.", options.command)
+
+      options.chars = "" + chars
 
       ## click the element first to simulate focus
       ## and typical user behavior in case the window
@@ -816,18 +819,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           options.command.snapshot().end() if options.command
 
           return options.$el
-
-          # console.table([
-          #   {typed: "a", which: 65, keyDown: true, keyPress: true, textInput: true, input: true, keyUp: true},
-          #   {typed: "{enter}", which: 13, keyDown: true, keyPress: true, change: true, keyUp: true}
-          # ])
-
-          # console.table(
-          #   {
-          #     "a":       {which: 65, keyDown: "defaultPrevented", keyPress: true, textInput: true, input: true, keyUp: true},
-          #     "{enter}": {which: 13, keyDown: true, keyPress: true, change: true, keyUp: true}
-          #   }, ["which", "keyDown", "keyPress", "textInput", "input", "keyUp", "change"]
-          # )
 
     clear: (subject, options = {}) ->
       ## what about other types of inputs besides just text?
