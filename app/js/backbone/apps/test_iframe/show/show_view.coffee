@@ -228,8 +228,20 @@
       }
 
     calcWidth: (main, tests, container) ->
+      iframe = container.find("#iframe-size-container")
       _.defer ->
-        container.width main.width() - tests.width()
+        width  = main.width() - tests.width()
+        height = container.height() - 37 ## 37 accounts for the header
+
+        container.width(width)
+
+        iframeWidth  = iframe.width()
+        iframeHeight = iframe.height()
+
+        # debugger
+        if width < iframeWidth or height < iframeHeight
+          scale = Math.min(width / iframeWidth, height / iframeHeight, 1).toFixed(4)
+          iframe.css({transform: "scale(#{scale})"})
 
     updateIframeCss: (name, val) ->
       switch name
@@ -259,7 +271,7 @@
         val = $slider.parents(".form-group").find("input").val()
         $slider.slider("value", val)
 
-      @calcWidth = _(@calcWidth).partial main, tests, container
+      @calcWidth = _(@calcWidth).chain().partial(main, tests, container).throttle(50).value()
 
       $(window).on "resize", @calcWidth
 

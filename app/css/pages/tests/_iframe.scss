@@ -33,10 +33,12 @@
     }
 
     #iframe-size-container {
-      height: 100%;
+      width: 1000px;
+      height: 562px;
+      // height: 100%;
       margin: 0 auto;
       transform: scale(1);
-      transform-origin: 50% 0; //center vertically at the top
+      transform-origin: 0% 0%;
     }
 
     #iframe-message {
