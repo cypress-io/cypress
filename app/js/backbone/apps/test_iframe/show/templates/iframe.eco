@@ -66,11 +66,11 @@
       </li>
       <li>
         <span id="current-viewport-sizes">
-          <span id="viewport-width"><%= @width %></span>
+          <span id="viewport-width"><%= @viewportWidth %></span>
           x
-          <span id="viewport-height"><%= @height %></span>
+          <span id="viewport-height"><%= @viewportHeight %></span>
           <span id="viewport-scale-container">
-            (<span id="viewport-scale"><%= @scale %></span>%)
+            (<span id="viewport-scale"><%= @viewportScale %></span>%)
           </span>
         </span>
       </li>

@@ -33,12 +33,12 @@
     #   "click #perf"         : "perfClicked"
 
     modelEvents:
-      "change:viewport"    : "viewportChanged"
-      "change:width"       : "widthChanged"
-      "change:height"      : "heightChanged"
-      "change:scale"       : "scaleChanged"
-      "change:url"         : "urlChanged"
-      "change:pageLoading" : "pageLoadingChanged"
+      "change:viewport"       : "viewportChanged"
+      "change:viewportWidth"  : "widthChanged"
+      "change:viewportHeight" : "heightChanged"
+      "change:viewportScale"  : "scaleChanged"
+      "change:url"            : "urlChanged"
+      "change:pageLoading"    : "pageLoadingChanged"
 
     viewportChanged: (model, value, options) ->
       @ui.size.css {
@@ -49,13 +49,13 @@
       @calcWidth()
 
     widthChanged: (model, value) ->
-      @ui.width.text model.get("width")
+      @ui.width.text(value)
 
     heightChanged: (model, value) ->
-      @ui.height.text model.get("height")
+      @ui.height.text(value)
 
     scaleChanged: (model, value) ->
-      @ui.scale.text model.get("scale")
+      @ui.scale.text model.get("viewportScale")
 
     urlChanged: (model, value, options) ->
       @ui.url.val(value)
