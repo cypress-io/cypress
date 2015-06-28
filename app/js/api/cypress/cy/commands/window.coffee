@@ -30,3 +30,10 @@ $Cypress.register "Window", (Cypress, _, $) ->
       win.document
 
     doc: -> @sync.document()
+
+    viewport: (presetOrWidth, height, options) ->
+      width = presetOrWidth
+
+      Cypress.trigger "viewport", {width: width, height: height}
+
+      return null

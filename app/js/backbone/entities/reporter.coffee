@@ -34,6 +34,9 @@
         @listenTo @Cypress, "initialized", (obj) =>
           @receivedRunner(obj.runner)
 
+        @listenTo @Cypress, "viewport", (viewport) ->
+          App.config.setViewport(viewport)
+
         @listenTo @Cypress, "url:changed", (url) ->
           App.config.setUrl(url)
 

@@ -4,6 +4,7 @@
 
   class Entities.Config extends Entities.Model
     defaults: ->
+      scale:      1
       collapsed:  @getConfig("collapsed")
       panels:     @getConfig("panels")
       panelWidth: @getConfig("panelWidth")
@@ -18,6 +19,16 @@
       panelWidth:
         default: 300
         type: "number"
+
+    mutators:
+      scale: ->
+        Math.ceil(parseFloat(@attributes.scale) * 100).toFixed(0)
+
+      width: ->
+        @attributes.width ? @get("viewport")?.width
+
+      height: ->
+        @attributes.height ? @get("viewport")?.height
 
     testProp: (prop, stringOrRegExp) ->
       switch
@@ -36,6 +47,15 @@
 
     setUI: (ui) ->
       @set "ui", ui
+
+    setViewport: (viewport) ->
+      @set
+        viewport: viewport
+        width:    viewport.width
+        height:   viewport.height
+
+    setScale: (scale) ->
+      @set "scale", scale
 
     setUrl: (url) ->
       @set "url", url

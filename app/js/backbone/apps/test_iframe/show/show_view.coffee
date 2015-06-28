@@ -17,6 +17,9 @@
       chosenBrowser: "#chosen-manual-browser"
       closeBrowser:  "#chosen-manual-browser i"
       url:           "#url-container input"
+      width:         "#viewport-width"
+      height:        "#viewport-height"
+      scale:         "#viewport-scale"
 
     events:
       "click @ui.expand"        : "expandClicked"
@@ -30,8 +33,29 @@
     #   "click #perf"         : "perfClicked"
 
     modelEvents:
+      "change:viewport"    : "viewportChanged"
+      "change:width"       : "widthChanged"
+      "change:height"      : "heightChanged"
+      "change:scale"       : "scaleChanged"
       "change:url"         : "urlChanged"
       "change:pageLoading" : "pageLoadingChanged"
+
+    viewportChanged: (model, value, options) ->
+      @ui.size.css {
+        height: value.height
+        width: value.width
+      }
+
+      @calcWidth()
+
+    widthChanged: (model, value) ->
+      @ui.width.text model.get("width")
+
+    heightChanged: (model, value) ->
+      @ui.height.text model.get("height")
+
+    scaleChanged: (model, value) ->
+      @ui.scale.text model.get("scale")
 
     urlChanged: (model, value, options) ->
       @ui.url.val(value)
@@ -229,7 +253,7 @@
 
     calcWidth: (main, tests, container) ->
       iframe = container.find("#iframe-size-container")
-      _.defer ->
+      _.defer =>
         width  = main.width() - tests.width()
         height = container.height() - 37 ## 37 accounts for the header
 
@@ -238,10 +262,13 @@
         iframeWidth  = iframe.width()
         iframeHeight = iframe.height()
 
-        # debugger
         if width < iframeWidth or height < iframeHeight
           scale = Math.min(width / iframeWidth, height / iframeHeight, 1).toFixed(4)
-          iframe.css({transform: "scale(#{scale})"})
+        else
+          scale = 1
+
+        iframe.css({transform: "scale(#{scale})"})
+        @model.setScale(scale)
 
     updateIframeCss: (name, val) ->
       switch name
@@ -271,7 +298,7 @@
         val = $slider.parents(".form-group").find("input").val()
         $slider.slider("value", val)
 
-      @calcWidth = _(@calcWidth).chain().partial(main, tests, container).throttle(50).value()
+      @calcWidth = _(@calcWidth).chain().bind(@).partial(main, tests, container).value()
 
       $(window).on "resize", @calcWidth
 
@@ -307,7 +334,7 @@
 
       @$el.hide()
 
-      if App.config.ui("host")
+      if @model.ui("host")
         @loadSatelitteIframe(src, options, fn)
       else
         @loadRegularIframes(src, options, fn)
@@ -347,7 +374,7 @@
       remoteLoaded = $.Deferred()
       iframeLoaded = $.Deferred()
 
-      name = App.config.getProjectName()
+      name = @model.getProjectName()
 
       remoteOpts =
         id: "Your App: '#{name}' "

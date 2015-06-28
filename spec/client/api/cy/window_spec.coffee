@@ -109,3 +109,10 @@ describe "$Cypress.Cy Window Commands", ->
             Returned: "DOM Fixture"
           }
 
+  context.only "#viewport", ->
+    it "triggers 'viewport' event with dimensions object", (done) ->
+      @Cypress.on "viewport", (viewport) ->
+        expect(viewport).to.deep.eq {width: 800, height: 600}
+        done()
+
+      @cy.viewport(800, 600)
