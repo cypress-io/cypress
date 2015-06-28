@@ -109,10 +109,34 @@ describe "$Cypress.Cy Window Commands", ->
             Returned: "DOM Fixture"
           }
 
-  context.only "#viewport", ->
+  context "#viewport", ->
     it "triggers 'viewport' event with dimensions object", (done) ->
       @Cypress.on "viewport", (viewport) ->
         expect(viewport).to.deep.eq {width: 800, height: 600}
         done()
 
       @cy.viewport(800, 600)
+
+    context "presets", ->
+      it "iphone-6", (done) ->
+        @Cypress.on "viewport", (viewport) ->
+          expect(viewport).to.deep.eq {width: 1334, height: 750}
+          done()
+
+        @cy.viewport("iphone-6")
+
+    context "errors", ->
+      it "throws with passed invalid preset"
+
+      it "throws when passed anything other than number or string"
+
+    context ".log", ->
+      it "logs viewport with width, height"
+
+      it "sets state to success immediately"
+
+      it "snapshots immediately"
+
+      it "can turn off logging viewport command"
+
+      it "can turn off logging viewport when using preset"

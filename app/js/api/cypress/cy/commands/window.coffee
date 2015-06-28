@@ -1,5 +1,16 @@
 $Cypress.register "Window", (Cypress, _, $) ->
 
+  viewports = {
+    "macbook-15": "1440x900"
+    "macbook-13": "1280x800"
+    "macbook-11": "1366x768"
+    "iphone-6+" : "1920x1080"
+    "iphone-6"  : "1334x750"
+    "iphone-5"  : "1136x640"
+    "iphone-4"  : "960x640"
+    "iphone-3"  : "320x480"
+  }
+
   Cypress.addParentCommand
     title: (options = {}) ->
       options.log = false
@@ -32,7 +43,11 @@ $Cypress.register "Window", (Cypress, _, $) ->
     doc: -> @sync.document()
 
     viewport: (presetOrWidth, height, options) ->
-      width = presetOrWidth
+      if _.isString(presetOrWidth)
+        ## get preset, split by x, convert to a number
+        [width, height] = _(viewports[presetOrWidth].split("x")).map(Number)
+      else
+        width = presetOrWidth
 
       Cypress.trigger "viewport", {width: width, height: height}
 
