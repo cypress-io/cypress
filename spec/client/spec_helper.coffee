@@ -43,6 +43,27 @@ window.getNames = (queue) ->
 window.getFirstSubjectByName = (name) ->
   _(@cy.queue).findWhere({name: name}).subject
 
+window.enterAppTestingMode = ->
+  beforeEach (done) ->
+    new Promise =>
+      @iframe?.remove()
+
+      @iframe = $("<iframe />", {
+        style: "position: absolute; right: 0; top: 50px; width: 40%; height: 100%;"
+        load: =>
+          $mainRegion = $("<div id='main-region'></div>")
+          @iframe.contents().find("body").append $mainRegion
+          App.addRegions
+            mainRegion: Marionette.Region.extend(el: $mainRegion)
+
+          done()
+      })
+
+      @iframe.appendTo $("body")
+
+  afterEach ->
+    # @iframe.remove()
+
 window.enterIntegrationTestingMode = (fixture, options = {}) ->
   _.defaults options,
     silent: false

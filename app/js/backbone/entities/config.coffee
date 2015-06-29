@@ -44,7 +44,6 @@
 
     setViewport: (viewport) ->
       @set
-        viewport:       viewport
         viewportWidth:  viewport.width
         viewportHeight: viewport.height
 

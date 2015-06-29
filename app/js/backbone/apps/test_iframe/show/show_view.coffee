@@ -1,130 +1,18 @@
 @App.module "TestIframeApp.Show", (Show, App, Backbone, Marionette, $, _) ->
 
-  class Show.Iframe extends App.Views.ItemView
+  class Show.Layout extends App.Views.LayoutView
     template: "test_iframe/show/iframe"
 
     ui:
-      # header:   "header"
-      size:          "#iframe-size-container"
-      expand:        ".fa-expand"
-      compress:      ".fa-compress"
-      message:       "#iframe-message"
-      dropdown:      ".dropdown"
-      sliders:       ".slider"
-      button:        ".dropdown-toggle"
-      choices:       ".dropdown-menu li a"
-      browser:       ".browser-versions li"
-      chosenBrowser: "#chosen-manual-browser"
-      closeBrowser:  "#chosen-manual-browser i"
-      url:           "#url-container input"
-      width:         "#viewport-width"
-      height:        "#viewport-height"
-      scale:         "#viewport-scale"
+      size: "#iframe-size-container"
 
-    events:
-      "click @ui.expand"        : "expandClicked"
-      "click @ui.compress"      : "compressClicked"
-      "click @ui.button"        : "buttonClicked"
-      "click @ui.choices"       : "choicesClicked"
-      "click @ui.browser"       : "browserClicked"
-      "click @ui.closeBrowser"  : "closeBrowserClicked"
-      "show.bs.dropdown"        : "dropdownShow"
-      "hide.bs.dropdown"        : "dropdownHide"
-    #   "click #perf"         : "perfClicked"
-
-    modelEvents:
-      "change:viewport"       : "viewportChanged"
-      "change:viewportWidth"  : "widthChanged"
-      "change:viewportHeight" : "heightChanged"
-      "change:viewportScale"  : "scaleChanged"
-      "change:url"            : "urlChanged"
-      "change:pageLoading"    : "pageLoadingChanged"
-
-    viewportChanged: (model, value, options) ->
+    resizeViewport: ->
       @ui.size.css {
-        height: value.height
-        width: value.width
+        width: @model.get("viewportWidth")
+        height: @model.get("viewportHeight")
       }
 
       @calcWidth()
-
-    widthChanged: (model, value) ->
-      @ui.width.text(value)
-
-    heightChanged: (model, value) ->
-      @ui.height.text(value)
-
-    scaleChanged: (model, value) ->
-      @ui.scale.text model.get("viewportScale")
-
-    urlChanged: (model, value, options) ->
-      @ui.url.val(value)
-
-    pageLoadingChanged: (model, value, options) ->
-      ## hides or shows the loading indicator
-      @ui.url.parent().toggleClass("loading", value)
-
-    # perfClicked: (e) ->
-    #   s = @$remote.contents().find("body").remove("script")
-    #   t = Date.now()
-    #   str = s.prop("outerHTML")
-    #   console.log "prop outerHTML", Date.now() - t
-    #   t = Date.now()
-    #   str = @$remote.contents().find("body").prop("outerHTML")
-    #   console.warn "body outerHTML", Date.now() - t
-
-    closeBrowserClicked: (e) ->
-      @trigger "close:browser:clicked"
-
-    browserClicked: (e) ->
-      el      = $(e.target)
-      browser = el.parent().data("browser")
-      version = el.text()
-
-      @trigger "browser:clicked", browser, version
-
-    browserChanged: (browser, version) ->
-      @ui.chosenBrowser.html(
-        Marionette.Renderer.render "test_iframe/show/_chosen_browser",
-          browser: browser
-          version: version
-      )
-
-    choicesClicked: (e) ->
-      e.preventDefault()
-
-    buttonClicked: (e) ->
-      e.stopPropagation()
-      @ui.button.parent().toggleClass("open")
-
-    getBootstrapNameSpaceForEvent: (name, e) ->
-      name + "." + e.namespace
-
-    dropdownShow: (e) ->
-      return if not @$iframe
-
-      ## the bootstrap namespace for click events
-      ## ie click.bs.bootstrap
-      eventNamespace = @getBootstrapNameSpaceForEvent("click", e)
-
-      ## binds to the $iframe document's click event
-      ## and repropogates this to our document
-      ## we do this because bootstrap will only bind
-      ## to our documents click event and not our iframes
-      ## so clicking into our iframe should close the dropdown
-      @$iframe.contents().one eventNamespace, (e) =>
-        $(document).trigger(eventNamespace, e)
-
-    dropdownHide: (e) ->
-      return if not @$iframe
-
-      ## the bootstrap namespace for click events
-      ## ie click.bs.bootstrap
-      eventNamespace = @getBootstrapNameSpaceForEvent("click", e)
-
-      ## we always want to remove our old custom handlers
-      ## when the drop down is closed to clean up references
-      @$iframe.contents().off eventNamespace
 
     restoreDom: ->
       return if not @originalBody
@@ -252,31 +140,32 @@
       }
 
     calcWidth: (main, tests, container) ->
-      iframe = container.find("#iframe-size-container")
-      _.defer =>
-        width  = main.width() - tests.width()
-        height = container.height() - 37 ## 37 accounts for the header
+      size = @ui.size
 
-        container.width(width)
+      # width  = main.width() - tests.width()
+      # height = container.height() - 37 ## 37 accounts for the header
 
-        iframeWidth  = iframe.width()
-        iframeHeight = iframe.height()
+      # container.width(width)
 
-        if width < iframeWidth or height < iframeHeight
-          scale = Math.min(width / iframeWidth, height / iframeHeight, 1).toFixed(4)
-        else
-          scale = 1
+      # iframeWidth  = size.width()
+      # iframeHeight = size.height()
 
-        iframe.css({transform: "scale(#{scale})"})
-        @model.setScale(scale)
+      # ## move all of this logic into model methods
+      # if width < iframeWidth or height < iframeHeight
+      #   scale = Math.min(width / iframeWidth, height / iframeHeight, 1).toFixed(4)
+      # else
+      #   scale = 1
 
-    updateIframeCss: (name, val) ->
-      switch name
-        when "height", "width"
-          @ui.size.css(name, val + "%")
-        when "scale"
-          num = (val / 100)
-          @ui.size.css("transform", "scale(#{num})")
+      # size.css({transform: "scale(#{scale})"})
+      # @model.setScale(scale)
+
+    # updateIframeCss: (name, val) ->
+    #   switch name
+    #     when "height", "width"
+    #       @ui.size.css(name, val + "%")
+    #     when "scale"
+    #       num = (val / 100)
+    #       @ui.size.css("transform", "scale(#{num})")
 
     onShow: ->
       main      = $("#main-region :first-child")
@@ -285,25 +174,24 @@
 
       view = @
 
-      @ui.sliders.slider
-        range: "min"
-        min: 1
-        max: 100
-        slide: (e, ui) ->
-          name = $(@).parents(".form-group").find("input").val(ui.value).prop("name")
-          view.updateIframeCss(name, ui.value)
+      # @ui.sliders.slider
+      #   range: "min"
+      #   min: 1
+      #   max: 100
+      #   slide: (e, ui) ->
+      #     name = $(@).parents(".form-group").find("input").val(ui.value).prop("name")
+      #     view.updateIframeCss(name, ui.value)
 
-      @ui.sliders.each (index, slider) ->
-        $slider = $(slider)
-        val = $slider.parents(".form-group").find("input").val()
-        $slider.slider("value", val)
+      # @ui.sliders.each (index, slider) ->
+      #   $slider = $(slider)
+      #   val = $slider.parents(".form-group").find("input").val()
+      #   $slider.slider("value", val)
 
       @calcWidth = _(@calcWidth).chain().bind(@).partial(main, tests, container).value()
 
-      $(window).on "resize", @calcWidth
+      @resizeViewport()
 
-      # @ui.header.hide()
-      @ui.compress.hide()
+      $(window).on "resize", @calcWidth
 
     onDestroy: ->
       $(window).off "resize", @calcWidth
@@ -402,7 +290,7 @@
           view.calcWidth()
           # view.ui.header.show()
 
-      $.when(remoteLoaded, iframeLoaded).done (remote, iframe) ->
+      $.when(remoteLoaded, iframeLoaded).done (remote, iframe) =>
         ## yes these args are supposed to be reversed
         ## TODO FIX THIS
         fn(iframe, remote)
@@ -431,3 +319,105 @@
 
       @$el.find("iframe").show()
       @externalWindow.close?()
+
+  class Show.Header extends App.Views.ItemView
+    template: "test_iframe/show/_header"
+
+    ui:
+      message:       "#iframe-message"
+      dropdown:      ".dropdown"
+      button:        ".dropdown-toggle"
+      choices:       ".dropdown-menu li a"
+      browser:       ".browser-versions li"
+      chosenBrowser: "#chosen-manual-browser"
+      closeBrowser:  "#chosen-manual-browser i"
+      url:           "#url-container input"
+      width:         "#viewport-width"
+      height:        "#viewport-height"
+      scale:         "#viewport-scale"
+
+    events:
+      "click @ui.expand"        : "expandClicked"
+      "click @ui.compress"      : "compressClicked"
+      "click @ui.button"        : "buttonClicked"
+      "click @ui.choices"       : "choicesClicked"
+      "click @ui.browser"       : "browserClicked"
+      "click @ui.closeBrowser"  : "closeBrowserClicked"
+      "show.bs.dropdown"        : "dropdownShow"
+      "hide.bs.dropdown"        : "dropdownHide"
+
+    modelEvents:
+      "change:url"            : "urlChanged"
+      "change:pageLoading"    : "pageLoadingChanged"
+      "change:viewportWidth"  : "widthChanged"
+      "change:viewportHeight" : "heightChanged"
+      "change:viewportScale"  : "scaleChanged"
+
+    urlChanged: (model, value, options) ->
+      @ui.url.val(value)
+
+    pageLoadingChanged: (model, value, options) ->
+      ## hides or shows the loading indicator
+      @ui.url.parent().toggleClass("loading", value)
+
+    widthChanged: (model, value) ->
+      @ui.width.text(value)
+
+    heightChanged: (model, value) ->
+      @ui.height.text(value)
+
+    scaleChanged: (model, value) ->
+      @ui.scale.text model.get("viewportScale")
+
+    closeBrowserClicked: (e) ->
+      @trigger "close:browser:clicked"
+
+    browserClicked: (e) ->
+      el      = $(e.target)
+      browser = el.parent().data("browser")
+      version = el.text()
+
+      @trigger "browser:clicked", browser, version
+
+    browserChanged: (browser, version) ->
+      @ui.chosenBrowser.html(
+        Marionette.Renderer.render "test_iframe/show/_chosen_browser",
+          browser: browser
+          version: version
+      )
+
+    choicesClicked: (e) ->
+      e.preventDefault()
+
+    buttonClicked: (e) ->
+      e.stopPropagation()
+      @ui.button.parent().toggleClass("open")
+
+    getBootstrapNameSpaceForEvent: (name, e) ->
+      name + "." + e.namespace
+
+    dropdownShow: (e) ->
+      return if not @$iframe
+
+      ## the bootstrap namespace for click events
+      ## ie click.bs.bootstrap
+      eventNamespace = @getBootstrapNameSpaceForEvent("click", e)
+
+      ## binds to the $iframe document's click event
+      ## and repropogates this to our document
+      ## we do this because bootstrap will only bind
+      ## to our documents click event and not our iframes
+      ## so clicking into our iframe should close the dropdown
+      @$iframe.contents().one eventNamespace, (e) =>
+        $(document).trigger(eventNamespace, e)
+
+    dropdownHide: (e) ->
+      return if not @$iframe
+
+      ## the bootstrap namespace for click events
+      ## ie click.bs.bootstrap
+      eventNamespace = @getBootstrapNameSpaceForEvent("click", e)
+
+      ## we always want to remove our old custom handlers
+      ## when the drop down is closed to clean up references
+      @$iframe.contents().off eventNamespace
