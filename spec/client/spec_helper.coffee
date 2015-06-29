@@ -98,7 +98,7 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
 
       obj =
         $remoteIframe: @iframe
-        config: ->
+        config: {}
 
       ## in testing we manually call bindWindowListeners
       ## with our iframe's contentWindow because

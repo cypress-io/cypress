@@ -41,8 +41,6 @@ $Cypress.register "Location", (Cypress, _, $) ->
       # currentUrl = window.location.toString()
       remoteUrl  = @private("window").location.toString()
 
-      # remoteOrigin = @config("remoteOrigin")
-
       location = Cypress.Location.create(remoteUrl)
 
       ret = if _.isString(key)

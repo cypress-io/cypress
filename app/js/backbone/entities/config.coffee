@@ -119,6 +119,9 @@
 
       _.bind(get, @)
 
+    getCypressConfig: ->
+      @pick "commandTimeout", "baseUrl", "viewportWidth", "viewportHeight"
+
     run: (bool = true) ->
       @set("running", bool)
 

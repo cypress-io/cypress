@@ -24,3 +24,21 @@ describe "Config Entity", ->
     it "sets running to false", ->
       @config.run(false)
       expect(@config.isRunning()).to.be.false
+
+  context "#getCypressConfig", ->
+    beforeEach ->
+      @config.set
+        foo: "bar"
+        baz: "quux"
+        commandTimeout: 4000
+        baseUrl: "http://localhost:9000/app"
+        viewportWidth: 800
+        viewportHeight: 600
+
+    it "picks commandTimeout, baseUrl, viewportWidth, viewportHeight", ->
+      expect(@config.getCypressConfig()).to.deep.eq {
+        commandTimeout: 4000
+        baseUrl: "http://localhost:9000/app"
+        viewportWidth: 800
+        viewportHeight: 600
+      }

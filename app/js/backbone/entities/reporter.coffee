@@ -265,7 +265,7 @@
 
         ## initialize the helper objects for Cypress to be able
         ## to run tests
-        @Cypress.initialize(specWindow, remoteIframe, App.config.getExternalInterface())
+        @Cypress.initialize(specWindow, remoteIframe, App.config.getCypressConfig())
 
         @Cypress.run (err) =>
           App.config.run(false)
