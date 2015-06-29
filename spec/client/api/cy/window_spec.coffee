@@ -117,6 +117,10 @@ describe "$Cypress.Cy Window Commands", ->
 
       @cy.viewport(800, 600)
 
+    it "sets subject to null", ->
+      @cy.viewport("ipad-2").then (subject) ->
+        expect(subject).to.be.null
+
     context "presets", ->
       it "iphone-6", (done) ->
         @Cypress.on "viewport", (viewport) ->
@@ -126,17 +130,149 @@ describe "$Cypress.Cy Window Commands", ->
         @cy.viewport("iphone-6")
 
     context "errors", ->
-      it "throws with passed invalid preset"
+      beforeEach ->
+        @allowErrors()
 
-      it "throws when passed anything other than number or string"
+      it "throws with passed invalid preset", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) ->
+          expect(logs.length).to.eq(1)
+          expect(err.message).to.eq "cy.viewport could not find a preset for: 'foo'. Available presets are: macbook-15, macbook-13, macbook-11, ipad-2, ipad-mini, ipad-mini-2, ipad-3, ipad-4, iphone-6+, iphone-6, iphone-5, iphone-4, iphone-3"
+          done()
+
+        @cy.viewport("foo")
+
+      it "throws when passed a string as height", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) ->
+          expect(logs.length).to.eq(1)
+          expect(err.message).to.eq "cy.viewport can only accept a string preset or a width and height as numbers."
+          done()
+
+        @cy.viewport(800, "600")
+
+      it "throws when passed negative numbers", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) ->
+          expect(logs.length).to.eq(1)
+          expect(err.message).to.eq "cy.viewport width and height must be between 200px and 3000px."
+          done()
+
+        @cy.viewport(800, -600)
+
+      it "throws when passed width less than 200", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) ->
+          expect(logs.length).to.eq(1)
+          expect(err.message).to.eq "cy.viewport width and height must be between 200px and 3000px."
+          done()
+
+        @cy.viewport(199, 600)
+
+      it "throws when passed height greater than than 3000", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) ->
+          expect(logs.length).to.eq(1)
+          expect(err.message).to.eq "cy.viewport width and height must be between 200px and 3000px."
+          done()
+
+        @cy.viewport(1000, 3001)
+
+      it "throws when passed an empty string as width", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) ->
+          expect(logs.length).to.eq(1)
+          expect(err.message).to.eq "cy.viewport cannot be passed an empty string."
+          done()
+
+        @cy.viewport("")
+
+      _.each [{}, [], NaN, Infinity, null, undefined], (val) =>
+        it "throws when passed the invalid: '#{val}' as width", (done) ->
+          logs = []
+
+          @Cypress.on "log", (log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) ->
+            expect(logs.length).to.eq(1)
+            expect(err.message).to.eq "cy.viewport can only accept a string preset or a width and height as numbers."
+            done()
+
+          @cy.viewport(val)
 
     context ".log", ->
-      it "logs viewport with width, height"
+      beforeEach ->
+        @Cypress.on "log", (@log) =>
 
-      it "sets state to success immediately"
+      afterEach ->
+        @log = null
 
-      it "snapshots immediately"
+      it "logs viewport", ->
+        @cy.viewport(800, 600).then ->
+          expect(@log.get("name")).to.eq "viewport"
 
-      it "can turn off logging viewport command"
+      it "logs viewport with width, height", ->
+        @cy.viewport(800, 600).then ->
+          expect(@log.get("message")).to.eq "800, 600"
 
-      it "can turn off logging viewport when using preset"
+      it "logs viewport with preset", ->
+        @cy.viewport("ipad-2").then ->
+          expect(@log.get("message")).to.eq "ipad-2"
+
+      it "sets state to success immediately", ->
+        @cy.viewport(800, 600).then ->
+          expect(@log.get("state")).to.eq "success"
+
+      it "snapshots immediately", ->
+        @cy.viewport(800, 600).then ->
+          expect(@log.get("snapshot")).to.be.an("object")
+
+      it "can turn off logging viewport command", ->
+        @cy.viewport(800, 600, {log: false}).then ->
+          expect(@log).not.to.be.ok
+
+      it "can turn off logging viewport when using preset", ->
+        @cy.viewport("macbook-15", {log: false}).then ->
+          expect(@log).not.to.be.ok
+
+      it ".onConsole with preset", ->
+        @cy.viewport("ipad-3").then ->
+          expect(@log.attributes.onConsole()).to.deep.eq {
+            Command: "viewport"
+            Preset: "ipad-3"
+            Width: 2048
+            Height: 1536
+          }
+
+      it ".onConsole without preset", ->
+        @cy.viewport(1024, 768).then ->
+          expect(@log.attributes.onConsole()).to.deep.eq {
+            Command: "viewport"
+            Width: 1024
+            Height: 768
+          }
