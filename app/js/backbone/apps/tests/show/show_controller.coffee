@@ -57,8 +57,8 @@
     statsRegion: (runner) ->
       App.execute "show:test:stats", @layout.statsRegion, runner
 
-    iframeRegion: (runner) ->
-      App.execute "show:test:iframe", @layout.iframeRegion, runner
+    iframeRegion: (reporter) ->
+      App.execute "show:test:iframe", @layout.iframeRegion, reporter
 
     specsRegion: (runner, spec) ->
       App.execute "list:test:specs", @layout.specsRegion, runner, spec

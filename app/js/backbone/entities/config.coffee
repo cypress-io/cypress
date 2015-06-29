@@ -4,7 +4,6 @@
 
   class Entities.Config extends Entities.Model
     defaults: ->
-      viewportScale: 1
       collapsed:  @getConfig("collapsed")
       panels:     @getConfig("panels")
       panelWidth: @getConfig("panelWidth")
@@ -19,10 +18,6 @@
       panelWidth:
         default: 300
         type: "number"
-
-    mutators:
-      viewportScale: ->
-        Math.ceil(parseFloat(@attributes.viewportScale) * 100).toFixed(0)
 
     testProp: (prop, stringOrRegExp) ->
       switch
@@ -41,20 +36,6 @@
 
     setUI: (ui) ->
       @set "ui", ui
-
-    setViewport: (viewport) ->
-      @set
-        viewportWidth:  viewport.width
-        viewportHeight: viewport.height
-
-    setScale: (scale) ->
-      @set "viewportScale", scale
-
-    setUrl: (url) ->
-      @set "url", url
-
-    setPageLoading: (bool = true) ->
-      @set "pageLoading", bool
 
     toggleCollapse: ->
       @set "collapsed", !@get("collapsed")
@@ -110,22 +91,8 @@
     getProjectName: ->
       _.last @get("projectRoot").split("/")
 
-    ## returns a function bound to this model
-    ## which acts as a getter
-    getExternalInterface: ->
-      get = (attr) ->
-        @get(attr)
-
-      _.bind(get, @)
-
     getCypressConfig: ->
       @pick "commandTimeout", "baseUrl", "viewportWidth", "viewportHeight"
-
-    run: (bool = true) ->
-      @set("running", bool)
-
-    isRunning: ->
-      !!@get("running")
 
     ## should probably rename this to be something like
     ## 'command:hovered'.  Since our App.config is dictating

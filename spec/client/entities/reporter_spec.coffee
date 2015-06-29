@@ -89,6 +89,11 @@ describe "Reporter Entity", ->
       _.each @resets, (reset) ->
         expect(reset).to.be.calledWithMatch [], {silent: true}
 
+    it "resets message back to null", ->
+      @reporter.set "message", "foobarbaz"
+      @reporter.reset()
+      expect(@reporter.get("message")).to.be.null
+
   context "#receivedRunner", ->
     beforeEach ->
       runner = Fixtures.createRunnables
@@ -360,3 +365,26 @@ describe "Reporter Entity", ->
     it "returns .chosen", ->
       @reporter.chosen = {}
       expect(@reporter.getChosen()).to.deep.eq {}
+
+  # context "#revertDom", ->
+  #   beforeEach ->
+  #     @trigger = @sandbox.spy @config, "trigger"
+
+  #   it "triggers 'cannot:revert:dom' if isRunning", ->
+  #     @config.run()
+  #     @config.revertDom()
+  #     expect(@trigger).to.be.calledWith "cannot:revert:dom", true
+
+  #   it "triggers 'cannot:revert:dom' false", ->
+  #     @config.run()
+  #     @config.revertDom({}, false)
+  #     expect(@trigger).to.be.calledWith "cannot:revert:dom", false
+
+  # context "#run", ->
+  #   it "sets running to true", ->
+  #     @config.run()
+  #     expect(@config.isRunning()).to.be.true
+
+  #   it "sets running to false", ->
+  #     @config.run(false)
+  #     expect(@config.isRunning()).to.be.false

@@ -140,52 +140,32 @@
       }
 
     calcWidth: (main, tests, container) ->
+      width  = main.width() - tests.width()
+      height = container.height() - 37 ## 37 accounts for the header
+
+      container.width(width)
+
+      @calcScale(width, height)
+
+    calcScale: (width, height) ->
       size = @ui.size
 
-      # width  = main.width() - tests.width()
-      # height = container.height() - 37 ## 37 accounts for the header
+      iframeWidth  = size.width()
+      iframeHeight = size.height()
 
-      # container.width(width)
+      ## move all of this logic into model methods
+      if width < iframeWidth or height < iframeHeight
+        scale = Math.min(width / iframeWidth, height / iframeHeight, 1).toFixed(4)
+      else
+        scale = 1
 
-      # iframeWidth  = size.width()
-      # iframeHeight = size.height()
-
-      # ## move all of this logic into model methods
-      # if width < iframeWidth or height < iframeHeight
-      #   scale = Math.min(width / iframeWidth, height / iframeHeight, 1).toFixed(4)
-      # else
-      #   scale = 1
-
-      # size.css({transform: "scale(#{scale})"})
-      # @model.setScale(scale)
-
-    # updateIframeCss: (name, val) ->
-    #   switch name
-    #     when "height", "width"
-    #       @ui.size.css(name, val + "%")
-    #     when "scale"
-    #       num = (val / 100)
-    #       @ui.size.css("transform", "scale(#{num})")
+      size.css({transform: "scale(#{scale})"})
+      @model.setScale(scale)
 
     onShow: ->
       main      = $("#main-region :first-child")
       tests     = $("#test-container")
       container = $("#iframe-wrapper")
-
-      view = @
-
-      # @ui.sliders.slider
-      #   range: "min"
-      #   min: 1
-      #   max: 100
-      #   slide: (e, ui) ->
-      #     name = $(@).parents(".form-group").find("input").val(ui.value).prop("name")
-      #     view.updateIframeCss(name, ui.value)
-
-      # @ui.sliders.each (index, slider) ->
-      #   $slider = $(slider)
-      #   val = $slider.parents(".form-group").find("input").val()
-      #   $slider.slider("value", val)
 
       @calcWidth = _(@calcWidth).chain().bind(@).partial(main, tests, container).value()
 
@@ -215,14 +195,14 @@
 
     loadIframe: (src, options, fn) ->
       ## remove any existing iframes
-      @reverted = false
-      @ui.message.hide().empty()
+      # @reverted = false
+      # @ui.message.hide().empty()
 
       @resetReferences()
 
       @$el.hide()
 
-      if @model.ui("host")
+      if App.config.ui("host")
         @loadSatelitteIframe(src, options, fn)
       else
         @loadRegularIframes(src, options, fn)
@@ -262,7 +242,7 @@
       remoteLoaded = $.Deferred()
       iframeLoaded = $.Deferred()
 
-      name = @model.getProjectName()
+      name = App.config.getProjectName()
 
       remoteOpts =
         id: "Your App: '#{name}' "
@@ -295,31 +275,6 @@
         ## TODO FIX THIS
         fn(iframe, remote)
 
-    expandClicked: (e) ->
-      @ui.expand.hide()
-      @ui.compress.show()
-
-      @$el.find("iframe").hide()
-      ## display the iframe header in an 'external' mode
-      ## swap out fa-expand with fa-compress
-
-      @externalWindow = window.open(@src, "testIframeWindow", "titlebar=no,menubar=no,toolbar=no,location=no,personalbar=no,status=no")
-      # console.warn @externalWindow, @fn
-      # @externalWindow.onload =>
-        # console.warn "externalWindow ready!"
-        # @fn(@externalWindow)
-
-      # @externalWindow
-      ## when the externalWindow is open, keep the iframe around but proxy
-      ## the ECL and dom commands to it
-
-    compressClicked: (e) ->
-      @ui.compress.hide()
-      @ui.expand.show()
-
-      @$el.find("iframe").show()
-      @externalWindow.close?()
-
   class Show.Header extends App.Views.ItemView
     template: "test_iframe/show/_header"
 
@@ -348,6 +303,7 @@
 
     modelEvents:
       "change:url"            : "urlChanged"
+      "change:message"        : "messageChanged"
       "change:pageLoading"    : "pageLoadingChanged"
       "change:viewportWidth"  : "widthChanged"
       "change:viewportHeight" : "heightChanged"
@@ -355,6 +311,10 @@
 
     urlChanged: (model, value, options) ->
       @ui.url.val(value)
+
+    messageChanged: (model, value, options) ->
+      # if options.something? init?
+      @ui.message
 
     pageLoadingChanged: (model, value, options) ->
       ## hides or shows the loading indicator

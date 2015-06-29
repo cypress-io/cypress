@@ -3,57 +3,62 @@
   class Show.Controller extends App.Controllers.Application
 
     initialize: (options) ->
-      { runner } = options
+      { reporter } = options
 
       config = App.request "app:config:entity"
 
-      @layout = @getLayoutView(config)
+      ## set the initial config values from
+      ## our config entity
+      reporter.setConfig(config)
+
+      @layout = @getLayoutView(reporter)
 
       @listenTo @layout, "browser:clicked", (browser, version) ->
-        # runner.switchToBrowser(browser, version)
+        # reporter.switchToBrowser(browser, version)
 
       @listenTo @layout, "close:browser:clicked", ->
-        # runner.switchToBrowser()
+        # reporter.switchToBrowser()
 
-      ## when the runner triggers load:spec:iframe we load the iframe
-      @listenTo runner, "load:spec:iframe", (iframe, options) ->
-        @loadIframe @layout, runner, iframe, options
+      ## when the reporter triggers load:spec:iframe we load the iframe
+      @listenTo reporter, "load:spec:iframe", (iframe, options) ->
+        @loadIframe @layout, reporter, iframe, options
 
       ## TODO MOVE ALL THESE EVENTS DIRECTLY
       ## INTO THE LAYOUTVIEW
-      @listenTo config, "cannot:revert:dom", (init) ->
+      @listenTo reporter, "cannot:revert:dom", (init) ->
         @layout.cannotRevertDom(init)
 
-      @listenTo config, "revert:dom", (dom, options) ->
+      @listenTo reporter, "revert:dom", (dom, options) ->
         @layout.revertToDom dom, options
 
-      @listenTo config, "highlight:el", (el, options) ->
+      @listenTo reporter, "highlight:el", (el, options) ->
         @layout.highlightEl el, options
 
-      @listenTo config, "restore:dom", ->
+      @listenTo reporter, "restore:dom", ->
         @layout.restoreDom()
 
       @listenTo @layout, "show", ->
-        @headerView(config)
+        ## dont show the header in satelitte mode
+        return if config.ui("satelitte")
+
+        @headerView(reporter)
 
       @show @layout
 
-    loadIframe: (view, runner, specPath, options) ->
+    loadIframe: (view, reporter, specPath, options) ->
       view.loadIframe specPath, options, (contentWindow, remoteIframe) ->
         ## once its loaded we receive the contentWindow
-        ## and tell our runner to run the specPath's suite
-        runner.run(specPath, contentWindow, remoteIframe, options)
+        ## and tell our reporter to run the specPath's suite
+        reporter.run(specPath, contentWindow, remoteIframe, options)
 
-    headerView: (config) ->
-      return if config.ui("satelitte")
-
-      headerView = @getHeaderView(config)
+    headerView: (reporter) ->
+      headerView = @getHeaderView(reporter)
       @show headerView, region: @layout.headerRegion
 
-    getHeaderView: (config) ->
+    getHeaderView: (reporter) ->
       new Show.Header
-        model: config
+        model: reporter
 
-    getLayoutView: (config) ->
+    getLayoutView: (reporter) ->
       new Show.Layout
-        model: config
+        model: reporter

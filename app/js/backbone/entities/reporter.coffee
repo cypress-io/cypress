@@ -3,15 +3,22 @@
   do ($Cypress) ->
 
     runnableIdRegExp = /\[(.{3})\]$/
+    regExpCharacters = /[-\/\\^$*+?.()|[\]{}]/g
 
     CypressEvents = "run:start run:end suite:start suite:end hook:start hook:end test:start test:end".split(" ")
 
     alphabet = "abcdefghijklmnopqrstuvwxyz0123456789"
 
     class Entities.Reporter extends Entities.Model
-      defaults:
+      defaults: ->
         browser: null
         version: null
+        message: null
+        viewportScale: 1
+
+      mutators:
+        viewportScale: ->
+          Math.ceil(parseFloat(@attributes.viewportScale) * 100).toFixed(0)
 
       initialize: ->
         @Cypress   = $Cypress.create({loadModules: true})
@@ -34,14 +41,14 @@
         @listenTo @Cypress, "initialized", (obj) =>
           @receivedRunner(obj.runner)
 
-        @listenTo @Cypress, "viewport", (viewport) ->
-          App.config.setViewport(viewport)
+        @listenTo @Cypress, "viewport", (viewport) =>
+          @setViewport(viewport)
 
-        @listenTo @Cypress, "url:changed", (url) ->
-          App.config.setUrl(url)
+        @listenTo @Cypress, "url:changed", (url) =>
+          @setUrl(url)
 
-        @listenTo @Cypress, "page:loading", (bool) ->
-          App.config.setPageLoading(bool)
+        @listenTo @Cypress, "page:loading", (bool) =>
+          @setPageLoading(bool)
 
         @listenTo @Cypress, "log", (log) =>
           switch log.get("instrument")
@@ -81,6 +88,8 @@
           @[obj] = null
 
       reset: ->
+        @set @defaults()
+
         _.each [@commands, @routes, @agents], (collection) ->
           collection.reset([], {silent: true})
 
@@ -254,11 +263,31 @@
         return @
 
       escapeRegExp: (str) ->
-        new RegExp str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
+        new RegExp str.replace(regExpCharacters, '\\$&')
+
+      setConfig: (config) ->
+        @set config.pick("viewportWidth", "viewportHeight")
+
+      setScale: (scale) ->
+        @set "viewportScale", scale
+
+      isRunning: ->
+        !!@get("running")
+
+      setViewport: (viewport) ->
+        @set
+          viewportWidth:  viewport.width
+          viewportHeight: viewport.height
+
+      setUrl: (url) ->
+        @set "url", url
+
+      setPageLoading: (bool = true) ->
+        @set "pageLoading", bool
 
       ## used to be called runIframeSuite
       run: (iframe, specWindow, remoteIframe, options, fn) ->
-        App.config.run()
+        @set("running", true)
 
         ## trigger before:run prior to setting up the runner
         @trigger "before:run"
@@ -268,7 +297,7 @@
         @Cypress.initialize(specWindow, remoteIframe, App.config.getCypressConfig())
 
         @Cypress.run (err) =>
-          App.config.run(false)
+          @set("running", false)
 
           @Cypress.after(err)
 
