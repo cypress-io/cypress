@@ -1,8 +1,6 @@
 <% if @ui isnt "satellite": %>
   <header>
     <div id="url-container" class="pull-left">
-      <i class="fa fa-arrow-left"></i>
-      <i class="fa fa-arrow-right"></i>
       <div id="url-wrapper">
         <input class="url" />
         <span class="loading-wrapper">
