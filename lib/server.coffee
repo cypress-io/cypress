@@ -55,6 +55,7 @@ class Server
     ## passing or failing
 
     _.defaults obj,
+      baseUrl: null
       clientRoute: "/__/"
       commandTimeout: 4000
       port: 2020

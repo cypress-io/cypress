@@ -147,3 +147,5 @@ describe "Server Interface", ->
       it "viewportHeight=660", ->
         @defaults "viewportHeight", 660
 
+      it "baseUrl=null", ->
+        @defaults "baseUrl", null
