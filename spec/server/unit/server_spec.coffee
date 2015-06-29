@@ -141,3 +141,9 @@ describe "Server Interface", ->
       it "javascripts=[]", ->
         @defaults "javascripts", []
 
+      it "viewportWidth=1000", ->
+        @defaults "viewportWidth", 1000
+
+      it "viewportHeight=660", ->
+        @defaults "viewportHeight", 660
+
