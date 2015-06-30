@@ -971,41 +971,25 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(clicked).to.eq 1
 
     describe "change events", ->
-      # it "fires when enter is pressed and value has changed", ->
-      #   changed = 0
+      it "fires when enter is pressed and value has changed", ->
+        changed = 0
 
-      #   @cy.$(":text:first").change ->
-      #     changed += 1
+        @cy.$(":text:first").change ->
+          changed += 1
 
-      #   @cy.get(":text:first").invoke("val", "foo").type("bar{enter}").then ->
-      #     expect(changed).to.eq 1
+        @cy.get(":text:first").invoke("val", "foo").type("bar{enter}").then ->
+          expect(changed).to.eq 1
 
-      # it "fires twice when enter is pressed and then again after losing focus", ->
-      #   changed = 0
+      it "fires twice when enter is pressed and then again after losing focus", ->
+        changed = 0
 
-      #   @cy.$(":text:first").change ->
-      #     changed += 1
+        @cy.$(":text:first").change ->
+          changed += 1
 
-      #   @cy.get(":text:first").invoke("val", "foo").type("bar{enter}baz").blur().then ->
-      #     expect(changed).to.eq 2
+        @cy.get(":text:first").invoke("val", "foo").type("bar{enter}baz").blur().then ->
+          expect(changed).to.eq 2
 
       it "fires when element loses focus due to another action (click)", ->
-        # @cy.$(":text:first").focus ->
-        #   console.log "focus", $(this).get(0)
-
-        # @cy.$(":text:first").blur ->
-        #   console.log "blur", $(this).get(0)
-
-        # @cy.$("button:first").focus ->
-        #   console.log "focus", $(this).get(0)
-
-        # @cy.$("button:first").blur ->
-        #   console.log "blur", $(this).get(0)
-        #   debugger
-
-        # @cy.$(":text:first").get(0).focus()
-
-        # @cy.$("button:first").get(0).focus()
         changed = 0
 
         @cy.$(":text:first").change ->
