@@ -66,14 +66,6 @@
     sauceRegion: (runner, jobName, batchId) ->
       App.execute "list:test:jobs", @layout.jobsRegion, runner, jobName, batchId
 
-    panelsRegion: (runner, config) ->
-      ## trigger the event to ensure the test panels are listed
-      ## and pass up the runner
-      config.trigger "list:test:panels", runner,
-        domRegion: @layout.domRegion
-        xhrRegion: @layout.xhrRegion
-        logRegion: @layout.logRegion
-
     onDestroy: (config, runner) ->
       ## nuke our cookies when we leave
       App.clearAllCookies()
