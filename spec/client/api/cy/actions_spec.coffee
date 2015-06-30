@@ -273,14 +273,6 @@ describe "$Cypress.Cy Actions Commands", ->
         .get("input:text:first").type("foo")
         .get("input:text:last").type("bar")
 
-    it "can forcibly click even when being covered by another element", (done) ->
-      input  = $("<input />").attr("id", "input-covered-in-span").prependTo(@cy.$("body"))
-      span = $("<span>span on input</span>").css(position: "absolute", left: input.offset().left, top: input.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
-
-      input.on "click", -> done()
-
-      @cy.get("#input-covered-in-span").type("foo", {force: true})
-
     it "can type into contenteditable", ->
       oldText = @cy.$("#contenteditable").text()
 
@@ -288,34 +280,16 @@ describe "$Cypress.Cy Actions Commands", ->
         text = _.clean $div.text()
         expect(text).to.eq _.clean(oldText + "foo")
 
-    it "passes timeout and interval down to click", (done) ->
-      input  = $("<input />").attr("id", "input-covered-in-span").prependTo(@cy.$("body"))
-      span = $("<span>span on input</span>").css(position: "absolute", left: input.offset().left, top: input.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
-
-      @cy.on "retry", (options) ->
-        expect(options.timeout).to.eq 1000
-        expect(options.interval).to.eq 60
-        done()
-
-      @cy.get("#input-covered-in-span").type("foobar", {timeout: 1000, interval: 60})
-
-    it "can forcibly click even when element is invisible", (done) ->
-      input = @cy.$("input:first").hide()
-
-      input.click -> done()
-
-      @cy.get("input:first").click({force: true})
-
     # describe "input types", ->
-    #   _.each ["password", "email", "number", "date", "week", "month", "time", "datetime", "datetime-local", "search", "url"], (type) ->
-    #     it "accepts input [type=#{type}]", ->
-    #       input = @cy.$("<input type='#{type}' id='input-type-#{type}' />")
+      # _.each ["password", "email", "number", "date", "week", "month", "time", "datetime", "datetime-local", "search", "url"], (type) ->
+        # it "accepts input [type=#{type}]", ->
+        #   input = @cy.$("<input type='#{type}' id='input-type-#{type}' />")
 
-    #       @cy.$("body").append(input)
+        #   @cy.$("body").append(input)
 
-    #       @cy.get("#input-type-#{type}").type("1234").then ($input) ->
-    #         expect($input).to.have.value "1234"
-    #         expect($input.get(0)).to.eq input.get(0)
+        #   @cy.get("#input-type-#{type}").type("1234").then ($input) ->
+        #     expect($input).to.have.value "1234"
+        #     expect($input.get(0)).to.eq input.get(0)
 
     describe "delay", ->
       beforeEach ->
@@ -951,26 +925,87 @@ describe "$Cypress.Cy Actions Commands", ->
           @cy.get("#input-types [contenteditable]").invoke("text", "foo").type("bar{enter}baz{enter}quux").then ($div) ->
             expect($div).to.have.text("foobar\nbaz\nquux")
 
+    describe "click events", ->
+      it "passes timeout and interval down to click", (done) ->
+        input  = $("<input />").attr("id", "input-covered-in-span").prependTo(@cy.$("body"))
+        span = $("<span>span on input</span>").css(position: "absolute", left: input.offset().left, top: input.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+        @cy.on "retry", (options) ->
+          expect(options.timeout).to.eq 1000
+          expect(options.interval).to.eq 60
+          done()
+
+        @cy.get("#input-covered-in-span").type("foobar", {timeout: 1000, interval: 60})
+
+      it "can forcibly click even when element is invisible", (done) ->
+        input = @cy.$("input:first").hide()
+
+        input.click -> done()
+
+        @cy.get("input:first").click({force: true})
+
+      it "can forcibly click even when being covered by another element", (done) ->
+        input  = $("<input />").attr("id", "input-covered-in-span").prependTo(@cy.$("body"))
+        span = $("<span>span on input</span>").css(position: "absolute", left: input.offset().left, top: input.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+        input.on "click", -> done()
+
+        @cy.get("#input-covered-in-span").type("foo", {force: true})
+
+      it "does not issue another click event between type/type", ->
+        clicked = 0
+
+        @cy.$(":text:first").click ->
+          clicked += 1
+
+        @cy.get(":text:first").type("f").type("o").then ->
+          expect(clicked).to.eq 1
+
+      it "does not issue another click event if element is already in focus from click", ->
+        clicked = 0
+
+        @cy.$(":text:first").click ->
+          clicked += 1
+
+        @cy.get(":text:first").click().type("o").then ->
+          expect(clicked).to.eq 1
+
     describe "change events", ->
-      it "fires when enter is pressed and value has changed", ->
-        changed = 0
+      # it "fires when enter is pressed and value has changed", ->
+      #   changed = 0
 
-        @cy.$(":text:first").change ->
-          changed += 1
+      #   @cy.$(":text:first").change ->
+      #     changed += 1
 
-        @cy.get(":text:first").invoke("val", "foo").type("bar{enter}").then ->
-          expect(changed).to.eq 1
+      #   @cy.get(":text:first").invoke("val", "foo").type("bar{enter}").then ->
+      #     expect(changed).to.eq 1
 
-      it "fires twice when enter is pressed and then again after losing focus", ->
-        changed = 0
+      # it "fires twice when enter is pressed and then again after losing focus", ->
+      #   changed = 0
 
-        @cy.$(":text:first").change ->
-          changed += 1
+      #   @cy.$(":text:first").change ->
+      #     changed += 1
 
-        @cy.get(":text:first").invoke("val", "foo").type("bar{enter}baz").blur().then ->
-          expect(changed).to.eq 2
+      #   @cy.get(":text:first").invoke("val", "foo").type("bar{enter}baz").blur().then ->
+      #     expect(changed).to.eq 2
 
       it "fires when element loses focus due to another action (click)", ->
+        # @cy.$(":text:first").focus ->
+        #   console.log "focus", $(this).get(0)
+
+        # @cy.$(":text:first").blur ->
+        #   console.log "blur", $(this).get(0)
+
+        # @cy.$("button:first").focus ->
+        #   console.log "focus", $(this).get(0)
+
+        # @cy.$("button:first").blur ->
+        #   console.log "blur", $(this).get(0)
+        #   debugger
+
+        # @cy.$(":text:first").get(0).focus()
+
+        # @cy.$("button:first").get(0).focus()
         changed = 0
 
         @cy.$(":text:first").change ->
@@ -1012,6 +1047,51 @@ describe "$Cypress.Cy Actions Commands", ->
 
       #   @cy.get(":text:first").invoke("val", "foo").type("b{tab}").then ->
       #     expect(changed).to.eq 1
+
+      it "does not fire twice if element is already in focus between type/type", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy.get(":text:first").invoke("val", "foo").type("f").type("o{enter}").then ->
+          expect(changed).to.eq 1
+
+      it "does not fire twice if element is already in focus between clear/type", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy.get(":text:first").invoke("val", "foo").clear().type("o{enter}").then ->
+          expect(changed).to.eq 1
+
+      it "does not fire twice if element is already in focus between click/type", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy.get(":text:first").invoke("val", "foo").click().type("o{enter}").then ->
+          expect(changed).to.eq 1
+
+      it "does not fire twice if element is already in focus between type/click", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy.get(":text:first").invoke("val", "foo").type("d{enter}").click().then ->
+          expect(changed).to.eq 1
+
+      it "does not fire at all between clear/type/click", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy.get(":text:first").invoke("val", "foo").clear().type("o").click().then ->
+          expect(changed).to.eq 0
 
       it "does not fire if {enter} is preventedDefault", ->
         changed = 0

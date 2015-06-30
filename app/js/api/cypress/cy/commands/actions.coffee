@@ -170,12 +170,14 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           .catch (err) ->
             reject(err)
 
-      promise.timeout(timeout).catch Promise.TimeoutError, (err) =>
-        cleanup()
+      promise
+        .timeout(timeout)
+        .catch Promise.TimeoutError, (err) =>
+          cleanup()
 
-        return if options.error is false
+          return if options.error is false
 
-        @throwErr ".focus() timed out because your browser did not receive any focus events. This is a known bug in Chrome when it is not the currently focused window.", command
+          @throwErr ".focus() timed out because your browser did not receive any focus events. This is a known bug in Chrome when it is not the currently focused window.", command
 
     blur: (subject, options = {}) ->
       ## we should throw errors by default!
@@ -278,6 +280,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
           @throwErr ".blur() timed out because your browser did not receive any blur events. This is a known bug in Chrome when it is not the currently focused window.", command
 
+    ## update dblclick to use the click
+    ## logic and just swap out the event details?
     dblclick: (subject, options = {}) ->
       _.defaults options,
         log: true
@@ -741,18 +745,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
       options.chars = "" + chars
 
-      ## click the element first to simulate focus
-      ## and typical user behavior in case the window
-      ## is out of focus
-      @command("click", {
-        $el: options.$el
-        log: false
-        command: options.command
-        force: options.force
-        timeout: options.timeout
-        interval: options.interval
-      }).then =>
-
+      type = =>
         simulateSubmitHandler = =>
           form = options.$el.parents("form")
 
@@ -861,12 +854,32 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
               @throwErr("Special character sequence: '#{chars}' is not recognized. Available sequences are: #{allChars}", options.command)
 
         })
-        .then ->
-          ## submit events should be finished at this point!
-          ## so we can snapshot the current state of the DOM
-          options.command.snapshot().end() if options.command
 
-          return options.$el
+      @command("focused", {log: false}).then ($focused) =>
+        ## if we dont have a focused element
+        ## or if we do and its not ourselves
+        ## then issue the click
+        if not $focused or ($focused and $focused.get(0) isnt options.$el.get(0))
+          ## click the element first to simulate focus
+          ## and typical user behavior in case the window
+          ## is out of focus
+          @command("click", {
+            $el: options.$el
+            log: false
+            command: options.command
+            force: options.force
+            timeout: options.timeout
+            interval: options.interval
+          }).then =>
+            type()
+        else
+          type()
+      .then ->
+        ## submit events should be finished at this point!
+        ## so we can snapshot the current state of the DOM
+        options.command.snapshot().end() if options.command
+
+        return options.$el
 
     clear: (subject, options = {}) ->
       ## what about other types of inputs besides just text?

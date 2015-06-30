@@ -452,7 +452,9 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
     ## calling another command but wrapping it in a
     ## promise
     command: (name, args...) ->
-      Promise.resolve @sync[name].apply(@, args)
+      Promise
+        .resolve(@sync[name].apply(@, args))
+        .cancellable()
 
     defer: (fn) ->
       @clearTimeout(@prop("timerId"))
