@@ -10,16 +10,6 @@
     alphabet = "abcdefghijklmnopqrstuvwxyz0123456789"
 
     class Entities.Runner extends Entities.Model
-      defaults: ->
-        browser: null
-        version: null
-        message: null
-        viewportScale: 1
-
-      mutators:
-        viewportScale: ->
-          Math.ceil(parseFloat(@attributes.viewportScale) * 100).toFixed(0)
-
       initialize: ->
         @Cypress   = $Cypress.create({loadModules: true})
 
@@ -27,7 +17,7 @@
         @routes    = App.request "route:entities"
         @agents    = App.request "agent:entities"
         @socket    = App.request "socket:entity"
-        @iframe    = App.request "iframe:entity", @Cypress
+        @iframe    = App.request "iframe:entity", @, @Cypress
 
         _.each CypressEvents, (event) =>
           @listenTo @Cypress, event, (args...) =>
@@ -41,15 +31,6 @@
 
         @listenTo @Cypress, "initialized", (obj) =>
           @receivedRunner(obj.runner)
-
-        @listenTo @Cypress, "viewport", (viewport) =>
-          @setViewport(viewport)
-
-        @listenTo @Cypress, "url:changed", (url) =>
-          @setUrl(url)
-
-        @listenTo @Cypress, "page:loading", (bool) =>
-          @setPageLoading(bool)
 
         @listenTo @Cypress, "log", (log) =>
           switch log.get("instrument")
@@ -89,8 +70,6 @@
           @[obj] = null
 
       reset: ->
-        @set @defaults()
-
         _.each [@commands, @routes, @agents], (collection) ->
           collection.reset([], {silent: true})
 
@@ -140,14 +119,16 @@
       triggerLoadSpecFrame: (@specPath, options = {}) ->
         _.defaults options,
           chosenId: @get("chosenId")
-          browser:  @get("browser")
-          version:  @get("version")
+          specPath: @specPath
 
         ## reset our collection entities
         @reset()
 
+        ## pass the run method as our callback bound to us
+        run = _.bind(@run, @)
+
         ## tells the iframe view to load up a new iframe
-        @trigger "load:spec:iframe", @specPath, options
+        @iframe.load(run, options)
 
       getRunnableId: (runnable) ->
         ## grab the runnable id from the runnable's title
@@ -266,30 +247,8 @@
       escapeRegExp: (str) ->
         new RegExp str.replace(regExpCharacters, '\\$&')
 
-      setConfig: (config) ->
-        @set config.pick("viewportWidth", "viewportHeight")
-
-      setScale: (scale) ->
-        @set "viewportScale", scale
-
-      isRunning: ->
-        !!@get("running")
-
-      setViewport: (viewport) ->
-        @set
-          viewportWidth:  viewport.width
-          viewportHeight: viewport.height
-
-      setUrl: (url) ->
-        @set "url", url
-
-      setPageLoading: (bool = true) ->
-        @set "pageLoading", bool
-
       ## used to be called runIframeSuite
-      run: (iframe, specWindow, remoteIframe, options, fn) ->
-        @set("running", true)
-
+      run: (specWindow, remoteIframe, options, fn) ->
         ## trigger before:run prior to setting up the runner
         @trigger "before:run"
 
@@ -298,8 +257,6 @@
         @Cypress.initialize(specWindow, remoteIframe, App.config.getCypressConfig())
 
         @Cypress.run (err) =>
-          @set("running", false)
-
           @Cypress.after(err)
 
           ## trigger the after run event

@@ -2,14 +2,15 @@ describe "Iframe Show App", ->
   enterAppTestingMode()
 
   beforeEach ->
-    @reporter   = App.request("reporter:entity")
-    @config     = App.config = App.request("new:config:entity")
-    @Cypress    = @reporter.Cypress
+    @runner   = App.request("runner:entity")
+    @config   = App.config = App.request("new:config:entity")
+    @iframe   = @runner.iframe
+    @Cypress  = @runner.Cypress
 
     @setup = =>
       @sandbox.stub(App.TestIframeApp.Show.Layout.prototype, "calcWidth")
 
-      @controller = new App.TestIframeApp.Show.Controller({reporter: @reporter})
+      @controller = new App.TestIframeApp.Show.Controller({iframe: @iframe})
       @layout     = @controller.layout
       @header     = @layout.headerRegion.currentView
 
@@ -37,8 +38,8 @@ describe "Iframe Show App", ->
 
       it "sets scale to 1 when width + height are > iframe", ->
         @layout.calcScale(10000, 1000)
-        expect(@reporter.attributes.viewportScale).to.eq 1
-        expect(@reporter.get("viewportScale")).to.eq "100"
+        expect(@iframe.attributes.viewportScale).to.eq 1
+        expect(@iframe.get("viewportScale")).to.eq "100"
 
       it "reduces width scale proportionally", ->
         css = @sandbox.spy @layout.ui.size, "css"
@@ -47,8 +48,8 @@ describe "Iframe Show App", ->
         @layout.ui.size.height(500)
         @layout.calcScale(400, 400)
 
-        expect(@reporter.attributes.viewportScale).to.eq "0.8000"
-        expect(@reporter.get("viewportScale")).to.eq "80"
+        expect(@iframe.attributes.viewportScale).to.eq "0.8000"
+        expect(@iframe.get("viewportScale")).to.eq "80"
 
         expect(css).to.be.calledWith {transform: "scale(0.8000)"}
 

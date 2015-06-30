@@ -163,7 +163,7 @@
       @model.setScale(scale)
 
     onShow: ->
-      main      = $("#main-region :first-child")
+      main      = $("#main-region>:first-child")
       tests     = $("#test-container")
       container = $("#iframe-wrapper")
 
@@ -193,7 +193,8 @@
       @detachedBody = null
       @originalBody = null
 
-    loadIframe: (src, options, fn) ->
+    loadIframe: (options, fn) ->
+      src = options.specPath
       ## remove any existing iframes
       # @reverted = false
       # @ui.message.hide().empty()

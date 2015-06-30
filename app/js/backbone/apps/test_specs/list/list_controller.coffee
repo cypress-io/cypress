@@ -3,7 +3,7 @@
   class List.Controller extends App.Controllers.Application
 
     initialize: (options) ->
-      { reporter, spec } = options
+      { runner, iframe, spec } = options
 
       ## hold onto every single runnable type (suite or test)
       container  = App.request "runnable:container:entity"
@@ -11,8 +11,8 @@
       ## generate the root runnable which holds everything
       root = App.request "new:root:runnable:entity"
 
-      ## grab the commands collection from the reporter
-      { commands, routes, agents} = reporter
+      ## grab the commands collection from the runner
+      { commands, routes, agents} = runner
 
       ## when commands are added to this collection
       ## we need to find the runnable model by its id
@@ -34,18 +34,18 @@
       ## always make the first two arguments the root model + container collection
       @addRunnable = _.partial(@addRunnable, root, container)
 
-      ## always make the first two arguments the reporter + container collection
-      @createRunnableListeners = _.partial(@createRunnableListeners, reporter, container)
+      ## always make the first two arguments the runner + container collection
+      @createRunnableListeners = _.partial(@createRunnableListeners, runner, container)
 
-      ## always make the first argument the reporter
-      @insertChildViews = _.partial(@insertChildViews, reporter)
+      ## always make the first argument the runner
+      @insertChildViews = _.partial(@insertChildViews, runner, iframe)
 
-      @listenTo reporter, "before:run", ->
+      @listenTo runner, "before:run", ->
         ## move all the models over to previous run
         ## and reset all existing one
         container.reset()
 
-      @listenTo reporter, "after:add", ->
+      @listenTo runner, "after:add", ->
         ## removes any old models no longer in our run
         container.removeOldModels()
 
@@ -69,12 +69,12 @@
         if model = container.hasOnlyOneTest()
           model.open()
 
-      @listenTo reporter, "suite:add", (suite) ->
+      @listenTo runner, "suite:add", (suite) ->
         @addRunnable(suite, "suite")
-      # @listenTo reporter, "suite:start", (suite) ->
+      # @listenTo runner, "suite:start", (suite) ->
         # @addRunnable(suite, "suite")
 
-      @listenTo reporter, "suite:end", (suite) ->
+      @listenTo runner, "suite:end", (suite) ->
         return if suite.root
 
         ## when our suite stop update its state
@@ -82,11 +82,11 @@
         container.get(suite.id).updateState()
 
       # add the test to the suite unless it already exists
-      @listenTo reporter, "test:add", (test) ->
+      @listenTo runner, "test:add", (test) ->
         ## add the test to the container collection of runnables
         @addRunnable(test, "test")
 
-      @listenTo reporter, "test:end", (test) ->
+      @listenTo runner, "test:end", (test) ->
         ## find the client runnable model by the test's ide
         runnable = container.get(test.id)
 
@@ -95,11 +95,11 @@
         runnable.setResults(test)
 
         ## this logs the results of the test
-        ## and causes our reporter to fire 'test:results:ready'
-        reporter.logResults runnable
+        ## and causes our runner to fire 'test:results:ready'
+        runner.logResults runnable
 
-      @listenTo reporter, "reset:test:run", ->
-        ## when our reporter says to reset the test run
+      @listenTo runner, "reset:test:run", ->
+        ## when our runner says to reset the test run
         ## we do this so our tests go into the 'reset' state prior to the iframe
         ## loading -- so it visually looks like things are moving along faster
         ## and it gives a more accurate portrayal of whats about to happen
@@ -126,7 +126,7 @@
 
       @insertChildViews(runnable)
 
-    insertChildViews: (reporter, model) ->
+    insertChildViews: (runner, iframe, model) ->
       ## we could alternatively loop through all of the children
       ## from the root as opposed to going through the model
       ## to receive its layout but that would be much slower
@@ -144,7 +144,7 @@
           App.execute "list:test:routes", model, layout.routesRegion
 
           ## and pass up the commands collection (via hooks) and the commands region
-          App.execute "list:test:commands", model, layout.commandsRegion
+          App.execute "list:test:commands", model, iframe, layout.commandsRegion
         else
           region = layout.runnablesRegion
 
@@ -156,7 +156,7 @@
           runnablesView = @getRunnablesView model
           @show runnablesView, region: region
 
-    createRunnableListeners: (reporter, container, model) ->
+    createRunnableListeners: (runner, container, model) ->
       ## unbind everything else we will get duplicated events
       @stopListening model
 
@@ -177,8 +177,8 @@
         model.reset({silent: false})
         model.choose()
 
-        ## pass this id along to reporter
-        reporter.setChosen model
+        ## pass this id along to runner
+        runner.setChosen model
 
     getRunnableContentView: (runnable) ->
       new List.RunnableContent

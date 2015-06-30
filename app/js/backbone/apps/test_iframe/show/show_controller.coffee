@@ -3,62 +3,71 @@
   class Show.Controller extends App.Controllers.Application
 
     initialize: (options) ->
-      { reporter } = options
+      { iframe } = options
 
       config = App.request "app:config:entity"
 
-      ## set the initial config values from
-      ## our config entity
-      reporter.setConfig(config)
+      setConfig = ->
+        iframe.setConfig(config)
 
-      @layout = @getLayoutView(reporter)
+      setConfig()
+
+      @layout = @getLayoutView(iframe)
 
       @listenTo @layout, "browser:clicked", (browser, version) ->
-        # reporter.switchToBrowser(browser, version)
+        # iframe.switchToBrowser(browser, version)
 
       @listenTo @layout, "close:browser:clicked", ->
-        # reporter.switchToBrowser()
+        # iframe.switchToBrowser()
 
-      ## when the reporter triggers load:spec:iframe we load the iframe
-      @listenTo reporter, "load:spec:iframe", (iframe, options) ->
-        @loadIframe @layout, reporter, iframe, options
+      @listenTo iframe, "loaded", (cb, contentWindow, remoteIframe, options) ->
+        ## once its loaded we receive the contentWindow
+        ## we invoke the callback which tells our runner
+        ## to run the specPath's suite
+        cb(contentWindow, remoteIframe, options)
+
+      @listenTo iframe, "load:spec:iframe", (cb, options) ->
+        ## set the initial config values from
+        ## our config entity which restores
+        ## the default settings from cypress.json
+        setConfig()
+
+        @layout.loadIframe options, (contentWindow, remoteIframe) ->
+          ## once the iframes are loaded we trigger this event
+          ## which prevents forcing callbacks if we've navigated
+          ## away from the page and we're already shut down
+          iframe.trigger "loaded", cb, contentWindow, remoteIframe, options
 
       ## TODO MOVE ALL THESE EVENTS DIRECTLY
       ## INTO THE LAYOUTVIEW
-      @listenTo reporter, "cannot:revert:dom", (init) ->
+      @listenTo iframe, "cannot:revert:dom", (init) ->
         @layout.cannotRevertDom(init)
 
-      @listenTo reporter, "revert:dom", (dom, options) ->
+      @listenTo iframe, "revert:dom", (dom, options) ->
         @layout.revertToDom dom, options
 
-      @listenTo reporter, "highlight:el", (el, options) ->
+      @listenTo iframe, "highlight:el", (el, options) ->
         @layout.highlightEl el, options
 
-      @listenTo reporter, "restore:dom", ->
+      @listenTo iframe, "restore:dom", ->
         @layout.restoreDom()
 
       @listenTo @layout, "show", ->
         ## dont show the header in satelitte mode
         return if config.ui("satelitte")
 
-        @headerView(reporter)
+        @headerView(iframe)
 
       @show @layout
 
-    loadIframe: (view, reporter, specPath, options) ->
-      view.loadIframe specPath, options, (contentWindow, remoteIframe) ->
-        ## once its loaded we receive the contentWindow
-        ## and tell our reporter to run the specPath's suite
-        reporter.run(specPath, contentWindow, remoteIframe, options)
-
-    headerView: (reporter) ->
-      headerView = @getHeaderView(reporter)
+    headerView: (iframe) ->
+      headerView = @getHeaderView(iframe)
       @show headerView, region: @layout.headerRegion
 
-    getHeaderView: (reporter) ->
+    getHeaderView: (iframe) ->
       new Show.Header
-        model: reporter
+        model: iframe
 
-    getLayoutView: (reporter) ->
+    getLayoutView: (iframe) ->
       new Show.Layout
-        model: reporter
+        model: iframe
