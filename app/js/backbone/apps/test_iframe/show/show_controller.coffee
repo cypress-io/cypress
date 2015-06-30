@@ -32,25 +32,11 @@
         ## the default settings from cypress.json
         setConfig()
 
-        @layout.loadIframe options, (contentWindow, remoteIframe) ->
+        @layout.loadIframes options, (contentWindow, remoteIframe) ->
           ## once the iframes are loaded we trigger this event
           ## which prevents forcing callbacks if we've navigated
           ## away from the page and we're already shut down
           iframe.trigger "loaded", cb, contentWindow, remoteIframe, options
-
-      ## TODO MOVE ALL THESE EVENTS DIRECTLY
-      ## INTO THE LAYOUTVIEW
-      @listenTo iframe, "cannot:revert:dom", (init) ->
-        @layout.cannotRevertDom(init)
-
-      @listenTo iframe, "revert:dom", (dom, options) ->
-        @layout.revertToDom dom, options
-
-      @listenTo iframe, "highlight:el", (el, options) ->
-        @layout.highlightEl el, options
-
-      @listenTo iframe, "restore:dom", ->
-        @layout.restoreDom()
 
       @listenTo @layout, "show", ->
         ## dont show the header in satelitte mode

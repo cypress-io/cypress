@@ -6,6 +6,16 @@
     ui:
       size: "#iframe-size-container"
 
+    modelEvents:
+      ## move most of the logic out
+      ## out these methods and back
+      ## into the iframe model basically
+      ## just pass the DOM dependencies
+      ## back to the model
+      "revert:dom"   : "revertToDom"
+      "restore:dom"  : "restoreDom"
+      "highlight:el" : "highlightEl"
+
     resizeViewport: ->
       @ui.size.css {
         width: @model.get("viewportWidth")
@@ -35,12 +45,6 @@
           @removeRevertMessage()
 
           @detachedId = null
-
-    cannotRevertDom: (init) ->
-      if init
-        @ui.message.text("Cannot revert DOM while tests are running").addClass("cannot-revert").show()
-      else
-        @removeRevertMessage()
 
     revertToDom: (dom, options) ->
       ## replaces the iframes body with the dom object
@@ -193,7 +197,7 @@
       @detachedBody = null
       @originalBody = null
 
-    loadIframe: (options, fn) ->
+    loadIframes: (options, fn) ->
       src = options.specPath
       ## remove any existing iframes
       # @reverted = false
@@ -309,6 +313,7 @@
       "change:viewportWidth"  : "widthChanged"
       "change:viewportHeight" : "heightChanged"
       "change:viewportScale"  : "scaleChanged"
+      "cannot:revert:dom"     : "cannotRevertDom"
 
     urlChanged: (model, value, options) ->
       @ui.url.val(value)
@@ -356,6 +361,12 @@
 
     getBootstrapNameSpaceForEvent: (name, e) ->
       name + "." + e.namespace
+
+    cannotRevertDom: (init) ->
+      if init
+        @ui.message.text("Cannot revert DOM while tests are running").addClass("cannot-revert").show()
+      else
+        @removeRevertMessage()
 
     dropdownShow: (e) ->
       return if not @$iframe

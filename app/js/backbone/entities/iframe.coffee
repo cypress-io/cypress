@@ -6,6 +6,7 @@
       version: null
       message: null
       running: false
+      detachedId: null
       viewportScale: 1
 
     mutators:
@@ -59,7 +60,7 @@
       if arguments.length
         @set "running", bool
       else
-        !!@get("running")
+        @get("running")
 
     ## should probably rename this to be something like
     ## 'command:hovered'.  Since our App.config is dictating

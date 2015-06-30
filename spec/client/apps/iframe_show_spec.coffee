@@ -28,6 +28,9 @@ describe "Iframe Show App", ->
       expect(@layout.ui.size.width()).to.eq 800
       expect(@layout.ui.size.height()).to.eq 600
 
+    ## invoke Cypress viewport and then to reload
+    ## the iframe and ensure the dimensions are reset again
+
     it "calls #calcWidth on show", ->
       @setup()
       expect(App.TestIframeApp.Show.Layout::calcWidth).to.be.calledOnce
