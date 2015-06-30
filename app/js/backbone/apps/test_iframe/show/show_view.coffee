@@ -12,7 +12,7 @@
       ## into the iframe model basically
       ## just pass the DOM dependencies
       ## back to the model
-      "revert:dom"   : "revertToDom"
+      "revert:dom"   : "revertDom"
       "restore:dom"  : "restoreDom"
       "highlight:el" : "highlightEl"
 
@@ -24,29 +24,14 @@
 
       @calcWidth()
 
-    restoreDom: ->
-      return if not @originalBody
+    restoreDom: (originalBody) ->
+      @$el
+        .find("iframe.iframe-remote")
+          .contents()
+            .find("body")
+              .replaceWith(originalBody)
 
-      do =>
-        ## backup the current command's detachedId
-        previousDetachedId = @detachedId
-
-        ## we're using a setImmediate here because mouseleave will fire
-        ## before mouseenter.  and we dont want to restore the dom if we're
-        ## able to be hovering over a different command, else that would
-        ## be a huge waste.
-        setImmediate =>
-          ## we want to only restore the dom if we havent hovered over
-          ## to another command by the time this setImmediate function runs
-          return if previousDetachedId isnt @detachedId
-
-          @$el.find("iframe.iframe-remote").contents().find("body").replaceWith(@originalBody)
-
-          @removeRevertMessage()
-
-          @detachedId = null
-
-    revertToDom: (dom, options) ->
+    revertDom: (dom, options) ->
       ## replaces the iframes body with the dom object
       contents = @$remote.contents()
 
@@ -75,12 +60,7 @@
           dom:      dom
 
     addRevertMessage: (options) ->
-      @reverted = true
       @ui.message.text("DOM has been reverted").show()
-
-    removeRevertMessage: ->
-      @reverted = false
-      @ui.message.removeClass("cannot-revert").empty().hide()
 
     getZIndex: (el) ->
       if /^(auto|0)$/.test el.css("zIndex") then 1000 else Number el.css("zIndex")
@@ -314,6 +294,7 @@
       "change:viewportHeight" : "heightChanged"
       "change:viewportScale"  : "scaleChanged"
       "cannot:revert:dom"     : "cannotRevertDom"
+      "restore:dom"           : "restoreDom"
 
     urlChanged: (model, value, options) ->
       @ui.url.val(value)
@@ -367,6 +348,9 @@
         @ui.message.text("Cannot revert DOM while tests are running").addClass("cannot-revert").show()
       else
         @removeRevertMessage()
+
+    restoreDom: ->
+      @ui.message.removeClass("cannot-revert").empty().hide()
 
     dropdownShow: (e) ->
       return if not @$iframe

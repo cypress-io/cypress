@@ -13,6 +13,9 @@
       viewportScale: ->
         Math.ceil(parseFloat(@attributes.viewportScale) * 100).toFixed(0)
 
+    initialize: ->
+      @state = {}
+
     listeners: (runner, Cypress) ->
       @listenTo runner, "before:run", ->
         @isRunning(true)
@@ -21,7 +24,7 @@
         @isRunning(false)
 
       @listenTo Cypress, "stop", =>
-        @stopListening()
+        @stop()
 
       @listenTo Cypress, "viewport", (viewport) =>
         @setViewport(viewport)
@@ -38,6 +41,10 @@
         version:  @get("version")
 
       @trigger "load:spec:iframe", cb, options
+
+    stop: ->
+      @state = {}
+      @stopListening()
 
     setConfig: (config) ->
       @set config.pick("viewportWidth", "viewportHeight")
@@ -62,18 +69,37 @@
       else
         @get("running")
 
+    restoreDom: (command) ->
+      ## bail if we have no originalBody
+      return if not body = @state.originalBody
+
+      ## backup the current command's detachedId
+      previousDetachedId = @state.detachedId
+
+      ## we're using a setImmediate here because mouseleave will fire
+      ## before mouseenter.  and we dont want to restore the dom if we're
+      ## about to be hovering over a different command, else that would
+      ## be a huge waste.
+      setImmediate =>
+        ## we want to only restore the dom if we havent hovered over
+        ## to another command by the time this setImmediate function runs
+        return if previousDetachedId isnt @state.detachedId
+
+        @trigger "restore:dom", body
+
+        @state.detachedId = null
+
     ## should probably rename this to be something like
     ## 'command:hovered'.  Since our App.config is dictating
     ## interpreting the behavior and then dictating what
     ## exactly should happen.  The other areas are simply
-    ## broadcasting events.  This should move out of App.config
-    ## as well to something else. Perhaps an app or a utility.
+    ## broadcasting events.
     revertDom: (command, init = true) ->
       ## dont revert, instead fire a completely different
       ## message
       return @trigger("cannot:revert:dom", init) if @isRunning()
 
-      return @trigger "restore:dom" if not init
+      # return @trigger "restore:dom" if not init
 
       return if not command.hasSnapshot()
 

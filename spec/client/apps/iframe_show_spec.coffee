@@ -35,6 +35,20 @@ describe "Iframe Show App", ->
       @setup()
       expect(App.TestIframeApp.Show.Layout::calcWidth).to.be.calledOnce
 
+    it "replaces the iframe's body with originalBody on restoreDom", ->
+      @setup()
+
+      originalBody = $("<div id='original'>original body</div>")
+      iframe = $("<iframe />", {class: "iframe-remote"}).appendTo @layout.$el
+      iframe.contents().find("body").append("<div id='foo'>foo</div>")
+
+      expect(@layout.$el.find("iframe").contents().find("#foo")).to.exist
+      expect(@layout.$el.find("iframe").contents().find("#original")).not.to.exist
+      @iframe.trigger("restore:dom", originalBody)
+
+      expect(@layout.$el.find("iframe").contents().find("#foo")).not.to.exist
+      expect(@layout.$el.find("iframe").contents().find("#original")).to.exist
+
     describe "#calcScale", ->
       beforeEach ->
         @setup()
@@ -92,3 +106,11 @@ describe "Iframe Show App", ->
       expect(@header.ui.width).to.have.text("800")
       expect(@header.ui.height).to.have.text("600")
       expect(@header.ui.scale).to.have.text("100")
+
+    it "clears the revert message on restoreDom", ->
+      @setup()
+      @header.ui.message.text("foo").addClass("cannot-revert").show()
+      @iframe.trigger("restore:dom")
+      expect(@header.ui.message).to.be.hidden
+      expect(@header.ui.message).not.to.have.class("cannot-revert")
+      expect(@header.ui.message).to.be.empty

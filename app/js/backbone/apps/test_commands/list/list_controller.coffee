@@ -64,7 +64,7 @@
               @reverted = false
 
               ## and restore the dom to the original state
-              iframe.revertDom(command, false)
+              iframe.restoreDom(command)
 
       @listenTo commandsView, "childview:childview:command:mouseenter", (iv, iv2, args) ->
         command = args.model
