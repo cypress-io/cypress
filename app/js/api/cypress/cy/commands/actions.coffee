@@ -373,6 +373,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         mdownCancelled = mupCancelled = clickCancelled = null
         mdownEvt = mupEvt = clickEvt = null
+        $previouslyFocusedEl = null
 
         if options.log
           ## figure out the options which actually change the behavior of clicks
@@ -448,7 +449,18 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             @_hasStoppedPropagation = true
             stopPropagation.apply(@, arguments)
 
-          mdownCancelled = !$elToClick.get(0).dispatchEvent(mdownEvt)
+
+          @command("focused", {log: false}).then ($focused) =>
+            ## record the previously focused element before
+            ## issuing the mousedown because browsers may
+            ## automatically shift the focus to the element
+            ## without firing the focus event
+            $previouslyFocusedEl = $focused
+
+            mdownCancelled = !$elToClick.get(0).dispatchEvent(mdownEvt)
+
+        mdownFocusCallback = ->
+          mdownCausedFocus = true
 
         afterMouseDown = ($elToClick, coords) =>
           mupCancelled   = !$elToClick.get(0).dispatchEvent(mupEvt)
@@ -593,28 +605,61 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
           Promise.resolve(getCoords())
 
+        shouldFireFocusEvent = ($focused, $elToFocus) ->
+          ## if we dont have a focused element
+          ## we know we want to fire a focus event
+          return true if not $focused
+
+          ## if we didnt have a previously focused el
+          ## then always return true
+          return true if not $previouslyFocusedEl
+
+          ## if we are attemping to focus a differnet element
+          ## than the one we currently have, we know we want
+          ## to fire a focus event
+          return true if $focused.get(0) isnt $elToFocus.get(0)
+
+          ## if our focused element isnt the same as the previously
+          ## focused el then what probably happened is our mouse
+          ## down event caused our element to receive focuse
+          ## without the browser sending the focus event
+          ## which happens when the window isnt in focus
+          return true if $previouslyFocusedEl.get(0) isnt $focused.get(0)
+
+          return false
+
         p = findElByCoordinates($el)
           .then (obj) =>
             {$elToClick, coords} = obj
 
-            issueMouseDown($elToClick, coords)
+            issueMouseDown($elToClick, coords).then =>
 
-            ## if mousedown was cancelled then
-            ## just resolve after mouse down and dont
-            ## send a focus event
-            if mdownCancelled
-              afterMouseDown($elToClick, coords)
-            else
-              ## if our mousedown went through then
-              ## dispatch any primed change events
-              dispatchPrimedChangeEvents.call(@)
+              ## if mousedown was cancelled then
+              ## just resolve after mouse down and dont
+              ## send a focus event
+              if mdownCancelled
+                afterMouseDown($elToClick, coords)
+              else
+                ## retrieve the first focusable $el in our parent chain
+                $elToFocus = getFirstFocusableEl($elToClick)
 
-              ## retrieve the first focusable $el in our parent chain
-              $elToFocus = getFirstFocusableEl($elToClick)
+                @command("focused", {log: false}).then ($focused) =>
+                  if shouldFireFocusEvent($focused, $elToFocus)
+                    ## if our mousedown went through and
+                    ## we are focusing a different element
+                    ## dispatch any primed change events
+                    ## we have to do this because our blur
+                    ## method might not get triggered if
+                    ## our window is in focus since the
+                    ## browser may fire blur events naturally
+                    dispatchPrimedChangeEvents.call(@)
 
-              ## send in a focus event!
-              @command("focus", {$el: $elToFocus, error: false, log: false})
-              .then -> afterMouseDown($elToClick, coords)
+                    ## send in a focus event!
+                    @command("focus", {$el: $elToFocus, error: false, log: false})
+                    .then ->
+                      afterMouseDown($elToClick, coords)
+                  else
+                    afterMouseDown($elToClick, coords)
 
           .delay(wait)
           .cancellable()
