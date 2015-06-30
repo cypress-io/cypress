@@ -2715,6 +2715,11 @@ describe "$Cypress.Cy Actions Commands", ->
         .get("[contenteditable]:first").focus().blur().then ($ce) ->
           expect($ce.get(0)).to.eq ce.get(0)
 
+    it "can blur input[type=time]", (done) ->
+      @cy.$("#input-types [type=time]").blur -> done()
+
+      @cy.get("#input-types [type=time]").focus().invoke("val", "03:15:00").blur()
+
     describe ".log", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
