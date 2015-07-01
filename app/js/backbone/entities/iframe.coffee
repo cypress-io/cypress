@@ -94,23 +94,24 @@
       ## message if we are currently running
       return @trigger("cannot:revert:dom") if @isRunning()
 
-      return @commandExit() if not command.hasSnapshot()
+      return @commandExit() if not snapshot = command.getSnapshot()
 
       if body = @state.originalBody
-        @trigger "revert:dom", body
-        @revertDom(body, command)
+        @revertDom(snapshot, command)
       else
         @trigger "detach:body", _.once (body) =>
           @state.originalBody = body
-          @revertDom(body, command)
+          @revertDom(snapshot, command)
 
-    revertDom: (body, command) ->
-      @trigger "revert:dom", body
+    revertDom: (snapshot, command) ->
+      @trigger "revert:dom", snapshot
 
       @state.detachedId = command.id
 
       if el = command.getEl()
-        @trigger "highlight:el", el, _(command).pick("id", "coords", "highlightAttr", "scrollBy")
+        options     = command.pick("id", "coords", "highlightAttr", "scrollBy")
+        options.dom = snapshot
+        @trigger "highlight:el", el, options
 
       return @
 

@@ -16,7 +16,8 @@ describe "Iframe Entity", ->
 
   context "#commandEnter", ->
     beforeEach ->
-      @command = {hasSnapshot: -> true}
+      @snapshot = {foo: "bar"}
+      @command = {getSnapshot: => @snapshot}
       @iframe.isRunning(false)
 
     it "triggers 'cannot:revert:dom' if isRunning", ->
@@ -34,13 +35,13 @@ describe "Iframe Entity", ->
       @iframe.commandEnter(@command)
       expect(@iframe.state.originalBody).to.deep.eq {}
 
-    it "calls revertDom with body and command", ->
+    it "calls revertDom with snapshot and command", ->
       @sandbox.stub(@iframe, "trigger").withArgs("detach:body").callsArgWith(1, {})
       @sandbox.stub(@iframe, "revertDom")
 
       @iframe.commandEnter(@command)
 
-      expect(@iframe.revertDom).to.be.calledWith({}, @command)
+      expect(@iframe.revertDom).to.be.calledWith(@snapshot, @command)
 
     it "calls revertDom immediately when originalBody exists", ->
       trigger = @sandbox.spy(@iframe, "trigger")
@@ -49,43 +50,45 @@ describe "Iframe Entity", ->
       @iframe.state.originalBody = {}
       @iframe.commandEnter(@command)
 
-      expect(@iframe.revertDom).to.be.calledWith({}, @command)
+      expect(@iframe.revertDom).to.be.calledWith(@snapshot, @command)
       expect(@iframe.trigger).not.to.be.calledWith("detach:body")
 
   context "#revertDom", ->
     beforeEach ->
-      @body = {}
-      @command = {id: 123, getEl: ->}
+      @snapshot = {}
+      @command = new Backbone.Model {id: 123}
+      @command.getEl = ->
 
     it "triggers 'revert:dom' with body", ->
       trigger = @sandbox.spy(@iframe, "trigger")
-      @iframe.revertDom(@body, @command)
-      expect(trigger).to.be.calledWith "revert:dom", @body
+      @iframe.revertDom(@snapshot, @command)
+      expect(trigger).to.be.calledWith "revert:dom", @snapshot
 
     it "sets state.detachedId to command.id", ->
-      @iframe.revertDom(@body, @command)
+      @iframe.revertDom(@snapshot, @command)
       expect(@iframe.state.detachedId).to.eq 123
 
     it "triggers 'highlight:el' with command options if command hasEl", ->
-      _.extend @command, {
+      @command.set {
         coords: 999
         highlightAttr: "foo"
         scrollBy: 100
-        getEl: -> {el: "el"}
       }
+      @command.getEl = -> {el: "el"}
 
       trigger = @sandbox.spy(@iframe, "trigger")
-      @iframe.revertDom(@body, @command)
+      @iframe.revertDom(@snapshot, @command)
       expect(trigger).to.be.calledWith "highlight:el", {el: "el"}, {
         id: 123
         coords: 999
         highlightAttr: "foo"
         scrollBy: 100
+        dom: @snapshot
       }
 
     it "does not trigger 'highlight:el' when command doesnt hasEl", ->
       trigger = @sandbox.spy(@iframe, "trigger")
-      @iframe.revertDom(@body, @command)
+      @iframe.revertDom(@snapshot, @command)
       expect(trigger).not.to.be.calledWith "highlight:el"
 
 

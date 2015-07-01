@@ -12,7 +12,7 @@
       ## into the iframe model basically
       ## just pass the DOM dependencies
       ## back to the model
-      "revert:dom"        : "revertDom2"
+      "revert:dom"        : "revertDom"
       "restore:dom"       : "restoreDom"
       "highlight:el"      : "highlightEl"
 
@@ -36,36 +36,10 @@
       body.find("script").remove()
       body.detach()
 
-    revertDom2: (dom) ->
+    revertDom: (snapshot) ->
       contents = @$remote.contents()
       contents.find("body").remove()
-      contents.find("html").append(dom)
-
-    # revertDom: (dom, options) ->
-    #   ## replaces the iframes body with the dom object
-    #   contents = @$remote.contents()
-
-    #   if not @originalBody
-    #     body = contents.find("body")
-    #     body.find("script").remove()
-    #     @originalBody = body.detach()
-    #   else
-    #     contents.find("body").remove()
-
-      # @detachedId = options.id
-
-      ## potentially think about making this setImmediate for
-      ## either perf reason or if we want the screen to "blink"
-      ## after its removed above
-      # contents.find("html").append(dom)
-
-      # if options.el
-      #   @highlightEl options.el,
-      #     coords:   options.coords
-      #     id:       options.id
-      #     attr:     options.attr
-      #     scrollBy: options.scrollBy
-      #     dom:      dom
+      contents.find("html").append(snapshot)
 
     getZIndex: (el) ->
       if /^(auto|0)$/.test el.css("zIndex") then 1000 else Number el.css("zIndex")
