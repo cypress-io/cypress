@@ -12,9 +12,9 @@
       ## into the iframe model basically
       ## just pass the DOM dependencies
       ## back to the model
-      "revert:dom"   : "revertDom"
-      "restore:dom"  : "restoreDom"
-      "highlight:el" : "highlightEl"
+      "revert:dom"        : "revertDom2"
+      "restore:dom"       : "restoreDom"
+      "highlight:el"      : "highlightEl"
 
     resizeViewport: ->
       @ui.size.css {
@@ -31,36 +31,41 @@
             .find("body")
               .replaceWith(originalBody)
 
-    revertDom: (dom, options) ->
-      ## replaces the iframes body with the dom object
+    detachBody: ->
+      body = @$remote.contents().find("body")
+      body.find("script").remove()
+      body.detach()
+
+    revertDom2: (dom) ->
       contents = @$remote.contents()
+      contents.find("body").remove()
+      contents.find("html").append(dom)
 
-      if not @originalBody
-        body = contents.find("body")
-        body.find("script").remove()
-        @originalBody = body.detach()
-      else
-        contents.find("body").remove()
+    # revertDom: (dom, options) ->
+    #   ## replaces the iframes body with the dom object
+    #   contents = @$remote.contents()
 
-      @detachedId = options.id
+    #   if not @originalBody
+    #     body = contents.find("body")
+    #     body.find("script").remove()
+    #     @originalBody = body.detach()
+    #   else
+    #     contents.find("body").remove()
+
+      # @detachedId = options.id
 
       ## potentially think about making this setImmediate for
       ## either perf reason or if we want the screen to "blink"
       ## after its removed above
-      contents.find("html").append(dom)
+      # contents.find("html").append(dom)
 
-      @addRevertMessage(options)
-
-      if options.el
-        @highlightEl options.el,
-          coords:   options.coords
-          id:       options.id
-          attr:     options.attr
-          scrollBy: options.scrollBy
-          dom:      dom
-
-    addRevertMessage: (options) ->
-      @ui.message.text("DOM has been reverted").show()
+      # if options.el
+      #   @highlightEl options.el,
+      #     coords:   options.coords
+      #     id:       options.id
+      #     attr:     options.attr
+      #     scrollBy: options.scrollBy
+      #     dom:      dom
 
     getZIndex: (el) ->
       if /^(auto|0)$/.test el.css("zIndex") then 1000 else Number el.css("zIndex")
@@ -71,14 +76,9 @@
 
       @$remote.contents().find("[data-highlight-el],[data-highlight-hitbox]").remove()
 
-      # # if we're not currently reverted
-      # # and init is false then nuke the currently highlighted el
-      # if not @reverted and not options.init
-      #   return @$iframe.contents().find("[data-highlight-el='#{options.id}']").remove()
-
       if options.dom
         dom = options.dom
-        el  = options.dom.find("[" + options.attr + "]")
+        el  = options.dom.find("[" + options.highlightAttr + "]")
       else
         dom = @$remote.contents().find("body")
 
@@ -294,6 +294,7 @@
       "change:viewportHeight" : "heightChanged"
       "change:viewportScale"  : "scaleChanged"
       "cannot:revert:dom"     : "cannotRevertDom"
+      "revert:dom"            : "revertDom"
       "restore:dom"           : "restoreDom"
 
     urlChanged: (model, value, options) ->
@@ -344,13 +345,13 @@
       name + "." + e.namespace
 
     cannotRevertDom: (init) ->
-      if init
-        @ui.message.text("Cannot revert DOM while tests are running").addClass("cannot-revert").show()
-      else
-        @removeRevertMessage()
+      @ui.message.text("Cannot revert DOM while tests are running").addClass("cannot-revert").show()
 
     restoreDom: ->
       @ui.message.removeClass("cannot-revert").empty().hide()
+
+    revertDom: ->
+      @ui.message.text("DOM has been reverted").removeClass("cannot-revert").show()
 
     dropdownShow: (e) ->
       return if not @$iframe

@@ -49,6 +49,20 @@ describe "Iframe Show App", ->
       expect(@layout.$el.find("iframe").contents().find("#foo")).not.to.exist
       expect(@layout.$el.find("iframe").contents().find("#original")).to.exist
 
+    it "can returned detached body on 'detach:body'", (done) ->
+      @setup()
+
+      @sandbox.stub(@layout, "detachBody").returns({})
+
+      @iframe.trigger "detach:body", (body) ->
+        expect(body).to.deep.eq {}
+        done()
+
+    describe "#detachBody", ->
+      it "returns detached body"
+
+      it "removes scripts"
+
     describe "#calcScale", ->
       beforeEach ->
         @setup()
@@ -114,3 +128,12 @@ describe "Iframe Show App", ->
       expect(@header.ui.message).to.be.hidden
       expect(@header.ui.message).not.to.have.class("cannot-revert")
       expect(@header.ui.message).to.be.empty
+
+    it "adds message about not being able to revert the dom on cannotRevertDom", ->
+      @setup()
+      @header.ui.message.empty()
+      @iframe.trigger("cannot:revert:dom")
+      expect(@header.ui.message).to.be.visible
+      expect(@header.ui.message).to.have.class("cannot-revert")
+      expect(@header.ui.message).to.have.text("Cannot revert DOM while tests are running")
+

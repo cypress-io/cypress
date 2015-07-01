@@ -38,6 +38,9 @@
           ## away from the page and we're already shut down
           iframe.trigger "loaded", cb, contentWindow, remoteIframe, options
 
+      @listenTo iframe, "detach:body", (cb) ->
+        cb @layout.detachBody()
+
       @listenTo @layout, "show", ->
         ## dont show the header in satelitte mode
         return if config.ui("satelitte")

@@ -69,7 +69,7 @@
       else
         @get("running")
 
-    restoreDom: (command) ->
+    commandExit: (command) ->
       ## bail if we have no originalBody
       return if not body = @state.originalBody
 
@@ -89,26 +89,30 @@
 
         @state.detachedId = null
 
-    ## should probably rename this to be something like
-    ## 'command:hovered'.  Since our App.config is dictating
-    ## interpreting the behavior and then dictating what
-    ## exactly should happen.  The other areas are simply
-    ## broadcasting events.
-    revertDom: (command, init = true) ->
+    commandEnter: (command) ->
       ## dont revert, instead fire a completely different
-      ## message
-      return @trigger("cannot:revert:dom", init) if @isRunning()
+      ## message if we are currently running
+      return @trigger("cannot:revert:dom") if @isRunning()
 
-      # return @trigger "restore:dom" if not init
+      return @commandExit() if not command.hasSnapshot()
 
-      return if not command.hasSnapshot()
+      if body = @state.originalBody
+        @trigger "revert:dom", body
+        @revertDom(body, command)
+      else
+        @trigger "detach:body", _.once (body) =>
+          @state.originalBody = body
+          @revertDom(body, command)
 
-      @trigger "revert:dom", command.getSnapshot(),
-        id:       command.cid
-        el:       command.getEl()
-        attr:     command.get("highlightAttr")
-        coords:   command.get("coords")
-        scrollBy: command.get("scrollBy")
+    revertDom: (body, command) ->
+      @trigger "revert:dom", body
+
+      @state.detachedId = command.id
+
+      if el = command.getEl()
+        @trigger "highlight:el", el, _(command).pick("id", "coords", "highlightAttr", "scrollBy")
+
+      return @
 
     highlightEl: (command, init = true) ->
       @trigger "highlight:el", command.getEl(),
