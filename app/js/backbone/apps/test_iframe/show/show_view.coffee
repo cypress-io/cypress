@@ -7,18 +7,13 @@
       size: "#iframe-size-container"
 
     modelEvents:
-      ## move most of the logic out
-      ## out these methods and back
-      ## into the iframe model basically
-      ## just pass the DOM dependencies
-      ## back to the model
       "revert:dom"        : "revertDom"
       "restore:dom"       : "restoreDom"
       "highlight:el"      : "highlightEl"
 
     resizeViewport: ->
       @ui.size.css {
-        width: @model.get("viewportWidth")
+        width:  @model.get("viewportWidth")
         height: @model.get("viewportHeight")
       }
 
@@ -148,8 +143,6 @@
       @$remote      = null
       @$iframe      = null
       @fn           = null
-      @detachedBody = null
-      @originalBody = null
 
     loadIframes: (options, fn) ->
       src = options.specPath
@@ -262,7 +255,6 @@
 
     modelEvents:
       "change:url"            : "urlChanged"
-      "change:message"        : "messageChanged"
       "change:pageLoading"    : "pageLoadingChanged"
       "change:viewportWidth"  : "widthChanged"
       "change:viewportHeight" : "heightChanged"
@@ -273,10 +265,6 @@
 
     urlChanged: (model, value, options) ->
       @ui.url.val(value)
-
-    messageChanged: (model, value, options) ->
-      # if options.something? init?
-      @ui.message
 
     pageLoadingChanged: (model, value, options) ->
       ## hides or shows the loading indicator
