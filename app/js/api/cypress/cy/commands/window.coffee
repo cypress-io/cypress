@@ -100,9 +100,14 @@ $Cypress.register "Window", (Cypress, _, $) ->
         else
           throwErrBadArgs()
 
-      Cypress.trigger "viewport", {width: width, height: height}
+      @private("viewportWidth", width)
+      @private("viewportHeight", height)
+
+      viewport = {viewportWidth: width, viewportHeight: height}
+
+      Cypress.trigger "viewport", viewport
 
       if command
-        command.snapshot().end()
+        command.set(viewport).snapshot().end()
 
       return null

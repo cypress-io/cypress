@@ -112,7 +112,7 @@ describe "$Cypress.Cy Window Commands", ->
   context "#viewport", ->
     it "triggers 'viewport' event with dimensions object", (done) ->
       @Cypress.on "viewport", (viewport) ->
-        expect(viewport).to.deep.eq {width: 800, height: 600}
+        expect(viewport).to.deep.eq {viewportWidth: 800, viewportHeight: 600}
         done()
 
       @cy.viewport(800, 600)
@@ -121,10 +121,18 @@ describe "$Cypress.Cy Window Commands", ->
       @cy.viewport("ipad-2").then (subject) ->
         expect(subject).to.be.null
 
+    it "sets viewportWidth and viewportHeight to private", (done) ->
+      @Cypress.on "viewport", =>
+        expect(@cy.private("viewportWidth")).to.eq(800)
+        expect(@cy.private("viewportHeight")).to.eq(600)
+        done()
+
+      @cy.viewport(800, 600)
+
     context "presets", ->
       it "iphone-6", (done) ->
         @Cypress.on "viewport", (viewport) ->
-          expect(viewport).to.deep.eq {width: 1334, height: 750}
+          expect(viewport).to.deep.eq {viewportWidth: 1334, viewportHeight: 750}
           done()
 
         @cy.viewport("iphone-6")
@@ -259,6 +267,11 @@ describe "$Cypress.Cy Window Commands", ->
       it "can turn off logging viewport when using preset", ->
         @cy.viewport("macbook-15", {log: false}).then ->
           expect(@log).not.to.be.ok
+
+      it "sets viewportWidth and viewportHeight directly", ->
+        @cy.viewport(800, 600).then ->
+          expect(@log.get("viewportWidth")).to.eq(800)
+          expect(@log.get("viewportHeight")).to.eq(600)
 
       it ".onConsole with preset", ->
         @cy.viewport("ipad-3").then ->
