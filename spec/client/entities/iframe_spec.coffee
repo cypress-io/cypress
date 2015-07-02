@@ -56,7 +56,7 @@ describe "Iframe Entity", ->
   context "#revertDom", ->
     beforeEach ->
       @snapshot = {}
-      @command = new Backbone.Model {id: 123}
+      @command = new Backbone.Model
       @command.getEl = ->
 
     it "triggers 'revert:dom' with body", ->
@@ -66,7 +66,7 @@ describe "Iframe Entity", ->
 
     it "sets state.detachedId to command.id", ->
       @iframe.revertDom(@snapshot, @command)
-      expect(@iframe.state.detachedId).to.eq 123
+      expect(@iframe.state.detachedId).to.eq @command.cid
 
     it "triggers 'highlight:el' with command options if command hasEl", ->
       @command.set {
@@ -79,7 +79,6 @@ describe "Iframe Entity", ->
       trigger = @sandbox.spy(@iframe, "trigger")
       @iframe.revertDom(@snapshot, @command)
       expect(trigger).to.be.calledWith "highlight:el", {el: "el"}, {
-        id: 123
         coords: 999
         highlightAttr: "foo"
         scrollBy: 100

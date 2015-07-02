@@ -106,10 +106,10 @@
     revertDom: (snapshot, command) ->
       @trigger "revert:dom", snapshot
 
-      @state.detachedId = command.id
+      @state.detachedId = command.cid
 
       if el = command.getEl()
-        options     = command.pick("id", "coords", "highlightAttr", "scrollBy")
+        options     = command.pick("coords", "highlightAttr", "scrollBy")
         options.dom = snapshot
         @trigger "highlight:el", el, options
 
