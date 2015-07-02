@@ -82,7 +82,19 @@ describe "Iframe Show App", ->
         expect(@iframe.attributes.viewportScale).to.eq "0.8000"
         expect(@iframe.get("viewportScale")).to.eq "80"
 
-        expect(css).to.be.calledWith {transform: "scale(0.8000)"}
+        expect(css).to.be.calledWith {
+          transform: "scale(0.8000)"
+          marginLeft: -50
+        }
+
+    describe "#resizeViewport", ->
+      beforeEach ->
+        @setup()
+
+      it "resizes the iframe size container", ->
+        @iframe.setViewport {viewportWidth: 1024, viewportHeight: 768}
+        expect(@layout.ui.size.width()).to.eq(1024)
+        expect(@layout.ui.size.height()).to.eq(768)
 
   context "header", ->
     it "updates url value on url:changed", ->
@@ -115,7 +127,7 @@ describe "Iframe Show App", ->
 
       @setup()
 
-      @Cypress.trigger "viewport", {width: 800, height: 600}
+      @Cypress.trigger "viewport", {viewportWidth: 800, viewportHeight: 600}
 
       expect(@header.ui.width).to.have.text("800")
       expect(@header.ui.height).to.have.text("600")

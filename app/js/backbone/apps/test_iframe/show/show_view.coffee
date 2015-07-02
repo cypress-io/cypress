@@ -7,6 +7,7 @@
       size: "#iframe-size-container"
 
     modelEvents:
+      "resize:viewport"   : "resizeViewport"
       "revert:dom"        : "revertDom"
       "restore:dom"       : "restoreDom"
       "highlight:el"      : "highlightEl"
@@ -80,7 +81,7 @@
       if coords = options.coords
         setImmediate =>
           box = App.request("element:hit:box:layer", coords, dom)
-          box.attr("data-highlight-hitbox")
+          box.attr("data-highlight-hitbox", true)
 
     elExistsInDocument: (parent, el) ->
       $.contains parent[0], el[0]
