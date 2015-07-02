@@ -74,9 +74,8 @@
         ## dont show anything if our element displaces nothing
         return if dimensions.width is 0 or dimensions.height is 0
 
-        setImmediate =>
-          div = App.request("element:box:model:layers", el, dom)
-          div.attr("data-highlight-el", options.id)
+        div = App.request("element:box:model:layers", el, dom)
+        div.attr("data-highlight-el", true)
 
       if coords = options.coords
         setImmediate =>
@@ -112,7 +111,9 @@
       else
         scale = 1
 
-      size.css({transform: "scale(#{scale})"})
+      left = (width / 2) - (iframeWidth / 2)
+
+      size.css({transform: "scale(#{scale})", marginLeft: left})
       @model.setScale(scale)
 
     onShow: ->
