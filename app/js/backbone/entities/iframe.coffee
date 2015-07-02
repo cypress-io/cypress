@@ -53,9 +53,8 @@
       @set "viewportScale", scale
 
     setViewport: (viewport) ->
-      @set
-        viewportWidth:  viewport.width
-        viewportHeight: viewport.height
+      @set(viewport)
+      @trigger "resize:viewport"
 
     setUrl: (url) ->
       @set "url", url
@@ -85,6 +84,7 @@
         ## to another command by the time this setImmediate function runs
         return if previousDetachedId isnt @state.detachedId
 
+        @restoreViewport()
         @trigger "restore:dom", body
 
         @state.detachedId = null
@@ -103,7 +103,26 @@
           @state.originalBody = body
           @revertDom(snapshot, command)
 
+    restoreViewport: ->
+      viewport = _(@state).pick("viewportWidth", "viewportHeight")
+
+      return if _.isEmpty(viewport)
+
+      @setViewport(viewport)
+
+    revertViewport: (viewport) ->
+      if not (@state.viewportWidth and @state.viewportHeight)
+        ## backup previous viewport if we dont currently
+        ## have one
+        @state.viewportWidth  = @get("viewportWidth")
+        @state.viewportHeight = @get("viewportHeight")
+
+      ## reset our viewport to the command
+      @setViewport(viewport)
+
     revertDom: (snapshot, command) ->
+      @revertViewport(command.pick("viewportWidth", "viewportHeight"))
+
       @trigger "revert:dom", snapshot
 
       @state.detachedId = command.cid
