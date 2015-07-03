@@ -62,14 +62,35 @@
       </div>
     </li>
     <li>
-      <span id="current-viewport-sizes">
-        <span id="viewport-width"><%= @viewportWidth %></span>
-        x
-        <span id="viewport-height"><%= @viewportHeight %></span>
-        <span id="viewport-scale-container">
-          (<span id="viewport-scale"><%= @viewportScale %></span>%)
-        </span>
-      </span>
+      <div class="dropdown pull-left">
+        <button data-toggle="dropdown" class="btn btn-link">
+          <span id="current-viewport-sizes">
+            <span id="viewport-width"><%= @viewportWidth %></span>
+            x
+            <span id="viewport-height"><%= @viewportHeight %></span>
+            <span id="viewport-scale-container">
+              (<span id="viewport-scale"><%= @viewportScale %></span>%)
+            </span>
+          </span>
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div id="viewport-wrapper" class="dropdown-menu dropdown-menu-right">
+          <p>The <strong>viewport</strong> determines the width and height of your application. By default the viewport will be <strong>1000px</strong> by <strong>660px</strong> unless specified by a <code>cy.viewport</code> command.</p>
+          <p>Additionally you can override the default viewport dimensions by specifying these values in your <code>cypress.json</code>.</p>
+<pre>
+  {
+    viewportWidth: 1000,
+    viewportHeight: 660
+  }
+</pre>
+          <p id="viewport-link">
+            <a href="http://github.com/cypress-io/cypress/wiki/viewport" target="_blank">
+              <i class="fa fa-info-circle"></i>
+              Read more about viewport here.
+            </a>
+          </p>
+        </div>
+      </div>
     </li>
   </ul>
 </header>

@@ -244,6 +244,7 @@
       width:         "#viewport-width"
       height:        "#viewport-height"
       scale:         "#viewport-scale"
+      viewport:      "#viewport-wrapper"
 
     events:
       "click @ui.expand"        : "expandClicked"
@@ -252,6 +253,7 @@
       "click @ui.choices"       : "choicesClicked"
       "click @ui.browser"       : "browserClicked"
       "click @ui.closeBrowser"  : "closeBrowserClicked"
+      "click @ui.viewport"      : "viewportClicked"
       "show.bs.dropdown"        : "dropdownShow"
       "hide.bs.dropdown"        : "dropdownHide"
 
@@ -316,6 +318,9 @@
 
     revertDom: ->
       @ui.message.text("DOM has been reverted").removeClass("cannot-revert").show()
+
+    viewportClicked: (e) ->
+      e.stopPropagation()
 
     dropdownShow: (e) ->
       return if not @$iframe
