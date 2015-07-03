@@ -10,6 +10,32 @@ describe "Iframe Entity", ->
 
     it "resets state object literal"
 
+  context "#defaults", ->
+    it "sets browser to null", ->
+      expect(@iframe.get("browser")).to.be.null
+
+    it "sets version to null", ->
+      expect(@iframe.get("version")).to.be.null
+
+  context "#listeners", ->
+    it "listens to Cypress.url:changed", ->
+      setUrl = @sandbox.spy @iframe, "setUrl"
+      @Cypress.trigger "url:changed", "http://localhost:3000/users/1"
+      expect(setUrl).to.be.calledWith "http://localhost:3000/users/1"
+
+    it "listens to Cypress.page:loading", ->
+      setPageLoading = @sandbox.spy @iframe, "setPageLoading"
+      @Cypress.trigger "page:loading", true
+      expect(setPageLoading).to.be.calledWith true
+
+    it "listens to runner before:run", ->
+      @runner.trigger "before:run"
+      expect(@iframe.isRunning()).to.be.true
+
+    it "listens to runner after:run", ->
+      @runner.trigger "after:run"
+      expect(@iframe.isRunning()).to.be.false
+
   context "#commandExit", ->
     it "is noop without originalBody", ->
       expect(@iframe.commandExit()).to.be.undefined

@@ -1,163 +1,332 @@
-# describe "Runner Entity", ->
-#   beforeEach ->
-#     ## make sure we provide our socket entity whenever our runner
-#     ## requests it, so we can control its events / emission
-#     ## since we wrapped socket.io it makes testing this very easy
-#     @socket = App.request "io:entity"
-#     App.reqres.setHandler "socket:entity", => @socket
+describe "Runner Entity", ->
+  beforeEach ->
+    @runner = App.request("runner:entity")
+    @Cypress  = @runner.Cypress
 
-#   context ".only tests", ->
-#     beforeEach ->
-#       loadFixture(["tests/only", "html/remote"]).done (iframe, remoteIframe) =>
-#         @$remoteIframe = $(remoteIframe)
-#         @contentWindow = iframe.contentWindow
-#         @mocha         = iframe.contentWindow.mocha
+  context "#initialize", ->
+    it "listens to test:changed events and calls reRun", ->
+      reRun = @sandbox.stub @runner, "reRun"
 
-#     it "triggers 'exclusive:test' when tests have an .only", (done) ->
-#       @runnerModel = App.request "start:test:runner",
-#         mocha: @mocha
-#         runner: new Mocha.Runner(@mocha.suite)
+      ## need to reinitialize due to function reference
+      @runner.initialize()
+      socket = App.request "socket:entity"
+      socket.trigger "test:changed", "entities/user_spec.coffee"
 
-#       ## we need to set the runner model's grep options
-#       ## to our iframes mocha options
-#       @runnerModel.options.grep = @mocha.options.grep
+      expect(reRun).to.be.calledWith "entities/user_spec.coffee"
 
-#       trigger = @sandbox.spy @runnerModel, "trigger"
+    it "listens to Cypress.initialized", ->
+      receivedRunner = @sandbox.stub @runner, "receivedRunner"
+      @Cypress.trigger "initialized", {runner: runner = {}}
+      expect(receivedRunner).to.be.calledWith runner
 
-#       @runnerModel.runIframeSuite "only.html", @contentWindow, @$remoteIframe, ->
-#         expect(trigger).to.be.calledWith "exclusive:test"
-#         done()
+    it "listens to Cypress.message", ->
+      emit = @sandbox.stub @runner.socket, "emit"
+      fn = @sandbox.stub()
+      @Cypress.trigger "message", "create:user", {foo: "bar"}, fn
+      expect(emit).to.be.calledWith "client:request", "create:user", {foo: "bar"}, fn
 
-#     it "does not trigger 'exclutive:test' when tests do not have a .only", (done) ->
-#       @runnerModel = App.request("start:test:runner")
-#       @runnerModel.options.grep = /.*/
-#       trigger = @sandbox.spy @runnerModel, "trigger"
-#       @runnerModel.runIframeSuite "only.html", @contentWindow, @$remoteIframe, ->
-#         expect(trigger).not.to.be.calledWith "exclusive:test"
-#         done()
+  context "#stop", ->
+    beforeEach ->
+      @stop = @sandbox.stub(@Cypress, "stop").resolves()
 
-#   context "events", ->
-#     beforeEach ->
-#       loadFixture(["tests/events", "html/remote"]).done (iframe, remoteIframe) =>
-#         @$remoteIframe = $(remoteIframe)
-#         @contentWindow = iframe.contentWindow
-#         @mocha         = iframe.contentWindow.mocha
+    it "calls #restore", ->
+      restore = @sandbox.spy @runner, "restore"
+      @runner.stop().then ->
+        expect(restore).to.be.calledOnce
 
-#     it "triggers the following events", (done) ->
-#       @runnerModel = App.request "start:test:runner",
-#         mocha: @mocha
-#         runner: new Mocha.Runner(@mocha.suite)
+    it "stops listening", ->
+      stopListening = @sandbox.spy @runner, "stopListening"
+      @runner.stop().then ->
+        expect(stopListening).to.be.calledOnce
 
-#       @runnerModel.options.grep = /.*/
+    it "calls Cypress#stop", ->
+      @runner.stop().then =>
+        expect(@stop).to.be.calledOnce
 
-#       trigger = @sandbox.spy @runnerModel, "trigger"
+  context "#restore", ->
+    beforeEach ->
+      @reset = @sandbox.stub @runner, "reset"
 
-#       @runnerModel.runIframeSuite "events.html", @contentWindow, @$remoteIframe, ->
-#         events = _(trigger.args).map (args) -> args[0]
-#         expect(events).to.deep.eq [
-#           "before:run"
-#           "before:add"
-#           "suite:add"
-#           "test:add"
-#           "after:add"
-#           "suite:start"
-#           "suite:start"
-#           "test:start"
-#           "test:end"
-#           "suite:stop"
-#           "suite:stop"
-#           "after:run"
-#           "runner:end"
-#         ]
-#         done()
+    it "calls reset", ->
+      @runner.restore()
+      expect(@reset).to.be.calledOnce
 
-#     it "prevents the 'end' event from firing until all tests have run", (done) ->
-#       @runnerModel = App.request("start:test:runner")
-#       @runnerModel.options.grep = /.*/
+    it "nulls out references", ->
+      refs = ["commands", "routes", "agents", "chosen", "specPath", "socket", "Cypress"]
 
-#       runner = @runnerModel.runner
-#       emit = @sandbox.spy runner, "emit"
+      _.each refs, (ref) =>
+        @runner[ref] = "foo"
 
-#       @runnerModel.runIframeSuite "events.html", @contentWindow, @$remoteIframe, ->
-#         lastEvent = _.last(emit.args)[0]
-#         expect(lastEvent).to.eq "eclectus end"
-#         done()
+      @runner.restore()
 
-#   context "runner state", ->
-#     beforeEach ->
-#       loadFixture(["tests/events", "html/remote"]).done (iframe, remoteIframe) =>
-#         @$remoteIframe = $(remoteIframe)
-#         @contentWindow = iframe.contentWindow
-#         @mocha         = iframe.contentWindow.mocha
+      _.each refs, (ref) =>
+        expect(@runner[ref]).to.be.null
 
-#     it "clears out the runner.test before a test run", ->
-#       ## need to patch here because we are stubbing out the runSuite
-#       ## which would normally patch the Ecl prototype
-#       Eclectus.patch {$remoteIframe: @$remoteIframe}
+  context "#reset", ->
+    it "calls reset on each collection", ->
+      @resets = _.map ["commands", "routes", "agents"], (collection) =>
+        @sandbox.spy @runner[collection], "reset"
 
-#       @runnerModel = App.request "start:test:runner",
-#         mocha: @mocha
-#         runner: new Mocha.Runner(@mocha.suite)
+      @runner.reset()
 
-#       @runnerModel.options.grep = /.*/
+      _.each @resets, (reset) ->
+        expect(reset).to.be.calledWithMatch [], {silent: true}
 
-#       runner = @runnerModel.runner
+  context "#receivedRunner", ->
+    beforeEach ->
+      runner = Fixtures.createRunnables
+        tests: ["one"]
+        suites:
+          "suite 1":
+            tests: ["suite 1, two [0a3]", "suite 1, three"]
+            suites:
+              "suite 2":
+                tests: ["suite 2, four"]
 
-#       runner.test = "last test"
+      @cyRunner     = $Cypress.Runner.runner(@Cypress, runner)
+      @trigger      = @sandbox.spy @runner, "trigger"
 
-#       @sandbox.stub runner, "runSuite"
+      ## filter out other trigger events except for
+      ## the test:add and suite:add
+      @getAddEventCalls = ->
+        _.filter @trigger.getCalls(), (call) ->
+          /(test:add|suite:add)/.test call.args[0]
 
-#       @runnerModel.runIframeSuite "events.html", @contentWindow, @$remoteIframe, ->
+    it "triggers before:add", ->
+      @runner.receivedRunner @cyRunner
+      expect(@trigger).to.be.calledWith "before:add"
 
-#       expect(runner.test).to.be.undefined
+    it "triggers after:add", ->
+      @runner.receivedRunner @cyRunner
+      expect(@trigger).to.be.calledWith "after:add"
 
-#     it "inserts tests in tests property which match the grep", (done) ->
-#       @runnerModel = App.request("start:test:runner")
-#       @runnerModel.options.grep = /.*/
+    describe "no chosen id", ->
+      it "triggers add events, with runnable as 1st argument", ->
+        @runner.set "chosenId", null, silent: true
+        @runner.receivedRunner @cyRunner
 
-#       @runnerModel.runIframeSuite "events.html", @contentWindow, @$remoteIframe, =>
-#         expect(@runnerModel.tests).to.have.length(1)
-#         done()
+        calls = @getAddEventCalls()
 
-#   context "hook overrides", ->
-#     beforeEach ->
-#       @run = (grep, fn) ->
-#         @runnerModel = App.request "start:test:runner",
-#           mocha: @mocha
-#           runner: new Mocha.Runner(@mocha.suite)
-#         @runnerModel.options.grep = grep
+        ## there should be 1 call for each runnable
+        expect(calls).to.have.length @cyRunner.runnables.length
 
-#         runner = @runnerModel.runner
-#         emit = @sandbox.spy runner, "emit"
+        _.each @cyRunner.runnables, (runnable, index) ->
+          expect(calls[index]).to.be.calledWith "#{runnable.type}:add", runnable
 
-#         @runnerModel.runIframeSuite "remote.html", @contentWindow, @$remoteIframe, ->
-#           fn(emit)
+    describe "a chosen id", ->
+      it "doesnt initially trigger add events", ->
+        @runner.set "chosenId", 123, silent: true
 
-#       loadFixture(["tests/hooks", "html/remote"]).done (iframe, remoteIframe) =>
-#         @$remoteIframe = $(remoteIframe)
-#         @contentWindow = iframe.contentWindow
-#         @mocha         = iframe.contentWindow.mocha
+        ## allow the first getRunnables call to pass
+        ## through but then stub the rest
+        @getRunnables = @cyRunner.getRunnables
+        stub = @sandbox.stub @cyRunner, "getRunnables", ->
+          if stub.callCount is 0
+            @getRunnables.apply(@cyRunner, arguments)
 
-#     it "emits exactly same num of test:before:hooks events as there are tests", (done) ->
-#       @run /.*/, (emit) =>
-#         calls = _(emit.getCalls()).filter (call) -> call.args[0] is "test:before:hooks"
-#         expect(calls).to.have.length @runnerModel.tests.length
-#         done()
+        @runner.receivedRunner @cyRunner
 
-#     it "emits exactly same num of test:after:hooks events are there are tests", (done) ->
-#       @run /.*/, (emit) =>
-#         calls = _(emit.getCalls()).filter (call) -> call.args[0] is "test:after:hooks"
-#         expect(calls).to.have.length @runnerModel.tests.length
-#         done()
+        calls = @getAddEventCalls()
+        expect(calls).to.have.length(0)
 
-#     it "emits exactly same num of test:before:hooks events as there are grepp'd tests", (done) ->
-#       @run /\[s03\]/, (emit) =>
-#         calls = _(emit.getCalls()).filter (call) -> call.args[0] is "test:before:hooks"
-#         expect(calls).to.have.length @runnerModel.tests.length
-#         done()
+      context "when id is found", ->
+        it "sets the grep on the runner", ->
+          @runner.set "chosenId", "0a3", silent: true
+          grep = @sandbox.spy @cyRunner, "grep"
+          @runner.receivedRunner @cyRunner
+          expect(grep).to.be.calledWith /\[0a3\]/
 
-#     it "emits exactly same num of test:after:hooks events are there are grepp'd tests", (done) ->
-#       @run /\[s03\]/, (emit) =>
-#         calls = _(emit.getCalls()).filter (call) -> call.args[0] is "test:after:hooks"
-#         expect(calls).to.have.length @runnerModel.tests.length
-#         done()
+        it "triggers add events on matching grep'd tests", ->
+          @runner.set "chosenId", "0a3", silent: true
+          @runner.receivedRunner @cyRunner
+
+          ## only suite1 and test two should be added
+          ## because our chosenId grep's filters out
+          ## the rest
+          calls = @getAddEventCalls()
+          expect(calls).to.have.length(2)
+
+      context "when id isnt found", ->
+        it "removes chosenId", ->
+          @runner.set "chosenId", "abc", silent: true
+          @runner.receivedRunner @cyRunner
+          expect(@runner.get("chosenId")).to.be.undefined
+
+        it "triggers add events", ->
+          @runner.set "chosenId", "abc", silent: true
+          @runner.receivedRunner @cyRunner
+          calls = @getAddEventCalls()
+          expect(calls).to.have.length(6)
+
+        it "does not getRunnables again", ->
+          @runner.set "chosenId", "abc", silent: true
+          getRunnables = @sandbox.spy @cyRunner, "getRunnables"
+          @runner.receivedRunner @cyRunner
+          expect(getRunnables).to.be.calledOnce
+
+  context "#getRunnableId", ->
+    it "uses id from runnable title", ->
+      r = {title: "foo bar baz [123]"}
+      expect(@runner.getRunnableId(r)).to.eq "123"
+
+    it "generates a random id if one doesnt exist", ->
+      r = {title: "does not have an id"}
+      id = @runner.getRunnableId(r)
+      expect(id).to.be.ok
+      expect(id).to.match /[a-zA-Z0-9]{3}/
+
+  context "#createUniqueRunnableId", ->
+    it "generates random ids until its unique", ->
+      ids = ["123"]
+      r = {title: "has a duplicate id [123]"}
+      id = @runner.createUniqueRunnableId(r, ids)
+      expect(id).to.be.ok
+      expect(id).not.to.eq "123"
+      expect(id).to.match /[a-zA-Z0-9]{3}/
+
+    it "doesnt generate random ids if id is already unique", ->
+      ids = ["123"]
+      r = {title: "has id [456]"}
+      id = @runner.createUniqueRunnableId(r, ids)
+      expect(id).to.eq "456"
+
+  context "#run", ->
+    beforeEach ->
+      @init    = @sandbox.stub @Cypress, "initialize"
+      @run     = @sandbox.stub @Cypress, "run"
+      @trigger = @sandbox.spy @runner, "trigger"
+
+    it "triggers before:run", ->
+      @runner.run()
+      expect(@trigger).to.be.calledWith "before:run"
+
+    it "triggers before:run before calling Cypress.initialize()", ->
+      @runner.run()
+      expect(@init).to.be.calledBefore(@run)
+
+    it "triggers after:run as the Cypress.run callback", ->
+      @run.callsArg(0)
+      @runner.run()
+
+      expect(@trigger).to.be.calledWith "after:run"
+
+  context "#triggerLoadSpecFrame", ->
+    beforeEach ->
+      @trigger = @sandbox.spy(@runner, "trigger")
+
+    # it "sets default options", ->
+    #   attrs = {
+    #     chosenId: 123
+    #     browser: "chrome"
+    #     version: 40
+    #   }
+
+    #   @runner.set attrs
+
+    #   obj = {}
+
+    #   @runner.triggerLoadSpecFrame "app_spec.coffee", obj
+
+    #   expect(obj).to.deep.eq attrs
+
+    it "calls #reset", ->
+      reset = @sandbox.stub @runner, "reset"
+      @runner.triggerLoadSpecFrame "app_spec.coffee"
+      expect(reset).to.be.calledOnce
+
+    # it "triggers 'load:spec:iframe' with specPath and options", ->
+    #   options = {chosenId: "", browser: "", version: ""}
+    #   @runner.triggerLoadSpecFrame "app_spec.coffee", options
+    #   expect(@trigger).to.be.calledWith "load:spec:iframe", "app_spec.coffee", options
+
+  context "#start", ->
+    it "calls triggerLoadSpecFrame with specPath", ->
+      triggerLoadSpecFrame = @sandbox.stub(@runner, "triggerLoadSpecFrame")
+      @runner.start("app_spec.coffee")
+      expect(triggerLoadSpecFrame).to.be.calledWith "app_spec.coffee"
+
+    it "sets specPath", ->
+      @runner.start("app_spec.coffee")
+      expect(@runner.specPath).to.eq "app_spec.coffee"
+
+  context "#reRun", ->
+    beforeEach ->
+      @abort = @sandbox.stub(@Cypress, "abort").resolves()
+      @runner.specPath = "app_spec.coffee"
+
+    it "calls Cypress.abort()", ->
+      @runner.reRun "app_spec.coffee"
+      expect(@abort).to.be.calledOnce
+
+    it "triggers 'reset:test:run'", ->
+      trigger = @sandbox.spy(@runner, "trigger")
+      @runner.reRun("app_spec.coffee").then ->
+        expect(trigger).to.be.calledWith "reset:test:run"
+
+    it "calls triggerLoadSpecFrame with specPath and options", ->
+      triggerLoadSpecFrame = @sandbox.stub(@runner, "triggerLoadSpecFrame")
+      @runner.reRun("app_spec.coffee", {foo: "bar"}).then ->
+        expect(triggerLoadSpecFrame).to.be.calledWith "app_spec.coffee", {foo: "bar"}
+
+    it "returns undefined if specPath doesnt match this.specPath", ->
+      expect(@runner.reRun("foo_spec.coffee")).to.be.undefined
+
+  context "#logResults", ->
+    it "triggers 'test:results:ready'", ->
+      trigger = @sandbox.spy @runner, "trigger"
+
+      @runner.logResults({})
+      expect(trigger).to.be.calledWith "test:results:ready", {}
+
+  context "#setChosen", ->
+    beforeEach ->
+      @obj          = {id: 123}
+      @reRun        = @sandbox.stub @runner, "reRun"
+      @updateChosen = @sandbox.stub @runner, "updateChosen"
+
+    it "sets chosen", ->
+      @runner.setChosen @obj
+      expect(@runner.chosen).to.eq @obj
+
+    it "calls updateChosen with id", ->
+      @runner.setChosen @obj
+      expect(@updateChosen).to.be.calledWith 123
+
+    it "calls reRun with @specPath", ->
+      @runner.specPath = "app_spec.coffee"
+      @runner.setChosen @obj
+      expect(@reRun).to.be.calledWith "app_spec.coffee"
+
+    it "sets chosen to null", ->
+      @runner.setChosen()
+      expect(@runner.chosen).to.be.null
+
+    it "calls updateChosen with undefined", ->
+      @runner.setChosen()
+      expect(@updateChosen).to.be.calledWith undefined
+
+  context "#updateChosen", ->
+    it "sets chosenId", ->
+      @runner.updateChosen 123
+      expect(@runner.get("chosenId")).to.eq 123
+
+    it "unsets chosenId", ->
+      @runner.updateChosen 123
+      @runner.updateChosen()
+      expect(@runner.attributes).not.to.have.property("chosenId")
+
+  context "#hasChosen", ->
+    it "returns true", ->
+      @runner.updateChosen 123
+      expect(@runner.hasChosen()).to.be.true
+
+    it "returns false", ->
+      it "returns true", ->
+        @runner.updateChosen 123
+        @runner.updateChosen()
+        expect(@runner.hasChosen()).to.be.false
+
+  context "#getChosen", ->
+    it "returns .chosen", ->
+      @runner.chosen = {}
+      expect(@runner.getChosen()).to.deep.eq {}
