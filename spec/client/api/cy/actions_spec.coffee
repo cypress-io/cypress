@@ -500,6 +500,34 @@ describe "$Cypress.Cy Actions Commands", ->
       #   @cy.get("#input-types [type=date").invoke("val", "pass").type("word").then ($text) ->
       #     expect($text).to.have.value("date")
 
+      it "automatically moves the caret to the end if value is changed manually", ->
+        @cy.$(":text:first").keypress (e) ->
+          e.preventDefault()
+
+          key = String.fromCharCode(e.which)
+
+          $input = $(e.target)
+
+          val = $input.val()
+
+          $input.val(val + key + "-")
+
+        @cy.get(":text:first").type("foo").then ($input) ->
+          expect($input).to.have.value("f-o-o-")
+
+      it "automatically moves the caret to the end if value is changed manually asynchronously", ->
+        @cy.$(":text:first").keypress (e) ->
+          key = String.fromCharCode(e.which)
+
+          $input = $(e.target)
+
+          _.defer ->
+            val = $input.val()
+            $input.val(val + "-")
+
+        @cy.get(":text:first").type("foo").then ($input) ->
+          expect($input).to.have.value("f-o-o-")
+
       it "does not fire keypress when keydown is preventedDefault", (done) ->
         @cy.$(":text:first").get(0).addEventListener "keypress", (e) ->
           done("should not have received keypress event")

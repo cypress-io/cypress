@@ -39,14 +39,15 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
     }
 
     specialChars: {
-      "{selectall}": (el, rng) ->
-        rng.bounds('all').select()
+      "{selectall}": (el, options) ->
+        options.rng.bounds('all').select()
 
       ## charCode = 46
       ## no keyPress
       ## no textInput
       ## yes input (if value is actually changed)
-      "{del}": (el, rng, options) ->
+      "{del}": (el, options) ->
+        {rng} = options
         bounds = rng.bounds()
         if @boundsAreEqual(bounds)
           rng.bounds([bounds[0], bounds[0] + 1])
@@ -67,7 +68,8 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       ## no keyPress
       ## no textInput
       ## yes input (if value is actually changed)
-      "{backspace}": (el, rng, options) ->
+      "{backspace}": (el, options) ->
+        {rng} = options
         bounds = rng.bounds()
         if @boundsAreEqual(bounds)
           rng.bounds([bounds[0] - 1, bounds[0]])
@@ -88,7 +90,7 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       ## no keyPress
       ## no textInput
       ## no input
-      "{esc}": (el, rng, options) ->
+      "{esc}": (el, options) ->
         options.charCode  = 27
         options.keypress  = false
         options.textInput = false
@@ -97,16 +99,17 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
 
       # "{tab}": (el, rng) ->
 
-      "{{}": (el, rng, options) ->
+      "{{}": (el, options) ->
         options.key = "{"
-        @typeKey(el, rng, options.key, options)
+        @typeKey(el, options.key, options)
 
       ## charCode = 13
       ## yes keyPress
       ## no textInput
       ## no input
       ## yes change (if input is different from last change event)
-      "{enter}": (el, rng, options) ->
+      "{enter}": (el, options) ->
+        {rng} = options
         options.charCode  = 13
         options.textInput = false
         options.input     = false
@@ -119,7 +122,8 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       ## no keyPress
       ## no textInput
       ## no input
-      "{leftarrow}": (el, rng, options) ->
+      "{leftarrow}": (el, options) ->
+        {rng} = options
         bounds = rng.bounds()
         options.charCode  = 37
         options.keypress  = false
@@ -147,7 +151,8 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       ## no keyPress
       ## no textInput
       ## no input
-      "{rightarrow}": (el, rng, options) ->
+      "{rightarrow}": (el, options) ->
+        {rng} = options
         bounds = rng.bounds()
         options.charCode  = 39
         options.keypress  = false
@@ -208,7 +213,7 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
           bounds = [len, len]
           if not _.isEqual(rng._bounds, bounds)
             el.bililiteRangeSelection = bounds
-            rng._bounds = bounds
+            rng.bounds(bounds)
 
       keys = options.chars.split(charsBetweenCurlyBraces)
 
@@ -222,10 +227,10 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
         .each keys, (key) =>
           @typeChars(el, rng, key, promises, options)
         .cancellable()
-        .then ->
+        .then =>
           ## if after typing we ended up changing
           ## our value then fire the onTypeChange callback
-          if options.prev isnt rng.all()
+          if @expectedValueDoesNotMatchCurrentValue(options.prev, rng)
             options.onTypeChange()
 
           ## after typing be sure to clear all ranges
@@ -246,10 +251,11 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
 
     typeChars: (el, rng, chars, promises, options) ->
       options = _.clone(options)
+      options.rng = rng
 
       if charsBetweenCurlyBraces.test(chars)
         p = Promise
-          .resolve @handleSpecialChars(el, rng, chars, options)
+          .resolve @handleSpecialChars(el, chars, options)
           .delay(options.delay)
           .cancellable()
         promises.push(p)
@@ -258,7 +264,7 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
         Promise
           .each chars.split(""), (char) =>
             p = Promise
-              .resolve @typeKey(el, rng, char, options)
+              .resolve @typeKey(el, char, options)
               .delay(options.delay)
               .cancellable()
             promises.push(p)
@@ -267,6 +273,13 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
     getCharCode: (key) ->
       code = key.charCodeAt(0)
       @charCodeMap[code] ? code
+
+    expectedValueDoesNotMatchCurrentValue: (expected, rng) ->
+      expected isnt rng.all()
+
+    moveCaretToEnd: (rng) ->
+      len = rng.length()
+      rng.bounds [len, len]
 
     simulateKey: (el, eventType, key, options) ->
       ## bail if we've said not to fire this specific event
@@ -348,24 +361,39 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
     updateValue: (rng, key) ->
       rng.text(key, "end")
 
-    typeKey: (el, rng, key, options) ->
+    typeKey: (el, key, options) ->
+      ## if we have an afterKey value it means
+      ## we've typed in prior to this
+      if after = options.afterKey
+        ## if this afterKey value is no longer the current value
+        ## then something has altered the value and we need to
+        ## automatically shift the caret to the end like a real browser
+        if @expectedValueDoesNotMatchCurrentValue(after, options.rng)
+          @moveCaretToEnd(options.rng)
+
       @ensureKey el, key, options, ->
-        @updateValue(rng, key)
+        @updateValue(options.rng, key)
 
     ensureKey: (el, key, options, fn) ->
-      options.id = _.uniqueId("char")
+      options.id        = _.uniqueId("char")
+      options.beforeKey = options.rng.all()
 
       if @simulateKey(el, "keydown", key, options)
         if @simulateKey(el, "keypress", key, options)
           if @simulateKey(el, "textInput", key, options)
             fn.call(@) if fn
             @simulateKey(el, "input", key, options)
+
+            ## store the afterKey value so we know
+            ## if something mutates the value between typing keys
+            options.afterKey = options.rng.all()
+
       @simulateKey(el, "keyup", key, options)
 
-    handleSpecialChars: (el, rng, chars, options) ->
+    handleSpecialChars: (el, chars, options) ->
       if fn = @specialChars[chars]
         options.key = chars
-        fn.call(@, el, rng, options)
+        fn.call(@, el, options)
       else
         allChars = _.keys(@specialChars).join(", ")
         options.onNoMatchingSpecialChars(chars, allChars)
