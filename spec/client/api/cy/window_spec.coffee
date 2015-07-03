@@ -137,6 +137,20 @@ describe "$Cypress.Cy Window Commands", ->
 
         @cy.viewport("iphone-6")
 
+      it "can change the orientation to landspace", (done) ->
+        @Cypress.on "viewport", (viewport) ->
+          expect(viewport).to.deep.eq {viewportWidth: 568, viewportHeight: 320}
+          done()
+
+        @cy.viewport("iphone-5", "landscape")
+
+      it "can change the orientation to portrait", (done) ->
+        @Cypress.on "viewport", (viewport) ->
+          expect(viewport).to.deep.eq {viewportWidth: 320, viewportHeight: 568}
+          done()
+
+        @cy.viewport("iphone-5", "portrait")
+
     context "errors", ->
       beforeEach ->
         @allowErrors()
@@ -218,6 +232,19 @@ describe "$Cypress.Cy Window Commands", ->
           done()
 
         @cy.viewport("")
+
+      it "throws when passed an invalid orientation on a preset", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) ->
+          expect(logs.length).to.eq(1)
+          expect(err.message).to.eq "cy.viewport can only accept 'landscape' or 'portrait' as valid orientations. Your orientation was: 'foobar'"
+          done()
+
+        @cy.viewport("iphone-4", "foobar")
 
       _.each [{}, [], NaN, Infinity, null, undefined], (val) =>
         it "throws when passed the invalid: '#{val}' as width", (done) ->

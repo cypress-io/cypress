@@ -13,6 +13,8 @@ $Cypress.register "Window", (Cypress, _, $) ->
     "iphone-3"   : "320x480"
   }
 
+  validOrientations = ["landscape", "portrait"]
+
   Cypress.addParentCommand
     title: (options = {}) ->
       options.log = false
@@ -44,9 +46,9 @@ $Cypress.register "Window", (Cypress, _, $) ->
 
     doc: -> @sync.document()
 
-    viewport: (presetOrWidth, height, options = {}) ->
-      if _.isObject(height)
-        options = height
+    viewport: (presetOrWidth, heightOrOrientation, options = {}) ->
+      if _.isObject(heightOrOrientation)
+        options = heightOrOrientation
 
       _.defaults options,
         log: true
@@ -83,13 +85,28 @@ $Cypress.register "Window", (Cypress, _, $) ->
               presets = _.keys(viewports).join(", ")
               @throwErr "cy.viewport could not find a preset for: '#{preset}'. Available presets are: #{presets}", command
 
-          preset = presetOrWidth
+          orientationIsValidAndLandscape = (orientation) =>
+            if orientation not in validOrientations
+              all = validOrientations.join("' or '")
+              @throwErr "cy.viewport can only accept '#{all}' as valid orientations. Your orientation was: '#{orientation}'", command
+
+            orientation is "landscape"
+
+          preset      = presetOrWidth
+          orientation = heightOrOrientation
 
           ## get preset, split by x, convert to a number
-          [width, height] = getPresetDimensions(preset)
+          dimensions = getPresetDimensions(preset)
 
-        when widthAndHeightAreValidNumbers(presetOrWidth, height)
+          if _.isString(orientation)
+            if orientationIsValidAndLandscape(orientation)
+              dimensions.reverse()
+
+          [width, height] = dimensions
+
+        when widthAndHeightAreValidNumbers(presetOrWidth, heightOrOrientation)
           width = presetOrWidth
+          height = heightOrOrientation
 
           if not widthAndHeightAreWithinBounds(width, height)
             @throwErr "cy.viewport width and height must be between 200px and 3000px.", command
