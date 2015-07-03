@@ -53,6 +53,7 @@ window.$Cypress = do ($, _, Backbone, Promise) ->
       chai   = $Cypress.Chai.create(@, specWindow)
       mocha  = $Cypress.Mocha.create(@, specWindow)
       runner = $Cypress.Runner.create(@, specWindow, mocha)
+      log    = $Cypress.Log.create(@, cy)
 
       ## TODO: TEST THIS
       @prepareForSpecEvents()

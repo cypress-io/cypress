@@ -198,224 +198,233 @@ describe "$Cypress.Log API", ->
   describe "class methods", ->
     enterCommandTestingMode()
 
-    context ".log", ->
-      describe "defaults", ->
-        beforeEach ->
-          obj = {name: "foo", ctx: @cy, fn: (->), args: [1,2,3], type: "parent"}
-          @cy.prop("current", obj)
+    context ".create", ->
+      beforeEach ->
+        @Cypress.Log.create(@Cypress, @cy)
 
-        it "sets name to current.name", (done) ->
-          @Cypress.on "log", (obj) ->
-            expect(obj.get("name")).to.eq "foo"
-            done()
+        obj = {name: "foo", ctx: @cy, fn: (->), args: [1,2,3], type: "parent"}
+        @cy.prop("current", obj)
 
+      describe "#command", ->
+        it "displays a deprecation warning", ->
+          warn = @sandbox.spy console, "warn"
           @Cypress.command({})
+          expect(warn).to.be.calledWith "Cypress.command() is deprecated. Please update and use: Cypress.Log.command()"
 
-        it "sets type to current.type", (done) ->
+      context "$Log.log", ->
+        it "displays 0 argument", (done) ->
           @Cypress.on "log", (obj) ->
-            expect(obj.get("type")).to.eq "parent"
-            done()
+            if obj.get("name") is "eq"
+              expect(obj.get("message")).to.eq "0"
+              done()
 
-          @Cypress.command({})
+          @cy.get("div").eq(0)
 
-        it "sets message to stringified args", (done) ->
-          @Cypress.on "log", (obj) ->
-            expect(obj.get("message")).to.deep.eq "1, 2, 3"
-            done()
-
-          @Cypress.command({})
-
-        it "omits ctx from current.ctx", (done) ->
-          @Cypress.on "log", (obj) ->
-            expect(obj.get("ctx")).not.to.exist
-            done()
-
-          @Cypress.command({})
-
-        it "omits fn from current.fn", (done) ->
-          @Cypress.on "log", (obj) ->
-            expect(obj.get("fn")).not.to.exist
-            done()
-
-          @Cypress.command({})
-
-        it "sets hookName to prop hookName", (done) ->
-          @cy.private("hookName", "beforeEach")
-
-          @Cypress.on "log", (obj) ->
-            expect(obj.get("hookName")).to.eq "beforeEach"
-            @private("hookName", null)
-            done()
-
-          @Cypress.command({})
-
-        it "sets viewportWidth to private viewportWidth", (done) ->
-          @cy.private("viewportWidth", 999)
-
-          @Cypress.on "log", (obj) ->
-            expect(obj.get("viewportWidth")).to.eq 999
-            done()
-
-          @Cypress.command({})
-
-        it "sets viewportHeight to private viewportHeight", (done) ->
-          @cy.private("viewportHeight", 888)
-
-          @Cypress.on "log", (obj) ->
-            expect(obj.get("viewportHeight")).to.eq 888
-            done()
-
-          @Cypress.command({})
-
-        it "sets testId to runnable.id", (done) ->
-          @cy.private("runnable", {id: 123})
-
-          @Cypress.on "log", (obj) ->
-            expect(obj.get("testId")).to.eq 123
-            @private("runnable", null)
-            done()
-
-          @Cypress.command({})
-
-        it "sets numElements if $el", (done) ->
-          $el = @cy.$("body")
-
-          @Cypress.on "log", (obj) ->
-            expect(obj.get("numElements")).to.eq 1
-            done()
-
-          @Cypress.command($el: $el)
-
-        it "sets highlightAttr if $el", (done) ->
-          $el = @cy.$("body")
-
-          @Cypress.on "log", (obj) ->
-            expect(obj.get("highlightAttr")).not.to.be.undefined
-            expect(obj.get("highlightAttr")).to.eq @Cypress.highlightAttr
-            done()
-
-          @Cypress.command($el: $el)
-
-      it "displays 0 argument", (done) ->
-        @Cypress.on "log", (obj) ->
-          if obj.get("name") is "eq"
-            expect(obj.get("message")).to.eq "0"
-            done()
-
-        @cy.get("div").eq(0)
-
-      it "sets type to 'parent' dual commands when first command", (done) ->
-        @allowErrors()
-
-        @Cypress.on "log", (obj) ->
-          if obj.get("name") is "then"
-            expect(obj.get("type")).to.eq "parent"
-            done()
-
-        @cy.then ->
-          throw new Error("then failure")
-
-      it "sets type to 'child' dual commands when first command", (done) ->
-        @allowErrors()
-
-        @Cypress.on "log", (obj) ->
-          if obj.get("name") is "then"
-            expect(obj.get("type")).to.eq "child"
-            done()
-
-        @cy.noop({}).then ->
-          throw new Error("then failure")
-
-      describe "errors", ->
-        beforeEach ->
+        it "sets type to 'parent' dual commands when first command", (done) ->
           @allowErrors()
 
-          @cy.on "command:start", ->
-            @_timeout(100)
+          @Cypress.on "log", (obj) ->
+            if obj.get("name") is "then"
+              expect(obj.get("type")).to.eq "parent"
+              done()
 
-          ## prevent accidentally adding a .then to @cy
-          return null
+          @cy.then ->
+            throw new Error("then failure")
 
-        it "preserves errors", (done) ->
-          @Cypress.on "log", (@log) =>
+        it "sets type to 'child' dual commands when first command", (done) ->
+          @allowErrors()
 
-          @cy.on "fail", (err) =>
-            expect(@log.get("name")).to.eq "get"
-            expect(@log.get("message")).to.eq "foo"
-            expect(@log.get("error")).to.eq err
-            done()
+          @Cypress.on "log", (obj) ->
+            if obj.get("name") is "then"
+              expect(obj.get("type")).to.eq "child"
+              done()
 
-          @cy.get("foo")
+          @cy.noop({}).then ->
+            throw new Error("then failure")
 
-        it "#onConsole for parent commands", (done) ->
-          @Cypress.on "log", (@log) =>
+        describe "defaults", ->
+          it "sets name to current.name", (done) ->
+            @Cypress.on "log", (obj) ->
+              expect(obj.get("name")).to.eq "foo"
+              done()
 
-          @cy.on "fail", (err) =>
-            expect(@log.attributes.onConsole()).to.deep.eq {
-              Command: "get"
-              Returned: undefined
-              Error: err.toString()
-            }
-            done()
+            @Cypress.Log.command({})
 
-          @cy.get("foo")
+          it "sets type to current.type", (done) ->
+            @Cypress.on "log", (obj) ->
+              expect(obj.get("type")).to.eq "parent"
+              done()
 
-        it "#onConsole for dual commands as a parent", (done) ->
-          @Cypress.on "log", (@log) =>
+            @Cypress.Log.command({})
 
-          @cy.on "fail", (err) =>
-            expect(@log.attributes.onConsole()).to.deep.eq {
-              Command: "wait"
-              Error: err.toString()
-            }
-            done()
+          it "sets message to stringified args", (done) ->
+            @Cypress.on "log", (obj) ->
+              expect(obj.get("message")).to.deep.eq "1, 2, 3"
+              done()
 
-          @cy.wait ->
-            expect(true).to.be.false
+            @Cypress.Log.command({})
 
-        it "#onConsole for dual commands as a child", (done) ->
-          @Cypress.on "log", (@log) =>
+          it "omits ctx from current.ctx", (done) ->
+            @Cypress.on "log", (obj) ->
+              expect(obj.get("ctx")).not.to.exist
+              done()
 
-          @cy.on "fail", (err) =>
-            if @log.get("name") is "wait"
-              btns = getFirstSubjectByName.call(@, "get")
+            @Cypress.Log.command({})
+
+          it "omits fn from current.fn", (done) ->
+            @Cypress.on "log", (obj) ->
+              expect(obj.get("fn")).not.to.exist
+              done()
+
+            @Cypress.Log.command({})
+
+          it "sets hookName to prop hookName", (done) ->
+            @cy.private("hookName", "beforeEach")
+
+            @Cypress.on "log", (obj) ->
+              expect(obj.get("hookName")).to.eq "beforeEach"
+              @private("hookName", null)
+              done()
+
+            @Cypress.Log.command({})
+
+          it "sets viewportWidth to private viewportWidth", (done) ->
+            @cy.private("viewportWidth", 999)
+
+            @Cypress.on "log", (obj) ->
+              expect(obj.get("viewportWidth")).to.eq 999
+              done()
+
+            @Cypress.Log.command({})
+
+          it "sets viewportHeight to private viewportHeight", (done) ->
+            @cy.private("viewportHeight", 888)
+
+            @Cypress.on "log", (obj) ->
+              expect(obj.get("viewportHeight")).to.eq 888
+              done()
+
+            @Cypress.Log.command({})
+
+          it "sets testId to runnable.id", (done) ->
+            @cy.private("runnable", {id: 123})
+
+            @Cypress.on "log", (obj) ->
+              expect(obj.get("testId")).to.eq 123
+              @private("runnable", null)
+              done()
+
+            @Cypress.Log.command({})
+
+          it "sets numElements if $el", (done) ->
+            $el = @cy.$("body")
+
+            @Cypress.on "log", (obj) ->
+              expect(obj.get("numElements")).to.eq 1
+              done()
+
+            @Cypress.Log.command($el: $el)
+
+          it "sets highlightAttr if $el", (done) ->
+            $el = @cy.$("body")
+
+            @Cypress.on "log", (obj) ->
+              expect(obj.get("highlightAttr")).not.to.be.undefined
+              expect(obj.get("highlightAttr")).to.eq @Cypress.highlightAttr
+              done()
+
+            @Cypress.Log.command($el: $el)
+
+        describe "errors", ->
+          beforeEach ->
+            @allowErrors()
+
+            @cy.on "command:start", ->
+              @_timeout(100)
+
+            ## prevent accidentally adding a .then to @cy
+            return null
+
+          it "preserves errors", (done) ->
+            @Cypress.on "log", (@log) =>
+
+            @cy.on "fail", (err) =>
+              expect(@log.get("name")).to.eq "get"
+              expect(@log.get("message")).to.eq "foo"
+              expect(@log.get("error")).to.eq err
+              done()
+
+            @cy.get("foo")
+
+          it "#onConsole for parent commands", (done) ->
+            @Cypress.on "log", (@log) =>
+
+            @cy.on "fail", (err) =>
+              expect(@log.attributes.onConsole()).to.deep.eq {
+                Command: "get"
+                Returned: undefined
+                Error: err.toString()
+              }
+              done()
+
+            @cy.get("foo")
+
+          it "#onConsole for dual commands as a parent", (done) ->
+            @Cypress.on "log", (@log) =>
+
+            @cy.on "fail", (err) =>
               expect(@log.attributes.onConsole()).to.deep.eq {
                 Command: "wait"
-                "Applied To": $Cypress.Utils.getDomElements(btns)
                 Error: err.toString()
               }
               done()
 
-          @cy.get("button").wait ->
-            expect(true).to.be.false
+            @cy.wait ->
+              expect(true).to.be.false
 
-        it "#onConsole for children commands", (done) ->
-          @Cypress.on "log", (@log) =>
+          it "#onConsole for dual commands as a child", (done) ->
+            @Cypress.on "log", (@log) =>
 
-          @cy.on "fail", (err) =>
-            if @log.get("name") is "contains"
-              btns = getFirstSubjectByName.call(@, "get")
-              expect(@log.attributes.onConsole()).to.deep.eq {
-                Command: "contains"
-                Content: "asdfasdfasdfasdf"
-                "Applied To": $Cypress.Utils.getDomElements(btns)
-                Error: err.toString()
-              }
-              done()
+            @cy.on "fail", (err) =>
+              if @log.get("name") is "wait"
+                btns = getFirstSubjectByName.call(@, "get")
+                expect(@log.attributes.onConsole()).to.deep.eq {
+                  Command: "wait"
+                  "Applied To": $Cypress.Utils.getDomElements(btns)
+                  Error: err.toString()
+                }
+                done()
 
-          @cy.get("button").contains("asdfasdfasdfasdf")
+            @cy.get("button").wait ->
+              expect(true).to.be.false
 
-        it "#onConsole for nested children commands", (done) ->
-          @Cypress.on "log", (@log) =>
+          it "#onConsole for children commands", (done) ->
+            @Cypress.on "log", (@log) =>
 
-          @cy.on "fail", (err) =>
-            if @log.get("name") is "contains"
-              expect(@log.attributes.onConsole()).to.deep.eq {
-                Command: "contains"
-                Content: "asdfasdfasdfasdf"
-                "Applied To": getFirstSubjectByName.call(@, "eq").get(0)
-                Error: err.toString()
-              }
-              done()
+            @cy.on "fail", (err) =>
+              if @log.get("name") is "contains"
+                btns = getFirstSubjectByName.call(@, "get")
+                expect(@log.attributes.onConsole()).to.deep.eq {
+                  Command: "contains"
+                  Content: "asdfasdfasdfasdf"
+                  "Applied To": $Cypress.Utils.getDomElements(btns)
+                  Error: err.toString()
+                }
+                done()
 
-          @cy.get("button").eq(0).contains("asdfasdfasdfasdf")
+            @cy.get("button").contains("asdfasdfasdfasdf")
+
+          it "#onConsole for nested children commands", (done) ->
+            @Cypress.on "log", (@log) =>
+
+            @cy.on "fail", (err) =>
+              if @log.get("name") is "contains"
+                expect(@log.attributes.onConsole()).to.deep.eq {
+                  Command: "contains"
+                  Content: "asdfasdfasdfasdf"
+                  "Applied To": getFirstSubjectByName.call(@, "eq").get(0)
+                  Error: err.toString()
+                }
+                done()
+
+            @cy.get("button").eq(0).contains("asdfasdfasdfasdf")

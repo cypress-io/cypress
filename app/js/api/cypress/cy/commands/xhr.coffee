@@ -73,7 +73,7 @@ $Cypress.register "XHR", (Cypress, _, $) ->
     urls = urls.concat getUrl(options)
     @prop "availableUrls", urls
 
-    options.log = Cypress.route
+    options.log = Cypress.Log.route
       method:   options.method
       url:      getUrl(options)
       status:   options.status
@@ -145,7 +145,7 @@ $Cypress.register "XHR", (Cypress, _, $) ->
 
           ## assign this existing command
           ## to the xhr so we can reuse it later
-          xhr.log = Cypress.command
+          xhr.log = Cypress.Log.command
             name:      "xhr"
             alias:     alias
             aliasType: "route"

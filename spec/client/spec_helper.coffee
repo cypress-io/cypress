@@ -62,7 +62,7 @@ window.enterAppTestingMode = ->
       @$iframe.appendTo $("body")
 
   afterEach ->
-    # @$iframe.remove()
+    @$iframe.remove()
 
 window.enterIntegrationTestingMode = (fixture, options = {}) ->
   _.defaults options,
@@ -109,6 +109,7 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
       ## to test cy in isolation here away from the Mocha
       ## and Runner and Chai overrides
       @cy = $Cypress.Cy.create(@Cypress, {})
+      $Cypress.Log.create(@Cypress, @cy)
 
       ## lets prevent getting a ton of noise
       ## from ending early. we need to do that

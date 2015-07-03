@@ -53,7 +53,7 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
       @_timeout(ms, true)
 
       if options.log
-        command = Cypress.command
+        command = Cypress.Log.command
           onConsole: -> {
             "Waited For": "#{ms}ms before continuing"
             "Returned": subject
@@ -100,7 +100,7 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
 
     _waitString: (subject, str, options) ->
       if options.log
-        options.command = Cypress.command
+        options.command = Cypress.Log.command
           type: "parent"
           aliasType: "route"
 

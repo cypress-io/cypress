@@ -44,7 +44,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
       _.defaults options,
         timeout: 20000
 
-      command = Cypress.command
+      command = Cypress.Log.command
         type: "parent"
         name: "page load"
         message: "--waiting for new page to load---"
@@ -102,7 +102,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
         onLoad: ->
 
       if options.log
-        command = Cypress.command()
+        command = Cypress.Log.command()
 
       baseUrl = @private("baseUrl")
       url     = Cypress.Location.getRemoteUrl(url, baseUrl)

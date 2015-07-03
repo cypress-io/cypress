@@ -19,6 +19,6 @@ $Cypress.register "Misc", (Cypress, _, $) ->
 
       options.$el = obj if Cypress.Utils.hasElement(obj)
 
-      Cypress.command(options)
+      Cypress.Log.command(options)
 
       obj

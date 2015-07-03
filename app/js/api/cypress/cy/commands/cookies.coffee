@@ -17,7 +17,7 @@ $Cypress.register "Cookies", (Cypress, _, $) ->
 
       cookies = clearCookies(key)
 
-      Cypress.command
+      Cypress.Log.command
         end: true
         snapshot: true
         onConsole: ->
@@ -28,7 +28,7 @@ $Cypress.register "Cookies", (Cypress, _, $) ->
     clearCookies: ->
       cookies = clearCookies()
 
-      Cypress.command
+      Cypress.Log.command
         end: true
         snapshot: true
         onConsole: ->

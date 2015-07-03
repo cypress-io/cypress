@@ -28,7 +28,7 @@ $Cypress.register "LocalStorage", (Cypress, _, $) ->
 
       remote = clearLocalStorage.call(@, keys)
 
-      Cypress.command
+      Cypress.Log.command
         name: "clear ls"
         snapshot: true
         end: true

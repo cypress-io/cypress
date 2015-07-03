@@ -70,7 +70,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
       @ensureParent()
       @ensureSubject()
 
-      command = Cypress.command
+      command = Cypress.Log.command
         onConsole: ->
           Subject: subject
 

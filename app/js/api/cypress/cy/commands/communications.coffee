@@ -9,7 +9,7 @@ $Cypress.register "Communications", (Cypress, _, $, Promise) ->
 
       new Promise (resolve, reject) =>
 
-        command = Cypress.command
+        command = Cypress.Log.command
           name: "message"
           message: Cypress.Utils.stringify([msg, data])
 

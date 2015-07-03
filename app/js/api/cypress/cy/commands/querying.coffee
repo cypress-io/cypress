@@ -21,7 +21,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       start = (aliasType) ->
         return if options.log is false
 
-        options.command ?= Cypress.command
+        options.command ?= Cypress.Log.command
           message: [selector, deltaOptions]
           referencesAlias: aliasObj?.alias
           aliasType: aliasType
@@ -185,7 +185,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       @_retry(retry, options)
 
     root: ->
-      command = Cypress.command({message: ""})
+      command = Cypress.Log.command({message: ""})
 
       log = ($el) ->
         command.set({$el: $el}).snapshot().end()
@@ -259,7 +259,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
         ## figure out the options which actually change the behavior of traversals
         deltaOptions = Cypress.Utils.filterDelta(options, {visible: null, exist: true, length: null})
 
-        options.command ?= Cypress.command
+        options.command ?= Cypress.Log.command
           message: _.compact([filter, text, deltaOptions])
           type: if subject then "child" else "parent"
           onConsole: -> onConsole
@@ -322,7 +322,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
     within: (subject, fn) ->
       @ensureDom(subject)
 
-      command = Cypress.command
+      command = Cypress.Log.command
         $el: subject
         message: ""
 

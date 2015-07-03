@@ -25,7 +25,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       form = options.$el.get(0)
 
       if options.log
-        command = Cypress.command
+        command = Cypress.Log.command
           $el: options.$el
           onConsole: ->
             "Applied To": $Cypress.Utils.getDomElements(options.$el)
@@ -74,7 +74,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       @ensureDom(options.$el, "focus")
 
       if options.log
-        command = Cypress.command
+        command = Cypress.Log.command
           $el: options.$el
           onConsole: ->
             "Applied To": $Cypress.Utils.getDomElements(options.$el)
@@ -190,7 +190,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       @ensureDom(options.$el, "blur")
 
       if options.log
-        command = Cypress.command
+        command = Cypress.Log.command
           $el: options.$el
           onConsole: ->
             "Applied To": $Cypress.Utils.getDomElements(options.$el)
@@ -301,7 +301,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         @_timeout(wait, true)
 
         if options.log
-          command = Cypress.command
+          command = Cypress.Log.command
             $el: $el
             onConsole: ->
               "Applied To":   $Cypress.Utils.getDomElements($el)
@@ -383,7 +383,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           ## figure out the options which actually change the behavior of clicks
           deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: 50})
 
-          options.command = Cypress.command({
+          options.command = Cypress.Log.command({
             message: deltaOptions
             $el: $el
           })
@@ -716,7 +716,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             memo
           , {}
 
-        options.command = Cypress.command
+        options.command = Cypress.Log.command
           message: deltaOptions
           $el: options.$el
           onConsole: ->
@@ -899,7 +899,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           ## figure out the options which actually change the behavior of clicks
           deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: 50})
 
-          options.command = Cypress.command
+          options.command = Cypress.Log.command
             message: deltaOptions
             $el: $el
             onConsole: ->
@@ -943,7 +943,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         ## figure out the options which actually change the behavior of clicks
         deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: 50})
 
-        options.command = Cypress.command
+        options.command = Cypress.Log.command
           message: deltaOptions
           $el: options.$el
           onConsole: ->
@@ -1071,7 +1071,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       log = ($el) ->
         return if options.log is false
 
-        Cypress.command
+        Cypress.Log.command
           $el: $el
           end: true
           snapshot: true
@@ -1162,7 +1162,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           ## figure out the options which actually change the behavior of clicks
           deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: 50})
 
-          command = Cypress.command
+          command = Cypress.Log.command
             message: deltaOptions
             $el: $el
             onConsole: ->

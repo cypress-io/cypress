@@ -17,7 +17,7 @@ $Cypress.register "Window", (Cypress, _, $) ->
     title: (options = {}) ->
       options.log = false
       options.visible = false
-      options.command = Cypress.command()
+      options.command = Cypress.Log.command()
 
       ## using call here to invoke the 'text' method on the
       ## title's jquery object
@@ -52,7 +52,7 @@ $Cypress.register "Window", (Cypress, _, $) ->
         log: true
 
       if options.log
-        command = Cypress.command
+        command = Cypress.Log.command
           onConsole: ->
             obj = {}
             obj.Preset = preset if preset

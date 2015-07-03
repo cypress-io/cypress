@@ -167,6 +167,6 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
       if error
         error.onFail = (err) ->
 
-      Cypress.command obj
+      Cypress.Log.command obj
 
       return Cypress
