@@ -417,6 +417,11 @@ describe "$Cypress.Cy XHR Commands", ->
         .wait("@getFoo").then (xhr) ->
           expect(xhr.responseText).to.eq "foo bar baz"
 
+    it "does not error when response is null but respond is false", ->
+      @cy.route
+        url: /foo/
+        respond: false
+
     describe "request response fixture", ->
       beforeEach ->
         @trigger = @sandbox.stub(@Cypress, "trigger").withArgs("fixture").callsArgWithAsync(2, {foo: "bar"})
@@ -806,3 +811,19 @@ describe "$Cypress.Cy XHR Commands", ->
             ## because of jquery promise thenable
             win.$.get("/users")
           .respond()
+
+      ## currently this does not fail. we'll wait until someone cares
+      # it.only "errors if response was null or undefined", (done) ->
+      #   @cy.on "fail", (err) ->
+      #     debugger
+
+      #   @cy
+      #     .server()
+      #     .route({
+      #       url: /foo/
+      #       respond: false
+      #     })
+      #     .window().then (win) ->
+      #       win.$.get("/foo")
+      #       null
+      #     .respond()
