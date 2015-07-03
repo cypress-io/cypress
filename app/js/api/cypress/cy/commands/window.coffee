@@ -6,13 +6,10 @@ $Cypress.register "Window", (Cypress, _, $) ->
     "macbook-11" : "1366x768"
     "ipad-2"     : "1024x768"
     "ipad-mini"  : "1024x768"
-    "ipad-mini-2": "2048x1536"
-    "ipad-3"     : "2048x1536"
-    "ipad-4"     : "2048x1536"
-    "iphone-6+"  : "1920x1080"
-    "iphone-6"   : "1334x750"
-    "iphone-5"   : "1136x640"
-    "iphone-4"   : "960x640"
+    "iphone-6+"  : "414x736"
+    "iphone-6"   : "375x667"
+    "iphone-5"   : "320x568"
+    "iphone-4"   : "320x480"
     "iphone-3"   : "320x480"
   }
 

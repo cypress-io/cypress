@@ -132,7 +132,7 @@ describe "$Cypress.Cy Window Commands", ->
     context "presets", ->
       it "iphone-6", (done) ->
         @Cypress.on "viewport", (viewport) ->
-          expect(viewport).to.deep.eq {viewportWidth: 1334, viewportHeight: 750}
+          expect(viewport).to.deep.eq {viewportWidth: 375, viewportHeight: 667}
           done()
 
         @cy.viewport("iphone-6")
@@ -149,7 +149,7 @@ describe "$Cypress.Cy Window Commands", ->
 
         @cy.on "fail", (err) ->
           expect(logs.length).to.eq(1)
-          expect(err.message).to.eq "cy.viewport could not find a preset for: 'foo'. Available presets are: macbook-15, macbook-13, macbook-11, ipad-2, ipad-mini, ipad-mini-2, ipad-3, ipad-4, iphone-6+, iphone-6, iphone-5, iphone-4, iphone-3"
+          expect(err.message).to.eq "cy.viewport could not find a preset for: 'foo'. Available presets are: macbook-15, macbook-13, macbook-11, ipad-2, ipad-mini, iphone-6+, iphone-6, iphone-5, iphone-4, iphone-3"
           done()
 
         @cy.viewport("foo")
@@ -274,12 +274,12 @@ describe "$Cypress.Cy Window Commands", ->
           expect(@log.get("viewportHeight")).to.eq(600)
 
       it ".onConsole with preset", ->
-        @cy.viewport("ipad-3").then ->
+        @cy.viewport("ipad-mini").then ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "viewport"
-            Preset: "ipad-3"
-            Width: 2048
-            Height: 1536
+            Preset: "ipad-mini"
+            Width: 1024
+            Height: 768
           }
 
       it ".onConsole without preset", ->
