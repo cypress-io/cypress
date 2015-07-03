@@ -693,7 +693,12 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
       if options.log
         ## figure out the options which actually change the behavior of clicks
-        deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: 50})
+        deltaOptions = Cypress.Utils.filterDelta(options, {
+          force: false
+          timeout: null
+          interval: 50
+          delay: 10
+        })
 
         table = {}
 
@@ -717,7 +722,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           , {}
 
         options.command = Cypress.Log.command
-          message: deltaOptions
+          message: [chars, deltaOptions]
           $el: options.$el
           onConsole: ->
             "Typed":      chars

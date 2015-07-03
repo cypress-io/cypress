@@ -1372,15 +1372,13 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("input:first").type("foobar").then ($input) ->
           expect(@log.get("$el")).to.eq $input
 
-      it "#onConsole", ->
-        @cy.get("input:first").type("foobar").then ($input) ->
-          coords = @cy.getCenterCoordinates($input)
-          console = @log.attributes.onConsole()
-          expect(console.Command).to.eq("type")
-          expect(console.Typed).to.eq("foobar")
-          expect(console["Applied To"]).to.eq $input.get(0)
-          expect(console.Coords.x).to.be.closeTo coords.x, 1
-          expect(console.Coords.y).to.be.closeTo coords.y, 1
+      it "logs message", ->
+        @cy.get(":text:first").type("foobar").then ->
+          expect(@log.get("message")).to.eq "foobar"
+
+      it "logs delay arguments", ->
+        @cy.get(":text:first").type("foo", {delay: 20}).then ->
+          expect(@log.get("message")).to.eq "foo, {delay: 20}"
 
       it "logs only one type event", ->
         logs = []
@@ -1411,10 +1409,20 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "logs deltaOptions", ->
         @cy.get(":text:first").type("foo", {force: true, timeout: 1000}).then ->
-          expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
+          expect(@log.get("message")).to.eq "foo, {force: true, timeout: 1000}"
           expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
 
       context "#onConsole", ->
+        it "has all of the regular options", ->
+          @cy.get("input:first").type("foobar").then ($input) ->
+            coords = @cy.getCenterCoordinates($input)
+            console = @log.attributes.onConsole()
+            expect(console.Command).to.eq("type")
+            expect(console.Typed).to.eq("foobar")
+            expect(console["Applied To"]).to.eq $input.get(0)
+            expect(console.Coords.x).to.be.closeTo coords.x, 1
+            expect(console.Coords.y).to.be.closeTo coords.y, 1
+
         it "has a table of keys", ->
           @cy.get(":text:first").type("foo{enter}b{leftarrow}{del}{enter}").then ->
             table = @log.attributes.onConsole().table()
