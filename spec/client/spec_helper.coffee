@@ -33,15 +33,36 @@ stubSocketIo = ->
 
 window.loadDom = (fixture) ->
   loadFixture(fixture).done (iframe) =>
-    @iframe = $(iframe)
-    @head = @iframe.contents().find("head").children().prop("outerHTML")
-    @body = @iframe.contents().find("body").children().prop("outerHTML")
+    @$iframe = $(iframe)
+    @head = @$iframe.contents().find("head").children().prop("outerHTML")
+    @body = @$iframe.contents().find("body").children().prop("outerHTML")
 
 window.getNames = (queue) ->
   _(queue).pluck("name")
 
 window.getFirstSubjectByName = (name) ->
   _(@cy.queue).findWhere({name: name}).subject
+
+window.enterAppTestingMode = ->
+  beforeEach (done) ->
+    new Promise =>
+      @$iframe?.remove()
+
+      @$iframe = $("<iframe />", {
+        style: "position: absolute; right: 0; top: 50px; width: 40%; height: 100%;"
+        load: =>
+          $mainRegion = $("<div id='main-region'></div>")
+          @$iframe.contents().find("body").append $mainRegion
+          App.addRegions
+            mainRegion: Marionette.Region.extend(el: $mainRegion)
+
+          done()
+      })
+
+      @$iframe.appendTo $("body")
+
+  afterEach ->
+    # @$iframe.remove()
 
 window.enterIntegrationTestingMode = (fixture, options = {}) ->
   _.defaults options,
@@ -59,10 +80,10 @@ window.enterIntegrationTestingMode = (fixture, options = {}) ->
         console.error(err.stack)
 
     @loadDom(fixture).then =>
-      @Cypress.initialize @iframe.prop("contentWindow"), @iframe, ->
+      @Cypress.initialize @$iframe.prop("contentWindow"), @$iframe, ->
 
   after ->
-    @iframe.remove()
+    @$iframe.remove()
     @Cypress.stop()
 
 window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
@@ -74,8 +95,8 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
   beforeEach ->
     @setup = (opts = {}) =>
       if options.replaceIframeContents isnt false and opts.replaceIframeContents isnt false
-        @iframe.contents().find("head").html(@head)
-        @iframe.contents().find("body").html(@body)
+        @$iframe.contents().find("head").html(@head)
+        @$iframe.contents().find("body").html(@body)
 
       # debugger
       # window.mocha.enableTimeouts(false)
@@ -97,15 +118,15 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
       @sandbox.stub(@cy, "endedEarlyErr")
 
       obj =
-        $remoteIframe: @iframe
-        config: ->
+        $remoteIframe: @$iframe
+        config: {}
 
       ## in testing we manually call bindWindowListeners
       ## with our iframe's contentWindow because
       ## our iframe has alreadyloaded. because
       ## its already loaded these listeners would
       ## never actually get applied
-      @cy.bindWindowListeners @iframe.prop("contentWindow")
+      @cy.bindWindowListeners @$iframe.prop("contentWindow")
 
       @Cypress.trigger "initialize", obj
 
@@ -131,7 +152,7 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
     ## if we've changed the src by navigating
     ## away (aka cy.visit(...)) then we need
     ## to reload the fixture again and then setup
-    if /\.html$/.test(@iframe.attr("src"))
+    if /\.html$/.test(@$iframe.attr("src"))
       @setup()
     else
       @loadDom(fixture).then @setup
@@ -147,7 +168,7 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
     @Cypress.abort()
 
   after ->
-    # @iframe.remove()
+    # @$iframe.remove()
     # @Cypress.stop()
 
 window.Fixtures = do ->

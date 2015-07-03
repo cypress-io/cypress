@@ -8,5 +8,5 @@
 
   router = new Router
 
-  App.commands.setHandler "show:test:iframe", (region, runner) ->
-    router.to "show", region: region, runner: runner
+  App.commands.setHandler "show:test:iframe", (region, iframe) ->
+    router.to "show", region: region, iframe: iframe

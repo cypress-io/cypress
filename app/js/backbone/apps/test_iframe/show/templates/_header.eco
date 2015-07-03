@@ -1,0 +1,97 @@
+<header>
+  <div id="url-container" class="pull-left">
+    <div id="url-wrapper">
+      <input class="url" />
+      <span class="loading-wrapper">
+        <span class="loading-content">...loading</span>
+        <i class="fa fa-spinner fa-spin"></i>
+      </span>
+    </div>
+  </div>
+  <ul class="iframe-menu">
+    <li>
+      <div id="manual-browser-wrapper" class="dropdown pull-left">
+        <span id="chosen-manual-browser">
+          <em>No Browser Selected</em>
+        </span>
+        <button data-toggle="dropdown" class="btn btn-link">
+          <i class="fa fa-cog"></i>
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div id="browser-versions-container" class="dropdown-menu dropdown-menu-right">
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-xs-3">
+                <img src="/__cypress/static/img/chrome_16x16.png" />
+                <ul class="browser-versions list-unstyled"  data-browser="chrome">
+                  <li>37</li>
+                  <li>36</li>
+                  <li>35</li>
+                  <li>34</li>
+                </ul>
+              </div>
+              <div class="col-xs-3">
+                <img src="/__cypress/static/img/firefox_16x16.png" />
+                <ul class="browser-versions list-unstyled" data-browser="firefox">
+                  <li>32</li>
+                  <li>31</li>
+                  <li>30</li>
+                  <li>29</li>
+                </ul>
+              </div>
+              <div class="col-xs-3">
+                <img src="/__cypress/static/img/safari_16x16.png" />
+                <ul class="browser-versions list-unstyled" data-browser="safari">
+                  <li>5.1</li>
+                  <li>5.0.5</li>
+                  <li>4.0</li>
+                </ul>
+              </div>
+              <div class="col-xs-3">
+                <img src="/__cypress/static/img/ie_16x16.png" />
+                <ul class="browser-versions list-unstyled" data-browser="ie">
+                  <li>11</li>
+                  <li>10</li>
+                  <li>9</li>
+                  <li>8</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </li>
+    <li>
+      <div class="dropdown pull-left">
+        <button data-toggle="dropdown" class="btn btn-link">
+          <span id="current-viewport-sizes">
+            <span id="viewport-width"><%= @viewportWidth %></span>
+            x
+            <span id="viewport-height"><%= @viewportHeight %></span>
+            <span id="viewport-scale-container">
+              (<span id="viewport-scale"><%= @viewportScale %></span>%)
+            </span>
+          </span>
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <div id="viewport-wrapper" class="dropdown-menu dropdown-menu-right">
+          <p>The <strong>viewport</strong> determines the width and height of your application. By default the viewport will be <strong>1000px</strong> by <strong>660px</strong> unless specified by a <code>cy.viewport</code> command.</p>
+          <p>Additionally you can override the default viewport dimensions by specifying these values in your <code>cypress.json</code>.</p>
+<pre>
+  {
+    viewportWidth: 1000,
+    viewportHeight: 660
+  }
+</pre>
+          <p id="viewport-link">
+            <a href="http://github.com/cypress-io/cypress/wiki/viewport" target="_blank">
+              <i class="fa fa-info-circle"></i>
+              Read more about viewport here.
+            </a>
+          </p>
+        </div>
+      </div>
+    </li>
+  </ul>
+</header>
+<div id="iframe-message"></div>

@@ -55,11 +55,13 @@ class Server
     ## passing or failing
 
     _.defaults obj,
+      baseUrl: null
       clientRoute: "/__/"
       commandTimeout: 4000
       port: 2020
       autoOpen: false
-      wizard: false
+      viewportWidth: 1000
+      viewportHeight: 660
       testFolder: "tests"
       fixturesFolder: "tests/_fixtures"
       supportFolder: "tests/_support"

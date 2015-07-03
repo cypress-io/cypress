@@ -285,6 +285,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           logs.push log
 
         @cy.on "fail", (err) ->
+          console.log err
           ## should only log once
           expect(logs.length).to.eq 1
           expect(err.message).to.eq "Timed out after waiting '100ms' for your remote page to load."

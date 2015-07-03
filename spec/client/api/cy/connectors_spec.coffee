@@ -52,7 +52,7 @@ describe "$Cypress.Cy Connectors Commands", ->
       beforeEach ->
         ## set the jquery path back to our
         ## remote window
-        @Cypress.option "jQuery", @iframe.prop("contentWindow").$
+        @Cypress.option "jQuery", @$iframe.prop("contentWindow").$
 
         @remoteWindow = @cy.private("window")
 
@@ -97,7 +97,7 @@ describe "$Cypress.Cy Connectors Commands", ->
     beforeEach ->
       ## set the jquery path back to our
       ## remote window
-      @Cypress.option "jQuery", @iframe.prop("contentWindow").$
+      @Cypress.option "jQuery", @$iframe.prop("contentWindow").$
 
       @remoteWindow = @cy.private("window")
 

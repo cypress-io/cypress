@@ -37,12 +37,6 @@
     setUI: (ui) ->
       @set "ui", ui
 
-    setUrl: (url) ->
-      @set "url", url
-
-    setPageLoading: (bool = true) ->
-      @set "pageLoading", bool
-
     toggleCollapse: ->
       @set "collapsed", !@get("collapsed")
 
@@ -97,46 +91,8 @@
     getProjectName: ->
       _.last @get("projectRoot").split("/")
 
-    ## returns a function bound to this model
-    ## which acts as a getter
-    getExternalInterface: ->
-      get = (attr) ->
-        @get(attr)
-
-      _.bind(get, @)
-
-    run: (bool = true) ->
-      @set("running", bool)
-
-    isRunning: ->
-      !!@get("running")
-
-    ## should probably rename this to be something like
-    ## 'command:hovered'.  Since our App.config is dictating
-    ## interpreting the behavior and then dictating what
-    ## exactly should happen.  The other areas are simply
-    ## broadcasting events.  This should move out of App.config
-    ## as well to something else. Perhaps an app or a utility.
-    revertDom: (command, init = true) ->
-      ## dont revert, instead fire a completely different
-      ## message
-      return @trigger("cannot:revert:dom", init) if @isRunning()
-
-      return @trigger "restore:dom" if not init
-
-      return if not command.hasSnapshot()
-
-      @trigger "revert:dom", command.getSnapshot(),
-        id:       command.cid
-        el:       command.getEl()
-        attr:     command.get("highlightAttr")
-        coords:   command.get("coords")
-        scrollBy: command.get("scrollBy")
-
-    highlightEl: (command, init = true) ->
-      @trigger "highlight:el", command.getEl(),
-        id: command.cid
-        init: init
+    getCypressConfig: ->
+      @pick "commandTimeout", "baseUrl", "viewportWidth", "viewportHeight"
 
   App.reqres.setHandler "new:config:entity", (attrs = {}) ->
     new Entities.Config attrs

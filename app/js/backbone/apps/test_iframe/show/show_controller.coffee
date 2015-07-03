@@ -3,42 +3,60 @@
   class Show.Controller extends App.Controllers.Application
 
     initialize: (options) ->
-      { runner } = options
+      { iframe } = options
 
       config = App.request "app:config:entity"
 
-      view = @getView(config)
+      setConfig = ->
+        iframe.setConfig(config)
 
-      @listenTo view, "browser:clicked", (browser, version) ->
-        # runner.switchToBrowser(browser, version)
+      setConfig()
 
-      @listenTo view, "close:browser:clicked", ->
-        # runner.switchToBrowser()
+      @layout = @getLayoutView(iframe)
 
-      ## when the runner triggers load:spec:iframe we load the iframe
-      @listenTo runner, "load:spec:iframe", (iframe, options) ->
-        @loadIframe view, runner, iframe, options
+      @listenTo @layout, "browser:clicked", (browser, version) ->
+        # iframe.switchToBrowser(browser, version)
 
-      @listenTo config, "cannot:revert:dom", (init) ->
-        view.cannotRevertDom(init)
+      @listenTo @layout, "close:browser:clicked", ->
+        # iframe.switchToBrowser()
 
-      @listenTo config, "revert:dom", (dom, options) ->
-        view.revertToDom dom, options
-
-      @listenTo config, "highlight:el", (el, options) ->
-        view.highlightEl el, options
-
-      @listenTo config, "restore:dom", ->
-        view.restoreDom()
-
-      @show view
-
-    loadIframe: (view, runner, specPath, options) ->
-      view.loadIframe specPath, options, (contentWindow, remoteIframe) ->
+      @listenTo iframe, "loaded", (cb, contentWindow, remoteIframe, options) ->
         ## once its loaded we receive the contentWindow
-        ## and tell our runner to run the specPath's suite
-        runner.run(specPath, contentWindow, remoteIframe, options)
+        ## we invoke the callback which tells our runner
+        ## to run the specPath's suite
+        cb(contentWindow, remoteIframe, options)
 
-    getView: (config) ->
-      new Show.Iframe
-        model: config
+      @listenTo iframe, "load:spec:iframe", (cb, options) ->
+        ## set the initial config values from
+        ## our config entity which restores
+        ## the default settings from cypress.json
+        setConfig()
+
+        @layout.loadIframes options, (contentWindow, remoteIframe) ->
+          ## once the iframes are loaded we trigger this event
+          ## which prevents forcing callbacks if we've navigated
+          ## away from the page and we're already shut down
+          iframe.trigger "loaded", cb, contentWindow, remoteIframe, options
+
+      @listenTo iframe, "detach:body", (cb) ->
+        cb @layout.detachBody()
+
+      @listenTo @layout, "show", ->
+        ## dont show the header in satelitte mode
+        return if config.ui("satelitte")
+
+        @headerView(iframe)
+
+      @show @layout
+
+    headerView: (iframe) ->
+      headerView = @getHeaderView(iframe)
+      @show headerView, region: @layout.headerRegion
+
+    getHeaderView: (iframe) ->
+      new Show.Header
+        model: iframe
+
+    getLayoutView: (iframe) ->
+      new Show.Layout
+        model: iframe

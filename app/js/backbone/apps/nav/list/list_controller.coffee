@@ -7,9 +7,6 @@
 
       config   = App.request "app:config:entity"
 
-      @listenTo config, "list:test:panels", (runner, regions) ->
-        @panelsRegion runner, regions
-
       ## make sure we empty this region since we're
       ## in control of it
       @listenTo config, "close:test:panels", ->
@@ -41,9 +38,6 @@
       navView = @getNavView(navs, config)
 
       @show navView, region: @layout.navRegion
-
-    panelsRegion: (runner, regions) ->
-      App.execute "list:test:panels", @layout.panelsRegion, runner, regions
 
     getNavView: (navs, config) ->
       new List.Navs

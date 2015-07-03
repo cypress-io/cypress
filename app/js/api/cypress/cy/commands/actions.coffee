@@ -471,10 +471,10 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           clickCancelled = !$elToClick.get(0).dispatchEvent(clickEvt)
 
           if options.command
-            console = options.command.attributes.onConsole()
+            consoleObj = options.command.attributes.onConsole()
 
           onConsole = ->
-            console = _.defaults console ? {}, {
+            consoleObj = _.defaults consoleObj ? {}, {
               "Applied To":   $Cypress.Utils.getDomElements($el)
               "Elements":     $el.length
               "Coords":       coords
@@ -483,9 +483,9 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
             if $el.get(0) isnt $elToClick.get(0)
               ## only do this if $elToClick isnt $el
-              console["Actual Element Clicked"] = $Cypress.Utils.getDomElements($elToClick)
+              consoleObj["Actual Element Clicked"] = $Cypress.Utils.getDomElements($elToClick)
 
-            console.groups = ->
+            consoleObj.groups = ->
               [
                 {
                   name: "MouseDown"
@@ -510,7 +510,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
                 }
               ]
 
-            console
+            consoleObj
 
           ## display the red dot at these coords
           if options.command

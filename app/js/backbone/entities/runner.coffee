@@ -2,238 +2,267 @@
 
   do ($Cypress) ->
 
-    testIdRegExp = /\[(.{3})\]$/
+    runnableIdRegExp = /\[(.{3})\]$/
+    regExpCharacters = /[-\/\\^$*+?.()|[\]{}]/g
+
+    CypressEvents = "run:start run:end suite:start suite:end hook:start hook:end test:start test:end".split(" ")
+
+    alphabet = "abcdefghijklmnopqrstuvwxyz0123456789"
 
     class Entities.Runner extends Entities.Model
-      defaults: ->
-        iframes: []
-
-    ## need to compose this runner with models for each panel
-    ## DOM / XHR / LOG
-    ## and partial each test (on test run) if its chosenId...?
       initialize: ->
-        @satelliteEvents  = App.request "satellite:events"
-        @hostEvents       = App.request "host:events"
-        @passThruEvents   = App.request "pass:thru:events"
+        @Cypress   = $Cypress.create({loadModules: true})
 
-      setContentWindow: (@contentWindow, @$remoteIframe) ->
+        @commands  = App.request "command:entities"
+        @routes    = App.request "route:entities"
+        @agents    = App.request "agent:entities"
+        @socket    = App.request "socket:entity"
+        @iframe    = App.request "iframe:entity", @, @Cypress
 
-      setIframe: (@iframe) ->
+        _.each CypressEvents, (event) =>
+          @listenTo @Cypress, event, (args...) =>
+            @trigger event, args...
 
-      setOptions: (@mocha, @options) ->
+        @listenTo @Cypress, "message", (msg, data, cb) =>
+          @socket.emit "client:request", msg, data, cb
 
-      runSauce: ->
-        socket = App.request "socket:entity"
+        @listenTo @Cypress, "fixture", (fixture, cb) =>
+          @socket.emit "fixture", fixture, cb
 
-        ## when we get a response from the server with
-        ## the jobName we notify all parties
-        socket.emit "run:sauce", @iframe, (jobName, batchId) =>
-          @trigger "sauce:running", jobName, batchId
+        @listenTo @Cypress, "initialized", (obj) =>
+          @receivedRunner(obj.runner)
 
-      switchToBrowser: (browser, version) ->
-        @trigger "switch:to:manual:browser", browser, version
+        @listenTo @Cypress, "log", (log) =>
+          switch log.get("instrument")
+            when "command"
+              @commands.add log
 
-      setBrowserAndVersion: (browser, version) ->
-        @set
-          browser: browser
-          version: version
+            when "route"
+              @routes.add log
 
-      setSocketListeners: ->
-        socket = App.request "socket:entity"
+            when "agent"
+              @agents.add log
 
-        ## whenever our socket fires 'test:changed' we want to
-        ## proxy this to everyone else
-        @listenTo socket, "test:changed", @reRun
-
-        if App.config.ui("satellite")
-          _.each @hostEvents, (event) =>
-            @listenTo socket, event, (args...) =>
-              @trigger event, args...
-
-        if App.config.ui("host")
-          _.each @satelliteEvents, (event) =>
-            @listenTo socket, event, (args...) =>
-              @trigger event, args...
-
-        _.each @passThruEvents, (event) =>
-          @listenTo socket, event, (args...) =>
-            if event is "command:add"
-              @commands.add args...
             else
-              @trigger event, args...
+              throw new Error("Cypress.log() emitted an unknown instrument: #{log.get('instrument')}")
 
-      changeRunnableTimeout: (runnable) ->
-        runnable.timeout App.config.get("commandTimeout")
+        @listenTo @socket, "test:changed", @reRun
 
-      startListening: ->
-        @setListenersForAll()
-        @setListenersForCI() if App.config.ui("ci")
-        @setListenersForWeb() if not App.config.ui("ci")
+      start: (specPath) ->
+        @triggerLoadSpecFrame specPath
 
-      setListenersForAll: ->
-        @runner.on "test:before:hooks", (hook, suite) =>
-          Cypress.LocalStorage.clear([], window.localStorage, @$remoteIframe.prop("contentWindow").localStorage)
+      stop: ->
+        ## shut down Cypress
+        ## wait for promise to resolve
+        @Cypress.stop().then =>
+          ## remove our listeners
+          ## for socket + Cypress
+          @stopListening()
 
-          ## if we dont have a test already set then go
-          ## find it from the hook
-          # @test = @getTestFromHook(hook, suite) if not @test
+          @restore()
 
-        @runner.on "test", (test) =>
-          @changeRunnableTimeout(test)
+      restore: ->
+        ## reset the entities
+        @reset()
 
-          # @test = test
-          # @hook = "test"
+        ## and remove actual references to them
+        _.each ["commands", "routes", "agents", "chosen", "specPath", "socket", "Cypress"], (obj) =>
+          @[obj] = null
 
-          test.group = test.title
+      reset: ->
+        _.each [@commands, @routes, @agents], (collection) ->
+          collection.reset([], {silent: true})
 
-          # Cypress.set(test, @hook)
+      getChosen: ->
+        @chosen
 
-        @runner.on "hook", (hook) =>
-          @changeRunnableTimeout(hook)
+      hasChosen: ->
+        !!@get("chosenId")
 
-          # @hook = @getHookName(hook)
+      updateChosen: (id) ->
+        ## set chosenId as runnable if present else unset
+        if id then @set("chosenId", id) else @unset("chosenId")
 
-          ## if the hook is already associated to the test
-          ## just use that, else go find it
-          test       = hook.ctx.currentTest or @getTestFromHook(hook, hook.parent)
-          hook.cid   = test.cid
-          hook.group = test.title
+      setChosen: (runnable) ->
+        if runnable
+          @chosen = runnable
+        else
+          @chosen = null
 
-          ## set the hook as our current runnable
-          # Cypress.set(hook, @hook)
+        @updateChosen(runnable?.id)
 
-      setListenersForCI: ->
+        ## always reload the iframe
+        @reRun @specPath
 
-      setListenersForWeb: ->
-        @runner.on "suite end", (suite) =>
-          suite.removeAllListeners()
-          # @trigger "suite:stop", suite
+      logResults: (test) ->
+        @trigger "test:results:ready", test
 
-        @runner.on "test end", (test) =>
-          ## dont retrigger this event if its failedFromHook
-          ## in that case we've already captured it
-          @trigger("test:end", test) unless test.failedFromHook
+      reRun: (specPath, options = {}) ->
+        ## abort if we're being told to rerun
+        ## tests for a specPath we're not
+        ## currently watching
+        return if specPath isnt @specPath
 
-          ## remove the hook reference from the test
-          test.removeAllListeners()
-        ## start listening to all the pertinent runner events
+        ## when we are re-running we first
+        ## need to abort cypress always
+        @Cypress.abort().then =>
+          ## start the abort process since we're about
+          ## to load up in case we're running any tests
+          ## right this moment
 
-        @runner.on "hook end", (hook) ->
-          hook.removeAllListeners()
+          ## tells different areas of the app to prepare
+          ## for the resetting of the test run
+          @trigger "reset:test:run"
 
-      trigger: (event, args...) ->
-        ## because of defaults the change:iframes event
-        ## fires before our initialize (which is stupid)
-        return if not @satelliteEvents
+          @triggerLoadSpecFrame(specPath, options)
 
-        socket = App.request "socket:entity"
+      triggerLoadSpecFrame: (@specPath, options = {}) ->
+        _.defaults options,
+          chosenId: @get("chosenId")
+          specPath: @specPath
 
-        ## if we're in satellite mode and our event is
-        ## a satellite event then emit over websockets
-        if App.config.ui("satellite") and event in @satelliteEvents
-          args   = @transformRunnableArgs(args)
-          return socket.emit event, args...
+        ## reset our collection entities
+        @reset()
 
-        ## if we're in host mode and our event is a
-        ## satellite event AND we have a remoteIrame defined
-        if App.config.ui("host") and event in @hostEvents and @$remoteIframe
-          return socket.emit event, args...
+        ## pass the run method as our callback bound to us
+        run = _.bind(@run, @)
 
-        ## else just do the normal trigger and
-        ## remove the satellite namespace
-        super event, args...
+        ## tells the iframe view to load up a new iframe
+        @iframe.load(run, options)
 
-      transformEmitAttrs: (attrs) ->
-        obj = {}
+      getRunnableId: (runnable) ->
+        ## grab the runnable id from the runnable's title
+        matches = runnableIdRegExp.exec(runnable.title)
 
-        ## normally we'd use a reduce here but for some reason
-        ## on dom attrs the reduce completely barfs and is not
-        ## able to iterate over the object.
-        for key, value of attrs
-          obj[key] = value if @isWebSocketCompatibleValue(value)
+        ## use the captured group if there was a match
+        (matches and matches[1]) or @generateId()
 
-        obj
+      idSuffix: (title) ->
+        matches = title.match runnableIdRegExp
+        matches and matches[0]
+        # " [" + id + "]"
 
-      ## make sure this value is capable
-      ## of being sent through websockets
-      isWebSocketCompatibleValue: (value) ->
-        switch
-          when _.isElement(value)                           then false
-          when _.isObject(value) and _.isElement(value[0])  then false
-          when _.isFunction(value)                          then false
-          else true
+      generateId: ->
+        ids = _(3).times => @getRandom(alphabet)
+        ids.join("")
 
-      transformRunnableArgs: (args) ->
-        ## pull off these direct properties
-        props = ["title", "cid", "root", "pending", "stopped", "state", "duration", "type"]
+      getRandom: (alphabet) ->
+        index = Math.floor(Math.random() * alphabet.length)
+        alphabet[index]
 
-        ## pull off these parent props
-        parentProps = ["root", "cid"]
+      ## strip out the id suffix from the runnable title
+      originalTitle: (runnable) ->
+        _.rtrim runnable.title, @idSuffix(runnable.title)
 
-        ## fns to invoke
-        fns = ["originalTitle", "fullTitle", "slow", "timeout"]
+      createUniqueRunnableId: (runnable, ids) ->
+        id = runnable.id ?= @getRunnableId(runnable)
 
-        _(args).map (arg) =>
-          ## transfer direct props
-          obj = _(arg).pick props...
+        until id not in ids
+          id = @generateId()
 
-          ## transfer parent props
-          if parent = arg.parent
-            obj.parent = _(parent).pick parentProps...
+        return runnable.id = id
 
-          ## transfer the error as JSON
-          if err = arg.err
-            err.host = @$remoteIframe.prop("contentWindow").location.host
-            obj.err = JSON.stringify(err, ["message", "type", "name", "stack", "fileName", "lineNumber", "columnNumber", "host"])
+      receivedRunner: (runner) ->
+        @trigger "before:add"
 
-          ## invoke the functions and set those as properties
-          _.each fns, (fn) ->
-            obj[fn] = _.result(arg, fn)
+        runnables = []
+        ids = []
 
-          obj
+        triggerAddEvent = (runnable) =>
+          @trigger("#{runnable.type}:add", runnable)
 
-      ## tell our runner to run our iframes mocha suite
-      runIframeSuite: (iframe, contentWindow, remoteIframe, options, fn) ->
-        @setMochaRunner()
+        getRunnables = (options = {}) =>
+          _.defaults options,
+            pushRunnables: true
+            triggerAddEvent: true
 
-        ## options are optional and so if fn is undefined
-        ## we automatically set it to options
-        ## this allows consumers to pass a fn
-        ## as the last argument even though it
-        ## will be received as options
-        if _.isUndefined(fn)
-          fn = options
+          ## on the first iteration we want to simply collect
+          ## all of the runnable ids, and filter out any runnables
+          ## which dont have an id (or a duplicate id?)
+          runner.getRunnables
+            onRunnable: (runnable) =>
+              runnables.push(runnable) if options.pushRunnables
 
-        ## store the current iframe
-        @setIframe iframe
+              id = @createUniqueRunnableId(runnable, ids)
 
-        ## store the content window so we can
-        ## pass this along to our Eclectus methods
-        @setContentWindow contentWindow, remoteIframe
+              ids.push(id)
 
-        ## don't attempt to run any tests if we're in manual
-        ## testing mode and our iframe is not readable
-        return if not remoteIframe.isReadable()
+              ## force our runner to ignore running this
+              ## test if it doesnt have an id!
+              ## or if it has a duplicate id, nuke it including
+              ## any children.
+              ## just remove the children if its a suite
+              # runner.ignore(runnable) if not runnable.id
 
-        ## this is where we should automatically patch Ecl/Cy proto's
-        ## with the iframe contentWindow, and remote iframe
-        ## as of now we're passing App.confg into cypress but i dont like
-        ## leaking this backbone model's details into the cypress API
-        Cypress.setup(@runner, remoteIframe, App.config.getExternalInterface())
+              ## allow to get the original title without the id
+              runnable.originalTitle ?= @originalTitle(runnable)
 
-        r = Cypress.runner(@runner)
+              triggerAddEvent(runnable) if options.triggerAddEvent
 
-        ## reupdate chosen with the passed in chosenId
-        ## this allows us to pass the chosenId around
-        ## through websockets
-        @updateChosen(options.chosenId)
+        ## if we have a chosen id
+        if @hasChosen()
+          id = @get("chosenId")
 
-  App.reqres.setHandler "runner:entity", (mocha) ->
-    ## always set grep if its not already set
-    mocha.options.grep ?= /.*/
+          ## get our runnables now
+          getRunnables({triggerAddEvent: false})
 
-    ## store the actual mochaRunner on ourselves
-    runner = new Entities.Runner
-    runner.setSocketListeners()
-    runner.setOptions mocha, mocha.options
-    runner
+          ## and its an id within our runnables.
+          ## we do this to ensure that the user
+          ## didnt previously select this test
+          ## and then modify the spec and remove
+          ## this specific id
+          if id in ids
+            ## reset ids at the end to prevent
+            ## accidentally generating random ids
+            ## due to ids closure in onRunnable
+            ids = []
+
+            ## make the runner grep for just this unique id!
+            runner.grep @escapeRegExp("[" + id + "]")
+
+            ## get the runnables again since we now
+            ## have to iterate through them again
+            ## to see which ones should be added
+            ## we dont need to push the ids or push
+            ## the runnables since its a temp var anyway
+            getRunnables({pushRunnables: false})
+          else
+            ## remove the chosen id since its not
+            ## longer in the spec file!
+            @updateChosen()
+
+            ## trigger the triggerAddEvent on all of
+            ## our existing runnables!
+            _.each runnables, triggerAddEvent
+        else
+          ## if we havent chosen anything to begin with
+          ## then just iterate through all the runnables
+          ## and fire away!
+          getRunnables()
+
+        @trigger "after:add"
+
+        return @
+
+      escapeRegExp: (str) ->
+        new RegExp str.replace(regExpCharacters, '\\$&')
+
+      ## used to be called runIframeSuite
+      run: (specWindow, remoteIframe, options, fn) ->
+        ## trigger before:run prior to setting up the runner
+        @trigger "before:run"
+
+        ## initialize the helper objects for Cypress to be able
+        ## to run tests
+        @Cypress.initialize(specWindow, remoteIframe, App.config.getCypressConfig())
+
+        @Cypress.run (err) =>
+          @Cypress.after(err)
+
+          ## trigger the after run event
+          @trigger "after:run"
+
+          fn?(err)
+
+    App.reqres.setHandler "runner:entity", ->
+      new Entities.Runner
