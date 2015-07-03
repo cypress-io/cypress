@@ -48,7 +48,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
               when "dom"
                 _.extend obj2,
                   Options:  deltaOptions
-                  Returned: $Cypress.Utils.getDomElements(value)
+                  Returned: Cypress.Utils.getDomElements(value)
                   Elements: value?.length
 
               when "primitive"
@@ -254,7 +254,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       if options.log
         onConsole = {
           Content: text
-          "Applied To": $Cypress.Utils.getDomElements(subject or @prop("withinSubject"))
+          "Applied To": Cypress.Utils.getDomElements(subject or @prop("withinSubject"))
         }
 
         ## figure out the options which actually change the behavior of traversals
@@ -274,7 +274,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       log = ($el) ->
         return $el if not options.command
 
-        onConsole.Returned = $Cypress.Utils.getDomElements($el)
+        onConsole.Returned = Cypress.Utils.getDomElements($el)
         onConsole.Elements = $el?.length
 
         options.command.set({$el: $el})
