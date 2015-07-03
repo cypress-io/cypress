@@ -1057,3 +1057,28 @@ describe "$Cypress.Cy Querying Commands", ->
           done()
 
         @cy.contains("button", {exist:false})
+
+      it "throws when there is a found element but never becomes visible", (done) ->
+        @cy.$("#button").hide()
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "Found hidden content: 'button' in any elements but it never became visible."
+          done()
+
+        @cy.contains("button", {visible: true})
+
+      it "throws when there is a found element but never becomes hidden", (done) ->
+        @cy.$("#button").show()
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "Found visible content: 'button' in any elements but it never became hidden."
+          done()
+
+        @cy.contains("button", {visible: false})
+
+      it "throws when there is a found element but never becomes non-existent", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "Found content: 'button' within any existing elements but it never became non-existent."
+          done()
+
+        @cy.contains("button", {exist: false})

@@ -240,15 +240,16 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       getErr = (text, phrase) ->
         err = switch
           when options.exist is false
-            "Found content:"
+            "Found content: '#{text}' #{phrase} but it never became non-existent."
 
           when options.visible is false
-            "Found visible content:"
+            "Found visible content: '#{text}' #{phrase} but it never became hidden."
+
+          when options.visible is true
+            "Found hidden content: '#{text}' #{phrase} but it never became visible."
 
           else
-            "Could not find any content:"
-
-        err += " '#{text}' #{phrase}"
+            "Could not find any content: '#{text}' #{phrase}"
 
       if options.log
         onConsole = {
