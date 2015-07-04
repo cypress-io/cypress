@@ -2,11 +2,11 @@ html {
   position: relative;
   height: 100%;
 
-  &.updates, &.debug {
-    background-color: #EDEDED;
+  &.updates, &.debug, &.about {
+    background-color: #ECECEC;
 
     body {
-      background-color: #EDEDED;
+      background-color: #ECECEC;
       margin-bottom: 0;
     }
   }

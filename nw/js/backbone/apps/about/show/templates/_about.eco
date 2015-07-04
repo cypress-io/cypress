@@ -1,5 +1,5 @@
 <div id="about">
-  <img src="app://app/nw/img/cypress.iconset/icon_32x32@2x.png" />
+  <img src="../img/cypress.iconset/icon_32x32@2x.png" />
   <p>
     <strong>Cypress</strong>
   </p>

@@ -107,20 +107,19 @@
         App.config.getManifest()
 
     about: ->
-      debugger
       if about = windows.about
         return about.focus()
 
-      windows.about = about = App.request "gui:open", "app://app/nw/public/about.html",
+      windows.about = about = App.request "gui:open", "./about.html",
         position: "center"
         width: 300
         height: 210
         # frame: false
         toolbar: false
-        title: "About Cypress"
+        title: "About"
 
       about.once "loaded", ->
-        about.showDevTools() #if App.config.get("debug")
+        about.showDevTools() if App.config.get("debug")
 
         ## grab the about region from other window
         $el = $("#about-region", about.window.document)
@@ -144,13 +143,13 @@
       if updates = windows.updates
         return updates.focus()
 
-      windows.updates = updates = App.request "gui:open", "app://app/nw/public/updates.html",
+      windows.updates = updates = App.request "gui:open", "./updates.html",
         position: "center"
         width: 300
         height: 210
         # frame: false
         toolbar: false
-        title: ""
+        title: "Updates"
 
       updates.once "loaded", ->
         updates.showDevTools() if App.config.get("debug")
@@ -183,7 +182,7 @@
         height: 400
         # frame: false
         toolbar: false
-        title: ""
+        title: "Debug"
 
       debug.once "loaded", ->
         debug.showDevTools() if App.config.get("debug")

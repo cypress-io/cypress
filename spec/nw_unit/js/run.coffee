@@ -32,6 +32,8 @@ module.exports = (parentWindow, gui) ->
   gui.Screen.Init()
   runner = displayRunner(gui)
 
+  ## allow index to be passed in so we can change
+  ## which file we are testing against (used in deploy)
   if matches = /--index=(\S+)/.exec gui.App.argv
     pathToIndex = matches[1]
   else
