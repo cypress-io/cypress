@@ -1,0 +1,14 @@
+<div id="about">
+  <img src="app://app/nw/img/cypress.iconset/icon_32x32@2x.png" />
+  <p>
+    <strong>Cypress</strong>
+  </p>
+  <p class="version">
+    <span>Version: <%= @version %></span>
+  </p>
+  <p>
+    <a data-page href="#">
+      www.cypress.io
+    </a>
+  </p>
+</div>

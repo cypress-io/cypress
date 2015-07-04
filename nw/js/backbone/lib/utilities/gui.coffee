@@ -106,6 +106,40 @@
       catch
         App.config.getManifest()
 
+    about: ->
+      debugger
+      if about = windows.about
+        return about.focus()
+
+      windows.about = about = App.request "gui:open", "app://app/nw/public/about.html",
+        position: "center"
+        width: 300
+        height: 210
+        # frame: false
+        toolbar: false
+        title: "About Cypress"
+
+      about.once "loaded", ->
+        about.showDevTools() #if App.config.get("debug")
+
+        ## grab the about region from other window
+        $el = $("#about-region", about.window.document)
+
+        ## attach to the app as a custom region object
+        App.addRegions
+          aboutRegion: Marionette.Region.extend(el: $el)
+
+        App.vent.trigger "start:about:app", App.aboutRegion, about
+
+      about.once "close", ->
+        ## remove app region when this is closed down
+        App.removeRegion("aboutRegion") if App.aboutRegion
+
+        delete windows.about
+
+        ## really shut down the window!
+        @close(true)
+
     updates: ->
       if updates = windows.updates
         return updates.focus()
@@ -210,3 +244,6 @@
 
   App.commands.setHandler "gui:debug", ->
     API.debug()
+
+  App.commands.setHandler "gui:about", ->
+    API.about()
