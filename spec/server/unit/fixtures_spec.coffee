@@ -172,6 +172,41 @@ describe "Fixtures", ->
           expect(err.message).to.eq "'bad_coffee.coffee is not a valid CoffeeScript object.\n#{e}"
           done()
 
+  context "html files", ->
+    it "returns html as a string", ->
+      @fixture.get("index.html").then (index) ->
+        expect(index).to.eq """
+          <!doctype html>
+          <html>
+          <head>
+            <title>index.html</title>
+          </head>
+          <body>
+            index
+          </body>
+          </html>
+        """
+
+    it "rewrites file as formatted html", ->
+      @fixture.get("index.html").then =>
+        fs.readFileAsync(@fixture.folder + "/index.html", "utf8").then (str) ->
+          expect(str).to.eq """
+          <!doctype html>
+          <html>
+          <head>
+            <title>index.html</title>
+          </head>
+          <body>
+            index
+          </body>
+          </html>
+        """
+
+  context "txt files", ->
+    it "returns text as string", ->
+      @fixture.get("message.txt").then (index) ->
+        expect(index).to.eq "foobarbaz"
+
   context "extension omitted", ->
     it "#1 finds json", ->
       @fixture.get("foo").then (obj) ->
