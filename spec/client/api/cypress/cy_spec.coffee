@@ -159,10 +159,42 @@ describe "$Cypress.Cy API", ->
         expect(timeout).to.be.calledWith 1000
         expect(t._timeout).to.eq 1000
 
-    context "#prop", ->
+    describe "#Promise", ->
+      beforeEach ->
+        @cy = $Cypress.Cy.create(@Cypress, @specWindow)
+        null
+
+      it "is attached to cy", ->
+        expect(@cy.Promise).to.eq(Promise)
+        expect(@cy.Promise.resolve).to.be.a("function")
+        expect(@cy.Promise.pending).to.eq(Promise.pending)
+
+    describe "#_", ->
+      beforeEach ->
+        @cy = $Cypress.Cy.create(@Cypress, @specWindow)
+        null
+
+      it "is attached to cy", ->
+        expect(@cy._).to.eq(_)
+        expect(@cy._.each).to.be.a("function")
+        expect(@cy._.findWhere).to.eq(_.findWhere)
+
+    describe "#moment", ->
+      beforeEach ->
+        @cy = $Cypress.Cy.create(@Cypress, @specWindow)
+        null
+
+      it "is attached to cy", ->
+        @sandbox.useFakeTimers()
+        expect(@cy.moment).to.eq(moment)
+        expect(@cy.moment().toJSON()).to.eq(moment().toJSON())
+
+  context "integration", ->
+    enterCommandTestingMode()
+
+    describe "#prop", ->
       beforeEach ->
         @Cypress.restore()
-        @cy = $Cypress.Cy.create(@Cypress, @specWindow)
 
       it "is initially empty", ->
         expect(@cy.props).to.deep.eq {}
@@ -215,36 +247,6 @@ describe "$Cypress.Cy API", ->
         it "deletes registered properies", ->
 
           expect([@cy.prop("foo"), @cy.prop("baz")]).to.deep.eq [undefined, undefined]
-
-    context "#Promise", ->
-      beforeEach ->
-        @cy = $Cypress.Cy.create(@Cypress, @specWindow)
-
-      it "is attached to cy", ->
-        expect(@cy.Promise).to.eq(Promise)
-        expect(@cy.Promise.resolve).to.be.a("function")
-        expect(@cy.Promise.pending).to.eq(Promise.pending)
-
-    context "#_", ->
-      beforeEach ->
-        @cy = $Cypress.Cy.create(@Cypress, @specWindow)
-
-      it "is attached to cy", ->
-        expect(@cy._).to.eq(_)
-        expect(@cy._.each).to.be.a("function")
-        expect(@cy._.findWhere).to.eq(_.findWhere)
-
-    context "#moment", ->
-      beforeEach ->
-        @cy = $Cypress.Cy.create(@Cypress, @specWindow)
-
-      it "is attached to cy", ->
-        @sandbox.useFakeTimers()
-        expect(@cy.moment).to.eq(moment)
-        expect(@cy.moment().toJSON()).to.eq(moment().toJSON())
-
-  context "integration", ->
-    enterCommandTestingMode()
 
     describe "#_timeout", ->
       it "setter", ->
@@ -320,7 +322,7 @@ describe "$Cypress.Cy API", ->
         it "proxies $.#{fn}", ->
           expect(@cy.$[fn]).to.be.a("function")
 
-    context "#run", ->
+    describe "#run", ->
       it "calls prop next() on end if exists", (done) ->
         fn = -> done()
 
@@ -359,7 +361,7 @@ describe "$Cypress.Cy API", ->
         @cy.then ->
           @cy.private("runnable").state = "passed"
 
-    context "promises", ->
+    describe "promises", ->
       it "doesnt invoke .then on the cypress instance", (done) ->
         _then = @sandbox.spy @cy, "then"
         @cy.wait(1000)
@@ -370,7 +372,7 @@ describe "$Cypress.Cy API", ->
               expect(_then).not.to.be.called
               done()
 
-    context "#invoke2", ->
+    describe "#invoke2", ->
       it "waits for isReady before invoking command", (done) ->
         ## when we are isReady false that means we should
         ## never begin invoking our commands
@@ -389,7 +391,7 @@ describe "$Cypress.Cy API", ->
           .visit("/foo").then ->
             expect(@cy.prop("href")).to.include "foo"
 
-    context "#isReady", ->
+    describe "#isReady", ->
       it "creates a deferred when not ready", ->
         @cy.isReady(false)
         keys = _.keys @cy.prop("ready")
@@ -413,7 +415,7 @@ describe "$Cypress.Cy API", ->
 
         @cy.noop({})
 
-    context "#_storeHref", ->
+    describe "#_storeHref", ->
       it "sets prop href", ->
         @cy._storeHref()
         expect(@cy.prop("href")).to.include "/fixtures/html/dom.html"
@@ -426,7 +428,7 @@ describe "$Cypress.Cy API", ->
         @cy._storeHref()
         expect(@cy.prop("href")).to.eq "/foo/bar"
 
-    context "nested commands", ->
+    describe "nested commands", ->
       beforeEach ->
         @setup = (fn = ->) =>
           @Cypress.addParentCommand "nested", =>
@@ -494,7 +496,7 @@ describe "$Cypress.Cy API", ->
           .then ->
             expect(getNames(@cy.queue)).to.deep.eq ["inspect", "multiple", "url", "location", "noop", "then", "then"]
 
-    context "cancelling promises", ->
+    describe "cancelling promises", ->
       it "cancels via a delay", (done) ->
         pending = Promise.pending()
 
