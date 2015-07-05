@@ -186,7 +186,7 @@ module.exports = (parentWindow, gui, loadApp) ->
     afterEach ->
       @win?.close()
 
-    it "can click About in footer menu to bring up About Page", (done) ->
+    it "can click Updates in footer menu to bring up Updates Page", (done) ->
       @$("#footer [data-toggle='dropdown']").click()
       @$(".dropdown-menu [data-updates]").click()
 
