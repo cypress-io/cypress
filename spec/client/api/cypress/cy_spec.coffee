@@ -234,6 +234,15 @@ describe "$Cypress.Cy API", ->
         expect(@cy._.each).to.be.a("function")
         expect(@cy._.findWhere).to.eq(_.findWhere)
 
+    context "#moment", ->
+      beforeEach ->
+        @cy = $Cypress.Cy.create(@Cypress, @specWindow)
+
+      it "is attached to cy", ->
+        @sandbox.useFakeTimers()
+        expect(@cy.moment).to.eq(moment)
+        expect(@cy.moment().toJSON()).to.eq(moment().toJSON())
+
   context "integration", ->
     enterCommandTestingMode()
 
