@@ -19,7 +19,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
       return if not current
 
       options = _.last(current.args)
-      options?.onBeforeLoad?(contentWindow)
+      options?.onBeforeLoad?.call(@, contentWindow)
 
     _href: (win, url) ->
       win.location.href = url
@@ -124,7 +124,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
           $remoteIframe.one "load", =>
             @_storeHref()
             @_timeout(prevTimeout)
-            options.onLoad?(win)
+            options.onLoad?.call(@, win)
             if Cypress.cy.$("[data-cypress-visit-error]").length
               try
                 @throwErr("Could not load the remote page: #{url}", command)
