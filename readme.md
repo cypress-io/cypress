@@ -13,6 +13,8 @@ npm run dist
 
 ### While Developing
 ```bash
+bower install
+npm install
 npm run watch
 ```
 
