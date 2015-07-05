@@ -159,73 +159,10 @@ describe "$Cypress.Cy API", ->
         expect(timeout).to.be.calledWith 1000
         expect(t._timeout).to.eq 1000
 
-  context "integration", ->
-    enterCommandTestingMode()
-
-    context "#$", ->
-      it "queries the remote document", ->
-        input = @cy.$("#by-name input:first")
-        expect(input.length).to.eq 1
-        expect(input.prop("tagName")).to.eq "INPUT"
-
-      it "scopes the selector to context if provided", ->
-        input = @cy.$("input:first", @cy.$("#by-name"))
-        expect(input.length).to.eq 1
-        expect(input.prop("tagName")).to.eq "INPUT"
-
-    context "#run", ->
-      it "calls prop next() on end if exists", (done) ->
-        fn = -> done()
-
-        @cy.prop("next", fn)
-
-        @cy.noop()
-
-      it "removes prop next after calling", (done) ->
-        fn = => _.defer =>
-          expect(@cy.prop("next")).to.eq null
-          done()
-
-        @cy.prop("next", fn)
-
-        @cy.noop()
-
-      it "does not reset the timeout on completion when a runnable has a state already", (done) ->
-        ## this happens when using a (done) callback
-        ## and using cy commands at the same time!
-        ## because mocha detects the test is async
-        ## it doesnt add the final .then() command
-        ## which means our test receives a state
-        ## immediately when the done() is called
-        @cy.on "command:start", =>
-          @ct = @sandbox.spy @cy.private("runnable"), "clearTimeout"
-
-        @cy.on "command:end", =>
-          expect(@ct.callCount).to.eq 0
-
-          ## clear the state again else the function done()
-          ## inside of mocha (runnable.run) will return
-          ## early and not self.clearTimeout()
-          delete @cy.private("runnable").state
-          done()
-
-        @cy.then ->
-          @cy.private("runnable").state = "passed"
-
-    context "promises", ->
-      it "doesnt invoke .then on the cypress instance", (done) ->
-        _then = @sandbox.spy @cy, "then"
-        @cy.wait(1000)
-
-        @cy.on "set", (obj) ->
-          if obj.name is "wait"
-            @Cypress.abort().then ->
-              expect(_then).not.to.be.called
-              done()
-
     context "#prop", ->
       beforeEach ->
         @Cypress.restore()
+        @cy = $Cypress.Cy.create(@Cypress, @specWindow)
 
       it "is initially empty", ->
         expect(@cy.props).to.deep.eq {}
@@ -279,7 +216,28 @@ describe "$Cypress.Cy API", ->
 
           expect([@cy.prop("foo"), @cy.prop("baz")]).to.deep.eq [undefined, undefined]
 
-    context "#_timeout", ->
+    context "#Promise", ->
+      beforeEach ->
+        @cy = $Cypress.Cy.create(@Cypress, @specWindow)
+
+      it "is attached to cy", ->
+        expect(@cy.Promise).to.eq(Promise)
+        expect(@cy.Promise.resolve).to.be.a("function")
+        expect(@cy.Promise.pending).to.eq(Promise.pending)
+
+    context "#_", ->
+      beforeEach ->
+        @cy = $Cypress.Cy.create(@Cypress, @specWindow)
+
+      it "is attached to cy", ->
+        expect(@cy._).to.eq(_)
+        expect(@cy._.each).to.be.a("function")
+        expect(@cy._.findWhere).to.eq(_.findWhere)
+
+  context "integration", ->
+    enterCommandTestingMode()
+
+    describe "#_timeout", ->
       it "setter", ->
         @cy._timeout(500)
         expect(@test.timeout()).to.eq 500
@@ -305,7 +263,7 @@ describe "$Cypress.Cy API", ->
 
         expect(fn).to.throw(Error)
 
-    context "#_contains", ->
+    describe "#_contains", ->
       it "returns true if the document contains the element", ->
         btn = @cy.$("#button").get(0)
 
@@ -326,6 +284,82 @@ describe "$Cypress.Cy API", ->
         inputs.last().remove()
 
         expect(@cy._contains(inputs)).to.be.false
+
+    describe "#$", ->
+      it "queries the remote document", ->
+        input = @cy.$("#by-name input:first")
+        expect(input.length).to.eq 1
+        expect(input.prop("tagName")).to.eq "INPUT"
+
+      it "scopes the selector to context if provided", ->
+        input = @cy.$("input:first", @cy.$("#by-name"))
+        expect(input.length).to.eq 1
+        expect(input.prop("tagName")).to.eq "INPUT"
+
+      it "proxies Deferred", (done) ->
+        expect(@cy.$.Deferred).to.be.a("function")
+
+        df = @cy.$.Deferred()
+
+        _.delay ->
+          df.resolve()
+        , 10
+
+        df.done -> done()
+
+      _.each "Event Deferred ajax get getJSON getScript post when".split(" "), (fn) =>
+        it "proxies $.#{fn}", ->
+          expect(@cy.$[fn]).to.be.a("function")
+
+    context "#run", ->
+      it "calls prop next() on end if exists", (done) ->
+        fn = -> done()
+
+        @cy.prop("next", fn)
+
+        @cy.noop()
+
+      it "removes prop next after calling", (done) ->
+        fn = => _.defer =>
+          expect(@cy.prop("next")).to.eq null
+          done()
+
+        @cy.prop("next", fn)
+
+        @cy.noop()
+
+      it "does not reset the timeout on completion when a runnable has a state already", (done) ->
+        ## this happens when using a (done) callback
+        ## and using cy commands at the same time!
+        ## because mocha detects the test is async
+        ## it doesnt add the final .then() command
+        ## which means our test receives a state
+        ## immediately when the done() is called
+        @cy.on "command:start", =>
+          @ct = @sandbox.spy @cy.private("runnable"), "clearTimeout"
+
+        @cy.on "command:end", =>
+          expect(@ct.callCount).to.eq 0
+
+          ## clear the state again else the function done()
+          ## inside of mocha (runnable.run) will return
+          ## early and not self.clearTimeout()
+          delete @cy.private("runnable").state
+          done()
+
+        @cy.then ->
+          @cy.private("runnable").state = "passed"
+
+    context "promises", ->
+      it "doesnt invoke .then on the cypress instance", (done) ->
+        _then = @sandbox.spy @cy, "then"
+        @cy.wait(1000)
+
+        @cy.on "set", (obj) ->
+          if obj.name is "wait"
+            @Cypress.abort().then ->
+              expect(_then).not.to.be.called
+              done()
 
     context "#invoke2", ->
       it "waits for isReady before invoking command", (done) ->

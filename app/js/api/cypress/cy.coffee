@@ -1,4 +1,4 @@
-$Cypress.Cy = do ($Cypress, _, Backbone) ->
+$Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
   class $Cy
     ## does this need to be moved
@@ -575,6 +575,9 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
     _: _
 
     Promise: Promise
+
+
+    _.extend $Cy.prototype.$, _($).pick("Event", "Deferred", "ajax", "get", "getJSON", "getScript", "post", "when")
 
     _.extend $Cy.prototype, Backbone.Events
 
