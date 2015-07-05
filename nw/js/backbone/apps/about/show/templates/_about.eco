@@ -11,4 +11,7 @@
       www.cypress.io
     </a>
   </p>
+  <p class="copyright">
+    © <%= moment().year() %> Cypress.io, LLC
+  </p>
 </div>
