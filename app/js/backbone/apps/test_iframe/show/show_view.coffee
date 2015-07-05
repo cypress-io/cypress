@@ -92,9 +92,11 @@
         height: el.height()
       }
 
-    calcWidth: (main, tests, container) ->
+    calcWidth: (main, tests, container, headerHeight) ->
+      headerHeight = @$("header").outerHeight() ? 52
+
       width  = main.width() - tests.width()
-      height = container.height() - 37 ## 37 accounts for the header
+      height = container.height() - headerHeight ## accounts for the header
 
       container.width(width)
 
