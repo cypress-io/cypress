@@ -2885,7 +2885,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get(":text:first").dblclick()
 
-    it "silences errors on onfocusable elements", ->
+    it "silences errors on unfocusable elements", ->
       div = @cy.$("div:first")
 
       @cy.get("div:first").dblclick()
@@ -3245,10 +3245,10 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get(":text:first").click()
 
-    it "silences errors on onfocusable elements", ->
+    it "silences errors on unfocusable elements", ->
       div = @cy.$("div:first")
 
-      @cy.get("div:first").click()
+      @cy.get("div:first").click({force: true})
 
     it "causes first focused element to receive blur", (done) ->
       @cy.$("input:first").blur ->
