@@ -1,4 +1,4 @@
-$Cypress.register "Fixtures", (Cypress, _, $) ->
+$Cypress.register "Fixtures", (Cypress, _, $, Promise) ->
 
   cache = {}
 

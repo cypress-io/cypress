@@ -25,6 +25,7 @@
         focus: true
         width: 900
         height: 500
+        title: "Login"
 
     loggingIn: (url) ->
       ## display logging in loading spinner here

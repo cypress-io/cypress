@@ -1,4 +1,4 @@
-$Cypress.Cy = do ($Cypress, _, Backbone) ->
+$Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
   class $Cy
     ## does this need to be moved
@@ -16,7 +16,10 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
     initialize: (obj) ->
       @defaults()
 
-      {$remoteIframe, @config} = obj
+      {$remoteIframe, config} = obj
+
+      _.each obj.config, (value, key) =>
+        @private(key, value)
 
       @private("$remoteIframe", $remoteIframe)
 
@@ -48,8 +51,8 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       return @
 
     listeners: ->
-      @listenTo @Cypress, "initialize", (obj, bool) =>
-        @initialize(obj, bool)
+      @listenTo @Cypress, "initialize", (obj) =>
+        @initialize(obj)
 
       ## why arent we listening to "defaults" here?
       ## instead we are manually hard coding them
@@ -452,7 +455,9 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
     ## calling another command but wrapping it in a
     ## promise
     command: (name, args...) ->
-      Promise.resolve @sync[name].apply(@, args)
+      Promise
+        .resolve(@sync[name].apply(@, args))
+        .cancellable()
 
     defer: (fn) ->
       @clearTimeout(@prop("timerId"))
@@ -548,14 +553,9 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       return @
 
     _setRunnable: (runnable, hookName) ->
-      ## think about moving the cy.config object
-      ## to Cypress so it doesnt need to be reset.
-      ## also our options are "global" whereas
-      ## options on @cy are local to that specific
-      ## test run
       runnable.startedAt = new Date
 
-      if @config and _.isFinite(timeout = @config("commandTimeout"))
+      if _.isFinite(timeout = @private("commandTimeout"))
         runnable.timeout timeout
 
       @hook(hookName)
@@ -575,6 +575,10 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
     _: _
 
     Promise: Promise
+
+    moment: window.moment
+
+    _.extend $Cy.prototype.$, _($).pick("Event", "Deferred", "ajax", "get", "getJSON", "getScript", "post", "when")
 
     _.extend $Cy.prototype, Backbone.Events
 

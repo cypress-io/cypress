@@ -73,7 +73,7 @@ $Cypress.register "XHR", (Cypress, _, $) ->
     urls = urls.concat getUrl(options)
     @prop "availableUrls", urls
 
-    options.log = Cypress.route
+    options.log = Cypress.Log.route
       method:   options.method
       url:      getUrl(options)
       status:   options.status
@@ -145,7 +145,7 @@ $Cypress.register "XHR", (Cypress, _, $) ->
 
           ## assign this existing command
           ## to the xhr so we can reuse it later
-          xhr.log = Cypress.command
+          xhr.log = Cypress.Log.command
             name:      "xhr"
             alias:     alias
             aliasType: "route"
@@ -318,7 +318,7 @@ $Cypress.register "XHR", (Cypress, _, $) ->
       if not validHttpMethodsRe.test(options.method)
         @throwErr "cy.route() was called with an invalid method: '#{o.method}'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"
 
-      if not options.response?
+      if not options.response? and options.respond isnt false
         @throwErr "cy.route() cannot accept an undefined or null response. It must be set to something, even an empty string will work."
 
       ## convert to wildcard regex

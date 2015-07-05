@@ -2,7 +2,7 @@
 
   class List.Controller extends App.Controllers.Application
     initialize: (options) ->
-      { test } = options
+      { test, iframe } = options
 
       @hooks = hooks = test.get("hooks")
 
@@ -45,7 +45,7 @@
             ## we are now in a reverted state
             ## from the original
             @reverted = true
-            App.config.revertDom(command)
+            iframe.commandEnter(command)
 
           Promise.delay(50).then ->
             command.trigger "revert:dom"
@@ -64,7 +64,7 @@
               @reverted = false
 
               ## and restore the dom to the original state
-              App.config.revertDom(command, false)
+              iframe.commandExit(command)
 
       @listenTo commandsView, "childview:childview:command:mouseenter", (iv, iv2, args) ->
         command = args.model

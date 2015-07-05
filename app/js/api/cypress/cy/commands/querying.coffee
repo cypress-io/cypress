@@ -21,7 +21,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       start = (aliasType) ->
         return if options.log is false
 
-        options.command ?= Cypress.command
+        options.command ?= Cypress.Log.command
           message: [selector, deltaOptions]
           referencesAlias: aliasObj?.alias
           aliasType: aliasType
@@ -48,7 +48,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
               when "dom"
                 _.extend obj2,
                   Options:  deltaOptions
-                  Returned: $Cypress.Utils.getDomElements(value)
+                  Returned: Cypress.Utils.getDomElements(value)
                   Elements: value?.length
 
               when "primitive"
@@ -185,7 +185,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       @_retry(retry, options)
 
     root: ->
-      command = Cypress.command({message: ""})
+      command = Cypress.Log.command({message: ""})
 
       log = ($el) ->
         command.set({$el: $el}).snapshot().end()
@@ -240,26 +240,27 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       getErr = (text, phrase) ->
         err = switch
           when options.exist is false
-            "Found content:"
+            "Found content: '#{text}' #{phrase} but it never became non-existent."
 
           when options.visible is false
-            "Found visible content:"
+            "Found visible content: '#{text}' #{phrase} but it never became hidden."
+
+          when options.visible is true
+            "Found hidden content: '#{text}' #{phrase} but it never became visible."
 
           else
-            "Could not find any content:"
-
-        err += " '#{text}' #{phrase}"
+            "Could not find any content: '#{text}' #{phrase}"
 
       if options.log
         onConsole = {
           Content: text
-          "Applied To": $Cypress.Utils.getDomElements(subject or @prop("withinSubject"))
+          "Applied To": Cypress.Utils.getDomElements(subject or @prop("withinSubject"))
         }
 
         ## figure out the options which actually change the behavior of traversals
         deltaOptions = Cypress.Utils.filterDelta(options, {visible: null, exist: true, length: null})
 
-        options.command ?= Cypress.command
+        options.command ?= Cypress.Log.command
           message: _.compact([filter, text, deltaOptions])
           type: if subject then "child" else "parent"
           onConsole: -> onConsole
@@ -273,7 +274,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       log = ($el) ->
         return $el if not options.command
 
-        onConsole.Returned = $Cypress.Utils.getDomElements($el)
+        onConsole.Returned = Cypress.Utils.getDomElements($el)
         onConsole.Elements = $el?.length
 
         options.command.set({$el: $el})
@@ -282,15 +283,28 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
         return $el
 
-      containsTextNode = ($el, text) ->
-        contents = $el.contents().filter( -> @nodeType is 3).text()
-        _.str.include(contents, text)
+      getFirstDeepestElement = (elements, index = 0) ->
+        ## iterate through all of the elements in pairs
+        ## and check if the next item in the array is a
+        ## descedent of the current. if it is continue
+        ## to recurse. if not, or there is no next item
+        ## then return the current
+        $current = elements.slice(index,     index + 1)
+        $next    = elements.slice(index + 1, index + 2)
+
+        return $current if not $next
+
+        ## does current contain next?
+        if $.contains($current.get(0), $next.get(0))
+          getFirstDeepestElement(elements, index + 1)
+        else
+          $current
 
       text = text.toString().replace /('|")/g, "\\$1"
 
       ## find elements by the :contains psuedo selector
       ## and any submit inputs with the attributeContainsWord selector
-      selector = "#{filter}:contains('#{text}'), #{filter}[type='submit'][value~='#{text}']"
+      selector = "#{filter}:not(script):contains('#{text}'), #{filter}[type='submit'][value~='#{text}']"
 
       @command("get", selector, options).then (elements) ->
         return log(null) if not elements
@@ -303,15 +317,13 @@ $Cypress.register "Querying", (Cypress, _, $) ->
           $el = $(el)
           return log($el) if $el.is("input[type='submit'], button, a, label")
 
-        for el in elements.get()
-          $el = $(el)
-          return log($el) if containsTextNode($el, text)
+        return log getFirstDeepestElement(elements)
 
   Cypress.addChildCommand
     within: (subject, fn) ->
       @ensureDom(subject)
 
-      command = Cypress.command
+      command = Cypress.Log.command
         $el: subject
         message: ""
 

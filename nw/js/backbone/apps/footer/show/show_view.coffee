@@ -22,6 +22,7 @@
       quit:     "[data-quit]"
       updates:  "[data-updates]"
       debug:    "[data-debug]"
+      about:    "[data-about]"
 
     triggers:
       "click @ui.quit"     : "quit:clicked"
@@ -30,6 +31,7 @@
       "click @ui.settings" : "settings:clicked"
       "click @ui.updates"  : "updates:clicked"
       "click @ui.debug"    : "debug:clicked"
+      "click @ui.about"    : "about:clicked"
 
     events:
       "click .dropdown-menu a" : "aClicked"

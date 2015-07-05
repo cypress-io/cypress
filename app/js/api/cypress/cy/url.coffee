@@ -26,7 +26,7 @@ do ($Cypress, _) ->
       ## the previous was. this prevents logging
       ## additionally when the url didnt actually change
       if options.log and (url isnt previousUrl)
-        Cypress.command
+        Cypress.Log.command
           name: "new url"
           message: url
           event: true

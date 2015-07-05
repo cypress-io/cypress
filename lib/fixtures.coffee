@@ -4,12 +4,13 @@ path      = require "path"
 jsonlint  = require "jsonlint"
 check     = require "syntax-error"
 coffee    = require "coffee-script"
+beautify  = require("js-beautify").html
 pretty    = require("js-object-pretty-print").pretty
 formatter = require("jsonlint/lib/formatter").formatter
 
 fs = Promise.promisifyAll(fs)
 
-extensions = ".json .js .coffee".split(" ")
+extensions = ".json .js .coffee .html .txt .png .jpg .jpeg .gif .tif .tiff".split(" ")
 
 ## TODO: add image conversion to base64
 
@@ -66,8 +67,12 @@ class Fixtures
       when ".json"   then @parseJson(p, fixture)
       when ".js"     then @parseJs(p, fixture)
       when ".coffee" then @parseCoffee(p, fixture)
+      when ".html"   then @parseHtml(p, fixture)
+      when ".txt"    then @parseText(p, fixture)
+      when ".png", ".jpg", ".jpeg", ".gif", ".tif", ".tiff"
+        @parseImage(p, fixture)
       else
-        throw new Error("Invalid fixture extension: '#{ext}'. Acceptable file extensions are: [json, js, coffee, jpg, jpeg, png, gif, tiff]")
+        throw new Error("Invalid fixture extension: '#{ext}'. Acceptable file extensions are: #{extensions.join(", ")}")
 
   parseJson: (p, fixture) ->
     fs.readFileAsync(p, "utf8")
@@ -118,6 +123,25 @@ class Fixtures
         throw new Error("'#{fixture} is not a valid CoffeeScript object.\n#{err.toString()}")
       .finally ->
         process.env.NODE_DISABLE_COLORS = dc
+
+  parseHtml: (p, fixture) ->
+    fs.readFileAsync(p, "utf8")
+      .bind(@)
+      .then (str) ->
+        beautify str, {
+          indent_size: 2
+          extra_liners: []
+        }
+      .then (html) ->
+        fs.writeFileAsync(p, html).return(html)
+
+  parseText: (p, fixture) ->
+    fs.readFileAsync(p, "utf8")
+      .bind(@)
+
+  parseImage: (p, fixture) ->
+    fs.readFileAsync(p, "base64")
+      .bind(@)
 
   copyExample: (fixturesDir) ->
     src  = path.join(process.cwd(), "lib", "scaffold", "example.json")

@@ -28,7 +28,7 @@ do ($Cypress, _) ->
     commandErr: (err) ->
       current = @prop("current")
 
-      @Cypress.command
+      @Cypress.Log.command
         end: true
         snapshot: true
         error: err

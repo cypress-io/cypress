@@ -56,6 +56,9 @@
       @listenTo bottomView, "debug:clicked", ->
         App.execute "gui:debug"
 
+      @listenTo bottomView, "about:clicked", ->
+        App.execute "gui:about"
+
       @show bottomView, region: region
 
     getLayoutView: ->

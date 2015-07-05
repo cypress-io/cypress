@@ -1,4 +1,4 @@
-$Cypress.register "Navigation", (Cypress, _, $) ->
+$Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
   overrideRemoteLocationGetters = (cy, contentWindow) ->
     navigated = (attr, args) ->
@@ -19,7 +19,7 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
       return if not current
 
       options = _.last(current.args)
-      options?.onBeforeLoad?(contentWindow)
+      options?.onBeforeLoad?.call(@, contentWindow)
 
     _href: (win, url) ->
       win.location.href = url
@@ -44,7 +44,7 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
       _.defaults options,
         timeout: 20000
 
-      command = Cypress.command
+      command = Cypress.Log.command
         type: "parent"
         name: "page load"
         message: "--waiting for new page to load---"
@@ -102,9 +102,9 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
         onLoad: ->
 
       if options.log
-        command = Cypress.command()
+        command = Cypress.Log.command()
 
-      baseUrl = @config("baseUrl")
+      baseUrl = @private("baseUrl")
       url     = Cypress.Location.getRemoteUrl(url, baseUrl)
 
       ## backup the previous runnable timeout
@@ -124,7 +124,7 @@ $Cypress.register "Navigation", (Cypress, _, $) ->
           $remoteIframe.one "load", =>
             @_storeHref()
             @_timeout(prevTimeout)
-            options.onLoad?(win)
+            options.onLoad?.call(@, win)
             if Cypress.cy.$("[data-cypress-visit-error]").length
               try
                 @throwErr("Could not load the remote page: #{url}", command)

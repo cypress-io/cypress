@@ -24,11 +24,13 @@
       ## which is the mediator of all test framework events
       ## store this as a property on ourselves
       runner = App.request("start:test:runner")
-      runner.setBrowserAndVersion(browser, version) if browser and version
+
+      iframe = runner.iframe
+      iframe.setBrowserAndVersion(browser, version) if browser and version
 
       @onDestroy = _.partial(@onDestroy, config, runner)
 
-      @listenTo runner, "switch:to:manual:browser", (browser, version) ->
+      @listenTo iframe, "switch:to:manual:browser", (browser, version) ->
         App.execute "switch:to:manual:browser", id, browser, version
 
       @listenTo runner, "sauce:running", (jobName, batchId) ->
@@ -40,9 +42,8 @@
 
       @listenTo @layout, "show", =>
         @statsRegion(runner)          if not config.env("satellite")
-        @iframeRegion(runner)
-        @specsRegion(runner, spec)    if not config.env("satellite")
-        # @panelsRegion(runner, config) if not config.env("satellite")
+        @iframeRegion(iframe)
+        @specsRegion(runner, iframe, spec)    if not config.env("satellite")
 
         socket.emit "watch:test:file", id
 
@@ -50,29 +51,19 @@
         ## and load the iframe
         runner.start(id)
 
-        # @layout.resizePanels()
-
       @show @layout
 
     statsRegion: (runner) ->
       App.execute "show:test:stats", @layout.statsRegion, runner
 
-    iframeRegion: (runner) ->
-      App.execute "show:test:iframe", @layout.iframeRegion, runner
+    iframeRegion: (iframe) ->
+      App.execute "show:test:iframe", @layout.iframeRegion, iframe
 
-    specsRegion: (runner, spec) ->
-      App.execute "list:test:specs", @layout.specsRegion, runner, spec
+    specsRegion: (runner, iframe, spec) ->
+      App.execute "list:test:specs", @layout.specsRegion, runner, iframe, spec
 
     sauceRegion: (runner, jobName, batchId) ->
       App.execute "list:test:jobs", @layout.jobsRegion, runner, jobName, batchId
-
-    panelsRegion: (runner, config) ->
-      ## trigger the event to ensure the test panels are listed
-      ## and pass up the runner
-      config.trigger "list:test:panels", runner,
-        domRegion: @layout.domRegion
-        xhrRegion: @layout.xhrRegion
-        logRegion: @layout.logRegion
 
     onDestroy: (config, runner) ->
       ## nuke our cookies when we leave

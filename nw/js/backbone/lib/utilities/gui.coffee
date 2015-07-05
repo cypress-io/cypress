@@ -106,17 +106,50 @@
       catch
         App.config.getManifest()
 
-    updates: ->
-      if updates = windows.updates
-        return updates.focus()
+    about: ->
+      if about = windows.about
+        return about.focus()
 
-      windows.updates = updates = App.request "gui:open", "app://app/nw/public/updates.html",
+      windows.about = about = App.request "gui:open", "./about.html",
         position: "center"
         width: 300
         height: 210
         # frame: false
         toolbar: false
-        title: ""
+        title: "About"
+
+      about.once "loaded", ->
+        about.showDevTools() if App.config.get("debug")
+
+        ## grab the about region from other window
+        $el = $("#about-region", about.window.document)
+
+        ## attach to the app as a custom region object
+        App.addRegions
+          aboutRegion: Marionette.Region.extend(el: $el)
+
+        App.vent.trigger "start:about:app", App.aboutRegion, about
+
+      about.once "close", ->
+        ## remove app region when this is closed down
+        App.removeRegion("aboutRegion") if App.aboutRegion
+
+        delete windows.about
+
+        ## really shut down the window!
+        @close(true)
+
+    updates: ->
+      if updates = windows.updates
+        return updates.focus()
+
+      windows.updates = updates = App.request "gui:open", "./updates.html",
+        position: "center"
+        width: 300
+        height: 210
+        # frame: false
+        toolbar: false
+        title: "Updates"
 
       updates.once "loaded", ->
         updates.showDevTools() if App.config.get("debug")
@@ -149,7 +182,7 @@
         height: 400
         # frame: false
         toolbar: false
-        title: ""
+        title: "Debug"
 
       debug.once "loaded", ->
         debug.showDevTools() if App.config.get("debug")
@@ -210,3 +243,6 @@
 
   App.commands.setHandler "gui:debug", ->
     API.debug()
+
+  App.commands.setHandler "gui:about", ->
+    API.about()

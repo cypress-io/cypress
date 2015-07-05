@@ -52,7 +52,7 @@ describe "$Cypress.Cy Connectors Commands", ->
       beforeEach ->
         ## set the jquery path back to our
         ## remote window
-        @Cypress.option "jQuery", @iframe.prop("contentWindow").$
+        @Cypress.option "jQuery", @$iframe.prop("contentWindow").$
 
         @remoteWindow = @cy.private("window")
 
@@ -97,7 +97,7 @@ describe "$Cypress.Cy Connectors Commands", ->
     beforeEach ->
       ## set the jquery path back to our
       ## remote window
-      @Cypress.option "jQuery", @iframe.prop("contentWindow").$
+      @Cypress.option "jQuery", @$iframe.prop("contentWindow").$
 
       @remoteWindow = @cy.private("window")
 
@@ -215,9 +215,17 @@ describe "$Cypress.Cy Connectors Commands", ->
 
         @cy.noop({foo: "foo"}).invoke("foo")
 
-      it "snapshots after clicking", ->
+      it "snapshots after invoking", ->
         @cy.noop({foo: "foo"}).invoke("foo").then ->
           expect(@log.get("snapshot")).to.be.an("object")
+
+      it "logs $el if subject is element", ->
+        @cy.get("button:first").invoke("hide").then ($el) ->
+          expect(@log.get("$el").get(0)).to.eq $el.get(0)
+
+      it "does not log $el if subject isnt element", ->
+        @cy.noop(@obj).invoke("bar").then ->
+          expect(@log.get("$el")).not.to.exist
 
       it "logs obj as a property", ->
         @cy.noop(@obj).invoke("foo").then ->
@@ -276,6 +284,16 @@ describe "$Cypress.Cy Connectors Commands", ->
             "With Arguments": [1,2,3]
             On:       @obj
             Returned: 6
+          }
+
+      it "#onConsole as a function on DOM element", ->
+        @cy.get("button:first").invoke("hide").then ($btn) ->
+          onConsole = @log.attributes.onConsole()
+          expect(onConsole).to.deep.eq {
+            Command: "invoke"
+            Function: ".hide()"
+            On: $btn.get(0)
+            Returned: $btn.get(0)
           }
 
     describe "errors", ->

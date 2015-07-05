@@ -35,11 +35,22 @@ describe "$Cypress.Cy Navigation Commands", ->
 
     it "resets the runnables timeout after visit"
 
-    it "invokes onLoad callback"
+    it "invokes onLoad callback", (done) ->
+      cy = @cy
 
-    it "invokes onBeforeLoad callback", (done) ->
+      @cy.visit("fixtures/html/sinon.html", {
+        onLoad: (contentWindow) ->
+          expect(@).to.eq(cy)
+          expect(contentWindow.sinon).to.be.defined
+          done()
+      })
+
+    it "invokes onBeforeLoad callback with cy context", (done) ->
+      cy = @cy
+
       @cy.visit("fixtures/html/sinon.html", {
         onBeforeLoad: (contentWindow) ->
+          expect(@).to.eq(cy)
           expect(contentWindow.sinon).to.be.defined
           done()
       })
@@ -285,6 +296,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           logs.push log
 
         @cy.on "fail", (err) ->
+          console.log err
           ## should only log once
           expect(logs.length).to.eq 1
           expect(err.message).to.eq "Timed out after waiting '100ms' for your remote page to load."

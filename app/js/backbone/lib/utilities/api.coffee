@@ -4,8 +4,8 @@
     start: (options) ->
       Utilities.Overrides.overloadMochaRunnerUncaught() if not App.config.ui("ci")
 
-      ## return our reporter entity
-      return App.request("reporter:entity")
+      ## return our runner entity
+      return App.request("runner:entity")
 
     stop: (runner) ->
       runner.stop()

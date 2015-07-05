@@ -48,11 +48,11 @@ describe "Support ", ->
             //   var email    = email || "joe@example.com"
             //   var password = password || "foobar"
             //
-            //   var command = Cypress.command({
+            //   var log = Cypress.Log.command({
             //     name: "login",
             //     message: [email, password],
             //     onConsole: function(){
-            //       {
+            //       return {
             //         email: email,
             //         password: password
             //       }
@@ -68,7 +68,7 @@ describe "Support ", ->
             //     .get("h1", {log: false}).contains("Dashboard", {log: false}) //we should be on the dashboard now
             //     .url({log: false}).should("match", /dashboard/, {log: false})
             //     .then(function(){
-            //       command.snapshot().end()
+            //       log.snapshot().end()
             //     })
             // })
             """

@@ -12,14 +12,14 @@ $Cypress.register "Agents", (Cypress, _, $) ->
         onCreate: (obj) =>
           obj.type = [obj.type, obj.count].join("-")
           obj.callCount = 0
-          Cypress.agent(obj)
+          Cypress.Log.agent(obj)
 
         onInvoke: (obj) =>
           if log = obj.log
             ## increment the callCount on the agent instrument log
             log.set "callCount", log.get("callCount") + 1
 
-          Cypress.command
+          Cypress.Log.command
             name:    [obj.name, obj.count].join("-")
             message: obj.message
             error:   obj.error

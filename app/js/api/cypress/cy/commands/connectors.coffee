@@ -70,7 +70,8 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
       @ensureParent()
       @ensureSubject()
 
-      command = Cypress.command
+      command = Cypress.Log.command
+        $el: if Cypress.Utils.hasElement(subject) then subject else null
         onConsole: ->
           Subject: subject
 
@@ -101,12 +102,12 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
         ## think about using the hasOwnProperty
         fail() if _.isUndefined(prop)
 
-      invoke = ->
+      invoke = =>
         if _.isFunction(prop)
           ret = prop.apply (remoteSubject or subject), args
 
           if ret and Cypress.Utils.hasElement(ret) and remoteJQueryisNotSameAsGlobal(remoteJQuery) and Cypress.Utils.isInstanceOf(ret, remoteJQuery)
-            return Cypress.cy.$(ret)
+            return @$(ret)
 
           return ret
 
@@ -118,6 +119,12 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
           ".#{fn}(" + Cypress.Utils.stringify(args) + ")"
         else
           ".#{fn}"
+
+      getFormattedElement = ($el) ->
+        if Cypress.Utils.hasElement($el)
+          Cypress.Utils.getDomElements($el)
+        else
+          $el
 
       value = invoke()
 
@@ -136,8 +143,8 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
               obj["Property"] = message
 
             _.extend obj,
-              On: remoteSubject or subject
-              Returned: value
+              On:       getFormattedElement(remoteSubject or subject)
+              Returned: getFormattedElement(value)
 
             obj
 

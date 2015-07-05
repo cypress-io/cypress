@@ -26,8 +26,10 @@ chai.use(sinonChai)
 expect = chai.expect
 
 module.exports = (parentWindow, gui, loadApp) ->
-
   beforeEach ->
+    @debug = (fn) =>
+      setTimeout fn, 1000
+
     @sandbox = sinon.sandbox.create()
     cache.remove()
     Log.clearLogs()
@@ -155,6 +157,49 @@ module.exports = (parentWindow, gui, loadApp) ->
 
     it "moves the window to the coords arguments", ->
       expect(@moveTo).to.be.calledWith "1136", "30"
+
+  describe "About Window", ->
+    beforeEach ->
+      cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+        loadApp(@)
+
+    afterEach ->
+      @win?.close()
+
+    it "can click About in footer menu to bring up About Page", (done) ->
+      @$("#footer [data-toggle='dropdown']").click()
+      @$(".dropdown-menu [data-about]").click()
+
+      @App.vent.on "start:about:app", (region, @win) =>
+        expect(@App.aboutRegion.$el.find(".version")).to.contain("Version: 0.1.0")
+        expect(@App.aboutRegion.currentView.ui.page).to.contain("www.cypress.io")
+        expect(@win.title).to.eq "About"
+        done()
+
+  describe "Updates Window", ->
+    beforeEach ->
+      cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+        loadApp(@).then =>
+          ## force there to be no updates
+          @sandbox.stub(App.updater, "run").yieldsTo("onNone")
+
+    afterEach ->
+      @win?.close()
+
+    it "can click Updates in footer menu to bring up Updates Page", (done) ->
+      @$("#footer [data-toggle='dropdown']").click()
+      @$(".dropdown-menu [data-updates]").click()
+
+      @App.vent.on "start:updates:app", (region, @win) =>
+        version = @App.updatesRegion.$el.find(".version")
+        expect(version).to.contain("Current Version:")
+        expect(version).to.contain("0.1.0")
+
+        expect(@App.updatesRegion.currentView.ui.changelog).to.contain("View Changelog")
+        expect(@App.updatesRegion.currentView.ui.state).to.contain("No updates available.")
+        expect(@App.updatesRegion.currentView.ui.button).to.contain("Close")
+        expect(@win.title).to.eq "Updates"
+        done()
 
   ## other tests which need writing
   ## 1. logging in (stub the github response)

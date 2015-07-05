@@ -27,7 +27,7 @@ $Cypress.register "Aliasing", (Cypress, _, $) ->
 
       # allAliases = _(@_aliases).keys().join(", ")
 
-      # Cypress.command
+      # Cypress.Log.command
       #   onConsole: ->
       #     "Alias": str
       #     "Returned": subject

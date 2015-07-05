@@ -9,7 +9,7 @@ describe "$Cypress.Cy Listeners Extensions", ->
 
       @Cypress.trigger "initialize", {
         $remoteIframe: @iframe
-        config: ->
+        config: {}
       }
 
       ## make sure not to accidentally return

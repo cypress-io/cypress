@@ -1,4 +1,4 @@
-$Cypress.register "Assertions", (Cypress, _, $) ->
+$Cypress.register "Assertions", (Cypress, _, $, Promise) ->
 
   bRe            = /(\[b\])(.+)(\[\\b\])/
   bTagOpen       = /\[b\]/g
@@ -167,6 +167,6 @@ $Cypress.register "Assertions", (Cypress, _, $) ->
       if error
         error.onFail = (err) ->
 
-      Cypress.command obj
+      Cypress.Log.command obj
 
       return Cypress

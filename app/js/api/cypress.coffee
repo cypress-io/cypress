@@ -1,4 +1,4 @@
-window.$Cypress = do ($, _, Backbone) ->
+window.$Cypress = do ($, _, Backbone, Promise) ->
 
   class $Cypress
     constructor: ->
@@ -53,6 +53,7 @@ window.$Cypress = do ($, _, Backbone) ->
       chai   = $Cypress.Chai.create(@, specWindow)
       mocha  = $Cypress.Mocha.create(@, specWindow)
       runner = $Cypress.Runner.create(@, specWindow, mocha)
+      log    = $Cypress.Log.create(@, cy)
 
       ## TODO: TEST THIS
       @prepareForSpecEvents()
@@ -129,7 +130,7 @@ window.$Cypress = do ($, _, Backbone) ->
 
       ## attach each of the classes
       ## to the Cypress instance
-      for klass in "Cy Log Utils Chai Mocha Runner Agents Server Chainer Location LocalStorage Cookies".split(" ")
+      for klass in "Cy Log Utils Chai Mocha Runner Agents Server Chainer Location LocalStorage Cookies Keyboard".split(" ")
         Cypress[klass] = $Cypress[klass]
 
       ## copy the modules by reference too
