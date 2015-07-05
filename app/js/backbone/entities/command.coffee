@@ -1,5 +1,7 @@
 @App.module "Entities", (Entities, App, Backbone, Marionette, $, _) ->
 
+  logAttrs = "event error state testId hookName type highlightAttr name alias aliasType referencesAlias message numElements numRetries visible coords scrollBy viewportWidth viewportHeight url".split(" ")
+
   ## this is another good candidate for a mutator
   ## with stripping out the parent selector
 
@@ -216,13 +218,11 @@
       if log.get("type") not in ["parent", "child"]
         throw new Error("Commands may only have type of 'parent' or 'child'.  Command was: {name: #{log.get('name')}, type: #{log.get('type')}}")
 
-      attrs = ["event", "error", "state", "testId", "hookName", "type", "highlightAttr", "name", "alias", "aliasType", "referencesAlias", "message", "numElements", "numRetries", "visible", "coords", "scrollBy"]
-
-      command = new Entities.Command log.pick.apply(log, attrs)
+      command = new Entities.Command log.pick.apply(log, logAttrs)
       command.log = log
 
       command.listenTo log, "attrs:changed", (attrs) ->
-        command.set attrs
+        command.set _.pick(attrs, logAttrs...)
 
       return command
 
