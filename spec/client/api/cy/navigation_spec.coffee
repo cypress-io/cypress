@@ -135,6 +135,10 @@ describe "$Cypress.Cy Navigation Commands", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
 
+      it "preserves url on subsequent visits", ->
+        @cy.visit("/fixtures/html/sinon.html").get("button").then ->
+          expect(@log.get("url")).to.eq "/fixtures/html/sinon.html"
+
       it "logs immediately before resolving", (done) ->
         @Cypress.on "log", (log) ->
           expect(log.pick("name", "message")).to.deep.eq {
@@ -150,6 +154,7 @@ describe "$Cypress.Cy Navigation Commands", ->
             state: "success"
             name: "visit"
             message: "index.html"
+            url: "index.html"
           }
 
           _.each obj, (value, key) =>

@@ -139,6 +139,33 @@ describe "Iframe Entity", ->
       @iframe.revertDom(@snapshot, @command)
       expect(revertViewport).to.be.calledWith viewport
 
+    it "calls revertUrl with command", ->
+      url = "http://localhost:8000"
+      @command.set {url: url}
+      revertUrl = @sandbox.spy @iframe, "revertUrl"
+
+      @iframe.revertDom(@snapshot, @command)
+      expect(revertUrl).to.be.calledWith url
+
+  context "#revertUrl", ->
+    beforeEach ->
+      @url = "http://localhost:8000"
+      @iframe.setUrl @url
+      expect(@iframe.state).to.deep.eq {}
+
+    it "sets url to state", ->
+      @iframe.revertUrl(@url)
+      expect(@iframe.state.url).to.eq @url
+
+    it "does not reset state if already set", ->
+      @iframe.revertUrl(@url)
+      @iframe.revertUrl("www.github.com")
+      expect(@iframe.state.url).to.eq @url
+
+    it "sets the url on the iframe model", ->
+      @iframe.revertUrl(@url)
+      expect(@iframe.get("url")).to.eq @url
+
   context "#revertViewport", ->
     beforeEach ->
       @viewport = {viewportWidth: 1024, viewportHeight: 768}

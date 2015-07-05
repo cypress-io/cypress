@@ -306,6 +306,15 @@ describe "$Cypress.Log API", ->
 
             @Cypress.Log.command({})
 
+          it "sets url to private url", (done) ->
+            @cy.private("url", "www.github.com")
+
+            @Cypress.on "log", (obj) ->
+              expect(obj.get("url")).to.eq "www.github.com"
+              done()
+
+            @Cypress.Log.command({})
+
           it "sets testId to runnable.id", (done) ->
             @cy.private("runnable", {id: 123})
 

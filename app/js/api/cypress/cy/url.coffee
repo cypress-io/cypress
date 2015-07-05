@@ -17,6 +17,8 @@ do ($Cypress, _) ->
 
       @prop("urls", urls)
 
+      @private("url", url)
+
       _.defaults options,
         log: true
         by: null

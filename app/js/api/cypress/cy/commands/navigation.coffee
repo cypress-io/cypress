@@ -131,7 +131,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
               catch e
                 reject(e)
             else
-              command.snapshot().end() if command
+              command.set({url: url}).snapshot().end() if command
               resolve(win)
 
           ## any existing global variables will get nuked after it navigates

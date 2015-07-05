@@ -85,6 +85,7 @@
         return if previousDetachedId isnt @state.detachedId
 
         @restoreViewport()
+        @restoreUrl()
         @trigger "restore:dom", body
 
         @state.detachedId = null
@@ -120,8 +121,21 @@
       ## reset our viewport to the command
       @setViewport(viewport)
 
+    restoreUrl: ->
+      return if not url = @state.url
+
+      @setUrl(url)
+
+    revertUrl: (url) ->
+      if not (@state.url)
+        @state.url = @get("url")
+
+      @setUrl(url)
+
     revertDom: (snapshot, command) ->
       @revertViewport(command.pick("viewportWidth", "viewportHeight"))
+
+      @revertUrl(command.get("url"))
 
       @trigger "revert:dom", snapshot
 
