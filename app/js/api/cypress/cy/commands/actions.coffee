@@ -555,7 +555,10 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             if options.x and options.y
               coords = @getRelativeCoordinates($el, options.x, options.y)
             else
-              coords = @getCoordinates($el, options.position)
+              try
+                coords = @getCoordinates($el, options.position)
+              catch err
+                @throwErr(err, options.command)
 
             ## if we're forcing this click event
             ## just immediately send it up

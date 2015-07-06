@@ -3679,7 +3679,18 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get("select:first").click()
 
-      it "throws when provided invalid position"
+      it "throws when provided invalid position", (done) ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push log
+
+        @cy.on "fail", (err) ->
+          expect(logs.length).to.eq(2)
+          expect(err.message).to.eq "Invalid position argument: 'foo'. Position may only be center, topLeft, topRight, bottomLeft, or bottomRight."
+          done()
+
+        @cy.get("button:first").click("foo")
 
     describe ".log", ->
       beforeEach ->
