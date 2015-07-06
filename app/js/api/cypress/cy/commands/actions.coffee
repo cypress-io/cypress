@@ -346,15 +346,29 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           _(dblclicks).invoke("cancel")
           throw err
 
-    click: (subject, position, options = {}) ->
+    click: (subject, positionOrX, y, options = {}) ->
       ## TODO handle pointer-events: none
       ## http://caniuse.com/#feat=pointer-events
 
       ## TODO handle if element is removed during mousedown / mouseup
 
-      if _.isObject(position)
-        options = position
-        position = null
+      switch
+        when _.isObject(positionOrX)
+            options = positionOrX
+            position = null
+
+        when _.isObject(y)
+          options = y
+          position = positionOrX
+          y = null
+          x = null
+
+        when _.all [positionOrX, y], _.isFinite
+          position = null
+          x = positionOrX
+
+        when _.isString(positionOrX)
+          position = positionOrX
 
       _.defaults options,
         $el: subject
@@ -362,6 +376,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         force: false
         command: null
         position: position
+        x: x
+        y: y
         errorOnSelect: true
 
       @ensureDom(options.$el)
@@ -536,7 +552,10 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             ## in the viewport
             $el.get(0).scrollIntoView() if scrollIntoView
 
-            coords = @getCoordinates($el, options.position)
+            if options.x and options.y
+              coords = @getRelativeCoordinates($el, options.x, options.y)
+            else
+              coords = @getCoordinates($el, options.position)
 
             ## if we're forcing this click event
             ## just immediately send it up

@@ -78,6 +78,12 @@ do ($Cypress, _) ->
       y = rect.top + rect.height
       normalizeCoords(x, y)
 
+    getRelativeCoordinates: ($el, x, y) ->
+      rect = @getBoundingClientRect($el)
+      x    = rect.left + x
+      y    = rect.top + y
+      normalizeCoords(x, y)
+
     getCoordinates: ($el, position = "center") ->
       rect = @getBoundingClientRect($el)
 

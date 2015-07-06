@@ -3443,8 +3443,33 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get("#button-covered-in-span").click("bottomRight")
 
-    describe "relative coordinate arguments", ->
+      it "can pass options along with position", (done) ->
+        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$("body"))
+        span = $("<span>span</span>").css(position: "absolute", left: btn.offset().left + 80, top: btn.offset().top + 80, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(@cy.$("body"))
 
+        btn.on "click", -> done()
+
+        @cy.get("#button-covered-in-span").click("bottomRight", {force: true})
+
+    describe "relative coordinate arguments", ->
+      it "can specify x and y", (done) ->
+        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$("body"))
+        span = $("<span>span</span>").css(position: "absolute", left: btn.offset().left + 50, top: btn.offset().top + 65, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
+
+        clicked = _.after 2, -> done()
+
+        span.on "click", clicked
+        btn.on "click", clicked
+
+        @cy.get("#button-covered-in-span").click(75, 78)
+
+      it "can pass options along with x, y", (done) ->
+        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$("body"))
+        span = $("<span>span</span>").css(position: "absolute", left: btn.offset().left + 50, top: btn.offset().top + 65, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(@cy.$("body"))
+
+        btn.on "click", -> done()
+
+        @cy.get("#button-covered-in-span").click(75, 78, {force: true})
 
     describe "mousedown", ->
       it "gives focus after mousedown", (done) ->
