@@ -50,5 +50,8 @@ do ($Cypress, _) ->
       method = @prop("current").name
 
       unless $Cypress.Utils.isDescendent($el1, $el2)
-        node = $Cypress.Utils.stringifyElement($el2)
-        @throwErr("Cannot call .#{method}() on this element because it is being covered by another element: #{node}", onFail)
+        if $el2
+          node = $Cypress.Utils.stringifyElement($el2)
+          @throwErr("Cannot call .#{method}() on this element because it is being covered by another element: #{node}", onFail)
+        else
+          @throwErr("Cannot call .#{method}() on this element because its center is currently hidden from view.", onFail)

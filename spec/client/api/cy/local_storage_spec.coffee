@@ -13,7 +13,7 @@ describe "$Cypress.Cy Local Storage Commands", ->
 
     it "sets the storages", ->
       localStorage = window.localStorage
-      remoteStorage = @cy.sync.window().localStorage
+      remoteStorage = @cy.private("window").localStorage
 
       setStorages = @sandbox.spy $Cypress.LocalStorage, "setStorages"
 
@@ -27,7 +27,7 @@ describe "$Cypress.Cy Local Storage Commands", ->
         expect(unsetStorages).to.be.called
 
     it "sets subject to remote localStorage", ->
-      ls = @cy.sync.window().localStorage
+      ls = @cy.private("window").localStorage
 
       @cy.clearLocalStorage().then (remote) ->
         expect(remote).to.eq ls

@@ -59,6 +59,6 @@ describe "$Cypress.Cy Agents Commands", ->
         spy("foo")
 
         commands = _(logs).filter (log) ->
-          log.get("event") is "command"
+          log.get("instrument") is "command"
 
-        expect(commands).to.have.length(1)
+        expect(commands.length).to.eq(1)

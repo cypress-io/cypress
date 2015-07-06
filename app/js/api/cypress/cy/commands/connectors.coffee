@@ -46,7 +46,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
         args = remoteSubject or subject
         args = if args?._spreadArray then args else [args]
 
-        ret = fn.apply @prop("runnable").ctx, args
+        ret = fn.apply @private("runnable").ctx, args
 
         ## if ret is a DOM element
         ## and its an instance of the remoteJQuery
@@ -70,7 +70,10 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
       @ensureParent()
       @ensureSubject()
 
-      command = Cypress.command()
+      command = Cypress.Log.command
+        $el: if Cypress.Utils.hasElement(subject) then subject else null
+        onConsole: ->
+          Subject: subject
 
       ## name could be invoke or its!
       name = @prop("current").name
@@ -99,12 +102,12 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
         ## think about using the hasOwnProperty
         fail() if _.isUndefined(prop)
 
-      invoke = ->
+      invoke = =>
         if _.isFunction(prop)
           ret = prop.apply (remoteSubject or subject), args
 
           if ret and Cypress.Utils.hasElement(ret) and remoteJQueryisNotSameAsGlobal(remoteJQuery) and Cypress.Utils.isInstanceOf(ret, remoteJQuery)
-            return Cypress.cy.$(ret)
+            return @$(ret)
 
           return ret
 
@@ -116,6 +119,12 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
           ".#{fn}(" + Cypress.Utils.stringify(args) + ")"
         else
           ".#{fn}"
+
+      getFormattedElement = ($el) ->
+        if Cypress.Utils.hasElement($el)
+          Cypress.Utils.getDomElements($el)
+        else
+          $el
 
       value = invoke()
 
@@ -134,8 +143,8 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
               obj["Property"] = message
 
             _.extend obj,
-              On: remoteSubject or subject
-              Returned: value
+              On:       getFormattedElement(remoteSubject or subject)
+              Returned: getFormattedElement(value)
 
             obj
 

@@ -1,4 +1,4 @@
-$Cypress.register "Communications", (Cypress, _, $) ->
+$Cypress.register "Communications", (Cypress, _, $, Promise) ->
 
   Cypress.addParentCommand
     msg: ->
@@ -9,7 +9,7 @@ $Cypress.register "Communications", (Cypress, _, $) ->
 
       new Promise (resolve, reject) =>
 
-        command = Cypress.command
+        command = Cypress.Log.command
           name: "message"
           message: Cypress.Utils.stringify([msg, data])
 

@@ -3,33 +3,41 @@
     <% if @isPending: %>
       <i class="fa fa-spinner fa-spin"></i>
     <% else: %>
-      <span><%= @number %></span>
+      <% if @number: %>
+        <span><%= @number %></span>
+      <% end %>
     <% end %>
   </span>
   <span class="command-method">
-    <span><%= @name %></span>
+    <span>
+      <% if @event: %>
+        (<%= @name %>)
+      <% else: %>
+        <%= @name %>
+      <% end %>
+    </span>
   </span>
   <span class="command-message">
     <% if @referencesAlias: %>
-      <span class="command-alias <%= @aliasType %>" title="Found an alias for: '<%= @referencesAlias %>'">@<%= @referencesAlias %></span>
+      <% for alias in [].concat(@referencesAlias): %>
+        <span class="command-alias <%= @aliasType %>" title="Found an alias for: '<%= alias %>'">@<%= alias %></span>
+      <% end %>
     <% else: %>
       <span><%= @messageTruncated %></span>
     <% end %>
   </span>
-  <% if @shouldDisplayControls: %>
-    <span class="command-controls">
-      <% if @alias: %>
-        <span class="command-alias <%= @aliasType %>" title="<%= @message %> aliased as: '<%= @alias %>'">
-          <%= @alias %>
-        </span>
-      <% end %>
-      <% if not @visible: %>
-        <i class="fa fa-eye-slash" title="<%= @visibleMessage %>"></i>
-      <% end %>
-      <% if @numElements > 1: %>
-        <label title="<%= @numElements %> matched elements" class="label label-default"><%= @numElements %></label>
-      <% end %>
-      <!-- <i class="fa fa-pause"></i> -->
-    </span>
-  <% end %>
+  <span class="command-controls">
+    <% if @alias: %>
+      <span class="command-alias <%= @aliasType %>" title="<%= @message %> aliased as: '<%= @alias %>'">
+        <%= @alias %>
+      </span>
+    <% end %>
+    <% if not @visible: %>
+      <i class="fa fa-eye-slash" title="<%= @visibleMessage %>"></i>
+    <% end %>
+    <% if @numElements > 1: %>
+      <label title="<%= @numElements %> matched elements" class="label label-default"><%= @numElements %></label>
+    <% end %>
+    <!-- <i class="fa fa-pause"></i> -->
+  </span>
 </div>

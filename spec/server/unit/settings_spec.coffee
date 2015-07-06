@@ -18,6 +18,11 @@ describe "Settings", ->
       settings = Settings.readSync process.cwd()
       expect(settings).to.deep.eq {foo: "bar"}
 
+    it "throws on json errors", ->
+      fs.writeFileSync "cypress.json", "{foo: 'bar}"
+      fn = -> Settings.readSync process.cwd()
+      expect(fn).to.throw "Error reading from: #{process.cwd()}/cypress.json"
+
   context "#read", ->
     it "promises cypress.json", ->
       @setup {foo: "bar"}

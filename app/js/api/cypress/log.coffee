@@ -2,6 +2,88 @@
 ## including the intermediate $Log interface
 $Cypress.Log = do ($Cypress, _, Backbone) ->
 
+  CypressErrorRe = /(AssertionError|CypressError)/
+
+  klassMethods = {
+    agent: (Cypress, cy, obj = {}) ->
+      _.defaults obj,
+        name: "agent"
+
+      @log("agent", obj)
+
+    route: (Cypress, cy, obj = {}) ->
+      _.defaults obj,
+        name: "route"
+
+      @log("route", obj)
+
+    command: (Cypress, cy, obj = {}) ->
+      current = cy.prop("current") ? {}
+
+      _.defaults obj, _(current).pick("name", "type")
+
+      ## force duals to become either parents or childs
+      ## normally this would be handled by the command itself
+      ## but in cases where the command purposely does not log
+      ## then it could still be logged during a failure, which
+      ## is why we normalize its type value
+      if obj.type is "dual"
+        obj.type = if current.prev then "child" else "parent"
+
+      ## does this object represent the current command cypress
+      ## is processing?
+      obj.isCurrent = obj.name is current.name
+
+      _.defaults obj,
+        event: false
+        onRender: ->
+        onConsole: ->
+          ret = if $Cypress.Utils.hasElement(current.subject)
+            $Cypress.Utils.getDomElements(current.subject)
+          else
+            current.subject
+
+          "Returned": ret
+
+      if obj.isCurrent
+        ## stringify the obj.message (if it exists) or current.args
+        obj.message = $Cypress.Utils.stringify(obj.message ? current.args)
+
+      ## allow type to by a dynamic function
+      ## so it can conditionally return either
+      ## parent or child (useful in assertions)
+      if _.isFunction(obj.type)
+        obj.type = obj.type.call(cy, current, cy.prop("subject"))
+
+      @log("command", obj)
+
+    log: (Cypress, cy, instrument, obj) ->
+      _.defaults obj,
+        url:              cy.private("url")
+        hookName:         cy.private("hookName")
+        testId:           cy.private("runnable").id
+        viewportWidth:    cy.private("viewportWidth")
+        viewportHeight:   cy.private("viewportHeight")
+        referencesAlias:  undefined
+        alias:            undefined
+        aliasType:        undefined
+        message:          undefined
+        onRender: ->
+        onConsole: ->
+
+      if obj.isCurrent
+        _.defaults obj, alias: cy.getNextAlias()
+
+      obj.instrument = instrument
+
+      log = new $Log Cypress, obj
+      log.wrapOnConsole()
+
+      Cypress.trigger "log", log
+
+      return log
+  }
+
   class $Log
     constructor: (@Cypress, obj = {}) ->
       _.defaults obj,
@@ -83,7 +165,9 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       return @
 
     getError: (err) ->
-      if err.name is "CypressError"
+      ## dont log stack traces on cypress errors
+      ## or assertion errors
+      if CypressErrorRe.test(err.name)
         err.toString()
       else
         err.stack
@@ -108,8 +192,10 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       ## re-wrap onConsole to set Command + Error defaults
       @attributes.onConsole = _.wrap @attributes.onConsole, (orig, args...) ->
 
-        ## grab the Command name by default
-        consoleObj = {Command: _this.get("name")}
+        key = if _this.get("event") then "Event" else "Command"
+
+        consoleObj = {}
+        consoleObj[key] = _this.get("name")
 
         ## merge in the other properties from onConsole
         _.extend consoleObj, orig.apply(@, args)
@@ -121,85 +207,16 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
         return consoleObj
 
-    @create = (Cypress, obj) ->
-      new $Log(Cypress, obj)
+    @create = (Cypress, cy) ->
+      _.each klassMethods, (fn, key) ->
+        $Log[key] = _.partial(fn, Cypress, cy)
 
   _.extend $Log.prototype, Backbone.Events
 
   $Cypress.extend
     command: (obj = {}) ->
-      return if not @cy
+      console.warn "Cypress.command() is deprecated. Please update and use: Cypress.Log.command()"
 
-      current = @cy.prop("current") ? {}
-
-      _.defaults obj, _(current).pick("name", "type")
-
-      ## force duals to become either parents or childs
-      ## normally this would be handled by the command itself
-      ## but in cases where the command purposely does not log
-      ## then it could still be logged during a failure, which
-      ## is why we normalize its type value
-      if obj.type is "dual"
-        obj.type = if current.prev then "child" else "parent"
-
-      ## does this object represent the current command cypress
-      ## is processing?
-      obj.isCurrent = obj.name is current.name
-
-      _.defaults obj,
-        onRender: ->
-        onConsole: ->
-          "Returned": current.subject
-
-      if obj.isCurrent
-        ## stringify the obj.message (if it exists) or current.args
-        obj.message = $Cypress.Utils.stringify(obj.message ? current.args)
-
-      ## allow type to by a dynamic function
-      ## so it can conditionally return either
-      ## parent or child (useful in assertions)
-      if _.isFunction(obj.type)
-        obj.type = obj.type.call(@cy, current, @cy.prop("subject"))
-
-      @log("command", obj)
-
-    route: (obj = {}) ->
-      return if not @cy
-
-      _.defaults obj,
-        name: "route"
-
-      @log("route", obj)
-
-    agent: (obj = {}) ->
-      return if not @cy
-
-      _.defaults obj,
-        name: "agent"
-
-      @log("agent", obj)
-
-    log: (event, obj) ->
-      _.defaults obj,
-        hookName:         @cy.prop("hookName")
-        testId:           @cy.prop("runnable").id
-        referencesAlias:  undefined
-        alias:            undefined
-        aliasType:        undefined
-        message:          undefined
-        onRender: ->
-        onConsole: ->
-
-      if obj.isCurrent
-        _.defaults obj, alias: @cy.getNextAlias()
-
-      obj.event = event
-
-      log = $Log.create(@, obj)
-      log.wrapOnConsole()
-
-      @trigger "log", log
-
-      return log
+      $Log.command(obj)
 
   return $Log

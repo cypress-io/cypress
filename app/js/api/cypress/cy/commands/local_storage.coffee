@@ -2,7 +2,7 @@ $Cypress.register "LocalStorage", (Cypress, _, $) ->
 
   clearLocalStorage = (keys) ->
     local = window.localStorage
-    remote = @sync.window().localStorage
+    remote = @private("window").localStorage
 
     ## set our localStorage and the remote localStorage
     Cypress.LocalStorage.setStorages(local, remote)
@@ -28,7 +28,7 @@ $Cypress.register "LocalStorage", (Cypress, _, $) ->
 
       remote = clearLocalStorage.call(@, keys)
 
-      Cypress.command
+      Cypress.Log.command
         name: "clear ls"
         snapshot: true
         end: true

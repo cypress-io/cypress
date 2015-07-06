@@ -5,7 +5,7 @@ do ($Cypress, _) ->
 
   $Cypress.Cy.extend
     assign: (str, obj) ->
-      @prop("runnable").ctx[str] = obj
+      @private("runnable").ctx[str] = obj
 
     ## these are public because its expected other commands
     ## know about them and are expected to call them
@@ -14,13 +14,15 @@ do ($Cypress, _) ->
       if next and next.name is "as"
         next.args[0]
 
-    getAlias: (name) ->
+    getAlias: (name, command) ->
+      aliases = @prop("aliases") ? {}
+
       ## bail if the name doesnt reference an alias
       return if not aliasRe.test(name)
 
       ## slice off the '@'
-      if not alias = @_aliases[name.slice(1)]
-        @aliasNotFoundFor(name)
+      if not alias = aliases[name.slice(1)]
+        @aliasNotFoundFor(name, command)
 
       return alias
 
@@ -28,9 +30,11 @@ do ($Cypress, _) ->
       name.replace(aliasDisplayRe, "")
 
     getAvailableAliases: ->
-      _(@_aliases).keys()
+      return [] if not aliases = @prop("aliases")
 
-    aliasNotFoundFor: (name) ->
+      _(aliases).keys()
+
+    aliasNotFoundFor: (name, command) ->
       availableAliases = @getAvailableAliases()
 
       ## throw a very specific error if our alias isnt in the right
@@ -38,8 +42,8 @@ do ($Cypress, _) ->
       if (not aliasRe.test(name)) and (name in availableAliases)
         @throwErr "Invalid alias: '#{name}'. You forgot the '@'. It should be written as: '@#{@_aliasDisplayName(name)}'."
 
-      currentCommand = @prop("current").name
-      @throwErr "cy.#{currentCommand}() could not find a registered alias for: '#{@_aliasDisplayName(name)}'.  Available aliases are: '#{availableAliases.join(", ")}'."
+      command ?= @prop("current").name
+      @throwErr "cy.#{command}() could not find a registered alias for: '#{@_aliasDisplayName(name)}'. Available aliases are: '#{availableAliases.join(", ")}'."
 
     ## recursively inserts previous objects
     ## up until it finds a parent command

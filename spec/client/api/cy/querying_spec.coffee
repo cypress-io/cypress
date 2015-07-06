@@ -223,7 +223,7 @@ describe "$Cypress.Cy Querying Commands", ->
       ## wait until we're ALMOST about to time out before
       ## appending the missingEl
       @cy.on "retry", (options) =>
-        if options.total + (options.interval * 4) > options.timeout
+        if options.total + (options.interval * 4) > options._runnableTimeout
           @cy.$("body").append(missingEl)
 
       @cy.get("#missing-el").then ($div) ->
@@ -241,6 +241,44 @@ describe "$Cypress.Cy Querying Commands", ->
     it "does not throw when could not find element and was told not to retry", ->
       @cy.get("#missing-el", {retry: false}).then ($el) ->
         expect($el).not.to.exist
+
+    it "can increase the timeout", ->
+      missingEl = $("<div />", id: "missing-el")
+
+      ## make our runnable timeout after 100ms
+      @cy._timeout(100)
+
+      @cy.on "retry", (options) =>
+        ## make sure runnableTimeout is 10secs
+        expect(options._runnableTimeout).to.eq 10000
+
+        ## we shouldnt have a timer either
+        expect(@cy.private("runnable")).not.to.have.property("timer")
+
+      ## but wait 300ms
+      _.delay =>
+        @cy.$("body").append(missingEl)
+      , 300
+
+      @cy.inspect().get("#missing-el", {timeout: 10000})
+
+    it "does not factor in the total time the test has been running", ->
+      missingEl = $("<div />", id: "missing-el")
+
+      @cy.on "retry", _.after 2, =>
+        @cy.$("body").append(missingEl)
+
+      ## in this example our test has been running 200ms
+      ## but the timeout is below this amount, and it
+      ## still passes because the total running time is
+      ## not factored in (which is correct)
+      @cy
+        .wait(200)
+        .get("#missing-el", {timeout: 125})
+        .then ->
+          ## it should reset the timeout back
+          ## to 300 after successfully finished get method
+          expect(@cy._timeout()).to.eq 300
 
     _.each ["exist", "exists"], (key) ->
       describe "{#{key}: false}", ->
@@ -411,7 +449,7 @@ describe "$Cypress.Cy Querying Commands", ->
             Command: "get"
             Selector: "body"
             Options: undefined
-            Returned: $body
+            Returned: $body.get(0)
             Elements: 1
           }
 
@@ -421,7 +459,7 @@ describe "$Cypress.Cy Querying Commands", ->
             Command: "get"
             Alias: "@b"
             Options: undefined
-            Returned: $body
+            Returned: $body.get(0)
             Elements: 1
           }
 
@@ -636,7 +674,7 @@ describe "$Cypress.Cy Querying Commands", ->
           @cy._timeout(1000)
 
           retry = _.after 3, _.once =>
-            @cy.sync.window().$.getJSON("/json")
+            @cy.private("window").$.getJSON("/json")
 
           @cy.on "retry", retry
 
@@ -798,6 +836,13 @@ describe "$Cypress.Cy Querying Commands", ->
         .get("#contains-multiple-filter-match").contains("li", "Maintenance").then ($row) ->
           expect($row).to.have.class("active")
 
+    it "returns the parent node which contains content spanned across a child element and text node", ->
+      item = @cy.$("#upper .item")
+
+      @cy.contains("New York").then ($item) ->
+        expect($item).to.be.ok
+        expect($item.get(0)).to.eq item.get(0)
+
     describe "{exist: false}", ->
       it "returns null when no content exists", ->
         @cy.contains("alksjdflkasjdflkajsdf", {exist: false}).then ($el) ->
@@ -940,8 +985,8 @@ describe "$Cypress.Cy Querying Commands", ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "contains"
             Content: "nested contains"
-            "Applied To": getFirstSubjectByName.call(@, "get")
-            Returned: $label
+            "Applied To": getFirstSubjectByName.call(@, "get").get(0)
+            Returned: $label.get(0)
             Elements: 1
 
           }
@@ -1012,3 +1057,28 @@ describe "$Cypress.Cy Querying Commands", ->
           done()
 
         @cy.contains("button", {exist:false})
+
+      it "throws when there is a found element but never becomes visible", (done) ->
+        @cy.$("#button").hide()
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "Found hidden content: 'button' in any elements but it never became visible."
+          done()
+
+        @cy.contains("button", {visible: true})
+
+      it "throws when there is a found element but never becomes hidden", (done) ->
+        @cy.$("#button").show()
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "Found visible content: 'button' in any elements but it never became hidden."
+          done()
+
+        @cy.contains("button", {visible: false})
+
+      it "throws when there is a found element but never becomes non-existent", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "Found content: 'button' within any existing elements but it never became non-existent."
+          done()
+
+        @cy.contains("button", {exist: false})

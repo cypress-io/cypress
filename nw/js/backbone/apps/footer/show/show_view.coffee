@@ -23,6 +23,7 @@
       updates:  "[data-updates]"
       debug:    "[data-debug]"
       tests:    "[data-tests]"
+      about:    "[data-about]"
 
     triggers:
       "click @ui.quit"     : "quit:clicked"
@@ -32,6 +33,7 @@
       "click @ui.updates"  : "updates:clicked"
       "click @ui.debug"    : "debug:clicked"
       "click @ui.tests"    : "tests:clicked"
+      "click @ui.about"    : "about:clicked"
 
     events:
       "click .dropdown-menu a" : "aClicked"

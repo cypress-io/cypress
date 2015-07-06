@@ -1,4 +1,4 @@
-window.$Cypress = do ($, _, Backbone) ->
+window.$Cypress = do ($, _, Backbone, Promise) ->
 
   class $Cypress
     constructor: ->
@@ -20,9 +20,6 @@ window.$Cypress = do ($, _, Backbone) ->
         specWindow: specWindow
         $remoteIframe: $remoteIframe
         config: config
-
-      ## set our defaults
-      @defaults()
 
       ## let the world know we're ready to
       ## rock and roll
@@ -56,6 +53,7 @@ window.$Cypress = do ($, _, Backbone) ->
       chai   = $Cypress.Chai.create(@, specWindow)
       mocha  = $Cypress.Mocha.create(@, specWindow)
       runner = $Cypress.Runner.create(@, specWindow, mocha)
+      log    = $Cypress.Log.create(@, cy)
 
       ## TODO: TEST THIS
       @prepareForSpecEvents()
@@ -95,9 +93,6 @@ window.$Cypress = do ($, _, Backbone) ->
 
         return @
 
-    defaults: ->
-      @trigger "defaults"
-
     stop: ->
       @abort().then =>
 
@@ -123,7 +118,6 @@ window.$Cypress = do ($, _, Backbone) ->
     ## removing additional own instance properties
     restore: ->
       @trigger "restore"
-      @defaults()
       return @
 
     _.extend $Cypress.prototype, Backbone.Events
@@ -136,7 +130,7 @@ window.$Cypress = do ($, _, Backbone) ->
 
       ## attach each of the classes
       ## to the Cypress instance
-      for klass in "Cy Log Utils Chai Mocha Runner Agents Server Chainer Location LocalStorage Cookies".split(" ")
+      for klass in "Cy Log Utils Chai Mocha Runner Agents Server Chainer Location LocalStorage Cookies Keyboard Mouse".split(" ")
         Cypress[klass] = $Cypress[klass]
 
       ## copy the modules by reference too

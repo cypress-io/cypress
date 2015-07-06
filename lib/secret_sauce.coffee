@@ -88,10 +88,18 @@ SecretSauce.Socket =
         @Log.info "watching test file failed", {error: err, path: testFilePath}
         reject err
 
+  onFixture: (fixture, cb) ->
+    @Fixtures(@app).get(fixture)
+      .then(cb)
+      .catch (err) ->
+        cb({__error: err.message})
+
   _startListening: (chokidar, path) ->
     { _ } = SecretSauce
 
     messages = {}
+
+    {projectRoot, testFolder} = @app.get("cypress")
 
     @io.on "connection", (socket) =>
       @Log.info "socket connected"
@@ -140,6 +148,9 @@ SecretSauce.Socket =
           console.log "\u0007", err.details, err.message
           fn(message: err.message)
 
+      socket.on "fixture", =>
+        @onFixture.apply(@, arguments)
+
       socket.on "finished:generating:ids:for:test", (strippedPath) =>
         @Log.info "finished:generating:ids:for:test", strippedPath: strippedPath
         @io.emit "test:changed", file: strippedPath
@@ -160,7 +171,7 @@ SecretSauce.Socket =
         ## spec by setting custom-data on the job object
         batchId = Date.now()
 
-        jobName = @app.get("cypress").testFolder + "/" + spec
+        jobName = testFolder + "/" + spec
         fn(jobName, batchId)
 
         ## need to handle platform/browser/version incompatible configurations
@@ -213,7 +224,7 @@ SecretSauce.Socket =
 
           sauce options, df
 
-    @testsDir = path.join(@app.get("cypress").projectRoot, @app.get("cypress").testFolder)
+    @testsDir = path.join(projectRoot, testFolder)
 
     @fs.ensureDirAsync(@testsDir).bind(@)
 
@@ -516,18 +527,21 @@ SecretSauce.RemoteInitial =
     d.on 'error', (e) => @errorHandler(e, req, res)
 
     d.run =>
-      ## first check to see if this url contains a FQDN
+      ## 1. first check to see if this url contains a FQDN
       ## if it does then its been rewritten from an absolute-domain
       ## into a absolute-path-relative link, and we should extract the
       ## remoteHost from this URL
-      remoteHost = @getOriginFromFqdnUrl(req) ? req.cookies["__cypress.remoteHost"] ? @app.get("cypress").baseUrl
+      ## 2. or use cookies
+      ## 3. or use baseUrl
+      ## 4. or finally fall back on app instance var
+      remoteHost = @getOriginFromFqdnUrl(req) ? req.cookies["__cypress.remoteHost"] ? @app.get("cypress").baseUrl ? @app.get("__cypress.remoteHost")
 
       @Log.info "handling initial request", url: req.url, remoteHost: remoteHost
 
       ## we must have the remoteHost which tell us where
       ## we should request the initial HTML payload from
       if not remoteHost
-        throw new Error("Missing remoteHost cookie!")
+        throw new Error("Missing remoteHost. Cannot proxy request: #{req.url}")
 
       thr = @through (d) -> @queue(d)
 
@@ -566,12 +580,13 @@ SecretSauce.RemoteInitial =
     ## prepends req.url with remoteHost
     remoteUrl = @url.resolve(remoteHost, req.url)
 
-    setCookies = (initial, remoteHost) ->
+    setCookies = (initial, remoteHost) =>
       ## dont set the cookies if we're not on the initial request
       return if req.cookies["__cypress.initial"] isnt "true"
 
       res.cookie("__cypress.initial", initial)
       res.cookie("__cypress.remoteHost", remoteHost)
+      @app.set("__cypress.remoteHost", remoteHost)
 
     ## we are setting gzip to false here to prevent automatic
     ## decompression of the response since we dont need to transform
@@ -608,7 +623,7 @@ SecretSauce.RemoteInitial =
       if cookies = incomingRes.headers["set-cookie"]
         res.append("Set-Cookie", @stripCookieParams(cookies))
 
-      if /^30(1|2|7|8)$/.test(incomingRes.statusCode)
+      if /^30(1|2|3|7|8)$/.test(incomingRes.statusCode)
         ## redirection is extremely complicated and there are several use-cases
         ## we are encompassing. read the routes_spec for each situation and
         ## why we have to check on so many things.
@@ -680,6 +695,7 @@ SecretSauce.RemoteInitial =
 
     res.cookie("__cypress.initial", false)
     res.cookie("__cypress.remoteHost", remoteHost)
+    @app.set("__cypress.remoteHost", remoteHost)
 
     stream = @fs.createReadStream(file, "utf8")
 
@@ -876,6 +892,10 @@ SecretSauce.RemoteInitial =
           when "attr"
             elem.getAttribute attr, (val) ->
               elem.setAttribute attr, fn(val)
+
+          when "removeAttr"
+            elem.removeAttribute(attr)
+
           when "html"
             stream = elem.createStream({outer: true})
             stream.pipe(through (buf) ->

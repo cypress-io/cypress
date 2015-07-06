@@ -6,7 +6,7 @@ describe "$Cypress.Cy Angular Commands", ->
       @loadDom("html/angular").then =>
         @setup({replaceIframeContents: false})
         @Cypress.set @currentTest
-        @currentTest.timeout(400)
+        @currentTest.timeout(200)
 
     context "find by binding", ->
       it "finds color.name binding elements", ->
@@ -18,10 +18,11 @@ describe "$Cypress.Cy Angular Commands", ->
 
       describe "errors", ->
         beforeEach ->
+          @currentTest.enableTimeouts(false)
           @allowErrors()
 
         it "throws when cannot find angular", (done) ->
-          delete @cy.sync.window().angular
+          delete @cy.private("window").angular
 
           @cy.on "fail", (err) ->
             expect(err.message).to.include "Angular global (window.angular) was not found in your window! You cannot use .ng() methods without angular."
@@ -79,14 +80,15 @@ describe "$Cypress.Cy Angular Commands", ->
         ## wait until we're ALMOST about to time out before
         ## appending the missingInput
         @cy.on "retry", (options) =>
-          if options.total + (options.interval * 4) > options.timeout
+          if options.total + (options.interval * 4) > options._runnableTimeout
             @cy.$("body").append(missingLi)
 
-        @cy.ng("repeater", "li in lis").then ($li) ->
+        @cy.inspect().ng("repeater", "li in lis").then ($li) ->
           expect($li).to.match missingLi
 
       describe "errors", ->
         beforeEach ->
+          @currentTest.enableTimeouts(false)
           @allowErrors()
 
         it "throws when repeater cannot be found", (done) ->
@@ -116,7 +118,7 @@ describe "$Cypress.Cy Angular Commands", ->
           @cy.ng("repeater", "not-found")
 
         it "throws when cannot find angular", (done) ->
-          delete @cy.sync.window().angular
+          delete @cy.private("window").angular
 
           @cy.on "fail", (err) ->
             expect(err.message).to.include "Angular global (window.angular) was not found in your window! You cannot use .ng() methods without angular."
@@ -149,7 +151,7 @@ describe "$Cypress.Cy Angular Commands", ->
         ## wait until we're ALMOST about to time out before
         ## appending the missingInput
         @cy.on "retry", (options) =>
-          if options.total + (options.interval * 4) > options.timeout
+          if options.total + (options.interval * 4) > options._runnableTimeout
             @cy.$("body").append(missingInput)
 
         @cy.ng("model", "missing-input").then ($input) ->
@@ -174,6 +176,7 @@ describe "$Cypress.Cy Angular Commands", ->
 
       describe "errors", ->
         beforeEach ->
+          @currentTest.enableTimeouts(false)
           @allowErrors()
 
         it "throws when model cannot be found", (done) ->
@@ -202,7 +205,7 @@ describe "$Cypress.Cy Angular Commands", ->
           @cy.ng("model", "not-found")
 
         it "throws when cannot find angular", (done) ->
-          delete @cy.sync.window().angular
+          delete @cy.private("window").angular
 
           @cy.on "fail", (err) ->
             expect(err.message).to.include "Angular global (window.angular) was not found in your window! You cannot use .ng() methods without angular."

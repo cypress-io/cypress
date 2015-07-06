@@ -12,7 +12,7 @@ $Cypress.register "Debugging", (Cypress, _, $) ->
 
     debug: ->
       console.log "\n%c------------------------Cypress Command Info------------------------", "font-weight: bold;"
-      console.log "Runnable:           ", @prop("runnable")
+      console.log "Runnable:           ", @private("runnable")
       console.log "Subject:            ", @prop("subject")
       console.log "Available Aliases:  ", @getAvailableAliases()
       console.log "Pending Requests:   ", @getPendingRequests()

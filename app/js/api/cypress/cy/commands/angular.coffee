@@ -1,4 +1,4 @@
-$Cypress.register "Angular", (Cypress, _, $) ->
+$Cypress.register "Angular", (Cypress, _, $, Promise) ->
 
   ngPrefixes = ['ng-', 'ng_', 'data-ng-', 'x-ng-']
 
@@ -9,7 +9,7 @@ $Cypress.register "Angular", (Cypress, _, $) ->
       ## and if angular is available through them.  throw a very specific
       ## error message here that's different depending on what module
       ## system you're using
-      @throwErr "Angular global (window.angular) was not found in your window! You cannot use .ng() methods without angular." if not @sync.window().angular
+      @throwErr "Angular global (window.angular) was not found in your window! You cannot use .ng() methods without angular." if not @private("window").angular
 
       switch type
         when "model"
@@ -26,7 +26,7 @@ $Cypress.register "Angular", (Cypress, _, $) ->
     _findByNgBinding: (binding, options) ->
       selector = ".ng-binding"
 
-      angular = @sync.window().angular
+      angular = @private("window").angular
 
       options.error = "Could not find element for binding: '#{binding}'!"
 

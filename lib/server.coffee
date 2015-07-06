@@ -9,6 +9,8 @@ Promise      = require 'bluebird'
 Log          = require "./log"
 Project      = require "./project"
 Socket       = require "./socket"
+Support      = require "./support"
+Fixtures     = require "./fixtures"
 Settings     = require './util/settings'
 
 ## currently not making use of event emitter
@@ -28,11 +30,15 @@ class Server
     @initialize(projectRoot)
 
   initialize: (projectRoot) ->
-    @config = @getCypressJson(projectRoot)
+    try
+      @config = @getCypressJson(projectRoot)
 
-    @setCypressJson(@config)
+      @setCypressJson(@config)
 
-    Log.setSettings(@config)
+      Log.setSettings(@config)
+    catch err
+      err.jsonError = true
+      @config = err
 
   getCypressJson: (projectRoot) ->
     obj = Settings.readSync(projectRoot)
@@ -49,12 +55,16 @@ class Server
     ## passing or failing
 
     _.defaults obj,
+      baseUrl: null
       clientRoute: "/__/"
       commandTimeout: 4000
       port: 2020
       autoOpen: false
-      wizard: false
+      viewportWidth: 1000
+      viewportHeight: 660
       testFolder: "tests"
+      fixturesFolder: "tests/_fixtures"
+      supportFolder: "tests/_support"
       javascripts: []
       env: process.env["NODE_ENV"]
       namespace: "__cypress"
@@ -109,19 +119,22 @@ class Server
     e
 
   open: ->
-    @server    = http.createServer(@app)
-    @io        = require("socket.io")(@server, {path: "/__socket.io"})
-    @project   = Project(@config.projectRoot)
-
-    allowDestroy(@server)
-
-    @configureApplication()
-
-    ## refactor this class
-    socket = Socket(@io, @app)
-    socket.startListening()
-
     new Promise (resolve, reject) =>
+      ## bail if we had a problem reading from cypress.json
+      return reject(@config) if @config.jsonError
+
+      @server    = http.createServer(@app)
+      @io        = require("socket.io")(@server, {path: "/__socket.io"})
+      @project   = Project(@config.projectRoot)
+
+      allowDestroy(@server)
+
+      @configureApplication()
+
+      ## refactor this class
+      socket = Socket(@io, @app)
+      socket.startListening()
+
       onError = (err) =>
         ## if the server bombs before starting
         ## and the err no is EADDRINUSE
@@ -137,7 +150,17 @@ class Server
 
         @server.removeListener "error", onError
 
-        @project.ensureProjectId().bind(@)
+        Promise.join(
+          ## ensure fixtures dir is created
+          ## and example fixture if dir doesnt exist
+          Fixtures(@app).scaffold(),
+          ## ensure support dir is created
+          ## and example support file if dir doesnt exist
+          Support(@app).scaffold()
+        )
+        .bind(@)
+        .then ->
+          @project.ensureProjectId()
         .then ->
           require('open')(@config.clientUrl) if @config.autoOpen
         .return(@config)

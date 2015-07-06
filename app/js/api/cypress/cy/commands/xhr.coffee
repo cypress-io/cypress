@@ -73,7 +73,7 @@ $Cypress.register "XHR", (Cypress, _, $) ->
     urls = urls.concat getUrl(options)
     @prop "availableUrls", urls
 
-    options.log = Cypress.route
+    options.log = Cypress.Log.route
       method:   options.method
       url:      getUrl(options)
       status:   options.status
@@ -145,13 +145,14 @@ $Cypress.register "XHR", (Cypress, _, $) ->
 
           ## assign this existing command
           ## to the xhr so we can reuse it later
-          xhr.log = Cypress.command
-            name:      "request"
+          xhr.log = Cypress.Log.command
+            name:      "xhr"
             alias:     alias
             aliasType: "route"
             type:      "parent"
             error:     err
             snapshot:  true
+            event:     true
             onConsole: =>
               consoleObj = {
                 Method:        xhr.method
@@ -317,6 +318,9 @@ $Cypress.register "XHR", (Cypress, _, $) ->
       if not validHttpMethodsRe.test(options.method)
         @throwErr "cy.route() was called with an invalid method: '#{o.method}'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"
 
+      if not options.response? and options.respond isnt false
+        @throwErr "cy.route() cannot accept an undefined or null response. It must be set to something, even an empty string will work."
+
       ## convert to wildcard regex
       if options.url is "*"
         options.originalUrl = "*"
@@ -327,22 +331,47 @@ $Cypress.register "XHR", (Cypress, _, $) ->
       if alias = @getNextAlias()
         options.alias = alias
 
-      ## if we have a tmpServer
-      if tmpServer
-        ## make sure we have tmpRoutes
-        tmpRoutes = @prop(TMP_ROUTES)
+      applyRoute = (options) =>
+        ## if we have a tmpServer
+        if tmpServer
+          ## make sure we have tmpRoutes
+          tmpRoutes = @prop(TMP_ROUTES)
 
-        if not tmpRoutes
-          ## if we dont make them an array
-          tmpRoutes = @prop(TMP_ROUTES, [])
+          if not tmpRoutes
+            ## if we dont make them an array
+            tmpRoutes = @prop(TMP_ROUTES, [])
 
-        ## push a new callback function
-        ## which stubs the routes as soon
-        ## as we we have a server
-        tmpRoutes.push =>
-          stubRoute.call(@, options)
+          ## push a new callback function
+          ## which stubs the routes as soon
+          ## as we we have a server
+          tmpRoutes.push =>
+            stubRoute.call(@, options)
+        else
+          stubRoute.call(@, options, server)
+
+      ## if our response is a string and
+      ## its a fixture signature, then
+      ## dont resolve route until we go
+      ## fetch our fixture!
+      response = options.response
+      if _.isString(response)
+        if @matchesFixture(response)
+          fixture = @parseFixture(response)
+
+          return @sync.fixture(fixture).then (fixture) ->
+            ## assign the fixture to our response
+            options.response = fixture
+            applyRoute(options)
+        else
+          if aliasObj = @getAlias(response, "route")
+            ## reset the route's response to be the
+            ## aliases subject
+            options.response = aliasObj.subject
+
+        ## now apply the route
+        applyRoute(options)
       else
-        stubRoute.call(@, options, server)
+        applyRoute(options)
 
     respond: ->
       ## bail if we dont have a server prop or a tmpServer prop

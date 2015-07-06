@@ -1,5 +1,7 @@
 @App.module "Entities", (Entities, App, Backbone, Marionette, $, _) ->
 
+  logAttrs = "event error state testId hookName type highlightAttr name alias aliasType referencesAlias message numElements numRetries visible coords scrollBy viewportWidth viewportHeight url".split(" ")
+
   ## this is another good candidate for a mutator
   ## with stripping out the parent selector
 
@@ -17,11 +19,6 @@
 
       selector: ->
         _.trim @stripParentSelector()
-
-      ## display controls if there isnt an error
-      ## and this isnt a clone
-      shouldDisplayControls: ->
-        not @isCloned()
 
       truncated: ->
         switch @get("type")
@@ -86,8 +83,8 @@
     isParent: ->
       !!@get("isParent")
 
-    isCloned: ->
-      !!@get("isCloned")
+    isEvent: ->
+      !!@get("event")
 
     stripParentSelector: ->
       selector = @attributes.selector ? ""
@@ -119,6 +116,8 @@
 
       groups = @formatGroupsForConsole(obj)
 
+      table = @formatTableForConsonle(obj)
+
       obj = @formatForConsole(obj)
 
       _.each obj, (value, key) ->
@@ -126,12 +125,28 @@
 
       if groups
         _.each groups, (group) ->
-          console.group(group.name)
+          console.groupCollapsed(group.name)
 
           _.each group.items, (value, key) ->
             fn ["%c" + key, "color: blue", value]
 
           console.groupEnd()
+
+      if table
+        if _.isArray(table)
+          console.table(table)
+        else
+          console.groupCollapsed(table.name)
+          console.table(table.data, table.columns)
+          console.groupEnd()
+
+    formatTableForConsonle: (obj) ->
+      return if not obj.table
+
+      if table = _.result(obj, "table")
+        delete obj.table
+
+        table
 
     formatGroupsForConsole: (obj) ->
       return if not obj.groups
@@ -190,6 +205,12 @@
     anyFailed: ->
       @any (command) -> command.get("error")
 
+    getLastCommandThatMatchesError: (err) ->
+      for command in @models by -1
+        error = command.get("error")
+        if error and error is err
+          return command
+
     getTotalNumber: ->
       @_maxNumber
 
@@ -197,13 +218,11 @@
       if log.get("type") not in ["parent", "child"]
         throw new Error("Commands may only have type of 'parent' or 'child'.  Command was: {name: #{log.get('name')}, type: #{log.get('type')}}")
 
-      attrs = ["state", "testId", "hookName", "type", "highlightAttr", "name", "alias", "aliasType", "referencesAlias", "message", "numElements", "numRetries", "visible", "coords"]
-
-      command = new Entities.Command log.pick.apply(log, attrs)
+      command = new Entities.Command log.pick.apply(log, logAttrs)
       command.log = log
 
       command.listenTo log, "attrs:changed", (attrs) ->
-        command.set attrs
+        command.set _.pick(attrs, logAttrs...)
 
       return command
 
@@ -214,7 +233,7 @@
       if @isModelInstance(command)
 
         ## increment the number if its not cloned
-        command.increment(@maxNumber()) unless command.isCloned()
+        command.increment(@maxNumber()) unless command.isEvent()
 
         if parent = @parentExistsFor(command)
           command.setParent(parent)

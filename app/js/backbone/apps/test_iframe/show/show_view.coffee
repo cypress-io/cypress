@@ -1,169 +1,41 @@
 @App.module "TestIframeApp.Show", (Show, App, Backbone, Marionette, $, _) ->
 
-  class Show.Iframe extends App.Views.ItemView
+  class Show.Layout extends App.Views.LayoutView
     template: "test_iframe/show/iframe"
 
     ui:
-      # header:   "header"
-      size:          "#iframe-size-container"
-      expand:        ".fa-expand"
-      compress:      ".fa-compress"
-      message:       "#iframe-message"
-      dropdown:      ".dropdown"
-      sliders:       ".slider"
-      button:        ".dropdown-toggle"
-      choices:       ".dropdown-menu li a"
-      browser:       ".browser-versions li"
-      chosenBrowser: "#chosen-manual-browser"
-      closeBrowser:  "#chosen-manual-browser i"
-      url:           "#url-container input"
-
-    events:
-      "click @ui.expand"        : "expandClicked"
-      "click @ui.compress"      : "compressClicked"
-      "click @ui.button"        : "buttonClicked"
-      "click @ui.choices"       : "choicesClicked"
-      "click @ui.browser"       : "browserClicked"
-      "click @ui.closeBrowser"  : "closeBrowserClicked"
-      "show.bs.dropdown"        : "dropdownShow"
-      "hide.bs.dropdown"        : "dropdownHide"
-    #   "click #perf"         : "perfClicked"
+      size: "#iframe-size-container"
 
     modelEvents:
-      "change:url"         : "urlChanged"
-      "change:pageLoading" : "pageLoadingChanged"
+      "resize:viewport"   : "resizeViewport"
+      "revert:dom"        : "revertDom"
+      "restore:dom"       : "restoreDom"
+      "highlight:el"      : "highlightEl"
 
-    urlChanged: (model, value, options) ->
-      @ui.url.val(value)
+    resizeViewport: ->
+      @ui.size.css {
+        width:  @model.get("viewportWidth")
+        height: @model.get("viewportHeight")
+      }
 
-    pageLoadingChanged: (model, value, options) ->
-      ## hides or shows the loading indicator
-      @ui.url.parent().toggleClass("loading", value)
+      @calcWidth()
 
-    # perfClicked: (e) ->
-    #   s = @$remote.contents().find("body").remove("script")
-    #   t = Date.now()
-    #   str = s.prop("outerHTML")
-    #   console.log "prop outerHTML", Date.now() - t
-    #   t = Date.now()
-    #   str = @$remote.contents().find("body").prop("outerHTML")
-    #   console.warn "body outerHTML", Date.now() - t
+    restoreDom: (originalBody) ->
+      @$el
+        .find("iframe.iframe-remote")
+          .contents()
+            .find("body")
+              .replaceWith(originalBody)
 
-    closeBrowserClicked: (e) ->
-      @trigger "close:browser:clicked"
+    detachBody: ->
+      body = @$remote.contents().find("body")
+      body.find("script").remove()
+      body.detach()
 
-    browserClicked: (e) ->
-      el      = $(e.target)
-      browser = el.parent().data("browser")
-      version = el.text()
-
-      @trigger "browser:clicked", browser, version
-
-    browserChanged: (browser, version) ->
-      @ui.chosenBrowser.html(
-        Marionette.Renderer.render "test_iframe/show/_chosen_browser",
-          browser: browser
-          version: version
-      )
-
-    choicesClicked: (e) ->
-      e.preventDefault()
-
-    buttonClicked: (e) ->
-      e.stopPropagation()
-      @ui.button.parent().toggleClass("open")
-
-    getBootstrapNameSpaceForEvent: (name, e) ->
-      name + "." + e.namespace
-
-    dropdownShow: (e) ->
-      return if not @$iframe
-
-      ## the bootstrap namespace for click events
-      ## ie click.bs.bootstrap
-      eventNamespace = @getBootstrapNameSpaceForEvent("click", e)
-
-      ## binds to the $iframe document's click event
-      ## and repropogates this to our document
-      ## we do this because bootstrap will only bind
-      ## to our documents click event and not our iframes
-      ## so clicking into our iframe should close the dropdown
-      @$iframe.contents().one eventNamespace, (e) =>
-        $(document).trigger(eventNamespace, e)
-
-    dropdownHide: (e) ->
-      return if not @$iframe
-
-      ## the bootstrap namespace for click events
-      ## ie click.bs.bootstrap
-      eventNamespace = @getBootstrapNameSpaceForEvent("click", e)
-
-      ## we always want to remove our old custom handlers
-      ## when the drop down is closed to clean up references
-      @$iframe.contents().off eventNamespace
-
-    restoreDom: ->
-      return if not @originalBody
-
-      do =>
-        ## backup the current command's detachedId
-        previousDetachedId = @detachedId
-
-        ## we're using a setImmediate here because mouseleave will fire
-        ## before mouseenter.  and we dont want to restore the dom if we're
-        ## able to be hovering over a different command, else that would
-        ## be a huge waste.
-        setImmediate =>
-          ## we want to only restore the dom if we havent hovered over
-          ## to another command by the time this setImmediate function runs
-          return if previousDetachedId isnt @detachedId
-
-          @$el.find("iframe.iframe-remote").contents().find("body").replaceWith(@originalBody)
-
-          @removeRevertMessage()
-
-          @detachedId = null
-
-    cannotRevertDom: (init) ->
-      if init
-        @ui.message.text("Cannot revert DOM while tests are running").addClass("cannot-revert").show()
-      else
-        @removeRevertMessage()
-
-    revertToDom: (dom, options) ->
-      ## replaces the iframes body with the dom object
+    revertDom: (snapshot) ->
       contents = @$remote.contents()
-
-      if not @originalBody
-        body = contents.find("body")
-        body.find("script").remove()
-        @originalBody = body.detach()
-      else
-        contents.find("body").remove()
-
-      @detachedId = options.id
-
-      ## potentially think about making this setImmediate for
-      ## either perf reason or if we want the screen to "blink"
-      ## after its removed above
-      contents.find("html").append(dom)
-
-      @addRevertMessage(options)
-
-      if options.el
-        @highlightEl options.el,
-          coords: options.coords
-          id:     options.id
-          attr:   options.attr
-          dom:    dom
-
-    addRevertMessage: (options) ->
-      @reverted = true
-      @ui.message.text("DOM has been reverted").show()
-
-    removeRevertMessage: ->
-      @reverted = false
-      @ui.message.removeClass("cannot-revert").empty().hide()
+      contents.find("body").remove()
+      contents.find("html").append(snapshot)
 
     getZIndex: (el) ->
       if /^(auto|0)$/.test el.css("zIndex") then 1000 else Number el.css("zIndex")
@@ -174,19 +46,20 @@
 
       @$remote.contents().find("[data-highlight-el],[data-highlight-hitbox]").remove()
 
-      # # if we're not currently reverted
-      # # and init is false then nuke the currently highlighted el
-      # if not @reverted and not options.init
-      #   return @$iframe.contents().find("[data-highlight-el='#{options.id}']").remove()
-
       if options.dom
         dom = options.dom
-        el  = options.dom.find("[" + options.attr + "]")
+        el  = options.dom.find("[" + options.highlightAttr + "]")
       else
         dom = @$remote.contents().find("body")
 
-      ## scroll the bottom of the element into view
-      el.get(0).scrollIntoView(false) if el.get(0)
+      ## scroll the top of the element into view
+      if el.get(0)
+        el.get(0).scrollIntoView()
+        ## if we have a scrollBy on our command
+        ## then we need to additional scroll the window
+        ## by these offsets
+        if scrollBy = options.scrollBy
+          @$remote.prop("contentWindow").scrollBy(scrollBy.x, scrollBy.y)
 
       el.each (index, el) =>
         el = $(el)
@@ -202,14 +75,13 @@
         ## dont show anything if our element displaces nothing
         return if dimensions.width is 0 or dimensions.height is 0
 
-        setImmediate =>
-          div = App.request("element:box:model:layers", el, dom)
-          div.attr("data-highlight-el", options.id)
+        div = App.request("element:box:model:layers", el, dom)
+        div.attr("data-highlight-el", true)
 
       if coords = options.coords
         setImmediate =>
           box = App.request("element:hit:box:layer", coords, dom)
-          box.attr("data-highlight-hitbox")
+          box.attr("data-highlight-hitbox", true)
 
     elExistsInDocument: (parent, el) ->
       $.contains parent[0], el[0]
@@ -221,43 +93,40 @@
       }
 
     calcWidth: (main, tests, container) ->
-      _.defer ->
-        container.width main.width() - tests.width()
+      width  = main.width() - tests.width()
+      height = container.height() - 37 ## 37 accounts for the header
 
-    updateIframeCss: (name, val) ->
-      switch name
-        when "height", "width"
-          @ui.size.css(name, val + "%")
-        when "scale"
-          num = (val / 100)
-          @ui.size.css("transform", "scale(#{num})")
+      container.width(width)
+
+      @calcScale(width, height)
+
+    calcScale: (width, height) ->
+      size = @ui.size
+
+      iframeWidth  = size.width()
+      iframeHeight = size.height()
+
+      ## move all of this logic into model methods
+      if width < iframeWidth or height < iframeHeight
+        scale = Math.min(width / iframeWidth, height / iframeHeight, 1).toFixed(4)
+      else
+        scale = 1
+
+      left = (width / 2) - (iframeWidth / 2)
+
+      size.css({transform: "scale(#{scale})", marginLeft: left})
+      @model.setScale(scale)
 
     onShow: ->
-      main      = $("#main-region :first-child")
+      main      = $("#main-region>:first-child")
       tests     = $("#test-container")
       container = $("#iframe-wrapper")
 
-      view = @
+      @calcWidth = _(@calcWidth).chain().bind(@).partial(main, tests, container).value()
 
-      @ui.sliders.slider
-        range: "min"
-        min: 1
-        max: 100
-        slide: (e, ui) ->
-          name = $(@).parents(".form-group").find("input").val(ui.value).prop("name")
-          view.updateIframeCss(name, ui.value)
-
-      @ui.sliders.each (index, slider) ->
-        $slider = $(slider)
-        val = $slider.parents(".form-group").find("input").val()
-        $slider.slider("value", val)
-
-      @calcWidth = _(@calcWidth).partial main, tests, container
+      @resizeViewport()
 
       $(window).on "resize", @calcWidth
-
-      # @ui.header.hide()
-      @ui.compress.hide()
 
     onDestroy: ->
       $(window).off "resize", @calcWidth
@@ -276,13 +145,12 @@
       @$remote      = null
       @$iframe      = null
       @fn           = null
-      @detachedBody = null
-      @originalBody = null
 
-    loadIframe: (src, options, fn) ->
+    loadIframes: (options, fn) ->
+      src = options.specPath
       ## remove any existing iframes
-      @reverted = false
-      @ui.message.hide().empty()
+      # @reverted = false
+      # @ui.message.hide().empty()
 
       @resetReferences()
 
@@ -356,32 +224,126 @@
           view.calcWidth()
           # view.ui.header.show()
 
-      $.when(remoteLoaded, iframeLoaded).done (remote, iframe) ->
+      $.when(remoteLoaded, iframeLoaded).done (remote, iframe) =>
         ## yes these args are supposed to be reversed
         ## TODO FIX THIS
         fn(iframe, remote)
 
-    expandClicked: (e) ->
-      @ui.expand.hide()
-      @ui.compress.show()
+  class Show.Header extends App.Views.ItemView
+    template: "test_iframe/show/_header"
 
-      @$el.find("iframe").hide()
-      ## display the iframe header in an 'external' mode
-      ## swap out fa-expand with fa-compress
+    ui:
+      message:       "#iframe-message"
+      dropdown:      ".dropdown"
+      button:        ".dropdown-toggle"
+      choices:       ".dropdown-menu li a"
+      browser:       ".browser-versions li"
+      chosenBrowser: "#chosen-manual-browser"
+      closeBrowser:  "#chosen-manual-browser i"
+      url:           "#url-container input"
+      width:         "#viewport-width"
+      height:        "#viewport-height"
+      scale:         "#viewport-scale"
+      viewport:      "#viewport-wrapper"
 
-      @externalWindow = window.open(@src, "testIframeWindow", "titlebar=no,menubar=no,toolbar=no,location=no,personalbar=no,status=no")
-      # console.warn @externalWindow, @fn
-      # @externalWindow.onload =>
-        # console.warn "externalWindow ready!"
-        # @fn(@externalWindow)
+    events:
+      "click @ui.expand"        : "expandClicked"
+      "click @ui.compress"      : "compressClicked"
+      "click @ui.button"        : "buttonClicked"
+      "click @ui.choices"       : "choicesClicked"
+      "click @ui.browser"       : "browserClicked"
+      "click @ui.closeBrowser"  : "closeBrowserClicked"
+      "click @ui.viewport"      : "viewportClicked"
+      "show.bs.dropdown"        : "dropdownShow"
+      "hide.bs.dropdown"        : "dropdownHide"
 
-      # @externalWindow
-      ## when the externalWindow is open, keep the iframe around but proxy
-      ## the ECL and dom commands to it
+    modelEvents:
+      "change:url"            : "urlChanged"
+      "change:pageLoading"    : "pageLoadingChanged"
+      "change:viewportWidth"  : "widthChanged"
+      "change:viewportHeight" : "heightChanged"
+      "change:viewportScale"  : "scaleChanged"
+      "cannot:revert:dom"     : "cannotRevertDom"
+      "revert:dom"            : "revertDom"
+      "restore:dom"           : "restoreDom"
 
-    compressClicked: (e) ->
-      @ui.compress.hide()
-      @ui.expand.show()
+    urlChanged: (model, value, options) ->
+      @ui.url.val(value)
 
-      @$el.find("iframe").show()
-      @externalWindow.close?()
+    pageLoadingChanged: (model, value, options) ->
+      ## hides or shows the loading indicator
+      @ui.url.parent().toggleClass("loading", value)
+
+    widthChanged: (model, value) ->
+      @ui.width.text(value)
+
+    heightChanged: (model, value) ->
+      @ui.height.text(value)
+
+    scaleChanged: (model, value) ->
+      @ui.scale.text model.get("viewportScale")
+
+    closeBrowserClicked: (e) ->
+      @trigger "close:browser:clicked"
+
+    browserClicked: (e) ->
+      el      = $(e.target)
+      browser = el.parent().data("browser")
+      version = el.text()
+
+      @trigger "browser:clicked", browser, version
+
+    browserChanged: (browser, version) ->
+      @ui.chosenBrowser.html(
+        Marionette.Renderer.render "test_iframe/show/_chosen_browser",
+          browser: browser
+          version: version
+      )
+
+    choicesClicked: (e) ->
+      e.preventDefault()
+
+    buttonClicked: (e) ->
+      e.stopPropagation()
+      @ui.button.parent().toggleClass("open")
+
+    getBootstrapNameSpaceForEvent: (name, e) ->
+      name + "." + e.namespace
+
+    cannotRevertDom: (init) ->
+      @ui.message.text("Cannot revert DOM while tests are running").addClass("cannot-revert").show()
+
+    restoreDom: ->
+      @ui.message.removeClass("cannot-revert").empty().hide()
+
+    revertDom: ->
+      @ui.message.text("DOM has been reverted").removeClass("cannot-revert").show()
+
+    viewportClicked: (e) ->
+      e.stopPropagation()
+
+    dropdownShow: (e) ->
+      return if not @$iframe
+
+      ## the bootstrap namespace for click events
+      ## ie click.bs.bootstrap
+      eventNamespace = @getBootstrapNameSpaceForEvent("click", e)
+
+      ## binds to the $iframe document's click event
+      ## and repropogates this to our document
+      ## we do this because bootstrap will only bind
+      ## to our documents click event and not our iframes
+      ## so clicking into our iframe should close the dropdown
+      @$iframe.contents().one eventNamespace, (e) =>
+        $(document).trigger(eventNamespace, e)
+
+    dropdownHide: (e) ->
+      return if not @$iframe
+
+      ## the bootstrap namespace for click events
+      ## ie click.bs.bootstrap
+      eventNamespace = @getBootstrapNameSpaceForEvent("click", e)
+
+      ## we always want to remove our old custom handlers
+      ## when the drop down is closed to clean up references
+      @$iframe.contents().off eventNamespace

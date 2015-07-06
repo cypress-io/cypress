@@ -36,6 +36,73 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("select[name=movies]").select(["apoc", "br"]).then ($select) ->
         expect($select.val()).to.deep.eq ["apoc", "br"]
 
+    it "lists the input as the focused element", ->
+      select = @cy.$("select:first")
+
+      @cy.get("select:first").select("de_train").focused().then ($focused) ->
+        expect($focused.get(0)).to.eq select.get(0)
+
+    it "causes previous input to receive blur", (done) ->
+      @cy.$("input:text:first").blur -> done()
+
+      @cy
+        .get("input:text:first").type("foo")
+        .get("select:first").select("de_train")
+
+    it "can forcibly click even when being covered by another element", (done) ->
+      select  = $("<select />").attr("id", "select-covered-in-span").prependTo(@cy.$("body"))
+      span = $("<span>span on select</span>").css(position: "absolute", left: select.offset().left, top: select.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+      select.on "click", -> done()
+
+      @cy.get("#select-covered-in-span").select("foo", {force: true})
+
+    it "passes timeout and interval down to click", (done) ->
+      select  = $("<select />").attr("id", "select-covered-in-span").prependTo(@cy.$("body"))
+      span = $("<span>span on select</span>").css(position: "absolute", left: select.offset().left, top: select.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+      @cy.on "retry", (options) ->
+        expect(options.timeout).to.eq 1000
+        expect(options.interval).to.eq 60
+        done()
+
+      @cy.get("#select-covered-in-span").select("foobar", {timeout: 1000, interval: 60})
+
+    it "can forcibly click even when element is invisible", (done) ->
+      select = @cy.$("select:first").hide()
+
+      select.click -> done()
+
+      @cy.get("select:first").select("de_dust2", {force: true})
+
+    describe "events", ->
+      it "emits click event", (done) ->
+        @cy.$("select[name=maps]").click -> done()
+        @cy.get("select[name=maps]").select("train")
+
+      it "emits change event", (done) ->
+        @cy.$("select[name=maps]").change -> done()
+        @cy.get("select[name=maps]").select("train")
+
+      it "emits focus event", (done) ->
+        @cy.$("select[name=maps]").one "focus", -> done()
+        @cy.get("select[name=maps]").select("train")
+
+      it "emits input event", (done) ->
+        @cy.$("select[name=maps]").one "input", -> done()
+        @cy.get("select[name=maps]").select("train")
+
+      it "emits all events in the correct order", ->
+        fired = []
+        events = ["mousedown", "focus", "mouseup", "click", "input", "change"]
+
+        _.each events, (event) =>
+          @cy.$("select[name=maps]").one event, ->
+            fired.push(event)
+
+        @cy.get("select[name=maps]").select("train").then ->
+          expect(fired).to.deep.eq events
+
     describe "errors", ->
       beforeEach ->
         @allowErrors()
@@ -102,6 +169,57 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get("select:first").select("foo")
 
+    describe ".log", ->
+      beforeEach ->
+        @Cypress.on "log", (@log) =>
+
+      it "logs out select", ->
+        @cy.get("select:first").select("de_dust2").then ->
+          expect(@log.get("name")).to.eq "select"
+
+      it "passes in $el", ->
+        @cy.get("select:first").select("de_dust2").then ($select) ->
+          expect(@log.get("$el")).to.eq $select
+
+      it "is not immediately ended", (done) ->
+        @cy.$("select:first").click =>
+          expect(@log.get("state")).to.eq("pending")
+          done()
+
+        @cy.get("select:first").select("de_dust2")
+
+      it "snpahots and ends", ->
+        @cy.get("select:first").select("de_dust2").then ->
+          expect(@log.get("state")).to.eq("success")
+          expect(@log.get("snapshot")).to.be.an("object")
+
+      it "#onConsole", ->
+        @cy.get("select:first").select("de_dust2").then ($select) ->
+          coords = @cy.getCoordinates($select)
+          console = @log.attributes.onConsole()
+          expect(console.Command).to.eq("select")
+          expect(console.Selected).to.deep.eq ["de_dust2"]
+          expect(console["Applied To"]).to.eq $select.get(0)
+          expect(console.Coords.x).to.be.closeTo coords.x, 1
+          expect(console.Coords.y).to.be.closeTo coords.y, 1
+
+      it "logs only one select event", ->
+        logs = []
+        types = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+          types.push(log) if log.get("name") is "select"
+
+        @cy.get("select:first").select("de_dust2").then ->
+          expect(logs).to.have.length(2)
+          expect(types).to.have.length(1)
+
+      it "logs deltaOptions", ->
+        @cy.get("select:first").select("de_dust2", {force: true, timeout: 1000}).then ->
+          expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
+          expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
+
   context "#type", ->
     it "does not change the subject", ->
       input = @cy.$("input:first")
@@ -133,6 +251,10 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("input:text:first").type(" bar").then ($input) ->
         expect($input).to.have.value("foo bar")
 
+    it "can type numbers", ->
+      @cy.get(":text:first").type(123).then ($text) ->
+        expect($text).to.have.value("123")
+
     it "triggers focus event on the input", (done) ->
       @cy.$("input:text:first").focus -> done()
 
@@ -151,16 +273,928 @@ describe "$Cypress.Cy Actions Commands", ->
         .get("input:text:first").type("foo")
         .get("input:text:last").type("bar")
 
+    it "can type into contenteditable", ->
+      oldText = @cy.$("#contenteditable").text()
+
+      @cy.get("#contenteditable").type("foo").then ($div) ->
+        text = _.clean $div.text()
+        expect(text).to.eq _.clean(oldText + "foo")
+
     # describe "input types", ->
-    #   _.each ["password", "email", "number", "date", "week", "month", "time", "datetime", "datetime-local", "search", "url"], (type) ->
-    #     it "accepts input [type=#{type}]", ->
-    #       input = @cy.$("<input type='#{type}' id='input-type-#{type}' />")
+      # _.each ["password", "email", "number", "date", "week", "month", "time", "datetime", "datetime-local", "search", "url"], (type) ->
+        # it "accepts input [type=#{type}]", ->
+        #   input = @cy.$("<input type='#{type}' id='input-type-#{type}' />")
 
-    #       @cy.$("body").append(input)
+        #   @cy.$("body").append(input)
 
-    #       @cy.get("#input-type-#{type}").type("1234").then ($input) ->
-    #         expect($input).to.have.value "1234"
-    #         expect($input.get(0)).to.eq input.get(0)
+        #   @cy.get("#input-type-#{type}").type("1234").then ($input) ->
+        #     expect($input).to.have.value "1234"
+        #     expect($input.get(0)).to.eq input.get(0)
+
+    describe "delay", ->
+      beforeEach ->
+        @delay = 10
+
+      it "adds delay to delta for each key sequence", ->
+        @cy._timeout(50)
+
+        timeout = @sandbox.spy @cy, "_timeout"
+
+        @cy.get(":text:first").type("foo{enter}bar{leftarrow}").then ->
+          expect(timeout).to.be.calledWith @delay * 8
+
+      it "can cancel additional keystrokes", (done) ->
+        @cy._timeout(50)
+
+        text = @cy.$(":text:first").keydown _.after 3, ->
+          Cypress.abort()
+
+        @cy.on "cancel", ->
+          _.delay ->
+            expect(text).to.have.value("foo")
+            done()
+          , 50
+
+        @cy.get(":text:first").type("foo{enter}bar{leftarrow}")
+
+    describe "events", ->
+      it "receives keydown event", (done) ->
+        input = @cy.$(":text:first")
+
+        input.get(0).addEventListener "keydown", (e) =>
+          obj = _(e).pick("altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which")
+          expect(obj).to.deep.eq {
+            altKey: false
+            bubbles: true
+            cancelable: true
+            charCode: 0 ## deprecated
+            ctrlKey: false
+            detail: 0
+            keyCode: 65 ## deprecated but fired by chrome always uppercase in the ASCII table
+            layerX: 0
+            layerY: 0
+            location: 0
+            metaKey: false
+            pageX: 0
+            pageY: 0
+            repeat: false
+            shiftKey: false
+            type: "keydown"
+            view: @cy.private("window")
+            which: 65 ## deprecated but fired by chrome
+          }
+          done()
+
+        @cy.get(":text:first").type("a")
+
+      it "receives keypress event", (done) ->
+        input = @cy.$(":text:first")
+
+        input.get(0).addEventListener "keypress", (e) =>
+          obj = _(e).pick("altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which")
+          expect(obj).to.deep.eq {
+            altKey: false
+            bubbles: true
+            cancelable: true
+            charCode: 97 ## deprecated
+            ctrlKey: false
+            detail: 0
+            keyCode: 97 ## deprecated
+            layerX: 0
+            layerY: 0
+            location: 0
+            metaKey: false
+            pageX: 0
+            pageY: 0
+            repeat: false
+            shiftKey: false
+            type: "keypress"
+            view: @cy.private("window")
+            which: 97 ## deprecated
+          }
+          done()
+
+        @cy.get(":text:first").type("a")
+
+      it "receives keyup event", (done) ->
+        input = @cy.$(":text:first")
+
+        input.get(0).addEventListener "keyup", (e) =>
+          obj = _(e).pick("altKey", "bubbles", "cancelable", "charCode", "ctrlKey", "detail", "keyCode", "view", "layerX", "layerY", "location", "metaKey", "pageX", "pageY", "repeat", "shiftKey", "type", "which")
+          expect(obj).to.deep.eq {
+            altKey: false
+            bubbles: true
+            cancelable: true
+            charCode: 0 ## deprecated
+            ctrlKey: false
+            detail: 0
+            keyCode: 65 ## deprecated but fired by chrome always uppercase in the ASCII table
+            layerX: 0
+            layerY: 0
+            location: 0
+            metaKey: false
+            pageX: 0
+            pageY: 0
+            repeat: false
+            shiftKey: false
+            type: "keyup"
+            view: @cy.private("window")
+            which: 65 ## deprecated but fired by chrome
+          }
+          done()
+
+        @cy.get(":text:first").type("a")
+
+      it "receives textInput event", (done) ->
+        input = @cy.$(":text:first")
+
+        input.get(0).addEventListener "textInput", (e) =>
+          obj = _(e).pick "bubbles", "cancelable", "charCode", "data", "detail", "keyCode", "layerX", "layerY", "pageX", "pageY", "type", "view", "which"
+          expect(obj).to.deep.eq {
+            bubbles: true
+            cancelable: true
+            charCode: 0
+            data: "a"
+            detail: 0
+            keyCode: 0
+            layerX: 0
+            layerY: 0
+            pageX: 0
+            pageY: 0
+            type: "textInput"
+            view: @cy.private("window")
+            which: 0
+          }
+          done()
+
+        @cy.get(":text:first").type("a")
+
+      it "receives input event", (done) ->
+        input = @cy.$(":text:first")
+
+        input.get(0).addEventListener "input", (e) =>
+          obj = _(e).pick "bubbles", "cancelable", "type"
+          expect(obj).to.deep.eq {
+            bubbles: true
+            cancelable: false
+            type: "input"
+          }
+          done()
+
+        @cy.get(":text:first").type("a")
+
+      it "fires events in the correct order"
+
+      it "fires events for each key stroke"
+
+    describe "value changing", ->
+      it "changes the elements value", ->
+        @cy.get(":text:first").type("a").then ($text) ->
+          expect($text).to.have.value("a")
+
+      it "changes the elements value for multiple keys", ->
+        @cy.get(":text:first").type("foo").then ($text) ->
+          expect($text).to.have.value("foo")
+
+      it "can change input[type=number] values", ->
+        @cy.get("#input-types [type=number]").type("12").then ($text) ->
+          expect($text).to.have.value("12")
+
+      it "inserts text after existing text", ->
+        @cy.get(":text:first").invoke("val", "foo").type(" bar").then ($text) ->
+          expect($text).to.have.value("foo bar")
+
+      it "inserts text after existing text on input[type=number]", ->
+        @cy.get("#input-types [type=number]").invoke("val", "12").type("34").then ($text) ->
+          expect($text).to.have.value("1234")
+
+      it "can change input[type=email] values", ->
+        @cy.get("#input-types [type=email]").type("brian@foo.com").then ($text) ->
+          expect($text).to.have.value("brian@foo.com")
+
+      it "inserts text after existing text on input[type=email]", ->
+        @cy.get("#input-types [type=email]").invoke("val", "brian@foo.c").type("om").then ($text) ->
+          expect($text).to.have.value("brian@foo.com")
+
+      it "can change input[type=password] values", ->
+        @cy.get("#input-types [type=password]").type("password").then ($text) ->
+          expect($text).to.have.value("password")
+
+      it "inserts text after existing text on input[type=password]", ->
+        @cy.get("#input-types [type=password]").invoke("val", "pass").type("word").then ($text) ->
+          expect($text).to.have.value("password")
+
+      it "can change [contenteditable] values", ->
+        @cy.get("#input-types [contenteditable]").type("foo").then ($div) ->
+          expect($div).to.have.text("foo")
+
+      it "inserts text after existing text on [contenteditable]", ->
+        @cy.get("#input-types [contenteditable]").invoke("text", "foo").type(" bar").then ($text) ->
+          expect($text).to.have.text("foo bar")
+
+      # it "can change input[type=date] values", ->
+      #   @cy.get("#input-types [type=date").type("1986-03-14").then ($text) ->
+      #     expect($text).to.have.value("1986-03-14")
+
+      # it "inserts text after existing text on input[type=date]", ->
+      #   @cy.get("#input-types [type=date").invoke("val", "pass").type("word").then ($text) ->
+      #     expect($text).to.have.value("date")
+
+      it "automatically moves the caret to the end if value is changed manually", ->
+        @cy.$(":text:first").keypress (e) ->
+          e.preventDefault()
+
+          key = String.fromCharCode(e.which)
+
+          $input = $(e.target)
+
+          val = $input.val()
+
+          $input.val(val + key + "-")
+
+        @cy.get(":text:first").type("foo").then ($input) ->
+          expect($input).to.have.value("f-o-o-")
+
+      it "automatically moves the caret to the end if value is changed manually asynchronously", ->
+        @cy.$(":text:first").keypress (e) ->
+          key = String.fromCharCode(e.which)
+
+          $input = $(e.target)
+
+          _.defer ->
+            val = $input.val()
+            $input.val(val + "-")
+
+        @cy.get(":text:first").type("foo").then ($input) ->
+          expect($input).to.have.value("f-o-o-")
+
+      it "does not fire keypress when keydown is preventedDefault", (done) ->
+        @cy.$(":text:first").get(0).addEventListener "keypress", (e) ->
+          done("should not have received keypress event")
+
+        @cy.$(":text:first").get(0).addEventListener "keydown", (e) ->
+          e.preventDefault()
+
+        @cy.get(":text:first").type("foo").then -> done()
+
+      it "does not insert key when keydown is preventedDefault", ->
+        @cy.$(":text:first").get(0).addEventListener "keydown", (e) ->
+          e.preventDefault()
+
+        @cy.get(":text:first").type("foo").then ($text) ->
+          expect($text).to.have.value("")
+
+      it "does not insert key when keypress is preventedDefault", ->
+        @cy.$(":text:first").get(0).addEventListener "keypress", (e) ->
+          e.preventDefault()
+
+        @cy.get(":text:first").type("foo").then ($text) ->
+          expect($text).to.have.value("")
+
+      it "does not fire textInput when keypress is preventedDefault", (done) ->
+        @cy.$(":text:first").get(0).addEventListener "textInput", (e) ->
+          done("should not have received textInput event")
+
+        @cy.$(":text:first").get(0).addEventListener "keypress", (e) ->
+          e.preventDefault()
+
+        @cy.get(":text:first").type("foo").then -> done()
+
+      it "does not insert key when textInput is preventedDefault", ->
+        @cy.$(":text:first").get(0).addEventListener "textInput", (e) ->
+          e.preventDefault()
+
+        @cy.get(":text:first").type("foo").then ($text) ->
+          expect($text).to.have.value("")
+
+      it "does not fire input when textInput is preventedDefault", (done) ->
+        @cy.$(":text:first").get(0).addEventListener "input", (e) ->
+          done("should not have received input event")
+
+        @cy.$(":text:first").get(0).addEventListener "textInput", (e) ->
+          e.preventDefault()
+
+        @cy.get(":text:first").type("foo").then -> done()
+
+      it "preventing default to input event should not affect anything", ->
+        @cy.$(":text:first").get(0).addEventListener "input", (e) ->
+          e.preventDefault()
+
+        @cy.get(":text:first").type("foo").then ($input) ->
+          expect($input).to.have.value("foo")
+
+    describe "specialChars", ->
+      context "{{}", ->
+        it "sets which and keyCode to 219", (done) ->
+          @cy.$(":text:first").on "keydown", (e) ->
+            expect(e.which).to.eq 219
+            expect(e.keyCode).to.eq 219
+            done()
+
+          @cy.get(":text:first").invoke("val", "ab").type("{{}")
+
+        it "fires keypress event with 219 charCode", (done) ->
+          @cy.$(":text:first").on "keypress", (e) ->
+            expect(e.charCode).to.eq 219
+            expect(e.which).to.eq 219
+            expect(e.keyCode).to.eq 219
+            done()
+
+          @cy.get(":text:first").invoke("val", "ab").type("{{}")
+
+        it "fires textInput event with e.data", (done) ->
+          @cy.$(":text:first").on "textInput", (e) ->
+            expect(e.originalEvent.data).to.eq "{"
+            done()
+
+          @cy.get(":text:first").invoke("val", "ab").type("{{}")
+
+        it "fires input event", (done) ->
+          @cy.$(":text:first").on "input", (e) ->
+            done()
+
+          @cy.get(":text:first").invoke("val", "ab").type("{{}")
+
+        it "can prevent default character insertion", ->
+          @cy.$(":text:first").on "keydown", (e) ->
+            if e.keyCode is 219
+              e.preventDefault()
+
+          @cy.get(":text:first").invoke("val", "foo").type("{{}").then ($input) ->
+            expect($input).to.have.value("foo")
+
+      context "{esc}", ->
+        it "sets which and keyCode to 27 and does not fire keypress events", (done) ->
+          @cy.$(":text:first").on "keypress", ->
+            done("should not have received keypress")
+
+          @cy.$(":text:first").on "keydown", (e) ->
+            expect(e.which).to.eq 27
+            expect(e.keyCode).to.eq 27
+            done()
+
+          @cy.get(":text:first").invoke("val", "ab").type("{esc}")
+
+        it "does not fire textInput event", (done) ->
+          @cy.$(":text:first").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{esc}").then -> done()
+
+        it "does not fire input event", (done) ->
+          @cy.$(":text:first").on "input", (e) ->
+            done("input should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{esc}").then -> done()
+
+        it "can prevent default esc movement", (done) ->
+          @cy.$(":text:first").on "keydown", (e) ->
+            if e.keyCode is 27
+              e.preventDefault()
+
+          @cy.get(":text:first").invoke("val", "foo").type("d{esc}").then ($input) ->
+            expect($input).to.have.value("food")
+            done()
+
+      context "{backspace}", ->
+        it "backspaces character to the left", ->
+          @cy.get(":text:first").invoke("val", "bar").type("{leftarrow}{backspace}").then ($input) ->
+            expect($input).to.have.value("br")
+
+        it "can backspace a selection range of characters", ->
+          @cy
+            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
+              ## select the 'ar' characters
+              b = bililiteRange($input.get(0))
+              b.bounds([1, 3]).select()
+            .get(":text:first").type("{backspace}").then ($input) ->
+              expect($input).to.have.value("b")
+
+        it "sets which and keyCode to 8 and does not fire keypress events", (done) ->
+          @cy.$(":text:first").on "keypress", ->
+            done("should not have received keypress")
+
+          @cy.$(":text:first").on "keydown", _.after 2, (e) ->
+            expect(e.which).to.eq 8
+            expect(e.keyCode).to.eq 8
+            done()
+
+          @cy.get(":text:first").invoke("val", "ab").type("{leftarrow}{backspace}")
+
+        it "does not fire textInput event", (done) ->
+          @cy.$(":text:first").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{backspace}").then -> done()
+
+        it "does fire input event when value changes", (done) ->
+          @cy.$(":text:first").on "input", (e) ->
+            done()
+
+          @cy
+            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
+              ## select the 'a' characters
+              b = bililiteRange($input.get(0))
+              b.bounds([1, 2]).select()
+            .get(":text:first").type("{backspace}")
+
+        it "does not fire input event when value does not change", (done) ->
+          @cy.$(":text:first").on "input", (e) ->
+            done("should not have fired input")
+
+          @cy
+            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
+              ## set the range at the beggining
+              b = bililiteRange($input.get(0))
+              b.bounds([0, 0]).select()
+            .get(":text:first").type("{backspace}").then -> done()
+
+        it "can prevent default backspace movement", (done) ->
+          @cy.$(":text:first").on "keydown", (e) ->
+            if e.keyCode is 8
+              e.preventDefault()
+
+          @cy.get(":text:first").invoke("val", "foo").type("{leftarrow}{backspace}").then ($input) ->
+            expect($input).to.have.value("foo")
+            done()
+
+      context "{del}", ->
+        it "deletes character to the right", ->
+          @cy.get(":text:first").invoke("val", "bar").type("{leftarrow}{del}").then ($input) ->
+            expect($input).to.have.value("ba")
+
+        it "can delete a selection range of characters", ->
+          @cy
+            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
+              ## select the 'ar' characters
+              b = bililiteRange($input.get(0))
+              b.bounds([1, 3]).select()
+            .get(":text:first").type("{del}").then ($input) ->
+              expect($input).to.have.value("b")
+
+        it "sets which and keyCode to 46 and does not fire keypress events", (done) ->
+          @cy.$(":text:first").on "keypress", ->
+            done("should not have received keypress")
+
+          @cy.$(":text:first").on "keydown", _.after 2, (e) ->
+            expect(e.which).to.eq 46
+            expect(e.keyCode).to.eq 46
+            done()
+
+          @cy.get(":text:first").invoke("val", "ab").type("{leftarrow}{del}")
+
+        it "does not fire textInput event", (done) ->
+          @cy.$(":text:first").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{del}").then -> done()
+
+        it "does fire input event when value changes", (done) ->
+          @cy.$(":text:first").on "input", (e) ->
+            done()
+
+          @cy
+            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
+              ## select the 'a' characters
+              b = bililiteRange($input.get(0))
+              b.bounds([1, 2]).select()
+            .get(":text:first").type("{del}")
+
+        it "does not fire input event when value does not change", (done) ->
+          @cy.$(":text:first").on "input", (e) ->
+            done("should not have fired input")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{del}").then -> done()
+
+        it "can prevent default del movement", (done) ->
+          @cy.$(":text:first").on "keydown", (e) ->
+            if e.keyCode is 46
+              e.preventDefault()
+
+          @cy.get(":text:first").invoke("val", "foo").type("{leftarrow}{del}").then ($input) ->
+            expect($input).to.have.value("foo")
+            done()
+
+      context "{leftarrow}", ->
+        it "can move the cursor from the end to end - 1", ->
+          @cy.get(":text:first").invoke("val", "bar").type("{leftarrow}n").then ($input) ->
+            expect($input).to.have.value("banr")
+
+        it "does not move the cursor if already at bounds 0", ->
+          @cy.get(":text:first").invoke("val", "bar").type("{selectall}{leftarrow}n").then ($input) ->
+            expect($input).to.have.value("nbar")
+
+        it "sets the cursor to the left bounds", ->
+          @cy
+            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
+              ## select the 'a' character
+              b = bililiteRange($input.get(0))
+              b.bounds([1, 2]).select()
+            .get(":text:first").type("{leftarrow}n").then ($input) ->
+              expect($input).to.have.value("bnar")
+
+        it "sets the cursor to the very beginning", ->
+          @cy
+            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
+              ## select the 'a' character
+              b = bililiteRange($input.get(0))
+              b.bounds("all").select()
+            .get(":text:first").type("{leftarrow}n").then ($input) ->
+              expect($input).to.have.value("nbar")
+
+        it "sets which and keyCode to 37 and does not fire keypress events", (done) ->
+          @cy.$(":text:first").on "keypress", ->
+            done("should not have received keypress")
+
+          @cy.$(":text:first").on "keydown", (e) ->
+            expect(e.which).to.eq 37
+            expect(e.keyCode).to.eq 37
+            done()
+
+          @cy.get(":text:first").invoke("val", "ab").type("{leftarrow}").then ($input) ->
+            done()
+
+        it "does not fire textInput event", (done) ->
+          @cy.$(":text:first").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{leftarrow}").then -> done()
+
+        it "does not fire input event", (done) ->
+          @cy.$(":text:first").on "input", (e) ->
+            done("input should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{leftarrow}").then -> done()
+
+        it "can prevent default left arrow movement", (done) ->
+          @cy.$(":text:first").on "keydown", (e) ->
+            if e.keyCode is 37
+              e.preventDefault()
+
+          @cy.get(":text:first").invoke("val", "foo").type("{leftarrow}d").then ($input) ->
+            expect($input).to.have.value("food")
+            done()
+
+      context "{rightarrow}", ->
+        it "can move the cursor from the beginning to beginning + 1", ->
+          @cy.get(":text:first").invoke("val", "bar").focus().then ($input) ->
+            ## select the all characters
+            b = bililiteRange($input.get(0))
+            b.bounds("start").select()
+          .get(":text:first").type("{rightarrow}n").then ($input) ->
+            expect($input).to.have.value("bnar")
+
+        it "does not move the cursor if already at end of bounds", ->
+          @cy.get(":text:first").invoke("val", "bar").type("{selectall}{rightarrow}n").then ($input) ->
+            expect($input).to.have.value("barn")
+
+        it "sets the cursor to the rights bounds", ->
+          @cy
+            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
+              ## select the 'a' character
+              b = bililiteRange($input.get(0))
+              b.bounds([1, 2]).select()
+            .get(":text:first").type("{rightarrow}n").then ($input) ->
+              expect($input).to.have.value("banr")
+
+        it "sets the cursor to the very beginning", ->
+          @cy
+            .get(":text:first").invoke("val", "bar").focus().then ($input) ->
+              ## select the all characters
+              b = bililiteRange($input.get(0))
+              b.bounds("all").select()
+            .get(":text:first").type("{leftarrow}n").then ($input) ->
+              expect($input).to.have.value("nbar")
+
+        it "sets which and keyCode to 39 and does not fire keypress events", (done) ->
+          @cy.$(":text:first").on "keypress", ->
+            done("should not have received keypress")
+
+          @cy.$(":text:first").on "keydown", (e) ->
+            expect(e.which).to.eq 39
+            expect(e.keyCode).to.eq 39
+            done()
+
+          @cy.get(":text:first").invoke("val", "ab").type("{rightarrow}").then ($input) ->
+            done()
+
+        it "does not fire textInput event", (done) ->
+          @cy.$(":text:first").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{rightarrow}").then -> done()
+
+        it "does not fire input event", (done) ->
+          @cy.$(":text:first").on "input", (e) ->
+            done("input should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{rightarrow}").then -> done()
+
+        it "can prevent default right arrow movement", (done) ->
+          @cy.$(":text:first").on "keydown", (e) ->
+            if e.keyCode is 39
+              e.preventDefault()
+
+          @cy.get(":text:first").invoke("val", "foo").type("{leftarrow}{rightarrow}d").then ($input) ->
+            expect($input).to.have.value("fodo")
+            done()
+
+      context "{selectall}{del}", ->
+        it "can select all the text and delete", ->
+          @cy.get(":text:first").invoke("val", "1234").type("{selectall}{del}").type("foo").then ($text) ->
+            expect($text).to.have.value("foo")
+
+        it "can select all [contenteditable] and delete", ->
+          @cy.get("#input-types [contenteditable]").invoke("text", "1234").type("{selectall}{del}").type("foo").then ($div) ->
+            expect($div).to.have.text("foo")
+
+      context "{enter}", ->
+        it "sets which and keyCode to 13 and prevents EOL insertion", (done) ->
+          @cy.$("#input-types textarea").on "keypress", _.after 2, (e) ->
+            done("should not have received keypress event")
+
+          @cy.$("#input-types textarea").on "keydown", _.after 2, (e) ->
+            expect(e.which).to.eq 13
+            expect(e.keyCode).to.eq 13
+            e.preventDefault()
+
+          @cy.get("#input-types textarea").invoke("val", "foo").type("d{enter}").then ($textarea) ->
+            expect($textarea).to.have.value("food")
+            done()
+
+        it "sets which and keyCode and charCode to 13 and prevents EOL insertion", (done) ->
+          @cy.$("#input-types textarea").on "keypress", _.after 2, (e) ->
+            expect(e.which).to.eq 13
+            expect(e.keyCode).to.eq 13
+            expect(e.charCode).to.eq 13
+            e.preventDefault()
+
+          @cy.get("#input-types textarea").invoke("val", "foo").type("d{enter}").then ($textarea) ->
+            expect($textarea).to.have.value("food")
+            done()
+
+        it "does not fire textInput event", (done) ->
+          @cy.$(":text:first").on "textInput", (e) ->
+            done("textInput should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{enter}").then -> done()
+
+        it "does not fire input event", (done) ->
+          @cy.$(":text:first").on "input", (e) ->
+            done("input should not have fired")
+
+          @cy.get(":text:first").invoke("val", "ab").type("{enter}").then -> done()
+
+        it "inserts new line into textarea", ->
+          @cy.get("#input-types textarea").invoke("val", "foo").type("bar{enter}baz{enter}quux").then ($textarea) ->
+            expect($textarea).to.have.value("foobar\nbaz\nquux")
+
+        it "inserts new line into [contenteditable]", ->
+          @cy.get("#input-types [contenteditable]").invoke("text", "foo").type("bar{enter}baz{enter}quux").then ($div) ->
+            expect($div).to.have.text("foobar\nbaz\nquux")
+
+    describe "click events", ->
+      it "passes timeout and interval down to click", (done) ->
+        input  = $("<input />").attr("id", "input-covered-in-span").prependTo(@cy.$("body"))
+        span = $("<span>span on input</span>").css(position: "absolute", left: input.offset().left, top: input.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+        @cy.on "retry", (options) ->
+          expect(options.timeout).to.eq 1000
+          expect(options.interval).to.eq 60
+          done()
+
+        @cy.get("#input-covered-in-span").type("foobar", {timeout: 1000, interval: 60})
+
+      it "can forcibly click even when element is invisible", (done) ->
+        input = @cy.$("input:first").hide()
+
+        input.click -> done()
+
+        @cy.get("input:first").click({force: true})
+
+      it "can forcibly click even when being covered by another element", (done) ->
+        input  = $("<input />").attr("id", "input-covered-in-span").prependTo(@cy.$("body"))
+        span = $("<span>span on input</span>").css(position: "absolute", left: input.offset().left, top: input.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+        input.on "click", -> done()
+
+        @cy.get("#input-covered-in-span").type("foo", {force: true})
+
+      it "does not issue another click event between type/type", ->
+        clicked = 0
+
+        @cy.$(":text:first").click ->
+          clicked += 1
+
+        @cy.get(":text:first").type("f").type("o").then ->
+          expect(clicked).to.eq 1
+
+      it "does not issue another click event if element is already in focus from click", ->
+        clicked = 0
+
+        @cy.$(":text:first").click ->
+          clicked += 1
+
+        @cy.get(":text:first").click().type("o").then ->
+          expect(clicked).to.eq 1
+
+    describe "change events", ->
+      it "fires when enter is pressed and value has changed", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy.get(":text:first").invoke("val", "foo").type("bar{enter}").then ->
+          expect(changed).to.eq 1
+
+      it "fires twice when enter is pressed and then again after losing focus", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy.get(":text:first").invoke("val", "foo").type("bar{enter}baz").blur().then ->
+          expect(changed).to.eq 2
+
+      it "fires when element loses focus due to another action (click)", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy
+          .get(":text:first").type("foo").then ->
+            expect(changed).to.eq 0
+          .get("button:first").click().then ->
+            expect(changed).to.eq 1
+
+      it "fires when element loses focus due to another action (type)", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy
+          .get(":text:first").type("foo").then ->
+            expect(changed).to.eq 0
+          .get("textarea:first").type("bar").then ->
+            expect(changed).to.eq 1
+
+      it "fires when element is directly blurred", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy
+          .get(":text:first").type("foo").blur().then ->
+            expect(changed).to.eq 1
+
+      it "fires when element is tabbed away from"#, ->
+      #   changed = 0
+
+      #   @cy.$(":text:first").change ->
+      #     changed += 1
+
+      #   @cy.get(":text:first").invoke("val", "foo").type("b{tab}").then ->
+      #     expect(changed).to.eq 1
+
+      it "does not fire twice if element is already in focus between type/type", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy.get(":text:first").invoke("val", "foo").type("f").type("o{enter}").then ->
+          expect(changed).to.eq 1
+
+      it "does not fire twice if element is already in focus between clear/type", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy.get(":text:first").invoke("val", "foo").clear().type("o{enter}").then ->
+          expect(changed).to.eq 1
+
+      it "does not fire twice if element is already in focus between click/type", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy.get(":text:first").invoke("val", "foo").click().type("o{enter}").then ->
+          expect(changed).to.eq 1
+
+      it "does not fire twice if element is already in focus between type/click", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy.get(":text:first").invoke("val", "foo").type("d{enter}").click().then ->
+          expect(changed).to.eq 1
+
+      it "does not fire at all between clear/type/click", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy.get(":text:first").invoke("val", "foo").clear().type("o").click().then ->
+          expect(changed).to.eq 0
+
+      it "does not fire if {enter} is preventedDefault", ->
+        changed = 0
+
+        @cy.$(":text:first").keypress (e) ->
+          e.preventDefault() if e.which is 13
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy.get(":text:first").invoke("val", "foo").type("b{enter}").then ->
+          expect(changed).to.eq 0
+
+      it "does not fire when enter is pressed and value hasnt changed", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy.get(":text:first").invoke("val", "foo").type("b{backspace}{enter}").then ->
+          expect(changed).to.eq 0
+
+      it "does not fire at the end of the type", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy
+          .get(":text:first").type("foo").then ->
+            expect(changed).to.eq 0
+
+      it "does not fire change event if value hasnt actually changed", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy
+          .get(":text:first").invoke("val", "foo").type("{backspace}{backspace}oo{enter}").blur().then ->
+            expect(changed).to.eq 0
+
+      it "does not fire if mousedown is preventedDefault which prevents element from losing focus", ->
+        changed = 0
+
+        @cy.$(":text:first").change ->
+          changed += 1
+
+        @cy.$("textarea:first").mousedown -> return false
+
+        @cy
+          .get(":text:first").invoke("val", "foo").type("bar")
+          .get("textarea:first").click().then ->
+            expect(changed).to.eq 0
+
+      it "does not fire hitting {enter} inside of a textarea", ->
+        changed = 0
+
+        @cy.$("textarea:first").change ->
+          changed += 1
+
+        @cy
+          .get("textarea:first").type("foo{enter}bar").then ->
+            expect(changed).to.eq 0
+
+      it "does not fire hitting {enter} inside of [contenteditable]", ->
+        changed = 0
+
+        @cy.$("[contenteditable]:first").change ->
+          changed += 1
+
+        @cy
+          .get("[contenteditable]:first").type("foo{enter}bar").then ->
+            expect(changed).to.eq 0
+
+      ## [contenteditable] does not fire ANY change events ever!
+      it "does not fire at ALL for [contenteditable]", ->
+        changed = 0
+
+        @cy.$("[contenteditable]:first").change ->
+          changed += 1
+
+        @cy
+          .get("[contenteditable]:first").type("foo")
+          .get("button:first").click().then ->
+            expect(changed).to.eq 0
+
+    describe "caret position", ->
+      it "leaves caret at the end of the input"
+
+      it "always types at the end of the input"
 
     describe "{enter}", ->
       beforeEach ->
@@ -209,18 +1243,6 @@ describe "$Cypress.Cy Actions Commands", ->
             submits += 1
 
           @cy.get("#single-input input").type("f{enter}{enter}").then ->
-            expect(submits).to.eq 2
-
-        it "unbinds from form submit event", ->
-          submits = 0
-
-          form = @forms.find("#single-input").submit ->
-            submits += 1
-
-          @cy.get("#single-input input").type("f{enter}{enter}").then ->
-            ## simulate another enter event which should not issue another
-            ## submit event because we should have cleaned up the events
-            form.find("input").simulate "key-sequence", sequence: "b{enter}"
             expect(submits).to.eq 2
 
         it "does not submit when keydown is defaultPrevented on input", (done) ->
@@ -344,7 +1366,9 @@ describe "$Cypress.Cy Actions Commands", ->
           @cy.get("#multiple-inputs-and-multiple-submits input:first").type("foo{enter}")
 
         it "causes click event on the button", (done) ->
-          @forms.find("#multiple-inputs-and-multiple-submits button").click -> done()
+          @forms.find("#multiple-inputs-and-multiple-submits button").click (e) ->
+            e.preventDefault()
+            done()
 
           @cy.get("#multiple-inputs-and-multiple-submits input:first").type("foo{enter}")
 
@@ -376,13 +1400,13 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("input:first").type("foobar").then ($input) ->
           expect(@log.get("$el")).to.eq $input
 
-      it "#onConsole", ->
-        @cy.get("input:first").type("foobar").then ($input) ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
-            Command: "type"
-            Typed: "foobar"
-            "Applied To": $input
-          }
+      it "logs message", ->
+        @cy.get(":text:first").type("foobar").then ->
+          expect(@log.get("message")).to.eq "foobar"
+
+      it "logs delay arguments", ->
+        @cy.get(":text:first").type("foo", {delay: 20}).then ->
+          expect(@log.get("message")).to.eq "foo, {delay: 20}"
 
       it "logs only one type event", ->
         logs = []
@@ -408,10 +1432,53 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get(":text:first").type("foo")
 
       it "snapshots after clicking", ->
-        @Cypress.on "log", (@log) =>
-
         @cy.get(":text:first").type("foo").then ->
           expect(@log.get("snapshot")).to.be.an("object")
+
+      it "logs deltaOptions", ->
+        @cy.get(":text:first").type("foo", {force: true, timeout: 1000}).then ->
+          expect(@log.get("message")).to.eq "foo, {force: true, timeout: 1000}"
+          expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
+
+      context "#onConsole", ->
+        it "has all of the regular options", ->
+          @cy.get("input:first").type("foobar").then ($input) ->
+            coords = @cy.getCoordinates($input)
+            console = @log.attributes.onConsole()
+            expect(console.Command).to.eq("type")
+            expect(console.Typed).to.eq("foobar")
+            expect(console["Applied To"]).to.eq $input.get(0)
+            expect(console.Coords.x).to.be.closeTo coords.x, 1
+            expect(console.Coords.y).to.be.closeTo coords.y, 1
+
+        it "has a table of keys", ->
+          @cy.get(":text:first").type("foo{enter}b{leftarrow}{del}{enter}").then ->
+            table = @log.attributes.onConsole().table()
+            console.table(table.data, table.columns)
+            expect(table.columns).to.deep.eq [
+              "typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change"
+            ]
+            expect(table.name).to.eq "Key Events Table"
+            expect(table.data).to.deep.eq {
+              1: {typed: "f", which: 70, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
+              2: {typed: "o", which: 79, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
+              3: {typed: "o", which: 79, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
+              4: {typed: "{enter}", which: 13, keydown: true, keypress: true, keyup: true, change: true}
+              5: {typed: "b", which: 66, keydown: true, keypress: true, textInput: true, input: true, keyup: true}
+              6: {typed: "{leftarrow}", which: 37, keydown: true, keyup: true}
+              7: {typed: "{del}", which: 46, keydown: true, input: true, keyup: true}
+              8: {typed: "{enter}", which: 13, keydown: true, keypress: true, keyup: true, change: true}
+            }
+
+        it "has a table of keys with preventedDefault", ->
+          @cy.$(":text:first").keydown -> return false
+
+          @cy.get(":text:first").type("f").then ->
+            table = @log.attributes.onConsole().table()
+            console.table(table.data, table.columns)
+            expect(table.data).to.deep.eq {
+              1: {typed: "f", which: 70, keydown: "preventedDefault", keyup: true}
+            }
 
     describe "errors", ->
       beforeEach ->
@@ -487,6 +1554,80 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.type("foobar")
 
+      it "throws when input cannot be clicked", (done) ->
+        @cy._timeout(200)
+
+        input  = $("<input />").attr("id", "input-covered-in-span").prependTo(@cy.$("body"))
+        span = $("<span>span on button</span>").css(position: "absolute", left: input.offset().left, top: input.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq(2)
+          expect(err.message).to.include "Cannot call .type() on this element because it is being covered by another element:"
+          done()
+
+        @cy.inspect().get("#input-covered-in-span").type("foo")
+
+      it "throws when special characters dont exist", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq 2
+          allChars = _.keys(@Cypress.Keyboard.specialChars).join(", ")
+          expect(err.message).to.eq "Special character sequence: '{bar}' is not recognized. Available sequences are: #{allChars}"
+          done()
+
+        @cy.get(":text:first").type("foo{bar}")
+
+      it "throws when attemping to type tab", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq 2
+          expect(err.message).to.eq "{tab} isn't a supported character sequence. You'll want to use the command: 'cy.tab()' which is not ready yet, but when it is done that's what you'll use."
+          done()
+
+        @cy.get(":text:first").type("foo{tab}")
+
+      it "throws on an empty string", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq 2
+          expect(err.message).to.eq ".type() cannot accept an empty String! You need to actually type something."
+          done()
+
+        @cy.get(":text:first").type("")
+
+      _.each [NaN, Infinity, [], {}, null, undefined], (val) =>
+        it "throws when trying to type: #{val}", (done) ->
+          logs = []
+
+          @Cypress.on "log", (log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) =>
+            expect(logs.length).to.eq 2
+            expect(err.message).to.eq ".type() can only accept a String or Number. You passed in: '#{val}'"
+            done()
+
+          @cy.get(":text:first").type(val)
+
+      it "throws when type is cancelled by preventingDefault mousedown"
+
   context "#clear", ->
     it "does not change the subject", ->
       textarea = @cy.$("textarea")
@@ -503,6 +1644,25 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#comments").clear().then ($textarea) ->
         expect($textarea).to.have.value("")
+
+    it "can forcibly click even when being covered by another element", (done) ->
+      input  = $("<input />").attr("id", "input-covered-in-span").prependTo(@cy.$("body"))
+      span = $("<span>span on input</span>").css(position: "absolute", left: input.offset().left, top: input.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+      input.on "click", -> done()
+
+      @cy.get("#input-covered-in-span").clear({force: true})
+
+    it "passes timeout and interval down to click", (done) ->
+      input  = $("<input />").attr("id", "input-covered-in-span").prependTo(@cy.$("body"))
+      span = $("<span>span on input</span>").css(position: "absolute", left: input.offset().left, top: input.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+      @cy.on "retry", (options) ->
+        expect(options.timeout).to.eq 1000
+        expect(options.interval).to.eq 60
+        done()
+
+      @cy.get("#input-covered-in-span").clear({timeout: 1000, interval: 60})
 
     describe "errors", ->
       beforeEach ->
@@ -534,7 +1694,7 @@ describe "$Cypress.Cy Actions Commands", ->
           logs.push @log
 
         @cy.on "fail", (err) =>
-          expect(logs).to.have.length(3)
+          expect(logs.length).to.eq(3)
           expect(@log.get("error")).to.eq(err)
           expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <form id=\"checkboxes\"></form>"
           done()
@@ -586,7 +1746,28 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.clear()
 
+      it "throws when input cannot be cleared", (done) ->
+        @cy._timeout(200)
+
+        input  = $("<input />").attr("id", "input-covered-in-span").prependTo(@cy.$("body"))
+        span = $("<span>span on button</span>").css(position: "absolute", left: input.offset().left, top: input.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq(2)
+          expect(err.message).to.include "Cannot call .clear() on this element because it is being covered by another element:"
+          done()
+
+        @cy.get("#input-covered-in-span").clear()
+
     describe ".log", ->
+      beforeEach ->
+        @Cypress.on "log", (@log) =>
+
       it "logs immediately before resolving", (done) ->
         input = @cy.$("input:first")
 
@@ -599,10 +1780,13 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("input:first").clear()
 
       it "snapshots after clicking", ->
-        @Cypress.on "log", (@log) =>
-
         @cy.get("input:first").clear().then ($input) ->
           expect(@log.get("snapshot")).to.be.an("object")
+
+      it "logs deltaOptions", ->
+        @cy.get("input:first").clear({force: true, timeout: 1000}).then ->
+          expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
+          expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
 
   context "#check", ->
     it "does not change the subject", ->
@@ -641,6 +1825,25 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("[name=colors]").check(["blue", "green"]).then ($inputs) ->
         expect($inputs.filter(":checked").length).to.eq 2
         expect($inputs.filter("[value=blue],[value=green]")).to.be.checked
+
+    it "can forcibly click even when being covered by another element", (done) ->
+      checkbox  = $("<input type='checkbox' />").attr("id", "checkbox-covered-in-span").prependTo(@cy.$("body"))
+      span = $("<span>span on checkbox</span>").css(position: "absolute", left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+      checkbox.on "click", -> done()
+
+      @cy.get("#checkbox-covered-in-span").check({force: true})
+
+    it "passes timeout and interval down to click", (done) ->
+      checkbox  = $("<input type='checkbox' />").attr("id", "checkbox-covered-in-span").prependTo(@cy.$("body"))
+      span = $("<span>span on checkbox</span>").css(position: "absolute", left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+      @cy.on "retry", (options) ->
+        expect(options.timeout).to.eq 1000
+        expect(options.interval).to.eq 60
+        done()
+
+      @cy.get("#checkbox-covered-in-span").check({timeout: 1000, interval: 60})
 
     describe "events", ->
       it "emits click event", (done) ->
@@ -688,15 +1891,33 @@ describe "$Cypress.Cy Actions Commands", ->
           done()
 
       it "throws when any member of the subject isnt a checkbox or radio", (done) ->
-        ## find a textare which should blow up
-        ## the textarea is the last member of the subject
-        @cy.get(":checkbox,:radio,#comments").check()
-
         @cy.on "fail", (err) ->
           expect(err.message).to.include ".check() can only be called on :checkbox and :radio! Your subject contains a: <textarea id=\"comments\"></textarea>"
           done()
 
+        ## find a textare which should blow up
+        ## the textarea is the last member of the subject
+        @cy.get(":checkbox,:radio,#comments").check()
+
       it "throws when any member of the subject isnt visible", (done) ->
+        chk = @cy.$(":checkbox").first().hide()
+
+        node = $Cypress.Utils.stringifyElement(chk.last())
+
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push @log
+
+        @cy.on "fail", (err) =>
+          expect(logs).to.have.length(chk.length + 1)
+          expect(@log.get("error")).to.eq(err)
+          expect(err.message).to.eq "cy.check() cannot be called on the non-visible element: #{node}"
+          done()
+
+        @cy.get(":checkbox:first").check()
+
+      it "still ensures visibility even during a noop", (done) ->
         chk = @cy.$(":checkbox")
         chk.show().last().hide()
 
@@ -715,18 +1936,36 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get(":checkbox").check()
 
-        it "logs once when not dom subject", (done) ->
-          logs = []
+      it "logs once when not dom subject", (done) ->
+        logs = []
 
-          @Cypress.on "log", (@log) =>
-            logs.push @log
+        @Cypress.on "log", (@log) =>
+          logs.push @log
 
-          @cy.on "fail", (err) =>
-            expect(logs).to.have.length(1)
-            expect(@log.get("error")).to.eq(err)
-            done()
+        @cy.on "fail", (err) =>
+          expect(logs).to.have.length(1)
+          expect(@log.get("error")).to.eq(err)
+          done()
 
-          @cy.check()
+        @cy.check()
+
+      it "throws when input cannot be clicked", (done) ->
+        @cy._timeout(200)
+
+        checkbox  = $("<input type='checkbox' />").attr("id", "checkbox-covered-in-span").prependTo(@cy.$("body"))
+        span = $("<span>span on button</span>").css(position: "absolute", left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq(2)
+          expect(err.message).to.include "Cannot call .check() on this element because it is being covered by another element:"
+          done()
+
+        @cy.get("#checkbox-covered-in-span").check()
 
     describe ".log", ->
       beforeEach ->
@@ -767,15 +2006,15 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "passes in coords", ->
         @cy.get("[name=colors][value=blue]").check().then ($input) ->
-          coords = @cy.getCenterCoordinates($input)
+          coords = @cy.getCoordinates($input)
           expect(@log.get("coords")).to.deep.eq coords
 
       it "#onConsole", ->
         @cy.get("[name=colors][value=blue]").check().then ($input) ->
-          coords = @cy.getCenterCoordinates($input)
+          coords = @cy.getCoordinates($input)
           console = @log.attributes.onConsole()
           expect(console.Command).to.eq "check"
-          expect(console["Applied To"]).to.eq @log.get("$el")
+          expect(console["Applied To"]).to.eq @log.get("$el").get(0)
           expect(console.Elements).to.eq 1
           expect(console.Coords).to.deep.eq coords
 
@@ -784,10 +2023,16 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@log.get("coords")).to.be.undefined
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "check"
-            "Applied To": @log.get("$el")
+            "Applied To": @log.get("$el").get(0)
             Elements: 1
             Note: "This checkbox was already checked. No operation took place."
+            Options: undefined
           }
+
+      it "logs deltaOptions", ->
+        @cy.get("[name=colors][value=blue]").check({force: true, timeout: 1000}).then ->
+          expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
+          expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
 
   context "#uncheck", ->
     it "unchecks a checkbox", ->
@@ -810,6 +2055,25 @@ describe "$Cypress.Cy Actions Commands", ->
         done("should not fire change event")
       @cy.get(checkbox).uncheck()
       @cy.on "end", -> done()
+
+    it "can forcibly click even when being covered by another element", (done) ->
+      checkbox  = $("<input type='checkbox' />").attr("id", "checkbox-covered-in-span").prop("checked", true).prependTo(@cy.$("body"))
+      span = $("<span>span on checkbox</span>").css(position: "absolute", left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+      checkbox.on "click", -> done()
+
+      @cy.get("#checkbox-covered-in-span").uncheck({force: true})
+
+    it "passes timeout and interval down to click", (done) ->
+      checkbox  = $("<input type='checkbox' />").attr("id", "checkbox-covered-in-span").prop("checked", true).prependTo(@cy.$("body"))
+      span = $("<span>span on checkbox</span>").css(position: "absolute", left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+      @cy.on "retry", (options) ->
+        expect(options.timeout).to.eq 1000
+        expect(options.interval).to.eq 60
+        done()
+
+      @cy.get("#checkbox-covered-in-span").uncheck({timeout: 1000, interval: 60})
 
     describe "events", ->
       it "emits click event", (done) ->
@@ -886,6 +2150,24 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get(":checkbox:first").uncheck().uncheck()
 
+      it "throws when input cannot be clicked", (done) ->
+        @cy._timeout(200)
+
+        checkbox  = $("<input type='checkbox' />").attr("id", "checkbox-covered-in-span").prop("checked", true).prependTo(@cy.$("body"))
+        span = $("<span>span on button</span>").css(position: "absolute", left: checkbox.offset().left, top: checkbox.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq(2)
+          expect(err.message).to.include "Cannot call .uncheck() on this element because it is being covered by another element:"
+          done()
+
+        @cy.get("#checkbox-covered-in-span").uncheck()
+
     describe ".log", ->
       beforeEach ->
         @cy.$("[name=colors][value=blue]").prop("checked", true)
@@ -927,10 +2209,10 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "#onConsole", ->
         @cy.get("[name=colors][value=blue]").uncheck().then ($input) ->
-          coords = @cy.getCenterCoordinates($input)
+          coords = @cy.getCoordinates($input)
           console = @log.attributes.onConsole()
           expect(console.Command).to.eq "uncheck"
-          expect(console["Applied To"]).to.eq @log.get("$el")
+          expect(console["Applied To"]).to.eq @log.get("$el").get(0)
           expect(console.Elements).to.eq 1
           expect(console.Coords).to.deep.eq coords
 
@@ -938,16 +2220,22 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("[name=colors][value=blue]").invoke("prop", "checked", false).uncheck().then ($input) ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "uncheck"
-            "Applied To": @log.get("$el")
+            "Applied To": @log.get("$el").get(0)
             Elements: 1
             Note: "This checkbox was already unchecked. No operation took place."
+            Options: undefined
           }
 
-  context "#submit", ->
-    it "does not change the subject", ->
-      form = @cy.$("form")
+      it "logs deltaOptions", ->
+        @cy.get("[name=colors][value=blue]").check().uncheck({force: true, timeout: 1000}).then ->
+          expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
+          expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
 
-      @cy.get("form").submit().then ($form) ->
+  context "#submit", ->
+    it "does not change the subject when default actions is prevented", ->
+      form = @cy.$("form:first").on "submit", -> return false
+
+      @cy.get("form:first").submit().then ($form) ->
         expect($form.get(0)).to.eq form.get(0)
 
     it "works with native event listeners", ->
@@ -1045,7 +2333,7 @@ describe "$Cypress.Cy Actions Commands", ->
           logs.push @log
 
         @cy.on "fail", (err) =>
-          expect(logs).to.have.length(2)
+          expect(logs.length).to.eq(2)
           expect(@log.get("error")).to.eq(err)
           expect(err.message).to.include ".submit() can only be called on a <form>! Your subject contains a: <input id=\"input\">"
           done()
@@ -1066,6 +2354,18 @@ describe "$Cypress.Cy Actions Commands", ->
           done()
 
         @cy.get("form:first").submit().submit()
+
+      it "throws when subject is a collection of elements", (done) ->
+        forms = @cy.$("form")
+
+        ## make sure we have more than 1 form!
+        expect(forms.length).to.be.gt(1)
+
+        @cy.on "fail", (err) =>
+          expect(err.message).to.include ".submit() can only be called on a single form! Your subject contained #{forms.length} form elements!"
+          done()
+
+        @cy.get("form").submit()
 
       it "logs once when not dom subject", (done) ->
         logs = []
@@ -1103,6 +2403,8 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@log.get("snapshot")).to.be.an("object")
 
       it "provides $el", ->
+        @cy.$("form:first").submit -> return false
+
         @cy.get("form").first().submit().then ($form) ->
           expect(@log.get("name")).to.eq "submit"
           expect(@log.get("$el")).to.match $form
@@ -1111,7 +2413,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("form").first().submit().then ($form) ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "submit"
-            "Applied To": @log.get("$el")
+            "Applied To": @log.get("$el").get(0)
             Elements: 1
           }
 
@@ -1191,7 +2493,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("input:first").focused().then ($input) ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "focused"
-            Returned: $input
+            Returned: $input.get(0)
             Elements: 1
           }
 
@@ -1257,6 +2559,14 @@ describe "$Cypress.Cy Actions Commands", ->
         .get("input:first").focus()
         .get("input:last").focus()
 
+    it "can focus [contenteditable]", ->
+      ce = @cy.$("[contenteditable]:first")
+
+      @cy
+        .get("[contenteditable]:first").focus()
+        .focused().then ($ce) ->
+          expect($ce.get(0)).to.eq ce.get(0)
+
     describe ".log", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
@@ -1299,7 +2609,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("input:first").focus().then ($input) ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "focus"
-            "Applied To": $input
+            "Applied To": $input.get(0)
           }
 
     describe "errors", ->
@@ -1434,6 +2744,18 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("input:first").focus().blur().then ($input) ->
         expect($input).to.match input
 
+    it "can blur [contenteditable]", ->
+      ce = @cy.$("[contenteditable]:first")
+
+      @cy
+        .get("[contenteditable]:first").focus().blur().then ($ce) ->
+          expect($ce.get(0)).to.eq ce.get(0)
+
+    it "can blur input[type=time]", (done) ->
+      @cy.$("#input-types [type=time]").blur -> done()
+
+      @cy.get("#input-types [type=time]").focus().invoke("val", "03:15:00").blur()
+
     describe ".log", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
@@ -1475,7 +2797,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("input:first").focus().blur().then ($input) ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "blur"
-            "Applied To": $input
+            "Applied To": $input.get(0)
           }
 
     describe "errors", ->
@@ -1563,7 +2885,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get(":text:first").dblclick()
 
-    it "silences errors on onfocusable elements", ->
+    it "silences errors on unfocusable elements", ->
       div = @cy.$("div:first")
 
       @cy.get("div:first").dblclick()
@@ -1584,14 +2906,6 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#button").dblclick().then ->
         expect(@delay).to.be.calledWith 10
-
-    it "inserts artificial delay of 50ms for anchors", ->
-      @cy.on "invoke:start", (obj) =>
-        if obj.name is "dblclick"
-          @delay = @sandbox.spy Promise.prototype, "delay"
-
-      @cy.contains("Home Page").dblclick().then ->
-        expect(@delay).to.be.calledWith 50
 
     it "can operate on a jquery collection", ->
       dblclicks = 0
@@ -1624,13 +2938,21 @@ describe "$Cypress.Cy Actions Commands", ->
       ## make sure we have at least 5 anchor links
       expect(anchors.length).to.be.gte 5
 
-      @cy.on "cancel", ->
+      @cy.on "cancel", =>
+        ## timeout will get called synchronously
+        ## again during a click if the click function
+        ## is called
+        timeout = @sandbox.spy @cy, "_timeout"
+
         _.delay ->
           ## abort should only have been called once
           expect(spy.callCount).to.eq 1
 
           ## and we should have stopped dblclicking after 3
           expect(dblclicks).to.eq 3
+
+          expect(timeout.callCount).to.eq 0
+
           done()
         , 200
 
@@ -1643,7 +2965,7 @@ describe "$Cypress.Cy Actions Commands", ->
       ## which proves we are dblclicking serially
       throttled = _.throttle ->
         dblclicks += 1
-      , 40, {leading: false}
+      , 5, {leading: false}
 
       anchors = @cy.$("#sequential-clicks a")
       anchors.dblclick throttled
@@ -1779,7 +3101,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("button").first().dblclick().then ($button) ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "dblclick"
-            "Applied To": @log.get("$el")
+            "Applied To": @log.get("$el").get(0)
             Elements: 1
           }
 
@@ -1787,14 +3109,14 @@ describe "$Cypress.Cy Actions Commands", ->
     it "receives native click event", (done) ->
       btn = @cy.$("#button")
 
-      coords = @cy.getCenterCoordinates(btn)
+      coords = @cy.getCoordinates(btn)
 
       btn.get(0).addEventListener "click", (e) =>
         obj = _(e).pick("bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
         expect(obj).to.deep.eq {
           bubbles: true
           cancelable: true
-          view: @cy.sync.window()
+          view: @cy.private("window")
           clientX: coords.x
           clientY: coords.y
           button: 0
@@ -1814,24 +3136,24 @@ describe "$Cypress.Cy Actions Commands", ->
 
     it "bubbles up native click event", (done) ->
       click = (e) =>
-        @cy.sync.window().removeEventListener "click", click
+        @cy.private("window").removeEventListener "click", click
         done()
 
-      @cy.sync.window().addEventListener "click", click
+      @cy.private("window").addEventListener "click", click
 
       @cy.get("#button").click()
 
     it "sends native mousedown event", (done) ->
       btn = @cy.$("#button")
 
-      coords = @cy.getCenterCoordinates(btn)
+      coords = @cy.getCoordinates(btn)
 
       btn.get(0).addEventListener "mousedown", (e) =>
         obj = _(e).pick("bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
         expect(obj).to.deep.eq {
           bubbles: true
           cancelable: true
-          view: @cy.sync.window()
+          view: @cy.private("window")
           clientX: coords.x
           clientY: coords.y
           button: 0
@@ -1852,14 +3174,14 @@ describe "$Cypress.Cy Actions Commands", ->
     it "sends native mouseup event", (done) ->
       btn = @cy.$("#button")
 
-      coords = @cy.getCenterCoordinates(btn)
+      coords = @cy.getCoordinates(btn)
 
       btn.get(0).addEventListener "mouseup", (e) =>
         obj = _(e).pick("bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
         expect(obj).to.deep.eq {
           bubbles: true
           cancelable: true
-          view: @cy.sync.window()
+          view: @cy.private("window")
           clientX: coords.x
           clientY: coords.y
           button: 0
@@ -1923,10 +3245,10 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get(":text:first").click()
 
-    it "silences errors on onfocusable elements", ->
+    it "silences errors on unfocusable elements", ->
       div = @cy.$("div:first")
 
-      @cy.get("div:first").click()
+      @cy.get("div:first").click({force: true})
 
     it "causes first focused element to receive blur", (done) ->
       @cy.$("input:first").blur ->
@@ -1976,13 +3298,21 @@ describe "$Cypress.Cy Actions Commands", ->
       ## make sure we have at least 5 anchor links
       expect(anchors.length).to.be.gte 5
 
-      @cy.on "cancel", ->
+      @cy.on "cancel", =>
+        ## timeout will get called synchronously
+        ## again during a click if the click function
+        ## is called
+        timeout = @sandbox.spy @cy, "_timeout"
+
         _.delay ->
           ## abort should only have been called once
           expect(spy.callCount).to.eq 1
 
           ## and we should have stopped clicking after 3
           expect(clicks).to.eq 3
+
+          expect(timeout.callCount).to.eq 0
+
           done()
         , 200
 
@@ -2017,6 +3347,130 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#three-buttons button").click()
 
+    it "can click elements which are hidden until scrolled within parent container", ->
+      @cy.get("#overflow-auto-container").contains("quux").click()
+
+    ## this test needs to increase the height + width of the div
+    ## when we implement scrollBy the delta of the left/top
+    it "can click elements which are huge and the center is naturally below the fold", ->
+      @cy.get("#massively-long-div").click()
+
+    it "can forcibly click even when being covered by another element", (done) ->
+      btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").prependTo(@cy.$("body"))
+      span = $("<span>span on button</span>").css(position: "absolute", left: btn.offset().left, top: btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+      btn.on "click", -> done()
+
+      @cy.get("#button-covered-in-span").click({force: true})
+
+    it "eventually clicks when covered up", ->
+      btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").prependTo(@cy.$("body"))
+      span = $("<span>span on button</span>").css(position: "absolute", left: btn.offset().left, top: btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+      retried = false
+
+      @cy.on "retry", _.after 3, ->
+        span.hide()
+        retried = true
+
+      @cy.get("#button-covered-in-span").click().then ->
+        expect(retried).to.be.true
+
+    describe "position argument", ->
+      it "can click center by default", (done) ->
+        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$("body"))
+        span = $("<span>span</span>").css(position: "absolute", left: btn.offset().left + 30, top: btn.offset().top + 40, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
+
+        clicked = _.after 2, -> done()
+
+        span.on "click", clicked
+        btn.on "click", clicked
+
+        @cy.get("#button-covered-in-span").click()
+
+      it "can click center", (done) ->
+        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$("body"))
+        span = $("<span>span</span>").css(position: "absolute", left: btn.offset().left + 30, top: btn.offset().top + 40, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
+
+        clicked = _.after 2, -> done()
+
+        span.on "click", clicked
+        btn.on "click", clicked
+
+        @cy.get("#button-covered-in-span").click("center")
+
+      it "can click topLeft", (done) ->
+        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$("body"))
+        span = $("<span>span</span>").css(position: "absolute", left: btn.offset().left, top: btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
+
+        clicked = _.after 2, -> done()
+
+        span.on "click", clicked
+        btn.on "click", clicked
+
+        @cy.get("#button-covered-in-span").click("topLeft")
+
+      it "can click topRight", (done) ->
+        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$("body"))
+        span = $("<span>span</span>").css(position: "absolute", left: btn.offset().left + 80, top: btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
+
+        clicked = _.after 2, -> done()
+
+        span.on "click", clicked
+        btn.on "click", clicked
+
+        @cy.get("#button-covered-in-span").click("topRight")
+
+      it "can click bottomLeft", (done) ->
+        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$("body"))
+        span = $("<span>span</span>").css(position: "absolute", left: btn.offset().left, top: btn.offset().top + 80, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
+
+        clicked = _.after 2, -> done()
+
+        span.on "click", clicked
+        btn.on "click", clicked
+
+        @cy.get("#button-covered-in-span").click("bottomLeft")
+
+      it "can click bottomRight", (done) ->
+        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$("body"))
+        span = $("<span>span</span>").css(position: "absolute", left: btn.offset().left + 80, top: btn.offset().top + 80, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
+
+        clicked = _.after 2, -> done()
+
+        span.on "click", clicked
+        btn.on "click", clicked
+
+        @cy.get("#button-covered-in-span").click("bottomRight")
+
+      it "can pass options along with position", (done) ->
+        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$("body"))
+        span = $("<span>span</span>").css(position: "absolute", left: btn.offset().left + 80, top: btn.offset().top + 80, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(@cy.$("body"))
+
+        btn.on "click", -> done()
+
+        @cy.get("#button-covered-in-span").click("bottomRight", {force: true})
+
+    describe "relative coordinate arguments", ->
+      it "can specify x and y", (done) ->
+        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$("body"))
+        span = $("<span>span</span>").css(position: "absolute", left: btn.offset().left + 50, top: btn.offset().top + 65, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
+
+        clicked = _.after 2, -> done()
+
+        span.on "click", clicked
+        btn.on "click", clicked
+
+        @cy.get("#button-covered-in-span").click(75, 78)
+
+      it "can pass options along with x, y", (done) ->
+        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$("body"))
+        span = $("<span>span</span>").css(position: "absolute", left: btn.offset().left + 50, top: btn.offset().top + 65, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(@cy.$("body"))
+
+        btn.on "click", -> done()
+
+        @cy.get("#button-covered-in-span").click(75, 78, {force: true})
+
     describe "mousedown", ->
       it "gives focus after mousedown", (done) ->
         input = @cy.$("input:first")
@@ -2026,7 +3480,7 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(obj).to.deep.eq {
             bubbles: false
             cancelable: false
-            view: @cy.sync.window()
+            view: @cy.private("window")
             pageX: 0
             pageY: 0
             which: 0
@@ -2046,7 +3500,7 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(obj).to.deep.eq {
             bubbles: true
             cancelable: false
-            view: @cy.sync.window()
+            view: @cy.private("window")
             pageX: 0
             pageY: 0
             which: 0
@@ -2091,13 +3545,13 @@ describe "$Cypress.Cy Actions Commands", ->
           .focused().should("have.id", "button-covered-in-span")
 
       it "will give focus to the window if no element is focusable", (done) ->
-        $(@cy.sync.window()).on "focus", -> done()
+        $(@cy.private("window")).on "focus", -> done()
 
         @cy.get("#nested-find").click()
 
       # it "events", ->
       #   btn = @cy.$("button")
-      #   win = $(@cy.sync.window())
+      #   win = $(@cy.private("window"))
 
       #   _.each {"btn": btn, "win": win}, (type, key) ->
       #     _.each "focus mousedown mouseup click".split(" "), (event) ->
@@ -2112,21 +3566,8 @@ describe "$Cypress.Cy Actions Commands", ->
         # btn.on "mousedown", (e) ->
           # console.log("btn mousedown")
           # e.preventDefault()
+
         # win.on "mousedown", -> console.log("win mousedown")
-
-    describe "retry support", ->
-      it "eventually clicks when covered up", ->
-        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").prependTo(@cy.$("body"))
-        span = $("<span>span on button</span>").css(position: "absolute", left: btn.offset().left, top: btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
-
-        retried = false
-
-        @cy.on "retry", _.after 3, ->
-          span.hide()
-          retried = true
-
-        @cy.get("#button-covered-in-span").click().then ->
-          expect(retried).to.be.true
 
     describe "errors", ->
       beforeEach ->
@@ -2176,7 +3617,7 @@ describe "$Cypress.Cy Actions Commands", ->
           logs.push @log
 
         @cy.on "fail", (err) =>
-          expect(logs).to.have.length(4)
+          expect(logs.length).to.eq(4)
           expect(@log.get("error")).to.eq(err)
           expect(err.message).to.eq "cy.click() cannot be called on the non-visible element: #{node}"
           done()
@@ -2200,10 +3641,56 @@ describe "$Cypress.Cy Actions Commands", ->
           ## get + click logs
           expect(logs.length).eq(2)
           expect(@log.get("error")).to.eq(err)
+          expect(@log.get("snapshot")).to.be.an("object") ## still snapshot during an error
           expect(err.message).to.include "Cannot call .click() on this element because it is being covered by another element: #{node}"
+
+          console = @log.attributes.onConsole()
+          expect(console["Tried to Click"]).to.eq btn.get(0)
+          expect(console["But its Covered By"]).to.eq span.get(0)
+
           done()
 
         @cy.get("#button-covered-in-span").click()
+
+      it "throws when element is hidden and theres no element specifically covering it", (done) ->
+        ## i cant come up with a way to easily make getElementAtCoordinates
+        ## return null so we are just forcing it to return null to simulate
+        ## the element being "hidden" so to speak but still displacing space
+        @cy._timeout(200)
+
+        @sandbox.stub(@cy, "getElementAtCoordinates").returns(null)
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "Cannot call .click() on this element because its center is currently hidden from view."
+          done()
+
+        @cy.get("#overflow-auto-container").contains("quux").click()
+
+      it "throws when attempting to click a <select> element", (done) ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push log
+
+        @cy.on "fail", (err) ->
+          expect(logs.length).to.eq(2)
+          expect(err.message).to.eq "Cannot call .click() on a <select> element. Use cy.select() command instead to change the value."
+          done()
+
+        @cy.get("select:first").click()
+
+      it "throws when provided invalid position", (done) ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push log
+
+        @cy.on "fail", (err) ->
+          expect(logs.length).to.eq(2)
+          expect(err.message).to.eq "Invalid position argument: 'foo'. Position may only be center, topLeft, topRight, bottomLeft, or bottomRight."
+          done()
+
+        @cy.get("button:first").click("foo")
 
     describe ".log", ->
       beforeEach ->
@@ -2228,7 +3715,7 @@ describe "$Cypress.Cy Actions Commands", ->
         clicks = []
 
         ## append two buttons
-        button = -> $("<button class='clicks'>click</button")
+        button = -> $("<button class='clicks'>click</button>")
         @cy.$("body").append(button()).append(button())
 
         @Cypress.on "log", (obj) ->
@@ -2251,25 +3738,28 @@ describe "$Cypress.Cy Actions Commands", ->
       it "passes in coords", ->
         @cy.get("button").first().click().then ($btn) ->
           $btn.blur() ## blur which removes focus styles which would change coords
-          coords = @cy.getCenterCoordinates($btn)
+          coords = @cy.getCoordinates($btn)
           expect(@log.get("coords")).to.deep.eq coords
 
       it "#onConsole", ->
         @cy.get("button").first().click().then ($button) ->
-          console = @log.attributes.onConsole()
-          coords = @cy.getCenterCoordinates($button)
-          expect(@log.get("coords")).to.deep.eq coords
+          console   = @log.attributes.onConsole()
+          coords    = @cy.getCoordinates($button)
+          logCoords = @log.get("coords")
+          expect(logCoords.x).to.be.closeTo(coords.x, 1) ## ensure we are within 1
+          expect(logCoords.y).to.be.closeTo(coords.y, 1) ## ensure we are within 1
           expect(console.Command).to.eq "click"
-          expect(console["Applied To"].get(0)).to.eq @log.get("$el").get(0)
+          expect(console["Applied To"]).to.eq @log.get("$el").get(0)
           expect(console.Elements).to.eq 1
-          expect(console.Coords).to.deep.eq coords
+          expect(console.Coords.x).to.be.closeTo(coords.x, 1) ## ensure we are within 1
+          expect(console.Coords.y).to.be.closeTo(coords.y, 1) ## ensure we are within 1
 
       it "#onConsole actual element clicked", ->
         btn  = $("<button>", id: "button-covered-in-span").prependTo(@cy.$("body"))
         span = $("<span>span in button</span>").css(padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
 
         @cy.get("#button-covered-in-span").click().then ->
-          expect(@log.attributes.onConsole()["Actual Element Clicked"].get(0)).to.eq span.get(0)
+          expect(@log.attributes.onConsole()["Actual Element Clicked"]).to.eq span.get(0)
 
       it "#onConsole groups MouseDown", ->
         @cy.$("input:first").mousedown -> return false
@@ -2354,3 +3844,9 @@ describe "$Cypress.Cy Actions Commands", ->
               }
             }
           ]
+
+      it "logs deltaOptions", ->
+        @cy.get("button:first").click({force: true, timeout: 1000}).then ->
+          expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
+          expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
+

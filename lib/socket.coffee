@@ -5,12 +5,14 @@ uuid          = require 'node-uuid'
 chokidar      = require 'chokidar'
 Promise       = require "bluebird"
 IdGenerator   = require './id_generator'
+Fixtures      = require "./fixtures"
 Log           = require "./log"
 SecretSauce   = require "../lib/util/secret_sauce_loader"
 
 class Socket
   fs: fs
   Log: Log
+  Fixtures: Fixtures
   chokidar: chokidar
   Promise: Promise
   path: path

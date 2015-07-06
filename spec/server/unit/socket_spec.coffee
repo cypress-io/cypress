@@ -1,4 +1,5 @@
 root         = '../../../'
+_            = require "lodash"
 sinon        = require "sinon"
 chokidar     = require "chokidar"
 expect       = require('chai').expect
@@ -109,6 +110,54 @@ describe "Socket", ->
 
       @socket.watchTestFileByPath("test1.js").bind(@).then ->
         touch @filePath
+
+  context "#onFixture", ->
+    beforeEach ->
+      Fixtures.scaffold()
+
+      @todos   = Fixtures.project("todos")
+      @server  = Server(@todos)
+      @app     = @server.app
+      @socket  = Socket(@io, @app)
+
+    afterEach ->
+      Fixtures.remove()
+
+    it "binds to 'fixture' event", ->
+      @socket.startListening().then =>
+        expect(@ioSocket.on).to.be.calledWith("fixture")
+
+    it "calls socket#onFixture", ->
+      onFixture = @sandbox.stub(@socket, "onFixture")
+
+      @socket.startListening().then =>
+        socketCall = _.find @ioSocket.on.getCalls(), (call) ->
+          call.args[0] is "fixture"
+
+        ## get the callback function here
+        socketFn = socketCall.args[1]
+        socketFn.call(@socket, "foo", "bar")
+
+        ## ensure onFixture was called with those same arguments
+        ## therefore we have verified the socket binding and
+        ## the call into onFixture with the proper arguments
+        expect(onFixture).to.be.calledWith("foo", "bar")
+
+    it "returns the fixture object", ->
+      cb = @sandbox.spy()
+
+      @socket.onFixture("foo", cb).then ->
+        expect(cb).to.be.calledWith [
+          {"json": true}
+        ]
+
+    it "errors when fixtures fails", ->
+      cb = @sandbox.spy()
+
+      @socket.onFixture("invalid.exe", cb).then ->
+        obj = cb.getCall(0).args[0]
+        expect(obj).to.have.property("__error")
+        expect(obj.__error).to.eq "Invalid fixture extension: '.exe'. Acceptable file extensions are: .json, .js, .coffee, .html, .txt, .png, .jpg, .jpeg, .gif, .tif, .tiff"
 
   context "#startListening", ->
     beforeEach ->

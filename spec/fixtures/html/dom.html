@@ -12,6 +12,16 @@
           background-color: red;
           border: 1px solid black;
         }
+        #overflow-auto-container {
+          width: 100px;
+          height: 50px;
+          border: 1px solid #999;
+          overflow: auto;
+        }
+
+        #overflow-auto-container li {
+          line-height: 33px;
+        }
       </style>
 
       DOM Fixture
@@ -49,6 +59,15 @@
           <i>25</i>
         </span>
         <span>25</span>
+      </div>
+
+      <div id="wrapper">
+        <div id="upper">
+          <div class="item"><em>New</em> York</div>
+        </div>
+        <div id="lower">
+          <div class="item"><em>New</em> York</div>
+        </div>
       </div>
 
       <ul id="list">
@@ -172,6 +191,16 @@
         </form>
       </div>
 
+      <div id="input-types">
+        <input type="number" />
+        <input type="email" />
+        <input type="password" />
+        <input type="date" />
+        <input type="time" />
+        <div contenteditable="true"></div>
+        <textarea></textarea>
+      </div>
+
       <div id="sequential-clicks">
         <a href="#">1</a>
         <a href="#">2</a>
@@ -206,6 +235,10 @@
         <option value="co">Clockwork Orange</option>
         <option value="twbb">There Will Be Blood</option>
       </select>
+
+      <div id="contenteditable" contenteditable="true">
+        content should be editable
+      </div>
 
       <div id="contains-multiple-filter-match">
         <ul class="k-group k-treeview-lines" role="group">
@@ -274,6 +307,13 @@
         <button>2</button>
         <button>3</button>
       </div>
+      <ul id="overflow-auto-container">
+        <li>foo</li>
+        <li>bar</li>
+        <li>baz</li>
+        <li>quux</li>
+      </ul>
+      <div id="massively-long-div" style="height: 500px; width: 200px; background-color: gray;"></div>
     </div>
   </body>
 </html>

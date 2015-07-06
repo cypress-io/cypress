@@ -35,11 +35,22 @@ describe "$Cypress.Cy Navigation Commands", ->
 
     it "resets the runnables timeout after visit"
 
-    it "invokes onLoad callback"
+    it "invokes onLoad callback", (done) ->
+      cy = @cy
 
-    it "invokes onBeforeLoad callback", (done) ->
+      @cy.visit("fixtures/html/sinon.html", {
+        onLoad: (contentWindow) ->
+          expect(@).to.eq(cy)
+          expect(contentWindow.sinon).to.be.defined
+          done()
+      })
+
+    it "invokes onBeforeLoad callback with cy context", (done) ->
+      cy = @cy
+
       @cy.visit("fixtures/html/sinon.html", {
         onBeforeLoad: (contentWindow) ->
+          expect(@).to.eq(cy)
           expect(contentWindow.sinon).to.be.defined
           done()
       })
@@ -124,6 +135,10 @@ describe "$Cypress.Cy Navigation Commands", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
 
+      it "preserves url on subsequent visits", ->
+        @cy.visit("/fixtures/html/sinon.html").get("button").then ->
+          expect(@log.get("url")).to.eq "/fixtures/html/sinon.html"
+
       it "logs immediately before resolving", (done) ->
         @Cypress.on "log", (log) ->
           expect(log.pick("name", "message")).to.deep.eq {
@@ -139,6 +154,7 @@ describe "$Cypress.Cy Navigation Commands", ->
             state: "success"
             name: "visit"
             message: "index.html"
+            url: "index.html"
           }
 
           _.each obj, (value, key) =>
@@ -226,6 +242,26 @@ describe "$Cypress.Cy Navigation Commands", ->
   context "#loading", ->
     it "clears current timeout"
 
+    it "clears current cy subject", ->
+      input = @cy.$("form#click-me input")
+
+      @cy.get("form#click-me").find("input").click().then (subject) ->
+        expect(getNames(@cy.queue)).to.deep.eq [
+          "get", "find", "click", "then", "then"
+        ]
+        expect(getFirstSubjectByName("click").get(0)).to.eq input.get(0)
+        expect(subject).to.be.null
+
+    it "clears the current subject on submit event as well", ->
+      form = @cy.$("form#click-me")
+
+      @cy.get("form#click-me").submit().then (subject) ->
+        expect(getNames(@cy.queue)).to.deep.eq [
+          "get", "submit", "then", "then"
+        ]
+        expect(getFirstSubjectByName("get").get(0)).to.eq form.get(0)
+        expect(subject).to.be.null
+
     describe ".log", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
@@ -236,22 +272,22 @@ describe "$Cypress.Cy Navigation Commands", ->
         @Cypress.on "log", (log) ->
           logs.push log
 
-        cy.visit("/fixtures/html/sinon.html").then ->
+        @cy.visit("/fixtures/html/sinon.html").then ->
           expect(logs).to.have.length(1)
 
-      it "is name: loading", ->
-        cy.get("form#click-me").find("input").click().then ->
-          expect(@log.get("name")).to.eq "loading"
+      it "is name: page load", ->
+        @cy.get("form#click-me").find("input").click().then ->
+          expect(@log.get("name")).to.eq "page load"
 
       it "is type: parent", ->
-        cy.get("form#click-me").submit().then ->
+        @cy.get("form#click-me").submit().then ->
           expect(@log.get("type")).to.eq "parent"
 
       describe "#onConsole", ->
-        it "only has Command: loading", ->
-          cy.get("form#click-me").submit().then ->
+        it "only has Event: 'page load'", ->
+          @cy.get("form#click-me").submit().then ->
             expect(@log.attributes.onConsole()).to.deep.eq {
-              Command: "loading"
+              Event: "page load"
             }
 
     describe "errors", ->
@@ -265,6 +301,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           logs.push log
 
         @cy.on "fail", (err) ->
+          console.log err
           ## should only log once
           expect(logs.length).to.eq 1
           expect(err.message).to.eq "Timed out after waiting '100ms' for your remote page to load."

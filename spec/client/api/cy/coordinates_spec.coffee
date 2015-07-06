@@ -19,11 +19,11 @@ describe "$Cypress.Cy Coordinates Extensions", ->
     context "#getCenterCoordinates", ->
       it "returns center x/y including padding", ->
         ## padding is added to the line-height but width includes the padding
-        expect(@cy.getCenterCoordinates(@$button)).to.deep.eq {x: 100, y: 60}
+        expect(@cy.getCoordinates(@$button)).to.deep.eq {x: 100, y: 60}
 
       it "returns width / height factoring in rotation transforms", ->
         ## normally our outerWidth is 100 and outerHeight is 70
         ## after we've been rotated these are reversed and our previous
         ## calculation would be wrong. using getBoundingClientRect passes this test
         @$button.css({transform: "rotate(90deg)"})
-        expect(@cy.getCenterCoordinates(@$button)).to.deep.eq {x: 100, y: 60}
+        expect(@cy.getCoordinates(@$button)).to.deep.eq {x: 100, y: 60}

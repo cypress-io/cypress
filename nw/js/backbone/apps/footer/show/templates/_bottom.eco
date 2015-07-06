@@ -15,6 +15,7 @@
           <a href="#">Tests</a>
         </li>
         <li>
+        <li data-about>
           <a href="#">About</a>
         </li>
         <li data-debug>

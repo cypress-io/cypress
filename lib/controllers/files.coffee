@@ -29,13 +29,14 @@ class Files extends Controller
     filePath = path.join(process.cwd(), "lib/html/empty_inject.html")
 
     @getSpecs(test).bind(@).then (specs) ->
-      res.render filePath, {
-        title:        test
-        # stylesheets:  @getStylesheets()
-        javascripts:  @getJavascripts()
-        utilities:    @getUtilities()
-        specs:        specs
-      }
+      @getJavascripts().bind(@).then (js) ->
+        res.render filePath, {
+          title:        test
+          # stylesheets:  @getStylesheets()
+          javascripts:  js
+          utilities:    @getUtilities()
+          specs:        specs
+        }
 
   convertToAbsolutePath: (files) ->
     ## make sure its an array and remap to an absolute path
@@ -47,19 +48,24 @@ class Files extends Controller
     _.defaults options,
       test: true
 
-    {testFolder, rootFolder} = @app.get("cypress")
+    {testFolder, rootFolder, supportFolder} = @app.get("cypress")
 
     ## return the specs prefixed with /tests?p=spec
     _(specs).map (spec) ->
-      if options.test
-        ## prepend with tests path
-        spec = "#{testFolder}/#{spec}"
-      else
-        ## make sure we have no leading
-        ## or trailing forward slashes
-        spec = _.compact([rootFolder, spec])
-        spec = path.join(spec...)
+      ## if this is our support folder then
+      ## its already prefixed with the correct path
+      if _.str.contains(spec, supportFolder)
         spec = _.str.trim(spec, "/")
+      else
+        if options.test
+          ## prepend with tests path
+          spec = "#{testFolder}/#{spec}"
+        else
+          ## make sure we have no leading
+          ## or trailing forward slashes
+          spec = _.compact([rootFolder, spec])
+          spec = path.join(spec...)
+          spec = _.str.trim(spec, "/")
 
       "/__cypress/tests?p=#{spec}"
 
@@ -76,8 +82,30 @@ class Files extends Controller
     @convertToAbsolutePath @app.get("cypress").stylesheets
 
   getJavascripts: ->
-    paths = @convertToAbsolutePath @app.get("cypress").javascripts
-    @convertToSpecPath paths, {test: false}
+    {projectRoot, javascripts, supportFolder} = @app.get("cypress")
+
+    ## automatically add in our support folder and any javascripts
+    files = [].concat path.join(supportFolder, "**", "*"), javascripts
+    paths = @convertToAbsolutePath _.chain(files).compact().uniq().value()
+
+    Promise
+      .map paths, (p) ->
+        ## does the path include a globstar?
+        return p if not p.includes("*")
+
+        new Promise (resolve, reject) ->
+          ## ensure we are looking in our projectRoot
+          p = path.join(projectRoot, p)
+          glob p, (err, files) ->
+            reject(err) if err
+            resolve(files)
+      .then (files) ->
+        _.chain(files).flatten().map (file) ->
+          ## slice out the projectRoot from our files again
+          file.replace(projectRoot, "")
+        .value()
+      .then (files) =>
+        @convertToSpecPath(files, {test: false})
 
   getUtilities: ->
     utils = ["iframe"]
@@ -94,14 +122,44 @@ class Files extends Controller
     utils.map (util) -> "/__cypress/static/js/#{util}.js"
 
   getTestFiles: ->
+    cypress = @app.get("cypress")
+
     testFolderPath = path.join(
-      @app.get("cypress").projectRoot,
-      @app.get("cypress").testFolder
+      cypress.projectRoot,
+      cypress.testFolder
     )
 
+    ## support files are not automatically
+    ## ignored because only _fixtures are hard
+    ## coded. the rest is simply whatever is in
+    ## the javascripts array
+
+    fixturesFolderPath = path.join(
+      cypress.projectRoot,
+      cypress.fixturesFolder,
+      "**",
+      "*"
+    )
+
+    supportFolderPath = path.join(
+      cypress.projectRoot,
+      cypress.supportFolder,
+      "**",
+      "*"
+    )
+
+    ## map all of the javascripts to the project root
+    javascriptsPath = _.map cypress.javascripts, (js) ->
+      path.join(cypress.projectRoot, js)
+
     new Promise (resolve, reject) ->
+      ## ignore _fixtures + _support + javascripts
+      options = {
+        ignore: [].concat(javascriptsPath, supportFolderPath, fixturesFolderPath)
+      }
+
       ## grab all the js and coffee files
-      glob "#{testFolderPath}/**/*.+(js|coffee)", (err, files) ->
+      glob "#{testFolderPath}/**/*.+(js|coffee)", options, (err, files) ->
         reject(err) if err
 
         ## slice off the testFolder directory(ies) (which is our test folder)

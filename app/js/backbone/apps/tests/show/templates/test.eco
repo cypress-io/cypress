@@ -7,25 +7,12 @@
     <div id="specs-container">
       <div id="specs-region"></div>
     </div>
-<!--     <div class="keyboard-shortcuts-helper">
-      Type <mark>?</mark> to see a list of keyboard shortcuts
-    </div> -->
   </div>
 </div>
 <% end %>
-<!-- <div class="ecl-main-content">
-  <div id="test-page">
-    <div id="specs-region"></div>
-  </div>
-</div> -->
 <div id="iframe-wrapper">
   <div id="iframe-container">
     <div id="iframe-region"></div>
   </div>
 </div>
 <div id="jobs-region"></div>
-<ul id="panel-wrapper">
-  <li id="dom-region"></li>
-  <li id="xhr-region"></li>
-  <li id="log-region"></li>
-</ul>

@@ -28,7 +28,7 @@ describe "$Cypress.Cy Location Commands", ->
         @cy.url().then ->
           obj = {
             name: "url"
-            message: "/fixtures/html/dom.html"
+            message: ""
           }
 
           _.each obj, (value, key) =>

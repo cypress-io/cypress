@@ -7,8 +7,8 @@ $Cypress.register "Location", (Cypress, _, $) ->
       href = @sync.location("href", {log: false})
 
       if options.log
-        Cypress.command
-          message: href
+        Cypress.Log.command
+          message: ""
           end: true
           snapshot: true
 
@@ -20,8 +20,8 @@ $Cypress.register "Location", (Cypress, _, $) ->
       hash = @sync.location("hash", {log: false})
 
       if options.log
-        Cypress.command
-          message: hash
+        Cypress.Log.command
+          message: ""
           end: true
           snapshot: true
 
@@ -39,8 +39,7 @@ $Cypress.register "Location", (Cypress, _, $) ->
         log: true
 
       # currentUrl = window.location.toString()
-      remoteUrl  = @sync.window().location.toString()
-      # remoteOrigin = @config("remoteOrigin")
+      remoteUrl  = @private("window").location.toString()
 
       location = Cypress.Location.create(remoteUrl)
 
@@ -53,7 +52,7 @@ $Cypress.register "Location", (Cypress, _, $) ->
         location
 
       if options.log
-        Cypress.command
+        Cypress.Log.command
           message: key ? ""
           end: true
           snapshot: true

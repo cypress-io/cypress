@@ -52,9 +52,9 @@ describe "$Cypress.Cy Connectors Commands", ->
       beforeEach ->
         ## set the jquery path back to our
         ## remote window
-        @Cypress.option "jQuery", @iframe.prop("contentWindow").$
+        @Cypress.option "jQuery", @$iframe.prop("contentWindow").$
 
-        @remoteWindow = @cy.sync.window()
+        @remoteWindow = @cy.private("window")
 
       afterEach ->
         ## restore back to the global $
@@ -97,9 +97,9 @@ describe "$Cypress.Cy Connectors Commands", ->
     beforeEach ->
       ## set the jquery path back to our
       ## remote window
-      @Cypress.option "jQuery", @iframe.prop("contentWindow").$
+      @Cypress.option "jQuery", @$iframe.prop("contentWindow").$
 
-      @remoteWindow = @cy.sync.window()
+      @remoteWindow = @cy.private("window")
 
     afterEach ->
       ## restore back to the global $
@@ -215,9 +215,17 @@ describe "$Cypress.Cy Connectors Commands", ->
 
         @cy.noop({foo: "foo"}).invoke("foo")
 
-      it "snapshots after clicking", ->
+      it "snapshots after invoking", ->
         @cy.noop({foo: "foo"}).invoke("foo").then ->
           expect(@log.get("snapshot")).to.be.an("object")
+
+      it "logs $el if subject is element", ->
+        @cy.get("button:first").invoke("hide").then ($el) ->
+          expect(@log.get("$el").get(0)).to.eq $el.get(0)
+
+      it "does not log $el if subject isnt element", ->
+        @cy.noop(@obj).invoke("bar").then ->
+          expect(@log.get("$el")).not.to.exist
 
       it "logs obj as a property", ->
         @cy.noop(@obj).invoke("foo").then ->
@@ -278,13 +286,22 @@ describe "$Cypress.Cy Connectors Commands", ->
             Returned: 6
           }
 
+      it "#onConsole as a function on DOM element", ->
+        @cy.get("button:first").invoke("hide").then ($btn) ->
+          onConsole = @log.attributes.onConsole()
+          expect(onConsole).to.deep.eq {
+            Command: "invoke"
+            Function: ".hide()"
+            On: $btn.get(0)
+            Returned: $btn.get(0)
+          }
+
     describe "errors", ->
       beforeEach ->
+        @Cypress.on "log", (@log) =>
         @allowErrors()
 
       it "throws when property does not exist on the subject", (done) ->
-        @Cypress.on "log", (@log) =>
-
         @cy.on "fail", (err) =>
           expect(err.message).to.eq "cy.invoke() errored because the property: 'foo' does not exist on your subject."
           expect(@log.get("error")).to.eq err
@@ -303,8 +320,6 @@ describe "$Cypress.Cy Connectors Commands", ->
         @cy.invoke("queue")
 
       it "throws when first argument isnt a string", (done) ->
-        @Cypress.on "log", (@log) =>
-
         @cy.on "fail", (err) =>
           expect(err.message).to.eq "cy.invoke() only accepts a string as the first argument."
           expect(@log.get("error")).to.eq err
@@ -331,6 +346,17 @@ describe "$Cypress.Cy Connectors Commands", ->
           done()
 
         @cy.noop(undefined).its("attr", "src")
+
+      it "onConsole subject", (done) ->
+        @cy.on "fail", (err) =>
+          expect(@log.attributes.onConsole()).to.deep.eq {
+            Command: "its"
+            Error: "CypressError: cy.its() errored because the property: 'baz' does not exist on your subject."
+            Subject: {foo: "bar"}
+          }
+          done()
+
+        @cy.noop({foo: "bar"}).its("baz")
 
   context "#its", ->
     it "proxies to #invoke", ->

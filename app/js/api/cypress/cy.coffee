@@ -1,4 +1,4 @@
-$Cypress.Cy = do ($Cypress, _, Backbone) ->
+$Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
   class $Cy
     ## does this need to be moved
@@ -6,6 +6,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
     sync: {}
 
     constructor: (@Cypress, specWindow) ->
+      @privates = {}
       @queue = []
       @defaults()
       @listeners()
@@ -15,17 +16,26 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
     initialize: (obj) ->
       @defaults()
 
-      {@$remoteIframe, @config} = obj
+      {$remoteIframe, config} = obj
 
-      @$remoteIframe.on "load", =>
-        @urlChanged()
+      _.each obj.config, (value, key) =>
+        @private(key, value)
+
+      @private("$remoteIframe", $remoteIframe)
+
+      @_setRemoteIframeProps($remoteIframe)
+
+      $remoteIframe.on "load", =>
+        @_setRemoteIframeProps($remoteIframe)
+
+        @urlChanged(null, {log: false})
         @pageLoading(false)
 
         ## we reapply window listeners on load even though we
         ## applied them already during onBeforeLoad. the reason
         ## is that after load javascript has finished being evaluated
         ## and we may need to override things like alert + confirm again
-        @bindWindowListeners @$remoteIframe.prop("contentWindow")
+        @bindWindowListeners @private("window")
         @isReady(true, "load")
 
       ## anytime initialize is called we immediately
@@ -41,8 +51,8 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       return @
 
     listeners: ->
-      @listenTo @Cypress, "initialize", (obj, bool) =>
-        @initialize(obj, bool)
+      @listenTo @Cypress, "initialize", (obj) =>
+        @initialize(obj)
 
       ## why arent we listening to "defaults" here?
       ## instead we are manually hard coding them
@@ -51,9 +61,9 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       @listenTo @Cypress, "abort",      => @abort()
 
     abort: ->
-      @$remoteIframe?.off("submit beforeunload unload load hashchange")
+      @private("$remoteIframe")?.off("submit beforeunload unload load hashchange")
       @isReady(false, "abort")
-      @prop("runnable")?.clearTimeout()
+      @private("runnable")?.clearTimeout()
 
       promise = @prop("promise")
       promise?.cancel()
@@ -69,6 +79,8 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
 
     stop: ->
       delete window.cy
+
+      @privates = {}
 
       @Cypress.cy = null
 
@@ -99,15 +111,16 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       ## instance
       @defaults()
 
-    prop: (key, val) ->
-      if arguments.length is 1
-        @props[key]
-      else
-        @props[key] = val
+      return @
 
     ## global options applicable to all cy instances
     ## and restores
     options: (options = {}) ->
+
+    nullSubject: ->
+      @prop("subject", null)
+
+      return @
 
     _eventHasReturnValue: (e) ->
       val = e.originalEvent.returnValue
@@ -157,7 +170,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
 
       queue = @queue[index]
 
-      runnable = @prop("runnable")
+      runnable = @private("runnable")
 
       @group(runnable.group)
 
@@ -187,7 +200,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       run = =>
         ## bail if we've changed runnables by the
         ## time this resolves
-        return if @prop("runnable") isnt runnable
+        return if @private("runnable") isnt runnable
 
         ## reset the timeout to what it used to be
         @_timeout(prevTimeout)
@@ -247,7 +260,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       ## automatically defer running each command in succession
       ## so each command is async
       @defer ->
-        angular = @sync.window().angular
+        angular = @private("window").angular
 
         if angular and angular.getTestability
           run            = _.bind(run, @)
@@ -402,7 +415,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       @trigger "cancel", obj
 
     _contains: ($el) ->
-      doc = @sync.document().get(0)
+      doc = @private("document")
 
       contains = (el) ->
         $.contains(doc, el)
@@ -419,7 +432,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       if opt = @Cypress.option("jQuery")
         return opt
       else
-        @sync.window().$
+        @private("window").$
 
     _checkForNewChain: (chainerId) ->
       ## dont do anything if this isnt even defined
@@ -436,13 +449,15 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
         ## and reset our chainerId
         if id isnt chainerId
           @prop("chainerId", chainerId)
-          @prop("subject", null)
+          @nullSubject()
 
     ## the command method is useful for synchronously
     ## calling another command but wrapping it in a
     ## promise
     command: (name, args...) ->
-      Promise.resolve @sync[name].apply(@, args)
+      Promise
+        .resolve(@sync[name].apply(@, args))
+        .cancellable()
 
     defer: (fn) ->
       @clearTimeout(@prop("timerId"))
@@ -450,7 +465,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       @prop "timerId", setImmediate _.bind(fn, @)
 
     hook: (name) ->
-      @prop("hookName", name)
+      @private("hookName", name)
 
       return if not @prop("inspect")
 
@@ -499,38 +514,71 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
       ## already in a run loop and dont want to create another!
       ## we also reset the .next property to properly reference
       ## our new obj
-      if nestedIndex = @prop("nestedIndex")
+
+      ## we had a bug that would bomb on custom commands when it was the
+      ## first command. this was due to nestedIndex being undefined at that
+      ## time. so we have to ensure to check that its any kind of number (even 0)
+      ## in order to know to splice into the existing array.
+      ## we simplified
+
+      nestedIndex = @prop("nestedIndex")
+
+      ## if this is a number then we know
+      ## we're about to splice this into our queue
+      ## and need to reset next + increment the index
+      if _.isNumber(nestedIndex)
         @queue[nestedIndex].next = obj
-        @queue.splice (@prop("nestedIndex", nestedIndex += 1)), 0, obj
-      else
-        @queue.push(obj)
+        @prop("nestedIndex", nestedIndex += 1)
+
+      ## we look at whether or not nestedIndex is a number, because if it
+      ## is then we need to splice inside of our queue, else just push
+      ## it onto the end of the queu
+      index = if _.isNumber(nestedIndex) then nestedIndex else @queue.length
+
+      @queue.splice(index, 0, obj)
+
+      ## if nestedIndex is either undefined or 0
+      ## then we know we're processing regular commands
+      ## and not splicing in the middle of our queue
+      if not nestedIndex
         @prop "runId", @defer(@run)
 
       return @
 
-    setRunnable: (runnable, hookName) ->
-      ## think about moving the cy.config object
-      ## to Cypress so it doesnt need to be reset.
-      ## also our options are "global" whereas
-      ## options on @cy are local to that specific
-      ## test run
+    _setRemoteIframeProps: ($iframe) ->
+      @private "$remoteIframe", $iframe
+      @private "window", $iframe.prop("contentWindow")
+      @private "document", $iframe.prop("contentDocument")
+
+      return @
+
+    _setRunnable: (runnable, hookName) ->
       runnable.startedAt = new Date
 
-      if @config and _.isFinite(timeout = @config("commandTimeout"))
+      if _.isFinite(timeout = @private("commandTimeout"))
         runnable.timeout timeout
 
       @hook(hookName)
-      @prop("runnable", runnable)
+
+      ## we store runnable as a property because
+      ## we can't allow it to be reset with props
+      ## since it is long lived (page events continue)
+      ## after the tests have finished
+      @private "runnable", runnable
 
       return @
 
     $: (selector, context) ->
-      context ?= @sync.document()
+      context ?= @private("document")
       new $.fn.init selector, context
 
     _: _
 
     Promise: Promise
+
+    moment: window.moment
+
+    _.extend $Cy.prototype.$, _($).pick("Event", "Deferred", "ajax", "get", "getJSON", "getScript", "post", "when")
 
     _.extend $Cy.prototype, Backbone.Events
 
@@ -540,7 +588,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone) ->
     @set = (Cypress, runnable, hookName) ->
       return if not cy = Cypress.cy
 
-      cy.setRunnable(runnable, hookName)
+      cy._setRunnable(runnable, hookName)
 
     @create = (Cypress, specWindow) ->
       ## clear out existing listeners

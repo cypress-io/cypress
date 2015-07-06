@@ -21,6 +21,10 @@ do ($Cypress, _) ->
         ## did not submit
         return if e.isDefaultPrevented()
 
+        ## null out our subject immediately
+        ## to prevent chaining since our page is loading
+        @nullSubject()
+
         @isReady(false, "submit")
 
       win.off("beforeunload").on "beforeunload", (e) =>
@@ -36,7 +40,8 @@ do ($Cypress, _) ->
 
         @pageLoading()
 
-        ## return undefined so
+        ## return undefined so our beforeunload handler
+        ## doesnt trigger a confirmation dialog
         return undefined
 
       # win.off("unload").on "unload", =>
@@ -45,7 +50,9 @@ do ($Cypress, _) ->
         # @isReady(false, "unload")
 
       win.off("hashchange").on "hashchange", =>
-        @urlChanged()
+        @urlChanged(null, {
+          by: "hashchange"
+        })
 
       win.get(0).confirm = (message) ->
         console.info "Confirming 'true' to: ", message
