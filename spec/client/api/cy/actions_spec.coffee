@@ -195,7 +195,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "#onConsole", ->
         @cy.get("select:first").select("de_dust2").then ($select) ->
-          coords = @cy.getCenterCoordinates($select)
+          coords = @cy.getCoordinates($select)
           console = @log.attributes.onConsole()
           expect(console.Command).to.eq("select")
           expect(console.Selected).to.deep.eq ["de_dust2"]
@@ -1443,7 +1443,7 @@ describe "$Cypress.Cy Actions Commands", ->
       context "#onConsole", ->
         it "has all of the regular options", ->
           @cy.get("input:first").type("foobar").then ($input) ->
-            coords = @cy.getCenterCoordinates($input)
+            coords = @cy.getCoordinates($input)
             console = @log.attributes.onConsole()
             expect(console.Command).to.eq("type")
             expect(console.Typed).to.eq("foobar")
@@ -2006,12 +2006,12 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "passes in coords", ->
         @cy.get("[name=colors][value=blue]").check().then ($input) ->
-          coords = @cy.getCenterCoordinates($input)
+          coords = @cy.getCoordinates($input)
           expect(@log.get("coords")).to.deep.eq coords
 
       it "#onConsole", ->
         @cy.get("[name=colors][value=blue]").check().then ($input) ->
-          coords = @cy.getCenterCoordinates($input)
+          coords = @cy.getCoordinates($input)
           console = @log.attributes.onConsole()
           expect(console.Command).to.eq "check"
           expect(console["Applied To"]).to.eq @log.get("$el").get(0)
@@ -2209,7 +2209,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "#onConsole", ->
         @cy.get("[name=colors][value=blue]").uncheck().then ($input) ->
-          coords = @cy.getCenterCoordinates($input)
+          coords = @cy.getCoordinates($input)
           console = @log.attributes.onConsole()
           expect(console.Command).to.eq "uncheck"
           expect(console["Applied To"]).to.eq @log.get("$el").get(0)
@@ -3109,7 +3109,7 @@ describe "$Cypress.Cy Actions Commands", ->
     it "receives native click event", (done) ->
       btn = @cy.$("#button")
 
-      coords = @cy.getCenterCoordinates(btn)
+      coords = @cy.getCoordinates(btn)
 
       btn.get(0).addEventListener "click", (e) =>
         obj = _(e).pick("bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
@@ -3146,7 +3146,7 @@ describe "$Cypress.Cy Actions Commands", ->
     it "sends native mousedown event", (done) ->
       btn = @cy.$("#button")
 
-      coords = @cy.getCenterCoordinates(btn)
+      coords = @cy.getCoordinates(btn)
 
       btn.get(0).addEventListener "mousedown", (e) =>
         obj = _(e).pick("bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
@@ -3174,7 +3174,7 @@ describe "$Cypress.Cy Actions Commands", ->
     it "sends native mouseup event", (done) ->
       btn = @cy.$("#button")
 
-      coords = @cy.getCenterCoordinates(btn)
+      coords = @cy.getCoordinates(btn)
 
       btn.get(0).addEventListener "mouseup", (e) =>
         obj = _(e).pick("bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
@@ -3376,6 +3376,76 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("#button-covered-in-span").click().then ->
         expect(retried).to.be.true
 
+    describe "position argument", ->
+      it "can click center by default", (done) ->
+        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$("body"))
+        span = $("<span>span</span>").css(position: "absolute", left: btn.offset().left + 30, top: btn.offset().top + 40, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
+
+        clicked = _.after 2, -> done()
+
+        span.on "click", clicked
+        btn.on "click", clicked
+
+        @cy.get("#button-covered-in-span").click()
+
+      it "can click center", (done) ->
+        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$("body"))
+        span = $("<span>span</span>").css(position: "absolute", left: btn.offset().left + 30, top: btn.offset().top + 40, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
+
+        clicked = _.after 2, -> done()
+
+        span.on "click", clicked
+        btn.on "click", clicked
+
+        @cy.get("#button-covered-in-span").click("center")
+
+      it "can click topLeft", (done) ->
+        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$("body"))
+        span = $("<span>span</span>").css(position: "absolute", left: btn.offset().left, top: btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
+
+        clicked = _.after 2, -> done()
+
+        span.on "click", clicked
+        btn.on "click", clicked
+
+        @cy.get("#button-covered-in-span").click("topLeft")
+
+      it "can click topRight", (done) ->
+        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$("body"))
+        span = $("<span>span</span>").css(position: "absolute", left: btn.offset().left + 80, top: btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
+
+        clicked = _.after 2, -> done()
+
+        span.on "click", clicked
+        btn.on "click", clicked
+
+        @cy.get("#button-covered-in-span").click("topRight")
+
+      it "can click bottomLeft", (done) ->
+        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$("body"))
+        span = $("<span>span</span>").css(position: "absolute", left: btn.offset().left, top: btn.offset().top + 80, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
+
+        clicked = _.after 2, -> done()
+
+        span.on "click", clicked
+        btn.on "click", clicked
+
+        @cy.get("#button-covered-in-span").click("bottomLeft")
+
+      it "can click bottomRight", (done) ->
+        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$("body"))
+        span = $("<span>span</span>").css(position: "absolute", left: btn.offset().left + 80, top: btn.offset().top + 80, padding: 5, display: "inline-block", backgroundColor: "yellow").appendTo(btn)
+
+        clicked = _.after 2, -> done()
+
+        span.on "click", clicked
+        btn.on "click", clicked
+
+        @cy.get("#button-covered-in-span").click("bottomRight")
+
+    describe "relative coordinate arguments", ->
+
+
     describe "mousedown", ->
       it "gives focus after mousedown", (done) ->
         input = @cy.$("input:first")
@@ -3471,6 +3541,7 @@ describe "$Cypress.Cy Actions Commands", ->
         # btn.on "mousedown", (e) ->
           # console.log("btn mousedown")
           # e.preventDefault()
+
         # win.on "mousedown", -> console.log("win mousedown")
 
     describe "errors", ->
@@ -3583,6 +3654,8 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get("select:first").click()
 
+      it "throws when provided invalid position"
+
     describe ".log", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
@@ -3629,13 +3702,13 @@ describe "$Cypress.Cy Actions Commands", ->
       it "passes in coords", ->
         @cy.get("button").first().click().then ($btn) ->
           $btn.blur() ## blur which removes focus styles which would change coords
-          coords = @cy.getCenterCoordinates($btn)
+          coords = @cy.getCoordinates($btn)
           expect(@log.get("coords")).to.deep.eq coords
 
       it "#onConsole", ->
         @cy.get("button").first().click().then ($button) ->
           console   = @log.attributes.onConsole()
-          coords    = @cy.getCenterCoordinates($button)
+          coords    = @cy.getCoordinates($button)
           logCoords = @log.get("coords")
           expect(logCoords.x).to.be.closeTo(coords.x, 1) ## ensure we are within 1
           expect(logCoords.y).to.be.closeTo(coords.y, 1) ## ensure we are within 1
