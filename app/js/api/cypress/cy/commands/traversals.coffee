@@ -81,9 +81,6 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
         unless ret is false
           return log(ret)
 
-        retry = ->
-          @command(@prop("current").name, arg1, arg2, options)
-
         getErr = =>
           node = Cypress.Utils.stringifyElement(subject, "short")
           err = @_elCommandOptionsError($el, options)

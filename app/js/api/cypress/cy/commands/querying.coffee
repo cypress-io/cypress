@@ -245,7 +245,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
         retry: false ## dont retry because we perform our own element validation
 
       setEl = ($el) ->
-        return if options.log is false
+        return if not options.command
 
         onConsole.Returned = Cypress.Utils.getDomElements($el)
         onConsole.Elements = $el?.length
