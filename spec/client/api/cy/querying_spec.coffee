@@ -1127,3 +1127,16 @@ describe "$Cypress.Cy Querying Commands", ->
           done()
 
         @cy.contains("button", {exist: false})
+
+      it "throws when passed {length > 1} options", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", (err) ->
+          expect(logs.length).to.eq 1
+          expect(err.message).to.eq "cy.contains() cannot be passed a length option because it will only ever return 1 element."
+          done()
+
+        @cy.contains("Nested Find", {length: 2})

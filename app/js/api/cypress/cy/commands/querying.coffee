@@ -187,10 +187,9 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
       _.defaults options,
         log: true
+        length: null
 
-      ## contains cannot accept length options because it will only
-      ## return a maximum of 1 element
-
+      @throwErr "cy.contains() cannot be passed a length option because it will only ever return 1 element." if options.length
       @throwErr "cy.contains() can only accept a string or number!" if not (_.isString(text) or _.isFinite(text))
       @throwErr "cy.contains() cannot be passed an empty string!" if _.isBlank(text)
 
