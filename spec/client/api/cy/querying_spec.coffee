@@ -796,14 +796,16 @@ describe "$Cypress.Cy Querying Commands", ->
         expect($form.get(0)).to.eq form.get(0)
 
     it "favors input type=submit", ->
-      @cy.contains("click me").then ($el) ->
-        expect($el.length).to.eq(1)
-        expect($el).to.match("input[type=submit]")
+      input = @cy.$("#input-type-submit input")
+
+      @cy.contains("click me").then ($input) ->
+        expect($input.get(0)).to.eq(input.get(0))
 
     it "favors buttons next", ->
-      @cy.contains("click button").then ($el) ->
-        expect($el.length).to.eq(1)
-        expect($el).to.match("button")
+      button = @cy.$("#button-inside-a button")
+
+      @cy.contains("click button").then ($btn) ->
+        expect($btn.get(0)).to.eq(button.get(0))
 
     it "favors anchors next", ->
       @cy.contains("Home Page").then ($el) ->
@@ -854,6 +856,9 @@ describe "$Cypress.Cy Querying Commands", ->
 
         @cy.contains("span", "my hidden content", {visible: false}).then ($span) ->
           expect($span.get(0)).to.eq span.get(0)
+
+      it "returns invisible element when parent chain is visible", ->
+        @cy.get("#form-header-region").contains("Back", {visible: false})
 
     describe "subject contains text nodes", ->
       it "searches for content within subject", ->
@@ -975,6 +980,7 @@ describe "$Cypress.Cy Querying Commands", ->
       it "logs command option: {exist: false}", ->
         @cy.contains("does-not-exist", {exist: false}).then ->
           expect(@log.get("message")).to.eq "does-not-exist, {exist: false}"
+          expect(@log.get("$el")).to.not.be.ok
 
       it "logs command option: {visible: true} with filter", ->
         @cy.contains("div", "Nested Find", {visible: true}).then ->
@@ -982,14 +988,20 @@ describe "$Cypress.Cy Querying Commands", ->
 
       it "#onConsole", ->
         @cy.get("#complex-contains").contains("nested contains").then ($label) ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          onConsole = @log.attributes.onConsole()
+          expect(onConsole).to.deep.eq {
             Command: "contains"
             Content: "nested contains"
+            Options: null
             "Applied To": getFirstSubjectByName.call(@, "get").get(0)
             Returned: $label.get(0)
             Elements: 1
-
           }
+
+      it "#onConsole options", ->
+        @cy.contains("button", {visible: true}).then ->
+          onConsole = @log.attributes.onConsole()
+          expect(onConsole.Options).to.deep.eq {visible: true}
 
     describe "errors", ->
       beforeEach ->
@@ -1079,6 +1091,22 @@ describe "$Cypress.Cy Querying Commands", ->
       it "throws when there is a found element but never becomes non-existent", (done) ->
         @cy.on "fail", (err) ->
           expect(err.message).to.include "Found content: 'button' within any existing elements but it never became non-existent."
+          done()
+
+        @cy.contains("button", {exist: false})
+
+      it "logs out $el when existing $el is found even on failure", (done) ->
+        button = @cy.$("#button")
+
+        @Cypress.on "log", (@log) =>
+
+        @cy.on "fail", (err) =>
+          expect(@log.get("state")).to.eq("error")
+          expect(@log.get("error")).to.eq err
+          expect(@log.get("$el").get(0)).to.eq button.get(0)
+          onConsole = @log.attributes.onConsole()
+          expect(onConsole.Returned).to.eq button.get(0)
+          expect(onConsole.Elements).to.eq button.length
           done()
 
         @cy.contains("button", {exist: false})

@@ -30,7 +30,7 @@ $Cypress.register "Angular", (Cypress, _, $, Promise) ->
 
       options.error = "Could not find element for binding: '#{binding}'!"
 
-      options.retry = ($elements) ->
+      options.onRetry = ($elements) ->
         filtered = $elements.filter (index, el) ->
           dataBinding = angular.element(el).data("$binding")
 

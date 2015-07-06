@@ -63,37 +63,12 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
         e.onFail = -> options.command.error(e)
         throw e
 
-      length = $el.length
-
-      switch
-        when options.length isnt null
-          if not _.isFinite(options.length)
-            @throwErr("options.length must be a number")
-
-          if length is options.length
-            return log($el)
-
-        when options.exist is false
-          ## return if we didnt find anything and our options have asked
-          ## us for the element not to exist
-          if not length
-            return log(null)
-
-        when options.visible is false
-          ## make sure all the $el's are hidden
-          if length and length is $el.filter(":hidden").length
-            return log($el)
-
-        when options.visible is true
-          if length and length is $el.filter(":visible").length
-            return log($el)
-
-        else
-          ## return the el if it has a length or we've explicitly
-          ## disabled retrying
-          ## make sure all of the $el's are visible!
-          if length or options.retry is false
-            return log($el)
+      ret = @_elMatchesCommandOptions($el, options)
+      ## verify our $el matches the command options
+      ## and if this didnt return undefined bail
+      ## and log out the ret value
+      unless ret is false
+        return log(ret)
 
       retry = ->
         @command(@prop("current").name, arg1, arg2, options)
