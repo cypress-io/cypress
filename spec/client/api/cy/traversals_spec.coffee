@@ -169,31 +169,6 @@ describe "$Cypress.Cy Traversal Commands", ->
 
     @cy.get("#by-name").find(":checked", {length: 2})
 
-  it "errors after timing out not finding element", (done) ->
-    @allowErrors()
-
-    @cy._timeout(300)
-
-    @cy.on "fail", (err) ->
-      expect(err.message).to.include "Could not find element: span"
-      done()
-
-    @cy.get("#list li:last").find("span")
-
-  it "throws once when incorrect sizzle selector", (done) ->
-    @allowErrors()
-
-    logs = []
-
-    @Cypress.on "log", (log) ->
-      logs.push(log)
-
-    @cy.on "fail", (err) ->
-      expect(logs.length).to.eq 2
-      done()
-
-    @cy.get("div:first").find(".spinner'")
-
   it "does not log using first w/options", ->
     logs = []
 
@@ -240,3 +215,45 @@ describe "$Cypress.Cy Traversal Commands", ->
         }
 
         expect(@log.attributes.onConsole()).to.deep.eq obj
+
+  describe "errors", ->
+    beforeEach ->
+      @allowErrors()
+      @cy._timeout(300)
+
+    it "errors after timing out not finding element", (done) ->
+      @cy.on "fail", (err) ->
+        expect(err.message).to.include "Could not find element: span"
+        done()
+
+      @cy.get("#list li:last").find("span")
+
+    it "throws once when incorrect sizzle selector", (done) ->
+      @allowErrors()
+
+      logs = []
+
+      @Cypress.on "log", (log) ->
+        logs.push(log)
+
+      @cy.on "fail", (err) ->
+        expect(logs.length).to.eq 2
+        done()
+
+      @cy.get("div:first").find(".spinner'")
+
+    it "logs out $el when existing $el is found even on failure", (done) ->
+      button = @cy.$("#button").hide()
+
+      @Cypress.on "log", (@log) =>
+
+      @cy.on "fail", (err) =>
+        expect(@log.get("state")).to.eq("error")
+        expect(@log.get("error")).to.eq err
+        expect(@log.get("$el").get(0)).to.eq button.get(0)
+        onConsole = @log.attributes.onConsole()
+        expect(onConsole.Returned).to.eq button.get(0)
+        expect(onConsole.Elements).to.eq button.length
+        done()
+
+      @cy.get("#dom").find("#button", {visible: true})

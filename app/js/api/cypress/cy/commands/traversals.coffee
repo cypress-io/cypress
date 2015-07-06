@@ -56,43 +56,39 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
 
         return $el
 
-      ## catch sizzle errors here
-      try
-        $el = subject[traversal].call(subject, arg1, arg2)
-      catch e
-        e.onFail = -> options.command.error(e)
-        throw e
+      setEl = ($el) ->
+        return if options.log is false
 
-      ret = @_elMatchesCommandOptions($el, options)
-      ## verify our $el matches the command options
-      ## and if this didnt return undefined bail
-      ## and log out the ret value
-      unless ret is false
-        return log(ret)
+        onConsole.Returned = Cypress.Utils.getDomElements($el)
+        onConsole.Elements = $el?.length
 
-      retry = ->
-        @command(@prop("current").name, arg1, arg2, options)
+        options.command.set({$el: $el})
 
-      getErr = ->
-        err = switch
-          when options.length isnt null
-            if $el.length > options.length
-              "Too many elements found. Found '#{$el.length}', expected '#{options.length}':"
-            else
-              "Not enough elements found. Found '#{$el.length}', expected '#{options.length}':"
-          when options.exist is false #and not $el.length
-            "Found existing element:"
-          when options.visible is false and $el.length
-            "Found visible element:"
-          else
-            if not $el.length
-              "Could not find element:"
-            else
-              "Could not find visible element:"
+      do getElements = =>
+        ## catch sizzle errors here
+        try
+          $el = subject[traversal].call(subject, arg1, arg2)
+        catch e
+          e.onFail = -> options.command.error(e)
+          throw e
 
-        node = Cypress.Utils.stringifyElement(subject, "short")
-        err += " " + getSelector() + " from #{node}"
+        setEl($el)
 
-      options.error ?= getErr()
+        ret = @_elMatchesCommandOptions($el, options)
+        ## verify our $el matches the command options
+        ## and if this didnt return undefined bail
+        ## and log out the ret value
+        unless ret is false
+          return log(ret)
 
-      @_retry(retry, options)
+        retry = ->
+          @command(@prop("current").name, arg1, arg2, options)
+
+        getErr = =>
+          node = Cypress.Utils.stringifyElement(subject, "short")
+          err = @_elCommandOptionsError($el, options)
+          err += " " + getSelector() + " from #{node}"
+
+        options.error ?= getErr()
+
+        @_retry(getElements, options)

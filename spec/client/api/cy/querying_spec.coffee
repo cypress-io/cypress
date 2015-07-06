@@ -391,6 +391,7 @@ describe "$Cypress.Cy Querying Commands", ->
       it "logs exist: false", ->
         @cy.get("#does-not-exist", {exist: false}).then ->
           expect(@log.get("message")).to.eq "#does-not-exist, {exist: false}"
+          expect(@log.get("$el")).not.to.be.ok
 
       it "logs route aliases", ->
         @cy
@@ -751,6 +752,22 @@ describe "$Cypress.Cy Querying Commands", ->
           .server()
           .route(/users/, {}).as("getUsers")
           .get("@getUsers.all ")
+
+      it "logs out $el when existing $el is found even on failure", (done) ->
+        button = @cy.$("#button").hide()
+
+        @Cypress.on "log", (@log) =>
+
+        @cy.on "fail", (err) =>
+          expect(@log.get("state")).to.eq("error")
+          expect(@log.get("error")).to.eq err
+          expect(@log.get("$el").get(0)).to.eq button.get(0)
+          onConsole = @log.attributes.onConsole()
+          expect(onConsole.Returned).to.eq button.get(0)
+          expect(onConsole.Elements).to.eq button.length
+          done()
+
+        @cy.get("#button", {visible: true})
 
   context "#contains", ->
     it "is scoped to the body and will not return title elements", ->

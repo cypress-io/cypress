@@ -20,6 +20,8 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       ## figure out the options which actually change the behavior of traversals
       deltaOptions = Cypress.Utils.filterDelta(options, {visible: null, exist: true, length: null})
 
+      onConsole = {}
+
       start = (aliasType) ->
         return if options.log is false
 
@@ -27,6 +29,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
           message: [selector, deltaOptions]
           referencesAlias: aliasObj?.alias
           aliasType: aliasType
+          onConsole: -> onConsole
 
       log = (value, aliasType = "dom") ->
         return if options.log is false
@@ -40,28 +43,26 @@ $Cypress.register "Querying", (Cypress, _, $) ->
             $el: value
             numRetries: options.retries
 
-        _.extend obj,
-          onConsole: ->
-            obj2 = {"Command":  "get"}
-            key = if aliasObj then "Alias" else "Selector"
-            obj2[key] = selector
+        obj.onConsole = ->
+          key = if aliasObj then "Alias" else "Selector"
+          onConsole[key] = selector
 
-            switch aliasType
-              when "dom"
-                _.extend obj2,
-                  Options:  deltaOptions
-                  Returned: Cypress.Utils.getDomElements(value)
-                  Elements: value?.length
+          switch aliasType
+            when "dom"
+              _.extend onConsole,
+                Options:  deltaOptions
+                Returned: Cypress.Utils.getDomElements(value)
+                Elements: value?.length
 
-              when "primitive"
-                _.extend obj2,
-                  Returned: value
+            when "primitive"
+              _.extend onConsole,
+                Returned: value
 
-              when "route"
-                _.extend obj2,
-                  Returned: value
+            when "route"
+              _.extend onConsole,
+                Returned: value
 
-            return obj2
+          return onConsole
 
         options.command.set(obj).snapshot().end()
 
@@ -93,70 +94,64 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
       start("dom")
 
-      ## attempt to query for the elements by withinSubject context
-      ## and catch any sizzle errors!
-      try
-        $el = @$(selector, options.withinSubject)
-      catch e
-        e.onFail = -> options.command.error(e)
-        throw e
+      setEl = ($el) ->
+        return if options.log is false
 
-      ## if that didnt find anything and we have a within subject
-      ## and we have been explictly told to filter
-      ## then just attempt to filter out elements from our within subject
-      if not $el.length and options.withinSubject and options.filter
-        filtered = options.withinSubject.filter(selector)
+        onConsole.Returned = Cypress.Utils.getDomElements($el)
+        onConsole.Elements = $el?.length
 
-        ## reset $el if this found anything
-        $el = filtered if filtered.length
+        options.command.set({$el: $el})
 
-      ## allow retry to be a function which we ensure
-      ## returns truthy before returning its
-      if _.isFunction(options.onRetry)
-        if ret = options.onRetry.call(@, $el)
-          log($el)
-          return ret
-      else
-        if options.retry is false
-          return $el
-        else
-          ret = @_elMatchesCommandOptions($el, options)
-          ## verify our $el matches the command options
-          ## and if this didnt return false bail
-          ## and log out the ret value
-          unless ret is false
-            log(ret)
+      do getElements = =>
+        ## attempt to query for the elements by withinSubject context
+        ## and catch any sizzle errors!
+        try
+          $el = @$(selector, options.withinSubject)
+        catch e
+          e.onFail = -> options.command.error(e)
+          throw e
+
+        ## if that didnt find anything and we have a within subject
+        ## and we have been explictly told to filter
+        ## then just attempt to filter out elements from our within subject
+        if not $el.length and options.withinSubject and options.filter
+          filtered = options.withinSubject.filter(selector)
+
+          ## reset $el if this found anything
+          $el = filtered if filtered.length
+
+        ## store the $el now in case we fail
+        setEl($el)
+
+        ## allow retry to be a function which we ensure
+        ## returns truthy before returning its
+        if _.isFunction(options.onRetry)
+          if ret = options.onRetry.call(@, $el)
+            log($el)
             return ret
-
-      retry = ->
-        @command("get", selector, options)
-
-      getErr = ->
-        err = switch
-          when options.length isnt null
-            if $el.length > options.length
-              "Too many elements found. Found '#{$el.length}', expected '#{options.length}':"
-            else
-              "Not enough elements found. Found '#{$el.length}', expected '#{options.length}':"
-          when options.exist is false #and not $el.length
-            "Found existing element:"
-          when options.visible is false and $el.length
-            "Found visible element:"
+        else
+          if options.retry is false
+            return $el
           else
-            if not $el.length
-              "Could not find element:"
-            else
-              "Could not find visible element:"
+            ret = @_elMatchesCommandOptions($el, options)
+            ## verify our $el matches the command options
+            ## and if this didnt return false bail
+            ## and log out the ret value
+            unless ret is false
+              log(ret)
+              return ret
 
-        err += " #{selector}"
+        getErr = =>
+          err = @_elCommandOptionsError($el, options)
+          err += " #{selector}"
 
-      ## if we REALLY want to be helpful and intelligent then
-      ## if we time out, we should look at our aliases and see
-      ## if our selector matches any aliases without the '@'
-      ## if it did, then perhaps the user forgot to write '@'
-      options.error ?= getErr()
+        ## if we REALLY want to be helpful and intelligent then
+        ## if we time out, we should look at our aliases and see
+        ## if our selector matches any aliases without the '@'
+        ## if it did, then perhaps the user forgot to write '@'
+        options.error ?= getErr()
 
-      @_retry(retry, options)
+        @_retry(getElements, options)
 
     root: ->
       command = Cypress.Log.command({message: ""})
@@ -192,6 +187,9 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
       _.defaults options,
         log: true
+
+      ## contains cannot accept length options because it will only
+      ## return a maximum of 1 element
 
       @throwErr "cy.contains() can only accept a string or number!" if not (_.isString(text) or _.isFinite(text))
       @throwErr "cy.contains() cannot be passed an empty string!" if _.isBlank(text)
@@ -248,11 +246,12 @@ $Cypress.register "Querying", (Cypress, _, $) ->
         retry: false ## dont retry because we perform our own element validation
 
       setEl = ($el) ->
-        if options.command
-          onConsole.Returned = Cypress.Utils.getDomElements($el)
-          onConsole.Elements = $el?.length
+        return if options.log is false
 
-          options.command.set({$el: $el})
+        onConsole.Returned = Cypress.Utils.getDomElements($el)
+        onConsole.Elements = $el?.length
+
+        options.command.set({$el: $el})
 
       log = ($el) ->
         if options.command
@@ -307,7 +306,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       ## and any submit inputs with the attributeContainsWord selector
       selector = "#{filter}:not(script):contains('#{text}'), #{filter}[type='submit'][value~='#{text}']"
 
-      getElements = =>
+      do getElements = =>
         @command("get", selector, options).then ($elements) =>
           return verifyElCommandOptions(null) if not $elements?.length
 
@@ -316,8 +315,6 @@ $Cypress.register "Querying", (Cypress, _, $) ->
           return verifyElCommandOptions getFirstDeepestElement($elements)
 
           return @_retry(getElements, options)
-
-      Promise.resolve(getElements())
 
   Cypress.addChildCommand
     within: (subject, fn) ->
