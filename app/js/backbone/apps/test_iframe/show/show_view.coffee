@@ -303,9 +303,13 @@
       insertIframe = =>
         browserling = new Browserling("29051e55f59c35e17a571bcf3f145910")
         browserling.configure
+          platformName: "win"
+          platformVersion: "8.1"
           browser: options.browser
           version: options.version
           url: url
+
+        window.browserling = browserling
 
         $specIframe = $(browserling.iframe())
 
