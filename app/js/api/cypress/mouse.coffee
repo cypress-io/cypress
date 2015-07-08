@@ -14,6 +14,9 @@ $Cypress.Mouse = do ($Cypress, _, Promise) ->
         detail: 1
       }
 
+      ## ensure this property exists on older chromium versions
+      mdownEvt.buttons ?= 1
+
       mdownEvt.stopPropagation = ->
         @_hasStoppedPropagation = true
         stopPropagation.apply(@, arguments)
@@ -36,6 +39,9 @@ $Cypress.Mouse = do ($Cypress, _, Promise) ->
         detail: 1
       }
 
+      ## ensure this property exists on older chromium versions
+      mupEvt.buttons ?= 0
+
       mupEvt.stopPropagation = ->
         @_hasStoppedPropagation = true
         stopPropagation.apply(@, arguments)
@@ -57,6 +63,9 @@ $Cypress.Mouse = do ($Cypress, _, Promise) ->
         buttons: 0
         detail: 1
       }
+
+      ## ensure this property exists on older chromium versions
+      clickEvt.buttons ?= 0
 
       clickEvt.stopPropagation = ->
         @_hasStoppedPropagation = true
