@@ -103,7 +103,7 @@ $Cypress.Utils = do ($Cypress, _) ->
       !!(($el1.get(0) is $el2.get(0)) or $el1.has($el2).length)
 
     getDomElements: ($el) ->
-      return if not $el
+      return if not $el?.length
 
       if $el.length is 1
         $el.get(0)
