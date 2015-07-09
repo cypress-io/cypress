@@ -164,8 +164,11 @@
     loadSatelitteIframe: (src, options, fn) ->
       view = @
 
-      @browserChanged options.browser, options.version
+      if options.browser is "chromium"
+        return @loadHeadlessIframe(src, options, fn)
+      # @browserChanged options.browser, options.version
 
+      ## move this src out of here and into entities/iframe
       url = encodeURIComponent("http://tunnel.browserling.com:50228/#/tests/#{src}?__ui=satellite")
 
       insertIframe = =>
@@ -196,9 +199,21 @@
       else
         insertIframe()
 
+    loadHeadlessIframe: (src, options, fn) ->
+      contents = Marionette.Renderer.render("test_iframe/show/_chromium_running")
+
+      @$remote = $("<iframe>", {class: "iframe-remote"}).appendTo(@ui.size)
+      @$remote.contents().find("body").append(contents)
+
+      @calcWidth()
+      @$el.show()
+
+      fn(null, @$remote)
+
     loadRegularIframes: (src, options, fn) ->
       view = @
 
+      ## move this src out of here and into entities/iframe
       @src = "/__cypress/iframes/" + src
       @fn = fn
 

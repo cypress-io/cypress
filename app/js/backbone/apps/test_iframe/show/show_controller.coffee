@@ -14,12 +14,6 @@
 
       @layout = @getLayoutView(iframe)
 
-      @listenTo @layout, "browser:clicked", (browser, version) ->
-        # iframe.switchToBrowser(browser, version)
-
-      @listenTo @layout, "close:browser:clicked", ->
-        # iframe.switchToBrowser()
-
       @listenTo iframe, "loaded", (cb, contentWindow, remoteIframe, options) ->
         ## once its loaded we receive the contentWindow
         ## we invoke the callback which tells our runner

@@ -21,7 +21,13 @@
         <div id="browser-versions-container" class="dropdown-menu dropdown-menu-right">
           <div class="container-fluid">
             <div class="row">
-              <div class="col-xs-3">
+              <div>
+                <img src="/__cypress/static/img/chromium_16x16.png" />
+                <ul class="browser-versions list-unstyled"  data-browser="chromium">
+                  <li>41</li>
+                </ul>
+              </div>
+              <div>
                 <img src="/__cypress/static/img/chrome_16x16.png" />
                 <ul class="browser-versions list-unstyled"  data-browser="chrome">
                   <li>37</li>
@@ -30,7 +36,7 @@
                   <li>34</li>
                 </ul>
               </div>
-              <div class="col-xs-3">
+              <div>
                 <img src="/__cypress/static/img/firefox_16x16.png" />
                 <ul class="browser-versions list-unstyled" data-browser="firefox">
                   <li>32</li>
@@ -39,7 +45,7 @@
                   <li>29</li>
                 </ul>
               </div>
-              <div class="col-xs-3">
+              <div>
                 <img src="/__cypress/static/img/safari_16x16.png" />
                 <ul class="browser-versions list-unstyled" data-browser="safari">
                   <li>5.1</li>
@@ -47,7 +53,7 @@
                   <li>4.0</li>
                 </ul>
               </div>
-              <div class="col-xs-3">
+              <div>
                 <img src="/__cypress/static/img/ie_16x16.png" />
                 <ul class="browser-versions list-unstyled" data-browser="ie">
                   <li>11</li>

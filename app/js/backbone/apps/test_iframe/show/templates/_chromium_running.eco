@@ -1,0 +1,7 @@
+<link rel="stylesheet" href="/__cypress/static/css/remote.css">
+<div class="container">
+  <div class="jumbotron text-center">
+    <h1><i class="fa fa-refresh fa-spin"></i></h1>
+    <p class="lead">Your tests are running headlessly in Chromium.</p>
+  </div>
+</div>
