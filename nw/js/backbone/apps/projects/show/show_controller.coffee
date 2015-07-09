@@ -16,8 +16,13 @@
 
       @show projectView
 
+      options = {
+        onChromiumRun: (src) ->
+          App.execute "start:chromium:run", src
+      }
+
       _.defer ->
-        App.config.runProject(project.get("path"))
+        App.config.runProject(project.get("path"), options)
           .then (config) ->
             project.setClientUrl(config.clientUrl, config.clientUrlDisplay)
             App.execute "start:id:generator", config.idGeneratorUrl

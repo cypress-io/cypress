@@ -118,7 +118,7 @@ class Server
     e.portInUse = true
     e
 
-  open: ->
+  open: (options = {}) ->
     new Promise (resolve, reject) =>
       ## bail if we had a problem reading from cypress.json
       return reject(@config) if @config.jsonError
@@ -133,7 +133,7 @@ class Server
 
       ## refactor this class
       socket = Socket(@io, @app)
-      socket.startListening()
+      socket.startListening(options)
 
       onError = (err) =>
         ## if the server bombs before starting

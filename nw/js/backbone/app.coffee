@@ -10,7 +10,7 @@
   parseArgv = (options) ->
     _.defaults options,
       env: process.env["NODE_ENV"]
-      debug: "--debug" in options.argv
+      debug:    "--debug"    in options.argv
       updating: "--updating" in options.argv
       coords: parseCoords(options.argv)
 

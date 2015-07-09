@@ -33,10 +33,10 @@ class Socket
     @io          = io
     @idGenerator = IdGenerator(@app)
 
-  startListening: ->
+  startListening: (options) ->
     @app.once "close", @close.bind(@)
 
-    @_startListening(chokidar, path)
+    @_startListening(chokidar, path, options)
 
   close: (watchedFiles) ->
     @io.close()

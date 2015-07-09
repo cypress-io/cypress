@@ -153,8 +153,11 @@ SecretSauce.Socket =
         .catch (err) ->
           socket.emit "sauce:job:fail", clientObj.guid, err
 
-  _startListening: (chokidar, path) ->
+  _startListening: (chokidar, path, options) ->
     { _ } = SecretSauce
+
+    _.defaults options,
+      onChromiumRun: ->
 
     messages = {}
 
@@ -194,6 +197,9 @@ SecretSauce.Socket =
           @io.to("remote").emit "remote:request", id, message, data
         else
           cb({__error: "Could not process '#{message}'. No remote servers connected."})
+
+      socket.on "run:tests:in:chromium", (src) ->
+        options.onChromiumRun(src)
 
       socket.on "watch:test:file", (filePath) =>
         @watchTestFileByPath(filePath)

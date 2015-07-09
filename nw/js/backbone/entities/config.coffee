@@ -22,10 +22,10 @@
     getProjectPaths: ->
       @cache.getProjectPaths()
 
-    runProject: (path) ->
+    runProject: (path, options = {}) ->
       @project = @booter(path)
 
-      @project.boot().get("settings")
+      @project.boot(options).get("settings")
 
     closeProject: ->
       @project.close().bind(@).then ->

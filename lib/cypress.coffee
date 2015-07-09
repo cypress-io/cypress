@@ -54,7 +54,7 @@ class Booter
 
     @server = Server(@projectRoot)
 
-    @server.open().bind(@)
+    @server.open(options).bind(@)
     .then (settings) ->
       {server: @server, settings: settings}
 
