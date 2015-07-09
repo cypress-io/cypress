@@ -205,6 +205,18 @@
         ## really shut down the window!
         @close(true)
 
+    tests: ->
+      return if not App.config.get("debug")
+
+      tests = App.request "gui:open", "http://localhost:3500",
+        position: "center"
+        height: 1024
+        width: 768
+        title: "Cypress Tests"
+
+      tests.once "loaded", ->
+        tests.showDevTools()
+
     get: ->
       gui.Window.get()
 
@@ -243,6 +255,9 @@
 
   App.commands.setHandler "gui:debug", ->
     API.debug()
+
+  App.commands.setHandler "gui:tests", ->
+    API.tests()
 
   App.commands.setHandler "gui:about", ->
     API.about()

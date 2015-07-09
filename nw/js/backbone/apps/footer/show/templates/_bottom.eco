@@ -11,9 +11,11 @@
     <div class="dropup">
       <i class="fa fa-cog dropdown-toggle" data-toggle="dropdown"></i>
       <ul class="dropdown-menu dropdown-menu-right">
+        <% if @debug: %>
         <li data-tests>
           <a href="#">Tests</a>
         </li>
+        <% end %>
         <li>
         <li data-about>
           <a href="#">About</a>
