@@ -36,8 +36,8 @@
         cb @layout.detachBody()
 
       @listenTo @layout, "show", ->
-        ## dont show the header in satelitte mode
-        return if config.ui("satelitte")
+        ## dont show the header in satellite mode
+        return if config.ui("satellite")
 
         @headerView(iframe)
 

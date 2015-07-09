@@ -11,7 +11,7 @@
         throw new Error("Missing src for tests to run. Cannot start Chromium.")
 
       windows.chromium = App.request "gui:open", src, {
-        show: true
+        show: false
         position: "center"
         width: 1024
         width: 768

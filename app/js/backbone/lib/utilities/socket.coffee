@@ -1,6 +1,6 @@
 @App.module "Utilities", (Utilities, App, Backbone, Marionette, $, _) ->
 
-  satelliteEvents = "runner:start runner:end before:run before:add after:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test command:add command:attrs:changed".split(" ")
+  satelliteEvents = "runner:start runner:end before:run before:add after:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test command:add command:attrs:changed url:changed page:loading".split(" ")
   hostEvents      = "load:spec:iframe".split(" ")
   passThruEvents  = "sauce:job:create sauce:job:start sauce:job:done sauce:job:fail".split(" ")
 
@@ -9,15 +9,7 @@
       ## connect to socket io
       channel = io.connect({path: "/__socket.io"})
 
-      _.each hostEvents, (event) ->
-        channel.on event, (args...) ->
-          socket.trigger event, args...
-
-      _.each satelliteEvents, (event) ->
-        channel.on event, (args...) ->
-          socket.trigger event, args...
-
-      _.each passThruEvents, (event) ->
+      _.each [].concat(hostEvents, satelliteEvents, passThruEvents), (event) ->
         channel.on event, (args...) ->
           socket.trigger event, args...
 

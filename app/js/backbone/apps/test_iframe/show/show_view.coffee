@@ -7,10 +7,20 @@
       size: "#iframe-size-container"
 
     modelEvents:
+      "change:running"    : "runningChanged"
       "resize:viewport"   : "resizeViewport"
       "revert:dom"        : "revertDom"
       "restore:dom"       : "restoreDom"
       "highlight:el"      : "highlightEl"
+
+    runningChanged: (model, value, options) ->
+      ## dont do anything if we're still running
+      return if value
+
+      return if not @model.get("browser") is "chromium"
+
+      contents = Marionette.Renderer.render("test_iframe/show/_chromium_done")
+      @$remote.contents().find("body").html(contents)
 
     resizeViewport: ->
       @ui.size.css {

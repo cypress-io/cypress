@@ -13,6 +13,9 @@
       initialize: ->
         @Cypress   = $Cypress.create({loadModules: true})
 
+        @satelliteEvents = App.request("satellite:events")
+        @hostEvents      = App.request("host:events")
+
         @commands  = App.request "command:entities"
         @routes    = App.request "route:entities"
         @agents    = App.request "agent:entities"
@@ -22,6 +25,38 @@
         _.each CypressEvents, (event) =>
           @listenTo @Cypress, event, (args...) =>
             @trigger event, args...
+
+        if App.config.ui("host")
+          _.each @satelliteEvents, (event) =>
+            @listenTo @socket, event, (args...) =>
+              switch event
+                when "command:add"
+                  attrs = args[0]
+                  log = new @Cypress.Log(@Cypress, attrs)
+                  c = @commands.add log
+                  c.set("id", attrs.id)
+                when "command:attrs:changed"
+                  attrs = args[0]
+                  @commands.get(attrs.id).set(attrs)
+                else
+                  @trigger event, args...
+
+          _.each ["url:changed", "page:loading"], (event) =>
+            @listenTo @socket, event, (args...) =>
+              @Cypress.trigger event, args...
+
+        if App.config.ui("satellite")
+          _.each @hostEvents, (event) =>
+            @listenTo @socket, event, (args...) =>
+              @trigger event, args...
+
+          @listenTo @commands, "command:attrs:changed", (attrs) ->
+            attrs = @transformEmitAttrs(attrs)
+            @socket.emit "command:attrs:changed", attrs
+
+          _.each ["url:changed", "page:loading"], (event) =>
+            @listenTo @Cypress, event, (args...) =>
+              @socket.emit event, args...
 
         @listenTo @Cypress, "message", (msg, data, cb) =>
           @socket.emit "client:request", msg, data, cb
@@ -35,7 +70,17 @@
         @listenTo @Cypress, "log", (log) =>
           switch log.get("instrument")
             when "command"
-              @commands.add log
+              id = _.uniqueId("command")
+
+              ## if we're in satellite mode then we need to
+              ## broadcast this through websockets
+              if App.config.ui("satellite")
+                attrs = @transformEmitAttrs(log.attributes)
+                attrs.id = id
+                @socket.emit "command:add", attrs
+
+              c = @commands.add log
+              c.set "id", id
 
             when "route"
               @routes.add log
@@ -51,7 +96,7 @@
       start: (specPath) ->
         @Cypress.start()
 
-        @triggerLoadSpecFrame specPath
+        @triggerLoadSpecFrame specPath, {start: true}
 
       stop: ->
         ## shut down Cypress
@@ -74,6 +119,78 @@
       reset: ->
         _.each [@commands, @routes, @agents], (collection) ->
           collection.reset([], {silent: true})
+
+      trigger: (event, args...) ->
+        ## because of defaults the change:iframes event
+        ## fires before our initialize (which is stupid)
+        return if not @socket
+
+        ## if we're in satellite mode and our event is
+        ## a satellite event then emit over websockets
+        if App.config.ui("satellite") and event in @satelliteEvents
+          args = @transformRunnableArgs(args)
+          return @socket.emit event, args...
+
+        ## if we're in host mode and our event is a
+        ## satellite event AND we have a remoteIrame defined
+        # if App.config.ui("host") and event in @hostEvents #and @$remoteIframe
+          # debugger
+          # return @socket.emit event, args...
+
+        ## else just do the normal trigger and
+        ## remove the satellite namespace
+        super event, args...
+
+      transformEmitAttrs: (attrs) ->
+        obj = {}
+
+        ## normally we'd use a reduce here but for some reason
+        ## on dom attrs the reduce completely barfs and is not
+        ## able to iterate over the object.
+        for key, value of attrs
+          obj[key] = value if @isWebSocketCompatibleValue(value)
+
+        obj
+
+      ## make sure this value is capable
+      ## of being sent through websockets
+      isWebSocketCompatibleValue: (value) ->
+        switch
+          when _.isElement(value)                           then false
+          when _.isObject(value) and _.isElement(value[0])  then false
+          when _.isFunction(value)                          then false
+          else true
+
+      transformRunnableArgs: (args) ->
+        ## pull off these direct properties
+        props = ["title", "id", "root", "pending", "stopped", "state", "duration", "type"]
+
+        ## pull off these parent props
+        parentProps = ["root", "id"]
+
+        ## fns to invoke
+        fns = ["originalTitle", "fullTitle", "slow", "timeout"]
+
+        _(args).map (arg) =>
+          ## transfer direct props
+          obj = _(arg).pick props...
+
+          ## transfer parent props
+          if parent = arg.parent
+            obj.parent = _(parent).pick parentProps...
+
+          ## transfer the error as JSON
+          if err = arg.err
+            try
+              err.host = @Cypress.cy.$remoteIframe.prop("contentWindow").location.host
+
+            obj.err = JSON.stringify(err, ["message", "type", "name", "stack", "fileName", "lineNumber", "columnNumber", "host"])
+
+          ## invoke the functions and set those as properties
+          _.each fns, (fn) ->
+            obj[fn] = _.result(arg, fn)
+
+          obj
 
       getChosen: ->
         @chosen
@@ -122,9 +239,14 @@
         _.defaults options,
           chosenId: @get("chosenId")
           specPath: @specPath
+          start:    false
 
         ## reset our collection entities
         @reset()
+
+        ## bail if we're the host and we aren't initially kicking
+        ## off the whole process
+        return if App.config.ui("host") and options.start isnt true
 
         ## pass the run method as our callback bound to us
         run = _.bind(@run, @)
@@ -249,8 +371,16 @@
       escapeRegExp: (str) ->
         new RegExp str.replace(regExpCharacters, '\\$&')
 
-      ## used to be called runIframeSuite
+      runInHostMode: (options) ->
+        if options.browser is "chromium"
+          @socket.emit "run:tests:in:chromium", "http://localhost:2020/__/#/tests/#{options.specPath}?__ui=satellite"
+
       run: (specWindow, remoteIframe, options, fn) ->
+        ## dont try to start tests in host mode since our
+        ## satellite is the browser which is actually running
+        ## the tests
+        return @runInHostMode(options) if App.config.ui("host")
+
         ## trigger before:run prior to setting up the runner
         @trigger "before:run"
 

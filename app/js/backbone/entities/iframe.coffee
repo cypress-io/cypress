@@ -36,6 +36,8 @@
         @setPageLoading(bool)
 
     load: (cb, options) ->
+      ## add src and url to options here
+
       _.defaults options,
         browser:  @get("browser")
         version:  @get("version")
