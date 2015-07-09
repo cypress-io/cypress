@@ -49,6 +49,8 @@
         @listenTo @socket, "test:changed", @reRun
 
       start: (specPath) ->
+        @Cypress.start()
+
         @triggerLoadSpecFrame specPath
 
       stop: ->
