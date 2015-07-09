@@ -15,6 +15,7 @@
         <li data-tests>
           <a href="#">Tests</a>
         </li>
+        <li class="divider"></li>
         <% end %>
         <li>
         <li data-about>
