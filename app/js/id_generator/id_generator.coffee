@@ -1,7 +1,8 @@
 do ($, _, io) ->
   testIdRegExp  = /\[(.{3})\]$/
 
-  $Cypress.create()
+  Cypress = $Cypress.create()
+  Cypress.start()
 
   run           = Mocha.prototype.run
 

@@ -16,14 +16,14 @@
         @layout.satelliteMode()
         @layout.destroy()
 
-      @listenTo config, "change:env", (model, value, options) ->
+      @listenTo config, "change:ui", (model, value, options) ->
         ## if we're entering satellite mode then hide our layout
         ## and update some DOM classes for display purposes
         return @layout.satelliteMode() if value is "satellite"
 
-        ## else if our previous env attribute was satellite then
+        ## else if our previous ui attribute was satellite then
         ## we need to show our layout and re-render our navs region
-        if model.previous("env") is "satellite"
+        if model.previous("ui") is "satellite"
           @navsRegion(navs, config)
           @layout.satelliteMode(false)
 

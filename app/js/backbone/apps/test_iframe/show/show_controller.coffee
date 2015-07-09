@@ -51,6 +51,13 @@
 
     headerView: (iframe) ->
       headerView = @getHeaderView(iframe)
+
+      @listenTo headerView, "browser:clicked", (browser, version) ->
+        iframe.switchToBrowser(browser, version)
+
+      @listenTo headerView, "close:browser:clicked", ->
+        iframe.switchToBrowser()
+
       @show headerView, region: @layout.headerRegion
 
     getHeaderView: (iframe) ->

@@ -94,6 +94,65 @@ SecretSauce.Socket =
       .catch (err) ->
         cb({__error: err.message})
 
+  _runSauce: (socket, spec, fn) ->
+    { _ } = SecretSauce
+
+    ## this will be used to group jobs
+    ## together for the runs related to 1
+    ## spec by setting custom-data on the job object
+    batchId = Date.now()
+
+    jobName = @app.get("cypress").testFolder + "/" + spec
+    fn(jobName, batchId)
+
+    ## need to handle platform/browser/version incompatible configurations
+    ## and throw our own error
+    ## https://saucelabs.com/platforms/webdriver
+    jobs = [
+      { platform: "Windows 8.1", browser: "chrome",  version: 43, resolution: "1280x1024" }
+      { platform: "Windows 8.1", browser: "internet explorer",  version: 11, resolution: "1280x1024" }
+      # { platform: "Windows 7",   browser: "internet explorer",  version: 10 }
+      # { platform: "Linux",       browser: "chrome",             version: 37 }
+      { platform: "Linux",       browser: "firefox",            version: 33  }
+      { platform: "OS X 10.9",   browser: "safari",             version: 7 }
+    ]
+
+    normalizeJobObject = (obj) ->
+      obj = _.clone obj
+
+      obj.browser = {
+        "internet explorer": "ie"
+      }[obj.browserName] or obj.browserName
+
+      obj.os = obj.platform
+
+      return _.pick obj, "manualUrl", "browser", "version", "os", "batchId", "guid"
+
+    _.each jobs, (job) =>
+      url = @app.get("cypress").clientUrl + "#/" + jobName
+      options =
+        manualUrl:        url
+        remoteUrl:        url + "?nav=false"
+        batchId:          batchId
+        guid:             @uuid.v4()
+        browserName:      job.browser
+        version:          job.version
+        platform:         job.platform
+        screenResolution: job.resolution ? "1024x768"
+        onStart: (sessionID) ->
+          ## pass up the sessionID to the previous client obj by its guid
+          socket.emit "sauce:job:start", clientObj.guid, sessionID
+
+      clientObj = normalizeJobObject(options)
+      socket.emit "sauce:job:create", clientObj
+
+      @sauce(options)
+        .then (obj) ->
+          {sessionID, runningTime, passed} = obj
+          socket.emit "sauce:job:done", sessionID, runningTime, passed
+        .catch (err) ->
+          socket.emit "sauce:job:fail", clientObj.guid, err
+
   _startListening: (chokidar, path) ->
     { _ } = SecretSauce
 
@@ -155,7 +214,7 @@ SecretSauce.Socket =
         @Log.info "finished:generating:ids:for:test", strippedPath: strippedPath
         @io.emit "test:changed", file: strippedPath
 
-      _.each "load:spec:iframe command:add runner:start runner:end before:run before:add after:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test".split(" "), (event) ->
+      _.each "load:spec:iframe command:add command:attrs:changed runner:start runner:end before:run before:add after:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test".split(" "), (event) =>
         socket.on event, (args...) =>
           args = _.chain(args).compact().reject(_.isFunction).value()
           @io.emit event, args...
@@ -166,63 +225,7 @@ SecretSauce.Socket =
       ## we'll embed some additional meta data into
       ## the job name
       socket.on "run:sauce", (spec, fn) =>
-        ## this will be used to group jobs
-        ## together for the runs related to 1
-        ## spec by setting custom-data on the job object
-        batchId = Date.now()
-
-        jobName = testFolder + "/" + spec
-        fn(jobName, batchId)
-
-        ## need to handle platform/browser/version incompatible configurations
-        ## and throw our own error
-        ## https://saucelabs.com/platforms/webdriver
-        jobs = [
-          { platform: "Windows 8.1", browser: "internet explorer",  version: 11 }
-          { platform: "Windows 7",   browser: "internet explorer",  version: 10 }
-          { platform: "Linux",       browser: "chrome",             version: 37 }
-          { platform: "Linux",       browser: "firefox",            version: 33 }
-          { platform: "OS X 10.9",   browser: "safari",             version: 7 }
-        ]
-
-        normalizeJobObject = (obj) ->
-          obj = _(obj).clone()
-
-          obj.browser = {
-            "internet explorer": "ie"
-          }[obj.browserName] or obj.browserName
-
-          obj.os = obj.platform
-
-          _(obj).pick "name", "browser", "version", "os", "batchId", "guid"
-
-        _.each jobs, (job) =>
-          options =
-            host:        "0.0.0.0"
-            port:        @app.get("port")
-            name:        jobName
-            batchId:     batchId
-            guid:        uuid.v4()
-            browserName: job.browser
-            version:     job.version
-            platform:    job.platform
-
-          clientObj = normalizeJobObject(options)
-          socket.emit "sauce:job:create", clientObj
-
-          df = jQuery.Deferred()
-
-          df.progress (sessionID) ->
-            ## pass up the sessionID to the previous client obj by its guid
-            socket.emit "sauce:job:start", clientObj.guid, sessionID
-
-          df.fail (err) ->
-            socket.emit "sauce:job:fail", clientObj.guid, err
-
-          df.done (sessionID, runningTime, passed) ->
-            socket.emit "sauce:job:done", sessionID, runningTime, passed
-
-          sauce options, df
+        @_runSauce(socket, spec, fn)
 
     @testsDir = path.join(projectRoot, testFolder)
 

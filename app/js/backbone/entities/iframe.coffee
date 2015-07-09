@@ -62,6 +62,14 @@
     setPageLoading: (bool = true) ->
       @set "pageLoading", bool
 
+    setBrowserAndVersion: (browser, version) ->
+      @set
+        browser: browser
+        version: version
+
+    switchToBrowser: (browser, version) ->
+      @trigger "switch:to:manual:browser", browser, version
+
     isRunning: (bool) ->
       if arguments.length
         @set "running", bool

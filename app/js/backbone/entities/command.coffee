@@ -222,7 +222,14 @@
       command.log = log
 
       command.listenTo log, "attrs:changed", (attrs) ->
-        command.set _.pick(attrs, logAttrs...)
+        attrs = _.pick(attrs, logAttrs...)
+        command.set(attrs)
+
+        attrs.id = command.id
+
+        ## trigger this so we can get command attrs updates
+        ## when in host / satellite mode
+        @trigger("command:attrs:changed", attrs)
 
       return command
 
