@@ -17,7 +17,7 @@
       ## dont do anything if we're still running
       return if value
 
-      return if not @model.get("browser") is "chromium"
+      return if @model.get("browser") isnt "chromium"
 
       contents = Marionette.Renderer.render("test_iframe/show/_chromium_done")
       @$remote.contents().find("body").html(contents)
