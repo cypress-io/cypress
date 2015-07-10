@@ -5,6 +5,8 @@
     initialize: (options) ->
       { runner, iframe, spec } = options
 
+      testViewQueue = []
+
       ## hold onto every single runnable type (suite or test)
       container  = App.request "runnable:container:entity"
 
@@ -69,8 +71,10 @@
         if model = container.hasOnlyOneTest()
           model.open()
 
+        @startInsertingTestViews(testViewQueue)
+
       @listenTo runner, "suite:add", (suite) ->
-        @addRunnable(suite, "suite")
+        @addRunnable(suite, "suite", testViewQueue)
       # @listenTo runner, "suite:start", (suite) ->
         # @addRunnable(suite, "suite")
 
@@ -84,7 +88,7 @@
       # add the test to the suite unless it already exists
       @listenTo runner, "test:add", (test) ->
         ## add the test to the container collection of runnables
-        @addRunnable(test, "test")
+        @addRunnable(test, "test", testViewQueue)
 
       @listenTo runner, "test:end", (test) ->
         ## find the client runnable model by the test's ide
@@ -110,7 +114,7 @@
 
       @show runnablesView
 
-    addRunnable: (root, container, runnable, type) ->
+    addRunnable: (root, container, runnable, type, testViewQueue) ->
       ## we need to bail here because this is most likely due
       ## to the user changing their tests and the old test
       ## are still running...
@@ -124,7 +128,18 @@
 
       @createRunnableListeners(runnable)
 
+      # if type is "suite"
+      #   @insertChildViews(runnable)
+      # else
+      testViewQueue.push(runnable)
+
+    startInsertingTestViews: (testViewQueue) ->
+      return if not runnable = testViewQueue.shift()
+
       @insertChildViews(runnable)
+
+      setImmediate =>
+        @startInsertingTestViews(testViewQueue)
 
     insertChildViews: (runner, iframe, model) ->
       ## we could alternatively loop through all of the children
