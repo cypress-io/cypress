@@ -31,12 +31,15 @@ class Files extends Controller
     @getSpecs(test).bind(@).then (specs) ->
       @getJavascripts().bind(@).then (js) ->
         res.render filePath, {
-          title:        test
+          title:        @getTitle(test)
           # stylesheets:  @getStylesheets()
           javascripts:  js
           utilities:    @getUtilities()
           specs:        specs
         }
+
+  getTitle: (test) ->
+    if test is "__all" then "All Tests" else test
 
   convertToAbsolutePath: (files) ->
     ## make sure its an array and remap to an absolute path
@@ -71,7 +74,7 @@ class Files extends Controller
 
   getSpecs: (test) ->
     ## grab all of the specs if this is ci
-    if test is "ci"
+    if test is "__all"
       @getTestFiles().then (specs) =>
         @convertToSpecPath _(specs).pluck("name")
     else
@@ -155,6 +158,7 @@ class Files extends Controller
     new Promise (resolve, reject) ->
       ## ignore _fixtures + _support + javascripts
       options = {
+        sort: true
         ignore: [].concat(javascriptsPath, supportFolderPath, fixturesFolderPath)
       }
 
