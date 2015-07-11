@@ -113,7 +113,7 @@
         @reset()
 
         ## and remove actual references to them
-        _.each ["commands", "routes", "agents", "chosen", "specPath", "socket", "Cypress"], (obj) =>
+        _.each ["commands", "routes", "agents", "chosen", "specPath", "socket", "iframe", "Cypress"], (obj) =>
           @[obj] = null
 
       reset: ->
