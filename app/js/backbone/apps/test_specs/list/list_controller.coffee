@@ -5,7 +5,7 @@
     initialize: (options) ->
       { runner, iframe, spec } = options
 
-      testViewQueue = []
+      testViewQueue = testQueue = null
 
       ## hold onto every single runnable type (suite or test)
       container  = App.request "runnable:container:entity"
@@ -43,6 +43,9 @@
       @insertChildViews = _.partial(@insertChildViews, runner, iframe)
 
       @listenTo runner, "before:run", ->
+        testViewQueue = []
+        testQueue     = []
+
         ## move all the models over to previous run
         ## and reset all existing one
         container.reset()
@@ -94,6 +97,8 @@
         ## find the client runnable model by the test's ide
         runnable = container.get(test.id)
 
+        @addRunnableToQueue(testQueue, runnable)
+
         ## set the results of the test on the test client model
         ## passed | failed | pending
         runnable.setResults(test)
@@ -132,6 +137,17 @@
       #   @insertChildViews(runnable)
       # else
       testViewQueue.push(runnable)
+
+    addRunnableToQueue: (queue, test) ->
+      queue.push(test)
+
+      @cleanupQueue(queue)
+
+    cleanupQueue: (queue) ->
+      if queue.length > 50
+        runnable = queue.shift()
+        runnable.reduceCommandMemory()
+        @cleanupQueue(queue)
 
     startInsertingTestViews: (testViewQueue) ->
       return if not runnable = testViewQueue.shift()

@@ -30,6 +30,9 @@
       ## commands passed within each hook
       hook.failed() if hook
 
+    reduceCommandMemory: ->
+      @get("hooks").reduceCommandMemory()
+
     checkForFailedHook: ->
       ## bail if our hook property is falsy
       return if not name = @get("hookName")

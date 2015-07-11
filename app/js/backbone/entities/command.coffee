@@ -97,6 +97,9 @@
       ## replace only the first occurance of the parent selector
       selector.replace parent, ""
 
+    reduceMemory: ->
+      @getLog().reduceMemory()
+
     hasSnapshot: ->
       !!@getLog().get("snapshot")
 
@@ -213,6 +216,9 @@
 
     getTotalNumber: ->
       @_maxNumber
+
+    reduceCommandMemory: ->
+      @invoke "reduceMemory"
 
     createCommand: (log) ->
       if log.get("type") not in ["parent", "child"]

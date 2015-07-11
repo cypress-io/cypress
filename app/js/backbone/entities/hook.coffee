@@ -21,6 +21,10 @@
   class Entities.HooksCollection extends Entities.Collection
     model: Entities.Hook
 
+    reduceCommandMemory: ->
+      @each (hook) ->
+        hook.get("commands").reduceCommandMemory()
+
     getByName: (name) ->
       @findWhere({name: name})
 

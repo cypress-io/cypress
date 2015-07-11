@@ -186,6 +186,10 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
       @set obj
 
+    reduceMemory: ->
+      @off()
+      @attributes = _.omit @attributes, _.isObject
+
     wrapOnConsole: ->
       _this = @
 
