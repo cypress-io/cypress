@@ -61,7 +61,8 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       @listenTo @Cypress, "abort",      => @abort()
 
     abort: ->
-      @private("$remoteIframe")?.off("submit beforeunload unload load hashchange")
+      @offWindowListeners()
+      @offIframeListeners(@private("$remoteIframe"))
       @isReady(false, "abort")
       @private("runnable")?.clearTimeout()
 
@@ -81,6 +82,10 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       delete window.cy
 
       @stopListening()
+
+      @offWindowListeners()
+      @offIframeListeners(@private("$remoteIframe"))
+
       @privates = {}
 
       @Cypress.cy = null

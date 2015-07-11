@@ -1,6 +1,16 @@
 do ($Cypress, _) ->
 
+  previousWin = null
+
   $Cypress.Cy.extend
+
+    offWindowListeners: ->
+      if previousWin
+        previousWin.off()
+        previousWin = null
+
+    offIframeListeners: ($remoteIframe) ->
+      $remoteIframe.off()
 
     ## we listen for the unload + submit events on
     ## the window, because when we receive them we
@@ -9,12 +19,18 @@ do ($Cypress, _) ->
     ## its ready again (which happens after the load
     ## event)
     bindWindowListeners: (contentWindow) ->
+      @offWindowListeners()
+
+      return if contentWindow.location.href is "about:blank"
+
       win = $(contentWindow)
+
+      previousWin = win
 
       ## using the native submit method will not trigger a
       ## beforeunload event synchronously so we must bind
       ## to the submit event to know we're about to navigate away
-      win.off("submit").on "submit", (e) =>
+      win.on "submit", (e) =>
         ## if we've prevented the default submit action
         ## without stopping propagation, we will still
         ## receive this event even though the form
@@ -27,7 +43,7 @@ do ($Cypress, _) ->
 
         @isReady(false, "submit")
 
-      win.off("beforeunload").on "beforeunload", (e) =>
+      win.on "beforeunload", (e) =>
         ## bail if we've cancelled this event (from another source)
         ## or we've set a returnValue on the original event
         return if e.isDefaultPrevented() or @_eventHasReturnValue(e)
@@ -40,6 +56,11 @@ do ($Cypress, _) ->
 
         @pageLoading()
 
+        ## whenever our window is about to be nuked
+        ## we want to turn off all of the window listeners
+        ## else jquery will never release them
+        @offWindowListeners()
+
         ## return undefined so our beforeunload handler
         ## doesnt trigger a confirmation dialog
         return undefined
@@ -49,7 +70,7 @@ do ($Cypress, _) ->
         ## we've unloaded
         # @isReady(false, "unload")
 
-      win.off("hashchange").on "hashchange", =>
+      win.on "hashchange", =>
         @urlChanged(null, {
           by: "hashchange"
         })
