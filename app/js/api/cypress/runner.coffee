@@ -120,9 +120,13 @@ $Cypress.Runner = do ($Cypress, _) ->
       @initialize()
 
     stop: ->
+      @stopListening()
+
       @restore()
 
       @Cypress.runner = null
+
+      delete @runner
 
       return @
 

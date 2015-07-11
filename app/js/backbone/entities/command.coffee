@@ -41,6 +41,8 @@
       @get("state") is state
 
     reset: ->
+      @stopListening()
+      @log = null
       @clear(silent: true)
       @clear(silent: true)
 

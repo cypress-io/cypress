@@ -49,6 +49,7 @@ do ($Cypress, _, chai) ->
         return @
 
       stop: ->
+        @stopListening()
         @restore()
         @Cypress.chai = null
         return @

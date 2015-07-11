@@ -80,6 +80,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
     stop: ->
       delete window.cy
 
+      @stopListening()
       @privates = {}
 
       @Cypress.cy = null

@@ -175,6 +175,7 @@ $Cypress.Mocha = do ($Cypress, _, Mocha) ->
       mocha.ui name
 
     stop: ->
+      @stopListening()
       @restore()
 
       ## remove any listeners from the mocha.suite
