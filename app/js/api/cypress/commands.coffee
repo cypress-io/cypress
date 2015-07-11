@@ -10,6 +10,10 @@ do ($Cypress, _) ->
     addDualCommand: (key, fn) ->
       @add(key, fn, "dual")
 
+    ## think about adding this for
+    ## custom cy extensions as well
+    ## that we want to rollback afterwards
+    ## (Cypress.Cy.extend)
     prepareForCustomCommands: ->
       ## remove any existing custom commands
       @removeCustomCommands()
