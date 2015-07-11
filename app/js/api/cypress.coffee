@@ -58,6 +58,7 @@ window.$Cypress = do ($, _, Backbone, Promise) ->
 
       ## TODO: TEST THIS
       @prepareForSpecEvents()
+      @prepareForCustomCommands()
 
     onBeforeLoad: (contentWindow) ->
       ## should probably just trigger the "before:load"
@@ -106,6 +107,8 @@ window.$Cypress = do ($, _, Backbone, Promise) ->
       @abort().then =>
 
         @trigger "stop"
+
+        @removeCustomCommands()
 
         @off()
 

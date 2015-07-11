@@ -10,6 +10,32 @@ do ($Cypress, _) ->
     addDualCommand: (key, fn) ->
       @add(key, fn, "dual")
 
+    prepareForCustomCommands: ->
+      ## remove any existing custom commands
+      @removeCustomCommands()
+
+      ## backup old inject
+      @_inject = @inject
+
+      _this = @
+
+      @_customCommands = []
+
+      ## override inject to hold onto a copy of all custom commands
+      @inject = _.wrap @inject, (orig, key, fn, type) ->
+        _this._customCommands.push(key)
+
+        orig.call(@, key, fn, type)
+
+    removeCustomCommands: ->
+      ## restore old inject
+      @inject = @_inject if @_inject
+
+      _.each @_customCommands ? [], (key) ->
+        delete $Cypress.Cy.prototype[key]
+        delete $Cypress.Cy.prototype.sync[key]
+        $Cypress.Chainer.remove(key)
+
     add: (key, fn, type) ->
       throw new Error("Cypress.add(key, fn, type) must include a type!") if not type
 
