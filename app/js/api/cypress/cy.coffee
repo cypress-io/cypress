@@ -103,7 +103,16 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       @prop("angularCancelTimeout")?()
 
       ## reset the queue to an empty array
-      @queue = []
+      ## by mutating it. we do this because
+      ## queue is the context in promises
+      ## which ends up holding a reference
+      ## to the old array and keeps objects
+      ## in memory longer than we want them
+      for queue in @queue
+        for prop of queue
+          queue[prop] = null
+
+      @queue.splice(0, @queue.length)
 
       ## remove any outstanding groups
       ## for any open hooks and runnables
