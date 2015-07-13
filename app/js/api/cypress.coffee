@@ -119,6 +119,8 @@ window.$Cypress = do ($, _, Backbone, Promise) ->
       ## coerce into an array
       aborts = [].concat @invoke("abort")
 
+      aborts = _.reject aborts, (r) -> r is @cy
+
       ## abort can be async so make sure
       ## we wait until they all resolve!
       Promise.all(aborts).then => @restore()
@@ -127,8 +129,11 @@ window.$Cypress = do ($, _, Backbone, Promise) ->
     ## removing the queue from the proto and
     ## removing additional own instance properties
     restore: ->
-      @trigger "restore"
-      return @
+      restores = [].concat @invoke("restore")
+
+      restores = _.reject restores, (r) -> r is @cy
+
+      Promise.all(restores).return(null)
 
     _.extend $Cypress.prototype, Backbone.Events
 

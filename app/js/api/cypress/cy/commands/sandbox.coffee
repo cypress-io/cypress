@@ -3,15 +3,10 @@ $Cypress.register "Sandbox", (Cypress, _, $) ->
   Cypress.on "restore", ->
     ## restore the sandbox if we've
     ## created one
+    return if not @prop
+
     if sandbox = @prop("sandbox")
       sandbox.restore()
-
-      ## if we have a server, resets
-      ## these references for GC
-      if server = sandbox.server
-        server.requests  = []
-        server.queue     = []
-        server.responses = []
 
   Cypress.Cy.extend
     ## think about making this "public" so

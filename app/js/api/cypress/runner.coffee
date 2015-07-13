@@ -395,8 +395,8 @@ $Cypress.Runner = do ($Cypress, _) ->
             ## isnt the last test in our grep'd parent suite's tests array
             if @suite.root and (_this.test isnt _(_this.tests).last()) and (_this.test isnt _(tests).last())
               fn = _.wrap fn, (orig, args...) ->
-                testAfterHooks()
-                orig(args...)
+                testAfterHooks().then ->
+                  orig(args...)
 
           when "afterAll"
             ## find all of the grep'd _this tests which share

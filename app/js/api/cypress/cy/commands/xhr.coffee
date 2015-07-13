@@ -9,10 +9,17 @@ $Cypress.register "XHR", (Cypress, _, $) ->
   TMP_SERVER = "tmpServer"
   TMP_ROUTES = "tmpRoutes"
 
-  Cypress.on "abort", ->
+  restore = ->
     if @prop
       if server = @prop("server")
-        server.abort()
+        Promise.all(server.cancel()).then ->
+          server.restore()
+
+  Cypress.on "abort", ->
+    restore.call(@)
+
+  Cypress.on "restore", ->
+    restore.call(@)
 
   ## need to upgrade our server
   ## to allow for a setRequest hook
