@@ -134,7 +134,7 @@ $Cypress.register "XHR", (Cypress, _, $) ->
 
           ## increment the associated ROUTE LOG numResponses by 1
           ## (this increments the route instrument)
-          if rl = route.log
+          if rl = route and route.log
             numResponses = rl.get("numResponses")
             rl.set "numResponses", numResponses + 1
 
