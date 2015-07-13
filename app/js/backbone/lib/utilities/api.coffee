@@ -8,6 +8,8 @@
       return App.request("runner:entity")
 
     stop: (runner) ->
+      Utilities.Overrides.restore()
+
       runner.stop()
 
   App.reqres.setHandler "start:test:runner", (options = {}) ->
