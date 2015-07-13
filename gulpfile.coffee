@@ -51,6 +51,7 @@ compileCss = (source, dest) ->
       trace: true
       compass: true
       cacheLocation: ".tmp/.sass-cache"
+      sourcemap: false
     .on "error", log
     .pipe gulp.dest "#{dest}/public/css"
 
