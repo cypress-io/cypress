@@ -14,6 +14,8 @@ $Cypress.Mocha = do ($Cypress, _, Mocha) ->
       @override()
       @listeners()
 
+      @specWindow = specWindow
+
       @set(specWindow)
 
     override: ->
@@ -93,6 +95,7 @@ $Cypress.Mocha = do ($Cypress, _, Mocha) ->
 
           unbind = ->
             _this.stopListening Cypress, "enqueue", invokedCy
+            runnable.fn = orig
 
           try
             ## call the original function with
@@ -181,10 +184,17 @@ $Cypress.Mocha = do ($Cypress, _, Mocha) ->
       ## remove any listeners from the mocha.suite
       @mocha.suite.removeAllListeners()
 
+      @mocha.suite.suites = []
+      @mocha.suite.tests  = []
+
       ## null it out to break any references
       @mocha.suite = null
 
       @Cypress.mocha = null
+
+      delete @specWindow.mocha
+      delete @specWindow
+      delete @mocha
 
       return @
 
