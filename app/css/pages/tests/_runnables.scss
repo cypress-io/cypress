@@ -186,7 +186,7 @@
 
       &.processing > .runnable-wrapper {
         .test-state i {
-          @extend .#{$fa-css-prefix}-refresh;
+          @extend .#{$fa-css-prefix}-square-o;
           // @extend .fa-spin;
           color: #888;
         }
