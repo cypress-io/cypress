@@ -104,8 +104,8 @@ $Cypress.Server = do ($Cypress, _) ->
               }
 
             ## abort xhr's on cancel
-            .catch Promise.CancellationError, (err) =>
-              @abort(xhr)
+            .catch Promise.CancellationError, (err) ->
+              _this.abort(xhr)
 
             ## continue to bubble up errors
             ## if they happen
@@ -257,9 +257,11 @@ $Cypress.Server = do ($Cypress, _) ->
       xhr.abort()
 
     cancel: ->
-      ## abort anything in our queue since
-      ## those are xhr's which have been responded to
-      _.each @fakeServer.queue, @abort
+      if @fakeServer
+        ## abort anything in our queue since
+        ## those are xhr's which have been responded to
+        _.each @fakeServer.queue, @abort
+
       _.invoke @queue, "cancel"
 
     restore: ->
