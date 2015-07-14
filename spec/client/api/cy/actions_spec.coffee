@@ -164,7 +164,7 @@ describe "$Cypress.Cy Actions Commands", ->
         node = $Cypress.Utils.stringifyElement(select)
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "cy.select() cannot be called on the non-visible element: #{node}"
+          expect(err.message).to.include "cy.select() cannot be called on the non-visible element: #{node}"
           done()
 
         @cy.get("select:first").select("foo")
@@ -1534,7 +1534,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.on "fail", (err) =>
           expect(logs).to.have.length(2)
           expect(@log.get("error")).to.eq(err)
-          expect(err.message).to.eq "cy.type() cannot be called on the non-visible element: #{node}"
+          expect(err.message).to.include "cy.type() cannot be called on the non-visible element: #{node}"
           done()
 
         @cy.get("input:text:first").type("foo")
@@ -1728,7 +1728,7 @@ describe "$Cypress.Cy Actions Commands", ->
         node = $Cypress.Utils.stringifyElement(input)
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "cy.clear() cannot be called on the non-visible element: #{node}"
+          expect(err.message).to.include "cy.clear() cannot be called on the non-visible element: #{node}"
           done()
 
         @cy.get("input:text:first").clear()
@@ -1912,7 +1912,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.on "fail", (err) =>
           expect(logs).to.have.length(chk.length + 1)
           expect(@log.get("error")).to.eq(err)
-          expect(err.message).to.eq "cy.check() cannot be called on the non-visible element: #{node}"
+          expect(err.message).to.include "cy.check() cannot be called on the non-visible element: #{node}"
           done()
 
         @cy.get(":checkbox:first").check()
@@ -1931,7 +1931,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.on "fail", (err) =>
           expect(logs).to.have.length(chk.length + 1)
           expect(@log.get("error")).to.eq(err)
-          expect(err.message).to.eq "cy.check() cannot be called on the non-visible element: #{node}"
+          expect(err.message).to.include "cy.check() cannot be called on the non-visible element: #{node}"
           done()
 
         @cy.get(":checkbox").check()
@@ -2114,7 +2114,7 @@ describe "$Cypress.Cy Actions Commands", ->
           len  = (chk.length * 2) + 6
           expect(logs).to.have.length(len)
           expect(@log.get("error")).to.eq(err)
-          expect(err.message).to.eq "cy.uncheck() cannot be called on the non-visible element: #{node}"
+          expect(err.message).to.include "cy.uncheck() cannot be called on the non-visible element: #{node}"
           done()
 
         @cy
@@ -3376,6 +3376,18 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("#button-covered-in-span").click().then ->
         expect(retried).to.be.true
 
+    it "waits until element becomes visible", ->
+      btn = cy.$("#button").hide()
+
+      retried = false
+
+      @cy.on "retry", _.after 3, ->
+        btn.show()
+        retried = true
+
+      @cy.get("#button").click().then ->
+        expect(retried).to.be.true
+
     describe "position argument", ->
       it "can click center by default", (done) ->
         btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").css({height: 100, width: 100}).prependTo(@cy.$("body"))
@@ -3619,7 +3631,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq(4)
           expect(@log.get("error")).to.eq(err)
-          expect(err.message).to.eq "cy.click() cannot be called on the non-visible element: #{node}"
+          expect(err.message).to.include "cy.click() cannot be called on the non-visible element: #{node}"
           done()
 
         @cy.get("#three-buttons button").click()

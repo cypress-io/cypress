@@ -415,9 +415,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         ## 2. check to figure out the element listed at those coordinates
         ## 3. if this element is ourself or our descendents, click whatever was returned
         ## 4. else throw an error because something is covering us up
-        if options.force isnt true
-          @ensureVisibility $el, options.command
-
         getFirstFocusableEl = ($el) ->
           return $el if $el.is(focusable)
 
@@ -475,6 +472,15 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           return null
 
         findElByCoordinates = ($el) =>
+          if options.force isnt true
+            try
+              @ensureVisibility $el, options.command
+            catch err
+              retry = ->
+                findElByCoordinates($el)
+
+              options.error = err
+              return @_retry(retry, options)
 
           coordsObj = (coords, $el) ->
             {
