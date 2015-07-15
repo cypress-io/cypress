@@ -267,11 +267,12 @@ $Cypress.Server = do ($Cypress, _) ->
     restore: ->
       ## aggressively clean up all of this memory
       ## so we force GC early and often
-      delete @fakeServer.processRequest
-      delete @fakeServer.addRequest
-      delete @fakeServer.requests
-      delete @fakeServer.responses
-      delete @fakeServer.queue
+      if @fakeServer
+        delete @fakeServer.processRequest
+        delete @fakeServer.addRequest
+        delete @fakeServer.requests
+        delete @fakeServer.responses
+        delete @fakeServer.queue
 
       for array in [@queue, @requests, @responses, @onRequests]
         array.splice(0, array.length)
