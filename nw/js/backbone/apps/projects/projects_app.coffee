@@ -8,8 +8,8 @@
 
   router = new Router
 
-  App.vent.on "start:projects:app", ->
-    router.to "list"
+  App.vent.on "start:projects:app", (projectPath) ->
+    router.to "list", {projectPath: projectPath}
 
   App.vent.on "project:clicked", (project) ->
     router.to "show", project: project

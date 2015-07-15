@@ -1,5 +1,7 @@
 @App = do (Backbone, Marionette) ->
 
+  path = require("path")
+
   parseCoords = (args) ->
     coords = _.find args, (arg) -> _.str.startsWith(arg, "--coords")
 
@@ -13,6 +15,9 @@
       debug:    "--debug"    in options.argv
       updating: "--updating" in options.argv
       coords: parseCoords(options.argv)
+
+    if "-P" in options.argv
+      options.projectPath = path.resolve(process.cwd(), options.argv[1])
 
     if options.updating
       _.extend options,
@@ -64,7 +69,7 @@
       ## make sure we have a current session
       if user?.session_token
         ## if have it, start projects
-        App.vent.trigger "start:projects:app"
+        App.vent.trigger "start:projects:app", options.projectPath
       else
         ## else login
         App.vent.trigger "start:login:app"
