@@ -9,8 +9,8 @@
 
       projectsView = @getProjectsView(projects, user)
 
-      startProject = (project) ->
-        App.vent.trigger "project:clicked", project
+      startProject = (project, run = false) ->
+        App.vent.trigger "project:clicked", project, run
 
       if projectPath = params.projectPath
         @listenTo projectsView, "show", ->
@@ -20,7 +20,7 @@
           ## perhaps try to add the project first?
           throw new Error("Project could not be found by path: #{projectPath}") if not project
 
-          startProject(project)
+          startProject(project, true)
       else
         @listenTo projectsView, "project:added", (path) ->
           App.config.addProject(path).then ->

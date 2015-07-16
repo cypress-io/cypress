@@ -10,13 +10,26 @@
       if not src
         throw new Error("Missing src for tests to run. Cannot start Chromium.")
 
-      windows.chromium = App.request "gui:open", src, {
-        show: false
+      chromium = App.request "gui:open", src, {
+        show: true
+        frame: true
         position: "center"
         width: 1024
         width: 768
         title: "Running Tests"
       }
+
+      chromium.once "document-end", ->
+        chromium.window.require = require
+        chromium.window.cypressReporter = require("mocha/lib/reporters/dot")
+        _.extend chromium.window.Mocha.process, process
+        # chromium.window.Mocha.process = process
+        # console.log "document-start"
+        # chromium.window.process = process
+        # chromium.window.global  = global
+        # chromium.window.require = require
+
+      windows.chromium = chromium
 
   App.commands.setHandler "start:chromium:run", (src) ->
     API.startChromium(src)

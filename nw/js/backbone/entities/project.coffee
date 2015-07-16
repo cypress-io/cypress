@@ -25,7 +25,6 @@
     model: Entities.Project
 
     getProjectByPath: (path) ->
-      console.log JSON.stringify(@models)
       @findWhere({path: path})
 
   API =

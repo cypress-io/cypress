@@ -28,6 +28,7 @@
 
   App = new Marionette.Application
 
+  ## I think this should be window.App not global
   global.App = App
 
   App.addRegions

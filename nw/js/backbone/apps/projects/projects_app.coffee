@@ -11,5 +11,5 @@
   App.vent.on "start:projects:app", (projectPath) ->
     router.to "list", {projectPath: projectPath}
 
-  App.vent.on "project:clicked", (project) ->
-    router.to "show", project: project
+  App.vent.on "project:clicked", (project, run) ->
+    router.to "show", project: project, run: run

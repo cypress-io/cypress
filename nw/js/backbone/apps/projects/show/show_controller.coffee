@@ -26,6 +26,12 @@
           .then (config) ->
             project.setClientUrl(config.clientUrl, config.clientUrlDisplay)
             App.execute "start:id:generator", config.idGeneratorUrl
+            if params.run
+              # options.onChromiumRun("http://www.github.com")
+              # options.onChromiumRun(config.clientUrl + "#/organize")
+              options.onChromiumRun(config.clientUrl + "#/tests/apps/accounts/account_edit_spec.coffee")
+              # options.onChromiumRun(config.clientUrl + "#/tests/components/destroy_spec.coffee")
+
           .catch (err) ->
             project.setError(err)
 
