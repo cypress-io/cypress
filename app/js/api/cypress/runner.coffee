@@ -282,7 +282,7 @@ $Cypress.Runner = do ($Cypress, _) ->
         when "test"
           if matchesGrep(runnable, options.grep)
             options.onRunnable(runnable)
-            @tests.push @wrap(runnable)
+            @tests.push runnable
 
       ## recursively apply to all tests / suites of this runnable
       ## unless we've been told not to iterate (during optimized loop)
@@ -353,7 +353,7 @@ $Cypress.Runner = do ($Cypress, _) ->
         @testInTests(test)
 
     testInTests: (test) ->
-      !!_(@tests).findWhere({id: test.id})
+      test in @tests
 
     override: ->
       ## bail if our runner doesnt have a hook
@@ -386,6 +386,8 @@ $Cypress.Runner = do ($Cypress, _) ->
         ## its siblings.  but first we have to filter out
         ## suites which dont have a grep'd test in them
         isLastSuite = (suite) ->
+          return false if suite.root
+
           ## grab all of the suites from our grep'd tests
           ## including all of their ancestor suites!
           suites = _.reduce _this.tests, (memo, test) ->
@@ -448,7 +450,7 @@ $Cypress.Runner = do ($Cypress, _) ->
               ## else if we arent the last nested suite we fire if we're
               ## the last test
               if (@suite.root and _this.test is _(_this.tests).last()) or
-                (@suite.parent.root and _this.test is _(tests).last()) or
+                (@suite.parent?.root and _this.test is _(tests).last()) or
                   (not isLastSuite(@suite) and _this.test is _(tests).last())
                 fn = _.wrap fn, (orig, args...) ->
                   testAfterHooks()
