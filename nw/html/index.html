@@ -24,12 +24,14 @@
       var booter  = require("../../lib/cypress")
       var updater = booter.Updater(NwApp)
       var Log     = booter.Log
+      var Chromium = booter.Chromium
       var cache   = booter.cache
 
       cache.ensureExists().then(function(){
         var opts = {
           argv:    NwApp.argv,
           Log:     Log,
+          Chromium: Chromium,
           cache:   cache,
           updater: updater,
           booter:  booter

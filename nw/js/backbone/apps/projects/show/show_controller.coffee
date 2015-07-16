@@ -21,6 +21,9 @@
           App.execute "start:chromium:run", src
       }
 
+      if params.run
+        options.morgan = false
+
       _.defer ->
         App.config.runProject(project.get("path"), options)
           .then (config) ->
@@ -29,7 +32,7 @@
             if params.run
               # options.onChromiumRun("http://www.github.com")
               # options.onChromiumRun(config.clientUrl + "#/organize")
-              options.onChromiumRun(config.clientUrl + "#/tests/apps/accounts/account_edit_spec.coffee")
+              options.onChromiumRun(config.clientUrl + "#/tests/apps/accounts/account_edit_spec.coffee?__ui=satellite")
               # options.onChromiumRun(config.clientUrl + "#/tests/components/destroy_spec.coffee")
 
           .catch (err) ->

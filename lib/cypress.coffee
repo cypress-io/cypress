@@ -4,6 +4,7 @@ global.config  = require("konfig")()
 Settings       = require("./util/settings")
 Server         = require("./server")
 Updater        = require("./updater")
+Chromium       = require("./chromium")
 cache          = require("./cache")
 Log            = require("./log")
 child_process  = require("child_process")
@@ -69,6 +70,9 @@ class Booter
 
   ## attach to Booter class
   @Log = Log
+
+  ## attach to Booter class
+  @Chromium = Chromium
 
   ## attach to Booter class
   @manifest = fs.readJsonSync(process.cwd() + "/package.json")

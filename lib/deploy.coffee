@@ -89,6 +89,7 @@ class Deploy
           copy("./lib/environment.coffee",  "/src/lib/environment.coffee")
           copy("./lib/log.coffee",          "/src/lib/log.coffee")
           copy("./lib/exception.coffee",    "/src/lib/exception.coffee")
+          copy("./lib/chromium.coffee",     "/src/lib/chromium.coffee")
 
           ## copy test files
           copy("./spec/server/unit/konfig_spec.coffee",      "/spec/server/unit/konfig_spec.coffee")

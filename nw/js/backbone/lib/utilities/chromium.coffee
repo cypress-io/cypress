@@ -20,14 +20,7 @@
       }
 
       chromium.once "document-end", ->
-        chromium.window.require = require
-        chromium.window.cypressReporter = require("mocha/lib/reporters/dot")
-        _.extend chromium.window.Mocha.process, process
-        # chromium.window.Mocha.process = process
-        # console.log "document-start"
-        # chromium.window.process = process
-        # chromium.window.global  = global
-        # chromium.window.require = require
+        App.config.chromium(chromium.window)
 
       windows.chromium = chromium
 

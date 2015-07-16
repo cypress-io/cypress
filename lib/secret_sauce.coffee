@@ -3,6 +3,44 @@ SecretSauce =
     for key, fn of @[module]
       klass.prototype[key] = fn
 
+SecretSauce.Chromium =
+  override: ->
+    { _ } = SecretSauce
+
+    @window.require = require
+
+    _.extend @window.Mocha.process, process
+
+    @_reporter(@window)
+    @_onerror(@window)
+    @_log(@window)
+    @_afterRun(@window)
+
+  _reporter: (window) ->
+    window.$Cypress.reporter = require("mocha/lib/reporters/spec")
+
+  _onerror: (window) ->
+    # window.onerror = (err) ->
+      # ## log out the error to stdout
+
+      # ## notify Cypress API
+
+      # process.exit(1)
+
+  _log: (window) ->
+    util = @util
+
+    window.console.log = ->
+      msg = util.format.apply(util, arguments)
+      process.stdout.write(msg + "\n")
+
+  _afterRun: (window) ->
+    window.$Cypress.afterRun = (results) ->
+      console.log("results", results)
+      ## notify Cypress API
+
+      process.exit()
+
 SecretSauce.Keys =
   _convertToId: (index) ->
     ival = index.toString(36)

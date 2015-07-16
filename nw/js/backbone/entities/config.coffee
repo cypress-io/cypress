@@ -59,6 +59,11 @@
     offLog: ->
       @getLog().off()
 
+    chromium: (window) ->
+      C = @Chromium ? throw new Error("config#Chromium is not defined!")
+
+      C(window).override()
+
     getUpdater: -> @updater
 
     getManifest: -> @booter.manifest
@@ -75,7 +80,7 @@
         debugger if @get("debug")
 
   App.reqres.setHandler "config:entity", (attrs = {}) ->
-    props = ["cache", "booter", "updater", "Log"]
+    props = ["cache", "booter", "updater", "Log", "Chromium"]
 
     config = new Entities.Config _(attrs).omit props...
 
