@@ -7,8 +7,10 @@ $Cypress.Mocha = do ($Cypress, _, Mocha) ->
 
   class $Mocha
     constructor: (@Cypress, specWindow) ->
+      reporter = $Cypress.reporter ? ->
+
       @mocha = new Mocha
-        reporter: ->
+        reporter: reporter
         enableTimeouts: false
 
       @override()
