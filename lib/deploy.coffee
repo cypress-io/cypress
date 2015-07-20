@@ -17,22 +17,26 @@ fs = Promise.promisifyAll(fs)
 
 require path.join(process.cwd(), "gulpfile.coffee")
 
-distDir  = path.join(process.cwd(), "dist")
-buildDir = path.join(process.cwd(), "build")
+distDir   = path.join(process.cwd(), "dist")
+buildDir  = path.join(process.cwd(), "build")
+platforms = ["osx64", "linux64"]
 
-class Deploy
-  constructor: ->
-    if not (@ instanceof Deploy)
-      return new Deploy()
+class Platform
+  constructor: (@platform, @options = {}) ->
+    _.defaults @options,
+      runTests:         true
+      version:          null
+      publisher:        null
+      publisherOptions: {}
+      zip:              "cypress.zip"
 
-    @version          = null
-    @publisher        = null
-    @publisherOptions = {}
-    @platforms        = ["osx64"]
-    @zip              = "cypress.zip"
+    # @version          = null
+    # @publisher        = null
+    # @publisherOptions = {}
+    # @zip              = "cypress.zip"
 
   getVersion: ->
-    @version ? throw new Error("Deploy#version was not defined!")
+    @version ? throw new Error("Platform#version was not defined!")
 
   setVersion: ->
     @log("#setVersion")
@@ -47,8 +51,8 @@ class Deploy
       accessKeyId:     aws.key
       secretAccessKey: aws.secret
 
-  prepare: ->
-    @log("#prepare")
+  copyFiles: ->
+    @log("#copyFiles")
 
     copy = (src, dest) ->
       dest ?= src
@@ -91,9 +95,6 @@ class Deploy
           copy("./lib/exception.coffee",    "/src/lib/exception.coffee")
           copy("./lib/chromium.coffee",     "/src/lib/chromium.coffee")
 
-          ## copy test files
-          copy("./spec/server/unit/konfig_spec.coffee",      "/spec/server/unit/konfig_spec.coffee")
-          copy("./spec/server/unit/url_helpers_spec.coffee", "/spec/server/unit/url_helpers_spec.coffee")
         ]
       .all()
       .then ->
@@ -144,8 +145,8 @@ class Deploy
 
     fs.removeAsync(distDir)
 
-  cleanupBuild: ->
-    @log("#cleanupBuild")
+  cleanupPlatform: ->
+    @log("#cleanupPlatform")
 
     fs.removeAsync(buildDir)
 
@@ -209,8 +210,8 @@ class Deploy
   #       .on "error", reject
   #       .on "end", resolve
 
-  zipBuild: (platform) ->
-    @log("#zipBuild: #{platform}")
+  zipPlatform: (platform) ->
+    @log("#zipPlatform: #{platform}")
 
     ## change this to something manual if you're using
     ## the task: gulp dist:zip
@@ -225,10 +226,10 @@ class Deploy
 
         resolve()
 
-  zipBuilds: ->
-    @log("#zipBuilds")
+  zipPlatforms: ->
+    @log("#zipPlatforms")
 
-    Promise.all _.map(@platforms, _.bind(@zipBuild, @))
+    Promise.all _.map(@platforms, _.bind(@zipPlatform, @))
 
   getQuestions: (version) ->
     [{
@@ -328,9 +329,10 @@ class Deploy
       files: distDir + "/**/*"
       platforms: @platforms
       buildDir: buildDir
-      version: "0.12.1"
+      version: "0.12.2"
       buildType: => @getVersion()
       macIcns: "nw/public/img/cypress.icns"
+      # macZip: true
 
     nw.on "log", console.log
 
@@ -429,10 +431,11 @@ class Deploy
 
         resolve()
 
-  buildApp: ->
+  buildApp: (os) ->
     Promise.bind(@)
-      .then(@cleanupBuild)
-      .then(@prepare)
+      .then(@cleanupPlatform)
+      .then(@gulpBuild)
+      .then(@copyFiles)
       .then(@updatePackages)
       .then(@setVersion)
       .then(@convertToJs)
@@ -440,21 +443,23 @@ class Deploy
       .then(@cleanupSrc)
       .then(@build)
       .then(@npmInstall)
-      .then(@codeSign)
+      # .then(@codeSign)
 
   runTests: ->
+    return if @options.runTests is false
+
     Promise.bind(@).then(@nwTests)
 
   dist: ->
     @buildApp()
       .then(@runTests)
       .then(@cleanupDist)
-      .then(@zipBuilds)
+      .then(@zip)
 
   fixture: (cb) ->
     @dist()
       .then(@uploadFixtureToS3)
-      .then(@cleanupBuild)
+      .then(@cleanupPlatform)
       .then ->
         @log("Fixture Complete!", "green")
         cb?()
@@ -468,21 +473,110 @@ class Deploy
 
   manifest: ->
     Promise.bind(@)
-      .then(@prepare)
+      .then(@copyFiles)
       .then(@setVersion)
       .then(@updateS3Manifest)
       .then(@cleanupDist)
 
-  deploy: (cb) ->
-    @dist()
-      .then(@uploadsToS3)
-      .then(@updateS3Manifest)
-      .then(@cleanupBuild)
-      .then ->
-        @log("Dist Complete!", "green")
-        cb?()
-      .catch (err) ->
-        @log("Dist Failed!", "red")
-        console.log err
+  # deploy: ->
+    # @dist()
+    # @distEachVersion()
+      # .then(@uploadsToS3)
+      # .then(@updateS3Manifest)
+      # .then(@cleanupPlatform)
+      # .then ->
+      #   @log("Dist Complete!", "green")
+      #   cb?()
+      # .catch (err) ->
+      #   @log("Dist Failed!", "red")
+      #   console.log err
 
-module.exports = Deploy
+class Osx64 extends Platform
+  gulpBuild: ->
+    new Promise (resolve, reject) ->
+      gulp.start(["client:build", "nw:build"]).then(resolve)
+
+  deploy: ->
+    @dist()
+
+class Linux64 extends Platform
+  deploy: ->
+    new Promise (resolve, reject) =>
+      vagrant.ssh "gulp dist --skip-tests", (err) ->
+        reject(err) if err
+        resolve()
+
+module.exports = {
+  Platform: Platform
+  Osx64: Osx64
+  Linux64: Linux64
+
+  getPlatformsQuestion: ->
+    [{
+      name: "platforms"
+      type: "checkbox"
+      message: "Which OS's should we deploy?"
+      choices: [{
+        name: "Mac"
+        value: "osx64"
+        checked: true
+      },{
+        name: "Linux"
+        value: "linux64"
+        checked: true
+      }]
+    }]
+
+  askWhichPlatforms: ->
+    new Promise (resolve, reject) =>
+      inquirer.prompt @getPlatformsQuestion(), (answers) =>
+        resolve(answers.platforms)
+
+  updateS3Manifest: ->
+
+  cleanupEachPlatform: (platforms) ->
+    Promise
+      .bind(@)
+      .map(platforms, @cleanupPlatform)
+
+  buildPlatform: (platform, options) ->
+    Platform = @[platform.slice(0, 1).toUpperCase() + platform.slice(1)]
+
+    throw new Error("Platform: '#{platform}' not found") if not Platform
+
+    (new Platform(platform, options)).deploy()
+
+  deployEachPlatform: (platforms, options) ->
+    Promise
+      .bind(@)
+      .map(platforms, _.partialRight(@buildPlatform, options))
+
+  parseOptions: (argv) ->
+    # runTests
+
+  dist: ->
+    platform = os.platform()
+    options = @parseOptions(process.argv)
+
+    (new Platform(platform, options)).dist()
+
+  deploy: (platform) ->
+    ## read off the argv?
+    options = @parseOptions(process.argv)
+
+    deploy = (platforms) =>
+      @deployEachPlatform(platforms, options)
+        .then(@uploadsToS3)
+        .then(@updateS3Manifest)
+        .then(@cleanupEachPlatform)
+        .then ->
+          console.log("Dist Complete")
+        .catch (err) ->
+          console.log("Dist Failed")
+          console.log(err)
+
+    if platform
+      return deploy(platform)
+
+    @askWhichPlatforms().bind(@).then(deploy)
+}

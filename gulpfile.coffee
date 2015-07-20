@@ -9,6 +9,12 @@ child_process = require "child_process"
 runSequence   = require "run-sequence"
 os            = require "os"
 
+platform = ->
+  {
+    darwin: "osx64"
+    linux:  "linux64"
+  }[os.platform()] or throw new Error("OS Platform: '#{os.platform()}' not supported!")
+
 log = (obj = {}) ->
   args = [
     "\n{",
@@ -132,7 +138,7 @@ gulp.task "build:secret:sauce", (cb) ->
     .pipe gulp.dest("lib")
     .on "end", ->
       ## when thats done, lets create the secret_sauce snapshot .bin
-      child_process.exec "./support/nwjc lib/secret_sauce.js lib/secret_sauce.bin", (err, stdout, stderr) ->
+      child_process.exec "./support/#{platform()}/nwjc lib/secret_sauce.js lib/secret_sauce.bin", (err, stdout, stderr) ->
         console.log("stdout:", stdout)
         console.log("stderr:", stderr)
 
@@ -203,8 +209,9 @@ gulp.task "deploy:manifest", ->
 gulp.task "get:manifest", ->
   require("./lib/deploy")().getManifest()
 
-gulp.task "deploy", ["client:build", "nw:build"], ->
-  require("./lib/deploy")().deploy()
+gulp.task "deploy", ->
+# gulp.task "deploy", ["client:build", "nw:build"], ->
+  require("./lib/deploy").deploy()
 
 gulp.task "compile", ["clean:build"], ->
   require("./lib/deploy").compile()
