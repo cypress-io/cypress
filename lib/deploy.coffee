@@ -12,6 +12,10 @@ inquirer       = require("inquirer")
 NwBuilder      = require("node-webkit-builder")
 request        = require("request-promise")
 os             = require("os")
+vagrant        = require("vagrant")
+runSequence    = require("run-sequence")
+
+vagrant.debug = true
 
 fs = Promise.promisifyAll(fs)
 
@@ -36,12 +40,12 @@ class Platform
     # @zip              = "cypress.zip"
 
   getVersion: ->
-    @version ? throw new Error("Platform#version was not defined!")
+    @options.version ? throw new Error("Platform#version was not defined!")
 
   setVersion: ->
     @log("#setVersion")
 
-    @version = fs.readJsonSync(distDir + "/package.json").version
+    @options.version = fs.readJsonSync(@distDir("package.json")).version
 
   getPublisher: ->
     aws = fs.readJsonSync("./support/aws-credentials.json")
@@ -54,16 +58,16 @@ class Platform
   copyFiles: ->
     @log("#copyFiles")
 
-    copy = (src, dest) ->
+    copy = (src, dest) =>
       dest ?= src
-      dest = path.join(distDir, dest.slice(1))
+      dest = @distDir(dest.slice(1))
 
       fs.copyAsync(src, dest)
 
     fs
-      .removeAsync(distDir)
+      .removeAsync(@distDir())
       .then ->
-        fs.ensureDirAsync(distDir)
+        fs.ensureDirAsync(@distDir())
       .then ->
         [
           ## copy root files
@@ -98,7 +102,7 @@ class Platform
         ]
       .all()
       .then ->
-        fs.removeAsync(distDir + "/spec/server/unit/deploy_spec.coffee")
+        fs.removeAsync(@distDir("/spec/server/unit/deploy_spec.coffee"))
       .bind(@)
 
   convertToJs: ->
@@ -106,32 +110,36 @@ class Platform
 
     ## grab everything in src
     ## convert to js
-    new Promise (resolve, reject) ->
-      gulp.src(distDir + "/src/**/*.coffee")
+    new Promise (resolve, reject) =>
+      gulp.src(@distDir("src/**/*.coffee"))
         .pipe $.coffee()
-        .pipe gulp.dest(distDir + "/src")
+        .pipe gulp.dest(@distDir("src"))
         .on "end", resolve
         .on "error", reject
+
+  distDir: (src) ->
+    args = _.compact distDir, @package, src
+    path.join args...
 
   obfuscate: ->
     @log("#obfuscate")
 
     ## obfuscate all the js files
-    new Promise (resolve, reject) ->
+    new Promise (resolve, reject) =>
       ## grab all of the js files
-      files = glob.sync(distDir + "/src/**/*.js")
+      files = glob.sync @distDir("src/**/*.js")
 
       ## root is src
       ## entry is cypress.js
       ## files are all the js files
-      opts = {root: distDir + "/src", entry: distDir + "/src/lib/cypress.js", files: files}
+      opts = {root: @distDir("src"), entry: @distDir("src/lib/cypress.js"), files: files}
 
       obfuscator = require('obfuscator').obfuscator
       obfuscator opts, (err, obfuscated) ->
         return reject(err) if err
 
         ## move to lib
-        fs.writeFileSync(distDir + "/lib/cypress.js", obfuscated)
+        fs.writeFileSync(@distDir("lib/cypress.js"), obfuscated)
 
         resolve(obfuscated)
 
@@ -140,15 +148,10 @@ class Platform
 
     fs.removeAsync(distDir + "/src")
 
-  cleanupDist: ->
-    @log("#cleanupDist")
-
-    fs.removeAsync(distDir)
-
   cleanupPlatform: ->
     @log("#cleanupPlatform")
 
-    fs.removeAsync(buildDir)
+    fs.removeAsync path.join(buildDir, @platform)
 
   nwTests: ->
     @log("#nwTests")
@@ -270,19 +273,12 @@ class Platform
     @log("#updatePackages")
 
     new Promise (resolve, reject) =>
-      json = distDir + "/package.json"
+      json = @distDir("package.json")
       pkg  = fs.readJsonSync(json)
       pkg.env = "production"
 
-      ## publish a new version?
-      ## if yes then prompt to increment the package version number
-      ## display existing number + offer to increment by 1
-      inquirer.prompt @getQuestions(pkg.version), (answers) =>
-        ## set the new version if we're publishing!
-        ## update our own local package.json as well
-        if answers.publish
-          pkg.version = answers.version
-          @updateLocalPackageJson(answers.version)
+      finish = (version) =>
+        pkg.version = answers.version
 
         delete pkg.devDependencies
         delete pkg.bin
@@ -290,6 +286,22 @@ class Platform
         @writeJsonSync(json, pkg)
 
         resolve()
+
+      ## only ask to publish a new version if
+      ## we dont already have it set
+      if @options.version
+        finish(@options.version)
+      else
+        ## publish a new version?
+        ## if yes then prompt to increment the package version number
+        ## display existing number + offer to increment by 1
+        inquirer.prompt @getQuestions(pkg.version), (answers) =>
+          ## set the new version if we're publishing!
+          ## update our own local package.json as well
+          if answers.publish
+            @updateLocalPackageJson(answers.version)
+
+          finish(answers.version)
 
   npmInstall: ->
     @log("#npmInstall")
@@ -326,7 +338,7 @@ class Platform
     @log("#build")
 
     nw = new NwBuilder
-      files: distDir + "/**/*"
+      files: @distDir("/**/*")
       platforms: @platforms
       buildDir: buildDir
       version: "0.12.2"
@@ -431,7 +443,7 @@ class Platform
 
         resolve()
 
-  buildApp: (os) ->
+  buildApp: ->
     Promise.bind(@)
       .then(@cleanupPlatform)
       .then(@gulpBuild)
@@ -440,21 +452,22 @@ class Platform
       .then(@setVersion)
       .then(@convertToJs)
       .then(@obfuscate)
-      .then(@cleanupSrc)
-      .then(@build)
-      .then(@npmInstall)
+      # .then(@cleanupSrc)
+      # .then(@build)
+      # .then(@npmInstall)
       # .then(@codeSign)
 
   runTests: ->
-    return if @options.runTests is false
+    if @options.runTests is false
+      return Promise.resolve()
 
     Promise.bind(@).then(@nwTests)
 
   dist: ->
     @buildApp()
-      .then(@runTests)
-      .then(@cleanupDist)
-      .then(@zip)
+    #   .then(@runTests)
+    #   .then(@cleanupDist)
+    #   .then(@zip)
 
   fixture: (cb) ->
     @dist()
@@ -469,7 +482,7 @@ class Platform
 
   log: (msg, color = "yellow") ->
     return if process.env["NODE_ENV"] is "test"
-    console.log gutil.colors[color](msg)
+    console.log gutil.colors[color](msg), gutil.colors.bgWhite(gutil.colors.black(@platform))
 
   manifest: ->
     Promise.bind(@)
@@ -477,6 +490,13 @@ class Platform
       .then(@setVersion)
       .then(@updateS3Manifest)
       .then(@cleanupDist)
+
+  gulpBuild: ->
+    @log "gulpBuild"
+
+    new Promise (resolve, reject) ->
+      runSequence ["client:build", "nw:build"], (err) ->
+        if err then reject(err) else resolve()
 
   # deploy: ->
     # @dist()
@@ -492,19 +512,26 @@ class Platform
       #   console.log err
 
 class Osx64 extends Platform
-  gulpBuild: ->
-    new Promise (resolve, reject) ->
-      gulp.start(["client:build", "nw:build"]).then(resolve)
-
   deploy: ->
     @dist()
 
 class Linux64 extends Platform
   deploy: ->
     new Promise (resolve, reject) =>
-      vagrant.ssh "gulp dist --skip-tests", (err) ->
-        reject(err) if err
-        resolve()
+      ssh = ->
+        vagrant.ssh ["-c", "cd /vagrant && gulp dist --skip-tests"], (code) ->
+          if code isnt 0
+            reject("vagrant.ssh gulp dist failed!")
+          else
+            resolve()
+
+      vagrant.status (code) ->
+        if code isnt 0
+          vagrant.up (code) ->
+            reject("vagrant.up failed!") if code isnt 0
+            ssh()
+        else
+          ssh()
 
 module.exports = {
   Platform: Platform
@@ -536,8 +563,8 @@ module.exports = {
 
   cleanupEachPlatform: (platforms) ->
     Promise
-      .bind(@)
       .map(platforms, @cleanupPlatform)
+      .bind(@)
 
   buildPlatform: (platform, options) ->
     Platform = @[platform.slice(0, 1).toUpperCase() + platform.slice(1)]
@@ -548,17 +575,31 @@ module.exports = {
 
   deployEachPlatform: (platforms, options) ->
     Promise
+      .resolve(platforms)
       .bind(@)
-      .map(platforms, _.partialRight(@buildPlatform, options))
+      .map(_.partialRight(@buildPlatform, options))
 
   parseOptions: (argv) ->
-    # runTests
+    opts = {}
+    opts.runTests = false if "--skip-tests" in argv
+    opts
+
+  platform: ->
+    {
+      darwin: "osx64"
+      linux:  "linux64"
+    }[os.platform()] or throw new Error("OS Platform: '#{os.platform()}' not supported!")
+
+  cleanupDist: ->
+    # @log("#cleanupDist")
+
+    fs.removeAsync(distDir)
 
   dist: ->
-    platform = os.platform()
     options = @parseOptions(process.argv)
 
-    (new Platform(platform, options)).dist()
+    @cleanupDist().then =>
+      (new Platform(@platform(), options)).dist()
 
   deploy: (platform) ->
     ## read off the argv?

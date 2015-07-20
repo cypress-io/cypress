@@ -70,7 +70,8 @@
     "sinon-chai": "^2.7.0",
     "supertest": "^0.15.0",
     "supertest-session": "0.0.7",
-    "touch": "0.0.3"
+    "touch": "0.0.3",
+    "vagrant": "0.0.1"
   },
   "dependencies": {
     "bluebird": "2.9.27",

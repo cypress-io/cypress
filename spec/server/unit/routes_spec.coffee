@@ -251,7 +251,7 @@ describe "Routes", ->
             null
           .end(done)
 
-      it.only "can send back all tests", (done) ->
+      it "can send back all tests", (done) ->
         contents = removeWhitespace Fixtures.get("server/expected_all_tests_empty_inject.html")
 
         supertest(@app)
