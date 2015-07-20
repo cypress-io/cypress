@@ -1,4 +1,5 @@
-util = require("util")
+util         = require("util")
+SecretSauce  = require "./util/secret_sauce_loader"
 
 class Chromium
   util: util
