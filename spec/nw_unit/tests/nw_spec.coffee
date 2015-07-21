@@ -6,14 +6,25 @@
 ## with actually starting the REAL server as a forked
 ## process, instead of running as it is currently
 
+## because we run these tests during the /dist
+## process after obfuscation we no longer have
+## access to individual modules and must walk
+## back up to the root cypress-app dir and grab
+## them from there because process.cwd() still
+## matches wherever we're invoking this file from
+lookup = (path) ->
+  try
+    require(path)
+  catch e
+    require("../../#{path}")
+
 root = "../../../"
 
 Promise      = require("bluebird")
 chai         = require("chai")
 fs           = require("fs")
-# Cypress      = require("#{root}lib/cypress")
-cache        = require("#{root}lib/cache")
-Log          = require("#{root}lib/log")
+cache        = lookup("#{root}lib/cache")
+Log          = lookup("#{root}lib/log")
 sinon        = require("sinon")
 sinonChai    = require("sinon-chai")
 sinonPromise = require("sinon-as-promised")
@@ -91,7 +102,7 @@ module.exports = (parentWindow, gui, loadApp) ->
         fs.writeFileSync @todos + "/cypress.json", "{'foo': 'bar}"
         @$("#projects-container .project").click()
 
-        Promise.delay(100).then =>
+        Promise.delay(1000).then =>
           project = @$("#project")
           expect(project.find("p.text-danger")).to.contain("Could not start server!")
           expect(project.find("p.bg-danger")).to.contain("Error reading from")
