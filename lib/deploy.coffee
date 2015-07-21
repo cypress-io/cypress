@@ -84,6 +84,7 @@ class Platform
           copy("./lib/controllers",         "/src/lib/controllers")
           copy("./lib/util",                "/src/lib/util")
           copy("./lib/routes",              "/src/lib/routes")
+          copy("./lib/sauce",               "/src/lib/sauce")
           copy("./lib/cache.coffee",        "/src/lib/cache.coffee")
           copy("./lib/id_generator.coffee", "/src/lib/id_generator.coffee")
           copy("./lib/keys.coffee",         "/src/lib/keys.coffee")
