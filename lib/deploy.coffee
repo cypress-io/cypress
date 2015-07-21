@@ -40,12 +40,9 @@ class Platform
     # @zip              = "cypress.zip"
 
   getVersion: ->
-    @options.version ? throw new Error("Platform#version was not defined!")
-
-  setVersion: ->
-    @log("#setVersion")
-
-    @options.version = fs.readJsonSync(@distDir("package.json")).version
+    @options.version ?
+      fs.readJsonSync("./package.json").version ?
+          throw new Error("Platform#version was not defined!")
 
   getPublisher: ->
     aws = fs.readJsonSync("./support/aws-credentials.json")
@@ -66,6 +63,7 @@ class Platform
 
     fs
       .removeAsync(@distDir())
+      .bind(@)
       .then ->
         fs.ensureDirAsync(@distDir())
       .then ->
@@ -100,11 +98,14 @@ class Platform
           copy("./lib/exception.coffee",    "/src/lib/exception.coffee")
           copy("./lib/chromium.coffee",     "/src/lib/chromium.coffee")
 
+          ## copy nw_spec files
+          copy("./spec")
+
+          ## copy bower components for testing
+          copy("./bower_components")
+
         ]
       .all()
-      .then ->
-        fs.removeAsync(@distDir("/spec/server/unit/deploy_spec.coffee"))
-      .bind(@)
 
   convertToJs: ->
     @log("#convertToJs")
@@ -119,7 +120,7 @@ class Platform
         .on "error", reject
 
   distDir: (src) ->
-    args = _.compact distDir, @package, src
+    args = _.compact [distDir, @platform, src]
     path.join args...
 
   obfuscate: ->
@@ -136,7 +137,7 @@ class Platform
       opts = {root: @distDir("src"), entry: @distDir("src/lib/cypress.js"), files: files}
 
       obfuscator = require('obfuscator').obfuscator
-      obfuscator opts, (err, obfuscated) ->
+      obfuscator opts, (err, obfuscated) =>
         return reject(err) if err
 
         ## move to lib
@@ -144,34 +145,44 @@ class Platform
 
         resolve(obfuscated)
 
+  cleanupSpec: ->
+    @log("#cleanupSpec")
+
+    fs.removeAsync @distDir("/spec")
+
   cleanupSrc: ->
     @log("#cleanupSrc")
 
-    fs.removeAsync(distDir + "/src")
+    fs.removeAsync @distDir("/src")
+
+  cleanupBc: ->
+    @log("#cleanupBc")
+
+    fs.removeAsync @distDir("/bower_components")
 
   cleanupPlatform: ->
     @log("#cleanupPlatform")
 
     fs.removeAsync path.join(buildDir, @platform)
 
+  runTests: ->
+    if @options.runTests is false
+      return Promise.resolve()
+
+    Promise.bind(@).then(@nwTests)
+
   nwTests: ->
     @log("#nwTests")
-
-    @version ?= @setVersion()
-
-    ## make sure we are testing the BUILT app and not our dist
-    ## this tests to ensure secret_sauce.bin along with obfuscated js
-    ## and newly built node_modules are all working
-    indexPath = path.join "..", "..", "build", @getVersion(), "osx64", "cypress.app", "Contents", "Resources", "app.nw", "nw", "public", "index.html"
 
     new Promise (resolve, reject) =>
       retries = 0
 
-      nwTests = ->
+      nwTests = =>
         retries += 1
 
-        tests = "node_modules/.bin/nw ./spec/nw_unit --headless --index=#{indexPath}"
-        child_process.exec tests, (err, stdout, stderr) ->
+        tests = "../../node_modules/.bin/nw ./spec/nw_unit --headless"# --index=#{indexPath}"
+        child_process.exec tests, {cwd: @distDir()}, (err, stdout, stderr) =>
+        # child_process.spawn "../../node_modules/.bin/nw", ["./spec/nw_unit", "--headless"], {cwd: @distDir(), stdio: "inherit"}, (err, stdout, stderr) ->
           console.log "err", err
           console.log "stdout", stdout
           console.log "stderr", stderr
@@ -187,10 +198,12 @@ class Platform
             console.log gutil.colors.red("'nwTests' failed, retrying")
             nwTests()
 
-          fs.readJsonAsync("./spec/results.json")
+          results = @distDir("spec/results.json")
+
+          fs.readJsonAsync(results)
             .then (failures) ->
               if failures is 0
-                fs.removeSync("./spec/results.json")
+                fs.removeSync(results)
 
                 console.log gutil.colors.green("'nwTests' passed with #{failures} failures")
                 resolve()
@@ -200,28 +213,14 @@ class Platform
 
       nwTests()
 
-  # runTests: ->
-  #   new Promise (resolve, reject) ->
-  #     ## change into our distDir as process.cwd()
-  #     process.chdir(distDir)
-
-  #     ## require cypress to get the require path's cached
-  #     require(distDir + "/lib/cypress")
-
-  #     ## run all of our tests
-  #     gulp.src(distDir + "/spec/server/unit/**/*")
-  #       .pipe $.mocha()
-  #       .on "error", reject
-  #       .on "end", resolve
-
-  zipPlatform: (platform) ->
-    @log("#zipPlatform: #{platform}")
+  zip: ->
+    @log("#zip")
 
     ## change this to something manual if you're using
     ## the task: gulp dist:zip
     version = @getVersion()
 
-    root = "#{buildDir}/#{version}/#{platform}"
+    root = "#{buildDir}/#{version}/#{@platform}"
 
     new Promise (resolve, reject) =>
       zip = "ditto -c -k --sequesterRsrc --keepParent #{root}/cypress.app #{root}/#{@zip}"
@@ -230,95 +229,37 @@ class Platform
 
         resolve()
 
-  zipPlatforms: ->
-    @log("#zipPlatforms")
-
-    Promise.all _.map(@platforms, _.bind(@zipPlatform, @))
-
-  getQuestions: (version) ->
-    [{
-      name: "publish"
-      type: "list"
-      message: "Publish a new version? (currently: #{version})"
-      choices: [{
-        name: "Yes: set a new version and update remote manifest."
-        value: true
-      },{
-        name: "No:  just override the current deploy’ed version."
-        value: false
-      }]
-    },{
-      name: "version"
-      type: "input"
-      message: "Bump version to...? (currently: #{version})"
-      default: ->
-        a = version.split(".")
-        v = a[a.length - 1]
-        v = Number(v) + 1
-        a.splice(a.length - 1, 1, v)
-        a.join(".")
-      when: (answers) ->
-        answers.publish
-    }]
-
-  updateLocalPackageJson: (version) ->
-    json = fs.readJsonSync("./package.json")
-    json.version = version
-    @writeJsonSync("./package.json", json)
-
-  writeJsonSync: (path, obj) ->
-    fs.writeJsonSync(path, obj, null, 2)
-
   ## add tests around this method
-  updatePackages: ->
-    @log("#updatePackages")
+  updatePackage: ->
+    @log("#updatePackage")
 
-    new Promise (resolve, reject) =>
-      json = @distDir("package.json")
-      pkg  = fs.readJsonSync(json)
-      pkg.env = "production"
+    version = @options.version
 
-      finish = (version) =>
-        pkg.version = answers.version
+    fs.readJsonAsync(@distDir("package.json")).then (json) =>
+      json.env = "production"
+      json.version = version if version
+      json.scripts = {}
 
-        delete pkg.devDependencies
-        delete pkg.bin
+      delete json.devDependencies
+      delete json.bin
 
-        @writeJsonSync(json, pkg)
-
-        resolve()
-
-      ## only ask to publish a new version if
-      ## we dont already have it set
-      if @options.version
-        finish(@options.version)
-      else
-        ## publish a new version?
-        ## if yes then prompt to increment the package version number
-        ## display existing number + offer to increment by 1
-        inquirer.prompt @getQuestions(pkg.version), (answers) =>
-          ## set the new version if we're publishing!
-          ## update our own local package.json as well
-          if answers.publish
-            @updateLocalPackageJson(answers.version)
-
-          finish(answers.version)
+      fs.writeJsonAsync(@distDir("package.json"), json)
 
   npmInstall: ->
     @log("#npmInstall")
 
-    new Promise (resolve, reject) ->
+    new Promise (resolve, reject) =>
       attempts = 0
 
-      pathToPackageDir = _.once ->
+      # pathToPackageDir = _.once =>
         ## return the path to the directory containing the package.json
-        packages = glob.sync(buildDir + "/**/package.json", {nodir: true})
-        path.dirname(packages[0])
+        # packages = glob.sync(@distDir("package.json"), {nodir: true})
+        # path.dirname(packages[0])
 
-      npmInstall = ->
+      npmInstall = =>
         attempts += 1
 
-        child_process.exec "npm install --production", {cwd: pathToPackageDir()}, (err, stdout, stderr) ->
+        child_process.exec "npm install --production", {cwd: @distDir()}, (err, stdout, stderr) ->
           if err
             if attempts is 3
               fs.writeFileSync("./npm-install.log", stderr)
@@ -329,7 +270,7 @@ class Platform
 
           ## promise-semaphore has a weird '/'' file which causes zipping to bomb
           ## so we must remove that file!
-          fs.removeSync(pathToPackageDir() + "/node_modules/promise-semaphore/\\")
+          # fs.removeSync(pathToPackageDir() + "/node_modules/promise-semaphore/\\")
 
           resolve()
 
@@ -340,7 +281,7 @@ class Platform
 
     nw = new NwBuilder
       files: @distDir("/**/*")
-      platforms: @platforms
+      platforms: [@platform]
       buildDir: buildDir
       version: "0.12.2"
       buildType: => @getVersion()
@@ -431,44 +372,30 @@ class Platform
           .on "error", reject
           .on "end", resolve
 
-  codeSign: ->
-    @log("#codeSign")
+  cleanupDist: ->
+    @log("#cleanupDist")
 
-    appPath = path.join buildDir, @getVersion(), "osx64", "cypress.app"
+    fs.removeAsync(@distDir())
 
-    new Promise (resolve, reject) ->
-      child_process.exec "sh ./support/codesign.sh #{appPath}", (err, stdout, stderr) ->
-        return reject(err) if err
-
-        # console.log "stdout is", stdout
-
-        resolve()
-
-  buildApp: ->
+  dist: ->
     Promise.bind(@)
       .then(@cleanupPlatform)
       .then(@gulpBuild)
       .then(@copyFiles)
-      .then(@updatePackages)
-      .then(@setVersion)
+      .then(@updatePackage)
       .then(@convertToJs)
       .then(@obfuscate)
-      # .then(@cleanupSrc)
+      .then(@cleanupSrc)
+      .then(@npmInstall)
+      .then(@runTests)
+      .then(@cleanupSpec)
+      .then(@cleanupDist)
+      .then(@cleanupBc)
       # .then(@build)
-      # .then(@npmInstall)
       # .then(@codeSign)
-
-  runTests: ->
-    if @options.runTests is false
-      return Promise.resolve()
-
-    Promise.bind(@).then(@nwTests)
-
-  dist: ->
-    @buildApp()
-    #   .then(@runTests)
-    #   .then(@cleanupDist)
-    #   .then(@zip)
+      # .then(@runSmokeTest)
+      # .then(@zip)
+      # .then(@runZippedSmokeTest)
 
   fixture: (cb) ->
     @dist()
@@ -513,10 +440,26 @@ class Platform
       #   console.log err
 
 class Osx64 extends Platform
+  codeSign: ->
+    @log("#codeSign")
+
+    appPath = path.join buildDir, @getVersion(), "osx64", "cypress.app"
+
+    new Promise (resolve, reject) ->
+      child_process.exec "sh ./support/codesign.sh #{appPath}", (err, stdout, stderr) ->
+        return reject(err) if err
+
+        # console.log "stdout is", stdout
+
+        resolve()
+
   deploy: ->
     @dist()
 
 class Linux64 extends Platform
+  codeSign: ->
+    Promise.resolve()
+
   deploy: ->
     new Promise (resolve, reject) =>
       ssh = ->
@@ -538,6 +481,49 @@ module.exports = {
   Platform: Platform
   Osx64: Osx64
   Linux64: Linux64
+
+  getQuestions: (version) ->
+    [{
+      name: "publish"
+      type: "list"
+      message: "Publish a new version? (currently: #{version})"
+      choices: [{
+        name: "Yes: set a new version and update remote manifest."
+        value: true
+      },{
+        name: "No:  just override the current deploy’ed version."
+        value: false
+      }]
+    },{
+      name: "version"
+      type: "input"
+      message: "Bump version to...? (currently: #{version})"
+      default: ->
+        a = version.split(".")
+        v = a[a.length - 1]
+        v = Number(v) + 1
+        a.splice(a.length - 1, 1, v)
+        a.join(".")
+      when: (answers) ->
+        answers.publish
+    }]
+
+  updateLocalPackageJson: (version, json) ->
+    json ?= fs.readJsonSync("./package.json")
+    json.version = version
+    fs.writeJsonAsync("./package.json", json)
+
+  askDeployNewVersion: ->
+    new Promise (resolve, reject) =>
+      fs.readJsonAsync("./package.json").then (json) =>
+        inquirer.prompt @getQuestions(json.version), (answers) =>
+          ## set the new version if we're publishing!
+          ## update our own local package.json as well
+          if answers.publish
+            @updateLocalPackageJson(answers.version, json).then ->
+              resolve(answers.version)
+          else
+            resolve(json.version)
 
   getPlatformsQuestion: ->
     [{
@@ -578,7 +564,8 @@ module.exports = {
     Promise
       .resolve(platforms)
       .bind(@)
-      .map(_.partialRight(@buildPlatform, options))
+      .map (platform) ->
+        @buildPlatform(platform, options)
 
   parseOptions: (argv) ->
     opts = {}
@@ -596,6 +583,11 @@ module.exports = {
 
     fs.removeAsync(distDir)
 
+  runTests: ->
+    options = @parseOptions(process.argv)
+
+    (new Platform(@platform(), options)).runTests()
+
   dist: ->
     options = @parseOptions(process.argv)
 
@@ -607,15 +599,18 @@ module.exports = {
     options = @parseOptions(process.argv)
 
     deploy = (platforms) =>
-      @deployEachPlatform(platforms, options)
-        .then(@uploadsToS3)
-        .then(@updateS3Manifest)
-        .then(@cleanupEachPlatform)
-        .then ->
-          console.log("Dist Complete")
-        .catch (err) ->
-          console.log("Dist Failed")
-          console.log(err)
+      @askDeployNewVersion()
+        .then (version) =>
+          options.version = version
+          @deployEachPlatform(platforms, options)
+        # .then(@uploadsToS3)
+        # .then(@updateS3Manifest)
+        # .then(@cleanupEachPlatform)
+        # .then ->
+        #   console.log("Dist Complete")
+        # .catch (err) ->
+        #   console.log("Dist Failed")
+        #   console.log(err)
 
     if platform
       return deploy(platform)
