@@ -27,6 +27,7 @@ require path.join(process.cwd(), "gulpfile.coffee")
 distDir   = path.join(process.cwd(), "dist")
 buildDir  = path.join(process.cwd(), "build")
 platforms = ["osx64", "linux64"]
+zipName   = "cypress.zip"
 
 log = (msg, color = "yellow") ->
   return if process.env["NODE_ENV"] is "test"
@@ -40,7 +41,6 @@ class Platform
       publisher:        null
       publisherOptions: {}
       platform:         @platform
-      zip:              "cypress.zip"
 
   getVersion: ->
     @options.version ?
@@ -277,48 +277,10 @@ class Platform
 
     @uploadToS3("osx64", "fixture")
 
-  createRemoteManifest: ->
-    ## this isnt yet taking into account the os
-    ## because we're only handling mac right now
-    getUrl = (os) =>
-      {
-        url: [config.app.s3.path, config.app.s3.bucket, @version, os, @zip].join("/")
-      }
-
-    obj = {
-      name: "cypress"
-      version: @getVersion()
-      packages: {
-        mac: getUrl("osx64")
-        win: getUrl("win64")
-        linux64: getUrl("linux64")
-      }
-    }
-
-    src = "#{buildDir}/manifest.json"
-    fs.outputJsonAsync(src, obj).return(src)
-
   getManifest: ->
     url = [config.app.s3.path, config.app.s3.bucket, "manifest.json"].join("/")
     request(url).then (resp) ->
       console.log resp
-
-  updateS3Manifest: ->
-    @log("#updateS3Manifest")
-
-    publisher = @getPublisher()
-    options = @publisherOptions
-
-    headers = {}
-    headers["Cache-Control"] = "no-cache"
-
-    new Promise (resolve, reject) =>
-      @createRemoteManifest().then (src) ->
-        gulp.src(src)
-          .pipe publisher.publish(headers, options)
-          .pipe $.awspublish.reporter()
-          .on "error", reject
-          .on "end", resolve
 
   cleanupDist: ->
     @log("#cleanupDist")
@@ -594,7 +556,7 @@ module.exports = {
     root = "#{buildDir}/#{options.version}/#{platform}"
 
     new Promise (resolve, reject) =>
-      zip = "ditto -c -k --sequesterRsrc --keepParent #{root}/#{appName} #{root}/#{options.zip}"
+      zip = "ditto -c -k --sequesterRsrc --keepParent #{root}/#{appName} #{root}/#{zipName}"
       child_process.exec zip, {}, (err, stdout, stderr) ->
         return reject(err) if err
 
@@ -626,14 +588,14 @@ module.exports = {
     log.call(options, "#uploadToS3")
 
     new Promise (resolve, reject) =>
-      {publisherOptions, version, zip} = options
+      {publisherOptions, version} = options
 
       publisher = @getPublisher()
 
       headers = {}
       headers["Cache-Control"] = "no-cache"
 
-      gulp.src("#{buildDir}/#{version}/#{platform}/#{zip}")
+      gulp.src("#{buildDir}/#{version}/#{platform}/#{zipName}")
         .pipe $.rename (p) =>
           p.dirname = @getUploadDirName(version, platform, override)
           p
@@ -644,6 +606,9 @@ module.exports = {
 
   cleanupDist: ->
     fs.removeAsync(distDir)
+
+  cleanupBuild: ->
+    fs.removeAsync(buildDir)
 
   runTests: ->
     @getPlatform().runTests()
@@ -658,7 +623,69 @@ module.exports = {
     @cleanupDist().then =>
       @getPlatform(null).dist()
 
+  getReleases: (releases) ->
+    [{
+      name: "release"
+      type: "list"
+      message: "Release which version?"
+      choices: _.map releases, (r) ->
+        {
+          name: r
+          value: r
+        }
+    }]
+
+  createRemoteManifest: (version) ->
+    ## this isnt yet taking into account the os
+    ## because we're only handling mac right now
+    getUrl = (os) =>
+      {
+        url: [config.app.s3.path, config.app.s3.bucket, version, os, zipName].join("/")
+      }
+
+    obj = {
+      name: "cypress"
+      version: version
+      packages: {
+        mac: getUrl("osx64")
+        win: getUrl("win64")
+        linux64: getUrl("linux64")
+      }
+    }
+
+    src = "#{buildDir}/manifest.json"
+    fs.outputJsonAsync(src, obj).return(src)
+
+  updateS3Manifest: (version) ->
+    publisher = @getPublisher()
+    options = @publisherOptions
+
+    headers = {}
+    headers["Cache-Control"] = "no-cache"
+
+    new Promise (resolve, reject) =>
+      @createRemoteManifest(version).then (src) ->
+        gulp.src(src)
+          .pipe publisher.publish(headers, options)
+          .pipe $.awspublish.reporter()
+          .on "error", reject
+          .on "end", resolve
+
   release: ->
+    new Promise (resolve, reject) =>
+      releases = glob.sync("*", {cwd: buildDir})
+
+      inquirer.prompt @getReleases(releases), (answers) =>
+        @updateS3Manifest(answers.release)
+          .bind(@)
+          .then(@cleanupDist)
+          .then(@cleanupBuild)
+          .then ->
+            console.log("Release Complete")
+          .catch (err) ->
+            console.log("Release Failed")
+            console.log(err)
+          .then(resolve)
 
   deploy: (platform) ->
     ## read off the argv?
@@ -671,14 +698,11 @@ module.exports = {
           @deployPlatform(platform, options).then =>
             @zip(platform, options).then =>
               @uploadToS3(platform, options)
-        # .then(@uploadsToS3)
-        # .then(@updateS3Manifest)
-        # .then(@cleanupEachPlatform)
-        # .then ->
-        #   console.log("Dist Complete")
-        # .catch (err) ->
-        #   console.log("Dist Failed")
-        #   console.log(err)
+              .then ->
+                console.log("Dist Complete")
+              .catch (err) ->
+                console.log("Dist Failed")
+                console.log(err)
 
     if platform
       return deploy(platform)
