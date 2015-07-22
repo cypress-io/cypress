@@ -213,22 +213,6 @@ class Platform
 
       nwTests()
 
-  zip: ->
-    @log("#zip")
-
-    ## change this to something manual if you're using
-    ## the task: gulp dist:zip
-    version = @getVersion()
-
-    root = "#{buildDir}/#{version}/#{@platform}"
-
-    new Promise (resolve, reject) =>
-      zip = "ditto -c -k --sequesterRsrc --keepParent #{root}/cypress.app #{root}/#{@zip}"
-      child_process.exec zip, {}, (err, stdout, stderr) ->
-        return reject(err) if err
-
-        resolve()
-
   ## add tests around this method
   updatePackage: ->
     @log("#updatePackage")
@@ -276,8 +260,8 @@ class Platform
 
       npmInstall()
 
-  build: ->
-    @log("#build")
+  nwBuilder: ->
+    @log("#nwBuilder")
 
     nw = new NwBuilder
       files: @distDir("/**/*")
@@ -377,7 +361,7 @@ class Platform
 
     fs.removeAsync(@distDir())
 
-  dist: ->
+  build: ->
     Promise.bind(@)
       .then(@cleanupPlatform)
       .then(@gulpBuild)
@@ -387,13 +371,17 @@ class Platform
       .then(@obfuscate)
       .then(@cleanupSrc)
       .then(@npmInstall)
+
+  dist: ->
+    Promise.bind(@)
+      .then(@build)
       .then(@runTests)
       .then(@cleanupSpec)
-      .then(@cleanupDist)
       .then(@cleanupBc)
-      # .then(@build)
-      # .then(@codeSign)
-      # .then(@runSmokeTest)
+      .then(@nwBuilder)
+      .then(@codeSign)
+      .then(@cleanupDist)
+      .then(@runSmokeTest)
       # .then(@zip)
       # .then(@runZippedSmokeTest)
 
@@ -440,10 +428,28 @@ class Platform
       #   console.log err
 
 class Osx64 extends Platform
+  runSmokeTest: ->
+    @log("#runSmokeTest")
+
+    appPath = path.join buildDir, @getVersion(), @platform, "cypress.app", "Contents", "MacOS", "nwjs"
+
+    new Promise (resolve, reject) ->
+      rand = "" + Math.random()
+
+      child_process.exec "#{appPath} --smoke-test --ping=#{rand}", {stdio: "inherit"}, (err, stdout, stderr) ->
+        stdout = stdout.replace(/\s/, "")
+
+        return reject(err) if err
+
+        if stdout isnt rand
+          reject("Stdout: '#{stdout}' did not match the random number: '#{rand}'")
+        else
+          resolve()
+
   codeSign: ->
     @log("#codeSign")
 
-    appPath = path.join buildDir, @getVersion(), "osx64", "cypress.app"
+    appPath = path.join buildDir, @getVersion(), @platform, "cypress.app"
 
     new Promise (resolve, reject) ->
       child_process.exec "sh ./support/codesign.sh #{appPath}", (err, stdout, stderr) ->
@@ -553,19 +559,43 @@ module.exports = {
       .map(platforms, @cleanupPlatform)
       .bind(@)
 
-  buildPlatform: (platform, options) ->
+  deployPlatform: (platform, options) ->
+    @getPlatform(platform, options).deploy()
+
+  getPlatform: (platform, options) ->
+    platform ?= @platform()
+
     Platform = @[platform.slice(0, 1).toUpperCase() + platform.slice(1)]
 
     throw new Error("Platform: '#{platform}' not found") if not Platform
 
-    (new Platform(platform, options)).deploy()
+    options ?= @parseOptions(process.argv)
+
+    (new Platform(platform, options))
+
+  zip: (platform, options) ->
+    root = "#{buildDir}/#{options.version}/#{platform}"
+
+    new Promise (resolve, reject) =>
+      zip = "ditto -c -k --sequesterRsrc --keepParent #{root}/cypress.app #{root}/#{options.zip}"
+      child_process.exec zip, {}, (err, stdout, stderr) ->
+        return reject(err) if err
+
+        resolve()
+
+  zipEachPlatform: (platforms, options) ->
+    Promise
+      .resolve(platforms)
+      .bind(@)
+      .map (platform) ->
+        @zip(platform, options)
 
   deployEachPlatform: (platforms, options) ->
     Promise
       .resolve(platforms)
       .bind(@)
       .map (platform) ->
-        @buildPlatform(platform, options)
+        @deployPlatform(platform, options)
 
   parseOptions: (argv) ->
     opts = {}
@@ -584,15 +614,17 @@ module.exports = {
     fs.removeAsync(distDir)
 
   runTests: ->
-    options = @parseOptions(process.argv)
+    @getPlatform().runTests()
 
-    (new Platform(@platform(), options)).runTests()
+  runSmokeTest: ->
+    @getPlatform().runSmokeTest()
+
+  build: ->
+    @getPlatform().build()
 
   dist: ->
-    options = @parseOptions(process.argv)
-
     @cleanupDist().then =>
-      (new Platform(@platform(), options)).dist()
+      @getPlatform(null).dist()
 
   deploy: (platform) ->
     ## read off the argv?
@@ -603,6 +635,8 @@ module.exports = {
         .then (version) =>
           options.version = version
           @deployEachPlatform(platforms, options)
+          .then =>
+            @zipEachPlatform(platforms, options)
         # .then(@uploadsToS3)
         # .then(@updateS3Manifest)
         # .then(@cleanupEachPlatform)
