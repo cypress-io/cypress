@@ -12,8 +12,9 @@
   parseArgv = (options) ->
     _.defaults options,
       env: process.env["NODE_ENV"]
-      debug:    "--debug"    in options.argv
-      updating: "--updating" in options.argv
+      debug:     "--debug"      in options.argv
+      updating:  "--updating"   in options.argv
+      smokeTest: "--smoke-test" in options.argv
       coords: parseCoords(options.argv)
 
     if "-P" in options.argv
@@ -23,6 +24,9 @@
       _.extend options,
         appPath:  options.argv[0]
         execPath: options.argv[1]
+
+    if options.smokeTest
+      options.pong = options.argv[1].split("=")[1]
 
     return options
 
@@ -51,6 +55,13 @@
 
     ## our config + updater are ready
     App.vent.trigger "app:entities:ready", App
+
+    ## if we are in smokeTest mode
+    ## then just output the pong's value
+    ## and exit
+    if options.smokeTest
+      process.stdout.write(options.pong + "\n")
+      process.exit()
 
     ## if we are updating then do not start the app
     ## or display any UI. just finish installing the updates
