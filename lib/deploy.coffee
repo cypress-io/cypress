@@ -14,8 +14,11 @@ request        = require("request-promise")
 os             = require("os")
 vagrant        = require("vagrant")
 runSequence    = require("run-sequence")
+Xvfb           = require("xvfb")
 
 vagrant.debug = true
+["rsync", "rsync-auto", "rsync-back"].forEach (cmd) ->
+  vagrant[cmd] = vagrant._runWithArgs(cmd)
 
 fs = Promise.promisifyAll(fs)
 
@@ -25,6 +28,10 @@ distDir   = path.join(process.cwd(), "dist")
 buildDir  = path.join(process.cwd(), "build")
 platforms = ["osx64", "linux64"]
 
+log = (msg, color = "yellow") ->
+  return if process.env["NODE_ENV"] is "test"
+  console.log gutil.colors[color](msg), gutil.colors.bgWhite(gutil.colors.black(@platform))
+
 class Platform
   constructor: (@platform, @options = {}) ->
     _.defaults @options,
@@ -32,25 +39,13 @@ class Platform
       version:          null
       publisher:        null
       publisherOptions: {}
+      platform:         @platform
       zip:              "cypress.zip"
-
-    # @version          = null
-    # @publisher        = null
-    # @publisherOptions = {}
-    # @zip              = "cypress.zip"
 
   getVersion: ->
     @options.version ?
       fs.readJsonSync("./package.json").version ?
           throw new Error("Platform#version was not defined!")
-
-  getPublisher: ->
-    aws = fs.readJsonSync("./support/aws-credentials.json")
-
-    @publisher ?= $.awspublish.create
-      bucket:          config.app.s3.bucket
-      accessKeyId:     aws.key
-      secretAccessKey: aws.secret
 
   copyFiles: ->
     @log("#copyFiles")
@@ -267,46 +262,15 @@ class Platform
       files: @distDir("/**/*")
       platforms: [@platform]
       buildDir: buildDir
-      version: "0.12.2"
       buildType: => @getVersion()
+      appName: "Cypress"
+      version: "0.12.2"
       macIcns: "nw/public/img/cypress.icns"
       # macZip: true
 
     nw.on "log", console.log
 
     nw.build()
-
-  getUploadDirName: (version, platform, override) ->
-    (override or (version + "/" + platform)) + "/"
-
-  uploadToS3: (platform, override) ->
-    @log("#uploadToS3: #{platform}")
-
-    new Promise (resolve, reject) =>
-
-      publisher = @getPublisher()
-      options = @publisherOptions
-
-      headers = {}
-      headers["Cache-Control"] = "no-cache"
-
-      version = @getVersion()
-
-      gulp.src("#{buildDir}/#{version}/#{platform}/#{@zip}")
-        .pipe $.rename (p) =>
-          p.dirname = @getUploadDirName(version, platform, override)
-          p
-        .pipe publisher.publish(headers, options)
-        .pipe $.awspublish.reporter()
-        .on "error", reject
-        .on "end", resolve
-
-  uploadsToS3: (dirname) ->
-    @log("#uploadsToS3")
-
-    uploadToS3 = _.partialRight(@uploadToS3, dirname)
-
-    Promise.all _.map(@platforms, _.bind(uploadToS3, @))
 
   uploadFixtureToS3: ->
     @log("#uploadFixtureToS3")
@@ -382,8 +346,6 @@ class Platform
       .then(@codeSign)
       .then(@cleanupDist)
       .then(@runSmokeTest)
-      # .then(@zip)
-      # .then(@runZippedSmokeTest)
 
   fixture: (cb) ->
     @dist()
@@ -396,9 +358,8 @@ class Platform
         @log("Fixture Failed!", "red")
         console.log err
 
-  log: (msg, color = "yellow") ->
-    return if process.env["NODE_ENV"] is "test"
-    console.log gutil.colors[color](msg), gutil.colors.bgWhite(gutil.colors.black(@platform))
+  log: ->
+    log.apply(@, arguments)
 
   manifest: ->
     Promise.bind(@)
@@ -414,6 +375,22 @@ class Platform
       runSequence ["client:build", "nw:build"], (err) ->
         if err then reject(err) else resolve()
 
+  runSmokeTest: ->
+    @log("#runSmokeTest")
+
+    new Promise (resolve, reject) =>
+      rand = "" + Math.random()
+
+      child_process.exec "#{@buildPathToApp()} --smoke-test --ping=#{rand}", {stdio: "inherit"}, (err, stdout, stderr) ->
+        stdout = stdout.replace(/\s/, "")
+
+        return reject(err) if err
+
+        if stdout isnt rand
+          reject("Stdout: '#{stdout}' did not match the random number: '#{rand}'")
+        else
+          resolve()
+
   # deploy: ->
     # @dist()
     # @distEachVersion()
@@ -428,28 +405,13 @@ class Platform
       #   console.log err
 
 class Osx64 extends Platform
-  runSmokeTest: ->
-    @log("#runSmokeTest")
-
-    appPath = path.join buildDir, @getVersion(), @platform, "cypress.app", "Contents", "MacOS", "nwjs"
-
-    new Promise (resolve, reject) ->
-      rand = "" + Math.random()
-
-      child_process.exec "#{appPath} --smoke-test --ping=#{rand}", {stdio: "inherit"}, (err, stdout, stderr) ->
-        stdout = stdout.replace(/\s/, "")
-
-        return reject(err) if err
-
-        if stdout isnt rand
-          reject("Stdout: '#{stdout}' did not match the random number: '#{rand}'")
-        else
-          resolve()
+  buildPathToApp: ->
+    path.join buildDir, @getVersion(), @platform, "Cypress.app", "Contents", "MacOS", "nwjs"
 
   codeSign: ->
     @log("#codeSign")
 
-    appPath = path.join buildDir, @getVersion(), @platform, "cypress.app"
+    appPath = path.join buildDir, @getVersion(), @platform, "Cypress.app"
 
     new Promise (resolve, reject) ->
       child_process.exec "sh ./support/codesign.sh #{appPath}", (err, stdout, stderr) ->
@@ -463,25 +425,75 @@ class Osx64 extends Platform
     @dist()
 
 class Linux64 extends Platform
+  buildPathToApp: ->
+    path.join buildDir, @getVersion(), @platform, "Cypress", "Cypress"
+
   codeSign: ->
     Promise.resolve()
 
-  deploy: ->
-    new Promise (resolve, reject) =>
-      ssh = ->
-        vagrant.ssh ["-c", "cd /vagrant && gulp dist --skip-tests"], (code) ->
-          if code isnt 0
-            reject("vagrant.ssh gulp dist failed!")
-          else
-            resolve()
+  runSmokeTest: ->
+    xvfb = new Xvfb()
+    xvfb.startSync()
+    super.then ->
+      xvfb.stopSync()
 
-      vagrant.status (code) ->
+  nwBuilder: ->
+    src    = path.join(buildDir, @getVersion(), @platform)
+    dest   = path.join(buildDir, @getVersion(), "Cypress")
+    mvDest = path.join(buildDir, @getVersion(), @platform, "Cypress")
+
+    super.then ->
+      fs.renameAsync(src, dest).then ->
+        fs.ensureDirAsync(src).then ->
+          fs.moveAsync(dest, mvDest, {clobber: true})
+
+  npm: ->
+    new Promise (resolve, reject) ->
+      vagrant.ssh ["-c", "cd /cypress-app && npm install"], (code) ->
         if code isnt 0
-          vagrant.up (code) ->
-            reject("vagrant.up failed!") if code isnt 0
-            ssh()
+          reject("vagrant.rsync failed!")
         else
-          ssh()
+          resolve()
+
+  rsync: ->
+    new Promise (resolve, reject) ->
+      vagrant.rsync (code) ->
+        if code isnt 0
+          reject("vagrant.rsync failed!")
+        else
+          resolve()
+
+  rsyncBack: ->
+    new Promise (resolve, reject) ->
+      vagrant["rsync-back"] (code) ->
+        if code isnt 0
+          reject("vagrant.rsync-back failed!")
+        else
+          resolve()
+
+  deploy: ->
+    deploy = =>
+      new Promise (resolve, reject) =>
+        ssh = ->
+          vagrant.ssh ["-c", "cd /cypress-app && gulp dist --skip-tests"], (code) ->
+            if code isnt 0
+              reject("vagrant.ssh gulp dist failed!")
+            else
+              resolve()
+
+        vagrant.status (code) ->
+          if code isnt 0
+            vagrant.up (code) ->
+              reject("vagrant.up failed!") if code isnt 0
+              ssh()
+          else
+            ssh()
+
+    @rsync()
+      .bind(@)
+      .then(@npm)
+      .then(deploy)
+      .then(@rsyncBack)
 
 module.exports = {
   Platform: Platform
@@ -526,31 +538,29 @@ module.exports = {
           ## set the new version if we're publishing!
           ## update our own local package.json as well
           if answers.publish
-            @updateLocalPackageJson(answers.version, json).then ->
-              resolve(answers.version)
+            # @updateLocalPackageJson(answers.version, json).then ->
+            resolve(answers.version)
           else
             resolve(json.version)
 
-  getPlatformsQuestion: ->
+  getPlatformQuestion: ->
     [{
-      name: "platforms"
-      type: "checkbox"
-      message: "Which OS's should we deploy?"
+      name: "platform"
+      type: "list"
+      message: "Which OS should we deploy?"
       choices: [{
         name: "Mac"
         value: "osx64"
-        checked: true
       },{
         name: "Linux"
         value: "linux64"
-        checked: true
       }]
     }]
 
-  askWhichPlatforms: ->
+  askWhichPlatform: ->
     new Promise (resolve, reject) =>
-      inquirer.prompt @getPlatformsQuestion(), (answers) =>
-        resolve(answers.platforms)
+      inquirer.prompt @getPlatformQuestion(), (answers) =>
+        resolve(answers.platform)
 
   updateS3Manifest: ->
 
@@ -574,28 +584,21 @@ module.exports = {
     (new Platform(platform, options))
 
   zip: (platform, options) ->
+    log.call(options, "#zip")
+
+    appName = switch platform
+      when "osx64"   then "Cypress.app"
+      when "linux64" then "Cypress"
+      else throw new Error("appName for platform: '#{platform}' not found!")
+
     root = "#{buildDir}/#{options.version}/#{platform}"
 
     new Promise (resolve, reject) =>
-      zip = "ditto -c -k --sequesterRsrc --keepParent #{root}/cypress.app #{root}/#{options.zip}"
+      zip = "ditto -c -k --sequesterRsrc --keepParent #{root}/#{appName} #{root}/#{options.zip}"
       child_process.exec zip, {}, (err, stdout, stderr) ->
         return reject(err) if err
 
         resolve()
-
-  zipEachPlatform: (platforms, options) ->
-    Promise
-      .resolve(platforms)
-      .bind(@)
-      .map (platform) ->
-        @zip(platform, options)
-
-  deployEachPlatform: (platforms, options) ->
-    Promise
-      .resolve(platforms)
-      .bind(@)
-      .map (platform) ->
-        @deployPlatform(platform, options)
 
   parseOptions: (argv) ->
     opts = {}
@@ -608,9 +611,38 @@ module.exports = {
       linux:  "linux64"
     }[os.platform()] or throw new Error("OS Platform: '#{os.platform()}' not supported!")
 
-  cleanupDist: ->
-    # @log("#cleanupDist")
+  getPublisher: ->
+    aws = fs.readJsonSync("./support/aws-credentials.json")
 
+    $.awspublish.create
+      bucket:          config.app.s3.bucket
+      accessKeyId:     aws.key
+      secretAccessKey: aws.secret
+
+  getUploadDirName: (version, platform, override) ->
+    (override or (version + "/" + platform)) + "/"
+
+  uploadToS3: (platform, options, override) ->
+    log.call(options, "#uploadToS3")
+
+    new Promise (resolve, reject) =>
+      {publisherOptions, version, zip} = options
+
+      publisher = @getPublisher()
+
+      headers = {}
+      headers["Cache-Control"] = "no-cache"
+
+      gulp.src("#{buildDir}/#{version}/#{platform}/#{zip}")
+        .pipe $.rename (p) =>
+          p.dirname = @getUploadDirName(version, platform, override)
+          p
+        .pipe publisher.publish(headers, publisherOptions)
+        .pipe $.awspublish.reporter()
+        .on "error", reject
+        .on "end", resolve
+
+  cleanupDist: ->
     fs.removeAsync(distDir)
 
   runTests: ->
@@ -626,17 +658,19 @@ module.exports = {
     @cleanupDist().then =>
       @getPlatform(null).dist()
 
+  release: ->
+
   deploy: (platform) ->
     ## read off the argv?
     options = @parseOptions(process.argv)
 
-    deploy = (platforms) =>
+    deploy = (platform) =>
       @askDeployNewVersion()
         .then (version) =>
           options.version = version
-          @deployEachPlatform(platforms, options)
-          .then =>
-            @zipEachPlatform(platforms, options)
+          @deployPlatform(platform, options).then =>
+            @zip(platform, options).then =>
+              @uploadToS3(platform, options)
         # .then(@uploadsToS3)
         # .then(@updateS3Manifest)
         # .then(@cleanupEachPlatform)
@@ -649,5 +683,5 @@ module.exports = {
     if platform
       return deploy(platform)
 
-    @askWhichPlatforms().bind(@).then(deploy)
+    @askWhichPlatform().bind(@).then(deploy)
 }
