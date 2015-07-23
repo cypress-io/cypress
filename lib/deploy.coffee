@@ -15,6 +15,7 @@ os             = require("os")
 vagrant        = require("vagrant")
 runSequence    = require("run-sequence")
 Xvfb           = require("xvfb")
+plist          = require("plist")
 
 vagrant.debug = true
 ["rsync", "rsync-auto", "rsync-back"].forEach (cmd) ->
@@ -41,6 +42,11 @@ class Platform
       publisher:        null
       publisherOptions: {}
       platform:         @platform
+
+  afterBuild: ->
+    @log("#afterBuild")
+
+    Promise.resolve()
 
   getVersion: ->
     @options.version ?
@@ -266,6 +272,9 @@ class Platform
       appName: "Cypress"
       version: "0.12.2"
       macIcns: "nw/public/img/cypress.icns"
+      macPlist: {
+        CFBundleIdentifier: "com.cypress.io"
+      }
       # macZip: true
 
     nw.on "log", console.log
@@ -305,6 +314,7 @@ class Platform
       .then(@cleanupSpec)
       .then(@cleanupBc)
       .then(@nwBuilder)
+      .then(@afterBuild)
       .then(@codeSign)
       .then(@cleanupDist)
       .then(@runSmokeTest)
@@ -353,22 +363,32 @@ class Platform
         else
           resolve()
 
-  # deploy: ->
-    # @dist()
-    # @distEachVersion()
-      # .then(@uploadsToS3)
-      # .then(@updateS3Manifest)
-      # .then(@cleanupPlatform)
-      # .then ->
-      #   @log("Dist Complete!", "green")
-      #   cb?()
-      # .catch (err) ->
-      #   @log("Dist Failed!", "red")
-      #   console.log err
-
 class Osx64 extends Platform
   buildPathToApp: ->
-    path.join buildDir, @getVersion(), @platform, "Cypress.app", "Contents", "MacOS", "nwjs"
+    path.join buildDir, @getVersion(), @platform, "Cypress.app", "Contents", "MacOS", "cypress"
+
+  afterBuild: ->
+    @log("#afterBuild")
+
+    Promise.all([
+      @renameNwjsExecutable()
+      @renameNwjsPlist()
+    ])
+
+  renameNwjsExecutable: ->
+    dest = @buildPathToApp()
+    src  = dest.replace(/cypress$/, "nwjs")
+    fs.renameAsync(src, dest)
+
+  renameNwjsPlist: ->
+    pathToPlist = path.join(buildDir, @getVersion(), @platform, "Cypress.app", "Contents", "Info.plist")
+
+    ## after build we want to rename the nwjs executable
+    ## and update the plist settings
+    fs.readFileAsync(pathToPlist, "utf8").then (contents) ->
+      obj = plist.parse(contents)
+      obj.CFBundleExecutable = "cypress"
+      fs.writeFileAsync(pathToPlist, plist.build(obj))
 
   codeSign: ->
     @log("#codeSign")
