@@ -8,6 +8,9 @@ Promise       = require "bluebird"
 child_process = require "child_process"
 runSequence   = require "run-sequence"
 os            = require "os"
+deploy        = require "./lib/deploy"
+
+require("lodash").bindAll(deploy)
 
 platform = ->
   {
@@ -188,38 +191,32 @@ gulp.task "server", -> require("./server.coffee")
 
 gulp.task "test", -> require("./spec/server.coffee")
 
-gulp.task "run:tests", ->
-  require("./lib/deploy")().runTests()
+gulp.task "dist:tests", deploy.runTests
 
-gulp.task "build", ->
-  require("./lib/deploy")().buildApp()
+gulp.task "build:smoke:test", deploy.runSmokeTest
 
-gulp.task "dist:zip", ->
-  require("./lib/deploy")().zipBuilds()
+gulp.task "dist", deploy.dist
 
-gulp.task "dist", ->
-  require("./lib/deploy")().dist()
+gulp.task "build", deploy.build
+
+gulp.task "release", deploy.release
 
 gulp.task "deploy:fixture", ->
   require("./lib/deploy")().fixture()
 
-gulp.task "deploy:manifest", ->
-  require("./lib/deploy")().manifest()
+gulp.task "deploy:manifest", deploy.manifest
 
-gulp.task "get:manifest", ->
-  require("./lib/deploy")().getManifest()
+gulp.task "get:manifest", deploy.getManifest
 
-gulp.task "deploy", ->
-# gulp.task "deploy", ["client:build", "nw:build"], ->
-  require("./lib/deploy").deploy()
-
-gulp.task "compile", ["clean:build"], ->
-  require("./lib/deploy").compile()
+gulp.task "deploy", deploy.deploy
 
 gulp.task "client",        ["client:build", "client:watch"]
 gulp.task "nw",            ["nw:build", "nw:watch"]
 
-gulp.task "client:build",  ["bower", "client:css", "client:img", "client:fonts", "client:js", "client:html"]
-gulp.task "nw:build",      ["bower", "nw:css", "nw:img", "client:fonts", "nw:js", "nw:html", "nw:snapshot"]
+gulp.task "client:build",  ["bower"], (cb) ->
+  runSequence ["client:css", "client:img", "client:fonts", "client:js", "client:html"], cb
+
+gulp.task "nw:build",      ["bower"], (cb) ->
+  runSequence ["nw:css", "nw:img", "client:fonts", "nw:js", "nw:html", "nw:snapshot"], cb
 
 gulp.task "nw:snapshot",   ["build:secret:sauce"]
