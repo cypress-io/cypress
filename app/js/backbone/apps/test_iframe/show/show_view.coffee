@@ -89,7 +89,7 @@
         div.attr("data-highlight-el", true)
 
       if coords = options.coords
-        setImmediate =>
+        requestAnimationFrame =>
           box = App.request("element:hit:box:layer", coords, dom)
           box.attr("data-highlight-hitbox", true)
 
