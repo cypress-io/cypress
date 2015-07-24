@@ -202,14 +202,17 @@
             position: absolute;
             right: 0;
             top: 2px;
+            color: #AAA;
 
             i {
-              float: right;
-              margin-left: 5px;
+              margin: 0 5px 0 2px;
+              font-size: 14px;
+              position: relative;
+              top: 1px;
             }
 
             .loading-content {
-              top: 2px;
+              top: 1px;
               position: relative;
             }
           }
