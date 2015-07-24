@@ -388,13 +388,16 @@
         ## to run tests
         @Cypress.initialize(specWindow, remoteIframe, App.config.getCypressConfig())
 
-        @Cypress.run (err) =>
+        @Cypress.run (err, results) =>
           @Cypress.after(err)
 
           ## trigger the after run event
           @trigger "after:run"
 
           fn?(err)
+
+          if _.isFunction($Cypress.afterRun)
+            $Cypress.afterRun(results)
 
     App.reqres.setHandler "runner:entity", ->
       new Entities.Runner

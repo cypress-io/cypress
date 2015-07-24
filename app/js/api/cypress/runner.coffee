@@ -176,7 +176,14 @@ $Cypress.Runner = do ($Cypress, _) ->
     run: (fn) ->
       @runnerListeners()
 
-      @runner.run(fn)
+      @runner.run (err) =>
+        fn(err, @getTestResults())
+
+    getTestResults: ->
+      _(@tests).map (test) ->
+        obj = _(test).pick("id", "duration", "state")
+        obj.title = test.originalTitle
+        obj
 
     getHookName: (hook) ->
       ## find the name of the hook by parsing its
