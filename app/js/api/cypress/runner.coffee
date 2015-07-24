@@ -109,6 +109,7 @@ $Cypress.Runner = do ($Cypress, _) ->
       ## emit the pending event instead of the test
       ## so we normalize the pending / test events
       @runner.on "pending", (test) ->
+        test.state = "pending"
         @emit "test", test
 
       @runner.on "fail", (runnable, err) =>
