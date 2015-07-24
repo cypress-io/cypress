@@ -24,12 +24,17 @@ deploy = null
 
 platforms = ["osx64", "linux64"]
 
-describe.only "Deploy", ->
+describe "Deploy", ->
   beforeEach ->
     @sandbox = sinon.sandbox.create()
 
   afterEach ->
     @sandbox.restore()
+
+    Promise.all([
+      fs.removeAsync(distDir)
+      fs.removeAsync(buildDir)
+    ])
 
   context "#parseOptions", ->
     it "sets runTests to false in --skip-tests", ->
@@ -46,10 +51,11 @@ describe.only "Deploy", ->
       @buildPlatform = @sandbox.stub(Deploy, "buildPlatform").resolves()
 
     it "calls buildPlatform with each platform", ->
-      Deploy.deployEachPlatform(platforms, {}).then =>
+      options = {version: "1.2.3"}
+      Deploy.deployEachPlatform(platforms, options).then =>
         expect(@buildPlatform).to.be.calledOn Deploy
-        expect(@buildPlatform).to.be.calledWith "osx64"
-        expect(@buildPlatform).to.be.calledWith "linux64"
+        expect(@buildPlatform).to.be.calledWith "osx64", options
+        expect(@buildPlatform).to.be.calledWith "linux64", options
 
   context "#buildPlatform", ->
 
@@ -66,6 +72,9 @@ describe.only "Deploy", ->
 
     describe "#deploy", ->
       beforeEach ->
+        @sandbox.stub(@linux, "npm").resolves()
+        @sandbox.stub(@linux, "rsync").resolves()
+        @sandbox.stub(@linux, "rsyncBack").resolves()
         @sandbox.stub(vagrant, "status")
         @sandbox.stub(vagrant, "up")
         @sandbox.stub(vagrant, "ssh")
@@ -87,7 +96,7 @@ describe.only "Deploy", ->
         vagrant.status.callsArgWith(0, 0)
         vagrant.ssh.callsArgWith(1, 0)
         @linux.deploy().then ->
-          expect(vagrant.ssh).to.be.calledWith ["-c", "cd /vagrant && gulp dist --skip-tests"]
+          expect(vagrant.ssh).to.be.calledWith ["-c", "cd /cypress-app && gulp dist --skip-tests"]
 
       it "rejects if vagrant up fails", (done) ->
         vagrant.status.callsArgWith(0, -1)
@@ -112,113 +121,124 @@ describe.only "Deploy", ->
 
 #     @sandbox.restore()
 
-#   context "#prepare", ->
-#     it "creates dist folder", ->
-#       deploy.prepare().then ->
-#         isDir = fs.statSync(distDir).isDirectory()
-#         expect(isDir).to.be.true
+  context "#copyFiles", ->
+    beforeEach ->
+      @mac = new Deploy.Osx64 "osx64"
 
-#     it "copies package.json to dist", ->
-#       deploy.prepare().then ->
-#         expect(fs.statSync(distDir + "/package.json").isFile()).to.be.true
+    it "creates dist folder", ->
+      @mac.copyFiles().then ->
+        isDir = fs.statSync(@distDir()).isDirectory()
+        expect(isDir).to.be.true
 
-#     it "copies config/app.yml to dist", ->
-#       deploy.prepare().then ->
-#         expect(fs.statSync(distDir + "/config/app.yml").isFile()).to.be.true
+    it "copies package.json to dist", ->
+      @mac.copyFiles().then ->
+        expect(fs.statSync(@distDir("/package.json")).isFile()).to.be.true
 
-#     it "copies lib/cypress to dist src", ->
-#       deploy.prepare().then ->
-#         expect(fs.statSync(distDir + "/src/lib/cypress.coffee").isFile()).to.be.true
+    it "copies config/app.yml to dist", ->
+      @mac.copyFiles().then ->
+        expect(fs.statSync(@distDir("/config/app.yml")).isFile()).to.be.true
 
-#     it "copies lib/controllers to dist src", ->
-#       deploy.prepare().then ->
-#         expect(fs.statSync(distDir + "/src/lib/controllers").isDirectory()).to.be.true
+    it "copies lib/cypress to dist src", ->
+      @mac.copyFiles().then ->
+        expect(fs.statSync(@distDir("/src/lib/cypress.coffee")).isFile()).to.be.true
 
-#     it "copies lib/util to dist src", ->
-#       deploy.prepare().then ->
-#         expect(fs.statSync(distDir + "/src/lib/util").isDirectory()).to.be.true
+    it "copies lib/controllers to dist src", ->
+      @mac.copyFiles().then ->
+        expect(fs.statSync(@distDir("/src/lib/controllers")).isDirectory()).to.be.true
 
-#     it "copies lib/routes to dist src", ->
-#       deploy.prepare().then ->
-#         expect(fs.statSync(distDir + "/src/lib/routes").isDirectory()).to.be.true
+    it "copies lib/util to dist src", ->
+      @mac.copyFiles().then ->
+        expect(fs.statSync(@distDir("/src/lib/util")).isDirectory()).to.be.true
 
-#     it "copies lib/cache to dist src", ->
-#       deploy.prepare().then ->
-#         expect(fs.statSync(distDir + "/src/lib/cache.coffee").isFile()).to.be.true
+    it "copies lib/routes to dist src", ->
+      @mac.copyFiles().then ->
+        expect(fs.statSync(@distDir("/src/lib/routes")).isDirectory()).to.be.true
 
-#     it "copies lib/id_generator to dist src", ->
-#       deploy.prepare().then ->
-#         expect(fs.statSync(distDir + "/src/lib/id_generator.coffee").isFile()).to.be.true
+    it "copies lib/sauce to dist src", ->
+      @mac.copyFiles().then ->
+        expect(fs.statSync(@distDir("/src/lib/sauce")).isDirectory()).to.be.true
 
-#     it "copies lib/keys to dist src", ->
-#       deploy.prepare().then ->
-#         expect(fs.statSync(distDir + "/src/lib/keys.coffee").isFile()).to.be.true
+    it "copies lib/cache to dist src", ->
+      @mac.copyFiles().then ->
+        expect(fs.statSync(@distDir("/src/lib/cache.coffee")).isFile()).to.be.true
 
-#     it "copies lib/logger to dist src", ->
-#       deploy.prepare().then ->
-#         expect(fs.statSync(distDir + "/src/lib/logger.coffee").isFile()).to.be.true
+    it "copies lib/id_generator to dist src", ->
+      @mac.copyFiles().then ->
+        expect(fs.statSync(@distDir("/src/lib/id_generator.coffee")).isFile()).to.be.true
 
-#     it "copies lib/project to dist src", ->
-#       deploy.prepare().then ->
-#         expect(fs.statSync(distDir + "/src/lib/project.coffee").isFile()).to.be.true
+    it "copies lib/keys to dist src", ->
+      @mac.copyFiles().then ->
+        expect(fs.statSync(@distDir("/src/lib/keys.coffee")).isFile()).to.be.true
 
-#     it "copies lib/server to dist src", ->
-#       deploy.prepare().then ->
-#         expect(fs.statSync(distDir + "/src/lib/server.coffee").isFile()).to.be.true
+    it "copies lib/logger to dist src", ->
+      @mac.copyFiles().then ->
+        expect(fs.statSync(@distDir("/src/lib/logger.coffee")).isFile()).to.be.true
 
-#     it "copies lib/socket to dist src", ->
-#       deploy.prepare().then ->
-#         expect(fs.statSync(distDir + "/src/lib/socket.coffee").isFile()).to.be.true
+    it "copies lib/project to dist src", ->
+      @mac.copyFiles().then ->
+        expect(fs.statSync(@distDir("/src/lib/project.coffee")).isFile()).to.be.true
 
-#     it "copies lib/support to dist src", ->
-#       deploy.prepare().then ->
-#         expect(fs.statSync(distDir + "/src/lib/support.coffee").isFile()).to.be.true
+    it "copies lib/server to dist src", ->
+      @mac.copyFiles().then ->
+        expect(fs.statSync(@distDir("/src/lib/server.coffee")).isFile()).to.be.true
 
-#     it "copies lib/fixtures to dist src", ->
-#       deploy.prepare().then ->
-#         expect(fs.statSync(distDir + "/src/lib/fixtures.coffee").isFile()).to.be.true
+    it "copies lib/socket to dist src", ->
+      @mac.copyFiles().then ->
+        expect(fs.statSync(@distDir("/src/lib/socket.coffee")).isFile()).to.be.true
 
-#     it "copies lib/updater to dist src", ->
-#       deploy.prepare().then ->
-#         expect(fs.statSync(distDir + "/src/lib/updater.coffee").isFile()).to.be.true
+    it "copies lib/sauce/sauce to dist src", ->
+      @mac.copyFiles().then ->
+        expect(fs.statSync(@distDir("/src/lib/sauce/sauce.coffee")).isFile()).to.be.true
 
-#     it "copies lib/environment to dist src", ->
-#       deploy.prepare().then ->
-#         expect(fs.statSync(distDir + "/src/lib/environment.coffee").isFile()).to.be.true
+    it "copies lib/support to dist src", ->
+      @mac.copyFiles().then ->
+        expect(fs.statSync(@distDir("/src/lib/support.coffee")).isFile()).to.be.true
 
-#     it "copies lib/log to dist src", ->
-#       deploy.prepare().then ->
-#         expect(fs.statSync(distDir + "/src/lib/log.coffee").isFile()).to.be.true
+    it "copies lib/fixtures to dist src", ->
+      @mac.copyFiles().then ->
+        expect(fs.statSync(@distDir("/src/lib/fixtures.coffee")).isFile()).to.be.true
 
-#     it "copies lib/exception to dist src", ->
-#       deploy.prepare().then ->
-#         expect(fs.statSync(distDir + "/src/lib/exception.coffee").isFile()).to.be.true
+    it "copies lib/updater to dist src", ->
+      @mac.copyFiles().then ->
+        expect(fs.statSync(@distDir("/src/lib/updater.coffee")).isFile()).to.be.true
 
-#     it "copires lib/secret_sauce.bin to dist", ->
-#       deploy.prepare().then ->
-#         expect(fs.statSync(distDir + "/lib/secret_sauce.bin").isFile()).to.be.true
+    it "copies lib/environment to dist src", ->
+      @mac.copyFiles().then ->
+        expect(fs.statSync(@distDir("/src/lib/environment.coffee")).isFile()).to.be.true
 
-#     it "copies lib/public to dist", ->
-#       deploy.prepare().then ->
-#         expect(fs.statSync(distDir + "/lib/public").isDirectory()).to.be.true
+    it "copies lib/log to dist src", ->
+      @mac.copyFiles().then ->
+        expect(fs.statSync(@distDir("/src/lib/log.coffee")).isFile()).to.be.true
 
-#     it "copies lib/scaffold to dist", ->
-#       deploy.prepare().then ->
-#         expect(fs.statSync(distDir + "/lib/scaffold").isDirectory()).to.be.true
+    it "copies lib/exception to dist src", ->
+      @mac.copyFiles().then ->
+        expect(fs.statSync(@distDir("/src/lib/exception.coffee")).isFile()).to.be.true
 
-#     it "copies nw/public to dist", ->
-#       deploy.prepare().then ->
-#         expect(fs.statSync(distDir + "/nw/public").isDirectory()).to.be.true
+    it "copires lib/secret_sauce.bin to dist", ->
+      @mac.copyFiles().then ->
+        expect(fs.statSync(@distDir("/lib/secret_sauce.bin")).isFile()).to.be.true
 
-#     # it "copies spec/server to dist", ->
-#     #   @prepare().then ->
-#     #     expect(fs.statSync(distDir + "/spec/server").isDirectory()).to.be.true
+    it "copies lib/public to dist", ->
+      @mac.copyFiles().then ->
+        expect(fs.statSync(@distDir("/lib/public")).isDirectory()).to.be.true
 
-#     # it "omits deploy_spec from dist", (done) ->
-#     #   @prepare().then ->
-#     #     fs.statAsync(distDir + "/spec/server/unit/deploy_spec.coffee")
-#     #       .then -> done("should not find deploy_spec.coffee")
-#     #       .catch -> done()
+    it "copies lib/scaffold to dist", ->
+      @mac.copyFiles().then ->
+        expect(fs.statSync(@distDir("/lib/scaffold")).isDirectory()).to.be.true
+
+    it "copies nw/public to dist", ->
+      @mac.copyFiles().then ->
+        expect(fs.statSync(@distDir("/nw/public")).isDirectory()).to.be.true
+
+    # it "copies spec/server to dist", ->
+    #   @prepare().then ->
+    #     expect(fs.statSync(distDir + "/spec/server").isDirectory()).to.be.true
+
+    # it "omits deploy_spec from dist", (done) ->
+    #   @prepare().then ->
+    #     fs.statAsync(distDir + "/spec/server/unit/deploy_spec.coffee")
+    #       .then -> done("should not find deploy_spec.coffee")
+    #       .catch -> done()
 
 #   context "#convertToJs", ->
 #     beforeEach ->
@@ -233,17 +253,17 @@ describe.only "Deploy", ->
 #         expect(coffeeFiles.length).to.be.gt(0)
 #         expect(jsFiles.length).to.be.gt(0)
 
-#   context "#obfuscate", ->
-#     beforeEach ->
-#       deploy.prepare().then(deploy.convertToJs)
+  context "#obfuscate", ->
+    beforeEach ->
+      @mac = new Deploy.Osx64 "osx64"
 
-#     it "writes obfuscated js to dist/lib/cypress.js", ->
-#       @timeout(5000)
+    it "writes obfuscated js to dist/lib/cypress.js", ->
+      @timeout(5000)
 
-#       deploy.obfuscate().then (obfuscated) ->
-#         cypress = fs.statSync(distDir + "/lib/cypress.js")
-#         expect(cypress.isFile()).to.be.true
-#         expect(obfuscated.length).to.be.gt(0)
+      @mac.obfuscate().then (obfuscated) =>
+        cypress = fs.statSync @mac.distDir("/lib/cypress.js")
+        expect(cypress.isFile()).to.be.true
+        expect(obfuscated.length).to.be.gt(0)
 
 #   context "#cleanupSrc", ->
 #     beforeEach ->
@@ -402,20 +422,24 @@ describe.only "Deploy", ->
 #         spies = _.map fns, (fn) -> deploy[fn]
 #         sinon.assert.callOrder.apply(sinon, spies)
 
-#   context "#npmInstall", ->
-#     beforeEach ->
-#       ## 10 min timeout
-#       @timeout(10 * 60 * 1000)
+  context "#npmInstall", ->
+    beforeEach ->
+      @sandbox.stub(child_process, "exec").callsArg(2)
 
-#       deploy.version = "1.0.2"
-#       deploy.prepare().then(deploy.build)
+      ## 10 min timeout
+      @timeout(10 * 60 * 1000)
 
-#     it "exec 'npm install'", ->
-#       deploy.npmInstall().then ->
-#         cmd = child_process.exec.getCall(0).args[0]
-#         opts = child_process.exec.getCall(0).args[1]
-#         expect(cmd).to.eq "npm install --production"
-#         expect(opts.cwd).to.include("/build/1.0.2/osx64/cypress.app/Contents/Resources/app.nw")
+      # deploy.version = "1.0.2"
+      # deploy.prepare().then(deploy.build)
+      @mac = new Deploy.Osx64 "osx64", {version: "1.0.2"}
+      @mac.copyFiles().then(@mac.updatePackage)
+
+    it "exec 'npm install'", ->
+      @mac.npmInstall().then ->
+        cmd = child_process.exec.getCall(0).args[0]
+        opts = child_process.exec.getCall(0).args[1]
+        expect(cmd).to.eq "npm install --production"
+        expect(opts.cwd).to.include("/dist/osx64")
 
 #   context "#uploadToS3", ->
 #     beforeEach ->
