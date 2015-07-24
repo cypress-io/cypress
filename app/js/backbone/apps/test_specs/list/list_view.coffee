@@ -105,6 +105,7 @@
 
     onRender: ->
       @applyIndent()
+      @openChanged(@model, @model.get("open"))
 
     mouseover: (e) ->
       e.stopPropagation()
