@@ -17,26 +17,26 @@
       @show projectView
 
       options = {
-        onChromiumRun: (src) ->
-          App.execute "start:chromium:run", src
+        headless: params.headless
+        onChromiumRun: (src, options = {}) ->
+          App.execute "start:chromium:run", src, options
       }
 
-      if params.run
+      if options.headless
         options.morgan = false
 
-      _.defer ->
-        App.config.runProject(project.get("path"), options)
-          .then (config) ->
-            project.setClientUrl(config.clientUrl, config.clientUrlDisplay)
-            App.execute "start:id:generator", config.idGeneratorUrl
-            if params.run
-              # options.onChromiumRun("http://www.github.com")
-              # options.onChromiumRun(config.clientUrl + "#/organize")
-              options.onChromiumRun(config.clientUrl + "#/tests/apps/accounts/account_edit_spec.coffee?__ui=satellite")
-              # options.onChromiumRun(config.clientUrl + "#/tests/components/destroy_spec.coffee")
+      _.defer => @runProject(project, options)
 
-          .catch (err) ->
-            project.setError(err)
+    runProject: (project, options) ->
+      App.config.runProject(project.get("path"), options)
+        .then (config) ->
+          project.setClientUrl(config.clientUrl, config.clientUrlDisplay)
+          App.execute "start:id:generator", config.idGeneratorUrl
+          if options.headless
+            options.onChromiumRun(config.clientUrl + "#/tests/cypress_api.coffee?__ui=satellite", {headless: true})
+
+        .catch (err) ->
+          project.setError(err)
 
     getProjectView: (project) ->
       new Show.Project

@@ -4,10 +4,15 @@ SecretSauce =
       klass.prototype[key] = fn
 
 SecretSauce.Chromium =
-  override: ->
+  override: (options = {}) ->
     { _ } = SecretSauce
 
     @window.require = require
+
+    _.defaults options,
+      headless: false
+
+    return if options.headless is false
 
     _.extend @window.Mocha.process, process
 
@@ -36,7 +41,10 @@ SecretSauce.Chromium =
 
   _afterRun: (window) ->
     window.$Cypress.afterRun = (results) ->
-      console.log("results", results)
+      process.stdout.write("Results are:\n")
+      process.stdout.write JSON.stringify(results)
+      process.stdout.write("\n")
+      # console.log("results", results)
       ## notify Cypress API
 
       process.exit()
@@ -341,227 +349,6 @@ SecretSauce.IdGenerator =
     position = matches.index + matches[1].length + 1
     @str.insert contents, position, " [#{id}]"
 
-# SecretSauce.RemoteProxy =
-#   okStatus: /^[2|3]\d+$/
-
-#   _handle: (req, res, next, Domain, httpProxy) ->
-#     ## TODO TEST THIS BASEURL FALLBACK
-#     remoteHost = @getOriginFromFqdnUrl(req) ? req.cookies["__cypress.remoteHost"] ? @app.get("cypress").baseUrl
-
-#     ## we must have the remoteHost cookie
-#     if not remoteHost
-#       throw new Error("Missing remoteHost!")
-
-#     domain = Domain.create()
-
-#     domain.on 'error', (err) =>
-#       @errorHandler(err, req, res, remoteHost)
-
-#     domain.run =>
-#       @getContentStream(req, res, remoteHost, httpProxy)
-#       .on 'error', (err) =>
-#         @errorHandler(err, req, res, remoteHost)
-#       .pipe(res)
-
-#   getOriginFromFqdnUrl: (req) ->
-#     ## if we find an origin from this req.url
-#     ## then return it, and reset our req.url
-#     ## after stripping out the origin and ensuring
-#     ## our req.url starts with only 1 leading slash
-#     if origin = @UrlHelpers.getOriginFromFqdnUrl(req.url)
-#       req.url = "/" + req.url.replace(origin, "").replace(/^\/+/, "")
-
-#       ## return the origin
-#       return origin
-
-#   getContentStream: (req, res, remoteHost, httpProxy) ->
-#     switch remoteHost
-#       ## serve from the file system because
-#       ## we are using cypress as our weberver
-#       when "<root>"
-#         @getFileStream(req, res, remoteHost)
-
-#       ## else go make an HTTP request to the
-#       ## real server!
-#       else
-#         @getHttpStream(req, res, remoteHost, httpProxy)
-
-#   # creates a read stream to a file stored on the users filesystem
-#   # taking into account if they've chosen a specific rootFolder
-#   # that their project files exist in
-#   getFileStream: (req, res, remoteHost) ->
-#     { _ } = SecretSauce
-
-#     ## strip off any query params from our req's url
-#     ## since we're pulling this from the file system
-#     ## it does not understand query params
-#     pathname = @url.parse(req.url).pathname
-
-#     res.contentType(@mime.lookup(pathname))
-
-#     args = _.compact([
-#       @app.get("cypress").projectRoot,
-#       @app.get("cypress").rootFolder,
-#       pathname
-#     ])
-
-#     @fs.createReadStream  @path.join(args...)
-
-#   getHttpStream: (req, res, remoteHost, httpProxy) ->
-#     { _ } = SecretSauce
-
-#     # write     = res.write
-#     # writeHead = res.writeHead
-
-#     # res.writeHead = (code, headers) ->
-#     #   console.log "writeHead", code, headers
-
-#     #   writeHead.apply(res, arguments)
-
-#     # res.write = (data, encoding) ->
-#     #   console.log "write", data, encoding
-
-#     #   write.apply(res, arguments)
-
-#     # @emit "verbose", "piping url content #{opts.uri}, #{opts.uri.split(opts.remote)[1]}"
-#     @Log.info "piping http url content", url: req.url, remoteHost: remoteHost
-
-#     selectors = []
-
-#     # tr = @trumpet()
-
-#     thr = @through
-
-#     t = @through (d) -> @queue(d)
-
-#     toInject = "
-#       <script type='text/javascript'>
-#         window.onerror = function(){
-#           parent.onerror.apply(parent, arguments);
-#         }
-#       </script>
-#       <script type='text/javascript' src='/__cypress/static/js/sinon.js'></script>
-#       <script type='text/javascript'>
-#         var Cypress = parent.Cypress;
-#         if (!Cypress){
-#           throw new Error('Cypress must exist in the parent window!');
-#         };
-#         Cypress.onBeforeLoad(window);
-#       </script>
-#     "
-
-#     rewrite = (selector, type, attr, fn) ->
-#       if _.isFunction(attr)
-#         fn   = attr
-#         attr = null
-
-#       selectors.push {
-#         query: selector
-#         func: (elem) ->
-#           switch type
-#             when "attr"
-#               elem.getAttribute attr, (val) ->
-#                 elem.setAttribute attr, fn(val)
-#             when "html"
-#               stream = elem.createStream({outer: true})
-#               stream.pipe(thr (buf) ->
-#                 @queue fn(buf.toString())
-#               ).pipe(stream)
-#       }
-#       # tr.selectAll selector, (elem) ->
-#         # elem.getAttribute attr, (val) ->
-#         #   elem.setAttribute attr, fn(val)
-
-#     rewrite "head", "html", (str) ->
-#       str.replace(/<head>/, "<head> #{toInject}")
-
-#     rewrite "[href^='//']", "attr", "href", (href) ->
-#       "/" + req.protocol + ":" + href
-
-#     rewrite "form[action^='//']", "attr", "action", (action) ->
-#       "/" + req.protocol + ":" + action
-
-#     rewrite "form[action^='http']", "attr", "action", (action) ->
-#       if action.startsWith(remoteHost)
-#         action.replace(remoteHost, "")
-#       else
-#         "/" + action
-
-#     rewrite "[href^='http']", "attr", "href", (href) ->
-#       if href.startsWith(remoteHost)
-#         href.replace(remoteHost, "")
-#       else
-#         "/" + href
-
-#     h = @harmon([], selectors, true)
-
-#     ## we pass an empty function as next()
-#     ## because we arent using harmon as middleware
-#     h(req, res, ->)
-
-#     proxy = httpProxy.createProxyServer({})
-
-#     # proxy.once "error", (err) =>
-#     #   if req.cookies["__cypress.initial"] is "true"
-#     #     @errorHandler err, req, res, remoteHost
-#     #   else
-#     #     throw err
-
-#     # proxy.once "proxyRes", (proxyRes, req, res) =>
-#     #   if req.cookies["__cypress.initial"] is "true"
-#     #     if not @okStatus.test proxyRes.statusCode
-#     #       @errorHandler null, req, res, remoteHost, proxyRes
-
-#     # proxy.once "proxyReq", (proxyReq, req, res) ->
-
-#     ## hostRewrite: rewrites location header on redirects back to
-#     ## ourselves (localhost:2020) so the client will automatically
-#     ## re-request this back on ourselves so we can proxy it again
-#     proxy.web(req, res, {
-#       target: remoteHost
-#       changeOrigin: true
-#       autoRewrite: true
-#     })
-
-#     return res#.pipe(t)
-
-#   errorHandler: (e, req, res, remoteHost, proxyRes) ->
-#     remoteHost ?= req.cookies["__cypress.remoteHost"]
-
-#     url = @url.resolve(remoteHost, req.url)
-
-#     ## disregard ENOENT errors (that means the file wasnt found)
-#     ## which is a perfectly acceptable error (we account for that)
-#     if process.env["NODE_ENV"] isnt "production" and e and e.code isnt "ENOENT"
-#       console.error(e.stack)
-#       debugger
-
-#     @Log.info "error handling request", url: url, error: e
-
-#     filePath = switch
-#       when f = req.formattedUrl
-#         "file://#{f}"
-#       else
-#         url
-
-#     ## using req here to give us an opportunity to
-#     ## write to req.formattedUrl
-#     htmlPath = @path.join(process.cwd(), "lib/html/initial_500.html")
-#     # console.log "res status"
-#     # res.writeHead 501, {
-#       # "Content-Type": "text/plain"
-#     # }
-#     # res.end("DIE!")
-#     # res.end("WTF!")
-#     # res.status(501).render(htmlPath, {
-#       # url: filePath
-#       # fromFile: !!req.formattedUrl
-#     # }#, (err, html) ->
-#     #   proxyRes.writeHead 501, {"Content-Type": "text/html"}
-#     #   proxyRes.end(html)
-#     # )
-#     # res.end()
-
 SecretSauce.RemoteInitial =
   okStatus: /^[2|3|4]\d+$/
   badCookieParam: /^(httponly|secure)$/i
@@ -845,78 +632,6 @@ SecretSauce.RemoteInitial =
 
     ## normalize cookies into single dimensional array
      _.map [].concat(cookies), stripHttpOnlyAndSecure
-
-  # rewrite: (req, res, remoteHost) ->
-  #   { _ } = SecretSauce
-
-  # write     = res.write
-  # writeHead = res.writeHead
-
-  # res.writeHead = (code, headers) ->
-  #   console.log "writeHead", code, headers
-
-  #   writeHead.apply(res, arguments)
-
-  # res.write = (data, encoding) ->
-  #   console.log "write", data, encoding
-
-  #   write.apply(res, arguments)
-
-  #   through = @through
-
-  #   selectors = []
-
-  #   rewrite = (selector, type, attr, fn) ->
-  #     if _.isFunction(attr)
-  #       fn   = attr
-  #       attr = null
-
-  #     selectors.push {
-  #       query: selector
-  #       func: (elem) ->
-  #         switch type
-  #           when "attr"
-  #             elem.getAttribute attr, (val) ->
-  #               elem.setAttribute attr, fn(val)
-  #           when "html"
-  #             stream = elem.createStream({outer: true})
-  #             stream.pipe(through (buf) ->
-  #               @queue fn(buf.toString())
-  #             ).pipe(stream)
-  #     }
-
-  #   rewrite "head", "html", (str) =>
-  #     str.replace("<head>", "<head> #{@getHeadContent()}")
-
-  #   rewrite "[href^='//']", "attr", "href", (href) ->
-  #     "/" + req.protocol + ":" + href
-
-  #   rewrite "form[action^='//']", "attr", "action", (action) ->
-  #     "/" + req.protocol + ":" + action
-
-  #   rewrite "form[action^='http']", "attr", "action", (action) ->
-  #     if action.startsWith(remoteHost)
-  #       action.replace(remoteHost, "")
-  #     else
-  #       "/" + action
-
-  #   rewrite "[href^='http']", "attr", "href", (href) ->
-  #     if href.startsWith(remoteHost)
-  #       href.replace(remoteHost, "")
-  #     else
-  #       "/" + href
-
-  #   h = @harmon([], selectors, true)
-  #   h(req, res, ->)
-
-  #   # ## for harmon........ ugh
-  #   # if ct = res.get("content-type")
-  #   #   if ct and ct.includes("text/html")
-  #   #     res.isHtml = true
-
-  #   # if ce = res.get("content-encoding")
-  #   #   if ce and ce.toLowerCase() is "gzip"
-  #   #     res.isGziped = true
 
   rewrite: (req, res, remoteHost) ->
     { _ } = SecretSauce

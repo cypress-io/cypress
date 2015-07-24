@@ -59,10 +59,10 @@
     offLog: ->
       @getLog().off()
 
-    chromium: (window) ->
+    chromium: (window, options) ->
       C = @Chromium ? throw new Error("config#Chromium is not defined!")
 
-      C(window).override()
+      C(window).override(options)
 
     getUpdater: -> @updater
 

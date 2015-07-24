@@ -9,8 +9,8 @@
 
       projectsView = @getProjectsView(projects, user)
 
-      startProject = (project, run = false) ->
-        App.vent.trigger "project:clicked", project, run
+      startProject = (project, headless = false) ->
+        App.vent.trigger "project:clicked", project, headless
 
       if projectPath = params.projectPath
         @listenTo projectsView, "show", ->
