@@ -15,9 +15,10 @@
       debug:     "--debug"      in options.argv
       updating:  "--updating"   in options.argv
       smokeTest: "--smoke-test" in options.argv
+      headless:  "--headless"   in options.argv
       coords: parseCoords(options.argv)
 
-    if "-P" in options.argv
+    if "--project" in options.argv
       options.projectPath = path.resolve(process.cwd(), options.argv[1])
 
     if options.updating
@@ -88,6 +89,9 @@
 
       ## display the footer
       App.vent.trigger "start:footer:app"
+
+      ## dont display the gui if we're in headless mode
+      return if options.headless
 
       ## display the GUI
       App.execute "gui:display", options.coords
