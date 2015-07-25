@@ -62,4 +62,4 @@
     aClicked: (e) ->
       e.preventDefault()
       js = $(e.target).data("js")
-      @trigger("sauce:labs:clicked", js) if js
+      @trigger "clicked:#{js}"

@@ -176,7 +176,11 @@
 
       if options.browser is "chromium"
         return @loadHeadlessIframe(src, options, fn)
-      # @browserChanged options.browser, options.version
+
+      @model.setViewport({
+        viewportWidth:  "100%"
+        viewportHeight: "100%"
+      })
 
       ## move this src out of here and into entities/iframe
       url = encodeURIComponent("http://tunnel.browserling.com:50228/#/tests/#{src}?__ui=satellite")
@@ -304,6 +308,12 @@
       "cannot:revert:dom"     : "cannotRevertDom"
       "revert:dom"            : "revertDom"
       "restore:dom"           : "restoreDom"
+
+    onRender: ->
+      b = @model.get("browser")
+      v = @model.get("version")
+
+      @browserChanged(b, v) if b and v
 
     urlChanged: (model, value, options) ->
       @ui.url.val(value)

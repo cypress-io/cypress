@@ -30,7 +30,7 @@
               <div>
                 <img src="/__cypress/static/img/chrome_16x16.png" />
                 <ul class="browser-versions list-unstyled"  data-browser="chrome">
-                  <li>37</li>
+                  <li>43</li>
                   <li>36</li>
                   <li>35</li>
                   <li>34</li>

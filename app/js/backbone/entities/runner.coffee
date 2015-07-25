@@ -14,6 +14,7 @@
         @Cypress   = $Cypress.create({loadModules: true})
 
         @satelliteEvents = App.request("satellite:events")
+        @passThruEvents  = App.request("pass:thru:events")
         @hostEvents      = App.request("host:events")
 
         @commands  = App.request "command:entities"
@@ -21,6 +22,11 @@
         @agents    = App.request "agent:entities"
         @socket    = App.request "socket:entity"
         @iframe    = App.request "iframe:entity", @, @Cypress
+        @stats     = App.request "stats:entity", @
+
+        _.each @passThruEvents, (event) =>
+          @listenTo @socket, event, (args...) =>
+            @trigger event, args...
 
         _.each CypressEvents, (event) =>
           @listenTo @Cypress, event, (args...) =>
@@ -119,6 +125,12 @@
       reset: ->
         _.each [@commands, @routes, @agents], (collection) ->
           collection.reset([], {silent: true})
+
+      runSauce: ->
+        ## when we get a response from the server with
+        ## the jobName we notify all parties
+        @socket.emit "run:sauce", @specPath, (jobName, batchId) =>
+          @trigger "sauce:running", jobName, batchId
 
       trigger: (event, args...) ->
         ## because of defaults the change:iframes event
