@@ -48,7 +48,8 @@
 }
 
 .commands-container {
-  font-family: Consolas, Monaco, 'Andale Mono', monospace;
+  font-family: Menlo, Consolas, "Liberation Mono", Monaco, "Lucida Console", monospace;
+  font-size: 11px;
 
   background-color: #eef1f4;
   padding: 0;
@@ -177,7 +178,7 @@
     padding: 0 2px;
     display: inline-block;
     text-transform: uppercase;
-    font-size: 11px;
+    font-size: 10px;
     float: left;
     min-width: 80px;
     font-weight: 600;
@@ -259,7 +260,7 @@
 
       strong {
         font-weight: 600;
-        font-family: Menlo, monospace;
+        font-family: Menlo, Consolas, "Liberation Mono", Monaco, "Lucida Console", monospace;
         font-size: 95%;
         margin: 0 3px;
       }
