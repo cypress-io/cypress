@@ -18,10 +18,10 @@
   API =
     getNavs: ->
       new Entities.NavsCollection [
-        {name: "Tests",     href: "#tests",      icon: "fa fa-code"}
-        {name: "Organize",  href: "#organize",   icon: "fa fa-th"}
-        {name: "Analytics", href: "#analytics",  icon: "fa fa-bar-chart-o"}
-        {name: "Settings",  href: "#settings",   icon: "fa fa-cog"}
+        # {name: "Tests",     href: "#tests",                                      icon: "fa fa-code"}
+        {name: "Tests",     href: "#organize",                                   icon: "fa fa-code"}
+        {name: "Docs",      href: "https://github.com/cypress-io/cypress/wiki",  icon: "fa fa-graduation-cap", external: true}
+        {name: "Settings",  href: "#settings",                                   icon: "fa fa-cog"}
       ]
 
   App.reqres.setHandler "nav:entities", ->

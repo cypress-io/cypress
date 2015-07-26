@@ -4,7 +4,7 @@
     module: OrganizeApp
 
     before: ->
-      App.vent.trigger "main:nav:choose", "Organize"
+      App.vent.trigger "main:nav:choose", "Tests"
 
     actions:
       list: ->

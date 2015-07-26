@@ -21,6 +21,9 @@
     modelEvents:
       "change:chosen" : "chosenChanged"
 
+    onRender: ->
+      @$el.find("a").attr("target", "_blank") if @model.get("external")
+
     chosenChanged: (model, value, options) ->
       @$el.toggleClass "active", value
 
