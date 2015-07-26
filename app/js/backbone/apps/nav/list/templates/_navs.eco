@@ -1,8 +1,9 @@
-<header class="navbar navbar-inverse navbar-fixed-top">
-  <div class="navbar-header">
-    <a class="navbar-brand" href="#">Cypress</a>
+<div class="collapse-container">
+  <div class="pull-left logo">Cypress</div>
+  <div class="pull-right">
+    <button class="btn btn-default" id="sidebar-collapse">
+      <i></i>
+    </button>
   </div>
-  <nav class="collapse navbar-collapse cy-nav">
-    <ul class="nav navbar-nav navbar-right cy-vnavigation"></ul>
-  </nav>
-</header>
+</div>
+<ul class="cy-vnavigation"></ul>
