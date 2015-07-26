@@ -6,18 +6,35 @@
   }
 
   .file, .folder {
-
     color: #69727e;
-    font-weight: 500;
 
     i {
       color: #476fc9;
       margin-right: 5px;
     }
-
   }
 
+  .folder {
+    font-weight: 600;
+
+    i {
+      font-size: 14px;
+    }
+
+    &>div>div {
+      padding-bottom: 0;
+    }
+  }
+
+
   .file {
+    font-weight: 300;
+    border-bottom: 1px dotted #eeeeee;
+
+    i {
+      font-size: 12px;
+    }
+
     &:hover {
       background-color: #f3f7ff;
       cursor: pointer;
@@ -32,6 +49,10 @@
   }
 
   .list-as-table>.file {
+
+    &:last-child {
+      border-bottom: 0;
+    }
 
     &>div:first-child {
       @include responsive-width(75%);
@@ -80,6 +101,19 @@
 
             &>div>div:first-child {
               padding-left: 60px;
+            }
+
+            &>div>div:last-child {
+
+              &>.list-as-table>.folder,
+              &>.list-as-table>.file {
+
+                &>div>div:first-child {
+                  padding-left: 80px;
+                }
+
+              }
+
             }
 
           }
