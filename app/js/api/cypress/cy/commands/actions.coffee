@@ -346,24 +346,44 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           _(dblclicks).invoke("cancel")
           throw err
 
-    click: (subject, options = {}) ->
+    click: (subject, positionOrX, y, options = {}) ->
       ## TODO handle pointer-events: none
       ## http://caniuse.com/#feat=pointer-events
 
       ## TODO handle if element is removed during mousedown / mouseup
+
+      switch
+        when _.isObject(positionOrX)
+            options = positionOrX
+            position = null
+
+        when _.isObject(y)
+          options = y
+          position = positionOrX
+          y = null
+          x = null
+
+        when _.all [positionOrX, y], _.isFinite
+          position = null
+          x = positionOrX
+
+        when _.isString(positionOrX)
+          position = positionOrX
 
       _.defaults options,
         $el: subject
         log: true
         force: false
         command: null
+        position: position
+        x: x
+        y: y
         errorOnSelect: true
 
       @ensureDom(options.$el)
 
-      win             = @private("window")
-      wait            = 10
-      stopPropagation = MouseEvent.prototype.stopPropagation
+      win  = @private("window")
+      wait = 10
 
       clicks = []
 
@@ -375,8 +395,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         ## timing out from multiple clicks
         @_timeout(wait, true)
 
-        mdownCancelled = mupCancelled = clickCancelled = null
-        mdownEvt = mupEvt = clickEvt = null
+        domEvents = {}
         $previouslyFocusedEl = null
 
         if options.log
@@ -396,9 +415,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         ## 2. check to figure out the element listed at those coordinates
         ## 3. if this element is ourself or our descendents, click whatever was returned
         ## 4. else throw an error because something is covering us up
-        if options.force isnt true
-          @ensureVisibility $el, options.command
-
         getFirstFocusableEl = ($el) ->
           return $el if $el.is(focusable)
 
@@ -410,65 +426,9 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
           getFirstFocusableEl($el.parent())
 
-        issueMouseDown = ($elToClick, coords) =>
-          mdownEvt = new MouseEvent "mousedown", {
-            bubbles: true
-            cancelable: true
-            view: win
-            clientX: coords.x
-            clientY: coords.y
-            buttons: 1
-            detail: 1
-          }
-
-          mdownEvt.stopPropagation = ->
-            @_hasStoppedPropagation = true
-            stopPropagation.apply(@, arguments)
-
-          mupEvt = new MouseEvent "mouseup", {
-            bubbles: true
-            cancelable: true
-            view: win
-            clientX: coords.x
-            clientY: coords.y
-            buttons: 0
-            detail: 1
-          }
-
-          mupEvt.stopPropagation = ->
-            @_hasStoppedPropagation = true
-            stopPropagation.apply(@, arguments)
-
-          clickEvt = new MouseEvent "click", {
-            bubbles: true
-            cancelable: true
-            view: win
-            clientX: coords.x
-            clientY: coords.y
-            buttons: 0
-            detail: 1
-          }
-
-          clickEvt.stopPropagation = ->
-            @_hasStoppedPropagation = true
-            stopPropagation.apply(@, arguments)
-
-
-          @command("focused", {log: false}).then ($focused) =>
-            ## record the previously focused element before
-            ## issuing the mousedown because browsers may
-            ## automatically shift the focus to the element
-            ## without firing the focus event
-            $previouslyFocusedEl = $focused
-
-            mdownCancelled = !$elToClick.get(0).dispatchEvent(mdownEvt)
-
-        mdownFocusCallback = ->
-          mdownCausedFocus = true
-
         afterMouseDown = ($elToClick, coords) =>
-          mupCancelled   = !$elToClick.get(0).dispatchEvent(mupEvt)
-          clickCancelled = !$elToClick.get(0).dispatchEvent(clickEvt)
+          domEvents.mouseUp = @Cypress.Mouse.mouseUp($elToClick, coords, win)
+          domEvents.click   = @Cypress.Mouse.click($elToClick, coords, win)
 
           if options.command
             consoleObj = options.command.attributes.onConsole()
@@ -489,24 +449,15 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
               [
                 {
                   name: "MouseDown"
-                  items: {
-                    preventedDefault: mdownCancelled
-                    stoppedPropagation: !!mdownEvt._hasStoppedPropagation
-                  }
+                  items: _(domEvents.mouseDown).pick("preventedDefault", "stoppedPropagation")
                 },
                 {
                   name: "MouseUp"
-                  items: {
-                    preventedDefault: mupCancelled
-                    stoppedPropagation: !!mupEvt._hasStoppedPropagation
-                  }
+                  items: _(domEvents.mouseUp).pick("preventedDefault", "stoppedPropagation")
                 }
                 {
                   name: "Click"
-                  items: {
-                    preventedDefault: clickCancelled
-                    stoppedPropagation: !!clickEvt._hasStoppedPropagation
-                  }
+                  items: _(domEvents.click).pick("preventedDefault", "stoppedPropagation")
                 }
               ]
 
@@ -521,6 +472,15 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           return null
 
         findElByCoordinates = ($el) =>
+          if options.force isnt true
+            try
+              @ensureVisibility $el, options.command
+            catch err
+              retry = ->
+                findElByCoordinates($el)
+
+              options.error = err
+              return @_retry(retry, options)
 
           coordsObj = (coords, $el) ->
             {
@@ -598,7 +558,13 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             ## in the viewport
             $el.get(0).scrollIntoView() if scrollIntoView
 
-            coords = @getCoordinates($el)
+            if options.x and options.y
+              coords = @getRelativeCoordinates($el, options.x, options.y)
+            else
+              try
+                coords = @getCoordinates($el, options.position)
+              catch err
+                @throwErr(err, options.command)
 
             ## if we're forcing this click event
             ## just immediately send it up
@@ -636,12 +602,19 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           .then (obj) =>
             {$elToClick, coords} = obj
 
-            issueMouseDown($elToClick, coords).then =>
+            @command("focused", {log: false}).then ($focused) =>
+              ## record the previously focused element before
+              ## issuing the mousedown because browsers may
+              ## automatically shift the focus to the element
+              ## without firing the focus event
+              $previouslyFocusedEl = $focused
+
+              domEvents.mouseDown = @Cypress.Mouse.mouseDown($elToClick, coords, win)
 
               ## if mousedown was cancelled then
               ## just resolve after mouse down and dont
               ## send a focus event
-              if mdownCancelled
+              if domEvents.mouseDown.preventedDefault
                 afterMouseDown($elToClick, coords)
               else
                 ## retrieve the first focusable $el in our parent chain

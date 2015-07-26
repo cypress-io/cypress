@@ -1,5 +1,11 @@
 do ($Cypress, _) ->
 
+  normalizeCoords = (x, y) ->
+    {
+      x: Math.floor(x)
+      y: Math.floor(y)
+    }
+
   $Cypress.Cy.extend
     getElementAtCoordinates: (x, y) ->
       ## the coords we receive are absolute coordinates from
@@ -24,7 +30,7 @@ do ($Cypress, _) ->
 
       return el
 
-    getCenterCoordinates: ($el) ->
+    getBoundingClientRect: ($el) ->
       ## getBoundingClientRect ensures rotatation
       ## is factored into calculations
       ## which means we dont have to do any math, yay!
@@ -47,21 +53,45 @@ do ($Cypress, _) ->
         width  = $el.outerWidth()
         height = $el.outerHeight()
 
-      {
-        x: Math.floor(offset.left + width / 2)
-        y: Math.floor(offset.top + height / 2)
-      }
+    getCenterCoordinates: (rect) ->
+      x = rect.left + rect.width / 2
+      y = rect.top + rect.height / 2
+      normalizeCoords(x, y)
+
+    getTopLeftCoordinates: (rect) ->
+      x = rect.left
+      y = rect.top
+      normalizeCoords(x, y)
+
+    getTopRightCoordinates: (rect) ->
+      x = rect.left + rect.width
+      y = rect.top
+      normalizeCoords(x, y)
+
+    getBottomLeftCoordinates: (rect) ->
+      x = rect.left
+      y = rect.top + rect.height
+      normalizeCoords(x, y)
+
+    getBottomRightCoordinates: (rect) ->
+      x = rect.left + rect.width
+      y = rect.top + rect.height
+      normalizeCoords(x, y)
+
+    getRelativeCoordinates: ($el, x, y) ->
+      rect = @getBoundingClientRect($el)
+      x    = rect.left + x
+      y    = rect.top + y
+      normalizeCoords(x, y)
 
     getCoordinates: ($el, position = "center") ->
+      rect = @getBoundingClientRect($el)
+
       switch position
-        when "center"       then @getCenterCoordinates($el)
-        when "topLeft"
-          return
-        when "topRight"
-          return
-        when "bottomLeft"
-          return
-        when "bottomRight"
-          return
+        when "center"       then @getCenterCoordinates(rect)
+        when "topLeft"      then @getTopLeftCoordinates(rect)
+        when "topRight"     then @getTopRightCoordinates(rect)
+        when "bottomLeft"   then @getBottomLeftCoordinates(rect)
+        when "bottomRight"  then @getBottomRightCoordinates(rect)
         else
-          throw new Error("position may only be center, topLeft, topRight, bottomLeft, or bottomRight")
+          throw new Error("Invalid position argument: '#{position}'. Position may only be center, topLeft, topRight, bottomLeft, or bottomRight.")

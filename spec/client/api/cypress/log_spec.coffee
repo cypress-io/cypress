@@ -306,6 +306,15 @@ describe "$Cypress.Log API", ->
 
             @Cypress.Log.command({})
 
+          it "sets url to private url", (done) ->
+            @cy.private("url", "www.github.com")
+
+            @Cypress.on "log", (obj) ->
+              expect(obj.get("url")).to.eq "www.github.com"
+              done()
+
+            @Cypress.Log.command({})
+
           it "sets testId to runnable.id", (done) ->
             @cy.private("runnable", {id: 123})
 
@@ -362,6 +371,7 @@ describe "$Cypress.Log API", ->
             @cy.on "fail", (err) =>
               expect(@log.attributes.onConsole()).to.deep.eq {
                 Command: "get"
+                Elements: 0
                 Returned: undefined
                 Error: err.toString()
               }
@@ -407,6 +417,9 @@ describe "$Cypress.Log API", ->
                 expect(@log.attributes.onConsole()).to.deep.eq {
                   Command: "contains"
                   Content: "asdfasdfasdfasdf"
+                  Elements: undefined
+                  Returned: undefined
+                  Options: null
                   "Applied To": $Cypress.Utils.getDomElements(btns)
                   Error: err.toString()
                 }
@@ -422,6 +435,9 @@ describe "$Cypress.Log API", ->
                 expect(@log.attributes.onConsole()).to.deep.eq {
                   Command: "contains"
                   Content: "asdfasdfasdfasdf"
+                  Elements: undefined
+                  Returned: undefined
+                  Options: null
                   "Applied To": getFirstSubjectByName.call(@, "eq").get(0)
                   Error: err.toString()
                 }

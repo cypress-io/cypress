@@ -13,3 +13,4 @@ build
 lib/secret_sauce.bin
 cache
 spec/fixtures/nw/cypress.zip
+.vagrant

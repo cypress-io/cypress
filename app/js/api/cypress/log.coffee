@@ -59,6 +59,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
     log: (Cypress, cy, instrument, obj) ->
       _.defaults obj,
+        url:              cy.private("url")
         hookName:         cy.private("hookName")
         testId:           cy.private("runnable").id
         viewportWidth:    cy.private("viewportWidth")

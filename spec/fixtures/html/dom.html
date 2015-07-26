@@ -105,6 +105,18 @@
 
       <input type="submit" value="input contains submit" />
 
+      <form id="input-type-submit">
+        <a href="#">
+          <input type="submit" value="click me" />
+        </a>
+      </form>
+
+      <form id="button-inside-a">
+        <button>
+          <span>click button</span>
+        </button>
+      </form>
+
       <form id="click-me">
         <a href="#">
           <span>click me 1</span>
@@ -314,6 +326,28 @@
         <li>quux</li>
       </ul>
       <div id="massively-long-div" style="height: 500px; width: 200px; background-color: gray;"></div>
+      <div id="form-header-region">
+        <div>
+          <div id="header" class="navbar navbar-green">
+            <div class="navbar-header">
+              <ul>
+                <li>
+                  <span id="homebutton" data-js="done" class="btn btn-no-bg full-screen-btn pull-left navbar-btn" style="display: block;"><i class="fa fa-arrow-circle-o-left"></i> Done</span>
+                </li>
+                <li>
+                  <span id="backbutton" data-js="back" class="btn btn-no-bg full-screen-btn pull-left navbar-btn" style="display: none;"><i class="fa fa-caret-left"></i> Back</span>
+                </li>
+              </ul>
+              <div class="form-template-name-wrapper">
+                <div class="form-template-name">
+                  EyeProtection -
+                  129083
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </body>
 </html>
