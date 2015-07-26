@@ -1,6 +1,6 @@
 <div>
   <div>
-    <i class="fa fa-folder-o"></i>
+    <i class="fa fa-folder-open-o"></i>
     <%= @name %>
   </div>
   <div>
