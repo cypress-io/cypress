@@ -1,6 +1,7 @@
 <form class="form-inline">
-  <div class="form-group">
+  <div class="form-group search-bar">
     <label class="sr-only" for="search-files">Search Test Files</label>
     <input type="search" class="form-control" id="search-files" placeholder="Search files...">
+    <i class="fa fa-search"></i>
   </div>
 </form>

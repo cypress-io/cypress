@@ -23,3 +23,17 @@
     float: right;
   }
 }
+
+.search-bar {
+  position: relative;
+
+  input {
+    padding-left: 30px;
+  }
+
+  i {
+    position: absolute;
+    top: 10px;
+    left: 12px;
+  }
+}
