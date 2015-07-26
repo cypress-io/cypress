@@ -1,117 +1,117 @@
-#organize-page {
+.outer-files-container {
+  @include list-columns(100%);
+  margin-bottom: 0;
+}
 
-  .outer-files-container {
-    @include list-columns(100%);
-    margin-bottom: 0;
+.all-files-container {
+  margin-top: 50px;
+}
+
+.file, .folder {
+  color: #69727e;
+
+  i {
+    color: #476fc9;
+    margin-right: 5px;
+  }
+}
+
+.folder {
+  font-weight: 600;
+
+  i {
+    font-size: 14px;
   }
 
-  .file, .folder {
-    color: #69727e;
+  &>div>div {
+    padding-bottom: 0;
+  }
+}
 
-    i {
-      color: #476fc9;
-      margin-right: 5px;
-    }
+
+.file {
+  font-weight: 300;
+  border-bottom: 1px dotted #eeeeee;
+
+  i {
+    font-size: 12px;
   }
 
-  .folder {
-    font-weight: 600;
+  &:hover {
+    background-color: #f3f7ff;
+    cursor: pointer;
+  }
+}
 
-    i {
-      font-size: 14px;
-    }
+.list-as-table>.folder {
 
-    &>div>div {
-      padding-bottom: 0;
-    }
+  &>div>div:last-child {
+    padding: 0;
+  }
+}
+
+.list-as-table>.file {
+
+  &:last-child {
+    border-bottom: 0;
   }
 
-
-  .file {
-    font-weight: 300;
-    border-bottom: 1px dotted #eeeeee;
-
-    i {
-      font-size: 12px;
-    }
-
-    &:hover {
-      background-color: #f3f7ff;
-      cursor: pointer;
-    }
+  &>div:first-child {
+    @include responsive-width(75%);
   }
 
-  .list-as-table>.folder {
+  &>div:last-child {
+    @include responsive-width(25%);
+    text-align: right;
+    color: #bdc0c5;
+  }
+}
 
-    &>div>div:last-child {
-      padding: 0;
-    }
+.files-list-header {
+  @include list-columns(75%, 25%);
+  font-weight: bold;
+
+  &>li>div:last-child {
+    text-align: right;
   }
 
-  .list-as-table>.file {
+}
 
-    &:last-child {
-      border-bottom: 0;
-    }
 
-    &>div:first-child {
-      @include responsive-width(75%);
-    }
+// need to refactor to be calculated using javascript
+.outer-files-container.list-as-table>.folder,
+.outer-files-container.list-as-table>.file {
 
-    &>div:last-child {
-      @include responsive-width(25%);
-      text-align: right;
-      color: #bdc0c5;
-    }
+  &>div>div:first-child {
+    padding-left: 20px;
+    padding-right: 20px;
   }
 
-  .files-list-header {
-    @include list-columns(75%, 25%);
-    font-weight: bold;
+  &>div>div:last-child {
 
-    &>li>div:last-child {
-      text-align: right;
-    }
+    &>.list-as-table>.folder,
+    &>.list-as-table>.file {
 
-  }
+      &>div>div:first-child {
+        padding-left: 40px;
+      }
 
+      &>div>div:last-child {
 
-  // need to refactor to be calculated using javascript
-  .outer-files-container.list-as-table>.folder,
-  .outer-files-container.list-as-table>.file {
+        &>.list-as-table>.folder,
+        &>.list-as-table>.file {
 
-    &>div>div:first-child {
-      padding-left: 20px;
-      padding-right: 20px;
-    }
+          &>div>div:first-child {
+            padding-left: 60px;
+          }
 
-    &>div>div:last-child {
+          &>div>div:last-child {
 
-      &>.list-as-table>.folder,
-      &>.list-as-table>.file {
+            &>.list-as-table>.folder,
+            &>.list-as-table>.file {
 
-        &>div>div:first-child {
-          padding-left: 40px;
-        }
-
-        &>div>div:last-child {
-
-          &>.list-as-table>.folder,
-          &>.list-as-table>.file {
-
-            &>div>div:first-child {
-              padding-left: 60px;
-            }
-
-            &>div>div:last-child {
-
-              &>.list-as-table>.folder,
-              &>.list-as-table>.file {
-
-                &>div>div:first-child {
-                  padding-left: 80px;
-                }
-
+              &>div>div:first-child {
+                padding-left: 80px;
               }
 
             }
@@ -124,8 +124,7 @@
 
     }
 
-  } // end of folder/files styles
+  }
 
+} // end of folder/files styles
 
-
-}

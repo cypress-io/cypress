@@ -8,7 +8,7 @@
         </div>
       </div>
       <div id="recent-files-region"></div>
-      <div id="all-files-region"></div>
+      <div id="all-files-region" class="all-files-container"></div>
     </div>
   </div>
 </div>
