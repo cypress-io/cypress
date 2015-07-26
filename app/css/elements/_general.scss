@@ -51,6 +51,12 @@ ul {
 #cy-wrapper {
   height: 100%;
 
+  &.collapsed {
+    #main-region {
+      margin-left: 55px;
+    }
+  }
+
   &.satellite-mode {
     #main-region {
       margin-left: 0;
@@ -62,6 +68,7 @@ ul {
   }
 
   #main-region {
+    margin-left: 200px;
     position: relative;
     padding: 0;
     overflow: auto;
