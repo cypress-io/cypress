@@ -15,8 +15,8 @@ fs.readJson "./package.json", (err, pkg) ->
     .description("Installs Cypress")
 
   program
-    .command("run <project>")
-    .usage("<project> [options]")
+    .command("run [project]")
+    .usage("[project] [options]")
     .description("Runs Cypress Tests Headlessly")
     .option("-c, --cypress <path>",      "path to a specific executable Cypress App.")
     .option("-s, --spec <spec>",         "runs a specific spec file. defaults to 'all'")
@@ -29,9 +29,7 @@ fs.readJson "./package.json", (err, pkg) ->
     .description("Runs Cypress in CI Mode")
     .option("-r, --reporter <reporter>", "runs a specific mocha reporter. pass a path to use a custom reporter. defaults to 'spec'")
     .action (opts) ->
-      opts = parseOpts(opts)
-      opts.ci = true
-      require("./commands/run")(null, opts)
+      require("./commands/ci")(parseOpts(opts))
 
   program.parse(process.argv)
 

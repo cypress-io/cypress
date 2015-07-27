@@ -16,6 +16,8 @@
   },
   "homepage": "https://github.com/cypress-io/cypress-cli",
   "dependencies": {
+    "bluebird": "^2.9.34",
+    "chalk": "^1.1.0",
     "coffee-script": "^1.9.3",
     "commander": "^2.8.1",
     "fs-extra": "^0.22.1",
