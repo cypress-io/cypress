@@ -620,10 +620,18 @@ describe "Routes", ->
           .get("/index.html")
           .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
           .expect(404, "404 not found")
-
           .end(done)
 
     context "headers", ->
+      describe "when unload is true", ->
+        it "automatically redirects back to clientRoute", (done) ->
+          supertest(@app)
+            .get("/_")
+            .set("Cookie", "__cypress.unload=true; __cypress.initial=true; __cypress.remoteHost=http://localhost:8080")
+            .expect(302)
+            .expect "location", "/__/"
+            .end(done)
+
       describe "when initial is true", ->
         it "sets back to false", (done) ->
           nock("http://localhost:8080")

@@ -522,6 +522,12 @@ SecretSauce.RemoteInitial =
   _handle: (req, res, next, Domain) ->
     { _ } = SecretSauce
 
+    ## if we have an unload header it means
+    ## our parent app has been navigated away
+    ## directly and we need to automatically redirect
+    ## to the clientRoute
+    if req.cookies["__cypress.unload"]
+      return res.redirect @app.get("cypress").clientRoute
     d = Domain.create()
 
     d.on 'error', (e) => @errorHandler(e, req, res)
