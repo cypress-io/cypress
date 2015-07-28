@@ -1,5 +1,4 @@
 _       = require("lodash")
-path    = require("path")
 os      = require("os")
 fs      = require("fs-extra")
 cp      = require("child_process")
@@ -18,24 +17,10 @@ class Run
     _.defaults options,
       spec:     null
       reporter: "spec"
-      cypress:  @getPathToExecutable()
+      cypress:  utls.getPathToExecutable()
       project:  path.resolve(process.cwd(), project)
 
     @run(options)
-
-  getPathToExecutable: ->
-    path.join(utils.getDefaultAppFolder(), @getPlatformExecutable())
-
-  getPathToUserExecutable: ->
-    path.join(utils.getDefaultAppFolder(), @getPlatformExecutable().split("/")[0])
-
-  getPlatformExecutable: ->
-    switch p = os.platform()
-      when "darwin"  then "Cypress.app/Contents/MacOS/cypress"
-      when "linux64" then "Cypress"
-      when "win64"   then "Cypress.exe"
-      else
-        throw new Error("Platform: '#{p}' is not supported.")
 
   _cypressSmokeTest: (pathToCypress) ->
     new Promise (resolve, reject) ->
@@ -63,7 +48,7 @@ class Run
         console.log("")
         console.log(chalk.bgRed.white(" -Error- "))
         console.log(chalk.red.underline("The Cypress App could not be found."))
-        console.log("Expected the app to be found here:", chalk.blue(@getPathToUserExecutable()))
+        console.log("Expected the app to be found here:", chalk.blue(utils.getPathToUserExecutable()))
         console.log("")
         console.log(chalk.yellow("To fix this do (one) of the following:"))
         console.log("1. Reinstall Cypress with:", chalk.cyan("cypress install"))
