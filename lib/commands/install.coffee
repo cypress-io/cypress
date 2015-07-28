@@ -1,9 +1,13 @@
 _             = require("lodash")
 fs            = require("fs")
 chalk         = require("chalk")
+path          = require("path")
 request       = require("request")
 progress      = require("request-progress")
 ProgressBar   = require("progress")
+through2      = require("through2")
+yauzl         = require("yauzl")
+Decompress    = require("decompress")
 Promise       = require("bluebird")
 utils         = require("../utils")
 
@@ -19,16 +23,22 @@ class Install
       current:        0
       total:          100
       width:          30
-      throttle:       300
+      throttle:       100
       zipDestination: "./cypress.zip"
       destination:    utils.getDefaultAppFolder()
 
-    @download(options).then(@unzip)
+    @download(options)
+      # .catch (err) ->
+        ## could not download
+      .then(@unzip)
+      # .catch (err) ->
+        ## could not unzip
+      .then(@finish)
 
   download: (options) ->
     new Promise (resolve, reject) ->
       ascii = [
-        chalk.white("1.")
+        chalk.white("  -")
         chalk.blue("Downloading Cypress")
         chalk.yellow("[:bar]")
         chalk.white(":percent")
@@ -41,7 +51,7 @@ class Install
       })
 
       progress(request(url), {
-        throttle: 300
+        throttle: options.throttle
       })
 
       .on "progress", (state) ->
@@ -64,9 +74,47 @@ class Install
         if diff = options.total - options.percent
           bar.tick(diff)
 
-      resolve(options)
+        resolve(options)
 
   unzip: (options) ->
-    console.log "unzipping", options
+    new Promise (resolve, reject) ->
+
+      resolve = _.partial(resolve, options)
+
+      ascii = [
+        chalk.white("  -")
+        chalk.blue("Unzipping Cypress  ")
+        chalk.yellow("[:bar]")
+        chalk.white(":percent")
+        chalk.gray(":etas")
+      ]
+
+      yauzl.open options.zipDestination, (err, zipFile) ->
+        return reject(err) if err
+
+        total = zipFile.entryCount
+
+        bar = new ProgressBar(ascii.join(" "), {
+          total: total
+          width: options.width
+        })
+
+        new Decompress()
+          .src(options.zipDestination)
+          .dest(process.cwd())
+          .use(Decompress.zip())
+          .use through2.obj (file, enc, cb) ->
+            bar.tick(1)
+            cb(null, file)
+          .run(resolve)
+
+  finish: (options) ->
+    ascii = [
+      chalk.white("  -")
+      chalk.blue("Finished Installing")
+      chalk.green(utils.getPathToUserExecutable())
+    ]
+
+    console.log ascii.join(" ")
 
 module.exports = Install

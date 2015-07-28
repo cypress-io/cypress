@@ -21,11 +21,14 @@
     "chalk": "^1.1.0",
     "coffee-script": "^1.9.3",
     "commander": "^2.8.1",
+    "decompress": "^2.3.0",
     "fs-extra": "^0.22.1",
     "lodash": "^3.10.0",
     "progress": "^1.1.8",
     "request": "^2.60.0",
-    "request-progress": "^0.3.1"
+    "request-progress": "^0.3.1",
+    "through2": "^2.0.0",
+    "yauzl": "^2.3.1"
   },
   "bin": {
     "cypress": "bin/cypress"
