@@ -25,11 +25,12 @@ program
     require("./commands/run")(project, parseOpts(opts))
 
 program
-  .command("ci")
+  .command("ci [key]")
+  .usage("[key] [options]")
   .description("Runs Cypress in CI Mode")
   .option("-r, --reporter <reporter>", "runs a specific mocha reporter. pass a path to use a custom reporter. defaults to 'spec'")
-  .action (opts) ->
-    require("./commands/ci")(parseOpts(opts))
+  .action (key, opts) ->
+    require("./commands/ci")(key, parseOpts(opts))
 
 program.parse(process.argv)
 

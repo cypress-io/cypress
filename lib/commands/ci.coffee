@@ -3,10 +3,10 @@ path = require("path")
 os   = require("os")
 
 class Ci
-  constructor: (options = {}) ->
+  constructor: (key options = {}) ->
     if not (@ instanceof Ci)
-      return new Ci(projectRoot, options)
+      return new Ci(key, options)
 
-    @projectRoot = process.cwd()
+    @key = key
 
 module.exports = Ci
