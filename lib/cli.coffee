@@ -3,13 +3,16 @@ program = require("commander")
 pkg     = require("../package.json")
 
 parseOpts = (opts) ->
-  _.pick(opts, "cypress", "spec", "reporter")
+  _.pick(opts, "cypress", "spec", "reporter", "path")
 
 program.version(pkg.version)
 
 program
   .command("install")
   .description("Installs Cypress")
+  .option("-d, --destination <path>", "destination path to extract and install Cypress to.")
+  .action (opts) ->
+    require("./commands/install")(parseOpts(opts))
 
 program
   .command("run [project]")
