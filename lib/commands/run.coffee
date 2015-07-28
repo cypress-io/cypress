@@ -6,29 +6,34 @@ cp      = require("child_process")
 path    = require("path")
 chalk   = require("chalk")
 Promise = require("bluebird")
+utils   = require("../utils")
 
 fs = Promise.promisifyAll(fs)
 
 class Run
+  constructor: (project = ".", options = {}) ->
+    if not (@ instanceof Run)
+      return new Run(project, options)
+
+    _.defaults options,
+      spec:     null
+      reporter: "spec"
+      cypress:  @getPathToExecutable()
+      project:  path.resolve(process.cwd(), project)
+
+    @run(options)
+
   getPathToExecutable: ->
-    path.join(@getDefaultFolder(), @getPlatformExecutable())
+    path.join(utils.getDefaultAppFolder(), @getPlatformExecutable())
 
   getPathToUserExecutable: ->
-    path.join(@getDefaultFolder(), @getPlatformExecutable().split("/")[0])
+    path.join(utils.getDefaultAppFolder(), @getPlatformExecutable().split("/")[0])
 
   getPlatformExecutable: ->
     switch p = os.platform()
       when "darwin"  then "Cypress.app/Contents/MacOS/cypress"
       when "linux64" then "Cypress"
       when "win64"   then "Cypress.exe"
-      else
-        throw new Error("Platform: '#{p}' is not supported.")
-
-  getDefaultFolder: ->
-    switch p = os.platform()
-      when "darwin"  then "/Applications"
-      when "linux64" then "/usr/local"
-      # when "win64"   then "i/dont/know/yet"
       else
         throw new Error("Platform: '#{p}' is not supported.")
 
@@ -85,17 +90,5 @@ class Run
         args.push("--spec", options.spec)
 
       cp.spawn cypress, args, {stdio: "inherit"}
-
-  constructor: (project = ".", options = {}) ->
-    if not (@ instanceof Run)
-      return new Run(project, options)
-
-    _.defaults options,
-      spec:     null
-      reporter: "spec"
-      cypress:  @getPathToExecutable()
-      project:  path.resolve(process.cwd(), project)
-
-    @run(options)
 
 module.exports = Run
