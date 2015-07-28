@@ -11,7 +11,7 @@ Decompress    = require("decompress")
 Promise       = require("bluebird")
 utils         = require("../utils")
 
-url = "http://s3.amazonaws.com/dist.cypress.io/0.9.5/osx64/cypress.zip"
+url = "http://download.cypress.io/latest"
 
 class Install
   constructor: (options = {}) ->
@@ -35,8 +35,15 @@ class Install
         ## could not unzip
       .then(@finish)
 
+  getUrl: ->
+    ## append os to url
+    if os = utils.getOs()
+      "#{url}?os=#{os}"
+    else
+      url
+
   download: (options) ->
-    new Promise (resolve, reject) ->
+    new Promise (resolve, reject) =>
       ascii = [
         chalk.white("  -")
         chalk.blue("Downloading Cypress")
@@ -50,7 +57,7 @@ class Install
         width: options.width
       })
 
-      progress(request(url), {
+      progress(request(@getUrl()), {
         throttle: options.throttle
       })
 
@@ -101,7 +108,7 @@ class Install
 
         new Decompress()
           .src(options.zipDestination)
-          .dest(process.cwd())
+          .dest(options.destination)
           .use(Decompress.zip())
           .use through2.obj (file, enc, cb) ->
             bar.tick(1)
