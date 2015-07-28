@@ -3,16 +3,31 @@ path    = require("path")
 os      = require("os")
 fs      = require("fs-extra")
 cp      = require("child_process")
+path    = require("path")
 chalk   = require("chalk")
 Promise = require("bluebird")
 
 fs = Promise.promisifyAll(fs)
 
 class Run
-  getDefaultPathToCypress: ->
+  getPathToExecutable: ->
+    path.join(@getDefaultFolder(), @getPlatformExecutable())
+
+  getPathToUserExecutable: ->
+    path.join(@getDefaultFolder(), @getPlatformExecutable().split("/")[0])
+
+  getPlatformExecutable: ->
     switch p = os.platform()
-      when "darwin"  then "/Applications/Cypress.app/Contents/MacOS/cypress"
-      when "linux64" then "/usr/local/bin"
+      when "darwin"  then "Cypress.app/Contents/MacOS/cypress"
+      when "linux64" then "Cypress"
+      when "win64"   then "Cypress.exe"
+      else
+        throw new Error("Platform: '#{p}' is not supported.")
+
+  getDefaultFolder: ->
+    switch p = os.platform()
+      when "darwin"  then "/Applications"
+      when "linux64" then "/usr/local"
       # when "win64"   then "i/dont/know/yet"
       else
         throw new Error("Platform: '#{p}' is not supported.")
@@ -37,10 +52,19 @@ class Run
 
   _fileExistsAtPath: (pathToCypress) ->
     fs.statAsync(pathToCypress)
+      .bind(@)
       .return(pathToCypress)
       .catch (err) ->
-        console.log(chalk.bgRed.white(" Error: "), chalk.red.underline("Cypress App could not be found."))
-        console.log("Searched in path:", chalk.blue(pathToCypress))
+        console.log("")
+        console.log(chalk.bgRed.white(" -Error- "))
+        console.log(chalk.red.underline("The Cypress App could not be found."))
+        console.log("Expected the app to be found here:", chalk.blue(@getPathToUserExecutable()))
+        console.log("")
+        console.log(chalk.yellow("To fix this do (one) of the following:"))
+        console.log("1. Reinstall Cypress with:", chalk.cyan("cypress install"))
+        console.log("2. If Cypress is stored in another location, move it to the expected location")
+        console.log("3. Specify the existing location of Cypress with:", chalk.cyan("cypress run --cypress path/to/cypress"))
+        console.log("")
         process.exit()
 
   verifyCypress: (pathToCypress) ->
@@ -69,7 +93,7 @@ class Run
     _.defaults options,
       spec:     null
       reporter: "spec"
-      cypress:  @getDefaultPathToCypress()
+      cypress:  @getPathToExecutable()
       project:  path.resolve(process.cwd(), project)
 
     @run(options)
