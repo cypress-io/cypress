@@ -82,6 +82,7 @@
     "bluebird": "2.9.27",
     "body-parser": "1.12.4",
     "browserify": "6.1.0",
+    "chalk": "^1.1.0",
     "chmodr": "^0.1.0",
     "chokidar": "1.0.1",
     "coffee-script": "1.7.1",

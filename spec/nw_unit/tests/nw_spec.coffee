@@ -370,6 +370,64 @@ module.exports = (parentWindow, gui, loadApp) ->
             expect(view.ui.key.parents(".form-group")).not.to.have.class("has-error")
             done()
 
+  describe.only "API Token Args", ->
+    beforeEach ->
+      nock.disableNetConnect()
+
+      @argsAre = (args) =>
+        loadApp(@, {start: false}).then =>
+          @App.vent.on "app:entities:ready", =>
+            @exit  = @sandbox.stub process, "exit"
+            @write = @sandbox.stub process.stdout, "write"
+
+          @App.start({argv: [].concat(args)})
+
+          # wait for our token to come back
+          # because its async
+          Promise.delay(100)
+
+    afterEach ->
+      nock.cleanAll()
+      nock.enableNetConnect()
+
+    context "--key", ->
+      it "writes out key and exits", ->
+        nock(Routes.api())
+          .get("/token")
+          .reply(200, {
+            api_token: "foo-bar-baz-123"
+          })
+
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          @argsAre("--key").then =>
+            expect(@write).to.be.calledWith("foo-bar-baz-123\n")
+            expect(@exit).to.be.calledOnce
+
+      it "requires a session_token", ->
+        cache.setUser({name: "Brian"}).then =>
+          @argsAre("--key").then =>
+            expect(@write).not.to.be.calledWith("foo-bar-baz-123\n")
+            expect(@exit).to.be.calledWith(1)
+
+    context "--new-key", ->
+      it "writes out key and exits", ->
+        nock(Routes.api())
+          .put("/token")
+          .reply(200, {
+            api_token: "new-key-987"
+          })
+
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          @argsAre("--new-key").then =>
+            expect(@write).to.be.calledWith("new-key-987\n")
+            expect(@exit).to.be.calledOnce
+
+      it "requires a session_token", ->
+        cache.setUser({name: "Brian"}).then =>
+          @argsAre("--new-key").then =>
+            expect(@write).not.to.be.calledWith("new-key-987\n")
+            expect(@exit).to.be.calledWith(1)
+
   ## other tests which need writing
   ## 1. logging in (stub the github response)
   ## 2. adding a new project through the UI

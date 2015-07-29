@@ -1,6 +1,6 @@
 @App = do (Backbone, Marionette) ->
 
-  path = require("path")
+  path  = require("path")
 
   parseCoords = (args) ->
     coords = _.find args, (arg) -> _.str.startsWith(arg, "--coords")
@@ -12,10 +12,12 @@
   parseArgv = (options) ->
     _.defaults options,
       env: process.env["NODE_ENV"]
-      debug:     "--debug"      in options.argv
-      updating:  "--updating"   in options.argv
-      smokeTest: "--smoke-test" in options.argv
-      headless:  "--headless"   in options.argv
+      debug:       "--debug"      in options.argv
+      updating:    "--updating"   in options.argv
+      smokeTest:   "--smoke-test" in options.argv
+      headless:    "--headless"   in options.argv
+      key:         "--key"        in options.argv
+      generateKey: "--new-key"    in options.argv
       coords: parseCoords(options.argv)
 
     if "--project" in options.argv
@@ -78,6 +80,9 @@
 
       ## set the current user
       App.execute "set:current:user", user
+
+      if options.key or options.generateKey
+        return App.execute "handle:cli:arguments", options
 
       ## make sure we have a current session
       if user?.session_token
