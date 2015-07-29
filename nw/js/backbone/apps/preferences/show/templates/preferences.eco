@@ -1,0 +1,33 @@
+<div id="preferences">
+  <section>
+    <div class="container">
+      <form class="form-inline">
+        <div class="form-group">
+          <label class="col-xs-4">General Settings:</label>
+          <div class="col-xs-8 checkbox-container">
+            <div class="checkbox-inline">
+              <label>
+                <input type="checkbox"> Start Cypress at login
+              </label>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+  <section>
+    <div class="container">
+      <form class="form-inline">
+        <div class="form-group">
+          <label class="col-xs-4 control-label">Your API Key:</label>
+          <div class="col-xs-8">
+            <input id="api-key" class="form-control col-xs-10 input-sm" type="text" value="asbasdf" readonly>
+            <button type="button" class="btn btn-default btn-sm">
+              <i class="fa fa-refresh"></i>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+</div>

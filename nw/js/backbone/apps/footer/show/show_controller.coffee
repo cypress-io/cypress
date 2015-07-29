@@ -62,6 +62,9 @@
       @listenTo bottomView, "about:clicked", ->
         App.execute "gui:about"
 
+      @listenTo bottomView, "preferences:clicked", ->
+        App.execute "gui:preferences"
+
       @show bottomView, region: region
 
     getLayoutView: ->

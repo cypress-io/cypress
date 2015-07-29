@@ -212,6 +212,24 @@ module.exports = (parentWindow, gui, loadApp) ->
         expect(@win.title).to.eq "Updates"
         done()
 
+  describe.only "Preferences Window", ->
+    beforeEach ->
+      cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+        loadApp(@)
+
+    # afterEach ->
+      # @win?.close()
+
+    it "can click Preferences in footer menu to bring up Preferences Page", (done) ->
+      @$("#footer [data-toggle='dropdown']").click()
+      @$(".dropdown-menu [data-preferences]").click()
+
+      @App.vent.on "start:preferences:app", (region, @win) =>
+        # expect(@App.preferencesRegion.$el.find(".version")).to.contain("Version: 0.1.0")
+        # expect(@App.preferencesRegion.currentView.ui.page).to.contain("www.cypress.io")
+        expect(@win.title).to.eq "Preferences"
+        done()
+
   ## other tests which need writing
   ## 1. logging in (stub the github response)
   ## 2. adding a new project through the UI

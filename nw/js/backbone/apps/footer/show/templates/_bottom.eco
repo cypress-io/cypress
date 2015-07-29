@@ -28,7 +28,7 @@
           <a href="#">Check for updates</a>
         </li>
         <li class="divider"></li>
-        <li>
+        <li data-preferences>
           <a href="#">Preferences...</a>
         </li>
         <li class="divider"></li>
