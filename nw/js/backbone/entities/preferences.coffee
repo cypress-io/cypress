@@ -8,6 +8,7 @@
       generatingToken: false
 
     setToken: (token) ->
+      @set "generatingToken", false
       @set "token", token
 
     generateToken: ->

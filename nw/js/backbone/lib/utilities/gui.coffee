@@ -211,14 +211,14 @@
 
       windows.preferences = preferences = App.request "gui:open", "./preferences.html",
         position: "center"
-        width: 450
+        width: 520
         height: 270
         # frame: false
         toolbar: false
         title: "Preferences"
 
       preferences.once "loaded", ->
-        preferences.showDevTools() #if App.config.get("debug")
+        preferences.showDevTools() if App.config.get("debug")
 
         ## grab the preferences region from other window
         $el = $("#preferences-region", preferences.window.document)
