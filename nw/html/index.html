@@ -37,9 +37,10 @@
           booter:  booter
         }
 
-        $(function(){
+        // force App.start to be async
+        setTimeout(function(){
           App.start(opts);
-        })
+        }, 0)
       })
     </script>
   </body>
