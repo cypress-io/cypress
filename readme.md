@@ -2,9 +2,9 @@
 
 This is the CLI for [https://github.com/cypress-io/cypress](Cypress.io).
 
-### What this does
+## What this does
 
-This `CLI` enables you to interact with the Cypress Desktop Application for both local development and CI.
+This `CLI` enables you to interact with the Cypress Desktop Application through the command line. This is helpful for both local development and running Cypress in CI.
 
 For instance you can do common tasks like:
 
@@ -14,13 +14,13 @@ For instance you can do common tasks like:
 - Generating API Keys
 - Adding Projects
 
-### Installation
+## Installation
 
 `npm install -g cypress`
 
 This will make the `cypress` command globally available.
 
-### Available Commands
+## Available Commands
 
 ##### cypress install
 
