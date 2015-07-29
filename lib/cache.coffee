@@ -200,6 +200,19 @@ class Cache extends require("events").EventEmitter
   remove: ->
     fs.removeSync CACHE
 
+  _token: (method, session) ->
+    url = Routes.token()
+    headers = {"X-Session": session}
+    request({method: method, url: url, headers: headers, json: true})
+      .then (resp) ->
+        resp.api_token
+
+  getToken: (session) ->
+    @_token("get", session)
+
+  generateToken: (session) ->
+    @_token("put", session)
+
   ## move this to an auth module
   ## and update NW references
   logIn: (code) ->

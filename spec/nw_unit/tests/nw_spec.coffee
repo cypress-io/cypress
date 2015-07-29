@@ -25,9 +25,11 @@ chai         = require("chai")
 fs           = require("fs")
 cache        = lookup("#{root}lib/cache")
 Log          = lookup("#{root}lib/log")
+Routes       = lookup("#{root}lib/util/routes")
 sinon        = require("sinon")
 sinonChai    = require("sinon-chai")
 sinonPromise = require("sinon-as-promised")
+nock         = require("nock")
 Fixtures     = require("#{root}/spec/server/helpers/fixtures")
 
 fs = Promise.promisifyAll(fs)
@@ -212,23 +214,161 @@ module.exports = (parentWindow, gui, loadApp) ->
         expect(@win.title).to.eq "Updates"
         done()
 
-  describe.only "Preferences Window", ->
+  describe "Preferences Window", ->
+    win = null
+
     beforeEach ->
+      nock.disableNetConnect()
       cache.setUser({name: "Brian", session_token: "abc123"}).then =>
         loadApp(@)
 
-    # afterEach ->
-      # @win?.close()
+    afterEach ->
+      nock.cleanAll()
+      nock.enableNetConnect()
+      win?.close()
 
-    it "can click Preferences in footer menu to bring up Preferences Page", (done) ->
-      @$("#footer [data-toggle='dropdown']").click()
-      @$(".dropdown-menu [data-preferences]").click()
+    context "clicking Preferences in the footer", ->
+      beforeEach ->
+        @setup = (fn) =>
+          @$("#footer [data-toggle='dropdown']").click()
+          @$(".dropdown-menu [data-preferences]").click()
 
-      @App.vent.on "start:preferences:app", (region, @win) =>
-        # expect(@App.preferencesRegion.$el.find(".version")).to.contain("Version: 0.1.0")
-        # expect(@App.preferencesRegion.currentView.ui.page).to.contain("www.cypress.io")
-        expect(@win.title).to.eq "Preferences"
-        done()
+          @App.vent.on "start:preferences:app", (region, window) =>
+            win = window
+            view = @App.preferencesRegion.currentView
+            Promise.delay(100).then =>
+              fn.call(@, view, win)
+
+      it "display Loading... as the token key", (done) ->
+        nock(Routes.api())
+          .get("/token")
+          .delay(10000)
+          .reply(200, {
+            api_token: "foo-bar-baz-123"
+          })
+
+        @setup (view, win) ->
+          expect(view.ui.key).to.have.value("Loading...")
+          expect(view.ui.key.parents(".form-group")).not.to.have.class("has-error")
+          expect(win.title).to.eq "Preferences"
+          done()
+
+      it "displays the token after it is fetched", (done) ->
+        nock(Routes.api())
+          .get("/token")
+          .reply(200, {
+            api_token: "foo-bar-baz-123"
+          })
+
+        @setup (view, win) ->
+          expect(view.ui.key).to.have.value("foo-bar-baz-123")
+          expect(view.ui.key.parents(".form-group")).not.to.have.class("has-error")
+          done()
+
+      it "can generate a new token", (done) ->
+        nock(Routes.api())
+          .get("/token")
+          .reply(200, {
+            api_token: "foo-bar-baz-123"
+          })
+          .put("/token")
+          .delay(500)
+          .reply(200, {
+            api_token: "some-new-token-987"
+          })
+
+        @setup (view, win) ->
+          ## when the token is in flight
+          view.ui.generate.click()
+          expect(view.ui.generate).to.have.attr("disabled")
+          expect(view.ui.generate.find("i")).to.have.class("fa-spin")
+
+          ## when the token comes back
+          view.model.on "change:token", ->
+            expect(view.ui.generate).not.to.have.attr("disabled")
+            expect(view.ui.generate.find("i")).not.to.have.class("fa-spin")
+            expect(view.ui.key).to.have.value("some-new-token-987")
+            done()
+
+      it "displays error if fetching token fails", (done) ->
+        nock(Routes.api())
+          .get("/token")
+          .reply(401)
+
+        @setup (view, win) ->
+          expect(view.ui.generate).not.to.have.attr("disabled")
+          expect(view.ui.generate.find("i")).not.to.have.class("fa-spin")
+          expect(view.ui.key).to.have.value("Loading...")
+          expect(view.$el.find(".help-block")).to.contain("An error occured receiving token.")
+          done()
+
+      it "displays error if generating token fails", (done) ->
+        nock(Routes.api())
+          .get("/token")
+          .reply(200, {
+            api_token: "foo-bar-baz-123"
+          })
+          .put("/token")
+          .reply(401)
+
+        @setup (view, win) ->
+          ## when the token is in flight
+          view.ui.generate.click()
+
+          ## when the token comes back
+          view.model.on "change:error", ->
+            expect(view.ui.generate).not.to.have.attr("disabled")
+            expect(view.ui.generate.find("i")).not.to.have.class("fa-spin")
+            expect(view.ui.key).to.have.value("foo-bar-baz-123")
+            expect(view.$el.find(".help-block")).to.contain("An error occured receiving token.")
+            done()
+
+      it "disables clicking generate while generating", (done) ->
+        nock(Routes.api())
+          .get("/token")
+          .reply(200, {
+            api_token: "foo-bar-baz-123"
+          })
+          .put("/token")
+          .delay(2000)
+          .reply(200, {
+            api_token: "some-new-token-987"
+          })
+
+        @setup (view, win) =>
+          view.ui.generate.click()
+
+          generateToken = @sandbox.spy(view.model, "generateToken")
+
+          setTimeout ->
+            view.ui.generate.click()
+            expect(generateToken).not.to.be.called
+            done()
+          , 100
+
+      it "removes existing errors when generating", (done) ->
+        nock(Routes.api())
+          .get("/token")
+          .reply(500)
+          .put("/token")
+          .delay(500)
+          .reply(200, {
+            api_token: "some-new-token-987"
+          })
+
+        @setup (view, win) ->
+          ## should have initial error due to 500 returned
+          expect(view.ui.key.parents(".form-group")).to.have.class("has-error")
+
+          view.ui.generate.click()
+
+          expect(view.ui.key.parents(".form-group")).not.to.have.class("has-error")
+
+          ## when the token comes back
+          view.model.on "change:token", ->
+            expect(view.ui.key).to.have.value("some-new-token-987")
+            expect(view.ui.key.parents(".form-group")).not.to.have.class("has-error")
+            done()
 
   ## other tests which need writing
   ## 1. logging in (stub the github response)

@@ -68,6 +68,12 @@
 
     getManifest: -> @booter.manifest
 
+    getToken: (user) ->
+      @cache.getToken(user.get("session_token"))
+
+    generateToken: (user) ->
+      @cache.generateToken(user.get("session_token"))
+
     setErrorHandler: ->
       @getLog().setErrorHandler (err) =>
         ## exit if we're in production (blow up)

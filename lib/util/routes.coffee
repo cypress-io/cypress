@@ -6,6 +6,7 @@ api_url = config.app.api_url
 
 routes = {
   api: ""
+  token: "token"
   signin: "signin"
   signout: "signout"
   exceptions: "exceptions"

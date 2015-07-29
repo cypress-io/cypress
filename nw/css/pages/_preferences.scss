@@ -1,5 +1,5 @@
 #preferences {
-  text-align: center;
+  text-align: left;
 
   section {
     padding: 30px 0;
@@ -38,8 +38,16 @@
     padding-right: 7px;
   }
 
+  #api-key-container {
+    text-align: center;
+  }
+
   button:focus {
     outline: 0;
+  }
+
+  p.help-block {
+    text-align: left;
   }
 
 }
