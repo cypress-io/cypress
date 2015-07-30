@@ -5,13 +5,17 @@
   write = (str) ->
     process.stdout.write(str + "\n")
 
+  writeErr = (str, msgs...) ->
+    str = [chalk.red(str)].concat(msgs).join(" ")
+    write(str)
+    process.exit(1)
+
   displayToken = (token) ->
     write(token)
     process.exit()
 
   displayTokenError = ->
-    write("An error occured receiving token.")
-    process.exit(1)
+    writeErr("An error occured receiving token.")
 
   ensureSessionToken = (user) ->
     ## bail if we have a session_token
@@ -26,11 +30,15 @@
       user = App.currentUser
 
       switch
+        when options.ci           then @ci(options)
         when options.getKey       then @getKey(user)
         when options.generateKey  then @generateKey(user)
+        # when options.openProject  then @openProject(user, options)
+        when options.runProject   then @runProject(user, options)
+        else
+          @startGuiApp(options)
 
     getKey: (user) ->
-      ## require a session_token
       if ensureSessionToken(user)
 
         ## log out the API Token
@@ -39,13 +47,41 @@
           .catch(displayTokenError)
 
     generateKey: (user) ->
-      ## require a session_token
       if ensureSessionToken(user)
 
         ## generate a new API Token
         App.config.generateToken(user)
           .then(displayToken)
           .catch(displayTokenError)
+
+    runProject: (user, options) ->
+      if ensureSessionToken(user)
+        App.vent.trigger "start:projects:app", {
+          spec:        options.spec
+          reporter:    options.reporter
+          projectPath: options.projectPath
+          onProjectNotFound: (path) ->
+            writeErr("Cannot run project because it was not found:", chalk.blue(path))
+        }
+
+    ci: (options) ->
+      ## bail if we arent in a recognized CI environment
+      ## add project first
+      ## then runProject
+
+    startGuiApp: (options) ->
+      if options.session
+        ## if have it, start projects
+        App.vent.trigger "start:projects:app"
+      else
+        ## else login
+        App.vent.trigger "start:login:app"
+
+      ## display the footer
+      App.vent.trigger "start:footer:app"
+
+      ## display the GUI
+      App.execute "gui:display", options.coords
 
   App.commands.setHandler "handle:cli:arguments", (options = {}) ->
     API.parseCliOptions(options)

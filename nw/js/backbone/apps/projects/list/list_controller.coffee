@@ -3,6 +3,10 @@
   class List.Controller extends App.Controllers.Application
 
     initialize: (params) ->
+      _.defaults params,
+        projectPath: null
+        onProjectNotFound: ->
+
       projects = App.request "project:entities"
 
       user = App.request "current:user"
@@ -16,9 +20,8 @@
         @listenTo projectsView, "show", ->
           project = projects.getProjectByPath(projectPath)
 
-          ## TODO handle if project cannot be found by path
-          ## perhaps try to add the project first?
-          throw new Error("Project could not be found by path: #{projectPath}") if not project
+          ## if we couldnt find this project then bail
+          return params.onProjectNotFound(projectPath) if not project
 
           startProject(project, true)
       else

@@ -2,7 +2,7 @@ _        = require("lodash")
 path     = require("path")
 minimist = require("minimist")
 
-args     = "apiKey smokeTest getKey generateKey ci silent debug updating headless ping coords".split(" ")
+args     = "apiKey smokeTest getKey generateKey runProject spec reporter ci silent debug updating headless ping coords".split(" ")
 
 parseCoords = (cords) ->
   [x, y] = coords.split("x")
@@ -11,10 +11,11 @@ parseCoords = (cords) ->
 module.exports = (options) ->
   argv = minimist(options.argv, {
     alias: {
-      "api-key":    "apiKey"
-      "smoke-test": "smokeTest"
-      "get-key":    "getKey"
-      "new-key":    "generateKey"
+      "api-key":     "apiKey"
+      "smoke-test":  "smokeTest"
+      "get-key":     "getKey"
+      "new-key":     "generateKey"
+      "run-project": "runProject"
     }
   })
 
@@ -25,8 +26,8 @@ module.exports = (options) ->
   if options.coords
     options.coords = parseCoords(options.coords)
 
-  if options.project
-    options.projectPath = path.resolve(process.cwd(), options.project)
+  if options.runProject
+    options.projectPath = path.resolve(process.cwd(), options.runProject)
 
   if options.updating
     _.extend options,

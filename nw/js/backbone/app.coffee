@@ -35,7 +35,7 @@
     ## and exit
     if options.smokeTest
       process.stdout.write(options.pong + "\n")
-      process.exit()
+      return process.exit()
 
     ## if we are updating then do not start the app
     ## or display any UI. just finish installing the updates
@@ -46,31 +46,14 @@
       ## start the updates being applied app so the user knows its still a-happen-ning
       return App.execute "start:updates:applied:app", options.appPath, options.execPath
 
+    ## check cache store for user
     App.config.getUser().then (user) ->
-      ## check cache store for user
-
       ## set the current user
       App.execute "set:current:user", user
 
-      if options.getKey or options.generateKey
-        ## dont start the app because we need to output CLI info
-        return App.execute "handle:cli:arguments", options
+      ## do we have a session?
+      options.session = user?.session_token?
 
-      ## make sure we have a current session
-      if user?.session_token
-        ## if have it, start projects
-        App.vent.trigger "start:projects:app", options.projectPath
-      else
-        ## else login
-        App.vent.trigger "start:login:app"
-
-      ## display the footer
-      App.vent.trigger "start:footer:app"
-
-      ## dont display the gui if we're in headless mode
-      return if options.headless
-
-      ## display the GUI
-      App.execute "gui:display", options.coords
+      App.execute "handle:cli:arguments", options
 
   return App
