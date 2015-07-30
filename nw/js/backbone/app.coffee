@@ -1,9 +1,5 @@
 @App = do (Backbone, Marionette) ->
 
-  path     = require("path")
-  minimist = require("minimist")
-  args     = "apiKey smokeTest getKey generateKey ci silent debug updating headless coords".split(" ")
-
   App = new Marionette.Application
 
   ## I think this should be window.App not global
