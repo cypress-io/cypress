@@ -82,6 +82,7 @@
       App.execute "set:current:user", user
 
       if options.key or options.generateKey
+        ## dont start the app because we need to output CLI info
         return App.execute "handle:cli:arguments", options
 
       ## make sure we have a current session

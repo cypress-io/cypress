@@ -370,7 +370,7 @@ module.exports = (parentWindow, gui, loadApp) ->
             expect(view.ui.key.parents(".form-group")).not.to.have.class("has-error")
             done()
 
-  describe.only "API Token Args", ->
+  describe "API Token Args", ->
     beforeEach ->
       nock.disableNetConnect()
 
@@ -409,6 +409,16 @@ module.exports = (parentWindow, gui, loadApp) ->
             expect(@write).not.to.be.calledWith("foo-bar-baz-123\n")
             expect(@exit).to.be.calledWith(1)
 
+      it "notifies on error", ->
+        nock(Routes.api())
+          .get("/token")
+          .reply(500)
+
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          @argsAre("--key").then =>
+            expect(@write).to.be.calledWith("An error occured receiving token.\n")
+            expect(@exit).to.be.calledWith(1)
+
     context "--new-key", ->
       it "writes out key and exits", ->
         nock(Routes.api())
@@ -426,6 +436,16 @@ module.exports = (parentWindow, gui, loadApp) ->
         cache.setUser({name: "Brian"}).then =>
           @argsAre("--new-key").then =>
             expect(@write).not.to.be.calledWith("new-key-987\n")
+            expect(@exit).to.be.calledWith(1)
+
+      it "notifies on error", ->
+        nock(Routes.api())
+          .put("/token")
+          .reply(500)
+
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          @argsAre("--new-key").then =>
+            expect(@write).to.be.calledWith("An error occured receiving token.\n")
             expect(@exit).to.be.calledWith(1)
 
   ## other tests which need writing
