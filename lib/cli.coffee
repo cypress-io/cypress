@@ -32,6 +32,18 @@ program
   .action (key, opts) ->
     require("./commands/ci")(key, parseOpts(opts))
 
+program
+  .command("key")
+  .description("Returns your Cypress API Key")
+  .action ->
+    require("./commands/key")()
+
+program
+  .command("new:key")
+  .description("Generates a new Cypress API Key")
+  .action ->
+    require("./commands/new_key")()
+
 program.parse(process.argv)
 
 if not program.args.length
