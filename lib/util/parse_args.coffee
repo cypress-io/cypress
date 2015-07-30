@@ -2,7 +2,7 @@ _        = require("lodash")
 path     = require("path")
 minimist = require("minimist")
 
-args     = "apiKey smokeTest getKey generateKey ci silent debug updating headless coords".split(" ")
+args     = "apiKey smokeTest getKey generateKey ci silent debug updating headless ping coords".split(" ")
 
 parseCoords = (cords) ->
   [x, y] = coords.split("x")
