@@ -253,10 +253,6 @@ class Platform
             console.log gutil.colors.red("'npm install' failed, retrying")
             return npmInstall()
 
-          ## promise-semaphore has a weird '/'' file which causes zipping to bomb
-          ## so we must remove that file!
-          # fs.removeSync(pathToPackageDir() + "/node_modules/promise-semaphore/\\")
-
           resolve()
 
       npmInstall()
