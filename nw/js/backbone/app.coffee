@@ -12,6 +12,7 @@
   parseArgv = (options) ->
     _.defaults options,
       env: process.env["NODE_ENV"]
+      silent:      "--silent"     in options.argv
       debug:       "--debug"      in options.argv
       updating:    "--updating"   in options.argv
       smokeTest:   "--smoke-test" in options.argv
@@ -47,6 +48,10 @@
 
   App.on "start", (options) ->
     options = parseArgv(options)
+
+    ## suppress all console messages
+    if options.silent
+      App.suppressConsole()
 
     ## create a App.config model from the passed in options
     App.config = App.request("config:entity", options)
