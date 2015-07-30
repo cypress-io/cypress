@@ -390,7 +390,7 @@ module.exports = (parentWindow, gui, loadApp) ->
       nock.cleanAll()
       nock.enableNetConnect()
 
-    context "--key", ->
+    context "--get-key", ->
       it "writes out key and exits", ->
         nock(Routes.api())
           .get("/token")
@@ -399,13 +399,13 @@ module.exports = (parentWindow, gui, loadApp) ->
           })
 
         cache.setUser({name: "Brian", session_token: "abc123"}).then =>
-          @argsAre("--key").then =>
+          @argsAre("--get-key").then =>
             expect(@write).to.be.calledWith("foo-bar-baz-123\n")
             expect(@exit).to.be.calledOnce
 
       it "requires a session_token", ->
         cache.setUser({name: "Brian"}).then =>
-          @argsAre("--key").then =>
+          @argsAre("--get-key").then =>
             expect(@write).not.to.be.calledWith("foo-bar-baz-123\n")
             expect(@exit).to.be.calledWith(1)
 
@@ -415,7 +415,7 @@ module.exports = (parentWindow, gui, loadApp) ->
           .reply(500)
 
         cache.setUser({name: "Brian", session_token: "abc123"}).then =>
-          @argsAre("--key").then =>
+          @argsAre("--get-key").then =>
             expect(@write).to.be.calledWith("An error occured receiving token.\n")
             expect(@exit).to.be.calledWith(1)
 

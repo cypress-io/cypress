@@ -2,37 +2,9 @@
 
   path  = require("path")
 
-  parseCoords = (args) ->
-    coords = _.find args, (arg) -> _.str.startsWith(arg, "--coords")
-
-    return if not coords
-    [x, y] = coords.split("=")[1].split("x")
-    {x: x, y: y}
-
-  parseArgv = (options) ->
-    _.defaults options,
-      env: process.env["NODE_ENV"]
-      silent:      "--silent"     in options.argv
-      debug:       "--debug"      in options.argv
-      updating:    "--updating"   in options.argv
-      smokeTest:   "--smoke-test" in options.argv
-      headless:    "--headless"   in options.argv
-      key:         "--key"        in options.argv
-      generateKey: "--new-key"    in options.argv
-      coords: parseCoords(options.argv)
-
-    if "--project" in options.argv
-      options.projectPath = path.resolve(process.cwd(), options.argv[1])
-
-    if options.updating
-      _.extend options,
-        appPath:  options.argv[0]
-        execPath: options.argv[1]
-
-    if options.smokeTest
-      options.pong = options.argv[1].split("=")[1]
-
-    return options
+  path     = require("path")
+  minimist = require("minimist")
+  args     = "apiKey smokeTest getKey generateKey ci silent debug updating headless coords".split(" ")
 
   App = new Marionette.Application
 
@@ -47,7 +19,7 @@
   App.reqres.setHandler "default:region", -> App.mainRegion
 
   App.on "start", (options) ->
-    options = parseArgv(options)
+    options = options.backend.parseArgs(options)
 
     ## suppress all console messages
     if options.silent
@@ -86,7 +58,7 @@
       ## set the current user
       App.execute "set:current:user", user
 
-      if options.key or options.generateKey
+      if options.getKey or options.generateKey
         ## dont start the app because we need to output CLI info
         return App.execute "handle:cli:arguments", options
 

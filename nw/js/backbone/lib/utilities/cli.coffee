@@ -26,10 +26,10 @@
       user = App.currentUser
 
       switch
-        when options.key          then @key(user)
+        when options.getKey       then @getKey(user)
         when options.generateKey  then @generateKey(user)
 
-    key: (user) ->
+    getKey: (user) ->
       ## require a session_token
       if ensureSessionToken(user)
 
