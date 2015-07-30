@@ -1,7 +1,5 @@
 @App = do (Backbone, Marionette) ->
 
-  path  = require("path")
-
   path     = require("path")
   minimist = require("minimist")
   args     = "apiKey smokeTest getKey generateKey ci silent debug updating headless coords".split(" ")

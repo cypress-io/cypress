@@ -7,23 +7,38 @@
         when _.isString(str) then env is str
         else env
 
+    _getProp: (prop) ->
+      @backend[prop] ? throw new Error("config#backend.#{prop} is not defined!")
+
+    getCache: -> @_getProp("cache")
+
+    getBooter: -> @_getProp("Booter")
+
+    getManifest: -> @_getProp("manifest")
+
+    getUpdater: -> @_getProp("updater")
+
+    getLog: -> @_getProp("Log")
+
+    getChromium: -> @_getProp("Chromium")
+
     getUser: ->
-      @cache.getUser()
+      @getCache().getUser()
 
     setUser: (user) ->
-      @cache.setUser(user)
+      @getCache().setUser(user)
 
     addProject: (path) ->
-      @cache.addProject(path)
+      @getCache().addProject(path)
 
     removeProject: (path) ->
-      @cache.removeProject(path)
+      @getCache().removeProject(path)
 
     getProjectPaths: ->
-      @cache.getProjectPaths()
+      @getCache().getProjectPaths()
 
     runProject: (path, options = {}) ->
-      @project = @booter(path)
+      @project = @getBooter()(path)
 
       @project.boot(options).get("settings")
 
@@ -32,20 +47,17 @@
         delete @project
 
     logIn: (code) ->
-      @cache.logIn(code).bind(@)
+      @getCache().logIn(code).bind(@)
       .then (user) ->
         @setUser(user)
         .return(user)
 
     logOut: (user) ->
-      @cache.logOut(user.get("session_token"))
+      @getCache().logOut(user.get("session_token"))
 
     log: (text, data = {}) ->
       data.type = "native"
       @getLog().log("info", text, data)
-
-    getLog: ->
-      @Log ? throw new Error("config#Log is not defined!")
 
     getLogs: ->
       @getLog().getLogs()
@@ -60,19 +72,17 @@
       @getLog().off()
 
     chromium: (window, options) ->
-      C = @Chromium ? throw new Error("config#Chromium is not defined!")
+      C = @getChromium()
 
       C(window).override(options)
 
-    getUpdater: -> @updater
-
-    getManifest: -> @booter.manifest
+    getManifest: -> @getManifest()
 
     getToken: (user) ->
-      @cache.getToken(user.get("session_token"))
+      @getCache().getToken(user.get("session_token"))
 
     generateToken: (user) ->
-      @cache.generateToken(user.get("session_token"))
+      @getCache().generateToken(user.get("session_token"))
 
     setErrorHandler: ->
       @getLog().setErrorHandler (err) =>
@@ -86,7 +96,7 @@
         debugger if @get("debug")
 
   App.reqres.setHandler "config:entity", (attrs = {}) ->
-    props = ["cache", "booter", "updater", "Log", "Chromium"]
+    props = ["backend"]
 
     config = new Entities.Config _(attrs).omit props...
 

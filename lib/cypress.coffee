@@ -1,15 +1,9 @@
 require("./environment")
 
 global.config  = require("konfig")()
-Settings       = require("./util/settings")
 Server         = require("./server")
-Updater        = require("./updater")
-Chromium       = require("./chromium")
-cache          = require("./cache")
-Log            = require("./log")
 child_process  = require("child_process")
 open           = require('open')
-fs             = require("fs-extra")
 Promise        = require('bluebird')
 
 class Booter
@@ -61,21 +55,6 @@ class Booter
 
   close: ->
     @server.close()
-
-  ## attach to Booter class
-  @cache = cache
-
-  ## attach to Booter class
-  @Updater = Updater
-
-  ## attach to Booter class
-  @Log = Log
-
-  ## attach to Booter class
-  @Chromium = Chromium
-
-  ## attach to Booter class
-  @manifest = fs.readJsonSync(process.cwd() + "/package.json")
 
 send = (obj) ->
   if process.send
