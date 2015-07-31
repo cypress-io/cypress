@@ -32,14 +32,14 @@ This will make the `cypress` command globally available.
 
 ##### cypress login
 
-##### cypress key
+##### cypress get:key
 
 ##### cypress new:key
 
-##### cypress path
+##### cypress get:path
 
 ##### cypress set:path
 
-##### cypress add
+##### cypress add:project
 
-##### cypress remove
+##### cypress remove:project
