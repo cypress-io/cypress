@@ -8,19 +8,30 @@ class Run
       return new Run(project, options)
 
     _.defaults options,
+      key:      null
       spec:     null
-      reporter: "spec"
+      reporter: null
       project:  path.resolve(process.cwd(), project)
 
     @run(options)
 
   run: (options) ->
-    args = ["--headless", "--project", options.project]
+    opts = {}
+    args = ["--run-project", options.project]
 
     ## if we have a specific spec push that into the args
     if options.spec
       args.push("--spec", options.spec)
 
-    utils.spawn(args)
+    ## if we have a specific reporter push that into the args
+    if options.reporter
+      args.push("--reporter", options.reporter)
+
+    ## if we have a key assume we're in CI mode
+    if options.key
+      args.push("--ci", "--api-key", options.key)
+      opts.xvfb = true
+
+    utils.spawn(args, opts)
 
 module.exports = Run

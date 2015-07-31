@@ -4,9 +4,11 @@ os      = require("os")
 fs      = require("fs-extra")
 path    = require("path")
 chalk   = require("chalk")
+Xvfb    = require("xvfb")
 Promise = require("bluebird")
 
-fs = Promise.promisifyAll(fs)
+fs   = Promise.promisifyAll(fs)
+xvfb = Promise.promisifyAll(new Xvfb({silent: true}))
 
 module.exports = {
   getPathToExecutable: ->
@@ -84,6 +86,14 @@ module.exports = {
       ## now verify that we can spawn cypress successfully
       .then(@_cypressSmokeTest)
 
+  startXvfb: ->
+    xvfb.startAsync().catch (err) ->
+      console.log("")
+      console.log(chalk.bgRed.white(" -Error- "))
+      console.log(chalk.red.underline("Could not start Cypress headlessly. Your CI provider must support XVFB."))
+      console.log("")
+      process.exit(1)
+
   spawn: (args, options = {}) ->
     ## this needs to change to become async and
     ## to do a lookup for the cached cypress path
@@ -92,8 +102,15 @@ module.exports = {
     args = [].concat(args)
 
     _.defaults options,
+      xvfb: false
       stdio: ["ignore", process.stdout, "ignore"]
 
-    @verifyCypress(cypress).then ->
-      cp.spawn cypress, args, options
+    spawn = =>
+      @verifyCypress(cypress).then ->
+        cp.spawn cypress, args, options
+
+    if options.xvfb
+      @startXvfb().then(spawn)
+    else
+      spawn()
 }
