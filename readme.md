@@ -1,6 +1,6 @@
 ## Cypress CLI
 
-This is the CLI for [https://github.com/cypress-io/cypress](Cypress.io).
+This is the CLI for [https://github.com/cypress-io/cypress](https://github.com/cypress-io/cypress).
 
 ## What this does
 
