@@ -12,12 +12,8 @@
   ## store the default region as the main region
   App.reqres.setHandler "default:region", -> App.mainRegion
 
-  App.on "start", (options) ->
+  App.on "start", (options = {}) ->
     options = options.backend.parseArgs(options)
-
-    ## suppress all console messages
-    if options.silent
-      App.suppressConsole()
 
     ## create a App.config model from the passed in options
     App.config = App.request("config:entity", options)
@@ -54,6 +50,6 @@
       ## do we have a session?
       options.session = user?.session_token?
 
-      App.execute "handle:cli:arguments", options
+      App.config.cli(options)
 
   return App

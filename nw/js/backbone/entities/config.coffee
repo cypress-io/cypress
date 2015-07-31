@@ -22,6 +22,8 @@
 
     getChromium: -> @_getProp("Chromium")
 
+    getCli: -> @_getProp("cli")
+
     getUser: ->
       @getCache().getUser()
 
@@ -70,6 +72,10 @@
 
     offLog: ->
       @getLog().off()
+
+    cli: (options) ->
+      cli = @getCli()
+      cli(App, options)
 
     chromium: (window, options) ->
       C = @getChromium()

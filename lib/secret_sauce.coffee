@@ -1,8 +1,116 @@
+os    = require("os")
+chalk = require("chalk")
+
 SecretSauce =
   mixin: (module, klass) ->
     for key, fn of @[module]
       klass.prototype[key] = fn
 
+SecretSauce.Cli = (App, options) ->
+  write = (str) ->
+    process.stdout.write(str + "\n")
+
+  writeErr = (str, msgs...) ->
+    str = [chalk.red(str)].concat(msgs).join(" ")
+    write(str)
+    process.exit(1)
+
+  displayToken = (token) ->
+    write(token)
+    process.exit()
+
+  displayTokenError = ->
+    writeErr("An error occured receiving token.")
+
+  ensureLinuxEnv = ->
+    return true if os.platform() is "linx64"
+
+    writeErr("Sorry, cannot run in CI mode. You must be on a linux operating system.")
+
+  ensureSessionToken = (user) ->
+    ## bail if we have a session_token
+    return true if user.get("session_token")
+
+    ## else die and log out the auth error
+    writeErr("Sorry, you are not currently logged into Cypress. This request requires authentication.\nPlease log into Cypress and then issue this command again.")
+
+  class Cli
+    constructor: (@App, options = {}) ->
+      @user = @App.currentUser
+
+      @parseCliOptions(options)
+
+    parseCliOptions: (options) ->
+      switch
+        when options.ci           then @ci(options)
+        when options.getKey       then @getKey()
+        when options.generateKey  then @generateKey()
+        # when options.openProject  then @openProject(user, options)
+        when options.runProject   then @runProject(options)
+        else
+          @startGuiApp(options)
+
+    getKey: ->
+      if ensureSessionToken(@user)
+
+        ## log out the API Token
+        @App.config.getToken(@user)
+          .then(displayToken)
+          .catch(displayTokenError)
+
+    generateKey: ->
+      if ensureSessionToken(@user)
+
+        ## generate a new API Token
+        @App.config.generateToken(@user)
+          .then(displayToken)
+          .catch(displayTokenError)
+
+    runProject: (options) ->
+      if ensureSessionToken(@user)
+
+        ## silence all console messages
+        @App.silenceConsole()
+
+        @App.vent.trigger "start:projects:app", {
+          spec:        options.spec
+          reporter:    options.reporter
+          projectPath: options.projectPath
+          onProjectNotFound: (path) ->
+            writeErr("Cannot run project because it was not found:", chalk.blue(path))
+        }
+
+    ci: (options) ->
+      if ensureSessionToken(@user)
+        if ensureLinuxEnv()
+          "asfd"
+
+      ## bail if we arent in a recognized CI environment
+      ## add project first
+      ## then runProject
+      ## XVFB?
+      ## attempt to run in XVFB and die if we cant?
+      ## just say we only support linux based CI providers ATM
+      ## store the machine guid and store it in cypress servers?
+      ## CI must have internet access
+
+    startGuiApp: (options) ->
+      if options.session
+        ## if have it, start projects
+        @App.vent.trigger "start:projects:app"
+      else
+        ## else login
+        @App.vent.trigger "start:login:app"
+
+      ## display the footer
+      @App.vent.trigger "start:footer:app"
+
+      ## display the GUI
+      @App.execute "gui:display", options.coords
+
+  new Cli(App, options)
+
+## change this to be a function like CLI
 SecretSauce.Chromium =
   override: (options = {}) ->
     { _ } = SecretSauce

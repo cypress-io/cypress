@@ -1,6 +1,6 @@
 @App.module "Utilities", (Utilities, App, Backbone, Marionette, $, _) ->
 
-  App.suppressConsole = ->
+  App.silenceConsole = ->
     c = console
     _.each ["log", "warn", "info", "error"], (fn) ->
       c[fn] = ->
