@@ -33,10 +33,10 @@ program
     require("./commands/ci")(key, parseOpts(opts))
 
 program
-  .command("key")
+  .command("get:key")
   .description("Returns your Cypress API Key")
   .action ->
-    require("./commands/key")()
+    require("./commands/get_key")()
 
 program
   .command("new:key")

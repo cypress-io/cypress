@@ -1,13 +1,13 @@
 utils = require("../utils")
 
-class Key
+class NewKey
   constructor: ->
-    if not (@ instanceof Key)
-      return new Key
+    if not (@ instanceof NewKey)
+      return new NewKey
 
-    @key()
+    @newKey()
 
-  key: ->
+  newKey: ->
     utils.spawn("--new-key")
 
-module.exports = Key
+module.exports = NewKey
