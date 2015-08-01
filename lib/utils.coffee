@@ -28,7 +28,7 @@ module.exports = {
   getDefaultAppFolder: ->
     switch p = os.platform()
       when "darwin" then "/Applications"
-      when "linux"  then "/usr/local"
+      when "linux"  then "/usr/local/bin"
       # when "win32"   then "i/dont/know/yet"
       else
         throw new Error("Platform: '#{p}' is not supported.")
