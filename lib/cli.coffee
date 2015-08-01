@@ -1,9 +1,13 @@
-_       = require("lodash")
-program = require("commander")
-pkg     = require("../package.json")
+_         = require("lodash")
+commander = require("commander")
+pkg       = require("../package.json")
 
 parseOpts = (opts) ->
-  _.pick(opts, "cypress", "spec", "reporter", "path")
+  _.pick(opts, "cypress", "spec", "reporter", "path", "destination")
+
+## instantiate a new program for
+## easier testability
+program = new commander.Command()
 
 program.version(pkg.version)
 
@@ -48,3 +52,5 @@ program.parse(process.argv)
 
 if not program.args.length
   program.help()
+
+module.exports = program
