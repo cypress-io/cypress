@@ -362,7 +362,7 @@ class Platform
 
 class Osx64 extends Platform
   buildPathToApp: ->
-    path.join buildDir, @getVersion(), @platform, "Cypress.app", "Contents", "MacOS", "cypress"
+    path.join buildDir, @getVersion(), @platform, "Cypress.app", "Contents", "MacOS", "Cypress"
 
   afterBuild: ->
     @log("#afterBuild")
@@ -374,7 +374,7 @@ class Osx64 extends Platform
 
   renameNwjsExecutable: ->
     dest = @buildPathToApp()
-    src  = dest.replace(/cypress$/, "nwjs")
+    src  = dest.replace(/Cypress$/, "nwjs")
     fs.renameAsync(src, dest)
 
   renameNwjsPlist: ->
@@ -384,7 +384,7 @@ class Osx64 extends Platform
     ## and update the plist settings
     fs.readFileAsync(pathToPlist, "utf8").then (contents) ->
       obj = plist.parse(contents)
-      obj.CFBundleExecutable = "cypress"
+      obj.CFBundleExecutable = "Cypress"
       fs.writeFileAsync(pathToPlist, plist.build(obj))
 
   codeSign: ->
