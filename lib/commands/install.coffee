@@ -19,6 +19,7 @@ class Install
       return new Install(options)
 
     _.defaults options,
+      initialize:     true
       percent:        0
       current:        0
       total:          100
@@ -27,13 +28,32 @@ class Install
       zipDestination: "./cypress.zip"
       destination:    utils.getDefaultAppFolder()
 
+    return if not options.initialize
+
+    @initialize(options)
+
+  initialize: (options) ->
     @download(options)
-      # .catch (err) ->
-        ## could not download
+      .bind(@)
+      .catch(@downloadErr)
       .then(@unzip)
       # .catch (err) ->
-        ## could not unzip
+        # could not unzip
       .then(@finish)
+
+  downloadErr: (err) ->
+    console.log("")
+    console.log(chalk.bgRed.white(" -Error- "))
+    console.log(chalk.red.underline("The Cypress App could not be downloaded."))
+    console.log("")
+    console.log("URL:", chalk.blue(@getUrl()))
+    if err.statusCode
+      msg = [err.statusCode, err.statusMessage].join(" - ")
+      console.log("The server returned:", chalk.red(msg))
+    else
+      console.log(err.toString())
+    console.log("")
+    process.exit(1)
 
   getUrl: ->
     ## append os to url
@@ -57,9 +77,22 @@ class Install
         width: options.width
       })
 
+      ## nuke the bar on error
+      terminate = (err) ->
+        bar.clear = true
+        bar.terminate()
+        reject(err)
+
       progress(request(@getUrl()), {
         throttle: options.throttle
       })
+
+      .on "response", (response) ->
+        ## if our status code doesnt start with 200
+        if not /^2/.test(response.statusCode)
+          terminate _.pick(response, "statusCode", "statusMessage")
+
+      .on "error", terminate
 
       .on "progress", (state) ->
         ## always subtract the previously percent
@@ -70,9 +103,6 @@ class Install
         options.percent = state.percent
 
         bar.tick(options.current)
-
-      .on "error", (err) ->
-        reject(err)
 
       .pipe(fs.createWriteStream(options.zipDestination))
 
