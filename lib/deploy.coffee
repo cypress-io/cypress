@@ -412,9 +412,10 @@ class Linux64 extends Platform
 
   runSmokeTest: ->
     xvfb = new Xvfb()
-    xvfb.startSync()
-    super.then ->
-      xvfb.stopSync()
+    xvfb = Promise.promisifyAll(xvfb)
+    xvfb.startAsync().then (xvfxProcess) =>
+      super.then ->
+        xvfb.stopAsync()
 
   nwBuilder: ->
     src    = path.join(buildDir, @getVersion(), @platform)
