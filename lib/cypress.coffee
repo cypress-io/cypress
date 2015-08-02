@@ -13,7 +13,7 @@ class Booter
       return new Booter(projectRoot)
 
     if not projectRoot
-      throw new Error("Instantiating bin/cy requires a projectRoot!")
+      throw new Error("Instantiating lib/cypress requires a projectRoot!")
 
     @projectRoot = projectRoot
     @child       = null
