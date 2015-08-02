@@ -1,19 +1,12 @@
-fs        = require("fs-extra")
-Booter    = require("./cypress")
-Log       = require("./log")
-Updater   = require("./updater")
-Chromium  = require("./chromium")
-cache     = require("./cache")
-cli       = require("./cli")
-parseArgs = require("./util/parse_args")
+fs = require("fs-extra")
 
 module.exports = (NwApp) -> {
-  cache:     cache
-  cli:       cli
-  parseArgs: parseArgs
-  Log:       Log
-  Booter:    Booter
-  updater:   Updater(NwApp)
-  Chromium:  Chromium
+  cache:     require("./cache")
+  cli:       require("./cli")
+  parseArgs: require("./util/parse_args")
+  Log:       require("./log")
+  Booter:    require("./cypress")
+  updater:   require("./updater")(NwApp)
+  Chromium:  require("./chromium")
   manifest:  fs.readJsonSync(process.cwd() + "/package.json")
 }
