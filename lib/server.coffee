@@ -86,7 +86,7 @@ class Server
 
     @app.set "cypress", obj
 
-  configureApplication: (options) ->
+  configureApplication: (options = {}) ->
     _.defaults options,
       morgan: true
 
