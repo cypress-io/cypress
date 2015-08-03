@@ -2,6 +2,7 @@ root          = '../../../'
 Promise       = require 'bluebird'
 fs            = Promise.promisifyAll(require('fs'))
 expect        = require('chai').expect
+nock          = require 'nock'
 sinon         = require 'sinon'
 sinonPromise  = require 'sinon-as-promised'
 Server        = require "#{root}lib/server"
@@ -16,7 +17,7 @@ describe "Server Interface", ->
   beforeEach ->
     @sandbox = sinon.sandbox.create()
     @sandbox.stub(Socket.prototype, "startListening")
-    @sandbox.stub(Project.prototype, "ensureProjectId").resolves({})
+    @sandbox.stub(Project.prototype, "ensureProjectId").resolves("a-long-guid-123")
     @sandbox.stub(Settings, "readSync").returns({})
     @sandbox.stub(Support.prototype, "scaffold").resolves({})
     @sandbox.stub(Fixtures.prototype, "scaffold").resolves({})
@@ -88,6 +89,11 @@ describe "Server Interface", ->
     it "calls Support#scaffold", ->
       @server.open().bind(@).then ->
         expect(Support::scaffold).to.be.calledOnce
+
+    it "calls project#getDetails", ->
+      @sandbox.stub(Project.prototype, "getDetails").resolves("a-long-guid-123")
+      @server.open().bind(@).then ->
+        expect(Project::getDetails).to.be.calledWith("a-long-guid-123")
 
     context "errors", ->
       it "rejects when parsing cypress.json fails", (done) ->
