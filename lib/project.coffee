@@ -52,4 +52,12 @@ class Project
       Log.info "No Project ID found"
       throw new Error("No project ID found")
 
+  getDetails: (projectId) ->
+    require("./cache").getUser().then (user = {}) =>
+      Request.get({
+        url: "#{config.app.api_url}/projects/#{projectId}"
+        headers: {"X-Session": user.session_token}
+      }).catch (err) ->
+        ## swallow any errors
+
 module.exports = Project

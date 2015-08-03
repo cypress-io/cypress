@@ -163,7 +163,15 @@ class Server
         )
         .bind(@)
         .then ->
-          @project.ensureProjectId()
+          @project.ensureProjectId().then (id) =>
+            ## make an external request to
+            ## record the user_id
+            ## TODO: remove this after a few
+            ## upgrades since this is temporary
+            @project.getDetails(id)
+
+            ## dont wait for this to complete
+            return null
         .then ->
           require('open')(@config.clientUrl) if @config.autoOpen
         .return(@config)
