@@ -18,10 +18,21 @@ addQueryParams = (url, params) ->
     memo
   , url
 
+parseArgs = (url, args = []) ->
+  _.each args, (value) ->
+    switch
+      when _.isObject(value)
+        addQueryParams(url, value)
+
+      when _.isString(value)
+        url.setPath url.path().replace(":id", value)
+
+  return url
+
 Routes = _.reduce routes, (memo, value, key) ->
-  memo[key] = (params) ->
+  memo[key] = (args...) ->
     url = new Uri(api_url).setPath(value)
-    url = addQueryParams(url, params) if params
+    url = parseArgs(url, args) if args.length
     url.toString()
   memo
 , {}
