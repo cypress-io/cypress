@@ -5,11 +5,13 @@ Uri            = require("jsuri")
 api_url = config.app.api_url
 
 routes = {
-  api: ""
-  token: "token"
-  signin: "signin"
-  signout: "signout"
-  exceptions: "exceptions"
+  api:           ""
+  token:         "token"
+  signin:        "signin"
+  signout:       "signout"
+  project:       "projects/:id"
+  projectToken:  "projects/:id/token"
+  exceptions:    "exceptions"
 }
 
 addQueryParams = (url, params) ->

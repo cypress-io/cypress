@@ -17,3 +17,9 @@ describe "Routes Util", ->
 
   it "exceptions", ->
     expect(Routes.exceptions()).to.eq "http://localhost:1234/exceptions"
+
+  it "project", ->
+    expect(Routes.project("123-foo")).to.eq "http://localhost:1234/projects/123-foo"
+
+  it "projectToken", ->
+    expect(Routes.projectToken("123-foo")).to.eq "http://localhost:1234/projects/123-foo/token"
