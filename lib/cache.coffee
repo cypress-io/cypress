@@ -204,8 +204,7 @@ class Cache extends require("events").EventEmitter
     url = Routes.token()
     headers = {"X-Session": session}
     request({method: method, url: url, headers: headers, json: true})
-      .then (resp) ->
-        resp.api_token
+      .promise().get("api_token")
 
   getToken: (session) ->
     @_token("get", session)
@@ -213,12 +212,32 @@ class Cache extends require("events").EventEmitter
   generateToken: (session) ->
     @_token("put", session)
 
+  _projectToken: (method, session, projectPath) ->
+    @getProjects().then (projects) ->
+      if not projectId = _.findKey(projects, {PATH: projectPath})
+        e = new Error
+        e.projectNotFound = true
+        e.projectPath = projectPath
+        throw e
+      else
+        request({
+          method:  method
+          url:     Routes.projectToken(projectId)
+          headers: {"X-Session": session}
+          json:    true
+        }).promise().get("api_token")
+
+  getProjectToken: (session, project) ->
+    @_projectToken("get", session, project)
+
+  generateProjectToken: (session, project) ->
+    @_projectToken("put", session, project)
+
   ## move this to an auth module
   ## and update NW references
   logIn: (code) ->
     url = Routes.signin({code: code})
-    request.post(url)
-      .then(JSON.parse)
+    request.post(url, {json: true})
       .catch (err) ->
         ## normalize the error object
         throw (err.error or err)

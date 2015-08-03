@@ -1,5 +1,7 @@
-os    = require("os")
-chalk = require("chalk")
+os      = require("os")
+chalk   = require("chalk")
+Request = require("request-promise")
+Promise = require("bluebird")
 
 SecretSauce =
   mixin: (module, klass) ->
@@ -19,8 +21,11 @@ SecretSauce.Cli = (App, options) ->
     write(token)
     process.exit()
 
-  displayTokenError = ->
-    writeErr("An error occured receiving token.")
+  displayTokenError = (err) ->
+    if err.projectNotFound
+      writeErr("Sorry, could not retreive project key because no project was found:", chalk.blue(err.projectPath))
+    else
+      writeErr("An error occured receiving token.")
 
   ensureLinuxEnv = ->
     return true if os.platform() is "linx64"
@@ -43,8 +48,8 @@ SecretSauce.Cli = (App, options) ->
     parseCliOptions: (options) ->
       switch
         when options.ci           then @ci(options)
-        when options.getKey       then @getKey()
-        when options.generateKey  then @generateKey()
+        when options.getKey       then @getKey(options)
+        when options.generateKey  then @generateKey(options)
         # when options.openProject  then @openProject(user, options)
         when options.runProject   then @runProject(options)
         else
@@ -54,7 +59,7 @@ SecretSauce.Cli = (App, options) ->
       if ensureSessionToken(@user)
 
         ## log out the API Token
-        @App.config.getToken(@user)
+        @App.config.getProjectToken(@user, options.projectPath)
           .then(displayToken)
           .catch(displayTokenError)
 
@@ -62,7 +67,7 @@ SecretSauce.Cli = (App, options) ->
       if ensureSessionToken(@user)
 
         ## generate a new API Token
-        @App.config.generateToken(@user)
+        @App.config.generateProjectToken(@user, options.projectPath)
           .then(displayToken)
           .catch(displayTokenError)
 

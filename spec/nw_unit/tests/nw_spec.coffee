@@ -370,11 +370,14 @@ module.exports = (parentWindow, gui, loadApp) ->
             expect(view.ui.key.parents(".form-group")).not.to.have.class("has-error")
             done()
 
-  describe "API Token Args", ->
+  describe "API Project Token Args", ->
     beforeEach ->
       nock.disableNetConnect()
 
-      @argsAre = (args) =>
+      Fixtures.scaffold()
+      @todos = Fixtures.project("todos")
+
+      @argsAre = (args...) =>
         loadApp(@, {start: false}).then =>
           @App.vent.on "app:entities:ready", =>
             @exit  = @sandbox.stub process, "exit"
@@ -386,22 +389,25 @@ module.exports = (parentWindow, gui, loadApp) ->
           # because its async
           Promise.delay(100)
 
+
     afterEach ->
+      Fixtures.remove()
       nock.cleanAll()
       nock.enableNetConnect()
 
     context "--get-key", ->
       it "writes out key and exits", ->
         nock(Routes.api())
-          .get("/token")
+          .get("/projects/e3e58d3f-3769-4b50-af38-e31b8989a938/token")
           .reply(200, {
             api_token: "foo-bar-baz-123"
           })
 
         cache.setUser({name: "Brian", session_token: "abc123"}).then =>
-          @argsAre("--get-key").then =>
-            expect(@write).to.be.calledWith("foo-bar-baz-123\n")
-            expect(@exit).to.be.calledOnce
+          cache.addProject(@todos).then =>
+            @argsAre("--get-key", "--project", @todos).then =>
+              expect(@write).to.be.calledWith("foo-bar-baz-123\n")
+              expect(@exit).to.be.calledOnce
 
       it "requires a session_token", ->
         cache.setUser({name: "Brian"}).then =>
@@ -409,28 +415,37 @@ module.exports = (parentWindow, gui, loadApp) ->
             expect(@write).not.to.be.calledWith("foo-bar-baz-123\n")
             expect(@exit).to.be.calledWith(1)
 
-      it "notifies on error", ->
+      it "notifies on fetch error", ->
         nock(Routes.api())
-          .get("/token")
-          .reply(500)
+          .get("/projects/e3e58d3f-3769-4b50-af38-e31b8989a938/token")
+          .reply(404)
 
         cache.setUser({name: "Brian", session_token: "abc123"}).then =>
-          @argsAre("--get-key").then =>
-            expect(@write).to.be.calledWith("An error occured receiving token.\n")
+          cache.addProject(@todos).then =>
+            @argsAre("--get-key", "--project", @todos).then =>
+              expect(@write).to.be.calledWithMatch("An error occured receiving token.")
+              expect(@exit).to.be.calledWith(1)
+
+      it "notfies when project path cannot be found", ->
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          @argsAre("--get-key", "--project", "/foo/bar").then =>
+            expect(@write).to.be.calledWithMatch("Sorry, could not retreive project key because no project was found:")
+            expect(@write).to.be.calledWithMatch("/foo/bar")
             expect(@exit).to.be.calledWith(1)
 
     context "--new-key", ->
       it "writes out key and exits", ->
         nock(Routes.api())
-          .put("/token")
+          .put("/projects/e3e58d3f-3769-4b50-af38-e31b8989a938/token")
           .reply(200, {
             api_token: "new-key-987"
           })
 
         cache.setUser({name: "Brian", session_token: "abc123"}).then =>
-          @argsAre("--new-key").then =>
-            expect(@write).to.be.calledWith("new-key-987\n")
-            expect(@exit).to.be.calledOnce
+          cache.addProject(@todos).then =>
+            @argsAre("--new-key", "--project", @todos).then =>
+              expect(@write).to.be.calledWith("new-key-987\n")
+              expect(@exit).to.be.calledOnce
 
       it "requires a session_token", ->
         cache.setUser({name: "Brian"}).then =>
@@ -438,14 +453,22 @@ module.exports = (parentWindow, gui, loadApp) ->
             expect(@write).not.to.be.calledWith("new-key-987\n")
             expect(@exit).to.be.calledWith(1)
 
-      it "notifies on error", ->
+      it "notifies on fetch error", ->
         nock(Routes.api())
-          .put("/token")
+          .put("/projects/e3e58d3f-3769-4b50-af38-e31b8989a938/token")
           .reply(500)
 
         cache.setUser({name: "Brian", session_token: "abc123"}).then =>
-          @argsAre("--new-key").then =>
-            expect(@write).to.be.calledWith("An error occured receiving token.\n")
+          cache.addProject(@todos).then =>
+            @argsAre("--new-key", "--project", @todos).then =>
+              expect(@write).to.be.calledWithMatch("An error occured receiving token.")
+              expect(@exit).to.be.calledWith(1)
+
+      it "notfies when project path cannot be found", ->
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          @argsAre("--get-key", "--project", "/foo/bar").then =>
+            expect(@write).to.be.calledWithMatch("Sorry, could not retreive project key because no project was found:")
+            expect(@write).to.be.calledWithMatch("/foo/bar")
             expect(@exit).to.be.calledWith(1)
 
   ## other tests which need writing

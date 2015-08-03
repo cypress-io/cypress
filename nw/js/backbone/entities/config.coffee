@@ -90,6 +90,12 @@
     generateToken: (user) ->
       @getCache().generateToken(user.get("session_token"))
 
+    getProjectToken: (user, project) ->
+      @getCache().getProjectToken(user.get("session_token"), project)
+
+    generateProjectToken: (user, project) ->
+      @getCache().generateProjectToken(user.get("session_token"), project)
+
     setErrorHandler: ->
       @getLog().setErrorHandler (err) =>
         ## exit if we're in production (blow up)
