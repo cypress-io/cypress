@@ -1,11 +1,12 @@
-_       = require("lodash")
-cp      = require("child_process")
-os      = require("os")
-fs      = require("fs-extra")
-path    = require("path")
-chalk   = require("chalk")
-Xvfb    = require("xvfb")
-Promise = require("bluebird")
+_        = require("lodash")
+cp       = require("child_process")
+os       = require("os")
+fs       = require("fs-extra")
+path     = require("path")
+chalk    = require("chalk")
+Xvfb     = require("xvfb")
+userhome = require("userhome")
+Promise  = require("bluebird")
 
 fs   = Promise.promisifyAll(fs)
 xvfb = Promise.promisifyAll(new Xvfb({silent: true}))
@@ -19,16 +20,17 @@ module.exports = {
 
   getPlatformExecutable: ->
     switch p = os.platform()
-      when "darwin" then "Cypress.app/Contents/MacOS/cypress"
-      when "linux"  then "Cypress"
-      when "win32"  then "Cypress.exe"
+      when "darwin" then "Cypress.app/Contents/MacOS/Cypress"
+      when "linux"  then "Cypress/Cypress"
+      when "win32"  then "Cypress/Cypress.exe"
       else
         throw new Error("Platform: '#{p}' is not supported.")
 
   getDefaultAppFolder: ->
     switch p = os.platform()
       when "darwin" then "/Applications"
-      when "linux"  then "/usr/local/bin"
+      when "linux"  then userhome(".cypress")
+      # when "linux"  then "/usr/local/lib"
       # when "win32"   then "i/dont/know/yet"
       else
         throw new Error("Platform: '#{p}' is not supported.")
@@ -94,6 +96,9 @@ module.exports = {
       console.log("")
       process.exit(1)
 
+  stopXvfb: ->
+    xvfb.stopAsync()
+
   spawn: (args, options = {}) ->
     ## this needs to change to become async and
     ## to do a lookup for the cached cypress path
@@ -102,12 +107,16 @@ module.exports = {
     args = [].concat(args)
 
     _.defaults options,
-      xvfb: false
+      xvfb: os.platform() is "linux"
       stdio: ["ignore", process.stdout, "ignore"]
 
     spawn = =>
       @verifyCypress(cypress).then ->
-        cp.spawn cypress, args, options
+        sp = cp.spawn cypress, args, options
+        if options.xvfb
+          ## make sure we close down xvfb
+          ## when our spawned process exits
+          sp.on "close", @stopXvfb
 
     if options.xvfb
       @startXvfb().then(spawn)
