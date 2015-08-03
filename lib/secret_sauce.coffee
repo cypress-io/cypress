@@ -166,6 +166,17 @@ SecretSauce.Keys =
   _getProjectKeyRange: (id) ->
     @cache.getProject(id).get("RANGE")
 
+  _getNewKeyRange: (projectId) ->
+    url = "#{config.app.api_url}/projects/#{projectId}/keys"
+
+    @Log.info "Requesting new key range", {url: url}
+
+    @cache.getUser().then (user = {}) =>
+      Request.post({
+        url: url
+        headers: {"X-Session": user.session_token}
+      })
+
   ## Lookup the next Test integer and update
   ## offline location of sync
   getNextTestNumber: (projectId) ->

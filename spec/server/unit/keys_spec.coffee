@@ -4,6 +4,7 @@ sinon        = require 'sinon'
 sinonPromise = require 'sinon-as-promised'
 path         = require "path"
 nock         = require "nock"
+cache        = require "#{root}lib/cache"
 Project      = require "#{root}lib/project"
 Settings     = require "#{root}lib/util/settings"
 Keys         = require "#{root}lib/keys"
@@ -75,11 +76,14 @@ describe "Keys", ->
   context "#getNextTestNumber", ->
     beforeEach ->
       @rangeRequest = nock(config.app.api_url)
+      .matchHeader("X-Session", "123-456-789")
       .post("/projects/abc-123-foo-bar/keys")
       .reply(200, {
         start: 0,
         end: 10
       })
+
+      @sandbox.stub(cache, "getUser").resolves({session_token: "123-456-789"})
 
       @keys = Keys("/Users/brian/app")
 

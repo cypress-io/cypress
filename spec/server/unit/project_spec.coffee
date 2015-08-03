@@ -4,6 +4,7 @@ sinon        = require 'sinon'
 sinonPromise = require 'sinon-as-promised'
 nock         = require('nock')
 fs           = require "fs-extra"
+cache        = require "#{root}lib/cache"
 Project      = require "#{root}lib/project"
 Settings     = require "#{root}lib/util/settings"
 
@@ -15,6 +16,8 @@ describe "Project Interface", ->
 
     @readReturns = (obj = {}) =>
       @sandbox.stub(Settings, "read").resolves(obj)
+
+    @sandbox.stub(cache, "getUser").resolves({session_token: "123-456-789"})
 
     str = JSON.stringify({cypress: {}})
     fs.writeFileSync("cypress.json", str)
@@ -45,6 +48,7 @@ describe "Project Interface", ->
       @project = Project process.cwd()
 
       @createProject = nock(config.app.api_url)
+      .matchHeader("X-Session", "123-456-789")
       .post("/projects")
       .reply(200, {
         uuid: "abc-1234-foo-bar-baz"
@@ -72,6 +76,7 @@ describe "Project Interface", ->
       @project = Project process.cwd()
 
       @createProject = nock(config.app.api_url)
+      .matchHeader("X-Session", "123-456-789")
       .post("/projects")
       .reply(200, {
         uuid: "abc-1234-foo-bar-baz"

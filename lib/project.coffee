@@ -24,18 +24,23 @@ class Project
   ## to create a project ID if we do not already
   ## have one
   ensureProjectId: ->
-    @getProjectId().bind(@)
+    @getProjectId()
+    .bind(@)
     .catch(@createProjectId)
 
   createProjectId: ->
     Log.info "Creating Project ID"
 
-    Request.post("#{config.app.api_url}/projects")
-    .then (attrs) =>
-      attrs = {projectId: JSON.parse(attrs).uuid}
-      Log.info "Writing Project ID", _.clone(attrs)
-      Settings.write(@projectRoot, attrs)
-    .get("projectId")
+    require("./cache").getUser().then (user = {}) =>
+      Request.post({
+        url: "#{config.app.api_url}/projects"
+        headers: {"X-Session": user.session_token}
+      })
+      .then (attrs) =>
+        attrs = {projectId: JSON.parse(attrs).uuid}
+        Log.info "Writing Project ID", _.clone(attrs)
+        Settings.write(@projectRoot, attrs)
+      .get("projectId")
 
   getProjectId: ->
     Settings.read(@projectRoot)

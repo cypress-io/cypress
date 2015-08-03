@@ -1,7 +1,6 @@
 _             = require 'lodash'
 Promise       = require 'bluebird'
 path          = require 'path'
-Request       = require 'request-promise'
 Project       = require './project'
 cache         = require './cache'
 Log           = require './log'
@@ -21,13 +20,6 @@ class Keys
 
     @cache     = cache
     @project   = Project(projectRoot)
-
-  _getNewKeyRange: (projectId) ->
-    url = "#{config.app.api_url}/projects/#{projectId}/keys"
-
-    Log.info "Requesting new key range", {url: url}
-
-    Request.post(url)
 
 SecretSauce.mixin("Keys", Keys)
 
