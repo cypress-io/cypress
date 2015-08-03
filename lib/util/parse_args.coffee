@@ -2,7 +2,7 @@ _        = require("lodash")
 path     = require("path")
 minimist = require("minimist")
 
-args     = "apiKey smokeTest getKey generateKey runProject spec reporter ci debug updating headless ping coords".split(" ")
+args     = "apiKey smokeTest getKey generateKey runProject project spec reporter ci debug updating headless ping coords".split(" ")
 
 parseCoords = (cords) ->
   [x, y] = coords.split("x")
@@ -26,8 +26,9 @@ module.exports = (options) ->
   if options.coords
     options.coords = parseCoords(options.coords)
 
-  if options.runProject
-    options.projectPath = path.resolve(process.cwd(), options.runProject)
+  ## normalize runProject or project to projectPath
+  if rp = options.runProject or p = options.project
+    options.projectPath = path.resolve(process.cwd(), rp ? p)
 
   if options.updating
     _.extend options,
