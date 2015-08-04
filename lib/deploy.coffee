@@ -14,8 +14,8 @@ request        = require("request-promise")
 os             = require("os")
 vagrant        = require("vagrant")
 runSequence    = require("run-sequence")
+minimist       = require("minimist")
 Xvfb           = require("xvfb")
-plist          = require("plist")
 
 vagrant.debug = true
 ["rsync", "rsync-auto", "rsync-back"].forEach (cmd) ->
@@ -80,6 +80,7 @@ class Platform
 
           ## copy coffee src files
           copy("./lib/backend.coffee",      "/src/lib/backend.coffee")
+          copy("./lib/cli.coffee",          "/src/lib/cli.coffee")
           copy("./lib/cypress.coffee",      "/src/lib/cypress.coffee")
           copy("./lib/controllers",         "/src/lib/controllers")
           copy("./lib/util",                "/src/lib/util")
@@ -378,6 +379,8 @@ class Osx64 extends Platform
     fs.renameAsync(src, dest)
 
   renameNwjsPlist: ->
+    plist = require("plist")
+
     pathToPlist = path.join(buildDir, @getVersion(), @platform, "Cypress.app", "Contents", "Info.plist")
 
     ## after build we want to rename the nwjs executable
@@ -452,10 +455,12 @@ class Linux64 extends Platform
           resolve()
 
   deploy: ->
+    version = @options.version
+
     deploy = =>
       new Promise (resolve, reject) =>
         ssh = ->
-          vagrant.ssh ["-c", "cd /cypress-app && gulp dist --skip-tests"], (code) ->
+          vagrant.ssh ["-c", "cd /cypress-app && gulp dist --version #{version} --skip-tests"], (code) ->
             if code isnt 0
               reject("vagrant.ssh gulp dist failed!")
             else
@@ -486,7 +491,7 @@ module.exports = {
       type: "list"
       message: "Publish a new version? (currently: #{version})"
       choices: [{
-        name: "Yes: set a new version and update remote manifest."
+        name: "Yes: set a new version and deploy new version."
         value: true
       },{
         name: "No:  just override the current deploy’ed version."
@@ -581,8 +586,8 @@ module.exports = {
         resolve()
 
   parseOptions: (argv) ->
-    opts = {}
-    opts.runTests = false if "--skip-tests" in argv
+    opts = minimist(argv)
+    opts.runTests = false if opts["skip-tests"]
     opts
 
   platform: ->
@@ -656,7 +661,7 @@ module.exports = {
   createRemoteManifest: (version) ->
     ## this isnt yet taking into account the os
     ## because we're only handling mac right now
-    getUrl = (os) =>
+    getUrl = (os) ->
       {
         url: [config.app.s3.path, config.app.s3.bucket, version, os, zipName].join("/")
       }
@@ -705,8 +710,8 @@ module.exports = {
             console.log(err)
           .then(resolve)
 
-  deploy: (platform) ->
-    ## read off the argv?
+  deploy: ->
+    ## read off the argv
     options = @parseOptions(process.argv)
 
     deploy = (platform) =>
@@ -721,9 +726,6 @@ module.exports = {
               .catch (err) ->
                 console.log("Dist Failed")
                 console.log(err)
-
-    if platform
-      return deploy(platform)
 
     @askWhichPlatform().bind(@).then(deploy)
 }
