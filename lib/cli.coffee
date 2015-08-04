@@ -22,7 +22,6 @@ program
   .command("run [project]")
   .usage("[project] [options]")
   .description("Runs Cypress Tests Headlessly")
-  .option("-c, --cypress <path>",      "path to a specific executable Cypress App.")
   .option("-s, --spec <spec>",         "runs a specific spec file. defaults to 'all'")
   .option("-r, --reporter <reporter>", "runs a specific mocha reporter. pass a path to use a custom reporter. defaults to 'spec'")
   .action (project, opts) ->
@@ -37,16 +36,16 @@ program
     require("./commands/ci")(key, parseOpts(opts))
 
 program
-  .command("get:key")
-  .description("Returns your Cypress API Key")
-  .action ->
-    require("./commands/get_key")()
+  .command("get:key [project]")
+  .description("Returns your Project's Secret Key for use in CI")
+  .action (project) ->
+    require("./commands/key")(project)
 
 program
-  .command("new:key")
-  .description("Generates a new Cypress API Key")
-  .action ->
-    require("./commands/new_key")()
+  .command("new:key [project]")
+  .description("Generates a new Project Secret Key for use in CI")
+  .action (project) ->
+    require("./commands/key")(project, {reset: true})
 
 program.parse(process.argv)
 
