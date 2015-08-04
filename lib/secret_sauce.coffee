@@ -1,6 +1,7 @@
+_       = require("lodash")
 os      = require("os")
 chalk   = require("chalk")
-Request = require("request-promise")
+request = require("request-promise")
 Promise = require("bluebird")
 
 SecretSauce =
@@ -8,7 +9,7 @@ SecretSauce =
     for key, fn of @[module]
       klass.prototype[key] = fn
 
-SecretSauce.Cli = (App, options) ->
+SecretSauce.Cli = (App, options, Routes) ->
   write = (str) ->
     process.stdout.write(str + "\n")
 
@@ -27,10 +28,26 @@ SecretSauce.Cli = (App, options) ->
     else
       writeErr("An error occured receiving token.")
 
-  ensureLinuxEnv = ->
-    return true if os.platform() is "linx64"
+  ensureCiEnv = (user) ->
+    return true if ensureNoSessionToken(user) and ensureLinuxEnv()
 
-    writeErr("Sorry, cannot run in CI mode. You must be on a linux operating system.")
+    writeErr("Sorry, running in CI requires a valid CI provider and environment.")
+
+  ensureProjectAPIToken = (projectId, key, fn) ->
+    request.post({
+      url: Routes.ci(projectId)
+      headers: {"x-project-token": key}
+    })
+    .then(fn)
+    .catch (err) ->
+      writeErr("Sorry, your project's API Key was not valid. This project cannot run in CI.")
+
+  ensureLinuxEnv = ->
+    return true if os.platform() is "linux"
+
+  ensureNoSessionToken = (user) ->
+    ## bail if we DO have a session token
+    return true unless user.get("session_token")
 
   ensureSessionToken = (user) ->
     ## bail if we have a session_token
@@ -71,33 +88,52 @@ SecretSauce.Cli = (App, options) ->
           .then(displayToken)
           .catch(displayTokenError)
 
+    run: (options) ->
+      ## silence all console messages
+      @App.silenceConsole()
+
+      @App.vent.trigger "start:projects:app", {
+        ci:          options.ci
+        spec:        options.spec
+        reporter:    options.reporter
+        projectPath: options.projectPath
+        onProjectNotFound: (path) ->
+          ## instead of throwing we should prompt the user with inquirer
+          ## hey this project hasn't ever been added to cypress, would you
+          ## like to add this project?
+          ## YES/NO
+          ## --adding project--
+          ## --project added!--
+
+          writeErr("Cannot run project because it was not found:", chalk.blue(path))
+      }
+
     runProject: (options) ->
       if ensureSessionToken(@user)
+        @run(options)
 
-        ## silence all console messages
-        @App.silenceConsole()
+    removeProject: (options) ->
+      ## This project has been removed: path/to/project
 
-        @App.vent.trigger "start:projects:app", {
-          spec:        options.spec
-          reporter:    options.reporter
-          projectPath: options.projectPath
-          onProjectNotFound: (path) ->
-            writeErr("Cannot run project because it was not found:", chalk.blue(path))
-        }
+    addProject: (projectPath) ->
+      ## check if this project is already added
+      ## if so, exit with "This project has already been added."
+      ## say This project has been successfully added: path/to/project
+      @App.config.addProject(projectPath)
 
     ci: (options) ->
-      if ensureSessionToken(@user)
-        if ensureLinuxEnv()
-          "asfd"
+      ## 1. no session
+      ## 2. linux env
+      ## 3. project API key
+      ## 4. TODO travis ci
+      ## 5. free/paid project
+      {projectPath} = options
 
-      ## bail if we arent in a recognized CI environment
-      ## add project first
-      ## then runProject
-      ## XVFB?
-      ## attempt to run in XVFB and die if we cant?
-      ## just say we only support linux based CI providers ATM
-      ## store the machine guid and store it in cypress servers?
-      ## CI must have internet access
+      if ensureCiEnv(@user)
+        @addProject(projectPath).then =>
+          @App.config.getProjectIdByPath(projectPath).then (projectId) =>
+            ensureProjectAPIToken projectId, options.key, =>
+              @run(options)
 
     startGuiApp: (options) ->
       if options.session
@@ -177,7 +213,7 @@ SecretSauce.Keys =
     @Log.info "Requesting new key range", {url: url}
 
     @cache.getUser().then (user = {}) =>
-      Request.post({
+      request.post({
         url: url
         headers: {"X-Session": user.session_token}
       })

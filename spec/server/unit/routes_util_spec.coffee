@@ -23,3 +23,6 @@ describe "Routes Util", ->
 
   it "projectToken", ->
     expect(Routes.projectToken("123-foo")).to.eq "http://localhost:1234/projects/123-foo/token"
+
+  it "ci", ->
+    expect(Routes.ci("123-foo")).to.eq "http://localhost:1234/ci/123-foo"

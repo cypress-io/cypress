@@ -9,6 +9,7 @@ routes = {
   token:         "token"
   signin:        "signin"
   signout:       "signout"
+  ci:            "ci/:id"
   project:       "projects/:id"
   projectToken:  "projects/:id/token"
   exceptions:    "exceptions"

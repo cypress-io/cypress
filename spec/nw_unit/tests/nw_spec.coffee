@@ -23,6 +23,7 @@ root = "../../../"
 Promise      = require("bluebird")
 chai         = require("chai")
 fs           = require("fs")
+os           = require("os")
 cache        = lookup("#{root}lib/cache")
 Log          = lookup("#{root}lib/log")
 Routes       = lookup("#{root}lib/util/routes")
@@ -214,163 +215,163 @@ module.exports = (parentWindow, gui, loadApp) ->
         expect(@win.title).to.eq "Updates"
         done()
 
-  describe "Preferences Window", ->
-    win = null
+  # describe "Preferences Window", ->
+  #   win = null
 
-    beforeEach ->
-      nock.disableNetConnect()
-      cache.setUser({name: "Brian", session_token: "abc123"}).then =>
-        loadApp(@)
+  #   beforeEach ->
+  #     nock.disableNetConnect()
+  #     cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+  #       loadApp(@)
 
-    afterEach ->
-      nock.cleanAll()
-      nock.enableNetConnect()
-      win?.close()
+  #   afterEach ->
+  #     nock.cleanAll()
+  #     nock.enableNetConnect()
+  #     win?.close()
 
-    context "clicking Preferences in the footer", ->
-      beforeEach ->
-        @setup = (fn) =>
-          @$("#footer [data-toggle='dropdown']").click()
-          @$(".dropdown-menu [data-preferences]").click()
+  #   context "clicking Preferences in the footer", ->
+  #     beforeEach ->
+  #       @setup = (fn) =>
+  #         @$("#footer [data-toggle='dropdown']").click()
+  #         @$(".dropdown-menu [data-preferences]").click()
 
-          @App.vent.on "start:preferences:app", (region, window) =>
-            win = window
-            view = @App.preferencesRegion.currentView
-            Promise.delay(100).then =>
-              fn.call(@, view, win)
+  #         @App.vent.on "start:preferences:app", (region, window) =>
+  #           win = window
+  #           view = @App.preferencesRegion.currentView
+  #           Promise.delay(100).then =>
+  #             fn.call(@, view, win)
 
-      it "display Loading... as the token key", (done) ->
-        nock(Routes.api())
-          .get("/token")
-          .delay(10000)
-          .reply(200, {
-            api_token: "foo-bar-baz-123"
-          })
+  #     it "display Loading... as the token key", (done) ->
+  #       nock(Routes.api())
+  #         .get("/token")
+  #         .delay(10000)
+  #         .reply(200, {
+  #           api_token: "foo-bar-baz-123"
+  #         })
 
-        @setup (view, win) ->
-          expect(view.ui.key).to.have.value("Loading...")
-          expect(view.ui.key.parents(".form-group")).not.to.have.class("has-error")
-          expect(win.title).to.eq "Preferences"
-          done()
+  #       @setup (view, win) ->
+  #         expect(view.ui.key).to.have.value("Loading...")
+  #         expect(view.ui.key.parents(".form-group")).not.to.have.class("has-error")
+  #         expect(win.title).to.eq "Preferences"
+  #         done()
 
-      it "displays the token after it is fetched", (done) ->
-        nock(Routes.api())
-          .get("/token")
-          .reply(200, {
-            api_token: "foo-bar-baz-123"
-          })
+  #     it "displays the token after it is fetched", (done) ->
+  #       nock(Routes.api())
+  #         .get("/token")
+  #         .reply(200, {
+  #           api_token: "foo-bar-baz-123"
+  #         })
 
-        @setup (view, win) ->
-          expect(view.ui.key).to.have.value("foo-bar-baz-123")
-          expect(view.ui.key.parents(".form-group")).not.to.have.class("has-error")
-          done()
+  #       @setup (view, win) ->
+  #         expect(view.ui.key).to.have.value("foo-bar-baz-123")
+  #         expect(view.ui.key.parents(".form-group")).not.to.have.class("has-error")
+  #         done()
 
-      it "can generate a new token", (done) ->
-        nock(Routes.api())
-          .get("/token")
-          .reply(200, {
-            api_token: "foo-bar-baz-123"
-          })
-          .put("/token")
-          .delay(500)
-          .reply(200, {
-            api_token: "some-new-token-987"
-          })
+  #     it "can generate a new token", (done) ->
+  #       nock(Routes.api())
+  #         .get("/token")
+  #         .reply(200, {
+  #           api_token: "foo-bar-baz-123"
+  #         })
+  #         .put("/token")
+  #         .delay(500)
+  #         .reply(200, {
+  #           api_token: "some-new-token-987"
+  #         })
 
-        @setup (view, win) ->
-          ## when the token is in flight
-          view.ui.generate.click()
-          expect(view.ui.generate).to.have.attr("disabled")
-          expect(view.ui.generate.find("i")).to.have.class("fa-spin")
+  #       @setup (view, win) ->
+  #         ## when the token is in flight
+  #         view.ui.generate.click()
+  #         expect(view.ui.generate).to.have.attr("disabled")
+  #         expect(view.ui.generate.find("i")).to.have.class("fa-spin")
 
-          ## when the token comes back
-          view.model.on "change:token", ->
-            expect(view.ui.generate).not.to.have.attr("disabled")
-            expect(view.ui.generate.find("i")).not.to.have.class("fa-spin")
-            expect(view.ui.key).to.have.value("some-new-token-987")
-            done()
+  #         ## when the token comes back
+  #         view.model.on "change:token", ->
+  #           expect(view.ui.generate).not.to.have.attr("disabled")
+  #           expect(view.ui.generate.find("i")).not.to.have.class("fa-spin")
+  #           expect(view.ui.key).to.have.value("some-new-token-987")
+  #           done()
 
-      it "displays error if fetching token fails", (done) ->
-        nock(Routes.api())
-          .get("/token")
-          .reply(401)
+  #     it "displays error if fetching token fails", (done) ->
+  #       nock(Routes.api())
+  #         .get("/token")
+  #         .reply(401)
 
-        @setup (view, win) ->
-          expect(view.ui.generate).not.to.have.attr("disabled")
-          expect(view.ui.generate.find("i")).not.to.have.class("fa-spin")
-          expect(view.ui.key).to.have.value("Loading...")
-          expect(view.$el.find(".help-block")).to.contain("An error occured receiving token.")
-          done()
+  #       @setup (view, win) ->
+  #         expect(view.ui.generate).not.to.have.attr("disabled")
+  #         expect(view.ui.generate.find("i")).not.to.have.class("fa-spin")
+  #         expect(view.ui.key).to.have.value("Loading...")
+  #         expect(view.$el.find(".help-block")).to.contain("An error occured receiving token.")
+  #         done()
 
-      it "displays error if generating token fails", (done) ->
-        nock(Routes.api())
-          .get("/token")
-          .reply(200, {
-            api_token: "foo-bar-baz-123"
-          })
-          .put("/token")
-          .reply(401)
+  #     it "displays error if generating token fails", (done) ->
+  #       nock(Routes.api())
+  #         .get("/token")
+  #         .reply(200, {
+  #           api_token: "foo-bar-baz-123"
+  #         })
+  #         .put("/token")
+  #         .reply(401)
 
-        @setup (view, win) ->
-          ## when the token is in flight
-          view.ui.generate.click()
+  #       @setup (view, win) ->
+  #         ## when the token is in flight
+  #         view.ui.generate.click()
 
-          ## when the token comes back
-          view.model.on "change:error", ->
-            expect(view.ui.generate).not.to.have.attr("disabled")
-            expect(view.ui.generate.find("i")).not.to.have.class("fa-spin")
-            expect(view.ui.key).to.have.value("foo-bar-baz-123")
-            expect(view.$el.find(".help-block")).to.contain("An error occured receiving token.")
-            done()
+  #         ## when the token comes back
+  #         view.model.on "change:error", ->
+  #           expect(view.ui.generate).not.to.have.attr("disabled")
+  #           expect(view.ui.generate.find("i")).not.to.have.class("fa-spin")
+  #           expect(view.ui.key).to.have.value("foo-bar-baz-123")
+  #           expect(view.$el.find(".help-block")).to.contain("An error occured receiving token.")
+  #           done()
 
-      it "disables clicking generate while generating", (done) ->
-        nock(Routes.api())
-          .get("/token")
-          .reply(200, {
-            api_token: "foo-bar-baz-123"
-          })
-          .put("/token")
-          .delay(2000)
-          .reply(200, {
-            api_token: "some-new-token-987"
-          })
+  #     it "disables clicking generate while generating", (done) ->
+  #       nock(Routes.api())
+  #         .get("/token")
+  #         .reply(200, {
+  #           api_token: "foo-bar-baz-123"
+  #         })
+  #         .put("/token")
+  #         .delay(2000)
+  #         .reply(200, {
+  #           api_token: "some-new-token-987"
+  #         })
 
-        @setup (view, win) =>
-          view.ui.generate.click()
+  #       @setup (view, win) =>
+  #         view.ui.generate.click()
 
-          generateToken = @sandbox.spy(view.model, "generateToken")
+  #         generateToken = @sandbox.spy(view.model, "generateToken")
 
-          setTimeout ->
-            view.ui.generate.click()
-            expect(generateToken).not.to.be.called
-            done()
-          , 100
+  #         setTimeout ->
+  #           view.ui.generate.click()
+  #           expect(generateToken).not.to.be.called
+  #           done()
+  #         , 100
 
-      it "removes existing errors when generating", (done) ->
-        nock(Routes.api())
-          .get("/token")
-          .reply(500)
-          .put("/token")
-          .delay(500)
-          .reply(200, {
-            api_token: "some-new-token-987"
-          })
+  #     it "removes existing errors when generating", (done) ->
+  #       nock(Routes.api())
+  #         .get("/token")
+  #         .reply(500)
+  #         .put("/token")
+  #         .delay(500)
+  #         .reply(200, {
+  #           api_token: "some-new-token-987"
+  #         })
 
-        @setup (view, win) ->
-          ## should have initial error due to 500 returned
-          expect(view.ui.key.parents(".form-group")).to.have.class("has-error")
+  #       @setup (view, win) ->
+  #         ## should have initial error due to 500 returned
+  #         expect(view.ui.key.parents(".form-group")).to.have.class("has-error")
 
-          view.ui.generate.click()
+  #         view.ui.generate.click()
 
-          expect(view.ui.key.parents(".form-group")).not.to.have.class("has-error")
+  #         expect(view.ui.key.parents(".form-group")).not.to.have.class("has-error")
 
-          ## when the token comes back
-          view.model.on "change:token", ->
-            expect(view.ui.key).to.have.value("some-new-token-987")
-            expect(view.ui.key.parents(".form-group")).not.to.have.class("has-error")
-            done()
+  #         ## when the token comes back
+  #         view.model.on "change:token", ->
+  #           expect(view.ui.key).to.have.value("some-new-token-987")
+  #           expect(view.ui.key.parents(".form-group")).not.to.have.class("has-error")
+  #           done()
 
-  describe "API Project Token Args", ->
+  describe "CLI Args", ->
     beforeEach ->
       nock.disableNetConnect()
 
@@ -380,15 +381,15 @@ module.exports = (parentWindow, gui, loadApp) ->
       @argsAre = (args...) =>
         loadApp(@, {start: false}).then =>
           @App.vent.on "app:entities:ready", =>
-            @exit  = @sandbox.stub process, "exit"
-            @write = @sandbox.stub process.stdout, "write"
+            @exit    = @sandbox.stub process, "exit"
+            @write   = @sandbox.stub process.stdout, "write"
+            @trigger = @sandbox.stub @App.vent, "trigger"
 
           @App.start({argv: [].concat(args)})
 
           # wait for our token to come back
           # because its async
           Promise.delay(100)
-
 
     afterEach ->
       Fixtures.remove()
@@ -470,6 +471,48 @@ module.exports = (parentWindow, gui, loadApp) ->
             expect(@write).to.be.calledWithMatch("Sorry, could not retreive project key because no project was found:")
             expect(@write).to.be.calledWithMatch("/foo/bar")
             expect(@exit).to.be.calledWith(1)
+
+    context.only "--run-project --ci", ->
+      it "requires linux env", ->
+        @sandbox.stub(os, "platform").returns("darwin")
+
+        @argsAre("--run-project", @todos, "--ci", "abc123").then =>
+          expect(@write).to.be.calledWithMatch("Sorry, running in CI requires a valid CI provider and environment.")
+          expect(@exit).to.be.calledWith(1)
+
+      it "ensures there is no user session", ->
+        @sandbox.stub(os, "platform").returns("linux")
+
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          @argsAre("--run-project", @todos, "--ci", "abc123").then =>
+            expect(@write).to.be.calledWithMatch("Sorry, running in CI requires a valid CI provider and environment.")
+            expect(@exit).to.be.calledWith(1)
+
+      it "requires valid project key", ->
+        @sandbox.stub(os, "platform").returns("linux")
+
+        nock(Routes.api())
+          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938")
+          .matchHeader("x-project-token", "abc123")
+          .reply(401)
+
+        cache.setUser({name: "Brian"}).then =>
+          @argsAre("--run-project", @todos, "--ci", "--key", "abc123").then =>
+            expect(@write).to.be.calledWithMatch("Sorry, your project's API Key was not valid. This project cannot run in CI.")
+            expect(@exit).to.be.calledWith(1)
+            expect(@trigger).not.to.be.calledWith("start:projects:app")
+
+      it "can start projects in ci mode", ->
+        @sandbox.stub(os, "platform").returns("linux")
+
+        nock(Routes.api())
+          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938")
+          .matchHeader("x-project-token", "abc123")
+          .reply(200)
+
+        cache.setUser({name: "Brian"}).then =>
+          @argsAre("--run-project", @todos, "--ci", "--key", "abc123").then =>
+            expect(@trigger).to.be.calledWith("start:projects:app")
 
   ## other tests which need writing
   ## 1. logging in (stub the github response)

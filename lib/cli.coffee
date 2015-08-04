@@ -1,4 +1,5 @@
-SecretSauce = require "./util/secret_sauce_loader"
+Routes      = require("./util/routes")
+SecretSauce = require("./util/secret_sauce_loader")
 
 module.exports = (App, options) ->
-  SecretSauce.Cli(App, options)
+  SecretSauce.Cli(App, options, Routes)
