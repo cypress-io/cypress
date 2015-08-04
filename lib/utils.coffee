@@ -108,13 +108,13 @@ module.exports = {
     args = [].concat(args)
 
     _.defaults options,
-      test: false
+      verify: false
       xvfb: os.platform() is "linux"
       stdio: ["ignore", process.stdout, "ignore"]
 
     spawn = =>
       @verifyCypress(cypress).then ->
-        if options.test
+        if options.verify
           console.log(chalk.green("Cypress application is valid and should be okay to run:"), chalk.blue(cypress))
           process.exit()
 

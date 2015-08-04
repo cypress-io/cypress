@@ -36,12 +36,6 @@ program
     require("./commands/ci")(key, parseOpts(opts))
 
 program
-  .command("test")
-  .description("Runs a smoke test to ensure Cypress is installed correctly")
-  .action ->
-    require("./commands/test")()
-
-program
   .command("get:key [project]")
   .description("Returns your Project's Secret Key for use in CI")
   .action (project) ->
@@ -52,6 +46,12 @@ program
   .description("Generates a new Project Secret Key for use in CI")
   .action (project) ->
     require("./commands/key")(project, {reset: true})
+
+program
+  .command("verify")
+  .description("Verifies that Cypress is installed correctly and executable")
+  .action ->
+    require("./commands/verify")()
 
 program.parse(process.argv)
 
