@@ -4,7 +4,7 @@ minimist = require("minimist")
 
 args     = "apiKey smokeTest getKey generateKey runProject project spec reporter ci debug updating headless ping coords key".split(" ")
 
-parseCoords = (cords) ->
+parseCoords = (coords) ->
   [x, y] = coords.split("x")
   {x: x, y: y}
 

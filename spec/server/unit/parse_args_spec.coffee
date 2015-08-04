@@ -26,3 +26,11 @@ describe "parseArgs", ->
       projectPath = path.resolve(process.cwd(), "/baz")
       @setup("--run-project", "/baz")
       expect(@options.projectPath).to.eq projectPath
+
+  context "--coords", ->
+    it "sets x and y", ->
+      @setup("--coords=800x600")
+      expect(@options.coords).to.deep.eq({
+        x: "800"
+        y: "600"
+      })
