@@ -212,9 +212,13 @@ class Cache extends require("events").EventEmitter
   generateToken: (session) ->
     @_token("put", session)
 
-  _projectToken: (method, session, projectPath) ->
+  getProjectIdByPath: (projectPath) ->
     @getProjects().then (projects) ->
-      if not projectId = _.findKey(projects, {PATH: projectPath})
+      _.findKey(projects, {PATH: projectPath})
+
+  _projectToken: (method, session, projectPath) ->
+    @getProjectIdByPath(projectPath).then (projectId) ->
+      if not projectId
         e = new Error
         e.projectNotFound = true
         e.projectPath = projectPath

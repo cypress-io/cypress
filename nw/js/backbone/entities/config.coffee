@@ -36,6 +36,9 @@
     removeProject: (path) ->
       @getCache().removeProject(path)
 
+    getProjectIdByPath: (projectPath) ->
+      @getCache().getProjectIdByPath(projectPath)
+
     getProjectPaths: ->
       @getCache().getProjectPaths()
 

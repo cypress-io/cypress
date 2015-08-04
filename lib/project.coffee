@@ -16,7 +16,7 @@ class Project
       return new Project(projectRoot)
 
     if not projectRoot
-      throw new Error("Instantiating lib/projects requires a projectRoot!")
+      throw new Error("Instantiating lib/project requires a projectRoot!")
 
     @projectRoot = projectRoot
 
