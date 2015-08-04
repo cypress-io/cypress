@@ -383,7 +383,10 @@ module.exports = (parentWindow, gui, loadApp) ->
           @App.vent.on "app:entities:ready", =>
             @exit    = @sandbox.stub process, "exit"
             @write   = @sandbox.stub process.stdout, "write"
-            @trigger = @sandbox.stub @App.vent, "trigger"
+            @trigger = @sandbox.spy  @App.vent, "trigger"
+
+            ## prevent the actual project from literally starting
+            @sandbox.stub @App.ProjectsApp.Show.Controller.prototype, "initialize"
 
           @App.start({argv: [].concat(args)})
 
@@ -472,7 +475,7 @@ module.exports = (parentWindow, gui, loadApp) ->
             expect(@write).to.be.calledWithMatch("/foo/bar")
             expect(@exit).to.be.calledWith(1)
 
-    context.only "--run-project --ci", ->
+    context "--run-project --ci --key", ->
       it "requires linux env", ->
         @sandbox.stub(os, "platform").returns("darwin")
 
@@ -513,6 +516,30 @@ module.exports = (parentWindow, gui, loadApp) ->
         cache.setUser({name: "Brian"}).then =>
           @argsAre("--run-project", @todos, "--ci", "--key", "abc123").then =>
             expect(@trigger).to.be.calledWith("start:projects:app")
+
+    context "--run-project", ->
+      it "requires a session_token", ->
+        cache.setUser({name: "Brian"}).then =>
+          @argsAre("--get-key").then =>
+            expect(@write).not.to.be.calledWith("foo-bar-baz-123\n")
+            expect(@exit).to.be.calledWith(1)
+
+      it "can start a project", ->
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          @argsAre("--run-project", @todos).then =>
+            expect(@trigger).to.be.calledWithMatch("start:projects:app", {
+              ci: undefined
+              spec: undefined
+              reporter: undefined
+              projectPath: @todos
+            })
+
+      it "throws when cannot find path to project", ->
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          @argsAre("--run-project", "/foo/bar").then =>
+            expect(@write).to.be.calledWithMatch("Sorry, could not run project because it was not found:")
+            expect(@write).to.be.calledWithMatch("/foo/bar")
+            expect(@exit).to.be.calledWith(1)
 
   ## other tests which need writing
   ## 1. logging in (stub the github response)

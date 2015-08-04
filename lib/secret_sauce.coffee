@@ -105,7 +105,7 @@ SecretSauce.Cli = (App, options, Routes) ->
           ## --adding project--
           ## --project added!--
 
-          writeErr("Cannot run project because it was not found:", chalk.blue(path))
+          writeErr("Sorry, could not run project because it was not found:", chalk.blue(path))
       }
 
     runProject: (options) ->
