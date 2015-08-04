@@ -190,13 +190,14 @@ SecretSauce.Chromium =
 
   _afterRun: (window) ->
     window.$Cypress.afterRun = (results) ->
-      process.stdout.write("Results are:\n")
-      process.stdout.write JSON.stringify(results)
-      process.stdout.write("\n")
-      # console.log("results", results)
+      # process.stdout.write("Results are:\n")
+      # process.stdout.write JSON.stringify(results)
+      # process.stdout.write("\n")
       ## notify Cypress API
 
-      process.exit()
+      failures = _.where(results, {state: "failed"}).length
+
+      process.exit(failures)
 
 SecretSauce.Keys =
   _convertToId: (index) ->
