@@ -60,7 +60,7 @@ module.exports = {
           ## add the path we executed cypress at here
           ## and chalk up a nice error message :-)
           console.log("Cypress was not executable. It may be corrupt. Please reinstall the latest version.")
-          process.exit()
+          process.exit(1)
         else
           resolve()
 
@@ -77,7 +77,8 @@ module.exports = {
         console.log(chalk.yellow("To fix this do (one) of the following:"))
         console.log("1. Reinstall Cypress with:", chalk.cyan("cypress install"))
         console.log("2. If Cypress is stored in another location, move it to the expected location")
-        console.log("3. Specify the existing location of Cypress with:", chalk.cyan("cypress run --cypress path/to/cypress"))
+        ## TODO talk about how to permanently change the path to the cypress executable
+        # console.log("3. Specify the existing location of Cypress with:", chalk.cyan("cypress run --cypress path/to/cypress"))
         console.log("")
         process.exit()
 
@@ -107,11 +108,16 @@ module.exports = {
     args = [].concat(args)
 
     _.defaults options,
+      test: false
       xvfb: os.platform() is "linux"
       stdio: ["ignore", process.stdout, "ignore"]
 
     spawn = =>
       @verifyCypress(cypress).then ->
+        if options.test
+          console.log(chalk.green("Cypress application is valid and should be okay to run:"), chalk.blue(cypress))
+          process.exit()
+
         sp = cp.spawn cypress, args, options
         if options.xvfb
           ## make sure we close down xvfb

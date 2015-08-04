@@ -3,7 +3,7 @@ commander = require("commander")
 pkg       = require("../package.json")
 
 parseOpts = (opts) ->
-  _.pick(opts, "cypress", "spec", "reporter", "path", "destination")
+  _.pick(opts, "spec", "reporter", "path", "destination")
 
 ## instantiate a new program for
 ## easier testability
@@ -34,6 +34,12 @@ program
   .option("-r, --reporter <reporter>", "runs a specific mocha reporter. pass a path to use a custom reporter. defaults to 'spec'")
   .action (key, opts) ->
     require("./commands/ci")(key, parseOpts(opts))
+
+program
+  .command("test")
+  .description("Runs a smoke test to ensure Cypress is installed correctly")
+  .action ->
+    require("./commands/test")()
 
 program
   .command("get:key [project]")
