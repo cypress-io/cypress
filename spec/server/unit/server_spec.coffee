@@ -18,6 +18,7 @@ describe "Server Interface", ->
     @sandbox = sinon.sandbox.create()
     @sandbox.stub(Socket.prototype, "startListening")
     @sandbox.stub(Project.prototype, "ensureProjectId").resolves("a-long-guid-123")
+    @sandbox.stub(Project.prototype, "getDetails").resolves("a-long-guid-123")
     @sandbox.stub(Settings, "readSync").returns({})
     @sandbox.stub(Support.prototype, "scaffold").resolves({})
     @sandbox.stub(Fixtures.prototype, "scaffold").resolves({})
@@ -91,7 +92,6 @@ describe "Server Interface", ->
         expect(Support::scaffold).to.be.calledOnce
 
     it "calls project#getDetails", ->
-      @sandbox.stub(Project.prototype, "getDetails").resolves("a-long-guid-123")
       @server.open().bind(@).then ->
         expect(Project::getDetails).to.be.calledWith("a-long-guid-123")
 
