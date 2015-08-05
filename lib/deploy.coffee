@@ -370,15 +370,63 @@ class Osx64 extends Platform
 
     Promise.all([
       @renameNwjsExecutable()
-      @renameNwjsPlist()
+      @renameNwjsExecutablePlist()
+      # @renameFolders()
     ])
+  #     .bind(@)
+  #     .then(@renameNwjsHelpers)
+  #     .then(@renameNwjsHelperPlists)
+
+  # renameFolder: (folder) ->
+  #   fs.renameAsync(folder, folder.replace("nwjs", "cy"))
+
+  # renameFolders: ->
+  #   folders = @buildPathToApp().replace(/MacOS\/Cypress$/, "Frameworks/nwjs Helper.app")
+
+  #   Promise.promisify(glob)(folders)
+  #     .bind(@)
+  #     .then (files) =>
+  #       Promise.map(files, @renameFolder)
+
+  # renameNwjsHelper: (file) ->
+  #   fs.renameAsync file, file.replace(/nwjs(?!.*nwjs)/, "cy")
+
+  # renameNwjsPlist: (file) ->
+  #   plist = require("plist")
+
+  #   ## after build we want to rename the nwjs executable
+  #   ## and update the plist settings
+  #   fs.readFileAsync(file, "utf8").then (contents) ->
+  #     obj = plist.parse(contents)
+  #     obj.CFBundleName        = obj.CFBundleName.replace("nwjs",          "cy")
+  #     obj.CFBundleExecutable  = obj.CFBundleExecutable.replace("nwjs",    "cy")
+  #     obj.CFBundleDisplayName = obj.CFBundleDisplayName.replace("nwjs",   "cy")
+  #     obj.CFBundleIdentifier  = obj.CFBundleIdentifier.replace("nwjs.nw", "cy")
+
+  #     fs.writeFileAsync(file, plist.build(obj))
+
+  # renameNwjsHelpers: ->
+  #   helpers = @buildPathToApp().replace(/MacOS\/Cypress$/, "Frameworks/**/nwjs Helper")
+
+  #   Promise.promisify(glob)(helpers)
+  #     .bind(@)
+  #     .then (files) =>
+  #       Promise.map(files, @renameNwjsHelper)
+
+  # renameNwjsHelperPlists: ->
+  #   plists = @buildPathToApp().replace(/MacOS\/Cypress$/, "Frameworks/**/Info.plist")
+
+  #   Promise.promisify(glob)(plists)
+  #     .bind(@)
+  #     .then (files) =>
+  #       Promise.map(files, @renameNwjsPlist)
 
   renameNwjsExecutable: ->
     dest = @buildPathToApp()
     src  = dest.replace(/Cypress$/, "nwjs")
     fs.renameAsync(src, dest)
 
-  renameNwjsPlist: ->
+  renameNwjsExecutablePlist: ->
     plist = require("plist")
 
     pathToPlist = path.join(buildDir, @getVersion(), @platform, "Cypress.app", "Contents", "Info.plist")
@@ -641,6 +689,9 @@ module.exports = {
 
   build: ->
     @getPlatform().build()
+
+  afterBuild: ->
+    @getPlatform().afterBuild()
 
   dist: ->
     @cleanupDist().then =>

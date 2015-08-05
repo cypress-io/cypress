@@ -203,6 +203,8 @@ gulp.task "dist:tests", deploy.runTests
 
 gulp.task "build:smoke:test", deploy.runSmokeTest
 
+gulp.task "after:build", deploy.afterBuild
+
 gulp.task "dist", deploy.dist
 
 gulp.task "build", deploy.build
