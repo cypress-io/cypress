@@ -4,7 +4,6 @@ sinon        = require "sinon"
 chokidar     = require "chokidar"
 expect       = require('chai').expect
 fs           = require "fs-extra"
-touch        = require "touch"
 Socket       = require "#{root}lib/socket"
 Server       = require "#{root}lib/server"
 Settings     = require "#{root}lib/util/settings"
@@ -109,8 +108,12 @@ describe "Socket", ->
       ## its invoked we finish the test
       onTestFileChange = @sandbox.stub @socket, "onTestFileChange", -> done()
 
-      @socket.watchTestFileByPath("test1.js").bind(@).then ->
-        touch @filePath
+      ## not delaying this here causes random failures when running
+      ## all the tests. there prob some race condition or we arent
+      ## waiting for a promise or something to resolve
+      Promise.delay(200).then =>
+        @socket.watchTestFileByPath("test1.js").bind(@).then ->
+          fs.writeFileAsync(@filePath, "foooooooooo")
 
   context "#onFixture", ->
     beforeEach ->
@@ -268,11 +271,11 @@ describe "Socket", ->
     it "emits 'sauce:job:create' with client options", ->
       fn = @sandbox.stub()
       @socket._runSauce @ioSocket, "app_spec.coffee", fn
-      expect(@ioSocket.emit).to.be.calledWith "sauce:job:create", {
+      expect(@ioSocket.emit).to.be.calledWithMatch "sauce:job:create", {
         batchId: 10000000
         browser: "ie"
         guid: "abc123-edfg2323"
-        name: "tests/app_spec.coffee"
+        manualUrl: "http://localhost:2020/__/#/tests/app_spec.coffee"
         os: "Windows 8.1"
         version: 11
       }
@@ -282,9 +285,11 @@ describe "Socket", ->
       @socket._runSauce @ioSocket, "app_spec.coffee", fn
       options = @sauce.getCall(0).args[0]
       expect(options).to.deep.eq {
-        url: "http://localhost:2020/__/#/tests/app_spec.coffee?nav=false"
         batchId: 10000000
         guid: "abc123-edfg2323"
+        manualUrl: "http://localhost:2020/__/#/tests/app_spec.coffee"
+        remoteUrl: "http://localhost:2020/__/#/tests/app_spec.coffee?nav=false"
+        screenResolution: "1280x1024"
         browserName: options.browserName
         version:     options.version
         platform:    options.platform

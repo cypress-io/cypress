@@ -33,7 +33,7 @@ describe "Project Interface", ->
 
   it "requires a projectRoot", ->
     fn = -> Project()
-    expect(fn).to.throw "Instantiating lib/projects requires a projectRoot!"
+    expect(fn).to.throw "Instantiating lib/project requires a projectRoot!"
 
   context "#getProjectId", ->
     it "returns the project id from json", ->
