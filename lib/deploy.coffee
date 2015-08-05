@@ -342,7 +342,7 @@ class Platform
     @log "gulpBuild"
 
     new Promise (resolve, reject) ->
-      runSequence ["client:build", "nw:build"], (err) ->
+      runSequence ["client:build", "nw:build"], ["client:minify", "nw:minify"], (err) ->
         if err then reject(err) else resolve()
 
   runSmokeTest: ->

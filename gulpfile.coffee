@@ -75,6 +75,14 @@ compileJs = (source, options, cb) ->
 
   Promise.all(tasks)
 
+minify = (source, destination) ->
+  gulp.src(source)
+    .pipe($.print())
+    .pipe($.uglify({
+      preserveComments: "some"
+    }))
+    .pipe(gulp.dest(destination))
+
 gulp.task "client:css", -> compileCss("app", "lib")
 
 gulp.task "nw:css", -> compileCss("nw", "nw")
@@ -212,6 +220,12 @@ gulp.task "deploy", deploy.deploy
 
 gulp.task "client",        ["client:build", "client:watch"]
 gulp.task "nw",            ["nw:build", "nw:watch"]
+
+gulp.task "client:minify", ->
+  minify("lib/public/js/!(cypress).js", "lib/public/js")
+
+gulp.task "nw:minify", ->
+  minify("nw/public/js/*.js", "nw/public/js")
 
 gulp.task "client:build",  ["bower"], (cb) ->
   runSequence ["client:css", "client:img", "client:fonts", "client:js", "client:html"], cb
