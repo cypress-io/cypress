@@ -20,12 +20,14 @@ lookup = (path) ->
 
 root = "../../../"
 
+_            = require("lodash")
 Promise      = require("bluebird")
 chai         = require("chai")
 fs           = require("fs")
 os           = require("os")
 cache        = lookup("#{root}lib/cache")
 Log          = lookup("#{root}lib/log")
+Chromium     = lookup("#{root}lib/chromium")
 Routes       = lookup("#{root}lib/util/routes")
 sinon        = require("sinon")
 sinonChai    = require("sinon-chai")
@@ -379,14 +381,24 @@ module.exports = (parentWindow, gui, loadApp) ->
       @todos = Fixtures.project("todos")
 
       @argsAre = (args...) =>
+        if _.isFunction(_.last(args))
+          fn = args.pop()
+
         loadApp(@, {start: false}).then =>
           @App.vent.on "app:entities:ready", =>
             @exit    = @sandbox.stub process, "exit"
             @write   = @sandbox.stub process.stdout, "write"
             @trigger = @sandbox.spy  @App.vent, "trigger"
 
+            @App.commands.setHandler("start:chromium:run", ->)
+
             ## prevent the actual project from literally starting
-            @sandbox.stub @App.ProjectsApp.Show.Controller.prototype, "initialize"
+            @runProject = @sandbox.stub(@App.config, "runProject").resolves({
+              clientUrl:      "http://localhost:2222/__/"
+              idGeneratorUrl: "http://localhost:2222/id_generator"
+            })
+
+            fn() if fn
 
           @App.start({argv: [].concat(args)})
 
@@ -517,6 +529,69 @@ module.exports = (parentWindow, gui, loadApp) ->
           @argsAre("--run-project", @todos, "--ci", "--key", "abc123").then =>
             expect(@trigger).to.be.calledWith("start:projects:app")
 
+      it "calls start:chromium:app with src to all tests", (done) ->
+        @sandbox.stub(os, "platform").returns("linux")
+
+        nock(Routes.api())
+          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938")
+          .matchHeader("x-project-token", "abc123")
+          .reply(200)
+
+        fn = =>
+          @App.commands.setHandler "start:chromium:run", (src, options) ->
+            expect(src).to.eq "http://localhost:2222/__/#/tests/__all?__ui=satellite"
+            done()
+
+        cache.setUser({name: "Brian"}).then =>
+          cache.addProject(@todos).then =>
+            @argsAre("--run-project", @todos, "--ci", "--key", "abc123", fn)
+
+      it "calls Chromium#override with {ci: true}", (done) ->
+        @sandbox.stub(os, "platform").returns("linux")
+
+        override = @sandbox.stub(Chromium.prototype, "override")
+
+        nock(Routes.api())
+          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938")
+          .matchHeader("x-project-token", "abc123")
+          .reply(200)
+
+        fn = =>
+          win = {}
+
+          @App.commands.setHandler "start:chromium:run", (src, options) =>
+            options.onReady(win)
+            expect(override).to.be.calledWith({ci: true, reporter: undefined})
+
+            done()
+
+        cache.setUser({name: "Brian"}).then =>
+          cache.addProject(@todos).then =>
+            @argsAre("--run-project", @todos, "--ci", "--key", "abc123", fn)
+
+      it "calls Chromium#override with custom reporter", (done) ->
+        @sandbox.stub(os, "platform").returns("linux")
+
+        override = @sandbox.stub(Chromium.prototype, "override")
+
+        nock(Routes.api())
+          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938")
+          .matchHeader("x-project-token", "abc123")
+          .reply(200)
+
+        fn = =>
+          win = {}
+
+          @App.commands.setHandler "start:chromium:run", (src, options) =>
+            options.onReady(win)
+            expect(override).to.be.calledWith({ci: true, reporter: "junit"})
+
+            done()
+
+        cache.setUser({name: "Brian"}).then =>
+          cache.addProject(@todos).then =>
+            @argsAre("--run-project", @todos, "--reporter", "junit", "--ci", "--key", "abc123", fn)
+
     context "--run-project", ->
       it "requires a session_token", ->
         cache.setUser({name: "Brian"}).then =>
@@ -540,6 +615,58 @@ module.exports = (parentWindow, gui, loadApp) ->
             expect(@write).to.be.calledWithMatch("Sorry, could not run project because it was not found:")
             expect(@write).to.be.calledWithMatch("/foo/bar")
             expect(@exit).to.be.calledWith(1)
+
+      it "immediately starts the project", ->
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          cache.addProject(@todos).then =>
+            @argsAre("--run-project", @todos).then =>
+              expect(@runProject).to.be.calledWithMatch(@todos, {
+                morgan: false
+              })
+
+      it "calls start:chromium:app with src to all tests", (done) ->
+        fn = =>
+          @App.commands.setHandler "start:chromium:run", (src, options) ->
+            expect(src).to.eq "http://localhost:2222/__/#/tests/__all?__ui=satellite"
+            done()
+
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          cache.addProject(@todos).then =>
+            @argsAre("--run-project", @todos, fn)
+
+      it "calls start:chromium:app with src to specific test", (done) ->
+        fn = =>
+          @App.commands.setHandler "start:chromium:run", (src, options) ->
+            expect(src).to.eq "http://localhost:2222/__/#/tests/some/specific/test.coffee?__ui=satellite"
+            done()
+
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          cache.addProject(@todos).then =>
+            @argsAre("--run-project", @todos, "--spec", "some/specific/test.coffee", fn)
+
+      it "calls Chromium#override which extends window", (done) ->
+        fn = =>
+          win = {
+            console: {}
+            $Cypress: {}
+            Mocha: {
+              process: {}
+            }
+          }
+
+          @App.commands.setHandler "start:chromium:run", (src, options) =>
+            options.onReady(win)
+
+            expect(win.require).to.be.ok
+            expect(win.Mocha.process).not.to.be.empty
+            expect(win.$Cypress.reporter).to.be.ok
+            expect(win.console.log).to.be.a("function")
+
+            done()
+
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          cache.addProject(@todos).then =>
+            @argsAre("--run-project", @todos, fn)
 
   ## other tests which need writing
   ## 1. logging in (stub the github response)

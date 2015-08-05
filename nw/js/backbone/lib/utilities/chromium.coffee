@@ -12,6 +12,7 @@
 
       _.defaults options,
         headless: false
+        onReady: ->
 
       chromium = App.request "gui:open", src, {
         show: !options.headless
@@ -23,7 +24,7 @@
       }
 
       chromium.once "document-end", ->
-        App.config.chromium(chromium.window, options)
+        options.onReady(chromium.window)
 
       windows.chromium = chromium
 

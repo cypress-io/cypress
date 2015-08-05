@@ -11,5 +11,5 @@
   App.vent.on "start:projects:app", (options) ->
     router.to "list", options
 
-  App.vent.on "project:clicked", (project, headless) ->
-    router.to "show", project: project, headless: headless
+  App.vent.on "project:clicked", (project, options) ->
+    router.to "show", project: project, options: options

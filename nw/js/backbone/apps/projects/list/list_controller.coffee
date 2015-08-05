@@ -13,8 +13,8 @@
 
       projectsView = @getProjectsView(projects, user)
 
-      startProject = (project, headless = false) ->
-        App.vent.trigger "project:clicked", project, headless
+      startProject = (project, options = {}) ->
+        App.vent.trigger "project:clicked", project, options
 
       if projectPath = params.projectPath
         @listenTo projectsView, "show", ->
@@ -23,7 +23,7 @@
           ## if we couldnt find this project then bail
           return params.onProjectNotFound(projectPath) if not project
 
-          startProject(project, true)
+          startProject(project, params)
       else
         @listenTo projectsView, "project:added", (path) ->
           App.config.addProject(path).then ->

@@ -3,7 +3,7 @@
   class Show.Controller extends App.Controllers.Application
 
     initialize: (params) ->
-      {project} = params
+      {project, options} = params
 
       projectView = @getProjectView(project)
 
@@ -16,14 +16,8 @@
 
       @show projectView
 
-      options = {
-        headless: params.headless
-        onChromiumRun: (src, options = {}) ->
-          App.execute "start:chromium:run", src, options
-      }
-
-      if options.headless
-        options.morgan = false
+      _.defaults options,
+        onProjectStart: ->
 
       _.defer => @runProject(project, options)
 
@@ -31,9 +25,10 @@
       App.config.runProject(project.get("path"), options)
         .then (config) ->
           project.setClientUrl(config.clientUrl, config.clientUrlDisplay)
+
           App.execute "start:id:generator", config.idGeneratorUrl
-          if options.headless
-            options.onChromiumRun(config.clientUrl + "#/tests/cypress_api.coffee?__ui=satellite", {headless: true})
+
+          options.onProjectStart(config.clientUrl)
 
         .catch (err) ->
           project.setError(err)

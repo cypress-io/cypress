@@ -9,7 +9,7 @@ SecretSauce =
     for key, fn of @[module]
       klass.prototype[key] = fn
 
-SecretSauce.Cli = (App, options, Routes) ->
+SecretSauce.Cli = (App, options, Routes, Chromium) ->
   write = (str) ->
     process.stdout.write(str + "\n")
 
@@ -88,15 +88,28 @@ SecretSauce.Cli = (App, options, Routes) ->
           .then(displayToken)
           .catch(displayTokenError)
 
+    getSrc: (clientUrl, spec) ->
+      spec ?= "__all"
+
+      [clientUrl, "#/tests/", spec, "?__ui=satellite"].join("")
+
     run: (options) ->
       ## silence all console messages
-      @App.silenceConsole()
+      # @App.silenceConsole()
 
       @App.vent.trigger "start:projects:app", {
-        ci:          options.ci
-        spec:        options.spec
-        reporter:    options.reporter
+        morgan:      false
         projectPath: options.projectPath
+        onProjectStart: (clientUrl) =>
+          @App.execute "start:chromium:run", @getSrc(clientUrl, options.spec), {
+            headless:    true
+            onReady: (win) ->
+              Chromium(win).override({
+                ci:          options.ci
+                reporter:    options.reporter
+              })
+          }
+
         onProjectNotFound: (path) ->
           ## instead of throwing we should prompt the user with inquirer
           ## hey this project hasn't ever been added to cypress, would you
@@ -158,20 +171,23 @@ SecretSauce.Chromium =
 
     @window.require = require
 
-    _.defaults options,
-      headless: false
-
-    return if options.headless is false
+    ## right now we dont do anything differently
+    ## in ci vs a headless run, but when ci is true
+    ## we want to record the results of the run
+    ## and not do anything if its headless
+    # return if options.ci isnt true
 
     _.extend @window.Mocha.process, process
 
-    @_reporter(@window)
+    @_reporter(@window, options.reporter)
     @_onerror(@window)
     @_log(@window)
     @_afterRun(@window)
 
-  _reporter: (window) ->
-    window.$Cypress.reporter = require("mocha/lib/reporters/spec")
+  _reporter: (window, reporter) ->
+    reporter ?= require("mocha/lib/reporters/spec")
+
+    window.$Cypress.reporter = reporter
 
   _onerror: (window) ->
     # window.onerror = (err) ->

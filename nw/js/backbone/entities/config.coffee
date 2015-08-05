@@ -20,8 +20,6 @@
 
     getLog: -> @_getProp("Log")
 
-    getChromium: -> @_getProp("Chromium")
-
     getCli: -> @_getProp("cli")
 
     getUser: ->
@@ -79,11 +77,6 @@
     cli: (options) ->
       cli = @getCli()
       cli(App, options)
-
-    chromium: (window, options) ->
-      C = @getChromium()
-
-      C(window).override(options)
 
     getManifest: -> @getManifest()
 

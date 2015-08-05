@@ -7,6 +7,5 @@ module.exports = (NwApp) -> {
   Log:       require("./log")
   Booter:    require("./cypress")
   updater:   require("./updater")(NwApp)
-  Chromium:  require("./chromium")
   manifest:  fs.readJsonSync(process.cwd() + "/package.json")
 }
