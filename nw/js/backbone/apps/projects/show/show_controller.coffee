@@ -28,7 +28,7 @@
 
           App.execute "start:id:generator", config.idGeneratorUrl
 
-          options.onProjectStart(config.clientUrl)
+          options.onProjectStart(config)
 
         .catch (err) ->
           project.setError(err)

@@ -26,6 +26,7 @@ chai         = require("chai")
 fs           = require("fs")
 os           = require("os")
 cache        = lookup("#{root}lib/cache")
+Server       = lookup("#{root}lib/server")
 Log          = lookup("#{root}lib/log")
 Chromium     = lookup("#{root}lib/chromium")
 Routes       = lookup("#{root}lib/util/routes")
@@ -386,17 +387,17 @@ module.exports = (parentWindow, gui, loadApp) ->
 
         loadApp(@, {start: false}).then =>
           @App.vent.on "app:entities:ready", =>
-            @exit    = @sandbox.stub process, "exit"
-            @write   = @sandbox.stub process.stdout, "write"
-            @trigger = @sandbox.spy  @App.vent, "trigger"
+            @exit       = @sandbox.stub process, "exit"
+            @write      = @sandbox.stub process.stdout, "write"
+            @trigger    = @sandbox.spy  @App.vent, "trigger"
+            @runProject = @sandbox.spy  @App.config, "runProject"
 
             @App.commands.setHandler("start:chromium:run", ->)
 
-            ## prevent the actual project from literally starting
-            @runProject = @sandbox.stub(@App.config, "runProject").resolves({
-              clientUrl:      "http://localhost:2222/__/"
-              idGeneratorUrl: "http://localhost:2222/id_generator"
-            })
+            ## prevent the actual project from literally booting
+            @sandbox.stub Server.prototype, "open", ->
+              ## resolve with our own config object
+              Promise.resolve(@config)
 
             fn() if fn
 
@@ -539,7 +540,7 @@ module.exports = (parentWindow, gui, loadApp) ->
 
         fn = =>
           @App.commands.setHandler "start:chromium:run", (src, options) ->
-            expect(src).to.eq "http://localhost:2222/__/#/tests/__all?__ui=satellite"
+            expect(src).to.eq "http://localhost:8888/__/#/tests/__all?__ui=satellite"
             done()
 
         cache.setUser({name: "Brian"}).then =>
@@ -627,7 +628,7 @@ module.exports = (parentWindow, gui, loadApp) ->
       it "calls start:chromium:app with src to all tests", (done) ->
         fn = =>
           @App.commands.setHandler "start:chromium:run", (src, options) ->
-            expect(src).to.eq "http://localhost:2222/__/#/tests/__all?__ui=satellite"
+            expect(src).to.eq "http://localhost:8888/__/#/tests/__all?__ui=satellite"
             done()
 
         cache.setUser({name: "Brian", session_token: "abc123"}).then =>
@@ -637,12 +638,21 @@ module.exports = (parentWindow, gui, loadApp) ->
       it "calls start:chromium:app with src to specific test", (done) ->
         fn = =>
           @App.commands.setHandler "start:chromium:run", (src, options) ->
-            expect(src).to.eq "http://localhost:2222/__/#/tests/some/specific/test.coffee?__ui=satellite"
+            expect(src).to.eq "http://localhost:8888/__/#/tests/sub/sub_test.coffee?__ui=satellite"
             done()
 
         cache.setUser({name: "Brian", session_token: "abc123"}).then =>
           cache.addProject(@todos).then =>
-            @argsAre("--run-project", @todos, "--spec", "some/specific/test.coffee", fn)
+            @argsAre("--run-project", @todos, "--spec", "sub/sub_test.coffee", fn)
+
+      it "validates that specific spec exists", ->
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          cache.addProject(@todos).then =>
+            @argsAre("--run-project", @todos, "--spec", "foo/bar/baz_spec.js").then =>
+              Promise.delay(100).then =>
+                expect(@write).to.be.calledWithMatch("Sorry, could not run this specific spec because it was not found:")
+                expect(@write).to.be.calledWithMatch("foo/bar/baz_spec.js")
+                expect(@exit).to.be.calledWith(1)
 
       it "calls Chromium#override which extends window", (done) ->
         fn = =>

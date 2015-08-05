@@ -1,8 +1,12 @@
 _       = require("lodash")
 os      = require("os")
+path    = require("path")
 chalk   = require("chalk")
 request = require("request-promise")
 Promise = require("bluebird")
+fs      = require("fs-extra")
+
+fs = Promise.promisifyAll(fs)
 
 SecretSauce =
   mixin: (module, klass) ->
@@ -22,9 +26,11 @@ SecretSauce.Cli = (App, options, Routes, Chromium) ->
     write(token)
     process.exit()
 
-  displayTokenError = (err) ->
+  displayError = (err) ->
     if err.projectNotFound
       writeErr("Sorry, could not retreive project key because no project was found:", chalk.blue(err.projectPath))
+    if err.specNotFound
+      writeErr("Sorry, could not run this specific spec because it was not found:", chalk.blue(err.specPath))
     else
       writeErr("An error occured receiving token.")
 
@@ -78,7 +84,7 @@ SecretSauce.Cli = (App, options, Routes, Chromium) ->
         ## log out the API Token
         @App.config.getProjectToken(@user, options.projectPath)
           .then(displayToken)
-          .catch(displayTokenError)
+          .catch(displayError)
 
     generateKey: ->
       if ensureSessionToken(@user)
@@ -86,29 +92,48 @@ SecretSauce.Cli = (App, options, Routes, Chromium) ->
         ## generate a new API Token
         @App.config.generateProjectToken(@user, options.projectPath)
           .then(displayToken)
-          .catch(displayTokenError)
+          .catch(displayError)
 
     getSrc: (clientUrl, spec) ->
-      spec ?= "__all"
-
       [clientUrl, "#/tests/", spec, "?__ui=satellite"].join("")
+
+    getSpec: (config, options) ->
+      spec = options.spec
+
+      ## if we dont have a specific spec resolve with __all
+      return Promise.resolve(@getSrc(config.clientUrl, "__all")) if not spec
+
+      specFile = path.join(options.projectPath, config.testFolder, spec)
+
+      fs.statAsync(specFile)
+        .bind(@)
+        .then ->
+          @getSrc(config.clientUrl, spec)
+        .catch (err) ->
+          e = new Error
+          e.specNotFound = true
+          e.specPath = specFile
+          throw e
 
     run: (options) ->
       ## silence all console messages
-      # @App.silenceConsole()
+      @App.silenceConsole()
 
       @App.vent.trigger "start:projects:app", {
         morgan:      false
         projectPath: options.projectPath
-        onProjectStart: (clientUrl) =>
-          @App.execute "start:chromium:run", @getSrc(clientUrl, options.spec), {
-            headless:    true
-            onReady: (win) ->
-              Chromium(win).override({
-                ci:          options.ci
-                reporter:    options.reporter
-              })
-          }
+        onProjectStart: (config) =>
+          @getSpec(config, options)
+            .then (src) =>
+              @App.execute "start:chromium:run", src, {
+                headless:    true
+                onReady: (win) ->
+                  Chromium(win).override({
+                    ci:          options.ci
+                    reporter:    options.reporter
+                  })
+              }
+            .catch(displayError)
 
         onProjectNotFound: (path) ->
           ## instead of throwing we should prompt the user with inquirer
