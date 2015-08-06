@@ -746,14 +746,12 @@ module.exports = {
           .on "end", resolve
 
   release: ->
-    ## allow us to pass specific options here
-    ## to force the release to a specific version
-    ## or extend the getReleases to accept custom value
-    new Promise (resolve, reject) =>
-      releases = glob.sync("*", {cwd: buildDir})
+    ## read off the argv
+    options = @parseOptions(process.argv)
 
-      inquirer.prompt @getReleases(releases), (answers) =>
-        @updateS3Manifest(answers.release)
+    new Promise (resolve, reject) =>
+      release = (version) =>
+        @updateS3Manifest(version)
           .bind(@)
           .then(@cleanupDist)
           .then(@cleanupBuild)
@@ -762,7 +760,19 @@ module.exports = {
           .catch (err) ->
             console.log("Release Failed")
             console.log(err)
+            reject(err)
           .then(resolve)
+
+      if v = options.version
+        release(v)
+      else
+        ## allow us to pass specific options here
+        ## to force the release to a specific version
+        ## or extend the getReleases to accept custom value
+        releases = glob.sync("*", {cwd: buildDir})
+
+        inquirer.prompt @getReleases(releases), (answers) =>
+          release(answers.release)
 
   deploy: ->
     ## read off the argv

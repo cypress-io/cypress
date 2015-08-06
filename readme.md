@@ -66,12 +66,20 @@ npm run deploy
 
 ## with options
 npm run deploy -- --skip-tests
+
+```
+
+### Releasing
+
+```bash
+npm run release
 ```
 
 ### Rolling back
-1. Open `package.json`
-2. Reduce version to what we want to roll back to
-3. run `gulp deploy:manifest` to push this change live
+
+```bash
+npm run release -- --version 0.9.6
+```
 
 If the user just updated their old app will be in their trash bin. They could always delete the new app and "put back" their trashed app.
 
