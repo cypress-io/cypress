@@ -339,7 +339,7 @@
       browser = el.parent().data("browser")
       version = el.text()
 
-      @trigger "browser:clicked", browser, version
+      # @trigger "browser:clicked", browser, version
 
     browserChanged: (browser, version) ->
       @ui.chosenBrowser.html(
