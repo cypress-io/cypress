@@ -63,6 +63,9 @@ bin/cy <path-to-the-project-you-want-to-test> --no-ids --no-debug
 
 ```bash
 npm run deploy
+
+## with options
+npm run deploy -- --skip-tests
 ```
 
 ### Rolling back
