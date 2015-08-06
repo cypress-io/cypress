@@ -154,7 +154,7 @@
 
       @insertChildViews(runnable)
 
-      setImmediate =>
+      requestAnimationFrame =>
         @startInsertingTestViews(testViewQueue)
 
     insertChildViews: (runner, iframe, model) ->
