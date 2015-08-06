@@ -205,6 +205,51 @@
         ## really shut down the window!
         @close(true)
 
+    preferences: ->
+      if preferences = windows.preferences
+        return preferences.focus()
+
+      windows.preferences = preferences = App.request "gui:open", "./preferences.html",
+        position: "center"
+        width: 520
+        height: 270
+        # frame: false
+        toolbar: false
+        title: "Preferences"
+
+      preferences.once "loaded", ->
+        preferences.showDevTools() if App.config.get("debug")
+
+        ## grab the preferences region from other window
+        $el = $("#preferences-region", preferences.window.document)
+
+        ## attach to the app as a custom region object
+        App.addRegions
+          preferencesRegion: Marionette.Region.extend(el: $el)
+
+        App.vent.trigger "start:preferences:app", App.preferencesRegion, preferences
+
+      preferences.once "close", ->
+        ## remove app region when this is closed down
+        App.removeRegion("preferencesRegion") if App.preferencesRegion
+
+        delete windows.preferences
+
+        ## really shut down the window!
+        @close(true)
+
+    tests: ->
+      return if not App.config.get("debug")
+
+      tests = App.request "gui:open", "http://localhost:3500",
+        position: "center"
+        height: 1024
+        width: 768
+        title: "Cypress Tests"
+
+      tests.once "loaded", ->
+        tests.showDevTools()
+
     get: ->
       gui.Window.get()
 
@@ -244,5 +289,11 @@
   App.commands.setHandler "gui:debug", ->
     API.debug()
 
+  App.commands.setHandler "gui:tests", ->
+    API.tests()
+
   App.commands.setHandler "gui:about", ->
     API.about()
+
+  App.commands.setHandler "gui:preferences", ->
+    API.preferences()

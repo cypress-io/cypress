@@ -1,6 +1,11 @@
 @App.module "Entities", (Entities, App, Backbone, Marionette, $, _) ->
 
   class Entities.Agent extends Entities.Model
+    reset: ->
+      @stopListening()
+      @log = null
+      @clear(silent: true)
+      @clear(silent: true)
 
   class Entities.AgentsCollection extends Entities.Collection
     model: Entities.Agent
@@ -37,6 +42,10 @@
       return if _.isEmpty attrs
 
       super @createAgent(attrs)
+
+    reset: ->
+      @invoke "reset"
+      super
 
   App.reqres.setHandler "agent:entities", ->
     new Entities.AgentsCollection

@@ -37,6 +37,9 @@
     bottomRegion: (region) ->
       bottomView = @getBottomView()
 
+      @listenTo bottomView, "tests:clicked", ->
+        App.execute "gui:tests"
+
       @listenTo bottomView, "login:clicked", (view, obj) ->
         App.execute "login:request"
 
@@ -58,6 +61,9 @@
 
       @listenTo bottomView, "about:clicked", ->
         App.execute "gui:about"
+
+      @listenTo bottomView, "preferences:clicked", ->
+        App.execute "gui:preferences"
 
       @show bottomView, region: region
 

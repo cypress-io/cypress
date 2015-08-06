@@ -6,6 +6,9 @@ $Cypress.Chainer = do ($Cypress, _) ->
       @id = _.uniqueId("chainer")
       # @queue = []
 
+    @remove = (key) ->
+      delete $Chainer.prototype[key]
+
     @inject = (key, fn) ->
 
       ## when our instance methods are invoked

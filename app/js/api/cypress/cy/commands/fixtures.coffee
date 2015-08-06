@@ -7,6 +7,11 @@ $Cypress.register "Fixtures", (Cypress, _, $, Promise) ->
   clone = (obj) ->
     JSON.parse(JSON.stringify(obj))
 
+  ## reset the cache whenever we
+  ## completely stop
+  Cypress.on "stop", ->
+    cache = {}
+
   Cypress.addParentCommand
     fixture: (fixture, options = {}) ->
       ## always return a promise here

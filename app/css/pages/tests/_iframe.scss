@@ -167,8 +167,13 @@
         }
 
         #browser-versions-container {
-          width: 200px;
+          width: 220px;
           text-align: center;
+
+          div.row > div {
+            width: 20%;
+            float: left;
+          }
         }
 
         .browser-versions {

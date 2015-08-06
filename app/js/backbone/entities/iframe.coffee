@@ -36,6 +36,8 @@
         @setPageLoading(bool)
 
     load: (cb, options) ->
+      ## add src and url to options here
+
       _.defaults options,
         browser:  @get("browser")
         version:  @get("version")
@@ -61,6 +63,14 @@
 
     setPageLoading: (bool = true) ->
       @set "pageLoading", bool
+
+    setBrowserAndVersion: (browser, version) ->
+      @set
+        browser: browser
+        version: version
+
+    switchToBrowser: (browser, version) ->
+      @trigger "switch:to:manual:browser", browser, version
 
     isRunning: (bool) ->
       if arguments.length

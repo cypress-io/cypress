@@ -6,17 +6,34 @@
 ## with actually starting the REAL server as a forked
 ## process, instead of running as it is currently
 
+## because we run these tests during the /dist
+## process after obfuscation we no longer have
+## access to individual modules and must walk
+## back up to the root cypress-app dir and grab
+## them from there because process.cwd() still
+## matches wherever we're invoking this file from
+lookup = (path) ->
+  try
+    require(path)
+  catch e
+    require("../../#{path}")
+
 root = "../../../"
 
+_            = require("lodash")
 Promise      = require("bluebird")
 chai         = require("chai")
 fs           = require("fs")
-# Cypress      = require("#{root}lib/cypress")
-cache        = require("#{root}lib/cache")
-Log          = require("#{root}lib/log")
+os           = require("os")
+cache        = lookup("#{root}lib/cache")
+Server       = lookup("#{root}lib/server")
+Log          = lookup("#{root}lib/log")
+Chromium     = lookup("#{root}lib/chromium")
+Routes       = lookup("#{root}lib/util/routes")
 sinon        = require("sinon")
 sinonChai    = require("sinon-chai")
 sinonPromise = require("sinon-as-promised")
+nock         = require("nock")
 Fixtures     = require("#{root}/spec/server/helpers/fixtures")
 
 fs = Promise.promisifyAll(fs)
@@ -91,7 +108,7 @@ module.exports = (parentWindow, gui, loadApp) ->
         fs.writeFileSync @todos + "/cypress.json", "{'foo': 'bar}"
         @$("#projects-container .project").click()
 
-        Promise.delay(100).then =>
+        Promise.delay(1000).then =>
           project = @$("#project")
           expect(project.find("p.text-danger")).to.contain("Could not start server!")
           expect(project.find("p.bg-danger")).to.contain("Error reading from")
@@ -200,6 +217,466 @@ module.exports = (parentWindow, gui, loadApp) ->
         expect(@App.updatesRegion.currentView.ui.button).to.contain("Close")
         expect(@win.title).to.eq "Updates"
         done()
+
+  # describe "Preferences Window", ->
+  #   win = null
+
+  #   beforeEach ->
+  #     nock.disableNetConnect()
+  #     cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+  #       loadApp(@)
+
+  #   afterEach ->
+  #     nock.cleanAll()
+  #     nock.enableNetConnect()
+  #     win?.close()
+
+  #   context "clicking Preferences in the footer", ->
+  #     beforeEach ->
+  #       @setup = (fn) =>
+  #         @$("#footer [data-toggle='dropdown']").click()
+  #         @$(".dropdown-menu [data-preferences]").click()
+
+  #         @App.vent.on "start:preferences:app", (region, window) =>
+  #           win = window
+  #           view = @App.preferencesRegion.currentView
+  #           Promise.delay(100).then =>
+  #             fn.call(@, view, win)
+
+  #     it "display Loading... as the token key", (done) ->
+  #       nock(Routes.api())
+  #         .get("/token")
+  #         .delay(10000)
+  #         .reply(200, {
+  #           api_token: "foo-bar-baz-123"
+  #         })
+
+  #       @setup (view, win) ->
+  #         expect(view.ui.key).to.have.value("Loading...")
+  #         expect(view.ui.key.parents(".form-group")).not.to.have.class("has-error")
+  #         expect(win.title).to.eq "Preferences"
+  #         done()
+
+  #     it "displays the token after it is fetched", (done) ->
+  #       nock(Routes.api())
+  #         .get("/token")
+  #         .reply(200, {
+  #           api_token: "foo-bar-baz-123"
+  #         })
+
+  #       @setup (view, win) ->
+  #         expect(view.ui.key).to.have.value("foo-bar-baz-123")
+  #         expect(view.ui.key.parents(".form-group")).not.to.have.class("has-error")
+  #         done()
+
+  #     it "can generate a new token", (done) ->
+  #       nock(Routes.api())
+  #         .get("/token")
+  #         .reply(200, {
+  #           api_token: "foo-bar-baz-123"
+  #         })
+  #         .put("/token")
+  #         .delay(500)
+  #         .reply(200, {
+  #           api_token: "some-new-token-987"
+  #         })
+
+  #       @setup (view, win) ->
+  #         ## when the token is in flight
+  #         view.ui.generate.click()
+  #         expect(view.ui.generate).to.have.attr("disabled")
+  #         expect(view.ui.generate.find("i")).to.have.class("fa-spin")
+
+  #         ## when the token comes back
+  #         view.model.on "change:token", ->
+  #           expect(view.ui.generate).not.to.have.attr("disabled")
+  #           expect(view.ui.generate.find("i")).not.to.have.class("fa-spin")
+  #           expect(view.ui.key).to.have.value("some-new-token-987")
+  #           done()
+
+  #     it "displays error if fetching token fails", (done) ->
+  #       nock(Routes.api())
+  #         .get("/token")
+  #         .reply(401)
+
+  #       @setup (view, win) ->
+  #         expect(view.ui.generate).not.to.have.attr("disabled")
+  #         expect(view.ui.generate.find("i")).not.to.have.class("fa-spin")
+  #         expect(view.ui.key).to.have.value("Loading...")
+  #         expect(view.$el.find(".help-block")).to.contain("An error occured receiving token.")
+  #         done()
+
+  #     it "displays error if generating token fails", (done) ->
+  #       nock(Routes.api())
+  #         .get("/token")
+  #         .reply(200, {
+  #           api_token: "foo-bar-baz-123"
+  #         })
+  #         .put("/token")
+  #         .reply(401)
+
+  #       @setup (view, win) ->
+  #         ## when the token is in flight
+  #         view.ui.generate.click()
+
+  #         ## when the token comes back
+  #         view.model.on "change:error", ->
+  #           expect(view.ui.generate).not.to.have.attr("disabled")
+  #           expect(view.ui.generate.find("i")).not.to.have.class("fa-spin")
+  #           expect(view.ui.key).to.have.value("foo-bar-baz-123")
+  #           expect(view.$el.find(".help-block")).to.contain("An error occured receiving token.")
+  #           done()
+
+  #     it "disables clicking generate while generating", (done) ->
+  #       nock(Routes.api())
+  #         .get("/token")
+  #         .reply(200, {
+  #           api_token: "foo-bar-baz-123"
+  #         })
+  #         .put("/token")
+  #         .delay(2000)
+  #         .reply(200, {
+  #           api_token: "some-new-token-987"
+  #         })
+
+  #       @setup (view, win) =>
+  #         view.ui.generate.click()
+
+  #         generateToken = @sandbox.spy(view.model, "generateToken")
+
+  #         setTimeout ->
+  #           view.ui.generate.click()
+  #           expect(generateToken).not.to.be.called
+  #           done()
+  #         , 100
+
+  #     it "removes existing errors when generating", (done) ->
+  #       nock(Routes.api())
+  #         .get("/token")
+  #         .reply(500)
+  #         .put("/token")
+  #         .delay(500)
+  #         .reply(200, {
+  #           api_token: "some-new-token-987"
+  #         })
+
+  #       @setup (view, win) ->
+  #         ## should have initial error due to 500 returned
+  #         expect(view.ui.key.parents(".form-group")).to.have.class("has-error")
+
+  #         view.ui.generate.click()
+
+  #         expect(view.ui.key.parents(".form-group")).not.to.have.class("has-error")
+
+  #         ## when the token comes back
+  #         view.model.on "change:token", ->
+  #           expect(view.ui.key).to.have.value("some-new-token-987")
+  #           expect(view.ui.key.parents(".form-group")).not.to.have.class("has-error")
+  #           done()
+
+  describe "CLI Args", ->
+    beforeEach ->
+      nock.disableNetConnect()
+
+      Fixtures.scaffold()
+      @todos = Fixtures.project("todos")
+
+      @argsAre = (args...) =>
+        if _.isFunction(_.last(args))
+          fn = args.pop()
+
+        loadApp(@, {start: false}).then =>
+          @App.vent.on "app:entities:ready", =>
+            @exit       = @sandbox.stub process, "exit"
+            @write      = @sandbox.stub process.stdout, "write"
+            @trigger    = @sandbox.spy  @App.vent, "trigger"
+            @runProject = @sandbox.spy  @App.config, "runProject"
+
+            @App.commands.setHandler("start:chromium:run", ->)
+
+            ## prevent the actual project from literally booting
+            @sandbox.stub Server.prototype, "open", ->
+              ## resolve with our own config object
+              Promise.resolve(@config)
+
+            fn() if fn
+
+          @App.start({argv: [].concat(args)})
+
+          # wait for our token to come back
+          # because its async
+          Promise.delay(100)
+
+    afterEach ->
+      Fixtures.remove()
+      nock.cleanAll()
+      nock.enableNetConnect()
+
+    context "--get-key", ->
+      it "writes out key and exits", ->
+        nock(Routes.api())
+          .get("/projects/e3e58d3f-3769-4b50-af38-e31b8989a938/token")
+          .reply(200, {
+            api_token: "foo-bar-baz-123"
+          })
+
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          cache.addProject(@todos).then =>
+            @argsAre("--get-key", "--project", @todos).then =>
+              expect(@write).to.be.calledWith("foo-bar-baz-123\n")
+              expect(@exit).to.be.calledOnce
+
+      it "requires a session_token", ->
+        cache.setUser({name: "Brian"}).then =>
+          @argsAre("--get-key").then =>
+            expect(@write).not.to.be.calledWith("foo-bar-baz-123\n")
+            expect(@exit).to.be.calledWith(1)
+
+      it "notifies on fetch error", ->
+        nock(Routes.api())
+          .get("/projects/e3e58d3f-3769-4b50-af38-e31b8989a938/token")
+          .reply(404)
+
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          cache.addProject(@todos).then =>
+            @argsAre("--get-key", "--project", @todos).then =>
+              expect(@write).to.be.calledWithMatch("An error occured receiving token.")
+              expect(@exit).to.be.calledWith(1)
+
+      it "notfies when project path cannot be found", ->
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          @argsAre("--get-key", "--project", "/foo/bar").then =>
+            expect(@write).to.be.calledWithMatch("Sorry, could not retreive project key because no project was found:")
+            expect(@write).to.be.calledWithMatch("/foo/bar")
+            expect(@exit).to.be.calledWith(1)
+
+    context "--new-key", ->
+      it "writes out key and exits", ->
+        nock(Routes.api())
+          .put("/projects/e3e58d3f-3769-4b50-af38-e31b8989a938/token")
+          .reply(200, {
+            api_token: "new-key-987"
+          })
+
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          cache.addProject(@todos).then =>
+            @argsAre("--new-key", "--project", @todos).then =>
+              expect(@write).to.be.calledWith("new-key-987\n")
+              expect(@exit).to.be.calledOnce
+
+      it "requires a session_token", ->
+        cache.setUser({name: "Brian"}).then =>
+          @argsAre("--new-key").then =>
+            expect(@write).not.to.be.calledWith("new-key-987\n")
+            expect(@exit).to.be.calledWith(1)
+
+      it "notifies on fetch error", ->
+        nock(Routes.api())
+          .put("/projects/e3e58d3f-3769-4b50-af38-e31b8989a938/token")
+          .reply(500)
+
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          cache.addProject(@todos).then =>
+            @argsAre("--new-key", "--project", @todos).then =>
+              expect(@write).to.be.calledWithMatch("An error occured receiving token.")
+              expect(@exit).to.be.calledWith(1)
+
+      it "notfies when project path cannot be found", ->
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          @argsAre("--get-key", "--project", "/foo/bar").then =>
+            expect(@write).to.be.calledWithMatch("Sorry, could not retreive project key because no project was found:")
+            expect(@write).to.be.calledWithMatch("/foo/bar")
+            expect(@exit).to.be.calledWith(1)
+
+    context "--run-project --ci --key", ->
+      it "requires linux env", ->
+        @sandbox.stub(os, "platform").returns("darwin")
+
+        @argsAre("--run-project", @todos, "--ci", "abc123").then =>
+          expect(@write).to.be.calledWithMatch("Sorry, running in CI requires a valid CI provider and environment.")
+          expect(@exit).to.be.calledWith(1)
+
+      it "ensures there is no user session", ->
+        @sandbox.stub(os, "platform").returns("linux")
+
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          @argsAre("--run-project", @todos, "--ci", "abc123").then =>
+            expect(@write).to.be.calledWithMatch("Sorry, running in CI requires a valid CI provider and environment.")
+            expect(@exit).to.be.calledWith(1)
+
+      it "requires valid project key", ->
+        @sandbox.stub(os, "platform").returns("linux")
+
+        nock(Routes.api())
+          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938")
+          .matchHeader("x-project-token", "abc123")
+          .reply(401)
+
+        cache.setUser({name: "Brian"}).then =>
+          @argsAre("--run-project", @todos, "--ci", "--key", "abc123").then =>
+            expect(@write).to.be.calledWithMatch("Sorry, your project's API Key was not valid. This project cannot run in CI.")
+            expect(@exit).to.be.calledWith(1)
+            expect(@trigger).not.to.be.calledWith("start:projects:app")
+
+      it "can start projects in ci mode", ->
+        @sandbox.stub(os, "platform").returns("linux")
+
+        nock(Routes.api())
+          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938")
+          .matchHeader("x-project-token", "abc123")
+          .reply(200)
+
+        cache.setUser({name: "Brian"}).then =>
+          @argsAre("--run-project", @todos, "--ci", "--key", "abc123").then =>
+            expect(@trigger).to.be.calledWith("start:projects:app")
+
+      it "calls start:chromium:app with src to all tests", (done) ->
+        @sandbox.stub(os, "platform").returns("linux")
+
+        nock(Routes.api())
+          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938")
+          .matchHeader("x-project-token", "abc123")
+          .reply(200)
+
+        fn = =>
+          @App.commands.setHandler "start:chromium:run", (src, options) ->
+            expect(src).to.eq "http://localhost:8888/__/#/tests/__all?__ui=satellite"
+            done()
+
+        cache.setUser({name: "Brian"}).then =>
+          cache.addProject(@todos).then =>
+            @argsAre("--run-project", @todos, "--ci", "--key", "abc123", fn)
+
+      it "calls Chromium#override with {ci: true}", (done) ->
+        @sandbox.stub(os, "platform").returns("linux")
+
+        override = @sandbox.stub(Chromium.prototype, "override")
+
+        nock(Routes.api())
+          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938")
+          .matchHeader("x-project-token", "abc123")
+          .reply(200)
+
+        fn = =>
+          win = {}
+
+          @App.commands.setHandler "start:chromium:run", (src, options) =>
+            options.onReady(win)
+            expect(override).to.be.calledWith({ci: true, reporter: undefined})
+
+            done()
+
+        cache.setUser({name: "Brian"}).then =>
+          cache.addProject(@todos).then =>
+            @argsAre("--run-project", @todos, "--ci", "--key", "abc123", fn)
+
+      it "calls Chromium#override with custom reporter", (done) ->
+        @sandbox.stub(os, "platform").returns("linux")
+
+        override = @sandbox.stub(Chromium.prototype, "override")
+
+        nock(Routes.api())
+          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938")
+          .matchHeader("x-project-token", "abc123")
+          .reply(200)
+
+        fn = =>
+          win = {}
+
+          @App.commands.setHandler "start:chromium:run", (src, options) =>
+            options.onReady(win)
+            expect(override).to.be.calledWith({ci: true, reporter: "junit"})
+
+            done()
+
+        cache.setUser({name: "Brian"}).then =>
+          cache.addProject(@todos).then =>
+            @argsAre("--run-project", @todos, "--reporter", "junit", "--ci", "--key", "abc123", fn)
+
+    context "--run-project", ->
+      it "requires a session_token", ->
+        cache.setUser({name: "Brian"}).then =>
+          @argsAre("--get-key").then =>
+            expect(@write).not.to.be.calledWith("foo-bar-baz-123\n")
+            expect(@exit).to.be.calledWith(1)
+
+      it "can start a project", ->
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          @argsAre("--run-project", @todos).then =>
+            expect(@trigger).to.be.calledWithMatch("start:projects:app", {
+              ci: undefined
+              spec: undefined
+              reporter: undefined
+              projectPath: @todos
+            })
+
+      it "throws when cannot find path to project", ->
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          @argsAre("--run-project", "/foo/bar").then =>
+            expect(@write).to.be.calledWithMatch("Sorry, could not run project because it was not found:")
+            expect(@write).to.be.calledWithMatch("/foo/bar")
+            expect(@exit).to.be.calledWith(1)
+
+      it "immediately starts the project", ->
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          cache.addProject(@todos).then =>
+            @argsAre("--run-project", @todos).then =>
+              expect(@runProject).to.be.calledWithMatch(@todos, {
+                morgan: false
+              })
+
+      it "calls start:chromium:app with src to all tests", (done) ->
+        fn = =>
+          @App.commands.setHandler "start:chromium:run", (src, options) ->
+            expect(src).to.eq "http://localhost:8888/__/#/tests/__all?__ui=satellite"
+            done()
+
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          cache.addProject(@todos).then =>
+            @argsAre("--run-project", @todos, fn)
+
+      it "calls start:chromium:app with src to specific test", (done) ->
+        fn = =>
+          @App.commands.setHandler "start:chromium:run", (src, options) ->
+            expect(src).to.eq "http://localhost:8888/__/#/tests/sub/sub_test.coffee?__ui=satellite"
+            done()
+
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          cache.addProject(@todos).then =>
+            @argsAre("--run-project", @todos, "--spec", "sub/sub_test.coffee", fn)
+
+      it "validates that specific spec exists", ->
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          cache.addProject(@todos).then =>
+            @argsAre("--run-project", @todos, "--spec", "foo/bar/baz_spec.js").then =>
+              Promise.delay(100).then =>
+                expect(@write).to.be.calledWithMatch("Sorry, could not run this specific spec because it was not found:")
+                expect(@write).to.be.calledWithMatch("foo/bar/baz_spec.js")
+                expect(@exit).to.be.calledWith(1)
+
+      it "calls Chromium#override which extends window", (done) ->
+        fn = =>
+          win = {
+            console: {}
+            $Cypress: {}
+            Mocha: {
+              process: {}
+            }
+          }
+
+          @App.commands.setHandler "start:chromium:run", (src, options) =>
+            options.onReady(win)
+
+            expect(win.require).to.be.ok
+            expect(win.Mocha.process).not.to.be.empty
+            expect(win.$Cypress.reporter).to.be.ok
+            expect(win.console.log).to.be.a("function")
+
+            done()
+
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          cache.addProject(@todos).then =>
+            @argsAre("--run-project", @todos, fn)
 
   ## other tests which need writing
   ## 1. logging in (stub the github response)

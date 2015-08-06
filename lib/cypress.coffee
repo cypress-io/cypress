@@ -1,14 +1,10 @@
 require("./environment")
 
 global.config  = require("konfig")()
-Settings       = require("./util/settings")
 Server         = require("./server")
-Updater        = require("./updater")
-cache          = require("./cache")
-Log            = require("./log")
+Backend        = require("./backend")
 child_process  = require("child_process")
 open           = require('open')
-fs             = require("fs-extra")
 Promise        = require('bluebird')
 
 class Booter
@@ -17,7 +13,7 @@ class Booter
       return new Booter(projectRoot)
 
     if not projectRoot
-      throw new Error("Instantiating bin/cy requires a projectRoot!")
+      throw new Error("Instantiating lib/cypress requires a projectRoot!")
 
     @projectRoot = projectRoot
     @child       = null
@@ -54,24 +50,15 @@ class Booter
 
     @server = Server(@projectRoot)
 
-    @server.open().bind(@)
+    @server.open(options).bind(@)
     .then (settings) ->
       {server: @server, settings: settings}
 
   close: ->
     @server.close()
 
-  ## attach to Booter class
-  @cache = cache
-
-  ## attach to Booter class
-  @Updater = Updater
-
-  ## attach to Booter class
-  @Log = Log
-
-  ## attach to Booter class
-  @manifest = fs.readJsonSync(process.cwd() + "/package.json")
+  ## attach to Cypress class
+  @Backend = Backend
 
 send = (obj) ->
   if process.send

@@ -2,28 +2,45 @@
 
   class List.Controller extends App.Controllers.Application
 
-    initialize: ->
+    initialize: (params) ->
+      _.defaults params,
+        projectPath: null
+        onProjectNotFound: ->
+
       projects = App.request "project:entities"
 
       user = App.request "current:user"
 
       projectsView = @getProjectsView(projects, user)
 
-      @listenTo projectsView, "project:added", (path) ->
-        App.config.addProject(path).then ->
-          projects.add(path: path)
+      startProject = (project, options = {}) ->
+        App.vent.trigger "project:clicked", project, options
 
-      @listenTo projectsView, "sign:out:clicked", ->
-        App.vent.trigger "log:out", user
+      if projectPath = params.projectPath
+        @listenTo projectsView, "show", ->
+          project = projects.getProjectByPath(projectPath)
 
-      @listenTo projectsView, "childview:project:clicked", (iv, obj) ->
-        App.vent.trigger "project:clicked", obj.model
+          ## if we couldnt find this project then bail
+          return params.onProjectNotFound(projectPath) if not project
 
-      @listenTo projectsView, "childview:project:remove:clicked", (iv, project) ->
-        App.config.removeProject(project.get("path"))
-        projects.remove(project)
+          startProject(project, params)
+      else
+        @listenTo projectsView, "project:added", (path) ->
+          App.config.addProject(path).then ->
+            projects.add(path: path)
 
-      @show projectsView
+        @listenTo projectsView, "sign:out:clicked", ->
+          App.vent.trigger "log:out", user
+
+        @listenTo projectsView, "childview:project:clicked", (iv, obj) ->
+          startProject(obj.model)
+
+        @listenTo projectsView, "childview:project:remove:clicked", (iv, project) ->
+          App.config.removeProject(project.get("path"))
+          projects.remove(project)
+
+      @listenTo projects, "fetched", ->
+        @show projectsView
 
     getProjectsView: (projects, user) ->
       new List.Projects

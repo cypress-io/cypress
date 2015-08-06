@@ -20,6 +20,8 @@
     onShow: ->
       @$el.addClass("file") if not @model.hasChildren()
 
+      @$el.addClass("all-tests") if @model.get("all")
+
   class List.Empty extends App.Views.ItemView
     template: "organize/list/_empty"
 

@@ -8,8 +8,8 @@
 
   router = new Router
 
-  App.vent.on "start:projects:app", ->
-    router.to "list"
+  App.vent.on "start:projects:app", (options) ->
+    router.to "list", options
 
-  App.vent.on "project:clicked", (project) ->
-    router.to "show", project: project
+  App.vent.on "project:clicked", (project, options) ->
+    router.to "show", project: project, options: options

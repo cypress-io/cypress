@@ -1,7 +1,246 @@
+_       = require("lodash")
+os      = require("os")
+path    = require("path")
+chalk   = require("chalk")
+request = require("request-promise")
+Promise = require("bluebird")
+fs      = require("fs-extra")
+
+fs = Promise.promisifyAll(fs)
+
 SecretSauce =
   mixin: (module, klass) ->
     for key, fn of @[module]
       klass.prototype[key] = fn
+
+SecretSauce.Cli = (App, options, Routes, Chromium) ->
+  write = (str) ->
+    process.stdout.write(str + "\n")
+
+  writeErr = (str, msgs...) ->
+    str = [chalk.red(str)].concat(msgs).join(" ")
+    write(str)
+    process.exit(1)
+
+  displayToken = (token) ->
+    write(token)
+    process.exit()
+
+  displayError = (err) ->
+    if err.projectNotFound
+      writeErr("Sorry, could not retreive project key because no project was found:", chalk.blue(err.projectPath))
+    if err.specNotFound
+      writeErr("Sorry, could not run this specific spec because it was not found:", chalk.blue(err.specPath))
+    else
+      writeErr("An error occured receiving token.")
+
+  ensureCiEnv = (user) ->
+    return true if ensureNoSessionToken(user) and ensureLinuxEnv()
+
+    writeErr("Sorry, running in CI requires a valid CI provider and environment.")
+
+  ensureProjectAPIToken = (projectId, key, fn) ->
+    request.post({
+      url: Routes.ci(projectId)
+      headers: {"x-project-token": key}
+    })
+    .then(fn)
+    .catch (err) ->
+      writeErr("Sorry, your project's API Key was not valid. This project cannot run in CI.")
+
+  ensureLinuxEnv = ->
+    return true if os.platform() is "linux"
+
+  ensureNoSessionToken = (user) ->
+    ## bail if we DO have a session token
+    return true unless user.get("session_token")
+
+  ensureSessionToken = (user) ->
+    ## bail if we have a session_token
+    return true if user.get("session_token")
+
+    ## else die and log out the auth error
+    writeErr("Sorry, you are not currently logged into Cypress. This request requires authentication.\nPlease log into Cypress and then issue this command again.")
+
+  class Cli
+    constructor: (@App, options = {}) ->
+      @user = @App.currentUser
+
+      @parseCliOptions(options)
+
+    parseCliOptions: (options) ->
+      switch
+        when options.ci           then @ci(options)
+        when options.getKey       then @getKey(options)
+        when options.generateKey  then @generateKey(options)
+        # when options.openProject  then @openProject(user, options)
+        when options.runProject   then @runProject(options)
+        else
+          @startGuiApp(options)
+
+    getKey: ->
+      if ensureSessionToken(@user)
+
+        ## log out the API Token
+        @App.config.getProjectToken(@user, options.projectPath)
+          .then(displayToken)
+          .catch(displayError)
+
+    generateKey: ->
+      if ensureSessionToken(@user)
+
+        ## generate a new API Token
+        @App.config.generateProjectToken(@user, options.projectPath)
+          .then(displayToken)
+          .catch(displayError)
+
+    getSrc: (clientUrl, spec) ->
+      [clientUrl, "#/tests/", spec, "?__ui=satellite"].join("")
+
+    getSpec: (config, options) ->
+      spec = options.spec
+
+      ## if we dont have a specific spec resolve with __all
+      return Promise.resolve(@getSrc(config.clientUrl, "__all")) if not spec
+
+      specFile = path.join(options.projectPath, config.testFolder, spec)
+
+      fs.statAsync(specFile)
+        .bind(@)
+        .then ->
+          @getSrc(config.clientUrl, spec)
+        .catch (err) ->
+          e = new Error
+          e.specNotFound = true
+          e.specPath = specFile
+          throw e
+
+    run: (options) ->
+      ## silence all console messages
+      @App.silenceConsole()
+
+      @App.vent.trigger "start:projects:app", {
+        morgan:      false
+        projectPath: options.projectPath
+        onProjectStart: (config) =>
+          @getSpec(config, options)
+            .then (src) =>
+              @App.execute "start:chromium:run", src, {
+                headless:    true
+                onReady: (win) ->
+                  Chromium(win).override({
+                    ci:          options.ci
+                    reporter:    options.reporter
+                  })
+              }
+            .catch(displayError)
+
+        onProjectNotFound: (path) ->
+          ## instead of throwing we should prompt the user with inquirer
+          ## hey this project hasn't ever been added to cypress, would you
+          ## like to add this project?
+          ## YES/NO
+          ## --adding project--
+          ## --project added!--
+
+          writeErr("Sorry, could not run project because it was not found:", chalk.blue(path))
+      }
+
+    runProject: (options) ->
+      if ensureSessionToken(@user)
+        @run(options)
+
+    removeProject: (options) ->
+      ## This project has been removed: path/to/project
+
+    addProject: (projectPath) ->
+      ## check if this project is already added
+      ## if so, exit with "This project has already been added."
+      ## say This project has been successfully added: path/to/project
+      @App.config.addProject(projectPath)
+
+    ci: (options) ->
+      ## 1. no session
+      ## 2. linux env
+      ## 3. project API key
+      ## 4. TODO travis ci
+      ## 5. free/paid project
+      {projectPath} = options
+
+      if ensureCiEnv(@user)
+        @addProject(projectPath).then =>
+          @App.config.getProjectIdByPath(projectPath).then (projectId) =>
+            ensureProjectAPIToken projectId, options.key, =>
+              @run(options)
+
+    startGuiApp: (options) ->
+      if options.session
+        ## if have it, start projects
+        @App.vent.trigger "start:projects:app"
+      else
+        ## else login
+        @App.vent.trigger "start:login:app"
+
+      ## display the footer
+      @App.vent.trigger "start:footer:app"
+
+      ## display the GUI
+      @App.execute "gui:display", options.coords
+
+  new Cli(App, options)
+
+## change this to be a function like CLI
+SecretSauce.Chromium =
+  override: (options = {}) ->
+    { _ } = SecretSauce
+
+    @window.require = require
+
+    @window.$Cypress.isHeadless = true
+
+    ## right now we dont do anything differently
+    ## in ci vs a headless run, but when ci is true
+    ## we want to record the results of the run
+    ## and not do anything if its headless
+    # return if options.ci isnt true
+
+    _.extend @window.Mocha.process, process
+
+    @_reporter(@window, options.reporter)
+    @_onerror(@window)
+    @_log(@window)
+    @_afterRun(@window)
+
+  _reporter: (window, reporter) ->
+    reporter ?= require("mocha/lib/reporters/spec")
+
+    window.$Cypress.reporter = reporter
+
+  _onerror: (window) ->
+    # window.onerror = (err) ->
+      # ## log out the error to stdout
+
+      # ## notify Cypress API
+
+      # process.exit(1)
+
+  _log: (window) ->
+    util = @util
+
+    window.console.log = ->
+      msg = util.format.apply(util, arguments)
+      process.stdout.write(msg + "\n")
+
+  _afterRun: (window) ->
+    window.$Cypress.afterRun = (results) ->
+      # process.stdout.write("Results are:\n")
+      # process.stdout.write JSON.stringify(results)
+      # process.stdout.write("\n")
+      ## notify Cypress API
+
+      failures = _.where(results, {state: "failed"}).length
+
+      process.exit(failures)
 
 SecretSauce.Keys =
   _convertToId: (index) ->
@@ -11,6 +250,17 @@ SecretSauce.Keys =
 
   _getProjectKeyRange: (id) ->
     @cache.getProject(id).get("RANGE")
+
+  _getNewKeyRange: (projectId) ->
+    url = "#{config.app.api_url}/projects/#{projectId}/keys"
+
+    @Log.info "Requesting new key range", {url: url}
+
+    @cache.getUser().then (user = {}) =>
+      request.post({
+        url: url
+        headers: {"X-Session": user.session_token}
+      })
 
   ## Lookup the next Test integer and update
   ## offline location of sync
@@ -94,8 +344,70 @@ SecretSauce.Socket =
       .catch (err) ->
         cb({__error: err.message})
 
-  _startListening: (chokidar, path) ->
+  _runSauce: (socket, spec, fn) ->
     { _ } = SecretSauce
+
+    ## this will be used to group jobs
+    ## together for the runs related to 1
+    ## spec by setting custom-data on the job object
+    batchId = Date.now()
+
+    jobName = @app.get("cypress").testFolder + "/" + spec
+    fn(jobName, batchId)
+
+    ## need to handle platform/browser/version incompatible configurations
+    ## and throw our own error
+    ## https://saucelabs.com/platforms/webdriver
+    jobs = [
+      { platform: "Windows 8.1", browser: "chrome",  version: 43, resolution: "1280x1024" }
+      { platform: "Windows 8.1", browser: "internet explorer",  version: 11, resolution: "1280x1024" }
+      # { platform: "Windows 7",   browser: "internet explorer",  version: 10 }
+      # { platform: "Linux",       browser: "chrome",             version: 37 }
+      { platform: "Linux",       browser: "firefox",            version: 33  }
+      { platform: "OS X 10.9",   browser: "safari",             version: 7 }
+    ]
+
+    normalizeJobObject = (obj) ->
+      obj = _.clone obj
+
+      obj.browser = {
+        "internet explorer": "ie"
+      }[obj.browserName] or obj.browserName
+
+      obj.os = obj.platform
+
+      return _.pick obj, "manualUrl", "browser", "version", "os", "batchId", "guid"
+
+    _.each jobs, (job) =>
+      url = @app.get("cypress").clientUrl + "#/" + jobName
+      options =
+        manualUrl:        url
+        remoteUrl:        url + "?nav=false"
+        batchId:          batchId
+        guid:             @uuid.v4()
+        browserName:      job.browser
+        version:          job.version
+        platform:         job.platform
+        screenResolution: job.resolution ? "1024x768"
+        onStart: (sessionID) ->
+          ## pass up the sessionID to the previous client obj by its guid
+          socket.emit "sauce:job:start", clientObj.guid, sessionID
+
+      clientObj = normalizeJobObject(options)
+      socket.emit "sauce:job:create", clientObj
+
+      @sauce(options)
+        .then (obj) ->
+          {sessionID, runningTime, passed} = obj
+          socket.emit "sauce:job:done", sessionID, runningTime, passed
+        .catch (err) ->
+          socket.emit "sauce:job:fail", clientObj.guid, err
+
+  _startListening: (chokidar, path, options) ->
+    { _ } = SecretSauce
+
+    _.defaults options,
+      onChromiumRun: ->
 
     messages = {}
 
@@ -136,6 +448,9 @@ SecretSauce.Socket =
         else
           cb({__error: "Could not process '#{message}'. No remote servers connected."})
 
+      socket.on "run:tests:in:chromium", (src) ->
+        options.onChromiumRun(src)
+
       socket.on "watch:test:file", (filePath) =>
         @watchTestFileByPath(filePath)
 
@@ -155,9 +470,9 @@ SecretSauce.Socket =
         @Log.info "finished:generating:ids:for:test", strippedPath: strippedPath
         @io.emit "test:changed", file: strippedPath
 
-      _.each "load:spec:iframe command:add runner:start runner:end before:run before:add after:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test".split(" "), (event) ->
+      _.each "load:spec:iframe url:changed page:loading command:add command:attrs:changed runner:start runner:end before:run before:add after:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test".split(" "), (event) =>
         socket.on event, (args...) =>
-          args = _.chain(args).compact().reject(_.isFunction).value()
+          args = _.chain(args).reject(_.isUndefined).reject(_.isFunction).value()
           @io.emit event, args...
 
       ## when we're told to run:sauce we receive
@@ -166,63 +481,7 @@ SecretSauce.Socket =
       ## we'll embed some additional meta data into
       ## the job name
       socket.on "run:sauce", (spec, fn) =>
-        ## this will be used to group jobs
-        ## together for the runs related to 1
-        ## spec by setting custom-data on the job object
-        batchId = Date.now()
-
-        jobName = testFolder + "/" + spec
-        fn(jobName, batchId)
-
-        ## need to handle platform/browser/version incompatible configurations
-        ## and throw our own error
-        ## https://saucelabs.com/platforms/webdriver
-        jobs = [
-          { platform: "Windows 8.1", browser: "internet explorer",  version: 11 }
-          { platform: "Windows 7",   browser: "internet explorer",  version: 10 }
-          { platform: "Linux",       browser: "chrome",             version: 37 }
-          { platform: "Linux",       browser: "firefox",            version: 33 }
-          { platform: "OS X 10.9",   browser: "safari",             version: 7 }
-        ]
-
-        normalizeJobObject = (obj) ->
-          obj = _(obj).clone()
-
-          obj.browser = {
-            "internet explorer": "ie"
-          }[obj.browserName] or obj.browserName
-
-          obj.os = obj.platform
-
-          _(obj).pick "name", "browser", "version", "os", "batchId", "guid"
-
-        _.each jobs, (job) =>
-          options =
-            host:        "0.0.0.0"
-            port:        @app.get("port")
-            name:        jobName
-            batchId:     batchId
-            guid:        uuid.v4()
-            browserName: job.browser
-            version:     job.version
-            platform:    job.platform
-
-          clientObj = normalizeJobObject(options)
-          socket.emit "sauce:job:create", clientObj
-
-          df = jQuery.Deferred()
-
-          df.progress (sessionID) ->
-            ## pass up the sessionID to the previous client obj by its guid
-            socket.emit "sauce:job:start", clientObj.guid, sessionID
-
-          df.fail (err) ->
-            socket.emit "sauce:job:fail", clientObj.guid, err
-
-          df.done (sessionID, runningTime, passed) ->
-            socket.emit "sauce:job:done", sessionID, runningTime, passed
-
-          sauce options, df
+        @_runSauce(socket, spec, fn)
 
     @testsDir = path.join(projectRoot, testFolder)
 
@@ -293,227 +552,6 @@ SecretSauce.IdGenerator =
     ## group and include its length, so we insert right after it
     position = matches.index + matches[1].length + 1
     @str.insert contents, position, " [#{id}]"
-
-SecretSauce.RemoteProxy =
-  okStatus: /^[2|3]\d+$/
-
-  _handle: (req, res, next, Domain, httpProxy) ->
-    ## TODO TEST THIS BASEURL FALLBACK
-    remoteHost = @getOriginFromFqdnUrl(req) ? req.cookies["__cypress.remoteHost"] ? @app.get("cypress").baseUrl
-
-    ## we must have the remoteHost cookie
-    if not remoteHost
-      throw new Error("Missing remoteHost!")
-
-    domain = Domain.create()
-
-    domain.on 'error', (err) =>
-      @errorHandler(err, req, res, remoteHost)
-
-    domain.run =>
-      @getContentStream(req, res, remoteHost, httpProxy)
-      .on 'error', (err) =>
-        @errorHandler(err, req, res, remoteHost)
-      .pipe(res)
-
-  getOriginFromFqdnUrl: (req) ->
-    ## if we find an origin from this req.url
-    ## then return it, and reset our req.url
-    ## after stripping out the origin and ensuring
-    ## our req.url starts with only 1 leading slash
-    if origin = @UrlHelpers.getOriginFromFqdnUrl(req.url)
-      req.url = "/" + req.url.replace(origin, "").replace(/^\/+/, "")
-
-      ## return the origin
-      return origin
-
-  getContentStream: (req, res, remoteHost, httpProxy) ->
-    switch remoteHost
-      ## serve from the file system because
-      ## we are using cypress as our weberver
-      when "<root>"
-        @getFileStream(req, res, remoteHost)
-
-      ## else go make an HTTP request to the
-      ## real server!
-      else
-        @getHttpStream(req, res, remoteHost, httpProxy)
-
-  # creates a read stream to a file stored on the users filesystem
-  # taking into account if they've chosen a specific rootFolder
-  # that their project files exist in
-  getFileStream: (req, res, remoteHost) ->
-    { _ } = SecretSauce
-
-    ## strip off any query params from our req's url
-    ## since we're pulling this from the file system
-    ## it does not understand query params
-    pathname = @url.parse(req.url).pathname
-
-    res.contentType(@mime.lookup(pathname))
-
-    args = _.compact([
-      @app.get("cypress").projectRoot,
-      @app.get("cypress").rootFolder,
-      pathname
-    ])
-
-    @fs.createReadStream  @path.join(args...)
-
-  getHttpStream: (req, res, remoteHost, httpProxy) ->
-    { _ } = SecretSauce
-
-    # write     = res.write
-    # writeHead = res.writeHead
-
-    # res.writeHead = (code, headers) ->
-    #   console.log "writeHead", code, headers
-
-    #   writeHead.apply(res, arguments)
-
-    # res.write = (data, encoding) ->
-    #   console.log "write", data, encoding
-
-    #   write.apply(res, arguments)
-
-    # @emit "verbose", "piping url content #{opts.uri}, #{opts.uri.split(opts.remote)[1]}"
-    @Log.info "piping http url content", url: req.url, remoteHost: remoteHost
-
-    selectors = []
-
-    # tr = @trumpet()
-
-    thr = @through
-
-    t = @through (d) -> @queue(d)
-
-    toInject = "
-      <script type='text/javascript'>
-        window.onerror = function(){
-          parent.onerror.apply(parent, arguments);
-        }
-      </script>
-      <script type='text/javascript' src='/__cypress/static/js/sinon.js'></script>
-      <script type='text/javascript'>
-        var Cypress = parent.Cypress;
-        if (!Cypress){
-          throw new Error('Cypress must exist in the parent window!');
-        };
-        Cypress.onBeforeLoad(window);
-      </script>
-    "
-
-    rewrite = (selector, type, attr, fn) ->
-      if _.isFunction(attr)
-        fn   = attr
-        attr = null
-
-      selectors.push {
-        query: selector
-        func: (elem) ->
-          switch type
-            when "attr"
-              elem.getAttribute attr, (val) ->
-                elem.setAttribute attr, fn(val)
-            when "html"
-              stream = elem.createStream({outer: true})
-              stream.pipe(thr (buf) ->
-                @queue fn(buf.toString())
-              ).pipe(stream)
-      }
-      # tr.selectAll selector, (elem) ->
-        # elem.getAttribute attr, (val) ->
-        #   elem.setAttribute attr, fn(val)
-
-    rewrite "head", "html", (str) ->
-      str.replace(/<head>/, "<head> #{toInject}")
-
-    rewrite "[href^='//']", "attr", "href", (href) ->
-      "/" + req.protocol + ":" + href
-
-    rewrite "form[action^='//']", "attr", "action", (action) ->
-      "/" + req.protocol + ":" + action
-
-    rewrite "form[action^='http']", "attr", "action", (action) ->
-      if action.startsWith(remoteHost)
-        action.replace(remoteHost, "")
-      else
-        "/" + action
-
-    rewrite "[href^='http']", "attr", "href", (href) ->
-      if href.startsWith(remoteHost)
-        href.replace(remoteHost, "")
-      else
-        "/" + href
-
-    h = @harmon([], selectors, true)
-
-    ## we pass an empty function as next()
-    ## because we arent using harmon as middleware
-    h(req, res, ->)
-
-    proxy = httpProxy.createProxyServer({})
-
-    # proxy.once "error", (err) =>
-    #   if req.cookies["__cypress.initial"] is "true"
-    #     @errorHandler err, req, res, remoteHost
-    #   else
-    #     throw err
-
-    # proxy.once "proxyRes", (proxyRes, req, res) =>
-    #   if req.cookies["__cypress.initial"] is "true"
-    #     if not @okStatus.test proxyRes.statusCode
-    #       @errorHandler null, req, res, remoteHost, proxyRes
-
-    # proxy.once "proxyReq", (proxyReq, req, res) ->
-
-    ## hostRewrite: rewrites location header on redirects back to
-    ## ourselves (localhost:2020) so the client will automatically
-    ## re-request this back on ourselves so we can proxy it again
-    proxy.web(req, res, {
-      target: remoteHost
-      changeOrigin: true
-      autoRewrite: true
-    })
-
-    return res#.pipe(t)
-
-  errorHandler: (e, req, res, remoteHost, proxyRes) ->
-    remoteHost ?= req.cookies["__cypress.remoteHost"]
-
-    url = @url.resolve(remoteHost, req.url)
-
-    ## disregard ENOENT errors (that means the file wasnt found)
-    ## which is a perfectly acceptable error (we account for that)
-    if process.env["NODE_ENV"] isnt "production" and e and e.code isnt "ENOENT"
-      console.error(e.stack)
-      debugger
-
-    @Log.info "error handling request", url: url, error: e
-
-    filePath = switch
-      when f = req.formattedUrl
-        "file://#{f}"
-      else
-        url
-
-    ## using req here to give us an opportunity to
-    ## write to req.formattedUrl
-    htmlPath = @path.join(process.cwd(), "lib/html/initial_500.html")
-    # console.log "res status"
-    # res.writeHead 501, {
-      # "Content-Type": "text/plain"
-    # }
-    # res.end("DIE!")
-    # res.end("WTF!")
-    # res.status(501).render(htmlPath, {
-      # url: filePath
-      # fromFile: !!req.formattedUrl
-    # }#, (err, html) ->
-    #   proxyRes.writeHead 501, {"Content-Type": "text/html"}
-    #   proxyRes.end(html)
-    # )
-    # res.end()
 
 SecretSauce.RemoteInitial =
   okStatus: /^[2|3|4]\d+$/
@@ -810,78 +848,6 @@ SecretSauce.RemoteInitial =
 
     ## normalize cookies into single dimensional array
      _.map [].concat(cookies), stripHttpOnlyAndSecure
-
-  # rewrite: (req, res, remoteHost) ->
-  #   { _ } = SecretSauce
-
-  # write     = res.write
-  # writeHead = res.writeHead
-
-  # res.writeHead = (code, headers) ->
-  #   console.log "writeHead", code, headers
-
-  #   writeHead.apply(res, arguments)
-
-  # res.write = (data, encoding) ->
-  #   console.log "write", data, encoding
-
-  #   write.apply(res, arguments)
-
-  #   through = @through
-
-  #   selectors = []
-
-  #   rewrite = (selector, type, attr, fn) ->
-  #     if _.isFunction(attr)
-  #       fn   = attr
-  #       attr = null
-
-  #     selectors.push {
-  #       query: selector
-  #       func: (elem) ->
-  #         switch type
-  #           when "attr"
-  #             elem.getAttribute attr, (val) ->
-  #               elem.setAttribute attr, fn(val)
-  #           when "html"
-  #             stream = elem.createStream({outer: true})
-  #             stream.pipe(through (buf) ->
-  #               @queue fn(buf.toString())
-  #             ).pipe(stream)
-  #     }
-
-  #   rewrite "head", "html", (str) =>
-  #     str.replace("<head>", "<head> #{@getHeadContent()}")
-
-  #   rewrite "[href^='//']", "attr", "href", (href) ->
-  #     "/" + req.protocol + ":" + href
-
-  #   rewrite "form[action^='//']", "attr", "action", (action) ->
-  #     "/" + req.protocol + ":" + action
-
-  #   rewrite "form[action^='http']", "attr", "action", (action) ->
-  #     if action.startsWith(remoteHost)
-  #       action.replace(remoteHost, "")
-  #     else
-  #       "/" + action
-
-  #   rewrite "[href^='http']", "attr", "href", (href) ->
-  #     if href.startsWith(remoteHost)
-  #       href.replace(remoteHost, "")
-  #     else
-  #       "/" + href
-
-  #   h = @harmon([], selectors, true)
-  #   h(req, res, ->)
-
-  #   # ## for harmon........ ugh
-  #   # if ct = res.get("content-type")
-  #   #   if ct and ct.includes("text/html")
-  #   #     res.isHtml = true
-
-  #   # if ce = res.get("content-encoding")
-  #   #   if ce and ce.toLowerCase() is "gzip"
-  #   #     res.isGziped = true
 
   rewrite: (req, res, remoteHost) ->
     { _ } = SecretSauce

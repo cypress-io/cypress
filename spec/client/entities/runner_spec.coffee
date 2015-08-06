@@ -249,6 +249,11 @@ describe "Runner Entity", ->
       @runner.start("app_spec.coffee")
       expect(@runner.specPath).to.eq "app_spec.coffee"
 
+    it "calls Cypress.start", ->
+      start = @sandbox.spy @Cypress, "start"
+      @runner.start("app_spec.coffee")
+      expect(start).to.be.calledOnce
+
   context "#reRun", ->
     beforeEach ->
       @abort = @sandbox.stub(@Cypress, "abort").resolves()

@@ -53,11 +53,14 @@ $Cypress.Runner = do ($Cypress, _) ->
 
         @restore()
 
-      @runner.on "suite", (suite) ->
-        Cypress.trigger "suite:start", suite
+      @runner.on "suite", (suite) =>
+        Cypress.trigger "suite:start", @wrap(suite)
 
-      @runner.on "suite end", (suite) ->
-        Cypress.trigger "suite:end", suite
+      @runner.on "suite end", (suite) =>
+        Cypress.trigger "suite:end", @wrap(suite)
+
+        _.each suite.ctx, (value, key) ->
+          delete suite.ctx[key]
 
       @runner.on "hook", (hook) =>
         hookName = @getHookName(hook)
@@ -78,7 +81,7 @@ $Cypress.Runner = do ($Cypress, _) ->
         hook.ctx.currentTest = test
 
         Cypress.set(hook, hookName)
-        Cypress.trigger "hook:start", hook
+        Cypress.trigger "hook:start", @wrap(hook)
 
       @runner.on "hook end", (hook) =>
         hookName = @getHookName(hook)
@@ -91,27 +94,41 @@ $Cypress.Runner = do ($Cypress, _) ->
         if hookName is "before each" and test = hook.ctx.currentTest
           Cypress.set(test, "test")
 
-        Cypress.trigger "hook:end", hook
+        Cypress.trigger "hook:end", @wrap(hook)
 
       @runner.on "test", (test) =>
         @test = test
 
         Cypress.set(test, "test")
-        Cypress.trigger "test:start", test
+        Cypress.trigger "test:start", @wrap(test)
 
-      @runner.on "test end", (test) ->
-        Cypress.trigger "test:end", test
+      @runner.on "test end", (test) =>
+        Cypress.trigger "test:end", @wrap(test)
 
       ## if a test is pending mocha will only
       ## emit the pending event instead of the test
       ## so we normalize the pending / test events
       @runner.on "pending", (test) ->
+        test.state = "pending"
         @emit "test", test
 
       @runner.on "fail", (runnable, err) =>
         runnable.err = err
 
         @hookFailed(runnable, err) if runnable.type is "hook"
+
+    wrap: (runnable) ->
+      ## we need to optimize wrap by converting
+      ## tests to an id-based object which prevents
+      ## us from recursively iterating through every
+      ## parent since we could just return the found test
+      r = _(runnable).pick "id", "title", "originalTitle", "root", "hookName", "err", "duration", "state", "failedFromHook"
+
+      if parent = runnable.parent
+        ## recursively walk up the parent chain
+        r.parent = @wrap(parent)
+
+      return r
 
     restore: ->
       _.each [@runnables, @runner], (obj) =>
@@ -120,9 +137,14 @@ $Cypress.Runner = do ($Cypress, _) ->
       @initialize()
 
     stop: ->
+      @stopListening()
+
       @restore()
 
-      @Cypress.runner = null
+      ## remove the wrapped hook fn
+      delete @runner.hook
+
+      @runner = @tests = @Cypress.runner = null
 
       return @
 
@@ -137,6 +159,12 @@ $Cypress.Runner = do ($Cypress, _) ->
       ## restore is naturally called
       @runner.abort()
 
+      ## we need to emit the end event here
+      ## during an abort else mocha will not
+      ## slice out the uncaughtException handlers
+      ## and we will leak memory
+      @runner.emit("end")
+
     options: (options = {}) ->
       ## TODO
       ## need to handle
@@ -148,7 +176,14 @@ $Cypress.Runner = do ($Cypress, _) ->
     run: (fn) ->
       @runnerListeners()
 
-      @runner.run(fn)
+      @runner.run (err) =>
+        fn(err, @getTestResults()) if fn
+
+    getTestResults: ->
+      _(@tests).map (test) ->
+        obj = _(test).pick("id", "duration", "state")
+        obj.title = test.originalTitle
+        obj
 
     getHookName: (hook) ->
       ## find the name of the hook by parsing its
@@ -159,7 +194,7 @@ $Cypress.Runner = do ($Cypress, _) ->
     afterEachFailed: (test, err) ->
       test.state = "failed"
       test.err = err
-      @Cypress.trigger "test:end", test
+      @Cypress.trigger "test:end", @wrap(test)
 
     hookFailed: (hook, err) ->
       ## finds the test by returning the first test from
@@ -171,7 +206,7 @@ $Cypress.Runner = do ($Cypress, _) ->
       test.duration = hook.duration
       test.hookName = @getHookName(hook)
       test.failedFromHook = true
-      @Cypress.trigger "test:end", test
+      @Cypress.trigger "test:end", @wrap(test)
 
     ## returns each runnable to the callback function
     ## if it matches the current grep
@@ -254,8 +289,8 @@ $Cypress.Runner = do ($Cypress, _) ->
 
         when "test"
           if matchesGrep(runnable, options.grep)
-            @tests.push(runnable)
             options.onRunnable(runnable)
+            @tests.push runnable
 
       ## recursively apply to all tests / suites of this runnable
       ## unless we've been told not to iterate (during optimized loop)
@@ -310,12 +345,23 @@ $Cypress.Runner = do ($Cypress, _) ->
       ## if theres already a currentTest use that
       return test if test = hook?.ctx.currentTest
 
+      ## if we have a hook id then attempt
+      ## to find the test by its id
+      if hook?.id
+        found = @firstTest suite, (test) =>
+          hook.id is test.id
+
+        return found if found
+
       ## returns us the very first test
       ## which is in our grepped tests array
       ## based on walking down the current suite
       ## iterating through each test until it matches
       @firstTest suite, (test) =>
-        test in @tests
+        @testInTests(test)
+
+    testInTests: (test) ->
+      test in @tests
 
     override: ->
       ## bail if our runner doesnt have a hook
@@ -339,13 +385,17 @@ $Cypress.Runner = do ($Cypress, _) ->
             ## this will iterate through all nested tests
             ## as well.  and then we add it only if its
             ## in our grepp'd _this.tests array
-            tests.push(test) if test in _this.tests
+            if _this.testInTests(test)
+              tests.push test
+
           tests
 
         ## we have to see if this is the last suite amongst
         ## its siblings.  but first we have to filter out
         ## suites which dont have a grep'd test in them
         isLastSuite = (suite) ->
+          return false if suite.root
+
           ## grab all of the suites from our grep'd tests
           ## including all of their ancestor suites!
           suites = _.reduce _this.tests, (memo, test) ->
@@ -361,14 +411,19 @@ $Cypress.Runner = do ($Cypress, _) ->
         testBeforeHooks = (hook, suite) ->
           _this.test = _this.getTestFromHook(hook, suite) if not _this.test
 
-          Cypress.trigger "test:before:hooks", _this.test
+          ## there is a bug (but i believe its only in tests
+          ## which happens in Ended Early Integration Tests
+          ## where the test will be undefined due to the runner.suite
+          ## not yet having built its tests/suites array and thus
+          ## our @tests array is empty
+          Cypress.trigger "test:before:hooks", _this.wrap(_this.test ? {})
 
         testAfterHooks = ->
           test = _this.test
 
-          _this.test     = null
+          _this.test = null
 
-          Cypress.trigger "test:after:hooks", test
+          Cypress.trigger "test:after:hooks", _this.wrap(test)
 
           Cypress.restore()
 
@@ -391,8 +446,8 @@ $Cypress.Runner = do ($Cypress, _) ->
             ## isnt the last test in our grep'd parent suite's tests array
             if @suite.root and (_this.test isnt _(_this.tests).last()) and (_this.test isnt _(tests).last())
               fn = _.wrap fn, (orig, args...) ->
-                testAfterHooks()
-                orig(args...)
+                testAfterHooks().then ->
+                  orig(args...)
 
           when "afterAll"
             ## find all of the grep'd _this tests which share
@@ -408,7 +463,7 @@ $Cypress.Runner = do ($Cypress, _) ->
               ## else if we arent the last nested suite we fire if we're
               ## the last test
               if (@suite.root and _this.test is _(_this.tests).last()) or
-                (@suite.parent.root and _this.test is _(tests).last()) or
+                (@suite.parent?.root and _this.test is _(tests).last()) or
                   (not isLastSuite(@suite) and _this.test is _(tests).last())
                 fn = _.wrap fn, (orig, args...) ->
                   testAfterHooks()

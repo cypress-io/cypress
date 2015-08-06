@@ -14,12 +14,6 @@
 
       @layout = @getLayoutView(iframe)
 
-      @listenTo @layout, "browser:clicked", (browser, version) ->
-        # iframe.switchToBrowser(browser, version)
-
-      @listenTo @layout, "close:browser:clicked", ->
-        # iframe.switchToBrowser()
-
       @listenTo iframe, "loaded", (cb, contentWindow, remoteIframe, options) ->
         ## once its loaded we receive the contentWindow
         ## we invoke the callback which tells our runner
@@ -42,8 +36,8 @@
         cb @layout.detachBody()
 
       @listenTo @layout, "show", ->
-        ## dont show the header in satelitte mode
-        return if config.ui("satelitte")
+        ## dont show the header in satellite mode
+        return if config.ui("satellite")
 
         @headerView(iframe)
 
@@ -51,6 +45,13 @@
 
     headerView: (iframe) ->
       headerView = @getHeaderView(iframe)
+
+      @listenTo headerView, "browser:clicked", (browser, version) ->
+        iframe.switchToBrowser(browser, version)
+
+      @listenTo headerView, "close:browser:clicked", ->
+        iframe.switchToBrowser()
+
       @show headerView, region: @layout.headerRegion
 
     getHeaderView: (iframe) ->

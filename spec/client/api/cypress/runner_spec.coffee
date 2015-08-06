@@ -84,7 +84,7 @@ describe "$Cypress.Runner API", ->
         @runner.runner.on "suite", (@suite) =>
 
         @runner.run =>
-          expect(@trigger).to.be.calledWith "suite:start", @suite
+          expect(@trigger).to.be.calledWith "suite:start", @runner.wrap(@suite)
           done()
 
     describe "runner.on('suite end')", ->
@@ -92,7 +92,7 @@ describe "$Cypress.Runner API", ->
         @runner.runner.on "suite end", (@suite) =>
 
         @runner.run =>
-          expect(@trigger).to.be.calledWith "suite:end", @suite
+          expect(@trigger).to.be.calledWith "suite:end", @runner.wrap(@suite)
           done()
 
     describe "runner.on('hook')", ->
@@ -100,7 +100,7 @@ describe "$Cypress.Runner API", ->
         @runner.runner.on "hook", (@hook) =>
 
         @runner.run =>
-          expect(@trigger).to.be.calledWith "hook:start", @hook
+          expect(@trigger).to.be.calledWith "hook:start", _.omit(@runner.wrap(@hook), "duration")
           done()
 
       it "calls Cypress.set with the test + hookName", (done) ->
@@ -146,7 +146,7 @@ describe "$Cypress.Runner API", ->
         @runner.runner.on "hook end", (@hook) =>
 
         @runner.run =>
-          expect(@trigger).to.be.calledWith "hook:end", @hook
+          expect(@trigger).to.be.calledWith "hook:end", @runner.wrap(@hook)
           done()
 
       it "does not call Cypress.set if hook isnt before each", (done) ->
@@ -166,6 +166,9 @@ describe "$Cypress.Runner API", ->
         set = @sandbox.spy @Cypress, "set"
 
         @runner.runner.on "hook end", (@hook) =>
+          ## preserve the test now because
+          ## our suite will nuke the ctx later
+          @test = @hook.ctx.currentTest
 
         ## we expect 3 calls here
         ## 1 hook (beforeEach)
@@ -173,7 +176,7 @@ describe "$Cypress.Runner API", ->
         ## 1 test (on hook end - for the beforeEach)
         @runner.run =>
           expect(set.callCount).to.eq 3
-          expect(set.thirdCall).to.be.calledWith @hook.ctx.test, "test"
+          expect(set.thirdCall).to.be.calledWith @test, "test"
           done()
 
     describe "runner.on('test')", ->
@@ -181,7 +184,7 @@ describe "$Cypress.Runner API", ->
         @runner.runner.on "test", (@test) =>
 
         @runner.run =>
-          expect(@trigger).to.be.calledWith "test:start", @test
+          expect(@trigger).to.be.calledWith "test:start", _.omit(@runner.wrap(@test), "duration", "state")
           done()
 
       it "sets this.test", (done) ->
@@ -206,7 +209,7 @@ describe "$Cypress.Runner API", ->
         @runner.runner.on "test", (@test) =>
 
         @runner.run =>
-          expect(@trigger).to.be.calledWith "test:end", @test
+          expect(@trigger).to.be.calledWith "test:end", @runner.wrap(@test)
           done()
 
     describe "runner.on('pending')", ->
@@ -217,7 +220,7 @@ describe "$Cypress.Runner API", ->
         @runner.runner.on "pending", (@test) =>
 
         @runner.run =>
-          expect(@trigger).to.be.calledWith "test:start", @test
+          expect(@trigger).to.be.calledWith "test:start", @runner.wrap(@test)
           done()
 
     describe "runner.on('fail')", ->
@@ -401,7 +404,7 @@ describe "$Cypress.Runner API", ->
 
       it "triggers 'test:after:hooks' with the test", (done) ->
         @Cypress.on "test:after:hooks", (test) =>
-          expect(test).to.eq @runner.getTestByTitle "one"
+          expect(test).to.deep.eq @runner.wrap(@runner.getTestByTitle("one"))
           done()
 
         @runner.run()

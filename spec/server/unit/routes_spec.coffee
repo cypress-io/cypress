@@ -251,6 +251,18 @@ describe "Routes", ->
             null
           .end(done)
 
+      it "can send back all tests", (done) ->
+        contents = removeWhitespace Fixtures.get("server/expected_all_tests_empty_inject.html")
+
+        supertest(@app)
+          .get("/__cypress/iframes/__all")
+          .expect(200)
+          .expect (res) ->
+            body = removeWhitespace(res.text)
+            expect(body).to.eq contents
+            null
+          .end(done)
+
     describe "no-server", ->
       beforeEach ->
         Fixtures.scaffold("no-server")

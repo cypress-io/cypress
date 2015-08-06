@@ -9,9 +9,20 @@ $Cypress.register "XHR", (Cypress, _, $) ->
   TMP_SERVER = "tmpServer"
   TMP_ROUTES = "tmpRoutes"
 
+  restore = ->
+    if @prop
+      if server = @prop("server")
+        ## instead of wrapping this with
+        ## Promise.all here why not move
+        ## this to server.cancel()?
+        Promise.all(server.cancel()).then ->
+          server.restore()
+
   Cypress.on "abort", ->
-    if server = @prop("server")
-      server.abort()
+    restore.call(@)
+
+  Cypress.on "restore", ->
+    restore.call(@)
 
   ## need to upgrade our server
   ## to allow for a setRequest hook
@@ -126,7 +137,7 @@ $Cypress.register "XHR", (Cypress, _, $) ->
 
           ## increment the associated ROUTE LOG numResponses by 1
           ## (this increments the route instrument)
-          if rl = route.log
+          if rl = route and route.log
             numResponses = rl.get("numResponses")
             rl.set "numResponses", numResponses + 1
 

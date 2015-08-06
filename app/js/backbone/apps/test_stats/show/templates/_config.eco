@@ -6,7 +6,7 @@
   <ul class="dropdown-menu dropdown-menu-right" role="menu">
     <li class="dropdown-header">Sauce Labs</li>
     <li>
-      <a href="#" data-js="run">
+      <a href="#" data-js="sauce:labs">
         <i class="fa fa-play-circle"></i>
         Run
       </a>

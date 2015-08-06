@@ -7,10 +7,20 @@
       size: "#iframe-size-container"
 
     modelEvents:
+      "change:running"    : "runningChanged"
       "resize:viewport"   : "resizeViewport"
       "revert:dom"        : "revertDom"
       "restore:dom"       : "restoreDom"
       "highlight:el"      : "highlightEl"
+
+    runningChanged: (model, value, options) ->
+      ## dont do anything if we're still running
+      return if value
+
+      return if @model.get("browser") isnt "chromium"
+
+      contents = Marionette.Renderer.render("test_iframe/show/_chromium_done")
+      @$remote.contents().find("body").html(contents)
 
     resizeViewport: ->
       @ui.size.css {
@@ -79,7 +89,7 @@
         div.attr("data-highlight-el", true)
 
       if coords = options.coords
-        setImmediate =>
+        requestAnimationFrame =>
           box = App.request("element:hit:box:layer", coords, dom)
           box.attr("data-highlight-hitbox", true)
 
@@ -135,15 +145,15 @@
 
     resetReferences: ->
       # _.each ["Ecl", "$", "jQuery", "parent", "chai", "expect", "should", "assert", "Mocha", "mocha"], (global) =>
-      #   delete @$iframe[0].contentWindow[global]
+      #   delete @$specIframe[0].contentWindow[global]
 
-      @$iframe?[0].contentWindow.remote = null
+      @$specIframe?[0].contentWindow.remote = null
 
-      @$iframe?.remove()
+      @$specIframe?.remove()
       @$remote?.remove()
 
       @$remote      = null
-      @$iframe      = null
+      @$specIframe  = null
       @fn           = null
 
     loadIframes: (options, fn) ->
@@ -164,37 +174,69 @@
     loadSatelitteIframe: (src, options, fn) ->
       view = @
 
-      url = encodeURIComponent("http://tunnel.browserling.com:55573/#tests/#{src}?__ui=satellite")
+      if options.browser is "chromium"
+        return @loadHeadlessIframe(src, options, fn)
 
-      src = if options.browser and options.version
-        @browserChanged options.browser, options.version
-        "https://browserling.com/browse/#{options.browser}/#{options.version}/#{url}"
-      else
-        ## this needs to be a dynamic port!
-        "http://localhost:2020/#tests/#{src}?__ui=satellite"
+      @model.setViewport({
+        viewportWidth:  "100%"
+        viewportHeight: "100%"
+      })
 
-      remoteOpts =
-        id: "iframe-remote"
-        src: src
-        load: ->
-          fn(null, view.$remote)
-          view.$el.show()
+      ## move this src out of here and into entities/iframe
+      url = encodeURIComponent("http://tunnel.browserling.com:50228/#/tests/#{src}?__ui=satellite")
+
+      insertIframe = =>
+        browserling = new Browserling("29051e55f59c35e17a571bcf3f145910")
+        browserling.configure
+          platformName: "win"
+          platformVersion: "8.1"
+          browser: options.browser
+          version: options.version
+          url: url
+
+        window.browserling = browserling
+
+        $specIframe = $(browserling.iframe())
+
+        $specIframe.addClass("iframe-remote")
+        $specIframe.load ->
           view.calcWidth()
+          view.$el.show()
+          fn(null, view.$remote)
 
-      @$remote = $("<iframe />", remoteOpts).appendTo(@ui.size)
+        @$remote = $specIframe.appendTo(@ui.size)
+
+      if not window.Browserling
+        $.getScript("https://api.browserling.com/v1/browserling.js").done ->
+          insertIframe()
+
+      else
+        insertIframe()
+
+    loadHeadlessIframe: (src, options, fn) ->
+      contents = Marionette.Renderer.render("test_iframe/show/_chromium_running")
+
+      @$remote = $("<iframe>", {class: "iframe-remote"}).appendTo(@ui.size)
+      @$remote.contents().find("body").append(contents)
+
+      @calcWidth()
+      @$el.show()
+
+      fn(null, @$remote)
 
     loadRegularIframes: (src, options, fn) ->
       view = @
 
+      ## move this src out of here and into entities/iframe
       @src = "/__cypress/iframes/" + src
       @fn = fn
 
-      # @$iframe = window.open(@src, "testIframeWindow", "titlebar=no,menubar=no,toolbar=no,location=no,personalbar=no,status=no")
-      # @$iframe.onload = =>
-      #   fn(@$iframe)
+      # @$specIframe = window.open(@src, "testIframeWindow", "titlebar=no,menubar=no,toolbar=no,location=no,personalbar=no,status=no")
+      # @$specIframe.onload = =>
+      #   fn(@$specIframe)
 
       remoteLoaded = $.Deferred()
-      iframeLoaded = $.Deferred()
+      specLoaded = $.Deferred()
 
       name = App.config.getProjectName()
 
@@ -209,22 +251,22 @@
       remoteLoaded.resolve(view.$remote)
 
       remoteLoaded.done =>
-        @$iframe = $ "<iframe />",
+        @$specIframe = $ "<iframe />",
           id: "Your Spec: '#{src}' "
           class: "iframe-spec"
 
-        @$iframe.appendTo(@$el)
+        @$specIframe.appendTo(@$el)
 
-        @$iframe.prop("src", @src).one "load", ->
+        @$specIframe.prop("src", @src).one "load", ->
           ## make a reference between the iframes
           @contentWindow.remote = view.$remote[0].contentWindow
 
-          iframeLoaded.resolve(@contentWindow)
+          specLoaded.resolve(@contentWindow)
           view.$el.show()
           view.calcWidth()
           # view.ui.header.show()
 
-      $.when(remoteLoaded, iframeLoaded).done (remote, iframe) =>
+      $.when(remoteLoaded, specLoaded).done (remote, iframe) ->
         ## yes these args are supposed to be reversed
         ## TODO FIX THIS
         fn(iframe, remote)
@@ -267,6 +309,12 @@
       "revert:dom"            : "revertDom"
       "restore:dom"           : "restoreDom"
 
+    onRender: ->
+      b = @model.get("browser")
+      v = @model.get("version")
+
+      @browserChanged(b, v) if b and v
+
     urlChanged: (model, value, options) ->
       @ui.url.val(value)
 
@@ -291,7 +339,7 @@
       browser = el.parent().data("browser")
       version = el.text()
 
-      @trigger "browser:clicked", browser, version
+      # @trigger "browser:clicked", browser, version
 
     browserChanged: (browser, version) ->
       @ui.chosenBrowser.html(

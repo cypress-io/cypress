@@ -26,11 +26,11 @@
         @displayEllipsis(value)
 
     changeIconDirection: (bool) ->
-      klass = if bool then "right" else "down"
+      klass = if bool then "down" else "right"
       @ui.icon.removeClass().addClass("fa fa-caret-#{klass}")
 
     displayEllipsis: (bool) ->
-      @ui.ellipsis.toggleClass "hidden", !bool
+      @ui.ellipsis.toggleClass "hidden", bool
 
     repeatClicked: (e) ->
       e.stopPropagation()
@@ -105,6 +105,7 @@
 
     onRender: ->
       @applyIndent()
+      @openChanged(@model, @model.get("open"))
 
     mouseover: (e) ->
       e.stopPropagation()
@@ -140,7 +141,7 @@
     openChanged: (model, value, options) ->
       ## hide or show the instruments or runnables
       el = if @model.is("test") then @ui.instruments else @ui.runnables
-      el.toggleClass("hidden")
+      el.toggleClass("hidden", !value)
 
     errorChanged: (model, value, options) ->
       value or= ""

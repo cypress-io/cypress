@@ -50,6 +50,12 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
       return @
 
+    silenceConsole: (contentWindow) ->
+      if c = contentWindow.console
+        c.log = ->
+        c.warn = ->
+        c.info = ->
+
     listeners: ->
       @listenTo @Cypress, "initialize", (obj) =>
         @initialize(obj)
@@ -61,7 +67,8 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       @listenTo @Cypress, "abort",      => @abort()
 
     abort: ->
-      @private("$remoteIframe")?.off("submit beforeunload unload load hashchange")
+      @offWindowListeners()
+      @offIframeListeners(@private("$remoteIframe"))
       @isReady(false, "abort")
       @private("runnable")?.clearTimeout()
 
@@ -80,6 +87,11 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
     stop: ->
       delete window.cy
 
+      @stopListening()
+
+      @offWindowListeners()
+      @offIframeListeners(@private("$remoteIframe"))
+
       @privates = {}
 
       @Cypress.cy = null
@@ -97,7 +109,16 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       @prop("angularCancelTimeout")?()
 
       ## reset the queue to an empty array
-      @queue = []
+      ## by mutating it. we do this because
+      ## queue is the context in promises
+      ## which ends up holding a reference
+      ## to the old array and keeps objects
+      ## in memory longer than we want them
+      for queue in @queue
+        for prop of queue
+          queue[prop] = null
+
+      @queue.splice(0, @queue.length)
 
       ## remove any outstanding groups
       ## for any open hooks and runnables

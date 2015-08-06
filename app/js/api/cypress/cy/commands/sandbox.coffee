@@ -1,17 +1,17 @@
 $Cypress.register "Sandbox", (Cypress, _, $) ->
 
+  createSandbox = (sinon) ->
+    sinon.format = -> ""
+
+    sinon.sandbox.create()
+
   Cypress.on "restore", ->
     ## restore the sandbox if we've
     ## created one
+    return if not @prop
+
     if sandbox = @prop("sandbox")
       sandbox.restore()
-
-      ## if we have a server, resets
-      ## these references for GC
-      if server = sandbox.server
-        server.requests  = []
-        server.queue     = []
-        server.responses = []
 
   Cypress.Cy.extend
     ## think about making this "public" so
@@ -23,6 +23,6 @@ $Cypress.register "Sandbox", (Cypress, _, $) ->
       if not sinon
         @throwErr("Could not access the Server, Routes, Stub, Spies, or Mocks. Check to see if your application is loaded and is visible. Please open an issue if you see this message.")
 
-      sandbox = @prop("sandbox") ? sinon.sandbox.create()
+      sandbox = @prop("sandbox") ? createSandbox(sinon)
 
       @prop("sandbox", sandbox)

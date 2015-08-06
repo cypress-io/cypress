@@ -7,12 +7,16 @@ $Cypress.Mocha = do ($Cypress, _, Mocha) ->
 
   class $Mocha
     constructor: (@Cypress, specWindow) ->
+      reporter = $Cypress.reporter ? ->
+
       @mocha = new Mocha
-        reporter: ->
+        reporter: reporter
         enableTimeouts: false
 
       @override()
       @listeners()
+
+      @specWindow = specWindow
 
       @set(specWindow)
 
@@ -93,6 +97,7 @@ $Cypress.Mocha = do ($Cypress, _, Mocha) ->
 
           unbind = ->
             _this.stopListening Cypress, "enqueue", invokedCy
+            runnable.fn = orig
 
           try
             ## call the original function with
@@ -175,15 +180,23 @@ $Cypress.Mocha = do ($Cypress, _, Mocha) ->
       mocha.ui name
 
     stop: ->
+      @stopListening()
       @restore()
 
       ## remove any listeners from the mocha.suite
       @mocha.suite.removeAllListeners()
 
+      @mocha.suite.suites = []
+      @mocha.suite.tests  = []
+
       ## null it out to break any references
       @mocha.suite = null
 
       @Cypress.mocha = null
+
+      delete @specWindow.mocha
+      delete @specWindow
+      delete @mocha
 
       return @
 

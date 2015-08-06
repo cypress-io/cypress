@@ -1,107 +1,61 @@
-wd = require("wd")
-bluebird = require("bluebird")
+wd      = require("wd")
+Promise = require("bluebird")
 
-module.exports = (options = {}, df) ->
-  browser = wd.promiseChainRemote("ondemand.saucelabs.com", 80, 'brian-mann', "ab95ecc5-b788-482a-82f6-ea72e1b00b54")
+module.exports = (options = {}) ->
+  new Promise (resolve, reject) ->
+    browser = wd.promiseChainRemote("ondemand.saucelabs.com", 80, 'brian-mann', "ab95ecc5-b788-482a-82f6-ea72e1b00b54")
 
-  browser._hasNotified = false
+    browser._hasNotified = false
 
-  browser.on "status", (info) ->
-    if not browser._hasNotified
+    browser.on "status", (info) ->
+      return if browser._hasNotified
       browser._hasNotified = true
-      df.notify @sessionID, options
 
-  browser.on "command", (eventType, command, response) ->
+      if options.onStart
+        options.onStart(@sessionID, options)
 
-  browser.on "http", (meth, path, data) ->
+    browser.on "command", (eventType, command, response) ->
 
-  timeStart = Date.now()
-  passed    = true
+    browser.on "http", (meth, path, data) ->
 
-  ## should also add in the functionality to add a timeout per test
-  ## so if the eclectusResults global isnt changing then we should timeout
-  ## and make the global script timeout also configurable
+    timeStart = Date.now()
+    passed    = true
 
-  browser
-      # debugger
-    .init options, (err, arr) ->
-      ## update the job with our custom batchId
-      ## unless there was an erro
-      if not err
-        browser.sauceJobUpdate
-          "custom-data":
-            batchId: options.batchId
-            guid:    options.guid
+    ## should also add in the functionality to add a timeout per test
+    ## so if the cypressResults global isnt changing then we should timeout
+    ## and make the global script timeout also configurable
 
-    .catch (err) ->
-      # debugger
-      browser._hasError = true
-      df.reject(err)
-      # browser.quit()
-    # .setAsyncScriptTimeout(60*30*1000)
+    browser
+      .init options, (err, arr) ->
+        ## update the job with our custom batchId
+        ## unless there was an erro
+        if not err
+          browser.sauceJobUpdate
+            "custom-data":
+              batchId: options.batchId
+              guid:    options.guid
 
-    .get("http://#{options.host}:#{options.port}/##{options.name}?nav=false")
+      .catch (err) ->
+        browser._hasError = true
+        reject(err)
+        browser.quit()
 
-    .waitFor wd.asserters.jsCondition("window.eclectusResults", true), 60*30*1000, 1000, (err, obj) ->
-      ## reset passed to false if there are any failures
-      passed = !obj.failed
+      .get(options.remoteUrl)
 
-    .fin ->
-      # debugger
-      # return if browser._hasError
+      .waitFor wd.asserters.jsCondition("window.cypressResults", true), 60*30*1000, 1000, (err, obj) ->
+        ## reset passed to false if there are any failures
+        passed = !obj.failed
 
-      browser.sauceJobStatus(passed)
+      .fin ->
+        browser.sauceJobStatus(passed)
 
-      timeEnd = Date.now() - timeStart
-      df.resolve(browser.sessionID, timeEnd, passed)
+        browser.quit()
 
-      browser.quit()
+        runningTime = Date.now() - timeStart
+        resolve({
+          sessionID: browser.sessionID
+          runningTime: runningTime
+          passed: passed
+        })
 
-    .done()
-
-# Driver = require('selenium-webdriver')
-# chai = require("chai");
-# chaiAsPromised = require("chai-as-promised");
-
-# chai.use(chaiAsPromised);
-# chai.should();
-# chaiAsPromised.transferPromiseness = wd.transferPromiseness;
-
-# browser = wd.promiseChainRemote("ondemand.saucelabs.com", 80, 'brian-mann', "ab95ecc5-b788-482a-82f6-ea72e1b00b54")
-
-# browser.on 'status', (info) ->
-#   console.log(info);
-
-# browser.on 'command', (meth, path, data) ->
-#   console.log ' > ' + meth, path, data || ''
-# browser = wd.remote()
-
-# config =
-#   browserName:'chrome'
-
-# browser.init config, ->
-#   browser.get("http://nodejs.org/", ->
-#     console.log("?")
-#   )
-  # .title()
-  # .should.become("node.js")
-  # .elementById("intro")
-  # .text()
-  # .should.eventually.include('JavaScript runtime')
-  # .nodeify(@quit)
-
-# browser.get "http://nodejs.org/", ->
-# browser.get "http://0.0.0.0:2020/#tests/real_spec.coffee", ->
-  # console.log "got path"
-  # browser.eval "window.location.href", (e, href) ->
-    # console.log "href", href
-    # browser.quit()
-
-
-# driver = new Driver.Builder().withCapabilities(Driver.Capabilities['chrome']()).build()
-
-# driver.get("http://google.com")
-# .then =>
-#   driver.quit()
-
-# wd.build()
+      .done()

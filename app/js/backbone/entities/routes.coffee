@@ -6,6 +6,12 @@
         url = @get("url")
         if _.isString(url) then '"' + url + '"' else url
 
+    reset: ->
+      @stopListening()
+      @log = null
+      @clear(silent: true)
+      @clear(silent: true)
+
     getLog: ->
       @log or throw new Error("Route is missing its log reference!")
 
@@ -38,6 +44,10 @@
       return if _.isEmpty attrs
 
       super @createRoute(attrs)
+
+    reset: ->
+      @invoke "reset"
+      super
 
   App.reqres.setHandler "route:entities", ->
     new Entities.RoutesCollection

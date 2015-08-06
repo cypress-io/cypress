@@ -8,6 +8,15 @@ Promise       = require "bluebird"
 child_process = require "child_process"
 runSequence   = require "run-sequence"
 os            = require "os"
+deploy        = require "./lib/deploy"
+
+require("lodash").bindAll(deploy)
+
+platform = ->
+  {
+    darwin: "osx64"
+    linux:  "linux64"
+  }[os.platform()] or throw new Error("OS Platform: '#{os.platform()}' not supported!")
 
 log = (obj = {}) ->
   args = [
@@ -51,6 +60,7 @@ compileCss = (source, dest) ->
       trace: true
       compass: true
       cacheLocation: ".tmp/.sass-cache"
+      sourcemap: false
     .on "error", log
     .pipe gulp.dest "#{dest}/public/css"
 
@@ -64,6 +74,14 @@ compileJs = (source, options, cb) ->
   , []
 
   Promise.all(tasks)
+
+minify = (source, destination) ->
+  gulp.src(source)
+    .pipe($.print())
+    .pipe($.uglify({
+      preserveComments: "some"
+    }))
+    .pipe(gulp.dest(destination))
 
 gulp.task "client:css", -> compileCss("app", "lib")
 
@@ -131,7 +149,7 @@ gulp.task "build:secret:sauce", (cb) ->
     .pipe gulp.dest("lib")
     .on "end", ->
       ## when thats done, lets create the secret_sauce snapshot .bin
-      child_process.exec "./support/nwjc lib/secret_sauce.js lib/secret_sauce.bin", (err, stdout, stderr) ->
+      child_process.exec "./support/#{platform()}/nwjc lib/secret_sauce.js lib/secret_sauce.bin", (err, stdout, stderr) ->
         console.log("stdout:", stdout)
         console.log("stderr:", stderr)
 
@@ -181,37 +199,40 @@ gulp.task "server", -> require("./server.coffee")
 
 gulp.task "test", -> require("./spec/server.coffee")
 
-gulp.task "run:tests", ->
-  require("./lib/deploy")().runTests()
+gulp.task "dist:tests", deploy.runTests
 
-gulp.task "build", ->
-  require("./lib/deploy")().buildApp()
+gulp.task "build:smoke:test", deploy.runSmokeTest
 
-gulp.task "dist:zip", ->
-  require("./lib/deploy")().zipBuilds()
+gulp.task "after:build", deploy.afterBuild
 
-gulp.task "dist", ->
-  require("./lib/deploy")().dist()
+gulp.task "dist", deploy.dist
+
+gulp.task "build", deploy.build
+
+gulp.task "release", deploy.release
 
 gulp.task "deploy:fixture", ->
   require("./lib/deploy")().fixture()
 
-gulp.task "deploy:manifest", ->
-  require("./lib/deploy")().manifest()
+gulp.task "deploy:manifest", deploy.manifest
 
-gulp.task "get:manifest", ->
-  require("./lib/deploy")().getManifest()
+gulp.task "get:manifest", deploy.getManifest
 
-gulp.task "deploy", ["client:build", "nw:build"], ->
-  require("./lib/deploy")().deploy()
-
-gulp.task "compile", ["clean:build"], ->
-  require("./lib/deploy").compile()
+gulp.task "deploy", deploy.deploy
 
 gulp.task "client",        ["client:build", "client:watch"]
 gulp.task "nw",            ["nw:build", "nw:watch"]
 
-gulp.task "client:build",  ["bower", "client:css", "client:img", "client:fonts", "client:js", "client:html"]
-gulp.task "nw:build",      ["bower", "nw:css", "nw:img", "client:fonts", "nw:js", "nw:html", "nw:snapshot"]
+gulp.task "client:minify", ->
+  minify("lib/public/js/!(cypress).js", "lib/public/js")
+
+gulp.task "nw:minify", ->
+  minify("nw/public/js/*.js", "nw/public/js")
+
+gulp.task "client:build",  ["bower"], (cb) ->
+  runSequence ["client:css", "client:img", "client:fonts", "client:js", "client:html"], cb
+
+gulp.task "nw:build",      ["bower"], (cb) ->
+  runSequence ["nw:css", "nw:img", "client:fonts", "nw:js", "nw:html", "nw:snapshot"], cb
 
 gulp.task "nw:snapshot",   ["build:secret:sauce"]

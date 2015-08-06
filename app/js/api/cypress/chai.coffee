@@ -45,10 +45,10 @@ do ($Cypress, _, chai) ->
       listeners: ->
         @listenTo @Cypress, "stop", => @stop()
 
-
         return @
 
       stop: ->
+        @stopListening()
         @restore()
         @Cypress.chai = null
         return @
@@ -69,6 +69,7 @@ do ($Cypress, _, chai) ->
         return @
 
       restoreAssert: ->
+        delete chai.Assertion::existInDocument
         chai.Assertion::assert = assertProto
 
       patchAssert: ->

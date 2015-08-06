@@ -17,6 +17,8 @@
     filesRegion: (files) ->
       files.resetToTreeView()
 
+      files.prependWithAllTests() if files.length
+
       filesView = @getFilesView files
 
       @show filesView,

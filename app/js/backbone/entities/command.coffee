@@ -41,6 +41,8 @@
       @get("state") is state
 
     reset: ->
+      @stopListening()
+      @log = null
       @clear(silent: true)
       @clear(silent: true)
 
@@ -96,6 +98,9 @@
 
       ## replace only the first occurance of the parent selector
       selector.replace parent, ""
+
+    reduceMemory: ->
+      @getLog().reduceMemory()
 
     hasSnapshot: ->
       !!@getLog().get("snapshot")
@@ -214,6 +219,9 @@
     getTotalNumber: ->
       @_maxNumber
 
+    reduceCommandMemory: ->
+      @invoke "reduceMemory"
+
     createCommand: (log) ->
       if log.get("type") not in ["parent", "child"]
         throw new Error("Commands may only have type of 'parent' or 'child'.  Command was: {name: #{log.get('name')}, type: #{log.get('type')}}")
@@ -222,7 +230,14 @@
       command.log = log
 
       command.listenTo log, "attrs:changed", (attrs) ->
-        command.set _.pick(attrs, logAttrs...)
+        attrs = _.pick(attrs, logAttrs...)
+        command.set(attrs)
+
+        attrs.id = command.id
+
+        ## trigger this so we can get command attrs updates
+        ## when in host / satellite mode
+        @trigger("command:attrs:changed", attrs)
 
       return command
 

@@ -4,15 +4,16 @@
     defaults: ->
       state: "processing"
       indent: -10
-      open: false
       error: null
       hook: null
-      children:  new Entities.RunnableCollection
+      children: new Entities.RunnableCollection
       hooks: App.request("hook:entities")
       routes: App.request("route:entities")
       agents: App.request("agent:entities")
 
     initialize: ->
+      @set "open", @is("suite")
+
       new Backbone.Chooser(@)
 
     ## toggles open true|false
@@ -29,6 +30,9 @@
       ## a hooks collection if the hook ever ran, regardless of how many
       ## commands passed within each hook
       hook.failed() if hook
+
+    reduceCommandMemory: ->
+      @get("hooks").reduceCommandMemory()
 
     checkForFailedHook: ->
       ## bail if our hook property is falsy

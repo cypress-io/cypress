@@ -81,6 +81,13 @@
 
       @reset files.models
 
+    prependWithAllTests: ->
+      @unshift {
+        name: "Run All Tests"
+        fullPath: "__all"
+        all: true
+      }
+
   API =
     getFiles: ->
       files = new Entities.FilesCollection

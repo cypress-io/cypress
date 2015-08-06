@@ -75,6 +75,8 @@ window.enterIntegrationTestingMode = (fixture, options = {}) ->
     ## load all of the modules
     @Cypress = $Cypress.create({loadModules: true})
 
+    @Cypress.start()
+
     if options.silent is false
       @Cypress.on "fail", (err) ->
         console.error(err.stack)
@@ -103,6 +105,8 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
 
       ## load all of the modules
       @Cypress = $Cypress.create({loadModules: true})
+
+      @Cypress.start()
 
       ## instantiate @cy directly here which simulates
       ## what Cypress.window() does under the hood. we want

@@ -1,7 +1,8 @@
 $Cypress.register "Eval", (Cypress, _, $, Promise) ->
 
   Cypress.on "abort", ->
-    @prop("xhr")?.abort()
+    if @prop
+      @prop("xhr")?.abort()
 
   Cypress.addParentCommand
     eval: (code, options = {}) ->

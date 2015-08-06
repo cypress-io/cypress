@@ -1,7 +1,7 @@
 fs            = require "fs-extra"
 path          = require 'path'
 uuid          = require 'node-uuid'
-# sauce         = require '../sauce/sauce.coffee'
+sauce         = require './sauce/sauce'
 chokidar      = require 'chokidar'
 Promise       = require "bluebird"
 IdGenerator   = require './id_generator'
@@ -17,6 +17,7 @@ class Socket
   Promise: Promise
   path: path
   uuid: uuid
+  sauce: sauce
 
   constructor: (io, app) ->
     if not (@ instanceof Socket)
@@ -32,10 +33,10 @@ class Socket
     @io          = io
     @idGenerator = IdGenerator(@app)
 
-  startListening: ->
+  startListening: (options) ->
     @app.once "close", @close.bind(@)
 
-    @_startListening(chokidar, path)
+    @_startListening(chokidar, path, options)
 
   close: (watchedFiles) ->
     @io.close()

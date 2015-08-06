@@ -7,6 +7,7 @@ window.$Cypress = do ($, _, Backbone, Promise) ->
       @mocha  = null
       @runner = null
 
+    start: ->
       window.Cypress = @
 
     initialize: (specWindow, $remoteIframe, config) ->
@@ -57,12 +58,14 @@ window.$Cypress = do ($, _, Backbone, Promise) ->
 
       ## TODO: TEST THIS
       @prepareForSpecEvents()
+      @prepareForCustomCommands()
 
     onBeforeLoad: (contentWindow) ->
       ## should probably just trigger the "before:load"
       ## event here, so other commands can tap into that
       return if not @cy
 
+      @cy.silenceConsole(contentWindow) if $Cypress.isHeadless
       @cy.bindWindowListeners(contentWindow)
       @cy.checkForServer(contentWindow)
       @cy.onBeforeLoad(contentWindow)
@@ -94,13 +97,21 @@ window.$Cypress = do ($, _, Backbone, Promise) ->
         return @
 
     stop: ->
+      ## we immediately delete Cypress due to
+      ## abort being async. waiting for the async
+      ## event causes problems in other areas in
+      ## the system when we cannot tap into this async
+      ## method. (such as moving from remote manual
+      ## browser back to your own browser)
+      delete window.Cypress
+
       @abort().then =>
 
         @trigger "stop"
 
-        @off()
+        @removeCustomCommands()
 
-        delete window.Cypress
+        @off()
 
     abort: ->
       ## grab all the abort callbacks
@@ -108,6 +119,8 @@ window.$Cypress = do ($, _, Backbone, Promise) ->
 
       ## coerce into an array
       aborts = [].concat @invoke("abort")
+
+      aborts = _.reject aborts, (r) -> r is @cy
 
       ## abort can be async so make sure
       ## we wait until they all resolve!
@@ -117,8 +130,11 @@ window.$Cypress = do ($, _, Backbone, Promise) ->
     ## removing the queue from the proto and
     ## removing additional own instance properties
     restore: ->
-      @trigger "restore"
-      return @
+      restores = [].concat @invoke("restore")
+
+      restores = _.reject restores, (r) -> r is @cy
+
+      Promise.all(restores).return(null)
 
     _.extend $Cypress.prototype, Backbone.Events
 

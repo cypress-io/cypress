@@ -7,45 +7,60 @@
         when _.isString(str) then env is str
         else env
 
+    _getProp: (prop) ->
+      @backend[prop] ? throw new Error("config#backend.#{prop} is not defined!")
+
+    getCache: -> @_getProp("cache")
+
+    getBooter: -> @_getProp("Booter")
+
+    getManifest: -> @_getProp("manifest")
+
+    getUpdater: -> @_getProp("updater")
+
+    getLog: -> @_getProp("Log")
+
+    getCli: -> @_getProp("cli")
+
     getUser: ->
-      @cache.getUser()
+      @getCache().getUser()
 
     setUser: (user) ->
-      @cache.setUser(user)
+      @getCache().setUser(user)
 
     addProject: (path) ->
-      @cache.addProject(path)
+      @getCache().addProject(path)
 
     removeProject: (path) ->
-      @cache.removeProject(path)
+      @getCache().removeProject(path)
+
+    getProjectIdByPath: (projectPath) ->
+      @getCache().getProjectIdByPath(projectPath)
 
     getProjectPaths: ->
-      @cache.getProjectPaths()
+      @getCache().getProjectPaths()
 
-    runProject: (path) ->
-      @project = @booter(path)
+    runProject: (path, options = {}) ->
+      @project = @getBooter()(path)
 
-      @project.boot().get("settings")
+      @project.boot(options).get("settings")
 
     closeProject: ->
       @project.close().bind(@).then ->
         delete @project
 
     logIn: (code) ->
-      @cache.logIn(code).bind(@)
+      @getCache().logIn(code).bind(@)
       .then (user) ->
         @setUser(user)
         .return(user)
 
     logOut: (user) ->
-      @cache.logOut(user.get("session_token"))
+      @getCache().logOut(user.get("session_token"))
 
     log: (text, data = {}) ->
       data.type = "native"
       @getLog().log("info", text, data)
-
-    getLog: ->
-      @Log ? throw new Error("config#Log is not defined!")
 
     getLogs: ->
       @getLog().getLogs()
@@ -59,9 +74,23 @@
     offLog: ->
       @getLog().off()
 
-    getUpdater: -> @updater
+    cli: (options) ->
+      cli = @getCli()
+      cli(App, options)
 
-    getManifest: -> @booter.manifest
+    getManifest: -> @getManifest()
+
+    getToken: (user) ->
+      @getCache().getToken(user.get("session_token"))
+
+    generateToken: (user) ->
+      @getCache().generateToken(user.get("session_token"))
+
+    getProjectToken: (user, project) ->
+      @getCache().getProjectToken(user.get("session_token"), project)
+
+    generateProjectToken: (user, project) ->
+      @getCache().generateProjectToken(user.get("session_token"), project)
 
     setErrorHandler: ->
       @getLog().setErrorHandler (err) =>
@@ -75,7 +104,7 @@
         debugger if @get("debug")
 
   App.reqres.setHandler "config:entity", (attrs = {}) ->
-    props = ["cache", "booter", "updater", "Log"]
+    props = ["backend"]
 
     config = new Entities.Config _(attrs).omit props...
 

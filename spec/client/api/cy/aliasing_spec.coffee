@@ -106,7 +106,7 @@ describe "$Cypress.Cy Aliasing Commands", ->
           expect(@log.get("aliasType")).to.eq "primitive"
 
       it "sets aliasType to 'dom'", ->
-        @cy.get("body").find("div:first").click().as("div").then ->
+        @cy.get("body").find("button:first").click().as("button").then ->
           expect(@log.get("aliasType")).to.eq "dom"
 
   context "#_replayFrom", ->

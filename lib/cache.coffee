@@ -200,12 +200,48 @@ class Cache extends require("events").EventEmitter
   remove: ->
     fs.removeSync CACHE
 
+  _token: (method, session) ->
+    url = Routes.token()
+    headers = {"X-Session": session}
+    request({method: method, url: url, headers: headers, json: true})
+      .promise().get("api_token")
+
+  getToken: (session) ->
+    @_token("get", session)
+
+  generateToken: (session) ->
+    @_token("put", session)
+
+  getProjectIdByPath: (projectPath) ->
+    @getProjects().then (projects) ->
+      _.findKey(projects, {PATH: projectPath})
+
+  _projectToken: (method, session, projectPath) ->
+    @getProjectIdByPath(projectPath).then (projectId) ->
+      if not projectId
+        e = new Error
+        e.projectNotFound = true
+        e.projectPath = projectPath
+        throw e
+      else
+        request({
+          method:  method
+          url:     Routes.projectToken(projectId)
+          headers: {"X-Session": session}
+          json:    true
+        }).promise().get("api_token")
+
+  getProjectToken: (session, project) ->
+    @_projectToken("get", session, project)
+
+  generateProjectToken: (session, project) ->
+    @_projectToken("put", session, project)
+
   ## move this to an auth module
   ## and update NW references
   logIn: (code) ->
     url = Routes.signin({code: code})
-    request.post(url)
-      .then(JSON.parse)
+    request.post(url, {json: true})
       .catch (err) ->
         ## normalize the error object
         throw (err.error or err)

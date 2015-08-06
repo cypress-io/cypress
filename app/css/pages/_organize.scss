@@ -24,6 +24,14 @@
   li {
     list-style: none;
     position: relative;
+
+    &.all-tests {
+      margin-bottom: 10px;
+
+      a {
+        border-bottom: 1px dotted #999;
+      }
+    }
   }
 
   ul.outer-files-container li > ul {

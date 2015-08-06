@@ -86,7 +86,10 @@ class Server
 
     @app.set "cypress", obj
 
-  configureApplication: ->
+  configureApplication: (options = {}) ->
+    _.defaults options,
+      morgan: true
+
     ## set the cypress config from the cypress.json file
     @app.set "port",        @config.port
     @app.set "view engine", "html"
@@ -94,7 +97,7 @@ class Server
 
     @app.use require("cookie-parser")()
     @app.use require("compression")()
-    @app.use require("morgan")("dev")
+    @app.use require("morgan")("dev") if options.morgan
     @app.use require("body-parser").json()
 
     ## serve static file from public when route is /__cypress/static
@@ -118,7 +121,7 @@ class Server
     e.portInUse = true
     e
 
-  open: ->
+  open: (options = {}) ->
     new Promise (resolve, reject) =>
       ## bail if we had a problem reading from cypress.json
       return reject(@config) if @config.jsonError
@@ -129,11 +132,11 @@ class Server
 
       allowDestroy(@server)
 
-      @configureApplication()
+      @configureApplication(options)
 
       ## refactor this class
       socket = Socket(@io, @app)
-      socket.startListening()
+      socket.startListening(options)
 
       onError = (err) =>
         ## if the server bombs before starting
@@ -160,7 +163,15 @@ class Server
         )
         .bind(@)
         .then ->
-          @project.ensureProjectId()
+          @project.ensureProjectId().then (id) =>
+            ## make an external request to
+            ## record the user_id
+            ## TODO: remove this after a few
+            ## upgrades since this is temporary
+            @project.getDetails(id)
+
+            ## dont wait for this to complete
+            return null
         .then ->
           require('open')(@config.clientUrl) if @config.autoOpen
         .return(@config)

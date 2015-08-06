@@ -72,6 +72,12 @@ npm run deploy
 
 If the user just updated their old app will be in their trash bin. They could always delete the new app and "put back" their trashed app.
 
+### Manually Testing ID Generation
+1. Open app in Cypress
+2. In another tab, navigate to `http://localhost:2020/__cypress/id_generator`
+3. Change watched spec
+4. Id generator tab will output errors to the console if there are errors
+
 ### Manually Completing An Update
 This will manually complete an update given you have the new app downloaded and unzipped (which is the source), and you have the existing app (the destination).
 

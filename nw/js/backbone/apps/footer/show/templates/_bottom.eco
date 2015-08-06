@@ -11,6 +11,13 @@
     <div class="dropup">
       <i class="fa fa-cog dropdown-toggle" data-toggle="dropdown"></i>
       <ul class="dropdown-menu dropdown-menu-right">
+        <% if @debug: %>
+        <li data-tests>
+          <a href="#">Tests</a>
+        </li>
+        <li class="divider"></li>
+        <% end %>
+        <li>
         <li data-about>
           <a href="#">About</a>
         </li>
@@ -20,10 +27,10 @@
         <li data-updates>
           <a href="#">Check for updates</a>
         </li>
-        <li class="divider"></li>
-        <li>
+        <!-- <li class="divider"></li>
+        <li data-preferences>
           <a href="#">Preferences...</a>
-        </li>
+        </li> -->
         <li class="divider"></li>
         <li data-quit>
           <a href="#">Quit</a>

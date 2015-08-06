@@ -15,7 +15,7 @@
     ## globally so they're accessible from
     ## sauce labs or nullify them
     setGlobally: (bool = true) ->
-      window.eclectusResults = if bool then @attributes else null
+      window.cypressResults = if bool then @attributes else null
 
     startCounting: ->
       ## bail if we've already started counting!
