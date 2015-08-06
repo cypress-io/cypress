@@ -24,17 +24,21 @@ This will make the `cypress` command globally available.
 
 ##### cypress install
 
-##### cypress update
-
 ##### cypress run
 
 ##### cypress ci
 
-##### cypress login
-
 ##### cypress get:key
 
 ##### cypress new:key
+
+##### cypress verify
+
+## Coming Soon Commands
+
+##### cypress update
+
+##### cypress login
 
 ##### cypress get:path
 
