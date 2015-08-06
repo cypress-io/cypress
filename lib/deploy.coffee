@@ -746,6 +746,9 @@ module.exports = {
           .on "end", resolve
 
   release: ->
+    ## allow us to pass specific options here
+    ## to force the release to a specific version
+    ## or extend the getReleases to accept custom value
     new Promise (resolve, reject) =>
       releases = glob.sync("*", {cwd: buildDir})
 
