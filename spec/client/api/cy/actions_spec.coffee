@@ -306,8 +306,8 @@ describe "$Cypress.Cy Actions Commands", ->
       it "can cancel additional keystrokes", (done) ->
         @cy._timeout(50)
 
-        text = @cy.$(":text:first").keydown _.after 3, ->
-          Cypress.abort()
+        text = @cy.$(":text:first").keydown _.after 3, =>
+          @Cypress.abort()
 
         @cy.on "cancel", ->
           _.delay ->

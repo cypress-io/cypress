@@ -12,6 +12,9 @@ $Cypress.register "XHR", (Cypress, _, $) ->
   restore = ->
     if @prop
       if server = @prop("server")
+        ## instead of wrapping this with
+        ## Promise.all here why not move
+        ## this to server.cancel()?
         Promise.all(server.cancel()).then ->
           server.restore()
 

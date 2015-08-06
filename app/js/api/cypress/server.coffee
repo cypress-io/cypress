@@ -262,6 +262,9 @@ $Cypress.Server = do ($Cypress, _) ->
         ## those are xhr's which have been responded to
         _.each @fakeServer.queue, @abort
 
+      ## why not use Promise.all here and return
+      ## a promise since we are canceling our
+      ## queued promises?
       _.invoke @queue, "cancel"
 
     restore: ->

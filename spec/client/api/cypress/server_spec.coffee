@@ -182,12 +182,12 @@ describe "$Cypress.Cy Server API", ->
       @server.respond()
       expect(delay).to.be.calledWith 0
 
-  context "#abort", ->
+  context "#cancel", ->
     beforeEach ->
       @fakeServer = @sandbox.useFakeServer()
       @server = $Cypress.Server.create(@fakeServer, {delay: 200, respond: true})
 
-    it "can cancel promises in the queue", (done) ->
+    it "can cancel promises in the queue", ->
       @server.stub url: /users/, response: {}, method: "GET"
       @server.stub url: /posts/, response: {}, method: "GET"
       @server.stub url: /messages/, response: {}, method: "GET"
@@ -195,13 +195,10 @@ describe "$Cypress.Cy Server API", ->
       $.get("/posts")
       $.get("/messages")
       expect(@server.queue).to.have.length(3)
-      @server.abort()
-      _.delay =>
+      Promise.all(@server.cancel()).then =>
         _.each @fakeServer.requests, (request) ->
           expect(request.aborted).to.be.true
           expect(request.readyState).to.eq 0
-        done()
-      , 300
 
   context "#handleAfterResponse", ->
     beforeEach ->

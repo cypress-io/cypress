@@ -29,14 +29,18 @@ describe "$Cypress.Cy XHR Commands", ->
 
       expect(restore).to.be.called
 
-    _.each ["requests", "queue", "responses"], (prop) ->
-      it "resets to an empty array references to the sandbox server's prop: #{prop}", ->
-        sandbox = @cy._getSandbox()
-        sandbox.useFakeServer()
-        sandbox.server[prop] = [1,2,3]
-        expect(sandbox.server).to.have.property(prop).that.deep.eq [1,2,3]
-        @Cypress.restore()
-        expect(sandbox.server).to.have.property(prop).that.deep.eq []
+      ## we are on longer reseting these properties on the
+      ## sandbox but i cant remember why we stopped. i imagine
+      ## after looking at the tons of GC reports i reasoned
+      ## we didnt havent to do this anymore
+    # _.each ["requests", "queue", "responses"], (prop) ->
+    #   it.only "resets to an empty array references to the sandbox server's prop: #{prop}", ->
+    #     sandbox = @cy._getSandbox()
+    #     sandbox.useFakeServer()
+    #     sandbox.server[prop] = [1,2,3]
+    #     expect(sandbox.server).to.have.property(prop).that.deep.eq [1,2,3]
+    #     @Cypress.restore().then ->
+    #       expect(sandbox.server).to.have.property(prop).that.deep.eq []
 
     it "deletes the sandbox reference after restore", ->
       @cy._getSandbox()
@@ -741,16 +745,16 @@ describe "$Cypress.Cy XHR Commands", ->
           expect(@cy.prop("tmpServer")).to.be.null
           expect(@cy.prop("tmpRoutes")).to.be.null
 
-  context "#abort", ->
-    it "calls server#abort", (done) ->
-      abort = null
+  context "#cancel", ->
+    it "calls server#cancel", (done) ->
+      cancel = null
 
       @Cypress.once "abort", ->
-        expect(abort).to.be.called
+        expect(cancel).to.be.called
         done()
 
       @cy.server().then ->
-        abort = @sandbox.spy @cy.prop("server"), "abort"
+        cancel = @sandbox.spy @cy.prop("server"), "cancel"
         @Cypress.trigger "abort"
 
   context "#getPendingRequests", ->

@@ -10,7 +10,7 @@ do ($Cypress, _) ->
         previousWin = null
 
     offIframeListeners: ($remoteIframe) ->
-      $remoteIframe.off()
+      $remoteIframe?.off()
 
     ## we listen for the unload + submit events on
     ## the window, because when we receive them we

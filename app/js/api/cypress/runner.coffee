@@ -177,7 +177,7 @@ $Cypress.Runner = do ($Cypress, _) ->
       @runnerListeners()
 
       @runner.run (err) =>
-        fn(err, @getTestResults())
+        fn(err, @getTestResults()) if fn
 
     getTestResults: ->
       _(@tests).map (test) ->
@@ -347,7 +347,7 @@ $Cypress.Runner = do ($Cypress, _) ->
 
       ## if we have a hook id then attempt
       ## to find the test by its id
-      if hook.id
+      if hook?.id
         found = @firstTest suite, (test) =>
           hook.id is test.id
 
@@ -411,12 +411,17 @@ $Cypress.Runner = do ($Cypress, _) ->
         testBeforeHooks = (hook, suite) ->
           _this.test = _this.getTestFromHook(hook, suite) if not _this.test
 
-          Cypress.trigger "test:before:hooks", _this.wrap(_this.test)
+          ## there is a bug (but i believe its only in tests
+          ## which happens in Ended Early Integration Tests
+          ## where the test will be undefined due to the runner.suite
+          ## not yet having built its tests/suites array and thus
+          ## our @tests array is empty
+          Cypress.trigger "test:before:hooks", _this.wrap(_this.test ? {})
 
         testAfterHooks = ->
           test = _this.test
 
-          _this.test     = null
+          _this.test = null
 
           Cypress.trigger "test:after:hooks", _this.wrap(test)
 

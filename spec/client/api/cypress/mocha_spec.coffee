@@ -90,9 +90,12 @@ describe "$Cypress.Mocha API", ->
       expect(removeAllListeners).to.be.calledOnce
 
     it "nulls out mocha.suite", ->
+      ## we will lose a reference to this
+      ## because it is removed
+      mocha = @mocha.mocha
       expect(@mocha.mocha.suite).to.be.ok
       @Cypress.trigger("stop")
-      expect(@mocha.mocha.suite).to.be.null
+      expect(mocha.suite).to.be.null
 
     it "null outs Cypress.mocha", ->
       expect(@Cypress.mocha).to.be.ok
