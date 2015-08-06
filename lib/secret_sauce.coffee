@@ -196,6 +196,8 @@ SecretSauce.Chromium =
 
     @window.require = require
 
+    @window.$Cypress.isHeadless = true
+
     ## right now we dont do anything differently
     ## in ci vs a headless run, but when ci is true
     ## we want to record the results of the run

@@ -50,6 +50,12 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
       return @
 
+    silenceConsole: (contentWindow) ->
+      if c = contentWindow.console
+        c.log = ->
+        c.warn = ->
+        c.info = ->
+
     listeners: ->
       @listenTo @Cypress, "initialize", (obj) =>
         @initialize(obj)

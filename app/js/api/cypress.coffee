@@ -65,6 +65,7 @@ window.$Cypress = do ($, _, Backbone, Promise) ->
       ## event here, so other commands can tap into that
       return if not @cy
 
+      @cy.silenceConsole(contentWindow) if $Cypress.isHeadless
       @cy.bindWindowListeners(contentWindow)
       @cy.checkForServer(contentWindow)
       @cy.onBeforeLoad(contentWindow)
