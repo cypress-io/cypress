@@ -717,7 +717,7 @@ module.exports = {
       }
 
     obj = {
-      name: "cypress"
+      name: "Cypress"
       version: version
       packages: {
         mac: getUrl("osx64")
