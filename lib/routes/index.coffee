@@ -31,18 +31,5 @@ module.exports = (app) ->
       config: JSON.stringify(app.get("cypress"))
     }
 
-  ## serve the real cypress JS app when we're at root
-  app.get "/", (req, res, next) ->
-    ## if we dont have a req.session that means we're initially
-    ## requesting the cypress app and we need to redirect to the
-    ## root path that serves the app
-    if not req.cookies["__cypress.remoteHost"]
-      res.redirect app.get("cypress").clientRoute
-    else
-      ## send it to the catch all * route!
-      next("route")
-
-  ## unfound paths we assume we want to pass on through
-  ## to the origin proxyUrl
   app.all "*", (req, res, next) ->
     controllers.remoteInitial.handle(req, res, next)

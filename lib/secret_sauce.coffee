@@ -558,9 +558,20 @@ SecretSauce.RemoteInitial =
   _handle: (req, res, next, Domain) ->
     { _ } = SecretSauce
 
+    ## if we have an unload header it means
+    ## our parent app has been navigated away
+    ## directly and we need to automatically redirect
+    ## to the clientRoute
+    if req.cookies["__cypress.unload"]
+      return res.redirect @app.get("cypress").clientRoute
+
+    getRemoteHost = (req) =>
+      @getOriginFromFqdnUrl(req) ? req.cookies["__cypress.remoteHost"] ? @app.get("cypress").baseUrl ? @app.get("__cypress.remoteHost")
+
     d = Domain.create()
 
-    d.on 'error', (e) => @errorHandler(e, req, res)
+    d.on 'error', (e) =>
+      @errorHandler(e, req, res, getRemoteHost(req))
 
     d.run =>
       ## 1. first check to see if this url contains a FQDN
@@ -570,14 +581,17 @@ SecretSauce.RemoteInitial =
       ## 2. or use cookies
       ## 3. or use baseUrl
       ## 4. or finally fall back on app instance var
-      remoteHost = @getOriginFromFqdnUrl(req) ? req.cookies["__cypress.remoteHost"] ? @app.get("cypress").baseUrl ? @app.get("__cypress.remoteHost")
+      remoteHost = getRemoteHost(req)
 
       @Log.info "handling initial request", url: req.url, remoteHost: remoteHost
 
       ## we must have the remoteHost which tell us where
       ## we should request the initial HTML payload from
       if not remoteHost
-        throw new Error("Missing remoteHost. Cannot proxy request: #{req.url}")
+        ## if we dont have a req.session that means we're initially
+        ## requesting the cypress app and we need to redirect to the
+        ## root path that serves the app
+        return res.redirect @app.get("cypress").clientRoute
 
       thr = @through (d) -> @queue(d)
 
@@ -743,8 +757,6 @@ SecretSauce.RemoteInitial =
     return thr
 
   errorHandler: (e, req, res, remoteHost) ->
-    remoteHost ?= req.cookies["__cypress.remoteHost"]
-
     url = @url.resolve(remoteHost, req.url)
 
     ## disregard ENOENT errors (that means the file wasnt found)

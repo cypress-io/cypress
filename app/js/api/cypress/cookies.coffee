@@ -7,6 +7,10 @@ $Cypress.Cookies = do ($Cypress, _) ->
 
   return {
     set: (name, value) ->
+      ## dont set anything if we've been
+      ## told to unload
+      return if @get("unload") is "true"
+
       name = "#{namespace}.#{name}"
 
       Cookies.set name, value, {path: "/"}
