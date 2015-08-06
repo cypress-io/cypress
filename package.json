@@ -1,5 +1,5 @@
 {
-  "name": "cypress",
+  "name": "Cypress",
   "version": "0.9.6",
   "description": "Javascript Test Engine",
   "main": "app://app/nw/public/index.html",

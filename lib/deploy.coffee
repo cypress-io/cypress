@@ -267,7 +267,6 @@ class Platform
       platforms: [@platform]
       buildDir: buildDir
       buildType: => @getVersion()
-      appName: "Cypress"
       version: "0.12.2"
       macIcns: "nw/public/img/cypress.icns"
       macPlist: {
