@@ -18,7 +18,7 @@
     ## create a App.config model from the passed in options
     App.config = App.request("config:entity", options)
 
-    App.config.log("Starting Desktop App", options: options)
+    App.config.log("Starting Desktop App", options: _.omit(options, "backend"))
 
     ## create an App.updater model which is shared across the app
     App.updater = App.request "new:updater:entity"
