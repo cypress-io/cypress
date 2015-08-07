@@ -25,6 +25,7 @@
     "commander": "^2.8.1",
     "decompress": "^2.3.0",
     "fs-extra": "^0.22.1",
+    "human-interval": "^0.1.5",
     "lodash": "^3.10.0",
     "progress": "^1.1.8",
     "request": "^2.60.0",

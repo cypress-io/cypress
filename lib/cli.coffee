@@ -1,6 +1,11 @@
 _         = require("lodash")
 commander = require("commander")
+updater   = require("update-notifier")
+human     = require("human-interval")
 pkg       = require("../package.json")
+
+## check for updates every hour
+updater({pkg: pkg, updateCheckInterval: human("one hour")}).notify()
 
 parseOpts = (opts) ->
   _.pick(opts, "spec", "reporter", "path", "destination")
