@@ -248,11 +248,15 @@ describe "Updater", ->
           fs.readJsonAsync("new/app/path/Contents/Resources/app.nw/.cy/cache").then (obj) ->
             expect(obj).to.deep.eq {foo: "bar"}
 
-            ## make sure we have 0755 permissions!
-            require("child_process").exec "stat -f %Mp%Lp new/app/path/Contents/Resources/app.nw/.cy/foo/bar.txt", (err, stdout, stderr) ->
-              done(err) if err
-              expect(stdout).to.eq "0755\n"
-              done()
+          cmd = if process.platform is "darwin" then "-f %Mp%Lp" else "-c %a"
+
+          cmd = "stat #{cmd} new/app/path/Contents/Resources/app.nw/.cy/foo/bar.txt"
+
+          ## make sure we have 0755 permissions!
+          require("child_process").exec cmd, (err, stdout, stderr) ->
+            done(err) if err
+            expect(stdout).to.match /755/
+            done()
 
     describe "#trash", ->
       beforeEach ->
