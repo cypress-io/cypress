@@ -1,0 +1,3 @@
+test:
+  override:
+    - npm run test-ci
