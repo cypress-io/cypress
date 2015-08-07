@@ -2,7 +2,7 @@ _        = require("lodash")
 path     = require("path")
 minimist = require("minimist")
 
-args     = "apiKey smokeTest getKey generateKey runProject project spec reporter ci debug updating headless ping coords key".split(" ")
+args     = "apiKey smokeTest getKey generateKey runProject project spec reporter ci debug updating headless ping coords key logs clearLogs".split(" ")
 
 parseCoords = (coords) ->
   [x, y] = coords.split("x")
@@ -16,6 +16,7 @@ module.exports = (options) ->
       "get-key":     "getKey"
       "new-key":     "generateKey"
       "run-project": "runProject"
+      "clear-logs":  "clearLogs"
     }
   })
 

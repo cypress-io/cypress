@@ -15,8 +15,8 @@ fs = Promise.promisifyAll(fs)
 
 describe "Winston Logger", ->
   beforeEach ->
-    Log.clearLogs()
     @sandbox = sinon.sandbox.create()
+    Log.clearLogs()
 
   afterEach ->
     Log.removeAllListeners("logging")

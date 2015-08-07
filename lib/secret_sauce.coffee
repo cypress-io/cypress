@@ -73,6 +73,8 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
 
     parseCliOptions: (options) ->
       switch
+        when options.logs         then @logs(options)
+        when options.clearLogs    then @clearLogs(options)
         when options.ci           then @ci(options)
         when options.getKey       then @getKey(options)
         when options.generateKey  then @generateKey(options)
@@ -80,6 +82,15 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
         when options.runProject   then @runProject(options)
         else
           @startGuiApp(options)
+
+    clearLogs: ->
+      Log.clearLogs().then ->
+        process.exit()
+
+    logs: ->
+      Log.getLogs().then (logs) ->
+        process.stdout.write JSON.stringify(logs) + "\n"
+        process.exit()
 
     getKey: ->
       if ensureSessionToken(@user)
