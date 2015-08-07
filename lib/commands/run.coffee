@@ -29,7 +29,7 @@ class Run
 
     ## if we have a key assume we're in CI mode
     if options.key
-      args.push("--ci", "--api-key", options.key)
+      args.push("--ci", "--key", options.key)
       opts.xvfb = true
 
     utils.spawn(args, opts)
