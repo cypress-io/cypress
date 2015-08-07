@@ -46,7 +46,7 @@ SecretSauce.Cli = (App, options, Routes, Chromium) ->
     })
     .then(fn)
     .catch (err) ->
-      writeErr("Sorry, your project's API Key was not valid. This project cannot run in CI.")
+      writeErr("Sorry, your project's API Key: '#{key}' was not valid. This project cannot run in CI.")
 
   ensureLinuxEnv = ->
     return true if os.platform() is "linux"
