@@ -514,7 +514,7 @@ module.exports = (parentWindow, gui, loadApp) ->
 
         cache.setUser({name: "Brian"}).then =>
           @argsAre("--run-project", @todos, "--ci", "--key", "abc123").then =>
-            expect(@write).to.be.calledWithMatch("Sorry, your project's API Key was not valid. This project cannot run in CI.")
+            expect(@write).to.be.calledWithMatch("Sorry, your project's API Key: 'abc123' was not valid. This project cannot run in CI.")
             expect(@exit).to.be.calledWith(1)
             expect(@trigger).not.to.be.calledWith("start:projects:app")
 
