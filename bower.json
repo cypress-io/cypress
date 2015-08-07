@@ -48,5 +48,8 @@
     "kendo-ui": "~2015.1.616",
     "jquery": "~2.1.4",
     "card": "1.0.2"
+  },
+  "resolutions": {
+    "underscore": "1.7.0"
   }
 }

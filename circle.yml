@@ -5,6 +5,7 @@ machine:
 test:
   pre:
     - bundle
+    - npm run build
 
   override:
     - npm run test-server-ci
