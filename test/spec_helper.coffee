@@ -1,4 +1,5 @@
 global.mockery    = require("mockery")
+global.proxyquire = require("proxyquire")
 global.program    = require("../lib/cli")
 global.nock       = require("nock")
 global.expect     = require("chai").expect

@@ -12,6 +12,8 @@ fs   = Promise.promisifyAll(fs)
 xvfb = Promise.promisifyAll(new Xvfb({silent: true}))
 
 module.exports = {
+  xvfb: xvfb
+
   getPathToExecutable: ->
     path.join(@getDefaultAppFolder(), @getPlatformExecutable())
 
@@ -46,21 +48,29 @@ module.exports = {
   _cypressSmokeTest: (pathToCypress) ->
     ## cache the smoke test checksum so we
     ## dont have to do this on every cli command
-    new Promise (resolve, reject) ->
+    new Promise (resolve, reject) =>
       num = ""+Math.random()
 
-      cp.exec "#{pathToCypress} --smoke-test --ping=#{num}", (err, stdout, stderr) ->
-        stdout = stdout.replace(/\s/, "")
+      cp.exec "#{pathToCypress} --smoke-test --ping=#{num}", (err, stdout, stderr) =>
 
         if err
           console.log(err)
-          process.exit()
-
-        if stdout isnt num
-          ## add the path we executed cypress at here
-          ## and chalk up a nice error message :-)
-          console.log("Cypress was not executable. It may be corrupt. Please reinstall the latest version.")
           process.exit(1)
+          reject(err)
+
+        if stdout.replace(/\s/, "") isnt num
+          console.log("")
+          console.log(chalk.bgRed.white(" -Error- "))
+          console.log(chalk.red.underline("Cypress was not executable, it may be corrupt."))
+          console.log("")
+          console.log("Cypress was found at this path:", chalk.blue(@getPathToUserExecutable()))
+          console.log("")
+          console.log(chalk.yellow("To fix this reinstall Cypress with:"))
+          console.log(chalk.cyan("cypress install"))
+          console.log("")
+
+          process.exit(1)
+          reject()
         else
           resolve()
 
@@ -80,7 +90,7 @@ module.exports = {
         ## TODO talk about how to permanently change the path to the cypress executable
         # console.log("3. Specify the existing location of Cypress with:", chalk.cyan("cypress run --cypress path/to/cypress"))
         console.log("")
-        process.exit()
+        process.exit(1)
 
   verifyCypress: (pathToCypress) ->
     ## verify that there is a file at this path
@@ -113,9 +123,9 @@ module.exports = {
       stdio: ["ignore", process.stdout, "ignore"]
 
     spawn = =>
-      @verifyCypress(cypress).then ->
+      @verifyCypress(cypress).then =>
         if options.verify
-          console.log(chalk.green("Cypress application is valid and should be okay to run:"), chalk.blue(cypress))
+          console.log(chalk.green("Cypress application is valid and should be okay to run:"), chalk.blue(@getPathToUserExecutable()))
           process.exit()
 
         sp = cp.spawn cypress, args, options
@@ -123,6 +133,11 @@ module.exports = {
           ## make sure we close down xvfb
           ## when our spawned process exits
           sp.on "close", @stopXvfb
+
+        ## when our spawned process exits
+        ## make sure we kill our own process
+        ## with its exit code (to bubble up errors)
+        sp.on "exit", process.exit
 
     if options.xvfb
       @startXvfb().then(spawn)
