@@ -40,6 +40,7 @@
   "devDependencies": {
     "chai": "^3.2.0",
     "mocha": "^2.2.5",
+    "mock-spawn": "^0.2.6",
     "mockery": "^1.4.0",
     "nock": "^2.9.1",
     "proxyquire": "^1.6.0",
