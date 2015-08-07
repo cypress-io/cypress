@@ -89,7 +89,11 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
 
     logs: ->
       Log.getLogs().then (logs) ->
-        process.stdout.write JSON.stringify(logs) + "\n"
+        _.each logs, (log, i) ->
+          str   = JSON.stringify(log)
+          color = if i % 2 is 0 then "cyan" else "yellow"
+          write chalk[color](str)
+
         process.exit()
 
     getKey: ->
