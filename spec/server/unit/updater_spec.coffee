@@ -271,6 +271,7 @@ describe "Updater", ->
     describe "#install", ->
       beforeEach ->
         @install = @sandbox.stub(@updater.client, "install").callsArgWith(1, null)
+        @run     = @sandbox.stub(@updater.client, "run")
         @trash   = @sandbox.stub(@updater, "trash").resolves()
 
       it "trashes current appPath", ->
@@ -286,9 +287,6 @@ describe "Updater", ->
           expect(@updater.App.quit).to.be.calledOnce
 
       context "args", ->
-        beforeEach ->
-          @run     = @sandbox.stub(@updater.client, "run")
-
         it "uses args from App.argv", ->
           args = ["--foo", "--bar"]
           @updater.App.argv = args
