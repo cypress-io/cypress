@@ -13,7 +13,7 @@ SecretSauce =
     for key, fn of @[module]
       klass.prototype[key] = fn
 
-SecretSauce.Cli = (App, options, Routes, Chromium) ->
+SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
   write = (str) ->
     process.stdout.write(str + "\n")
 
@@ -46,7 +46,10 @@ SecretSauce.Cli = (App, options, Routes, Chromium) ->
     })
     .then(fn)
     .catch (err) ->
-      writeErr("Sorry, your project's API Key: '#{key}' was not valid. This project cannot run in CI.")
+      Log.info("Invalid API Key", {key: key, projectId: projectId, error: err.toString(), stack: err.stack})
+      _.delay =>
+        writeErr("Sorry, your project's API Key: '#{key}' was not valid. This project cannot run in CI.")
+      , 2000
 
   ensureLinuxEnv = ->
     return true if os.platform() is "linux"
