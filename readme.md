@@ -4,12 +4,12 @@ This is the CLI for [https://github.com/cypress-io/cypress](https://github.com/c
 
 ## What this does
 
-This `CLI` enables you to interact with the Cypress Desktop Application through the command line. This is helpful for both local development and running Cypress in CI.
+This `CLI` enables you to interact with the Cypress Desktop Application through the command line. This is helpful for both local development and running Cypress on a CI server.
 
 For instance you can do common tasks like:
 
 - Installing Cypress
-- Running Headlessly
+- Running Cypress Headlessly
 - Logging into Cypress
 - Generating API Keys
 - Adding Projects
