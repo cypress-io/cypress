@@ -56,7 +56,11 @@ logger.defaultErrorHandler = (err) ->
         exit()
 
     else
+      ## instead of console'ing these we should
+      ## think about chalking them so they are
+      ## formatted and displayed
       console.error(err)
+      console.error(err.stack)
       exit()
 
   settings = logger.getSettings()
