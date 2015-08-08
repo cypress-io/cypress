@@ -1,6 +1,6 @@
 require("./environment")
 
-global.config  = require("konfig")()
+config         = require("./config")
 Server         = require("./server")
 Backend        = require("./backend")
 child_process  = require("child_process")
@@ -67,7 +67,7 @@ send = (obj) ->
 isRunningFromCli = ->
   ## make sure we're not being loaded from a parent module
   ## and that we're inside of development env!
-  (not module.parent) and (process.env["NODE_ENV"] is "development")
+  (not module.parent) and (process.env["CYPRESS_ENV"] is "development")
 
 ## are we a child process
 ## by verifying we have the cyFork

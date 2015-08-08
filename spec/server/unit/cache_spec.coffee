@@ -32,7 +32,7 @@ describe "Cache", ->
 
     it "creates cache file in root/.cy/{environment}/cache", ->
       @cache.ensureExists().then ->
-        fs.statAsync(path.join(process.cwd(), ".cy", process.env["NODE_ENV"], "cache"))
+        fs.statAsync(path.join(process.cwd(), ".cy", process.env["CYPRESS_ENV"], "cache"))
 
   context "validators", ->
     beforeEach ->

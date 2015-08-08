@@ -1,4 +1,3 @@
-global.config ?= require("konfig")()
 fs             = require("fs-extra")
 path           = require("path")
 Promise        = require("bluebird")
@@ -6,6 +5,7 @@ _              = require("lodash")
 glob           = require("glob")
 chmodr         = require("chmodr")
 trash          = require("trash")
+config         = require("./config")
 Log            = require("./log")
 
 trash  = Promise.promisify(trash)
@@ -39,7 +39,7 @@ class Updater
     _.compact [c.getAppPath(), c.getAppExec(), "--updating", @getCoords()].concat(@App.argv)
 
   patchAppPath: ->
-    if process.env["NODE_ENV"] isnt "production"
+    if process.env["CYPRESS_ENV"] isnt "production"
       @getClient().getAppPath = -> process.cwd()
 
   getPackage: ->

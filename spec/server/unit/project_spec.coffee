@@ -5,10 +5,9 @@ sinonPromise = require 'sinon-as-promised'
 nock         = require('nock')
 fs           = require "fs-extra"
 cache        = require "#{root}lib/cache"
+config       = require "#{root}lib/config"
 Project      = require "#{root}lib/project"
 Settings     = require "#{root}lib/util/settings"
-
-config       = require("konfig")()
 
 describe "Project Interface", ->
   beforeEach ->

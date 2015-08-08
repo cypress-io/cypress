@@ -21,7 +21,7 @@ module.exports = (options) ->
   })
 
   _.extend options, _.pick(argv, args...), {
-    env: process.env["NODE_ENV"]
+    env: process.env["CYPRESS_ENV"]
   }
 
   if options.coords

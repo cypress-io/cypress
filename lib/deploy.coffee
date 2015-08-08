@@ -1,4 +1,4 @@
-config         = require("konfig")()
+config         = require("./config")
 path           = require("path")
 _              = require("lodash")
 fs             = require("fs-extra")
@@ -81,6 +81,7 @@ class Platform
           ## copy coffee src files
           copy("./lib/backend.coffee",      "/src/lib/backend.coffee")
           copy("./lib/cli.coffee",          "/src/lib/cli.coffee")
+          copy("./lib/config.coffee",       "/src/lib/config.coffee")
           copy("./lib/cypress.coffee",      "/src/lib/cypress.coffee")
           copy("./lib/controllers",         "/src/lib/controllers")
           copy("./lib/util",                "/src/lib/util")

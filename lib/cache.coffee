@@ -1,9 +1,8 @@
-global.config ?= require("konfig")()
-
 _         = require 'lodash'
 Promise   = require 'bluebird'
 path      = require 'path'
 request   = require "request-promise"
+config    = require "./config"
 Project   = require './project'
 Log       = require "./log"
 Routes    = require "./util/routes"

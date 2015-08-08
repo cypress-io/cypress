@@ -1,6 +1,6 @@
-global.config ?= require("konfig")()
-_              = require("lodash")
-Uri            = require("jsuri")
+_       = require("lodash")
+Uri     = require("jsuri")
+config  = require("../config")
 
 api_url = config.app.api_url
 
@@ -10,7 +10,9 @@ routes = {
   signin:        "signin"
   signout:       "signout"
   ci:            "ci/:id"
+  projects:      "projects"
   project:       "projects/:id"
+  projectKeys:   "projects/:id/keys"
   projectToken:  "projects/:id/token"
   exceptions:    "exceptions"
 }

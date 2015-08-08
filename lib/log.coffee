@@ -1,9 +1,9 @@
-global.config ?= require("konfig")()
 path           = require("path")
 _              = require("lodash")
 fs             = require("fs-extra")
 Promise        = require("bluebird")
 winston        = require("winston")
+config         = require("./config")
 
 ## make sure the log folder is available
 fs.ensureDirSync(config.app.log_path)
@@ -133,8 +133,6 @@ logger.clearLogs = ->
   Promise.all(files)
 
 logger.log = _.wrap logger.log, (orig, args...) ->
-#   return if (logger.forceLogger isnt true) and (process.env["NODE_ENV"] is "test")
-
   last = _.last(args)
 
   ## should be cloning this last object

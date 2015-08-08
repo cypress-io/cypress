@@ -54,7 +54,7 @@ Exception = {
       obj
 
   create: (err, settings) ->
-    return Promise.resolve() if process.env["NODE_ENV"] isnt "production"
+    return Promise.resolve() if process.env["CYPRESS_ENV"] isnt "production"
 
     Promise.all([@getBody(err, settings), @getHeaders()])
       .bind(@)

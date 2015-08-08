@@ -66,7 +66,7 @@ class Server
       fixturesFolder: "tests/_fixtures"
       supportFolder: "tests/_support"
       javascripts: []
-      env: process.env["NODE_ENV"]
+      env: process.env["CYPRESS_ENV"]
       namespace: "__cypress"
 
     rootUrl = "http://localhost:" + obj.port

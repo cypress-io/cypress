@@ -1,7 +1,4 @@
 root          = "../../../"
-config        = require("konfig")()
-Log           = require "#{root}/lib/log"
-Exception     = require "#{root}/lib/exception"
 winston       = require "winston"
 sinon         = require("sinon")
 sinonPromise  = require("sinon-as-promised")
@@ -10,6 +7,9 @@ Promise       = require "bluebird"
 _             = require "lodash"
 path          = require "path"
 expect        = require("chai").expect
+config        = require "#{root}lib/config"
+Log           = require "#{root}lib/log"
+Exception     = require "#{root}lib/exception"
 
 fs = Promise.promisifyAll(fs)
 

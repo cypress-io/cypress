@@ -1,11 +1,12 @@
-fs = require("fs-extra")
-
-pkg = process.cwd() + "/package.json"
+pkg = require("../package.json")
 
 getEnv = ->
-  ## use the node_env if its set
-  ## or grab it from our package.json env
-  ## or finally default it to development
-  process.env["NODE_ENV"] ?= fs.readJsonSync(pkg).env ? "development"
+  ## instead of setting NODE_ENV we will
+  ## use our own separate CYPRESS_ENV so
+  ## as not to conflict with CI providers
+
+  ## use env from package first
+  ## or development as default
+  process.env["CYPRESS_ENV"] ?= pkg.env ? "development"
 
 module.exports = getEnv()

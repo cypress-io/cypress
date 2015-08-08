@@ -114,21 +114,21 @@ describe "Exceptions", ->
 
   context "#create", ->
     beforeEach ->
-      @env = process.env["NODE_ENV"]
+      @env = process.env["CYPRESS_ENV"]
 
     afterEach ->
-      process.env["NODE_ENV"] = @env
+      process.env["CYPRESS_ENV"] = @env
 
     describe "development", ->
       beforeEach ->
-        process.env["NODE_ENV"] = "development"
+        process.env["CYPRESS_ENV"] = "development"
 
       it "immediately resolves", ->
         Exception.create()
 
     describe "production", ->
       beforeEach ->
-        process.env["NODE_ENV"] = "production"
+        process.env["CYPRESS_ENV"] = "production"
 
         err = {name: "ReferenceError", message: "undefined is not a function", stack: "asfd"}
 

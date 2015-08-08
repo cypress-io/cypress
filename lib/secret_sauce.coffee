@@ -781,7 +781,7 @@ SecretSauce.RemoteInitial =
 
     ## disregard ENOENT errors (that means the file wasnt found)
     ## which is a perfectly acceptable error (we account for that)
-    if process.env["NODE_ENV"] isnt "production" and e and e.code isnt "ENOENT"
+    if process.env["CYPRESS_ENV"] isnt "production" and e and e.code isnt "ENOENT"
       console.error(e.stack)
       debugger
 

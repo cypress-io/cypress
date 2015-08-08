@@ -4,6 +4,7 @@ sinon        = require 'sinon'
 sinonPromise = require 'sinon-as-promised'
 path         = require "path"
 nock         = require "nock"
+config       = require "#{root}lib/config"
 cache        = require "#{root}lib/cache"
 Project      = require "#{root}lib/project"
 Settings     = require "#{root}lib/util/settings"

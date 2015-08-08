@@ -1,7 +1,7 @@
 default:
   cy_path: ".cy"
-  cache_path: ".cy/#{process.env.NODE_ENV}/cache"
-  log_path: ".cy/#{process.env.NODE_ENV}"
+  cache_path: ".cy/#{process.env.CYPRESS_ENV}/cache"
+  log_path: ".cy/#{process.env.CYPRESS_ENV}"
   s3:
     path: "https://s3.amazonaws.com"
     bucket: dist.cypress.io

@@ -1,15 +1,36 @@
+root   = "../../../"
 expect = require("chai").expect
-konfig = require("konfig")
 
-describe "Konfig", ->
+describe "Config", ->
   beforeEach ->
     @setup = (env) =>
-      process.env["NODE_ENV"] = env
+      process.env["CYPRESS_ENV"] = env
 
-      @config = konfig()
+      @config = require("#{root}lib/config")
 
       @eq = (key, val) =>
         expect(@config.app[key]).to.eq(val)
+
+  afterEach ->
+    delete require.cache[require.resolve("#{root}lib/config")]
+
+  it "does not set global.config", ->
+    delete global.config
+    delete require.cache[require.resolve("#{root}lib/config")]
+
+    require("#{root}lib/config")
+    expect(global.config).not.to.be.ok
+
+  it "memoizes the result", ->
+    env = process.env["NODE_ENV"]
+
+    process.env["NODE_ENV"] = "development"
+    config = require("#{root}lib/config")
+
+    process.env["NODE_ENV"] = "test"
+    config2 = require("#{root}lib/config")
+
+    expect(config).to.eq(config2)
 
   context "development", ->
     beforeEach ->

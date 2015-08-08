@@ -1,25 +1,21 @@
-root   = "../../../"
-sinon  = require "sinon"
-fs     = require "fs-extra"
-expect = require("chai").expect
+root       = "../../../"
+expect     = require("chai").expect
+proxyquire = require("proxyquire").noPreserveCache()
 
 describe "Environment", ->
   beforeEach ->
     @expectedEnv = (env) ->
       require("#{root}lib/environment")
-      expect(process.env["NODE_ENV"]).to.eq(env)
-
-    @sandbox = sinon.sandbox.create()
+      expect(process.env["CYPRESS_ENV"]).to.eq(env)
 
   afterEach ->
     delete require.cache[require.resolve("#{root}lib/environment")]
-    delete process.env["NODE_ENV"]
-    @sandbox.restore()
+    delete process.env["CYPRESS_ENV"]
 
-  context "#existing process.env.NODE_ENV", ->
+  context "#existing process.env.CYPRESS_ENV", ->
     beforeEach ->
       @setEnv = (env) =>
-        process.env["NODE_ENV"] = env
+        process.env["CYPRESS_ENV"] = env
         @expectedEnv(env)
 
     it "is production", ->
@@ -34,7 +30,9 @@ describe "Environment", ->
   context "uses package.json env", ->
     beforeEach ->
       @setEnv = (env) =>
-        @sandbox.stub(fs, "readJsonSync").returns({env: env})
+        proxyquire("#{root}lib/environment", {
+          "../package.json": {env: env}
+        })
         @expectedEnv(env)
 
     it "is production", ->
@@ -47,8 +45,5 @@ describe "Environment", ->
       @setEnv("test")
 
   context "it uses development by default", ->
-    beforeEach ->
-      @sandbox.stub(fs, "readJsonSync").returns({})
-
     it "is development", ->
       @expectedEnv("development")
