@@ -4,12 +4,13 @@ path          = require 'path'
 Project       = require './project'
 cache         = require './cache'
 Log           = require './log'
-SecretSauce   = require "../lib/util/secret_sauce_loader"
-
-config   = require("konfig")()
+Routes        = require './util/routes'
+SecretSauce   = require "./util/secret_sauce_loader"
 
 class Keys
-  Log: Log
+  Log:    Log
+  cache:  cache
+  Routes: Routes
 
   constructor: (projectRoot) ->
     if not (@ instanceof Keys)
@@ -18,7 +19,6 @@ class Keys
     if not projectRoot
       throw new Error("Instantiating lib/keys requires a projectRoot!")
 
-    @cache     = cache
     @project   = Project(projectRoot)
 
 SecretSauce.mixin("Keys", Keys)

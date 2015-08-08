@@ -5,10 +5,10 @@ fs       = require 'fs'
 path     = require 'path'
 Log      = require "./log"
 Settings = require './util/settings'
+Routes   = require './util/routes'
 
 fs       = Promise.promisifyAll(fs)
 
-config   = require("konfig")()
 
 class Project
   constructor: (projectRoot) ->
@@ -33,7 +33,7 @@ class Project
 
     require("./cache").getUser().then (user = {}) =>
       Request.post({
-        url: "#{config.app.api_url}/projects"
+        url: Routes.projects()
         headers: {"X-Session": user.session_token}
       })
       .then (attrs) =>
@@ -55,7 +55,7 @@ class Project
   getDetails: (projectId) ->
     require("./cache").getUser().then (user = {}) =>
       Request.get({
-        url: "#{config.app.api_url}/projects/#{projectId}"
+        url: Routes.project(projectId)
         headers: {"X-Session": user.session_token}
       }).catch (err) ->
         ## swallow any errors

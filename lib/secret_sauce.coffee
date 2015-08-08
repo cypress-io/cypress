@@ -270,7 +270,7 @@ SecretSauce.Keys =
     @cache.getProject(id).get("RANGE")
 
   _getNewKeyRange: (projectId) ->
-    url = "#{config.app.api_url}/projects/#{projectId}/keys"
+    url = @Routes.projectKeys(projectId)
 
     @Log.info "Requesting new key range", {url: url}
 
