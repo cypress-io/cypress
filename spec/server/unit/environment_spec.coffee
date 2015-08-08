@@ -1,6 +1,6 @@
 root       = "../../../"
+fs         = require "fs-extra"
 expect     = require("chai").expect
-proxyquire = require("proxyquire").noPreserveCache()
 
 describe "Environment", ->
   beforeEach ->
@@ -30,9 +30,7 @@ describe "Environment", ->
   context "uses package.json env", ->
     beforeEach ->
       @setEnv = (env) =>
-        proxyquire("#{root}lib/environment", {
-          "../package.json": {env: env}
-        })
+        @sandbox.stub(fs, "readJsonSync").returns({env: env})
         @expectedEnv(env)
 
     it "is production", ->
@@ -45,5 +43,8 @@ describe "Environment", ->
       @setEnv("test")
 
   context "it uses development by default", ->
+    beforeEach ->
+      @sandbox.stub(fs, "readJsonSync").returns({})
+
     it "is development", ->
       @expectedEnv("development")

@@ -1,4 +1,9 @@
-pkg = require("../package.json")
+fs = require("fs-extra")
+
+## cannot use relative require statement
+## here because when obfuscated package
+## would not be available
+pkg = process.cwd() + "/package.json"
 
 getEnv = ->
   ## instead of setting NODE_ENV we will
@@ -7,6 +12,6 @@ getEnv = ->
 
   ## use env from package first
   ## or development as default
-  process.env["CYPRESS_ENV"] ?= pkg.env ? "development"
+  process.env["CYPRESS_ENV"] ?= fs.readJsonSync(pkg).env ? "development"
 
 module.exports = getEnv()
