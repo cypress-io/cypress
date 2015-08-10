@@ -16,23 +16,8 @@
         App.config.trigger "remove:nav"
 
     updateAppEnv: (params) ->
-      ## store whether this was existing
-      existing = !!params.__ui
-
-      ## always set the __ui on our params
-      ## this allows the user to change the URL
-      ## to switch our __ui mode
-      ## or if unchanged will just match our current environment
-      params.__ui ?= App.getCurrentUI()
-
-      ## always attempt to reset the env as well
-      ## which will fire change events if necessary
-      App.config.setUI(params.__ui)
-
-      ## clear out the env from params
-      ## if it didnt exist before so its not
-      ## displayed in our URL
-      delete params.__ui if not existing
+      if ui = params.__ui
+        App.config.setUI(ui)
 
     actions:
       show: ->
