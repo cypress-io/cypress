@@ -12,7 +12,7 @@
 
     getCache: -> @_getProp("cache")
 
-    getBooter: -> @_getProp("Booter")
+    getBooter: -> @_getProp("Cypress")
 
     getManifest: -> @_getProp("manifest")
 
