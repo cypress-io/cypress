@@ -147,9 +147,9 @@ module.exports = (parentWindow, gui) ->
     ## built our suite / test structure
     mocha.run (failures) ->
       if "--headless" in gui.App.argv
-        # process.stdout.write("exiting with #{failures} failures\n")
-        # process.exit(failures)
         fs.writeJson process.cwd() + "/spec/results.json", failures, ->
-          gui.App.quit()
+          # gui.App.quit()
+          process.stdout.write("exiting with #{failures} failures\n")
+          process.exit(failures)
 
   runTests()
