@@ -270,10 +270,10 @@ class Platform
   nwTests: ->
     @log("#nwTests")
 
-    @_nwTests({cli: true})
+    @_nwTests()
     .bind(@)
+    .then -> @_nwTests({cli: true})
     .then -> @_nwTests({project: true})
-    .then(@_nwTests)
 
   ## add tests around this method
   updatePackage: ->
