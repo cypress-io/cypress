@@ -2,7 +2,7 @@
 
   API =
     start: (options) ->
-      Utilities.Overrides.overloadMochaRunnerUncaught() if not App.config.ui("ci")
+      Utilities.Overrides.overloadMochaRunnerUncaught()
 
       ## return our runner entity
       return App.request("runner:entity")

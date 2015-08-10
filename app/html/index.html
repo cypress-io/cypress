@@ -23,7 +23,9 @@
 
     <script type="text/javascript">
       $(function(){
-        App.start({{{config}}})
+        setTimeout(function(){
+          App.start({{{config}}})
+        }, 0)
       });
     </script>
   </body>

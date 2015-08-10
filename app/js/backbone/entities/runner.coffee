@@ -32,6 +32,18 @@
           @listenTo @Cypress, event, (args...) =>
             @trigger event, args...
 
+        @listenTo @Cypress, "message", (msg, data, cb) =>
+          @socket.emit "client:request", msg, data, cb
+
+        @listenTo @Cypress, "fixture", (fixture, cb) =>
+          @socket.emit "fixture", fixture, cb
+
+        @listenTo @Cypress, "initialized", (obj) =>
+          @receivedRunner(obj.runner)
+
+        ## dont do anything else if we're in headless mode
+        return if $Cypress.isHeadless
+
         if App.config.ui("host")
           _.each @satelliteEvents, (event) =>
             @listenTo @socket, event, (args...) =>
@@ -63,15 +75,6 @@
           _.each ["url:changed", "page:loading"], (event) =>
             @listenTo @Cypress, event, (args...) =>
               @socket.emit event, args...
-
-        @listenTo @Cypress, "message", (msg, data, cb) =>
-          @socket.emit "client:request", msg, data, cb
-
-        @listenTo @Cypress, "fixture", (fixture, cb) =>
-          @socket.emit "fixture", fixture, cb
-
-        @listenTo @Cypress, "initialized", (obj) =>
-          @receivedRunner(obj.runner)
 
         @listenTo @Cypress, "log", (log) =>
           switch log.get("instrument")

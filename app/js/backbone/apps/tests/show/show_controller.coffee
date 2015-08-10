@@ -40,12 +40,18 @@
 
       @layout = @getLayoutView config
 
-      @listenTo @layout, "show", =>
-        @statsRegion(runner)               if not config.ui("satellite")
-        @iframeRegion(iframe)
-        @specsRegion(runner, iframe, spec) if not config.ui("satellite")
+      @listenTo @layout, "show", ->
+        ## bail if we're currently headless or we're in
+        ## satellite mode
+        return if $Cypress.isHeadless or config.ui("satellite")
+
+        @statsRegion(runner)
+        @specsRegion(runner, iframe, spec)
 
         socket.emit "watch:test:file", id
+
+      @listenTo @layout, "show", ->
+        @iframeRegion(iframe)
 
         ## start running the tests
         ## and load the iframe

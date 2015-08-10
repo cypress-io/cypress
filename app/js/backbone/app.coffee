@@ -37,7 +37,7 @@
 
     App.config.setEnv options.env
 
-    App.config.setUI App.getCurrentUI()
+    App.config.setUI("web")
 
     App.module("NavApp").start(App.navs)
 
