@@ -47,6 +47,8 @@ module.exports = (parentWindow, gui, loadApp) ->
         ## trick the argv into thinking we are updating!
         @App.start argv: ["path/to/app_path", "path/to/exec_path", "--updating", "--coords=1136x30"]
 
+        Promise.delay(200)
+
     it "passes appPath and execPath to install", ->
       expect(@install).to.be.calledWith "path/to/app_path", "path/to/exec_path"
 

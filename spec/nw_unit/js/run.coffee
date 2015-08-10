@@ -1,8 +1,9 @@
+_          = require("lodash")
+fs         = require("fs-extra")
 Promise    = require("bluebird")
 chai       = require("chai")
 chaiJquery = require("chai-jquery")
-fs         = require("fs-extra")
-_          = require("lodash")
+minimist   = require("minimist")
 
 moveWindow = (gui, window, left) ->
   screens = gui.Screen.screens
@@ -127,14 +128,15 @@ module.exports = (parentWindow, gui) ->
         chai.use (chai, utils) ->
           chaiJquery(chai, utils, ctx.$)
 
-    cliSpec    = require("../tests/cli_spec.coffee")
-    projecSpec = require("../tests/project_spec.coffee")
-    nwSpec     = require("../tests/nw_spec.coffee")
+    cliSpec     = require("../tests/cli_spec.coffee")
+    projectSpec = require("../tests/project_spec.coffee")
+    nwSpec      = require("../tests/nw_spec.coffee")
 
-    ## run crashy tests if --crashy is passed else regular spec
-    spec = switch
-      when "--project" in gui.App.argv then projecSpec
-      when "--cli"     in gui.App.argv then cliSpec
+    opts = minimist(gui.App.argv)
+
+    spec = switch opts["nw-spec"]
+      when "project" then projectSpec
+      when "cli"     then cliSpec
       else nwSpec
 
     ## pass our parent's contentWindow

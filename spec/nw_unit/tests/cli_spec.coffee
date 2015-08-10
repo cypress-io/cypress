@@ -42,13 +42,12 @@ module.exports = (parentWindow, gui, loadApp) ->
 
           # wait for our token to come back
           # because its async
-          Promise.delay(2000)
+          Promise.delay(200)
 
     afterEach ->
       Fixtures.remove()
       nock.cleanAll()
       nock.enableNetConnect()
-      Promise.delay(2000)
 
     context "--get-key", ->
       it "writes out key and exits", ->
@@ -177,8 +176,6 @@ module.exports = (parentWindow, gui, loadApp) ->
           .reply(200)
 
         fn = =>
-          console.log @Server().prototype.open
-
           @App.commands.setHandler "start:chromium:run", (src, options) ->
             expect(src).to.eq "http://localhost:8888/__/#/tests/__all?__ui=satellite"
             done()

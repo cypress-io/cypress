@@ -175,8 +175,51 @@ class Platform
 
     Promise.bind(@).then(@nwTests)
 
-  nwTests: ->
-    @log("#nwTests")
+  _nwTests: (options = {}) ->
+    _.defaults options,
+      project: false
+      cli: false
+
+    # new Promise (resolve, reject) =>
+    #   retries = 0
+
+    #   nwTests = =>
+    #     retries += 1
+
+    #     # tests = "../../node_modules/.bin/nw ./spec/nw_unit --headless"# --index=#{indexPath}"
+    #     args = ["../../node_modules/.bin/nw", "./spec/nw_unit", "--headless"]
+
+    #     switch
+    #       when options.project
+    #         args.push "--project"
+    #       when options.cli
+    #         args.push "--cli"
+
+    #     console.log args.join(" ")
+    #     spawn = child_process.exec args.join(" "), {cwd: @distDir(), stdio: "inherit"}, (err, stdout, stderr) ->
+
+
+    #     spawn.on "exit", (failures) ->
+    #       console.log "exit failures are", failures
+
+    #     spawn.on "close", (failures) ->
+    #       console.log "failures are", failures
+          # retry = (failures) ->
+          #   if retries is 5
+          #     if failures instanceof Error
+          #       err = failures
+          #     else
+          #       err = new Error("Mocha failed with '#{failures}' failures")
+          #     return reject(err)
+
+          #   console.log gutil.colors.red("'nwTests' failed, retrying")
+          #   nwTests()
+
+          # if failures is 0
+          #   console.log gutil.colors.green("'nwTests' passed with #{failures} failures")
+          #   resolve()
+          # else
+          #   retry(failures)
 
     new Promise (resolve, reject) =>
       retries = 0
@@ -185,6 +228,13 @@ class Platform
         retries += 1
 
         tests = "../../node_modules/.bin/nw ./spec/nw_unit --headless"# --index=#{indexPath}"
+
+        switch
+          when options.project
+            tests += " --nw-spec project"
+          when options.cli
+            tests += " --nw-spec cli"
+
         child_process.exec tests, {cwd: @distDir()}, (err, stdout, stderr) =>
         # child_process.spawn "../../node_modules/.bin/nw", ["./spec/nw_unit", "--headless"], {cwd: @distDir(), stdio: "inherit"}, (err, stdout, stderr) ->
           console.log "err", err
@@ -199,7 +249,7 @@ class Platform
                 err = new Error("Mocha failed with '#{failures}' failures")
               return reject(err)
 
-            console.log gutil.colors.red("'nwTests' failed, retrying")
+            console.log gutil.colors.red("'nwTests' failed, retrying"), gutil.colors.magenta(tests)
             nwTests()
 
           results = @distDir("spec/results.json")
@@ -216,6 +266,14 @@ class Platform
             .catch(retry)
 
       nwTests()
+
+  nwTests: ->
+    @log("#nwTests")
+
+    @_nwTests({cli: true})
+    .bind(@)
+    .then -> @_nwTests({project: true})
+    .then(@_nwTests)
 
   ## add tests around this method
   updatePackage: ->
