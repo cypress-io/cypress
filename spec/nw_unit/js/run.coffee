@@ -3,7 +3,6 @@ chai       = require("chai")
 chaiJquery = require("chai-jquery")
 fs         = require("fs-extra")
 _          = require("lodash")
-nwSpec     = require("../tests/nw_spec.coffee")
 
 moveWindow = (gui, window, left) ->
   screens = gui.Screen.screens
@@ -71,7 +70,13 @@ module.exports = (parentWindow, gui) ->
 
               App.start = (overrides = {}) ->
                 _.extend opts, overrides
-                start.call(App, opts)
+
+                ## force our start to be async
+                _.defer -> start.call(App, opts)
+
+                ## return our opts for
+                ## use in tests
+                return opts
 
         currentWindow.once "loaded", ->
           resolve(currentWindow)
@@ -122,14 +127,26 @@ module.exports = (parentWindow, gui) ->
         chai.use (chai, utils) ->
           chaiJquery(chai, utils, ctx.$)
 
+    cliSpec    = require("../tests/cli_spec.coffee")
+    projecSpec = require("../tests/project_spec.coffee")
+    nwSpec     = require("../tests/nw_spec.coffee")
+
+    ## run crashy tests if --crashy is passed else regular spec
+    spec = switch
+      when "--project" in gui.App.argv then projecSpec
+      when "--cli"     in gui.App.argv then cliSpec
+      else nwSpec
+
     ## pass our parent's contentWindow
     ## the nw gui and the loadApp function
-    nwSpec(parentWindow, gui, loadApp)
+    spec(parentWindow, gui, loadApp)
 
     ## tell mocha to run since we have now
     ## built our suite / test structure
     mocha.run (failures) ->
       if "--headless" in gui.App.argv
+        # process.stdout.write("exiting with #{failures} failures\n")
+        # process.exit(failures)
         fs.writeJson process.cwd() + "/spec/results.json", failures, ->
           gui.App.quit()
 
