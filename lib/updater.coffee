@@ -36,7 +36,7 @@ class Updater
   getArgs: ->
     c = @getClient()
 
-    _.compact [c.getAppPath(), c.getAppExec(), "--updating", @getCoords()].concat(@App.argv)
+    _.compact [c.getAppPath(), c.getAppExec(), "--updating", @getCoords()]
 
   patchAppPath: ->
     if process.env["CYPRESS_ENV"] isnt "production"

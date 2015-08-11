@@ -85,6 +85,11 @@ describe "Updater", ->
     it "compacts null values", ->
       expect(@updater.getArgs()).to.deep.eq ["foo", "bar", "--updating"]
 
+    it "doesnt concat App.argv", ->
+      @updater.App.argv = ["quux"]
+      @updater.coords = {x: 1000, y: 30}
+      expect(@updater.getArgs()).to.deep.eq ["foo", "bar", "--updating", "--coords=1000x30"]
+
   context "#run", ->
     beforeEach ->
       @updater = Updater({quit: @sandbox.spy()})
@@ -218,18 +223,25 @@ describe "Updater", ->
         @updater.runInstaller("/Users/bmann/newApp").then =>
           expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec(), "--updating"], {})
 
-      it "passes along additional App argv", ->
+      ## we no longer pass up additional App argv
+      ## other than from debug i'm not sure why we
+      ## would have ever wanted to do this. in fact
+      ## its caused a bug in parseArgs and its duplicated
+      ## every existing argument
+      it "does not pass along additional App argv", ->
         @updater.App.argv = ["--debug"]
         c = @updater.client
         @updater.runInstaller("/Users/bmann/newApp").then =>
-          expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec(), "--updating", "--debug"], {})
+          # expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec(), "--updating", "--debug"], {})
+          expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec(), "--updating"], {})
 
       it "passes along App.coords if they exist", ->
         @updater.setCoords {x: 600, y: 1200}
         @updater.App.argv = ["--debug"]
         c = @updater.client
         @updater.runInstaller("/Users/bmann/newApp").then =>
-          expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec(), "--updating", "--coords=600x1200", "--debug"], {})
+          # expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec(), "--updating", "--coords=600x1200", "--debug"], {})
+          expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec(), "--updating", "--coords=600x1200"], {})
 
     describe "#copyCyDataTo", ->
       beforeEach ->
