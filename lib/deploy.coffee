@@ -371,9 +371,10 @@ class Platform
       .then(@cleanupBc)
       .then(@nwBuilder)
       .then(@afterBuild)
-      .then(@codeSign)
       .then(@cleanupDist)
       .then(@runSmokeTest)
+      .then(@codeSign) ## codesign after running smoke tests due to changing .cy
+      .then(@verifyAppCanOpen)
 
   fixture: (cb) ->
     @dist()
@@ -403,25 +404,41 @@ class Platform
       runSequence ["client:build", "nw:build"], ["client:minify", "nw:minify"], (err) ->
         if err then reject(err) else resolve()
 
+  verifyAppCanOpen: ->
+    Promise.resolve()
+
   runSmokeTest: ->
     @log("#runSmokeTest")
 
     new Promise (resolve, reject) =>
       rand = "" + Math.random()
 
-      child_process.exec "#{@buildPathToApp()} --smoke-test --ping=#{rand}", {stdio: "inherit"}, (err, stdout, stderr) ->
+      child_process.exec "#{@buildPathToApp()} --smoke-test --ping=#{rand}", (err, stdout, stderr) ->
         stdout = stdout.replace(/\s/, "")
 
-        return reject(err) if err
+        throw err if err
 
         if stdout isnt rand
-          reject("Stdout: '#{stdout}' did not match the random number: '#{rand}'")
+          throw new Error("Stdout: '#{stdout}' did not match the random number: '#{rand}'")
         else
           resolve()
 
 class Osx64 extends Platform
   buildPathToApp: ->
     path.join buildDir, @getVersion(), @platform, "Cypress.app", "Contents", "MacOS", "Cypress"
+
+  verifyAppCanOpen: ->
+    @log("#verifyAppCanOpen")
+
+    pathToApp = path.join buildDir, @getVersion(), @platform, "Cypress.app"
+
+    new Promise (resolve) ->
+      sp = child_process.spawn "spctl", ["-a", pathToApp], {stdio: "inherit"}
+      sp.on "exit", (code) ->
+        if code is 0
+          resolve()
+        else
+          throw new Error("Verifying App via GateKeeper failed")
 
   afterBuild: ->
     @log("#afterBuild")
@@ -502,12 +519,12 @@ class Osx64 extends Platform
     appPath = path.join buildDir, @getVersion(), @platform, "Cypress.app"
 
     new Promise (resolve, reject) ->
-      child_process.exec "sh ./support/codesign.sh #{appPath}", (err, stdout, stderr) ->
-        return reject(err) if err
-
-        # console.log "stdout is", stdout
-
-        resolve()
+      sp = child_process.spawn "sh", ["./support/codesign.sh", appPath], {stdio: "inherit"}
+      sp.on "exit", (code) ->
+        if code is 0
+          resolve()
+        else
+          throw new Error("Code Signing failed.")
 
   deploy: ->
     @dist()
