@@ -24,7 +24,7 @@
       }
 
       chromium.once "document-end", ->
-        options.onReady(chromium.window)
+        options.onReady(chromium)
 
       windows.chromium = chromium
 

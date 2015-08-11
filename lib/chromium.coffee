@@ -4,14 +4,15 @@ SecretSauce  = require "./util/secret_sauce_loader"
 class Chromium
   util: util
 
-  constructor: (window) ->
+  constructor: (win) ->
     if not (@ instanceof Chromium)
-      return new Chromium(window)
+      return new Chromium(win)
 
-    if not window
+    if not win
       throw new Error("Instantiating lib/chromium requires a window!")
 
-    @window = window
+    @win    = win
+    @window = win.window
 
 SecretSauce.mixin("Chromium", Chromium)
 

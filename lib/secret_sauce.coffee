@@ -247,6 +247,16 @@ SecretSauce.Chromium =
       process.stdout.write(msg + "\n")
 
   _afterRun: (window) ->
+    # takeScreenshot = (cb) =>
+    #   process.stdout.write("Taking Screenshot\n")
+    #   @win.capturePage (img) ->
+    #     data = img.replace(/^data:image\/(png|jpg|jpeg);base64,/, "")
+    #     fs.writeFile "./ss.jpg", data, "base64", (err) ->
+    #       if err
+    #         process.stdout.write("err + #{JSON.stringify(err)}")
+    #       else
+    #         cb()
+
     window.$Cypress.afterRun = (results) ->
       # process.stdout.write("Results are:\n")
       # process.stdout.write JSON.stringify(results)
@@ -255,6 +265,7 @@ SecretSauce.Chromium =
 
       failures = _.where(results, {state: "failed"}).length
 
+      # takeScreenshot ->
       process.exit(failures)
 
 SecretSauce.Keys =
