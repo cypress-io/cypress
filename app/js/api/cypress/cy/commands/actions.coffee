@@ -472,16 +472,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           return null
 
         findElByCoordinates = ($el) =>
-          if options.force isnt true
-            try
-              @ensureVisibility $el, options.command
-            catch err
-              retry = ->
-                findElByCoordinates($el)
-
-              options.error = err
-              return @_retry(retry, options)
-
           coordsObj = (coords, $el) ->
             {
               coords: coords
@@ -548,6 +538,16 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             return coordsObj(coords, $elToClick)
 
           getCoords = (scrollIntoView = true) =>
+            if options.force isnt true
+              try
+                @ensureVisibility $el, options.command
+              catch err
+                retry = ->
+                  getCoords(scrollIntoView)
+
+                options.error = err
+                return @_retry(retry, options)
+
             ## use native scrollIntoView here so scrollable
             ## containers are automatically handled correctly
 
