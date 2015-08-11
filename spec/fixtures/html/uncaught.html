@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <title>Uncaught Tests</title>
+    <link rel="icon" href="data:;base64,=">
+    <script type="text/javascript" src="/lib/public/js/iframe.js"></script>
+    <script type="text/javascript">
+      // this should run
+      it("t1", function(){})
+
+      // these 3 should be skipped
+      describe("s1", function(){
+        beforeEach(function(){
+          cy.get(".does-not-exist", {timeout: 100})
+        })
+        it("t2", function(){})
+        it("t3", function(){})
+        it("t4", function(){})
+      })
+
+      // these 3 should run
+      describe("s2", function(){
+        beforeEach(function(){
+        })
+        it("t5", function(){})
+        it("t6", function(){})
+        it("t7", function(){})
+      })
+    </script>
+  </head>
+  <body>
+  </body>
+</html>

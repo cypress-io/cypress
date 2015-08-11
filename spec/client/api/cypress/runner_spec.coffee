@@ -728,21 +728,22 @@ describe "$Cypress.Runner API", ->
 
   context "#fail", ->
     beforeEach ->
-      @runner = $Cypress.Runner.runner(@Cypress, {uncaught: ->})
+      @runner = $Cypress.Runner.runner(@Cypress, {})
 
     it "calls runner.uncaught with err", ->
-      uncaught = @sandbox.stub @runner.runner, "uncaught"
+      runnable = {callback: ->}
+      callback = @sandbox.stub runnable, "callback"
 
       err = new Error
-      @Cypress.trigger("fail", err, {})
+      @Cypress.trigger("fail", err, runnable)
 
-      expect(uncaught).to.be.calledWith(err)
+      expect(callback).to.be.calledWith(err)
 
     it "calls afterEachFailed if runnable state is passed", ->
       afterEachFailed = @sandbox.spy @runner, "afterEachFailed"
 
       err = new Error
-      runnable = {state: "passed"}
+      runnable = {state: "passed", callback: ->}
       @Cypress.trigger "fail", err, runnable
 
       expect(afterEachFailed).to.be.calledWith runnable, err
@@ -751,7 +752,7 @@ describe "$Cypress.Runner API", ->
       afterEachFailed = @sandbox.spy @runner, "afterEachFailed"
 
       err = new Error
-      @Cypress.trigger "fail", err, {}
+      @Cypress.trigger "fail", err, {callback: ->}
 
       expect(afterEachFailed).not.to.be.called
 

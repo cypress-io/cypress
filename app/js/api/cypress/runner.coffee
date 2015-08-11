@@ -14,7 +14,7 @@ $Cypress.Runner = do ($Cypress, _) ->
       ## to update the runnable to failed status
       @afterEachFailed(runnable, err) if runnable.state is "passed"
 
-      @runner.uncaught(err)
+      runnable.callback(err)
 
     initialize: ->
       ## hold onto the runnables for faster lookup later
