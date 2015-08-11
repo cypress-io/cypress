@@ -18,8 +18,8 @@
         show: !options.headless
         frame: !options.headless
         position: "center"
-        width: 1024
-        width: 768
+        width: 1280
+        height: 720
         title: "Running Tests"
       }
 
