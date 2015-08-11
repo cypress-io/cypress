@@ -294,20 +294,23 @@ module.exports = (parentWindow, gui, loadApp) ->
       it "calls Chromium#override which extends window", (done) ->
         fn = =>
           win = {
-            console: {}
-            $Cypress: {}
-            Mocha: {
-              process: {}
+            window: {
+              console: {}
+              $Cypress: {}
+              Mocha: {
+                process: {}
+              }
             }
           }
 
           @App.commands.setHandler "start:chromium:run", (src, options) =>
             options.onReady(win)
 
-            expect(win.require).to.be.ok
-            expect(win.Mocha.process).not.to.be.empty
-            expect(win.$Cypress.reporter).to.be.ok
-            expect(win.console.log).to.be.a("function")
+            expect(win.window.require).to.be.ok
+            expect(win.window.Mocha.process).not.to.be.empty
+            expect(win.window.$Cypress.reporter).to.be.ok
+            expect(win.window.$Cypress.isHeadless).to.be.true
+            expect(win.window.console.log).to.be.a("function")
 
             done()
 
