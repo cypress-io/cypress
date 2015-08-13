@@ -93,6 +93,10 @@
         ## add the test to the container collection of runnables
         @addRunnable(test, "test", testViewQueue)
 
+      @listenTo runner, "test:start", (test) ->
+        runnable = container.get(test.id)
+        runnable.activate() if runnable
+
       @listenTo runner, "test:end", (test) ->
         ## find the client runnable model by the test's ide
         runnable = container.get(test.id)

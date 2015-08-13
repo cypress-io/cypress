@@ -16,6 +16,9 @@
 
       new Backbone.Chooser(@)
 
+    activate: ->
+      @set "state", "active"
+
     ## toggles open true|false
     toggleOpen: ->
       @set "open", !@get("open")

@@ -157,13 +157,9 @@
       }
 
       &.active {
-        background-color: #f7f8f9;
-        // box-shadow: 0 1px 3px #555 inset;
-
-        .runnables .runnable-wrapper {
-          background-color: #f7f8f9;
-          border-left: 1px solid transparent;
-          // box-shadow: 0 1px 3px #555 inset;
+        .test-state i {
+          @extend .#{$fa-css-prefix}-refresh;
+          @extend .#{$fa-css-prefix}-spin;
         }
       }
 

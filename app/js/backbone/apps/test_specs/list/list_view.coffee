@@ -96,7 +96,6 @@
       "get:layout:view" : "getLayoutView"
       "change:title"    : "render"
       "change:state"    : "stateChanged"
-      "change:chosen"   : "chosenChanged"
       "change:open"     : "openChanged"
       "change:error"    : "errorChanged"
 
@@ -131,11 +130,8 @@
     getLayoutView: (fn) ->
       fn(@)
 
-    chosenChanged: (model, value, options) ->
-      @$el.toggleClass "active", value
-
     stateChanged: (model, value, options) ->
-      @$el.removeClass("processing pending failed passed").addClass(value)
+      @$el.removeClass("active processing pending failed passed").addClass(value)
       @applyIndent(value)
 
     openChanged: (model, value, options) ->
