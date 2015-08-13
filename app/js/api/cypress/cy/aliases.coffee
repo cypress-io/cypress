@@ -45,6 +45,16 @@ do ($Cypress, _) ->
       command ?= @prop("current").name
       @throwErr "cy.#{command}() could not find a registered alias for: '#{@_aliasDisplayName(name)}'. Available aliases are: '#{availableAliases.join(", ")}'."
 
+    _forceLoggingOptions: (args) ->
+      ## if the obj has options and
+      ## log is false, set it to true
+      for arg, i in args by -1
+        if _.isObject(arg) and arg.log is false
+          opts = _.clone(arg)
+          opts.log = true
+          args[i] = opts
+          return
+
     ## recursively inserts previous objects
     ## up until it finds a parent command
     _replayFrom: (current, memo = []) ->
@@ -54,6 +64,7 @@ do ($Cypress, _) ->
 
       insert = =>
         _.each memo, (obj) =>
+          @_forceLoggingOptions(obj.args)
           obj.chainerId = chainerId
           @_insert(obj)
 
