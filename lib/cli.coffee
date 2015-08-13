@@ -33,8 +33,8 @@ program
     require("./commands/run")(project, parseOpts(opts))
 
 program
-  .command("ci <key>")
-  .usage("<key> [options]")
+  .command("ci [key]")
+  .usage("[key] [options]")
   .description("Runs Cypress in CI Mode")
   .option("-r, --reporter <reporter>", "runs a specific mocha reporter. pass a path to use a custom reporter. defaults to 'spec'")
   .action (key, opts) ->
