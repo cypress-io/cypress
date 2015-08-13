@@ -112,7 +112,7 @@
 
     reset: (options = {}) ->
       @resetRunnable(options)
-      @get("children").invoke("reset")
+      @get("children").invoke("reset", options)
 
     anyCommandsFailed: ->
       @get("hooks").anyFailed()
@@ -125,14 +125,26 @@
 
       ## make sure we collapse up again
       ## if we are open!
-      @collapse() if @get("open")
+      if @get("open")
+        @collapse()
+
+      ## force the hooks to reset without
+      ## silencing them so they are immediately
+      ## removed else we will have this weird
+      ## collapse / open bug which shows the
+      ## old commands
+      ## additionally we have optimized our
+      ## controller not to reinsert view instances
+      ## on tests, so we can just reset the collections
+      ## which will in turn clear out the old views
+      ## without worrying about replacing view instances
+      if @is("test")
+        _.each ["agents", "routes", "hooks"], (key) =>
+          @get(key).reset([])
 
       ## reset these specific attributes
       _.each ["state", "duration", "error", "hook"], (key) =>
         @unset key
-
-      ## remove the models within our commands collection
-      @get("hooks").reset([], options)
 
       ## merge in the defaults unless we already have them set
       defaults = _(@).result "defaults"

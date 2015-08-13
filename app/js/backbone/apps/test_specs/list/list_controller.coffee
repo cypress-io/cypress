@@ -137,9 +137,6 @@
 
       @createRunnableListeners(runnable)
 
-      # if type is "suite"
-      #   @insertChildViews(runnable)
-      # else
       testViewQueue.push(runnable)
 
     addRunnableToQueue: (queue, test) ->
@@ -174,6 +171,12 @@
         @show contentView, region: layout.contentRegion
 
         if model.is("test")
+          ## if we've refreshed a test without hard refreshing
+          ## the browser and we already have view instances then
+          ## dont reinsert them. we just reset their collections
+          ## which achieves the same results
+          return if layout.commandsRegion.hasView()
+
           App.execute "list:test:agents", model, layout.agentsRegion
 
           App.execute "list:test:routes", model, layout.routesRegion
