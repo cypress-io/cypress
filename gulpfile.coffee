@@ -224,7 +224,8 @@ gulp.task "client",        ["client:build", "client:watch"]
 gulp.task "nw",            ["nw:build", "nw:watch"]
 
 gulp.task "client:minify", ->
-  minify("lib/public/js/!(cypress).js", "lib/public/js")
+  ## dont minify cypress or sinon
+  minify("lib/public/js/!(cypress|sinon).js", "lib/public/js")
 
 gulp.task "nw:minify", ->
   minify("nw/public/js/*.js", "nw/public/js")
