@@ -1,5 +1,5 @@
 _             = require("lodash")
-fs            = require("fs")
+fs            = require("fs-extra")
 chalk         = require("chalk")
 path          = require("path")
 request       = require("request")
@@ -10,6 +10,8 @@ yauzl         = require("yauzl")
 Decompress    = require("decompress")
 Promise       = require("bluebird")
 utils         = require("../utils")
+
+fs = Promise.promisifyAll(fs)
 
 url = "http://download.cypress.io/latest"
 
@@ -37,9 +39,9 @@ class Install
       .bind(@)
       .catch(@downloadErr)
       .then(@unzip)
-      # .catch (err) ->
-        # could not unzip
-      .then(@finish)
+      .catch(@unzipErr)
+      .then ->
+        @finish(options)
 
   downloadErr: (err) ->
     console.log("")
@@ -52,6 +54,15 @@ class Install
       console.log("The server returned:", chalk.red(msg))
     else
       console.log(err.toString())
+    console.log("")
+    process.exit(1)
+
+  unzipErr: (err) ->
+    console.log("")
+    console.log(chalk.bgRed.white(" -Error- "))
+    console.log(chalk.red.underline("The Cypress App could not be unzipped."))
+    console.log("")
+    console.log(chalk.red(err.stack))
     console.log("")
     process.exit(1)
 
@@ -116,8 +127,6 @@ class Install
   unzip: (options) ->
     new Promise (resolve, reject) ->
 
-      resolve = _.partial(resolve, options)
-
       ascii = [
         chalk.white("  -")
         chalk.blue("Unzipping Cypress  ")
@@ -145,13 +154,18 @@ class Install
             cb(null, file)
           .run(resolve)
 
-  finish: (options) ->
-    ascii = [
-      chalk.white("  -")
-      chalk.blue("Finished Installing")
-      chalk.green(utils.getPathToUserExecutable())
-    ]
+  cleanupZip: (options) ->
+    fs.removeAsync(options.zipDestination)
 
-    console.log ascii.join(" ")
+  finish: (options) ->
+    @cleanupZip(options).then ->
+
+      ascii = [
+        chalk.white("  -")
+        chalk.blue("Finished Installing")
+        chalk.green(utils.getPathToUserExecutable())
+      ]
+
+      console.log ascii.join(" ")
 
 module.exports = Install
