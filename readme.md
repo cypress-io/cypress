@@ -1,4 +1,4 @@
-## Cypress CLI
+## Cypress CLI [![Circle CI](https://circleci.com/gh/cypress-io/cypress-cli.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress-cli)
 
 This is the CLI for [https://github.com/cypress-io/cypress](https://github.com/cypress-io/cypress).
 
@@ -47,3 +47,12 @@ This will make the `cypress` command globally available.
 ##### cypress add:project
 
 ##### cypress remove:project
+
+## Contributing
+
+```bash
+ npm test                                             ## run tests
+ npm run test-debug                                   ## run tests w/node inspector
+ npm version [major | minor | patch] -m "release %s"  ## update version
+ npm release                                          ## release to npm
+```
