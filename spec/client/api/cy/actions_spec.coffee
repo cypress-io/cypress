@@ -2009,6 +2009,10 @@ describe "$Cypress.Cy Actions Commands", ->
           coords = @cy.getCoordinates($input)
           expect(@log.get("coords")).to.deep.eq coords
 
+      it "ends command when checkbox is already checked", ->
+        @cy.get("[name=colors][value=blue]").check().check().then ->
+          expect(@log.get("state")).eq("success")
+
       it "#onConsole", ->
         @cy.get("[name=colors][value=blue]").check().then ($input) ->
           coords = @cy.getCoordinates($input)
@@ -2206,6 +2210,10 @@ describe "$Cypress.Cy Actions Commands", ->
       it "passes in $el", ->
         @cy.get("[name=colors][value=blue]").uncheck().then ($input) ->
           expect(@log.get("$el").get(0)).to.eq $input.get(0)
+
+      it "ends command when checkbox is already unchecked", ->
+        @cy.get("[name=colors][value=blue]").invoke("prop", "checked", false).uncheck().then ->
+          expect(@log.get("state")).eq("success")
 
       it "#onConsole", ->
         @cy.get("[name=colors][value=blue]").uncheck().then ($input) ->

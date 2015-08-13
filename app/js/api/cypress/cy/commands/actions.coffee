@@ -1161,6 +1161,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           ## still ensure visibility even if the command is noop
           @ensureVisibility $el, command
           onConsole.Note = "This checkbox was already #{type}ed. No operation took place."
+          if command
+            command.snapshot().end()
           return
         else
           ## set the coords only if we are actually
