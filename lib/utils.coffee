@@ -131,7 +131,6 @@ module.exports = {
 
     spawn = =>
       @verifyCypress().then (pathToCypress) =>
-        console.log "pathToCypress", pathToCypress
         if options.verify
           console.log(chalk.green("Cypress application is valid and should be okay to run:"), chalk.blue(@getPathToUserExecutable()))
           process.exit()
