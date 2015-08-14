@@ -74,11 +74,14 @@ module.exports = {
         else
           resolve()
 
-  _fileExistsAtPath: (pathToCypress) ->
+  _fileExistsAtPath: (pathToCypress, options = {}) ->
     fs.statAsync(pathToCypress)
       .bind(@)
       .return(pathToCypress)
       .catch (err) =>
+        ## allow us to bubble up the error if catch is false
+        return throw(err) if options.catch is false
+
         console.log("")
         console.log(chalk.bgRed.white(" -Error- "))
         console.log(chalk.red.underline("The Cypress App could not be found."))
@@ -92,13 +95,16 @@ module.exports = {
         console.log("")
         process.exit(1)
 
-  verifyCypress: (pathToCypress) ->
+  verifyCypress: (pathToCypress, options = {}) ->
+    _.defaults options,
+      catch: true
+
     ## this needs to change to become async and
     ## to do a lookup for the cached cypress path
     pathToCypress ?= @getPathToExecutable()
 
     ## verify that there is a file at this path
-    @_fileExistsAtPath(pathToCypress)
+    @_fileExistsAtPath(pathToCypress, options)
 
       ## now verify that we can spawn cypress successfully
       .then(@_cypressSmokeTest)
