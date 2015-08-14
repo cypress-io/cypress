@@ -14,10 +14,11 @@ describe "utils", ->
 
   context "#spawn", ->
     beforeEach ->
-      @verifyCypress = @sandbox.stub(utils, "verifyCypress").resolves()
       @startAsync    = @sandbox.stub(utils.xvfb, "startAsync").resolves()
       @stopAsync     = @sandbox.stub(utils.xvfb, "stopAsync").resolves()
 
+      @sandbox.stub(utils, "_fileExistsAtPath").resolves()
+      @sandbox.stub(utils, "_cypressSmokeTest").resolves()
       @sandbox.stub(utils, "getPathToExecutable").returns("/path/to/cypress")
 
     it "passes args + options to spawn", ->

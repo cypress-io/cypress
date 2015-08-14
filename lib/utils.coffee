@@ -93,11 +93,16 @@ module.exports = {
         process.exit(1)
 
   verifyCypress: (pathToCypress) ->
+    ## this needs to change to become async and
+    ## to do a lookup for the cached cypress path
+    pathToCypress ?= @getPathToExecutable()
+
     ## verify that there is a file at this path
     @_fileExistsAtPath(pathToCypress)
 
       ## now verify that we can spawn cypress successfully
       .then(@_cypressSmokeTest)
+      .return(pathToCypress)
 
   startXvfb: ->
     xvfb.startAsync().catch (err) ->
@@ -111,10 +116,6 @@ module.exports = {
     xvfb.stopAsync()
 
   spawn: (args, options = {}) ->
-    ## this needs to change to become async and
-    ## to do a lookup for the cached cypress path
-    cypress = @getPathToExecutable()
-
     args = [].concat(args)
 
     _.defaults options,
@@ -123,12 +124,13 @@ module.exports = {
       stdio: ["ignore", process.stdout, "ignore"]
 
     spawn = =>
-      @verifyCypress(cypress).then =>
+      @verifyCypress().then (pathToCypress) =>
+        console.log "pathToCypress", pathToCypress
         if options.verify
           console.log(chalk.green("Cypress application is valid and should be okay to run:"), chalk.blue(@getPathToUserExecutable()))
           process.exit()
 
-        sp = cp.spawn cypress, args, options
+        sp = cp.spawn pathToCypress, args, options
         if options.xvfb
           ## make sure we close down xvfb
           ## when our spawned process exits
