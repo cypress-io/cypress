@@ -86,3 +86,7 @@ describe "Install", ->
       @install.initialize(@options).then =>
         expect(@console).to.be.calledWithMatch("Finished Installing")
         expect(@console).to.be.calledWithMatch("/foo/bar")
+
+    it "invokes options.after", (done) ->
+      @options.after = -> done()
+      @install.initialize(@options)

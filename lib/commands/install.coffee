@@ -29,6 +29,7 @@ class Install
       throttle:       100
       zipDestination: "./cypress.zip"
       destination:    utils.getDefaultAppFolder()
+      after:          ->
 
     return if not options.initialize
 
@@ -167,5 +168,7 @@ class Install
       ]
 
       console.log ascii.join(" ")
+
+      options.after(options)
 
 module.exports = Install
