@@ -1,6 +1,6 @@
-path   = require("path")
-utils  = require("../../lib/utils")
-Ci     = require("../../lib/commands/ci")
+path    = require("path")
+utils   = require("../../lib/utils")
+Ci      = require("../../lib/commands/ci")
 
 describe "Ci", ->
   context "cli interface", ->
@@ -25,36 +25,74 @@ describe "Ci", ->
       @parse("ci --reporter matrix")
       expect(@spy).to.be.calledWith(undefined, {reporter: "matrix"})
 
-  context "#ci", ->
+  context "#constructor", ->
     beforeEach ->
-      @spawn = @sandbox.stub(utils, "spawn")
-      @setup = (key, options = {}) =>
-        @ci = Ci(key, options)
+      @spawn  = @sandbox.stub(utils, "spawn")
+      @verify = @sandbox.stub(utils, "verifyCypress").resolves()
+
+      @setup = (key, options = {}) ->
+        options.initialize = false
+        Ci(key, options).initialize(options)
 
     afterEach ->
       delete process.env.CYPRESS_API_KEY
 
     it "spawns --run-project with --ci and --key and xvfb", ->
-      @setup("abc12345")
-      pathToProject = path.resolve(process.cwd(), ".")
-      expect(@spawn).to.be.calledWith(["--run-project", pathToProject, "--ci", "--key", "abc12345"], {xvfb: true})
+      @setup("abc12345").then =>
+        pathToProject = path.resolve(process.cwd(), ".")
+        expect(@spawn).to.be.calledWith(["--run-project", pathToProject, "--ci", "--key", "abc12345"], {xvfb: true})
 
     it "can pass a specific reporter", ->
-      @setup("foo", {reporter: "some/custom/reporter.js"})
-      pathToProject = path.resolve(process.cwd(), ".")
-      args = @spawn.getCall(0).args[0]
-      expect(args).to.include("--reporter", "some/custom/reporter.js")
+      @setup("foo", {reporter: "some/custom/reporter.js"}).then =>
+        pathToProject = path.resolve(process.cwd(), ".")
+        args = @spawn.getCall(0).args[0]
+        expect(args).to.include("--reporter", "some/custom/reporter.js")
 
     it "uses process.env.CYPRESS_API_KEY when no key was passed", ->
       process.env.CYPRESS_API_KEY = "987-654-321"
-      @setup()
-      args = @spawn.getCall(0).args[0]
-      expect(args).to.include("--key", "987-654-321")
+      @setup().then =>
+        args = @spawn.getCall(0).args[0]
+        expect(args).to.include("--key", "987-654-321")
 
     it "calls _noKeyErr when there isnt a key or env var", ->
       noKeyErr = @sandbox.stub(Ci.prototype, "_noKeyErr")
-      @setup()
-      expect(noKeyErr).to.be.calledOnce
+      @setup().then =>
+        expect(noKeyErr).to.be.calledOnce
+
+  context "#initialize", ->
+    beforeEach ->
+      @Ci = proxyquire("../lib/commands/ci", {
+        "./run":     @Run     = @sandbox.stub()
+        "./install": @Install = @sandbox.spy (opts) ->
+          opts.after(opts)
+      })
+
+      @verify = @sandbox.stub(utils,  "verifyCypress").resolves()
+      @log    = @sandbox.spy(console, "log")
+
+      @setup = (key, options = {}) =>
+        options.initialize = false
+        @Ci(key, options)
+
+    it "verifies cypress first", ->
+      ci = @setup("abc123")
+      ci.initialize().then =>
+        expect(@verify).to.be.calledOnce
+
+    it "installs cypress if verification failed", ->
+      @verify.rejects()
+
+      ci = @setup("abc123")
+      ci.initialize({key: "abc123"}).then =>
+        expect(@Install.getCall(0).args[0].after).to.be.a("function")
+        expect(@Run).to.be.calledWithMatch(null, {key: "abc123"})
+
+    it "logs out install message", ->
+      @verify.rejects()
+
+      ci = @setup("abc123")
+      ci.initialize().then =>
+        expect(@log).to.be.calledWithMatch("Cypress was not found:", "Installing a fresh copy.")
 
   context "#_noKeyErr", ->
     beforeEach ->

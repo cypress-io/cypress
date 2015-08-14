@@ -1,8 +1,10 @@
-_     = require("lodash")
-path  = require("path")
-os    = require("os")
-chalk = require("chalk")
-run   = require("./run")
+_       = require("lodash")
+path    = require("path")
+os      = require("os")
+chalk   = require("chalk")
+utils   = require("../utils")
+Run     = require("./run")
+Install = require("./install")
 
 class Ci
   constructor: (key, options = {}) ->
@@ -15,9 +17,13 @@ class Ci
 
     return @_noKeyErr(options) if not key
 
-    options.key = key
+    _.defaults options,
+      initialize: true
+      key:        key
 
-    @ci(options)
+    return if not options.initialize
+
+    @initialize(options)
 
   _noKeyErr: (options) ->
     console.log("")
@@ -33,7 +39,16 @@ class Ci
     console.log("Please provide us your project's secret key and then rerun.")
     process.exit(1)
 
-  ci: (options) ->
-    run null, _.pick(options, "reporter", "key")
+  initialize: (options) ->
+    run = ->
+      Run(null, options)
+
+    utils.verifyCypress(null, {catch: false})
+      .then(run)
+      .catch ->
+        console.log("Cypress was not found:", chalk.green("Installing a fresh copy."))
+        console.log("")
+
+        Install({after: run})
 
 module.exports = Ci
