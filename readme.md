@@ -54,5 +54,5 @@ This will make the `cypress` command globally available.
  npm test                                             ## run tests
  npm run test-debug                                   ## run tests w/node inspector
  npm version [major | minor | patch] -m "release %s"  ## update version
- npm release                                          ## release to npm
+ npm publish                                          ## publish to npm
 ```
