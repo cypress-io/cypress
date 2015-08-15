@@ -54,6 +54,7 @@ describe "Project Interface", ->
       })
 
     afterEach ->
+      delete process.env.CYPRESS_PROJECT_ID
       nock.cleanAll()
 
     it "POSTs for a projectId", ->
@@ -69,6 +70,17 @@ describe "Project Interface", ->
     it "returns the projectId", ->
       @project.createProjectId().then (id) ->
         expect(id).to.eq "abc-1234-foo-bar-baz"
+
+    it "can set the project id by CYPRESS_PROJECT_ID env", ->
+      process.env.CYPRESS_PROJECT_ID = "987-654-321-foo"
+      @project.createProjectId().then (id) ->
+        expect(id).to.eq "987-654-321-foo"
+
+    it "writes a specified project id to settings", ->
+      process.env.CYPRESS_PROJECT_ID = "987-654-321-foo"
+      @project.createProjectId().then (id) =>
+        Settings.read(@project.projectRoot).then (settings) ->
+          expect(settings).to.deep.eq {projectId: "987-654-321-foo"}
 
   context "#ensureProjectId", ->
     beforeEach ->

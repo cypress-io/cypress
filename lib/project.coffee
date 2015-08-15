@@ -31,16 +31,29 @@ class Project
   createProjectId: ->
     Log.info "Creating Project ID"
 
+    write = (id) =>
+      attrs = {projectId: id}
+      Log.info "Writing Project ID", _.clone(attrs)
+      Settings
+        .write(@projectRoot, attrs)
+        .get("projectId")
+
+    ## allow us to specify the exact key
+    ## we want via the CYPRESS_PROJECT_ID env.
+    ## this allows us to omit the cypress.json
+    ## file (like in example repos) yet still
+    ## use a correct id in the API
+    if id = process.env.CYPRESS_PROJECT_ID
+      return write(id)
+
     require("./cache").getUser().then (user = {}) =>
       Request.post({
         url: Routes.projects()
         headers: {"X-Session": user.session_token}
+        json: true
       })
-      .then (attrs) =>
-        attrs = {projectId: JSON.parse(attrs).uuid}
-        Log.info "Writing Project ID", _.clone(attrs)
-        Settings.write(@projectRoot, attrs)
-      .get("projectId")
+      .then (attrs) ->
+        write(attrs.uuid)
 
   getProjectId: ->
     Settings.read(@projectRoot)
