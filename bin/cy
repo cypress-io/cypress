@@ -5,6 +5,8 @@ require("coffee-script/register")
 var path    = require('path')
 var spawn   = require("child_process").spawn
 var open    = require("open")
+var minimist= require("minimist")
+var _       = require("lodash")
 
 // console.log("args are", process.argv)
 
@@ -13,24 +15,32 @@ var cyServer = path.join(__dirname, "..", "lib", "cypress.coffee");
 
 // need to add --debug here
 
+var options = minimist(process.argv.slice(2))
+
+console.log(options)
+
 var getArgs = function(){
   var args = ["--", process.argv[2], "verbose"]
 
-  if (process.argv[3] != "--no-ids")
+  if (options.ids !== false)
     args.push("id_generator")
 
   return args
 }
 
-var opts = {
-  debug: "--debug",
+var opts = {}
+
+if (options.debug !== false)
+  opts.debug = "--debug"
+
+_.extend(opts, {
   script: cyServer,
   watch: ["--watch", cyRoot],
   ignore: ["--ignore", "lib/public"],
   verbose: "--verbose",
   exts: ["-e", "coffee,js"],
   args: getArgs()
-}
+})
 
 var args = []
 
@@ -39,7 +49,7 @@ for (key in opts)
 
 spawn("nodemon", args, {stdio: "inherit"})
 
-if (process.argv.indexOf("--no-debug") === -1){
+if (options.debug !== false){
   spawn("node-inspector", [], {stdio: "inherit"})
 
   open("http://127.0.0.1:8080/debug?ws=127.0.0.1:8080&port=5858")
