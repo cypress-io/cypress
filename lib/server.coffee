@@ -98,7 +98,6 @@ class Server
     @app.use require("cookie-parser")()
     @app.use require("compression")()
     @app.use require("morgan")("dev") if options.morgan
-    @app.use require("body-parser").json()
 
     ## serve static file from public when route is /__cypress/static
     ## this is to namespace the static cypress files away from

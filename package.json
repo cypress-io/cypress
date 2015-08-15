@@ -39,6 +39,7 @@
   },
   "homepage": "https://github.com/cypress-io/cypress",
   "devDependencies": {
+    "body-parser": "1.12.4",
     "chai": "2.1.0",
     "chai-as-promised": "^4.2.0",
     "chai-jquery": "^2.0.0",
@@ -80,7 +81,6 @@
   },
   "dependencies": {
     "bluebird": "2.9.27",
-    "body-parser": "1.12.4",
     "browserify": "6.1.0",
     "chalk": "^1.1.0",
     "chmodr": "^0.1.0",
@@ -110,7 +110,7 @@
     "node-webkit-updater": "^0.2.4",
     "open": "0.0.5",
     "promise-semaphore": "0.2.3",
-    "request": "^2.55.0",
+    "request": "2.60.0",
     "request-promise": "0.3.3",
     "requirejs": "2.1.15",
     "sauce-connect-launcher": "0.9.3",

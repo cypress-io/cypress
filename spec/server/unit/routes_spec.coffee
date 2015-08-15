@@ -1386,4 +1386,16 @@ describe "Routes", ->
         # .expect "location", /dashboard/
         .end(done)
 
-    it "hands back 201 status codes"
+    it "hands back 201 status codes", (done) ->
+      nock(@baseUrl)
+        .post("/companies/validate", {
+          payload: {name: "Brian"}
+        })
+        .reply(201)
+
+      supertest(@app)
+        .post("/companies/validate")
+        .send({payload: {name: "Brian"}})
+        .set("Cookie", "__cypress.initial=false; __cypress.remoteHost=http://localhost:8000")
+        .expect(201)
+        .end(done)
