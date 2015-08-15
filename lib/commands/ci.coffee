@@ -13,7 +13,7 @@ class Ci
 
     ## if we dont have a key assume
     ## its in an env variable
-    key ?= process.env.CYPRESS_API_KEY
+    key ?= process.env.CYPRESS_CI_KEY
 
     return @_noKeyErr(options) if not key
 
@@ -32,7 +32,7 @@ class Ci
     console.log("")
     console.log("You did not pass a specific key to:", chalk.blue("cypress ci"))
     console.log("")
-    console.log("Since no key was passed, we checked for an environment\nvariable but none was found with the name:", chalk.blue("CYPRESS_API_KEY"))
+    console.log("Since no key was passed, we checked for an environment\nvariable but none was found with the name:", chalk.blue("CYPRESS_CI_KEY"))
     console.log("")
     console.log("You can receive your project's secret key by running\nthe terminal command:", chalk.blue("cypress get:key"))
     console.log("")

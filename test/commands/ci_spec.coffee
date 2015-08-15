@@ -35,7 +35,7 @@ describe "Ci", ->
         Ci(key, options).initialize(options)
 
     afterEach ->
-      delete process.env.CYPRESS_API_KEY
+      delete process.env.CYPRESS_CI_KEY
 
     it "spawns --run-project with --ci and --key and xvfb", ->
       @setup("abc12345").then =>
@@ -48,8 +48,8 @@ describe "Ci", ->
         args = @spawn.getCall(0).args[0]
         expect(args).to.include("--reporter", "some/custom/reporter.js")
 
-    it "uses process.env.CYPRESS_API_KEY when no key was passed", ->
-      process.env.CYPRESS_API_KEY = "987-654-321"
+    it "uses process.env.CYPRESS_CI_KEY when no key was passed", ->
+      process.env.CYPRESS_CI_KEY = "987-654-321"
       @setup().then =>
         args = @spawn.getCall(0).args[0]
         expect(args).to.include("--key", "987-654-321")
@@ -110,4 +110,4 @@ describe "Ci", ->
       expect(@log).to.be.calledWith("Please provide us your project's secret key and then rerun.")
 
     it "logs the env key we checked for", ->
-      expect(@log).to.be.calledWithMatch(/\w+/, "CYPRESS_API_KEY")
+      expect(@log).to.be.calledWithMatch(/\w+/, "CYPRESS_CI_KEY")
