@@ -34,3 +34,8 @@ describe "parseArgs", ->
         x: "800"
         y: "600"
       })
+
+  context "--port", ->
+    it "converts to Number", ->
+      @setup("--port", "8080")
+      expect(@options.port).to.eq(8080)

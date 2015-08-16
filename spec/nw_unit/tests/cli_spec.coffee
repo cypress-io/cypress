@@ -28,11 +28,12 @@ module.exports = (parentWindow, gui, loadApp) ->
             @write      = @sandbox.stub process.stdout, "write"
             @trigger    = @sandbox.spy  @App.vent, "trigger"
             @runProject = @sandbox.spy  @App.config, "runProject"
+            @open       = @sandbox.spy  @Server().prototype, "open"
 
             @App.commands.setHandler("start:chromium:run", ->)
 
             ## prevent the actual project from literally booting
-            @sandbox.stub @Server().prototype, "open", ->
+            @sandbox.stub @Server().prototype, "_open", ->
               ## resolve with our own config object
               Promise.resolve(@config)
 
@@ -317,3 +318,21 @@ module.exports = (parentWindow, gui, loadApp) ->
         cache.setUser({name: "Brian", session_token: "abc123"}).then =>
           cache.addProject(@todos).then =>
             @argsAre("--run-project", @todos, fn)
+
+    context "--run-project --port", ->
+      beforeEach ->
+        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+          cache.addProject(@todos).then =>
+            @argsAre("--port", "7878", "--run-project", @todos)
+
+      it "can change default port", ->
+        expect(@runProject).to.be.calledWithMatch(@todos, {
+          port: 7878
+        })
+
+        expect(@open).to.be.calledWithMatch({
+          port: 7878
+        })
+
+      it "displays client port", ->
+        expect(@$("#project").find("a")).to.contain("http://localhost:7878")

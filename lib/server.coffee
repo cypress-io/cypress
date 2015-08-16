@@ -69,14 +69,9 @@ class Server
       env: process.env["CYPRESS_ENV"]
       namespace: "__cypress"
 
-    rootUrl = "http://localhost:" + obj.port
+    @setUrls(obj)
 
-    _.defaults obj,
-      clientUrlDisplay: rootUrl
-      clientUrl: rootUrl + obj.clientRoute
-
-    _.defaults obj,
-      idGeneratorUrl: rootUrl + "/__cypress/id_generator"
+    return obj
 
   ## go through this method for all tests because
   ## it handles setting the defaults up automatically
@@ -86,9 +81,27 @@ class Server
 
     @app.set "cypress", obj
 
+  setUrls: (obj) ->
+    rootUrl = "http://localhost:" + obj.port
+
+    _.extend obj,
+      clientUrlDisplay: rootUrl
+      clientUrl: rootUrl + obj.clientRoute
+
+    _.extend obj,
+      idGeneratorUrl: rootUrl + "/__cypress/id_generator"
+
   configureApplication: (options = {}) ->
     _.defaults options,
       morgan: true
+
+    ## if we have a port passed through
+    ## our options then override what
+    ## is set on our config and update
+    ## our urls (which reference the port)
+    if p = options.port
+      @config.port = p
+      @setUrls(@config)
 
     ## set the cypress config from the cypress.json file
     @app.set "port",        @config.port
@@ -121,17 +134,19 @@ class Server
     e
 
   open: (options = {}) ->
-    new Promise (resolve, reject) =>
-      ## bail if we had a problem reading from cypress.json
-      return reject(@config) if @config.jsonError
+    return Promise.reject(@config) if @config.jsonError
 
+    Promise.try =>
+      @configureApplication(options)
+      @_open(options)
+
+  _open: (options) ->
+    new Promise (resolve, reject) =>
       @server    = http.createServer(@app)
       @io        = require("socket.io")(@server, {path: "/__socket.io"})
       @project   = Project(@config.projectRoot)
 
       allowDestroy(@server)
-
-      @configureApplication(options)
 
       ## refactor this class
       socket = Socket(@io, @app)

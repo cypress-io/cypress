@@ -95,6 +95,25 @@ describe "Server Interface", ->
       @server.open().bind(@).then ->
         expect(Project::getDetails).to.be.calledWith("a-long-guid-123")
 
+    context "port", ->
+      it "can override default port", ->
+        @server.open({port: 8080}).then =>
+          expect(@server.config.port).to.eq 8080
+          expect(@server.app.get("cypress").port).to.eq 8080
+          expect(@server.app.get("port")).to.eq 8080
+
+      it "updates clientUrl", ->
+        @server.open({port: 8080}).then =>
+          expect(@server.config.clientUrl).to.eq "http://localhost:8080/__/"
+
+      it "updates clientUrlDisplay", ->
+        @server.open({port: 8080}).then =>
+          expect(@server.config.clientUrlDisplay).to.eq "http://localhost:8080"
+
+      it "upates idGeneratorUrl", ->
+        @server.open({port: 8080}).then =>
+          expect(@server.config.idGeneratorUrl).to.eq "http://localhost:8080/__cypress/id_generator"
+
     context "errors", ->
       it "rejects when parsing cypress.json fails", (done) ->
         Settings.readSync.restore()
