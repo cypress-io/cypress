@@ -27,12 +27,15 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
     process.exit()
 
   displayError = (err) ->
-    if err.projectNotFound
-      writeErr("Sorry, could not retreive project key because no project was found:", chalk.blue(err.projectPath))
-    if err.specNotFound
-      writeErr("Sorry, could not run this specific spec because it was not found:", chalk.blue(err.specPath))
-    else
-      writeErr("An error occured receiving token.")
+    switch
+      when err.projectNotFound
+        writeErr("Sorry, could not retreive project key because no project was found:", chalk.blue(err.projectPath))
+      when err.specNotFound
+        writeErr("Sorry, could not run this specific spec because it was not found:", chalk.blue(err.specPath))
+      when err.portInUse
+        writeErr("Sorry, could not run this project because this port is currently in use:", chalk.blue(err.port), chalk.yellow("\nSpecify a different port with the '--port <port>' argument or shut down the other process using this port."))
+      else
+        writeErr("An error occured receiving token.")
 
   ensureCiEnv = (user) ->
     return true if ensureNoSessionToken(user) and ensureLinuxEnv()
@@ -132,12 +135,13 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
 
     run: (options) ->
       ## silence all console messages
-      @App.silenceConsole()
+      # @App.silenceConsole()
 
       @App.vent.trigger "start:projects:app", {
         morgan:      false
         projectPath: options.projectPath
         port:        options.port
+        onError:     displayError
         onProjectStart: (config) =>
           @getSpec(config, options)
             .then (src) =>

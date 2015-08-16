@@ -33,7 +33,7 @@ module.exports = (parentWindow, gui, loadApp) ->
             @App.commands.setHandler("start:chromium:run", ->)
 
             ## prevent the actual project from literally booting
-            @sandbox.stub @Server().prototype, "_open", ->
+            @_open = @sandbox.stub @Server().prototype, "_open", ->
               ## resolve with our own config object
               Promise.resolve(@config)
 
@@ -321,18 +321,35 @@ module.exports = (parentWindow, gui, loadApp) ->
 
     context "--run-project --port", ->
       beforeEach ->
-        cache.setUser({name: "Brian", session_token: "abc123"}).then =>
-          cache.addProject(@todos).then =>
-            @argsAre("--port", "7878", "--run-project", @todos)
+        @setup = (fn = ->) =>
+          cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+            cache.addProject(@todos).then =>
+              @argsAre("--port", "7878", "--run-project", @todos, fn).then ->
+                Promise.delay(100)
 
       it "can change default port", ->
-        expect(@runProject).to.be.calledWithMatch(@todos, {
-          port: 7878
-        })
+        @setup().then =>
+          expect(@runProject).to.be.calledWithMatch(@todos, {
+            port: 7878
+          })
 
-        expect(@open).to.be.calledWithMatch({
-          port: 7878
-        })
+          expect(@open).to.be.calledWithMatch({
+            port: 7878
+          })
 
       it "displays client port", ->
-        expect(@$("#project").find("a")).to.contain("http://localhost:7878")
+        @setup().then =>
+          expect(@$("#project").find("a")).to.contain("http://localhost:7878")
+
+      it "handles port in use errors", ->
+        fn = =>
+          @_open.restore()
+          err = @Server().prototype.portInUseErr(7878)
+          @sandbox.stub(@Server().prototype, "_open").rejects(err)
+
+        @setup(fn).then =>
+          expect(@write).to.be.calledWithMatch("port is currently in use", 7878)
+          expect(@exit).to.be.calledWith(1)
+
+
+

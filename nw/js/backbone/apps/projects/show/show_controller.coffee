@@ -17,6 +17,7 @@
       @show projectView
 
       _.defaults options,
+        onError: ->
         onProjectStart: ->
 
       _.defer => @runProject(project, options)
@@ -32,6 +33,7 @@
 
         .catch (err) ->
           project.setError(err)
+          options.onError(err)
 
     getProjectView: (project) ->
       new Show.Project

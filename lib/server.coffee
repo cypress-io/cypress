@@ -130,6 +130,7 @@ class Server
 
   portInUseErr: (port) ->
     e = new Error("Port: '#{port}' is already in use.")
+    e.port = port
     e.portInUse = true
     e
 
