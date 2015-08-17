@@ -25,6 +25,12 @@ describe "Ci", ->
       @parse("ci --reporter matrix")
       expect(@spy).to.be.calledWith(undefined, {reporter: "matrix"})
 
+    it "calls with specific port", ->
+      ## there is a bug where previous args are leaking
+      ## into the program and building up state
+      @parse("ci foobar --port 2121")
+      expect(@spy).to.be.calledWithMatch("foobar", {port: "2121"})
+
   context "#constructor", ->
     beforeEach ->
       @spawn  = @sandbox.stub(utils, "spawn")
@@ -47,6 +53,12 @@ describe "Ci", ->
         pathToProject = path.resolve(process.cwd(), ".")
         args = @spawn.getCall(0).args[0]
         expect(args).to.include("--reporter", "some/custom/reporter.js")
+
+    it "can pass a specific port", ->
+      @setup("foo", {port: "2500"}).then =>
+        pathToProject = path.resolve(process.cwd(), ".")
+        args = @spawn.getCall(0).args[0]
+        expect(args).to.include("--port", "2500")
 
     it "uses process.env.CYPRESS_CI_KEY when no key was passed", ->
       process.env.CYPRESS_CI_KEY = "987-654-321"

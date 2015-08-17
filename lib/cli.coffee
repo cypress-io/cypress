@@ -8,7 +8,7 @@ pkg       = require("../package.json")
 updater({pkg: pkg, updateCheckInterval: human("one hour")}).notify()
 
 parseOpts = (opts) ->
-  _.pick(opts, "spec", "reporter", "path", "destination")
+  _.pick(opts, "spec", "reporter", "path", "destination", "port")
 
 ## instantiate a new program for
 ## easier testability
@@ -29,6 +29,7 @@ program
   .description("Runs Cypress Tests Headlessly")
   .option("-s, --spec <spec>",         "runs a specific spec file. defaults to 'all'")
   .option("-r, --reporter <reporter>", "runs a specific mocha reporter. pass a path to use a custom reporter. defaults to 'spec'")
+  .option("-p, --port <port>",         "runs cypress on a specific port. overrides any value in cypress.json. defaults to '2020'")
   .action (project, opts) ->
     require("./commands/run")(project, parseOpts(opts))
 
@@ -37,6 +38,7 @@ program
   .usage("[key] [options]")
   .description("Runs Cypress in CI Mode")
   .option("-r, --reporter <reporter>", "runs a specific mocha reporter. pass a path to use a custom reporter. defaults to 'spec'")
+  .option("-p, --port <port>",         "runs cypress on a specific port. overrides any value in cypress.json. defaults to '2020'")
   .action (key, opts) ->
     require("./commands/ci")(key, parseOpts(opts))
 

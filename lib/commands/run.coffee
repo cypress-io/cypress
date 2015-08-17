@@ -19,6 +19,9 @@ class Run
     opts = {}
     args = ["--run-project", options.project]
 
+    if options.port
+      args.push("--port", options.port)
+
     ## if we have a specific spec push that into the args
     if options.spec
       args.push("--spec", options.spec)
