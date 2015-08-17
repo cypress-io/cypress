@@ -348,7 +348,9 @@ module.exports = (parentWindow, gui, loadApp) ->
           @sandbox.stub(@Server().prototype, "_open").rejects(err)
 
         @setup(fn).then =>
-          expect(@write).to.be.calledWithMatch("port is currently in use", 7878)
+          expect(@write).to.be.calledWithMatch("port is currently in use:")
+          expect(@write).to.be.calledWithMatch("7878")
+          expect(@write).to.be.calledWithMatch("or shut down the other process")
           expect(@exit).to.be.calledWith(1)
 
 
