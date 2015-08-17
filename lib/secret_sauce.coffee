@@ -135,7 +135,7 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
 
     run: (options) ->
       ## silence all console messages
-      # @App.silenceConsole()
+      @App.silenceConsole()
 
       @App.vent.trigger "start:projects:app", {
         morgan:      false
