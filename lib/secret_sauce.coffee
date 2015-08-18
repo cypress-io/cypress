@@ -8,20 +8,20 @@ fs      = require("fs-extra")
 
 fs = Promise.promisifyAll(fs)
 
+write = (str) ->
+  process.stdout.write(str + "\n")
+
+writeErr = (str, msgs...) ->
+  str = [chalk.red(str)].concat(msgs).join(" ")
+  write(str)
+  process.exit(1)
+
 SecretSauce =
   mixin: (module, klass) ->
     for key, fn of @[module]
       klass.prototype[key] = fn
 
 SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
-  write = (str) ->
-    process.stdout.write(str + "\n")
-
-  writeErr = (str, msgs...) ->
-    str = [chalk.red(str)].concat(msgs).join(" ")
-    write(str)
-    process.exit(1)
-
   displayToken = (token) ->
     write(token)
     process.exit()
@@ -232,9 +232,26 @@ SecretSauce.Chromium =
     @_afterRun(@window)
 
   _reporter: (window, reporter) ->
-    reporter ?= require("mocha/lib/reporters/spec")
+    getReporter = ->
+      switch
+        when reporter is "teamcity"
+          require("mocha-teamcity-reporter")
 
-    window.$Cypress.reporter = reporter
+        when reporter?
+          try
+            require("mocha/lib/reporters/#{reporter}")
+          catch
+            try
+              require(reporter)
+            catch
+              ## either pass a relative path to your reporter
+              ## or include it in your package.json
+              writeErr("Could not load reporter:", chalk.blue(reporter))
+
+        else
+          require("mocha/lib/reporters/spec")
+
+    window.$Cypress.reporter = getReporter()
 
   _onerror: (window) ->
     # window.onerror = (err) ->
