@@ -41,7 +41,7 @@ class SpecProcessor extends Controller
     )
 
     config =
-      baseUrl: process.cwd()
+      baseUrl: settings.projectRoot
       name: filePath
       out: "main.js"
 
