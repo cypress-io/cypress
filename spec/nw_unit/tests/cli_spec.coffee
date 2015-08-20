@@ -1,4 +1,5 @@
 _            = require("lodash")
+cp           = require("child_process")
 lookup       = require("../js/spec_helper")
 cache        = lookup("lib/cache")
 # Server       = lookup("lib/server")
@@ -26,6 +27,7 @@ module.exports = (parentWindow, gui, loadApp) ->
           @App.vent.on "app:entities:ready", =>
             @exit       = @sandbox.stub process, "exit"
             @write      = @sandbox.stub process.stdout, "write"
+            @exec       = @sandbox.stub(cp, "exec").withArgs("git rev-parse --abbrev-ref HEAD").callsArgWith(1, null, "master")
             @trigger    = @sandbox.spy  @App.vent, "trigger"
             @runProject = @sandbox.spy  @App.config, "runProject"
             @open       = @sandbox.spy  @Server().prototype, "open"
@@ -146,7 +148,7 @@ module.exports = (parentWindow, gui, loadApp) ->
         @sandbox.stub(os, "platform").returns("linux")
 
         nock(Routes.api())
-          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938")
+          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938?branch=master")
           .matchHeader("x-project-token", "abc123")
           .reply(401)
 
@@ -160,7 +162,7 @@ module.exports = (parentWindow, gui, loadApp) ->
         @sandbox.stub(os, "platform").returns("linux")
 
         nock(Routes.api())
-          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938")
+          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938?branch=master")
           .matchHeader("x-project-token", "abc123")
           .reply(200)
 
@@ -172,7 +174,7 @@ module.exports = (parentWindow, gui, loadApp) ->
         @sandbox.stub(os, "platform").returns("linux")
 
         nock(Routes.api())
-          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938")
+          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938?branch=master")
           .matchHeader("x-project-token", "abc123")
           .reply(200)
 
@@ -191,7 +193,7 @@ module.exports = (parentWindow, gui, loadApp) ->
         override = @sandbox.stub(@Chromium().prototype, "override")
 
         nock(Routes.api())
-          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938")
+          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938?branch=master")
           .matchHeader("x-project-token", "abc123")
           .reply(200)
 
@@ -214,7 +216,7 @@ module.exports = (parentWindow, gui, loadApp) ->
         override = @sandbox.stub(@Chromium().prototype, "override")
 
         nock(Routes.api())
-          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938")
+          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938?branch=master")
           .matchHeader("x-project-token", "abc123")
           .reply(200)
 
@@ -230,6 +232,46 @@ module.exports = (parentWindow, gui, loadApp) ->
         cache.setUser({name: "Brian"}).then =>
           cache.addProject(@todos).then =>
             @argsAre("--run-project", @todos, "--reporter", "junit", "--ci", "--key", "abc123", fn)
+
+
+      describe "branch", ->
+        beforeEach ->
+          @sandbox.stub(os, "platform").returns("linux")
+
+          @checkBranchQueryParam = (branch, fn) =>
+            req = nock(Routes.api())
+              .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938")
+              .query(branch: branch)
+              .matchHeader("x-project-token", "abc123")
+              .reply(401)
+
+            cache.setUser({name: "Brian"}).then =>
+              @argsAre("--run-project", @todos, "--ci", "--key", "abc123", fn).then =>
+                req.done()
+
+        afterEach ->
+          ["CIRCLE_BRANCH", "TRAVIS_BRANCH", "CI_BRANCH"].forEach (b) ->
+            delete process.env[b]
+
+        it "sets branch to CIRCLE_BRANCH", ->
+          process.env.CIRCLE_BRANCH = "staging-circle"
+          @checkBranchQueryParam("staging-circle")
+
+        it "sets branch to TRAVIS_BRANCH", ->
+          process.env.TRAVIS_BRANCH = "staging-circle2"
+          @checkBranchQueryParam("staging-circle2")
+
+        it "sets branch to CI_BRANCH", ->
+          process.env.CI_BRANCH = "staging-circle3"
+          @checkBranchQueryParam("staging-circle3")
+
+        it "uses git rev-parse when no env vars", ->
+          @checkBranchQueryParam "foo-branch", =>
+            @exec.callsArgWith(1, null, "foo-branch")
+
+        it "does not send a branch when git errors", ->
+          @checkBranchQueryParam "", =>
+            @exec.callsArgWith(1, new Error)
 
     context "--run-project", ->
       it "requires a session_token", ->

@@ -1,5 +1,6 @@
 _       = require("lodash")
 os      = require("os")
+cp      = require("child_process")
 path    = require("path")
 chalk   = require("chalk")
 request = require("request-promise")
@@ -42,11 +43,29 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
 
     writeErr("Sorry, running in CI requires a valid CI provider and environment.")
 
+  getBranchFromGit = ->
+    new Promise (resolve, reject) ->
+      cp.exec "git rev-parse --abbrev-ref HEAD", (err, stdout, stderr) ->
+        ## dont resolve with any branch
+        ## if theres an err
+        return resolve("") if err
+
+        resolve(stdout)
+
+  getBranch = ->
+    for branch in ["CIRCLE_BRANCH", "TRAVIS_BRANCH", "CI_BRANCH"]
+      if b = process.env[branch]
+        return Promise.resolve(b)
+
+    getBranchFromGit()
+
   ensureProjectAPIToken = (projectId, key, fn) ->
-    request.post({
-      url: Routes.ci(projectId)
-      headers: {"x-project-token": key}
-    })
+    getBranch()
+    .then (branch) ->
+      request.post({
+        url: Routes.ci(projectId, branch: branch)
+        headers: {"x-project-token": key}
+      })
     .then(fn)
     .catch (err) ->
       writeErr("Sorry, your project's API Key: '#{key}' was not valid. This project cannot run in CI.")
