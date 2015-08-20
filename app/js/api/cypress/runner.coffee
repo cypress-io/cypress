@@ -183,6 +183,9 @@ $Cypress.Runner = do ($Cypress, _) ->
       _(@tests).map (test) ->
         obj = _(test).pick("id", "duration", "state")
         obj.title = test.originalTitle
+        ## TODO FIX THIS!
+        if not obj.state
+          obj.state = "skipped"
         obj
 
     getHookName: (hook) ->
