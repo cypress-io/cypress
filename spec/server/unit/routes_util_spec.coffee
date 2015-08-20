@@ -32,3 +32,6 @@ describe "Routes Util", ->
 
   it "ci", ->
     expect(Routes.ci("123-foo")).to.eq "http://localhost:1234/ci/123-foo"
+
+  it "tests", ->
+    expect(Routes.tests("123-guid")).to.eq "http://localhost:1234/tests/123-guid"
