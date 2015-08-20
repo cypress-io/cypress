@@ -1,0 +1,6 @@
+<div id="builds-list-page">
+  <div class="ecl-main-content">
+    <h2>Builds</h2>
+    <div id="builds-region" class="block-panel"></div>
+  </div>
+</div>

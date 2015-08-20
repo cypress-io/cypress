@@ -19,7 +19,7 @@
     getNavs: ->
       new Entities.NavsCollection [
         {name: "Tests",     href: "#tests",      icon: "fa fa-code"}
-        {name: "Organize",  href: "#organize",   icon: "fa fa-th"}
+        {name: "Builds",    href: "#builds",     icon: "fa fa-th"}
         {name: "Analytics", href: "#analytics",  icon: "fa fa-bar-chart-o"}
         {name: "Settings",  href: "#settings",   icon: "fa fa-cog"}
       ]

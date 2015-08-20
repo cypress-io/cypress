@@ -1,7 +1,7 @@
-@App.module "OrganizeApp.List", (List, App, Backbone, Marionette, $, _) ->
+@App.module "TestsApp.List", (List, App, Backbone, Marionette, $, _) ->
 
   class List.Layout extends App.Views.LayoutView
-    template: "organize/list/list_layout"
+    template: "tests/list/list_layout"
 
   class List.File extends App.Views.CompositeView
     childView: List.File
@@ -10,9 +10,9 @@
 
     getTemplate: ->
       if @model.get("children").length
-        "organize/list/_folder"
+        "tests/list/_folder"
       else
-        "organize/list/_file"
+        "tests/list/_file"
 
     initialize: ->
       @collection = @model.get("children")
@@ -23,7 +23,7 @@
       @$el.addClass("all-tests") if @model.get("all")
 
   class List.Empty extends App.Views.ItemView
-    template: "organize/list/_empty"
+    template: "tests/list/_empty"
 
     serializeData: ->
       path: @options.path

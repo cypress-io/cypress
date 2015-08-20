@@ -20,6 +20,9 @@
         App.config.setUI(ui)
 
     actions:
+      list: ->
+        route: "tests"
+
       show: ->
         route: "tests/*id"
 
