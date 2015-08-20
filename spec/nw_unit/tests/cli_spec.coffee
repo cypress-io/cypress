@@ -164,7 +164,9 @@ module.exports = (parentWindow, gui, loadApp) ->
         nock(Routes.api())
           .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938?branch=master")
           .matchHeader("x-project-token", "abc123")
-          .reply(200)
+          .reply(200, {
+            ci_guid: "foo-bar-baz-123"
+          })
 
         cache.setUser({name: "Brian"}).then =>
           @argsAre("--run-project", @todos, "--ci", "--key", "abc123").then =>
@@ -176,7 +178,9 @@ module.exports = (parentWindow, gui, loadApp) ->
         nock(Routes.api())
           .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938?branch=master")
           .matchHeader("x-project-token", "abc123")
-          .reply(200)
+          .reply(200, {
+            ci_guid: "foo-bar-baz-123"
+          })
 
         fn = =>
           @App.commands.setHandler "start:chromium:run", (src, options) ->
@@ -190,19 +194,21 @@ module.exports = (parentWindow, gui, loadApp) ->
       it "calls Chromium#override with {ci: true}", (done) ->
         @sandbox.stub(os, "platform").returns("linux")
 
-        override = @sandbox.stub(@Chromium().prototype, "override")
-
         nock(Routes.api())
           .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938?branch=master")
           .matchHeader("x-project-token", "abc123")
-          .reply(200)
+          .reply(200, {
+            ci_guid: "foo-bar-baz-123"
+          })
 
         fn = =>
           win = {}
 
+          override = @sandbox.stub(@Chromium().prototype, "override")
+
           @App.commands.setHandler "start:chromium:run", (src, options) =>
             options.onReady(win)
-            expect(override).to.be.calledWith({ci: true, reporter: undefined})
+            expect(override).to.be.calledWithMatch({ci: true, reporter: undefined})
 
             done()
 
@@ -213,19 +219,21 @@ module.exports = (parentWindow, gui, loadApp) ->
       it "calls Chromium#override with custom reporter", (done) ->
         @sandbox.stub(os, "platform").returns("linux")
 
-        override = @sandbox.stub(@Chromium().prototype, "override")
-
         nock(Routes.api())
           .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938?branch=master")
           .matchHeader("x-project-token", "abc123")
-          .reply(200)
+          .reply(200, {
+            ci_guid: "foo-bar-baz-123"
+          })
 
         fn = =>
           win = {}
 
+          override = @sandbox.stub(@Chromium().prototype, "override")
+
           @App.commands.setHandler "start:chromium:run", (src, options) =>
             options.onReady(win)
-            expect(override).to.be.calledWith({ci: true, reporter: "junit"})
+            expect(override).to.be.calledWithMatch({ci: true, reporter: "junit"})
 
             done()
 
@@ -233,6 +241,34 @@ module.exports = (parentWindow, gui, loadApp) ->
           cache.addProject(@todos).then =>
             @argsAre("--run-project", @todos, "--reporter", "junit", "--ci", "--key", "abc123", fn)
 
+      it "calls Chromium#override with {ci_guid: foo-bar-baz-123}", (done) ->
+        @sandbox.stub(os, "platform").returns("linux")
+
+        nock(Routes.api())
+          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938?branch=master")
+          .matchHeader("x-project-token", "abc123")
+          .reply(200, {
+            ci_guid: "foo-bar-baz-123"
+          })
+
+        fn = =>
+          win = {}
+
+          override = @sandbox.stub(@Chromium().prototype, "override")
+
+          @App.commands.setHandler "start:chromium:run", (src, options) =>
+            options.onReady(win)
+            expect(override).to.be.calledWith({
+              ci: true
+              reporter: undefined
+              ci_guid: "foo-bar-baz-123"
+            })
+
+            done()
+
+        cache.setUser({name: "Brian"}).then =>
+          cache.addProject(@todos).then =>
+            @argsAre("--run-project", @todos, "--ci", "--key", "abc123", fn)
 
       describe "branch", ->
         beforeEach ->

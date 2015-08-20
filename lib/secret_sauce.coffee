@@ -65,7 +65,10 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
       request.post({
         url: Routes.ci(projectId, branch: branch)
         headers: {"x-project-token": key}
+        json: true
       })
+      .then (attrs) ->
+        attrs.ci_guid
     .then(fn)
     .catch (err) ->
       writeErr("Sorry, your project's API Key: '#{key}' was not valid. This project cannot run in CI.")
@@ -170,6 +173,7 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
                   Chromium(win).override({
                     ci:          options.ci
                     reporter:    options.reporter
+                    ci_guid:     options.ci_guid
                   })
               }
             .catch(displayError)
@@ -209,7 +213,8 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
       if ensureCiEnv(@user)
         @addProject(projectPath).then =>
           @App.config.getProjectIdByPath(projectPath).then (projectId) =>
-            ensureProjectAPIToken projectId, options.key, =>
+            ensureProjectAPIToken projectId, options.key, (ci_guid) =>
+              options.ci_guid = ci_guid
               @run(options)
 
     startGuiApp: (options) ->
@@ -248,7 +253,7 @@ SecretSauce.Chromium =
     @_reporter(@window, options.reporter)
     @_onerror(@window)
     @_log(@window)
-    @_afterRun(@window)
+    @_afterRun(@window, options.ci_guid)
 
   _reporter: (window, reporter) ->
     reporter ?= require("mocha/lib/reporters/spec")
@@ -270,7 +275,7 @@ SecretSauce.Chromium =
       msg = util.format.apply(util, arguments)
       process.stdout.write(msg + "\n")
 
-  _afterRun: (window) ->
+  _afterRun: (window, ci_guid) ->
     # takeScreenshot = (cb) =>
     #   process.stdout.write("Taking Screenshot\n")
     #   @win.capturePage (img) ->
