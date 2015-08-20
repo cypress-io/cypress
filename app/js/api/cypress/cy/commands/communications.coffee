@@ -4,14 +4,18 @@ $Cypress.register "Communications", (Cypress, _, $, Promise) ->
     msg: ->
       @sync.message.apply(@, arguments)
 
-    message: (msg, data) ->
+    message: (msg, data, options = {}) ->
       ## should we increase the command timeout here to 10s?
+
+      _.defaults options,
+        log: true
 
       new Promise (resolve, reject) =>
 
-        command = Cypress.Log.command
-          name: "message"
-          message: Cypress.Utils.stringify([msg, data])
+        if options.log
+          command = Cypress.Log.command
+            name: "message"
+            message: Cypress.Utils.stringify([msg, data])
 
         Cypress.trigger "message", msg, data, (response) =>
           if err = response.__error
@@ -23,12 +27,14 @@ $Cypress.register "Communications", (Cypress, _, $, Promise) ->
               e.stack = response.__stack if response.__stack
               reject(e)
           else
-            command.set
-              onConsole: -> {
-                Message: msg
-                "Data Sent": data
-                "Data Returned": response
-              }
+            if command
+              command.set
+                onConsole: -> {
+                  Message: msg
+                  "Data Sent": data
+                  "Data Returned": response
+                }
 
-            command.snapshot().end()
+              command.snapshot().end()
+
             resolve(response)
