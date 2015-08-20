@@ -204,6 +204,9 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
         ## merge in the other properties from onConsole
         _.extend consoleObj, orig.apply(@, args)
 
+        ## TODO: right here we need to automatically
+        ## merge in "Returned + Elemented" if there is an $el
+
         ## and finally add error if one exists
         if err = _this.get("error")
           _.defaults consoleObj,
