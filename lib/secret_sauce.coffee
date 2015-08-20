@@ -1,5 +1,7 @@
 _       = require("lodash")
+str     = require("underscore.string")
 os      = require("os")
+cp      = require("child_process")
 path    = require("path")
 chalk   = require("chalk")
 request = require("request-promise")
@@ -42,11 +44,35 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
 
     writeErr("Sorry, running in CI requires a valid CI provider and environment.")
 
+  getBranchFromGit = ->
+    new Promise (resolve, reject) ->
+      cp.exec "git rev-parse --abbrev-ref HEAD", (err, stdout, stderr) ->
+        ## dont resolve with any branch
+        ## if theres an err
+        return resolve("") if err
+
+        resolve(stdout)
+
+  getBranch = ->
+    for branch in ["CIRCLE_BRANCH", "TRAVIS_BRANCH", "CI_BRANCH"]
+      if b = process.env[branch]
+        return Promise.resolve(b)
+
+    getBranchFromGit()
+
   ensureProjectAPIToken = (projectId, key, fn) ->
-    request.post({
-      url: Routes.ci(projectId)
-      headers: {"x-project-token": key}
-    })
+    getBranch()
+    .then (branch) ->
+      ## strip out whitespace or new lines
+      branch = str.clean(branch)
+
+      request.post({
+        url: Routes.ci(projectId, branch: branch)
+        headers: {"x-project-token": key}
+        json: true
+      })
+      .then (attrs) ->
+        attrs.ci_guid
     .then(fn)
     .catch (err) ->
       writeErr("Sorry, your project's API Key: '#{key}' was not valid. This project cannot run in CI.")
@@ -151,6 +177,7 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
                   Chromium(win).override({
                     ci:          options.ci
                     reporter:    options.reporter
+                    ci_guid:     options.ci_guid
                   })
               }
             .catch(displayError)
@@ -190,7 +217,8 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
       if ensureCiEnv(@user)
         @addProject(projectPath).then =>
           @App.config.getProjectIdByPath(projectPath).then (projectId) =>
-            ensureProjectAPIToken projectId, options.key, =>
+            ensureProjectAPIToken projectId, options.key, (ci_guid) =>
+              options.ci_guid = ci_guid
               @run(options)
 
     startGuiApp: (options) ->
@@ -229,7 +257,7 @@ SecretSauce.Chromium =
     @_reporter(@window, options.reporter)
     @_onerror(@window)
     @_log(@window)
-    @_afterRun(@window)
+    @_afterRun(@window, options.ci_guid)
 
   _reporter: (window, reporter) ->
     getReporter = ->
@@ -268,7 +296,7 @@ SecretSauce.Chromium =
       msg = util.format.apply(util, arguments)
       process.stdout.write(msg + "\n")
 
-  _afterRun: (window) ->
+  _afterRun: (window, ci_guid) ->
     # takeScreenshot = (cb) =>
     #   process.stdout.write("Taking Screenshot\n")
     #   @win.capturePage (img) ->
@@ -279,16 +307,28 @@ SecretSauce.Chromium =
     #       else
     #         cb()
 
-    window.$Cypress.afterRun = (results) ->
+    window.$Cypress.afterRun = (duration, tests) =>
       # process.stdout.write("Results are:\n")
-      # process.stdout.write JSON.stringify(results)
+      # process.stdout.write JSON.stringify(tests)
       # process.stdout.write("\n")
       ## notify Cypress API
 
-      failures = _.where(results, {state: "failed"}).length
+      exit = ->
+        failures = _.where(tests, {state: "failed"}).length
 
-      # takeScreenshot ->
-      process.exit(failures)
+        # takeScreenshot ->
+        process.exit(failures)
+
+      request.post({
+        url: @Routes.tests(ci_guid)
+        body: {
+          duration: duration
+          tests: tests
+        }
+        json: true
+      })
+      .then(exit)
+      .catch(exit)
 
 SecretSauce.Keys =
   _convertToId: (index) ->

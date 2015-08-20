@@ -183,7 +183,7 @@
       })
 
       ## move this src out of here and into entities/iframe
-      url = encodeURIComponent("http://tunnel.browserling.com:50228/#/tests/#{src}?__ui=satellite")
+      url = encodeURIComponent("http://tunnel.browserling.com:50228/__/#/tests/#{src}?__ui=satellite")
 
       insertIframe = =>
         browserling = new Browserling("29051e55f59c35e17a571bcf3f145910")
