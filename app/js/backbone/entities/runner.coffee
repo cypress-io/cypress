@@ -403,6 +403,9 @@
         ## to run tests
         @Cypress.initialize(specWindow, remoteIframe, App.config.getCypressConfig())
 
+        ## capture start date
+        start = new Date
+
         @Cypress.run (err, results) =>
           @Cypress.after(err)
 
@@ -412,7 +415,9 @@
           fn?(err)
 
           if _.isFunction($Cypress.afterRun)
-            $Cypress.afterRun(results)
+            ## send duration + test results
+            end = new Date - start
+            $Cypress.afterRun(end, results)
 
     App.reqres.setHandler "runner:entity", ->
       new Entities.Runner

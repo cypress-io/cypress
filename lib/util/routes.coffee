@@ -10,6 +10,7 @@ routes = {
   signin:        "signin"
   signout:       "signout"
   ci:            "ci/:id"
+  tests:         "tests/:id"
   projects:      "projects"
   project:       "projects/:id"
   projectKeys:   "projects/:id/keys"
