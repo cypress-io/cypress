@@ -27,7 +27,7 @@ module.exports = (parentWindow, gui, loadApp) ->
           @App.vent.on "app:entities:ready", =>
             @exit       = @sandbox.stub process, "exit"
             @write      = @sandbox.stub process.stdout, "write"
-            @exec       = @sandbox.stub(cp, "exec").withArgs("git rev-parse --abbrev-ref HEAD").callsArgWith(1, null, "master")
+            @exec       = @sandbox.stub(cp, "exec").withArgs("git rev-parse --abbrev-ref HEAD").callsArgWith(1, null, "master\n")
             @trigger    = @sandbox.spy  @App.vent, "trigger"
             @runProject = @sandbox.spy  @App.config, "runProject"
             @open       = @sandbox.spy  @Server().prototype, "open"
@@ -308,6 +308,14 @@ module.exports = (parentWindow, gui, loadApp) ->
         it "does not send a branch when git errors", ->
           @checkBranchQueryParam "", =>
             @exec.callsArgWith(1, new Error)
+
+        it "cleans out whitespace and new lines from stdout", ->
+          @checkBranchQueryParam "clean", =>
+            @exec.callsArgWith(1, null, "  clean  \n")
+
+        it "cleans out whitespace and new lines from env", ->
+          process.env.CIRCLE_BRANCH = "   clean   \n"
+          @checkBranchQueryParam "clean"
 
     context "--run-project", ->
       it "requires a session_token", ->

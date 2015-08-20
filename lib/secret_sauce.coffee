@@ -1,4 +1,5 @@
 _       = require("lodash")
+str     = require("underscore.string")
 os      = require("os")
 cp      = require("child_process")
 path    = require("path")
@@ -62,6 +63,9 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
   ensureProjectAPIToken = (projectId, key, fn) ->
     getBranch()
     .then (branch) ->
+      ## strip out whitespace or new lines
+      branch = str.clean(branch)
+
       request.post({
         url: Routes.ci(projectId, branch: branch)
         headers: {"x-project-token": key}
@@ -286,16 +290,28 @@ SecretSauce.Chromium =
     #       else
     #         cb()
 
-    window.$Cypress.afterRun = (results) ->
+    window.$Cypress.afterRun = (duration, tests) =>
       # process.stdout.write("Results are:\n")
-      # process.stdout.write JSON.stringify(results)
+      # process.stdout.write JSON.stringify(tests)
       # process.stdout.write("\n")
       ## notify Cypress API
 
-      failures = _.where(results, {state: "failed"}).length
+      exit = ->
+        failures = _.where(tests, {state: "failed"}).length
 
-      # takeScreenshot ->
-      process.exit(failures)
+        # takeScreenshot ->
+        process.exit(failures)
+
+      request.post({
+        url: @Routes.tests(ci_guid)
+        body: {
+          duration: duration
+          tests: tests
+        }
+        json: true
+      })
+      .then(exit)
+      .catch(exit)
 
 SecretSauce.Keys =
   _convertToId: (index) ->
