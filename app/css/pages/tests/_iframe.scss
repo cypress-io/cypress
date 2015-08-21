@@ -63,13 +63,14 @@
       position: absolute;
       background-color: #f8f8f8;
       line-height: 22px;
-      padding: 15px;
+      padding: 10px;
       color: #888;
       border-top: 0;
-      border-left: 1px solid #ddd;
+      border: 1px solid #ddd;
       left: 0;
       right: 0;
       top: 0;
+      box-shadow: 0 2px 3px #888;
 
       .iframe-menu {
         float: right;
