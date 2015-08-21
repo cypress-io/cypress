@@ -20,14 +20,33 @@
 .builds-container {
   @include list-columns(9%, 13%, 24%, 34%, 10%, 10%);
 
-  &>li>div>div {
-    padding: 10px 20px;
-    font-weight: 500;
-  }
+  &>li {
 
+    &:hover {
+      background-color: #f3f7ff;
+      cursor: pointer;
+    }
 
-  &>li>div:last-child {
-    text-align: right;
+    &>div>div {
+      padding: 10px 20px;
+      font-weight: 500;
+    }
+
+    &>div:first-child {
+      border-left: 5px solid #eee;
+      min-height: 62px;
+      &.pass {
+        border-color: #1CB77E;
+      }
+      &.fail {
+        border-color: #CC4239;
+      }
+    }
+
+    &>div:last-child {
+      text-align: right;
+    }
+
   }
 
 }

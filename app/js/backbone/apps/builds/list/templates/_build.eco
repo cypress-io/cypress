@@ -1,4 +1,4 @@
-<div>
+<div class="<%= @status %>">
   <div>
     <%= @buildId %>
   </div>
