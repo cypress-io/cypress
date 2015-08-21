@@ -10,7 +10,13 @@
 </div>
 <div>
   <div class="build-message">
-    <%= @message %>
+    <div class="user">
+      <i class="fa fa-user"></i>
+      <%= @user %>
+    </div>
+    <div class="msg">
+      <%= @message %>
+    </div>
   </div>
 </div>
 <div>

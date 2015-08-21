@@ -74,6 +74,17 @@
 
 .build-message {
   font-size: 12px;
-  font-weight: 300;
   color: #898A8B;
+
+  .msg {
+    font-weight: 300;
+    padding-left: 3px;
+    &:before {
+      content: ">"
+    }
+  }
+
+  .user {
+    font-weight: 600;
+  }
 }

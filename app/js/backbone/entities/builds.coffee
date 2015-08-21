@@ -24,7 +24,8 @@
           "skipped":0,
           "created_at":"2015-08-21T02:35:12.748Z",
           "updated_at":"2015-08-21T02:35:38.687Z",
-          "status": "pass"
+          "status": "pass",
+          "user": "Julie Pearson"
         },
         {
           "uuid": "e474ccb9-0352-4ad9-85d3-feeb1e0505d3",
@@ -39,7 +40,8 @@
           "skipped":1,
           "created_at":"2015-08-21T02:35:12.748Z",
           "updated_at":"2015-08-21T02:35:38.687Z",
-          "status": "fail"
+          "status": "fail",
+          "user": "Julie Pearson"
         },
         {
           "uuid": "e474ccb9-0352-4ad9-85d3-feeb1e0505d4",
@@ -54,7 +56,8 @@
           "skipped":0,
           "created_at":"2015-08-21T02:35:12.748Z",
           "updated_at":"2015-08-21T02:35:38.687Z",
-          "status": "fail"
+          "status": "fail",
+          "user": "Brian Mann"
         },
         {
           "uuid": "e474ccb9-0352-4ad9-85d3-feeb1e0505d5",
@@ -69,7 +72,8 @@
           "skipped":0,
           "created_at":"2015-08-21T02:35:12.748Z",
           "updated_at":"2015-08-21T02:35:38.687Z",
-          "status": "cancel"
+          "status": "cancel",
+          "user": "Julie Pearson"
         }
       ]
       # builds.fetch
