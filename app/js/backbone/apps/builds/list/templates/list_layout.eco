@@ -1,6 +1,9 @@
 <div id="builds-list-page">
-  <div class="ecl-main-content">
-    <h2>Builds</h2>
-    <div id="builds-region" class="block-panel"></div>
+  <div class="cy-main-content">
+  <div class="block-panel">
+    <div class="title-bar">
+      <h1>Builds</h1>
+    </div>
+    <div id="builds-region"></div>
   </div>
 </div>
