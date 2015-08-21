@@ -4,6 +4,9 @@
     idAttribute: "uuid"
 
     mutators:
+      buildId: ->
+        @attributes.buildId ? @attributes.uuid.slice(0, 5)
+
       message: ->
         _.truncate(@attributes.message, 43)
 
@@ -14,7 +17,7 @@
 
   API =
     getBuilds: ->
-      builds = new Entities.BuildsCollection [
+      models = [
         {
           "uuid": "e474ccb9-0352-4ad9-85d3-feeb1e0505d2",
           "buildId": "1894"
@@ -80,8 +83,11 @@
           "author": "Julie Pearson"
         }
       ]
-      # builds.fetch
-        # reset: true
+
+      builds = new Entities.BuildsCollection
+      builds.fetch({reset: true}).then (resp) ->
+        if not resp.length
+          builds.reset(models)
       builds
 
   App.reqres.setHandler "build:entities", ->
