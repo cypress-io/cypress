@@ -6,6 +6,7 @@
       <th>Failed</th>
       <th>Skipped</th>
       <th>Pending</th>
+      <th>Total</th>
       <th>Duration</th>
       <th>Created At</th>
     </tr>

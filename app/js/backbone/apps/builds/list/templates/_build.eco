@@ -14,6 +14,9 @@
   <%= @pending %>
 </td>
 <td>
+  <%= @total %>
+</td>
+<td>
   <%= @duration %>
 </td>
 <td>
