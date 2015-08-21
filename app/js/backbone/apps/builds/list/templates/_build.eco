@@ -53,7 +53,7 @@
       </div>
       <div>
         <% if @skipped > 0: %>
-          <span class="label label-info">Skip</span>
+          <span class="label label-warning">Skip</span>
         <% end %>
       </div>
     </div>
@@ -65,7 +65,7 @@
       </div>
       <div>
         <% if @pending > 0: %>
-          <span class="label label-default">Pend</span>
+          <span class="label label-info">Pend</span>
         <% end %>
       </div>
     </div>

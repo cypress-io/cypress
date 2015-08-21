@@ -4,6 +4,7 @@
 }
 
 .builds-list-header {
+  margin-top: 25px;
   @include list-columns(9%, 13%, 24%, 34%, 10%, 10%);
 
   &>li>div:nth-child(4)>div {
