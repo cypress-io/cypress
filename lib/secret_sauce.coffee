@@ -1,5 +1,4 @@
 _       = require("lodash")
-str     = require("underscore.string")
 os      = require("os")
 cp      = require("child_process")
 path    = require("path")
@@ -7,6 +6,7 @@ chalk   = require("chalk")
 request = require("request-promise")
 Promise = require("bluebird")
 fs      = require("fs-extra")
+git     = require("gift")
 
 fs = Promise.promisifyAll(fs)
 
@@ -24,6 +24,8 @@ SecretSauce =
       klass.prototype[key] = fn
 
 SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
+  repo = Promise.promisifyAll git(options.projectPath)
+
   displayToken = (token) ->
     write(token)
     process.exit()
@@ -45,13 +47,20 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
     writeErr("Sorry, running in CI requires a valid CI provider and environment.")
 
   getBranchFromGit = ->
-    new Promise (resolve, reject) ->
-      cp.exec "git rev-parse --abbrev-ref HEAD", (err, stdout, stderr) ->
-        ## dont resolve with any branch
-        ## if theres an err
-        return resolve("") if err
+    repo.branchAsync()
+      .get("name")
+      .catch -> ""
 
-        resolve(stdout)
+  getMessage = ->
+    repo.current_commitAsync()
+      .get("message")
+      .catch -> ""
+
+  getAuthor = ->
+    repo.current_commitAsync()
+      .get("author")
+      .get("name")
+      .catch -> ""
 
   getBranch = ->
     for branch in ["CIRCLE_BRANCH", "TRAVIS_BRANCH", "CI_BRANCH"]
@@ -61,14 +70,19 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
     getBranchFromGit()
 
   ensureProjectAPIToken = (projectId, key, fn) ->
-    getBranch()
-    .then (branch) ->
-      ## strip out whitespace or new lines
-      branch = str.clean(branch)
-
+    Promise.props({
+      branch: getBranch()
+      author: getAuthor()
+      message: getMessage()
+    }).then (git) ->
       request.post({
-        url: Routes.ci(projectId, branch: branch)
-        headers: {"x-project-token": key}
+        url: Routes.ci(projectId)
+        headers: {
+          "x-project-token": key
+          "x-git-branch":    git.branch
+          "x-git-author":    git.author
+          "x-git-message":   git.message
+        }
         json: true
       })
       .then (attrs) ->
