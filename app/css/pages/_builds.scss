@@ -5,7 +5,7 @@
 
 .builds-list-header {
   margin-top: 25px;
-  @include list-columns(9%, 13%, 24%, 34%, 10%, 10%);
+  @include list-columns(9%, 13%, 27%, 31%, 10%, 10%);
 
   &>li>div:nth-child(4)>div {
     padding-left: 0;
@@ -19,7 +19,7 @@
 }
 
 .builds-container {
-  @include list-columns(9%, 13%, 24%, 34%, 10%, 10%);
+  @include list-columns(9%, 13%, 27%, 31%, 10%, 10%);
 
   &>li {
 
@@ -80,12 +80,14 @@
   .msg {
     font-weight: 300;
     padding-left: 3px;
-    &:before {
-      content: ">"
-    }
   }
 
   .user {
     font-weight: 600;
+    margin-left: 3px;
+  }
+
+  .fa-user {
+    color: #bbb;
   }
 }

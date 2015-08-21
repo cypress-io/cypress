@@ -3,6 +3,10 @@
   class Entities.Build extends Entities.Model
     idAttribute: "uuid"
 
+    mutators:
+      message: ->
+        _.truncate(@attributes.message, 43)
+
   class Entities.BuildsCollection extends Entities.Collection
     model: Entities.Build
 
@@ -25,7 +29,7 @@
           "created_at":"2015-08-21T02:35:12.748Z",
           "updated_at":"2015-08-21T02:35:38.687Z",
           "status": "pass",
-          "user": "Julie Pearson"
+          "author": "Julie Pearson"
         },
         {
           "uuid": "e474ccb9-0352-4ad9-85d3-feeb1e0505d3",
@@ -41,7 +45,7 @@
           "created_at":"2015-08-21T02:35:12.748Z",
           "updated_at":"2015-08-21T02:35:38.687Z",
           "status": "fail",
-          "user": "Julie Pearson"
+          "author": "Julie Pearson"
         },
         {
           "uuid": "e474ccb9-0352-4ad9-85d3-feeb1e0505d4",
@@ -57,7 +61,7 @@
           "created_at":"2015-08-21T02:35:12.748Z",
           "updated_at":"2015-08-21T02:35:38.687Z",
           "status": "fail",
-          "user": "Brian Mann"
+          "author": "Brian Mann"
         },
         {
           "uuid": "e474ccb9-0352-4ad9-85d3-feeb1e0505d5",
@@ -73,7 +77,7 @@
           "created_at":"2015-08-21T02:35:12.748Z",
           "updated_at":"2015-08-21T02:35:38.687Z",
           "status": "cancel",
-          "user": "Julie Pearson"
+          "author": "Julie Pearson"
         }
       ]
       # builds.fetch

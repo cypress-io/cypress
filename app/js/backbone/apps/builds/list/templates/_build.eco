@@ -12,7 +12,7 @@
   <div class="build-message">
     <div class="user">
       <i class="fa fa-user"></i>
-      <%= @user %>
+      <%= @author %>
     </div>
     <div class="msg">
       <%= @message %>
@@ -81,7 +81,7 @@
 </div>
 <div>
   <div>
-    <%= @duration %>ms
+    <%= (@duration / 1000).toFixed(0) %>secs
   </div>
 </div>
 <div>
