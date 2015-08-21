@@ -9,7 +9,7 @@
 
       @listenTo files, "sync", =>
         @searchRegion(files)
-        @recentFilesRegion(files)
+        # @recentFilesRegion(files)
         @filesRegion(files)
 
       @show @layout,
