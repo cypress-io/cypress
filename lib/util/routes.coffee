@@ -13,6 +13,7 @@ routes = {
   tests:         "tests/:id"
   projects:      "projects"
   project:       "projects/:id"
+  projectCi:     "projects/:id/ci"
   projectKeys:   "projects/:id/keys"
   projectToken:  "projects/:id/token"
   exceptions:    "exceptions"
