@@ -14,6 +14,9 @@ module.exports = (app) ->
   app.get "/__cypress/files", (req, res) ->
     controllers.files.handleFiles(req, res)
 
+  app.get "/__cypress/builds", (req, res, next) ->
+    controllers.builds.handleBuilds(req, res, next)
+
   ## routing for the dynamic iframe html
   app.get "/__cypress/iframes/*", (req, res) ->
     controllers.files.handleIframe(req, res)
