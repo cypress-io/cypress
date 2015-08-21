@@ -6,7 +6,17 @@
   }
 
   .all-files-container {
-    margin-top: 50px;
+    margin-top: 20px;
+    margin-bottom: 40px;
+  }
+
+  .file.all-tests {
+    font-weight: 600;
+
+
+    i {
+      display: none;
+    }
   }
 
   .file, .folder {
@@ -54,6 +64,16 @@
 
   .list-as-table>.file {
 
+    &.all-tests {
+      &>div:first-child {
+
+      }
+
+      &>div:last-child {
+        display: none;
+      }
+    }
+
     &:last-child {
       border-bottom: 0;
     }
@@ -71,7 +91,6 @@
 
   .files-list-header {
     @include list-columns(75%, 25%);
-    font-weight: bold;
 
     &>li>div:last-child {
       text-align: right;
