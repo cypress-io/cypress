@@ -35,7 +35,7 @@
 
       @listenTo @layout, "show", =>
         @statsRegion stats
-        # @configRegion runner
+        @configRegion runner
 
       @show @layout
 
