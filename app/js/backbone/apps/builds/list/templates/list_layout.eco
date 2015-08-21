@@ -3,6 +3,14 @@
   <div class="block-panel">
     <div class="title-bar">
       <h1>Builds</h1>
+      <div class="controls">
+        <select class="form-control">
+          <option value="all-branches">All Branches</option>
+          <option value="master">master</option>
+          <option value="search">search-todos</option>
+          <option value="add">adding-testBranch</option>
+        </select>
+      </div>
     </div>
     <div id="builds-region"></div>
   </div>
