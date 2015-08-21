@@ -1,6 +1,7 @@
 @App.module "Entities", (Entities, App, Backbone, Marionette, $, _) ->
 
   class Entities.Build extends Entities.Model
+    idAttribute: "uuid"
 
   class Entities.BuildsCollection extends Entities.Collection
     model: Entities.Build

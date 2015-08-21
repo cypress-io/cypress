@@ -24,5 +24,5 @@
       new List.Layout
 
     getBuildsView: (builds) ->
-      new List.Files
+      new List.Builds
         collection: builds

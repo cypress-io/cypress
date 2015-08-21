@@ -1,1 +1,21 @@
-build!!
+<td>
+  <%= @branch %>
+</td>
+<td>
+  <%= @passed %>
+</td>
+<td>
+  <%= @failed %>
+</td>
+<td>
+  <%= @skipped %>
+</td>
+<td>
+  <%= @pending %>
+</td>
+<td>
+  <%= @duration %>
+</td>
+<td>
+  <%= @created_at %>
+</td>
