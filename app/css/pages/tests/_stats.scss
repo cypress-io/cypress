@@ -1,7 +1,6 @@
 #header-container {
   background-color: #f8f8f8;
-  overflow: auto;
-  border-bottom: 1px solid #ddd;
+  overflow: visible;
 
   #stats-container {
     padding: 0;
@@ -77,6 +76,7 @@
 
   #runner-config {
     float: right;
+    padding: 6px;
 
     i {
       font-size: 17px;
