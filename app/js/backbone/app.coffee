@@ -2,7 +2,7 @@
 
   App = new Marionette.Application
 
-  App.rootRoute = "/organize"
+  App.rootRoute = "/tests"
 
   App.addRegions
     navRegion:   "#nav-region"
