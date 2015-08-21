@@ -1,57 +1,37 @@
 #header-container {
-  background-color: #eeeff1;
-  padding-left: 20px;
-  overflow: visible;
-  height: 37px;
+  background-color: #fff;
+  overflow: auto;
   border-bottom: 1px solid #ddd;
 
   #stats-container {
-    // min-width: 330px;
     padding: 0;
     float: left;
-    height: 100%;
     margin-bottom: 0;
 
     li {
       list-style-type: none;
       float: left;
-      margin: 0 10px;
-      padding-top: 3px;
-      padding-bottom: 3px;
-      font-weight: 300;
-      height: 100%;
+      padding: 10px;
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 32px;
 
       &#tests-passed {
-        i {
-          color: #23AE89;
-        }
+        color: #23AE89;
       }
 
       &#tests-failed {
-        i {
-          color: #E94B3B;
-        }
+        color: #E94B3B;
       }
 
       &#tests-pending {
-        i {
-          color: #aaa;
-        }
-      }
-
-      span {
-        color: #555;
-        font-weight: 500;
-      }
-
-      div {
-        line-height: 1.1;
+        color: #aaa;
       }
     }
 
     #tests-duration {
-      border-left: 1px dotted #CCC;
-      border-right: 1px dotted #CCC;
+      border-left: 1px solid #ddd;
+      border-right: 1px solid #ddd;
       padding-left: 10px;
       padding-right: 10px;
     }
@@ -74,12 +54,6 @@
   }
 
   #cross-browsers {
-    // position: absolute;
-    // right: 0;
-
-    // img {
-      // opacity: 0.7;
-    // }
     float: right;
     position: relative;
     top: 6px;
@@ -90,7 +64,7 @@
 
     li {
       padding: 0 5px;
-      border-right: 1px dotted #CCC;
+      border-right: 1px solid #CCC;
       margin: 0 0;
       position: relative;
       top: -1px;

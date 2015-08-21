@@ -1,5 +1,5 @@
 #test-container {
-  background-color: #eee;
+  background-color: #f8f8f8;
   position: absolute;
   left: 0;
   bottom: 0;
@@ -67,8 +67,8 @@
 
     li.runnable {
       width: 100%;
-      color: #6B6C6B;
-      background-color: #fdfdfd;
+      color: #6c6c6c;
+      background-color: #fff;
       overflow: auto;
       line-height: 18px;
       padding-left: 0;
@@ -91,7 +91,7 @@
             overflow: hidden;
 
             .suite-title {
-              color: #6B6C6B;
+              color: #43474A;
               font-weight: 600;
             }
           }

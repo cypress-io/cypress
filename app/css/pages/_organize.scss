@@ -1,59 +1,131 @@
 #tests-list-page {
-  h4 {
-    // margin: 0;
+
+  .outer-files-container {
+    @include list-columns(100%);
+    margin-bottom: 0;
+  }
+
+  .all-files-container {
+    margin-top: 50px;
+  }
+
+  .file, .folder {
+    color: #69727e;
 
     i {
-      font-size: 80%;
+      color: #476fc9;
+      margin-right: 5px;
+    }
+  }
+
+  .folder {
+    font-weight: 600;
+
+    i {
+      font-size: 14px;
+    }
+
+    &>div>div {
+      padding-bottom: 0;
+    }
+  }
+
+
+  .file {
+    font-weight: 300;
+    border-bottom: 1px dotted #eeeeee;
+
+    i {
+      font-size: 12px;
+    }
+
+    &:hover {
+      background-color: #f3f7ff;
+      cursor: pointer;
+    }
+  }
+
+  .list-as-table>.folder {
+
+    &>div>div:last-child {
+      padding: 0;
+    }
+  }
+
+  .list-as-table>.file {
+
+    &:last-child {
+      border-bottom: 0;
+    }
+
+    &>div:first-child {
+      @include responsive-width(75%);
+    }
+
+    &>div:last-child {
+      @include responsive-width(25%);
+      text-align: right;
+      color: #bdc0c5;
+    }
+  }
+
+  .files-list-header {
+    @include list-columns(75%, 25%);
+    font-weight: bold;
+
+    &>li>div:last-child {
+      text-align: right;
     }
 
   }
 
-  .block-panel {
-    padding: 10px;
-  }
 
-  ul {
-    margin: 5px 0 5px 7px;
-    padding-left: 11px;
+  // need to refactor to be calculated using javascript
+  .outer-files-container.list-as-table>.folder,
+  .outer-files-container.list-as-table>.file {
 
-    & > li > ul h4 {
-      font-size: 125%;
+    &>div>div:first-child {
+      padding-left: 20px;
+      padding-right: 20px;
     }
-  }
 
-  li {
-    list-style: none;
-    position: relative;
+    &>div>div:last-child {
 
-    &.all-tests {
-      margin-bottom: 10px;
+      &>.list-as-table>.folder,
+      &>.list-as-table>.file {
 
-      a {
-        border-bottom: 1px dotted #999;
+        &>div>div:first-child {
+          padding-left: 40px;
+        }
+
+        &>div>div:last-child {
+
+          &>.list-as-table>.folder,
+          &>.list-as-table>.file {
+
+            &>div>div:first-child {
+              padding-left: 60px;
+            }
+
+            &>div>div:last-child {
+
+              &>.list-as-table>.folder,
+              &>.list-as-table>.file {
+
+                &>div>div:first-child {
+                  padding-left: 80px;
+                }
+
+              }
+
+            }
+
+          }
+
+        }
+
       }
+
     }
   }
-
-  ul.outer-files-container li > ul {
-    border-left: 1px dotted #999;
-  }
-
-  ul.outer-files-container li > ul > li {
-    &:before {
-      // border-left: 1px dotted #999;
-      border-bottom: 1px dotted #999;
-      position: absolute;
-      width: 10px;
-      height: 11px;
-      content: "";
-      margin-left: -12px;
-    }
-  }
-
-  // li.file {
-  //   list-style: disc;
-  //   list-style-position: inside;
-  //   padding-left: 0;
-  //   margin-left: 0;
-  // }
 }

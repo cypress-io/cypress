@@ -5,7 +5,7 @@
   top: 0;
   bottom: 0;
   right: 0;
-  box-shadow: 2px 0 7px #333;
+  // box-shadow: 2px 0 7px #333;
 
   .iframe-spec {
     display: none !important;
@@ -14,8 +14,6 @@
   #iframe-container {
     height: 100%;
     width: 100%;
-    // transform-origin: left top;
-    // transform: scale(0.65);
     position: relative;
     // box-shadow: 0 0 12px #CCCCCC;
     // bottom: 24px;
@@ -35,7 +33,6 @@
     #iframe-size-container {
       width: 100%;
       height: 100%;
-      // height: 100%;
       margin: 0 0;
       transform: scale(1);
       transform-origin: 50% 0%;
@@ -62,18 +59,17 @@
     }
 
     header {
+      height: $header-height;
       position: absolute;
-      background-color: #F7F7F7;
+      background-color: #f8f8f8;
       line-height: 22px;
-      padding: 5px 10px;
+      padding: 15px;
       color: #888;
-      border: 1px solid #ddd;
       border-top: 0;
+      border-left: 1px solid #ddd;
       left: 0;
       right: 0;
-      height: $header-height;
       top: 0;
-      box-shadow: 0 2px 3px #888;
 
       .iframe-menu {
         float: right;
@@ -280,7 +276,6 @@
 
     iframe {
       background-color: #fff;
-      // width: 600px;
       width: 100%;
       height: 100%;
       border: 0;

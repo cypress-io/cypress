@@ -1,11 +1,11 @@
 <div>
   <div>
     <i class="fa fa-file-o"></i>
-    <%= @name %>
+    Recent File
   </div>
 </div>
 <div>
   <div>
-    2 days ago
+    /users
   </div>
 </div>

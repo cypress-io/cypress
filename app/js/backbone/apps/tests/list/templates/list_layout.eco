@@ -1,6 +1,14 @@
 <div id="tests-list-page">
-  <div class="ecl-main-content">
-    <h2>Test Files</h2>
-    <div id="files-region" class="block-panel"></div>
+  <div class="cy-main-content">
+    <div class="block-panel">
+      <div class="title-bar">
+        <h1>My Test Files</h1>
+        <div class="controls">
+          <div id="search-region"></div>
+        </div>
+      </div>
+      <div id="recent-files-region"></div>
+      <div id="all-files-region" class="all-files-container"></div>
+    </div>
   </div>
 </div>

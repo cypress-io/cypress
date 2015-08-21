@@ -1,0 +1,12 @@
+<h2>All Files</h2>
+<ul class="list-as-table files-list-header">
+  <li>
+    <div>
+      <div>Name</div>
+    </div>
+    <div>
+      <div>Last Modified</div>
+    </div>
+  </li>
+</ul>
+<ul class="outer-files-container list-as-table"></ul>

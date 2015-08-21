@@ -575,16 +575,16 @@ SecretSauce.Socket =
 
     @fs.ensureDirAsync(@testsDir).bind(@)
 
-    ## BREAKING DUE TO __DIRNAME
-    # watchCssFiles = chokidar.watch path.join(__dirname, "public", "css"), ignored: (path, stats) ->
-    #   return false if fs.statSync(path).isDirectory()
+    if process.env["NODE_ENV"] is "development"
+      watchCssFiles = chokidar.watch @path.join(process.cwd(), "lib", "public", "css"), ignored: (path, stats) =>
+        return false if @fs.statSync(path).isDirectory()
 
-    #   not /\.css$/.test path
+        not /\.css$/.test path
 
-    # # watchCssFiles.on "add", (path) -> console.log "added css:", path
-    # watchCssFiles.on "change", (filePath, stats) =>
-    #   filePath = path.basename(filePath)
-    #   @io.emit "eclectus:css:changed", file: filePath
+      # watchCssFiles.on "add", (path) -> console.log "added css:", path
+      watchCssFiles.on "change", (filePath, stats) =>
+        filePath = path.basename(filePath)
+        @io.emit "cypress:css:changed", file: filePath
 
 SecretSauce.IdGenerator =
   hasExistingId: (e) ->

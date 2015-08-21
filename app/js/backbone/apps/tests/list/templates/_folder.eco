@@ -1,5 +1,9 @@
-<h4>
-  <i class="fa fa-folder-o"></i>
-  <%= @name %>
-</h4>
-<ul></ul>
+<div>
+  <div>
+    <i class="fa fa-folder-open-o"></i>
+    <%= @name %>
+  </div>
+  <div>
+    <ul class="list-as-table"></ul>
+  </div>
+</div>

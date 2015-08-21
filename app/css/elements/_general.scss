@@ -6,7 +6,7 @@ body {
   position: relative;
   padding: 0;
   background-color: #F6F6F6;
-  font-family: "Open Sans", sans-serif;
+  font-family: "Muli", sans-serif;
   font-size: 12px;
   color: #555;
   // opacity: 0;
@@ -15,7 +15,7 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Muli', sans-serif;
   font-weight: 300;
 }
 
@@ -48,10 +48,7 @@ ul {
   padding-left: 0px;
 }
 
-#ecl-wrapper {
-  // padding-top: 50px;
-  position: absolute;
-  width: 100%;
+#cy-wrapper {
   height: 100%;
 
   &.collapsed {
@@ -71,7 +68,7 @@ ul {
   }
 
   #main-region {
-    margin-left: 216px;
+    margin-left: 200px;
     position: relative;
     padding: 0;
     overflow: auto;
