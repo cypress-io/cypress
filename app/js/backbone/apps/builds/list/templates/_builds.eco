@@ -1,15 +1,23 @@
-<table class="table table-hover">
-  <thead>
-    <tr>
-      <th>Branch</th>
-      <th>Passed</th>
-      <th>Failed</th>
-      <th>Skipped</th>
-      <th>Pending</th>
-      <th>Total</th>
-      <th>Duration</th>
-      <th>Created At</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+<ul class="list-as-table list-header builds-list-header">
+  <li>
+    <div>
+      <div>Build #</div>
+    </div>
+    <div>
+      <div>Branch</div>
+    </div>
+    <div>
+      <div>Message</div>
+    </div>
+    <div>
+      <div>Test Results</div>
+    </div>
+    <div>
+      <div>Duration</div>
+    </div>
+    <div>
+      <div>Started</div>
+    </div>
+  </li>
+</ul>
+<ul class="builds-container list-as-table"></ul>

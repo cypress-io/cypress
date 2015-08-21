@@ -40,6 +40,7 @@
 @import "elements/dropdown-menus";
 @import "elements/forms";
 @import "elements/general";
+@import "elements/labels";
 @import "elements/lists";
 @import "elements/main-content";
 @import "elements/nav";
@@ -50,6 +51,7 @@
 
 // Independent Pages
 @import "pages/analytics";
+@import "pages/builds";
 @import "pages/tests";
 @import "pages/tests/commands";
 @import "pages/tests/iframe";

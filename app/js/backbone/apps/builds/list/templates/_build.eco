@@ -1,24 +1,85 @@
-<td>
-  <%= @branch %>
-</td>
-<td>
-  <%= @passed %>
-</td>
-<td>
-  <%= @failed %>
-</td>
-<td>
-  <%= @skipped %>
-</td>
-<td>
-  <%= @pending %>
-</td>
-<td>
-  <%= @total %>
-</td>
-<td>
-  <%= @duration %>
-</td>
-<td>
-  <%= @created_at %>
-</td>
+<div>
+  <div>
+    <%= @buildId %>
+  </div>
+</div>
+<div>
+  <div>
+    <%= @branch %>
+  </div>
+</div>
+<div>
+  <div class="build-message">
+    <%= @message %>
+  </div>
+</div>
+<div>
+  <div class="build-stats">
+    <div>
+      <div>
+        <% if @passed > 0: %>
+          <%= @passed %>
+        <% end %>
+      </div>
+      <div>
+        <% if @passed > 0: %>
+          <span class="label label-success">Pass</span>
+        <% end %>
+      </div>
+    </div>
+    <div>
+      <div>
+        <% if @failed > 0: %>
+          <%= @failed %>
+        <% end %>
+      </div>
+      <div>
+        <% if @failed > 0: %>
+          <span class="label label-danger">Fail</span>
+        <% end %>
+      </div>
+    </div>
+    <div>
+      <div>
+        <% if @skipped > 0: %>
+          <%= @skipped %>
+        <% end %>
+      </div>
+      <div>
+        <% if @skipped > 0: %>
+          <span class="label label-info">Skip</span>
+        <% end %>
+      </div>
+    </div>
+    <div>
+      <div>
+        <% if @pending > 0: %>
+          <%= @pending %>
+        <% end %>
+      </div>
+      <div>
+        <% if @pending > 0: %>
+          <span class="label label-default">Pend</span>
+        <% end %>
+      </div>
+    </div>
+    <div>
+      <div>
+        <%= @total %>
+      </div>
+      <div>
+        <span class="label label-default">Total</span>
+      </div>
+    </div>
+  </div>
+</div>
+<div>
+  <div>
+    <%= @duration %>ms
+  </div>
+</div>
+<div>
+  <div>
+    <%= moment(@created_at).fromNow() %>
+  </div>
+</div>

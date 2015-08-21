@@ -1,0 +1,60 @@
+.builds-container {
+  @include list-columns(100%);
+  margin-bottom: 40px;
+}
+
+.builds-list-header {
+  @include list-columns(9%, 13%, 24%, 34%, 10%, 10%);
+
+  &>li>div:nth-child(4)>div {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  &>li>div:last-child {
+    text-align: right;
+  }
+
+}
+
+.builds-container {
+  @include list-columns(9%, 13%, 24%, 34%, 10%, 10%);
+
+  &>li>div>div {
+    padding: 10px 20px;
+    font-weight: 500;
+  }
+
+
+  &>li>div:last-child {
+    text-align: right;
+  }
+
+}
+
+.list-as-table>li>div>div.build-stats {
+  padding: 0;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+
+
+  &>div {
+    min-height: 62px;
+    @include responsive-width(20%);
+    border-right: 1px solid #eee;
+    padding: 10px;
+
+    &:first-child {
+      border-left: 1px solid #eee;
+    }
+
+
+  }
+}
+
+.build-message {
+  font-size: 12px;
+  font-weight: 300;
+  color: #898A8B;
+}
