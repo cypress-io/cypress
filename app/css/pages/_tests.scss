@@ -1,5 +1,9 @@
 #tests-list-page {
 
+  .well {
+    margin: 20px;
+  }
+
   .outer-files-container {
     @include list-columns(100%);
     margin-bottom: 0;

@@ -1,12 +1,14 @@
-<h2>All Files</h2>
-<ul class="list-as-table list-header files-list-header">
-  <li>
-    <div>
-      <div>Name</div>
-    </div>
-    <div>
-      <div>Last Modified</div>
-    </div>
-  </li>
-</ul>
+<% if @length: %>
+  <h2>All Files</h2>
+  <ul class="list-as-table list-header files-list-header">
+    <li>
+      <div>
+        <div>Name</div>
+      </div>
+      <div>
+        <div>Last Modified</div>
+      </div>
+    </li>
+  </ul>
+<% end %>
 <ul class="outer-files-container list-as-table"></ul>

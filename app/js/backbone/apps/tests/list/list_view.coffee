@@ -67,3 +67,6 @@
 
     emptyViewOptions: ->
       path: @collection.path
+
+    templateHelpers: ->
+      length: @collection.length
