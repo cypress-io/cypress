@@ -10,8 +10,20 @@
       message: ->
         _.truncate(@attributes.message, 43)
 
+      status: ->
+        switch
+          when @get("total") is @get("passed")
+            "pass"
+          when @get("failed") > 0
+            "fail"
+          else
+            "cancel"
+
   class Entities.BuildsCollection extends Entities.Collection
     model: Entities.Build
+
+    comparator: (m) ->
+      -moment(m.get("created_at")).unix()
 
     url: "/__cypress/builds"
 
@@ -84,10 +96,14 @@
         }
       ]
 
-      builds = new Entities.BuildsCollection
-      builds.fetch({reset: true}).then (resp) ->
+      check = (resp) ->
         if not resp.length
           builds.reset(models)
+
+      builds = new Entities.BuildsCollection
+      builds.fetch({reset: true})
+        .fail(check)
+        .done(check)
       builds
 
   App.reqres.setHandler "build:entities", ->
