@@ -164,7 +164,7 @@ gulp.task "build:secret:sauce", (cb) ->
   return false
 
 gulp.task "client:html", ->
-  gulp.src(["app/html/index.html", "app/html/id_generator.html"])
+  gulp.src(["app/html/*"])
     .pipe gulp.dest("lib/public")
 
 gulp.task "nw:html", ->
