@@ -5,6 +5,7 @@ before ->
     c = Cypress ? @Cypress
     c.off("fail")
 
+  sinon.format = -> ""
   @sandbox = sinon.sandbox.create()
 
 beforeEach ->
