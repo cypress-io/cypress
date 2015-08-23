@@ -4,6 +4,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
   focusable = "a[href],link[href],button,input,select,textarea,[tabindex],[contenteditable]"
 
+  delay = 50
+
   dispatchPrimedChangeEvents = ->
     ## if we have a changeEvent, dispatch it
     if changeEvent = @prop("changeEvent")
@@ -50,9 +52,13 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       ## dont submit the form if our dispatched event was cancelled (false)
       form.submit() if dispatched
 
-      command.snapshot().end() if command
+      @_timeout(delay, true)
 
-      return options.$el
+      Promise
+        .delay(delay)
+        .then ->
+          command.snapshot().end() if command
+        .return(options.$el)
 
     fill: (subject, obj, options = {}) ->
       @throwErr "cy.fill() must be passed an object literal as its 1st argument!" if not _.isObject(obj)
@@ -93,7 +99,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         @throwErr(".focus() can only be called on a single element! Your subject contained #{num} elements!", command)
 
-      timeout = @_timeout() / 2
+      timeout = @_timeout() * .90
 
       cleanup = null
       hasFocused = false
@@ -117,9 +123,13 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
           cleanup()
 
-          command.snapshot().end() if command
+          @_timeout(delay, true)
 
-          resolve(options.$el)
+          Promise
+            .delay(delay)
+            .then ->
+              command.snapshot().end() if command
+              resolve(options.$el)
 
         options.$el.on("focus", focused)
 
@@ -212,7 +222,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           node = Cypress.Utils.stringifyElement($focused)
           @throwErr(".blur() can only be called on the focused element. Currently the focused element is a: #{node}", command)
 
-        timeout = @_timeout() / 2
+        timeout = @_timeout() * .90
 
         cleanup = null
         hasBlurred = false
@@ -236,9 +246,13 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
             cleanup()
 
-            command.snapshot().end() if command
+            @_timeout(delay, true)
 
-            resolve(options.$el)
+            Promise
+              .delay(delay)
+              .then ->
+                command.snapshot().end() if command
+                resolve(options.$el)
 
           options.$el.on("blur", blurred)
 
@@ -288,17 +302,15 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
       @ensureDom(subject)
 
-      wait = 10
-
       dblclicks = []
 
       dblclick = (el, index) =>
         $el = $(el)
 
-        ## we want to add this wait delta to our
+        ## we want to add this delay delta to our
         ## runnables timeout so we prevent it from
         ## timing out from multiple clicks
-        @_timeout(wait, true)
+        @_timeout(delay, true)
 
         if options.log
           command = Cypress.Log.command
@@ -325,7 +337,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           ## chaining thenable promises
           return null
 
-        .delay(wait)
+        .delay(delay)
         .cancellable()
 
         dblclicks.push(p)
@@ -383,17 +395,11 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       @ensureDom(options.$el)
 
       win  = @private("window")
-      wait = 10
 
       clicks = []
 
       click = (el, index) =>
         $el = $(el)
-
-        ## we want to add this wait delta to our
-        ## runnables timeout so we prevent it from
-        ## timing out from multiple clicks
-        @_timeout(wait, true)
 
         domEvents = {}
         $previouslyFocusedEl = null
@@ -463,13 +469,15 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
             consoleObj
 
-          ## display the red dot at these coords
-          if options.command
-            options.command.set({coords: coords, onConsole: onConsole}).snapshot().end()
-
-          ## need to return null here to prevent
-          ## chaining thenable promises
-          return null
+          Promise
+            .delay(delay)
+            .then ->
+              ## display the red dot at these coords
+              if options.command
+                options.command.set({coords: coords, onConsole: onConsole}).snapshot().end()
+            ## need to return null here to prevent
+            ## chaining thenable promises
+            .return(null)
 
         findElByCoordinates = ($el) =>
           coordsObj = (coords, $el) ->
@@ -598,7 +606,13 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
           return false
 
+        ## we want to add this delay delta to our
+        ## runnables timeout so we prevent it from
+        ## timing out from multiple clicks
+        @_timeout(delay, true)
+
         p = findElByCoordinates($el)
+          .cancellable()
           .then (obj) =>
             {$elToClick, coords} = obj
 
@@ -637,9 +651,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
                       afterMouseDown($elToClick, coords)
                   else
                     afterMouseDown($elToClick, coords)
-
-          .delay(wait)
-          .cancellable()
 
         clicks.push(p)
 
@@ -852,12 +863,16 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             type()
         else
           type()
-      .then ->
-        ## submit events should be finished at this point!
-        ## so we can snapshot the current state of the DOM
-        options.command.snapshot().end() if options.command
+      .then =>
+        @_timeout(delay, true)
 
-        return options.$el
+        Promise
+          .delay(delay)
+          .then ->
+            ## submit events should be finished at this point!
+            ## so we can snapshot the current state of the DOM
+            options.command.snapshot().end() if options.command
+          .return(options.$el)
 
     clear: (subject, options = {}) ->
       ## what about other types of inputs besides just text?

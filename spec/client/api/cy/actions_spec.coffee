@@ -105,6 +105,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe "errors", ->
       beforeEach ->
+        @currentTest.timeout(200)
         @allowErrors()
 
       it "throws when not a dom subject", (done) ->
@@ -279,6 +280,32 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("#contenteditable").type("foo").then ($div) ->
         text = _.clean $div.text()
         expect(text).to.eq _.clean(oldText + "foo")
+
+    it "delays 50ms before resolving", (done) ->
+      waited = false
+
+      @cy.$(":text:first").on "change", (e) =>
+        _.delay ->
+          waited = true
+        , 50
+
+        @cy.on "invoke:end", ->
+          expect(waited).to.be.true
+          done()
+
+      @cy.get(":text:first").type("foo{enter}")
+
+    it "increases the timeout delta", (done) ->
+      prevTimeout = @test.timeout()
+
+      @cy.on "invoke:end", (obj) =>
+        if obj.name is "type"
+          ## 40 is from 4 keys
+          ## 100 is from .click + .focus delays!
+          expect(@test.timeout()).to.eq 40 + 100 + 50 + prevTimeout
+          done()
+
+      @cy.get(":text:first").type("foo{enter}")
 
     # describe "input types", ->
       # _.each ["password", "email", "number", "date", "week", "month", "time", "datetime", "datetime-local", "search", "url"], (type) ->
@@ -1482,6 +1509,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe "errors", ->
       beforeEach ->
+        @currentTest.timeout(200)
         @allowErrors()
 
       it "throws when not a dom subject", (done) ->
@@ -1666,6 +1694,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe "errors", ->
       beforeEach ->
+        @currentTest.timeout(200)
         @allowErrors()
 
       it "throws when not a dom subject", (done) ->
@@ -1845,6 +1874,20 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#checkbox-covered-in-span").check({timeout: 1000, interval: 60})
 
+    it "delays 50ms before resolving", (done) ->
+      waited = false
+
+      @cy.$("form:first").on "submit", (e) =>
+        _.delay ->
+          waited = true
+        , 50
+
+        @cy.on "invoke:end", ->
+          expect(waited).to.be.true
+          done()
+
+      @cy.get("form:first").submit()
+
     describe "events", ->
       it "emits click event", (done) ->
         @cy.$("[name=colors][value=blue]").click -> done()
@@ -1860,6 +1903,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe "errors", ->
       beforeEach ->
+        @currentTest.timeout(200)
         @allowErrors()
 
       it "throws when subject isnt dom", (done) ->
@@ -2090,6 +2134,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe "errors", ->
       beforeEach ->
+        @currentTest.timeout(200)
         @allowErrors()
 
       it "throws specifically on a radio", (done) ->
@@ -2313,15 +2358,40 @@ describe "$Cypress.Cy Actions Commands", ->
       ## because the submit method does not trigger beforeunload
       ## synchronously.
 
-      @cy.on "invoke:end", (obj) =>
+      @cy.on "command:returned:value", (obj, ret) =>
         if obj.name is "submit"
           ## expect our isReady to be pending
           expect(@cy.prop("ready").promise.isPending()).to.be.true
 
       @cy.get("form:first").submit()
 
+    it "delays 50ms before resolving", (done) ->
+      waited = false
+
+      @cy.$("form:first").on "submit", (e) =>
+        _.delay ->
+          waited = true
+        , 50
+
+        @cy.on "invoke:end", ->
+          expect(waited).to.be.true
+          done()
+
+      @cy.get("form:first").submit()
+
+    it "increases the timeout delta", (done) ->
+      prevTimeout = @test.timeout()
+
+      @cy.on "invoke:end", (obj) =>
+        if obj.name is "submit"
+          expect(@test.timeout()).to.eq 50 + prevTimeout
+          done()
+
+      @cy.get("form:first").submit()
+
     describe "errors", ->
       beforeEach ->
+        @currentTest.timeout(200)
         @allowErrors()
 
       it "is a child command", (done) ->
@@ -2575,6 +2645,30 @@ describe "$Cypress.Cy Actions Commands", ->
         .focused().then ($ce) ->
           expect($ce.get(0)).to.eq ce.get(0)
 
+    it "delays 50ms before resolving", (done) ->
+      waited = false
+
+      @cy.$("#focus input").on "focus", (e) =>
+        _.delay ->
+          waited = true
+        , 50
+
+        @cy.on "invoke:end", ->
+          expect(waited).to.be.true
+          done()
+
+      @cy.get("#focus input").focus()
+
+    it "increases the timeout delta", (done) ->
+      prevTimeout = @test.timeout()
+
+      @cy.on "invoke:end", (obj) =>
+        if obj.name is "focus"
+          expect(@test.timeout()).to.eq 50 + prevTimeout
+          done()
+
+      @cy.get("#focus input").focus()
+
     describe ".log", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
@@ -2622,6 +2716,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe "errors", ->
       beforeEach ->
+        @currentTest.timeout(200)
         @allowErrors()
 
       it "throws when not a dom subject", (done) ->
@@ -2764,6 +2859,30 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#input-types [type=time]").focus().invoke("val", "03:15:00").blur()
 
+    it "delays 50ms before resolving", (done) ->
+      waited = false
+
+      @cy.$("input:first").on "blur", (e) =>
+        _.delay ->
+          waited = true
+        , 50
+
+        @cy.on "invoke:end", ->
+          expect(waited).to.be.true
+          done()
+
+      @cy.get("input:first").focus().blur()
+
+    it "increases the timeout delta", (done) ->
+      prevTimeout = @test.timeout()
+
+      @cy.on "invoke:end", (obj) =>
+        if obj.name is "blur"
+          expect(@test.timeout()).to.eq 50 + prevTimeout
+          done()
+
+      @cy.get("input:first").focus().blur()
+
     describe ".log", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
@@ -2810,6 +2929,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe "errors", ->
       beforeEach ->
+        @currentTest.timeout(200)
         @allowErrors()
 
       it "throws when not a dom subject", (done) ->
@@ -2907,13 +3027,13 @@ describe "$Cypress.Cy Actions Commands", ->
         .get("input:first").focus()
         .get("input:text:last").dblclick()
 
-    it "inserts artificial delay of 10ms", ->
+    it "inserts artificial delay of 50ms", ->
       @cy.on "invoke:start", (obj) =>
         if obj.name is "dblclick"
           @delay = @sandbox.spy Promise.prototype, "delay"
 
       @cy.get("#button").dblclick().then ->
-        expect(@delay).to.be.calledWith 10
+        expect(@delay).to.be.calledWith 50
 
     it "can operate on a jquery collection", ->
       dblclicks = 0
@@ -2986,17 +3106,19 @@ describe "$Cypress.Cy Actions Commands", ->
     it "increases the timeout delta after each dblclick", (done) ->
       prevTimeout = @test.timeout()
 
-      count = @cy.$("button").length
+      count = @cy.$("button").slice(0, 3).length
 
       @cy.on "invoke:end", (obj) =>
         if obj.name is "dblclick"
-          expect(@test.timeout()).to.eq (count * 10) + prevTimeout
+          ## 100 here because dbclick + focus each are 50ms
+          expect(@test.timeout()).to.eq (count * 100) + prevTimeout
           done()
 
-      @cy.get("button").dblclick()
+      @cy.get("button").invoke("slice", 0, 3).dblclick()
 
     describe "errors", ->
       beforeEach ->
+        @currentTest.timeout(200)
         @allowErrors()
 
       it "throws when not a dom subject", (done) ->
@@ -3267,17 +3389,31 @@ describe "$Cypress.Cy Actions Commands", ->
         .get("input:first").focus()
         .get("input:text:last").click()
 
-    it "inserts artificial delay of 10ms", ->
+    it "inserts artificial delay of 50ms", ->
       @cy.on "invoke:start", (obj) =>
         if obj.name is "click"
-          @delay = @sandbox.spy Promise.prototype, "delay"
+          @delay = @sandbox.spy Promise, "delay"
 
       @cy.get("#button").click().then ->
-        expect(@delay).to.be.calledWith 10
+        expect(@delay).to.be.calledWith 50
+
+    it "delays 50ms before resolving", (done) ->
+      waited = false
+
+      @cy.$("button:first").on "click", (e) =>
+        _.delay ->
+          waited = true
+        , 50
+
+        @cy.on "invoke:end", ->
+          expect(waited).to.be.true
+          done()
+
+      @cy.get("button:first").click()
 
     it "can operate on a jquery collection", ->
       clicks = 0
-      buttons = @cy.$("button")
+      buttons = @cy.$("button").slice(0, 3)
       buttons.click ->
         clicks += 1
         return false
@@ -3286,7 +3422,7 @@ describe "$Cypress.Cy Actions Commands", ->
       expect(buttons.length).to.be.gt 1
 
       ## make sure each button received its click event
-      @cy.get("button").click().then ($buttons) ->
+      @cy.get("button").invoke("slice", 0, 3).click().then ($buttons) ->
         expect($buttons.length).to.eq clicks
 
     it "can cancel multiple clicks", (done) ->
@@ -3350,7 +3486,8 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.on "invoke:end", (obj) =>
         if obj.name is "click"
-          expect(@test.timeout()).to.eq (count * 10) + prevTimeout
+          ## 100ms here because click + focus are each
+          expect(@test.timeout()).to.eq (count * 100) + prevTimeout
           done()
 
       @cy.get("#three-buttons button").click()
@@ -3591,6 +3728,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe "errors", ->
       beforeEach ->
+        @currentTest.timeout(200)
         @allowErrors()
 
       it "throws when not a dom subject", (done) ->
