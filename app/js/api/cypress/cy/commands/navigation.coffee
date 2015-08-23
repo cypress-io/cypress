@@ -60,6 +60,10 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
       ## which at that point we may keep runnable around
       return if not @private("runnable")
 
+      ## this tells the world that we're
+      ## handling a page load event
+      @prop("pageChangeEvent", true)
+
       _.defaults options,
         timeout: 20000
 
@@ -69,7 +73,9 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
         message: "--waiting for new page to load---"
         event: true
         ## add a note here that loading nulled out the current subject?
-        onConsole: -> {}
+        onConsole: -> {
+          "Notes": "This page event automatically nulls the current subject. This prevents chaining off of DOM objects which existed on the previous page."
+        }
 
       prevTimeout = @_timeout()
 
@@ -90,13 +96,9 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
               @fail(e)
           else
             command.set("message", "--page loaded--").snapshot().end()
-        .then =>
-          ## null out our subject again after loading resolves
-          ## to prevent chaining since our page is loading
-          @nullSubject()
 
-          ## return null here to prevent further promise chaining
-          null
+          ## return null to prevent accidental chaining
+          return null
         .catch Promise.CancellationError, (err) ->
           ## dont do anything on cancellation errors
           return

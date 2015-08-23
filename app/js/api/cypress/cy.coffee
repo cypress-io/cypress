@@ -383,10 +383,16 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
         ## the chainer id before running its fn
         @_checkForNewChain(obj.chainerId)
 
+        ## run the command's fn
+        ret = obj.fn.apply(obj.ctx, args)
+
+        ## allow us to immediately tap into
+        ## return value of our command
+        @trigger "command:returned:value", obj, ret
+
         ## we cannot pass our cypress instance or our chainer
         ## back into bluebird else it will create a thenable
         ## which is never resolved
-        ret = obj.fn.apply(obj.ctx, args)
         if (ret is @ or ret is @chain()) then null else ret
 
       .then (subject, options = {}) =>
@@ -397,25 +403,36 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
         ## and we've potentially altered the subject
         @trigger "invoke:subject", subject, obj
 
-        # if we havent become recently ready and unless we've
-        # explicitly disabled checking for location changes
-        # and if our href has changed in between running the commands then
-        # then we're no longer ready to proceed with the next command
-        # if @prop("recentlyReady") is null
-        #   if @_hrefChanged()
-        #     debugger
-        #     @isReady(false, "href changed")
-
-        # @onInvokeEnd(subject)
-
         ## reset the nestedIndex back to null
         @prop("nestedIndex", null)
 
         ## also reset recentlyReady back to null
         @prop("recentlyReady", null)
 
-        ## return the prop subject
+        ## if we became unready when a command
+        ## was being resolved then we need to
+        ## null out the subject here and additionally
+        ## check for child commands and error if found
+        ## only if this is a DOM subject
+        ##
+        ## since we delay the resolving
+        ## of our command subjects, they may have
+        ## caused a page load / form submit so
+        ## if our subject has been nulled we need
+        ## to keep it nulled
         @prop("subject", subject)
+
+        if @prop("pageChangeEvent")
+          @prop("pageChangeEvent", false)
+
+          ## if we currently have a DOM subject and its not longer
+          ## in the document then we need to null out our subject because
+          ## a page change has happened and we want to discontinue chaining
+          if $Cypress.Utils.hasElement(subject) and not @_contains(subject)
+            ## additionally check for errors here
+            ## so we can notify the user if they're trying
+            ## to chain child commands off of this null subject
+            @nullSubject()
 
         @trigger "invoke:end", obj
 
@@ -426,9 +443,9 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
         ## resolving we need to ensure it finishes first
         if ready = @prop("ready")
           if ready.promise.isPending()
-            return ready.promise.return(subject).catch (err) ->
+            return ready.promise.return(@prop("subject")).catch (err) ->
 
-        return subject
+        return @prop("subject")
 
     cancel: (err) ->
       obj = @prop("current")
