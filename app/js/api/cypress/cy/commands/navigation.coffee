@@ -24,6 +24,25 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
     _href: (win, url) ->
       win.location.href = url
 
+    submitting: (e, options = {}) ->
+      ## even though our beforeunload event
+      ## should be firing shortly, lets just
+      ## set the pageChangeEvent to true because
+      ## there may be situations where it doesnt
+      ## fire fast enough
+      @prop("pageChangeEvent", true)
+
+      Cypress.Log.command
+        type: "parent"
+        name: "form sub"
+        message: "--submitting form---"
+        event: true
+        end: true
+        snapshot: true
+        onConsole: -> {
+          "Originated From": e.target
+        }
+
     loading: (options = {}) ->
       current = @prop("current")
 

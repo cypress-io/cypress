@@ -37,9 +37,7 @@ do ($Cypress, _) ->
         ## did not submit
         return if e.isDefaultPrevented()
 
-        ## null out our subject immediately
-        ## to prevent chaining since our page is loading
-        @nullSubject()
+        @submitting(e)
 
         @isReady(false, "submit")
 
