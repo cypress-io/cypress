@@ -53,7 +53,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           expect(@_href).to.be.calledWith @win, "about:blank"
 
     it "does not navigate to about:blank if existing url is about:blank", ->
-      @sandbox.stub(@cy.sync, "url").returns("about:blank")
+      @sandbox.stub(@cy, "_getLocation").returns("about:blank")
       _href = @sandbox.spy @cy, "_href"
 
       cy
