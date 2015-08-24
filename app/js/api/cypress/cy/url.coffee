@@ -3,7 +3,7 @@ do ($Cypress, _) ->
   $Cypress.Cy.extend
     urlChanged: (url, options = {}) ->
       ## allow the url to be explictly passed here
-      url ?= @sync.url({log: false})
+      url ?= @_getLocation("href")
 
       ## about:blank returns "" and we dont
       ## want to trigger the url:changed

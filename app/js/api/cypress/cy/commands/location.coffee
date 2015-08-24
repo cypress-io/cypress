@@ -1,5 +1,15 @@
 $Cypress.register "Location", (Cypress, _, $) ->
 
+  Cypress.Cy.extend
+    _getLocation: (key) ->
+      remoteUrl = @private("window").location.toString()
+      location  = Cypress.Location.create(remoteUrl)
+
+      if key
+        location[key]
+      else
+        location
+
   Cypress.addParentCommand
     url: (options = {}) ->
       _.defaults options, {log: true}

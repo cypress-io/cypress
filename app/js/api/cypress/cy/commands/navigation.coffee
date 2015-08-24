@@ -161,7 +161,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
         ## if we're visiting a page and we're not currently
         ## on about:blank then we need to nuke the window
         ## and after its nuked then visit the url
-        if @sync.url({log: false}) isnt "about:blank"
+        if @_getLocation("href") isnt "about:blank"
           $remoteIframe.one "load", =>
             visit(win, url, options)
 
