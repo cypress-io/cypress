@@ -13,6 +13,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
         exists: true
         log: true
         command: null
+        verify: true
 
       ## normalize these two options
       options.exist = options.exists and options.exist
@@ -102,7 +103,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
         options.command.set({$el: $el})
 
-      do getElements = =>
+      getElements = =>
         ## attempt to query for the elements by withinSubject context
         ## and catch any sizzle errors!
         try
@@ -153,21 +154,35 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
         @_retry(getElements, options)
 
-    root: ->
-      command = Cypress.Log.command({message: ""})
+      do resolveElements = =>
+        Promise.try(getElements).then ($el) =>
+          if options.verify is false
+            return $el
+
+          @verifyUpcomingAssertions($el)
+            .return({
+              subject: $el
+              command: command
+            })
+            .catch (err) =>
+              @_retry resolveElements, options
+
+    root: (options = {}) ->
+      _.defaults options, {log: true}
+
+      if options.log
+        command = Cypress.Log.command({message: ""})
 
       log = ($el) ->
-        command.set({$el: $el}).snapshot().end()
+        command.set({$el: $el}) if command
 
-        return $el
+        return {subject: $el, command: command}
 
-      withinSubject = @prop("withinSubject")
-
-      if withinSubject
+      if withinSubject = @prop("withinSubject")
         return log(withinSubject)
 
-      @command("get", "html", {log: false}).then ($html) ->
-        log($html)
+      @command("get", "html", {log: false}).then (ret) ->
+        log(ret.subject)
 
   Cypress.addDualCommand
     contains: (subject, filter, text, options = {}) ->
@@ -243,6 +258,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
         filter: true
         log: false
         retry: false ## dont retry because we perform our own element validation
+        verify: false ## dont verify upcoming assertions, we do that ourselves
 
       setEl = ($el) ->
         return if not options.command

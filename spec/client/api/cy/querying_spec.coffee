@@ -171,9 +171,20 @@ describe "$Cypress.Cy Querying Commands", ->
           .root().then ($root) ->
             expect($root.get(0)).to.eq form.get(0)
 
+    it "eventually resolves", ->
+      _.delay ->
+        cy.$("html").addClass("foo").addClass("bar")
+      , 100
+
+      cy.root().should("have.class", "foo").and("have.class", "bar")
+
     describe ".log", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
+
+      it "can turn off logging", ->
+        @cy.root({log: false}).then ->
+          expect(@log).to.be.undefined
 
       it "logs immediately before resolving", (done) ->
         @Cypress.on "log", (log) ->
@@ -204,6 +215,14 @@ describe "$Cypress.Cy Querying Commands", ->
             .get("input")
             .root().then ($root) ->
               expect(@log.get("$el").get(0)).to.eq(form.get(0))
+
+      it "onConsole", ->
+        @cy.root().then ($root) ->
+          onConsole = @log.attributes.onConsole()
+          expect(onConsole).to.deep.eq {
+            Command: "root"
+            Returned: $root.get(0)
+          }
 
   context "#get", ->
     beforeEach ->
@@ -370,6 +389,14 @@ describe "$Cypress.Cy Querying Commands", ->
         ## should resolving after removing 2 buttons
         @cy.get("button", {length: length}).then ($buttons) ->
           expect($buttons.length).to.eq length
+
+    describe "assertion verification", ->
+      it "automatically retries", ->
+        _.delay ->
+          cy.$("button:first").attr("data-foo", "bar")
+        , 100
+
+        cy.get("button:first").should("have.attr", "data-foo").and("match", /bar/)
 
     describe ".log", ->
       beforeEach ->
