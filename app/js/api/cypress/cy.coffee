@@ -322,20 +322,6 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
     #   fn._invokeImmediately = true
     #   fn
 
-    _storeHref: ->
-      ## we are using href and stripping out the hash because
-      ## hash changes do not cause full page refreshes
-      ## however, i believe this will completely barf when
-      ## JS users are using pushstate since there is no hash
-      ## TODO. need to listen to pushstate events here which
-      ## will act as the isReady() the same way load events do
-      location = @sync.location({log: false})
-      @prop "href", location.href.replace(location.hash, "")
-
-    _hrefChanged: ->
-      location = @sync.location({log: false})
-      console.log "command is", @prop("current").name, "href is", @prop("href"), "location href is", location.href
-      @prop("href") isnt location.href.replace(location.hash, "")
 
     set: (obj, prev, next) ->
       obj.prev = prev
@@ -355,9 +341,6 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
         @trigger "invoke:start", obj
 
         @log obj
-
-        ## store our current href before invoking the next command
-        @_storeHref()
 
         @prop "nestedIndex", @prop("index")
 

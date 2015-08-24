@@ -11,22 +11,6 @@ describe "$Cypress.Cy Navigation Commands", ->
         src = $("iframe").attr("src")
         expect(src).to.eq "/foo"
 
-    it "immediately updates the stored href on load", (done) ->
-      _storeHref = @sandbox.spy @cy, "_storeHref"
-
-      @cy.on "invoke:subject", (subject, obj) ->
-        expect(_storeHref.callCount).to.eq 2
-        done()
-
-      @cy.visit("/foo")
-
-    it "prevents _hrefChanged from always being true after visiting", (done) ->
-      @cy.on "invoke:subject", (subject, obj) ->
-        expect(@_hrefChanged()).to.be.false
-        done()
-
-      @cy.visit("/foo")
-
     it "rejects the promise if data-cypress-visit-error is in the body"
 
     it "rejects with error: ...something..."

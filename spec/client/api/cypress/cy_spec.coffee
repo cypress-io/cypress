@@ -384,13 +384,6 @@ describe "$Cypress.Cy API", ->
           ## we've begun running our promise
           @Cypress.abort().then -> done()
 
-      it "updates the stored href", ->
-        @cy
-          .then ->
-            expect(@cy.prop("href")).to.include "/fixtures/html/dom.html"
-          .visit("/foo").then ->
-            expect(@cy.prop("href")).to.include "foo"
-
     describe "#isReady", ->
       it "creates a deferred when not ready", ->
         @cy.isReady(false)
@@ -414,19 +407,6 @@ describe "$Cypress.Cy API", ->
           done()
 
         @cy.noop({})
-
-    describe "#_storeHref", ->
-      it "sets prop href", ->
-        @cy._storeHref()
-        expect(@cy.prop("href")).to.include "/fixtures/html/dom.html"
-
-      it "strips the hash from the href", ->
-        @sandbox.stub(@cy.sync, "location").returns
-          href: "/foo/bar#baz/quux"
-          hash: "#baz/quux"
-
-        @cy._storeHref()
-        expect(@cy.prop("href")).to.eq "/foo/bar"
 
     describe "nested commands", ->
       beforeEach ->

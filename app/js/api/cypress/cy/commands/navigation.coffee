@@ -87,7 +87,6 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
         .cancellable()
         .timeout(options.timeout)
         .then =>
-          @_storeHref()
           @_timeout(prevTimeout)
           if Cypress.cy.$("[data-cypress-visit-error]").length
             try
@@ -143,7 +142,6 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
           # ## when the remote iframe's load event fires
           # ## callback fn
           $remoteIframe.one "load", =>
-            @_storeHref()
             @_timeout(prevTimeout)
             options.onLoad?.call(@, win)
             if Cypress.cy.$("[data-cypress-visit-error]").length
