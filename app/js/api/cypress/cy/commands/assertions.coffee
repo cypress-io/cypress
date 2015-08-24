@@ -39,82 +39,143 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
 
     obj
 
-  Cypress.addChildCommand
-    should: (subject, chainers, args...) ->
-      ## if we're using eventually.have.length blow up
-      if reEvHaveLength.test(chainers)
-        num = args[0] ? "n"
-        @throwErr("'eventually.have.length' is NOT a supported assertion. Use the command options: '{length: #{num}}' implicit assertion instead.")
+  shouldFn = (subject, chainers, args...) ->
+    ## if we're using eventually.have.length blow up
+    if reEvHaveLength.test(chainers)
+      num = args[0] ? "n"
+      @throwErr("'eventually.have.length' is NOT a supported assertion. Use the command options: '{length: #{num}}' implicit assertion instead.")
 
-      ## should doesnt support options here
-      ## so we cant use the wait command
-      ## we must use @_retry directly
+    ## should doesnt support options here
+    ## so we cant use the wait command
+    ## we must use @_retry directly
 
-      exp = Cypress.Chai.expect(subject).to
+    exp = Cypress.Chai.expect(subject).to
 
-      ## are we doing an existance assertion?
-      if reExistance.test(chainers)
-        chainers = chainers.split("exist").join("existInDocument")
-        exp.isCheckingExistance = true
+    ## are we doing an existance assertion?
+    if reExistance.test(chainers)
+      chainers = chainers.split("exist").join("existInDocument")
+      exp.isCheckingExistance = true
 
-      chainers = chainers.split(".")
-      lastChainer = _(chainers).last()
+    chainers = chainers.split(".")
+    lastChainer = _(chainers).last()
 
-      ## backup the original assertion subject
-      originalObj = exp._obj
+    ## backup the original assertion subject
+    originalObj = exp._obj
 
-      eventually = false
+    eventually = false
 
-      options = {}
+    options = {}
 
-      applyChainer = (memo, value) ->
-        if value is lastChainer
-          if _.isFunction(memo[value])
-            memo[value].apply(memo, args)
-        else
-          memo[value]
+    applyChainer = (memo, value) ->
+      if value is lastChainer
+        if _.isFunction(memo[value])
+          memo[value].apply(memo, args)
+      else
+        memo[value]
 
-      applyChainers = =>
-        ## if we're not doing existance assertions
-        ## then check to ensure the subject exists
-        ## in the DOM if its a DOM subject
-        ## need to continually apply this check due
-        ## to eventually
-        if not exp.isCheckingExistance
-          @ensureDom(subject) if Cypress.Utils.hasElement(subject)
+    applyChainers = =>
+      ## if we're not doing existance assertions
+      ## then check to ensure the subject exists
+      ## in the DOM if its a DOM subject
+      ## need to continually apply this check due
+      ## to eventually
+      if not exp.isCheckingExistance
+        @ensureDom(subject) if Cypress.Utils.hasElement(subject)
 
-        _.reduce chainers, (memo, value) =>
-          if value is "eventually"
-            eventually = true
-            return memo
+      _.reduce chainers, (memo, value) =>
+        if value is "eventually"
+          eventually = true
+          return memo
 
-          if value not of memo
-            @throwErr("The chainer: '#{value}' was not found. Building implicit assertion failed.")
+        if value not of memo
+          @throwErr("The chainer: '#{value}' was not found. Building implicit assertion failed.")
 
-          if eventually
-            try
-              applyChainer(memo, value)
-            catch e
-              options.error = e
-              @_retry(applyChainers, options)
-          else
+        if eventually
+          try
             applyChainer(memo, value)
+          catch e
+            options.error = e
+            @_retry(applyChainers, options)
+        else
+          applyChainer(memo, value)
 
-        , exp
+      , exp
 
-      Promise.resolve(applyChainers()).then ->
-        ## if the _obj has been mutated then we
-        ## are chaining assertion properties and
-        ## should return this new subject
-        if originalObj isnt exp._obj
-          return exp._obj
+    Promise.resolve(applyChainers()).then ->
+      ## if the _obj has been mutated then we
+      ## are chaining assertion properties and
+      ## should return this new subject
+      if originalObj isnt exp._obj
+        return exp._obj
 
-        return subject
+      return subject
 
-    and: (subject, args...) ->
-      @sync.should.apply(@, args)
+  Cypress.addAssertionCommand
+    should: ->
+      shouldFn.apply(@, arguments)
+
+    and: ->
+      shouldFn.apply(@, arguments)
 
   Cypress.Cy.extend
+    verifyUpcomingAssertions: (subject) ->
+      cmds = @getUpcomingAssertions()
+
+      ## bail if we have no assertions
+      return Promise.resolve(subject) if not cmds.length
+
+      fns = @_injectAssertionFns(cmds)
+
+      subjects = []
+
+      ## iterate through each subject
+      ## and force the assertion to return
+      ## this value so it does not get
+      ## invoked again
+      memoizeSubjectReturnValue = ->
+        _.each subjects, (subject, i) ->
+          cmd  = cmds[i]
+          orig = cmd.fn.originalFn
+          cmd.fn = -> return subject
+          cmd.fn.originalFn = orig
+
+      assertions = (memo, fn) =>
+        fn(memo).then (subject) ->
+          subjects.push(subject)
+          subject
+
+      Promise
+        .reduce(fns, assertions, subject)
+        .then ->
+          memoizeSubjectReturnValue()
+        .cancellable()
+        .catch Promise.CancellationError, ->
+          debugger
+
+    _injectAssertionFns: (cmds) ->
+      _.map cmds, _.bind(@_injectAssertion, @)
+
+    _injectAssertion: (cmd) ->
+      return (subject) =>
+        cmd.fn.originalFn.apply @, [subject].concat(cmd.args)
+
+    getUpcomingAssertions: ->
+      current = @prop("current")
+      index   = @prop("index") + 1
+
+      assertions = []
+
+      ## grab the rest of the queue'd commands
+      for cmd in @queue.slice(index)
+        ## grab all of the queued commands which are
+        ## assertions and match our current chainerId
+        if cmd.type is "assertion" and cmd.chainerId is current.chainerId
+          assertions.push(cmd)
+        else
+          break
+
+      assertions
+
     assert: (passed, message, value, actual, expected, error) ->
       ## if this is a jquery object and its true
       ## then remove all the 'but's and replace with 'and'

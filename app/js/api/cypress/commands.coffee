@@ -10,6 +10,9 @@ do ($Cypress, _) ->
     addDualCommand: (key, fn) ->
       @add(key, fn, "dual")
 
+    addAssertionCommand: (key, fn) ->
+      @add(key, fn, "assertion")
+
     ## think about adding this for
     ## custom cy extensions as well
     ## that we want to rollback afterwards
@@ -76,6 +79,11 @@ do ($Cypress, _) ->
         args
 
       wrap = (fn) ->
+        wrapped = wrapByType(fn)
+        wrapped.originalFn = fn
+        wrapped
+
+      wrapByType = (fn) ->
         switch type
           when "parent"
             return fn
@@ -87,7 +95,7 @@ do ($Cypress, _) ->
 
               return orig.apply(@, args)
 
-          when "child"
+          when "child", "assertion"
             _.wrap fn, (orig, args...) ->
               @ensureParent()
 
