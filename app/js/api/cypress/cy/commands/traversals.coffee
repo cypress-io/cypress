@@ -52,9 +52,9 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
 
         options.command.set({$el: $el})
 
-        options.command.snapshot().end()
+        options.command.snapshot()
 
-        return $el
+        return {subject: $el, command: options.command}
 
       setEl = ($el) ->
         return if options.log is false

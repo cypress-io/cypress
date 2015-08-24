@@ -63,9 +63,12 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
         .delay(ms)
         .then ->
           if command
-            command.snapshot().end()
+            command.snapshot()
 
-        .return(subject)
+        .return({
+          subject: subject
+          command: command
+        })
 
     _waitFunction: (subject, fn, options) ->
       retry = ->

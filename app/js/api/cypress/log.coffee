@@ -160,7 +160,10 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       return @
 
     end: ->
-      @set "state", "success"
+      @set({
+        end: true
+        state: "success"
+      })
 
       return @
 

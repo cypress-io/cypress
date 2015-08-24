@@ -57,8 +57,11 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       Promise
         .delay(delay)
         .then ->
-          command.snapshot().end() if command
-        .return(options.$el)
+          command.snapshot() if command
+        .return({
+          subject: options.$el
+          command: command
+        })
 
     fill: (subject, obj, options = {}) ->
       @throwErr "cy.fill() must be passed an object literal as its 1st argument!" if not _.isObject(obj)
@@ -128,8 +131,11 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           Promise
             .delay(delay)
             .then ->
-              command.snapshot().end() if command
-              resolve(options.$el)
+              command.snapshot() if command
+              resolve({
+                subject: options.$el
+                command: command
+              })
 
         options.$el.on("focus", focused)
 
@@ -251,8 +257,11 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             Promise
               .delay(delay)
               .then ->
-                command.snapshot().end() if command
-                resolve(options.$el)
+                command.snapshot() if command
+                resolve({
+                  subject: options.$el
+                  command: command
+                })
 
           options.$el.on("blur", blurred)
 
@@ -331,7 +340,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
           # $el.cySimulate("dblclick")
 
-          command.snapshot().end() if command
+          command.snapshot() if command
 
           ## need to return null here to prevent
           ## chaining thenable promises
@@ -474,7 +483,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             .then ->
               ## display the red dot at these coords
               if options.command
-                options.command.set({coords: coords, onConsole: onConsole}).snapshot().end()
+                options.command.set({coords: coords, onConsole: onConsole}).snapshot()
             ## need to return null here to prevent
             ## chaining thenable promises
             .return(null)
@@ -871,8 +880,11 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           .then ->
             ## submit events should be finished at this point!
             ## so we can snapshot the current state of the DOM
-            options.command.snapshot().end() if options.command
-          .return(options.$el)
+            options.command.snapshot() if options.command
+          .return({
+            subject: options.$el
+            command: options.command
+          })
 
     clear: (subject, options = {}) ->
       ## what about other types of inputs besides just text?
@@ -914,7 +926,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           timeout: options.timeout
           interval: options.interval
         }).then ->
-          options.command.snapshot().end() if options.command
+          options.command.snapshot() if options.command
 
           return null
 
@@ -922,7 +934,10 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         .resolve(subject.toArray())
         .each(clear)
         .cancellable()
-        .return(subject)
+        .return({
+          subject: subject
+          command: options.command
+        })
 
     select: (subject, valueOrText, options = {}) ->
       _.defaults options,
@@ -1056,8 +1071,11 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
             ## change events should be finished at this point!
             ## so we can snapshot the current state of the DOM
-            options.command.snapshot().end() if options.command
-      ).return(options.$el)
+            options.command.snapshot() if options.command
+      ).return({
+        subject: options.$el
+        command: options.command
+      })
 
   Cypress.addParentCommand
     focused: (options = {}) ->
@@ -1178,7 +1196,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           onConsole.Note = "This checkbox was already #{type}ed. No operation took place."
           if command
             command.snapshot().end()
-          return
+
+          return null
         else
           ## set the coords only if we are actually
           ## going to go out and click this bad boy

@@ -30,5 +30,9 @@ $Cypress.register "Communications", (Cypress, _, $, Promise) ->
                 "Data Returned": response
               }
 
-            command.snapshot().end()
-            resolve(response)
+            command.snapshot()
+
+            resolve({
+              subject: response
+              command: command
+            })

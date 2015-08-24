@@ -17,21 +17,32 @@ $Cypress.register "Window", (Cypress, _, $) ->
 
   Cypress.addParentCommand
     title: (options = {}) ->
-      options.log = false
-      options.visible = false
-      options.command = Cypress.Log.command()
+      _.defaults options, {log: true}
+
+      if options.log
+        command = Cypress.Log.command()
+
+      ## TODO: FIX SETTING OPTIONS.LOG TO FALSE HERE
+      ## WILL THROW AN ERROR IN THE GET COMMAND
+      ## ADDITIONALLY WE SHOULDNT HAVE TO PASS A COMMAND
+      ## INTO CY.GET
+
+      # options.command = Cypress.Log.command()
 
       ## using call here to invoke the 'text' method on the
       ## title's jquery object
 
       ## we're chaining off the promise so we need to go through
       ## the command method which returns a promise
-      @command("get", "title", options).call("text").then (text) ->
-        options.command.set({message: text})
+      @command("get", "title", {
+        log: false
+        visible: false
+        command: command
+      }).call("text").then (text) ->
+        if command
+          command.set({message: text}).snapshot()
 
-        options.command.snapshot().end()
-
-        return text
+        return {subject: text, command: command}
 
     window: ->
       window = @private("window")
@@ -50,8 +61,7 @@ $Cypress.register "Window", (Cypress, _, $) ->
       if _.isObject(heightOrOrientation)
         options = heightOrOrientation
 
-      _.defaults options,
-        log: true
+      _.defaults options, {log: true}
 
       if options.log
         command = Cypress.Log.command
@@ -122,6 +132,6 @@ $Cypress.register "Window", (Cypress, _, $) ->
       Cypress.trigger "viewport", viewport
 
       if command
-        command.set(viewport).snapshot().end()
+        command.set(viewport).snapshot()
 
-      return null
+      return {subject: null, command: command}

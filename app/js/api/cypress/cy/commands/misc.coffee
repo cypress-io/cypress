@@ -12,13 +12,15 @@ $Cypress.register "Misc", (Cypress, _, $) ->
 
     noop: (obj) -> obj
 
-    wrap: (obj) ->
-      options =
-        end: true
-        snapshot: true
+    wrap: (obj, options = {}) ->
+      _.defaults options, {log: true}
 
-      options.$el = obj if Cypress.Utils.hasElement(obj)
+      if options.log
+        command = Cypress.Log.command()
 
-      Cypress.Log.command(options)
+        if Cypress.Utils.hasElement(obj)
+          command.set({$el: obj})
 
-      obj
+        command.snapshot()
+
+      return {subject: obj, command: command}

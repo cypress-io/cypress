@@ -255,9 +255,9 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       log = ($el) ->
         if options.command
           setEl($el)
-          options.command.snapshot().end()
+          options.command.snapshot()
 
-        return $el
+        return {subject: $el, command: options.command}
 
       ## verify that this $el matches
       ## its command options
@@ -340,7 +340,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
       fn.call @private("runnable").ctx
 
-      command.snapshot().end()
+      command.snapshot()
 
       stop = =>
         @off "command:start", setWithinSubject
@@ -378,4 +378,4 @@ $Cypress.register "Querying", (Cypress, _, $) ->
           stop()
           @prop "withinSubject", null
 
-      return subject
+      return {subject: subject, command: command}

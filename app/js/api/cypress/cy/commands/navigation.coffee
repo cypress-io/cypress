@@ -150,8 +150,9 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
               catch e
                 reject(e)
             else
-              command.set({url: url}).snapshot().end() if command
-              resolve(win)
+              command.set({url: url}).snapshot() if command
+
+              resolve({subject: win, command: command})
 
           ## any existing global variables will get nuked after it navigates
           $remoteIframe.prop "src", Cypress.Location.createInitialRemoteSrc(url)

@@ -148,9 +148,9 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
 
             obj
 
-        command.snapshot().end()
+        command.snapshot()
 
-      return value
+      return {subject: value, command: command}
 
     its: (subject, fn, args...) ->
       args.unshift(fn)

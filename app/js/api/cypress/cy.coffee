@@ -322,6 +322,11 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
     #   fn._invokeImmediately = true
     #   fn
 
+    getSubjectAndCommand: (obj) ->
+      if _.has(obj, "subject") and _.has(obj, "command")
+        return obj
+      else
+        {subject: obj, command: undefined}
 
     set: (obj, prev, next) ->
       obj.prev = prev
@@ -378,8 +383,15 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
         ## which is never resolved
         if (ret is @ or ret is @chain()) then null else ret
 
-      .then (subject, options = {}) =>
+      .then (ret) =>
+        {subject, command} = @getSubjectAndCommand(ret)
+
         obj.subject = subject
+        obj.command = command
+
+        ## end our command since our subject
+        ## has been resolved at this point
+        command.end() if command
 
         ## trigger an event here so we know our
         ## command has been successfully applied
@@ -519,7 +531,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
     enqueue: (key, fn, args, type, chainerId) ->
       @clearTimeout @prop("runId")
 
-      obj = {name: key, ctx: @, fn: fn, args: args, type: type, chainerId: chainerId}
+      obj = {name: key, ctx: @, fn: fn, args: args, type: type, chainerId: chainerId, command: null}
 
       @trigger "enqueue", obj
       @Cypress.trigger "enqueue", obj
