@@ -158,7 +158,9 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
     ## if we've changed the src by navigating
     ## away (aka cy.visit(...)) then we need
     ## to reload the fixture again and then setup
-    if /\.html$/.test(@$iframe.attr("src"))
+    fixture = fixture.split(".html").join("") + ".html"
+
+    if _.endsWith(@$iframe.prop("contentWindow").location.href, fixture)
       @setup()
     else
       @loadDom(fixture).then @setup
