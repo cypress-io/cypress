@@ -136,6 +136,13 @@ describe "$Cypress.Cy Traversal Commands", ->
 
             expect(@log.attributes.onConsole()).to.deep.eq obj
 
+  it "eventually resolves", ->
+    _.delay ->
+      @cy.$("button:first").text("foo").addClass("bar")
+    , 100
+
+    cy.root().find("button:first").should("have.text", "foo").and("have.class", "bar")
+
   it "retries until it finds", ->
     li = @cy.$("#list li:last")
     span = $("<span>foo</span>")

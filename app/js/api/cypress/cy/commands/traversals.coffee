@@ -52,8 +52,6 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
 
         options.command.set({$el: $el})
 
-        options.command.snapshot()
-
         return {subject: $el, command: options.command}
 
       setEl = ($el) ->
@@ -79,7 +77,10 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
         ## and if this didnt return undefined bail
         ## and log out the ret value
         unless ret is false
-          return log(ret)
+          return @verifyUpcomingAssertions(ret)
+            .return(log(ret))
+            .catch (err) =>
+              @_retry getElements, options
 
         getErr = =>
           node = Cypress.Utils.stringifyElement(subject, "short")
