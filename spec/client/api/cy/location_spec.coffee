@@ -6,6 +6,14 @@ describe "$Cypress.Cy Location Commands", ->
       @cy.url().then (url) ->
         expect(url).to.eq "/fixtures/html/dom.html"
 
+    it "eventually resolves", ->
+      _.delay ->
+        win = cy.sync.window()
+        win.location.href = "/foo/bar/baz.html"
+      , 100
+
+      cy.url().should("match", /baz/).and("eq", "/foo/bar/baz.html")
+
     describe ".log", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
@@ -40,7 +48,8 @@ describe "$Cypress.Cy Location Commands", ->
 
       it "#onConsole", ->
         @cy.url().then ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          onConsole = @log.attributes.onConsole()
+          expect(onConsole).to.deep.eq {
             Command: "url"
             Returned: "/fixtures/html/dom.html"
           }
@@ -49,6 +58,14 @@ describe "$Cypress.Cy Location Commands", ->
     it "returns the location hash", ->
       @cy.hash().then (hash) ->
         expect(hash).to.eq ""
+
+    it "eventually resolves", ->
+      _.delay ->
+        win = cy.sync.window()
+        win.location.hash = "users/1"
+      , 100
+
+      cy.hash().should("match", /users/).and("eq", "#users/1")
 
     describe ".log", ->
       beforeEach ->
@@ -84,7 +101,8 @@ describe "$Cypress.Cy Location Commands", ->
 
       it "#onConsole", ->
         @cy.hash().then ->
-          expect(@log.attributes.onConsole()).to.deep.eq {
+          onConsole = @log.attributes.onConsole()
+          expect(onConsole).to.deep.eq {
             Command: "hash"
             Returned: ""
           }
@@ -98,6 +116,14 @@ describe "$Cypress.Cy Location Commands", ->
     it "returns a specific key from location object", ->
       @cy.location("href").then (href) ->
         expect(href).to.eq "/fixtures/html/dom.html"
+
+    it "eventually resolves", ->
+      _.delay ->
+        win = cy.sync.window()
+        win.location.pathname = "users/1"
+      , 100
+
+      cy.location().should("have.property", "pathname").and("match", /users/)
 
     describe ".log", ->
       beforeEach ->

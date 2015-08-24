@@ -14,30 +14,42 @@ $Cypress.register "Location", (Cypress, _, $) ->
     url: (options = {}) ->
       _.defaults options, {log: true}
 
-      href = @sync.location("href", {log: false})
-
       if options.log
         command = Cypress.Log.command
           message: ""
-          snapshot: true
 
-        return {subject: href, command: command}
+      getHref = =>
+        @_getLocation("href")
 
-      return href
+      do resolveHref = =>
+        Promise.try(getHref).then (href) =>
+          @verifyUpcomingAssertions(href)
+            .return({
+              subject: href
+              command: command
+            })
+            .catch (err) =>
+              @_retry resolveHref, options
 
     hash: (options = {}) ->
       _.defaults options, {log: true}
 
-      hash = @sync.location("hash", {log: false})
-
       if options.log
         command = Cypress.Log.command
           message: ""
-          snapshot: true
 
-        return {subject: hash, command: command}
+      getHash = =>
+        @_getLocation("hash")
 
-      return hash
+      do resolveHash = =>
+        Promise.try(getHash).then (hash) =>
+          @verifyUpcomingAssertions(hash)
+            .return({
+              subject: hash
+              command: command
+            })
+            .catch (err) =>
+              @_retry resolveHash, options
 
     location: (key, options) ->
       ## normalize arguments allowing key + options to be undefined
@@ -49,24 +61,27 @@ $Cypress.register "Location", (Cypress, _, $) ->
 
       _.defaults options, {log: true}
 
-      # currentUrl = window.location.toString()
-      remoteUrl  = @private("window").location.toString()
+      getLocation = =>
+        location = @_getLocation()
 
-      location = Cypress.Location.create(remoteUrl)
-
-      ret = if _.isString(key)
-        ## use existential here because we only want to throw
-        ## on null or undefined values (and not empty strings)
-        location[key] ?
-          @throwErr("Location object does have not have key: #{key}")
-      else
-        location
+        ret = if _.isString(key)
+          ## use existential here because we only want to throw
+          ## on null or undefined values (and not empty strings)
+          location[key] ?
+            @throwErr("Location object does have not have key: #{key}")
+        else
+          location
 
       if options.log
         command = Cypress.Log.command
           message: key ? ""
-          snapshot: true
 
-        return {subject: ret, command: command}
-
-      return ret
+      do resolveLocation = =>
+        Promise.try(getLocation).then (ret) =>
+          @verifyUpcomingAssertions(ret)
+            .return({
+              subject: ret
+              command: command
+            })
+            .catch (err) =>
+              @_retry resolveLocation, options
