@@ -391,7 +391,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
         ## end our command since our subject
         ## has been resolved at this point
-        command.end() if command
+        command.snapshot().end() if command
 
         ## trigger an event here so we know our
         ## command has been successfully applied
