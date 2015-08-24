@@ -43,6 +43,13 @@ describe "$Cypress.Cy Window Commands", ->
       @cy.title().until (title) ->
         expect(title).to.eq "about page"
 
+    it "eventually resolves", ->
+      _.delay ->
+        @cy.$("title").text("about page")
+      , 100
+
+      cy.title().should("eq", "about page").and("match", /about/)
+
     describe "errors", ->
       beforeEach ->
         @currentTest.timeout(300)
@@ -76,6 +83,10 @@ describe "$Cypress.Cy Window Commands", ->
           if @log.get("name") is "get"
             throw new Error("cy.get() should not have logged out.")
 
+      it "can turn off logging", ->
+        @cy.title({log: false}).then ->
+          expect(@log).to.be.undefined
+
       it "logs immediately before resolving", (done) ->
         input = @cy.$(":text:first")
 
@@ -96,7 +107,6 @@ describe "$Cypress.Cy Window Commands", ->
         @cy.title().then ->
           obj = {
             name: "title"
-            message: "DOM Fixture"
           }
 
           _.each obj, (value, key) =>

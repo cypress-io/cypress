@@ -22,27 +22,25 @@ $Cypress.register "Window", (Cypress, _, $) ->
       if options.log
         command = Cypress.Log.command()
 
-      ## TODO: FIX SETTING OPTIONS.LOG TO FALSE HERE
-      ## WILL THROW AN ERROR IN THE GET COMMAND
-      ## ADDITIONALLY WE SHOULDNT HAVE TO PASS A COMMAND
-      ## INTO CY.GET
-
-      # options.command = Cypress.Log.command()
-
       ## using call here to invoke the 'text' method on the
       ## title's jquery object
 
-      ## we're chaining off the promise so we need to go through
-      ## the command method which returns a promise
-      @command("get", "title", {
-        log: false
-        visible: false
-        command: command
-      }).call("text").then (text) ->
-        if command
-          command.set({message: text}).snapshot()
-
-        return {subject: text, command: command}
+      do resolveTitle = =>
+        @command("get", "title", {
+          log: false
+          visible: false
+          verify: false
+          command: command
+        })
+        .call("text")
+        .then (text) =>
+          @verifyUpcomingAssertions(text)
+            .return({
+              subject: text
+              command: command
+            })
+            .catch (err) =>
+              @_retry resolveTitle, options
 
     window: ->
       window = @private("window")
@@ -132,6 +130,6 @@ $Cypress.register "Window", (Cypress, _, $) ->
       Cypress.trigger "viewport", viewport
 
       if command
-        command.set(viewport).snapshot()
+        command.set(viewport)
 
       return {subject: null, command: command}
