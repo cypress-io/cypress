@@ -234,7 +234,7 @@ describe "$Cypress.Cy Querying Commands", ->
       list = @cy.$("#list")
 
       @cy.get("#list").then ($list) ->
-        expect($list).to.match list
+        expect($list.get(0)).to.eq list.get(0)
 
     it "retries finding elements until something is found", ->
       missingEl = $("<div />", id: "missing-el")
@@ -247,10 +247,6 @@ describe "$Cypress.Cy Querying Commands", ->
 
       @cy.get("#missing-el").then ($div) ->
         expect($div).to.match missingEl
-
-    it "does not throw when could not find element and was told not to retry", ->
-      @cy.get("#missing-el", {retry: false}).then ($el) ->
-        expect($el).not.to.exist
 
     it "can increase the timeout", ->
       missingEl = $("<div />", id: "missing-el")
@@ -290,40 +286,88 @@ describe "$Cypress.Cy Querying Commands", ->
           ## to 300 after successfully finished get method
           expect(@cy._timeout()).to.eq 300
 
-    _.each ["exist", "exists"], (key) ->
-      describe "{#{key}: false}", ->
-        it "returns null when cannot find element", ->
-          options = {}
-          options[key] = false
-          @cy.get("#missing-el", options).then ($el) ->
-            expect($el).to.be.null
+    describe "deprecated command options", ->
+      beforeEach ->
+        @allowErrors()
 
-        it "retries until cannot find element", ->
-          ## add 500ms to the delta
-          @cy._timeout(500, true)
+      it "throws on {exist: false}", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "Command Options such as: '{exist: false}' have been deprecated. Instead write this as an assertion: .should('not.exist')."
+          done()
 
-          retry = _.after 3, =>
-            @cy.$("#list li:last").remove()
+        @cy.get("ul li", {exist: false})
 
-          @cy.on "retry", retry
+      it "throws on {exists: true}", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "Command Options such as: '{exists: true}' have been deprecated. Instead write this as an assertion: .should('exist')."
+          done()
 
-          options = {}
-          options[key] = false
-          @cy.get("#list li:last", options).then ($el) ->
-            expect($el).to.be.null
+        @cy.get("ul li", {exists: true, length: 10})
 
-    describe "{visible: null}", ->
+      it "throws on {visible: true}", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "Command Options such as: '{visible: true}' have been deprecated. Instead write this as an assertion: .should('be.visible')."
+          done()
+
+        @cy.get("ul li", {visible: true})
+
+
+      it "throws on {visible: false}", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "Command Options such as: '{visible: false}' have been deprecated. Instead write this as an assertion: .should('not.be.visible')."
+          done()
+
+        @cy.get("ul li", {visible: false})
+
+      it "throws on {length: 3}", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "Command Options such as: '{length: 3}' have been deprecated. Instead write this as an assertion: .should('have.length', '3')."
+          done()
+
+        @cy.get("ul li", {length: 3})
+
+    describe "should('exist')", ->
+      it "waits until button exists", ->
+        @cy.on "retry", _.after 3, =>
+          @cy.$("body").append $("<div id='missing-el'>missing el</div>")
+
+        @cy.get("#missing-el").should("exist")
+
+    describe "should('not.exist')", ->
+      it "waits until button does not exist", ->
+        @cy.on "retry", _.after 3, =>
+          @cy.$("#button").remove()
+
+        @cy.get("#button").should("not.exist")
+
+      it "returns null when cannot find element", ->
+        @cy.get("#missing-el").should("not.exist").then ($el) ->
+          expect($el).to.be.null
+
+      it "retries until cannot find element", ->
+        ## add 500ms to the delta
+        @cy._timeout(500, true)
+
+        retry = _.after 3, =>
+          @cy.$("#list li:last").remove()
+
+        @cy.on "retry", retry
+
+        @cy.get("#list li:last").should("not.exist").then ($el) ->
+          expect($el).to.be.null
+
+    describe "visibility is unopinionated", ->
       it "finds invisible elements by default", ->
         button = @cy.$("#button").hide()
 
         @cy.get("#button").then ($button) ->
           expect($button.get(0)).to.eq button.get(0)
 
-    describe "{visible: false}", ->
+    describe "should('not.be.visible')", ->
       it "returns invisible element", ->
         button = @cy.$("#button").hide()
 
-        @cy.get("#button", {visible: false}).then ($button) ->
+        @cy.get("#button").should("not.be.visible").then ($button) ->
           expect($button.get(0)).to.eq button.get(0)
 
       it "retries until element is invisible", ->
@@ -337,14 +381,14 @@ describe "$Cypress.Cy Querying Commands", ->
 
         @cy.on "retry", retry
 
-        @cy.get("#button", {visible: false}).then ($button) ->
+        @cy.get("#button").should("not.be.visible").then ($button) ->
           expect($button.get(0)).to.eq button.get(0)
 
-    describe "{visible: true}", ->
+    describe "should('be.visible')", ->
       it "returns visible element", ->
         button = @cy.$("#button")
 
-        @cy.get("#button", {visible: true}).then ($button) ->
+        @cy.get("#button").should("be.visible").then ($button) ->
           expect($button.get(0)).to.eq button.get(0)
 
       it "retries until element is visible", ->
@@ -358,14 +402,14 @@ describe "$Cypress.Cy Querying Commands", ->
 
         @cy.on "retry", retry
 
-        @cy.get("#button", {visible: true}).then ($button) ->
+        @cy.get("#button").should("be.visible").then ($button) ->
           expect($button.get(0)).to.eq button.get(0)
 
-    describe "{length: n}", ->
+    describe "should('have.length', n)", ->
       it "resolves once length equals n", ->
         forms = @cy.$("form")
 
-        @cy.get("form", {length: forms.length}).then ($forms) ->
+        @cy.get("form").should("have.length", forms.length).then ($forms) ->
           expect($forms.length).to.eq forms.length
 
       it "retries until length equals n", ->
@@ -378,7 +422,7 @@ describe "$Cypress.Cy Querying Commands", ->
           buttons = @cy.$("button")
 
         ## should resolving after removing 2 buttons
-        @cy.get("button", {length: length}).then ($buttons) ->
+        @cy.get("button").should("have.length", length).then ($buttons) ->
           expect($buttons.length).to.eq length
 
     describe "assertion verification", ->
@@ -393,7 +437,7 @@ describe "$Cypress.Cy Querying Commands", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
 
-      it "logs command option: length", ->
+      it "logs elements length", ->
         buttons = @cy.$("button")
 
         length = buttons.length - 2
@@ -403,12 +447,12 @@ describe "$Cypress.Cy Querying Commands", ->
           buttons = @cy.$("button")
 
         ## should resolving after removing 2 buttons
-        @cy.get("button", {length: length}).then ($buttons) ->
-          expect(@log.get("message")).to.eq "button, {length: #{length}}"
+        @cy.get("button").should("have.length", length).then ($buttons) ->
+          expect(@log.get("numElements")).to.eq length
 
       it "logs exist: false", ->
-        @cy.get("#does-not-exist", {exist: false}).then ->
-          expect(@log.get("message")).to.eq "#does-not-exist, {exist: false}"
+        @cy.get("#does-not-exist").should("not.exist").then ->
+          expect(@log.get("message")).to.eq "#does-not-exist"
           expect(@log.get("$el")).not.to.be.ok
 
       it "logs route aliases", ->
@@ -467,7 +511,6 @@ describe "$Cypress.Cy Querying Commands", ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "get"
             Selector: "body"
-            Options: undefined
             Returned: $body.get(0)
             Elements: 1
           }
@@ -477,7 +520,6 @@ describe "$Cypress.Cy Querying Commands", ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "get"
             Alias: "@b"
-            Options: undefined
             Returned: $body.get(0)
             Elements: 1
           }
@@ -638,7 +680,7 @@ describe "$Cypress.Cy Querying Commands", ->
       #   @cy.noop().then ->
       #     expect(@cy.get("something")).to.be.a("function")
 
-    describe "errors", ->
+    describe.skip "errors", ->
       beforeEach ->
         @allowErrors()
 
@@ -654,12 +696,12 @@ describe "$Cypress.Cy Querying Commands", ->
 
         @cy.get(".spinner'")
 
-      it "throws when options.length isnt a number", (done) ->
+      it "throws when should('have.length') isnt a number", (done) ->
         @cy.on "fail", (err) ->
           expect(err.message).to.include "options.length must be a number"
           done()
 
-        @cy.get("button", {length: "asdf"})
+        @cy.get("button").should("have.length", "asdf")
 
       it "throws on too many elements after timing out waiting for length", (done) ->
         buttons = @cy.$("button")
@@ -787,7 +829,7 @@ describe "$Cypress.Cy Querying Commands", ->
 
         @cy.get("#button", {visible: true})
 
-  context "#contains", ->
+  context.only "#contains", ->
     it "is scoped to the body and will not return title elements", ->
       @cy.contains("DOM Fixture").then ($el) ->
         expect($el).not.to.match("title")

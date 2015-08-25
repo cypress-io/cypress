@@ -7,19 +7,11 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       _.defaults options,
         retry: true
         withinSubject: @prop("withinSubject")
-        length: null
-        visible: null
-        exist: true
-        exists: true
         log: true
         command: null
         verify: true
 
-      ## normalize these two options
-      options.exist = options.exists and options.exist
-
-      ## figure out the options which actually change the behavior of traversals
-      deltaOptions = Cypress.Utils.filterDelta(options, {visible: null, exist: true, length: null})
+      @ensureNoCommandOptions(options)
 
       onConsole = {}
 
@@ -27,7 +19,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
         return if options.log is false
 
         options.command ?= Cypress.Log.command
-          message: [selector, deltaOptions]
+          message: selector
           referencesAlias: aliasObj?.alias
           aliasType: aliasType
           onConsole: -> onConsole
@@ -51,7 +43,6 @@ $Cypress.register "Querying", (Cypress, _, $) ->
           switch aliasType
             when "dom"
               _.extend onConsole,
-                Options:  deltaOptions
                 Returned: Cypress.Utils.getDomElements(value)
                 Elements: value?.length
 
@@ -121,6 +112,9 @@ $Cypress.register "Querying", (Cypress, _, $) ->
           ## reset $el if this found anything
           $el = filtered if filtered.length
 
+        ## normalize $el in case it doesnt exist
+        $el = if $el and $el.length then $el else null
+
         ## store the $el now in case we fail
         setEl($el)
 
@@ -131,28 +125,19 @@ $Cypress.register "Querying", (Cypress, _, $) ->
             log($el)
             return ret
         else
-          if options.retry is false
-            return $el
-          else
-            ret = @_elMatchesCommandOptions($el, options)
-            ## verify our $el matches the command options
-            ## and if this didnt return false bail
-            ## and log out the ret value
-            unless ret is false
-              log(ret)
-              return ret
+          log($el)
+          return $el
 
-        getErr = =>
-          err = @_elCommandOptionsError($el, options)
-          err += " #{selector}"
+      checkToAutomaticallyRetry = (count, $el) ->
+        ## we should automatically retry querying
+        ## if we did not have any upcoming assertions
+        ## and our $el's length was 0, because that means
+        ## the element didnt exist in the DOM and the user
+        ## did not explicitly request that it does not exist
+        return if count isnt 0 or ($el and $el.length)
 
-        ## if we REALLY want to be helpful and intelligent then
-        ## if we time out, we should look at our aliases and see
-        ## if our selector matches any aliases without the '@'
-        ## if it did, then perhaps the user forgot to write '@'
-        options.error ?= getErr()
-
-        @_retry(getElements, options)
+        ## throw here to cause the .catch to trigger
+        throw new Error()
 
       do resolveElements = =>
         Promise.try(getElements).then ($el) =>
@@ -160,11 +145,14 @@ $Cypress.register "Querying", (Cypress, _, $) ->
             return $el
 
           @verifyUpcomingAssertions($el)
+            .then (count) ->
+              checkToAutomaticallyRetry(count, $el)
             .return({
               subject: $el
               command: command
             })
             .catch (err) =>
+              console.log err
               @_retry resolveElements, options
 
     root: (options = {}) ->
@@ -257,7 +245,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
         withinSubject: subject or @prop("withinSubject") or @$("body")
         filter: true
         log: false
-        retry: false ## dont retry because we perform our own element validation
+        # retry: false ## dont retry because we perform our own element validation
         verify: false ## dont verify upcoming assertions, we do that ourselves
 
       setEl = ($el) ->
@@ -354,7 +342,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       prevWithinSubject = @prop("withinSubject")
       @prop("withinSubject", subject)
 
-      fn.call @private("runnable").ctx
+      fn.call @private("runnable").ctx, subject
 
       command.snapshot()
 
