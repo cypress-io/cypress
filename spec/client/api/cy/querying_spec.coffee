@@ -248,15 +248,6 @@ describe "$Cypress.Cy Querying Commands", ->
       @cy.get("#missing-el").then ($div) ->
         expect($div).to.match missingEl
 
-    it "retries until .until resolves to true", ->
-      retry = _.after 3, =>
-        @cy.$("#list li").last().remove()
-
-      @cy.on "retry", retry
-
-      @cy.get("#list li").until ($list) ->
-        expect($list.length).to.eq 2
-
     it "does not throw when could not find element and was told not to retry", ->
       @cy.get("#missing-el", {retry: false}).then ($el) ->
         expect($el).not.to.exist

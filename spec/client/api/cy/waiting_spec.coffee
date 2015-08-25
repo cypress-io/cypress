@@ -1,67 +1,6 @@
 describe "$Cypress.Cy Waiting Commands", ->
   enterCommandTestingMode()
 
-  context "#until", ->
-    describe "it retries the previous command", ->
-      it "retries when false", (done) ->
-        i = 0
-        fn = ->
-          i += 1
-        fn = @sandbox.spy fn
-        @cy.noop({}).then(fn).until (i) ->
-          i is 3
-        @cy.on "end", ->
-          expect(fn.callCount).to.eq 3
-          done()
-
-      it "retries when null", (done) ->
-        i = 0
-        fn = ->
-          i += 1
-        fn = @sandbox.spy fn
-        @cy.noop({}).then(fn).until (i) ->
-          if i isnt 2 then null else true
-        @cy.on "end", ->
-          expect(fn.callCount).to.eq 2
-          done()
-
-      ## until no longer retries when undefined
-      # it "retries when undefined", (done) ->
-      #   i = 0
-      #   fn = ->
-      #     i += 1
-      #   fn = @sandbox.spy fn
-      #   @cy.noop({}).then(fn).until (i) ->
-      #     if i isnt 2 then undefined else true
-      #   @cy.on "end", ->
-      #     expect(fn.callCount).to.eq 2
-      #     done()
-
-    describe "errors thrown", ->
-      beforeEach ->
-        @currentTest.enableTimeouts(false)
-        @uncaught = @allowErrors()
-
-      it "times out eventually due to false value", (done) ->
-        ## forcibly reduce the timeout to 100 ms
-        ## so we dont have to wait so long
-        @cy
-          .noop()
-          .until (-> false), timeout: 100
-
-        @cy.on "fail", (err) ->
-          expect(err.message).to.include "The final value was: false"
-          done()
-
-      it "appends to the err message", (done) ->
-        @cy
-          .noop()
-          .until (-> expect(true).to.be.false), timeout: 100
-
-        @cy.on "fail", (err) ->
-          expect(err.message).to.include "Timed out retrying. Could not continue due to: AssertionError"
-          done()
-
   context "#wait", ->
     describe "number argument", ->
       it "passes delay onto Promise", ->

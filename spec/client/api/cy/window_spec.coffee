@@ -32,17 +32,6 @@ describe "$Cypress.Cy Window Commands", ->
       @cy.title().then (text) ->
         expect(text).to.eq "waiting on title"
 
-    it "retries until it has the correct title", ->
-      @cy.$("title").text("home page")
-
-      retry = _.after 2, =>
-        @cy.$("title").text("about page")
-
-      @cy.on "retry", retry
-
-      @cy.title().until (title) ->
-        expect(title).to.eq "about page"
-
     it "eventually resolves", ->
       _.delay ->
         @cy.$("title").text("about page")
