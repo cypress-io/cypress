@@ -1,5 +1,7 @@
 do ($Cypress, _) ->
 
+  commandOptions = ["exist", "exists", "visible", "length"]
+
   $Cypress.Cy.extend
     ensureSubject: ->
       subject = @prop("subject")
@@ -45,6 +47,19 @@ do ($Cypress, _) ->
         @throwErr("Cannot call .#{method}() because the current subject has been removed or detached from the DOM.")
 
       return subject
+
+    ensureNoCommandOptions: (options) ->
+      _.each commandOptions, (opt) =>
+        if _.has(options, opt)
+          assertion = switch opt
+            when "exist", "exists"
+              if options[opt] then "exist" else "not.exist"
+            when "visible"
+              if options[opt] then "be.visible" else "not.be.visible"
+            when "length"
+              "have.length', '#{options[opt]}"
+
+          @throwErr("Command Options such as: '{#{opt}: #{options[opt]}}' have been deprecated. Instead write this as an assertion: .should('#{assertion}').")
 
     ensureDescendents: ($el1, $el2, onFail) ->
       method = @prop("current").name
