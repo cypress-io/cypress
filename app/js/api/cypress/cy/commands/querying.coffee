@@ -320,12 +320,19 @@ $Cypress.register "Querying", (Cypress, _, $) ->
           return @_retry(getElements, options)
 
   Cypress.addChildCommand
-    within: (subject, fn) ->
+    within: (subject, options, fn) ->
       @ensureDom(subject)
 
-      command = Cypress.Log.command
-        $el: subject
-        message: ""
+      if _.isUndefined(fn)
+        fn = options
+        options = {}
+
+      _.defaults options, {log: true}
+
+      if options.log
+        command = Cypress.Log.command
+          $el: subject
+          message: ""
 
       @throwErr("cy.within() must be called with a function!", command) if not _.isFunction(fn)
 
@@ -343,8 +350,6 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       @prop("withinSubject", subject)
 
       fn.call @private("runnable").ctx, subject
-
-      command.snapshot()
 
       stop = =>
         @off "command:start", setWithinSubject

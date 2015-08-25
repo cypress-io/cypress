@@ -92,6 +92,15 @@ describe "$Cypress.Cy Querying Commands", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
 
+      it "can silence logging", ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log) if log.name is "within"
+
+        @cy.get("div:first").within({log: false}, ->).then ->
+          expect(logs.length).to.eq(0)
+
       it "logs immediately before resolving", (done) ->
         div = @cy.$("div:first")
 
@@ -108,12 +117,6 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy.get("div:first").within ->
           @cy.then ->
             expect(@log.get("snapshot")).to.be.an("object")
-
-      it "logs out deltaOptions with message", ->
-        button = @cy.$("#button").hide()
-
-        @cy.get("#button", {visible: false}).then ($el) ->
-          expect(@log.get("message")).to.eq "#button, {visible: false}"
 
     describe "errors", ->
       beforeEach ->
