@@ -1808,6 +1808,17 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get("input:first").clear()
 
+      it "ends", ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log) if log.get("name") is "clear"
+
+        @cy.get("input").invoke("slice", 0, 2).clear().then ->
+          _.each logs, (log) ->
+            expect(log.get("state")).to.eq("success")
+            expect(log.get("end")).to.be.true
+
       it "snapshots after clicking", ->
         @cy.get("input:first").clear().then ($input) ->
           expect(@log.get("snapshot")).to.be.an("object")
@@ -3898,6 +3909,17 @@ describe "$Cypress.Cy Actions Commands", ->
           $btn.blur() ## blur which removes focus styles which would change coords
           coords = @cy.getCoordinates($btn)
           expect(@log.get("coords")).to.deep.eq coords
+
+      it "ends", ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log) if log.get("name") is "click"
+
+        @cy.get("button").invoke("slice", 0, 2).click().then ->
+          _.each logs, (log) ->
+            expect(log.get("state")).to.eq("success")
+            expect(log.get("end")).to.be.true
 
       it "#onConsole", ->
         @cy.get("button").first().click().then ($button) ->

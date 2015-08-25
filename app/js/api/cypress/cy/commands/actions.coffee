@@ -483,7 +483,9 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             .then ->
               ## display the red dot at these coords
               if options.command
-                options.command.set({coords: coords, onConsole: onConsole}).snapshot()
+                ## because we snapshot and output a command per click
+                ## we need to manually snapshot + end them
+                options.command.set({coords: coords, onConsole: onConsole}).snapshot().end()
             ## need to return null here to prevent
             ## chaining thenable promises
             .return(null)
