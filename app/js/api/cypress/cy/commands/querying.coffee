@@ -188,11 +188,11 @@ $Cypress.register "Querying", (Cypress, _, $) ->
           text = filter
           filter = ""
 
-      _.defaults options,
-        log: true
-        length: null
+      _.defaults options, {log: true}
 
-      @throwErr "cy.contains() cannot be passed a length option because it will only ever return 1 element." if options.length
+      @ensureNoCommandOptions(options)
+
+      # @throwErr "cy.contains() cannot be passed a length option because it will only ever return 1 element." if options.length
       @throwErr "cy.contains() can only accept a string or number!" if not (_.isString(text) or _.isFinite(text))
       @throwErr "cy.contains() cannot be passed an empty string!" if _.isBlank(text)
 
@@ -211,37 +211,33 @@ $Cypress.register "Querying", (Cypress, _, $) ->
           else
             "in any elements"
 
-      getErr = (text, phrase) ->
-        err = switch
-          when options.exist is false
-            "Found content: '#{text}' #{phrase} but it never became non-existent."
+      # getErr = (text, phrase) ->
+      #   err = switch
+      #     when options.exist is false
+      #       "Found content: '#{text}' #{phrase} but it never became non-existent."
 
-          when options.visible is false
-            "Found visible content: '#{text}' #{phrase} but it never became hidden."
+      #     when options.visible is false
+      #       "Found visible content: '#{text}' #{phrase} but it never became hidden."
 
-          when options.visible is true
-            "Found hidden content: '#{text}' #{phrase} but it never became visible."
+      #     when options.visible is true
+      #       "Found hidden content: '#{text}' #{phrase} but it never became visible."
 
-          else
-            "Could not find any content: '#{text}' #{phrase}"
+      #     else
+      #       "Could not find any content: '#{text}' #{phrase}"
 
       if options.log
-        ## figure out the options which actually change the behavior of traversals
-        deltaOptions = Cypress.Utils.filterDelta(options, {visible: null, exist: true, length: null})
-
         onConsole = {
           Content: text
-          Options: if _.isEmpty(deltaOptions) then null else deltaOptions
           "Applied To": Cypress.Utils.getDomElements(subject or @prop("withinSubject"))
         }
 
         options.command ?= Cypress.Log.command
-          message: _.compact([filter, text, deltaOptions])
+          message: _.compact([filter, text])
           type: if subject then "child" else "parent"
           onConsole: -> onConsole
 
       _.extend options,
-        error: getErr(text, phrase)
+        # error: getErr(text, phrase)
         withinSubject: subject or @prop("withinSubject") or @$("body")
         filter: true
         log: false
@@ -262,23 +258,6 @@ $Cypress.register "Querying", (Cypress, _, $) ->
           options.command.snapshot()
 
         return {subject: $el, command: options.command}
-
-      ## verify that this $el matches
-      ## its command options
-      verifyElCommandOptions = ($el) =>
-        if options.command
-          ## if this command fails we want
-          ## to log out the last found $el
-          options.onFail = (err) ->
-            options.command.error(err)
-            setEl($el)
-
-        ret = @_elMatchesCommandOptions($el, options)
-        if ret isnt false
-          return log(ret)
-        else
-          ## if it doesnt then retry finding it
-          @_retry getElements, options
 
       getFirstDeepestElement = (elements, index = 0) ->
         ## iterate through all of the elements in pairs
@@ -309,15 +288,39 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       ## and any submit inputs with the attributeContainsWord selector
       selector = "#{filter}:not(script):contains('#{text}'), #{filter}[type='submit'][value~='#{text}']"
 
-      do getElements = =>
+      checkToAutomaticallyRetry = (count, $el) ->
+        ## we should automatically retry querying
+        ## if we did not have any upcoming assertions
+        ## and our $el's length was 0, because that means
+        ## the element didnt exist in the DOM and the user
+        ## did not explicitly request that it does not exist
+        return if count isnt 0 or ($el and $el.length)
+
+        ## throw here to cause the .catch to trigger
+        throw new Error()
+
+      do resolveElements = =>
         @command("get", selector, options).then ($elements) =>
-          return verifyElCommandOptions(null) if not $elements?.length
+          $el = switch
+            when $elements and filter
+              $elements.last()
+            when $elements
+              getFirstDeepestElement($elements)
+            else
+              null
 
-          return verifyElCommandOptions($elements.last()) if filter
+          log($el)
 
-          return verifyElCommandOptions getFirstDeepestElement($elements)
-
-          return @_retry(getElements, options)
+          @verifyUpcomingAssertions($el)
+            .then (count) ->
+              checkToAutomaticallyRetry(count, $el)
+            .return({
+              subject: $el
+              command: options.command
+            })
+            .catch (err) =>
+              console.log err
+              @_retry resolveElements, options
 
   Cypress.addChildCommand
     within: (subject, options, fn) ->

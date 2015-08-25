@@ -832,7 +832,7 @@ describe "$Cypress.Cy Querying Commands", ->
 
         @cy.get("#button", {visible: true})
 
-  context.only "#contains", ->
+  context "#contains", ->
     it "is scoped to the body and will not return title elements", ->
       @cy.contains("DOM Fixture").then ($el) ->
         expect($el).not.to.match("title")
@@ -925,20 +925,60 @@ describe "$Cypress.Cy Querying Commands", ->
         expect($item).to.be.ok
         expect($item.get(0)).to.eq item.get(0)
 
-    describe "{exist: false}", ->
+    describe "deprecated command options", ->
+      beforeEach ->
+        @allowErrors()
+
+      it "throws on {exist: false}", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "Command Options such as: '{exist: false}' have been deprecated. Instead write this as an assertion: .should('not.exist')."
+          done()
+
+        @cy.contains("asdfasdf", {exist: false})
+
+      it "throws on {exists: true}", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "Command Options such as: '{exists: true}' have been deprecated. Instead write this as an assertion: .should('exist')."
+          done()
+
+        @cy.contains("button", {exists: true, length: 10})
+
+      it "throws on {visible: true}", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "Command Options such as: '{visible: true}' have been deprecated. Instead write this as an assertion: .should('be.visible')."
+          done()
+
+        @cy.contains("button", {visible: true})
+
+
+      it "throws on {visible: false}", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "Command Options such as: '{visible: false}' have been deprecated. Instead write this as an assertion: .should('not.be.visible')."
+          done()
+
+        @cy.get("ul li").contains("foo", {visible: false})
+
+      it "throws on {length: 3}", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "Command Options such as: '{length: 3}' have been deprecated. Instead write this as an assertion: .should('have.length', '3')."
+          done()
+
+        @cy.contains("foo", {length: 3})
+
+    describe "should('not.exist')", ->
       it "returns null when no content exists", ->
-        @cy.contains("alksjdflkasjdflkajsdf", {exist: false}).then ($el) ->
+        @cy.contains("alksjdflkasjdflkajsdf").should("not.exist").then ($el) ->
           expect($el).to.be.null
 
-    describe "{visible: false}", ->
+    describe "should('be.visible')", ->
       it "returns invisible element", ->
         span = @cy.$("#not-hidden").hide()
 
-        @cy.contains("span", "my hidden content", {visible: false}).then ($span) ->
+        @cy.contains("span", "my hidden content").should("not.be.visible").then ($span) ->
           expect($span.get(0)).to.eq span.get(0)
 
       it "returns invisible element when parent chain is visible", ->
-        @cy.get("#form-header-region").contains("Back", {visible: false})
+        @cy.get("#form-header-region").contains("Back").should("not.be.visible")
 
     describe "subject contains text nodes", ->
       it "searches for content within subject", ->
@@ -1057,14 +1097,15 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy.get("body").contains("foo").then ->
           expect(@log.get("type")).to.eq "child"
 
-      it "logs command option: {exist: false}", ->
-        @cy.contains("does-not-exist", {exist: false}).then ->
-          expect(@log.get("message")).to.eq "does-not-exist, {exist: false}"
+      it "logs when not exists", ->
+        @cy.contains("does-not-exist").should("not.exist").then ->
+          expect(@log.get("message")).to.eq "does-not-exist"
           expect(@log.get("$el")).to.not.be.ok
 
-      it "logs command option: {visible: true} with filter", ->
-        @cy.contains("div", "Nested Find", {visible: true}).then ->
-          expect(@log.get("message")).to.eq "div, Nested Find, {visible: true}"
+      it "logs when should be visible with filter", ->
+        @cy.contains("div", "Nested Find").should("be.visible").then ($div) ->
+          expect(@log.get("message")).to.eq "div, Nested Find"
+          expect(@log.get("$el")).to.eq $div
 
       it "#onConsole", ->
         @cy.get("#complex-contains").contains("nested contains").then ($label) ->
@@ -1072,18 +1113,12 @@ describe "$Cypress.Cy Querying Commands", ->
           expect(onConsole).to.deep.eq {
             Command: "contains"
             Content: "nested contains"
-            Options: null
             "Applied To": getFirstSubjectByName.call(@, "get").get(0)
             Returned: $label.get(0)
             Elements: 1
           }
 
-      it "#onConsole options", ->
-        @cy.contains("button", {visible: true}).then ->
-          onConsole = @log.attributes.onConsole()
-          expect(onConsole.Options).to.deep.eq {visible: true}
-
-    describe "errors", ->
+    describe.skip "errors", ->
       beforeEach ->
         @allowErrors()
         @currentTest.timeout(300)
