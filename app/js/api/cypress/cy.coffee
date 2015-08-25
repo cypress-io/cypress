@@ -458,6 +458,8 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       if _.isElement($el)
         contains($el)
       else
+        return false if $el.length is 0
+
         ## or all the elements in the collection
         _.all $el.toArray(), contains
 
