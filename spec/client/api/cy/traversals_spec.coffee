@@ -23,7 +23,7 @@ describe "$Cypress.Cy Traversal Commands", ->
         @cy.get("#list")[name](arg).then ($el) ->
           expect($el).to.match el
 
-      describe "errors", ->
+      describe.skip "errors", ->
         beforeEach ->
           @currentTest.timeout(150)
           @allowErrors()
@@ -129,7 +129,6 @@ describe "$Cypress.Cy Traversal Commands", ->
 
             _.extend obj, {
               "Applied To": getFirstSubjectByName.call(@, "get").get(0)
-              Options: undefined
               Returned: returned
               Elements: $el.length
             }
@@ -165,8 +164,20 @@ describe "$Cypress.Cy Traversal Commands", ->
       buttons = @cy.$("button")
 
     ## should resolving after removing 2 buttons
-    @cy.root().find("button", {length: length}).then ($buttons) ->
+    @cy.root().find("button").should("have.length", length).then ($buttons) ->
       expect($buttons.length).to.eq length
+
+  it "should('not.exist')", ->
+    @cy.on "retry", _.after 3, =>
+      @cy.$("#nested-div").find("span").remove()
+
+    @cy.get("#nested-div").find("span").should("not.exist")
+
+  it "should('exist')", ->
+    @cy.on "retry", _.after 3, =>
+      @cy.$("#nested-div").append($("<strong />"))
+
+    @cy.get("#nested-div").find("strong")
 
   ## https://github.com/cypress-io/cypress/issues/38
   it "works with checkboxes", ->
@@ -174,7 +185,7 @@ describe "$Cypress.Cy Traversal Commands", ->
       c = @cy.$("[name=colors]").slice(0, 2)
       c.prop("checked", true)
 
-    @cy.get("#by-name").find(":checked", {length: 2})
+    @cy.get("#by-name").find(":checked").should("have.length", 2)
 
   it "does not log using first w/options", ->
     logs = []
@@ -186,7 +197,46 @@ describe "$Cypress.Cy Traversal Commands", ->
       expect($button.length).to.eq(1)
       expect(logs.length).to.eq(1)
 
-  context "delta + options", ->
+  describe "deprecated command options", ->
+    beforeEach ->
+      @allowErrors()
+
+    it "throws on {exist: false}", (done) ->
+      @cy.on "fail", (err) ->
+        expect(err.message).to.eq "Command Options such as: '{exist: false}' have been deprecated. Instead write this as an assertion: .should('not.exist')."
+        done()
+
+      @cy.root().find("ul li", {exist: false})
+
+    it "throws on {exists: true}", (done) ->
+      @cy.on "fail", (err) ->
+        expect(err.message).to.eq "Command Options such as: '{exists: true}' have been deprecated. Instead write this as an assertion: .should('exist')."
+        done()
+
+      @cy.root().find("ul li", {exists: true, length: 10})
+
+    it "throws on {visible: true}", (done) ->
+      @cy.on "fail", (err) ->
+        expect(err.message).to.eq "Command Options such as: '{visible: true}' have been deprecated. Instead write this as an assertion: .should('be.visible')."
+        done()
+
+      @cy.root().find("ul li", {visible: true})
+
+    it "throws on {visible: false}", (done) ->
+      @cy.on "fail", (err) ->
+        expect(err.message).to.eq "Command Options such as: '{visible: false}' have been deprecated. Instead write this as an assertion: .should('not.be.visible')."
+        done()
+
+      @cy.root().find("ul li", {visible: false})
+
+    it "throws on {length: 3}", (done) ->
+      @cy.on "fail", (err) ->
+        expect(err.message).to.eq "Command Options such as: '{length: 3}' have been deprecated. Instead write this as an assertion: .should('have.length', '3')."
+        done()
+
+      @cy.root().find("ul li", {length: 3})
+
+  context.skip "delta + options", ->
     beforeEach ->
       @Cypress.on "log", (@log) =>
 
@@ -223,7 +273,7 @@ describe "$Cypress.Cy Traversal Commands", ->
 
         expect(@log.attributes.onConsole()).to.deep.eq obj
 
-  describe "errors", ->
+  describe.skip "errors", ->
     beforeEach ->
       @allowErrors()
       @cy._timeout(300)
