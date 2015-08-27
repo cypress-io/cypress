@@ -1,4 +1,4 @@
-do ($Cypress, _) ->
+do ($Cypress, _, $) ->
 
   commandOptions = ["exist", "exists", "visible", "length"]
 
@@ -47,6 +47,17 @@ do ($Cypress, _) ->
         @throwErr("Cannot call .#{method}() because the current subject has been removed or detached from the DOM.")
 
       return subject
+
+    ensureElExistance: ($el) ->
+      ## dont throw if this isnt even a DOM object
+      return if not $Cypress.Utils.isInstanceOf($el, $)
+
+      ## ensure that we either had some assertions
+      ## or that the element existed
+      return if $el and $el.length
+
+      ## throw here to cause the .catch to trigger
+      @throwErr("")
 
     ensureNoCommandOptions: (options) ->
       _.each commandOptions, (opt) =>

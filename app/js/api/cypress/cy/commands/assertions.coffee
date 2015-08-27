@@ -114,11 +114,54 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
       shouldFn.apply(@, arguments)
 
   Cypress.Cy.extend
-    verifyUpcomingAssertions: (subject) ->
+    verifyUpcomingAssertions: (subject, options = {}) ->
       cmds = @getUpcomingAssertions()
 
+      options.assertions ?= []
+
       ## bail if we have no assertions
-      return Promise.resolve(subject) if not cmds.length
+      if not cmds.length
+        return Promise.try =>
+          @ensureElExistance(subject)
+
+      i = 0
+
+      assert = @assert
+      @assert = ->
+        args = arguments
+
+        do (cmd = cmds[i]) =>
+          setCommandLog = (log) =>
+            ## our next log may not be an assertion
+            ## due to page events so make sure we wait
+            ## until we see page events
+            return if log.get("name") isnt "assert"
+
+            i += 1
+
+            ## when we do immediately stop listening to unbind
+            @stopListening @Cypress, "before:log", setCommandLog
+
+            ## if we already have a command
+            ## then just update its attrs from
+            ## the new log
+            if c = cmd.command
+              c.merge(log)
+
+              ## and make sure we return false
+              ## which prevents a new log from
+              ## being added
+              return false
+            else
+              ## reset our state to pending even if
+              ## we have an error
+              # log.set("state", "pending")
+              cmd.command = log
+              options.assertions.push(log)
+
+          @listenTo @Cypress, "before:log", setCommandLog
+
+        assert.apply(@, args)
 
       fns = @_injectAssertionFns(cmds)
 
@@ -132,7 +175,8 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
         _.each subjects, (subject, i) ->
           cmd  = cmds[i]
           orig = cmd.fn.originalFn
-          cmd.fn = -> return subject
+          cmd.fn = ->
+            return subject
           cmd.fn.originalFn = orig
 
       assertions = (memo, fn) =>
@@ -140,13 +184,47 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
           subjects.push(subject)
           subject
 
+      restore = =>
+        ## no matter what we need to
+        ## restore the assertions
+        @assert = assert
+
       Promise
         .reduce(fns, assertions, subject)
+        .then(restore)
         .then ->
           memoizeSubjectReturnValue()
+        .then =>
+          @finishAssertions(options.assertions)
+        .return(cmds)
         .cancellable()
         .catch Promise.CancellationError, ->
+          restore()
           debugger
+        .catch (err) =>
+          restore()
+
+          ## when we're told not to retry
+          if err.retry is false
+            ## finish the assertions
+            @finishAssertions(options.assertions)
+
+            ## and then push our command into this err
+            try
+              @throwErr(err, options.command)
+            catch e
+              err = e
+
+          throw err
+
+    finishAssertions: (assertions) ->
+      _.each assertions, (log) ->
+        log.snapshot()
+
+        if e = log.get("_error")
+          log.error(e)
+        else
+          log.end()
 
     _injectAssertionFns: (cmds) ->
       _.map cmds, _.bind(@_injectAssertion, @)
@@ -187,26 +265,39 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
         fn = current.args and current.args[0]
         fn and _.isFunction(fn) and fn.length > 0
 
+      current = @prop("current")
+
+      if current.type is "assertion"
+        obj.end = true
+        obj.snapshot = true
+        obj.error = error
+      else
+        obj._error = error
+
+      isChildLike = (subject, current) ->
+        (value is subject) or
+          (current.type isnt "assertion") or
+            (functionHadArguments(current))
+
       _.extend obj,
         name:     "assert"
-        end:      true
-        snapshot: true
+        # end:      true
+        # snapshot: true
         message:  message
         passed:   passed
         selector: value?.selector
-        error:    error
         type: (current, subject) ->
           ## if our current command has arguments assume
           ## we are an assertion that's involving the current
           ## subject or our value is the current subject
-          if value is subject or functionHadArguments(current)
+          if isChildLike(subject, current)
             "child"
           else
             "parent"
 
-        onRender: ($row) =>
-          klass = if passed then "passed" else "failed"
-          $row.addClass "command-assertion-#{klass}"
+        onRender: ($row) ->
+          klasses = "command-assertion-failed command-assertion-passed command-assertion-pending"
+          $row.removeClass(klasses).addClass("command-assertion-#{@state}")
 
           ## converts [b] string tags into real elements
           convertTags($row)

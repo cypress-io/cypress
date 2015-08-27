@@ -79,6 +79,11 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       log = new $Log Cypress, obj
       log.wrapOnConsole()
 
+      ## dont trigger log if any return value from
+      ## our before:log is false
+      return if _.any Cypress.invoke("before:log", log), (ret) ->
+        ret is false
+
       Cypress.trigger "log", log
 
       return log

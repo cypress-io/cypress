@@ -21,6 +21,15 @@ $Cypress.register "Misc", (Cypress, _, $) ->
         if Cypress.Utils.hasElement(obj)
           command.set({$el: obj})
 
-        command.snapshot()
+      do resolveWrap = =>
+        @verifyUpcomingAssertions(obj, options)
+          .then ->
+            return {subject: obj, command: command}
+          .catch (err) =>
+            ## if our err specifically tells us not
+            ## to retry then just bubble it up
+            throw err if err.retry is false
 
-      return {subject: obj, command: command}
+            options.error = err
+
+            @_retry resolveWrap, options

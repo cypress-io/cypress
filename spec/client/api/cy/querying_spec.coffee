@@ -370,6 +370,9 @@ describe "$Cypress.Cy Querying Commands", ->
       it "returns invisible element", ->
         button = @cy.$("#button").hide()
 
+        # @cy.get("#button").then ($button) ->
+          # expect($button).not.to.be.visible
+
         @cy.get("#button").should("not.be.visible").then ($button) ->
           expect($button.get(0)).to.eq button.get(0)
 
@@ -456,7 +459,7 @@ describe "$Cypress.Cy Querying Commands", ->
       it "logs exist: false", ->
         @cy.get("#does-not-exist").should("not.exist").then ->
           expect(@log.get("message")).to.eq "#does-not-exist"
-          expect(@log.get("$el")).not.to.be.ok
+          expect(@log.get("$el").get(0)).not.to.be.ok
 
       it "logs route aliases", ->
         @cy
@@ -493,6 +496,14 @@ describe "$Cypress.Cy Querying Commands", ->
           done()
 
         @cy.get("body")
+
+      it "snapshots and ends when consuming an alias", ->
+        @cy
+          .get("body").as("b")
+          .get("@b").then ->
+            expect(@log.get("end")).to.be.true
+            expect(@log.get("state")).to.eq("passed")
+            expect(@log.get("snapshot")).to.be.an("object")
 
       it "logs obj once complete", ->
         @cy.get("body").as("b").then ($body) ->
@@ -683,7 +694,7 @@ describe "$Cypress.Cy Querying Commands", ->
       #   @cy.noop().then ->
       #     expect(@cy.get("something")).to.be.a("function")
 
-    describe.skip "errors", ->
+    describe "errors", ->
       beforeEach ->
         @allowErrors()
 
@@ -699,12 +710,12 @@ describe "$Cypress.Cy Querying Commands", ->
 
         @cy.get(".spinner'")
 
-      it "throws when should('have.length') isnt a number", (done) ->
-        @cy.on "fail", (err) ->
-          expect(err.message).to.include "options.length must be a number"
-          done()
+      # it.only "throws when should('have.length') isnt a number", (done) ->
+      #   @cy.on "fail", (err) ->
+      #     expect(err.message).to.include "options.length must be a number"
+      #     done()
 
-        @cy.get("button").should("have.length", "asdf")
+      #   @cy.get("button").should("have.length", "asdf")
 
       it "throws on too many elements after timing out waiting for length", (done) ->
         buttons = @cy.$("button")
@@ -713,7 +724,7 @@ describe "$Cypress.Cy Querying Commands", ->
           expect(err.message).to.include "Too many elements found. Found '#{buttons.length}', expected '#{buttons.length - 1}': button"
           done()
 
-        @cy.get("button", {length: buttons.length - 1})
+        @cy.get("button").should("have.length", buttons.length - 1)
 
       it "throws on too few elements after timing out waiting for length", (done) ->
         buttons = @cy.$("button")
@@ -725,11 +736,25 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy.get("button", {length: buttons.length + 1})
 
       it "throws after timing out not finding element", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "Expected to find element: '#missing-el', but never found it."
+          done()
+
         @cy.get("#missing-el")
 
+      it "throws after timing out not finding element when should exist", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "Could not find element: #missing-el"
+          expect(err.message).to.include "Expected to find element: '#missing-el', but never found it."
           done()
+
+        @cy.get("#missing-el").should("exist")
+
+      it "throws existance error without running assertions", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "Expected to find element: '#missing-el', but never found it."
+          done()
+
+        @cy.get("#missing-el").should("have.prop", "foo")
 
       it "throws when using an alias that does not exist"
 
@@ -754,18 +779,18 @@ describe "$Cypress.Cy Querying Commands", ->
           .get("getJsonButton")
 
       it "throws after timing out while not trying to find an element", (done) ->
-        @cy.get("div:first", {exist: false})
-
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "Found existing element: div:first"
+          expect(err.message).to.include "Expected <div#dom> not to exist in the DOM, but it was found."
           done()
+
+        @cy.get("div:first").should("not.exist")
 
       it "throws after timing out while trying to find an invisible element", (done) ->
-        @cy.get("div:first", {visible: false})
-
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "Found visible element: div:first"
+          expect(err.message).to.include "Expected <div#dom> not to be visible, but it was continuously visible."
           done()
+
+        @cy.get("div:first").should("not.be.visible")
 
       it "throws after timing out trying to find a visible element", (done) ->
         @cy.$("#button").hide()
@@ -1062,10 +1087,12 @@ describe "$Cypress.Cy Querying Commands", ->
 
         @cy.get("body").contains("foo")
 
-      it "snapshots after finding element", ->
+      it "snapshots and ends after finding element", ->
         @Cypress.on "log", (@log) =>
 
         @cy.contains("foo").then ->
+          expect(@log.get("end")).to.be.true
+          expect(@log.get("state")).to.eq("passed")
           expect(@log.get("snapshot")).to.be.an("object")
 
       it "silences internal @cy.get() log", ->
@@ -1100,7 +1127,7 @@ describe "$Cypress.Cy Querying Commands", ->
       it "logs when not exists", ->
         @cy.contains("does-not-exist").should("not.exist").then ->
           expect(@log.get("message")).to.eq "does-not-exist"
-          expect(@log.get("$el")).to.not.be.ok
+          expect(@log.get("$el").length).to.eq(0)
 
       it "logs when should be visible with filter", ->
         @cy.contains("div", "Nested Find").should("be.visible").then ($div) ->

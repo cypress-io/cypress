@@ -56,7 +56,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
           return onConsole
 
-        options.command.set(obj).snapshot().end()
+        options.command.set(obj)
 
       ## we always want to strip everything after the first '.'
       ## since we support alias propertys like '1' or 'all'
@@ -68,7 +68,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
           when Cypress.Utils.hasElement(subject)
             if @_contains(subject)
               log(subject)
-              return subject
+              return {subject: subject, command: options.command}
             else
               @_replayFrom command
               return null
@@ -112,9 +112,6 @@ $Cypress.register "Querying", (Cypress, _, $) ->
           ## reset $el if this found anything
           $el = filtered if filtered.length
 
-        ## normalize $el in case it doesnt exist
-        $el = if $el and $el.length then $el else null
-
         ## store the $el now in case we fail
         setEl($el)
 
@@ -128,31 +125,32 @@ $Cypress.register "Querying", (Cypress, _, $) ->
           log($el)
           return $el
 
-      checkToAutomaticallyRetry = (count, $el) ->
-        ## we should automatically retry querying
-        ## if we did not have any upcoming assertions
-        ## and our $el's length was 0, because that means
-        ## the element didnt exist in the DOM and the user
-        ## did not explicitly request that it does not exist
-        return if count isnt 0 or ($el and $el.length)
-
-        ## throw here to cause the .catch to trigger
-        throw new Error()
-
       do resolveElements = =>
         Promise.try(getElements).then ($el) =>
           if options.verify is false
             return $el
 
-          @verifyUpcomingAssertions($el)
-            .then (count) ->
-              checkToAutomaticallyRetry(count, $el)
-            .return({
-              subject: $el
-              command: command
-            })
+          @verifyUpcomingAssertions($el, options)
+            .then ->
+              return {subject: $el, command: options.command}
             .catch (err) =>
-              console.log err
+              ## if our err specifically tells us not
+              ## to retry then just bubble it up
+              return throw err if err.retry is false
+
+              ## if our $el is null and our assertions
+              ## failed then we know the user is not
+              ## expecting this element to return null
+              options.error = switch
+                ## do we even need to do this now
+                ## yes because we may not have a single
+                ## assertion so we have to prepare for an
+                ## error message without an assertion
+                when not $el.length
+                 "Expected to find element: '#{selector}', but never found it."
+                else
+                  err
+
               @_retry resolveElements, options
 
     root: (options = {}) ->
@@ -252,13 +250,6 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
         options.command.set({$el: $el})
 
-      log = ($el) ->
-        if options.command
-          setEl($el)
-          options.command.snapshot()
-
-        return {subject: $el, command: options.command}
-
       getFirstDeepestElement = (elements, index = 0) ->
         ## iterate through all of the elements in pairs
         ## and check if the next item in the array is a
@@ -302,24 +293,21 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       do resolveElements = =>
         @command("get", selector, options).then ($elements) =>
           $el = switch
-            when $elements and filter
+            when $elements and $elements.length and filter
               $elements.last()
-            when $elements
+            when $elements and $elements.length
               getFirstDeepestElement($elements)
             else
-              null
+              $elements
 
-          log($el)
+          setEl($el)
 
-          @verifyUpcomingAssertions($el)
-            .then (count) ->
-              checkToAutomaticallyRetry(count, $el)
+          @verifyUpcomingAssertions($el, options)
             .return({
               subject: $el
               command: options.command
             })
             .catch (err) =>
-              console.log err
               @_retry resolveElements, options
 
   Cypress.addChildCommand

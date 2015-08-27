@@ -41,17 +41,6 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
 
         options.command.set({$el: $el})
 
-      checkToAutomaticallyRetry = (count, $el) ->
-        ## we should automatically retry querying
-        ## if we did not have any upcoming assertions
-        ## and our $el's length was 0, because that means
-        ## the element didnt exist in the DOM and the user
-        ## did not explicitly request that it does not exist
-        return if count isnt 0 or ($el and $el.length)
-
-        ## throw here to cause the .catch to trigger
-        throw new Error()
-
       do getElements = =>
         ## catch sizzle errors here
         try
@@ -62,10 +51,7 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
 
         setEl($el)
 
-        @verifyUpcomingAssertions($el)
-          .then (count) ->
-            ## ensureCountOrElLength
-            checkToAutomaticallyRetry(count, $el)
+        @verifyUpcomingAssertions($el, options)
           .return({
             subject: $el
             command: options.command

@@ -35,7 +35,10 @@ do ($Cypress, _, Promise) ->
         ## when we fail
         command.snapshot() if command
 
-        err = "Timed out retrying. " + options.error ? "The last command was: " + options.name
+        if assertions = options.assertions
+          @finishAssertions(assertions)
+
+        err = "Timed out retrying. " + options.error
         @throwErr err, (options.onFail or command)
 
       Promise.delay(options.interval).cancellable().then =>
