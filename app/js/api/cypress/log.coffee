@@ -105,6 +105,9 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
     get: (attr) ->
       @attributes[attr]
 
+    unset: (key) ->
+      @set key, undefined
+
     set: (key, val) ->
       if _.isString(key)
         obj = {}
@@ -155,14 +158,14 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
     error: (err) ->
       @set
         error: err
-        state: "error"
+        state: "failed"
 
       return @
 
     end: ->
       @set({
         end: true
-        state: "success"
+        state: "passed"
       })
 
       return @
@@ -188,6 +191,20 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       }
 
       @set obj
+
+    merge: (log) ->
+      ## merges another logs attributes into
+      ## ours by also removing / adding any properties
+      ## on the original
+
+      ## 1. calculate which properties to unset
+      unsets = _.chain(@attributes).keys().without(_(log.attributes).keys()...).value()
+
+      _.each unsets, (unset) =>
+        @unset(unset)
+
+      ## 2. merge in any other properties
+      @set(log.attributes)
 
     reduceMemory: ->
       @off()
