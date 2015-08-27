@@ -31,7 +31,7 @@ describe "$Cypress.Cy Agents Commands", ->
           expect(@log.get("name")).to.eq("spy-1")
           expect(@log.get("message")).to.eq("function(arg1, arg2)")
           expect(@log.get("type")).to.eq("parent")
-          expect(@log.get("state")).to.eq("success")
+          expect(@log.get("state")).to.eq("passed")
           expect(@log.get("snapshot")).to.be.an("object")
 
         it "increments callCount", ->

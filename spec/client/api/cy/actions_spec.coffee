@@ -191,7 +191,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "snpahots and ends", ->
         @cy.get("select:first").select("de_dust2").then ->
-          expect(@log.get("state")).to.eq("success")
+          expect(@log.get("state")).to.eq("passed")
           expect(@log.get("snapshot")).to.be.an("object")
 
       it "#onConsole", ->
@@ -1816,7 +1816,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get("input").invoke("slice", 0, 2).clear().then ->
           _.each logs, (log) ->
-            expect(log.get("state")).to.eq("success")
+            expect(log.get("state")).to.eq("passed")
             expect(log.get("end")).to.be.true
 
       it "snapshots after clicking", ->
@@ -2066,7 +2066,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "ends command when checkbox is already checked", ->
         @cy.get("[name=colors][value=blue]").check().check().then ->
-          expect(@log.get("state")).eq("success")
+          expect(@log.get("state")).eq("passed")
 
       it "#onConsole", ->
         @cy.get("[name=colors][value=blue]").check().then ($input) ->
@@ -2269,7 +2269,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "ends command when checkbox is already unchecked", ->
         @cy.get("[name=colors][value=blue]").invoke("prop", "checked", false).uncheck().then ->
-          expect(@log.get("state")).eq("success")
+          expect(@log.get("state")).eq("passed")
 
       it "#onConsole", ->
         @cy.get("[name=colors][value=blue]").uncheck().then ($input) ->
@@ -2568,7 +2568,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "ends immediately", ->
         @cy.focused().then ->
           expect(@log.get("end")).to.be.true
-          expect(@log.get("state")).to.eq("success")
+          expect(@log.get("state")).to.eq("passed")
 
       it "snapshots immediately", ->
         @cy.focused().then ->
@@ -3918,7 +3918,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get("button").invoke("slice", 0, 2).click().then ->
           _.each logs, (log) ->
-            expect(log.get("state")).to.eq("success")
+            expect(log.get("state")).to.eq("passed")
             expect(log.get("end")).to.be.true
 
       it "#onConsole", ->

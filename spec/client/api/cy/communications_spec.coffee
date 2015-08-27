@@ -113,7 +113,7 @@ describe "$Cypress.Cy Communications Commands", ->
 
         @cy.message("create:user").then ->
           obj = {
-            state: "success"
+            state: "passed"
             name: "message"
             message: "create:user"
           }

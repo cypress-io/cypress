@@ -280,7 +280,7 @@ describe "$Cypress.Cy Window Commands", ->
 
       it "sets state to success immediately", ->
         @cy.viewport(800, 600).then ->
-          expect(@log.get("state")).to.eq "success"
+          expect(@log.get("state")).to.eq "passed"
 
       it "snapshots immediately", ->
         @cy.viewport(800, 600).then ->

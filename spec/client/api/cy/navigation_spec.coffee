@@ -135,7 +135,7 @@ describe "$Cypress.Cy Navigation Commands", ->
       it "logs obj once complete", ->
         @cy.visit("index.html").then ->
           obj = {
-            state: "success"
+            state: "passed"
             name: "visit"
             message: "index.html"
             url: "index.html"

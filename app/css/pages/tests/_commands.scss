@@ -199,7 +199,7 @@
     }
   }
 
-  .command-error {
+  .command-failed {
     padding-left: 3px;
     border-left: 2px solid $fail;
     background-color: lighten($fail, 30%);
@@ -262,6 +262,23 @@
         font-family: Menlo, monospace;
         font-size: 95%;
         margin: 0 3px;
+      }
+    }
+  }
+
+  .command-assertion-pending {
+    & .command-method {
+      & span {
+        background-color: $pending;
+        color: white;
+
+      }
+    }
+    & .command-message {
+      color: $pending;
+
+      strong {
+        color: darken($pending, 10%);
       }
     }
   }

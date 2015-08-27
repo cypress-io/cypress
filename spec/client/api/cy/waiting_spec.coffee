@@ -529,10 +529,10 @@ describe "$Cypress.Cy Waiting Commands", ->
 
           @Cypress.on "log", (l) =>
             log = l
-            expect(log.get("state")).not.to.eq "success"
+            expect(log.get("state")).not.to.eq "passed"
 
           @cy.noop({}).wait(10).then ->
-            expect(log.get("state")).to.eq "success"
+            expect(log.get("state")).to.eq "passed"
 
         it "does not immediately snapshot", ->
           log = null

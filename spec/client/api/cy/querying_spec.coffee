@@ -497,7 +497,7 @@ describe "$Cypress.Cy Querying Commands", ->
       it "logs obj once complete", ->
         @cy.get("body").as("b").then ($body) ->
           obj = {
-            state: "success"
+            state: "passed"
             name: "get"
             message: "body"
             alias: "b"

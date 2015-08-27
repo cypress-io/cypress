@@ -46,11 +46,11 @@ describe "$Cypress.Log API", ->
 
     it "#end", ->
       @log.end()
-      expect(@log.get("state")).to.eq "success"
+      expect(@log.get("state")).to.eq "passed"
 
     it "#end triggers attrs:changed", (done) ->
       @log.on "attrs:changed", (attrs) ->
-        expect(attrs.state).to.eq "success"
+        expect(attrs.state).to.eq "passed"
         done()
 
       @log.end()

@@ -16,7 +16,7 @@
 
     getClassByState: ->
       switch @model.get("state")
-        when "passed" then "success"
+        when "passed" then "passed"
         when "failed" then "danger"
         when "error"  then "warning"
         else ""

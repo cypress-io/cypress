@@ -26,7 +26,7 @@ describe "$Cypress.Cy Location Commands", ->
       it "ends immediately", ->
         @cy.url().then ->
           expect(@log.get("end")).to.be.true
-          expect(@log.get("state")).to.eq("success")
+          expect(@log.get("state")).to.eq("passed")
 
       it "snapshots immediately", ->
         @cy.url().then ->
@@ -79,7 +79,7 @@ describe "$Cypress.Cy Location Commands", ->
       it "ends immediately", ->
         @cy.hash().then ->
           expect(@log.get("end")).to.be.true
-          expect(@log.get("state")).to.eq("success")
+          expect(@log.get("state")).to.eq("passed")
 
       it "snapshots immediately", ->
         @cy.hash().then ->
@@ -135,7 +135,7 @@ describe "$Cypress.Cy Location Commands", ->
       it "ends immediately", ->
         @cy.location("href").then ->
           expect(@log.get("end")).to.be.true
-          expect(@log.get("state")).to.eq("success")
+          expect(@log.get("state")).to.eq("passed")
 
       it "snapshots immediately", ->
         @cy.location("href").then ->

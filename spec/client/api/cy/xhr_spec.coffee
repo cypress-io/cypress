@@ -696,7 +696,7 @@ describe "$Cypress.Cy XHR Commands", ->
         it "#onConsole", ->
 
         it "ends", ->
-          expect(@log.get("state")).to.eq("success")
+          expect(@log.get("state")).to.eq("passed")
 
         it "snapshots again", ->
           expect(@log.get("snapshot")).to.be.an("object")

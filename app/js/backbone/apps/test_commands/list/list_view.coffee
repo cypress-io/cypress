@@ -40,8 +40,8 @@
       ## add or remove command-pending whether we're in pending state
       @$el.toggleClass "command-pending", @model.state("pending")
 
-      ## add or remove command-error whether we have an error
-      @$el.toggleClass "command-error", @model.state("error")
+      ## add or remove command-failed whether we have an error
+      @$el.toggleClass "command-failed", @model.state("failed")
 
       @model.triggerCommandCallback("onRender", @$el)
 
