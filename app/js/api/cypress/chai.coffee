@@ -27,6 +27,38 @@ do ($Cypress, _, chai) ->
       addCustomProperties: ->
         _this = @
 
+              ## filter out anything not currently in our document
+              if not cy._contains(obj)
+                obj = @_obj = obj.filter (index, el) ->
+                  cy._contains(el)
+
+              node = if obj and obj.length then $Cypress.Utils.stringifyElement(obj, "short") else obj.selector
+
+              ## if our length assertion fails we need to check to
+              ## ensure that the length argument is a finite number
+              ## because if its not, we need to bail on retrying
+              try
+                @assert(
+                  obj.length is length,
+                  "expected '#{node}' to have a length of \#{exp} but got \#{act}",
+                  "expected '#{node}' to not have a length of \#{act}",
+                  length,
+                  obj.length
+                )
+
+              catch e1
+                if _.isFinite(length)
+                  return throw e1
+
+                e2 = cy.cypressErr("You must provide a valid number to a length assertion. You passed: '#{length}'")
+                e2.retry = false
+                throw e2
+
+          fn2 = (_super) ->
+            return ->
+              _super.apply(@, arguments)
+
+          fn1, fn2
         ## I dont like directly talking to cy here and directly
         ## calling the _contains method but I don't know of another
         ## way to do this, since we need to talk to the remoteDocument

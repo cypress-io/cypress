@@ -388,3 +388,30 @@
 #         $Cypress.Chai.expect(true).to.eq.true
 
 #         expectOriginal(exp).to.be.calledWith(true)
+    describe "#have.length", ->
+      it "formats _obj with cypress", (done) ->
+        @onAssert (log) ->
+          expect(log.get("message")).to.eq("expected [b]<button#button>[\\b] to have a length of [b]1[\\b] and got [b]1[\\b]")
+          done()
+
+        @cy.get("button:first").should("have.length", 1)
+
+      it "formats error _obj with cypress", (done) ->
+        @onAssert (log) ->
+          expect(log.get("_error").message).to.eq("expected '<body>' to have a length of 2 but got 1")
+          done()
+
+        @cy.get("body").should("have.length", 2)
+
+      it "does not touch non DOM objects", ->
+        @cy.noop([1,2,3]).should("have.length", 3)
+
+      it "rejects any element not in the document", ->
+        buttons = @cy.$("button")
+
+        length = buttons.length
+
+        @cy.on "retry", _.after 2, =>
+          @cy.$("button:last").remove()
+
+        @cy.wrap(buttons).should("have.length", length - 1)

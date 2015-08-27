@@ -6,6 +6,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
   allButs        = /\bbut\b/g
   reExistance    = /exist/
   reEvHaveLength = /eventually.+length/
+  reHaveLength   = /length/
 
   Cypress.on "assert", ->
     @assert.apply(@, arguments)
@@ -52,9 +53,8 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
     exp = Cypress.Chai.expect(subject).to
 
     ## are we doing an existance assertion?
-    if reExistance.test(chainers)
-      chainers = chainers.split("exist").join("existInDocument")
-      exp.isCheckingExistance = true
+    if reHaveLength.test(chainers)
+      exp.isCheckingLength = true
 
     chainers = chainers.split(".")
     lastChainer = _(chainers).last()
@@ -79,7 +79,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
       ## in the DOM if its a DOM subject
       ## need to continually apply this check due
       ## to eventually
-      if not exp.isCheckingExistance
+      if not exp.isCheckingLength
         @ensureDom(subject) if Cypress.Utils.hasElement(subject)
 
       _.reduce chainers, (memo, value) =>
