@@ -15,7 +15,7 @@ $Cypress.register "Location", (Cypress, _, $) ->
       _.defaults options, {log: true}
 
       if options.log
-        command = Cypress.Log.command
+        options.command = Cypress.Log.command
           message: ""
 
       getHref = =>
@@ -23,19 +23,21 @@ $Cypress.register "Location", (Cypress, _, $) ->
 
       do resolveHref = =>
         Promise.try(getHref).then (href) =>
-          @verifyUpcomingAssertions(href)
+          @verifyUpcomingAssertions(href, options)
             .return({
               subject: href
-              command: command
+              command: options.command
             })
             .catch (err) =>
+              options.error = err
+
               @_retry resolveHref, options
 
     hash: (options = {}) ->
       _.defaults options, {log: true}
 
       if options.log
-        command = Cypress.Log.command
+        options.command = Cypress.Log.command
           message: ""
 
       getHash = =>
@@ -43,12 +45,14 @@ $Cypress.register "Location", (Cypress, _, $) ->
 
       do resolveHash = =>
         Promise.try(getHash).then (hash) =>
-          @verifyUpcomingAssertions(hash)
+          @verifyUpcomingAssertions(hash, options)
             .return({
               subject: hash
-              command: command
+              command: options.command
             })
             .catch (err) =>
+              options.error = err
+
               @_retry resolveHash, options
 
     location: (key, options) ->
@@ -73,15 +77,17 @@ $Cypress.register "Location", (Cypress, _, $) ->
           location
 
       if options.log
-        command = Cypress.Log.command
+        options.command = Cypress.Log.command
           message: key ? ""
 
       do resolveLocation = =>
         Promise.try(getLocation).then (ret) =>
-          @verifyUpcomingAssertions(ret)
+          @verifyUpcomingAssertions(ret, options)
             .return({
               subject: ret
-              command: command
+              command: options.command
             })
             .catch (err) =>
+              options.error = err
+
               @_retry resolveLocation, options
