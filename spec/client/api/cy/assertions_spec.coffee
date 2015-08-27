@@ -415,3 +415,13 @@
           @cy.$("button:last").remove()
 
         @cy.wrap(buttons).should("have.length", length - 1)
+
+    describe "#eventually.have.length", ->
+      it "is deprecated", (done) ->
+        @allowErrors()
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "The 'eventually' assertion chainer has been deprecated. This is now the default behavior so you can safely remove this word and everything should work as before."
+          done()
+
+        @cy.noop().should("eventually.have.length", 1)

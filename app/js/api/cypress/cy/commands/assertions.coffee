@@ -41,18 +41,14 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
     obj
 
   shouldFn = (subject, chainers, args...) ->
-    ## if we're using eventually.have.length blow up
-    if reEvHaveLength.test(chainers)
-      num = args[0] ? "n"
-      @throwErr("'eventually.have.length' is NOT a supported assertion. Use the command options: '{length: #{num}}' implicit assertion instead.")
-
-    ## should doesnt support options here
-    ## so we cant use the wait command
-    ## we must use @_retry directly
-
     exp = Cypress.Chai.expect(subject).to
 
-    ## are we doing an existance assertion?
+    if reEvHaveLength.test(chainers)
+      err = @cypressErr("The 'eventually' assertion chainer has been deprecated. This is now the default behavior so you can safely remove this word and everything should work as before.")
+      err.retry = false
+      throw err
+
+    ## are we doing a length assertion?
     if reHaveLength.test(chainers)
       exp.isCheckingLength = true
 
