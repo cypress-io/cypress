@@ -14,7 +14,7 @@ do ($Cypress, _, Promise) ->
       _.defaults options,
         _runnableTimeout: runnableTimeout
         start: new Date
-        interval: 50
+        interval: 16
         retries: 0
         name: @prop("current")?.name
 
