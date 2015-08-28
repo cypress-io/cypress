@@ -1,4 +1,4 @@
-do ($Cypress, _, chai) ->
+do ($Cypress, _, $, chai) ->
 
   ## all words between single quotes which are at
   ## the end of the string
@@ -27,6 +27,16 @@ do ($Cypress, _, chai) ->
       addCustomProperties: ->
         _this = @
 
+        chai.Assertion.overwriteChainableMethod "length",
+          fn1 = (_super) ->
+            return (length) ->
+              cy = _this.Cypress.cy
+
+              obj = @_obj
+
+              if not cy or not ($Cypress.Utils.isInstanceOf(obj, $) or $Cypress.Utils.hasElement(obj))
+                return _super.apply(@, arguments)
+
               ## filter out anything not currently in our document
               if not cy._contains(obj)
                 obj = @_obj = obj.filter (index, el) ->
@@ -47,8 +57,19 @@ do ($Cypress, _, chai) ->
                 )
 
               catch e1
+                e1.node = node
+                e1.negated = utils.flag(@, "negate")
+                e1.type = "length"
+
                 if _.isFinite(length)
-                  return throw e1
+                  getLongLengthMessage = (len1, len2) ->
+                    if len1 > len2
+                      "Too many elements found. Found '#{len1}', expected '#{len2}'."
+                    else
+                      "Not enough elements found. Found '#{len1}', expected '#{len2}'."
+
+                  e1.longMessage = getLongLengthMessage(obj.length, length)
+                  throw e1
 
                 e2 = cy.cypressErr("You must provide a valid number to a length assertion. You passed: '#{length}'")
                 e2.retry = false
@@ -58,21 +79,70 @@ do ($Cypress, _, chai) ->
             return ->
               _super.apply(@, arguments)
 
-          fn1, fn2
-        ## I dont like directly talking to cy here and directly
-        ## calling the _contains method but I don't know of another
-        ## way to do this, since we need to talk to the remoteDocument
-        chai.Assertion.addProperty "existInDocument", ->
-          if not cy = _this.Cypress.cy
-            throw new Error("cy must be running to use this assertion.")
+        chai.Assertion.overwriteProperty "exist", (_super) ->
+          return ->
+            cy = _this.Cypress.cy
 
-          obj = @_obj
+            obj = @_obj
 
-          @assert(
-            cy._contains(obj),
-            "expected #{utils.inspect(obj.selector)} to exist in the document",
-            "expected #{utils.inspect(obj.selector)} not to exist in the document"
-          )
+            if not cy or not ($Cypress.Utils.isInstanceOf(obj, $) or $Cypress.Utils.hasElement(obj))
+              _super.apply(@, arguments)
+            else
+              if not obj.length
+                @_obj = null
+
+              node = if obj and obj.length then $Cypress.Utils.stringifyElement(obj, "short") else obj.selector
+
+              try
+                @assert(
+                  isContained = cy._contains(obj),
+                  "expected '#{node}' to exist in the DOM"
+                  "expected '#{node}' not to exist in the DOM"
+                )
+              catch e1
+                e1.node = node
+                e1.negated = utils.flag(@, "negate")
+                e1.type = "existence"
+
+                getLongExistsMessage = (obj) ->
+                  ## if we expected not for an element to exist
+                  if isContained
+                    "Expected #{node} not to exist in the DOM, but it was continuously found."
+                  else
+                    "Expected to find element: '#{obj.selector}', but never found it."
+
+                e1.longMessage = getLongExistsMessage(obj)
+                throw e1
+
+        chai.Assertion.overwriteProperty "visible", (_super) ->
+          return ->
+            obj = @_obj
+
+            if not ($Cypress.Utils.isInstanceOf(obj, $) or $Cypress.Utils.hasElement(obj))
+              _super.apply(@, arguments)
+            else
+              node = if obj then $Cypress.Utils.stringifyElement(obj, "short") else obj
+
+              try
+                @assert(
+                  isVisible = obj.is(":visible")
+                  "expected '#{node}' to be hidden"
+                  "expected '#{node}' not to be hidden"
+                )
+              catch e1
+                e1.node = node
+                e1.negated = utils.flag(@, "negate")
+                e1.type = "visibility"
+
+                getLongVisibleMessage = (obj) ->
+                  ## we expected this to be hidden
+                  if isVisible
+                    "Expected #{node} not to be visible, but it was continuously visible."
+                  else
+                    "Expected #{node} to be visible, but it was continuously hidden."
+
+                e1.longMessage = getLongVisibleMessage(obj)
+                throw e1
 
       listeners: ->
         @listenTo @Cypress, "stop", => @stop()
@@ -108,10 +178,6 @@ do ($Cypress, _, chai) ->
         _this = @
 
         chai.Assertion::assert = _.wrap assertProto, (orig, args...) ->
-          ## we only want to shift the arguments and send these
-          ## off to Ecl.assert if it exists (which it wont in our
-          ## own test mode)
-
           passed    = utils.test(@, args)
           value     = utils.flag(@, "object")
           expected  = args[3]

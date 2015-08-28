@@ -76,6 +76,13 @@ window.enterIntegrationTestingMode = (fixture, options = {}) ->
     ## load all of the modules
     @Cypress = $Cypress.create({loadModules: true})
 
+    ## immediately create the chai instance so
+    ## we get our custom properties but then
+    ## restore it to keep things simple
+    @chai = $Cypress.Chai.create(@Cypress, {})
+    @chai.addCustomProperties()
+    @chai.restore()
+
     @Cypress.start()
 
     if options.silent is false
@@ -106,6 +113,13 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
 
       ## load all of the modules
       @Cypress = $Cypress.create({loadModules: true})
+
+      ## immediately create the chai instance so
+      ## we get our custom properties but then
+      ## restore it to keep things simple
+      @chai = $Cypress.Chai.create(@Cypress, {})
+      @chai.addCustomProperties()
+      @chai.restore()
 
       @Cypress.start()
 
