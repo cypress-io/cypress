@@ -131,8 +131,8 @@ $Cypress.register "Querying", (Cypress, _, $) ->
             return $el
 
           @verifyUpcomingAssertions($el, options, {
-              onRetry: resolveElements
-            })
+            onRetry: resolveElements
+          })
 
     root: (options = {}) ->
       _.defaults options, {log: true}
