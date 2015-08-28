@@ -171,9 +171,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
       i = 0
 
       assert = @assert
-      @assert = ->
-        args = arguments
-
+      @assert = (args...) ->
         do (cmd = cmds[i]) =>
           setCommandLog = (log) =>
             ## our next log may not be an assertion
@@ -181,7 +179,17 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
             ## until we see page events
             return if log.get("name") isnt "assert"
 
-            i += 1
+            ## its possible a single 'should' will assert multiple
+            ## things such as the case with have.property. we can
+            ## detect when that is happening because cmd will be null.
+            ## if thats the case then just set cmd to be the previous
+            ## cmd and do not increase 'i'
+            ## this will prevent 2 logs from ever showing up but still
+            ## provide errors when the 1st assertion fails.
+            if not cmd
+              cmd = cmds[i - 1]
+            else
+              i += 1
 
             ## when we do immediately stop listening to unbind
             @stopListening @Cypress, "before:log", setCommandLog
@@ -205,7 +213,8 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
 
           @listenTo @Cypress, "before:log", setCommandLog
 
-        assert.apply(@, args)
+        ## send verify=true as the last arg
+        assert.apply(@, args.concat(true))
 
       fns = @_injectAssertionFns(cmds)
 
@@ -294,7 +303,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
 
       assertions
 
-    assert: (passed, message, value, actual, expected, error) ->
+    assert: (passed, message, value, actual, expected, error, verifying = false) ->
       ## if this is a jquery object and its true
       ## then remove all the 'but's and replace with 'and'
       ## also just think about slicing off everything after a comma?
@@ -311,16 +320,19 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
 
       current = @prop("current")
 
-      if current.type is "assertion"
+      ## if we are simply verifying the upcoming
+      ## assertions then do not immediately end or snapshot
+      ## else do
+      if verifying
+        obj._error = error
+      else
         obj.end = true
         obj.snapshot = true
         obj.error = error
-      else
-        obj._error = error
 
       isChildLike = (subject, current) ->
         (value is subject) or
-          (current.type isnt "assertion") or
+          # (current.type isnt "assertion") or
             (functionHadArguments(current))
 
       _.extend obj,
