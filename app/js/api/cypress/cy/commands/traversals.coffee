@@ -45,6 +45,10 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
         ## catch sizzle errors here
         try
           $el = subject[traversal].call(subject, arg1, arg2)
+
+          ## normalize the selector since jQuery won't have it
+          ## or completely borks it
+          $el.selector = getSelector()
         catch e
           e.onFail = -> options.command.error(e)
           throw e
@@ -53,13 +57,8 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
 
         @verifyUpcomingAssertions($el, options, {
           onRetry: getElements
+          onFail: (err) ->
+            if err.type is "existence"
+              node = $Cypress.Utils.stringifyElement(subject, "short")
+              err.longMessage += " Queried from element: #{node}"
         })
-
-        # getErr = =>
-        #   node = Cypress.Utils.stringifyElement(subject, "short")
-        #   err = @_elCommandOptionsError($el, options)
-        #   err += " " + getSelector() + " from #{node}"
-
-        # options.error ?= getErr()
-
-        # @_retry(getElements, options)

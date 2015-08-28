@@ -132,9 +132,6 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
           @verifyUpcomingAssertions($el, options, {
               onRetry: resolveElements
-              onFail: (err) ->
-                if not $el.length
-                  options.error = "Expected to find element: '#{selector}', but never found it."
             })
 
     root: (options = {}) ->
@@ -174,38 +171,34 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
       @ensureNoCommandOptions(options)
 
-      # @throwErr "cy.contains() cannot be passed a length option because it will only ever return 1 element." if options.length
       @throwErr "cy.contains() can only accept a string or number!" if not (_.isString(text) or _.isFinite(text))
       @throwErr "cy.contains() cannot be passed an empty string!" if _.isBlank(text)
 
-      phrase = switch
-        when filter
-          "within the selector: '#{filter}'"
-        when subject
-          node = Cypress.Utils.stringifyElement(subject, "short")
-          if options.exist is false
-            "within an existing element: #{node}"
+      getPhrase = (type, negated) ->
+        switch
+          when filter
+            "within the selector: '#{filter}' "
+          when subject
+            node = Cypress.Utils.stringifyElement(subject, "short")
+            "within the element: #{node} "
           else
-            "within the element: #{node}"
-        else
-          if options.exist is false
-            "within any existing elements"
-          else
-            "in any elements"
+            ""
 
-      # getErr = (text, phrase) ->
-      #   err = switch
-      #     when options.exist is false
-      #       "Found content: '#{text}' #{phrase} but it never became non-existent."
+      getErr = (err) ->
+        {type, negated, node} = err
 
-      #     when options.visible is false
-      #       "Found visible content: '#{text}' #{phrase} but it never became hidden."
+        switch type
+          when "existence"
+            if negated
+              "Expected not to find content: '#{text}' #{getPhrase(type, negated)}but continuously found it."
+            else
+              "Expected to find content: '#{text}' #{getPhrase(type, negated)}but never did."
 
-      #     when options.visible is true
-      #       "Found hidden content: '#{text}' #{phrase} but it never became visible."
-
-      #     else
-      #       "Could not find any content: '#{text}' #{phrase}"
+          when "visibility"
+            if negated
+              "Expected element with content: '#{text}' #{getPhrase(type, negated)}not to be visible, but it was continuously visible."
+            else
+              "Expected element with content: '#{text}' #{getPhrase(type, negated)}to be visible, but it was continuously hidden."
 
       if options.log
         onConsole = {
@@ -288,6 +281,11 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
           @verifyUpcomingAssertions($el, options, {
             onRetry: resolveElements
+            onFail: (err) =>
+              if err.type is "length" and err.expected > 1
+                @throwErr "cy.contains() cannot be passed a length option because it will only ever return 1 element.", options.command
+
+              options.error = getErr(err)
           })
 
   Cypress.addChildCommand

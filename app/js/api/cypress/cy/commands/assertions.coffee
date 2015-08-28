@@ -126,13 +126,37 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
           {subject: subject, command: options.command}
 
       onFailFn = (err) =>
+        ## when we fail for whatever reason we need to
+        ## check to see if we would firstly fail if
+        ## we don't have an el in existence. what this
+        ## catches are assertions downstream about an
+        ## elements existence but the element never
+        ## exists in the first place. this will probably
+        ## ensure the error is about existence not about
+        ## the downstream assertion.
+        try
+          @ensureElExistance(subject)
+        catch e2
+          err = e2
+
+        options.error = err
+
+        throw err if err.retry is false
+
         onFail  = callbacks.onFail
         onRetry = callbacks.onRetry
 
         if not onFail and not onRetry
           throw err
 
-        onFail.call(@, err) if _.isFunction(onFail)
+        ## if our onFail throws then capture it
+        ## and finish the assertions and then throw
+        ## it again
+        try
+          onFail.call(@, err) if _.isFunction(onFail)
+        catch e3
+          @finishAssertions(options.assertions)
+          throw e3
 
         @_retry(onRetry, options) if _.isFunction(onRetry)
 
@@ -235,12 +259,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
               err = e
 
           throw err
-        .catch (err) =>
-          throw err if err.retry is false
-
-          options.error = err
-
-          onFailFn(err)
+        .catch(onFailFn)
 
     finishAssertions: (assertions) ->
       _.each assertions, (log) ->

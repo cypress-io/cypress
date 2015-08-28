@@ -56,8 +56,14 @@ do ($Cypress, _, $) ->
       ## or that the element existed
       return if $el and $el.length
 
-      ## throw here to cause the .catch to trigger
-      @throwErr("")
+      ## TODO: REFACTOR THIS TO CALL THE CHAI-OVERRIDES DIRECTLY
+      ## OR GO THROUGH I18N
+
+      ## prevent any additional logs this is an implicit assertion
+      @listenToOnce @Cypress, "before:log", -> return false
+
+      ## verify the $el exists and use our default error messages
+      $Cypress.Chai.expect($el).to.exist
 
     ensureNoCommandOptions: (options) ->
       _.each commandOptions, (opt) =>

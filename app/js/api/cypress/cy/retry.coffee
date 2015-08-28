@@ -39,10 +39,13 @@ do ($Cypress, _, Promise) ->
           @finishAssertions(assertions)
 
         getErrMessage = (err) ->
-          if err and err.message
-            err.message
-          else
-            err
+          switch
+            when err and err.longMessage
+              err.longMessage
+            when err and err.message
+              err.message
+            else
+              err
 
         err = "Timed out retrying. " + getErrMessage(options.error)
         @throwErr err, (options.onFail or command)

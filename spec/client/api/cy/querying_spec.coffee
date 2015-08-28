@@ -710,18 +710,11 @@ describe "$Cypress.Cy Querying Commands", ->
 
         @cy.get(".spinner'")
 
-      # it.only "throws when should('have.length') isnt a number", (done) ->
-      #   @cy.on "fail", (err) ->
-      #     expect(err.message).to.include "options.length must be a number"
-      #     done()
-
-      #   @cy.get("button").should("have.length", "asdf")
-
       it "throws on too many elements after timing out waiting for length", (done) ->
         buttons = @cy.$("button")
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "Too many elements found. Found '#{buttons.length}', expected '#{buttons.length - 1}': button"
+          expect(err.message).to.include "Too many elements found. Found '#{buttons.length}', expected '#{buttons.length - 1}'."
           done()
 
         @cy.get("button").should("have.length", buttons.length - 1)
@@ -730,10 +723,10 @@ describe "$Cypress.Cy Querying Commands", ->
         buttons = @cy.$("button")
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "Not enough elements found. Found '#{buttons.length}', expected '#{buttons.length + 1}': button"
+          expect(err.message).to.include "Not enough elements found. Found '#{buttons.length}', expected '#{buttons.length + 1}'."
           done()
 
-        @cy.get("button", {length: buttons.length + 1})
+        @cy.get("button").should("have.length", buttons.length + 1)
 
       it "throws after timing out not finding element", (done) ->
         @cy.on "fail", (err) ->
@@ -749,7 +742,7 @@ describe "$Cypress.Cy Querying Commands", ->
 
         @cy.get("#missing-el").should("exist")
 
-      it "throws existance error without running assertions", (done) ->
+      it "throws existence error without running assertions", (done) ->
         @cy.on "fail", (err) ->
           expect(err.message).to.include "Expected to find element: '#missing-el', but never found it."
           done()
@@ -768,7 +761,7 @@ describe "$Cypress.Cy Querying Commands", ->
           @cy.on "retry", retry
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "Could not find element: getJsonButton"
+          expect(err.message).to.include "Expected to find element: 'getJsonButton', but never found it."
           done()
 
         @cy
@@ -780,7 +773,7 @@ describe "$Cypress.Cy Querying Commands", ->
 
       it "throws after timing out while not trying to find an element", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "Expected <div#dom> not to exist in the DOM, but it was found."
+          expect(err.message).to.include "Expected <div#dom> not to exist in the DOM, but it was continuously found."
           done()
 
         @cy.get("div:first").should("not.exist")
@@ -796,16 +789,16 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy.$("#button").hide()
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "Could not find visible element: #button"
+          expect(err.message).to.include "Expected <button#button> to be visible, but it was continuously hidden."
           done()
 
-        @cy.get("#button", {visible: true})
+        @cy.get("#button").should("be.visible")
 
       it "sets error command state", (done) ->
         @Cypress.on "log", (@log) =>
 
         @cy.on "fail", (err) =>
-          expect(@log.get("state")).to.eq "error"
+          expect(@log.get("state")).to.eq "failed"
           expect(@log.get("error")).to.eq err
           done()
 
@@ -847,7 +840,7 @@ describe "$Cypress.Cy Querying Commands", ->
         @Cypress.on "log", (@log) =>
 
         @cy.on "fail", (err) =>
-          expect(@log.get("state")).to.eq("error")
+          expect(@log.get("state")).to.eq("failed")
           expect(@log.get("error")).to.eq err
           expect(@log.get("$el").get(0)).to.eq button.get(0)
           onConsole = @log.attributes.onConsole()
@@ -855,7 +848,7 @@ describe "$Cypress.Cy Querying Commands", ->
           expect(onConsole.Elements).to.eq button.length
           done()
 
-        @cy.get("#button", {visible: true})
+        @cy.get("#button").should("be.visible")
 
   context "#contains", ->
     it "is scoped to the body and will not return title elements", ->
@@ -1145,10 +1138,10 @@ describe "$Cypress.Cy Querying Commands", ->
             Elements: 1
           }
 
-    describe.skip "errors", ->
+    describe "errors", ->
       beforeEach ->
         @allowErrors()
-        @currentTest.timeout(300)
+        @currentTest.timeout(200)
 
       _.each [undefined, null], (val) ->
         it "throws when text is #{val}", (done) ->
@@ -1177,65 +1170,87 @@ describe "$Cypress.Cy Querying Commands", ->
 
         @cy.contains(undefined)
 
-      it "throws when there is a filter", (done) ->
-        @cy.contains("span", "brand new content")
-
-        @cy.on "fail", (err) ->
-          expect(err.message).to.include "Could not find any content: 'brand new content' within the selector: 'span'"
-          done()
-
       it "throws when there is no filter and no subject", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "Could not find any content: 'brand new content' in any elements"
+          expect(err.message).to.include "Expected to find content: 'brand new content' but never did."
           done()
 
         @cy.contains("brand new content")
 
+      it "throws when there is a filter", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "Expected to find content: 'brand new content' within the selector: 'span' but never did."
+          done()
+
+        @cy.contains("span", "brand new content")
+
       it "throws when there is no filter but there is a subject", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "Could not find any content: '0' within the element: <div.badge>"
+          expect(err.message).to.include "Expected to find content: '0' within the element: <div.badge> but never did."
           done()
 
         @cy.get("#edge-case-contains").find(".badge").contains(0)
 
-      it "throws when there is a no filter but there is a multi subject", (done) ->
-        @cy.contains("brand new content")
-
-        @cy.on "fail", (err) ->
-          expect(err.message).to.include "Could not find any content: 'brand new content' in any elements"
-          done()
-
       it "throws after timing out while not trying to find an element that contains content", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "Found content: 'button' within any existing elements"
+          expect(err.message).to.include "Expected not to find content: 'button' but continuously found it."
           done()
 
-        @cy.contains("button", {exist:false})
+        @cy.contains("button").should("not.exist")
 
       it "throws when there is a found element but never becomes visible", (done) ->
         @cy.$("#button").hide()
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "Found hidden content: 'button' in any elements but it never became visible."
+          expect(err.message).to.include "Expected element with content: 'button' to be visible, but it was continuously hidden."
           done()
 
-        @cy.contains("button", {visible: true})
+        @cy.contains("button").should("be.visible")
 
       it "throws when there is a found element but never becomes hidden", (done) ->
         @cy.$("#button").show()
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "Found visible content: 'button' in any elements but it never became hidden."
+          expect(err.message).to.include "Expected element with content: 'button' not to be visible, but it was continuously visible."
           done()
 
-        @cy.contains("button", {visible: false})
+        @cy.contains("button").should("not.be.visible")
 
-      it "throws when there is a found element but never becomes non-existent", (done) ->
+      it "throws when there is a found element but never becomes visible within a subject", (done) ->
+        @cy.$("#button").hide()
+
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "Found content: 'button' within any existing elements but it never became non-existent."
+          expect(err.message).to.include "Expected element with content: 'button' within the element: <button#button> to be visible, but it was continuously hidden."
           done()
 
-        @cy.contains("button", {exist: false})
+        @cy.get("#button").contains("button").should("be.visible")
+
+      it "throws when there is a found element but never becomes hidden within a subject", (done) ->
+        @cy.$("#button").show()
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "Expected element with content: 'button' within the element: <button#button> not to be visible, but it was continuously visible."
+          done()
+
+        @cy.get("#button").contains("button").should("not.be.visible")
+
+      it "throws when there is a found element but never becomes visible within a filter", (done) ->
+        @cy.$("#button").hide()
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "Expected element with content: 'button' within the selector: '#button' to be visible, but it was continuously hidden."
+          done()
+
+        @cy.contains("#button", "button").should("be.visible")
+
+      it "throws when there is a found element but never becomes hidden within a filter", (done) ->
+        @cy.$("#button").show()
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include "Expected element with content: 'button' within the selector: '#button' not to be visible, but it was continuously visible."
+          done()
+
+        @cy.contains("#button", "button").should("not.be.visible")
 
       it "logs out $el when existing $el is found even on failure", (done) ->
         button = @cy.$("#button")
@@ -1243,7 +1258,7 @@ describe "$Cypress.Cy Querying Commands", ->
         @Cypress.on "log", (@log) =>
 
         @cy.on "fail", (err) =>
-          expect(@log.get("state")).to.eq("error")
+          expect(@log.get("state")).to.eq("failed")
           expect(@log.get("error")).to.eq err
           expect(@log.get("$el").get(0)).to.eq button.get(0)
           onConsole = @log.attributes.onConsole()
@@ -1251,9 +1266,9 @@ describe "$Cypress.Cy Querying Commands", ->
           expect(onConsole.Elements).to.eq button.length
           done()
 
-        @cy.contains("button", {exist: false})
+        @cy.contains("button").should("not.exist")
 
-      it "throws when passed {length > 1} options", (done) ->
+      it "throws when assertion is have.length > 1", (done) ->
         logs = []
 
         @Cypress.on "log", (log) ->
@@ -1264,4 +1279,4 @@ describe "$Cypress.Cy Querying Commands", ->
           expect(err.message).to.eq "cy.contains() cannot be passed a length option because it will only ever return 1 element."
           done()
 
-        @cy.contains("Nested Find", {length: 2})
+        @cy.contains("Nested Find").should("have.length", 2)
