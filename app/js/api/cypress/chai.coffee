@@ -96,8 +96,10 @@ do ($Cypress, _, $, chai) ->
               try
                 @assert(
                   isContained = cy._contains(obj),
-                  "expected '#{node}' to exist in the DOM"
-                  "expected '#{node}' not to exist in the DOM"
+                  "expected \#{act} to exist in the DOM",
+                  "expected \#{act} not to exist in the DOM",
+                  node,
+                  node
                 )
               catch e1
                 e1.node = node
@@ -126,8 +128,8 @@ do ($Cypress, _, $, chai) ->
               try
                 @assert(
                   isVisible = obj.is(":visible")
-                  "expected '#{node}' to be hidden"
-                  "expected '#{node}' not to be hidden"
+                  "expected '#{node}' to be visible"
+                  "expected '#{node}' not to be visible"
                 )
               catch e1
                 e1.node = node
