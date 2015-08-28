@@ -38,7 +38,13 @@ do ($Cypress, _, Promise) ->
         if assertions = options.assertions
           @finishAssertions(assertions)
 
-        err = "Timed out retrying. " + options.error
+        getErrMessage = (err) ->
+          if err and err.message
+            err.message
+          else
+            err
+
+        err = "Timed out retrying. " + getErrMessage(options.error)
         @throwErr err, (options.onFail or command)
 
       Promise.delay(options.interval).cancellable().then =>
