@@ -68,7 +68,7 @@ describe "$Cypress.Cy Communications Commands", ->
           cb({__error: "some err message"})
 
         @cy.on "fail", (err) =>
-          expect(@log.get("state")).to.eq "error"
+          expect(@log.get("state")).to.eq "failed"
           expect(@log.get("error").message).to.eq "some err message"
           expect(@log.get("error")).to.eq err
           done()

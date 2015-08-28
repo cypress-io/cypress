@@ -34,12 +34,12 @@ describe "$Cypress.Log API", ->
     it "#error", ->
       err = new Error
       @log.error(err)
-      expect(@log.get("state")).to.eq "error"
+      expect(@log.get("state")).to.eq "failed"
       expect(@log.get("error")).to.eq err
 
     it "#error triggers attrs:changed", (done) ->
       @log.on "attrs:changed", (attrs) ->
-        expect(attrs.state).to.eq "error"
+        expect(attrs.state).to.eq "failed"
         done()
 
       @log.error({})

@@ -172,7 +172,7 @@ describe "$Cypress.Cy Navigation Commands", ->
         @Cypress.on "log", (@log) =>
 
         @cy.on "fail", (err) =>
-          expect(@log.get("state")).to.eq "error"
+          expect(@log.get("state")).to.eq "failed"
           expect(@log.get("error")).to.eq err
           done()
 
