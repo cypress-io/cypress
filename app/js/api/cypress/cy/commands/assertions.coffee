@@ -70,7 +70,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
         memo[value]
 
     applyChainers = =>
-      ## if we're not doing existance assertions
+      ## if we're not doing existence assertions
       ## then check to ensure the subject exists
       ## in the DOM if its a DOM subject
       ## need to continually apply this check due
