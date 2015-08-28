@@ -5,7 +5,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
   bTagClosed     = /\[\\b\]/g
   allButs        = /\bbut\b/g
   reExistance    = /exist/
-  reEvHaveLength = /eventually.+length/
+  reEventually   = /^eventually/
   reHaveLength   = /length/
 
   Cypress.on "assert", ->
@@ -43,7 +43,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
   shouldFn = (subject, chainers, args...) ->
     exp = Cypress.Chai.expect(subject).to
 
-    if reEvHaveLength.test(chainers)
+    if reEventually.test(chainers)
       err = @cypressErr("The 'eventually' assertion chainer has been deprecated. This is now the default behavior so you can safely remove this word and everything should work as before.")
       err.retry = false
       throw err
