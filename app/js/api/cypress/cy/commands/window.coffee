@@ -22,20 +22,22 @@ $Cypress.register "Window", (Cypress, _, $) ->
       if options.log
         options.command = Cypress.Log.command()
 
-      ## using call here to invoke the 'text' method on the
-      ## title's jquery object
-
       do resolveTitle = =>
         @command("get", "title", {
           log: false
-          visible: false
           verify: false
           command: options.command
         })
-        .call("text")
-        .then (text) =>
-          @verifyUpcomingAssertions(text, options, {
+        .then ($el) =>
+          @verifyUpcomingAssertions($el.text(), options, {
             onRetry: resolveTitle
+            onPass: =>
+              ## since we are passing text into our upcoming
+              ## assertions we additionally need to verify
+              ## that the title element was actually found
+              @ensureElExistance($el)
+
+              {subject: $el.text(), command: options.command}
           })
 
     window: ->

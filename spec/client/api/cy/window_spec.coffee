@@ -41,15 +41,17 @@ describe "$Cypress.Cy Window Commands", ->
 
     describe "errors", ->
       beforeEach ->
-        @currentTest.timeout(300)
+        @currentTest.timeout(200)
         @allowErrors()
 
       it "throws after timing out", (done) ->
         @cy.$("title").remove()
-        @cy.title()
+
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "Could not find element: title"
+          expect(err.message).to.include "Expected to find element: 'title', but never found it."
           done()
+
+        @cy.title()
 
       it "only logs once", (done) ->
         @cy.$("title").remove()
