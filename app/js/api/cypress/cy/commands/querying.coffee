@@ -194,12 +194,6 @@ $Cypress.register "Querying", (Cypress, _, $) ->
             else
               "Expected to find content: '#{text}' #{getPhrase(type, negated)}but never did."
 
-          when "visibility"
-            if negated
-              "Expected element with content: '#{text}' #{getPhrase(type, negated)}not to be visible, but it was continuously visible."
-            else
-              "Expected element with content: '#{text}' #{getPhrase(type, negated)}to be visible, but it was continuously hidden."
-
       if options.log
         onConsole = {
           Content: text
@@ -282,10 +276,12 @@ $Cypress.register "Querying", (Cypress, _, $) ->
           @verifyUpcomingAssertions($el, options, {
             onRetry: resolveElements
             onFail: (err) =>
-              if err.type is "length" and err.expected > 1
-                @throwErr "cy.contains() cannot be passed a length option because it will only ever return 1 element.", options.command
-
-              options.error = getErr(err)
+              switch err.type
+                when "length"
+                  if err.expected > 1
+                    @throwErr "cy.contains() cannot be passed a length option because it will only ever return 1 element.", options.command
+                when "existence"
+                  err.longMessage = getErr(err)
           })
 
   Cypress.addChildCommand

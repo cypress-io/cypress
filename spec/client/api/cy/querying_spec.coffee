@@ -1198,60 +1198,6 @@ describe "$Cypress.Cy Querying Commands", ->
 
         @cy.contains("button").should("not.exist")
 
-      it "throws when there is a found element but never becomes visible", (done) ->
-        @cy.$("#button").hide()
-
-        @cy.on "fail", (err) ->
-          expect(err.message).to.include "Expected element with content: 'button' to be visible, but it was continuously hidden."
-          done()
-
-        @cy.contains("button").should("be.visible")
-
-      it "throws when there is a found element but never becomes hidden", (done) ->
-        @cy.$("#button").show()
-
-        @cy.on "fail", (err) ->
-          expect(err.message).to.include "Expected element with content: 'button' not to be visible, but it was continuously visible."
-          done()
-
-        @cy.contains("button").should("not.be.visible")
-
-      it "throws when there is a found element but never becomes visible within a subject", (done) ->
-        @cy.$("#button").hide()
-
-        @cy.on "fail", (err) ->
-          expect(err.message).to.include "Expected element with content: 'button' within the element: <button#button> to be visible, but it was continuously hidden."
-          done()
-
-        @cy.get("#button").contains("button").should("be.visible")
-
-      it "throws when there is a found element but never becomes hidden within a subject", (done) ->
-        @cy.$("#button").show()
-
-        @cy.on "fail", (err) ->
-          expect(err.message).to.include "Expected element with content: 'button' within the element: <button#button> not to be visible, but it was continuously visible."
-          done()
-
-        @cy.get("#button").contains("button").should("not.be.visible")
-
-      it "throws when there is a found element but never becomes visible within a filter", (done) ->
-        @cy.$("#button").hide()
-
-        @cy.on "fail", (err) ->
-          expect(err.message).to.include "Expected element with content: 'button' within the selector: '#button' to be visible, but it was continuously hidden."
-          done()
-
-        @cy.contains("#button", "button").should("be.visible")
-
-      it "throws when there is a found element but never becomes hidden within a filter", (done) ->
-        @cy.$("#button").show()
-
-        @cy.on "fail", (err) ->
-          expect(err.message).to.include "Expected element with content: 'button' within the selector: '#button' not to be visible, but it was continuously visible."
-          done()
-
-        @cy.contains("#button", "button").should("not.be.visible")
-
       it "logs out $el when existing $el is found even on failure", (done) ->
         button = @cy.$("#button")
 
