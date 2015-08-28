@@ -114,15 +114,35 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
       shouldFn.apply(@, arguments)
 
   Cypress.Cy.extend
-    verifyUpcomingAssertions: (subject, options = {}) ->
+    verifyUpcomingAssertions: (subject, options = {}, callbacks = {}) ->
       cmds = @getUpcomingAssertions()
 
       options.assertions ?= []
 
+      onPassFn = =>
+        if _.isFunction(callbacks.onPass)
+          callbacks.onPass.call(@, cmds)
+        else
+          {subject: subject, command: options.command}
+
+      onFailFn = (err) =>
+        onFail  = callbacks.onFail
+        onRetry = callbacks.onRetry
+
+        if not onFail and not onRetry
+          throw err
+
+        onFail.call(@, err) if _.isFunction(onFail)
+
+        @_retry(onRetry, options) if _.isFunction(onRetry)
+
       ## bail if we have no assertions
       if not cmds.length
-        return Promise.try =>
-          @ensureElExistance(subject)
+        return Promise
+          .try =>
+            @ensureElExistance(subject)
+          .then(onPassFn)
+          .catch(onFailFn)
 
       i = 0
 
@@ -196,11 +216,10 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
           memoizeSubjectReturnValue()
         .then =>
           @finishAssertions(options.assertions)
-        .return(cmds)
+        .then(onPassFn)
         .cancellable()
         .catch Promise.CancellationError, ->
           restore()
-          debugger
         .catch (err) =>
           restore()
 
@@ -216,6 +235,12 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
               err = e
 
           throw err
+        .catch (err) =>
+          throw err if err.retry is false
+
+          options.error = err
+
+          onFailFn(err)
 
     finishAssertions: (assertions) ->
       _.each assertions, (log) ->

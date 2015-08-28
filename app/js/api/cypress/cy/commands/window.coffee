@@ -20,7 +20,7 @@ $Cypress.register "Window", (Cypress, _, $) ->
       _.defaults options, {log: true}
 
       if options.log
-        command = Cypress.Log.command()
+        options.command = Cypress.Log.command()
 
       ## using call here to invoke the 'text' method on the
       ## title's jquery object
@@ -30,17 +30,13 @@ $Cypress.register "Window", (Cypress, _, $) ->
           log: false
           visible: false
           verify: false
-          command: command
+          command: options.command
         })
         .call("text")
         .then (text) =>
-          @verifyUpcomingAssertions(text)
-            .return({
-              subject: text
-              command: command
-            })
-            .catch (err) =>
-              @_retry resolveTitle, options
+          @verifyUpcomingAssertions(text, options, {
+            onRetry: resolveTitle
+          })
 
     window: ->
       window = @private("window")

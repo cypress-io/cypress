@@ -130,28 +130,12 @@ $Cypress.register "Querying", (Cypress, _, $) ->
           if options.verify is false
             return $el
 
-          @verifyUpcomingAssertions($el, options)
-            .then ->
-              return {subject: $el, command: options.command}
-            .catch (err) =>
-              ## if our err specifically tells us not
-              ## to retry then just bubble it up
-              return throw err if err.retry is false
-
-              ## if our $el is null and our assertions
-              ## failed then we know the user is not
-              ## expecting this element to return null
-              options.error = switch
-                ## do we even need to do this now
-                ## yes because we may not have a single
-                ## assertion so we have to prepare for an
-                ## error message without an assertion
-                when not $el.length
-                 "Expected to find element: '#{selector}', but never found it."
-                else
-                  err
-
-              @_retry resolveElements, options
+          @verifyUpcomingAssertions($el, options, {
+              onRetry: resolveElements
+              onFail: (err) ->
+                if not $el.length
+                  options.error = "Expected to find element: '#{selector}', but never found it."
+            })
 
     root: (options = {}) ->
       _.defaults options, {log: true}
@@ -302,13 +286,9 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
           setEl($el)
 
-          @verifyUpcomingAssertions($el, options)
-            .return({
-              subject: $el
-              command: options.command
-            })
-            .catch (err) =>
-              @_retry resolveElements, options
+          @verifyUpcomingAssertions($el, options, {
+            onRetry: resolveElements
+          })
 
   Cypress.addChildCommand
     within: (subject, options, fn) ->

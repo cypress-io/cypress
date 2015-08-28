@@ -23,15 +23,9 @@ $Cypress.register "Location", (Cypress, _, $) ->
 
       do resolveHref = =>
         Promise.try(getHref).then (href) =>
-          @verifyUpcomingAssertions(href, options)
-            .return({
-              subject: href
-              command: options.command
-            })
-            .catch (err) =>
-              options.error = err
-
-              @_retry resolveHref, options
+          @verifyUpcomingAssertions(href, options, {
+            onRetry: resolveHref
+          })
 
     hash: (options = {}) ->
       _.defaults options, {log: true}
@@ -45,15 +39,9 @@ $Cypress.register "Location", (Cypress, _, $) ->
 
       do resolveHash = =>
         Promise.try(getHash).then (hash) =>
-          @verifyUpcomingAssertions(hash, options)
-            .return({
-              subject: hash
-              command: options.command
-            })
-            .catch (err) =>
-              options.error = err
-
-              @_retry resolveHash, options
+          @verifyUpcomingAssertions(hash, options, {
+            onRetry: resolveHash
+          })
 
     location: (key, options) ->
       ## normalize arguments allowing key + options to be undefined
@@ -82,12 +70,6 @@ $Cypress.register "Location", (Cypress, _, $) ->
 
       do resolveLocation = =>
         Promise.try(getLocation).then (ret) =>
-          @verifyUpcomingAssertions(ret, options)
-            .return({
-              subject: ret
-              command: options.command
-            })
-            .catch (err) =>
-              options.error = err
-
-              @_retry resolveLocation, options
+          @verifyUpcomingAssertions(ret, options, {
+            onRetry: resolveLocation
+          })

@@ -51,13 +51,9 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
 
         setEl($el)
 
-        @verifyUpcomingAssertions($el, options)
-          .return({
-            subject: $el
-            command: options.command
-          })
-          .catch (err) =>
-            @_retry getElements, options
+        @verifyUpcomingAssertions($el, options, {
+          onRetry: getElements
+        })
 
         # getErr = =>
         #   node = Cypress.Utils.stringifyElement(subject, "short")
