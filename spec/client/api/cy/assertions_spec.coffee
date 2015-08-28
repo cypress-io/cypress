@@ -1,393 +1,522 @@
-# describe "$Cypress.Cy Assertion Commands", ->
-#   enterCommandTestingMode()
+describe "$Cypress.Cy Assertion Commands", ->
+  enterCommandTestingMode()
 
-#   context "#should", ->
-#     it "returns the subject for chainability", ->
-#       @cy.noop({foo: "bar"}).should("deep.eq", {foo: "bar"}).then (obj) ->
-#         expect(obj).to.deep.eq {foo: "bar"}
+  context "#should", ->
+    beforeEach ->
+      @chai = $Cypress.Chai.create(@Cypress, {})
 
-#     it "can use negation", ->
-#       @cy.noop(false).should("not.be.true")
+    afterEach ->
+      @chai.restore()
 
-#     it "works with jquery chai", ->
-#       div = $("<div class='foo'>asdf</div>")
+    it "returns the subject for chainability", ->
+      @cy.noop({foo: "bar"}).should("deep.eq", {foo: "bar"}).then (obj) ->
+        expect(obj).to.deep.eq {foo: "bar"}
 
-#       @cy.$("body").append(div)
+    it "can use negation", ->
+      @cy.noop(false).should("not.be.true")
 
-#       @cy
-#         .get("div.foo").should("have.class", "foo").then ($div) ->
-#           expect($div).to.match div
-#           $div.remove()
+    it "works with jquery chai", ->
+      div = $("<div class='foo'>asdf</div>")
 
-#     it "can chain multiple assertions", ->
-#       @cy
-#         .get("body")
-#           .should("contain", "DOM Fixture")
-#           .should("have.property", "length", 1)
+      @cy.$("body").append(div)
 
-#     it "can change the subject", ->
-#       @cy.get("input:first").should("have.property", "length").should("eq", 1).then (num) ->
-#         expect(num).to.eq(1)
+      @cy
+        .get("div.foo").should("have.class", "foo").then ($div) ->
+          expect($div).to.match div
+          $div.remove()
 
-#     it "changes the subject with chai-jquery", ->
-#       @cy.get("input:first").should("have.attr", "id").should("eq", "input")
+    it "can chain multiple assertions", ->
+      @cy
+        .get("body")
+          .should("contain", "DOM Fixture")
+          .should("have.property", "length", 1)
 
-#     it "changes the subject with JSON", ->
-#       obj = {requestJSON: {teamIds: [2]}}
-#       @cy.noop(obj).its("requestJSON").should("have.property", "teamIds").should("deep.eq", [2])
+    it "can change the subject", ->
+      @cy.get("input:first").should("have.property", "length").should("eq", 1).then (num) ->
+        expect(num).to.eq(1)
 
-#     describe "not.exist", ->
-#       beforeEach ->
-#         @chai = $Cypress.Chai.create(@Cypress, {})
+    it "changes the subject with chai-jquery", ->
+      @cy.get("input:first").should("have.attr", "id").should("eq", "input")
 
-#       afterEach ->
-#         @chai.restore()
+    it "changes the subject with JSON", ->
+      obj = {requestJSON: {teamIds: [2]}}
+      @cy.noop(obj).its("requestJSON").should("have.property", "teamIds").should("deep.eq", [2])
 
-#       it "does not throw when subject leaves dom", ->
-#         @cy.$("button:first").click ->
-#           $(@).remove()
+    describe "not.exist", ->
+      beforeEach ->
+        @chai = $Cypress.Chai.create(@Cypress, {})
 
-#         @cy.get("button:first").click().should("not.exist")
+      afterEach ->
+        @chai.restore()
 
-#       it "throws when the subject eventually isnt in the DOM", ->
-#         button = @cy.$("button:first")
+      it.skip "does not throw when subject leaves dom", ->
+        @cy.$("button:first").click ->
+          $(@).remove()
 
-#         @cy.on "retry", _.after 2, _.once ->
-#           button.remove()
+        @cy.get("button:first").click().should("not.exist")
 
-#         @cy.get("button:first").click().should("eventually.not.exist")
+      it.skip "throws when the subject eventually isnt in the DOM", ->
+        button = @cy.$("button:first")
 
-#     describe "eventually chainer", ->
-#       it "retries assertion until true", ->
-#         button = @cy.$("button:first")
+        @cy.on "retry", _.after 2, _.once ->
+          button.remove()
 
-#         retry = _.after 3, ->
-#           button.addClass("new-class")
+        @cy.get("button:first").click().should("not.exist")
 
-#         @cy.on "retry", retry
+    describe "have.text", ->
+      beforeEach ->
+        @Cypress.on "log", (@log) =>
 
-#         @cy.get("button:first").should("eventually.have.class", "new-class")
+      it "resolves the assertion", ->
+        @cy.get("#list li").eq(0).should("have.text", "li 0").then ->
+          @chai.restore()
 
-#     describe "errors", ->
-#       beforeEach ->
-#         @allowErrors()
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("passed")
+          expect(@log.get("end")).to.be.true
 
-#       it "should not be true", (done) ->
-#         @cy.on "fail", (err) ->
-#           expect(err.message).to.eq "expected false to be true"
-#           done()
+    describe "have.length", ->
+      beforeEach ->
+        @Cypress.on "log", (@log) =>
 
-#         @cy.noop(false).should("be.true")
+      it "throws when should('have.length') isnt a number", (done) ->
+        @allowErrors()
 
-#       it "throws err when not available chaninable", (done) ->
-#         @cy.on "fail", (err) ->
-#           expect(err.message).to.eq "The chainer: 'dee' was not found. Building implicit assertion failed."
-#           done()
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "You must provide a valid number to a length assertion. You passed: 'asdf'"
+          done()
 
-#         @cy.noop({}).should("dee.eq", {})
+        @cy.get("button").should("have.length", "asdf")
 
-#       it "throws err when ends with a non available chaninable", (done) ->
-#         @cy.on "fail", (err) ->
-#           expect(err.message).to.eq "The chainer: 'eq2' was not found. Building implicit assertion failed."
-#           done()
+      it "does not log extra commands on fail and properly fails command + assertions", (done) ->
+        @allowErrors()
 
-#         @cy.noop({}).should("deep.eq2", {})
+        logs = []
 
-#       it "throws when eventually times out", (done) ->
-#         @cy._timeout(200)
+        @Cypress.on "log", (log) ->
+          logs.push log
 
-#         @cy.on "fail", (err) ->
-#           expect(err.message).to.eq "Timed out retrying. AssertionError: expected <button id=\"button\">button</button> to have class 'does-not-have-class'"
-#           done()
+        @cy.on "fail", (err) ->
+          expect(logs.length).to.eq(4)
 
-#         @cy.get("button:first").should("eventually.have.class", "does-not-have-class")
+          expect(logs[2].get("name")).to.eq("get")
+          expect(logs[2].get("state")).to.eq("failed")
+          expect(logs[2].get("error")).to.eq(err)
 
-#       it "throws when using eventually and non available chainer", (done) ->
-#         @cy.on "fail", (err) ->
-#           expect(err.message).to.eq "The chainer: 'eq2' was not found. Building implicit assertion failed."
-#           done()
+          expect(logs[3].get("name")).to.eq("assert")
+          expect(logs[3].get("state")).to.eq("failed")
+          expect(logs[3].get("error").name).to.eq("AssertionError")
 
-#         @cy.noop({}).should("eventually.deep.eq2", {})
+          done()
 
-#       it "throws when the subject isnt in the DOM", (done) ->
-#         @cy.$("button:first").click ->
-#           $(@).addClass("foo").remove()
+        @cy
+          .root().should("exist")
+          .get("button").should("have.length", "asdf")
 
-#         @cy.on "fail", (err) ->
-#           expect(err.message).to.eq "Cannot call .should() because the current subject has been removed or detached from the DOM."
-#           done()
+      it "finishes failed assertions and does not log extra commands when cy.contains fails", (done) ->
+        @allowErrors()
 
-#         @cy.get("button:first").click().should("have.class", "foo").then ->
-#           done("cy.should was supposed to fail")
+        logs = []
 
-#       it "throws when the subject eventually isnt in the DOM", (done) ->
-#         button = @cy.$("button:first")
+        @Cypress.on "log", (log) ->
+          logs.push log
 
-#         @cy.on "retry", _.after 2, _.once ->
-#           button.addClass("foo").remove()
+        @cy.on "fail", (err) ->
+          expect(logs.length).to.eq(2)
 
-#         @cy.on "fail", (err) ->
-#           expect(err.message).to.eq "Cannot call .should() because the current subject has been removed or detached from the DOM."
-#           done()
+          expect(logs[0].get("name")).to.eq("contains")
+          expect(logs[0].get("state")).to.eq("failed")
+          expect(logs[0].get("error")).to.eq(err)
 
-#         @cy.get("button:first").click().should("eventually.have.class", "foo").then ->
-#           done("cy.should was supposed to fail")
+          expect(logs[1].get("name")).to.eq("assert")
+          expect(logs[1].get("state")).to.eq("failed")
+          expect(logs[1].get("error").name).to.eq("AssertionError")
 
-#       it "throws when using eventually.have.length", (done) ->
-#         @cy.on "fail", (err) ->
-#           expect(err.message).to.eq "'eventually.have.length' is NOT a supported assertion. Use the command options: '{length: 3}' implicit assertion instead."
-#           done()
+          done()
 
-#         @cy.get("button:first").should("eventually.have.length", 3)
+        @cy.contains("Nested Find").should("have.length", 2)
 
-#       it "thows when using eventually.have.length without providing a number", (done) ->
-#         @cy.on "fail", (err) ->
-#           expect(err.message).to.eq "'eventually.have.length' is NOT a supported assertion. Use the command options: '{length: n}' implicit assertion instead."
-#           done()
+    describe "have.class", ->
+      beforeEach ->
+        @Cypress.on "log", (@log) =>
 
-#         @cy.get("button:first").should("eventually.have.length")
+      it "snapshots and ends the assertion after retrying", ->
+        @cy.on "retry", _.after 3, =>
+          @cy.$("#specific-contains span:first").addClass("active")
 
-#   context "#and", ->
-#     it "proxies to #should", ->
-#       @cy.noop({foo: "bar"}).should("have.property", "foo").and("eq", "bar")
+        @cy.contains("foo").should("have.class", "active").then ->
+          @chai.restore()
 
-#   context "#assert", ->
-#     before ->
-#       @onAssert = (fn) =>
-#         @Cypress.on "log", (obj) =>
-#           if obj.get("name") is "assert"
-#             ## restore so we dont create an endless loop
-#             ## due to Cypress.assert being called again
-#             @chai.restore()
-#             fn.call(@, obj)
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("end")).to.be.true
+          expect(@log.get("state")).to.eq("passed")
+          expect(@log.get("snapshot")).to.be.an("object")
 
-#     beforeEach ->
-#       @chai = $Cypress.Chai.create(@Cypress, {})
+      it "retries assertion until true", ->
+        button = @cy.$("button:first")
 
-#     afterEach ->
-#       @chai.restore()
+        retry = _.after 3, ->
+          button.addClass("new-class")
 
-#     it "has custom onFail on err", (done) ->
-#       @allowErrors()
+        @cy.on "retry", retry
 
-#       @onAssert (log) ->
-#         expect(log.get("error").onFail).to.be.a("function")
-#         done()
+        @cy.get("button:first").should("have.class", "new-class")
 
-#       @cy.then ->
-#         expect(true).to.be.false
+    describe "errors", ->
+      beforeEach ->
+        @allowErrors()
 
-#     it "does not output should logs on failures", (done) ->
-#       @allowErrors()
+      it "should not be true", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "expected false to be true"
+          done()
 
-#       logs = []
+        @cy.noop(false).should("be.true")
 
-#       @Cypress.on "log", (log) ->
-#         logs.push log
+      it "throws err when not available chaninable", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "The chainer: 'dee' was not found. Building implicit assertion failed."
+          done()
 
-#       @cy.on "fail", =>
-#         @chai.restore()
-#         expect(logs).to.have.length(1)
-#         done()
+        @cy.noop({}).should("dee.eq", {})
 
-#       @cy.noop({}).should("have.property", "foo")
+      it "throws err when ends with a non available chaninable", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "The chainer: 'eq2' was not found. Building implicit assertion failed."
+          done()
 
-#     it "ends immediately", (done) ->
-#       @onAssert (log) ->
-#         expect(log.get("end")).to.be.true
-#         expect(log.get("state")).to.eq("success")
-#         done()
+        @cy.noop({}).should("deep.eq2", {})
 
-#       @cy.get("body").then ->
-#         expect(@cy.prop("subject")).to.match "body"
+      it "throws when eventually times out", (done) ->
+        @cy._timeout(200)
 
-#     it "snapshots immediately", (done) ->
-#       @onAssert (log) ->
-#         expect(log.get("snapshot")).to.be.an("object")
-#         done()
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "Timed out retrying. expected <button id=\"button\">button</button> to have class 'does-not-have-class'"
+          done()
 
-#       @cy.get("body").then ->
-#         expect(@cy.prop("subject")).to.match "body"
-
-#     it "sets type to child when assertion involved current subject", (done) ->
-#       @onAssert (log) ->
-#         expect(log.get("type")).to.eq "child"
-#         done()
+        @cy.get("button:first").should("have.class", "does-not-have-class")
 
-#       @cy.get("body").then ->
-#         expect(@cy.prop("subject")).to.match "body"
-
-#     it "sets type to child current command had arguments but does not match subject", (done) ->
-#       @onAssert (log) ->
-#         expect(log.get("type")).to.eq "child"
-#         done()
-
-#       @cy.get("body").then ($body) ->
-#         expect($body.length).to.eq(1)
-
-#     it "sets type to parent when assertion did not involve current subject and didnt have arguments", (done) ->
-#       @onAssert (log) ->
-#         expect(log.get("type")).to.eq "parent"
-#         done()
-
-#       @cy.get("body").then ->
-#         expect(true).to.be.true
-
-#     it "replaces instances of word: 'but' with 'and' for passing assertion", (done) ->
-#       ## chai jquery adds 2 assertions here so
-#       ## we bind to the 2nd one
-#       @Cypress.on "log", (log) ->
-#         if log.get("name") is "assert"
-#           assert(log)
-
-#       assert = _.after 2, (obj) =>
-#         @chai.restore()
-
-#         expect(obj.get("message")).to.eq "expected [b]<a>[\\b] to have a [b]<a>[\\b] attribute with the value [b]#[\\b], and the value was [b]#[\\b]"
-#         done()
-
-#       @cy.get("a").then ($a) ->
-#         expect($a).to.have.attr "href", "#"
-
-#     it "does not replaces instances of word: 'but' with 'and' for failing assertion", (done) ->
-#       @allowErrors()
-
-#       ## chai jquery adds 2 assertions here so
-#       ## we bind to the 2nd one
-#       @Cypress.on "log", (obj) ->
-#         if obj.get("name") is "assert"
-#           assert(obj)
-
-#       assert = _.after 2, (obj) =>
-#         @chai.restore()
-#         expect(obj.get("message")).to.eq "expected [b]<a>[\\b] to have a [b]<a>[\\b] attribute with the value [b]asdf[\\b], but the value was [b]#[\\b]"
-#         done()
-
-#       @cy.get("a").then ($a) ->
-#         expect($a).to.have.attr "href", "asdf"
-
-#     it "does not replace 'button' with 'andton'", (done) ->
-#       ## chai jquery adds 2 assertions here so
-#       ## we bind to the 2nd one
-#       @Cypress.on "log", (obj) ->
-#         if obj.get("name") is "assert"
-#           assert(obj)
-
-#       assert = _.after 1, (obj) =>
-#         @chai.restore()
-
-#         expect(obj.get("message")).to.eq "expected [b]<button#button>[\\b] to be visible"
-#         done()
-
-#       @cy.get("#button").then ($button) ->
-#         expect($button).to.be.visible
-
-#     it "#onConsole for regular objects", (done) ->
-#       @onAssert (obj) ->
-#         expect(obj.attributes.onConsole()).to.deep.eq {
-#           Command: "assert"
-#           expected: 1
-#           actual: 1
-#           Message: "expected 1 to equal 1"
-#         }
-#         done()
-
-#       @cy
-#         .then ->
-#           expect(1).to.eq 1
-
-#     it "#onConsole for DOM objects", (done) ->
-#       @onAssert (obj) ->
-#         expect(obj.attributes.onConsole()).to.deep.eq {
-#           Command: "assert"
-#           subject: getFirstSubjectByName.call(@, "get")
-#           Message: "expected <body> to match body"
-#         }
-#         done()
-
-#       @cy
-#         .get("body").then ($body) ->
-#           expect($body).to.match "body"
-
-#     it "#onConsole for errors", (done) ->
-#       @allowErrors()
-
-#       @onAssert (obj) ->
-#         expect(obj.attributes.onConsole()).to.deep.eq {
-#           Command: "assert"
-#           expected: false
-#           actual: true
-#           Message: "expected true to be false"
-#           Error: obj.get("error").stack
-#         }
-#         done()
-
-#       @cy.then ->
-#         expect(true).to.be.false
-
-#     describe "#patchAssert", ->
-#       it "wraps \#{this} and \#{exp} in \#{b}", (done) ->
-#         @onAssert (obj) ->
-#           expect(obj.get("message")).to.eq "expected [b]foo[\\b] to equal [b]foo[\\b]"
-#           done()
-
-#         @cy.then ->
-#           expect("foo").to.eq "foo"
-
-#       it "doesnt mutate error message", ->
-#         @cy.then ->
-#           try
-#             expect(true).to.eq false
-#           catch e
-#             expect(e.message).to.eq "expected true to equal false"
-
-#       describe "jQuery elements", ->
-#         it "sets _obj to selector", (done) ->
-#           @onAssert (obj) ->
-#             expect(obj.get("message")).to.eq "expected [b]<body>[\\b] to exist"
-#             done()
-
-#           @cy.get("body").then ($body) ->
-#             expect($body).to.exist
-
-#         describe "without selector", ->
-#           it "exists", (done) ->
-#             @onAssert (obj) ->
-#               expect(obj.get("message")).to.eq "expected [b]<div>[\\b] to exist"
-#               done()
-
-#             ## prepend an empty div so it has no id or class
-#             @cy.$("body").prepend $("<div />")
-
-#             @cy.get("div").eq(0).then ($div) ->
-#               # expect($div).to.match("div")
-#               expect($div).to.exist
-
-#           it "uses element name", (done) ->
-#             @onAssert (obj) ->
-#               expect(obj.get("message")).to.eq "expected [b]<input>[\\b] to match [b]input[\\b]"
-#               done()
-
-#             ## prepend an empty div so it has no id or class
-#             @cy.$("body").prepend $("<input />")
-
-#             @cy.get("input").eq(0).then ($div) ->
-#               expect($div).to.match("input")
-
-#         describe "property assertions", ->
-#           it "has property", (done) ->
-#             @onAssert (obj) ->
-#               expect(obj.get("message")).to.eq "expected [b]<form#by-id>[\\b] to have a property [b]length[\\b]"
-#               done()
-
-#             @cy.get("form").should("have.property", "length")
-
-#     describe "#expect", ->
-#       it "proxies to chai.expect", ->
-#         exp = @sandbox.spy chai, "expect"
-#         $Cypress.Chai.expect(true).to.eq.true
-
-#         expectOriginal(exp).to.be.calledWith(true)
+      it "throws when using eventually and non available chainer", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "The chainer: 'eq2' was not found. Building implicit assertion failed."
+          done()
+
+        @cy.noop({}).should("deep.eq2", {})
+
+      it "throws when the subject isnt in the DOM", (done) ->
+        @cy.$("button:first").click ->
+          $(@).addClass("foo").remove()
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "Cannot call .should() because the current subject has been removed or detached from the DOM."
+          done()
+
+        @cy.get("button:first").click().should("have.class", "foo").then ->
+          done("cy.should was supposed to fail")
+
+      it.skip "throws when the subject eventually isnt in the DOM", (done) ->
+        button = @cy.$("button:first")
+
+        @cy.on "retry", _.after 2, _.once ->
+          button.addClass("foo").remove()
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "Cannot call .should() because the current subject has been removed or detached from the DOM."
+          done()
+
+        @cy.get("button:first").click().should("have.class", "foo").then ->
+          done("cy.should was supposed to fail")
+
+      it "throws when should('have.length') isnt a number", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "You must provide a valid number to a length assertion. You passed: 'undefined'"
+          done()
+
+        @cy.get("button").should("have.length")
+
+  context "#and", ->
+    it "proxies to #should", ->
+      @cy.noop({foo: "bar"}).should("have.property", "foo").and("eq", "bar")
+
+  context "#assert", ->
+    before ->
+      @onAssert = (fn) =>
+        @Cypress.on "log", (obj) =>
+          if obj.get("name") is "assert"
+            ## restore so we dont create an endless loop
+            ## due to Cypress.assert being called again
+            @chai.restore()
+            fn.call(@, obj)
+
+    beforeEach ->
+      @chai = $Cypress.Chai.create(@Cypress, {})
+
+    afterEach ->
+      @chai.restore()
+
+    it "has custom onFail on err", (done) ->
+      @allowErrors()
+
+      @onAssert (log) ->
+        expect(log.get("error").onFail).to.be.a("function")
+        done()
+
+      @cy.then ->
+        expect(true).to.be.false
+
+    it "does not output should logs on failures", (done) ->
+      @allowErrors()
+
+      logs = []
+
+      @Cypress.on "log", (log) ->
+        logs.push log
+
+      @cy.on "fail", =>
+        @chai.restore()
+        expect(logs).to.have.length(1)
+        done()
+
+      @cy.noop({}).should("have.property", "foo")
+
+    it "ends immediately", (done) ->
+      @onAssert (log) ->
+        expect(log.get("end")).to.be.true
+        expect(log.get("state")).to.eq("passed")
+        done()
+
+      @cy.get("body").then ->
+        expect(@cy.prop("subject")).to.match "body"
+
+    it "snapshots immediately", (done) ->
+      @onAssert (log) ->
+        expect(log.get("snapshot")).to.be.an("object")
+        done()
+
+      @cy.get("body").then ->
+        expect(@cy.prop("subject")).to.match "body"
+
+    it "sets type to child when assertion involved current subject", (done) ->
+      @onAssert (log) ->
+        expect(log.get("type")).to.eq "child"
+        done()
+
+      @cy.get("body").then ->
+        expect(@cy.prop("subject")).to.match "body"
+
+    it "sets type to child current command had arguments but does not match subject", (done) ->
+      @onAssert (log) ->
+        expect(log.get("type")).to.eq "child"
+        done()
+
+      @cy.get("body").then ($body) ->
+        expect($body.length).to.eq(1)
+
+    it "sets type to parent when assertion did not involve current subject and didnt have arguments", (done) ->
+      @onAssert (log) ->
+        expect(log.get("type")).to.eq "parent"
+        done()
+
+      @cy.get("body").then ->
+        expect(true).to.be.true
+
+    it "replaces instances of word: 'but' with 'and' for passing assertion", (done) ->
+      ## chai jquery adds 2 assertions here so
+      ## we bind to the 2nd one
+      @Cypress.on "log", (log) ->
+        if log.get("name") is "assert"
+          assert(log)
+
+      assert = _.after 2, (obj) =>
+        @chai.restore()
+
+        expect(obj.get("message")).to.eq "expected [b]<a>[\\b] to have a [b]<a>[\\b] attribute with the value [b]#[\\b], and the value was [b]#[\\b]"
+        done()
+
+      @cy.get("a").then ($a) ->
+        expect($a).to.have.attr "href", "#"
+
+    it "does not replaces instances of word: 'but' with 'and' for failing assertion", (done) ->
+      @allowErrors()
+
+      ## chai jquery adds 2 assertions here so
+      ## we bind to the 2nd one
+      @Cypress.on "log", (obj) ->
+        if obj.get("name") is "assert"
+          assert(obj)
+
+      assert = _.after 2, (obj) =>
+        @chai.restore()
+        expect(obj.get("message")).to.eq "expected [b]<a>[\\b] to have a [b]<a>[\\b] attribute with the value [b]asdf[\\b], but the value was [b]#[\\b]"
+        done()
+
+      @cy.get("a").then ($a) ->
+        expect($a).to.have.attr "href", "asdf"
+
+    it "does not replace 'button' with 'andton'", (done) ->
+      ## chai jquery adds 2 assertions here so
+      ## we bind to the 2nd one
+      @Cypress.on "log", (obj) ->
+        if obj.get("name") is "assert"
+          assert(obj)
+
+      assert = _.after 1, (obj) =>
+        @chai.restore()
+
+        expect(obj.get("message")).to.eq "expected [b]<button#button>[\\b] to be visible"
+        done()
+
+      @cy.get("#button").then ($button) ->
+        expect($button).to.be.visible
+
+    it "#onConsole for regular objects", (done) ->
+      @onAssert (obj) ->
+        expect(obj.attributes.onConsole()).to.deep.eq {
+          Command: "assert"
+          expected: 1
+          actual: 1
+          Message: "expected 1 to equal 1"
+        }
+        done()
+
+      @cy
+        .then ->
+          expect(1).to.eq 1
+
+    it "#onConsole for DOM objects", (done) ->
+      @onAssert (obj) ->
+        expect(obj.attributes.onConsole()).to.deep.eq {
+          Command: "assert"
+          subject: getFirstSubjectByName.call(@, "get")
+          Message: "expected <body> to match body"
+        }
+        done()
+
+      @cy
+        .get("body").then ($body) ->
+          expect($body).to.match "body"
+
+    it "#onConsole for errors", (done) ->
+      @allowErrors()
+
+      @onAssert (obj) ->
+        expect(obj.attributes.onConsole()).to.deep.eq {
+          Command: "assert"
+          expected: false
+          actual: true
+          Message: "expected true to be false"
+          Error: obj.get("error").stack
+        }
+        done()
+
+      @cy.then ->
+        expect(true).to.be.false
+
+    describe "#patchAssert", ->
+      it "wraps \#{this} and \#{exp} in \#{b}", (done) ->
+        @onAssert (obj) ->
+          expect(obj.get("message")).to.eq "expected [b]foo[\\b] to equal [b]foo[\\b]"
+          done()
+
+        @cy.then ->
+          expect("foo").to.eq "foo"
+
+      it "doesnt mutate error message", ->
+        @cy.then ->
+          try
+            expect(true).to.eq false
+          catch e
+            expect(e.message).to.eq "expected true to equal false"
+
+      describe "jQuery elements", ->
+        it "sets _obj to selector", (done) ->
+          @onAssert (obj) ->
+            expect(obj.get("message")).to.eq "expected [b]<body>[\\b] to exist in the DOM"
+            done()
+
+          @cy.get("body").then ($body) ->
+            expect($body).to.exist
+
+        describe "without selector", ->
+          it "exists", (done) ->
+            @onAssert (obj) ->
+              expect(obj.get("message")).to.eq "expected [b]<div>[\\b] to exist in the DOM"
+              done()
+
+            ## prepend an empty div so it has no id or class
+            @cy.$("body").prepend $("<div />")
+
+            @cy.get("div").eq(0).then ($div) ->
+              # expect($div).to.match("div")
+              expect($div).to.exist
+
+          it "uses element name", (done) ->
+            @onAssert (obj) ->
+              expect(obj.get("message")).to.eq "expected [b]<input>[\\b] to match [b]input[\\b]"
+              done()
+
+            ## prepend an empty div so it has no id or class
+            @cy.$("body").prepend $("<input />")
+
+            @cy.get("input").eq(0).then ($div) ->
+              expect($div).to.match("input")
+
+        describe "property assertions", ->
+          it "has property", (done) ->
+            @onAssert (obj) ->
+              expect(obj.get("message")).to.eq "expected [b]<form#by-id>[\\b] to have a property [b]length[\\b]"
+              done()
+
+            @cy.get("form").should("have.property", "length")
+
+    describe "#expect", ->
+      it "proxies to chai.expect", ->
+        exp = @sandbox.spy chai, "expect"
+        $Cypress.Chai.expect(true).to.eq.true
+
+        expectOriginal(exp).to.be.calledWith(true)
+
+  context "chai overrides", ->
+    before ->
+      @onAssert = (fn) =>
+        @Cypress.on "log", (obj) =>
+          if obj.get("name") is "assert"
+            ## restore so we dont create an endless loop
+            ## due to Cypress.assert being called again
+            @chai.restore()
+            fn.call(@, obj)
+
+    beforeEach ->
+      @chai = $Cypress.Chai.create(@Cypress, {})
+
+    afterEach ->
+      @chai.restore()
+
+    describe "#exist", ->
+      it "uses $el.selector in expectation", (done) ->
+        @onAssert (log) ->
+          debugger
+          expect(log.get("message")).to.eq("expected [b]#does-not-exist[\\b] not to exist in the DOM")
+          done()
+
+        @cy.get("#does-not-exist").should("not.exist")
+
+    describe "#not.exist", ->
+      it "resolves all 3 assertions", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          if log.get("name") is "assert"
+            logs.push(log)
+
+            if logs.length is 3
+              done()
+
+        @cy
+          .get("#does-not-exist1").should("not.exist")
+          .get("#does-not-exist2").should("not.exist")
+          .get("#does-not-exist3").should("not.exist")
+
     describe "#have.length", ->
       it "formats _obj with cypress", (done) ->
         @onAssert (log) ->
