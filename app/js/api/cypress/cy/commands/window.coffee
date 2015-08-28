@@ -29,15 +29,13 @@ $Cypress.register "Window", (Cypress, _, $) ->
           command: options.command
         })
         .then ($el) =>
+          ## set the $el in the options which
+          ## is what the verification uses to
+          ## ensure the element exists
+          options.$el = $el
+
           @verifyUpcomingAssertions($el.text(), options, {
             onRetry: resolveTitle
-            onPass: =>
-              ## since we are passing text into our upcoming
-              ## assertions we additionally need to verify
-              ## that the title element was actually found
-              @ensureElExistance($el)
-
-              {subject: $el.text(), command: options.command}
           })
 
     window: ->

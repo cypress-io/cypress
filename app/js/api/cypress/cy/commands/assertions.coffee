@@ -135,7 +135,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
         ## ensure the error is about existence not about
         ## the downstream assertion.
         try
-          @ensureElExistance(subject)
+          @ensureElExistance(options.$el or subject)
         catch e2
           err = e2
 
@@ -164,7 +164,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
       if not cmds.length
         return Promise
           .try =>
-            @ensureElExistance(subject)
+            @ensureElExistance(options.$el or subject)
           .then(onPassFn)
           .catch(onFailFn)
 
