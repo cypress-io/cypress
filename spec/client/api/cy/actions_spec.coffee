@@ -3644,13 +3644,14 @@ describe "$Cypress.Cy Actions Commands", ->
         input = @cy.$("input:first")
 
         input.get(0).addEventListener "focus", (e) =>
-          obj = _(e).pick("bubbles", "cancelable", "view", "pageX", "pageY", "which", "relatedTarget", "detail", "type")
+          obj = _(e).pick("bubbles", "cancelable", "view", "which", "relatedTarget", "detail", "type")
           expect(obj).to.deep.eq {
             bubbles: false
             cancelable: false
             view: @cy.private("window")
-            pageX: 0
-            pageY: 0
+            ## chrome no longer fires pageX and pageY
+            # pageX: 0
+            # pageY: 0
             which: 0
             relatedTarget: null
             detail: 0
@@ -3664,13 +3665,13 @@ describe "$Cypress.Cy Actions Commands", ->
         input = @cy.$("input:first")
 
         input.get(0).addEventListener "focusin", (e) =>
-          obj = _(e).pick("bubbles", "cancelable", "view", "pageX", "pageY", "which", "relatedTarget", "detail", "type")
+          obj = _(e).pick("bubbles", "cancelable", "view", "which", "relatedTarget", "detail", "type")
           expect(obj).to.deep.eq {
             bubbles: true
             cancelable: false
             view: @cy.private("window")
-            pageX: 0
-            pageY: 0
+            # pageX: 0
+            # pageY: 0
             which: 0
             relatedTarget: null
             detail: 0
