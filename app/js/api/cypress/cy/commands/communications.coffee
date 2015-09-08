@@ -17,14 +17,14 @@ $Cypress.register "Communications", (Cypress, _, $, Promise) ->
             name: "message"
             message: Cypress.Utils.stringify([msg, data])
 
-        Cypress.trigger "message", msg, data, (response) =>
-          if err = response.__error
+        Cypress.trigger "message", msg, data, (resp) =>
+          if err = resp.__error
             try
               @throwErr(err, command)
             catch e
               e.__isMessage = true
-              e.name = response.__name if response.__name
-              e.stack = response.__stack if response.__stack
+              e.name = resp.__name if resp.__name
+              e.stack = resp.__stack if resp.__stack
               reject(e)
           else
             if command
@@ -32,9 +32,10 @@ $Cypress.register "Communications", (Cypress, _, $, Promise) ->
                 onConsole: -> {
                   Message: msg
                   "Data Sent": data
-                  "Data Returned": response
+                  "Data Returned": resp.response
+                  "Logs": resp.__logs
                 }
 
               command.snapshot().end()
 
-            resolve(response)
+            resolve(resp.response)
