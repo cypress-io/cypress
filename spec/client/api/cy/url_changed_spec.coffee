@@ -27,13 +27,13 @@ describe "$Cypress Url:Changed Events", ->
 
     it "triggers url:changed", ->
       url     = "http://localhost:3000/app.html"
-      @sandbox.stub(@cy.sync, "url").returns(url)
+      @sandbox.stub(@cy, "_getLocation").returns(url)
       @cy.urlChanged()
       expect(@trigger).to.be.calledWith "url:changed", url
 
     it "doesnt trigger if url is ''", ->
       ## this happens on about:blank
-      @sandbox.stub(@cy.sync, "url").returns("")
+      @sandbox.stub(@cy, "_getLocation").returns("")
       @cy.urlChanged()
       expect(@trigger).not.to.be.called
 
