@@ -193,7 +193,10 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
       runnable = @private("runnable")
 
-      @group(runnable.group)
+      ## there are some edge cases where
+      ## cy is run without a queue and
+      ## runnable is undefined
+      @group(runnable?.group)
 
       ## if we're at the very end
       if not queue
