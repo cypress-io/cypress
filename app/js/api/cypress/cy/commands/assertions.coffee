@@ -318,6 +318,9 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
         fn = current.args and current.args[0]
         fn and _.isFunction(fn) and fn.length > 0
 
+      isAssertionType = (cmd) ->
+        cmd and cmd.type is "assertion"
+
       current = @prop("current")
 
       ## if we are simply verifying the upcoming
@@ -332,8 +335,11 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
 
       isChildLike = (subject, current) ->
         (value is subject) or
-          # (current.type isnt "assertion") or
-            (functionHadArguments(current))
+          ## if our current command is an assertion type
+          isAssertionType(current) or
+            ## or if the next command is an assertion type
+            isAssertionType(current.next) or
+              (functionHadArguments(current))
 
       _.extend obj,
         name:     "assert"

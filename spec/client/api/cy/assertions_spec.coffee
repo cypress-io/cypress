@@ -495,11 +495,20 @@ describe "$Cypress.Cy Assertion Commands", ->
     describe "#exist", ->
       it "uses $el.selector in expectation", (done) ->
         @onAssert (log) ->
-          debugger
           expect(log.get("message")).to.eq("expected [b]#does-not-exist[\\b] not to exist in the DOM")
           done()
 
         @cy.get("#does-not-exist").should("not.exist")
+
+    describe "#be.visible", ->
+      it "sets type to child", (done) ->
+        @onAssert (log) ->
+          expect(log.get("type")).to.eq("child")
+          done()
+
+        cy
+          .get("body")
+          .get("nested-find").should("be.visible")
 
     describe "#not.exist", ->
       it "resolves all 3 assertions", (done) ->
