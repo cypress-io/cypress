@@ -294,6 +294,10 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
 
       ## grab the rest of the queue'd commands
       for cmd in @queue.slice(index)
+        ## don't break on utilities, just skip over them
+        if cmd.type is "utility"
+          continue
+
         ## grab all of the queued commands which are
         ## assertions and match our current chainerId
         if cmd.type is "assertion" and cmd.chainerId is current.chainerId

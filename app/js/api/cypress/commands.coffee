@@ -13,6 +13,9 @@ do ($Cypress, _) ->
     addAssertionCommand: (key, fn) ->
       @add(key, fn, "assertion")
 
+    addUtilityCommand: (key, fn) ->
+      @add(key, fn, "utility")
+
     ## think about adding this for
     ## custom cy extensions as well
     ## that we want to rollback afterwards
@@ -88,7 +91,7 @@ do ($Cypress, _) ->
           when "parent"
             return fn
 
-          when "dual"
+          when "dual", "utility"
             _.wrap fn, (orig, args...) ->
               subject = @prop("subject")
               args = prepareSubject(subject, args)

@@ -1,6 +1,10 @@
 $Cypress.register "Debugging", (Cypress, _, $) ->
 
-  Cypress.addDualCommand
+  Cypress.addUtilityCommand
+    ## pause should indefinitely pause until the user
+    ## presses a key or clicks in the UI to continue
+    # pause: ->
+
     inspect: ->
       ## bug fix due to 3rd party libs like
       ## chai using inspect function for
