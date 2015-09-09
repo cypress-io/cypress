@@ -2,8 +2,11 @@ $Cypress.register "Aliasing", (Cypress, _, $) ->
 
   blacklist = ["test", "runnable", "timeout", "slow", "skip", "inspect"]
 
-  Cypress.addChildCommand
+  Cypress.addUtilityCommand
     as: (subject, str) ->
+      @ensureParent()
+      @ensureSubject()
+
       aliases = @prop("aliases") ? {}
 
       if not _.isString(str)

@@ -40,6 +40,15 @@ describe "$Cypress.Cy Assertion Commands", ->
 
       @cy.get("div:first").should("have.class", "foo").debug().and("have.id", "bar")
 
+    it "skips over aliasing", ->
+      @cy.on "retry", _.after 2, =>
+        @cy.$("div:first").addClass("foo")
+
+      @cy.on "retry", _.after 4, =>
+        @cy.$("div:first").attr("id", "bar")
+
+      @cy.get("div:first").as("div").should("have.class", "foo").debug().and("have.id", "bar")
+
     it "can change the subject", ->
       @cy.get("input:first").should("have.property", "length").should("eq", 1).then (num) ->
         expect(num).to.eq(1)
