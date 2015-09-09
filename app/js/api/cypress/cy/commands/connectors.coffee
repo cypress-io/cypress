@@ -70,7 +70,9 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
       @ensureParent()
       @ensureSubject()
 
-      command = Cypress.Log.command
+      options = {}
+
+      options.command = Cypress.Log.command
         $el: if Cypress.Utils.hasElement(subject) then subject else null
         onConsole: ->
           Subject: subject
@@ -79,78 +81,92 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
       name = @prop("current").name
 
       if not _.isString(fn)
-        @throwErr("cy.#{name}() only accepts a string as the first argument.", command)
+        @throwErr("cy.#{name}() only accepts a string as the first argument.", options.command)
 
-      remoteJQuery = @_getRemoteJQuery()
-      if Cypress.Utils.hasElement(subject) and remoteJQueryisNotSameAsGlobal(remoteJQuery)
-        remoteSubject = remoteJQuery(subject)
-        Cypress.Utils.setCypressNamespace(remoteSubject, subject)
+      getValue = =>
+        remoteJQuery = @_getRemoteJQuery()
+        if Cypress.Utils.hasElement(subject) and remoteJQueryisNotSameAsGlobal(remoteJQuery)
+          remoteSubject = remoteJQuery(subject)
+          Cypress.Utils.setCypressNamespace(remoteSubject, subject)
 
-      prop = (remoteSubject or subject)[fn]
+        prop = (remoteSubject or subject)[fn]
 
-      fail = =>
-        @throwErr("cy.#{name}() errored because the property: '#{fn}' does not exist on your subject.", command)
+        fail = =>
+          @throwErr("cy.#{name}() errored because the property: '#{fn}' does not exist on your subject.", options.command)
 
-      ## if the property does not EXIST on the subject
-      ## then throw a specific error message
-      try
-        fail() if fn not of (remoteSubject or subject)
-      catch e
-        # if not Object.prototype.hasOwnProperty.call((remoteSubject or subject), fn)
-        ## fallback to a second attempt at finding the property on the subject
-        ## in case our subject isnt object-like
-        ## think about using the hasOwnProperty
-        fail() if _.isUndefined(prop)
+        ## if the property does not EXIST on the subject
+        ## then throw a specific error message
+        try
+          fail() if fn not of (remoteSubject or subject)
+        catch e
+          # if not Object.prototype.hasOwnProperty.call((remoteSubject or subject), fn)
+          ## fallback to a second attempt at finding the property on the subject
+          ## in case our subject isnt object-like
+          ## think about using the hasOwnProperty
+          fail() if _.isUndefined(prop)
 
-      invoke = =>
-        if _.isFunction(prop)
-          ret = prop.apply (remoteSubject or subject), args
+        invoke = =>
+          if _.isFunction(prop)
+            ret = prop.apply (remoteSubject or subject), args
 
-          if ret and Cypress.Utils.hasElement(ret) and remoteJQueryisNotSameAsGlobal(remoteJQuery) and Cypress.Utils.isInstanceOf(ret, remoteJQuery)
-            return @$(ret)
+            if ret and Cypress.Utils.hasElement(ret) and remoteJQueryisNotSameAsGlobal(remoteJQuery) and Cypress.Utils.isInstanceOf(ret, remoteJQuery)
+              return @$(ret)
 
-          return ret
+            return ret
 
-        else
-          prop
+          else
+            prop
 
-      getMessage = ->
-        if _.isFunction(prop)
-          ".#{fn}(" + Cypress.Utils.stringify(args) + ")"
-        else
-          ".#{fn}"
+        getMessage = ->
+          if _.isFunction(prop)
+            ".#{fn}(" + Cypress.Utils.stringify(args) + ")"
+          else
+            ".#{fn}"
 
-      getFormattedElement = ($el) ->
-        if Cypress.Utils.hasElement($el)
-          Cypress.Utils.getDomElements($el)
-        else
-          $el
+        getFormattedElement = ($el) ->
+          if Cypress.Utils.hasElement($el)
+            Cypress.Utils.getDomElements($el)
+          else
+            $el
 
-      value = invoke()
+        value = invoke()
 
-      if command
-        message = getMessage()
+        if options.command
+          message = getMessage()
 
-        command.set
-          message: message
-          onConsole: ->
-            obj = {}
+          options.command.set
+            message: message
+            onConsole: ->
+              obj = {}
 
-            if _.isFunction(prop)
-              obj["Function"] = message
-              obj["With Arguments"] = args if args.length
-            else
-              obj["Property"] = message
+              if _.isFunction(prop)
+                obj["Function"] = message
+                obj["With Arguments"] = args if args.length
+              else
+                obj["Property"] = message
 
-            _.extend obj,
-              On:       getFormattedElement(remoteSubject or subject)
-              Returned: getFormattedElement(value)
+              _.extend obj,
+                On:       getFormattedElement(remoteSubject or subject)
+                Returned: getFormattedElement(value)
 
-            obj
+              obj
 
-        command.snapshot()
+        return value
 
-      return {subject: value, command: command}
+      ## wrap retrying into its own
+      ## separate function
+      retryValue = =>
+        Promise
+        .try(getValue)
+        .catch (err) =>
+          options.error = err
+          @_retry(retryValue, options)
+
+      do resolveValue = =>
+        Promise.try(retryValue).then (value) =>
+          @verifyUpcomingAssertions(value, options, {
+            onRetry: resolveValue
+          })
 
     its: (subject, fn, args...) ->
       args.unshift(fn)
