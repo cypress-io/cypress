@@ -159,7 +159,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
 
       subject._spreadArray = true
 
-      @sync.then.call(@, fn)
+      thenFn.call(@, subject, fn)
 
   Cypress.addDualCommand
 
