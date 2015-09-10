@@ -122,16 +122,14 @@ describe "$Cypress.Cy Aliasing Commands", ->
 
     describe "subject not in document", ->
       it "inserts into the queue", (done) ->
-        @cy.on "end", ->
-          expect(getNames(@queue)).to.deep.eq(
-            ["get", "eq", "as", "then", "get", "get", "eq"]
-          )
-          done()
-
         @cy
           .get("#list li").eq(0).as("firstLi").then ($li) ->
             $li.remove()
-          .get("@firstLi")
+          .get("@firstLi").then ->
+            expect(getNames(@cy.queue)).to.deep.eq(
+              ["get", "eq", "as", "then", "get", "get", "eq", "then"]
+            )
+            done()
 
       it "replays from last root to current", ->
         first = @cy.$("#list li").eq(0)
@@ -171,6 +169,57 @@ describe "$Cypress.Cy Aliasing Commands", ->
         ## chainer id's
         @cy.get("@button").then ($button) ->
           expect($button).to.have.id("button")
+
+      it "skips commands which did not change, and starts at the first valid subject or parent command", (done) ->
+        @cy.$("#list li").click ->
+          ul  = $(@).parent()
+          lis = ul.children().clone()
+
+          ## this simulates a re-render
+          ul.children().remove()
+          ul.append(lis)
+          lis.first().remove()
+
+        @cy
+          .get("#list li")
+          .then ($lis) ->
+            return $lis
+          .as("items")
+          .first()
+          .click()
+          .as("firstItem")
+          .then ->
+            expect(getNames(@cy.queue)).to.deep.eq(
+              ["get", "then", "as", "first", "click", "as", "then", "get", "should", "then", "get", "should", "then"]
+            )
+          .get("@items")
+          .should("have.length", 2)
+          .then ->
+            expect(getNames(@cy.queue)).to.deep.eq(
+              ["get", "then", "as", "first", "click", "as", "then", "get", "get", "should", "then", "get", "should", "then"]
+            )
+          .get("@firstItem")
+          .should("contain", "li 1")
+          .then ->
+            expect(getNames(@cy.queue)).to.deep.eq(
+              ["get", "then", "as", "first", "click", "as", "then", "get", "get", "should", "then", "get", "get", "first", "should", "then"]
+            )
+            done()
+
+      it "inserts assertions", (done) ->
+        @cy
+          .get("#checkboxes input")
+          .eq(0)
+          .should("be.checked", "cockatoo")
+          .as("firstItem")
+          .then ($input) ->
+            $input.remove()
+          .get("@firstItem")
+          .then ->
+            expect(getNames(@cy.queue)).to.deep.eq(
+              ["get", "eq", "should", "as", "then", "get", "get", "eq", "should", "then"]
+            )
+            done()
 
   context "#getAlias", ->
     it "retrieves aliases", ->

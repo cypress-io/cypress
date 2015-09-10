@@ -55,28 +55,71 @@ do ($Cypress, _) ->
           args[i] = opts
           return
 
-    ## recursively inserts previous objects
-    ## up until it finds a parent command
-    _replayFrom: (current, memo = []) ->
+    _getCommandsUntilFirstParentOrValidSubject: (command, memo = []) ->
+      return null if not command
+
+      ## push these onto the beginning of the commands array
+      memo.unshift(command)
+
+      ## break and return the memo
+      if command.type is "parent" or @_contains(command.subject)
+        return memo
+
+      @_getCommandsUntilFirstParentOrValidSubject(command.prev, memo)
+
+    ## recursively inserts previous commands
+    _replayFrom: (current) ->
       ## reset each chainerId to the
       ## current value
       chainerId = @prop("chainerId")
 
-      insert = =>
-        _.each memo, (obj) =>
-          @_forceLoggingOptions(obj.args)
-          obj.chainerId = chainerId
-          @_insert(obj)
+      insert = (commands) =>
+        _.each commands, (cmd) =>
+          @_forceLoggingOptions(cmd.args)
+          cmd.chainerId = chainerId
 
-      if current
-        memo.unshift current
+          ## clone the command to prevent
+          ## mutating its properties
+          @_insert _.clone(cmd)
 
-        if current.type is "parent"
-          insert()
-        else
-          @_replayFrom current.prev, memo
-      else
-        insert()
+      ## - starting with the aliased command
+      ## - walk up to each prev command
+      ## - until you reach a parent command
+      ## - or until the subject is in the DOM
+      ## - from that command walk down inserting
+      ##   every command which changed the subject
+      ## - coming upon an assertion should only be
+      ##   inserted if the previous command should
+      ##   be replayed
+
+      commands = @_getCommandsUntilFirstParentOrValidSubject(current)
+
+      if commands
+        initialCommand = commands.shift()
+
+        insert _.reduce commands, (memo, command, index) ->
+          push = ->
+            memo.push(command)
+
+          switch
+            when command.type is "assertion"
+              ## if we're an assertion and the prev command
+              ## is in the memo, then push this one
+              if command.prev in memo
+                push()
+
+            when command.subject isnt initialCommand.subject
+              ## when our subjects dont match then
+              ## reset the initialCommand to this command
+              ## so the next commands can compare against
+              ## this one to figure out the changing subjects
+              initialCommand = command
+
+              push()
+
+          return memo
+
+        , [initialCommand]
 
     # cy
     #   .server()
