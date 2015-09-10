@@ -175,11 +175,11 @@ describe "$Cypress.Cy Querying Commands", ->
             expect($root.get(0)).to.eq form.get(0)
 
     it "eventually resolves", ->
-      _.delay ->
-        cy.$("html").addClass("foo").addClass("bar")
+      _.delay =>
+        @cy.$("html").addClass("foo").addClass("bar")
       , 100
 
-      cy.root().should("have.class", "foo").and("have.class", "bar")
+      @cy.root().should("have.class", "foo").and("have.class", "bar")
 
     describe ".log", ->
       beforeEach ->
