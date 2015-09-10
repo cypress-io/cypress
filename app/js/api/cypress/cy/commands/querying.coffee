@@ -63,26 +63,55 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       if aliasObj = @getAlias(selector.split(".")[0])
         {subject, alias, command} = aliasObj
 
-        switch
-          ## if this is a DOM element
-          when Cypress.Utils.hasElement(subject)
-            if @_contains(subject)
-              log(subject)
-              return {subject: subject, command: options.command}
-            else
-              @_replayFrom command
-              return null
+        return do resolveAlias = =>
+          switch
+            ## if this is a DOM element
+            when Cypress.Utils.hasElement(subject)
+              replayFrom = false
 
-          ## if this is a route command
-          when command.name is "route"
-            alias = _.compact([alias, selector.split(".")[1]]).join(".")
-            responses = @getResponsesByAlias(alias) ? null
-            log(responses, "route")
-            return responses
-          else
-            ## log as primitive
-            log(subject, "primitive")
-            return subject
+              replay = =>
+                @_replayFrom command
+                return null
+
+              ## if we're missing any element
+              ## within our subject then filter out
+              ## anything not currently in the DOM
+              if not @_contains(subject)
+                subject = subject.filter (index, el) ->
+                  cy._contains(el)
+
+                ## if we have nothing left
+                ## just go replay the commands
+                if not subject.length
+                  return replay()
+
+              log(subject)
+
+              return @verifyUpcomingAssertions(subject, options, {
+                onFail: (err) ->
+                  ## if we are failing because our aliased elements
+                  ## are less than what is expected then we know we
+                  ## need to requery for them and can thus replay
+                  ## the commands leading up to the alias
+                  if err.type is "length" and err.actual < err.expected
+                    replayFrom = true
+                onRetry: =>
+                  if replayFrom
+                    replay()
+                  else
+                    resolveAlias()
+              })
+
+            ## if this is a route command
+            when command.name is "route"
+              alias = _.compact([alias, selector.split(".")[1]]).join(".")
+              responses = @getResponsesByAlias(alias) ? null
+              log(responses, "route")
+              return responses
+            else
+              ## log as primitive
+              log(subject, "primitive")
+              return subject
 
       start("dom")
 

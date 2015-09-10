@@ -431,13 +431,56 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy.get("button").should("have.length", length).then ($buttons) ->
           expect($buttons.length).to.eq length
 
+      it "retries an alias when not enough elements found", ->
+        buttons = @cy.$("button")
+
+        length = buttons.length + 1
+
+        ## add another button after 2 retries, once
+        @cy.on "retry", _.after 2, _.once =>
+          $("<button />").appendTo @cy.$("body")
+
+        ## should eventually resolve after adding 1 button
+        @cy
+          .get("button").as("btns")
+          .get("@btns").should("have.length", length).then ($buttons) ->
+            expect($buttons.length).to.eq length
+
+      it "retries an alias when too many elements found without replaying commands", ->
+        buttons = @cy.$("button")
+
+        length = buttons.length - 2
+
+        _replayFrom = @sandbox.spy(@cy, "_replayFrom")
+
+        ## add another button after 2 retries, once
+        @cy.on "retry", _.after 2, =>
+          buttons.last().remove()
+          buttons = @cy.$("button")
+
+        ## should eventually resolve after adding 1 button
+        @cy
+          .get("button").as("btns")
+          .get("@btns").should("have.length", length).then ($buttons) ->
+            expect(_replayFrom).not.to.be.called
+            expect(@cy.queue.length).to.eq(6) ## we should not have replayed any commands
+            expect($buttons.length).to.eq length
+
     describe "assertion verification", ->
       it "automatically retries", ->
-        _.delay ->
-          cy.$("button:first").attr("data-foo", "bar")
+        _.delay =>
+          @cy.$("button:first").attr("data-foo", "bar")
         , 100
 
-        cy.get("button:first").should("have.attr", "data-foo").and("match", /bar/)
+        @cy.get("button:first").should("have.attr", "data-foo").and("match", /bar/)
+
+      it "eventually resolves an alias", ->
+        @cy.on "retry", _.after 2, =>
+          @cy.$("button:first").addClass("foo-bar-baz")
+
+        @cy
+          .get("button:first").as("btn")
+          .get("@btn").should("have.class", "foo-bar-baz")
 
     describe ".log", ->
       beforeEach ->
