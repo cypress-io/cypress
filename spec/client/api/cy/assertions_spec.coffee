@@ -183,6 +183,7 @@ describe "$Cypress.Cy Assertion Commands", ->
     describe "errors", ->
       beforeEach ->
         @allowErrors()
+        @currentTest.timeout(200)
 
       it "should not be true", (done) ->
         @cy.on "fail", (err) ->
@@ -226,20 +227,20 @@ describe "$Cypress.Cy Assertion Commands", ->
           $(@).addClass("foo").remove()
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "Cannot call .should() because the current subject has been removed or detached from the DOM."
+          expect(err.message).to.include "Cannot call .should() because the current subject has been removed or detached from the DOM."
           done()
 
         @cy.get("button:first").click().should("have.class", "foo").then ->
           done("cy.should was supposed to fail")
 
-      it.skip "throws when the subject eventually isnt in the DOM", (done) ->
+      it "throws when the subject eventually isnt in the DOM", (done) ->
         button = @cy.$("button:first")
 
         @cy.on "retry", _.after 2, _.once ->
           button.addClass("foo").remove()
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "Cannot call .should() because the current subject has been removed or detached from the DOM."
+          expect(err.message).to.include "Cannot call .should() because the current subject has been removed or detached from the DOM."
           done()
 
         @cy.get("button:first").click().should("have.class", "foo").then ->
@@ -526,7 +527,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
         cy
           .get("body")
-          .get("nested-find").should("be.visible")
+          .get("#nested-find").should("be.visible")
 
     describe "#not.exist", ->
       it "resolves all 3 assertions", (done) ->
