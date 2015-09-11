@@ -18,8 +18,19 @@ $Cypress.register "Aliasing", (Cypress, _, $) ->
       if str in blacklist
         @throwErr "cy.as() cannot be aliased as: '#{str}'. This word is reserved."
 
-      prev       = @prop("current").prev
-      prev.alias = str
+      ## this is the previous command
+      ## which we are setting the alias as
+      prev = @prop("current").get("prev")
+      prev.set("alias", str)
+
+      ## we also need to set the alias on the last command log
+      log = _.last(@commands.logs({instrument: "command", event: false}))
+
+      if log
+        log.set({
+          alias:     str
+          aliasType: if $Cypress.Utils.hasElement(subject) then "dom" else "primitive"
+        })
 
       aliases[str] = {subject: subject, command: prev, alias: str}
 
@@ -27,14 +38,5 @@ $Cypress.register "Aliasing", (Cypress, _, $) ->
 
       ## assign the subject to our runnable ctx
       @assign(str, subject)
-
-      # allAliases = _(@_aliases).keys().join(", ")
-
-      # Cypress.Log.command
-      #   onConsole: ->
-      #     "Alias": str
-      #     "Returned": subject
-      #     "Elements": subject.length
-      #     "All Aliases": allAliases
 
       return subject

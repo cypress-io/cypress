@@ -28,10 +28,6 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       ## then it could still be logged during a failure, which
       ## is why we normalize its type value
       if obj.type is "dual"
-
-      ## does this object represent the current command cypress
-      ## is processing?
-      obj.isCurrent = obj.name is current.name
         obj.type = if current.get("prev") then "child" else "parent"
 
       _.defaults obj,
@@ -70,9 +66,6 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
         message:          undefined
         onRender: ->
         onConsole: ->
-
-      if obj.isCurrent
-        _.defaults obj, alias: cy.getNextAlias()
 
       obj.instrument = instrument
 
