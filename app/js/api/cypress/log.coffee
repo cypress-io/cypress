@@ -84,6 +84,9 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       return if _.any Cypress.invoke("before:log", log), (ret) ->
         ret is false
 
+      ## set the log on the command
+      cy.prop("current")?.log(log)
+
       Cypress.trigger "log", log
 
       return log
@@ -214,6 +217,12 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
     reduceMemory: ->
       @off()
       @attributes = _.omit @attributes, _.isObject
+
+    finish: ->
+      ## end our command since our subject
+      ## has been resolved at this point
+      ## unless its already been 'ended'
+      @snapshot().end() if @get("end") isnt true
 
     wrapOnConsole: ->
       _this = @

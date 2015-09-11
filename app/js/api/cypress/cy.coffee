@@ -322,12 +322,6 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
     #   fn._invokeImmediately = true
     #   fn
 
-    getSubjectAndCommand: (obj) ->
-      if _.has(obj, "subject") and _.has(obj, "command")
-        return obj
-      else
-        {subject: obj, command: undefined}
-
     set: (command, prev, next) ->
       command.set({prev: prev, next: next})
 
@@ -382,14 +376,12 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
         ## which is never resolved
         if (ret is @ or ret is @chain()) then null else ret
 
-      .then (ret) =>
-        {subject, command} = @getSubjectAndCommand(ret)
+      .then (subject) =>
+        command.set({subject: subject})
 
-        obj.subject = subject
-        obj.command = command
-
-        ## end / snapshot our command if we have one
-        command.finish() if command
+        ## end / snapshot our logs
+        ## if they need it
+        command.finishLogs()
 
         ## trigger an event here so we know our
         ## command has been successfully applied
