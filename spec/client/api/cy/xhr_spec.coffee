@@ -221,7 +221,7 @@ describe "$Cypress.Cy XHR Commands", ->
               type: "parent"
               error: err
               instrument: "command"
-              message: undefined
+              message: ""
               event: true
             }
             _.each obj, (value, key) =>
@@ -683,7 +683,7 @@ describe "$Cypress.Cy XHR Commands", ->
           obj = {
             name: "xhr"
             event: true
-            message: undefined
+            message: ""
             type: "parent"
             aliasType: "route"
             referencesAlias: undefined
