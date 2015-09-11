@@ -28,8 +28,8 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
         "Applied To": $Cypress.Utils.getDomElements(subject)
       }
 
-      if options.log
-        options.command ?= Cypress.Log.command
+      if options.log isnt false
+        options._log = Cypress.Log.command
           message: getSelector()
           onConsole: -> onConsole
 
@@ -39,7 +39,7 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
         onConsole.Returned = Cypress.Utils.getDomElements($el)
         onConsole.Elements = $el?.length
 
-        options.command.set({$el: $el})
+        options._log.set({$el: $el})
 
       do getElements = =>
         ## catch sizzle errors here
@@ -50,7 +50,7 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
           ## or completely borks it
           $el.selector = getSelector()
         catch e
-          e.onFail = -> options.command.error(e)
+          e.onFail = -> options._log.error(e)
           throw e
 
         setEl($el)

@@ -20,13 +20,12 @@ $Cypress.register "Window", (Cypress, _, $) ->
       _.defaults options, {log: true}
 
       if options.log
-        options.command = Cypress.Log.command()
+        options._log = Cypress.Log.command()
 
       do resolveTitle = =>
         @command("get", "title", {
           log: false
           verify: false
-          command: options.command
         })
         .then ($el) =>
           ## set the $el in the options which
@@ -58,7 +57,7 @@ $Cypress.register "Window", (Cypress, _, $) ->
       _.defaults options, {log: true}
 
       if options.log
-        command = Cypress.Log.command
+        options._log = Cypress.Log.command
           onConsole: ->
             obj = {}
             obj.Preset = preset if preset
@@ -67,7 +66,7 @@ $Cypress.register "Window", (Cypress, _, $) ->
             obj
 
       throwErrBadArgs = =>
-        @throwErr "cy.viewport can only accept a string preset or a width and height as numbers.", command
+        @throwErr "cy.viewport can only accept a string preset or a width and height as numbers.", options._log
 
       widthAndHeightAreValidNumbers = (width, height) ->
         _.all [width, height], (val) ->
@@ -79,7 +78,7 @@ $Cypress.register "Window", (Cypress, _, $) ->
 
       switch
         when _.isString(presetOrWidth) and _.isBlank(presetOrWidth)
-          @throwErr "cy.viewport cannot be passed an empty string.", command
+          @throwErr "cy.viewport cannot be passed an empty string.", options._log
 
         when _.isString(presetOrWidth)
           getPresetDimensions = (preset) =>
@@ -87,12 +86,12 @@ $Cypress.register "Window", (Cypress, _, $) ->
               _(viewports[presetOrWidth].split("x")).map(Number)
             catch e
               presets = _.keys(viewports).join(", ")
-              @throwErr "cy.viewport could not find a preset for: '#{preset}'. Available presets are: #{presets}", command
+              @throwErr "cy.viewport could not find a preset for: '#{preset}'. Available presets are: #{presets}", options._log
 
           orientationIsValidAndLandscape = (orientation) =>
             if orientation not in validOrientations
               all = validOrientations.join("' or '")
-              @throwErr "cy.viewport can only accept '#{all}' as valid orientations. Your orientation was: '#{orientation}'", command
+              @throwErr "cy.viewport can only accept '#{all}' as valid orientations. Your orientation was: '#{orientation}'", options._log
 
             orientation is "landscape"
 
@@ -113,7 +112,7 @@ $Cypress.register "Window", (Cypress, _, $) ->
           height = heightOrOrientation
 
           if not widthAndHeightAreWithinBounds(width, height)
-            @throwErr "cy.viewport width and height must be between 200px and 3000px.", command
+            @throwErr "cy.viewport width and height must be between 200px and 3000px.", options._log
 
         else
           throwErrBadArgs()
@@ -125,7 +124,7 @@ $Cypress.register "Window", (Cypress, _, $) ->
 
       Cypress.trigger "viewport", viewport
 
-      if command
-        command.set(viewport)
+      if options._log
+        options._log.set(viewport)
 
-      return {subject: null, command: command}
+      return null

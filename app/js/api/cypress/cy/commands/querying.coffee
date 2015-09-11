@@ -18,7 +18,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       start = (aliasType) ->
         return if options.log is false
 
-        options.command ?= Cypress.Log.command
+        options._log ?= Cypress.Log.command
           message: selector
           referencesAlias: aliasObj?.alias
           aliasType: aliasType
@@ -27,7 +27,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       log = (value, aliasType = "dom") ->
         return if options.log is false
 
-        start(aliasType) if not options.command
+        start(aliasType) if not _.isObject(options._log)
 
         obj = {}
 
@@ -56,7 +56,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
           return onConsole
 
-        options.command.set(obj)
+        options._log.set(obj)
 
       ## we always want to strip everything after the first '.'
       ## since we support alias propertys like '1' or 'all'
@@ -121,7 +121,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
         onConsole.Returned = Cypress.Utils.getDomElements($el)
         onConsole.Elements = $el?.length
 
-        options.command.set({$el: $el})
+        options._log.set({$el: $el})
 
       getElements = =>
         ## attempt to query for the elements by withinSubject context
@@ -129,7 +129,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
         try
           $el = @$(selector, options.withinSubject)
         catch e
-          e.onFail = -> options.command.error(e)
+          e.onFail = -> options._log.error(e)
           throw e
 
         ## if that didnt find anything and we have a within subject
@@ -166,19 +166,18 @@ $Cypress.register "Querying", (Cypress, _, $) ->
     root: (options = {}) ->
       _.defaults options, {log: true}
 
-      if options.log
-        command = Cypress.Log.command({message: ""})
+      if options.log isnt false
+        options._log = Cypress.Log.command({message: ""})
 
       log = ($el) ->
-        command.set({$el: $el}) if command
+        options._log.set({$el: $el}) if options.log
 
-        return {subject: $el, command: command}
+        return $el
 
       if withinSubject = @prop("withinSubject")
         return log(withinSubject)
 
-      @command("get", "html", {log: false}).then (ret) ->
-        log(ret.subject)
+      @command("get", "html", {log: false}).then(log)
 
   Cypress.addDualCommand
     contains: (subject, filter, text, options = {}) ->
@@ -223,18 +222,18 @@ $Cypress.register "Querying", (Cypress, _, $) ->
             else
               "Expected to find content: '#{text}' #{getPhrase(type, negated)}but never did."
 
-      if options.log
+      if options.log isnt false
         onConsole = {
           Content: text
           "Applied To": Cypress.Utils.getDomElements(subject or @prop("withinSubject"))
         }
 
-        options.command ?= Cypress.Log.command
+        options._log = Cypress.Log.command
           message: _.compact([filter, text])
           type: if subject then "child" else "parent"
           onConsole: -> onConsole
 
-      _.extend options,
+      getOpts = _.extend _.clone(options),
         # error: getErr(text, phrase)
         withinSubject: subject or @prop("withinSubject") or @$("body")
         filter: true
@@ -243,12 +242,12 @@ $Cypress.register "Querying", (Cypress, _, $) ->
         verify: false ## dont verify upcoming assertions, we do that ourselves
 
       setEl = ($el) ->
-        return if not options.command
+        return if options.log is false
 
         onConsole.Returned = Cypress.Utils.getDomElements($el)
         onConsole.Elements = $el?.length
 
-        options.command.set({$el: $el})
+        options._log.set({$el: $el})
 
       getFirstDeepestElement = (elements, index = 0) ->
         ## iterate through all of the elements in pairs
@@ -291,7 +290,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
         throw new Error()
 
       do resolveElements = =>
-        @command("get", selector, options).then ($elements) =>
+        @command("get", selector, getOpts).then ($elements) =>
           $el = switch
             when $elements and $elements.length and filter
               $elements.last()
@@ -308,7 +307,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
               switch err.type
                 when "length"
                   if err.expected > 1
-                    @throwErr "cy.contains() cannot be passed a length option because it will only ever return 1 element.", options.command
+                    @throwErr "cy.contains() cannot be passed a length option because it will only ever return 1 element.", options._log
                 when "existence"
                   err.longMessage = getErr(err)
           })
@@ -324,11 +323,11 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       _.defaults options, {log: true}
 
       if options.log
-        command = Cypress.Log.command
+        options._log = Cypress.Log.command
           $el: subject
           message: ""
 
-      @throwErr("cy.within() must be called with a function!", command) if not _.isFunction(fn)
+      @throwErr("cy.within() must be called with a function!", options._log) if not _.isFunction(fn)
 
       ## reference the next command after this
       ## within.  when that command runs we'll
@@ -381,4 +380,4 @@ $Cypress.register "Querying", (Cypress, _, $) ->
           stop()
           @prop "withinSubject", null
 
-      return {subject: subject, command: command}
+      return subject

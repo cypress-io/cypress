@@ -14,8 +14,8 @@ $Cypress.register "Location", (Cypress, _, $) ->
     url: (options = {}) ->
       _.defaults options, {log: true}
 
-      if options.log
-        options.command = Cypress.Log.command
+      if options.log isnt false
+        options._log = Cypress.Log.command
           message: ""
 
       getHref = =>
@@ -30,8 +30,8 @@ $Cypress.register "Location", (Cypress, _, $) ->
     hash: (options = {}) ->
       _.defaults options, {log: true}
 
-      if options.log
-        options.command = Cypress.Log.command
+      if options.log isnt false
+        options._log = Cypress.Log.command
           message: ""
 
       getHash = =>
@@ -60,12 +60,12 @@ $Cypress.register "Location", (Cypress, _, $) ->
           ## use existential here because we only want to throw
           ## on null or undefined values (and not empty strings)
           location[key] ?
-            @throwErr("Location object does have not have key: #{key}")
+            @throwErr("Location object does not have key: #{key}")
         else
           location
 
-      if options.log
-        options.command = Cypress.Log.command
+      if options.log isnt false
+        options._log = Cypress.Log.command
           message: key ? ""
 
       do resolveLocation = =>

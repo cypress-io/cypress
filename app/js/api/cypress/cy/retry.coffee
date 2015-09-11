@@ -1,7 +1,7 @@
 do ($Cypress, _, Promise) ->
 
   $Cypress.Cy.extend
-    _retry: (fn, options, command) ->
+    _retry: (fn, options, log) ->
       ## remove the runnables timeout because we are now in retry
       ## mode and should be handling timing out ourselves and dont
       ## want to accidentally time out via mocha
@@ -9,7 +9,11 @@ do ($Cypress, _, Promise) ->
         runnableTimeout = options.timeout ? @_timeout()
         @_clearTimeout()
 
-      command ?= options.command
+      current = @prop("current")
+
+      ## use the log if passed in, else fallback to options._log
+      ## else fall back to just grabbing the last log per our current command
+      log ?= options._log ? current?.getLastLog()
 
       _.defaults options,
         _runnableTimeout: runnableTimeout
@@ -33,7 +37,7 @@ do ($Cypress, _, Promise) ->
         ## snapshot the DOM since we are bailing
         ## so the user can see the state we're in
         ## when we fail
-        command.snapshot() if command
+        log.snapshot() if log
 
         if assertions = options.assertions
           @finishAssertions(assertions)
@@ -48,7 +52,7 @@ do ($Cypress, _, Promise) ->
               err
 
         err = "Timed out retrying. " + getErrMessage(options.error)
-        @throwErr err, (options.onFail or command)
+        @throwErr err, (options.onFail or log)
 
       Promise.delay(options.interval).cancellable().then =>
         @trigger "retry", options

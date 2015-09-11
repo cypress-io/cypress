@@ -15,11 +15,11 @@ $Cypress.register "Misc", (Cypress, _, $) ->
     wrap: (obj, options = {}) ->
       _.defaults options, {log: true}
 
-      if options.log
-        options.command = Cypress.Log.command()
+      if options.log isnt false
+        options._log = Cypress.Log.command()
 
         if Cypress.Utils.hasElement(obj)
-          options.command.set({$el: obj})
+          options._log.set({$el: obj})
 
       do resolveWrap = =>
         @verifyUpcomingAssertions(obj, options, {

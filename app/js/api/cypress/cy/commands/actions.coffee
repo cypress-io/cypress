@@ -34,7 +34,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       form = options.$el.get(0)
 
       if options.log
-        options.command = Cypress.Log.command
+        options._log = Cypress.Log.command
           $el: options.$el
           onConsole: ->
             "Applied To": $Cypress.Utils.getDomElements(options.$el)
@@ -43,10 +43,10 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       if not options.$el.is("form")
         node = Cypress.Utils.stringifyElement(options.$el)
         word = Cypress.Utils.plural(options.$el, "contains", "is")
-        @throwErr(".submit() can only be called on a <form>! Your subject #{word} a: #{node}", options.command)
+        @throwErr(".submit() can only be called on a <form>! Your subject #{word} a: #{node}", options._log)
 
       if (num = options.$el.length) and num > 1
-        @throwErr(".submit() can only be called on a single form! Your subject contained #{num} form elements!", options.command)
+        @throwErr(".submit() can only be called on a single form! Your subject contained #{num} form elements!", options._log)
 
       ## calling the native submit method will not actually trigger
       ## a submit event, so we need to dispatch this manually so
@@ -90,7 +90,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       @ensureDom(options.$el, "focus")
 
       if options.log
-        options.command = Cypress.Log.command
+        options._log = Cypress.Log.command
           $el: options.$el
           onConsole: ->
             "Applied To": $Cypress.Utils.getDomElements(options.$el)
@@ -102,12 +102,12 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         return if options.error is false
 
         node = Cypress.Utils.stringifyElement(options.$el)
-        @throwErr(".focus() can only be called on a valid focusable element! Your subject is a: #{node}", options.command)
+        @throwErr(".focus() can only be called on a valid focusable element! Your subject is a: #{node}", options._log)
 
       if (num = options.$el.length) and num > 1
         return if options.error is false
 
-        @throwErr(".focus() can only be called on a single element! Your subject contained #{num} elements!", options.command)
+        @throwErr(".focus() can only be called on a single element! Your subject contained #{num} elements!", options._log)
 
       timeout = @_timeout() * .90
 
@@ -195,7 +195,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
           return if options.error is false
 
-          @throwErr ".focus() timed out because your browser did not receive any focus events. This is a known bug in Chrome when it is not the currently focused window.", options.command
+          @throwErr ".focus() timed out because your browser did not receive any focus events. This is a known bug in Chrome when it is not the currently focused window.", options._log
         .then =>
           return options.$el if options.verify is false
 
@@ -216,7 +216,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       @ensureDom(options.$el, "blur")
 
       if options.log
-        options.command = Cypress.Log.command
+        options._log = Cypress.Log.command
           $el: options.$el
           onConsole: ->
             "Applied To": $Cypress.Utils.getDomElements(options.$el)
@@ -224,19 +224,19 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       if (num = options.$el.length) and num > 1
         return if options.error is false
 
-        @throwErr(".blur() can only be called on a single element! Your subject contained #{num} elements!", options.command)
+        @throwErr(".blur() can only be called on a single element! Your subject contained #{num} elements!", options._log)
 
       @command("focused", {log: false, verify: false}).then ($focused) =>
         if not $focused
           return if options.error is false
 
-          @throwErr(".blur() can only be called when there is a currently focused element.", options.command)
+          @throwErr(".blur() can only be called when there is a currently focused element.", options._log)
 
         if options.$el.get(0) isnt $focused.get(0)
           return if options.error is false
 
           node = Cypress.Utils.stringifyElement($focused)
-          @throwErr(".blur() can only be called on the focused element. Currently the focused element is a: #{node}", options.command)
+          @throwErr(".blur() can only be called on the focused element. Currently the focused element is a: #{node}", options._log)
 
         timeout = @_timeout() * .90
 
@@ -336,13 +336,13 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         @_timeout(delay, true)
 
         if options.log
-          command = Cypress.Log.command
+          log = Cypress.Log.command
             $el: $el
             onConsole: ->
               "Applied To":   $Cypress.Utils.getDomElements($el)
               "Elements":     $el.length
 
-        @ensureVisibility $el, command
+        @ensureVisibility $el, log
 
         p = @command("focus", {$el: $el, error: false, verify: false, log: false}).then =>
           event = new MouseEvent "dblclick", {
@@ -354,7 +354,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
           # $el.cySimulate("dblclick")
 
-          command.snapshot() if command
+          log.snapshot() if log
 
           ## need to return null here to prevent
           ## chaining thenable promises
@@ -410,7 +410,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         log: true
         verify: true
         force: false
-        command: null
         position: position
         x: x
         y: y
@@ -419,8 +418,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       @ensureDom(options.$el)
 
       win  = @private("window")
-
-      options.commands = []
 
       clicks = []
 
@@ -434,15 +431,13 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           ## figure out the options which actually change the behavior of clicks
           deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: 50})
 
-          options.command = Cypress.Log.command({
+          options._log = Cypress.Log.command({
             message: deltaOptions
             $el: $el
           })
 
-          options.commands.push(options.command)
-
         if options.errorOnSelect and $el.is("select")
-          @throwErr "Cannot call .click() on a <select> element. Use cy.select() command instead to change the value.", options.command
+          @throwErr "Cannot call .click() on a <select> element. Use cy.select() command instead to change the value.", options._log
 
         ## in order to simulate actual user behavior we need to do the following:
         ## 1. take our element and figure out its center coordinate
@@ -464,8 +459,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           domEvents.mouseUp = @Cypress.Mouse.mouseUp($elToClick, coords, win)
           domEvents.click   = @Cypress.Mouse.click($elToClick, coords, win)
 
-          if options.command
-            consoleObj = options.command.attributes.onConsole()
+          if options._log
+            consoleObj = options._log.attributes.onConsole()
 
           onConsole = ->
             consoleObj = _.defaults consoleObj ? {}, {
@@ -501,10 +496,10 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             .delay(delay)
             .then ->
               ## display the red dot at these coords
-              if options.command
+              if options._log
                 ## because we snapshot and output a command per click
                 ## we need to manually snapshot + end them
-                options.command.set({coords: coords, onConsole: onConsole}).snapshot().end()
+                options._log.set({coords: coords, onConsole: onConsole}).snapshot().end()
             ## need to return null here to prevent
             ## chaining thenable promises
             .return(null)
@@ -520,9 +515,9 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             height = $fixed.outerHeight()
             width  = $fixed.outerWidth()
             win.scrollBy(-width, -height)
-            if options.command
+            if options._log
               ## store the scrollBy to be used later in the iframe view
-              options.command.set "scrollBy", {x: -width, y: -height}
+              options._log.set "scrollBy", {x: -width, y: -height}
 
           getElementWithFixedPosition = ($el) ->
             ## return null if we're at body/html
@@ -547,7 +542,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             $elToClick = @getElementAtCoordinates(coords.x, coords.y)
 
             try
-              @ensureDescendents $el, $elToClick, options.command
+              @ensureDescendents $el, $elToClick, options._log
             catch err
               ## if $elToClick isnt a descendent then attempt to nudge the
               ## window scrollBy based on the height of the covering element
@@ -562,9 +557,9 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
                 # return getElementAtCoordinates(coords)
                 return @_retry(retry, options)
 
-              if options.command
-                options.command.snapshot()
-                options.command.set onConsole: ->
+              if options._log
+                options._log.snapshot()
+                options._log.set onConsole: ->
                   obj = {}
                   obj["Tried to Click"]     = $Cypress.Utils.getDomElements($el)
                   obj["But its Covered By"] = $Cypress.Utils.getDomElements($elToClick)
@@ -578,7 +573,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           getCoords = (scrollIntoView = true) =>
             if options.force isnt true
               try
-                @ensureVisibility $el, options.command
+                @ensureVisibility $el, options._log
               catch err
                 retry = ->
                   getCoords(scrollIntoView)
@@ -602,7 +597,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
               try
                 coords = @getCoordinates($el, options.position)
               catch err
-                @throwErr(err, options.command)
+                @throwErr(err, options._log)
 
             ## if we're forcing this click event
             ## just immediately send it up
@@ -693,18 +688,9 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           return options.$el if options.verify is false
 
           do verifyAssertions = =>
-            @verifyUpcomingAssertions(subject, options, {
+            @verifyUpcomingAssertions(options.$el, options, {
               onRetry: verifyAssertions
             })
-        .then ->
-          ## clear command because
-          ## we have an array of commands
-          delete options.command
-
-          return {
-            subject: options.$el
-            command: getFirstCommandOrNull(options.commands)
-          }
         .catch Promise.CancellationError, (err) ->
           _(clicks).invoke("cancel")
           throw err
@@ -751,7 +737,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             memo
           , {}
 
-        options.command = Cypress.Log.command
+        options._log = Cypress.Log.command
           message: [chars, deltaOptions]
           $el: options.$el
           onConsole: ->
@@ -767,16 +753,16 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
       if not options.$el.is(textLike)
         node = Cypress.Utils.stringifyElement(options.$el)
-        @throwErr(".type() can only be called on textarea or :text! Your subject is a: #{node}", options.command)
+        @throwErr(".type() can only be called on textarea or :text! Your subject is a: #{node}", options._log)
 
       if (num = options.$el.length) and num > 1
-        @throwErr(".type() can only be called on a single textarea or :text! Your subject contained #{num} elements!", options.command)
+        @throwErr(".type() can only be called on a single textarea or :text! Your subject contained #{num} elements!", options._log)
 
       if not (_.isString(chars) or _.isFinite(chars))
-        @throwErr(".type() can only accept a String or Number. You passed in: '#{chars}'", options.command)
+        @throwErr(".type() can only accept a String or Number. You passed in: '#{chars}'", options._log)
 
       if _.isBlank(chars)
-        @throwErr(".type() cannot accept an empty String! You need to actually type something.", options.command)
+        @throwErr(".type() cannot accept an empty String! You need to actually type something.", options._log)
 
       options.chars = "" + chars
 
@@ -884,9 +870,9 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
           onNoMatchingSpecialChars: (chars, allChars) =>
             if chars is "{tab}"
-              @throwErr("{tab} isn't a supported character sequence. You'll want to use the command: 'cy.tab()' which is not ready yet, but when it is done that's what you'll use.", options.command)
+              @throwErr("{tab} isn't a supported character sequence. You'll want to use the command: 'cy.tab()' which is not ready yet, but when it is done that's what you'll use.", options._log)
             else
-              @throwErr("Special character sequence: '#{chars}' is not recognized. Available sequences are: #{allChars}", options.command)
+              @throwErr("Special character sequence: '#{chars}' is not recognized. Available sequences are: #{allChars}", options._log)
 
         })
 
@@ -902,7 +888,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             $el: options.$el
             log: false
             verify: false
-            command: options.command
+            _log: options._log
             force: options.force
             timeout: options.timeout
             interval: options.interval
@@ -935,9 +921,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
       @ensureDom(subject)
 
-      ## set our command to be an array
-      options.commands = []
-
       ## blow up if any member of the subject
       ## isnt a textarea or :text
       clear = (el, index) =>
@@ -947,7 +930,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           ## figure out the options which actually change the behavior of clicks
           deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: 50})
 
-          options.command = Cypress.Log.command
+          options._log = Cypress.Log.command
             message: deltaOptions
             $el: $el
             onConsole: ->
@@ -955,24 +938,22 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
               "Elements":   $el.length
               "Options":    deltaOptions
 
-          options.commands.push(options.command)
-
         node = Cypress.Utils.stringifyElement($el)
 
         if not $el.is(textLike)
           word = Cypress.Utils.plural(subject, "contains", "is")
-          @throwErr ".clear() can only be called on textarea or :text! Your subject #{word} a: #{node}", options.command
+          @throwErr ".clear() can only be called on textarea or :text! Your subject #{word} a: #{node}", options._log
 
         @command("type", "{selectall}{del}", {
           $el: $el
           log: false
           verify: false ## handle verification ourselves
-          command: options.command
+          _log: options._log
           force: options.force
           timeout: options.timeout
           interval: options.interval
         }).then ->
-          options.command.snapshot().end() if options.command
+          options._log.snapshot().end() if options._log
 
           return null
 
@@ -985,15 +966,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             @verifyUpcomingAssertions(subject, options, {
               onRetry: verifyAssertions
             })
-        .then ->
-          ## clear command because
-          ## we have an array of commands
-          delete options.command
-
-          return {
-            subject: subject
-            command: getFirstCommandOrNull(options.commands)
-          }
 
     select: (subject, valueOrText, options = {}) ->
       _.defaults options,
@@ -1007,7 +979,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         ## figure out the options which actually change the behavior of clicks
         deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: 50})
 
-        options.command = Cypress.Log.command
+        options._log = Cypress.Log.command
           message: deltaOptions
           $el: options.$el
           onConsole: ->
@@ -1079,7 +1051,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         log: false
         verify: false
         errorOnSelect: false ## prevent click errors since we want the select to be clicked
-        command: options.command
+        _log: options._log
         force: options.force
         timeout: options.timeout
         interval: options.interval
@@ -1142,12 +1114,12 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         log: true
 
       if options.log
-        options.command = Cypress.Log.command()
+        options._log = Cypress.Log.command()
 
       log = ($el) ->
         return if options.log is false
 
-        options.command.set({
+        options._log.set({
           $el: $el
           onConsole: ->
             ret = if $el
@@ -1203,10 +1175,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           ## pass in a null jquery object for assertions
           @verifyUpcomingAssertions($el ? $(null), options, {
             onRetry: resolveFocused
-          }).then (obj) ->
-            ## reset our subject again
-            obj.subject = options.$el
-            return obj
+          })
+          .return(options.$el)
 
   Cypress.Cy.extend
     _check_or_uncheck: (type, subject, values = [], options = {}) ->
@@ -1228,9 +1198,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         force: false
 
       @ensureDom(options.$el)
-
-      ## set our command to be an array
-      options.commands = []
 
       isNoop = ($el) ->
         switch type
@@ -1259,7 +1226,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           ## figure out the options which actually change the behavior of clicks
           deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: 50})
 
-          options.command = Cypress.Log.command
+          options._log = Cypress.Log.command
             message: deltaOptions
             $el: $el
             onConsole: ->
@@ -1267,23 +1234,21 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
                 Options: deltaOptions
               }
 
-          options.commands.push(options.command)
-
         if not isAcceptableElement($el)
           node   = Cypress.Utils.stringifyElement($el)
           word   = Cypress.Utils.plural(options.$el, "contains", "is")
           phrase = if type is "check" then " and :radio" else ""
-          @throwErr ".#{type}() can only be called on :checkbox#{phrase}! Your subject #{word} a: #{node}", options.command
+          @throwErr ".#{type}() can only be called on :checkbox#{phrase}! Your subject #{word} a: #{node}", options._log
 
         ## if the checkbox was already checked
         ## then notify the user of this note
         ## and bail
         if isNoop($el)
           ## still ensure visibility even if the command is noop
-          @ensureVisibility $el, options.command
+          @ensureVisibility $el, options._log
           onConsole.Note = "This checkbox was already #{type}ed. No operation took place."
-          if options.command
-            options.command.snapshot().end()
+          if options._log
+            options._log.snapshot().end()
 
           return null
         else
@@ -1291,7 +1256,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           ## going to go out and click this bad boy
           coords = @getCoordinates($el)
           onConsole.Coords = coords
-          options.command.set "coords", coords
+          options._log.set "coords", coords
 
         ## if we didnt pass in any values or our
         ## el's value is in the array then check it
@@ -1300,12 +1265,12 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             $el: $el
             log: false
             verify: false
-            command: options.command
+            _log: options._log
             force: options.force
             timeout: options.timeout
             interval: options.interval
           }).then ->
-            options.command.snapshot().end() if options.command
+            options._log.snapshot().end() if options._log
 
             return null
 
@@ -1319,12 +1284,3 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             @verifyUpcomingAssertions(options.$el, options, {
               onRetry: verifyAssertions
             })
-        .then ->
-          ## clear command because
-          ## we have an array of commands
-          delete options.command
-
-          return {
-            subject: options.$el
-            command: getFirstCommandOrNull(options.commands)
-          }

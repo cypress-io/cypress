@@ -127,7 +127,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
         if _.isFunction(callbacks.onPass)
           callbacks.onPass.call(@, cmds)
         else
-          {subject: subject, command: options.command}
+          subject
 
       onFailFn = (err) =>
         ## when we fail for whatever reason we need to
@@ -267,7 +267,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
 
             ## and then push our command into this err
             try
-              @throwErr(err, options.command)
+              @throwErr(err, options._log)
             catch e
               err = e
 

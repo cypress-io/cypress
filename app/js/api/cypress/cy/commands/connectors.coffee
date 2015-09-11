@@ -30,7 +30,6 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
     ## allow the 'then' to change the subject to the return value
     ## if its a non null/undefined value else to return the subject
     try
-
       args = remoteSubject or subject
       args = if args?._spreadArray then args else [args]
 
@@ -55,7 +54,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
 
     options = {}
 
-    options.command = Cypress.Log.command
+    options._log = Cypress.Log.command
       $el: if Cypress.Utils.hasElement(subject) then subject else null
       onConsole: ->
         Subject: subject
@@ -64,7 +63,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
     name = @prop("current").get("name")
 
     if not _.isString(fn)
-      @throwErr("cy.#{name}() only accepts a string as the first argument.", options.command)
+      @throwErr("cy.#{name}() only accepts a string as the first argument.", options._log)
 
     getValue = =>
       remoteJQuery = @_getRemoteJQuery()
@@ -75,7 +74,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
       prop = (remoteSubject or subject)[fn]
 
       fail = =>
-        @throwErr("cy.#{name}() errored because the property: '#{fn}' does not exist on your subject.", options.command)
+        @throwErr("cy.#{name}() errored because the property: '#{fn}' does not exist on your subject.", options._log)
 
       ## if the property does not EXIST on the subject
       ## then throw a specific error message
@@ -114,10 +113,10 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
 
       value = invoke()
 
-      if options.command
+      if options._log
         message = getMessage()
 
-        options.command.set
+        options._log.set
           message: message
           onConsole: ->
             obj = {}
