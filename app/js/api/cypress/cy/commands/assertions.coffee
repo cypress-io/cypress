@@ -198,11 +198,11 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
             ## when we do immediately stop listening to unbind
             @stopListening @Cypress, "before:log", setCommandLog
 
-            ## if we already have a command
+            ## if we already have a log
             ## then just update its attrs from
             ## the new log
-            if c = cmd.command
-              c.merge(log)
+            if l = cmd.getLastLog()
+              l.merge(log)
 
               ## and make sure we return false
               ## which prevents a new log from
@@ -212,7 +212,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
               ## reset our state to pending even if
               ## we have an error
               # log.set("state", "pending")
-              cmd.command = log
+              cmd.log(log)
               options.assertions.push(log)
 
           @listenTo @Cypress, "before:log", setCommandLog
@@ -231,10 +231,10 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
       memoizeSubjectReturnValue = ->
         _.each subjects, (subject, i) ->
           cmd  = cmds[i]
-          orig = cmd.fn.originalFn
-          cmd.fn = ->
+          orig = cmd.get("fn").originalFn
+          cmd.set "fn", ->
             return subject
-          cmd.fn.originalFn = orig
+          cmd.get("fn").originalFn = orig
 
       assertions = (memo, fn) =>
         fn(memo).then (subject) ->
@@ -288,7 +288,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
 
     _injectAssertion: (cmd) ->
       return (subject) =>
-        cmd.fn.originalFn.apply @, [subject].concat(cmd.args)
+        cmd.get("fn").originalFn.apply @, [subject].concat(cmd.get("args"))
 
     getUpcomingAssertions: ->
       current = @prop("current")
@@ -297,14 +297,14 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
       assertions = []
 
       ## grab the rest of the queue'd commands
-      for cmd in @queue.slice(index)
+      for cmd in @commands.slice(index)
         ## don't break on utilities, just skip over them
-        if cmd.type is "utility"
+        if cmd.is("utility")
           continue
 
         ## grab all of the queued commands which are
         ## assertions and match our current chainerId
-        if cmd.type is "assertion" and cmd.chainerId is current.chainerId
+        if cmd.is("assertion") and cmd.get("chainerId") is current.get("chainerId")
           assertions.push(cmd)
         else
           break
@@ -323,11 +323,11 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
         obj.$el = value
 
       functionHadArguments = (current) ->
-        fn = current.args and current.args[0]
+        fn = current and current.get("args") and current.get("args")[0]
         fn and _.isFunction(fn) and fn.length > 0
 
       isAssertionType = (cmd) ->
-        cmd and cmd.type is "assertion"
+        cmd and cmd.is("assertion")
 
       current = @prop("current")
 
@@ -346,7 +346,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
           ## if our current command is an assertion type
           isAssertionType(current) or
             ## or if the next command is an assertion type
-            isAssertionType(current.next) or
+            isAssertionType(current?.get("next")) or
               (functionHadArguments(current))
 
       _.extend obj,

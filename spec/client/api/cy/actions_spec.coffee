@@ -350,8 +350,8 @@ describe "$Cypress.Cy Actions Commands", ->
     it "increases the timeout delta", (done) ->
       prevTimeout = @test.timeout()
 
-      @cy.on "invoke:end", (obj) =>
-        if obj.name is "type"
+      @cy.on "invoke:end", (cmd) =>
+        if cmd.get("name") is "type"
           ## 40 is from 4 keys
           ## 100 is from .click + .focus delays!
           expect(@test.timeout()).to.eq 40 + 100 + 50 + prevTimeout
@@ -1290,8 +1290,8 @@ describe "$Cypress.Cy Actions Commands", ->
         it "triggers form submit synchronously before type logs or resolves", ->
           events = []
 
-          @cy.on "invoke:start", (obj) ->
-            events.push "#{obj.name}:start"
+          @cy.on "invoke:start", (log) ->
+            events.push "#{log.get('name')}:start"
 
           @forms.find("#single-input").submit (e) ->
             e.preventDefault()
@@ -1306,8 +1306,8 @@ describe "$Cypress.Cy Actions Commands", ->
 
               events.push "#{log.get('name')}:log:#{state}"
 
-          @cy.on "invoke:end", (obj) ->
-            events.push "#{obj.name}:end"
+          @cy.on "invoke:end", (log) ->
+            events.push "#{log.get('name')}:end"
 
           @cy.get("#single-input input").type("f{enter}").then ->
             expect(events).to.deep.eq [
@@ -2683,8 +2683,8 @@ describe "$Cypress.Cy Actions Commands", ->
       ## because the submit method does not trigger beforeunload
       ## synchronously.
 
-      @cy.on "command:returned:value", (obj, ret) =>
-        if obj.name is "submit"
+      @cy.on "command:returned:value", (cmd, ret) =>
+        if cmd.get("name") is "submit"
           ## expect our isReady to be pending
           expect(@cy.prop("ready").promise.isPending()).to.be.true
 
@@ -2707,8 +2707,8 @@ describe "$Cypress.Cy Actions Commands", ->
     it "increases the timeout delta", (done) ->
       prevTimeout = @test.timeout()
 
-      @cy.on "invoke:end", (obj) =>
-        if obj.name is "submit"
+      @cy.on "invoke:end", (cmd) =>
+        if cmd.get("name") is "submit"
           expect(@test.timeout()).to.eq 50 + prevTimeout
           done()
 
@@ -3097,8 +3097,8 @@ describe "$Cypress.Cy Actions Commands", ->
     it "increases the timeout delta", (done) ->
       prevTimeout = @test.timeout()
 
-      @cy.on "invoke:end", (obj) =>
-        if obj.name is "focus"
+      @cy.on "invoke:end", (cmd) =>
+        if cmd.get("name") is "focus"
           expect(@test.timeout()).to.eq 50 + prevTimeout
           done()
 
@@ -3363,8 +3363,8 @@ describe "$Cypress.Cy Actions Commands", ->
     it "increases the timeout delta", (done) ->
       prevTimeout = @test.timeout()
 
-      @cy.on "invoke:end", (obj) =>
-        if obj.name is "blur"
+      @cy.on "invoke:end", (cmd) =>
+        if cmd.get("name") is "blur"
           expect(@test.timeout()).to.eq 50 + prevTimeout
           done()
 
@@ -3569,8 +3569,8 @@ describe "$Cypress.Cy Actions Commands", ->
         .get("input:text:last").dblclick()
 
     it "inserts artificial delay of 50ms", ->
-      @cy.on "invoke:start", (obj) =>
-        if obj.name is "dblclick"
+      @cy.on "invoke:start", (cmd) =>
+        if cmd.get("name") is "dblclick"
           @delay = @sandbox.spy Promise.prototype, "delay"
 
       @cy.get("#button").dblclick().then ->
@@ -3649,8 +3649,8 @@ describe "$Cypress.Cy Actions Commands", ->
 
       count = @cy.$("button").slice(0, 3).length
 
-      @cy.on "invoke:end", (obj) =>
-        if obj.name is "dblclick"
+      @cy.on "invoke:end", (cmd) =>
+        if cmd.get("name") is "dblclick"
           ## 100 here because dbclick + focus each are 50ms
           expect(@test.timeout()).to.eq (count * 100) + prevTimeout
           done()
@@ -3749,8 +3749,8 @@ describe "$Cypress.Cy Actions Commands", ->
         button = -> $("<button class='dblclicks'>dblclick</button")
         @cy.$("body").append(button()).append(button())
 
-        @Cypress.on "log", (obj) ->
-          dblclicks.push(obj) if obj.get("name") is "dblclick"
+        @Cypress.on "log", (log) ->
+          dblclicks.push(log) if log.get("name") is "dblclick"
 
         @cy.get("button.dblclicks").dblclick().then ($buttons) ->
           expect($buttons.length).to.eq(2)
@@ -3931,8 +3931,8 @@ describe "$Cypress.Cy Actions Commands", ->
         .get("input:text:last").click()
 
     it "inserts artificial delay of 50ms", ->
-      @cy.on "invoke:start", (obj) =>
-        if obj.name is "click"
+      @cy.on "invoke:start", (cmd) =>
+        if cmd.get("name") is "click"
           @delay = @sandbox.spy Promise, "delay"
 
       @cy.get("#button").click().then ->
@@ -4025,8 +4025,8 @@ describe "$Cypress.Cy Actions Commands", ->
 
       count = @cy.$("#three-buttons button").length
 
-      @cy.on "invoke:end", (obj) =>
-        if obj.name is "click"
+      @cy.on "invoke:end", (cmd) =>
+        if cmd.get("name") is "click"
           ## 100ms here because click + focus are each
           expect(@test.timeout()).to.eq (count * 100) + prevTimeout
           done()
@@ -4488,8 +4488,8 @@ describe "$Cypress.Cy Actions Commands", ->
         button = -> $("<button class='clicks'>click</button>")
         @cy.$("body").append(button()).append(button())
 
-        @Cypress.on "log", (obj) ->
-          clicks.push(obj) if obj.get("name") is "click"
+        @Cypress.on "log", (log) ->
+          clicks.push(log) if log.get("name") is "click"
 
         @cy.get("button.clicks").click().then ($buttons) ->
           expect($buttons.length).to.eq(2)

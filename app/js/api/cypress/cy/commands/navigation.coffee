@@ -18,7 +18,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
       return if not current
 
-      options = _.last(current.args)
+      options = _.last(current.get("args"))
       options?.onBeforeLoad?.call(@, contentWindow)
 
     _href: (win, url) ->
@@ -48,7 +48,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
       ## if we are visiting a page which caused
       ## the beforeunload, then dont output this command
-      return if current?.name is "visit"
+      return if current?.get("name") is "visit"
 
       ## bail if we dont have a runnable
       ## because beforeunload can happen at any time

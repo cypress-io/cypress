@@ -103,7 +103,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
               })
 
             ## if this is a route command
-            when command.name is "route"
+            when command.get("name") is "route"
               alias = _.compact([alias, selector.split(".")[1]]).join(".")
               responses = @getResponsesByAlias(alias) ? null
               log(responses, "route")
@@ -333,7 +333,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       ## reference the next command after this
       ## within.  when that command runs we'll
       ## know to remove withinSubject
-      next = @prop("current").next
+      next = @prop("current").get("next")
 
       ## backup the current withinSubject
       ## this prevents a bug where we null out

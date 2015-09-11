@@ -16,7 +16,7 @@ do ($Cypress, _, Promise) ->
         start: new Date
         interval: 16
         retries: 0
-        name: @prop("current")?.name
+        name: current?.get("name")
 
       ## we calculate the total time we've been retrying
       ## so we dont exceed the runnables timeout

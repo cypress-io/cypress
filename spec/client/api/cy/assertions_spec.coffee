@@ -497,12 +497,12 @@ describe "$Cypress.Cy Assertion Commands", ->
   context "chai overrides", ->
     before ->
       @onAssert = (fn) =>
-        @Cypress.on "log", (obj) =>
-          if obj.get("name") is "assert"
+        @Cypress.on "log", (log) =>
+          if log.get("name") is "assert"
             ## restore so we dont create an endless loop
             ## due to Cypress.assert being called again
             @chai.restore()
-            fn.call(@, obj)
+            fn.call(@, log)
 
     beforeEach ->
       @chai = $Cypress.Chai.create(@Cypress, {})

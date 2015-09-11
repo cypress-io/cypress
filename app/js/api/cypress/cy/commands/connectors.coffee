@@ -17,7 +17,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
     ## resolving our deferred.
     current = @prop("current")
 
-    if not current.next and current.args.length is 2 and (current.args[1].name is "done" or current.args[1].length is 1)
+    if not current.get("next") and current.get("args").length is 2 and (current.get("args")[1].name is "done" or current.get("args")[1].length is 1)
       return @prop("next", fn)
 
     remoteJQuery = @_getRemoteJQuery()
@@ -61,7 +61,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
         Subject: subject
 
     ## name could be invoke or its!
-    name = @prop("current").name
+    name = @prop("current").get("name")
 
     if not _.isString(fn)
       @throwErr("cy.#{name}() only accepts a string as the first argument.", options.command)

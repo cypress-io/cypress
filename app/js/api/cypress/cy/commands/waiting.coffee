@@ -139,8 +139,8 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
           aliases.push(str)
           options.command.set "referencesAlias", aliases
 
-        if command.name isnt "route"
           @throwErr("cy.wait() can only accept aliases for routes.  The alias: '#{alias}' did not match a route.", options.command)
+        if command.get("name") isnt "route"
 
         ## create shallow copy of each options object
         checkForXhr.call(@, str, alias, _.clone(options))
