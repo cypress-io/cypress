@@ -1796,14 +1796,6 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#input-covered-in-span").clear({timeout: 1000, interval: 60})
 
-    it "resolves with 1 command", ->
-      @cy.get("input:first").clear().then ->
-        expect(@cy.queue[1].command).to.be.ok
-
-    it "resolves with no commands", ->
-      @cy.get("input").invoke("slice", 0, 2).clear().then ->
-        expect(@cy.queue[2].command).not.to.be.ok
-
     describe "assertion verification", ->
       beforeEach ->
         @allowErrors()
@@ -2070,14 +2062,6 @@ describe "$Cypress.Cy Actions Commands", ->
           done()
 
       @cy.get("form:first").submit()
-
-    it "resolves with 1 command", ->
-      @cy.get(":checkbox:first").check().then ->
-        expect(@cy.queue[1].command).to.be.ok
-
-    it "resolves with no commands", ->
-      @cy.get(":checkbox").invoke("slice", 0, 2).check().then ->
-        expect(@cy.queue[2].command).not.to.be.ok
 
     describe "assertion verification", ->
       beforeEach ->
@@ -2373,18 +2357,6 @@ describe "$Cypress.Cy Actions Commands", ->
         done()
 
       @cy.get("#checkbox-covered-in-span").uncheck({timeout: 1000, interval: 60})
-
-    it "resolves with 1 command", ->
-      @cy.$(":checkbox:first").prop("checked", true)
-
-      @cy.get(":checkbox:first").uncheck().then ->
-        expect(@cy.queue[1].command).to.be.ok
-
-    it "resolves with no commands", ->
-      @cy.$(":checkbox").prop("checked", true)
-
-      @cy.get(":checkbox").invoke("slice", 0, 2).uncheck().then ->
-        expect(@cy.queue[2].command).not.to.be.ok
 
     describe "assertion verification", ->
       beforeEach ->
@@ -2880,7 +2852,7 @@ describe "$Cypress.Cy Actions Commands", ->
             Elements: 1
           }
 
-  context.only "#focused", ->
+  context "#focused", ->
     it "returns the activeElement", ->
       button = @cy.$("#button")
       button.get(0).focus()
@@ -4073,14 +4045,6 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#button").click().then ->
         expect(retried).to.be.true
-
-    it "resolves with 1 command", ->
-      @cy.get("button:first").click().then ->
-        expect(@cy.queue[1].command).to.be.ok
-
-    it "resolves with no commands", ->
-      @cy.get("button").invoke("slice", 0, 2).click().then ->
-        expect(@cy.queue[2].command).not.to.be.ok
 
     describe "assertion verification", ->
       beforeEach ->
