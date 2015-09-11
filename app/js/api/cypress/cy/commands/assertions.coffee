@@ -58,8 +58,6 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
     ## backup the original assertion subject
     originalObj = exp._obj
 
-    eventually = false
-
     options = {}
 
     applyChainer = (memo, value) ->
@@ -76,24 +74,13 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
       ## need to continually apply this check due
       ## to eventually
       if not exp.isCheckingLength
-        @ensureDom(subject) if Cypress.Utils.hasElement(subject)
+        @ensureDom(subject, "should") if Cypress.Utils.hasElement(subject)
 
       _.reduce chainers, (memo, value) =>
-        if value is "eventually"
-          eventually = true
-          return memo
-
         if value not of memo
           @throwErr("The chainer: '#{value}' was not found. Building implicit assertion failed.")
 
-        if eventually
-          try
-            applyChainer(memo, value)
-          catch e
-            options.error = e
-            @_retry(applyChainers, options)
-        else
-          applyChainer(memo, value)
+        applyChainer(memo, value)
 
       , exp
 
