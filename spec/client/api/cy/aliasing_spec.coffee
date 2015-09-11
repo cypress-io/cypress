@@ -113,7 +113,7 @@ describe "$Cypress.Cy Aliasing Commands", ->
     describe "subject in document", ->
       it "returns if subject is still in the document", (done) ->
         @cy.on "end", ->
-          expect(@queue.length).to.eq 3
+          expect(@commands.length).to.eq 3
           done()
 
         @cy
@@ -126,7 +126,7 @@ describe "$Cypress.Cy Aliasing Commands", ->
           .get("#list li").eq(0).as("firstLi").then ($li) ->
             $li.remove()
           .get("@firstLi").then ->
-            expect(getNames(@cy.queue)).to.deep.eq(
+            expect(@cy.commands.names()).to.deep.eq(
               ["get", "eq", "as", "then", "get", "get", "eq", "then"]
             )
             done()
@@ -144,7 +144,7 @@ describe "$Cypress.Cy Aliasing Commands", ->
 
       it "replays up until first root command", (done) ->
         @cy.on "end", ->
-          expect(getNames(@queue)).to.deep.eq(
+          expect(@commands.names()).to.deep.eq(
             ["get", "noop", "get", "eq", "as", "then", "get", "get", "eq"]
           )
           done()
@@ -189,19 +189,19 @@ describe "$Cypress.Cy Aliasing Commands", ->
           .click()
           .as("firstItem")
           .then ->
-            expect(getNames(@cy.queue)).to.deep.eq(
+            expect(@cy.commands.names()).to.deep.eq(
               ["get", "then", "as", "first", "click", "as", "then", "get", "should", "then", "get", "should", "then"]
             )
           .get("@items")
           .should("have.length", 2)
           .then ->
-            expect(getNames(@cy.queue)).to.deep.eq(
+            expect(@cy.commands.names()).to.deep.eq(
               ["get", "then", "as", "first", "click", "as", "then", "get", "get", "should", "then", "get", "should", "then"]
             )
           .get("@firstItem")
           .should("contain", "li 1")
           .then ->
-            expect(getNames(@cy.queue)).to.deep.eq(
+            expect(@cy.commands.names()).to.deep.eq(
               ["get", "then", "as", "first", "click", "as", "then", "get", "get", "should", "then", "get", "get", "first", "should", "then"]
             )
             done()
@@ -216,7 +216,7 @@ describe "$Cypress.Cy Aliasing Commands", ->
             $input.remove()
           .get("@firstItem")
           .then ->
-            expect(getNames(@cy.queue)).to.deep.eq(
+            expect(@cy.commands.names()).to.deep.eq(
               ["get", "eq", "should", "as", "then", "get", "get", "eq", "should", "then"]
             )
             done()

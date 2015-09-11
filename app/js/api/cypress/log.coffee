@@ -18,9 +18,9 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       @log("route", obj)
 
     command: (Cypress, cy, obj = {}) ->
-      current = cy.prop("current") ? {}
+      current = cy.prop("current")
 
-      _.defaults obj, _(current).pick("name", "type")
+      _.defaults obj, current?.pick("name", "type")
 
       ## force duals to become either parents or childs
       ## normally this would be handled by the command itself
@@ -28,26 +28,26 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       ## then it could still be logged during a failure, which
       ## is why we normalize its type value
       if obj.type is "dual"
-        obj.type = if current.prev then "child" else "parent"
 
       ## does this object represent the current command cypress
       ## is processing?
       obj.isCurrent = obj.name is current.name
+        obj.type = if current.get("prev") then "child" else "parent"
 
       _.defaults obj,
         event: false
         onRender: ->
         onConsole: ->
-          ret = if $Cypress.Utils.hasElement(current.subject)
-            $Cypress.Utils.getDomElements(current.subject)
+          ret = if $Cypress.Utils.hasElement(current.get("subject"))
+            $Cypress.Utils.getDomElements(current.get("subject"))
           else
-            current.subject
+            current.get("subject")
 
           "Returned": ret
 
-      if obj.isCurrent
-        ## stringify the obj.message (if it exists) or current.args
-        obj.message = $Cypress.Utils.stringify(obj.message ? current.args)
+      # if obj.isCurrent
+        ## stringify the obj.message (if it exists) or current.get("args")
+      obj.message = $Cypress.Utils.stringify(obj.message ? current.get("args"))
 
       ## allow type to by a dynamic function
       ## so it can conditionally return either

@@ -1,8 +1,10 @@
 do ($Cypress, _) ->
 
   class $Command
-    constructor: ->
+    constructor: (obj = {}) ->
       @reset()
+
+      @set(obj)
 
     set: (key, val) ->
       if _.isString(key)
@@ -15,27 +17,82 @@ do ($Cypress, _) ->
 
       return @
 
+    finishLogs: ->
+      ## finish each of the logs we have
+      _.invoke @get("logs"), "finish"
+
+    log: (log) ->
+      @get("logs").push(log)
+
+    getLastLog: ->
+      ## return the last non-event log
+      logs = @get("logs")
+      if logs.length
+        for log in logs by -1
+          if log.get("event") is false
+            return log
+      else
+        undefined
+
+    is: (str) ->
+      @get("type") is str
+
     get: (attr) ->
       @attributes[attr]
 
     toJSON: ->
       @attributes
 
+    clone: ->
+      new $Command _.clone(@attributes)
+
     reset: ->
       @attributes = {}
-      @logs       = []
+      @attributes.logs = []
 
       return @
+
+    @create = (obj) ->
+      new $Command(obj)
 
   class $Commands
     constructor: ->
       @commands = []
 
-    splice: ->
-      @commands.splice.apply(@, arguments)
+    logs: (filters) ->
+      logs = _.flatten @invoke("get", "logs")
+
+      if filters
+        matchesFilters = _.matches(filters)
+
+        logs = _(logs).filter (log) ->
+          matchesFilters(log.attributes)
+
+      return logs
+
+    add: (obj) ->
+      if $Cypress.Utils.isInstanceOf(obj, $Command)
+        return obj
+      else
+        new $Command(obj)
+
+    names: ->
+      @invoke("get", "name")
+
+    splice: (start, end, obj) ->
+      @commands.splice(start, end, @add(obj))
+
+    slice: ->
+      @commands.slice.apply(@commands, arguments)
 
     at: (index) ->
       @commands[index]
+
+    findWhere: (attrs) ->
+      matchesAttrs = _.matches(attrs)
+
+      @find (command) ->
+        matchesAttrs(command.attributes)
 
     toJSON: ->
       @invoke("toJSON")
@@ -43,7 +100,7 @@ do ($Cypress, _) ->
     reset: ->
       @invoke("reset")
 
-      @splice(0, @commands.length)
+      @commands.splice(0, @commands.length)
 
       return @
 
@@ -55,7 +112,13 @@ do ($Cypress, _) ->
   }
 
   ## mixin underscore methods
-  _.each ["invoke"], (method) ->
+  _.each ["pick"], (method) ->
+    $Command.prototype[method] = (args...) ->
+      args.unshift(@attributes)
+      _[method].apply(_, args)
+
+  ## mixin underscore methods
+  _.each ["invoke", "map", "pluck", "first", "find", "last"], (method) ->
     $Commands.prototype[method] = (args...) ->
       args.unshift(@commands)
       _[method].apply(_, args)
@@ -78,54 +141,6 @@ do ($Cypress, _) ->
 
     addUtilityCommand: (key, fn) ->
       @add(key, fn, "utility")
-
-    enqueue: (key, fn, args, type, chainerId) ->
-      @clearTimeout @prop("runId")
-
-      obj = {name: key, ctx: @, fn: fn, args: args, type: type, chainerId: chainerId, log: null}
-
-      @trigger "enqueue", obj
-      @Cypress.trigger "enqueue", obj
-
-      @insertCommand(obj)
-
-    insertCommand: (obj) ->
-      ## if we have a nestedIndex it means we're processing
-      ## nested commands and need to splice them into the
-      ## index past the current index as opposed to
-      ## pushing them to the end we also dont want to
-      ## reset the run defer because splicing means we're
-      ## already in a run loop and dont want to create another!
-      ## we also reset the .next property to properly reference
-      ## our new obj
-
-      ## we had a bug that would bomb on custom commands when it was the
-      ## first command. this was due to nestedIndex being undefined at that
-      ## time. so we have to ensure to check that its any kind of number (even 0)
-      ## in order to know to splice into the existing array.
-      nestedIndex = @prop("nestedIndex")
-
-      ## if this is a number then we know
-      ## we're about to splice this into our commands
-      ## and need to reset next + increment the index
-      if _.isNumber(nestedIndex)
-        @commands.at(nestedIndex).set("next", obj)
-        @prop("nestedIndex", nestedIndex += 1)
-
-      ## we look at whether or not nestedIndex is a number, because if it
-      ## is then we need to splice inside of our commands, else just push
-      ## it onto the end of the queu
-      index = if _.isNumber(nestedIndex) then nestedIndex else @commands.length
-
-      @commands.splice(index, 0, obj)
-
-      ## if nestedIndex is either undefined or 0
-      ## then we know we're processing regular commands
-      ## and not splicing in the middle of our commands
-      if not nestedIndex
-        @prop "runId", @defer(@run)
-
-      return @
 
     ## think about adding this for
     ## custom cy extensions as well

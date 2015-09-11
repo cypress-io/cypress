@@ -41,8 +41,8 @@ describe "$Cypress.Cy Navigation Commands", ->
 
     it "does not error without an onBeforeLoad callback", ->
       @cy.visit("fixtures/html/sinon.html").then ->
-        prev = @cy.prop("current").prev
-        expect(prev.args).to.have.length(1)
+        prev = @cy.prop("current").get("prev")
+        expect(prev.get("args")).to.have.length(1)
 
     it "first navigates to about:blank if existing url isnt about:blank", ->
       cy
@@ -230,7 +230,7 @@ describe "$Cypress.Cy Navigation Commands", ->
       input = @cy.$("form#click-me input")
 
       @cy.get("form#click-me").find("input").click().then (subject) ->
-        expect(getNames(@cy.queue)).to.deep.eq [
+        expect(@cy.commands.names()).to.deep.eq [
           "get", "find", "click", "then", "then"
         ]
         expect(getFirstSubjectByName("click").get(0)).to.eq input.get(0)
@@ -240,7 +240,7 @@ describe "$Cypress.Cy Navigation Commands", ->
       form = @cy.$("form#click-me")
 
       @cy.get("form#click-me").submit().then (subject) ->
-        expect(getNames(@cy.queue)).to.deep.eq [
+        expect(@cy.commands.names()).to.deep.eq [
           "get", "submit", "then", "then"
         ]
         expect(getFirstSubjectByName("get").get(0)).to.eq form.get(0)

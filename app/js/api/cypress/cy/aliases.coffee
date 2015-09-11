@@ -10,9 +10,9 @@ do ($Cypress, _) ->
     ## these are public because its expected other commands
     ## know about them and are expected to call them
     getNextAlias: ->
-      next = @prop("current").next
-      if next and next.name is "as"
-        next.args[0]
+      next = @prop("current").get("next")
+      if next and next.get("name") is "as"
+        next.get("args")[0]
 
     getAlias: (name, command) ->
       aliases = @prop("aliases") ? {}
@@ -42,7 +42,7 @@ do ($Cypress, _) ->
       if (not aliasRe.test(name)) and (name in availableAliases)
         @throwErr "Invalid alias: '#{name}'. You forgot the '@'. It should be written as: '@#{@_aliasDisplayName(name)}'."
 
-      command ?= @prop("current").name
+      command ?= @prop("current").get("name")
       @throwErr "cy.#{command}() could not find a registered alias for: '#{@_aliasDisplayName(name)}'. Available aliases are: '#{availableAliases.join(", ")}'."
 
     _forceLoggingOptions: (args) ->
@@ -62,10 +62,10 @@ do ($Cypress, _) ->
       memo.unshift(command)
 
       ## break and return the memo
-      if command.type is "parent" or @_contains(command.subject)
+      if command.get("type") is "parent" or @_contains(command.get("subject"))
         return memo
 
-      @_getCommandsUntilFirstParentOrValidSubject(command.prev, memo)
+      @_getCommandsUntilFirstParentOrValidSubject(command.get("prev"), memo)
 
     ## recursively inserts previous commands
     _replayFrom: (current) ->
@@ -75,12 +75,12 @@ do ($Cypress, _) ->
 
       insert = (commands) =>
         _.each commands, (cmd) =>
-          @_forceLoggingOptions(cmd.args)
-          cmd.chainerId = chainerId
+          @_forceLoggingOptions(cmd.get("args"))
+          cmd.set("chainerId", chainerId)
 
           ## clone the command to prevent
           ## mutating its properties
-          @_insert _.clone(cmd)
+          @insertCommand cmd.clone()
 
       ## - starting with the aliased command
       ## - walk up to each prev command
@@ -102,13 +102,13 @@ do ($Cypress, _) ->
             memo.push(command)
 
           switch
-            when command.type is "assertion"
+            when command.get("type") is "assertion"
               ## if we're an assertion and the prev command
               ## is in the memo, then push this one
-              if command.prev in memo
+              if command.get("prev") in memo
                 push()
 
-            when command.subject isnt initialCommand.subject
+            when command.get("subject") isnt initialCommand.get("subject")
               ## when our subjects dont match then
               ## reset the initialCommand to this command
               ## so the next commands can compare against

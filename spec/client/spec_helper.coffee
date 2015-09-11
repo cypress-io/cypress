@@ -42,7 +42,7 @@ window.getNames = (queue) ->
   _(queue).pluck("name")
 
 window.getFirstSubjectByName = (name) ->
-  _(@cy.queue).findWhere({name: name}).subject
+  @cy.commands.findWhere({name: name}).get("subject")
 
 window.enterAppTestingMode = ->
   beforeEach (done) ->

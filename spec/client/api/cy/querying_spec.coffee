@@ -463,7 +463,7 @@ describe "$Cypress.Cy Querying Commands", ->
           .get("button").as("btns")
           .get("@btns").should("have.length", length).then ($buttons) ->
             expect(_replayFrom).not.to.be.called
-            expect(@cy.queue.length).to.eq(6) ## we should not have replayed any commands
+            expect(@cy.commands.length).to.eq(6) ## we should not have replayed any commands
             expect($buttons.length).to.eq length
 
     describe "assertion verification", ->

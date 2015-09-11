@@ -203,7 +203,7 @@ describe "$Cypress.Log API", ->
         @Cypress.Log.create(@Cypress, @cy)
 
         obj = {name: "foo", ctx: @cy, fn: (->), args: [1,2,3], type: "parent"}
-        @cy.prop("current", obj)
+        @cy.prop("current", @Cypress.Command.create(obj))
 
       describe "#command", ->
         it "displays a deprecation warning", ->

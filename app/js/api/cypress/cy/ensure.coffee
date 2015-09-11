@@ -7,7 +7,7 @@ do ($Cypress, _, $) ->
       subject = @prop("subject")
 
       if not subject?
-        name = @prop("current").name
+        name = @prop("current").get("name")
         @throwErr("Subject is #{subject}!  You cannot call .#{name}() without a subject.")
 
       return subject
@@ -15,13 +15,13 @@ do ($Cypress, _, $) ->
     ensureParent: ->
       current = @prop("current")
 
-      if not current.prev
-        @throwErr("cy.#{current.name}() is a child command which operates on an existing subject.  Child commands must be called after a parent command!")
+      if not current.get("prev")
+        @throwErr("cy.#{current.get('name')}() is a child command which operates on an existing subject.  Child commands must be called after a parent command!")
 
     ensureVisibility: (subject, onFail) ->
       subject ?= @ensureSubject()
 
-      method = @prop("current").name
+      method = @prop("current").get("name")
 
       if not (subject.length is subject.filter(":visible").length)
         node = $Cypress.Utils.stringifyElement(subject)
@@ -30,7 +30,7 @@ do ($Cypress, _, $) ->
     ensureDom: (subject, method) ->
       subject ?= @ensureSubject()
 
-      method ?= @prop("current").name
+      method ?= @prop("current").get("name")
 
       isWindow = $Cypress.Utils.hasWindow(subject)
 
@@ -79,7 +79,7 @@ do ($Cypress, _, $) ->
           @throwErr("Command Options such as: '{#{opt}: #{options[opt]}}' have been deprecated. Instead write this as an assertion: .should('#{assertion}').")
 
     ensureDescendents: ($el1, $el2, onFail) ->
-      method = @prop("current").name
+      method = @prop("current").get("name")
 
       unless $Cypress.Utils.isDescendent($el1, $el2)
         if $el2

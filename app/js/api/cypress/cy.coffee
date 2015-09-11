@@ -328,24 +328,23 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       else
         {subject: obj, command: undefined}
 
-    set: (obj, prev, next) ->
-      obj.prev = prev
-      obj.next = next
+    set: (command, prev, next) ->
+      command.set({prev: prev, next: next})
 
-      @prop("current", obj)
+      @prop("current", command)
 
-      @invoke2(obj)
+      @invoke2(command)
 
-    invoke2: (obj, args...) ->
+    invoke2: (command, args...) ->
       promise = if @prop("ready")
         Promise.resolve @prop("ready").promise
       else
         Promise.resolve()
 
       promise.cancellable().then =>
-        @trigger "invoke:start", obj
+        @trigger "invoke:start", command
 
-        @log obj
+        @log command
 
         @prop "nestedIndex", @prop("index")
 
@@ -353,7 +352,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
         ## passing them in explicitly
         ## else just use the arguments the command was
         ## originally created with
-        if args.length then args else obj.args
+        return if args.length then args else command.get("args")
 
       ## allow promises to be used in the arguments
       ## and wait until they're all resolved
@@ -369,14 +368,14 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
         ## rewrap all functions by checking
         ## the chainer id before running its fn
-        @_checkForNewChain(obj.chainerId)
+        @_checkForNewChain command.get("chainerId")
 
         ## run the command's fn
-        ret = obj.fn.apply(obj.ctx, args)
+        ret = command.get("fn").apply(command.get("ctx"), args)
 
         ## allow us to immediately tap into
         ## return value of our command
-        @trigger "command:returned:value", obj, ret
+        @trigger "command:returned:value", command, ret
 
         ## we cannot pass our cypress instance or our chainer
         ## back into bluebird else it will create a thenable
@@ -395,7 +394,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
         ## trigger an event here so we know our
         ## command has been successfully applied
         ## and we've potentially altered the subject
-        @trigger "invoke:subject", subject, obj
+        @trigger "invoke:subject", subject, command
 
         ## reset the nestedIndex back to null
         @prop("nestedIndex", null)
@@ -428,7 +427,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
             ## to chain child commands off of this null subject
             @nullSubject()
 
-        @trigger "invoke:end", obj
+        @trigger "invoke:end", command
 
         ## we must look back at the ready property
         ## at the end of resolving our command because
@@ -442,9 +441,57 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
         return @prop("subject")
 
     cancel: (err) ->
-      obj = @prop("current")
-      @log {name: "Cancelled: #{obj.name}", args: err.message}, "danger"
-      @trigger "cancel", obj
+      command = @prop("current")
+      @log {name: "Cancelled: #{command.get('name')}", args: err.message}, "danger"
+      @trigger "cancel", command
+
+    enqueue: (key, fn, args, type, chainerId) ->
+      @clearTimeout @prop("runId")
+
+      obj = {name: key, ctx: @, fn: fn, args: args, type: type, chainerId: chainerId}
+
+      @trigger "enqueue", obj
+      @Cypress.trigger "enqueue", obj
+
+      @insertCommand(obj)
+
+    insertCommand: (obj) ->
+      ## if we have a nestedIndex it means we're processing
+      ## nested commands and need to splice them into the
+      ## index past the current index as opposed to
+      ## pushing them to the end we also dont want to
+      ## reset the run defer because splicing means we're
+      ## already in a run loop and dont want to create another!
+      ## we also reset the .next property to properly reference
+      ## our new obj
+
+      ## we had a bug that would bomb on custom commands when it was the
+      ## first command. this was due to nestedIndex being undefined at that
+      ## time. so we have to ensure to check that its any kind of number (even 0)
+      ## in order to know to splice into the existing array.
+      nestedIndex = @prop("nestedIndex")
+
+      ## if this is a number then we know
+      ## we're about to splice this into our commands
+      ## and need to reset next + increment the index
+      if _.isNumber(nestedIndex)
+        @commands.at(nestedIndex).set("next", obj)
+        @prop("nestedIndex", nestedIndex += 1)
+
+      ## we look at whether or not nestedIndex is a number, because if it
+      ## is then we need to splice inside of our commands, else just push
+      ## it onto the end of the queu
+      index = if _.isNumber(nestedIndex) then nestedIndex else @commands.length
+
+      @commands.splice(index, 0, obj)
+
+      ## if nestedIndex is either undefined or 0
+      ## then we know we're processing regular commands
+      ## and not splicing in the middle of our commands
+      if not nestedIndex
+        @prop "runId", @defer(@run)
+
+      return @
 
     _contains: ($el) ->
       doc = @private("document")

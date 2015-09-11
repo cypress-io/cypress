@@ -115,15 +115,17 @@ describe "$Cypress.Cy API", ->
         @cy = $Cypress.Cy.create(@Cypress, @specWindow, {})
         null
 
-      it "resets queue to empty array", ->
-        @cy.queue = [1,2,3]
+      it "calls reset on commands", ->
+        reset = @sandbox.spy @cy.commands, "reset"
         @Cypress.trigger("restore")
-        expect(@cy.queue).to.deep.eq []
+        expect(reset).to.be.calledOnce
 
       it "calls endedEarlyErr if index > 0 and < queue.length", ->
         endedEarlyErr = @sandbox.stub @cy, "endedEarlyErr"
         @cy.prop("index", 2)
-        @cy.queue = [1,2,3,4]
+        @cy.commands.splice(0, 1, {})
+        @cy.commands.splice(1, 2, {})
+        @cy.commands.splice(2, 3, {})
         @cy.restore()
         expect(endedEarlyErr).to.be.calledOnce
 
@@ -366,8 +368,8 @@ describe "$Cypress.Cy API", ->
         _then = @sandbox.spy @cy, "then"
         @cy.wait(1000)
 
-        @cy.on "set", (obj) ->
-          if obj.name is "wait"
+        @cy.on "set", (cmd) ->
+          if cmd.get("name") is "wait"
             @Cypress.abort().then ->
               expect(_then).not.to.be.called
               done()
@@ -403,7 +405,7 @@ describe "$Cypress.Cy API", ->
         @cy.isReady(true)
 
         @cy.on "end", ->
-          expect(@queue.length).to.eq(1)
+          expect(@commands.length).to.eq(1)
           done()
 
         @cy.noop({})
@@ -433,16 +435,16 @@ describe "$Cypress.Cy API", ->
           @cy.get("input:first").type("foo")
 
         @cy.login().noop().then ->
-          expect(getNames(@cy.queue)).to.deep.eq ["login", "get", "type", "noop", "then", "then"]
+          expect(@cy.commands.names()).to.deep.eq ["login", "get", "type", "noop", "then", "then"]
 
       it "queues in the correct order", ->
         @setup =>
-          expect(getNames(@cy.queue)).to.deep.eq ["inspect", "nested", "url", "noop", "then", "then"]
+          expect(@cy.commands.names()).to.deep.eq ["inspect", "nested", "url", "noop", "then", "then"]
 
       it "nested command should reference url as next property", ->
         @setup =>
-          nested = _(@cy.queue).find (obj) -> obj.name is "nested"
-          expect(nested.next.name).to.eq "url"
+          nested = @cy.commands.findWhere({name: "nested"})
+          expect(nested.get("next").name).to.eq "url"
 
       it "null outs nestedIndex prior to restoring", (done) ->
         @setup()
@@ -461,7 +463,7 @@ describe "$Cypress.Cy API", ->
           .inspect()
           .nest1()
           .then ->
-            expect(getNames(@cy.queue)).to.deep.eq ["inspect", "nest1", "nest2", "noop", "then", "then"]
+            expect(@cy.commands.names()).to.deep.eq ["inspect", "nest1", "nest2", "noop", "then", "then"]
 
       it "works with multiple nested commands", ->
         @Cypress.addParentCommand "multiple", =>
@@ -474,7 +476,7 @@ describe "$Cypress.Cy API", ->
           .inspect()
           .multiple()
           .then ->
-            expect(getNames(@cy.queue)).to.deep.eq ["inspect", "multiple", "url", "location", "noop", "then", "then"]
+            expect(@cy.commands.names()).to.deep.eq ["inspect", "multiple", "url", "location", "noop", "then", "then"]
 
     describe "cancelling promises", ->
       it "cancels via a delay", (done) ->
