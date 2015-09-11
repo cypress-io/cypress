@@ -4,7 +4,6 @@ $Cypress.Chainer = do ($Cypress, _) ->
 
     constructor: (@cy) ->
       @id = _.uniqueId("chainer")
-      # @queue = []
 
     @remove = (key) ->
       delete $Chainer.prototype[key]
@@ -14,8 +13,6 @@ $Cypress.Chainer = do ($Cypress, _) ->
       ## when our instance methods are invoked
       ## we know we are chaining on an existing series
       $Chainer.prototype[key] = (args...) ->
-        # @queue.push(key)
-
         ## call back the original function with our new args
         ## pass args an as array and not a destructured invocation
         fn.call(@cy, @id, args)

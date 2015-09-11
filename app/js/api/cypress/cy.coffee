@@ -6,10 +6,11 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
     sync: {}
 
     constructor: (@Cypress, specWindow) ->
-      @privates = {}
-      @queue = []
       @defaults()
       @listeners()
+
+      @commands = $Cypress.Commands.create()
+      @privates = {}
 
       specWindow.cy = @
 
@@ -97,28 +98,24 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       @Cypress.cy = null
 
     restore: ->
-      ## if our index is above 0 but is below the queue.length
+      ## if our index is above 0 but is below the commands.length
       ## then we know we've ended early due to a done() and
       ## we should throw a very specific error message
       index = @prop("index")
-      @endedEarlyErr() if index > 0 and index < @queue.length
+      @endedEarlyErr() if index > 0 and index < @commands.length
 
       @clearTimeout @prop("runId")
       @clearTimeout @prop("timerId")
 
       @prop("angularCancelTimeout")?()
 
-      ## reset the queue to an empty array
+      ## reset the commands to an empty array
       ## by mutating it. we do this because
-      ## queue is the context in promises
+      ## commands is the context in promises
       ## which ends up holding a reference
       ## to the old array and keeps objects
       ## in memory longer than we want them
-      for queue in @queue
-        for prop of queue
-          queue[prop] = null
-
-      @queue.splice(0, @queue.length)
+      @commands.reset()
 
       ## remove any outstanding groups
       ## for any open hooks and runnables
@@ -189,17 +186,17 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       ## start at 0 index if we dont have one
       index = @prop("index") ? @prop("index", 0)
 
-      queue = @queue[index]
+      command = @commands.at(index)
 
       runnable = @private("runnable")
 
       ## there are some edge cases where
-      ## cy is run without a queue and
+      ## cy is run without a command and
       ## runnable is undefined
       @group(runnable?.group)
 
       ## if we're at the very end
-      if not queue
+      if not command
 
         ## trigger end event
         @trigger("end")
@@ -229,9 +226,9 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
         ## reset the timeout to what it used to be
         @_timeout(prevTimeout)
 
-        @trigger "command:start", queue
+        @trigger "command:start", command
 
-        promise = @set(queue, @queue[index - 1], @queue[index + 1]).then =>
+        promise = @set(command, @commands.at(index - 1), @commands.at(index + 1)).then =>
           ## each successful command invocation should
           ## always reset the timeout for the current runnable
           ## unless it already has a state.  if it has a state
@@ -247,7 +244,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
           ## over at 0
           @prop("index", index += 1)
 
-          @trigger "command:end", queue
+          @trigger "command:end", command
 
           @defer @run
 
@@ -279,7 +276,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
         @prop "promise", promise
 
-        @trigger "set", queue
+        @trigger "set", command
 
       ## automatically defer running each command in succession
       ## so each command is async
@@ -392,10 +389,8 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
         obj.subject = subject
         obj.command = command
 
-        ## end our command since our subject
-        ## has been resolved at this point
-        ## unless its already been 'ended'
-        command.snapshot().end() if command and command.get("end") isnt true
+        ## end / snapshot our command if we have one
+        command.finish() if command
 
         ## trigger an event here so we know our
         ## command has been successfully applied
@@ -533,56 +528,6 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
     ## subject
     chain: ->
       @prop("chain")
-
-    enqueue: (key, fn, args, type, chainerId) ->
-      @clearTimeout @prop("runId")
-
-      obj = {name: key, ctx: @, fn: fn, args: args, type: type, chainerId: chainerId, command: null}
-
-      @trigger "enqueue", obj
-      @Cypress.trigger "enqueue", obj
-
-      @_insert(obj)
-
-    _insert: (obj) ->
-      ## if we have a nestedIndex it means we're processing
-      ## nested commands and need to splice them into the
-      ## index past the current index as opposed to
-      ## pushing them to the end we also dont want to
-      ## reset the run defer because splicing means we're
-      ## already in a run loop and dont want to create another!
-      ## we also reset the .next property to properly reference
-      ## our new obj
-
-      ## we had a bug that would bomb on custom commands when it was the
-      ## first command. this was due to nestedIndex being undefined at that
-      ## time. so we have to ensure to check that its any kind of number (even 0)
-      ## in order to know to splice into the existing array.
-      ## we simplified
-
-      nestedIndex = @prop("nestedIndex")
-
-      ## if this is a number then we know
-      ## we're about to splice this into our queue
-      ## and need to reset next + increment the index
-      if _.isNumber(nestedIndex)
-        @queue[nestedIndex].next = obj
-        @prop("nestedIndex", nestedIndex += 1)
-
-      ## we look at whether or not nestedIndex is a number, because if it
-      ## is then we need to splice inside of our queue, else just push
-      ## it onto the end of the queu
-      index = if _.isNumber(nestedIndex) then nestedIndex else @queue.length
-
-      @queue.splice(index, 0, obj)
-
-      ## if nestedIndex is either undefined or 0
-      ## then we know we're processing regular commands
-      ## and not splicing in the middle of our queue
-      if not nestedIndex
-        @prop "runId", @defer(@run)
-
-      return @
 
     _setRemoteIframeProps: ($iframe) ->
       @private "$remoteIframe", $iframe
