@@ -231,10 +231,16 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
         ## merge in the other properties from onConsole
         _.extend consoleObj, orig.apply(@, args)
 
-        ## and finally add error if one exists
+        ## add error if one exists
         if err = _this.get("error")
           _.defaults consoleObj,
             Error: _this.getError(err)
+
+        ## add note if no snapshot exists
+        if not @snapshot
+          consoleObj.Snapshot = "The snapshot is missing. Displaying current state of the DOM."
+        else
+          delete consoleObj.Snapshot
 
         return consoleObj
 
