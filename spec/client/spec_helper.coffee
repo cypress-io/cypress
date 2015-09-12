@@ -46,21 +46,21 @@ window.getFirstSubjectByName = (name) ->
 
 window.enterAppTestingMode = ->
   beforeEach (done) ->
-    new Promise =>
-      @$iframe?.remove()
+    iframe = @$iframe ? $("iframe")
+    iframe.remove()
 
-      @$iframe = $("<iframe />", {
-        style: "position: absolute; right: 0; top: 50px; width: 40%; height: 100%;"
-        load: =>
-          $mainRegion = $("<div id='main-region'></div>")
-          @$iframe.contents().find("body").append $mainRegion
-          App.addRegions
-            mainRegion: Marionette.Region.extend(el: $mainRegion)
+    @$iframe = $("<iframe />", {
+      style: "position: absolute; right: 0; top: 50px; width: 40%; height: 100%;"
+      load: =>
+        $mainRegion = $("<div id='main-region'></div>")
+        @$iframe.contents().find("body").append $mainRegion
+        App.addRegions
+          mainRegion: Marionette.Region.extend(el: $mainRegion)
 
-          done()
-      })
+        done()
+    })
 
-      @$iframe.appendTo $("body")
+    @$iframe.appendTo $("body")
 
   afterEach ->
     @$iframe.remove()
@@ -80,8 +80,8 @@ window.enterIntegrationTestingMode = (fixture, options = {}) ->
     ## we get our custom properties but then
     ## restore it to keep things simple
     @chai = $Cypress.Chai.create(@Cypress, {})
-    @chai.addCustomProperties()
     @chai.restore()
+    @chai.addCustomProperties()
 
     @Cypress.start()
 
@@ -118,8 +118,8 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
       ## we get our custom properties but then
       ## restore it to keep things simple
       @chai = $Cypress.Chai.create(@Cypress, {})
-      @chai.addCustomProperties()
       @chai.restore()
+      @chai.addCustomProperties()
 
       @Cypress.start()
 

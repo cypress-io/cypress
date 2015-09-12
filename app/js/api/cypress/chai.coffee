@@ -15,6 +15,8 @@ do ($Cypress, _, $, chai) ->
     expect       = chai.expect
     assert       = chai.assert
     assertProto  = chai.Assertion::assert
+    lengthProto  = chai.Assertion::__methods.length.method
+    existProto   = Object.getOwnPropertyDescriptor(chai.Assertion::, "exist").get
     getMessage   = utils.getMessage
 
     class $Chai
@@ -27,6 +29,22 @@ do ($Cypress, _, $, chai) ->
 
       addCustomProperties: ->
         _this = @
+
+        utils.getMessage = _.wrap getMessage, (orig, assert, args) ->
+          obj = assert._obj
+
+          ## if we are formatting a DOM object
+          if $Cypress.Utils.hasElement(obj)
+            ## replace object with our formatted one
+            assert._obj = $Cypress.Utils.stringifyElement(obj, "short")
+
+          msg = orig.call(@, assert, args)
+
+          ## restore the real obj if we changed it
+          if obj isnt assert._obj
+            assert._obj = obj
+
+          return msg
 
         chai.Assertion.overwriteChainableMethod "length",
           fn1 = (_super) ->
@@ -131,7 +149,7 @@ do ($Cypress, _, $, chai) ->
       restore: ->
         chai.expect = expect
         chai.assert = assert
-        @restoreAssert()
+        @restoreAsserts()
 
         return @
 
@@ -143,28 +161,16 @@ do ($Cypress, _, $, chai) ->
 
         return @
 
-      restoreAssert: ->
-        delete chai.Assertion::existInDocument
+      restoreAsserts: ->
+        utils.getMessage = getMessage
+
         chai.Assertion::assert = assertProto
+        chai.Assertion::__methods.length.method = lengthProto
+
+        Object.defineProperty(chai.Assertion::, "exist", {get: existProto})
 
       patchAssert: ->
         _this = @
-
-        utils.getMessage = _.wrap getMessage, (orig, assert, args) ->
-          obj = assert._obj
-
-          ## if we are formatting a DOM object
-          if $Cypress.Utils.hasElement(obj)
-            ## replace object with our formatted one
-            assert._obj = $Cypress.Utils.stringifyElement(obj, "short")
-
-          msg = orig.call(@, assert, args)
-
-          ## restore the real obj if we changed it
-          if obj isnt assert._obj
-            assert._obj = obj
-
-          return msg
 
         chai.Assertion::assert = _.wrap assertProto, (orig, args...) ->
           passed    = utils.test(@, args)

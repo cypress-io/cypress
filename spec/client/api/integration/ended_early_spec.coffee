@@ -8,7 +8,7 @@ describe "Ended Early Integration Tests", ->
       ## we need to restore the assertion
       ## else it will continue to patch
       ## and log out to Cypress!
-      @Cypress.chai.restoreAssert()
+      @Cypress.chai.restoreAsserts()
 
     it "does not emit a command log", (done) ->
       logs = []

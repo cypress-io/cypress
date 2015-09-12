@@ -823,7 +823,7 @@ describe "$Cypress.Cy Querying Commands", ->
 
       it "throws after timing out while trying to find an invisible element", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "Expected <div#dom> not to be visible, but it was continuously visible."
+          expect(err.message).to.include "expected '<div#dom>' not to be visible"
           done()
 
         @cy.get("div:first").should("not.be.visible")
@@ -832,7 +832,7 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy.$("#button").hide()
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "Expected <button#button> to be visible, but it was continuously hidden."
+          expect(err.message).to.include "expected '<button#button>' to be visible"
           done()
 
         @cy.get("#button").should("be.visible")
