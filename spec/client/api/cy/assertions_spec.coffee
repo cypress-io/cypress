@@ -61,25 +61,28 @@ describe "$Cypress.Cy Assertion Commands", ->
       @cy.noop(obj).its("requestJSON").should("have.property", "teamIds").should("deep.eq", [2])
 
     describe "not.exist", ->
-      beforeEach ->
-        @chai = $Cypress.Chai.create(@Cypress, {})
-
-      afterEach ->
-        @chai.restore()
-
-      it.skip "does not throw when subject leaves dom", ->
-        @cy.$("button:first").click ->
-          $(@).remove()
-
-        @cy.get("button:first").click().should("not.exist")
-
-      it.skip "throws when the subject eventually isnt in the DOM", ->
+      it "resolves eventually not exist", ->
         button = @cy.$("button:first")
 
         @cy.on "retry", _.after 2, _.once ->
           button.remove()
 
         @cy.get("button:first").click().should("not.exist")
+
+      it "resolves all 3 assertions", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          if log.get("name") is "assert"
+            logs.push(log)
+
+            if logs.length is 3
+              done()
+
+        @cy
+          .get("#does-not-exist1").should("not.exist")
+          .get("#does-not-exist2").should("not.exist")
+          .get("#does-not-exist3").should("not.exist")
 
     describe "have.text", ->
       beforeEach ->

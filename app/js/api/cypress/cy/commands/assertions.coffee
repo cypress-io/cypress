@@ -49,8 +49,8 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
       throw err
 
     ## are we doing a length assertion?
-    if reHaveLength.test(chainers)
-      exp.isCheckingLength = true
+    if reHaveLength.test(chainers) or reExistance.test(chainers)
+      exp.isCheckingExistence = true
 
     chainers = chainers.split(".")
     lastChainer = _(chainers).last()
@@ -68,12 +68,13 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
         memo[value]
 
     applyChainers = =>
-      ## if we're not doing existence assertions
+      ## if we're not doing existence or length assertions
       ## then check to ensure the subject exists
       ## in the DOM if its a DOM subject
-      ## need to continually apply this check due
-      ## to eventually
-      if not exp.isCheckingLength
+      ## because its possible we're asserting about an
+      ## element which has left the DOM and we always
+      ## want to auto-fail on those
+      if not exp.isCheckingExistence
         @ensureDom(subject, "should") if Cypress.Utils.hasElement(subject)
 
       _.reduce chainers, (memo, value) =>
