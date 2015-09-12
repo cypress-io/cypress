@@ -45,17 +45,6 @@ do ($Cypress, _) ->
       command ?= @prop("current").get("name")
       @throwErr "cy.#{command}() could not find a registered alias for: '#{@_aliasDisplayName(name)}'. Available aliases are: '#{availableAliases.join(", ")}'."
 
-    _forceLoggingOptions: (args) ->
-      ## if the obj has options and
-      ## log is false, set it to true
-      for arg, i in args by -1
-        if _.isObject(arg) and (arg.log is false or arg._log)
-          opts = _.clone(arg)
-          opts.log = true
-          delete opts._log
-          args[i] = opts
-          return
-
     _getCommandsUntilFirstParentOrValidSubject: (command, memo = []) ->
       return null if not command
 
@@ -76,7 +65,6 @@ do ($Cypress, _) ->
 
       insert = (commands) =>
         _.each commands, (cmd) =>
-          @_forceLoggingOptions(cmd.get("args"))
           cmd.set("chainerId", chainerId)
 
           ## clone the command to prevent

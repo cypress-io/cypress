@@ -43,7 +43,23 @@ do ($Cypress, _) ->
     toJSON: ->
       @attributes
 
+    _removeNonPrimitives: (args) ->
+      ## if the obj has options and
+      ## log is false, set it to true
+      for arg, i in args by -1
+        if _.isObject(arg)
+          ## filter out any properties which arent primitives
+          ## to prevent accidental mutations
+          opts = _(arg).omit(_.isObject)
+
+          ## force command to log
+          opts.log = true
+
+        args[i] = opts
+        return
+
     clone: ->
+      @_removeNonPrimitives @get("args")
       new $Command _.clone(@attributes)
 
     reset: ->
