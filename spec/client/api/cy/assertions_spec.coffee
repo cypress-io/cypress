@@ -195,14 +195,14 @@ describe "$Cypress.Cy Assertion Commands", ->
 
         @cy.noop(false).should("be.true")
 
-      it "throws err when not available chaninable", (done) ->
+      it "throws err when not available chainable", (done) ->
         @cy.on "fail", (err) ->
           expect(err.message).to.eq "The chainer: 'dee' was not found. Building implicit assertion failed."
           done()
 
         @cy.noop({}).should("dee.eq", {})
 
-      it "throws err when ends with a non available chaninable", (done) ->
+      it "throws err when ends with a non available chainable", (done) ->
         @cy.on "fail", (err) ->
           expect(err.message).to.eq "The chainer: 'eq2' was not found. Building implicit assertion failed."
           done()
@@ -213,7 +213,7 @@ describe "$Cypress.Cy Assertion Commands", ->
         @cy._timeout(200)
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "Timed out retrying. expected <button id=\"button\">button</button> to have class 'does-not-have-class'"
+          expect(err.message).to.eq "Timed out retrying: expected '<button#button>' to have class 'does-not-have-class'"
           done()
 
         @cy.get("button:first").should("have.class", "does-not-have-class")
@@ -255,6 +255,13 @@ describe "$Cypress.Cy Assertion Commands", ->
           done()
 
         @cy.get("button").should("have.length")
+
+      it "eventually.have.length is deprecated", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "The 'eventually' assertion chainer has been deprecated. This is now the default behavior so you can safely remove this word and everything should work as before."
+          done()
+
+        @cy.noop().should("eventually.have.length", 1)
 
   context "#and", ->
     it "proxies to #should", ->
@@ -352,7 +359,7 @@ describe "$Cypress.Cy Assertion Commands", ->
       assert = _.after 2, (obj) =>
         @chai.restore()
 
-        expect(obj.get("message")).to.eq "expected [b]<a>[\\b] to have a [b]<a>[\\b] attribute with the value [b]#[\\b], and the value was [b]#[\\b]"
+        expect(obj.get("message")).to.eq "expected [b]<a>[\\b] to have a [b]href[\\b] attribute with the value [b]#[\\b], and the value was [b]#[\\b]"
         done()
 
       @cy.get("a").then ($a) ->
@@ -369,7 +376,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
       assert = _.after 2, (obj) =>
         @chai.restore()
-        expect(obj.get("message")).to.eq "expected [b]<a>[\\b] to have a [b]<a>[\\b] attribute with the value [b]asdf[\\b], but the value was [b]#[\\b]"
+        expect(obj.get("message")).to.eq "expected [b]<a>[\\b] to have a [b]href[\\b] attribute with the value [b]asdf[\\b], but the value was [b]#[\\b]"
         done()
 
       @cy.get("a").then ($a) ->
@@ -532,22 +539,6 @@ describe "$Cypress.Cy Assertion Commands", ->
           .get("body")
           .get("#nested-find").should("be.visible")
 
-    describe "#not.exist", ->
-      it "resolves all 3 assertions", (done) ->
-        logs = []
-
-        @Cypress.on "log", (log) ->
-          if log.get("name") is "assert"
-            logs.push(log)
-
-            if logs.length is 3
-              done()
-
-        @cy
-          .get("#does-not-exist1").should("not.exist")
-          .get("#does-not-exist2").should("not.exist")
-          .get("#does-not-exist3").should("not.exist")
-
     describe "#have.length", ->
       it "formats _obj with cypress", (done) ->
         @onAssert (log) ->
@@ -575,13 +566,3 @@ describe "$Cypress.Cy Assertion Commands", ->
           @cy.$("button:last").remove()
 
         @cy.wrap(buttons).should("have.length", length - 1)
-
-    describe "#eventually.have.length", ->
-      it "is deprecated", (done) ->
-        @allowErrors()
-
-        @cy.on "fail", (err) ->
-          expect(err.message).to.eq "The 'eventually' assertion chainer has been deprecated. This is now the default behavior so you can safely remove this word and everything should work as before."
-          done()
-
-        @cy.noop().should("eventually.have.length", 1)
