@@ -3550,7 +3550,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
     it "can operate on a jquery collection", ->
       dblclicks = 0
-      buttons = @cy.$("button")
+      buttons = @cy.$("button").slice(0, 2)
       buttons.dblclick ->
         dblclicks += 1
         return false
@@ -3559,7 +3559,7 @@ describe "$Cypress.Cy Actions Commands", ->
       expect(buttons.length).to.be.gt 1
 
       ## make sure each button received its dblclick event
-      @cy.get("button").dblclick().then ($buttons) ->
+      @cy.get("button").invoke("slice", 0, 2).dblclick().then ($buttons) ->
         expect($buttons.length).to.eq dblclicks
 
     it "can cancel multiple dblclicks", (done) ->
@@ -3624,7 +3624,8 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.on "invoke:end", (cmd) =>
         if cmd.get("name") is "dblclick"
           ## 100 here because dbclick + focus each are 50ms
-          expect(@test.timeout()).to.eq (count * 100) + prevTimeout
+          num = (count * 100) + prevTimeout
+          expect(@test.timeout()).to.be.within(num, num + 100)
           done()
 
       @cy.get("button").invoke("slice", 0, 3).dblclick()
@@ -4000,7 +4001,8 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.on "invoke:end", (cmd) =>
         if cmd.get("name") is "click"
           ## 100ms here because click + focus are each
-          expect(@test.timeout()).to.eq (count * 100) + prevTimeout
+          num = (count * 100) + prevTimeout
+          expect(@test.timeout()).to.be.within(num, num + 100)
           done()
 
       @cy.get("#three-buttons button").click()
