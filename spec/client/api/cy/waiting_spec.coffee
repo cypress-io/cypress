@@ -94,7 +94,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           @cy.wait (-> expect(true).to.be.false), timeout: 100
 
           @cy.on "fail", (err) ->
-            expect(err.message).to.include "Timed out retrying. Could not continue due to: AssertionError"
+            expect(err.message).to.include "Timed out retrying: Could not continue due to: AssertionError"
             done()
 
     describe "alias argument", ->

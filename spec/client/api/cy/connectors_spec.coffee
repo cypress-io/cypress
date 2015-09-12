@@ -431,7 +431,7 @@ describe "$Cypress.Cy Connectors Commands", ->
         @cy.on "fail", (err) =>
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "its"
-            Error: "CypressError: Timed out retrying. cy.its() errored because the property: 'baz' does not exist on your subject."
+            Error: "CypressError: Timed out retrying: cy.its() errored because the property: 'baz' does not exist on your subject."
             Subject: {foo: "bar"}
           }
           done()
