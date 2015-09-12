@@ -49,9 +49,10 @@ do ($Cypress, _) ->
       ## if the obj has options and
       ## log is false, set it to true
       for arg, i in args by -1
-        if _.isObject(arg) and arg.log is false
+        if _.isObject(arg) and (arg.log is false or arg._log)
           opts = _.clone(arg)
           opts.log = true
+          delete opts._log
           args[i] = opts
           return
 
