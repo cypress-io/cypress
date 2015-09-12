@@ -521,6 +521,35 @@ describe "$Cypress.Cy Assertion Commands", ->
     afterEach ->
       @chai.restore()
 
+    describe "#match", ->
+      it "calls super when provided a regex", ->
+        expect("foo").to.match(/foo/)
+
+      it "throws when not provided a regex", ->
+        fn = ->
+          expect("foo").to.match("foo")
+
+        expect(fn).to.throw("'match' requires its argument be a 'RegExp'. You passed: 'foo'")
+
+      it "throws with cy.should", (done) ->
+        @allowErrors()
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "'match' requires its argument be a 'RegExp'. You passed: 'bar'"
+          done()
+
+        @cy.noop("foo").should("match", "bar")
+
+      it "can restore match to original fn", ->
+        fn = ->
+          expect("foo").to.match("foo")
+
+        @chai.restore()
+        expect(fn).to.throw("re.exec is not a function")
+
+      it "does not affect DOM element matching", ->
+        @cy.get("body").should("match", "body")
+
     describe "#exist", ->
       it "uses $el.selector in expectation", (done) ->
         @onAssert (log) ->
