@@ -55,8 +55,8 @@ do ($Cypress, _) ->
           ## force command to log
           opts.log = true
 
-        args[i] = opts
-        return
+          args[i] = opts
+          return
 
     clone: ->
       @_removeNonPrimitives @get("args")

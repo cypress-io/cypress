@@ -33,3 +33,8 @@ describe "$Cypress.Commands API", ->
           verify: null
         }
       ])
+
+    it "does not remove arguments when nothing is an object", ->
+      @commands.splice(0, 1, {args: ["foo"]})
+      c2 = @commands.at(0).clone()
+      expect(c2.get("args")).to.deep.eq ["foo"]
