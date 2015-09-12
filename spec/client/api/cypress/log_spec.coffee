@@ -156,6 +156,7 @@ describe "$Cypress.Log API", ->
     describe "#wrapOnConsole", ->
       it "automatically adds Command with name", ->
         @log.set("name", "foo")
+        @log.set("snapshot", {})
         @log.set("onConsole", -> {bar: "baz"})
         @log.wrapOnConsole()
         expect(@log.attributes.onConsole()).to.deep.eq {
@@ -164,13 +165,19 @@ describe "$Cypress.Log API", ->
         }
 
       it "automatically adds Event with name", ->
-        @log.set({name: "foo", event: true})
+        @log.set({name: "foo", event: true, snapshot: {}})
         @log.set("onConsole", -> {bar: "baz"})
         @log.wrapOnConsole()
         expect(@log.attributes.onConsole()).to.deep.eq {
           Event: "foo"
           bar: "baz"
         }
+
+      it "adds a note when snapshot is missing", ->
+        @log.set("name", "foo")
+        @log.set("onConsole", -> {})
+        @log.wrapOnConsole()
+        expect(@log.attributes.onConsole().Snapshot).to.eq "The snapshot is missing. Displaying current state of the DOM."
 
     describe "#publicInterface", ->
       beforeEach ->
