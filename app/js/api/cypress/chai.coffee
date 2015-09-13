@@ -17,6 +17,7 @@ do ($Cypress, _, $, chai) ->
     assertProto  = chai.Assertion::assert
     matchProto   = chai.Assertion::match
     lengthProto  = chai.Assertion::__methods.length.method
+    containProto = chai.Assertion::__methods.contain.method
     existProto   = Object.getOwnPropertyDescriptor(chai.Assertion::, "exist").get
     getMessage   = utils.getMessage
 
@@ -53,6 +54,29 @@ do ($Cypress, _, $, chai) ->
               _super.apply(@, arguments)
             else
               throw new chai.AssertionError("'match' requires its argument be a 'RegExp'. You passed: '#{regExp}'")
+
+        chai.Assertion.overwriteChainableMethod "contain",
+          fn1 = (_super) ->
+            return (text) ->
+              cy = _this.Cypress.cy
+
+              obj = @_obj
+
+              if not cy or not ($Cypress.Utils.isInstanceOf(obj, $) or $Cypress.Utils.hasElement(obj))
+                return _super.apply(@, arguments)
+
+              selector = ":contains('#{text}'), [type='submit'][value~='#{text}']"
+
+              @assert(
+                obj.is(selector) or !!obj.find(selector).length
+                "expected \#{this} to contain \#{exp}"
+                "expected \#{this} not to contain \#{exp}"
+                text
+              )
+
+          fn2 = (_super) ->
+            return ->
+              _super.apply(@, arguments)
 
         chai.Assertion.overwriteChainableMethod "length",
           fn1 = (_super) ->
@@ -175,6 +199,7 @@ do ($Cypress, _, $, chai) ->
         chai.Assertion::assert = assertProto
         chai.Assertion::match = matchProto
         chai.Assertion::__methods.length.method = lengthProto
+        chai.Assertion::__methods.contain.method = containProto
 
         Object.defineProperty(chai.Assertion::, "exist", {get: existProto})
 

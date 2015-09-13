@@ -521,6 +521,19 @@ describe "$Cypress.Cy Assertion Commands", ->
     afterEach ->
       @chai.restore()
 
+    describe "#contain", ->
+      it "can find input type submit by value", ->
+        @cy.get("#input-type-submit").should("contain", "click me")
+
+      it "is true when element contains text", ->
+        @cy.get("#nested-find").should("contain", "Nested Find")
+
+      it "is true when submit input contains value", ->
+        @cy.get("input[type=submit]:first").should("contain", "input contains submit")
+
+      it "calls super when not DOM element", ->
+        @cy.noop("foobar").should("contain", "oob")
+
     describe "#match", ->
       it "calls super when provided a regex", ->
         expect("foo").to.match(/foo/)
