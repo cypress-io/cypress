@@ -39,7 +39,7 @@
       <label title="<%= @numElements %> matched elements" class="label label-danger"><%= @numElements %></label>
     <% end %>
     <% if @numElements > 1: %>
-      <label title="<%= @numElements %> matched elements" class="label label-default"><%= @numElements %></label>
+      <label title="<%= @numElements %> matched elements" class="label label-primary"><%= @numElements %></label>
     <% end %>
     <!-- <i class="fa fa-pause"></i> -->
   </span>
