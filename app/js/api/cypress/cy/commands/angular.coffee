@@ -28,9 +28,9 @@ $Cypress.register "Angular", (Cypress, _, $, Promise) ->
 
       angular = @private("window").angular
 
-      options.error = "Could not find element for binding: '#{binding}'!"
+      _.extend options, {verify: false, log: false}
 
-      options.onRetry = ($elements) ->
+      getEl = ($elements) ->
         filtered = $elements.filter (index, el) ->
           dataBinding = angular.element(el).data("$binding")
 
@@ -43,22 +43,32 @@ $Cypress.register "Angular", (Cypress, _, $, Promise) ->
         if filtered.length
           return filtered
 
-        ## else return false
-        return false
+        ## else return null element
+        return $(null)
 
-      @command("get", selector, options)
+      do resolveElements = =>
+        @command("get", selector, options).then ($elements) =>
+          @verifyUpcomingAssertions(getEl($elements), options, {
+            onRetry: resolveElements
+            onFail: (err) ->
+              err.longMessage = "Could not find element for binding: '#{binding}'!"
+          })
 
     _findByNgAttr: (name, attr, el, options) ->
       selectors = []
       error = "Could not find element for #{name}: '#{el}'.  Searched "
 
+      _.extend options, {verify: false, log: false}
+
       finds = _.map ngPrefixes, (prefix) =>
         selector = "[#{prefix}#{attr}'#{el}']"
         selectors.push(selector)
 
-        @command("get", selector, options)
-          .cancellable()
-          .catch Promise.CancellationError (err) ->
+        do resolveElements = =>
+          @command("get", selector, options).then ($elements) =>
+            @verifyUpcomingAssertions($elements, options, {
+              onRetry: resolveElements
+            })
 
       error += selectors.join(", ") + "."
 
