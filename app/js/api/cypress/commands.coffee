@@ -28,6 +28,8 @@ do ($Cypress, _) ->
 
       @get("logs").push(log)
 
+      return @
+
     getLastLog: ->
       ## return the last non-event log
       logs = @get("logs")
@@ -64,7 +66,7 @@ do ($Cypress, _) ->
 
     clone: ->
       @_removeNonPrimitives @get("args")
-      new $Command _.clone(@attributes)
+      $Command.create _.clone(@attributes)
 
     reset: ->
       @attributes = {}
@@ -76,8 +78,8 @@ do ($Cypress, _) ->
       new $Command(obj)
 
   class $Commands
-    constructor: ->
-      @commands = []
+    constructor: (cmds = []) ->
+      @commands = cmds
 
     logs: (filters) ->
       logs = _.flatten @invoke("get", "logs")
@@ -94,25 +96,38 @@ do ($Cypress, _) ->
       if $Cypress.Utils.isInstanceOf(obj, $Command)
         return obj
       else
-        new $Command(obj)
+        $Command.create(obj)
+
+    get: ->
+      @commands
 
     names: ->
       @invoke("get", "name")
 
     splice: (start, end, obj) ->
-      @commands.splice(start, end, @add(obj))
+      cmd = @add(obj)
+      @commands.splice(start, end, cmd)
+
+      return cmd
 
     slice: ->
-      @commands.slice.apply(@commands, arguments)
+      cmds = @commands.slice.apply(@commands, arguments)
+      $Commands.create(cmds)
 
     at: (index) ->
       @commands[index]
 
-    findWhere: (attrs) ->
+    _filterByAttrs: (attrs, method) ->
       matchesAttrs = _.matches(attrs)
 
-      @find (command) ->
+      @[method] (command) ->
         matchesAttrs(command.attributes)
+
+    where: (attrs) ->
+      @_filterByAttrs(attrs, "filter")
+
+    findWhere: (attrs) ->
+      @_filterByAttrs(attrs, "find")
 
     toJSON: ->
       @invoke("toJSON")
@@ -124,8 +139,8 @@ do ($Cypress, _) ->
 
       return @
 
-    @create = ->
-      new $Commands
+    @create = (cmds) ->
+      new $Commands(cmds)
 
   Object.defineProperty $Commands.prototype, "length", {
     get: -> @commands.length
@@ -138,7 +153,7 @@ do ($Cypress, _) ->
       _[method].apply(_, args)
 
   ## mixin underscore methods
-  _.each ["invoke", "map", "pluck", "first", "find", "last"], (method) ->
+  _.each ["invoke", "map", "pluck", "first", "find", "filter", "last", "indexOf", "each"], (method) ->
     $Commands.prototype[method] = (args...) ->
       args.unshift(@commands)
       _[method].apply(_, args)

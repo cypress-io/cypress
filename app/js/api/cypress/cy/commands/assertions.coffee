@@ -315,7 +315,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
       assertions = []
 
       ## grab the rest of the queue'd commands
-      for cmd in @commands.slice(index)
+      for cmd in @commands.slice(index).get()
         ## don't break on utilities, just skip over them
         if cmd.is("utility")
           continue
