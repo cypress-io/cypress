@@ -109,6 +109,30 @@ describe "$Cypress.Cy Aliasing Commands", ->
         @cy.get("body").find("button:first").click().as("button").then ->
           expect(@log.get("aliasType")).to.eq "dom"
 
+      it "aliases previous command / non event / matching chainerId", ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push(log)
+
+        @Cypress.addParentCommand "foo", =>
+          cmd = @Cypress.Log.command({})
+
+          @cy.chain().get("ul:first li", {log: false}).first({log: false}).then ($li) ->
+            cmd.snapshot().end()
+            return undefined
+
+        @cy.foo().as("foo").then ->
+          expect(logs.length).to.eq(1)
+          expect(@log.get("alias")).to.eq("foo")
+          expect(@log.get("aliasType")).to.eq("dom")
+
+      # it.only "does not alias previous logs when no matching chainerId", ->
+      #   @cy
+      #     .get("div:first")
+      #     .noop({}).as("foo").then ->
+      #       debugger
+
   context "#_replayFrom", ->
     describe "subject in document", ->
       it "returns if subject is still in the document", (done) ->

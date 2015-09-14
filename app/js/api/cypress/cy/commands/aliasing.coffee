@@ -24,9 +24,13 @@ $Cypress.register "Aliasing", (Cypress, _, $) ->
       prev.set("alias", str)
 
       ## we also need to set the alias on the last command log
-      log = _.last(@commands.logs({instrument: "command", event: false}))
+      ## that matches our chainerId
+      if log = _.last(@commands.logs({
+        instrument: "command"
+        event: false
+        chainerId: @prop("chainerId")
+      }))
 
-      if log
         log.set({
           alias:     str
           aliasType: if $Cypress.Utils.hasElement(subject) then "dom" else "primitive"

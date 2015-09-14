@@ -22,6 +22,10 @@ do ($Cypress, _) ->
       _.invoke @get("logs"), "finish"
 
     log: (log) ->
+      ## always set the chainerId of the log to ourselves
+      ## so it can be queried on later
+      log.set("chainerId", @get("chainerId"))
+
       @get("logs").push(log)
 
     getLastLog: ->
