@@ -1,0 +1,734 @@
+<html><head>
+      <meta http-equiv="content-type" content="text/html;charset=utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Cypress.io</title>
+
+      <link href="data:;base64,=" rel="icon">
+
+      <link rel="stylesheet" href="/__cypress/static/css/vendor.css">
+      <link rel="stylesheet" href="/__cypress/static/css/cypress.css">
+
+      <script type="text/javascript" src="/__cypress/static/js/vendor.js"></script><style type="text/css"></style>
+      <script type="text/javascript" src="/__cypress/static/js/cypress.js"></script>
+      <script type="text/javascript" src="/__cypress/static/js/app.js"></script>
+  </head>
+  <body>
+    <div id="cy-wrapper" class="collapsed">
+      <div id="nav-region"><div><div id="cy-sidebar">
+  <div id="nav-region"><div><div class="collapse-container">
+  <div class="pull-left logo">Cypress</div>
+  <div class="pull-right">
+    <button class="btn btn-default" id="sidebar-collapse">
+      <i class="fa fa-angle-right"></i>
+    </button>
+  </div>
+</div>
+<ul class="cy-vnavigation"><li class="parent active"><a href="#tests">
+  <i class="fa fa-code"></i>
+  <span>Tests</span>
+</a></li><li class="parent"><a href="#builds">
+  <i class="fa fa-th"></i>
+  <span>Builds</span>
+</a></li><li class="parent"><a href="#analytics">
+  <i class="fa fa-bar-chart-o"></i>
+  <span>Analytics</span>
+</a></li><li class="parent"><a href="#settings">
+  <i class="fa fa-cog"></i>
+  <span>Settings</span>
+</a></li><li class="parent"><a href="https://github.com/cypress-io/cypress/wiki" target="_blank">
+  <i class="fa fa-graduation-cap"></i>
+  <span>Docs</span>
+</a></li></ul></div></div>
+  <div id="panels-region"></div>
+</div></div></div>
+      <div id="main-region"><div>
+<div id="test-container">
+  <div id="test-specs">
+    <div id="header-container">
+      <div id="stats-region"><div><div id="stats-region"><div><ul id="stats-container">
+  <li id="tests-failed">
+    <i class="fa fa-times"></i>
+    <span class="num">2</span>
+  </li>
+</ul></div></div>
+<div id="chosen-region"></div>
+</div></div>
+    </div>
+    <div id="specs-container">
+      <div id="specs-region"><ul class="runnables" id="specs-list"><li class="suite runnable failed"><div class="runnable-wrapper" style="padding-left: 4px;">
+  <div class="runnable-content-region"><div><div class="runnable-state">
+  <span class="suite-state">
+    <i class="fa fa-caret-down"></i>
+  </span>
+  <span class="suite-title">
+    TodoMVC - React
+    <i class="fa fa-ellipsis-h hidden"></i>
+  </span>
+</div>
+<div class="runnable-controls">
+  <i class="fa fa-repeat"></i>
+</div></div></div>
+</div>
+<div class="runnables-region"><ul class="runnables"><li class="suite runnable failed"><div class="runnable-wrapper" style="padding-left: 19px;">
+  <div class="runnable-content-region"><div><div class="runnable-state">
+  <span class="suite-state">
+    <i class="fa fa-caret-down"></i>
+  </span>
+  <span class="suite-title">
+    No Todos
+    <i class="fa fa-ellipsis-h hidden"></i>
+  </span>
+</div>
+<div class="runnable-controls">
+  <i class="fa fa-repeat"></i>
+</div></div></div>
+</div>
+<div class="runnables-region"><ul class="runnables"><li class="test runnable failed"><div class="runnable-wrapper" style="padding-left: 34px;">
+  <div class="runnable-content-region"><div><div class="runnable-state">
+  <span class="test-state">
+    <i class="fa"></i>
+  </span>
+  <span class="test-title">
+    should hide #main and #footer
+  </span>
+</div>
+<div class="runnable-controls">
+  <i class="fa fa-warning has-command-errors" title="One or more commands failed"></i>
+  <i class="fa fa-repeat"></i>
+</div></div></div>
+  <div class="runnable-instruments">
+    <div class="runnable-agents-region"><div class="instruments-container"><ul class="hooks-container">
+  <li class="hook-item">
+    <span class="hook-name">
+      <i class="fa fa-caret-down"></i>
+      Screenshot (<span data-js="total">1</span>)
+    </span>
+    <p><img src="/__cypress/static/img/failure1.png" style="max-height: 100px; box-shadow: 0px 0px 6px #428BCA;" /></p>
+  </li>
+</ul></div></div>
+    <div class="runnable-routes-region"><div class="instruments-container" style="display: none;"><ul class="hooks-container">
+  <li class="hook-item">
+    <span class="hook-name">
+      <i class="fa fa-caret-right"></i>
+      Routes (<span data-js="total">0</span>)
+      <i class="fa fa-ellipsis-h"></i>
+    </span>
+    <div class="server-container hidden">
+      <div class="tab-content">
+        <div class="tab-pane active">
+          <table class="table table-condensed">
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Url</th>
+                <th>Status</th>
+                <th>Alias</th>
+                <th title="Number of responses which matched this route">#</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </li>
+</ul></div></div>
+    <div class="runnable-commands-region"><ul class="hooks-container"><li class="hook-item"><span class="hook-name">
+  <i class="fa fa-caret-down"></i>
+  before each
+  <span class="hook-failed hidden">(failed)</span>
+  <i class="fa fa-ellipsis-h hidden"></i>
+</span>
+<ul class="commands-container"><li class="command-type-parent command-name-visit command-parent"><div class="command-wrapper">
+  <span class="command-number">
+
+
+        <span>1</span>
+
+
+  </span>
+  <span class="command-method" style="padding-left: 0px;">
+    <span>
+
+        visit
+
+    </span>
+  </span>
+  <span class="command-message">
+
+      <span>http://localhost:8888</span>
+
+  </span>
+  <span class="command-controls">
+
+
+
+    <!-- <i class="fa fa-pause"></i> -->
+  </span>
+</div></li><li class="command-type-parent command-name-new-url command-parent command-event"><div class="command-wrapper">
+  <span class="command-number">
+
+
+
+  </span>
+  <span class="command-method" style="padding-left: 0px;">
+    <span>
+
+        (new url)
+
+    </span>
+  </span>
+  <span class="command-message">
+
+      <span>http://localhost:8888/#/</span>
+
+  </span>
+  <span class="command-controls">
+
+
+
+    <!-- <i class="fa fa-pause"></i> -->
+  </span>
+</div></li></ul></li><li class="hook-item"><span class="hook-name">
+  <i class="fa fa-caret-down"></i>
+  test
+  <span class="hook-failed hidden">(failed)</span>
+  <i class="fa fa-ellipsis-h hidden"></i>
+</span>
+<ul class="commands-container"><li class="command-type-parent command-name-get command-parent"><div class="command-wrapper">
+  <span class="command-number">
+
+
+        <span>1</span>
+
+
+  </span>
+  <span class="command-method" style="padding-left: 0px;">
+    <span>
+
+        get
+
+    </span>
+  </span>
+  <span class="command-message">
+
+      <span>.todo-list li, {exist: false}</span>
+
+  </span>
+  <span class="command-controls">
+
+
+
+    <!-- <i class="fa fa-pause"></i> -->
+  </span>
+</div></li><li class="command-type-parent command-name-get command-parent"><div class="command-wrapper">
+  <span class="command-number">
+
+
+        <span>2</span>
+
+
+  </span>
+  <span class="command-method" style="padding-left: 0px;">
+    <span>
+
+        get
+
+    </span>
+  </span>
+  <span class="command-message">
+
+      <span>.main, {exist: false}</span>
+
+  </span>
+  <span class="command-controls">
+
+
+
+    <!-- <i class="fa fa-pause"></i> -->
+  </span>
+</div></li><li class="command-type-parent command-name-get command-parent command-error"><div class="command-wrapper">
+  <span class="command-number">
+
+
+        <span>3</span>
+
+
+  </span>
+  <span class="command-method" style="padding-left: 0px;">
+    <span>
+
+        get
+
+    </span>
+  </span>
+  <span class="command-message">
+
+      <span>.footer</span>
+
+  </span>
+  <span class="command-controls">
+
+
+
+    <!-- <i class="fa fa-pause"></i> -->
+  </span>
+</div></li></ul></li></ul></div>
+  </div>
+  <span class="hook"></span>
+  <pre class="test-error">CypressError: Timed out retrying. Could not find element: .footer</pre>
+</div></li></ul></div></li><li class="suite runnable failed"><div class="runnable-wrapper" style="padding-left: 19px;">
+  <div class="runnable-content-region"><div><div class="runnable-state">
+  <span class="suite-state">
+    <i class="fa fa-caret-down"></i>
+  </span>
+  <span class="suite-title">
+    New Todo
+    <i class="fa fa-ellipsis-h hidden"></i>
+  </span>
+</div>
+<div class="runnable-controls">
+  <i class="fa fa-repeat"></i>
+</div></div></div>
+</div>
+<div class="runnables-region"><ul class="runnables"><li class="test runnable failed"><div class="runnable-wrapper" style="padding-left: 34px;">
+  <div class="runnable-content-region"><div><div class="runnable-state">
+  <span class="test-state">
+    <i class="fa"></i>
+  </span>
+  <span class="test-title">
+    should allow me to add todo items
+  </span>
+</div>
+<div class="runnable-controls">
+  <i class="fa fa-warning has-command-errors" title="One or more commands failed"></i>
+  <i class="fa fa-repeat"></i>
+</div></div></div>
+  <div class="runnable-instruments">
+    <div class="runnable-agents-region"><div class="instruments-container"><ul class="hooks-container">
+  <li class="hook-item">
+    <span class="hook-name">
+      <i class="fa fa-caret-down"></i>
+      Screenshot (<span data-js="total">1</span>)
+    </span>
+    <p><img src="/__cypress/static/img/failure2.png" style="max-height: 100px;" /></p>
+  </li>
+</ul></div></div>
+    <div class="runnable-routes-region"><div class="instruments-container" style="display: none;"><ul class="hooks-container">
+  <li class="hook-item">
+    <span class="hook-name">
+      <i class="fa fa-caret-right"></i>
+      Routes (<span data-js="total">0</span>)
+      <i class="fa fa-ellipsis-h"></i>
+    </span>
+    <div class="server-container hidden">
+      <div class="tab-content">
+        <div class="tab-pane active">
+          <table class="table table-condensed">
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Url</th>
+                <th>Status</th>
+                <th>Alias</th>
+                <th title="Number of responses which matched this route">#</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </li>
+</ul></div></div>
+    <div class="runnable-commands-region"><ul class="hooks-container"><li class="hook-item"><span class="hook-name">
+  <i class="fa fa-caret-down"></i>
+  before each
+  <span class="hook-failed hidden">(failed)</span>
+  <i class="fa fa-ellipsis-h hidden"></i>
+</span>
+<ul class="commands-container"><li class="command-type-parent command-name-visit command-parent"><div class="command-wrapper">
+  <span class="command-number">
+
+
+        <span>1</span>
+
+
+  </span>
+  <span class="command-method" style="padding-left: 0px;">
+    <span>
+
+        visit
+
+    </span>
+  </span>
+  <span class="command-message">
+
+      <span>http://localhost:8888</span>
+
+  </span>
+  <span class="command-controls">
+
+
+
+    <!-- <i class="fa fa-pause"></i> -->
+  </span>
+</div></li><li class="command-type-parent command-name-new-url command-parent command-event"><div class="command-wrapper">
+  <span class="command-number">
+
+
+
+  </span>
+  <span class="command-method" style="padding-left: 0px;">
+    <span>
+
+        (new url)
+
+    </span>
+  </span>
+  <span class="command-message">
+
+      <span>http://localhost:8888/#/</span>
+
+  </span>
+  <span class="command-controls">
+
+
+
+    <!-- <i class="fa fa-pause"></i> -->
+  </span>
+</div></li></ul></li><li class="hook-item"><span class="hook-name">
+  <i class="fa fa-caret-down"></i>
+  test
+  <span class="hook-failed hidden">(failed)</span>
+  <i class="fa fa-ellipsis-h hidden"></i>
+</span>
+<ul class="commands-container"><li class="command-type-parent command-name-get command-parent"><div class="command-wrapper">
+  <span class="command-number">
+
+
+        <span>1</span>
+
+
+  </span>
+  <span class="command-method" style="padding-left: 0px;">
+    <span>
+
+        get
+
+    </span>
+  </span>
+  <span class="command-message">
+
+      <span>.new-todo</span>
+
+  </span>
+  <span class="command-controls">
+
+
+
+    <!-- <i class="fa fa-pause"></i> -->
+  </span>
+</div></li><li class="command-type-child command-name-type command-child"><div class="command-wrapper">
+  <span class="command-number">
+
+
+        <span>2</span>
+
+
+  </span>
+  <span class="command-method" style="padding-left: 5px;">
+    <span>
+
+        type
+
+    </span>
+  </span>
+  <span class="command-message">
+
+      <span>buy some cheese</span>
+
+  </span>
+  <span class="command-controls">
+
+
+
+    <!-- <i class="fa fa-pause"></i> -->
+  </span>
+</div></li><li class="command-type-child command-name-type command-child"><div class="command-wrapper">
+  <span class="command-number">
+
+
+        <span>3</span>
+
+
+  </span>
+  <span class="command-method" style="padding-left: 5px;">
+    <span>
+
+        type
+
+    </span>
+  </span>
+  <span class="command-message">
+
+      <span>{enter}</span>
+
+  </span>
+  <span class="command-controls">
+
+
+
+    <!-- <i class="fa fa-pause"></i> -->
+  </span>
+</div></li><li class="command-type-parent command-name-get command-parent"><div class="command-wrapper">
+  <span class="command-number">
+
+
+        <span>4</span>
+
+
+  </span>
+  <span class="command-method" style="padding-left: 0px;">
+    <span>
+
+        get
+
+    </span>
+  </span>
+  <span class="command-message">
+
+      <span>.todo-list li</span>
+
+  </span>
+  <span class="command-controls">
+
+
+
+    <!-- <i class="fa fa-pause"></i> -->
+  </span>
+</div></li><li class="command-type-child command-name-eq command-child"><div class="command-wrapper">
+  <span class="command-number">
+
+
+        <span>5</span>
+
+
+  </span>
+  <span class="command-method" style="padding-left: 5px;">
+    <span>
+
+        eq
+
+    </span>
+  </span>
+  <span class="command-message">
+
+      <span>0</span>
+
+  </span>
+  <span class="command-controls">
+
+
+
+    <!-- <i class="fa fa-pause"></i> -->
+  </span>
+</div></li><li class="command-type-child command-name-find command-child"><div class="command-wrapper">
+  <span class="command-number">
+
+
+        <span>6</span>
+
+
+  </span>
+  <span class="command-method" style="padding-left: 5px;">
+    <span>
+
+        find
+
+    </span>
+  </span>
+  <span class="command-message">
+
+      <span>label</span>
+
+  </span>
+  <span class="command-controls">
+
+
+
+    <!-- <i class="fa fa-pause"></i> -->
+  </span>
+</div></li><li class="command-type-child command-name-contains command-child"><div class="command-wrapper">
+  <span class="command-number">
+
+
+        <span>7</span>
+
+
+  </span>
+  <span class="command-method" style="padding-left: 5px;">
+    <span>
+
+        contains
+
+    </span>
+  </span>
+  <span class="command-message">
+
+      <span>buy some cheese</span>
+
+  </span>
+  <span class="command-controls">
+
+
+
+    <!-- <i class="fa fa-pause"></i> -->
+  </span>
+</div></li><li class="command-type-parent command-name-get command-parent"><div class="command-wrapper">
+  <span class="command-number">
+
+
+        <span>8</span>
+
+
+  </span>
+  <span class="command-method" style="padding-left: 0px;">
+    <span>
+
+        get
+
+    </span>
+  </span>
+  <span class="command-message">
+
+      <span>.todo-list li</span>
+
+  </span>
+  <span class="command-controls">
+
+
+
+      <label title="2 matched elements" class="label label-default">2</label>
+
+    <!-- <i class="fa fa-pause"></i> -->
+  </span>
+</div></li><li class="command-type-child command-name-eq command-child"><div class="command-wrapper">
+  <span class="command-number">
+
+
+        <span>9</span>
+
+
+  </span>
+  <span class="command-method" style="padding-left: 5px;">
+    <span>
+
+        eq
+
+    </span>
+  </span>
+  <span class="command-message">
+
+      <span>1</span>
+
+  </span>
+  <span class="command-controls">
+
+
+
+    <!-- <i class="fa fa-pause"></i> -->
+  </span>
+</div></li><li class="command-type-child command-name-find command-child"><div class="command-wrapper">
+  <span class="command-number">
+
+
+        <span>10</span>
+
+
+  </span>
+  <span class="command-method" style="padding-left: 5px;">
+    <span>
+
+        find
+
+    </span>
+  </span>
+  <span class="command-message">
+
+      <span>label</span>
+
+  </span>
+  <span class="command-controls">
+
+
+
+    <!-- <i class="fa fa-pause"></i> -->
+  </span>
+</div></li><li class="command-type-child command-name-contains command-child command-error"><div class="command-wrapper">
+  <span class="command-number">
+
+
+        <span>11</span>
+
+
+  </span>
+  <span class="command-method" style="padding-left: 5px;">
+    <span>
+
+        contains
+
+    </span>
+  </span>
+  <span class="command-message">
+
+      <span>incorrect text</span>
+
+  </span>
+  <span class="command-controls">
+
+
+
+    <!-- <i class="fa fa-pause"></i> -->
+  </span>
+</div></li></ul></li></ul></div>
+  </div>
+  <span class="hook"></span>
+  <pre class="test-error">CypressError: Timed out retrying. Could not find any content: 'incorrect text' within the element: &lt;label&gt;</pre>
+</div></li></ul></div></li></ul></div></li></ul></div>
+    </div>
+  </div>
+</div>
+
+<div id="iframe-wrapper" style="right: 0px; width: 1240px;">
+  <div id="iframe-container">
+    <div id="iframe-region"><div style="display: block;"><div id="header-region"><div><header>
+  <ul style="float:left;">
+    <li>
+      <div class="btn-group">
+        <button type="button" class="btn btn-default" style="line-height: 14px;">Run these tests</button>
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fa fa-caret-down"></i>
+        </button>
+        <ul class="dropdown-menu">
+          <li><a href="#">Internet Explorer 9</a></li>
+          <li><a href="#">Internet Explorer 10</a></li>
+          <li role="separator" class="divider"></li>
+          <li><a href="#">Google Chrome 43</a></li>
+          <li><a href="#">Google Chrome 42</a></li>
+          <li><a href="#">Google Chrome 41</a></li>
+        </ul>
+      </div>
+    </li>
+  </ul>
+</header>
+<div id="iframe-message" style="display: none;"></div></div></div>
+<div id="iframe-size-container" style="width: 1000px; height: 660px; transform: scale(0.6985); margin-left: 120px;">
+</div>
+</div></div>
+  </div>
+</div>
+<div id="jobs-region"></div></div></div>
+    </div>
+
+</body></html>
