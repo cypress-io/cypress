@@ -215,7 +215,9 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       ## end our command since our subject
       ## has been resolved at this point
       ## unless its already been 'ended'
-      @snapshot().end() if @get("end") isnt true
+      ## or has been specifically told not to auto resolve
+      if @get("autoEnd") isnt false and @get("end") isnt true
+        @snapshot().end()
 
     wrapOnConsole: ->
       _this = @
