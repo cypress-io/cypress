@@ -5,6 +5,11 @@ $Cypress.register "Communications", (Cypress, _, $, Promise) ->
       @sync.message.apply(@, arguments)
 
     message: (msg, data, options = {}) ->
+      ## accept {retry: true} here which will verify
+      ## upcoming assertions and replay the msg?
+      ## or make this the default and force users
+      ## to only turn OFF this behavior
+
       _.defaults options, {log: true}
 
       ## should we increase the command timeout here to 10s?

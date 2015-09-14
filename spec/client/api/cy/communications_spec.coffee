@@ -4,7 +4,7 @@ describe "$Cypress.Cy Communications Commands", ->
   context "#msg", ->
     it "proxies to #message", ->
       @Cypress.on "message", (msg, data, cb) ->
-        cb({foo: "bar"})
+        cb(response: {foo: "bar"})
 
       @cy.msg("create:user").then (user) ->
         expect(user).to.deep.eq {foo: "bar"}
@@ -12,7 +12,7 @@ describe "$Cypress.Cy Communications Commands", ->
   context "#message", ->
     it "changes the subject to the server's response", ->
       @Cypress.on "message", (msg, data, cb) ->
-        cb({foo: "bar"})
+        cb(response: {foo: "bar"})
 
       @cy.message("create:user").then (user) ->
         expect(user).to.deep.eq {foo: "bar"}
@@ -20,7 +20,7 @@ describe "$Cypress.Cy Communications Commands", ->
     it "does not resolve when abort happens before callback", (done) ->
       @Cypress.on "message", (msg, data, cb) =>
         _.delay ->
-          cb({foo: "bar"})
+          cb(response: {foo: "bar"})
         , 100
 
         @Cypress.abort()
@@ -109,7 +109,7 @@ describe "$Cypress.Cy Communications Commands", ->
 
       it "logs obj once complete", ->
         @Cypress.on "message", (msg, data, cb) ->
-          cb({baz: "quux"})
+          cb(response: {baz: "quux"})
 
         @cy.message("create:user").then ->
           obj = {
@@ -123,12 +123,13 @@ describe "$Cypress.Cy Communications Commands", ->
 
       it "#onConsole", ->
         @Cypress.on "message", (msg, data, cb) ->
-          cb({baz: "quux"})
+          cb(response: {baz: "quux"}, __logs: [1,2,3])
 
         @cy.message("create:user", {foo: "bar"}).then ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "message"
             Message: "create:user"
+            Logs: [1,2,3]
             "Data Sent": {foo: "bar"}
             "Data Returned": {baz: "quux"}
           }
