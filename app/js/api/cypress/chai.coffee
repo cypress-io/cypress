@@ -53,7 +53,9 @@ do ($Cypress, _, $, chai) ->
             if _.isRegExp(regExp) or $Cypress.Utils.hasElement(@_obj)
               _super.apply(@, arguments)
             else
-              throw new chai.AssertionError("'match' requires its argument be a 'RegExp'. You passed: '#{regExp}'")
+              err = cy.cypressErr("'match' requires its argument be a 'RegExp'. You passed: '#{regExp}'")
+              err.retry = false
+              throw err
 
         chai.Assertion.overwriteChainableMethod "contain",
           fn1 = (_super) ->

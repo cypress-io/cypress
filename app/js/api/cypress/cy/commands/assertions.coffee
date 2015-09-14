@@ -42,15 +42,24 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
 
   shouldFn = (subject, chainers, args...) ->
     exp = Cypress.Chai.expect(subject).to
+    originalChainers = chainers
 
-    if reEventually.test(chainers)
-      err = @cypressErr("The 'eventually' assertion chainer has been deprecated. This is now the default behavior so you can safely remove this word and everything should work as before.")
-      err.retry = false
-      throw err
+    throwAndLogErr = (err) =>
+      ## since we are throwing our own error
+      ## without going through the assertion we need
+      ## to ensure our .should command gets logged
+      current = @prop("current")
 
-    ## are we doing a length assertion?
-    if reHaveLength.test(chainers) or reExistance.test(chainers)
-      exp.isCheckingExistence = true
+      log = Cypress.Log.command({
+        name: "should"
+        type: "child"
+        message: [].concat(originalChainers, args)
+        end: true
+        snapshot: true
+        error: err
+      })
+
+      @throwErr(err, log)
 
     chainers = chainers.split(".")
     lastChainer = _(chainers).last()
@@ -60,10 +69,29 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
 
     options = {}
 
+    if reEventually.test(chainers)
+      err = @cypressErr("The 'eventually' assertion chainer has been deprecated. This is now the default behavior so you can safely remove this word and everything should work as before.")
+      err.retry = false
+      throwAndLogErr(err)
+
+    ## are we doing a length assertion?
+    if reHaveLength.test(chainers) or reExistance.test(chainers)
+      exp.isCheckingExistence = true
+
     applyChainer = (memo, value) ->
       if value is lastChainer
         if _.isFunction(memo[value])
-          memo[value].apply(memo, args)
+          try
+            memo[value].apply(memo, args)
+          catch err
+            ## if we made it all the way to the actual
+            ## assertion but its set to retry false then
+            ## we need to log out this .should since there
+            ## was a problem with the actual assertion syntax
+            if err.retry is false
+              throwAndLogErr(err)
+            else
+              throw err
       else
         memo[value]
 
@@ -74,12 +102,14 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
       ## because its possible we're asserting about an
       ## element which has left the DOM and we always
       ## want to auto-fail on those
-      if not exp.isCheckingExistence
-        @ensureDom(subject, "should") if Cypress.Utils.hasElement(subject)
+      if not exp.isCheckingExistence and Cypress.Utils.hasElement(subject)
+        @ensureDom(subject, "should")
 
       _.reduce chainers, (memo, value) =>
         if value not of memo
-          @throwErr("The chainer: '#{value}' was not found. Building implicit assertion failed.")
+          err = @cypressErr("The chainer: '#{value}' was not found. Could not build assertion.")
+          err.retry = false
+          throwAndLogErr(err)
 
         applyChainer(memo, value)
 

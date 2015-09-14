@@ -118,7 +118,7 @@ describe "$Cypress.Cy Assertion Commands", ->
           logs.push log
 
         @cy.on "fail", (err) ->
-          expect(logs.length).to.eq(4)
+          expect(logs.length).to.eq(5)
 
           expect(logs[2].get("name")).to.eq("get")
           expect(logs[2].get("state")).to.eq("failed")
@@ -197,17 +197,36 @@ describe "$Cypress.Cy Assertion Commands", ->
 
       it "throws err when not available chainable", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "The chainer: 'dee' was not found. Building implicit assertion failed."
+          expect(err.message).to.eq "The chainer: 'dee' was not found. Could not build assertion."
           done()
 
         @cy.noop({}).should("dee.eq", {})
 
       it "throws err when ends with a non available chainable", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "The chainer: 'eq2' was not found. Building implicit assertion failed."
+          expect(err.message).to.eq "The chainer: 'eq2' was not found. Could not build assertion."
           done()
 
         @cy.noop({}).should("deep.eq2", {})
+
+      it "logs 'should' when non avaiable chainer", (done) ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push log
+
+        @cy.on "fail", (err) =>
+          @chai.restore()
+
+          expect(logs.length).to.eq(2)
+          expect(@log.get("name")).to.eq("should")
+          expect(@log.get("error")).to.eq(err)
+          expect(@log.get("state")).to.eq("failed")
+          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("message")).to.eq("not.contain2, does-not-exist-foo-bar")
+          done()
+
+        @cy.get("div:first").should("not.contain2", "does-not-exist-foo-bar")
 
       it "throws when eventually times out", (done) ->
         @cy._timeout(200)
@@ -218,19 +237,25 @@ describe "$Cypress.Cy Assertion Commands", ->
 
         @cy.get("button:first").should("have.class", "does-not-have-class")
 
-      it "throws when using eventually and non available chainer", (done) ->
-        @cy.on "fail", (err) ->
-          expect(err.message).to.eq "The chainer: 'eq2' was not found. Building implicit assertion failed."
-          done()
-
-        @cy.noop({}).should("deep.eq2", {})
-
       it "throws when the subject isnt in the DOM", (done) ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push log
+
         @cy.$("button:first").click ->
           $(@).addClass("foo").remove()
 
-        @cy.on "fail", (err) ->
+        @cy.on "fail", (err) =>
+          @chai.restore()
+
           expect(err.message).to.include "Cannot call .should() because the current subject has been removed or detached from the DOM."
+          # expect(logs.length).to.eq(3)
+          # expect(@log.get("name")).to.eq("should")
+          # expect(@log.get("error")).to.eq(err)
+          # expect(@log.get("state")).to.eq("failed")
+          # expect(@log.get("snapshot")).to.be.an("object")
+          # expect(@log.get("message")).to.eq("have.class, foo")
           done()
 
         @cy.get("button:first").click().should("have.class", "foo").then ->
@@ -250,18 +275,86 @@ describe "$Cypress.Cy Assertion Commands", ->
           done("cy.should was supposed to fail")
 
       it "throws when should('have.length') isnt a number", (done) ->
-        @cy.on "fail", (err) ->
-          expect(err.message).to.eq "You must provide a valid number to a length assertion. You passed: 'undefined'"
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push log
+
+        ## we specifically turn off logging have.length validation errors
+        ## because the assertion will already be logged
+        @cy.on "fail", (err) =>
+          @chai.restore()
+
+          expect(logs.length).to.eq(3)
+          expect(err.message).to.eq "You must provide a valid number to a length assertion. You passed: 'foo'"
+          expect(@log.get("name")).to.eq("should")
+          expect(@log.get("error")).to.eq(err)
+          expect(@log.get("state")).to.eq("failed")
+          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("message")).to.eq("have.length, foo")
           done()
 
-        @cy.get("button").should("have.length")
+        @cy.get("button").should("have.length", "foo")
 
       it "eventually.have.length is deprecated", (done) ->
-        @cy.on "fail", (err) ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push log
+
+        @cy.on "fail", (err) =>
+          @chai.restore()
+
+          expect(logs.length).to.eq(2)
           expect(err.message).to.eq "The 'eventually' assertion chainer has been deprecated. This is now the default behavior so you can safely remove this word and everything should work as before."
+          expect(@log.get("name")).to.eq("should")
+          expect(@log.get("error")).to.eq(err)
+          expect(@log.get("state")).to.eq("failed")
+          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("message")).to.eq("eventually.have.length, 1")
           done()
 
-        @cy.noop().should("eventually.have.length", 1)
+        @cy.get("div:first").should("eventually.have.length", 1)
+
+      it "does not additionally log when .should is the current command", (done) ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push log
+
+        @cy.on "fail", (err) =>
+          @chai.restore()
+
+          expect(logs.length).to.eq(1)
+          expect(@log.get("name")).to.eq("should")
+          expect(@log.get("error")).to.eq(err)
+          expect(@log.get("state")).to.eq("failed")
+          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("message")).to.eq("deep.eq2, {}")
+
+          done()
+
+        @cy.noop({}).should("deep.eq2", {})
+
+      it "logs and immediately fails on custom match assertions", (done) ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push log
+
+        @cy.on "fail", (err) =>
+          @chai.restore()
+
+          expect(logs.length).to.eq(2)
+          expect(err.message).to.eq "'match' requires its argument be a 'RegExp'. You passed: 'foo'"
+          expect(@log.get("name")).to.eq("should")
+          expect(@log.get("error")).to.eq(err)
+          expect(@log.get("state")).to.eq("failed")
+          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("message")).to.eq("match, foo")
+          done()
+
+        @cy.wrap("foo").should("match", "foo")
 
   context "#and", ->
     it "proxies to #should", ->
