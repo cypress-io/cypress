@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <title>.Only Tests</title>
+    <link rel="icon" href="data:;base64,=">
+    <script type="text/javascript" src="/lib/public/js/iframe.js"></script>
+    <script type="text/javascript">
+      describe("server", function(){
+        beforeEach(function(){
+          cy
+            .server()
+            .route(/foo/, {foo: "bar"}).as("getFoo")
+            .visit("fixtures/html/sinon.html")
+        })
+        it("t1", function(){
+          cy.wait("@getFoo").its("url").should("include", "?some=data")
+        })
+
+        it("t2", function(){
+          cy.wait("@getFoo").its("url").should("include", "?some=data")
+        })
+
+        it("t3", function(){
+          cy.wait("@getFoo").its("url").should("include", "?some=data")
+        })
+      })
+    </script>
+  </head>
+  <body>
+    Server Integration Specs
+  </body>
+</html>

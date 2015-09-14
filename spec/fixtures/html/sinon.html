@@ -27,6 +27,8 @@
       $(function(){
         $.get("/bar")
 
+        $.getJSON("/foo", {some: "data"})
+
         $("button#pushState").click(function(){
           window.history.pushState({foo: "bar"}, null, "pushState.html")
         })

@@ -9,18 +9,18 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
     Cypress.Location.override(contentWindow, navigated)
 
+  Cypress.on "before:window:load", (contentWindow) ->
+    ## override the remote iframe getters
+    overrideRemoteLocationGetters(@, contentWindow)
+
+    current = @prop("current")
+
+    return if not current
+
+    options = _.last(current.get("args"))
+    options?.onBeforeLoad?.call(@, contentWindow)
+
   Cypress.Cy.extend
-    onBeforeLoad: (contentWindow) ->
-      ## override the remote iframe getters
-      overrideRemoteLocationGetters(@, contentWindow)
-
-      current = @prop("current")
-
-      return if not current
-
-      options = _.last(current.get("args"))
-      options?.onBeforeLoad?.call(@, contentWindow)
-
     _href: (win, url) ->
       win.location.href = url
 

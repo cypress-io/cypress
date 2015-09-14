@@ -61,14 +61,14 @@ window.$Cypress = do ($, _, Backbone, Promise) ->
       @prepareForCustomCommands()
 
     onBeforeLoad: (contentWindow) ->
-      ## should probably just trigger the "before:load"
+      ## should probably just trigger the "before:window:load"
       ## event here, so other commands can tap into that
       return if not @cy
 
       @cy.silenceConsole(contentWindow) if $Cypress.isHeadless
       @cy.bindWindowListeners(contentWindow)
-      @cy.checkForServer(contentWindow)
-      @cy.onBeforeLoad(contentWindow)
+
+      @trigger("before:window:load", contentWindow)
 
     ## TODO: TEST THIS
     ## we need to specially handle spec events coming

@@ -728,22 +728,27 @@ describe "$Cypress.Cy XHR Commands", ->
             .then ->
               expect(@route.get("numResponses")).to.eq 3
 
-  context "#checkForServer", ->
+  context "Cypress.on(before:window:load)", ->
     beforeEach ->
       ## force us to start from blank window
       @cy.private("$remoteIframe").prop("src", "about:blank")
 
-    it "nukes TMP_SERVER and TMP_ROUTES", ->
+    it "reapplies server + route automatically before window:load", ->
+      ## this tests that the server + routes are automatically reapplied
+      ## after the 2nd visit - which is an example of the remote iframe
+      ## causing an onBeforeLoad event
       @cy
         .server()
-        .route(/foo/, {foo: "bar"})
+        .route(/foo/, {foo: "bar"}).as("getFoo")
         .then ->
-          expect(@cy.prop("tmpServer")).to.be.a("function")
-          expect(@cy.prop("tmpRoutes")).to.be.a("array")
+          expect(@cy.prop("bindServer")).to.be.a("function")
+          expect(@cy.prop("bindRoutes")).to.be.a("array")
         .visit("fixtures/html/sinon.html")
         .then ->
-          expect(@cy.prop("tmpServer")).to.be.null
-          expect(@cy.prop("tmpRoutes")).to.be.null
+          expect(@cy.prop("bindServer")).to.be.a("function")
+          expect(@cy.prop("bindRoutes")).to.be.a("array")
+        .visit("fixtures/html/sinon.html")
+        .wait("@getFoo").its("url").should("include", "?some=data")
 
   context "#cancel", ->
     it "calls server#cancel", (done) ->
