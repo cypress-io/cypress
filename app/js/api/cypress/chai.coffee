@@ -32,6 +32,12 @@ do ($Cypress, _, $, chai) ->
       addCustomProperties: ->
         _this = @
 
+        normalizeNumber = (num) ->
+          parsed = Number(num)
+
+          ## return num if this isNaN else return parsed
+          if _.isNaN(parsed) then num else parsed
+
         utils.getMessage = _.wrap getMessage, (orig, assert, args) ->
           obj = assert._obj
 
@@ -89,6 +95,8 @@ do ($Cypress, _, $, chai) ->
 
               if not cy or not ($Cypress.Utils.isInstanceOf(obj, $) or $Cypress.Utils.hasElement(obj))
                 return _super.apply(@, arguments)
+
+              length = normalizeNumber(length)
 
               ## filter out anything not currently in our document
               if not cy._contains(obj)

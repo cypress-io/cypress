@@ -100,6 +100,11 @@ describe "$Cypress.Cy Assertion Commands", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
 
+      it "allows valid string numbers", ->
+        length = @cy.$("button").length
+
+        @cy.get("button").should("have.length", ""+length)
+
       it "throws when should('have.length') isnt a number", (done) ->
         @allowErrors()
 
