@@ -1,5 +1,166 @@
 do ($Cypress, _) ->
 
+  class $Command
+    constructor: (obj = {}) ->
+      @reset()
+
+      @set(obj)
+
+    set: (key, val) ->
+      if _.isString(key)
+        obj = {}
+        obj[key] = val
+      else
+        obj = key
+
+      _.extend @attributes, obj
+
+      return @
+
+    finishLogs: ->
+      ## finish each of the logs we have
+      _.invoke @get("logs"), "finish"
+
+    log: (log) ->
+      ## always set the chainerId of the log to ourselves
+      ## so it can be queried on later
+      log.set("chainerId", @get("chainerId"))
+
+      @get("logs").push(log)
+
+      return @
+
+    getLastLog: ->
+      ## return the last non-event log
+      logs = @get("logs")
+      if logs.length
+        for log in logs by -1
+          if log.get("event") is false
+            return log
+      else
+        undefined
+
+    is: (str) ->
+      @get("type") is str
+
+    get: (attr) ->
+      @attributes[attr]
+
+    toJSON: ->
+      @attributes
+
+    _removeNonPrimitives: (args) ->
+      ## if the obj has options and
+      ## log is false, set it to true
+      for arg, i in args by -1
+        if _.isObject(arg)
+          ## filter out any properties which arent primitives
+          ## to prevent accidental mutations
+          opts = _(arg).omit(_.isObject)
+
+          ## force command to log
+          opts.log = true
+
+          args[i] = opts
+          return
+
+    clone: ->
+      @_removeNonPrimitives @get("args")
+      $Command.create _.clone(@attributes)
+
+    reset: ->
+      @attributes = {}
+      @attributes.logs = []
+
+      return @
+
+    @create = (obj) ->
+      new $Command(obj)
+
+  class $Commands
+    constructor: (cmds = []) ->
+      @commands = cmds
+
+    logs: (filters) ->
+      logs = _.flatten @invoke("get", "logs")
+
+      if filters
+        matchesFilters = _.matches(filters)
+
+        logs = _(logs).filter (log) ->
+          matchesFilters(log.attributes)
+
+      return logs
+
+    add: (obj) ->
+      if $Cypress.Utils.isInstanceOf(obj, $Command)
+        return obj
+      else
+        $Command.create(obj)
+
+    get: ->
+      @commands
+
+    names: ->
+      @invoke("get", "name")
+
+    splice: (start, end, obj) ->
+      cmd = @add(obj)
+      @commands.splice(start, end, cmd)
+
+      return cmd
+
+    slice: ->
+      cmds = @commands.slice.apply(@commands, arguments)
+      $Commands.create(cmds)
+
+    at: (index) ->
+      @commands[index]
+
+    _filterByAttrs: (attrs, method) ->
+      matchesAttrs = _.matches(attrs)
+
+      @[method] (command) ->
+        matchesAttrs(command.attributes)
+
+    where: (attrs) ->
+      @_filterByAttrs(attrs, "filter")
+
+    findWhere: (attrs) ->
+      @_filterByAttrs(attrs, "find")
+
+    toJSON: ->
+      @invoke("toJSON")
+
+    reset: ->
+      @invoke("reset")
+
+      @commands.splice(0, @commands.length)
+
+      return @
+
+    @create = (cmds) ->
+      new $Commands(cmds)
+
+  Object.defineProperty $Commands.prototype, "length", {
+    get: -> @commands.length
+  }
+
+  ## mixin underscore methods
+  _.each ["pick"], (method) ->
+    $Command.prototype[method] = (args...) ->
+      args.unshift(@attributes)
+      _[method].apply(_, args)
+
+  ## mixin underscore methods
+  _.each ["invoke", "map", "pluck", "first", "find", "filter", "last", "indexOf", "each"], (method) ->
+    $Commands.prototype[method] = (args...) ->
+      args.unshift(@commands)
+      _[method].apply(_, args)
+
+  $Cypress.Command  = $Command
+  $Cypress.Commands = $Commands
+
   $Cypress.extend
     addChildCommand: (key, fn) ->
       @add(key, fn, "child")
@@ -9,6 +170,12 @@ do ($Cypress, _) ->
 
     addDualCommand: (key, fn) ->
       @add(key, fn, "dual")
+
+    addAssertionCommand: (key, fn) ->
+      @add(key, fn, "assertion")
+
+    addUtilityCommand: (key, fn) ->
+      @add(key, fn, "utility")
 
     ## think about adding this for
     ## custom cy extensions as well
@@ -76,18 +243,23 @@ do ($Cypress, _) ->
         args
 
       wrap = (fn) ->
+        wrapped = wrapByType(fn)
+        wrapped.originalFn = fn
+        wrapped
+
+      wrapByType = (fn) ->
         switch type
           when "parent"
             return fn
 
-          when "dual"
+          when "dual", "utility"
             _.wrap fn, (orig, args...) ->
               subject = @prop("subject")
               args = prepareSubject(subject, args)
 
               return orig.apply(@, args)
 
-          when "child"
+          when "child", "assertion"
             _.wrap fn, (orig, args...) ->
               @ensureParent()
 

@@ -12,13 +12,16 @@ $Cypress.register "Misc", (Cypress, _, $) ->
 
     noop: (obj) -> obj
 
-    wrap: (obj) ->
-      options =
-        end: true
-        snapshot: true
+    wrap: (obj, options = {}) ->
+      _.defaults options, {log: true}
 
-      options.$el = obj if Cypress.Utils.hasElement(obj)
+      if options.log isnt false
+        options._log = Cypress.Log.command()
 
-      Cypress.Log.command(options)
+        if Cypress.Utils.hasElement(obj)
+          options._log.set({$el: obj})
 
-      obj
+      do resolveWrap = =>
+        @verifyUpcomingAssertions(obj, options, {
+          onRetry: resolveWrap
+        })

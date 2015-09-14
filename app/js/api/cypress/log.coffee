@@ -18,9 +18,9 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       @log("route", obj)
 
     command: (Cypress, cy, obj = {}) ->
-      current = cy.prop("current") ? {}
+      current = cy.prop("current")
 
-      _.defaults obj, _(current).pick("name", "type")
+      _.defaults obj, current?.pick("name", "type")
 
       ## force duals to become either parents or childs
       ## normally this would be handled by the command itself
@@ -28,26 +28,22 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       ## then it could still be logged during a failure, which
       ## is why we normalize its type value
       if obj.type is "dual"
-        obj.type = if current.prev then "child" else "parent"
-
-      ## does this object represent the current command cypress
-      ## is processing?
-      obj.isCurrent = obj.name is current.name
+        obj.type = if current.get("prev") then "child" else "parent"
 
       _.defaults obj,
         event: false
         onRender: ->
         onConsole: ->
-          ret = if $Cypress.Utils.hasElement(current.subject)
-            $Cypress.Utils.getDomElements(current.subject)
+          ret = if $Cypress.Utils.hasElement(current.get("subject"))
+            $Cypress.Utils.getDomElements(current.get("subject"))
           else
-            current.subject
+            current.get("subject")
 
           "Returned": ret
 
-      if obj.isCurrent
-        ## stringify the obj.message (if it exists) or current.args
-        obj.message = $Cypress.Utils.stringify(obj.message ? current.args)
+      # if obj.isCurrent
+        ## stringify the obj.message (if it exists) or current.get("args")
+      obj.message = $Cypress.Utils.stringify(obj.message ? current.get("args"))
 
       ## allow type to by a dynamic function
       ## so it can conditionally return either
@@ -71,13 +67,18 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
         onRender: ->
         onConsole: ->
 
-      if obj.isCurrent
-        _.defaults obj, alias: cy.getNextAlias()
-
       obj.instrument = instrument
 
       log = new $Log Cypress, obj
       log.wrapOnConsole()
+
+      ## dont trigger log if any return value from
+      ## our before:log is false
+      return if _.any Cypress.invoke("before:log", log), (ret) ->
+        ret is false
+
+      ## set the log on the command
+      cy.prop("current")?.log(log)
 
       Cypress.trigger "log", log
 
@@ -104,6 +105,9 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
     get: (attr) ->
       @attributes[attr]
+
+    unset: (key) ->
+      @set key, undefined
 
     set: (key, val) ->
       if _.isString(key)
@@ -155,12 +159,15 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
     error: (err) ->
       @set
         error: err
-        state: "error"
+        state: "failed"
 
       return @
 
     end: ->
-      @set "state", "success"
+      @set({
+        end: true
+        state: "passed"
+      })
 
       return @
 
@@ -186,9 +193,31 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
       @set obj
 
+    merge: (log) ->
+      ## merges another logs attributes into
+      ## ours by also removing / adding any properties
+      ## on the original
+
+      ## 1. calculate which properties to unset
+      unsets = _.chain(@attributes).keys().without(_(log.attributes).keys()...).value()
+
+      _.each unsets, (unset) =>
+        @unset(unset)
+
+      ## 2. merge in any other properties
+      @set(log.attributes)
+
     reduceMemory: ->
       @off()
       @attributes = _.omit @attributes, _.isObject
+
+    finish: ->
+      ## end our command since our subject
+      ## has been resolved at this point
+      ## unless its already been 'ended'
+      ## or has been specifically told not to auto resolve
+      if @get("autoEnd") isnt false and @get("end") isnt true
+        @snapshot().end()
 
     wrapOnConsole: ->
       _this = @
@@ -211,6 +240,12 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
         if err = _this.get("error")
           _.defaults consoleObj,
             Error: _this.getError(err)
+
+        ## add note if no snapshot exists
+        if not @snapshot
+          consoleObj.Snapshot = "The snapshot is missing. Displaying current state of the DOM."
+        else
+          delete consoleObj.Snapshot
 
         return consoleObj
 

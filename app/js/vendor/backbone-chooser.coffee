@@ -9,7 +9,7 @@ do (Backbone, _) ->
 
       ## when backbone hands off the models attributes to the server
       ## it pushes emulateJSON into the options prior to calling
-      ## toJSON.  So we can work off of the existance of that property
+      ## toJSON.  So we can work off of the existence of that property
       ## to know we're saving and going over the wire
       obj = _(obj).omit("chosen") if _(options).has "emulateJSON"
       obj

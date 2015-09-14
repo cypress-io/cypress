@@ -37,11 +37,11 @@ do ($Cypress, _) ->
           ## if type isnt parent then we know its dual or child
           ## and we can add Applied To if there is a prev command
           ## and it is a parent
-          if current.type isnt "parent" and prev = current.prev
-            ret = if $Cypress.Utils.hasElement(prev.subject)
-              $Cypress.Utils.getDomElements(prev.subject)
+          if current.get("type") isnt "parent" and prev = current.get("prev")
+            ret = if $Cypress.Utils.hasElement(prev.get("subject"))
+              $Cypress.Utils.getDomElements(prev.get("subject"))
             else
-              prev.subject
+              prev.get("subject")
 
             obj["Applied To"] = ret
             obj
@@ -56,7 +56,7 @@ do ($Cypress, _) ->
 
     fail: (err) ->
       current = @prop("current")
-      @log {name: "Failed: #{current.name}", args: err.message}, "danger" if current
+      @log {name: "Failed: #{current.get('name')}", args: err.message}, "danger" if current
 
       ## allow for our own custom onFail function
       if err.onFail

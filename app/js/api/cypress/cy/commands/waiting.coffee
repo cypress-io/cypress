@@ -1,27 +1,5 @@
 $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
 
-  Cypress.addChildCommand
-
-    until: (subject, fn, options = {}) ->
-      retry = ->
-        ## should check here to make sure we have a .prev
-        ## and if not we should throwErr
-        @invoke2(@prop("current").prev).then =>
-          @invoke2(@prop("current"), fn, options)
-
-      try
-        ## invoke fn and make sure its not strictly false
-        options.value = fn.call(@private("runnable").ctx, subject)
-        return subject if options.value
-      catch e
-        options.error = "Could not continue due to: " + e
-        return @_retry(retry, options)
-
-      ## retry outside of the try / catch block because
-      ## if retry throws errors we want those to bubble
-      options.error = "The final value was: " + options.value
-      return @_retry(retry, options) if _.isNull(options.value) or options.value is false
-
   Cypress.addDualCommand
 
     wait: (subject, msOrFnOrAlias, options = {}) ->
@@ -34,8 +12,7 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
       if _.isString(options)
         @throwErr("cy.wait() was passed invalid arguments. You cannot pass multiple strings. If you're trying to wait for multiple routes, use an array.")
 
-      _.defaults options,
-        log: true
+      _.defaults options, {log: true}
 
       args = [subject, msOrFnOrAlias, options]
 
@@ -52,8 +29,8 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
       ## increase the timeout by the delta
       @_timeout(ms, true)
 
-      if options.log
-        command = Cypress.Log.command
+      if options.log isnt false
+        options._log = Cypress.Log.command
           onConsole: -> {
             "Waited For": "#{ms}ms before continuing"
             "Returned": subject
@@ -62,8 +39,8 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
       Promise
         .delay(ms)
         .then ->
-          if command
-            command.snapshot().end()
+          if options._log
+            options._log.snapshot()
 
         .return(subject)
 
@@ -99,8 +76,8 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
       @_retry(retry, options) if _.isNull(options.value) or options.value is false
 
     _waitString: (subject, str, options) ->
-      if options.log
-        options.command = Cypress.Log.command
+      if options.log isnt false
+        options._log = Cypress.Log.command
           type: "parent"
           aliasType: "route"
 
@@ -152,14 +129,14 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
         ## if we have a command then continue to
         ## build up an array of referencesAlias
         ## because wait can reference an array of aliases
-        if options.command
-          referencesAlias = options.command.get("referencesAlias") ? []
+        if options._log
+          referencesAlias = options._log.get("referencesAlias") ? []
           aliases = [].concat(referencesAlias)
           aliases.push(str)
-          options.command.set "referencesAlias", aliases
+          options._log.set "referencesAlias", aliases
 
-        if command.name isnt "route"
-          @throwErr("cy.wait() can only accept aliases for routes.  The alias: '#{alias}' did not match a route.", options.command)
+        if command.get("name") isnt "route"
+          @throwErr("cy.wait() can only accept aliases for routes.  The alias: '#{alias}' did not match a route.", options._log)
 
         ## create shallow copy of each options object
         checkForXhr.call(@, str, alias, _.clone(options))
@@ -182,13 +159,13 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
           ## then return that, else return the array of xhr responses
           ret = if responses.length is 1 then responses[0] else responses
 
-          if options.command
-            options.command.set "onConsole", -> {
+          if options._log
+            options._log.set "onConsole", -> {
               "Waited For": @referencesAlias.join(", ")
               "Returned": ret
             }
 
-            options.command.snapshot().end()
+            options._log.snapshot().end()
 
           return ret
         .catch (err) ->

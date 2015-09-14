@@ -10,9 +10,9 @@ do ($Cypress, _) ->
     ## these are public because its expected other commands
     ## know about them and are expected to call them
     getNextAlias: ->
-      next = @prop("current").next
-      if next and next.name is "as"
-        next.args[0]
+      next = @prop("current").get("next")
+      if next and next.get("name") is "as"
+        next.get("args")[0]
 
     getAlias: (name, command) ->
       aliases = @prop("aliases") ? {}
@@ -42,42 +42,73 @@ do ($Cypress, _) ->
       if (not aliasRe.test(name)) and (name in availableAliases)
         @throwErr "Invalid alias: '#{name}'. You forgot the '@'. It should be written as: '@#{@_aliasDisplayName(name)}'."
 
-      command ?= @prop("current").name
+      command ?= @prop("current").get("name")
       @throwErr "cy.#{command}() could not find a registered alias for: '#{@_aliasDisplayName(name)}'. Available aliases are: '#{availableAliases.join(", ")}'."
 
-    _forceLoggingOptions: (args) ->
-      ## if the obj has options and
-      ## log is false, set it to true
-      for arg, i in args by -1
-        if _.isObject(arg) and (arg.log is false or arg.command)
-          opts = _.clone(arg)
-          opts.log = true
-          delete opts.command
-          args[i] = opts
-          return
+    _getCommandsUntilFirstParentOrValidSubject: (command, memo = []) ->
+      return null if not command
 
-    ## recursively inserts previous objects
-    ## up until it finds a parent command
-    _replayFrom: (current, memo = []) ->
+      ## push these onto the beginning of the commands array
+      memo.unshift(command)
+
+      ## break and return the memo
+      if command.get("type") is "parent" or @_contains(command.get("subject"))
+        return memo
+
+      @_getCommandsUntilFirstParentOrValidSubject(command.get("prev"), memo)
+
+    ## recursively inserts previous commands
+    _replayFrom: (current) ->
       ## reset each chainerId to the
       ## current value
       chainerId = @prop("chainerId")
 
-      insert = =>
-        _.each memo, (obj) =>
-          @_forceLoggingOptions(obj.args)
-          obj.chainerId = chainerId
-          @_insert(obj)
+      insert = (commands) =>
+        _.each commands, (cmd) =>
+          cmd.set("chainerId", chainerId)
 
-      if current
-        memo.unshift current
+          ## clone the command to prevent
+          ## mutating its properties
+          @insertCommand cmd.clone()
 
-        if current.type is "parent"
-          insert()
-        else
-          @_replayFrom current.prev, memo
-      else
-        insert()
+      ## - starting with the aliased command
+      ## - walk up to each prev command
+      ## - until you reach a parent command
+      ## - or until the subject is in the DOM
+      ## - from that command walk down inserting
+      ##   every command which changed the subject
+      ## - coming upon an assertion should only be
+      ##   inserted if the previous command should
+      ##   be replayed
+
+      commands = @_getCommandsUntilFirstParentOrValidSubject(current)
+
+      if commands
+        initialCommand = commands.shift()
+
+        insert _.reduce commands, (memo, command, index) ->
+          push = ->
+            memo.push(command)
+
+          switch
+            when command.get("type") is "assertion"
+              ## if we're an assertion and the prev command
+              ## is in the memo, then push this one
+              if command.get("prev") in memo
+                push()
+
+            when command.get("subject") isnt initialCommand.get("subject")
+              ## when our subjects dont match then
+              ## reset the initialCommand to this command
+              ## so the next commands can compare against
+              ## this one to figure out the changing subjects
+              initialCommand = command
+
+              push()
+
+          return memo
+
+        , [initialCommand]
 
     # cy
     #   .server()

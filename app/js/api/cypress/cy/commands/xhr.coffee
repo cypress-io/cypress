@@ -5,13 +5,13 @@ $Cypress.register "XHR", (Cypress, _, $) ->
   validAliasApi      = /^(\d+|all)$/
   requestXhr         = /\.request$/
 
-  SERVER     = "server"
-  TMP_SERVER = "tmpServer"
-  TMP_ROUTES = "tmpRoutes"
+  SERVER         = "server"
+  REBIND_SERVER  = "bindServer"
+  REBIND_ROUTES  = "bindRoutes"
 
   restore = ->
     if @prop
-      if server = @prop("server")
+      if server = @prop(SERVER)
         ## instead of wrapping this with
         ## Promise.all here why not move
         ## this to server.cancel()?
@@ -23,6 +23,24 @@ $Cypress.register "XHR", (Cypress, _, $) ->
 
   Cypress.on "restore", ->
     restore.call(@)
+
+  Cypress.on "before:window:load", (contentWindow) ->
+    ## whenever our content window is refreshed
+    ## due to either a cy.visit or something else
+    ## we need to reapply all of our server properties
+    ## and patch the XHR object. this means that even
+    ## if we applied the server successfully to a window
+    ## before-hand - no matter how we get a new window
+    ## from a command or action or what-have-you, we now
+    ## reapply the server + its routes to this new window
+    ##
+    ## down below we should ALWAYS have access to the
+    ## REBIND_SERVER and REBIND_ROUTES properties
+    if fn = @prop(REBIND_SERVER)
+      fn()
+
+    if routes = @prop(REBIND_ROUTES)
+      _.each routes, (route) -> route()
 
   ## need to upgrade our server
   ## to allow for a setRequest hook
@@ -157,6 +175,7 @@ $Cypress.register "XHR", (Cypress, _, $) ->
           ## assign this existing command
           ## to the xhr so we can reuse it later
           xhr.log = Cypress.Log.command
+            message:   ""
             name:      "xhr"
             alias:     alias
             aliasType: "route"
@@ -249,17 +268,24 @@ $Cypress.register "XHR", (Cypress, _, $) ->
 
       _.defaults options, defaults
 
+      ## always set REBIND_SERVER because
+      ## we may always want to use it
+      @prop REBIND_SERVER, =>
+        startServer.call(@, options)
+
       try
         startServer.call(@, options)
       catch
-        @prop TMP_SERVER, =>
-          startServer.call(@, options)
-
+        ## if we cant start the server right now
+        ## due to sinon or whatever just return null
         return null
 
     route: (args...) ->
-      ## bail if we dont have a server prop or a tmpServer prop
-      if not server = @prop("server") or tmpServer = @prop(TMP_SERVER)
+      ## bail if we dont have a server prop or a rebindServer prop
+      server       = @prop(SERVER)
+      rebindServer = @prop(REBIND_SERVER)
+
+      if not (server or rebindServer)
         @throwErr("cy.route() cannot be invoked before starting the cy.server()")
 
       responseMissing = =>
@@ -343,22 +369,28 @@ $Cypress.register "XHR", (Cypress, _, $) ->
         options.alias = alias
 
       applyRoute = (options) =>
-        ## if we have a tmpServer
-        if tmpServer
-          ## make sure we have tmpRoutes
-          tmpRoutes = @prop(TMP_ROUTES)
+        ## if we have a rebindServer we always want
+        ## to create functions to rebind the routes
+        if rebindServer
+          ## make sure we have rebindRoutes
+          rebindRoutes = @prop(REBIND_ROUTES)
 
-          if not tmpRoutes
+          if not rebindRoutes
             ## if we dont make them an array
-            tmpRoutes = @prop(TMP_ROUTES, [])
+            rebindRoutes = @prop(REBIND_ROUTES, [])
 
           ## push a new callback function
           ## which stubs the routes as soon
           ## as we we have a server
-          tmpRoutes.push =>
+          rebindRoutes.push =>
             stubRoute.call(@, options)
-        else
+
+        ## if we have a server go ahead and stub
+        ## the routes
+        if server
           stubRoute.call(@, options, server)
+
+        return options
 
       ## if our response is a string and
       ## its a fixture signature, then
@@ -385,8 +417,8 @@ $Cypress.register "XHR", (Cypress, _, $) ->
         applyRoute(options)
 
     respond: ->
-      ## bail if we dont have a server prop or a tmpServer prop
-      if not server = @prop("server")
+      ## bail if we dont have a server prop or a rebindServer prop
+      if not server = @prop(SERVER)
         @throwErr("cy.respond() cannot be invoked before starting the cy.server()")
 
       if not @getPendingRequests().length
@@ -406,17 +438,6 @@ $Cypress.register "XHR", (Cypress, _, $) ->
 
     getCompletedRequests: ->
       @prop("responses") ? []
-
-    checkForServer: (contentWindow) ->
-      if fn = @prop(TMP_SERVER)
-        fn()
-
-      if routes = @prop(TMP_ROUTES)
-        _.each routes, (route) -> route()
-
-      _.each [TMP_SERVER, TMP_ROUTES], (attr) =>
-        ## nuke these from cy
-        @prop(attr, null)
 
     _getLastXhrByAlias: (alias, prop) ->
       ## find the last request or response
@@ -472,6 +493,3 @@ $Cypress.register "XHR", (Cypress, _, $) ->
 
     getXhrTypeByAlias: (alias) ->
       if requestXhr.test(alias) then "request" else "response"
-
-
-

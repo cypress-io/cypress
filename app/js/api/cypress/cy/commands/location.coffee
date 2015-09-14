@@ -1,31 +1,47 @@
 $Cypress.register "Location", (Cypress, _, $) ->
 
+  Cypress.Cy.extend
+    _getLocation: (key) ->
+      remoteUrl = @private("window").location.toString()
+      location  = Cypress.Location.create(remoteUrl)
+
+      if key
+        location[key]
+      else
+        location
+
   Cypress.addParentCommand
     url: (options = {}) ->
       _.defaults options, {log: true}
 
-      href = @sync.location("href", {log: false})
-
-      if options.log
-        Cypress.Log.command
+      if options.log isnt false
+        options._log = Cypress.Log.command
           message: ""
-          end: true
-          snapshot: true
 
-      return href
+      getHref = =>
+        @_getLocation("href")
+
+      do resolveHref = =>
+        Promise.try(getHref).then (href) =>
+          @verifyUpcomingAssertions(href, options, {
+            onRetry: resolveHref
+          })
 
     hash: (options = {}) ->
       _.defaults options, {log: true}
 
-      hash = @sync.location("hash", {log: false})
-
-      if options.log
-        Cypress.Log.command
+      if options.log isnt false
+        options._log = Cypress.Log.command
           message: ""
-          end: true
-          snapshot: true
 
-      return hash
+      getHash = =>
+        @_getLocation("hash")
+
+      do resolveHash = =>
+        Promise.try(getHash).then (hash) =>
+          @verifyUpcomingAssertions(hash, options, {
+            onRetry: resolveHash
+          })
 
     location: (key, options) ->
       ## normalize arguments allowing key + options to be undefined
@@ -35,26 +51,25 @@ $Cypress.register "Location", (Cypress, _, $) ->
 
       options ?= {}
 
-      _.defaults options,
-        log: true
+      _.defaults options, {log: true}
 
-      # currentUrl = window.location.toString()
-      remoteUrl  = @private("window").location.toString()
+      getLocation = =>
+        location = @_getLocation()
 
-      location = Cypress.Location.create(remoteUrl)
+        ret = if _.isString(key)
+          ## use existential here because we only want to throw
+          ## on null or undefined values (and not empty strings)
+          location[key] ?
+            @throwErr("Location object does not have key: #{key}")
+        else
+          location
 
-      ret = if _.isString(key)
-        ## use existential here because we only want to throw
-        ## on null or undefined values (and not empty strings)
-        location[key] ?
-          @throwErr("Location object does have not have key: #{key}")
-      else
-        location
-
-      if options.log
-        Cypress.Log.command
+      if options.log isnt false
+        options._log = Cypress.Log.command
           message: key ? ""
-          end: true
-          snapshot: true
 
-      return ret
+      do resolveLocation = =>
+        Promise.try(getLocation).then (ret) =>
+          @verifyUpcomingAssertions(ret, options, {
+            onRetry: resolveLocation
+          })

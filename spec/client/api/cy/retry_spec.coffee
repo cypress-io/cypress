@@ -2,26 +2,26 @@ describe "$Cypress.Cy Retry Extension", ->
   enterCommandTestingMode()
 
   context "#_retry", ->
-    it "returns a nested cancellable promise", (done) ->
-      i = 0
-      fn = ->
-        i += 1
-        console.log "iteration #", i
+    # it "returns a nested cancellable promise", (done) ->
+    #   i = 0
+    #   fn = ->
+    #     i += 1
+    #     console.log "iteration #", i
 
-      fn = @sandbox.spy fn
+    #   fn = @sandbox.spy fn
 
-      @cy.noop({}).then(fn).until -> i is 3
+    #   @cy.noop({}).then(fn).until -> i is 3
 
-      @cy.on "retry", ->
-        ## abort after the 1st retry
-        ## which is the 2nd invocation of i
-        ## which should prevent the 3rd invocation
-        @Cypress.abort() if i is 2
+    #   @cy.on "retry", ->
+    #     ## abort after the 1st retry
+    #     ## which is the 2nd invocation of i
+    #     ## which should prevent the 3rd invocation
+    #     @Cypress.abort() if i is 2
 
-      @cy.on "cancel", ->
-        ## once from .then and once from .until
-        expect(fn.callCount).to.eq 2
-        done()
+    #   @cy.on "cancel", ->
+    #     ## once from .then and once from .until
+    #     expect(fn.callCount).to.eq 2
+    #     done()
 
     it "stores the runnables current timeout", ->
       prevTimeout = @test.timeout()

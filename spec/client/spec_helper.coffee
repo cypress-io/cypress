@@ -5,6 +5,7 @@ before ->
     c = Cypress ? @Cypress
     c.off("fail")
 
+  sinon.format = -> ""
   @sandbox = sinon.sandbox.create()
 
 beforeEach ->
@@ -41,25 +42,25 @@ window.getNames = (queue) ->
   _(queue).pluck("name")
 
 window.getFirstSubjectByName = (name) ->
-  _(@cy.queue).findWhere({name: name}).subject
+  @cy.commands.findWhere({name: name}).get("subject")
 
 window.enterAppTestingMode = ->
   beforeEach (done) ->
-    new Promise =>
-      @$iframe?.remove()
+    iframe = @$iframe ? $("iframe")
+    iframe.remove()
 
-      @$iframe = $("<iframe />", {
-        style: "position: absolute; right: 0; top: 50px; width: 40%; height: 100%;"
-        load: =>
-          $mainRegion = $("<div id='main-region'></div>")
-          @$iframe.contents().find("body").append $mainRegion
-          App.addRegions
-            mainRegion: Marionette.Region.extend(el: $mainRegion)
+    @$iframe = $("<iframe />", {
+      style: "position: absolute; right: 0; top: 50px; width: 40%; height: 100%;"
+      load: =>
+        $mainRegion = $("<div id='main-region'></div>")
+        @$iframe.contents().find("body").append $mainRegion
+        App.addRegions
+          mainRegion: Marionette.Region.extend(el: $mainRegion)
 
-          done()
-      })
+        done()
+    })
 
-      @$iframe.appendTo $("body")
+    @$iframe.appendTo $("body")
 
   afterEach ->
     @$iframe.remove()
@@ -74,6 +75,13 @@ window.enterIntegrationTestingMode = (fixture, options = {}) ->
   beforeEach ->
     ## load all of the modules
     @Cypress = $Cypress.create({loadModules: true})
+
+    ## immediately create the chai instance so
+    ## we get our custom properties but then
+    ## restore it to keep things simple
+    @chai = $Cypress.Chai.create(@Cypress, {})
+    @chai.restore()
+    @chai.addCustomProperties()
 
     @Cypress.start()
 
@@ -105,6 +113,13 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
 
       ## load all of the modules
       @Cypress = $Cypress.create({loadModules: true})
+
+      ## immediately create the chai instance so
+      ## we get our custom properties but then
+      ## restore it to keep things simple
+      @chai = $Cypress.Chai.create(@Cypress, {})
+      @chai.restore()
+      @chai.addCustomProperties()
 
       @Cypress.start()
 
@@ -157,7 +172,9 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
     ## if we've changed the src by navigating
     ## away (aka cy.visit(...)) then we need
     ## to reload the fixture again and then setup
-    if /\.html$/.test(@$iframe.attr("src"))
+    fixture = fixture.split(".html").join("") + ".html"
+
+    if _.endsWith(@$iframe.prop("contentWindow").location.href, fixture)
       @setup()
     else
       @loadDom(fixture).then @setup

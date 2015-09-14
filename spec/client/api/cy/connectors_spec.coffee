@@ -26,17 +26,17 @@ describe "$Cypress.Cy Connectors Commands", ->
       ## on the returned object, we will know
 
       @cy.then ->
-        expect(@cy.queue.length).to.eq 2
+        expect(@cy.commands.length).to.eq 2
 
-        lastThen = _(@cy.queue).last()
+        lastThen = @cy.commands.last()
 
-        expect(lastThen.args[0]).to.be.a.function
-        expect(lastThen.args[1].length).to.eq 1
+        expect(lastThen.get("args")[0]).to.be.a.function
+        expect(lastThen.get("args")[1].length).to.eq 1
 
         ## if our browser supports the .name property
         ## of a function, then test it too to make
         ## sure its called 'done'
-        if name = lastThen.args[1].name
+        if name = lastThen.get("args")[1].name
           expect(name).to.eq "done"
 
     it "assigns prop next if .then matched what would be added by mocha", (done) ->
@@ -105,6 +105,79 @@ describe "$Cypress.Cy Connectors Commands", ->
       ## restore back to the global $
       @Cypress.option "jQuery", $
 
+    describe "assertion verification", ->
+      beforeEach ->
+        delete @remoteWindow.$.fn.foo
+
+        @allowErrors()
+        @currentTest.timeout(100)
+
+        @chai = $Cypress.Chai.create(@Cypress, {})
+        @Cypress.on "log", (log) =>
+          if log.get("name") is "assert"
+            @log = log
+
+      afterEach ->
+        @chai.restore()
+
+      it "eventually passes the assertion", ->
+        @cy.on "retry", _.after 2, =>
+          @remoteWindow.$.fn.foo = -> "foo"
+
+        @cy.get("input:first").invoke("foo").should("eq", "foo").then ->
+          @chai.restore()
+
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("passed")
+          expect(@log.get("end")).to.be.true
+
+      it "eventually fails the assertion", (done) ->
+        @cy.on "retry", _.after 2, =>
+          @remoteWindow.$.fn.foo = -> "foo"
+
+        @cy.on "fail", (err) =>
+          @chai.restore()
+
+          expect(err.message).to.include(@log.get("error").message)
+          expect(err.message).not.to.include("undefined")
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("failed")
+          expect(@log.get("error")).to.be.an.instanceof(Error)
+
+          done()
+
+        @cy.get("input:first").invoke("foo").should("eq", "bar")
+
+      it "can still fail on invoke", (done) ->
+        @Cypress.on "log", (@log) =>
+
+        @cy.on "fail", (err) =>
+          @chai.restore()
+
+          expect(err.message).to.include(@log.get("error").message)
+          expect(err.message).not.to.include("undefined")
+          expect(@log.get("name")).to.eq("invoke")
+          expect(@log.get("state")).to.eq("failed")
+          expect(@log.get("error")).to.be.an.instanceof(Error)
+
+          done()
+
+        @cy.get("input:first").invoke("foobarbaz")
+
+      it "does not log an additional log on failure", (done) ->
+        @remoteWindow.$.fn.foo = -> "foo"
+
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", ->
+          expect(logs.length).to.eq(3)
+          done()
+
+        @cy.get("input:first").invoke("foo").should("eq", "bar")
+
     describe "remote DOM subjects", ->
       it "is invoked on the remote DOM subject", ->
         @remoteWindow.$.fn.foo = -> "foo"
@@ -148,10 +221,11 @@ describe "$Cypress.Cy Connectors Commands", ->
       describe "errors", ->
         beforeEach ->
           @allowErrors()
+          @currentTest.timeout(200)
 
         it "bubbles up automatically", (done) ->
           @cy.on "fail", (err) ->
-            expect(err.message).to.eq "fn.err failed!"
+            expect(err.message).to.include "fn.err failed!"
             done()
 
           @cy.noop(@obj).invoke("err")
@@ -218,6 +292,11 @@ describe "$Cypress.Cy Connectors Commands", ->
       it "snapshots after invoking", ->
         @cy.noop({foo: "foo"}).invoke("foo").then ->
           expect(@log.get("snapshot")).to.be.an("object")
+
+      it "ends", ->
+        @cy.noop({foo: "foo"}).invoke("foo").then ->
+          expect(@log.get("state")).to.eq("passed")
+          expect(@log.get("end")).to.be.true
 
       it "logs $el if subject is element", ->
         @cy.get("button:first").invoke("hide").then ($el) ->
@@ -300,11 +379,12 @@ describe "$Cypress.Cy Connectors Commands", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
         @allowErrors()
+        @currentTest.timeout(200)
 
       it "throws when property does not exist on the subject", (done) ->
         @cy.on "fail", (err) =>
-          expect(err.message).to.eq "cy.invoke() errored because the property: 'foo' does not exist on your subject."
-          expect(@log.get("error")).to.eq err
+          expect(err.message).to.include "cy.invoke() errored because the property: 'foo' does not exist on your subject."
+          expect(@log.get("error")).to.include err
           done()
 
         @cy.noop({}).invoke("foo")
@@ -351,7 +431,7 @@ describe "$Cypress.Cy Connectors Commands", ->
         @cy.on "fail", (err) =>
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "its"
-            Error: "CypressError: cy.its() errored because the property: 'baz' does not exist on your subject."
+            Error: "CypressError: Timed out retrying: cy.its() errored because the property: 'baz' does not exist on your subject."
             Subject: {foo: "bar"}
           }
           done()
@@ -365,13 +445,14 @@ describe "$Cypress.Cy Connectors Commands", ->
     describe "errors", ->
       beforeEach ->
         @allowErrors()
+        @currentTest.timeout(200)
 
       it "throws when property does not exist on the subject", (done) ->
         @Cypress.on "log", (@log) =>
 
         @cy.on "fail", (err) =>
-          expect(err.message).to.eq "cy.its() errored because the property: 'foo' does not exist on your subject."
-          expect(@log.get("error")).to.eq err
+          expect(err.message).to.include "cy.its() errored because the property: 'foo' does not exist on your subject."
+          expect(@log.get("error")).to.include err
           done()
 
         @cy.noop({}).its("foo")

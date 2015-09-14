@@ -7,7 +7,7 @@ do ($Cypress, _) ->
       switch
         when options.length isnt null
           if not _.isFinite(options.length)
-            @throwErr("options.length must be a number", options.command)
+            @throwErr("options.length must be a number", options._log)
 
           if length is options.length
             return $el

@@ -26,7 +26,7 @@
       ## the first view we show is always going to become the mainView of our
       ## controller (whether its a layout or another view type).  So if this
       ## *is* a layout, when we show other regions inside of that layout, we
-      ## check for the existance of a mainView first, so our controller is only
+      ## check for the existence of a mainView first, so our controller is only
       ## closed down when the original mainView is closed.
 
       return if @_mainView

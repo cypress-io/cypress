@@ -75,6 +75,58 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("select:first").select("de_dust2", {force: true})
 
+    describe "assertion verification", ->
+      beforeEach ->
+        @allowErrors()
+        @currentTest.timeout(300)
+
+        @chai = $Cypress.Chai.create(@Cypress, {})
+        @Cypress.on "log", (log) =>
+          if log.get("name") is "assert"
+            @log = log
+
+      afterEach ->
+        @chai.restore()
+
+      it "eventually passes the assertion", ->
+        @cy.$("select:first").change ->
+          _.delay =>
+            $(@).addClass("selected")
+          , 100
+
+        @cy.get("select:first").select("de_nuke").should("have.class", "selected").then ->
+          @chai.restore()
+
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("passed")
+          expect(@log.get("end")).to.be.true
+
+      it "eventually fails the assertion", (done) ->
+        @cy.on "fail", (err) =>
+          @chai.restore()
+
+          expect(err.message).to.include(@log.get("error").message)
+          expect(err.message).not.to.include("undefined")
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("failed")
+          expect(@log.get("error")).to.be.an.instanceof(Error)
+
+          done()
+
+        @cy.get("select:first").select("de_nuke").should("have.class", "selected")
+
+      it "does not log an additional log on failure", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", ->
+          expect(logs.length).to.eq(3)
+          done()
+
+        @cy.get("select:first").select("de_nuke").should("have.class", "selected")
+
     describe "events", ->
       it "emits click event", (done) ->
         @cy.$("select[name=maps]").click -> done()
@@ -105,6 +157,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe "errors", ->
       beforeEach ->
+        @currentTest.timeout(200)
         @allowErrors()
 
       it "throws when not a dom subject", (done) ->
@@ -190,7 +243,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "snpahots and ends", ->
         @cy.get("select:first").select("de_dust2").then ->
-          expect(@log.get("state")).to.eq("success")
+          expect(@log.get("state")).to.eq("passed")
           expect(@log.get("snapshot")).to.be.an("object")
 
       it "#onConsole", ->
@@ -279,6 +332,32 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("#contenteditable").type("foo").then ($div) ->
         text = _.clean $div.text()
         expect(text).to.eq _.clean(oldText + "foo")
+
+    it "delays 50ms before resolving", (done) ->
+      waited = false
+
+      @cy.$(":text:first").on "change", (e) =>
+        _.delay ->
+          waited = true
+        , 50
+
+        @cy.on "invoke:end", ->
+          expect(waited).to.be.true
+          done()
+
+      @cy.get(":text:first").type("foo{enter}")
+
+    it "increases the timeout delta", (done) ->
+      prevTimeout = @test.timeout()
+
+      @cy.on "invoke:end", (cmd) =>
+        if cmd.get("name") is "type"
+          ## 40 is from 4 keys
+          ## 100 is from .click + .focus delays!
+          expect(@test.timeout()).to.eq 40 + 100 + 50 + prevTimeout
+          done()
+
+      @cy.get(":text:first").type("foo{enter}")
 
     # describe "input types", ->
       # _.each ["password", "email", "number", "date", "week", "month", "time", "datetime", "datetime-local", "search", "url"], (type) ->
@@ -1211,8 +1290,8 @@ describe "$Cypress.Cy Actions Commands", ->
         it "triggers form submit synchronously before type logs or resolves", ->
           events = []
 
-          @cy.on "invoke:start", (obj) ->
-            events.push "#{obj.name}:start"
+          @cy.on "invoke:start", (log) ->
+            events.push "#{log.get('name')}:start"
 
           @forms.find("#single-input").submit (e) ->
             e.preventDefault()
@@ -1227,8 +1306,8 @@ describe "$Cypress.Cy Actions Commands", ->
 
               events.push "#{log.get('name')}:log:#{state}"
 
-          @cy.on "invoke:end", (obj) ->
-            events.push "#{obj.name}:end"
+          @cy.on "invoke:end", (log) ->
+            events.push "#{log.get('name')}:end"
 
           @cy.get("#single-input input").type("f{enter}").then ->
             expect(events).to.deep.eq [
@@ -1392,6 +1471,58 @@ describe "$Cypress.Cy Actions Commands", ->
 
           @cy.get("#multiple-inputs-and-multiple-submits input:first").type("foo{enter}").then -> done()
 
+    describe "assertion verification", ->
+      beforeEach ->
+        @allowErrors()
+        @currentTest.timeout(100)
+
+        @chai = $Cypress.Chai.create(@Cypress, {})
+        @Cypress.on "log", (log) =>
+          if log.get("name") is "assert"
+            @log = log
+
+      afterEach ->
+        @chai.restore()
+
+      it "eventually passes the assertion", ->
+        @cy.$("input:first").keyup ->
+          _.delay =>
+            $(@).addClass("typed")
+          , 100
+
+        @cy.get("input:first").type("f").should("have.class", "typed").then ->
+          @chai.restore()
+
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("passed")
+          expect(@log.get("end")).to.be.true
+
+      it "eventually fails the assertion", (done) ->
+        @cy.on "fail", (err) =>
+          @chai.restore()
+
+          expect(err.message).to.include(@log.get("error").message)
+          expect(err.message).not.to.include("undefined")
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("failed")
+          expect(@log.get("error")).to.be.an.instanceof(Error)
+
+          done()
+
+        @cy.get("input:first").type("f").should("have.class", "typed")
+
+      it "does not log an additional log on failure", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", ->
+          expect(logs.length).to.eq(3)
+          done()
+
+        @cy.get("input:first").type("f").should("have.class", "typed")
+
     describe ".log", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
@@ -1482,6 +1613,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe "errors", ->
       beforeEach ->
+        @currentTest.timeout(200)
         @allowErrors()
 
       it "throws when not a dom subject", (done) ->
@@ -1664,8 +1796,69 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#input-covered-in-span").clear({timeout: 1000, interval: 60})
 
+    describe "assertion verification", ->
+      beforeEach ->
+        @allowErrors()
+        @currentTest.timeout(100)
+
+        @chai = $Cypress.Chai.create(@Cypress, {})
+        @Cypress.on "log", (log) =>
+          if log.get("name") is "assert"
+            @log = log
+
+      afterEach ->
+        @chai.restore()
+
+      it "eventually passes the assertion", ->
+        @cy.$("input:first").keyup ->
+          _.delay =>
+            $(@).addClass("cleared")
+          , 100
+
+        @cy.get("input:first").clear().should("have.class", "cleared").then ->
+          @chai.restore()
+
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("passed")
+          expect(@log.get("end")).to.be.true
+
+      it "eventually passes the assertion on multiple inputs", ->
+        @cy.$("input").keyup ->
+          _.delay =>
+            $(@).addClass("cleared")
+          , 100
+
+        @cy.get("input").invoke("slice", 0, 2).clear().should("have.class", "cleared")
+
+      it "eventually fails the assertion", (done) ->
+        @cy.on "fail", (err) =>
+          @chai.restore()
+
+          expect(err.message).to.include(@log.get("error").message)
+          expect(err.message).not.to.include("undefined")
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("failed")
+          expect(@log.get("error")).to.be.an.instanceof(Error)
+
+          done()
+
+        @cy.get("input:first").clear().should("have.class", "cleared")
+
+      it "does not log an additional log on failure", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", ->
+          expect(logs.length).to.eq(3)
+          done()
+
+        @cy.get("input:first").clear().should("have.class", "cleared")
+
     describe "errors", ->
       beforeEach ->
+        @currentTest.timeout(200)
         @allowErrors()
 
       it "throws when not a dom subject", (done) ->
@@ -1779,6 +1972,17 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get("input:first").clear()
 
+      it "ends", ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log) if log.get("name") is "clear"
+
+        @cy.get("input").invoke("slice", 0, 2).clear().then ->
+          _.each logs, (log) ->
+            expect(log.get("state")).to.eq("passed")
+            expect(log.get("end")).to.be.true
+
       it "snapshots after clicking", ->
         @cy.get("input:first").clear().then ($input) ->
           expect(@log.get("snapshot")).to.be.an("object")
@@ -1845,6 +2049,80 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#checkbox-covered-in-span").check({timeout: 1000, interval: 60})
 
+    it "delays 50ms before resolving", (done) ->
+      waited = false
+
+      @cy.$("form:first").on "submit", (e) =>
+        _.delay ->
+          waited = true
+        , 50
+
+        @cy.on "invoke:end", ->
+          expect(waited).to.be.true
+          done()
+
+      @cy.get("form:first").submit()
+
+    describe "assertion verification", ->
+      beforeEach ->
+        @allowErrors()
+        @currentTest.timeout(100)
+
+        @chai = $Cypress.Chai.create(@Cypress, {})
+        @Cypress.on "log", (log) =>
+          if log.get("name") is "assert"
+            @log = log
+
+      afterEach ->
+        @chai.restore()
+
+      it "eventually passes the assertion", ->
+        @cy.$(":checkbox:first").click ->
+          _.delay =>
+            $(@).addClass("checked")
+          , 100
+
+        @cy.get(":checkbox:first").check().should("have.class", "checked").then ->
+          @chai.restore()
+
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("passed")
+          expect(@log.get("end")).to.be.true
+
+      it "eventually passes the assertion on multiple :checkboxs", ->
+        @cy.$(":checkbox").click ->
+          _.delay =>
+            $(@).addClass("checked")
+          , 100
+
+        @cy.get(":checkbox").invoke("slice", 0, 2).check().should("have.class", "checked")
+
+      it "eventually fails the assertion", (done) ->
+        @cy.on "fail", (err) =>
+          @chai.restore()
+
+          expect(err.message).to.include(@log.get("error").message)
+          expect(err.message).not.to.include("undefined")
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("failed")
+          expect(@log.get("error")).to.be.an.instanceof(Error)
+
+          done()
+
+        @cy.get(":checkbox:first").check().should("have.class", "checked")
+
+      it "does not log an additional log on failure", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", ->
+          expect(logs.length).to.eq(3)
+          done()
+
+        @cy.get(":checkbox:first").check().should("have.class", "checked")
+
     describe "events", ->
       it "emits click event", (done) ->
         @cy.$("[name=colors][value=blue]").click -> done()
@@ -1860,6 +2138,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe "errors", ->
       beforeEach ->
+        @currentTest.timeout(200)
         @allowErrors()
 
       it "throws when subject isnt dom", (done) ->
@@ -2011,7 +2290,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "ends command when checkbox is already checked", ->
         @cy.get("[name=colors][value=blue]").check().check().then ->
-          expect(@log.get("state")).eq("success")
+          expect(@log.get("state")).eq("passed")
 
       it "#onConsole", ->
         @cy.get("[name=colors][value=blue]").check().then ($input) ->
@@ -2079,6 +2358,68 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#checkbox-covered-in-span").uncheck({timeout: 1000, interval: 60})
 
+    describe "assertion verification", ->
+      beforeEach ->
+        @allowErrors()
+        @currentTest.timeout(100)
+
+        @chai = $Cypress.Chai.create(@Cypress, {})
+        @Cypress.on "log", (log) =>
+          if log.get("name") is "assert"
+            @log = log
+
+      afterEach ->
+        @chai.restore()
+
+      it "eventually passes the assertion", ->
+        @cy.$(":checkbox:first").prop("checked", true).click ->
+          _.delay =>
+            $(@).addClass("unchecked")
+          , 100
+
+        @cy.get(":checkbox:first").uncheck().should("have.class", "unchecked").then ->
+          @chai.restore()
+
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("passed")
+          expect(@log.get("end")).to.be.true
+
+      it "eventually passes the assertion on multiple :checkboxs", ->
+        @cy.$(":checkbox").prop("checked", true).click ->
+          _.delay =>
+            $(@).addClass("unchecked")
+          , 100
+
+        @cy.get(":checkbox").invoke("slice", 0, 2).uncheck().should("have.class", "unchecked")
+
+      it "eventually fails the assertion", (done) ->
+        @cy.$(":checkbox:first").prop("checked", true)
+
+        @cy.on "fail", (err) =>
+          @chai.restore()
+
+          expect(err.message).to.include(@log.get("error").message)
+          expect(err.message).not.to.include("undefined")
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("failed")
+          expect(@log.get("error")).to.be.an.instanceof(Error)
+
+          done()
+
+        @cy.get(":checkbox:first").uncheck().should("have.class", "unchecked")
+
+      it "does not log an additional log on failure", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", ->
+          expect(logs.length).to.eq(3)
+          done()
+
+        @cy.get(":checkbox:first").uncheck().should("have.class", "unchecked")
+
     describe "events", ->
       it "emits click event", (done) ->
         @cy.$("[name=colors][value=blue]").prop("checked", true).click -> done()
@@ -2090,6 +2431,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe "errors", ->
       beforeEach ->
+        @currentTest.timeout(200)
         @allowErrors()
 
       it "throws specifically on a radio", (done) ->
@@ -2213,7 +2555,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "ends command when checkbox is already unchecked", ->
         @cy.get("[name=colors][value=blue]").invoke("prop", "checked", false).uncheck().then ->
-          expect(@log.get("state")).eq("success")
+          expect(@log.get("state")).eq("passed")
 
       it "#onConsole", ->
         @cy.get("[name=colors][value=blue]").uncheck().then ($input) ->
@@ -2313,15 +2655,100 @@ describe "$Cypress.Cy Actions Commands", ->
       ## because the submit method does not trigger beforeunload
       ## synchronously.
 
-      @cy.on "invoke:end", (obj) =>
-        if obj.name is "submit"
+      @cy.on "command:returned:value", (cmd, ret) =>
+        if cmd.get("name") is "submit"
           ## expect our isReady to be pending
           expect(@cy.prop("ready").promise.isPending()).to.be.true
 
       @cy.get("form:first").submit()
 
+    it "delays 50ms before resolving", (done) ->
+      waited = false
+
+      @cy.$("form:first").on "submit", (e) =>
+        _.delay ->
+          waited = true
+        , 50
+
+        @cy.on "invoke:end", ->
+          expect(waited).to.be.true
+          done()
+
+      @cy.get("form:first").submit()
+
+    it "increases the timeout delta", (done) ->
+      prevTimeout = @test.timeout()
+
+      @cy.on "invoke:end", (cmd) =>
+        if cmd.get("name") is "submit"
+          expect(@test.timeout()).to.eq 50 + prevTimeout
+          done()
+
+      @cy.get("form:first").submit()
+
+    describe "assertion verification", ->
+      beforeEach ->
+        @allowErrors()
+        @currentTest.timeout(100)
+
+        @chai = $Cypress.Chai.create(@Cypress, {})
+        @Cypress.on "log", (log) =>
+          if log.get("name") is "assert"
+            @log = log
+
+      afterEach ->
+        @chai.restore()
+
+      it "eventually passes the assertion", ->
+        @cy.on "fail", (err) -> debugger
+
+        @cy.$("form:first").submit ->
+          _.delay =>
+            $(@).addClass("submitted")
+          , 100
+
+          return false
+
+        @cy.get("form:first").submit().should("have.class", "submitted").then ->
+          @chai.restore()
+
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("passed")
+          expect(@log.get("end")).to.be.true
+
+      it "eventually fails the assertion", (done) ->
+        @cy.$("form:first").submit -> return false
+
+        @cy.on "fail", (err) =>
+          @chai.restore()
+
+          expect(err.message).to.include(@log.get("error").message)
+          expect(err.message).not.to.include("undefined")
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("failed")
+          expect(@log.get("error")).to.be.an.instanceof(Error)
+
+          done()
+
+        @cy.get("form:first").submit().should("have.class", "submitted")
+
+      it "does not log an additional log on failure", (done) ->
+        @cy.$("form:first").submit -> return false
+
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", ->
+          expect(logs.length).to.eq(3)
+          done()
+
+        @cy.get("form:first").submit().should("have.class", "submitted")
+
     describe "errors", ->
       beforeEach ->
+        @currentTest.timeout(200)
         @allowErrors()
 
       it "is a child command", (done) ->
@@ -2475,6 +2902,56 @@ describe "$Cypress.Cy Actions Commands", ->
         .focused().then ($focused) ->
           expect($focused).to.be.null
 
+    describe "assertion verification", ->
+      beforeEach ->
+        @allowErrors()
+        @currentTest.timeout(300)
+
+        @chai = $Cypress.Chai.create(@Cypress, {})
+        @Cypress.on "log", (log) =>
+          if log.get("name") is "assert"
+            @log = log
+
+      afterEach ->
+        @chai.restore()
+
+      it "eventually passes the assertion", ->
+        @cy.on "retry", _.after 2, =>
+          @cy.$(":text:first").addClass("focused").focus()
+
+        @cy.focused().should("have.class", "focused").then ->
+          @chai.restore()
+
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("passed")
+          expect(@log.get("end")).to.be.true
+
+      it "eventually fails the assertion", (done) ->
+        @cy.on "fail", (err) =>
+          @chai.restore()
+
+          expect(err.message).to.include(@log.get("error").message)
+          expect(err.message).not.to.include("undefined")
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("failed")
+          expect(@log.get("error")).to.be.an.instanceof(Error)
+
+          done()
+
+        @cy.focused().should("have.class", "focused")
+
+      it "does not log an additional log on failure", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", ->
+          expect(logs.length).to.eq(2)
+          done()
+
+        @cy.focused().should("have.class", "focused")
+
     describe ".log", ->
       beforeEach ->
         @cy.$("input:first").get(0).focus()
@@ -2487,7 +2964,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "ends immediately", ->
         @cy.focused().then ->
           expect(@log.get("end")).to.be.true
-          expect(@log.get("state")).to.eq("success")
+          expect(@log.get("state")).to.eq("passed")
 
       it "snapshots immediately", ->
         @cy.focused().then ->
@@ -2575,6 +3052,82 @@ describe "$Cypress.Cy Actions Commands", ->
         .focused().then ($ce) ->
           expect($ce.get(0)).to.eq ce.get(0)
 
+    it "delays 50ms before resolving", (done) ->
+      waited = false
+
+      @cy.$("#focus input").on "focus", (e) =>
+        _.delay ->
+          waited = true
+        , 50
+
+        @cy.on "invoke:end", ->
+          expect(waited).to.be.true
+          done()
+
+      @cy.get("#focus input").focus()
+
+    it "increases the timeout delta", (done) ->
+      prevTimeout = @test.timeout()
+
+      @cy.on "invoke:end", (cmd) =>
+        if cmd.get("name") is "focus"
+          expect(@test.timeout()).to.eq 50 + prevTimeout
+          done()
+
+      @cy.get("#focus input").focus()
+
+    describe "assertion verification", ->
+      beforeEach ->
+        @allowErrors()
+        @currentTest.timeout(300)
+
+        @chai = $Cypress.Chai.create(@Cypress, {})
+        @Cypress.on "log", (log) =>
+          if log.get("name") is "assert"
+            @log = log
+
+      afterEach ->
+        @chai.restore()
+
+      it "eventually passes the assertion", ->
+        @cy.$(":text:first").focus ->
+          _.delay =>
+            $(@).addClass("focused")
+          , 100
+
+        @cy.get(":text:first").focus().should("have.class", "focused").then ->
+          @chai.restore()
+
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("passed")
+          expect(@log.get("end")).to.be.true
+
+      it "eventually fails the assertion", (done) ->
+        @cy.on "fail", (err) =>
+          @chai.restore()
+
+          expect(err.message).to.include(@log.get("error").message)
+          expect(err.message).not.to.include("undefined")
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("failed")
+          expect(@log.get("error")).to.be.an.instanceof(Error)
+
+          done()
+
+        @cy.get(":text:first").focus().should("have.class", "focused")
+
+      it "does not log an additional log on failure", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", ->
+          expect(logs.length).to.eq(3)
+          done()
+
+        @cy.get(":text:first").focus().should("have.class", "focused")
+
     describe ".log", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
@@ -2622,6 +3175,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe "errors", ->
       beforeEach ->
+        @currentTest.timeout(200)
         @allowErrors()
 
       it "throws when not a dom subject", (done) ->
@@ -2764,6 +3318,84 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#input-types [type=time]").focus().invoke("val", "03:15:00").blur()
 
+    it "delays 50ms before resolving", (done) ->
+      waited = false
+
+      @cy.$("input:first").on "blur", (e) =>
+        _.delay ->
+          waited = true
+        , 50
+
+        @cy.on "invoke:end", ->
+          expect(waited).to.be.true
+          done()
+
+      @cy.get("input:first").focus().blur()
+
+    it "increases the timeout delta", (done) ->
+      prevTimeout = @test.timeout()
+
+      @cy.on "invoke:end", (cmd) =>
+        if cmd.get("name") is "blur"
+          expect(@test.timeout()).to.eq 50 + prevTimeout
+          done()
+
+      @cy.get("input:first").focus().blur()
+
+    describe "assertion verification", ->
+      beforeEach ->
+        @allowErrors()
+        @currentTest.timeout(300)
+
+        @chai = $Cypress.Chai.create(@Cypress, {})
+        @Cypress.on "log", (log) =>
+          if log.get("name") is "assert"
+            @log = log
+
+      afterEach ->
+        @chai.restore()
+
+      it "eventually passes the assertion", ->
+        @cy.on "fail", (err) -> debugger
+
+        @cy.$(":text:first").blur ->
+          _.delay =>
+            $(@).addClass("blured")
+          , 100
+
+        @cy.get(":text:first").focus().blur().should("have.class", "blured").then ->
+          @chai.restore()
+
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("passed")
+          expect(@log.get("end")).to.be.true
+
+      it "eventually fails the assertion", (done) ->
+        @cy.on "fail", (err) =>
+          @chai.restore()
+
+          expect(err.message).to.include(@log.get("error").message)
+          expect(err.message).not.to.include("undefined")
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("failed")
+          expect(@log.get("error")).to.be.an.instanceof(Error)
+
+          done()
+
+        @cy.get(":text:first").focus().blur().should("have.class", "blured")
+
+      it "does not log an additional log on failure", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", ->
+          expect(logs.length).to.eq(4)
+          done()
+
+        @cy.get(":text:first").focus().blur().should("have.class", "blured")
+
     describe ".log", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
@@ -2810,6 +3442,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe "errors", ->
       beforeEach ->
+        @currentTest.timeout(200)
         @allowErrors()
 
       it "throws when not a dom subject", (done) ->
@@ -2907,17 +3540,17 @@ describe "$Cypress.Cy Actions Commands", ->
         .get("input:first").focus()
         .get("input:text:last").dblclick()
 
-    it "inserts artificial delay of 10ms", ->
-      @cy.on "invoke:start", (obj) =>
-        if obj.name is "dblclick"
+    it "inserts artificial delay of 50ms", ->
+      @cy.on "invoke:start", (cmd) =>
+        if cmd.get("name") is "dblclick"
           @delay = @sandbox.spy Promise.prototype, "delay"
 
       @cy.get("#button").dblclick().then ->
-        expect(@delay).to.be.calledWith 10
+        expect(@delay).to.be.calledWith 50
 
     it "can operate on a jquery collection", ->
       dblclicks = 0
-      buttons = @cy.$("button")
+      buttons = @cy.$("button").slice(0, 2)
       buttons.dblclick ->
         dblclicks += 1
         return false
@@ -2926,7 +3559,7 @@ describe "$Cypress.Cy Actions Commands", ->
       expect(buttons.length).to.be.gt 1
 
       ## make sure each button received its dblclick event
-      @cy.get("button").dblclick().then ($buttons) ->
+      @cy.get("button").invoke("slice", 0, 2).dblclick().then ($buttons) ->
         expect($buttons.length).to.eq dblclicks
 
     it "can cancel multiple dblclicks", (done) ->
@@ -2986,17 +3619,20 @@ describe "$Cypress.Cy Actions Commands", ->
     it "increases the timeout delta after each dblclick", (done) ->
       prevTimeout = @test.timeout()
 
-      count = @cy.$("button").length
+      count = @cy.$("button").slice(0, 3).length
 
-      @cy.on "invoke:end", (obj) =>
-        if obj.name is "dblclick"
-          expect(@test.timeout()).to.eq (count * 10) + prevTimeout
+      @cy.on "invoke:end", (cmd) =>
+        if cmd.get("name") is "dblclick"
+          ## 100 here because dbclick + focus each are 50ms
+          num = (count * 100) + prevTimeout
+          expect(@test.timeout()).to.be.within(num, num + 100)
           done()
 
-      @cy.get("button").dblclick()
+      @cy.get("button").invoke("slice", 0, 3).dblclick()
 
     describe "errors", ->
       beforeEach ->
+        @currentTest.timeout(200)
         @allowErrors()
 
       it "throws when not a dom subject", (done) ->
@@ -3086,8 +3722,8 @@ describe "$Cypress.Cy Actions Commands", ->
         button = -> $("<button class='dblclicks'>dblclick</button")
         @cy.$("body").append(button()).append(button())
 
-        @Cypress.on "log", (obj) ->
-          dblclicks.push(obj) if obj.get("name") is "dblclick"
+        @Cypress.on "log", (log) ->
+          dblclicks.push(log) if log.get("name") is "dblclick"
 
         @cy.get("button.dblclicks").dblclick().then ($buttons) ->
           expect($buttons.length).to.eq(2)
@@ -3267,17 +3903,31 @@ describe "$Cypress.Cy Actions Commands", ->
         .get("input:first").focus()
         .get("input:text:last").click()
 
-    it "inserts artificial delay of 10ms", ->
-      @cy.on "invoke:start", (obj) =>
-        if obj.name is "click"
-          @delay = @sandbox.spy Promise.prototype, "delay"
+    it "inserts artificial delay of 50ms", ->
+      @cy.on "invoke:start", (cmd) =>
+        if cmd.get("name") is "click"
+          @delay = @sandbox.spy Promise, "delay"
 
       @cy.get("#button").click().then ->
-        expect(@delay).to.be.calledWith 10
+        expect(@delay).to.be.calledWith 50
+
+    it "delays 50ms before resolving", (done) ->
+      waited = false
+
+      @cy.$("button:first").on "click", (e) =>
+        _.delay ->
+          waited = true
+        , 50
+
+        @cy.on "invoke:end", ->
+          expect(waited).to.be.true
+          done()
+
+      @cy.get("button:first").click()
 
     it "can operate on a jquery collection", ->
       clicks = 0
-      buttons = @cy.$("button")
+      buttons = @cy.$("button").slice(0, 3)
       buttons.click ->
         clicks += 1
         return false
@@ -3286,7 +3936,7 @@ describe "$Cypress.Cy Actions Commands", ->
       expect(buttons.length).to.be.gt 1
 
       ## make sure each button received its click event
-      @cy.get("button").click().then ($buttons) ->
+      @cy.get("button").invoke("slice", 0, 3).click().then ($buttons) ->
         expect($buttons.length).to.eq clicks
 
     it "can cancel multiple clicks", (done) ->
@@ -3348,9 +3998,11 @@ describe "$Cypress.Cy Actions Commands", ->
 
       count = @cy.$("#three-buttons button").length
 
-      @cy.on "invoke:end", (obj) =>
-        if obj.name is "click"
-          expect(@test.timeout()).to.eq (count * 10) + prevTimeout
+      @cy.on "invoke:end", (cmd) =>
+        if cmd.get("name") is "click"
+          ## 100ms here because click + focus are each
+          num = (count * 100) + prevTimeout
+          expect(@test.timeout()).to.be.within(num, num + 100)
           done()
 
       @cy.get("#three-buttons button").click()
@@ -3395,6 +4047,68 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#button").click().then ->
         expect(retried).to.be.true
+
+    describe "assertion verification", ->
+      beforeEach ->
+        @allowErrors()
+        @currentTest.timeout(100)
+
+        @chai = $Cypress.Chai.create(@Cypress, {})
+        @Cypress.on "log", (log) =>
+          if log.get("name") is "assert"
+            @log = log
+
+      afterEach ->
+        @chai.restore()
+
+      it "eventually passes the assertion", ->
+        @cy.$("button:first").click ->
+          _.delay =>
+            $(@).addClass("clicked")
+          , 100
+          return false
+
+        @cy.get("button:first").click().should("have.class", "clicked").then ->
+          @chai.restore()
+
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("passed")
+          expect(@log.get("end")).to.be.true
+
+      it "eventually passes the assertion on multiple buttons", ->
+        @cy.$("button").click ->
+          _.delay =>
+            $(@).addClass("clicked")
+          , 100
+          return false
+
+        @cy.get("button").invoke("slice", 0, 2).click().should("have.class", "clicked")
+
+      it "eventually fails the assertion", (done) ->
+        @cy.on "fail", (err) =>
+          @chai.restore()
+
+          expect(err.message).to.include(@log.get("error").message)
+          expect(err.message).not.to.include("undefined")
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("failed")
+          expect(@log.get("error")).to.be.an.instanceof(Error)
+
+          done()
+
+        @cy.get("button:first").click().should("have.class", "clicked")
+
+      it "does not log an additional log on failure", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", ->
+          expect(logs.length).to.eq(3)
+          done()
+
+        @cy.get("button:first").click().should("have.class", "clicked")
 
     describe "position argument", ->
       it "can click center by default", (done) ->
@@ -3496,13 +4210,14 @@ describe "$Cypress.Cy Actions Commands", ->
         input = @cy.$("input:first")
 
         input.get(0).addEventListener "focus", (e) =>
-          obj = _(e).pick("bubbles", "cancelable", "view", "pageX", "pageY", "which", "relatedTarget", "detail", "type")
+          obj = _(e).pick("bubbles", "cancelable", "view", "which", "relatedTarget", "detail", "type")
           expect(obj).to.deep.eq {
             bubbles: false
             cancelable: false
             view: @cy.private("window")
-            pageX: 0
-            pageY: 0
+            ## chrome no longer fires pageX and pageY
+            # pageX: 0
+            # pageY: 0
             which: 0
             relatedTarget: null
             detail: 0
@@ -3516,13 +4231,13 @@ describe "$Cypress.Cy Actions Commands", ->
         input = @cy.$("input:first")
 
         input.get(0).addEventListener "focusin", (e) =>
-          obj = _(e).pick("bubbles", "cancelable", "view", "pageX", "pageY", "which", "relatedTarget", "detail", "type")
+          obj = _(e).pick("bubbles", "cancelable", "view", "which", "relatedTarget", "detail", "type")
           expect(obj).to.deep.eq {
             bubbles: true
             cancelable: false
             view: @cy.private("window")
-            pageX: 0
-            pageY: 0
+            # pageX: 0
+            # pageY: 0
             which: 0
             relatedTarget: null
             detail: 0
@@ -3591,6 +4306,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe "errors", ->
       beforeEach ->
+        @currentTest.timeout(200)
         @allowErrors()
 
       it "throws when not a dom subject", (done) ->
@@ -3738,8 +4454,8 @@ describe "$Cypress.Cy Actions Commands", ->
         button = -> $("<button class='clicks'>click</button>")
         @cy.$("body").append(button()).append(button())
 
-        @Cypress.on "log", (obj) ->
-          clicks.push(obj) if obj.get("name") is "click"
+        @Cypress.on "log", (log) ->
+          clicks.push(log) if log.get("name") is "click"
 
         @cy.get("button.clicks").click().then ($buttons) ->
           expect($buttons.length).to.eq(2)
@@ -3760,6 +4476,17 @@ describe "$Cypress.Cy Actions Commands", ->
           $btn.blur() ## blur which removes focus styles which would change coords
           coords = @cy.getCoordinates($btn)
           expect(@log.get("coords")).to.deep.eq coords
+
+      it "ends", ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log) if log.get("name") is "click"
+
+        @cy.get("button").invoke("slice", 0, 2).click().then ->
+          _.each logs, (log) ->
+            expect(log.get("state")).to.eq("passed")
+            expect(log.get("end")).to.be.true
 
       it "#onConsole", ->
         @cy.get("button").first().click().then ($button) ->
@@ -3869,4 +4596,3 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("button:first").click({force: true, timeout: 1000}).then ->
           expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
           expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
-
