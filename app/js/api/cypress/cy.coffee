@@ -107,8 +107,6 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       @clearTimeout @prop("runId")
       @clearTimeout @prop("timerId")
 
-      @prop("angularCancelTimeout")?()
-
       ## reset the commands to an empty array
       ## by mutating it. we do this because
       ## commands is the context in promises
@@ -280,25 +278,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
       ## automatically defer running each command in succession
       ## so each command is async
-      @defer ->
-        angular = @private("window").angular
-
-        if angular and angular.getTestability
-          run            = _.bind(run, @)
-
-          root           = @$("[ng-app]").get(0)
-          $timeout       = angular.element(root).injector().get("$timeout")
-          angularPromise = $timeout =>
-            angular.getTestability(root).whenStable(run)
-            @prop "angularCancelTimeout", null
-          , 20
-
-          @prop "angularCancelTimeout", ->
-            $timeout.cancel(angularPromise)
-
-          return null
-        else
-          run()
+      @defer(run)
 
     clearTimeout: (id) ->
       clearImmediate(id) if id
