@@ -221,7 +221,7 @@ describe "$Cypress.Cy XHR Commands", ->
               type: "parent"
               error: err
               instrument: "command"
-              message: undefined
+              message: ""
               event: true
             }
             _.each obj, (value, key) =>
@@ -683,7 +683,7 @@ describe "$Cypress.Cy XHR Commands", ->
           obj = {
             name: "xhr"
             event: true
-            message: undefined
+            message: ""
             type: "parent"
             aliasType: "route"
             referencesAlias: undefined
@@ -696,7 +696,7 @@ describe "$Cypress.Cy XHR Commands", ->
         it "#onConsole", ->
 
         it "ends", ->
-          expect(@log.get("state")).to.eq("success")
+          expect(@log.get("state")).to.eq("passed")
 
         it "snapshots again", ->
           expect(@log.get("snapshot")).to.be.an("object")

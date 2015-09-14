@@ -11,22 +11,6 @@ describe "$Cypress.Cy Navigation Commands", ->
         src = $("iframe").attr("src")
         expect(src).to.eq "/foo"
 
-    it "immediately updates the stored href on load", (done) ->
-      _storeHref = @sandbox.spy @cy, "_storeHref"
-
-      @cy.on "invoke:subject", (subject, obj) ->
-        expect(_storeHref.callCount).to.eq 2
-        done()
-
-      @cy.visit("/foo")
-
-    it "prevents _hrefChanged from always being true after visiting", (done) ->
-      @cy.on "invoke:subject", (subject, obj) ->
-        expect(@_hrefChanged()).to.be.false
-        done()
-
-      @cy.visit("/foo")
-
     it "rejects the promise if data-cypress-visit-error is in the body"
 
     it "rejects with error: ...something..."
@@ -57,8 +41,8 @@ describe "$Cypress.Cy Navigation Commands", ->
 
     it "does not error without an onBeforeLoad callback", ->
       @cy.visit("fixtures/html/sinon.html").then ->
-        prev = @cy.prop("current").prev
-        expect(prev.args).to.have.length(1)
+        prev = @cy.prop("current").get("prev")
+        expect(prev.get("args")).to.have.length(1)
 
     it "first navigates to about:blank if existing url isnt about:blank", ->
       cy
@@ -69,7 +53,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           expect(@_href).to.be.calledWith @win, "about:blank"
 
     it "does not navigate to about:blank if existing url is about:blank", ->
-      @sandbox.stub(@cy.sync, "url").returns("about:blank")
+      @sandbox.stub(@cy, "_getLocation").returns("about:blank")
       _href = @sandbox.spy @cy, "_href"
 
       cy
@@ -151,7 +135,7 @@ describe "$Cypress.Cy Navigation Commands", ->
       it "logs obj once complete", ->
         @cy.visit("index.html").then ->
           obj = {
-            state: "success"
+            state: "passed"
             name: "visit"
             message: "index.html"
             url: "index.html"
@@ -188,7 +172,7 @@ describe "$Cypress.Cy Navigation Commands", ->
         @Cypress.on "log", (@log) =>
 
         @cy.on "fail", (err) =>
-          expect(@log.get("state")).to.eq "error"
+          expect(@log.get("state")).to.eq "failed"
           expect(@log.get("error")).to.eq err
           done()
 
@@ -246,7 +230,7 @@ describe "$Cypress.Cy Navigation Commands", ->
       input = @cy.$("form#click-me input")
 
       @cy.get("form#click-me").find("input").click().then (subject) ->
-        expect(getNames(@cy.queue)).to.deep.eq [
+        expect(@cy.commands.names()).to.deep.eq [
           "get", "find", "click", "then", "then"
         ]
         expect(getFirstSubjectByName("click").get(0)).to.eq input.get(0)
@@ -256,7 +240,7 @@ describe "$Cypress.Cy Navigation Commands", ->
       form = @cy.$("form#click-me")
 
       @cy.get("form#click-me").submit().then (subject) ->
-        expect(getNames(@cy.queue)).to.deep.eq [
+        expect(@cy.commands.names()).to.deep.eq [
           "get", "submit", "then", "then"
         ]
         expect(getFirstSubjectByName("get").get(0)).to.eq form.get(0)

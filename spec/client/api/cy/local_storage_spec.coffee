@@ -56,7 +56,7 @@ describe "$Cypress.Cy Local Storage Commands", ->
       it "ends immediately", ->
         @cy.clearLocalStorage().then ->
           expect(@log.get("end")).to.be.true
-          expect(@log.get("state")).to.eq("success")
+          expect(@log.get("state")).to.eq("passed")
 
       it "snapshots immediately", ->
         @cy.clearLocalStorage().then ->

@@ -18,7 +18,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
       return if not current
 
-      options = _.last(current.args)
+      options = _.last(current.get("args"))
       options?.onBeforeLoad?.call(@, contentWindow)
 
     _href: (win, url) ->
@@ -48,7 +48,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
       ## if we are visiting a page which caused
       ## the beforeunload, then dont output this command
-      return if current?.name is "visit"
+      return if current?.get("name") is "visit"
 
       ## bail if we dont have a runnable
       ## because beforeunload can happen at any time
@@ -67,7 +67,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
       _.defaults options,
         timeout: 20000
 
-      command = Cypress.Log.command
+      options._log = Cypress.Log.command
         type: "parent"
         name: "page load"
         message: "--waiting for new page to load---"
@@ -87,15 +87,14 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
         .cancellable()
         .timeout(options.timeout)
         .then =>
-          @_storeHref()
           @_timeout(prevTimeout)
           if Cypress.cy.$("[data-cypress-visit-error]").length
             try
-              @throwErr("Loading the new page failed.", command)
+              @throwErr("Loading the new page failed.", options._log)
             catch e
               @fail(e)
           else
-            command.set("message", "--page loaded--").snapshot().end()
+            options._log.set("message", "--page loaded--").snapshot().end()
 
           ## return null to prevent accidental chaining
           return null
@@ -104,7 +103,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
           return
         .catch Promise.TimeoutError, (err) =>
           try
-            @throwErr "Timed out after waiting '#{options.timeout}ms' for your remote page to load.", command
+            @throwErr "Timed out after waiting '#{options.timeout}ms' for your remote page to load.", options._log
           catch e
             ## must directly fail here else we potentially
             ## get unhandled promise exception
@@ -123,7 +122,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
         onLoad: ->
 
       if options.log
-        command = Cypress.Log.command()
+        options._log = Cypress.Log.command()
 
       baseUrl = @private("baseUrl")
       url     = Cypress.Location.getRemoteUrl(url, baseUrl)
@@ -143,16 +142,16 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
           # ## when the remote iframe's load event fires
           # ## callback fn
           $remoteIframe.one "load", =>
-            @_storeHref()
             @_timeout(prevTimeout)
             options.onLoad?.call(@, win)
             if Cypress.cy.$("[data-cypress-visit-error]").length
               try
-                @throwErr("Could not load the remote page: #{url}", command)
+                @throwErr("Could not load the remote page: #{url}", options._log)
               catch e
                 reject(e)
             else
-              command.set({url: url}).snapshot().end() if command
+              options._log.set({url: url}).snapshot() if options._log
+
               resolve(win)
 
           ## any existing global variables will get nuked after it navigates
@@ -162,7 +161,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
         ## if we're visiting a page and we're not currently
         ## on about:blank then we need to nuke the window
         ## and after its nuked then visit the url
-        if @sync.url({log: false}) isnt "about:blank"
+        if @_getLocation("href") isnt "about:blank"
           $remoteIframe.one "load", =>
             visit(win, url, options)
 
@@ -175,4 +174,4 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
         .timeout(options.timeout)
         .catch Promise.TimeoutError, (err) =>
           $remoteIframe.off("load")
-          @throwErr "Timed out after waiting '#{options.timeout}ms' for your remote page to load.", command
+          @throwErr "Timed out after waiting '#{options.timeout}ms' for your remote page to load.", options._log

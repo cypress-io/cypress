@@ -157,6 +157,7 @@ $Cypress.register "XHR", (Cypress, _, $) ->
           ## assign this existing command
           ## to the xhr so we can reuse it later
           xhr.log = Cypress.Log.command
+            message:   ""
             name:      "xhr"
             alias:     alias
             aliasType: "route"
@@ -472,6 +473,3 @@ $Cypress.register "XHR", (Cypress, _, $) ->
 
     getXhrTypeByAlias: (alias) ->
       if requestXhr.test(alias) then "request" else "response"
-
-
-

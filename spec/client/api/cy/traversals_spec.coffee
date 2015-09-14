@@ -30,10 +30,10 @@ describe "$Cypress.Cy Traversal Commands", ->
 
         it "throws when options.length isnt a number", (done) ->
           @cy.on "fail", (err) ->
-            expect(err.message).to.include "options.length must be a number"
+            expect(err.message).to.include "You must provide a valid number to a length assertion. You passed: 'asdf'"
             done()
 
-          @cy.get("#list")[name](arg, {length: "asdf"})
+          @cy.get("#list")[name](arg).should("have.length", "asdf")
 
         it "throws on too many elements after timing out waiting for length", (done) ->
           el = @cy.$("#list")[name](arg)
@@ -41,10 +41,10 @@ describe "$Cypress.Cy Traversal Commands", ->
           node = $Cypress.Utils.stringifyElement @cy.$("#list"), "short"
 
           @cy.on "fail", (err) ->
-            expect(err.message).to.include "Too many elements found. Found '#{el.length}', expected '#{el.length - 1}': #{arg ? ''} from #{node}"
+            expect(err.message).to.include "Too many elements found. Found '#{el.length}', expected '#{el.length - 1}'."
             done()
 
-          @cy.get("#list")[name](arg, {length: el.length - 1})
+          @cy.get("#list")[name](arg).should("have.length", el.length - 1)
 
         it "throws on too few elements after timing out waiting for length", (done) ->
           el = @cy.$("#list")[name](arg)
@@ -52,10 +52,10 @@ describe "$Cypress.Cy Traversal Commands", ->
           node = $Cypress.Utils.stringifyElement @cy.$("#list"), "short"
 
           @cy.on "fail", (err) ->
-            expect(err.message).to.include "Not enough elements found. Found '#{el.length}', expected '#{el.length + 1}': #{arg ? ''} from #{node}"
+            expect(err.message).to.include "Not enough elements found. Found '#{el.length}', expected '#{el.length + 1}'."
             done()
 
-          @cy.get("#list")[name](arg, {length: el.length + 1})
+          @cy.get("#list")[name](arg).should("have.length", el.length + 1)
 
         it "without a dom element", (done) ->
           @cy.noop({})[name](arg)
@@ -78,7 +78,7 @@ describe "$Cypress.Cy Traversal Commands", ->
             node = $Cypress.Utils.stringifyElement @cy.$(node), "short"
 
             @cy.on "fail", (err) ->
-              expect(err.message).to.include "Could not find element: #{el} from #{node}"
+              expect(err.message).to.include "Expected to find element: '#{el}', but never found it. Queried from element: #{node}"
               done()
 
           switch name
@@ -129,12 +129,18 @@ describe "$Cypress.Cy Traversal Commands", ->
 
             _.extend obj, {
               "Applied To": getFirstSubjectByName.call(@, "get").get(0)
-              Options: undefined
               Returned: returned
               Elements: $el.length
             }
 
             expect(@log.attributes.onConsole()).to.deep.eq obj
+
+  it "eventually resolves", ->
+    _.delay ->
+      @cy.$("button:first").text("foo").addClass("bar")
+    , 100
+
+    cy.root().find("button:first").should("have.text", "foo").and("have.class", "bar")
 
   it "retries until it finds", ->
     li = @cy.$("#list li:last")
@@ -158,8 +164,20 @@ describe "$Cypress.Cy Traversal Commands", ->
       buttons = @cy.$("button")
 
     ## should resolving after removing 2 buttons
-    @cy.root().find("button", {length: length}).then ($buttons) ->
+    @cy.root().find("button").should("have.length", length).then ($buttons) ->
       expect($buttons.length).to.eq length
+
+  it "should('not.exist')", ->
+    @cy.on "retry", _.after 3, =>
+      @cy.$("#nested-div").find("span").remove()
+
+    @cy.get("#nested-div").find("span").should("not.exist")
+
+  it "should('exist')", ->
+    @cy.on "retry", _.after 3, =>
+      @cy.$("#nested-div").append($("<strong />"))
+
+    @cy.get("#nested-div").find("strong")
 
   ## https://github.com/cypress-io/cypress/issues/38
   it "works with checkboxes", ->
@@ -167,7 +185,7 @@ describe "$Cypress.Cy Traversal Commands", ->
       c = @cy.$("[name=colors]").slice(0, 2)
       c.prop("checked", true)
 
-    @cy.get("#by-name").find(":checked", {length: 2})
+    @cy.get("#by-name").find(":checked").should("have.length", 2)
 
   it "does not log using first w/options", ->
     logs = []
@@ -179,42 +197,44 @@ describe "$Cypress.Cy Traversal Commands", ->
       expect($button.length).to.eq(1)
       expect(logs.length).to.eq(1)
 
-  context "delta + options", ->
+  describe "deprecated command options", ->
     beforeEach ->
-      @Cypress.on "log", (@log) =>
+      @allowErrors()
 
-    it "compacts message without a selector", ->
-      @cy.get("#list").children({visible: true}).then ->
-        expect(@log.get("message")).to.eq "{visible: true}"
+    it "throws on {exist: false}", (done) ->
+      @cy.on "fail", (err) ->
+        expect(err.message).to.eq "Command Options such as: '{exist: false}' have been deprecated. Instead write this as an assertion: .should('not.exist')."
+        done()
 
-    it "logs out to message", ->
-      @cy.get("#list").find("li:first", {visible: true}).then ->
-        expect(@log.get("message")).to.eq "li:first, {visible: true}"
+      @cy.root().find("ul li", {exist: false})
 
-    it "logs command option: length", ->
-      @cy.on "retry", _.after 2, =>
-        c = @cy.$("[name=colors]").slice(0, 2)
-        c.prop("checked", true)
+    it "throws on {exists: true}", (done) ->
+      @cy.on "fail", (err) ->
+        expect(err.message).to.eq "Command Options such as: '{exists: true}' have been deprecated. Instead write this as an assertion: .should('exist')."
+        done()
 
-      @cy.get("#by-name").find(":checked", {length: 2}).then ->
-        expect(@log.get("message")).to.eq ":checked, {length: 2}"
+      @cy.root().find("ul li", {exists: true, length: 10})
 
-    it "logs exist: false", ->
-      @cy.get("div:first").find("#does-not-exist", {exist: false}).then ->
-        expect(@log.get("message")).to.eq "#does-not-exist, {exist: false}"
+    it "throws on {visible: true}", (done) ->
+      @cy.on "fail", (err) ->
+        expect(err.message).to.eq "Command Options such as: '{visible: true}' have been deprecated. Instead write this as an assertion: .should('be.visible')."
+        done()
 
-    it "has options onConsole", ->
-      @cy.get("#list").find("li:first", {visible: true}).then ($el) ->
-        obj = {
-          Command: "find"
-          Selector: "li:first"
-          Options: {visible: true}
-          "Applied To": getFirstSubjectByName.call(@, "get").get(0)
-          Returned: $el.get(0)
-          Elements: $el.length
-        }
+      @cy.root().find("ul li", {visible: true})
 
-        expect(@log.attributes.onConsole()).to.deep.eq obj
+    it "throws on {visible: false}", (done) ->
+      @cy.on "fail", (err) ->
+        expect(err.message).to.eq "Command Options such as: '{visible: false}' have been deprecated. Instead write this as an assertion: .should('not.be.visible')."
+        done()
+
+      @cy.root().find("ul li", {visible: false})
+
+    it "throws on {length: 3}", (done) ->
+      @cy.on "fail", (err) ->
+        expect(err.message).to.eq "Command Options such as: '{length: 3}' have been deprecated. Instead write this as an assertion: .should('have.length', '3')."
+        done()
+
+      @cy.root().find("ul li", {length: 3})
 
   describe "errors", ->
     beforeEach ->
@@ -223,7 +243,7 @@ describe "$Cypress.Cy Traversal Commands", ->
 
     it "errors after timing out not finding element", (done) ->
       @cy.on "fail", (err) ->
-        expect(err.message).to.include "Could not find element: span"
+        expect(err.message).to.include "Expected to find element: 'span', but never found it. Queried from element: <li>"
         done()
 
       @cy.get("#list li:last").find("span")
@@ -248,7 +268,7 @@ describe "$Cypress.Cy Traversal Commands", ->
       @Cypress.on "log", (@log) =>
 
       @cy.on "fail", (err) =>
-        expect(@log.get("state")).to.eq("error")
+        expect(@log.get("state")).to.eq("failed")
         expect(@log.get("error")).to.eq err
         expect(@log.get("$el").get(0)).to.eq button.get(0)
         onConsole = @log.attributes.onConsole()
@@ -256,4 +276,4 @@ describe "$Cypress.Cy Traversal Commands", ->
         expect(onConsole.Elements).to.eq button.length
         done()
 
-      @cy.get("#dom").find("#button", {visible: true})
+      @cy.get("#dom").find("#button").should("be.visible")

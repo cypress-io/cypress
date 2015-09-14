@@ -34,23 +34,23 @@ describe "$Cypress.Log API", ->
     it "#error", ->
       err = new Error
       @log.error(err)
-      expect(@log.get("state")).to.eq "error"
+      expect(@log.get("state")).to.eq "failed"
       expect(@log.get("error")).to.eq err
 
     it "#error triggers attrs:changed", (done) ->
       @log.on "attrs:changed", (attrs) ->
-        expect(attrs.state).to.eq "error"
+        expect(attrs.state).to.eq "failed"
         done()
 
       @log.error({})
 
     it "#end", ->
       @log.end()
-      expect(@log.get("state")).to.eq "success"
+      expect(@log.get("state")).to.eq "passed"
 
     it "#end triggers attrs:changed", (done) ->
       @log.on "attrs:changed", (attrs) ->
-        expect(attrs.state).to.eq "success"
+        expect(attrs.state).to.eq "passed"
         done()
 
       @log.end()
@@ -156,6 +156,7 @@ describe "$Cypress.Log API", ->
     describe "#wrapOnConsole", ->
       it "automatically adds Command with name", ->
         @log.set("name", "foo")
+        @log.set("snapshot", {})
         @log.set("onConsole", -> {bar: "baz"})
         @log.wrapOnConsole()
         expect(@log.attributes.onConsole()).to.deep.eq {
@@ -164,13 +165,19 @@ describe "$Cypress.Log API", ->
         }
 
       it "automatically adds Event with name", ->
-        @log.set({name: "foo", event: true})
+        @log.set({name: "foo", event: true, snapshot: {}})
         @log.set("onConsole", -> {bar: "baz"})
         @log.wrapOnConsole()
         expect(@log.attributes.onConsole()).to.deep.eq {
           Event: "foo"
           bar: "baz"
         }
+
+      it "adds a note when snapshot is missing", ->
+        @log.set("name", "foo")
+        @log.set("onConsole", -> {})
+        @log.wrapOnConsole()
+        expect(@log.attributes.onConsole().Snapshot).to.eq "The snapshot is missing. Displaying current state of the DOM."
 
     describe "#publicInterface", ->
       beforeEach ->
@@ -203,7 +210,7 @@ describe "$Cypress.Log API", ->
         @Cypress.Log.create(@Cypress, @cy)
 
         obj = {name: "foo", ctx: @cy, fn: (->), args: [1,2,3], type: "parent"}
-        @cy.prop("current", obj)
+        @cy.prop("current", @Cypress.Command.create(obj))
 
       describe "#command", ->
         it "displays a deprecation warning", ->
@@ -371,6 +378,7 @@ describe "$Cypress.Log API", ->
             @cy.on "fail", (err) =>
               expect(@log.attributes.onConsole()).to.deep.eq {
                 Command: "get"
+                Selector: "foo"
                 Elements: 0
                 Returned: undefined
                 Error: err.toString()
@@ -417,9 +425,8 @@ describe "$Cypress.Log API", ->
                 expect(@log.attributes.onConsole()).to.deep.eq {
                   Command: "contains"
                   Content: "asdfasdfasdfasdf"
-                  Elements: undefined
+                  Elements: 0
                   Returned: undefined
-                  Options: null
                   "Applied To": $Cypress.Utils.getDomElements(btns)
                   Error: err.toString()
                 }
@@ -435,9 +442,8 @@ describe "$Cypress.Log API", ->
                 expect(@log.attributes.onConsole()).to.deep.eq {
                   Command: "contains"
                   Content: "asdfasdfasdfasdf"
-                  Elements: undefined
+                  Elements: 0
                   Returned: undefined
-                  Options: null
                   "Applied To": getFirstSubjectByName.call(@, "eq").get(0)
                   Error: err.toString()
                 }

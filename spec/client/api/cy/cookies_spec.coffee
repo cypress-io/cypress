@@ -32,7 +32,7 @@ describe "$Cypress.Cy Cookie Commands", ->
       it "ends immediately", ->
         @cy.clearCookie("foo").then ->
           expect(@log.get("end")).to.be.true
-          expect(@log.get("state")).to.eq("success")
+          expect(@log.get("state")).to.eq("passed")
 
       it "snapshots immediately", ->
         @cy.clearCookie("foo").then ->
@@ -71,7 +71,7 @@ describe "$Cypress.Cy Cookie Commands", ->
       it "ends immediately", ->
         @cy.clearCookies().then ->
           expect(@log.get("end")).to.be.true
-          expect(@log.get("state")).to.eq("success")
+          expect(@log.get("state")).to.eq("passed")
 
       it "snapshots immediately", ->
         @cy.clearCookies().then ->

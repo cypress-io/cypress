@@ -140,7 +140,7 @@
 
     .label {
       font-weight: normal;
-      padding: 1px 5px;
+      padding: 1px 4px;
       border-radius: 5px;
     }
 
@@ -199,7 +199,7 @@
     }
   }
 
-  .command-error {
+  .command-failed {
     padding-left: 3px;
     border-left: 2px solid $fail;
     background-color: lighten($fail, 30%);
@@ -266,6 +266,23 @@
     }
   }
 
+  .command-assertion-pending {
+    & .command-method {
+      & span {
+        background-color: $pending;
+        color: white;
+
+      }
+    }
+    & .command-message {
+      color: $pending;
+
+      strong {
+        color: darken($pending, 10%);
+      }
+    }
+  }
+
   .command-assertion-failed {
     & .command-method {
       & span {
@@ -327,7 +344,10 @@
 
     i:hover {
       cursor: pointer;
+    }
 
+    label {
+      font-size: 85%;
     }
 
     // .fa-pause {

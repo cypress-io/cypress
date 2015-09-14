@@ -55,7 +55,7 @@
       @ui.label.addClass("label-danger").text("Timed Out")
 
     checkCommands: ->
-      @ui.warning.addClass("has-command-errors").prop("title", "One or more commands failed") if @model.anyCommandsFailed()
+      @ui.warning.addClass("has-command-failures").prop("title", "One or more commands failed") if @model.anyCommandsFailed()
       @ui.label.removeClass("label-success").addClass("label-danger") if @model.anyCommandsFailed()
 
   class List.RunnableLayout extends App.Views.LayoutView

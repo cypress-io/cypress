@@ -23,7 +23,7 @@
           // then function which prevents the noop functions
           // from being called thus ensuring our test ends early
           cy
-            .then(function(){ cy.Promise.delay(1000) })
+            .then(function(){ return cy.Promise.delay(1000) })
             .noop({}).noop({})
 
           done()

@@ -32,28 +32,26 @@ describe "$Cypress.Cy Window Commands", ->
       @cy.title().then (text) ->
         expect(text).to.eq "waiting on title"
 
-    it "retries until it has the correct title", ->
-      @cy.$("title").text("home page")
-
-      retry = _.after 2, =>
+    it "eventually resolves", ->
+      _.delay ->
         @cy.$("title").text("about page")
+      , 100
 
-      @cy.on "retry", retry
-
-      @cy.title().until (title) ->
-        expect(title).to.eq "about page"
+      cy.title().should("eq", "about page").and("match", /about/)
 
     describe "errors", ->
       beforeEach ->
-        @currentTest.timeout(300)
+        @currentTest.timeout(200)
         @allowErrors()
 
       it "throws after timing out", (done) ->
         @cy.$("title").remove()
-        @cy.title()
+
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "Could not find element: title"
+          expect(err.message).to.include "Expected to find element: 'title', but never found it."
           done()
+
+        @cy.title()
 
       it "only logs once", (done) ->
         @cy.$("title").remove()
@@ -76,6 +74,10 @@ describe "$Cypress.Cy Window Commands", ->
           if @log.get("name") is "get"
             throw new Error("cy.get() should not have logged out.")
 
+      it "can turn off logging", ->
+        @cy.title({log: false}).then ->
+          expect(@log).to.be.undefined
+
       it "logs immediately before resolving", (done) ->
         input = @cy.$(":text:first")
 
@@ -96,7 +98,6 @@ describe "$Cypress.Cy Window Commands", ->
         @cy.title().then ->
           obj = {
             name: "title"
-            message: "DOM Fixture"
           }
 
           _.each obj, (value, key) =>
@@ -281,7 +282,7 @@ describe "$Cypress.Cy Window Commands", ->
 
       it "sets state to success immediately", ->
         @cy.viewport(800, 600).then ->
-          expect(@log.get("state")).to.eq "success"
+          expect(@log.get("state")).to.eq "passed"
 
       it "snapshots immediately", ->
         @cy.viewport(800, 600).then ->

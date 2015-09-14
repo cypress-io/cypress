@@ -191,7 +191,7 @@
       &.test.failed > .runnable-wrapper {
         border-left: 10px solid $fail;
 
-        .fa-warning.has-command-errors {
+        .fa-warning.has-command-failures {
           visibility: visible;
         }
       }

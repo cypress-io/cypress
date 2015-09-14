@@ -1,7 +1,7 @@
 do ($Cypress, _, Promise) ->
 
   $Cypress.Cy.extend
-    _retry: (fn, options) ->
+    _retry: (fn, options, log) ->
       ## remove the runnables timeout because we are now in retry
       ## mode and should be handling timing out ourselves and dont
       ## want to accidentally time out via mocha
@@ -9,12 +9,18 @@ do ($Cypress, _, Promise) ->
         runnableTimeout = options.timeout ? @_timeout()
         @_clearTimeout()
 
+      current = @prop("current")
+
+      ## use the log if passed in, else fallback to options._log
+      ## else fall back to just grabbing the last log per our current command
+      log ?= options._log ? current?.getLastLog()
+
       _.defaults options,
         _runnableTimeout: runnableTimeout
         start: new Date
-        interval: 50
+        interval: 16
         retries: 0
-        name: @prop("current")?.name
+        name: current?.get("name")
 
       ## we calculate the total time we've been retrying
       ## so we dont exceed the runnables timeout
@@ -28,8 +34,25 @@ do ($Cypress, _, Promise) ->
       @log "Retrying after: #{options.interval}ms. Total: #{total}, Timeout At: #{options._runnableTimeout}", "warning"
 
       if total + options.interval >= options._runnableTimeout
-        err = "Timed out retrying. " + options.error ? "The last command was: " + options.name
-        @throwErr err, (options.onFail or options.command)
+        ## snapshot the DOM since we are bailing
+        ## so the user can see the state we're in
+        ## when we fail
+        log.snapshot() if log
+
+        if assertions = options.assertions
+          @finishAssertions(assertions)
+
+        getErrMessage = (err) ->
+          switch
+            when err and err.longMessage
+              err.longMessage
+            when err and err.message
+              err.message
+            else
+              err
+
+        err = "Timed out retrying: " + getErrMessage(options.error)
+        @throwErr err, (options.onFail or log)
 
       Promise.delay(options.interval).cancellable().then =>
         @trigger "retry", options

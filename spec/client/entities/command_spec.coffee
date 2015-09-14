@@ -10,7 +10,7 @@ describe "Command Entities", ->
       attrs = {
         event: "Command"
         error: null
-        state: "success"
+        state: "passed"
         testId: 123
         hookName: "test"
         type: "parent"
@@ -49,11 +49,11 @@ describe "Command Entities", ->
       expect(@command.get("state")).to.eq "pending"
 
       @log.set({
-        state: "success"
+        state: "passed"
         url: "http://localhost:8001"
       })
 
-      expect(@command.get("state")).to.eq "success"
+      expect(@command.get("state")).to.eq "passed"
       expect(@command.get("url")).to.eq "http://localhost:8001"
 
 #   before ->

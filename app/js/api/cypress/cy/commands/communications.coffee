@@ -4,31 +4,42 @@ $Cypress.register "Communications", (Cypress, _, $, Promise) ->
     msg: ->
       @sync.message.apply(@, arguments)
 
-    message: (msg, data) ->
+    message: (msg, data, options = {}) ->
+      ## accept {retry: true} here which will verify
+      ## upcoming assertions and replay the msg?
+      ## or make this the default and force users
+      ## to only turn OFF this behavior
+
+      _.defaults options, {log: true}
+
       ## should we increase the command timeout here to 10s?
 
       new Promise (resolve, reject) =>
 
-        command = Cypress.Log.command
-          name: "message"
-          message: Cypress.Utils.stringify([msg, data])
+        if options.log isnt false
+          options._log = Cypress.Log.command
+            name: "message"
+            message: Cypress.Utils.stringify([msg, data])
 
-        Cypress.trigger "message", msg, data, (response) =>
-          if err = response.__error
+        Cypress.trigger "message", msg, data, (resp) =>
+          if err = resp.__error
             try
-              @throwErr(err, command)
+              @throwErr(err, options._log)
             catch e
               e.__isMessage = true
-              e.name = response.__name if response.__name
-              e.stack = response.__stack if response.__stack
+              e.name = resp.__name if resp.__name
+              e.stack = resp.__stack if resp.__stack
               reject(e)
           else
-            command.set
-              onConsole: -> {
-                Message: msg
-                "Data Sent": data
-                "Data Returned": response
-              }
+            if options._log
+              options._log.set
+                onConsole: -> {
+                  Message: msg
+                  "Data Sent": data
+                  "Data Returned": resp.response
+                  "Logs": resp.__logs
+                }
 
-            command.snapshot().end()
-            resolve(response)
+              options._log.snapshot()
+
+            resolve(resp.response)

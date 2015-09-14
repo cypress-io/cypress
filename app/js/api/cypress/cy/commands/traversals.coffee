@@ -14,18 +14,9 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
 
       options ?= {}
 
-      _.defaults options,
-        length: null
-        visible: null
-        exist: true
-        exists: true
-        log: true
+      _.defaults options, {log: true}
 
-      ## normalize these two options
-      options.exist = options.exists and options.exist
-
-      ## figure out the options which actually change the behavior of traversals
-      deltaOptions = Cypress.Utils.filterDelta(options, {visible: null, exist: true, length: null})
+      @ensureNoCommandOptions(options)
 
       getSelector = ->
         args = _([arg1, arg2]).chain().reject(_.isFunction).reject(_.isObject).value()
@@ -34,27 +25,13 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
 
       onConsole = {
         Selector: getSelector()
-        Options: deltaOptions
         "Applied To": $Cypress.Utils.getDomElements(subject)
       }
 
-      if options.log
-        options.command ?= Cypress.Log.command
-          message: _.compact([getSelector(), deltaOptions])
+      if options.log isnt false
+        options._log = Cypress.Log.command
+          message: getSelector()
           onConsole: -> onConsole
-
-      log = ($el) ->
-        return $el if not options.command
-
-        _.extend onConsole,
-          "Returned": $Cypress.Utils.getDomElements($el)
-          "Elements": $el?.length
-
-        options.command.set({$el: $el})
-
-        options.command.snapshot().end()
-
-        return $el
 
       setEl = ($el) ->
         return if options.log is false
@@ -62,30 +39,26 @@ $Cypress.register "Traversals", (Cypress, _, $) ->
         onConsole.Returned = Cypress.Utils.getDomElements($el)
         onConsole.Elements = $el?.length
 
-        options.command.set({$el: $el})
+        options._log.set({$el: $el})
 
       do getElements = =>
         ## catch sizzle errors here
         try
           $el = subject[traversal].call(subject, arg1, arg2)
+
+          ## normalize the selector since jQuery won't have it
+          ## or completely borks it
+          $el.selector = getSelector()
         catch e
-          e.onFail = -> options.command.error(e)
+          e.onFail = -> options._log.error(e)
           throw e
 
         setEl($el)
 
-        ret = @_elMatchesCommandOptions($el, options)
-        ## verify our $el matches the command options
-        ## and if this didnt return undefined bail
-        ## and log out the ret value
-        unless ret is false
-          return log(ret)
-
-        getErr = =>
-          node = Cypress.Utils.stringifyElement(subject, "short")
-          err = @_elCommandOptionsError($el, options)
-          err += " " + getSelector() + " from #{node}"
-
-        options.error ?= getErr()
-
-        @_retry(getElements, options)
+        @verifyUpcomingAssertions($el, options, {
+          onRetry: getElements
+          onFail: (err) ->
+            if err.type is "existence"
+              node = $Cypress.Utils.stringifyElement(subject, "short")
+              err.longMessage += " Queried from element: #{node}"
+        })

@@ -3,84 +3,69 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
   remoteJQueryisNotSameAsGlobal = (remoteJQuery) ->
     remoteJQuery and (remoteJQuery isnt $)
 
-  Cypress.addChildCommand
-    spread: (subject, fn) ->
-      ## if this isnt an array blow up right here
-      if not _.isArray(subject)
-        @throwErr("cy.spread() requires the existing subject be an array!")
+  ## thens can return more "thenables" which are not resolved
+  ## until they're 'really' resolved, so naturally this API
+  ## supports nesting promises
+  thenFn = (subject, fn) ->
+    ## if this is the very last command we know its the 'then'
+    ## called by mocha.  in this case, we need to defer its
+    ## fn callback else we will not properly finish the run
+    ## of our commands, which ends up duplicating multiple commands
+    ## downstream.  this is because this fn callback forces mocha
+    ## to continue synchronously onto tests (if for instance this
+    ## 'then' is called from a hook) - by defering it, we finish
+    ## resolving our deferred.
+    current = @prop("current")
 
-      subject._spreadArray = true
+    if not current.get("next") and current.get("args").length is 2 and (current.get("args")[1].name is "done" or current.get("args")[1].length is 1)
+      return @prop("next", fn)
 
-      @sync.then.call(@, fn)
+    remoteJQuery = @_getRemoteJQuery()
+    if Cypress.Utils.hasElement(subject) and remoteJQueryisNotSameAsGlobal(remoteJQuery)
+      remoteSubject = remoteJQuery(subject)
+      Cypress.Utils.setCypressNamespace(remoteSubject, subject)
 
-  Cypress.addDualCommand
+    ## we need to wrap this in a try-catch still (even though we're
+    ## using bluebird) because we want to handle the return by
+    ## allow the 'then' to change the subject to the return value
+    ## if its a non null/undefined value else to return the subject
+    try
+      args = remoteSubject or subject
+      args = if args?._spreadArray then args else [args]
 
-    ## thens can return more "thenables" which are not resolved
-    ## until they're 'really' resolved, so naturally this API
-    ## supports nesting promises
-    then: (subject, fn) ->
-      ## if this is the very last command we know its the 'then'
-      ## called by mocha.  in this case, we need to defer its
-      ## fn callback else we will not properly finish the run
-      ## of our commands, which ends up duplicating multiple commands
-      ## downstream.  this is because this fn callback forces mocha
-      ## to continue synchronously onto tests (if for instance this
-      ## 'then' is called from a hook) - by defering it, we finish
-      ## resolving our deferred.
-      current = @prop("current")
+      ret = fn.apply @private("runnable").ctx, args
 
-      if not current.next and current.args.length is 2 and (current.args[1].name is "done" or current.args[1].length is 1)
-        return @prop("next", fn)
+      ## if ret is a DOM element
+      ## and its an instance of the remoteJQuery
+      if ret and Cypress.Utils.hasElement(ret) and remoteJQueryisNotSameAsGlobal(remoteJQuery) and Cypress.Utils.isInstanceOf(ret, remoteJQuery)
+        ## set it back to our own jquery object
+        ## to prevent it from being passed downstream
+        ret = Cypress.cy.$(ret)
 
-      remoteJQuery = @_getRemoteJQuery()
-      if Cypress.Utils.hasElement(subject) and remoteJQueryisNotSameAsGlobal(remoteJQuery)
-        remoteSubject = remoteJQuery(subject)
-        Cypress.Utils.setCypressNamespace(remoteSubject, subject)
+      ## then will resolve with the fn's
+      ## return or just pass along the subject
+      return ret ? subject
+    catch e
+      throw e
 
-      ## we need to wrap this in a try-catch still (even though we're
-      ## using bluebird) because we want to handle the return by
-      ## allow the 'then' to change the subject to the return value
-      ## if its a non null/undefined value else to return the subject
-      try
+  invokeFn = (subject, fn, args...) ->
+    @ensureParent()
+    @ensureSubject()
 
-        args = remoteSubject or subject
-        args = if args?._spreadArray then args else [args]
+    options = {}
 
-        ret = fn.apply @private("runnable").ctx, args
+    options._log = Cypress.Log.command
+      $el: if Cypress.Utils.hasElement(subject) then subject else null
+      onConsole: ->
+        Subject: subject
 
-        ## if ret is a DOM element
-        ## and its an instance of the remoteJQuery
-        if ret and Cypress.Utils.hasElement(ret) and remoteJQueryisNotSameAsGlobal(remoteJQuery) and Cypress.Utils.isInstanceOf(ret, remoteJQuery)
-          ## set it back to our own jquery object
-          ## to prevent it from being passed downstream
-          ret = Cypress.cy.$(ret)
+    ## name could be invoke or its!
+    name = @prop("current").get("name")
 
-        ## then will resolve with the fn's
-        ## return or just pass along the subject
-        return ret ? subject
-      catch e
-        throw e
+    if not _.isString(fn)
+      @throwErr("cy.#{name}() only accepts a string as the first argument.", options._log)
 
-    ## making this a dual command due to child commands
-    ## automatically returning their subject when their
-    ## return values are undefined.  prob should rethink
-    ## this and investigate why that is the default behavior
-    ## of child commands
-    invoke: (subject, fn, args...) ->
-      @ensureParent()
-      @ensureSubject()
-
-      command = Cypress.Log.command
-        $el: if Cypress.Utils.hasElement(subject) then subject else null
-        onConsole: ->
-          Subject: subject
-
-      ## name could be invoke or its!
-      name = @prop("current").name
-
-      if not _.isString(fn)
-        @throwErr("cy.#{name}() only accepts a string as the first argument.", command)
-
+    getValue = =>
       remoteJQuery = @_getRemoteJQuery()
       if Cypress.Utils.hasElement(subject) and remoteJQueryisNotSameAsGlobal(remoteJQuery)
         remoteSubject = remoteJQuery(subject)
@@ -89,7 +74,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
       prop = (remoteSubject or subject)[fn]
 
       fail = =>
-        @throwErr("cy.#{name}() errored because the property: '#{fn}' does not exist on your subject.", command)
+        @throwErr("cy.#{name}() errored because the property: '#{fn}' does not exist on your subject.", options._log)
 
       ## if the property does not EXIST on the subject
       ## then throw a specific error message
@@ -128,10 +113,10 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
 
       value = invoke()
 
-      if command
+      if options._log
         message = getMessage()
 
-        command.set
+        options._log.set
           message: message
           onConsole: ->
             obj = {}
@@ -148,10 +133,45 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
 
             obj
 
-        command.snapshot().end()
-
       return value
 
-    its: (subject, fn, args...) ->
-      args.unshift(fn)
-      @sync.invoke.apply(@, args)
+    ## wrap retrying into its own
+    ## separate function
+    retryValue = =>
+      Promise
+      .try(getValue)
+      .catch (err) =>
+        options.error = err
+        @_retry(retryValue, options)
+
+    do resolveValue = =>
+      Promise.try(retryValue).then (value) =>
+        @verifyUpcomingAssertions(value, options, {
+          onRetry: resolveValue
+        })
+
+  Cypress.addChildCommand
+    spread: (subject, fn) ->
+      ## if this isnt an array blow up right here
+      if not _.isArray(subject)
+        @throwErr("cy.spread() requires the existing subject be an array!")
+
+      subject._spreadArray = true
+
+      thenFn.call(@, subject, fn)
+
+  Cypress.addDualCommand
+
+    then: ->
+      thenFn.apply(@, arguments)
+
+    ## making this a dual command due to child commands
+    ## automatically returning their subject when their
+    ## return values are undefined.  prob should rethink
+    ## this and investigate why that is the default behavior
+    ## of child commands
+    invoke: ->
+      invokeFn.apply(@, arguments)
+
+    its: ->
+      invokeFn.apply(@, arguments)
