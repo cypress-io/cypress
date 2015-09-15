@@ -2,6 +2,8 @@ do ($Cypress, _, $) ->
 
   commandOptions = ["exist", "exists", "visible", "length"]
 
+  returnFalse = -> return false
+
   $Cypress.Cy.extend
     ensureSubject: ->
       subject = @prop("subject")
@@ -59,8 +61,13 @@ do ($Cypress, _, $) ->
       ## TODO: REFACTOR THIS TO CALL THE CHAI-OVERRIDES DIRECTLY
       ## OR GO THROUGH I18N
 
+      returnFalse = =>
+        @stopListening @Cypress, "before:log", returnFalse
+
+        return false
+
       ## prevent any additional logs this is an implicit assertion
-      @listenToOnce @Cypress, "before:log", -> return false
+      @listenTo @Cypress, "before:log", returnFalse
 
       ## verify the $el exists and use our default error messages
       $Cypress.Chai.expect($el).to.exist
