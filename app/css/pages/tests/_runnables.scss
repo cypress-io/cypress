@@ -80,6 +80,10 @@
         overflow: hidden;
         border-left: 10px solid transparent;
 
+        .test-title, .suite-title {
+          font-size: 12.5px;
+        }
+
 
         .runnable-content-region {
           overflow: auto;
