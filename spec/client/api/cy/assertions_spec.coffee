@@ -361,6 +361,20 @@ describe "$Cypress.Cy Assertion Commands", ->
 
         @cy.wrap("foo").should("match", "foo")
 
+      it "does not log ensureElExistance errors", (done) ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push log
+
+        @cy.on "fail", (err) =>
+          @chai.restore()
+
+          expect(logs.length).to.eq(1)
+          done()
+
+        @cy.get("#does-not-exist")
+
   context "#and", ->
     it "proxies to #should", ->
       @cy.noop({foo: "bar"}).should("have.property", "foo").and("eq", "bar")
