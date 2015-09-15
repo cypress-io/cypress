@@ -133,8 +133,6 @@ do ($Cypress, _) ->
       @invoke("toJSON")
 
     reset: ->
-      @invoke("reset")
-
       @commands.splice(0, @commands.length)
 
       return @
