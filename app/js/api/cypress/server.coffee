@@ -2,6 +2,8 @@
 
 $Cypress.Server = do ($Cypress, _) ->
 
+  class AbortError extends Error
+
   class $Server
     constructor: (@fakeServer, options) ->
       ## think about moving these properties to a getter/setter
@@ -17,6 +19,7 @@ $Cypress.Server = do ($Cypress, _) ->
       @beforeRequest = options.beforeRequest
       @afterResponse = options.afterResponse
       @onError       = options.onError
+      @onAbort       = options.onAbort
       @_delay        = options.delay
       @_autoRespond  = options.respond
 
@@ -84,11 +87,25 @@ $Cypress.Server = do ($Cypress, _) ->
             ## this is used for 404 routes so they are delayed like regular routes
             delay = if _this._autoRespond then _this._delay else 0
 
+          ## think about capturing the abort
+          ## stack trace here
+          abort = xhr.abort
+
+          xhr.abort = ->
+            abort.apply(@, arguments)
+            err = new AbortError("This XHR was aborted by your code -- check this stack trace below.")
+            err.name = "AbortError"
+            if _.isFunction(_this.onAbort)
+              _this.onAbort(xhr, matchedRoute, err)
+
           p = Promise
             .delay(delay)
             .cancellable()
             .then ->
-              orig.apply(respondCtx, args)
+              if xhr.aborted
+                args = [0, {}, ""]
+              else
+                orig.apply(respondCtx, args)
             .then ->
               if _this.requestDidNotMatchAnyResponses(xhr, args)
                 status  = 404
@@ -280,7 +297,7 @@ $Cypress.Server = do ($Cypress, _) ->
       for array in [@queue, @requests, @responses, @onRequests]
         array.splice(0, array.length)
 
-      for prop in "beforeRequest handleAfterResponse afterResponse onError onFilter fakeServer".split(" ")
+      for prop in "beforeRequest handleAfterResponse afterResponse onError onAbort onFilter fakeServer".split(" ")
         @[prop] = null
 
       return @

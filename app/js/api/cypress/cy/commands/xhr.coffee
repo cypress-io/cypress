@@ -181,7 +181,6 @@ $Cypress.register "XHR", (Cypress, _, $) ->
             aliasType: "route"
             type:      "parent"
             error:     err
-            snapshot:  true
             event:     true
             onConsole: =>
               consoleObj = {
@@ -202,13 +201,17 @@ $Cypress.register "XHR", (Cypress, _, $) ->
 
               consoleObj
             onRender: ($row) ->
-              status = if xhr.status > 0 then xhr.status else "---"
-
-              klass = switch status
-                when "---"
-                  "pending"
+              status = switch
+                when xhr.aborted
+                  klass = "aborted"
+                  "(aborted)"
+                when xhr.status > 0
+                  xhr.status
                 else
-                  if /^2/.test(status) then "successful" else "bad"
+                  klass = "pending"
+                  "---"
+
+              klass ?= if /^2/.test(status) then "successful" else "bad"
 
               $row.find(".command-message").html ->
                 [
@@ -226,6 +229,9 @@ $Cypress.register "XHR", (Cypress, _, $) ->
           ## if this is a GET for a nonAjaxAsset
           method is "GET" and nonAjaxAssets.test(url)
 
+        onAbort: (xhr, route, err) =>
+          log(xhr, route, err)
+
         onError: (xhr, route, err) =>
           err.onFail = ->
 
@@ -239,6 +245,9 @@ $Cypress.register "XHR", (Cypress, _, $) ->
           setRequest.call(@, xhr, alias)
 
           ## log out this request immediately
+          ## routes are a great example of needing
+          ## to handle multiple snapshots. when the xhr
+          ## first starts, and then when it finally ends.
           log(xhr, route)
 
         afterResponse: (xhr, route = {}) =>

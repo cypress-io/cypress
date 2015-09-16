@@ -182,6 +182,37 @@ describe "$Cypress.Cy Server API", ->
       @server.respond()
       expect(delay).to.be.calledWith 0
 
+    it "sets status=0 headers={} body='' when xhr has been aborted", ->
+      @setup()
+      @server.stub url: /foo/, response: {}, method: "GET", status: 200
+
+      handleAfterResponse = @sandbox.spy(@server, "handleAfterResponse")
+
+      x = $.getJSON("/foo")
+      x.abort()
+
+      @server.queue[0].then (xhr) ->
+        expect(handleAfterResponse).to.be.calledWith xhr, {status: 0, headers: {}, body: ""}
+
+    it "catches xhr aborts and throws AbortError", ->
+      onAbort = @sandbox.stub()
+
+      @setup({onAbort: onAbort})
+      @server.stub url: /foo/, response: {}, method: "GET", status: 200
+
+      x = $.getJSON("/foo")
+      x.abort()
+
+      @server.queue[0].then (xhr) ->
+        expect(onAbort).to.be.calledWith xhr, xhr.matchedRoute
+
+        err = onAbort.getCall(0).args[2]
+
+        expect(err.name).to.eq "AbortError"
+
+      # @server.queue[0].catch (err) ->
+        # debugger
+
   context "#cancel", ->
     beforeEach ->
       @fakeServer = @sandbox.useFakeServer()
