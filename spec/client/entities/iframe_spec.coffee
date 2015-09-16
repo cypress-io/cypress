@@ -6,9 +6,15 @@ describe "Iframe Entity", ->
     @Cypress  = @runner.Cypress
 
   context "#stop", ->
-    it "stops listening"
+    it "stops listening", ->
+      stopListening = @sandbox.spy @iframe, "stopListening"
+      @iframe.stop()
+      expect(stopListening).to.be.calledOnce
 
-    it "resets state object literal"
+    it "resets state object literal", ->
+      @iframe.state = {foo: "bar"}
+      @iframe.stop()
+      expect(@iframe.state).to.deep.eq({})
 
   context "#defaults", ->
     it "sets browser to null", ->
@@ -35,6 +41,16 @@ describe "Iframe Entity", ->
     it "listens to runner after:run", ->
       @runner.trigger "after:run"
       expect(@iframe.isRunning()).to.be.false
+
+    it "resets the state before each run", ->
+      @iframe.state = {foo: "bar"}
+      @runner.trigger "before:run"
+      expect(@iframe.state).to.deep.eq({})
+
+    it "listens to Cypress stop", ->
+      stop = @sandbox.spy @iframe, "stop"
+      @Cypress.trigger "stop"
+      expect(stop).to.be.calledOnce
 
   context "#commandExit", ->
     it "is noop without originalBody", ->

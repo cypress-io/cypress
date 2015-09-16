@@ -18,6 +18,7 @@
 
     listeners: (runner, Cypress) ->
       @listenTo runner, "before:run", ->
+        @initialize()
         @isRunning(true)
 
       @listenTo runner, "after:run", ->
@@ -45,7 +46,7 @@
       @trigger "load:spec:iframe", cb, options
 
     stop: ->
-      @state = {}
+      @initialize()
       @stopListening()
 
     setConfig: (config) ->
