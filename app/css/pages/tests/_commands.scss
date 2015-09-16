@@ -233,11 +233,16 @@
 
       .fa-circle.successful {
         color: $pending;
-
       }
+
+      .fa-circle.aborted {
+        color: $fail;
+      }
+
       .fa-circle.bad {
         color: #F0AD4E;
       }
+
       .fa-circle.pending {
         color: #AAA;
       }
