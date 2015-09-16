@@ -251,8 +251,8 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
           _.defaults consoleObj,
             Error: _this.getError(err)
 
-        ## add note if no snapshot exists
-        if not @snapshot
+        ## add note if no snapshot exists on command instruments
+        if _this.get("instrument") is "command" and not @snapshot
           consoleObj.Snapshot = "The snapshot is missing. Displaying current state of the DOM."
         else
           delete consoleObj.Snapshot
