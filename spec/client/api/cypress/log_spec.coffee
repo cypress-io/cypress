@@ -175,6 +175,7 @@ describe "$Cypress.Log API", ->
 
       it "adds a note when snapshot is missing", ->
         @log.set("name", "foo")
+        @log.set("instrument", "command")
         @log.set("onConsole", -> {})
         @log.wrapOnConsole()
         expect(@log.attributes.onConsole().Snapshot).to.eq "The snapshot is missing. Displaying current state of the DOM."
