@@ -211,12 +211,22 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       @off()
       @attributes = _.omit @attributes, _.isObject
 
+    _shouldAutoEnd: ->
+      ## must be autoEnd
+      ## and not already ended
+      ## and not an event
+      ## and a command
+      @get("autoEnd") isnt false and
+        @get("end") isnt true and
+          @get("event") is false and
+            @get("instrument") is "command"
+
     finish: ->
       ## end our command since our subject
       ## has been resolved at this point
       ## unless its already been 'ended'
       ## or has been specifically told not to auto resolve
-      if @get("autoEnd") isnt false and @get("end") isnt true
+      if @_shouldAutoEnd()
         @snapshot().end()
 
     wrapOnConsole: ->
