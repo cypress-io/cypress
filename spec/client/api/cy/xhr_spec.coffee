@@ -68,6 +68,7 @@ describe "$Cypress.Cy XHR Commands", ->
         delay: 10
         beforeRequest: ->
         afterResponse: ->
+        onAbort: ->
         onError: ->
         onFilter: ->
       }
@@ -663,7 +664,69 @@ describe "$Cypress.Cy XHR Commands", ->
                 aliasType: "route"
                 state: "pending"
               }
-              expect(@log.get("snapshot")).to.be.ok
+              ## snapshots should not be taken when
+              ## logs are first inserted (but once multiple
+              ## snapshots are working, it should do one at first
+              ## and then another when it ends)
+              expect(@log.get("snapshot")).not.to.be.ok
+
+        it "does not end xhr requests when the associated command ends", ->
+          logs = null
+
+          @cy
+            .route({
+              url: /foo/,
+              response: {}
+              delay: 50
+            }).as("getFoo")
+            .window().then (w) ->
+              w.$.getJSON("foo")
+              w.$.getJSON("foo")
+              w.$.getJSON("foo")
+              null
+            .then ->
+              cmd = @cy.commands.findWhere({name: "window"})
+              logs = cmd.get("next").get("logs")
+
+              expect(logs.length).to.eq(3)
+
+              _.each logs, (log) ->
+                expect(log.get("name")).to.eq("xhr")
+                expect(log.get("end")).not.to.be.true
+            .wait(["@getFoo", "@getFoo", "@getFoo"]).then  ->
+              _.each logs, (log) ->
+                expect(log.get("name")).to.eq("xhr")
+                expect(log.get("end")).to.be.true
+
+        it "updates log immediately whenever an xhr is aborted", ->
+          snapshot = null
+
+          @cy
+            .route({
+              url: /foo/,
+              response: {}
+              delay: 50
+            }).as("getFoo")
+            .window().then (w) ->
+              xhr = w.$.getJSON("foo")
+              w.$.getJSON("foo")
+              xhr.abort()
+
+              null
+            .then ->
+              xhrs = @cy.commands.logs({name: "xhr"})
+
+              snapshot = @sandbox.spy(xhrs[0], "snapshot")
+
+              expect(xhrs[0].get("state")).to.eq("failed")
+              expect(xhrs[0].get("error").name).to.eq("AbortError")
+              expect(xhrs[0].get("snapshot")).to.be.an("object")
+
+              expect(@cy.prop("requests").length).to.eq(2)
+              expect(@cy.prop("responses")).to.be.undefined
+            .wait(["@getFoo", "@getFoo"]).then ->
+              ## should not re-snapshot after the response
+              expect(snapshot).not.to.be.called
 
       describe "responses", ->
         beforeEach ->
@@ -788,7 +851,7 @@ describe "$Cypress.Cy XHR Commands", ->
       respond = null
 
       @cy
-        .server({delay: 1000}).then (server) ->
+        .server({delay: 100}).then (server) ->
           respond = @sandbox.spy server, "respond"
         .window().then (win) ->
           win.$.get("/users")
