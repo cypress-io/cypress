@@ -40,7 +40,24 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
 
     obj
 
+  remoteJQueryisNotSameAsGlobal = (remoteJQuery) ->
+    remoteJQuery and (remoteJQuery isnt $)
+
+  shouldFnWithCallback = (subject, fn) ->
+    Promise
+      .try =>
+        remoteJQuery = @_getRemoteJQuery()
+        if Cypress.Utils.hasElement(subject) and remoteJQueryisNotSameAsGlobal(remoteJQuery)
+          remoteSubject = remoteJQuery(subject)
+          Cypress.Utils.setCypressNamespace(remoteSubject, subject)
+
+        fn.call @private("runnable").ctx, remoteSubject ? subject
+      .return(subject)
+
   shouldFn = (subject, chainers, args...) ->
+    if _.isFunction(chainers)
+      return shouldFnWithCallback.apply(@, arguments)
+
     exp = Cypress.Chai.expect(subject).to
     originalChainers = chainers
 
@@ -115,7 +132,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
 
       , exp
 
-    Promise.resolve(applyChainers()).then ->
+    Promise.try(applyChainers).then ->
       ## if the _obj has been mutated then we
       ## are chaining assertion properties and
       ## should return this new subject
@@ -192,6 +209,9 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
 
       i = 0
 
+      cmdHasFunctionArg = (cmd) ->
+        _.isFunction(cmd.get("args")[0])
+
       assert = @assert
       @assert = (args...) ->
         do (cmd = cmds[i]) =>
@@ -201,6 +221,13 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
             ## until we see page events
             return if log.get("name") isnt "assert"
 
+            ## when we do immediately stop listening to unbind
+            @stopListening @Cypress, "before:log", setCommandLog
+
+            insertNewLog = (log) ->
+              cmd.log(log)
+              options.assertions.push(log)
+
             ## its possible a single 'should' will assert multiple
             ## things such as the case with have.property. we can
             ## detect when that is happening because cmd will be null.
@@ -208,13 +235,42 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
             ## cmd and do not increase 'i'
             ## this will prevent 2 logs from ever showing up but still
             ## provide errors when the 1st assertion fails.
+            # debugger if log.get("state") is "success"
+            # debugger if /have id/.test log.get("message")
+
             if not cmd
               cmd = cmds[i - 1]
             else
               i += 1
 
-            ## when we do immediately stop listening to unbind
-            @stopListening @Cypress, "before:log", setCommandLog
+            ## if our command has a function argument
+            ## then we know it may contain multiple
+            ## assertions
+            if cmdHasFunctionArg(cmd)
+              index      = cmd.get("assertionIndex")
+              assertions = cmd.get("assertions")
+
+              incrementIndex = ->
+                ## always increase the assertionIndex
+                ## so our next assertion matches up
+                ## to the correct index
+                cmd.set("assertionIndex", index += 1)
+
+              ## if we dont have an assertion at this
+              ## index then insert a new log
+              if not assertion = assertions[index]
+                assertions.push(log)
+                incrementIndex()
+
+                return insertNewLog(log)
+              else
+                ## else just merge this log
+                ## into the previous assertion log
+                incrementIndex()
+                assertion.merge(log)
+
+                ## dont output a new log
+                return false
 
             ## if we already have a log
             ## then just update its attrs from
@@ -227,11 +283,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
               ## being added
               return false
             else
-              ## reset our state to pending even if
-              ## we have an error
-              # log.set("state", "pending")
-              cmd.log(log)
-              options.assertions.push(log)
+              insertNewLog(log)
 
           @listenTo @Cypress, "before:log", setCommandLog
 
@@ -306,6 +358,14 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
 
     _injectAssertion: (cmd) ->
       return (subject) =>
+        ## set assertions to itself or empty array
+        if not cmd.get("assertions")
+          cmd.set("assertions", [])
+
+        ## reset the assertion index back to 0
+        ## so we can track assertions and merge
+        ## them up with existing ones
+        cmd.set("assertionIndex", 0)
         cmd.get("fn").originalFn.apply @, [subject].concat(cmd.get("args"))
 
     getUpcomingAssertions: ->

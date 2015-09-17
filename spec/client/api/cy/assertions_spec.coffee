@@ -60,6 +60,130 @@ describe "$Cypress.Cy Assertion Commands", ->
       obj = {requestJSON: {teamIds: [2]}}
       @cy.noop(obj).its("requestJSON").should("have.property", "teamIds").should("deep.eq", [2])
 
+    describe "function argument", ->
+      it "waits until function is true", ->
+        button = @cy.$("button:first")
+
+        @cy.on "retry", _.after 2, =>
+          button.addClass("ready")
+
+        @cy.get("button:first").should ($button) ->
+          expect($button).to.have.class("ready")
+
+      it "works with regular objects", ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push(log)
+
+        obj = {}
+
+        @cy.on "retry", _.after 2, =>
+          obj.foo = "bar"
+
+        @cy.wrap(obj).should (o) ->
+          expect(o).to.have.property("foo").and.eq("bar")
+        .then ->
+          @chai.restore()
+
+          ## wrap + have property + and eq
+          expect(logs.length).to.eq(3)
+
+      it "logs two assertions", ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push(log)
+
+        _.delay =>
+          @cy.$("body").addClass("foo")
+        , Math.random() * 300
+
+        _.delay =>
+          @cy.$("body").prop("id", "bar")
+        , Math.random() * 300
+
+        @cy
+          .get("body").should ($body) ->
+            expect($body).to.have.class("foo")
+            expect($body).to.have.id("bar")
+          .then ->
+            @chai.restore()
+
+            @cy.$("body").removeClass("foo").removeAttr("id")
+
+            expect(logs.length).to.eq(3)
+
+            ## the messages should have been updated to reflect
+            ## the current state of the <body> element
+            expect(logs[1].get("message")).to.eq("expected [b]<body#bar.foo>[\\b] to have class [b]foo[\\b]")
+            expect(logs[2].get("message")).to.eq("expected [b]<body#bar.foo>[\\b] to have id [b]bar[\\b]")
+
+      it "logs assertions as children even if subject is different", ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push(log)
+
+        _.delay =>
+          @cy.$("body").addClass("foo")
+        , Math.random() * 300
+
+        _.delay =>
+          @cy.$("body").prop("id", "bar")
+        , Math.random() * 300
+
+        @cy
+          .get("body").should ($body) ->
+            expect($body.attr("class")).to.match(/foo/)
+            expect($body.attr("id")).to.include("bar")
+          .then ->
+            @chai.restore()
+
+            @cy.$("body").removeClass("foo").removeAttr("id")
+
+            expect(logs.length).to.eq(3)
+
+            types = _(logs).map (l) -> l.get("type")
+
+            expect(types).to.deep.eq(["parent", "child", "child"])
+
+      context "remote jQuery instances", ->
+        beforeEach ->
+          ## set the jquery path back to our
+          ## remote window
+          @Cypress.option "jQuery", @$iframe.prop("contentWindow").$
+
+          @remoteWindow = @cy.private("window")
+
+        afterEach ->
+          ## restore back to the global $
+          @Cypress.option "jQuery", $
+
+        it "yields the remote jQuery instance", ->
+          @remoteWindow.$.fn.__foobar = fn = ->
+
+          @cy
+            .get("input:first").should ($input) ->
+              @chai.restore()
+
+              expect($input).to.be.instanceof @remoteWindow.$
+              expect($input).to.have.property "__foobar", fn
+
+        it "still returns the original subject", ->
+          @Cypress.option "jQuery", $
+
+          @remoteWindow.$.fn.__foobar = fn = ->
+
+          @cy
+            .get("input:first").should ($input) ->
+              @chai.restore()
+
+              return $input
+            .then ($input) ->
+              expect($input).not.to.be.instanceof @remoteWindow.$
+              expect($input).not.to.have.property "__foobar"
+
     describe "not.exist", ->
       it "resolves eventually not exist", ->
         button = @cy.$("button:first")
