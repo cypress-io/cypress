@@ -2,7 +2,7 @@ require("../spec_helper")
 
 pkg = require("#{root}package")
 
-describe.only "the package.json", ->
+describe "the package.json", ->
   it "includes mocha as dependency", ->
     expect(pkg.dependencies).to.include.keys("mocha")
 

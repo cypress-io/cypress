@@ -64,32 +64,32 @@ send = (obj) ->
   if process.send
     process.send(obj)
 
-isRunningFromCli = ->
-  ## make sure we're not being loaded from a parent module
-  ## and that we're inside of development env!
-  (not module.parent) and (process.env["CYPRESS_ENV"] is "development")
+# isRunningFromCli = ->
+#   ## make sure we're not being loaded from a parent module
+#   ## and that we're inside of development env!
+#   (not module.parent) and (process.env["CYPRESS_ENV"] is "development")
 
 ## are we a child process
 ## by verifying we have the cyFork
 ## env and we are not in debugger
 ## mode with node inspector
-isChildProcess = ->
-  !!(process.send and not process.execArgv.length)
+# isChildProcess = ->
+#   !!(process.send and not process.execArgv.length)
 
-## if we are a child process
-## or if we are being run from the command
-## line directly from node (like nodemon)
-if isChildProcess() or isRunningFromCli()
-  projectRoot = process.argv[2]
+# ## if we are a child process
+# ## or if we are being run from the command
+# ## line directly from node (like nodemon)
+# if isChildProcess() or isRunningFromCli()
+#   projectRoot = process.argv[2]
 
-  ## boot the server and then send this
-  ## to our parent process
-  Booter(projectRoot).boot().then (obj) ->
-    obj.settings.done = true
+#   ## boot the server and then send this
+#   ## to our parent process
+#   Booter(projectRoot).boot().then (obj) ->
+#     obj.settings.done = true
 
-    if "id_generator" in process.argv
-      open(obj.settings.idGeneratorUrl)
+#     if "id_generator" in process.argv
+#       open(obj.settings.idGeneratorUrl)
 
-    send(obj.settings)
+#     send(obj.settings)
 
 module.exports = Booter

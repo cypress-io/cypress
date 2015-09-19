@@ -583,7 +583,7 @@ class Linux64 extends Platform
           xvfb.stopAsync()
 
   runSmokeTest: ->
-    xvfb = new ./()
+    xvfb = new Xvfb()
     xvfb = Promise.promisifyAll(xvfb)
     xvfb.startAsync().then (xvfxProcess) =>
       @_runSmokeTest({
