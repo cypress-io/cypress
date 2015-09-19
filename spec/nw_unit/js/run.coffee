@@ -80,7 +80,9 @@ module.exports = (parentWindow, gui) ->
                 return opts
 
         currentWindow.once "loaded", ->
-          resolve(currentWindow)
+          _.delay ->
+            resolve(currentWindow)
+          , 100
 
       if currentWindow
         currentWindow.once "closed", openWindow
