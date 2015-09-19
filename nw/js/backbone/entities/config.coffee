@@ -78,8 +78,6 @@
       cli = @getCli()
       cli(App, options)
 
-    getManifest: -> @getManifest()
-
     getToken: (user) ->
       @getCache().getToken(user.get("session_token"))
 
