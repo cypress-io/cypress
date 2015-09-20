@@ -110,6 +110,10 @@ module.exports = {
       .then(@_cypressSmokeTest)
       .return(pathToCypress)
 
+  verifyCypressExists: (options = {}) ->
+    _.defaults options, {catch: false}
+
+    @_fileExistsAtPath(null, options)
   startXvfb: ->
     xvfb.startAsync().catch (err) ->
       console.log("")

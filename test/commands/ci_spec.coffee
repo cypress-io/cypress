@@ -34,7 +34,7 @@ describe "Ci", ->
   context "#constructor", ->
     beforeEach ->
       @spawn  = @sandbox.stub(utils, "spawn")
-      @verify = @sandbox.stub(utils, "verifyCypress").resolves()
+      @verify = @sandbox.stub(utils, "verifyCypressExists").resolves()
 
       @setup = (key, options = {}) ->
         options.initialize = false
@@ -79,7 +79,7 @@ describe "Ci", ->
           opts.after(opts)
       })
 
-      @verify = @sandbox.stub(utils,  "verifyCypress").resolves()
+      @verify = @sandbox.stub(utils,  "verifyCypressExists").resolves()
       @log    = @sandbox.spy(console, "log")
 
       @setup = (key, options = {}) =>

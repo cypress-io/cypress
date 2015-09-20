@@ -43,9 +43,10 @@ class Ci
     run = ->
       Run(null, options)
 
-    utils.verifyCypress(null, {catch: false})
+    utils.verifyCypressExists()
       .then(run)
       .catch ->
+        console.log("")
         console.log("Cypress was not found:", chalk.green("Installing a fresh copy."))
         console.log("")
 
