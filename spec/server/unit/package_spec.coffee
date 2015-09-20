@@ -20,13 +20,8 @@ describe "the package.json", ->
         width: 300
       })
 
-    it.only "resolves icon", (done) ->
-      @timeout(5000)
-
-      sp = cp.spawn "gulp", ["nw:logo"], {stdio: "inherit"}
-      sp.on "exit", ->
-        fs.statAsync(pkg.window.icon)
-        done()
+    it "resolves icon", (done) ->
+      fs.statAsync(pkg.window.icon)
 
   context "platformOverrides", ->
     it "has linux overrides", ->
