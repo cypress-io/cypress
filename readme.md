@@ -16,36 +16,76 @@ For instance you can do common tasks like:
 
 ## Installation
 
-`npm install -g cypress`
+```bash
+npm install -g cypress
+```
 
-This will make the `cypress` command globally available.
+This will make the `cypress` command globally available from your command line.
+
+You can now execute the following commands:
 
 ## Available Commands
 
-##### cypress install
+##### [cypress install](#cypress-install-1)
+##### [cypress run](#cypress-run-1)
+##### [cypress ci](#cypress-ci-1)
+##### [cypress open](#cypress-open-1)
+##### [cypress get:path](#cypress-getpath-1)
+##### [cypress get:key](#cypress-getkey-1)
+##### [cypress new:key](#cypress-newkey-1)
+##### [cypress verify](#cypress-verify-1)
 
-##### cypress run
+--
 
-##### cypress ci
+### cypress install
 
-##### cypress get:key
+Installs Cypress to the default location for each Operating System.
 
-##### cypress new:key
+OS | Path
+:--- | :---
+Mac  | `/Applications/Cypress.app`
+Linux  | `/home/<user>/.cypress/Cypress`
 
-##### cypress verify
+### cypress run
 
-## Coming Soon Commands
+Runs Cypress headlessly. By default will run all your tests. Useful when developing locally.
+
+### cypress ci
+
+Run Cypress headlessly in CI. Expects your CI provider to have `XVFB` installed.
+
+> **Note:** Most CI Providers will already have `XVFB` installed.
+
+### cypress open
+
+Opens the Cypress application. This is the same thing as double-clicking the application.
+
+In Mac you'll see the `Cy` icon in the tray, and in Linux you'll see the Cypress application window open.
+
+### cypress get:path
+
+Returns the path Cypress will be install to. Additionally checks to see if Cypress already exists at that path.
+
+### cypress get:key
+
+Returns your secret project key for use in CI.
+
+### cypress new:key
+
+Creates a new secret project key and returns that key for use in CI. This will negate previous secret keys, so be sure to update your CI to use this new key.
+
+### cypress verify
+
+Verifies that the Cypress application is found and is executable.
+
+## Upcoming Commands
+
+These commands have not yet been released:
 
 ##### cypress update
-
 ##### cypress login
-
-##### cypress get:path
-
 ##### cypress set:path
-
 ##### cypress add:project
-
 ##### cypress remove:project
 
 ## Contributing
