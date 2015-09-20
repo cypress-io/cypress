@@ -68,6 +68,24 @@ describe "utils", ->
       utils.spawn(null, {xvfb: false}).then ->
         expect(unref).not.to.be.called
 
+  context "#getCypressPath", ->
+    beforeEach ->
+      @log = @sandbox.spy(console, "log")
+
+    it "logs when Cypress is found", ->
+      @sandbox.stub(utils, "_fileExistsAtPath").resolves()
+
+      utils.getCypressPath().then =>
+        expect(@log).to.be.calledWithMatch "Path to Cypress:", utils.getPathToUserExecutable()
+        expect(@log).to.be.calledWithMatch "Cypress was found at this path."
+
+    it "logs when Cypress isnt found", ->
+      @sandbox.stub(utils, "_fileExistsAtPath").rejects()
+
+      utils.getCypressPath().then =>
+        expect(@log).to.be.calledWithMatch "Path to Cypress:", utils.getPathToUserExecutable()
+        expect(@log).to.be.calledWithMatch "Cypress was not found at this path."
+
   context "#_fileExistsAtPath", ->
     beforeEach ->
       fs.ensureFileAsync("./tmp/foo.txt")

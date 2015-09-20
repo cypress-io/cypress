@@ -114,6 +114,28 @@ module.exports = {
     _.defaults options, {catch: false}
 
     @_fileExistsAtPath(null, options)
+
+  getCypressPath: (pathToCypress) ->
+    pathToCypress ?= @getPathToExecutable()
+
+    msgs = [
+      ["Path to Cypress:", chalk.blue(@getPathToUserExecutable())]
+    ]
+
+    log = ->
+      console.log("")
+      msgs.forEach (msg) ->
+        console.log.apply(console, [].concat(msg))
+      console.log("")
+
+    @verifyCypressExists()
+      .then ->
+        msgs.push([chalk.green("Cypress was found at this path.")])
+        log()
+      .catch (err) ->
+        msgs.push([chalk.red.underline("Cypress was not found at this path.")])
+        log()
+
   startXvfb: ->
     xvfb.startAsync().catch (err) ->
       console.log("")

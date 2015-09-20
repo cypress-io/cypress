@@ -47,6 +47,14 @@ program
   .description("Opens Cypress as a regular application")
   .action (key, opts) ->
     require("./commands/open")()
+
+program
+  .command("get:path")
+  .description("Returns the default path of the Cypress executable")
+  .action (key, opts) ->
+    require("./commands/path")()
+
+program
   .command("get:key [project]")
   .description("Returns your Project's Secret Key for use in CI")
   .action (project) ->
