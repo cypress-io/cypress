@@ -1,6 +1,6 @@
 require("../spec_helper")
 
-gulp = require("gulp")
+cp =   require("child_process")
 pkg  = require("#{root}package")
 
 describe "the package.json", ->
@@ -21,7 +21,7 @@ describe "the package.json", ->
       })
 
     it "resolves icon", (done) ->
-      gulp.start "nw:logo", ->
+      cp.exec "gulp nw:logo", (err, stdout, sterr) ->
         fs.statAsync(pkg.window.icon)
         done()
 
