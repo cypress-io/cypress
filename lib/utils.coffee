@@ -126,6 +126,7 @@ module.exports = {
 
     _.defaults options,
       verify: false
+      detached: false
       xvfb: os.platform() is "linux"
       stdio: ["ignore", process.stdout, "ignore"]
 
@@ -133,7 +134,7 @@ module.exports = {
       @verifyCypress().then (pathToCypress) =>
         if options.verify
           console.log(chalk.green("Cypress application is valid and should be okay to run:"), chalk.blue(@getPathToUserExecutable()))
-          process.exit()
+          return process.exit()
 
         sp = cp.spawn pathToCypress, args, options
         if options.xvfb
@@ -145,6 +146,11 @@ module.exports = {
         ## make sure we kill our own process
         ## with its exit code (to bubble up errors)
         sp.on "exit", process.exit
+
+        if options.detached
+          sp.unref()
+
+        return sp
 
     if options.xvfb
       @startXvfb().then(spawn)

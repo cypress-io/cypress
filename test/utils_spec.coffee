@@ -46,6 +46,28 @@ describe "utils", ->
 
       utils.spawn("--foo")
 
+    it "unref's if options.detached = true", ->
+      unref = @sandbox.spy()
+
+      @spawn = @sandbox.stub(cp, "spawn").returns({
+        on: ->
+        unref: unref
+      })
+
+      utils.spawn(null, {detached: true, xvfb: false}).then ->
+        expect(unref).to.be.calledOnce
+
+    it "does not unref by default", ->
+      unref = @sandbox.spy()
+
+      @spawn = @sandbox.stub(cp, "spawn").returns({
+        on: ->
+        unref: unref
+      })
+
+      utils.spawn(null, {xvfb: false}).then ->
+        expect(unref).not.to.be.called
+
   context "#_fileExistsAtPath", ->
     beforeEach ->
       fs.ensureFileAsync("./tmp/foo.txt")

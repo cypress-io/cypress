@@ -43,6 +43,10 @@ program
     require("./commands/ci")(key, parseOpts(opts))
 
 program
+  .command("open")
+  .description("Opens Cypress as a regular application")
+  .action (key, opts) ->
+    require("./commands/open")()
   .command("get:key [project]")
   .description("Returns your Project's Secret Key for use in CI")
   .action (project) ->
