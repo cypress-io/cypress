@@ -74,10 +74,15 @@ module.exports = {
         else
           resolve()
 
-  _fileExistsAtPath: (pathToCypress, options = {}) ->
-    fs.statAsync(pathToCypress)
+  _fileExistsAtPath: (options = {}) ->
+    ## this needs to change to become async and
+    ## to do a lookup for the cached cypress path
+    _.defaults options,
+      pathToCypress: @getPathToExecutable()
+
+    fs.statAsync(options.pathToCypress)
       .bind(@)
-      .return(pathToCypress)
+      .return(options.pathToCypress)
       .catch (err) =>
         ## allow us to bubble up the error if catch is false
         return throw(err) if options.catch is false
@@ -95,29 +100,24 @@ module.exports = {
         console.log("")
         process.exit(1)
 
-  verifyCypress: (pathToCypress, options = {}) ->
+  verifyCypress: (options = {}) ->
     _.defaults options,
       catch: true
 
-    ## this needs to change to become async and
-    ## to do a lookup for the cached cypress path
-    pathToCypress ?= @getPathToExecutable()
-
     ## verify that there is a file at this path
-    @_fileExistsAtPath(pathToCypress, options)
-
-      ## now verify that we can spawn cypress successfully
-      .then(@_cypressSmokeTest)
-      .return(pathToCypress)
+    @_fileExistsAtPath(options)
+      .then (pathToCypress) =>
+        ## now verify that we can spawn cypress successfully
+        @_cypressSmokeTest(pathToCypress)
+        .return(pathToCypress)
 
   verifyCypressExists: (options = {}) ->
-    _.defaults options, {catch: false}
+    _.defaults options,
+      catch: false
 
-    @_fileExistsAtPath(null, options)
+    @_fileExistsAtPath(options)
 
-  getCypressPath: (pathToCypress) ->
-    pathToCypress ?= @getPathToExecutable()
-
+  getCypressPath: ->
     msgs = [
       ["Path to Cypress:", chalk.blue(@getPathToUserExecutable())]
     ]

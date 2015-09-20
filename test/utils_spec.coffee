@@ -17,7 +17,7 @@ describe "utils", ->
       @startAsync    = @sandbox.stub(utils.xvfb, "startAsync").resolves()
       @stopAsync     = @sandbox.stub(utils.xvfb, "stopAsync").resolves()
 
-      @sandbox.stub(utils, "_fileExistsAtPath").resolves()
+      @sandbox.stub(utils, "_fileExistsAtPath").resolves("/path/to/cypress")
       @sandbox.stub(utils, "_cypressSmokeTest").resolves()
       @sandbox.stub(utils, "getPathToExecutable").returns("/path/to/cypress")
 
@@ -94,11 +94,11 @@ describe "utils", ->
       fs.removeAsync("./tmp")
 
     it "exits with 1 on err", ->
-      utils._fileExistsAtPath("/does/not/exist").then =>
+      utils._fileExistsAtPath({pathToCypress: "/does/not/exist"}).then =>
         expect(@exit).to.be.calledWith(1)
 
     it "returns path on success", ->
-      utils._fileExistsAtPath("./tmp/foo.txt").then (p) ->
+      utils._fileExistsAtPath({pathToCypress: "./tmp/foo.txt"}).then (p) ->
         expect(p).to.eq "./tmp/foo.txt"
 
   context "#_cypressSmokeTest", ->
