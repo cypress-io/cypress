@@ -1,6 +1,7 @@
 require("../spec_helper")
 
-pkg = require("#{root}package")
+gulp = require("gulp")
+pkg  = require("#{root}package")
 
 describe "the package.json", ->
   it "includes mocha as dependency", ->
@@ -19,8 +20,10 @@ describe "the package.json", ->
         width: 300
       })
 
-    it "resolves icon", ->
-      fs.statAsync(pkg.window.icon)
+    it "resolves icon", (done) ->
+      gulp.start "nw:logo", ->
+        fs.statAsync(pkg.window.icon)
+        done()
 
   context "platformOverrides", ->
     it "has linux overrides", ->
