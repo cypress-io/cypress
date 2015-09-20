@@ -20,7 +20,7 @@ describe "the package.json", ->
         width: 300
       })
 
-    it "resolves icon", (done) ->
+    it "resolves icon", ->
       fs.statAsync(pkg.window.icon)
 
   context "platformOverrides", ->
