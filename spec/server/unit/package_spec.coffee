@@ -20,8 +20,11 @@ describe "the package.json", ->
         width: 300
       })
 
-    it "resolves icon", (done) ->
-      cp.exec "gulp nw:logo", (err, stdout, sterr) ->
+    it.only "resolves icon", (done) ->
+      @timeout(5000)
+
+      sp = cp.spawn "gulp", ["nw:logo"], {stdio: "inherit"}
+      sp.on "exit", ->
         fs.statAsync(pkg.window.icon)
         done()
 
