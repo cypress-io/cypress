@@ -48,29 +48,29 @@ describe "Cypress", ->
 
     it "auto opens idGeneratorUrl"
 
-  context "required with {fork: true}", ->
-    beforeEach ->
-      @currentTest.timeout(10000)
-      FixturesHelper.scaffold()
+  # context "required with {fork: true}", ->
+  #   beforeEach ->
+  #     @currentTest.timeout(10000)
+  #     FixturesHelper.scaffold()
 
-      @fork = @sandbox.spy child_process, "fork"
+  #     @fork = @sandbox.spy child_process, "fork"
 
-      @todos = FixturesHelper.project("todos")
+  #     @todos = FixturesHelper.project("todos")
 
-      @booter = Cypress(@todos)
+  #     @booter = Cypress(@todos)
 
-    afterEach (done) ->
-      FixturesHelper.remove()
+  #   afterEach (done) ->
+  #     FixturesHelper.remove()
 
-      if @booter and @booter.child
-        @booter.child.on "close", -> done()
+  #     if @booter and @booter.child
+  #       @booter.child.on "close", -> done()
 
-        @booter.child.kill()
+  #       @booter.child.kill()
 
-      else
-        done()
+  #     else
+  #       done()
 
-    it "forks booter with the proper projectRoot argument", ->
-      @booter.boot({fork: true}).then (settings) =>
-        expect(@fork).to.be.calledWith require.resolve("#{root}lib/cypress"), [@todos]
-        expect(settings.projectRoot).to.eq @todos
+  #   it "forks booter with the proper projectRoot argument", ->
+  #     @booter.boot({fork: true}).then (settings) =>
+  #       expect(@fork).to.be.calledWith require.resolve("#{root}lib/cypress"), [@todos]
+  #       expect(settings.projectRoot).to.eq @todos

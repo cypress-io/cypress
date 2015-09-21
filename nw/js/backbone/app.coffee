@@ -33,6 +33,14 @@
       process.stdout.write(options.pong + "\n")
       return process.exit()
 
+    ## if we are in returnPackage mode
+    ## then just output our package's value
+    ## and exist
+    if options.returnPkg
+      manifest = JSON.stringify(App.config.getManifest())
+      process.stdout.write(manifest + "\n")
+      return process.exit()
+
     ## if we are updating then do not start the app
     ## or display any UI. just finish installing the updates
     if options.updating

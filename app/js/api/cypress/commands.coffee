@@ -40,6 +40,11 @@ do ($Cypress, _) ->
       else
         undefined
 
+    hasPreviouslyLinkedCommand: ->
+      prev = @get("prev")
+
+      !!(prev and prev.get("chainerId") is @get("chainerId"))
+
     is: (str) ->
       @get("type") is str
 

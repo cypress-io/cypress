@@ -30,11 +30,11 @@ describe "Async Integration Tests", ->
         .get("form").then ($form) ->
           expect($form).to.contain("form success!")
 
-    it "needs an explicit wait when an element is immediately found", ->
+    it "needs an explicit should when an element is immediately found", ->
       @cy
         .server()
         .route("POST", "/users", {})
         .get("input[name=name]").type("brian")
         .get("#submit").click()
-        .get("form").wait ($form) ->
+        .get("form").should ($form) ->
           expect($form).to.contain("form success!")

@@ -16,6 +16,7 @@ vagrant        = require("vagrant")
 runSequence    = require("run-sequence")
 minimist       = require("minimist")
 Xvfb           = require("xvfb")
+expect         = require("chai").expect
 
 vagrant.debug = true
 ["rsync", "rsync-auto", "rsync-back"].forEach (cmd) ->
@@ -407,21 +408,46 @@ class Platform
   verifyAppCanOpen: ->
     Promise.resolve()
 
-  runSmokeTest: ->
+  _runSmokeTest: (pkgWindow) ->
     @log("#runSmokeTest")
 
-    new Promise (resolve, reject) =>
-      rand = "" + Math.random()
+    smokeTest = =>
+      new Promise (resolve, reject) =>
+        rand = "" + Math.random()
 
-      child_process.exec "#{@buildPathToApp()} --smoke-test --ping=#{rand}", (err, stdout, stderr) ->
-        stdout = stdout.replace(/\s/, "")
+        child_process.exec "#{@buildPathToApp()} --smoke-test --ping=#{rand}", (err, stdout, stderr) ->
+          stdout = stdout.replace(/\s/, "")
 
-        throw err if err
+          return reject(err) if err
 
-        if stdout isnt rand
-          throw new Error("Stdout: '#{stdout}' did not match the random number: '#{rand}'")
-        else
+          if stdout isnt rand
+            throw new Error("Stdout: '#{stdout}' did not match the random number: '#{rand}'")
+          else
+            resolve()
+
+    verifyAppPackage = =>
+      new Promise (resolve, reject) =>
+        child_process.exec "#{@buildPathToApp()} --return-pkg", (err, stdout, stderr) ->
+          return reject(err) if err
+
+          stdout = JSON.parse(stdout)
+
+          try
+            expect(stdout.window).to.deep.eq(pkgWindow)
+          catch err
+            console.log(stdout.window)
+            console.log(pkgWindow)
+            return reject(err)
+
+          try
+            expect(stdout.env).to.eq("production")
+          catch err
+            console.log(stdout)
+            return reject(err)
+
           resolve()
+
+    smokeTest().then(verifyAppPackage)
 
 class Osx64 extends Platform
   buildPathToApp: ->
@@ -439,6 +465,18 @@ class Osx64 extends Platform
           resolve()
         else
           throw new Error("Verifying App via GateKeeper failed")
+
+  runSmokeTest: ->
+    @_runSmokeTest({
+      icon: "nw/public/img/cypress.iconset/icon_256x256@2x.png"
+      title: "Cypress"
+      frame: false
+      toolbar: false
+      show: false
+      show_in_taskbar: false
+      height: 400
+      width: 300
+    })
 
   afterBuild: ->
     @log("#afterBuild")
@@ -536,11 +574,28 @@ class Linux64 extends Platform
   codeSign: ->
     Promise.resolve()
 
+  nwTests: ->
+    xvfb = new Xvfb()
+    xvfb = Promise.promisifyAll(xvfb)
+    xvfb.startAsync()
+      .then (xvfxProcess) =>
+        super.then ->
+          xvfb.stopAsync()
+
   runSmokeTest: ->
     xvfb = new Xvfb()
     xvfb = Promise.promisifyAll(xvfb)
     xvfb.startAsync().then (xvfxProcess) =>
-      super.then ->
+      @_runSmokeTest({
+        icon: "nw/public/img/cypress.iconset/icon_256x256@2x.png"
+        title: "Cypress"
+        toolbar: false
+        frame: true
+        show: true
+        show_in_taskbar: true
+        height: 400
+        width: 300
+      }).then ->
         xvfb.stopAsync()
 
   nwBuilder: ->
@@ -580,10 +635,16 @@ class Linux64 extends Platform
   deploy: ->
     version = @options.version
 
+    getOpts = =>
+      if @options.runTests is false
+        "--skip-tests"
+      else
+        ""
+
     deploy = =>
       new Promise (resolve, reject) =>
         ssh = ->
-          vagrant.ssh ["-c", "cd /cypress-app && gulp dist --version #{version} --skip-tests"], (code) ->
+          vagrant.ssh ["-c", "cd /cypress-app && gulp dist --version #{version} #{getOpts()}"], (code) ->
             if code isnt 0
               reject("vagrant.ssh gulp dist failed!")
             else

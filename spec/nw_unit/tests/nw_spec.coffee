@@ -4,18 +4,6 @@ cache        = lookup("lib/cache")
 Routes       = lookup("lib/util/routes")
 
 module.exports = (parentWindow, gui, loadApp) ->
-  describe "Login", ->
-    it "displays login", ->
-      loadApp(@).then =>
-        button = @$("#login button")
-        expect(button).to.contain("Login with Github")
-
-    it "displays login when session_token is null", ->
-      cache.setUser({name: "brian", session_token: null}).then =>
-        loadApp(@).then =>
-          button = @$("#login button")
-          expect(button).to.contain("Login with Github")
-
   describe "Logged In", ->
     beforeEach ->
       cache.setUser({name: "Brian", session_token: "abc123"}).then =>
@@ -29,6 +17,42 @@ module.exports = (parentWindow, gui, loadApp) ->
     it "displays empty project well", ->
       well = @$(".well p.lead")
       expect(well).to.contain("No projects have been added.")
+
+  describe "Login", ->
+    it "displays login", ->
+      loadApp(@).then =>
+        button = @$("#login button")
+        expect(button).to.contain("Login with Github")
+
+    it "displays login when session_token is null", ->
+      cache.setUser({name: "brian", session_token: null}).then =>
+        loadApp(@).then =>
+          button = @$("#login button")
+          expect(button).to.contain("Login with Github")
+
+  describe "Platform Specific GUI", ->
+    switch process.platform
+      when "darwin"
+        context "osx", ->
+          it "sets native menu", ->
+            loadApp(@).then =>
+              expect(@currentWindow.menu).to.be.ok
+
+          it "binds to blur event", ->
+            loadApp(@).then =>
+              expect(@currentWindow.listeners("blur")).to.have.length(1)
+
+      when "linux"
+        context "linux", ->
+          it "does not set native menu", ->
+            loadApp(@).then =>
+              expect(@currentWindow.menu).to.be.undefined
+
+          it "does not set tray"
+
+          it "does not bind to blur event", ->
+            loadApp(@).then =>
+              expect(@currentWindow.listeners("blur")).to.have.length(0)
 
   describe "Secret Sauce", ->
     beforeEach ->
@@ -76,6 +100,16 @@ module.exports = (parentWindow, gui, loadApp) ->
         expect(@win.title).to.eq "About"
         done()
 
+    it "focuses on the window", (done) ->
+      focus = @sandbox.spy global.Window.prototype, "focus"
+
+      @$("#footer [data-toggle='dropdown']").click()
+      @$(".dropdown-menu [data-about]").click()
+
+      @App.vent.on "start:about:app", (region, @win) =>
+        expect(focus).to.be.calledOn(@win)
+        done()
+
   describe "Updates Window", ->
     beforeEach ->
       cache.setUser({name: "Brian", session_token: "abc123"}).then =>
@@ -99,6 +133,16 @@ module.exports = (parentWindow, gui, loadApp) ->
         expect(@App.updatesRegion.currentView.ui.state).to.contain("No updates available.")
         expect(@App.updatesRegion.currentView.ui.button).to.contain("Close")
         expect(@win.title).to.eq "Updates"
+        done()
+
+    it "focuses on the window", (done) ->
+      focus = @sandbox.spy global.Window.prototype, "focus"
+
+      @$("#footer [data-toggle='dropdown']").click()
+      @$(".dropdown-menu [data-updates]").click()
+
+      @App.vent.on "start:updates:app", (region, @win) =>
+        expect(focus).to.be.calledOn(@win)
         done()
 
   # describe "Preferences Window", ->

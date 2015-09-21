@@ -29,73 +29,18 @@ describe "$Cypress.Cy Waiting Commands", ->
         expect(trigger).not.to.be.calledWith "invoke:end"
 
     describe "function argument", ->
-      it "resolves when truthy", ->
-        @cy.wait ->
-          "foo" is "foo"
-
-      it "retries when false", (done) ->
-        i = 0
-        fn = ->
-          i += 1
-          i is 2
-        fn = @sandbox.spy fn
-        @cy.wait(fn)
-        @cy.on "end", ->
-          expect(fn.callCount).to.eq 2
-          done()
-
-      it "retries when null", (done) ->
-        i = 0
-        fn = ->
-          i += 1
-          if i isnt 2 then null else true
-        fn = @sandbox.spy fn
-        @cy.then(fn).wait(fn)
-        @cy.on "end", ->
-          expect(fn.callCount).to.eq 2
-          done()
-
-      it "resolves when undefined", (done) ->
-        ## after returns undefined
-        fn = -> undefined
-
-        fn = @sandbox.spy fn
-        @cy.wait(fn)
-
-        @cy.on "end", ->
-          expect(fn.callCount).to.eq 1
-          done()
-
-      it "resolves with existing subject", ->
-        @cy
-          .get("input").then ($input) ->
-            @$input = $input
-          .wait(-> true)
-
-        @cy.on "invoke:end", (obj) =>
-          if obj.name is "wait"
-            expect(@cy.prop("subject")).to.eq @$input
-
       describe "errors thrown", ->
         beforeEach ->
           @currentTest.enableTimeouts(false)
           @uncaught = @allowErrors()
 
-        it "times out eventually due to false value", (done) ->
-          ## forcibly reduce the timeout to 500 ms
-          ## so we dont have to wait so long
-          @cy.wait (-> false), timeout: 100
-
-          @cy.on "fail", (err) ->
-            expect(err.message).to.include "The final value was: false"
+        it "is deprecated", (done) ->
+          @cy.on "fail", (err) =>
+            expect(err.message).to.eq "cy.wait(fn) has been deprecated. Instead just change this command to be .should(fn)."
             done()
 
-        it "appends to the err message", (done) ->
-          @cy.wait (-> expect(true).to.be.false), timeout: 100
-
-          @cy.on "fail", (err) ->
-            expect(err.message).to.include "Timed out retrying: Could not continue due to: AssertionError"
-            done()
+          @cy.get("body").wait ($body) ->
+            expect($body).to.match("body")
 
     describe "alias argument", ->
       it "waits for a route alias to have a response", ->

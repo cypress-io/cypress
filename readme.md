@@ -11,6 +11,13 @@ The `lib/secret_sauce.bin` file is required to run NW.  You can either run the `
 npm run dist
 ```
 
+### Before Running Tests
+```bash
+// this will build all of the
+// client JS files, bower, etc
+npm run build
+```
+
 ### While Developing
 ```bash
 bower install

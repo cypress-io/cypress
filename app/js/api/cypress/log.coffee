@@ -2,7 +2,8 @@
 ## including the intermediate $Log interface
 $Cypress.Log = do ($Cypress, _, Backbone) ->
 
-  CypressErrorRe = /(AssertionError|CypressError)/
+  CypressErrorRe  = /(AssertionError|CypressError)/
+  parentOrChildRe = /parent|child/
 
   klassMethods = {
     agent: (Cypress, cy, obj = {}) ->
@@ -27,8 +28,10 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
       ## but in cases where the command purposely does not log
       ## then it could still be logged during a failure, which
       ## is why we normalize its type value
-      if obj.type is "dual"
-        obj.type = if current.get("prev") then "child" else "parent"
+      if not parentOrChildRe.test(obj.type)
+        ## does this command have a previously linked command
+        ## by chainer id
+        obj.type = if current.hasPreviouslyLinkedCommand() then "child" else "parent"
 
       _.defaults obj,
         event: false

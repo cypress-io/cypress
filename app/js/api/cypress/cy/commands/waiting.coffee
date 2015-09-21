@@ -45,35 +45,7 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
         .return(subject)
 
     _waitFunction: (subject, fn, options) ->
-      retry = ->
-        @invoke2(@prop("current"), fn, options)
-
-      stringify = (fn) ->
-        _.str.clean fn.toString()
-
-      try
-        ## invoke fn and make sure its not strictly false
-        options.value = fn.call(@private("runnable").ctx, subject)
-        if options.value
-          ## do not think we need to log out waits
-          ## just like we dont log out cy.thens
-          ## if wait blows up and fails then handle that
-          ## at that time
-          # log({
-          #   "Waited For": stringify(fn)
-          #   Retried: options.retries + " times"
-          # })
-          return subject
-      catch e
-        options.error = "Could not continue due to: " + e
-
-        return @_retry(retry, options)
-
-      ## retry outside of the try / catch block because
-      ## if retry throws errors we want those to bubble
-      options.error = "The final value was: " + options.value
-
-      @_retry(retry, options) if _.isNull(options.value) or options.value is false
+      @throwErr("cy.wait(fn) has been deprecated. Instead just change this command to be .should(fn).")
 
     _waitString: (subject, str, options) ->
       if options.log isnt false

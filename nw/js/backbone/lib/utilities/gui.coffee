@@ -29,17 +29,18 @@
         @show(win)
         @focus(win)
 
-      nativeMenuBar = new gui.Menu(type: "menubar")
-      nativeMenuBar.createMacBuiltin "Cypress.io"
+      if process.platform is "darwin"
+        nativeMenuBar = new gui.Menu(type: "menubar")
+        nativeMenuBar.createMacBuiltin?("Cypress.io")
 
-      win.menu = nativeMenuBar
+        win.menu = nativeMenuBar
 
-      @displayTray(win) unless App.config.env("test")
+        @displayTray(win) unless App.config.env("test")
 
-      win.on "blur", =>
-        return if App.fileDialogOpened or not App.config.env("production")
+        win.on "blur", =>
+          return if App.fileDialogOpened or not App.config.env("production")
 
-        @hide(win)
+          @hide(win)
 
       win.on "focus", ->
         ## show the other windows if they're hidden
@@ -47,7 +48,6 @@
 
     displayTray: (win) ->
       tray = new gui.Tray
-        # title:   "Cy"
         icon:    "nw/public/img/tray/mac-normal@2x.png"
         alticon: "nw/public/img/tray/mac-normal-inverse@2x.png"
 
@@ -118,7 +118,9 @@
         toolbar: false
         title: "About"
 
-      about.once "loaded", ->
+      about.once "loaded", =>
+        @focus(about)
+
         about.showDevTools() if App.config.get("debug")
 
         ## grab the about region from other window
@@ -151,7 +153,9 @@
         toolbar: false
         title: "Updates"
 
-      updates.once "loaded", ->
+      updates.once "loaded", =>
+        @focus(updates)
+
         updates.showDevTools() if App.config.get("debug")
 
         ## grab the updates region from other window
@@ -184,7 +188,9 @@
         toolbar: false
         title: "Debug"
 
-      debug.once "loaded", ->
+      debug.once "loaded", =>
+        @focus(debug)
+
         debug.showDevTools() if App.config.get("debug")
 
         ## grab the debug region from other window
@@ -217,7 +223,9 @@
         toolbar: false
         title: "Preferences"
 
-      preferences.once "loaded", ->
+      preferences.once "loaded", =>
+        @focus(preferences)
+
         preferences.showDevTools() if App.config.get("debug")
 
         ## grab the preferences region from other window
