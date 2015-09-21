@@ -860,6 +860,12 @@ SecretSauce.RemoteInitial =
     ## rewrite back to our current host localhost:2020
     headers = @mapHeaders(headers, remoteHost, req.get("host"))
 
+    ## do not cache the initial responses, no matter what
+    ## later on we should switch to an etag system so we dont
+    ## have to download the remote http responses if the etag
+    ## hasnt changed
+    headers["cache-control"] = "no-cache, no-store, must-revalidate"
+
     ## proxy the headers
     res.set(headers)
 

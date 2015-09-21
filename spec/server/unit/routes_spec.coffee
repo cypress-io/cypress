@@ -339,6 +339,21 @@ describe "Routes", ->
           .expect(200, "foo")
           .end(done)
 
+    context "Cache-Control: no-cache", ->
+      it "does not cache initial response headers", (done) ->
+        nock("http://localhost:8080")
+          .get("/")
+          .reply 200, "hello from bar!", {
+            "Content-Type": "text/html"
+          }
+
+        supertest(@app)
+          .get("/")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://localhost:8080")
+          .expect(200)
+          .expect("cache-control", "no-cache, no-store, must-revalidate")
+          .end(done)
+
     context "gzip", ->
       it "does not send accept-encoding headers when initial=true", (done) ->
         nock(@baseUrl)
