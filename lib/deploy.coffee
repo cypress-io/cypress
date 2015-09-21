@@ -635,10 +635,16 @@ class Linux64 extends Platform
   deploy: ->
     version = @options.version
 
+    getOpts = =>
+      if @options.runTests is false
+        "--skip-tests"
+      else
+        ""
+
     deploy = =>
       new Promise (resolve, reject) =>
         ssh = ->
-          vagrant.ssh ["-c", "cd /cypress-app && gulp dist --version #{version} --skip-tests"], (code) ->
+          vagrant.ssh ["-c", "cd /cypress-app && gulp dist --version #{version} #{getOpts()}"], (code) ->
             if code isnt 0
               reject("vagrant.ssh gulp dist failed!")
             else
