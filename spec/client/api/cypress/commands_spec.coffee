@@ -82,3 +82,18 @@ describe "$Cypress.Commands API", ->
       cmd = @commands.findWhere({name: "foo"})
       expect(cmd.get("name")).to.eq("foo")
       expect(cmd.get("id")).to.eq(1)
+
+  context "#hasPreviouslyLinkedCommand", ->
+    it "is true when prev + matching chainerIds", ->
+      c1 = @commands.splice(0, 1, {chainerId: 123})
+      c2 = @commands.splice(1, 2, {chainerId: 123, prev: c1})
+      expect(c2.hasPreviouslyLinkedCommand()).to.be.true
+
+    it "is false when prev + not matching chainerIds", ->
+      c1 = @commands.splice(0, 1, {chainerId: 123})
+      c2 = @commands.splice(1, 2, {chainerId: 124, prev: c1})
+      expect(c2.hasPreviouslyLinkedCommand()).to.be.false
+
+    it "is false when no prev", ->
+      c1 = @commands.splice(0, 1, {chainerId: 123})
+      expect(c1.hasPreviouslyLinkedCommand()).to.be.false

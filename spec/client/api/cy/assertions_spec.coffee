@@ -499,6 +499,42 @@ describe "$Cypress.Cy Assertion Commands", ->
 
         @cy.get("#does-not-exist")
 
+      it "logs once with type: parent immediately without retrying", (done) ->
+        ## when cy.should is used by itself it really just acts like
+        ## a cy.then (it does not retry) because nothing has been told
+        ## to retry it!
+
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          @chai.restore()
+
+          expect(logs.length).to.eq(2)
+          expect(err.message).to.eq("foo is not defined")
+          expect(logs[1].get("name")).to.eq("should")
+          expect(logs[1].get("state")).to.eq("failed")
+          expect(logs[1].get("snapshot")).to.be.an("object")
+
+          done()
+
+        @cy.get("button")
+        @cy.should ->
+          foo.bar()
+
+    describe ".log", ->
+      beforeEach ->
+        @Cypress.on "log", (@log) =>
+
+      it "is type child", ->
+        @cy.get("button").should("match", "button").then ->
+          @chai.restore()
+
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("type")).to.eq("child")
+
   context "#and", ->
     it "proxies to #should", ->
       @cy.noop({foo: "bar"}).should("have.property", "foo").and("eq", "bar")
