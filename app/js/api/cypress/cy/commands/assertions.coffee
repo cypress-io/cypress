@@ -11,18 +11,37 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
   Cypress.on "assert", ->
     @assert.apply(@, arguments)
 
-  convertTags = ($row) ->
-    html = $row.html()
+  convertTags = (str) ->
+    ## must first escape these characters
+    ## since we will be inserting them
+    ## as real html
+    str = _.escape(str)
 
     ## bail if matches werent found
-    return if not bRe.test(html)
+    return str if not bRe.test(str)
 
-    html = html
+    str
       .replace(bTagOpen, ": <strong>")
       .replace(bTagClosed, "</strong>")
       .split(" :").join(":")
 
-    $row.html(html)
+  convertMessage = ($row, message) ->
+    message = convertTags(message)
+
+    $row.find("[data-js=message]").html(message)
+
+  convertRowFontSize = ($row, message) ->
+    len = message.length
+
+    ## bail if this isnt a huge message
+    return if len < 100
+
+    ## else reduce the font-size down to 85%
+    ## and reduce the line height
+    $row.css({
+      fontSize: "85%"
+      lineHeight: "14px"
+    })
 
   ## Rules:
   ## 1. always remove value
@@ -450,8 +469,12 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
           klasses = "command-assertion-failed command-assertion-passed command-assertion-pending"
           $row.removeClass(klasses).addClass("command-assertion-#{@state}")
 
+          ## if our message is too big
+          ## then scale the font size down
+          convertRowFontSize($row, @message)
+
           ## converts [b] string tags into real elements
-          convertTags($row)
+          convertMessage($row, @message)
         onConsole: =>
           obj = {Command: "assert"}
 

@@ -23,7 +23,7 @@
         <span class="command-alias <%= @aliasType %>" title="Found an alias for: '<%= alias %>'">@<%= alias %></span>
       <% end %>
     <% else: %>
-      <span><%= @messageTruncated %></span>
+      <span data-js="message"><%= @messageTruncated %></span>
     <% end %>
   </span>
   <span class="command-controls">
