@@ -806,6 +806,9 @@ describe "$Cypress.Cy Assertion Commands", ->
       it "calls super when not DOM element", ->
         @cy.noop("foobar").should("contain", "oob")
 
+      it "escapes quotes", ->
+        cy.get("#escape-quotes").should("contain", "shouldn't")
+
     describe "#match", ->
       it "calls super when provided a regex", ->
         expect("foo").to.match(/foo/)

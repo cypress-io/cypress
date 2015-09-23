@@ -272,7 +272,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
           $priorities = elements.filter $current.parents(priorityElement)
           if $priorities.length then $priorities.last() else $current
 
-      text = text.toString().replace /('|")/g, "\\$1"
+      text = Cypress.Utils.escapeQuotes(text)
 
       ## find elements by the :contains psuedo selector
       ## and any submit inputs with the attributeContainsWord selector

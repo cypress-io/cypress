@@ -73,7 +73,9 @@ do ($Cypress, _, $, chai) ->
               if not cy or not ($Cypress.Utils.isInstanceOf(obj, $) or $Cypress.Utils.hasElement(obj))
                 return _super.apply(@, arguments)
 
-              selector = ":contains('#{text}'), [type='submit'][value~='#{text}']"
+              escText = $Cypress.Utils.escapeQuotes(text)
+
+              selector = ":contains('#{escText}'), [type='submit'][value~='#{escText}']"
 
               @assert(
                 obj.is(selector) or !!obj.find(selector).length

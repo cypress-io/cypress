@@ -2,6 +2,7 @@ $Cypress.Utils = do ($Cypress, _) ->
 
   tagOpen     = /\[([a-z\s='"-]+)\]/g
   tagClosed   = /\[\/([a-z]+)\]/g
+  quotesRe    = /('|")/g
 
   CYPRESS_OBJECT_NAMESPACE = "_cypressObj"
 
@@ -145,6 +146,11 @@ $Cypress.Utils = do ($Cypress, _) ->
         instance instanceof constructor
       catch e
         false
+
+    escapeQuotes: (text) ->
+      ## convert to str and escape any single
+      ## or double quotes
+      ("" + text).replace(quotesRe, "\\$1")
 
     getCypressNamespace: (obj) ->
       obj and obj[CYPRESS_OBJECT_NAMESPACE]
