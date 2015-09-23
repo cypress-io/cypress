@@ -444,6 +444,9 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
             "parent"
 
         onRender: ($row) ->
+          ## remove the numElements label
+          $row.find("[data-js=numElements]").remove()
+
           klasses = "command-assertion-failed command-assertion-passed command-assertion-pending"
           $row.removeClass(klasses).addClass("command-assertion-#{@state}")
 

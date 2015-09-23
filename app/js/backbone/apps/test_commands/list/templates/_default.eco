@@ -36,10 +36,10 @@
       <i class="fa fa-eye-slash" title="<%= @visibleMessage %>"></i>
     <% end %>
     <% if @numElements is 0: %>
-      <label title="<%= @numElements %> matched elements" class="label label-danger"><%= @numElements %></label>
+      <label data-js="numElements" title="<%= @numElements %> matched elements" class="label label-danger"><%= @numElements %></label>
     <% end %>
     <% if @numElements > 1: %>
-      <label title="<%= @numElements %> matched elements" class="label label-primary"><%= @numElements %></label>
+      <label data-js="numElements" title="<%= @numElements %> matched elements" class="label label-primary"><%= @numElements %></label>
     <% end %>
     <!-- <i class="fa fa-pause"></i> -->
   </span>
