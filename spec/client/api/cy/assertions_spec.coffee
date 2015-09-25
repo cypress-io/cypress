@@ -535,6 +535,22 @@ describe "$Cypress.Cy Assertion Commands", ->
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("type")).to.eq("child")
 
+      it "is type child when alias between assertions", ->
+        @cy.get("button").as("btn").should("match", "button").then ->
+          @chai.restore()
+
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("type")).to.eq("child")
+
+      it "resets upcomingAssertions after resolving assertions", ->
+        @cy.get("button").as("btn").should("match", "button").and ->
+          ## length should be 2 for 'cy.should' and 'cy.and'
+          expect(@cy.prop("upcomingAssertions").length).to.eq(2)
+        @cy.should ->
+          expect(@cy.prop("upcomingAssertions")).to.deep.eq([])
+        .then ->
+          expect(@cy.prop("upcomingAssertions")).to.deep.eq([])
+
   context "#and", ->
     it "proxies to #should", ->
       @cy.noop({foo: "bar"}).should("have.property", "foo").and("eq", "bar")

@@ -171,6 +171,8 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
     verifyUpcomingAssertions: (subject, options = {}, callbacks = {}) ->
       cmds = @getUpcomingAssertions()
 
+      @prop("upcomingAssertions", cmds)
+
       options.assertions ?= []
 
       determineEl = ($el, subject) ->
@@ -254,9 +256,6 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
             ## cmd and do not increase 'i'
             ## this will prevent 2 logs from ever showing up but still
             ## provide errors when the 1st assertion fails.
-            # debugger if log.get("state") is "success"
-            # debugger if /have id/.test log.get("message")
-
             if not cmd
               cmd = cmds[i - 1]
             else
@@ -331,6 +330,8 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
           subject
 
       restore = =>
+        @prop("upcomingAssertions", [])
+
         ## no matter what we need to
         ## restore the assertions
         @assert = assert
@@ -438,13 +439,14 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
         obj.snapshot = true
         obj.error = error
 
-      isChildLike = (subject, current) ->
+      isChildLike = (subject, current) =>
         (value is subject) or
           ## if our current command is an assertion type
           isAssertionType(current) or
-            ## or if the next command is an assertion type
-            isAssertionType(current?.get("next")) or
-              (functionHadArguments(current))
+            ## are we currently verifying assertions?
+            @prop("upcomingAssertions")?.length > 0 or
+              ## did the function have arguments
+              functionHadArguments(current)
 
       _.extend obj,
         name:     "assert"
