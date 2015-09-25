@@ -37,16 +37,59 @@ $Cypress.register "Window", (Cypress, _, $) ->
             onRetry: resolveTitle
           })
 
-    window: ->
-      window = @private("window")
-      @throwErr "The remote iframe is undefined!" if not window
+    window: (options = {}) ->
+      _.defaults options, {log: true}
 
-      return window
+      if options.log
+        options._log = Cypress.Log.command()
 
-    document: ->
-      win = @private("window")
-      @throwErr "The remote iframe's document is undefined!" if not win.document
-      win.document
+      getWindow = =>
+        window = @private("window")
+        @throwErr("The remote iframe is undefined!", options._log) if not window
+
+        return window
+
+      ## wrap retrying into its own
+      ## separate function
+      retryWindow = =>
+        Promise
+        .try(getWindow)
+        .catch (err) =>
+          options.error = err
+          @_retry(retryWindow, options)
+
+      do verifyAssertions = =>
+        Promise.try(retryWindow).then (win) =>
+          @verifyUpcomingAssertions(win, options, {
+            onRetry: verifyAssertions
+          })
+
+    document: (options = {}) ->
+      _.defaults options, {log: true}
+
+      if options.log
+        options._log = Cypress.Log.command()
+
+      getDocument = =>
+        win = @private("window")
+        @throwErr "The remote iframe's document is undefined!" if not win?.document
+
+        return win.document
+
+      ## wrap retrying into its own
+      ## separate function
+      retryDocument = =>
+        Promise
+          .try(getDocument)
+          .catch (err) =>
+            options.error = err
+            @_retry(retryDocument, options)
+
+      do verifyAssertions = =>
+        Promise.try(retryDocument).then (doc) =>
+          @verifyUpcomingAssertions(doc, options, {
+            onRetry: verifyAssertions
+          })
 
     doc: -> @sync.document()
 

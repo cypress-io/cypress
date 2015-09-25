@@ -46,6 +46,13 @@ do ($Cypress, _, $, chai) ->
             ## replace object with our formatted one
             assert._obj = $Cypress.Utils.stringifyElement(obj, "short")
 
+          ## if we are formatting the window object
+          if $Cypress.Utils.hasWindow(obj)
+            assert._obj = "<window>"
+
+          if $Cypress.Utils.hasDocument(obj)
+            assert._obj = "<document>"
+
           msg = orig.call(@, assert, args)
 
           ## restore the real obj if we changed it

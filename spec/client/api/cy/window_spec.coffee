@@ -6,6 +6,148 @@ describe "$Cypress.Cy Window Commands", ->
       @cy.window().then (win) ->
         expect(win).to.eq $("iframe").prop("contentWindow")
 
+    describe "assertion verification", ->
+      beforeEach ->
+        @remoteWindow = @cy.private("window")
+
+        delete @remoteWindow.foo
+
+        @allowErrors()
+        @currentTest.timeout(100)
+
+        @chai = $Cypress.Chai.create(@Cypress, {})
+        @Cypress.on "log", (log) =>
+          if log.get("name") is "assert"
+            @log = log
+
+      afterEach ->
+        @chai.restore()
+
+      it "eventually passes the assertion", ->
+        @cy.on "retry", _.after 2, =>
+          @remoteWindow.foo = "bar"
+
+        @cy.window().should("have.property", "foo", "bar").then ->
+          @chai.restore()
+
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("passed")
+          expect(@log.get("end")).to.be.true
+
+      it "eventually fails the assertion", (done) ->
+        @cy.on "retry", _.after 2, =>
+          @remoteWindow.foo = "foo"
+
+        @cy.on "fail", (err) =>
+          @chai.restore()
+
+          expect(err.message).to.include(@log.get("error").message)
+          expect(err.message).not.to.include("undefined")
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("failed")
+          expect(@log.get("error")).to.be.an.instanceof(Error)
+
+          done()
+
+        @cy.window().should("have.property", "foo", "bar")
+
+      it "can still fail on window", (done) ->
+        win = @cy.private("window")
+
+        @cy.private("window", undefined)
+
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push log
+
+        @cy.on "fail", (err) =>
+          @cy.private("window", win)
+
+          @chai.restore()
+
+          expect(logs.length).to.eq(1)
+          expect(err.message).to.include(@log.get("error").message)
+          expect(@log.get("name")).to.eq("window")
+          expect(@log.get("state")).to.eq("failed")
+          expect(@log.get("error")).to.be.an.instanceof(Error)
+
+          done()
+
+        @cy.window()
+
+      it "does not log an additional log on failure", (done) ->
+        @remoteWindow.foo = "foo"
+
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", ->
+          expect(logs.length).to.eq(2)
+          done()
+
+        @cy.window().should("have.property", "foo", "bar")
+
+    describe ".log", ->
+      beforeEach ->
+        @Cypress.on "log", (@log) =>
+
+      it "can turn off logging", ->
+        @cy.window({log: false}).then ->
+          expect(@log).to.be.undefined
+
+      it "logs immediately before resolving", (done) ->
+        @Cypress.on "log", (log) ->
+          expect(log.get("state")).to.eq("pending")
+          expect(log.get("snapshot")).not.to.be.ok
+          done()
+
+        @cy.window()
+
+      it "snapshots after resolving", ->
+        @cy.window().then ->
+          expect(@log.get("snapshot")).to.be.an("object")
+
+      it "can be aliased", ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push log
+
+        @cy
+          .window().as("win")
+          .get("body")
+          .get("@win").then (win) ->
+            expect(win).to.eq(@win)
+
+            ## window + get + get
+            expect(logs.length).to.eq(3)
+
+            expect(logs[0].get("alias")).to.eq("win")
+            expect(logs[0].get("aliasType")).to.eq("primitive")
+
+            expect(logs[2].get("aliasType")).to.eq("primitive")
+            expect(logs[2].get("referencesAlias")).to.eq("win")
+
+      it "logs obj", ->
+        @cy.window().then ->
+          obj = {
+            name: "window"
+            message: ""
+          }
+
+          _.each obj, (value, key) =>
+            expect(@log.get(key)).to.deep.eq value
+
+      it "#onConsole", ->
+        @cy.window().then (win) ->
+          expect(@log.attributes.onConsole()).to.deep.eq {
+            Command: "window"
+            Returned: win
+          }
+
   context "#document", ->
     it "returns the remote document as a jquery object", ->
       @cy.document().then ($doc) ->
@@ -14,6 +156,149 @@ describe "$Cypress.Cy Window Commands", ->
     it "aliases doc to document", ->
       @cy.doc().then ($doc) ->
         expect($doc).to.eq $("iframe").prop("contentDocument")
+
+    describe "assertion verification", ->
+      beforeEach ->
+        @remoteDocument = @cy.private("window").document
+
+        delete @remoteDocument.foo
+
+        @allowErrors()
+        @currentTest.timeout(100)
+
+        @chai = $Cypress.Chai.create(@Cypress, {})
+        @Cypress.on "log", (log) =>
+          if log.get("name") is "assert"
+            @log = log
+
+      afterEach ->
+        @chai.restore()
+
+      it "eventually passes the assertion", ->
+        @cy.on "retry", _.after 2, =>
+          @remoteDocument.foo = "bar"
+
+        @cy.document().should("have.property", "foo", "bar").then ->
+          @chai.restore()
+
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("passed")
+          expect(@log.get("end")).to.be.true
+
+      it "eventually fails the assertion", (done) ->
+        @cy.on "retry", _.after 2, =>
+          @remoteDocument.foo = "foo"
+
+        @cy.on "fail", (err) =>
+          @chai.restore()
+
+          expect(err.message).to.include(@log.get("error").message)
+          expect(err.message).not.to.include("undefined")
+          expect(@log.get("name")).to.eq("assert")
+          expect(@log.get("state")).to.eq("failed")
+          expect(@log.get("error")).to.be.an.instanceof(Error)
+
+          done()
+
+        @cy.document().should("have.property", "foo", "bar")
+
+      it "can still fail on document", (done) ->
+        win = @cy.private("window")
+
+        @cy.private("window", undefined)
+
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push log
+
+        @cy.on "fail", (err) =>
+          @cy.private("window", win)
+
+          @chai.restore()
+
+          expect(logs.length).to.eq(1)
+          expect(err.message).to.include(@log.get("error").message)
+          expect(@log.get("name")).to.eq("document")
+          expect(@log.get("state")).to.eq("failed")
+          expect(@log.get("error")).to.be.an.instanceof(Error)
+
+          done()
+
+        @cy.document()
+
+      it "does not log an additional log on failure", (done) ->
+        @remoteDocument.foo = "foo"
+
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+
+        @cy.on "fail", ->
+          expect(logs.length).to.eq(2)
+          done()
+
+        @cy.document().should("have.property", "foo", "bar")
+
+    describe ".log", ->
+      beforeEach ->
+        @Cypress.on "log", (@log) =>
+
+      it "can turn off logging", ->
+        @cy.document({log: false}).then ->
+          expect(@log).to.be.undefined
+
+      it "logs immediately before resolving", (done) ->
+        @Cypress.on "log", (log) ->
+          expect(log.get("state")).to.eq("pending")
+          expect(log.get("snapshot")).not.to.be.ok
+          done()
+
+        @cy.document()
+
+      it "snapshots after resolving", ->
+        @cy.document().then ->
+          expect(@log.get("snapshot")).to.be.an("object")
+
+      it "can be aliased", ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push log
+
+        @cy
+          .document().as("doc")
+          .get("body")
+          .get("@doc").then (doc) ->
+            expect(doc).to.eq(@doc)
+
+            ## docdow + get + get
+            expect(logs.length).to.eq(3)
+
+            expect(logs[0].get("alias")).to.eq("doc")
+            expect(logs[0].get("aliasType")).to.eq("primitive")
+
+            expect(logs[2].get("aliasType")).to.eq("primitive")
+            expect(logs[2].get("referencesAlias")).to.eq("doc")
+
+      it "logs obj", ->
+        @cy.document().then ->
+          obj = {
+            name: "document"
+            message: ""
+          }
+
+          _.each obj, (value, key) =>
+            expect(@log.get(key)).to.deep.eq value
+
+      it "#onConsole", ->
+        @cy.document().then (win) ->
+          expect(@log.attributes.onConsole()).to.deep.eq {
+            Command: "document"
+            Returned: win
+          }
+
 
   context "#title", ->
     it "returns the pages title as a string", ->

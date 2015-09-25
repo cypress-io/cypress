@@ -98,6 +98,12 @@ $Cypress.Utils = do ($Cypress, _) ->
       catch
         false
 
+    hasDocument: (obj) ->
+      try
+        !!((obj and obj.nodeType is 9) or (obj and obj[0] and obj[0].nodeType is 9))
+      catch
+        false
+
     isDescendent: ($el1, $el2) ->
       return false if not $el2
 
