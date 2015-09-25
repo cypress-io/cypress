@@ -18,16 +18,6 @@ describe "Iframe Show App", ->
     @setup()
 
   context "layout", ->
-    it "calls #resizeViewport on show", ->
-      @config.set
-        viewportWidth: 800
-        viewportHeight: 600
-
-      @setup()
-
-      expect(@layout.ui.size.width()).to.eq 800
-      expect(@layout.ui.size.height()).to.eq 600
-
     ## invoke Cypress viewport and then to reload
     ## the iframe and ensure the dimensions are reset again
 
@@ -109,15 +99,9 @@ describe "Iframe Show App", ->
       @Cypress.trigger "page:loading", false
       expect(@header.ui.url.parent()).not.to.have.class("loading")
 
-    it "initially displays width, height, scale", ->
-      @config.set
-        viewportWidth: 1024
-        viewportHeight: 768
-
+    it "initially displays scale", ->
       @setup()
 
-      expect(@header.ui.width).to.have.text("1024")
-      expect(@header.ui.height).to.have.text("768")
       expect(@header.ui.scale).to.have.text("100")
 
     it "updates width, height, scale on model change", ->

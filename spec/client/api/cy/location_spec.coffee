@@ -8,11 +8,11 @@ describe "$Cypress.Cy Location Commands", ->
 
     it "eventually resolves", ->
       _.delay ->
-        win = cy.sync.window()
+        win = cy.private("window")
         win.location.href = "/foo/bar/baz.html"
       , 100
 
-      cy.url().should("match", /baz/).and("eq", "/foo/bar/baz.html")
+      @cy.url().should("match", /baz/).and("eq", "/foo/bar/baz.html")
 
     describe "assertion verification", ->
       beforeEach ->
@@ -29,7 +29,7 @@ describe "$Cypress.Cy Location Commands", ->
 
       it "eventually passes the assertion", ->
         @cy.on "retry", _.after 2, =>
-          win = cy.sync.window()
+          win = cy.private("window")
           win.location.href = "/foo/bar/baz.html"
 
         @cy.url().should("match", /baz/).then ->
@@ -112,11 +112,11 @@ describe "$Cypress.Cy Location Commands", ->
 
     it "eventually resolves", ->
       _.delay ->
-        win = cy.sync.window()
+        win = cy.private("window")
         win.location.hash = "users/1"
       , 100
 
-      cy.hash().should("match", /users/).and("eq", "#users/1")
+      @cy.hash().should("match", /users/).and("eq", "#users/1")
 
     describe "assertion verification", ->
       beforeEach ->
@@ -133,7 +133,7 @@ describe "$Cypress.Cy Location Commands", ->
 
       it "eventually passes the assertion", ->
         @cy.on "retry", _.after 2, =>
-          win = cy.sync.window()
+          win = cy.private("window")
           win.location.hash = "users/1"
 
         @cy.hash().should("match", /users/).then ->
@@ -221,11 +221,11 @@ describe "$Cypress.Cy Location Commands", ->
 
     it "eventually resolves", ->
       _.delay ->
-        win = cy.sync.window()
+        win = cy.private("window")
         win.location.pathname = "users/1"
       , 100
 
-      cy.location().should("have.property", "pathname").and("match", /users/)
+      @cy.location().should("have.property", "pathname").and("match", /users/)
 
     describe "assertion verification", ->
       beforeEach ->
@@ -242,7 +242,7 @@ describe "$Cypress.Cy Location Commands", ->
 
       it "eventually passes the assertion", ->
         @cy.on "retry", _.after 2, =>
-          win = cy.sync.window()
+          win = cy.private("window")
           win.location.pathname = "users/1"
 
         @cy.location("pathname").should("match", /users/).then ->
