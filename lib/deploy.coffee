@@ -333,6 +333,7 @@ class Platform
         CFBundleIdentifier: "com.cypress.io"
       }
       # macZip: true
+      zip: false
 
     nw.on "log", console.log
 
