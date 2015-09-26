@@ -29,7 +29,22 @@ describe "Install", ->
       @sandbox.stub(@install, "unzip").resolves()
       @sandbox.stub(@install, "finish").resolves()
 
-    it "downloads latest version of cypress"
+    it "sets options.version to response x-version", ->
+      nock("http://aws.amazon.com")
+      .get("/some.zip")
+      .reply 200, (uri, requestBody) ->
+        fs.createReadStream("test/fixture/example.zip")
+
+      nock("http://download.cypress.io")
+      .get("/latest")
+      .query(true)
+      .reply 302, undefined, {
+        "Location": "http://aws.amazon.com/some.zip"
+        "x-version": "0.11.1"
+      }
+
+      @install.initialize(@options).then =>
+        expect(@options.version).to.eq("0.11.1")
 
     it "catches download status errors and exits", ->
       @sandbox.stub(@install, "download").rejects({statusCode: 404, statusMessage: "Not Found"})
@@ -69,7 +84,7 @@ describe "Install", ->
 
   context "#finish", ->
     beforeEach ->
-      @options = {initialize: false}
+      @options = {initialize: false, version: "0.11.2"}
       @install = new Install(@options)
       @console = @sandbox.spy(console, "log")
       @cleanupZip = @sandbox.spy(@install, "cleanupZip")
@@ -86,6 +101,18 @@ describe "Install", ->
       @install.initialize(@options).then =>
         expect(@console).to.be.calledWithMatch("Finished Installing")
         expect(@console).to.be.calledWithMatch("/foo/bar")
+        expect(@console).to.be.calledWithMatch("(version: 0.11.2)")
+
+    it "displays opening app message", ->
+      @install.initialize(@options).then =>
+        expect(@console).to.be.calledWithMatch("You can now open Cypress by running:")
+        expect(@console).to.be.calledWithMatch("cypress open")
+
+    it "can silence opening app message", ->
+      @options.displayOpen = false
+
+      @install.initialize(@options).then =>
+        expect(@console).not.to.be.calledWithMatch("cypress open")
 
     it "invokes options.after", (done) ->
       @options.after = -> done()

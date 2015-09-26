@@ -96,6 +96,7 @@ describe "Ci", ->
 
       ci = @setup("abc123")
       ci.initialize({key: "abc123"}).then =>
+        expect(@Install.getCall(0).args[0].displayOpen).to.be.false
         expect(@Install.getCall(0).args[0].after).to.be.a("function")
         expect(@Run).to.be.calledWithMatch(null, {key: "abc123"})
 

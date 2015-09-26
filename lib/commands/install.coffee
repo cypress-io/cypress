@@ -22,6 +22,8 @@ class Install
 
     _.defaults options,
       initialize:     true
+      displayOpen:    true
+      version:        null
       percent:        0
       current:        0
       total:          100
@@ -95,11 +97,22 @@ class Install
         bar.terminate()
         reject(err)
 
-      progress(request(@getUrl()), {
+      req = request({
+        url: @getUrl()
+        followRedirect: (response) ->
+          ## set the version in options
+          options.version = response.headers["x-version"]
+
+          ## yes redirect
+          return true
+      })
+
+      progress(req, {
         throttle: options.throttle
       })
 
       .on "response", (response) ->
+
         ## if our status code doesnt start with 200
         if not /^2/.test(response.statusCode)
           terminate _.pick(response, "statusCode", "statusMessage")
@@ -139,7 +152,8 @@ class Install
       yauzl.open options.zipDestination, (err, zipFile) ->
         return reject(err) if err
 
-        total = zipFile.entryCount
+        count = 0
+        total = Math.floor(zipFile.entryCount / 250)
 
         bar = new ProgressBar(ascii.join(" "), {
           total: total
@@ -151,23 +165,43 @@ class Install
           .dest(options.destination)
           .use(Decompress.zip())
           .use through2.obj (file, enc, cb) ->
-            bar.tick(1)
+            count += 1
+            if count % 250 is 0
+              bar.tick(1)
             cb(null, file)
           .run(resolve)
 
   cleanupZip: (options) ->
     fs.removeAsync(options.zipDestination)
 
+  finishedInstalling: (version) ->
+    ascii = [
+      chalk.white("  -")
+      chalk.blue("Finished Installing")
+      chalk.green(utils.getPathToUserExecutable())
+      chalk.gray("(version: #{version})")
+    ]
+
+    console.log ascii.join(" ")
+
+  displayOpeningApp: ->
+    console.log("")
+
+    ascii = [
+      chalk.yellow("  You can now open Cypress by running:")
+      chalk.cyan("cypress open")
+    ]
+
+    console.log ascii.join(" ")
+
+    console.log("")
+
   finish: (options) ->
-    @cleanupZip(options).then ->
+    @cleanupZip(options).then =>
 
-      ascii = [
-        chalk.white("  -")
-        chalk.blue("Finished Installing")
-        chalk.green(utils.getPathToUserExecutable())
-      ]
+      @finishedInstalling(options.version)
 
-      console.log ascii.join(" ")
+      @displayOpeningApp() if options.displayOpen
 
       options.after(options)
 

@@ -50,6 +50,6 @@ class Ci
         console.log("Cypress was not found:", chalk.green("Installing a fresh copy."))
         console.log("")
 
-        Install({after: run})
+        Install({after: run, displayOpen: false})
 
 module.exports = Ci
