@@ -477,6 +477,28 @@ describe "$Cypress.Cy XHR Commands", ->
               data: JSON.stringify({foo: "bar"})
               dataType: "json"
 
+      ## https://github.com/cypress-io/cypress/issues/65
+      it "provides the correct requestJSON on multiple requests", ->
+        post = (win, obj) ->
+          win.$.ajax({
+            type: "POST"
+            url: "/foo"
+            data: JSON.stringify(obj)
+            dataType: "json"
+          })
+
+          return null
+
+        @cy
+          .server()
+          .route("POST", /foo/, {}).as("getFoo")
+          .window().then (win) ->
+            post(win, {foo: "bar1"})
+          .wait("@getFoo").its("requestJSON").should("deep.eq", {foo: "bar1"})
+          .window().then (win) ->
+            post(win, {foo: "bar2"})
+          .wait("@getFoo").its("requestJSON").should("deep.eq", {foo: "bar2"})
+
     describe "filtering requests", ->
       beforeEach ->
         @cy.server()
