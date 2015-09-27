@@ -96,6 +96,7 @@ class Platform
           copy("./lib/server.coffee",       "/src/lib/server.coffee")
           copy("./lib/socket.coffee",       "/src/lib/socket.coffee")
           copy("./lib/support.coffee",      "/src/lib/support.coffee")
+          copy("./lib/request.coffee",     "/src/lib/request.coffee")
           copy("./lib/fixtures.coffee",     "/src/lib/fixtures.coffee")
           copy("./lib/updater.coffee",      "/src/lib/updater.coffee")
           copy("./lib/environment.coffee",  "/src/lib/environment.coffee")
