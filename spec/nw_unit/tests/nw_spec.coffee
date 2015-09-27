@@ -54,7 +54,7 @@ module.exports = (parentWindow, gui, loadApp) ->
           well = @$(".well p.lead")
           expect(well).to.contain("No projects have been added.")
 
-    it.only "displays login errors", ->
+    it "displays login errors", ->
       @user = {
         id: 1
         name: "brian"
