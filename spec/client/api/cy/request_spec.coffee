@@ -3,12 +3,13 @@ describe "$Cypress.Cy Request Commands", ->
 
   context "#request", ->
     beforeEach ->
+      trigger = @Cypress.trigger
+
       @responseIs = (resp, timeout = 10) =>
         @Cypress.trigger.restore?()
 
         @sandbox.spy(@Cypress, "trigger")
 
-        trigger = @Cypress.trigger
         @Cypress.trigger = (args...) ->
           if args[0] is "request"
             trigger.apply(@, arguments)
@@ -282,16 +283,7 @@ describe "$Cypress.Cy Request Commands", ->
 
     describe ".log", ->
       beforeEach ->
-        @sandbox.spy(@Cypress, "trigger")
-
-        trigger = @Cypress.trigger
-        @Cypress.trigger = (args...) ->
-          if args[0] is "request"
-            _.delay ->
-              args[2]({status: 200})
-            , 10
-          else
-            trigger.apply(@, arguments)
+        @responseIs({status: 200})
 
         @Cypress.on "log", (@log) =>
 
@@ -314,6 +306,40 @@ describe "$Cypress.Cy Request Commands", ->
       it "snapshots after clicking", ->
         @cy.request("http://localhost:8080").then ->
           expect(@log.get("snapshot")).to.be.an("object")
+
+      it ".onConsole", ->
+        @responseIs({
+          status: 201
+          body: {id: 123}
+          headers: {
+            "Content-Type": "application/json"
+          }
+        })
+
+        @cy.request({
+          url: "http://localhost:8080/foo"
+          headers: {"x-token": "abc123"}
+          method: "POST"
+          body: {first: "brian"}
+        }).then ->
+          expect(@log.attributes.onConsole()).to.deep.eq {
+            Command: "request"
+            Request: {
+              url: "http://localhost:8080/foo"
+              headers: {"x-token": "abc123"}
+              method: "POST"
+              body: {first: "brian"}
+              gzip: true
+              json: true
+            }
+            Returned: {
+              status: 201
+              body: {id: 123}
+              headers: {
+                "Content-Type": "application/json"
+              }
+            }
+          }
 
     describe "errors", ->
       beforeEach ->

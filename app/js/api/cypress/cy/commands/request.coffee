@@ -120,13 +120,16 @@ $Cypress.register "Request", (Cypress, _, $) ->
 
       ## clone the requestOpts to prevent
       ## anything from mutating it now
-      requestOpts = _(options).pick("auth", "json", "cookies", "method", "headers", "body", "url", "gzip")
+      requestOpts = _(options).pick("method", "url", "body", "headers", "cookies", "json", "auth", "gzip")
 
       if options.log
         options._log = Cypress.Log.command({
           message: ""
-          onConsole: ->
-            requestOpts
+          onConsole: -> {
+            Request: requestOpts
+            Returned: options.response
+          }
+
           onRender: ($row) ->
             status = switch
               when r = options.response
