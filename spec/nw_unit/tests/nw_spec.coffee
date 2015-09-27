@@ -30,6 +30,52 @@ module.exports = (parentWindow, gui, loadApp) ->
           button = @$("#login button")
           expect(button).to.contain("Login with Github")
 
+    it "displays 'logging in'", ->
+      @user = {
+        id: 1
+        name: "brian"
+        email: "a@b.com"
+        session_token: "1111-2222-3333-4444"
+      }
+
+      nock(Routes.api())
+        .post("/signin")
+        .query({code: "123-foo-bar"})
+        .delay(300)
+        .reply(200, @user)
+
+      loadApp(@).then =>
+        @App.vent.trigger("logging:in", "app://authentication.html?code=123-foo-bar")
+
+        expect(@$("#login").find(".fa-spinner")).to.exist
+        expect(@$("#login").find("span")).to.contain("Logging in...")
+
+        Promise.delay(500).then =>
+          well = @$(".well p.lead")
+          expect(well).to.contain("No projects have been added.")
+
+    it.only "displays login errors", ->
+      @user = {
+        id: 1
+        name: "brian"
+        email: "a@b.com"
+        session_token: "1111-2222-3333-4444"
+      }
+
+      nock(Routes.api())
+        .post("/signin")
+        .query({code: "123-foo-bar"})
+        .delay(300)
+        .reply(401, "Your email: '#{@user.email}' has not been authorized.")
+
+      loadApp(@).then =>
+        @App.vent.trigger("logging:in", "app://authentication.html?code=123-foo-bar")
+
+        Promise.delay(500).then =>
+          expect(@$("#login").find("p.bg-danger")).to.contain(@user.email)
+          expect(@$("#login").find("p.bg-danger")).to.contain("has not been authorized.")
+          expect(@$("#login").find("p.bg-danger")).not.to.contain("401")
+
   describe "Platform Specific GUI", ->
     switch process.platform
       when "darwin"

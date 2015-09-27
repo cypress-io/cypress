@@ -6,12 +6,14 @@ chokidar      = require 'chokidar'
 Promise       = require "bluebird"
 IdGenerator   = require './id_generator'
 Fixtures      = require "./fixtures"
+Request       = require "./request"
 Log           = require "./log"
 SecretSauce   = require "../lib/util/secret_sauce_loader"
 
 class Socket
   fs: fs
   Log: Log
+  Request: Request
   Fixtures: Fixtures
   chokidar: chokidar
   Promise: Promise

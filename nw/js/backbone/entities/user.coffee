@@ -13,7 +13,7 @@
 
     setLoginError: (err) ->
       @set "loggingIn", false, {silent: true}
-      @set "error", err.toString()
+      @set "error", err.message
 
   App.reqres.setHandler "new:user:entity", (attrs = {}) ->
     new Entities.User attrs

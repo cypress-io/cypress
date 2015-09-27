@@ -386,6 +386,12 @@ SecretSauce.Socket =
         @Log.info "watching test file failed", {error: err, path: testFilePath}
         reject err
 
+  onRequest: (options, cb) ->
+    @Request.send(options)
+      .then(cb)
+      .catch (err) ->
+        cb({__error: err.message})
+
   onFixture: (fixture, cb) ->
     @Fixtures(@app).get(fixture)
       .then(cb)
@@ -510,6 +516,9 @@ SecretSauce.Socket =
         .catch (err) ->
           console.log "\u0007", err.details, err.message
           fn(message: err.message)
+
+      socket.on "request", =>
+        @onRequest.apply(@, arguments)
 
       socket.on "fixture", =>
         @onFixture.apply(@, arguments)
