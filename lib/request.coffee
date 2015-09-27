@@ -40,6 +40,7 @@ module.exports = {
       cookies: {}
       auth: null
       json: false
+      gzip: true
     }
 
     _.extend options, {

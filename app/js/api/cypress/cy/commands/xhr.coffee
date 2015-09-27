@@ -217,7 +217,7 @@ $Cypress.register "XHR", (Cypress, _, $) ->
                 [
                   "<i class='fa fa-circle #{klass}'></i>" + xhr.method,
                   status,
-                  _.truncate(xhr.url, "20")
+                  _.truncate(xhr.url, 20)
                 ].join(" ")
 
       defaults = {

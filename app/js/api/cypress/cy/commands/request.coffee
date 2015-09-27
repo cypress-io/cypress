@@ -5,6 +5,19 @@ $Cypress.register "Request", (Cypress, _, $) ->
 
   optionalOpts = "body auth headers json cookies".split(" ")
 
+  defaults = {
+    log: true
+    body: null
+    auth: null
+    headers: null
+    json: false
+    cookies: false
+    gzip: true
+    failOnStatus: true
+    method: "GET"
+    timeout: 20000
+  }
+
   request = (options) =>
     new Promise (resolve) ->
       Cypress.trigger "request", options, resolve
@@ -27,19 +40,6 @@ $Cypress.register "Request", (Cypress, _, $) ->
     ## METHOD / URL / BODY
     ## or object literal with all expanded options
     request: (args...) ->
-
-      defaults = {
-        log: true
-        body: null
-        auth: null
-        headers: null
-        json: false
-        cookies: false
-        failOnStatus: true
-        method: "GET"
-        timeout: 30000
-      }
-
       options = o = {}
 
       switch
@@ -67,52 +67,100 @@ $Cypress.register "Request", (Cypress, _, $) ->
 
       _.defaults options, defaults
 
+      options.method = options.method.toUpperCase()
+
+      if not validHttpMethodsRe.test(options.method)
+        @throwErr("cy.request() was called with an invalid method: '#{o.method}'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS")
+
       if not options.url
-        @throwErr("cy.request requires a url be passed.")
+        @throwErr("cy.request requires a url. You did not provide a url.")
+
+      if not _.isString(options.url)
+        @throwErr("cy.request requires the url to be a string.")
+
+      ## normalize the url by prepending it with our current origin
+      ## or the baseUrl
+      ## or just using the options.url if its FQDN
+      ## origin may return an empty string if we haven't visited anything yet
+      origin = @_getLocation("origin") or @private("baseUrl")
+      options.url = Cypress.Location.getRemoteUrl options.url, origin
+
+      ## if options.url isnt FQDN then we need to throw here
+      ## if we made a request prior to a visit then it needs
+      ## to be filled out
+      if not Cypress.Location.isFullyQualifiedUrl(options.url)
+        @throwErr("cy.request must be provided a fully qualified url - one that begins with 'http'. By default cy.request will use either the current window's origin or the 'baseUrl' in cypress.json. Neither of those values were present.")
 
       if isValidJsonObj(options.body)
         options.json = true
 
       options = _.omit options, whichAreUntruthyAndOptional
 
+      if a = options.auth
+        if not _.isObject(a)
+          @throwErr("cy.request must be passed an object literal for the 'auth' option.")
+
       if h = options.headers
         if _.isObject(h)
           options.headers = h
         else
-          ## throw err
+          @throwErr("cy.request requires headers to be an object literal.")
 
       if c = options.cookies
         switch
-          when _.isObject(c)
+          when _.isObject(c) and not _.isArray(c) and not _.isFunction(c)
             options.cookies = c
-          when true
-            options.cookies = Cypress.Cookies.get()
+          when c is true
+            options.cookies = Cypress.Cookies.getAllCookies()
           else
-            ## throw err
+            @throwErr("cy.request requires cookies to be true, or an object literal.")
+
+      if not _.isBoolean(options.gzip)
+        @throwErr("cy.request requires gzip to be a boolean.")
 
       ## clone the requestOpts to prevent
       ## anything from mutating it now
-      requestOpts = _(options).pick("auth", "json", "cookies", "method", "headers", "body", "url")
+      requestOpts = _(options).pick("auth", "json", "cookies", "method", "headers", "body", "url", "gzip")
 
       if options.log
         options._log = Cypress.Log.command({
-          onConsole: -> requestOpts
+          message: ""
+          onConsole: ->
+            requestOpts
+          onRender: ($row) ->
+            status = switch
+              when r = options.response
+                r.status
+              else
+                klass = "pending"
+                "---"
+
+            klass ?= if isOkStatusCodeRe.test(status) then "successful" else "bad"
+
+            $row.find(".command-message").html ->
+              [
+                "<i class='fa fa-circle #{klass}'></i>" + options.method,
+                status,
+                _.truncate(options.url, 20)
+              ].join(" ")
         })
 
       ## need to remove the current timeout
-      ## @_clearTimeout()
-      ## normalize this url just like cy.visit
+      ## because we're handling timeouts ourselves
+      @_clearTimeout()
 
-      ## do we need to set this as cancellable?
       request(requestOpts)
         .timeout(options.timeout)
         .then (response) =>
+          options.response = response
+
           if err = response.__error
-            @throwErr(err)
+            @throwErr(err, options._log)
 
           ## bomb if we should fail on non 2xx status code
           if options.failOnStatus and not isOkStatusCodeRe.test(response.status)
-            @throwErr("cy.request failed because the response had the status code: #{response.status}")
+            @throwErr("cy.request failed because the response had the status code: #{response.status}", options._log)
 
           return response
-        .catch Promise.CancellationError, (err) ->
+        .catch Promise.TimeoutError, (err) =>
+          @throwErr "cy.request timed out waiting '#{options.timeout}ms' for a response. No response ever occured.", options._log
