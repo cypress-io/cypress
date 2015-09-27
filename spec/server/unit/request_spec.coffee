@@ -62,7 +62,7 @@ describe.only "Request", ->
         }
 
       Request.send({url: "http://www.github.com/foo"}).then (resp) ->
-        expect(resp).to.have.keys("status", "body", "headers")
+        expect(resp).to.have.keys("status", "body", "headers", "duration")
 
         expect(resp.status).to.eq(200)
         expect(resp.body).to.eq("hello")
@@ -114,4 +114,15 @@ describe.only "Request", ->
       }).then (resp) ->
         expect(resp.body).to.eq("{bad: 'json'}")
 
+    it "sets duration on response", ->
+      nock("http://localhost:8080")
+        .get("/foo")
+        .reply(200, "123", {
+          "Content-Type": "text/plain"
+        })
 
+      Request.send({
+        url: "http://localhost:8080/foo"
+      }).then (resp) ->
+        expect(resp.duration).to.be.a("Number")
+        expect(resp.duration).to.be.gt(1)

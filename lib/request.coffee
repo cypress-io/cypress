@@ -37,9 +37,6 @@ module.exports = {
   send: (options = {}) ->
     _.defaults options, {
       headers: {}
-      cookies: {}
-      auth: null
-      json: false
       gzip: true
     }
 
@@ -51,6 +48,13 @@ module.exports = {
     if c = options.cookies
       options.headers["Cookie"] = @createCookieString(c)
 
-    request(options).then @normalizeResponse.bind(@)
+    ms = Date.now()
+
+    request(options)
+      .then(@normalizeResponse.bind(@))
+      .then (resp) ->
+        resp.duration = Date.now() - ms
+
+        return resp
 
 }
