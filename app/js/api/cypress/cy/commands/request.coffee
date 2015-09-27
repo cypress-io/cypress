@@ -144,7 +144,7 @@ $Cypress.register "Request", (Cypress, _, $) ->
               [
                 "<i class='fa fa-circle #{klass}'></i>" + options.method,
                 status,
-                _.truncate(options.url, 20)
+                _.truncate(options.url, 25)
               ].join(" ")
         })
 
