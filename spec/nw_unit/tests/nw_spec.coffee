@@ -50,7 +50,7 @@ module.exports = (parentWindow, gui, loadApp) ->
         expect(@$("#login").find(".fa-spinner")).to.exist
         expect(@$("#login").find("span")).to.contain("Logging in...")
 
-        Promise.delay(500).then =>
+        Promise.delay(1000).then =>
           well = @$(".well p.lead")
           expect(well).to.contain("No projects have been added.")
 
@@ -71,7 +71,7 @@ module.exports = (parentWindow, gui, loadApp) ->
       loadApp(@).then =>
         @App.vent.trigger("logging:in", "app://authentication.html?code=123-foo-bar")
 
-        Promise.delay(500).then =>
+        Promise.delay(1000).then =>
           expect(@$("#login").find("p.bg-danger")).to.contain(@user.email)
           expect(@$("#login").find("p.bg-danger")).to.contain("has not been authorized.")
           expect(@$("#login").find("p.bg-danger")).not.to.contain("401")
