@@ -186,6 +186,14 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
       command = @commands.at(index)
 
+      ## if the command should be skipped
+      ## just bail and increment index
+      ## and set the subject
+      if command and command.get("skip")
+        @prop("index", index + 1)
+        @prop("subject", command.get("subject"))
+        return @run()
+
       runnable = @private("runnable")
 
       ## there are some edge cases where

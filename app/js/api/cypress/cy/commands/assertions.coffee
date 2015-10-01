@@ -316,18 +316,15 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
       ## and force the assertion to return
       ## this value so it does not get
       ## invoked again
-      memoizeSubjectReturnValue = ->
-        _.each subjects, (subject, i) ->
+      setSubjectAndSkip = ->
+        for subject, i in subjects
           cmd  = cmds[i]
-          orig = cmd.get("fn").originalFn
-          cmd.set "fn", ->
-            return subject
-          cmd.get("fn").originalFn = orig
+          cmd.set("subject", subject)
+          cmd.skip()
 
-      assertions = (memo, fn) =>
+      assertions = (memo, fn, i) =>
         fn(memo).then (subject) ->
-          subjects.push(subject)
-          subject
+          subjects[i] = subject
 
       restore = =>
         @prop("upcomingAssertions", [])
@@ -339,8 +336,7 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
       Promise
         .reduce(fns, assertions, subject)
         .then(restore)
-        .then ->
-          memoizeSubjectReturnValue()
+        .then(setSubjectAndSkip)
         .then =>
           @finishAssertions(options.assertions)
         .then(onPassFn)

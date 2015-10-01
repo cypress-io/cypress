@@ -20,6 +20,19 @@ $Cypress.register "Debugging", (Cypress, _, $) ->
       ## call the fn
       onResume.call(@, resumeAll)
 
+    getNextQueuedCommand: ->
+      ## gets the next command which
+      ## isnt skipped
+      search = (i) =>
+        cmd = @commands.at(i)
+
+        if cmd and cmd.get("skip")
+          search(i + 1)
+        else
+          return cmd
+
+      search(@prop("index"))
+
   Cypress.addUtilityCommand
     ## pause should indefinitely pause until the user
     ## presses a key or clicks in the UI to continue
@@ -51,7 +64,7 @@ $Cypress.register "Debugging", (Cypress, _, $) ->
           fn.call(@)
 
       @prop "onPaused", (fn) ->
-        next = @prop("current").get("next")
+        next = @getNextQueuedCommand()
 
         if next and @isCommandFromMocha(next)
           return fn.call(@)

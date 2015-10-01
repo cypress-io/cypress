@@ -69,6 +69,9 @@ do ($Cypress, _) ->
           args[i] = opts
           return
 
+    skip: ->
+      @set("skip", true)
+
     clone: ->
       @_removeNonPrimitives @get("args")
       $Command.create _.clone(@attributes)
