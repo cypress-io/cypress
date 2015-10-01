@@ -5,6 +5,21 @@ describe "$Cypress.Cy Fixtures Commands", ->
   ## the real browser environment
   context "#fixture", ->
     beforeEach ->
+      @responseIs = (resp, timeout = 10) =>
+        @Cypress.trigger.restore?()
+
+        @sandbox.spy(@Cypress, "trigger")
+
+        trigger = @Cypress.trigger
+        @Cypress.trigger = (args...) ->
+          if args[0] is "fixture"
+            trigger.apply(@, arguments)
+            _.delay ->
+              args[2](resp)
+            , timeout
+          else
+            trigger.apply(@, arguments)
+
       @trigger = @sandbox.stub(@Cypress, "trigger").withArgs("fixture").callsArgWithAsync(2, {foo: "bar"})
 
     it "triggers 'fixture' on Cypress", ->
@@ -17,10 +32,28 @@ describe "$Cypress.Cy Fixtures Commands", ->
       @cy.fixture("foo").as("foo").then ->
         expect(@foo).to.deep.eq {foo: "bar"}
 
+    describe "cancellation", ->
+      it "cancels promise", (done) ->
+        ## respond after 50 ms
+        @responseIs({}, 50)
+
+        @Cypress.on "fixture", =>
+          @cmd = @cy.commands.first()
+          @Cypress.abort()
+
+        @cy.on "cancel", (cancelledCmd) =>
+          _.delay =>
+            expect(cancelledCmd).to.eq(@cmd)
+            expect(@cmd.get("subject")).to.be.undefined
+            done()
+          , 100
+
+        @cy.fixture("foo")
+
     describe "errors", ->
       beforeEach ->
         @allowErrors()
-        @trigger.withArgs("fixture").callsArgWithAsync(2, {__error: "some error"})
+        @responseIs({__error: "some error"})
 
       it "throws if response contains __error key", (done) ->
         @cy.on "fail", (err) ->
@@ -31,14 +64,6 @@ describe "$Cypress.Cy Fixtures Commands", ->
 
       it "logs command error", (done) ->
         logs = []
-
-        _this = @
-
-        ## we have to restore the trigger when commandErr is called
-        ## so that something logs out!
-        @cy.commandErr = _.wrap @cy.commandErr, (orig, err) ->
-          _this.Cypress.trigger.restore()
-          orig.call(@, err)
 
         @Cypress.on "log", (@log) =>
           logs.push log

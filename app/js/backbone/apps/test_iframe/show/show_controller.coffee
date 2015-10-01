@@ -7,11 +7,6 @@
 
       config = App.request "app:config:entity"
 
-      setConfig = ->
-        iframe.setConfig(config)
-
-      setConfig()
-
       @layout = @getLayoutView(iframe)
 
       @listenTo iframe, "loaded", (cb, contentWindow, remoteIframe, options) ->
@@ -21,11 +16,6 @@
         cb(contentWindow, remoteIframe, options)
 
       @listenTo iframe, "load:spec:iframe", (cb, options) ->
-        ## set the initial config values from
-        ## our config entity which restores
-        ## the default settings from cypress.json
-        setConfig()
-
         @layout.loadIframes options, (contentWindow, remoteIframe) ->
           ## once the iframes are loaded we trigger this event
           ## which prevents forcing callbacks if we've navigated

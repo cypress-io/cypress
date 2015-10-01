@@ -1,9 +1,6 @@
-root         = '../../../'
+require("../spec_helper")
+
 _            = require "lodash"
-sinon        = require "sinon"
-chokidar     = require "chokidar"
-expect       = require('chai').expect
-fs           = require "fs-extra"
 Socket       = require "#{root}lib/socket"
 Server       = require "#{root}lib/server"
 Settings     = require "#{root}lib/util/settings"
@@ -11,8 +8,6 @@ Fixtures     = require "#{root}/spec/server/helpers/fixtures"
 
 describe "Socket", ->
   beforeEach ->
-    @sandbox = sinon.sandbox.create()
-
     @ioSocket =
       on: @sandbox.stub()
       emit: @sandbox.stub()
@@ -27,8 +22,6 @@ describe "Socket", ->
     @app    = @server.app
 
   afterEach ->
-    @sandbox.restore()
-
     Settings.remove(process.cwd())
 
   it "returns a socket instance", ->
@@ -114,6 +107,70 @@ describe "Socket", ->
       Promise.delay(200).then =>
         @socket.watchTestFileByPath("test1.js").bind(@).then ->
           fs.writeFileAsync(@filePath, "foooooooooo")
+
+  context "#onRequest", ->
+    beforeEach ->
+      Fixtures.scaffold()
+
+      @todos   = Fixtures.project("todos")
+      @server  = Server(@todos)
+      @app     = @server.app
+      @socket  = Socket(@io, @app)
+
+    afterEach ->
+      Fixtures.remove()
+
+    it "binds to 'request' event", ->
+      @socket.startListening().then =>
+        expect(@ioSocket.on).to.be.calledWith("request")
+
+    it "calls socket#onRequest", ->
+      onRequest = @sandbox.stub(@socket, "onRequest")
+
+      @socket.startListening().then =>
+        socketCall = _.find @ioSocket.on.getCalls(), (call) ->
+          call.args[0] is "request"
+
+        ## get the callback function here
+        socketFn = socketCall.args[1]
+        socketFn.call(@socket, "foo", "bar")
+
+        ## ensure onRequest was called with those same arguments
+        ## therefore we have verified the socket binding and
+        ## the call into onRequest with the proper arguments
+        expect(onRequest).to.be.calledWith("foo", "bar")
+
+    it "returns the request object", ->
+      nock("http://localhost:8080")
+        .get("/status.json")
+        .reply(200, {status: "ok"})
+
+      cb = @sandbox.spy()
+
+      req = {
+        url: "http://localhost:8080/status.json"
+      }
+
+      @socket.onRequest(req, cb).then ->
+        expect(cb).to.be.calledWithMatch {
+          status: 200
+          body: {status: "ok"}
+        }
+
+    it "errors when fixtures fails", ->
+      nock("http://localhost:8080")
+        .get("/status.json")
+        .reply(200, {status: "ok"})
+
+      cb = @sandbox.spy()
+
+      req = {
+        url: "http://localhost:1111/foo"
+      }
+
+      @socket.onRequest(req, cb).then ->
+        obj = cb.getCall(0).args[0]
+        expect(obj).to.have.property("__error", "Error: connect ECONNREFUSED 127.0.0.1:1111")
 
   context "#onFixture", ->
     beforeEach ->

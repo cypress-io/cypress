@@ -43,14 +43,21 @@ describe "Iframe Entity", ->
       expect(@iframe.isRunning()).to.be.false
 
     it "resets the state before each run", ->
+      @iframe.set "url", "foo"
       @iframe.state = {foo: "bar"}
       @runner.trigger "before:run"
       expect(@iframe.state).to.deep.eq({})
+      expect(@iframe.get("url")).to.be.null
 
     it "listens to Cypress stop", ->
       stop = @sandbox.spy @iframe, "stop"
       @Cypress.trigger "stop"
       expect(stop).to.be.calledOnce
+
+    it "listens to Cypress initialize", ->
+      setViewport = @sandbox.spy @iframe, "setViewport"
+      @Cypress.trigger "initialize", {config: {viewportWidth: 500, viewportHeight: 800, foo: "bar"}}
+      expect(setViewport).to.be.calledWithExactly({viewportWidth: 500, viewportHeight: 800})
 
   context "#commandExit", ->
     it "is noop without originalBody", ->

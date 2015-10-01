@@ -223,7 +223,7 @@
     // right: 20px;
   }
 
-  .command-name-xhr {
+  .command-name-xhr, .command-name-request {
     .command-message {
       .command-status {
         font-weight: 700;
@@ -261,6 +261,7 @@
         font-size: 11px;
         display: inline-block;
         height: 14px;
+        line-height: 16px;
       }
     }
     .command-message {

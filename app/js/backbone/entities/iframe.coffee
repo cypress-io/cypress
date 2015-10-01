@@ -2,11 +2,13 @@
 
   class Entities.Iframe extends Entities.Model
     defaults: ->
+      url: null
       browser: null
       version: null
       message: null
       running: false
       detachedId: null
+      pageLoading: false
       viewportScale: 1
 
     mutators:
@@ -15,6 +17,7 @@
 
     initialize: ->
       @state = {}
+      @set @defaults()
 
     listeners: (runner, Cypress) ->
       @listenTo runner, "before:run", ->
@@ -23,6 +26,11 @@
 
       @listenTo runner, "after:run", ->
         @isRunning(false)
+
+      @listenTo Cypress, "initialize", (obj) =>
+        {config} = obj
+
+        @setViewport _(config).pick("viewportHeight", "viewportWidth")
 
       @listenTo Cypress, "stop", =>
         @stop()
@@ -48,9 +56,6 @@
     stop: ->
       @initialize()
       @stopListening()
-
-    setConfig: (config) ->
-      @set config.pick("viewportWidth", "viewportHeight")
 
     setScale: (scale) ->
       @set "viewportScale", scale

@@ -191,6 +191,9 @@
       debug.once "loaded", =>
         @focus(debug)
 
+        ## pass moment up
+        debug.window.moment = moment
+
         debug.showDevTools() if App.config.get("debug")
 
         ## grab the debug region from other window

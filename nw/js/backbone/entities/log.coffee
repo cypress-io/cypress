@@ -13,14 +13,14 @@
 
       timestampFormatted: ->
         if date = @get("timestamp")
-          global.moment(date).fromNow(true)
+          moment(date).fromNow(true)
 
   class Entities.LogsCollection extends Entities.Collection
     model: Entities.Log
 
     comparator: (log) ->
       if date = log.get("timestamp")
-        -global.moment(date).unix()
+        -moment(date).unix()
 
     offLog: ->
       App.config.offLog()

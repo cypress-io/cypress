@@ -2,6 +2,7 @@ $Cypress.Utils = do ($Cypress, _) ->
 
   tagOpen     = /\[([a-z\s='"-]+)\]/g
   tagClosed   = /\[\/([a-z]+)\]/g
+  quotesRe    = /('|")/g
 
   CYPRESS_OBJECT_NAMESPACE = "_cypressObj"
 
@@ -97,6 +98,12 @@ $Cypress.Utils = do ($Cypress, _) ->
       catch
         false
 
+    hasDocument: (obj) ->
+      try
+        !!((obj and obj.nodeType is 9) or (obj and obj[0] and obj[0].nodeType is 9))
+      catch
+        false
+
     isDescendent: ($el1, $el2) ->
       return false if not $el2
 
@@ -145,6 +152,11 @@ $Cypress.Utils = do ($Cypress, _) ->
         instance instanceof constructor
       catch e
         false
+
+    escapeQuotes: (text) ->
+      ## convert to str and escape any single
+      ## or double quotes
+      ("" + text).replace(quotesRe, "\\$1")
 
     getCypressNamespace: (obj) ->
       obj and obj[CYPRESS_OBJECT_NAMESPACE]

@@ -11,18 +11,37 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
   Cypress.on "assert", ->
     @assert.apply(@, arguments)
 
-  convertTags = ($row) ->
-    html = $row.html()
+  convertTags = (str) ->
+    ## must first escape these characters
+    ## since we will be inserting them
+    ## as real html
+    str = _.escape(str)
 
     ## bail if matches werent found
-    return if not bRe.test(html)
+    return str if not bRe.test(str)
 
-    html = html
+    str
       .replace(bTagOpen, ": <strong>")
       .replace(bTagClosed, "</strong>")
       .split(" :").join(":")
 
-    $row.html(html)
+  convertMessage = ($row, message) ->
+    message = convertTags(message)
+
+    $row.find("[data-js=message]").html(message)
+
+  convertRowFontSize = ($row, message) ->
+    len = message.length
+
+    ## bail if this isnt a huge message
+    return if len < 100
+
+    ## else reduce the font-size down to 85%
+    ## and reduce the line height
+    $row.css({
+      fontSize: "85%"
+      lineHeight: "14px"
+    })
 
   ## Rules:
   ## 1. always remove value
@@ -152,6 +171,8 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
     verifyUpcomingAssertions: (subject, options = {}, callbacks = {}) ->
       cmds = @getUpcomingAssertions()
 
+      @prop("upcomingAssertions", cmds)
+
       options.assertions ?= []
 
       determineEl = ($el, subject) ->
@@ -235,9 +256,6 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
             ## cmd and do not increase 'i'
             ## this will prevent 2 logs from ever showing up but still
             ## provide errors when the 1st assertion fails.
-            # debugger if log.get("state") is "success"
-            # debugger if /have id/.test log.get("message")
-
             if not cmd
               cmd = cmds[i - 1]
             else
@@ -312,6 +330,8 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
           subject
 
       restore = =>
+        @prop("upcomingAssertions", [])
+
         ## no matter what we need to
         ## restore the assertions
         @assert = assert
@@ -419,13 +439,14 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
         obj.snapshot = true
         obj.error = error
 
-      isChildLike = (subject, current) ->
+      isChildLike = (subject, current) =>
         (value is subject) or
           ## if our current command is an assertion type
           isAssertionType(current) or
-            ## or if the next command is an assertion type
-            isAssertionType(current?.get("next")) or
-              (functionHadArguments(current))
+            ## are we currently verifying assertions?
+            @prop("upcomingAssertions")?.length > 0 or
+              ## did the function have arguments
+              functionHadArguments(current)
 
       _.extend obj,
         name:     "assert"
@@ -444,11 +465,18 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
             "parent"
 
         onRender: ($row) ->
+          ## remove the numElements label
+          $row.find("[data-js=numElements]").remove()
+
           klasses = "command-assertion-failed command-assertion-passed command-assertion-pending"
           $row.removeClass(klasses).addClass("command-assertion-#{@state}")
 
+          ## if our message is too big
+          ## then scale the font size down
+          convertRowFontSize($row, @message)
+
           ## converts [b] string tags into real elements
-          convertTags($row)
+          convertMessage($row, @message)
         onConsole: =>
           obj = {Command: "assert"}
 

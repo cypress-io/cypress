@@ -46,6 +46,13 @@ do ($Cypress, _, $, chai) ->
             ## replace object with our formatted one
             assert._obj = $Cypress.Utils.stringifyElement(obj, "short")
 
+          ## if we are formatting the window object
+          if $Cypress.Utils.hasWindow(obj)
+            assert._obj = "<window>"
+
+          if $Cypress.Utils.hasDocument(obj)
+            assert._obj = "<document>"
+
           msg = orig.call(@, assert, args)
 
           ## restore the real obj if we changed it
@@ -73,7 +80,9 @@ do ($Cypress, _, $, chai) ->
               if not cy or not ($Cypress.Utils.isInstanceOf(obj, $) or $Cypress.Utils.hasElement(obj))
                 return _super.apply(@, arguments)
 
-              selector = ":contains('#{text}'), [type='submit'][value~='#{text}']"
+              escText = $Cypress.Utils.escapeQuotes(text)
+
+              selector = ":contains('#{escText}'), [type='submit'][value~='#{escText}']"
 
               @assert(
                 obj.is(selector) or !!obj.find(selector).length

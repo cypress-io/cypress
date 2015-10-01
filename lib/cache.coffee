@@ -2,6 +2,7 @@ _         = require 'lodash'
 Promise   = require 'bluebird'
 path      = require 'path'
 request   = require "request-promise"
+errors    = require "request-promise/errors"
 config    = require "./config"
 Project   = require './project'
 Log       = require "./log"
@@ -241,9 +242,11 @@ class Cache extends require("events").EventEmitter
   logIn: (code) ->
     url = Routes.signin({code: code})
     request.post(url, {json: true})
-      .catch (err) ->
-        ## normalize the error object
-        throw (err.error or err)
+    .catch errors.StatusCodeError, (err) ->
+      ## slice out the status code since RP automatically
+      ## adds this before the message
+      err.message = err.message.split(" - ").slice(1).join("")
+      throw err
 
   logOut: (token) ->
     nukeSession = (resolve, reject) ->

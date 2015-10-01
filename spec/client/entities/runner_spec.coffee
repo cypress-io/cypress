@@ -25,6 +25,18 @@ describe "Runner Entity", ->
       @Cypress.trigger "message", "create:user", {foo: "bar"}, fn
       expect(emit).to.be.calledWith "client:request", "create:user", {foo: "bar"}, fn
 
+    it "listens to Cypress.fixture", ->
+      emit = @sandbox.stub @runner.socket, "emit"
+      fn = @sandbox.stub()
+      @Cypress.trigger "fixture", "users/admin", fn
+      expect(emit).to.be.calledWith "fixture", "users/admin", fn
+
+    it "listens to Cypress.request", ->
+      emit = @sandbox.stub @runner.socket, "emit"
+      fn = @sandbox.stub()
+      @Cypress.trigger "request", req = {url: "http://www.github.com/users"}, fn
+      expect(emit).to.be.calledWith "request", req, fn
+
   context "#stop", ->
     beforeEach ->
       @stop = @sandbox.stub(@Cypress, "stop").resolves()

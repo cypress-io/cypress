@@ -26,8 +26,9 @@
           when "assertion", "spy", "stub"   then @get("message")?.length > 100
 
       messageTruncated: ->
-        return if not message = @get("message")
-        _(message).truncate(100, " ")
+        return "" if not message = @get("message")
+
+        _(message).truncate(100, "...")
 
       visibleMessage: ->
         return if @get("visible")

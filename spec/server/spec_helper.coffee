@@ -1,7 +1,6 @@
 global.root      = '../../../'
 global.supertest = require("supertest")
 global.nock      = require("nock")
-global._         = require("lodash")
 global.fs        = require("fs-extra")
 global.Promise   = require("bluebird")
 global.expect    = require("chai").expect

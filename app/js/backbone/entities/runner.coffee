@@ -38,6 +38,9 @@
         @listenTo @Cypress, "fixture", (fixture, cb) =>
           @socket.emit "fixture", fixture, cb
 
+        @listenTo @Cypress, "request", (request, cb) =>
+          @socket.emit "request", request, cb
+
         @listenTo @Cypress, "initialized", (obj) =>
           @receivedRunner(obj.runner)
 
