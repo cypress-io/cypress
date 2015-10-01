@@ -1,6 +1,11 @@
 #header-container {
   background-color: #f8f8f8;
   overflow: visible;
+  position: absolute;
+  border-bottom: 1px solid #ddd;
+  width: 100%;
+  z-index: 1;
+  box-shadow: 0 1px 1px #eee;
 
   #stats-container {
     padding: 0;
@@ -97,6 +102,31 @@
       i {
         font-size: 12px;
       }
+    }
+  }
+
+  #pause-controls {
+    float: right;
+    margin: 2px 5px 2px;
+    border: 2px dashed #ccc;
+    line-height: 22px;
+    border-radius: 10px;
+
+    li {
+      float: left;
+      padding: 8px 5px;
+
+      &:first-child {
+        margin-left: 10px;
+      }
+
+      &:last-child {
+        margin-right: 10px;
+      }
+    }
+
+    i.fa-play {
+      font-size: 82%;
     }
   }
 }

@@ -1,4 +1,22 @@
-<div id="runner-config" class="dropdown">
+<ul id="pause-controls" class="list-unstyled">
+  <li>
+    <label class="label label-info">Paused</label>
+  </li>
+  <li>
+    <button type="button" class="btn btn-default btn-xs">
+      <i class="fa fa-play"></i>
+      <span>Resume</span>
+    </button>
+  </li>
+  <li>
+    <button type="button" class="btn btn-default btn-xs">
+      <i class="fa fa-step-forward"></i>
+      <span>cy.click</span>
+    </button>
+  </li>
+</ul>
+
+<!-- <div id="runner-config" class="dropdown">
   <button class="btn btn-link" data-toggle="dropdown">
     <i class="fa fa-cloud"></i>
     <i class="fa fa-caret-down"></i>
@@ -18,4 +36,4 @@
       </a>
     </li>
   </ul>
-</div>
+</div> -->

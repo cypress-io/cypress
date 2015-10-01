@@ -14,7 +14,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: 0;
+  top: 47px;
   bottom: 0;
 
   #specs-container {
@@ -22,7 +22,6 @@
     width: 100%;
     overflow: auto;
     padding-bottom: 30px;
-    border-top: 1px solid #ddd;
 
     #specs-region {
       height: 100%;
@@ -42,25 +41,25 @@
     }
 
   }
-.keyboard-shortcuts-helper {
-  // this needs to be styled to work like
-  // a sticky footer
-  color: #aaa;
-  text-align: center;
-  position: absolute;
-  bottom: 5px;
-  left: 25%;
 
-  mark {
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 0 5px;
-    display: inline-block;
-    color: #888;
+  .keyboard-shortcuts-helper {
+    // this needs to be styled to work like
+    // a sticky footer
+    color: #aaa;
+    text-align: center;
+    position: absolute;
+    bottom: 5px;
+    left: 25%;
+
+    mark {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 0 5px;
+      display: inline-block;
+      color: #888;
+    }
   }
-
-}
 
   ul.runnables {
     padding-left: 0;

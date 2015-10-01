@@ -1,9 +1,9 @@
 <% if @ui isnt "satellite": %>
 <div id="test-container">
+  <div id="header-container">
+    <div id="stats-region"></div>
+  </div>
   <div id="test-specs">
-    <div id="header-container">
-      <div id="stats-region"></div>
-    </div>
     <div id="specs-container">
       <div id="specs-region"></div>
     </div>
