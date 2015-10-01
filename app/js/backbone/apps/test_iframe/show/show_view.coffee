@@ -308,6 +308,7 @@
       "change:viewportHeight" : "heightChanged"
       "change:viewportScale"  : "scaleChanged"
       "cannot:revert:dom"     : "cannotRevertDom"
+      "clear:revert:message"  : "clearRevertMsg"
       "revert:dom"            : "revertDom"
       "restore:dom"           : "restoreDom"
 
@@ -362,6 +363,9 @@
 
     cannotRevertDom: (init) ->
       @ui.message.text("Cannot revert DOM while tests are running").addClass("cannot-revert").show()
+
+    clearRevertMsg: ->
+      @restoreDom()
 
     restoreDom: ->
       @ui.message.removeClass("cannot-revert").empty().hide()
