@@ -8,7 +8,17 @@ $Cypress.register "Debugging", (Cypress, _, $) ->
 
   Cypress.Cy.extend
     resume: (resumeAll = true) ->
-      @prop("onResume").call(@, resumeAll)
+      onResume = @prop("onResume")
+
+      ## dont do anything if this isnt a fn
+      return if not _.isFunction(onResume)
+
+      ## nuke this out so it can only
+      ## be called a maximum of 1 time
+      @prop("onResume", null)
+
+      ## call the fn
+      onResume.call(@, resumeAll)
 
   Cypress.addUtilityCommand
     ## pause should indefinitely pause until the user

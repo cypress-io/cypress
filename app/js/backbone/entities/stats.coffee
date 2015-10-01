@@ -48,8 +48,11 @@
       @unset("paused")
       @trigger("pause:mode")
 
+    disableNext: ->
+      @set("disableNext", true)
+
     pause: (nextCmd) ->
-      @set({nextCmd: nextCmd, paused: true})
+      @set({nextCmd: nextCmd, disableNext: false, paused: true})
       @trigger("pause:mode")
 
   App.reqres.setHandler "stats:entity", ->

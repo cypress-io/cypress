@@ -63,6 +63,7 @@
         runner.resume()
 
       @listenTo configView, "next:clicked", ->
+        stats.disableNext()
         runner.next()
 
       @listenTo configView, "clicked:sauce:labs", (option) ->

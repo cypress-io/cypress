@@ -56,15 +56,25 @@
   class Show.Config extends App.Views.ItemView
     template: "test_stats/show/_config"
 
+    ui:
+      resume: "[data-js-resume]"
+      next:   "[data-js-next]"
+
     modelEvents:
       "pause:mode" : "render"
+      "change:disableNext": "disableNextChanged"
 
     events:
       "click a" : "aClicked"
 
     triggers:
-      "click [data-js-resume]" : "resume:clicked"
-      "click [data-js-next]"   : "next:clicked"
+      "click @ui.resume" : "resume:clicked"
+      "click @ui.next"   : "next:clicked"
+
+    disableNextChanged: (model, value, options) ->
+      return if value isnt true
+
+      @ui.next.addClass("disabled").attr("disabled", true)
 
     aClicked: (e) ->
       e.preventDefault()
