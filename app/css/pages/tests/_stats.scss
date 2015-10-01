@@ -107,22 +107,32 @@
 
   #pause-controls {
     float: right;
-    margin: 2px 5px 2px;
-    border: 2px dashed #ccc;
+    margin: 7px 7px 0;
+    // border: 2px dashed #ccc;
     line-height: 22px;
     border-radius: 10px;
+    background-color: #d9d9d9;
+    overflow: hidden;
 
     li {
       float: left;
-      padding: 8px 5px;
+      padding: 5px;
 
       &:first-child {
-        margin-left: 10px;
+        margin-right: 5px;
       }
 
       &:last-child {
-        margin-right: 10px;
+        margin-right: 5px;
       }
+    }
+
+    button:hover {
+      background-color: #dfdfdf;
+    }
+
+    i {
+      color: #999;
     }
 
     i.fa-play {

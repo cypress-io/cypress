@@ -1,7 +1,7 @@
 <% if @paused: %>
   <ul id="pause-controls" class="list-unstyled">
-    <li>
-      <label class="label label-info">Paused</label>
+    <li class="label-danger">
+      <label class="label label-danger">Paused</label>
     </li>
     <li>
       <button data-js-resume type="button" class="btn btn-default btn-xs">
