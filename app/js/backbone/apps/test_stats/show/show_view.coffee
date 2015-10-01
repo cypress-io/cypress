@@ -56,8 +56,15 @@
   class Show.Config extends App.Views.ItemView
     template: "test_stats/show/_config"
 
+    modelEvents:
+      "pause:mode" : "render"
+
     events:
       "click a" : "aClicked"
+
+    triggers:
+      "click [data-js-resume]" : "resume:clicked"
+      "click [data-js-next]"   : "next:clicked"
 
     aClicked: (e) ->
       e.preventDefault()

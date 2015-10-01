@@ -44,6 +44,9 @@
         @listenTo @Cypress, "initialized", (obj) =>
           @receivedRunner(obj.runner)
 
+        @listenTo @Cypress, "paused", (nextCmd) =>
+          @trigger "paused", nextCmd
+
         ## dont do anything else if we're in headless mode
         return if $Cypress.isHeadless
 
@@ -209,6 +212,13 @@
             obj[fn] = _.result(arg, fn)
 
           obj
+
+      resume: ->
+        @trigger("resumed")
+        @Cypress.trigger("resume:all")
+
+      next: ->
+        @Cypress.trigger("resume:next")
 
       getChosen: ->
         @chosen

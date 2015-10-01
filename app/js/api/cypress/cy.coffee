@@ -244,7 +244,10 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
           @trigger "command:end", command
 
-          @defer @run
+          if fn = @prop("onPaused")
+            fn.call(@, @run)
+          else
+            @defer @run
 
           ## must have this empty return here else we end up creating
           ## additional .then callbacks due to bluebird chaining

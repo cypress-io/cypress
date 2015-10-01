@@ -3,6 +3,12 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
   remoteJQueryisNotSameAsGlobal = (remoteJQuery) ->
     remoteJQuery and (remoteJQuery isnt $)
 
+  Cypress.Cy.extend
+    isCommandFromMocha: (cmd) ->
+      not cmd.get("next") and
+        cmd.get("args").length is 2 and
+          (cmd.get("args")[1].name is "done" or cmd.get("args")[1].length is 1)
+
   ## thens can return more "thenables" which are not resolved
   ## until they're 'really' resolved, so naturally this API
   ## supports nesting promises
@@ -16,8 +22,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
     ## 'then' is called from a hook) - by defering it, we finish
     ## resolving our deferred.
     current = @prop("current")
-
-    if not current.get("next") and current.get("args").length is 2 and (current.get("args")[1].name is "done" or current.get("args")[1].length is 1)
+    if @isCommandFromMocha(current)
       return @prop("next", fn)
 
     remoteJQuery = @_getRemoteJQuery()

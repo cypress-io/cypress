@@ -31,11 +31,17 @@
       @listenTo runner, "after:run", ->
         stats.setGlobally()
 
+      @listenTo runner, "paused", (nextCmd) ->
+        stats.pause(nextCmd)
+
+      @listenTo runner, "resumed", ->
+        stats.resume()
+
       @layout = @getLayoutView()
 
       @listenTo @layout, "show", =>
         @statsRegion stats
-        @configRegion runner
+        @configRegion stats, runner
 
       @show @layout
 
@@ -50,8 +56,14 @@
       statsView = @getStatsView stats
       @show statsView, region: @layout.statsRegion
 
-    configRegion: (runner) ->
-      configView = @getConfigView()
+    configRegion: (stats, runner) ->
+      configView = @getConfigView(stats)
+
+      @listenTo configView, "resume:clicked", ->
+        runner.resume()
+
+      @listenTo configView, "next:clicked", ->
+        runner.next()
 
       @listenTo configView, "clicked:sauce:labs", (option) ->
         runner.runSauce()
@@ -69,8 +81,9 @@
 
       @show chosenView, region: @layout.chosenRegion
 
-    getConfigView: ->
+    getConfigView: (stats) ->
       new Show.Config
+        model: stats
 
     getChosenView: (chosen) ->
       new Show.Chosen

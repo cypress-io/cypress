@@ -43,5 +43,14 @@
     getDurationFormatted: ->
       (@get("duration") / 1000).toFixed(2)
 
+    resume: ->
+      @unset("nextCmd")
+      @unset("paused")
+      @trigger("pause:mode")
+
+    pause: (nextCmd) ->
+      @set({nextCmd: nextCmd, paused: true})
+      @trigger("pause:mode")
+
   App.reqres.setHandler "stats:entity", ->
     new Entities.Stats
