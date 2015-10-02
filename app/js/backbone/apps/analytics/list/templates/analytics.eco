@@ -1,11 +1,13 @@
 <div id="analytics">
   <div class="cy-main-content">
-    <div class="block-panel">
-      <div class="title-bar">
-        <h1>Analytics</h1>
-      </div>
-      <div class="analytics-content">
-        Coming Soon
+    <div class="wrapper">
+      <div class="block-panel">
+        <div class="title-bar">
+          <h1>Analytics</h1>
+        </div>
+        <div class="analytics-content">
+          Coming Soon
+        </div>
       </div>
     </div>
   </div>

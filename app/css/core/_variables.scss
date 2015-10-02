@@ -20,11 +20,6 @@ $brand-primary: #476fc9;
 $border-radius-base:        2px !default;
 
 
-// Overwrite responsive screen sizes so that
-// navbar doesn't de-collapse on smaller screens
-$screen-xs:                  0px !default;
-$screen-sm:                  0px !default;
-
 // Inverted navbar
 // Reset inverted navbar basics
 $navbar-inverse-bg:                         #262a2f !default;

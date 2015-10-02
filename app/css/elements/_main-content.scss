@@ -4,11 +4,19 @@
   font-size: 13px;
   font-weight: 200;
   line-height: 21px;
-  margin-top: 50px;
-  float: left;
-  width: 60%;
-  margin-left: 20%;
-  margin-right: 20%;
+  margin: 50px auto 0;
+  max-width: 1170px;
+  min-width: $screen-xs;
+
+  .wrapper {
+    @media (min-width: 0) and (max-width: 1400px) {
+      margin: 0 30px;
+    }
+  }
+
+  .block-panel {
+    padding: 0;
+  }
 
   h1 {
     color: #262a2f;
