@@ -8,7 +8,10 @@ $Cypress.register "Debugging", (Cypress, _, $) ->
 
   Cypress.on "pause", ->
     ## continue chaining off the current chain
-    @prop("chain").pause()
+    if chain = @prop("chain")
+      chain.pause()
+    else
+      @pause()
 
   Cypress.Cy.extend
     resume: (resumeAll = true) ->
