@@ -189,7 +189,11 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       ## if the command should be skipped
       ## just bail and increment index
       ## and set the subject
+      ## TODO DRY THIS LOGIC UP
       if command and command.get("skip")
+        ## must set prev + next since other
+        ## operations depend on this state being correct
+        command.set({prev: @commands.at(index - 1), next: @commands.at(index + 1)})
         @prop("index", index + 1)
         @prop("subject", command.get("subject"))
         return @run()
