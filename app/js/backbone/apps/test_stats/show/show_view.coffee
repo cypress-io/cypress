@@ -57,7 +57,7 @@
     template: "test_stats/show/_config"
 
     ui:
-      pause:  "[data-js-pause]"
+      stop:    "[data-js-stop]"
       restart: "[data-js-restart]"
       play:   "[data-js-play]"
       next:   "[data-js-next]"
@@ -66,22 +66,22 @@
       "pause:mode":          "render"
       "change:running":      "render"
       "change:ended":        "render"
-      "change:disablePause": "disablePauseChanged"
+      "change:disableStop":  "disableStopChanged"
       "change:disableNext":  "disableNextChanged"
 
     events:
       "click a" : "aClicked"
 
     triggers:
-      "click @ui.pause"  : "pause:clicked"
+      "click @ui.stop"   : "stop:clicked"
       "click @ui.restart": "restart:clicked"
       "click @ui.play"   : "play:clicked"
       "click @ui.next"   : "next:clicked"
 
-    disablePauseChanged: (model, value, options) ->
+    disableStopChanged: (model, value, options) ->
       return if value isnt true
 
-      @ui.pause.addClass("disabled").attr("disabled", true)
+      @ui.stop.addClass("disabled").attr("disabled", true)
 
     disableNextChanged: (model, value, options) ->
       return if value isnt true

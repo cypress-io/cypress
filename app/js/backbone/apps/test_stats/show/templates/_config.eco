@@ -9,8 +9,8 @@
       </button>
     <% else: %>
       <% if @running: %>
-        <button data-js-pause type="button" class="btn btn-default" title="Pause Commands">
-          <i class="fa fa-pause"></i>
+        <button data-js-stop type="button" class="btn btn-default" title="Stop Running">
+          <i class="fa fa-stop"></i>
         </button>
       <% end %>
     <% end %>

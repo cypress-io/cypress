@@ -63,9 +63,9 @@
       @listenTo configView, "restart:clicked", ->
         runner.restart()
 
-      @listenTo configView, "pause:clicked", ->
-        stats.pause()
-        runner.pause()
+      @listenTo configView, "stop:clicked", ->
+        stats.stop()
+        runner.abort()
 
       @listenTo configView, "next:clicked", ->
         stats.disableNext()

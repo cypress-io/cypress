@@ -217,8 +217,8 @@
         @trigger("resumed")
         @Cypress.trigger("resume:all")
 
-      pause: ->
-        @Cypress.trigger("pause")
+      abort: ->
+        @Cypress.abort()
 
       next: ->
         @Cypress.trigger("resume:next")
