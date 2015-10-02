@@ -108,35 +108,39 @@
   #pause-controls {
     float: right;
     margin: 7px 7px 0;
-    // border: 2px dashed #ccc;
-    line-height: 22px;
-    border-radius: 10px;
-    background-color: #d9d9d9;
-    overflow: hidden;
 
-    li {
-      float: left;
-      padding: 5px;
+  //   line-height: 22px;
+  //   overflow: hidden;
 
-      &:first-child {
-        margin-right: 5px;
-      }
+  //   li {
+  //     float: left;
+  //     // padding: 5px;
 
-      &:last-child {
-        margin-right: 5px;
-      }
-    }
+  //     &:first-child {
+  //       // margin-right: 5px;
+  //     }
 
-    button:hover {
-      background-color: #dfdfdf;
-    }
+  //     &:last-child {
+  //       // margin-right: 5px;
+  //     }
+  //   }
+
+  //   button:hover {
+  //     background-color: #dfdfdf;
+  //   }
 
     i {
-      color: #999;
+      color: #666;
+      font-size: 90%;
+
+      &.red {
+        color: $fail;
+      }
+
     }
 
-    i.fa-play {
-      font-size: 82%;
-    }
+  //   i.fa-play {
+  //     font-size: 82%;
+  //   }
   }
 }

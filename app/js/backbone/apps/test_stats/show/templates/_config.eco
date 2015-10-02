@@ -1,24 +1,19 @@
 <% if @paused: %>
-  <ul id="pause-controls" class="list-unstyled">
-    <li class="label-danger">
-      <label class="label label-danger">Paused</label>
-    </li>
-    <li>
-      <button data-js-resume type="button" class="btn btn-default btn-xs">
-        <i class="fa fa-play"></i>
-        <span>Resume</span>
-      </button>
-    </li>
+  <div id="pause-controls" class="btn-group btn-group-sm" role="group">
+    <button type="button" class="btn btn-default active disabled">
+      <i class="fa fa-pause red"></i>
+    </button>
+    <button type="button" class="btn btn-default" title="Play Commands">
+      <i class="fa fa-play"></i>
+    </button>
     <% if @nextCmd: %>
-      <li>
-        <button data-js-next type="button" class="btn btn-default btn-xs">
-          <i class="fa fa-step-forward"></i>
-          <span>Next: <%= @nextCmd %></span>
-        </button>
-      </li>
+      <button type="button" class="btn btn-default" title="Next Command: <%= @nextCmd %>">
+        <i class="fa fa-step-forward"></i>
+      </button>
     <% end %>
-  </ul>
+  </div>
 <% end %>
+
 
 <!-- <div id="runner-config" class="dropdown">
   <button class="btn btn-link" data-toggle="dropdown">
