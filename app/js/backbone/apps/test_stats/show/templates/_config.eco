@@ -1,8 +1,8 @@
 <% if @paused: %>
-  <div id="pause-controls" class="btn-group btn-group-sm" role="group">
-    <button type="button" class="btn btn-default active disabled">
+  <div id="pause-controls" class="btn-group btn-group-lg" role="group">
+<!--     <button type="button" class="btn btn-default active disabled">
       <i class="fa fa-pause red"></i>
-    </button>
+    </button> -->
     <button data-js-resume type="button" class="btn btn-default" title="Play Commands">
       <i class="fa fa-play"></i>
     </button>

@@ -106,8 +106,9 @@
   }
 
   #pause-controls {
+    border-left: 1px solid #ddd;
     float: right;
-    margin: 7px 7px 0;
+    // margin: 7px 7px 0;
 
   //   line-height: 22px;
   //   overflow: hidden;
@@ -125,12 +126,19 @@
   //     }
   //   }
 
-  //   button:hover {
-  //     background-color: #dfdfdf;
-  //   }
+    button {
+      line-height: 24px;
+      // background-color: transparent;
+      border-color: transparent;
+      border-right: 1px solid #ddd;
+      border-radius: 0;
+
+      // &:hover {
+      //   background-color: #dfdfdf;
+      // }
+    }
 
     i {
-      color: #666;
       font-size: 90%;
 
       &.red {
