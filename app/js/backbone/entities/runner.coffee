@@ -217,6 +217,9 @@
         @trigger("resumed")
         @Cypress.trigger("resume:all")
 
+      pause: ->
+        @Cypress.trigger("pause")
+
       next: ->
         @Cypress.trigger("resume:next")
 
@@ -238,6 +241,10 @@
 
         @updateChosen(runnable?.id)
 
+        ## always reload the iframe
+        @reRun @specPath
+
+      restart: ->
         ## always reload the iframe
         @reRun @specPath
 

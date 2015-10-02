@@ -7,11 +7,15 @@
 
       stats = @stats = App.request "stats:entity"
 
+      @listenTo runner, "before:run", ->
+        stats.running()
+
       @listenTo runner, "suite:start", ->
         stats.startCounting()
 
       @listenTo runner, "after:run", ->
-        stats.stopCounting()
+        stats.end()
+        stats.setGlobally()
 
       @listenTo runner, "test:end", ->
         stats.setDuration()
@@ -24,15 +28,12 @@
         @chosenRegion runner, chosen
 
       @listenTo runner, "reset:test:run", ->
-        ## anytime the iframe needs to be reloaded
+        ## anytime the iframe needs to be restarted
         ## we reset our stats back to 0
         stats.reset()
 
-      @listenTo runner, "after:run", ->
-        stats.setGlobally()
-
       @listenTo runner, "paused", (nextCmd) ->
-        stats.pause(nextCmd)
+        stats.paused(nextCmd)
 
       @listenTo runner, "resumed", ->
         stats.resume()
@@ -46,9 +47,6 @@
       @show @layout
 
     onDestroy: ->
-      ## make sure we stop counting just in case we've clicked
-      ## between test specs too quickly!
-      @stats.stopCounting()
       @stats.setGlobally(false)
       @stats = null
 
@@ -59,8 +57,15 @@
     configRegion: (stats, runner) ->
       configView = @getConfigView(stats)
 
-      @listenTo configView, "resume:clicked", ->
+      @listenTo configView, "play:clicked", ->
         runner.resume()
+
+      @listenTo configView, "restart:clicked", ->
+        runner.restart()
+
+      @listenTo configView, "pause:clicked", ->
+        stats.pause()
+        runner.pause()
 
       @listenTo configView, "next:clicked", ->
         stats.disableNext()

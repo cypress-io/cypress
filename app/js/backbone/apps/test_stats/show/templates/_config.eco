@@ -1,18 +1,31 @@
-<% if @paused: %>
-  <div id="pause-controls" class="btn-group btn-group-lg" role="group">
-<!--     <button type="button" class="btn btn-default active disabled">
-      <i class="fa fa-pause red"></i>
-    </button> -->
-    <button data-js-resume type="button" class="btn btn-default" title="Play Commands">
-      <i class="fa fa-play"></i>
-    </button>
+<div id="pause-controls" role="group">
+  <% if @paused: %>
+    <label class="label label-danger">Paused</label>
+  <% end %>
+  <div class="btn-group btn-group-lg">
+    <% if @paused: %>
+      <button data-js-play type="button" class="btn btn-default" title="Play Commands">
+        <i class="fa fa-play"></i>
+      </button>
+    <% else: %>
+      <% if @running: %>
+        <button data-js-pause type="button" class="btn btn-default" title="Pause Commands">
+          <i class="fa fa-pause"></i>
+        </button>
+      <% end %>
+    <% end %>
+    <% if @ended: %>
+      <button data-js-restart type="button" class="btn btn-default" title="Reload Commands">
+        <i class="fa fa-repeat"></i>
+      </button>
+    <% end %>
     <% if @nextCmd: %>
       <button data-js-next type="button" class="btn btn-default" title="Next Command: <%= @nextCmd %>">
         <i class="fa fa-step-forward"></i>
       </button>
     <% end %>
   </div>
-<% end %>
+</div>
 
 
 <!-- <div id="runner-config" class="dropdown">

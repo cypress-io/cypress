@@ -6,6 +6,10 @@ $Cypress.register "Debugging", (Cypress, _, $) ->
   Cypress.on "resume:all", ->
     @resume()
 
+  Cypress.on "pause", ->
+    ## continue chaining off the current chain
+    @prop("chain").pause()
+
   Cypress.Cy.extend
     resume: (resumeAll = true) ->
       onResume = @prop("onResume")
