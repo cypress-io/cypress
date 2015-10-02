@@ -57,7 +57,7 @@
       else
         @$el.addClass("file")
 
-      @$el.addClass("all-tests") if @model.get("all")
+      @$el.addClass("all-tests btn btn-primary btn-sm") if @model.get("all")
 
   class List.Files extends App.Views.CompositeView
     template: "tests/list/_files"
