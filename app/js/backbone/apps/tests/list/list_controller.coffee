@@ -8,7 +8,7 @@
       @layout = @getLayoutView()
 
       @listenTo files, "sync", =>
-        @searchRegion(files) if files.length
+        # @searchRegion(files) if files.length
         # @recentFilesRegion(files)
         @filesRegion(files)
 

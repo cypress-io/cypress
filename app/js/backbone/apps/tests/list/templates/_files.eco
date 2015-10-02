@@ -6,7 +6,7 @@
         <div>Name</div>
       </div>
       <div>
-        <div>Last Modified</div>
+        <!-- <div>Last Modified</div> -->
       </div>
     </li>
   </ul>
