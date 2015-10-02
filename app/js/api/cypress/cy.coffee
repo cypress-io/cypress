@@ -592,6 +592,8 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
     moment: window.moment
 
+    Blob: window.blobUtil
+
     _.extend $Cy.prototype.$, _($).pick("Event", "Deferred", "ajax", "get", "getJSON", "getScript", "post", "when")
 
     _.extend $Cy.prototype, Backbone.Events
