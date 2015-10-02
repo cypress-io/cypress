@@ -492,12 +492,6 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
         ## or all the elements in the collection
         _.all $el.toArray(), contains
 
-    _getRemoteJQuery: ->
-      if opt = @Cypress.option("jQuery")
-        return opt
-      else
-        @private("window").$
-
     _checkForNewChain: (chainerId) ->
       ## dont do anything if this isnt even defined
       return if _.isUndefined(chainerId)

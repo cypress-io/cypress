@@ -59,17 +59,10 @@ $Cypress.register "Assertions", (Cypress, _, $, Promise) ->
 
     obj
 
-  remoteJQueryisNotSameAsGlobal = (remoteJQuery) ->
-    remoteJQuery and (remoteJQuery isnt $)
-
   shouldFnWithCallback = (subject, fn) ->
     Promise
       .try =>
-        remoteJQuery = @_getRemoteJQuery()
-        if Cypress.Utils.hasElement(subject) and remoteJQueryisNotSameAsGlobal(remoteJQuery)
-          remoteSubject = remoteJQuery(subject)
-          Cypress.Utils.setCypressNamespace(remoteSubject, subject)
-
+        remoteSubject = @getRemotejQueryInstance(subject)
         fn.call @private("runnable").ctx, remoteSubject ? subject
       .return(subject)
 
