@@ -98,7 +98,15 @@ $Cypress.register "Debugging", (Cypress, _, $) ->
       @prop("inspect", true)
       return null
 
-    debug: ->
+    debug: (options = {}) ->
+      _.defaults options, {log: true}
+
+      if options.log
+        options._log = Cypress.Log.command({
+          snapshot: true
+          end: true
+        })
+
       console.log "\n%c------------------------Cypress Command Info------------------------", "font-weight: bold;"
       console.log "Runnable:           ", @private("runnable")
       console.log "Subject:            ", @prop("subject")
