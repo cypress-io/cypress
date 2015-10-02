@@ -15,7 +15,7 @@
       <% end %>
     <% end %>
     <% if @ended: %>
-      <button data-js-restart type="button" class="btn btn-default" title="Reload Commands">
+      <button data-js-restart type="button" class="btn btn-default" title="Restart Tests">
         <i class="fa fa-repeat"></i>
       </button>
     <% end %>
