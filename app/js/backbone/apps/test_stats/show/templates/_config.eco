@@ -3,11 +3,11 @@
     <button type="button" class="btn btn-default active disabled">
       <i class="fa fa-pause red"></i>
     </button>
-    <button type="button" class="btn btn-default" title="Play Commands">
+    <button data-js-resume type="button" class="btn btn-default" title="Play Commands">
       <i class="fa fa-play"></i>
     </button>
     <% if @nextCmd: %>
-      <button type="button" class="btn btn-default" title="Next Command: <%= @nextCmd %>">
+      <button data-js-next type="button" class="btn btn-default" title="Next Command: <%= @nextCmd %>">
         <i class="fa fa-step-forward"></i>
       </button>
     <% end %>
