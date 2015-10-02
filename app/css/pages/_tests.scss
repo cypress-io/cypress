@@ -25,7 +25,7 @@
     }
 
     i {
-      display: none;
+      @extend .#{$fa-css-prefix}-play;
     }
   }
 
@@ -39,7 +39,9 @@
   }
 
   .folder {
-    font-weight: 600;
+    font-weight: bold;
+    font-size: 14px;
+    color: #111;
 
     i {
       font-size: 14px;
