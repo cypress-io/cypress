@@ -38,7 +38,21 @@ class Socket
   startListening: (options) ->
     @app.once "close", @close.bind(@)
 
-    @_startListening(chokidar, path, options)
+    if process.env["CYPRESS_ENV"] is "development"
+      @listenToCssChanges()
+
+    @_startListening(path, options)
+
+  listenToCssChanges: ->
+    watchCssFiles = chokidar.watch path.join(process.cwd(), "lib", "public", "css"), ignored: (path, stats) =>
+      return false if fs.statSync(path).isDirectory()
+
+      not /\.css$/.test path
+
+    # watchCssFiles.on "add", (path) -> console.log "added css:", path
+    watchCssFiles.on "change", (filePath, stats) =>
+      filePath = path.basename(filePath)
+      @io.emit "cypress:css:changed", file: filePath
 
   close: (watchedFiles) ->
     @io.close()

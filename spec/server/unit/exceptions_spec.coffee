@@ -1,11 +1,9 @@
-root          = "../../../"
-expect        = require("chai").expect
-nock          = require("nock")
+require("../spec_helper")
+
+delete global.fs
+
 mock          = require("mock-fs")
-sinon         = require("sinon")
-sinonPromise  = require("sinon-as-promised")
 winston       = require("winston")
-Promise       = require("bluebird")
 Exception     = require("#{root}lib/exception")
 Log           = require("#{root}lib/log")
 cache         = require("#{root}lib/cache")
@@ -15,13 +13,11 @@ Settings      = require("#{root}lib/util/settings")
 describe "Exceptions", ->
   beforeEach ->
     nock.disableNetConnect()
-    @sandbox = sinon.sandbox.create()
 
   afterEach ->
     mock.restore()
     nock.cleanAll()
     nock.enableNetConnect()
-    @sandbox.restore()
 
   context "#getUrl", ->
     it "returns Routes.exceptions_path()", ->

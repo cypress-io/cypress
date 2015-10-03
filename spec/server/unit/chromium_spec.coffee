@@ -14,7 +14,7 @@ describe "Chromium", ->
     }
     @c = Chromium(@win)
 
-  context.only "#override", ->
+  context "#override", ->
     beforeEach ->
       @afterRun = @sandbox.spy(@c, "_afterRun")
       @exit     = @sandbox.stub(process, "exit")

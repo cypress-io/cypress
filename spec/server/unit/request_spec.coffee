@@ -125,4 +125,4 @@ describe "Request", ->
         url: "http://localhost:8080/foo"
       }).then (resp) ->
         expect(resp.duration).to.be.a("Number")
-        expect(resp.duration).to.be.gt(1)
+        expect(resp.duration).to.be.gt(0)

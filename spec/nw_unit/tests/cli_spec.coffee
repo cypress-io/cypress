@@ -1,6 +1,7 @@
 _            = require("lodash")
 cp           = require("child_process")
 lookup       = require("../js/spec_helper")
+Repo         = require("gift/lib/repo")
 cache        = lookup("lib/cache")
 # Server       = lookup("lib/server")
 # Chromium     = lookup("lib/chromium")
@@ -27,10 +28,12 @@ module.exports = (parentWindow, gui, loadApp) ->
           @App.vent.on "app:entities:ready", =>
             @exit       = @sandbox.stub process, "exit"
             @write      = @sandbox.stub process.stdout, "write"
-            @exec       = @sandbox.stub(cp, "exec").withArgs("git rev-parse --abbrev-ref HEAD").callsArgWith(1, null, "master\n")
+            @branch     = @sandbox.stub(Repo.prototype, "branch").callsArgWith(0, null, {name: "master"})
+            @commit     = @sandbox.stub(Repo.prototype, "current_commit").callsArgWith(0, null, {message: "foo msg", author: {name: "John Henry"}})
             @trigger    = @sandbox.spy  @App.vent, "trigger"
             @runProject = @sandbox.spy  @App.config, "runProject"
             @open       = @sandbox.spy  @Server().prototype, "open"
+
 
             @App.commands.setHandler("start:chromium:run", ->)
 
@@ -148,8 +151,11 @@ module.exports = (parentWindow, gui, loadApp) ->
         @sandbox.stub(os, "platform").returns("linux")
 
         nock(Routes.api())
-          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938?branch=master")
+          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938")
           .matchHeader("x-project-token", "abc123")
+          .matchHeader("x-git-branch", "master")
+          .matchHeader("x-git-author", "John Henry")
+          .matchHeader("x-git-message", "foo msg")
           .reply(401)
 
         cache.setUser({name: "Brian"}).then =>
@@ -162,22 +168,29 @@ module.exports = (parentWindow, gui, loadApp) ->
         @sandbox.stub(os, "platform").returns("linux")
 
         nock(Routes.api())
-          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938?branch=master")
+          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938")
           .matchHeader("x-project-token", "abc123")
+          .matchHeader("x-git-branch", "master")
+          .matchHeader("x-git-author", "John Henry")
+          .matchHeader("x-git-message", "foo msg")
           .reply(200, {
             ci_guid: "foo-bar-baz-123"
           })
 
         cache.setUser({name: "Brian"}).then =>
           @argsAre("--run-project", @todos, "--ci", "--key", "abc123").then =>
+            console.log @trigger.getCalls()
             expect(@trigger).to.be.calledWith("start:projects:app")
 
       it "calls start:chromium:app with src to all tests", (done) ->
         @sandbox.stub(os, "platform").returns("linux")
 
         nock(Routes.api())
-          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938?branch=master")
+          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938")
           .matchHeader("x-project-token", "abc123")
+          .matchHeader("x-git-branch", "master")
+          .matchHeader("x-git-author", "John Henry")
+          .matchHeader("x-git-message", "foo msg")
           .reply(200, {
             ci_guid: "foo-bar-baz-123"
           })
@@ -195,8 +208,11 @@ module.exports = (parentWindow, gui, loadApp) ->
         @sandbox.stub(os, "platform").returns("linux")
 
         nock(Routes.api())
-          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938?branch=master")
+          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938")
           .matchHeader("x-project-token", "abc123")
+          .matchHeader("x-git-branch", "master")
+          .matchHeader("x-git-author", "John Henry")
+          .matchHeader("x-git-message", "foo msg")
           .reply(200, {
             ci_guid: "foo-bar-baz-123"
           })
@@ -220,8 +236,11 @@ module.exports = (parentWindow, gui, loadApp) ->
         @sandbox.stub(os, "platform").returns("linux")
 
         nock(Routes.api())
-          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938?branch=master")
+          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938")
           .matchHeader("x-project-token", "abc123")
+          .matchHeader("x-git-branch", "master")
+          .matchHeader("x-git-author", "John Henry")
+          .matchHeader("x-git-message", "foo msg")
           .reply(200, {
             ci_guid: "foo-bar-baz-123"
           })
@@ -245,8 +264,11 @@ module.exports = (parentWindow, gui, loadApp) ->
         @sandbox.stub(os, "platform").returns("linux")
 
         nock(Routes.api())
-          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938?branch=master")
+          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938")
           .matchHeader("x-project-token", "abc123")
+          .matchHeader("x-git-branch", "master")
+          .matchHeader("x-git-author", "John Henry")
+          .matchHeader("x-git-message", "foo msg")
           .reply(200, {
             ci_guid: "foo-bar-baz-123"
           })
@@ -277,8 +299,10 @@ module.exports = (parentWindow, gui, loadApp) ->
           @checkBranchQueryParam = (branch, fn) =>
             req = nock(Routes.api())
               .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938")
-              .query(branch: branch)
               .matchHeader("x-project-token", "abc123")
+              .matchHeader("x-git-branch", branch)
+              .matchHeader("x-git-author", "John Henry")
+              .matchHeader("x-git-message", "foo msg")
               .reply(401)
 
             cache.setUser({name: "Brian"}).then =>
@@ -301,21 +325,13 @@ module.exports = (parentWindow, gui, loadApp) ->
           process.env.CI_BRANCH = "staging-circle3"
           @checkBranchQueryParam("staging-circle3")
 
-        it "uses git rev-parse when no env vars", ->
+        it.only "uses git branch when no env vars", ->
           @checkBranchQueryParam "foo-branch", =>
-            @exec.callsArgWith(1, null, "foo-branch")
+            @branch.callsArgWith(0, null, {name: "foo-branch"})
 
         it "does not send a branch when git errors", ->
           @checkBranchQueryParam "", =>
-            @exec.callsArgWith(1, new Error)
-
-        it "cleans out whitespace and new lines from stdout", ->
-          @checkBranchQueryParam "clean", =>
-            @exec.callsArgWith(1, null, "  clean  \n")
-
-        it "cleans out whitespace and new lines from env", ->
-          process.env.CIRCLE_BRANCH = "   clean   \n"
-          @checkBranchQueryParam "clean"
+            @branch.callsArgWith(1, new Error)
 
     context "--run-project", ->
       it "requires a session_token", ->

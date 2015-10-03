@@ -5,22 +5,19 @@ global.window = {
   }
 }
 
-root        = '../../../'
-expect      = require('chai').expect
-fs          = require "fs-extra"
+require("../spec_helper")
+
+delete global.fs
+
+mock        = require "mock-fs"
 Updater     = require "#{root}lib/updater"
 Fixtures    = require "#{root}/spec/server/helpers/fixtures"
-mock        = require "mock-fs"
-nock        = require 'nock'
-sinon       = require "sinon"
 
 describe "Updater", ->
   beforeEach ->
-    @sandbox = sinon.sandbox.create()
     nock.disableNetConnect()
 
   afterEach ->
-    @sandbox.restore()
     mock.restore()
     nock.enableNetConnect()
     nock.cleanAll()

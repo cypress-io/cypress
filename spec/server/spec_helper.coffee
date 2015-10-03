@@ -7,7 +7,7 @@ global.expect    = require("chai").expect
 sinon            = require("sinon")
 sinonPromise     = require("sinon-as-promised")
 
-global.fs        = Promise.promisifyAll(global.fs)
+global.fs = fs = Promise.promisifyAll(global.fs)
 
 require('chai')
 .use(require('sinon-chai'))
@@ -17,3 +17,6 @@ beforeEach ->
 
 afterEach ->
   @sandbox.restore()
+
+  if global.fs isnt fs
+    global.fs = fs

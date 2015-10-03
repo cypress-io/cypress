@@ -511,7 +511,7 @@ SecretSauce.Socket =
         .catch (err) ->
           socket.emit "sauce:job:fail", clientObj.guid, err
 
-  _startListening: (chokidar, path, options) ->
+  _startListening: (path, options) ->
     { _ } = SecretSauce
 
     _.defaults options,
@@ -597,17 +597,6 @@ SecretSauce.Socket =
     @testsDir = path.join(projectRoot, testFolder)
 
     @fs.ensureDirAsync(@testsDir).bind(@)
-
-    if process.env["NODE_ENV"] is "development"
-      watchCssFiles = chokidar.watch @path.join(process.cwd(), "lib", "public", "css"), ignored: (path, stats) =>
-        return false if @fs.statSync(path).isDirectory()
-
-        not /\.css$/.test path
-
-      # watchCssFiles.on "add", (path) -> console.log "added css:", path
-      watchCssFiles.on "change", (filePath, stats) =>
-        filePath = path.basename(filePath)
-        @io.emit "cypress:css:changed", file: filePath
 
 SecretSauce.IdGenerator =
   hasExistingId: (e) ->
