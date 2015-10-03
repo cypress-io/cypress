@@ -4,23 +4,23 @@
   <% end %>
   <div class="btn-group btn-group-lg">
     <% if @paused: %>
-      <button data-js-play type="button" class="btn btn-default" title="Play Commands">
+      <button data-js-play type="button" class="btn btn-default" data-toggle="tooltip" title="Resume">
         <i class="fa fa-play"></i>
       </button>
     <% else: %>
       <% if @running: %>
-        <button data-js-stop type="button" class="btn btn-default" title="Stop Running">
+        <button data-js-stop type="button" class="btn btn-default" data-toggle="tooltip" title="Stop Running">
           <i class="fa fa-stop"></i>
         </button>
       <% end %>
     <% end %>
     <% if @ended: %>
-      <button data-js-restart type="button" class="btn btn-default" title="Restart Tests">
+      <button data-js-restart type="button" class="btn btn-default" data-toggle="tooltip" title="Run All Tests">
         <i class="fa fa-repeat"></i>
       </button>
     <% end %>
     <% if @nextCmd: %>
-      <button data-js-next type="button" class="btn btn-default" title="Next Command: <%= @nextCmd %>">
+      <button data-js-next type="button" class="btn btn-default" data-toggle="tooltip" title="Next: '<%= @nextCmd %>'">
         <i class="fa fa-step-forward"></i>
       </button>
     <% end %>

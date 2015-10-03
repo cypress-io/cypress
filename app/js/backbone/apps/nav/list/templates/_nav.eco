@@ -1,4 +1,4 @@
-<a href="<%= @href %>">
+<a href="<%= @href %>" data-toggle="tooltip" title="<%= @name %>">
   <i class="<%= @icon %>"></i>
   <span><%= @name %></span>
 </a>

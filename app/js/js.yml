@@ -16,6 +16,7 @@ vendor:
   - bower_components/spin.js/jquery.spin.js
   - bower_components/jsuri/Uri.js
   - bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/dropdown.js
+  - bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/tooltip.js
   - bower_components/jquery-ui/ui/core.js
   - bower_components/jquery-ui/ui/widget.js
   - bower_components/jquery-ui/ui/mouse.js

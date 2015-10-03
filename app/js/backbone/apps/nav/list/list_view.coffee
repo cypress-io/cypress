@@ -18,11 +18,19 @@
     template: "nav/list/_nav"
     className: "parent"
 
+    ui:
+      a: "a"
+
     modelEvents:
       "change:chosen" : "chosenChanged"
 
     onRender: ->
-      @$el.find("a").attr("target", "_blank") if @model.get("external")
+      @ui.a.attr("target", "_blank") if @model.get("external")
+
+      @ui.a.tooltip({placement: "right", trigger: "hover"})
+
+    onDestroy: ->
+      @ui.a.tooltip("destroy")
 
     chosenChanged: (model, value, options) ->
       @$el.toggleClass "active", value

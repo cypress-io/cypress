@@ -61,6 +61,7 @@
       restart: "[data-js-restart]"
       play:   "[data-js-play]"
       next:   "[data-js-next]"
+      tooltips: "[data-toggle='tooltip']"
 
     modelEvents:
       "pause:mode":          "render"
@@ -77,6 +78,16 @@
       "click @ui.restart": "restart:clicked"
       "click @ui.play"   : "play:clicked"
       "click @ui.next"   : "next:clicked"
+
+    onBeforeRender: ->
+      if _.isObject(@ui.tooltips) and @ui.tooltips.length
+        @ui.tooltips.tooltip("destroy")
+
+    onRender: ->
+      @ui.tooltips.tooltip({container: "body", placement: "bottom"})
+
+    onDestroy: ->
+      @ui.tooltips.tooltip("destroy")
 
     disableStopChanged: (model, value, options) ->
       return if value isnt true

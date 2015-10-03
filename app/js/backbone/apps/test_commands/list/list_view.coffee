@@ -6,6 +6,7 @@
     ui:
       wrapper:  ".command-wrapper"
       method:   ".command-method"
+      tooltips: "[data-toggle='tooltip']"
       # pause:    ".fa-pause"
 
     modelEvents:
@@ -35,6 +36,10 @@
 
       @$el.addClass "command-event" if @model.isEvent()
 
+    onBeforeRender: ->
+      if _.isObject(@ui.tooltips) and @ui.tooltips.length
+        @ui.tooltips.tooltip("destroy")
+
     onRender: ->
       @ui.method.css "padding-left", @model.get("indent")
 
@@ -45,6 +50,8 @@
       @$el.toggleClass "command-failed", @model.state("failed")
 
       @model.triggerCommandCallback("onRender", @$el)
+
+      @ui.tooltips.tooltip({container: "body"})
 
     clicked: (e) ->
       e.stopPropagation()
@@ -84,6 +91,8 @@
       ## stop the model from listening
       ## to its command log's events
       @model.stopListening()
+
+      @ui.tooltips.tooltip("destroy")
 
   class List.Hook extends App.Views.CompositeView
     template: "test_commands/list/_hook"
