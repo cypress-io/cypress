@@ -7,11 +7,15 @@
 
       stats = @stats = App.request "stats:entity"
 
+      @listenTo runner, "before:run", ->
+        stats.running()
+
       @listenTo runner, "suite:start", ->
         stats.startCounting()
 
       @listenTo runner, "after:run", ->
-        stats.stopCounting()
+        stats.end()
+        stats.setGlobally()
 
       @listenTo runner, "test:end", ->
         stats.setDuration()
@@ -24,25 +28,25 @@
         @chosenRegion runner, chosen
 
       @listenTo runner, "reset:test:run", ->
-        ## anytime the iframe needs to be reloaded
+        ## anytime the iframe needs to be restarted
         ## we reset our stats back to 0
         stats.reset()
 
-      @listenTo runner, "after:run", ->
-        stats.setGlobally()
+      @listenTo runner, "paused", (nextCmd) ->
+        stats.paused(nextCmd)
+
+      @listenTo runner, "resumed", ->
+        stats.resume()
 
       @layout = @getLayoutView()
 
       @listenTo @layout, "show", =>
         @statsRegion stats
-        @configRegion runner
+        @configRegion stats, runner
 
       @show @layout
 
     onDestroy: ->
-      ## make sure we stop counting just in case we've clicked
-      ## between test specs too quickly!
-      @stats.stopCounting()
       @stats.setGlobally(false)
       @stats = null
 
@@ -50,8 +54,22 @@
       statsView = @getStatsView stats
       @show statsView, region: @layout.statsRegion
 
-    configRegion: (runner) ->
-      configView = @getConfigView()
+    configRegion: (stats, runner) ->
+      configView = @getConfigView(stats)
+
+      @listenTo configView, "play:clicked", ->
+        runner.resume()
+
+      @listenTo configView, "restart:clicked", ->
+        runner.restart()
+
+      @listenTo configView, "stop:clicked", ->
+        stats.stop()
+        runner.abort()
+
+      @listenTo configView, "next:clicked", ->
+        stats.disableNext()
+        runner.next()
 
       @listenTo configView, "clicked:sauce:labs", (option) ->
         runner.runSauce()
@@ -69,8 +87,9 @@
 
       @show chosenView, region: @layout.chosenRegion
 
-    getConfigView: ->
+    getConfigView: (stats) ->
       new Show.Config
+        model: stats
 
     getChosenView: (chosen) ->
       new Show.Chosen

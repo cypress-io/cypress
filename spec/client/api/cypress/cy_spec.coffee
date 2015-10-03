@@ -191,6 +191,12 @@ describe "$Cypress.Cy API", ->
         expect(@cy.moment).to.eq(moment)
         expect(@cy.moment().toJSON()).to.eq(moment().toJSON())
 
+    describe "#Blob", ->
+      it "attaches blob utils", ->
+        expect(@cy).to.have.property("Blob")
+        expect(@cy.Blob).to.have.property("dataURLToBlob")
+        expect(@cy.Blob).to.have.property("base64StringToBlob")
+
   context "integration", ->
     enterCommandTestingMode()
 

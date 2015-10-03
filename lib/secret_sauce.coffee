@@ -1,10 +1,12 @@
 _       = require("lodash")
 os      = require("os")
+cp      = require("child_process")
 path    = require("path")
 chalk   = require("chalk")
 request = require("request-promise")
 Promise = require("bluebird")
 fs      = require("fs-extra")
+git     = require("gift")
 
 fs = Promise.promisifyAll(fs)
 
@@ -22,6 +24,8 @@ SecretSauce =
       klass.prototype[key] = fn
 
 SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
+  repo = Promise.promisifyAll git(options.projectPath)
+
   displayToken = (token) ->
     write(token)
     process.exit()
@@ -42,11 +46,47 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
 
     writeErr("Sorry, running in CI requires a valid CI provider and environment.")
 
+  getBranchFromGit = ->
+    repo.branchAsync()
+      .get("name")
+      .catch -> ""
+
+  getMessage = ->
+    repo.current_commitAsync()
+      .get("message")
+      .catch -> ""
+
+  getAuthor = ->
+    repo.current_commitAsync()
+      .get("author")
+      .get("name")
+      .catch -> ""
+
+  getBranch = ->
+    for branch in ["CIRCLE_BRANCH", "TRAVIS_BRANCH", "CI_BRANCH"]
+      if b = process.env[branch]
+        return Promise.resolve(b)
+
+    getBranchFromGit()
+
   ensureProjectAPIToken = (projectId, key, fn) ->
-    request.post({
-      url: Routes.ci(projectId)
-      headers: {"x-project-token": key}
-    })
+    Promise.props({
+      branch: getBranch()
+      author: getAuthor()
+      message: getMessage()
+    }).then (git) ->
+      request.post({
+        url: Routes.ci(projectId)
+        headers: {
+          "x-project-token": key
+          "x-git-branch":    git.branch
+          "x-git-author":    git.author
+          "x-git-message":   git.message
+        }
+        json: true
+      })
+      .then (attrs) ->
+        attrs.ci_guid
     .then(fn)
     .catch (err) ->
       writeErr("Sorry, your project's API Key: '#{key}' was not valid. This project cannot run in CI.")
@@ -151,6 +191,7 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
                   Chromium(win).override({
                     ci:          options.ci
                     reporter:    options.reporter
+                    ci_guid:     options.ci_guid
                   })
               }
             .catch(displayError)
@@ -190,7 +231,8 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
       if ensureCiEnv(@user)
         @addProject(projectPath).then =>
           @App.config.getProjectIdByPath(projectPath).then (projectId) =>
-            ensureProjectAPIToken projectId, options.key, =>
+            ensureProjectAPIToken projectId, options.key, (ci_guid) =>
+              options.ci_guid = ci_guid
               @run(options)
 
     startGuiApp: (options) ->
@@ -229,7 +271,7 @@ SecretSauce.Chromium =
     @_reporter(@window, options.reporter)
     @_onerror(@window)
     @_log(@window)
-    @_afterRun(@window)
+    @_afterRun(@window, options.ci_guid)
 
   _reporter: (window, reporter) ->
     getReporter = ->
@@ -268,7 +310,7 @@ SecretSauce.Chromium =
       msg = util.format.apply(util, arguments)
       process.stdout.write(msg + "\n")
 
-  _afterRun: (window) ->
+  _afterRun: (window, ci_guid) ->
     # takeScreenshot = (cb) =>
     #   process.stdout.write("Taking Screenshot\n")
     #   @win.capturePage (img) ->
@@ -279,16 +321,28 @@ SecretSauce.Chromium =
     #       else
     #         cb()
 
-    window.$Cypress.afterRun = (results) ->
+    window.$Cypress.afterRun = (duration, tests) =>
       # process.stdout.write("Results are:\n")
-      # process.stdout.write JSON.stringify(results)
+      # process.stdout.write JSON.stringify(tests)
       # process.stdout.write("\n")
       ## notify Cypress API
 
-      failures = _.where(results, {state: "failed"}).length
+      exit = ->
+        failures = _.where(tests, {state: "failed"}).length
 
-      # takeScreenshot ->
-      process.exit(failures)
+        # takeScreenshot ->
+        process.exit(failures)
+
+      request.post({
+        url: @Routes.tests(ci_guid)
+        body: {
+          duration: duration
+          tests: tests
+        }
+        json: true
+      })
+      .then(exit)
+      .catch(exit)
 
 SecretSauce.Keys =
   _convertToId: (index) ->
@@ -544,16 +598,16 @@ SecretSauce.Socket =
 
     @fs.ensureDirAsync(@testsDir).bind(@)
 
-    ## BREAKING DUE TO __DIRNAME
-    # watchCssFiles = chokidar.watch path.join(__dirname, "public", "css"), ignored: (path, stats) ->
-    #   return false if fs.statSync(path).isDirectory()
+    if process.env["NODE_ENV"] is "development"
+      watchCssFiles = chokidar.watch @path.join(process.cwd(), "lib", "public", "css"), ignored: (path, stats) =>
+        return false if @fs.statSync(path).isDirectory()
 
-    #   not /\.css$/.test path
+        not /\.css$/.test path
 
-    # # watchCssFiles.on "add", (path) -> console.log "added css:", path
-    # watchCssFiles.on "change", (filePath, stats) =>
-    #   filePath = path.basename(filePath)
-    #   @io.emit "eclectus:css:changed", file: filePath
+      # watchCssFiles.on "add", (path) -> console.log "added css:", path
+      watchCssFiles.on "change", (filePath, stats) =>
+        filePath = path.basename(filePath)
+        @io.emit "cypress:css:changed", file: filePath
 
 SecretSauce.IdGenerator =
   hasExistingId: (e) ->

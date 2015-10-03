@@ -1,6 +1,6 @@
 @App.module "NavApp.List", (List, App, Backbone, Marionette, $, _) ->
 
-  ECL_WRAPPER = "#ecl-wrapper"
+  CY_WRAPPER = "#cy-wrapper"
 
   class List.Layout extends App.Views.LayoutView
     template: "nav/list/layout"
@@ -8,18 +8,29 @@
     satelliteMode: (bool = true) ->
       ## when we enter satellite-mode add this class to our wrapper
       if bool
-        $(ECL_WRAPPER).removeClass().addClass("satellite-mode")
+        $(CY_WRAPPER).removeClass().addClass("satellite-mode")
         @$el.hide()
       else
-        $(ECL_WRAPPER).removeClass("satellite-mode")
+        $(CY_WRAPPER).removeClass("satellite-mode")
         @$el.show()
 
   class List.Nav extends App.Views.ItemView
     template: "nav/list/_nav"
     className: "parent"
 
+    ui:
+      a: "a"
+
     modelEvents:
       "change:chosen" : "chosenChanged"
+
+    onRender: ->
+      @ui.a.attr("target", "_blank") if @model.get("external")
+
+      @ui.a.tooltip({placement: "right", trigger: "hover"})
+
+    onDestroy: ->
+      @ui.a.tooltip("destroy")
 
     chosenChanged: (model, value, options) ->
       @$el.toggleClass "active", value
@@ -51,7 +62,7 @@
     collapsedChanged: (model, value, options) ->
       ## must go outside of this view to add the collapse class
       ## since it affects both the nav region + main region
-      $(ECL_WRAPPER).toggleClass("collapsed", value)
+      $(CY_WRAPPER).toggleClass("collapsed", value)
 
       ## swap the fa angle class
       klass = if value then "fa fa-angle-right" else "fa fa-angle-left"

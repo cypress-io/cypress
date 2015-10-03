@@ -14,6 +14,9 @@ $Cypress.register "Communications", (Cypress, _, $, Promise) ->
 
       ## should we increase the command timeout here to 10s?
 
+      _.defaults options,
+        log: true
+
       new Promise (resolve, reject) =>
 
         if options.log isnt false

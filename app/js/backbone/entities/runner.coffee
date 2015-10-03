@@ -44,6 +44,9 @@
         @listenTo @Cypress, "initialized", (obj) =>
           @receivedRunner(obj.runner)
 
+        @listenTo @Cypress, "paused", (nextCmd) =>
+          @trigger "paused", nextCmd
+
         ## dont do anything else if we're in headless mode
         return if $Cypress.isHeadless
 
@@ -210,6 +213,16 @@
 
           obj
 
+      resume: ->
+        @trigger("resumed")
+        @Cypress.trigger("resume:all")
+
+      abort: ->
+        @Cypress.abort()
+
+      next: ->
+        @Cypress.trigger("resume:next")
+
       getChosen: ->
         @chosen
 
@@ -228,6 +241,10 @@
 
         @updateChosen(runnable?.id)
 
+        ## always reload the iframe
+        @reRun @specPath
+
+      restart: ->
         ## always reload the iframe
         @reRun @specPath
 
@@ -406,6 +423,9 @@
         ## to run tests
         @Cypress.initialize(specWindow, remoteIframe, App.config.getCypressConfig())
 
+        ## capture start date
+        start = new Date
+
         @Cypress.run (err, results) =>
           @Cypress.after(err)
 
@@ -415,7 +435,9 @@
           fn?(err)
 
           if _.isFunction($Cypress.afterRun)
-            $Cypress.afterRun(results)
+            ## send duration + test results
+            end = new Date - start
+            $Cypress.afterRun(end, results)
 
     App.reqres.setHandler "runner:entity", ->
       new Entities.Runner

@@ -56,8 +56,48 @@
   class Show.Config extends App.Views.ItemView
     template: "test_stats/show/_config"
 
+    ui:
+      stop:    "[data-js-stop]"
+      restart: "[data-js-restart]"
+      play:   "[data-js-play]"
+      next:   "[data-js-next]"
+      tooltips: "[data-toggle='tooltip']"
+
+    modelEvents:
+      "pause:mode":          "render"
+      "change:running":      "render"
+      "change:ended":        "render"
+      "change:disableStop":  "disableStopChanged"
+      "change:disableNext":  "disableNextChanged"
+
     events:
       "click a" : "aClicked"
+
+    triggers:
+      "click @ui.stop"   : "stop:clicked"
+      "click @ui.restart": "restart:clicked"
+      "click @ui.play"   : "play:clicked"
+      "click @ui.next"   : "next:clicked"
+
+    onBeforeRender: ->
+      if _.isObject(@ui.tooltips) and @ui.tooltips.length
+        @ui.tooltips.tooltip("destroy")
+
+    onRender: ->
+      @ui.tooltips.tooltip({container: "body", placement: "bottom"})
+
+    onDestroy: ->
+      @ui.tooltips.tooltip("destroy")
+
+    disableStopChanged: (model, value, options) ->
+      return if value isnt true
+
+      @ui.stop.addClass("disabled").attr("disabled", true)
+
+    disableNextChanged: (model, value, options) ->
+      return if value isnt true
+
+      @ui.next.addClass("disabled").attr("disabled", true)
 
     aClicked: (e) ->
       e.preventDefault()

@@ -20,10 +20,16 @@
         App.config.setUI(ui)
 
     actions:
+      list: ->
+        route: "tests"
+
       show: ->
         route: "tests/*id"
 
   router = new Router
+
+  App.reqres.setHandler "show:test", (id) ->
+    router.to "show", id: id
 
   App.commands.setHandler "switch:to:manual:browser", (id, browser, version) ->
     obj = {id: id}

@@ -103,6 +103,7 @@
     "errorhandler": "1.1.1",
     "express": "4.12.3",
     "fs-extra": "0.22.1",
+    "gift": "^0.6.1",
     "glob": "5.0.10",
     "gulp-util": "^3.0.6",
     "hbs": "2.7.0",

@@ -16,6 +16,7 @@ vendor:
   - bower_components/spin.js/jquery.spin.js
   - bower_components/jsuri/Uri.js
   - bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/dropdown.js
+  - bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/tooltip.js
   - bower_components/jquery-ui/ui/core.js
   - bower_components/jquery-ui/ui/widget.js
   - bower_components/jquery-ui/ui/mouse.js
@@ -23,6 +24,7 @@ vendor:
   - bower_components/bluebird/js/browser/bluebird.js
   - bower_components/js-cookie/src/js.cookie.js
   - bower_components/moment/moment.js
+  - bower_components/blob-util/dist/blob-util.js
   - app/js/vendor/backbone-chooser.coffee
   - app/js/vendor/bililiteRange.js
 

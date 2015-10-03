@@ -42,6 +42,14 @@
       ## always make the first argument the runner
       @insertChildViews = _.partial(@insertChildViews, runner, iframe)
 
+      @listenTo runner, "paused", ->
+        ## open the runnable if we find one
+        ## when the pause is clicked
+        runnable = container.find (r) ->
+          r.get("state") is "active"
+
+        runnable?.open()
+
       @listenTo runner, "before:run", ->
         testViewQueue = []
         testQueue     = []

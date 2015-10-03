@@ -102,9 +102,11 @@
         height: el.height()
       }
 
-    calcWidth: (main, tests, container) ->
+    calcWidth: (main, tests, container, headerHeight) ->
+      headerHeight = @$("header").outerHeight() ? 46
+
       width  = main.width() - tests.width()
-      height = container.height() - 37 ## 37 accounts for the header
+      height = container.height() - headerHeight ## accounts for the header
 
       container.width(width)
 
@@ -183,7 +185,7 @@
       })
 
       ## move this src out of here and into entities/iframe
-      url = encodeURIComponent("http://tunnel.browserling.com:50228/#/tests/#{src}?__ui=satellite")
+      url = encodeURIComponent("http://tunnel.browserling.com:50228/__/#/tests/#{src}?__ui=satellite")
 
       insertIframe = =>
         browserling = new Browserling("29051e55f59c35e17a571bcf3f145910")
@@ -306,6 +308,7 @@
       "change:viewportHeight" : "heightChanged"
       "change:viewportScale"  : "scaleChanged"
       "cannot:revert:dom"     : "cannotRevertDom"
+      "clear:revert:message"  : "clearRevertMsg"
       "revert:dom"            : "revertDom"
       "restore:dom"           : "restoreDom"
 
@@ -360,6 +363,9 @@
 
     cannotRevertDom: (init) ->
       @ui.message.text("Cannot revert DOM while tests are running").addClass("cannot-revert").show()
+
+    clearRevertMsg: ->
+      @restoreDom()
 
     restoreDom: ->
       @ui.message.removeClass("cannot-revert").empty().hide()

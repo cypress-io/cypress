@@ -1,0 +1,23 @@
+<ul class="list-as-table list-header builds-list-header">
+  <li>
+    <div>
+      <div>Build #</div>
+    </div>
+    <div>
+      <div>Branch</div>
+    </div>
+    <div>
+      <div>Message</div>
+    </div>
+    <div>
+      <div>Test Results</div>
+    </div>
+    <div>
+      <div>Duration</div>
+    </div>
+    <div>
+      <div>Started</div>
+    </div>
+  </li>
+</ul>
+<ul class="builds-container list-as-table"></ul>

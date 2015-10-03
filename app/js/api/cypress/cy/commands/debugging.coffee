@@ -1,9 +1,93 @@
 $Cypress.register "Debugging", (Cypress, _, $) ->
 
+  Cypress.on "resume:next", ->
+    @resume(false)
+
+  Cypress.on "resume:all", ->
+    @resume()
+
+  Cypress.on "pause", ->
+    ## continue chaining off the current chain
+    if chain = @prop("chain")
+      chain.pause()
+    else
+      @pause()
+
+  Cypress.Cy.extend
+    resume: (resumeAll = true) ->
+      onResume = @prop("onResume")
+
+      ## dont do anything if this isnt a fn
+      return if not _.isFunction(onResume)
+
+      ## nuke this out so it can only
+      ## be called a maximum of 1 time
+      @prop("onResume", null)
+
+      ## call the fn
+      onResume.call(@, resumeAll)
+
+    getNextQueuedCommand: ->
+      ## gets the next command which
+      ## isnt skipped
+      search = (i) =>
+        cmd = @commands.at(i)
+
+        if cmd and cmd.get("skip")
+          search(i + 1)
+        else
+          return cmd
+
+      search(@prop("index"))
+
   Cypress.addUtilityCommand
     ## pause should indefinitely pause until the user
     ## presses a key or clicks in the UI to continue
-    # pause: ->
+    pause: (options = {}) ->
+      _.defaults options, {log: true}
+
+      if options.log
+        options._log = Cypress.Log.command({
+          snapshot: true
+          autoEnd: false
+        })
+
+      onResume = (fn, timeout) =>
+        @prop "onResume", (resumeAll) ->
+          if resumeAll
+            ## nuke onPause only if
+            ## we've been told to resume
+            ## all the commands, else
+            ## pause on the very next one
+            @prop("onPaused", null)
+
+            if options.log
+              options._log.end()
+
+          ## restore timeout
+          @_timeout(timeout)
+
+          ## invoke callback fn
+          fn.call(@)
+
+      @prop "onPaused", (fn) ->
+        next = @getNextQueuedCommand()
+
+        if next and @isCommandFromMocha(next)
+          return fn.call(@)
+
+        Cypress.trigger("paused", next?.get("name"))
+
+        ## backup the current timeout
+        timeout = @_timeout()
+
+        ## clear out the current timeout
+        @_clearTimeout()
+
+        ## set onResume function
+        onResume(fn, timeout)
+
+      return @prop("subject")
 
     inspect: ->
       ## bug fix due to 3rd party libs like
@@ -14,7 +98,15 @@ $Cypress.register "Debugging", (Cypress, _, $) ->
       @prop("inspect", true)
       return null
 
-    debug: ->
+    debug: (options = {}) ->
+      _.defaults options, {log: true}
+
+      if options.log
+        options._log = Cypress.Log.command({
+          snapshot: true
+          end: true
+        })
+
       console.log "\n%c------------------------Cypress Command Info------------------------", "font-weight: bold;"
       console.log "Runnable:           ", @private("runnable")
       console.log "Subject:            ", @prop("subject")
@@ -24,4 +116,4 @@ $Cypress.register "Debugging", (Cypress, _, $) ->
       debugger
 
       ## return the subject
-      cy.prop("subject")
+      @prop("subject")

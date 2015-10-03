@@ -86,7 +86,7 @@
 
     commandExit: (command) ->
       ## bail if we have no originalBody
-      return if not body = @state.originalBody
+      return @trigger("clear:revert:message") if not body = @state.originalBody
 
       ## backup the current command's detachedId
       previousDetachedId = @state.detachedId

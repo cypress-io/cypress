@@ -19,7 +19,7 @@
   ],
   "dependencies": {
     "labjs": "*",
-    "bootstrap-sass-official": "3.2.0+1",
+    "bootstrap-sass-official": "3.3.5",
     "font-awesome": "~4.2.0",
     "backbone": "~1.1.2",
     "spin.js": "~2.0.1",
@@ -47,7 +47,8 @@
     "bootstrap": "~3.3.5",
     "kendo-ui": "~2015.1.616",
     "jquery": "~2.1.4",
-    "card": "1.0.2"
+    "card": "1.0.2",
+    "blob-util": "git://github.com/nolanlawson/blob-util#14d8a70f5737bdaf9012fefb0554c30c05cfd583"
   },
   "resolutions": {
     "jquery": "2.1.4",

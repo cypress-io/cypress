@@ -14,6 +14,9 @@ module.exports = (app) ->
   app.get "/__cypress/files", (req, res) ->
     controllers.files.handleFiles(req, res)
 
+  app.get "/__cypress/builds", (req, res, next) ->
+    controllers.builds.handleBuilds(req, res, next)
+
   ## routing for the dynamic iframe html
   app.get "/__cypress/iframes/*", (req, res) ->
     controllers.files.handleIframe(req, res)
@@ -22,6 +25,11 @@ module.exports = (app) ->
   ## to generate the id's for the test files
   app.get "/__cypress/id_generator", (req, res, next) ->
     res.sendFile path.join(process.cwd(), "lib", "public", "id_generator.html"), {etag: false}
+
+  app.get "/__root/*", (req, res, next) ->
+    file = path.join(app.get("cypress").projectRoot, req.params[0])
+
+    res.sendFile(file, {etag: false})
 
   ## we've namespaced the initial sending down of our cypress
   ## app as '__'  this route shouldn't ever be used by servers

@@ -27,6 +27,26 @@ describe "$Cypress.Cy Aliasing Commands", ->
       @cy.get("#list li").eq(0).as("firstLi").then ($li) ->
         expect($li).to.match li
 
+    context "DOM subjects", ->
+      beforeEach ->
+        ## set the jquery path back to our
+        ## remote window
+        @Cypress.option "jQuery", @$iframe.prop("contentWindow").$
+
+        @remoteWindow = @cy.private("window")
+
+      afterEach ->
+        ## restore back to the global $
+        @Cypress.option "jQuery", $
+
+      it "assigns the remote jquery instance", ->
+        @remoteWindow.$.fn.foo = fn = ->
+
+        @cy
+          .get("input:first").as("input").then ($input) ->
+            expect(@input).to.be.instanceof @remoteWindow.$
+            expect(@input).to.have.property "foo", fn
+
     context "#assign", ->
       beforeEach ->
         @cy.noop("foo").as("foo")

@@ -30,5 +30,11 @@ describe "Routes Util", ->
   it "projectKeys", ->
     expect(Routes.projectKeys("123-foo")).to.eq "http://localhost:1234/projects/123-foo/keys"
 
+  it "projectCi", ->
+    expect(Routes.projectCi("123-foo")).to.eq "http://localhost:1234/projects/123-foo/ci"
+
   it "ci", ->
     expect(Routes.ci("123-foo")).to.eq "http://localhost:1234/ci/123-foo"
+
+  it "tests", ->
+    expect(Routes.tests("123-guid")).to.eq "http://localhost:1234/tests/123-guid"

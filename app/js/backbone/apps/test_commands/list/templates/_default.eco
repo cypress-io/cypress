@@ -20,7 +20,7 @@
   <span class="command-message">
     <% if @referencesAlias: %>
       <% for alias in [].concat(@referencesAlias): %>
-        <span class="command-alias <%= @aliasType %>" title="Found an alias for: '<%= alias %>'">@<%= alias %></span>
+        <span class="command-alias <%= @aliasType %>" data-toggle="tooltip" title="Found an alias for: '<%= alias %>'">@<%= alias %></span>
       <% end %>
     <% else: %>
       <span data-js="message"><%= @messageTruncated %></span>
@@ -28,18 +28,18 @@
   </span>
   <span class="command-controls">
     <% if @alias: %>
-      <span class="command-alias <%= @aliasType %>" title="<%= @message %> aliased as: '<%= @alias %>'">
+      <span class="command-alias <%= @aliasType %>" data-toggle="tooltip" title="<%= @message %> aliased as: '<%= @alias %>'">
         <%= @alias %>
       </span>
     <% end %>
     <% if not @visible: %>
-      <i class="fa fa-eye-slash" title="<%= @visibleMessage %>"></i>
+      <i class="fa fa-eye-slash" data-toggle="tooltip" title="<%= @visibleMessage %>"></i>
     <% end %>
     <% if @numElements is 0: %>
-      <label data-js="numElements" title="<%= @numElements %> matched elements" class="label label-danger"><%= @numElements %></label>
+      <label data-js="numElements" data-toggle="tooltip" title="<%= @numElements %> matched elements" class="label label-danger"><%= @numElements %></label>
     <% end %>
     <% if @numElements > 1: %>
-      <label data-js="numElements" title="<%= @numElements %> matched elements" class="label label-primary"><%= @numElements %></label>
+      <label data-js="numElements" data-toggle="tooltip" title="<%= @numElements %> matched elements" class="label label-primary"><%= @numElements %></label>
     <% end %>
     <!-- <i class="fa fa-pause"></i> -->
   </span>

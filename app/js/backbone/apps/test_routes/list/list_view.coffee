@@ -3,8 +3,21 @@
   class List.Route extends App.Views.ItemView
     template: "test_routes/list/_route"
 
+    ui:
+      tooltips: "[data-toggle='tooltip']"
+
     modelEvents:
       "change:numResponses" : "render"
+
+    onBeforeRender: ->
+      if _.isObject(@ui.tooltips) and @ui.tooltips.length
+        @ui.tooltips.tooltip("destroy")
+
+    onRender: ->
+      @ui.tooltips.tooltip({container: "body"})
+
+    onDestroy: ->
+      @ui.tooltips.tooltip("destroy")
 
   class List.Routes extends App.Views.CompositeView
     template: "test_routes/list/routes"

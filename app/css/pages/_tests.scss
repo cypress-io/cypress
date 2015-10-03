@@ -1,0 +1,162 @@
+#tests-list-page {
+
+  .well {
+    margin: 20px;
+  }
+
+  .outer-files-container {
+    @include list-columns(100%);
+    margin-bottom: 0;
+  }
+
+  .all-files-container {
+    margin-top: 20px;
+    margin-bottom: 40px;
+  }
+
+  .file.all-tests {
+    position: absolute;
+    top: 68px;
+    left: 100px;
+    border-bottom: 1px solid #3861bf;
+
+    &>div, &>div>div {
+      padding: 0;
+    }
+
+    i {
+      @extend .#{$fa-css-prefix}-play;
+    }
+  }
+
+  .file:not(.all-tests), .folder {
+    color: #69727e;
+
+    i {
+      color: #476fc9;
+      margin-right: 5px;
+    }
+  }
+
+  .folder {
+    font-weight: bold;
+    font-size: 14px;
+    color: #111;
+
+    i {
+      font-size: 14px;
+    }
+
+    &>div>div {
+      padding-bottom: 0;
+    }
+  }
+
+
+  .file:not(.all-tests) {
+    font-weight: 300;
+    border-bottom: 1px dotted #eeeeee;
+
+    i {
+      font-size: 12px;
+    }
+
+    &:hover {
+      background-color: #f3f7ff;
+      cursor: pointer;
+    }
+  }
+
+  .list-as-table>.folder {
+
+    &>div>div:last-child {
+      padding: 0;
+    }
+  }
+
+  .list-as-table>.file:not(.all-tests) {
+
+    &.all-tests {
+      &>div:first-child {
+
+      }
+
+      &>div:last-child {
+        display: none;
+      }
+    }
+
+    &:last-child {
+      border-bottom: 0;
+    }
+
+    &>div:first-child {
+      @include responsive-width(75%);
+    }
+
+    &>div:last-child {
+      @include responsive-width(25%);
+      text-align: right;
+      color: #bdc0c5;
+    }
+  }
+
+  .files-list-header {
+    @include list-columns(75%, 25%);
+
+    &>li>div:last-child {
+      text-align: right;
+    }
+
+  }
+
+
+  // need to refactor to be calculated using javascript
+  .outer-files-container.list-as-table>.folder,
+  .outer-files-container.list-as-table>.file:not(.all-tests) {
+
+    &>div>div:first-child {
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+
+    &>div>div:last-child {
+
+      &>.list-as-table>.folder,
+      &>.list-as-table>.file {
+
+        &>div>div:first-child {
+          padding-left: 40px;
+        }
+
+        &>div>div:last-child {
+
+          &>.list-as-table>.folder,
+          &>.list-as-table>.file {
+
+            &>div>div:first-child {
+              padding-left: 60px;
+            }
+
+            &>div>div:last-child {
+
+              &>.list-as-table>.folder,
+              &>.list-as-table>.file {
+
+                &>div>div:first-child {
+                  padding-left: 80px;
+                }
+
+              }
+
+            }
+
+          }
+
+        }
+
+      }
+
+    }
+  }
+}

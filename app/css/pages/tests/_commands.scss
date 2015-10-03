@@ -144,6 +144,10 @@
       border-radius: 5px;
     }
 
+    .label-default {
+      background-color: #777;
+    }
+
     .command-alias {
       border-radius: 10px;
       color: #777888;
@@ -254,7 +258,7 @@
       span {
         border-radius: 2px;
         padding: 0 3px;
-        font-size: 10px;
+        font-size: 11px;
         display: inline-block;
         height: 14px;
         line-height: 16px;
@@ -265,8 +269,6 @@
 
       strong {
         font-weight: 600;
-        font-family: Menlo, monospace;
-        font-size: 95%;
         margin: 0 3px;
       }
     }

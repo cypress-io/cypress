@@ -40,7 +40,9 @@ $Cypress.register "Aliasing", (Cypress, _, $) ->
 
       @prop("aliases", aliases)
 
+      remoteSubject = @getRemotejQueryInstance(subject)
+
       ## assign the subject to our runnable ctx
-      @assign(str, subject)
+      @assign(str, remoteSubject ? subject)
 
       return subject

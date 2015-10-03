@@ -1,15 +1,44 @@
-.ecl-main-content {
+.cy-main-content {
   background-color: #F6F6F6;
   color: inherit;
   font-size: 13px;
   font-weight: 200;
   line-height: 21px;
-  padding: 0 30px;
-  margin-top: 0;
-  float: left;
-  width: 100%;
+  margin: 50px auto 0;
+  max-width: 1170px;
+  min-width: $screen-xs;
+
+  .wrapper {
+    @media (min-width: 0) and (max-width: 1400px) {
+      margin: 0 30px;
+    }
+  }
+
+  .block-panel {
+    padding: 0;
+  }
 
   h1 {
-    line-height: 1.3em;
+    color: #262a2f;
+    font-size: 22px;
+    font-weight: bold;
+    margin-top: 0;
   }
+
+  h2 {
+    color: #69727e;
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  h3 {
+    color: #4f4f4f;
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  hr {
+    clear: both;
+  }
+
 }

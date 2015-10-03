@@ -186,6 +186,18 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
       command = @commands.at(index)
 
+      ## if the command should be skipped
+      ## just bail and increment index
+      ## and set the subject
+      ## TODO DRY THIS LOGIC UP
+      if command and command.get("skip")
+        ## must set prev + next since other
+        ## operations depend on this state being correct
+        command.set({prev: @commands.at(index - 1), next: @commands.at(index + 1)})
+        @prop("index", index + 1)
+        @prop("subject", command.get("subject"))
+        return @run()
+
       runnable = @private("runnable")
 
       ## there are some edge cases where
@@ -244,7 +256,10 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
           @trigger "command:end", command
 
-          @defer @run
+          if fn = @prop("onPaused")
+            fn.call(@, @run)
+          else
+            @defer @run
 
           ## must have this empty return here else we end up creating
           ## additional .then callbacks due to bluebird chaining
@@ -481,12 +496,6 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
         ## or all the elements in the collection
         _.all $el.toArray(), contains
 
-    _getRemoteJQuery: ->
-      if opt = @Cypress.option("jQuery")
-        return opt
-      else
-        @private("window").$
-
     _checkForNewChain: (chainerId) ->
       ## dont do anything if this isnt even defined
       return if _.isUndefined(chainerId)
@@ -580,6 +589,8 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
     Promise: Promise
 
     moment: window.moment
+
+    Blob: window.blobUtil
 
     _.extend $Cy.prototype.$, _($).pick("Event", "Deferred", "ajax", "get", "getJSON", "getScript", "post", "when")
 

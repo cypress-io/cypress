@@ -1,5 +1,5 @@
 #test-container {
-  background-color: #eee;
+  background-color: #f8f8f8;
   position: absolute;
   left: 0;
   bottom: 0;
@@ -14,7 +14,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: 0;
+  top: 47px;
   bottom: 0;
 
   #specs-container {
@@ -41,25 +41,25 @@
     }
 
   }
-.keyboard-shortcuts-helper {
-  // this needs to be styled to work like
-  // a sticky footer
-  color: #aaa;
-  text-align: center;
-  position: absolute;
-  bottom: 5px;
-  left: 25%;
 
-  mark {
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 0 5px;
-    display: inline-block;
-    color: #888;
+  .keyboard-shortcuts-helper {
+    // this needs to be styled to work like
+    // a sticky footer
+    color: #aaa;
+    text-align: center;
+    position: absolute;
+    bottom: 5px;
+    left: 25%;
+
+    mark {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 0 5px;
+      display: inline-block;
+      color: #888;
+    }
   }
-
-}
 
   ul.runnables {
     padding-left: 0;
@@ -67,8 +67,8 @@
 
     li.runnable {
       width: 100%;
-      color: #6B6C6B;
-      background-color: #fdfdfd;
+      color: #6c6c6c;
+      background-color: #fff;
       overflow: auto;
       line-height: 18px;
       padding-left: 0;
@@ -78,6 +78,10 @@
         position: relative;
         overflow: hidden;
         border-left: 10px solid transparent;
+
+        .test-title, .suite-title {
+          font-size: 12.5px;
+        }
 
 
         .runnable-content-region {
@@ -91,8 +95,9 @@
             overflow: hidden;
 
             .suite-title {
-              color: #6B6C6B;
-              font-weight: 600;
+              color: #111;
+              font-weight: 800;
+              font-size: 13px;
             }
           }
 

@@ -1,8 +1,14 @@
 <div id="analytics">
-  <div class="ecl-main-content">
-    <h2>Analytics</h2>
-    <div class="block-panel">
-      Coming Soon
+  <div class="cy-main-content">
+    <div class="wrapper">
+      <div class="block-panel">
+        <div class="title-bar">
+          <h1>Analytics</h1>
+        </div>
+        <div class="analytics-content">
+          Coming Soon
+        </div>
+      </div>
     </div>
   </div>
 </div>

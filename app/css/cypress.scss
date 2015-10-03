@@ -1,6 +1,7 @@
 // @import "bootstrap-sass-official/assets/stylesheets/bootstrap";
 
 @import "core/variables";
+@import "core/mixins";
 
 // Core variables and mixins
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/variables";
@@ -10,17 +11,22 @@
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/normalize";
 
 // Core CSS
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/buttons";
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/code";
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/dropdowns";
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/forms";
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/grid";
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/labels";
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/navs";
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/progress-bars";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/scaffolding";
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/tables";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/type";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/code";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/grid";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/tables";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/forms";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/buttons";
+
+// Components
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/dropdowns";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/button-groups";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/navs";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/navbar";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/labels";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/progress-bars";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/tooltip";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/wells";
 
 // Utilities
@@ -30,20 +36,28 @@
 @import "font-awesome/scss/font-awesome";
 
 // Reusable Elements
-@import "elements/general";
-@import "elements/buttons";
-@import "elements/main-content";
-@import "elements/sidebar";
-@import "elements/text";
 @import "elements/block-panels";
+@import "elements/buttons";
+@import "elements/dropdown-menus";
+@import "elements/forms";
+@import "elements/general";
+@import "elements/labels";
+@import "elements/lists";
+@import "elements/main-content";
+@import "elements/nav";
 @import "elements/panels";
 @import "elements/scroll-bars";
+@import "elements/text";
+@import "elements/title-bars";
 
 // Independent Pages
+@import "pages/analytics";
+@import "pages/builds";
+@import "pages/tests";
 @import "pages/tests/commands";
 @import "pages/tests/iframe";
 @import "pages/tests/instruments";
 @import "pages/tests/jobs";
 @import "pages/tests/runnables";
 @import "pages/tests/stats";
-@import "pages/organize";
+@import "pages/settings";
