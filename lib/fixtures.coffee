@@ -10,9 +10,7 @@ formatter = require("jsonlint/lib/formatter").formatter
 
 fs = Promise.promisifyAll(fs)
 
-extensions = ".json .js .coffee .html .txt .png .jpg .jpeg .gif .tif .tiff".split(" ")
-
-## TODO: add image conversion to base64
+extensions = ".json .js .coffee .html .txt .png .jpg .jpeg .gif .tif .tiff .zip".split(" ")
 
 class Fixtures
   constructor: (app) ->
@@ -69,8 +67,8 @@ class Fixtures
       when ".coffee" then @parseCoffee(p, fixture)
       when ".html"   then @parseHtml(p, fixture)
       when ".txt"    then @parseText(p, fixture)
-      when ".png", ".jpg", ".jpeg", ".gif", ".tif", ".tiff"
-        @parseImage(p, fixture)
+      when ".png", ".jpg", ".jpeg", ".gif", ".tif", ".tiff", ".zip"
+        @parseBase64(p, fixture)
       else
         throw new Error("Invalid fixture extension: '#{ext}'. Acceptable file extensions are: #{extensions.join(", ")}")
 
@@ -139,7 +137,7 @@ class Fixtures
     fs.readFileAsync(p, "utf8")
       .bind(@)
 
-  parseImage: (p, fixture) ->
+  parseBase64: (p, fixture) ->
     fs.readFileAsync(p, "base64")
       .bind(@)
 
