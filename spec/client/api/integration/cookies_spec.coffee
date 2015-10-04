@@ -7,5 +7,5 @@ describe "Cookies Integration Tests", ->
 
       ## this navigates us to a new page so
       ## we should be setting the initial cookie
-      @cy.inspect().get("a").click().then ->
+      @cy.get("a").click().then ->
         expect(Cookies.get("__cypress.initial")).to.eq("true")

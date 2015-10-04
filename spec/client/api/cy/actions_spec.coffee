@@ -1702,7 +1702,7 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(err.message).to.include "Cannot call .type() on this element because it is being covered by another element:"
           done()
 
-        @cy.inspect().get("#input-covered-in-span").type("foo")
+        @cy.get("#input-covered-in-span").type("foo")
 
       it "throws when special characters dont exist", (done) ->
         logs = []

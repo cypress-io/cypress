@@ -83,7 +83,7 @@ describe "$Cypress.Cy Angular Commands", ->
           if options.total + (options.interval * 4) > options._runnableTimeout
             @cy.$("body").append(missingLi)
 
-        @cy.inspect().ng("repeater", "li in lis").then ($li) ->
+        @cy.ng("repeater", "li in lis").then ($li) ->
           expect($li).to.match missingLi
 
       describe "errors", ->
@@ -169,7 +169,7 @@ describe "$Cypress.Cy Angular Commands", ->
 
         ## we want to make sure that the ng promises do not continue
         ## to retry after the first one resolves
-        @cy.inspect().ng("model", "missing-input").then ->
+        @cy.ng("model", "missing-input").then ->
           _retry.reset()
         .wait(100).then ->
           expect(_retry.callCount).to.eq 0

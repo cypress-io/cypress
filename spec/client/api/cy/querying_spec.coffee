@@ -269,7 +269,7 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy.$("body").append(missingEl)
       , 300
 
-      @cy.inspect().get("#missing-el", {timeout: 10000})
+      @cy.get("#missing-el", {timeout: 10000})
 
     it "does not factor in the total time the test has been running", ->
       missingEl = $("<div />", id: "missing-el")

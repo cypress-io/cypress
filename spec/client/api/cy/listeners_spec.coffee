@@ -48,7 +48,7 @@ describe "$Cypress.Cy Listeners Extensions", ->
       it "sets isReady to false", ->
         ## when we click the a it should synchronously fire
         ## the beforeunload event which we then set isReady to false
-        @cy.inspect().get("a#change-page").click().then ->
+        @cy.get("a#change-page").click().then ->
           expect(@isReady).to.be.calledWith false, "beforeunload"
 
       it "does not set isReady if beforeunload has a return value", ->
@@ -57,7 +57,7 @@ describe "$Cypress.Cy Listeners Extensions", ->
 
         ## when we click the a it should synchronously fire
         ## the beforeunload event which we then set isReady to false
-        @cy.inspect().get("a#change-page").click().then ->
+        @cy.get("a#change-page").click().then ->
           expect(@isReady).not.to.be.calledWith false
 
       it "sets initial cookies", ->

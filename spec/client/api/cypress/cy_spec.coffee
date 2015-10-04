@@ -427,7 +427,6 @@ describe "$Cypress.Cy API", ->
             @cy.chain().url()
 
           @cy
-            .inspect()
             .nested()
             .noop()
             .then ->
@@ -449,7 +448,7 @@ describe "$Cypress.Cy API", ->
 
       it "queues in the correct order", ->
         @setup =>
-          expect(@cy.commands.names()).to.deep.eq ["inspect", "nested", "url", "noop", "then", "then"]
+          expect(@cy.commands.names()).to.deep.eq ["nested", "url", "noop", "then", "then"]
 
       it "nested command should reference url as next property", ->
         @setup =>
@@ -470,10 +469,9 @@ describe "$Cypress.Cy API", ->
           @cy.noop()
 
         @cy
-          .inspect()
           .nest1()
           .then ->
-            expect(@cy.commands.names()).to.deep.eq ["inspect", "nest1", "nest2", "noop", "then", "then"]
+            expect(@cy.commands.names()).to.deep.eq ["nest1", "nest2", "noop", "then", "then"]
 
       it "works with multiple nested commands", ->
         @Cypress.addParentCommand "multiple", =>
@@ -483,10 +481,9 @@ describe "$Cypress.Cy API", ->
             .noop()
 
         @cy
-          .inspect()
           .multiple()
           .then ->
-            expect(@cy.commands.names()).to.deep.eq ["inspect", "multiple", "url", "location", "noop", "then", "then"]
+            expect(@cy.commands.names()).to.deep.eq ["multiple", "url", "location", "noop", "then", "then"]
 
     describe "cancelling promises", ->
       it "cancels via a delay", (done) ->
