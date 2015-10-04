@@ -320,8 +320,6 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       promise.cancellable().then =>
         @trigger "invoke:start", command
 
-        @log command
-
         @prop "nestedIndex", @prop("index")
 
         ## allow the invoked arguments to be overridden by
