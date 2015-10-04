@@ -60,8 +60,11 @@ describe "Iframe Entity", ->
       expect(setViewport).to.be.calledWithExactly({viewportWidth: 500, viewportHeight: 800})
 
   context "#commandExit", ->
-    it "is noop without originalBody", ->
-      expect(@iframe.commandExit()).to.be.undefined
+    it "triggers 'clear:revert:message' without originalBody", ->
+      trigger = @sandbox.spy @iframe, "trigger"
+
+      expect(@iframe.commandExit()).to.eq(@iframe)
+      expect(trigger).to.be.calledWith("clear:revert:message")
 
   context "#commandEnter", ->
     beforeEach ->

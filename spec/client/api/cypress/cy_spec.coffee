@@ -192,6 +192,10 @@ describe "$Cypress.Cy API", ->
         expect(@cy.moment().toJSON()).to.eq(moment().toJSON())
 
     describe "#Blob", ->
+      beforeEach ->
+        @cy = $Cypress.Cy.create(@Cypress, @specWindow)
+        null
+
       it "attaches blob utils", ->
         expect(@cy).to.have.property("Blob")
         expect(@cy.Blob).to.have.property("dataURLToBlob")
