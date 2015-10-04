@@ -31,8 +31,6 @@ do ($Cypress, _, Promise) ->
 
       ## if our total exceeds the timeout OR the total + the interval
       ## exceed the runnables timeout, then bail
-      @log "Retrying after: #{options.interval}ms. Total: #{total}, Timeout At: #{options._runnableTimeout}", "warning"
-
       if total + options.interval >= options._runnableTimeout
         ## snapshot the DOM since we are bailing
         ## so the user can see the state we're in
@@ -56,8 +54,6 @@ do ($Cypress, _, Promise) ->
 
       Promise.delay(options.interval).cancellable().then =>
         @trigger "retry", options
-
-        @log {name: "retry(#{options.name})", args: fn}
 
         ## invoke the passed in retry fn
         fn.call(@)

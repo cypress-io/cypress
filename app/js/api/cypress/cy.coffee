@@ -115,11 +115,6 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       ## in memory longer than we want them
       @commands.reset()
 
-      ## remove any outstanding groups
-      ## for any open hooks and runnables
-      @group(false)
-      @group(false)
-
       ## remove any event listeners
       @off()
 
@@ -154,7 +149,6 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
         ## so we dont accidently set isReady
         ## back to false in between commands
         ## which are async
-        @log "Ready due to: #{event}", "success"
         @prop("recentlyReady", true)
 
         if ready = @prop("ready")
@@ -174,8 +168,6 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       return if @prop("ready") and @prop("ready").promise.isPending()
 
       ## else set it to a deferred object
-      @log "No longer ready due to: #{event}", "warning"
-
       @trigger "ready", false
 
       @prop "ready", Promise.pending()
@@ -199,11 +191,6 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
         return @run()
 
       runnable = @private("runnable")
-
-      ## there are some edge cases where
-      ## cy is run without a command and
-      ## runnable is undefined
-      @group(runnable?.group)
 
       ## if we're at the very end
       if not command
@@ -428,9 +415,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
         return @prop("subject")
 
     cancel: (err) ->
-      command = @prop("current")
-      @log {name: "Cancelled: #{command.get('name')}", args: err.message}, "danger"
-      @trigger "cancel", command
+      @trigger "cancel", @prop("current")
 
     enqueue: (key, fn, args, type, chainerId) ->
       @clearTimeout @prop("runId")
@@ -528,28 +513,6 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
     hook: (name) ->
       @private("hookName", name)
-
-      return if not @prop("inspect")
-
-      return console.groupEnd() if not name
-
-      console.group(name)
-
-    group: (name) ->
-      ## bail if we're not in inspect mode
-      return if not @prop("inspect") or _.isUndefined(name)
-
-      ## end the group if name is explicitly false
-      return console.groupEnd() if name is false
-
-      ## bail if we already have a _group set
-      return if @_group
-
-      ## set the _group
-      @_group = name
-
-      ## start a group by the name
-      console.group(name)
 
     ## returns the current chain so you can continue
     ## chaining off of cy without breaking the current

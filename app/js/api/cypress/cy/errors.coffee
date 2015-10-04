@@ -56,7 +56,6 @@ do ($Cypress, _) ->
 
     fail: (err) ->
       current = @prop("current")
-      @log {name: "Failed: #{current.get('name')}", args: err.message}, "danger" if current
 
       ## allow for our own custom onFail function
       if err.onFail

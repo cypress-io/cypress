@@ -89,15 +89,6 @@ $Cypress.register "Debugging", (Cypress, _, $) ->
 
       return @prop("subject")
 
-    inspect: ->
-      ## bug fix due to 3rd party libs like
-      ## chai using inspect function for
-      ## special display
-      # return "" if not @prop
-
-      @prop("inspect", true)
-      return null
-
     debug: (options = {}) ->
       _.defaults options, {log: true}
 
