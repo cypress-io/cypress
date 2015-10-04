@@ -5,7 +5,7 @@
   border-bottom: 1px solid #ddd;
   width: 100%;
   z-index: 1;
-  box-shadow: 0 1px 1px #eee;
+  // box-shadow: 0 1px 1px #eee;
 
   #stats-container {
     padding: 0;
@@ -127,10 +127,9 @@
   //   }
 
     button {
-      line-height: 24px;
+      line-height: 26px;
       // background-color: transparent;
-      border-color: transparent;
-      border-right: 1px solid #ddd;
+      border: transparent;
       border-radius: 0;
       background-color: #f8f8f8;
       outline: 0;
