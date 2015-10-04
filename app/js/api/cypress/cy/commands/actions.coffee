@@ -212,6 +212,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         error: true
         log: true
         verify: true
+        force: false
 
       @ensureDom(options.$el, "blur")
 
@@ -227,12 +228,12 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         @throwErr(".blur() can only be called on a single element! Your subject contained #{num} elements!", options._log)
 
       @command("focused", {log: false, verify: false}).then ($focused) =>
-        if not $focused
+        if options.force isnt true and not $focused
           return if options.error is false
 
           @throwErr(".blur() can only be called when there is a currently focused element.", options._log)
 
-        if options.$el.get(0) isnt $focused.get(0)
+        if options.force isnt true and options.$el.get(0) isnt $focused.get(0)
           return if options.error is false
 
           node = Cypress.Utils.stringifyElement($focused)

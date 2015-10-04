@@ -3342,6 +3342,20 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("input:first").focus().blur()
 
+    it "can force blurring on a non-focused element", (done) ->
+      @cy.$("input:first").blur -> done()
+
+      @cy
+        .get("input:last").focus()
+        .get("input:first").blur({force: true})
+
+    it "can force blurring when there is no focused element", (done) ->
+      @cy.$("input:first").blur -> done()
+
+      @cy
+        .focused().should("not.exist")
+        .get("input:first").blur({force: true})
+
     describe "assertion verification", ->
       beforeEach ->
         @allowErrors()
