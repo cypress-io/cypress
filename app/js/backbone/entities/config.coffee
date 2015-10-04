@@ -4,7 +4,7 @@
 
   class Entities.Config extends Entities.Model
     defaults: ->
-      collapsed:  @getConfig("collapsed")
+      collapsed:  true#@getConfig("collapsed")
       panels:     @getConfig("panels")
       panelWidth: @getConfig("panelWidth")
 

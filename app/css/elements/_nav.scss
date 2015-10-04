@@ -77,6 +77,10 @@
       box-shadow: 0 1px 0 #2A2C31 inset;
       overflow: hidden;
 
+      img {
+        width: 32px; height: 32px;
+      }
+
       .logo {
         text-align: left;
         display: inline-block;

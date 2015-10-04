@@ -99,6 +99,7 @@ gulp.task "nw:img", ["nw:icns", "nw:tray", "nw:logo"]
 gulp.task "nw:logo", ->
   gulp.src("nw/img/cypress.iconset/**/*")
     .pipe gulp.dest "nw/public/img/cypress.iconset"
+    .pipe gulp.dest "lib/public/img/cypress.iconset"
 
 gulp.task "nw:tray", ->
   gulp.src("nw/img/tray/**/*")

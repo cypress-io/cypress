@@ -1,9 +1,7 @@
 <div class="collapse-container">
   <div class="pull-left logo">Cypress</div>
   <div class="pull-right">
-    <button class="btn btn-default" id="sidebar-collapse">
-      <i></i>
-    </button>
+    <img src="/__cypress/static/img/cypress.iconset/icon_128x128@2x.png" />
   </div>
 </div>
 <ul class="cy-vnavigation"></ul>
