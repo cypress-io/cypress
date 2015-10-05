@@ -3475,6 +3475,11 @@ describe "$Cypress.Cy Actions Commands", ->
             expect(logs).to.have.length(3)
             expect(names).to.deep.eq ["get", "focus", "blur"]
 
+      it "logs delta options for {force: true}", ->
+        @cy
+          .get("input:first").blur({force: true}).then ->
+            expect(@log.get("message")).to.eq("{force: true}")
+
       it "#onConsole", ->
         @cy.get("input:first").focus().blur().then ($input) ->
           expect(@log.attributes.onConsole()).to.deep.eq {
