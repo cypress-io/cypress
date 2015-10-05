@@ -500,7 +500,14 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
               if options._log
                 ## because we snapshot and output a command per click
                 ## we need to manually snapshot + end them
-                options._log.set({coords: coords, onConsole: onConsole}).snapshot().end()
+                options._log.set({coords: coords, onConsole: onConsole})
+
+              ## we need to split this up because we want the coordinates
+              ## to mutate our passed in options._log but we dont necessary
+              ## want to snapshot and end our command if we're a different
+              ## action like (cy.type) and we're borrowing the click action
+              if options._log and options.log
+                options._log.snapshot().end()
             ## need to return null here to prevent
             ## chaining thenable promises
             .return(null)

@@ -1539,6 +1539,34 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get(":text:first").type("foo", {delay: 20}).then ->
           expect(@log.get("message")).to.eq "foo, {delay: 20}"
 
+      it "clones textarea value after the type happens", ->
+        expectToHaveValueAndCoords = =>
+          cmd = @cy.commands.findWhere({name: "type"})
+          log = cmd.get("logs")[0]
+          txt = log.get("snapshot").find("#comments")
+          expect(txt).to.have.value("foobarbaz")
+          expect(log.get("coords")).to.be.ok
+
+        @cy
+          .get("#comments").type("foobarbaz").then ($txt) ->
+            expectToHaveValueAndCoords()
+          .get("#comments").clear().type("onetwothree").then ->
+            expectToHaveValueAndCoords()
+
+      it "clones textarea value when textarea is focused first", ->
+        expectToHaveValueAndNoCoords = =>
+          cmd = @cy.commands.findWhere({name: "type"})
+          log = cmd.get("logs")[0]
+          txt = log.get("snapshot").find("#comments")
+          expect(txt).to.have.value("foobarbaz")
+          expect(log.get("coords")).not.to.be.ok
+
+        @cy
+          .get("#comments").focus().type("foobarbaz").then ($txt) ->
+            expectToHaveValueAndNoCoords()
+          .get("#comments").clear().type("onetwothree").then ->
+            expectToHaveValueAndNoCoords()
+
       it "logs only one type event", ->
         logs = []
         types = []
