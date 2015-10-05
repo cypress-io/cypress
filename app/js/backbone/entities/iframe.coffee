@@ -63,7 +63,7 @@
 
       marginLeft = (@get("containerWidth") / 2) - (width / 2)
 
-      heightHeight = 47
+      heightHeight = 46
       nudge = 10
 
       if (iframeActualHeight + height + nudge) >= @get("containerHeight")

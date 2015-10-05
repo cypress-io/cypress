@@ -103,7 +103,7 @@
       }
 
     calcWidth: (main, tests, container, headerHeight) ->
-      headerHeight = @$("header").outerHeight() ? 47
+      headerHeight = @$("header").outerHeight() ? 46
 
       width  = main.width() - tests.width()
       height = container.height() - headerHeight ## accounts for the header

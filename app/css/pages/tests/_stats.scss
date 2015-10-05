@@ -2,10 +2,10 @@
   background-color: #f8f8f8;
   overflow: visible;
   position: absolute;
-  border-bottom: 1px solid #ddd;
+  // border-bottom: 1px solid #ddd;
   width: 100%;
   z-index: 1;
-  // box-shadow: 0 1px 1px #eee;
+  box-shadow: 0 1px 3px #ccc;
 
   #stats-container {
     padding: 0;

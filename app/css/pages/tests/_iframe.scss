@@ -63,11 +63,12 @@
       line-height: 22px;
       padding: 10px;
       color: #888;
-      border-bottom: 1px solid #ddd;
+      // border-bottom: 1px solid #ddd;
       left: 0;
       right: 0;
       top: 0;
-      // box-shadow: 0 2px 3px #888;
+      box-shadow: 0 1px 5px #888;
+      z-index: 1;
 
       .iframe-menu {
         float: right;
