@@ -42,10 +42,10 @@
       body.find("script").remove()
       body.detach()
 
-    revertDom: (snapshot) ->
+    revertDom: (state) ->
       contents = @$remote.contents()
       contents.find("body").remove()
-      contents.find("html").append(snapshot)
+      contents.find("html").append(state)
 
     getZIndex: (el) ->
       if /^(auto|0)$/.test el.css("zIndex") then 1000 else Number el.css("zIndex")
@@ -277,43 +277,36 @@
 
   class Show.Snapshot extends App.Views.ItemView
     template: "test_iframe/show/_snapshot"
+    id: "iframe-message"
 
     ui:
       message: "#iframe-message"
 
     modelEvents:
-      "cannot:revert:dom"     : "cannotRevertDom"
-      "clear:revert:message"  : "clearRevertMsg"
-      "revert:dom"            : "revertDom"
-      "restore:dom"           : "restoreDom"
+      "message" : "render"
 
-    onShow: ->
+    initialize: ->
       @calcVisibility = _(@calcVisibility).chain().bind(@).throttle(50).value()
-
       $(window).on "resize", @calcVisibility
+
+    onRender: ->
+      @$el.removeAttr("class")
+
+      if klass = @model.get("messageClass")
+        @$el.addClass(klass)
+
+      @$el.toggle(!!@model.get("message"))
+
+      @calcVisibility()
 
     onDestroy: ->
       $(window).off "resize", @calcVisibility
 
     calcVisibility: ->
-      height = @ui.message.outerHeight()
-      width  = @ui.message.outerWidth()
+      height = @$el.outerHeight()
+      width  = @$el.outerWidth()
 
-      @ui.message.css @model.getMessageCssCoords(height, width)
-
-    cannotRevertDom: (init) ->
-      @ui.message.text("Cannot show Snapshot while tests are running").addClass("cannot-revert").show()
-      @calcVisibility()
-
-    clearRevertMsg: ->
-      @restoreDom()
-
-    restoreDom: ->
-      @ui.message.removeClass("cannot-revert").empty().hide()
-
-    revertDom: ->
-      @ui.message.text("DOM Snapshot").removeClass("cannot-revert").show()
-      @calcVisibility()
+      @$el.css @model.getMessageCssCoords(height, width)
 
   class Show.Header extends App.Views.ItemView
     template: "test_iframe/show/_header"

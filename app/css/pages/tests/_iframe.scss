@@ -54,6 +54,10 @@
       &.cannot-revert {
         background-color: $fail;
       }
+
+      .snapshot-name {
+        color: #F5A327;
+      }
     }
 
     header {

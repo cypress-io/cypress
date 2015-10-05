@@ -16,6 +16,10 @@
       viewportScale: ->
         Math.ceil(parseFloat(@attributes.viewportScale) * 100).toFixed(0)
 
+      messageFormatted: ->
+        msg = @get("message")
+        if @get("snapshotName") then msg + ":" else msg
+
     initialize: ->
       @state = {}
       @set @defaults()
@@ -107,8 +111,12 @@
         @get("running")
 
     commandExit: (command) ->
+      ## always clear the interval no matter what
+      ## since mouseleave will fire first
+      clearInterval(@state.intervalId)
+
       ## bail if we have no originalBody
-      return @trigger("clear:revert:message") if not body = @state.originalBody
+      return @unsetMessage() if not body = @state.originalBody
 
       ## backup the current command's detachedId
       previousDetachedId = @state.detachedId
@@ -125,22 +133,35 @@
         @restoreViewport()
         @restoreUrl()
         @trigger "restore:dom", body
+        @unsetMessage()
 
         @state.detachedId = null
 
     commandEnter: (command) ->
       ## dont revert, instead fire a completely different
       ## message if we are currently running
-      return @trigger("cannot:revert:dom") if @isRunning()
+      return @testsAreRunningErr() if @isRunning()
 
-      return @commandExit() if not snapshot = command.getSnapshot()
+      return @commandExit() if not snapshots = command.getSnapshots()
 
       if body = @state.originalBody
-        @revertDom(snapshot, command)
+        @revertDom(snapshots, command)
       else
         @trigger "detach:body", _.once (body) =>
           @state.originalBody = body
-          @revertDom(snapshot, command)
+          @revertDom(snapshots, command)
+
+    unsetMessage: ->
+      @set({message: null, messageClass: null, snapshotName: null})
+      @trigger("message")
+
+    testsAreRunningErr: ->
+      @set({
+        message: "Cannot show Snapshot while tests are running"
+        messageClass: "cannot-revert"
+      })
+
+      @trigger("message")
 
     restoreViewport: ->
       viewport = _(@state).pick("viewportWidth", "viewportHeight")
@@ -175,19 +196,42 @@
       @setUrl(url)
       @setRevertUrl()
 
-    revertDom: (snapshot, command) ->
+    revertDom: (snapshots, command) ->
       @revertViewport(command.pick("viewportWidth", "viewportHeight"))
 
       @revertUrl(command.get("url"))
 
-      @trigger "revert:dom", snapshot
-
       @state.detachedId = command.cid
 
-      if el = command.getEl()
-        options     = command.pick("coords", "highlightAttr", "scrollBy")
-        options.dom = snapshot
-        @trigger "highlight:el", el, options
+      clearInterval(@state.intervalId)
+
+      revert = (snapshot) =>
+        @set({
+          message: "DOM Snapshot"
+          messageClass: null
+          snapshotName: snapshot.name
+        })
+
+        @trigger("message")
+
+        @trigger "revert:dom", snapshot.state
+
+        if el = command.getEl()
+          options     = command.pick("coords", "highlightAttr", "scrollBy")
+          options.dom = snapshot.state
+          @trigger "highlight:el", el, options
+
+      if snapshots.length > 1
+        i = 0
+        @state.intervalId = setInterval ->
+          i += 1
+          if not snapshots[i]
+            i = 0
+
+          revert(snapshots[i])
+        , 800
+
+      revert(snapshots[0])
 
       return @
 

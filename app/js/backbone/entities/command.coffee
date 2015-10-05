@@ -103,11 +103,8 @@
     reduceMemory: ->
       @getLog().reduceMemory()
 
-    hasSnapshot: ->
-      !!@getLog().get("snapshot")
-
-    getSnapshot: ->
-      @getLog().get("snapshot")
+    getSnapshots: ->
+      @getLog().get("snapshots")
 
     getEl: ->
       @getLog().get("$el")
