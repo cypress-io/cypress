@@ -51,7 +51,7 @@
 
       @model.triggerCommandCallback("onRender", @$el)
 
-      @ui.tooltips.tooltip({container: "body"})
+      @ui.tooltips.tooltip({container: "body", delay: 250})
 
     clicked: (e) ->
       e.stopPropagation()
