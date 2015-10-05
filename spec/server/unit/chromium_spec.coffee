@@ -1,5 +1,6 @@
 require("../spec_helper")
 
+RP        = require("request-promise")
 Chromium  = require("#{root}lib/chromium")
 Routes    = require("#{root}lib/util/routes")
 
@@ -26,6 +27,14 @@ describe "Chromium", ->
     it "sets $Cypress.afterRun", ->
       @c.override({ci_guid: "123"})
       expect(@c.window.$Cypress.afterRun).to.be.a("function")
+
+    it "exits without posting when no ci_guid", ->
+      post = @sandbox.spy(RP, "post")
+
+      @c.override({ci_guid: undefined})
+      @c.window.$Cypress.afterRun(600, [{}]).then =>
+        expect(post).not.to.be.called
+        expect(@exit).to.be.calledOnce
 
     it "POSTS to /tests/:ci_guid with duration + tests", ->
       req = nock(Routes.api())

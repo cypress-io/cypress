@@ -333,16 +333,19 @@ SecretSauce.Chromium =
         # takeScreenshot ->
         process.exit(failures)
 
-      request.post({
-        url: @Routes.tests(ci_guid)
-        body: {
-          duration: duration
-          tests: tests
-        }
-        json: true
-      })
-      .then(exit)
-      .catch(exit)
+      if ci_guid
+        request.post({
+          url: @Routes.tests(ci_guid)
+          body: {
+            duration: duration
+            tests: tests
+          }
+          json: true
+        })
+        .then(exit)
+        .catch(exit)
+      else
+        Promise.try(exit)
 
 SecretSauce.Keys =
   _convertToId: (index) ->
