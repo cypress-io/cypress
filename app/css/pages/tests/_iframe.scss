@@ -244,6 +244,10 @@
         width: 100%;
         letter-spacing: .3px;
 
+        &.reverted {
+          background-color: #FFF4DE;
+        }
+
         &:focus {
           // the outline color on focus looks strange
           // because it doesn't respect input's

@@ -302,6 +302,7 @@
       "hide.bs.dropdown"        : "dropdownHide"
 
     modelEvents:
+      "change:revertUrl"      : "revertUrlChanged"
       "change:url"            : "urlChanged"
       "change:pageLoading"    : "pageLoadingChanged"
       "change:viewportWidth"  : "widthChanged"
@@ -320,6 +321,9 @@
 
     urlChanged: (model, value, options) ->
       @ui.url.val(value)
+
+    revertUrlChanged: (model, value, options) ->
+      @ui.url.toggleClass("reverted", value)
 
     pageLoadingChanged: (model, value, options) ->
       ## hides or shows the loading indicator

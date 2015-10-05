@@ -7,6 +7,7 @@
       version: null
       message: null
       running: false
+      revertUrl: false
       detachedId: null
       pageLoading: false
       viewportScale: 1
@@ -137,16 +138,21 @@
       ## reset our viewport to the command
       @setViewport(viewport)
 
+    setRevertUrl: (bool = true) ->
+      @set "revertUrl", bool
+
     restoreUrl: ->
       return if not url = @state.url
 
       @setUrl(url)
+      @setRevertUrl(false)
 
     revertUrl: (url) ->
       if not (@state.url)
         @state.url = @get("url")
 
       @setUrl(url)
+      @setRevertUrl()
 
     revertDom: (snapshot, command) ->
       @revertViewport(command.pick("viewportWidth", "viewportHeight"))
