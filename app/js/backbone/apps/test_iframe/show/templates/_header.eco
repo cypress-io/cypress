@@ -11,9 +11,9 @@
   <ul class="iframe-menu">
     <li>
       <div id="manual-browser-wrapper" class="dropdown pull-left">
-        <span id="chosen-manual-browser">
+        <!-- <span id="chosen-manual-browser">
           <em>No Browser Selected</em>
-        </span>
+        </span> -->
         <button data-toggle="dropdown" class="btn btn-link">
           <i class="fa fa-cog"></i>
           <i class="fa fa-caret-down"></i>
@@ -78,7 +78,6 @@
               (<span id="viewport-scale"><%= @viewportScale %></span>%)
             </span>
           </span>
-          <i class="fa fa-caret-down"></i>
         </button>
         <div id="viewport-wrapper" class="dropdown-menu dropdown-menu-right">
           <p>The <strong>viewport</strong> determines the width and height of your application. By default the viewport will be <strong>1000px</strong> by <strong>660px</strong> unless specified by a <code>cy.viewport</code> command.</p>
