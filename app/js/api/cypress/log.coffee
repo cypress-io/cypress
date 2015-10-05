@@ -154,8 +154,23 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
         attributes: @attributes
       }
 
-    snapshot: ->
-      @set "snapshot", @Cypress.createSnapshot @get("$el")
+    snapshot: (options = {}) ->
+      _.defaults options,
+        multiple: false
+        name: null
+        at: null
+
+      obj = {name: options.name, state: @Cypress.createSnapshot @get("$el")}
+
+      if options.multiple
+        snapshots = @get("snapshots") ? []
+
+        ## insert at index 'at' or whatever is the next position
+        snapshots[options.at or snapshots.length] = obj
+      else
+        snapshots = [obj]
+
+      @set "snapshots", snapshots
 
       return @
 
@@ -255,7 +270,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
             Error: _this.getError(err)
 
         ## add note if no snapshot exists on command instruments
-        if _this.get("instrument") is "command" and not @snapshot
+        if _this.get("instrument") is "command" and not @snapshots
           consoleObj.Snapshot = "The snapshot is missing. Displaying current state of the DOM."
         else
           delete consoleObj.Snapshot

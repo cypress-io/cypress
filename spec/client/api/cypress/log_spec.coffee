@@ -203,6 +203,41 @@ describe "$Cypress.Log API", ->
         @interface.off "foo"
         expect(@log._events).to.be.empty
 
+    describe "#snapshot", ->
+      beforeEach ->
+        @sandbox.stub(@Cypress, "createSnapshot").returns({})
+
+      it "can set multiple snapshots", ->
+        @log.snapshot({multiple: true})
+        @log.snapshot({multiple: true})
+
+        expect(@log.get("snapshots").length).to.eq(2)
+
+      it "can name the snapshot", ->
+        @log.snapshot({name: "logging in"})
+        expect(@log.get("snapshots").length).to.eq(1)
+        expect(@log.get("snapshots")[0].name).to.eq("logging in")
+
+      it "can set multiple named snapshots", ->
+        @log.snapshot({multiple: true, name: "one"})
+        @log.snapshot({multiple: true, name: "two"})
+
+        snapshots = @log.get("snapshots")
+        expect(snapshots[0].name).to.eq("one")
+        expect(snapshots[1].name).to.eq("two")
+
+      it "can insert snapshot at specific position", ->
+        @log.snapshot({multiple: true, name: "one"})
+        @log.snapshot({multiple: true, name: "two"})
+        @log.snapshot({multiple: true, name: "three"})
+        @log.snapshot({multiple: true, name: "replacement", at: 1})
+
+        snapshots = @log.get("snapshots")
+        expect(snapshots.length).to.eq(3)
+        expect(snapshots[0].name).to.eq("one")
+        expect(snapshots[1].name).to.eq("replacement")
+        expect(snapshots[2].name).to.eq("three")
+
   describe "class methods", ->
     enterCommandTestingMode()
 
