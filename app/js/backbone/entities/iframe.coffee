@@ -58,6 +58,27 @@
       @initialize()
       @stopListening()
 
+    getMessageCssCoords: (height, width) ->
+      iframeActualHeight = @get("iframeHeight") * @attributes.viewportScale
+
+      marginLeft = (@get("containerWidth") / 2) - (width / 2)
+
+      heightHeight = 47
+      nudge = 10
+
+      if (iframeActualHeight + height + nudge) >= @get("containerHeight")
+        {top: "", bottom: 0, marginLeft: marginLeft, opacity: "0.7"}
+      else
+        {top: (iframeActualHeight + heightHeight + nudge), bottom: "", marginLeft: marginLeft, opacity: "0.9"}
+
+    setHeightsAndWidth: (containerHeight, iframeHeight, containerWidth, iframeWidth) ->
+      @set({
+        containerHeight: containerHeight
+        containerWidth: containerWidth
+        iframeHeight: iframeHeight
+        iframeWidth: iframeWidth
+      })
+
     setScale: (scale) ->
       @set "viewportScale", scale
 

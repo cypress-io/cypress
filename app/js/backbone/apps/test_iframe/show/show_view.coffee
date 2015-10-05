@@ -103,7 +103,7 @@
       }
 
     calcWidth: (main, tests, container, headerHeight) ->
-      headerHeight = @$("header").outerHeight() ? 46
+      headerHeight = @$("header").outerHeight() ? 47
 
       width  = main.width() - tests.width()
       height = container.height() - headerHeight ## accounts for the header
@@ -117,6 +117,8 @@
 
       iframeWidth  = size.width()
       iframeHeight = size.height()
+
+      @model.setHeightsAndWidth(height, iframeHeight, width, iframeWidth)
 
       ## move all of this logic into model methods
       if width < iframeWidth or height < iframeHeight
@@ -273,6 +275,46 @@
         ## TODO FIX THIS
         fn(iframe, remote)
 
+  class Show.Snapshot extends App.Views.ItemView
+    template: "test_iframe/show/_snapshot"
+
+    ui:
+      message: "#iframe-message"
+
+    modelEvents:
+      "cannot:revert:dom"     : "cannotRevertDom"
+      "clear:revert:message"  : "clearRevertMsg"
+      "revert:dom"            : "revertDom"
+      "restore:dom"           : "restoreDom"
+
+    onShow: ->
+      @calcVisibility = _(@calcVisibility).chain().bind(@).throttle(50).value()
+
+      $(window).on "resize", @calcVisibility
+
+    onDestroy: ->
+      $(window).off "resize", @calcVisibility
+
+    calcVisibility: ->
+      height = @ui.message.outerHeight()
+      width  = @ui.message.outerWidth()
+
+      @ui.message.css @model.getMessageCssCoords(height, width)
+
+    cannotRevertDom: (init) ->
+      @ui.message.text("Cannot show Snapshot while tests are running").addClass("cannot-revert").show()
+      @calcVisibility()
+
+    clearRevertMsg: ->
+      @restoreDom()
+
+    restoreDom: ->
+      @ui.message.removeClass("cannot-revert").empty().hide()
+
+    revertDom: ->
+      @ui.message.text("DOM Snapshot").removeClass("cannot-revert").show()
+      @calcVisibility()
+
   class Show.Header extends App.Views.ItemView
     template: "test_iframe/show/_header"
 
@@ -284,7 +326,7 @@
       browser:       ".browser-versions li"
       chosenBrowser: "#chosen-manual-browser"
       closeBrowser:  "#chosen-manual-browser i"
-      url:           "#url-container input"
+      url:           ".url"
       width:         "#viewport-width"
       height:        "#viewport-height"
       scale:         "#viewport-scale"
@@ -308,10 +350,6 @@
       "change:viewportWidth"  : "widthChanged"
       "change:viewportHeight" : "heightChanged"
       "change:viewportScale"  : "scaleChanged"
-      "cannot:revert:dom"     : "cannotRevertDom"
-      "clear:revert:message"  : "clearRevertMsg"
-      "revert:dom"            : "revertDom"
-      "restore:dom"           : "restoreDom"
 
     onRender: ->
       b = @model.get("browser")
@@ -364,18 +402,6 @@
 
     getBootstrapNameSpaceForEvent: (name, e) ->
       name + "." + e.namespace
-
-    cannotRevertDom: (init) ->
-      @ui.message.text("Cannot revert DOM while tests are running").addClass("cannot-revert").show()
-
-    clearRevertMsg: ->
-      @restoreDom()
-
-    restoreDom: ->
-      @ui.message.removeClass("cannot-revert").empty().hide()
-
-    revertDom: ->
-      @ui.message.text("DOM has been reverted").removeClass("cannot-revert").show()
 
     viewportClicked: (e) ->
       e.stopPropagation()

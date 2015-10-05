@@ -39,15 +39,13 @@
     }
 
     #iframe-message {
-      position: absolute;
-      right: 350px;
-      top: 6px;
       background-color: #111;
       color: #FFF;
-      opacity: 0.7;
       padding: 5px 10px;
       border-radius: 5px;
-      display: none;
+      margin-bottom: 2px;
+      position: absolute;
+      display: inline-block;
 
       &:empty {
         display: none;

@@ -30,6 +30,7 @@
         return if config.ui("satellite")
 
         @headerView(iframe)
+        @snapshotView(iframe)
 
       @show @layout
 
@@ -43,6 +44,15 @@
         iframe.switchToBrowser()
 
       @show headerView, region: @layout.headerRegion
+
+    snapshotView: (iframe) ->
+      snapshotView = @getSnapshotView(iframe)
+
+      @show snapshotView, region: @layout.messageRegion
+
+    getSnapshotView: (iframe) ->
+      new Show.Snapshot
+        model: iframe
 
     getHeaderView: (iframe) ->
       new Show.Header
