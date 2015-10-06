@@ -9,11 +9,12 @@ through2      = require("through2")
 yauzl         = require("yauzl")
 Decompress    = require("decompress")
 Promise       = require("bluebird")
+url           = require("url")
 utils         = require("../utils")
 
 fs = Promise.promisifyAll(fs)
 
-url = "http://download.cypress.io/latest"
+baseUrl = "http://download.cypress.io/"
 
 class Install
   constructor: (options = {}) ->
@@ -70,11 +71,19 @@ class Install
     process.exit(1)
 
   getUrl: ->
-    ## append os to url
-    if os = utils.getOs()
-      "#{url}?os=#{os}"
+    prepend = (u) ->
+      u = url.resolve(baseUrl, u)
+
+      ## append os to url
+      if os = utils.getOs()
+        "#{u}?os=#{os}"
+      else
+        u
+
+    if v = process.env.CYPRESS_VERSION
+      prepend("version/#{v}")
     else
-      url
+      prepend("latest")
 
   download: (options) ->
     new Promise (resolve, reject) =>

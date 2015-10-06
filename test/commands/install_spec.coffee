@@ -29,6 +29,9 @@ describe "Install", ->
       @sandbox.stub(@install, "unzip").resolves()
       @sandbox.stub(@install, "finish").resolves()
 
+    afterEach ->
+      delete process.env.CYPRESS_VERSION
+
     it "sets options.version to response x-version", ->
       nock("http://aws.amazon.com")
       .get("/some.zip")
@@ -45,6 +48,25 @@ describe "Install", ->
 
       @install.initialize(@options).then =>
         expect(@options.version).to.eq("0.11.1")
+
+    it "can specify cypress version", ->
+      process.env.CYPRESS_VERSION = "0.12.1"
+
+      nock("http://aws.amazon.com")
+      .get("/some.zip")
+      .reply 200, (uri, requestBody) ->
+        fs.createReadStream("test/fixture/example.zip")
+
+      nock("http://download.cypress.io")
+      .get("/version/0.12.1")
+      .query(true)
+      .reply 302, undefined, {
+        "Location": "http://aws.amazon.com/some.zip"
+        "x-version": "0.12.1"
+      }
+
+      @install.initialize(@options).then =>
+        expect(@options.version).to.eq("0.12.1")
 
     it "catches download status errors and exits", ->
       @sandbox.stub(@install, "download").rejects({statusCode: 404, statusMessage: "Not Found"})
