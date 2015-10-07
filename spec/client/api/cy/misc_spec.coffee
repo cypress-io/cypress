@@ -20,7 +20,8 @@ describe "$Cypress.Cy Misc Commands", ->
           expect(log.get("message")).to.eq "{}"
           expect(log.get("name")).to.eq "wrap"
           expect(log.get("end")).to.be.true
-          expect(log.get("snapshot")).to.be.an("object")
+          expect(log.get("snapshots").length).to.eq(1)
+          expect(log.get("snapshots")[0]).to.be.an("object")
           done()
 
         @cy.wrap({})

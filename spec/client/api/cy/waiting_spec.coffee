@@ -484,10 +484,12 @@ describe "$Cypress.Cy Waiting Commands", ->
 
           @Cypress.on "log", (l) =>
             log = l
-            expect(log.get("snapshot")).not.to.be.ok
+            if log.get("name") is "wait"
+              expect(@log.get("snapshots")).not.to.be.ok
 
           @cy.noop({}).wait(10).then ->
-            expect(log.get("snapshot")).to.be.an("object")
+            expect(log.get("snapshots").length).to.eq(1)
+            expect(log.get("snapshots")[0]).to.be.an("object")
 
         it "is a type: child if subject", ->
           @cy.noop({}).wait(10).then ->

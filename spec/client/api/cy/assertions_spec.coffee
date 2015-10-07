@@ -300,7 +300,8 @@ describe "$Cypress.Cy Assertion Commands", ->
           expect(@log.get("name")).to.eq("assert")
           expect(@log.get("end")).to.be.true
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
 
       it "retries assertion until true", ->
         button = @cy.$("button:first")
@@ -351,7 +352,8 @@ describe "$Cypress.Cy Assertion Commands", ->
           expect(@log.get("name")).to.eq("should")
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
           expect(@log.get("message")).to.eq("not.contain2, does-not-exist-foo-bar")
           done()
 
@@ -383,7 +385,8 @@ describe "$Cypress.Cy Assertion Commands", ->
           # expect(@log.get("name")).to.eq("should")
           # expect(@log.get("error")).to.eq(err)
           # expect(@log.get("state")).to.eq("failed")
-          # expect(@log.get("snapshot")).to.be.an("object")
+          # expect(@log.get("snapshots").length).to.eq(1)
+          # expect(@log.get("snapshots")[0]).to.be.an("object")
           # expect(@log.get("message")).to.eq("have.class, foo")
           done()
 
@@ -419,7 +422,8 @@ describe "$Cypress.Cy Assertion Commands", ->
           expect(@log.get("name")).to.eq("should")
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
           expect(@log.get("message")).to.eq("have.length, foo")
           done()
 
@@ -439,7 +443,8 @@ describe "$Cypress.Cy Assertion Commands", ->
           expect(@log.get("name")).to.eq("should")
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
           expect(@log.get("message")).to.eq("eventually.have.length, 1")
           done()
 
@@ -458,7 +463,8 @@ describe "$Cypress.Cy Assertion Commands", ->
           expect(@log.get("name")).to.eq("should")
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
           expect(@log.get("message")).to.eq("deep.eq2, {}")
 
           done()
@@ -479,7 +485,8 @@ describe "$Cypress.Cy Assertion Commands", ->
           expect(@log.get("name")).to.eq("should")
           expect(@log.get("error")).to.eq(err)
           expect(@log.get("state")).to.eq("failed")
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
           expect(@log.get("message")).to.eq("match, foo")
           done()
 
@@ -516,7 +523,8 @@ describe "$Cypress.Cy Assertion Commands", ->
           expect(err.message).to.eq("foo is not defined")
           expect(logs[1].get("name")).to.eq("should")
           expect(logs[1].get("state")).to.eq("failed")
-          expect(logs[1].get("snapshot")).to.be.an("object")
+          expect(logs[1].get("snapshots").length).to.eq(1)
+          expect(logs[1].get("snapshots")[0]).to.be.an("object")
 
           done()
 
@@ -607,7 +615,8 @@ describe "$Cypress.Cy Assertion Commands", ->
 
     it "snapshots immediately", (done) ->
       @onAssert (log) ->
-        expect(log.get("snapshot")).to.be.an("object")
+        expect(log.get("snapshots").length).to.eq(1)
+        expect(log.get("snapshots")[0]).to.be.an("object")
         done()
 
       @cy.get("body").then ->

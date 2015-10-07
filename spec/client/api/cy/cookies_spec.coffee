@@ -36,7 +36,8 @@ describe "$Cypress.Cy Cookie Commands", ->
 
       it "snapshots immediately", ->
         @cy.clearCookie("foo").then ->
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
 
       it "#onConsole", ->
         @cy.clearCookie("foo").then (cookies) ->
@@ -75,7 +76,8 @@ describe "$Cypress.Cy Cookie Commands", ->
 
       it "snapshots immediately", ->
         @cy.clearCookies().then ->
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
 
       it "#onConsole", ->
         @cy.clearCookies().then (cookies) ->

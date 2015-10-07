@@ -108,7 +108,8 @@ describe "$Cypress.Cy Window Commands", ->
 
       it "snapshots after resolving", ->
         @cy.window().then ->
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
 
       it "can be aliased", ->
         logs = []
@@ -252,14 +253,15 @@ describe "$Cypress.Cy Window Commands", ->
       it "logs immediately before resolving", (done) ->
         @Cypress.on "log", (log) ->
           expect(log.get("state")).to.eq("pending")
-          expect(log.get("snapshot")).not.to.be.ok
+          expect(log.get("snapshots")).not.to.be.ok
           done()
 
         @cy.document()
 
       it "snapshots after resolving", ->
         @cy.document().then ->
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
 
       it "can be aliased", ->
         logs = []
@@ -377,7 +379,8 @@ describe "$Cypress.Cy Window Commands", ->
         @Cypress.on "log", (@log) =>
 
         @cy.title().then ->
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
 
       it "logs obj", ->
         @cy.title().then ->
@@ -571,7 +574,8 @@ describe "$Cypress.Cy Window Commands", ->
 
       it "snapshots immediately", ->
         @cy.viewport(800, 600).then ->
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
 
       it "can turn off logging viewport command", ->
         @cy.viewport(800, 600, {log: false}).then ->

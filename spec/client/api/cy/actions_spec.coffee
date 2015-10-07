@@ -234,6 +234,21 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("select:first").select("de_dust2").then ($select) ->
           expect(@log.get("$el")).to.eq $select
 
+      it "snapshots before clicking", (done) ->
+        @cy.$("select:first").change =>
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0].name).to.eq("before")
+          expect(@log.get("snapshots")[0].state).to.be.an("object")
+          done()
+
+        @cy.get("select:first").select("de_dust2").then ($select) ->
+
+      it "snapshots after clicking", ->
+        @cy.get("select:first").select("de_dust2").then ($select) ->
+          expect(@log.get("snapshots").length).to.eq(2)
+          expect(@log.get("snapshots")[1].name).to.eq("after")
+          expect(@log.get("snapshots")[1].state).to.be.an("object")
+
       it "is not immediately ended", (done) ->
         @cy.$("select:first").click =>
           expect(@log.get("state")).to.eq("pending")
@@ -241,10 +256,9 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get("select:first").select("de_dust2")
 
-      it "snpahots and ends", ->
+      it "ends", ->
         @cy.get("select:first").select("de_dust2").then ->
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("snapshot")).to.be.an("object")
 
       it "#onConsole", ->
         @cy.get("select:first").select("de_dust2").then ($select) ->
@@ -1543,7 +1557,7 @@ describe "$Cypress.Cy Actions Commands", ->
         expectToHaveValueAndCoords = =>
           cmd = @cy.commands.findWhere({name: "type"})
           log = cmd.get("logs")[0]
-          txt = log.get("snapshot").find("#comments")
+          txt = log.get("snapshots")[1].state.find("#comments")
           expect(txt).to.have.value("foobarbaz")
           expect(log.get("coords")).to.be.ok
 
@@ -1557,7 +1571,7 @@ describe "$Cypress.Cy Actions Commands", ->
         expectToHaveValueAndNoCoords = =>
           cmd = @cy.commands.findWhere({name: "type"})
           log = cmd.get("logs")[0]
-          txt = log.get("snapshot").find("#comments")
+          txt = log.get("snapshots")[1].state.find("#comments")
           expect(txt).to.have.value("foobarbaz")
           expect(log.get("coords")).not.to.be.ok
 
@@ -1590,9 +1604,20 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get(":text:first").type("foo")
 
-      it "snapshots after clicking", ->
+      it "snapshots before typing", (done) ->
+        @cy.$(":text:first").keydown =>
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0].name).to.eq("before")
+          expect(@log.get("snapshots")[0].state).to.be.an("object")
+          done()
+
+        @cy.get(":text:first").type("foo")
+
+      it "snapshots after typing", ->
         @cy.get(":text:first").type("foo").then ->
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(2)
+          expect(@log.get("snapshots")[1].name).to.eq("after")
+          expect(@log.get("snapshots")[1].state).to.be.an("object")
 
       it "logs deltaOptions", ->
         @cy.get(":text:first").type("foo", {force: true, timeout: 1000}).then ->
@@ -2013,7 +2038,8 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "snapshots after clicking", ->
         @cy.get("input:first").clear().then ($input) ->
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
 
       it "logs deltaOptions", ->
         @cy.get("input:first").clear({force: true, timeout: 1000}).then ->
@@ -2289,11 +2315,20 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get(":checkbox:first").check()
 
-      it "snapshots after clicking", ->
-        @Cypress.on "log", (@log) =>
+      it "snapshots before clicking", (done) ->
+        @cy.$(":checkbox:first").change =>
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0].name).to.eq("before")
+          expect(@log.get("snapshots")[0].state).to.be.an("object")
+          done()
 
+        @cy.get(":checkbox:first").check()
+
+      it "snapshots after clicking", ->
         @cy.get(":checkbox:first").check().then ->
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(2)
+          expect(@log.get("snapshots")[1].name).to.eq("after")
+          expect(@log.get("snapshots")[1].state).to.be.an("object")
 
       it "logs only 1 check event", ->
         logs = []
@@ -2559,11 +2594,20 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get(":checkbox:first").check().uncheck()
 
-      it "snapshots after clicking", ->
-        @Cypress.on "log", (@log) =>
+      it "snapshots before clicking", (done) ->
+        @cy.$(":checkbox:first").change =>
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0].name).to.eq("before")
+          expect(@log.get("snapshots")[0].state).to.be.an("object")
+          done()
 
-        @cy.get(":checkbox:first").check().uncheck().then ->
-          expect(@log.get("snapshot")).to.be.an("object")
+        @cy.get(":checkbox:first").invoke("prop", "checked", true).uncheck()
+
+      it "snapshots after clicking", ->
+        @cy.get(":checkbox:first").invoke("prop", "checked", true).uncheck().then ->
+          expect(@log.get("snapshots").length).to.eq(2)
+          expect(@log.get("snapshots")[1].name).to.eq("after")
+          expect(@log.get("snapshots")[1].state).to.be.an("object")
 
       it "logs only 1 check event", ->
         logs = []
@@ -2859,12 +2903,6 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get("form:first").submit()
 
-      it "snapshots after clicking", ->
-        @Cypress.on "log", (@log) =>
-
-        @cy.get("form:first").submit().then ($input) ->
-          expect(@log.get("snapshot")).to.be.an("object")
-
       it "provides $el", ->
         @cy.$("form:first").submit -> return false
 
@@ -2872,7 +2910,28 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@log.get("name")).to.eq "submit"
           expect(@log.get("$el")).to.match $form
 
+      it "snapshots before submitted", (done) ->
+        @cy.$("form:first").submit -> return false
+
+        @cy.$("form").first().submit =>
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0].name).to.eq("before")
+          expect(@log.get("snapshots")[0].state).to.be.an("object")
+          done()
+
+        @cy.get("form").first().submit()
+
+      it "snapshots after submitting", ->
+        @cy.$("form:first").submit -> return false
+
+        @cy.get("form").first().submit().then ($form) ->
+          expect(@log.get("snapshots").length).to.eq(2)
+          expect(@log.get("snapshots")[1].name).to.eq("after")
+          expect(@log.get("snapshots")[1].state).to.be.an("object")
+
       it "#onConsole", ->
+        @cy.$("form:first").submit -> return false
+
         @cy.get("form").first().submit().then ($form) ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "submit"
@@ -2996,7 +3055,8 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "snapshots immediately", ->
         @cy.focused().then ->
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
 
       it "passes in $el", ->
         @cy.get("input:first").focused().then ($input) ->
@@ -3175,7 +3235,8 @@ describe "$Cypress.Cy Actions Commands", ->
         @Cypress.on "log", (@log) =>
 
         @cy.get(":text:first").focus().then ->
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
 
       it "passes in $el", ->
         @cy.get("input:first").focus().then ($input) ->
@@ -3457,7 +3518,8 @@ describe "$Cypress.Cy Actions Commands", ->
         @Cypress.on "log", (@log) =>
 
         @cy.get(":text:first").focus().blur().then ->
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
 
       it "passes in $el", ->
         @cy.get("input:first").focus().blur().then ($input) ->
@@ -3760,7 +3822,8 @@ describe "$Cypress.Cy Actions Commands", ->
         @Cypress.on "log", (@log) =>
 
         @cy.get("button:first").dblclick().then ($button) ->
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
 
       it "returns only the $el for the element of the subject that was dblclicked", ->
         dblclicks = []
@@ -4424,7 +4487,13 @@ describe "$Cypress.Cy Actions Commands", ->
           ## get + click logs
           expect(logs.length).eq(2)
           expect(@log.get("error")).to.eq(err)
-          expect(@log.get("snapshot")).to.be.an("object") ## still snapshot during an error
+
+          ## there should still be 2 snapshots on error (before + after)
+          expect(@log.get("snapshots").length).to.eq(2)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
+          expect(@log.get("snapshots")[0].name).to.eq("before")
+          expect(@log.get("snapshots")[1]).to.be.an("object")
+          expect(@log.get("snapshots")[1].name).to.eq("after")
           expect(err.message).to.include "Cannot call .click() on this element because it is being covered by another element: #{node}"
 
           console = @log.attributes.onConsole()
@@ -4490,9 +4559,20 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get("button:first").click()
 
+      it "snapshots before clicking", (done) ->
+        @cy.$("button:first").click =>
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0].name).to.eq("before")
+          expect(@log.get("snapshots")[0].state).to.be.an("object")
+          done()
+
+        @cy.get("button:first").click()
+
       it "snapshots after clicking", ->
         @cy.get("button:first").click().then ($button) ->
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(2)
+          expect(@log.get("snapshots")[1].name).to.eq("after")
+          expect(@log.get("snapshots")[1].state).to.be.an("object")
 
       it "returns only the $el for the element of the subject that was clicked", ->
         clicks = []

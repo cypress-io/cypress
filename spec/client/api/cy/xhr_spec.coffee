@@ -717,7 +717,7 @@ describe "$Cypress.Cy XHR Commands", ->
               ## logs are first inserted (but once multiple
               ## snapshots are working, it should do one at first
               ## and then another when it ends)
-              expect(@log.get("snapshot")).not.to.be.ok
+              expect(@log.get("snapshots")).not.to.be.ok
 
         it "does not end xhr requests when the associated command ends", ->
           logs = null
@@ -769,7 +769,8 @@ describe "$Cypress.Cy XHR Commands", ->
 
               expect(xhrs[0].get("state")).to.eq("failed")
               expect(xhrs[0].get("error").name).to.eq("AbortError")
-              expect(xhrs[0].get("snapshot")).to.be.an("object")
+              expect(xhrs[0].get("snapshots").length).to.eq(1)
+              expect(xhrs[0].get("snapshots")[0]).to.be.an("object")
 
               expect(@cy.prop("requests").length).to.eq(2)
               expect(@cy.prop("responses")).to.be.undefined
@@ -811,7 +812,8 @@ describe "$Cypress.Cy XHR Commands", ->
           expect(@log.get("state")).to.eq("passed")
 
         it "snapshots again", ->
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
 
       describe "numResponses", ->
         it "is initially 0", ->

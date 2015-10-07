@@ -40,6 +40,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             "Applied To": $Cypress.Utils.getDomElements(options.$el)
             Elements: options.$el.length
 
+        options._log.snapshot("before", {next: "after"})
+
       if not options.$el.is("form")
         node = Cypress.Utils.stringifyElement(options.$el)
         word = Cypress.Utils.plural(options.$el, "contains", "is")
@@ -359,7 +361,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
           # $el.cySimulate("dblclick")
 
-          log.snapshot() if log
+          # log.snapshot() if log
 
           ## need to return null here to prevent
           ## chaining thenable promises
@@ -440,6 +442,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             message: deltaOptions
             $el: $el
           })
+
+          options._log.snapshot("before", {next: "after"})
 
         if options.errorOnSelect and $el.is("select")
           @throwErr "Cannot call .click() on a <select> element. Use cy.select() command instead to change the value.", options._log
@@ -570,12 +574,16 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
                 return @_retry(retry, options)
 
               if options._log
-                options._log.snapshot()
                 options._log.set onConsole: ->
                   obj = {}
                   obj["Tried to Click"]     = $Cypress.Utils.getDomElements($el)
                   obj["But its Covered By"] = $Cypress.Utils.getDomElements($elToClick)
                   obj
+
+              ## snapshot only on click failure
+              err.onFail = ->
+                if options._log
+                  options._log.snapshot()
 
               options.error   = err
               return @_retry(getCoords, options)
@@ -762,6 +770,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
                 data: getTableData()
                 columns: ["typed", "which", "keydown", "keypress", "textInput", "input", "keyup", "change"]
               }
+
+        options._log.snapshot("before", {next: "after"})
 
       if not options.$el.is(textLike)
         node = Cypress.Utils.stringifyElement(options.$el)
@@ -998,6 +1008,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             "Selected":   values
             "Applied To": $Cypress.Utils.getDomElements(options.$el)
             "Options":    deltaOptions
+
+        options._log.snapshot("before", {next: "after"})
 
       ## if subject is a <select> el assume we are filtering down its
       ## options to a specific option first by value and then by text
@@ -1245,6 +1257,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
               _.extend onConsole, {
                 Options: deltaOptions
               }
+
+          options._log.snapshot("before", {next: "after"})
 
         if not isAcceptableElement($el)
           node   = Cypress.Utils.stringifyElement($el)

@@ -81,7 +81,8 @@ describe "$Cypress.Cy Location Commands", ->
 
       it "snapshots immediately", ->
         @cy.url().then ->
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
 
       it "logs obj", ->
         @cy.url().then ->
@@ -185,7 +186,8 @@ describe "$Cypress.Cy Location Commands", ->
 
       it "snapshots immediately", ->
         @cy.hash().then ->
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
 
       it "logs obj", ->
         @cy.hash().then ->
@@ -292,7 +294,8 @@ describe "$Cypress.Cy Location Commands", ->
 
       it "snapshots immediately", ->
         @cy.location("href").then ->
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
 
       it "does not emit when {log: false} as options", ->
         @cy.location("href", {log: false}).then ->

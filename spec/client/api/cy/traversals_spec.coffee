@@ -109,7 +109,8 @@ describe "$Cypress.Cy Traversal Commands", ->
 
         it "snapshots after finding element", ->
           @cy.get("#list")[name](arg).then ->
-            expect(@log.get("snapshot")).to.be.an("object")
+            expect(@log.get("snapshots").length).to.eq(1)
+            expect(@log.get("snapshots")[0]).to.be.an("object")
 
         it "has the $el", ->
           @cy.get("#list")[name](arg).then ($el) ->

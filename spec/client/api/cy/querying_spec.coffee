@@ -116,7 +116,8 @@ describe "$Cypress.Cy Querying Commands", ->
       it "snapshots after clicking", ->
         @cy.get("div:first").within ->
           @cy.then ->
-            expect(@log.get("snapshot")).to.be.an("object")
+            expect(@log.get("snapshots").length).to.eq(1)
+            expect(@log.get("snapshots")[0]).to.be.an("object")
 
     describe "errors", ->
       beforeEach ->
@@ -202,7 +203,8 @@ describe "$Cypress.Cy Querying Commands", ->
         @Cypress.on "log", (@log) =>
 
         @cy.root().then ->
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
 
       it "sets $el to document", ->
         html = @cy.$("html")
@@ -546,7 +548,8 @@ describe "$Cypress.Cy Querying Commands", ->
           .get("@b").then ->
             expect(@log.get("end")).to.be.true
             expect(@log.get("state")).to.eq("passed")
-            expect(@log.get("snapshot")).to.be.an("object")
+            expect(@log.get("snapshots").length).to.eq(1)
+            expect(@log.get("snapshots")[0]).to.be.an("object")
 
       it "logs obj once complete", ->
         @cy.get("body").as("b").then ($body) ->
@@ -1129,7 +1132,8 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy.contains("foo").then ->
           expect(@log.get("end")).to.be.true
           expect(@log.get("state")).to.eq("passed")
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
 
       it "silences internal @cy.get() log", ->
         logs = []

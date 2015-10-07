@@ -38,10 +38,6 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
 
       Promise
         .delay(ms)
-        .then ->
-          if options._log
-            options._log.snapshot()
-
         .return(subject)
 
     _waitFunction: (subject, fn, options) ->

@@ -60,4 +60,5 @@ describe "$Cypress.Cy Local Storage Commands", ->
 
       it "snapshots immediately", ->
         @cy.clearLocalStorage().then ->
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")

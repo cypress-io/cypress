@@ -291,7 +291,8 @@ describe "$Cypress.Cy Connectors Commands", ->
 
       it "snapshots after invoking", ->
         @cy.noop({foo: "foo"}).invoke("foo").then ->
-          expect(@log.get("snapshot")).to.be.an("object")
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
 
       it "ends", ->
         @cy.noop({foo: "foo"}).invoke("foo").then ->
