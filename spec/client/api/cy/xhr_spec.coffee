@@ -620,6 +620,33 @@ describe "$Cypress.Cy XHR Commands", ->
         @cy
           .route(/foo/, "fixture:bar")
 
+      it "does not retry (cancels existing promise) when xhr errors", (done) ->
+        cancel = @sandbox.spy(Promise.prototype, "cancel")
+
+        @cy.on "retry", =>
+          if @cy.prop("err")
+            done("should have cancelled and not retried after failing")
+
+        @cy.on "fail", (err) =>
+          p = @cy.prop("promise")
+
+          _.delay =>
+            expect(cancel).to.be.calledOn(p)
+            done()
+          , 100
+
+        @cy
+          .route({
+            url: /foo/,
+            response: {}
+            delay: 100
+          })
+          .window().then (win) ->
+            win.$.getJSON("/foo").done ->
+              throw new Error("foo failed")
+            null
+          .get("button").should("have.class", "does-not-exist")
+
       it "explodes if response alias cannot be found", (done) ->
         logs = []
 

@@ -12,7 +12,8 @@ $Cypress.Runner = do ($Cypress, _) ->
       ## if runnable.state is passed then we've
       ## probably failed in an afterEach and need
       ## to update the runnable to failed status
-      @afterEachFailed(runnable, err) if runnable.state is "passed"
+      if runnable.state is "passed"
+        @afterEachFailed(runnable, err)
 
       runnable.callback(err)
 

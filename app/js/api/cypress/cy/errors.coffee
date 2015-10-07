@@ -46,6 +46,19 @@ do ($Cypress, _) ->
             obj["Applied To"] = ret
             obj
 
+    checkTestErr: (test) ->
+      ## if our test has an error but we dont
+      ## have one referenced then set this err
+      ## this can happen if there is an window
+      ## uncaught error from our test which
+      ## bypasses our commands entirely so
+      ## we never actually catch it
+      ## and 'endedEarlyErr' would fire
+      if err = test.err and not @prop("err")
+        @prop("err", err)
+
+      return @
+
     endedEarlyErr: ->
       ## return if we already have an error
       return if @prop("err")
@@ -55,6 +68,12 @@ do ($Cypress, _) ->
       @fail(err)
 
     fail: (err) ->
+      ## make sure we cancel our outstanding
+      ## promise since we could have hit this
+      ## fail handler outside of a command chain
+      ## and we want to ensure we don't continue retrying
+      @prop("promise")?.cancel()
+
       current = @prop("current")
 
       ## allow for our own custom onFail function

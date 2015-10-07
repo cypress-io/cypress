@@ -37,7 +37,7 @@
       Mocha.Runner::uncaught = _.wrap uncaught, (orig, err) ->
         ## debugger if this isnt an AssertionError or CypressError or a message err
         ## because that means we prob f'd up something
-        if not /(AssertionError|CypressError)/.test(err.name) and not err.__isMessage
+        if not /(AssertionError|CypressError)/.test(err.name) and not err.__isMessage and not /SilenceError/.test(err.message)
           console.error(err.stack)
           debugger
 

@@ -66,6 +66,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       @listenTo @Cypress, "stop",       => @stop()
       @listenTo @Cypress, "restore",    => @restore()
       @listenTo @Cypress, "abort",      => @abort()
+      @listenTo @Cypress, "test:after:hooks", (test) => @checkTestErr(test)
 
     abort: ->
       @offWindowListeners()
