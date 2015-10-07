@@ -156,7 +156,7 @@ describe "$Cypress.Log API", ->
     describe "#wrapOnConsole", ->
       it "automatically adds Command with name", ->
         @log.set("name", "foo")
-        @log.set("snapshot", {})
+        @log.set("snapshots", [{name: null, state: {}}])
         @log.set("onConsole", -> {bar: "baz"})
         @log.wrapOnConsole()
         expect(@log.attributes.onConsole()).to.deep.eq {
@@ -208,35 +208,46 @@ describe "$Cypress.Log API", ->
         @sandbox.stub(@Cypress, "createSnapshot").returns({})
 
       it "can set multiple snapshots", ->
-        @log.snapshot({multiple: true})
-        @log.snapshot({multiple: true})
+        @log.snapshot()
+        @log.snapshot()
 
         expect(@log.get("snapshots").length).to.eq(2)
 
       it "can name the snapshot", ->
-        @log.snapshot({name: "logging in"})
+        @log.snapshot("logging in")
         expect(@log.get("snapshots").length).to.eq(1)
         expect(@log.get("snapshots")[0].name).to.eq("logging in")
 
       it "can set multiple named snapshots", ->
-        @log.snapshot({multiple: true, name: "one"})
-        @log.snapshot({multiple: true, name: "two"})
+        @log.snapshot("one")
+        @log.snapshot("two")
 
         snapshots = @log.get("snapshots")
         expect(snapshots[0].name).to.eq("one")
         expect(snapshots[1].name).to.eq("two")
 
       it "can insert snapshot at specific position", ->
-        @log.snapshot({multiple: true, name: "one"})
-        @log.snapshot({multiple: true, name: "two"})
-        @log.snapshot({multiple: true, name: "three"})
-        @log.snapshot({multiple: true, name: "replacement", at: 1})
+        @log.snapshot("one")
+        @log.snapshot("two")
+        @log.snapshot("three")
+        @log.snapshot("replacement", {at: 1})
 
         snapshots = @log.get("snapshots")
         expect(snapshots.length).to.eq(3)
         expect(snapshots[0].name).to.eq("one")
         expect(snapshots[1].name).to.eq("replacement")
         expect(snapshots[2].name).to.eq("three")
+
+      it "can automatically set the name of the next snapshot", ->
+        @log.snapshot("before", {next: "after"})
+        @log.snapshot("asdfasdf") ## should ignore this name
+        @log.snapshot("third")
+
+        snapshots = @log.get("snapshots")
+        expect(snapshots.length).to.eq(3)
+        expect(snapshots[0].name).to.eq("before")
+        expect(snapshots[1].name).to.eq("after")
+        expect(snapshots[2].name).to.eq("third")
 
   describe "class methods", ->
     enterCommandTestingMode()

@@ -154,23 +154,28 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
         attributes: @attributes
       }
 
-    snapshot: (options = {}) ->
+    snapshot: (name, options = {}) ->
       _.defaults options,
-        multiple: false
-        name: null
         at: null
+        next: null
 
-      obj = {name: options.name, state: @Cypress.createSnapshot @get("$el")}
+      obj = {name: name, state: @Cypress.createSnapshot @get("$el")}
 
-      if options.multiple
-        snapshots = @get("snapshots") ? []
+      snapshots = @get("snapshots") ? []
 
-        ## insert at index 'at' or whatever is the next position
-        snapshots[options.at or snapshots.length] = obj
-      else
-        snapshots = [obj]
+      ## insert at index 'at' or whatever is the next position
+      snapshots[options.at or snapshots.length] = obj
 
       @set "snapshots", snapshots
+
+      if next = options.next
+        fn = @snapshot
+        @snapshot = ->
+          ## restore the fn
+          delete @snapshot
+
+          ## call orig fn with next as name
+          fn.call(@, next)
 
       return @
 
