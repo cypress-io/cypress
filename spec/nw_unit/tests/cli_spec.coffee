@@ -179,7 +179,6 @@ module.exports = (parentWindow, gui, loadApp) ->
 
         cache.setUser({name: "Brian"}).then =>
           @argsAre("--run-project", @todos, "--ci", "--key", "abc123").then =>
-            console.log @trigger.getCalls()
             expect(@trigger).to.be.calledWith("start:projects:app")
 
       it "calls start:chromium:app with src to all tests", (done) ->
@@ -325,7 +324,7 @@ module.exports = (parentWindow, gui, loadApp) ->
           process.env.CI_BRANCH = "staging-circle3"
           @checkBranchQueryParam("staging-circle3")
 
-        it.only "uses git branch when no env vars", ->
+        it "uses git branch when no env vars", ->
           @checkBranchQueryParam "foo-branch", =>
             @branch.callsArgWith(0, null, {name: "foo-branch"})
 
