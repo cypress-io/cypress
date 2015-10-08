@@ -24,23 +24,23 @@ $Cypress.register "XHR", (Cypress, _, $) ->
   Cypress.on "restore", ->
     restore.call(@)
 
-  Cypress.on "before:window:load", (contentWindow) ->
-    ## whenever our content window is refreshed
-    ## due to either a cy.visit or something else
-    ## we need to reapply all of our server properties
-    ## and patch the XHR object. this means that even
-    ## if we applied the server successfully to a window
-    ## before-hand - no matter how we get a new window
-    ## from a command or action or what-have-you, we now
-    ## reapply the server + its routes to this new window
-    ##
-    ## down below we should ALWAYS have access to the
-    ## REBIND_SERVER and REBIND_ROUTES properties
-    if fn = @prop(REBIND_SERVER)
-      fn()
+  # Cypress.on "before:window:load", (contentWindow) ->
+  #   ## whenever our content window is refreshed
+  #   ## due to either a cy.visit or something else
+  #   ## we need to reapply all of our server properties
+  #   ## and patch the XHR object. this means that even
+  #   ## if we applied the server successfully to a window
+  #   ## before-hand - no matter how we get a new window
+  #   ## from a command or action or what-have-you, we now
+  #   ## reapply the server + its routes to this new window
+  #   ##
+  #   ## down below we should ALWAYS have access to the
+  #   ## REBIND_SERVER and REBIND_ROUTES properties
+  #   if fn = @prop(REBIND_SERVER)
+  #     fn()
 
-    if routes = @prop(REBIND_ROUTES)
-      _.each routes, (route) -> route()
+  #   if routes = @prop(REBIND_ROUTES)
+  #     _.each routes, (route) -> route()
 
   ## need to upgrade our server
   ## to allow for a setRequest hook
