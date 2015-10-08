@@ -112,40 +112,60 @@ describe "Winston Logger", ->
       expect(Log.defaultErrorHandler(@err)).to.be.false
 
     context "handleErr", ->
-      it "is called after resolving", (done) ->
+      it "is called after resolving", ->
         Log.defaultErrorHandler(@err)
-        _.defer =>
+        Promise.delay(50).then =>
           expect(@exit).to.be.called
-          done()
 
-      it "is called after rejecting", (done) ->
+      it "is called after rejecting", ->
         @create.rejects()
         Log.defaultErrorHandler(@err)
-        _.defer =>
+        Promise.delay(50).then =>
           expect(@exit).to.be.called
-          done()
 
-      it "calls process.exit(1)", (done) ->
+      it "calls process.exit(1)", ->
         Log.defaultErrorHandler(@err)
-        _.defer =>
+        Promise.delay(50).then =>
           expect(@exit).to.be.calledWith(1)
-          done()
 
-      it "calls Log#errorhandler", (done) ->
+      it "calls Log#errorhandler", ->
         fn = @sandbox.spy()
         Log.setErrorHandler(fn)
         Log.defaultErrorHandler(@err)
-        _.defer ->
+        Promise.delay(50).then =>
           expect(fn).to.be.called
-          done()
 
-      it "calls exit if Log#errorhandler returns true", (done) ->
+      it "calls exit if Log#errorhandler returns true", ->
         Log.setErrorHandler -> true
         Log.defaultErrorHandler(@err)
-        _.defer =>
+        Promise.delay(50).then =>
           expect(@exit).to.be.called
-          done()
 
+  describe "unhandledRejection", ->
+    it "passes error to defaultErrorHandler", ->
+      defaultErrorHandler = @sandbox.stub(Log, "defaultErrorHandler")
+
+      handlers = process.listeners("unhandledRejection")
+
+      expect(handlers.length).to.eq(1)
+
+      err = new Error("foo")
+
+      handlers[0](err)
+
+    it "catches unhandled rejections", (done) ->
+      defaultErrorHandler = @sandbox.stub(Log, "defaultErrorHandler")
+
+      Promise
+        .resolve("")
+        .throw("foo")
+
+      Promise.delay(50).then ->
+        expect(defaultErrorHandler).to.be.calledOnce
+        expect(defaultErrorHandler.getCall(0).args[0].message).to.eq("foo")
+        done()
+
+      # expect(defaultErrorHandler).to.be.calledWith(err)
   # it "logs to error", (done) ->
   #   # debugger
   #   process.listeners("uncaughtException").pop()
