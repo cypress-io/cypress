@@ -11,9 +11,9 @@
   <span class="command-method">
     <span>
       <% if @event: %>
-        (<%= @name %>)
+        (<%= @displayName %>)
       <% else: %>
-        <%= @name %>
+        <%= @displayName %>
       <% end %>
     </span>
   </span>
