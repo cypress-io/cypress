@@ -7,12 +7,22 @@ $Cypress.Server2 = do ($Cypress, _) ->
 
   class $Server
     constructor: (contentWindow, options = {}) ->
-      _.defaults options,
+      @options = options
+
+      _.defaults @options,
+        testId: ""
         xhrUrl: ""
         onSend: ->
         onAbort: ->
         onError: ->
         onLoad: ->
+        # log: true ## always log for the time being
+        delay: 0
+        enable: true
+        autoRespond: true
+        waitOnResponse: Infinity
+        strategy: "deny" ## or allow 404's
+        whitelist: (xhr) -> ## function whether to allow a request to go out (css/js/html/templates) etc
 
       ## what about holding a reference to the test id?
       ## to prevent cross pollution of requests?
@@ -24,11 +34,17 @@ $Cypress.Server2 = do ($Cypress, _) ->
 
       server = @
 
-      XHR = contentWindow.XMLHttpRequest
-      send = XHR.prototype.send
-      open = XHR.prototype.open
+      XHR   = contentWindow.XMLHttpRequest
+      send  = XHR.prototype.send
+      open  = XHR.prototype.open
+      abort = XHR.prototype.abort
 
-      XHR.prototype.open = (method, url, async, username, password) ->
+      XHR.prototype.abort = ->
+        @aborted = true
+
+        abort.apply(@, arguments)
+
+      XHR.prototype.open = (method, url, async = true, username, password) ->
         server.add(@, {
           method: method
           url: url
@@ -37,7 +53,7 @@ $Cypress.Server2 = do ($Cypress, _) ->
         ## if this XHR matches a mocked route then shift
         ## its url to the mocked url and set the request
         ## headers for the response
-        url = server.normalizeStubUrl(options.xhrUrl, url)
+        # url = server.normalizeStubUrl(options.xhrUrl, url)
 
         ## change absolute url's to relative ones
         ## if they match our baseUrl / visited URL
@@ -49,6 +65,9 @@ $Cypress.Server2 = do ($Cypress, _) ->
         return if not server.isActive
 
         @initiator = server.getInitiatorStack(@)
+
+        ## add header properties for the xhr's id
+        ## and the testId
 
         if stub = server.getStubForXhr(@)
           server.applyStubProperties(@, stub)
@@ -119,6 +138,13 @@ $Cypress.Server2 = do ($Cypress, _) ->
       ["/" + xhrUrl, url].join("/").replace(twoOrMoreDoubleSlashesRe, "/")
 
     stub: (attrs = {}) ->
+      ## merge attrs with the server's defaults
+      ## so we preserve the state of the attrs
+      ## at the time they're created since we
+      ## can create another server later
+
+      ## dont mutate the original attrs
+      attrs = _.defaults {}, attrs, @options
       @stubs.push(attrs)
 
     getStubForXhr: (xhr) ->
@@ -132,8 +158,8 @@ $Cypress.Server2 = do ($Cypress, _) ->
     xhrMatchesStub: (xhr, stub) ->
       return true
 
-    find: (xhr) ->
-      @xhrs[xhr.id]
+    # find: (xhr) ->
+    #   @xhrs[xhr.id]
 
     add: (xhr, attrs = {}) ->
       _.extend(xhr, attrs)
@@ -144,8 +170,16 @@ $Cypress.Server2 = do ($Cypress, _) ->
       @isActive = false
 
       ## abort any outstanding xhr's
+      _(@xhrs).chain().filter((xhr) ->
+        xhr.readyState isnt 4
+      ).invoke("abort")
 
-    @initialize = (contentWindow, options) ->
+      return @
+
+    set: (obj) ->
+      _.extend(@options, obj)
+
+    @create = (contentWindow, options) ->
       new $Server(contentWindow, options)
 
   return $Server
