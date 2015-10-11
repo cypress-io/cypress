@@ -11,23 +11,31 @@ $Cypress.Server2 = do ($Cypress, _) ->
       key = "X-Cypress-" + _.capitalize(key)
       xhr.setRequestHeader(key, val)
 
-  class $Server
-    constructor: (contentWindow, options = {}) ->
-      @options = options
+  nope = -> return null
 
-      _.defaults @options,
-        testId: ""
-        xhrUrl: ""
-        delay: 0
-        enable: true
-        autoRespond: true
-        waitOnResponse: Infinity
-        strategy: "deny" ## or allow 404's
-        whitelist: $Server.whitelist ## function whether to allow a request to go out (css/js/html/templates) etc
-        onSend: ->
-        onAbort: ->
-        onError: ->
-        onLoad: ->
+  whitelist = (xhr) ->
+    ## whitelist if we're GET + looks like we're fetching regular resources
+    xhr.method is "GET" and regularResourcesRe.test(xhr.url)
+
+  defaults = {
+    testId: ""
+    xhrUrl: ""
+    delay: 0
+    enable: true
+    autoRespond: true
+    waitOnResponse: Infinity
+    force404: true ## or allow 404's
+    normalizeUrl: _.identity
+    whitelist: whitelist ## function whether to allow a request to go out (css/js/html/templates) etc
+    onSend: ->
+    onAbort: ->
+    onError: ->
+    onLoad: ->
+  }
+
+  class $Server
+    constructor: (@options = {}) ->
+      _.defaults @options, defaults
 
       ## what about holding a reference to the test id?
       ## to prevent cross pollution of requests?
@@ -37,6 +45,11 @@ $Cypress.Server2 = do ($Cypress, _) ->
       @stubs    = []
       @isActive = true
 
+      ## always start disabled
+      ## so we dont handle stubs
+      @enableStubs(false)
+
+    bindTo: (contentWindow) ->
       server = @
 
       XHR   = contentWindow.XMLHttpRequest
@@ -49,7 +62,7 @@ $Cypress.Server2 = do ($Cypress, _) ->
 
         abortStack = server.getStack()
 
-        options.onAbort(@, abortStack)
+        server.options.onAbort(@, abortStack)
 
         abort.apply(@, arguments)
 
@@ -59,11 +72,14 @@ $Cypress.Server2 = do ($Cypress, _) ->
           url: url
         })
 
+        ## always normalize the url
+        url = server.options.normalizeUrl(url)
+
         ## if this XHR matches a mocked route then shift
         ## its url to the mocked url and set the request
         ## headers for the response
         if server.getStubForXhr(@)
-          url = server.normalizeStubUrl(options.xhrUrl, url)
+          url = server.normalizeStubUrl(server.options.xhrUrl, url)
 
         ## change absolute url's to relative ones
         ## if they match our baseUrl / visited URL
@@ -83,7 +99,7 @@ $Cypress.Server2 = do ($Cypress, _) ->
         ## add header properties for the xhr's id
         ## and the testId
         setHeader(@, "id", @id)
-        setHeader(@, "testId", options.testId)
+        setHeader(@, "testId", server.options.testId)
 
         ## if there is an existing stub for this
         ## XHR then add those properties into it
@@ -94,11 +110,11 @@ $Cypress.Server2 = do ($Cypress, _) ->
         sendStack = server.getStack()
 
         ## log this out now since it's being sent officially
-        options.onSend(@, sendStack)
+        server.options.onSend(@, sendStack)
 
         if stub
           ## call the onRequest function
-          ## after we've called options.onSend
+          ## after we've called server.options.onSend
           stub.onRequest(@)
 
         ## if our server is in specific mode for
@@ -112,7 +128,7 @@ $Cypress.Server2 = do ($Cypress, _) ->
           try
             onload.apply(@, arguments)
           catch err
-            options.onError(@, err)
+            server.options.onError(@, err)
 
         onerror = @onerror
         @onerror = ->
@@ -131,7 +147,7 @@ $Cypress.Server2 = do ($Cypress, _) ->
 
           ## log stuff here when its done
           if @readyState is 4
-            options.onLoad(@)
+            server.options.onLoad(@)
 
         send.apply(@, arguments)
 
@@ -166,6 +182,12 @@ $Cypress.Server2 = do ($Cypress, _) ->
       return stub
 
     getStubForXhr: (xhr) ->
+      ## bail if we're not currently stubbed
+      return nope() if not @isStubbed()
+
+      ## bail if this xhr matches our whitelist
+      return nope() if @options.whitelist.call(@, xhr)
+
       ## loop in reverse to get
       ## the first matching stub
       ## thats been most recently added
@@ -173,7 +195,21 @@ $Cypress.Server2 = do ($Cypress, _) ->
         if @xhrMatchesStub(xhr, stub)
           return stub
 
-      return null
+      ## else if no stub matched
+      ## send 404 if we're allowed to
+      if @options.force404
+        @get404Stub()
+      else
+        ## else return null
+        return nope()
+
+    get404Stub: ->
+      {
+        status: 404
+        response: ""
+        delay: 0
+        headers: null
+      }
 
     xhrMatchesStub: (xhr, stub) ->
       xhr.method is stub.method and
@@ -187,7 +223,7 @@ $Cypress.Server2 = do ($Cypress, _) ->
       xhr.id = id = _.uniqueId("xhr")
       @xhrs[id] = xhr
 
-    restore: ->
+    deactivate: ->
       @isActive = false
 
       ## abort any outstanding xhr's
@@ -197,13 +233,26 @@ $Cypress.Server2 = do ($Cypress, _) ->
 
       return @
 
+    isStubbed: ->
+      !!@isEnabled
+
+    enableStubs: (bool = true) ->
+      @isEnabled = bool
+
     set: (obj) ->
+      ## handle enable=true|false
+      if enable = obj.enable
+        @enableStubs(enable)
+
       _.extend(@options, obj)
 
-    @whitelist = (xhr) ->
-      xhr.method is "GET" and regularResourcesRe.test(xhr.url)
+    ## override the defaults for all
+    ## servers
+    @defaults = (obj = {}) ->
+      ## merge obj into defaults
+      _.extend defaults, obj
 
-    @create = (contentWindow, options) ->
-      new $Server(contentWindow, options)
+    @create = (options) ->
+      new $Server(options)
 
   return $Server

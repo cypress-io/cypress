@@ -7,7 +7,7 @@ describe "$Cypress.Cy Server2 API", ->
     @iframe.remove()
 
   it ".create", ->
-    server = $Cypress.Server2.create(@window, {})
+    server = $Cypress.Server2.create({})
     expect(server).to.be.instanceof $Cypress.Server2
 
   context "XHR#abort", ->
@@ -15,9 +15,10 @@ describe "$Cypress.Cy Server2 API", ->
       @send = @sandbox.stub(@window.XMLHttpRequest.prototype, "send")
       @open = @sandbox.spy(@window.XMLHttpRequest.prototype, "open")
       @abort = @sandbox.spy(@window.XMLHttpRequest.prototype, "abort")
-      @server = $Cypress.Server2.create(@window, {
+      @server = $Cypress.Server2.create({
         xhrUrl: "__cypress/xhrs/"
       })
+      @server.bindTo(@window)
       @xhr = new @window.XMLHttpRequest
 
     it "sets aborted=true", ->
@@ -34,9 +35,10 @@ describe "$Cypress.Cy Server2 API", ->
     beforeEach ->
       @send = @sandbox.stub(@window.XMLHttpRequest.prototype, "send")
       @open = @sandbox.spy(@window.XMLHttpRequest.prototype, "open")
-      @server = $Cypress.Server2.create(@window, {
+      @server = $Cypress.Server2.create({
         xhrUrl: "__cypress/xhrs/"
       })
+      @server.bindTo(@window)
       @xhr = new @window.XMLHttpRequest
 
     it "adds to server#xhrs", ->
@@ -61,9 +63,10 @@ describe "$Cypress.Cy Server2 API", ->
   context "XHR#send", ->
     beforeEach ->
       @send = @sandbox.spy(@window.XMLHttpRequest.prototype, "send")
-      @server = $Cypress.Server2.create(@window, {
+      @server = $Cypress.Server2.create({
         xhrUrl: "__cypress/xhrs/"
       })
+      @server.bindTo(@window)
       @xhr = new @window.XMLHttpRequest
 
     it "bails if server isnt active"
@@ -94,6 +97,8 @@ describe "$Cypress.Cy Server2 API", ->
     it "sets x-cypress-testId"
 
     it "calls applyStubProperties", ->
+      @server.enableStubs()
+
       applyStubProperties = @sandbox.spy @server, "applyStubProperties"
 
       stub1 = @server.stub({
@@ -124,9 +129,10 @@ describe "$Cypress.Cy Server2 API", ->
   context "#applyStubProperties", ->
     beforeEach ->
       @setRequestHeader = @sandbox.spy(@window.XMLHttpRequest.prototype, "setRequestHeader")
-      @server = $Cypress.Server2.create(@window, {
+      @server = $Cypress.Server2.create({
         xhrUrl: "__cypress/xhrs/"
       })
+      @server.bindTo(@window)
       @stub = @server.stub({
         method: "POST"
         url: /foo/
@@ -179,12 +185,14 @@ describe "$Cypress.Cy Server2 API", ->
 
   context "#stub", ->
     beforeEach ->
-      @server = $Cypress.Server2.create(@window, {
+      @server = $Cypress.Server2.create({
         xhrUrl: "__cypress/xhrs/"
         delay: 100
         waitOnResponse: false
         foo: "bar"
       })
+      @server.bindTo(@window)
+      @server.enableStubs()
 
     it "merges defaults for delay, autoRespond, waitOnResponse and pushes into stubs", ->
       expect(@server.stubs).to.be.empty
@@ -209,9 +217,10 @@ describe "$Cypress.Cy Server2 API", ->
     beforeEach ->
       @send = @sandbox.stub(@window.XMLHttpRequest.prototype, "send")
       @open = @sandbox.spy(@window.XMLHttpRequest.prototype, "open")
-      @server = $Cypress.Server2.create(@window, {
+      @server = $Cypress.Server2.create({
         xhrUrl: "__cypress/xhrs/"
       })
+      @server.bindTo(@window)
       @xhr = new @window.XMLHttpRequest
 
     it "sets a unique xhrId", ->
@@ -223,15 +232,16 @@ describe "$Cypress.Cy Server2 API", ->
       expect(@xhr.method).to.eq("POST")
       expect(@xhr.url).to.include("/bar")
 
-  context "#restore", ->
+  context "#deactivate", ->
     beforeEach ->
       @abort = @sandbox.spy(@window.XMLHttpRequest.prototype, "abort")
-      @server = $Cypress.Server2.create(@window, {
+      @server = $Cypress.Server2.create({
         xhrUrl: "__cypress/xhrs/"
       })
+      @server.bindTo(@window)
 
     it "sets isActive=false", ->
-      @server.restore()
+      @server.deactivate()
       expect(@server.isActive).to.be.false
 
     it "aborts outstanding requests", (done) ->
@@ -244,7 +254,7 @@ describe "$Cypress.Cy Server2 API", ->
       xhr3.open("GET", "/timeout?ms=500")
 
       xhr1.onload = =>
-        @server.restore()
+        @server.deactivate()
 
         ## abort should not have been called
         ## on xhr1, only xhr2 + xhr3
@@ -256,3 +266,5 @@ describe "$Cypress.Cy Server2 API", ->
 
       _.invoke [xhr1, xhr2, xhr3], "send"
 
+  context ".whitelist", ->
+    it "ignores whitelisted routes even when matching stub"
