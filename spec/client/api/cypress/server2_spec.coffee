@@ -44,14 +44,166 @@ describe "$Cypress.Cy Server2 API", ->
       @xhr.open("GET", "/foo")
       expect(@server.xhrs[@xhr.id]).to.eq(@xhr)
 
-    it "normalizes stub url and async", ->
+    it "normalizes async", ->
       @xhr.open("GET", "/foo")
-      expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/foo", true)
+      expect(@open).to.be.calledWith("GET", "/foo", true)
+
+    it "changes url to stub url", ->
+      @sandbox.stub(@server, "getStubForXhr").returns({})
+      @xhr.open("GET", "/foo")
+      expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/foo")
 
     it "calls the original open", ->
       @xhr.open("GET", "/foo", true, "us", "pw")
       expect(@open).to.be.calledOn(@xhr)
-      expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/foo", true, "us", "pw")
+      expect(@open).to.be.calledWith("GET", "/foo", true, "us", "pw")
+
+  context "XHR#send", ->
+    beforeEach ->
+      @send = @sandbox.spy(@window.XMLHttpRequest.prototype, "send")
+      @server = $Cypress.Server2.create(@window, {
+        xhrUrl: "__cypress/xhrs/"
+      })
+      @xhr = new @window.XMLHttpRequest
+
+    it "bails if server isnt active"
+
+    it "sets requestBody on all requests", ->
+      @xhr.open("GET", "/foo")
+      @xhr.send("a=b")
+      expect(@xhr.requestBody).to.eq("a=b")
+
+    it "sets requestJSON on all requests", ->
+      @xhr.open("POST", "/users")
+      @xhr.send(JSON.stringify({foo: "bar"}))
+      expect(@xhr.requestJSON).to.deep.eq({foo: "bar"})
+
+    it "does not set requestJSON on formData", ->
+      formData = new FormData
+      formData.append("foo", "bar")
+      formData.append("baz", "quux")
+
+      @xhr.open("POST", "/form")
+      @xhr.send(formData)
+
+      expect(@xhr.requestBody).to.eq(formData)
+      expect(@xhr.requestJSON).to.be.undefined
+
+    it "sets x-cypress-id"
+
+    it "sets x-cypress-testId"
+
+    it "calls applyStubProperties", ->
+      applyStubProperties = @sandbox.spy @server, "applyStubProperties"
+
+      stub1 = @server.stub({
+        method: "POST"
+        url: /.+/
+        response: {}
+        onRequest: ->
+      })
+
+      stub2 = @server.stub({
+        method: "POST"
+        url: /users/
+        response: {}
+        onRequest: ->
+      })
+
+      @xhr.open("POST", "/users/123")
+      @xhr.send()
+
+      expect(applyStubProperties).to.be.calledWith(@xhr, stub2)
+
+    it "captures send (initiator) stack"
+
+    it "calls stub.onRequest"
+
+    it "calls send"
+
+  context "#applyStubProperties", ->
+    beforeEach ->
+      @setRequestHeader = @sandbox.spy(@window.XMLHttpRequest.prototype, "setRequestHeader")
+      @server = $Cypress.Server2.create(@window, {
+        xhrUrl: "__cypress/xhrs/"
+      })
+      @stub = @server.stub({
+        method: "POST"
+        url: /foo/
+        delay: 25
+        status: 201
+        headers: {
+          "x-token": "123-abc"
+        }
+        response: [{name: "b"}, {name: "j"}]
+      })
+      @xhr = new @window.XMLHttpRequest
+      @xhr.open("POST", "foobar")
+      @server.applyStubProperties(@xhr, @stub)
+
+      @expectRequestHeader = (key, val) =>
+        expect(@setRequestHeader).to.be.calledOn(@xhr)
+        expect(@setRequestHeader).to.be.calledWith("X-Cypress-#{key}", val)
+
+    it "sets status", ->
+      @expectRequestHeader("Status", 201)
+
+    it "sets response", ->
+      @expectRequestHeader("Response", JSON.stringify([{name: "b"}, {name: "j"}]))
+
+    it "sets matched url", ->
+      @expectRequestHeader("Matched", "/foo/")
+
+    it "sets delay", ->
+      @expectRequestHeader("Delay", 25)
+
+    it "sets headers", ->
+      @expectRequestHeader("Headers", JSON.stringify({"x-token": "123-abc"}))
+
+    it "sets isStub=true", ->
+      expect(@xhr.isStub).to.be.true
+
+    it "does not set null/undefined headers", ->
+      @setRequestHeader.reset()
+
+      stub = @server.stub({
+        method: "POST"
+        url: /foo/
+      })
+
+      xhr = new @window.XMLHttpRequest
+      xhr.open("POST", "foobar")
+      @server.applyStubProperties(xhr, stub)
+
+      expect(@setRequestHeader).not.to.be.calledWith("X-Cypress-Headers")
+
+  context "#stub", ->
+    beforeEach ->
+      @server = $Cypress.Server2.create(@window, {
+        xhrUrl: "__cypress/xhrs/"
+        delay: 100
+        waitOnResponse: false
+        foo: "bar"
+      })
+
+    it "merges defaults for delay, autoRespond, waitOnResponse and pushes into stubs", ->
+      expect(@server.stubs).to.be.empty
+      @server.stub({
+        url: /foo/
+        response: {}
+        delay: 50
+        autoRespond: undefined
+        waitOnResponse: undefined
+      })
+
+      expect(@server.stubs.length).to.eq(1)
+      expect(@server.stubs[0]).to.deep.eq {
+        url: /foo/
+        response: {}
+        delay: 50
+        autoRespond: true
+        waitOnResponse: false
+      }
 
   context "#add", ->
     beforeEach ->

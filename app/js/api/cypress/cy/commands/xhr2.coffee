@@ -5,19 +5,23 @@ $Cypress.register "XHR2", (Cypress, _) ->
       server.restore()
 
   Cypress.on "before:window:load", (contentWindow) ->
-    @startServer(contentWindow)
+    @startXhrServer(contentWindow)
 
   Cypress.Cy.extend
-    startServer: (contentWindow) ->
+    getXhrServer: ->
+      @prop("server") ? @throwErr("The XHR server is unavailable or missing. This should never happen and most likely indicates a bug. Open an issue if you see this message.")
+
+    startXhrServer: (contentWindow) ->
       logs = {}
       ## do the same thing like what we did with the
       ## sandbox?
 
       ## abort outstanding XHR's that are still in flight?
       ## when moving between tests?
-      @prop "server", $Cypress.Server2.initialize(contentWindow, {
+      @prop "server", $Cypress.Server2.create(contentWindow, {
+        testId: @private("runnable").id
         xhrUrl: @private("xhrUrl")
-        onSend: (xhr) ->
+        onSend: (xhr, stack) ->
           logs[xhr.id] = Cypress.Log.command({
             message:   ""
             name:      "xhr"
@@ -56,12 +60,40 @@ $Cypress.register "XHR2", (Cypress, _) ->
         onError: (xhr, err) ->
           if log = logs[xhr.id]
             log.snapshot().error(err)
+
+        onAbort: (xhr, stack) ->
+          err = new Error("This XHR was aborted by your code -- check this stack trace below.")
+          err.name = "AbortError"
+          err.stack = stack
+
+          if log = logs[xhr.id]
+            log.snapshot().error(err)
       })
 
   Cypress.addParentCommand
-    server2: (args...) ->
+    server2: (options = {}) ->
+      _.defaults options,
+        enable: true ## set enable to false to turn off stubbing
+
+      @getXhrServer().set({})#options)
 
     route2: (args...) ->
-      server = @prop("server")
+      ## method / url / response / options
+      ## url / response / options
+      ## options
+
+      _.defaults options,
+        method: "GET"
+        status: 200
+        stub: true
+        delay: undefined
+        headers: undefined ## response headers
+        response: undefined
+        autoRespond: undefined
+        waitOnResponse: undefined
+        onRequest: ->
+        onResponse: ->
+
+      server = @getXhrServer()
 
       server.stub({url: /users/, status: 200, response: [{}, {}]})

@@ -1,9 +1,15 @@
 $Cypress.Server2 = do ($Cypress, _) ->
 
   twoOrMoreDoubleSlashesRe = /\/{2,}/g
+  regularResourcesRe       = /\.(js|html|css)$/
 
-  header = (val) ->
-    "X-Cypress-" + _.capitalize(val)
+  setHeader = (xhr, key, val, transformer) ->
+    if val?
+      if transformer
+        val = transformer(val)
+
+      key = "X-Cypress-" + _.capitalize(key)
+      xhr.setRequestHeader(key, val)
 
   class $Server
     constructor: (contentWindow, options = {}) ->
@@ -12,17 +18,16 @@ $Cypress.Server2 = do ($Cypress, _) ->
       _.defaults @options,
         testId: ""
         xhrUrl: ""
-        onSend: ->
-        onAbort: ->
-        onError: ->
-        onLoad: ->
-        # log: true ## always log for the time being
         delay: 0
         enable: true
         autoRespond: true
         waitOnResponse: Infinity
         strategy: "deny" ## or allow 404's
-        whitelist: (xhr) -> ## function whether to allow a request to go out (css/js/html/templates) etc
+        whitelist: $Server.whitelist ## function whether to allow a request to go out (css/js/html/templates) etc
+        onSend: ->
+        onAbort: ->
+        onError: ->
+        onLoad: ->
 
       ## what about holding a reference to the test id?
       ## to prevent cross pollution of requests?
@@ -42,6 +47,10 @@ $Cypress.Server2 = do ($Cypress, _) ->
       XHR.prototype.abort = ->
         @aborted = true
 
+        abortStack = server.getStack()
+
+        options.onAbort(@, abortStack)
+
         abort.apply(@, arguments)
 
       XHR.prototype.open = (method, url, async = true, username, password) ->
@@ -53,27 +62,44 @@ $Cypress.Server2 = do ($Cypress, _) ->
         ## if this XHR matches a mocked route then shift
         ## its url to the mocked url and set the request
         ## headers for the response
-        # url = server.normalizeStubUrl(options.xhrUrl, url)
+        if server.getStubForXhr(@)
+          url = server.normalizeStubUrl(options.xhrUrl, url)
 
         ## change absolute url's to relative ones
         ## if they match our baseUrl / visited URL
         open.call(@, method, url, async, username, password)
 
-      XHR.prototype.send = ->
+      XHR.prototype.send = (@requestBody = null) ->
         ## dont send anything if our server isnt active
         ## anymore
         return if not server.isActive
 
-        @initiator = server.getInitiatorStack(@)
+        if _.isString(@requestBody)
+          try
+            ## attempt setting request json
+            ## if requestBody is a string
+            @requestJSON = JSON.parse(@requestBody)
 
         ## add header properties for the xhr's id
         ## and the testId
+        setHeader(@, "id", @id)
+        setHeader(@, "testId", options.testId)
 
+        ## if there is an existing stub for this
+        ## XHR then add those properties into it
         if stub = server.getStubForXhr(@)
           server.applyStubProperties(@, stub)
 
+        ## capture where this xhr came from
+        sendStack = server.getStack()
+
         ## log this out now since it's being sent officially
-        options.onSend(@)
+        options.onSend(@, sendStack)
+
+        if stub
+          ## call the onRequest function
+          ## after we've called options.onSend
+          stub.onRequest(@)
 
         ## if our server is in specific mode for
         ## not waiting or auto responding or delay
@@ -109,28 +135,18 @@ $Cypress.Server2 = do ($Cypress, _) ->
 
         send.apply(@, arguments)
 
-    getInitiatorStack: (xhr) ->
+    getStack: ->
       err = new Error
-      err.stack.split("\n").slice(3)
+      err.stack.split("\n").slice(3).join("\n")
 
     applyStubProperties: (xhr, stub) ->
-      xhr.setRequestHeader header("status"),   stub.status
-      xhr.setRequestHeader header("response"), JSON.stringify(stub.response)
-      xhr.setRequestHeader header("matched"),  stub.url
-      xhr.setRequestHeader header("delay"),    stub.delay
+      setHeader(xhr, "status",   stub.status)
+      setHeader(xhr, "response", stub.response, JSON.stringify)
+      setHeader(xhr, "matched",  stub.url + "")
+      setHeader(xhr, "delay",    stub.delay)
+      setHeader(xhr, "headers",  stub.headers, JSON.stringify)
 
       xhr.isStub = true
-
-      ## either look at accepts / content-type
-      ## or the response to figure out whether
-      ## to set requestJSON
-
-      ## set accepts / content-type headers?
-
-      ## parse the request into requestJSON?
-
-      ## call the onRequest function
-      # stub.onRequest(xhr)
 
     normalizeStubUrl: (xhrUrl, url) ->
       ## always ensure this is an absolute-relative url
@@ -144,8 +160,10 @@ $Cypress.Server2 = do ($Cypress, _) ->
       ## can create another server later
 
       ## dont mutate the original attrs
-      attrs = _.defaults {}, attrs, @options
-      @stubs.push(attrs)
+      stub = _.defaults {}, attrs, _(@options).pick("delay", "autoRespond", "waitOnResponse")
+      @stubs.push(stub)
+
+      return stub
 
     getStubForXhr: (xhr) ->
       ## loop in reverse to get
@@ -155,11 +173,14 @@ $Cypress.Server2 = do ($Cypress, _) ->
         if @xhrMatchesStub(xhr, stub)
           return stub
 
-    xhrMatchesStub: (xhr, stub) ->
-      return true
+      return null
 
-    # find: (xhr) ->
-    #   @xhrs[xhr.id]
+    xhrMatchesStub: (xhr, stub) ->
+      xhr.method is stub.method and
+        if _.isRegExp(stub.url)
+          stub.url.test(xhr.url)
+        else
+          stub.url is xhr.url
 
     add: (xhr, attrs = {}) ->
       _.extend(xhr, attrs)
@@ -178,6 +199,9 @@ $Cypress.Server2 = do ($Cypress, _) ->
 
     set: (obj) ->
       _.extend(@options, obj)
+
+    @whitelist = (xhr) ->
+      xhr.method is "GET" and regularResourcesRe.test(xhr.url)
 
     @create = (contentWindow, options) ->
       new $Server(contentWindow, options)
