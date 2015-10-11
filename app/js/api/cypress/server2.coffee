@@ -110,7 +110,7 @@ $Cypress.Server2 = do ($Cypress, _) ->
         sendStack = server.getStack()
 
         ## log this out now since it's being sent officially
-        server.options.onSend(@, sendStack)
+        server.options.onSend(@, sendStack, stub)
 
         if stub
           ## call the onRequest function
@@ -147,7 +147,7 @@ $Cypress.Server2 = do ($Cypress, _) ->
 
           ## log stuff here when its done
           if @readyState is 4
-            server.options.onLoad(@)
+            server.options.onLoad(@, stub)
 
         send.apply(@, arguments)
 
@@ -161,8 +161,6 @@ $Cypress.Server2 = do ($Cypress, _) ->
       setHeader(xhr, "matched",  stub.url + "")
       setHeader(xhr, "delay",    stub.delay)
       setHeader(xhr, "headers",  stub.headers, JSON.stringify)
-
-      xhr.isStub = true
 
     normalizeStubUrl: (xhrUrl, url) ->
       ## always ensure this is an absolute-relative url

@@ -689,7 +689,7 @@ describe "$Cypress.Cy XHR Commands", ->
               ## and then another when it ends)
               expect(@log.get("snapshots")).not.to.be.ok
 
-        it "does not end xhr requests when the associated command ends", ->
+        it.skip "does not end xhr requests when the associated command ends", ->
           logs = null
 
           @cy
@@ -717,7 +717,7 @@ describe "$Cypress.Cy XHR Commands", ->
                 expect(log.get("name")).to.eq("xhr")
                 expect(log.get("end")).to.be.true
 
-        it "updates log immediately whenever an xhr is aborted", ->
+        it.skip "updates log immediately whenever an xhr is aborted", ->
           snapshot = null
 
           @cy

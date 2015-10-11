@@ -13,8 +13,21 @@ $Cypress.register "XHR2", (Cypress, _) ->
     (not _.isObject(url) and not _.isObject(response)) or
       (_.isRegExp(url) or _.isString(url))
 
+  getUrl = (options) ->
+    options.originalUrl or options.url
+
   unavailableErr = ->
     @throwErr("The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message.")
+
+  getResponse = (xhr) ->
+    ## if request was for JSON
+    ## and this isnt valid JSON then
+    ## we should prob throw a very
+    ## specific error
+    try
+      JSON.parse(xhr.responseText)
+    catch
+      xhr.responseText
 
   defaults = {
     method: "GET"
@@ -31,10 +44,10 @@ $Cypress.register "XHR2", (Cypress, _) ->
 
   Cypress.on "abort", deactivate
 
-  Cypress.on "test:before:hooks", ->
+  Cypress.on "test:before:hooks", (test) ->
     deactivate()
 
-    server = @startXhrServer()
+    server = @startXhrServer(test.id)
 
   Cypress.on "before:window:load", (contentWindow) ->
     if server
@@ -46,15 +59,11 @@ $Cypress.register "XHR2", (Cypress, _) ->
     getXhrServer: ->
       @prop("server") ? unavailableErr.call(@)
 
-    startXhrServer: (contentWindow) ->
+    startXhrServer: (testId) ->
       logs = {}
-      ## do the same thing like what we did with the
-      ## sandbox?
 
-      ## abort outstanding XHR's that are still in flight?
-      ## when moving between tests?
       @prop "server", $Cypress.Server2.create({
-        testId: @private("runnable").id
+        testId: testId
         xhrUrl: @private("xhrUrl")
         normalizeUrl: (url) =>
           ## if url is FQDN that starts with our origin
@@ -67,17 +76,35 @@ $Cypress.register "XHR2", (Cypress, _) ->
           else
             url
 
-        onSend: (xhr, stack) ->
+        onSend: (xhr, stack, stub) =>
+          availableUrls = @prop("availableUrls") or []
+
           logs[xhr.id] = Cypress.Log.command({
             message:   ""
             name:      "xhr"
-            displayName: if xhr.isStub then "xhr stub" else "xhr"
-            # alias:     alias
+            displayName: if stub then "xhr stub" else "xhr"
+            alias:     stub?.alias
             aliasType: "route"
             type:      "parent"
-            # error:     err
             event:     true
-            # onConsole: =>
+            onConsole: =>
+              consoleObj = {
+                Method:        xhr.method
+                URL:           xhr.url
+                "Matched URL": stub.url
+                Status:        xhr.status
+                Response:      getResponse(xhr)
+                Alias:         stub?.alias
+                Request:       xhr
+              }
+
+              ## TODO: TEST THIS
+              if not stub
+                _.extend consoleObj,
+                  Reason: "The URL for request did not match any of your route(s).  It's response was automatically sent back a 404."
+                  "Route URLs": availableUrls
+
+              consoleObj
             onRender: ($row) ->
               status = switch
                 when xhr.aborted
@@ -99,7 +126,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
                 ].join(" ")
           })
 
-        onLoad: (xhr) ->
+        onLoad: (xhr, stub) ->
           if log = logs[xhr.id]
             log.set("foo", "bar").snapshot().end()
 
@@ -121,7 +148,9 @@ $Cypress.register "XHR2", (Cypress, _) ->
       _.defaults options,
         enable: true ## set enable to false to turn off stubbing
 
-      @prop("serverIsStubbed", true)
+      ## if we disable the server later make sure
+      ## we cannot add cy.routes to it
+      @prop("serverIsStubbed", options.enable)
 
       @getXhrServer().set(options)
 
@@ -201,5 +230,24 @@ $Cypress.register "XHR2", (Cypress, _) ->
       ## command (route) has an alias?
       if alias = @getNextAlias()
         options.alias = alias
+
+      ## do not mutate existing availableUrls
+      urls = @prop("availableUrls") ? []
+      urls = urls.concat getUrl(options)
+      @prop "availableUrls", urls
+
+      options.log = Cypress.Log.route
+        method:   options.method
+        url:      getUrl(options)
+        status:   options.status
+        response: options.response
+        alias:    options.alias
+        numResponses: 0
+        onConsole: ->
+          Method:   options.method
+          URL:      getUrl(options)
+          Status:   options.status
+          Response: options.response
+          Alias:    options.alias
 
       @getXhrServer().stub(options)
