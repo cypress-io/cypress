@@ -107,6 +107,10 @@ $Cypress.register "XHR2", (Cypress, _) ->
 
           availableUrls = @prop("availableUrls") or []
 
+          if sl = stub and stub.log
+            numResponses = sl.get("numResponses")
+            sl.set "numResponses", numResponses + 1
+
           logs[xhr.id] = log = Cypress.Log.command({
             message:   ""
             name:      "xhr"
@@ -119,7 +123,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
               consoleObj = {
                 Method:        xhr.method
                 URL:           xhr.url
-                "Matched URL": stub.url
+                "Matched URL": stub?.url
                 Status:        xhr.status
                 Response:      getResponse(xhr)
                 Alias:         alias
@@ -131,6 +135,15 @@ $Cypress.register "XHR2", (Cypress, _) ->
                 _.extend consoleObj,
                   Reason: "The URL for request did not match any of your route(s).  It's response was automatically sent back a 404."
                   "Route URLs": availableUrls
+
+              consoleObj.groups = ->
+                [
+                  {
+                    name: "Initiator"
+                    items: [stack]
+                    label: false
+                  }
+                ]
 
               consoleObj
             onRender: ($row) ->
@@ -269,6 +282,13 @@ $Cypress.register "XHR2", (Cypress, _) ->
       urls = @prop("availableUrls") ? []
       urls = urls.concat getUrl(options)
       @prop "availableUrls", urls
+
+      ## if our response is a string and
+      ## a reference to an alias
+      if _.isString(o.response) and aliasObj = @getAlias(o.response, "route")
+        ## reset the route's response to be the
+        ## aliases subject
+        options.response = aliasObj.subject
 
       options.log = Cypress.Log.route
         method:   options.method
