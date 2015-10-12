@@ -33,7 +33,229 @@
 describe "$Cypress.Cy XHR Commands", ->
   enterCommandTestingMode()
 
-  context "#server", ->
+  context "#startXhrServer", ->
+    beforeEach ->
+      @create = @sandbox.spy $Cypress.Server2, "create"
+      @setup = =>
+        @cy.private("xhrUrl", "__cypress/xhrs/")
+        @Cypress.trigger "test:before:hooks", {id: 123}
+
+        ## pass up our iframe so the server binds to the XHR
+        ## this ends up being faster than doing a cy.visit in every test
+        @Cypress.trigger "before:window:load", @$iframe.prop("contentWindow")
+
+    afterEach ->
+      ## after each test we need to restore the iframe's XHR
+      ## object else we would continue to patch it over and over
+      @cy.prop("server").restore()
+
+    it "sends testId", ->
+      @setup()
+      expect(@create).to.be.calledWithMatch {testId: 123}
+
+    it "sends xhrUrl", ->
+      @setup()
+      expect(@create).to.be.calledWithMatch {xhrUrl: "__cypress/xhrs/"}
+
+    describe ".log", ->
+      beforeEach ->
+        @Cypress.on "log", (@log) =>
+
+        @setup()
+
+      context "requests", ->
+        it "immediately logs xhr obj", ->
+          @cy
+            .server2()
+            .route2(/foo/, {}).as("getFoo")
+            .window().then (win) =>
+              win.$.get("foo")
+              null
+            .then ->
+              expect(@log.pick("name", "displayName", "event", "alias", "aliasType", "state")).to.deep.eq {
+                name: "xhr"
+                displayName: "xhr stub"
+                event: true
+                alias: "getFoo"
+                aliasType: "route"
+                state: "pending"
+              }
+              snapshots = @log.get("snapshots")
+              expect(snapshots.length).to.eq(1)
+              expect(snapshots[0].name).to.eq("request")
+              expect(snapshots[0].state).to.be.an("object")
+
+        it "does not end xhr requests when the associated command ends", ->
+          logs = null
+
+          @cy
+            .server2()
+            .route2({
+              url: /foo/,
+              response: {}
+              delay: 50
+            }).as("getFoo")
+            .window().then (w) ->
+              w.$.getJSON("foo")
+              w.$.getJSON("foo")
+              w.$.getJSON("foo")
+              null
+            .then ->
+              cmd = @cy.commands.findWhere({name: "window"})
+              logs = cmd.get("next").get("logs")
+
+              expect(logs.length).to.eq(3)
+
+              _.each logs, (log) ->
+                expect(log.get("name")).to.eq("xhr")
+                expect(log.get("end")).not.to.be.true
+            .wait(["@getFoo", "@getFoo", "@getFoo"]).then  ->
+              _.each logs, (log) ->
+                expect(log.get("name")).to.eq("xhr")
+                expect(log.get("end")).to.be.true
+
+        it "updates log immediately whenever an xhr is aborted", ->
+          snapshot = null
+          xhrs = null
+
+          @cy
+            .server2()
+            .route2({
+              url: /foo/,
+              response: {}
+              delay: 50
+            }).as("getFoo")
+            .window().then (win) ->
+              xhr1 = win.$.getJSON("foo1")
+              xhr2 = win.$.getJSON("foo2")
+              xhr1.abort()
+
+              null
+            .then ->
+              xhrs = @cy.commands.logs({name: "xhr"})
+
+              expect(xhrs[0].get("state")).to.eq("failed")
+              expect(xhrs[0].get("error").name).to.eq("AbortError")
+              expect(xhrs[0].get("snapshots").length).to.eq(2)
+              expect(xhrs[0].get("snapshots")[0].name).to.eq("request")
+              expect(xhrs[0].get("snapshots")[0].state).to.be.a("object")
+              expect(xhrs[0].get("snapshots")[1].name).to.eq("aborted")
+              expect(xhrs[0].get("snapshots")[1].state).to.be.a("object")
+
+              expect(@cy.prop("requests").length).to.eq(2)
+
+              ## the abort should have set its response
+              expect(@cy.prop("responses").length).to.eq(1)
+            .wait(["@getFoo", "@getFoo"]).then ->
+              ## should not re-snapshot after the response
+              expect(xhrs[0].get("snapshots").length).to.eq(2)
+
+      context "responses", ->
+        beforeEach ->
+          logs = []
+
+          @Cypress.on "log", (log) =>
+            logs.push(log)
+
+          @cy
+            .server2()
+            .route2(/foo/, {}).as("getFoo")
+            .window().then (win) ->
+              win.$.get("foo_bar")
+              null
+            .wait("@getFoo").then ->
+              @log = _(logs).find (l) -> l.get("name") is "xhr"
+
+        it "logs obj", ->
+          obj = {
+            name: "xhr"
+            displayName: "xhr stub"
+            event: true
+            message: ""
+            type: "parent"
+            aliasType: "route"
+            referencesAlias: undefined
+            alias: "getFoo"
+          }
+
+          _.each obj, (value, key) =>
+            expect(@log.get(key)).to.deep.eq(value, "expected key: #{key} to eq value: #{value}")
+
+        it "#onConsole", ->
+
+        it "ends", ->
+          expect(@log.get("state")).to.eq("passed")
+
+        it "snapshots again", ->
+          expect(@log.get("snapshots").length).to.eq(2)
+          expect(@log.get("snapshots")[0].name).to.eq("request")
+          expect(@log.get("snapshots")[0].state).to.be.an("object")
+          expect(@log.get("snapshots")[1].name).to.eq("response")
+          expect(@log.get("snapshots")[1].state).to.be.an("object")
+
+      context "request JSON parsing", ->
+        it "adds requestJSON if requesting JSON", (done) ->
+          @cy
+            .server2()
+            .route2({
+              method: "POST"
+              url: /foo/
+              response: {}
+              onRequest: (xhr) ->
+                expect(xhr).to.have.property("requestJSON")
+                expect(xhr.requestJSON).to.deep.eq {foo: "bar"}
+                expect(xhr.requestBody).to.eq JSON.stringify({foo: "bar"})
+                done()
+            })
+            .window().then (win) ->
+              win.$.ajax
+                type: "POST"
+                url: "/foo"
+                data: JSON.stringify({foo: "bar"})
+                dataType: "json"
+              null
+
+        ## https://github.com/cypress-io/cypress/issues/65
+        it "provides the correct requestJSON on multiple requests", ->
+          post = (win, obj) ->
+            win.$.ajax({
+              type: "POST"
+              url: "/foo"
+              data: JSON.stringify(obj)
+              dataType: "json"
+            })
+
+            return null
+
+          @cy
+            .server2()
+            .route2("POST", /foo/, {}).as("getFoo")
+            .window().then (win) ->
+              post(win, {foo: "bar1"})
+            .wait("@getFoo").its("requestJSON").should("deep.eq", {foo: "bar1"})
+            .window().then (win) ->
+              post(win, {foo: "bar2"})
+            .wait("@getFoo").its("requestJSON").should("deep.eq", {foo: "bar2"})
+
+  context "#server2", ->
+    beforeEach ->
+      @Cypress.trigger "test:before:hooks"
+
+    it "sets serverIsStubbed", ->
+      @cy.server2().then ->
+        expect(@cy.prop("serverIsStubbed")).to.be.true
+
+    it "can disable serverIsStubbed", ->
+      @cy.server2({enable: false}).then ->
+        expect(@cy.prop("serverIsStubbed")).to.be.false
+
+    it "sends enable to server", ->
+      set = @sandbox.spy @cy.prop("server"), "set"
+
+      @cy.server2().then ->
+        expect(set).to.be.calledWithExactly({enable: true})
+
+  context.skip "#server", ->
     beforeEach ->
       defaults = {
         ignore: true
@@ -180,6 +402,8 @@ describe "$Cypress.Cy XHR Commands", ->
             done()
 
           @cy.server2(arg)
+
+      it "after turning off server it throws attempting to route"
 
       describe ".log", ->
         beforeEach ->
@@ -428,47 +652,6 @@ describe "$Cypress.Cy XHR Commands", ->
             expect(response).to.deep.eq {foo: "bar"}
             expect(response).to.deep.eq @foo
 
-    describe.skip "request JSON parsing", ->
-      it "adds requestJSON if requesting JSON", (done) ->
-        @cy
-          .route2({
-            method: "POST"
-            url: /foo/
-            response: {}
-            onRequest: (xhr) ->
-              expect(xhr).to.have.property("requestJSON")
-              expect(xhr.requestJSON).to.deep.eq {foo: "bar"}
-              done()
-          })
-          .then ->
-            @cy.private("window").$.ajax
-              type: "POST"
-              url: "/foo"
-              data: JSON.stringify({foo: "bar"})
-              dataType: "json"
-
-      ## https://github.com/cypress-io/cypress/issues/65
-      it "provides the correct requestJSON on multiple requests", ->
-        post = (win, obj) ->
-          win.$.ajax({
-            type: "POST"
-            url: "/foo"
-            data: JSON.stringify(obj)
-            dataType: "json"
-          })
-
-          return null
-
-        @cy
-          .server2()
-          .route2("POST", /foo/, {}).as("getFoo")
-          .window().then (win) ->
-            post(win, {foo: "bar1"})
-          .wait("@getFoo").its("requestJSON").should("deep.eq", {foo: "bar1"})
-          .window().then (win) ->
-            post(win, {foo: "bar2"})
-          .wait("@getFoo").its("requestJSON").should("deep.eq", {foo: "bar2"})
-
     describe.skip "filtering requests", ->
       beforeEach ->
         @cy.server2()
@@ -491,7 +674,7 @@ describe "$Cypress.Cy XHR Commands", ->
         @cy.server2({ignore: false}).window().then (w) ->
           Promise.resolve(w.$.get("/fixtures/ajax/app.html")).catch -> done()
 
-    describe.only "errors", ->
+    describe "errors", ->
       beforeEach ->
         @allowErrors()
 
@@ -669,121 +852,6 @@ describe "$Cypress.Cy XHR Commands", ->
             # Responses: []
 
           }
-
-      describe "requests", ->
-        it "immediately logs xhr obj", ->
-          @cy
-            .route2(/foo/, {}).as("getFoo")
-            .window().then (win) =>
-              win.$.get("foo")
-              expect(@log.pick("name", "event", "alias", "aliasType", "state")).to.deep.eq {
-                name: "xhr"
-                event: true
-                alias: "getFoo"
-                aliasType: "route"
-                state: "pending"
-              }
-              ## snapshots should not be taken when
-              ## logs are first inserted (but once multiple
-              ## snapshots are working, it should do one at first
-              ## and then another when it ends)
-              expect(@log.get("snapshots")).not.to.be.ok
-
-        it.skip "does not end xhr requests when the associated command ends", ->
-          logs = null
-
-          @cy
-            .route2({
-              url: /foo/,
-              response: {}
-              delay: 50
-            }).as("getFoo")
-            .window().then (w) ->
-              w.$.getJSON("foo")
-              w.$.getJSON("foo")
-              w.$.getJSON("foo")
-              null
-            .then ->
-              cmd = @cy.commands.findWhere({name: "window"})
-              logs = cmd.get("next").get("logs")
-
-              expect(logs.length).to.eq(3)
-
-              _.each logs, (log) ->
-                expect(log.get("name")).to.eq("xhr")
-                expect(log.get("end")).not.to.be.true
-            .wait(["@getFoo", "@getFoo", "@getFoo"]).then  ->
-              _.each logs, (log) ->
-                expect(log.get("name")).to.eq("xhr")
-                expect(log.get("end")).to.be.true
-
-        it.skip "updates log immediately whenever an xhr is aborted", ->
-          snapshot = null
-
-          @cy
-            .route2({
-              url: /foo/,
-              response: {}
-              delay: 50
-            }).as("getFoo")
-            .window().then (w) ->
-              xhr = w.$.getJSON("foo")
-              w.$.getJSON("foo")
-              xhr.abort()
-
-              null
-            .then ->
-              xhrs = @cy.commands.logs({name: "xhr"})
-
-              snapshot = @sandbox.spy(xhrs[0], "snapshot")
-
-              expect(xhrs[0].get("state")).to.eq("failed")
-              expect(xhrs[0].get("error").name).to.eq("AbortError")
-              expect(xhrs[0].get("snapshots").length).to.eq(1)
-              expect(xhrs[0].get("snapshots")[0]).to.be.an("object")
-
-              expect(@cy.prop("requests").length).to.eq(2)
-              expect(@cy.prop("responses")).to.be.undefined
-            .wait(["@getFoo", "@getFoo"]).then ->
-              ## should not re-snapshot after the response
-              expect(snapshot).not.to.be.called
-
-      describe "responses", ->
-        beforeEach ->
-          logs = []
-
-          @Cypress.on "log", (log) =>
-            logs.push(log)
-
-          @cy
-            .route2(/foo/, {}).as("getFoo")
-            .window().then (win) ->
-              win.$.get("foo_bar")
-            .wait("@getFoo").then ->
-              @log = _(logs).find (l) -> l.get("name") is "xhr"
-
-        it "logs obj", ->
-          obj = {
-            name: "xhr"
-            event: true
-            message: ""
-            type: "parent"
-            aliasType: "route"
-            referencesAlias: undefined
-            alias: "getFoo"
-          }
-
-          _.each obj, (value, key) =>
-            expect(@log.get(key)).to.deep.eq(value, "expected key: #{key} to eq value: #{value}")
-
-        it "#onConsole", ->
-
-        it "ends", ->
-          expect(@log.get("state")).to.eq("passed")
-
-        it "snapshots again", ->
-          expect(@log.get("snapshots").length).to.eq(1)
-          expect(@log.get("snapshots")[0]).to.be.an("object")
 
       describe "numResponses", ->
         it "is initially 0", ->

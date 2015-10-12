@@ -57,6 +57,10 @@ $Cypress.Server2 = do ($Cypress, _) ->
       open  = XHR.prototype.open
       abort = XHR.prototype.abort
 
+      server.restore = ->
+        _.each {send: send, open: open, abort: abort}, (value, key) ->
+          XHR.prototype[key] = value
+
       XHR.prototype.abort = ->
         @aborted = true
 
@@ -127,6 +131,7 @@ $Cypress.Server2 = do ($Cypress, _) ->
           ## by the onload function
           try
             onload.apply(@, arguments)
+            server.options.onLoad(@, stub)
           catch err
             server.options.onError(@, err)
 
@@ -134,20 +139,6 @@ $Cypress.Server2 = do ($Cypress, _) ->
         @onerror = ->
           console.log "onerror"
           debugger
-
-        ## wait until the last possible moment to attach to onreadystatechange
-        orst = @onreadystatechange
-        @onreadystatechange = ->
-          if _.isFunction(orst)
-            orst.apply(@, arguments)
-
-          ## override xhr.onload so we
-          ## can catch XHR related errors
-          ## that happen on the response?
-
-          ## log stuff here when its done
-          if @readyState is 4
-            server.options.onLoad(@, stub)
 
         send.apply(@, arguments)
 
@@ -243,6 +234,10 @@ $Cypress.Server2 = do ($Cypress, _) ->
         @enableStubs(enable)
 
       _.extend(@options, obj)
+
+    ## noop by default to keep
+    ## standard interface
+    restore: ->
 
     ## override the defaults for all
     ## servers

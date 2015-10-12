@@ -1,6 +1,8 @@
 $Cypress.register "XHR2", (Cypress, _) ->
 
   validHttpMethodsRe = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)$/i
+  requestXhrRe       = /\.request$/
+  validAliasApiRe    = /^(\d+|all)$/
 
   server = null
 
@@ -29,6 +31,28 @@ $Cypress.register "XHR2", (Cypress, _) ->
     catch
       xhr.responseText
 
+  setRequest = (xhr, alias) ->
+    requests = @prop("requests") ? []
+
+    requests.push({
+      xhr: xhr
+      alias: alias
+    })
+
+    @prop("requests", requests)
+
+  setResponse = (xhr) ->
+    obj = _.findWhere @prop("requests"), {xhr: xhr}
+
+    responses = @prop("responses") ? []
+
+    responses.push({
+      xhr: xhr
+      alias: obj?.alias
+    })
+
+    @prop("responses", responses)
+
   defaults = {
     method: "GET"
     status: 200
@@ -44,7 +68,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
 
   Cypress.on "abort", deactivate
 
-  Cypress.on "test:before:hooks", (test) ->
+  Cypress.on "test:before:hooks", (test = {}) ->
     deactivate()
 
     server = @startXhrServer(test.id)
@@ -77,13 +101,17 @@ $Cypress.register "XHR2", (Cypress, _) ->
             url
 
         onSend: (xhr, stack, stub) =>
+          alias = stub?.alias
+
+          setRequest.call(@, xhr, alias)
+
           availableUrls = @prop("availableUrls") or []
 
-          logs[xhr.id] = Cypress.Log.command({
+          logs[xhr.id] = log = Cypress.Log.command({
             message:   ""
             name:      "xhr"
             displayName: if stub then "xhr stub" else "xhr"
-            alias:     stub?.alias
+            alias:     alias
             aliasType: "route"
             type:      "parent"
             event:     true
@@ -94,7 +122,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
                 "Matched URL": stub.url
                 Status:        xhr.status
                 Response:      getResponse(xhr)
-                Alias:         stub?.alias
+                Alias:         alias
                 Request:       xhr
               }
 
@@ -126,21 +154,27 @@ $Cypress.register "XHR2", (Cypress, _) ->
                 ].join(" ")
           })
 
-        onLoad: (xhr, stub) ->
+          log.snapshot("request")
+
+        onLoad: (xhr) =>
+          setResponse.call(@, xhr)
+
           if log = logs[xhr.id]
-            log.set("foo", "bar").snapshot().end()
+            log.snapshot("response").end()
 
         onError: (xhr, err) ->
           if log = logs[xhr.id]
             log.snapshot().error(err)
 
-        onAbort: (xhr, stack) ->
+        onAbort: (xhr, stack) =>
+          setResponse.call(@, xhr)
+
           err = new Error("This XHR was aborted by your code -- check this stack trace below.")
           err.name = "AbortError"
           err.stack = stack
 
           if log = logs[xhr.id]
-            log.snapshot().error(err)
+            log.snapshot("aborted").error(err)
       })
 
   Cypress.addParentCommand
@@ -251,3 +285,69 @@ $Cypress.register "XHR2", (Cypress, _) ->
           Alias:    options.alias
 
       @getXhrServer().stub(options)
+
+  Cypress.Cy.extend
+    getPendingRequests: ->
+      return [] if not requests = @prop("requests")
+
+      return requests if not responses = @prop("responses")
+
+      _.difference requests, responses
+
+    getCompletedRequests: ->
+      @prop("responses") ? []
+
+    _getLastXhrByAlias: (alias, prop) ->
+      ## find the last request or response
+      ## which hasnt already been used.
+      xhrs = @prop(prop) ? []
+
+      ## allow us to handle waiting on both
+      ## the request or the response part of the xhr
+      privateProp = "_has#{prop}BeenWaitedOn"
+
+      for obj in xhrs
+        ## we want to return the first xhr which has
+        ## not already been waited on, and if its alias matches ours
+        if !obj[privateProp] and obj.alias is alias
+          obj[privateProp] = true
+          return obj.xhr
+
+    ## this should actually be getRequestsByAlias
+    ## since this will return all requests and not
+    ## responses
+    getResponsesByAlias: (alias) ->
+      [alias, prop] = alias.split(".")
+
+      if prop and not validAliasApiRe.test(prop)
+        @throwErr "'#{prop}' is not a valid alias property. Only 'numbers' or 'all' is permitted."
+
+      if prop is "0"
+        @throwErr "'0' is not a valid alias property. Are you trying to ask for the first response? If so write @#{alias}.1"
+
+      ## return an array of xhrs
+      matching = _(@prop("responses")).chain().where({alias: alias}).pluck("xhr").value()
+
+      ## return the whole array if prop is all
+      return matching if prop is "all"
+
+      ## else if prop its a digit and we need to return
+      ## the 1-based response from the array
+      return matching[_.toNumber(prop) - 1] if prop
+
+      ## else return the last matching response
+      return _.last(matching)
+
+    getLastXhrByAlias: (alias) ->
+      [str, prop] = alias.split(".")
+
+      if prop
+        if prop is "request"
+          return @_getLastXhrByAlias(str, "requests")
+        else
+          @throwErr "'#{prop}' is not a valid alias property. Are you trying to ask for the first request? If so write @#{str}.request"
+
+      @_getLastXhrByAlias(alias, "responses")
+
+    getXhrTypeByAlias: (alias) ->
+      if requestXhrRe.test(alias) then "request" else "response"

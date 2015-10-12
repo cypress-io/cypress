@@ -5,6 +5,8 @@ fs        = require("fs")
 hbs       = require("hbs")
 glob      = require("glob")
 coffee    = require("coffee-script")
+str       = require("string-to-stream")
+Promise   = require("bluebird")
 _         = require("underscore")
 
 app       = express()
@@ -74,6 +76,21 @@ app.get "/lib/*", (req, res) ->
 app.get "/fixtures/*", (req, res) ->
   res.sendFile "fixtures/#{req.params[0]}",
     root: __dirname
+
+app.all "/__cypress/xhrs/*", (req, res, next) ->
+  respond = ->
+    res.type("json").status(req.get("x-cypress-status"))
+
+    ## figure out the stream interface and pipe these
+    ## chunks to the response
+    str(req.get("x-cypress-response")).pipe(res)
+
+  delay = ~~req.get("x-cypress-delay")
+
+  if delay > 0
+    Promise.delay(delay).then(respond)
+  else
+    respond()
 
 app.get "/", (req, res) ->
   res.render path.join(__dirname, "views", "index.html"), {
