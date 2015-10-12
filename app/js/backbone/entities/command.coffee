@@ -134,7 +134,10 @@
           console.groupCollapsed(group.name)
 
           _.each group.items, (value, key) ->
-            fn ["%c" + key, "color: blue", value]
+            if group.label is false
+              fn [value]
+            else
+              fn ["%c" + key, "color: blue", value]
 
           console.groupEnd()
 
