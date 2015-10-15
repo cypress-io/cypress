@@ -18,6 +18,12 @@ writeErr = (str, msgs...) ->
   write(str)
   process.exit(1)
 
+  ## since we normally stub out exit we need to
+  ## throw the str here so our test code's promises
+  ## do what they're supposed to do!
+  if process.env["CYPRESS_ENV"] isnt "production"
+    throw(str)
+
 SecretSauce =
   mixin: (module, klass) ->
     for key, fn of @[module]
@@ -74,7 +80,8 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
       branch: getBranch()
       author: getAuthor()
       message: getMessage()
-    }).then (git) ->
+    })
+    .then (git) ->
       request.post({
         url: Routes.ci(projectId)
         headers: {
@@ -87,9 +94,9 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
       })
       .then (attrs) ->
         attrs.ci_guid
+      .catch (err) ->
+        writeErr("Sorry, your project's API Key: '#{key}' was not valid. This project cannot run in CI.")
     .then(fn)
-    .catch (err) ->
-      writeErr("Sorry, your project's API Key: '#{key}' was not valid. This project cannot run in CI.")
 
   ensureLinuxEnv = ->
     return true if os.platform() is "linux"
@@ -105,6 +112,9 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
     ## else die and log out the auth error
     writeErr("Sorry, you are not currently logged into Cypress. This request requires authentication.\nPlease log into Cypress and then issue this command again.")
 
+  ## think about publicly attaching this class
+  ## to the CLI object (in test env) so we can test
+  ## it easier without doing NW integration tests
   class Cli
     constructor: (@App, options = {}) ->
       @user = @App.currentUser

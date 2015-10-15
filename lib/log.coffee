@@ -68,6 +68,9 @@ logger.defaultErrorHandler = (err) ->
 
   ## do not exit on error, let us
   ## handle it manually
+  ## why are we returning false here?
+  ## we need to return false only from
+  ## exitOnError
   return false
 
 logger.setSettings = (obj) ->
@@ -146,5 +149,11 @@ logger.log = _.wrap logger.log, (orig, args...) ->
       type: "server"
 
   orig.apply(@, args)
+
+process.removeAllListeners("unhandledRejection")
+process.on "unhandledRejection", (err, promise) ->
+  logger.defaultErrorHandler(err)
+
+  return false
 
 module.exports = logger

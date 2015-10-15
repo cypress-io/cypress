@@ -18,6 +18,7 @@ beforeEach ->
   App.Utilities.Overrides.overloadMochaRunnerUncaught()
 
 afterEach ->
+  process.removeAllListeners("unhandledRejection")
   @sandbox.restore()
 
   ## must remove references to the server
