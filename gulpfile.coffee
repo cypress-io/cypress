@@ -10,6 +10,8 @@ runSequence   = require "run-sequence"
 os            = require "os"
 deploy        = require "./lib/deploy"
 
+fs = Promise.promisifyAll(fs)
+
 require("lodash").bindAll(deploy)
 
 platform = ->
@@ -35,6 +37,8 @@ log = (obj = {}) ->
 transform = (paths, options = {}) ->
   new Promise (resolve, reject) ->
     gulp.src(paths)
+      .pipe $.cached(options.destination)
+
       .pipe $.plumber errorHandler: log
 
       .pipe $.tap (file, t) ->
@@ -42,6 +46,8 @@ transform = (paths, options = {}) ->
 
       .pipe $.tap (file, t) ->
         t.through($.eco, [basePath: options.basePath])  if isEco(file)
+
+      .pipe $.remember(options.destination)
 
       .pipe if options.concat then $.concat(options.concat + ".js", newLine: "; \r\n") else $.util.noop()
 
@@ -64,16 +70,18 @@ compileCss = (source, dest) ->
     .on "error", log
     .pipe gulp.dest "#{dest}/public/css"
 
-compileJs = (source, options, cb) ->
-  bundles = yaml.load(fs.readFileSync("#{source}/js/js.yml", "utf8"))
+getYaml = (source) ->
+  fs.readFileAsync("#{source}/js/js.yml", "utf8").then(yaml.load)
 
-  tasks = _.reduce bundles, (memo, files, name) ->
-    obj = _.extend {}, options, {concat: name}
-    memo.push transform(files, obj)
-    memo
-  , []
+compileJs = (source, options) ->
+  getYaml(source).then (bundles) ->
+    tasks = _.reduce bundles, (memo, files, name) ->
+      obj = _.extend {}, options, {concat: name}
+      memo.push transform(files, obj)
+      memo
+    , []
 
-  Promise.all(tasks)
+    Promise.all(tasks)
 
 minify = (source, destination) ->
   gulp.src(source)
@@ -82,6 +90,10 @@ minify = (source, destination) ->
       preserveComments: "some"
     }))
     .pipe(gulp.dest(destination))
+
+getClientJsOpts = ->
+  destination: "lib/public/js"
+  basePath: "app/js"
 
 gulp.task "client:css", -> compileCss("app", "lib")
 
@@ -126,12 +138,8 @@ gulp.task "project:img", ->
   gulp.src("app/img/**/*")
     .pipe gulp.dest "lib/public/img"
 
-gulp.task "client:js", (cb) ->
-  options =
-    destination: "lib/public/js"
-    basePath: "app/js"
-
-  compileJs("app", options, cb)
+gulp.task "client:js", ->
+  compileJs("app", getClientJsOpts())
 
 gulp.task "nw:js", (cb) ->
   options =
@@ -179,7 +187,26 @@ gulp.task "watch:client:css", ->
   gulp.watch "app/css/**", ["client:css"]
 
 gulp.task "watch:client:js", ->
-  gulp.watch "app/js/**/*", ["client:js"]
+  options = getClientJsOpts()
+
+  getYaml("app").then (bundles) ->
+    ## watch all of the files in the app.yml so we rebuild
+    ## on any reloads including vendor changes
+    files = _.chain(bundles).values().flatten().uniq().value()
+    watcher = gulp.watch files, ["client:js"]
+
+  #   _.each bundles, (files, name) ->
+  #     watcher = gulp.watch files, ->
+  #       start = process.hrtime()
+  #       gulp.emit("task_start", {task: "client:js (#{name})"})
+  #       transform(files, _.extend({concat: name}, options)).then ->
+  #         end = process.hrtime(start)
+  #         gulp.emit("task_stop", {task: "client:js (#{name})", hrDuration: end})
+
+    watcher.on "change", (event) ->
+      if event.type is "deleted"
+        delete $.cache.caches[options.destination][event.path]
+        remember.forget(options.destination, event.path)
 
 gulp.task "watch:nw:css", ->
   gulp.watch "nw/css/**", ["nw:css"]
