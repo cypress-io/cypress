@@ -54,6 +54,9 @@ $Cypress.Server2 = do ($Cypress, _) ->
         response: {}
       }
 
+    getXhr: ->
+      @xhr ? throw new Error("$Proxy#xhr is missing!")
+
     setStatus: ->
       @status = @xhr.status
       @statusMessage = "#{@xhr.status} (#{@xhr.statusText})"
@@ -211,7 +214,7 @@ $Cypress.Server2 = do ($Cypress, _) ->
         if stub and _.isFunction(stub.onRequest)
           ## call the onRequest function
           ## after we've called server.options.onSend
-          stub.onRequest(proxy)
+          stub.onRequest(@)
 
         ## if our server is in specific mode for
         ## not waiting or auto responding or delay

@@ -12,7 +12,7 @@
 #         }).done (resp) ->
 #           debugger
 
-#   context "#server2", ->
+#   context "#server", ->
 #     describe "Cypress.on(restore)", ->
 #       it "calls server#restore"
 
@@ -29,7 +29,7 @@
 
 #       context "#onConsole", ->
 
-#   context "#route2", ->
+#   context "#route", ->
 describe "$Cypress.Cy XHR Commands", ->
   enterCommandTestingMode()
 
@@ -63,7 +63,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
     describe.skip "filtering requests", ->
       beforeEach ->
-        @cy.server2()
+        @cy.server()
 
       extensions = {
         html: "ajax html"
@@ -80,7 +80,7 @@ describe "$Cypress.Cy XHR Commands", ->
       it "can disable default filtering", (done) ->
         ## this should throw since it should return 404 when no
         ## route matches it
-        @cy.server2({ignore: false}).window().then (w) ->
+        @cy.server({ignore: false}).window().then (w) ->
           Promise.resolve(w.$.get("/fixtures/ajax/app.html")).catch -> done()
 
     describe ".log", ->
@@ -92,8 +92,8 @@ describe "$Cypress.Cy XHR Commands", ->
       context "requests", ->
         it "immediately logs xhr obj", ->
           @cy
-            .server2()
-            .route2(/foo/, {}).as("getFoo")
+            .server()
+            .route(/foo/, {}).as("getFoo")
             .window().then (win) ->
               win.$.get("foo")
               null
@@ -116,8 +116,8 @@ describe "$Cypress.Cy XHR Commands", ->
           logs = null
 
           @cy
-            .server2()
-            .route2({
+            .server()
+            .route({
               url: /foo/,
               response: {}
               delay: 50
@@ -146,8 +146,8 @@ describe "$Cypress.Cy XHR Commands", ->
           xhrs = null
 
           @cy
-            .server2()
-            .route2({
+            .server()
+            .route({
               url: /foo/,
               response: {}
               delay: 50
@@ -199,8 +199,8 @@ describe "$Cypress.Cy XHR Commands", ->
             logs.push(log)
 
           @cy
-            .server2()
-            .route2(/foo/, {}).as("getFoo")
+            .server()
+            .route(/foo/, {}).as("getFoo")
             .window().then (win) ->
               win.$.get("foo_bar")
               null
@@ -235,8 +235,8 @@ describe "$Cypress.Cy XHR Commands", ->
       context "request JSON parsing", ->
         it "adds requestJSON if requesting JSON", (done) ->
           @cy
-            .server2()
-            .route2({
+            .server()
+            .route({
               method: "POST"
               url: /foo/
               response: {}
@@ -267,8 +267,8 @@ describe "$Cypress.Cy XHR Commands", ->
             return null
 
           @cy
-            .server2()
-            .route2("POST", /foo/, {}).as("getFoo")
+            .server()
+            .route("POST", /foo/, {}).as("getFoo")
             .window().then (win) ->
               post(win, {foo: "bar1"})
             .wait("@getFoo").its("requestJSON").should("deep.eq", {foo: "bar1"})
@@ -276,22 +276,22 @@ describe "$Cypress.Cy XHR Commands", ->
               post(win, {foo: "bar2"})
             .wait("@getFoo").its("requestJSON").should("deep.eq", {foo: "bar2"})
 
-  context "#server2", ->
+  context "#server", ->
     beforeEach ->
       @Cypress.trigger "test:before:hooks"
 
     it "sets serverIsStubbed", ->
-      @cy.server2().then ->
+      @cy.server().then ->
         expect(@cy.prop("serverIsStubbed")).to.be.true
 
     it "can disable serverIsStubbed", ->
-      @cy.server2({enable: false}).then ->
+      @cy.server({enable: false}).then ->
         expect(@cy.prop("serverIsStubbed")).to.be.false
 
     it "sends enable to server", ->
       set = @sandbox.spy @cy.prop("server"), "set"
 
-      @cy.server2().then ->
+      @cy.server().then ->
         expect(set).to.be.calledWithExactly({enable: true})
 
   context.skip "#server", ->
@@ -317,14 +317,14 @@ describe "$Cypress.Cy XHR Commands", ->
         expect(@create.getCall(0).args[1]).to.have.keys _.keys(@options({}))
         done()
 
-      @cy.server2()
+      @cy.server()
 
     it "can accept an object literal as options", (done) ->
       @cy.on "end", =>
         expect(@create.getCall(0).args[1]).to.have.keys _.keys(@options({foo: "foo"}))
         done()
 
-      @cy.server2({foo: "foo"})
+      @cy.server({foo: "foo"})
 
     it "can accept an onRequest and onResponse callback", (done) ->
       onRequest = ->
@@ -334,7 +334,7 @@ describe "$Cypress.Cy XHR Commands", ->
         expect(@create.getCall(0).args[1]).to.have.keys _.keys(@options({onRequest: onRequest, onResponse, onResponse}))
         done()
 
-      @cy.server2(onRequest, onResponse)
+      @cy.server(onRequest, onResponse)
 
     it "can accept onRequest and onRespond through options", (done) ->
       onRequest = ->
@@ -344,42 +344,42 @@ describe "$Cypress.Cy XHR Commands", ->
         expect(@create.getCall(0).args[1]).to.have.keys _.keys(@options({onRequest: onRequest, onResponse, onResponse}))
         done()
 
-      @cy.server2({onRequest: onRequest, onResponse: onResponse})
+      @cy.server({onRequest: onRequest, onResponse: onResponse})
 
     it "starts the fake XHR server", ->
-      @cy.server2().then ->
+      @cy.server().then ->
         expect(@cy.prop("sandbox").server).to.be.defined
 
     it "sets ignore=true by default", ->
-      @cy.server2().then ->
+      @cy.server().then ->
         expect(@cy.prop("sandbox").server.xhr.useFilters).to.be.true
 
     it "can set ignore=false", ->
-      @cy.server2({ignore: false}).then ->
+      @cy.server({ignore: false}).then ->
         expect(@cy.prop("sandbox").server.xhr.useFilters).to.be.false
 
     it "sets respond=true by default", ->
-      @cy.server2().then ->
+      @cy.server().then ->
         expect(@cy.prop("server")._autoRespond).to.be.true
 
     it "can set respond=false", ->
-      @cy.server2({respond: false}).then ->
+      @cy.server({respond: false}).then ->
         expect(@cy.prop("server")._autoRespond).to.be.false
 
     it "sets delay to 10ms by default", ->
-      @cy.server2().then ->
+      @cy.server().then ->
         expect(@cy.prop("server")._delay).to.eq 10
 
     it "can set delay to 100ms", ->
-      @cy.server2({delay: 100}).then ->
+      @cy.server({delay: 100}).then ->
         expect(@cy.prop("server")._delay).to.eq 100
 
     it "delay prevents a response from immediately responding", ->
       clock = @sandbox.useFakeTimers("setTimeout")
 
       @cy
-        .server2({delay: 5000})
-        .route2(/users/, {})
+        .server({delay: 5000})
+        .route(/users/, {})
         .window().then (win) ->
           win.$.get("/users")
           clock.tick(4000)
@@ -393,19 +393,19 @@ describe "$Cypress.Cy XHR Commands", ->
 
       it "can start server with no errors", ->
         @cy
-          .server2()
+          .server()
           .visit("fixtures/html/sinon.html")
 
       it "can add routes with no errors", ->
         @cy
-          .server2()
-          .route2(/foo/, {})
+          .server()
+          .route(/foo/, {})
           .visit("fixtures/html/sinon.html")
 
       it "routes xhr requests", ->
         @cy
-          .server2()
-          .route2(/foo/, {foo: "bar"})
+          .server()
+          .route(/foo/, {foo: "bar"})
           .visit("fixtures/html/sinon.html")
           .window().then (w) ->
             w.$.get("/foo")
@@ -414,8 +414,8 @@ describe "$Cypress.Cy XHR Commands", ->
 
       it "works with aliases", ->
         @cy
-          .server2()
-          .route2(/foo/, {foo: "bar"}).as("getFoo")
+          .server()
+          .route(/foo/, {foo: "bar"}).as("getFoo")
           .visit("fixtures/html/sinon.html")
           .window().then (w) ->
             w.$.get("/foo")
@@ -424,8 +424,8 @@ describe "$Cypress.Cy XHR Commands", ->
 
       it "prevents XHR's from going out from sinon.html", ->
         @cy
-          .server2()
-          .route2(/bar/, {bar: "baz"}).as("getBar")
+          .server()
+          .route(/bar/, {bar: "baz"}).as("getBar")
           .visit("fixtures/html/sinon.html")
           .wait("@getBar").then (xhr) ->
             expect(xhr.responseText).to.eq JSON.stringify({bar: "baz"})
@@ -437,10 +437,10 @@ describe "$Cypress.Cy XHR Commands", ->
       _.each ["asdf", 123, null, undefined], (arg) ->
         it "throws on bad argument: #{arg}", (done) ->
           @cy.on "fail", (err) ->
-            expect(err.message).to.include ".server2() only accepts a single object literal or 2 callback functions!"
+            expect(err.message).to.include ".server() only accepts a single object literal or 2 callback functions!"
             done()
 
-          @cy.server2(arg)
+          @cy.server(arg)
 
       it "after turning off server it throws attempting to route"
 
@@ -467,8 +467,8 @@ describe "$Cypress.Cy XHR Commands", ->
             done()
 
           @cy
-            .server2()
-            .route2(/foo/, {}).as("getFoo")
+            .server()
+            .route(/foo/, {}).as("getFoo")
             .window().then (win) ->
               win.$.get("/foo").done ->
                 throw new Error("specific ajax error")
@@ -482,11 +482,11 @@ describe "$Cypress.Cy XHR Commands", ->
         _.each opts, (value, key) ->
           expect(options[key]).to.deep.eq(opts[key], "failed on property: (#{key})")
 
-      @cy.server2().then ->
+      @cy.server().then ->
         @stub   = @sandbox.spy @server, "stub"
 
     it "accepts url, response", ->
-      @cy.route2("/foo", {}).then ->
+      @cy.route("/foo", {}).then ->
         @expectOptionsToBe({
           method: "GET"
           status: 200
@@ -495,7 +495,7 @@ describe "$Cypress.Cy XHR Commands", ->
         })
 
     it "accepts regex url, response", ->
-      @cy.route2(/foo/, {}).then ->
+      @cy.route(/foo/, {}).then ->
         @expectOptionsToBe({
           method: "GET"
           status: 200
@@ -506,7 +506,7 @@ describe "$Cypress.Cy XHR Commands", ->
     it.skip "accepts url, response, onRequest", ->
       onRequest = ->
 
-      @cy.route2("/foo", {}, onRequest).then ->
+      @cy.route("/foo", {}, onRequest).then ->
         @expectOptionsToBe({
           method: "GET"
           status: 200
@@ -520,7 +520,7 @@ describe "$Cypress.Cy XHR Commands", ->
       onRequest = ->
       onResponse = ->
 
-      @cy.route2("/foo", {}, onRequest, onResponse).then ->
+      @cy.route("/foo", {}, onRequest, onResponse).then ->
         @expectOptionsToBe({
           method: "GET"
           status: 200
@@ -531,7 +531,7 @@ describe "$Cypress.Cy XHR Commands", ->
         })
 
     it "accepts method, url, response", ->
-      @cy.route2("GET", "/foo", {}).then ->
+      @cy.route("GET", "/foo", {}).then ->
         @expectOptionsToBe({
           method: "GET"
           status: 200
@@ -542,7 +542,7 @@ describe "$Cypress.Cy XHR Commands", ->
     it.skip "accepts method, url, response, onRequest", ->
       onRequest = ->
 
-      @cy.route2("GET", "/foo", {}, onRequest).then ->
+      @cy.route("GET", "/foo", {}, onRequest).then ->
         @expectOptionsToBe({
           method: "GET"
           url: "/foo"
@@ -556,7 +556,7 @@ describe "$Cypress.Cy XHR Commands", ->
       onRequest = ->
       onResponse = ->
 
-      @cy.route2("GET", "/foo", {}, onRequest, onResponse).then ->
+      @cy.route("GET", "/foo", {}, onRequest, onResponse).then ->
         @expectOptionsToBe({
           method: "GET"
           url: "/foo"
@@ -567,7 +567,7 @@ describe "$Cypress.Cy XHR Commands", ->
         })
 
     it "uppercases method", ->
-      @cy.route2("get", "/foo", {}).then ->
+      @cy.route("get", "/foo", {}).then ->
         @expectOptionsToBe({
           method: "GET"
           status: 200
@@ -576,7 +576,7 @@ describe "$Cypress.Cy XHR Commands", ->
         })
 
     it "accepts string or regex as the url", ->
-      @cy.route2("get", /.*/, {}).then ->
+      @cy.route("get", /.*/, {}).then ->
         @expectOptionsToBe({
           method: "GET"
           status: 200
@@ -597,7 +597,7 @@ describe "$Cypress.Cy XHR Commands", ->
         onResponse: onResponse
       }
 
-      @cy.route2(opts).then ->
+      @cy.route(opts).then ->
         @expectOptionsToBe(opts)
 
     it "can accept wildcard * as URL and converts to /.*/ regex", ->
@@ -606,7 +606,7 @@ describe "$Cypress.Cy XHR Commands", ->
         response: {}
       }
 
-      @cy.route2(opts).then ->
+      @cy.route(opts).then ->
         @expectOptionsToBe({
           method: "GET"
           status: 200
@@ -619,15 +619,15 @@ describe "$Cypress.Cy XHR Commands", ->
       onRequest = -> done()
 
       @cy
-        .server2()
-        .route2("POST", "/users", {}, onRequest)
+        .server()
+        .route("POST", "/users", {}, onRequest)
         .then ->
           @cy.private("window").$.post("/users", "name=brian")
 
     it.skip "can explicitly done() in onRequest function from options", (done) ->
       @cy
-        .server2()
-        .route2({
+        .server()
+        .route({
           method: "POST"
           url: "/users"
           response: {}
@@ -638,14 +638,14 @@ describe "$Cypress.Cy XHR Commands", ->
 
     it.skip "adds multiple routes to the responses array", ->
       @cy
-        .route2("foo", {})
-        .route2("bar", {})
+        .route("foo", {})
+        .route("bar", {})
         .then ->
           expect(@cy.prop("sandbox").server.responses).to.have.length(2)
 
     it.skip "can use regular strings as response", ->
       @cy
-        .route2("foo", "foo bar baz").as("getFoo")
+        .route("foo", "foo bar baz").as("getFoo")
         .window().then (win) ->
           win.$.get("foo")
           null
@@ -664,7 +664,7 @@ describe "$Cypress.Cy XHR Commands", ->
       _.each ["fx:", "fixture:"], (type) =>
         it "can pass a #{type} reference to route", ->
           @cy
-            .route2(/foo/, "#{type}foo").as("getFoo")
+            .route(/foo/, "#{type}foo").as("getFoo")
             .window().then (win) ->
               win.$.getJSON("foo")
               null
@@ -676,7 +676,7 @@ describe "$Cypress.Cy XHR Commands", ->
       it "can pass an alias reference to route", ->
         @cy
           .noop({foo: "bar"}).as("foo")
-          .route2(/foo/, "@foo").as("getFoo")
+          .route(/foo/, "@foo").as("getFoo")
           .window().then (win) ->
             win.$.getJSON("foo")
             null
@@ -689,7 +689,7 @@ describe "$Cypress.Cy XHR Commands", ->
       beforeEach ->
         @allowErrors()
 
-      it "throws if cy.server2() hasnt been invoked", (done) ->
+      it "throws if cy.server() hasnt been invoked", (done) ->
         @Cypress.restore()
         @Cypress.set(@test)
 
@@ -697,14 +697,14 @@ describe "$Cypress.Cy XHR Commands", ->
           expect(err.message).to.include "cy.route() cannot be invoked before starting the cy.server()"
           done()
 
-        @cy.route2()
+        @cy.route()
 
       it "url must be a string or regexp", (done) ->
         @cy.on "fail", (err) ->
           expect(err.message).to.include "cy.route() was called with a invalid url. Url must be either a string or regular expression."
           done()
 
-        @cy.route2({
+        @cy.route({
           url: {}
         })
 
@@ -713,35 +713,35 @@ describe "$Cypress.Cy XHR Commands", ->
           expect(err.message).to.include "cy.route() was called with an invalid method: 'POSTS'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"
           done()
 
-        @cy.route2("posts", "/foo", {})
+        @cy.route("posts", "/foo", {})
 
       it "requires a response", (done) ->
         @cy.on "fail", (err) ->
           expect(err.message).to.include "cy.route() must be called with a response."
           done()
 
-        @cy.route2("post", "/foo")
+        @cy.route("post", "/foo")
 
       it "requires a url when given a response", (done) ->
         @cy.on "fail", (err) ->
           expect(err.message).to.include "cy.route() must be called with a url. It can be a string or regular expression."
           done()
 
-        @cy.route2({})
+        @cy.route({})
 
       it "requires a response with no method", (done) ->
         @cy.on "fail", (err) ->
           expect(err.message).to.include "cy.route() must be called with a response."
           done()
 
-        @cy.route2(/foo/)
+        @cy.route(/foo/)
 
       it "requires arguments", (done) ->
         @cy.on "fail", (err) ->
           expect(err.message).to.include "cy.route() must be given a method, url, and response."
           done()
 
-        @cy.route2()
+        @cy.route()
 
       it.skip "sets err on log when caused by the XHR response", (done) ->
         @Cypress.on "log", (@log) =>
@@ -752,7 +752,7 @@ describe "$Cypress.Cy XHR Commands", ->
           done()
 
         @cy
-          .route2(/foo/, {}).as("getFoo")
+          .route(/foo/, {}).as("getFoo")
           .window().then (win) ->
             win.$.get("foo_bar").done ->
               foo.bar()
@@ -782,7 +782,7 @@ describe "$Cypress.Cy XHR Commands", ->
           done()
 
         @cy
-          .route2(/foo/, "fixture:bar")
+          .route(/foo/, "fixture:bar")
 
       it.skip "does not retry (cancels existing promise) when xhr errors", (done) ->
         cancel = @sandbox.spy(Promise.prototype, "cancel")
@@ -800,7 +800,7 @@ describe "$Cypress.Cy XHR Commands", ->
           , 100
 
         @cy
-          .route2({
+          .route({
             url: /foo/,
             response: {}
             delay: 100
@@ -818,7 +818,7 @@ describe "$Cypress.Cy XHR Commands", ->
           logs.push @log
 
         @cy.on "fail", (err) =>
-          expect(err.message).to.eq "cy.route2() could not find a registered alias for: 'bar'. Available aliases are: 'foo'."
+          expect(err.message).to.eq "cy.route() could not find a registered alias for: 'bar'. Available aliases are: 'foo'."
           expect(logs.length).to.eq(2)
           expect(@log.get("name")).to.eq "route"
           expect(@log.get("error")).to.eq err
@@ -827,30 +827,30 @@ describe "$Cypress.Cy XHR Commands", ->
 
         @cy
           .wrap({foo: "bar"}).as("foo")
-          .route2(/foo/, "@bar")
+          .route(/foo/, "@bar")
 
       _.each [undefined, null], (val) =>
         it.skip "requires response not be #{val}", (done) ->
           @cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.route2() cannot accept an undefined or null response. It must be set to something, even an empty string will work."
+            expect(err.message).to.include "cy.route() cannot accept an undefined or null response. It must be set to something, even an empty string will work."
             done()
 
-          @cy.route2(/foo/, val)
+          @cy.route(/foo/, val)
 
     describe ".log", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
 
       it "has name of route", ->
-        @cy.route2("/foo", {}).then ->
+        @cy.route("/foo", {}).then ->
           expect(@log.get("name")).to.eq "route"
 
       it "uses the wildcard URL", ->
-        @cy.route2("*", {}).then ->
+        @cy.route("*", {}).then ->
           expect(@log.get("url")).to.eq("*")
 
       it "#onConsole", ->
-        @cy.route2("*", {foo: "bar"}).as("foo").then ->
+        @cy.route("*", {foo: "bar"}).as("foo").then ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "route"
             Method: "GET"
@@ -866,12 +866,12 @@ describe "$Cypress.Cy XHR Commands", ->
 
       describe "numResponses", ->
         it "is initially 0", ->
-          @cy.route2(/foo/, {}).then =>
+          @cy.route(/foo/, {}).then =>
             expect(@log.get("numResponses")).to.eq 0
 
         it "is incremented to 2", ->
           @cy
-            .route2(/foo/, {}).then ->
+            .route(/foo/, {}).then ->
               @route = @log
             .window().then (win) ->
               win.$.get("/foo")
@@ -880,7 +880,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
         it "is incremented for each matching request", ->
           @cy
-            .route2(/foo/, {}).then ->
+            .route(/foo/, {}).then ->
               @route = @log
             .window().then (win) ->
               @cy.Promise.all [
@@ -901,8 +901,8 @@ describe "$Cypress.Cy XHR Commands", ->
       ## after the 2nd visit - which is an example of the remote iframe
       ## causing an onBeforeLoad event
       @cy
-        .server2()
-        .route2(/foo/, {foo: "bar"}).as("getFoo")
+        .server()
+        .route(/foo/, {foo: "bar"}).as("getFoo")
         .then ->
           expect(@cy.prop("bindServer")).to.be.a("function")
           expect(@cy.prop("bindRoutes")).to.be.a("array")
@@ -921,7 +921,7 @@ describe "$Cypress.Cy XHR Commands", ->
         expect(cancel).to.be.called
         done()
 
-      @cy.server2().then ->
+      @cy.server().then ->
         cancel = @sandbox.spy @cy.prop("server"), "cancel"
         @Cypress.trigger "abort"
 
@@ -951,7 +951,7 @@ describe "$Cypress.Cy XHR Commands", ->
       respond = null
 
       @cy
-        .server2({delay: 100}).then (server) ->
+        .server({delay: 100}).then (server) ->
           respond = @sandbox.spy server, "respond"
         .window().then (win) ->
           win.$.get("/users")
@@ -965,7 +965,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
       it "errors without a server", (done) ->
         @cy.on "fail", (err) =>
-          expect(err.message).to.eq "cy.respond() cannot be invoked before starting the cy.server2()"
+          expect(err.message).to.eq "cy.respond() cannot be invoked before starting the cy.server()"
           done()
 
         @cy.respond()
@@ -976,8 +976,8 @@ describe "$Cypress.Cy XHR Commands", ->
           done()
 
         @cy
-          .server2()
-          .route2(/users/, {})
+          .server()
+          .route(/users/, {})
           .window().then (win) ->
             ## this is waited on to be resolved
             ## because of jquery promise thenable
@@ -990,8 +990,8 @@ describe "$Cypress.Cy XHR Commands", ->
       #     debugger
 
       #   @cy
-      #     .server2()
-      #     .route2({
+      #     .server()
+      #     .route({
       #       url: /foo/
       #       respond: false
       #     })

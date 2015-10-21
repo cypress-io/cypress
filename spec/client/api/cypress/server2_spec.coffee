@@ -17,6 +17,7 @@ describe "$Cypress.Cy Server2 API", ->
       @abort = @sandbox.spy(@window.XMLHttpRequest.prototype, "abort")
       @server = $Cypress.Server2.create({
         xhrUrl: "__cypress/xhrs/"
+        onAbort: ->
       })
       @server.bindTo(@window)
       @xhr = new @window.XMLHttpRequest
@@ -30,6 +31,13 @@ describe "$Cypress.Cy Server2 API", ->
       @xhr.open("GET", "/foo")
       @xhr.abort()
       expect(@abort).to.be.calledOn(@xhr)
+
+    it "calls onAbort callback with xhr + stack trace", ->
+      @sandbox.stub(@server, "getStack").returns("foobarbaz")
+      onAbort = @sandbox.spy @server.options, "onAbort"
+      @xhr.open("GET", "/foo")
+      @xhr.abort()
+      expect(onAbort).to.be.calledWith(@server.getProxyFor(@xhr), "foobarbaz")
 
   context "XHR#open", ->
     beforeEach ->
@@ -166,7 +174,7 @@ describe "$Cypress.Cy Server2 API", ->
     it "sets headers", ->
       @expectRequestHeader("Headers", JSON.stringify({"x-token": "123-abc"}))
 
-    it "sets isStub=true", ->
+    it.skip "sets isStub=true", ->
       expect(@xhr.isStub).to.be.true
 
     it "does not set null/undefined headers", ->
@@ -194,7 +202,7 @@ describe "$Cypress.Cy Server2 API", ->
       @server.bindTo(@window)
       @server.enableStubs()
 
-    it "merges defaults for delay, autoRespond, waitOnResponse and pushes into stubs", ->
+    it "merges defaults for delay, status, autoRespond, waitOnResponse and pushes into stubs", ->
       expect(@server.stubs).to.be.empty
       @server.stub({
         url: /foo/
@@ -209,6 +217,7 @@ describe "$Cypress.Cy Server2 API", ->
         url: /foo/
         response: {}
         delay: 50
+        status: 200
         autoRespond: true
         waitOnResponse: false
       }

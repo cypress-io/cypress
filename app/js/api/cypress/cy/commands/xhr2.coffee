@@ -31,17 +31,22 @@ $Cypress.register "XHR2", (Cypress, _) ->
     else
       resp
 
+  getXhr = (xhr) ->
+    xhr.getXhr()
+
   setRequest = (xhr, alias) ->
     requests = @prop("requests") ? []
 
     requests.push({
-      xhr: xhr
+      xhr: getXhr(xhr)
       alias: alias
     })
 
     @prop("requests", requests)
 
   setResponse = (xhr) ->
+    xhr = getXhr(xhr)
+
     obj = _.findWhere @prop("requests"), {xhr: xhr}
 
     responses = @prop("responses") ? []
@@ -75,6 +80,8 @@ $Cypress.register "XHR2", (Cypress, _) ->
 
   Cypress.on "before:window:load", (contentWindow) ->
     if server
+      ## should we be restoring the previous
+      ## content window here?
       server.bindTo(contentWindow)
     else
       unavailableErr.call(@)
