@@ -267,7 +267,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
   context "#server", ->
     beforeEach ->
-      @Cypress.trigger "test:before:hooks"
+      @setup()
 
     it "sets serverIsStubbed", ->
       @cy.server().then ->
@@ -282,6 +282,24 @@ describe "$Cypress.Cy XHR Commands", ->
 
       @cy.server().then ->
         expect(set).to.be.calledWithExactly({enable: true})
+
+    it "can disable the server after enabling it", ->
+      set = @sandbox.spy @cy.prop("server"), "set"
+
+      @cy
+        .server()
+        .route(/app/, {}).as("getJSON")
+        .window().then (win) ->
+          win.$.get("/fixtures/ajax/app.json")
+          null
+        .wait("@getJSON").its("responseText").should("eq", "{}")
+        .server({enable: false})
+        .then ->
+          expect(set).to.be.calledWithExactly({enable: false})
+        .window().then (win) ->
+          win.$.get("/fixtures/ajax/app.json")
+          null
+        .wait("@getJSON").its("responseText").should("not.eq", "{}")
 
   context.skip "#server", ->
     beforeEach ->
@@ -684,6 +702,10 @@ describe "$Cypress.Cy XHR Commands", ->
             win.$.get("/fixtures/ajax/app.json")
             null
           .wait("@getFoo").then (xhr) ->
+            log = @cy.commands.logs({name: "xhr"})[0]
+
+            expect(log.get("alias")).to.eq("getFoo")
+
             response = JSON.parse(xhr.responseText)
             expect(response).to.deep.eq({
               some: "json"

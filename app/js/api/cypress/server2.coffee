@@ -176,7 +176,7 @@ $Cypress.Server2 = do ($Cypress, _) ->
         ## its url to the mocked url and set the request
         ## headers for the response
         stub = server.getStubForXhr(@)
-        if stub and stub.stub isnt false
+        if server.shouldApplyStub(stub)
           url = server.normalizeStubUrl(server.options.xhrUrl, url)
 
         ## change absolute url's to relative ones
@@ -201,8 +201,10 @@ $Cypress.Server2 = do ($Cypress, _) ->
 
         ## if there is an existing stub for this
         ## XHR then add those properties into it
+        ## only if stub isnt explicitly false
+        ## and the server is enabled
         stub = server.getStubForXhr(@)
-        if stub and stub.stub isnt false
+        if server.shouldApplyStub(stub)
           server.applyStubProperties(@, stub)
 
         ## capture where this xhr came from
@@ -251,6 +253,10 @@ $Cypress.Server2 = do ($Cypress, _) ->
       err = new Error
       err.stack.split("\n").slice(3).join("\n")
 
+    shouldApplyStub: (stub) ->
+      ## make sure the stub or the server isnt 'unstubbed'
+      stub and stub.stub isnt false and @isStubbed()
+
     applyStubProperties: (xhr, stub) ->
       responser = if _.isObject(stub.response) then JSON.stringify else null
 
@@ -278,8 +284,8 @@ $Cypress.Server2 = do ($Cypress, _) ->
       return stub
 
     getStubForXhr: (xhr) ->
-      ## bail if we're not currently stubbed
-      return nope() if not @isStubbed()
+      ## bail if we've attached no stubs
+      return nope() if not @stubs.length
 
       ## bail if this xhr matches our whitelist
       return nope() if @options.whitelist.call(@, xhr)
@@ -341,8 +347,8 @@ $Cypress.Server2 = do ($Cypress, _) ->
 
     set: (obj) ->
       ## handle enable=true|false
-      if enable = obj.enable
-        @enableStubs(enable)
+      if obj.enable?
+        @enableStubs(obj.enable)
 
       _.extend(@options, obj)
 
