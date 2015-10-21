@@ -60,15 +60,14 @@ $Cypress.register "XHR2", (Cypress, _) ->
 
   defaults = {
     method: "GET"
-    status: 200
-    stub: true
+    stub: undefined
     delay: undefined
     headers: undefined ## response headers
     response: undefined
     autoRespond: undefined
     waitOnResponse: undefined
-    onRequest: ->
-    onResponse: ->
+    onRequest: undefined ## need to rebind these to 'cy' context
+    onResponse: undefined
   }
 
   Cypress.on "abort", deactivate
@@ -135,7 +134,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
                 Status:        xhr.statusMessage
                 Response:      getResponse(xhr.response)
                 Headers:       xhr.headers
-                Request:       xhr.xhr
+                Request:       xhr.getXhr()
               }
 
               # ## TODO: TEST THIS
@@ -273,7 +272,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
       if not validHttpMethodsRe.test(options.method)
         @throwErr "cy.route() was called with an invalid method: '#{o.method}'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"
 
-      if not options.response? and options.respond isnt false
+      if not options.response? and options.stub isnt false ## or autoRespond?
         @throwErr "cy.route() cannot accept an undefined or null response. It must be set to something, even an empty string will work."
 
       ## convert to wildcard regex

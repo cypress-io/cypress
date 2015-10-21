@@ -29,10 +29,13 @@ $Cypress.Server2 = do ($Cypress, _) ->
     xhrUrl: ""
     delay: 0
     status: 200
+    stub: true
     enable: true
     autoRespond: true
     waitOnResponse: Infinity
     force404: true ## or allow 404's
+    onRequest: undefined
+    onResponse: undefined
     normalizeUrl: _.identity
     whitelist: whitelist ## function whether to allow a request to go out (css/js/html/templates) etc
     onSend: ->
@@ -172,7 +175,8 @@ $Cypress.Server2 = do ($Cypress, _) ->
         ## if this XHR matches a mocked route then shift
         ## its url to the mocked url and set the request
         ## headers for the response
-        if server.getStubForXhr(@)
+        stub = server.getStubForXhr(@)
+        if stub and stub.stub isnt false
           url = server.normalizeStubUrl(server.options.xhrUrl, url)
 
         ## change absolute url's to relative ones
@@ -197,7 +201,8 @@ $Cypress.Server2 = do ($Cypress, _) ->
 
         ## if there is an existing stub for this
         ## XHR then add those properties into it
-        if stub = server.getStubForXhr(@)
+        stub = server.getStubForXhr(@)
+        if stub and stub.stub isnt false
           server.applyStubProperties(@, stub)
 
         ## capture where this xhr came from
@@ -267,7 +272,7 @@ $Cypress.Server2 = do ($Cypress, _) ->
       ## can create another server later
 
       ## dont mutate the original attrs
-      stub = _.defaults {}, attrs, _(@options).pick("delay", "status", "autoRespond", "waitOnResponse")
+      stub = _.defaults {}, attrs, _(@options).pick("delay", "method", "status", "stub", "autoRespond", "waitOnResponse", "onRequest", "onResponse")
       @stubs.push(stub)
 
       return stub
@@ -300,8 +305,6 @@ $Cypress.Server2 = do ($Cypress, _) ->
         response: ""
         delay: 0
         headers: null
-        onRequest: ->
-        onResponse: ->
       }
 
     xhrMatchesStub: (xhr, stub) ->

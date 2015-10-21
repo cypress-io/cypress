@@ -83,6 +83,53 @@ describe "$Cypress.Cy XHR Commands", ->
         @cy.server({ignore: false}).window().then (w) ->
           Promise.resolve(w.$.get("/fixtures/ajax/app.html")).catch -> done()
 
+    describe "request JSON parsing", ->
+      beforeEach ->
+        @setup()
+
+      it "adds requestJSON if requesting JSON", (done) ->
+        @cy
+          .server()
+          .route({
+            method: "POST"
+            url: /foo/
+            response: {}
+            onRequest: (xhr) ->
+              expect(xhr).to.have.property("requestJSON")
+              expect(xhr.requestJSON).to.deep.eq {foo: "bar"}
+              expect(xhr.requestBody).to.eq JSON.stringify({foo: "bar"})
+              done()
+          })
+          .window().then (win) ->
+            win.$.ajax
+              type: "POST"
+              url: "/foo"
+              data: JSON.stringify({foo: "bar"})
+              dataType: "json"
+            null
+
+      ## https://github.com/cypress-io/cypress/issues/65
+      it "provides the correct requestJSON on multiple requests", ->
+        post = (win, obj) ->
+          win.$.ajax({
+            type: "POST"
+            url: "/foo"
+            data: JSON.stringify(obj)
+            dataType: "json"
+          })
+
+          return null
+
+        @cy
+          .server()
+          .route("POST", /foo/, {}).as("getFoo")
+          .window().then (win) ->
+            post(win, {foo: "bar1"})
+          .wait("@getFoo").its("requestJSON").should("deep.eq", {foo: "bar1"})
+          .window().then (win) ->
+            post(win, {foo: "bar2"})
+          .wait("@getFoo").its("requestJSON").should("deep.eq", {foo: "bar2"})
+
     describe ".log", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
@@ -177,20 +224,6 @@ describe "$Cypress.Cy XHR Commands", ->
               ## should not re-snapshot after the response
               expect(xhrs[0].get("snapshots").length).to.eq(2)
 
-        it "#onConsole sets groups Initiator", ->
-          @cy
-            .window().then (win) ->
-              win.$.get("foo")
-              null
-            .then ->
-              onConsole = @log.attributes.onConsole()
-
-              group = onConsole.groups()[0]
-              expect(group.name).to.eq("Initiator")
-              expect(group.label).to.be.false
-              expect(group.items[0]).to.be.a("string")
-              expect(group.items[0].split("\n").length).to.gt(1)
-
       context "responses", ->
         beforeEach ->
           logs = []
@@ -231,50 +264,6 @@ describe "$Cypress.Cy XHR Commands", ->
           expect(@log.get("snapshots")[0].state).to.be.an("object")
           expect(@log.get("snapshots")[1].name).to.eq("response")
           expect(@log.get("snapshots")[1].state).to.be.an("object")
-
-      context "request JSON parsing", ->
-        it "adds requestJSON if requesting JSON", (done) ->
-          @cy
-            .server()
-            .route({
-              method: "POST"
-              url: /foo/
-              response: {}
-              onRequest: (xhr) ->
-                expect(xhr).to.have.property("requestJSON")
-                expect(xhr.requestJSON).to.deep.eq {foo: "bar"}
-                expect(xhr.requestBody).to.eq JSON.stringify({foo: "bar"})
-                done()
-            })
-            .window().then (win) ->
-              win.$.ajax
-                type: "POST"
-                url: "/foo"
-                data: JSON.stringify({foo: "bar"})
-                dataType: "json"
-              null
-
-        ## https://github.com/cypress-io/cypress/issues/65
-        it "provides the correct requestJSON on multiple requests", ->
-          post = (win, obj) ->
-            win.$.ajax({
-              type: "POST"
-              url: "/foo"
-              data: JSON.stringify(obj)
-              dataType: "json"
-            })
-
-            return null
-
-          @cy
-            .server()
-            .route("POST", /foo/, {}).as("getFoo")
-            .window().then (win) ->
-              post(win, {foo: "bar1"})
-            .wait("@getFoo").its("requestJSON").should("deep.eq", {foo: "bar1"})
-            .window().then (win) ->
-              post(win, {foo: "bar2"})
-            .wait("@getFoo").its("requestJSON").should("deep.eq", {foo: "bar2"})
 
   context "#server", ->
     beforeEach ->
@@ -685,6 +674,24 @@ describe "$Cypress.Cy XHR Commands", ->
             expect(response).to.deep.eq {foo: "bar"}
             expect(response).to.deep.eq @foo
 
+      it "can alias a route without stubbing it", ->
+        @cy
+          .route({
+            url: /ajax\/app/
+            stub: false
+          }).as("getFoo")
+          .window().then (win) ->
+            win.$.get("/fixtures/ajax/app.json")
+            null
+          .wait("@getFoo").then (xhr) ->
+            response = JSON.parse(xhr.responseText)
+            expect(response).to.deep.eq({
+              some: "json"
+              foo: {
+                bar: "baz"
+              }
+            })
+
     describe "errors", ->
       beforeEach ->
         @allowErrors()
@@ -890,6 +897,84 @@ describe "$Cypress.Cy XHR Commands", ->
               ]
             .then ->
               expect(@route.get("numResponses")).to.eq 3
+
+  context "onConsole logs", ->
+    beforeEach ->
+      @Cypress.on "log", (@log) =>
+
+      @setup()
+
+    # it "truncates response" ## do this in a route stub
+
+    describe "zero configuration / zero routes", ->
+      beforeEach ->
+        @cy
+          .server()
+          .window().then (win) ->
+            new Promise (resolve) ->
+              win.$.ajax({
+                method: "POST"
+                url: "/foo"
+                data: JSON.stringify({foo: "bar"})
+              }).fail ->
+                resolve()
+
+      it "sends back 404", ->
+        @cy.then ->
+          xhr = @cy.prop("responses")[0].xhr
+
+          onConsole = _.pick @log.attributes.onConsole(), "Method", "Status", "URL", "Request"
+          expect(onConsole).to.deep.eq({
+            Method: "POST"
+            Status: "404 (Not Found)"
+            URL: "/foo"
+            Request: xhr
+          })
+
+    describe "{force404: false}", ->
+      beforeEach ->
+        @cy
+          .server({force404: false})
+          .window().then (win) ->
+            win.$.getJSON("/fixtures/ajax/app.json")
+
+      it "logs request + response headers", ->
+        @cy.then ->
+          onConsole = @log.attributes.onConsole()
+          expect(onConsole.Headers.request).to.be.an("object")
+          expect(onConsole.Headers.response).to.be.an("object")
+
+      it "logs Method, Status, URL, and Request", ->
+        @cy.then ->
+          xhr = @cy.prop("responses")[0].xhr
+
+          onConsole = _.pick @log.attributes.onConsole(), "Method", "Status", "URL", "Request"
+          expect(onConsole).to.deep.eq({
+            Method: "GET"
+            URL: "/fixtures/ajax/app.json"
+            Status: "200 (OK)"
+            Request: xhr
+          })
+
+      it "logs response", ->
+        @cy.then ->
+          onConsole = @log.attributes.onConsole()
+          expect(onConsole.Response).to.deep.eq({
+            some: "json"
+            foo: {
+              bar: "baz"
+            }
+          })
+
+      it "sets groups Initiator", ->
+        @cy.then ->
+          onConsole = @log.attributes.onConsole()
+
+          group = onConsole.groups()[0]
+          expect(group.name).to.eq("Initiator")
+          expect(group.label).to.be.false
+          expect(group.items[0]).to.be.a("string")
+          expect(group.items[0].split("\n").length).to.gt(1)
 
   context.skip "Cypress.on(before:window:load)", ->
     beforeEach ->
