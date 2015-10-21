@@ -78,12 +78,18 @@ app.get "/fixtures/*", (req, res) ->
     root: __dirname
 
 app.all "/__cypress/xhrs/*", (req, res, next) ->
-  respond = ->
-    res.type("json").status(req.get("x-cypress-status"))
+  resp   = req.get("x-cypress-response") or ""
 
-    ## figure out the stream interface and pipe these
-    ## chunks to the response
-    str(req.get("x-cypress-response")).pipe(res)
+  respond = =>
+    res
+      .type("json")
+      .status(req.get("x-cypress-status"))
+
+    if _.isString(resp)
+      try
+        resp = JSON.parse(resp)
+
+    res.send(resp)
 
   delay = ~~req.get("x-cypress-delay")
 
