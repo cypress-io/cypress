@@ -21,6 +21,10 @@ $Cypress.register "XHR2", (Cypress, _) ->
   unavailableErr = ->
     @throwErr("The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message.")
 
+  urlWithoutOrigin = (url) ->
+    location = Cypress.Location.create(url)
+    location.href.replace(location.origin, "")
+
   getResponse = (xhr) ->
     ## if request was for JSON
     ## and this isnt valid JSON then
@@ -163,7 +167,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
                 [
                   "<i class='fa fa-circle #{klass}'></i>" + xhr.method,
                   status,
-                  _.truncate(xhr.url, 20)
+                  _.truncate(urlWithoutOrigin(xhr.url), 20)
                 ].join(" ")
           })
 
