@@ -25,15 +25,11 @@ $Cypress.register "XHR2", (Cypress, _) ->
     location = Cypress.Location.create(url)
     location.href.replace(location.origin, "")
 
-  getResponse = (xhr) ->
-    ## if request was for JSON
-    ## and this isnt valid JSON then
-    ## we should prob throw a very
-    ## specific error
-    try
-      JSON.parse(xhr.responseText)
-    catch
-      xhr.responseText
+  getResponse = (resp) ->
+    if _.isString(resp)
+      _.truncate(resp, 100, " ... (truncated)")
+    else
+      resp
 
   setRequest = (xhr, alias) ->
     requests = @prop("requests") ? []
@@ -125,20 +121,21 @@ $Cypress.register "XHR2", (Cypress, _) ->
             event:     true
             onConsole: =>
               consoleObj = {
+                Alias:         alias
                 Method:        xhr.method
                 URL:           xhr.url
                 "Matched URL": stub?.url
-                Status:        xhr.status
-                Response:      getResponse(xhr)
-                Alias:         alias
-                Request:       xhr
+                Status:        xhr.statusMessage
+                Response:      getResponse(xhr.response)
+                Headers:       xhr.headers
+                Request:       xhr.xhr
               }
 
-              ## TODO: TEST THIS
-              if not stub
-                _.extend consoleObj,
-                  Reason: "The URL for request did not match any of your route(s).  It's response was automatically sent back a 404."
-                  "Route URLs": availableUrls
+              # ## TODO: TEST THIS
+              # if not stub
+              #   _.extend consoleObj,
+              #     Reason: "The URL for request did not match any of your route(s).  It's response was automatically sent back a 404."
+              #     "Route URLs": availableUrls
 
               consoleObj.groups = ->
                 [
@@ -195,7 +192,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
       })
 
   Cypress.addParentCommand
-    server2: (options = {}) ->
+    server: (options = {}) ->
       _.defaults options,
         enable: true ## set enable to false to turn off stubbing
 
@@ -205,7 +202,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
 
       @getXhrServer().set(options)
 
-    route2: (args...) ->
+    route: (args...) ->
       ## method / url / response / options
       ## url / response / options
       ## options

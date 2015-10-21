@@ -1,7 +1,8 @@
 $Cypress.Server2 = do ($Cypress, _) ->
 
   twoOrMoreDoubleSlashesRe = /\/{2,}/g
-  regularResourcesRe       = /\.(js|html|css)$/
+  regularResourcesRe       = /\.(jsx?|html|css)$/
+  isCypressHeaderRe        = /^X-Cypress-/i
 
   setHeader = (xhr, key, val, transformer) ->
     if val?
@@ -13,6 +14,12 @@ $Cypress.Server2 = do ($Cypress, _) ->
 
   nope = -> return null
 
+  parseJSON = (text) ->
+    try
+      JSON.parse(text)
+    catch
+      text
+
   whitelist = (xhr) ->
     ## whitelist if we're GET + looks like we're fetching regular resources
     xhr.method is "GET" and regularResourcesRe.test(xhr.url)
@@ -21,6 +28,7 @@ $Cypress.Server2 = do ($Cypress, _) ->
     testId: ""
     xhrUrl: ""
     delay: 0
+    status: 200
     enable: true
     autoRespond: true
     waitOnResponse: Infinity
@@ -33,6 +41,69 @@ $Cypress.Server2 = do ($Cypress, _) ->
     onLoad: ->
   }
 
+  class $Proxy
+    constructor: (@xhr) ->
+      @id            = @xhr.id
+      @url           = @xhr.url
+      @method        = @xhr.method
+      @status        = null
+      @response      = null
+      @statusMessage = null
+      @headers       = {
+        request: {}
+        response: {}
+      }
+
+    setStatus: ->
+      @status = @xhr.status
+      @statusMessage = "#{@xhr.status} (#{@xhr.statusText})"
+
+    setResponse: ->
+      ## if request was for JSON
+      ## and this isnt valid JSON then
+      ## we should prob throw a very
+      ## specific error
+      @response = parseJSON(@xhr.responseText)
+
+    setResponseHeaders: ->
+      ## parse response header string into object
+      ## https://gist.github.com/monsur/706839
+      headerStr = @xhr.getAllResponseHeaders()
+
+      set = (resp) =>
+        @headers.response = resp
+
+      headers = {}
+      if not headerStr
+        return set(headers)
+
+      headerPairs = headerStr.split('\u000d\u000a')
+      for headerPair in headerPairs
+        # Can't use split() here because it does the wrong thing
+        # if the header value has the string ": " in it.
+        index = headerPair.indexOf('\u003a\u0020')
+        if index > 0
+          key = headerPair.substring(0, index)
+          val = headerPair.substring(index + 2)
+          headers[key] = val
+
+      set(headers)
+
+    setRequestHeader: (key, val) ->
+      return if isCypressHeaderRe.test(key)
+
+      current = @headers.request[key]
+
+      ## if we already have a request header
+      ## then prepend val with ', '
+      if current
+        val = ", " + val
+
+      @headers.request[key] = val
+
+    @add = (xhr) ->
+      new $Proxy(xhr)
+
   class $Server
     constructor: (@options = {}) ->
       _.defaults @options, defaults
@@ -42,6 +113,7 @@ $Cypress.Server2 = do ($Cypress, _) ->
 
       ## what about restoring the server?
       @xhrs     = {}
+      @proxies  = {}
       @stubs    = []
       @isActive = true
 
@@ -52,21 +124,36 @@ $Cypress.Server2 = do ($Cypress, _) ->
     bindTo: (contentWindow) ->
       server = @
 
-      XHR   = contentWindow.XMLHttpRequest
-      send  = XHR.prototype.send
-      open  = XHR.prototype.open
-      abort = XHR.prototype.abort
+      XHR    = contentWindow.XMLHttpRequest
+      send   = XHR.prototype.send
+      open   = XHR.prototype.open
+      abort  = XHR.prototype.abort
+      srh    = XHR.prototype.setRequestHeader
 
       server.restore = ->
-        _.each {send: send, open: open, abort: abort}, (value, key) ->
+        _.each {send: send, open: open, abort: abort, setRequestHeader: srh}, (value, key) ->
           XHR.prototype[key] = value
 
+      XHR.prototype.setRequestHeader = ->
+        proxy = server.getProxyFor(@)
+
+        proxy.setRequestHeader.apply(proxy, arguments)
+
+        srh.apply(@, arguments)
+
       XHR.prototype.abort = ->
+        ## if we already have a readyState of 4
+        ## then do not get the abort stack or
+        ## set the aborted property or call onAbort
+        ## to test this just use a regular XHR
         @aborted = true
 
         abortStack = server.getStack()
 
-        server.options.onAbort(@, abortStack)
+        proxy = server.getProxyFor(@)
+        proxy.aborted = true
+
+        server.options.onAbort(proxy, abortStack)
 
         abort.apply(@, arguments)
 
@@ -113,13 +200,18 @@ $Cypress.Server2 = do ($Cypress, _) ->
         ## capture where this xhr came from
         sendStack = server.getStack()
 
-        ## log this out now since it's being sent officially
-        server.options.onSend(@, sendStack, stub)
+        ## get the proxy xhr
+        proxy = server.getProxyFor(@)
 
-        if stub
+        ## log this out now since it's being sent officially
+        ## unless its been whitelisted
+        if not server.options.whitelist.call(server, @)
+          server.options.onSend(proxy, sendStack, stub)
+
+        if stub and _.isFunction(stub.onRequest)
           ## call the onRequest function
           ## after we've called server.options.onSend
-          stub.onRequest(@)
+          stub.onRequest(proxy)
 
         ## if our server is in specific mode for
         ## not waiting or auto responding or delay
@@ -127,13 +219,18 @@ $Cypress.Server2 = do ($Cypress, _) ->
         ## do that here.
         onload = @onload
         @onload = ->
+          proxy.setStatus()
+          proxy.setResponse()
+          proxy.setResponseHeaders()
+
           ## catch synchronous errors caused
           ## by the onload function
           try
-            onload.apply(@, arguments)
-            server.options.onLoad(@, stub)
+            if _.isFunction(onload)
+              onload.apply(@, arguments)
+            server.options.onLoad(proxy, stub)
           catch err
-            server.options.onError(@, err)
+            server.options.onError(proxy, err)
 
         onerror = @onerror
         @onerror = ->
@@ -147,8 +244,10 @@ $Cypress.Server2 = do ($Cypress, _) ->
       err.stack.split("\n").slice(3).join("\n")
 
     applyStubProperties: (xhr, stub) ->
+      responser = if _.isObject(stub.response) then JSON.stringify else null
+
       setHeader(xhr, "status",   stub.status)
-      setHeader(xhr, "response", stub.response, JSON.stringify)
+      setHeader(xhr, "response", stub.response, responser)
       setHeader(xhr, "matched",  stub.url + "")
       setHeader(xhr, "delay",    stub.delay)
       setHeader(xhr, "headers",  stub.headers, JSON.stringify)
@@ -165,7 +264,7 @@ $Cypress.Server2 = do ($Cypress, _) ->
       ## can create another server later
 
       ## dont mutate the original attrs
-      stub = _.defaults {}, attrs, _(@options).pick("delay", "autoRespond", "waitOnResponse")
+      stub = _.defaults {}, attrs, _(@options).pick("delay", "status", "autoRespond", "waitOnResponse")
       @stubs.push(stub)
 
       return stub
@@ -198,6 +297,8 @@ $Cypress.Server2 = do ($Cypress, _) ->
         response: ""
         delay: 0
         headers: null
+        onRequest: ->
+        onResponse: ->
       }
 
     xhrMatchesStub: (xhr, stub) ->
@@ -211,6 +312,10 @@ $Cypress.Server2 = do ($Cypress, _) ->
       _.extend(xhr, attrs)
       xhr.id = id = _.uniqueId("xhr")
       @xhrs[id] = xhr
+      @proxies[id] = p = $Proxy.add(xhr)
+
+    getProxyFor: (xhr) ->
+      @proxies[xhr.id]
 
     deactivate: ->
       @isActive = false
@@ -244,6 +349,8 @@ $Cypress.Server2 = do ($Cypress, _) ->
     @defaults = (obj = {}) ->
       ## merge obj into defaults
       _.extend defaults, obj
+
+    @Proxy = $Proxy
 
     @create = (options) ->
       new $Server(options)
