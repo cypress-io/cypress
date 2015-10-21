@@ -14,6 +14,8 @@ fs = Promise.promisifyAll(fs)
 
 require("lodash").bindAll(deploy)
 
+rememberedNames = []
+
 platform = ->
   {
     darwin: "osx64"
@@ -35,9 +37,15 @@ log = (obj = {}) ->
   $.util.beep()
 
 transform = (paths, options = {}) ->
+
+  cacheName = path.join(options.destination, options.concat)
+
+  if cacheName not in rememberedNames
+    rememberedNames.push(cacheName)
+
   new Promise (resolve, reject) ->
     gulp.src(paths)
-      .pipe $.cached(options.destination)
+      .pipe $.cached(cacheName)
 
       .pipe $.plumber errorHandler: log
 
@@ -47,7 +55,7 @@ transform = (paths, options = {}) ->
       .pipe $.tap (file, t) ->
         t.through($.eco, [basePath: options.basePath])  if isEco(file)
 
-      .pipe $.remember(options.destination)
+      .pipe $.remember(cacheName)
 
       .pipe if options.concat then $.concat(options.concat + ".js", newLine: "; \r\n") else $.util.noop()
 
@@ -203,10 +211,15 @@ gulp.task "watch:client:js", ->
   #         end = process.hrtime(start)
   #         gulp.emit("task_stop", {task: "client:js (#{name})", hrDuration: end})
 
+    ## nuke everything on delete or add
     watcher.on "change", (event) ->
-      if event.type is "deleted"
-        delete $.cache.caches[options.destination][event.path]
-        remember.forget(options.destination, event.path)
+      console.log event
+      if /deleted|added/.test(event.type)
+        _.each $.cached.caches, (value, key) ->
+          delete $.cached.caches[key]
+
+        _.each rememberedNames, (name) ->
+          $.remember.forgetAll(name)
 
 gulp.task "watch:nw:css", ->
   gulp.watch "nw/css/**", ["nw:css"]
