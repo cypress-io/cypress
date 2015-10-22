@@ -60,6 +60,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
 
   defaults = {
     method: "GET"
+    status: 200
     stub: undefined
     delay: undefined
     headers: undefined ## response headers
@@ -182,9 +183,13 @@ $Cypress.register "XHR2", (Cypress, _) ->
           if log = logs[xhr.id]
             log.snapshot("response").end()
 
-        onError: (xhr, err) ->
+        onError: (xhr, err) =>
+          err.onFail = ->
+
           if log = logs[xhr.id]
             log.snapshot().error(err)
+
+          @fail(err)
 
         onAbort: (xhr, stack) =>
           setResponse.call(@, xhr)
@@ -198,7 +203,13 @@ $Cypress.register "XHR2", (Cypress, _) ->
       })
 
   Cypress.addParentCommand
-    server: (options = {}) ->
+    server: (options) ->
+      if arguments.length is 0
+        options = {}
+
+      if not _.isObject(options)
+        @throwErr("cy.server() accepts only an object literal as its argument!")
+
       _.defaults options,
         enable: true ## set enable to false to turn off stubbing
 
