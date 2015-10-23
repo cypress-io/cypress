@@ -21,7 +21,7 @@ module.exports = (app) ->
   app.get "/__cypress/iframes/*", (req, res) ->
     controllers.files.handleIframe(req, res)
 
-  app.get "/__cypress/xhrs/*", (req, res, next) ->
+  app.all "/__cypress/xhrs/*", (req, res, next) ->
     controllers.xhrs.handleXhr(req, res, next)
 
   ## this serves the html file which is stripped down
