@@ -31,22 +31,17 @@ $Cypress.register "XHR2", (Cypress, _) ->
     else
       resp
 
-  getXhr = (xhr) ->
-    xhr.getXhr()
-
   setRequest = (xhr, alias) ->
     requests = @prop("requests") ? []
 
     requests.push({
-      xhr: getXhr(xhr)
+      xhr: xhr
       alias: alias
     })
 
     @prop("requests", requests)
 
   setResponse = (xhr) ->
-    xhr = getXhr(xhr)
-
     obj = _.findWhere @prop("requests"), {xhr: xhr}
 
     responses = @prop("responses") ? []
@@ -136,7 +131,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
                 Duration:      xhr.duration
                 Response:      getResponse(xhr.response)
                 Headers:       xhr.headers
-                Request:       xhr.getXhr()
+                XHR:           xhr
               }
 
               # ## TODO: TEST THIS

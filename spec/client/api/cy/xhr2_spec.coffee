@@ -930,7 +930,7 @@ describe "$Cypress.Cy XHR Commands", ->
             Method: "POST"
             Status: "404 (Not Found)"
             URL: "/foo"
-            Request: xhr
+            XHR: xhr
           })
 
     describe "{force404: false}", ->
@@ -955,7 +955,7 @@ describe "$Cypress.Cy XHR Commands", ->
             Method: "GET"
             URL: "/fixtures/ajax/app.json"
             Status: "200 (OK)"
-            Request: xhr
+            XHR: xhr
           })
 
       it "logs response", ->

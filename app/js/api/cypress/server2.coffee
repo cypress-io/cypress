@@ -44,7 +44,9 @@ $Cypress.Server2 = do ($Cypress, _) ->
     onLoad: ->
   }
 
-  class $Proxy
+  ## maybe rename this to XMLHttpRequest ?
+  ## so it shows up correctly as an instance in the console
+  class XMLHttpRequest
     constructor: (@xhr) ->
       @id            = @xhr.id
       @url           = @xhr.url
@@ -58,7 +60,8 @@ $Cypress.Server2 = do ($Cypress, _) ->
       }
 
     getXhr: ->
-      @xhr ? throw new Error("$Proxy#xhr is missing!")
+      @xhr ? throw new Error("XMLHttpRequest#xhr is missing!")
+
     setDuration: (timeStart) ->
       @duration = (new Date) - timeStart
 
@@ -110,7 +113,7 @@ $Cypress.Server2 = do ($Cypress, _) ->
       @headers.request[key] = val
 
     @add = (xhr) ->
-      new $Proxy(xhr)
+      new XMLHttpRequest(xhr)
 
   class $Server
     constructor: (@options = {}) ->
@@ -329,7 +332,7 @@ $Cypress.Server2 = do ($Cypress, _) ->
       _.extend(xhr, attrs)
       xhr.id = id = _.uniqueId("xhr")
       @xhrs[id] = xhr
-      @proxies[id] = p = $Proxy.add(xhr)
+      @proxies[id] = XMLHttpRequest.add(xhr)
 
     getProxyFor: (xhr) ->
       @proxies[xhr.id]
@@ -367,7 +370,7 @@ $Cypress.Server2 = do ($Cypress, _) ->
       ## merge obj into defaults
       _.extend defaults, obj
 
-    @Proxy = $Proxy
+    @Proxy = XMLHttpRequest
 
     @create = (options) ->
       new $Server(options)
