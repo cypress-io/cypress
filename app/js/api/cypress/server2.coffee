@@ -59,6 +59,8 @@ $Cypress.Server2 = do ($Cypress, _) ->
 
     getXhr: ->
       @xhr ? throw new Error("$Proxy#xhr is missing!")
+    setDuration: (timeStart) ->
+      @duration = (new Date) - timeStart
 
     setStatus: ->
       @status = @xhr.status
@@ -223,12 +225,15 @@ $Cypress.Server2 = do ($Cypress, _) ->
           ## after we've called server.options.onSend
           stub.onRequest(@)
 
+        timeStart = new Date
+
         ## if our server is in specific mode for
         ## not waiting or auto responding or delay
         ## or not logging or auto responding with 404
         ## do that here.
         onload = @onload
         @onload = ->
+          proxy.setDuration(timeStart)
           proxy.setStatus()
           proxy.setResponse()
           proxy.setResponseHeaders()

@@ -912,6 +912,15 @@ describe "$Cypress.Cy XHR Commands", ->
               }).fail ->
                 resolve()
 
+      it "calculates duration", ->
+        @cy.then ->
+          xhr = @cy.prop("responses")[0].xhr
+
+          onConsole = @log.attributes.onConsole()
+          expect(onConsole.Duration).to.be.a("number")
+          expect(onConsole.Duration).to.be.gt(1)
+          expect(onConsole.Duration).to.be.lt(1000)
+
       it "sends back 404", ->
         @cy.then ->
           xhr = @cy.prop("responses")[0].xhr
