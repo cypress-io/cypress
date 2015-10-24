@@ -129,9 +129,9 @@ $Cypress.register "XHR2", (Cypress, _) ->
                 "Matched URL": stub?.url
                 Status:        xhr.statusMessage
                 Duration:      xhr.duration
-                Response:      getResponse(xhr.response)
-                Headers:       xhr.headers
-                XHR:           xhr
+                Request:       xhr.request
+                Response:      xhr.response
+                XHR:           xhr.getXhr()
               }
 
               # ## TODO: TEST THIS

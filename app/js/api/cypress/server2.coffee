@@ -52,12 +52,9 @@ $Cypress.Server2 = do ($Cypress, _) ->
       @url           = @xhr.url
       @method        = @xhr.method
       @status        = null
-      @response      = null
       @statusMessage = null
-      @headers       = {
-        request: {}
-        response: {}
-      }
+      @request       = {}
+      @response      = null
 
     getXhr: ->
       @xhr ? throw new Error("XMLHttpRequest#xhr is missing!")
@@ -69,12 +66,12 @@ $Cypress.Server2 = do ($Cypress, _) ->
       @status = @xhr.status
       @statusMessage = "#{@xhr.status} (#{@xhr.statusText})"
 
-    setResponse: ->
-      ## if request was for JSON
-      ## and this isnt valid JSON then
-      ## we should prob throw a very
-      ## specific error
-      @response = parseJSON(@xhr.responseText)
+    setRequestBody: (requestBody = null) ->
+      @request.body = parseJSON(requestBody)
+
+    setResponseBody: ->
+      @response ?= {}
+      @response.body = parseJSON(@xhr.responseText)
 
     setResponseHeaders: ->
       ## parse response header string into object
@@ -82,7 +79,8 @@ $Cypress.Server2 = do ($Cypress, _) ->
       headerStr = @xhr.getAllResponseHeaders()
 
       set = (resp) =>
-        @headers.response = resp
+        @response ?= {}
+        @response.headers = resp
 
       headers = {}
       if not headerStr
@@ -103,17 +101,40 @@ $Cypress.Server2 = do ($Cypress, _) ->
     setRequestHeader: (key, val) ->
       return if isCypressHeaderRe.test(key)
 
-      current = @headers.request[key]
+      @request.headers ?= {}
+
+      current = @request.headers[key]
 
       ## if we already have a request header
       ## then prepend val with ', '
       if current
         val = ", " + val
 
-      @headers.request[key] = val
+      @request.headers[key] = val
 
     @add = (xhr) ->
       new XMLHttpRequest(xhr)
+
+  Object.defineProperties XMLHttpRequest.prototype,
+    requestHeaders: {
+      get: ->
+        @request?.headers
+    }
+
+    requestBody: {
+      get: ->
+        @request?.body
+    }
+
+    responseHeaders: {
+      get: ->
+        @response?.headers
+    }
+
+    responseBody: {
+      get: ->
+        @response?.body
+    }
 
   class $Server
     constructor: (@options = {}) ->
@@ -188,16 +209,10 @@ $Cypress.Server2 = do ($Cypress, _) ->
         ## if they match our baseUrl / visited URL
         open.call(@, method, url, async, username, password)
 
-      XHR.prototype.send = (@requestBody = null) ->
+      XHR.prototype.send = (requestBody) ->
         ## dont send anything if our server isnt active
         ## anymore
         return if not server.isActive
-
-        if _.isString(@requestBody)
-          try
-            ## attempt setting request json
-            ## if requestBody is a string
-            @requestJSON = JSON.parse(@requestBody)
 
         ## add header properties for the xhr's id
         ## and the testId
@@ -217,6 +232,8 @@ $Cypress.Server2 = do ($Cypress, _) ->
 
         ## get the proxy xhr
         proxy = server.getProxyFor(@)
+
+        proxy.setRequestBody(requestBody)
 
         ## log this out now since it's being sent officially
         ## unless its been whitelisted
@@ -238,7 +255,7 @@ $Cypress.Server2 = do ($Cypress, _) ->
         @onload = ->
           proxy.setDuration(timeStart)
           proxy.setStatus()
-          proxy.setResponse()
+          proxy.setResponseBody()
           proxy.setResponseHeaders()
 
           ## catch synchronous errors caused
