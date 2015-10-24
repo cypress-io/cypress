@@ -88,6 +88,8 @@ $Cypress.register "XHR2", (Cypress, _) ->
     startXhrServer: (testId) ->
       logs = {}
 
+      cy = @
+
       @prop "server", $Cypress.Server2.create({
         testId: testId
         xhrUrl: @private("xhrUrl")
@@ -178,6 +180,11 @@ $Cypress.register "XHR2", (Cypress, _) ->
 
           if log = logs[xhr.id]
             log.snapshot("response").end()
+
+        onFixtureError: (xhr, err) ->
+          err = cy.cypressErr(err)
+
+          @onError(xhr, err)
 
         onError: (xhr, err) =>
           err.onFail = ->

@@ -112,6 +112,12 @@ $Cypress.Server2 = do ($Cypress, _) ->
 
       @request.headers[key] = val
 
+    getFixtureError: ->
+      body = @response and @response.body
+
+      if body and err = body.__error
+        return err
+
     @add = (xhr) ->
       new XMLHttpRequest(xhr)
 
@@ -257,6 +263,9 @@ $Cypress.Server2 = do ($Cypress, _) ->
           proxy.setStatus()
           proxy.setResponseBody()
           proxy.setResponseHeaders()
+
+          if err = proxy.getFixtureError()
+            return server.options.onFixtureError(proxy, err)
 
           ## catch synchronous errors caused
           ## by the onload function
