@@ -83,11 +83,34 @@ describe "$Cypress.Cy XHR Commands", ->
         @cy.server({ignore: false}).window().then (w) ->
           Promise.resolve(w.$.get("/fixtures/ajax/app.html")).catch -> done()
 
+    describe "#onResponse", ->
+      beforeEach ->
+        @setup()
+
+      it "calls onResponse callback with cy context + proxy xhr", (done) ->
+        cy = @cy
+
+        @cy
+          .server()
+          .route({
+            url: /foo/
+            response: {foo: "bar"}
+            onResponse: (xhr) ->
+              expect(@).to.eq(cy)
+              expect(xhr.responseBody).to.deep.eq {foo: "bar"}
+              done()
+          })
+          .window().then (win) ->
+            win.$.get("/foo")
+            null
+
     describe "request JSON parsing", ->
       beforeEach ->
         @setup()
 
-      it "adds requestJSON if requesting JSON", (done) ->
+      it "adds parses requestBody into JSON", (done) ->
+        cy = @cy
+
         @cy
           .server()
           .route({
@@ -95,9 +118,8 @@ describe "$Cypress.Cy XHR Commands", ->
             url: /foo/
             response: {}
             onRequest: (xhr) ->
-              expect(xhr).to.have.property("requestJSON")
-              expect(xhr.requestJSON).to.deep.eq {foo: "bar"}
-              expect(xhr.requestBody).to.eq JSON.stringify({foo: "bar"})
+              expect(@).to.eq(cy)
+              expect(xhr.requestBody).to.deep.eq {foo: "bar"}
               done()
           })
           .window().then (win) ->
@@ -109,7 +131,7 @@ describe "$Cypress.Cy XHR Commands", ->
             null
 
       ## https://github.com/cypress-io/cypress/issues/65
-      it "provides the correct requestJSON on multiple requests", ->
+      it "provides the correct requestBody on multiple requests", ->
         post = (win, obj) ->
           win.$.ajax({
             type: "POST"
@@ -125,10 +147,10 @@ describe "$Cypress.Cy XHR Commands", ->
           .route("POST", /foo/, {}).as("getFoo")
           .window().then (win) ->
             post(win, {foo: "bar1"})
-          .wait("@getFoo").its("requestJSON").should("deep.eq", {foo: "bar1"})
+          .wait("@getFoo").its("requestBody").should("deep.eq", {foo: "bar1"})
           .window().then (win) ->
             post(win, {foo: "bar2"})
-          .wait("@getFoo").its("requestJSON").should("deep.eq", {foo: "bar2"})
+          .wait("@getFoo").its("requestBody").should("deep.eq", {foo: "bar2"})
 
     describe ".log", ->
       beforeEach ->
@@ -292,14 +314,14 @@ describe "$Cypress.Cy XHR Commands", ->
         .window().then (win) ->
           win.$.get("/fixtures/ajax/app.json")
           null
-        .wait("@getJSON").its("responseText").should("eq", "{}")
+        .wait("@getJSON").its("responseBody").should("deep.eq", {})
         .server({enable: false})
         .then ->
           expect(set).to.be.calledWithExactly({enable: false})
         .window().then (win) ->
           win.$.get("/fixtures/ajax/app.json")
           null
-        .wait("@getJSON").its("responseText").should("not.eq", "{}")
+        .wait("@getJSON").its("responseBody").should("not.deep.eq", {})
 
     it "sets delay at 0 by default", ->
       @cy
@@ -638,7 +660,7 @@ describe "$Cypress.Cy XHR Commands", ->
           win.$.get("foo")
           null
         .wait("@getFoo").then (xhr) ->
-          expect(xhr.responseText).to.eq "foo bar baz"
+          expect(xhr.responseBody).to.eq "foo bar baz"
 
     it.skip "does not error when response is null but respond is false", ->
       @cy.route
@@ -654,9 +676,8 @@ describe "$Cypress.Cy XHR Commands", ->
             win.$.getJSON("foo")
             null
           .wait("@getFoo").then (xhr) ->
-            response = JSON.parse(xhr.responseText)
-            expect(response).to.deep.eq {foo: "bar"}
-            expect(response).to.deep.eq @foo
+            expect(xhr.responseBody).to.deep.eq {foo: "bar"}
+            expect(xhr.responseBody).to.deep.eq @foo
 
       it "can alias a route without stubbing it", ->
         @cy
@@ -672,8 +693,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
             expect(log.get("alias")).to.eq("getFoo")
 
-            response = JSON.parse(xhr.responseText)
-            expect(response).to.deep.eq({
+            expect(xhr.responseBody).to.deep.eq({
               some: "json"
               foo: {
                 bar: "baz"
@@ -925,12 +945,12 @@ describe "$Cypress.Cy XHR Commands", ->
         @cy.then ->
           xhr = @cy.prop("responses")[0].xhr
 
-          onConsole = _.pick @log.attributes.onConsole(), "Method", "Status", "URL", "Request"
+          onConsole = _.pick @log.attributes.onConsole(), "Method", "Status", "URL", "XHR"
           expect(onConsole).to.deep.eq({
             Method: "POST"
             Status: "404 (Not Found)"
             URL: "/foo"
-            XHR: xhr
+            XHR: xhr.xhr
           })
 
     describe "{force404: false}", ->
@@ -943,25 +963,25 @@ describe "$Cypress.Cy XHR Commands", ->
       it "logs request + response headers", ->
         @cy.then ->
           onConsole = @log.attributes.onConsole()
-          expect(onConsole.Headers.request).to.be.an("object")
-          expect(onConsole.Headers.response).to.be.an("object")
+          expect(onConsole.Request.headers).to.be.an("object")
+          expect(onConsole.Response.headers).to.be.an("object")
 
-      it "logs Method, Status, URL, and Request", ->
+      it "logs Method, Status, URL, and XHR", ->
         @cy.then ->
           xhr = @cy.prop("responses")[0].xhr
 
-          onConsole = _.pick @log.attributes.onConsole(), "Method", "Status", "URL", "Request"
+          onConsole = _.pick @log.attributes.onConsole(), "Method", "Status", "URL", "XHR"
           expect(onConsole).to.deep.eq({
             Method: "GET"
             URL: "/fixtures/ajax/app.json"
             Status: "200 (OK)"
-            XHR: xhr
+            XHR: xhr.xhr
           })
 
       it "logs response", ->
         @cy.then ->
           onConsole = @log.attributes.onConsole()
-          expect(onConsole.Response).to.deep.eq({
+          expect(onConsole.Response.body).to.deep.eq({
             some: "json"
             foo: {
               bar: "baz"

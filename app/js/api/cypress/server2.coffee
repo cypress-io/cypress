@@ -254,10 +254,10 @@ $Cypress.Server2 = do ($Cypress, _) ->
         if not server.options.whitelist.call(server, @)
           server.options.onSend(proxy, sendStack, stub)
 
-        if stub and _.isFunction(stub.onRequest)
+        if _.isFunction(server.options.onRequest)
           ## call the onRequest function
           ## after we've called server.options.onSend
-          stub.onRequest(@)
+          server.options.onRequest(stub, proxy)
 
         timeStart = new Date
 
@@ -283,6 +283,9 @@ $Cypress.Server2 = do ($Cypress, _) ->
             server.options.onLoad(proxy, stub)
           catch err
             server.options.onError(proxy, err)
+
+          if _.isFunction(server.options.onResponse)
+            server.options.onResponse(stub, proxy)
 
         onerror = @onerror
         @onerror = ->

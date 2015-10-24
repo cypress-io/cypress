@@ -212,6 +212,14 @@ $Cypress.register "XHR2", (Cypress, _) ->
 
           if log = logs[xhr.id]
             log.snapshot("aborted").error(err)
+
+        onRequest: (stub, xhr) =>
+          if stub and _.isFunction(stub.onRequest)
+            stub.onRequest.call(@, xhr)
+
+        onResponse: (stub, xhr) =>
+          if stub and _.isFunction(stub.onResponse)
+            stub.onResponse.call(@, xhr)
       })
 
   Cypress.addParentCommand
