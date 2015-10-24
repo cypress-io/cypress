@@ -150,6 +150,18 @@ $Cypress.Server2 = do ($Cypress, _) ->
         @response?.body
     }
 
+    requestJSON: {
+      get: ->
+        console.warn("requestJSON is now deprecated and will be removed in the next version. Update this to 'requestBody' or 'request.body'.")
+        @requestBody
+    }
+
+    responseJSON: {
+      get: ->
+        console.warn("responseJSON is now deprecated and will be removed in the next version. Update this to 'responseBody' or 'response.body'.")
+        @responseBody
+    }
+
   class $Server
     constructor: (@options = {}) ->
       _.defaults @options, defaults
