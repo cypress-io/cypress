@@ -366,6 +366,9 @@ $Cypress.Server2 = do ($Cypress, _) ->
     deactivate: ->
       @isActive = false
 
+      @abort()
+
+    abort: ->
       ## abort any outstanding xhr's
       _(@xhrs).chain().filter((xhr) ->
         xhr.readyState isnt 4

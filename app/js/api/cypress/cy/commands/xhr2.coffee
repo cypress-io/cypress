@@ -66,6 +66,15 @@ $Cypress.register "XHR2", (Cypress, _) ->
     onResponse: undefined
   }
 
+  Cypress.on "before:unload", ->
+    ## if our page is going away due to
+    ## a form submit / anchor click then
+    ## we need to cancel all outstanding
+    ## XHR's so the command log displays
+    ## correctly
+    if server
+      server.abort()
+
   Cypress.on "abort", deactivate
 
   Cypress.on "test:before:hooks", (test = {}) ->

@@ -59,6 +59,8 @@ do ($Cypress, _) ->
         ## else jquery will never release them
         @offWindowListeners()
 
+        @Cypress.trigger("before:unload")
+
         ## return undefined so our beforeunload handler
         ## doesnt trigger a confirmation dialog
         return undefined
