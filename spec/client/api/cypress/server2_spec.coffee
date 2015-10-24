@@ -59,7 +59,7 @@ describe "$Cypress.Cy Server2 API", ->
       expect(@open).to.be.calledWith("GET", "/foo", true)
 
     it "changes url to stub url", ->
-      @sandbox.stub(@server, "getStubForXhr").returns({})
+      @sandbox.stub(@server, "shouldApplyStub").returns(true)
       @xhr.open("GET", "/foo")
       expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/foo")
 
@@ -82,14 +82,18 @@ describe "$Cypress.Cy Server2 API", ->
     it "sets requestBody on all requests", ->
       @xhr.open("GET", "/foo")
       @xhr.send("a=b")
-      expect(@xhr.requestBody).to.eq("a=b")
+      proxy = @server.getProxyFor(@xhr)
+      expect(proxy.requestBody).to.eq("a=b")
+      expect(proxy.request.body).to.eq("a=b")
 
-    it "sets requestJSON on all requests", ->
+    it "parses requestBody into JSON", ->
       @xhr.open("POST", "/users")
       @xhr.send(JSON.stringify({foo: "bar"}))
-      expect(@xhr.requestJSON).to.deep.eq({foo: "bar"})
+      proxy = @server.getProxyFor(@xhr)
+      expect(proxy.requestBody).to.deep.eq({foo: "bar"})
+      expect(proxy.request.body).to.deep.eq({foo: "bar"})
 
-    it "does not set requestJSON on formData", ->
+    it "sets requestBody on formData", ->
       formData = new FormData
       formData.append("foo", "bar")
       formData.append("baz", "quux")
@@ -97,8 +101,9 @@ describe "$Cypress.Cy Server2 API", ->
       @xhr.open("POST", "/form")
       @xhr.send(formData)
 
-      expect(@xhr.requestBody).to.eq(formData)
-      expect(@xhr.requestJSON).to.be.undefined
+      proxy = @server.getProxyFor(@xhr)
+
+      expect(proxy.requestBody).to.eq(formData)
 
     it "sets x-cypress-id"
 
@@ -148,6 +153,8 @@ describe "$Cypress.Cy Server2 API", ->
         status: 201
         headers: {
           "x-token": "123-abc"
+          "contentType": "foo/bar"
+          "X-Foo-Bar": "sekret"
         }
         response: [{name: "b"}, {name: "j"}]
       })
@@ -172,10 +179,12 @@ describe "$Cypress.Cy Server2 API", ->
       @expectRequestHeader("Delay", 25)
 
     it "sets headers", ->
-      @expectRequestHeader("Headers", JSON.stringify({"x-token": "123-abc"}))
-
-    it.skip "sets isStub=true", ->
-      expect(@xhr.isStub).to.be.true
+      headers = JSON.stringify({
+        "x-token": "123-abc"
+        "content-type": "foo/bar"
+        "x-foo-bar": "sekret"
+      })
+      @expectRequestHeader("Headers", headers)
 
     it "does not set null/undefined headers", ->
       @setRequestHeader.reset()
@@ -196,20 +205,18 @@ describe "$Cypress.Cy Server2 API", ->
       @server = $Cypress.Server2.create({
         xhrUrl: "__cypress/xhrs/"
         delay: 100
-        waitOnResponse: false
+        waitOnResponses: false
         foo: "bar"
       })
       @server.bindTo(@window)
       @server.enableStubs()
 
-    it "merges defaults for delay, status, autoRespond, waitOnResponse and pushes into stubs", ->
+    it "merges defaults into stubs", ->
       expect(@server.stubs).to.be.empty
       @server.stub({
         url: /foo/
         response: {}
         delay: 50
-        autoRespond: undefined
-        waitOnResponse: undefined
       })
 
       expect(@server.stubs.length).to.eq(1)
@@ -217,9 +224,13 @@ describe "$Cypress.Cy Server2 API", ->
         url: /foo/
         response: {}
         delay: 50
+        method: "GET"
         status: 200
+        stub: true
         autoRespond: true
-        waitOnResponse: false
+        waitOnResponses: false
+        onRequest: undefined
+        onResponse: undefined
       }
 
   context "#add", ->

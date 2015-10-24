@@ -3,6 +3,7 @@ $Cypress.Server2 = do ($Cypress, _) ->
   twoOrMoreDoubleSlashesRe = /\/{2,}/g
   regularResourcesRe       = /\.(jsx?|html|css)$/
   isCypressHeaderRe        = /^X-Cypress-/i
+  needsDashRe              = /([a-z][A-Z])/g
 
   setHeader = (xhr, key, val, transformer) ->
     if val?
@@ -11,6 +12,12 @@ $Cypress.Server2 = do ($Cypress, _) ->
 
       key = "X-Cypress-" + _.capitalize(key)
       xhr.setRequestHeader(key, val)
+
+  normalize = (val) ->
+    val = val.replace needsDashRe, (match) ->
+      match[0] + "-" + match[1]
+
+    val.toLowerCase()
 
   nope = -> return null
 
@@ -27,12 +34,13 @@ $Cypress.Server2 = do ($Cypress, _) ->
   defaults = {
     testId: ""
     xhrUrl: ""
+    method: "GET"
     delay: 0
     status: 200
     stub: true
     enable: true
     autoRespond: true
-    waitOnResponse: Infinity
+    waitOnResponses: Infinity
     force404: true ## or allow 404's
     onRequest: undefined
     onResponse: undefined
@@ -291,6 +299,15 @@ $Cypress.Server2 = do ($Cypress, _) ->
       ## make sure the stub or the server isnt 'unstubbed'
       stub and stub.stub isnt false and @isStubbed()
 
+    transformHeaders: (headers) ->
+      ## normalize camel-cased headers key
+      headers = _.reduce headers, (memo, value, key) ->
+        memo[normalize(key)] = value
+        memo
+      , {}
+
+      JSON.stringify(headers)
+
     applyStubProperties: (xhr, stub) ->
       responser = if _.isObject(stub.response) then JSON.stringify else null
 
@@ -298,7 +315,7 @@ $Cypress.Server2 = do ($Cypress, _) ->
       setHeader(xhr, "response", stub.response, responser)
       setHeader(xhr, "matched",  stub.url + "")
       setHeader(xhr, "delay",    stub.delay)
-      setHeader(xhr, "headers",  stub.headers, JSON.stringify)
+      setHeader(xhr, "headers",  stub.headers, @transformHeaders)
 
     normalizeStubUrl: (xhrUrl, url) ->
       ## always ensure this is an absolute-relative url
@@ -312,7 +329,7 @@ $Cypress.Server2 = do ($Cypress, _) ->
       ## can create another server later
 
       ## dont mutate the original attrs
-      stub = _.defaults {}, attrs, _(@options).pick("delay", "method", "status", "stub", "autoRespond", "waitOnResponse", "onRequest", "onResponse")
+      stub = _.defaults {}, attrs, _(@options).pick("delay", "method", "status", "stub", "autoRespond", "waitOnResponses", "onRequest", "onResponse")
       @stubs.push(stub)
 
       return stub

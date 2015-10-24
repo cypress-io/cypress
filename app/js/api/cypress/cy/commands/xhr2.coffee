@@ -61,7 +61,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
     headers: undefined ## response headers
     response: undefined
     autoRespond: undefined
-    waitOnResponse: undefined
+    waitOnResponses: undefined
     onRequest: undefined ## need to rebind these to 'cy' context
     onResponse: undefined
   }
