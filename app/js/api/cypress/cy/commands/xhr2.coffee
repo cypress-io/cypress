@@ -25,12 +25,6 @@ $Cypress.register "XHR2", (Cypress, _) ->
     location = Cypress.Location.create(url)
     location.href.replace(location.origin, "")
 
-  getResponse = (resp) ->
-    if _.isString(resp)
-      _.truncate(resp, 100, " ... (truncated)")
-    else
-      resp
-
   setRequest = (xhr, alias) ->
     requests = @prop("requests") ? []
 
@@ -102,16 +96,14 @@ $Cypress.register "XHR2", (Cypress, _) ->
       @prop "server", $Cypress.Server2.create({
         testId: testId
         xhrUrl: @private("xhrUrl")
+        getRemoteUrl: (url) =>
+          href = @_getLocation("href")
+          Cypress.Location.resolve(href, url)
+
         normalizeUrl: (url) =>
-          ## if url is FQDN that starts with our origin
-          ## then we need to strip it out
-          ## to prevent accidental CORS request
-          ## TODO think about changing this from
-          ## origin to just being the 'remoteHost' from cookies
-          if origin = @_getLocation("origin")
-            url.replace(origin, "")
-          else
-            url
+          ## strip out the origin from the url
+          location = Cypress.Location.create(url)
+          location.href.replace(location.origin, "")
 
         onSend: (xhr, stack, stub) =>
           alias = stub?.alias
@@ -145,11 +137,8 @@ $Cypress.register "XHR2", (Cypress, _) ->
                 XHR:           xhr.getXhr()
               }
 
-              # ## TODO: TEST THIS
-              # if not stub
-              #   _.extend consoleObj,
-              #     Reason: "The URL for request did not match any of your route(s).  It's response was automatically sent back a 404."
-              #     "Route URLs": availableUrls
+              if stub and stub.is404
+                consoleObj.Note = "The Method + URL for this request did not match any of your routes. It was automatically sent back '404'. Setting {force404: false} will turn off this behavior."
 
               consoleObj.groups = ->
                 [

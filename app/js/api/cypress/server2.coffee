@@ -44,6 +44,7 @@ $Cypress.Server2 = do ($Cypress, _) ->
     force404: true ## or allow 404's
     onRequest: undefined
     onResponse: undefined
+    getRemoteUrl: _.identity
     normalizeUrl: _.identity
     whitelist: whitelist ## function whether to allow a request to go out (css/js/html/templates) etc
     onSend: ->
@@ -216,7 +217,10 @@ $Cypress.Server2 = do ($Cypress, _) ->
         abort.apply(@, arguments)
 
       XHR.prototype.open = (method, url, async = true, username, password) ->
-        server.add(@, {
+        ## get the FQDN remote url that our user expects
+        url = server.options.getRemoteUrl(url)
+
+        proxy = server.add(@, {
           method: method
           url: url
         })
@@ -224,8 +228,8 @@ $Cypress.Server2 = do ($Cypress, _) ->
         ## always normalize the url
         url = server.options.normalizeUrl(url)
 
-        ## if this XHR matches a mocked route then shift
-        ## its url to the mocked url and set the request
+        ## if this XHR matches a stubbed route then shift
+        ## its url to the stubbed url and set the request
         ## headers for the response
         stub = server.getStubForXhr(@)
         if server.shouldApplyStub(stub)
@@ -350,6 +354,11 @@ $Cypress.Server2 = do ($Cypress, _) ->
       return stub
 
     getStubForXhr: (xhr) ->
+      ## return the 404 stub if we dont have any stubs
+      ## but we are stubbed - meaning we havent added any routes
+      ## but have started the server
+      return @get404Stub() if not @stubs.length and @isStubbed()
+
       ## bail if we've attached no stubs
       return nope() if not @stubs.length
 
@@ -377,6 +386,7 @@ $Cypress.Server2 = do ($Cypress, _) ->
         response: ""
         delay: 0
         headers: null
+        is404: true
       }
 
     xhrMatchesStub: (xhr, stub) ->

@@ -83,6 +83,120 @@ describe "$Cypress.Cy XHR Commands", ->
         @cy.server({ignore: false}).window().then (w) ->
           Promise.resolve(w.$.get("/fixtures/ajax/app.html")).catch -> done()
 
+    describe "url rewriting", ->
+      beforeEach ->
+        @setup()
+
+      it "has a FQDN absolute-relative url", ->
+        @cy
+          .server()
+          .route({
+            url: /foo/
+            stub: false
+          }).as("getFoo")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
+          .window().then (win) ->
+            @cy.prop("server").restore()
+            @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
+            @cy.prop("server").bindTo(win)
+            win.$.get("/foo")
+            null
+          .wait("@getFoo").then (xhr) ->
+            expect(xhr.url).to.eq("http://localhost:3500/foo")
+            expect(@open).to.be.calledWith("GET", "/foo")
+
+      it "has a relative URL", ->
+        @cy
+          .server()
+          .route({
+            url: /foo/
+            stub: false
+          }).as("getFoo")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
+          .window().then (win) ->
+            @cy.prop("server").restore()
+            @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
+            @cy.prop("server").bindTo(win)
+            win.$.get("foo")
+            null
+          .wait("@getFoo").then (xhr) ->
+            expect(xhr.url).to.eq("http://localhost:3500/fixtures/html/xhr.html/foo")
+            expect(@open).to.be.calledWith("GET", "/fixtures/html/xhr.html/foo")
+
+      it "transparently rewrites FQDN urls", ->
+        @cy
+          .server()
+          .route({
+            url: /foo/
+            stub: false
+          }).as("getFoo")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
+          .window().then (win) ->
+            @cy.prop("server").restore()
+            @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
+            @cy.prop("server").bindTo(win)
+            win.$.get("http://localhost:9999/foo")
+            null
+          .wait("@getFoo").then (xhr) ->
+            expect(xhr.url).to.eq("http://localhost:9999/foo")
+            expect(@open).to.be.calledWith("GET", "/foo")
+
+      it "rewrites FQDN url's for stubs", ->
+        @cy
+          .server()
+          .route({
+            url: /foo/
+            response: {}
+          }).as("getFoo")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
+          .window().then (win) ->
+            @cy.prop("server").restore()
+            @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
+            @cy.prop("server").bindTo(win)
+            win.$.get("http://localhost:9999/foo")
+            null
+          .wait("@getFoo").then (xhr) ->
+            expect(xhr.url).to.eq("http://localhost:9999/foo")
+            expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/foo")
+
+      it "rewrites absolute url's for stubs", ->
+        @cy
+          .server()
+          .route({
+            url: /foo/
+            response: {}
+          }).as("getFoo")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
+          .window().then (win) ->
+            @cy.prop("server").restore()
+            @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
+            @cy.prop("server").bindTo(win)
+            win.$.get("/foo")
+            null
+          .wait("@getFoo").then (xhr) ->
+            expect(xhr.url).to.eq("http://localhost:3500/foo")
+            expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/foo")
+
+      it "rewrites 404's url's for stubs", ->
+        @cy
+          .server()
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
+          .window().then (win) ->
+            @cy.prop("server").restore()
+            @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
+            @cy.prop("server").bindTo(win)
+            new Promise (resolve) ->
+              win.$.ajax({
+                method: "POST"
+                url: "/foo"
+                data: JSON.stringify({foo: "bar"})
+              }).fail ->
+                resolve()
+          .then ->
+            xhr = @cy.prop("responses")[0].xhr
+            expect(xhr.url).to.eq("http://localhost:3500/foo")
+            expect(@open).to.be.calledWith("POST", "/__cypress/xhrs/foo")
+
     describe "#onResponse", ->
       beforeEach ->
         @setup()
@@ -917,8 +1031,6 @@ describe "$Cypress.Cy XHR Commands", ->
 
       @setup()
 
-    # it "truncates response" ## do this in a route stub
-
     describe "zero configuration / zero routes", ->
       beforeEach ->
         @cy
@@ -941,7 +1053,7 @@ describe "$Cypress.Cy XHR Commands", ->
           expect(onConsole.Duration).to.be.gt(1)
           expect(onConsole.Duration).to.be.lt(1000)
 
-      it "sends back 404", ->
+      it "sends back regular 404", ->
         @cy.then ->
           xhr = @cy.prop("responses")[0].xhr
 
@@ -952,6 +1064,20 @@ describe "$Cypress.Cy XHR Commands", ->
             URL: "/foo"
             XHR: xhr.xhr
           })
+
+    describe "route setup", ->
+      beforeEach ->
+        @cy
+          .server()
+          .route("/foo", {}).as("anyRequest")
+          .window().then (win) ->
+            win.$.get("/bar")
+            null
+
+      it "sends back 404 when request doesnt match route", ->
+        @cy.then ->
+          onConsole = @log.attributes.onConsole()
+          expect(onConsole.Note).to.eq("The Method + URL for this request did not match any of your route(s). It was automatically sent back '404'. Setting {force404: false} will turn off this behavior.")
 
     describe "{force404: false}", ->
       beforeEach ->
