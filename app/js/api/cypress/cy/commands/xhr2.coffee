@@ -24,7 +24,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
     if stub and stub.stub isnt false then "xhr stub" else "xhr"
 
   stripOrigin = (url) ->
-    location = Cypress.Location.create(url)
+    location = Cypress.Location.parse(url)
     location.href.replace(location.origin, "")
 
   setRequest = (xhr, alias) ->
@@ -102,6 +102,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
       @prop "server", $Cypress.Server2.create({
         testId: testId
         xhrUrl: @private("xhrUrl")
+        stripOrigin: stripOrigin
         getUrlOptions: (url) =>
           ## resolve handling if the origin is either legitimately CORS
           ## such as the case with 'http://www.google.com' or if this
@@ -116,7 +117,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
             when requestOrigin is currentOrigin
               {
                 actual:  stripOrigin(url)
-                display: Cypress.Location.resolve(remoteOrigin, stripOrigin(url))
+                display: Cypress.Location.resolve(remoteOrigin or currentOrigin, stripOrigin(url))
               }
 
             ## when the request's origin is actually to our remote's

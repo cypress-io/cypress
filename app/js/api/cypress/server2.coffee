@@ -43,6 +43,7 @@ $Cypress.Server2 = do ($Cypress, _) ->
     force404: true ## or allow 404's
     onRequest: undefined
     onResponse: undefined
+    stripOrigin: _.identity
     getUrlOptions: _.identity
     whitelist: whitelist ## function whether to allow a request to go out (css/js/html/templates) etc
     onSend: ->
@@ -422,11 +423,17 @@ $Cypress.Server2 = do ($Cypress, _) ->
       }
 
     xhrMatchesStub: (xhr, stub) ->
+      testRe = (url1, url2) ->
+        stub.url.test(url1) or stub.url.test(url2)
+
+      testStr = (url1, url2) ->
+        stub.url is url1 or stub.url is url2
+
       xhr.method is stub.method and
         if _.isRegExp(stub.url)
-          stub.url.test(xhr.url)
+          testRe(xhr.url, @options.stripOrigin(xhr.url))
         else
-          stub.url is xhr.url
+          testStr(xhr.url, @options.stripOrigin(xhr.url))
 
     add: (xhr, attrs = {}) ->
       _.extend(xhr, attrs)

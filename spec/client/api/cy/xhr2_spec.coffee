@@ -254,6 +254,28 @@ describe "$Cypress.Cy XHR Commands", ->
             expect(xhr.url).to.eq("http://www.google.com/phones/phones.json")
             expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/http://www.google.com/phones/phones.json")
 
+      it "sets display correctly when there is no remoteOrigin", ->
+        ## this is an example of having cypress act as your webserver
+        ## when the remoteHost is <root>
+        @cy
+          .server()
+          .route({
+            url: /foo/
+            response: {}
+          }).as("getFoo")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
+          .window().then (win) ->
+            ## trick cypress into thinking the remoteOrigin is location:9999
+            @sandbox.stub(@cy, "_getLocation").withArgs("origin").returns("")
+            @cy.prop("server").restore()
+            @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
+            @cy.prop("server").bindTo(win)
+            win.$.get("/foo")
+            null
+          .wait("@getFoo").then (xhr) ->
+            expect(xhr.url).to.eq("http://localhost:3500/foo")
+            expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/foo")
+
     describe "#onResponse", ->
       beforeEach ->
         @setup()
@@ -1144,7 +1166,7 @@ describe "$Cypress.Cy XHR Commands", ->
           expect(onConsole).to.deep.eq({
             Method: "POST"
             Status: "404 (Not Found)"
-            URL: "/foo"
+            URL: "http://localhost:3500/foo"
             XHR: xhr.xhr
           })
 
@@ -1191,7 +1213,7 @@ describe "$Cypress.Cy XHR Commands", ->
           onConsole = _.pick @log.attributes.onConsole(), "Method", "Status", "URL", "XHR"
           expect(onConsole).to.deep.eq({
             Method: "GET"
-            URL: "/fixtures/ajax/app.json"
+            URL: "http://localhost:3500/fixtures/ajax/app.json"
             Status: "200 (OK)"
             XHR: xhr.xhr
           })
