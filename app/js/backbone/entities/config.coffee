@@ -92,7 +92,7 @@
       _.last @get("projectRoot").split("/")
 
     getCypressConfig: ->
-      @pick "commandTimeout", "baseUrl", "viewportWidth", "viewportHeight"
+      @pick "commandTimeout", "xhrUrl", "baseUrl", "viewportWidth", "viewportHeight"
 
   App.reqres.setHandler "new:config:entity", (attrs = {}) ->
     new Entities.Config attrs

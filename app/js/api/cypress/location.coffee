@@ -261,12 +261,50 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
       ## forward slashes
       [_.trim(baseUrl, "/"), _.trim(url, "/")].join("/")
 
+    @isAbsoluteRelative = (segment) ->
+      ## does this start with a forward slash?
+      segment and segment[0] is "/"
+
+    @join = (from, rest...) ->
+      last = _.last(rest)
+
+      paths = _.reduce rest, (memo, segment) ->
+        if segment is last
+          memo.push _.ltrim(segment, "/")
+        else
+          memo.push _.trim(segment, "/")
+        memo
+      , [_.rtrim(from, "/")]
+
+      paths.join("/")
+
+    @resolve = (from, to) ->
+      ## if to is fully qualified then
+      ## just return that
+      return to if @isFullyQualifiedUrl(to)
+
+      ## else take from and figure out if
+      ## to is relative or absolute-relative
+
+      ## if to is absolute relative '/foo'
+      if @isAbsoluteRelative(to)
+        ## get origin from 'from'
+        origin = @parse(from).origin
+        @join(origin, to)
+      else
+        @join(from, to)
+
     # @create = (current, remote, defaultOrigin) ->
     #   location = new $Location(current, remote, defaultOrigin)
     #   location.getObject()
 
     @create = (remote) ->
       location = new $Location(remote)
+      location.getObject()
+
+    @parse = (url) ->
+      location = new $Location(url)
+      location.remote = new Uri(url)
       location.getObject()
 
   return $Location

@@ -21,6 +21,9 @@ module.exports = (app) ->
   app.get "/__cypress/iframes/*", (req, res) ->
     controllers.files.handleIframe(req, res)
 
+  app.all "/__cypress/xhrs/*", (req, res, next) ->
+    controllers.xhrs.handleXhr(req, res, next)
+
   ## this serves the html file which is stripped down
   ## to generate the id's for the test files
   app.get "/__cypress/id_generator", (req, res, next) ->

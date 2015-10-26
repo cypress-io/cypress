@@ -57,6 +57,7 @@ class Server
     _.defaults obj,
       baseUrl: null
       clientRoute: "/__/"
+      xhrRoute: "/xhrs/"
       commandTimeout: 4000
       port: 2020
       autoOpen: false
@@ -87,6 +88,7 @@ class Server
     _.extend obj,
       clientUrlDisplay: rootUrl
       clientUrl: rootUrl + obj.clientRoute
+      xhrUrl: obj.namespace + obj.xhrRoute
 
     _.extend obj,
       idGeneratorUrl: rootUrl + "/__cypress/id_generator"

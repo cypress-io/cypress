@@ -21,6 +21,8 @@
     <div id="xhr">
       Sinon Fixture
     </div>
+    <button id="fetch">fetch</button>
+    <button id="create">create</button>
     <button id="pushState">pushstate</button>
     <a id="hashchange" href="#hashchange">hashchange</a>
     <script type="text/javascript">
@@ -28,6 +30,18 @@
         $.get("/bar")
 
         $.getJSON("/foo", {some: "data"})
+
+        $("button#create").click(function(){
+          $.ajax({
+            method: "POST",
+            url: "/users/1",
+            data: JSON.stringify({some: "data"})
+          })
+        })
+
+        $("button#fetch").click(function(){
+          $.getJSON("/users")
+        })
 
         $("button#pushState").click(function(){
           window.history.pushState({foo: "bar"}, null, "pushState.html")

@@ -1,6 +1,6 @@
 @App.module "Entities", (Entities, App, Backbone, Marionette, $, _) ->
 
-  logAttrs = "event error state testId hookName type highlightAttr name alias aliasType referencesAlias message numElements numRetries visible coords scrollBy viewportWidth viewportHeight url".split(" ")
+  logAttrs = "event error state testId hookName type highlightAttr name displayName alias aliasType referencesAlias message numElements numRetries visible coords scrollBy viewportWidth viewportHeight url".split(" ")
 
   ## this is another good candidate for a mutator
   ## with stripping out the parent selector
@@ -37,6 +37,9 @@
           "One or more matched elements are not visible."
         else
           "This element is not visible."
+
+      displayName: ->
+        @attributes.displayName ? @attributes.name
 
     state: (state) ->
       @get("state") is state
@@ -131,7 +134,10 @@
           console.groupCollapsed(group.name)
 
           _.each group.items, (value, key) ->
-            fn ["%c" + key, "color: blue", value]
+            if group.label is false
+              fn [value]
+            else
+              fn ["%c" + key, "color: blue", value]
 
           console.groupEnd()
 

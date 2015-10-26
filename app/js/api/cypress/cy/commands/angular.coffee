@@ -11,6 +11,11 @@ $Cypress.register "Angular", (Cypress, _, $, Promise) ->
       ## system you're using
       @throwErr "Angular global (window.angular) was not found in your window! You cannot use .ng() methods without angular." if not @private("window").angular
 
+      _.defaults options, {log: true}
+
+      if options.log
+        options._log = Cypress.Log.command()
+
       switch type
         when "model"
           @_findByNgAttr("model", "model=", selector, options)

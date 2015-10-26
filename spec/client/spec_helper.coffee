@@ -18,7 +18,6 @@ beforeEach ->
   App.Utilities.Overrides.overloadMochaRunnerUncaught()
 
 afterEach ->
-  process.removeAllListeners("unhandledRejection")
   @sandbox.restore()
 
   ## must remove references to the server
@@ -91,7 +90,11 @@ window.enterIntegrationTestingMode = (fixture, options = {}) ->
         console.error(err.stack)
 
     @loadDom(fixture).then =>
-      @Cypress.initialize @$iframe.prop("contentWindow"), @$iframe, ->
+      ## why do we use the initialize method here but only
+      ## trigger it in the command testing mode below?
+      @Cypress.initialize @$iframe.prop("contentWindow"), @$iframe, {
+        xhrUrl: "__cypress/xhrs/"
+      }
 
   after ->
     @$iframe.remove()
@@ -140,7 +143,9 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
 
       obj =
         $remoteIframe: @$iframe
-        config: {}
+        config: {
+          xhrUrl: "__cypress/xhrs/"
+        }
 
       ## in testing we manually call bindWindowListeners
       ## with our iframe's contentWindow because
@@ -162,6 +167,7 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
       @Cypress.option("jQuery", $)
 
       if @currentTest
+        @Cypress.trigger "test:before:hooks", {id: 123}
         @Cypress.set(@currentTest)
         @currentTest.enableTimeouts(false)
 

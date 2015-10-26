@@ -1,11 +1,9 @@
-root          = "../../../"
+require("../spec_helper")
+
 Server        = require("#{root}lib/server")
 Fixtures      = require "#{root}/spec/server/helpers/fixtures"
 glob          = require("glob")
 path          = require("path")
-expect        = require("chai").expect
-nock          = require('nock')
-sinon         = require('sinon')
 supertest     = require("supertest")
 Session       = require("supertest-session")
 str           = require("underscore.string")
@@ -20,7 +18,6 @@ describe "Routes", ->
   beforeEach ->
     nock.enableNetConnect()
 
-    @sandbox = sinon.sandbox.create()
     @sandbox.stub(Server.prototype, "getCypressJson").returns({})
 
     @server = Server("/Users/brian/app")
@@ -37,7 +34,6 @@ describe "Routes", ->
 
   afterEach ->
     @session.destroy()
-    @sandbox.restore()
     nock.cleanAll()
 
   context "GET /", ->
@@ -222,6 +218,176 @@ describe "Routes", ->
             expect(res.text).to.eq file
             null
           .end(done)
+
+  context "ALL /__cypress/xhrs/*", ->
+    describe "delay", ->
+      it "can set delay to 10ms", (done) ->
+        delay = @sandbox.spy(Promise, "delay")
+
+        supertest(@app)
+          .get("/__cypress/xhrs/users/1")
+          .set("x-cypress-delay", "10")
+          .expect(200)
+          .end ->
+            expect(delay).to.be.calledWith(10)
+            done()
+
+      it "does not call Promise.delay when no delay", (done) ->
+        delay = @sandbox.spy(Promise, "delay")
+
+        supertest(@app)
+          .get("/__cypress/xhrs/users/1")
+          .expect(200)
+          .end ->
+            expect(delay).not.to.be.called
+            done()
+
+    describe "status", ->
+      it "can set status", (done) ->
+        supertest(@app)
+          .get("/__cypress/xhrs/users/1")
+          .set("x-cypress-status", "401")
+          .expect(401)
+          .end(done)
+
+    describe "headers", ->
+      it "can set headers", (done) ->
+        headers = JSON.stringify({
+          "x-token": "123"
+          "content-type": "text/plain"
+        })
+
+        supertest(@app)
+          .get("/__cypress/xhrs/users/1")
+          .set("x-cypress-headers", headers)
+          .expect(200)
+          .expect("Content-Type", /text\/plain/)
+          .expect("x-token", "123")
+          .end(done)
+
+      it "sets headers from response type", (done) ->
+        headers = JSON.stringify({
+          "x-token": "123"
+        })
+
+        supertest(@app)
+          .get("/__cypress/xhrs/users/1")
+          .set("x-cypress-headers", headers)
+          .set("x-cypress-response", JSON.stringify({foo: "bar"}))
+          .expect(200)
+          .expect("Content-Type", /application\/json/)
+          .expect("x-token", "123")
+          .expect({foo: "bar"})
+          .end(done)
+
+    describe "response", ->
+      it "sets response to json", (done) ->
+        supertest(@app)
+          .get("/__cypress/xhrs/users/1")
+          .set("x-cypress-response", JSON.stringify([1,2,3]))
+          .expect(200)
+          .expect("Content-Type", /application\/json/)
+          .expect([1,2,3])
+          .end(done)
+
+      it "sets response to text/html", (done) ->
+        supertest(@app)
+          .get("/__cypress/xhrs/users/1")
+          .set("x-cypress-response", "<html>foo</html>")
+          .expect(200)
+          .expect("Content-Type", /text\/html/)
+          .expect("<html>foo</html>")
+          .end(done)
+
+      it "sets response to text/plain", (done) ->
+        supertest(@app)
+          .get("/__cypress/xhrs/users/1")
+          .set("x-cypress-response", "foobarbaz")
+          .expect(200)
+          .expect("Content-Type", /text\/plain/)
+          .expect("foobarbaz")
+          .end(done)
+
+      it "sets response to text/plain on empty response", (done) ->
+        supertest(@app)
+          .get("/__cypress/xhrs/users/1")
+          .set("x-cypress-response", "")
+          .expect(200)
+          .expect("Content-Type", /text\/plain/)
+          .expect("")
+          .end(done)
+
+      context "fixture", ->
+        beforeEach ->
+          Fixtures.scaffold("todos")
+
+          @server.setCypressJson {
+            projectRoot: Fixtures.project("todos")
+            testFolder: "tests"
+          }
+
+        afterEach ->
+          Fixtures.remove("todos")
+
+        it "returns fixture contents", (done) ->
+          supertest(@app)
+            .get("/__cypress/xhrs/bar")
+            .set("x-cypress-response", "fixture:foo")
+            .expect(200)
+            .expect("Content-Type", /application\/json/)
+            .expect([{json: true}])
+            .end(done)
+
+        it "returns __error on fixture errors", (done) ->
+          supertest(@app)
+            .get("/__cypress/xhrs/bar")
+            .set("x-cypress-response", "fixture:bad_json")
+            .expect(400)
+            .expect("Content-Type", /application\/json/)
+            .expect (res) ->
+              expect(res.body.__error).to.include("'bad_json' is not valid JSON.")
+              null
+            .end(done)
+
+      context "PUT", ->
+        it "can issue PUT requests", (done) ->
+          supertest(@app)
+            .put("/__cypress/xhrs/users/1", {
+              name: "brian"
+            })
+            .set("x-cypress-response", JSON.stringify({id: 123, name: "brian"}))
+            .expect(200)
+            .expect("Content-Type", /application\/json/)
+            .expect({id: 123, name: "brian"})
+            .end(done)
+
+      context "POST", ->
+        it "can issue POST requests", (done) ->
+          supertest(@app)
+            .post("/__cypress/xhrs/users/1", {
+              name: "brian"
+            })
+            .set("x-cypress-response", JSON.stringify({id: 123, name: "brian"}))
+            .expect(200)
+            .expect("Content-Type", /application\/json/)
+            .expect({id: 123, name: "brian"})
+            .end(done)
+
+      context "HEAD", ->
+        it "can issue PUT requests", (done) ->
+          supertest(@app)
+            .head("/__cypress/xhrs/users/1")
+            .expect(200)
+            .expect("Content-Type", /text\/plain/)
+            .end(done)
+
+      context "DELETE", ->
+        it "can issue DELETE requests", (done) ->
+          supertest(@app)
+            .delete("/__cypress/xhrs/users/1")
+            .expect(200)
+            .expect("Content-Type", /text\/plain/)
+            .end(done)
 
   context "GET /__cypress/iframes/*", ->
     describe "todos", ->

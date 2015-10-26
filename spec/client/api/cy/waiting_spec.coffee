@@ -47,13 +47,13 @@ describe "$Cypress.Cy Waiting Commands", ->
         response = {foo: "foo"}
 
         @cy
+          .visit("/fixtures/html/xhr.html")
           .server()
           .route("GET", /.*/, response).as("fetch")
           .window().then (win) ->
             win.$.get("/foo")
           .wait("@fetch").then (xhr) ->
-            obj = JSON.parse(xhr.responseText)
-            expect(obj).to.deep.eq response
+            expect(xhr.responseBody).to.deep.eq response
 
       it "waits for the route alias to have a request", ->
         @cy.on "retry", _.once =>
@@ -62,11 +62,12 @@ describe "$Cypress.Cy Waiting Commands", ->
           null
 
         @cy
+          .visit("/fixtures/html/xhr.html")
           .server({delay: 1000})
           .route(/users/, {}).as("getUsers")
           .wait("@getUsers.request").then (xhr) ->
-            expect(xhr.url).to.eq "/users"
-            expect(xhr.readyState).to.eq 1
+            expect(xhr.url).to.include "/users"
+            expect(xhr.response).to.be.null
 
       it "waits for the route alias to have a request + response", ->
         @cy.on "retry", _.once =>
@@ -77,12 +78,13 @@ describe "$Cypress.Cy Waiting Commands", ->
         @cy
           .server({delay: 200})
           .route(/users/, {}).as("getUsers")
+          .visit("/fixtures/html/xhr.html")
           .wait("@getUsers.request").then (xhr) ->
-            expect(xhr.url).to.eq "/users"
-            expect(xhr.readyState).to.eq 1
+            expect(xhr.url).to.include "/users"
+            expect(xhr.response).to.be.null
           .wait("@getUsers").then (xhr) ->
-            expect(xhr.readyState).to.eq 4
-            expect(xhr.responseText).to.eq "{}"
+            expect(xhr.status).to.eq 200
+            expect(xhr.responseBody).to.deep.eq({})
 
       it "resets the timeout after waiting", ->
         prevTimeout = @cy._timeout()
@@ -95,6 +97,7 @@ describe "$Cypress.Cy Waiting Commands", ->
         @cy
           .server()
           .route("GET", /.*/, {}).as("fetch")
+          .visit("/fixtures/html/xhr.html")
           .wait("@fetch").then ->
             expect(@cy._timeout()).to.eq prevTimeout
 
@@ -150,6 +153,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy
+            .visit("/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("foo")
             .window().then (win) ->
@@ -162,6 +166,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy
+            .visit("/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("foo")
             .route(/bar/, {}).as("bar")
@@ -175,6 +180,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy
+            .visit("/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("foo")
             .get("body").as("bar")
@@ -190,6 +196,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy
+            .visit("/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("foo")
             .route(/bar/, {}).as("bar")
@@ -208,6 +215,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             null
 
           @cy
+            .visit("/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {foo: "foo"}).as("foo")
             .route(/bar/, {bar: "bar"}).as("bar")
@@ -228,6 +236,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             null
 
           @cy
+            .visit("/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {foo: "foo"}).as("foo")
             .route(/bar/, {bar: "bar"}).as("bar")
@@ -246,6 +255,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             , 500
 
           @cy
+            .visit("/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("foo")
             .route(/bar/, {}).as("bar")
@@ -263,6 +273,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             , 500
 
           @cy
+            .visit("/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("foo")
             .get("body").as("bar")
@@ -287,6 +298,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             , 500
 
           @cy
+            .visit("/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {foo: "foo"}).as("foo")
             .route(/bar/, {bar: "bar"}).as("bar")
@@ -312,6 +324,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             , 500
 
           @cy
+            .visit("/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {foo: "foo"}).as("foo")
             .route(/bar/, {bar: "bar"}).as("bar")
@@ -336,6 +349,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             win.$.get("/users", {num: response})
 
           @cy
+            .visit("/fixtures/html/xhr.html")
             .server()
             .route(/users/, resp).as("getUsers")
             .wait(["@getUsers", "@getUsers", "@getUsers"])
@@ -357,6 +371,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             win.$.get("/users", {num: response})
 
           @cy
+            .visit("/fixtures/html/xhr.html")
             .server()
             .route(/users/, resp).as("getUsers")
             .wait("@getUsers")
@@ -379,6 +394,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             win.$.get("/users", {num: request})
 
           @cy
+            .visit("/fixtures/html/xhr.html")
             .server()
             .route(/users/, resp).as("getUsers")
             .wait("@getUsers.request")
@@ -397,6 +413,7 @@ describe "$Cypress.Cy Waiting Commands", ->
         resp2 = {bar: "bar"}
 
         @cy
+          .visit("/fixtures/html/xhr.html")
           .server()
           .route(/users/, resp1).as("getUsers")
           .route(/posts/, resp2).as("getPosts")
@@ -404,10 +421,8 @@ describe "$Cypress.Cy Waiting Commands", ->
             win.$.get("/users")
             win.$.get("/posts")
           .wait(["@getUsers", "@getPosts"]).spread (xhr1, xhr2) ->
-            obj1 = JSON.parse(xhr1.responseText)
-            obj2 = JSON.parse(xhr2.responseText)
-            expect(obj1).to.deep.eq resp1
-            expect(obj2).to.deep.eq resp2
+            expect(xhr1.responseBody).to.deep.eq resp1
+            expect(xhr2.responseBody).to.deep.eq resp2
 
     describe "multiple separate alias waits", ->
       it "waits for a 3rd request before resolving", ->
@@ -420,17 +435,18 @@ describe "$Cypress.Cy Waiting Commands", ->
           win.$.get("/users", {num: response})
 
         @cy
+          .visit("/fixtures/html/xhr.html")
           .server()
           .route(/users/, resp).as("getUsers")
           .wait("@getUsers").then (xhr) ->
-            expect(xhr.url).to.eq "/users?num=1"
-            expect(xhr.responseText).to.eq JSON.stringify(resp)
+            expect(xhr.url).to.include "/users?num=1"
+            expect(xhr.responseBody).to.deep.eq resp
           .wait("@getUsers").then (xhr) ->
-            expect(xhr.url).to.eq "/users?num=2"
-            expect(xhr.responseText).to.eq JSON.stringify(resp)
+            expect(xhr.url).to.include "/users?num=2"
+            expect(xhr.responseBody).to.deep.eq resp
           .wait("@getUsers").then (xhr) ->
-            expect(xhr.url).to.eq "/users?num=3"
-            expect(xhr.responseText).to.eq JSON.stringify(resp)
+            expect(xhr.url).to.include "/users?num=3"
+            expect(xhr.responseBody).to.deep.eq resp
 
       it "waits for the 4th request before resolving", ->
         resp = {foo: "foo"}
@@ -442,15 +458,16 @@ describe "$Cypress.Cy Waiting Commands", ->
           win.$.get("/users", {num: response})
 
         @cy
+          .visit("/fixtures/html/xhr.html")
           .server()
           .route(/users/, resp).as("getUsers")
           .wait(["@getUsers", "@getUsers", "@getUsers"]).spread (xhr1, xhr2, xhr3) ->
-            expect(xhr1.url).to.eq "/users?num=1"
-            expect(xhr2.url).to.eq "/users?num=2"
-            expect(xhr3.url).to.eq "/users?num=3"
+            expect(xhr1.url).to.include "/users?num=1"
+            expect(xhr2.url).to.include "/users?num=2"
+            expect(xhr3.url).to.include "/users?num=3"
           .wait("@getUsers").then (xhr) ->
-            expect(xhr.url).to.eq "/users?num=4"
-            expect(xhr.responseText).to.eq JSON.stringify(resp)
+            expect(xhr.url).to.include "/users?num=4"
+            expect(xhr.responseBody).to.deep.eq resp
 
       describe "errors", ->
         beforeEach ->
@@ -567,6 +584,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             done()
 
           @cy
+            .visit("/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("getFoo")
             .route(/bar/, {}).as("getBar")
@@ -582,6 +600,7 @@ describe "$Cypress.Cy Waiting Commands", ->
       describe "alias argument", ->
         it "is a parent command", ->
           @cy
+            .visit("/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("getFoo")
             .window().then (win) ->
@@ -591,6 +610,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
         it "passes as array of referencesAlias", ->
           @cy
+            .visit("/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("getFoo")
             .route(/bar/, {}).as("getBar")
@@ -602,6 +622,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
         it "#onConsole waiting on 1 alias", ->
           @cy
+            .visit("/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("getFoo")
             .window().then (win) ->
@@ -615,6 +636,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
         it "#onConsole waiting on multiple aliases", ->
           @cy
+            .visit("/fixtures/html/xhr.html")
             .server()
             .route(/foo/, {}).as("getFoo")
             .route(/bar/, {}).as("getBar")

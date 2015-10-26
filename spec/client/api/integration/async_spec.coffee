@@ -1,14 +1,17 @@
 describe "Async Integration Tests", ->
-  enterCommandTestingMode("html/async")
+  enterCommandTestingMode()
 
   context "waiting", ->
     beforeEach ->
       @loadDom("html/async").then =>
         @setup({replaceIframeContents: false})
+        @Cypress.trigger "test:before:hooks", {id: 123}
         @Cypress.set @currentTest
+        @chai.patchAssert()
 
     it "will find 'form success' message by default (after retrying)", ->
       @cy
+        .visit("/fixtures/html/async.html")
         .server()
         .route("POST", "/users", {})
         .get("input[name=name]").type("brian")
@@ -23,6 +26,7 @@ describe "Async Integration Tests", ->
         done()
 
       @cy
+        .visit("/fixtures/html/async.html")
         .server()
         .route("POST", "/users", {})
         .get("input[name=name]").type("brian")
@@ -32,6 +36,7 @@ describe "Async Integration Tests", ->
 
     it "needs an explicit should when an element is immediately found", ->
       @cy
+        .visit("/fixtures/html/async.html")
         .server()
         .route("POST", "/users", {})
         .get("input[name=name]").type("brian")
