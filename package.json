@@ -23,7 +23,7 @@
     "chalk": "^1.1.0",
     "coffee-script": "^1.9.3",
     "commander": "^2.8.1",
-    "decompress": "^2.3.0",
+    "decompress": "^3.0.0",
     "fs-extra": "^0.22.1",
     "human-interval": "^0.1.5",
     "lodash": "^3.10.0",

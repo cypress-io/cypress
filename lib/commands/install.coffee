@@ -178,7 +178,10 @@ class Install
             if count % 250 is 0
               bar.tick(1)
             cb(null, file)
-          .run(resolve)
+          .run (err, files) ->
+            return reject(err) if err
+
+            resolve()
 
   cleanupZip: (options) ->
     fs.removeAsync(options.zipDestination)

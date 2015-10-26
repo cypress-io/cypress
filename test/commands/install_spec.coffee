@@ -1,8 +1,9 @@
-fs      = require("fs-extra")
-path    = require("path")
-Promise = require("bluebird")
-utils   = require("../../lib/utils")
-Install = require("../../lib/commands/install")
+fs         = require("fs-extra")
+path       = require("path")
+Promise    = require("bluebird")
+Decompress = require("decompress")
+utils      = require("../../lib/utils")
+Install    = require("../../lib/commands/install")
 
 fs = Promise.promisifyAll(fs)
 
@@ -79,12 +80,20 @@ describe "Install", ->
       @install = new Install(@options)
       @console = @sandbox.spy(console, "log")
       @exit    = @sandbox.stub(process, "exit")
-      @sandbox.stub(@install, "download").resolves()
+      @sandbox.stub(@install, "download").resolves(@options)
       @sandbox.stub(@install, "finish").resolves()
 
     it "catches unzip errors and exits", ->
       err = new Error("unzip failed")
       @sandbox.stub(@install, "unzip").rejects(err)
+      @install.initialize(@options).then =>
+        expect(@console).to.be.calledWithMatch(err.stack)
+        expect(@exit).to.be.calledWith(1)
+
+    it "catches decompression errors", ->
+      err = new Error("fail whale")
+      @sandbox.stub(Decompress.prototype, "run").callsArgWithAsync(0, err)
+      @options.zipDestination = "test/fixture/example.zip"
       @install.initialize(@options).then =>
         expect(@console).to.be.calledWithMatch(err.stack)
         expect(@exit).to.be.calledWith(1)
