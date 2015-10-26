@@ -144,8 +144,6 @@ $Cypress.register "XHR2", (Cypress, _) ->
 
           setRequest.call(@, xhr, alias)
 
-          availableUrls = @prop("availableUrls") or []
-
           if sl = stub and stub.log
             numResponses = sl.get("numResponses")
             sl.set "numResponses", numResponses + 1
@@ -344,11 +342,6 @@ $Cypress.register "XHR2", (Cypress, _) ->
       ## command (route) has an alias?
       if alias = @getNextAlias()
         options.alias = alias
-
-      ## do not mutate existing availableUrls
-      urls = @prop("availableUrls") ? []
-      urls = urls.concat getUrl(options)
-      @prop "availableUrls", urls
 
       ## if our response is a string and
       ## a reference to an alias
