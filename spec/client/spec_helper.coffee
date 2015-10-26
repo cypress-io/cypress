@@ -139,7 +139,9 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
 
       obj =
         $remoteIframe: @$iframe
-        config: {}
+        config: {
+          xhrUrl: "__cypress/xhrs/"
+        }
 
       ## in testing we manually call bindWindowListeners
       ## with our iframe's contentWindow because
@@ -161,6 +163,7 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
       @Cypress.option("jQuery", $)
 
       if @currentTest
+        @Cypress.trigger "test:before:hooks", {id: 123}
         @Cypress.set(@currentTest)
         @currentTest.enableTimeouts(false)
 

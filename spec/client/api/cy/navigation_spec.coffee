@@ -256,7 +256,7 @@ describe "$Cypress.Cy Navigation Commands", ->
         @Cypress.on "log", (log) ->
           logs.push log
 
-        @cy.visit("/fixtures/html/sinon.html").then ->
+        @cy.visit("/fixtures/html/xhr.html").then ->
           expect(logs).to.have.length(1)
 
       it "is name: page load", ->

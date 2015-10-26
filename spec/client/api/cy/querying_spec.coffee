@@ -508,6 +508,7 @@ describe "$Cypress.Cy Querying Commands", ->
 
       it "logs route aliases", ->
         @cy
+          .visit("/fixtures/html/xhr.html")
           .server()
           .route(/users/, {}).as("getUsers")
           .window().then (win) ->
@@ -596,6 +597,7 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy
           .server()
           .route(/users/, {}).as("getUsers")
+          .visit("/fixtures/html/xhr.html")
           .window().then (win) ->
             win.$.get("/users")
           .get("@getUsers").then (obj) ->
@@ -646,20 +648,23 @@ describe "$Cypress.Cy Querying Commands", ->
           @cy
             .server()
             .route(/users/, {}).as("getUsers")
+            .visit("/fixtures/html/xhr.html")
             .window().then (win) ->
               win.$.get("/users")
             .get("@getUsers").then (xhr) ->
-              expect(xhr.url).to.eq "/users"
+              expect(xhr.url).to.include "/users"
 
         it "returns null if no xhr is found", ->
           @cy
             .server()
             .route(/users/, {}).as("getUsers")
+            .visit("/fixtures/html/xhr.html")
             .get("@getUsers").then (xhr) ->
               expect(xhr).to.be.null
 
         it "returns an array of xhrs", ->
           @cy
+            .visit("/fixtures/html/xhr.html")
             .server()
             .route(/users/, {}).as("getUsers")
             .window().then (win) ->
@@ -667,33 +672,36 @@ describe "$Cypress.Cy Querying Commands", ->
               win.$.get("/users", {num: 2})
             .get("@getUsers.all").then (xhrs) ->
               expect(xhrs).to.be.an("array")
-              expect(xhrs[0].url).to.eq "/users?num=1"
-              expect(xhrs[1].url).to.eq "/users?num=2"
+              expect(xhrs[0].url).to.include "/users?num=1"
+              expect(xhrs[1].url).to.include "/users?num=2"
 
         it "returns the 1st xhr", ->
           @cy
+            .visit("/fixtures/html/xhr.html")
             .server()
             .route(/users/, {}).as("getUsers")
             .window().then (win) ->
               win.$.get("/users", {num: 1})
               win.$.get("/users", {num: 2})
             .get("@getUsers.1").then (xhr1) ->
-              expect(xhr1.url).to.eq "/users?num=1"
+              expect(xhr1.url).to.include "/users?num=1"
 
         it "returns the 2nd xhr", ->
           @cy
+            .visit("/fixtures/html/xhr.html")
             .server()
             .route(/users/, {}).as("getUsers")
             .window().then (win) ->
               win.$.get("/users", {num: 1})
               win.$.get("/users", {num: 2})
             .get("@getUsers.2").then (xhr2) ->
-              expect(xhr2.url).to.eq "/users?num=2"
+              expect(xhr2.url).to.include "/users?num=2"
 
         it "returns the 3rd xhr as null", ->
           @cy
             .server()
             .route(/users/, {}).as("getUsers")
+            .visit("/fixtures/html/xhr.html")
             .window().then (win) ->
               win.$.get("/users", {num: 1})
               win.$.get("/users", {num: 2})
@@ -798,14 +806,6 @@ describe "$Cypress.Cy Querying Commands", ->
       it "throws when using an alias that does not exist"
 
       it "throws after timing out after a .wait() alias reference", (done) ->
-        @cy.$("#get-json").click =>
-          @cy._timeout(1000)
-
-          retry = _.after 3, _.once =>
-            @cy.private("window").$.getJSON("/json")
-
-          @cy.on "retry", retry
-
         @cy.on "fail", (err) ->
           expect(err.message).to.include "Expected to find element: 'getJsonButton', but never found it."
           done()
@@ -813,6 +813,14 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy
           .server()
           .route(/json/, {foo: "foo"}).as("getJSON")
+          .visit("/fixtures/html/xhr.html").then ->
+            @cy.$("#get-json").click =>
+              @cy._timeout(1000)
+
+              retry = _.after 3, _.once =>
+                @cy.private("window").$.getJSON("/json")
+
+              @cy.on "retry", retry
           .get("#get-json").as("getJsonButton").click()
           .wait("@getJSON")
           .get("getJsonButton")
