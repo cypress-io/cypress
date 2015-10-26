@@ -361,8 +361,15 @@ $Cypress.Runner = do ($Cypress, _) ->
       ## which is in our grepped tests array
       ## based on walking down the current suite
       ## iterating through each test until it matches
-      @firstTest suite, (test) =>
+      found = @firstTest suite, (test) =>
         @testInTests(test)
+
+      return found if found
+
+      ## have one last final fallback where
+      ## we just return true on the very first
+      ## test (used in testing)
+      @firstTest suite, (test) -> true
 
     testInTests: (test) ->
       test in @tests

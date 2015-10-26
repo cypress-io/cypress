@@ -25,6 +25,54 @@
           cy.wait("@getFoo").its("url").should("include", "?some=data")
         })
       })
+
+      describe("server with 1 visit", function(){
+        before(function(){
+          cy.visit("/fixtures/html/sinon.html")
+        })
+
+        beforeEach(function(){
+          cy
+            .server()
+            .route(/users/, [{}, {}]).as("getUsers")
+        })
+
+        it("t4", function(){
+          cy
+            .get("#fetch").click()
+            .wait("@getUsers").then(function(xhr){
+              expect(xhr.url).to.include("/users")
+              expect(xhr.responseBody).to.deep.eq([{}, {}])
+            })
+        })
+
+        it("t5", function(){
+          cy
+            .route("POST", /users/, {name: "b"}).as("createUser")
+            .get("#create").click()
+            .wait("@createUser").its("requestBody").should("deep.eq", {some: "data"})
+        })
+
+        // we can probably move this out of this integration
+        // test and into the normal command tests since this
+        // is testing a different feature
+        it("t6", function(){
+          cy
+            .route({
+              method: "POST",
+              url: /users/,
+              response: {name: "b"},
+              delay: 200
+            }).as("createUser")
+            .get("#create").click()
+            .then(function(){
+              // simulate an open request which should become
+              // aborted (usually due to moving to next test)
+              Cypress.trigger("test:before:hooks", {id: 123})
+            })
+            .wait("@createUser").its("aborted").should("be.true")
+        })
+      })
     </script>
   </head>
   <body>
