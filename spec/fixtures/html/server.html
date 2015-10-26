@@ -11,7 +11,7 @@
           cy
             .server()
             .route(/foo/, {foo: "bar"}).as("getFoo")
-            .visit("fixtures/html/sinon.html")
+            .visit("/fixtures/html/sinon.html")
         })
         it("t1", function(){
           cy.wait("@getFoo").its("url").should("include", "?some=data")

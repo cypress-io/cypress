@@ -90,7 +90,11 @@ window.enterIntegrationTestingMode = (fixture, options = {}) ->
         console.error(err.stack)
 
     @loadDom(fixture).then =>
-      @Cypress.initialize @$iframe.prop("contentWindow"), @$iframe, ->
+      ## why do we use the initialize method here but only
+      ## trigger it in the command testing mode below?
+      @Cypress.initialize @$iframe.prop("contentWindow"), @$iframe, {
+        xhrUrl: "__cypress/xhrs/"
+      }
 
   after ->
     @$iframe.remove()

@@ -226,6 +226,9 @@ $Cypress.Server2 = do ($Cypress, _) ->
       setHeader(xhr, "headers",  stub.headers, @transformHeaders)
 
     normalizeStubUrl: (xhrUrl, url) ->
+      if not xhrUrl
+        console.warn("'Server.options.xhrUrl' has not been set")
+
       ## always ensure this is an absolute-relative url
       ## and remove any double slashes
       xhrUrl = _.compact(xhrUrl.split("/")).join("/")
