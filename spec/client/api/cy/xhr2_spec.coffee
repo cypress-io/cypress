@@ -1066,6 +1066,15 @@ describe "$Cypress.Cy XHR Commands", ->
             XHR: xhr.xhr
           })
 
+    describe "whitelisting", ->
+      it "does not send back 404s on whitelisted routes", ->
+        @cy
+          .server()
+          .window().then (win) ->
+            win.$.get("/fixtures/ajax/app.js")
+          .then (resp) ->
+            expect(resp).to.eq "{foo: \"bar\"}"
+
     describe "route setup", ->
       beforeEach ->
         @cy

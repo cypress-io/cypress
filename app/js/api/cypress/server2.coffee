@@ -357,7 +357,12 @@ $Cypress.Server2 = do ($Cypress, _) ->
       ## return the 404 stub if we dont have any stubs
       ## but we are stubbed - meaning we havent added any routes
       ## but have started the server
-      return @get404Stub() if not @stubs.length and @isStubbed()
+      ## and this request shouldnt be whitelisted
+      if not @stubs.length and
+        @isStubbed() and
+          @options.force404 isnt false and
+            not @options.whitelist.call(@, xhr)
+              return @get404Stub()
 
       ## bail if we've attached no stubs
       return nope() if not @stubs.length
