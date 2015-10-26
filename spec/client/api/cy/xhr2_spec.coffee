@@ -401,6 +401,31 @@ describe "$Cypress.Cy XHR Commands", ->
           expect(@log.get("snapshots")[1].name).to.eq("response")
           expect(@log.get("snapshots")[1].state).to.be.an("object")
 
+    describe "errors", ->
+      beforeEach ->
+        @setup()
+        @allowErrors()
+
+      it "sets err on log when caused by XHR network failure", (done) ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push(log)
+
+        @cy.on "fail", (err) =>
+          ## visit + window + xhr log === 3
+          expect(logs.length).to.eq(3)
+          expect(@log.get("error")).to.be.ok
+          expect(@log.get("error")).to.eq err
+          done()
+
+        @cy
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
+          .window().then (win) ->
+            new Promise (resolve) ->
+              win.$.get("http://www.google.com/foo.json").fail ->
+                foo.bar()
+
   context "#server", ->
     beforeEach ->
       @setup()

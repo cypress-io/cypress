@@ -51,6 +51,8 @@ $Cypress.Server2 = do ($Cypress, _) ->
     onAbort: ->
     onError: ->
     onLoad: ->
+    onFixtureError: ->
+    onNetworkError: ->
   }
 
   ## maybe rename this to XMLHttpRequest ?
@@ -305,8 +307,14 @@ $Cypress.Server2 = do ($Cypress, _) ->
 
         onerror = @onerror
         @onerror = ->
-          console.log "onerror"
-          debugger
+          ## its possible our real onerror handler
+          ## throws so we need to catch those errors too
+          try
+            if _.isFunction(onerror)
+              onerror.apply(@, arguments)
+            server.options.onNetworkError(proxy)
+          catch err
+            server.options.onError(proxy, err)
 
         send.apply(@, arguments)
 
