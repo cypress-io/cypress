@@ -141,7 +141,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
               }
 
               if stub and stub.is404
-                consoleObj.Note = "The Method + URL for this request did not match any of your routes. It was automatically sent back '404'. Setting {force404: false} will turn off this behavior."
+                consoleObj.Note = "The Method + URL for this request did not match any of your routes. It was automatically sent back '404'. Setting cy.server({force404: false}) will turn off this behavior."
 
               consoleObj.groups = ->
                 [

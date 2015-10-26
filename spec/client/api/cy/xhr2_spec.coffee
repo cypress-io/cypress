@@ -1078,7 +1078,7 @@ describe "$Cypress.Cy XHR Commands", ->
       it "sends back 404 when request doesnt match route", ->
         @cy.then ->
           onConsole = @log.attributes.onConsole()
-          expect(onConsole.Note).to.eq("The Method + URL for this request did not match any of your route(s). It was automatically sent back '404'. Setting {force404: false} will turn off this behavior.")
+          expect(onConsole.Note).to.eq("The Method + URL for this request did not match any of your routes. It was automatically sent back '404'. Setting cy.server({force404: false}) will turn off this behavior.")
 
     describe "{force404: false}", ->
       beforeEach ->
