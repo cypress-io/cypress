@@ -805,6 +805,7 @@ describe "$Cypress.Cy XHR Commands", ->
           .wait("@getFoo").then (xhr) ->
             log = @cy.commands.logs({name: "xhr"})[0]
 
+            expect(log.get("displayName")).to.eq("xhr")
             expect(log.get("alias")).to.eq("getFoo")
 
             expect(xhr.responseBody).to.deep.eq({

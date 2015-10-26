@@ -22,6 +22,9 @@ $Cypress.register "XHR2", (Cypress, _) ->
     @throwErr("The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message.")
 
   urlWithoutOrigin = (url) ->
+  getDisplayName = (stub) ->
+    if stub and stub.stub isnt false then "xhr stub" else "xhr"
+
     location = Cypress.Location.create(url)
     location.href.replace(location.origin, "")
 
@@ -119,7 +122,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
           logs[xhr.id] = log = Cypress.Log.command({
             message:   ""
             name:      "xhr"
-            displayName: if stub then "xhr stub" else "xhr"
+            displayName: getDisplayName(stub)
             alias:     alias
             aliasType: "route"
             type:      "parent"
