@@ -1,6 +1,5 @@
 $Cypress.Server2 = do ($Cypress, _) ->
 
-  twoOrMoreDoubleSlashesRe = /\/{2,}/g
   regularResourcesRe       = /\.(jsx?|html|css)$/
   isCypressHeaderRe        = /^X-Cypress-/i
   needsDashRe              = /([a-z][A-Z])/g
@@ -44,8 +43,7 @@ $Cypress.Server2 = do ($Cypress, _) ->
     force404: true ## or allow 404's
     onRequest: undefined
     onResponse: undefined
-    getRemoteUrl: _.identity
-    normalizeUrl: _.identity
+    getUrlOptions: _.identity
     whitelist: whitelist ## function whether to allow a request to go out (css/js/html/templates) etc
     onSend: ->
     onAbort: ->
@@ -219,27 +217,32 @@ $Cypress.Server2 = do ($Cypress, _) ->
         abort.apply(@, arguments)
 
       XHR.prototype.open = (method, url, async = true, username, password) ->
-        ## get the FQDN remote url that our user expects
-        url = server.options.getRemoteUrl(url)
+        ## get the fully qualified url that normally the browser
+        ## would be sending this request to
+
+        ## FQDN:               http://www.google.com/responses/users.json
+        ## relative:           partials/phones-list.html
+        ## absolute-relative:  /app/partials/phones-list.html
+        originalUrl = server.getFullyQualifiedUrl(contentWindow, url)
+
+        ## resolve handling actual + display url's
+        url = server.options.getUrlOptions(originalUrl)
 
         proxy = server.add(@, {
           method: method
-          url: url
+          url: url.display
         })
-
-        ## always normalize the url
-        url = server.options.normalizeUrl(url)
 
         ## if this XHR matches a stubbed route then shift
         ## its url to the stubbed url and set the request
         ## headers for the response
         stub = server.getStubForXhr(@)
         if server.shouldApplyStub(stub)
-          url = server.normalizeStubUrl(server.options.xhrUrl, url)
+          url.actual = server.normalizeStubUrl(server.options.xhrUrl, url.actual)
 
         ## change absolute url's to relative ones
         ## if they match our baseUrl / visited URL
-        open.call(@, method, url, async, username, password)
+        open.call(@, method, url.actual, async, username, password)
 
       XHR.prototype.send = (requestBody) ->
         ## dont send anything if our server isnt active
@@ -287,8 +290,8 @@ $Cypress.Server2 = do ($Cypress, _) ->
         @onload = ->
           proxy.setDuration(timeStart)
           proxy.setStatus()
-          proxy.setResponseBody()
           proxy.setResponseHeaders()
+          proxy.setResponseBody()
 
           if err = proxy.getFixtureError()
             return server.options.onFixtureError(proxy, err)
@@ -317,6 +320,25 @@ $Cypress.Server2 = do ($Cypress, _) ->
             server.options.onError(proxy, err)
 
         send.apply(@, arguments)
+
+    getFullyQualifiedUrl: (contentWindow, url) ->
+      doc = contentWindow.document
+      oldBase = doc.getElementsByTagName("base")[0]
+      oldHref = oldBase && oldBase.href
+      docHead = doc.head or doc.getElementsByTagName("head")[0]
+      ourBase = oldBase or docHead.appendChild(doc.createElement("base"))
+
+      resolver      = doc.createElement("a")
+      ourBase.href  = contentWindow.location.href
+      resolver.href = url
+      resolvedUrl   = resolver.href ## browser magic at work here
+
+      if oldBase
+        oldBase.href = oldHref
+      else
+        docHead.removeChild(ourBase)
+
+      resolvedUrl
 
     getStack: ->
       err = new Error
@@ -347,7 +369,9 @@ $Cypress.Server2 = do ($Cypress, _) ->
     normalizeStubUrl: (xhrUrl, url) ->
       ## always ensure this is an absolute-relative url
       ## and remove any double slashes
-      ["/" + xhrUrl, url].join("/").replace(twoOrMoreDoubleSlashesRe, "/")
+      xhrUrl = _.compact(xhrUrl.split("/")).join("/")
+      url    = _.ltrim(url, "/")
+      ["/" + xhrUrl, url].join("/")
 
     stub: (attrs = {}) ->
       ## merge attrs with the server's defaults

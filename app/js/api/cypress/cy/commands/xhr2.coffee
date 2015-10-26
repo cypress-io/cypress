@@ -21,10 +21,10 @@ $Cypress.register "XHR2", (Cypress, _) ->
   unavailableErr = ->
     @throwErr("The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message.")
 
-  urlWithoutOrigin = (url) ->
   getDisplayName = (stub) ->
     if stub and stub.stub isnt false then "xhr stub" else "xhr"
 
+  stripOrigin = (url) ->
     location = Cypress.Location.create(url)
     location.href.replace(location.origin, "")
 
@@ -99,14 +99,39 @@ $Cypress.register "XHR2", (Cypress, _) ->
       @prop "server", $Cypress.Server2.create({
         testId: testId
         xhrUrl: @private("xhrUrl")
-        getRemoteUrl: (url) =>
-          href = @_getLocation("href")
-          Cypress.Location.resolve(href, url)
+        getUrlOptions: (url) =>
+          ## resolve handling if the origin is either legitimately CORS
+          ## such as the case with 'http://www.google.com' or if this
+          ## is a FQDN that happens to match our remote origin.
+          requestOrigin = Cypress.Location.parse(url).origin
+          currentOrigin = Cypress.Location.parse(window.location.href).origin
+          remoteOrigin  = @_getLocation("origin")
 
-        normalizeUrl: (url) =>
-          ## strip out the origin from the url
-          location = Cypress.Location.create(url)
-          location.href.replace(location.origin, "")
+          switch
+            ## when our request's origin matches our current origin
+            ## then swap out the request origin to be the remote origin
+            when requestOrigin is currentOrigin
+              {
+                actual:  stripOrigin(url)
+                display: Cypress.Location.resolve(remoteOrigin, stripOrigin(url))
+              }
+
+            ## when the request's origin is actually to our remote's
+            ## origin then we know that the user has probably hard
+            ## coded the AJAX requests to be FQDN to what their expected
+            ## host is
+            when requestOrigin is remoteOrigin
+              {
+                actual: stripOrigin(url)
+                display: url
+              }
+
+            ## this is a legit CORS request and dont touch it
+            else
+              {
+                actual: url
+                display: url
+              }
 
         onSend: (xhr, stack, stub) =>
           alias = stub?.alias
@@ -170,7 +195,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
                 [
                   "<i class='fa fa-circle #{klass}'></i>" + xhr.method,
                   status,
-                  _.truncate(urlWithoutOrigin(xhr.url), 20)
+                  _.truncate(stripOrigin(xhr.url), 20)
                 ].join(" ")
           })
 

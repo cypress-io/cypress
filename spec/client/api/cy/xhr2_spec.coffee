@@ -120,10 +120,10 @@ describe "$Cypress.Cy XHR Commands", ->
             win.$.get("foo")
             null
           .wait("@getFoo").then (xhr) ->
-            expect(xhr.url).to.eq("http://localhost:3500/fixtures/html/xhr.html/foo")
-            expect(@open).to.be.calledWith("GET", "/fixtures/html/xhr.html/foo")
+            expect(xhr.url).to.eq("http://localhost:3500/fixtures/html/foo")
+            expect(@open).to.be.calledWith("GET", "/fixtures/html/foo")
 
-      it "transparently rewrites FQDN urls", ->
+      it "transparently rewrites FQDN urls which match remote host", ->
         @cy
           .server()
           .route({
@@ -132,6 +132,8 @@ describe "$Cypress.Cy XHR Commands", ->
           }).as("getFoo")
           .visit("http://localhost:3500/fixtures/html/xhr.html")
           .window().then (win) ->
+            ## trick cypress into thinking the remoteOrigin is location:9999
+            @sandbox.stub(@cy, "_getLocation").withArgs("origin").returns("http://localhost:9999")
             @cy.prop("server").restore()
             @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
             @cy.prop("server").bindTo(win)
@@ -157,7 +159,7 @@ describe "$Cypress.Cy XHR Commands", ->
             null
           .wait("@getFoo").then (xhr) ->
             expect(xhr.url).to.eq("http://localhost:9999/foo")
-            expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/foo")
+            expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/http://localhost:9999/foo")
 
       it "rewrites absolute url's for stubs", ->
         @cy
@@ -196,6 +198,61 @@ describe "$Cypress.Cy XHR Commands", ->
             xhr = @cy.prop("responses")[0].xhr
             expect(xhr.url).to.eq("http://localhost:3500/foo")
             expect(@open).to.be.calledWith("POST", "/__cypress/xhrs/foo")
+
+      it "rewrites urls with nested segments", ->
+        @cy
+          .server()
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
+          .route({
+            url: /phones/
+            response: {}
+          }).as("getPhones")
+          .window().then (win) ->
+            @cy.prop("server").restore()
+            @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
+            @cy.prop("server").bindTo(win)
+            win.$.get("phones/phones.json")
+            null
+          .wait("@getPhones")
+          .then ->
+            xhr = @cy.prop("responses")[0].xhr
+            expect(xhr.url).to.eq("http://localhost:3500/fixtures/html/phones/phones.json")
+            expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/fixtures/html/phones/phones.json")
+
+      it "does not touch real CORS requests", ->
+        @cy
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
+          .window().then (win) ->
+            @cy.prop("server").restore()
+            @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
+            @cy.prop("server").bindTo(win)
+            new Promise (resolve) ->
+              win.$.get("http://www.google.com/phones/phones.json").fail ->
+                resolve()
+          .then ->
+            xhr = @cy.prop("requests")[0].xhr
+            expect(xhr.url).to.eq("http://www.google.com/phones/phones.json")
+            expect(@open).to.be.calledWith("GET", "http://www.google.com/phones/phones.json")
+
+      it "can stub real CORS requests too", ->
+        @cy
+          .server()
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
+          .route({
+            url: /phones/
+            response: {}
+          }).as("getPhones")
+          .window().then (win) ->
+            @cy.prop("server").restore()
+            @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
+            @cy.prop("server").bindTo(win)
+            win.$.get("http://www.google.com/phones/phones.json")
+            null
+          .wait("@getPhones")
+          .then ->
+            xhr = @cy.prop("responses")[0].xhr
+            expect(xhr.url).to.eq("http://www.google.com/phones/phones.json")
+            expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/http://www.google.com/phones/phones.json")
 
     describe "#onResponse", ->
       beforeEach ->
@@ -794,9 +851,9 @@ describe "$Cypress.Cy XHR Commands", ->
 
     it "can use regular strings as response", ->
       @cy
-        .route("foo", "foo bar baz").as("getFoo")
+        .route("/foo", "foo bar baz").as("getFoo")
         .window().then (win) ->
-          win.$.get("foo")
+          win.$.get("/foo")
           null
         .wait("@getFoo").then (xhr) ->
           expect(xhr.responseBody).to.eq "foo bar baz"
