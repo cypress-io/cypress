@@ -174,7 +174,6 @@ $Cypress.Server2 = do ($Cypress, _) ->
       @xhrs     = {}
       @proxies  = {}
       @stubs    = []
-      @isActive = true
 
       ## always start disabled
       ## so we dont handle stubs
@@ -245,10 +244,6 @@ $Cypress.Server2 = do ($Cypress, _) ->
         open.call(@, method, url.actual, async, username, password)
 
       XHR.prototype.send = (requestBody) ->
-        ## dont send anything if our server isnt active
-        ## anymore
-        return if not server.isActive
-
         ## add header properties for the xhr's id
         ## and the testId
         setHeader(@, "id", @id)
@@ -441,11 +436,6 @@ $Cypress.Server2 = do ($Cypress, _) ->
 
     getProxyFor: (xhr) ->
       @proxies[xhr.id]
-
-    deactivate: ->
-      @isActive = false
-
-      @abort()
 
     abort: ->
       ## abort any outstanding xhr's

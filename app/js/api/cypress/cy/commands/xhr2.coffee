@@ -6,10 +6,9 @@ $Cypress.register "XHR2", (Cypress, _) ->
 
   server = null
 
-  deactivate = ->
+  abort = ->
     if server
-      server.deactivate()
-      server = null
+      server.abort()
 
   isUrlLikeArgs = (url, response) ->
     (not _.isObject(url) and not _.isObject(response)) or
@@ -43,6 +42,10 @@ $Cypress.register "XHR2", (Cypress, _) ->
 
     responses = @prop("responses") ? []
 
+    ## we could be setting response from
+    ## multiple places so this should first
+    ## see if we find the xhr in responses
+    ## and bail if we do.
     responses.push({
       xhr: xhr
       alias: obj?.alias
@@ -72,10 +75,10 @@ $Cypress.register "XHR2", (Cypress, _) ->
     if server
       server.abort()
 
-  Cypress.on "abort", deactivate
+  Cypress.on "abort", abort
 
   Cypress.on "test:before:hooks", (test = {}) ->
-    deactivate()
+    abort()
 
     server = @startXhrServer(test.id)
 
