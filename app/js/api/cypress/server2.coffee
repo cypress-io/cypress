@@ -180,18 +180,23 @@ $Cypress.Server2 = do ($Cypress, _) ->
       ## so we dont handle stubs
       @enableStubs(false)
 
-    bindTo: (contentWindow) ->
+    bindTo: (contentWindow, XHR) ->
       server = @
 
-      XHR    = contentWindow.XMLHttpRequest
+      XHR    ?= contentWindow.XMLHttpRequest
       send   = XHR.prototype.send
       open   = XHR.prototype.open
       abort  = XHR.prototype.abort
       srh    = XHR.prototype.setRequestHeader
 
       server.restore = ->
+        ## restore the property back on the window
+        contentWindow.XMLHttpRequest = XHR
+
         _.each {send: send, open: open, abort: abort, setRequestHeader: srh}, (value, key) ->
           XHR.prototype[key] = value
+
+        return {contentWindow: contentWindow, XMLHttpRequest: XHR}
 
       XHR.prototype.setRequestHeader = ->
         proxy = server.getProxyFor(@)
