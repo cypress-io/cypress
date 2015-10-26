@@ -180,148 +180,6 @@ $Cypress.Server2 = do ($Cypress, _) ->
       ## so we dont handle stubs
       @enableStubs(false)
 
-    bindTo: (contentWindow, XHR) ->
-      server = @
-
-      XHR    ?= contentWindow.XMLHttpRequest
-      send   = XHR.prototype.send
-      open   = XHR.prototype.open
-      abort  = XHR.prototype.abort
-      srh    = XHR.prototype.setRequestHeader
-
-      server.restore = ->
-        ## restore the property back on the window
-        contentWindow.XMLHttpRequest = XHR
-
-        _.each {send: send, open: open, abort: abort, setRequestHeader: srh}, (value, key) ->
-          XHR.prototype[key] = value
-
-        return {contentWindow: contentWindow, XMLHttpRequest: XHR}
-
-      XHR.prototype.setRequestHeader = ->
-        proxy = server.getProxyFor(@)
-
-        proxy.setRequestHeader.apply(proxy, arguments)
-
-        srh.apply(@, arguments)
-
-      XHR.prototype.abort = ->
-        ## if we already have a readyState of 4
-        ## then do not get the abort stack or
-        ## set the aborted property or call onAbort
-        ## to test this just use a regular XHR
-        @aborted = true
-
-        abortStack = server.getStack()
-
-        proxy = server.getProxyFor(@)
-        proxy.aborted = true
-
-        server.options.onAbort(proxy, abortStack)
-
-        abort.apply(@, arguments)
-
-      XHR.prototype.open = (method, url, async = true, username, password) ->
-        ## get the fully qualified url that normally the browser
-        ## would be sending this request to
-
-        ## FQDN:               http://www.google.com/responses/users.json
-        ## relative:           partials/phones-list.html
-        ## absolute-relative:  /app/partials/phones-list.html
-        originalUrl = server.getFullyQualifiedUrl(contentWindow, url)
-
-        ## resolve handling actual + display url's
-        url = server.options.getUrlOptions(originalUrl)
-
-        proxy = server.add(@, {
-          method: method
-          url: url.display
-        })
-
-        ## if this XHR matches a stubbed route then shift
-        ## its url to the stubbed url and set the request
-        ## headers for the response
-        stub = server.getStubForXhr(@)
-        if server.shouldApplyStub(stub)
-          url.actual = server.normalizeStubUrl(server.options.xhrUrl, url.actual)
-
-        ## change absolute url's to relative ones
-        ## if they match our baseUrl / visited URL
-        open.call(@, method, url.actual, async, username, password)
-
-      XHR.prototype.send = (requestBody) ->
-        ## add header properties for the xhr's id
-        ## and the testId
-        setHeader(@, "id", @id)
-        setHeader(@, "testId", server.options.testId)
-
-        ## if there is an existing stub for this
-        ## XHR then add those properties into it
-        ## only if stub isnt explicitly false
-        ## and the server is enabled
-        stub = server.getStubForXhr(@)
-        if server.shouldApplyStub(stub)
-          server.applyStubProperties(@, stub)
-
-        ## capture where this xhr came from
-        sendStack = server.getStack()
-
-        ## get the proxy xhr
-        proxy = server.getProxyFor(@)
-
-        proxy.setRequestBody(requestBody)
-
-        ## log this out now since it's being sent officially
-        ## unless its been whitelisted
-        if not server.options.whitelist.call(server, @)
-          server.options.onSend(proxy, sendStack, stub)
-
-        if _.isFunction(server.options.onRequest)
-          ## call the onRequest function
-          ## after we've called server.options.onSend
-          server.options.onRequest(stub, proxy)
-
-        timeStart = new Date
-
-        ## if our server is in specific mode for
-        ## not waiting or auto responding or delay
-        ## or not logging or auto responding with 404
-        ## do that here.
-        onload = @onload
-        @onload = ->
-          proxy.setDuration(timeStart)
-          proxy.setStatus()
-          proxy.setResponseHeaders()
-          proxy.setResponseBody()
-
-          if err = proxy.getFixtureError()
-            return server.options.onFixtureError(proxy, err)
-
-          ## catch synchronous errors caused
-          ## by the onload function
-          try
-            if _.isFunction(onload)
-              onload.apply(@, arguments)
-            server.options.onLoad(proxy, stub)
-          catch err
-            server.options.onError(proxy, err)
-
-          if _.isFunction(server.options.onResponse)
-            server.options.onResponse(stub, proxy)
-
-        onerror = @onerror
-        @onerror = ->
-          ## its possible our real onerror handler
-          ## throws so we need to catch those errors too
-          try
-            if _.isFunction(onerror)
-              onerror.apply(@, arguments)
-            server.options.onNetworkError(proxy)
-          catch err
-            server.options.onError(proxy, err)
-
-        send.apply(@, arguments)
-
     getFullyQualifiedUrl: (contentWindow, url) ->
       doc = contentWindow.document
       oldBase = doc.getElementsByTagName("base")[0]
@@ -473,6 +331,149 @@ $Cypress.Server2 = do ($Cypress, _) ->
     ## noop by default to keep
     ## standard interface
     restore: ->
+
+    bindTo: (contentWindow) ->
+      $Server.bindTo(contentWindow, => @)
+
+    @bindTo = (contentWindow, getServer) ->
+      XHR    = contentWindow.XMLHttpRequest
+      send   = XHR.prototype.send
+      open   = XHR.prototype.open
+      abort  = XHR.prototype.abort
+      srh    = XHR.prototype.setRequestHeader
+
+      getServer().restore = ->
+        ## restore the property back on the window
+        contentWindow.XMLHttpRequest = XHR
+
+        _.each {send: send, open: open, abort: abort, setRequestHeader: srh}, (value, key) ->
+          XHR.prototype[key] = value
+
+        return {contentWindow: contentWindow, XMLHttpRequest: XHR}
+
+      XHR.prototype.setRequestHeader = ->
+        proxy = getServer().getProxyFor(@)
+
+        proxy.setRequestHeader.apply(proxy, arguments)
+
+        srh.apply(@, arguments)
+
+      XHR.prototype.abort = ->
+        ## if we already have a readyState of 4
+        ## then do not get the abort stack or
+        ## set the aborted property or call onAbort
+        ## to test this just use a regular XHR
+        @aborted = true
+
+        abortStack = getServer().getStack()
+
+        proxy = getServer().getProxyFor(@)
+        proxy.aborted = true
+
+        getServer().options.onAbort(proxy, abortStack)
+
+        abort.apply(@, arguments)
+
+      XHR.prototype.open = (method, url, async = true, username, password) ->
+        ## get the fully qualified url that normally the browser
+        ## would be sending this request to
+
+        ## FQDN:               http://www.google.com/responses/users.json
+        ## relative:           partials/phones-list.html
+        ## absolute-relative:  /app/partials/phones-list.html
+        originalUrl = getServer().getFullyQualifiedUrl(contentWindow, url)
+
+        ## resolve handling actual + display url's
+        url = getServer().options.getUrlOptions(originalUrl)
+
+        proxy = getServer().add(@, {
+          method: method
+          url: url.display
+        })
+
+        ## if this XHR matches a stubbed route then shift
+        ## its url to the stubbed url and set the request
+        ## headers for the response
+        stub = getServer().getStubForXhr(@)
+        if getServer().shouldApplyStub(stub)
+          url.actual = getServer().normalizeStubUrl(getServer().options.xhrUrl, url.actual)
+
+        ## change absolute url's to relative ones
+        ## if they match our baseUrl / visited URL
+        open.call(@, method, url.actual, async, username, password)
+
+      XHR.prototype.send = (requestBody) ->
+        ## add header properties for the xhr's id
+        ## and the testId
+        setHeader(@, "id", @id)
+        setHeader(@, "testId", getServer().options.testId)
+
+        ## if there is an existing stub for this
+        ## XHR then add those properties into it
+        ## only if stub isnt explicitly false
+        ## and the server is enabled
+        stub = getServer().getStubForXhr(@)
+        if getServer().shouldApplyStub(stub)
+          getServer().applyStubProperties(@, stub)
+
+        ## capture where this xhr came from
+        sendStack = getServer().getStack()
+
+        ## get the proxy xhr
+        proxy = getServer().getProxyFor(@)
+
+        proxy.setRequestBody(requestBody)
+
+        ## log this out now since it's being sent officially
+        ## unless its been whitelisted
+        if not getServer().options.whitelist.call(getServer(), @)
+          getServer().options.onSend(proxy, sendStack, stub)
+
+        if _.isFunction(getServer().options.onRequest)
+          ## call the onRequest function
+          ## after we've called getServer().options.onSend
+          getServer().options.onRequest(stub, proxy)
+
+        timeStart = new Date
+
+        ## if our server is in specific mode for
+        ## not waiting or auto responding or delay
+        ## or not logging or auto responding with 404
+        ## do that here.
+        onload = @onload
+        @onload = ->
+          proxy.setDuration(timeStart)
+          proxy.setStatus()
+          proxy.setResponseHeaders()
+          proxy.setResponseBody()
+
+          if err = proxy.getFixtureError()
+            return getServer().options.onFixtureError(proxy, err)
+
+          ## catch synchronous errors caused
+          ## by the onload function
+          try
+            if _.isFunction(onload)
+              onload.apply(@, arguments)
+            getServer().options.onLoad(proxy, stub)
+          catch err
+            getServer().options.onError(proxy, err)
+
+          if _.isFunction(getServer().options.onResponse)
+            getServer().options.onResponse(stub, proxy)
+
+        onerror = @onerror
+        @onerror = ->
+          ## its possible our real onerror handler
+          ## throws so we need to catch those errors too
+          try
+            if _.isFunction(onerror)
+              onerror.apply(@, arguments)
+            getServer().options.onNetworkError(proxy)
+          catch err
+            getServer().options.onError(proxy, err)
+
+        send.apply(@, arguments)
 
     ## override the defaults for all
     ## servers

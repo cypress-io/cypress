@@ -6,6 +6,9 @@ $Cypress.register "XHR2", (Cypress, _) ->
 
   server = null
 
+  getServer = ->
+    server ? unavailableErr.call(@)
+
   abort = ->
     if server
       server.abort()
@@ -84,9 +87,8 @@ $Cypress.register "XHR2", (Cypress, _) ->
 
   Cypress.on "before:window:load", (contentWindow) ->
     if server
-      ## should we be restoring the previous
-      ## content window here?
-      server.bindTo(contentWindow)
+      ## dynamically bind the server to whatever is currently running
+      $Cypress.Server2.bindTo contentWindow, _.bind(getServer, @)
     else
       unavailableErr.call(@)
 
