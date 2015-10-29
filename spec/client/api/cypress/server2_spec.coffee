@@ -9,6 +9,32 @@
 #   it ".create", ->
 #     server = $Cypress.Server2.create({})
 #     expect(server).to.be.instanceof $Cypress.Server2
+describe "$Cypress.Cy Server API", ->
+  beforeEach ->
+    @iframe = $("<iframe />").appendTo $("body")
+    @window = @iframe.prop("contentWindow")
+
+  afterEach ->
+    @iframe.remove()
+
+  it ".create", ->
+    server = $Cypress.Server.create({})
+    expect(server).to.be.instanceof $Cypress.Server
+
+  it ".defaults", ->
+    defaults = _.clone $Cypress.Server.defaults()
+
+    expect(defaults.status).to.eq(200)
+
+    defaults2 = $Cypress.Server.defaults({status: 500})
+    expect(defaults2.status).to.eq(500)
+
+    server = $Cypress.Server.create({})
+    stub = server.stub()
+
+    expect(stub.status).to.eq(500)
+
+    $Cypress.Server.defaults(defaults)
 
 #   context "XHR#abort", ->
 #     beforeEach ->

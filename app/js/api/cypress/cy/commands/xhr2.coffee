@@ -57,8 +57,8 @@ $Cypress.register "XHR2", (Cypress, _) ->
     @prop("responses", responses)
 
   defaults = {
-    method: "GET"
-    status: 200
+    method: undefined
+    status: undefined
     stub: undefined
     delay: undefined
     headers: undefined ## response headers

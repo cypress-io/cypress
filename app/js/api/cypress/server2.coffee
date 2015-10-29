@@ -36,13 +36,15 @@ $Cypress.Server = do ($Cypress, _) ->
     method: "GET"
     delay: 0
     status: 200
+    headers: null
+    response: null
     stub: true
     enable: true
     autoRespond: true
     waitOnResponses: Infinity
     force404: true ## or allow 404's
-    onRequest: undefined
-    onResponse: undefined
+    onAnyRequest: undefined
+    onAnyResponse: undefined
     stripOrigin: _.identity
     getUrlOptions: _.identity
     whitelist: whitelist ## function whether to allow a request to go out (css/js/html/templates) etc
@@ -434,10 +436,10 @@ $Cypress.Server = do ($Cypress, _) ->
         if not getServer().options.whitelist.call(getServer(), @)
           getServer().options.onSend(proxy, sendStack, stub)
 
-        if _.isFunction(getServer().options.onRequest)
-          ## call the onRequest function
+        if _.isFunction(getServer().options.onAnyRequest)
+          ## call the onAnyRequest function
           ## after we've called getServer().options.onSend
-          getServer().options.onRequest(stub, proxy)
+          getServer().options.onAnyRequest(stub, proxy)
 
         timeStart = new Date
 
@@ -464,8 +466,8 @@ $Cypress.Server = do ($Cypress, _) ->
           catch err
             getServer().options.onError(proxy, err)
 
-          if _.isFunction(getServer().options.onResponse)
-            getServer().options.onResponse(stub, proxy)
+          if _.isFunction(getServer().options.onAnyResponse)
+            getServer().options.onAnyResponse(stub, proxy)
 
         onerror = @onerror
         @onerror = ->
@@ -486,7 +488,7 @@ $Cypress.Server = do ($Cypress, _) ->
       ## merge obj into defaults
       _.extend defaults, obj
 
-    @Proxy = XMLHttpRequest
+    @XMLHttpRequest = XMLHttpRequest
 
     @create = (options) ->
       new $Server(options)
