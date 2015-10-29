@@ -1,4 +1,4 @@
-$Cypress.Cookies = do ($Cypress, _) ->
+$Cypress.Cookies = do ($Cypress, _, Cookies) ->
 
   reHttp = /^http/
 
