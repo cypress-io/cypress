@@ -88,7 +88,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
   Cypress.on "before:window:load", (contentWindow) ->
     if server
       ## dynamically bind the server to whatever is currently running
-      $Cypress.Server2.bindTo contentWindow, _.bind(getServer, @)
+      $Cypress.Server.bindTo contentWindow, _.bind(getServer, @)
     else
       unavailableErr.call(@)
 
@@ -101,7 +101,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
 
       cy = @
 
-      @prop "server", $Cypress.Server2.create({
+      @prop "server", $Cypress.Server.create({
         testId: testId
         xhrUrl: @private("xhrUrl")
         stripOrigin: stripOrigin
@@ -240,11 +240,11 @@ $Cypress.register "XHR2", (Cypress, _) ->
           if log = logs[xhr.id]
             log.snapshot("aborted").error(err)
 
-        onRequest: (stub, xhr) =>
+        onAnyRequest: (stub, xhr) =>
           if stub and _.isFunction(stub.onRequest)
             stub.onRequest.call(@, xhr)
 
-        onResponse: (stub, xhr) =>
+        onAnyResponse: (stub, xhr) =>
           if stub and _.isFunction(stub.onResponse)
             stub.onResponse.call(@, xhr)
       })

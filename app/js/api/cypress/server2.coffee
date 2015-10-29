@@ -1,4 +1,4 @@
-$Cypress.Server2 = do ($Cypress, _) ->
+$Cypress.Server = do ($Cypress, _) ->
 
   regularResourcesRe       = /\.(jsx?|html|css)$/
   isCypressHeaderRe        = /^X-Cypress-/i

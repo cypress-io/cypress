@@ -51,7 +51,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
   context "#startXhrServer", ->
     beforeEach ->
-      @create = @sandbox.spy $Cypress.Server2, "create"
+      @create = @sandbox.spy $Cypress.Server, "create"
 
     it "sends testId", ->
       @setup()

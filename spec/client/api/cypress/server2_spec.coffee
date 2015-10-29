@@ -15,7 +15,7 @@
 #       @send = @sandbox.stub(@window.XMLHttpRequest.prototype, "send")
 #       @open = @sandbox.spy(@window.XMLHttpRequest.prototype, "open")
 #       @abort = @sandbox.spy(@window.XMLHttpRequest.prototype, "abort")
-#       @server = $Cypress.Server2.create({
+#       @server = $Cypress.Server.create({
 #         xhrUrl: "__cypress/xhrs/"
 #         onAbort: ->
 #       })
@@ -43,7 +43,7 @@
 #     beforeEach ->
 #       @send = @sandbox.stub(@window.XMLHttpRequest.prototype, "send")
 #       @open = @sandbox.spy(@window.XMLHttpRequest.prototype, "open")
-#       @server = $Cypress.Server2.create({
+#       @server = $Cypress.Server.create({
 #         xhrUrl: "__cypress/xhrs/"
 #       })
 #       @server.bindTo(@window)
@@ -71,7 +71,7 @@
 #   context "XHR#send", ->
 #     beforeEach ->
 #       @send = @sandbox.spy(@window.XMLHttpRequest.prototype, "send")
-#       @server = $Cypress.Server2.create({
+#       @server = $Cypress.Server.create({
 #         xhrUrl: "__cypress/xhrs/"
 #       })
 #       @server.bindTo(@window)
@@ -142,7 +142,7 @@
 #   context "#applyStubProperties", ->
 #     beforeEach ->
 #       @setRequestHeader = @sandbox.spy(@window.XMLHttpRequest.prototype, "setRequestHeader")
-#       @server = $Cypress.Server2.create({
+#       @server = $Cypress.Server.create({
 #         xhrUrl: "__cypress/xhrs/"
 #       })
 #       @server.bindTo(@window)
@@ -202,7 +202,7 @@
 
 #   context "#stub", ->
 #     beforeEach ->
-#       @server = $Cypress.Server2.create({
+#       @server = $Cypress.Server.create({
 #         xhrUrl: "__cypress/xhrs/"
 #         delay: 100
 #         waitOnResponses: false
@@ -237,7 +237,7 @@
 #     beforeEach ->
 #       @send = @sandbox.stub(@window.XMLHttpRequest.prototype, "send")
 #       @open = @sandbox.spy(@window.XMLHttpRequest.prototype, "open")
-#       @server = $Cypress.Server2.create({
+#       @server = $Cypress.Server.create({
 #         xhrUrl: "__cypress/xhrs/"
 #       })
 #       @server.bindTo(@window)
@@ -255,7 +255,7 @@
 #   context "#deactivate", ->
 #     beforeEach ->
 #       @abort = @sandbox.spy(@window.XMLHttpRequest.prototype, "abort")
-#       @server = $Cypress.Server2.create({
+#       @server = $Cypress.Server.create({
 #         xhrUrl: "__cypress/xhrs/"
 #       })
 #       @server.bindTo(@window)
