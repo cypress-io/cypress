@@ -5,6 +5,9 @@ $Cypress.Chainer = do ($Cypress, _) ->
     constructor: (@cy) ->
       @id = _.uniqueId("chainer")
 
+    @extend = (obj) ->
+      _.extend @prototype, obj
+
     @remove = (key) ->
       delete $Chainer.prototype[key]
 
