@@ -395,7 +395,7 @@ $Cypress.Server = do ($Cypress, _) ->
 
         proxy = getServer().add(@, {
           method: method
-          url: url.display
+          url: decodeURI(url.display)
         })
 
         ## if this XHR matches a stubbed route then shift

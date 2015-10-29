@@ -276,6 +276,27 @@ describe "$Cypress.Cy XHR Commands", ->
             expect(xhr.url).to.eq("http://localhost:3500/foo")
             expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/foo")
 
+      it "decodes proxy urls", ->
+        @cy
+          .server()
+          .visit("/fixtures/html/xhr.html")
+          .route({
+            url: /users/
+            response: {}
+          }).as("getUsers")
+          .window().then (win) ->
+            @cy.prop("server").restore()
+            @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
+            @cy.prop("server").bindTo(win)
+            win.$.get("/users?q=(id eq 123)")
+            null
+          .wait("@getUsers")
+          .then ->
+            xhr = @cy.prop("responses")[0].xhr
+            expect(xhr.url).to.eq("http://localhost:3500/users?q=(id eq 123)")
+            url = encodeURI("users?q=(id eq 123)")
+            expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/#{url}")
+
     describe "#onResponse", ->
       beforeEach ->
         @setup()
