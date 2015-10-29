@@ -177,7 +177,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
       if withinSubject = @prop("withinSubject")
         return log(withinSubject)
 
-      @command("get", "html", {log: false}).then(log)
+      @execute("get", "html", {log: false}).then(log)
 
   Cypress.addDualCommand
     contains: (subject, filter, text, options = {}) ->
@@ -290,7 +290,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
         throw new Error()
 
       do resolveElements = =>
-        @command("get", selector, getOpts).then ($elements) =>
+        @execute("get", selector, getOpts).then ($elements) =>
           $el = switch
             when $elements and $elements.length and filter
               $elements.last()

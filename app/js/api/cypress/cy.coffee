@@ -498,9 +498,9 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
           @nullSubject()
 
     ## the command method is useful for synchronously
-    ## calling another command but wrapping it in a
-    ## promise
-    command: (name, args...) ->
+    ## executing another command and wrapping it in a
+    ## cancellable promise
+    execute: (name, args...) ->
       Promise
         .resolve(@sync[name].apply(@, args))
         .cancellable()

@@ -175,12 +175,12 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             # options.$el.cySimulate("focus")
             # options.$el.cySimulate("focusin")
 
-          @command("focused", {log: false, verify: false}).then ($focused) =>
+          @execute("focused", {log: false, verify: false}).then ($focused) =>
             ## only blur if we have a focused element AND its not
             ## currently ourselves!
             if $focused and $focused.get(0) isnt options.$el.get(0)
 
-              @command("blur", {$el: $focused, error: false, verify: false, log: false}).then =>
+              @execute("blur", {$el: $focused, error: false, verify: false, log: false}).then =>
                 simulate()
             else
               simulate()
@@ -233,7 +233,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         @throwErr(".blur() can only be called on a single element! Your subject contained #{num} elements!", options._log)
 
-      @command("focused", {log: false, verify: false}).then ($focused) =>
+      @execute("focused", {log: false, verify: false}).then ($focused) =>
         if options.force isnt true and not $focused
           return if options.error is false
 
@@ -351,7 +351,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         @ensureVisibility $el, log
 
-        p = @command("focus", {$el: $el, error: false, verify: false, log: false}).then =>
+        p = @execute("focus", {$el: $el, error: false, verify: false, log: false}).then =>
           event = new MouseEvent "dblclick", {
             bubbles: true
             cancelable: true
@@ -661,7 +661,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           .then (obj) =>
             {$elToClick, coords} = obj
 
-            @command("focused", {log: false, verify: false}).then ($focused) =>
+            @execute("focused", {log: false, verify: false}).then ($focused) =>
               ## record the previously focused element before
               ## issuing the mousedown because browsers may
               ## automatically shift the focus to the element
@@ -679,7 +679,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
                 ## retrieve the first focusable $el in our parent chain
                 $elToFocus = getFirstFocusableEl($elToClick)
 
-                @command("focused", {log: false, verify: false}).then ($focused) =>
+                @execute("focused", {log: false, verify: false}).then ($focused) =>
                   if shouldFireFocusEvent($focused, $elToFocus)
                     ## if our mousedown went through and
                     ## we are focusing a different element
@@ -691,7 +691,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
                     dispatchPrimedChangeEvents.call(@)
 
                     ## send in a focus event!
-                    @command("focus", {$el: $elToFocus, error: false, verify: false, log: false})
+                    @execute("focus", {$el: $elToFocus, error: false, verify: false, log: false})
                     .then ->
                       afterMouseDown($elToClick, coords)
                   else
@@ -837,7 +837,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             ## currently this is sync but if we use a waterfall
             ## promise in the submit command it will break again
             ## consider changing type to a Promise and juggle logging
-            @command("submit", {log: false, $el: form})
+            @execute("submit", {log: false, $el: form})
 
         dispatchChangeEvent = (id) =>
           change = document.createEvent("HTMLEvents")
@@ -898,7 +898,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         })
 
-      @command("focused", {log: false, verify: false}).then ($focused) =>
+      @execute("focused", {log: false, verify: false}).then ($focused) =>
         ## if we dont have a focused element
         ## or if we do and its not ourselves
         ## then issue the click
@@ -906,7 +906,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           ## click the element first to simulate focus
           ## and typical user behavior in case the window
           ## is out of focus
-          @command("click", {
+          @execute("click", {
             $el: options.$el
             log: false
             verify: false
@@ -966,7 +966,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           word = Cypress.Utils.plural(subject, "contains", "is")
           @throwErr ".clear() can only be called on textarea or :text! Your subject #{word} a: #{node}", options._log
 
-        @command("type", "{selectall}{del}", {
+        @execute("type", "{selectall}{del}", {
           $el: $el
           log: false
           verify: false ## handle verification ourselves
@@ -1070,7 +1070,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       if not multiple and values.length > 1
         @throwErr(".select() matched than one option by value or text: #{valueOrText.join(", ")}")
 
-      @command("click", {
+      @execute("click", {
         $el: options.$el
         log: false
         verify: false
@@ -1093,7 +1093,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         Promise
           .resolve(optionEls) ## why cant we just pass these directly to .each?
           .each (optEl) =>
-            @command("click", {
+            @execute("click", {
               $el: optEl
               log: false
               verify: false
@@ -1287,7 +1287,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         ## if we didnt pass in any values or our
         ## el's value is in the array then check it
         if not values.length or $el.val() in values
-          @command("click", {
+          @execute("click", {
             $el: $el
             log: false
             verify: false

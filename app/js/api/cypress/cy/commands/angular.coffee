@@ -52,7 +52,7 @@ $Cypress.register "Angular", (Cypress, _, $, Promise) ->
         return $(null)
 
       do resolveElements = =>
-        @command("get", selector, options).then ($elements) =>
+        @execute("get", selector, options).then ($elements) =>
           @verifyUpcomingAssertions(getEl($elements), options, {
             onRetry: resolveElements
             onFail: (err) ->
@@ -70,7 +70,7 @@ $Cypress.register "Angular", (Cypress, _, $, Promise) ->
         selectors.push(selector)
 
         do resolveElements = =>
-          @command("get", selector, options).then ($elements) =>
+          @execute("get", selector, options).then ($elements) =>
             @verifyUpcomingAssertions($elements, options, {
               onRetry: resolveElements
             })

@@ -23,7 +23,7 @@ $Cypress.register "Window", (Cypress, _, $) ->
         options._log = Cypress.Log.command()
 
       do resolveTitle = =>
-        @command("get", "title", {
+        @execute("get", "title", {
           log: false
           verify: false
         })
