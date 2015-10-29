@@ -35,7 +35,7 @@
         $("button.xhr").click(function(e){
           e.preventDefault()
 
-          $.get("/foo", function(data){
+          $.get("/fixtures/ajax/app.html", function(data){
             $("#results").html("data is " + data)
             bar.baz()
           })
