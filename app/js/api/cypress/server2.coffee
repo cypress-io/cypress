@@ -180,6 +180,8 @@ $Cypress.Server2 = do ($Cypress, _) ->
       ## so we dont handle stubs
       @enableStubs(false)
 
+    getOptions: -> @options
+
     getFullyQualifiedUrl: (contentWindow, url) ->
       doc = contentWindow.document
       oldBase = doc.getElementsByTagName("base")[0]

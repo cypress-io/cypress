@@ -277,7 +277,12 @@ $Cypress.register "XHR2", (Cypress, _) ->
       responseMissing = =>
         @throwErr "cy.route() must be called with a response."
 
-      options = o = {}
+      ## get the default options currently set
+      ## on our server
+      options = o = @getXhrServer().getOptions()
+
+      isntStubbed = ->
+        options.stub isnt false
 
       switch
         when _.isObject(args[0]) and not _.isRegExp(args[0])
@@ -287,16 +292,23 @@ $Cypress.register "XHR2", (Cypress, _) ->
           @throwErr "cy.route() must be given a method, url, and response."
 
         when args.length is 1
-          responseMissing()
+          if isntStubbed()
+            responseMissing()
+          else
+            o.url = args[0]
 
         when args.length is 2
-          o.url        = args[0]
-          o.response   = args[1]
+          if isntStubbed()
+            o.url        = args[0]
+            o.response   = args[1]
 
-          ## if our url actually matches an http method
-          ## then we know the user omitted response
-          if _.isString(o.url) and validHttpMethodsRe.test(o.url)
-            responseMissing()
+            ## if our url actually matches an http method
+            ## then we know the user omitted response
+            if _.isString(o.url) and validHttpMethodsRe.test(o.url) and isntStubbed()
+              responseMissing()
+          else
+            o.method = args[0]
+            o.url = args[1]
 
         when args.length is 3
           if validHttpMethodsRe.test(args[0]) or isUrlLikeArgs(args[1], args[2])
@@ -330,7 +342,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
       if not validHttpMethodsRe.test(options.method)
         @throwErr "cy.route() was called with an invalid method: '#{o.method}'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"
 
-      if not options.response? and options.stub isnt false ## or autoRespond?
+      if _.has(options, "response") and not options.response? and isntStubbed() ## or autoRespond?
         @throwErr "cy.route() cannot accept an undefined or null response. It must be set to something, even an empty string will work."
 
       ## convert to wildcard regex

@@ -821,6 +821,28 @@ describe "$Cypress.Cy XHR Commands", ->
           response: {}
         })
 
+    it "does not require response or method when stub.false", ->
+      @cy
+        .server({stub: false})
+        .route(/users/).as("getUsers")
+        .then ->
+          @expectOptionsToBe({
+            status: 200
+            method: "GET"
+            url: /users/
+          })
+
+    it "does not require response when stub.false", ->
+      @cy
+        .server({stub: false})
+        .route("POST", /users/).as("createUsers")
+        .then ->
+          @expectOptionsToBe({
+            status: 200
+            method: "POST"
+            url: /users/
+          })
+
     it "accepts an object literal as options", ->
       onRequest = ->
       onResponse = ->
