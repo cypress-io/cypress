@@ -389,6 +389,20 @@ describe "Routes", ->
             .expect("Content-Type", /text\/plain/)
             .end(done)
 
+    # describe.only "maximum header size", ->
+    #   ## https://github.com/cypress-io/cypress/issues/76
+    #   it "does not bomb on huge headers", (done) ->
+    #     json = Fixtures.get("server/really_big_json.json")
+
+    #     supertest(@app)
+    #       .get("/__cypress/xhrs/users")
+    #       .set("x-cypress-response", json)
+    #       .set("x-cypress-response-2", json)
+    #       .expect(200)
+    #       .expect("Content-Type", /application\/json/)
+    #       .expect(JSON.parse(json))
+    #       .end(done)
+
   context "GET /__cypress/iframes/*", ->
     describe "todos", ->
       beforeEach ->
