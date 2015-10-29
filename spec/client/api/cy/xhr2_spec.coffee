@@ -439,6 +439,21 @@ describe "$Cypress.Cy XHR Commands", ->
               ## should not re-snapshot after the response
               expect(xhrs[0].get("snapshots").length).to.eq(2)
 
+        it "can access requestHeaders", ->
+          @cy
+            .server()
+            .route(/foo/, {}).as("getFoo")
+            .window().then (win) ->
+              win.$.ajax({
+                method: "GET"
+                url: "/foo"
+                headers: {
+                  "x-token": "123"
+                }
+              })
+              null
+            .wait("@getFoo").its("requestHeaders").should("have.property", "x-token", "123")
+
       context "responses", ->
         beforeEach ->
           logs = []

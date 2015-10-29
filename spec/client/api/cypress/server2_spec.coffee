@@ -1,14 +1,3 @@
-# describe "$Cypress.Cy Server2 API", ->
-#   beforeEach ->
-#     @iframe = $("<iframe />").appendTo $("body")
-#     @window = @iframe.prop("contentWindow")
-
-#   afterEach ->
-#     @iframe.remove()
-
-#   it ".create", ->
-#     server = $Cypress.Server2.create({})
-#     expect(server).to.be.instanceof $Cypress.Server2
 describe "$Cypress.Cy Server API", ->
   beforeEach ->
     @iframe = $("<iframe />").appendTo $("body")
@@ -35,6 +24,44 @@ describe "$Cypress.Cy Server API", ->
     expect(stub.status).to.eq(500)
 
     $Cypress.Server.defaults(defaults)
+
+  context "#setResponseHeaders", ->
+    beforeEach ->
+      @server = $Cypress.Server.create({
+        xhrUrl: "__cypress/xhrs/"
+      })
+      @server.bindTo(@window)
+      @xhr = new @window.XMLHttpRequest
+
+    it "sets response.headers and responseHeaders", (done) ->
+      headers = """
+        X-Powered-By: Express
+        Vary: Accept-Encoding
+        Content-Type: application/json
+        Cache-Control: public, max-age=0
+        Connection: keep-alive
+        Content-Length: 53
+      """.split("\n").join('\u000d\u000a')
+
+      @sandbox.stub(@xhr, "getAllResponseHeaders").returns(headers)
+
+      @xhr.open("GET", "/fixtures/ajax/app.json")
+
+      proxy = @server.getProxyFor(@xhr)
+
+      @xhr.onload = ->
+        expect(proxy.responseHeaders).to.eq(proxy.response.headers)
+        expect(proxy.responseHeaders).to.deep.eq({
+          "X-Powered-By": "Express"
+          "Vary": "Accept-Encoding"
+          "Content-Type": "application/json"
+          "Cache-Control": "public, max-age=0"
+          "Connection": "keep-alive"
+          "Content-Length": "53"
+        })
+        done()
+
+      @xhr.send()
 
 #   context "XHR#abort", ->
 #     beforeEach ->
