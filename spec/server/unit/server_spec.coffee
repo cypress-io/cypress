@@ -177,7 +177,7 @@ describe "Server Interface", ->
       }
 
       @server.configureApplication({
-        env: {
+        environmentVariables: {
           version: "0.13.1"
           foo: "bar"
         }
