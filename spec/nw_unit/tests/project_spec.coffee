@@ -31,6 +31,7 @@ module.exports = (parentWindow, gui, loadApp) ->
 
     context "server started", ->
       beforeEach ->
+        @trigger = @sandbox.spy(@App.vent, "trigger")
         @$("#projects-container .project").click()
 
         Promise.delay(1500).then =>
@@ -43,6 +44,11 @@ module.exports = (parentWindow, gui, loadApp) ->
         Promise.delay(500).then =>
           expect(@$("project")).not.to.exist
         .delay(1000)
+
+      it "calls project:clicked with options", ->
+        expect(@trigger).to.be.calledWith("project:clicked")
+        expect(@trigger.getCall(0).args[2]).to.be.an("object")
+        expect(@trigger.getCall(0).args[2]).to.have.property("projectPath")
 
       it "displays project information", ->
         expect(@project.find("h3")).to.contain("todos")

@@ -139,6 +139,8 @@ class Server
   configureApplication: (options = {}) ->
     _.defaults options,
       morgan: true
+      port: null
+      environmentVariables: null
 
     ## merge these into except
     ## for the 'environmentVariables' key
