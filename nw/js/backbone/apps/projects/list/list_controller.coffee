@@ -33,7 +33,7 @@
           App.vent.trigger "log:out", user
 
         @listenTo projectsView, "childview:project:clicked", (iv, obj) ->
-          startProject(obj.model)
+          startProject(obj.model, params)
 
         @listenTo projectsView, "childview:project:remove:clicked", (iv, project) ->
           App.config.removeProject(project.get("path"))

@@ -1,47 +1,74 @@
-_        = require "lodash"
-Promise  = require 'bluebird'
-path     = require 'path'
-fs       = Promise.promisifyAll(require('fs'))
+_        = require("lodash")
+Promise  = require("bluebird")
+path     = require("path")
+fs       = require("fs-extra")
+
+fs       = Promise.promisifyAll(fs)
 
 module.exports =
   _pathToCypressJson: (projectRoot) ->
     path.join(projectRoot, "cypress.json")
 
-  _logErr: (projectRoot, err) ->
-    throw new Error "Error reading from: #{projectRoot}/cypress.json\n#{err.message}"
+  _pathToFile: (projectRoot, file) ->
+    path.join(projectRoot, file)
 
-    # console.log "Could not read file from: '#{projectRoot}/cypress.json'"
+  _logErr: (projectRoot, err, file) ->
+    file ?= "cypress.json"
+
+    throw new Error "Error reading from: #{projectRoot}/#{file}\n#{err.message}"
 
   _stringify: (obj) ->
     JSON.stringify(obj, null, 2)
 
-  _get: (method, projectRoot) ->
+  _get: (method, projectRoot, options = {}) ->
     if not projectRoot
       throw new Error("Settings requires projectRoot to be defined!")
 
-    file = @_pathToCypressJson(projectRoot)
+    _.defaults options,
+      writeInitial: true
+
+    file = @_pathToFile(projectRoot, options.file)
 
     ## should synchronously check to see if cypress.json exists
     ## and if not, create an empty one
-    if not fs.existsSync(file)
+    if not fs.existsSync(file) and options.writeInitial
       fs.writeFileSync(file, @_stringify({cypress: {}}))
 
-    fs[method](file, "utf8")
+    fs[method](file)
 
   read: (projectRoot) ->
-    @_get("readFileAsync", projectRoot)
-    .then(JSON.parse)
+    @_get("readJsonAsync", projectRoot, {file: "cypress.json"})
     .get("cypress")
     .catch (err) =>
       @_logErr(projectRoot, err)
 
-  readSync: (projectRoot) ->
-    try
-      str = @_get("readFileSync", projectRoot)
+  readEnvSync: (projectRoot) ->
+    options = {
+      file: "cypress.env.json"
+      writeInitial: false
+    }
 
-      return JSON.parse(str).cypress
+    try
+      @_get("readJsonSync", projectRoot, options)
     catch err
-      @_logErr(projectRoot, err)
+      ## dont catch errors if
+      ## there wasnt a cypress.env.json
+      if err.code is "ENOENT"
+        return {}
+
+      @_logErr(projectRoot, err, options.file)
+
+  readSync: (projectRoot) ->
+    options = {
+      file: "cypress.json"
+    }
+
+    try
+      obj = @_get("readJsonSync", projectRoot, options)
+
+      return obj.cypress
+    catch err
+      @_logErr(projectRoot, err, options.file)
 
   write: (projectRoot, obj = {}) ->
     @read(projectRoot).bind(@).then (settings) ->

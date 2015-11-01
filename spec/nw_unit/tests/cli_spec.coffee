@@ -34,7 +34,6 @@ module.exports = (parentWindow, gui, loadApp) ->
             @runProject = @sandbox.spy  @App.config, "runProject"
             @open       = @sandbox.spy  @Server().prototype, "open"
 
-
             @App.commands.setHandler("start:chromium:run", ->)
 
             ## prevent the actual project from literally booting
@@ -454,5 +453,46 @@ module.exports = (parentWindow, gui, loadApp) ->
           expect(@write).to.be.calledWithMatch("or shut down the other process")
           expect(@exit).to.be.calledWith(1)
 
+    context "--port", ->
+      beforeEach ->
+        @setup = (args...) =>
+          cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+            cache.addProject(@todos).then =>
+              @argsAre.apply(@, args).then ->
+                Promise.delay(100)
 
+      it "can add port without starting a project", ->
+        @setup("--port", "9090", "--env", "foo=bar").then =>
+          expect(@trigger).to.be.calledWithMatch("start:projects:app", {
+            port: 9090
+            environmentVariables: {
+              foo: "bar"
+            }
+          })
 
+    context "--env", ->
+      beforeEach ->
+        @setup = (args...) =>
+          cache.setUser({name: "Brian", session_token: "abc123"}).then =>
+            cache.addProject(@todos).then =>
+              @argsAre.apply(@, args).then ->
+                Promise.delay(100)
+
+      it "can add environment variables when a project runs", ->
+        @setup("--env", "version=0.12.1 foo=bar host=http://localhost:8888", "--run-project", @todos).then =>
+          expect(@_open).to.be.calledWithMatch({
+            environmentVariables: {
+              version: "0.12.1"
+              foo: "bar"
+              host: "http://localhost:8888"
+            }
+          })
+
+      it "can add environment variables without a specific project", ->
+        @setup("--env", "version=0.12.1 foo=bar").then =>
+          expect(@trigger).to.be.calledWithMatch("start:projects:app", {
+            environmentVariables: {
+              version: "0.12.1"
+              foo: "bar"
+            }
+          })

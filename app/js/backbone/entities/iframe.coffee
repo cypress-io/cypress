@@ -32,10 +32,8 @@
       @listenTo runner, "after:run", ->
         @isRunning(false)
 
-      @listenTo Cypress, "initialize", (obj) =>
-        {config} = obj
-
-        @setViewport _(config).pick("viewportHeight", "viewportWidth")
+      @listenTo Cypress, "config", (obj) =>
+        @setViewport _(obj).pick("viewportHeight", "viewportWidth")
 
       @listenTo Cypress, "stop", =>
         @stop()

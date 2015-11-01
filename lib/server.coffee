@@ -1,7 +1,8 @@
 express      = require 'express'
 http         = require 'http'
-fs           = require 'fs'
+fs           = require 'fs-extra'
 hbs          = require 'hbs'
+path         = require 'path'
 _            = require 'underscore'
 _.str        = require 'underscore.string'
 allowDestroy = require "server-destroy"
@@ -12,6 +13,12 @@ Socket       = require "./socket"
 Support      = require "./support"
 Fixtures     = require "./fixtures"
 Settings     = require './util/settings'
+
+## cypress following by _ or - or .
+cypressEnvRe = /^(cypress_)/i
+
+isCypressEnvLike = (key) ->
+  cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
 
 ## currently not making use of event emitter
 ## but may do so soon
@@ -43,7 +50,28 @@ class Server
   getCypressJson: (projectRoot) ->
     obj = Settings.readSync(projectRoot)
     obj.projectRoot = projectRoot
+    obj.envFile = Settings.readEnvSync(projectRoot)
     obj
+
+  getProcessEnvVars: (obj = {}) ->
+    normalize = (key) ->
+      key.replace(cypressEnvRe, "")
+
+    _.reduce obj, (memo, value, key) ->
+      if isCypressEnvLike(key)
+        memo[normalize(key)] = value
+      memo
+    , {}
+
+  parseEnv: (env = {}, envFile = {}) ->
+    ## env is from cypress.json
+    ## envFile is from cypress.env.json
+
+    _.extend env,
+      envFile,
+      @getProcessEnvVars(process.env)
+      ## finally get the ones from the CLI --env
+      ## this should come from nw parseArgs?
 
   setCypressDefaults: (obj = {}) ->
     if url = obj.baseUrl
@@ -67,8 +95,13 @@ class Server
       fixturesFolder: "tests/_fixtures"
       supportFolder: "tests/_support"
       javascripts: []
-      env: process.env["CYPRESS_ENV"]
       namespace: "__cypress"
+
+    ## split out our own app wide env from user env variables
+    ## and delete envFile
+    obj.environmentVariables = @parseEnv(obj.env, obj.envFile)
+    obj.env = process.env["CYPRESS_ENV"]
+    delete obj.envFile
 
     @setUrls(obj)
 
@@ -96,6 +129,14 @@ class Server
   configureApplication: (options = {}) ->
     _.defaults options,
       morgan: true
+      port: null
+      environmentVariables: null
+
+    ## merge these into except
+    ## for the 'environmentVariables' key
+    if envs = options.environmentVariables
+      @config.environmentVariables ?= {}
+      _.extend(@config.environmentVariables, envs)
 
     ## if we have a port passed through
     ## our options then override what

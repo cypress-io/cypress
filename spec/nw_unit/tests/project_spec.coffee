@@ -31,6 +31,7 @@ module.exports = (parentWindow, gui, loadApp) ->
 
     context "server started", ->
       beforeEach ->
+        @trigger = @sandbox.spy(@App.vent, "trigger")
         @$("#projects-container .project").click()
 
         Promise.delay(1500).then =>
@@ -44,6 +45,11 @@ module.exports = (parentWindow, gui, loadApp) ->
           expect(@$("project")).not.to.exist
         .delay(1000)
 
+      it "calls project:clicked with options", ->
+        expect(@trigger).to.be.calledWith("project:clicked")
+        expect(@trigger.getCall(0).args[2]).to.be.an("object")
+        expect(@trigger.getCall(0).args[2]).to.have.property("projectPath")
+
       it "displays project information", ->
         expect(@project.find("h3")).to.contain("todos")
         expect(@project.find(".well")).to.contain("Server Running")
@@ -53,6 +59,17 @@ module.exports = (parentWindow, gui, loadApp) ->
     context "boot errors", ->
       it "cypress.json parse errors", ->
         fs.writeFileSync @todos + "/cypress.json", "{'foo': 'bar}"
+        @$("#projects-container .project").click()
+
+        Promise.delay(1000).then =>
+          project = @$("#project")
+          expect(project.find("p.text-danger")).to.contain("Could not start server!")
+          expect(project.find("p.bg-danger")).to.contain("Error reading from")
+          expect(project.find("p.bg-danger")).to.contain("Unexpected token")
+          expect(project.find("p.bg-danger br")).to.have.length(2)
+
+      it "cypress.env.json parse errors", ->
+        fs.writeFileSync @todos + "/cypress.env.json", "{'foo': 'bar}"
         @$("#projects-container .project").click()
 
         Promise.delay(1000).then =>

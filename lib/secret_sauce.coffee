@@ -192,6 +192,7 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
         projectPath: options.projectPath
         port:        options.port
         onError:     displayError
+        environmentVariables: options.environmentVariables
         onProjectStart: (config) =>
           @getSpec(config, options)
             .then (src) =>
@@ -247,8 +248,8 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
 
     startGuiApp: (options) ->
       if options.session
-        ## if have it, start projects
-        @App.vent.trigger "start:projects:app"
+        ## if have it, start projects and pass up port + environmentVariables
+        @App.vent.trigger "start:projects:app", _.pick(options, "port", "environmentVariables")
       else
         ## else login
         @App.vent.trigger "start:login:app"

@@ -131,17 +131,64 @@ describe "$Cypress API", ->
 
       @Cypress.runner = {}
       @Cypress.mocha = {options: @sandbox.spy()}
-      @Cypress.initialize(1,2,3)
+      @Cypress.initialize(1,2)
 
     it "triggers 'initialize'", ->
       expect(@trigger).to.be.calledWith "initialize", {
         specWindow: 1
         $remoteIframe: 2
-        config: 3
       }
 
     it "calls mocha#options with runner", ->
       expect(@Cypress.mocha.options).to.be.calledWith {}
+
+  describe "#env", ->
+    beforeEach ->
+      @Cypress.config({
+        environmentVariables: {foo: "bar"}
+      })
+
+    it "acts as getter", ->
+      expect(@Cypress.env()).to.deep.eq({foo: "bar"})
+
+    it "acts as getter with 1 string arg", ->
+      expect(@Cypress.env("foo")).to.deep.eq("bar")
+
+    it "acts as setter with key, value", ->
+      @Cypress.env("bar", "baz")
+      expect(@Cypress.env()).to.deep.eq({foo: "bar", bar: "baz"})
+
+    it "acts as setter with object", ->
+      @Cypress.env({bar: "baz"})
+      expect(@Cypress.env()).to.deep.eq({foo: "bar", bar: "baz"})
+
+    it "throws when Cypress.environmentVariables is undefined", ->
+      delete @Cypress.environmentVariables
+
+      fn = =>
+        @Cypress.env()
+
+      expect(fn).to.throw("Cypress.environmentVariables is not defined. Open an issue if you see this message.")
+
+  describe "#config", ->
+    beforeEach ->
+      @trigger = @sandbox.spy @Cypress, "trigger"
+
+    it "instantiates EnvironmentVariables", ->
+      expect(@Cypress).not.to.have.property("environmentVariables")
+      @Cypress.config({foo: "bar"})
+      expect(@Cypress.environmentVariables).to.be.instanceof($Cypress.EnvironmentVariables)
+
+    it "passes config.environmentVariables", ->
+      @Cypress.config({
+        environmentVariables: {foo: "bar"}
+      })
+
+      expect(@Cypress.env()).to.deep.eq({foo: "bar"})
+
+    it "triggers 'config'", ->
+      @Cypress.config({foo: "bar"})
+      expect(@trigger).to.be.calledWith("config", {foo: "bar"})
 
   describe "#window", ->
     beforeEach ->

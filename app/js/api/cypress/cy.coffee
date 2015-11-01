@@ -17,10 +17,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
     initialize: (obj) ->
       @defaults()
 
-      {$remoteIframe, config} = obj
-
-      _.each obj.config, (value, key) =>
-        @private(key, value)
+      {$remoteIframe} = obj
 
       @private("$remoteIframe", $remoteIframe)
 
@@ -46,6 +43,10 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       ## our tests are re-run
       @isReady(true, "initialize")
 
+    config: (obj) ->
+      _.each obj.config, (value, key) =>
+        @private(key, value)
+
     defaults: ->
       @props = {}
 
@@ -60,6 +61,9 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
     listeners: ->
       @listenTo @Cypress, "initialize", (obj) =>
         @initialize(obj)
+
+      @listenTo @Cypress, "config", (obj) =>
+        @config(obj)
 
       ## why arent we listening to "defaults" here?
       ## instead we are manually hard coding them

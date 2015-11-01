@@ -39,3 +39,12 @@ describe "parseArgs", ->
     it "converts to Number", ->
       @setup("--port", "8080")
       expect(@options.port).to.eq(8080)
+
+  context "--env", ->
+    it "converts to object literal", ->
+      @setup("--env", "foo=bar,version=0.12.1,host=localhost:8888")
+      expect(@options.environmentVariables).to.deep.eq({
+        foo: "bar"
+        version: "0.12.1"
+        host: "localhost:8888"
+      })

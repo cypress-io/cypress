@@ -23,6 +23,27 @@ describe "Settings", ->
       fn = -> Settings.readSync process.cwd()
       expect(fn).to.throw "Error reading from: #{process.cwd()}/cypress.json"
 
+  context "#readEnvSync", ->
+    afterEach ->
+      fs.removeAsync("cypress.env.json")
+
+    it "parses json", ->
+      json = {foo: "bar", baz: "quux"}
+      fs.writeJsonSync("cypress.env.json", json)
+      expect(Settings.readEnvSync(process.cwd())).to.deep.eq(json)
+
+    it "throws when invalid json", ->
+      fs.writeFileSync("cypress.env.json", "{'foo;: 'bar}")
+
+      fn = ->
+        Settings.readEnvSync(process.cwd())
+
+      expect(fn).to.throw(/Error reading from/)
+
+    it "does not write initial file", ->
+      Settings.readEnvSync(process.cwd())
+      expect(fs.existsSync("cypress.env.json")).to.be.false
+
   context "#read", ->
     it "promises cypress.json", ->
       @setup {foo: "bar"}

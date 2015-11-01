@@ -90,11 +90,13 @@ window.enterIntegrationTestingMode = (fixture, options = {}) ->
         console.error(err.stack)
 
     @loadDom(fixture).then =>
+      @Cypress.config({
+        xhrUrl: "__cypress/xhrs/"
+      })
+
       ## why do we use the initialize method here but only
       ## trigger it in the command testing mode below?
-      @Cypress.initialize @$iframe.prop("contentWindow"), @$iframe, {
-        xhrUrl: "__cypress/xhrs/"
-      }
+      @Cypress.initialize @$iframe.prop("contentWindow"), @$iframe
 
   after ->
     @$iframe.remove()
@@ -141,12 +143,6 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
       ## tested in integration mode)
       @sandbox.stub(@cy, "endedEarlyErr")
 
-      obj =
-        $remoteIframe: @$iframe
-        config: {
-          xhrUrl: "__cypress/xhrs/"
-        }
-
       ## in testing we manually call bindWindowListeners
       ## with our iframe's contentWindow because
       ## our iframe has alreadyloaded. because
@@ -154,7 +150,11 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
       ## never actually get applied
       @cy.bindWindowListeners @$iframe.prop("contentWindow")
 
-      @Cypress.trigger "initialize", obj
+      @Cyress.config({
+        xhrUrl: "__cypress/xhrs/"
+      })
+
+      @Cypress.trigger "initialize", {$remoteIframe: @$iframe}
 
       ## must call defaults manually because
       ## this is naturally called in initialize

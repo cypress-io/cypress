@@ -111,6 +111,11 @@
       start: (specPath) ->
         @Cypress.start()
 
+        ## configure cypress at the earliest stages so
+        ## that any spec files / helpers have the configuration
+        ## avilable ASAP
+        @Cypress.config(App.config.getCypressConfig())
+
         @triggerLoadSpecFrame specPath, {start: true}
 
       stop: ->
@@ -421,7 +426,7 @@
 
         ## initialize the helper objects for Cypress to be able
         ## to run tests
-        @Cypress.initialize(specWindow, remoteIframe, App.config.getCypressConfig())
+        @Cypress.initialize(specWindow, remoteIframe)
 
         ## capture start date
         start = new Date

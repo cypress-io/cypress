@@ -92,7 +92,8 @@
       _.last @get("projectRoot").split("/")
 
     getCypressConfig: ->
-      @pick "commandTimeout", "xhrUrl", "baseUrl", "viewportWidth", "viewportHeight"
+      ## todo test cloning this to prevent env mutation
+      _.clone @pick "commandTimeout", "environmentVariables", "xhrUrl", "baseUrl", "viewportWidth", "viewportHeight"
 
   App.reqres.setHandler "new:config:entity", (attrs = {}) ->
     new Entities.Config attrs
