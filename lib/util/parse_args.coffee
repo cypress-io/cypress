@@ -9,9 +9,9 @@ parseCoords = (coords) ->
   {x: x, y: y}
 
 parseEnv = (envs) ->
-  ## convert foo=bar version=1.2.3 to
+  ## convert foo=bar,version=1.2.3 to
   ## {foo: 'bar', version: '1.2.3'}
-  _(envs.split(/\s+/)).map (pair) ->
+  _(envs.split(",")).map (pair) ->
     pair.split("=")
   .object().value()
 
@@ -35,7 +35,6 @@ module.exports = (options) ->
 
   if options.coords
     options.coords = parseCoords(options.coords)
-
 
   if envs = options.environmentVariables
     options.environmentVariables = parseEnv(envs)

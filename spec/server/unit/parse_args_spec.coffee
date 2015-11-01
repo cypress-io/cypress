@@ -42,8 +42,9 @@ describe "parseArgs", ->
 
   context "--env", ->
     it "converts to object literal", ->
-      @setup("--env", "foo=bar version=0.12.1")
+      @setup("--env", "foo=bar,version=0.12.1,host=localhost:8888")
       expect(@options.environmentVariables).to.deep.eq({
         foo: "bar"
         version: "0.12.1"
+        host: "localhost:8888"
       })
