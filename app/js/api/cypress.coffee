@@ -10,7 +10,12 @@ window.$Cypress = do ($, _, Backbone, Promise) ->
     start: ->
       window.Cypress = @
 
-    initialize: (specWindow, $remoteIframe, config) ->
+    config: (config = {}) ->
+      $Cypress.EnvironmentVariables.create(@, config.environmentVariables)
+
+      @trigger "config", config
+
+    initialize: (specWindow, $remoteIframe) ->
       ## push down the options
       ## to the runner
       @mocha.options(@runner)
@@ -20,7 +25,6 @@ window.$Cypress = do ($, _, Backbone, Promise) ->
       @trigger "initialize",
         specWindow: specWindow
         $remoteIframe: $remoteIframe
-        config: config
 
       ## let the world know we're ready to
       ## rock and roll
@@ -146,7 +150,7 @@ window.$Cypress = do ($, _, Backbone, Promise) ->
 
       ## attach each of the classes
       ## to the Cypress instance
-      for klass in "Cy Log Utils Chai Mocha Runner Agents Server Chainer Location LocalStorage Cookies Keyboard Mouse Command Commands".split(" ")
+      for klass in "Cy Log Utils Chai Mocha Runner Agents Server Chainer Location LocalStorage Cookies Keyboard Mouse Command Commands EnvironmentVariables".split(" ")
         Cypress[klass] = $Cypress[klass]
 
       ## copy the modules by reference too
