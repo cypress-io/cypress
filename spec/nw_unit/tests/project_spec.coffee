@@ -68,6 +68,17 @@ module.exports = (parentWindow, gui, loadApp) ->
           expect(project.find("p.bg-danger")).to.contain("Unexpected token")
           expect(project.find("p.bg-danger br")).to.have.length(2)
 
+      it "cypress.env.json parse errors", ->
+        fs.writeFileSync @todos + "/cypress.env.json", "{'foo': 'bar}"
+        @$("#projects-container .project").click()
+
+        Promise.delay(1000).then =>
+          project = @$("#project")
+          expect(project.find("p.text-danger")).to.contain("Could not start server!")
+          expect(project.find("p.bg-danger")).to.contain("Error reading from")
+          expect(project.find("p.bg-danger")).to.contain("Unexpected token")
+          expect(project.find("p.bg-danger br")).to.have.length(2)
+
     context "projects list", ->
       it "displays added project", ->
         project = @$("#projects-container .project")

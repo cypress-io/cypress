@@ -50,18 +50,8 @@ class Server
   getCypressJson: (projectRoot) ->
     obj = Settings.readSync(projectRoot)
     obj.projectRoot = projectRoot
-    obj.envFile = @getCypressEnvFromFile(projectRoot)
+    obj.envFile = Settings.readEnvSync(projectRoot)
     obj
-
-  getCypressEnvFromFile: (projectRoot) ->
-    ## read off cypress.env.json if it
-    ## exists
-    envPath = path.join(projectRoot, "cypress.env.json")
-
-    return {} if not fs.existsSync(envPath)
-
-    ## dont catch errors
-    fs.readJsonSync(envPath)
 
   getProcessEnvVars: (obj = {}) ->
     normalize = (key) ->

@@ -239,26 +239,6 @@ describe "Server Interface", ->
         FOO: "bar"
       })
 
-  context "#getCypressEnvFromFile", ->
-    afterEach ->
-      fs.removeAsync("cypress.env.json")
-
-    it "returns {} if cypress.env.json does not exist", ->
-      expect(@server.getCypressEnvFromFile("/foo/bar/baz")).to.deep.eq({})
-
-    it "parses json if file exists", ->
-      json = {foo: "bar", baz: "quux"}
-      fs.writeJsonSync("cypress.env.json", json)
-      expect(@server.getCypressEnvFromFile(process.cwd())).to.deep.eq(json)
-
-    it "throws when invalid json", ->
-      fs.writeFileSync("cypress.env.json", "{'foo;: 'bar}")
-
-      fn = =>
-        @server.getCypressEnvFromFile(process.cwd())
-
-      expect(fn).to.throw(SyntaxError)
-
   context "#getCypressJson", ->
     describe "defaults", ->
       beforeEach ->
