@@ -10,6 +10,17 @@ updater({pkg: pkg, updateCheckInterval: human("one hour")}).notify()
 parseOpts = (opts) ->
   _.pick(opts, "spec", "reporter", "path", "destination", "port", "env")
 
+descriptions = {
+  destination: "destination path to extract and install Cypress to"
+  spec:        "runs a specific spec file. defaults to 'all'"
+  reporter:    "runs a specific mocha reporter. pass a path to use a custom reporter. defaults to 'spec'"
+  port:        "runs cypress on a specific port. overrides any value in cypress.json. defaults to '2020'"
+  env:         "sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json"
+}
+
+text = (d) ->
+  descriptions[d] ? throw new Error("Could not find description for: #{d}")
+
 module.exports = ->
   ## instantiate a new program for
   ## easier testability
@@ -20,7 +31,7 @@ module.exports = ->
   program
     .command("install")
     .description("Installs Cypress")
-    .option("-d, --destination <path>", "destination path to extract and install Cypress to.")
+    .option("-d, --destination <path>", text("destination"))
     .action (opts) ->
       require("./commands/install")(parseOpts(opts))
 
@@ -28,10 +39,10 @@ module.exports = ->
     .command("run [project]")
     .usage("[project] [options]")
     .description("Runs Cypress Tests Headlessly")
-    .option("-s, --spec <spec>",         "runs a specific spec file. defaults to 'all'")
-    .option("-r, --reporter <reporter>", "runs a specific mocha reporter. pass a path to use a custom reporter. defaults to 'spec'")
-    .option("-p, --port <port>",         "runs cypress on a specific port. overrides any value in cypress.json. defaults to '2020'")
-    .option("-e, --env <env>",           "sets environment variables. overrides any value in cypress.json or cypress.env.json.")
+    .option("-s, --spec <spec>",         text("spec"))
+    .option("-r, --reporter <reporter>", text("reporter"))
+    .option("-p, --port <port>",         text("port"))
+    .option("-e, --env <env>",           text("env"))
     .action (project, opts) ->
       console.log project, opts.port
       require("./commands/run")(project, parseOpts(opts))
@@ -40,9 +51,9 @@ module.exports = ->
     .command("ci [key]")
     .usage("[key] [options]")
     .description("Runs Cypress in CI Mode")
-    .option("-r, --reporter <reporter>", "runs a specific mocha reporter. pass a path to use a custom reporter. defaults to 'spec'")
-    .option("-p, --port <port>",         "runs cypress on a specific port. overrides any value in cypress.json. defaults to '2020'")
-    .option("-e, --env <env vars>",      "sets environment variables. overrides any value in cypress.json or cypress.env.json.")
+    .option("-r, --reporter <reporter>", text("reporter"))
+    .option("-p, --port <port>",         text("port"))
+    .option("-e, --env <env vars>",      text("env"))
     .action (key, opts) ->
       require("./commands/ci")(key, parseOpts(opts))
 
