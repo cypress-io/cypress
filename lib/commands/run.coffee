@@ -19,6 +19,9 @@ class Run
     opts = {}
     args = ["--run-project", options.project]
 
+    if options.env
+      args.push("--env", options.env)
+
     if options.port
       args.push("--port", options.port)
 

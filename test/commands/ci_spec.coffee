@@ -31,6 +31,10 @@ describe "Ci", ->
       @parse("ci foobar --port 2121")
       expect(@spy).to.be.calledWithMatch("foobar", {port: "2121"})
 
+    it "calls run with env variables", ->
+      @parse("ci foobar --env foo=bar,host=http://localhost:8888")
+      expect(@spy).to.be.calledWith("foobar", {env: "foo=bar,host=http://localhost:8888"})
+
   context "#constructor", ->
     beforeEach ->
       @spawn  = @sandbox.stub(utils, "spawn")

@@ -8,7 +8,7 @@ pkg       = require("../package.json")
 updater({pkg: pkg, updateCheckInterval: human("one hour")}).notify()
 
 parseOpts = (opts) ->
-  _.pick(opts, "spec", "reporter", "path", "destination", "port")
+  _.pick(opts, "spec", "reporter", "path", "destination", "port", "env")
 
 module.exports = ->
   ## instantiate a new program for
