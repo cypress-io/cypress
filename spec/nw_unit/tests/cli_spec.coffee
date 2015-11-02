@@ -479,7 +479,7 @@ module.exports = (parentWindow, gui, loadApp) ->
                 Promise.delay(100)
 
       it "can add environment variables when a project runs", ->
-        @setup("--env", "version=0.12.1 foo=bar host=http://localhost:8888", "--run-project", @todos).then =>
+        @setup("--env", "version=0.12.1,foo=bar,host=http://localhost:8888", "--run-project", @todos).then =>
           expect(@_open).to.be.calledWithMatch({
             environmentVariables: {
               version: "0.12.1"
@@ -489,7 +489,7 @@ module.exports = (parentWindow, gui, loadApp) ->
           })
 
       it "can add environment variables without a specific project", ->
-        @setup("--env", "version=0.12.1 foo=bar").then =>
+        @setup("--env", "version=0.12.1,foo=bar").then =>
           expect(@trigger).to.be.calledWithMatch("start:projects:app", {
             environmentVariables: {
               version: "0.12.1"
