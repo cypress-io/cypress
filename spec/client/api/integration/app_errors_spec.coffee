@@ -1,4 +1,4 @@
-describe "Uncaught App Errors Tests", ->
+describe "App Errors Tests", ->
   enterIntegrationTestingMode("html/errors", {silent: true})
 
   context "should not fire ended early event", ->
