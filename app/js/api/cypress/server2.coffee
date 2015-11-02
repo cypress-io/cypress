@@ -393,9 +393,11 @@ $Cypress.Server = do ($Cypress, _) ->
         ## resolve handling actual + display url's
         url = getServer().options.getUrlOptions(originalUrl)
 
+        ## decode the entire url.display to make
+        ## it easier to do assertions
         proxy = getServer().add(@, {
           method: method
-          url: decodeURI(url.display)
+          url: decodeURIComponent(url.display)
         })
 
         ## if this XHR matches a stubbed route then shift

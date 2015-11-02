@@ -28,7 +28,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
 
   stripOrigin = (url) ->
     location = Cypress.Location.parse(url)
-    location.href.replace(location.origin, "")
+    url.replace(location.origin, "")
 
   setRequest = (xhr, alias) ->
     requests = @prop("requests") ? []

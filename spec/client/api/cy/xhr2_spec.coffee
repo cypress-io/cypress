@@ -35,7 +35,6 @@ describe "$Cypress.Cy XHR Commands", ->
 
   beforeEach ->
     @setup = =>
-      @cy.private("xhrUrl", "__cypress/xhrs/")
       @Cypress.trigger "test:before:hooks", {id: 123}
 
       ## pass up our iframe so the server binds to the XHR
@@ -295,6 +294,27 @@ describe "$Cypress.Cy XHR Commands", ->
             xhr = @cy.prop("responses")[0].xhr
             expect(xhr.url).to.eq("http://localhost:3500/users?q=(id eq 123)")
             url = encodeURI("users?q=(id eq 123)")
+            expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/#{url}")
+
+      it "decodes proxy urls #2", ->
+        @cy
+          .server()
+          .visit("/fixtures/html/xhr.html")
+          .route({
+            url: /accounts/
+            response: {}
+          }).as("getAccounts")
+          .window().then (win) ->
+            @cy.prop("server").restore()
+            @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
+            @cy.prop("server").bindTo(win)
+            win.$.get("/accounts?page=1&%24filter=(rowStatus+eq+1)&%24orderby=name+asc&includeOpenFoldersCount=true&includeStatusCount=true")
+            null
+          .wait("@getAccounts")
+          .then ->
+            xhr = @cy.prop("responses")[0].xhr
+            expect(xhr.url).to.eq("http://localhost:3500/accounts?page=1&$filter=(rowStatus+eq+1)&$orderby=name+asc&includeOpenFoldersCount=true&includeStatusCount=true")
+            url = "accounts?page=1&%24filter=(rowStatus+eq+1)&%24orderby=name+asc&includeOpenFoldersCount=true&includeStatusCount=true"
             expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/#{url}")
 
     describe "#onResponse", ->
