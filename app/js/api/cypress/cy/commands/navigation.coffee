@@ -124,7 +124,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
       if options.log
         options._log = Cypress.Log.command()
 
-      baseUrl = @private("baseUrl")
+      baseUrl = @Cypress.config("baseUrl")
       url     = Cypress.Location.getRemoteUrl(url, baseUrl)
 
       ## backup the previous runnable timeout

@@ -43,10 +43,6 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
       ## our tests are re-run
       @isReady(true, "initialize")
 
-    config: (obj) ->
-      _.each obj.config, (value, key) =>
-        @private(key, value)
-
     defaults: ->
       @props = {}
 
@@ -61,9 +57,6 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
     listeners: ->
       @listenTo @Cypress, "initialize", (obj) =>
         @initialize(obj)
-
-      @listenTo @Cypress, "config", (obj) =>
-        @config(obj)
 
       ## why arent we listening to "defaults" here?
       ## instead we are manually hard coding them
@@ -533,7 +526,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
     _setRunnable: (runnable, hookName) ->
       runnable.startedAt = new Date
 
-      if _.isFinite(timeout = @private("commandTimeout"))
+      if _.isFinite(timeout = @Cypress.config("commandTimeout"))
         runnable.timeout timeout
 
       @hook(hookName)

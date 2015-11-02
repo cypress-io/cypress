@@ -90,7 +90,7 @@ window.enterIntegrationTestingMode = (fixture, options = {}) ->
         console.error(err.stack)
 
     @loadDom(fixture).then =>
-      @Cypress.config({
+      @Cypress.setConfig({
         xhrUrl: "__cypress/xhrs/"
       })
 
@@ -150,7 +150,7 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
       ## never actually get applied
       @cy.bindWindowListeners @$iframe.prop("contentWindow")
 
-      @Cyress.config({
+      @Cypress.setConfig({
         xhrUrl: "__cypress/xhrs/"
       })
 

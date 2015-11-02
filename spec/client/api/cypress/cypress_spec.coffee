@@ -144,7 +144,7 @@ describe "$Cypress API", ->
 
   describe "#env", ->
     beforeEach ->
-      @Cypress.config({
+      @Cypress.setConfig({
         environmentVariables: {foo: "bar"}
       })
 
@@ -170,25 +170,40 @@ describe "$Cypress API", ->
 
       expect(fn).to.throw("Cypress.environmentVariables is not defined. Open an issue if you see this message.")
 
-  describe "#config", ->
+  describe "#setConfig", ->
     beforeEach ->
       @trigger = @sandbox.spy @Cypress, "trigger"
 
     it "instantiates EnvironmentVariables", ->
       expect(@Cypress).not.to.have.property("environmentVariables")
-      @Cypress.config({foo: "bar"})
+      @Cypress.setConfig({foo: "bar"})
       expect(@Cypress.environmentVariables).to.be.instanceof($Cypress.EnvironmentVariables)
 
     it "passes config.environmentVariables", ->
-      @Cypress.config({
+      @Cypress.setConfig({
         environmentVariables: {foo: "bar"}
       })
 
       expect(@Cypress.env()).to.deep.eq({foo: "bar"})
 
     it "triggers 'config'", ->
-      @Cypress.config({foo: "bar"})
+      @Cypress.setConfig({foo: "bar"})
       expect(@trigger).to.be.calledWith("config", {foo: "bar"})
+
+    it "passes config to Config.create", ->
+      @Cypress.setConfig({foo: "bar"})
+      expect(@Cypress.config()).to.deep.eq({foo: "bar"})
+      expect(@Cypress.config("foo")).to.eq("bar")
+
+    it "can modify config values", ->
+      @Cypress.setConfig({foo: "bar"})
+      @Cypress.config("bar", "baz")
+      expect(@Cypress.config()).to.deep.eq({foo: "bar", bar: "baz"})
+
+    it "can set object literal as values", ->
+      @Cypress.setConfig({foo: "bar"})
+      @Cypress.config({foo: "baz", bar: "baz"})
+      expect(@Cypress.config()).to.deep.eq({foo: "baz", bar: "baz"})
 
   describe "#window", ->
     beforeEach ->

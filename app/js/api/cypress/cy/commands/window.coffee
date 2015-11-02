@@ -160,8 +160,8 @@ $Cypress.register "Window", (Cypress, _, $) ->
         else
           throwErrBadArgs()
 
-      @private("viewportWidth", width)
-      @private("viewportHeight", height)
+      @Cypress.config("viewportWidth", width)
+      @Cypress.config("viewportHeight", height)
 
       viewport = {viewportWidth: width, viewportHeight: height}
 

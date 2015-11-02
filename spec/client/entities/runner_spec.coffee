@@ -266,6 +266,12 @@ describe "Runner Entity", ->
       @runner.start("app_spec.coffee")
       expect(start).to.be.calledOnce
 
+    it "calls Cypress.setConfig with app config", ->
+      cfg = App.config.getCypressConfig()
+      setConfig = @sandbox.spy @Cypress, "setConfig"
+      @runner.start("app_spec.coffee")
+      expect(setConfig).to.be.calledWith(cfg)
+
   context "#reRun", ->
     beforeEach ->
       @abort = @sandbox.stub(@Cypress, "abort").resolves()

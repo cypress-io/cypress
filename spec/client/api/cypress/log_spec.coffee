@@ -343,7 +343,7 @@ describe "$Cypress.Log API", ->
             @Cypress.Log.command({})
 
           it "sets viewportWidth to private viewportWidth", (done) ->
-            @cy.private("viewportWidth", 999)
+            @Cypress.config("viewportWidth", 999)
 
             @Cypress.on "log", (obj) ->
               expect(obj.get("viewportWidth")).to.eq 999
@@ -352,7 +352,7 @@ describe "$Cypress.Log API", ->
             @Cypress.Log.command({})
 
           it "sets viewportHeight to private viewportHeight", (done) ->
-            @cy.private("viewportHeight", 888)
+            @Cypress.config("viewportHeight", 888)
 
             @Cypress.on "log", (obj) ->
               expect(obj.get("viewportHeight")).to.eq 888

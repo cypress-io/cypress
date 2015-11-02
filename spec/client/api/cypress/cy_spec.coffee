@@ -47,12 +47,6 @@ describe "$Cypress.Cy API", ->
         @Cypress.trigger "initialize", {$remoteIframe: @remoteIframe}
         expect(@cy.private("$remoteIframe")).to.eq @remoteIframe
 
-      it "sets config into private", ->
-        config = {foo: "bar", commandTimeout: 4000}
-        @Cypress.trigger "initialize", {$remoteIframe: @remoteIframe, config: config}
-        expect(@cy.private("foo")).to.eq "bar"
-        expect(@cy.private("commandTimeout")).to.eq 4000
-
     describe "#defaults", ->
       it "sets props to {}", ->
         cy = $Cypress.Cy.create(@Cypress, @specWindow)
@@ -140,6 +134,7 @@ describe "$Cypress.Cy API", ->
 
     describe "#_setRunnable", ->
       beforeEach ->
+        @Cypress.setConfig({})
         @cy = $Cypress.Cy.create(@Cypress, @specWindow)
         null
 
@@ -156,7 +151,7 @@ describe "$Cypress.Cy API", ->
         @test.enableTimeouts(false)
         t = @test
         timeout = @sandbox.spy t, "timeout"
-        @cy.private("commandTimeout", 1000)
+        @Cypress.config("commandTimeout", 1000)
         @cy._setRunnable(t)
         expect(timeout).to.be.calledWith 1000
         expect(t._timeout).to.eq 1000

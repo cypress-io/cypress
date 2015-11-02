@@ -61,8 +61,8 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
         url:              cy.private("url")
         hookName:         cy.private("hookName")
         testId:           cy.private("runnable").id
-        viewportWidth:    cy.private("viewportWidth")
-        viewportHeight:   cy.private("viewportHeight")
+        viewportWidth:    Cypress.config("viewportWidth")
+        viewportHeight:   Cypress.config("viewportHeight")
         referencesAlias:  undefined
         alias:            undefined
         aliasType:        undefined

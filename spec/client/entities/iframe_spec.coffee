@@ -56,7 +56,7 @@ describe "Iframe Entity", ->
 
     it "listens to Cypress initialize", ->
       setViewport = @sandbox.spy @iframe, "setViewport"
-      @Cypress.trigger "initialize", {config: {viewportWidth: 500, viewportHeight: 800, foo: "bar"}}
+      @Cypress.trigger "config", {viewportWidth: 500, viewportHeight: 800, foo: "bar"}
       expect(setViewport).to.be.calledWithExactly({viewportWidth: 500, viewportHeight: 800})
 
   context "#commandExit", ->

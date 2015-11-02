@@ -103,7 +103,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
 
       @prop "server", $Cypress.Server.create({
         testId: testId
-        xhrUrl: @private("xhrUrl")
+        xhrUrl: @Cypress.config("xhrUrl")
         stripOrigin: stripOrigin
         getUrlOptions: (url) =>
           ## resolve handling if the origin is either legitimately CORS

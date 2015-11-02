@@ -114,7 +114,7 @@
         ## configure cypress at the earliest stages so
         ## that any spec files / helpers have the configuration
         ## avilable ASAP
-        @Cypress.config(App.config.getCypressConfig())
+        @Cypress.setConfig(App.config.getCypressConfig())
 
         @triggerLoadSpecFrame specPath, {start: true}
 

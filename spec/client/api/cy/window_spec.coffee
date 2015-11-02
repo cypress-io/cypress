@@ -412,8 +412,8 @@ describe "$Cypress.Cy Window Commands", ->
 
     it "sets viewportWidth and viewportHeight to private", (done) ->
       @Cypress.on "viewport", =>
-        expect(@cy.private("viewportWidth")).to.eq(800)
-        expect(@cy.private("viewportHeight")).to.eq(600)
+        expect(@Cypress.config("viewportWidth")).to.eq(800)
+        expect(@Cypress.config("viewportHeight")).to.eq(600)
         done()
 
       @cy.viewport(800, 600)

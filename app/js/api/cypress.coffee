@@ -10,8 +10,13 @@ window.$Cypress = do ($, _, Backbone, Promise) ->
     start: ->
       window.Cypress = @
 
-    config: (config = {}) ->
-      $Cypress.EnvironmentVariables.create(@, config.environmentVariables)
+    setConfig: (config = {}) ->
+      {environmentVariables} = config
+
+      config = _.omit(config, "environmentVariables")
+
+      $Cypress.EnvironmentVariables.create(@, environmentVariables)
+      $Cypress.Config.create(@, config)
 
       @trigger "config", config
 

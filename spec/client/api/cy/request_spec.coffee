@@ -117,7 +117,7 @@ describe "$Cypress.Cy Request Commands", ->
 
       context "url normalization", ->
         it "uses absolute urls and adds trailing slash", ->
-          @cy.private("baseUrl", "http://localhost:8080/app")
+          @Cypress.config("baseUrl", "http://localhost:8080/app")
 
           @cy.request("https://www.foo.com").then ->
             @expectOptionsToBe({
@@ -136,7 +136,7 @@ describe "$Cypress.Cy Request Commands", ->
 
         it "prefixes with baseUrl when origin is empty", ->
           @sandbox.stub(@cy, "_getLocation").withArgs("origin").returns("")
-          @cy.private("baseUrl", "http://localhost:8080/app")
+          @Cypress.config("baseUrl", "http://localhost:8080/app")
 
           @cy.request("/foo/bar?cat=1").then ->
             @expectOptionsToBe({
@@ -146,7 +146,7 @@ describe "$Cypress.Cy Request Commands", ->
             })
 
         it "prefixes with current origin over baseUrl", ->
-          @cy.private("baseUrl", "http://localhost:8080/app")
+          @Cypress.config("baseUrl", "http://localhost:8080/app")
           @sandbox.stub(@cy, "_getLocation").withArgs("origin").returns("http://localhost:1234")
 
           @cy.request("foobar?cat=1").then ->
@@ -362,7 +362,7 @@ describe "$Cypress.Cy Request Commands", ->
         @cy.request()
 
       it "throws when url is not FQDN", (done) ->
-        @cy.private("baseUrl", "")
+        @Cypress.config("baseUrl", "")
         @sandbox.stub(@cy, "_getLocation").withArgs("origin").returns("")
 
         logs = []
