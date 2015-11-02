@@ -47,7 +47,7 @@ module.exports = (parentWindow, gui, loadApp) ->
 
           # wait for our token to come back
           # because its async
-          Promise.delay(200)
+          Promise.delay(1000)
 
     afterEach ->
       Fixtures.remove()

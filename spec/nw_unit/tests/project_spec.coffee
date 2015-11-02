@@ -45,12 +45,11 @@ module.exports = (parentWindow, gui, loadApp) ->
           expect(@$("project")).not.to.exist
         .delay(1000)
 
-      it "calls project:clicked with options", ->
+      it "calls project:clicked with options + displays project information", ->
         expect(@trigger).to.be.calledWith("project:clicked")
         expect(@trigger.getCall(0).args[2]).to.be.an("object")
         expect(@trigger.getCall(0).args[2]).to.have.property("projectPath")
 
-      it "displays project information", ->
         expect(@project.find("h3")).to.contain("todos")
         expect(@project.find(".well")).to.contain("Server Running")
         expect(@project.find("a")).to.contain("http://localhost:8888")
