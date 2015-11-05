@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "0.7.4",
+  "version": "0.7.5",
   "description": "CLI for Cypress.io Desktop App",
   "preferGlobal": true,
   "scripts": {
