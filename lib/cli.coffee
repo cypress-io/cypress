@@ -44,7 +44,6 @@ module.exports = ->
     .option("-p, --port <port>",         text("port"))
     .option("-e, --env <env>",           text("env"))
     .action (project, opts) ->
-      console.log project, opts.port
       require("./commands/run")(project, parseOpts(opts))
 
   program
