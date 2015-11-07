@@ -1025,6 +1025,23 @@ describe "Routes", ->
             null
           .end(done)
 
+      it "omits content-security-policy", (done) ->
+        nock(@baseUrl)
+          .get("/bar")
+          .reply 200, "OK", {
+            "Content-Type": "text/html"
+            "content-security-policy": "foobar;"
+          }
+
+        supertest(@app)
+          .get("/bar")
+          .set("Cookie", "__cypress.initial=false; __cypress.remoteHost=http://www.github.com")
+          .expect(200)
+          .expect (res) ->
+            expect(res.headers).not.to.have.keys("content-security-policy")
+            null
+          .end(done)
+
       it "strips HttpOnly and Secure from all cookies", (done) ->
         nock(@baseUrl)
           .get("/bar")

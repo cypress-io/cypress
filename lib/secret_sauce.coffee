@@ -919,7 +919,7 @@ SecretSauce.RemoteInitial =
     { _ } = SecretSauce
 
     ## omit problematic headers
-    headers = _.omit incomingRes.headers, "set-cookie", "x-frame-options", "content-length"
+    headers = _.omit incomingRes.headers, "set-cookie", "x-frame-options", "content-length", "content-security-policy"
 
     ## rewrite custom headers which reference the wrong host
     ## if our host is localhost:8080 we need to
