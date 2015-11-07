@@ -1201,6 +1201,25 @@ describe "Routes", ->
             expect(body).to.eq contents
             null
           .end(done)
+
+      it.skip "injects even when head tag is missing", (done) ->
+        contents = removeWhitespace Fixtures.get("server/expected_no_head_tag_inject.html")
+
+        nock(@baseUrl)
+          .get("/bar")
+          .reply 200, "<html> <body>hello from bar!</body> </html>",
+            "Content-Type": "text/html"
+
+        supertest(@app)
+          .get("/bar")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+          .expect(200)
+          .expect (res) ->
+            body = removeWhitespace(res.text)
+            expect(body).to.eq contents
+            null
+          .end(done)
+
       it "injects sinon content after following redirect", (done) ->
         contents = removeWhitespace Fixtures.get("server/expected_sinon_inject.html")
 

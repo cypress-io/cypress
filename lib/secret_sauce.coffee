@@ -669,6 +669,7 @@ SecretSauce.IdGenerator =
 
 SecretSauce.RemoteInitial =
   headRe: /(<head.*?>)/
+  htmlRe: /(<html.*?>)/
   okStatus: /^[2|3|4]\d+$/
   badCookieParam: /^(httponly|secure)$/i
 
@@ -1010,11 +1011,20 @@ SecretSauce.RemoteInitial =
               @queue fn(buf.toString())
             ).pipe(stream)
 
+    ## we still aren't handling pages which are missing their <head> tag
+    ## for those we need to insert our own <head> tag
     rewrite "head", "html", (str) =>
       str.replace(@headRe, "$1 #{@getHeadContent()}")
 
     rewrite "[href^='//']", "attr", "href", (href) ->
       "/" + req.protocol + ":" + href
+    # rewrite "html", "html", {method: "select"}, (str) =>
+    #   ## if we are missing a <head> tag then
+    #   ## dynamically insert one
+    #   if not @headRe.test(str)
+    #     str.replace(@htmlRe, "$1 <head> #{@getHeadContent()} </head>")
+    #   else
+    #     str
 
     rewrite "form[action^='//']", "attr", "action", (action) ->
       "/" + req.protocol + ":" + action
