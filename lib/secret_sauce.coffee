@@ -668,6 +668,7 @@ SecretSauce.IdGenerator =
     @str.insert contents, position, " [#{id}]"
 
 SecretSauce.RemoteInitial =
+  headRe: /(<head.*?>)/
   okStatus: /^[2|3|4]\d+$/
   badCookieParam: /^(httponly|secure)$/i
 
@@ -981,11 +982,19 @@ SecretSauce.RemoteInitial =
         #   elem.setAttribute attr, fn(val)
 
     rewrite = (selector, type, attr, fn) ->
-      if _.isFunction(attr)
-        fn   = attr
-        attr = null
+      options = {}
 
-      tr.selectAll selector, (elem) ->
+      switch
+        when _.isFunction(attr)
+          fn   = attr
+          attr = null
+
+        when _.isPlainObject(attr)
+          options = attr
+
+      options.method ?= "selectAll"
+
+      tr[options.method] selector, (elem) ->
         switch type
           when "attr"
             elem.getAttribute attr, (val) ->
@@ -995,13 +1004,14 @@ SecretSauce.RemoteInitial =
             elem.removeAttribute(attr)
 
           when "html"
-            stream = elem.createStream({outer: true})
+            options.outer ?= true
+            stream = elem.createStream({outer: options.outer})
             stream.pipe(through (buf) ->
               @queue fn(buf.toString())
             ).pipe(stream)
 
     rewrite "head", "html", (str) =>
-      str.replace("<head>", "<head> #{@getHeadContent()}")
+      str.replace(@headRe, "$1 #{@getHeadContent()}")
 
     rewrite "[href^='//']", "attr", "href", (href) ->
       "/" + req.protocol + ":" + href

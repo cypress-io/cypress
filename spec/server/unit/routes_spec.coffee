@@ -1184,6 +1184,23 @@ describe "Routes", ->
             null
           .end(done)
 
+      it "injects when head has attributes", (done) ->
+        contents = removeWhitespace Fixtures.get("server/expected_head_inject.html")
+
+        nock(@baseUrl)
+          .get("/bar")
+          .reply 200, "<html> <head prefix=\"og: foo\"> <meta name=\"foo\" content=\"bar\"> </head> <body>hello from bar!</body> </html>",
+            "Content-Type": "text/html"
+
+        supertest(@app)
+          .get("/bar")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+          .expect(200)
+          .expect (res) ->
+            body = removeWhitespace(res.text)
+            expect(body).to.eq contents
+            null
+          .end(done)
       it "injects sinon content after following redirect", (done) ->
         contents = removeWhitespace Fixtures.get("server/expected_sinon_inject.html")
 
