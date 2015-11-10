@@ -33,7 +33,7 @@
 
   App.on "start", (options = {}) ->
     ## start listening to socket io
-    App.execute "socket:start"
+    App.execute "socket:start", options.socketId
 
     App.config.setEnv options.env
 

@@ -5,9 +5,13 @@
   passThruEvents  = "sauce:job:create sauce:job:start sauce:job:done sauce:job:fail".split(" ")
 
   API =
-    start: ->
+    start: (socketId) ->
       ## connect to socket io
       channel = io.connect({path: "/__socket.io"})
+
+      if socketId
+        channel.on "connect", ->
+          channel.emit "app:connect", socketId
 
       _.each [].concat(hostEvents, satelliteEvents, passThruEvents), (event) ->
         channel.on event, (args...) ->
@@ -33,12 +37,12 @@
         link.attr("href", href.toString())
 
       ## create the app socket entity
-      socket = App.request "io:entity", channel
+      socket = App.request "io:entity", channel, socketId
 
       App.reqres.setHandler "socket:entity", -> socket
 
-  App.commands.setHandler "socket:start", ->
-    API.start()
+  App.commands.setHandler "socket:start", (socketId) ->
+    API.start(socketId)
 
   App.reqres.setHandler "satellite:events", -> satelliteEvents
   App.reqres.setHandler "host:events",      -> hostEvents
