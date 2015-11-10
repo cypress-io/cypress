@@ -41,6 +41,7 @@ module.exports = {
     }
 
     _.extend options, {
+      strictSSL: false
       simple: false
       resolveWithFullResponse: true
     }

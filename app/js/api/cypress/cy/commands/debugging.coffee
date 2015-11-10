@@ -45,7 +45,7 @@ $Cypress.register "Debugging", (Cypress, _, $) ->
     ## presses a key or clicks in the UI to continue
     pause: (options = {}) ->
       ## bail if we're headless
-      return @prop("subject") if Cypress.isHeadless
+      return @prop("subject") if $Cypress.isHeadless
 
       _.defaults options, {log: true}
 

@@ -32,6 +32,33 @@
           @listenTo @Cypress, event, (args...) =>
             @trigger event, args...
 
+        @listenTo @Cypress, "run:start", =>
+          @socket.emit "mocha", "start"
+
+        @listenTo @Cypress, "run:end", =>
+          @socket.emit "mocha", "end"
+
+        @listenTo @Cypress, "suite:start", (suite) =>
+          @socket.emit "mocha", "suite", suite
+
+        @listenTo @Cypress, "suite:end", (suite) =>
+          @socket.emit "mocha", "suite end", suite
+
+        @listenTo @Cypress, "test:start", (test) =>
+          @socket.emit "mocha", "test", test
+
+        @listenTo @Cypress, "test:end", (test) =>
+          @socket.emit "mocha", "test end", test
+
+        # @listenTo @Cypress, "pending", (test) =>
+          # @socket.emit "mocha", "pending", test
+
+        @listenTo @Cypress, "pass", (test) =>
+          @socket.emit "mocha", "pass", test
+
+        @listenTo @Cypress, "fail", (test) =>
+          @socket.emit "mocha", "fail", test
+
         @listenTo @Cypress, "message", (msg, data, cb) =>
           @socket.emit "client:request", msg, data, cb
 

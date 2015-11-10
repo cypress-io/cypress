@@ -45,6 +45,19 @@ describe "Request", ->
       })
 
   context "#send", ->
+    it "sets strictSSL=false", ->
+      rp = require("request-promise")
+
+      init = @sandbox.spy rp.Request.prototype, "init"
+      nock("http://www.github.com")
+        .get("/foo")
+        .reply 200, "hello", {
+          "Content-Type": "text/html"
+        }
+
+      Request.send({url: "http://www.github.com/foo"}).then ->
+        expect(init).to.be.calledWithMatch({strictSSL: false})
+
     it "sets simple=false", (done) ->
       nock("http://www.github.com")
         .get("/foo")

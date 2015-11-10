@@ -57,6 +57,12 @@ class Socket
       filePath = path.basename(filePath)
       @io.emit "cypress:css:changed", file: filePath
 
+  checkForAppErrors: ->
+    setTimeout =>
+      console.log "check:for:app:errors"
+      @io.emit("check:for:app:errors")
+    , 2000
+
   close: (watchedFiles) ->
     @io.close()
 

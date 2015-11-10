@@ -18,6 +18,8 @@
   App.vent.on "main:nav:choose", (nav) -> App.navs.chooseByName nav
 
   App.on "before:start", (options = {}) ->
+    App.catchUncaughtErrors()
+
     ## and nuke them all on beforeunload
     App.clearAllCookiesBeforeUnload()
 
@@ -33,7 +35,7 @@
 
   App.on "start", (options = {}) ->
     ## start listening to socket io
-    App.execute "socket:start"
+    App.execute "socket:start", options.socketId
 
     App.config.setEnv options.env
 

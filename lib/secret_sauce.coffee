@@ -44,6 +44,8 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
         writeErr("Sorry, could not run this specific spec because it was not found:", chalk.blue(err.specPath))
       when err.portInUse
         writeErr("Sorry, could not run this project because this port is currently in use:", chalk.blue(err.port), chalk.yellow("\nSpecify a different port with the '--port <port>' argument or shut down the other process using this port."))
+      when err.chromiumDidNotLoad
+        writeErr("Sorry, there was an error while attempting to start your tests.", chalk.yellow("\nerrorCode:", chalk.blue(err.errorCode)), chalk.yellow("\nerrorDescription:", chalk.blue(err.errorDescription)))
       else
         writeErr("An error occured receiving token.")
 
@@ -185,26 +187,71 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
 
     run: (options) ->
       ## silence all console messages
-      @App.silenceConsole()
+      # @App.silenceConsole()
+
+      id = Math.random()
+
+      connected = false
 
       @App.vent.trigger "start:projects:app", {
         morgan:      false
+        socketId:    id
         projectPath: options.projectPath
         port:        options.port
         onError:     displayError
         environmentVariables: options.environmentVariables
+        # onAppError: (err) ->
+          # writeErr(err)
+
+        onConnect: (socketId, socket) ->
+          ## if this id is correct and this socket
+          ## isnt being tracked yet then add it
+          if id is socketId
+            if not connected
+              console.log "socket: #{socketId} connected successfully!"
+              connected = true
+
+            socket.on "mocha", (event, data) ->
+              console.log "mocha event: #{event}"
+
         onProjectStart: (config) =>
           @getSpec(config, options)
             .then (src) =>
-              @App.execute "start:chromium:run", src, {
-                headless:    true
-                onReady: (win) ->
-                  Chromium(win).override({
-                    ci:          options.ci
-                    reporter:    options.reporter
-                    ci_guid:     options.ci_guid
-                  })
+              # startChromiumRun(src)
+
+              sp = cp.spawn "electron", [".", "--url=http://localhost:2020/__"], {
+                cwd: path.join(process.cwd(), "..", "cypress-chromium")
               }
+
+              # sp.stdout.on "data", (data) ->
+              #   if data.toString() is "did-finish-load"
+              #     ## check to ensure there are no App.error
+              #     ## if there are exit and log out the error
+              #     # process.stdout.write("data is: #{data}")
+              #     config.checkForAppErrors()
+
+              sp.stderr.on "data", (data) ->
+                try
+                  obj = JSON.parse(data)
+                catch e
+                  obj = {}
+
+                err = new Error
+                err.chromiumDidNotLoad = true
+                err.errorCode = obj.errorCode
+                err.errorDescription = obj.errorDescription
+
+                displayError(err)
+
+              # @App.execute "start:chromium:run", src, {
+              #   headless:    true
+              #   onReady: (win) ->
+              #     Chromium(win).override({
+              #       ci:          options.ci
+              #       reporter:    options.reporter
+              #       ci_guid:     options.ci_guid
+              #     })
+              # }
             .catch(displayError)
 
         onProjectNotFound: (path) ->
@@ -529,7 +576,10 @@ SecretSauce.Socket =
     { _ } = SecretSauce
 
     _.defaults options,
+      socketId: null
+      onConnect: ->
       onChromiumRun: ->
+      checkForAppErrors: ->
 
     messages = {}
 
@@ -607,6 +657,13 @@ SecretSauce.Socket =
       ## the job name
       socket.on "run:sauce", (spec, fn) =>
         @_runSauce(socket, spec, fn)
+
+      socket.on "app:errors", (err) ->
+        process.stdout.write "app:errors"
+        options.onAppError(err)
+
+      socket.on "app:connect", (socketId) ->
+        options.onConnect(socketId, socket)
 
     @testsDir = path.join(projectRoot, testFolder)
 

@@ -130,6 +130,7 @@ class Server
     _.defaults options,
       morgan: true
       port: null
+      socketId: null
       environmentVariables: null
 
     ## merge these into except
@@ -145,6 +146,10 @@ class Server
     if p = options.port
       @config.port = p
       @setUrls(@config)
+
+    ## send up our socketId to the client
+    if sid = options.socketId
+      @config.socketId = sid
 
     ## set the cypress config from the cypress.json file
     @app.set "port",        @config.port
@@ -195,6 +200,12 @@ class Server
       ## refactor this class
       socket = Socket(@io, @app)
       socket.startListening(options)
+
+      # @config.checkForAppErrors = ->
+      #   socket.checkForAppErrors()
+
+      ## expose the socket back to the app
+      # options.socket = socket
 
       onError = (err) =>
         ## if the server bombs before starting
