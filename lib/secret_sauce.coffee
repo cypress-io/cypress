@@ -2,6 +2,8 @@ _       = require("lodash")
 os      = require("os")
 cp      = require("child_process")
 path    = require("path")
+util    = require("util")
+kill    = require("tree-kill")
 chalk   = require("chalk")
 request = require("request-promise")
 Promise = require("bluebird")
@@ -194,6 +196,7 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Reporter, Log) ->
       reporter = Reporter()
 
       connected = false
+      sp        = null
 
       @App.vent.trigger "start:projects:app", {
         morgan:      false
@@ -211,17 +214,28 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Reporter, Log) ->
           ## isnt being tracked yet then add it
           if id is socketId
             if not connected
-              console.log "socket: #{socketId} connected successfully!"
+              # console.log "socket: #{socketId} connected successfully!"
               connected = true
 
             socket.on "mocha", (event, args...) ->
               args = [event].concat(args)
               reporter.emit.apply(reporter, args)
 
+              if event is "end"
+                stats = reporter.stats()
+                console.log(stats)
+
+                kill sp.pid, "SIGKILL", (err) ->
+                  process.exit(stats.failures)
+
         onProjectStart: (config) =>
           @getSpec(config, options)
             .then (src) =>
               # startChromiumRun(src)
+
+              global.console.log = ->
+                msg = util.format.apply(util, arguments)
+                process.stdout.write(msg + "\n")
 
               sp = cp.spawn "electron", [".", "--url=http://localhost:2020/__#/tests/sync_xhr.coffee"], {
                 cwd: path.join(process.cwd(), "..", "cypress-chromium")

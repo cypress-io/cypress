@@ -137,6 +137,7 @@
     "through": "2.3.6",
     "through2": "0.6.3",
     "trash": "^1.4.1",
+    "tree-kill": "^1.0.0",
     "trumpet": "^1.7.1",
     "underscore": "1.6.0",
     "underscore.string": "2.3.3",
