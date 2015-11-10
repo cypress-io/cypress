@@ -128,10 +128,13 @@ class Server
 
   configureApplication: (options = {}) ->
     _.defaults options,
+      idGenerator: true
       morgan: true
       port: null
       socketId: null
       environmentVariables: null
+
+    @config.idGenerator = options.idGenerator
 
     ## merge these into except
     ## for the 'environmentVariables' key

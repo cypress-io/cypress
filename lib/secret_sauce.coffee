@@ -197,6 +197,7 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Reporter, Log) ->
 
       @App.vent.trigger "start:projects:app", {
         morgan:      false
+        idGenerator: !!options.ci
         socketId:    id
         projectPath: options.projectPath
         port:        options.port

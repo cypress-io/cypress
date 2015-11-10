@@ -27,7 +27,7 @@
         .then (config) ->
           project.setClientUrl(config.clientUrl, config.clientUrlDisplay)
 
-          App.execute "start:id:generator", config.idGeneratorUrl
+          App.execute("start:id:generator", config.idGeneratorUrl) if config.idGenerator
 
           options.onProjectStart(config)
 
