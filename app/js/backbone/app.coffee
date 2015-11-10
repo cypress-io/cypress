@@ -18,6 +18,8 @@
   App.vent.on "main:nav:choose", (nav) -> App.navs.chooseByName nav
 
   App.on "before:start", (options = {}) ->
+    App.catchUncaughtErrors()
+
     ## and nuke them all on beforeunload
     App.clearAllCookiesBeforeUnload()
 

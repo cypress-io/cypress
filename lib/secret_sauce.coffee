@@ -200,6 +200,9 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
         port:        options.port
         onError:     displayError
         environmentVariables: options.environmentVariables
+        # onAppError: (err) ->
+          # writeErr(err)
+
         onConnect: (socketId, socket) ->
           ## if this id is correct and this socket
           ## isnt being tracked yet then add it
@@ -576,6 +579,7 @@ SecretSauce.Socket =
       socketId: null
       onConnect: ->
       onChromiumRun: ->
+      checkForAppErrors: ->
 
     messages = {}
 
@@ -654,6 +658,9 @@ SecretSauce.Socket =
       socket.on "run:sauce", (spec, fn) =>
         @_runSauce(socket, spec, fn)
 
+      socket.on "app:errors", (err) ->
+        process.stdout.write "app:errors"
+        options.onAppError(err)
 
       socket.on "app:connect", (socketId) ->
         options.onConnect(socketId, socket)
