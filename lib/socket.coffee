@@ -8,11 +8,13 @@ IdGenerator   = require './id_generator'
 Fixtures      = require "./fixtures"
 Request       = require "./request"
 Log           = require "./log"
+Reporter      = require "./reporter"
 SecretSauce   = require "../lib/util/secret_sauce_loader"
 
 class Socket
   fs: fs
   Log: Log
+  Reporter: Reporter
   Request: Request
   Fixtures: Fixtures
   chokidar: chokidar
@@ -34,6 +36,7 @@ class Socket
     @app         = app
     @io          = io
     @idGenerator = IdGenerator(@app)
+    @reporter    = Reporter(@app)
 
   startListening: (options) ->
     @app.once "close", @close.bind(@)
