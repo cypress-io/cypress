@@ -123,7 +123,7 @@ $Cypress.Runner = do ($Cypress, _) ->
       ## tests to an id-based object which prevents
       ## us from recursively iterating through every
       ## parent since we could just return the found test
-      r = _(runnable).pick "id", "title", "originalTitle", "root", "hookName", "err", "duration", "state", "failedFromHook"
+      r = _(runnable).pick "id", "title", "originalTitle", "root", "hookName", "err", "duration", "state", "failedFromHook", "timedOut", "async", "sync"
 
       if parent = runnable.parent
         ## recursively walk up the parent chain
