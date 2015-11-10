@@ -2,20 +2,22 @@ _     = require("lodash")
 Mocha = require("mocha")
 chalk = require("chalk")
 
+createSuite = (obj) ->
+  new Mocha.Suite(obj.title, {})
+
 createRunnable = (obj) ->
   ## recursively create parent suites
   runnable = new Mocha.Runnable(obj.title, ->)
-  runnable.ignoreLeaks = true
   runnable.timedOut = obj.timedOut
   runnable.async    = obj.async
   runnable.sync     = obj.sync
   runnable.duration = obj.duration
   runnable.state    = obj.state
 
-  return [runnable]
+  if p = obj.parent
+    runnable.parent = createSuite(p)
 
-createSuite = (suite) ->
-  ## recursively create parent suites
+  return runnable
 
 createErr = (test, err) ->
   [createRunnable(test), err]
@@ -23,8 +25,8 @@ createErr = (test, err) ->
 events = {
   "start":     true
   "end":       true
-  "suite":     true
-  "suite:end": true
+  "suite":     createSuite
+  "suite:end": createSuite
   "test":      createRunnable
   "test end":  createRunnable
   "hook":      createRunnable
@@ -51,7 +53,7 @@ class Reporter
     @runner   = new Mocha.Runner(@mocha.suite)
     @reporter = new @mocha._reporter(@runner, {})
 
-    return @
+    @runner.ignoreLeaks = true
 
   emit: (event, args...) ->
     ## make sure this event is in our events hash
@@ -65,5 +67,8 @@ class Reporter
       args = [event].concat(args)
 
       @runner.emit.apply(@runner, args)
+
+  stats: ->
+    @reporter.stats
 
 module.exports = Reporter
