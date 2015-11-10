@@ -2,15 +2,15 @@ _     = require("lodash")
 Mocha = require("mocha")
 chalk = require("chalk")
 
-createTest = (test) ->
+createRunnable = (obj) ->
   ## recursively create parent suites
-  runnable = new Mocha.Runnable(test.title, ->)
+  runnable = new Mocha.Runnable(obj.title, ->)
   runnable.ignoreLeaks = true
-  runnable.timedOut = test.timedOut
-  runnable.async    = test.async
-  runnable.sync     = test.sync
-  runnable.duration = test.duration
-  runnable.state    = test.state
+  runnable.timedOut = obj.timedOut
+  runnable.async    = obj.async
+  runnable.sync     = obj.sync
+  runnable.duration = obj.duration
+  runnable.state    = obj.state
 
   return [runnable]
 
@@ -18,43 +18,51 @@ createSuite = (suite) ->
   ## recursively create parent suites
 
 createErr = (test, err) ->
-  [createTest(test), err]
+  [createRunnable(test), err]
 
 events = {
-  "run:start"   : {name: "start" }
-  "run:end"     : {name: "end" }
-  "suite:start" : {name: "suite" }
-  "suite:end"   : {name: "suite end" }
-  "test:end"    : {name: "test end", fn: createTest }
-  "pending"     : {name: "pending", fn: createTest }
-  "pass"        : {name: "pass", fn: createTest }
-  "fail"        : {name: "fail", fn: createErr }
+  "start":     true
+  "end":       true
+  "suite":     true
+  "suite:end": true
+  "test":      createRunnable
+  "test end":  createRunnable
+  "hook":      createRunnable
+  "hook end":  createRunnable
+  "pass":      createRunnable
+  "pending":   createRunnable
+  "fail":      createErr
+  # "run:start"   : {name: "start" }
+  # "run:end"     : {name: "end" }
+  # "suite:start" : {name: "suite" }
+  # "suite:end"   : {name: "suite end" }
+  # "test:end"    : {name: "test end", fn: createTest }
+  # "pending"     : {name: "pending", fn: createTest }
+  # "pass"        : {name: "pass", fn: createTest }
+  # "fail"        : {name: "fail", fn: createErr }
 }
 
-getEvent = (event) ->
-  events[event] #? console.warn(chalk.red("Event not found for: #{event}"))
-
 class Reporter
-  constructor: (app, options = {}) ->
+  constructor: (options = {}) ->
     if not (@ instanceof Reporter)
-      return new Reporter(app, options)
+      return new Reporter(options)
 
-    if not app
-      throw new Error("Instantiating lib/reporter requires an app!")
-
-    @mocha    = new Mocha({reporter: "xunit"})
+    @mocha    = new Mocha({reporter: "spec"})
     @runner   = new Mocha.Runner(@mocha.suite)
     @reporter = new @mocha._reporter(@runner, {})
 
-  emit: (event, args = []) ->
-    if event = getEvent(event)
+    return @
 
-      if event.fn
+  emit: (event, args...) ->
+    ## make sure this event is in our events hash
+    if e = events[event]
+
+      if _.isFunction(e)
         ## transform the arguments if
         ## there is an event.fn callback
-        args = event.fn.apply(@, args)
+        args = e.apply(@, args)
 
-      args = [event.name].concat(args)
+      args = [event].concat(args)
 
       @runner.emit.apply(@runner, args)
 

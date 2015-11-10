@@ -29,7 +29,7 @@ SecretSauce =
     for key, fn of @[module]
       klass.prototype[key] = fn
 
-SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
+SecretSauce.Cli = (App, options, Routes, Chromium, Reporter, Log) ->
   repo = Promise.promisifyAll git(options.projectPath)
 
   displayToken = (token) ->
@@ -191,6 +191,8 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
 
       id = Math.random()
 
+      reporter = Reporter()
+
       connected = false
 
       @App.vent.trigger "start:projects:app", {
@@ -211,15 +213,16 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
               console.log "socket: #{socketId} connected successfully!"
               connected = true
 
-            socket.on "mocha", (event, data) ->
-              console.log "mocha event: #{event}"
+            socket.on "mocha", (event, args...) ->
+              args = [event].concat(args)
+              reporter.emit.apply(reporter, args)
 
         onProjectStart: (config) =>
           @getSpec(config, options)
             .then (src) =>
               # startChromiumRun(src)
 
-              sp = cp.spawn "electron", [".", "--url=http://localhost:2020/__"], {
+              sp = cp.spawn "electron", [".", "--url=http://localhost:2020/__#/tests/sync_xhr.coffee"], {
                 cwd: path.join(process.cwd(), "..", "cypress-chromium")
               }
 
