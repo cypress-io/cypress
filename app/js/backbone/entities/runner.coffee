@@ -53,14 +53,14 @@
         @listenTo @Cypress, "test:end", (test) =>
           @socket.emit "mocha", "test end", test
 
-        # @listenTo @Cypress, "pending", (test) =>
-          # @socket.emit "mocha", "pending", test
+        @listenTo @Cypress, "mocha:pending", (test) =>
+          @socket.emit "mocha", "pending", test
 
-        @listenTo @Cypress, "pass", (test) =>
+        @listenTo @Cypress, "mocha:pass", (test) =>
           @socket.emit "mocha", "pass", test
 
-        @listenTo @Cypress, "fail", (test) =>
-          @socket.emit "mocha", "fail", test
+        @listenTo @Cypress, "mocha:fail", (test, err) =>
+          @socket.emit "mocha", "fail", test, err
 
         @listenTo @Cypress, "message", (msg, data, cb) =>
           @socket.emit "client:request", msg, data, cb

@@ -26,7 +26,7 @@ events = {
   "start":     true
   "end":       true
   "suite":     createSuite
-  "suite:end": createSuite
+  "suite end": createSuite
   "test":      createRunnable
   "test end":  createRunnable
   "hook":      createRunnable
