@@ -130,11 +130,12 @@ class Server
     _.defaults options,
       idGenerator: true
       morgan: true
+      isHeadless: false
       port: null
       socketId: null
       environmentVariables: null
 
-    @config.idGenerator = options.idGenerator
+    _.extend @config, _.pick(options, "idGenerator", "isHeadless")
 
     ## merge these into except
     ## for the 'environmentVariables' key

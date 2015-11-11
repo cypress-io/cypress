@@ -43,7 +43,7 @@
       @listenTo @layout, "show", ->
         ## bail if we're currently headless or we're in
         ## satellite mode
-        return if $Cypress.isHeadless or config.ui("satellite")
+        return if config.get("isHeadless") or config.ui("satellite")
 
         @statsRegion(runner)
         @specsRegion(runner, iframe, spec)

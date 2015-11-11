@@ -13,6 +13,9 @@
       initialize: ->
         @Cypress   = $Cypress.create({loadModules: true})
 
+        if App.config.get("isHeadless")
+          $Cypress.isHeadless = true
+
         @satelliteEvents = App.request("satellite:events")
         @passThruEvents  = App.request("pass:thru:events")
         @hostEvents      = App.request("host:events")

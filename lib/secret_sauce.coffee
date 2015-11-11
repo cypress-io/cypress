@@ -200,6 +200,7 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Reporter, Log) ->
 
       @App.vent.trigger "start:projects:app", {
         morgan:      false
+        isHeadless:  true
         idGenerator: !!options.ci
         socketId:    id
         projectPath: options.projectPath
@@ -237,7 +238,7 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Reporter, Log) ->
                 msg = util.format.apply(util, arguments)
                 process.stdout.write(msg + "\n")
 
-              sp = cp.spawn "electron", [".", "--url=http://localhost:2020/__#/tests/sync_xhr.coffee"], {
+              sp = cp.spawn "electron", [".", "--url=#{src}"], {
                 cwd: path.join(process.cwd(), "..", "cypress-chromium")
               }
 
