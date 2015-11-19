@@ -2,40 +2,102 @@ $Cypress.Cookies = do ($Cypress, _) ->
 
   reHttp = /^http/
 
+  isDebugging = false
+
   ## TODO have app set this on cypress via config
   namespace = "__cypress"
 
+  preserved = {}
+
+  defaults = {
+    whitelist: null
+  }
+
+  isNamespaced = (name) ->
+    _(name).startsWith(namespace)
+
+  isWhitelisted = (name) ->
+    if w = defaults.whitelist
+      switch
+        when _.isString(w)
+          name is w
+        when _.isArray(w)
+          name in w
+        when _.isFunction(w)
+          w(name)
+        when _.isRegExp(w)
+          w.test(name)
+        else
+          false
+
   return {
+    debug: (bool = true) ->
+      isDebugging = bool
+
     set: (name, value) ->
       ## dont set anything if we've been
       ## told to unload
-      return if @get("unload") is "true"
+      return if @getCy("unload") is "true"
 
-      name = "#{namespace}.#{name}"
+      if isDebugging and not isNamespaced(name)
+        console.info("Cypress.Cookies.set", "name:#{name}", "value:#{value}")
 
       Cookies.set name, value, {path: "/"}
 
     get: (name) ->
-      name = "#{namespace}.#{name}"
-
       Cookies.get(name)
 
+    remove: (name, options = {}) ->
+      _.defaults options,
+        path: "/"
+        force: true
+
+      remove = (name) ->
+        if isDebugging and not isNamespaced(name)
+          console.info("Cypress.Cookies.remove", "name:#{name}")
+
+        Cookies.remove(name, options)
+
+      removePreserved = (name) ->
+        if preserved[name]
+          delete preserved[name]
+
+      if options.force
+        removePreserved(name)
+        remove(name)
+      else
+        if not isWhitelisted(name) and not removePreserved(name)
+          remove(name)
+
+    removeCy: (name) ->
+      @remove("#{namespace}.#{name}")
+
+    setCy: (name, value) ->
+      @set("#{namespace}.#{name}", value)
+
+    getCy: (name) ->
+      @get("#{namespace}.#{name}")
+
+    preserveOnce: (keys...) ->
+      _.each keys, (key) ->
+        preserved[key] = true
+
     setInitial: ->
-      @set "initial", true
+      @setCy "initial", true
 
     setInitialRequest: (remoteHost) ->
-      @set "remoteHost", remoteHost
+      @setCy "remoteHost", remoteHost
       @setInitial()
       @
 
     getRemoteHost: ->
-      @get "remoteHost"
+      @getCy "remoteHost"
 
     getAllCookies: ->
       ## return all the cookies except those which
       ## start with our namespace
       _.reduce Cookies.get(), (memo, value, key) ->
-        unless _(key).startsWith(namespace)
+        unless isNamespaced(key)
           memo[key] = value
 
         memo
@@ -43,22 +105,23 @@ $Cypress.Cookies = do ($Cypress, _) ->
 
     clearCookies: (cookie) ->
       ## bail if it starts with our namespace
-      return if cookie and _(cookie).startsWith(namespace)
-
-      removeCookie = (key) ->
-        Cookies.remove(key, {path: "/"})
+      return if cookie and isNamespaced(cookie)
 
       ## if cookie was passed in then just remove cookies
       ## that match that key
       if cookie
-        return removeCookie(cookie)
+        return @remove(cookie, {force: false})
 
       ## else nuke all the cookies except for our namesapce
-      _.each Cookies.get(), (value, key) ->
+      _.each Cookies.get(), (value, key) =>
         ## do not remove cypress namespace'd cookies
         ## no matter what
-        return if _(key).startsWith(namespace)
+        return if isNamespaced(key)
 
-        removeCookie(key)
+        @remove(key, {force: false})
+
+    defaults: (obj = {}) ->
+      ## merge obj into defaults
+      _.extend defaults, obj
 
   }
