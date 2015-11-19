@@ -13,6 +13,9 @@ require('chai')
 .use(require('sinon-chai'))
 
 beforeEach ->
+  if global.fs isnt fs
+    global.fs = fs
+
   @sandbox = sinon.sandbox.create()
 
 afterEach ->

@@ -32,13 +32,32 @@ module.exports =
     ## should synchronously check to see if cypress.json exists
     ## and if not, create an empty one
     if not fs.existsSync(file) and options.writeInitial
-      fs.writeFileSync(file, @_stringify({cypress: {}}))
+      fs.writeFileSync(file, @_stringify({}))
 
     fs[method](file)
 
+  _write: (projectRoot, obj = {}) ->
+    fs.writeFileAsync(
+      @_pathToCypressJson(projectRoot),
+      @_stringify(obj)
+    )
+    .return(obj)
+
+  _writeSync: (projectRoot, obj = {}) ->
+    fs.writeFileSync(
+      @_pathToCypressJson(projectRoot),
+      @_stringify(obj)
+    )
+
+    return obj
+
   read: (projectRoot) ->
     @_get("readJsonAsync", projectRoot, {file: "cypress.json"})
-    .get("cypress")
+    .then (obj) =>
+      if settings = obj.cypress
+        @_write(projectRoot, settings)
+      else
+        obj
     .catch (err) =>
       @_logErr(projectRoot, err)
 
@@ -66,7 +85,10 @@ module.exports =
     try
       obj = @_get("readJsonSync", projectRoot, options)
 
-      return obj.cypress
+      if settings = obj.cypress
+        @_writeSync(projectRoot, settings)
+      else
+        obj
     catch err
       @_logErr(projectRoot, err, options.file)
 
@@ -74,13 +96,7 @@ module.exports =
     @read(projectRoot).bind(@).then (settings) ->
       _.extend settings, obj
 
-      fs.writeFileAsync(
-        @_pathToCypressJson(projectRoot),
-        @_stringify({cypress: settings})
-      )
-      .return(settings)
-
-  writeSync: ->
+      @_write(projectRoot, settings)
 
   remove: (projectRoot) ->
     fs.unlinkSync @_pathToCypressJson(projectRoot)
