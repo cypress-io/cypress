@@ -12,6 +12,8 @@ fs = Promise.promisifyAll(fs)
 
 extensions = ".json .js .coffee .html .txt .png .jpg .jpeg .gif .tif .tiff .zip".split(" ")
 
+queue = {}
+
 class Fixtures
   constructor: (app) ->
     if not (@ instanceof Fixtures)
@@ -52,11 +54,28 @@ class Fixtures
     fs.statAsync(p).bind(@)
 
   parseFile: (p, fixture, ext) ->
-    @fileExists(p)
-      .catch (err) ->
-        throw new Error("No fixture exists at: #{p}")
-      .then ->
-        @parseFileByExtension(p, fixture, ext)
+    if queue[p]
+      Promise.delay(1).then =>
+        @parseFile(p, fixture, ext)
+    else
+      queue[p] = true
+
+      cleanup = ->
+        delete queue[p]
+
+      @fileExists(p)
+        .catch (err) ->
+          throw new Error("No fixture exists at: #{p}")
+        .then ->
+          @parseFileByExtension(p, fixture, ext)
+        .then (ret) ->
+          cleanup()
+
+          return ret
+        .catch (err) ->
+          cleanup()
+
+          throw err
 
   parseFileByExtension: (p, fixture, ext) ->
     ext ?= path.extname(fixture)
@@ -77,11 +96,15 @@ class Fixtures
       .bind(@)
       .then (str) ->
         ## format the json
-        formatter.formatJson(str, "  ")
-      .then (json) ->
-        ## write the file back even if there were errors
-        ## so we write back the formatted version of the json
-        fs.writeFileAsync(p, json).return(json)
+        formatted = formatter.formatJson(str, "  ")
+
+        ## if we didnt change then return the str
+        if formatted is str
+          return str
+        else
+          ## write the file back even if there were errors
+          ## so we write back the formatted version of the str
+          fs.writeFileAsync(p, formatted).return(formatted)
       .then(jsonlint.parse)
       .catch (err) ->
         throw new Error("'#{fixture}' is not valid JSON.\n#{err.message}")
