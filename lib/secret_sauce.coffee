@@ -24,7 +24,7 @@ writeErr = (str, msgs...) ->
   ## throw the str here so our test code's promises
   ## do what they're supposed to do!
   if process.env["CYPRESS_ENV"] isnt "production"
-    throw(str)
+    throw str
 
 SecretSauce =
   mixin: (module, klass) ->
@@ -744,6 +744,8 @@ SecretSauce.IdGenerator =
     @str.insert contents, position, " [#{id}]"
 
 SecretSauce.RemoteInitial =
+  headRe: /(<head.*?>)/
+  htmlRe: /(<html.*?>)/
   okStatus: /^[2|3|4]\d+$/
   badCookieParam: /^(httponly|secure)$/i
 
@@ -995,7 +997,7 @@ SecretSauce.RemoteInitial =
     { _ } = SecretSauce
 
     ## omit problematic headers
-    headers = _.omit incomingRes.headers, "set-cookie", "x-frame-options", "content-length"
+    headers = _.omit incomingRes.headers, "set-cookie", "x-frame-options", "content-length", "content-security-policy"
 
     ## rewrite custom headers which reference the wrong host
     ## if our host is localhost:8080 we need to
@@ -1035,6 +1037,10 @@ SecretSauce.RemoteInitial =
       ## trim out whitespace
       parts = _.invoke cookie.split(";"), "trim"
 
+      ## if Domain is included then we actually need to duplicate
+      ## the cookie for both the domain and without the domain so
+      ## it gets sent for both types of requests...?
+
       ## reject any part that is httponly or secure
       parts = _.reject parts, (part) =>
         @badCookieParam.test(part)
@@ -1056,12 +1062,29 @@ SecretSauce.RemoteInitial =
         # elem.getAttribute attr, (val) ->
         #   elem.setAttribute attr, fn(val)
 
-    rewrite = (selector, type, attr, fn) ->
-      if _.isFunction(attr)
-        fn   = attr
-        attr = null
+    changeToAbsoluteRelative = (str) ->
+      "/" + req.protocol + ":" + str
 
-      tr.selectAll selector, (elem) ->
+    removeRemoteHostOrMakeAbsoluteRelative = (str) ->
+      if str.startsWith(remoteHost)
+        str.replace(remoteHost, "")
+      else
+        "/" + str
+
+    rewrite = (selector, type, attr, fn) ->
+      options = {}
+
+      switch
+        when _.isFunction(attr)
+          fn   = attr
+          attr = null
+
+        when _.isPlainObject(attr)
+          options = attr
+
+      options.method ?= "selectAll"
+
+      tr[options.method] selector, (elem) ->
         switch type
           when "attr"
             elem.getAttribute attr, (val) ->
@@ -1071,31 +1094,39 @@ SecretSauce.RemoteInitial =
             elem.removeAttribute(attr)
 
           when "html"
-            stream = elem.createStream({outer: true})
+            options.outer ?= true
+            stream = elem.createStream({outer: options.outer})
             stream.pipe(through (buf) ->
               @queue fn(buf.toString())
             ).pipe(stream)
 
+    ## we still aren't handling pages which are missing their <head> tag
+    ## for those we need to insert our own <head> tag
     rewrite "head", "html", (str) =>
-      str.replace("<head>", "<head> #{@getHeadContent()}")
+      str.replace(@headRe, "$1 #{@getHeadContent()}")
 
-    rewrite "[href^='//']", "attr", "href", (href) ->
-      "/" + req.protocol + ":" + href
+    # rewrite "html", "html", {method: "select"}, (str) =>
+    #   ## if we are missing a <head> tag then
+    #   ## dynamically insert one
+    #   if not @headRe.test(str)
+    #     str.replace(@htmlRe, "$1 <head> #{@getHeadContent()} </head>")
+    #   else
+    #     str
 
-    rewrite "form[action^='//']", "attr", "action", (action) ->
-      "/" + req.protocol + ":" + action
+    rewrite "[href^='//']", "attr", "href", changeToAbsoluteRelative
 
-    rewrite "form[action^='http']", "attr", "action", (action) ->
-      if action.startsWith(remoteHost)
-        action.replace(remoteHost, "")
-      else
-        "/" + action
+    rewrite "form[action^='//']", "attr", "action", changeToAbsoluteRelative
 
-    rewrite "[href^='http']", "attr", "href", (href) ->
-      if href.startsWith(remoteHost)
-        href.replace(remoteHost, "")
-      else
-        "/" + href
+    rewrite "form[action^='http']", "attr", "action", removeRemoteHostOrMakeAbsoluteRelative
+
+    rewrite "[href^='http']", "attr", "href", removeRemoteHostOrMakeAbsoluteRelative
+
+    ## only rewrite these script src tags if the origin matches our remote host
+    ## or matches a domain which we have a cookie for. store a list of domains
+    ## per cypress session (to enable parallelization)
+    ## __cypress.session
+    # rewrite "script[src^='http']", "attr", "src", removeRemoteHostOrMakeAbsoluteRelative
+    # rewrite "script[src^='//']", "attr", "src", changeToAbsoluteRelative
 
     return tr
 

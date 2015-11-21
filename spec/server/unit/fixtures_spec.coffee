@@ -103,6 +103,23 @@ describe "Fixtures", ->
           }
         ]
 
+    it "reformats empty objects", ->
+      fn = =>
+        @fixture.get("empty_objects")
+
+      Promise.map(Array(500), fn, {concurrency: 5}).then =>
+        fs.readFileAsync(@fixture.folder + "/empty_objects.json", "utf8").then (str) ->
+          expect(str).to.eq """
+            {
+              "empty": {
+                "object": {\n      \n    },
+                "array": [\n      \n    ],
+                "object2": {\n      \n    },
+                "array2": [\n      \n    ]
+              }
+            }
+          """
+
   context "js files", ->
     it "returns valid JS object", ->
       @fixture.get("user.js").then (user) ->

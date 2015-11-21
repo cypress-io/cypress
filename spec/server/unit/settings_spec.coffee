@@ -1,16 +1,39 @@
-root        = '../../../'
-expect      = require('chai').expect
-fs          = require "fs-extra"
-Settings    = require "#{root}lib/util/settings"
+require("../spec_helper")
+
+Settings = require "#{root}lib/util/settings"
 
 describe "Settings", ->
   beforeEach ->
     @setup = (obj = {}) ->
-      str = JSON.stringify({cypress: obj})
+      str = JSON.stringify(obj)
       fs.writeFileSync("cypress.json", str)
 
   afterEach ->
     fs.removeSync("cypress.json")
+
+  context "nested cypress object", ->
+    beforeEach ->
+      @setup = (obj = {}) ->
+        str = JSON.stringify({cypress: obj})
+        fs.writeFileSync("cypress.json", str)
+
+    it "flattens object on read", ->
+      @setup({foo: "bar"})
+
+      Settings.read(process.cwd()).then (settings) ->
+        expect(settings).to.deep.eq {foo: "bar"}
+
+        fs.readJsonAsync("cypress.json").then (obj) ->
+          expect(obj).to.deep.eq({foo: "bar"})
+
+    it "flattens object on readSync", ->
+      @setup({foo: "bar"})
+
+      settings = Settings.readSync(process.cwd())
+      expect(settings).to.deep.eq {foo: "bar"}
+
+      fs.readJsonAsync("cypress.json").then (obj) ->
+        expect(obj).to.deep.eq({foo: "bar"})
 
   context "#readSync", ->
     it "reads cypress.json", ->
@@ -62,11 +85,3 @@ describe "Settings", ->
 
       Settings.write(process.cwd(), projectId: "abc123").then (settings) ->
         expect(settings).to.deep.eq {projectId: "abc123", autoOpen: true}
-
-    it "does not obliterate the cypress root key", ->
-      @setup()
-
-      Settings.write(process.cwd(), foo: "bar").then ->
-        obj = JSON.parse fs.readFileSync("cypress.json", "utf8")
-
-        expect(obj).to.deep.eq {cypress: {foo: "bar"}}

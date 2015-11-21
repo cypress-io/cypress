@@ -75,6 +75,9 @@ do ($Cypress, _) ->
           by: "hashchange"
         })
 
+      win.get(0).alert = (str) ->
+        console.info "Automatically resolving alert: ", str
+
       win.get(0).confirm = (message) ->
         console.info "Confirming 'true' to: ", message
         return true

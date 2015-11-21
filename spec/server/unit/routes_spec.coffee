@@ -1025,6 +1025,23 @@ describe "Routes", ->
             null
           .end(done)
 
+      it "omits content-security-policy", (done) ->
+        nock(@baseUrl)
+          .get("/bar")
+          .reply 200, "OK", {
+            "Content-Type": "text/html"
+            "content-security-policy": "foobar;"
+          }
+
+        supertest(@app)
+          .get("/bar")
+          .set("Cookie", "__cypress.initial=false; __cypress.remoteHost=http://www.github.com")
+          .expect(200)
+          .expect (res) ->
+            expect(res.headers).not.to.have.keys("content-security-policy")
+            null
+          .end(done)
+
       it "strips HttpOnly and Secure from all cookies", (done) ->
         nock(@baseUrl)
           .get("/bar")
@@ -1156,6 +1173,42 @@ describe "Routes", ->
           .reply 200, "<html> <head> <title>foo</title> </head> <body>hello from bar!</body> </html>", {
             "Content-Type": "text/html"
           }
+
+        supertest(@app)
+          .get("/bar")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+          .expect(200)
+          .expect (res) ->
+            body = removeWhitespace(res.text)
+            expect(body).to.eq contents
+            null
+          .end(done)
+
+      it "injects when head has attributes", (done) ->
+        contents = removeWhitespace Fixtures.get("server/expected_head_inject.html")
+
+        nock(@baseUrl)
+          .get("/bar")
+          .reply 200, "<html> <head prefix=\"og: foo\"> <meta name=\"foo\" content=\"bar\"> </head> <body>hello from bar!</body> </html>",
+            "Content-Type": "text/html"
+
+        supertest(@app)
+          .get("/bar")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+          .expect(200)
+          .expect (res) ->
+            body = removeWhitespace(res.text)
+            expect(body).to.eq contents
+            null
+          .end(done)
+
+      it.skip "injects even when head tag is missing", (done) ->
+        contents = removeWhitespace Fixtures.get("server/expected_no_head_tag_inject.html")
+
+        nock(@baseUrl)
+          .get("/bar")
+          .reply 200, "<html> <body>hello from bar!</body> </html>",
+            "Content-Type": "text/html"
 
         supertest(@app)
           .get("/bar")
