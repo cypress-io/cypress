@@ -17,9 +17,9 @@
         channel.on event, (args...) ->
           socket.trigger event, args...
 
-      channel.on "check:for:app:errors", ->
-        console.log "check:for:app:errors"
-        socket.emit "app:errors", App.error
+      # channel.on "check:for:app:errors", ->
+      #   console.log "check:for:app:errors"
+      #   socket.emit "app:errors", App.error
 
       channel.on "test:changed", (data) ->
         socket.trigger "test:changed", data.file
