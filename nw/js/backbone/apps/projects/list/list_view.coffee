@@ -1,5 +1,12 @@
 @App.module "ProjectsApp.List", (List, App, Backbone, Marionette, $, _) ->
 
+  class List.Error extends App.Views.ItemView
+    template: "projects/list/_error"
+    templateHelpers: ->
+      message: @options.message
+    triggers:
+      "click [data-ok]" : "ok:clicked"
+
   class List.Project extends App.Views.ItemView
     template: "projects/list/_project"
     tagName: "li"

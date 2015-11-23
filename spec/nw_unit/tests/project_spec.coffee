@@ -78,6 +78,31 @@ module.exports = (parentWindow, gui, loadApp) ->
           expect(project.find("p.bg-danger")).to.contain("Unexpected token")
           expect(project.find("p.bg-danger br")).to.have.length(2)
 
+      it "permission problems adding project", ->
+        @permissions = Fixtures.project("permissions")
+
+        ## remove read permissions
+        fs.chmodSync(@permissions, "111")
+
+        ## trigger a project being added
+        App.mainRegion.currentView.trigger("project:added", @permissions)
+
+        Promise.delay(500).then =>
+          projects = @$("#projects")
+
+          expect(projects.find("header")).not.to.exist
+          expect(projects.find("h3")).to.contain("Error adding project!")
+          expect(projects.find("p")).to.contain("Error writing to:")
+          expect(projects.find("p")).to.contain(@permissions)
+          expect(projects.find("p")).to.contain("EACCES")
+
+          projects.find("button").click()
+
+          Promise.delay(500).then =>
+            projects = @$("#projects")
+            expect(projects.find("header")).to.exist
+            expect(projects.find(".project")).to.exist
+
     context "projects list", ->
       it "displays added project", ->
         project = @$("#projects-container .project")

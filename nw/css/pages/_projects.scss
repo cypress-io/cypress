@@ -83,7 +83,7 @@
   }
 }
 
-#project {
+#project, #projects.error {
   text-align: center;
 
   h3 {
@@ -96,7 +96,9 @@
     border-top: 1px dashed #999;
     display: inline-block;
   }
+}
 
+#project, #projects {
   p.bg-danger {
     padding: 5px;
   }

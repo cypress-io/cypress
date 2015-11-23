@@ -7,6 +7,9 @@
         projectPath: null
         onProjectNotFound: ->
 
+      @displayProjects(params)
+
+    displayProjects: (params) ->
       projects = App.request "project:entities"
 
       user = App.request "current:user"
@@ -26,8 +29,11 @@
           startProject(project, params)
       else
         @listenTo projectsView, "project:added", (path) ->
-          App.config.addProject(path).then ->
+          App.config.addProject(path)
+          .then ->
             projects.add(path: path)
+          .catch (err) =>
+            @displayError(err.message, params)
 
         @listenTo projectsView, "sign:out:clicked", ->
           App.vent.trigger "log:out", user
@@ -41,6 +47,21 @@
 
       @listenTo projects, "fetched", ->
         @show projectsView
+
+    displayError: (msg, params) ->
+      errorView = @getErrorView(msg)
+
+      @show errorView
+
+      ## we'll lose all event listeners
+      ## if we attach this before show
+      ## so we need to wait until after
+      @listenTo errorView, "ok:clicked", ->
+        @displayProjects(params)
+
+    getErrorView: (msg) ->
+      new List.Error
+        message: msg
 
     getProjectsView: (projects, user) ->
       new List.Projects
