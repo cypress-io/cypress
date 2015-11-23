@@ -20,6 +20,8 @@
       require("nw.gui").Window.get().evalNWBin(null, "lib/secret_sauce.bin")
       global.SecretSauce = window.SecretSauce
 
+      Error.stackTraceLimit = Infinity
+
       var NwApp   = require("nw.gui").App
       var cypress = require("../../lib/cypress")
       var backend = cypress.Backend(NwApp)

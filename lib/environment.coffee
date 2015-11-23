@@ -1,5 +1,8 @@
 fs = require("fs-extra")
 
+## never cut off stack traces
+Error.stackTraceLimit = Infinity
+
 ## cannot use relative require statement
 ## here because when obfuscated package
 ## would not be available
