@@ -7,8 +7,7 @@ Log      = require "./log"
 Settings = require './util/settings'
 Routes   = require './util/routes'
 
-fs       = Promise.promisifyAll(fs)
-
+fs = Promise.promisifyAll(fs)
 
 class Project
   constructor: (projectRoot) ->
@@ -23,12 +22,20 @@ class Project
   ## A simple helper method
   ## to create a project ID if we do not already
   ## have one
+  ## should refactor this method to only create
+  ## a project ID if we were missing one
+  ## currently this catches all errors like EACCES
+  ## errors which should not try to generate a project id
   ensureProjectId: ->
     @getProjectId()
     .bind(@)
     .catch(@createProjectId)
 
-  createProjectId: ->
+  createProjectId: (err) ->
+    ## dont try to create a project id if
+    ## we had an error accessing cypress.json
+    throw err if err and err.code is "EACCES"
+
     Log.info "Creating Project ID"
 
     write = (id) =>

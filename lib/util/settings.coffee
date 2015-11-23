@@ -3,19 +3,30 @@ Promise  = require("bluebird")
 path     = require("path")
 fs       = require("fs-extra")
 
-fs       = Promise.promisifyAll(fs)
+fs = Promise.promisifyAll(fs)
+
+class WriteError extends Error
+  constructor: (@message) ->
+    @name = "WriteError"
+    Error.captureStackTrace(@, WriteError)
 
 module.exports =
-  _pathToCypressJson: (projectRoot) ->
-    path.join(projectRoot, "cypress.json")
-
   _pathToFile: (projectRoot, file) ->
     path.join(projectRoot, file)
 
-  _logErr: (projectRoot, err, file) ->
-    file ?= "cypress.json"
+  _err: (msg, file, err, klass) ->
+    klass ?= Error
 
-    throw new Error "Error reading from: #{projectRoot}/#{file}\n#{err.message}"
+    e = new klass "#{msg}#{file}\n#{err.message}"
+    e.code = err.code
+    e.errno = err.errno
+    throw e
+
+  _logReadErr: (file, err) ->
+    @_err("Error reading from: ", file, err)
+
+  _logWriteErr: (file, err) ->
+    @_err("Error writing to: ", file, err, WriteError)
 
   _stringify: (obj) ->
     JSON.stringify(obj, null, 2)
@@ -32,34 +43,40 @@ module.exports =
     ## should synchronously check to see if cypress.json exists
     ## and if not, create an empty one
     if not fs.existsSync(file) and options.writeInitial
-      fs.writeFileSync(file, @_stringify({}))
+      @_writeSync(file, {})
 
     fs[method](file)
 
-  _write: (projectRoot, obj = {}) ->
-    fs.writeFileAsync(
-      @_pathToCypressJson(projectRoot),
-      @_stringify(obj)
-    )
+  _write: (file, obj = {}) ->
+    fs.writeFileAsync(file, @_stringify(obj))
     .return(obj)
+    .catch (err) =>
+      @_logWriteErr(file, err)
 
-  _writeSync: (projectRoot, obj = {}) ->
-    fs.writeFileSync(
-      @_pathToCypressJson(projectRoot),
-      @_stringify(obj)
-    )
+  _writeSync: (file, obj = {}) ->
+    try
+      fs.writeFileSync(file, @_stringify(obj))
+      return obj
 
-    return obj
+    catch err
+      @_logWriteErr(file, err)
 
   read: (projectRoot) ->
-    @_get("readJsonAsync", projectRoot, {file: "cypress.json"})
-    .then (obj) =>
-      if settings = obj.cypress
-        @_write(projectRoot, settings)
-      else
-        obj
-    .catch (err) =>
-      @_logErr(projectRoot, err)
+    file = @_pathToFile(projectRoot, "cypress.json")
+
+    ## must re-wrap this because readJsonAsync may
+    ## throw a sync error from _writeSync
+    Promise.try =>
+      @_get("readJsonAsync", projectRoot, {file: "cypress.json"})
+      .then (obj) =>
+        if settings = obj.cypress
+          @_write(file, settings)
+        else
+          obj
+      .catch (err) =>
+        throw err if err instanceof WriteError
+
+        @_logReadErr(file, err)
 
   readEnvSync: (projectRoot) ->
     options = {
@@ -75,28 +92,36 @@ module.exports =
       if err.code is "ENOENT"
         return {}
 
-      @_logErr(projectRoot, err, options.file)
+      throw err if err instanceof WriteError
+
+      @_logReadErr(projectRoot, err, options.file)
 
   readSync: (projectRoot) ->
     options = {
       file: "cypress.json"
     }
 
+    file = @_pathToFile(projectRoot, "cypress.json")
+
     try
       obj = @_get("readJsonSync", projectRoot, options)
 
       if settings = obj.cypress
-        @_writeSync(projectRoot, settings)
+        @_writeSync(file, settings)
       else
         obj
     catch err
-      @_logErr(projectRoot, err, options.file)
+      throw err if err instanceof WriteError
+
+      @_logReadErr(file, err)
 
   write: (projectRoot, obj = {}) ->
     @read(projectRoot).bind(@).then (settings) ->
       _.extend settings, obj
 
-      @_write(projectRoot, settings)
+      file = @_pathToFile(projectRoot, "cypress.json")
+
+      @_write(file, settings)
 
   remove: (projectRoot) ->
-    fs.unlinkSync @_pathToCypressJson(projectRoot)
+    fs.unlinkSync @_pathToFile(projectRoot, "cypress.json")
