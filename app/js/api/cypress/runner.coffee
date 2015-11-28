@@ -447,7 +447,8 @@ $Cypress.Runner = do ($Cypress, _) ->
             testBeforeHooks(hooks[0], @suite)
 
           when "beforeEach"
-            testBeforeHooks(hooks[0], @suite)
+            if @suite.root
+              testBeforeHooks(hooks[0], @suite)
 
           when "afterEach"
             ## find all of the grep'd _this tests which share
