@@ -386,7 +386,7 @@ describe "$Cypress.Cy XHR Commands", ->
             post(win, {foo: "bar2"})
           .wait("@getFoo").its("requestBody").should("deep.eq", {foo: "bar2"})
 
-    describe "issues #84", ->
+    describe "issue #84", ->
       beforeEach ->
         @setup()
 
@@ -404,6 +404,32 @@ describe "$Cypress.Cy XHR Commands", ->
           win.$.getJSON("/forms")
           null
         .wait("@getForm").its("status").should("eq", 200)
+
+    describe "#issue #85", ->
+      beforeEach ->
+        @setup()
+
+      it "correctly returns the right XHR alias", ->
+        @cy
+          .server()
+          .route({
+            method: "POST"
+            url: /foo/
+            response: {}
+          }).as("getFoo")
+          .route(/folders/, {foo: "bar"}).as("getFolders")
+          .window().then (win) ->
+            win.$.getJSON("/folders")
+            win.$.post("/foo", {})
+            null
+          .wait("@getFolders")
+          .wait("@getFoo")
+          .route(/folders/, {foo: "baz"}).as("getFoldersWithSearch")
+          .window().then (win) ->
+            win.$.getJSON("/folders/123/activities?foo=bar")
+            null
+          .wait("@getFoldersWithSearch").its("url")
+          .should("contain", "?foo=bar")
 
     describe ".log", ->
       beforeEach ->
