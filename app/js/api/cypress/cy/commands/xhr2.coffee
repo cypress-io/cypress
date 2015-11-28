@@ -286,7 +286,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
 
       switch
         when _.isObject(args[0]) and not _.isRegExp(args[0])
-          _.extend options, args[0]
+          options = o = _.extend {}, options, args[0]
 
         when args.length is 0
           @throwErr "cy.route() must be given a method, url, and response."

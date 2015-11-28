@@ -182,7 +182,7 @@ $Cypress.Server = do ($Cypress, _) ->
       ## so we dont handle stubs
       @enableStubs(false)
 
-    getOptions: -> @options
+    getOptions: -> _.clone(@options)
 
     getFullyQualifiedUrl: (contentWindow, url) ->
       doc = contentWindow.document

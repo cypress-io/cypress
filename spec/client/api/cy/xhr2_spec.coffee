@@ -386,6 +386,25 @@ describe "$Cypress.Cy XHR Commands", ->
             post(win, {foo: "bar2"})
           .wait("@getFoo").its("requestBody").should("deep.eq", {foo: "bar2"})
 
+    describe "issues #84", ->
+      beforeEach ->
+        @setup()
+
+      it "does not incorrectly match options", ->
+        @cy
+          .server()
+          .route({
+            method: "GET"
+            url: /answers/
+            status: 503
+            response: {}
+          })
+        .route(/forms/, []).as("getForm")
+        .window().then (win) ->
+          win.$.getJSON("/forms")
+          null
+        .wait("@getForm").its("status").should("eq", 200)
+
     describe ".log", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
