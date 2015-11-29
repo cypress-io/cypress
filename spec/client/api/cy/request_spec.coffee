@@ -232,13 +232,15 @@ describe "$Cypress.Cy Request Commands", ->
           expect(subject).to.deep.eq(resp)
 
     describe "timeout", ->
-      it "sets timeout to be 20 secs", ->
+      it "sets timeout to Cypress.config(requestTimeout)", ->
+        @Cypress.config("requestTimeout", 2500)
+
         @responseIs({status: 200})
 
         timeout = @sandbox.spy(Promise.prototype, "timeout")
 
         @cy.request("http://www.foo.com").then ->
-          expect(timeout).to.be.calledWith(20000)
+          expect(timeout).to.be.calledWith(2500)
 
       it "can override timeout", ->
         @responseIs({status: 200})

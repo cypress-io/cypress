@@ -15,7 +15,6 @@ $Cypress.register "Request", (Cypress, _, $) ->
     gzip: true
     failOnStatus: true
     method: "GET"
-    timeout: 20000
   }
 
   request = (options) =>
@@ -65,7 +64,9 @@ $Cypress.register "Request", (Cypress, _, $) ->
           o.url    = args[1]
           o.body   = args[2]
 
-      _.defaults options, defaults
+      _.defaults options, defaults, {
+        timeout: Cypress.config("requestTimeout")
+      }
 
       options.method = options.method.toUpperCase()
 

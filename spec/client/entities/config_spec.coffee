@@ -8,6 +8,8 @@ describe "Config Entity", ->
         foo: "bar"
         baz: "quux"
         commandTimeout: 4000
+        visitTimeout: 30000
+        requestTimeout: 20000
         baseUrl: "http://localhost:9000/app"
         viewportWidth: 800
         viewportHeight: 600
@@ -15,6 +17,8 @@ describe "Config Entity", ->
     it "picks commandTimeout, baseUrl, viewportWidth, viewportHeight", ->
       expect(@config.getCypressConfig()).to.deep.eq {
         commandTimeout: 4000
+        visitTimeout: 30000
+        requestTimeout: 20000
         baseUrl: "http://localhost:9000/app"
         viewportWidth: 800
         viewportHeight: 600

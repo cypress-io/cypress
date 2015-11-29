@@ -290,3 +290,12 @@ describe "Server Interface", ->
 
       it "env=CYPRESS_ENV", ->
         @defaults "env", process.env["CYPRESS_ENV"]
+
+      it "commandTimeout=4000", ->
+        @defaults "commandTimeout", 4000
+
+      it "visitTimeout=30000", ->
+        @defaults "visitTimeout", 30000
+
+      it "requestTimeout=20000", ->
+        @defaults "requestTimeout", 20000

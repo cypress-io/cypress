@@ -2,6 +2,12 @@ describe "$Cypress.Cy Navigation Commands", ->
   enterCommandTestingMode()
 
   context "#visit", ->
+    it "sets timeout to Cypress.config(visitTimeout)", ->
+      timeout = @sandbox.spy Promise.prototype, "timeout"
+      @Cypress.config("visitTimeout", 1500)
+      @cy.visit("/foo").then ->
+        expect(timeout).to.be.calledWith(1500)
+
     it "resolves the subject to the remote iframe window", ->
       @cy.visit("/foo").then (win) ->
         expect(win).to.eq $("iframe").prop("contentWindow")
@@ -224,6 +230,12 @@ describe "$Cypress.Cy Navigation Commands", ->
         @cy.visit("timeout?ms=5000", {timeout: 500})
 
   context "#loading", ->
+    it "sets timeout to Cypress.config(visitTimeout)", ->
+      timeout = @sandbox.spy Promise.prototype, "timeout"
+      @Cypress.config("visitTimeout", 1500)
+      @cy.visit("/foo").then ->
+        expect(timeout).to.be.calledWith(1500)
+
     it "clears current timeout"
 
     it "clears current cy subject", ->
