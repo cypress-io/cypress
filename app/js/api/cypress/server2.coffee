@@ -187,7 +187,7 @@ $Cypress.Server = do ($Cypress, _) ->
     getFullyQualifiedUrl: (contentWindow, url) ->
       doc = contentWindow.document
       oldBase = doc.getElementsByTagName("base")[0]
-      oldHref = oldBase && oldBase.href
+      oldHref = oldBase and oldBase.href
       docHead = doc.head or doc.getElementsByTagName("head")[0]
       ourBase = oldBase or docHead.appendChild(doc.createElement("base"))
 

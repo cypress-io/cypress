@@ -218,7 +218,7 @@ describe "$Cypress.Cy XHR Commands", ->
             expect(xhr.url).to.eq("http://localhost:3500/fixtures/html/phones/phones.json")
             expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/fixtures/html/phones/phones.json")
 
-      it "does not touch real CORS requests", ->
+      it "rewrites CORS to be absolute-relative", ->
         @cy
           .visit("http://localhost:3500/fixtures/html/xhr.html")
           .window().then (win) ->
@@ -231,7 +231,7 @@ describe "$Cypress.Cy XHR Commands", ->
           .then ->
             xhr = @cy.prop("requests")[0].xhr
             expect(xhr.url).to.eq("http://www.google.com/phones/phones.json")
-            expect(@open).to.be.calledWith("GET", "http://www.google.com/phones/phones.json")
+            expect(@open).to.be.calledWith("GET", "/http://www.google.com/phones/phones.json")
 
       it "can stub real CORS requests too", ->
         @cy

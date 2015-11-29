@@ -132,10 +132,12 @@ $Cypress.register "XHR2", (Cypress, _) ->
                 display: url
               }
 
-            ## this is a legit CORS request and dont touch it
+            ## this is a legit CORS request and we need to
+            ## rewrite its url to be absolute-relative so it
+            ## is correctly proxied
             else
               {
-                actual: url
+                actual: "/" + url
                 display: url
               }
 
