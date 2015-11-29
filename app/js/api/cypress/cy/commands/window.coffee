@@ -31,9 +31,10 @@ $Cypress.register "Window", (Cypress, _, $) ->
           ## set the $el in the options which
           ## is what the verification uses to
           ## ensure the element exists
-          options.$el = $el
+          options.$el = $el.filter("head title")
+          options.$el.selector = $el.selector
 
-          @verifyUpcomingAssertions($el.text(), options, {
+          @verifyUpcomingAssertions(options.$el.text(), options, {
             onRetry: resolveTitle
           })
 
