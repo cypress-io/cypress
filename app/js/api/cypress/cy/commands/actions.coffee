@@ -417,12 +417,18 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         log: true
         verify: true
         force: false
+        multiple: false
         position: position
         x: x
         y: y
         errorOnSelect: true
 
       @ensureDom(options.$el)
+
+      ## throw if we're trying to click multiple elements
+      ## and we did not pass the multiple flag
+      if options.multiple is false and options.$el.length > 1
+        @throwErr("Cannot call .click() on multiple elements. You tried to click #{options.$el.length} elements. Pass {multiple: true} if you want to serially click each element.")
 
       win  = @private("window")
 
