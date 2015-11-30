@@ -184,24 +184,12 @@ $Cypress.Server = do ($Cypress, _) ->
 
     getOptions: -> _.clone(@options)
 
+
     getFullyQualifiedUrl: (contentWindow, url) ->
-      doc = contentWindow.document
-      oldBase = doc.getElementsByTagName("base")[0]
-      oldHref = oldBase and oldBase.href
-      docHead = doc.head or doc.getElementsByTagName("head")[0]
-      ourBase = oldBase or docHead.appendChild(doc.createElement("base"))
-
-      resolver      = doc.createElement("a")
-      ourBase.href  = contentWindow.location.href
-      resolver.href = url
-      resolvedUrl   = resolver.href ## browser magic at work here
-
-      if oldBase
-        oldBase.href = oldHref
-      else
-        docHead.removeChild(ourBase)
-
-      resolvedUrl
+      ## the href getter will always resolve a full path
+      a = contentWindow.document.createElement("a")
+      a.href = url
+      a.href
 
     getStack: ->
       err = new Error

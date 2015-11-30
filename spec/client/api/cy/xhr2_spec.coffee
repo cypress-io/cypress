@@ -122,6 +122,44 @@ describe "$Cypress.Cy XHR Commands", ->
             expect(xhr.url).to.eq("http://localhost:3500/fixtures/html/foo")
             expect(@open).to.be.calledWith("GET", "/fixtures/html/foo")
 
+      it "resolves relative urls correctly when base tag is present", ->
+        @cy
+          .server()
+          .route({
+            url: /foo/
+            stub: false
+          }).as("getFoo")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
+          .window().then (win) ->
+            win.$("<base href='/'>").appendTo(win.$("head"))
+            @cy.prop("server").restore()
+            @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
+            @cy.prop("server").bindTo(win)
+            win.$.get("foo")
+            null
+          .wait("@getFoo").then (xhr) ->
+            expect(xhr.url).to.eq("http://localhost:3500/foo")
+            expect(@open).to.be.calledWith("GET", "/foo")
+
+      it "resolves relative urls correctly when base tag is present on nested routes", ->
+        @cy
+          .server()
+          .route({
+            url: /foo/
+            stub: false
+          }).as("getFoo")
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
+          .window().then (win) ->
+            win.$("<base href='/nested/route/path'>").appendTo(win.$("head"))
+            @cy.prop("server").restore()
+            @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
+            @cy.prop("server").bindTo(win)
+            win.$.get("../foo")
+            null
+          .wait("@getFoo").then (xhr) ->
+            expect(xhr.url).to.eq("http://localhost:3500/nested/foo")
+            expect(@open).to.be.calledWith("GET", "/nested/foo")
+
       it "transparently rewrites FQDN urls which match remote host", ->
         @cy
           .server()

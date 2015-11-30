@@ -63,6 +63,22 @@ describe "$Cypress.Cy Server API", ->
 
       @xhr.send()
 
+  context "#getFullyQualifiedUrl", ->
+    beforeEach ->
+      @server = $Cypress.Server.create()
+
+      @expectUrlToEq = (url, url2) =>
+        expect(@server.getFullyQualifiedUrl(window, url)).to.eq(url2)
+
+    it "resolves absolute relative links", ->
+      @expectUrlToEq("/foo/bar.html", "#{window.location.origin}/foo/bar.html")
+
+    it "resolves relative links", ->
+      ## slice off the last path segment since this is a relative link
+      ## http://localhost:3500/specs/api/cypress/server_spec -> http://localhost:3500/specs/api/cypress
+      path = window.location.origin + window.location.pathname.split("/").slice(0, -1).join("/")
+      @expectUrlToEq("foo/bar.html", "#{path}/foo/bar.html")
+
 #   context "XHR#abort", ->
 #     beforeEach ->
 #       @send = @sandbox.stub(@window.XMLHttpRequest.prototype, "send")
