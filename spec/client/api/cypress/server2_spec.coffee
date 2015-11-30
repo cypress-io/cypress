@@ -25,6 +25,52 @@ describe "$Cypress.Cy Server API", ->
 
     $Cypress.Server.defaults(defaults)
 
+  context "#isWhitelisted", ->
+    beforeEach ->
+      @server = $Cypress.Server.create()
+      @server.bindTo(@window)
+      @xhr = new @window.XMLHttpRequest
+
+    it "whitelists GET *.js", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.js"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "whitelists GET *.jsx", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.jsx"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "whitelists GET *.html", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.html"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "whitelists GET *.css", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.css"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "whitelists GET *.js?_=123123", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.js?_=123123"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "whitelists GET *.html?_=123123&foo=bar", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.html?_=123123&foo=bar"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "does not whitelist GET *.json?_=123123", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.json?_=123123"
+      expect(@server.isWhitelisted(@xhr)).not.to.be.true
+
+    it "does not whitelist OPTIONS *.js?_=123123", ->
+      @xhr.method = "OPTIONS"
+      @xhr.url = "/foo.js?_=123123"
+      expect(@server.isWhitelisted(@xhr)).not.to.be.true
+
   context "#setResponseHeaders", ->
     beforeEach ->
       @server = $Cypress.Server.create({

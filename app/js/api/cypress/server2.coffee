@@ -1,6 +1,6 @@
 $Cypress.Server = do ($Cypress, _) ->
 
-  regularResourcesRe       = /\.(jsx?|html|css)$/
+  regularResourcesRe       = /\.(jsx?|html|css)(\?.*)?$/
   isCypressHeaderRe        = /^X-Cypress-/i
   needsDashRe              = /([a-z][A-Z])/g
 
@@ -184,6 +184,8 @@ $Cypress.Server = do ($Cypress, _) ->
 
     getOptions: -> _.clone(@options)
 
+    isWhitelisted: (xhr) ->
+      @options.whitelist.call(@, xhr)
 
     getFullyQualifiedUrl: (contentWindow, url) ->
       ## the href getter will always resolve a full path
@@ -247,14 +249,14 @@ $Cypress.Server = do ($Cypress, _) ->
       if not @stubs.length and
         @isStubbed() and
           @options.force404 isnt false and
-            not @options.whitelist.call(@, xhr)
+            not @isWhitelisted(xhr)
               return @get404Stub()
 
       ## bail if we've attached no stubs
       return nope() if not @stubs.length
 
       ## bail if this xhr matches our whitelist
-      return nope() if @options.whitelist.call(@, xhr)
+      return nope() if @isWhitelisted(xhr)
 
       ## loop in reverse to get
       ## the first matching stub
@@ -423,7 +425,7 @@ $Cypress.Server = do ($Cypress, _) ->
 
         ## log this out now since it's being sent officially
         ## unless its been whitelisted
-        if not getServer().options.whitelist.call(getServer(), @)
+        if not getServer().isWhitelisted(@)
           getServer().options.onSend(proxy, sendStack, stub)
 
         if _.isFunction(getServer().options.onAnyRequest)
