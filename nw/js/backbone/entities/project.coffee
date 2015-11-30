@@ -21,6 +21,18 @@
 
       @set "error", err.toString()
 
+    reset: ->
+      props = {
+        error: null
+        portInUse: null
+        clientUrl: null
+        clientUrlDisplay: null
+      }
+
+      @set(props, {silent: true})
+
+      @trigger("rebooted")
+
   class Entities.ProjectsCollection extends Entities.Collection
     model: Entities.Project
 

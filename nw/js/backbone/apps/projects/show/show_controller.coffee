@@ -19,6 +19,11 @@
       _.defaults options,
         onError: ->
         onProjectStart: ->
+        onReboot: =>
+          project.reset()
+
+          App.config.closeProject().then =>
+            @runProject(project, options)
 
       _.defer => @runProject(project, options)
 

@@ -55,6 +55,13 @@ module.exports = (parentWindow, gui, loadApp) ->
         expect(@project.find("a")).to.contain("http://localhost:8888")
         expect(@project.find("button[data-stop]")).to.contain("Stop")
 
+        fs.readJsonAsync(@todos + "/cypress.json").then (json) =>
+          json.port = 8887
+
+          fs.writeJsonAsync(@todos + "/cypress.json", json).then =>
+            Promise.delay(100).then =>
+              expect(@$("#project").find("a")).to.contain("http://localhost:8887")
+
     context "boot errors", ->
       it "cypress.json parse errors", ->
         fs.writeFileSync @todos + "/cypress.json", "{'foo': 'bar}"
