@@ -125,3 +125,6 @@ module.exports =
 
   remove: (projectRoot) ->
     fs.unlinkSync @_pathToFile(projectRoot, "cypress.json")
+
+  pathToCypressJson: (projectRoot) ->
+    @_pathToFile(projectRoot, "cypress.json")
