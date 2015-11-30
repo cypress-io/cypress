@@ -56,8 +56,8 @@ describe "Socket", ->
 
     afterEach ->
       @socket.close()
-      Fixtures.remove()
       @watchers.close()
+      Fixtures.remove()
 
     it "returns undefined if #testFilePath matches arguments", ->
       @socket.testFilePath = @filePath
@@ -91,8 +91,8 @@ describe "Socket", ->
       ## all the tests. there prob some race condition or we arent
       ## waiting for a promise or something to resolve
       Promise.delay(200).then =>
-        @socket.watchTestFileByPath("test1.js", @watchers).bind(@).then ->
-          fs.writeFileAsync(@filePath, "foooooooooo")
+        @socket.watchTestFileByPath("test2.coffee", @watchers).bind(@).then ->
+          fs.writeFileAsync(@socket.testsDir + "/test2.coffee", "foooooooooo")
 
   context "#onRequest", ->
     beforeEach ->
