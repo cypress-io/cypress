@@ -2,7 +2,6 @@ fs            = require "fs-extra"
 path          = require 'path'
 uuid          = require 'node-uuid'
 sauce         = require './sauce/sauce'
-chokidar      = require 'chokidar'
 Promise       = require "bluebird"
 IdGenerator   = require './id_generator'
 Fixtures      = require "./fixtures"
@@ -15,7 +14,6 @@ class Socket
   Log: Log
   Request: Request
   Fixtures: Fixtures
-  chokidar: chokidar
   Promise: Promise
   path: path
   uuid: uuid
@@ -35,29 +33,25 @@ class Socket
     @io          = io
     @idGenerator = IdGenerator(@app)
 
-  startListening: (options) ->
-    @app.once "close", @close.bind(@)
-
+  startListening: (watchers, options) ->
     if process.env["CYPRESS_ENV"] is "development"
-      @listenToCssChanges()
+      @listenToCssChanges(watchers)
 
-    @_startListening(path, options)
+    @_startListening(path, watchers, options)
 
-  listenToCssChanges: ->
-    watchCssFiles = chokidar.watch path.join(process.cwd(), "lib", "public", "css"), ignored: (path, stats) =>
-      return false if fs.statSync(path).isDirectory()
+  listenToCssChanges: (watchers) ->
+    watchers.watch path.join(process.cwd(), "lib", "public", "css"), {
+      ignored: (path, stats) =>
+        return false if fs.statSync(path).isDirectory()
 
-      not /\.css$/.test path
+        not /\.css$/.test path
+      onChange: (filePath, stats) =>
+        filePath = path.basename(filePath)
+        @io.emit "cypress:css:changed", file: filePath
+    }
 
-    # watchCssFiles.on "add", (path) -> console.log "added css:", path
-    watchCssFiles.on "change", (filePath, stats) =>
-      filePath = path.basename(filePath)
-      @io.emit "cypress:css:changed", file: filePath
-
-  close: (watchedFiles) ->
+  close: ->
     @io.close()
-
-    @closeWatchers()
 
 SecretSauce.mixin("Socket", Socket)
 

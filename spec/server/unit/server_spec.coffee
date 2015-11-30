@@ -1,33 +1,27 @@
-root          = '../../../'
-Promise       = require 'bluebird'
-fs            = Promise.promisifyAll(require('fs-extra'))
-expect        = require('chai').expect
-nock          = require 'nock'
-sinon         = require 'sinon'
-sinonPromise  = require 'sinon-as-promised'
+require("../spec_helper")
+
 Server        = require "#{root}lib/server"
 Socket        = require "#{root}lib/socket"
 Support       = require "#{root}lib/support"
 Fixtures      = require "#{root}lib/fixtures"
+Watchers      = require "#{root}lib/watchers"
 Project       = require "#{root}lib/project"
 Log           = require "#{root}lib/log"
 Settings      = require "#{root}lib/util/settings"
 
 describe "Server Interface", ->
   beforeEach ->
-    @sandbox = sinon.sandbox.create()
     @sandbox.stub(Socket.prototype, "startListening")
     @sandbox.stub(Project.prototype, "ensureProjectId").resolves("a-long-guid-123")
     @sandbox.stub(Project.prototype, "getDetails").resolves("a-long-guid-123")
     @sandbox.stub(Settings, "readSync").returns({})
     @sandbox.stub(Support.prototype, "scaffold").resolves({})
     @sandbox.stub(Fixtures.prototype, "scaffold").resolves({})
+    @sandbox.stub(Watchers.prototype, "watch").returns()
     @server = Server("/Users/brian/app")
 
   afterEach ->
     @server?.close()
-
-    @sandbox.restore()
 
   it "sets config as a property", ->
     s = Server("/foo")
@@ -94,6 +88,38 @@ describe "Server Interface", ->
     it "calls project#getDetails", ->
       @server.open().bind(@).then ->
         expect(Project::getDetails).to.be.calledWith("a-long-guid-123")
+
+    it "watches cypress.json", ->
+      @server.open().bind(@).then ->
+        expect(Watchers::watch).to.be.calledWith("/Users/brian/app/cypress.json")
+
+    it "passes watchers to Socket.startListening", ->
+      options = {}
+
+      @server.open(options).then ->
+        startListening = Socket::startListening
+        expect(startListening.getCall(0).args[0]).to.be.instanceof(Watchers)
+        expect(startListening.getCall(0).args[1]).to.eq(options)
+
+    it "calls onReboot when cypress.json changes", ->
+      onReboot = @sandbox.spy()
+
+      ## invoke the onChange callback
+      Watchers::watch.yieldsTo("onChange")
+
+      @server.open({onReboot: onReboot}).then ->
+        expect(onReboot).to.be.calledOnce
+
+    it "calls close once on watchers + socket when app closes", ->
+      close1 = @sandbox.stub(Watchers::, "close")
+      close2 = @sandbox.stub(Socket::, "close")
+
+      @server.open().then =>
+        @server.app.emit("close")
+        @server.app.emit("close")
+
+        expect(close1).to.be.calledOnce
+        expect(close2).to.be.calledOnce
 
     context "port", ->
       it "can override default port", ->

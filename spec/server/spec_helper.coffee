@@ -4,6 +4,7 @@ global.nock      = require("nock")
 global.fs        = require("fs-extra")
 global.Promise   = require("bluebird")
 global.expect    = require("chai").expect
+global.proxyquire = require("proxyquire")
 sinon            = require("sinon")
 sinonPromise     = require("sinon-as-promised")
 

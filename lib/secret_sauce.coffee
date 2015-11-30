@@ -424,11 +424,7 @@ SecretSauce.Socket =
         @io.emit "generate:ids:for:test", filePath, strippedPath
       .catch(->)
 
-  closeWatchers: ->
-    if f = @watchedTestFile
-      f.close()
-
-  watchTestFileByPath: (testFilePath) ->
+  watchTestFileByPath: (testFilePath, watchers) ->
     ## normalize the testFilePath
     testFilePath = @path.join(@testsDir, testFilePath)
 
@@ -438,21 +434,15 @@ SecretSauce.Socket =
 
     @Log.info "watching test file", {path: testFilePath}
 
+    ## remove the existing file by its path
+    watchers.remove(testFilePath)
+
     ## store this location
     @testFilePath = testFilePath
 
-    ## close existing watchedTestFile(s)
-    ## since we're now watching a different path
-    @closeWatchers()
-
-    new @Promise (resolve, reject) =>
-      @watchedTestFile = @chokidar.watch testFilePath
-      @watchedTestFile.on "change", @onTestFileChange.bind(@)
-      @watchedTestFile.on "ready", =>
-        resolve @watchedTestFile
-      @watchedTestFile.on "error", (err) =>
-        @Log.info "watching test file failed", {error: err, path: testFilePath}
-        reject err
+    watchers.watchAsync(testFilePath, {
+      onChange: @onTestFileChange.bind(@)
+    })
 
   onRequest: (options, cb) ->
     @Request.send(options)
@@ -525,7 +515,7 @@ SecretSauce.Socket =
         .catch (err) ->
           socket.emit "sauce:job:fail", clientObj.guid, err
 
-  _startListening: (path, options) ->
+  _startListening: (path, watchers, options) ->
     { _ } = SecretSauce
 
     _.defaults options,
@@ -574,7 +564,7 @@ SecretSauce.Socket =
         options.onChromiumRun(src)
 
       socket.on "watch:test:file", (filePath) =>
-        @watchTestFileByPath(filePath)
+        @watchTestFileByPath(filePath, watchers)
 
       socket.on "generate:test:id", (data, fn) =>
         @Log.info "generate:test:id", data: data

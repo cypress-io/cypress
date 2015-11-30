@@ -12,6 +12,7 @@ Project      = require "./project"
 Socket       = require "./socket"
 Support      = require "./support"
 Fixtures     = require "./fixtures"
+Watchers     = require "./watchers"
 Settings     = require './util/settings'
 
 ## cypress following by _ or - or .
@@ -190,9 +191,23 @@ class Server
 
       allowDestroy(@server)
 
+      ## preserve file watchers
+      watchers  = Watchers()
+
+      ## whenever the cypress.json file changes we need to reboot
+      watchers.watch(Settings.pathToCypressJson(@config.projectRoot), {
+        onChange: (filePath, stats) =>
+          if _.isFunction(options.onReboot)
+            options.onReboot()
+      })
+
       ## refactor this class
       socket = Socket(@io, @app)
-      socket.startListening(options)
+      socket.startListening(watchers, options)
+
+      @app.once "close", =>
+        watchers.close()
+        socket.close()
 
       onError = (err) =>
         ## if the server bombs before starting
