@@ -4624,6 +4624,11 @@ describe "$Cypress.Cy Actions Commands", ->
             expect(log.get("state")).to.eq("passed")
             expect(log.get("end")).to.be.true
 
+      it "logs {multiple: true} options", ->
+        @cy.get("span").invoke("slice", 0, 2).click({multiple: true, timeout: 1000}).then ->
+          expect(@log.get("message")).to.eq "{multiple: true, timeout: 1000}"
+          expect(@log.attributes.onConsole().Options).to.deep.eq {multiple: true, timeout: 1000}
+
       it "#onConsole", ->
         @cy.get("button").first().click().then ($button) ->
           console   = @log.attributes.onConsole()

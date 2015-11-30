@@ -442,7 +442,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         if options.log
           ## figure out the options which actually change the behavior of clicks
-          deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: null})
+          deltaOptions = Cypress.Utils.filterDelta(options, {force: false, multiple: false, timeout: null, interval: null})
 
           options._log = Cypress.Log.command({
             message: deltaOptions
