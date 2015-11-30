@@ -59,7 +59,7 @@ module.exports = (parentWindow, gui, loadApp) ->
           json.port = 8887
 
           fs.writeJsonAsync(@todos + "/cypress.json", json).then =>
-            Promise.delay(100).then =>
+            Promise.delay(500).then =>
               expect(@$("#project").find("a")).to.contain("http://localhost:8887")
 
     context "boot errors", ->
