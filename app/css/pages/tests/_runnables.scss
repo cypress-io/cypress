@@ -40,6 +40,19 @@
       }
     }
 
+    #no-tests-found {
+      ul {
+        padding-left: 20px;
+        font-size: 13px;
+        color: #777;
+      }
+
+      li {
+        list-style: decimal inside;
+        line-height: 1.6;
+      }
+    }
+
   }
 
   .keyboard-shortcuts-helper {

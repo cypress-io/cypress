@@ -1,7 +1,13 @@
-<div class="well well-lg">
+<div id="no-tests-found" class="well well-lg">
   <h4>
     <i class="fa fa-warning"></i>
-    Sorry, couldn't find any tests here:
+    Sorry, there's something wrong with this file:
   </h4>
-  <pre><%= @spec %></pre>
+  <pre class="bg-warning"><%= @spec %></pre>
+  <ul>
+    <li>Have you written any tests?</li>
+    <li>Are there typo’s or syntax errors?</li>
+    <li>Check your Console for errors.</li>
+    <li>Check your Network Tab for failed requests.</li>
+  </ul>
 </div>

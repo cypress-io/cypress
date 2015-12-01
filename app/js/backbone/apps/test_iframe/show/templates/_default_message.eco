@@ -5,8 +5,8 @@
     <p class="lead">This is the default blank page.</p>
     <p>To test your web application:</p>
     <ul class="list-unstyled">
-      <li>Start your webserver</li>
-      <li>cy.visit("/index.html")</li>
+      <li>Start your app's server</li>
+      <li>cy.visit() your app</li>
       <li>Begin writing tests</li>
     </ul>
   </div>
