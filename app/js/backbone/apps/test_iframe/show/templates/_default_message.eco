@@ -6,7 +6,12 @@
     <p>To test your web application:</p>
     <ul class="list-unstyled">
       <li>Start your app's server</li>
-      <li>cy.visit() your app</li>
+      <li>
+        <kbd>
+          <a href="https://github.com/cypress-io/cypress/wiki/visit" target="_blank">cy.visit()</a>
+        </kbd>
+        your app
+      </li>
       <li>Begin writing tests</li>
     </ul>
   </div>
