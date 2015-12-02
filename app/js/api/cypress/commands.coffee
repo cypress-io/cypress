@@ -283,7 +283,7 @@ do ($Cypress, _) ->
             This usually happens when you accidentally write commands outside an it(...) test.
             If that is the case, just move these commands inside an 'it(...)' test.
             Check your test file for errors.\n
-            https://github.com/cypress-io/cypress/wiki/errors#cypress-cannot-execute-commands-outside-a-running-test
+            http://on.cypress.io/cannot-execute-commands-outside-test
           """)
 
         ## this is the first call on cypress

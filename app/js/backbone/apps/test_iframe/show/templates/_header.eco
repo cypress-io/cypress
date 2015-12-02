@@ -89,7 +89,7 @@
   }
 </pre>
           <p id="viewport-link">
-            <a href="http://github.com/cypress-io/cypress/wiki/viewport" target="_blank">
+            <a href="http://on.cypress.io/viewport" target="_blank">
               <i class="fa fa-info-circle"></i>
               Read more about viewport here.
             </a>

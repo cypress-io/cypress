@@ -2,7 +2,7 @@
   <h4>
     <i class="fa fa-warning"></i>
     Sorry, there's something wrong with this file:
-    <a class="pull-right" href="https://github.com/cypress-io/cypress/wiki/errors#sorry-theres-something-wrong-with-this-file" target="_blank">
+    <a class="pull-right" href="http://on.cypress.io/theres-something-wrong-with-this-file" target="_blank">
       <i class="fa fa-question-circle"></i>
     </a>
   </h4>

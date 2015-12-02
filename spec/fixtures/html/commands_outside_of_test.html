@@ -19,7 +19,7 @@
               .get("h1")
           }
           catch (e) {
-            var msg = "\nCypress cannot execute commands outside a running test.\nThis usually happens when you accidentally write commands outside an it(...) test.\nIf that is the case, just move these commands inside an 'it(...)' test.\nCheck your test file for errors.\n\nhttps://github.com/cypress-io/cypress/wiki/errors#cypress-cannot-execute-commands-outside-a-running-test"
+            var msg = "\nCypress cannot execute commands outside a running test.\nThis usually happens when you accidentally write commands outside an it(...) test.\nIf that is the case, just move these commands inside an 'it(...)' test.\nCheck your test file for errors.\n\nhttp://on.cypress.io/cannot-execute-commands-outside-test"
 
             if (e.message !== msg) {
               it("caught errors running outside of tests [0b8]", function(){
