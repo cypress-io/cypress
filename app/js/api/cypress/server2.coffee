@@ -1,6 +1,6 @@
 $Cypress.Server = do ($Cypress, _) ->
 
-  regularResourcesRe       = /\.(jsx?|html|css)(\?.*)?$/
+  regularResourcesRe       = /\.(jsx?|coffee|html|less|s?css)(\?.*)?$/
   isCypressHeaderRe        = /^X-Cypress-/i
   needsDashRe              = /([a-z][A-Z])/g
 

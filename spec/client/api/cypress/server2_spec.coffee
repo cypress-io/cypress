@@ -51,6 +51,26 @@ describe "$Cypress.Cy Server API", ->
       @xhr.url = "/foo.css"
       expect(@server.isWhitelisted(@xhr)).to.be.true
 
+    it "whitelists GET *.scss", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.scss"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "whitelists GET *.less", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.less"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "whitelists GET *.coffee", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.coffee"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "whitelists GET *.js.coffee", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.js.coffee"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
     it "whitelists GET *.js?_=123123", ->
       @xhr.method = "GET"
       @xhr.url = "/foo.js?_=123123"
