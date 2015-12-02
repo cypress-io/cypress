@@ -38,7 +38,7 @@ For some issues, there are places you can check for more information. This may h
 
 - For issues in the web browser, check the JavaScript console and your Network tab.
 - Click on any commands where the failure occured, this will log more information about the error to the JavaScript console.
-- Use Cypress' `[debug](https://github.com/cypress-io/cypress/wiki/debug)` or `[pause](https://github.com/cypress-io/cypress/wiki/pause)` commands to step through your commands.
+- Use Cypress' [`debug`](https://github.com/cypress-io/cypress/wiki/debug) or [`pause`](https://github.com/cypress-io/cypress/wiki/pause) commands to step through your commands.
 
 ### Reproducibility
 
