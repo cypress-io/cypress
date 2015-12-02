@@ -380,7 +380,7 @@ describe "$Cypress.Cy Assertion Commands", ->
         @cy.on "fail", (err) =>
           @chai.restore()
 
-          expect(err.message).to.include "Cannot call .should() because the current subject has been removed or detached from the DOM."
+          expect(err.message).to.include "cy.should() failed because this element you are chaining off of has become detached or removed from the DOM:"
           # expect(logs.length).to.eq(3)
           # expect(@log.get("name")).to.eq("should")
           # expect(@log.get("error")).to.eq(err)
@@ -400,7 +400,7 @@ describe "$Cypress.Cy Assertion Commands", ->
           button.addClass("foo").remove()
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "Cannot call .should() because the current subject has been removed or detached from the DOM."
+          expect(err.message).to.include "cy.should() failed because this element you are chaining off of has become detached or removed from the DOM:"
           done()
 
         @cy.get("button:first").click().should("have.class", "foo").then ->

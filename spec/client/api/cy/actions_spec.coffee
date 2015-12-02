@@ -174,7 +174,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) ->
           expect(selected).to.eq 1
-          expect(err.message).to.eq "Cannot call .select() because the current subject has been removed or detached from the DOM."
+          expect(err.message).to.include "cy.select() failed because this element"
           done()
 
         @cy.get("select:first").select("de_dust2").select("de_aztec")
@@ -1683,7 +1683,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) ->
           expect(typed).to.eq 1
-          expect(err.message).to.eq "Cannot call .type() because the current subject has been removed or detached from the DOM."
+          expect(err.message).to.include "cy.type() failed because this element"
           done()
 
         @cy.get("input:first").type("a").type("b")
@@ -1928,7 +1928,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) ->
           expect(cleared).to.eq 1
-          expect(err.message).to.eq "Cannot call .clear() because the current subject has been removed or detached from the DOM."
+          expect(err.message).to.include "cy.clear() failed because this element"
           done()
 
         @cy.get("input:first").clear().clear()
@@ -2210,7 +2210,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) ->
           expect(checked).to.eq 1
-          expect(err.message).to.eq "Cannot call .check() because the current subject has been removed or detached from the DOM."
+          expect(err.message).to.include "cy.check() failed because this element"
           done()
 
         @cy.get(":checkbox:first").check().check()
@@ -2554,7 +2554,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) ->
           expect(unchecked).to.eq 1
-          expect(err.message).to.eq "Cannot call .uncheck() because the current subject has been removed or detached from the DOM."
+          expect(err.message).to.include "cy.uncheck() failed because this element"
           done()
 
         @cy.get(":checkbox:first").uncheck().uncheck()
@@ -2857,7 +2857,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) ->
           expect(submitted).to.eq 1
-          expect(err.message).to.eq "Cannot call .submit() because the current subject has been removed or detached from the DOM."
+          expect(err.message).to.include "cy.submit() failed because this element"
           done()
 
         @cy.get("form:first").submit().submit()
@@ -3282,7 +3282,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) ->
           expect(focused).to.eq 1
-          expect(err.message).to.eq "Cannot call .focus() because the current subject has been removed or detached from the DOM."
+          expect(err.message).to.include "cy.focus() failed because this element"
           done()
 
         @cy.get("input:first").focus().focus()
@@ -3336,7 +3336,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "Cannot call .blur() because the current subject has been removed or detached from the DOM."
+          expect(err.message).to.include "cy.blur() failed because this element"
           done()
 
         ## we remove the first element and then
@@ -3571,7 +3571,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) ->
           expect(blurred).to.eq 1
-          expect(err.message).to.eq "Cannot call .blur() because the current subject has been removed or detached from the DOM."
+          expect(err.message).to.include "cy.blur() failed because this element"
           done()
 
         @cy.get("input:first").focus().blur().focus().blur()
@@ -3759,7 +3759,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) ->
           expect(dblclicked).to.eq 1
-          expect(err.message).to.eq "Cannot call .dblclick() because the current subject has been removed or detached from the DOM."
+          expect(err.message).to.include "cy.dblclick() failed because this element"
           done()
 
         @cy.get("button:first").dblclick().dblclick()
@@ -4443,7 +4443,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) ->
           expect(clicked).to.eq 1
-          expect(err.message).to.eq "Cannot call .click() because the current subject has been removed or detached from the DOM."
+          expect(err.message).to.include "cy.click() failed because this element"
           done()
 
         @cy.get(":checkbox:first").click().click()
