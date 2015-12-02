@@ -78,6 +78,14 @@ describe "$Cypress.Utils API", ->
         expect($Cypress.Utils.hasElement(value)).to.be.false
 
   describe "#stringifyElement", ->
+    it "returns <window>", ->
+      str = $Cypress.Utils.stringifyElement(window)
+      expect(str).to.eq("<window>")
+
+    it "returns <document>", ->
+      str = $Cypress.Utils.stringifyElement(document)
+      expect(str).to.eq("<document>")
+
     context "long form", ->
       it "includes wraps element in gt/ls", ->
         input = $("<input />")
