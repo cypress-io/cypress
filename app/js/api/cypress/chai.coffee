@@ -42,16 +42,9 @@ do ($Cypress, _, $, chai) ->
           obj = assert._obj
 
           ## if we are formatting a DOM object
-          if $Cypress.Utils.hasElement(obj)
+          if $Cypress.Utils.hasElement(obj) or $Cypress.Utils.hasWindow(obj) or $Cypress.Utils.hasDocument(obj)
             ## replace object with our formatted one
             assert._obj = $Cypress.Utils.stringifyElement(obj, "short")
-
-          ## if we are formatting the window object
-          if $Cypress.Utils.hasWindow(obj)
-            assert._obj = "<window>"
-
-          if $Cypress.Utils.hasDocument(obj)
-            assert._obj = "<document>"
 
           msg = orig.call(@, assert, args)
 

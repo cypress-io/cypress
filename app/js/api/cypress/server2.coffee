@@ -1,6 +1,6 @@
 $Cypress.Server = do ($Cypress, _) ->
 
-  regularResourcesRe       = /\.(jsx?|html|css)$/
+  regularResourcesRe       = /\.(jsx?|coffee|html|less|s?css)(\?.*)?$/
   isCypressHeaderRe        = /^X-Cypress-/i
   needsDashRe              = /([a-z][A-Z])/g
 
@@ -182,26 +182,16 @@ $Cypress.Server = do ($Cypress, _) ->
       ## so we dont handle stubs
       @enableStubs(false)
 
-    getOptions: -> @options
+    getOptions: -> _.clone(@options)
+
+    isWhitelisted: (xhr) ->
+      @options.whitelist.call(@, xhr)
 
     getFullyQualifiedUrl: (contentWindow, url) ->
-      doc = contentWindow.document
-      oldBase = doc.getElementsByTagName("base")[0]
-      oldHref = oldBase && oldBase.href
-      docHead = doc.head or doc.getElementsByTagName("head")[0]
-      ourBase = oldBase or docHead.appendChild(doc.createElement("base"))
-
-      resolver      = doc.createElement("a")
-      ourBase.href  = contentWindow.location.href
-      resolver.href = url
-      resolvedUrl   = resolver.href ## browser magic at work here
-
-      if oldBase
-        oldBase.href = oldHref
-      else
-        docHead.removeChild(ourBase)
-
-      resolvedUrl
+      ## the href getter will always resolve a full path
+      a = contentWindow.document.createElement("a")
+      a.href = url
+      a.href
 
     getStack: ->
       err = new Error
@@ -259,14 +249,14 @@ $Cypress.Server = do ($Cypress, _) ->
       if not @stubs.length and
         @isStubbed() and
           @options.force404 isnt false and
-            not @options.whitelist.call(@, xhr)
+            not @isWhitelisted(xhr)
               return @get404Stub()
 
       ## bail if we've attached no stubs
       return nope() if not @stubs.length
 
       ## bail if this xhr matches our whitelist
-      return nope() if @options.whitelist.call(@, xhr)
+      return nope() if @isWhitelisted(xhr)
 
       ## loop in reverse to get
       ## the first matching stub
@@ -435,7 +425,7 @@ $Cypress.Server = do ($Cypress, _) ->
 
         ## log this out now since it's being sent officially
         ## unless its been whitelisted
-        if not getServer().options.whitelist.call(getServer(), @)
+        if not getServer().isWhitelisted(@)
           getServer().options.onSend(proxy, sendStack, stub)
 
         if _.isFunction(getServer().options.onAnyRequest)

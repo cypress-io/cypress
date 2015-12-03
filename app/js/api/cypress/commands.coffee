@@ -277,6 +277,15 @@ do ($Cypress, _) ->
               return ret ? subject
 
       $Cypress.Cy.prototype[key] = (args...) ->
+        if not @private("runnable")
+          @throwErr("""
+            \nCypress cannot execute commands outside a running test.
+            This usually happens when you accidentally write commands outside an it(...) test.
+            If that is the case, just move these commands inside an 'it(...)' test.
+            Check your test file for errors.\n
+            http://on.cypress.io/cannot-execute-commands-outside-test
+          """)
+
         ## this is the first call on cypress
         ## so create a new chainer instance
         chain = $Cypress.Chainer.create(@, key, args)

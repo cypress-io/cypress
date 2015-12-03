@@ -12,6 +12,7 @@ Project      = require "./project"
 Socket       = require "./socket"
 Support      = require "./support"
 Fixtures     = require "./fixtures"
+Watchers     = require "./watchers"
 Settings     = require './util/settings'
 
 ## cypress following by _ or - or .
@@ -78,24 +79,22 @@ class Server
       ## always strip trailing slashes
       obj.baseUrl = _.str.rtrim(url, "/")
 
-    ## commandTimeout should be in the cypress.json file
-    ## since it has a significant impact on the tests
-    ## passing or failing
-
     _.defaults obj,
-      baseUrl: null
-      clientRoute: "/__/"
-      xhrRoute: "/xhrs/"
+      baseUrl:        null
+      clientRoute:    "/__/"
+      xhrRoute:       "/xhrs/"
       commandTimeout: 4000
-      port: 2020
-      autoOpen: false
-      viewportWidth: 1000
+      visitTimeout:   30000
+      requestTimeout: 20000
+      port:           2020
+      autoOpen:       false
+      viewportWidth:  1000
       viewportHeight: 660
-      testFolder: "tests"
+      testFolder:     "tests"
       fixturesFolder: "tests/_fixtures"
-      supportFolder: "tests/_support"
-      javascripts: []
-      namespace: "__cypress"
+      supportFolder:  "tests/_support"
+      javascripts:    []
+      namespace:      "__cypress"
 
     ## split out our own app wide env from user env variables
     ## and delete envFile
@@ -201,9 +200,23 @@ class Server
 
       allowDestroy(@server)
 
+      ## preserve file watchers
+      watchers  = Watchers()
+
+      ## whenever the cypress.json file changes we need to reboot
+      watchers.watch(Settings.pathToCypressJson(@config.projectRoot), {
+        onChange: (filePath, stats) =>
+          if _.isFunction(options.onReboot)
+            options.onReboot()
+      })
+
       ## refactor this class
       socket = Socket(@io, @app)
-      socket.startListening(options)
+      socket.startListening(watchers, options)
+
+      @app.once "close", =>
+        watchers.close()
+        socket.close()
 
       # @config.checkForAppErrors = ->
       #   socket.checkForAppErrors()

@@ -25,6 +25,72 @@ describe "$Cypress.Cy Server API", ->
 
     $Cypress.Server.defaults(defaults)
 
+  context "#isWhitelisted", ->
+    beforeEach ->
+      @server = $Cypress.Server.create()
+      @server.bindTo(@window)
+      @xhr = new @window.XMLHttpRequest
+
+    it "whitelists GET *.js", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.js"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "whitelists GET *.jsx", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.jsx"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "whitelists GET *.html", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.html"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "whitelists GET *.css", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.css"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "whitelists GET *.scss", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.scss"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "whitelists GET *.less", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.less"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "whitelists GET *.coffee", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.coffee"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "whitelists GET *.js.coffee", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.js.coffee"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "whitelists GET *.js?_=123123", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.js?_=123123"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "whitelists GET *.html?_=123123&foo=bar", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.html?_=123123&foo=bar"
+      expect(@server.isWhitelisted(@xhr)).to.be.true
+
+    it "does not whitelist GET *.json?_=123123", ->
+      @xhr.method = "GET"
+      @xhr.url = "/foo.json?_=123123"
+      expect(@server.isWhitelisted(@xhr)).not.to.be.true
+
+    it "does not whitelist OPTIONS *.js?_=123123", ->
+      @xhr.method = "OPTIONS"
+      @xhr.url = "/foo.js?_=123123"
+      expect(@server.isWhitelisted(@xhr)).not.to.be.true
+
   context "#setResponseHeaders", ->
     beforeEach ->
       @server = $Cypress.Server.create({
@@ -62,6 +128,22 @@ describe "$Cypress.Cy Server API", ->
         done()
 
       @xhr.send()
+
+  context "#getFullyQualifiedUrl", ->
+    beforeEach ->
+      @server = $Cypress.Server.create()
+
+      @expectUrlToEq = (url, url2) =>
+        expect(@server.getFullyQualifiedUrl(window, url)).to.eq(url2)
+
+    it "resolves absolute relative links", ->
+      @expectUrlToEq("/foo/bar.html", "#{window.location.origin}/foo/bar.html")
+
+    it "resolves relative links", ->
+      ## slice off the last path segment since this is a relative link
+      ## http://localhost:3500/specs/api/cypress/server_spec -> http://localhost:3500/specs/api/cypress
+      path = window.location.origin + window.location.pathname.split("/").slice(0, -1).join("/")
+      @expectUrlToEq("foo/bar.html", "#{path}/foo/bar.html")
 
 #   context "XHR#abort", ->
 #     beforeEach ->

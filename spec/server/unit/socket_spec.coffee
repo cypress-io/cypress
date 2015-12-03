@@ -3,6 +3,7 @@ require("../spec_helper")
 _            = require "lodash"
 Socket       = require "#{root}lib/socket"
 Server       = require "#{root}lib/server"
+Watchers     = require "#{root}lib/watchers"
 Settings     = require "#{root}lib/util/settings"
 Fixtures     = require "#{root}/spec/server/helpers/fixtures"
 
@@ -44,69 +45,54 @@ describe "Socket", ->
       @socket.close()
       expect(@io.close).to.be.called
 
-    it "calls close on the watchedFiles", ->
-      @socket.startListening().then =>
-        closeWatchers = @sandbox.spy @socket, "closeWatchers"
-
-        @socket.close()
-
-        expect(closeWatchers).to.be.called
-
-  context "#closeWatchers", ->
-    beforeEach ->
-      @socket = Socket(@io, @app)
-
-    it "calls close on #watchedTestFile", ->
-      close = @sandbox.stub()
-      @socket.watchedTestFile = {close: close}
-      @socket.closeWatchers()
-      expect(close).to.be.calledOnce
-
-    it "is noop without #watchedTestFile", ->
-      expect(@socket.closeWatchers()).to.be.undefined
-
   context "#watchTestFileByPath", ->
     beforeEach ->
       @socket          = Socket(@io, @app)
       @socket.testsDir = Fixtures.project "todos/tests"
       @filePath        = @socket.testsDir + "/test1.js"
+      @watchers        = Watchers()
 
       Fixtures.scaffold()
 
     afterEach ->
       @socket.close()
+      @watchers.close()
       Fixtures.remove()
 
     it "returns undefined if #testFilePath matches arguments", ->
       @socket.testFilePath = @filePath
-      expect(@socket.watchTestFileByPath("test1.js")).to.be.undefined
+      expect(@socket.watchTestFileByPath("test1.js"), @watchers).to.be.undefined
 
     it "closes existing watchedTestFile", ->
-      close = @sandbox.stub()
-      @socket.watchedTestFile = {close: close}
-      @socket.watchTestFileByPath "test1.js"
-      expect(close).to.be.called
+      remove = @sandbox.stub(@watchers, "remove")
+      @socket.watchedTestFile = "test1.js"
+      @socket.watchTestFileByPath("test1.js", @watchers).then ->
+        expect(remove).to.be.calledWithMatch("test1.js")
 
     it "sets #testFilePath", ->
-      @socket.watchTestFileByPath("test1.js")
-      expect(@socket.testFilePath).to.eq @filePath
+      @socket.watchTestFileByPath("test1.js", @watchers).then =>
+        expect(@socket.testFilePath).to.eq @filePath
 
     it "can normalizes leading slash", ->
-      @socket.watchTestFileByPath("/test1.js")
-      expect(@socket.testFilePath).to.eq @filePath
+      @socket.watchTestFileByPath("/test1.js", @watchers).then =>
+        expect(@socket.testFilePath).to.eq @filePath
 
     it "watches file by path", (done) ->
+      socket = @socket
+
       ## chokidar may take 100ms to pick up the file changes
       ## so we just override onTestFileChange and whenever
       ## its invoked we finish the test
-      onTestFileChange = @sandbox.stub @socket, "onTestFileChange", -> done()
+      onTestFileChange = @sandbox.stub @socket, "onTestFileChange", ->
+        expect(@).to.eq(socket)
+        done()
 
       ## not delaying this here causes random failures when running
       ## all the tests. there prob some race condition or we arent
       ## waiting for a promise or something to resolve
       Promise.delay(200).then =>
-        @socket.watchTestFileByPath("test1.js").bind(@).then ->
-          fs.writeFileAsync(@filePath, "foooooooooo")
+        @socket.watchTestFileByPath("test2.coffee", @watchers).bind(@).then ->
+          fs.writeFileAsync(@socket.testsDir + "/test2.coffee", "foooooooooo")
 
   context "#onRequest", ->
     beforeEach ->
@@ -248,27 +234,19 @@ describe "Socket", ->
       @socket.startListening().then ->
         expect(@testsDir).to.eq Fixtures.project("todos/does-not-exist")
 
-    it "listens for app close event once", ->
-      close = @sandbox.spy @socket, "close"
-
-      @socket.startListening().then ->
-        @app.emit("close")
-        @app.emit("close")
-
-        expect(close).to.be.calledOnce
-
     describe "watch:test:file", ->
       it "listens for watch:test:file event", ->
         @socket.startListening().then =>
           expect(@ioSocket.on).to.be.calledWith("watch:test:file")
 
       it "passes filePath to #watchTestFileByPath", ->
+        watchers = {}
         watchTestFileByPath = @sandbox.stub @socket, "watchTestFileByPath"
 
         @ioSocket.on.withArgs("watch:test:file").callsArgWith(1, "foo/bar/baz")
 
-        @socket.startListening().then =>
-          expect(watchTestFileByPath).to.be.calledWith "foo/bar/baz"
+        @socket.startListening(watchers).then =>
+          expect(watchTestFileByPath).to.be.calledWith "foo/bar/baz", watchers
 
     describe "#onTestFileChange", ->
       beforeEach ->

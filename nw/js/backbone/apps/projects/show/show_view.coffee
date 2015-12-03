@@ -4,6 +4,7 @@
     template: "projects/show/project"
 
     modelEvents:
+      "rebooted"         : "render"
       "change:clientUrl" : "render"
       "change:error"     : "render"
 

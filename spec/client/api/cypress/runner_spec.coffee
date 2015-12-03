@@ -316,6 +316,26 @@ describe "$Cypress.Runner API", ->
       expect(test.title).to.eq "one"
 
   context "#override", ->
+    describe "a few tests", ->
+      beforeEach ->
+        runner = Fixtures.createRunnables
+          suites:
+            "suite 1":
+              tests: ["suite 1, one"]
+            "suite 2":
+              hooks: ["beforeAll"]
+              tests: ["suite 2, two"]
+
+        @runner = $Cypress.Runner.runner(@Cypress, runner)
+
+      it "fires test:before:hooks twice", (done) ->
+        trigger = @sandbox.spy @Cypress, "trigger"
+
+        @runner.run ->
+          calls = _(trigger.getCalls()).filter (call) -> call.args[0] is "test:before:hooks"
+          expect(calls.length).to.eq(2)
+          done()
+
     describe "many tests", ->
       beforeEach ->
         runner = Fixtures.createRunnables

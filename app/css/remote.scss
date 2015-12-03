@@ -8,6 +8,7 @@
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/normalize";
 
 // Core CSS
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/code";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/buttons";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/jumbotron";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/grid";
@@ -19,6 +20,15 @@
 
 .jumbotron {
   margin-top: 20px;
+
+  kbd {
+    background-color: #777;
+    display: inline-block;
+
+    a {
+      color: $kbd-color;
+    }
+  }
 
   ul {
     text-align: left;

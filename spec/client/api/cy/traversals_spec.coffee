@@ -66,7 +66,7 @@ describe "$Cypress.Cy Traversal Commands", ->
             @cy.$("#list").remove()
 
           @cy.on "fail", (err) ->
-            expect(err.message).to.eq "Cannot call .#{name}() because the current subject has been removed or detached from the DOM."
+            expect(err.message).to.include "cy.#{name}() failed because this element"
             done()
 
           @cy.get("#list")[name](arg)

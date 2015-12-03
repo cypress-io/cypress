@@ -154,7 +154,7 @@ describe "$Cypress.Cy Querying Commands", ->
           @cy.$("#list").remove()
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "Cannot call .within() because the current subject has been removed or detached from the DOM."
+          expect(err.message).to.include "cy.within() failed because this element"
           done()
 
         @cy.get("#list").within ->

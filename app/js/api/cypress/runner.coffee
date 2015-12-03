@@ -432,14 +432,18 @@ $Cypress.Runner = do ($Cypress, _) ->
           _.chain(suites).uniq().intersection(suite.parent.suites).last().value() is suite
 
         testBeforeHooks = (hook, suite) ->
-          _this.test = _this.getTestFromHook(hook, suite) if not _this.test
+          if not _this.test
+            _this.test = _this.getTestFromHook(hook, suite)
 
-          ## there is a bug (but i believe its only in tests
-          ## which happens in Ended Early Integration Tests
-          ## where the test will be undefined due to the runner.suite
-          ## not yet having built its tests/suites array and thus
-          ## our @tests array is empty
-          Cypress.trigger "test:before:hooks", _this.wrap(_this.test ? {})
+          if not _this.test.hasFiredTestBeforeHooks
+            _this.test.hasFiredTestBeforeHooks = true
+
+            ## there is a bug (but i believe its only in tests
+            ## which happens in Ended Early Integration Tests
+            ## where the test will be undefined due to the runner.suite
+            ## not yet having built its tests/suites array and thus
+            ## our @tests array is empty
+            Cypress.trigger "test:before:hooks", _this.wrap(_this.test ? {})
 
         testAfterHooks = ->
           test = _this.test
@@ -452,12 +456,10 @@ $Cypress.Runner = do ($Cypress, _) ->
 
         switch name
           when "beforeAll"
-            ## if we're the root suite we know to fire
-            if @suite.root
-              testBeforeHooks(hooks[0], @suite)
+            testBeforeHooks(hooks[0], @suite)
 
           when "beforeEach"
-            if @suite.root and _this.test isnt _this.tests[0]
+            if @suite.root
               testBeforeHooks(hooks[0], @suite)
 
           when "afterEach"

@@ -417,12 +417,18 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         log: true
         verify: true
         force: false
+        multiple: false
         position: position
         x: x
         y: y
         errorOnSelect: true
 
       @ensureDom(options.$el)
+
+      ## throw if we're trying to click multiple elements
+      ## and we did not pass the multiple flag
+      if options.multiple is false and options.$el.length > 1
+        @throwErr("Cannot call .click() on multiple elements. You tried to click #{options.$el.length} elements. Pass {multiple: true} if you want to serially click each element.")
 
       win  = @private("window")
 
@@ -436,7 +442,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         if options.log
           ## figure out the options which actually change the behavior of clicks
-          deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: null})
+          deltaOptions = Cypress.Utils.filterDelta(options, {force: false, multiple: false, timeout: null, interval: null})
 
           options._log = Cypress.Log.command({
             message: deltaOptions

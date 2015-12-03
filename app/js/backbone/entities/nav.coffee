@@ -22,7 +22,7 @@
         # {name: "Builds",    href: "#builds",     icon: "fa fa-th"}
         {name: "Analytics", href: "#analytics",  icon: "fa fa-bar-chart-o"}
         # {name: "Settings",  href: "#settings",   icon: "fa fa-cog"}
-        {name: "Docs",      href: "https://github.com/cypress-io/cypress/wiki",  icon: "fa fa-graduation-cap", external: true}
+        {name: "Docs",      href: "http://on.cypress.io",  icon: "fa fa-graduation-cap", external: true}
       ]
 
   App.reqres.setHandler "nav:entities", ->

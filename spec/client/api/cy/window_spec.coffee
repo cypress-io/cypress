@@ -301,7 +301,6 @@ describe "$Cypress.Cy Window Commands", ->
             Returned: win
           }
 
-
   context "#title", ->
     it "returns the pages title as a string", ->
       title = @cy.$("title").text()
@@ -325,6 +324,14 @@ describe "$Cypress.Cy Window Commands", ->
       , 100
 
       cy.title().should("eq", "about page").and("match", /about/)
+
+    it "only finds titles in the <head>", ->
+      title = @cy.$("head title").text()
+
+      @cy.$("body").append("<title>some title</title>")
+
+      @cy.title().then ($title) ->
+        expect($title).to.eq(title)
 
     describe "errors", ->
       beforeEach ->

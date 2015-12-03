@@ -46,7 +46,12 @@ do ($Cypress, _, $) ->
         @throwErr("Cannot call .#{method}() on a non-DOM subject!")
 
       if not (isWindow or @_contains(subject))
-        @throwErr("Cannot call .#{method}() because the current subject has been removed or detached from the DOM.")
+        node = $Cypress.Utils.stringifyElement(subject)
+        @throwErr("""
+          cy.#{method}() failed because this element you are chaining off of has become detached or removed from the DOM:\n
+          #{node}\n
+          http://on.cypress.io/element-has-detached-from-dom
+        """)
 
       return subject
 

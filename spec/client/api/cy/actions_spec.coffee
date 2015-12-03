@@ -174,7 +174,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) ->
           expect(selected).to.eq 1
-          expect(err.message).to.eq "Cannot call .select() because the current subject has been removed or detached from the DOM."
+          expect(err.message).to.include "cy.select() failed because this element"
           done()
 
         @cy.get("select:first").select("de_dust2").select("de_aztec")
@@ -1683,7 +1683,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) ->
           expect(typed).to.eq 1
-          expect(err.message).to.eq "Cannot call .type() because the current subject has been removed or detached from the DOM."
+          expect(err.message).to.include "cy.type() failed because this element"
           done()
 
         @cy.get("input:first").type("a").type("b")
@@ -1928,7 +1928,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) ->
           expect(cleared).to.eq 1
-          expect(err.message).to.eq "Cannot call .clear() because the current subject has been removed or detached from the DOM."
+          expect(err.message).to.include "cy.clear() failed because this element"
           done()
 
         @cy.get("input:first").clear().clear()
@@ -2210,7 +2210,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) ->
           expect(checked).to.eq 1
-          expect(err.message).to.eq "Cannot call .check() because the current subject has been removed or detached from the DOM."
+          expect(err.message).to.include "cy.check() failed because this element"
           done()
 
         @cy.get(":checkbox:first").check().check()
@@ -2554,7 +2554,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) ->
           expect(unchecked).to.eq 1
-          expect(err.message).to.eq "Cannot call .uncheck() because the current subject has been removed or detached from the DOM."
+          expect(err.message).to.include "cy.uncheck() failed because this element"
           done()
 
         @cy.get(":checkbox:first").uncheck().uncheck()
@@ -2857,7 +2857,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) ->
           expect(submitted).to.eq 1
-          expect(err.message).to.eq "Cannot call .submit() because the current subject has been removed or detached from the DOM."
+          expect(err.message).to.include "cy.submit() failed because this element"
           done()
 
         @cy.get("form:first").submit().submit()
@@ -3282,7 +3282,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) ->
           expect(focused).to.eq 1
-          expect(err.message).to.eq "Cannot call .focus() because the current subject has been removed or detached from the DOM."
+          expect(err.message).to.include "cy.focus() failed because this element"
           done()
 
         @cy.get("input:first").focus().focus()
@@ -3336,7 +3336,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "Cannot call .blur() because the current subject has been removed or detached from the DOM."
+          expect(err.message).to.include "cy.blur() failed because this element"
           done()
 
         ## we remove the first element and then
@@ -3571,7 +3571,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) ->
           expect(blurred).to.eq 1
-          expect(err.message).to.eq "Cannot call .blur() because the current subject has been removed or detached from the DOM."
+          expect(err.message).to.include "cy.blur() failed because this element"
           done()
 
         @cy.get("input:first").focus().blur().focus().blur()
@@ -3759,7 +3759,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) ->
           expect(dblclicked).to.eq 1
-          expect(err.message).to.eq "Cannot call .dblclick() because the current subject has been removed or detached from the DOM."
+          expect(err.message).to.include "cy.dblclick() failed because this element"
           done()
 
         @cy.get("button:first").dblclick().dblclick()
@@ -4033,7 +4033,7 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(waited).to.be.true
           done()
 
-      @cy.get("button:first").click()
+      @cy.get("button:first").click({multiple: true})
 
     it "can operate on a jquery collection", ->
       clicks = 0
@@ -4046,7 +4046,7 @@ describe "$Cypress.Cy Actions Commands", ->
       expect(buttons.length).to.be.gt 1
 
       ## make sure each button received its click event
-      @cy.get("button").invoke("slice", 0, 3).click().then ($buttons) ->
+      @cy.get("button").invoke("slice", 0, 3).click({multiple: true}).then ($buttons) ->
         expect($buttons.length).to.eq clicks
 
     it "can cancel multiple clicks", (done) ->
@@ -4084,7 +4084,7 @@ describe "$Cypress.Cy Actions Commands", ->
           done()
         , 200
 
-      @cy.get("#sequential-clicks a").click()
+      @cy.get("#sequential-clicks a").click({multiple: true})
 
     it "serially clicks a collection", ->
       clicks = 0
@@ -4100,7 +4100,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
       ## make sure we're clicking multiple anchors
       expect(anchors.length).to.be.gt 1
-      @cy.get("#sequential-clicks a").click().then ($anchors) ->
+      @cy.get("#sequential-clicks a").click({multiple: true}).then ($anchors) ->
         expect($anchors.length).to.eq clicks
 
     it "increases the timeout delta after each click", (done) ->
@@ -4115,7 +4115,7 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@test.timeout()).to.be.within(num, num + 100)
           done()
 
-      @cy.get("#three-buttons button").click()
+      @cy.get("#three-buttons button").click({multiple: true})
 
     it "can click elements which are hidden until scrolled within parent container", ->
       @cy.get("#overflow-auto-container").contains("quux").click()
@@ -4192,7 +4192,7 @@ describe "$Cypress.Cy Actions Commands", ->
           , 100
           return false
 
-        @cy.get("button").invoke("slice", 0, 2).click().should("have.class", "clicked")
+        @cy.get("button").invoke("slice", 0, 2).click({multiple: true}).should("have.class", "clicked")
 
       it "eventually fails the assertion", (done) ->
         @cy.on "fail", (err) =>
@@ -4424,6 +4424,15 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.click()
 
+      it "throws when attempting to click multiple elements", (done) ->
+        num = @cy.$("button").length
+
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq "Cannot call .click() on multiple elements. You tried to click #{num} elements. Pass {multiple: true} if you want to serially click each element."
+          done()
+
+        @cy.get("button").click()
+
       it "throws when subject is not in the document", (done) ->
         clicked = 0
 
@@ -4434,7 +4443,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) ->
           expect(clicked).to.eq 1
-          expect(err.message).to.eq "Cannot call .click() because the current subject has been removed or detached from the DOM."
+          expect(err.message).to.include "cy.click() failed because this element"
           done()
 
         @cy.get(":checkbox:first").click().click()
@@ -4468,7 +4477,7 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(err.message).to.include "cy.click() cannot be called on the non-visible element: #{node}"
           done()
 
-        @cy.get("#three-buttons button").click()
+        @cy.get("#three-buttons button").click({multiple: true})
 
       it "throws when a non-descendent element is covering subject", (done) ->
         @cy._timeout(200)
@@ -4584,7 +4593,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @Cypress.on "log", (log) ->
           clicks.push(log) if log.get("name") is "click"
 
-        @cy.get("button.clicks").click().then ($buttons) ->
+        @cy.get("button.clicks").click({multiple: true}).then ($buttons) ->
           expect($buttons.length).to.eq(2)
           expect(clicks.length).to.eq(2)
           expect(clicks[1].get("$el").get(0)).to.eq $buttons.last().get(0)
@@ -4610,10 +4619,15 @@ describe "$Cypress.Cy Actions Commands", ->
         @Cypress.on "log", (log) ->
           logs.push(log) if log.get("name") is "click"
 
-        @cy.get("button").invoke("slice", 0, 2).click().then ->
+        @cy.get("button").invoke("slice", 0, 2).click({multiple: true}).then ->
           _.each logs, (log) ->
             expect(log.get("state")).to.eq("passed")
             expect(log.get("end")).to.be.true
+
+      it "logs {multiple: true} options", ->
+        @cy.get("span").invoke("slice", 0, 2).click({multiple: true, timeout: 1000}).then ->
+          expect(@log.get("message")).to.eq "{multiple: true, timeout: 1000}"
+          expect(@log.attributes.onConsole().Options).to.deep.eq {multiple: true, timeout: 1000}
 
       it "#onConsole", ->
         @cy.get("button").first().click().then ($button) ->

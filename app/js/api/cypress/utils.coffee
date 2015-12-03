@@ -123,6 +123,14 @@ $Cypress.Utils = do ($Cypress, _) ->
     ## short form css-inlines the element
     ## long form returns the outerHTML
     stringifyElement: (el, form = "long") ->
+      ## if we are formatting the window object
+      if @hasWindow(el)
+        return "<window>"
+
+      ## if we are formatting the document object
+      if @hasDocument(el)
+        return "<document>"
+
       el = if _.isElement(el) then $(el) else el
 
       switch form
