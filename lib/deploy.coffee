@@ -100,6 +100,7 @@ class Platform
           copy("./lib/fixtures.coffee",     "/src/lib/fixtures.coffee")
           copy("./lib/watchers.coffee",     "/src/lib/watchers.coffee")
           copy("./lib/updater.coffee",      "/src/lib/updater.coffee")
+          copy("./lib/reporter.coffee",     "/src/lib/reporter.coffee")
           copy("./lib/environment.coffee",  "/src/lib/environment.coffee")
           copy("./lib/log.coffee",          "/src/lib/log.coffee")
           copy("./lib/exception.coffee",    "/src/lib/exception.coffee")
