@@ -243,7 +243,10 @@ class Platform
 
     @getLatestChromiumVersion().then (version) =>
       new Promise (resolve, reject) =>
-        opts = {env: {CYPRESS_ENV: ""}}
+        env = _.clone(process.env)
+        env.CYPRESS_ENV = ""
+
+        opts = {env: env}
 
         child_process.exec "#{@buildPathToApp()} --get-chromium-version", opts, (err, stdout, stderr) ->
           [err, stdout, stderr].forEach (val) ->
@@ -457,8 +460,8 @@ class Platform
       .then(@afterBuild)
       .then(@cleanupDist)
       .then(@handleChromium)
-      .then(@runChromiumSmokeTest)
       .then(@runSmokeTest)
+      .then(@runChromiumSmokeTest)
       .then(@codeSign) ## codesign after running smoke tests due to changing .cy
       .then(@verifyAppCanOpen)
 
@@ -693,6 +696,13 @@ class Linux64 extends Platform
         height: 400
         width: 300
       }).then ->
+        xvfb.stopAsync()
+
+  runChromiumSmokeTest: ->
+    xvfb = new Xvfb()
+    xvfb = Promise.promisifyAll(xvfb)
+    xvfb.startAsync().then (xvfxProcess) =>
+      super.then ->
         xvfb.stopAsync()
 
   nwBuilder: ->
