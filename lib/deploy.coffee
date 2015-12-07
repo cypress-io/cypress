@@ -243,7 +243,12 @@ class Platform
 
     @getLatestChromiumVersion().then (version) =>
       new Promise (resolve, reject) =>
-        child_process.exec "#{@buildPathToChromium()} -- --version", (err, stdout, stderr) ->
+        opts = {env: {CYPRESS_ENV: ""}}
+
+        child_process.exec "#{@buildPathToApp()} --get-chromium-version", opts, (err, stdout, stderr) ->
+          [err, stdout, stderr].forEach (val) ->
+            console.log(val) if val
+
           return reject(err) if err
 
           stdout = stdout.replace(/\s/, "")
