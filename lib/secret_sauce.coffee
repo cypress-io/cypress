@@ -50,6 +50,8 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Reporter, Log) ->
         writeErr("Sorry, there was an error loading Cypress.", chalk.yellow("\nerrorCode:", chalk.blue(err.errorCode)), chalk.yellow("\nerrorDescription:", chalk.blue(err.errorDescription)))
       when err.testsDidNotStart
         writeErr("Sorry, there was an error while attempting to start your tests. The remote client never connected.")
+      when err.couldNotSpawnChromium
+        writeErr("Sorry, there was an error spawning Chromium.", chalk.yellow("\n" + err.message))
       else
         writeErr("An error occured receiving token.")
 
@@ -136,8 +138,46 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Reporter, Log) ->
         when options.generateKey  then @generateKey(options)
         # when options.openProject  then @openProject(user, options)
         when options.runProject   then @runProject(options)
+        when options.getChromiumVersion then @getChromiumVersion(options)
         else
           @startGuiApp(options)
+
+    getOsPathToChromiumBin: ->
+      switch process.platform
+        when "darwin" then "./bin/chromium/Chromium.app/Contents/MacOS/Electron"
+        when "linux"  then "./bin/chromium/Chromium"
+
+    getChromiumOptions: ->
+      opts = {}
+
+      if process.env["CYPRESS_ENV"] is "production"
+        opts.cmd = @getOsPathToChromiumBin()
+        opts.args = ["--"]
+      else
+        opts.cmd = "electron"
+        opts.cwd = path.join(process.cwd(), "..", "cypress-chromium")
+        opts.args = ["."]
+
+      opts
+
+    getChromiumVersion: ->
+      opts = @getChromiumOptions()
+      opts.stdio = "inherit"
+      opts.args.push("--version")
+
+      sp = cp.spawn opts.cmd, opts.args, opts
+
+      sp.on "error", (err) ->
+        err.couldNotSpawnChromium = true
+
+        ## log out the error to the console if we're not in production
+        if process.env["CYPRESS_ENV"] isnt "production"
+          process.stdout.write(JSON.stringify(err) + "\n")
+
+        displayError(err)
+
+      sp.on "close", (code) ->
+        process.exit(code)
 
     clearLogs: ->
       Log.clearLogs().then ->
@@ -247,18 +287,10 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Reporter, Log) ->
 
                 console.log("Tests should begin momentarily...")
 
-                # src = "http://localhost:1232"
+                o = @getChromiumOptions()
+                o.args.push("--url=#{src}")
 
-                args = ["--url=#{src}"]
-
-                if process.env["CYPRESS_ENV"] isnt "production"
-                  sp = cp.spawn "electron", ["."].concat(args), {
-                    cwd: path.join(process.cwd(), "..", "cypress-chromium")
-                  }
-                else
-                  ## if we are in production we need to figure out the path
-                  ## to the binary to spawn
-                  sp = cp.spawn "bin/Chromium/Chromium.app/Contents/MacOS/Electron", ["--"].concat(args)
+                sp = cp.spawn o.cmd, o.args, o
 
                 # sp.stdout.on "data", (data) ->
                 #   if data.toString() is "did-finish-load"
