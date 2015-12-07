@@ -46,7 +46,7 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Reporter, Log) ->
         writeErr("Sorry, could not run this specific spec because it was not found:", chalk.blue(err.specPath))
       when err.portInUse
         writeErr("Sorry, could not run this project because this port is currently in use:", chalk.blue(err.port), chalk.yellow("\nSpecify a different port with the '--port <port>' argument or shut down the other process using this port."))
-      when err.chromiumDidNotLoad
+      when err.chromiumFailedLoadingCypress
         writeErr("Sorry, there was an error loading Cypress.", chalk.yellow("\nerrorCode:", chalk.blue(err.errorCode)), chalk.yellow("\nerrorDescription:", chalk.blue(err.errorDescription)))
       when err.testsDidNotStart
         writeErr("Sorry, there was an error while attempting to start your tests. The remote client never connected.")
@@ -285,7 +285,7 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Reporter, Log) ->
                   msg = util.format.apply(util, arguments)
                   process.stdout.write(msg + "\n")
 
-                console.log("Tests should begin momentarily...")
+                console.log("\nTests should begin momentarily...\n")
 
                 o = @getChromiumOptions()
                 o.args.push("--url=#{src}")
@@ -304,15 +304,16 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Reporter, Log) ->
                 sp.stderr.on "data", (data) ->
                   try
                     obj = JSON.parse(data)
-                  catch e
-                    obj = {}
 
-                  err = new Error
-                  err.chromiumDidNotLoad = true
-                  err.errorCode = obj.errorCode
-                  err.errorDescription = obj.errorDescription
+                    ## bail if we arent the stderror coming from chromium
+                    return if not (obj.hasOwnProperty("errorCode") or obj.hasOwnProperty("errorDescription"))
 
-                  displayError(err)
+                    err = new Error
+                    err.chromiumFailedLoadingCypress = true
+                    err.errorCode = obj.errorCode
+                    err.errorDescription = obj.errorDescription
+
+                    displayError(err)
 
                 # @App.execute "start:chromium:run", src, {
                 #   headless:    true
