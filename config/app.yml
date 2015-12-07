@@ -2,6 +2,9 @@ default:
   cy_path: ".cy"
   cache_path: ".cy/#{process.env.CYPRESS_ENV}/cache"
   log_path: ".cy/#{process.env.CYPRESS_ENV}"
+  desktop_manifest_url: http://download.cypress.io/desktop.json
+  chromium_url: http://download.cypress.io/chromium
+  chromium_manifest_url: http://download.cypress.io/chromium.json
   s3:
     path: "https://s3.amazonaws.com"
     bucket: dist.cypress.io
