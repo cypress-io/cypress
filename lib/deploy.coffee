@@ -862,7 +862,7 @@ module.exports = {
         resolve()
 
   parseOptions: (argv) ->
-    opts = minimist(argv)
+    opts = minimist(argv.slice(2))
     opts.runTests = false if opts["skip-tests"]
     opts
 
