@@ -2,13 +2,11 @@ default:
   cy_path: ".cy"
   cache_path: ".cy/#{process.env.CYPRESS_ENV}/cache"
   log_path: ".cy/#{process.env.CYPRESS_ENV}"
+  cdn_url: "http://cdn.cypress.io"
+  desktop_url: "http://download.cypress.io/desktop"
   desktop_manifest_url: http://download.cypress.io/desktop.json
   chromium_url: http://download.cypress.io/chromium
   chromium_manifest_url: http://download.cypress.io/chromium.json
-  s3:
-    path: "https://s3.amazonaws.com"
-    bucket: dist.cypress.io
-    manifest: "manifest.json"
 
 development: &development
   api_url: "http://localhost:1234"

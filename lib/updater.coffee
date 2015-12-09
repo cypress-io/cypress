@@ -44,7 +44,7 @@ class Updater
 
   getPackage: ->
     pkg = fs.readJsonSync path.join(process.cwd(), "package.json")
-    pkg.manifestUrl = [config.app.s3.path, config.app.s3.bucket, config.app.s3.manifest].join("/")
+    pkg.manifestUrl = config.app.desktop_manifest_url
     pkg
 
   getClient: ->

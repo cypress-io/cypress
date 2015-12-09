@@ -430,8 +430,7 @@ class Platform
     @uploadToS3("osx64", "fixture")
 
   getManifest: ->
-    url = [config.app.s3.path, config.app.s3.bucket, "manifest.json"].join("/")
-    request(url).then (resp) ->
+    requestPromise(config.app.desktop_manifest_url).then (resp) ->
       console.log resp
 
   cleanupDist: ->
@@ -888,15 +887,22 @@ module.exports = {
     }[os.platform()] or throw new Error("OS Platform: '#{os.platform()}' not supported!")
 
   getPublisher: ->
-    aws = fs.readJsonSync("./support/aws-credentials.json")
+    aws = @getAwsObj()
 
     $.awspublish.create
-      bucket:          config.app.s3.bucket
+      params: {
+        Bucket:        aws.bucket
+      }
       accessKeyId:     aws.key
       secretAccessKey: aws.secret
 
+  getAwsObj: ->
+    fs.readJsonSync("./support/aws-credentials.json")
+
   getUploadDirName: (version, platform, override) ->
-    (override or (version + "/" + platform)) + "/"
+    aws = @getAwsObj()
+
+    aws.folder + "/" + (override or (version + "/" + platform)) + "/"
 
   uploadToS3: (platform, options, override) ->
     log.call(options, "#uploadToS3")
@@ -913,6 +919,7 @@ module.exports = {
         .pipe $.rename (p) =>
           p.dirname = @getUploadDirName(version, platform, override)
           p
+        .pipe $.debug()
         .pipe publisher.publish(headers, publisherOptions)
         .pipe $.awspublish.reporter()
         .on "error", reject
@@ -957,7 +964,7 @@ module.exports = {
     ## because we're only handling mac right now
     getUrl = (os) ->
       {
-        url: [config.app.s3.path, config.app.s3.bucket, version, os, zipName].join("/")
+        url: [config.app.desktop_url, version, os, zipName].join("/")
       }
 
     obj = {
