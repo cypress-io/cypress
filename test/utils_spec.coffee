@@ -18,7 +18,6 @@ describe "utils", ->
       @stopAsync     = @sandbox.stub(utils.xvfb, "stopAsync").resolves()
 
       @sandbox.stub(utils, "_fileExistsAtPath").resolves("/path/to/cypress")
-      @sandbox.stub(utils, "_cypressSmokeTest").resolves()
       @sandbox.stub(utils, "getPathToExecutable").returns("/path/to/cypress")
 
     it "passes args + options to spawn", ->
@@ -100,22 +99,3 @@ describe "utils", ->
     it "returns path on success", ->
       utils._fileExistsAtPath({pathToCypress: "./tmp/foo.txt"}).then (p) ->
         expect(p).to.eq "./tmp/foo.txt"
-
-  context "#_cypressSmokeTest", ->
-    it "exits with 1 on err", ->
-      @sandbox.stub(cp, "exec").callsArgWith(1, (new Error("foo")))
-
-      utils._cypressSmokeTest("/does/not/exist")
-        .catch (err) =>
-          expect(err.message).to.eq("foo")
-          expect(@exit).to.be.calledWith(1)
-
-    it "exits with 1 if stdout isnt ping", ->
-      @sandbox.stub(cp, "exec").callsArgWith(1, null, "asdf")
-      @sandbox.stub(utils, "getPathToUserExecutable").returns("/foo/bar/baz")
-      log = @sandbox.spy(console, "log")
-
-      utils._cypressSmokeTest("/does/no/exist")
-        .catch (err) =>
-          expect(log).to.be.calledWithMatch("Cypress was found at this path:", "/foo/bar/baz")
-          expect(@exit).to.be.calledWith(1)

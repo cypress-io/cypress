@@ -45,35 +45,6 @@ module.exports = {
       else
         throw new Error("Platform: '#{p}' is not supported.")
 
-  _cypressSmokeTest: (pathToCypress) ->
-    ## cache the smoke test checksum so we
-    ## dont have to do this on every cli command
-    new Promise (resolve, reject) =>
-      num = ""+Math.random()
-
-      cp.exec "#{pathToCypress} --smoke-test --ping=#{num}", (err, stdout, stderr) =>
-
-        if err
-          console.log(err)
-          process.exit(1)
-          reject(err)
-
-        if stdout.replace(/\s/, "") isnt num
-          console.log("")
-          console.log(chalk.bgRed.white(" -Error- "))
-          console.log(chalk.red.underline("Cypress was not executable, it may be corrupt."))
-          console.log("")
-          console.log("Cypress was found at this path:", chalk.blue(@getPathToUserExecutable()))
-          console.log("")
-          console.log(chalk.yellow("To fix this reinstall Cypress with:"))
-          console.log(chalk.cyan("cypress install"))
-          console.log("")
-
-          process.exit(1)
-          reject()
-        else
-          resolve()
-
   _fileExistsAtPath: (options = {}) ->
     ## this needs to change to become async and
     ## to do a lookup for the cached cypress path
@@ -106,10 +77,6 @@ module.exports = {
 
     ## verify that there is a file at this path
     @_fileExistsAtPath(options)
-      .then (pathToCypress) =>
-        ## now verify that we can spawn cypress successfully
-        @_cypressSmokeTest(pathToCypress)
-        .return(pathToCypress)
 
   verifyCypressExists: (options = {}) ->
     _.defaults options,
