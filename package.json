@@ -141,7 +141,7 @@
     "through2": "0.6.3",
     "trash": "^1.4.1",
     "tree-kill": "^1.0.0",
-    "trumpet": "^1.7.1",
+    "trumpet": "cypress-io/node-trumpet",
     "underscore": "1.6.0",
     "underscore.string": "2.3.3",
     "wd": "^0.3.12",
