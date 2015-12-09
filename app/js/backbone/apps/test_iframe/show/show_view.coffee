@@ -161,6 +161,10 @@
       @fn           = null
 
     loadIframes: (options, fn) ->
+      ## clear the console anytime we are about to load
+      ## the iframe
+      console.clear?()
+
       src = options.specPath
       ## remove any existing iframes
       # @reverted = false
