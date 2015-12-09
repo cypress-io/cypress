@@ -32,6 +32,10 @@ module.exports = ->
     .command("install")
     .description("Installs Cypress")
     .option("-d, --destination <path>", text("destination"))
+  program
+    .command("update")
+    .description("Updates Cypress to the latest version")
+    .option("-d, --destination <path>", text("destination"))
     .action (opts) ->
       require("./commands/install")(parseOpts(opts))
 
