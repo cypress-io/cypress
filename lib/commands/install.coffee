@@ -25,6 +25,7 @@ class Install
       initialize:     true
       displayOpen:    true
       version:        null
+      cypressVersion: null
       percent:        0
       current:        0
       total:          100
@@ -70,7 +71,7 @@ class Install
     console.log("")
     process.exit(1)
 
-  getUrl: ->
+  getUrl: (version) ->
     prepend = (u) ->
       u = url.resolve(baseUrl, u)
 
@@ -80,10 +81,10 @@ class Install
       else
         u
 
-    if v = process.env.CYPRESS_VERSION
-      prepend("version/#{v}")
+    if v = (version or process.env.CYPRESS_VERSION)
+      prepend("desktop/#{v}")
     else
-      prepend("latest")
+      prepend("desktop")
 
   download: (options) ->
     new Promise (resolve, reject) =>
@@ -107,7 +108,7 @@ class Install
         reject(err)
 
       req = request({
-        url: @getUrl()
+        url: @getUrl(options.cypressVersion)
         followRedirect: (response) ->
           ## set the version in options
           options.version = response.headers["x-version"]
@@ -162,7 +163,7 @@ class Install
         return reject(err) if err
 
         count = 0
-        total = Math.floor(zipFile.entryCount / 250)
+        total = Math.floor(zipFile.entryCount / 500)
 
         bar = new ProgressBar(ascii.join(" "), {
           total: total
@@ -175,7 +176,7 @@ class Install
           .use(Decompress.zip())
           .use through2.obj (file, enc, cb) ->
             count += 1
-            if count % 250 is 0
+            if count % 500 is 0
               bar.tick(1)
             cb(null, file)
           .run (err, files) ->

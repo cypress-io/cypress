@@ -22,6 +22,10 @@ describe "Install", ->
       @parse("install --destination /foo/bar/baz")
       expect(@spy).to.be.calledWith({destination: "/foo/bar/baz"})
 
+    it "can pass version", ->
+      @parse("install --cypress-version 0.13.0")
+      expect(@spy).to.be.calledWith({cypressVersion: "0.13.0"})
+
   context "#download", ->
     beforeEach ->
       @options = {initialize: false}
@@ -40,7 +44,7 @@ describe "Install", ->
         fs.createReadStream("test/fixture/example.zip")
 
       nock("http://download.cypress.io")
-      .get("/latest")
+      .get("/desktop")
       .query(true)
       .reply 302, undefined, {
         "Location": "http://aws.amazon.com/some.zip"
@@ -50,7 +54,7 @@ describe "Install", ->
       @install.initialize(@options).then =>
         expect(@options.version).to.eq("0.11.1")
 
-    it "can specify cypress version", ->
+    it "can specify cypress version in env", ->
       process.env.CYPRESS_VERSION = "0.12.1"
 
       nock("http://aws.amazon.com")
@@ -59,7 +63,7 @@ describe "Install", ->
         fs.createReadStream("test/fixture/example.zip")
 
       nock("http://download.cypress.io")
-      .get("/version/0.12.1")
+      .get("/desktop/0.12.1")
       .query(true)
       .reply 302, undefined, {
         "Location": "http://aws.amazon.com/some.zip"
@@ -68,6 +72,25 @@ describe "Install", ->
 
       @install.initialize(@options).then =>
         expect(@options.version).to.eq("0.12.1")
+
+    it "can specify cypress version in arguments", ->
+      @options.version = "0.13.0"
+
+      nock("http://aws.amazon.com")
+      .get("/some.zip")
+      .reply 200, (uri, requestBody) ->
+        fs.createReadStream("test/fixture/example.zip")
+
+      nock("http://download.cypress.io")
+      .get("/desktop/0.13.0")
+      .query(true)
+      .reply 302, undefined, {
+        "Location": "http://aws.amazon.com/some.zip"
+        "x-version": "0.13.0"
+      }
+
+      @install.initialize(@options).then =>
+        expect(@options.version).to.eq("0.13.0")
 
     it "catches download status errors and exits", ->
       @sandbox.stub(@install, "download").rejects({statusCode: 404, statusMessage: "Not Found"})

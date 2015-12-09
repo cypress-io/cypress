@@ -8,14 +8,15 @@ pkg       = require("../package.json")
 updater({pkg: pkg, updateCheckInterval: human("one hour")}).notify()
 
 parseOpts = (opts) ->
-  _.pick(opts, "spec", "reporter", "path", "destination", "port", "env")
+  _.pick(opts, "spec", "reporter", "path", "destination", "port", "env", "cypressVersion")
 
 descriptions = {
   destination: "destination path to extract and install Cypress to"
   spec:        "runs a specific spec file. defaults to 'all'"
   reporter:    "runs a specific mocha reporter. pass a path to use a custom reporter. defaults to 'spec'"
-  port:        "runs cypress on a specific port. overrides any value in cypress.json. defaults to '2020'"
+  port:        "runs Cypress on a specific port. overrides any value in cypress.json. defaults to '2020'"
   env:         "sets environment variables. separate multiple values with a comma. overrides any value in cypress.json or cypress.env.json"
+  version:     "installs a specific version of Cypress"
 }
 
 text = (d) ->
@@ -32,6 +33,10 @@ module.exports = ->
     .command("install")
     .description("Installs Cypress")
     .option("-d, --destination <path>", text("destination"))
+    .option("--cypress-version <version>", text("version"))
+    .action (opts) ->
+      require("./commands/install")(parseOpts(opts))
+
   program
     .command("update")
     .description("Updates Cypress to the latest version")
