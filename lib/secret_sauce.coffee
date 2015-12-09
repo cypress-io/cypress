@@ -283,7 +283,7 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Reporter, Log) ->
 
                 if event is "end"
                   stats = reporter.stats()
-                  console.log(stats)
+                  # console.log(stats)
 
                   killChromium (err) ->
                     process.exit(stats.failures)

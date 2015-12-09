@@ -3,7 +3,12 @@ Mocha = require("mocha")
 chalk = require("chalk")
 
 createSuite = (obj) ->
-  new Mocha.Suite(obj.title, {})
+  suite = new Mocha.Suite(obj.title, {})
+
+  if p = obj.parent
+    suite.parent = createSuite(p)
+
+  return suite
 
 createRunnable = (obj) ->
   ## recursively create parent suites
@@ -34,14 +39,6 @@ events = {
   "pass":      createRunnable
   "pending":   createRunnable
   "fail":      createErr
-  # "run:start"   : {name: "start" }
-  # "run:end"     : {name: "end" }
-  # "suite:start" : {name: "suite" }
-  # "suite:end"   : {name: "suite end" }
-  # "test:end"    : {name: "test end", fn: createTest }
-  # "pending"     : {name: "pending", fn: createTest }
-  # "pass"        : {name: "pass", fn: createTest }
-  # "fail"        : {name: "fail", fn: createErr }
 }
 
 class Reporter
@@ -56,6 +53,10 @@ class Reporter
     @runner.ignoreLeaks = true
 
   emit: (event, args...) ->
+    if args = @parseArgs(event, args)
+      @runner.emit.apply(@runner, args)
+
+  parseArgs: (event, args) ->
     ## make sure this event is in our events hash
     if e = events[event]
 
@@ -64,9 +65,7 @@ class Reporter
         ## there is an event.fn callback
         args = e.apply(@, args)
 
-      args = [event].concat(args)
-
-      @runner.emit.apply(@runner, args)
+      [event].concat(args)
 
   stats: ->
     @reporter.stats
