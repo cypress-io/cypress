@@ -663,11 +663,34 @@ SecretSauce.Socket =
       checkForAppErrors: ->
 
     messages = {}
+    chromiums = {}
 
     {projectRoot, testFolder} = @app.get("cypress")
 
     @io.on "connection", (socket) =>
       @Log.info "socket connected"
+
+      socket.on "chromium:connected", =>
+        return if socket.inChromiumRoom
+
+        socket.inChromiumRoom = true
+        socket.join("chromium")
+
+        socket.on "chromium:history:response", (id, response) =>
+          if message = chromiums[id]
+            delete chromiums[id]
+            message(response)
+
+      socket.on "history:entries", (cb) =>
+        id = @uuid.v4()
+
+        chromiums[id] = cb
+
+        if _.keys(@io.sockets.adapter.rooms.chromium).length > 0
+          messages[id] = cb
+          @io.to("chromium").emit "chromium:history:request", id
+        else
+          cb({__error: "Could not process 'history:entries'. No chromium servers connected."})
 
       socket.on "remote:connected", =>
         @Log.info "remote:connected"
