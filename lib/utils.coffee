@@ -5,7 +5,7 @@ fs       = require("fs-extra")
 path     = require("path")
 chalk    = require("chalk")
 Xvfb     = require("xvfb")
-userhome = require("userhome")
+home     = require("home-or-tmp")
 Promise  = require("bluebird")
 
 fs   = Promise.promisifyAll(fs)
@@ -31,8 +31,7 @@ module.exports = {
   getDefaultAppFolder: ->
     switch p = os.platform()
       when "darwin" then "/Applications"
-      when "linux"  then userhome(".cypress")
-      # when "linux"  then "/usr/local/lib"
+      when "linux"  then path.join(home, ".cypress")
       # when "win32"   then "i/dont/know/yet"
       else
         throw new Error("Platform: '#{p}' is not supported.")

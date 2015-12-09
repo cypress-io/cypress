@@ -25,6 +25,7 @@
     "commander": "^2.8.1",
     "decompress": "^3.0.0",
     "fs-extra": "^0.22.1",
+    "home-or-tmp": "^2.0.0",
     "human-interval": "^0.1.5",
     "lodash": "^3.10.0",
     "progress": "^1.1.8",
@@ -32,7 +33,6 @@
     "request-progress": "^0.3.1",
     "through2": "^2.0.0",
     "update-notifier": "^0.5.0",
-    "userhome": "^1.0.0",
     "xvfb": "cypress-io/node-xvfb",
     "yauzl": "^2.3.1"
   },
