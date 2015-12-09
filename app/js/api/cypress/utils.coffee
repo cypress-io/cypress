@@ -7,6 +7,11 @@ $Cypress.Utils = do ($Cypress, _) ->
   CYPRESS_OBJECT_NAMESPACE = "_cypressObj"
 
   return {
+    cypressError: (err) ->
+      err = new Error(err)
+      err.name = "CypressError"
+      err
+
     normalizeObjWithLength: (obj) ->
       ## underscore shits the bed if our object has a 'length'
       ## property so we have to normalize that

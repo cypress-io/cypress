@@ -2,9 +2,7 @@ do ($Cypress, _) ->
 
   $Cypress.Cy.extend
     cypressErr: (err) ->
-      err = new Error(err)
-      err.name = "CypressError"
-      err
+      $Cypress.Utils.cypressError(err)
 
     throwErr: (err, onFail) ->
       if _.isString(err)
