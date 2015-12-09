@@ -142,7 +142,6 @@ Verifies that the Cypress application is found.
 
 These commands have not yet been released:
 
-##### cypress update
 ##### cypress login
 ##### cypress set:path
 ##### cypress add:project
