@@ -12,6 +12,14 @@ git     = require("gift")
 
 fs = Promise.promisifyAll(fs)
 
+log = ->
+  msg = util.format.apply(util, arguments)
+  process.stdout.write(msg + "\n")
+
+patchGlobalConsoleLog = ->
+  if global.console.log isnt log
+    global.console.log = log
+
 write = (str) ->
   process.stdout.write(str + "\n")
 
@@ -248,7 +256,7 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Reporter, Log) ->
         @App.vent.trigger "start:projects:app", {
           morgan:      false
           isHeadless:  true
-          idGenerator: !!options.ci
+          idGenerator: !options.ci ## if we are in CI dont use IDGenerator
           socketId:    id
           projectPath: options.projectPath
           port:        options.port
@@ -258,6 +266,8 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Reporter, Log) ->
             # writeErr(err)
 
           onConnect: (socketId, socket) ->
+            patchGlobalConsoleLog()
+
             ## if this id is correct and this socket
             ## isnt being tracked yet then add it
             if id is socketId
@@ -281,9 +291,7 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Reporter, Log) ->
           onProjectStart: (config) =>
             @getSpec(config, options)
               .then (src) =>
-                global.console.log = ->
-                  msg = util.format.apply(util, arguments)
-                  process.stdout.write(msg + "\n")
+                patchGlobalConsoleLog()
 
                 console.log("\nTests should begin momentarily...\n")
 
