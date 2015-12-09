@@ -10,9 +10,7 @@ For instance you can do common tasks like:
 
 - Installing Cypress
 - Running Cypress Headlessly
-- Logging into Cypress
 - Generating API Keys
-- Adding Projects
 
 ## Installation
 
@@ -27,6 +25,7 @@ You can now execute the following commands:
 ## Available Commands
 
 ##### [cypress install](#cypress-install-1)
+##### [cypress update](#cypress-update-1)
 ##### [cypress run](#cypress-run-1)
 ##### [cypress ci](#cypress-ci-1)
 ##### [cypress open](#cypress-open-1)
@@ -46,15 +45,76 @@ OS | Path
 Mac  | `/Applications/Cypress.app`
 Linux  | `/home/<user>/.cypress/Cypress`
 
+```bash
+## by default will install the latest version
+cypress install
+```
+
+```bash
+## install a specific version
+cypress install --cypress-version 0.13.0
+```
+
+Additionally if you have a `CYPRESS_VERSION` environment variable set, it will automatically download that version. Useful in CI.
+
+### cypress update
+
+Updates Cypress to the latest version. This does the same thing as `cypress install`.
+
+```bash
+## now we have the latest version
+cypress update
+```
+
 ### cypress run
 
 Runs Cypress headlessly. By default will run all your tests. Useful when developing locally.
 
+```bash
+## by default will use your current path
+cypress run
+```
+
+```bash
+## or you can specify a path to the project
+cypress run /users/john/projects/TodoMVC
+```
+
+```bash
+## specify a port to use which overrides values in cypress.json
+cypress run --port 8080
+```
+
+```bash
+## specify a mocha reporter to use
+cypress run --reporter json
+```
+
+```bash
+## specify a spec to run instead of running all the tests
+cypress run --spec app_spec.js
+```
+
+```bash
+## specify environment variables
+cypress run --env host=api.dev.local
+```
+
+You can [read more about environment variables here.](http://on.cypress.io/environment-variables)
+
 ### cypress ci
 
-Run Cypress headlessly in CI. Expects your CI provider to have `XVFB` installed.
+Run Cypress headlessly in CI. [Read the Continuous Integration docs for examples.](http://on.cypress.io/continuous-integration)
 
-> **Note:** Most CI Providers will already have `XVFB` installed.
+```bash
+## provide the CI secret key directly
+cypress ci 1234-abcd-efgh-9876
+```
+
+```bash
+## or if its setup in an env variable called CYPRESS_CI_KEY
+cypress ci
+```
 
 ### cypress open
 
@@ -76,7 +136,7 @@ Creates a new secret project key and returns that key for use in CI. This will n
 
 ### cypress verify
 
-Verifies that the Cypress application is found and is executable.
+Verifies that the Cypress application is found.
 
 ## Upcoming Commands
 
