@@ -43,6 +43,7 @@ $Cypress.Runner = do ($Cypress, _) ->
       @setRunnerListeners = true
 
       Cypress = @Cypress
+      _this   = @
 
       ## mocha has begun running the tests
       @runner.on "start", ->
@@ -106,24 +107,35 @@ $Cypress.Runner = do ($Cypress, _) ->
       @runner.on "test end", (test) =>
         Cypress.trigger "test:end", @wrap(test)
 
+      @runner.on "pass", (test) =>
+        Cypress.trigger "mocha:pass", @wrap(test)
+
       ## if a test is pending mocha will only
       ## emit the pending event instead of the test
       ## so we normalize the pending / test events
       @runner.on "pending", (test) ->
-        test.state = "pending"
-        @emit "test", test
+        if $Cypress.isHeadless
+          Cypress.trigger "mocha:pending", _this.wrap(test)
+        else
+          test.state = "pending"
+          @emit "test", test
 
       @runner.on "fail", (runnable, err) =>
-        runnable.err = err
+        if $Cypress.isHeadless
+          Cypress.trigger "mocha:fail", @wrap(runnable), @wrapErr(err)
+        else
+          runnable.err = err
+          @hookFailed(runnable, err) if runnable.type is "hook"
 
-        @hookFailed(runnable, err) if runnable.type is "hook"
+    wrapErr: (err) ->
+      _.pick err, "message", "type", "name", "stack", "fileName", "lineNumber", "columnNumber", "host", "uncaught", "actual", "expected", "showDiff"
 
     wrap: (runnable) ->
       ## we need to optimize wrap by converting
       ## tests to an id-based object which prevents
       ## us from recursively iterating through every
       ## parent since we could just return the found test
-      r = _(runnable).pick "id", "title", "originalTitle", "root", "hookName", "err", "duration", "state", "failedFromHook"
+      r = _(runnable).pick "id", "title", "originalTitle", "root", "hookName", "err", "duration", "state", "failedFromHook", "timedOut", "async", "sync"
 
       if parent = runnable.parent
         ## recursively walk up the parent chain

@@ -127,9 +127,14 @@ class Server
 
   configureApplication: (options = {}) ->
     _.defaults options,
+      idGenerator: true
       morgan: true
+      isHeadless: false
       port: null
+      socketId: null
       environmentVariables: null
+
+    _.extend @config, _.pick(options, "idGenerator", "isHeadless")
 
     ## merge these into except
     ## for the 'environmentVariables' key
@@ -144,6 +149,10 @@ class Server
     if p = options.port
       @config.port = p
       @setUrls(@config)
+
+    ## send up our socketId to the client
+    if sid = options.socketId
+      @config.socketId = sid
 
     ## set the cypress config from the cypress.json file
     @app.set "port",        @config.port
@@ -208,6 +217,12 @@ class Server
       @app.once "close", =>
         watchers.close()
         socket.close()
+
+      # @config.checkForAppErrors = ->
+      #   socket.checkForAppErrors()
+
+      ## expose the socket back to the app
+      # options.socket = socket
 
       onError = (err) =>
         ## if the server bombs before starting

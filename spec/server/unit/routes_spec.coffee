@@ -1386,6 +1386,21 @@ describe "Routes", ->
             null
           .end(done)
 
+      it "rewrites <svg> without hanging", (done) ->
+        ## if this test finishes without timing out we know its all good
+        contents = removeWhitespace Fixtures.get("server/err_response.html")
+
+        nock(@baseUrl)
+          .get("/bar")
+          .reply 200, contents,
+            "Content-Type": "text/html; charset=utf-8"
+
+        supertest(@app)
+          .get("/bar")
+          .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+          .expect(200)
+          .end(done)
+
     context "<root> file serving", ->
       beforeEach (done) ->
         @baseUrl = "/index.html"

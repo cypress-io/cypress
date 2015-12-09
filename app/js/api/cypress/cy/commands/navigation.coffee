@@ -7,7 +7,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
         args: args
       })
 
-    Cypress.Location.override(contentWindow, navigated)
+    Cypress.Location.override(Cypress, contentWindow, navigated)
 
   Cypress.on "before:window:load", (contentWindow) ->
     ## override the remote iframe getters

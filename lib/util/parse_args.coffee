@@ -2,7 +2,7 @@ _        = require("lodash")
 path     = require("path")
 minimist = require("minimist")
 
-args     = "apiKey smokeTest getKey generateKey runProject project spec reporter ci debug updating headless ping coords key logs clearLogs port returnPkg environmentVariables".split(" ")
+args     = "apiKey smokeTest getKey generateKey runProject project spec reporter ci debug updating headless ping coords key logs clearLogs port returnPkg environmentVariables getChromiumVersion".split(" ")
 
 parseCoords = (coords) ->
   [x, y] = coords.split("x")
@@ -26,6 +26,7 @@ module.exports = (options) ->
       "clear-logs":  "clearLogs"
       "return-pkg":  "returnPkg"
       "env":         "environmentVariables"
+      "get-chromium-version": "getChromiumVersion"
     }
   })
 

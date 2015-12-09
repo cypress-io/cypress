@@ -15,6 +15,6 @@ getEnv = ->
 
   ## use env from package first
   ## or development as default
-  process.env["CYPRESS_ENV"] ?= fs.readJsonSync(pkg).env ? "development"
+  process.env["CYPRESS_ENV"] or= fs.readJsonSync(pkg).env ? "development"
 
 module.exports = getEnv()

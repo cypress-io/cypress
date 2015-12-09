@@ -46,7 +46,7 @@ describe "Updater", ->
     it "inserts manifestUrl to package.json", ->
       expect(@updater.getPackage()).to.deep.eq {
         foo: "bar"
-        manifestUrl: "https://s3.amazonaws.com/dist.cypress.io/manifest.json"
+        manifestUrl: "http://download.cypress.io/desktop.json"
       }
 
   context "#getClient", ->
@@ -327,20 +327,20 @@ describe "Updater", ->
       })
 
       ## force a manifest.json response here to be a slightly higher version
-      nock("https://s3.amazonaws.com")
-        .get("/dist.cypress.io/manifest.json")
+      nock("http://download.cypress.io")
+        .get("/desktop.json")
         .reply 200, {
           name: "cypress"
           version: "0.0.2"
           packages: {
             mac: {
-              url: "https://s3.amazonaws.com/dist.cypress.io/0.0.2/cypress.zip"
+              url: "http://cdn.cypress.io/desktop/0.0.2/cypress.zip"
             }
             win: {
-              url: "https://s3.amazonaws.com/dist.cypress.io/0.0.2/cypress.zip"
+              url: "http://cdn.cypress.io/desktop/0.0.2/cypress.zip"
             }
             linux: {
-              url: "https://s3.amazonaws.com/dist.cypress.io/0.0.2/cypress.zip"
+              url: "http://cdn.cypress.io/desktop/0.0.2/cypress.zip"
             }
           }
         }

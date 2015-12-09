@@ -7,11 +7,13 @@ IdGenerator   = require './id_generator'
 Fixtures      = require "./fixtures"
 Request       = require "./request"
 Log           = require "./log"
+Reporter      = require "./reporter"
 SecretSauce   = require "../lib/util/secret_sauce_loader"
 
 class Socket
   fs: fs
   Log: Log
+  Reporter: Reporter
   Request: Request
   Fixtures: Fixtures
   Promise: Promise
@@ -32,6 +34,7 @@ class Socket
     @app         = app
     @io          = io
     @idGenerator = IdGenerator(@app)
+    @reporter    = Reporter(@app)
 
   startListening: (watchers, options) ->
     if process.env["CYPRESS_ENV"] is "development"

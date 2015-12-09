@@ -2,6 +2,8 @@ _       = require("lodash")
 os      = require("os")
 cp      = require("child_process")
 path    = require("path")
+util    = require("util")
+kill    = require("tree-kill")
 chalk   = require("chalk")
 request = require("request-promise")
 Promise = require("bluebird")
@@ -9,6 +11,14 @@ fs      = require("fs-extra")
 git     = require("gift")
 
 fs = Promise.promisifyAll(fs)
+
+log = ->
+  msg = util.format.apply(util, arguments)
+  process.stdout.write(msg + "\n")
+
+patchGlobalConsoleLog = ->
+  if global.console.log isnt log
+    global.console.log = log
 
 write = (str) ->
   process.stdout.write(str + "\n")
@@ -29,7 +39,7 @@ SecretSauce =
     for key, fn of @[module]
       klass.prototype[key] = fn
 
-SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
+SecretSauce.Cli = (App, options, Routes, Chromium, Reporter, Log) ->
   repo = Promise.promisifyAll git(options.projectPath)
 
   displayToken = (token) ->
@@ -44,6 +54,12 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
         writeErr("Sorry, could not run this specific spec because it was not found:", chalk.blue(err.specPath))
       when err.portInUse
         writeErr("Sorry, could not run this project because this port is currently in use:", chalk.blue(err.port), chalk.yellow("\nSpecify a different port with the '--port <port>' argument or shut down the other process using this port."))
+      when err.chromiumFailedLoadingCypress
+        writeErr("Sorry, there was an error loading Cypress.", chalk.yellow("\nerrorCode:", chalk.blue(err.errorCode)), chalk.yellow("\nerrorDescription:", chalk.blue(err.errorDescription)))
+      when err.testsDidNotStart
+        writeErr("Sorry, there was an error while attempting to start your tests. The remote client never connected.")
+      when err.couldNotSpawnChromium
+        writeErr("Sorry, there was an error spawning Chromium.", chalk.yellow("\n" + err.message))
       else
         writeErr("An error occured receiving token.")
 
@@ -130,8 +146,46 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
         when options.generateKey  then @generateKey(options)
         # when options.openProject  then @openProject(user, options)
         when options.runProject   then @runProject(options)
+        when options.getChromiumVersion then @getChromiumVersion(options)
         else
           @startGuiApp(options)
+
+    getOsPathToChromiumBin: ->
+      switch process.platform
+        when "darwin" then "./bin/chromium/Chromium.app/Contents/MacOS/Electron"
+        when "linux"  then "./bin/chromium/Chromium"
+
+    getChromiumOptions: ->
+      opts = {}
+
+      if process.env["CYPRESS_ENV"] is "production"
+        opts.cmd = @getOsPathToChromiumBin()
+        opts.args = ["--"]
+      else
+        opts.cmd = "electron"
+        opts.cwd = path.join(process.cwd(), "..", "cypress-chromium")
+        opts.args = ["."]
+
+      opts
+
+    getChromiumVersion: ->
+      opts = @getChromiumOptions()
+      opts.stdio = "inherit"
+      opts.args.push("--version")
+
+      sp = cp.spawn opts.cmd, opts.args, opts
+
+      sp.on "error", (err) ->
+        err.couldNotSpawnChromium = true
+
+        ## log out the error to the console if we're not in production
+        if process.env["CYPRESS_ENV"] isnt "production"
+          process.stdout.write(JSON.stringify(err) + "\n")
+
+        displayError(err)
+
+      sp.on "close", (code) ->
+        process.exit(code)
 
     clearLogs: ->
       Log.clearLogs().then ->
@@ -187,36 +241,120 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Log) ->
       ## silence all console messages
       @App.silenceConsole()
 
-      @App.vent.trigger "start:projects:app", {
-        morgan:      false
-        projectPath: options.projectPath
-        port:        options.port
-        onError:     displayError
-        environmentVariables: options.environmentVariables
-        onProjectStart: (config) =>
-          @getSpec(config, options)
-            .then (src) =>
-              @App.execute "start:chromium:run", src, {
-                headless:    true
-                onReady: (win) ->
-                  Chromium(win).override({
-                    ci:          options.ci
-                    reporter:    options.reporter
-                    ci_guid:     options.ci_guid
-                  })
-              }
-            .catch(displayError)
+      id = Math.random()
 
-        onProjectNotFound: (path) ->
-          ## instead of throwing we should prompt the user with inquirer
-          ## hey this project hasn't ever been added to cypress, would you
-          ## like to add this project?
-          ## YES/NO
-          ## --adding project--
-          ## --project added!--
+      reporter = Reporter()
 
-          writeErr("Sorry, could not run project because it was not found:", chalk.blue(path))
-      }
+      connected = false
+      sp        = null
+
+      killChromium = (fn = ->) ->
+        kill sp.pid, "SIGKILL", fn
+
+      p = new Promise (resolve, reject) =>
+
+        @App.vent.trigger "start:projects:app", {
+          morgan:      false
+          isHeadless:  true
+          idGenerator: !options.ci ## if we are in CI dont use IDGenerator
+          socketId:    id
+          projectPath: options.projectPath
+          port:        options.port
+          onError:     displayError
+          environmentVariables: options.environmentVariables
+          # onAppError: (err) ->
+            # writeErr(err)
+
+          onConnect: (socketId, socket) ->
+            patchGlobalConsoleLog()
+
+            ## if this id is correct and this socket
+            ## isnt being tracked yet then add it
+            if id is socketId
+              if not connected
+                ## resolve our promise that we became
+                ## connected so it doesnt time out
+                resolve()
+                connected = true
+
+              socket.on "mocha", (event, args...) ->
+                args = [event].concat(args)
+                reporter.emit.apply(reporter, args)
+
+                if event is "end"
+                  stats = reporter.stats()
+                  # console.log(stats)
+
+                  killChromium (err) ->
+                    process.exit(stats.failures)
+
+          onProjectStart: (config) =>
+            @getSpec(config, options)
+              .then (src) =>
+                patchGlobalConsoleLog()
+
+                console.log("\nTests should begin momentarily...\n")
+
+                o = @getChromiumOptions()
+                o.args.push("--url=#{src}")
+
+                sp = cp.spawn o.cmd, o.args, o
+
+                # sp.stdout.on "data", (data) ->
+                #   if data.toString() is "did-finish-load"
+                #     ## check to ensure there are no App.error
+                #     ## if there are exit and log out the error
+                #     # process.stdout.write("data is: #{data}")
+                #     config.checkForAppErrors()
+
+                ## Chromium will output data on stderr
+                ## on 'did-fail-load' events
+                sp.stderr.on "data", (data) ->
+                  try
+                    obj = JSON.parse(data)
+
+                    ## bail if we arent the stderror coming from chromium
+                    return if not (obj.hasOwnProperty("errorCode") or obj.hasOwnProperty("errorDescription"))
+
+                    err = new Error
+                    err.chromiumFailedLoadingCypress = true
+                    err.errorCode = obj.errorCode
+                    err.errorDescription = obj.errorDescription
+
+                    displayError(err)
+
+                # @App.execute "start:chromium:run", src, {
+                #   headless:    true
+                #   onReady: (win) ->
+                #     Chromium(win).override({
+                #       ci:          options.ci
+                #       reporter:    options.reporter
+                #       ci_guid:     options.ci_guid
+                #     })
+                # }
+              .catch(displayError)
+
+          onProjectNotFound: (path) ->
+            ## instead of throwing we should prompt the user with inquirer
+            ## hey this project hasn't ever been added to cypress, would you
+            ## like to add this project?
+            ## YES/NO
+            ## --adding project--
+            ## --project added!--
+
+            writeErr("Sorry, could not run project because it was not found:", chalk.blue(path))
+        }
+
+      ## allow up to 10 seconds for our promise to resolve
+      ## when the client application connects. if we dont
+      ## resolve in time then kill all chromium processes
+      p
+      .timeout(10000)
+      .catch Promise.TimeoutError, (err) ->
+        err.testsDidNotStart = true
+
+        killChromium ->
+          displayError(err)
 
     runProject: (options) ->
       if ensureSessionToken(@user)
@@ -519,14 +657,40 @@ SecretSauce.Socket =
     { _ } = SecretSauce
 
     _.defaults options,
+      socketId: null
+      onConnect: ->
       onChromiumRun: ->
+      checkForAppErrors: ->
 
     messages = {}
+    chromiums = {}
 
     {projectRoot, testFolder} = @app.get("cypress")
 
     @io.on "connection", (socket) =>
       @Log.info "socket connected"
+
+      socket.on "chromium:connected", =>
+        return if socket.inChromiumRoom
+
+        socket.inChromiumRoom = true
+        socket.join("chromium")
+
+        socket.on "chromium:history:response", (id, response) =>
+          if message = chromiums[id]
+            delete chromiums[id]
+            message(response)
+
+      socket.on "history:entries", (cb) =>
+        id = @uuid.v4()
+
+        chromiums[id] = cb
+
+        if _.keys(@io.sockets.adapter.rooms.chromium).length > 0
+          messages[id] = cb
+          @io.to("chromium").emit "chromium:history:request", id
+        else
+          cb({__error: "Could not process 'history:entries'. No chromium servers connected."})
 
       socket.on "remote:connected", =>
         @Log.info "remote:connected"
@@ -597,6 +761,13 @@ SecretSauce.Socket =
       ## the job name
       socket.on "run:sauce", (spec, fn) =>
         @_runSauce(socket, spec, fn)
+
+      # socket.on "app:errors", (err) ->
+        # process.stdout.write "app:errors"
+        # options.onAppError(err)
+
+      socket.on "app:connect", (socketId) ->
+        options.onConnect(socketId, socket)
 
     @testsDir = path.join(projectRoot, testFolder)
 

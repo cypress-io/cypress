@@ -13,6 +13,9 @@
       initialize: ->
         @Cypress   = $Cypress.create({loadModules: true})
 
+        if App.config.get("isHeadless")
+          $Cypress.isHeadless = true
+
         @satelliteEvents = App.request("satellite:events")
         @passThruEvents  = App.request("pass:thru:events")
         @hostEvents      = App.request("host:events")
@@ -32,6 +35,33 @@
           @listenTo @Cypress, event, (args...) =>
             @trigger event, args...
 
+        @listenTo @Cypress, "run:start", =>
+          @socket.emit "mocha", "start"
+
+        @listenTo @Cypress, "run:end", =>
+          @socket.emit "mocha", "end"
+
+        @listenTo @Cypress, "suite:start", (suite) =>
+          @socket.emit "mocha", "suite", suite
+
+        @listenTo @Cypress, "suite:end", (suite) =>
+          @socket.emit "mocha", "suite end", suite
+
+        @listenTo @Cypress, "test:start", (test) =>
+          @socket.emit "mocha", "test", test
+
+        @listenTo @Cypress, "test:end", (test) =>
+          @socket.emit "mocha", "test end", test
+
+        @listenTo @Cypress, "mocha:pending", (test) =>
+          @socket.emit "mocha", "pending", test
+
+        @listenTo @Cypress, "mocha:pass", (test) =>
+          @socket.emit "mocha", "pass", test
+
+        @listenTo @Cypress, "mocha:fail", (test, err) =>
+          @socket.emit "mocha", "fail", test, err
+
         @listenTo @Cypress, "message", (msg, data, cb) =>
           @socket.emit "client:request", msg, data, cb
 
@@ -40,6 +70,9 @@
 
         @listenTo @Cypress, "request", (request, cb) =>
           @socket.emit "request", request, cb
+
+        @listenTo @Cypress, "history:entries", (cb) =>
+          @socket.emit "history:entries", cb
 
         @listenTo @Cypress, "initialized", (obj) =>
           @receivedRunner(obj.runner)

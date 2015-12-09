@@ -10,12 +10,16 @@ $              = require('gulp-load-plugins')()
 gutil          = require("gulp-util")
 inquirer       = require("inquirer")
 NwBuilder      = require("nw-builder")
-request        = require("request-promise")
+requestPromise = require("request-promise")
+request        = require("request")
 os             = require("os")
 vagrant        = require("vagrant")
 runSequence    = require("run-sequence")
 minimist       = require("minimist")
 Xvfb           = require("xvfb")
+tar            = require("tar-fs")
+zlib           = require("zlib")
+stp            = require("stream-to-promise")
 expect         = require("chai").expect
 
 vagrant.debug = true
@@ -28,8 +32,10 @@ require path.join(process.cwd(), "gulpfile.coffee")
 
 distDir   = path.join(process.cwd(), "dist")
 buildDir  = path.join(process.cwd(), "build")
+cacheDir  = path.join(process.cwd(), "cache")
 platforms = ["osx64", "linux64"]
 zipName   = "cypress.zip"
+tarName   = "chromium.tar.gz"
 
 log = (msg, color = "yellow") ->
   return if process.env["NODE_ENV"] is "test"
@@ -53,6 +59,59 @@ class Platform
     @options.version ?
       fs.readJsonSync("./package.json").version ?
           throw new Error("Platform#version was not defined!")
+
+  getLatestChromiumVersion: ->
+    requestPromise(config.app.chromium_manifest_url, {json: true})
+    .promise()
+    .get("version")
+
+  untarChromium: (pathToChromiumFile) ->
+    @log("#untar")
+
+    ## read from chromium.tar.gz and untar
+    ## and extract into ./bin/chromium
+    rs = fs.createReadStream(pathToChromiumFile)
+    .pipe(zlib.createGunzip())
+    .pipe(tar.extract(@buildPathToChromiumDir()))
+
+    stp(rs)
+
+  downloadChromium: (pathToChromiumFile) ->
+    @log("#downloadChromium")
+
+    osName = switch @platform
+      when "osx64"    then "mac"
+      when "linux64"  then "linux64"
+
+    url = config.app.chromium_url + "?os=#{osName}"
+
+    dir = path.dirname(pathToChromiumFile)
+
+    fs.ensureDirAsync(dir).then =>
+      ## go download chromium
+      r = request(url)
+
+      ## store this in tar in the cache
+      .pipe(fs.createWriteStream(pathToChromiumFile))
+
+      stp(r).return(pathToChromiumFile)
+
+  handleChromium: ->
+    @log("#handleChromium")
+
+    ## get the latest chromium version
+    @getLatestChromiumVersion().then (version) =>
+      pathToChromiumFile = path.join(cacheDir, "chromium", version, @platform, tarName)
+
+      untar = =>
+        @untarChromium(pathToChromiumFile)
+
+      ## see if we have this version cached
+      fs.statAsync(pathToChromiumFile)
+        .then(untar)
+        .catch =>
+          @downloadChromium(pathToChromiumFile)
+          .then(untar)
 
   copyFiles: ->
     @log("#copyFiles")
@@ -100,6 +159,7 @@ class Platform
           copy("./lib/fixtures.coffee",     "/src/lib/fixtures.coffee")
           copy("./lib/watchers.coffee",     "/src/lib/watchers.coffee")
           copy("./lib/updater.coffee",      "/src/lib/updater.coffee")
+          copy("./lib/reporter.coffee",     "/src/lib/reporter.coffee")
           copy("./lib/environment.coffee",  "/src/lib/environment.coffee")
           copy("./lib/log.coffee",          "/src/lib/log.coffee")
           copy("./lib/exception.coffee",    "/src/lib/exception.coffee")
@@ -177,6 +237,29 @@ class Platform
       return Promise.resolve()
 
     Promise.bind(@).then(@nwTests)
+
+  runChromiumSmokeTest: ->
+    @log("#runChromiumSmokeTest")
+
+    @getLatestChromiumVersion().then (version) =>
+      new Promise (resolve, reject) =>
+        env = _.clone(process.env)
+        env.CYPRESS_ENV = ""
+
+        opts = {env: env}
+
+        child_process.exec "#{@buildPathToApp()} --get-chromium-version", opts, (err, stdout, stderr) ->
+          [err, stdout, stderr].forEach (val) ->
+            console.log(val) if val
+
+          return reject(err) if err
+
+          stdout = stdout.replace(/\s/, "")
+
+          if stdout isnt version
+            throw new Error("Chromium version: '#{stdout}' did not match expected version: '#{version}'")
+          else
+            resolve()
 
   _nwTests: (options = {}) ->
     _.defaults options,
@@ -347,8 +430,7 @@ class Platform
     @uploadToS3("osx64", "fixture")
 
   getManifest: ->
-    url = [config.app.s3.path, config.app.s3.bucket, "manifest.json"].join("/")
-    request(url).then (resp) ->
+    requestPromise(config.app.desktop_manifest_url).then (resp) ->
       console.log resp
 
   cleanupDist: ->
@@ -376,7 +458,9 @@ class Platform
       .then(@nwBuilder)
       .then(@afterBuild)
       .then(@cleanupDist)
+      .then(@handleChromium)
       .then(@runSmokeTest)
+      .then(@runChromiumSmokeTest)
       .then(@codeSign) ## codesign after running smoke tests due to changing .cy
       .then(@verifyAppCanOpen)
 
@@ -455,6 +539,12 @@ class Platform
 class Osx64 extends Platform
   buildPathToApp: ->
     path.join buildDir, @getVersion(), @platform, "Cypress.app", "Contents", "MacOS", "Cypress"
+
+  buildPathToChromium: ->
+    path.join @buildPathToChromiumDir(), "Chromium.app", "Contents", "MacOS", "Electron"
+
+  buildPathToChromiumDir: ->
+    path.join buildDir, @getVersion(), @platform, "Cypress.app", "Contents", "Resources", "app.nw", "bin", "chromium"
 
   verifyAppCanOpen: ->
     @log("#verifyAppCanOpen")
@@ -574,6 +664,12 @@ class Linux64 extends Platform
   buildPathToApp: ->
     path.join buildDir, @getVersion(), @platform, "Cypress", "Cypress"
 
+  buildPathToChromium: ->
+    path.join @buildPathToChromiumDir(), "Chromium"
+
+  buildPathToChromiumDir: ->
+    path.join buildDir, @getVersion(), @platform, "Cypress", "bin", "chromium"
+
   codeSign: ->
     Promise.resolve()
 
@@ -599,6 +695,13 @@ class Linux64 extends Platform
         height: 400
         width: 300
       }).then ->
+        xvfb.stopAsync()
+
+  runChromiumSmokeTest: ->
+    xvfb = new Xvfb()
+    xvfb = Promise.promisifyAll(xvfb)
+    xvfb.startAsync().then (xvfxProcess) =>
+      super.then ->
         xvfb.stopAsync()
 
   nwBuilder: ->
@@ -773,7 +876,7 @@ module.exports = {
         resolve()
 
   parseOptions: (argv) ->
-    opts = minimist(argv)
+    opts = minimist(argv.slice(2))
     opts.runTests = false if opts["skip-tests"]
     opts
 
@@ -784,15 +887,22 @@ module.exports = {
     }[os.platform()] or throw new Error("OS Platform: '#{os.platform()}' not supported!")
 
   getPublisher: ->
-    aws = fs.readJsonSync("./support/aws-credentials.json")
+    aws = @getAwsObj()
 
     $.awspublish.create
-      bucket:          config.app.s3.bucket
+      params: {
+        Bucket:        aws.bucket
+      }
       accessKeyId:     aws.key
       secretAccessKey: aws.secret
 
+  getAwsObj: ->
+    fs.readJsonSync("./support/aws-credentials.json")
+
   getUploadDirName: (version, platform, override) ->
-    (override or (version + "/" + platform)) + "/"
+    aws = @getAwsObj()
+
+    aws.folder + "/" + (override or (version + "/" + platform)) + "/"
 
   uploadToS3: (platform, options, override) ->
     log.call(options, "#uploadToS3")
@@ -809,6 +919,7 @@ module.exports = {
         .pipe $.rename (p) =>
           p.dirname = @getUploadDirName(version, platform, override)
           p
+        .pipe $.debug()
         .pipe publisher.publish(headers, publisherOptions)
         .pipe $.awspublish.reporter()
         .on "error", reject
@@ -853,7 +964,7 @@ module.exports = {
     ## because we're only handling mac right now
     getUrl = (os) ->
       {
-        url: [config.app.s3.path, config.app.s3.bucket, version, os, zipName].join("/")
+        url: [config.app.desktop_url, version, os, zipName].join("/")
       }
 
     obj = {

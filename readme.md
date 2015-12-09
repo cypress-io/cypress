@@ -160,3 +160,15 @@ Remote server responds:
 // and passes back the same GUID ID, as well as the new JSON response data
 socket.emit("remote:response", "123-a-guid-as-an-id", {a: "new response data obj"})
 ```
+
+### Debugging Linux (Desktop)
+
+- `vagrant halt`
+- Modify Vagrantfile, comment out `vm.box` and uncomment `vm.define desktop`
+- `vagrant up`
+- `.vagrant/ssh` can be edited in sublime and takes effect immediately
+- Open `terminal` on the desktop
+- `cd /cypress_app`
+- `npm i`
+- Open new tab: `npm run watch`
+- `node_modules/.bin/nw .`

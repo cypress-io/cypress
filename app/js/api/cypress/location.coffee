@@ -127,7 +127,12 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
       }
 
     ## override pathname + query here
-    @override = (win, navigated) ->
+    @override = (Cypress, win, navigated) ->
+
+      # getHistory = =>
+      #   new Promise (resolve) ->
+      #     Cypress.trigger "history:entries", resolve
+
       ## history does not fire events until a click or back has happened
       ## so we have to know when they do manually
       _.each ["back", "forward", "go", "pushState", "replaceState"], (attr) ->
@@ -136,10 +141,37 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
         return if not orig = win.history?[attr]
 
         win.history[attr] = ->
-          orig.apply(@, arguments)
+          args = arguments
 
-          ## let our function know we've navigated
-          navigated(attr, arguments)
+
+          if $Cypress.isHeadless
+            throw $Cypress.Utils.cypressError("""
+              Your app called 'history.#{attr}()' when running headlessly.\n
+              This is a known bug. Currently, calling 'history.#{attr}()' will cause tests to restart continuously and never finish.\n
+              We are throwing this error temporarily until the issue is resolved.
+            """)
+
+            # getHistory().then (response) =>
+            #   {history, index} = response
+
+            #   if err = response.__error
+            #     throw $Cypress.Utils.cypressError(err)
+            #   else
+            #     getUrl = ->
+            #       switch attr
+            #         when "go"      then history[index + args[0]]
+            #         when "back"    then history[index - 1]
+            #         when "forward" then history[index + 1]
+
+            #     if url = getUrl()
+            #       win.location.href = getUrl()
+
+            #       navigated(attr, args)
+          else
+            orig.apply(@, args)
+
+            ## let our function know we've navigated
+            navigated(attr, args)
 
     ## think about moving this method out of Cypress
     ## and into our app, since it kind of leaks the

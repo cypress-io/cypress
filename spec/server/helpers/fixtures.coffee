@@ -39,7 +39,7 @@ module.exports =
       fs.ensureDirSync zip.split("/cypress.zip").join("")
 
       file = fs.createWriteStream(zip)
-      url  = [config.app.s3.path, config.app.s3.bucket, "fixture", "cypress.zip"].join("/")
+      url  = [config.app.cdn_url, "desktop", "fixture", "cypress.zip"].join("/")
 
       request.get(url).pipe(file)
 
