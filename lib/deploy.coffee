@@ -837,8 +837,6 @@ module.exports = {
       inquirer.prompt @getPlatformQuestion(), (answers) =>
         resolve(answers.platform)
 
-  updateS3Manifest: ->
-
   cleanupEachPlatform: (platforms) ->
     Promise
       .map(platforms, @cleanupPlatform)
@@ -959,12 +957,12 @@ module.exports = {
         }
     }]
 
-  createRemoteManifest: (version) ->
+  createRemoteManifest: (folder, version) ->
     ## this isnt yet taking into account the os
     ## because we're only handling mac right now
     getUrl = (os) ->
       {
-        url: [config.app.desktop_url, version, os, zipName].join("/")
+        url: [config.app.cdn_url, folder, version, os, zipName].join("/")
       }
 
     obj = {
@@ -983,13 +981,18 @@ module.exports = {
   updateS3Manifest: (version) ->
     publisher = @getPublisher()
     options = @publisherOptions
+    aws = @getAwsObj()
 
     headers = {}
     headers["Cache-Control"] = "no-cache"
 
     new Promise (resolve, reject) =>
-      @createRemoteManifest(version).then (src) ->
+      @createRemoteManifest(aws.folder, version).then (src) ->
         gulp.src(src)
+          .pipe $.rename (p) ->
+            p.dirname = aws.folder + "/" + p.dirname
+            p
+          .pipe $.debug()
           .pipe publisher.publish(headers, options)
           .pipe $.awspublish.reporter()
           .on "error", reject

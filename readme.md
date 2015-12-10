@@ -66,7 +66,7 @@ bin/cy <path-to-the-project-you-want-to-test> --no-debug
 bin/cy <path-to-the-project-you-want-to-test> --no-ids --no-debug
 ```
 
-### Deplying
+### Deploying
 
 ```bash
 npm run deploy
