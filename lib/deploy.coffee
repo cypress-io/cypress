@@ -550,14 +550,18 @@ class Osx64 extends Platform
     @log("#verifyAppCanOpen")
 
     pathToApp = path.join buildDir, @getVersion(), @platform, "Cypress.app"
+    pathToChr = path.join @buildPathToChromiumDir(), "Chromium.app"
 
-    new Promise (resolve) ->
-      sp = child_process.spawn "spctl", ["-a", pathToApp], {stdio: "inherit"}
-      sp.on "exit", (code) ->
-        if code is 0
-          resolve()
-        else
-          throw new Error("Verifying App via GateKeeper failed")
+    spctl = (p) ->
+      new Promise (resolve) ->
+        sp = child_process.spawn "spctl", ["-a", p], {stdio: "inherit"}
+        sp.on "exit", (code) ->
+          if code is 0
+            resolve()
+          else
+            throw new Error("Verifying App via GateKeeper failed")
+
+    Promise.map [pathToApp, pathToChr], spctl
 
   runSmokeTest: ->
     @_runSmokeTest({

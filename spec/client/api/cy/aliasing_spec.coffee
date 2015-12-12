@@ -147,6 +147,28 @@ describe "$Cypress.Cy Aliasing Commands", ->
           expect(@log.get("alias")).to.eq("foo")
           expect(@log.get("aliasType")).to.eq("dom")
 
+      it "does not match alias when the alias has already been applied", ->
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push(log)
+
+        @cy
+          .visit("fixtures/html/commands.html")
+          .server()
+          .route(/foo/, {}).as("getFoo")
+          .then ->
+            ## 1 log from visit
+            ## 1 log from route
+            expect(logs.length).to.eq(2)
+
+            expect(logs[0].get("name")).to.eq("visit")
+            expect(logs[0].get("alias")).not.to.be.ok
+            expect(logs[0].get("aliasType")).not.to.be.ok
+
+            expect(logs[1].get("name")).to.eq("route")
+            expect(logs[1].get("alias")).to.eq("getFoo")
+
       # it.only "does not alias previous logs when no matching chainerId", ->
       #   @cy
       #     .get("div:first")

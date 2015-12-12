@@ -83,7 +83,16 @@ $Cypress.Server = do ($Cypress, _) ->
 
     setResponseBody: ->
       @response ?= {}
-      @response.body = parseJSON(@xhr.responseText)
+
+      ## if we are a responseType of arraybuffer
+      ## then touching responseText will throw and
+      ## our ArrayBuffer should just be on the response
+      ## object
+      @response.body =
+        try
+          parseJSON(@xhr.responseText)
+        catch e
+          @xhr.response
 
     setResponseHeaders: ->
       ## parse response header string into object

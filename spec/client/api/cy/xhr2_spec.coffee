@@ -291,6 +291,46 @@ describe "$Cypress.Cy XHR Commands", ->
             expect(xhr.url).to.eq("http://www.google.com/phones/phones.json")
             expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/http://www.google.com/phones/phones.json")
 
+      it "can stub CORS string routes", ->
+        @cy
+          .server()
+          .visit("http://localhost:3500/fixtures/html/xhr.html")
+          .route({
+            url: "http://localhost:3501/fixtures/ajax/app.json"
+            stub: false
+          }).as("getPhones")
+          .window().then (win) ->
+            @cy.prop("server").restore()
+            @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
+            @cy.prop("server").bindTo(win)
+            win.$.get("http://localhost:3501/fixtures/ajax/app.json")
+            null
+          .wait("@getPhones")
+          .then ->
+            xhr = @cy.prop("responses")[0].xhr
+            expect(xhr.url).to.eq("http://localhost:3501/fixtures/ajax/app.json")
+            expect(@open).to.be.calledWith("GET", "/http://localhost:3501/fixtures/ajax/app.json")
+
+      # it.only "can stub root requests to CORS", ->
+      #   @cy
+      #     .server()
+      #     .visit("http://localhost:3500/fixtures/html/xhr.html")
+      #     .route({
+      #       url: "http://localhost:3501"
+      #       stub: false
+      #     }).as("getPhones")
+      #     .window().then (win) ->
+      #       @cy.prop("server").restore()
+      #       @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
+      #       @cy.prop("server").bindTo(win)
+      #       win.$.get("http://localhost:3501")
+      #       null
+      #     .wait("@getPhones")
+      #     .then ->
+      #       xhr = @cy.prop("responses")[0].xhr
+      #       expect(xhr.url).to.eq("http://localhost:3501")
+      #       expect(@open).to.be.calledWith("GET", "/http://localhost:3501")
+
       it "sets display correctly when there is no remoteOrigin", ->
         ## this is an example of having cypress act as your webserver
         ## when the remoteHost is <root>
@@ -376,7 +416,7 @@ describe "$Cypress.Cy XHR Commands", ->
             win.$.get("/foo")
             null
 
-    describe "request JSON parsing", ->
+    describe "request parsing", ->
       beforeEach ->
         @setup()
 
@@ -423,6 +463,30 @@ describe "$Cypress.Cy XHR Commands", ->
           .window().then (win) ->
             post(win, {foo: "bar2"})
           .wait("@getFoo").its("requestBody").should("deep.eq", {foo: "bar2"})
+
+      it "handles arraybuffer", ->
+        @cy
+          .server({stub: false})
+          .route("GET", /buffer/).as("getBuffer")
+          .window().then (win) ->
+            xhr = new win.XMLHttpRequest
+            xhr.responseType = "arraybuffer"
+            xhr.open("GET", "/buffer")
+            xhr.send()
+            null
+          .wait("@getBuffer").then (xhr) ->
+            expect(xhr.responseBody.toString()).to.eq("[object ArrayBuffer]")
+
+      it "handles xml", ->
+        @cy
+          .server({stub: false})
+          .route("GET", /xml/).as("getXML")
+          .window().then (win) ->
+            xhr = new win.XMLHttpRequest
+            xhr.open("GET", "/xml")
+            xhr.send()
+            null
+          .wait("@getXML").its("responseBody").should("eq", "<foo>bar</foo>")
 
     describe "issue #84", ->
       beforeEach ->

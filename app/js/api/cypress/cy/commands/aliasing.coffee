@@ -23,6 +23,10 @@ $Cypress.register "Aliasing", (Cypress, _, $) ->
       prev = @prop("current").get("prev")
       prev.set("alias", str)
 
+      noLogFromPreviousCommandisAlreadyAliased = ->
+        _.all prev.get("logs"), (log) ->
+          log.get("alias") isnt str
+
       ## we also need to set the alias on the last command log
       ## that matches our chainerId
       if log = _.last(@commands.logs({
@@ -31,10 +35,16 @@ $Cypress.register "Aliasing", (Cypress, _, $) ->
         chainerId: @prop("chainerId")
       }))
 
-        log.set({
-          alias:     str
-          aliasType: if $Cypress.Utils.hasElement(subject) then "dom" else "primitive"
-        })
+        ## make sure this alias hasn't already been applied
+        ## to the previous command's logs by looping through
+        ## all of its logs and making sure none of them are
+        ## set to this alias
+        if noLogFromPreviousCommandisAlreadyAliased()
+
+          log.set({
+            alias:     str
+            aliasType: if $Cypress.Utils.hasElement(subject) then "dom" else "primitive"
+          })
 
       aliases[str] = {subject: subject, command: prev, alias: str}
 
