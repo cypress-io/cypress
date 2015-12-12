@@ -11,6 +11,7 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
 
   reHttp = /^https?:\/\//
   reWww = /^www/
+  rePushStateOrReplaceState = /push|replace/
 
   reLocalHost = /^(localhost|0\.0\.0\.0|127\.0\.0\.1)/
 
@@ -143,8 +144,7 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
         win.history[attr] = ->
           args = arguments
 
-
-          if $Cypress.isHeadless
+          if $Cypress.isHeadless and not rePushStateOrReplaceState.test(attr)
             throw $Cypress.Utils.cypressError("""
               Your app called 'history.#{attr}()' when running headlessly.\n
               This is a known bug. Currently, calling 'history.#{attr}()' will cause tests to restart continuously and never finish.\n
