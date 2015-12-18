@@ -1,17 +1,14 @@
-fs            = require('fs')
+require("../spec_helper")
+
 path          = require('path')
-chai          = require('chai')
-expect        = chai.expect
 through2      = require('through2')
 through       = require('through')
-sinon         = require('sinon')
-sinonChai     = require('sinon-chai')
 _             = require('lodash')
 _s            = require('underscore.string')
-SpecProcessor = require("../../../lib/controllers/spec_processor")
+SpecProcessor = require("#{root}lib/controllers/spec_processor")
 FixturesRoot  = path.resolve(__dirname, '../../', 'fixtures/', 'server/')
 
-describe "spec processor", ->
+describe "Spec Processor", ->
   afterEach ->
     try
       fs.unlinkSync(path.join(FixturesRoot, '/sample.js'))
@@ -27,7 +24,8 @@ describe "spec processor", ->
     @specProcessor = SpecProcessor(app)
     @res = through2.obj (chunk, enc, cb) -> cb(null, chunk)
 
-    @res.type = sinon.stub()
+    @res.set  = @sandbox.stub()
+    @res.type = @sandbox.stub()
 
     fs.writeFileSync(path.join(FixturesRoot, '/sample.js'), ';')
 
