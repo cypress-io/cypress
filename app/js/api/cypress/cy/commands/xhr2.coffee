@@ -23,8 +23,8 @@ $Cypress.register "XHR2", (Cypress, _) ->
   unavailableErr = ->
     @throwErr("The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message.")
 
-  getDisplayName = (stub) ->
-    if stub and stub.stub isnt false then "xhr stub" else "xhr"
+  getDisplayName = (route) ->
+    if route and route.response? then "xhr stub" else "xhr"
 
   stripOrigin = (url) ->
     location = Cypress.Location.parse(url)
@@ -59,7 +59,6 @@ $Cypress.register "XHR2", (Cypress, _) ->
   defaults = {
     method: undefined
     status: undefined
-    stub: undefined
     delay: undefined
     headers: undefined ## response headers
     response: undefined
@@ -141,19 +140,21 @@ $Cypress.register "XHR2", (Cypress, _) ->
                 display: url
               }
 
-        onSend: (xhr, stack, stub) =>
-          alias = stub?.alias
+        ## shouldnt these stubs be called routes?
+        ## rename everything related to stubs => routes
+        onSend: (xhr, stack, route) =>
+          alias = route?.alias
 
           setRequest.call(@, xhr, alias)
 
-          if sl = stub and stub.log
-            numResponses = sl.get("numResponses")
-            sl.set "numResponses", numResponses + 1
+          if rl = route and route.log
+            numResponses = rl.get("numResponses")
+            rl.set "numResponses", numResponses + 1
 
           logs[xhr.id] = log = Cypress.Log.command({
             message:   ""
             name:      "xhr"
-            displayName: getDisplayName(stub)
+            displayName: getDisplayName(route)
             alias:     alias
             aliasType: "route"
             type:      "parent"
@@ -163,16 +164,17 @@ $Cypress.register "XHR2", (Cypress, _) ->
                 Alias:         alias
                 Method:        xhr.method
                 URL:           xhr.url
-                "Matched URL": stub?.url
+                "Matched URL": route?.url
                 Status:        xhr.statusMessage
                 Duration:      xhr.duration
+                "Stubbed":     if route and route.response? then "Yes" else "No"
                 Request:       xhr.request
                 Response:      xhr.response
                 XHR:           xhr.getXhr()
               }
 
-              if stub and stub.is404
-                consoleObj.Note = "The Method + URL for this request did not match any of your routes. It was automatically sent back '404'. Setting cy.server({force404: false}) will turn off this behavior."
+              if route and route.is404
+                consoleObj.Note = "This request did not match any of your routes. It was automatically sent back '404'. Setting cy.server({force404: false}) will turn off this behavior."
 
               consoleObj.groups = ->
                 [
@@ -273,44 +275,44 @@ $Cypress.register "XHR2", (Cypress, _) ->
       ## url / response / options
       ## options
 
+      ## by default assume we have a specified
+      ## response from the user
+      hasResponse = true
+
       if not @prop("serverIsStubbed")
         @throwErr("cy.route() cannot be invoked before starting the cy.server()")
-
-      responseMissing = =>
-        @throwErr "cy.route() must be called with a response."
 
       ## get the default options currently set
       ## on our server
       options = o = @getXhrServer().getOptions()
 
-      isntStubbed = ->
-        options.stub isnt false
-
       switch
         when _.isObject(args[0]) and not _.isRegExp(args[0])
+          ## we dont have a specified response
+          if not _.has(args[0], "response")
+            hasResponse = false
+
           options = o = _.extend {}, options, args[0]
 
         when args.length is 0
-          @throwErr "cy.route() must be given a method, url, and response."
+          @throwErr "cy.route() was not provided any arguments. You must provide valid arguments."
 
         when args.length is 1
-          if isntStubbed()
-            responseMissing()
-          else
-            o.url = args[0]
+          o.url = args[0]
+
+          hasResponse = false
 
         when args.length is 2
-          if isntStubbed()
-            o.url        = args[0]
-            o.response   = args[1]
-
-            ## if our url actually matches an http method
-            ## then we know the user omitted response
-            if _.isString(o.url) and validHttpMethodsRe.test(o.url) and isntStubbed()
-              responseMissing()
-          else
+          ## if our url actually matches an http method
+          ## then we know the user doesn't want to stub this route
+          if _.isString(args[0]) and validHttpMethodsRe.test(args[0])
             o.method = args[0]
-            o.url = args[1]
+            o.url    = args[1]
+
+            hasResponse = false
+          else
+            o.url      = args[0]
+            o.response = args[1]
 
         when args.length is 3
           if validHttpMethodsRe.test(args[0]) or isUrlLikeArgs(args[1], args[2])
@@ -344,7 +346,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
       if not validHttpMethodsRe.test(options.method)
         @throwErr "cy.route() was called with an invalid method: '#{o.method}'.  Method can only be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS"
 
-      if _.has(options, "response") and not options.response? and isntStubbed() ## or autoRespond?
+      if hasResponse and not options.response?
         @throwErr "cy.route() cannot accept an undefined or null response. It must be set to something, even an empty string will work."
 
       ## convert to wildcard regex
@@ -378,7 +380,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
           Response: options.response
           Alias:    options.alias
 
-      @getXhrServer().stub(options)
+      @getXhrServer().route(options)
 
   Cypress.Cy.extend
     getPendingRequests: ->

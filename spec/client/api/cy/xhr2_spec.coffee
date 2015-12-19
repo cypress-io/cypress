@@ -91,7 +91,6 @@ describe "$Cypress.Cy XHR Commands", ->
           .server()
           .route({
             url: /foo/
-            stub: false
           }).as("getFoo")
           .visit("http://localhost:3500/fixtures/html/xhr.html")
           .window().then (win) ->
@@ -107,10 +106,7 @@ describe "$Cypress.Cy XHR Commands", ->
       it "has a relative URL", ->
         @cy
           .server()
-          .route({
-            url: /foo/
-            stub: false
-          }).as("getFoo")
+          .route(/foo/).as("getFoo")
           .visit("http://localhost:3500/fixtures/html/xhr.html")
           .window().then (win) ->
             @cy.prop("server").restore()
@@ -127,7 +123,6 @@ describe "$Cypress.Cy XHR Commands", ->
           .server()
           .route({
             url: /foo/
-            stub: false
           }).as("getFoo")
           .visit("http://localhost:3500/fixtures/html/xhr.html")
           .window().then (win) ->
@@ -146,7 +141,6 @@ describe "$Cypress.Cy XHR Commands", ->
           .server()
           .route({
             url: /foo/
-            stub: false
           }).as("getFoo")
           .visit("http://localhost:3500/fixtures/html/xhr.html")
           .window().then (win) ->
@@ -163,10 +157,7 @@ describe "$Cypress.Cy XHR Commands", ->
       it "transparently rewrites FQDN urls which match remote host", ->
         @cy
           .server()
-          .route({
-            url: /foo/
-            stub: false
-          }).as("getFoo")
+          .route(/foo/).as("getFoo")
           .visit("http://localhost:3500/fixtures/html/xhr.html")
           .window().then (win) ->
             ## trick cypress into thinking the remoteOrigin is location:9999
@@ -201,10 +192,7 @@ describe "$Cypress.Cy XHR Commands", ->
       it "rewrites absolute url's for stubs", ->
         @cy
           .server()
-          .route({
-            url: /foo/
-            response: {}
-          }).as("getFoo")
+          .route(/foo/, {}).as("getFoo")
           .visit("http://localhost:3500/fixtures/html/xhr.html")
           .window().then (win) ->
             @cy.prop("server").restore()
@@ -295,10 +283,7 @@ describe "$Cypress.Cy XHR Commands", ->
         @cy
           .server()
           .visit("http://localhost:3500/fixtures/html/xhr.html")
-          .route({
-            url: "http://localhost:3501/fixtures/ajax/app.json"
-            stub: false
-          }).as("getPhones")
+          .route("http://localhost:3501/fixtures/ajax/app.json").as("getPhones")
           .window().then (win) ->
             @cy.prop("server").restore()
             @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
@@ -378,10 +363,7 @@ describe "$Cypress.Cy XHR Commands", ->
         @cy
           .server()
           .visit("/fixtures/html/xhr.html")
-          .route({
-            url: /accounts/
-            response: {}
-          }).as("getAccounts")
+          .route(/accounts/, {}).as("getAccounts")
           .window().then (win) ->
             @cy.prop("server").restore()
             @open = @sandbox.spy win.XMLHttpRequest.prototype, "open"
@@ -466,7 +448,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
       it "handles arraybuffer", ->
         @cy
-          .server({stub: false})
+          .server()
           .route("GET", /buffer/).as("getBuffer")
           .window().then (win) ->
             xhr = new win.XMLHttpRequest
@@ -479,7 +461,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
       it "handles xml", ->
         @cy
-          .server({stub: false})
+          .server()
           .route("GET", /xml/).as("getXML")
           .window().then (win) ->
             xhr = new win.XMLHttpRequest
@@ -749,14 +731,14 @@ describe "$Cypress.Cy XHR Commands", ->
         .server()
         .route("*", {})
         .then ->
-          expect(@cy.prop("server").stubs[0].delay).to.eq(0)
+          expect(@cy.prop("server").routes[0].delay).to.eq(0)
 
     it "passes down options.delay to routes", ->
       @cy
         .server({delay: 100})
         .route("*", {})
         .then ->
-          expect(@cy.prop("server").stubs[0].delay).to.eq(100)
+          expect(@cy.prop("server").routes[0].delay).to.eq(100)
 
     describe "errors", ->
       beforeEach ->
@@ -898,12 +880,12 @@ describe "$Cypress.Cy XHR Commands", ->
       @setup()
 
       @expectOptionsToBe = (opts) =>
-        options = @stub.getCall(0).args[0]
+        options = @route.getCall(0).args[0]
         _.each opts, (value, key) ->
           expect(options[key]).to.deep.eq(opts[key], "failed on property: (#{key})")
 
       @cy.server().then ->
-        @stub   = @sandbox.spy @server, "stub"
+        @route   = @sandbox.spy @server, "route"
 
     it "accepts url, response", ->
       @cy.route("/foo", {}).then ->
@@ -1024,9 +1006,9 @@ describe "$Cypress.Cy XHR Commands", ->
           response: {}
         })
 
-    it "does not require response or method when stub.false", ->
+    it "does not require response or method when not stubbing", ->
       @cy
-        .server({stub: false})
+        .server()
         .route(/users/).as("getUsers")
         .then ->
           @expectOptionsToBe({
@@ -1035,9 +1017,9 @@ describe "$Cypress.Cy XHR Commands", ->
             url: /users/
           })
 
-    it "does not require response when stub.false", ->
+    it "does not require response when not stubbing", ->
       @cy
-        .server({stub: false})
+        .server()
         .route("POST", /users/).as("createUsers")
         .then ->
           @expectOptionsToBe({
@@ -1110,6 +1092,23 @@ describe "$Cypress.Cy XHR Commands", ->
         url: /foo/
         respond: false
 
+    describe "deprecations", ->
+      beforeEach ->
+        @warn = @sandbox.spy(console, "warn")
+
+      it "logs {stub: false} deprecation on server", ->
+        @cy
+          .server({stub: false})
+          .then ->
+            expect(@warn).to.be.calledWithMatch("Passing cy.server({stub: false}) is now deprecated.")
+
+      it "logs {stub: false} deprecation on route", ->
+        @cy
+          .server()
+          .route({url: "foo", stub: false})
+          .then ->
+            expect(@warn).to.be.calledWithMatch("Passing cy.route({stub: false}) is now deprecated.")
+
     describe "request response alias", ->
       it "can pass an alias reference to route", ->
         @cy
@@ -1124,10 +1123,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
       it "can alias a route without stubbing it", ->
         @cy
-          .route({
-            url: /ajax\/app/
-            stub: false
-          }).as("getFoo")
+          .route(/ajax\/app/).as("getFoo")
           .window().then (win) ->
             win.$.get("/fixtures/ajax/app.json")
             null
@@ -1174,13 +1170,6 @@ describe "$Cypress.Cy XHR Commands", ->
 
         @cy.route("posts", "/foo", {})
 
-      it "requires a response", (done) ->
-        @cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.route() must be called with a response."
-          done()
-
-        @cy.route("post", "/foo")
-
       it "requires a url when given a response", (done) ->
         @cy.on "fail", (err) ->
           expect(err.message).to.include "cy.route() must be called with a url. It can be a string or regular expression."
@@ -1188,16 +1177,24 @@ describe "$Cypress.Cy XHR Commands", ->
 
         @cy.route({})
 
-      it "requires a response with no method", (done) ->
-        @cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.route() must be called with a response."
-          done()
+      _.each [null, undefined], (val) ->
+        it "throws if response options was explicitly set to #{val}", (done) ->
+          @cy.on "fail", (err) ->
+            expect(err.message).to.include "cy.route() cannot accept an undefined or null response. It must be set to something, even an empty string will work."
+            done()
 
-        @cy.route(/foo/)
+          @cy.route({url: /foo/, response: val})
+
+        it "throws if response argument was explicitly set to #{val}", (done) ->
+          @cy.on "fail", (err) ->
+            expect(err.message).to.include "cy.route() cannot accept an undefined or null response. It must be set to something, even an empty string will work."
+            done()
+
+          @cy.route(/foo/, val)
 
       it "requires arguments", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.route() must be given a method, url, and response."
+          expect(err.message).to.include "cy.route() was not provided any arguments. You must provide valid arguments."
           done()
 
         @cy.route()
@@ -1293,14 +1290,6 @@ describe "$Cypress.Cy XHR Commands", ->
           .wrap({foo: "bar"}).as("foo")
           .route(/foo/, "@bar")
 
-      _.each [undefined, null], (val) =>
-        it "requires response not be #{val}", (done) ->
-          @cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.route() cannot accept an undefined or null response. It must be set to something, even an empty string will work."
-            done()
-
-          @cy.route(/foo/, val)
-
     describe ".log", ->
       beforeEach ->
         @Cypress.on "log", (@log) =>
@@ -1361,6 +1350,17 @@ describe "$Cypress.Cy XHR Commands", ->
 
       @setup()
 
+    describe "when stubbed", ->
+      it "says Stubbed: Yes", ->
+        @cy
+          .server()
+          .route(/foo/, {}).as("getFoo")
+          .window().then (win) ->
+            new Promise (resolve) ->
+              win.$.get("/foo").done(resolve)
+          .then ->
+            expect(@log.attributes.onConsole().Stubbed).to.eq("Yes")
+
     describe "zero configuration / zero routes", ->
       beforeEach ->
         @cy
@@ -1395,6 +1395,9 @@ describe "$Cypress.Cy XHR Commands", ->
             XHR: xhr.xhr
           })
 
+      it "says Stubbed: Yes when sent 404 back", ->
+        expect(@log.attributes.onConsole().Stubbed).to.eq("Yes")
+
     describe "whitelisting", ->
       it "does not send back 404s on whitelisted routes", ->
         @cy
@@ -1416,7 +1419,7 @@ describe "$Cypress.Cy XHR Commands", ->
       it "sends back 404 when request doesnt match route", ->
         @cy.then ->
           onConsole = @log.attributes.onConsole()
-          expect(onConsole.Note).to.eq("The Method + URL for this request did not match any of your routes. It was automatically sent back '404'. Setting cy.server({force404: false}) will turn off this behavior.")
+          expect(onConsole.Note).to.eq("This request did not match any of your routes. It was automatically sent back '404'. Setting cy.server({force404: false}) will turn off this behavior.")
 
     describe "{force404: false}", ->
       beforeEach ->
@@ -1424,6 +1427,9 @@ describe "$Cypress.Cy XHR Commands", ->
           .server({force404: false})
           .window().then (win) ->
             win.$.getJSON("/fixtures/ajax/app.json")
+
+      it "says Stubbed: No when request isnt forced 404", ->
+        expect(@log.attributes.onConsole().Stubbed).to.eq("No")
 
       it "logs request + response headers", ->
         @cy.then ->
