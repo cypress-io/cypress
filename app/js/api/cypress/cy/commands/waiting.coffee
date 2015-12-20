@@ -58,7 +58,7 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
 
         _.ordinalize requests[alias]
 
-      checkForXhr = (alias, type, options) ->
+      checkForXhr = (alias, type, num, options) ->
         options.type = type
 
         ## append .type to the alias
@@ -69,13 +69,13 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
 
         # options.error ?= "cy.wait() timed out waiting for the #{getNumRequests(alias)} #{type} to the route: '#{str}'. No #{type} ever occured."
         # if not options.error or options.type isnt type
-        options.error ?= "cy.wait() timed out waiting '#{options.timeout}ms' for the #{getNumRequests(alias)} #{type} to the route: '#{alias}'. No #{type} ever occured."
+        options.error = "cy.wait() timed out waiting '#{options.timeout}ms' for the #{num} #{type} to the route: '#{alias}'. No #{type} ever occured."
 
         @_retry ->
-          checkForXhr.call(@, alias, type, options)
+          checkForXhr.call(@, alias, type, num, options)
         , options
 
-      waitForXhr = (str) ->
+      waitForXhr = (str, options) ->
         ## we always want to strip everything after the first '.'
         ## since we support alias property 'request'
         [str, str2] = str.split(".")
@@ -107,16 +107,17 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
         ## create shallow copy of each options object
         ## but slice out the error since we may set
         ## the error related to a previous xhr
-        options = _.omit(options, "error")
         timeout = options.timeout
+
+        num = getNumRequests(alias)
 
         waitForRequest = =>
           options.timeout = timeout ? Cypress.config("requestTimeout")
-          checkForXhr.call(@, alias, "request", options)
+          checkForXhr.call(@, alias, "request", num, options)
 
         waitForResponse = =>
           options.timeout = timeout ? Cypress.config("responseTimeout")
-          checkForXhr.call(@, alias, "response", options)
+          checkForXhr.call(@, alias, "response", num, options)
 
         ## if we were only waiting for the request
         ## then resolve immediately do not wait for response
@@ -135,7 +136,7 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
           ## we may get back an xhr value instead
           ## of a promise, so we have to wrap this
           ## in another promise :-(
-          xhr = Promise.resolve waitForXhr.call(@, str, options)
+          xhr = Promise.resolve waitForXhr.call(@, str, _.omit(options, "error", "timeout"))
           xhrs.push(xhr)
           xhr
         .then (responses) ->
