@@ -85,7 +85,8 @@ class Server
       xhrRoute:       "/xhrs/"
       commandTimeout: 4000
       visitTimeout:   30000
-      requestTimeout: 20000
+      requestTimeout: 5000
+      responseTimeout: 20000
       port:           2020
       autoOpen:       false
       viewportWidth:  1000

@@ -323,5 +323,8 @@ describe "Server Interface", ->
       it "visitTimeout=30000", ->
         @defaults "visitTimeout", 30000
 
-      it "requestTimeout=20000", ->
-        @defaults "requestTimeout", 20000
+      it "requestTimeout=5000", ->
+        @defaults "requestTimeout", 5000
+
+      it "responseTimeout=20000", ->
+        @defaults "responseTimeout", 20000
