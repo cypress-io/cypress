@@ -31,6 +31,12 @@ class SpecProcessor extends Controller
   #     debugger
 
   handle: (spec, req, res, next) ->
+    res.set({
+      "Cache-Control": "no-cache, no-store, must-revalidate"
+      "Pragma": "no-cache"
+      "Expires": "0"
+    })
+
     res.type "js"
 
     settings = @app.get("cypress")

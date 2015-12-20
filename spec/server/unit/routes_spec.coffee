@@ -1,6 +1,7 @@
 require("../spec_helper")
 
 Server        = require("#{root}lib/server")
+CacheBuster   = require "#{root}/lib/util/cache_buster"
 Fixtures      = require "#{root}/spec/server/helpers/fixtures"
 glob          = require("glob")
 path          = require("path")
@@ -16,6 +17,8 @@ removeWhitespace = (c) ->
 
 describe "Routes", ->
   beforeEach ->
+    @sandbox.stub(CacheBuster, "get").returns("-123")
+
     nock.enableNetConnect()
 
     @sandbox.stub(Server.prototype, "getCypressJson").returns({})

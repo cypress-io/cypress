@@ -4,6 +4,7 @@ path    = require "path"
 glob    = require "glob"
 Promise = require "bluebird"
 
+CacheBuster = require "../util/cache_buster"
 Controller  = require "./controller"
 
 class Files extends Controller
@@ -70,6 +71,7 @@ class Files extends Controller
           spec = path.join(spec...)
           spec = _.str.trim(spec, "/")
 
+      spec += CacheBuster.get()
       "/__cypress/tests?p=#{spec}"
 
   getSpecs: (test) ->

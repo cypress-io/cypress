@@ -26,6 +26,13 @@ $Cypress.Server = do ($Cypress, _) ->
     catch
       text
 
+  warnOnStubDeprecation = (obj, type) ->
+    if _.has(obj, "stub")
+      console.warn("""
+        Passing cy.#{type}({stub: false}) is now deprecated. You can safely remove: {stub: false}.\n
+        http://on.cypress.io/deprecated-stub-false-on-#{type}
+      """)
+
   whitelist = (xhr) ->
     ## whitelist if we're GET + looks like we're fetching regular resources
     xhr.method is "GET" and regularResourcesRe.test(xhr.url)
@@ -38,7 +45,6 @@ $Cypress.Server = do ($Cypress, _) ->
     status: 200
     headers: null
     response: null
-    stub: true
     enable: true
     autoRespond: true
     waitOnResponses: Infinity
@@ -185,7 +191,7 @@ $Cypress.Server = do ($Cypress, _) ->
       ## what about restoring the server?
       @xhrs     = {}
       @proxies  = {}
-      @stubs    = []
+      @routes   = []
 
       ## always start disabled
       ## so we dont handle stubs
@@ -206,9 +212,10 @@ $Cypress.Server = do ($Cypress, _) ->
       err = new Error
       err.stack.split("\n").slice(3).join("\n")
 
-    shouldApplyStub: (stub) ->
-      ## make sure the stub or the server isnt 'unstubbed'
-      stub and stub.stub isnt false and @isStubbed()
+    shouldApplyStub: (route) ->
+      ## make sure the route or the server is enabled
+      ## and make sure our response isnt null or undefined
+      @isEnabled and route and route.response?
 
     transformHeaders: (headers) ->
       ## normalize camel-cased headers key
@@ -219,14 +226,14 @@ $Cypress.Server = do ($Cypress, _) ->
 
       JSON.stringify(headers)
 
-    applyStubProperties: (xhr, stub) ->
-      responser = if _.isObject(stub.response) then JSON.stringify else null
+    applyStubProperties: (xhr, route) ->
+      responser = if _.isObject(route.response) then JSON.stringify else null
 
-      setHeader(xhr, "status",   stub.status)
-      setHeader(xhr, "response", stub.response, responser)
-      setHeader(xhr, "matched",  stub.url + "")
-      setHeader(xhr, "delay",    stub.delay)
-      setHeader(xhr, "headers",  stub.headers, @transformHeaders)
+      setHeader(xhr, "status",   route.status)
+      setHeader(xhr, "response", route.response, responser)
+      setHeader(xhr, "matched",  route.url + "")
+      setHeader(xhr, "delay",    route.delay)
+      setHeader(xhr, "headers",  route.headers, @transformHeaders)
 
     normalizeStubUrl: (xhrUrl, url) ->
       if not xhrUrl
@@ -238,31 +245,33 @@ $Cypress.Server = do ($Cypress, _) ->
       url    = _.ltrim(url, "/")
       ["/" + xhrUrl, url].join("/")
 
-    stub: (attrs = {}) ->
+    route: (attrs = {}) ->
+      warnOnStubDeprecation(attrs, "route")
+
       ## merge attrs with the server's defaults
       ## so we preserve the state of the attrs
       ## at the time they're created since we
       ## can create another server later
 
       ## dont mutate the original attrs
-      stub = _.defaults {}, attrs, _(@options).pick("delay", "method", "status", "stub", "autoRespond", "waitOnResponses", "onRequest", "onResponse")
-      @stubs.push(stub)
+      route = _.defaults {}, attrs, _(@options).pick("delay", "method", "status", "autoRespond", "waitOnResponses", "onRequest", "onResponse")
+      @routes.push(route)
 
-      return stub
+      return route
 
-    getStubForXhr: (xhr) ->
+    getRouteForXhr: (xhr) ->
       ## return the 404 stub if we dont have any stubs
       ## but we are stubbed - meaning we havent added any routes
       ## but have started the server
       ## and this request shouldnt be whitelisted
-      if not @stubs.length and
-        @isStubbed() and
+      if not @routes.length and
+        @isEnabled and
           @options.force404 isnt false and
             not @isWhitelisted(xhr)
-              return @get404Stub()
+              return @get404Route()
 
       ## bail if we've attached no stubs
-      return nope() if not @stubs.length
+      return nope() if not @routes.length
 
       ## bail if this xhr matches our whitelist
       return nope() if @isWhitelisted(xhr)
@@ -270,19 +279,19 @@ $Cypress.Server = do ($Cypress, _) ->
       ## loop in reverse to get
       ## the first matching stub
       ## thats been most recently added
-      for stub in @stubs by -1
-        if @xhrMatchesStub(xhr, stub)
-          return stub
+      for route in @routes by -1
+        if @xhrMatchesRoute(xhr, route)
+          return route
 
       ## else if no stub matched
       ## send 404 if we're allowed to
       if @options.force404
-        @get404Stub()
+        @get404Route()
       else
         ## else return null
         return nope()
 
-    get404Stub: ->
+    get404Route: ->
       {
         status: 404
         response: ""
@@ -291,15 +300,15 @@ $Cypress.Server = do ($Cypress, _) ->
         is404: true
       }
 
-    xhrMatchesStub: (xhr, stub) ->
+    xhrMatchesRoute: (xhr, route) ->
       testRe = (url1, url2) ->
-        stub.url.test(url1) or stub.url.test(url2)
+        route.url.test(url1) or route.url.test(url2)
 
       testStr = (url1, url2) ->
-        stub.url is url1 or stub.url is url2
+        route.url is url1 or route.url is url2
 
-      xhr.method is stub.method and
-        if _.isRegExp(stub.url)
+      xhr.method is route.method and
+        if _.isRegExp(route.url)
           testRe(xhr.url, @options.stripOrigin(xhr.url))
         else
           testStr(xhr.url, @options.stripOrigin(xhr.url))
@@ -321,13 +330,12 @@ $Cypress.Server = do ($Cypress, _) ->
 
       return @
 
-    isStubbed: ->
-      !!@isEnabled
-
     enableStubs: (bool = true) ->
       @isEnabled = bool
 
     set: (obj) ->
+      warnOnStubDeprecation(obj, "server")
+
       ## handle enable=true|false
       if obj.enable?
         @enableStubs(obj.enable)
@@ -402,8 +410,8 @@ $Cypress.Server = do ($Cypress, _) ->
         ## if this XHR matches a stubbed route then shift
         ## its url to the stubbed url and set the request
         ## headers for the response
-        stub = getServer().getStubForXhr(@)
-        if getServer().shouldApplyStub(stub)
+        route = getServer().getRouteForXhr(@)
+        if getServer().shouldApplyStub(route)
           url.actual = getServer().normalizeStubUrl(getServer().options.xhrUrl, url.actual)
 
         ## change absolute url's to relative ones
@@ -416,13 +424,13 @@ $Cypress.Server = do ($Cypress, _) ->
         setHeader(@, "id", @id)
         setHeader(@, "testId", getServer().options.testId)
 
-        ## if there is an existing stub for this
+        ## if there is an existing route for this
         ## XHR then add those properties into it
-        ## only if stub isnt explicitly false
+        ## only if route isnt explicitly false
         ## and the server is enabled
-        stub = getServer().getStubForXhr(@)
-        if getServer().shouldApplyStub(stub)
-          getServer().applyStubProperties(@, stub)
+        route = getServer().getRouteForXhr(@)
+        if getServer().shouldApplyStub(route)
+          getServer().applyStubProperties(@, route)
 
         ## capture where this xhr came from
         sendStack = getServer().getStack()
@@ -435,12 +443,12 @@ $Cypress.Server = do ($Cypress, _) ->
         ## log this out now since it's being sent officially
         ## unless its been whitelisted
         if not getServer().isWhitelisted(@)
-          getServer().options.onSend(proxy, sendStack, stub)
+          getServer().options.onSend(proxy, sendStack, route)
 
         if _.isFunction(getServer().options.onAnyRequest)
           ## call the onAnyRequest function
           ## after we've called getServer().options.onSend
-          getServer().options.onAnyRequest(stub, proxy)
+          getServer().options.onAnyRequest(route, proxy)
 
         timeStart = new Date
 
@@ -463,12 +471,12 @@ $Cypress.Server = do ($Cypress, _) ->
           try
             if _.isFunction(onload)
               onload.apply(@, arguments)
-            getServer().options.onLoad(proxy, stub)
+            getServer().options.onLoad(proxy, route)
           catch err
             getServer().options.onError(proxy, err)
 
           if _.isFunction(getServer().options.onAnyResponse)
-            getServer().options.onAnyResponse(stub, proxy)
+            getServer().options.onAnyResponse(route, proxy)
 
         onerror = @onerror
         @onerror = ->

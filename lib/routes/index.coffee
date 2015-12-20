@@ -1,4 +1,5 @@
-path        = require 'path'
+path        = require("path")
+CacheBuster = require("../util/cache_buster")
 
 module.exports = (app) ->
   controllers = require('../controllers')(app)
@@ -6,7 +7,8 @@ module.exports = (app) ->
   ## routing for the actual specs which are processed automatically
   ## this could be just a regular .js file or a .coffee file
   app.get "/__cypress/tests", (req, res, next) ->
-    test = req.query.p
+    ## slice out the cache buster
+    test = CacheBuster.strip(req.query.p)
 
     controllers.specProcessor.handle(test, req, res, next)
 
