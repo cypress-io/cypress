@@ -19,9 +19,9 @@ describe "$Cypress.Cy Server API", ->
     expect(defaults2.status).to.eq(500)
 
     server = $Cypress.Server.create({})
-    stub = server.stub()
+    route = server.route()
 
-    expect(stub.status).to.eq(500)
+    expect(route.status).to.eq(500)
 
     $Cypress.Server.defaults(defaults)
 

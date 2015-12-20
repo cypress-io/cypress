@@ -14,6 +14,9 @@ extensions = ".json .js .coffee .html .txt .png .jpg .jpeg .gif .tif .tiff .zip"
 
 queue = {}
 
+lastCharacterIsNewLine = (str) ->
+  str[str.length - 1] is "\n"
+
 class Fixtures
   constructor: (app) ->
     if not (@ instanceof Fixtures)
@@ -102,6 +105,10 @@ class Fixtures
         if formatted is str
           return str
         else
+          ## if last character is a new line
+          ## then append this to the formatted str
+          if lastCharacterIsNewLine(str)
+            formatted += "\n"
           ## write the file back even if there were errors
           ## so we write back the formatted version of the str
           fs.writeFileAsync(p, formatted).return(formatted)
@@ -149,11 +156,14 @@ class Fixtures
     fs.readFileAsync(p, "utf8")
       .bind(@)
       .then (str) ->
-        beautify str, {
+        html = beautify str, {
           indent_size: 2
           extra_liners: []
         }
-      .then (html) ->
+
+        if lastCharacterIsNewLine(str)
+          html += "\n"
+
         fs.writeFileAsync(p, html).return(html)
 
   parseText: (p, fixture) ->

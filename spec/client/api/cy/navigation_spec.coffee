@@ -115,11 +115,13 @@ describe "$Cypress.Cy Navigation Commands", ->
 
           @win.history[attr](arg)
           expect(@urlChanged).to.be.called
+          Promise.delay(300)
 
       _.each ["pushState", "replaceState"], (attr) =>
         it "fires 'history:event' on attr: '#{attr}'", ->
           @win.history[attr]({}, "foo")
           expect(@urlChanged).to.be.called
+          Promise.delay(300)
 
     describe ".log", ->
       beforeEach ->
