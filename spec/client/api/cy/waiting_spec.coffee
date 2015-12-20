@@ -69,23 +69,6 @@ describe "$Cypress.Cy Waiting Commands", ->
             expect(xhr.url).to.include "/users"
             expect(xhr.response).to.be.null
 
-      it "waits for the route alias to have a request + response", ->
-        @cy.on "retry", _.once =>
-          win = @cy.private("window")
-          win.$.get("/users")
-          null
-
-        @cy
-          .server({delay: 200})
-          .route(/users/, {}).as("getUsers")
-          .visit("/fixtures/html/xhr.html")
-          .wait("@getUsers.request").then (xhr) ->
-            expect(xhr.url).to.include "/users"
-            expect(xhr.response).to.be.null
-          .wait("@getUsers").then (xhr) ->
-            expect(xhr.status).to.eq 200
-            expect(xhr.responseBody).to.deep.eq({})
-
       it "resets the timeout after waiting", ->
         prevTimeout = @cy._timeout()
 
@@ -101,6 +84,34 @@ describe "$Cypress.Cy Waiting Commands", ->
           .wait("@fetch").then ->
             expect(@cy._timeout()).to.eq prevTimeout
 
+      it "waits for requestTimeout", (done) ->
+        @Cypress.config("requestTimeout", 199)
+
+        @cy.on "retry", (options) ->
+          expect(options.timeout).to.eq(199)
+          done()
+
+        @cy
+          .server()
+          .route("GET", "*", {}).as("fetch")
+          .wait("@fetch")
+
+      it "waits for responseTimeout", (done) ->
+        @Cypress.config("responseTimeout", 299)
+
+        @cy.on "retry", (options) ->
+          expect(options.timeout).to.eq(299)
+          done()
+
+        @cy
+          .visit("/fixtures/html/xhr.html")
+          .server({delay: 100})
+          .route("GET", "*", {}).as("fetch")
+          .window().then (win) ->
+            win.$.get("/foo")
+            null
+          .wait("@fetch")
+
       describe "errors", ->
         beforeEach ->
           @currentTest.enableTimeouts(false)
@@ -114,10 +125,10 @@ describe "$Cypress.Cy Waiting Commands", ->
           @cy.get("body").as("b").wait("@b")
 
         it "throws when route is never resolved", (done) ->
-          @cy._timeout(200)
+          @Cypress.config("requestTimeout", 100)
 
           @cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting for the 1st response to the route: 'fetch'. No response ever occured."
+            expect(err.message).to.include "cy.wait() timed out waiting '100ms' for the 1st request to the route: 'fetch'. No request ever occured."
             done()
 
           @cy
@@ -126,10 +137,10 @@ describe "$Cypress.Cy Waiting Commands", ->
             .wait("@fetch")
 
         it "throws when alias is never requested", (done) ->
-          @cy._timeout(200)
+          @Cypress.config("requestTimeout", 100)
 
           @cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting for the 1st request to the route: 'foo'. No request ever occured."
+            expect(err.message).to.include "cy.wait() timed out waiting '100ms' for the 1st request to the route: 'foo'. No request ever occured."
             done()
 
           @cy
@@ -189,10 +200,10 @@ describe "$Cypress.Cy Waiting Commands", ->
             .wait(["@foo", "@bar"])
 
         it "throws whenever an alias times out", (done) ->
-          @cy._timeout(200)
+          @Cypress.config("requestTimeout", 100)
 
           @cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting for the 1st response to the route: 'foo'. No response ever occured."
+            expect(err.message).to.include "cy.wait() timed out waiting '100ms' for the 1st request to the route: 'foo'. No request ever occured."
             done()
 
           @cy
@@ -203,10 +214,10 @@ describe "$Cypress.Cy Waiting Commands", ->
             .wait(["@foo", "@bar"])
 
         it "throws when bar cannot resolve", (done) ->
-          @cy._timeout(200)
+          @Cypress.config("requestTimeout", 100)
 
           @cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting for the 1st response to the route: 'bar'. No response ever occured."
+            expect(err.message).to.include "cy.wait() timed out waiting '100ms' for the 1st request to the route: 'bar'. No request ever occured."
             done()
 
           @cy.on "retry", _.once =>
@@ -222,12 +233,10 @@ describe "$Cypress.Cy Waiting Commands", ->
             .wait(["@foo", "@bar"])
 
         it "throws when foo cannot resolve", (done) ->
-          @enableTimeouts(false)
-
-          @cy._timeout(200)
+          @Cypress.config("requestTimeout", 100)
 
           @cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting for the 1st response to the route: 'foo'. No response ever occured."
+            expect(err.message).to.include "cy.wait() timed out waiting '100ms' for the 1st request to the route: 'foo'. No request ever occured."
             done()
 
           @cy.on "retry", _.once =>
@@ -246,7 +255,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           Promise.onPossiblyUnhandledRejection (err) ->
             done(err)
 
-          @cy._timeout(200)
+          @Cypress.config("requestTimeout", 100)
 
           @cy.on "fail", (err) ->
             expect(err.message).to.eq "Invalid alias: 'bar'. You forgot the '@'. It should be written as: '@bar'."
@@ -264,7 +273,7 @@ describe "$Cypress.Cy Waiting Commands", ->
         it "does not throw again when 2nd alias doesnt reference a route", (done) ->
           Promise.onPossiblyUnhandledRejection done
 
-          @cy._timeout(200)
+          @Cypress.config("requestTimeout", 100)
 
           @cy.on "fail", (err) ->
             expect(err.message).to.eq "cy.wait() can only accept aliases for routes.  The alias: 'bar' did not match a route."
@@ -282,7 +291,7 @@ describe "$Cypress.Cy Waiting Commands", ->
         it "does not throw twice when both aliases time out", (done) ->
           Promise.onPossiblyUnhandledRejection done
 
-          @cy._timeout(200)
+          @Cypress.config("requestTimeout", 100)
 
           @cy.on "retry", (options) ->
             ## force bar to time out before foo
@@ -292,7 +301,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           @cy.on "fail", (err) =>
             @cy.on "retry", -> done("should not have retried!")
 
-            expect(err.message).to.include "cy.wait() timed out waiting for the 1st response to the route: 'bar'. No response ever occured."
+            expect(err.message).to.include "cy.wait() timed out waiting '100ms' for the 1st request to the route: 'bar'. No request ever occured."
             _.delay ->
               done()
             , 500
@@ -307,7 +316,7 @@ describe "$Cypress.Cy Waiting Commands", ->
         it "does not retry after 1 alias times out", (done) ->
           Promise.onPossiblyUnhandledRejection done
 
-          @cy._timeout(200)
+          @Cypress.config("requestTimeout", 100)
 
           @cy.on "retry", (options) ->
             ## force bar to time out before foo
@@ -334,10 +343,10 @@ describe "$Cypress.Cy Waiting Commands", ->
           resp = {foo: "foo"}
           response = 0
 
-          @cy._timeout(200)
+          @Cypress.config("requestTimeout", 200)
 
           @cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting for the 3rd response to the route: 'getUsers'. No response ever occured."
+            expect(err.message).to.include "cy.wait() timed out waiting '200ms' for the 3rd request to the route: 'getUsers'. No request ever occured."
             done()
 
           @cy.on "retry", =>
@@ -358,10 +367,10 @@ describe "$Cypress.Cy Waiting Commands", ->
           resp = {foo: "foo"}
           response = 0
 
-          @cy._timeout(200)
+          @Cypress.config("requestTimeout", 200)
 
           @cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting for the 2nd response to the route: 'getUsers'. No response ever occured."
+            expect(err.message).to.include "cy.wait() timed out waiting '200ms' for the 2nd request to the route: 'getUsers'. No request ever occured."
             done()
 
           ## dont send the 2nd response
@@ -381,10 +390,10 @@ describe "$Cypress.Cy Waiting Commands", ->
           resp = {foo: "foo"}
           request = 0
 
-          @cy._timeout(200)
+          @Cypress.config("requestTimeout", 200)
 
           @cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting for the 2nd request to the route: 'getUsers'. No request ever occured."
+            expect(err.message).to.include "cy.wait() timed out waiting '200ms' for the 2nd request to the route: 'getUsers'. No request ever occured."
             done()
 
           ## dont send the 2nd request
@@ -399,6 +408,78 @@ describe "$Cypress.Cy Waiting Commands", ->
             .route(/users/, resp).as("getUsers")
             .wait("@getUsers.request")
             .wait("@getUsers.request")
+
+        it "throws when waiting for response to route", (done) ->
+          @Cypress.config("responseTimeout", 100)
+
+          @cy.on "fail", (err) ->
+            expect(err.message).to.include "cy.wait() timed out waiting '100ms' for the 1st response to the route: 'response'. No response ever occured."
+            done()
+
+          @cy
+            .visit("/fixtures/html/xhr.html")
+            .server()
+            .route("*").as("response")
+            .window().then (win) ->
+              win.$.get("/timeout?ms=500")
+              null
+            .wait("@response")
+
+        it "throws when waiting for 2nd response to route", (done) ->
+          @Cypress.config("responseTimeout", 200)
+
+          @cy.on "fail", (err) ->
+            expect(err.message).to.include "cy.wait() timed out waiting '200ms' for the 2nd response to the route: 'response'. No response ever occured."
+            done()
+
+          @cy
+            .visit("/fixtures/html/xhr.html")
+            .server()
+            .route("*").as("response")
+            .window().then (win) ->
+              win.$.get("/timeout?ms=0")
+              win.$.get("/timeout?ms=5000")
+              null
+            .wait(["@response", "@response"])
+
+        it "throws when waiting for 1st response to bar", (done) ->
+          @Cypress.config("responseTimeout", 200)
+
+          @cy.on "fail", (err) ->
+            expect(err.message).to.include "cy.wait() timed out waiting '200ms' for the 1st response to the route: 'bar'. No response ever occured."
+            done()
+
+          @cy
+            .visit("/fixtures/html/xhr.html")
+            .server()
+            .route("/timeout?ms=0").as("foo")
+            .route("/timeout?ms=5000").as("bar")
+            .window().then (win) ->
+              win.$.get("/timeout?ms=0")
+              win.$.get("/timeout?ms=5000")
+              null
+            .wait(["@foo", "@bar"])
+
+        it "throws when waiting on the 2nd request", (done) ->
+          @Cypress.config("requestTimeout", 200)
+
+          @cy.on "retry", _.once =>
+            win = @cy.private("window")
+            win.$.get("/users")
+            null
+
+          @cy.on "fail", (err) ->
+            expect(err.message).to.include "cy.wait() timed out waiting '200ms' for the 2nd request to the route: 'getUsers'. No request ever occured."
+            done()
+
+          @cy
+            .server({delay: 200})
+            .route(/users/, {}).as("getUsers")
+            .visit("/fixtures/html/xhr.html")
+            .wait("@getUsers.request").then (xhr) ->
+              expect(xhr.url).to.include "/users"
+              expect(xhr.response).to.be.null
+            .wait("@getUsers")
 
         it "throws when passed multiple string arguments", (done) ->
           @cy.on "fail", (err) ->
@@ -538,7 +619,7 @@ describe "$Cypress.Cy Waiting Commands", ->
               "Returned": btn
             }
 
-      describe "alias argument errors", ->
+      describe.skip "alias argument errors", ->
         beforeEach ->
           @currentTest.enableTimeouts(false)
           @allowErrors()

@@ -232,8 +232,8 @@ describe "$Cypress.Cy Request Commands", ->
           expect(subject).to.deep.eq(resp)
 
     describe "timeout", ->
-      it "sets timeout to Cypress.config(requestTimeout)", ->
-        @Cypress.config("requestTimeout", 2500)
+      it "sets timeout to Cypress.config(responseTimeout)", ->
+        @Cypress.config("responseTimeout", 2500)
 
         @responseIs({status: 200})
 
