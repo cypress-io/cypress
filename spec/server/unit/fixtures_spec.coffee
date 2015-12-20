@@ -271,6 +271,48 @@ describe "Fixtures", ->
           expect(err.message).to.eq "No fixture file found with an acceptable extension. Searched in: #{p}"
           done()
 
+  context "new lines", ->
+    it "does not remove trailing new lines on .txt", ->
+      @fixture.get("trailing_new_line.txt").then (str) =>
+        fs.readFileAsync(@fixture.folder + "/trailing_new_line.txt", "utf8").then (str2) ->
+          expect(str2).to.eq "foo\nbar\nbaz\n"
+
+    it "does not remove trailing new lines on .json", ->
+      @fixture.get("trailing_new_line.json").then (str) =>
+        fs.readFileAsync(@fixture.folder + "/trailing_new_line.json", "utf8").then (str2) ->
+          expect(str2).to.eq """
+            {
+              "foo": "bar"
+            }\n
+          """
+
+    it "does not remove trailing new lines on .js", ->
+      @fixture.get("trailing_new_line.js").then (str) =>
+        fs.readFileAsync(@fixture.folder + "/trailing_new_line.js", "utf8").then (str2) ->
+          expect(str2).to.eq """
+            {
+              foo: "bar"
+            }\n
+          """
+
+    it "does not remove trailing new lines on .coffee", ->
+      @fixture.get("trailing_new_line.coffee").then (str) =>
+        fs.readFileAsync(@fixture.folder + "/trailing_new_line.coffee", "utf8").then (str2) ->
+          expect(str2).to.eq """
+            {
+              foo: "bar"
+            }\n
+          """
+
+    it "does not remove trailing new lines on .html", ->
+      @fixture.get("trailing_new_line.html").then (str) =>
+        fs.readFileAsync(@fixture.folder + "/trailing_new_line.html", "utf8").then (str2) ->
+          expect(str2).to.eq """
+            <html>
+            <body>foo</body>
+            </html>\n
+          """
+
   context "#scaffold", ->
     it "creates both fixturesFolder and example.json when fixturesFolder does not exist", ->
       ## todos has a fixtures folder so let's first nuke it and then scaffold
