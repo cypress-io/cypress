@@ -93,8 +93,9 @@ window.enterIntegrationTestingMode = (fixture, options = {}) ->
       @Cypress.setConfig({
         xhrUrl: "__cypress/xhrs/"
         commandTimeout: 2000
-        visitTimeout: 2000
-        requestTimeout: 2000
+        visitTimeout: 2001
+        requestTimeout: 2002
+        responseTimeout: 2003
       })
 
       ## why do we use the initialize method here but only
@@ -156,8 +157,9 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
       @Cypress.setConfig({
         xhrUrl: "__cypress/xhrs/"
         commandTimeout: 2000
-        visitTimeout: 2000
-        requestTimeout: 2000
+        visitTimeout: 2001
+        requestTimeout: 2002
+        responseTimeout: 2003
       })
 
       @Cypress.trigger "initialize", {$remoteIframe: @$iframe}

@@ -65,7 +65,7 @@ $Cypress.register "Request", (Cypress, _, $) ->
           o.body   = args[2]
 
       _.defaults options, defaults, {
-        timeout: Cypress.config("requestTimeout")
+        timeout: Cypress.config("responseTimeout")
       }
 
       options.method = options.method.toUpperCase()

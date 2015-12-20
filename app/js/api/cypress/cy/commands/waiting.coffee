@@ -58,25 +58,21 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
 
         _.ordinalize requests[alias]
 
-      checkForXhr = (alias, str, options) ->
-        xhr = @getLastXhrByAlias(alias)
+      checkForXhr = (alias, type, options) ->
+        options.type = type
 
-        word = @getXhrTypeByAlias(alias)
+        ## append .type to the alias
+        xhr = @getLastXhrByAlias(alias + "." + type)
 
         ## return our xhr object
-        return xhr if xhr
+        return Promise.resolve(xhr) if xhr
 
-        options.error ?= "cy.wait() timed out waiting for the #{getNumRequests(alias)} #{word} to the route: '#{str}'. No #{word} ever occured."
-
-        ## store the current runnable timeout here
-        ## and manage it ourselves
-        options.runnableTimeout ?= @_timeout()
-
-        ## prevent the runnable from timing out entirely
-        @_clearTimeout()
+        # options.error ?= "cy.wait() timed out waiting for the #{getNumRequests(alias)} #{type} to the route: '#{str}'. No #{type} ever occured."
+        # if not options.error or options.type isnt type
+        options.error ?= "cy.wait() timed out waiting '#{options.timeout}ms' for the #{getNumRequests(alias)} #{type} to the route: '#{alias}'. No #{type} ever occured."
 
         @_retry ->
-          checkForXhr.call(@, alias, str, options)
+          checkForXhr.call(@, alias, type, options)
         , options
 
       waitForXhr = (str) ->
@@ -94,6 +90,8 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
 
         str = _.compact([alias, str2]).join(".")
 
+        type = @getXhrTypeByAlias(str)
+
         ## if we have a command then continue to
         ## build up an array of referencesAlias
         ## because wait can reference an array of aliases
@@ -107,7 +105,25 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
           @throwErr("cy.wait() can only accept aliases for routes.  The alias: '#{alias}' did not match a route.", options._log)
 
         ## create shallow copy of each options object
-        checkForXhr.call(@, str, alias, _.clone(options))
+        ## but slice out the error since we may set
+        ## the error related to a previous xhr
+        options = _.omit(options, "error")
+        timeout = options.timeout
+
+        waitForRequest = =>
+          options.timeout = timeout ? Cypress.config("requestTimeout")
+          checkForXhr.call(@, alias, "request", options)
+
+        waitForResponse = =>
+          options.timeout = timeout ? Cypress.config("responseTimeout")
+          checkForXhr.call(@, alias, "response", options)
+
+        ## if we were only waiting for the request
+        ## then resolve immediately do not wait for response
+        if type is "request"
+          waitForRequest()
+        else
+          waitForRequest().then(waitForResponse)
 
       ## we have to juggle a separate array of promises
       ## in order to cancel them when one bombs
@@ -119,7 +135,7 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
           ## we may get back an xhr value instead
           ## of a promise, so we have to wrap this
           ## in another promise :-(
-          xhr = Promise.resolve waitForXhr.call(@, str)
+          xhr = Promise.resolve waitForXhr.call(@, str, options)
           xhrs.push(xhr)
           xhr
         .then (responses) ->

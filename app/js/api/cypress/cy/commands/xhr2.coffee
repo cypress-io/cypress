@@ -439,9 +439,10 @@ $Cypress.register "XHR2", (Cypress, _) ->
         if prop is "request"
           return @_getLastXhrByAlias(str, "requests")
         else
-          @throwErr "'#{prop}' is not a valid alias property. Are you trying to ask for the first request? If so write @#{str}.request"
+          if prop isnt "response"
+            @throwErr "'#{prop}' is not a valid alias property. Are you trying to ask for the first request? If so write @#{str}.request"
 
-      @_getLastXhrByAlias(alias, "responses")
+      @_getLastXhrByAlias(str, "responses")
 
     getXhrTypeByAlias: (alias) ->
       if requestXhrRe.test(alias) then "request" else "response"
