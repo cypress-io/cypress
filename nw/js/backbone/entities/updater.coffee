@@ -13,7 +13,7 @@
           when "applying"     then "Applying updates..."
           when "done"         then "Updates ready!"
           when "none"         then "No updates available."
-          when "error"        then "An error occured updating."
+          when "error"        then "An error occurred updating."
 
       buttonFormatted: ->
         if @get("state") is "done" then "Restart" else "Close"
