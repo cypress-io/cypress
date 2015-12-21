@@ -303,7 +303,7 @@ describe "$Cypress.Cy Aliasing Commands", ->
 
       it "throws when an alias cannot be found", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.get() could not find a registered alias for: 'lastDiv'. Available aliases are: 'b, firstInput'."
+          expect(err.message).to.include "cy.get() could not find a registered alias for: 'lastDiv'.\nAvailable aliases are: 'b, firstInput'."
           done()
 
         @cy
@@ -313,7 +313,7 @@ describe "$Cypress.Cy Aliasing Commands", ->
 
       it "throws when alias is missing '@' but matches an available alias", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "Invalid alias: 'getAny'. You forgot the '@'. It should be written as: '@getAny'."
+          expect(err.message).to.eq "Invalid alias: 'getAny'.\nYou forgot the '@'. It should be written as: '@getAny'."
           done()
 
         @cy

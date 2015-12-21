@@ -217,7 +217,7 @@ describe "$Cypress.Cy Actions Commands", ->
         node = $Cypress.Utils.stringifyElement(select)
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.select() cannot be called on the non-visible element: #{node}"
+          expect(err.message).to.include "cy.select() failed because this element is not visible"
           done()
 
         @cy.get("select:first").select("foo")
@@ -1719,7 +1719,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.on "fail", (err) =>
           expect(logs).to.have.length(2)
           expect(@log.get("error")).to.eq(err)
-          expect(err.message).to.include "cy.type() cannot be called on the non-visible element: #{node}"
+          expect(err.message).to.include "cy.type() failed because this element is not visible"
           done()
 
         @cy.get("input:text:first").type("foo")
@@ -1752,7 +1752,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq(2)
-          expect(err.message).to.include "Cannot call .type() on this element because it is being covered by another element:"
+          expect(err.message).to.include "cy.type() failed because this element is being covered by another element"
           done()
 
         @cy.get("#input-covered-in-span").type("foo")
@@ -1974,7 +1974,7 @@ describe "$Cypress.Cy Actions Commands", ->
         node = $Cypress.Utils.stringifyElement(input)
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.clear() cannot be called on the non-visible element: #{node}"
+          expect(err.message).to.include "cy.clear() failed because this element is not visible"
           done()
 
         @cy.get("input:text:first").clear()
@@ -2005,7 +2005,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq(2)
-          expect(err.message).to.include "Cannot call .clear() on this element because it is being covered by another element:"
+          expect(err.message).to.include "cy.clear() failed because this element is being covered by another element"
           done()
 
         @cy.get("#input-covered-in-span").clear()
@@ -2245,7 +2245,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.on "fail", (err) =>
           expect(logs).to.have.length(chk.length + 1)
           expect(@log.get("error")).to.eq(err)
-          expect(err.message).to.include "cy.check() cannot be called on the non-visible element: #{node}"
+          expect(err.message).to.include "cy.check() failed because this element is not visible"
           done()
 
         @cy.get(":checkbox:first").check()
@@ -2264,7 +2264,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.on "fail", (err) =>
           expect(logs).to.have.length(chk.length + 1)
           expect(@log.get("error")).to.eq(err)
-          expect(err.message).to.include "cy.check() cannot be called on the non-visible element: #{node}"
+          expect(err.message).to.include "cy.check() failed because this element is not visible"
           done()
 
         @cy.get(":checkbox").check()
@@ -2295,7 +2295,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq(2)
-          expect(err.message).to.include "Cannot call .check() on this element because it is being covered by another element:"
+          expect(err.message).to.include "cy.check() failed because this element is being covered by another element"
           done()
 
         @cy.get("#checkbox-covered-in-span").check()
@@ -2523,7 +2523,7 @@ describe "$Cypress.Cy Actions Commands", ->
           len  = (chk.length * 2) + 6
           expect(logs).to.have.length(len)
           expect(@log.get("error")).to.eq(err)
-          expect(err.message).to.include "cy.uncheck() cannot be called on the non-visible element: #{node}"
+          expect(err.message).to.include "cy.uncheck() failed because this element is not visible"
           done()
 
         @cy
@@ -2572,7 +2572,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq(2)
-          expect(err.message).to.include "Cannot call .uncheck() on this element because it is being covered by another element:"
+          expect(err.message).to.include "cy.uncheck() failed because this element is being covered by another element"
           done()
 
         @cy.get("#checkbox-covered-in-span").uncheck()
@@ -3770,7 +3770,7 @@ describe "$Cypress.Cy Actions Commands", ->
         node = $Cypress.Utils.stringifyElement(btn)
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.eq "cy.dblclick() cannot be called on the non-visible element: #{node}"
+          expect(err.message).to.include "cy.dblclick() failed because this element is not visible"
           done()
 
         @cy.get("button").dblclick()
@@ -3801,7 +3801,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.on "fail", (err) =>
           expect(logs).to.have.length(4)
           expect(@log.get("error")).to.eq(err)
-          expect(err.message).to.eq "cy.dblclick() cannot be called on the non-visible element: #{node}"
+          expect(err.message).to.include "cy.dblclick() failed because this element is not visible"
           done()
 
         @cy.get("#three-buttons button").dblclick()
@@ -4474,7 +4474,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq(4)
           expect(@log.get("error")).to.eq(err)
-          expect(err.message).to.include "cy.click() cannot be called on the non-visible element: #{node}"
+          expect(err.message).to.include "cy.click() failed because this element is not visible"
           done()
 
         @cy.get("#three-buttons button").click({multiple: true})
@@ -4503,7 +4503,7 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@log.get("snapshots")[0].name).to.eq("before")
           expect(@log.get("snapshots")[1]).to.be.an("object")
           expect(@log.get("snapshots")[1].name).to.eq("after")
-          expect(err.message).to.include "Cannot call .click() on this element because it is being covered by another element: #{node}"
+          expect(err.message).to.include "cy.click() failed because this element is being covered by another element"
 
           console = @log.attributes.onConsole()
           expect(console["Tried to Click"]).to.eq btn.get(0)
@@ -4522,7 +4522,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @sandbox.stub(@cy, "getElementAtCoordinates").returns(null)
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.include "Cannot call .click() on this element because its center is currently hidden from view."
+          expect(err.message).to.include "cy.click() failed because the center of this element is hidden from view:"
           done()
 
         @cy.get("#overflow-auto-container").contains("quux").click()

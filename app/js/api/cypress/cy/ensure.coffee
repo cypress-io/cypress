@@ -27,7 +27,12 @@ do ($Cypress, _, $) ->
 
       if not (subject.length is subject.filter(":visible").length)
         node = $Cypress.Utils.stringifyElement(subject)
-        @throwErr("cy.#{method}() cannot be called on the non-visible element: #{node}", onFail)
+        @throwErr("""
+          cy.#{method}() failed because this element is not visible:\n
+          #{node}\n
+          Use {force: true} to disable error checking.\n
+          http://on.cypress.io/element-cannot-be-interacted-with
+        """, onFail)
 
     ensureDom: (subject, method) ->
       subject ?= @ensureSubject()
@@ -96,6 +101,16 @@ do ($Cypress, _, $) ->
       unless $Cypress.Utils.isDescendent($el1, $el2)
         if $el2
           node = $Cypress.Utils.stringifyElement($el2)
-          @throwErr("Cannot call .#{method}() on this element because it is being covered by another element: #{node}", onFail)
+          @throwErr("""
+            cy.#{method}() failed because this element is being covered by another element:\n
+            #{node}\n
+            Use {force: true} to disable error checking.\n
+            http://on.cypress.io/element-cannot-be-interacted-with
+          """, onFail)
         else
-          @throwErr("Cannot call .#{method}() on this element because its center is currently hidden from view.", onFail)
+          @throwErr("""
+            cy.#{method}() failed because the center of this element is hidden from view:\n
+            #{node}\n
+            Use {force: true} to disable error checking.\n
+            http://on.cypress.io/element-cannot-be-interacted-with
+          """, onFail)

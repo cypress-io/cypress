@@ -28,8 +28,8 @@ describe "$Cypress.Cy Location Commands", ->
         @chai.restore()
 
       it "eventually passes the assertion", ->
-        @cy.on "retry", _.after 2, =>
-          win = cy.private("window")
+        @cy.on "retry", _.after 2, _.once =>
+          win = @cy.private("window")
           win.location.href = "/foo/bar/baz.html"
 
         @cy.url().should("match", /baz/).then ->
@@ -243,8 +243,8 @@ describe "$Cypress.Cy Location Commands", ->
         @chai.restore()
 
       it "eventually passes the assertion", ->
-        @cy.on "retry", _.after 2, =>
-          win = cy.private("window")
+        @cy.on "retry", _.after 2, _.once =>
+          win = @cy.private("window")
           win.location.pathname = "users/1"
 
         @cy.location("pathname").should("match", /users/).then ->

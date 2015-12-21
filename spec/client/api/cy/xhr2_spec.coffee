@@ -1279,7 +1279,7 @@ describe "$Cypress.Cy XHR Commands", ->
           logs.push @log
 
         @cy.on "fail", (err) =>
-          expect(err.message).to.eq "cy.route() could not find a registered alias for: 'bar'. Available aliases are: 'foo'."
+          expect(err.message).to.eq "cy.route() could not find a registered alias for: 'bar'.\nAvailable aliases are: 'foo'."
           expect(logs.length).to.eq(2)
           expect(@log.get("name")).to.eq "route"
           expect(@log.get("error")).to.eq err

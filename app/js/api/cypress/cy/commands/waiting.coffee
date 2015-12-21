@@ -78,8 +78,8 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
         ## since we support alias property 'request'
         [str, str2] = str.split(".")
 
-        if not aliasObj = @getAlias(str, log)
-          @aliasNotFoundFor(str, log)
+        if not aliasObj = @getAlias(str, "wait", log)
+          @aliasNotFoundFor(str, "wait", log)
 
         ## if this alias is for a route then poll
         ## until we find the response xhr object
