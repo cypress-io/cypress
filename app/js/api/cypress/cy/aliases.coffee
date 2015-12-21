@@ -14,7 +14,7 @@ do ($Cypress, _) ->
       if next and next.get("name") is "as"
         next.get("args")[0]
 
-    getAlias: (name, command) ->
+    getAlias: (name, log) ->
       aliases = @prop("aliases") ? {}
 
       ## bail if the name doesnt reference an alias
@@ -22,7 +22,7 @@ do ($Cypress, _) ->
 
       ## slice off the '@'
       if not alias = aliases[name.slice(1)]
-        @aliasNotFoundFor(name, command)
+        @aliasNotFoundFor(name, log)
 
       return alias
 
@@ -34,16 +34,23 @@ do ($Cypress, _) ->
 
       _(aliases).keys()
 
-    aliasNotFoundFor: (name, command) ->
+    aliasNotFoundFor: (name, log) ->
       availableAliases = @getAvailableAliases()
 
       ## throw a very specific error if our alias isnt in the right
       ## format, but its word is found in the availableAliases
       if (not aliasRe.test(name)) and (name in availableAliases)
-        @throwErr "Invalid alias: '#{name}'. You forgot the '@'. It should be written as: '@#{@_aliasDisplayName(name)}'."
+        @throwErr "Invalid alias: '#{name}'.\nYou forgot the '@'. It should be written as: '@#{@_aliasDisplayName(name)}'.", log
 
-      command ?= @prop("current").get("name")
-      @throwErr "cy.#{command}() could not find a registered alias for: '#{@_aliasDisplayName(name)}'. Available aliases are: '#{availableAliases.join(", ")}'."
+      cmd = log and log.get("name") or @prop("current").get("name")
+      err = "cy.#{cmd}() could not find a registered alias for: '#{@_aliasDisplayName(name)}'.\n"
+
+      if availableAliases.length
+        err += "Available aliases are: '#{availableAliases.join(", ")}'."
+      else
+        err += "You have not aliased anything yet."
+
+      @throwErr(err, log)
 
     _getCommandsUntilFirstParentOrValidSubject: (command, memo = []) ->
       return null if not command

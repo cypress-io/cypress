@@ -45,7 +45,7 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
 
     _waitString: (subject, str, options) ->
       if options.log isnt false
-        options._log = Cypress.Log.command
+        log = options._log = Cypress.Log.command
           type: "parent"
           aliasType: "route"
 
@@ -67,8 +67,6 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
         ## return our xhr object
         return Promise.resolve(xhr) if xhr
 
-        # options.error ?= "cy.wait() timed out waiting for the #{getNumRequests(alias)} #{type} to the route: '#{str}'. No #{type} ever occured."
-        # if not options.error or options.type isnt type
         options.error = "cy.wait() timed out waiting '#{options.timeout}ms' for the #{num} #{type} to the route: '#{alias}'. No #{type} ever occured."
 
         @_retry ->
@@ -80,8 +78,8 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
         ## since we support alias property 'request'
         [str, str2] = str.split(".")
 
-        if not aliasObj = @getAlias(str)
-          return @aliasNotFoundFor(str)
+        if not aliasObj = @getAlias(str, log)
+          @aliasNotFoundFor(str, log)
 
         ## if this alias is for a route then poll
         ## until we find the response xhr object
@@ -95,14 +93,14 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
         ## if we have a command then continue to
         ## build up an array of referencesAlias
         ## because wait can reference an array of aliases
-        if options._log
-          referencesAlias = options._log.get("referencesAlias") ? []
+        if log
+          referencesAlias = log.get("referencesAlias") ? []
           aliases = [].concat(referencesAlias)
           aliases.push(str)
-          options._log.set "referencesAlias", aliases
+          log.set "referencesAlias", aliases
 
         if command.get("name") isnt "route"
-          @throwErr("cy.wait() can only accept aliases for routes.  The alias: '#{alias}' did not match a route.", options._log)
+          @throwErr("cy.wait() can only accept aliases for routes.\nThe alias: '#{alias}' did not match a route.", options._log)
 
         ## create shallow copy of each options object
         ## but slice out the error since we may set

@@ -119,7 +119,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
         it "throws when alias doesnt match a route", (done) ->
           @cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() can only accept aliases for routes.  The alias: 'b' did not match a route."
+            expect(err.message).to.include "cy.wait() can only accept aliases for routes.\nThe alias: 'b' did not match a route."
             done()
 
           @cy.get("body").as("b").wait("@b")
@@ -150,7 +150,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
         it "throws when alias is missing '@' but matches an available alias", (done) ->
           @cy.on "fail", (err) ->
-            expect(err.message).to.eq "Invalid alias: 'getAny'. You forgot the '@'. It should be written as: '@getAny'."
+            expect(err.message).to.eq "Invalid alias: 'getAny'.\nYou forgot the '@'. It should be written as: '@getAny'."
             done()
 
           @cy
@@ -160,7 +160,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
         it "throws when 2nd alias doesnt match any registered alias", (done) ->
           @cy.on "fail", (err) ->
-            expect(err.message).to.eq "cy.wait() could not find a registered alias for: 'bar'. Available aliases are: 'foo'."
+            expect(err.message).to.eq "cy.wait() could not find a registered alias for: 'bar'.\nAvailable aliases are: 'foo'."
             done()
 
           @cy
@@ -173,7 +173,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
         it "throws when 2nd alias is missing '@' but matches an available alias", (done) ->
           @cy.on "fail", (err) ->
-            expect(err.message).to.eq "Invalid alias: 'bar'. You forgot the '@'. It should be written as: '@bar'."
+            expect(err.message).to.eq "Invalid alias: 'bar'.\nYou forgot the '@'. It should be written as: '@bar'."
             done()
 
           @cy
@@ -187,7 +187,7 @@ describe "$Cypress.Cy Waiting Commands", ->
 
         it "throws when 2nd alias isnt a route alias", (done) ->
           @cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() can only accept aliases for routes.  The alias: 'bar' did not match a route."
+            expect(err.message).to.include "cy.wait() can only accept aliases for routes.\nThe alias: 'bar' did not match a route."
             done()
 
           @cy
@@ -258,7 +258,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           @Cypress.config("requestTimeout", 100)
 
           @cy.on "fail", (err) ->
-            expect(err.message).to.eq "Invalid alias: 'bar'. You forgot the '@'. It should be written as: '@bar'."
+            expect(err.message).to.eq "Invalid alias: 'bar'.\nYou forgot the '@'. It should be written as: '@bar'."
             _.delay ->
               done()
             , 500
@@ -276,7 +276,7 @@ describe "$Cypress.Cy Waiting Commands", ->
           @Cypress.config("requestTimeout", 100)
 
           @cy.on "fail", (err) ->
-            expect(err.message).to.eq "cy.wait() can only accept aliases for routes.  The alias: 'bar' did not match a route."
+            expect(err.message).to.eq "cy.wait() can only accept aliases for routes.\nThe alias: 'bar' did not match a route."
             _.delay ->
               done()
             , 500
@@ -619,15 +619,13 @@ describe "$Cypress.Cy Waiting Commands", ->
               "Returned": btn
             }
 
-      describe.skip "alias argument errors", ->
+      describe "alias argument errors", ->
         beforeEach ->
           @currentTest.enableTimeouts(false)
           @allowErrors()
 
         it ".log", (done) ->
-          @enableTimeouts(false)
-
-          @cy._timeout(200)
+          @Cypress.config("requestTimeout", 100)
 
           numRetries = 0
 
@@ -656,12 +654,25 @@ describe "$Cypress.Cy Waiting Commands", ->
             .route(/foo/, {}).as("getFoo")
             .noop({}).wait("@getFoo")
 
+        it "only logs once", (done) ->
+          logs = []
+
+          @Cypress.on "log", (log) ->
+            logs.push(log)
+
+          @cy.on "fail", (err) ->
+            expect(logs.length).to.eq(1)
+            expect(err.message).to.eq("cy.wait() could not find a registered alias for: \'foo\'.\nYou have not aliased anything yet.")
+            done()
+
+          @cy.wait("@foo")
+
         it "#onConsole multiple aliases", (done) ->
-          @cy._timeout(200)
+          @Cypress.config("requestTimeout", 100)
 
           @cy.on "fail", (err) =>
             expect(@log.get("error")).to.eq err
-            expect(err.message).to.include "cy.wait() timed out waiting for the 1st response to the route: 'getBar'. No response ever occured."
+            expect(err.message).to.include "cy.wait() timed out waiting '100ms' for the 1st request to the route: 'getBar'. No request ever occured."
             done()
 
           @cy
