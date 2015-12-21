@@ -265,6 +265,9 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Reporter, Log) ->
           # onAppError: (err) ->
             # writeErr(err)
 
+          onResolve: ->
+            resolve()
+
           onConnect: (socketId, socket) ->
             patchGlobalConsoleLog()
 
@@ -274,7 +277,7 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Reporter, Log) ->
               if not connected
                 ## resolve our promise that we became
                 ## connected so it doesnt time out
-                resolve()
+                @onResolve()
                 connected = true
 
               socket.on "mocha", (event, args...) ->

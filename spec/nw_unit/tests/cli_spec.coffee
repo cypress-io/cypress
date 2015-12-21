@@ -46,7 +46,15 @@ module.exports = (parentWindow, gui, loadApp) ->
 
           # wait for our token to come back
           # because its async
-          Promise.delay(1000)
+          Promise.delay(1000).then =>
+            start = _.find @trigger.getCalls(), (c) ->
+              c.args[0] is "start:projects:app"
+
+            ## resolve our promise which will
+            ## throw after 10 secs due to no
+            ## remote connection
+            if start
+              start.args[1].onResolve?()
 
     afterEach ->
       Fixtures.remove()
@@ -457,7 +465,7 @@ module.exports = (parentWindow, gui, loadApp) ->
         @setup = (args...) =>
           cache.setUser({name: "Brian", session_token: "abc123"}).then =>
             cache.addProject(@todos).then =>
-              @argsAre.apply(@, args).then ->
+              @argsAre.apply(@, args).then =>
                 Promise.delay(100)
 
       it "can add port without starting a project", ->
