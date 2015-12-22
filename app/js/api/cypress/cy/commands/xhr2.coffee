@@ -372,6 +372,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
         status:   options.status
         response: options.response
         alias:    options.alias
+        isStubbed: options.response?
         numResponses: 0
         onConsole: ->
           Method:   options.method

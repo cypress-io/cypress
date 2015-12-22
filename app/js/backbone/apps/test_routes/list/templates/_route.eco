@@ -2,7 +2,9 @@
 <td>
   <%= @urlFormatted %>
 </td>
-<td><%= @status %></td>
+<td>
+  <%= if @isStubbed then "Yes" else "No" %>
+</td>
 <td>
   <% if @alias: %>
     <span class="route-alias" data-toggle="tooltip" title="Aliased this route as: <%= @alias %>">

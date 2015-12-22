@@ -19,7 +19,7 @@
     model: Entities.Route
 
     createRoute: (log) ->
-      attrs = ["testId", "hook", "type", "method", "name", "url", "status", "alias", "numResponses"]
+      attrs = ["testId", "hook", "type", "method", "name", "url", "status", "alias", "isStubbed", "numResponses"]
 
       route     = new Entities.Route log.pick.apply(log, attrs)
       route.log = log
