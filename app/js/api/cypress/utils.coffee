@@ -140,7 +140,14 @@ $Cypress.Utils = do ($Cypress, _) ->
 
       switch form
         when "long"
-          el.clone().empty().prop("outerHTML")
+          text     = _.chain(el.text()).clean().truncate(10).value()
+          children = el.children().length
+          str      = el.clone().empty().prop("outerHTML")
+          switch
+            when children then str.replace("></", ">...</")
+            when text     then str.replace("></", ">#{text}</")
+            else
+              str
         when "short"
           str = el.prop("tagName").toLowerCase()
           if id = el.prop("id")
