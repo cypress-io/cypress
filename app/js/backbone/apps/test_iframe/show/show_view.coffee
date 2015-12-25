@@ -77,9 +77,6 @@
         ## bail if our el no longer exists in the parent dom
         return if not @elExistsInDocument(dom, el)
 
-        ## bail if our el isnt visible either
-        return if not el.is(":visible")
-
         dimensions = @getDimensions(el)
 
         ## dont show anything if our element displaces nothing
@@ -97,9 +94,12 @@
       $.contains parent[0], el[0]
 
     getDimensions: (el) ->
+      ## switch to using outerWidth + outerHeight
+      ## because we want to highlight our element even
+      ## if it only has margin and zero content height / width
       {
-        width: el.width()
-        height: el.height()
+        width: el.outerWidth(true)
+        height: el.outerHeight(true)
       }
 
     calcWidth: (main, tests, container, headerHeight) ->
