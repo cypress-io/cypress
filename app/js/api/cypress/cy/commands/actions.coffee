@@ -1048,6 +1048,11 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         @throwErr ".select() was called with an array of arguments but does not have a 'multiple' attribute set!"
 
       getOptions = =>
+        ## throw if <select> is disabled
+        if options.$el.prop("disabled")
+          node = Cypress.Utils.stringifyElement(options.$el)
+          @throwErr "cy.select() failed because this element is currently disabled:\n\n#{node}"
+
         values  = []
         optionEls = []
         optionsObjects = options.$el.children().map (index, el) ->
@@ -1082,6 +1087,11 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         if not values.length
           @throwErr("cy.select() failed because it could not find a single <option> with value or text matching: '#{valueOrText.join(", ")}'")
+
+        _.each optionEls, ($el) =>
+          if $el.prop("disabled")
+            node = Cypress.Utils.stringifyElement($el)
+            @throwErr("cy.select() failed because this <option> you are trying to select is currently disabled:\n\n#{node}")
 
         {values: values, optionEls: optionEls}
 

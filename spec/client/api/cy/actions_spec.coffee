@@ -75,6 +75,30 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("select:first").select("de_dust2", {force: true})
 
+    it "retries until <option> can be selected", ->
+      option = @cy.$("<option>foo</option>")
+
+      @cy.on "retry", _.once =>
+        @cy.$("select:first").append option
+
+      @cy.get("select:first").select("foo")
+
+    it "retries until <select> is no longer disabled", ->
+      select = @cy.$("select[name=disabled]")
+
+      @cy.on "retry", _.once =>
+        select.prop("disabled", false)
+
+      @cy.get("select[name=disabled]").select("foo")
+
+    it "retries until <options> are no longer disabled", ->
+      select = @cy.$("select[name=opt-disabled]")
+
+      @cy.on "retry", _.once =>
+        select.find("option").prop("disabled", false)
+
+      @cy.get("select[name=opt-disabled]").select("bar")
+
     describe "assertion verification", ->
       beforeEach ->
         @allowErrors()
@@ -157,7 +181,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
     describe "errors", ->
       beforeEach ->
-        @currentTest.timeout(200)
+        @currentTest.timeout(100)
         @allowErrors()
 
       it "throws when not a dom subject", (done) ->
@@ -228,6 +252,20 @@ describe "$Cypress.Cy Actions Commands", ->
           done()
 
         @cy.get("select[name=foods]").select("foo")
+
+      it "throws when the <select> itself is disabled", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include("cy.select() failed because this element is currently disabled:")
+          done()
+
+        @cy.get("select[name=disabled]").select("foo")
+
+      it "throws when options are disabled", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include("cy.select() failed because this <option> you are trying to select is currently disabled:")
+          done()
+
+        @cy.get("select[name=opt-disabled]").select("bar")
 
       it "only logs once on failure", (done) ->
         logs = []
