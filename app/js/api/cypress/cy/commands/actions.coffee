@@ -1003,6 +1003,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
       @ensureDom(options.$el)
 
+      onConsole = {}
+
       if options.log
         ## figure out the options which actually change the behavior of clicks
         deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: null})
@@ -1011,9 +1013,10 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           message: deltaOptions
           $el: options.$el
           onConsole: ->
-            "Selected":   values
-            "Applied To": $Cypress.Utils.getDomElements(options.$el)
-            "Options":    deltaOptions
+            ## merge into onConsole without mutating it
+            _.extend {}, onConsole,
+              "Applied To": $Cypress.Utils.getDomElements(options.$el)
+              "Options":    deltaOptions
 
         options._log.snapshot("before", {next: "after"})
 
@@ -1044,98 +1047,119 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       if not multiple and valueOrText.length > 1
         @throwErr ".select() was called with an array of arguments but does not have a 'multiple' attribute set!"
 
-      values  = []
-      optionEls = []
-      optionsObjects = options.$el.children().map (index, el) ->
-        ## push the value in values array if its
-        ## found within the valueOrText
-        value = el.value
-        optEl = $(el)
+      getOptions = =>
+        values  = []
+        optionEls = []
+        optionsObjects = options.$el.children().map (index, el) ->
+          ## push the value in values array if its
+          ## found within the valueOrText
+          value = el.value
+          optEl = $(el)
 
-        if value in valueOrText
-          optionEls.push optEl
-          values.push(value)
+          if value in valueOrText
+            optionEls.push optEl
+            values.push(value)
 
-        ## return the elements text + value
-        {
-          value: value
-          text: optEl.text()
-          $el: optEl
-        }
+          ## return the elements text + value
+          {
+            value: value
+            text: optEl.text()
+            $el: optEl
+          }
 
-      ## if we couldn't find anything by value then attempt
-      ## to find it by text and insert its value into values arr
-      if not values.length
-        _.each optionsObjects.get(), (obj, index) ->
-          if obj.text in valueOrText
-            optionEls.push obj.$el
-            values.push(obj.value)
+        ## if we couldn't find anything by value then attempt
+        ## to find it by text and insert its value into values arr
+        if not values.length
+          _.each optionsObjects.get(), (obj, index) ->
+            if obj.text in valueOrText
+              optionEls.push obj.$el
+              values.push(obj.value)
 
-      ## if we didnt set multiple to true and
-      ## we have more than 1 option to set then blow up
-      if not multiple and values.length > 1
-        @throwErr(".select() matched than one option by value or text: #{valueOrText.join(", ")}")
+        ## if we didnt set multiple to true and
+        ## we have more than 1 option to set then blow up
+        if not multiple and values.length > 1
+          @throwErr(".select() matched than one option by value or text: #{valueOrText.join(", ")}")
 
-      @execute("click", {
-        $el: options.$el
-        log: false
-        verify: false
-        errorOnSelect: false ## prevent click errors since we want the select to be clicked
-        _log: options._log
-        force: options.force
-        timeout: options.timeout
-        interval: options.interval
-      }).then( =>
+        if not values.length
+          @throwErr("cy.select() failed because it could not find a single <option> with value or text matching: '#{valueOrText.join(", ")}'")
 
-        ## TODO:
-        ## 1. test cancellation
-        ## 2. test passing optionEls to each directly
-        ## 3. update other tests using this Promise.each pattern
-        ## 4. test that force is always true
-        ## 5. test that command is not provided (undefined / null)
-        ## 6. test that option actually receives click event
-        ## 7. test that select still has focus (i think it already does have a test)
-        ## 8. test that multiple=true selects receive option event for each selected option
+        {values: values, optionEls: optionEls}
+
+      retryOptions = =>
         Promise
-          .resolve(optionEls) ## why cant we just pass these directly to .each?
-          .each (optEl) =>
-            @execute("click", {
-              $el: optEl
-              log: false
-              verify: false
-              force: true ## always force the click to happen on the <option>
-              timeout: options.timeout
-              interval: options.interval
-            })
-          .cancellable()
-          .then =>
-            ## reset the selects value after we've
-            ## fired all the proper click events
-            ## for the options
-            ## TODO: shouldn't we be updating the values
-            ## as we click the <option> instead of
-            ## all afterwards?
-            options.$el.val(values)
+        .try(getOptions)
+        .catch (err) =>
+          options.error = err
+          @_retry(retryOptions, options)
 
-            input = new Event "input", {
-              bubbles: true
-              cancelable: false
-            }
+      Promise
+      .try(retryOptions)
+      .then (obj = {}) =>
+        {values, optionEls} = obj
 
-            options.$el.get(0).dispatchEvent(input)
+        ## preserve the selected values
+        onConsole.Selected = values
 
-            ## yup manually create this change event
-            ## 1.6.5. HTML event types
-            ## scroll down to 'change'
-            change = document.createEvent("HTMLEvents")
-            change.initEvent("change", true, false)
+        @execute("click", {
+          $el: options.$el
+          log: false
+          verify: false
+          errorOnSelect: false ## prevent click errors since we want the select to be clicked
+          _log: options._log
+          force: options.force
+          timeout: options.timeout
+          interval: options.interval
+        }).then( =>
 
-            options.$el.get(0).dispatchEvent(change)
-      ).then =>
-        do verifyAssertions = =>
-          @verifyUpcomingAssertions(options.$el, options, {
-            onRetry: verifyAssertions
-      })
+          ## TODO:
+          ## 1. test cancellation
+          ## 2. test passing optionEls to each directly
+          ## 3. update other tests using this Promise.each pattern
+          ## 4. test that force is always true
+          ## 5. test that command is not provided (undefined / null)
+          ## 6. test that option actually receives click event
+          ## 7. test that select still has focus (i think it already does have a test)
+          ## 8. test that multiple=true selects receive option event for each selected option
+          Promise
+            .resolve(optionEls) ## why cant we just pass these directly to .each?
+            .each (optEl) =>
+              @execute("click", {
+                $el: optEl
+                log: false
+                verify: false
+                force: true ## always force the click to happen on the <option>
+                timeout: options.timeout
+                interval: options.interval
+              })
+            .cancellable()
+            .then =>
+              ## reset the selects value after we've
+              ## fired all the proper click events
+              ## for the options
+              ## TODO: shouldn't we be updating the values
+              ## as we click the <option> instead of
+              ## all afterwards?
+              options.$el.val(values)
+
+              input = new Event "input", {
+                bubbles: true
+                cancelable: false
+              }
+
+              options.$el.get(0).dispatchEvent(input)
+
+              ## yup manually create this change event
+              ## 1.6.5. HTML event types
+              ## scroll down to 'change'
+              change = document.createEvent("HTMLEvents")
+              change.initEvent("change", true, false)
+
+              options.$el.get(0).dispatchEvent(change)
+        ).then =>
+          do verifyAssertions = =>
+            @verifyUpcomingAssertions(options.$el, options, {
+              onRetry: verifyAssertions
+        })
 
   Cypress.addParentCommand
     focused: (options = {}) ->

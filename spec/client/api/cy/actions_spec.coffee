@@ -50,7 +50,7 @@ describe "$Cypress.Cy Actions Commands", ->
         .get("select:first").select("de_train")
 
     it "can forcibly click even when being covered by another element", (done) ->
-      select  = $("<select />").attr("id", "select-covered-in-span").prependTo(@cy.$("body"))
+      select  = $("<select><option>foo</option></select>").attr("id", "select-covered-in-span").prependTo(@cy.$("body"))
       span = $("<span>span on select</span>").css(position: "absolute", left: select.offset().left, top: select.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
 
       select.on "click", -> done()
@@ -220,7 +220,27 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(err.message).to.include "cy.select() failed because this element is not visible"
           done()
 
-        @cy.get("select:first").select("foo")
+        @cy.get("select:first").select("de_dust2")
+
+      it "throws when value or text does not exist", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.include("cy.select() failed because it could not find a single <option> with value or text matching: 'foo'")
+          done()
+
+        @cy.get("select[name=foods]").select("foo")
+
+      it "only logs once on failure", (done) ->
+        logs = []
+
+        @Cypress.on "log", (@log) ->
+          logs.push log
+
+        @cy.on "fail", (err) ->
+          ## 2 logs, 1 for cy.get, 1 for cy.select
+          expect(logs.length).to.eq(2)
+          done()
+
+        @cy.get("select:first").select("does_not_exist")
 
     describe ".log", ->
       beforeEach ->
