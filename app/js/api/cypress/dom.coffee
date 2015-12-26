@@ -1,11 +1,11 @@
-$Cypress.JQuery = do ($Cypress, _, $) ->
+$Cypress.Dom = do ($Cypress, _, $) ->
 
   fixedOrAbsoluteRe = /(fixed|absolute)/
 
   return obj = {
     ## assign this fn to jquery and to our revealing module
     ## at the same time. #pro
-    elIsHidden: $.expr.filters.hidden = (el) ->
+    isHidden: $.expr.filters.hidden = (el) ->
       $el = $(el)
 
       ## in Cypress-land we consider the element hidden if

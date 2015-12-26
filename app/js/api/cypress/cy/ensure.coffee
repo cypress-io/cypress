@@ -26,7 +26,7 @@ do ($Cypress, _, $) ->
       method = @prop("current").get("name")
 
       if not (subject.length is subject.filter(":visible").length)
-        reason = $Cypress.JQuery.getReasonElIsHidden(subject)
+        reason = $Cypress.Dom.getReasonElIsHidden(subject)
         node   = $Cypress.Utils.stringifyElement(subject)
         @throwErr("""
           cy.#{method}() failed because this element is not visible:\n

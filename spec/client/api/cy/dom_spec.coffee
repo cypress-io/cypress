@@ -2,8 +2,12 @@ describe "$Cypress.jQuery Extensions", ->
   enterCommandTestingMode()
 
   it "attaches to Cypress namespace", ->
-    expect($Cypress.JQuery).to.be.an("object")
-    expect(Cypress.JQuery).to.be.an("object")
+    expect($Cypress.Dom).to.be.an("object")
+    expect(Cypress.Dom).to.be.an("object")
+
+  it "exposes isHidden", ->
+    expect($Cypress.Dom.isHidden).to.be.a("function")
+    expect(Cypress.Dom.isHidden).to.be.a("function")
 
   context "hidden overrides", ->
     beforeEach ->
@@ -131,7 +135,7 @@ describe "$Cypress.jQuery Extensions", ->
     describe "#getReasonElIsHidden", ->
       beforeEach ->
         @reasonIs = ($el, str) ->
-          expect($Cypress.JQuery.getReasonElIsHidden($el)).to.eq(str)
+          expect($Cypress.Dom.getReasonElIsHidden($el)).to.eq(str)
 
       it "has 'display: none'", ->
         @reasonIs @$displayNone, "This element is not visible because it has CSS property: 'display: none'"
