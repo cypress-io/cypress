@@ -109,6 +109,7 @@ describe "$Cypress.Log API", ->
         expect(@log.get("numElements")).to.eq @$el.length
 
       it "sets visible to true", ->
+        @$el.css({height: 100, width: 100})
         @log.set($el: @$el)
         expect(@log.get("visible")).to.be.true
 

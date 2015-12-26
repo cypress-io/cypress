@@ -1750,7 +1750,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("form").type("foo")
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.include ".type() can only be called on textarea or :text! Your subject is a: <form id=\"by-id\"></form>"
+          expect(err.message).to.include ".type() can only be called on textarea or :text! Your subject is a: <form id=\"by-id\">...</form>"
           done()
 
       it "throws when subject is a collection of elements", (done) ->
@@ -2000,14 +2000,14 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.on "fail", (err) =>
           expect(logs.length).to.eq(3)
           expect(@log.get("error")).to.eq(err)
-          expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <form id=\"checkboxes\"></form>"
+          expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <form id=\"checkboxes\">...</form>"
           done()
 
         @cy.get("textarea:first,form#checkboxes").clear()
 
       it "throws if any subject isnt a :text", (done) ->
         @cy.on "fail", (err) ->
-          expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <div id=\"dom\"></div>"
+          expect(err.message).to.include ".clear() can only be called on textarea or :text! Your subject contains a: <div id=\"dom\">...</div>"
           done()
 
         @cy.get("div").clear()
@@ -2278,7 +2278,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("form").check()
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.include ".check() can only be called on :checkbox and :radio! Your subject contains a: <form id=\"by-id\"></form>"
+          expect(err.message).to.include ".check() can only be called on :checkbox and :radio! Your subject contains a: <form id=\"by-id\">...</form>"
           done()
 
       it "throws when any member of the subject isnt a checkbox or radio", (done) ->
@@ -3349,7 +3349,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("form").focus()
 
         @cy.on "fail", (err) ->
-          expect(err.message).to.include ".focus() can only be called on a valid focusable element! Your subject is a: <form id=\"by-id\"></form>"
+          expect(err.message).to.include ".focus() can only be called on a valid focusable element! Your subject is a: <form id=\"by-id\">...</form>"
           done()
 
       it "throws when subject is a collection of elements", (done) ->
