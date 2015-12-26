@@ -11,7 +11,6 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
 
   reHttp = /^https?:\/\//
   reWww = /^www/
-  rePushStateOrReplaceState = /push|replace/
 
   reLocalHost = /^(localhost|0\.0\.0\.0|127\.0\.0\.1)/
 
@@ -142,36 +141,10 @@ $Cypress.Location = do ($Cypress, _, Uri) ->
         return if not orig = win.history?[attr]
 
         win.history[attr] = ->
-          args = arguments
+          orig.apply(@, arguments)
 
-          if $Cypress.isHeadless and not rePushStateOrReplaceState.test(attr)
-            throw $Cypress.Utils.cypressError("""
-              Your app called 'history.#{attr}()' when running headlessly.\n
-              This is a known bug. Currently, calling 'history.#{attr}()' will cause tests to restart continuously and never finish.\n
-              We are throwing this error temporarily until the issue is resolved.
-            """)
-
-            # getHistory().then (response) =>
-            #   {history, index} = response
-
-            #   if err = response.__error
-            #     throw $Cypress.Utils.cypressError(err)
-            #   else
-            #     getUrl = ->
-            #       switch attr
-            #         when "go"      then history[index + args[0]]
-            #         when "back"    then history[index - 1]
-            #         when "forward" then history[index + 1]
-
-            #     if url = getUrl()
-            #       win.location.href = getUrl()
-
-            #       navigated(attr, args)
-          else
-            orig.apply(@, args)
-
-            ## let our function know we've navigated
-            navigated(attr, args)
+          ## let our function know we've navigated
+          navigated(attr, arguments)
 
     ## think about moving this method out of Cypress
     ## and into our app, since it kind of leaks the
