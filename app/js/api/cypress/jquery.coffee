@@ -64,7 +64,9 @@ $Cypress.JQuery = do ($Cypress, _, $) ->
 
       ## stop if we've reached the body or html
       ## in case there is no body
-      return false if $parent.is("body,html")
+      ## or if parent is the document which can
+      ## happen if we already have an <html> element
+      return false if $parent.is("body,html") or $Cypress.Utils.hasDocument($parent)
 
       if @elHasOverflowHidden($parent) and @elHasNoOffsetWidthOrHeight($parent)
         ## if any of the elements between the parent and origEl
