@@ -14,7 +14,7 @@ describe "$Cypress.Cy Ensure Extensions", ->
 
       fn = => @cy.ensureDom(button, "foo")
 
-      expect(fn).to.throw("cy.foo() failed because this element you are chaining off of has become detached or removed from the DOM:\n\n<button></button>\n\nhttp://on.cypress.io/element-has-detached-from-dom")
+      expect(fn).to.throw("cy.foo() failed because this element you are chaining off of has become detached or removed from the DOM:\n\n<button>foo</button>\n\nhttp://on.cypress.io/element-has-detached-from-dom")
 
   ## WE NEED TO ADD SPECS AROUND THE EXACT ERROR MESSAGE TEXT
   ## SINCE WE ARE NOT ACTUALLY TESTING THE EXACT MESSAGE TEXT

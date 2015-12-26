@@ -137,13 +137,13 @@ describe "$Cypress.jQuery Extensions", ->
         @reasonIs @$displayNone, "This element is not visible because it has CSS property: 'display: none'"
 
       it "has a parent with 'display: none'", ->
-        @reasonIs @$parentDisplayNone.find("span"), "This element is not visible because it has parent <div#none> with CSS property: 'display: none'"
+        @reasonIs @$parentDisplayNone.find("span"), "This element is not visible because it's parent: <div#none> has CSS property: 'display: none'"
 
       it "has 'visibility: hidden'", ->
         @reasonIs @$visHidden, "This element is not visible because it has CSS property: 'visibility: hidden'"
 
       it "has parent with 'visibility: hidden'", ->
-        @reasonIs @$parentVisHidden.find("button"), "This element is not visible because it has parent <div.invis> with CSS property: 'visibility: hidden'"
+        @reasonIs @$parentVisHidden.find("button"), "This element is not visible because it's parent: <div.invis> has CSS property: 'visibility: hidden'"
 
       it "has effective zero width", ->
         @reasonIs @$divNoWidth, "This element is not visible because it has an effective width and height of: '0 x 100' pixels."
@@ -152,7 +152,7 @@ describe "$Cypress.jQuery Extensions", ->
         @reasonIs @$divNoHeight, "This element is not visible because it has an effective width and height of: '50 x 0' pixels."
 
       it "has a parent when an effective zero width and overflow: hidden", ->
-        @reasonIs @$parentNoHeight.find("span"), "This element is not visible because it has parent <div> with CSS property: 'overflow: hidden' and an effective width and height of: '100 x 0' pixels."
+        @reasonIs @$parentNoHeight.find("span"), "This element is not visible because it's parent: <div> has CSS property: 'overflow: hidden' and an effective width and height of: '100 x 0' pixels."
 
       it "cannot determine why element is not visible", ->
         @reasonIs @$btnOpacity, "Cypress could not determine why this element is not visible."
