@@ -26,11 +26,13 @@ do ($Cypress, _, $) ->
       method = @prop("current").get("name")
 
       if not (subject.length is subject.filter(":visible").length)
-        node = $Cypress.Utils.stringifyElement(subject)
+        reason = $Cypress.JQuery.getReasonElIsHidden(subject)
+        node   = $Cypress.Utils.stringifyElement(subject)
         @throwErr("""
           cy.#{method}() failed because this element is not visible:\n
           #{node}\n
-          Use {force: true} to disable error checking.\n
+          #{reason}\n
+          Fix this problem, or use {force: true} to disable error checking.\n
           http://on.cypress.io/element-cannot-be-interacted-with
         """, onFail)
 
@@ -104,13 +106,13 @@ do ($Cypress, _, $) ->
           @throwErr("""
             cy.#{method}() failed because this element is being covered by another element:\n
             #{node}\n
-            Use {force: true} to disable error checking.\n
+            Fix this problem, or use {force: true} to disable error checking.\n
             http://on.cypress.io/element-cannot-be-interacted-with
           """, onFail)
         else
           @throwErr("""
             cy.#{method}() failed because the center of this element is hidden from view:\n
             #{node}\n
-            Use {force: true} to disable error checking.\n
+            Fix this problem, or use {force: true} to disable error checking.\n
             http://on.cypress.io/element-cannot-be-interacted-with
           """, onFail)
