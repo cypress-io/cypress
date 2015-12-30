@@ -22,6 +22,7 @@ npm run build
 ```bash
 bower install
 npm install
+bundle
 npm run watch
 ```
 
