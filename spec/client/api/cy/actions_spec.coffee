@@ -4571,6 +4571,40 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get("#button-covered-in-span").click()
 
+      it "throws when non-descendent element is covering with fixed position", (done) ->
+        @cy._timeout(200)
+
+        btn  = $("<button>button covered</button>").attr("id", "button-covered-in-span").prependTo(@cy.$("body"))
+        span = $("<span>span on button</span>").css(position: "fixed", left: btn.offset().left, top: btn.offset().top, padding: 5, display: "inline-block", backgroundColor: "yellow").prependTo(@cy.$("body"))
+
+        logs = []
+
+        node = @Cypress.Utils.stringifyElement(span)
+
+        @Cypress.on "log", (@log) =>
+          logs.push log
+
+        @cy.on "fail", (err) =>
+          ## get + click logs
+          expect(logs.length).eq(2)
+          expect(@log.get("error")).to.eq(err)
+
+          ## there should still be 2 snapshots on error (before + after)
+          expect(@log.get("snapshots").length).to.eq(2)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
+          expect(@log.get("snapshots")[0].name).to.eq("before")
+          expect(@log.get("snapshots")[1]).to.be.an("object")
+          expect(@log.get("snapshots")[1].name).to.eq("after")
+          expect(err.message).to.include "cy.click() failed because this element is being covered by another element"
+
+          console = @log.attributes.onConsole()
+          expect(console["Tried to Click"]).to.eq btn.get(0)
+          expect(console["But its Covered By"]).to.eq span.get(0)
+
+          done()
+
+        @cy.get("#button-covered-in-span").click()
+
       it "throws when element is hidden and theres no element specifically covering it", (done) ->
         ## i cant come up with a way to easily make getElementAtCoordinates
         ## return null so we are just forcing it to return null to simulate

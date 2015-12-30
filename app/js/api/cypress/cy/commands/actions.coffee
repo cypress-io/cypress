@@ -566,6 +566,20 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             try
               @ensureDescendents $el, $elToClick, options._log
             catch err
+              if options._log
+                options._log.set onConsole: ->
+                  obj = {}
+                  obj["Tried to Click"]     = $Cypress.Utils.getDomElements($el)
+                  obj["But its Covered By"] = $Cypress.Utils.getDomElements($elToClick)
+                  obj
+
+              ## snapshot only on click failure
+              err.onFail = ->
+                if options._log
+                  options._log.snapshot()
+
+              options.error = err
+
               ## if $elToClick isnt a descendent then attempt to nudge the
               ## window scrollBy based on the height of the covering element
               ## (if its fixed position) until our element comes into view
@@ -579,19 +593,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
                 # return getElementAtCoordinates(coords)
                 return @_retry(retry, options)
 
-              if options._log
-                options._log.set onConsole: ->
-                  obj = {}
-                  obj["Tried to Click"]     = $Cypress.Utils.getDomElements($el)
-                  obj["But its Covered By"] = $Cypress.Utils.getDomElements($elToClick)
-                  obj
-
-              ## snapshot only on click failure
-              err.onFail = ->
-                if options._log
-                  options._log.snapshot()
-
-              options.error   = err
               return @_retry(getCoords, options)
 
             return coordsObj(coords, $elToClick)
