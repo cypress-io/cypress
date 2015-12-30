@@ -3613,9 +3613,9 @@ describe "$Cypress.Cy Actions Commands", ->
         @allowErrors()
 
       it "throws when not a dom subject", (done) ->
-        @cy.noop({}).blur()
-
         @cy.on "fail", -> done()
+
+        @cy.noop({}).blur()
 
       it "throws when subject is not in the document", (done) ->
         blurred = 0
@@ -3660,6 +3660,19 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.on "fail", (err) ->
           expect(err.message).to.include ".blur() can only be called on the focused element. Currently the focused element is a: <input id=\"input\">"
           done()
+
+      it "logs delta options on error", (done) ->
+        @cy.$("button:first").click ->
+          $(@).remove()
+
+        @Cypress.on "log", (@log) =>
+
+        @cy.on "fail", (err) =>
+          expect(@log.get("message")).to.eq("{force: true}")
+          done()
+
+        @cy
+          .get("button:first").click().blur({force: true})
 
       it "logs once when not dom subject", (done) ->
         logs = []

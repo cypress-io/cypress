@@ -216,8 +216,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         verify: true
         force: false
 
-      @ensureDom(options.$el, "blur")
-
       if options.log
         ## figure out the options which actually change the behavior of clicks
         deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: null})
@@ -227,6 +225,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           message: deltaOptions
           onConsole: ->
             "Applied To": $Cypress.Utils.getDomElements(options.$el)
+
+      @ensureDom(options.$el, "blur", options._log)
 
       if (num = options.$el.length) and num > 1
         return if options.error is false

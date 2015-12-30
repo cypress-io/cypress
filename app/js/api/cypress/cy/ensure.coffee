@@ -36,7 +36,7 @@ do ($Cypress, _, $) ->
           http://on.cypress.io/element-cannot-be-interacted-with
         """, onFail)
 
-    ensureDom: (subject, method) ->
+    ensureDom: (subject, method, log) ->
       subject ?= @ensureSubject()
 
       method ?= @prop("current").get("name")
@@ -50,7 +50,7 @@ do ($Cypress, _, $) ->
       ## true, false, 0, 1, 3, "foo", "bar"
       if not (isWindow or $Cypress.Utils.hasElement(subject))
         console.warn("Subject is currently: ", subject)
-        @throwErr("Cannot call .#{method}() on a non-DOM subject!")
+        @throwErr("Cannot call .#{method}() on a non-DOM subject!", log)
 
       if not (isWindow or @_contains(subject))
         node = $Cypress.Utils.stringifyElement(subject)
@@ -58,7 +58,7 @@ do ($Cypress, _, $) ->
           cy.#{method}() failed because this element you are chaining off of has become detached or removed from the DOM:\n
           #{node}\n
           http://on.cypress.io/element-has-detached-from-dom
-        """)
+        """, log)
 
       return subject
 
