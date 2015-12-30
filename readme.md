@@ -43,6 +43,7 @@ npm run watch
 ```
 
 Now, you have 2 options:
+
 1. Boot the Desktop Application and run a project.
 2. Run a project directly from the command line.
 
@@ -58,6 +59,14 @@ node_modules/nw/bin/nw . --debug
 
 You should now see the Cypress icon in your tray, use Cypress as normal.
 
+Code changes which are applied instantly:
+- `web app`
+- `driver`
+
+Code changes which require you to reboot `nw`:
+- `desktop gui` 
+- `server`
+
 **Optional:** If you're going to be running the project in Desktop GUI mode, and adding new projects, you need to start the Key Server
 ```bash
 ## Start the Key Server
@@ -65,7 +74,7 @@ cd cypress-api
 npm run dev
 ```
 
-### 2. Run project from command line.
+### 2. Run project from command line
 
 ```bash
 ## boot a specific project
@@ -80,6 +89,12 @@ bin/cy <path-to-the-project-you-want-to-test> --no-debug
 ## turn off both
 bin/cy <path-to-the-project-you-want-to-test> --no-ids --no-debug
 ```
+
+Code changes which are applied instantly:
+- `web app`
+- `driver`
+- `desktop gui` 
+- `server` 
 
 ## Deploying
 
