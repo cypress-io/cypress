@@ -86,8 +86,17 @@ bin/cy <path-to-the-project-you-want-to-test> --no-ids
 ## turn off debugging
 bin/cy <path-to-the-project-you-want-to-test> --no-debug
 
-## turn off both
-bin/cy <path-to-the-project-you-want-to-test> --no-ids --no-debug
+## disable auto opening browser
+bin/cy <path-to-the-project-you-want-to-test> --no-open
+
+## turn off all options
+bin/cy <path-to-the-project-you-want-to-test> --no-ids --no-debug --no-open
+```
+
+If you've disabled auto opening be sure to navigate to:
+
+```bash
+http://localhost:2020/__/
 ```
 
 Code changes which are applied instantly:
