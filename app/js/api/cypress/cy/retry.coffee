@@ -17,21 +17,23 @@ do ($Cypress, _, Promise) ->
 
       _.defaults options,
         _runnableTimeout: runnableTimeout
-        start: new Date
-        interval: 16
-        retries: 0
-        name: current?.get("name")
+        _interval: 16
+        _retries: 0
+        _start: new Date
+        _name: current?.get("name")
+
+      interval = options.interval ? options._interval
 
       ## we calculate the total time we've been retrying
       ## so we dont exceed the runnables timeout
-      options.total = total = (new Date - options.start)
+      options.total = total = (new Date - options._start)
 
       ## increment retries
-      options.retries += 1
+      options._retries += 1
 
       ## if our total exceeds the timeout OR the total + the interval
       ## exceed the runnables timeout, then bail
-      if total + options.interval >= options._runnableTimeout
+      if total + interval >= options._runnableTimeout
         ## snapshot the DOM since we are bailing
         ## so the user can see the state we're in
         ## when we fail
@@ -52,7 +54,6 @@ do ($Cypress, _, Promise) ->
         err = "Timed out retrying: " + getErrMessage(options.error)
         @throwErr err, (options.onFail or log)
 
-      Promise.delay(options.interval).cancellable().then =>
       Promise.delay(interval).cancellable().then =>
         @trigger("retry", options) unless options.silent is true
 

@@ -34,7 +34,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
         if aliasType is "dom"
           _.extend obj,
             $el: value
-            numRetries: options.retries
+            numRetries: options._retries
 
         obj.onConsole = ->
           key = if aliasObj then "Alias" else "Selector"

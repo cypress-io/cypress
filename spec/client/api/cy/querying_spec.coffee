@@ -247,7 +247,7 @@ describe "$Cypress.Cy Querying Commands", ->
       ## wait until we're ALMOST about to time out before
       ## appending the missingEl
       @cy.on "retry", (options) =>
-        if options.total + (options.interval * 4) > options._runnableTimeout
+        if options.total + (options._interval * 4) > options._runnableTimeout
           @cy.$("body").append(missingEl)
 
       @cy.get("#missing-el").then ($div) ->
