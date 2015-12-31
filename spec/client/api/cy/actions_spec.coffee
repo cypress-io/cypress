@@ -4771,7 +4771,8 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(err.message).to.include("cy.click() could not be issued because this element is currently animating:\n")
           done()
 
-        @cy.get(".slidein").click()
+        p.on "animationstart", =>
+          @cy.get(".slidein").click({interval: 50, animationDistanceThreshold: 0})
 
     describe ".log", ->
       beforeEach ->

@@ -1246,8 +1246,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       if options.force is true or options.waitForAnimations is false
         return Promise.resolve(coords)
       else
-        console.log coords
-
         ## verify that our element is not currently animating
         ## by verifying it is still at the same coordinates within
         ## 5 pixels of x/y?
