@@ -1,59 +1,83 @@
-[![Circle CI](https://circleci.com/gh/brian-mann/eclectus.svg?style=svg&circle-token=a6d67217ee174805c91925400b4210ada937def9)](https://circleci.com/gh/brian-mann/eclectus)
+[![Circle CI](https://circleci.com/gh/cypress-io/cypress-app.svg?style=svg&circle-token=a6d67217ee174805c91925400b4210ada937def9)](https://circleci.com/gh/cypress-io/cypress-app)
 
 ## Docs / API
 
 [Visit the Wiki](https://github.com/cypress-io/cypress-app/wiki)
 
-### Before Running NW
-The `lib/secret_sauce.bin` file is required to run NW.  You can either run the `npm run watch` command, or run a one-off dist with:
+## First Time Installs
 
 ```bash
-npm run dist
+## Getting Node Installed
+curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.29.0/install.sh | bash
+nvm install 1.2
+nvm use 1.2
 ```
 
-### Before Running Tests
 ```bash
-// this will build all of the
-// client JS files, bower, etc
-npm run build
+## Need ruby dependencies to run compass / scss (which is written in Ruby)
+curl -sSL https://get.rvm.io | bash
+source /home/vagrant/.rvm/scripts/rvm
+rvm requirements
+rvm install 2.0.0-p481
+rvm use 2.0.0-p481 --default
+gem install bundler
+bundle
 ```
 
-### While Developing
+## Development
+
+To run development environment:
+
+- Navigate to the directory where the `cypress-app` project is on your computer.
+- Run the following commands:
+
 ```bash
+## Install project dependencies
 bower install
 npm install
+```
+
+```bash
+## Watch all project files and build as necessary
 npm run watch
 ```
 
-##### Start the Key Server
+Now, you have 2 options:
+
+1. Boot the Desktop Application and run a project.
+2. Run a project directly from the command line.
+
+### 1. Boot the Desktop Application
 
 ```bash
+## Boot Node Webkit
+node_modules/nw/bin/nw .
+
+## With Chrome Dev Tools
+node_modules/nw/bin/nw . --debug
+```
+
+You should now see the Cypress icon in your tray, use Cypress as normal.
+
+Code changes which are applied instantly:
+- `web app`
+- `driver`
+
+Code changes which require you to reboot `nw`:
+- `desktop gui` 
+- `server`
+
+**Optional:** If you're going to be running the project in Desktop GUI mode, and adding new projects, you need to start the Key Server
+```bash
+## Start the Key Server
 cd cypress-api
 npm run dev
 ```
 
-### Booting NW
-Alias 'nw' in your `.bash_profile`
+### 2. Run project from command line
 
 ```bash
-alias nw="/Applications/nwjs.app/Contents/MacOS/nwjs"
-```
-
-Boot NW
-
-```bash
-nw .
-```
-
-With Chrome Dev Tools
-
-```bash
-nw . --debug
-```
-
-### Booting via the CLI
-
-```bash
+## boot a specific project
 bin/cy <path-to-the-project-you-want-to-test>
 
 ## turn off id generation
@@ -62,11 +86,26 @@ bin/cy <path-to-the-project-you-want-to-test> --no-ids
 ## turn off debugging
 bin/cy <path-to-the-project-you-want-to-test> --no-debug
 
-## turn off both
-bin/cy <path-to-the-project-you-want-to-test> --no-ids --no-debug
+## disable auto opening browser
+bin/cy <path-to-the-project-you-want-to-test> --no-open
+
+## turn off all options
+bin/cy <path-to-the-project-you-want-to-test> --no-ids --no-debug --no-open
 ```
 
-### Deploying
+If you've disabled auto opening be sure to navigate to:
+
+```bash
+http://localhost:2020/__/
+```
+
+Code changes which are applied instantly:
+- `web app`
+- `driver`
+- `desktop gui` 
+- `server` 
+
+## Deploying
 
 ```bash
 npm run deploy
@@ -76,13 +115,13 @@ npm run deploy -- --skip-tests
 
 ```
 
-### Releasing
+## Releasing
 
 ```bash
 npm run release
 ```
 
-### Rolling back
+## Rolling back
 
 ```bash
 npm run release -- --version 0.9.6
