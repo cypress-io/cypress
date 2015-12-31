@@ -442,21 +442,22 @@ describe "$Cypress.Cy Actions Commands", ->
         #     expect($input).to.have.value "1234"
         #     expect($input.get(0)).to.eq input.get(0)
 
-    it "waits until element stops animating", ->
-      input = $("<input class='slidein' />")
-      input.css("animation-duration", ".3s")
-
+    it "waits until element stops animating", (done) ->
       retries = []
+      input   = $("<input class='slidein' />")
+      input.css("animation-duration", ".3s")
 
       @cy.on "retry", (obj) ->
         ## this verifies the input has not been typed into
         expect(input).to.have.value("")
         retries.push(obj)
 
-      @cy.$("#animation-container").append(input)
+      input.on "animationstart", =>
+        @cy.get(".slidein").type("foo").then ->
+          expect(retries.length).to.be.gt(10)
+          done()
 
-      @cy.get(".slidein").type("foo").then ->
-        expect(retries.length).to.be.gt(10)
+      @cy.$("#animation-container").append(input)
 
     it "does not throw when waiting for animations is disabled", ->
       @sandbox.stub(@Cypress, "config").withArgs("waitForAnimations").returns(false)
@@ -1912,7 +1913,8 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(err.message).to.include("cy.type() could not be issued because this element is currently animating:\n")
           done()
 
-        @cy.get(".slidein").type("foo")
+        input.on "animationstart", =>
+          @cy.get(".slidein").type("foo")
 
   context "#clear", ->
     it "does not change the subject", ->
@@ -4273,23 +4275,24 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("#button").click().then ->
         expect(retried).to.be.true
 
-    it "waits until element stops animating", ->
-      p = $("<p class='slidein'>sliding in</p>")
-      p.css("animation-duration", ".3s")
-
+    it "waits until element stops animating", (done) ->
       retries = []
       clicks  = 0
 
+      p = $("<p class='slidein'>sliding in</p>")
       p.on "click", -> clicks += 1
+      p.css("animation-duration", ".5s")
 
       @cy.on "retry", (obj) ->
         expect(clicks).to.eq(0)
         retries.push(obj)
 
-      @cy.$("#animation-container").append(p)
+      p.on "animationstart", =>
+        @cy.get(".slidein").click({interval: 50}).then ->
+          expect(retries.length).to.be.gt(5)
+          done()
 
-      @cy.get(".slidein").click().then ->
-        expect(retries.length).to.be.gt(10)
+      @cy.$("#animation-container").append(p)
 
     it "does not throw when waiting for animations is disabled", ->
       @sandbox.stub(@Cypress, "config").withArgs("waitForAnimations").returns(false)
