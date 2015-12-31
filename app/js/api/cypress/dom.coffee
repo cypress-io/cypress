@@ -83,7 +83,7 @@ $Cypress.Dom = do ($Cypress, _, $) ->
 
     parentHasNoOffsetWidthOrHeightAndOverflowHidden: ($el) ->
       ## if we've walked all the way up to body or html then return false
-      return false if $el.is("body,html")
+      return false if not $el.length or $el.is("body,html")
 
       ## if we have overflow hidden and no effective width or height
       if @elHasOverflowHidden($el) and @elHasNoOffsetWidthOrHeight($el)
@@ -93,8 +93,9 @@ $Cypress.Dom = do ($Cypress, _, $) ->
         return @parentHasNoOffsetWidthOrHeightAndOverflowHidden($el.parent())
 
     parentHasDisplayNone: ($el) ->
-      ## if we've walked all the way up to document then return false
-      return false if $Cypress.Utils.hasDocument($el)
+      ## if we have no $el or we've walked all the way up to document
+      ## then return false
+      return false if not $el.length or $Cypress.Utils.hasDocument($el)
 
       ## if we have display none then return the $el
       if @elHasDisplayNone($el)
@@ -105,7 +106,7 @@ $Cypress.Dom = do ($Cypress, _, $) ->
 
     parentHasVisibilityNone: ($el) ->
       ## if we've walked all the way up to document then return false
-      return false if $Cypress.Utils.hasDocument($el)
+      return false if not $el.length or $Cypress.Utils.hasDocument($el)
 
       ## if we have display none then return the $el
       if @elHasVisibilityHidden($el)
