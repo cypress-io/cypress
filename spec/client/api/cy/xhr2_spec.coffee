@@ -206,7 +206,7 @@ describe "$Cypress.Cy XHR Commands", ->
 
       it "rewrites 404's url's for stubs", ->
         @cy
-          .server()
+          .server({force404: true})
           .visit("http://localhost:3500/fixtures/html/xhr.html")
           .window().then (win) ->
             @cy.prop("server").restore()
@@ -1364,7 +1364,7 @@ describe "$Cypress.Cy XHR Commands", ->
     describe "zero configuration / zero routes", ->
       beforeEach ->
         @cy
-          .server()
+          .server({force404: true})
           .window().then (win) ->
             new Promise (resolve) ->
               win.$.ajax({
@@ -1410,7 +1410,7 @@ describe "$Cypress.Cy XHR Commands", ->
     describe "route setup", ->
       beforeEach ->
         @cy
-          .server()
+          .server({force404: true})
           .route("/foo", {}).as("anyRequest")
           .window().then (win) ->
             win.$.get("/bar")

@@ -48,7 +48,7 @@ $Cypress.Server = do ($Cypress, _) ->
     enable: true
     autoRespond: true
     waitOnResponses: Infinity
-    force404: true ## or allow 404's
+    force404: false ## to force 404's for non-stubbed routes
     onAnyRequest: undefined
     onAnyResponse: undefined
     stripOrigin: _.identity
