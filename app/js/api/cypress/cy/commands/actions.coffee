@@ -1259,7 +1259,10 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         ## if we dont have at least 2 points
         ## then automatically retry
         if coordsHistory.length < 2
-          return @_retry(retry, options)
+          ## silence the first trigger so we dont
+          ## actually fire the 'retry' event
+          opts = _.chain(options).clone().extend({silent: true}).value()
+          return @_retry(retry, opts)
 
         ## make sure our element is not currently animating
         try

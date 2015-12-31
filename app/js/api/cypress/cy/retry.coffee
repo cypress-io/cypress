@@ -53,7 +53,8 @@ do ($Cypress, _, Promise) ->
         @throwErr err, (options.onFail or log)
 
       Promise.delay(options.interval).cancellable().then =>
-        @trigger "retry", options
+      Promise.delay(interval).cancellable().then =>
+        @trigger("retry", options) unless options.silent is true
 
         ## invoke the passed in retry fn
         fn.call(@)
