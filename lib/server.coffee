@@ -88,6 +88,8 @@ class Server
       requestTimeout: 5000
       responseTimeout: 20000
       port:           2020
+      waitForAnimations: true
+      animationDistanceThreshold: 5
       autoOpen:       false
       viewportWidth:  1000
       viewportHeight: 660

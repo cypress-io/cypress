@@ -328,3 +328,9 @@ describe "Server Interface", ->
 
       it "responseTimeout=20000", ->
         @defaults "responseTimeout", 20000
+
+      it "waitForAnimations=true", ->
+        @defaults "waitForAnimations", true
+
+      it "animationDistanceThreshold=5", ->
+        @defaults "animationDistanceThreshold", 5

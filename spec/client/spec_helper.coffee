@@ -96,6 +96,8 @@ window.enterIntegrationTestingMode = (fixture, options = {}) ->
         visitTimeout: 2001
         requestTimeout: 2002
         responseTimeout: 2003
+        waitForAnimations: true
+        animationDistanceThreshold: 5
       })
 
       ## why do we use the initialize method here but only
@@ -160,6 +162,8 @@ window.enterCommandTestingMode = (fixture = "html/dom", options = {}) ->
         visitTimeout: 2001
         requestTimeout: 2002
         responseTimeout: 2003
+        waitForAnimations: true
+        animationDistanceThreshold: 5
       })
 
       @Cypress.trigger "initialize", {$remoteIframe: @$iframe}

@@ -14,6 +14,8 @@ describe "Config Entity", ->
         baseUrl: "http://localhost:9000/app"
         viewportWidth: 800
         viewportHeight: 600
+        waitForAnimations: true
+        animationDistanceThreshold: 5
 
     it "picks commandTimeout, baseUrl, viewportWidth, viewportHeight", ->
       expect(@config.getCypressConfig()).to.deep.eq {
@@ -24,4 +26,6 @@ describe "Config Entity", ->
         baseUrl: "http://localhost:9000/app"
         viewportWidth: 800
         viewportHeight: 600
+        waitForAnimations: true
+        animationDistanceThreshold: 5
       }
