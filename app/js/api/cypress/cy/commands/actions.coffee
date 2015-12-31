@@ -218,7 +218,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
       if options.log
         ## figure out the options which actually change the behavior of clicks
-        deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: null})
+        deltaOptions = Cypress.Utils.filterOutOptions(options)
 
         options._log = Cypress.Log.command
           $el: options.$el
@@ -442,7 +442,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         if options.log
           ## figure out the options which actually change the behavior of clicks
-          deltaOptions = Cypress.Utils.filterDelta(options, {force: false, multiple: false, timeout: null, interval: null})
+          deltaOptions = Cypress.Utils.filterOutOptions(options)
 
           options._log = Cypress.Log.command({
             message: deltaOptions
@@ -622,14 +622,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             ## in the viewport
             $el.get(0).scrollIntoView() if scrollIntoView
 
-            if options.x and options.y
-              coords = @getRelativeCoordinates($el, options.x, options.y)
-            else
-              try
-                coords = @getCoordinates($el, options.position)
-              catch err
-                @throwErr(err, options._log)
-
             @_waitForAnimations($el, options, coordsHistory)
             .then(verifyElementAtCoordinates)
 
@@ -736,12 +728,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
       if options.log
         ## figure out the options which actually change the behavior of clicks
-        deltaOptions = Cypress.Utils.filterDelta(options, {
-          force: false
-          timeout: null
-          interval: null
-          delay: 10
-        })
+        deltaOptions = Cypress.Utils.filterOutOptions(options)
 
         table = {}
 
@@ -957,7 +944,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         if options.log
           ## figure out the options which actually change the behavior of clicks
-          deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: null})
+          deltaOptions = Cypress.Utils.filterOutOptions(options)
 
           options._log = Cypress.Log.command
             message: deltaOptions
@@ -1008,7 +995,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
       if options.log
         ## figure out the options which actually change the behavior of clicks
-        deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: null})
+        deltaOptions = Cypress.Utils.filterOutOptions(options)
 
         options._log = Cypress.Log.command
           message: deltaOptions
@@ -1259,6 +1246,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       if options.force is true or options.waitForAnimations is false
         return Promise.resolve(coords)
       else
+        console.log coords
+
         ## verify that our element is not currently animating
         ## by verifying it is still at the same coordinates within
         ## 5 pixels of x/y?
@@ -1325,7 +1314,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         if options.log
           ## figure out the options which actually change the behavior of clicks
-          deltaOptions = Cypress.Utils.filterDelta(options, {force: false, timeout: null, interval: null})
+          deltaOptions = Cypress.Utils.filterOutOptions(options)
 
           options._log = Cypress.Log.command
             message: deltaOptions

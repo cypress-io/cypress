@@ -6,6 +6,16 @@ $Cypress.Utils = do ($Cypress, _) ->
 
   CYPRESS_OBJECT_NAMESPACE = "_cypressObj"
 
+  defaultOptions = {
+    delay: 10
+    force: false
+    timeout: null
+    interval: null
+    multiple: false
+    waitOnAnimations: null
+    animationDistanceThreshold: null
+  }
+
   return {
     cypressError: (err) ->
       err = new Error(err)
@@ -24,17 +34,18 @@ $Cypress.Utils = do ($Cypress, _) ->
     ## return a new object if the obj
     ## contains the properties of filter
     ## and the values are different
-    filterDelta: (obj, filter) ->
-      filter = @normalizeObjWithLength(filter)
+    filterOutOptions: (obj, filter = {}) ->
+      _.defaults filter, defaultOptions
 
-      obj = _.reduce filter, (memo, value, key) ->
-        key = key.toLowerCase()
+      @normalizeObjWithLength(filter)
 
-        if _(obj).has(key) and obj[key] isnt value
-          memo[key] = obj[key]
+      whereFilterHasSameKeyButDifferentValue = (value, key) ->
+        upperKey = _.capitalize(key)
 
-        memo
-      , {}
+        (_(filter).has(key) or _(filter).has(upperKey)) and
+          filter[key] isnt value
+
+      obj = _.pick(obj, whereFilterHasSameKeyButDifferentValue)
 
       if _.isEmpty(obj) then undefined else obj
 

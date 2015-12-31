@@ -1,17 +1,17 @@
 describe "$Cypress.Utils API", ->
   enterCommandTestingMode()
 
-  describe "#filterDelta", ->
+  describe "#filterOutOptions", ->
     it "returns new obj based on the delta from the filter", ->
-      obj = $Cypress.Utils.filterDelta {visible: true, exist: false, foo: "bar"}, {visible: null, exist: false}
+      obj = $Cypress.Utils.filterOutOptions {visible: true, exist: false, foo: "bar"}, {visible: null, exist: false}
       expect(obj).to.deep.eq {visible: true}
 
     it "returns undefined if nothing is different", ->
-      obj = $Cypress.Utils.filterDelta {foo: "foo", bar: "bar"}, {foo: "foo"}
+      obj = $Cypress.Utils.filterOutOptions {foo: "foo", bar: "bar"}, {foo: "foo"}
       expect(obj).to.be.undefined
 
     it "normalizes objects with length property", ->
-      obj = $Cypress.Utils.filterDelta {exist: true}, {visible: null, exist: false, length: null}
+      obj = $Cypress.Utils.filterOutOptions {exist: true}, {visible: null, exist: false, length: null}
       expect(obj).to.deep.eq {exist: true}
 
   describe "#stringify", ->
