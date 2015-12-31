@@ -22,6 +22,30 @@
         #overflow-auto-container li {
           line-height: 33px;
         }
+
+        #animation-container {
+          overflow: hidden;
+        }
+
+        .slidein {
+          background-color: yellow;
+          border: 1px solid red;
+          width: 100px;
+          float: left;
+          margin: 0;
+          animation-timing-function: linear;
+          animation-name: slidein;
+        }
+
+        @keyframes slidein {
+          from {
+            margin-left: 100%;
+          }
+
+          to {
+            margin-left: 0%;
+          }
+        }
       </style>
 
       DOM Fixture
@@ -261,6 +285,9 @@
       </div>
 
       <span id="escape-quotes">shouldn't and can"t</span>
+
+      <div id="animation-container">
+      </div>
 
       <div id="contains-multiple-filter-match">
         <ul class="k-group k-treeview-lines" role="group">

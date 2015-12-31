@@ -442,6 +442,34 @@ describe "$Cypress.Cy Actions Commands", ->
         #     expect($input).to.have.value "1234"
         #     expect($input.get(0)).to.eq input.get(0)
 
+    it "waits until element stops animating", ->
+      input = $("<input class='slidein' />")
+      input.css("animation-duration", ".3s")
+
+      retries = []
+
+      @cy.on "retry", (obj) ->
+        ## this verifies the input has not been typed into
+        expect(input).to.have.value("")
+        retries.push(obj)
+
+      @cy.$("#animation-container").append(input)
+
+      @cy.get(".slidein").type("foo").then ->
+        expect(retries.length).to.be.gt(10)
+
+    it "does not throw when waiting for animations is disabled", ->
+      @sandbox.stub(@Cypress, "config").withArgs("waitForAnimations").returns(false)
+
+      @cy._timeout(100)
+
+      input = $("<input class='slidein' />")
+      input.css("animation-duration", ".5s")
+
+      @cy.$("#animation-container").append(input)
+
+      @cy.get(".slidein").type("foo")
+
     describe "delay", ->
       beforeEach ->
         @delay = 10
@@ -1871,6 +1899,21 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "throws when type is cancelled by preventingDefault mousedown"
 
+      it "throws when element animation exceeds timeout", (done) ->
+        @cy._timeout(100)
+
+        input = $("<input class='slidein' />")
+        input.css("animation-duration", ".5s")
+
+        @cy.$("#animation-container").append(input)
+
+        @cy.on "fail", (err) ->
+          expect(input).to.have.value("")
+          expect(err.message).to.include("cy.type() could not be issued because this element is currently animating:\n")
+          done()
+
+        @cy.get(".slidein").type("foo")
+
   context "#clear", ->
     it "does not change the subject", ->
       textarea = @cy.$("textarea")
@@ -2102,6 +2145,7 @@ describe "$Cypress.Cy Actions Commands", ->
       it "logs deltaOptions", ->
         @cy.get("input:first").clear({force: true, timeout: 1000}).then ->
           expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
+
           expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
 
   context "#check", ->
@@ -4229,10 +4273,60 @@ describe "$Cypress.Cy Actions Commands", ->
       @cy.get("#button").click().then ->
         expect(retried).to.be.true
 
+    it "waits until element stops animating", ->
+      p = $("<p class='slidein'>sliding in</p>")
+      p.css("animation-duration", ".3s")
+
+      retries = []
+      clicks  = 0
+
+      p.on "click", -> clicks += 1
+
+      @cy.on "retry", (obj) ->
+        expect(clicks).to.eq(0)
+        retries.push(obj)
+
+      @cy.$("#animation-container").append(p)
+
+      @cy.get(".slidein").click().then ->
+        expect(retries.length).to.be.gt(10)
+
+    it "does not throw when waiting for animations is disabled", ->
+      @sandbox.stub(@Cypress, "config").withArgs("waitForAnimations").returns(false)
+
+      @cy._timeout(100)
+
+      p = $("<p class='slidein'>sliding in</p>")
+      p.css("animation-duration", ".5s")
+
+      @cy.$("#animation-container").append(p)
+
+      @cy.get(".slidein").click()
+
+    it "does not throw when turning off waitForAnimations in options", ->
+      @cy._timeout(100)
+
+      p = $("<p class='slidein'>sliding in</p>")
+      p.css("animation-duration", ".5s")
+
+      @cy.$("#animation-container").append(p)
+
+      @cy.get(".slidein").click({waitForAnimations: false})
+
+    it "does not throw when setting animationDistanceThreshold extremely high in options", ->
+      @cy._timeout(100)
+
+      p = $("<p class='slidein'>sliding in</p>")
+      p.css("animation-duration", ".5s")
+
+      @cy.$("#animation-container").append(p)
+
+      @cy.get(".slidein").click({animationDistanceThreshold: 1000})
+
     describe "assertion verification", ->
       beforeEach ->
         @allowErrors()
-        @currentTest.timeout(100)
+        @cy._timeout(200)
 
         @chai = $Cypress.Chai.create(@Cypress, {})
         @Cypress.on "log", (log) =>
@@ -4246,7 +4340,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.$("button:first").click ->
           _.delay =>
             $(@).addClass("clicked")
-          , 100
+          , 50
           return false
 
         @cy.get("button:first").click().should("have.class", "clicked").then ->
@@ -4260,7 +4354,7 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.$("button").click ->
           _.delay =>
             $(@).addClass("clicked")
-          , 100
+          , 50
           return false
 
         @cy.get("button").invoke("slice", 0, 2).click({multiple: true}).should("have.class", "clicked")
@@ -4657,6 +4751,24 @@ describe "$Cypress.Cy Actions Commands", ->
           done()
 
         @cy.get("button:first").click("foo")
+
+      it "throws when element animation exceeds timeout", (done) ->
+        @cy._timeout(100)
+
+        clicks = 0
+
+        p = $("<p class='slidein'>sliding in</p>")
+        p.css("animation-duration", ".5s")
+        p.on "click", -> clicks += 1
+
+        @cy.$("#animation-container").append(p)
+
+        @cy.on "fail", (err) ->
+          expect(clicks).to.eq(0)
+          expect(err.message).to.include("cy.click() could not be issued because this element is currently animating:\n")
+          done()
+
+        @cy.get(".slidein").click()
 
     describe ".log", ->
       beforeEach ->

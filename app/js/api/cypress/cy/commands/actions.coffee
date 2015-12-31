@@ -553,7 +553,12 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             ## else recursively continue to walk up the parent node chain
             getElementWithFixedPosition($el.parent())
 
-          getElementAtCoordinates = (coords) =>
+          verifyElementAtCoordinates = (coords) =>
+            ## return the coordsObj immediately
+            ## if force is true
+            if options.force is true
+              return coordsObj(coords, $el)
+
             ## accept options which disable actually ensuring the element
             ## is clickable / in the foreground
             ## this is helpful during css animations for instance where
@@ -590,21 +595,20 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
                   getCoords(false)
 
                 ## try again now that we've nudged the window's scroll
-                # return getElementAtCoordinates(coords)
                 return @_retry(retry, options)
 
               return @_retry(getCoords, options)
 
             return coordsObj(coords, $elToClick)
 
-          getCoords = (scrollIntoView = true) =>
+          getCoords = (scrollIntoView = true, coordsHistory = []) =>
+            retry = ->
+              getCoords(scrollIntoView, coordsHistory)
+
             if options.force isnt true
               try
                 @ensureVisibility $el, options._log
               catch err
-                retry = ->
-                  getCoords(scrollIntoView)
-
                 options.error = err
                 return @_retry(retry, options)
 
@@ -626,14 +630,10 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
               catch err
                 @throwErr(err, options._log)
 
-            ## if we're forcing this click event
-            ## just immediately send it up
-            if options.force
-              return coordsObj(coords, $el)
+            @_waitForAnimations($el, options, coordsHistory)
+            .then(verifyElementAtCoordinates)
 
-            getElementAtCoordinates(coords)
-
-          Promise.resolve(getCoords())
+          Promise.try(getCoords)
 
         shouldFireFocusEvent = ($focused, $elToFocus) ->
           ## if we dont have a focused element
@@ -924,7 +924,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           }).then =>
             type()
         else
-          type()
+          @_waitForAnimations(options.$el, options).then(type)
       .then =>
         @_timeout(delay, true)
 
@@ -1244,6 +1244,42 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           .return(options.$el)
 
   Cypress.Cy.extend
+    _waitForAnimations: ($el, options, coordsHistory = []) ->
+      ## determine if this element is animating
+      if options.x and options.y
+        coords = @getRelativeCoordinates($el, options.x, options.y)
+      else
+        try
+          coords = @getCoordinates($el, options.position)
+        catch err
+          @throwErr(err, options._log)
+
+      ## if we're forcing this click event
+      ## just immediately send it up
+      if options.force is true or options.waitForAnimations is false
+        return Promise.resolve(coords)
+      else
+        ## verify that our element is not currently animating
+        ## by verifying it is still at the same coordinates within
+        ## 5 pixels of x/y?
+        coordsHistory.push(coords)
+
+        retry = =>
+          @_waitForAnimations($el, options, coordsHistory)
+
+        ## if we dont have at least 2 points
+        ## then automatically retry
+        if coordsHistory.length < 2
+          return @_retry(retry, options)
+
+        ## make sure our element is not currently animating
+        try
+          @ensureElementIsNotAnimating($el, coordsHistory, options.animationDistanceThreshold)
+          Promise.resolve(coords)
+        catch err
+          options.error = err
+          @_retry(retry, options)
+
     _check_or_uncheck: (type, subject, values = [], options = {}) ->
       ## we're not handling conversion of values to strings
       ## in case we've received numbers

@@ -20,6 +20,45 @@ do ($Cypress, _, $) ->
       if not current.get("prev")
         @throwErr("cy.#{current.get('name')}() is a child command which operates on an existing subject.  Child commands must be called after a parent command!")
 
+    ensureElementIsNotAnimating: ($el, coords = [], threshold) ->
+      waitForAnimations = @Cypress.config("waitForAnimations")
+
+      ## bail if we have disabled waiting on animations
+      return if waitForAnimations is false
+
+      threshold ?= @Cypress.config("animationDistanceThreshold")
+
+      lastTwo = coords.slice(-2)
+
+      ## bail if we dont yet have two points
+      if lastTwo.length isnt 2
+        @throwErr("not enough coord points provided to calculate distance")
+
+      [point1, point2] = lastTwo
+
+      distance = ->
+        deltaX = point1.x - point2.x
+        deltaY = point1.y - point2.y
+
+        Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+
+
+      ## verify that there is not a distance
+      ## greater than a default of '5' between
+      ## the points
+      if distance() > threshold
+        method = @prop("current").get("name")
+        node   = $Cypress.Utils.stringifyElement($el)
+        @throwErr("""
+          cy.#{method}() could not be issued because this element is currently animating:\n
+          #{node}\n
+          You can fix this problem by:
+            - Passing {force: true} which disables all error checking
+            - Passing {waitForAnimations: false} which disables waiting on animations
+            - Passing {animationDistanceThreshold: 20} which decreases the sensitivity\n
+          http://on.cypress.io/element-is-animating
+        """)
+
     ensureVisibility: (subject, onFail) ->
       subject ?= @ensureSubject()
 
