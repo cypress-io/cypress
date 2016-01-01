@@ -1109,6 +1109,18 @@ describe "$Cypress.Cy XHR Commands", ->
           .then ->
             expect(@warn).to.be.calledWithMatch("Passing cy.route({stub: false}) is now deprecated.")
 
+      it "logs on {force404: false}", ->
+        @cy
+          .server({force404: false})
+          .then ->
+            expect(@warn).to.be.calledWith("Passing cy.server({force404: false}) is now the default behavior of cy.server(). You can safely remove this option.")
+
+      it "does not log on {force404: true}", ->
+        @cy
+          .server({force404: true})
+          .then ->
+            expect(@warn).not.to.be.called
+
     describe "request response alias", ->
       it "can pass an alias reference to route", ->
         @cy

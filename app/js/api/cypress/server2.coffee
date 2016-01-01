@@ -33,6 +33,10 @@ $Cypress.Server = do ($Cypress, _) ->
         http://on.cypress.io/deprecated-stub-false-on-#{type}
       """)
 
+  warnOnForce404Default = (obj) ->
+    if obj.force404 is false
+      console.warn("Passing cy.server({force404: false}) is now the default behavior of cy.server(). You can safely remove this option.")
+
   whitelist = (xhr) ->
     ## whitelist if we're GET + looks like we're fetching regular resources
     xhr.method is "GET" and regularResourcesRe.test(xhr.url)
@@ -335,6 +339,7 @@ $Cypress.Server = do ($Cypress, _) ->
 
     set: (obj) ->
       warnOnStubDeprecation(obj, "server")
+      warnOnForce404Default(obj)
 
       ## handle enable=true|false
       if obj.enable?
