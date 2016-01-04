@@ -4764,8 +4764,6 @@ describe "$Cypress.Cy Actions Commands", ->
         p.css("animation-duration", ".5s")
         p.on "click", -> clicks += 1
 
-        @cy.$("#animation-container").append(p)
-
         @cy.on "fail", (err) ->
           expect(clicks).to.eq(0)
           expect(err.message).to.include("cy.click() could not be issued because this element is currently animating:\n")
@@ -4773,6 +4771,8 @@ describe "$Cypress.Cy Actions Commands", ->
 
         p.on "animationstart", =>
           @cy.get(".slidein").click({interval: 50, animationDistanceThreshold: 0})
+
+        @cy.$("#animation-container").append(p)
 
     describe ".log", ->
       beforeEach ->
