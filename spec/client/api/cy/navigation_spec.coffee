@@ -1,6 +1,35 @@
 describe "$Cypress.Cy Navigation Commands", ->
   enterCommandTestingMode()
 
+  context "#go", ->
+    describe "errors", ->
+      beforeEach ->
+        @allowErrors()
+
+      _.each [null, undefined, NaN, Infinity, {}, [], ->], (val) =>
+        it "throws on: '#{val}'", (done) ->
+          @Cypress.on "fail", (err) ->
+            expect(err.message).to.eq("cy.go() accepts only a string or number argument")
+            done()
+
+          @cy.go(val)
+
+      it "throws on invalid string", (done) ->
+        @Cypress.on "fail", (err) ->
+          expect(err.message).to.eq("cy.go() accepts either 'forward' or 'back'. You passed: 'foo'")
+          done()
+
+        @cy.go("foo")
+
+      it "throws on zero", (done) ->
+        @Cypress.on "fail", (err) ->
+          expect(err.message).to.eq("cy.go() cannot accept '0'. The number must be greater or less than '0'.")
+          done()
+
+        @cy.go(0)
+
+    describe ".log", ->
+
   context "#visit", ->
     it "sets timeout to Cypress.config(visitTimeout)", ->
       timeout = @sandbox.spy Promise.prototype, "timeout"

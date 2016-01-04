@@ -35,6 +35,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
         ## and we may need to override things like alert + confirm again
         @bindWindowListeners @private("window")
         @isReady(true, "load")
+        @Cypress.trigger("load")
 
       ## anytime initialize is called we immediately
       ## set cy to be ready to invoke commands

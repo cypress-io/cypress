@@ -110,6 +110,66 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
             @fail(e)
 
   Cypress.addParentCommand
+    go: (numberOrString, options = {}) ->
+      _.defaults options, {log: true}
+
+      if options.log
+        options._log = Cypress.Log.command()
+
+      win = @private("window")
+
+      goNumber = (num) =>
+        if num is 0
+          @throwErr("cy.go() cannot accept '0'. The number must be greater or less than '0'.", options._log)
+
+        didUnload = false
+        pending   = Promise.pending()
+
+        beforeUnload = ->
+          didUnload = true
+
+        resolve = ->
+          pending.resolve()
+
+        Cypress.on "before:unload", beforeUnload
+        Cypress.on "load", resolve
+
+        win.history.go(num)
+
+        Promise.delay(100).then =>
+          ## cleanup the handler
+          Cypress.off("before:unload", beforeUnload)
+
+          cleanup = =>
+            Cypress.off "load", resolve
+
+            ## need to set the attributes of 'go'
+            ## onConsole here with win
+
+            ## make sure we resolve our go function
+            ## with the remove window (just like cy.visit)
+            @private("window")
+
+          ## if we've didUnload then we know we're
+          ## doing a full page refresh and we need
+          ## to wait until
+          if didUnload
+            pending.promise.then(cleanup)
+          else
+            cleanup()
+
+      goString = (str) =>
+        switch str
+          when "forward" then goNumber(1)
+          when "back"    then goNumber(-1)
+          else
+            @throwErr("cy.go() accepts either 'forward' or 'back'. You passed: '#{str}'", options._log)
+
+      switch
+        when _.isFinite(numberOrString) then goNumber(numberOrString)
+        when _.isString(numberOrString) then goString(numberOrString)
+        else
+          @throwErr("cy.go() accepts only a string or number argument", options._log)
 
     visit: (url, options = {}) ->
       if not _.isString(url)
