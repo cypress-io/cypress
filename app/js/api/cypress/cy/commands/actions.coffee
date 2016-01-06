@@ -607,7 +607,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
             if options.force isnt true
               try
-                @ensureVisibility $el, options._log
+                @ensureVisibility($el, options._log)
+                @ensureActionability($el, options._log)
               catch err
                 options.error = err
                 return @_retry(retry, options)

@@ -42,7 +42,6 @@ do ($Cypress, _, $) ->
 
         Math.sqrt(deltaX * deltaX + deltaY * deltaY)
 
-
       ## verify that there is not a distance
       ## greater than a default of '5' between
       ## the points
@@ -58,6 +57,21 @@ do ($Cypress, _, $) ->
             - Passing {animationDistanceThreshold: 20} which decreases the sensitivity\n
           http://on.cypress.io/element-is-animating
         """)
+
+    ensureActionability: (subject, onFail) ->
+      subject ?= @ensureSubject()
+
+      method = @prop("current").get("name")
+
+      if subject.prop("disabled")
+        node = $Cypress.Utils.stringifyElement(subject)
+
+        @throwErr("""
+          cy.#{method}() failed because this element is disabled:\n
+          #{node}\n
+          Fix this problem, or use {force: true} to disable error checking.\n
+          http://on.cypress.io/element-cannot-be-interacted-with
+        """, onFail)
 
     ensureVisibility: (subject, onFail) ->
       subject ?= @ensureSubject()

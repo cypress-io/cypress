@@ -471,6 +471,23 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get(".slidein").type("foo")
 
+    it "waits until element is no longer disabled", ->
+      txt = cy.$(":text:first").prop("disabled", true)
+
+      retried = false
+      clicks = 0
+
+      txt.on "click", ->
+        clicks += 1
+
+      @cy.on "retry", _.after 3, ->
+        txt.prop("disabled", false)
+        retried = true
+
+      @cy.get(":text:first").type("foo").then ->
+        expect(clicks).to.eq(1)
+        expect(retried).to.be.true
+
     describe "delay", ->
       beforeEach ->
         @delay = 10
@@ -1811,6 +1828,22 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get("input:text:first").type("foo")
 
+      it "throws when subject is disabled", (done) ->
+        @cy.$("input:text:first").prop("disabled", true)
+
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push log
+
+        @cy.on "fail", (err) =>
+          ## get + type logs
+          expect(logs.length).eq(2)
+          expect(err.message).to.include("cy.type() failed because this element is disabled:\n")
+          done()
+
+        @cy.get("input:text:first").type("foo")
+
       it "throws when submitting within nested forms"
 
       it "logs once when not dom subject", (done) ->
@@ -1932,6 +1965,23 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#comments").clear().then ($textarea) ->
         expect($textarea).to.have.value("")
+
+    it "waits until element is no longer disabled", ->
+      textarea = @cy.$("#comments").val("foo bar").prop("disabled", true)
+
+      retried = false
+      clicks = 0
+
+      textarea.on "click", ->
+        clicks += 1
+
+      @cy.on "retry", _.after 3, ->
+        textarea.prop("disabled", false)
+        retried = true
+
+      @cy.get("#comments").clear().then ->
+        expect(clicks).to.eq(1)
+        expect(retried).to.be.true
 
     it "can forcibly click even when being covered by another element", (done) ->
       input  = $("<input />").attr("id", "input-covered-in-span").prependTo(@cy.$("body"))
@@ -2082,6 +2132,22 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get("input:text:first").clear()
 
+      it "throws when subject is disabled", (done) ->
+        @cy.$("input:text:first").prop("disabled", true)
+
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push log
+
+        @cy.on "fail", (err) =>
+          ## get + type logs
+          expect(logs.length).eq(2)
+          expect(err.message).to.include("cy.clear() failed because this element is disabled:\n")
+          done()
+
+        @cy.get("input:text:first").clear()
+
       it "logs once when not dom subject", (done) ->
         logs = []
 
@@ -2207,10 +2273,27 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#checkbox-covered-in-span").check({timeout: 1000, interval: 60})
 
+    it "waits until element is no longer disabled", ->
+      chk = cy.$(":checkbox:first").prop("disabled", true)
+
+      retried = false
+      clicks = 0
+
+      chk.on "click", ->
+        clicks += 1
+
+      @cy.on "retry", _.after 3, ->
+        chk.prop("disabled", false)
+        retried = true
+
+      @cy.get(":checkbox:first").check().then ->
+        expect(clicks).to.eq(1)
+        expect(retried).to.be.true
+
     it "delays 50ms before resolving", (done) ->
       waited = false
 
-      @cy.$("form:first").on "submit", (e) =>
+      @cy.$(":checkbox:first").on "change", (e) =>
         _.delay ->
           waited = true
         , 50
@@ -2219,7 +2302,7 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(waited).to.be.true
           done()
 
-      @cy.get("form:first").submit()
+      @cy.get(":checkbox:first").check()
 
     describe "assertion verification", ->
       beforeEach ->
@@ -2350,6 +2433,22 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(logs).to.have.length(chk.length + 1)
           expect(@log.get("error")).to.eq(err)
           expect(err.message).to.include "cy.check() failed because this element is not visible"
+          done()
+
+        @cy.get(":checkbox:first").check()
+
+      it "throws when subject is disabled", (done) ->
+        @cy.$(":checkbox:first").prop("disabled", true)
+
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push log
+
+        @cy.on "fail", (err) =>
+          ## get + type logs
+          expect(logs.length).eq(2)
+          expect(err.message).to.include("cy.check() failed because this element is disabled:\n")
           done()
 
         @cy.get(":checkbox:first").check()
@@ -2525,6 +2624,23 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#checkbox-covered-in-span").uncheck({timeout: 1000, interval: 60})
 
+    it "waits until element is no longer disabled", ->
+      chk = cy.$(":checkbox:first").prop("checked", true).prop("disabled", true)
+
+      retried = false
+      clicks = 0
+
+      chk.on "click", ->
+        clicks += 1
+
+      @cy.on "retry", _.after 3, ->
+        chk.prop("disabled", false)
+        retried = true
+
+      @cy.get(":checkbox:first").uncheck().then ->
+        expect(clicks).to.eq(1)
+        expect(retried).to.be.true
+
     describe "assertion verification", ->
       beforeEach ->
         @allowErrors()
@@ -2680,6 +2796,22 @@ describe "$Cypress.Cy Actions Commands", ->
           done()
 
         @cy.get("#checkbox-covered-in-span").uncheck()
+
+      it "throws when subject is disabled", (done) ->
+        @cy.$(":checkbox:first").prop("checked", true).prop("disabled", true)
+
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push log
+
+        @cy.on "fail", (err) =>
+          ## get + type logs
+          expect(logs.length).eq(2)
+          expect(err.message).to.include("cy.uncheck() failed because this element is disabled:\n")
+          done()
+
+        @cy.get(":checkbox:first").uncheck()
 
     describe ".log", ->
       beforeEach ->
@@ -3976,7 +4108,7 @@ describe "$Cypress.Cy Actions Commands", ->
             Elements: 1
           }
 
-  context "#click", ->
+  context.only "#click", ->
     it "receives native click event", (done) ->
       btn = @cy.$("#button")
 
@@ -4273,6 +4405,23 @@ describe "$Cypress.Cy Actions Commands", ->
         retried = true
 
       @cy.get("#button").click().then ->
+        expect(retried).to.be.true
+
+    it "waits until element is no longer disabled", ->
+      btn = cy.$("#button").prop("disabled", true)
+
+      retried = false
+      clicks = 0
+
+      btn.on "click", ->
+        clicks += 1
+
+      @cy.on "retry", _.after 3, ->
+        btn.prop("disabled", false)
+        retried = true
+
+      @cy.get("#button").click().then ->
+        expect(clicks).to.eq(1)
         expect(retried).to.be.true
 
     it "waits until element stops animating", (done) ->
@@ -4646,6 +4795,22 @@ describe "$Cypress.Cy Actions Commands", ->
           done()
 
         @cy.get("#three-buttons button").click({multiple: true})
+
+      it "throws when subject is disabled", (done) ->
+        btn = @cy.$("#button").prop("disabled", true)
+
+        logs = []
+
+        @Cypress.on "log", (@log) =>
+          logs.push log
+
+        @cy.on "fail", (err) =>
+          ## get + click logs
+          expect(logs.length).eq(2)
+          expect(err.message).to.include("cy.click() failed because this element is disabled:\n")
+          done()
+
+        @cy.get("#button").click()
 
       it "throws when a non-descendent element is covering subject", (done) ->
         @cy._timeout(200)
