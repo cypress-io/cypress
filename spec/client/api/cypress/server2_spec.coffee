@@ -91,6 +91,77 @@ describe "$Cypress.Cy Server API", ->
       @xhr.url = "/foo.js?_=123123"
       expect(@server.isWhitelisted(@xhr)).not.to.be.true
 
+  context "#setRequestHeader", ->
+    beforeEach ->
+      @server = $Cypress.Server.create({
+        xhrUrl: "__cypress/xhrs/"
+      })
+      @srh  = @sandbox.spy(@window.XMLHttpRequest.prototype, "setRequestHeader")
+      @server.bindTo(@window)
+      @xhr = new @window.XMLHttpRequest
+      @xhr.open("GET", "/fixtures/ajax/app.json")
+      @proxy = @server.getProxyFor(@xhr)
+
+    it "sets request.headers", ->
+      @proxy.setRequestHeader("foo", "bar")
+      expect(@proxy.request.headers).to.deep.eq({foo: "bar"})
+
+    it "appends to request.headers", ->
+      @proxy.setRequestHeader("foo", "bar")
+      @proxy.setRequestHeader("foo", "baz")
+      expect(@proxy.request.headers).to.deep.eq({foo: "bar, baz"})
+
+    it "ignores cypress headers", ->
+      @proxy.setRequestHeader("X-Cypress-Delay", 1000)
+      expect(@proxy.request.headers).not.to.be.ok
+
+    it "sets proxy request headers from xhr", ->
+      @xhr.setRequestHeader("foo", "bar")
+
+      ## the original setRequestHeaders method should be called here
+      expect(@srh).to.be.calledWith("foo", "bar")
+      expect(@proxy.request.headers).to.deep.eq({foo: "bar"})
+
+    ## since we yield the xhrProxy object in tests
+    ## we need to call the original xhr's implementation
+    ## on setRequestHeaders
+    it "calls the original xhr's implementation", ->
+      @proxy.setRequestHeader("foo", "bar")
+      expect(@srh).to.be.calledWith("foo", "bar")
+      expect(@srh).to.be.calledOn(@xhr)
+
+  context "#getResponseHeader", ->
+    beforeEach ->
+      @server = $Cypress.Server.create({
+        xhrUrl: "__cypress/xhrs/"
+      })
+      @grh  = @sandbox.spy(@window.XMLHttpRequest.prototype, "getResponseHeader")
+      @server.bindTo(@window)
+      @xhr = new @window.XMLHttpRequest
+      @xhr.open("GET", "/fixtures/ajax/app.json")
+      @proxy = @server.getProxyFor(@xhr)
+
+    it "calls the original xhr implementation", ->
+      @proxy.getResponseHeader("foo")
+      expect(@grh).to.be.calledWith("foo")
+      expect(@grh).to.be.calledOn(@xhr)
+
+  context "#getAllResponseHeaders", ->
+    beforeEach ->
+      @server = $Cypress.Server.create({
+        xhrUrl: "__cypress/xhrs/"
+      })
+      @garh  = @sandbox.spy(@window.XMLHttpRequest.prototype, "getAllResponseHeaders")
+      @server.bindTo(@window)
+      @xhr = new @window.XMLHttpRequest
+      @xhr.open("GET", "/fixtures/ajax/app.json")
+      @proxy = @server.getProxyFor(@xhr)
+
+    it "calls the original xhr implementation", ->
+      @proxy.getAllResponseHeaders()
+      expect(@garh).to.be.calledOnce
+      expect(@garh).to.be.calledOn(@xhr)
+
   context "#setResponseHeaders", ->
     beforeEach ->
       @server = $Cypress.Server.create({

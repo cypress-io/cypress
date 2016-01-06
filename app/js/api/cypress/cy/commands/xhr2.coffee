@@ -170,7 +170,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
                 "Stubbed":     if route and route.response? then "Yes" else "No"
                 Request:       xhr.request
                 Response:      xhr.response
-                XHR:           xhr.getXhr()
+                XHR:           xhr._getXhr()
               }
 
               if route and route.is404

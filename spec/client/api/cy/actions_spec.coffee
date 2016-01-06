@@ -4108,7 +4108,7 @@ describe "$Cypress.Cy Actions Commands", ->
             Elements: 1
           }
 
-  context.only "#click", ->
+  context "#click", ->
     it "receives native click event", (done) ->
       btn = @cy.$("#button")
 

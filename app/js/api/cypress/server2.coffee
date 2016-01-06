@@ -78,20 +78,20 @@ $Cypress.Server = do ($Cypress, _) ->
       @request       = {}
       @response      = null
 
-    getXhr: ->
+    _getXhr: ->
       @xhr ? throw new Error("XMLHttpRequest#xhr is missing!")
 
-    setDuration: (timeStart) ->
+    _setDuration: (timeStart) ->
       @duration = (new Date) - timeStart
 
-    setStatus: ->
+    _setStatus: ->
       @status = @xhr.status
       @statusMessage = "#{@xhr.status} (#{@xhr.statusText})"
 
-    setRequestBody: (requestBody = null) ->
+    _setRequestBody: (requestBody = null) ->
       @request.body = parseJSON(requestBody)
 
-    setResponseBody: ->
+    _setResponseBody: ->
       @response ?= {}
 
       ## if we are a responseType of arraybuffer
@@ -104,7 +104,7 @@ $Cypress.Server = do ($Cypress, _) ->
         catch e
           @xhr.response
 
-    setResponseHeaders: ->
+    _setResponseHeaders: ->
       ## parse response header string into object
       ## https://gist.github.com/monsur/706839
       headerStr = @xhr.getAllResponseHeaders()
@@ -129,7 +129,13 @@ $Cypress.Server = do ($Cypress, _) ->
 
       set(headers)
 
-    setRequestHeader: (key, val) ->
+    _getFixtureError: ->
+      body = @response and @response.body
+
+      if body and err = body.__error
+        return err
+
+    _setRequestHeader: (key, val) ->
       return if isCypressHeaderRe.test(key)
 
       @request.headers ?= {}
@@ -139,15 +145,18 @@ $Cypress.Server = do ($Cypress, _) ->
       ## if we already have a request header
       ## then prepend val with ', '
       if current
-        val = ", " + val
+        val = current + ", " + val
 
       @request.headers[key] = val
 
-    getFixtureError: ->
-      body = @response and @response.body
+    setRequestHeader: ->
+      @xhr.setRequestHeader.apply(@xhr, arguments)
 
-      if body and err = body.__error
-        return err
+    getResponseHeader: ->
+      @xhr.getResponseHeader.apply(@xhr, arguments)
+
+    getAllResponseHeaders: ->
+      @xhr.getAllResponseHeaders.apply(@xhr, arguments)
 
     @add = (xhr) ->
       new XMLHttpRequest(xhr)
@@ -373,7 +382,7 @@ $Cypress.Server = do ($Cypress, _) ->
       XHR.prototype.setRequestHeader = ->
         proxy = getServer().getProxyFor(@)
 
-        proxy.setRequestHeader.apply(proxy, arguments)
+        proxy._setRequestHeader.apply(proxy, arguments)
 
         srh.apply(@, arguments)
 
@@ -443,7 +452,7 @@ $Cypress.Server = do ($Cypress, _) ->
         ## get the proxy xhr
         proxy = getServer().getProxyFor(@)
 
-        proxy.setRequestBody(requestBody)
+        proxy._setRequestBody(requestBody)
 
         ## log this out now since it's being sent officially
         ## unless its been whitelisted
@@ -463,12 +472,12 @@ $Cypress.Server = do ($Cypress, _) ->
         ## do that here.
         onload = @onload
         @onload = ->
-          proxy.setDuration(timeStart)
-          proxy.setStatus()
-          proxy.setResponseHeaders()
-          proxy.setResponseBody()
+          proxy._setDuration(timeStart)
+          proxy._setStatus()
+          proxy._setResponseHeaders()
+          proxy._setResponseBody()
 
-          if err = proxy.getFixtureError()
+          if err = proxy._getFixtureError()
             return getServer().options.onFixtureError(proxy, err)
 
           ## catch synchronous errors caused
