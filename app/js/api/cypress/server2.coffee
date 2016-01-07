@@ -53,13 +53,14 @@ $Cypress.Server = do ($Cypress, _) ->
     autoRespond: true
     waitOnResponses: Infinity
     force404: false ## to force 404's for non-stubbed routes
+    onAnyAbort: undefined
     onAnyRequest: undefined
     onAnyResponse: undefined
     stripOrigin: _.identity
     getUrlOptions: _.identity
     whitelist: whitelist ## function whether to allow a request to go out (css/js/html/templates) etc
     onSend: ->
-    onAbort: ->
+    onXhrAbort: ->
     onError: ->
     onLoad: ->
     onFixtureError: ->
@@ -337,8 +338,9 @@ $Cypress.Server = do ($Cypress, _) ->
 
     abort: ->
       ## abort any outstanding xhr's
+      ## which aren't already aborted
       _(@xhrs).chain().filter((xhr) ->
-        xhr.readyState isnt 4
+        xhr.aborted isnt true and xhr.readyState isnt 4
       ).invoke("abort")
 
       return @
@@ -389,7 +391,7 @@ $Cypress.Server = do ($Cypress, _) ->
       XHR.prototype.abort = ->
         ## if we already have a readyState of 4
         ## then do not get the abort stack or
-        ## set the aborted property or call onAbort
+        ## set the aborted property or call onXhrAbort
         ## to test this just use a regular XHR
         @aborted = true
 
@@ -398,7 +400,14 @@ $Cypress.Server = do ($Cypress, _) ->
         proxy = getServer().getProxyFor(@)
         proxy.aborted = true
 
-        getServer().options.onAbort(proxy, abortStack)
+        getServer().options.onXhrAbort(proxy, abortStack)
+
+        if _.isFunction(getServer().options.onAnyAbort)
+          route = getServer().getRouteForXhr(@)
+
+          ## call the onAnyAbort function
+          ## after we've called getServer().options.onSend
+          getServer().options.onAnyAbort(route, proxy)
 
         abort.apply(@, arguments)
 

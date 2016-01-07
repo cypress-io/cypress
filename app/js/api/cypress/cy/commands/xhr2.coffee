@@ -64,6 +64,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
     response: undefined
     autoRespond: undefined
     waitOnResponses: undefined
+    onAbort: undefined
     onRequest: undefined ## need to rebind these to 'cy' context
     onResponse: undefined
   }
@@ -234,7 +235,7 @@ $Cypress.register "XHR2", (Cypress, _) ->
 
           @fail(err)
 
-        onAbort: (xhr, stack) =>
+        onXhrAbort: (xhr, stack) =>
           setResponse.call(@, xhr)
 
           err = new Error("This XHR was aborted by your code -- check this stack trace below.")
@@ -244,13 +245,17 @@ $Cypress.register "XHR2", (Cypress, _) ->
           if log = logs[xhr.id]
             log.snapshot("aborted").error(err)
 
-        onAnyRequest: (stub, xhr) =>
-          if stub and _.isFunction(stub.onRequest)
-            stub.onRequest.call(@, xhr)
+        onAnyAbort: (route, xhr) =>
+          if route and _.isFunction(route.onAbort)
+            route.onAbort.call(@, xhr)
 
-        onAnyResponse: (stub, xhr) =>
-          if stub and _.isFunction(stub.onResponse)
-            stub.onResponse.call(@, xhr)
+        onAnyRequest: (route, xhr) =>
+          if route and _.isFunction(route.onRequest)
+            route.onRequest.call(@, xhr)
+
+        onAnyResponse: (route, xhr) =>
+          if route and _.isFunction(route.onResponse)
+            route.onResponse.call(@, xhr)
       })
 
   Cypress.addParentCommand

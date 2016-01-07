@@ -216,34 +216,42 @@ describe "$Cypress.Cy Server API", ->
       path = window.location.origin + window.location.pathname.split("/").slice(0, -1).join("/")
       @expectUrlToEq("foo/bar.html", "#{path}/foo/bar.html")
 
-#   context "XHR#abort", ->
-#     beforeEach ->
-#       @send = @sandbox.stub(@window.XMLHttpRequest.prototype, "send")
-#       @open = @sandbox.spy(@window.XMLHttpRequest.prototype, "open")
-#       @abort = @sandbox.spy(@window.XMLHttpRequest.prototype, "abort")
-#       @server = $Cypress.Server.create({
-#         xhrUrl: "__cypress/xhrs/"
-#         onAbort: ->
-#       })
-#       @server.bindTo(@window)
-#       @xhr = new @window.XMLHttpRequest
+  context "XHR#abort", ->
+    beforeEach ->
+      @send = @sandbox.stub(@window.XMLHttpRequest.prototype, "send")
+      @open = @sandbox.spy(@window.XMLHttpRequest.prototype, "open")
+      @abort = @sandbox.spy(@window.XMLHttpRequest.prototype, "abort")
+      @server = $Cypress.Server.create({
+        xhrUrl: "__cypress/xhrs/"
+        onXhrAbort: ->
+        onAnyAbort: ->
+      })
+      @server.bindTo(@window)
+      @xhr = new @window.XMLHttpRequest
 
-#     it "sets aborted=true", ->
-#       @xhr.open("GET", "/foo")
-#       @xhr.abort()
-#       expect(@xhr.aborted).to.eq(true)
+    it "sets aborted=true", ->
+      @xhr.open("GET", "/foo")
+      @xhr.abort()
+      expect(@xhr.aborted).to.eq(true)
 
-#     it "calls the original abort", ->
-#       @xhr.open("GET", "/foo")
-#       @xhr.abort()
-#       expect(@abort).to.be.calledOn(@xhr)
+    it "calls the original abort", ->
+      @xhr.open("GET", "/foo")
+      @xhr.abort()
+      expect(@abort).to.be.calledOn(@xhr)
 
-#     it "calls onAbort callback with xhr + stack trace", ->
-#       @sandbox.stub(@server, "getStack").returns("foobarbaz")
-#       onAbort = @sandbox.spy @server.options, "onAbort"
-#       @xhr.open("GET", "/foo")
-#       @xhr.abort()
-#       expect(onAbort).to.be.calledWith(@server.getProxyFor(@xhr), "foobarbaz")
+    it "calls onXhrAbort callback with xhr + stack trace", ->
+      @sandbox.stub(@server, "getStack").returns("foobarbaz")
+      onXhrAbort = @sandbox.spy @server.options, "onXhrAbort"
+      @xhr.open("GET", "/foo")
+      @xhr.abort()
+      expect(onXhrAbort).to.be.calledWith(@server.getProxyFor(@xhr), "foobarbaz")
+
+    it "calls onAnyAbort callback with route + xhr", ->
+      onAnyAbort = @sandbox.spy @server.options, "onAnyAbort"
+
+      @xhr.open("GET", "/foo")
+      @xhr.abort()
+      expect(onAnyAbort).to.be.called
 
 #   context "XHR#open", ->
 #     beforeEach ->
@@ -494,3 +502,31 @@ describe "$Cypress.Cy Server API", ->
 
 #   context ".whitelist", ->
 #     it "ignores whitelisted routes even when matching stub"
+  context.only "#abort", ->
+    it "only aborts xhrs which have not already been aborted", ->
+      xhrAbort = 0
+      anyAbort = 0
+
+      @abort = @sandbox.spy(@window.XMLHttpRequest.prototype, "abort")
+      @server = $Cypress.Server.create({
+        xhrUrl: "__cypress/xhrs/"
+        onXhrAbort: -> xhrAbort += 1
+        onAnyAbort: -> anyAbort += 1
+      })
+      @server.bindTo(@window)
+
+      @xhr1 = new @window.XMLHttpRequest
+      @xhr1.open("GET", "/foo")
+
+      @xhr2 = new @window.XMLHttpRequest
+      @xhr2.open("GET", "/foo")
+
+      @xhr3 = new @window.XMLHttpRequest
+      @xhr3.open("GET", "/foo")
+
+      @xhr1.abort()
+
+      @server.abort()
+
+      expect(xhrAbort).to.eq(3)
+      expect(anyAbort).to.eq(3)

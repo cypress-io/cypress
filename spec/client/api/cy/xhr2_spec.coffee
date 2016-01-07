@@ -398,6 +398,31 @@ describe "$Cypress.Cy XHR Commands", ->
             win.$.get("/foo")
             null
 
+    describe "#onAbort", ->
+      beforeEach ->
+        @setup()
+
+      it "calls onAbort callback with cy context + proxy xhr", (done) ->
+        cy = @cy
+
+        @cy
+          .server()
+          .route({
+            url: /foo/
+            response: {}
+            onAbort: (xhr) ->
+              expect(@).to.eq(cy)
+              expect(xhr.aborted).to.be.true
+              done()
+          })
+          .window().then (win) ->
+            xhr = new win.XMLHttpRequest
+            xhr.open("GET", "/foo")
+            xhr.send()
+            xhr.abort()
+            null
+
+
     describe "request parsing", ->
       beforeEach ->
         @setup()
