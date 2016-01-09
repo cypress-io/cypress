@@ -481,6 +481,50 @@ describe "$Cypress.Cy Waiting Commands", ->
               expect(xhr.response).to.be.null
             .wait("@getUsers")
 
+        it "throws when waiting on the 3rd request on array of aliases", (done) ->
+          @Cypress.config("requestTimeout", 500)
+          @Cypress.config("responseTimeout", 10000)
+
+          @cy.on "retry", _.once =>
+            win = @cy.private("window")
+            _.defer => win.$.get("/timeout?ms=2001")
+            _.defer => win.$.get("/timeout?ms=2002")
+
+          @cy.on "fail", (err) ->
+            expect(err.message).to.include "cy.wait() timed out waiting '500ms' for the 1st request to the route: 'getThree'. No request ever occured."
+            done()
+
+          @cy
+            .visit("/fixtures/html/xhr.html")
+            .server()
+            .route("/timeout?ms=2001").as("getOne")
+            .route("/timeout?ms=2002").as("getTwo")
+            .route(/three/, {}).as("getThree")
+            .wait(["@getOne", "@getTwo", "@getThree"])
+
+        it "throws when waiting on the 3rd response on array of aliases", (done) ->
+          @Cypress.config("requestTimeout", 200)
+          @Cypress.config("responseTimeout", 300)
+
+          @cy.on "retry", _.once =>
+            win = @cy.private("window")
+            _.defer => win.$.get("/timeout?ms=1")
+            _.defer => win.$.get("/timeout?ms=2")
+            _.defer => win.$.get("/timeout?ms=3000")
+
+          @cy.on "fail", (err) ->
+            expect(err.message).to.include "cy.wait() timed out waiting '300ms' for the 1st response to the route: 'getThree'. No response ever occured."
+            done()
+
+          @cy
+            .visit("/fixtures/html/xhr.html")
+            .server()
+            .route("/timeout?ms=1").as("getOne")
+            .route("/timeout?ms=2").as("getTwo")
+            .route("/timeout?ms=3000").as("getThree")
+            .route(/three/, {}).as("getThree")
+            .wait(["@getOne", "@getTwo", "@getThree"])
+
         it "throws when passed multiple string arguments", (done) ->
           @cy.on "fail", (err) ->
             expect(err.message).to.eq "cy.wait() was passed invalid arguments. You cannot pass multiple strings. If you're trying to wait for multiple routes, use an array."

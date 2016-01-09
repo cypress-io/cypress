@@ -69,8 +69,10 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
 
         options.error = "cy.wait() timed out waiting '#{options.timeout}ms' for the #{num} #{type} to the route: '#{alias}'. No #{type} ever occured."
 
+        args = arguments
+
         @_retry ->
-          checkForXhr.call(@, alias, type, num, options)
+          checkForXhr.apply(@, args)
         , options
 
       waitForXhr = (str, options) ->
@@ -110,10 +112,12 @@ $Cypress.register "Waiting", (Cypress, _, $, Promise) ->
         num = getNumRequests(alias)
 
         waitForRequest = =>
+          options = _.omit(options, "_runnableTimeout")
           options.timeout = timeout ? Cypress.config("requestTimeout")
           checkForXhr.call(@, alias, "request", num, options)
 
         waitForResponse = =>
+          options = _.omit(options, "_runnableTimeout")
           options.timeout = timeout ? Cypress.config("responseTimeout")
           checkForXhr.call(@, alias, "response", num, options)
 
