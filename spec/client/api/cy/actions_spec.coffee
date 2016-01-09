@@ -4437,9 +4437,14 @@ describe "$Cypress.Cy Actions Commands", ->
         retries.push(obj)
 
       p.on "animationstart", =>
-        @cy.get(".slidein").click({interval: 50}).then ->
-          expect(retries.length).to.be.gt(5)
-          done()
+        t = Date.now()
+        _.delay =>
+          console.log Date.now() - t
+
+          @cy.get(".slidein").click({interval: 30}).then ->
+            expect(retries.length).to.be.gt(5)
+            done()
+        , 100
 
       @cy.$("#animation-container").append(p)
 

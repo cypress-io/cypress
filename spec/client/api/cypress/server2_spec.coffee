@@ -502,7 +502,7 @@ describe "$Cypress.Cy Server API", ->
 
 #   context ".whitelist", ->
 #     it "ignores whitelisted routes even when matching stub"
-  context.only "#abort", ->
+  context "#abort", ->
     it "only aborts xhrs which have not already been aborted", ->
       xhrAbort = 0
       anyAbort = 0
