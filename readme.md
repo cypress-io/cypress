@@ -24,6 +24,10 @@ gem install bundler
 bundle
 ```
 
+```bash
+npm install -g bower
+```
+
 ## Development
 
 To run development environment:
@@ -64,7 +68,7 @@ Code changes which are applied instantly:
 - `driver`
 
 Code changes which require you to reboot `nw`:
-- `desktop gui` 
+- `desktop gui`
 - `server`
 
 **Optional:** If you're going to be running the project in Desktop GUI mode, and adding new projects, you need to start the Key Server
@@ -102,8 +106,8 @@ http://localhost:2020/__/
 Code changes which are applied instantly:
 - `web app`
 - `driver`
-- `desktop gui` 
-- `server` 
+- `desktop gui`
+- `server`
 
 ## Deploying
 

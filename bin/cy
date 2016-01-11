@@ -47,7 +47,7 @@ var args = []
 for (key in opts)
   args = args.concat(opts[key])
 
-spawn("nodemon", args, {stdio: "inherit"})
+spawn("node_modules/.bin/nodemon", args, {stdio: "inherit"})
 
 if (options.open !== false){
   setTimeout(function(){
@@ -57,7 +57,7 @@ if (options.open !== false){
 
 
 if (options.debug !== false){
-  spawn("node-inspector", [], {stdio: "inherit"})
+  spawn("node_modules/.bin/node-inspector", [], {stdio: "inherit"})
 
   open("http://127.0.0.1:8080/debug?ws=127.0.0.1:8080&port=5858")
 }
