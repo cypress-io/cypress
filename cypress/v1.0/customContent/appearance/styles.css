@@ -13,6 +13,9 @@
 .block-show-code pre {
   background-color: #f7f7f7;
   box-shadow: 0 0 0;
+  padding: 15px;
+  font-family: Consolas;
+  font-size: 13.6px;
 }
 
 pre {
