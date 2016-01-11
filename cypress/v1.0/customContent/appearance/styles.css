@@ -1,5 +1,13 @@
 .cm-s-neo .cm-comment {
-  color: #999;   
+  color: #999;
+}
+
+.cm-s-neo .cm-string {
+  color: #183691;
+}
+
+.cm-s-neo .cm-variable, .cm-s-neo .cm-qualifier {
+  color: #795da3;
 }
 
 .block-show-code pre {
@@ -7,20 +15,20 @@
   box-shadow: 0 0 0;
 }
 
-pre { 
+pre {
  border: 0;
  border-radius: 0;
 }
 
 .theme-line, .theme-solid {
-  background-color: #e5e5e5   
+  background-color: #e5e5e5;
 }
 
 .body-overlap .main-content {
-  -webkit-box-shadow: 0 1px 1px #999; 
-  box-shadow: 0 1px 1px #999;  
+  -webkit-box-shadow: 0 1px 1px #999;
+  box-shadow: 0 1px 1px #999;
 }
 
 .theme-solid .sidebar-nav h4 {
- font-size: 103%; 
+ font-size: 103%;
 }
