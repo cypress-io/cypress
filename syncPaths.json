@@ -1,0 +1,14 @@
+{
+    "cypress": {
+        "v1.0": {
+            "documentation": "cypress/v1.0/documentation",
+            "customPages": "cypress/v1.0/customPages",
+            "customContent": {
+                "appearance": {
+                    "html_body": "cypress/v1.0/customContent/appearance/landing_page.html",
+                    "stylesheet": "cypress/v1.0/customContent/appearance/styles.css"
+                }
+            }
+        }
+    }
+}
