@@ -1,0 +1,2 @@
+slug: global-configuration
+

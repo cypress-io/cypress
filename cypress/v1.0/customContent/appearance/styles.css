@@ -1,0 +1,26 @@
+.cm-s-neo .cm-comment {
+  color: #999;   
+}
+
+.block-show-code pre {
+  background-color: #f7f7f7;
+  box-shadow: 0 0 0;
+}
+
+pre { 
+ border: 0;
+ border-radius: 0;
+}
+
+.theme-line, .theme-solid {
+  background-color: #e5e5e5   
+}
+
+.body-overlap .main-content {
+  -webkit-box-shadow: 0 1px 1px #999; 
+  box-shadow: 0 1px 1px #999;  
+}
+
+.theme-solid .sidebar-nav h4 {
+ font-size: 103%; 
+}
