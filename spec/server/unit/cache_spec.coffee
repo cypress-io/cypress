@@ -1,27 +1,17 @@
-root          = '../../../'
-path          = require 'path'
-Promise       = require 'bluebird'
-expect        = require('chai').expect
-Keys          = require "#{root}lib/keys"
-Project       = require "#{root}lib/project"
-cache         = require "#{root}lib/cache"
-Settings      = require "#{root}lib/util/settings"
-Routes        = require "#{root}lib/util/routes"
-fs            = require 'fs-extra'
-nock          = require 'nock'
-sinon         = require 'sinon'
-sinonPromise  = require('sinon-as-promised')(Promise)
+require("../spec_helper")
+
+path          = require("path")
+Keys          = require("#{root}lib/keys")
+Project       = require("#{root}lib/project")
+cache         = require("#{root}lib/cache")
+Settings      = require("#{root}lib/util/settings")
+Routes        = require("#{root}lib/util/routes")
 
 describe "Cache", ->
   beforeEach ->
-    nock.disableNetConnect()
-    @sandbox = sinon.sandbox.create()
     @cache = cache
 
   afterEach ->
-    nock.cleanAll()
-    nock.enableNetConnect()
-    @sandbox.restore()
     @cache.remove()
 
   context "#ensureExists", ->

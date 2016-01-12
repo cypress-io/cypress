@@ -1,4 +1,5 @@
-expect     = require("chai").expect
+require("../spec_helper")
+
 UrlHelpers = require('../../../lib/util/url_helpers')
 
 describe "Url helpers", ->

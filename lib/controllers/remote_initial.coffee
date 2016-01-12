@@ -8,7 +8,7 @@ Domain        = require("domain")
 through       = require("through")
 jsUri         = require("jsuri")
 trumpet       = require("trumpet")
-url           = require("url")
+urlHelpers    = require("url")
 Log           = require("../log")
 UrlHelpers    = require("../util/url_helpers")
 escapeRegExp  = require("../util/escape_regexp")
@@ -100,7 +100,7 @@ class RemoteInitial extends Controller
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
     ## prepends req.url with remoteHost
-    remoteUrl = url.resolve(remoteHost, req.url)
+    remoteUrl = urlHelpers.resolve(remoteHost, req.url)
 
     setCookies = (initial, remoteHost) =>
       ## dont set the cookies if we're not on the initial request
@@ -204,7 +204,7 @@ class RemoteInitial extends Controller
     ## strip off any query params from our req's url
     ## since we're pulling this from the file system
     ## it does not understand query params
-    file = url.parse(path.join(args...)).pathname
+    file = urlHelpers.parse(path.join(args...)).pathname
 
     req.formattedUrl = file
 
@@ -227,7 +227,7 @@ class RemoteInitial extends Controller
     return thr
 
   errorHandler: (e, req, res, remoteHost) ->
-    url = url.resolve(remoteHost, req.url)
+    url = urlHelpers.resolve(remoteHost, req.url)
 
     ## disregard ENOENT errors (that means the file wasnt found)
     ## which is a perfectly acceptable error (we account for that)

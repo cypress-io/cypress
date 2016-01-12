@@ -1,18 +1,12 @@
-root         = '../../../'
-expect       = require('chai').expect
-sinon        = require 'sinon'
-sinonPromise = require 'sinon-as-promised'
-nock         = require('nock')
-fs           = require "fs-extra"
-cache        = require "#{root}lib/cache"
-config       = require "#{root}lib/config"
-Project      = require "#{root}lib/project"
-Settings     = require "#{root}lib/util/settings"
+require("../spec_helper")
+
+cache        = require("#{root}lib/cache")
+config       = require("#{root}lib/config")
+Project      = require("#{root}lib/project")
+Settings     = require("#{root}lib/util/settings")
 
 describe "Project Interface", ->
   beforeEach ->
-    @sandbox = sinon.sandbox.create()
-
     @readReturns = (obj = {}) =>
       @sandbox.stub(Settings, "read").resolves(obj)
 
@@ -22,8 +16,6 @@ describe "Project Interface", ->
     fs.writeFileSync("cypress.json", str)
 
   afterEach ->
-    @sandbox.restore()
-
     fs.removeSync("cypress.json")
 
   it "returns a project instance", ->

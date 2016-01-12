@@ -1,13 +1,13 @@
 require("../spec_helper")
 
-Server        = require "#{root}lib/server"
-Socket        = require "#{root}lib/socket"
-Support       = require "#{root}lib/support"
-Fixtures      = require "#{root}lib/fixtures"
-Watchers      = require "#{root}lib/watchers"
-Project       = require "#{root}lib/project"
-Log           = require "#{root}lib/log"
-Settings      = require "#{root}lib/util/settings"
+Server        = require("#{root}lib/server")
+Socket        = require("#{root}lib/socket")
+Support       = require("#{root}lib/support")
+Fixtures      = require("#{root}lib/fixtures")
+Watchers      = require("#{root}lib/watchers")
+Project       = require("#{root}lib/project")
+Log           = require("#{root}lib/log")
+Settings      = require("#{root}lib/util/settings")
 
 describe "Server Interface", ->
   beforeEach ->

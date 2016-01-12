@@ -1,6 +1,4 @@
-root       = "../../../"
-fs         = require "fs-extra"
-expect     = require("chai").expect
+require("../spec_helper")
 
 describe "Environment", ->
   beforeEach ->

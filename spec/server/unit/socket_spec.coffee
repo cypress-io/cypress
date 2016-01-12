@@ -146,6 +146,8 @@ describe "Socket", ->
         }
 
     it "errors when fixtures fails", ->
+      nock.enableNetConnect()
+
       nock("http://localhost:8080")
         .get("/status.json")
         .reply(200, {status: "ok"})

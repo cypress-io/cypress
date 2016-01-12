@@ -9,9 +9,9 @@ require("../spec_helper")
 
 delete global.fs
 
-mock        = require "mock-fs"
-Updater     = require "#{root}lib/updater"
-Fixtures    = require "#{root}/spec/server/helpers/fixtures"
+mock        = require("mock-fs")
+Updater     = require("#{root}lib/updater")
+Fixtures    = require("#{root}/spec/server/helpers/fixtures")
 
 describe "Updater", ->
   beforeEach ->

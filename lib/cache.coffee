@@ -1,16 +1,16 @@
-_         = require 'lodash'
-Promise   = require 'bluebird'
-path      = require 'path'
-request   = require "request-promise"
-errors    = require "request-promise/errors"
-config    = require "./config"
-Project   = require './project'
-Log       = require "./log"
-Routes    = require "./util/routes"
-fs        = require 'fs-extra'
-CACHE     = config.app.cache_path
+_         = require("lodash")
+fs        = require("fs-extra")
+path      = require("path")
+Promise   = require("bluebird")
+request   = require("request-promise")
+errors    = require("request-promise/errors")
+config    = require("./config")
+Project   = require("./project")
+Log       = require("./log")
+Routes    = require("./util/routes")
 
-fs = Promise.promisifyAll(fs)
+CACHE = config.app.cache_path
+fs    = Promise.promisifyAll(fs)
 
 class Cache extends require("events").EventEmitter
   path: CACHE

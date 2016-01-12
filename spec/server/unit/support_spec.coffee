@@ -1,12 +1,9 @@
-root        = '../../../'
-path        = require 'path'
-fs          = require 'fs-extra'
-chai        = require 'chai'
-Server      = require "#{root}lib/server"
-Support     = require "#{root}lib/support"
-Fixtures    = require "#{root}/spec/server/helpers/fixtures"
+require("../spec_helper")
 
-expect       = chai.expect
+path        = require("path")
+Server      = require("#{root}lib/server")
+Support     = require("#{root}lib/support")
+Fixtures    = require("#{root}/spec/server/helpers/fixtures")
 
 describe "Support ", ->
   beforeEach ->

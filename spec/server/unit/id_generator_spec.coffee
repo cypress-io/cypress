@@ -3,6 +3,7 @@ require("../spec_helper")
 path         = require("path")
 Server       = require("#{root}lib/server")
 Keys         = require("#{root}lib/keys")
+cache        = require("#{root}lib/cache")
 Settings     = require("#{root}lib/util/settings")
 IdGenerator  = require("#{root}lib/id_generator")
 Fixtures     = require("#{root}/spec/server/helpers/fixtures")
@@ -42,10 +43,10 @@ describe "IdGenerator", ->
   context "#getId", ->
     beforeEach ->
       @sandbox.stub(@idGenerator, "appendTestId").resolves({})
-      @sandbox.stub(@idGenerator.keys.cache, "getProject").resolves({RANGE: {start: 0, end: 100}})
+      @sandbox.stub(cache, "getProject").resolves({RANGE: {start: 0, end: 100}})
 
     afterEach ->
-      @idGenerator.keys.cache.remove()
+      cache.remove()
 
     it "queues multiple ids through promise semaphore", ->
       @idGenerator.getId({})

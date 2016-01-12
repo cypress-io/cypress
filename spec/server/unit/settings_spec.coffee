@@ -1,6 +1,6 @@
 require("../spec_helper")
 
-Settings = require "#{root}lib/util/settings"
+Settings = require("#{root}lib/util/settings")
 
 describe "Settings", ->
   beforeEach ->

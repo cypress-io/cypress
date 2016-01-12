@@ -1,26 +1,18 @@
-root          = "../../../"
-winston       = require "winston"
-sinon         = require("sinon")
-sinonPromise  = require("sinon-as-promised")
-fs            = require "fs-extra"
-Promise       = require "bluebird"
-_             = require "lodash"
-path          = require "path"
-expect        = require("chai").expect
-config        = require "#{root}lib/config"
-Log           = require "#{root}lib/log"
-Exception     = require "#{root}lib/exception"
+require("../spec_helper")
 
-fs = Promise.promisifyAll(fs)
+_             = require("lodash")
+winston       = require("winston")
+path          = require("path")
+config        = require("#{root}lib/config")
+Log           = require("#{root}lib/log")
+Exception     = require("#{root}lib/exception")
 
 describe "Winston Logger", ->
   beforeEach ->
-    @sandbox = sinon.sandbox.create()
     Log.clearLogs()
 
   afterEach ->
     Log.removeAllListeners("logging")
-    @sandbox.restore()
 
   after ->
     fs.removeAsync(config.app.log_path)

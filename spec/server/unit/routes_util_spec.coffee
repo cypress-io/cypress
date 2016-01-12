@@ -1,5 +1,5 @@
-root   = "../../../"
-expect = require("chai").expect
+require("../spec_helper")
+
 Routes = require("#{root}/lib/util/routes")
 
 describe "Routes Util", ->

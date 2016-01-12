@@ -1,14 +1,14 @@
 require("../spec_helper")
 
-Server        = require("#{root}lib/server")
-CacheBuster   = require "#{root}/lib/util/cache_buster"
-Fixtures      = require "#{root}/spec/server/helpers/fixtures"
 glob          = require("glob")
 path          = require("path")
 supertest     = require("supertest")
 Session       = require("supertest-session")
 str           = require("underscore.string")
 coffee        = require("coffee-script")
+Server        = require("#{root}lib/server")
+CacheBuster   = require("#{root}/lib/util/cache_buster")
+Fixtures      = require("#{root}/spec/server/helpers/fixtures")
 
 removeWhitespace = (c) ->
   c = str.clean(c)

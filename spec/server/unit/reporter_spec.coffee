@@ -1,6 +1,6 @@
 require("../spec_helper")
 
-Reporter = require "#{root}lib/reporter"
+Reporter = require("#{root}lib/reporter")
 
 describe "Reporter", ->
   beforeEach ->

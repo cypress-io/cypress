@@ -1,9 +1,9 @@
 require("../spec_helper")
 
-path           = require 'path'
-Server         = require "#{root}lib/server"
-Fixtures       = require "#{root}lib/fixtures"
-FixturesHelper = require "#{root}/spec/server/helpers/fixtures"
+path           = require("path")
+Server         = require("#{root}lib/server")
+Fixtures       = require("#{root}lib/fixtures")
+FixturesHelper = require("#{root}/spec/server/helpers/fixtures")
 
 describe "Fixtures", ->
   beforeEach ->

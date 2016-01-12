@@ -1,5 +1,4 @@
-root   = "../../../"
-expect = require("chai").expect
+require("../spec_helper")
 
 describe "Config", ->
   beforeEach ->
