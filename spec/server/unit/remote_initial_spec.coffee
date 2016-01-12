@@ -9,7 +9,7 @@ Readable      = require("stream").Readable
 Server        = require("#{root}lib/server")
 RemoteInitial = require("#{root}lib/controllers/remote_initial")
 
-describe.only "Remote Initial", ->
+describe "Remote Initial", ->
   beforeEach ->
     @sandbox.stub(Server.prototype, "getCypressJson").returns({})
 

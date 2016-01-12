@@ -7,7 +7,7 @@ Settings     = require("#{root}lib/util/settings")
 IdGenerator  = require("#{root}lib/id_generator")
 Fixtures     = require("#{root}/spec/server/helpers/fixtures")
 
-describe.only "IdGenerator", ->
+describe "IdGenerator", ->
   beforeEach ->
     @sandbox.stub(Settings, "read").resolves({projectId: "abc-123-foo-bar"})
     @sandbox.stub(Settings, "readSync").returns({})
