@@ -17,10 +17,15 @@ beforeEach ->
   if global.fs isnt fs
     global.fs = fs
 
+  nock.disableNetConnect()
+
   @sandbox = sinon.sandbox.create()
 
 afterEach ->
   @sandbox.restore()
+
+  nock.cleanAll()
+  nock.enableNetConnect()
 
   if global.fs isnt fs
     global.fs = fs
