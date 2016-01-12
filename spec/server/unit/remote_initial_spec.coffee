@@ -2,19 +2,15 @@
 ## WAS REFACTORED AND MOST DO NOT APPLY.
 ## WILL ADD UNIT TESTS AS PROBLEMS ARISE (IF THEY ARISE)
 
-root          = "../../../"
+require("../spec_helper")
+
+through       = require("through")
+Readable      = require("stream").Readable
 Server        = require("#{root}lib/server")
 RemoteInitial = require("#{root}lib/controllers/remote_initial")
-Readable      = require("stream").Readable
-expect        = require("chai").expect
-through       = require("through")
-nock          = require('nock')
-sinon         = require('sinon')
-fs            = require('fs')
 
-describe "Remote Initial", ->
+describe.only "Remote Initial", ->
   beforeEach ->
-    @sandbox = sinon.sandbox.create()
     @sandbox.stub(Server.prototype, "getCypressJson").returns({})
 
     @server = Server("/Users/brian/app")
@@ -37,7 +33,6 @@ describe "Remote Initial", ->
 #     nock.disableNetConnect()
 
   afterEach ->
-    @sandbox.restore()
 #     nock.cleanAll()
 #     nock.enableNetConnect()
 

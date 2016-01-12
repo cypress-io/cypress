@@ -93,6 +93,7 @@
     "supertest": "^0.15.0",
     "supertest-session": "0.0.7",
     "tar-fs": "^1.8.1",
+    "through2": "0.6.3",
     "vagrant": "0.0.1"
   },
   "dependencies": {
@@ -138,7 +139,6 @@
     "string-to-stream": "^1.0.1",
     "syntax-error": "^1.1.4",
     "through": "2.3.6",
-    "through2": "0.6.3",
     "trash": "^1.4.1",
     "tree-kill": "^1.0.0",
     "trumpet": "cypress-io/node-trumpet",
