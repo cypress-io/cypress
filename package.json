@@ -31,9 +31,9 @@
     "dist": "gulp dist",
     "release": "gulp release",
     "test-nw": "node_modules/.bin/nw ./spec/nw_unit",
-    "test-server": "NODE_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.*,socket.io:* mocha --opts spec/server/mocha.opts --watch",
-    "test-server-debug": "NODE_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.*,socket.io:* node-debug --hidden='(node_modules|bower_components)' --no-preload _mocha --opts spec/server/mocha.opts --watch",
-    "test-server-ci": "NODE_ENV=test BLUEBIRD_DEBUG=1 NODE_DEBUG=request mocha --opts spec/server/mocha.opts"
+    "test-server": "NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.*,socket.io:* mocha --opts spec/server/mocha.opts --watch",
+    "test-server-debug": "NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.*,socket.io:* node-debug --hidden='(node_modules|bower_components)' --no-preload _mocha --opts spec/server/mocha.opts --watch",
+    "test-server-ci": "NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 NODE_DEBUG=request mocha --opts spec/server/mocha.opts"
   },
   "repository": {
     "type": "git",
