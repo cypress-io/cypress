@@ -1,23 +1,15 @@
-root         = '../../../'
-expect       = require('chai').expect
-sinon        = require 'sinon'
-sinonPromise = require 'sinon-as-promised'
-path         = require "path"
-nock         = require "nock"
-config       = require "#{root}lib/config"
-cache        = require "#{root}lib/cache"
-Project      = require "#{root}lib/project"
-Settings     = require "#{root}lib/util/settings"
-Keys         = require "#{root}lib/keys"
+require("../spec_helper")
+
+path         = require("path")
+config       = require("#{root}lib/config")
+cache        = require("#{root}lib/cache")
+Project      = require("#{root}lib/project")
+Settings     = require("#{root}lib/util/settings")
+Keys         = require("#{root}lib/keys")
 
 describe "Keys", ->
   beforeEach ->
-    @sandbox = sinon.sandbox.create()
-
     @sandbox.stub(Settings, "read").resolves({projectId: "abc-123-foo-bar"})
-
-  afterEach ->
-    @sandbox.restore()
 
   it "returns a keys instance", ->
     keys = Keys("/Users/brian/app")
@@ -37,10 +29,10 @@ describe "Keys", ->
 
       ## we need to force the range to resolve with a start and end
       ## else it would POST out to receive a project keys range
-      @sandbox.stub(@keys.cache, "getProject").resolves({RANGE: {start: 0, end: 100}})
+      @sandbox.stub(cache, "getProject").resolves({RANGE: {start: 0, end: 100}})
 
     afterEach ->
-      @keys.cache.remove()
+      cache.remove()
 
     it "ensures project id exists", ->
       ensureProjectId = @sandbox.spy @keys.project, "ensureProjectId"
@@ -49,19 +41,19 @@ describe "Keys", ->
         expect(ensureProjectId).to.be.calledOnce
 
     it "ensures cache exists", ->
-      ensureExists = @sandbox.spy @keys.cache, "ensureExists"
+      ensureExists = @sandbox.spy cache, "ensureExists"
 
       @keys.nextKey().then ->
         expect(ensureExists).to.be.called
 
     it "ensures cache has project", ->
-      ensureProject = @sandbox.spy @keys.cache, "ensureProject"
+      ensureProject = @sandbox.spy cache, "ensureProject"
 
       @keys.nextKey().then =>
         expect(ensureProject).to.be.calledOnce
 
     it "gets next test number", ->
-      @keys.cache.getProject.resolves {RANGE: {start: 9, end: 100}}
+      cache.getProject.resolves {RANGE: {start: 9, end: 100}}
 
       @keys.nextKey().then (id) ->
         expect(id).to.eq "00a"
@@ -89,13 +81,13 @@ describe "Keys", ->
       @keys = Keys("/Users/brian/app")
 
       @existingRangeIs = (obj = {}) =>
-        @sandbox.stub(@keys.cache, "getProject").resolves({RANGE: obj})
-        @sandbox.stub(@keys.cache, "updateRange").resolves({})
+        @sandbox.stub(cache, "getProject").resolves({RANGE: obj})
+        @sandbox.stub(cache, "updateRange").resolves({})
 
     afterEach ->
       nock.cleanAll()
 
-      @keys.cache.remove()
+      cache.remove()
 
     it "requests a new range when missing 'start' and 'end'", ->
       @existingRangeIs()
@@ -138,7 +130,7 @@ describe "Keys", ->
     it "updates the cache range", ->
       @existingRangeIs({start: 5, end: 10})
 
-      updateRange = @keys.cache.updateRange
+      updateRange = cache.updateRange
 
       @keys.getNextTestNumber("abc-123-foo-bar").then (num) ->
         expect(num).to.eq 6
