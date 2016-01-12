@@ -1,30 +1,19 @@
-root         = '../../../'
-path         = require 'path'
-fs           = require 'fs'
-chai         = require 'chai'
-sinon        = require "sinon"
-sinonPromise = require 'sinon-as-promised'
-sinonChai    = require 'sinon-chai'
-Server       = require "#{root}lib/server"
-Keys         = require "#{root}lib/keys"
-Settings     = require "#{root}lib/util/settings"
-IdGenerator  = require "#{root}lib/id_generator"
-Fixtures     = require "#{root}/spec/server/helpers/fixtures"
+require("../spec_helper")
 
-expect       = chai.expect
-chai.use(sinonChai)
+path         = require("path")
+Server       = require("#{root}lib/server")
+Keys         = require("#{root}lib/keys")
+Settings     = require("#{root}lib/util/settings")
+IdGenerator  = require("#{root}lib/id_generator")
+Fixtures     = require("#{root}/spec/server/helpers/fixtures")
 
-describe "IdGenerator", ->
+describe.only "IdGenerator", ->
   beforeEach ->
-    @sandbox = sinon.sandbox.create()
     @sandbox.stub(Settings, "read").resolves({projectId: "abc-123-foo-bar"})
     @sandbox.stub(Settings, "readSync").returns({})
 
     @server      = Server(process.cwd())
     @idGenerator = IdGenerator(@server.app)
-
-  afterEach ->
-    @sandbox.restore()
 
   it "stores app", ->
     expect(@idGenerator.app).to.eq @server.app

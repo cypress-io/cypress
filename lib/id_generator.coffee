@@ -1,21 +1,17 @@
-_               = require 'underscore'
-_.str           = require 'underscore.string'
-path            = require 'path'
-gutil           = require 'gulp-util'
-Promise         = require 'bluebird'
-fs              = Promise.promisifyAll(require('fs'))
-Keys            = require "./keys"
-Log             = require "./log"
-SecretSauce     = require "./util/secret_sauce_loader"
-PSemaphore      = require 'promise-semaphore'
-escapeRegExp    = require "./util/escape_regexp"
+path            = require("path")
+_               = require("underscore")
+str             = require("underscore.string")
+PSemaphore      = require("promise-semaphore")
+gutil           = require("gulp-util")
+Promise         = require("bluebird")
+Keys            = require("./keys")
+Log             = require("./log")
+escapeRegExp    = require("./util/escape_regexp")
 
+fs              = Promise.promisifyAll(require('fs'))
 pSemaphore       = new PSemaphore()
 
 class IdGenerator
-  Log: Log
-  escapeRegExp: escapeRegExp
-
   constructor: (app) ->
     if not (@ instanceof IdGenerator)
       return new IdGenerator(app)
@@ -26,10 +22,6 @@ class IdGenerator
     @app         = app
     @projectRoot = @app.get("cypress").projectRoot
     @keys        = Keys(@projectRoot)
-
-  str: _.str
-
-  path: path
 
   read: (path) ->
     fs.readFileAsync(path, "utf8")
@@ -59,7 +51,7 @@ class IdGenerator
     ## then the actual error instance will be e.error
     e = if e instanceof Error then e else e.error
 
-    @Log.info "Error Generating Id", {error: e}
+    Log.info "Error Generating Id", {error: e}
 
     console.log ""
     console.log "========================================"
@@ -81,6 +73,58 @@ class IdGenerator
 
     trace[0].file.replace(rootPath, "")
 
-SecretSauce.mixin("IdGenerator", IdGenerator)
+  hasExistingId: (e) ->
+    e.idFound
+
+  idFound: ->
+    e = new Error
+    e.idFound = true
+    throw e
+
+  nextId: (data) ->
+    @keys.nextKey().bind(@)
+    .then((id) ->
+      Log.info "Appending ID to Spec", {id: id, spec: data.spec, title: data.title}
+      @appendTestId(data.spec, data.title, id)
+      .return(id)
+    )
+    .catch (e) ->
+      @logErr(e, data.spec)
+
+      throw e
+
+  appendTestId: (spec, title, id) ->
+    normalizedPath = path.join(@projectRoot, spec)
+
+    @read(normalizedPath).bind(@)
+    .then (contents) ->
+      @insertId(contents, title, id)
+    .then (contents) ->
+      ## enable editFileMode which prevents us from sending out test:changed events
+      @editFileMode(true)
+
+      ## write the new content back to the file
+      @write(normalizedPath, contents)
+    .then ->
+      ## remove the editFileMode so we emit file changes again
+      ## if we're still in edit file mode then wait 1 second and disable it
+      ## chokidar doesnt instantly see file changes so we have to wait
+      @editFileMode(false, {delay: 1000})
+    .catch @hasExistingId, (err) ->
+      ## do nothing when the ID is existing
+
+  insertId: (contents, title, id) ->
+    re = new RegExp "['\"](" + escapeRegExp(title) + ")['\"]"
+
+    # ## if the string is found and it doesnt have an id
+    matches = re.exec contents
+
+    ## matches[1] will be the captured group which is the title
+    return @idFound() if not matches
+
+    ## position is the string index where we first find the capture
+    ## group and include its length, so we insert right after it
+    position = matches.index + matches[1].length + 1
+    str.insert contents, position, " [#{id}]"
 
 module.exports = IdGenerator

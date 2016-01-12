@@ -541,61 +541,6 @@ SecretSauce.Keys =
       .then -> @getNextTestNumber(projectId)
       .then @_convertToId
 
-SecretSauce.IdGenerator =
-  hasExistingId: (e) ->
-    e.idFound
-
-  idFound: ->
-    e = new Error
-    e.idFound = true
-    throw e
-
-  nextId: (data) ->
-    @keys.nextKey().bind(@)
-    .then((id) ->
-      @Log.info "Appending ID to Spec", {id: id, spec: data.spec, title: data.title}
-      @appendTestId(data.spec, data.title, id)
-      .return(id)
-    )
-    .catch (e) ->
-      @logErr(e, data.spec)
-
-      throw e
-
-  appendTestId: (spec, title, id) ->
-    normalizedPath = @path.join(@projectRoot, spec)
-
-    @read(normalizedPath).bind(@)
-    .then (contents) ->
-      @insertId(contents, title, id)
-    .then (contents) ->
-      ## enable editFileMode which prevents us from sending out test:changed events
-      @editFileMode(true)
-
-      ## write the new content back to the file
-      @write(normalizedPath, contents)
-    .then ->
-      ## remove the editFileMode so we emit file changes again
-      ## if we're still in edit file mode then wait 1 second and disable it
-      ## chokidar doesnt instantly see file changes so we have to wait
-      @editFileMode(false, {delay: 1000})
-    .catch @hasExistingId, (err) ->
-      ## do nothing when the ID is existing
-
-  insertId: (contents, title, id) ->
-    re = new RegExp "['\"](" + @escapeRegExp(title) + ")['\"]"
-
-    # ## if the string is found and it doesnt have an id
-    matches = re.exec contents
-
-    ## matches[1] will be the captured group which is the title
-    return @idFound() if not matches
-
-    ## position is the string index where we first find the capture
-    ## group and include its length, so we insert right after it
-    position = matches.index + matches[1].length + 1
-    @str.insert contents, position, " [#{id}]"
-
 SecretSauce.RemoteInitial =
   headRe: /(<head.*?>)/
   htmlRe: /(<html.*?>)/
