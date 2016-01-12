@@ -103,7 +103,7 @@ getBranch = (repo) ->
   getBranchFromGit(repo)
 
 ensureProjectAPIToken = (projectId, projectPath, key, fn) ->
-  repo = Promise.promisifyAll git(options.projectPath)
+  repo = Promise.promisifyAll git(projectPath)
 
   Promise.props({
     branch: getBranch(repo)
@@ -199,7 +199,7 @@ class Cli
 
       process.exit()
 
-  getKey: ->
+  getKey: (options) ->
     if ensureSessionToken(@user)
 
       ## log out the API Token
@@ -207,7 +207,7 @@ class Cli
         .then(displayToken)
         .catch(displayError)
 
-  generateKey: ->
+  generateKey: (options) ->
     if ensureSessionToken(@user)
 
       ## generate a new API Token
