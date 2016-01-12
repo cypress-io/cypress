@@ -159,27 +159,6 @@ gulp.task "nw:js", (cb) ->
 gulp.task "bower", ->
   $.bower()
 
-gulp.task "build:secret:sauce", (cb) ->
-  ## convert to js from coffee (with bare: true)
-  gulp.src("lib/secret_sauce.coffee")
-    .pipe($.coffee({bare: true}))
-    .pipe gulp.dest("lib")
-    .on "end", ->
-      ## when thats done, lets create the secret_sauce snapshot .bin
-      child_process.exec "./support/#{platform()}/nwjc lib/secret_sauce.js lib/secret_sauce.bin", (err, stdout, stderr) ->
-        console.log("stdout:", stdout)
-        console.log("stderr:", stderr)
-
-        if err
-          console.log("err with nwjc:", err)
-
-        ## finally cleanup any v8 logs and remove secret sauce.js
-        gulp.src(["lib/secret_sauce.js", "./v8.log"])
-          .on "end", cb
-          .pipe($.clean())
-
-  return false
-
 gulp.task "client:html", ->
   gulp.src(["app/html/*"])
     .pipe gulp.dest("lib/public")
@@ -189,7 +168,7 @@ gulp.task "nw:html", ->
     .pipe gulp.dest("nw/public")
 
 gulp.task "client:watch", ["watch:client:css", "watch:client:js", "watch:client:html"]
-gulp.task "nw:watch",  ["watch:nw:css",  "watch:nw:js",  "watch:nw:html", "watch:nw:secret:sauce"]
+gulp.task "nw:watch",  ["watch:nw:css",  "watch:nw:js",  "watch:nw:html"]
 
 gulp.task "watch:client:css", ->
   gulp.watch "app/css/**", ["client:css"]
@@ -233,9 +212,6 @@ gulp.task "watch:client:html", ->
 gulp.task "watch:nw:html", ->
   gulp.watch "nw/html/**", ["nw:html"]
 
-gulp.task "watch:nw:secret:sauce", ->
-  gulp.watch "lib/secret_sauce.coffee", ["nw:snapshot"]
-
 gulp.task "server", -> require("./server.coffee")
 
 gulp.task "test", -> require("./spec/server.coffee")
@@ -275,6 +251,4 @@ gulp.task "client:build",  ["bower"], (cb) ->
   runSequence ["client:css", "client:img", "client:fonts", "client:js", "client:html"], cb
 
 gulp.task "nw:build",      ["bower"], (cb) ->
-  runSequence ["nw:css", "nw:img", "client:fonts", "nw:js", "nw:html", "nw:snapshot"], cb
-
-gulp.task "nw:snapshot",   ["build:secret:sauce"]
+  runSequence ["nw:css", "nw:img", "client:fonts", "nw:js", "nw:html"], cb
