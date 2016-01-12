@@ -1,11 +1,13 @@
 require("../spec_helper")
 
-_            = require "lodash"
-Socket       = require "#{root}lib/socket"
-Server       = require "#{root}lib/server"
-Watchers     = require "#{root}lib/watchers"
-Settings     = require "#{root}lib/util/settings"
-Fixtures     = require "#{root}/spec/server/helpers/fixtures"
+_            = require("lodash")
+uuid         = require("node-uuid")
+sauce        = require("#{root}lib/sauce/run")
+Socket       = require("#{root}lib/socket")
+Server       = require("#{root}lib/server")
+Watchers     = require("#{root}lib/watchers")
+Settings     = require("#{root}lib/util/settings")
+Fixtures     = require("#{root}/spec/server/helpers/fixtures")
 
 describe "Socket", ->
   beforeEach ->
@@ -291,9 +293,9 @@ describe "Socket", ->
   context "#_runSauce", ->
     beforeEach ->
       @socket = Socket(@io, @app)
-      @sauce  = @sandbox.stub(@socket, "sauce").resolves()
+      @run    = @sandbox.stub(sauce, "run").resolves()
       @sandbox.stub(Date, "now").returns(10000000)
-      @sandbox.stub(@socket.uuid, "v4").returns("abc123-edfg2323")
+      @sandbox.stub(uuid, "v4").returns("abc123-edfg2323")
 
     afterEach ->
       @socket.close()
@@ -315,10 +317,10 @@ describe "Socket", ->
         version: 11
       }
 
-    it "passes options to sauce", ->
+    it "passes options to sauce.run", ->
       fn = @sandbox.stub()
       @socket._runSauce @ioSocket, "app_spec.coffee", fn
-      options = @sauce.getCall(0).args[0]
+      options = @run.getCall(0).args[0]
       expect(options).to.deep.eq {
         batchId: 10000000
         guid: "abc123-edfg2323"
