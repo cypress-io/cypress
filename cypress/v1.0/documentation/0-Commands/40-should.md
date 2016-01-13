@@ -1,6 +1,6 @@
 slug: should
 
-#### **New to Cypress?** [Read about assertions first.](assertions)
+#### **New to Cypress?** [Read about assertions first.](/docs/making-assertions)
 
 ***
 
@@ -341,4 +341,4 @@ When clicking on `assert` within the command log, the console outputs the follow
 ## Related
 
 1. [and](and)
-2. [Assertions](assertions)
+2. [Assertions](/docs/making-assertions)

@@ -42,7 +42,7 @@ Just like `Promises`, you can return any compatible `thenable` (anything that ha
 }
 [/block]
 
-Normally you'd use implicit subject assertions via [should](should) or [and](and), but it's sometimes convenient to write explicit assertions about a given subject.
+Normally you'd use implicit subject assertions via [should](/v1.0/docs/should) or [and](and), but it's sometimes convenient to write explicit assertions about a given subject.
 
 **Note:** *any errors raised by failed assertions will immediately bubble up and cause the test to fail.  This is the opposite of [`wait`](wait).*
 

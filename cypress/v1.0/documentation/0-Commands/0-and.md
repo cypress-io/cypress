@@ -1,79 +1,59 @@
 excerpt: Enables chaining multiple assertions together
 slug: and
 
-#### **New to Cypress?** [Read about assertions first.](assertions) 
-[block:api-header]
-{
-  "type": "basic",
-  "title": "New to Cypress? [Read about assertions first.](assertions)"
-}
-[/block]
-### **New to Cypress?** [Writing Assertions](doc:writing-assertions) 
-[block:code]
-{
-  "codes": [
-    {
-      "code": "cy\n  // subject is now <a>\n  .get(\"a\")\n\n  // assert <a> contains text: \"Edit User\"\n  // subject is still the <a>\n  .should(\"contain\", \"Edit User\")\n\n  // assert subject has 'href' attribute\n  // subject now changes to return value from the 'href' attribute\n  .and(\"have.attr\", \"href\")\n\n  // assert that the string returned from 'href'\n  // matches the RegExp /users/\n  // the subject is still the same string\n  .and(\"match\", /users/)\n\n  // assert that the string does not\n  // have a '#' character within it\n  .and(\"not.include\", \"#\")",
-      "language": "javascript",
-      "name": null
-    }
-  ]
-}
-[/block]
+#### **New to Cypress?** [Read about assertions first.](/docs/making-assertions)
 
-[block:api-header]
-{
-  "type": "basic"
-}
-[/block]
 ***
 
 `cy.and` makes assertions about the current subject.
 
 When chaining multiple assertions together, `cy.and` reads very well.
 
-`cy.and` is identical to [`cy.should`](should).
+`cy.and` is identical to [`cy.should`](/v1.0/docs/should).
 
 ***
 
 ## Chaining Assertions
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"button\").should(\"have.class\", \"active\").and(\"not.be.disabled\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("button").should("have.class", "active").and("not.be.disabled")
+```
 
 ***
 
 ## Asserting On Subject Changes
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "<!-- App Code -->\n<ul>\n  <li>\n    <a href=\"users/123/edit\">Edit User</a>\n  </li>\n</ul>\n",
-            "language": "html"
-        }
-    ]
-}
-[/block]
+```html
+<!-- App Code -->
+<ul>
+  <li>
+    <a href="users/123/edit">Edit User</a>
+  </li>
+</ul>
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy\n  // subject is now <a>\n  .get(\"a\")\n\n  // assert <a> contains text: \"Edit User\"\n  // subject is still the <a>\n  .should(\"contain\", \"Edit User\")\n\n  // assert subject has 'href' attribute\n  // subject now changes to return value from the 'href' attribute\n  .and(\"have.attr\", \"href\")\n\n  // assert that the string returned from 'href'\n  // matches the RegExp /users/\n  // the subject is still the same string\n  .and(\"match\", /users/)\n\n  // assert that the string does not\n  // have a '#' character within it\n  .and(\"not.include\", \"#\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy
+  // subject is now <a>
+  .get("a")
+
+  // assert <a> contains text: "Edit User"
+  // subject is still the <a>
+  .should("contain", "Edit User")
+
+  // assert subject has 'href' attribute
+  // subject now changes to return value from the 'href' attribute
+  .and("have.attr", "href")
+
+  // assert that the string returned from 'href'
+  // matches the RegExp /users/
+  // the subject is still the same string
+  .and("match", /users/)
+
+  // assert that the string does not
+  // have a '#' character within it
+  .and("not.include", "#")
+```
 
 ***
 
@@ -83,16 +63,9 @@ If you've worked in `Chai` before, you will recognize that `cy.and` matches the 
 
 Take this *explicit* assertion for example:
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "expect({foo: \"bar\"}).to.have.property(\"foo\").and.eq(\"bar\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+expect({foo: "bar"}).to.have.property("foo").and.eq("bar")
+```
 
 `cy.and` reproduces this same assertion behavior.
 
@@ -100,16 +73,12 @@ Take this *explicit* assertion for example:
 
 ## Command Log
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "//\n  .find(\"input[type='checkbox']\")\n    .should(\"be.checked\")\n    .and(\"not.be.disabled\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+//
+  .find("input[type='checkbox']")
+    .should("be.checked")
+    .and("not.be.disabled")
+```
 
 The commands above will display in the command log as:
 
@@ -122,5 +91,5 @@ When clicking on `assert` within the command log, the console outputs the follow
 ***
 
 ## Related
-1. [should](should)
-2. [Assertions](assertions)
+1. [should](/v1.0/docs/should)
+2. [Assertions](/docs/making-assertions)

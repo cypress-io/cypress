@@ -128,7 +128,7 @@ If you'd like to disable this behavior and enable requests which do NOT match yo
 }
 [/block]
 
-```js
+```javascript
 // Application Code
 
 $(function(){
