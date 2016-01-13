@@ -1,10 +1,11 @@
+excerpt: Type into element
 slug: type
 
 ### [cy.type( *text* )](#usage)
 
 Types into the current DOM subject.
 
-Prior to typing, if the element isn't currently focused, Cypress will issue a [click action command](click), which will cause the element to receive focus.
+Prior to typing, if the element isn't currently focused, Cypress will issue a [click action command](/v1.0/docs/click), which will cause the element to receive focus.
 
 Text may include these special character sequences:
 
@@ -37,16 +38,11 @@ delay | 10 | Delay after each keypress
 
 #### Type into a textarea.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// issues all keyboard events\n// and returns <textarea> for further chaining\ncy.get(\"textarea\").type(\"Hello world\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// issues all keyboard events
+// and returns <textarea> for further chaining
+cy.get("textarea").type("Hello world")
+```
 
 ***
 
@@ -54,18 +50,14 @@ delay | 10 | Delay after each keypress
 
 #### Force a click to happen prior to type
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// this will disable the built-in logic for ensuring\n// the element is visible, and is physically clickable\n// prior to typing into it\ncy.get(\"input[type=text]\").type(\"foobarbaz\", {force: true})\n",
-            "language": "javascript"
-        }
-    ]
-}
-[/block]
+```javascript
+// this will disable the built-in logic for ensuring
+// the element is visible, and is physically clickable
+// prior to typing into it
+cy.get("input[type=text]").type("foobarbaz", {force: true})
+```
 
-Type issues a [`click`](click action command) prior to typing (if the element isn't currently focused). Because of this, sometimes it is useful to force the click to happen. Forcing a click disables error checking prior to the click.
+Type issues a [`click`](/v1.0/docs/click) prior to typing (if the element isn't currently focused). Because of this, sometimes it is useful to force the click to happen. Forcing a click disables error checking prior to the click.
 
 Be careful with this option because it allows the type to happen where it might actually be impossible for a real user to type.
 
@@ -115,16 +107,11 @@ In a real browser preventing the mousedown on a form field will prevent it from 
 
 #### Mimics user behavior
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// each keypress is delayed 10ms by default\n// which simulates how a very fast user types!\ncy.get(\"[contenteditable]\").type(\"some text!\")\n",
-            "language": "javascript"
-        }
-    ]
-}
-[/block]
+```javascript
+// each keypress is delayed 10ms by default
+// which simulates how a very fast user types!
+cy.get("[contenteditable]").type("some text!")
+```
 
 ***
 
@@ -150,16 +137,17 @@ Additionally `change` events will be fired either when the `{enter}` key is pres
 
 Cypress respects all default browser behavior when events are cancelled.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// prevent the key from being inserted\n// by canceling keydown, keypress, or textInput\n$(\"#username\").on(\"keydown\", function(e){\n  e.preventDefault();\n})\n\n// Cypress will not insert any characters if keydown, keypress, or textInput\n// is cancelled - which matches the default behavior of browsers\ncy.get(\"#username\").type(\"bob@gmail.com\").should(\"have.value\", \"\") // true\n",
-            "language": "javascript"
-        }
-    ]
-}
-[/block]
+```javascript
+// prevent the key from being inserted
+// by canceling keydown, keypress, or textInput
+$("#username").on("keydown", function(e){
+  e.preventDefault();
+})
+
+// Cypress will not insert any characters if keydown, keypress, or textInput
+// is cancelled - which matches the default behavior of browsers
+cy.get("#username").type("bob@gmail.com").should("have.value", "") // true
+```
 
 ***
 
@@ -182,27 +170,19 @@ This behavior is defined here: [Form Implicit Submission](https://html.spec.what
 
 For instance the following will submit the form.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "<form action=\"/login\">\n  <input id=\"username\" />\n  <input id=\"password\" />\n  <button type=\"submit\">Log In</button>\n</form>\n",
-            "language": "html"
-        }
-    ]
-}
-[/block]
+```html
+<form action="/login">
+  <input id="username" />
+  <input id="password" />
+  <button type="submit">Log In</button>
+</form>
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy\n  .get(\"#username\").type(\"bob@example.com\")\n  .get(\"#password\").type(\"password123{enter}\")\n",
-            "language": "javascript"
-        }
-    ]
-}
-[/block]
+```javascript
+cy
+  .get("#username").type("bob@example.com")
+  .get("#password").type("password123{enter}")
+```
 
 Because there are multiple `inputs` and one `submit` button, Cypress submits the form (and fires submit events) as well as a synthetic `click` event to the `button`.
 
@@ -249,16 +229,9 @@ In other words, you get the best of both worlds: simulated when its practical to
 
 ## Command Log
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"input[name=firstName]\").type(\"Jane Lane\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("input[name=firstName]").type("Jane Lane")
+```
 
 The commands above will display in the command log as:
 
@@ -271,4 +244,4 @@ When clicking on `type` within the command log, the console outputs the followin
 ***
 
 ## Related
-1. [clear](clear)
+1. [clear](/v1.0/docs/clear)

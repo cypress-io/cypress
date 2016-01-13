@@ -1,3 +1,4 @@
+excerpt: Get the next sibling of elements
 slug: next
 
 ### [cy.next()](#usage)
@@ -16,27 +17,18 @@ Get the immediately following sibling of each element in the set of matched elem
 
 #### Find the element next to `.second`
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "<ul>\n  <li>apples</li>\n  <li class=\"second\">oranges</li>\n  <li>bananas</li>\n</ul>\n",
-            "language": "html"
-        }
-    ]
-}
-[/block]
+```html
+<ul>
+  <li>apples</li>
+  <li class="second">oranges</li>
+  <li>bananas</li>
+</ul>
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "//returns <li>bananas</li>\ncy.get(\".second\").next()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+//returns <li>bananas</li>
+cy.get(".second").next()
+```
 
 ***
 
@@ -44,42 +36,27 @@ Get the immediately following sibling of each element in the set of matched elem
 
 #### Find the very next sibling of each li. Keep only the ones with a class `selected`.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "<ul>\n  <li>apples</li>\n  <li>oranges</li>\n  <li>bananas</li>\n  <li class=\"selected\">pineapples</li>\n</ul>\n",
-            "language": "html"
-        }
-    ]
-}
-[/block]
+```html
+<ul>
+  <li>apples</li>
+  <li>oranges</li>
+  <li>bananas</li>
+  <li class="selected">pineapples</li>
+</ul>
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "//returns <li>pineapples</li>\ncy.get(\"li\").next(\".selected\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+//returns <li>pineapples</li>
+cy.get("li").next(".selected")
+```
 
 ***
 
 ## Command Log
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\".left-nav\").find(\"li.active\").next()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get(".left-nav").find("li.active").next()
+```
 
 The commands above will display in the command log as:
 
@@ -92,4 +69,4 @@ When clicking on `next` within the command log, the console outputs the followin
 ***
 
 ## Related
-1. [prev](prev)
+1. [prev](/v1.0/docs/prev)

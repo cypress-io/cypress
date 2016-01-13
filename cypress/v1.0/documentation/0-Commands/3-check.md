@@ -1,3 +1,4 @@
+excerpt: Check a checkbox
 slug: check
 
 ### [cy.check()](#usage)
@@ -8,43 +9,22 @@ Checks the checkbox. Triggers events associated with check.
 
 #### Check the checkbox
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"[type='checkbox']\").check()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("[type='checkbox']").check()
+```
 
 #### Check the element with id of `saveUserName` and check it
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"#saveUserName\").check()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("#saveUserName").check()
+```
 ***
 
 ## Command Log
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"form\").find(\"[name='emailUser']\").check()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("form").find("[name='emailUser']").check()
+```
 
 The commands above will display in the command log as:
 
@@ -56,4 +36,4 @@ When clicking on `check` within the command log, the console outputs the followi
 
 ***
 ## Related
-1. [uncheck](uncheck)
+1. [uncheck](/v1.0/docs/uncheck)

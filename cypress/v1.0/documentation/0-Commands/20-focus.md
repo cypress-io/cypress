@@ -1,8 +1,9 @@
+excerpt: Focus on the current subject
 slug: focus
 
 ### [cy.focus()](#usage)
 
-Force focus on the current subject.
+Focus on the current subject.
 
 Returns the existing subject.
 
@@ -14,44 +15,24 @@ If there is currently an `activeElement` (a different element currently with foc
 
 #### Focus on the current subject.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"[name='comment']\").focus()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("[name='comment']").focus()
+```
 
 #### Focus, type, and blur the current subject.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// returns the <textarea> for further chaining\ncy.get(\"[name='comment']\").focus().type(\"Nice Product!\").blur()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// returns the <textarea> for further chaining
+cy.get("[name='comment']").focus().type("Nice Product!").blur()
+```
 
 ***
 
 ## Command Log
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"[name='comment']\").focus()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("[name='comment']").focus()
+```
 
 The commands above will display in the command log as:
 
@@ -64,5 +45,5 @@ When clicking on the `focus` command within the command log, the console outputs
 ***
 
 ## Related
-1. [focused](focused)
-2. [blur](blur)
+1. [focused](/v1.0/docs/focused)
+2. [blur](/v1.0/docs/blur)

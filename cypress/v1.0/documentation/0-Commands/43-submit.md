@@ -1,3 +1,4 @@
+excerpt: Submit a form
 slug: submit
 
 ### [cy.submit()](#usage)
@@ -12,42 +13,27 @@ Follows all of the rules of form submission per the w3c spec.
 
 #### Submit a form
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "<form id=\"contact\">\n  <input type=\"text\" name=\"message\">\n  <button type=\"submit\">Send</button>\n</form>\n",
-            "language": "html"
-        }
-    ]
-}
-[/block]
+```html
+<form id="contact">
+  <input type="text" name="message">
+  <button type="submit">Send</button>
+</form>
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// submits the form and performs all default actions\n// and returns <form> for further chaining\ncy.get(\"#contact\").submit()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// submits the form and performs all default actions
+// and returns <form> for further chaining
+cy.get("#contact").submit()
+```
 
 ***
 
 ## Command Log
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.route(\"POST\", /users/, \"fixture:user\").as(\"userSuccess\")\ncy.get(\"form\").submit()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.route("POST", /users/, "fixture:user").as("userSuccess")
+cy.get("form").submit()
+```
 
 The commands above will display in the command log as:
 
@@ -60,4 +46,4 @@ When clicking on `submit` within the command log, the console outputs the follow
 ***
 
 ## Related
-1. [click](click)
+1. [click](/v1.0/docs/click)

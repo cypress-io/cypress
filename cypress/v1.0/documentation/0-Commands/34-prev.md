@@ -1,3 +1,4 @@
+excerpt: Get the previous sibling of elements
 slug: prev
 
 ### [cy.prev()](#usage)
@@ -13,68 +14,47 @@ Get the immediately preceding sibling of each element in the set of matched elem
 ***
 
 ## Usage
-[block:code]
-{
-    "codes": [
-        {
-            "code": "<ul>\n  <li>list item 1</li>\n  <li>list item 2</li>\n  <li class=\"third-item\">list item 3</li>\n  <li>list item 4</li>\n  <li>list item 5</li>\n</ul>\n",
-            "language": "html"
-        }
-    ]
-}
-[/block]
+```html
+<ul>
+  <li>list item 1</li>
+  <li>list item 2</li>
+  <li class="third-item">list item 3</li>
+  <li>list item 4</li>
+  <li>list item 5</li>
+</ul>
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// returns <li>list item 2</li>\ncy.get(\".third-item\").prev()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// returns <li>list item 2</li>
+cy.get(".third-item").prev()
+```
 
 ***
 
 ## Selector Usage
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "<ul>\n  <li>list item 1</li>\n  <li>list item 2</li>\n  <li class=\"third-item\">list item 3</li>\n  <li>list item 4</li>\n  <li>list item 5</li>\n</ul>\n",
-            "language": "html"
-        }
-    ]
-}
-[/block]
+```html
+<ul>
+  <li>list item 1</li>
+  <li>list item 2</li>
+  <li class="third-item">list item 3</li>
+  <li>list item 4</li>
+  <li>list item 5</li>
+</ul>
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// returns <li>list item 3</li>\ncy.get(\"li\").prev(\".third-item\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// returns <li>list item 3</li>
+cy.get("li").prev(".third-item")
+```
 
 ***
 
 ## Command Log
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\".left-nav\").find(\"li.active\").prev()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get(".left-nav").find("li.active").prev()
+```
 
 The commands above will display in the command log as:
 
@@ -87,4 +67,4 @@ When clicking on `prev` within the command log, the console outputs the followin
 ***
 
 ## Related
-1. [next]([next)
+1. [next](/v1.0/docs/next)

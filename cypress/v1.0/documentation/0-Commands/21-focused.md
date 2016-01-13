@@ -1,3 +1,4 @@
+excerpt: Get the element that is focused
 slug: focused
 
 ### [cy.focused()](#usage)
@@ -11,31 +12,17 @@ If Cypress does not find any element with focus, it will return `null`.
 
 #### Return the element that is focused.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.focused()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.focused()
+```
 
 ***
 
 #### Make an assertion on the focused element.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.focused().should(\"have.attr\", \"name\", \"num\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.focused().should("have.attr", "name", "num")
+```
 
 ***
 
@@ -50,5 +37,5 @@ When clicking on the `focused` command within the command log, the console outpu
 ***
 
 ## Related
-1. [focus](focus)
-2. [blur](blur)
+1. [focus](/v1.0/docs/focus)
+2. [blur](/v1.0/docs/blur)

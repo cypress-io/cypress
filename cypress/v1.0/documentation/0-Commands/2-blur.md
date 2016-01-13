@@ -1,8 +1,9 @@
+excerpt: Blur the current subject
 slug: blur
 
 ### [cy.blur()](#usage)
 
-Force blur of the current subject.
+Blur the current subject.
 
 Returns the existing subject.
 
@@ -22,46 +23,27 @@ force | false | Forces blur, disables error checking prior to blur
 
 #### Blur the comment input.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// returns the same <textarea> for further chaining\ncy.get(\"[name='comment']\").type(\"Nice Product!\").blur()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// returns the same <textarea> for further chaining
+cy.get("[name='comment']").type("Nice Product!").blur()
+```
 
 ## Options Usage
 
 #### Blur the first input ignoring whether the input is currently focused.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// returns the same <input> for further chaining\ncy.get(\"input:first\").blur({force: true})\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// returns the same <input> for further chaining
+cy.get("input:first").blur({force: true})
+```
 
 ***
 
 ## Command Log
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"[name='comment']\").type(\"Nice Product!\").blur()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("[name='comment']").type("Nice Product!").blur()
+```
 
 The commands above will display in the command log as:
 
@@ -74,5 +56,5 @@ When clicking on the `blur` command within the command log, the console outputs 
 ***
 
 ## Related
-1. [focused](focused)
-2. [focus](focus)
+1. [focused](/v1.0/docs/focused)
+2. [focus](/v1.0/docs/focus)

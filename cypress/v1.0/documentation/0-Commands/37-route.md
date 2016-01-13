@@ -1,6 +1,7 @@
+excerpt: Set a route matching a url
 slug: route
 
-#### **New to Cypress?** [Read about XHR strategy first.](xhr)
+#### **New to Cypress?** [Read about XHR strategy first.](/docs/network-requests-xhr)
 
 ***
 
@@ -53,16 +54,17 @@ onResponse | null | callback function when a response is returned
 
 #### Wait on non-stubbed XHR's by url
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// by not passing a response to the route\n// Cypress will pass this request through\n// without stubbing it - but still allow\n// us to wait for it later\ncy\n  .server()\n  .route(/users/).as(\"getUsers\")\n  .visit(\"/users\")\n  .wait(\"@getUsers\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// by not passing a response to the route
+// Cypress will pass this request through
+// without stubbing it - but still allow
+// us to wait for it later
+cy
+  .server()
+  .route(/users/).as("getUsers")
+  .visit("/users")
+  .wait("@getUsers")
+```
 
 ***
 
@@ -70,16 +72,18 @@ onResponse | null | callback function when a response is returned
 
 #### Wait on non-stubbed XHR's by method + url
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// by not passing a response to the route\n// Cypress will pass this request through\n// without stubbing it - but still allow\n// us to wait for it later\ncy\n  .server()\n  .route(\"POST\", /users/).as(\"postUser\")\n  .visit(\"/users\")\n  .get(\"#first-name\").type(\"Brian{enter}\")\n  .wait(\"@postUser\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// by not passing a response to the route
+// Cypress will pass this request through
+// without stubbing it - but still allow
+// us to wait for it later
+cy
+  .server()
+  .route("POST", /users/).as("postUser")
+  .visit("/users")
+  .get("#first-name").type("Brian{enter}")
+  .wait("@postUser")
+```
 
 ***
 
@@ -89,16 +93,11 @@ onResponse | null | callback function when a response is returned
 
 When passing a `string` as the `url`, the XHR's URL must match exactly what you've written.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy\n  .server()\n  .route(\"/users\", [{id: 1, name: \"Brian\"}])\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy
+  .server()
+  .route("/users", [{id: 1, name: "Brian"}])
+```
 
 ***
 
@@ -106,27 +105,19 @@ When passing a `string` as the `url`, the XHR's URL must match exactly what you'
 
 When passing a `regexp` as the `url`, the XHR's url will be tested against this regular expression and will apply if it passes.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy\n  .server()\n  .route(/users\\/\\d+/, {id: 1, name: \"Randall\"})\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy
+  .server()
+  .route(/users\/\d+/, {id: 1, name: "Randall"})
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// Application Code\n\n$.get(\"/users/1337\", function(data){\n  console.log(data) // => {id: 1, name: \"Randall\"}\n})\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// Application Code
+
+$.get("/users/1337", function(data){
+  console.log(data) // => {id: 1, name: "Randall"}
+})
+```
 
 ***
 
@@ -138,27 +129,29 @@ If a request doesn't match any route [it will automatically receive a 404](#note
 
 For instance given we have the following routes:
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy\n  .server()\n  .route(/users/, [{id: 19, name: \"Laura\"}, {id: 20, name: \"Jamie\"}])\n  .route(\"POST\", /messages/, {id: 123, message: \"foobarbaz!\"})\n  .get(\"form\").submit()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy
+  .server()
+  .route(/users/, [{id: 19, name: "Laura"}, {id: 20, name: "Jamie"}])
+  .route("POST", /messages/, {id: 123, message: "foobarbaz!"})
+  .get("form").submit()
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// Application Code\n\n// when our form is submitted\n$(\"form\").submit(function(){\n  // send an AJAX to: GET /users\n  $.get(\"/users\" )\n\n  // send an AJAX to: POST /messages\n  $.post(\"/messages\", {some: \"data\"})\n\n  // send an AJAX to: GET /updates\n  $.get(\"/updates\")\n})\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// Application Code
+
+// when our form is submitted
+$("form").submit(function(){
+  // send an AJAX to: GET /users
+  $.get("/users" )
+
+  // send an AJAX to: POST /messages
+  $.post("/messages", {some: "data"})
+
+  // send an AJAX to: GET /updates
+  $.get("/updates")
+})
+```
 
 The above application code will issue **3** AJAX requests.
 
@@ -172,31 +165,45 @@ The above application code will issue **3** AJAX requests.
 
 #### Specify the method
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy\n  .server()\n\n  // match all DELETE requests to \"/users\"\n  // and respond with an empty JSON object\n  .route(\"DELETE\", \"/users\", {})\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy
+  .server()
+
+  // match all DELETE requests to "/users"
+  // and respond with an empty JSON object
+  .route("DELETE", "/users", {})
+```
 
 ***
 
 ## Options Usage
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy\n  .server()\n  .route({\n    method: \"DELETE\",\n    url: /user\\/\\d+/,\n    status: 412,\n    response: {\n      rolesCount: 45\n    },\n    delay: 500,\n    headers: {\n      \"X-Token\": null\n    },\n    onRequest: function(xhr) {\n      // do something with the\n      // raw XHR object when the\n      // request initially goes out\n    },\n    onResponse: function(xhr) {\n      // do something with the\n      // raw XHR object when the\n      // response comes back\n    }\n  })\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy
+  .server()
+  .route({
+    method: "DELETE",
+    url: /user\/\d+/,
+    status: 412,
+    response: {
+      rolesCount: 45
+    },
+    delay: 500,
+    headers: {
+      "X-Token": null
+    },
+    onRequest: function(xhr) {
+      // do something with the
+      // raw XHR object when the
+      // request initially goes out
+    },
+    onResponse: function(xhr) {
+      // do something with the
+      // raw XHR object when the
+      // response comes back
+    }
+  })
+```
 
 ***
 
@@ -204,16 +211,14 @@ The above application code will issue **3** AJAX requests.
 
 You can optionally pass in a delay option which will cause a delay (in ms) to the response for matched requests. The example below will cause the response to be delayed by 3 secs.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.route({\n  method: \"PATCH\",\n  url: /answers\\/\\d+/,\n  response: {},\n  delay: 3000\n})\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.route({
+  method: "PATCH",
+  url: /answers\/\d+/,
+  response: {},
+  delay: 3000
+})
+```
 
 ***
 
@@ -247,16 +252,9 @@ Status | Body | Headers
 
 If you'd like to disable this behavior you need to pass:
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.server({force404: false})\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.server({force404: false})
+```
 
 You can [read more about this here.](server#prevent-sending-404s-to-unmatched-requests)
 
@@ -266,16 +264,13 @@ You can [read more about this here.](server#prevent-sending-404s-to-unmatched-re
 
 Instead of writing a response inline you can automatically connect a response with a fixture.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy\n  .server()\n  .route(/posts/, \"fixture:logo.png\").as(\"getLogo\")\n  .route(/users/, \"fixture:users/all.json\").as(\"getUsers\")\n  .route(/admin/, \"fixtures:users/admin.json\").as(\"getAdmin\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy
+  .server()
+  .route(/posts/, "fixture:logo.png").as("getLogo")
+  .route(/users/, "fixture:users/all.json").as("getUsers")
+  .route(/admin/, "fixtures:users/admin.json").as("getAdmin")
+```
 
 You can [read more about fixtures here.](https://github.com/cypress-io/cypress/wiki/fixture#usage-with-cyroute)
 
@@ -291,16 +286,13 @@ If you'd like to override this, explicitly pass in `headers` as an `object liter
 
 ## Command Log
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy\n  .server()\n  .route(/accounts/).as(\"accountsGet\")\n  .route(/company/, \"fixtures:company\").as(\"companyGet\")\n  .route(/teams/,   \"fixtures:teams\").as(\"teamsGet\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy
+  .server()
+  .route(/accounts/).as("accountsGet")
+  .route(/company/, "fixtures:company").as("companyGet")
+  .route(/teams/,   "fixtures:teams").as("teamsGet")
+```
 
 Whenever you start a server and add routes, Cypress will display a new `Instrument Log` called **Routes**.
 
@@ -318,6 +310,6 @@ When clicking on `XHR Stub` within the command log, the console outputs the foll
 
 ***
 ## Related
-1. [server](server)
-2. [wait](wait)
-3. [as](as)
+1. [server](/v1.0/docs/server)
+2. [wait](/v1.0/docs/wait)
+3. [as](/v1.0/docs/as)

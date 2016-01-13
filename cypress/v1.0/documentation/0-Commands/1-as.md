@@ -1,7 +1,7 @@
 excerpt: Alias reusable objects for later
 slug: as
 
-#### **New to Cypress?** [Read about Aliasing first.](aliasing)
+#### **New to Cypress?** [Read about using aliases first.](/docs/using-aliases)
 
 ***
 
@@ -15,31 +15,26 @@ Create an alias to be used later.
 
 #### Alias a route, then later wait for that route using `@alias`
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy\n  .route(\"PUT\", /^\\/users\\/\\d+/, \"fixture:user\").as(\"userPut\")\n  .get(\"form\").submit()\n  .wait(\"@userPut\")\n    .its(\"url\").should(\"contain\", \"users\")\n\n",
-            "language": "javascript"
-        }
-    ]
-}
-[/block]
+```javascript
+cy
+  .route("PUT", /^\/users\/\d+/, "fixture:user").as("userPut")
+  .get("form").submit()
+  .wait("@userPut")
+    .its("url").should("contain", "users")
 
+```
 ***
 
 ## Command Log
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy\n  .route(/company/, \"fixture:company\").as(\"companyGet\")\n  .route(/roles/, \"fixture:roles\").as(\"rolesGet\")\n  .route(/teams/, \"fixture:teams\").as(\"teamsGet\")\n  .route(/users\\/\\d+/, \"fixture:user\").as(\"userGet\")\n  .route(\"PUT\", /^\\/users\\/\\d+/, \"fixture:user\").as(\"userPut\")\n",
-            "language": "javascript"
-        }
-    ]
-}
-[/block]
+```javascript
+cy
+  .route(/company/, "fixture:company").as("companyGet")
+  .route(/roles/, "fixture:roles").as("rolesGet")
+  .route(/teams/, "fixture:teams").as("teamsGet")
+  .route(/users\/\d+/, "fixture:user").as("userGet")
+  .route("PUT", /^\/users\/\d+/, "fixture:user").as("userPut")
+```
 
 Aliases of routes display in the routes instrument panel:
 
@@ -48,5 +43,5 @@ Aliases of routes display in the routes instrument panel:
 ***
 
 ## Related
-1. [wait](wait)
-2. [get](get)
+1. [wait](/v1.0/docs/wait)
+2. [get](/v1.0/docs/get)

@@ -1,3 +1,4 @@
+excerpt: Select an option
 slug: select
 
 ### [cy.select( *text* )](#text-usage)
@@ -29,27 +30,17 @@ interval | 50 | Interval which to retry a select
 
 #### Select the option with the text `apples`
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "<select>\n  <option value=\"456\">apples</option>\n  <option value=\"457\">oranges</option>\n  <option value=\"458\">bananas</option>\n</select>\n",
-            "language": "html"
-        }
-    ]
-}
-[/block]
+```html
+<select>
+  <option value="456">apples</option>
+  <option value="457">oranges</option>
+  <option value="458">bananas</option>
+</select>
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"select\").select(\"apples\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("select").select("apples")
+```
 
 ***
 
@@ -57,42 +48,25 @@ interval | 50 | Interval which to retry a select
 
 #### Select the option with the value "456"
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "<select>\n  <option value=\"456\">apples</option>\n  <option value=\"457\">oranges</option>\n  <option value=\"458\">bananas</option>\n</select>\n",
-            "language": "html"
-        }
-    ]
-}
-[/block]
+```html
+<select>
+  <option value="456">apples</option>
+  <option value="457">oranges</option>
+  <option value="458">bananas</option>
+</select>
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"select\").select(\"456\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("select").select("456")
+```
 
 ***
 
 ## Command Log
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"select\").select(\"Homer Simpson\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("select").select("Homer Simpson")
+```
 
 The commands above will display in the command log as:
 
@@ -105,4 +79,4 @@ When clicking on `select` within the command log, the console outputs the follow
 ***
 
 ## Related
-1. [click](click)
+1. [click](/v1.0/docs/click)

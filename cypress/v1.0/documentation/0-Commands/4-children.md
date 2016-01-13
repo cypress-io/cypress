@@ -1,3 +1,4 @@
+excerpt: Get the children of elements
 slug: children
 
 ### [cy.children()](#usage)
@@ -10,64 +11,56 @@ The `.children()` method optionally accepts a selector expression. If the select
 
 ## Usage
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "<ul class=\"level-1\">\n  <li class=\"item-i\">I</li>\n  <li class=\"item-ii\">II\n    <ul class=\"level-2\">\n      <li class=\"item-a\">A</li>\n      <li class=\"item-b\">B\n        <ul class=\"level-3\">\n          <li class=\"item-1\">1</li>\n          <li class=\"item-2\">2</li>\n          <li class=\"item-3\">3</li>\n        </ul>\n      </li>\n      <li class=\"item-c\">C</li>\n    </ul>\n  </li>\n  <li class=\"item-iii\">III</li>\n</ul>\n",
-            "language": "html"
-        }
-    ]
-}
-[/block]
+```html
+<ul class="level-1">
+  <li class="item-i">I</li>
+  <li class="item-ii">II
+    <ul class="level-2">
+      <li class="item-a">A</li>
+      <li class="item-b">B
+        <ul class="level-3">
+          <li class="item-1">1</li>
+          <li class="item-2">2</li>
+          <li class="item-3">3</li>
+        </ul>
+      </li>
+      <li class="item-c">C</li>
+    </ul>
+  </li>
+  <li class="item-iii">III</li>
+</ul>
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// returns [\n//  <li class=\"item-a\"></li>,\n//  <li class=\"item-b\"></li>,\n//  <li class=\"item-c\"></li>\n// ]\ncy.get(\"ul.level-2\").children()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// returns [
+//  <li class="item-a"></li>,
+//  <li class="item-b"></li>,
+//  <li class="item-c"></li>
+// ]
+cy.get("ul.level-2").children()
+```
 
 ## Selector Usage
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "<div>\n  <span>Hello</span>\n  <p class=\"selected\">Hello Again</p>\n  <div class=\"selected\">And Again</div>\n  <p>And One Last Time</p>\n</div>\n",
-            "language": "html"
-        }
-    ]
-}
-[/block]
+```html
+<div>
+  <span>Hello</span>
+  <p class="selected">Hello Again</p>
+  <div class="selected">And Again</div>
+  <p>And One Last Time</p>
+</div>
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// returns [<p class=\"selected\">Hello Again</p>, <div class=\"selected\">And Again</div>]\ncy.get(\"div\").children(\".selected\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// returns [<p class="selected">Hello Again</p>, <div class="selected">And Again</div>]
+cy.get("div").children(".selected")
+```
 
 ## Command Log
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\".left-nav>.nav\").children().should(\"have.length\", 8)\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get(".left-nav>.nav").children().should("have.length", 8)
+```
 
 The commands above will display in the command log as:
 
@@ -78,7 +71,7 @@ When clicking on the `children` command within the command log, the console outp
 <img width="542" alt="screen shot 2015-11-27 at 1 52 41 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447071/2e9252bc-950e-11e5-9a32-e5860da89160.png">
 
 ## Related
-1. [parent](parent)
-2. [parents](parents)
-3. [next](next)
-4. [siblings](siblings)
+1. [parent](/v1.0/docs/parent)
+2. [parents](/v1.0/docs/parents)
+3. [next](/v1.0/docs/next)
+4. [siblings](/v1.0/docs/siblings)

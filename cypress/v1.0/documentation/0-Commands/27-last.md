@@ -1,3 +1,4 @@
+excerpt: Get the last element
 slug: last
 
 ### [cy.last()](#usage)
@@ -10,42 +11,27 @@ Reduce the set of matched elements to the final one in the set. This command doe
 
 #### Get the last list item in a list.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "<ul>\n  <li class=\"one\">list item 1</li>\n  <li class=\"two\">list item 2</li>\n  <li class=\"three\">list item 3</li>\n  <li class=\"four\">list item 4</li>\n</ul>\n",
-            "language": "html"
-        }
-    ]
-}
-[/block]
+```html
+<ul>
+  <li class="one">list item 1</li>
+  <li class="two">list item 2</li>
+  <li class="three">list item 3</li>
+  <li class="four">list item 4</li>
+</ul>
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// returns <li class=\"four\"></li>\ncy.get(\"ul\").last()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// returns <li class="four"></li>
+cy.get("ul").last()
+```
 
 ***
 
 ## Command Log
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"form\").find(\"button\").last()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("form").find("button").last()
+```
 
 The commands above will display in the command log as:
 
@@ -58,4 +44,4 @@ When clicking on `last` within the command log, the console outputs the followin
 ***
 
 ## Related
-1. [first](first)
+1. [first](/v1.0/docs/first)

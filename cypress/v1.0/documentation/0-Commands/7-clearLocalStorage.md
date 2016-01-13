@@ -1,3 +1,4 @@
+excerpt: Clear all data in local storage.
 slug: clearlocalstorage
 
 ### [cy.clearLocalStorage()](#usage)
@@ -8,13 +9,7 @@ Clears all data in local storage.
 
 > Clear Local Storage
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// returns local storage object\ncy.clearLocalStorage()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// returns local storage object
+cy.clearLocalStorage()
+```

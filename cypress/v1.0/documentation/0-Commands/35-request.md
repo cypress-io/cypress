@@ -1,3 +1,4 @@
+excerpt: Make XHR request
 slug: request
 
 Use `cy.request` to make XHR requests. Great for talking to an external endpoint before, during, or after your tests for seeding, querying records, or API testing.
@@ -50,31 +51,30 @@ failOnStatus | true | By default Cypress will fail on any response code other th
 
 #### Make a GET request
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// make a request to seed the database prior to running each test\nbeforeEach(function(){\n  cy.request(\"http://localhost:8080/db/seed\")\n})\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// make a request to seed the database prior to running each test
+beforeEach(function(){
+  cy.request("http://localhost:8080/db/seed")
+})
+```
 
 ***
 
 #### Sets the subject to the XHR's response
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// the response object is an object literal\n// containing status, body, headers, and duration\ncy.request(\"http://dev.local/users\").then(function(response){\n  // subject is now this response object\n  // {\n  //   status: 200,\n  //   headers: {...},\n  //   body: [{id: 1, name: \"Jane\"}, {id: 2, name: \"LeeAnn\"}],\n  //   duration: 28\n  // {\n})\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// the response object is an object literal
+// containing status, body, headers, and duration
+cy.request("http://dev.local/users").then(function(response){
+  // subject is now this response object
+  // {
+  //   status: 200,
+  //   headers: {...},
+  //   body: [{id: 1, name: "Jane"}, {id: 2, name: "LeeAnn"}],
+  //   duration: 28
+  // {
+})
+```
 
 ***
 
@@ -82,16 +82,10 @@ failOnStatus | true | By default Cypress will fail on any response code other th
 
 #### Send a DELETE request
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// send a JSON body to create some users\ncy.request(\"DELETE\", \"http://localhost:8888/users\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// send a JSON body to create some users
+cy.request("DELETE", "http://localhost:8888/users")
+```
 
 ***
 
@@ -99,16 +93,16 @@ failOnStatus | true | By default Cypress will fail on any response code other th
 
 #### Send a POST request with a JSON body
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// the Accepts Request Header is automatically set based\n// on the type of body you supply\ncy\n  .request(\"POST\", \"http://localhost:8888/users/admin\", {name: \"Jane\"})\n  .then(function(response){\n    // response.body would automatically be serialized into JSON\n    expect(response.body).to.deep.eq({name: \"Jane\"}) // true\n})\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// the Accepts Request Header is automatically set based
+// on the type of body you supply
+cy
+  .request("POST", "http://localhost:8888/users/admin", {name: "Jane"})
+  .then(function(response){
+    // response.body would automatically be serialized into JSON
+    expect(response.body).to.deep.eq({name: "Jane"}) // true
+})
+```
 
 ***
 
@@ -124,16 +118,13 @@ Cypress does not actually make this request out of the browser. So you will not 
 
 Normally when the browser detects a cross-origin XHR request it will send an `OPTIONS` preflight check to ensure server allows cross-origin requests. `cy.request` bypasses CORS entirely.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// we can make requests to any external server, no problem.\ncy\n  .request(\"https://www.google.com/webhp?#q=how+is+cypress+so+awesome\")\n    .its(\"body\")\n    .should(\"include\", \"cypress is awesome because it bypasses CORS\") // true\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// we can make requests to any external server, no problem.
+cy
+  .request("https://www.google.com/webhp?#q=how+is+cypress+so+awesome")
+    .its("body")
+    .should("include", "cypress is awesome because it bypasses CORS") // true
+```
 
 ***
 
@@ -141,44 +132,30 @@ Normally when the browser detects a cross-origin XHR request it will send an `OP
 
 If you provide a non fully qualified domain name Cypress will make its best guess which host you want the request to go to.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy\n  // after you visit somewhere Cypress will assume this is the host\n  .visit(\"http://localhost:8080/app\")\n  .request(\"users/1.json\") // <-- url is http://localhost:8080/users/1.json\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy
+  // after you visit somewhere Cypress will assume this is the host
+  .visit("http://localhost:8080/app")
+  .request("users/1.json") // <-- url is http://localhost:8080/users/1.json
+```
 
 If you make the `cy.request` prior to visiting a page, Cypress will use the host configured in the `baseUrl` property inside of `cypress.json`.
 
-[block:code]
+```javascript
+// cypress.json
 {
-    "codes": [
-        {
-            "code": "// cypress.json\n{\n  baseUrl: \"http://localhost:1234\"\n}\n",
-            "language": "js"
-        }
-    ]
+  baseUrl: "http://localhost:1234"
 }
-[/block]
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// inside of your tests\ncy.request(\"seed/admin\") //<-- url is http://localhost:1234/seed/admin\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// inside of your tests
+cy.request("seed/admin") //<-- url is http://localhost:1234/seed/admin
+```
 
 If Cypress cannot determine the host it will throw an explicit error.
 
 ***
 
 ## Related
-1. [server](server)
+1. [server](/v1.0/docs/server)

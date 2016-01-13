@@ -1,3 +1,4 @@
+excerpt: Clear a value of an input or textarea
 slug: clear
 
 ### [cy.clear()](#usage)
@@ -6,16 +7,9 @@ Clears a value of an `<input>` or `<textarea>`.
 
 Under the hood this is actually a shortcut for writing:
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": ".type(\"{selectall}{backspace}\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+.type("{selectall}{backspace}")
+```
 
 ***
 
@@ -23,42 +17,22 @@ Under the hood this is actually a shortcut for writing:
 
 #### Clear the input and type a new value.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "<input name=\"firstName\" value=\"John Doe\" />\n",
-            "language": "html"
-        }
-    ]
-}
-[/block]
+```html
+<input name="firstName" value="John Doe" />
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// clears the existing value first before typing\ncy.get(\"input[name=firstName]\").clear().type(\"Jane Lane\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// clears the existing value first before typing
+cy.get("input[name=firstName]").clear().type("Jane Lane")
+```
 
 ***
 
 ## Command Log
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"input[name=firstName]\").clear().type(\"Jane Lane\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("input[name=firstName]").clear().type("Jane Lane")
+```
 
 The commands above will display in the command log as:
 
@@ -71,4 +45,4 @@ When clicking on `clear` within the command log, the console outputs the followi
 ***
 
 ## Related
-1. [type]([type)
+1. [type](/v1.0/docs/type)

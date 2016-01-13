@@ -1,7 +1,7 @@
 excerpt: Enables chaining multiple assertions together
 slug: and
 
-#### **New to Cypress?** [Read about assertions first.](/docs/making-assertions)
+#### **New to Cypress?** [Read about making assertions first.](/docs/making-assertions)
 
 ***
 
@@ -74,7 +74,6 @@ expect({foo: "bar"}).to.have.property("foo").and.eq("bar")
 ## Command Log
 
 ```javascript
-//
   .find("input[type='checkbox']")
     .should("be.checked")
     .and("not.be.disabled")

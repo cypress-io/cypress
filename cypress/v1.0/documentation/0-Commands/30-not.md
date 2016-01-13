@@ -1,3 +1,4 @@
+excerpt: Remove elements from set
 slug: not
 
 ### [cy.not( *selector* )](#selector-usage)
@@ -10,31 +11,17 @@ Remove elements from the set of matched elements. Opposite of [`.filter()`](http
 
 > Filter the current subject to the elements that do not have class `active`.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\".left-nav>.nav\").find(\">li\").not(\".active\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get(".left-nav>.nav").find(">li").not(".active")
+```
 
 ***
 
 ## Command Log
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"form\").find(\"button\").not(\"[type='submit']\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("form").find("button").not("[type='submit']")
+```
 
 The commands above will display in the command log as:
 
@@ -46,4 +33,4 @@ When clicking on `not` within the command log, the console outputs the following
 
 ***
 ## Related
-1. [filter](filter)
+1. [filter](/v1.0/docs/filter)

@@ -1,3 +1,4 @@
+excerpt: Check to see if matching element contains text
 slug: contains
 
 ### [cy.contains( *text* )](#text-usage)
@@ -28,157 +29,163 @@ Using a selector allows you to return more *shallow* elements in the tree which 
 
 > Find the deepest element containing the text `apples`
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "<ul>\n  <li>apples</li>\n  <li>oranges</li>\n  <li>bananas</li>\n</ul>\n",
-            "language": "html"
-        }
-    ]
-}
-[/block]
+```html
+<ul>
+  <li>apples</li>
+  <li>oranges</li>
+  <li>bananas</li>
+</ul>
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// returns <li>apples</li>\ncy.contains(\"apples\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// returns <li>apples</li>
+cy.contains("apples")
+```
 
 ***
 
 > Find the input[type='submit'] by value <br>
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "<div id=\"main\">\n  <form>\n    <div>\n      <label>name</label>\n      <input name=\"name\" />\n    </div>\n    <div>\n      <label>age</label>\n      <input name=\"age\" />\n    </div>\n    <input type=\"submit\" value=\"submit the form!\" />\n  </form>\n</div>\n",
-            "language": "html"
-        }
-    ]
-}
-[/block]
+```html
+<div id="main">
+  <form>
+    <div>
+      <label>name</label>
+      <input name="name" />
+    </div>
+    <div>
+      <label>age</label>
+      <input name="age" />
+    </div>
+    <input type="submit" value="submit the form!" />
+  </form>
+</div>
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// get the form element\n// search inside its descendants for the content 'submit the form!'\n// find the input[type='submit'] element\n// click it\ncy.get(\"form\").contains(\"submit the form!\").click()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// get the form element
+// search inside its descendants for the content 'submit the form!'
+// find the input[type='submit'] element
+// click it
+cy.get("form").contains("submit the form!").click()
+```
 
 ***
 
 > Cypress will favor `button` of any type
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "<form>\n  <input name=\"search\" />\n  <button>\n    <i class=\"fa fa-search\"></i>\n    <span>Search</span>\n  </button>\n</form>\n",
-            "language": "html"
-        }
-    ]
-}
-[/block]
+```html
+<form>
+  <input name="search" />
+  <button>
+    <i class="fa fa-search"></i>
+    <span>Search</span>
+  </button>
+</form>
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// let's make sure the <i> has the class: \"fa-search\"\n\n// even though the <span> is the deepest element which contains: \"Search\"\n// Cypress will automatically favor button elements higher in the chain\n\n// in this case the <button> is returned which is why we can now drill\n// into its children\ncy.contains(\"Search\").children(\"i\").should(\"have.class\", \"fa-search\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// let's make sure the <i> has the class: "fa-search"
+
+// even though the <span> is the deepest element which contains: "Search"
+// Cypress will automatically favor button elements higher in the chain
+
+// in this case the <button> is returned which is why we can now drill
+// into its children
+cy.contains("Search").children("i").should("have.class", "fa-search")
 
 ***
 
 > Cypress will favor `a`
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "<nav>\n  <a href=\"/dashboard\">\n    <i class=\"fa fa-dashboard\"></i>\n    <span>Dashboard</span>\n  </a>\n  <a href=\"/users\">\n    <i class=\"fa fa-users\"></i>\n    <span>Users</span>\n  </a>\n  <a href=\"/signout\">\n    <i class=\"fa fa-sign-out\"></i>\n    <span>Sign Out</span>\n  </a>\n</nav>\n",
-            "language": "html"
-        }
-    ]
-}
-[/block]
+```html
+<nav>
+  <a href="/dashboard">
+    <i class="fa fa-dashboard"></i>
+    <span>Dashboard</span>
+  </a>
+  <a href="/users">
+    <i class="fa fa-users"></i>
+    <span>Users</span>
+  </a>
+  <a href="/signout">
+    <i class="fa fa-sign-out"></i>
+    <span>Sign Out</span>
+  </a>
+</nav>
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// even though the <span> is the deepest element which contains: \"Sign Out\"\n// Cypress will automatically favor anchor elements higher in the chain\n\n// in this case we can assert on the anchors properties\ncy.get(\"nav\").contains(\"Sign Out\").should(\"have.attr\", \"href\", \"/signout\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// even though the <span> is the deepest element which contains: "Sign Out"
+// Cypress will automatically favor anchor elements higher in the chain
+
+// in this case we can assert on the anchors properties
+cy.get("nav").contains("Sign Out").should("have.attr", "href", "/signout")
+```
 
 ***
 
 > Cypress will favor `label`
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "<form>\n  <label>\n    <span>Name:</span>\n    <span>\n      <input name=\"name\" />\n    </span>\n  </label>\n  <label>\n    <span>Age:</span>\n    <span>\n      <input name=\"age\" />\n    </span>\n  </label>\n  <button type=\"submit\">Submit</button>\n</form>\n",
-            "language": "html"
-        }
-    ]
-}
-[/block]
+```html
+<form>
+  <label>
+    <span>Name:</span>
+    <span>
+      <input name="name" />
+    </span>
+  </label>
+  <label>
+    <span>Age:</span>
+    <span>
+      <input name="age" />
+    </span>
+  </label>
+  <button type="submit">Submit</button>
+</form>
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// even though the <span> is the deepest element which contains: \"Age\"\n// Cypress will automatically favor label elements higher in the chain\n\n// additionally we can omit the colon as long as the element\n// at least contains the text 'Age'\n\n//in this case we can easily target the input\n//because the label is returned\ncy.contains(\"Age\").find(\"input\").type(\"29\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// even though the <span> is the deepest element which contains: "Age"
+// Cypress will automatically favor label elements higher in the chain
+
+// additionally we can omit the colon as long as the element
+// at least contains the text 'Age'
+
+//in this case we can easily target the input
+//because the label is returned
+cy.contains("Age").find("input").type("29")
+```
 
 ***
 
 > Only the first matched element will be returned
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "<ul id=\"header\">\n  <li>Welcome, Jane Lane</li>\n</ul>\n<div id=\"main\">\n  <span>These users have 10 connections with Jane Lane</span>\n  <ul>\n    <li>User 1</li>\n    <li>User 2</li>\n    <li>User 3</li>\n  </ul>\n</div>\n",
-            "language": "html"
-        }
-    ]
-}
-[/block]
+```html
+<ul id="header">
+  <li>Welcome, Jane Lane</li>
+</ul>
+<div id="main">
+  <span>These users have 10 connections with Jane Lane</span>
+  <ul>
+    <li>User 1</li>
+    <li>User 2</li>
+    <li>User 3</li>
+  </ul>
+</div>
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// this will return the <li> in the #header since that is the first\n// element which contains the text \"Jane Lane\"\ncy.contains(\"Jane Lane\")\n\n// if you want to select the <span> inside of #main instead\n// you need to scope the contains first\n\n//now the <span> is returned\ncy.get(\"#main\").contains(\"Jane Lane\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// this will return the <li> in the #header since that is the first
+// element which contains the text "Jane Lane"
+cy.contains("Jane Lane")
+
+// if you want to select the <span> inside of #main instead
+// you need to scope the contains first
+
+//now the <span> is returned
+cy.get("#main").contains("Jane Lane")
+```
 
 ***
 
@@ -186,119 +193,112 @@ Using a selector allows you to return more *shallow* elements in the tree which 
 
 > Specify a selector to return a specific element
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "<html>\n  <body>\n    <ul>\n      <li>apples</li>\n      <li>oranges</li>\n      <li>bananas</li>\n    </ul>\n  </body>\n</html>\n",
-            "language": "html"
-        }
-    ]
-}
-[/block]
+```html
+<html>
+  <body>
+    <ul>
+      <li>apples</li>
+      <li>oranges</li>
+      <li>bananas</li>
+    </ul>
+  </body>
+</html>
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// technically the <html>, <body>, <ul>, and first <li> all contain \"apples\"\n\n// normally Cypress would return the first <li> since that is the deepest\n// element which contains: \"apples\"\n\n// to override this behavior, pass a 'ul' selector\n// this returns the ul element since it also contains the text\n\n// returns <ul>...</ul>\ncy.contains(\"ul\", \"apples\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// technically the <html>, <body>, <ul>, and first <li> all contain "apples"
+
+// normally Cypress would return the first <li> since that is the deepest
+// element which contains: "apples"
+
+// to override this behavior, pass a 'ul' selector
+// this returns the ul element since it also contains the text
+
+// returns <ul>...</ul>
+cy.contains("ul", "apples")
+```
 
 ***
 
 ## Notes
 
-`cy.contains` is a dual command.  This means it can act as both a `parent` and a `child` command.  Read more about [`commands`](commands) if this is unfamiliar.
+`cy.contains` is a dual command.  This means it can act as both a `parent` and a `child` command.  Read more about [`commands`](/docs/issuing-commands) if this is unfamiliar.
 
 Because it is a dual command it can either **begin** a chain of commands or work off of an **existing** subject.
-
-Read more about [`chaining`](chaining) here.
 
 ***
 
 > Start a chain of commands
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// search from the root scope (default: document)\ncy.contains(\"some content\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// search from the root scope (default: document)
+cy.contains("some content")
+```
 
 ***
 
 > Find content within an existing scope
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// search within an existing subject for the content\n// contains is now scoped to the <aside> element and will\n// only search its DOM descendants for the content\ncy.get(\"#main\").find(\"aside\").contains(\"Add a user\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// search within an existing subject for the content
+// contains is now scoped to the <aside> element and will
+// only search its DOM descendants for the content
+cy.get("#main").find("aside").contains("Add a user")
+```
 
 ***
 
 > Be wary of chaining multiple contains <br>
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// let's imagine a scenario where you click a user's delete button\n// and a dialog appears asking you to confirm this deletion.\n\n// the following will not work:\ncy\n  .contains(\"Delete User\").click()\n\n  // because this is chained off of the existing button subject\n  // Cypress will look inside of the existing button subject\n  // for the new content\n\n  // in other words Cypress will look inside of the element\n  // containing \"Delete User\" for the content: \"Yes I'm sure!\"\n  .contains(\"Yes, I'm sure!\").click()\n\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// let's imagine a scenario where you click a user's delete button
+// and a dialog appears asking you to confirm this deletion.
+
+// the following will not work:
+cy
+  .contains("Delete User").click()
+
+  // because this is chained off of the existing button subject
+  // Cypress will look inside of the existing button subject
+  // for the new content
+
+  // in other words Cypress will look inside of the element
+  // containing "Delete User" for the content: "Yes I'm sure!"
+  .contains("Yes, I'm sure!").click()
+
+```
 
 ***
 
 > End previous chains to get back to the root scope <br>
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy\n  // explicitly .end() the previous chain\n  .contains(\"Delete User\").click().end()\n\n  // Cypress will now search the root scope\n  // for this content (default: document)\n  .contains(\"Yes, I'm sure!\").click()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy
+  // explicitly .end() the previous chain
+  .contains("Delete User").click().end()
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// alternatively just call cy again which\n// automatically creates a new chain from the root scope\ncy.contains(\"Delete User\").click()\ncy.contains(\"Yes I'm sure!\").click()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+  // Cypress will now search the root scope
+  // for this content (default: document)
+  .contains("Yes, I'm sure!").click()
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// you can also do this\ncy\n  .contains(\"Delete User\").click()\n\n  // by using the parent command .get() we automatically\n  // abort previous chains and change the scope to #dialog\n  // which contains the content we're looking for\n  .get(\"#dialog\").contains(\"Yes I'm sure!\").click()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// alternatively just call cy again which
+// automatically creates a new chain from the root scope
+cy.contains("Delete User").click()
+cy.contains("Yes I'm sure!").click()
+```
+
+```javascript
+// you can also do this
+cy
+  .contains("Delete User").click()
+
+  // by using the parent command .get() we automatically
+  // abort previous chains and change the scope to #dialog
+  // which contains the content we're looking for
+  .get("#dialog").contains("Yes I'm sure!").click()
+```
 
 ***
 
@@ -312,6 +312,6 @@ When clicking on the `contains` command within the command log, the console outp
 ***
 
 ## Related
-1. [get](get)
-2. [within](within)
-3. [root](root)
+1. [get](/v1.0/docs/get)
+2. [within](/v1.0/docs/within)
+3. [root](/v1.0/docs/root)

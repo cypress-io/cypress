@@ -1,3 +1,4 @@
+excerpt: Load a fixture to represent data
 slug: fixture
 
 ### [cy.fixture( *fixture* )](#single-fixture-usage)
@@ -29,31 +30,17 @@ Loads an array of multiple fixtures by name.
 
 #### Load the `users.json` fixture
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.fixture(\"users.json\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.fixture("users.json")
+```
 
 ***
 
 #### Omit the extension
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.fixture(\"admin\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.fixture("admin")
+```
 
 Cypress will search for files called `admin` and resolve the first one in this order:
 
@@ -65,16 +52,13 @@ Cypress will search for files called `admin` and resolve the first one in this o
 
 #### Image fixtures will be sent as `base64`
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.fixture(\"images/logo.png\").then(function(logo){\n  // logo will be encoded as base64\n  // and look something like this:\n  // aIJKnwxydrB10NVWqhlmmC+ZiWs7otHotSAAAOw==\n})\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.fixture("images/logo.png").then(function(logo){
+  // logo will be encoded as base64
+  // and look something like this:
+  // aIJKnwxydrB10NVWqhlmmC+ZiWs7otHotSAAAOw==
+})
+```
 
 ***
 
@@ -90,16 +74,9 @@ You can nest fixtures within folders and reference them by defining the route to
 
 `{your project root}/tests/_fixtures/users/admin.json`
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.fixture(\"users/admin.json\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.fixture("users/admin.json")
+```
 
 ***
 
@@ -123,46 +100,38 @@ This enables you to set a fixture as the response for a route without having to 
 
 Example 1:
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.route(\"GET\", /users/, \"fixture:users\") // these are the same\ncy.route(\"GET\", /users/, \"fx:users\")      // these are the same\n",
-            "language": "javascript"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.route("GET", /users/, "fixture:users") // these are the same
+cy.route("GET", /users/, "fx:users")      // these are the same
+```
 
 This saves you from having to explicitly load the fixture first like in Example #2.
 
 Example 2:
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy\n  .fixture(\"users\").then(function(json){\n    cy.route(\"GET\", /users/, json)\n  })\n",
-            "language": "javascript"
-        }
-    ]
-}
-[/block]
+```javascript
+cy
+  .fixture("users").then(function(json){
+    cy.route("GET", /users/, json)
+  })
+```
 
 However if you still need access to the fixture data, instead of yielding the fixture's data in Example #2, we can make use of aliasing.
 
 Example 3:
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy\n  .fixture(\"users\").as(\"usersJSON\")\n  .route(\"GET\", /users/, \"@usersJSON\")\n\n  ...later on...\n\n  .then(function(){\n    // we have access to this.usersJSON since it was aliased\n    this.usersJSON\n  })\n",
-            "language": "javascript"
-        }
-    ]
-}
-[/block]
+```javascript
+cy
+  .fixture("users").as("usersJSON")
+  .route("GET", /users/, "@usersJSON")
+
+  ...later on...
+
+  .then(function(){
+    // we have access to this.usersJSON since it was aliased
+    this.usersJSON
+  })
+```
 
 Using an alias provides the benefit of terseness and readability, yet still allows you access to the alias'd object later on for direct manipulation.
 
@@ -172,4 +141,4 @@ This is useful when asserting about values in the fixture object, or perhaps cha
 
 ## More about Fixtures
 
-For a detailed explanation of when and why to use fixtures, [read more about fixtures here](fixtures).
+For a detailed explanation of when and why to use fixtures, [read more about fixtures here](/docs/creating-fixtures).

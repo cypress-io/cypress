@@ -1,6 +1,7 @@
+excerpt: Control the behavior of network requests and responses.
 slug: server
 
-#### **New to Cypress?** [Read about XHR strategy first.](xhr)
+#### **New to Cypress?** [Read about XHR strategy first.](/docs/network-requests-xhr)
 
 ***
 
@@ -45,16 +46,9 @@ whitelist | function | Default callback function which whitelists requests from 
 
 #### Start a server
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.server()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.server()
+```
 
 By default after starting a server:
 - Any request which does not match a `cy.route` will be sent `404`
@@ -77,31 +71,34 @@ By default `cy.route` inherits its options from `cy.server`. Passing any of the 
 - onRequest
 - onResponse
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy\n  .server({\n    method: \"POST\",\n    delay: 1000,\n    status: 422,\n    response: {}\n  })\n\n  // our route command will now inherit its options\n  // from the server. anything we pass specifically\n  // will override the defaults.\n  //\n  // in this example our matching requests will\n  // be delayed 1000ms and have a status of 422\n  // but its response be what we set below\n  .route(/users/, {errors: \"Name cannot be blank\"})\n\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy
+  .server({
+    method: "POST",
+    delay: 1000,
+    status: 422,
+    response: {}
+  })
+
+  // our route command will now inherit its options
+  // from the server. anything we pass specifically
+  // will override the defaults.
+  //
+  // in this example our matching requests will
+  // be delayed 1000ms and have a status of 422
+  // but its response be what we set below
+  .route(/users/, {errors: "Name cannot be blank"})
+
+```
 
 ***
 
 #### Change the default delay for all routes
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// delay each response 1500ms\ncy.server({delay: 1500})\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// delay each response 1500ms
+cy.server({delay: 1500})
+```
 
 Adding delay helps simulate real world network latency. Normally stubbed responses return in under <20ms. Adding a delay can help you visualize how your application's state reacts to requests that are in flight.
 
@@ -117,16 +114,13 @@ Status | Body | Headers
 
 If you'd like to disable this behavior and enable requests which do NOT match your routes to continue to reach your server, then pass `{force404: false}`.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// Test Code\n\ncy\n  .server({force404: false})\n  .route(/activities/, \"fixture:activities.json\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// Test Code
+
+cy
+  .server({force404: false})
+  .route(/activities/, "fixture:activities.json")
+```
 
 ```javascript
 // Application Code
@@ -156,27 +150,38 @@ When you stub requests, you can automatically control their response headers.
 
 This is useful when you want to send back meta data in the headers, such as **pagination** or **token** information.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// Test Code\n\ncy\n  .server({\n    headers: {\n      \"x-token\": \"abc-123-foo-bar\"\n    }\n  })\n  .route(\"GET\", \"/users/1\", {id: 1, name: \"Brian\"}).as(\"getUser\")\n  .visit(\"/users/1/profile\")\n  .wait(\"@getUser\")\n    .its(\"responseHeaders\")\n    .should(\"have.property\", \"x-token\", \"abc-123-foo-bar\") // true\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// Test Code
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// Application Code\n\n// lets use the native XHR object\nvar xhr = new XMLHttpRequest\n\nxhr.open(\"GET\", \"/users/1\")\n\nxhr.onload = function(){\n  var token = this.getResponseHeader(\"x-token\")\n  console.log(token) // => abc-123-foo-bar\n}\n\nxhr.send()\n\n",
-            "language": "js"
-        }
-    ]
+cy
+  .server({
+    headers: {
+      "x-token": "abc-123-foo-bar"
+    }
+  })
+  .route("GET", "/users/1", {id: 1, name: "Brian"}).as("getUser")
+  .visit("/users/1/profile")
+  .wait("@getUser")
+    .its("responseHeaders")
+    .should("have.property", "x-token", "abc-123-foo-bar") // true
+```
+
+```javascript
+// Application Code
+
+// lets use the native XHR object
+var xhr = new XMLHttpRequest
+
+xhr.open("GET", "/users/1")
+
+xhr.onload = function(){
+  var token = this.getResponseHeader("x-token")
+  console.log(token) // => abc-123-foo-bar
 }
-[/block]
+
+xhr.send()
+
+```
 
 ***
 
@@ -190,29 +195,25 @@ The idea is that we never went to interfere with static assets which are fetched
 
 The default function is:
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "var whitelist = function(xhr){\n  // this function receives the xhr object in question and\n  // will whitelist if its a GET that appears to be a static resource\n  xhr.method === \"GET\" && /\\.(jsx?|html|css)(\\?.*)?$/.test(xhr.url)\n}\n",
-            "language": "js"
-        }
-    ]
+
+```javascript
+var whitelist = function(xhr){
+  // this function receives the xhr object in question and
+  // will whitelist if its a GET that appears to be a static resource
+  xhr.method === "GET" && /\.(jsx?|html|css)(\?.*)?$/.test(xhr.url)
 }
-[/block]
+```
 
 You can of course override this function with your own specific logic.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.server({\n  whitelist: function(xhr){\n    // specify your own function that should return\n    // truthy if you want this xhr to be ignored,\n    // not logged, and not stubbed.\n  }\n})\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.server({
+  whitelist: function(xhr){
+    // specify your own function that should return
+    // truthy if you want this xhr to be ignored,
+    // not logged, and not stubbed.
+  }
+})
 
 If you would like to change the default option for **ALL** `cy.server` you [can change this option permanently](#permanently-override-default-server-options).
 
@@ -222,16 +223,20 @@ If you would like to change the default option for **ALL** `cy.server` you [can 
 
 You can disable all stubbing and its effects and restore to the default behavior as a test is running.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy\n  .server()\n  .route(\"POST\", /users/, {}).as(\"createUser\")\n\n  ...\n\n  // this now disables stubbing routes and XHR's\n  // will no longer show up as (XHR Stub) in the\n  // Command Log. However routing aliases can\n  // continue to be used and will continue to\n  // match requests, but will not affect responses\n  .server({enable: false})\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy
+  .server()
+  .route("POST", /users/, {}).as("createUser")
+
+  ...
+
+  // this now disables stubbing routes and XHR's
+  // will no longer show up as (XHR Stub) in the
+  // Command Log. However routing aliases can
+  // continue to be used and will continue to
+  // match requests, but will not affect responses
+  .server({enable: false})
+```
 
 ***
 
@@ -243,16 +248,18 @@ Any configuration you pass to `cy.server` will only persist until the end of the
 
 > **Note:** A great place to put this configuration is in your `tests/_support/spec_helper.js` file, since it is loaded before any test files are evaluated.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// pass anything here you'd normally pass\n// to cy.server(). These options will now\n// because the new defaults.\nCypress.Server.defaults({\n  delay: 500,\n  force404: false,\n  whitelist: function(xhr){\n    // handle custom logic for whitelisting\n  }\n})\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// pass anything here you'd normally pass
+// to cy.server(). These options will now
+// because the new defaults.
+Cypress.Server.defaults({
+  delay: 500,
+  force404: false,
+  whitelist: function(xhr){
+    // handle custom logic for whitelisting
+  }
+})
+```
 
 These are now the default options for any `cy.server`.
 
@@ -276,13 +283,13 @@ When a new test runs, any oustanding requests still in flight are automatically 
 
 Oftentimes your application may make initial requests immediately when it loads (such as authenticating a user). Cypress makes it possible to actually start your server and define routes before a `cy.visit`. Upon the next visit, the server + routes will be instantly applied before your application loads.
 
-You can [read more about XHR strategy here](xhr).
+You can [read more about XHR strategy here](/docs/network-requests-xhr).
 
 ***
 
 ## Related
-1. [route](route)
-2. [wait](wait)
-3. [get](get)
-4. [as](as)
-5. [request](request)
+1. [route](/v1.0/docs/route)
+2. [wait](/v1.0/docs/wait)
+3. [get](/v1.0/docs/get)
+4. [as](/v1.0/docs/as)
+5. [request](/v1.0/docs/request)

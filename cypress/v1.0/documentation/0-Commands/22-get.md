@@ -1,3 +1,4 @@
+excerpt: Get an element
 slug: get
 
 ### [cy.get( *selector* )](#selector-usage)
@@ -5,12 +6,12 @@ Matches one or more DOM elements based on the CSS-based selector.  The selector 
 
 `cy.get(...)` will **always** query from the current scope (default: document), and ignore previous commands.
 
-If Cypress does not find any matching element(s), it will continue to retry until the [`commandTimeout`](options) has been reached.
+If Cypress does not find any matching element(s), it will continue to retry until the `commandTimeout` has been reached.
 
 ***
 
 ### [cy.get( *alias* )](#alias-usage)
-Alternatively, pass in an '@' character to find an [aliased](aliasing) element.
+Alternatively, pass in an '@' character to find an [aliased](/docs/using-aliases) element.
 
 Internally Cypress keeps a cache of all aliased elements.  If the element currently exists in the DOM, it is immediately returned.  If the element no longer exists, Cypress will re-query the element based on the previous selector path to find it again.
 
@@ -20,47 +21,28 @@ Internally Cypress keeps a cache of all aliased elements.  If the element curren
 
 > Find the element with an id of `main`
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"#main\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("#main")
+```
 
 ***
 
 > Find the first `li` descendent within `ul`
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"ul li:first\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("ul li:first")
+```
 
 ***
 
 > Find the element with class `dropdown menu`, and click it. <br>
 > Break out of previous command chain and query for `#search` from the root document.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy\n  .get(\".dropdown-menu\").click()\n  .get(\"#search\").type(\"mogwai\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy
+  .get(".dropdown-menu").click()
+  .get("#search").type("mogwai")
+```
 
 ***
 
@@ -71,74 +53,45 @@ Internally Cypress keeps a cache of all aliased elements.  If the element curren
 > Find the element `textarea` within `form`. <br>
 > Type `is so cool` into the `textarea`.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"form\").within(function(){\n  cy\n    .get(\"input\").type(\"brian\")\n    .get(\"textarea\").type(\"is so cool\")\n})\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("form").within(function(){
+  cy
+    .get("input").type("brian")
+    .get("textarea").type("is so cool")
+})
+```
 
 ***
 
 > Specify that an element should be visible
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// here we are specifying to only resolve the 'get'\n// when the matched element becomes visible\ncy.get(\"#search input\", {visible: true}).type(\"brian\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// here we are specifying to only resolve the 'get'
+// when the matched element becomes visible
+cy.get("#search input", {visible: true}).type("brian")
+```
 
 ***
 
 > Specify that an element should not be visible
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"button\", {visible: false})\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("button", {visible: false})
+```
 
 ***
 
 > Specify that an element should not exist
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"#footer\", {exist: false})\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("#footer", {exist: false})
+```
 
 > Specific that a collection of elements should have length of 5
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"ul>li\", {length: 5})\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("ul>li", {length: 5})
+```
 
 ***
 
@@ -146,35 +99,32 @@ Internally Cypress keeps a cache of all aliased elements.  If the element curren
 
 > Retrieve existing `todos` elements
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"ul#todos li\").as(\"todos\")\n\n//...hack hack hack...\n\n//later retreive the todos\ncy.get(\"@todos\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("ul#todos li").as("todos")
+
+//...hack hack hack...
+
+//later retreive the todos
+cy.get("@todos")
+```
 
 ***
 
 > Alias the `submitBtn` in a `beforeEach`
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "beforeEach(function(){\n  cy.get(\"button[type=submit]\").as(\"submitBtn\")\n})\n\nit(\"disables on click\", function(){\n  cy.get(\"@submitBtn\").click().should(\"be.disabled\")\n})\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+beforeEach(function(){
+  cy.get("button[type=submit]").as("submitBtn")
+})
+
+it("disables on click", function(){
+  cy.get("@submitBtn").click().should("be.disabled")
+})
+```
 
 ***
 
-For a detailed explanation of aliasing, [read more about aliasing here](aliasing).
+For a detailed explanation of aliasing, [read more about aliasing here](/docs/using-aliases).
 
 ## Command Log
 
@@ -186,7 +136,7 @@ When clicking on the `get` command within the command log, the console outputs t
 
 ## Related
 
-1. [contains](contains)
-2. [within](within)
-3. [find](find)
-4. [root](root)
+1. [contains](/v1.0/docs/contains)
+2. [within](/v1.0/docs/within)
+3. [find](/v1.0/docs/find)
+4. [root](/v1.0/docs/root)

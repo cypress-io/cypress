@@ -1,3 +1,4 @@
+excerpt: Get the parent of elements
 slug: parent
 
 ### [cy.parent()](#usage)
@@ -16,16 +17,9 @@ Get the parent of each element in the current set of matched elements filtered b
 
 #### Get the parent of the active `li`
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"li.active\").parent().should(\"have.class\", \"nav\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("li.active").parent().should("have.class", "nav")
+```
 
 ***
 
@@ -33,31 +27,17 @@ Get the parent of each element in the current set of matched elements filtered b
 
 #### Get the parent with class `nav` of the active `li`
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"li.active\").parent(\".nav\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("li.active").parent(".nav")
+```
 
 ***
 
 ## Command Log
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"li.active\").parent().should(\"have.class\", \"nav\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("li.active").parent().should("have.class", "nav")
+```
 
 The commands above will display in the command log as:
 
@@ -70,5 +50,5 @@ When clicking on the `parent` command within the command log, the console output
 ***
 
 ## Related
-1. [parents](parents)
-2. [children](children)
+1. [parents](/v1.0/docs/parents)
+2. [children](/v1.0/docs/children)

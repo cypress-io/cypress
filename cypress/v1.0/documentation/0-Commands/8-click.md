@@ -59,16 +59,10 @@ interval | 50 | Interval which to retry a click
 
 #### Click the button
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// returns <button type=\"submit\">Submit</button>\ncy.get(\"button\").click()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// returns <button type="submit">Submit</button>
+cy.get("button").click()
+```
 
 ***
 
@@ -76,16 +70,10 @@ interval | 50 | Interval which to retry a click
 
 #### Specify a corner of the element to click
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// click is issued in the top right corner of the element\ncy.get(\"button\").click(\"topRight\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// click is issued in the top right corner of the element
+cy.get("button").click("topRight")
+```
 
 ***
 
@@ -93,16 +81,12 @@ interval | 50 | Interval which to retry a click
 
 #### Specify explicit coordinates relative to top left corner
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// the click will be issued inside of the element\n// 15px from the left and\n// 40px from the top\ncy.get(\"button\").click(15, 40)\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// the click will be issued inside of the element
+// 15px from the left and
+// 40px from the top
+cy.get("button").click(15, 40)
+```
 
 ***
 
@@ -110,16 +94,11 @@ interval | 50 | Interval which to retry a click
 
 #### Force a click regardless of visibility or other elements in front of element
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// this will disable the built-in logic for ensuring\n// the element is visible, and is physically clickable\ncy.get(\"input[type=submit]\").click({force: true})\n",
-            "language": "javascript"
-        }
-    ]
-}
-[/block]
+```javascript
+// this will disable the built-in logic for ensuring
+// the element is visible, and is physically clickable
+cy.get("input[type=submit]").click({force: true})
+```
 
 This is useful when you want the click issued no matter what. Forcing a click disables the error checking that happens prior to a click.
 
@@ -129,31 +108,17 @@ Be careful with this option because it allows the click to happen where it might
 
 #### Force a click with position argument
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"button\").click(\"bottomLeft\", {force: true})\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("button").click("bottomLeft", {force: true})
+```
 
 ***
 
 #### Force a click with relative coordinates
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"button\").click(5, 60, {force: true})\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("button").click(5, 60, {force: true})
+```
 
 ***
 
@@ -189,16 +154,13 @@ So far the only library we've seen cause issues with is animating KendoUI's `dro
 
 #### Events which are fired
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"input[type=submit]\").click()\n// mousedown\n// focus\n// mouseup\n// click\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("input[type=submit]").click()
+// mousedown
+// focus
+// mouseup
+// click
+```
 
 The events are fired exactly to spec, including the coordinates of where the event took place.
 
@@ -230,16 +192,9 @@ Additionally the coordinates of the click will be recorded the exact moment the 
 
 ## Command Log
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"form\").find(\"button\").contains(\"Create User\").click()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("form").find("button").contains("Create User").click()
+```
 
 The commands above will display in the command log as:
 
@@ -252,6 +207,7 @@ When clicking on `click` within the command log, the console outputs the followi
 ***
 
 ## Related
-1. [dblclick](dblclick)
-2. [check](check)
-3. [select](select)
+1. [dblclick](/v1.0/docs/dblclick)
+2. [check](/v1.0/docs/check)
+3. [select](/v1.0/docs/select)
+4. [submit](/v1.0/docs/submit)

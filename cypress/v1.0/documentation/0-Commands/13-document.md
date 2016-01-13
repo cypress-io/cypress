@@ -1,6 +1,8 @@
+excerpt: Get document element
 slug: document
 
 ### [cy.document()](#usage)
+
 
 Get document element
 
@@ -8,31 +10,19 @@ Get document element
 
 ## Usage
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.document().then(function(document) {\n  // work with document element\n});\n",
-            "language": "javascript"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.document().then(function(document) {
+  // work with document element
+});
+```
 
 ***
 
 ## Command Log
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.document()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.document()
+```
 
 The commands above will display in the command log as:
 
@@ -45,4 +35,4 @@ When clicking on `document` within the command log, the console outputs the foll
 ***
 
 ## Related
-1. [window](window)
+1. [window](/v1.0/docs/window)

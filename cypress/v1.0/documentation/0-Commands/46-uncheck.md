@@ -1,6 +1,8 @@
+excerpt: Uncheck a checkbox
 slug: uncheck
 
 ### [cy.uncheck()](#usage)
+
 
 Unchecks a checkbox.
 
@@ -10,43 +12,24 @@ Unchecks a checkbox.
 
 #### Uncheck the checkbox
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\":checkbox\").uncheck()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get(":checkbox").uncheck()
+```
 
 #### Uncheck element with id saveUserName
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"#saveUserName\").uncheck()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("#saveUserName").uncheck()
+```
 ***
 
 ## Command Log
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy\n  .get(\"[data-js='choose-all']\").click()\n  .find(\"input[type='checkbox']\").first().uncheck()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy
+  .get("[data-js='choose-all']").click()
+  .find("input[type='checkbox']").first().uncheck()
+```
 
 The commands above will display in the command log as:
 
@@ -58,4 +41,4 @@ When clicking on `uncheck` within the command log, the console outputs the follo
 
 ***
 ## Related
-1. [check](check)
+1. [check](/v1.0/docs/check)

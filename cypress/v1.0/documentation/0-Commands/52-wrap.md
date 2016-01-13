@@ -1,0 +1,24 @@
+excerpt: Invoke the function on the current subject
+slug: wrap
+
+### [cy.wrap()](#usage)
+
+***
+
+## Usage
+
+Invokes the function on the subject in wrap and returns that new value.
+
+```javascript
+var fn = function(){
+  return "bar"
+}
+
+cy.wrap({foo: fn}).invoke("foo").should("eq", "bar") // true
+```
+
+***
+
+## Related
+1. [invoke](/v1.0/docs/invoke)
+2. [then](/v1.0/docs/then)

@@ -1,3 +1,4 @@
+excerpt: Pause command
 slug: pause
 
 ### [cy.pause()](#usage)
@@ -8,18 +9,14 @@ slug: pause
 
 ## Usage
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy\n  .get(\"a\").should(\"have.attr\", \"href\").and(\"match\", /dashboard/)\n  .pause()\n  .get(\"button\").should(\"not.be.disabled\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy
+  .get("a").should("have.attr", "href").and("match", /dashboard/)
+  .pause()
+  .get("button").should("not.be.disabled")
+```
 
 ***
 
 ## Related
-1. [debug](debug)
+1. [debug](/v1.0/docs/debug)

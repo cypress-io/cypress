@@ -1,3 +1,4 @@
+excerpt: Get the siblings of elements
 slug: siblings
 
 ### [cy.siblings()](#usage)
@@ -16,27 +17,19 @@ Get the siblings of each element in the set of matched elements filtered by a se
 
 #### Get the siblings of each li.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "<ul>\n  <li>Home</li>\n  <li>Contact</li>\n  <li class=\"active\">Services</li>\n  <li>Price</li>\n</ul>\n",
-            "language": "html"
-        }
-    ]
-}
-[/block]
+```html
+<ul>
+  <li>Home</li>
+  <li>Contact</li>
+  <li class="active">Services</li>
+  <li>Price</li>
+</ul>
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// returns all other li's in list\ncy.get(\".active\").siblings()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// returns all other li's in list
+cy.get(".active").siblings()
+```
 
 ***
 
@@ -44,31 +37,18 @@ Get the siblings of each element in the set of matched elements filtered by a se
 
 #### Get siblings of element with class `active`.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// returns <li class=\"active\">Services</li>\ncy.get(\"li\").siblings(\".active\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// returns <li class="active">Services</li>
+cy.get("li").siblings(".active")
+```
 
 ***
 
 ## Command Log
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\".left-nav\").find(\"li.active\").siblings()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get(".left-nav").find("li.active").siblings()
+```
 
 The commands above will display in the command log as:
 
@@ -81,4 +61,4 @@ When clicking on `siblings` within the command log, the console outputs the foll
 ***
 
 ## Related
-1. [prev]([prev)
+1. [prev](/v1.0/docs/prev)

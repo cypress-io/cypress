@@ -1,3 +1,4 @@
+excerpt: Change the screen size of your application
 slug: viewport
 
 Use `cy.viewport` to control the screen size of your application.
@@ -39,31 +40,46 @@ Pass `landscape` as the orientation to reverse the width/height.
 
 > Resize the viewport to 1024x768
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// the viewport will now be changed to 1024x768\ncy.viewport(1024, 768)\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// the viewport will now be changed to 1024x768
+cy.viewport(1024, 768)
+```
 
 ***
 
 > Organize desktop vs mobile tests separately
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "describe(\"Nav Menus\", function(){\n  context(\"720p resolution\", function(){\n    beforeEach(function(){\n      // run these tests in a desktop browser\n      // with a 720p monitor\n      cy.viewport(1280, 720)\n    })\n\n    it(\"displays full header\", function(){\n      cy\n        .get(\"nav .desktop-menu\", {visible: true})\n        .get(\"nav .mobile-menu\", {visible: false})\n    })\n\n  context(\"iphone-5 resolution\", function(){\n    beforeEach(function(){\n      // run these tests in a mobile browser\n      // and ensure our responsive UI is correct\n      cy.viewport(\"iphone-5\")\n    })\n\n    it(\"displays mobile menu on click\", function(){\n      cy\n         .get(\"nav .desktop-menu\", {visible: false})\n         .get(\"nav .mobile-menu\", {visible: true}).find(\"i.hamburger\").click()\n         .get(\"ul.slideout-menu\", {visible: true})\n    })\n  })\n})\n",
-            "language": "javascript"
-        }
-    ]
-}
-[/block]
+```javascript
+describe("Nav Menus", function(){
+  context("720p resolution", function(){
+    beforeEach(function(){
+      // run these tests in a desktop browser
+      // with a 720p monitor
+      cy.viewport(1280, 720)
+    })
+
+    it("displays full header", function(){
+      cy
+        .get("nav .desktop-menu", {visible: true})
+        .get("nav .mobile-menu", {visible: false})
+    })
+
+  context("iphone-5 resolution", function(){
+    beforeEach(function(){
+      // run these tests in a mobile browser
+      // and ensure our responsive UI is correct
+      cy.viewport("iphone-5")
+    })
+
+    it("displays mobile menu on click", function(){
+      cy
+         .get("nav .desktop-menu", {visible: false})
+         .get("nav .mobile-menu", {visible: true}).find("i.hamburger").click()
+         .get("ul.slideout-menu", {visible: true})
+    })
+  })
+})
+```
 
 ***
 
@@ -71,31 +87,20 @@ Pass `landscape` as the orientation to reverse the width/height.
 
 > Resize the viewport to iPhone 6 width and height
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// the viewport will now be changed to 414x736\ncy.viewport(\"iphone-6\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// the viewport will now be changed to 414x736
+cy.viewport("iphone-6")
+```
 
 ***
 
 > Change the orientation to landscape
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// the viewport will now be changed to 736x414\n// which simulates the user holding the phone sideways\ncy.viewport(\"iphone-6\", \"landscape\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// the viewport will now be changed to 736x414
+// which simulates the user holding the phone sideways
+cy.viewport("iphone-6", "landscape")
+```
 
 ***
 
@@ -122,16 +127,13 @@ By default, until you issue a `cy.viewport` command, Cypress will assume the wid
 
 You can change these default dimensions by adding the following to your `cypress.json`
 
-[block:code]
+```javascript
+// cypress.json
 {
-    "codes": [
-        {
-            "code": "// cypress.json\n{\n  viewportWidth: 1000,\n  viewportHeight: 660\n}\n",
-            "language": "javascript"
-        }
-    ]
+  viewportWidth: 1000,
+  viewportHeight: 660
 }
-[/block]
+```
 
 ***
 

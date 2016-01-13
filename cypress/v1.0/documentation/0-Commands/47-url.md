@@ -1,3 +1,4 @@
+excerpt: Get the current URL
 slug: url
 
 ### [cy.url()](#usage)
@@ -10,16 +11,12 @@ Returns the current URL as a string.
 
 #### Assert the URL is `http://localhost:8000/users/1/edit`
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// clicking the anchor causes the browser to follow the link\ncy\n  .get(\"#user-edit a\").click()\n  .url().should(\"eq\", \"http://localhost:8000/users/1/edit\") // => true\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// clicking the anchor causes the browser to follow the link
+cy
+  .get("#user-edit a").click()
+  .url().should("eq", "http://localhost:8000/users/1/edit") // => true
+```
 
 ***
 
@@ -27,16 +24,11 @@ Returns the current URL as a string.
 
 `cy.url()` uses `href` under the hood.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// these return the same string\ncy.url()\ncy.location().its(\"href\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// these return the same string
+cy.url()
+cy.location().its("href")
+```
 
 ***
 
@@ -50,16 +42,13 @@ Given this remote URL:
 
 All 3 of these assertions are the same.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.location().its(\"href\").should(\"eq\", \"http://localhost:8000/index.html\")\n\ncy.location().invoke(\"toString\").should(\"eq\", \"http://localhost:8000/index.html\")\n\ncy.url().should(\"eq\", \"http://localhost:8000/index.html\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.location().its("href").should("eq", "http://localhost:8000/index.html")
+
+cy.location().invoke("toString").should("eq", "http://localhost:8000/index.html")
+
+cy.url().should("eq", "http://localhost:8000/index.html")
+```
 
 `href` and `toString` come from the `window.location` spec.
 
@@ -71,16 +60,9 @@ But you may be wondering where the `url` property comes from.  Per the `window.l
 
 ## Command Log
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.url().should(\"contain\", \"#users/new\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.url().should("contain", "#users/new")
+```
 
 The commands above will display in the command log as:
 
@@ -92,5 +74,5 @@ When clicking on `url` within the command log, the console outputs the following
 
 ***
 ## Related
-1. [hash](hash)
-2. [location](location)
+1. [hash](/v1.0/docs/hash)
+2. [location](/v1.0/docs/location)

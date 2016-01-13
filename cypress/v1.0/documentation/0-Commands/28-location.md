@@ -1,3 +1,4 @@
+excerpt: Get window.location
 slug: location
 
 ### [cy.location()](#usage)
@@ -31,31 +32,28 @@ toString | function | http://localhost:8000/app/index.html?q=brian#/users/123/ed
 
 #### Test that a redirect works
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// we should be redirected to the login page\ncy\n  .visit(\"http://localhost:3000/admin\")\n  .location().its(\"pathname\").should(\"eq\", \"/login\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// we should be redirected to the login page
+cy
+  .visit("http://localhost:3000/admin")
+  .location().its("pathname").should("eq", "/login")
+```
 
 ***
 
 #### Test searching for a user
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// we can yield the location subject and work with\n// it directly as an object\ncy\n  .get(\"#search\").type(\"brian{enter}\")\n  .location().then(function(location){\n    expect(location.search).to.eq(\"?search=brian\")\n    expect(location.pathname).to.eq(\"/users\")\n    expect(location.toString()).to.eq(\"http://localhost:8000/users?search=brian\")\n  })\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// we can yield the location subject and work with
+// it directly as an object
+cy
+  .get("#search").type("brian{enter}")
+  .location().then(function(location){
+    expect(location.search).to.eq("?search=brian")
+    expect(location.pathname).to.eq("/users")
+    expect(location.toString()).to.eq("http://localhost:8000/users?search=brian")
+  })
+```
 
 ***
 
@@ -65,27 +63,21 @@ toString | function | http://localhost:8000/app/index.html?q=brian#/users/123/ed
 
 Let's examine the following scenario:
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// get our remote window and log out\n// the window.location object\ncy.window().then(function(window){\n  console.log(window.location)\n})\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// get our remote window and log out
+// the window.location object
+cy.window().then(function(window){
+  console.log(window.location)
+})
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// go through the location command\n// and log out this object\ncy.location().then(function(location){\n  console.log(location)\n})\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// go through the location command
+// and log out this object
+cy.location().then(function(location){
+  console.log(location)
+})
+```
 
 Cypress automatically normalizes the `cy.location()` command and strips out extrenuous values and properties found in `window.location`.
 
@@ -99,16 +91,9 @@ In Cypress, the object we returned is a plain object, and changing or affecting 
 
 ## Command Log
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.location().its(\"href\").should(\"contain\", \"#users/new\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.location().its("href").should("contain", "#users/new")
+```
 
 The commands above will display in the command log as:
 
@@ -122,5 +107,5 @@ When clicking on `location` within the command log, the console outputs the foll
 
 ## Related
 
-1. [hash](hash)
-2. [url](url)
+1. [hash](/v1.0/docs/hash)
+2. [url](/v1.0/docs/url)

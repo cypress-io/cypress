@@ -1,3 +1,4 @@
+excerpt: Double-click on a subject
 slug: dblclick
 
 ### [cy.dblclick()](#usage)
@@ -10,42 +11,22 @@ Double-clicks the current subject.
 
 #### Double click anchor link
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "<a href='#nav1'>Menu</a>\n",
-            "language": "html"
-        }
-    ]
-}
-[/block]
+```html
+<a href='#nav1'>Menu</a>
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// returns the <a> for further chaining\ncy.get(\"#nav1\").dblclick()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// returns the <a> for further chaining
+cy.get("#nav1").dblclick()
+```
 
 ***
 
 ## Command Log
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"[data-schedule-id='4529114']:first\").dblclick()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("[data-schedule-id='4529114']:first").dblclick()
+```
 
 The commands above will display in the command log as:
 
@@ -58,4 +39,4 @@ When clicking on `dblclick` within the command log, the console outputs the foll
 ***
 
 ## Related
-1. [click](click)
+1. [click](/v1.0/docs/click)

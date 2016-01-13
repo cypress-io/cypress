@@ -1,3 +1,4 @@
+excerpt: Get the parents of elements
 slug: parents
 
 ### [cy.parents()](#usage)
@@ -16,16 +17,9 @@ Get the ancestors of each element in the current set of matched elements filtere
 
 #### Get the parents of the active `li`
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"li.active\").parents()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("li.active").parents()
+```
 
 ***
 
@@ -33,16 +27,9 @@ Get the ancestors of each element in the current set of matched elements filtere
 
 #### Get the parents with class `nav` of the active `li`
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"li.active\").parents(\".nav\")\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("li.active").parents(".nav")
+```
 
 ***
 
@@ -57,5 +44,5 @@ When clicking on the `parents` command within the command log, the console outpu
 ***
 
 ## Related
-1. [parent](parent)
-2. [children](children)
+1. [parent](/v1.0/docs/parent)
+2. [children](/v1.0/docs/children)

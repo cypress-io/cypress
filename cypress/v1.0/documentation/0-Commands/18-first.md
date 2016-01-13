@@ -1,3 +1,4 @@
+excerpt: Get the first element within elements
 slug: first
 
 ### [cy.first()](#usage)
@@ -10,42 +11,27 @@ Reduce the set of matched elements to the first in the set. This method does not
 
 #### Get the first list item in a list.
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "<ul>\n  <li class=\"one\">list item 1</li>\n  <li class=\"two\">list item 2</li>\n  <li class=\"three\">list item 3</li>\n  <li class=\"four\">list item 4</li>\n</ul>\n",
-            "language": "html"
-        }
-    ]
-}
-[/block]
+```html
+<ul>
+  <li class="one">list item 1</li>
+  <li class="two">list item 2</li>
+  <li class="three">list item 3</li>
+  <li class="four">list item 4</li>
+</ul>
+```
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "// returns <li class=\"one\"></li>\ncy.get(\"ul\").first()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+// returns <li class="one"></li>
+cy.get("ul").first()
+```
 
 ***
 
 ## Command Log
 
-[block:code]
-{
-    "codes": [
-        {
-            "code": "cy.get(\"form\").find(\"input\").first()\n",
-            "language": "js"
-        }
-    ]
-}
-[/block]
+```javascript
+cy.get("form").find("input").first()
+```
 
 The commands above will display in the command log as:
 
@@ -58,4 +44,4 @@ When clicking on `first` within the command log, the console outputs the followi
 ***
 
 ## Related
-1. [last](last)
+1. [last](/v1.0/docs/last)

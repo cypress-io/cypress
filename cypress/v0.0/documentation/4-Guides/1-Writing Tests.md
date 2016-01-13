@@ -24,7 +24,7 @@ Cypress will now list this spec file inside of Cypress, and will run the tests w
 
 ## How to write tests
 
-Cypress is built on top of [`Mocha`](tools#mocha) and uses its `bdd` interface. Therefore tests you write in Cypress will adhere to this style.
+Cypress is built on top of [`Mocha`](/docs/bundled-tools#mocha) and uses its `bdd` interface. Therefore tests you write in Cypress will adhere to this style.
 
 If you're familiar with writing tests in JavaScript, then writing tests in Cypress will be a breeze.
 

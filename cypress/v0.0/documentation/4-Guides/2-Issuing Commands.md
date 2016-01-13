@@ -1,2 +1,2 @@
-slug: writing-commands
+slug: issuing-commands
 
