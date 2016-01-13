@@ -1,0 +1,84 @@
+slug: siblings
+
+### [cy.siblings()](#usage)
+
+Get the siblings of each element in the set of matched elements.
+
+***
+
+### [cy.siblings( *selector* )](#selector-usage)
+
+Get the siblings of each element in the set of matched elements filtered by a selector.
+
+***
+
+## Usage
+
+#### Get the siblings of each li.
+
+[block:code]
+{
+    "codes": [
+        {
+            "code": "<ul>\n  <li>Home</li>\n  <li>Contact</li>\n  <li class=\"active\">Services</li>\n  <li>Price</li>\n</ul>\n",
+            "language": "html"
+        }
+    ]
+}
+[/block]
+
+[block:code]
+{
+    "codes": [
+        {
+            "code": "// returns all other li's in list\ncy.get(\".active\").siblings()\n",
+            "language": "js"
+        }
+    ]
+}
+[/block]
+
+***
+
+## Selector Usage
+
+#### Get siblings of element with class `active`.
+
+[block:code]
+{
+    "codes": [
+        {
+            "code": "// returns <li class=\"active\">Services</li>\ncy.get(\"li\").siblings(\".active\")\n",
+            "language": "js"
+        }
+    ]
+}
+[/block]
+
+***
+
+## Command Log
+
+[block:code]
+{
+    "codes": [
+        {
+            "code": "cy.get(\".left-nav\").find(\"li.active\").siblings()\n",
+            "language": "js"
+        }
+    ]
+}
+[/block]
+
+The commands above will display in the command log as:
+
+<img width="561" alt="screen shot 2015-11-29 at 12 48 55 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458897/a93f2a1e-9697-11e5-8a5b-b131156e1aa4.png">
+
+When clicking on `siblings` within the command log, the console outputs the following:
+
+<img width="429" alt="screen shot 2015-11-29 at 12 49 09 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458898/ab940fd2-9697-11e5-96ab-a4c34efa3431.png">
+
+***
+
+## Related
+1. [prev]([prev)

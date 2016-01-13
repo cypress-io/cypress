@@ -25,6 +25,9 @@ Whatever you do, just work in staging and once all changes are done, synchronize
 #### Working Locally
 
 ```bash
+## use proper node version
+nvm use 5.3.0
+
 ## pull in all remote files only
 ## if there are external changes
 ## not committed to this repo
