@@ -53,5 +53,5 @@ In Guides, to link to another page on Guides:
 
 In Guides, to link to another page on API:
 ```md
-[and](v1/docs/and)
+[and](/v1.0/docs/and)
 ```
