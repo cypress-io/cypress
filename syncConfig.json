@@ -1,6 +1,6 @@
 {
     "projectNames": {
-        "staging": "cypress-staging",
+        "staging": "cypress",
         "production": "cypress"
     }
 }

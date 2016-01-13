@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+    "upload": "readmeio-sync upload"
+    "clean": "readmeio-sync clean-remote"
   },
   "author": "",
   "license": "ISC"

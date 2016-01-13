@@ -1,2 +1,0 @@
-slug: server-1
-
