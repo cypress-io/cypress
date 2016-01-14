@@ -1,5 +1,5 @@
 gui:
-  - nw/js/gui.js
+  - nw/app/js/gui.js
 
 vendor:
   - bower_components/jquery/dist/jquery.js
@@ -14,14 +14,14 @@ vendor:
   - bower_components/bootstrap-contextmenu/bootstrap-contextmenu.js
 
 app:
-  - nw/js/config/**
-  - nw/js/backbone/app.coffee
-  - nw/js/backbone/lib/templates/**
-  - nw/js/backbone/lib/entities/**
-  - nw/js/backbone/lib/utilities/**
-  - nw/js/backbone/lib/views/**
-  - nw/js/backbone/lib/controllers/**
-  - nw/js/backbone/lib/components/**
-  - nw/js/backbone/lib/routers/**
-  - nw/js/backbone/entities/**
-  - nw/js/backbone/apps/**
+  - nw/app/js/config/**
+  - nw/app/js/backbone/app.coffee
+  - nw/app/js/backbone/lib/templates/**
+  - nw/app/js/backbone/lib/entities/**
+  - nw/app/js/backbone/lib/utilities/**
+  - nw/app/js/backbone/lib/views/**
+  - nw/app/js/backbone/lib/controllers/**
+  - nw/app/js/backbone/lib/components/**
+  - nw/app/js/backbone/lib/routers/**
+  - nw/app/js/backbone/entities/**
+  - nw/app/js/backbone/apps/**

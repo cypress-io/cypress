@@ -1,0 +1,12 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Login</title>
+    <script type="text/javascript">
+      global.App.vent.trigger("logging:in", location.toString())
+
+      require('nw.gui').Window.get().close()
+    </script>
+  </head>
+  <body></body>
+</html>
