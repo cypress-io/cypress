@@ -1,6 +1,14 @@
 excerpt: Write your first test
 slug: writing-tests
 
+## Recommended file structure
+
+While Cypress allows for configuration of where your test files can be located, if you're starting your first project, we recommend you use the following structure.
+
+```
+- test
+```
+
 After adding your project, Cypress will automatically scaffold out a suggested folder structure. By default it will create:
 
 ```
@@ -15,6 +23,43 @@ After adding your project, Cypress will automatically scaffold out a suggested f
   "title": "Configure Folder Structure"
 }
 [/block]
+
+## Definitions
+
+There are certain terms you should be familiar with to help you follow this guide before writing your first test.
+
+#### In your test file:
+
+<dl>
+  <dt><strong>Test</strong></dt>
+  <dd>...</dd>
+  <dt><strong>Test Suite</strong></dt>
+  <dd>...</dd>
+  <dt><strong>Command</strong></dt>
+  <dd>...</dd>
+  <dt><strong>Parent Command</strong></dt>
+  <dd>...</dd>
+  <dt><strong>Subject Command</strong></dt>
+  <dd>...</dd>
+  <dt><strong>Assertion</strong></dt>
+  <dd>...</dd>
+  <dt><strong>Alias</strong></dt>
+  <dd>...</dd>
+  <dt><strong>Fixture</strong></dt>
+  <dd>...</dd>
+</dl>
+
+#### In Cypress' Test Runner:
+
+<dl>
+  <dt><strong>Command Log</strong></dt>
+  <dd>...</dd>
+  <dt><strong>Instrument Panel</strong></dt>
+  <dd>...</dd>
+  <dt><strong>Application Frame</strong></dt>
+  <dd>...</dd>
+</dl>
+
 
 ## Test Files
 

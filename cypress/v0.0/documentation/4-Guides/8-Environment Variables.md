@@ -7,7 +7,7 @@ slug: environment-variables
 
 Cypress gives you 4 flexible ways of setting environment variables.
 
-When your tests are running, you can use the [`Cypress.env()`](env) function to access the values of your environment variables.
+When your tests are running, you can use the [`Cypress.env()`](http://on.cypress.io/api/env) function to access the values of your environment variables.
 
 ## Use Case
 
