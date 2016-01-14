@@ -46,6 +46,9 @@ npm run clean
 
 **Edits should NEVER be made from the Readme.io's web ui**
 
+
+##### Links
+
 Links are all handled through our [cypress.on](https://github.com/cypress-io/cypress-on) api.
 
 To link to a page on Guides:
@@ -57,3 +60,15 @@ To link to a page on API:
 ```md
 [and](http://on.cypress.io/api/$slug)
 ```
+
+##### Creating New Files
+
+When creating new files, each file requires an excert and a slug **followed by a newline**:
+```md
+excerpt: Description at top of page
+slug: slug-for-url
+
+
+```
+
+If you forget the newline, readmeio-sync's upload will not work because of how they are regexing the metadata.
