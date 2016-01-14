@@ -1,6 +1,3 @@
-gui:
-  - nw/app/js/gui.js
-
 vendor:
   - bower_components/jquery/dist/jquery.js
   - bower_components/underscore/underscore.js
@@ -12,6 +9,7 @@ vendor:
   - bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/dropdown.js
   - bower_components/moment/moment.js
   - bower_components/bootstrap-contextmenu/bootstrap-contextmenu.js
+  - bower_components/bluebird/js/browser/bluebird.js
 
 app:
   - nw/app/js/config/**
