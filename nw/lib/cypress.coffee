@@ -4,21 +4,24 @@ app           = require("electron").app
 ipc           = require("electron").ipcMain
 BrowserWindow = require("electron").BrowserWindow
 
-ipc.on "request", (event, type, arg) ->
-  send = (msg) ->
-    event.sender.send("response", msg)
-
-  switch type
-    when "update"
-      send({foo: "bar"})
-    else
-      throw new Error("No ipc event registered for: '#{type}'")
-
 ## Keep a global reference of the window object, if you don't, the window will
 ## be closed automatically when the JavaScript object is garbage collected.
 mainWindow = null
 
 module.exports = (argv) ->
+  ipc.on "request", (event, id, type, arg) ->
+    send = (err, data) ->
+      event.sender.send("response", {id: id, __error: err, data: data})
+
+    switch type
+      ## return argv (or options here?)
+      when "argv"
+        send(null, argv)
+      when "update"
+        send(null, {foo: "bar"})
+      else
+        throw new Error("No ipc event registered for: '#{type}'")
+
   options = {}
 
   options.url = "file://#{__dirname}/../app/public/index.html"
