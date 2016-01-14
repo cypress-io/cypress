@@ -1,7 +1,7 @@
 excerpt: Set a route matching a url
 slug: route
 
-#### **New to Cypress?** [Read about XHR strategy first.](/docs/network-requests-xhr)
+#### **New to Cypress?** [Read about XHR strategy first.](http://on.cypress.io/guides/network-requests-xhr)
 
 ***
 
@@ -310,6 +310,6 @@ When clicking on `XHR Stub` within the command log, the console outputs the foll
 
 ***
 ## Related
-1. [server](/v1.0/docs/server)
-2. [wait](/v1.0/docs/wait)
-3. [as](/v1.0/docs/as)
+1. [server](http://on.cypress.io/api/server)
+2. [wait](http://on.cypress.io/api/wait)
+3. [as](http://on.cypress.io/api/as)

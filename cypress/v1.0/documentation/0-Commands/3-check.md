@@ -36,4 +36,4 @@ When clicking on `check` within the command log, the console outputs the followi
 
 ***
 ## Related
-1. [uncheck](/v1.0/docs/uncheck)
+1. [uncheck](http://on.cypress.io/api/uncheck)

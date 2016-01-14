@@ -33,4 +33,4 @@ When clicking on `not` within the command log, the console outputs the following
 
 ***
 ## Related
-1. [filter](/v1.0/docs/filter)
+1. [filter](http://on.cypress.io/api/filter)

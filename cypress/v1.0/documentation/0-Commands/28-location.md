@@ -107,5 +107,5 @@ When clicking on `location` within the command log, the console outputs the foll
 
 ## Related
 
-1. [hash](/v1.0/docs/hash)
-2. [url](/v1.0/docs/url)
+1. [hash](http://on.cypress.io/api/hash)
+2. [url](http://on.cypress.io/api/url)

@@ -45,4 +45,4 @@ When clicking on `clear` within the command log, the console outputs the followi
 ***
 
 ## Related
-1. [type](/v1.0/docs/type)
+1. [type](http://on.cypress.io/api/type)

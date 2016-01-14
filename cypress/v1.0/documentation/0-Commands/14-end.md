@@ -22,4 +22,4 @@ cy
 ***
 
 ## Related
-1. [root](/v1.0/docs/root)
+1. [root](http://on.cypress.io/api/root)

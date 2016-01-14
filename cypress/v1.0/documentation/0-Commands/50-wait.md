@@ -164,6 +164,6 @@ When clicking on `wait` within the command log, the console outputs the followin
 ***
 
 ## Related
-1. [server](/v1.0/docs/server)
-2. [route](/v1.0/docs/route)
-3. [as](/v1.0/docs/as)
+1. [server](http://on.cypress.io/api/server)
+2. [route](http://on.cypress.io/api/route)
+3. [as](http://on.cypress.io/api/as)

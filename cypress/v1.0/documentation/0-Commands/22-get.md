@@ -11,7 +11,7 @@ If Cypress does not find any matching element(s), it will continue to retry unti
 ***
 
 ### [cy.get( *alias* )](#alias-usage)
-Alternatively, pass in an '@' character to find an [aliased](/docs/using-aliases) element.
+Alternatively, pass in an '@' character to find an [aliased](http://on.cypress.io/guides/using-aliases) element.
 
 Internally Cypress keeps a cache of all aliased elements.  If the element currently exists in the DOM, it is immediately returned.  If the element no longer exists, Cypress will re-query the element based on the previous selector path to find it again.
 
@@ -124,7 +124,7 @@ it("disables on click", function(){
 
 ***
 
-For a detailed explanation of aliasing, [read more about aliasing here](/docs/using-aliases).
+For a detailed explanation of aliasing, [read more about aliasing here](http://on.cypress.io/guides/using-aliases).
 
 ## Command Log
 
@@ -136,7 +136,7 @@ When clicking on the `get` command within the command log, the console outputs t
 
 ## Related
 
-1. [contains](/v1.0/docs/contains)
-2. [within](/v1.0/docs/within)
-3. [find](/v1.0/docs/find)
-4. [root](/v1.0/docs/root)
+1. [contains](http://on.cypress.io/api/contains)
+2. [within](http://on.cypress.io/api/within)
+3. [find](http://on.cypress.io/api/find)
+4. [root](http://on.cypress.io/api/root)

@@ -1,1 +1,2 @@
+excerpt: Deprecations
 slug: deprecations

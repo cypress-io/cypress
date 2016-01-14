@@ -195,4 +195,4 @@ Cypress will automatically apply the server + routes to the very next `visit` an
 ***
 
 ## Related
-1. [go](/v1.0/docs/go)
+1. [go](http://on.cypress.io/api/go)

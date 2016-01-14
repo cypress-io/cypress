@@ -1,3 +1,4 @@
+excerpt: Get closest ancestor
 slug: closest
 
 ### [cy.closest( *selector* )](#selector-usage)
@@ -27,5 +28,5 @@ When clicking on the `closest` command within the command log, the console outpu
 <img width="478" alt="screen shot 2015-11-27 at 2 07 46 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447201/535515c4-9510-11e5-9cf5-088bf21f34ac.png">
 
 ## Related
-1. [parents](/v1.0/docs/parents)
-2. [next](/v1.0/docs/next)
+1. [parents](http://on.cypress.io/api/parents)
+2. [next](http://on.cypress.io/api/next)

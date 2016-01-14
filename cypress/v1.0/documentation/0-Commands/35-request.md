@@ -158,4 +158,4 @@ If Cypress cannot determine the host it will throw an explicit error.
 ***
 
 ## Related
-1. [server](/v1.0/docs/server)
+1. [server](http://on.cypress.io/api/server)

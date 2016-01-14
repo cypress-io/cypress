@@ -141,4 +141,4 @@ This is useful when asserting about values in the fixture object, or perhaps cha
 
 ## More about Fixtures
 
-For a detailed explanation of when and why to use fixtures, [read more about fixtures here](/docs/creating-fixtures).
+For a detailed explanation of when and why to use fixtures, [read more about fixtures here](http://on.cypress.io/guides/creating-fixtures).

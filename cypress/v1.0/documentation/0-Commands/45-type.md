@@ -5,7 +5,7 @@ slug: type
 
 Types into the current DOM subject.
 
-Prior to typing, if the element isn't currently focused, Cypress will issue a [click action command](/v1.0/docs/click), which will cause the element to receive focus.
+Prior to typing, if the element isn't currently focused, Cypress will issue a [click action command](http://on.cypress.io/api/click), which will cause the element to receive focus.
 
 Text may include these special character sequences:
 
@@ -57,7 +57,7 @@ cy.get("textarea").type("Hello world")
 cy.get("input[type=text]").type("foobarbaz", {force: true})
 ```
 
-Type issues a [`click`](/v1.0/docs/click) prior to typing (if the element isn't currently focused). Because of this, sometimes it is useful to force the click to happen. Forcing a click disables error checking prior to the click.
+Type issues a [`click`](http://on.cypress.io/api/click) prior to typing (if the element isn't currently focused). Because of this, sometimes it is useful to force the click to happen. Forcing a click disables error checking prior to the click.
 
 Be careful with this option because it allows the type to happen where it might actually be impossible for a real user to type.
 
@@ -244,4 +244,4 @@ When clicking on `type` within the command log, the console outputs the followin
 ***
 
 ## Related
-1. [clear](/v1.0/docs/clear)
+1. [clear](http://on.cypress.io/api/clear)

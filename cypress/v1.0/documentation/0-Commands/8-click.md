@@ -207,7 +207,7 @@ When clicking on `click` within the command log, the console outputs the followi
 ***
 
 ## Related
-1. [dblclick](/v1.0/docs/dblclick)
-2. [check](/v1.0/docs/check)
-3. [select](/v1.0/docs/select)
-4. [submit](/v1.0/docs/submit)
+1. [dblclick](http://on.cypress.io/api/dblclick)
+2. [check](http://on.cypress.io/api/check)
+3. [select](http://on.cypress.io/api/select)
+4. [submit](http://on.cypress.io/api/submit)

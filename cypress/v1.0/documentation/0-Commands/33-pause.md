@@ -19,4 +19,4 @@ cy
 ***
 
 ## Related
-1. [debug](/v1.0/docs/debug)
+1. [debug](http://on.cypress.io/api/debug)

@@ -50,5 +50,5 @@ When clicking on the `parent` command within the command log, the console output
 ***
 
 ## Related
-1. [parents](/v1.0/docs/parents)
-2. [children](/v1.0/docs/children)
+1. [parents](http://on.cypress.io/api/parents)
+2. [children](http://on.cypress.io/api/children)

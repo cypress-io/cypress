@@ -7,5 +7,5 @@ slug: root
 
 ## Related
 
-1. [get](/v1.0/docs/get)
-1. [within](/v1.0/docs/within)
+1. [get](http://on.cypress.io/api/get)
+1. [within](http://on.cypress.io/api/within)

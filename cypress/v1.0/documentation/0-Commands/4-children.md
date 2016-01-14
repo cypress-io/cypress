@@ -71,7 +71,7 @@ When clicking on the `children` command within the command log, the console outp
 <img width="542" alt="screen shot 2015-11-27 at 1 52 41 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447071/2e9252bc-950e-11e5-9a32-e5860da89160.png">
 
 ## Related
-1. [parent](/v1.0/docs/parent)
-2. [parents](/v1.0/docs/parents)
-3. [next](/v1.0/docs/next)
-4. [siblings](/v1.0/docs/siblings)
+1. [parent](http://on.cypress.io/api/parent)
+2. [parents](http://on.cypress.io/api/parents)
+3. [next](http://on.cypress.io/api/next)
+4. [siblings](http://on.cypress.io/api/siblings)

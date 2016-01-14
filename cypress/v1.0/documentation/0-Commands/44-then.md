@@ -3,7 +3,7 @@ slug: then
 
 ### [cy.then( *function* )](#usage)
 
-`cy.then()` will yield you the current subject as the first argument.  Be sure to read about [commands](/docs/issuing-commands) in detail if this sounds unfamiliar.
+`cy.then()` will yield you the current subject as the first argument.  Be sure to read about [commands](http://on.cypress.io/guides/issuing-commands) in detail if this sounds unfamiliar.
 
 `cy.then()` is modeled identically to the way `Promises` work in JavaScript.  Whatever is returned from the callback function becomes the new subject, and will flow into the next command, with the exception of `null` and `undefined`.
 
@@ -38,9 +38,9 @@ cy.get("#todos li").then(function($lis){
 })
 ```
 
-Normally you'd use implicit subject assertions via [should](/v1.0/docs/should) or [and](/v1.0/docs/and), but it's sometimes convenient to write explicit assertions about a given subject.
+Normally you'd use implicit subject assertions via [should](http://on.cypress.io/api/should) or [and](http://on.cypress.io/api/and), but it's sometimes convenient to write explicit assertions about a given subject.
 
-**Note:** *any errors raised by failed assertions will immediately bubble up and cause the test to fail.  This is the opposite of [`wait`](/v1.0/docs/wait).*
+**Note:** *any errors raised by failed assertions will immediately bubble up and cause the test to fail.  This is the opposite of [`wait`](http://on.cypress.io/api/wait).*
 
 ***
 
@@ -108,6 +108,6 @@ cy.get("form").then(function($form){
 
 ## Related
 
-1. [its](/v1.0/docs/its)
-2. [invoke](/v1.0/docs/invoke)
-3. [wait](/v1.0/docs/wait)
+1. [its](http://on.cypress.io/api/its)
+2. [invoke](http://on.cypress.io/api/invoke)
+3. [wait](http://on.cypress.io/api/wait)

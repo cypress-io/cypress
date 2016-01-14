@@ -35,4 +35,4 @@ When clicking on `document` within the command log, the console outputs the foll
 ***
 
 ## Related
-1. [window](/v1.0/docs/window)
+1. [window](http://on.cypress.io/api/window)

@@ -56,5 +56,5 @@ When clicking on the `blur` command within the command log, the console outputs 
 ***
 
 ## Related
-1. [focused](/v1.0/docs/focused)
-2. [focus](/v1.0/docs/focus)
+1. [focused](http://on.cypress.io/api/focused)
+2. [focus](http://on.cypress.io/api/focus)

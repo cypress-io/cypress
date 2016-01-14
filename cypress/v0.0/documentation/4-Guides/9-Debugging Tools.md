@@ -1,2 +1,3 @@
-slug: debugging
+excerpt: Debug Cypress
+slug: debugging-tools
 

@@ -1,7 +1,7 @@
 excerpt: Control the behavior of network requests and responses.
 slug: server
 
-#### **New to Cypress?** [Read about XHR strategy first.](/docs/network-requests-xhr)
+#### **New to Cypress?** [Read about XHR strategy first.](http://on.cypress.io/guides/network-requests-xhr)
 
 ***
 
@@ -283,13 +283,13 @@ When a new test runs, any oustanding requests still in flight are automatically 
 
 Oftentimes your application may make initial requests immediately when it loads (such as authenticating a user). Cypress makes it possible to actually start your server and define routes before a `cy.visit`. Upon the next visit, the server + routes will be instantly applied before your application loads.
 
-You can [read more about XHR strategy here](/docs/network-requests-xhr).
+You can [read more about XHR strategy here](http://on.cypress.io/guides/network-requests-xhr).
 
 ***
 
 ## Related
-1. [route](/v1.0/docs/route)
-2. [wait](/v1.0/docs/wait)
-3. [get](/v1.0/docs/get)
-4. [as](/v1.0/docs/as)
-5. [request](/v1.0/docs/request)
+1. [route](http://on.cypress.io/api/route)
+2. [wait](http://on.cypress.io/api/wait)
+3. [get](http://on.cypress.io/api/get)
+4. [as](http://on.cypress.io/api/as)
+5. [request](http://on.cypress.io/api/request)

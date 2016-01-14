@@ -46,12 +46,14 @@ npm run clean
 
 **Edits should NEVER be made from the Readme.io's web ui**
 
-In Guides, to link to another page on Guides:
+Links are all handled through our [cypress.on](https://github.com/cypress-io/cypress-on) api.
+
+To link to a page on Guides:
 ```md
-[Installing and Running](/docs/installing-and-running)
+[Installing and Running](http://on.cypress.io/guides/$slug)
 ```
 
-In Guides, to link to another page on API:
+To link to a page on API:
 ```md
-[and](/v1.0/docs/and)
+[and](http://on.cypress.io/api/$slug)
 ```

@@ -84,5 +84,5 @@ When clicking on `hash` within the command log, the console outputs the followin
 
 ## Related
 
-1. [location](/v1.0/docs/location)
-2. [url](/v1.0/docs/url)
+1. [location](http://on.cypress.io/api/location)
+2. [url](http://on.cypress.io/api/url)

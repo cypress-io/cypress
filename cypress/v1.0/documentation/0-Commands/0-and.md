@@ -1,7 +1,7 @@
 excerpt: Enables chaining multiple assertions together
 slug: and
 
-#### **New to Cypress?** [Read about making assertions first.](/docs/making-assertions)
+#### **New to Cypress?** [Read about making assertions first.](http://on.cypress.io/guides/making-assertions)
 
 ***
 
@@ -9,7 +9,7 @@ slug: and
 
 When chaining multiple assertions together, `cy.and` reads very well.
 
-`cy.and` is identical to [`cy.should`](/v1.0/docs/should).
+`cy.and` is identical to [`cy.should`](http://on.cypress.io/api/should).
 
 ***
 
@@ -90,5 +90,5 @@ When clicking on `assert` within the command log, the console outputs the follow
 ***
 
 ## Related
-1. [should](/v1.0/docs/should)
-2. [Assertions](/docs/making-assertions)
+1. [should](http://on.cypress.io/api/should)
+2. [Assertions](http://on.cypress.io/guides/making-assertions)

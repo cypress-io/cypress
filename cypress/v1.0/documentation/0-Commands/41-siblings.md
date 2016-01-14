@@ -61,4 +61,4 @@ When clicking on `siblings` within the command log, the console outputs the foll
 ***
 
 ## Related
-1. [prev](/v1.0/docs/prev)
+1. [prev](http://on.cypress.io/api/prev)

@@ -3,7 +3,7 @@ slug: its
 
 `cy.its` calls properties on the current subject.
 
-`cy.its` is identical to [`cy.invoke`](/v1.0/docs/invoke), which reads better when invoking function properties.
+`cy.its` is identical to [`cy.invoke`](http://on.cypress.io/api/invoke), which reads better when invoking function properties.
 
 ### [cy.its( *propertyName* )](#usage)
 
@@ -30,6 +30,6 @@ cy
 ***
 
 ## Related
-1. [invoke](/v1.0/docs/invoke)
-2. [wrap](/v1.0/docs/wrap)
-3. [then](/v1.0/docs/then)
+1. [invoke](http://on.cypress.io/api/invoke)
+2. [wrap](http://on.cypress.io/api/wrap)
+3. [then](http://on.cypress.io/api/then)

@@ -5,7 +5,7 @@ slug: invoke
 
 This works the same way as underscore's `invoke` function.
 
-`cy.invoke` is identical to [`cy.its`](/v1.0/docs/its). `cy.its` reads better when calling regular properties which are not functions.
+`cy.invoke` is identical to [`cy.its`](http://on.cypress.io/api/its). `cy.its` reads better when calling regular properties which are not functions.
 
 ### [cy.invoke( *functionName* )](#function-usage)
 
@@ -91,6 +91,6 @@ cy.get("form").invoke("attr", "ng-show").should("not.include", "myValue")
 
 ## Related
 
-1. [its](/v1.0/docs/its)
-2. [wrap](/v1.0/docs/wrap)
-3. [then](/v1.0/docs/then)
+1. [its](http://on.cypress.io/api/its)
+2. [wrap](http://on.cypress.io/api/wrap)
+3. [then](http://on.cypress.io/api/then)

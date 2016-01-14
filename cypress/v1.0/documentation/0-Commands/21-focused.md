@@ -37,5 +37,5 @@ When clicking on the `focused` command within the command log, the console outpu
 ***
 
 ## Related
-1. [focus](/v1.0/docs/focus)
-2. [blur](/v1.0/docs/blur)
+1. [focus](http://on.cypress.io/api/focus)
+2. [blur](http://on.cypress.io/api/blur)

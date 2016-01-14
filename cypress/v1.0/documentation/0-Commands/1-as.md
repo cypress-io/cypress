@@ -1,7 +1,7 @@
 excerpt: Alias reusable objects for later
 slug: as
 
-#### **New to Cypress?** [Read about using aliases first.](/docs/using-aliases)
+#### **New to Cypress?** [Read about using aliases first.](http://on.cypress.io/guides/using-aliases)
 
 ***
 
@@ -43,5 +43,5 @@ Aliases of routes display in the routes instrument panel:
 ***
 
 ## Related
-1. [wait](/v1.0/docs/wait)
-2. [get](/v1.0/docs/get)
+1. [wait](http://on.cypress.io/api/wait)
+2. [get](http://on.cypress.io/api/get)

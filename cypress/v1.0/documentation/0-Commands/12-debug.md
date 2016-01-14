@@ -23,4 +23,4 @@ cy.get("a").debug().should("have.attr", "href").and("match", /dashboard/)
 ***
 
 ## Related
-1. [pause](/v1.0/docs/pause)
+1. [pause](http://on.cypress.io/api/pause)
