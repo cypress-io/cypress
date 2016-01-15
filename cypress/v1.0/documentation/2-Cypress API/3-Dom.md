@@ -1,4 +1,4 @@
-slug: dom-ishidden
+slug: dom
 excerpt: Find out whether an element is hidden
 
 `Cypress.Dom` holds methods and logic related to DOM.
