@@ -20,28 +20,26 @@ There are clear benefits to testing code. But many *web applications* are not fu
 
 These are just a few reasons why it's often difficult to test modern web applications. Often it takes longer to write a passing test for a feature, than to actually build the feature.
 
-There is a lot of mental friction when writing tests.
-
-Testing just becomes another layer to cut through. Because testing is often brittle, we lose confidence that our tests are delivering any additional value.
+There is a lot of mental friction when writing tests. Testing just becomes another layer to cut through. Because testing is often brittle, we lose confidence that our tests are delivering any additional value.
 
 Because of this complexity, most organizations have an entire Quality Assurance (QA) department dedicated to these tasks.
 
 > Cypress aims to solve the biggest difficulties when it comes to testing web applications. It aims to reduce the mental effort required to write tests. Cypress works in your typical development workflow (in the browser) and allows you to see your application while it's being tested. This enables you to practice TDD since there is no context shift between testing and development.
 
-
 ## Core Goals of Cypress
 
 * **Easy Setup:** Allow you to write your first test in less than 5 minutes.
-* **In-Browser Testing:** Integrate testing within your normal development process.
 * **Automated:** Allow you to drive your application with tests instead of manual interactions.
+* **Easy Integration:** Require zero code changes to your existing application.
+* **In-Browser Testing:** Integrate testing within your normal development process.
+* **JavaScript:** Allow you to write your test suite in JavaScript.
+* **Enjoyable:** Make writing tests an enjoyable, fun experience.
+* **Opinionated:** Encourage writing good tests.
 * **Clear error messages:** Provide **clear**, debuggable error messages.
 * **Intelligent Network Requests:** Make dealing with `AJAX/XHR` ridiculously simple.
 * **Cross-browser support:** Provide cross-browser testing and debugging **without** leaving Google Chrome and work in all modern browsers (`IE11+`)
 * **CI Integration:** Instantly integrate any Continuous Integration provider.
 * **Accessible:** Work with any JavaScript framework (current and future).
-* **Accessible:** Replace server side testing tools like `Capybara`.
+* **Flexible:** Replace server side testing tools like `Capybara`.
 * **Integrate with Server:** Allow you to communicate directly to a backend server for seeding / querying.
-* **Easy Integration:** Require zero code changes to your existing application.
 * **Elimate Selenium:** Eliminate the need to code or deal with `Selenium`.
-* **Enjoyable:** Make writing tests an enjoyable, fun experience.
-* **Opinionated:** Encourage writing good tests.
