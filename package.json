@@ -6,8 +6,16 @@
   "scripts": {
     "dev": "gulp dev"
   },
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cypress-io/cypress-gui.git"
+  },
+  "author": "Brian Mann",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cypress-io/cypress-gui/issues"
+  },
+  "homepage": "https://github.com/cypress-io/cypress-gui",
   "dependencies": {
     "coffee-script": "^1.10.0",
     "path": "^0.12.7"
