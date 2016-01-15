@@ -1,5 +1,5 @@
-excerpt: Set up environment variables
 slug: environment-variables
+excerpt: Set up environment variables
 
 ## Environment Variables
 - [Use Case](#use-case)

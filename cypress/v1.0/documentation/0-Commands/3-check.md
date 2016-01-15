@@ -1,5 +1,5 @@
-excerpt: Check a checkbox
 slug: check
+excerpt: Check a checkbox
 
 ### [cy.check()](#usage)
 

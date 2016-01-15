@@ -1,5 +1,5 @@
-excerpt: Get descendants of elements
 slug: find
+excerpt: Get descendants of elements
 
 ### [cy.find( *selector* )](#selector-usage)
 

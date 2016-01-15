@@ -1,5 +1,5 @@
-excerpt: Structure your folders and files
 slug: directory-structure
+excerpt: Structure your folders and files
 
 ## Folder Structure
 

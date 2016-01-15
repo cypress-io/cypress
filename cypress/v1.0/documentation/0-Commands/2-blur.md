@@ -1,5 +1,5 @@
-excerpt: Blur the current subject
 slug: blur
+excerpt: Blur the current subject
 
 ### [cy.blur()](#usage)
 

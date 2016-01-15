@@ -1,5 +1,5 @@
-excerpt: Reference work done in previous commands.
 slug: using-aliases
+excerpt: Reference work done in previous commands.
 
 Because all commands in Cypress are async, it makes referencing commands between each other at best clumsy and obfuscated, and at worst impossible.
 

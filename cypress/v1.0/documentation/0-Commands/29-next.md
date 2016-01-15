@@ -1,5 +1,5 @@
-excerpt: Get the next sibling of elements
 slug: next
+excerpt: Get the next sibling of elements
 
 ### [cy.next()](#usage)
 

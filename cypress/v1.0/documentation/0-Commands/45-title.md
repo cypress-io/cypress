@@ -1,5 +1,5 @@
-excerpt: Get the title of the document
 slug: title
+excerpt: Get the title of the document
 
 ### [cy.title()](#usage)
 

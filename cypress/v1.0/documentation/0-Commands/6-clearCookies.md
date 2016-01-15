@@ -1,5 +1,5 @@
-excerpt: Clear all browser cookies.
 slug: clearcookies
+excerpt: Clear all browser cookies.
 
 ### [cy.clearCookies()](#usage)
 

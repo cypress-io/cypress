@@ -1,5 +1,5 @@
-excerpt: Get the root element
 slug: root
+excerpt: Get the root element
 
 ### root
 

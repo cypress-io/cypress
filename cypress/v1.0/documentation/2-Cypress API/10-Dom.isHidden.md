@@ -1,5 +1,5 @@
-excerpt: Find out whether an element is hidden
 slug: dom-ishidden
+excerpt: Find out whether an element is hidden
 
 `Cypress.Dom` holds methods and logic related to DOM.
 

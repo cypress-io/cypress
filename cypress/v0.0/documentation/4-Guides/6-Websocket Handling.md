@@ -1,3 +1,3 @@
-excerpt: Handle Websockets
 slug: websocket-handling
+excerpt: Handle Websockets
 

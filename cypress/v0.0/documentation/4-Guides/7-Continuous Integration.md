@@ -1,5 +1,5 @@
-excerpt: Run Cypress in any CI provider
 slug: continuous-integration
+excerpt: Run Cypress in any CI provider
 
 ## Requirements
 

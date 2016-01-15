@@ -1,5 +1,5 @@
-excerpt: Applications using Cypress
 slug: all-example-apps
+excerpt: Applications using Cypress
 
 Name | JS | Server | CI
 --- | --- | --- |

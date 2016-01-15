@@ -1,5 +1,5 @@
-excerpt: Format or parse dates using moment methods
 slug: moment
+excerpt: Format or parse dates using moment methods
 
 Cypress automatically proxies [`moment.js`](http://momentjs.com/) and exposes it as `cy.moment`.
 

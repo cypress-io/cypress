@@ -1,5 +1,5 @@
-excerpt: Submit a form
 slug: submit
+excerpt: Submit a form
 
 ### [cy.submit()](#usage)
 

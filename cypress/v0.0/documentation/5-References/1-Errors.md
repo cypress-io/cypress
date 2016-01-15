@@ -1,5 +1,5 @@
-excerpt: Understand errors thrown in Cypress
 slug: errors
+excerpt: Understand errors thrown in Cypress
 
 ## Errors
 

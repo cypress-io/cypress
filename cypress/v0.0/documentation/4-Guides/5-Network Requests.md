@@ -1,5 +1,5 @@
-excerpt: Manage AJAX/XHR requests
 slug: network-requests-xhr
+excerpt: Manage AJAX/XHR requests
 
 Cypress makes it easy to manage the entire lifecyle of AJAX / XHR requests within your application.
 

@@ -1,5 +1,5 @@
-excerpt: Get a cookie by its key. Returns the string value.
 slug: cookies-get
+excerpt: Get a cookie by its key. Returns the string value.
 
 ### [Cypress.Cookies.get( *key* )](#get-usage)
 

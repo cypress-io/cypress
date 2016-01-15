@@ -1,5 +1,5 @@
-excerpt: Alias reusable objects for later
 slug: as
+excerpt: Alias reusable objects for later
 
 #### **New to Cypress?** [Read about using aliases first.](http://on.cypress.io/guides/using-aliases)
 

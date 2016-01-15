@@ -1,5 +1,5 @@
-excerpt: Get global window object
 slug: window
+excerpt: Get global window object
 
 ### [cy.window()](#usage)
 

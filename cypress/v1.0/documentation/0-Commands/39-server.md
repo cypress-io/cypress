@@ -1,5 +1,5 @@
-excerpt: Control the behavior of network requests and responses.
 slug: server
+excerpt: Control the behavior of network requests and responses.
 
 #### **New to Cypress?** [Read about XHR strategy first.](http://on.cypress.io/guides/network-requests-xhr)
 

@@ -1,5 +1,5 @@
-excerpt: Invoke the function on the current subject
 slug: wrap
+excerpt: Invoke the function on the current subject
 
 ### [cy.wrap()](#usage)
 

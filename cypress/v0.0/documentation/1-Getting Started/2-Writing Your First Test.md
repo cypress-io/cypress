@@ -1,5 +1,5 @@
-excerpt: Walkthrough writing your first test
 slug: writing-your-first-test
+excerpt: Walkthrough writing your first test
 
 ## Definitions
 

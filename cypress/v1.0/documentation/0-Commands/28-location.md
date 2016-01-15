@@ -1,5 +1,5 @@
-excerpt: Get window.location
 slug: location
+excerpt: Get window.location
 
 ### [cy.location()](#usage)
 

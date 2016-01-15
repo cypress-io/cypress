@@ -1,5 +1,5 @@
-excerpt: Make an assertion about current subject
 slug: should
+excerpt: Make an assertion about current subject
 
 #### **New to Cypress?** [Read about assertions first.](http://on.cypress.io/guides/making-assertions)
 

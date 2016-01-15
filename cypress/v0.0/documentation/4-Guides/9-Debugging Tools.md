@@ -1,3 +1,3 @@
-excerpt: Debug Cypress
 slug: debugging-tools
+excerpt: Debug Cypress
 

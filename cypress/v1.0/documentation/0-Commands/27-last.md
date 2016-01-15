@@ -1,5 +1,5 @@
-excerpt: Get the last element
 slug: last
+excerpt: Get the last element
 
 ### [cy.last()](#usage)
 

@@ -1,5 +1,5 @@
-excerpt: Traverse the dom and perform actions with commands
 slug: issuing-commands
+excerpt: Traverse the dom and perform actions with commands
 
 ## Async
 

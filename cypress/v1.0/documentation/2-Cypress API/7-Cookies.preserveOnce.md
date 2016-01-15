@@ -1,5 +1,5 @@
-excerpt: Instantiate a bluebird promise
 slug: cookies-preserveonce
+excerpt: Instantiate a bluebird promise
 
 ### [Cypress.Cookies.preserveOnce( *key1*, *key2*, *key3*, ... )](#preserve-usage)
 

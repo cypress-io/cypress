@@ -1,5 +1,5 @@
-excerpt: Get the current URL hash
 slug: hash
+excerpt: Get the current URL hash
 
 ### [cy.hash()](#usage)
 

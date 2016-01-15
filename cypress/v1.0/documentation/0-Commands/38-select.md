@@ -1,5 +1,5 @@
-excerpt: Select an option
 slug: select
+excerpt: Select an option
 
 ### [cy.select( *text* )](#text-usage)
 

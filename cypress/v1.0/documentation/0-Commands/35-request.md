@@ -1,5 +1,5 @@
-excerpt: Make XHR request
 slug: request
+excerpt: Make XHR request
 
 Use `cy.request` to make XHR requests. Great for talking to an external endpoint before, during, or after your tests for seeding, querying records, or API testing.
 

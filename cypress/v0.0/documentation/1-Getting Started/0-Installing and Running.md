@@ -1,5 +1,5 @@
-excerpt: Quick start guide for using Cypress
 slug: installing-and-running
+excerpt: Quick start guide for using Cypress
 
 ## System Requirements
 

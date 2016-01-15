@@ -1,5 +1,5 @@
-excerpt: Get the siblings of elements
 slug: siblings
+excerpt: Get the siblings of elements
 
 ### [cy.siblings()](#usage)
 

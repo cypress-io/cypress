@@ -1,5 +1,5 @@
-excerpt: Log out cookie values on set or remove
 slug: cookies-debug
+excerpt: Log out cookie values on set or remove
 
 ### [Cypress.Cookies.debug( *boolean* )](#debug-usage)
 

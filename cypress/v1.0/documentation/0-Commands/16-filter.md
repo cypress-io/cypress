@@ -1,5 +1,5 @@
-excerpt: Filter elements by selector
 slug: filter
+excerpt: Filter elements by selector
 
 ### [cy.filter( *selector* )](#selector-usage)
 

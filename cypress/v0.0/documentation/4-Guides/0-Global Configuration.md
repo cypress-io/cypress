@@ -1,5 +1,5 @@
-excerpt: Configure Cypress
 slug: global-configuration
+excerpt: Configure Cypress
 
 Every project has a `cypress.json` file with configuration options including:
 

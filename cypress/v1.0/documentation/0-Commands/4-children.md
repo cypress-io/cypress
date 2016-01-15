@@ -1,5 +1,5 @@
-excerpt: Get the children of elements
 slug: children
+excerpt: Get the children of elements
 
 ### [cy.children()](#usage)
 

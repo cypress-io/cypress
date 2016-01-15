@@ -1,5 +1,5 @@
-excerpt: Clear all data in local storage.
 slug: clearlocalstorage
+excerpt: Clear all data in local storage.
 
 ### [cy.clearLocalStorage()](#usage)
 

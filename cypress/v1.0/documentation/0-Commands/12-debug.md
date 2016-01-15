@@ -1,5 +1,5 @@
-excerpt: Call debugger
 slug: debug
+excerpt: Call debugger
 
 `cy.debug` will call `debugger` in JavaScript.
 

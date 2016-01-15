@@ -1,5 +1,5 @@
-excerpt: Pause command
 slug: pause
+excerpt: Pause command
 
 ### [cy.pause()](#usage)
 

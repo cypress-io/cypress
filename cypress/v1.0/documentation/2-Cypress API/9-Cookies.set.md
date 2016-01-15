@@ -1,5 +1,5 @@
-excerpt: Set a cookie by key, value.
 slug: cookies-set
+excerpt: Set a cookie by key, value.
 
 ### [Cypress.Cookies.set( *key*, *value* )](#set-usage)
 

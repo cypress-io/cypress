@@ -1,5 +1,5 @@
-excerpt: Set a route matching a url
 slug: route
+excerpt: Set a route matching a url
 
 #### **New to Cypress?** [Read about XHR strategy first.](http://on.cypress.io/guides/network-requests-xhr)
 

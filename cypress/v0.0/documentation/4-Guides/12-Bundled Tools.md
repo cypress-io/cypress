@@ -1,5 +1,5 @@
-excerpt: Tools used in Cypress
 slug: bundled-tools
+excerpt: Tools used in Cypress
 
 Cypress bundles together a familiar set of tools and builds heavily on them. Much of the Cypress API is rooted in the path these tools have paved.
 

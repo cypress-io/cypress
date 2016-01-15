@@ -1,5 +1,5 @@
-excerpt: Remove elements from set
 slug: not
+excerpt: Remove elements from set
 
 ### [cy.not( *selector* )](#selector-usage)
 

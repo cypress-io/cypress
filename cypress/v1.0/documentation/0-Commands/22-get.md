@@ -1,5 +1,5 @@
-excerpt: Get an element
 slug: get
+excerpt: Get an element
 
 ### [cy.get( *selector* )](#selector-usage)
 Matches one or more DOM elements based on the CSS-based selector.  The selector can be any valid jQuery selector.

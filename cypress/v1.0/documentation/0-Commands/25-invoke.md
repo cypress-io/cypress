@@ -1,5 +1,5 @@
-excerpt: Call properties on the current subject
 slug: invoke
+excerpt: Call properties on the current subject
 
 `cy.invoke` invokes properties which are functions on the current subject.
 

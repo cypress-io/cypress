@@ -1,5 +1,5 @@
-excerpt: Check to see if matching element contains text
 slug: contains
+excerpt: Check to see if matching element contains text
 
 ### [cy.contains( *text* )](#text-usage)
 

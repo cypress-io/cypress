@@ -1,5 +1,5 @@
-excerpt: Visit a remote url
 slug: visit
+excerpt: Visit a remote url
 
 ### [cy.visit( *url* )](#usage)
 

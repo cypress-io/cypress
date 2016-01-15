@@ -1,5 +1,5 @@
-excerpt: Enables chaining multiple assertions together
 slug: and
+excerpt: Enables chaining multiple assertions together
 
 #### **New to Cypress?** [Read about making assertions first.](http://on.cypress.io/guides/making-assertions)
 

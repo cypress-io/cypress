@@ -1,5 +1,5 @@
-excerpt: Remove a cookie by its key.
 slug: cookies-remove
+excerpt: Remove a cookie by its key.
 
 ### [Cypress.Cookies.remove( *key* )](#remove-usage)
 

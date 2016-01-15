@@ -1,5 +1,5 @@
-excerpt: Verify expectations
 slug: making-assertions
+excerpt: Verify expectations
 
 Assertions verify an expectation.
 

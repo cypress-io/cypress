@@ -1,5 +1,5 @@
-excerpt: Focus on the current subject
 slug: focus
+excerpt: Focus on the current subject
 
 ### [cy.focus()](#usage)
 

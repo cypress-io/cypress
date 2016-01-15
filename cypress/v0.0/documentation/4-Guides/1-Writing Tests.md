@@ -1,3 +1,3 @@
-excerpt: Writing Tests
 slug: writing-tests
+excerpt: Writing Tests
 

@@ -1,5 +1,5 @@
-excerpt: Load a fixture to represent data
 slug: fixture
+excerpt: Load a fixture to represent data
 
 ### [cy.fixture( *fixture* )](#single-fixture-usage)
 Loads a single fixture by name.

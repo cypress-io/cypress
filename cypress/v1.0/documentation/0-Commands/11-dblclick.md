@@ -1,5 +1,5 @@
-excerpt: Double-click on a subject
 slug: dblclick
+excerpt: Double-click on a subject
 
 ### [cy.dblclick()](#usage)
 

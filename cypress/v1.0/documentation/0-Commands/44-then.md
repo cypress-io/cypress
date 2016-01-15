@@ -1,5 +1,5 @@
-excerpt: Yield the current subject as an argument
 slug: then
+excerpt: Yield the current subject as an argument
 
 ### [cy.then( *function* )](#usage)
 

@@ -1,5 +1,5 @@
-excerpt: Get the current URL
 slug: url
+excerpt: Get the current URL
 
 ### [cy.url()](#usage)
 

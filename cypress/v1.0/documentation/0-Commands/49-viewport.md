@@ -1,5 +1,5 @@
-excerpt: Change the screen size of your application
 slug: viewport
+excerpt: Change the screen size of your application
 
 Use `cy.viewport` to control the screen size of your application.
 

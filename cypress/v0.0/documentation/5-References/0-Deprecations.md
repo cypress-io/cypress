@@ -1,5 +1,5 @@
-excerpt: Deprecations
 slug: deprecations
+excerpt: Deprecations
 
 Deprecations which require additional explanation are listed here.
 

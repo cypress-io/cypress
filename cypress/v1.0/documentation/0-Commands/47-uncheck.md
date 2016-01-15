@@ -1,5 +1,5 @@
-excerpt: Uncheck a checkbox
 slug: uncheck
+excerpt: Uncheck a checkbox
 
 ### [cy.uncheck()](#usage)
 

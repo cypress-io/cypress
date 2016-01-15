@@ -1,5 +1,5 @@
-excerpt: Get the parent of elements
 slug: parent
+excerpt: Get the parent of elements
 
 ### [cy.parent()](#usage)
 

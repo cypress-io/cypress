@@ -1,2 +1,2 @@
-excerpt: See known issues
 slug: known-issues
+excerpt: See known issues

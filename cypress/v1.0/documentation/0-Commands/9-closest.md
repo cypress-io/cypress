@@ -1,5 +1,5 @@
-excerpt: Get closest ancestor
 slug: closest
+excerpt: Get closest ancestor
 
 ### [cy.closest( *selector* )](#selector-usage)
 

@@ -1,5 +1,5 @@
-excerpt: Load fixtures
 slug: creating-fixtures
+excerpt: Load fixtures
 
 Cypress has first class support for managing fixtures in your test files.
 

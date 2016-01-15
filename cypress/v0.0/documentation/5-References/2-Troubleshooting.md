@@ -1,5 +1,5 @@
-excerpt: Get help for common problems in Cypress
 slug: troubleshooting
+excerpt: Get help for common problems in Cypress
 
 ## Installation
 

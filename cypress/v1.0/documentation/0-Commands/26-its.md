@@ -1,5 +1,5 @@
-excerpt: Call properties on the current subject
 slug: its
+excerpt: Call properties on the current subject
 
 `cy.its` calls properties on the current subject.
 

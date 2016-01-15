@@ -1,5 +1,5 @@
-excerpt: Get the first element within elements
 slug: first
+excerpt: Get the first element within elements
 
 ### [cy.first()](#usage)
 

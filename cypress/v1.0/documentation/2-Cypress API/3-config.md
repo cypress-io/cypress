@@ -1,5 +1,5 @@
-excerpt: get and set configuration options
 slug: config
+excerpt: get and set configuration options
 
 #### **New to Cypress?** [Read about configuration first.](http://on.cypress.io/guides/global-configuration)
 

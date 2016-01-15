@@ -1,5 +1,5 @@
-excerpt: Get the previous sibling of elements
 slug: prev
+excerpt: Get the previous sibling of elements
 
 ### [cy.prev()](#usage)
 

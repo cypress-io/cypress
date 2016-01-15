@@ -1,5 +1,5 @@
-excerpt: Wait for a specific amount of time or resource to resolve
 slug: wait
+excerpt: Wait for a specific amount of time or resource to resolve
 
 #### **New to Cypress?** [Read about XHR strategy first.](xhr)
 

@@ -1,5 +1,5 @@
-excerpt: End the command chain
 slug: end
+excerpt: End the command chain
 
 ### [cy.end()](#usage)
 

@@ -1,5 +1,5 @@
-excerpt: Within
 slug: within
+excerpt: Within
 
 ### [cy.within( *function* )](#usage)
 

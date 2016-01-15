@@ -1,5 +1,5 @@
-excerpt: Modify Cookie defaults
 slug: cookies-defaults
+excerpt: Modify Cookie defaults
 
 ### [Cypress.Cookies.defaults( *options* )](#defaults-usage)
 

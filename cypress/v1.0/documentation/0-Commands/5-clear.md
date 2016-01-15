@@ -1,5 +1,5 @@
-excerpt: Clear a value of an input or textarea
 slug: clear
+excerpt: Clear a value of an input or textarea
 
 ### [cy.clear()](#usage)
 

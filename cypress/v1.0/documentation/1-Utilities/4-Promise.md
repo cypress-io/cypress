@@ -1,5 +1,5 @@
-excerpt: Instantiate a bluebird promise
 slug: promise
+excerpt: Instantiate a bluebird promise
 
 Cypress automatically proxies [`Bluebird`](https://github.com/petkaantonov/bluebird) and exposes it as `cy.Promise`.
 

@@ -1,5 +1,5 @@
-excerpt: Type into element
 slug: type
+excerpt: Type into element
 
 ### [cy.type( *text* )](#usage)
 

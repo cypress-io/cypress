@@ -1,3 +1,3 @@
-excerpt: Instantiate a bluebird promise
 slug: addparentcommand-1
+excerpt: Instantiate a bluebird promise
 

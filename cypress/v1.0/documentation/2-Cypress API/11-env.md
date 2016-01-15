@@ -1,5 +1,5 @@
-excerpt: get and set environment variables
 slug: env
+excerpt: get and set environment variables
 
 #### **New to Cypress?** [Read about environment variables first.](http://on.cypress.io/guides/environment-variables)
 

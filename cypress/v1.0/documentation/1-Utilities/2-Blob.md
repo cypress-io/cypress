@@ -1,5 +1,5 @@
-excerpt: Convert base64 strings to blob objects
 slug: blob
+excerpt: Convert base64 strings to blob objects
 
 Cypress proxies a [`Blob Utilities`](https://github.com/nolanlawson/blob-util) library and exposes it as `cy.Blob`.
 
