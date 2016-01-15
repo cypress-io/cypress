@@ -6,8 +6,8 @@ Name | JS | Server | CI
 [TodoMVC](https://github.com/cypress-io/examples-react-travis-ci) | React | Node | TravisCI
 PieChopper | Angular | Node | CircleCI
 
-## TodoMVC
-This repo compares Cypress Tests to official TodoMVC Tests. This gives you a good comparison vs using vanilla Selenium.
+## [TodoMVC](https://github.com/cypress-io/examples-react-travis-ci)
+This repo compares Cypress Tests to official TodoMVC Tests. This gives you a good comparison of writing and running tests in Cypress vs vanilla Selenium.
 
 Features:
 - Querying
@@ -18,11 +18,11 @@ Features:
 ***
 
 ## PieChopper
-This is a single page application with a decent amount of features. It involves lots of form filling.
+This is a single page application with a decent amount of features. It involves lots of form submissions.
 
 Features:
 - Querying
-- Form Filling
+- Forms
 - Scroll Tests
 - XHR Stubbing
 - Dialogs

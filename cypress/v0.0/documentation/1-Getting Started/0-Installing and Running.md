@@ -72,6 +72,6 @@ After adding your project to Cypress, Cypress will generate a `cypress.json` fil
 /cypress.json
 ```
 
-This file contains your unique `projectId` and allows for specific Cypress [configuration](http://on.cypress.io/guides/global-configuration).
+This file contains your unique `projectId` and allows for specific Cypress [configuration](http://on.cypress.io/guides/configuration).
 
 It is okay to commit this file to `git`.
