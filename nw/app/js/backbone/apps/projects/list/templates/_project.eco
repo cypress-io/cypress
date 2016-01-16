@@ -1,5 +1,0 @@
-<h4>
-  <%= @name %>
-  <small><%= @path %></small>
-</h4>
-<i class="fa fa-angle-right"></i>
