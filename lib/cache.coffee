@@ -197,6 +197,12 @@ class Cache extends require("events").EventEmitter
 
     @_set {USER: user}
 
+  removeUserSession: ->
+    @getUser()
+    .then (user = {}) =>
+      user.session_token = null
+      @_set({USER: user})
+
   remove: ->
     fs.removeSync CACHE
 
@@ -248,23 +254,23 @@ class Cache extends require("events").EventEmitter
   #     err.message = err.message.split(" - ").slice(1).join("")
   #     throw err
 
-  logOut: (token) ->
-    nukeSession = (resolve, reject) ->
-      @_get("USER")
-      .then (user = {}) =>
-        user.session_token = null
-        @_set({USER: user})
-      .then(resolve)
-      .catch(reject)
+  # logOut: (token) ->
+  #   nukeSession = (resolve, reject) ->
+  #     @_get("USER")
+  #     .then (user = {}) =>
+  #       user.session_token = null
+  #       @_set({USER: user})
+  #     .then(resolve)
+  #     .catch(reject)
 
-    url = Routes.signout()
-    headers = {"X-Session": token}
+  #   url = Routes.signout()
+  #   headers = {"X-Session": token}
 
-    new Promise (resolve, reject) =>
-      nukeSession = _.bind(nukeSession, @, resolve, reject)
+  #   new Promise (resolve, reject) =>
+  #     nukeSession = _.bind(nukeSession, @, resolve, reject)
 
-      request.post({url: url, headers: headers})
-        .then(nukeSession)
-        .catch(nukeSession)
+  #     request.post({url: url, headers: headers})
+  #       .then(nukeSession)
+  #       .catch(nukeSession)
 
 module.exports = new Cache

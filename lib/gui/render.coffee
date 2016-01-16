@@ -86,6 +86,11 @@ module.exports = (optionsOrArgv) ->
             send(null, user)
         .catch(sendErr)
 
+      when "log:out"
+        auth.logOut(arg)
+        .then(cache.removeUserSession())
+        ## TODO: clear cookies here
+
       when "external:open"
         shell.openExternal(arg)
 

@@ -20,4 +20,9 @@ module.exports = {
       ## adds this before the message
       err.message = err.message.split(" - ").slice(1).join("")
       throw err
+
+  logOut: (token) ->
+    url = Routes.signout()
+    headers = {"X-Session": token}
+    request.post({url: url, headers: headers})
 }
