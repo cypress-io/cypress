@@ -2,5 +2,5 @@ path = require("path")
 
 module.exports = {
   getPathToHtml: ->
-    "file://" + path.join(__dirname, "..", "dest", "index.html")
+    "file://" + path.join(__dirname, "..", "dist", "index.html")
 }

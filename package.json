@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "http-server ./dist -o",
     "dev": "gulp dev"
   },
   "repository": {
