@@ -20,12 +20,13 @@
         App.ipc("show:directory:dialog")
         .then (dirPath) ->
           ## if the user cancelled the dialog selection
-          ## dirPath will be null
+          ## dirPath will be undefined
           return if not dirPath
 
+          ## initially set our project to be loading state
           project = projects.add({path: dirPath, loading: true})
 
-          ## wait at least 1 second even if add:project
+          ## wait at least 750ms even if add:project
           ## resolves faster to prevent the sudden flash
           ## of loading content which is jarring
           Promise.all([
@@ -33,6 +34,8 @@
             Promise.delay(750)
           ])
           .then ->
+            ## our project is now in the loaded state
+            ## and can be started
             project.loaded()
 
         .catch (err) =>
@@ -58,7 +61,7 @@
         @listenTo projectsView, "childview:project:clicked", (iv, obj) ->
           project = obj.model
 
-          ## dont do anything if our project is loading
+          ## bail if our project is loading
           return if project.isLoading()
 
           startProject(project, params)

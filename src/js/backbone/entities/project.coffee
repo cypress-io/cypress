@@ -1,5 +1,8 @@
 @App.module "Entities", (Entities, App, Backbone, Marionette, $, _) ->
 
+  stringify = (err) ->
+    [err.name, err.message].join(": ")
+
   class Entities.Project extends Entities.Model
     defaults:
       loading: false
@@ -28,7 +31,7 @@
       if err.portInUse
         @set("portInUse", true)
 
-      @set "error", err.toString()
+      @set "error", stringify(err)
 
     reset: ->
       props = {
