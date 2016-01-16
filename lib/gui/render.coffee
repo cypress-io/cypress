@@ -105,6 +105,12 @@ module.exports = (optionsOrArgv) ->
           send(null, user)
         .catch(send)
 
+      when "get:project:paths"
+        cache.getProjectPaths()
+          .then (paths) ->
+            send(null, paths)
+          .catch(send)
+
       else
         throw new Error("No ipc event registered for: '#{type}'")
 
