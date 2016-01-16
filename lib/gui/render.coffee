@@ -1,9 +1,11 @@
 _             = require("lodash")
+uri           = require("url")
 path          = require("path")
 app           = require("electron").app
 ipc           = require("electron").ipcMain
 BrowserWindow = require("electron").BrowserWindow
 cache         = require("../cache")
+auth          = require("../authentication")
 CypressGui    = require("cypress-gui")
 
 ## Keep a global reference of the window object, if you don't, the window will
@@ -13,7 +15,7 @@ mainWindow = null
 getUrl = (type) ->
   switch type
     when "GITHUB_LOGIN"
-      "https://www.google.com"
+      auth.getLoginUrl()
     else
       throw new Error("No acceptable window type found for: '#{arg.type}'")
 
@@ -35,6 +37,12 @@ module.exports = (optionsOrArgv) ->
       event.sender.send("response", {id: id, __error: err, data: data})
 
     switch type
+      when "log:in"
+        auth.logIn(arg)
+        .then (user) ->
+          send(null, user)
+        .catch(send)
+
       when "window:open"
         args = _.defaults {}, arg, {
           url: getUrl(arg.type)
@@ -46,17 +54,39 @@ module.exports = (optionsOrArgv) ->
           }
         }
 
-        url = getUrl(arg.type)
+        urlChanged = (url) ->
+          parsed = uri.parse(url, true)
+
+          if code = parsed.query.code
+            win.close()
+
+            send(null, code)
 
         win = new BrowserWindow(args)
-        win.loadURL(args.url)
 
         ## open dev tools if they're true
         if args.devTools
           win.webContents.openDevTools()
 
-        win.once "dom-ready", ->
-          send(null, null)
+        ## enable our url to be a promise
+        ## and wait for this to be resolved
+        Promise
+          .resolve(args.url)
+          .then (url) ->
+            ## navigate the window here!
+            win.loadURL(url)
+
+            # win.once "dom-ready", ->
+            #   send(null, null)
+
+            if args.type is "GITHUB_LOGIN"
+              win.webContents.on "will-navigate", (e, url) ->
+                urlChanged(url)
+
+              win.webContents.on "did-get-redirect-request", (e, oldUrl, newUrl) ->
+                urlChanged(newUrl)
+
+          .catch(send)
 
       when "get:options"
         ## return options
@@ -67,9 +97,9 @@ module.exports = (optionsOrArgv) ->
 
       when "get:current:user"
         cache.getUser()
-          .then (user) ->
-            send(null, user)
-          .catch(send)
+        .then (user) ->
+          send(null, user)
+        .catch(send)
 
       else
         throw new Error("No ipc event registered for: '#{type}'")

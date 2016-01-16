@@ -237,16 +237,16 @@ class Cache extends require("events").EventEmitter
   generateProjectToken: (session, project) ->
     @_projectToken("put", session, project)
 
-  ## move this to an auth module
-  ## and update NW references
-  logIn: (code) ->
-    url = Routes.signin({code: code})
-    request.post(url, {json: true})
-    .catch errors.StatusCodeError, (err) ->
-      ## slice out the status code since RP automatically
-      ## adds this before the message
-      err.message = err.message.split(" - ").slice(1).join("")
-      throw err
+  # ## move this to an auth module
+  # ## and update NW references
+  # logIn: (code) ->
+  #   url = Routes.signin({code: code})
+  #   request.post(url, {json: true})
+  #   .catch errors.StatusCodeError, (err) ->
+  #     ## slice out the status code since RP automatically
+  #     ## adds this before the message
+  #     err.message = err.message.split(" - ").slice(1).join("")
+  #     throw err
 
   logOut: (token) ->
     nukeSession = (resolve, reject) ->
