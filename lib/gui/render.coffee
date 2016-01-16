@@ -7,11 +7,15 @@ dialog        = require("electron").dialog
 BrowserWindow = require("electron").BrowserWindow
 cache         = require("../cache")
 auth          = require("../authentication")
+Cypress       = require("../cypress")
 cypressGui    = require("cypress-gui")
 
 ## Keep a global reference of the window object, if you don't, the window will
 ## be closed automatically when the JavaScript object is garbage collected.
 mainWindow = null
+
+## global reference to any open projects
+openProject = null
 
 getUrl = (type) ->
   switch type
@@ -156,6 +160,29 @@ module.exports = (optionsOrArgv) ->
         .then ->
           send(null, arg)
         .catch(sendErr)
+
+      when "open:project"
+        ## store the currently open project
+        openProject = Cypress(arg.path)
+
+        openProject
+        .boot(arg.options)
+        .get("settings")
+        .then (settings) ->
+          send(null, settings)
+        .catch(sendErr)
+
+      when "close:project"
+        ret = ->
+          ## null this back out
+          openProject = null
+
+          send(null, null)
+
+        return ret() if not openProject
+
+        openProject.close()
+        .then(ret)
 
       else
         throw new Error("No ipc event registered for: '#{type}'")

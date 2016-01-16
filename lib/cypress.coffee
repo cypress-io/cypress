@@ -1,11 +1,10 @@
 require("./environment")
 
+child_process  = require("child_process")
+open           = require("open")
+Promise        = require("bluebird")
 config         = require("./config")
 Server         = require("./server")
-Backend        = require("./backend")
-child_process  = require("child_process")
-open           = require('open')
-Promise        = require('bluebird')
 
 class Booter
   constructor: (projectRoot) ->
@@ -56,9 +55,6 @@ class Booter
 
   close: ->
     @server.close()
-
-  ## attach to Cypress class
-  @Backend = Backend
 
 send = (obj) ->
   if process.send
