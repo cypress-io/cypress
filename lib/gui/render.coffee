@@ -3,6 +3,7 @@ uri           = require("url")
 path          = require("path")
 app           = require("electron").app
 ipc           = require("electron").ipcMain
+dialog        = require("electron").dialog
 BrowserWindow = require("electron").BrowserWindow
 cache         = require("../cache")
 auth          = require("../authentication")
@@ -37,6 +38,25 @@ module.exports = (optionsOrArgv) ->
       event.sender.send("response", {id: id, __error: err, data: data})
 
     switch type
+      when "show:directory:dialog"
+        ## associate this dialog to the mainWindow
+        ## so the user never loses track of which
+        ## window the dialog belongs to. in other words
+        ## if they blur off, they only need to focus back
+        ## on the Cypress app for this dialog to appear again
+        ## https://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/Sheets/Concepts/AboutSheets.html
+
+        props = {
+          ## we only want the user to select a single
+          ## directory. not multiple, and not files
+          properties: ["openDirectory"]
+        }
+
+        dialog.showOpenDialog mainWindow, props, (paths = []) ->
+          ## return the first path since there can only ever
+          ## be a single directory selection
+          send(null, paths[0])
+
       when "log:in"
         auth.logIn(arg)
         .then (user) ->
@@ -107,9 +127,21 @@ module.exports = (optionsOrArgv) ->
 
       when "get:project:paths"
         cache.getProjectPaths()
-          .then (paths) ->
-            send(null, paths)
-          .catch(send)
+        .then (paths) ->
+          send(null, paths)
+        .catch(send)
+
+      when "remove:project"
+        cache.removeProject(arg)
+        .then ->
+          send(null, arg)
+        .catch(send)
+
+      when "add:project"
+        cache.addProject(arg)
+        .then ->
+          send(null, arg)
+        .catch(send)
 
       else
         throw new Error("No ipc event registered for: '#{type}'")
