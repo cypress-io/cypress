@@ -34,6 +34,20 @@ module.exports = (optionsOrArgv) ->
     options = optionsOrArgv
 
   ipc.on "request", (event, id, type, arg) ->
+    cloneErr = (err) ->
+      ## pull off these properties
+      obj = _.pick(err, "message", "type", "name", "stack", "fileName", "lineNumber", "columnNumber")
+
+      ## and any own (custom) properties
+      ## of the err object
+      for own prop, val of err
+        obj[prop] = val
+
+      obj
+
+    sendErr = (err) ->
+      event.sender.send("response", {id: id, __error: cloneErr(err)})
+
     send = (err, data) ->
       event.sender.send("response", {id: id, __error: err, data: data})
 
@@ -65,7 +79,7 @@ module.exports = (optionsOrArgv) ->
             ## TODO: what does cache
             ## setUser return us?
             send(null, user)
-        .catch(send)
+        .catch(sendErr)
 
       when "window:open"
         args = _.defaults {}, arg, {
@@ -110,7 +124,7 @@ module.exports = (optionsOrArgv) ->
               win.webContents.on "did-get-redirect-request", (e, oldUrl, newUrl) ->
                 urlChanged(newUrl)
 
-          .catch(send)
+          .catch(sendErr)
 
       when "get:options"
         ## return options
@@ -123,25 +137,25 @@ module.exports = (optionsOrArgv) ->
         cache.getUser()
         .then (user) ->
           send(null, user)
-        .catch(send)
+        .catch(sendErr)
 
       when "get:project:paths"
         cache.getProjectPaths()
         .then (paths) ->
           send(null, paths)
-        .catch(send)
+        .catch(sendErr)
 
       when "remove:project"
         cache.removeProject(arg)
         .then ->
           send(null, arg)
-        .catch(send)
+        .catch(sendErr)
 
       when "add:project"
         cache.addProject(arg)
         .then ->
           send(null, arg)
-        .catch(send)
+        .catch(sendErr)
 
       else
         throw new Error("No ipc event registered for: '#{type}'")
