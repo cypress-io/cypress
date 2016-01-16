@@ -7,7 +7,7 @@ shell         = require("electron").shell
 dialog        = require("electron").dialog
 BrowserWindow = require("electron").BrowserWindow
 cache         = require("../cache")
-auth          = require("../authentication")
+session       = require("../session")
 Cypress       = require("../cypress")
 cypressGui    = require("cypress-gui")
 
@@ -21,7 +21,7 @@ openProject = null
 getUrl = (type) ->
   switch type
     when "GITHUB_LOGIN"
-      auth.getLoginUrl()
+      session.getLoginUrl()
     else
       throw new Error("No acceptable window type found for: '#{arg.type}'")
 
@@ -77,7 +77,7 @@ module.exports = (optionsOrArgv) ->
           send(null, paths[0])
 
       when "log:in"
-        auth.logIn(arg)
+        session.logIn(arg)
         .then (user) ->
           cache.setUser(user)
           .then ->
@@ -87,7 +87,7 @@ module.exports = (optionsOrArgv) ->
         .catch(sendErr)
 
       when "log:out"
-        auth.logOut(arg)
+        session.logOut(arg)
         .then(cache.removeUserSession())
         ## TODO: clear cookies here
 
