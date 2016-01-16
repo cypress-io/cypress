@@ -8,7 +8,7 @@
       projectView = @getProjectView(project)
 
       @listenTo projectView, "client:url:clicked", ->
-        App.execute "gui:external:open", project.get("clientUrl")
+        App.ipc("external:open", project.get("clientUrl"))
 
       @listenTo projectView, "stop:clicked ok:clicked" , ->
         App.ipc("close:project").then ->
