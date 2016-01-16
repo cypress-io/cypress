@@ -60,7 +60,19 @@
       border-bottom: 1px solid #EEE;
       position: relative;
 
-      &:hover {
+      &.loading {
+        &:hover {
+          cursor: wait;
+        }
+
+        color: #ccc;
+
+        small {
+          color: #ccc;
+        }
+      }
+
+      &.loaded:hover {
         cursor: pointer;
         background-color: #EEE;
       }

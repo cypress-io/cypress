@@ -16,6 +16,28 @@
 
       projectsView = @getProjectsView(projects, user)
 
+      addProject = =>
+        App.ipc("show:directory:dialog")
+        .then (dirPath) ->
+          ## if the user cancelled the dialog selection
+          ## dirPath will be null
+          return if not dirPath
+
+          project = projects.add({path: dirPath, loading: true})
+
+          ## wait at least 1 second even if add:project
+          ## resolves faster to prevent the sudden flash
+          ## of loading content which is jarring
+          Promise.all([
+            App.ipc("add:project", dirPath)
+            Promise.delay(750)
+          ])
+          .then ->
+            project.loaded()
+
+        .catch (err) =>
+          @displayError(err.message, params)
+
       startProject = (project, options = {}) ->
         App.vent.trigger "project:clicked", project, options
 
@@ -28,22 +50,23 @@
 
           startProject(project, params)
       else
-        @listenTo projectsView, "project:added", (path) ->
-          App.config.addProject(path)
-          .then ->
-            projects.add(path: path)
-          .catch (err) =>
-            @displayError(err.message, params)
+        @listenTo projectsView, "button:clicked", addProject
 
         @listenTo projectsView, "sign:out:clicked", ->
           App.vent.trigger "log:out", user
 
         @listenTo projectsView, "childview:project:clicked", (iv, obj) ->
-          startProject(obj.model, params)
+          project = obj.model
+
+          ## dont do anything if our project is loading
+          return if project.isLoading()
+
+          startProject(project, params)
 
         @listenTo projectsView, "childview:project:remove:clicked", (iv, project) ->
-          App.config.removeProject(project.get("path"))
           projects.remove(project)
+
+          App.ipc("remove:project", project.get("path"))
 
       @listenTo projects, "fetched", ->
         @show projectsView

@@ -1,8 +1,17 @@
 @App.module "Entities", (Entities, App, Backbone, Marionette, $, _) ->
 
   class Entities.Project extends Entities.Model
+    defaults:
+      loading: false
+
     initialize: ->
       @setName()
+
+    loaded: ->
+      @set("loading", false)
+
+    isLoading: ->
+      !!@get("loading")
 
     setName: ->
       @set name: @getNameFromPath()
@@ -42,7 +51,7 @@
   API =
     getProjects: ->
       projects = new Entities.ProjectsCollection
-      App.config.getProjectPaths().then (paths) ->
+      App.ipc("get:project:paths").then (paths) ->
         projects.add _(paths).map (path) -> {path: path}
         projects.trigger("fetched")
       projects

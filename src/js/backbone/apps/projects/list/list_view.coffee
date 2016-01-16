@@ -12,10 +12,18 @@
     tagName: "li"
     className: "project"
 
+    modelEvents:
+      "change:loading" : "render"
+
     triggers:
       "click" : "project:clicked"
 
     onRender: ->
+      ## flip between these two classes
+      @$el.toggleClass("loading", @model.isLoading())
+      @$el.toggleClass("loaded", !@model.isLoading())
+
+    onShow: ->
       @$el.contextmenu
         target: @options.contextMenu
         onItem: =>
@@ -50,19 +58,13 @@
     events:
       "mousedown @ui.signout": "signOutClicked"
       # "click @ui.signout" : "signOutClicked"
-      "click @ui.button"  : "buttonClicked"
       "change @ui.input"  : "inputChanged"
+
+    triggers:
+      "click @ui.button" : "button:clicked"
 
     signOutClicked: (e) ->
       @trigger "sign:out:clicked"
-
-    buttonClicked: (e) ->
-      App.fileDialogOpened = true
-      @ui.input.click()
-
-    inputChanged: (e) ->
-      App.fileDialogOpened = null
-      @trigger "project:added", @ui.input.val()
 
     onRender: ->
       @ui.signout.dropdown()
