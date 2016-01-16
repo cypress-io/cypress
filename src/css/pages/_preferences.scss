@@ -1,0 +1,53 @@
+#preferences {
+  text-align: left;
+
+  section {
+    padding: 30px 0;
+
+    &:first-child {
+      border-bottom: 1px solid #D6D6D6;
+      box-shadow: 0 1px 0 #FFF;
+    }
+  }
+
+  label {
+    font-weight: normal;
+    text-align: right;
+    padding-right: 0;
+  }
+
+  label.control-label {
+    padding-top: 5px;
+  }
+
+  .checkbox-container {
+    text-align: left;
+  }
+
+  .checkbox-inline {
+
+    label, [type=checkbox] {
+      cursor: pointer;
+    }
+  }
+
+  #api-key {
+    cursor: pointer;
+    background-color: #FFF;
+    padding-left: 7px;
+    padding-right: 7px;
+  }
+
+  #api-key-container {
+    text-align: center;
+  }
+
+  button:focus {
+    outline: 0;
+  }
+
+  p.help-block {
+    text-align: left;
+  }
+
+}

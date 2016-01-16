@@ -1,0 +1,25 @@
+vendor:
+  - bower_components/jquery/dist/jquery.js
+  - bower_components/underscore/underscore.js
+  - bower_components/backbone/backbone.js
+  - bower_components/backbone.marionette/lib/backbone.marionette.js
+  - bower_components/underscore.string/lib/underscore.string.js
+  - bower_components/backbone.mutators/backbone.mutators.js
+  - bower_components/jsuri/Uri.js
+  - bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/dropdown.js
+  - bower_components/moment/moment.js
+  - bower_components/bootstrap-contextmenu/bootstrap-contextmenu.js
+  - bower_components/bluebird/js/browser/bluebird.js
+
+app:
+  - src/js/config/**
+  - src/js/backbone/app.coffee
+  - src/js/backbone/lib/templates/**
+  - src/js/backbone/lib/entities/**
+  - src/js/backbone/lib/utilities/**
+  - src/js/backbone/lib/views/**
+  - src/js/backbone/lib/controllers/**
+  - src/js/backbone/lib/components/**
+  - src/js/backbone/lib/routers/**
+  - src/js/backbone/entities/**
+  - src/js/backbone/apps/**

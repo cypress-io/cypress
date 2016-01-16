@@ -1,0 +1,105 @@
+#projects {
+  #context-menu .dropdown-menu {
+    min-width: inherit;
+  }
+
+  header {
+    background-color: #EEE;
+    border-bottom: 1px solid #CCC;
+    padding: 10px;
+    position: fixed;
+    float: left;
+    width: 100%;
+    line-height: 32px;
+    height: $header-height;
+    z-index: 10;
+
+    p {
+      float: left;
+      margin: 0 5px 0 0;
+    }
+
+    ul.dropdown-menu {
+      min-width: 50px;
+      margin-top: -5px;
+    }
+
+    a:focus, a:active {
+      outline: 0
+    }
+
+    button {
+      float: right;
+      padding: 5px 10px;
+
+      &:focus {
+        outline: 0;
+      }
+    }
+  }
+
+  ul#projects-container {
+    margin-top: $header-height;
+    margin-bottom: $footer-height;
+    float: left;
+    width: 100%;
+
+    li.empty {
+      margin: 25px;
+      text-align: center;
+
+      p {
+        margin-bottom: 0;
+      }
+    }
+
+    li.project {
+      @include user-select(none);
+
+      padding: 5px 20px;
+      border-bottom: 1px solid #EEE;
+      position: relative;
+
+      &:hover {
+        cursor: pointer;
+        background-color: #EEE;
+      }
+
+      small {
+        font-size: 70%;
+        display: block;
+        margin-top: 5px;
+        @include text-overflow;
+      }
+
+      i {
+        font-size: 20px;
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        margin-top: -13px;
+      }
+    }
+  }
+}
+
+#project, #projects.error {
+  text-align: center;
+
+  h3 {
+    @include text-overflow;
+  }
+
+  a {
+    padding-top: 5px;
+    margin-top: 5px;
+    border-top: 1px dashed #999;
+    display: inline-block;
+  }
+}
+
+#project, #projects {
+  p.bg-danger {
+    padding: 5px;
+  }
+}

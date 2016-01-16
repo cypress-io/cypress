@@ -1,0 +1,17 @@
+<div id="debug">
+  <div class="panel">
+    <button data-clear class="btn btn-sm btn-danger pull-right">
+      <i class="fa fa-minus-circle"></i>
+      Clear
+    </button>
+    <button data-refresh class="btn btn-sm btn-default pull-left">
+      <i class="fa fa-refresh"></i>
+      Refresh
+    </button>
+  </div>
+  <div id="code">
+    <table class="table table-bordered table-condensed">
+      <tbody></tbody>
+    </table>
+  </div>
+</div>

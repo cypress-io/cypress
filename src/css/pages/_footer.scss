@@ -1,0 +1,55 @@
+#updates-available {
+  text-align: center;
+  background-color: #D9EDF7;
+  position: absolute;
+  bottom: $footer-height;
+  width: 100%;
+  color: #3A87AD;
+  line-height: $footer-height;
+
+  strong {
+    margin-left: 10px;
+
+    &:hover {
+      color: darken(#3A87AD, 15%);
+      cursor: pointer;
+    }
+  }
+}
+
+#footer {
+  background-color: #DDD;
+  position: fixed;
+  width: 100%;
+  border-top: 1px solid #AAA;
+  z-index: 10;
+  bottom: 0;
+
+  span:hover, .dropup.open {
+    cursor: pointer;
+
+    i {
+      color: #333;
+    }
+  }
+
+  i {
+    color: #777;
+    font-size: 24px;
+    line-height: $footer-height;
+    margin: 0 10px 0 5px;
+  }
+
+  .dropdown-menu {
+    margin-right: 5px;
+    margin-bottom: -10px;
+  }
+
+  &:before {
+    content: "";
+    position: absolute;
+    height: 1px;
+    width: 100%;
+    background-color: #fff;
+  }
+}

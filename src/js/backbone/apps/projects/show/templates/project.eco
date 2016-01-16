@@ -1,0 +1,37 @@
+<div id="project">
+  <h3>
+    <p><%= @name %></p>
+  </h3>
+  <% if @error: %>
+    <p class="text-danger">Could not start server!</p>
+    <p class="bg-danger">
+      <i class="fa fa-warning"></i>
+      <%- @error.replace("\n", "<br /><br />") %>
+    </p>
+    <% if @portInUse: %>
+      <div class="well well">
+        <p class="text-muted">To Fix:</p>
+        <ul class="text-left">
+          <li>Shut down the other running process</li>
+          <li>Or change your port number in the cypress.json file</li>
+        </ul>
+      </div>
+    <% end %>
+    <button data-ok class="btn btn-info">Ok</button>
+  <% else: %>
+    <% if @clientUrl: %>
+      <div class="well well-lg">
+        <div>Server Running</div>
+        <div>
+          <a href="#"><%= @clientUrlDisplay %></a>
+        </div>
+      </div>
+      <button data-stop class="btn btn-danger">Stop</button>
+    <% else: %>
+      <span>
+        <i class="fa fa-spinner fa-spin"></i>
+        Starting Server...
+      </span>
+    <% end %>
+  <% end %>
+</div>

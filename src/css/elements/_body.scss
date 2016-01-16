@@ -1,0 +1,18 @@
+html {
+  position: relative;
+  height: 100%;
+
+  &.updates, &.debug, &.about, &.preferences {
+    background-color: #ECECEC;
+
+    body {
+      background-color: #ECECEC;
+      margin-bottom: 0;
+    }
+  }
+}
+
+body {
+  // background-color: rgba(0,0,0,0);
+  margin-bottom: $footer-height;
+}
