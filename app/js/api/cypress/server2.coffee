@@ -30,7 +30,7 @@ $Cypress.Server = do ($Cypress, _) ->
     if _.has(obj, "stub")
       console.warn("""
         Passing cy.#{type}({stub: false}) is now deprecated. You can safely remove: {stub: false}.\n
-        http://on.cypress.io/deprecated-stub-false-on-#{type}
+        https://on.cypress.io/deprecated-stub-false-on-#{type}
       """)
 
   warnOnForce404Default = (obj) ->

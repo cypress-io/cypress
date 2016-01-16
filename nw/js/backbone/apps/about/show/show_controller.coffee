@@ -11,7 +11,7 @@
 
       @listenTo aboutView, "page:clicked", ->
         ## this needs to be moved to an .env variable
-        App.execute "gui:external:open", "http://www.cypress.io"
+        App.execute "gui:external:open", "https://www.cypress.io"
 
       @show aboutView
 

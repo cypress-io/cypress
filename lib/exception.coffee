@@ -7,7 +7,7 @@ Log      = require("./log")
 Settings = require("./util/settings")
 Routes   = require("./util/routes")
 
-## POST http://api.cypress.io/exceptions
+## POST https://api.cypress.io/exceptions
 ## sets request body
 ## error: {}
 ## logs: {}

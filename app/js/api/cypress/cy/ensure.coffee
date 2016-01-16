@@ -55,7 +55,7 @@ do ($Cypress, _, $) ->
             - Passing {force: true} which disables all error checking
             - Passing {waitForAnimations: false} which disables waiting on animations
             - Passing {animationDistanceThreshold: 20} which decreases the sensitivity\n
-          http://on.cypress.io/element-is-animating
+          https://on.cypress.io/element-is-animating
         """)
 
     ensureActionability: (subject, onFail) ->
@@ -70,7 +70,7 @@ do ($Cypress, _, $) ->
           cy.#{method}() failed because this element is disabled:\n
           #{node}\n
           Fix this problem, or use {force: true} to disable error checking.\n
-          http://on.cypress.io/element-cannot-be-interacted-with
+          https://on.cypress.io/element-cannot-be-interacted-with
         """, onFail)
 
     ensureVisibility: (subject, onFail) ->
@@ -86,7 +86,7 @@ do ($Cypress, _, $) ->
           #{node}\n
           #{reason}\n
           Fix this problem, or use {force: true} to disable error checking.\n
-          http://on.cypress.io/element-cannot-be-interacted-with
+          https://on.cypress.io/element-cannot-be-interacted-with
         """, onFail)
 
     ensureDom: (subject, method, log) ->
@@ -110,7 +110,7 @@ do ($Cypress, _, $) ->
         @throwErr("""
           cy.#{method}() failed because this element you are chaining off of has become detached or removed from the DOM:\n
           #{node}\n
-          http://on.cypress.io/element-has-detached-from-dom
+          https://on.cypress.io/element-has-detached-from-dom
         """, log)
 
       return subject
@@ -160,12 +160,12 @@ do ($Cypress, _, $) ->
             cy.#{method}() failed because this element is being covered by another element:\n
             #{node}\n
             Fix this problem, or use {force: true} to disable error checking.\n
-            http://on.cypress.io/element-cannot-be-interacted-with
+            https://on.cypress.io/element-cannot-be-interacted-with
           """, onFail)
         else
           @throwErr("""
             cy.#{method}() failed because the center of this element is hidden from view:\n
             #{node}\n
             Fix this problem, or use {force: true} to disable error checking.\n
-            http://on.cypress.io/element-cannot-be-interacted-with
+            https://on.cypress.io/element-cannot-be-interacted-with
           """, onFail)

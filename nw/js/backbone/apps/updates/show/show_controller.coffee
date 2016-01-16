@@ -14,7 +14,7 @@
 
       @listenTo updatesView, "changelog:clicked", ->
         ## this needs to be moved to an .env variable
-        App.execute "gui:external:open", "http://on.cypress.io/changelog"
+        App.execute "gui:external:open", "https://on.cypress.io/changelog"
 
       set = (state) ->
         updater.setState(state)
