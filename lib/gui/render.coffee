@@ -3,6 +3,7 @@ uri           = require("url")
 path          = require("path")
 app           = require("electron").app
 ipc           = require("electron").ipcMain
+shell         = require("electron").shell
 dialog        = require("electron").dialog
 BrowserWindow = require("electron").BrowserWindow
 cache         = require("../cache")
@@ -84,6 +85,9 @@ module.exports = (optionsOrArgv) ->
             ## setUser return us?
             send(null, user)
         .catch(sendErr)
+
+      when "external:open"
+        shell.openExternal(arg)
 
       when "window:open"
         args = _.defaults {}, arg, {
