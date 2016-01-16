@@ -40,7 +40,11 @@ module.exports = (optionsOrArgv) ->
       when "log:in"
         auth.logIn(arg)
         .then (user) ->
-          send(null, user)
+          cache.setUser(user)
+          .then ->
+            ## TODO: what does cache
+            ## setUser return us?
+            send(null, user)
         .catch(send)
 
       when "window:open"
