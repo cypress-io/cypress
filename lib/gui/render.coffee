@@ -6,7 +6,7 @@ ipc           = require("electron").ipcMain
 BrowserWindow = require("electron").BrowserWindow
 cache         = require("../cache")
 auth          = require("../authentication")
-CypressGui    = require("cypress-gui")
+cypressGui    = require("cypress-gui")
 
 ## Keep a global reference of the window object, if you don't, the window will
 ## be closed automatically when the JavaScript object is garbage collected.
@@ -104,7 +104,7 @@ module.exports = (optionsOrArgv) ->
       else
         throw new Error("No ipc event registered for: '#{type}'")
 
-  options.url = CypressGui.getPathToHtml()# "file://#{__dirname}/../app/public/index.html"
+  options.url = cypressGui.getPathToHtml()# "file://#{__dirname}/../app/public/index.html"
 
   console.log options
 
