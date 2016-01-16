@@ -48,9 +48,11 @@
         cb()
 
     logOut: (user) ->
-      App.config.logOut(user).bind(@).then ->
-        @clearCookies ->
-          App.vent.trigger "start:login:app"
+      ## immediately log out even before our
+      ## promise resolves so we dont block the UI
+      App.vent.trigger "start:login:app"
+
+      App.ipc("log:out", user.get("session_token"))
 
   App.commands.setHandler "login:request", ->
     API.loginRequest()
