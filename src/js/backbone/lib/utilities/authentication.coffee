@@ -13,21 +13,21 @@
         title: "Login"
         type: "GITHUB_LOGIN"
       })
+      .then (code) ->
+        ## display logging in loading spinner here
+        App.currentUser.loggingIn()
 
-    loggingIn: (url) ->
-      ## display logging in loading spinner here
-      App.currentUser.loggingIn()
+        ## TODO: supposed to focus the window here!
+        ## i think this is for linux
+        ## App.execute "gui:focus"
 
-      App.execute "gui:focus"
-
-      code = new Uri(url).getQueryParamValue("code")
-
-      App.config.logIn(code)
-        .then (user) ->
-          App.currentUser.loggedIn(user)
-          App.vent.trigger "start:projects:app"
-        .catch (err) ->
-          App.currentUser.setLoginError(err)
+        ## now actually log in
+        App.ipc("log:in", code)
+      .then (user) ->
+        App.currentUser.loggedIn(user)
+        App.vent.trigger "start:projects:app"
+      .catch (err) ->
+        App.currentUser.setLoginError(err)
 
     clearCookies: (cb) ->
       win = App.request "gui:get"
@@ -54,9 +54,6 @@
 
   App.commands.setHandler "login:request", ->
     API.loginRequest()
-
-  App.vent.on "logging:in", (url) ->
-    API.loggingIn(url)
 
   App.reqres.setHandler "current:user", ->
     App.currentUser or throw new Error("No current user set on App!")
