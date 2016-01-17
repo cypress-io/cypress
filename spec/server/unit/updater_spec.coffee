@@ -46,7 +46,7 @@ describe "Updater", ->
     it "inserts manifestUrl to package.json", ->
       expect(@updater.getPackage()).to.deep.eq {
         foo: "bar"
-        manifestUrl: "http://download.cypress.io/desktop.json"
+        manifestUrl: "https://download.cypress.io/desktop.json"
       }
 
   context "#getClient", ->
