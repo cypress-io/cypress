@@ -110,8 +110,11 @@ class Install
       req = request({
         url: @getUrl(options.cypressVersion)
         followRedirect: (response) ->
-          ## set the version in options
-          options.version = response.headers["x-version"]
+          if version = response.headers["x-version"]
+            ## set the version in options if we have one.
+            ## this insulates us from potential redirect
+            ## problems where version would be set to undefined.
+            options.version = version
 
           ## yes redirect
           return true
