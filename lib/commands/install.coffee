@@ -14,7 +14,7 @@ utils         = require("../utils")
 
 fs = Promise.promisifyAll(fs)
 
-baseUrl = "http://download.cypress.io/"
+baseUrl = "https://download.cypress.io/"
 
 class Install
   constructor: (options = {}) ->

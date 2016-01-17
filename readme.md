@@ -100,11 +100,11 @@ cypress run --spec app_spec.js
 cypress run --env host=api.dev.local
 ```
 
-You can [read more about environment variables here.](http://on.cypress.io/environment-variables)
+You can [read more about environment variables here.](https://on.cypress.io/environment-variables)
 
 ### cypress ci
 
-Run Cypress headlessly in CI. [Read the Continuous Integration docs for examples.](http://on.cypress.io/continuous-integration)
+Run Cypress headlessly in CI. [Read the Continuous Integration docs for examples.](https://on.cypress.io/continuous-integration)
 
 ```bash
 ## provide the CI secret key directly

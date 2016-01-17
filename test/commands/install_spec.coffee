@@ -38,16 +38,16 @@ describe "Install", ->
       delete process.env.CYPRESS_VERSION
 
     it "sets options.version to response x-version", ->
-      nock("http://aws.amazon.com")
+      nock("https://aws.amazon.com")
       .get("/some.zip")
       .reply 200, (uri, requestBody) ->
         fs.createReadStream("test/fixture/example.zip")
 
-      nock("http://download.cypress.io")
+      nock("https://download.cypress.io")
       .get("/desktop")
       .query(true)
       .reply 302, undefined, {
-        "Location": "http://aws.amazon.com/some.zip"
+        "Location": "https://aws.amazon.com/some.zip"
         "x-version": "0.11.1"
       }
 
@@ -57,16 +57,16 @@ describe "Install", ->
     it "can specify cypress version in env", ->
       process.env.CYPRESS_VERSION = "0.12.1"
 
-      nock("http://aws.amazon.com")
+      nock("https://aws.amazon.com")
       .get("/some.zip")
       .reply 200, (uri, requestBody) ->
         fs.createReadStream("test/fixture/example.zip")
 
-      nock("http://download.cypress.io")
+      nock("https://download.cypress.io")
       .get("/desktop/0.12.1")
       .query(true)
       .reply 302, undefined, {
-        "Location": "http://aws.amazon.com/some.zip"
+        "Location": "https://aws.amazon.com/some.zip"
         "x-version": "0.12.1"
       }
 
@@ -76,16 +76,16 @@ describe "Install", ->
     it "can specify cypress version in arguments", ->
       @options.version = "0.13.0"
 
-      nock("http://aws.amazon.com")
+      nock("https://aws.amazon.com")
       .get("/some.zip")
       .reply 200, (uri, requestBody) ->
         fs.createReadStream("test/fixture/example.zip")
 
-      nock("http://download.cypress.io")
+      nock("https://download.cypress.io")
       .get("/desktop/0.13.0")
       .query(true)
       .reply 302, undefined, {
-        "Location": "http://aws.amazon.com/some.zip"
+        "Location": "https://aws.amazon.com/some.zip"
         "x-version": "0.13.0"
       }
 
