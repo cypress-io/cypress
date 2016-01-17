@@ -6,6 +6,7 @@ util    = require("util")
 kill    = require("tree-kill")
 chalk   = require("chalk")
 request = require("request-promise")
+errors  = require "request-promise/errors"
 Promise = require("bluebird")
 fs      = require("fs-extra")
 git     = require("gift")
@@ -111,7 +112,13 @@ SecretSauce.Cli = (App, options, Routes, Chromium, Reporter, Log) ->
       .then (attrs) ->
         attrs.ci_guid
       .catch (err) ->
-        writeErr("Sorry, your project's API Key: '#{key}' was not valid. This project cannot run in CI.")
+        if err.statusCode is 401
+          key = key.slice(0, 5) + "..." + key.slice(-5)
+          writeErr("Sorry, your project's secret CI key: '#{key}' was not valid. This project cannot run in CI.")
+        else
+          ## we should probably log this in rayrun since this is unexpected
+          ## theres no good reason we shouldn't be able to communicate with cypress-api
+          writeErr("Sorry, there was a problem communicating with the remote Cypress servers. This is likely a temporarily problem. Try again later.")
     .then(fn)
 
   ensureLinuxEnv = ->
