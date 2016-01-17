@@ -122,6 +122,21 @@ describe "$Cypress.Utils API", ->
         str = $Cypress.Utils.stringifyElement(div, "short")
         expect(str).to.eq "<div#baz.foo>"
 
+      it "can stringify svg", ->
+        svg = $('<svg id="svg123" class="icon icon-svg" width="100" height="100"><rect class="node" fill="red" width="50" height="50" x="25" y="25"></rect></svg>')
+        @cy.$("body").append(svg)
+
+        str = $Cypress.Utils.stringifyElement(svg, "short")
+        expect(str).to.eq("<svg#svg123.icon.icon-svg>")
+
+      it "gets updated class names", ->
+        div = $("<div id='baz' class='foo' />")
+        div.prop("class", "foo bar")
+        @cy.$("body").append(div)
+
+        str = $Cypress.Utils.stringifyElement(div, "short")
+        expect(str).to.eq("<div#baz.foo.bar>")
+
     context "#convertHtmlTags", ->
       it "converts opening brackets to tags", ->
         html = $Cypress.Utils.convertHtmlTags "[strong]foo"
