@@ -93,9 +93,9 @@ minify = (source, destination) ->
 
 getClientJsOpts = ->
   destination: "dist/js"
-  basePath: "src/js"
+  basePath: "app/js"
 
-gulp.task "css", -> compileCss("src", "dist")
+gulp.task "css", -> compileCss("app", "dist")
 
 gulp.task "fonts", ->
   gulp.src("bower_components/font-awesome/fonts/**")
@@ -106,31 +106,31 @@ gulp.task "vendor:img", ->
     .pipe gulp.dest "dist/css/images"
 
 gulp.task "img", ->
-  gulp.src("src/img/**/*")
+  gulp.src("app/img/**/*")
     .pipe gulp.dest "dist/img"
 
 gulp.task "js", ->
-  compileJs("src", getClientJsOpts())
+  compileJs("app", getClientJsOpts())
 
 gulp.task "bower", ->
   $.bower()
 
 gulp.task "html", ->
-  gulp.src(["src/html/*"])
+  gulp.src(["app/html/*"])
     .pipe gulp.dest("dist")
 
 gulp.task "watch", ["watch:css", "watch:js", "watch:html"]
 
 gulp.task "watch:html", ->
-  gulp.watch "src/html/**", ["html"]
+  gulp.watch "app/html/**", ["html"]
 
 gulp.task "watch:css", ->
-  gulp.watch "src/css/**", ["css"]
+  gulp.watch "app/css/**", ["css"]
 
 gulp.task "watch:js", ->
   options = getClientJsOpts()
 
-  getYaml("src").then (bundles) ->
+  getYaml("app").then (bundles) ->
     ## watch all of the files in the app.yml so we rebuild
     ## on any reloads including vendor changes
     files = _.chain(bundles).values().flatten().uniq().value()
