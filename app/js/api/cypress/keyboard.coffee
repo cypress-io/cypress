@@ -198,11 +198,11 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       options.prev = rng.all()
 
       resetBounds = (start, end) ->
-        len = rng.length()
 
         if start? and end?
           bounds = [start, end]
         else
+          len = rng.length()
           bounds = [len, len]
 
         ## resets the bounds to the
