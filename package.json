@@ -78,7 +78,6 @@
     "mkdirp": "^0.5.1",
     "mock-fs": "3.2.0",
     "nock": "2.10.0",
-    "node-inspector": "^0.12.2",
     "nodemon": "^1.8.1",
     "nw": "0.12.2",
     "nw-builder": "cypress-io/nw-builder",
