@@ -22,43 +22,43 @@
 
     getCli: -> @_getProp("cli")
 
-    getUser: ->
-      @getCache().getUser()
+    # getUser: ->
+      # @getCache().getUser()
 
-    setUser: (user) ->
-      @getCache().setUser(user)
+    # setUser: (user) ->
+      # @getCache().setUser(user)
 
-    addProject: (path) ->
-      @getCache().addProject(path)
+    # addProject: (path) ->
+      # @getCache().addProject(path)
 
-    removeProject: (path) ->
-      @getCache().removeProject(path)
+    # removeProject: (path) ->
+    #   @getCache().removeProject(path)
 
     getProjectIdByPath: (projectPath) ->
       @getCache().getProjectIdByPath(projectPath)
 
-    getProjectPaths: ->
-      @getCache().getProjectPaths()
+    # getProjectPaths: ->
+    #   @getCache().getProjectPaths()
 
-    runProject: (path, options = {}) ->
-      @project = @getBooter()(path)
+    # runProject: (path, options = {}) ->
+    #   @project = @getBooter()(path)
 
-      @project.boot(options).get("settings")
+    #   @project.boot(options).get("settings")
 
-    closeProject: ->
-      @project.close().bind(@).then ->
-        delete @project
+    # closeProject: ->
+    #   @project.close().bind(@).then ->
+    #     delete @project
 
-    logIn: (code) ->
-      @getCache().logIn(code).bind(@)
-      .then (user) ->
-        ## move setting user into the
-        ## authentication module (using cache automatically)
-        @setUser(user)
-        .return(user)
+    # logIn: (code) ->
+    #   @getCache().logIn(code).bind(@)
+    #   .then (user) ->
+    #     ## move setting user into the
+    #     ## authentication module (using cache automatically)
+    #     @setUser(user)
+    #     .return(user)
 
-    logOut: (user) ->
-      @getCache().logOut(user.get("session_token"))
+    # logOut: (user) ->
+      # @getCache().logOut(user.get("session_token"))
 
     log: (text, data = {}) ->
       data.type = "native"
