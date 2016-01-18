@@ -59,17 +59,6 @@ transform = (paths, options = {}) ->
 isCoffee  = (file) -> file.isBuffer() and /.coffee$/.test(file.path)
 isEco     = (file) -> file.isBuffer() and /.eco$/.test(file.path)
 
-compileCss = (source, dest) ->
-  gulp.src("#{source}/css/**/*.scss")
-    .pipe($.sass({
-      importer: importOnce
-      importOnce: {
-        bower: true
-      }
-    })
-    .on('error', $.sass.logError))
-    .pipe gulp.dest "#{dest}/css"
-
 getYaml = (source) ->
   fs.readFileAsync("#{source}/js/js.yml", "utf8").then(yaml.load)
 
@@ -95,7 +84,16 @@ getClientJsOpts = ->
   destination: "dist/js"
   basePath: "app/js"
 
-gulp.task "css", -> compileCss("app", "dist")
+gulp.task "css", ->
+  gulp.src("app/css/**/*.scss")
+    .pipe($.sass({
+      importer: importOnce
+      importOnce: {
+        bower: true
+      }
+    })
+    .on('error', $.sass.logError))
+    .pipe gulp.dest "dist/css"
 
 gulp.task "fonts", ->
   gulp.src("bower_components/font-awesome/fonts/**")
@@ -153,5 +151,4 @@ gulp.task "minify", ->
   minify("dist/js/!(cypress|sinon).js", "dist/js")
 
 gulp.task "build",  ["bower"], (cb) ->
-  # runSequence ["css", "img", "fonts", "js", "html"], cb
-  runSequence ["img", "fonts", "js", "html"], cb
+  runSequence ["css", "img", "fonts", "js", "html"], cb

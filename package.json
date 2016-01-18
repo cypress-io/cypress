@@ -29,6 +29,7 @@
     "gulp-cached": "^1.1.0",
     "gulp-coffee": "^2.3.1",
     "gulp-concat": "^2.6.0",
+    "gulp-debug": "^2.1.2",
     "gulp-eco": "0.0.2",
     "gulp-load-plugins": "^1.2.0",
     "gulp-plumber": "^1.0.1",

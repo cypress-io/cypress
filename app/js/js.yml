@@ -12,14 +12,14 @@ vendor:
   - bower_components/bluebird/js/browser/bluebird.js
 
 app:
-  - src/js/config/**
-  - src/js/backbone/app.coffee
-  - src/js/backbone/lib/templates/**
-  - src/js/backbone/lib/entities/**
-  - src/js/backbone/lib/utilities/**
-  - src/js/backbone/lib/views/**
-  - src/js/backbone/lib/controllers/**
-  - src/js/backbone/lib/components/**
-  - src/js/backbone/lib/routers/**
-  - src/js/backbone/entities/**
-  - src/js/backbone/apps/**
+  - app/js/config/**
+  - app/js/backbone/app.coffee
+  - app/js/backbone/lib/templates/**
+  - app/js/backbone/lib/entities/**
+  - app/js/backbone/lib/utilities/**
+  - app/js/backbone/lib/views/**
+  - app/js/backbone/lib/controllers/**
+  - app/js/backbone/lib/components/**
+  - app/js/backbone/lib/routers/**
+  - app/js/backbone/entities/**
+  - app/js/backbone/apps/**
