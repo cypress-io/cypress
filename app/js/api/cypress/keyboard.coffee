@@ -197,23 +197,62 @@ $Cypress.Keyboard = do ($Cypress, _, Promise, bililiteRange) ->
       ## and change callbacks
       options.prev = rng.all()
 
+      resetBounds = (start, end) ->
+        len = rng.length()
+
+        if start? and end?
+          bounds = [start, end]
+        else
+          bounds = [len, len]
+
+        ## resets the bounds to the
+        ## end of the element's text
+        if not _.isEqual(rng._bounds, bounds)
+          el.bililiteRangeSelection = bounds
+          rng.bounds(bounds)
+
       ## restore the bounds if our el already has this
       if bililiteRangeSelection
         rng.bounds(bililiteRangeSelection)
       else
-        ## if our input is one of these, then
-        ## simulate each key stroke, ensure none
-        ## are defaultPrevented, but only change
-        ## the value once everything has been typed
-        # if /date|month|datetime|time/.test(type)
-          ## throw an error if value is invalid
-          ## use a switch/case here
-
-        if len = rng.length()
-          bounds = [len, len]
-          if not _.isEqual(rng._bounds, bounds)
-            el.bililiteRangeSelection = bounds
-            rng.bounds(bounds)
+        ## native date/moth/datetime/time input types
+        ## do not have selectionStart so we have to
+        ## manually fix the range on those elements.
+        ## we know we need to do that when
+        ## el.selectionStart throws or if the element
+        ## does not have a selectionStart property
+        try
+          if "selectionStart" of el
+            el.selectionStart
+          else
+            resetBounds()
+        catch
+          ## currently if this throws we're likely on
+          ## a native input type (number, etc)
+          ## and we're just going to take a shortcut here
+          ## by figuring out if there is currently a
+          ## selection range of the window. whatever that
+          ## value is we need to set the range of the el.
+          ## now this will fail if there is a PARTIAL range
+          ## for instance if our element has value of: 121234
+          ## and the selection range is '12' we cannot know
+          ## if it is the [0,1] index or the [2,3] index. to
+          ## fix this we need to walk forward and backward by
+          ## s.modify('extend', 'backward', 'character') until
+          ## we can definitely figure out where the selection is
+          ## check if this fires selectionchange events. if it does
+          ## we may need an option that enables to use to simply
+          ## silence these events, or perhaps just TELL US where
+          ## to type via the index.
+          try
+            selection = el.ownerDocument.getSelection().toString()
+            index = options.$el.val().indexOf(selection)
+            if selection.length and index > -1
+              resetBounds(index, selection.length)
+            else
+              resetBounds()
+          catch
+            resetBounds()
 
       keys = options.chars.split(charsBetweenCurlyBraces)
 
