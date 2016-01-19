@@ -3,48 +3,44 @@ excerpt: Verify expectations
 
 Assertions verify an expectation.
 
-![assertions](https://cloud.githubusercontent.com/assets/1268976/10002810/3102a8a6-6077-11e5-85bf-5f8666bcb1a8.png)
 
-Cypress comes bundled with the following tools:
-
-* [Chai](http://on.cypress.io/guides/bundled-tolls#chai)
-* [Chai-jQuery](http://on.cypress.io/guides/bundled-tolls#chai-jquery)
-* [Chai-Sinon](http://on.cypress.io/guides/bundled-tolls#sinon-chai)
-
-These libraries allow you to make assertions and verify your app works as expected.
 
 ## Writing an Assertion
 
 There are two ways to write an assertion within Cypress.
 
-1. Using `cy.should`
-2. Using `expect` or `assert`
+1. **Implicit Subjects:** Using `cy.should`
+2. **Explicit Subjects:** Using `expect` or `assert`
 
-#### Implicit Subjects with `cy.should`
+**Implicit Subjects with `cy.should`**
 
-This is the preferred way of making an assertion.
-
-The subject of the assertion is inferred from the last Cypress command, which is why this is called an `implicit subject`.
+Using Cypress' [`should`](http://on.cypress.io/api/should) command is the preferred way of making an assertion. The subject of the assertion is inferred from the subject of the last Cypress command, which is why this is called an **implicit subject**.
 
 ```javascript
 // the implicit subject here is the <button>
 cy.get("button").should("have.class", "active")
 ```
 
-#### Explicit Subjects with `expect` or `assert`
+![assertions](https://cloud.githubusercontent.com/assets/1268976/10002810/3102a8a6-6077-11e5-85bf-5f8666bcb1a8.png)
 
-Using `expect` or `assert` allows you to pass in a specific subject when making an assertion.
+**Explicit Subjects with `expect` or `assert`**
 
-These assertions are more commonly used when writing unit tests, but can also be used when writing integration tests.
+ Using `expect` or `assert` allows you to pass in a specific subject when making an assertion.
+
+These assertions are more commonly used when writing unit tests, but can also be used when writing integration tests. Cypress comes bundled with some existing tools that already handle assertions such as:
+
+* [Chai](http://on.cypress.io/guides/bundled-tolls#chai)
+* [Chai-jQuery](http://on.cypress.io/guides/bundled-tolls#chai-jquery)
+* [Chai-Sinon](http://on.cypress.io/guides/bundled-tolls#sinon-chai)
 
 ```javascript
 // the explicit subject here is the boolean: true
-expect(true).to.be.true // passes
+expect(true).to.be.true
 ```
 
 ```javascript
 // assert is also available
-assert.isTrue(true, "true should be true") // passes
+assert.isTrue(true, "true should be true")
 ```
 
 Explicit assertions are great when you want to perform custom logic prior to making the assertion.
@@ -80,8 +76,8 @@ An assertion is comprised of a subject, chainer methods, and an optional value.
 
 ```javascript
 expect({foo: "bar"}).to.have.property("foo")
-           ↲              ↲             ↲
-        subject        chainers       value
+           ↲              ↲            ↲
+        subject        chainers      value
 ```
 
 The following chainers are available for your use:
@@ -165,25 +161,25 @@ Additionally these chainers are added when asserting about a DOM object.
 
 You will commonly use these chainers after using DOM commands like: [`cy.get`](http://on.cypress.io/api/get), [`cy.contains`](http://on.cypress.io/api/contains), etc.
 
-#### Using Chainers with `cy.should`
+**Using Chainers with [`cy.should`](http://on.cypress.io/api/should)**
 
-When utilizing `cy.should`, instead of writing chainers as properties and methods, they are instead transformed into a string argument.
+When utilizing [`cy.should`](http://on.cypress.io/api/should), instead of writing chainers as properties and methods, they are instead transformed into a string argument.
 
 If we convert the previous example to use `cy.should`, it would look like:
 
 ```javascript
 cy.wrap({foo: "bar"}).should("have.property", "foo")
-           ↲                      ↲             ↲
+           ↲                      ↲            ↲
         subject                chainers       value
 ```
 
-The chainers are shifted and become the first argument to `cy.should`, with values simply being passed in as additional arguments.
+The chainers are shifted and become the first argument to [`cy.should`](http://on.cypress.io/api/should), with values simply being passed in as additional arguments.
 
 ```javascript
 // we can additionally continue to chain and add
 // multiple assertions about our <button> subject
 cy.get("button").should("have.class", "active").and("be.visible")
-          ↲                  ↲           ↲              ↲
+          ↲                  ↲          ↲             ↲
         subject           chainers     value         chainers
 ```
 
@@ -196,44 +192,38 @@ cy.get("button").should(function($button){
 })
 ```
 
-This example above may be more familiar to you if you've written tests in `JavaScript` before.
+This example above may be more familiar to you if you've written tests in JavaScript before.
 
-If you look closely, you'll see that we've passed a `callback function` to the `cy.should` method. This allows us to write arbitrary expectations inside of that callback function, yet still receive all of the wonderful benefits of `cy.should`.
+If you look closely, you'll see that we've passed a callback function to the [`cy.should`](http://on.cypress.io/api/should) method. This allows us to write expectations inside of that callback function, yet still receive all of the wonderful benefits of [`cy.should`](http://on.cypress.io/api/should).
 
-Read about [resolving assertions](http://on.cypress.io/guides/making-assertions#resolving-assertions) below to learn how `cy.should` works under the hood.
+Read about [resolving assertions](http://on.cypress.io/guides/making-assertions#resolving-assertions) below to learn how [`cy.should`](http://on.cypress.io/api/should) works under the hood.
 
 ## Resolving Assertions
 
-Knowing when and how to resolve assertions is extremely challenging, made even more difficult by modern JS frameworks.
+Knowing when and how to resolve assertions is can be challenging, made even more difficult by modern JavaScript frameworks. Yet accurately resolving assertions is the key for preventing flaky and brittle tests.
 
-Yet accurately resolving assertions is the key for preventing flaky and brittle tests.
+Cypress's API is built to consistently pass or fail every time. As part of this strategy, Cypress will automatically look downstream at assertions and modify its behavior based on upcoming assertions.
 
-Cypress's API is built to consistently pass or fail every time. As part of this strategy, Cypress will automatically look downstream at assertions and modify its behavior based on the upcoming assertions.
-
-Internally Cypress will retry commands which are associated to assertions, and will not continue until **all** assertions pass.
-
-In this way, think of assertions as **guards**. This enables you (the developer) to specify conditions that must be resolved prior to moving on.
+Internally, Cypress will retry commands which are associated to assertions, and will not continue until **all** assertions pass. Using assertions as guards enables you to specify conditions that must be resolved prior to moving on.
 
 What conditions should you specify? Anything that guarantees your app is in the correct state.
 
-For instance, here are some typical scenarios:
+Here are some typical scenarios:
 
-* Clicking an `<a>` and verifying the `url` is correct after you expect your server to redirect.
+* Clicking an `<a>` then verifying the url is correct after you expect your server to redirect.
 * Focusing, then blurring on an `<input>` and expecting an error message with a specific class to be visible.
 * Clicking a `<button>` and waiting for a modal to animate in.
 * Typing into a `<form>` and verifying an element should not exist or not be visible.
 
-Every command that comes before a `cy.should` will not resolve until **all** of its associated assertions pass.
+Every command that comes before a [`cy.should`](http://on.cypress.io/api/should) will not resolve until **all** of its associated assertions pass.
 
 This enables you to accurately test the following situation:
 
 ```html
 <!-- Our App Code -->
 <form>
-  <div>
-    <input name="fullName" placeholder="What is your name?" />
-    <span id="error" style="display: none;"></span>
-  </div>
+  <input name="name" placeholder="What is your name?" />
+  <span id="error" style="display: none;"></span>
 </form>
 
 <script type="text/javascript">
@@ -269,11 +259,12 @@ cy
     .and("have.class", "alert-danger")
     .and("contain", "Your name is required.")
 ```
-![assertions](https://cloud.githubusercontent.com/assets/1268976/10004440/b1c53294-607f-11e5-8d7d-3f5694a1fb1a.gif)
 
 Our tests' code is insulated from flaky failures because it is not coupled to any specific timing mechanism. If you look closely, our application code is written in such a way that introduces random wait times - yet Cypress will pass 100% of the time, without any explicit `wait` calls. The moment all 3 of the assertions pass, Cypress will resolve.
 
-In modern JS frameworks, and in many common web-based actions, there is usually an *indeterminate* amount of time between an action and a side effect such as:
+![assertions](https://cloud.githubusercontent.com/assets/1268976/10004440/b1c53294-607f-11e5-8d7d-3f5694a1fb1a.gif)
+
+In modern JavaScript frameworks, and in many common web-based actions, there is usually an *indeterminate* amount of time between an action and a side effect such as:
 
 * Network Requests
 * Redirects
