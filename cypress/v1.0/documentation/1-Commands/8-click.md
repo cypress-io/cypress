@@ -1,8 +1,7 @@
 slug: click
+excerpt: Click the current DOM subject
 
 ### [cy.click()](#usage)
-
-Clicks the current DOM subject.
 
 Like all child commands, `click` returns the current subject for further chaining.
 

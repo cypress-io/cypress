@@ -1,19 +1,22 @@
 slug: as
 excerpt: Alias reusable objects for later
 
-#### **New to Cypress?** [Read about using aliases first.](http://on.cypress.io/guides/using-aliases)
-
-***
-
-### [cy.as( *text* )](#usage)
+## [cy.as( *text* )](#usage)
 
 Create an alias to be used later.
 
+[block:callout]
+{
+  "type": "info",
+  "body": "[Read about using aliases first.](http://on.cypress.io/guides/using-aliases)",
+  "title": "New to Cypess?"
+}
+[/block]
 ***
 
 ## Usage
 
-#### Alias a route, then later wait for that route using `@alias`
+**Alias a route, then later wait for that route using `@alias`**
 
 ```javascript
 cy
@@ -43,5 +46,6 @@ Aliases of routes display in the routes instrument panel:
 ***
 
 ## Related
-1. [wait](http://on.cypress.io/api/wait)
-2. [get](http://on.cypress.io/api/get)
+1. [get](http://on.cypress.io/api/get)
+2. [wait](http://on.cypress.io/api/wait)
+3. [Using Aliases](http://on.cypress.io/guides/using-aliases)

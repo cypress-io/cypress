@@ -1,27 +1,29 @@
 slug: and
 excerpt: Enables chaining multiple assertions together
 
-#### **New to Cypress?** [Read about making assertions first.](http://on.cypress.io/guides/making-assertions)
-
-***
+## [cy.and()](#usage)
 
 `cy.and` makes assertions about the current subject.
 
-When chaining multiple assertions together, `cy.and` reads very well.
+When chaining multiple assertions together, `cy.and` sometimes reads better than [`cy.should`](http://on.cypress.io/api/should).
 
 `cy.and` is identical to [`cy.should`](http://on.cypress.io/api/should).
 
+[block:callout]
+{
+  "type": "info",
+  "body": "[Read about making assertions first.](http://on.cypress.io/guides/making-assertions)",
+  "title": "New to Cypess?"
+}
+[/block]
+
 ***
 
-## Chaining Assertions
+## Usage
 
 ```javascript
 cy.get("button").should("have.class", "active").and("not.be.disabled")
 ```
-
-***
-
-## Asserting On Subject Changes
 
 ```html
 <!-- App Code -->
@@ -59,7 +61,7 @@ cy
 
 ## Notes
 
-If you've worked in `Chai` before, you will recognize that `cy.and` matches the same fluent assertion syntax.
+If you've worked in [Chai](http://chaijs.com/) before, you will recognize that `cy.and` matches the same fluent assertion syntax.
 
 Take this *explicit* assertion for example:
 
@@ -78,8 +80,6 @@ expect({foo: "bar"}).to.have.property("foo").and.eq("bar")
     .should("be.checked")
     .and("not.be.disabled")
 ```
-
-
 
 
 [block:html]

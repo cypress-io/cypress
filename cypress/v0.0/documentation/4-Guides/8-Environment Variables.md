@@ -1,21 +1,13 @@
 slug: environment-variables
 excerpt: Set up environment variables
 
-## Environment Variables
-- [Use Case](#use-case)
-- [Setting Env Vars](#setting-env-vars)
-
-Cypress gives you 4 flexible ways of setting environment variables.
-
-When your tests are running, you can use the [`Cypress.env()`](http://on.cypress.io/api/env) function to access the values of your environment variables.
-
 ## Use Case
 
 Environment variables should be used:
 - Whenever values are different across developer machines
 - Whenever values change frequently and are highly dynamic
 
-The most common use case are accessing the custom values you've written in your `hosts` file.
+The most common use case is to access custom values you've written in your `hosts` file.
 
 For instance instead of hard coding this in your tests:
 
@@ -46,17 +38,18 @@ To summarize you can:
 
 Don't feel obligated to pick just one method. It is common to use one strategy for local development but another when running in CI.
 
+When your tests are running, you can use the [`Cypress.env()`](http://on.cypress.io/api/env) function to access the values of your environment variables.
+
 ***
 
-### Option #1: Set in `cypress.json`
+**Option #1: Set in `cypress.json`**
 
-Any key/value you set in your `cypress.json` under the `env` key will become an environment variable.
+Any key/value you set in your [`cypress.json`](http://on.cypress.io/guides/configuration) under the `env` key will become an environment variable.
 
 ```javascript
 // cypress.json
 {
-  "viewporthWidth": 800,
-  "viewportHeight": 600,
+  "projectId": "128076ed-9868-4e98-9cef-98dd8b705d75",
   "env": {
     "foo": "bar",
     "some": "value"
@@ -72,17 +65,27 @@ Cypress.env("foo")  // => "bar"
 Cypress.env("some") // => "value"
 ```
 
-**Benefits**
-- Great for values which need to be checked into source control and remain the same on all machines
+[block:callout]
+{
+  "type": "success",
+  "body": "- Great for values that need to be checked into source control and remain the same on all machines",
+  "title": "Benefits"
+}
+[/block]
 
-**Downsides**
-- Only works for values which should be the same on across all machines
+[block:callout]
+{
+  "type": "danger",
+  "body": "- Only works for values which should be the same on across all machines",
+  "title": "Downsides"
+}
+[/block]
 
 ***
 
-### Option #2: Create a `cypress.env.json`
+**Option #2: Create a `cypress.env.json`**
 
-You can create your own `cypress.env.json`, which Cypress will automatically check for. Values in here will overwrite conflicting values in `cypress.json`.
+You can create your own `cypress.env.json`, which Cypress will automatically check. Values in here will overwrite conflicting values in `cypress.json`.
 
 This strategy is useful because if you add `cypress.env.json` to your `.gitignore` file, the values in here can be different for each developer machine.
 
@@ -90,7 +93,7 @@ This strategy is useful because if you add `cypress.env.json` to your `.gitignor
 // cypress.env.json
 
 {
-  "host": "brian.dev.local",
+  "host": "veronica.dev.local",
   "api_server": "http://localhost:8888/api/v1/"
 }
 ```
@@ -98,84 +101,109 @@ This strategy is useful because if you add `cypress.env.json` to your `.gitignor
 ```javascript
 // in your test files
 
-Cypress.env()             // => {host: "brian.dev.local", api_server: "http://localhost:8888/api/v1"}
-Cypress.env("host")       // => "brian.dev.local"
+Cypress.env()             // => {host: "veronica.dev.local", api_server: "http://localhost:8888/api/v1"}
+Cypress.env("host")       // => "veronica.dev.local"
 Cypress.env("api_server") // => "http://localhost:8888/api/v1/"
 ```
 
-**Benefits**
-- Dedicated file just for environment variables
-- Enables you to generate this file from other build processes
-- If its not checked into source control these values can be different on each machine
+[block:callout]
+{
+  "type": "success",
+  "body": "- Dedicated file just for environment variables\n- Enables you to generate this file from other build processes\n- Values can be different on each machine if not checked into source control",
+  "title": "Benefits"
+}
+[/block]
 
-**Downsides**
-- Another file you have to deal with
-- Overkill for 1 or 2 environment variables
+[block:callout]
+{
+  "type": "danger",
+  "body": "- Another file you have to deal with\n- Overkill for 1 or 2 environment variables",
+  "title": "Downsides"
+}
+[/block]
 
 ***
 
-### Option #3: Export as `CYPRESS_*`
+**Option #3: Export as `CYPRESS_*`**
 
-Any environment variable on your machine which starts with either `CYPRESS_` or `cypress_` will automatically be added and made available to you.
+Any environment variable on your machine that starts with either `CYPRESS_` or `cypress_` will automatically be added and made available to you.
 
 Conflicting values from this method will override `cypress.json` and `cypress.env.json` files.
 
-Cypress will automatically **strip off** the `CYPRESS_` part when adding your environment variables.
+Cypress will automatically **strip off** the `CYPRESS_` when adding your environment variables.
 
 ```bash
 ## export cypress env variables from the command line
-export CYPRESS_HOST=brian.dev.local
+export CYPRESS_HOST=laura.dev.local
 export cypress_api_server=http://localhost:8888/api/v1/
 ```
 
 ```javascript
 // in your test files
 
-Cypress.env()             // => {HOST: "brian.dev.local", api_server: "http://localhost:8888/api/v1"}
-Cypress.env("HOST")       // => "brian.dev.local"
+Cypress.env()             // => {HOST: "laura.dev.local", api_server: "http://localhost:8888/api/v1"}
+Cypress.env("HOST")       // => "laura.dev.local"
 Cypress.env("api_server") // => "http://localhost:8888/api/v1/"
 ```
 
-**Benefits**
-- Quickly export some values
-- Can be stored in your `bash_profile`
-- Allows for dynamic values between different machines
-- Especially useful for CI environments
 
-**Downsides**
-- Not as obvious where values come from vs the other methods
+[block:callout]
+{
+  "type": "success",
+  "body": "- Quickly export some values\n- Can be stored in your `bash_profile`\n- Allows for dynamic values between different machines\n- Especially useful for CI environments",
+  "title": "Benefits"
+}
+[/block]
+
+[block:callout]
+{
+  "type": "danger",
+  "body": "- Not as obvious where values come from vs the other methods",
+  "title": "Downsides"
+}
+[/block]
 
 ***
 
-### Option #4: Pass in from the CLI as `--env`
+**Option #4: Pass in from the CLI as `--env`**
 
 Lastly you can also pass in environment variables as options when [using the CLI tool](https://github.com/cypress-io/cypress-cli).
 
 Values here will overwrite all other conflicting environment variables.
 
-You can use the `--env` option on `cypress run` or `cypress ci`.
+You can use the `--env` option on `cypress ci`.
 
-> **Note:** Multiple values must be separated by a comma. NOT A SPACE.
+[block:callout]
+{
+  "type": "info",
+  "body": "Multiple values must be separated by a comma. NOT A SPACE."
+}
+[/block]
 
 ```bash
-cypress run --env host=brian.dev.local,api_server=http://localhost:8888/api/v1
+cypress ci --env host=kevin.dev.local,api_server=http://localhost:8888/api/v1
 ```
 
 ```javascript
 // in your test files
 
-Cypress.env()             // => {host: "brian.dev.local", api_server: "http://localhost:8888/api/v1"}
-Cypress.env("host")       // => "brian.dev.local"
+Cypress.env()             // => {host: "kevin.dev.local", api_server: "http://localhost:8888/api/v1"}
+Cypress.env("host")       // => "kevin.dev.local"
 Cypress.env("api_server") // => "http://localhost:8888/api/v1/"
 ```
 
-**Benefits**
-- Does not require any changes to files / config
-- Obvious where environment variables come from
-- Allows for dynamic values between different machines
-- Overwrites all other forms of setting env variables
+[block:callout]
+{
+  "type": "success",
+  "body": "- Does not require any changes to files / config\n- Obvious where environment variables come from\n- Allows for dynamic values between different machines\n- Overwrites all other forms of setting env variables",
+  "title": "Benefits"
+}
+[/block]
 
-**Downsides**
-- Pain to always write the `--env` options everywhere you use Cypress
-
-
+[block:callout]
+{
+  "type": "danger",
+  "body": "- Pain to write the `--env` options everywhere you use Cypress",
+  "title": "Downsides"
+}
+[/block]

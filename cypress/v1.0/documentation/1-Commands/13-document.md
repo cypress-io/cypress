@@ -1,5 +1,5 @@
 slug: document
-excerpt: Get document element
+excerpt: Get the document element
 
 ### [cy.document()](#usage)
 

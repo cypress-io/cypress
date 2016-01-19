@@ -1,14 +1,14 @@
 slug: deprecations
-excerpt: Deprecations
+excerpt: Features that will be removed in the future.
 
-Deprecations which require additional explanation are listed here.
+Deprecations that require additional explanation will be listed here.
 
 - [Passing cy.server({stub: false}) is now deprecated](#passing-cyserverstub-false-is-now-deprecated)
 - [Passing cy.route({stub: false}) is now deprecated](#passing-cyroutestub-false-is-now-deprecated)
 
 ## Passing cy.server({stub: false}) is now deprecated
 
-In previous versions of Cypress to prevent Cypress from stubbing routes you had to explicitly tell your server not to stub routes like this:
+In previous versions of Cypress, to prevent Cypress from stubbing routes you had to explicitly tell your server not to stub routes like this:
 
 ```javascript
 cy
@@ -16,11 +16,11 @@ cy
   .route(...)
 ```
 
-You no longer have to do this, because whether a `cy.route` is stubbed or not is simply based on whether or not you specified a `response` in the `cy.route`.
+You no longer have to do this. Whether a [cy.route](http://on.cypress.io/api/route) is stubbed or not is simply based on whether or not you specified a response in [cy.route](http://on.cypress.io/api/route).
 
 ## Passing cy.route({stub: false}) is now deprecated
 
-In previous versions of Cypress `cy.route` would require you pass it a `response` unless you specified `stub: false` in its options.
+In previous versions of Cypress, [cy.route](http://on.cypress.io/api/route) would require a `response` unless you specified `stub: false` in its options.
 
 You used to have to write this:
 
@@ -30,7 +30,7 @@ cy
   .route({url: /posts/, stub: false})
 ```
 
-This is now deprecated because now Cypress will automatically stub a `cy.route` based on whether or not it has a `response` property.
+This is now deprecated because Cypress automatically stubs [cy.route](http://on.cypress.io/api/route) based on whether or not it has a `response` property.
 
 ```javascript
 cy
