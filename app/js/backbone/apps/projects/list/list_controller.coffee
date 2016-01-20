@@ -30,7 +30,7 @@
           ## resolves faster to prevent the sudden flash
           ## of loading content which is jarring
           Promise.all([
-            App.ipc("add:project", dirPath)
+            App.ipc("add:project", dirPath),
             Promise.delay(750)
           ])
           .then ->
