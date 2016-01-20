@@ -44,12 +44,6 @@
       @listenTo bottomView, "login:clicked", (view, obj) ->
         App.execute "login:request"
 
-      @listenTo bottomView, "reload:clicked", ->
-        App.execute "gui:reload"
-
-      @listenTo bottomView, "console:clicked", ->
-        App.execute "gui:console"
-
       @listenTo bottomView, "quit:clicked", ->
         App.execute "gui:quit"
 

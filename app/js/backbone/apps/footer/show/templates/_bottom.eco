@@ -1,12 +1,4 @@
 <div id="footer">
-  <% if @debug: %>
-    <span class="pull-left">
-      <i class="fa fa-repeat"></i>
-    </span>
-    <span class="pull-left">
-      <i class="fa fa-terminal"></i>
-    </span>
-  <% end %>
   <span class="pull-right">
     <div class="dropup">
       <i class="fa fa-cog dropdown-toggle" data-toggle="dropdown"></i>
