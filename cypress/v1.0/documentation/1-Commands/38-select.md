@@ -1,34 +1,35 @@
 slug: select
 excerpt: Select an option
 
-### [cy.select( *text* )](#text-usage)
+## [cy.select( *text* )](#text-usage)
 
-Selects an option within a `<select>` element based on the text content within the option.
-
-***
-
-### [cy.select( *value* )](#value-usage)
-
-Selects an option within a `<select>` element based on the value of the option.
+Select an option within a `<select>` element based on the text content of the option.
 
 ***
 
-### [cy.select( *text*, *options* )](#options-usage)
-### [cy.select( *value*, *options* )](#options-usage)
+## [cy.select( *value* )](#value-usage)
 
-Select supports these options:
+Select an option within a `<select>` element based on the value of the option.
+
+***
+
+## [cy.select( *text*, *options* )](#options-usage)
+## [cy.select( *value*, *options* )](#options-usage)
+
+Pass in an object containing the following key/values. Select supports the following options:
 
 Option | Default | Notes
 --- | --- | ---
-force | false | Forces select, disables error checking prior to select
-timeout | 4000 | Total time to retry the select
-interval | 50 | Interval which to retry a select
+`force` | `false` | Forces select, disables error checking prior to select
+`interval` | `50` | Interval which to retry a select
+`timeout` | `4000` | Total time to retry the select
+`log` | `true` | Display command in command log
 
 ***
 
 ## Text Usage
 
-#### Select the option with the text `apples`
+Select the option with the text `apples`
 
 ```html
 <select>
@@ -39,6 +40,7 @@ interval | 50 | Interval which to retry a select
 ```
 
 ```javascript
+// returns <option value="456">apples</option>
 cy.get("select").select("apples")
 ```
 
@@ -46,7 +48,7 @@ cy.get("select").select("apples")
 
 ## Value Usage
 
-#### Select the option with the value "456"
+Select the option with the value "456"
 
 ```html
 <select>
@@ -57,6 +59,7 @@ cy.get("select").select("apples")
 ```
 
 ```javascript
+// returns <option value="456">apples</option>
 cy.get("select").select("456")
 ```
 

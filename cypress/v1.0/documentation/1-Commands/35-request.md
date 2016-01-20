@@ -35,8 +35,8 @@ You can additionally specify the following options:
 
 Option | Default | Notes
 --- | --- | ---
-`url` | `null` | The URL to make the request.
 `method` | `GET` | The HTTP method to use when making the request.
+`url` | `null` | The URL to make the request.
 `body` | `null` | The Request Body to send along with the request.
 `headers` | `null` | Any additional headers to send. Accepts an object literal.
 `cookies` | `false` | Whether to send the current browser cookies. Can also accept an object literal.

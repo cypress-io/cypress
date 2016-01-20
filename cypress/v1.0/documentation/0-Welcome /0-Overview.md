@@ -46,7 +46,7 @@ Nullam id dolor id nibh ultricies vehicula ut id elit. Donec id elit non mi port
 | [prev]() | Get the previous sibling of elements |
 | [request]() | Make XHR request |
 | [root]() | Get the root element |
-| [route]() | Set a route matching a url |
+| [route]() | Route responses to matching requests |
 | [select]() | Select an option |
 | [server]() | Control the behavior of network requests and responses. |
 | [should]() | Make an assertion about current subject |
