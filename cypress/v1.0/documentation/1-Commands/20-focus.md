@@ -1,25 +1,23 @@
 slug: focus
 excerpt: Focus on the current subject
 
-### [cy.focus()](#usage)
+## [cy.focus()](#usage)
 
-Focus on the current subject.
+Focus on the current subject. Returns the existing subject.
 
-Returns the existing subject.
-
-If there is currently an `activeElement` (a different element currently with focus), Cypress will automatically issue a `blur` event to that element first, as per the w3c spec.
+If there is currently an `activeElement` (a different element currently with focus), Cypress will issue a `blur` event to that element first, as per the w3c spec.
 
 ***
 
 ## Usage
 
-#### Focus on the current subject.
+Focus on the current subject.
 
 ```javascript
 cy.get("[name='comment']").focus()
 ```
 
-#### Focus, type, and blur the current subject.
+Focus, type, and blur the current subject.
 
 ```javascript
 // returns the <textarea> for further chaining
@@ -47,3 +45,4 @@ When clicking on the `focus` command within the command log, the console outputs
 ## Related
 1. [focused](http://on.cypress.io/api/focused)
 2. [blur](http://on.cypress.io/api/blur)
+2. [click](http://on.cypress.io/api/click)

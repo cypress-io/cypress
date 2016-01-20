@@ -1,27 +1,25 @@
 slug: blur
 excerpt: Blur the current subject
 
-### [cy.blur()](#usage)
+## [cy.blur()](#usage)
 
-Blur the current subject.
-
-Returns the existing subject.
+Blur the current subject. Returns the existing subject.
 
 ***
 
-### [cy.blur( *options* )](#options-usage)
+## [cy.blur( *options* )](#options-usage)
 
 Blur supports these options:
 
 Option | Default | Notes
 --- | --- | ---
-force | false | Forces blur, disables error checking prior to blur
+`force` | `false` | Forces blur, disables error checking prior to blur
 
 ***
 
 ## Usage
 
-#### Blur the comment input.
+Blur the comment input.
 
 ```javascript
 // returns the same <textarea> for further chaining
@@ -30,7 +28,7 @@ cy.get("[name='comment']").type("Nice Product!").blur()
 
 ## Options Usage
 
-#### Blur the first input ignoring whether the input is currently focused.
+Blur the first input, ignoring whether the input is currently focused.
 
 ```javascript
 // returns the same <input> for further chaining

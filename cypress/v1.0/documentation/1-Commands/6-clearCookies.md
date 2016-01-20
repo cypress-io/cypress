@@ -1,19 +1,19 @@
 slug: clearcookies
 excerpt: Clear all browser cookies.
 
-### [cy.clearCookies()](#usage)
+## [cy.clearCookies()](#usage)
 
 Clears all of the browser cookies.
 
 Cypress automatically invokes this command **between** each test to prevent state from building up.
 
-Therefore you won't need to invoke this command normally unless you're using it to clear cookies within a single test.
+You shouldn't need to invoke this command unless you're using it to clear cookies inside a single test.
 
 ***
 
 ## Usage
 
-> Clear cookies after logging in
+Clear cookies after logging in
 
 ```javascript
 cy
@@ -23,4 +23,7 @@ cy
   .url().should("eq", "login")
 ```
 
-In this example, when first login our server sends us back a `session cookie`. After invoking `cy.clearCookies` this would have cleared the session cookie, and upon navigating to a authorized page, our server should have redirected us back to login.
+In this example, on first login our server sends us back a session cookie. After invoking `cy.clearCookies` this clears the session cookie, and upon navigating to an unauthorized page, our server should have redirected us back to login.
+
+## Related
+1. [Cypress API Cookies](http://on.cypress.io/api/cookies)

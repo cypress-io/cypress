@@ -1,16 +1,17 @@
 slug: focused
 excerpt: Get the element that is focused
 
-### [cy.focused()](#usage)
+## [cy.focused()](#usage)
+
 Returns the current element that is focused.
 
-If Cypress does not find any element with focus, it will return `null`.
+If Cypress does not find *any* element with focus, `null` is returned.
 
 ***
 
 ## Usage
 
-#### Return the element that is focused.
+Return the element that is focused.
 
 ```javascript
 cy.focused()
@@ -18,10 +19,10 @@ cy.focused()
 
 ***
 
-#### Make an assertion on the focused element.
+Make an assertion on the focused element.
 
 ```javascript
-cy.focused().should("have.attr", "name", "num")
+cy.focused().should("have.attr", "name", "username")
 ```
 
 ***

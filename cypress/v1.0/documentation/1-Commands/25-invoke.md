@@ -1,15 +1,11 @@
 slug: invoke
 excerpt: Call properties on the current subject
 
-`cy.invoke` invokes properties which are functions on the current subject.
+## [cy.invoke( *functionName* )](#function-usage)
 
-This works the same way as underscore's `invoke` function.
+`cy.invoke` invokes properties that are functions on the current subject. This works the same way as underscore's `invoke` function.
 
-`cy.invoke` is identical to [`cy.its`](http://on.cypress.io/api/its). `cy.its` reads better when calling regular properties which are not functions.
-
-### [cy.invoke( *functionName* )](#function-usage)
-
-Invokes the function on the subject and returns that new value.
+`cy.invoke` is identical to [`cy.its`](http://on.cypress.io/api/its). `cy.its` sometimes reads better when calling regular properties which are not functions.
 
 ```javascript
 var fn = function(){
@@ -21,7 +17,7 @@ cy.wrap({foo: fn}).invoke("foo").should("eq", "bar") // true
 
 ***
 
-### [cy.invoke( *functionName*, \**arguments* )](#function-with-arguments-usage)
+## [cy.invoke( *functionName*, \**arguments* )](#function-with-arguments-usage)
 
 Invokes the function and forwards any additional arguments to the function call. There are no limits to the number of arguments.
 
@@ -41,21 +37,22 @@ cy
 
 ## Function Usage
 
-#### Properties which are functions are invoked
+Properties that are functions are invoked
 
 ```javascript
 // force a hidden div to be 'display: block'
 // so we can interact with its children elements
 cy
   .get("div.container").should("be.hidden") // true
+
   .invoke("show") // call the jquery method 'show' on the 'div.container'
     .should("be.visible") // true
-    .find("input").type("cypress is great")
+    .find("input").type("Cypress is great")
 ```
 
 ***
 
-#### Useful for 3rd party plugins
+Useful for 3rd party plugins
 
 ```javascript
 // as a slightly verbose approach
@@ -74,17 +71,19 @@ cy
   .get("input")
     .invoke("getKendoDropDownList")
     .invoke("select", "apples")
-  .its("val").should("match", /apple/)
+  .its("val").should("match", /apples/)
 ```
 
 ***
 
 ## Function with Arguments Usage
 
-#### Arguments are automatically forwarded to the function
+Arguments are automatically forwarded to the function
 
 ```javascript
-cy.get("form").invoke("attr", "ng-show").should("not.include", "myValue")
+cy
+  .get("form").invoke("attr", "ng-show")
+    .should("not.include", "myValue")
 ```
 
 ***

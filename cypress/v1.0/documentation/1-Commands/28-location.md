@@ -1,9 +1,9 @@
 slug: location
 excerpt: Get window.location
 
-### [cy.location()](#usage)
+## [cy.location()](#usage)
 
-Returns an object literal which matches the `window.location` spec.
+Returns an object literal that matches the `window.location` spec.
 
 Given a remote URL of:
 
@@ -15,16 +15,16 @@ An object would be returned with the following properties:
 
 Key | Type | Returns
 --- | --- | ----
-hash | string | #/users/123/edit
-host | string | localhost:8000
-hostname | string | localhost
-href | string | http://localhost:8000/app/index.html?q=brian#/users/123/edit
-origin | string | http://localhost:8000
-pathname | string | /app.index.html
-port | string | 8000
-protocol | string | http:
-search | string | ?q=brian
-toString | function | http://localhost:8000/app/index.html?q=brian#/users/123/edit
+`hash` | string | #/users/123/edit
+`host` | string | localhost:8000
+`hostname` | string | localhost
+`href` | string | http://localhost:8000/app/index.html?q=brian#/users/123/edit
+`origin` | string | http://localhost:8000
+`pathname` | string | /app.index.html
+`port` | string | 8000
+`protocol` | string | http:
+`search` | string | ?q=brian
+`toString` | function | http://localhost:8000/app/index.html?q=brian#/users/123/edit
 
 ***
 

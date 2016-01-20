@@ -1,19 +1,19 @@
 slug: check
 excerpt: Check a checkbox
 
-### [cy.check()](#usage)
+## [cy.check()](#usage)
 
 Checks the checkbox. Triggers events associated with check.
 
 ## Usage
 
-#### Check the checkbox
+Check the checkbox
 
 ```javascript
 cy.get("[type='checkbox']").check()
 ```
 
-#### Check the element with id of `saveUserName` and check it
+Check the element with id of `saveUserName` and check it
 
 ```javascript
 cy.get("#saveUserName").check()
@@ -37,3 +37,4 @@ When clicking on `check` within the command log, the console outputs the followi
 ***
 ## Related
 1. [uncheck](http://on.cypress.io/api/uncheck)
+2. [click](http://on.cypress.io/api/click)

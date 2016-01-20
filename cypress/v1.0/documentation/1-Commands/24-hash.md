@@ -1,7 +1,7 @@
 slug: hash
 excerpt: Get the current URL hash
 
-### [cy.hash()](#usage)
+## [cy.hash()](#usage)
 
 Returns the current URL hash as a string, including the `#` character.
 
@@ -11,20 +11,16 @@ If no `#` character is present, an empty string will be returned.
 
 ## Usage
 
-#### Assert the hash is `#/users/1`
-
-Given this remote URL:
-`http://localhost:8000/app/#/users/1`
-
-Hash would return `#/users/1`
+Assert the hash is `#/users/1` given this remote URL: `http://localhost:8000/app/#/users/1`
 
 ```javascript
+// Hash returns `#/users/1`
 cy.hash().should("eq", "#/users/1") // => true
 ```
 
 ***
 
-#### Assert the hash matches via regex
+Assert the hash matches via regex
 
 ```html
 <ul id="users">
@@ -38,7 +34,7 @@ cy.hash().should("eq", "#/users/1") // => true
 
 ```javascript
 cy
-  .get("#users li").find("a").click()
+  .get("#users li").find("a")
   .hash().should("match", /users\/.+$/) // => true
 ```
 
@@ -46,20 +42,20 @@ cy
 
 ## Notes
 
-#### Hash is a shortcut for `cy.location().hash`
+**Hash is a shortcut for `cy.location().hash`**
 
 These 3 assertions are all the same.
 
 ```javascript
-// verbose
+// 1. verbose
 cy.location().then(function(location){
   expect(location.hash).to.eq("#/users/1")
 })
 
-// better
+// 2. better
 cy.location().its("hash").should("eq", "#/users/1")
 
-// best
+// 3. best
 cy.hash().should("eq", "#/users/1")
 ```
 

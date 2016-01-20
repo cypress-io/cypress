@@ -1,25 +1,30 @@
 slug: contains
 excerpt: Check to see if matching element contains text
 
-### [cy.contains( *text* )](#text-usage)
+## [cy.contains( *text* )](#text-usage)
 
 Returns the deepest element containing the text.  Elements can contain *more* than the desired text and still match.
 
-Additionally, Cypress will prefer these elements (in this order) `input[type='submit']`, `button`, `a`, `label` over the deepest element found.
+Additionally, Cypress will prefer some elements over the deepest element found. Preference order:
+
+- `input[type='submit']`
+- `button`
+- `a`
+- `label`
 
 If Cypress does not find a matching element, it will continue to retry until the [`commandTimeout`](options) has been reached.
 
 ***
 
-### [cy.contains( *text*, *options* )](#text-options)
+## [cy.contains( *text*, *options* )](#text-options)
 
 Pass in an options object to specify the conditions of the element.
 
 ***
 
-### [cy.contains( *selector*, *text* )](#selector-and-text-usage)
+## [cy.contains( *selector*, *text* )](#selector-and-text-usage)
 
-Specify a selector to filter elements containing the text.  Cypress will **ignore** it's default preference of `input[type='submit']`, `button`, `a`, `label` for the specified selector.
+Specify a selector to filter elements containing the text. Cypress will **ignore** it's default preference for the specified selector.
 
 Using a selector allows you to return more *shallow* elements in the tree which contain the specific text.
 
@@ -27,7 +32,7 @@ Using a selector allows you to return more *shallow* elements in the tree which 
 
 ## Text Usage
 
-> Find the deepest element containing the text `apples`
+Find the deepest element containing the text `apples`
 
 ```html
 <ul>
@@ -44,7 +49,7 @@ cy.contains("apples")
 
 ***
 
-> Find the input[type='submit'] by value <br>
+Find the input[type='submit'] by value <br>
 
 ```html
 <div id="main">
@@ -72,7 +77,7 @@ cy.get("form").contains("submit the form!").click()
 
 ***
 
-> Cypress will favor `button` of any type
+Cypress will favor `button` over other elements
 
 ```html
 <form>
@@ -85,9 +90,7 @@ cy.get("form").contains("submit the form!").click()
 ```
 
 ```javascript
-// let's make sure the <i> has the class: "fa-search"
-
-// even though the <span> is the deepest element which contains: "Search"
+// even though the <span> is the deepest element that contains: "Search"
 // Cypress will automatically favor button elements higher in the chain
 
 // in this case the <button> is returned which is why we can now drill
@@ -96,27 +99,24 @@ cy.contains("Search").children("i").should("have.class", "fa-search")
 
 ***
 
-> Cypress will favor `a`
+Cypress will favor `a`
 
 ```html
 <nav>
   <a href="/dashboard">
-    <i class="fa fa-dashboard"></i>
     <span>Dashboard</span>
   </a>
   <a href="/users">
-    <i class="fa fa-users"></i>
     <span>Users</span>
   </a>
   <a href="/signout">
-    <i class="fa fa-sign-out"></i>
     <span>Sign Out</span>
   </a>
 </nav>
 ```
 
 ```javascript
-// even though the <span> is the deepest element which contains: "Sign Out"
+// even though the <span> is the deepest element that contains: "Sign Out"
 // Cypress will automatically favor anchor elements higher in the chain
 
 // in this case we can assert on the anchors properties
@@ -125,41 +125,34 @@ cy.get("nav").contains("Sign Out").should("have.attr", "href", "/signout")
 
 ***
 
-> Cypress will favor `label`
+Cypress will favor `label`
 
 ```html
 <form>
   <label>
     <span>Name:</span>
-    <span>
-      <input name="name" />
-    </span>
+    <input name="name" />
   </label>
   <label>
     <span>Age:</span>
-    <span>
-      <input name="age" />
-    </span>
+    <input name="age" />
   </label>
-  <button type="submit">Submit</button>
 </form>
 ```
 
 ```javascript
-// even though the <span> is the deepest element which contains: "Age"
-// Cypress will automatically favor label elements higher in the chain
+// even though the <span> is the deepest element that contains: "Age"
+// Cypress will favor label elements higher in the chain
 
 // additionally we can omit the colon as long as the element
 // at least contains the text 'Age'
 
-//in this case we can easily target the input
-//because the label is returned
 cy.contains("Age").find("input").type("29")
 ```
 
 ***
 
-> Only the first matched element will be returned
+Only the *first* matched element will be returned
 
 ```html
 <ul id="header">
@@ -177,7 +170,7 @@ cy.contains("Age").find("input").type("29")
 
 ```javascript
 // this will return the <li> in the #header since that is the first
-// element which contains the text "Jane Lane"
+// element that contains the text "Jane Lane"
 cy.contains("Jane Lane")
 
 // if you want to select the <span> inside of #main instead
@@ -191,7 +184,7 @@ cy.get("#main").contains("Jane Lane")
 
 ## Selector and Text Usage
 
-> Specify a selector to return a specific element
+Specify a selector to return a specific element
 
 ```html
 <html>
@@ -209,7 +202,7 @@ cy.get("#main").contains("Jane Lane")
 // technically the <html>, <body>, <ul>, and first <li> all contain "apples"
 
 // normally Cypress would return the first <li> since that is the deepest
-// element which contains: "apples"
+// element that contains: "apples"
 
 // to override this behavior, pass a 'ul' selector
 // this returns the ul element since it also contains the text
@@ -224,11 +217,11 @@ cy.contains("ul", "apples")
 
 `cy.contains` is a dual command.  This means it can act as both a `parent` and a `child` command.  Read more about [`commands`](http://on.cypress.io/guides/issuing-commands) if this is unfamiliar.
 
-Because it is a dual command it can either **begin** a chain of commands or work off of an **existing** subject.
+Because it is a dual command it can either *begin* a chain of commands or work off of an *existing* subject.
 
 ***
 
-> Start a chain of commands
+Start a chain of commands
 
 ```javascript
 // search from the root scope (default: document)
@@ -237,7 +230,7 @@ cy.contains("some content")
 
 ***
 
-> Find content within an existing scope
+Find content within an existing scope
 
 ```javascript
 // search within an existing subject for the content
@@ -248,7 +241,7 @@ cy.get("#main").find("aside").contains("Add a user")
 
 ***
 
-> Be wary of chaining multiple contains <br>
+Be wary of chaining multiple contains
 
 ```javascript
 // let's imagine a scenario where you click a user's delete button
@@ -270,7 +263,7 @@ cy
 
 ***
 
-> End previous chains to get back to the root scope <br>
+End previous chains to get back to the root scope
 
 ```javascript
 cy

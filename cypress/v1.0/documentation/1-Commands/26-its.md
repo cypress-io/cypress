@@ -1,23 +1,22 @@
 slug: its
 excerpt: Call properties on the current subject
 
-`cy.its` calls properties on the current subject.
+## [cy.its( *propertyName* )](#usage)
+
+`cy.its` calls properties on the current subject and returns that new value.
 
 `cy.its` is identical to [`cy.invoke`](http://on.cypress.io/api/invoke), which reads better when invoking function properties.
 
-### [cy.its( *propertyName* )](#usage)
-
-Calls a property on the current subject and returns that new value.
-
-```javascript
-cy.wrap({foo: "bar"}).its("foo").should("eq", "bar") // true
-```
 
 ***
 
 ## Usage
 
-#### Call the `length` property on the current subject
+```javascript
+cy.wrap({foo: "bar"}).its("foo").should("eq", "bar") // true
+```
+
+Call the `length` property on the current subject
 
 ```javascript
 cy

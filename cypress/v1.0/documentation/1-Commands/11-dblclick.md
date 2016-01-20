@@ -1,7 +1,7 @@
 slug: dblclick
 excerpt: Double-click on a subject
 
-### [cy.dblclick()](#usage)
+## [cy.dblclick()](#usage)
 
 Double-clicks the current subject.
 
@@ -9,7 +9,7 @@ Double-clicks the current subject.
 
 ## Usage
 
-#### Double click anchor link
+Double click anchor link
 
 ```html
 <a href='#nav1'>Menu</a>

@@ -1,7 +1,7 @@
 slug: clear
 excerpt: Clear a value of an input or textarea
 
-### [cy.clear()](#usage)
+## [cy.clear()](#usage)
 
 Clears a value of an `<input>` or `<textarea>`.
 
@@ -15,15 +15,15 @@ Under the hood this is actually a shortcut for writing:
 
 ## Usage
 
-#### Clear the input and type a new value.
+Clear the input and type a new value.
 
 ```html
-<input name="firstName" value="John Doe" />
+<input name="name" value="John Doe" />
 ```
 
 ```javascript
 // clears the existing value first before typing
-cy.get("input[name=firstName]").clear().type("Jane Lane")
+cy.get("input[name='name']").clear().type("Jane Lane")
 ```
 
 ***
@@ -31,7 +31,7 @@ cy.get("input[name=firstName]").clear().type("Jane Lane")
 ## Command Log
 
 ```javascript
-cy.get("input[name=firstName]").clear().type("Jane Lane")
+cy.get("input[name='name']").clear().type("Jane Lane")
 ```
 
 The commands above will display in the command log as:

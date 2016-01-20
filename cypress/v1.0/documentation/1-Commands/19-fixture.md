@@ -1,10 +1,11 @@
 slug: fixture
 excerpt: Load a fixture to represent data
 
-### [cy.fixture( *fixture* )](#single-fixture-usage)
-Loads a single fixture by name.
+## [cy.fixture( *fixture* )](#single-fixture-usage)
 
-If extension is omitted Cypress will attempt to resolve the fixture's name by order of these extensions:
+Loads a single fixture by filename.
+
+If an extension is omitted, Cypress will attempt to resolve the fixture by order of these extensions:
 
 * `.json`
 * `.js`
@@ -21,14 +22,9 @@ If extension is omitted Cypress will attempt to resolve the fixture's name by or
 
 ***
 
-### [cy.fixture( *array* )](#array-usage)
-Loads an array of multiple fixtures by name.
-
-***
-
 ## Single Fixture Usage
 
-#### Load the `users.json` fixture
+Load the `users.json` fixture
 
 ```javascript
 cy.fixture("users.json")
@@ -36,7 +32,7 @@ cy.fixture("users.json")
 
 ***
 
-#### Omit the extension
+Omit the extension
 
 ```javascript
 cy.fixture("admin")
@@ -50,27 +46,23 @@ Cypress will search for files called `admin` and resolve the first one in this o
 
 ***
 
-#### Image fixtures will be sent as `base64`
+Image fixtures will be sent as `base64`
 
 ```javascript
 cy.fixture("images/logo.png").then(function(logo){
   // logo will be encoded as base64
-  // and look something like this:
-  // aIJKnwxydrB10NVWqhlmmC+ZiWs7otHotSAAAOw==
+  // and should look something like this:
+  // aIJKnwxydrB10NVWqhlmmC+ZiWs7otHotSAAAOw==...
 })
 ```
 
 ***
 
-## Array Usage
-
-***
-
 ## Notes
 
-#### Nesting
+**Nesting**
 
-You can nest fixtures within folders and reference them by defining the route to the file:
+You can nest fixtures within folders and reference them by defining the path to the file:
 
 `{your project root}/tests/_fixtures/users/admin.json`
 
@@ -80,34 +72,34 @@ cy.fixture("users/admin.json")
 
 ***
 
-#### Validation
+**Validation**
 
-Cypress will automatically validate your fixtures. If your `.json`, `.js`, or `.coffee`  files contain syntax errors, they will automatically be sent to your client.
+Cypress will automatically validate your fixtures. If your `.json`, `.js`, or `.coffee`  files contain syntax errors, they will automatically be shown in the Command Log.
 
 ***
 
-#### Formatting
+**Formatting**
 
-Cypress will additionally automatically rewrite and format your fixture files. That means you can paste in a single line of `json` for instance, and the next time Cypress serves this fixture, it will format / indent the `json` which makes it easier to read and debug.
+Cypress automatically formats your fixture files. That means you can paste in a single line of `json` and the next time Cypress serves this fixture, it will format / indent the `json` which makes it easier to read and debug.
 
 ***
 
 ## Usage with `cy.route()`
 
-Fixtures can be referenced directly by the special keywords: `fixture:` and `fx:`.
+Fixtures can be referenced directly by the special keywords: `fixture:` or `fx:`.
 
 This enables you to set a fixture as the response for a route without having to first use the `cy.fixture` command.
 
-Example 1:
+**Example 1:**
 
 ```javascript
-cy.route("GET", /users/, "fixture:users") // these are the same
-cy.route("GET", /users/, "fx:users")      // these are the same
+cy.route("GET", /users/, "fixture:users") // this works
+cy.route("GET", /users/, "fx:users")      // this also works
 ```
 
-This saves you from having to explicitly load the fixture first like in Example #2.
+This saves you from having to explicitly load the fixture first (like in Example #2).
 
-Example 2:
+**Example 2:**
 
 ```javascript
 cy
@@ -116,9 +108,9 @@ cy
   })
 ```
 
-However if you still need access to the fixture data, instead of yielding the fixture's data in Example #2, we can make use of aliasing.
+However if you still need access to the fixture data, instead of yielding the fixture's data in Example #2, we can make use of [aliasing](http://on.cypress.io/guides/using-aliases).
 
-Example 3:
+**Example 3:**
 
 ```javascript
 cy
@@ -133,9 +125,9 @@ cy
   })
 ```
 
-Using an alias provides the benefit of terseness and readability, yet still allows you access to the alias'd object later on for direct manipulation.
+Using an alias provides the benefit of terseness and readability, yet still allows you access to the aliased object later on for direct manipulation.
 
-This is useful when asserting about values in the fixture object, or perhaps changing its values prior to handing it off to a `cy.route`.
+This is useful when asserting about values in the fixture object, or perhaps if you need to change its values prior to handing it off to a [`cy.route`](http://on.cypress.io/api/route).
 
 ***
 

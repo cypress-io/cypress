@@ -1,27 +1,27 @@
 slug: last
 excerpt: Get the last element
 
-### [cy.last()](#usage)
+## [cy.last()](#usage)
 
-Reduce the set of matched elements to the final one in the set. This command does not accept any arguments.
+Reduce the set of matched elements to the final one in the set.
 
 ***
 
 ## Usage
 
-#### Get the last list item in a list.
+Get the last list item in a list.
 
 ```html
 <ul>
-  <li class="one">list item 1</li>
-  <li class="two">list item 2</li>
-  <li class="three">list item 3</li>
-  <li class="four">list item 4</li>
+  <li class="one">Knick knack on my thumb</li>
+  <li class="two">Knick knack on my shoe</li>
+  <li class="three">Knick knack on my knee</li>
+  <li class="four">Knick knack on my door</li>
 </ul>
 ```
 
 ```javascript
-// returns <li class="four"></li>
+// returns <li class="four">Knick knack on my door</li>
 cy.get("ul").last()
 ```
 

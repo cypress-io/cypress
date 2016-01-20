@@ -1,13 +1,13 @@
 slug: find
 excerpt: Get descendants of elements
 
-### [cy.find( *selector* )](#selector-usage)
+## [cy.find( *selector* )](#selector-usage)
 
-Gets the descendants of the each element in the current set of matched elements within the selector.
+Get the descendants of each element in the current set of matched elements within the selector.
 
 ## Selector Usage
 
-> Get li's within parent
+Get li's within parent
 
 ```html
 <ul id="parent">

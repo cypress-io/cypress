@@ -16,7 +16,7 @@ Create an alias to be used later.
 
 ## Usage
 
-**Alias a route, then later wait for that route using `@alias`**
+Alias a route, then later wait for that route using `@alias`
 
 ```javascript
 cy

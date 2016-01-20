@@ -1,7 +1,7 @@
 slug: filter
 excerpt: Filter elements by selector
 
-### [cy.filter( *selector* )](#selector-usage)
+## [cy.filter( *selector* )](#selector-usage)
 
 Reduce the set of matched elements to those that match the selector.
 
@@ -9,10 +9,21 @@ Reduce the set of matched elements to those that match the selector.
 
 ## Selector Usage
 
-> Filter the current subject to the element with class `active`.
+Filter the current subject to the element with class `active`.
+
+```html
+<ul>
+  <li>Home</li>
+  <li class="active">About</li>
+  <li>Services</li>
+  <li>Pricing</li>
+  <li>Contact</li>
+</ul>
+```
 
 ```javascript
-cy.get(".left-nav>.nav").find(">li").filter(".active")
+// returns <li>About</li>
+cy.get("ul").find(">li").filter(".active")
 ```
 
 ***

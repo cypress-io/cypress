@@ -32,7 +32,7 @@ Nullam id dolor id nibh ultricies vehicula ut id elit. Donec id elit non mi port
 | [focus]() | Focus on the current subject |
 | [focused]() | Get the element that is focused |
 | [get]() | Get an element |
-| [go]() | Go |
+| [go]() | Navigate back or forward to the previous or next URL in the browser's history |
 | [hash]() | Get the current URL hash |
 | [invoke]() | Call properties on the current subject |
 | [its]() | Call properties on the current subject |

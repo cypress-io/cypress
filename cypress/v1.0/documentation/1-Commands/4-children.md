@@ -1,59 +1,59 @@
 slug: children
 excerpt: Get the children of elements
 
-### [cy.children()](#usage)
+## [cy.children()](#usage)
 
-Get the children of each element in the set of matched elements, optionally filtered by a selector.
+Get the children of each element in the set of matched elements.
 
-### [cy.children( *selector* )](#selector-usage)
+## [cy.children( *selector* )](#selector-usage)
 
 The `.children()` method optionally accepts a selector expression. If the selector is supplied, the elements will be filtered by testing whether they match it.
 
 ## Usage
 
 ```html
-<ul class="level-1">
-  <li class="item-i">I</li>
-  <li class="item-ii">II
-    <ul class="level-2">
-      <li class="item-a">A</li>
-      <li class="item-b">B
-        <ul class="level-3">
-          <li class="item-1">1</li>
-          <li class="item-2">2</li>
-          <li class="item-3">3</li>
+<ul class="primary-nav">
+  <li class="about">About</li>
+  <li class="services">Services
+    <ul class="secondary-nav">
+      <li class="services-1">Web Design</li>
+      <li class="services-2">Print Design
+        <ul class="tertiary-nav">
+          <li class="item-1">Signage</li>
+          <li class="item-2">T-Shirt</li>
+          <li class="item-3">Business Cards</li>
         </ul>
       </li>
-      <li class="item-c">C</li>
+      <li class="services-3">Logo Design</li>
     </ul>
   </li>
-  <li class="item-iii">III</li>
+  <li class="Contact">Contact</li>
 </ul>
 ```
 
 ```javascript
 // returns [
-//  <li class="item-a"></li>,
-//  <li class="item-b"></li>,
-//  <li class="item-c"></li>
+//  <li class="services-1"></li>,
+//  <li class="services-2"></li>,
+//  <li class="services-3"></li>
 // ]
-cy.get("ul.level-2").children()
+cy.get("ul.secondary-nav").children()
 ```
 
 ## Selector Usage
 
 ```html
 <div>
-  <span>Hello</span>
-  <p class="selected">Hello Again</p>
-  <div class="selected">And Again</div>
-  <p>And One Last Time</p>
+  <ul>
+    <li class="active">Unit Testing</li>
+    <li>Integration Testing</li>
+  </ul>
 </div>
 ```
 
 ```javascript
-// returns [<p class="selected">Hello Again</p>, <div class="selected">And Again</div>]
-cy.get("div").children(".selected")
+// returns [<li class="active">Unit Testing</li>]
+cy.get("ul").children(".active")
 ```
 
 ## Command Log
