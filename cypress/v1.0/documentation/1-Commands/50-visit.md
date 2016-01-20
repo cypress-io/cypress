@@ -1,7 +1,7 @@
 slug: visit
 excerpt: Visit a remote url
 
-## [cy.visit( *url* )](#usage)
+# [cy.visit( *url* )](#usage)
 
 Visit a remote url. This will most likely be the first command you run.
 
@@ -9,7 +9,7 @@ Visit a remote url. This will most likely be the first command you run.
 
 ***
 
-## [cy.visit( *url*, *options* )](#options-usage)
+# [cy.visit( *url*, *options* )](#options-usage)
 
 Visit optionally accepts an `options` object:
 
@@ -21,7 +21,7 @@ Option | Default | Notes
 
 ***
 
-## Usage
+# Usage
 
 Visit a local server running on http://localhost:8000
 
@@ -59,6 +59,7 @@ Having Cypress serve your files is useful in simple projects and example apps, b
 ***
 
 Visit is automatically prefixed with `baseUrl`.
+
 ```javascript
 // cypress.json
 {
@@ -76,7 +77,7 @@ Read more about [`configuration`](http://on.cypress.io/guides/configuration) her
 
 ***
 
-## Options Usage
+# Options Usage
 
 Change the default timeout
 
@@ -120,9 +121,9 @@ cy.visit("http://localhost:3000/#/users", {
 
 ***
 
-## Notes
+# Notes
 
-**Visit will always yield the remote page's window object when it resolves**
+## Visit will always yield the remote page's window object when it resolves
 
 ```javascript
 cy.visit("index.html").then(function(contentWindow)){
@@ -132,7 +133,7 @@ cy.visit("index.html").then(function(contentWindow)){
 
 ***
 
-**Visit will automatically follow redirects**
+## Visit will automatically follow redirects
 
 ```javascript
 // we aren't logged in, and our webserver
@@ -144,7 +145,7 @@ cy
 
 ***
 
-**Cypress automatically wipes page state between visits**
+## Cypress automatically wipes page state between visits
 
 Whenever you `cy.visit(...)`, Cypress will automatically wipe the state of the page before navigating to an external page.
 
@@ -166,7 +167,7 @@ cy
 
 ***
 
-**Preventing XHR / AJAX requests before a remote page initially loads**
+## Preventing XHR / AJAX requests before a remote page initially loads
 
 One common scenario Cypress supports is visiting a remote page and also preventing any AJAX requests from immediately going out.
 
@@ -196,6 +197,7 @@ Cypress will automatically apply the server and routes to the very next `visit` 
 
 ***
 
-## Related
+# Related
+
 1. [go](http://on.cypress.io/api/go)
 1. [server](http://on.cypress.io/api/server)

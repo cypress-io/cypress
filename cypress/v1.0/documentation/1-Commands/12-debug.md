@@ -1,7 +1,7 @@
 slug: debug
 excerpt: Call debugger
 
-## [cy.debug()](#usage)
+# [cy.debug()](#usage)
 
 `cy.debug` will call `debugger` in JavaScript.
 
@@ -13,7 +13,7 @@ cy.get("button").debug()
 
 ***
 
-## Usage
+# Usage
 
 ```javascript
 // Cypress will log out the current subject and other
@@ -23,5 +23,6 @@ cy.get("a").debug().should("have.attr", "href")
 
 ***
 
-## Related
+# Related
+
 1. [pause](http://on.cypress.io/api/pause)

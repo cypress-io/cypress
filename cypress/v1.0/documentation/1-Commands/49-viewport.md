@@ -1,7 +1,7 @@
 slug: viewport
 excerpt: Change the screen size of your application
 
-## [cy.viewport( *width*, *height* )](#usage)
+# [cy.viewport( *width*, *height* )](#usage)
 
 Use `cy.viewport` to control the screen size of your application.
 
@@ -13,7 +13,7 @@ This command is useful for when you need to test your application in a specific 
 
 ***
 
-## [cy.viewport( *preset*, *orientation* )](#preset-usage)
+# [cy.viewport( *preset*, *orientation* )](#preset-usage)
 
 Viewport supports the following presets (in pixels):
 
@@ -36,7 +36,7 @@ Pass `landscape` as the orientation to reverse the width/height.
 
 ***
 
-## Usage
+# Usage
 
 Resize the viewport to 1024x768
 
@@ -85,7 +85,7 @@ describe("Nav Menus", function(){
 
 ***
 
-## Preset Usage
+# Preset Usage
 
 Resize the viewport to iPhone 6 width and height
 
@@ -106,23 +106,23 @@ cy.viewport("iphone-6", "landscape")
 
 ***
 
-## Known Issues
+# Known Issues
 
-**`devicePixelRatio` is not simulated**
+## `devicePixelRatio` is not simulated
 
 This is something Cypress will eventually do, which will match how Chrome's responsive mobile browsing simulation works. [Open an issue](https://github.com/cypress-io/cypress/issues/new?body=**Description**%0A*Include%20a%20high%20level%20description%20of%20the%20error%20here%20including%20steps%20of%20how%20to%20recreate.%20Include%20any%20benefits%2C%20challenges%20or%20considerations.*%0A%0A**Code**%0A*Include%20the%20commands%20used*%0A%0A**Steps%20To%20Reproduce**%0A-%20%5B%20%5D%20Steps%0A-%20%5B%20%5D%20To%0A-%20%5B%20%5D%20Reproduce%2FFix%0A%0A**Additional%20Info**%0A*Include%20any%20images%2C%20notes%2C%20or%20whatever.*%0A) if you need this to be fixed.
 
 ***
 
-## Notes
+# Notes
 
-**Cypress will restore the viewport for each command**
+## Cypress will restore the viewport for each command
 
 When hovering over each command, Cypress will automatically restore the viewport to the dimensions that existed when that command ran.
 
 ***
 
-**Default sizing**
+## Default sizing
 
 By default, until you issue a `cy.viewport` command, Cypress will assume the width is: `1000px` and the height is `660px`.
 
@@ -137,7 +137,7 @@ You can [change these default dimensions](http://on.cypress.io/guides/configurat
 
 ***
 
-**Auto Scaling**
+## Auto Scaling
 
 By default, if your screen is not large enough to display all of the current dimension's pixels, Cypress will scale and center your application within Cypress to accommodate.
 
@@ -145,5 +145,6 @@ Scaling the app should not affect any calculations or behavior of your applicati
 
 The upsides to this is that tests should consistently pass or fail regardless of each of your developers' screen sizes. Tests will also consistently run in `CI` because all of the viewports will be the same no matter what machine Cypress runs on.
 
-## Related
+# Related
+
 1. [Configuration](http://on.cypress.io/guides/configuration)

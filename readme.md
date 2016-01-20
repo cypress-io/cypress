@@ -1,4 +1,4 @@
-## Introduction
+# Introduction
 
 The documents in this repo are synchronized remotedly with Readme.io.
 
@@ -6,17 +6,17 @@ The documents in this repo are synchronized remotedly with Readme.io.
 
 It does somewhat complicate the process and is not quite as nice as editing `Github Wikis`, but it's still pretty great.
 
-## Getting Started
+# Getting Started
 
 https://github.com/mobify/readmeio-sync
 
-## Contributing
+# Contributing
 
 To make changes to our documentation:
 
 1. Make changes **locally** here (in markdown) and then synchronize them **remotely**.
 
-#### Working Locally
+### Working Locally
 
 You may need to login with your Readme.io credentials before working.
 
@@ -26,28 +26,28 @@ export README_PASSWORD=<readmeio_account_password>
 ```
 
 ```bash
-## use proper node version
+# use proper node version
 nvm use 5.3.0
 
-## modify local files
+# modify local files
 <hack hack hack>
 
-## commit to github
+# commit to github
 git commit -am 'updated docs'
 
-## deploy changes to readme.io
+# deploy changes to readme.io
 npm run upload
 
-## clean out deleted files on readme.io
+# clean out deleted files on readme.io
 npm run clean
 ```
 
-#### Writing Docs
+### Writing Docs
 
 **Edits should NEVER be made from the Readme.io's web ui**
 
 
-##### Links
+#### Links
 
 Links are all handled through our [cypress.on](https://github.com/cypress-io/cypress-on) api.
 
@@ -61,7 +61,7 @@ To link to a page on API:
 [and](http://on.cypress.io/api/$slug)
 ```
 
-##### Creating New Files
+#### Creating New Files
 
 When creating new files, each file requires an excert and a slug **followed by a newline**:
 ```md

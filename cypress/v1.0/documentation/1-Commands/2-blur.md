@@ -1,13 +1,13 @@
 slug: blur
 excerpt: Blur the current subject
 
-## [cy.blur()](#usage)
+# [cy.blur()](#usage)
 
 Blur the current subject. Returns the existing subject.
 
 ***
 
-## [cy.blur( *options* )](#options-usage)
+# [cy.blur( *options* )](#options-usage)
 
 Blur supports these options:
 
@@ -17,7 +17,7 @@ Option | Default | Notes
 
 ***
 
-## Usage
+# Usage
 
 Blur the comment input.
 
@@ -26,7 +26,7 @@ Blur the comment input.
 cy.get("[name='comment']").type("Nice Product!").blur()
 ```
 
-## Options Usage
+# Options Usage
 
 Blur the first input, ignoring whether the input is currently focused.
 
@@ -37,7 +37,7 @@ cy.get("input:first").blur({force: true})
 
 ***
 
-## Command Log
+# Command Log
 
 ```javascript
 cy.get("[name='comment']").type("Nice Product!").blur()
@@ -53,6 +53,6 @@ When clicking on the `blur` command within the command log, the console outputs 
 
 ***
 
-## Related
+# Related
 1. [focused](http://on.cypress.io/api/focused)
 2. [focus](http://on.cypress.io/api/focus)

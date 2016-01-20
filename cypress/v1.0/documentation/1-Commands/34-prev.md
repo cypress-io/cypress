@@ -1,19 +1,19 @@
 slug: prev
 excerpt: Get the previous sibling of elements
 
-## [cy.prev()](#usage)
+# [cy.prev()](#usage)
 
 Get the immediately preceding sibling of each element in the set of matched elements.
 
 ***
 
-## [cy.prev( *selector* )](#selector-usage)
+# [cy.prev( *selector* )](#selector-usage)
 
 Get the immediately preceding sibling of each element in the set of matched elements filtered by selector.
 
 ***
 
-## Usage
+# Usage
 
 ```html
 <ul>
@@ -32,7 +32,7 @@ cy.get(".active").prev()
 
 ***
 
-## Selector Usage
+# Selector Usage
 
 ```html
 <ul>
@@ -51,7 +51,7 @@ cy.get("li").prev(".active")
 
 ***
 
-## Command Log
+# Command Log
 
 ```javascript
 cy.get(".left-nav").find("li.active").prev()
@@ -67,5 +67,6 @@ When clicking on `prev` within the command log, the console outputs the followin
 
 ***
 
-## Related
+# Related
+
 1. [next](http://on.cypress.io/api/next)

@@ -1,19 +1,149 @@
+body {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  color: #333;
+  font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-size: 16px;
+  line-height: 1.6;
+  word-wrap: break-word;
+}
+
+.theme-solid .docs-header h1 {
+  font-size: 28px;
+}
+
+.docs-content [marked] h1 {
+  font-size: 22px;
+  text-transform: none;
+}
+
+.docs-content [marked] h1 {
+  font-size: 22px;
+  text-transform: none;
+}
+
+.blocks-parent .block>div>div [marked] h1:first-child {
+  margin-top: 0;
+}
+
+.docs-content [marked] h2 {
+  font-size: 18px;
+  text-transform: none;
+}
+
+.cm-s-neo .cm-variable {
+  color: #333;
+}
+.cm-s-neo .cm-property {
+  color: #795da3;
+}
+
+.cm-s-new .cm-string {
+  color: #183691;
+}
+
 .cm-s-neo .cm-comment {
   color: #999;
+}
+
+.cm-tag {
+  color: #63a35c;
 }
 
 .cm-s-neo .cm-string {
   color: #183691;
 }
 
-.cm-s-neo .cm-variable, .cm-s-neo .cm-qualifier {
+.cm-s-neo .cm-qualifier {
   color: #795da3;
 }
 
+.cm-tag.cm-bracket {
+  color: #333;
+}
+
+.block-show-code {
+  padding: 0;
+  margin-bottom: 0;
+}
+
+
+.block-show-code .code-tabs a {
+  color: #aaa;
+  font-size: 90%;
+}
+
 .block-show-code pre {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  overflow: auto;
   background-color: #f7f7f7;
   box-shadow: 0 0 0;
   padding: 15px;
-  font-family: Consolas;
-  font-size: 13.6px;
+  font-size: 1em;
+}
+
+.block-show-code pre>code {
+  padding: 0;
+  margin: 0;
+  font-size: 100%;
+  word-break: normal;
+  white-space: pre;
+  background: transparent;
+  border: 0;
+}
+
+code {
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 12px;
+}
+
+.block-show-code pre {
+  padding: 16px;
+  overflow: auto;
+  font-size: 85%;
+  line-height: 1.45;
+  background-color: #f7f7f7;
+  border-radius: 3px;
+  border: 0;
+  margin-bottom: 0;
+  word-break: normal;
+}
+
+.block-show-code pre {
+  word-wrap: normal;
+}
+
+.block-show-code pre code {
+  display: inline;
+  max-width: initial;
+  padding: 0;
+  margin: 0;
+  overflow: initial;
+  line-height: inherit;
+  word-wrap: normal;
+  background-color: transparent;
+  border: 0;
+}
+
+.block-show-code pre code:before,
+.block-show-code pre code:after {
+  content: normal;
+}
+
+code {
+  padding: 0;
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
+  margin: 0;
+  font-size: 85%;
+  background-color: rgba(0,0,0,0.04);
+  border-radius: 3px;
+}
+
+code:before,
+code:after {
+  letter-spacing: -0.2em;
+  content: "\00a0";
 }

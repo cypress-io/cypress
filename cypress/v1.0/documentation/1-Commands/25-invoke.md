@@ -1,7 +1,7 @@
 slug: invoke
 excerpt: Call properties on the current subject
 
-## [cy.invoke( *functionName* )](#function-usage)
+# [cy.invoke( *functionName* )](#function-usage)
 
 `cy.invoke` invokes properties that are functions on the current subject. This works the same way as underscore's `invoke` function.
 
@@ -17,7 +17,7 @@ cy.wrap({foo: fn}).invoke("foo").should("eq", "bar") // true
 
 ***
 
-## [cy.invoke( *functionName*, \**arguments* )](#function-with-arguments-usage)
+# [cy.invoke( *functionName*, \**arguments* )](#function-with-arguments-usage)
 
 Invokes the function and forwards any additional arguments to the function call. There are no limits to the number of arguments.
 
@@ -35,7 +35,7 @@ cy
 
 ***
 
-## Function Usage
+# Function Usage
 
 Properties that are functions are invoked
 
@@ -76,7 +76,7 @@ cy
 
 ***
 
-## Function with Arguments Usage
+# Function with Arguments Usage
 
 Arguments are automatically forwarded to the function
 
@@ -88,7 +88,7 @@ cy
 
 ***
 
-## Related
+# Related
 
 1. [its](http://on.cypress.io/api/its)
 2. [wrap](http://on.cypress.io/api/wrap)

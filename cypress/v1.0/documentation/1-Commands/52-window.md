@@ -1,13 +1,13 @@
 slug: window
 excerpt: Get global window object
 
-## [cy.window()](#usage)
+# [cy.window()](#usage)
 
 Returns the global window object of the remote application you've visited.
 
 ***
 
-## Usage
+# Usage
 
 Returns the remote window object
 
@@ -22,7 +22,7 @@ cy
 
 ***
 
-## Command Log
+# Command Log
 
 ```javascript
 cy.window()
@@ -38,5 +38,6 @@ When clicking on `window` within the command log, the console outputs the follow
 
 ***
 
-## Related
+# Related
+
 1. [document](http://on.cypress.io/api/document)

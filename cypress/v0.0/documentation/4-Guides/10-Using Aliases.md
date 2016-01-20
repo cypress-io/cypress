@@ -36,7 +36,7 @@ cy.then(function(){
 
 Of course this is not good. It's clunky and difficult to figure out what is going on. Plus, with complex JavaScript applications, the element references may no longer be in the DOM by the time you're ready to use them.
 
-## Introducing Aliasing
+# Introducing Aliasing
 
 **Aliasing** was designed to solve async referencing issues and DOM Element re-querying, routing requests and responses, server integration, and automated error handling. Aliasing also gives you a human readable word for a potentially complex series of events. Aliasing is prominently displayed in the Cypress Command Log making it even easier to understand relationships.
 
@@ -49,7 +49,7 @@ Aliasing is incredibly powerful but very simple to use:
 
 Every time you reference an alias, it should be prefixed with `@`. You can think of this character as "a" for alias or you can think of an alias as a pointer (like how variables point to memory).
 
-## DOM Elements
+# DOM Elements
 
 One use case for aliasing is for referencing a DOM Element.
 
@@ -73,7 +73,7 @@ Because we've used the `@` character in `cy.get`, instead of querying the DOM fo
 
 ***
 
-**When alias references no longer exist in the DOM**
+## When alias references no longer exist in the DOM
 
 Cypress automatically decides when it should reference existing elements, or re-query for new elements.
 
@@ -117,7 +117,7 @@ In our case it would re-issue the commands: `cy.get("#todos li").first()`. Every
 }
 [/block]
 
-## Routes
+# Routes
 
 Another use case for aliasing is with routes. Using route aliases makes dealing with AJAX requests much easier.
 

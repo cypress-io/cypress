@@ -3,7 +3,7 @@ excerpt: Why you should test your code.
 
 Since you've landed here, hopefully you’re open to the idea that testing code has some benefits. But, maybe you're still weighing the benefits or maybe you just need some fuel to convince your team that testing is worth looking into. Let's go over just a few reasons why you should be testing your code.
 
-## Invest in testing to:
+# Invest in testing to:
 
 :fa-code:  **Increase code quality**
 Writing tests challenges you think more clearly about edge cases and code for them.

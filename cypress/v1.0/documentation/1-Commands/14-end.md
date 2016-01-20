@@ -1,13 +1,13 @@
 slug: end
 excerpt: End the command chain
 
-## [cy.end()](#usage)
+# [cy.end()](#usage)
 
 Ends the Cypress command chain and returns `null`. This is equivalent to the jQuery `end()` method.
 
 ***
 
-## Usage
+# Usage
 
 ```javascript
 // cy.end is useful when you want to end a chain of commands
@@ -21,5 +21,6 @@ cy
 
 ***
 
-## Related
+# Related
+
 1. [root](http://on.cypress.io/api/root)

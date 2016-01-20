@@ -1,14 +1,14 @@
 slug: troubleshooting
 excerpt: Get help for common problems in Cypress
 
-## Installation
+# Installation
 
 There are known problems installing on Linux for:
 
 - [Wheezy](https://github.com/cypress-io/cypress/issues/87)
 - [Jenkins](https://github.com/cypress-io/cypress-cli/issues/2)
 
-**Running In CI**
+## Running In CI
 
 By default Cypress expects your CI provider to have:
 

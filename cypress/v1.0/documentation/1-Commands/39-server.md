@@ -1,7 +1,7 @@
 slug: server
 excerpt: Control the behavior of network requests and responses.
 
-### [cy.server()](#default-usage)
+# [cy.server()](#default-usage)
 
 Use `cy.server` to control the behavior of requests and responses. Start a server to begin routing responses to your requests.
 
@@ -15,7 +15,7 @@ Use `cy.server` to control the behavior of requests and responses. Start a serve
 
 ***
 
-### [cy.server( *options* )](#options-usage)
+# [cy.server( *options* )](#options-usage)
 
 `cy.server` takes options that are used for 2 different purposes:
 
@@ -44,7 +44,7 @@ Option | Default | Notes
 
 ***
 
-## Default Usage
+# Default Usage
 
 Start a server
 
@@ -60,9 +60,9 @@ After starting a server:
 
 ***
 
-## Options Usage
+# Options Usage
 
-**Change the defaults for upcoming `cy.route` commands**
+## Change the defaults for upcoming `cy.route` commands
 
 By default [`cy.route`](http://on.cypress.io/api/route) inherits its options from `cy.server`. Passing any of the following options to server will be inherited:
 
@@ -96,7 +96,7 @@ cy
 
 ***
 
-**Change the default delay for all routes**
+## Change the default delay for all routes
 
 ```javascript
 // delay each response 1500ms
@@ -107,7 +107,7 @@ Adding delay can help simulate real world network latency. Normally stubbed resp
 
 ***
 
-**Prevent sending 404's to unmatched requests**
+## Prevent sending 404's to unmatched requests
 
 By default, once you start a `cy.server`, Cypress will automatically send requests that don't match routes the following:
 
@@ -143,7 +143,7 @@ $(function(){
 
 ***
 
-**Change the default response headers for all routes**
+## Change the default response headers for all routes
 
 When you stub requests, you can automatically control their response headers.
 
@@ -189,7 +189,7 @@ xhr.send()
 
 ***
 
-**Change the default whitelisting**
+## Change the default whitelisting
 
 Cypress comes with a `whitelist` function that will filter out any requests that are for static assets like `.html`, `.js`, `.jsx`, `.css`.
 
@@ -223,7 +223,7 @@ If you would like to change the default option for **ALL** `cy.server` you [can 
 
 ***
 
-**Turn off the server after you've started it**
+## Turn off the server after you've started it
 
 You can disable all stubbing and its effects and restore to the default behavior as a test is running.
 
@@ -244,9 +244,9 @@ cy
 
 ***
 
-## Notes
+# Notes
 
-**Server persists until the next test runs**
+## Server persists until the next test runs
 
 Cypress automatically continues to persist the server and routing configuration even after a test ends. This means you can continue to use your application and still benefit from stubbing or other server configuration.
 
@@ -254,13 +254,13 @@ However between tests, when a new test runs, the previous configuration is resto
 
 ***
 
-**Outstanding requests are automatically aborted between tests**
+## Outstanding requests are automatically aborted between tests
 
 When a new test runs, any oustanding requests still in flight are automatically aborted. In fact this happens by default whether or not you've even started a `cy.server`.
 
 ***
 
-**Server can be started before you `cy.visit`**
+## Server can be started before you `cy.visit`
 
 Oftentimes your application may make initial requests immediately when it loads (such as authenticating a user). Cypress makes it possible to start your server and define routes before a [`cy.visit`](http://on.cypress.io/api/visit). Upon the next visit, the server + routes will be instantly applied before your application loads.
 
@@ -268,7 +268,8 @@ You can [read more about XHR strategy here](http://on.cypress.io/guides/network-
 
 ***
 
-## Related
+# Related
+
 1. [route](http://on.cypress.io/api/route)
 2. [wait](http://on.cypress.io/api/wait)
 3. [request](http://on.cypress.io/api/request)

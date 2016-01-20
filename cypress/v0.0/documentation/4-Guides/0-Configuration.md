@@ -11,7 +11,7 @@ When a project is added to Cypress, a `cypress.json` file is created in your pro
 
 You can modify other options in your `cypress.json`.
 
-## Global Options
+# Global Options
 
 Option | Default | Description
 ----- | ---- | ----
@@ -19,7 +19,7 @@ Option | Default | Description
 `env` | `{}` | [Environment Variables](http://on.cypress.io/guides/environment-variables)
 `commandTimeout` | `4000` | Time (ms) to wait until commands time out
 
-## Network Options
+# Network Options
 
 Option | Default | Description
 ----- | ---- | ----
@@ -28,7 +28,7 @@ Option | Default | Description
 `requestTimeout` | `5000` | Time (ms) to wait for an XHR request during [`cy.wait`](wait) command
 `responseTimeout` | `20000` | Time (ms) to wait until a response for [`cy.request`](request) and [`cy.wait`](http://on.cypress.io/api/wait) commands
 
-## Directory Options
+# Directory Options
 
 Option | Default | Description
 ----- | ---- | ----
@@ -36,14 +36,14 @@ Option | Default | Description
 `fixturesFolder` | `/tests/_fixtures` | Where Cypress will look for fixture files
 `supportFolder` | `/tests/_support` | Where Cypress will auto load support files
 
-## Viewport Options
+# Viewport Options
 
 Option | Default | Description
 ----- | ---- | ----
 `viewportWidth` | `1000` | Default width in pixels for [`cy.viewport`](http://on.cypress.io/api/viewport)
 `viewportHeight` | `660` | Default hidth in pixels for  [`cy.viewport`](http://on.cypress.io/api/viewport)
 
-## Animation Options
+# Animation Options
 
 Option | Default | Description
 ----- | ---- | ----

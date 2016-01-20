@@ -1,7 +1,7 @@
 slug: contains
 excerpt: Check to see if matching element contains text
 
-## [cy.contains( *text* )](#text-usage)
+# [cy.contains( *text* )](#text-usage)
 
 Returns the deepest element containing the text.  Elements can contain *more* than the desired text and still match.
 
@@ -16,13 +16,13 @@ If Cypress does not find a matching element, it will continue to retry until the
 
 ***
 
-## [cy.contains( *text*, *options* )](#text-options)
+# [cy.contains( *text*, *options* )](#text-options)
 
 Pass in an options object to specify the conditions of the element.
 
 ***
 
-## [cy.contains( *selector*, *text* )](#selector-and-text-usage)
+# [cy.contains( *selector*, *text* )](#selector-and-text-usage)
 
 Specify a selector to filter elements containing the text. Cypress will **ignore** it's default preference for the specified selector.
 
@@ -30,7 +30,7 @@ Using a selector allows you to return more *shallow* elements in the tree which 
 
 ***
 
-## Text Usage
+# Text Usage
 
 Find the deepest element containing the text `apples`
 
@@ -182,7 +182,7 @@ cy.get("#main").contains("Jane Lane")
 
 ***
 
-## Selector and Text Usage
+# Selector and Text Usage
 
 Specify a selector to return a specific element
 
@@ -213,7 +213,7 @@ cy.contains("ul", "apples")
 
 ***
 
-## Notes
+# Notes
 
 `cy.contains` is a dual command.  This means it can act as both a `parent` and a `child` command.  Read more about [`commands`](http://on.cypress.io/guides/issuing-commands) if this is unfamiliar.
 
@@ -295,7 +295,7 @@ cy
 
 ***
 
-## Command Log
+# Command Log
 
 <img width="536" alt="screen shot 2015-11-27 at 1 43 22 pm" src="https://cloud.githubusercontent.com/assets/1271364/11446973/009ac32c-950d-11e5-9eaa-09f8b8ddf086.png">
 
@@ -304,7 +304,8 @@ When clicking on the `contains` command within the command log, the console outp
 <img width="477" alt="screen shot 2015-11-27 at 1 43 50 pm" src="https://cloud.githubusercontent.com/assets/1271364/11446977/04b31be4-950d-11e5-811e-4fd83d364d00.png">
 ***
 
-## Related
+# Related
+
 1. [get](http://on.cypress.io/api/get)
 2. [within](http://on.cypress.io/api/within)
 3. [root](http://on.cypress.io/api/root)

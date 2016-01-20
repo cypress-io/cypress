@@ -1,7 +1,7 @@
 slug: clear
 excerpt: Clear a value of an input or textarea
 
-## [cy.clear()](#usage)
+# [cy.clear()](#usage)
 
 Clears a value of an `<input>` or `<textarea>`.
 
@@ -13,7 +13,7 @@ Under the hood this is actually a shortcut for writing:
 
 ***
 
-## Usage
+# Usage
 
 Clear the input and type a new value.
 
@@ -28,7 +28,7 @@ cy.get("input[name='name']").clear().type("Jane Lane")
 
 ***
 
-## Command Log
+# Command Log
 
 ```javascript
 cy.get("input[name='name']").clear().type("Jane Lane")
@@ -44,5 +44,6 @@ When clicking on `clear` within the command log, the console outputs the followi
 
 ***
 
-## Related
+# Related
+
 1. [type](http://on.cypress.io/api/type)

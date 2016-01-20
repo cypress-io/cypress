@@ -1,20 +1,20 @@
 slug: select
 excerpt: Select an option
 
-## [cy.select( *text* )](#text-usage)
+# [cy.select( *text* )](#text-usage)
 
 Select an option within a `<select>` element based on the text content of the option.
 
 ***
 
-## [cy.select( *value* )](#value-usage)
+# [cy.select( *value* )](#value-usage)
 
 Select an option within a `<select>` element based on the value of the option.
 
 ***
 
-## [cy.select( *text*, *options* )](#options-usage)
-## [cy.select( *value*, *options* )](#options-usage)
+# [cy.select( *text*, *options* )](#options-usage)
+# [cy.select( *value*, *options* )](#options-usage)
 
 Pass in an object containing the following key/values. Select supports the following options:
 
@@ -27,7 +27,7 @@ Option | Default | Notes
 
 ***
 
-## Text Usage
+# Text Usage
 
 Select the option with the text `apples`
 
@@ -46,7 +46,7 @@ cy.get("select").select("apples")
 
 ***
 
-## Value Usage
+# Value Usage
 
 Select the option with the value "456"
 
@@ -65,7 +65,7 @@ cy.get("select").select("456")
 
 ***
 
-## Command Log
+# Command Log
 
 ```javascript
 cy.get("select").select("Homer Simpson")
@@ -81,5 +81,6 @@ When clicking on `select` within the command log, the console outputs the follow
 
 ***
 
-## Related
+# Related
+
 1. [click](http://on.cypress.io/api/click)

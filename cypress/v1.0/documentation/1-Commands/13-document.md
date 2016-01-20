@@ -1,13 +1,13 @@
 slug: document
 excerpt: Get the document element
 
-## [cy.document()](#usage)
+# [cy.document()](#usage)
 
 Get the document element
 
 ***
 
-## Usage
+# Usage
 
 ```javascript
 cy.document().then(function(document) {
@@ -17,7 +17,7 @@ cy.document().then(function(document) {
 
 ***
 
-## Command Log
+# Command Log
 
 ```javascript
 cy.document()
@@ -33,5 +33,6 @@ When clicking on `document` within the command log, the console outputs the foll
 
 ***
 
-## Related
+# Related
+
 1. [window](http://on.cypress.io/api/window)

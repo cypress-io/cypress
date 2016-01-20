@@ -11,7 +11,7 @@ Errors that require additional explanation are listed here.
 
 ***
 
-## Sorry, there's something wrong with this file
+# Sorry, there's something wrong with this file
 
 ![screen shot 2015-12-01 at 12 29 06 pm](https://cloud.githubusercontent.com/assets/1268976/11508539/553573ba-9827-11e5-956b-e849b95e806c.png)
 
@@ -28,7 +28,7 @@ You'll also get this message if you've have an empty test file, and have not yet
 
 ***
 
-## Cypress cannot execute commands outside a running test
+# Cypress cannot execute commands outside a running test
 
 ![screen shot 2015-12-02 at 9 57 23 pm](https://cloud.githubusercontent.com/assets/1268976/11550645/b9b8bd42-993f-11e5-896e-f6a6ca43acb4.png)
 
@@ -64,7 +64,7 @@ If you are purposefully writing commands outside of a test, there is probably a 
 
 ***
 
-## cy.method() failed because the element you are chaining off of has become detached or removed from the dom
+# cy.method() failed because the element you are chaining off of has become detached or removed from the dom
 
 ![screen shot 2015-12-02 at 9 55 29 pm](https://cloud.githubusercontent.com/assets/1268976/11550618/79d68542-993f-11e5-8b5f-9418dfa964c1.png)
 
@@ -133,7 +133,7 @@ When we say **guard** we mean writing commands in such a way that prevents Cypre
 
 ***
 
-## cy.method() failed because the element cannot be interacted with
+# cy.method() failed because the element cannot be interacted with
 
 You may see a variation of this message for 4 different reasons:
 
@@ -162,7 +162,7 @@ cy.get("button").click({force: true}).
 
 ***
 
-## cy.method() failed because the element is currently animating
+# cy.method() failed because the element is currently animating
 
 ![screen shot 2015-12-30 at 11 44 22 pm](https://cloud.githubusercontent.com/assets/1268976/12061262/4f9a252e-af4f-11e5-9139-9c8bdb08ae58.png)
 

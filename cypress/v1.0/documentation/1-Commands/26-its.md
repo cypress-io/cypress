@@ -1,7 +1,7 @@
 slug: its
 excerpt: Call properties on the current subject
 
-## [cy.its( *propertyName* )](#usage)
+# [cy.its( *propertyName* )](#usage)
 
 `cy.its` calls properties on the current subject and returns that new value.
 
@@ -10,7 +10,7 @@ excerpt: Call properties on the current subject
 
 ***
 
-## Usage
+# Usage
 
 ```javascript
 cy.wrap({foo: "bar"}).its("foo").should("eq", "bar") // true
@@ -28,7 +28,7 @@ cy
 
 ***
 
-## Related
+# Related
 1. [invoke](http://on.cypress.io/api/invoke)
 2. [wrap](http://on.cypress.io/api/wrap)
 3. [then](http://on.cypress.io/api/then)

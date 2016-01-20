@@ -1,13 +1,13 @@
 slug: not
 excerpt: Remove elements from set
 
-## [cy.not( *selector* )](#selector-usage)
+# [cy.not( *selector* )](#selector-usage)
 
 Remove elements from the set of matched elements. Opposite of [`cy.filter()`](http://on.cypress.io/api/filter)
 
 ***
 
-## Selector Usage
+# Selector Usage
 
 Filter the current subject to the elements that do not have class `active`.
 
@@ -17,7 +17,7 @@ cy.get(".left-nav>.nav").find(">li").not(".active")
 
 ***
 
-## Command Log
+# Command Log
 
 ```javascript
 cy.get("form").find("button").not("[type='submit']")
@@ -32,5 +32,6 @@ When clicking on `not` within the command log, the console outputs the following
 <img width="689" alt="screen shot 2015-11-29 at 12 37 39 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458819/0d6870f6-9696-11e5-9364-2685b8ffc71b.png">
 
 ***
-## Related
+# Related
+
 1. [filter](http://on.cypress.io/api/filter)

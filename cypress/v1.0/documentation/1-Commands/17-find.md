@@ -1,11 +1,11 @@
 slug: find
 excerpt: Get descendants of elements
 
-## [cy.find( *selector* )](#selector-usage)
+# [cy.find( *selector* )](#selector-usage)
 
 Get the descendants of each element in the current set of matched elements within the selector.
 
-## Selector Usage
+# Selector Usage
 
 Get li's within parent
 
@@ -21,8 +21,7 @@ Get li's within parent
 cy.get("#parent").find("li")
 ```
 
-## Command Log
-
+# Command Log
 
 ```javascript
 cy.get(".left-nav>.nav").find(">li")
@@ -36,5 +35,6 @@ When clicking on the `find` command within the command log, the console outputs 
 
 <img width="516" alt="screen shot 2015-11-27 at 2 19 54 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447312/fa3679cc-9511-11e5-9bea-904f8c70063d.png">
 
-## Related
+# Related
+
 1. [get](http://on.cypress.io/api/get)

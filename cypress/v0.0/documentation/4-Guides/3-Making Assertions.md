@@ -3,16 +3,14 @@ excerpt: Verify expectations
 
 Assertions verify an expectation.
 
-
-
-## Writing an Assertion
+# Writing an Assertion
 
 There are two ways to write an assertion within Cypress.
 
 1. **Implicit Subjects:** Using `cy.should`
 2. **Explicit Subjects:** Using `expect` or `assert`
 
-**Implicit Subjects with `cy.should`**
+## Implicit Subjects with `cy.should`
 
 Using Cypress' [`should`](http://on.cypress.io/api/should) command is the preferred way of making an assertion. The subject of the assertion is inferred from the subject of the last Cypress command, which is why this is called an **implicit subject**.
 
@@ -23,7 +21,7 @@ cy.get("button").should("have.class", "active")
 
 ![assertions](https://cloud.githubusercontent.com/assets/1268976/10002810/3102a8a6-6077-11e5-85bf-5f8666bcb1a8.png)
 
-**Explicit Subjects with `expect` or `assert`**
+## Explicit Subjects with `expect` or `assert`
 
  Using `expect` or `assert` allows you to pass in a specific subject when making an assertion.
 
@@ -70,7 +68,7 @@ cy
 })
 ```
 
-## Available Assertions
+# Available Assertions
 
 An assertion is comprised of a subject, chainer methods, and an optional value.
 
@@ -82,7 +80,7 @@ expect({foo: "bar"}).to.have.property("foo")
 
 The following chainers are available for your use:
 
-#### [Chai](http://chaijs.com/api/bdd/)
+## [Chai](http://chaijs.com/api/bdd/)
 - to
 - be
 - been
@@ -134,7 +132,7 @@ The following chainers are available for your use:
 - increase / increases
 - decrease / decreases
 
-#### [Chai-jQuery](https://github.com/chaijs/chai-jquery)
+## [Chai-jQuery](https://github.com/chaijs/chai-jquery)
 
 Additionally these chainers are added when asserting about a DOM object.
 
@@ -161,7 +159,7 @@ Additionally these chainers are added when asserting about a DOM object.
 
 You will commonly use these chainers after using DOM commands like: [`cy.get`](http://on.cypress.io/api/get), [`cy.contains`](http://on.cypress.io/api/contains), etc.
 
-**Using Chainers with [`cy.should`](http://on.cypress.io/api/should)**
+## Using Chainers with [`cy.should`](http://on.cypress.io/api/should)
 
 When utilizing [`cy.should`](http://on.cypress.io/api/should), instead of writing chainers as properties and methods, they are instead transformed into a string argument.
 
@@ -198,7 +196,7 @@ If you look closely, you'll see that we've passed a callback function to the [`c
 
 Read about [resolving assertions](http://on.cypress.io/guides/making-assertions#resolving-assertions) below to learn how [`cy.should`](http://on.cypress.io/api/should) works under the hood.
 
-## Resolving Assertions
+# Resolving Assertions
 
 Knowing when and how to resolve assertions is can be challenging, made even more difficult by modern JavaScript frameworks. Yet accurately resolving assertions is the key for preventing flaky and brittle tests.
 
@@ -277,7 +275,7 @@ In modern JavaScript frameworks, and in many common web-based actions, there is 
 
 Cypress makes it easy to test and make assertions about all of these.
 
-## Debugging Assertions
+# Debugging Assertions
 
 - When assertions fail
 - Determining Subject Changes
@@ -285,7 +283,7 @@ Cypress makes it easy to test and make assertions about all of these.
 - Inspecting Objects
 - Making multiple assertions
 
-## Common Assertions
+# Common Assertions
 
 - Element existence
 - Element non-existance

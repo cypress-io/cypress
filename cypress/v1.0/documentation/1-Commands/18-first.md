@@ -1,13 +1,13 @@
 slug: first
 excerpt: Get the first element within elements
 
-## [cy.first()](#usage)
+# [cy.first()](#usage)
 
 Reduce the set of matched elements to the first in the set.
 
 ***
 
-## Usage
+# Usage
 
 Get the first list item in a list.
 
@@ -27,7 +27,7 @@ cy.get("ul").first()
 
 ***
 
-## Command Log
+# Command Log
 
 ```javascript
 cy.get("form").find("input").first()
@@ -43,5 +43,6 @@ When clicking on `first` within the command log, the console outputs the followi
 
 ***
 
-## Related
+# Related
+
 1. [last](http://on.cypress.io/api/last)

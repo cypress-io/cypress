@@ -1,11 +1,11 @@
 slug: clearlocalstorage
 excerpt: Clear all data in local storage.
 
-## [cy.clearLocalStorage()](#usage)
+# [cy.clearLocalStorage()](#usage)
 
 Clears all data in local storage.
 
-## Usage
+# Usage
 
 Clear Local Storage
 

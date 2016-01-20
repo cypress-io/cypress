@@ -1,7 +1,7 @@
 slug: location
 excerpt: Get window.location
 
-## [cy.location()](#usage)
+# [cy.location()](#usage)
 
 Returns an object literal that matches the `window.location` spec.
 
@@ -28,9 +28,9 @@ Key | Type | Returns
 
 ***
 
-## Usage
+# Usage
 
-#### Test that a redirect works
+Test that a redirect works
 
 ```javascript
 // we should be redirected to the login page
@@ -41,7 +41,7 @@ cy
 
 ***
 
-#### Test searching for a user
+Test searching for a user
 
 ```javascript
 // we can yield the location subject and work with
@@ -57,9 +57,9 @@ cy
 
 ***
 
-## Notes
+# Notes
 
-#### Do not use `window.location`
+## Do not use `window.location`
 
 Let's examine the following scenario:
 
@@ -89,7 +89,7 @@ In Cypress, the object we returned is a plain object, and changing or affecting 
 
 ***
 
-## Command Log
+# Command Log
 
 ```javascript
 cy.location().its("href").should("contain", "#users/new")
@@ -105,7 +105,7 @@ When clicking on `location` within the command log, the console outputs the foll
 
 ***
 
-## Related
+# Related
 
 1. [hash](http://on.cypress.io/api/hash)
 2. [url](http://on.cypress.io/api/url)

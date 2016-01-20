@@ -1,11 +1,11 @@
 slug: definitions
 excerpt: Testing terms
 
-## Definitions
+# Definitions
 
 There are certain terms you should be familiar with to help you follow this guide before writing your first test.
 
-### In your test file:
+## In your test file:
 
 <dl>
   <dt><strong>Test File</strong></dt>
@@ -54,7 +54,7 @@ describe("My ToDo App Starts", function(){
 })
 ```
 
-### In Cypress' Test Runner:
+## In Cypress' Test Runner:
 
 <dl>
   <dt><strong>Command Log</strong></dt>

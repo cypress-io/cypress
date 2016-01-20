@@ -1,19 +1,19 @@
 slug: next
 excerpt: Get the next sibling of elements
 
-## [cy.next()](#usage)
+# [cy.next()](#usage)
 
 Get the immediately following sibling of each element in the set of matched elements.
 
 ***
 
-## [cy.next( *selector* )](#selector-usage)
+# [cy.next( *selector* )](#selector-usage)
 
 Get the immediately following sibling of each element in the set of matched elements. If a selector is provided, it retrieves the next sibling only if it matches that selector.
 
 ***
 
-## Usage
+# Usage
 
 Find the element next to `.second`
 
@@ -32,7 +32,7 @@ cy.get(".second").next()
 
 ***
 
-## Selector Usage
+# Selector Usage
 
 Find the very next sibling of each li. Keep only the ones with a class `selected`.
 
@@ -52,7 +52,7 @@ cy.get("li").next(".selected")
 
 ***
 
-## Command Log
+# Command Log
 
 ```javascript
 cy.get(".left-nav").find("li.active").next()
@@ -68,5 +68,6 @@ When clicking on `next` within the command log, the console outputs the followin
 
 ***
 
-## Related
+# Related
+
 1. [prev](http://on.cypress.io/api/prev)

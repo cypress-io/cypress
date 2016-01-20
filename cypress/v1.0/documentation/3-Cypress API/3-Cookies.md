@@ -5,43 +5,43 @@ excerpt: Manage your application's cookies
 
 Additionally you can take advantage of `Cypress.Cookies.preserveOnce` or even **whitelist** cookies by their name to preserve values across multiple tests. This enables you to preserve sessions through several tests.
 
-## [Cypress.Cookies.get( *key* )](#get-usage)
+# [Cypress.Cookies.get( *key* )](#get-usage)
 
 Get a cookie by its key. Returns the string value.
 
 ***
 
-## [Cypress.Cookies.set( *key*, *value* )](#set-usage)
+# [Cypress.Cookies.set( *key*, *value* )](#set-usage)
 
 Set a cookie by key, value.
 
 ***
 
-## [Cypress.Cookies.remove( *key* )](#remove-usage)
+# [Cypress.Cookies.remove( *key* )](#remove-usage)
 
 Remove a cookie by its key. Overrides any whitelisted cookies or preserved cookies.
 
 ***
 
-## [Cypress.Cookies.debug( *boolean* )](#debug-usage)
+# [Cypress.Cookies.debug( *boolean* )](#debug-usage)
 
 Enable or disable cookie debugging. When enabled, Cypress will log out when cookies are set or removed.
 
 ***
 
-## [Cypress.Cookies.preserveOnce( *key1*, *key2*, *key3*, ... )](#preserve-usage)
+# [Cypress.Cookies.preserveOnce( *key1*, *key2*, *key3*, ... )](#preserve-usage)
 
 Will preserve cookies by key. Pass an unlimited number of arguments. These preserved cookies will not be cleared when the next test starts.
 
 ***
 
-## [Cypress.Cookies.defaults( *options* )](#defaults-usage)
+# [Cypress.Cookies.defaults( *options* )](#defaults-usage)
 
 Set defaults for all cookies such as whitelisting a set of cookies to bypass being removed after each test.
 
 ***
 
-## Get Usage
+# Get Usage
 
 ```javascript
 // Assuming we had a cookie with the key: 'session_id'
@@ -51,7 +51,7 @@ Cypress.Cookies.get("session_id") // => AF6bupO4jOpZReEZnaW-Ho5fpJAXd_48kA
 
 ***
 
-## Set Usage
+# Set Usage
 
 ```javascript
 Cypress.Cookies.set("remember_token", "foobarbaz")
@@ -61,7 +61,7 @@ Cypress.Cookies.get("remember_token") // => foobarbaz
 
 ***
 
-## Remove Usage
+# Remove Usage
 
 This will remove a cookies value and override any specific whitelisting or cookie preservation you have. In other words, this will nuke the cookies value no matter what.
 
@@ -81,7 +81,7 @@ Cypress.Cookies.get("remember_token") // => undefined
 
 ***
 
-## Debug Usage
+# Debug Usage
 
 By turning on debugging Cypress will automatically log out to the console when it **sets** or **removes** cookie values. This is useful to help you understand how Cypress removes cookies in between tests, and is useful to visualize how to handle preserving cookies in between tests.
 
@@ -105,7 +105,7 @@ Cypress.Cookies.debug(false) // now debugging is turned off
 
 ***
 
-## Preserve Usage
+# Preserve Usage
 
 Cypress gives you a simple interface to automatically preserve cookies *after* a test finished. Cypress will automatically remove all cookies before each new test starts by default.
 
@@ -154,7 +154,7 @@ describe("Dashboard", function(){
 
 ***
 
-## Defaults Usage
+# Defaults Usage
 
 You can modify the global defaults and whitelist a set of Cookies which will always be preserved between tests.
 
@@ -167,7 +167,7 @@ Any change you make here will take effect immediately for the remainder of every
 }
 [/block]
 
-Whitelist accepts:
+**Whitelist accepts:**
 
 - string
 - array
@@ -218,9 +218,9 @@ Cypress.Cookies.defaults({
 
 ***
 
-## Notes
+# Notes
 
-**Whats the difference between this interface and [`cy.clearCookies`](http://on.cypress.io/api/clearCookies)**
+## Whats the difference between this interface and [`cy.clearCookies`](http://on.cypress.io/api/clearCookies)
 
 [`cy.clearCookies`](http://on.cypress.io/api/clearCookies) is a command that is useful to use during your tests. Since it is a command, it can be chained onto other commands. Additionally, like other commands, it is asynchronous.
 

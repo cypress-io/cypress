@@ -1,7 +1,7 @@
 slug: then
 excerpt: Yield the current subject as an argument
 
-## [cy.then( *function* )](#usage)
+# [cy.then( *function* )](#usage)
 
 `cy.then()` will yield you the current subject as the first argument.
 
@@ -21,7 +21,7 @@ Just like Promises, you can return any compatible "thenable" (anything that has 
 
 ***
 
-## Usage
+# Usage
 
 The element `input` is yielded
 
@@ -135,7 +135,7 @@ cy
   })
 ```
 
-## Related
+# Related
 
 1. [its](http://on.cypress.io/api/its)
 2. [invoke](http://on.cypress.io/api/invoke)

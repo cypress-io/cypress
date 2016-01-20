@@ -1,11 +1,11 @@
 slug: closest
 excerpt: Get the closest ancestor
 
-## [cy.closest( *selector* )](#selector-usage)
+# [cy.closest( *selector* )](#selector-usage)
 
 For each element in the set, get the first element that matches the selector by testing the element itself and traversing up through its ancestors in the DOM tree.
 
-## Selector Usage
+# Selector Usage
 
 Find the closest element of the current subject with the class `nav`
 
@@ -13,7 +13,7 @@ Find the closest element of the current subject with the class `nav`
 cy.get("li.active").closest(".nav")
 ```
 
-## Command Log
+# Command Log
 
 ```javascript
 cy.get("li.active").closest(".nav")
@@ -27,7 +27,8 @@ When clicking on the `closest` command within the command log, the console outpu
 
 <img width="478" alt="screen shot 2015-11-27 at 2 07 46 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447201/535515c4-9510-11e5-9cf5-088bf21f34ac.png">
 
-## Related
+# Related
+
 1. [parents](http://on.cypress.io/api/parents)
 2. [next](http://on.cypress.io/api/next)
 3. [first](http://on.cypress.io/api/first)

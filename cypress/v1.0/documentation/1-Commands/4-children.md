@@ -1,15 +1,15 @@
 slug: children
 excerpt: Get the children of elements
 
-## [cy.children()](#usage)
+# [cy.children()](#usage)
 
 Get the children of each element in the set of matched elements.
 
-## [cy.children( *selector* )](#selector-usage)
+# [cy.children( *selector* )](#selector-usage)
 
 The `.children()` method optionally accepts a selector expression. If the selector is supplied, the elements will be filtered by testing whether they match it.
 
-## Usage
+# Usage
 
 ```html
 <ul class="primary-nav">
@@ -40,7 +40,7 @@ The `.children()` method optionally accepts a selector expression. If the select
 cy.get("ul.secondary-nav").children()
 ```
 
-## Selector Usage
+# Selector Usage
 
 ```html
 <div>
@@ -56,7 +56,7 @@ cy.get("ul.secondary-nav").children()
 cy.get("ul").children(".active")
 ```
 
-## Command Log
+# Command Log
 
 ```javascript
 cy.get(".left-nav>.nav").children().should("have.length", 8)
@@ -70,7 +70,8 @@ When clicking on the `children` command within the command log, the console outp
 
 <img width="542" alt="screen shot 2015-11-27 at 1 52 41 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447071/2e9252bc-950e-11e5-9a32-e5860da89160.png">
 
-## Related
+# Related
+
 1. [parent](http://on.cypress.io/api/parent)
 2. [parents](http://on.cypress.io/api/parents)
 3. [next](http://on.cypress.io/api/next)

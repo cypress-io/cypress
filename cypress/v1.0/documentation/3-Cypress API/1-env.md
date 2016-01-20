@@ -13,31 +13,31 @@ This document covers the API for consuming your environment variables *in your t
 }
 [/block]
 
-## [Cypress.env()](#no-arguments-usage)
+# [Cypress.env()](#no-arguments-usage)
 
 Returns all of your environment variables as an object literal.
 
 ***
 
-## [Cypress.env( *key* )](#key-usage)
+# [Cypress.env( *key* )](#key-usage)
 
 Returns the value of a single environment variable by its key.
 
 ***
 
-## [Cypress.env( *key*, *value* )](#key-value-usage)
+# [Cypress.env( *key*, *value* )](#key-value-usage)
 
 Sets an environment variable for a specific key.
 
 ***
 
-## [Cypress.env( *object* )](#object-usage)
+# [Cypress.env( *object* )](#object-usage)
 
 Sets multiple environment variables.
 
 ***
 
-## No Arguments Usage
+# No Arguments Usage
 
 Get all environment variables.
 
@@ -57,7 +57,7 @@ Cypress.env() // => {foo: "bar", baz: "quux"}
 
 ***
 
-## Key Usage
+# Key Usage
 
 Return just a single environment variable value.
 
@@ -78,7 +78,7 @@ Cypress.env("baz") // => quux
 
 ***
 
-## Key Value Usage
+# Key Value Usage
 
 Cypress allows you to change the values of your environment variables from within your tests.
 
@@ -107,7 +107,7 @@ Cypress.env("host") // => http://server.dev.local
 
 ***
 
-## Object Usage
+# Object Usage
 
 You can set multiple values by passing an object literal.
 
@@ -132,9 +132,9 @@ Cypress.env() // => {foo: "foo", baz: "quux", host: "http://server.dev.local"}
 
 ***
 
-## Notes
+# Notes
 
-**Why use `Cypress.env` instead of `cy.env`?**
+## Why use `Cypress.env` instead of `cy.env`?
 
 As a rule of thumb anything you call from `Cypress` affects global state. Anything you call from `cy` affects local state.
 
@@ -142,13 +142,13 @@ Methods on `cy` are local and specific to a single test. Side effects from `cy` 
 
 ***
 
-**Why would I ever need to use environment variables?**
+## Why would I ever need to use environment variables?
 
 The [Environment Variables](http://on.cypress.io/guides/environment-variables) guide explains common use cases.
 
 ***
 
-**Can I pass in environment variables from the command line?**
+## Can I pass in environment variables from the command line?
 
 Yes. You can do that and much more.
 

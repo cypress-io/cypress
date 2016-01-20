@@ -1,7 +1,7 @@
 slug: hash
 excerpt: Get the current URL hash
 
-## [cy.hash()](#usage)
+# [cy.hash()](#usage)
 
 Returns the current URL hash as a string, including the `#` character.
 
@@ -9,7 +9,7 @@ If no `#` character is present, an empty string will be returned.
 
 ***
 
-## Usage
+# Usage
 
 Assert the hash is `#/users/1` given this remote URL: `http://localhost:8000/app/#/users/1`
 
@@ -40,9 +40,9 @@ cy
 
 ***
 
-## Notes
+# Notes
 
-**Hash is a shortcut for `cy.location().hash`**
+## Hash is a shortcut for `cy.location().hash`
 
 These 3 assertions are all the same.
 
@@ -61,7 +61,7 @@ cy.hash().should("eq", "#/users/1")
 
 ***
 
-## Command Log
+# Command Log
 
 ```javascript
 cy.hash().should("eq", "#users/new")
@@ -78,7 +78,7 @@ When clicking on `hash` within the command log, the console outputs the followin
 
 ***
 
-## Related
+# Related
 
 1. [location](http://on.cypress.io/api/location)
 2. [url](http://on.cypress.io/api/url)

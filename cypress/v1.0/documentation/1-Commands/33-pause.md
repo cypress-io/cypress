@@ -1,13 +1,13 @@
 slug: pause
 excerpt: Pause command
 
-## [cy.pause()](#usage)
+# [cy.pause()](#usage)
 
 `cy.pause` will stop command execution and allow you the ability to interact with your app, resume commands when you're ready, or step into the next command.
 
 ***
 
-## Usage
+# Usage
 
 ```javascript
 cy
@@ -18,5 +18,6 @@ cy
 
 ***
 
-## Related
+# Related
+
 1. [debug](http://on.cypress.io/api/debug)

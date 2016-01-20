@@ -1,11 +1,11 @@
 slug: within
 excerpt: Within
 
-## [cy.within( *function* )](#usage)
+# [cy.within( *function* )](#usage)
 
 ***
 
-## Usage
+# Usage
 
 ```html
 <form>
@@ -26,5 +26,6 @@ cy.get("form").within(function(){
 
 ***
 
-## Related
+# Related
+
 1. [root](http://on.cypress.io/api/root)

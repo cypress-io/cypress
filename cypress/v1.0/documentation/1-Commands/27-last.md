@@ -1,13 +1,13 @@
 slug: last
 excerpt: Get the last element
 
-## [cy.last()](#usage)
+# [cy.last()](#usage)
 
 Reduce the set of matched elements to the final one in the set.
 
 ***
 
-## Usage
+# Usage
 
 Get the last list item in a list.
 
@@ -27,7 +27,7 @@ cy.get("ul").last()
 
 ***
 
-## Command Log
+# Command Log
 
 ```javascript
 cy.get("form").find("button").last()
@@ -43,5 +43,5 @@ When clicking on `last` within the command log, the console outputs the followin
 
 ***
 
-## Related
+# Related
 1. [first](http://on.cypress.io/api/first)

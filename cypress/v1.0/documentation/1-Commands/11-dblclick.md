@@ -1,13 +1,13 @@
 slug: dblclick
 excerpt: Double-click on a subject
 
-## [cy.dblclick()](#usage)
+# [cy.dblclick()](#usage)
 
 Double-clicks the current subject.
 
 ***
 
-## Usage
+# Usage
 
 Double click anchor link
 
@@ -22,7 +22,7 @@ cy.get("#nav1").dblclick()
 
 ***
 
-## Command Log
+# Command Log
 
 ```javascript
 cy.get("[data-schedule-id='4529114']:first").dblclick()
@@ -38,5 +38,6 @@ When clicking on `dblclick` within the command log, the console outputs the foll
 
 ***
 
-## Related
+# Related
+
 1. [click](http://on.cypress.io/api/click)

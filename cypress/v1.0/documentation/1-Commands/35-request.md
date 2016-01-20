@@ -1,7 +1,7 @@
 slug: request
 excerpt: Make XHR request
 
-## [cy.request( *url* )](#url-usage)
+# [cy.request( *url* )](#url-usage)
 
 Makes a `GET` request using the url.
 
@@ -11,25 +11,25 @@ Use `cy.request` to make XHR requests. Great for talking to an external endpoint
 
 ***
 
-## [cy.request( *method*, *url* )](#method-and-url-usage)
+# [cy.request( *method*, *url* )](#method-and-url-usage)
 
 Make a request using the provided method to the url.
 
 ***
 
-## [cy.request( *method*, *url*, *body* )](#method-and-url-and-body-usage)
+# [cy.request( *method*, *url*, *body* )](#method-and-url-and-body-usage)
 
 Additionally pass in the request `body` as a `String` or `Object Literal`. Cypress will set the `Accepts` request header and serialize the response body by its `Content-Type`.
 
 ***
 
-## [cy.request( *url*, *body* )](#url-and-body-usage)
+# [cy.request( *url*, *body* )](#url-and-body-usage)
 
 Make a `GET` request to the provided url with the provided body.
 
 ***
 
-## [cy.request( *options* )](#options-usage)
+# [cy.request( *options* )](#options-usage)
 
 You can additionally specify the following options:
 
@@ -47,7 +47,7 @@ Option | Default | Notes
 
 ***
 
-## URL Usage
+# URL Usage
 
 Make a `GET` request
 
@@ -78,7 +78,7 @@ cy.request("http://dev.local/users").then(function(response){
 
 ***
 
-## Method and URL Usage
+# Method and URL Usage
 
 Send a `DELETE` request
 
@@ -89,7 +89,7 @@ cy.request("DELETE", "http://localhost:8888/users/827")
 
 ***
 
-## Method and URL and Body Usage
+# Method and URL and Body Usage
 
 Send a `POST` request with a JSON body
 
@@ -106,15 +106,15 @@ cy
 
 ***
 
-## Notes
+# Notes
 
-**Why don't I see the XHR in the Network Tab of the Chrome Dev Tools?**
+## Why don't I see the XHR in the Network Tab of the Chrome Dev Tools?
 
 Cypress does not actually make the request out of the browser. So you will not see the request inside of the Chrome Dev Tools.
 
 ***
 
-**CORS is bypassed**
+## CORS is bypassed
 
 Normally when the browser detects a cross-origin XHR request, it will send an `OPTIONS` preflight check to ensure the server allows cross-origin requests. `cy.request` bypasses CORS entirely.
 
@@ -128,7 +128,7 @@ cy
 
 ***
 
-**Rules for resolving a relative request url**
+## Rules for resolving a relative request url
 
 If you provide a non fully qualified domain name (FQDN), Cypress will make its best guess as to which host you want the request to go to.
 
@@ -157,5 +157,6 @@ If Cypress cannot determine the host it will throw an explicit error.
 
 ***
 
-## Related
+# Related
+
 1. [visit](http://on.cypress.io/api/visit)

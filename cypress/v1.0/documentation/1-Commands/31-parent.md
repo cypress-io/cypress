@@ -1,19 +1,19 @@
 slug: parent
 excerpt: Get the parent of elements
 
-## [cy.parent()](#usage)
+# [cy.parent()](#usage)
 
 Get the parent of each element in the current set of matched elements.
 
 ***
 
-## [cy.parent( *selector* )](#selector-usage)
+# [cy.parent( *selector* )](#selector-usage)
 
 Get the parent of each element in the current set of matched elements filtered by selector.
 
 ***
 
-## Usage
+# Usage
 
 Get the parent of the active `li`
 
@@ -23,7 +23,7 @@ cy.get("li.active").parent()
 
 ***
 
-## Selector Usage
+# Selector Usage
 
 Get the parent with class `nav` of the active `li`
 
@@ -33,7 +33,7 @@ cy.get("li.active").parent(".nav")
 
 ***
 
-## Command Log
+# Command Log
 
 ```javascript
 cy.get("li.active").parent().should("have.class", "nav")
@@ -49,6 +49,7 @@ When clicking on the `parent` command within the command log, the console output
 
 ***
 
-## Related
+# Related
+
 1. [parents](http://on.cypress.io/api/parents)
 2. [children](http://on.cypress.io/api/children)

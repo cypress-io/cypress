@@ -1,7 +1,7 @@
 slug: fixture
 excerpt: Load a fixture to represent data
 
-## [cy.fixture( *fixture* )](#single-fixture-usage)
+# [cy.fixture( *fixture* )](#single-fixture-usage)
 
 Loads a single fixture by filename.
 
@@ -22,7 +22,7 @@ If an extension is omitted, Cypress will attempt to resolve the fixture by order
 
 ***
 
-## Single Fixture Usage
+# Single Fixture Usage
 
 Load the `users.json` fixture
 
@@ -58,9 +58,9 @@ cy.fixture("images/logo.png").then(function(logo){
 
 ***
 
-## Notes
+# Notes
 
-**Nesting**
+## Nesting
 
 You can nest fixtures within folders and reference them by defining the path to the file:
 
@@ -72,25 +72,25 @@ cy.fixture("users/admin.json")
 
 ***
 
-**Validation**
+## Validation
 
 Cypress will automatically validate your fixtures. If your `.json`, `.js`, or `.coffee`  files contain syntax errors, they will automatically be shown in the Command Log.
 
 ***
 
-**Formatting**
+## Formatting
 
 Cypress automatically formats your fixture files. That means you can paste in a single line of `json` and the next time Cypress serves this fixture, it will format / indent the `json` which makes it easier to read and debug.
 
 ***
 
-## Usage with `cy.route()`
+# Usage with `cy.route()`
 
 Fixtures can be referenced directly by the special keywords: `fixture:` or `fx:`.
 
 This enables you to set a fixture as the response for a route without having to first use the `cy.fixture` command.
 
-**Example 1:**
+## Example 1:
 
 ```javascript
 cy.route("GET", /users/, "fixture:users") // this works
@@ -99,7 +99,7 @@ cy.route("GET", /users/, "fx:users")      // this also works
 
 This saves you from having to explicitly load the fixture first (like in Example #2).
 
-**Example 2:**
+## Example 2:
 
 ```javascript
 cy
@@ -110,7 +110,7 @@ cy
 
 However if you still need access to the fixture data, instead of yielding the fixture's data in Example #2, we can make use of [aliasing](http://on.cypress.io/guides/using-aliases).
 
-**Example 3:**
+## Example 3:
 
 ```javascript
 cy
@@ -131,6 +131,6 @@ This is useful when asserting about values in the fixture object, or perhaps if 
 
 ***
 
-## More about Fixtures
+# More about Fixtures
 
 For a detailed explanation of when and why to use fixtures, [read more about fixtures here](http://on.cypress.io/guides/creating-fixtures).

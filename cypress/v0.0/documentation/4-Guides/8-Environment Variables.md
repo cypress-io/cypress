@@ -1,7 +1,7 @@
 slug: environment-variables
 excerpt: Set up environment variables
 
-## Use Case
+# Use Case
 
 Environment variables should be used:
 - Whenever values are different across developer machines
@@ -26,7 +26,7 @@ cy
   .visit(Cypress.env("host"))
 ```
 
-## Setting Env Vars
+# Setting Env Vars
 
 There are 4 different ways to set environment variables. Each has a slightly different use case.
 
@@ -42,7 +42,7 @@ When your tests are running, you can use the [`Cypress.env()`](http://on.cypress
 
 ***
 
-**Option #1: Set in `cypress.json`**
+## Option #1: Set in `cypress.json`
 
 Any key/value you set in your [`cypress.json`](http://on.cypress.io/guides/configuration) under the `env` key will become an environment variable.
 
@@ -83,7 +83,7 @@ Cypress.env("some") // => "value"
 
 ***
 
-**Option #2: Create a `cypress.env.json`**
+## Option #2: Create a `cypress.env.json`
 
 You can create your own `cypress.env.json`, which Cypress will automatically check. Values in here will overwrite conflicting values in `cypress.json`.
 
@@ -124,7 +124,7 @@ Cypress.env("api_server") // => "http://localhost:8888/api/v1/"
 
 ***
 
-**Option #3: Export as `CYPRESS_*`**
+## Option #3: Export as `CYPRESS_*`
 
 Any environment variable on your machine that starts with either `CYPRESS_` or `cypress_` will automatically be added and made available to you.
 
@@ -133,7 +133,7 @@ Conflicting values from this method will override `cypress.json` and `cypress.en
 Cypress will automatically **strip off** the `CYPRESS_` when adding your environment variables.
 
 ```bash
-## export cypress env variables from the command line
+# export cypress env variables from the command line
 export CYPRESS_HOST=laura.dev.local
 export cypress_api_server=http://localhost:8888/api/v1/
 ```
@@ -165,7 +165,7 @@ Cypress.env("api_server") // => "http://localhost:8888/api/v1/"
 
 ***
 
-**Option #4: Pass in from the CLI as `--env`**
+## Option #4: Pass in from the CLI as `--env`
 
 Lastly you can also pass in environment variables as options when [using the CLI tool](https://github.com/cypress-io/cypress-cli).
 

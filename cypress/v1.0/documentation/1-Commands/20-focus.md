@@ -1,7 +1,7 @@
 slug: focus
 excerpt: Focus on the current subject
 
-## [cy.focus()](#usage)
+# [cy.focus()](#usage)
 
 Focus on the current subject. Returns the existing subject.
 
@@ -9,7 +9,7 @@ If there is currently an `activeElement` (a different element currently with foc
 
 ***
 
-## Usage
+# Usage
 
 Focus on the current subject.
 
@@ -26,7 +26,7 @@ cy.get("[name='comment']").focus().type("Nice Product!").blur()
 
 ***
 
-## Command Log
+# Command Log
 
 ```javascript
 cy.get("[name='comment']").focus()
@@ -42,7 +42,7 @@ When clicking on the `focus` command within the command log, the console outputs
 
 ***
 
-## Related
+# Related
 1. [focused](http://on.cypress.io/api/focused)
 2. [blur](http://on.cypress.io/api/blur)
 2. [click](http://on.cypress.io/api/click)

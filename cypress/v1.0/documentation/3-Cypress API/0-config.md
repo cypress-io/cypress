@@ -14,31 +14,31 @@ This document covers the API for consuming your configuration options *in your t
 }
 [/block]
 
-## [Cypress.config()](#no-arguments-usage)
+# [Cypress.config()](#no-arguments-usage)
 
 Returns all of your configuration options as an object literal.
 
 ***
 
-## [Cypress.config( *key* )](#key-usage)
+# [Cypress.config( *key* )](#key-usage)
 
 Returns the value of a single configuration option by its key.
 
 ***
 
-## [Cypress.config( *key*, *value* )](#key-value-usage)
+# [Cypress.config( *key*, *value* )](#key-value-usage)
 
 Sets a configuration option for a specific key.
 
 ***
 
-## [Cypress.config( *object* )](#object-usage)
+# [Cypress.config( *object* )](#object-usage)
 
 Sets multiple configuration options.
 
 ***
 
-## No Arguments Usage
+# No Arguments Usage
 
 Get all configuration options.
 
@@ -55,7 +55,7 @@ Cypress.config() // => {commandTimeout: 10000, visitTimeout: 30000, ...}
 
 ***
 
-## Key Usage
+# Key Usage
 
 Return just a single configuration option value.
 
@@ -72,7 +72,7 @@ Cypress.config("visitTimeout") // => 60000
 
 ***
 
-## Key Value Usage
+# Key Value Usage
 
 Cypress allows you to change the values of your configuration options from within your tests.
 
@@ -99,7 +99,7 @@ Cypress.config("viewportWidth") // => 800
 
 ***
 
-## Object Usage
+# Object Usage
 
 You can set multiple values by passing an object literal.
 
@@ -122,9 +122,9 @@ Cypress.config() // => {commandTimeout: 10000, viewportHeight: 900, ...}
 
 ***
 
-## Notes
+# Notes
 
-**Why use `Cypress.config` instead of `cy.config`?**
+## Why use `Cypress.config` instead of `cy.config`?
 
 As a rule of thumb anything you call from `Cypress` affects global state. Anything you call from `cy` affects local state.
 

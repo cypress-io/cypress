@@ -1,7 +1,7 @@
 slug: writing-your-first-test
 excerpt: Walkthrough writing your first test
 
-## Folder Structure
+# Folder Structure
 
 After adding your project, Cypress will automatically scaffold out a suggested folder structure. By default it will create:
 
@@ -21,7 +21,7 @@ While Cypress allows for configuration of where your test files can be located, 
 }
 [/block]
 
-## Test Files
+# Test Files
 
 Test files may be written as either `.js` or `.coffee` files.
 
@@ -37,7 +37,7 @@ Navigate to `http://localhost:2020`. You should see this spec file listed inside
 }
 [/block]
 
-## How to write tests
+# How to write tests
 
 Cypress is built on top of [Mocha](http://on.cypress.io/guides/bundled-tools#mocha) and uses its `bdd` interface. Tests you write in Cypress will mostly adhere to this style.
 
@@ -45,7 +45,7 @@ If you're familiar with writing tests in JavaScript, then writing tests in Cypre
 
 We're still working on introductory docs and videos. For now, [check out some examples](http://on.cypress.io/guides/all-example-apps) of applications using Cypress tests.
 
-## Command Line Tools
+# Command Line Tools
 
 Cypress can also be run headlessly from the command line. You can use the [CLI tools](https://github.com/cypress-io/cypress-cli) to do things like:
 

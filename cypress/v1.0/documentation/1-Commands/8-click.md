@@ -1,7 +1,7 @@
 slug: click
 excerpt: Click the current DOM subject
 
-## [cy.click()](#usage)
+# [cy.click()](#usage)
 
 Like all child commands, `click` returns the current subject for further chaining.
 
@@ -13,7 +13,7 @@ By default, the click is issued at the exact center of the element. You can pass
 
 ***
 
-## [cy.click( *position* )](#position-usage)
+# [cy.click( *position* )](#position-usage)
 
 Clicks the element at the specified position. The `center` position is the default position.
 
@@ -27,7 +27,7 @@ Position | Default | Notes
 
 ***
 
-## [cy.click( *x*, *y* )](#coordinates-usage)
+# [cy.click( *x*, *y* )](#coordinates-usage)
 
 You can pass a relative `x` and `y` coordinate which will calculate distance in pixels from the top left corner of the element and isssue the click at the calculated coordinate.
 
@@ -42,9 +42,9 @@ You can pass a relative `x` and `y` coordinate which will calculate distance in 
 
 ***
 
-## [cy.click( *options* )](#options-usage)
-## [cy.click( *position*, *options* )](#options-usage)
-## [cy.click( *x*, *y*, *options* )](#options-usage)
+# [cy.click( *options* )](#options-usage)
+# [cy.click( *position*, *options* )](#options-usage)
+# [cy.click( *x*, *y*, *options* )](#options-usage)
 
 Click supports these options:
 
@@ -58,7 +58,7 @@ Option | Default | Notes
 
 ***
 
-## Usage
+# Usage
 
 Click the button
 
@@ -69,7 +69,7 @@ cy.get("button").click()
 
 ***
 
-## Position Usage
+# Position Usage
 
 Specify a corner of the element to click
 
@@ -80,7 +80,7 @@ cy.get("button").click("topRight")
 
 ***
 
-## Coordinates Usage
+# Coordinates Usage
 
 Specify explicit coordinates relative to the top left corner
 
@@ -93,7 +93,7 @@ cy.get("button").click(15, 40)
 
 ***
 
-## Options Usage
+# Options Usage
 
 Force a click regardless of visibility or other elements in front of the element
 
@@ -125,15 +125,15 @@ cy.get("button").click(5, 60, {force: true})
 
 ***
 
-## Known Issues
+# Known Issues
 
-**pointer-events: none**
+## pointer-events: none
 
 Cypress does not currently factor in `pointer-events: none` in its clicking algorithm. [Open an issue](https://github.com/cypress-io/cypress/issues/new?body=**Description**%0A*Include%20a%20high%20level%20description%20of%20the%20error%20here%20including%20steps%20of%20how%20to%20recreate.%20Include%20any%20benefits%2C%20challenges%20or%20considerations.*%0A%0A**Code**%0A*Include%20the%20commands%20used*%0A%0A**Steps%20To%20Reproduce**%0A-%20%5B%20%5D%20Steps%0A-%20%5B%20%5D%20To%0A-%20%5B%20%5D%20Reproduce%2FFix%0A%0A**Additional%20Info**%0A*Include%20any%20images%2C%20notes%2C%20or%20whatever.*%0A) if you need this to be fixed.
 
 ***
 
-**Element removal during `mousedown` or `mouseup`**
+## Element removal during `mousedown` or `mouseup`
 
 The spec states what should happen if the element clicked is removed from the DOM during `mousedown` or `mouseup`, but Cypress is not currently factoring this in.
 
@@ -141,7 +141,7 @@ This behavior will be added sometime in the near future. [Open an issue](https:/
 
 ***
 
-**Animations**
+## Animations
 
 Unlike other testing frameworks, like Selenium, Cypress has built in logic for dealing with both CSS and JavaScript animations. Cypress will detect if an element is animating and will wait until the element reaches a clickable state. You will never deal with a situation where Cypress accidentally clicks the *wrong* element.
 
@@ -153,9 +153,9 @@ So far the only library we've seen cause issues with is animating KendoUI's `dro
 
 ***
 
-## Notes
+# Notes
 
-**Events that are fired**
+## Events that are fired
 
 ```javascript
 cy.get("button").click()
@@ -173,7 +173,7 @@ Additionally if the `mousedown` event causes the element to be removed from the 
 
 ***
 
-**Focus is given to the first focusable element**
+## Focus is given to the first focusable element
 
 Just like real browsers, clicking a `<span>`, for example, inside of a `<button>` will properly give the focus to the button, since that's what would happen in a real user scenario.
 
@@ -181,19 +181,19 @@ However, Cypress additionally handles situations where a child descendent is cli
 
 ***
 
-**Mousedown cancellation will not cause focus**
+## Mousedown cancellation will not cause focus
 
 If the mousedown event has its default action prevented (`e.preventDefault()`) then the element will not receive focus as per the spec.
 
 ***
 
-**Coordinates of a click**
+## Coordinates of a click
 
 The coordinates of the click will be recorded the exact moment the click happens. When hovering over the `click` command, Cypress will display a red "hitbox" indicator on the snapshot showing you where the click event occurred on the page.
 
 ***
 
-## Command Log
+# Command Log
 
 ```javascript
 cy.get("form").find("button").contains("Create User").click()
@@ -209,7 +209,8 @@ When clicking on `click` within the command log, the console outputs the followi
 
 ***
 
-## Related
+# Related
+
 1. [dblclick](http://on.cypress.io/api/dblclick)
 2. [check](http://on.cypress.io/api/check)
 3. [select](http://on.cypress.io/api/select)

@@ -1,7 +1,7 @@
 slug: submit
 excerpt: Submit a form
 
-## [cy.submit()](#usage)
+# [cy.submit()](#usage)
 
 Submits the current subject if it is a form.
 
@@ -9,7 +9,7 @@ Follows all of the rules of form submission per the w3c spec.
 
 ***
 
-## Usage
+# Usage
 
 Submit a form
 
@@ -28,7 +28,7 @@ cy.get("#contact").submit()
 
 ***
 
-## Command Log
+# Command Log
 
 ```javascript
 cy.route("POST", /users/, "fixture:user").as("userSuccess")
@@ -45,5 +45,6 @@ When clicking on `submit` within the command log, the console outputs the follow
 
 ***
 
-## Related
+# Related
+
 1. [click](http://on.cypress.io/api/click)

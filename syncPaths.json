@@ -16,7 +16,7 @@
             "customContent": {
                 "appearance": {
                     "html_body": "cypress/v1.0/customContent/appearance/landing_page.html",
-                    "stylesheet": "cypress/v1.0/customContent/appearance/styles.css"
+                    "stylesheet": "cypress/v0.0/customContent/appearance/styles.css"
                 }
             }
         }

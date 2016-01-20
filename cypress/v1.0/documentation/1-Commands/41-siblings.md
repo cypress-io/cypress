@@ -1,19 +1,19 @@
 slug: siblings
 excerpt: Get the siblings of elements
 
-## [cy.siblings()](#usage)
+# [cy.siblings()](#usage)
 
 Get the siblings of each element in the set of matched elements.
 
 ***
 
-## [cy.siblings( *selector* )](#selector-usage)
+# [cy.siblings( *selector* )](#selector-usage)
 
 Get the siblings of each element in the set of matched elements filtered by a selector.
 
 ***
 
-## Usage
+# Usage
 
 Get the siblings of each li.
 
@@ -33,7 +33,7 @@ cy.get(".active").siblings()
 
 ***
 
-## Selector Usage
+# Selector Usage
 
 Get siblings of element with class `active`.
 
@@ -44,7 +44,7 @@ cy.get("li").siblings(".active")
 
 ***
 
-## Command Log
+# Command Log
 
 ```javascript
 cy.get(".left-nav").find("li.active").siblings()
@@ -60,6 +60,7 @@ When clicking on `siblings` within the command log, the console outputs the foll
 
 ***
 
-## Related
+# Related
+
 1. [prev](http://on.cypress.io/api/prev)
 2. [next](http://on.cypress.io/api/next)

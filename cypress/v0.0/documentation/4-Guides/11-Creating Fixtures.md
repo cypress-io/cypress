@@ -3,15 +3,15 @@ excerpt: Load fixtures
 
 Cypress has first class support for managing fixtures in your test files.
 
-## What are Fixtures
+# What are Fixtures
 
-## Supported Formats
+# Supported Formats
 
-## Fixtures vs Factories
+# Fixtures vs Factories
 
-## Routing Responses
+# Routing Responses
 
-## Organizing
+# Organizing
 
 Cypress will automatically scaffold out a suggested folder structure for organizing your fixtures.
 

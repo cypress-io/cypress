@@ -1,13 +1,13 @@
 slug: url
 excerpt: Get the current URL
 
-## [cy.url()](#usage)
+# [cy.url()](#usage)
 
 Returns the current URL as a string.
 
 ***
 
-## Usage
+# Usage
 
 Assert the URL is `http://localhost:8000/users/1/edit`
 
@@ -31,9 +31,9 @@ cy.location().its("href") // these return the same string
 
 ***
 
-## Notes
+# Notes
 
-**Why is this command called `url` instead of `href`?**
+## Why is this command called `url` instead of `href`?
 
 Given this remote URL:
 
@@ -57,7 +57,7 @@ But you may be wondering where the `url` property comes from.  Per the `window.l
 
 ***
 
-## Command Log
+# Command Log
 
 ```javascript
 cy.url().should("contain", "#users/new")
@@ -72,6 +72,8 @@ When clicking on `url` within the command log, the console outputs the following
 <img width="440" alt="screen shot 2015-11-29 at 1 42 52 pm" src="https://cloud.githubusercontent.com/assets/1271364/11459197/229e2552-969f-11e5-80a9-eeaf3221a178.png">
 
 ***
-## Related
+
+# Related
+
 1. [hash](http://on.cypress.io/api/hash)
 2. [location](http://on.cypress.io/api/location)

@@ -1,7 +1,7 @@
 slug: clearcookies
 excerpt: Clear all browser cookies.
 
-## [cy.clearCookies()](#usage)
+# [cy.clearCookies()](#usage)
 
 Clears all of the browser cookies.
 
@@ -11,7 +11,7 @@ You shouldn't need to invoke this command unless you're using it to clear cookie
 
 ***
 
-## Usage
+# Usage
 
 Clear cookies after logging in
 
@@ -25,5 +25,6 @@ cy
 
 In this example, on first login our server sends us back a session cookie. After invoking `cy.clearCookies` this clears the session cookie, and upon navigating to an unauthorized page, our server should have redirected us back to login.
 
-## Related
+# Related
+
 1. [Cypress API Cookies](http://on.cypress.io/api/cookies)

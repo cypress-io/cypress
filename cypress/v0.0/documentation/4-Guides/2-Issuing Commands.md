@@ -1,7 +1,7 @@
 slug: issuing-commands
 excerpt: Traverse the dom and perform actions with commands
 
-## Async
+# Async
 
 When writing functional (integration) tests, you will inevitably traverse the DOM and perform user actions. In traditional server-side rendered views, it's unlikely you'll be dealing with many application state changes. However, if you're writing an application using a modern JavaScript framework, you'll likely need to navigate through highly complex, dynamic states.
 
@@ -21,7 +21,7 @@ The [Command API](http://on.cypress.io/api) attempts to balance readability, ter
 
 The [Command API](http://on.cypress.io/api) is also fluent - that is, you chain all commands together - similar to how jQuery's API is designed.
 
-## Subjects
+# Subjects
 
 Commands work just like JavaScript Promises. That is, the resolved value of one command becomes the `subject` of the next command - just like a waterfall.
 
@@ -73,7 +73,7 @@ When chaining together multiple commands you rarely should need to yield the sub
 cy.get("#main").find("button").click().should("have.class", "active")
 ```
 
-## Chaining
+# Chaining
 
 Because Cypress implements a fluent API, all commands are linked together.  Cypress has a small, but powerful, set of rules to know how to process the chain of commands.
 
@@ -83,7 +83,7 @@ There are 3 types of commands:
 - Child Commands
 - Dual Commands
 
-**Parent Commands**
+## Parent Commands
 
 Parent commands always **begin** a new chain of commands. Even if you've written a previous chain, parent commands will always start a new chain, and ignore previous chains. Parent commands should be written off the `cy` object:
 
@@ -107,7 +107,7 @@ cy
   .get("input").type("foobarbaz")
 ```
 
-**Child Commands**
+## Child Commands
 
 Child commands are always chained off of a **parent** command, or another **child** command.
 
@@ -153,7 +153,7 @@ cy
     .type("foobarbaz")
 ```
 
-**Dual Commands**
+## Dual Commands
 
 While parent commands always start a new chain of commands and child commands require being chained off a parent command, dual commands can behave as parent or child command. That is, they can **start** a new chain, or be chained off of an **existing** chain.
 

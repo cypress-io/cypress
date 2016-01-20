@@ -3,7 +3,7 @@ excerpt: Permanently override default server options
 
 Any configuration you pass to [`cy.server`](http://on.cypress.io/api/server) will only persist until the end of the test. If you find yourself passing the same configuration to each [`cy.server`](http://on.cypress.io/api/server), then you might want to permanently change the default options for all [`cy.server`](http://on.cypress.io/api/server) instances.
 
-## [Cypress.Server.defaults( *object* )](#usage)
+# [Cypress.Server.defaults( *object* )](#usage)
 
 Change default configuration for [`cy.server`](http://on.cypress.io/api/server)
 
@@ -14,7 +14,7 @@ Change default configuration for [`cy.server`](http://on.cypress.io/api/server)
 }
 [/block]
 
-## Usage
+# Usage
 
 ```javascript
 // pass anything here you'd normally pass

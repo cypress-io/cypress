@@ -1,7 +1,7 @@
 slug: route
 excerpt: Route responses to matching requests
 
-## [cy.route( *url* )](#url-usage)
+# [cy.route( *url* )](#url-usage)
 
 Use `cy.route` to route responses to matching requests.
 
@@ -17,13 +17,13 @@ Set a route matching the specific `url` which is not stubbed but can be waited o
 
 ***
 
-## [cy.route( *method*, *url* )](#method-and-url-usage)
+# [cy.route( *method*, *url* )](#method-and-url-usage)
 
 Set a route matching the specific `method` and `url` which is not stubbed but can be waited on later.
 
 ***
 
-## [cy.route( *url*, *response* )](#url-and-response-usage)
+# [cy.route( *url*, *response* )](#url-and-response-usage)
 
 Set a route matching the `url` stubbed with the supplied `response`.
 
@@ -31,13 +31,13 @@ By default this will match `GET` request methods.
 
 ***
 
-## [cy.route( *method*, *url*, *response* )](#method-url-and-response-usage)
+# [cy.route( *method*, *url*, *response* )](#method-url-and-response-usage)
 
 Set a route matching the `method` and `url` stubbed with the supplied `response`.
 
 ***
 
-## [cy.route( *options* )](#options-usage)
+# [cy.route( *options* )](#options-usage)
 
 Pass in an object containing the following key/values.
 
@@ -54,7 +54,7 @@ Option | Default | Notes
 
 ***
 
-## Url Usage
+# Url Usage
 
 Wait on non-stubbed XHR's by url
 
@@ -72,7 +72,7 @@ cy
 
 ***
 
-## Method and Url Usage
+# Method and Url Usage
 
 Wait on non-stubbed XHR's by method + url
 
@@ -91,9 +91,9 @@ cy
 
 ***
 
-## Url and Response Usage
+# Url and Response Usage
 
-**Url as a string**
+## Url as a string
 
 When passing a `string` as the `url`, the XHR's URL must match exactly what you've written.
 
@@ -105,7 +105,7 @@ cy
 
 ***
 
-**Url as a RegExp**
+## Url as a RegExp
 
 When passing a RegExp as the `url`, the XHR's url will be tested against the regular expression and will apply if it passes.
 
@@ -125,7 +125,7 @@ $.get("/users/1337", function(data){
 
 ***
 
-**Matching requests and routes**
+## Matching requests and routes
 
 Any request that matches the `method` and `url` of a route will be responded to based on the configuration of that route.
 
@@ -165,7 +165,7 @@ The above application code will issue 3 AJAX requests:
 
 ***
 
-## Method, Url, and Response Usage
+# Method, Url, and Response Usage
 
 Specify the method
 
@@ -180,7 +180,7 @@ cy
 
 ***
 
-## Options Usage
+# Options Usage
 
 ```javascript
 cy
@@ -211,7 +211,7 @@ cy
 
 ***
 
-**Setting a delay for a specific route**
+## Setting a delay for a specific route
 
 You can optionally pass in a delay option which will cause a delay (in ms) to the response for matched requests. The example below will cause the response to be delayed by 3 secs.
 
@@ -226,9 +226,9 @@ cy.route({
 
 ***
 
-## Notes
+# Notes
 
-**Understanding Stubbed vs Regular XHR's**
+## Understanding Stubbed vs Regular XHR's
 
 Cypress indicates whether an XHR sent back a stubbed response vs actually going out to a server.
 
@@ -246,7 +246,7 @@ Even the `Initiator` is included, which is a stack trace to what caused the XHR 
 
 ***
 
-**Requests that don't match a route**
+## Requests that don't match a route
 
 By default, **all** requests that do not match a route will automatically be handed back:
 
@@ -264,7 +264,7 @@ You can [read more about this here.](http://on.cypress.io/api/server#prevent-sen
 
 ***
 
-**Using Fixtures as Responses**
+## Using Fixtures as Responses
 
 Instead of writing a response inline you can automatically connect a response with a fixture.
 
@@ -287,7 +287,7 @@ You can [read more about fixtures here.](http://on.cypress.io/api/fixture)
 
 ***
 
-**Response Headers are automatically set**
+## Response Headers are automatically set
 
 By default, Cypress will automatically set `Content-Type` and `Content-Length` based on what your `response body` looks like.
 
@@ -295,7 +295,7 @@ If you'd like to override this, explicitly pass in `headers` as an `object liter
 
 ***
 
-## Command Log
+# Command Log
 
 ```javascript
 cy
@@ -321,7 +321,8 @@ When clicking on `XHR Stub` within the Command Log, the console outputs the foll
 
 ***
 
-## Related
+# Related
+
 1. [server](http://on.cypress.io/api/server)
 2. [wait](http://on.cypress.io/api/wait)
 3. [as](http://on.cypress.io/api/as)

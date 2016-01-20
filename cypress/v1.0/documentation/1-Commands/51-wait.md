@@ -1,13 +1,13 @@
 slug: wait
 excerpt: Wait for a specific amount of time or resource to resolve
 
-## [cy.wait( *number* )](#number-usage)
+# [cy.wait( *number* )](#number-usage)
 
 Wait a specific amount of `ms` before resolving and continuing onto the next command.
 
 ***
 
-## [cy.wait( *alias* )](#alias-usage)
+# [cy.wait( *alias* )](#alias-usage)
 
 Wait until the matching [aliased](http://on.cypress.io/guides/using-aliases) XHR has a response.
 
@@ -21,13 +21,13 @@ Wait until the matching [aliased](http://on.cypress.io/guides/using-aliases) XHR
 
 ***
 
-## [cy.wait( *\[alias1*, *alias2*, *alias3\]* )](#alias-array-usage)
+# [cy.wait( *\[alias1*, *alias2*, *alias3\]* )](#alias-array-usage)
 
 Wait for an array of [aliases](http://on.cypress.io/guides/using-aliases) to have responses.
 
 ***
 
-## Number Usage
+# Number Usage
 
 ```javascript
 // Wait 500ms before resolving
@@ -36,7 +36,7 @@ cy.wait(500)
 
 ***
 
-## Alias Usage
+# Alias Usage
 
 Wait for a specific XHR to respond
 
@@ -88,7 +88,7 @@ cy
 
 ***
 
-## Alias Array Usage
+# Alias Array Usage
 
 You can pass an array of aliases that will be waited on before resolving.
 
@@ -125,9 +125,9 @@ cy
 
 ***
 
-## Notes
+# Notes
 
-**requestTimeout and responseTimeout**
+## requestTimeout and responseTimeout
 
 `cy.wait` goes through two separate "waiting" periods for a matching XHR.
 
@@ -147,7 +147,7 @@ This gives you the best of both worlds - a fast error feedback loop when request
 
 ***
 
-## Command Log
+# Command Log
 
 ```javascript
 cy
@@ -168,8 +168,9 @@ When clicking on `wait` within the command log, the console outputs the followin
 
 ***
 
-## Related
+# Related
+
 1. [server](http://on.cypress.io/api/server)
 2. [route](http://on.cypress.io/api/route)
 3. [as](http://on.cypress.io/api/as)
-3. [spread](http://on.cypress.io/api/spread)
+4. [spread](http://on.cypress.io/api/spread)

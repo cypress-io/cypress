@@ -1,7 +1,7 @@
 slug: continuous-integration
 excerpt: Run Cypress in any CI provider
 
-## Supported Services
+# Supported Services
 
 Cypress should run on **all** CI providers. We currently have seen Cypress working on the following providers:
 
@@ -13,7 +13,7 @@ Cypress should run on **all** CI providers. We currently have seen Cypress worki
 
 If you're running on your own `Jenkins` server you may have to install some other dependencies [which are documented here](http://on.cypress.io/guides/troubleshooting).
 
-## Running in CI
+# Running in CI
 
 Running Cypress in CI is very easy. If you're using a hosted CI service, generally the workflow is the same:
 
@@ -21,28 +21,28 @@ Running Cypress in CI is very easy. If you're using a hosted CI service, general
 2. [Acquire a Cypress secret key](#acquire-a-cypress-secret-key)
 3. [Add 2 lines of code to your CI config file](#add-2-lines-of-code-to-your-ci-config-file)
 
-**Add your project to your CI provider**
+## Add your project to your CI provider
 
 This is different for each provider, but usually includes logging into your CI service, connecting it with your Github account, and then adding that project's repo.
 
-**Acquire a Cypress secret key**
+## Acquire a Cypress secret key
 
 Cypress verifies that your project is allowed to run in CI by using a secret key. This key can only be obtained from the Cypress CLI tool (currently). If you haven't installed the Cypress CLI tool, run the following command from your terminal:
 
 ```bash
-## install the Cypress CLI tool
+# install the Cypress CLI tool
 npm install -g cypress
 ```
 
 Run this following Cypress command from your terminal:
 
 ```bash
-## this will return your secret key
+# this will return your secret key
 cypress get:key
 ```
 
 ```bash
-## you'll see a key that looks like this
+# you'll see a key that looks like this
 703b33d9-a00e-4c66-90c2-40efc0fee2c6
 ```
 
@@ -55,7 +55,7 @@ cypress get:key
 }
 [/block]
 
-**Add 2 lines of code to your CI config file**
+## Add 2 lines of code to your CI config file
 
 Depending on which CI provider you're using you'll have access to a configuration file such as:
 
@@ -65,11 +65,11 @@ Depending on which CI provider you're using you'll have access to a configuratio
 You'll only need to add two lines of code to this file to run Cypress tests.
 
 ```bash
-## this will install the cypress-cli tools
+# this will install the cypress-cli tools
 npm install -g cypress
 
 
-## this will run tests headlessly
+# this will run tests headlessly
 cypress ci <your-secret-key>
 ```
 
@@ -77,24 +77,24 @@ You'll want to refer to your CI providers documentation for knowing when to run 
 
 For instance, with [Travis CI](https://docs.travis-ci.com/user/customizing-the-build/#The-Build-Lifecycle) they expose a `before_install` and `script` phase. You'd write `npm install -g cypress` in the `before_install` phase, and `cypress ci` in the `script` phase.
 
-**Storing your secret key as an environment variable**
+## Storing your secret key as an environment variable
 
 Instead of hard-coding your secret key into a configuration file, you can opt to store this as an environment variable with your CI provider. This prevents your secret key from being stored in version control. Each CI provider will be different, but generally each exposes a way to set environment variables.
 
 Set the name of the environment variable to `CYPRESS_CI_KEY` and paste your secret key as the value, then run your tests in CI by simply calling:
 
 ```bash
-## this will run tests headlessly
+# this will run tests headlessly
 cypress ci
 ```
 
-**Specifying a version of Cypress**
+## Specifying a version of Cypress
 
 You can specify a specific version of Cypress to use in CI by setting an Environment Variable: `CYPRESS_VERSION`.
 
 As long as a previous version has not been removed (due to security issues) this will work.
 
-## Examples
+# Examples
 
 You can see a fully working project in TravisCI here:
 

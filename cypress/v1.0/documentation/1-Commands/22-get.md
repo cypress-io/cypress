@@ -1,7 +1,7 @@
 slug: get
 excerpt: Get an element
 
-## [cy.get( *selector* )](#selector-usage)
+# [cy.get( *selector* )](#selector-usage)
 
 Matches one or more DOM elements based on the selector.  The selector can be any valid jQuery selector.
 
@@ -11,7 +11,7 @@ If Cypress does not find any matching element(s), it will continue to retry unti
 
 ***
 
-## [cy.get( *alias* )](#alias-usage)
+# [cy.get( *alias* )](#alias-usage)
 
 You can pass in a '@' character to find an [aliased](http://on.cypress.io/guides/using-aliases) element.
 
@@ -19,7 +19,7 @@ Internally Cypress keeps a cache of all aliased elements.  If the element curren
 
 ***
 
-## Selector Usage
+# Selector Usage
 
 Find the element with an id of `main`
 
@@ -65,7 +65,7 @@ cy.get("form").within(function(){
 
 ***
 
-## Alias Usage
+# Alias Usage
 
 For a detailed explanation of aliasing, [read more about aliasing here](http://on.cypress.io/guides/using-aliases).
 
@@ -97,7 +97,7 @@ it("disables on click", function(){
 ***
 
 
-## Command Log
+# Command Log
 
 <img width="524" alt="screen shot 2015-11-27 at 1 24 20 pm" src="https://cloud.githubusercontent.com/assets/1271364/11446808/5d2f2180-950a-11e5-8645-4f0f14321f86.png">
 
@@ -105,7 +105,7 @@ When clicking on the `get` command within the command log, the console outputs t
 
 <img width="543" alt="screen shot 2015-11-27 at 1 24 45 pm" src="https://cloud.githubusercontent.com/assets/1271364/11446809/61a6f4f4-950a-11e5-9b23-a9efa1fbccfc.png">
 
-## Related
+# Related
 
 1. [contains](http://on.cypress.io/api/contains)
 2. [within](http://on.cypress.io/api/within)

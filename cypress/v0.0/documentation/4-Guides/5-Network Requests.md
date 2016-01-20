@@ -3,7 +3,8 @@ excerpt: Manage AJAX/XHR requests
 
 Cypress makes it easy to manage the entire lifecyle of AJAX / XHR requests within your application. Cypress provides you direct access to the XHR objects, enabling you to make assertions about its properties. Additionally you can even stub and mock a request's response.
 
-Common testing scenarios:
+**Common testing scenarios:**
+
 - Asserting on a request's body
 - Asserting on a request's url
 - Asserting on a request's headers
@@ -13,7 +14,7 @@ Common testing scenarios:
 - Delaying a response
 - Waiting for a response to happen
 
-## Strategy
+# Strategy
 
 Within Cypress, you have the ability to choose whether to stub responses or allow them to actually hit your server. You can also mix and match within the same test by choosing to stub certain requests, while allowing others to hit your server.
 
@@ -21,7 +22,7 @@ Let's investigate both strategies, why you would use one versus the other, and w
 
 ---
 
-**Strategy #1: Don't Stub Responses**
+## Strategy #1: Don't Stub Responses
 
 Requests that aren't stubbed will actually reach your server. By not stubbing your responses you are writing true **end to end** tests. This means you are driving your application the same way a real user would.
 
@@ -62,7 +63,7 @@ If you are writing a traditional server-side application where most of the respo
 
 ---
 
-**Strategy #2: Stub Responses**
+## Strategy #2: Stub Responses
 
 Stubbing responses enables you to control every aspect of the response, including the response body, the status, headers, and even network delay. Stubbing is extremely fast, most responses will be returned in less than 20ms.
 
@@ -96,7 +97,7 @@ In fact stubbed requests will still show up in the Network tab of your Developer
 
 ---
 
-## Requests
+# Requests
 
 Cypress will automatically indicate when an XHR request happens in your application. These are logged in the Cypress' Command Log regardless of whether or not you are using stubbing. This provides you a visual indicator when a request has happened and when it is finished. Additionally, Cypress will take a snapshot of the DOM when the request is made, and another snapshot when the response comes back.
 
@@ -104,7 +105,7 @@ By default, Cypress is configured to **ignore** requests that are used to fetch 
 
 Cypress automatically collects the request `headers` and the request `body` and will make this available to you.
 
-## Responses
+# Responses
 
 Cypress makes it easy to stub a response and control the body, status, headers, or even delay.
 
@@ -117,7 +118,7 @@ These two commands work together to control the behavior of your responses.
 
 [`cy.server`](http://on.cypress.io/api/server) enables stubbing, while [`cy.route`](http://on.cypress.io/api/route) provides a routing table so Cypress understands which response should go with which request.
 
-#### Server + Routing Table
+# Server + Routing Table
 
 ```javascript
 cy
@@ -147,7 +148,7 @@ For a complete reference of the API and options, refer to the documentation for 
 - [`cy.server`](http://on.cypress.io/api/server)
 - [`cy.route`](http://on.cypress.io/api/route)
 
-## Fixtures
+# Fixtures
 
 When stubbing a response, you typically need to manage potentially large and complex JSON objects. Cypress has first class support for [fixtures](http://on.cypress.io/guides/creating-fixtures), and even allows you to integrate fixture syntax directly into responses.
 
@@ -171,7 +172,7 @@ cy
   .route("GET", /activities/, "@activitiesJSON")
 ```
 
-## Waiting
+# Waiting
 
 Whether or not you choose to stub responses, Cypress enables you to declaratively [`wait`](http://on.cypress.io/api/wait) for requests and their responses.
 
@@ -199,7 +200,7 @@ Declaratively waiting for responses has many advantages:
 - Source of failure is clearer
 - You can make assertions about the XHR objects
 
-**Removing Flake**
+## Removing Flake
 
 One advantage of declaratively waiting for requests is that it decreases the chances of test flake.
 
@@ -231,7 +232,7 @@ What makes this so powerful is that Cypress will automatically wait for a reques
 
 Instead of forcing Cypress to test the *side effect* of a successful request (the display of the Book results), you can test the actual *cause* of the results.
 
-**Clear Source of Failure**
+## Clear Source of Failure
 
 In our example above, we added an assertion to the display of the search results.
 
@@ -251,7 +252,7 @@ With Cypress, by adding a [`wait`](http://on.cypress.io/api/wait) guard, you can
 
 Now we know exactly why our test failed. It had nothing to do with the DOM. Instead we can see that either our request never went out or a request went out to the wrong URL.
 
-**Asserting about the XHR Object**
+## Asserting about the XHR Object
 
 Another benefit of using [`wait`](http://on.cypress.io/api/wait) on requests is that it allows you to access the actual `XHR` object. This is useful when you want to make assertions about this object.
 
@@ -285,7 +286,7 @@ The XHR object that [`wait`](http://on.cypress.io/api/wait) yields you has every
 - Response Body
 - Response Headers
 
-## Assertions
+# Assertions
 - counting number of requests
 - asserting about request body / headers
 - asserting about response body / headers / status

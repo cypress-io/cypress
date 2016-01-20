@@ -1,11 +1,11 @@
 slug: check
 excerpt: Check a checkbox
 
-## [cy.check()](#usage)
+# [cy.check()](#usage)
 
 Checks the checkbox. Triggers events associated with check.
 
-## Usage
+# Usage
 
 Check the checkbox
 
@@ -20,7 +20,7 @@ cy.get("#saveUserName").check()
 ```
 ***
 
-## Command Log
+# Command Log
 
 ```javascript
 cy.get("form").find("[name='emailUser']").check()
@@ -35,6 +35,7 @@ When clicking on `check` within the command log, the console outputs the followi
 <img width="547" alt="screen shot 2015-11-29 at 12 53 48 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458927/65a2526c-9698-11e5-8b33-f59e666170e2.png">
 
 ***
-## Related
+# Related
+
 1. [uncheck](http://on.cypress.io/api/uncheck)
 2. [click](http://on.cypress.io/api/click)

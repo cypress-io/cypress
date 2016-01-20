@@ -1,7 +1,7 @@
 slug: installing-and-running
 excerpt: Quick start guide for using Cypress
 
-## System Requirements
+# System Requirements
 
 Cypress is a desktop application. This desktop application is the equivalent replacement of `Selenium Server` and must be running to test in Cypress.
 
@@ -24,25 +24,25 @@ Windows is [*(not yet working)*](https://github.com/cypress-io/cypress/issues/74
 
 There are no dependencies to install the Desktop Application, although if you want to [use Cypress from the Command Line](https://github.com/cypress-io/cypress-cli) you will need to have `node` installed.
 
-## Installing
+# Installing
 
 You can install Cypress in 2 different ways:
 * From a command line interface
 * By direct download
 
-**From the command line**
+## From the command line
 
 ```bash
-## install the Cypress CLI tool
+# install the Cypress CLI tool
 npm install -g cypress
 
-## install the Desktop Cypress app
+# install the Desktop Cypress app
 cypress install
 ```
 
 ![cypress-install](https://cloud.githubusercontent.com/assets/1268976/9279271/5c3826ba-4284-11e5-969b-91b0c27a8dee.gif)
 
-**Direct Download**
+## Direct Download
 
 You can download Cypress directly [here.](http://download.cypress.io/latest)
 
@@ -54,7 +54,7 @@ You can download Cypress directly [here.](http://download.cypress.io/latest)
 }
 [/block]
 
-## Adding Projects
+# Adding Projects
 
 After installing, you will need to add the project(s) you want to write Cypress tests in.
 

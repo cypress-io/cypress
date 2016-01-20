@@ -1,7 +1,7 @@
 slug: promise
 excerpt: Instantiate a bluebird promise
 
-### [new cy.Promise( *function* )](#usage)
+## [new cy.Promise( *function* )](#usage)
 
 Cypress automatically proxies [`Bluebird`](https://github.com/petkaantonov/bluebird) and exposes it as `cy.Promise`.
 
@@ -9,7 +9,7 @@ Instantiate a new bluebird promise.
 
 ***
 
-## Usage
+# Usage
 
 Use `cy.Promise` to create promises. Cypress is promise aware so if you return a promise from inside of commands like [`cy.then`](http://on.cypress.io/api/then), Cypress will not continue until those promises resolve.
 

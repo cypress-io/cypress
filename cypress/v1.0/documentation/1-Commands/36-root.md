@@ -1,13 +1,13 @@
 slug: root
 excerpt: Get the root element
 
-## [cy.root()](#root-usage)
+# [cy.root()](#root-usage)
 
 Get the root element. By default the root is `document`.
 
 ***
 
-## Usage
+# Usage
 
 ```html
 <form>
@@ -31,7 +31,7 @@ cy.get("form").within(function(){
 
 ***
 
-## Related
+# Related
 
 1. [get](http://on.cypress.io/api/get)
 1. [within](http://on.cypress.io/api/within)

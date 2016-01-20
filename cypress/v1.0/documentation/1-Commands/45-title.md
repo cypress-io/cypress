@@ -1,13 +1,13 @@
 slug: title
 excerpt: Get the title of the document
 
-## [cy.title()](#usage)
+# [cy.title()](#usage)
 
 Get the title of the document.
 
 ***
 
-## Usage
+# Usage
 
 Assert that the document's title is "New User"
 
@@ -17,7 +17,7 @@ cy.title().should("contain", "New User")
 
 ***
 
-## Command Log
+# Command Log
 
 ```javascript
 cy.title().should("contain", "New User")
@@ -33,5 +33,6 @@ When clicking on `title` within the command log, the console outputs the followi
 
 ***
 
-## Related
+# Related
+
 1. [document](http://on.cypress.io/api/document)
