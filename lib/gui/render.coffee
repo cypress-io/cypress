@@ -8,6 +8,7 @@ dialog        = require("electron").dialog
 BrowserWindow = require("electron").BrowserWindow
 cache         = require("../cache")
 session       = require("../session")
+logger        = require("../log")
 Cypress       = require("../cypress")
 cypressGui    = require("cypress-gui")
 
@@ -22,6 +23,10 @@ getUrl = (type) ->
   switch type
     when "GITHUB_LOGIN"
       session.getLoginUrl()
+    when "ABOUT"
+      cypressGui.getPathToAbout()
+    when "DEBUG"
+      cypressGui.getPathToDebug()
     else
       throw new Error("No acceptable window type found for: '#{arg.type}'")
 
@@ -95,11 +100,21 @@ module.exports = (optionsOrArgv) ->
         shell.openExternal(arg)
 
       when "window:open"
+        ## should allow us to auto-focus
+        ## the window if focus: true ?
+        ##
+        ## we should keep an object reference
+        ## between all the windows and their type
+        ## if we see an existing type and its already
+        ## created, then just focus it, do not
+        ## create a new one.
+
         args = _.defaults {}, arg, {
           url: getUrl(arg.type)
           width:  600
           height: 500
           show:   true
+          preload: path.join(__dirname, "./ipc.js")
           webPreferences: {
             nodeIntegration: false
           }
@@ -145,6 +160,22 @@ module.exports = (optionsOrArgv) ->
 
       when "update"
         send(null, {foo: "bar"})
+
+      when "get:logs"
+        logger.getLogs().then (logs) ->
+          send(null, logs)
+
+      when "on:log"
+        logger.onLog = (log) ->
+          send(null, log)
+
+      when "off:log"
+        logger.off()
+        send(null, null)
+
+      when "clear:logs"
+        logger.clearLogs().then ->
+          send(null, null)
 
       when "get:current:user"
         cache.getUser()
@@ -196,7 +227,7 @@ module.exports = (optionsOrArgv) ->
       else
         throw new Error("No ipc event registered for: '#{type}'")
 
-  options.url = cypressGui.getPathToHtml()# "file://#{__dirname}/../app/public/index.html"
+  options.url = cypressGui.getPathToIndex()# "file://#{__dirname}/../app/public/index.html"
 
   console.log options
 
