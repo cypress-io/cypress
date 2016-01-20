@@ -13,4 +13,7 @@ module.exports = {
   getPathToDebug: ->
     file("debug.html")
 
+  getPathToUpdates: ->
+    file("updates.html")
+
 }

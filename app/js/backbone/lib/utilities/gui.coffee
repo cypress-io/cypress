@@ -120,39 +120,14 @@
       })
 
     updates: ->
-      if updates = windows.updates
-        return updates.focus()
-
-      windows.updates = updates = App.request "gui:open", "./updates.html",
+      App.ipc("window:open", {
         position: "center"
         width: 300
         height: 210
-        # frame: false
         toolbar: false
         title: "Updates"
-
-      updates.once "loaded", =>
-        @focus(updates)
-
-        updates.showDevTools() if App.config.get("debug")
-
-        ## grab the updates region from other window
-        $el = $("#updates-region", updates.window.document)
-
-        ## attach to the app as a custom region object
-        App.addRegions
-          updatesRegion: Marionette.Region.extend(el: $el)
-
-        App.vent.trigger "start:updates:app", App.updatesRegion, updates
-
-      updates.once "close", ->
-        ## remove app region when this is closed down
-        App.removeRegion("updatesRegion") if App.updatesRegion
-
-        delete windows.updates
-
-        ## really shut down the window!
-        @close(true)
+        type: "UPDATES"
+      })
 
     debug: ->
       App.ipc("window:open", {

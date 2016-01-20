@@ -3,24 +3,33 @@
   class Show.Controller extends App.Controllers.Application
 
     initialize: (options = {}) ->
-      { window } = options
-
       updater = App.updater
 
       updatesView = @getUpdatesView(updater)
 
-      @listenTo updatesView, "button:clicked", ->
-        window.close()
+      # @listenTo updatesView, "button:clicked", ->
+        # window.close()
 
       @listenTo updatesView, "changelog:clicked", ->
         ## this needs to be moved to an .env variable
-        App.execute "gui:external:open", "http://on.cypress.io/changelog"
+        App.ipc("external:open", "https://on.cypress.io/changelog")
 
       set = (state) ->
         updater.setState(state)
 
       @listenTo updatesView, "show", ->
         ## add all of the
+        App.ipc "updater:run", (obj = {}) ->
+          switch obj.event
+            when "start" then set("checking")
+            when "apply" then set("applying")
+            when "error" then set("error")
+            when "done"  then set("done")
+            when "none"  then set("none")
+            when "download"
+              updater.setNewVersion(obj.version)
+              set("downloading")
+
         updater.run
           onStart: -> set("checking")
           onApply: -> set("applying")
