@@ -10,6 +10,7 @@
         focus: true
         width: 1000
         height: 635
+        preload: false
         title: "Login"
         type: "GITHUB_LOGIN"
       })
