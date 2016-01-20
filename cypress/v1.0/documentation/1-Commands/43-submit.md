@@ -1,9 +1,9 @@
 slug: submit
 excerpt: Submit a form
 
-### [cy.submit()](#usage)
+## [cy.submit()](#usage)
 
-Submits the current subject, if it is a form.
+Submits the current subject if it is a form.
 
 Follows all of the rules of form submission per the w3c spec.
 
@@ -11,7 +11,7 @@ Follows all of the rules of form submission per the w3c spec.
 
 ## Usage
 
-#### Submit a form
+Submit a form
 
 ```html
 <form id="contact">
@@ -22,7 +22,7 @@ Follows all of the rules of form submission per the w3c spec.
 
 ```javascript
 // submits the form and performs all default actions
-// and returns <form> for further chaining
+// returns <form> for further chaining
 cy.get("#contact").submit()
 ```
 

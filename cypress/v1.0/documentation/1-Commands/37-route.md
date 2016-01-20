@@ -252,7 +252,7 @@ By default, **all** requests that do not match a route will automatically be han
 
 Status | Body | Headers
 --- | --- | ---
-404 | "" | null
+`404` | "" | `null`
 
 If you'd like to disable this behavior you need to pass:
 
@@ -325,3 +325,4 @@ When clicking on `XHR Stub` within the Command Log, the console outputs the foll
 1. [server](http://on.cypress.io/api/server)
 2. [wait](http://on.cypress.io/api/wait)
 3. [as](http://on.cypress.io/api/as)
+4. [Network Requests](http://on.cypress.io/guides/network-requests-xhr)

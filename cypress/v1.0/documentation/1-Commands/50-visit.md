@@ -1,7 +1,7 @@
 slug: visit
 excerpt: Visit a remote url
 
-### [cy.visit( *url* )](#usage)
+## [cy.visit( *url* )](#usage)
 
 Visit a remote url. This will most likely be the first command you run.
 
@@ -9,18 +9,21 @@ Visit a remote url. This will most likely be the first command you run.
 
 ***
 
-### [cy.visit( *url*, *options* )](#options-usage)
+## [cy.visit( *url*, *options* )](#options-usage)
 
 Visit optionally accepts an `options` object:
- - `timeout`      **Default:** 20000ms
- - `onBeforeLoad` **Default:** function(){}
- - `onLoad`       **Default:** function(){}
+
+Option | Default | Notes
+--- | --- | ---
+`timeout`      | `20000` |
+`onBeforeLoad` | function(){} |
+`onLoad`       | function(){} |
 
 ***
 
 ## Usage
 
-> Visit a local server running on http://localhost:8000
+Visit a local server running on http://localhost:8000
 
 ```javascript
 cy.visit("http://localhost:8000")
@@ -28,10 +31,10 @@ cy.visit("http://localhost:8000")
 
 ***
 
-> Protocol can be omitted from common hosts
+Protocol can be omitted from common hosts
 
 ```javascript
-// cypress will automatically prepend the http:// protocol
+// Cypress will automatically prepend the http:// protocol
 // to common hosts.  If you're not using one of these
 // 3 hosts, then make sure to provide the protocol
 cy.visit("localhost:3000") // => http://localhost:3000
@@ -41,7 +44,7 @@ cy.visit("127.0.0.1:3000") // => http://127.0.0.1:3000
 
 ***
 
-> Cypress can optionally act as your web server
+Cypress can optionally act as your web server
 
 ```javascript
 // Cypress will automatically attempt to serve your files
@@ -55,8 +58,7 @@ Having Cypress serve your files is useful in simple projects and example apps, b
 
 ***
 
-> Visit is automatically prefixed with `baseUrl`
-
+Visit is automatically prefixed with `baseUrl`.
 ```javascript
 // cypress.json
 {
@@ -68,15 +70,15 @@ Having Cypress serve your files is useful in simple projects and example apps, b
 cy.visit("dashboard")
 ```
 
-This is highly recommended. Simply configure `baseUrl` in the `cypress.json` file to prevent repeating yourself in every single `cy.visit(...)`.
+This is recommended. Simply configure `baseUrl` in the `cypress.json` file to prevent repeating yourself in every single `cy.visit(...)`.
 
-Read more about [`configuration`](getting-started#configuration) here.
+Read more about [`configuration`](http://on.cypress.io/guides/configuration) here.
 
 ***
 
 ## Options Usage
 
-> Change the default timeout
+Change the default timeout
 
 ```javascript
 // change the timeout to be 30 seconds
@@ -85,7 +87,7 @@ cy.visit("/index.html", {timeout: 30000})
 
 ***
 
-> Provide an `onBeforeLoad` callback function
+Provide an `onBeforeLoad` callback function
 
 ```javascript
 // onBeforeLoad is called as soon as possible, before
@@ -100,7 +102,7 @@ cy.visit("http://localhost:3000/#dashboard", {
 ```
 ***
 
-> Provide an `onLoad` callback function
+Provide an `onLoad` callback function
 
 ```javascript
 // onLoad is called once your page has fired its load event.
@@ -120,7 +122,7 @@ cy.visit("http://localhost:3000/#/users", {
 
 ## Notes
 
-> Visit will always yield the remote page's window object when it resolves
+**Visit will always yield the remote page's window object when it resolves**
 
 ```javascript
 cy.visit("index.html").then(function(contentWindow)){
@@ -130,7 +132,7 @@ cy.visit("index.html").then(function(contentWindow)){
 
 ***
 
-> Visit will automatically follow redirects
+**Visit will automatically follow redirects**
 
 ```javascript
 // we aren't logged in, and our webserver
@@ -142,7 +144,7 @@ cy
 
 ***
 
-> Cypress automatically wipes page state between visits
+**Cypress automatically wipes page state between visits**
 
 Whenever you `cy.visit(...)`, Cypress will automatically wipe the state of the page before navigating to an external page.
 
@@ -164,7 +166,7 @@ cy
 
 ***
 
-> Preventing XHR / AJAX requests before a remote page initially loads
+**Preventing XHR / AJAX requests before a remote page initially loads**
 
 One common scenario Cypress supports is visiting a remote page and also preventing any AJAX requests from immediately going out.
 
@@ -177,7 +179,7 @@ cy
   .route(/users/, {...})
 ```
 
-But if your app makes a request upon being initialized, **the above code will not work**.  `cy.visit(...)` will resolve once its `load` event fires.  The `server` and `route` commands are not processed until **after** `visit` resolves.
+But if your app makes a request upon being initialized, *the above code will not work*.  `cy.visit()` will resolve once its `load` event fires.  The `server` and `route` commands are not processed until *after* `visit` resolves.
 
 Many applications will have already begun routing, initialization, and requests by the time `visit` resolves. Therefore creating a `cy.server` will happen too late, and Cypress will not process the requests.
 
@@ -190,9 +192,10 @@ cy
   .visit("http://localhost:8000/#/app")
 ```
 
-Cypress will automatically apply the server + routes to the very next `visit` and does so immediately before any of your application code runs.
+Cypress will automatically apply the server and routes to the very next `visit` and does so immediately before any of your application code runs.
 
 ***
 
 ## Related
 1. [go](http://on.cypress.io/api/go)
+1. [server](http://on.cypress.io/api/server)

@@ -1,7 +1,7 @@
 slug: title
 excerpt: Get the title of the document
 
-### [cy.title()](#usage)
+## [cy.title()](#usage)
 
 Get the title of the document.
 
@@ -9,7 +9,7 @@ Get the title of the document.
 
 ## Usage
 
-#### Assert that the document's title is "New User"
+Assert that the document's title is "New User"
 
 ```javascript
 cy.title().should("contain", "New User")

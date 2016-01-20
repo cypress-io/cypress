@@ -1,33 +1,37 @@
 slug: env
 excerpt: get and set environment variables
 
-#### **New to Cypress?** [Read about environment variables first.](http://on.cypress.io/guides/environment-variables)
-
-***
-
 `Cypress.env` allows you to `get` and `set` your environment variables.
 
 This document covers the API for consuming your environment variables *in your tests*. The [Environment Variable](http://on.cypress.io/guides/environment-variables) guide explains the 4 ways you can set them *outside of your tests*.
 
-### [Cypress.env()](#no-arguments-usage)
+[block:callout]
+{
+  "type": "info",
+  "body": "[Read about environment variables first.](http://on.cypress.io/guides/environment-variables)",
+  "title": "New to Cypess?"
+}
+[/block]
+
+## [Cypress.env()](#no-arguments-usage)
 
 Returns all of your environment variables as an object literal.
 
 ***
 
-### [Cypress.env( *key* )](#key-usage)
+## [Cypress.env( *key* )](#key-usage)
 
 Returns the value of a single environment variable by its key.
 
 ***
 
-### [Cypress.env( *key*, *value* )](#key-value-usage)
+## [Cypress.env( *key*, *value* )](#key-value-usage)
 
 Sets an environment variable for a specific key.
 
 ***
 
-### [Cypress.env( *object* )](#object-usage)
+## [Cypress.env( *object* )](#object-usage)
 
 Sets multiple environment variables.
 
@@ -78,7 +82,12 @@ Cypress.env("baz") // => quux
 
 Cypress allows you to change the values of your environment variables from within your tests.
 
-> **Note:** Any value you change will be permanently changed for the remainder of your tests.
+[block:callout]
+{
+  "type": "warning",
+  "body": "Any value you change will be permanently changed for the remainder of your tests."
+}
+[/block]
 
 ```javascript
 // cypress.json
@@ -125,7 +134,7 @@ Cypress.env() // => {foo: "foo", baz: "quux", host: "http://server.dev.local"}
 
 ## Notes
 
-#### Why did you use `Cypress.env` instead of `cy.env`?
+**Why use `Cypress.env` instead of `cy.env`?**
 
 As a rule of thumb anything you call from `Cypress` affects global state. Anything you call from `cy` affects local state.
 
@@ -133,13 +142,13 @@ Methods on `cy` are local and specific to a single test. Side effects from `cy` 
 
 ***
 
-#### Why would I ever need to use environment variables?
+**Why would I ever need to use environment variables?**
 
 The [Environment Variables](http://on.cypress.io/guides/environment-variables) guide explains common use cases.
 
 ***
 
-#### Can I pass in environment variables from the command line?
+**Can I pass in environment variables from the command line?**
 
 Yes. You can do that and much more.
 

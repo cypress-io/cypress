@@ -51,7 +51,7 @@ Nullam id dolor id nibh ultricies vehicula ut id elit. Donec id elit non mi port
 | [server]() | Control the behavior of network requests and responses. |
 | [should]() | Make an assertion about current subject |
 | [siblings]() | Get the siblings of elements |
-| [spread]() | Spread |
+| [spread]() | Spread an array as individual arguments to a callback function |
 | [submit]() | Submit a form |
 | [then]() | Yield the current subject as an argument |
 | [title]() | Get the title of the document |

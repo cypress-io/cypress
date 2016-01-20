@@ -1,21 +1,35 @@
 slug: then
 excerpt: Yield the current subject as an argument
 
-### [cy.then( *function* )](#usage)
+## [cy.then( *function* )](#usage)
 
-`cy.then()` will yield you the current subject as the first argument.  Be sure to read about [commands](http://on.cypress.io/guides/issuing-commands) in detail if this sounds unfamiliar.
+`cy.then()` will yield you the current subject as the first argument.
 
-`cy.then()` is modeled identically to the way `Promises` work in JavaScript.  Whatever is returned from the callback function becomes the new subject, and will flow into the next command, with the exception of `null` and `undefined`.
+`cy.then()` is modeled identically to the way Promises work in JavaScript.  Whatever is returned from the callback function becomes the new subject, and will flow into the next command, with the exception of `null` and `undefined`.
 
-When `null` or `undefined` is returned by the callback function, the subject will not be modified and will instead carry over to next command.
+When `null` or `undefined` is returned by the callback function, the subject will not be modified and will instead carry over to the next command.
 
-Just like `Promises`, you can return any compatible `thenable` (anything that has a `.then()` interface) and Cypress will wait for that to resolve before continuing forward through the chain of commands.
+Just like Promises, you can return any compatible "thenable" (anything that has a `.then()` interface) and Cypress will wait for that to resolve before continuing forward through the chain of commands.
+
+[block:callout]
+{
+  "type": "info",
+  "body": "[Read about issuing commands first.](http://on.cypress.io/guides/issuing-commands)",
+  "title": "New to Cypess?"
+}
+[/block]
 
 ***
 
 ## Usage
 
-> The element `input` is yielded
+The element `input` is yielded
+
+```html
+<form id="todos">
+  <input type="text" class="addTodo" />
+</form>
+```
 
 ```javascript
 cy.get("form").find("input").then(function($input){
@@ -27,36 +41,50 @@ cy.get("form").find("input").then(function($input){
 
 ***
 
-> Asserting explicitly about the subject `li`'s
+Assert explicitly about the subject `<li>`'s
+
+```html
+<div id="todos">
+  <li>Walk the dog</li>
+  <li>Feed the cat</li>
+  <li>Write JavaScript</li>
+</div>
+```
 
 ```javascript
 cy.get("#todos li").then(function($lis){
   expect($lis).to.have.length(3)
-  expect($lis.eq(0)).to.contain("walk the dog")
-  expect($lis.eq(1)).to.contain("feed the cat")
-  expect($lis.eq(2)).to.contain("write javascript")
+  expect($lis.eq(0)).to.contain("Walk the dog")
+  expect($lis.eq(1)).to.contain("Feed the cat")
+  expect($lis.eq(2)).to.contain("Write JavaScript")
 })
 ```
 
-Normally you'd use implicit subject assertions via [should](http://on.cypress.io/api/should) or [and](http://on.cypress.io/api/and), but it's sometimes convenient to write explicit assertions about a given subject.
+Normally you'd use implicit subject assertions via [should](http://on.cypress.io/api/should) or [and](http://on.cypress.io/api/and), but it's sometimes it's more convenient to write explicit assertions about a given subject.
 
-**Note:** *any errors raised by failed assertions will immediately bubble up and cause the test to fail.  This is the opposite of [`wait`](http://on.cypress.io/api/wait).*
+[block:callout]
+{
+  "type": "warning",
+  "body": "Any errors raised by failed assertions will immediately bubble up and cause the test to fail."
+}
+[/block]
 
 ***
 
-> The subject is changed by returning `{foo: 'bar'}`
+The subject is changed by returning `{foo: 'bar'}`
 
 ```javascript
 cy.then(function(){
   return {foo: "bar"}
 }).then(function(obj){
   // subject is now the obj {foo: "bar"}
+  expect(obj).to.deep.eq({foo: "bar"}) // true
 })
 ```
 
 ***
 
-> Cypress waits for the Promise to resolve before continuing
+Cypress waits for the Promise to resolve before continuing
 
 ```javascript
 // if using Q
@@ -91,23 +119,24 @@ cy.get("button").click().then(function($button){
 
 ***
 
-> Returning `null` or `undefined` will not modify the subject
+Returning `null` or `undefined` will not modify the subject
 
 ```javascript
-cy.get("form").then(function($form){
-  console.log("form is:", $form)
-  // undefined is returned here, therefore
-  // the $form subject will automatically
-  // carry over and allow for continued chaining
-}).find("input").then(function($input){
-  // we have our real $input element here since
-  // our form element carried over and we called
-  // .find("input") on it
-})
+cy
+  .get("form").then(function($form){
+    console.log("form is:", $form)
+    // undefined is returned here, therefore
+    // the $form subject will automatically
+    // carry over and allow for continued chaining
+  }).find("input").then(function($input){
+    // we have our real $input element here since
+    // our form element carried over and we called
+    // .find("input") on it
+  })
 ```
 
 ## Related
 
 1. [its](http://on.cypress.io/api/its)
 2. [invoke](http://on.cypress.io/api/invoke)
-3. [wait](http://on.cypress.io/api/wait)
+3. [Issuing Commands](http://on.cypress.io/guides/issuing-commands)

@@ -1,13 +1,13 @@
 slug: siblings
 excerpt: Get the siblings of elements
 
-### [cy.siblings()](#usage)
+## [cy.siblings()](#usage)
 
 Get the siblings of each element in the set of matched elements.
 
 ***
 
-### [cy.siblings( *selector* )](#selector-usage)
+## [cy.siblings( *selector* )](#selector-usage)
 
 Get the siblings of each element in the set of matched elements filtered by a selector.
 
@@ -15,7 +15,7 @@ Get the siblings of each element in the set of matched elements filtered by a se
 
 ## Usage
 
-#### Get the siblings of each li.
+Get the siblings of each li.
 
 ```html
 <ul>
@@ -35,7 +35,7 @@ cy.get(".active").siblings()
 
 ## Selector Usage
 
-#### Get siblings of element with class `active`.
+Get siblings of element with class `active`.
 
 ```javascript
 // returns <li class="active">Services</li>
@@ -62,3 +62,4 @@ When clicking on `siblings` within the command log, the console outputs the foll
 
 ## Related
 1. [prev](http://on.cypress.io/api/prev)
+2. [next](http://on.cypress.io/api/next)

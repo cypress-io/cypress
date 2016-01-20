@@ -1,7 +1,7 @@
 slug: url
 excerpt: Get the current URL
 
-### [cy.url()](#usage)
+## [cy.url()](#usage)
 
 Returns the current URL as a string.
 
@@ -9,7 +9,7 @@ Returns the current URL as a string.
 
 ## Usage
 
-#### Assert the URL is `http://localhost:8000/users/1/edit`
+Assert the URL is `http://localhost:8000/users/1/edit`
 
 ```javascript
 // clicking the anchor causes the browser to follow the link
@@ -20,21 +20,20 @@ cy
 
 ***
 
-#### URL is a shortcut for `cy.location().href`
+URL is a shortcut for `cy.location().href`
 
 `cy.url()` uses `href` under the hood.
 
 ```javascript
-// these return the same string
-cy.url()
-cy.location().its("href")
+cy.url()                  // these return the same string
+cy.location().its("href") // these return the same string
 ```
 
 ***
 
 ## Notes
 
-#### Why is this command called `url` instead of `href`?
+**Why is this command called `url` instead of `href`?**
 
 Given this remote URL:
 
@@ -54,7 +53,7 @@ cy.url().should("eq", "http://localhost:8000/index.html")
 
 But you may be wondering where the `url` property comes from.  Per the `window.location` spec, there actually isn't a `url` property on the `location` object.
 
-`cy.url()` exists because its what most developers naturally assume would return them the full current URL.  We almost never refer to the URL as an `href`.
+`cy.url()` exists because it's what most developers naturally assume would return them the full current URL.  We almost never refer to the URL as an `href`.
 
 ***
 

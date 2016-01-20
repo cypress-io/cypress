@@ -1,34 +1,30 @@
 slug: should
 excerpt: Make an assertion about current subject
 
-#### **New to Cypress?** [Read about assertions first.](http://on.cypress.io/guides/making-assertions)
-
-***
+### [cy.should( *chainers* )](#chainers-usage)
 
 `cy.should` makes assertions about the current subject.
 
-### [cy.should( *chainers* )](#chainers-usage)
+Implicitly assert about the current subject. Returns the existing current subject.
 
-Implicitly assert about the current subject.
+`cy.should` is identical to [`cy.and`](http://on.cypress.io/api/and).
 
-Returns the existing current subject.
+[block:callout]
+{
+  "type": "info",
+  "body": "[Read about making assertions first.](http://on.cypress.io/guides/making-assertions)",
+  "title": "New to Cypess?"
+}
+[/block]
 
-```javascript
-cy.get("button[type='submit']").should("not.be.disabled")
-```
 ***
 
 ### [cy.should( *chainers*, *value* )](#chainers-with-value-usage)
 
-Implicitly assert a value about the current subject.
-
-Returns the existing current subject (usually).
+Implicitly assert a value about the current subject. Returns the existing current subject (usually).
 
 Some chai methods and chai-jQuery methods return a new (different) subject for chain-ability.
 
-```javascript
-cy.get("li").should("have.class", "active")
-```
 ***
 
 ### [cy.should( *chainers*, *method*, *value* )](#chainers-with-method-and-value-usage)
@@ -37,32 +33,19 @@ Implicitly assert about the subject by calling a method and providing a value to
 
 Returns the new assertion subject for further assertion chain-ability.
 
-```javascript
-// have.attr comes from chai-jquery
-cy.get("input").should("have.attr", "name", "firstName")
-```
-
 ***
 
 ### [cy.should( *function* )](#function-usage)
 
-Pass a function which can have any number of explicit assertions within it.
+Pass a function that can have any number of explicit assertions within it.
 
 Does not change the subject. Whatever was passed to the function is what is returned.
-
-```javascript
-cy.get("p").should(function($p){
-  expect($p.eq(0)).to.contain("text from the 1st p")
-  expect($p.eq(1)).to.contain("text from the 2nd p")
-  expect($p.eq(2)).to.contain("text from the 3rd p")
-})
-```
 
 ***
 
 ## Chainers Usage
 
-#### Assert the checkbox is disabled
+Assert the checkbox is disabled
 
 ```javascript
 cy.get(":checkbox").should("be.disabled")
@@ -70,7 +53,7 @@ cy.get(":checkbox").should("be.disabled")
 
 ***
 
-#### The current subject is returned
+The current subject is returned
 
 ```javascript
 cy.get("option:first").should("be.selected").then(function($option)){
@@ -82,7 +65,7 @@ cy.get("option:first").should("be.selected").then(function($option)){
 
 ## Chainers with Value Usage
 
-#### Assert the class is 'form-horizontal'
+Assert the class is 'form-horizontal'
 
 ```javascript
 cy.get("form").should("have.class", "form-horizontal")
@@ -90,7 +73,7 @@ cy.get("form").should("have.class", "form-horizontal")
 
 ***
 
-#### Assert the value is not 'foo'
+Assert the value is not 'foo'
 
 ```javascript
 cy.get("input").should("not.have.value", "foo")
@@ -98,7 +81,7 @@ cy.get("input").should("not.have.value", "foo")
 
 ***
 
-#### The current subject is returned
+The current subject is returned
 
 ```javascript
 cy.get("button").should("have.id", "new-user").then(function($button){
@@ -110,9 +93,10 @@ cy.get("button").should("have.id", "new-user").then(function($button){
 
 ## Chainers with Method and Value Usage
 
-#### Assert the href is equal to '/users'
+Assert the href is equal to '/users'
 
 ```javascript
+// have.attr comes from chai-jquery
 cy.get("#header a").should("have.attr", "href", "/users")
 ```
 
@@ -120,15 +104,21 @@ cy.get("#header a").should("have.attr", "href", "/users")
 
 ## Function Usage
 
-#### Verify length, content, and classes from multiple \<p\>
+**Verify length, content, and classes from multiple `<p>`**
 
-Passing a function to `should` enables you to assert on arbitrary subjects.
+Passing a function to `should` enables you to assert on arbitrary subjects. This gives you the opportunity to *massage* what you'd like to assert on.
 
-This gives you the opportunity to *massage* what you'd like to assert on.
+Just be sure *not* to include any code that has side effects in your callback function.
 
-Just be sure **not** to include any code that has side effects in your callback function.
+The callback function will be retried over and over again until no assertions within it throw.
 
-The callback function will potentially be retried over and over again until no assertions within it throw.
+```html
+<div>
+  <p class="text-primary">Hello World</p>
+  <p class="text-danger">You have an error</p>
+  <p class="text-default">Try again later</p>
+</div>
+```
 
 ```javascript
 cy
@@ -137,8 +127,8 @@ cy
     // should have found 3 elements
     expect($p).to.have.length(3)
 
-    // make sure the first contains this text content
-    expect($p.first()).to.contain("text from the first p")
+    // make sure the first contains some text content
+    expect($p.first()).to.contain("Hello World")
 
     // use jquery's map to grab all of their classes
     // jquery's map returns a new jquery object
@@ -157,33 +147,37 @@ cy
 
 ***
 
-#### Using a callback function will not change the subject
+**Using a callback function will not change the subject**
 
 ```javascript
-cy.get("button").should(function($button){
-  // whatever we return here is ignored
-  // as Cypress will always force the return
-  // value for future commands to be the same <button> subject
+cy
+  .get("button").should(function($button){
+    // whatever we return here is ignored
+    // as Cypress will always force the return
+    // value for future commands to be the same
+    // as the previous subject which is <button>
 
-  expect({foo: "bar"}).to.deep.eq({foo: "bar"})
+    expect({foo: "bar"}).to.deep.eq({foo: "bar"})
 
-  // whatever the return value (if any) is ignored
-  return {foo: "bar"}
-}).then(function($button){
-  // $button === <button>
-  // the subject is unchanged no matter what was returned
-})
+    // whatever the return value (if any) is ignored
+    return {foo: "bar"}
+  })
+
+  .then(function($button){
+    // $button === <button>
+    // the subject is unchanged no matter what was returned
+  })
 ```
 
 ***
 
 ## Multiple Assertions
 
-#### Chaining multiple assertions
+**Chaining multiple assertions**
 
 Cypress makes it easy to chain assertions together.
 
-In this example we use `and` which is identical to `should`.
+In this example we use [`and`](http://on.cypress.io/api/and) which is identical to `should`.
 
 ```javascript
 // our subject is not changed by our first assertion,
@@ -193,9 +187,9 @@ cy.get("option:first").should("be.selected").and("have.value", "Metallica")
 
 ***
 
-#### Assertions which change the subject
+**Assertions that change the subject**
 
-Sometimes using a specific chainer will automatically change the assertion subject. Cypress will follow this new subject.
+Sometimes using a specific chainer will automatically change the assertion subject.
 
 For instance in `chai`, the method [`have.property("...")`](http://chaijs.com/api/bdd/) will automatically change the subject.
 
@@ -204,7 +198,7 @@ Additionally in [`Chai-jQuery`](https://github.com/chaijs/chai-jquery#attrname-v
 This allows you to utilize other `chainer` methods such as `match` when making assertions about values.
 
 ```javascript
-// in this example our subject was changed to the string 'sans-serif' because
+// in this example our subject changed to the string 'sans-serif' because
 // have.css("font-family") returned a string instead of the <body> element
 cy
   // subject is <body>
@@ -223,7 +217,7 @@ cy
 
 Cypress won't resolve your commands until all of its assertions pass.
 
-#### Wait until the assertion passes
+**Wait until the assertions pass**
 
 ```javascript
 // Application Code
@@ -250,9 +244,9 @@ You can [read more about how Cypress resolves your assertions](http://on.cypress
 
 ## Notes
 
-#### How do I know what assertions and chainers I can use?
+**What assertions and chainers I can use?**
 
-The `chainers` that `cy.should` accepts come from:
+The chainers that `cy.should` accepts come from:
 
 * Chai
 * Chai-jQuery
@@ -261,11 +255,11 @@ A [list of these](http://on.cypress.io/guides/making-assertions#available-assert
 
 ***
 
-#### How do I know which assertions change the subject and which keep it the same?
+**How do I know which assertions change the subject and which keep it the same?**
 
 The chainers that come from [Chai](http://on.cypress.io/guides/bundled-tools#chai) or [Chai-jQuery](http://on.cypress.io/guides/bundled-tools#chai-jquery) will always document what they return.
 
-Alternatively it is very easy to use Cypress itself to figure this out.
+Alternatively, it is very easy to use Cypress itself to figure this out.
 
 You can [read more about debugging assertions](http://on.cypress.io/guides/making-assertions#debugging-assertions) here.
 

@@ -1,33 +1,38 @@
 slug: config
 excerpt: get and set configuration options
 
-#### **New to Cypress?** [Read about configuration first.](http://on.cypress.io/guides/configuration)
-
-***
-
 `Cypress.config` allows you to `get` and `set` your configuration options.
 
 This document covers the API for consuming your configuration options *in your tests*.
 
-### [Cypress.config()](#no-arguments-usage)
+
+[block:callout]
+{
+  "type": "info",
+  "body": "[Read about configuration first.](http://on.cypress.io/guides/configuration)",
+  "title": "New to Cypess?"
+}
+[/block]
+
+## [Cypress.config()](#no-arguments-usage)
 
 Returns all of your configuration options as an object literal.
 
 ***
 
-### [Cypress.config( *key* )](#key-usage)
+## [Cypress.config( *key* )](#key-usage)
 
 Returns the value of a single configuration option by its key.
 
 ***
 
-### [Cypress.config( *key*, *value* )](#key-value-usage)
+## [Cypress.config( *key*, *value* )](#key-value-usage)
 
 Sets a configuration option for a specific key.
 
 ***
 
-### [Cypress.config( *object* )](#object-usage)
+## [Cypress.config( *object* )](#object-usage)
 
 Sets multiple configuration options.
 
@@ -71,7 +76,12 @@ Cypress.config("visitTimeout") // => 60000
 
 Cypress allows you to change the values of your configuration options from within your tests.
 
-> **Note:** Any value you change will be permanently changed for the remainder of your tests.
+[block:callout]
+{
+  "type": "warning",
+  "body": "Any value you change will be permanently changed for the remainder of your tests."
+}
+[/block]
 
 ```javascript
 // cypress.json
@@ -114,10 +124,8 @@ Cypress.config() // => {commandTimeout: 10000, viewportHeight: 900, ...}
 
 ## Notes
 
-#### Why did you use `Cypress.config` instead of `cy.config`?
+**Why use `Cypress.config` instead of `cy.config`?**
 
 As a rule of thumb anything you call from `Cypress` affects global state. Anything you call from `cy` affects local state.
 
 Methods on `cy` are local and specific to a single test. Side effects from `cy` methods are restored between each test. We chose to use `Cypress` because changes to your configuration options take effect for the remainder of **ALL** tests.
-
-

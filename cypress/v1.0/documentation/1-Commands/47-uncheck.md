@@ -1,8 +1,7 @@
 slug: uncheck
 excerpt: Uncheck a checkbox
 
-### [cy.uncheck()](#usage)
-
+## [cy.uncheck()](#usage)
 
 Unchecks a checkbox.
 
@@ -10,13 +9,13 @@ Unchecks a checkbox.
 
 ## Usage
 
-#### Uncheck the checkbox
+Uncheck the checkbox
 
 ```javascript
 cy.get(":checkbox").uncheck()
 ```
 
-#### Uncheck element with id saveUserName
+Uncheck element with the id `saveUserName`
 
 ```javascript
 cy.get("#saveUserName").uncheck()
@@ -42,3 +41,4 @@ When clicking on `uncheck` within the command log, the console outputs the follo
 ***
 ## Related
 1. [check](http://on.cypress.io/api/check)
+1. [click](http://on.cypress.io/api/click)
