@@ -54,7 +54,7 @@
       # App.config.log("Starting Desktop App", options: _.omit(options, "backend"))
 
       ## create an App.updater model which is shared across the app
-      App.updater = App.request "new:updater:entity", options.verison
+      App.updater = App.request "new:updater:entity", options.version
 
       # window.onerror = (err) ->
 
