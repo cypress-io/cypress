@@ -12,14 +12,10 @@ trash  = Promise.promisify(trash)
 chmodr = Promise.promisify(chmodr)
 
 class Updater
-  constructor: (App) ->
+  constructor: ->
     if not (@ instanceof Updater)
-      return new Updater(App)
+      return new Updater
 
-    if not App
-      throw new Error("Instantiating lib/updater requires an App!")
-
-    @App        = App
     @client     = null
     @coords     = null
     @callbacks  = {}
@@ -73,7 +69,7 @@ class Updater
 
         c.run(execPath, args)
 
-        @App.quit()
+        @trigger("quit")
 
   ## copies .cy to the new app path
   ## so we dont lose our cache, logs, etc
@@ -104,7 +100,7 @@ class Updater
 
       @getClient().runInstaller(newAppPath, args, {})
 
-      @App.quit()
+      @trigger("quit")
 
   unpack: (destinationPath, manifest) ->
     Log.info "unpacking new version", destination: destinationPath

@@ -6,9 +6,11 @@ ipc           = require("electron").ipcMain
 shell         = require("electron").shell
 dialog        = require("electron").dialog
 BrowserWindow = require("electron").BrowserWindow
+pkg           = require("../../package.json")
 cache         = require("../cache")
 session       = require("../session")
 logger        = require("../log")
+updater       = require("../updater")()
 Cypress       = require("../cypress")
 cypressGui    = require("cypress-gui")
 
@@ -27,6 +29,8 @@ getUrl = (type) ->
       cypressGui.getPathToAbout()
     when "DEBUG"
       cypressGui.getPathToDebug()
+    when "UPDATES"
+      cypressGui.getPathToUpdates()
     else
       throw new Error("No acceptable window type found for: '#{arg.type}'")
 
@@ -155,8 +159,25 @@ module.exports = (optionsOrArgv) ->
           .catch(sendErr)
 
       when "get:options"
-        ## return options
-        send(null, options)
+        send(null, {
+          env:     process.env.CYPRESS_ENV
+          version: pkg.version
+        })
+
+      when "updater:run"
+        set = (event, version) ->
+          send(null, {event: event, version: version})
+
+        updater.run({
+          onStart: -> set("start")
+          onApply: -> set("apply")
+          onError: -> set("error")
+          onDone: ->  set("done")
+          onNone: ->  set("none")
+          onQuit: ->  process.exit()
+          onDownload: (version) ->
+            set("downloading", version)
+        })
 
       when "update"
         send(null, {foo: "bar"})
