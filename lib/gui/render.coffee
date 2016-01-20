@@ -176,7 +176,7 @@ module.exports = (optionsOrArgv) ->
           onNone: ->  set("none")
           onQuit: ->  process.exit()
           onDownload: (version) ->
-            set("downloading", version)
+            set("download", version)
         })
 
       when "update"
