@@ -1,6 +1,13 @@
 path = require("path")
 
+file = (name) ->
+  "file://" + path.join(__dirname, "..", "dist", name)
+
 module.exports = {
-  getPathToHtml: ->
-    "file://" + path.join(__dirname, "..", "dist", "index.html")
+  getPathToIndex: ->
+    file("index.html")
+
+  getPathToAbout: ->
+    file("about.html")
+
 }
