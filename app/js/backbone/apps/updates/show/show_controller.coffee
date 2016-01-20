@@ -18,27 +18,16 @@
         updater.setState(state)
 
       @listenTo updatesView, "show", ->
-        ## add all of the
-        App.ipc "updater:run", (obj = {}) ->
-          switch obj.event
+        App.ipc "updater:run", (err, data = {}) ->
+          switch data.event
             when "start" then set("checking")
             when "apply" then set("applying")
             when "error" then set("error")
             when "done"  then set("done")
             when "none"  then set("none")
             when "download"
-              updater.setNewVersion(obj.version)
+              updater.setNewVersion(data.version)
               set("downloading")
-
-        updater.run
-          onStart: -> set("checking")
-          onApply: -> set("applying")
-          onError: -> set("error")
-          onDone: ->  set("done")
-          onNone: ->  set("none")
-          onDownload: (version) ->
-            updater.setNewVersion(version)
-            set("downloading")
 
       @show updatesView
 
