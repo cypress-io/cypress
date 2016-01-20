@@ -28,11 +28,16 @@
       _.defer => @openProject(project, options)
 
     openProject: (project, options) ->
-      App.ipc("open:project", {
-        path:    project.get("path")
-        options: options
-      })
-      .then (config) ->
+      ## wait at least 750ms even if open:project
+      ## resolves faster
+      Promise.all([
+        App.ipc("open:project", {
+          path:    project.get("path")
+          options: options
+        }),
+        Promise.delay(500)
+      ])
+      .spread (config) ->
         project.setClientUrl(config.clientUrl, config.clientUrlDisplay)
 
         # App.execute("start:id:generator", config.idGeneratorUrl) if config.idGenerator
