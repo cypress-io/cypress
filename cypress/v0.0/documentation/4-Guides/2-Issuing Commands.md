@@ -15,11 +15,11 @@ The architecture of Cypress focuses around asynchronicity. The DOM is a highly c
 2. Commands can be replayed, inserted between others, or even conditionally run.
 3. Cypress can look ahead (or look behind) at commands which have yet to run, and alter its behavior.
 
-Cypress is designed to also handle the disadvantages of async. One example is [aliasing](http://on.cypress.io/guides/using-aliases). This works around the need to assign values to variables.
+Cypress is designed to also handle the disadvantages of async. One example is [aliasing](https://on.cypress.io/guides/using-aliases). This works around the need to assign values to variables.
 
-The [Command API](http://on.cypress.io/api) attempts to balance readability, terseness, flexibility, and capability all while being designed similar to familiar APIs.
+The [Command API](https://on.cypress.io/api) attempts to balance readability, terseness, flexibility, and capability all while being designed similar to familiar APIs.
 
-The [Command API](http://on.cypress.io/api) is also fluent - that is, you chain all commands together - similar to how jQuery's API is designed.
+The [Command API](https://on.cypress.io/api) is also fluent - that is, you chain all commands together - similar to how jQuery's API is designed.
 
 # Subjects
 
@@ -54,7 +54,7 @@ button = cy.get("#main").find("button")
 
 Just like Promises, the value that async commands return can only be yielded in a callback function.
 
-If you want to retrieve the resolved value (the subject) of a command, use a [`then`](http://on.cypress.io/api/then) command, the same way you would with Promises.
+If you want to retrieve the resolved value (the subject) of a command, use a [`then`](https://on.cypress.io/api/then) command, the same way you would with Promises.
 
 ```javascript
 cy.get("#main").find("button").then(function($button){
@@ -65,7 +65,7 @@ cy.get("#main").find("button").then(function($button){
 })
 ```
 
-When chaining together multiple commands you rarely should need to yield the subject via a [`then`](http://on.cypress.io/api/then) command. Cypress favors readability and terseness, and even [assertions](http://on.cypress.io/guides/making-assertions) can be implicitly run without having to use a [`then`](http://on.cypress.io/api/then) command.
+When chaining together multiple commands you rarely should need to yield the subject via a [`then`](https://on.cypress.io/api/then) command. Cypress favors readability and terseness, and even [assertions](https://on.cypress.io/guides/making-assertions) can be implicitly run without having to use a [`then`](https://on.cypress.io/api/then) command.
 
 ```javascript
 // we're testing that an 'active' class is
@@ -88,10 +88,10 @@ There are 3 types of commands:
 Parent commands always **begin** a new chain of commands. Even if you've written a previous chain, parent commands will always start a new chain, and ignore previous chains. Parent commands should be written off the `cy` object:
 
 Examples of parent commands:
- - [`visit`](http://on.cypress.io/api/visit)
- - [`server`](http://on.cypress.io/api/server)
- - [`get`](http://on.cypress.io/api/get)
- - [`root`](http://on.cypress.io/api/root)
+ - [`visit`](https://on.cypress.io/api/visit)
+ - [`server`](https://on.cypress.io/api/server)
+ - [`get`](https://on.cypress.io/api/get)
+ - [`root`](https://on.cypress.io/api/root)
 
 ```javascript
 cy
@@ -112,13 +112,13 @@ cy
 Child commands are always chained off of a **parent** command, or another **child** command.
 
 Examples of child commands:
-- [`find`](http://on.cypress.io/api/find)
-- [`click`](http://on.cypress.io/api/click)
-- [`type`](http://on.cypress.io/api/type)
-- [`children`](http://on.cypress.io/api/children)
-- [`should`](http://on.cypress.io/api/should)
+- [`find`](https://on.cypress.io/api/find)
+- [`click`](https://on.cypress.io/api/click)
+- [`type`](https://on.cypress.io/api/type)
+- [`children`](https://on.cypress.io/api/children)
+- [`should`](https://on.cypress.io/api/should)
 
-Each of the above commands require an existing subject. It wouldn't make sense to [`click`](http://on.cypress.io/api/click) onto nothing, nor would it make sense to [`type`](http://on.cypress.io/api/type) or query for [`children`](http://on.cypress.io/api/children) of nothing.
+Each of the above commands require an existing subject. It wouldn't make sense to [`click`](https://on.cypress.io/api/click) onto nothing, nor would it make sense to [`type`](https://on.cypress.io/api/type) or query for [`children`](https://on.cypress.io/api/children) of nothing.
 
 
 [block:callout]
@@ -158,8 +158,8 @@ cy
 While parent commands always start a new chain of commands and child commands require being chained off a parent command, dual commands can behave as parent or child command. That is, they can **start** a new chain, or be chained off of an **existing** chain.
 
 Examples of dual commands:
-- [`contains`](http://on.cypress.io/api/contains)
-- [`wait`](http://on.cypress.io/api/wait)
+- [`contains`](https://on.cypress.io/api/contains)
+- [`wait`](https://on.cypress.io/api/wait)
 
 ```javascript
 cy

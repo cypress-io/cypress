@@ -14,7 +14,7 @@ Just like Promises, you can return any compatible "thenable" (anything that has 
 [block:callout]
 {
   "type": "info",
-  "body": "[Read about issuing commands first.](http://on.cypress.io/guides/issuing-commands)",
+  "body": "[Read about issuing commands first.](https://on.cypress.io/guides/issuing-commands)",
   "title": "New to Cypess?"
 }
 [/block]
@@ -60,7 +60,7 @@ cy.get("#todos li").then(function($lis){
 })
 ```
 
-Normally you'd use implicit subject assertions via [should](http://on.cypress.io/api/should) or [and](http://on.cypress.io/api/and), but it's sometimes it's more convenient to write explicit assertions about a given subject.
+Normally you'd use implicit subject assertions via [should](https://on.cypress.io/api/should) or [and](https://on.cypress.io/api/and), but it's sometimes it's more convenient to write explicit assertions about a given subject.
 
 [block:callout]
 {
@@ -137,6 +137,6 @@ cy
 
 # Related
 
-1. [its](http://on.cypress.io/api/its)
-2. [invoke](http://on.cypress.io/api/invoke)
-3. [Issuing Commands](http://on.cypress.io/guides/issuing-commands)
+1. [its](https://on.cypress.io/api/its)
+2. [invoke](https://on.cypress.io/api/invoke)
+3. [Issuing Commands](https://on.cypress.io/guides/issuing-commands)

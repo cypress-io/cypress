@@ -20,4 +20,4 @@ cy
 
 # Related
 
-1. [debug](http://on.cypress.io/api/debug)
+1. [debug](https://on.cypress.io/api/debug)

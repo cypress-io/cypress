@@ -10,7 +10,7 @@ Set a route matching the specific `url` which is not stubbed but can be waited o
 [block:callout]
 {
   "type": "info",
-  "body": "[Read about XHR strategy first.](http://on.cypress.io/guides/network-requests-xhr)",
+  "body": "[Read about XHR strategy first.](https://on.cypress.io/guides/network-requests-xhr)",
   "title": "New to Cypess?"
 }
 [/block]
@@ -260,7 +260,7 @@ If you'd like to disable this behavior you need to pass:
 cy.server({force404: false})
 ```
 
-You can [read more about this here.](http://on.cypress.io/api/server#prevent-sending-404s-to-unmatched-requests)
+You can [read more about this here.](https://on.cypress.io/api/server#prevent-sending-404s-to-unmatched-requests)
 
 ***
 
@@ -283,7 +283,7 @@ cy
   })
 ```
 
-You can [read more about fixtures here.](http://on.cypress.io/api/fixture)
+You can [read more about fixtures here.](https://on.cypress.io/api/fixture)
 
 ***
 
@@ -323,7 +323,7 @@ When clicking on `XHR Stub` within the Command Log, the console outputs the foll
 
 # Related
 
-1. [server](http://on.cypress.io/api/server)
-2. [wait](http://on.cypress.io/api/wait)
-3. [as](http://on.cypress.io/api/as)
-4. [Network Requests](http://on.cypress.io/guides/network-requests-xhr)
+1. [server](https://on.cypress.io/api/server)
+2. [wait](https://on.cypress.io/api/wait)
+3. [as](https://on.cypress.io/api/as)
+4. [Network Requests](https://on.cypress.io/guides/network-requests-xhr)

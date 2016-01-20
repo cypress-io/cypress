@@ -5,7 +5,7 @@ excerpt: Type into an element
 
 Types into the current DOM subject.
 
-Prior to typing, if the element isn't currently focused, Cypress will issue a [click](http://on.cypress.io/api/click) on the elemtn, which will cause the element to receive focus.
+Prior to typing, if the element isn't currently focused, Cypress will issue a [click](https://on.cypress.io/api/click) on the elemtn, which will cause the element to receive focus.
 
 Text may include these special character sequences:
 
@@ -59,7 +59,7 @@ Force a click to happen prior to type
 cy.get("input[type=text]").type("Test all the things", {force: true})
 ```
 
-Type issues a [`click`](http://on.cypress.io/api/click) prior to typing (if the element isn't currently focused). Because of this, sometimes it is useful to force the click to happen. Forcing a click disables error checking prior to the click.
+Type issues a [`click`](https://on.cypress.io/api/click) prior to typing (if the element isn't currently focused). Because of this, sometimes it is useful to force the click to happen. Forcing a click disables error checking prior to the click.
 
 [block:callout]
 {
@@ -244,6 +244,6 @@ When clicking on `type` within the command log, the console outputs the followin
 
 # Related
 
-1. [clear](http://on.cypress.io/api/clear)
-2. [click](http://on.cypress.io/api/click)
-3. [submit](http://on.cypress.io/api/submit)
+1. [clear](https://on.cypress.io/api/clear)
+2. [click](https://on.cypress.io/api/click)
+3. [submit](https://on.cypress.io/api/submit)

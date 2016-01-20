@@ -13,7 +13,7 @@ If Cypress does not find any matching element(s), it will continue to retry unti
 
 # [cy.get( *alias* )](#alias-usage)
 
-You can pass in a '@' character to find an [aliased](http://on.cypress.io/guides/using-aliases) element.
+You can pass in a '@' character to find an [aliased](https://on.cypress.io/guides/using-aliases) element.
 
 Internally Cypress keeps a cache of all aliased elements.  If the element currently exists in the DOM, it is immediately returned.  If the element no longer exists, Cypress will re-query the element based on the previous selector path to find it again.
 
@@ -50,7 +50,7 @@ cy
 
 ***
 
-Use `get` to reset scope in a [`within`](http://on.cypress.io/api/within)
+Use `get` to reset scope in a [`within`](https://on.cypress.io/api/within)
 
 ```javascript
 // Find `form` and scope all new queries to within `form`.
@@ -67,7 +67,7 @@ cy.get("form").within(function(){
 
 # Alias Usage
 
-For a detailed explanation of aliasing, [read more about aliasing here](http://on.cypress.io/guides/using-aliases).
+For a detailed explanation of aliasing, [read more about aliasing here](https://on.cypress.io/guides/using-aliases).
 
 Retrieve existing `todos` elements
 
@@ -107,7 +107,7 @@ When clicking on the `get` command within the command log, the console outputs t
 
 # Related
 
-1. [contains](http://on.cypress.io/api/contains)
-2. [within](http://on.cypress.io/api/within)
-3. [find](http://on.cypress.io/api/find)
-4. [root](http://on.cypress.io/api/root)
+1. [contains](https://on.cypress.io/api/contains)
+2. [within](https://on.cypress.io/api/within)
+3. [find](https://on.cypress.io/api/find)
+4. [root](https://on.cypress.io/api/root)

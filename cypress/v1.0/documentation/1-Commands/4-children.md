@@ -72,7 +72,7 @@ When clicking on the `children` command within the command log, the console outp
 
 # Related
 
-1. [parent](http://on.cypress.io/api/parent)
-2. [parents](http://on.cypress.io/api/parents)
-3. [next](http://on.cypress.io/api/next)
-4. [siblings](http://on.cypress.io/api/siblings)
+1. [parent](https://on.cypress.io/api/parent)
+2. [parents](https://on.cypress.io/api/parents)
+3. [next](https://on.cypress.io/api/next)
+4. [siblings](https://on.cypress.io/api/siblings)

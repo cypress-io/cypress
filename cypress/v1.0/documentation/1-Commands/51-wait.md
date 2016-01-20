@@ -9,12 +9,12 @@ Wait a specific amount of `ms` before resolving and continuing onto the next com
 
 # [cy.wait( *alias* )](#alias-usage)
 
-Wait until the matching [aliased](http://on.cypress.io/guides/using-aliases) XHR has a response.
+Wait until the matching [aliased](https://on.cypress.io/guides/using-aliases) XHR has a response.
 
 [block:callout]
 {
   "type": "info",
-  "body": "[Read about XHR strategy first.](http://on.cypress.io/guides/network-requests-xhr)",
+  "body": "[Read about XHR strategy first.](https://on.cypress.io/guides/network-requests-xhr)",
   "title": "New to Cypess?"
 }
 [/block]
@@ -23,7 +23,7 @@ Wait until the matching [aliased](http://on.cypress.io/guides/using-aliases) XHR
 
 # [cy.wait( *\[alias1*, *alias2*, *alias3\]* )](#alias-array-usage)
 
-Wait for an array of [aliases](http://on.cypress.io/guides/using-aliases) to have responses.
+Wait for an array of [aliases](https://on.cypress.io/guides/using-aliases) to have responses.
 
 ***
 
@@ -109,7 +109,7 @@ cy
   })
 ```
 
-You could also use the [`cy.spread`](http://on.cypress.io/api/spread) command here to spread out this array into multiple arguments.
+You could also use the [`cy.spread`](https://on.cypress.io/api/spread) command here to spread out this array into multiple arguments.
 
 ```javascript
 cy
@@ -131,13 +131,13 @@ cy
 
 `cy.wait` goes through two separate "waiting" periods for a matching XHR.
 
-The first period waits for a matching request to leave the browser. This duration is configured by [`requestTimeout`](http://on.cypress.io/guides/configuration) - which has a default of `5000` ms.
+The first period waits for a matching request to leave the browser. This duration is configured by [`requestTimeout`](https://on.cypress.io/guides/configuration) - which has a default of `5000` ms.
 
 This means that when you begin waiting for an XHR, Cypress will wait up to 5 seconds for a matching XHR to be created. If no matching XHR is found, you will get an error message that looks like this:
 
 ![screen shot 2015-12-21 at 5 00 09 pm](https://cloud.githubusercontent.com/assets/1268976/11942578/8e7cba50-a805-11e5-805c-614f8640fbcc.png)
 
-Once Cypress detects that a matching XHR has begun its request it then switches over to the 2nd waiting period. This duration is configured by [`responseTimeout`](http://on.cypress.io/guides/configuration) - which has a default of `20000` ms.
+Once Cypress detects that a matching XHR has begun its request it then switches over to the 2nd waiting period. This duration is configured by [`responseTimeout`](https://on.cypress.io/guides/configuration) - which has a default of `20000` ms.
 
 This means Cypress will now wait up to 20 seconds for the external server to respond to this XHR. If no response is detected, you will get an error message that looks like this:
 
@@ -170,7 +170,7 @@ When clicking on `wait` within the command log, the console outputs the followin
 
 # Related
 
-1. [server](http://on.cypress.io/api/server)
-2. [route](http://on.cypress.io/api/route)
-3. [as](http://on.cypress.io/api/as)
-4. [spread](http://on.cypress.io/api/spread)
+1. [server](https://on.cypress.io/api/server)
+2. [route](https://on.cypress.io/api/route)
+3. [as](https://on.cypress.io/api/as)
+4. [spread](https://on.cypress.io/api/spread)

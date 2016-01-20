@@ -40,4 +40,4 @@ When clicking on `window` within the command log, the console outputs the follow
 
 # Related
 
-1. [document](http://on.cypress.io/api/document)
+1. [document](https://on.cypress.io/api/document)

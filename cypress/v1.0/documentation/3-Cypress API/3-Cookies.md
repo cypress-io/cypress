@@ -220,9 +220,9 @@ Cypress.Cookies.defaults({
 
 # Notes
 
-## Whats the difference between this interface and [`cy.clearCookies`](http://on.cypress.io/api/clearCookies)
+## Whats the difference between this interface and [`cy.clearCookies`](https://on.cypress.io/api/clearCookies)
 
-[`cy.clearCookies`](http://on.cypress.io/api/clearCookies) is a command that is useful to use during your tests. Since it is a command, it can be chained onto other commands. Additionally, like other commands, it is asynchronous.
+[`cy.clearCookies`](https://on.cypress.io/api/clearCookies) is a command that is useful to use during your tests. Since it is a command, it can be chained onto other commands. Additionally, like other commands, it is asynchronous.
 
 `Cypress.Cookies` is a synchronous interface that allows you to do more than just clear cookies.
 

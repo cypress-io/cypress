@@ -3,7 +3,7 @@ excerpt: Filter elements by selector
 
 # [cy.filter( *selector* )](#selector-usage)
 
-Reduce the set of matched elements to those that match the selector.  Opposite of [`cy.not()`](http://on.cypress.io/api/not)
+Reduce the set of matched elements to those that match the selector.  Opposite of [`cy.not()`](https://on.cypress.io/api/not)
 
 ***
 
@@ -44,4 +44,4 @@ When clicking on the `filter` command within the command log, the console output
 
 # Related
 
-1. [not](http://on.cypress.io/api/not)
+1. [not](https://on.cypress.io/api/not)

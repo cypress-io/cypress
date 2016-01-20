@@ -49,7 +49,7 @@ You can download Cypress directly [here.](http://download.cypress.io/latest)
 [block:callout]
 {
   "type": "danger",
-  "body": "The vast majority of the time, Cypress will install correctly. But if you're on Linux you [might have to install some other dependencies](http://on.cypress.io/guides/troubleshooting#installation).",
+  "body": "The vast majority of the time, Cypress will install correctly. But if you're on Linux you [might have to install some other dependencies](https://on.cypress.io/guides/troubleshooting#installation).",
   "title": "Woops, I got an error installing"
 }
 [/block]
@@ -72,6 +72,6 @@ After adding your project to Cypress, Cypress will generate a `cypress.json` fil
 /cypress.json
 ```
 
-This file contains your unique `projectId` and allows for specific Cypress [configuration](http://on.cypress.io/guides/configuration).
+This file contains your unique `projectId` and allows for specific Cypress [configuration](https://on.cypress.io/guides/configuration).
 
 It is okay to commit this file to `git`.

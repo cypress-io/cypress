@@ -43,6 +43,6 @@ When clicking on the `focus` command within the command log, the console outputs
 ***
 
 # Related
-1. [focused](http://on.cypress.io/api/focused)
-2. [blur](http://on.cypress.io/api/blur)
-2. [click](http://on.cypress.io/api/click)
+1. [focused](https://on.cypress.io/api/focused)
+2. [blur](https://on.cypress.io/api/blur)
+2. [click](https://on.cypress.io/api/click)

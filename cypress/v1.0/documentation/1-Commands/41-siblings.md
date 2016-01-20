@@ -62,5 +62,5 @@ When clicking on `siblings` within the command log, the console outputs the foll
 
 # Related
 
-1. [prev](http://on.cypress.io/api/prev)
-2. [next](http://on.cypress.io/api/next)
+1. [prev](https://on.cypress.io/api/prev)
+2. [next](https://on.cypress.io/api/next)

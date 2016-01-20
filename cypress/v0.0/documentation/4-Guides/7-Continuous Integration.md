@@ -11,7 +11,7 @@ Cypress should run on **all** CI providers. We currently have seen Cypress worki
 - CodeShip
 - GitLab
 
-If you're running on your own `Jenkins` server you may have to install some other dependencies [which are documented here](http://on.cypress.io/guides/troubleshooting).
+If you're running on your own `Jenkins` server you may have to install some other dependencies [which are documented here](https://on.cypress.io/guides/troubleshooting).
 
 # Running in CI
 

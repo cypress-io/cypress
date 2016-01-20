@@ -8,7 +8,7 @@ Create an alias to be used later.
 [block:callout]
 {
   "type": "info",
-  "body": "[Read about using aliases first.](http://on.cypress.io/guides/using-aliases)",
+  "body": "[Read about using aliases first.](https://on.cypress.io/guides/using-aliases)",
   "title": "New to Cypess?"
 }
 [/block]
@@ -47,6 +47,6 @@ Aliases of routes display in the routes instrument panel:
 
 # Related
 
-1. [get](http://on.cypress.io/api/get)
-2. [wait](http://on.cypress.io/api/wait)
-3. [Using Aliases](http://on.cypress.io/guides/using-aliases)
+1. [get](https://on.cypress.io/api/get)
+2. [wait](https://on.cypress.io/api/wait)
+3. [Using Aliases](https://on.cypress.io/guides/using-aliases)

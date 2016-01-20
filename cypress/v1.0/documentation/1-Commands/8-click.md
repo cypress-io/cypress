@@ -147,7 +147,7 @@ Unlike other testing frameworks, like Selenium, Cypress has built in logic for d
 
 However, sometimes when dealing with 3rd party plugins that animate using JavaScript, Cypress logic to scroll an element into view can be affected. Cypress (acting like a real user) will attempt to position the element onscreen by scrolling all parent elements that need to be scrolled (just like a real user) prior to making a click. This *may* have an adverse affect if a 3rd party plugin is bound to the `scroll` event. Cypress is so fast that sometimes there are timing issues where 3rd party plugins have incorrectly calculated animations and sometimes even prevent an element from displaying altogether.
 
-These situations are rare, but if you're having a difficult time getting an element to click or experiencing seemingly *random* failures, you will save *yourself hours of debugging and headache* by simply issuing the `{force: true}` option to the click or by inserting a small delay prior to the click with [`[cy.wait(ms)](wait)`](http://on.cypress.io/api/wait). It is almost never worth your time trying to debug finicky animation issues caused by 3rd party plugins.
+These situations are rare, but if you're having a difficult time getting an element to click or experiencing seemingly *random* failures, you will save *yourself hours of debugging and headache* by simply issuing the `{force: true}` option to the click or by inserting a small delay prior to the click with [`cy.wait(ms)`](https://on.cypress.io/api/wait). It is almost never worth your time trying to debug finicky animation issues caused by 3rd party plugins.
 
 So far the only library we've seen cause issues with is animating KendoUI's `dropdownlist`. By using `{force: true}` or inserting a small `wait` prior to a click, these issues completely go away.
 
@@ -211,7 +211,7 @@ When clicking on `click` within the command log, the console outputs the followi
 
 # Related
 
-1. [dblclick](http://on.cypress.io/api/dblclick)
-2. [check](http://on.cypress.io/api/check)
-3. [select](http://on.cypress.io/api/select)
-4. [submit](http://on.cypress.io/api/submit)
+1. [dblclick](https://on.cypress.io/api/dblclick)
+2. [check](https://on.cypress.io/api/check)
+3. [select](https://on.cypress.io/api/select)
+4. [submit](https://on.cypress.io/api/submit)

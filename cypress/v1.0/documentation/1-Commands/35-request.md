@@ -159,4 +159,4 @@ If Cypress cannot determine the host it will throw an explicit error.
 
 # Related
 
-1. [visit](http://on.cypress.io/api/visit)
+1. [visit](https://on.cypress.io/api/visit)

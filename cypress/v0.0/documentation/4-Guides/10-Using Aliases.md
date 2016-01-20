@@ -44,8 +44,8 @@ Of course this is not good. It's clunky and difficult to figure out what is goin
 
 Aliasing is incredibly powerful but very simple to use:
 
-* Create an alias with the [`as`](http://on.cypress.io/api/as) command.
-* Reference an alias with the [`get`](http://on.cypress.io/api/get) or [`wait`](http://on.cypress.io/api/wait) command.
+* Create an alias with the [`as`](https://on.cypress.io/api/as) command.
+* Reference an alias with the [`get`](https://on.cypress.io/api/get) or [`wait`](https://on.cypress.io/api/wait) command.
 
 Every time you reference an alias, it should be prefixed with `@`. You can think of this character as "a" for alias or you can think of an alias as a pointer (like how variables point to memory).
 
@@ -143,7 +143,7 @@ $("form").submit(function(){
 })
 ```
 
-You can tell Cypress to wait until it sees a request that matches your aliased route using the [`wait`](http://on.cypress.io/api/wait) command.
+You can tell Cypress to wait until it sees a request that matches your aliased route using the [`wait`](https://on.cypress.io/api/wait) command.
 
 ```javascript
 cy

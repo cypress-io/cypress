@@ -60,7 +60,7 @@ describe("Some Tests", function(){
 
 Simply move those Cypress commands into an `it(...)` and everything will work correctly.
 
-If you are purposefully writing commands outside of a test, there is probably a better way to accomplish whatever you're trying to do. Read through the [Example Repos](http://on.cypress.io/guides/all-example-apps), [open an issue](https://github.com/cypress-io/cypress/issues/new?body=**Description**%0A*Include%20a%20high%20level%20description%20of%20the%20error%20here%20including%20steps%20of%20how%20to%20recreate.%20Include%20any%20benefits%2C%20challenges%20or%20considerations.*%0A%0A**Code**%0A*Include%20the%20commands%20used*%0A%0A**Steps%20To%20Reproduce**%0A-%20%5B%20%5D%20Steps%0A-%20%5B%20%5D%20To%0A-%20%5B%20%5D%20Reproduce%2FFix%0A%0A**Additional%20Info**%0A*Include%20any%20images%2C%20notes%2C%20or%20whatever.*%0A), or [come talk to someone in Gitter](https://gitter.im/cypress-io/cypress).
+If you are purposefully writing commands outside of a test, there is probably a better way to accomplish whatever you're trying to do. Read through the [Example Repos](https://on.cypress.io/guides/all-example-apps), [open an issue](https://github.com/cypress-io/cypress/issues/new?body=**Description**%0A*Include%20a%20high%20level%20description%20of%20the%20error%20here%20including%20steps%20of%20how%20to%20recreate.%20Include%20any%20benefits%2C%20challenges%20or%20considerations.*%0A%0A**Code**%0A*Include%20the%20commands%20used*%0A%0A**Steps%20To%20Reproduce**%0A-%20%5B%20%5D%20Steps%0A-%20%5B%20%5D%20To%0A-%20%5B%20%5D%20Reproduce%2FFix%0A%0A**Additional%20Info**%0A*Include%20any%20images%2C%20notes%2C%20or%20whatever.*%0A), or [come talk to someone in Gitter](https://gitter.im/cypress-io/cypress).
 
 ***
 
@@ -166,7 +166,7 @@ cy.get("button").click({force: true}).
 
 ![screen shot 2015-12-30 at 11 44 22 pm](https://cloud.githubusercontent.com/assets/1268976/12061262/4f9a252e-af4f-11e5-9139-9c8bdb08ae58.png)
 
-By default Cypress detects if an element you're trying to interact with is animating. This check ensures that an element is not animating too quickly for a real user to interact with the element. This also prevents some edge cases where actions such as [`type`](http://on.cypress.io/api/type) or [`click`](http://on.cypress.io/api/click) happenening too fast during a transition.
+By default Cypress detects if an element you're trying to interact with is animating. This check ensures that an element is not animating too quickly for a real user to interact with the element. This also prevents some edge cases where actions such as [`type`](https://on.cypress.io/api/type) or [`click`](https://on.cypress.io/api/click) happenening too fast during a transition.
 
 Cypress will continuously attempt to interact with the element until it eventually times out.
 
@@ -180,7 +180,7 @@ If you'd like to force Cypress to interact with the element there are a few opti
 cy.get("#modal button").click({waitForAnimations: false})
 ```
 
-You can globally disable animation error checking, or increase the threshold by modifying your [`cypress.json`](http://on.cypress.io/guides/configuration).
+You can globally disable animation error checking, or increase the threshold by modifying your [`cypress.json`](https://on.cypress.io/guides/configuration).
 
 ```javascript
 // cypress.json

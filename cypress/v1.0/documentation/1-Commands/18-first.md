@@ -45,4 +45,4 @@ When clicking on `first` within the command log, the console outputs the followi
 
 # Related
 
-1. [last](http://on.cypress.io/api/last)
+1. [last](https://on.cypress.io/api/last)

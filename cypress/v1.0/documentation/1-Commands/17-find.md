@@ -37,4 +37,4 @@ When clicking on the `find` command within the command log, the console outputs 
 
 # Related
 
-1. [get](http://on.cypress.io/api/get)
+1. [get](https://on.cypress.io/api/get)

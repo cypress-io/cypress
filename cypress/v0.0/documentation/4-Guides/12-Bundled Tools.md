@@ -23,7 +23,7 @@ Additionally Mocha gives us excellent `async` support, along with support for us
 
 [Chai docs](http://chaijs.com/)
 
-While Mocha provides us a framework to structure our tests, `chai` gives us the ability to easily write assertions. Chai gives us very readable assertions with excellent error messages. Cypress extends this, fixes several common pitfalls, and wraps `chai's` DSL using [subjects](http://on.cypress.io/guides/making-assertions) and the [should](http://on.cypress.io/api/should) command.
+While Mocha provides us a framework to structure our tests, `chai` gives us the ability to easily write assertions. Chai gives us very readable assertions with excellent error messages. Cypress extends this, fixes several common pitfalls, and wraps `chai's` DSL using [subjects](https://on.cypress.io/guides/making-assertions) and the [should](https://on.cypress.io/api/should) command.
 
 # Chai-jQuery
 
@@ -35,7 +35,7 @@ When writing integration tests, you will work endlessly with the DOM. Cypress br
 
 [Sinon docs](http://sinonjs.org/)
 
-When writing unit tests, or even in integration-like tests, you'll regularly need to ability to `stub` and `spy` methods. Additionally `sinon` brings in the ability to stop or accelerate time, and create fake servers. Cypress passes on some of `sinons` API without modifying it, but Cypress has built an entire layer on the concept of [creating servers and routing](http://on.cypress.io/guides/network-requests-xhr) on the client.
+When writing unit tests, or even in integration-like tests, you'll regularly need to ability to `stub` and `spy` methods. Additionally `sinon` brings in the ability to stop or accelerate time, and create fake servers. Cypress passes on some of `sinons` API without modifying it, but Cypress has built an entire layer on the concept of [creating servers and routing](https://on.cypress.io/guides/network-requests-xhr) on the client.
 
 Dealing with AJAX/XHR's on the client has traditionally been extremely difficult to manage. Cypress provides an incredibly easy yet powerful API for managing the request/response lifecycle.
 

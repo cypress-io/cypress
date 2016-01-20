@@ -70,4 +70,4 @@ When clicking on `next` within the command log, the console outputs the followin
 
 # Related
 
-1. [prev](http://on.cypress.io/api/prev)
+1. [prev](https://on.cypress.io/api/prev)

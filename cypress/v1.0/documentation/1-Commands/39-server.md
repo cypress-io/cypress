@@ -8,7 +8,7 @@ Use `cy.server` to control the behavior of requests and responses. Start a serve
 [block:callout]
 {
   "type": "info",
-  "body": "[Read about XHR strategy first.](http://on.cypress.io/guides/network-requests-xhr)",
+  "body": "[Read about XHR strategy first.](https://on.cypress.io/guides/network-requests-xhr)",
   "title": "New to Cypess?"
 }
 [/block]
@@ -19,10 +19,10 @@ Use `cy.server` to control the behavior of requests and responses. Start a serve
 
 `cy.server` takes options that are used for 2 different purposes:
 
-1. As defaults which are merged into [`cy.route`](http://on.cypress.io/api/route).
+1. As defaults which are merged into [`cy.route`](https://on.cypress.io/api/route).
 2. As configuration behavior for *all* requests.
 
-The following options will automatically be merged in as defaults to [`cy.route`](http://on.cypress.io/api/route)
+The following options will automatically be merged in as defaults to [`cy.route`](https://on.cypress.io/api/route)
 
 Option | Default | Notes
 --- | --- | ---
@@ -64,7 +64,7 @@ After starting a server:
 
 ## Change the defaults for upcoming `cy.route` commands
 
-By default [`cy.route`](http://on.cypress.io/api/route) inherits its options from `cy.server`. Passing any of the following options to server will be inherited:
+By default [`cy.route`](https://on.cypress.io/api/route) inherits its options from `cy.server`. Passing any of the following options to server will be inherited:
 
 - delay
 - method
@@ -124,6 +124,7 @@ cy
 ```
 
 ```javascript
+
 // Application Code
 
 $(function(){
@@ -262,16 +263,16 @@ When a new test runs, any oustanding requests still in flight are automatically 
 
 ## Server can be started before you `cy.visit`
 
-Oftentimes your application may make initial requests immediately when it loads (such as authenticating a user). Cypress makes it possible to start your server and define routes before a [`cy.visit`](http://on.cypress.io/api/visit). Upon the next visit, the server + routes will be instantly applied before your application loads.
+Oftentimes your application may make initial requests immediately when it loads (such as authenticating a user). Cypress makes it possible to start your server and define routes before a [`cy.visit`](https://on.cypress.io/api/visit). Upon the next visit, the server + routes will be instantly applied before your application loads.
 
-You can [read more about XHR strategy here](http://on.cypress.io/guides/network-requests-xhr).
+You can [read more about XHR strategy here](https://on.cypress.io/guides/network-requests-xhr).
 
 ***
 
 # Related
 
-1. [route](http://on.cypress.io/api/route)
-2. [wait](http://on.cypress.io/api/wait)
-3. [request](http://on.cypress.io/api/request)
-4. [visit](http://on.cypress.io/api/visit)
-5. [Network Requests](http://on.cypress.io/guides/network-requests-xhr)
+1. [route](https://on.cypress.io/api/route)
+2. [wait](https://on.cypress.io/api/wait)
+3. [request](https://on.cypress.io/api/request)
+4. [visit](https://on.cypress.io/api/visit)
+5. [Network Requests](https://on.cypress.io/guides/network-requests-xhr)

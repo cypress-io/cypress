@@ -27,4 +27,4 @@ In this example, on first login our server sends us back a session cookie. After
 
 # Related
 
-1. [Cypress API Cookies](http://on.cypress.io/api/cookies)
+1. [Cypress API Cookies](https://on.cypress.io/api/cookies)

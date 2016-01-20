@@ -108,7 +108,7 @@ cy
   })
 ```
 
-However if you still need access to the fixture data, instead of yielding the fixture's data in Example #2, we can make use of [aliasing](http://on.cypress.io/guides/using-aliases).
+However if you still need access to the fixture data, instead of yielding the fixture's data in Example #2, we can make use of [aliasing](https://on.cypress.io/guides/using-aliases).
 
 ## Example 3:
 
@@ -127,10 +127,10 @@ cy
 
 Using an alias provides the benefit of terseness and readability, yet still allows you access to the aliased object later on for direct manipulation.
 
-This is useful when asserting about values in the fixture object, or perhaps if you need to change its values prior to handing it off to a [`cy.route`](http://on.cypress.io/api/route).
+This is useful when asserting about values in the fixture object, or perhaps if you need to change its values prior to handing it off to a [`cy.route`](https://on.cypress.io/api/route).
 
 ***
 
 # More about Fixtures
 
-For a detailed explanation of when and why to use fixtures, [read more about fixtures here](http://on.cypress.io/guides/creating-fixtures).
+For a detailed explanation of when and why to use fixtures, [read more about fixtures here](https://on.cypress.io/guides/creating-fixtures).

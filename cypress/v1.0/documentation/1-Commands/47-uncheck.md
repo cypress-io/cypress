@@ -43,5 +43,5 @@ When clicking on `uncheck` within the command log, the console outputs the follo
 
 # Related
 
-1. [check](http://on.cypress.io/api/check)
-1. [click](http://on.cypress.io/api/click)
+1. [check](https://on.cypress.io/api/check)
+1. [click](https://on.cypress.io/api/click)

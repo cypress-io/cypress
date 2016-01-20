@@ -5,7 +5,7 @@ excerpt: Call properties on the current subject
 
 `cy.invoke` invokes properties that are functions on the current subject. This works the same way as underscore's `invoke` function.
 
-`cy.invoke` is identical to [`cy.its`](http://on.cypress.io/api/its). `cy.its` sometimes reads better when calling regular properties which are not functions.
+`cy.invoke` is identical to [`cy.its`](https://on.cypress.io/api/its). `cy.its` sometimes reads better when calling regular properties which are not functions.
 
 ```javascript
 var fn = function(){
@@ -90,6 +90,6 @@ cy
 
 # Related
 
-1. [its](http://on.cypress.io/api/its)
-2. [wrap](http://on.cypress.io/api/wrap)
-3. [then](http://on.cypress.io/api/then)
+1. [its](https://on.cypress.io/api/its)
+2. [wrap](https://on.cypress.io/api/wrap)
+3. [then](https://on.cypress.io/api/then)

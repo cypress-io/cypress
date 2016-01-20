@@ -126,7 +126,7 @@ When hovering over each command, Cypress will automatically restore the viewport
 
 By default, until you issue a `cy.viewport` command, Cypress will assume the width is: `1000px` and the height is `660px`.
 
-You can [change these default dimensions](http://on.cypress.io/guides/configuration) by adding the following to your `cypress.json`
+You can [change these default dimensions](https://on.cypress.io/guides/configuration) by adding the following to your `cypress.json`
 
 ```javascript
 {
@@ -147,4 +147,4 @@ The upsides to this is that tests should consistently pass or fail regardless of
 
 # Related
 
-1. [Configuration](http://on.cypress.io/guides/configuration)
+1. [Configuration](https://on.cypress.io/guides/configuration)

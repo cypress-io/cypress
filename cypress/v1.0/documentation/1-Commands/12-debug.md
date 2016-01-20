@@ -25,4 +25,4 @@ cy.get("a").debug().should("have.attr", "href")
 
 # Related
 
-1. [pause](http://on.cypress.io/api/pause)
+1. [pause](https://on.cypress.io/api/pause)

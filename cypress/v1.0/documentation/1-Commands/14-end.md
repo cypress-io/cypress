@@ -23,4 +23,4 @@ cy
 
 # Related
 
-1. [root](http://on.cypress.io/api/root)
+1. [root](https://on.cypress.io/api/root)

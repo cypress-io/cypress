@@ -21,6 +21,6 @@ cy.wrap({foo: fn}).invoke("foo").should("eq", "bar") // true
 
 # Related
 
-1. [invoke](http://on.cypress.io/api/invoke)
-1. [its](http://on.cypress.io/api/its)
-2. [then](http://on.cypress.io/api/then)
+1. [invoke](https://on.cypress.io/api/invoke)
+1. [its](https://on.cypress.io/api/its)
+2. [then](https://on.cypress.io/api/then)

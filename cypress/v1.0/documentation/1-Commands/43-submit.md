@@ -47,4 +47,4 @@ When clicking on `submit` within the command log, the console outputs the follow
 
 # Related
 
-1. [click](http://on.cypress.io/api/click)
+1. [click](https://on.cypress.io/api/click)

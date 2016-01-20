@@ -40,4 +40,4 @@ When clicking on `dblclick` within the command log, the console outputs the foll
 
 # Related
 
-1. [click](http://on.cypress.io/api/click)
+1. [click](https://on.cypress.io/api/click)

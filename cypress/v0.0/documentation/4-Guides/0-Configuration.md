@@ -16,17 +16,17 @@ You can modify other options in your `cypress.json`.
 Option | Default | Description
 ----- | ---- | ----
 `port` | `2020` | Port to use for Cypress
-`env` | `{}` | [Environment Variables](http://on.cypress.io/guides/environment-variables)
+`env` | `{}` | [Environment Variables](https://on.cypress.io/guides/environment-variables)
 `commandTimeout` | `4000` | Time (ms) to wait until commands time out
 
 # Network Options
 
 Option | Default | Description
 ----- | ---- | ----
-`baseUrl` | `null` | Base url to prefix to [`cy.visit`](http://on.cypress.io/api/visit) or [`cy.request`](http://on.cypress.io/api/request) command
-`visitTimeout` | `30000` | Time (ms) to wait until [`cy.visit`](http://on.cypress.io/api/visit) times out
+`baseUrl` | `null` | Base url to prefix to [`cy.visit`](https://on.cypress.io/api/visit) or [`cy.request`](https://on.cypress.io/api/request) command
+`visitTimeout` | `30000` | Time (ms) to wait until [`cy.visit`](https://on.cypress.io/api/visit) times out
 `requestTimeout` | `5000` | Time (ms) to wait for an XHR request during [`cy.wait`](wait) command
-`responseTimeout` | `20000` | Time (ms) to wait until a response for [`cy.request`](request) and [`cy.wait`](http://on.cypress.io/api/wait) commands
+`responseTimeout` | `20000` | Time (ms) to wait until a response for [`cy.request`](request) and [`cy.wait`](https://on.cypress.io/api/wait) commands
 
 # Directory Options
 
@@ -40,8 +40,8 @@ Option | Default | Description
 
 Option | Default | Description
 ----- | ---- | ----
-`viewportWidth` | `1000` | Default width in pixels for [`cy.viewport`](http://on.cypress.io/api/viewport)
-`viewportHeight` | `660` | Default hidth in pixels for  [`cy.viewport`](http://on.cypress.io/api/viewport)
+`viewportWidth` | `1000` | Default width in pixels for [`cy.viewport`](https://on.cypress.io/api/viewport)
+`viewportHeight` | `660` | Default hidth in pixels for  [`cy.viewport`](https://on.cypress.io/api/viewport)
 
 # Animation Options
 

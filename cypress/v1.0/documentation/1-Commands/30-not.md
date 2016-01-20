@@ -3,7 +3,7 @@ excerpt: Remove elements from set
 
 # [cy.not( *selector* )](#selector-usage)
 
-Remove elements from the set of matched elements. Opposite of [`cy.filter()`](http://on.cypress.io/api/filter)
+Remove elements from the set of matched elements. Opposite of [`cy.filter()`](https://on.cypress.io/api/filter)
 
 ***
 
@@ -34,4 +34,4 @@ When clicking on `not` within the command log, the console outputs the following
 ***
 # Related
 
-1. [filter](http://on.cypress.io/api/filter)
+1. [filter](https://on.cypress.io/api/filter)

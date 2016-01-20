@@ -16,7 +16,7 @@ While Cypress allows for configuration of where your test files can be located, 
 [block:callout]
 {
   "type": "info",
-  "body": "You can modify the folder configuration in your `cypress.json`. See [configuration](http://on.cypress.io/guides/configuration) for more detail.",
+  "body": "You can modify the folder configuration in your `cypress.json`. See [configuration](https://on.cypress.io/guides/configuration) for more detail.",
   "title": "Configure Folder Structure"
 }
 [/block]
@@ -39,11 +39,11 @@ Navigate to `http://localhost:2020`. You should see this spec file listed inside
 
 # How to write tests
 
-Cypress is built on top of [Mocha](http://on.cypress.io/guides/bundled-tools#mocha) and uses its `bdd` interface. Tests you write in Cypress will mostly adhere to this style.
+Cypress is built on top of [Mocha](https://on.cypress.io/guides/bundled-tools#mocha) and uses its `bdd` interface. Tests you write in Cypress will mostly adhere to this style.
 
 If you're familiar with writing tests in JavaScript, then writing tests in Cypress will be a breeze. If you've never written tests before, we suggest you read our [Intro to Unit Testing]() and [Intro to Integration Testing]() tutorials first.
 
-We're still working on introductory docs and videos. For now, [check out some examples](http://on.cypress.io/guides/all-example-apps) of applications using Cypress tests.
+We're still working on introductory docs and videos. For now, [check out some examples](https://on.cypress.io/guides/all-example-apps) of applications using Cypress tests.
 
 # Command Line Tools
 

@@ -53,12 +53,12 @@ Links are all handled through our [cypress.on](https://github.com/cypress-io/cyp
 
 To link to a page on Guides:
 ```md
-[Installing and Running](http://on.cypress.io/guides/$slug)
+[Installing and Running](https://on.cypress.io/guides/$slug)
 ```
 
 To link to a page on API:
 ```md
-[and](http://on.cypress.io/api/$slug)
+[and](https://on.cypress.io/api/$slug)
 ```
 
 #### Creating New Files

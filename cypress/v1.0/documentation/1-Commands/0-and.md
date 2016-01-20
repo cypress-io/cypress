@@ -1,25 +1,48 @@
 slug: and
 excerpt: Enables chaining multiple assertions together
 
-# [cy.and()](#usage)
+# [cy.and( *chainers*)](#chainers-usage)
 
-`cy.and` makes assertions about the current subject.
+`cy.and` makes assertions about the current subject. Implicitly assert about the current subject. Returns the existing current subject.
 
-When chaining multiple assertions together, `cy.and` sometimes reads better than [`cy.should`](http://on.cypress.io/api/should).
+When chaining multiple assertions together, `cy.and` sometimes reads better than [`cy.should`](https://on.cypress.io/api/should).
 
-`cy.and` is identical to [`cy.should`](http://on.cypress.io/api/should).
+`cy.and` is identical to [`cy.should`](https://on.cypress.io/api/should).
 
 [block:callout]
 {
   "type": "info",
-  "body": "[Read about making assertions first.](http://on.cypress.io/guides/making-assertions)",
+  "body": "[Read about making assertions first.](https://on.cypress.io/guides/making-assertions)",
   "title": "New to Cypess?"
 }
 [/block]
 
 ***
 
-# Usage
+# [cy.and( *chainers*, *value* )](#chainers-with-value-usage)
+
+Implicitly assert a value about the current subject. Returns the existing current subject (usually).
+
+Some chai methods and chai-jQuery methods return a new (different) subject for chain-ability.
+
+***
+
+# [cy.and( *chainers*, *method*, *value* )](#chainers-with-method-and-value-usage)
+
+Implicitly assert about the subject by calling a method and providing a value to that method.
+
+Returns the new assertion subject for further assertion chain-ability.
+
+***
+
+# [cy.and( *function* )](#function-usage)
+
+Pass a function that can have any number of explicit assertions within it.
+
+Does not change the subject. Whatever was passed to the function is what is returned.
+
+
+# Chainers Usage
 
 ```javascript
 cy.get("button").should("have.class", "active").and("not.be.disabled")
@@ -93,5 +116,5 @@ When clicking on `assert` within the command log, the console outputs the follow
 
 # Related
 
-1. [should](http://on.cypress.io/api/should)
-2. [Assertions](http://on.cypress.io/guides/making-assertions)
+1. [should](https://on.cypress.io/api/should)
+2. [Assertions](https://on.cypress.io/guides/making-assertions)

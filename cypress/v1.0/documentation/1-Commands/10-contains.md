@@ -215,7 +215,7 @@ cy.contains("ul", "apples")
 
 # Notes
 
-`cy.contains` is a dual command.  This means it can act as both a `parent` and a `child` command.  Read more about [`commands`](http://on.cypress.io/guides/issuing-commands) if this is unfamiliar.
+`cy.contains` is a dual command.  This means it can act as both a `parent` and a `child` command.  Read more about [`commands`](https://on.cypress.io/guides/issuing-commands) if this is unfamiliar.
 
 Because it is a dual command it can either *begin* a chain of commands or work off of an *existing* subject.
 
@@ -306,6 +306,6 @@ When clicking on the `contains` command within the command log, the console outp
 
 # Related
 
-1. [get](http://on.cypress.io/api/get)
-2. [within](http://on.cypress.io/api/within)
-3. [root](http://on.cypress.io/api/root)
+1. [get](https://on.cypress.io/api/get)
+2. [within](https://on.cypress.io/api/within)
+3. [root](https://on.cypress.io/api/root)

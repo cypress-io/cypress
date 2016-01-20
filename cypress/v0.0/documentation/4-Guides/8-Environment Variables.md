@@ -38,13 +38,13 @@ To summarize you can:
 
 Don't feel obligated to pick just one method. It is common to use one strategy for local development but another when running in CI.
 
-When your tests are running, you can use the [`Cypress.env()`](http://on.cypress.io/api/env) function to access the values of your environment variables.
+When your tests are running, you can use the [`Cypress.env()`](https://on.cypress.io/api/env) function to access the values of your environment variables.
 
 ***
 
 ## Option #1: Set in `cypress.json`
 
-Any key/value you set in your [`cypress.json`](http://on.cypress.io/guides/configuration) under the `env` key will become an environment variable.
+Any key/value you set in your [`cypress.json`](https://on.cypress.io/guides/configuration) under the `env` key will become an environment variable.
 
 ```javascript
 // cypress.json

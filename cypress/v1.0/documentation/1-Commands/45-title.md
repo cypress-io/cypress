@@ -35,4 +35,4 @@ When clicking on `title` within the command log, the console outputs the followi
 
 # Related
 
-1. [document](http://on.cypress.io/api/document)
+1. [document](https://on.cypress.io/api/document)

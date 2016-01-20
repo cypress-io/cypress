@@ -45,5 +45,5 @@ When clicking on the `parents` command within the command log, the console outpu
 
 # Related
 
-1. [parent](http://on.cypress.io/api/parent)
-2. [children](http://on.cypress.io/api/children)
+1. [parent](https://on.cypress.io/api/parent)
+2. [children](https://on.cypress.io/api/children)

@@ -5,7 +5,7 @@ excerpt: Call properties on the current subject
 
 `cy.its` calls properties on the current subject and returns that new value.
 
-`cy.its` is identical to [`cy.invoke`](http://on.cypress.io/api/invoke), which reads better when invoking function properties.
+`cy.its` is identical to [`cy.invoke`](https://on.cypress.io/api/invoke), which reads better when invoking function properties.
 
 
 ***
@@ -29,6 +29,6 @@ cy
 ***
 
 # Related
-1. [invoke](http://on.cypress.io/api/invoke)
-2. [wrap](http://on.cypress.io/api/wrap)
-3. [then](http://on.cypress.io/api/then)
+1. [invoke](https://on.cypress.io/api/invoke)
+2. [wrap](https://on.cypress.io/api/wrap)
+3. [then](https://on.cypress.io/api/then)

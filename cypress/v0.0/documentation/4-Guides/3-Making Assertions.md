@@ -12,7 +12,7 @@ There are two ways to write an assertion within Cypress.
 
 ## Implicit Subjects with `cy.should`
 
-Using Cypress' [`should`](http://on.cypress.io/api/should) command is the preferred way of making an assertion. The subject of the assertion is inferred from the subject of the last Cypress command, which is why this is called an **implicit subject**.
+Using Cypress' [`should`](https://on.cypress.io/api/should) command is the preferred way of making an assertion. The subject of the assertion is inferred from the subject of the last Cypress command, which is why this is called an **implicit subject**.
 
 ```javascript
 // the implicit subject here is the <button>
@@ -27,9 +27,9 @@ cy.get("button").should("have.class", "active")
 
 These assertions are more commonly used when writing unit tests, but can also be used when writing integration tests. Cypress comes bundled with some existing tools that already handle assertions such as:
 
-* [Chai](http://on.cypress.io/guides/bundled-tolls#chai)
-* [Chai-jQuery](http://on.cypress.io/guides/bundled-tolls#chai-jquery)
-* [Chai-Sinon](http://on.cypress.io/guides/bundled-tolls#sinon-chai)
+* [Chai](https://on.cypress.io/guides/bundled-tolls#chai)
+* [Chai-jQuery](https://on.cypress.io/guides/bundled-tolls#chai-jquery)
+* [Chai-Sinon](https://on.cypress.io/guides/bundled-tolls#sinon-chai)
 
 ```javascript
 // the explicit subject here is the boolean: true
@@ -157,11 +157,11 @@ Additionally these chainers are added when asserting about a DOM object.
 - contain
 - descendents
 
-You will commonly use these chainers after using DOM commands like: [`cy.get`](http://on.cypress.io/api/get), [`cy.contains`](http://on.cypress.io/api/contains), etc.
+You will commonly use these chainers after using DOM commands like: [`cy.get`](https://on.cypress.io/api/get), [`cy.contains`](https://on.cypress.io/api/contains), etc.
 
-## Using Chainers with [`cy.should`](http://on.cypress.io/api/should)
+## Using Chainers with [`cy.should`](https://on.cypress.io/api/should)
 
-When utilizing [`cy.should`](http://on.cypress.io/api/should), instead of writing chainers as properties and methods, they are instead transformed into a string argument.
+When utilizing [`cy.should`](https://on.cypress.io/api/should), instead of writing chainers as properties and methods, they are instead transformed into a string argument.
 
 If we convert the previous example to use `cy.should`, it would look like:
 
@@ -171,7 +171,7 @@ cy.wrap({foo: "bar"}).should("have.property", "foo")
         subject                chainers       value
 ```
 
-The chainers are shifted and become the first argument to [`cy.should`](http://on.cypress.io/api/should), with values simply being passed in as additional arguments.
+The chainers are shifted and become the first argument to [`cy.should`](https://on.cypress.io/api/should), with values simply being passed in as additional arguments.
 
 ```javascript
 // we can additionally continue to chain and add
@@ -192,9 +192,9 @@ cy.get("button").should(function($button){
 
 This example above may be more familiar to you if you've written tests in JavaScript before.
 
-If you look closely, you'll see that we've passed a callback function to the [`cy.should`](http://on.cypress.io/api/should) method. This allows us to write expectations inside of that callback function, yet still receive all of the wonderful benefits of [`cy.should`](http://on.cypress.io/api/should).
+If you look closely, you'll see that we've passed a callback function to the [`cy.should`](https://on.cypress.io/api/should) method. This allows us to write expectations inside of that callback function, yet still receive all of the wonderful benefits of [`cy.should`](https://on.cypress.io/api/should).
 
-Read about [resolving assertions](http://on.cypress.io/guides/making-assertions#resolving-assertions) below to learn how [`cy.should`](http://on.cypress.io/api/should) works under the hood.
+Read about [resolving assertions](https://on.cypress.io/guides/making-assertions#resolving-assertions) below to learn how [`cy.should`](https://on.cypress.io/api/should) works under the hood.
 
 # Resolving Assertions
 
@@ -213,7 +213,7 @@ Here are some typical scenarios:
 * Clicking a `<button>` and waiting for a modal to animate in.
 * Typing into a `<form>` and verifying an element should not exist or not be visible.
 
-Every command that comes before a [`cy.should`](http://on.cypress.io/api/should) will not resolve until **all** of its associated assertions pass.
+Every command that comes before a [`cy.should`](https://on.cypress.io/api/should) will not resolve until **all** of its associated assertions pass.
 
 This enables you to accurately test the following situation:
 

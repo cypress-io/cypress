@@ -3,12 +3,12 @@ excerpt: get and set environment variables
 
 `Cypress.env` allows you to `get` and `set` your environment variables.
 
-This document covers the API for consuming your environment variables *in your tests*. The [Environment Variable](http://on.cypress.io/guides/environment-variables) guide explains the 4 ways you can set them *outside of your tests*.
+This document covers the API for consuming your environment variables *in your tests*. The [Environment Variable](https://on.cypress.io/guides/environment-variables) guide explains the 4 ways you can set them *outside of your tests*.
 
 [block:callout]
 {
   "type": "info",
-  "body": "[Read about environment variables first.](http://on.cypress.io/guides/environment-variables)",
+  "body": "[Read about environment variables first.](https://on.cypress.io/guides/environment-variables)",
   "title": "New to Cypess?"
 }
 [/block]
@@ -144,7 +144,7 @@ Methods on `cy` are local and specific to a single test. Side effects from `cy` 
 
 ## Why would I ever need to use environment variables?
 
-The [Environment Variables](http://on.cypress.io/guides/environment-variables) guide explains common use cases.
+The [Environment Variables](https://on.cypress.io/guides/environment-variables) guide explains common use cases.
 
 ***
 
@@ -152,4 +152,4 @@ The [Environment Variables](http://on.cypress.io/guides/environment-variables) g
 
 Yes. You can do that and much more.
 
-The [Environment Variables](http://on.cypress.io/guides/environment-variables) guide explains the 4 ways you can set environment variables for your tests.
+The [Environment Variables](https://on.cypress.io/guides/environment-variables) guide explains the 4 ways you can set environment variables for your tests.

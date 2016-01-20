@@ -29,6 +29,6 @@ When clicking on the `closest` command within the command log, the console outpu
 
 # Related
 
-1. [parents](http://on.cypress.io/api/parents)
-2. [next](http://on.cypress.io/api/next)
-3. [first](http://on.cypress.io/api/first)
+1. [parents](https://on.cypress.io/api/parents)
+2. [next](https://on.cypress.io/api/next)
+3. [first](https://on.cypress.io/api/first)

@@ -1,18 +1,18 @@
 slug: should
-excerpt: Make an assertion about current subject
+excerpt: Make an assertion about the current subject
 
 # [cy.should( *chainers* )](#chainers-usage)
 
-`cy.should` makes assertions about the current subject.
+`cy.should` makes assertions about the current subject. Implicitly assert about the current subject. Returns the existing current subject.
 
-Implicitly assert about the current subject. Returns the existing current subject.
+When chaining multiple assertions together, [`cy.and`](https://on.cypress.io/api/and) sometimes reads better than `cy.should`.
 
-`cy.should` is identical to [`cy.and`](http://on.cypress.io/api/and).
+`cy.should` is identical to [`cy.and`](https://on.cypress.io/api/and).
 
 [block:callout]
 {
   "type": "info",
-  "body": "[Read about making assertions first.](http://on.cypress.io/guides/making-assertions)",
+  "body": "[Read about making assertions first.](https://on.cypress.io/guides/making-assertions)",
   "title": "New to Cypess?"
 }
 [/block]
@@ -177,7 +177,7 @@ cy
 
 Cypress makes it easy to chain assertions together.
 
-In this example we use [`and`](http://on.cypress.io/api/and) which is identical to `should`.
+In this example we use [`and`](https://on.cypress.io/api/and) which is identical to `should`.
 
 ```javascript
 // our subject is not changed by our first assertion,
@@ -238,7 +238,7 @@ cy
     .and("not.have.class", "inactive")
 ```
 
-You can [read more about how Cypress resolves your assertions](http://on.cypress.io/guides/making-assertions#resolving-assertions) here.
+You can [read more about how Cypress resolves your assertions](https://on.cypress.io/guides/making-assertions#resolving-assertions) here.
 
 ***
 
@@ -251,17 +251,17 @@ The chainers that `cy.should` accepts come from:
 * Chai
 * Chai-jQuery
 
-A [list of these](http://on.cypress.io/guides/making-assertions#available-assertions) can be found here.
+A [list of these](https://on.cypress.io/guides/making-assertions#available-assertions) can be found here.
 
 ***
 
 ## How do I know which assertions change the subject and which keep it the same?
 
-The chainers that come from [Chai](http://on.cypress.io/guides/bundled-tools#chai) or [Chai-jQuery](http://on.cypress.io/guides/bundled-tools#chai-jquery) will always document what they return.
+The chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#chai) or [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#chai-jquery) will always document what they return.
 
 Alternatively, it is very easy to use Cypress itself to figure this out.
 
-You can [read more about debugging assertions](http://on.cypress.io/guides/making-assertions#debugging-assertions) here.
+You can [read more about debugging assertions](https://on.cypress.io/guides/making-assertions#debugging-assertions) here.
 
 ***
 
@@ -285,5 +285,5 @@ When clicking on `assert` within the command log, the console outputs the follow
 
 # Related
 
-1. [and](http://on.cypress.io/api/and)
-2. [Assertions](http://on.cypress.io/guides/making-assertions)
+1. [and](https://on.cypress.io/api/and)
+2. [Assertions](https://on.cypress.io/guides/making-assertions)

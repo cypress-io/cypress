@@ -44,4 +44,4 @@ When clicking on `last` within the command log, the console outputs the followin
 ***
 
 # Related
-1. [first](http://on.cypress.io/api/first)
+1. [first](https://on.cypress.io/api/first)

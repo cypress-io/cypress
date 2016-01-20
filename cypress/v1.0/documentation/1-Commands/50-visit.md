@@ -73,7 +73,7 @@ cy.visit("dashboard")
 
 This is recommended. Simply configure `baseUrl` in the `cypress.json` file to prevent repeating yourself in every single `cy.visit(...)`.
 
-Read more about [`configuration`](http://on.cypress.io/guides/configuration) here.
+Read more about [`configuration`](https://on.cypress.io/guides/configuration) here.
 
 ***
 
@@ -199,5 +199,5 @@ Cypress will automatically apply the server and routes to the very next `visit` 
 
 # Related
 
-1. [go](http://on.cypress.io/api/go)
-1. [server](http://on.cypress.io/api/server)
+1. [go](https://on.cypress.io/api/go)
+1. [server](https://on.cypress.io/api/server)
