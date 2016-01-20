@@ -3,6 +3,7 @@
   App = new Marionette.Application
 
   App.addRegions
+    aboutRegion:  "#about-region"
     mainRegion:   "#main-region"
     footerRegion: "#footer-region"
 
@@ -10,8 +11,6 @@
   App.reqres.setHandler "default:region", -> App.mainRegion
 
   App.on "start", (options = {}) ->
-    options = {}# options.backend.parseArgs(options)
-
     ## create a App.config model from the passed in options
     App.config = App.request("config:entity", options)
 
@@ -25,15 +24,28 @@
 
     ## if we are updating then do not start the app
     ## or display any UI. just finish installing the updates
-    if options.updating
-      ## display the GUI
-      App.execute "gui:display", options.coords
 
-      ## start the updates being applied app so the user knows its still a-happen-ning
-      return App.execute "start:updates:applied:app", options.appPath, options.execPath
+    switch
+      when options.about
+        about()
+      when options.debug
+        throw new Error("debug not implemented yet")
+      when options.updating
+        updating(options)
+      else
+        projects()
 
-    # App.vent.trigger "start:login:app"
+  about = ->
+    App.vent.trigger("start:about:app", App.aboutRegion)
 
+  updating = (options) ->
+    ## display the GUI
+    App.execute "gui:display", options.coords
+
+    ## start the updates being applied app so the user knows its still a-happen-ning
+    return App.execute "start:updates:applied:app", options.appPath, options.execPath
+
+  projects = ->
     ## check cache store for user
     App.ipc("get:current:user").then (user) ->
       # set the current user

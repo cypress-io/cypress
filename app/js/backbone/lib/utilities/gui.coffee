@@ -109,39 +109,15 @@
       #   App.config.getManifest()
 
     about: ->
-      if about = windows.about
-        return about.focus()
-
-      windows.about = about = App.request "gui:open", "./about.html",
+      ## TODO: fix focus
+      App.ipc("window:open", {
         position: "center"
         width: 300
         height: 210
-        # frame: false
         toolbar: false
         title: "About"
-
-      about.once "loaded", =>
-        @focus(about)
-
-        about.showDevTools() if App.config.get("debug")
-
-        ## grab the about region from other window
-        $el = $("#about-region", about.window.document)
-
-        ## attach to the app as a custom region object
-        App.addRegions
-          aboutRegion: Marionette.Region.extend(el: $el)
-
-        App.vent.trigger "start:about:app", App.aboutRegion, about
-
-      about.once "close", ->
-        ## remove app region when this is closed down
-        App.removeRegion("aboutRegion") if App.aboutRegion
-
-        delete windows.about
-
-        ## really shut down the window!
-        @close(true)
+        type: "ABOUT"
+      })
 
     updates: ->
       if updates = windows.updates

@@ -7,5 +7,5 @@
 
   router = new Router
 
-  App.vent.on "start:about:app", (region, win) ->
-    router.to "show", region: region, window: win
+  App.vent.on "start:about:app", (region) ->
+    router.to "show", region: region

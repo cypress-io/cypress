@@ -3,15 +3,13 @@
   class Show.Controller extends App.Controllers.Application
 
     initialize: (options = {}) ->
-      { window } = options
-
       updater = App.updater
 
       aboutView = @getAboutView(updater)
 
       @listenTo aboutView, "page:clicked", ->
         ## this needs to be moved to an .env variable
-        App.execute "gui:external:open", "http://www.cypress.io"
+        App.ipc("external:open", "https://cypress.io")
 
       @show aboutView
 
