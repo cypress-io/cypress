@@ -3,14 +3,16 @@
   class Show.Controller extends App.Controllers.Application
 
     initialize: (options = {}) ->
-      { window } = options
+      logs = App.request "log:entities"
 
-      @logs = logs = App.request "log:entities"
+      App.ipc "on:log", (log) ->
+        logs.add(log)
 
       debugView = @getDebugView(logs)
 
       @listenTo debugView, "clear:clicked", ->
-        logs.clear()
+        App.ipc("clear:logs").then ->
+          logs.reset()
 
       @listenTo debugView, "refresh:clicked", ->
         logs.refresh()
@@ -18,7 +20,7 @@
       @show debugView
 
     onDestroy: ->
-      @logs.offLog()
+      App.ipc("off:log")
 
     getDebugView: (logs) ->
       new Show.Debug

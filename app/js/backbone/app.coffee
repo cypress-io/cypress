@@ -4,6 +4,7 @@
 
   App.addRegions
     aboutRegion:  "#about-region"
+    debugRegion:  "#debug-region"
     mainRegion:   "#main-region"
     footerRegion: "#footer-region"
 
@@ -29,7 +30,7 @@
       when options.about
         about()
       when options.debug
-        throw new Error("debug not implemented yet")
+        debug()
       when options.updating
         updating(options)
       else
@@ -37,6 +38,9 @@
 
   about = ->
     App.vent.trigger("start:about:app", App.aboutRegion)
+
+  debug = ->
+    App.vent.trigger("start:debug:app", App.debugRegion)
 
   updating = (options) ->
     ## display the GUI

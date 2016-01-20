@@ -10,4 +10,7 @@ module.exports = {
   getPathToAbout: ->
     file("about.html")
 
+  getPathToDebug: ->
+    file("debug.html")
+
 }

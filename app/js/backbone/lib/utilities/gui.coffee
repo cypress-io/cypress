@@ -155,77 +155,24 @@
         @close(true)
 
     debug: ->
-      if debug = windows.debug
-        return debug.focus()
-
-      windows.debug = debug = App.request "gui:open", "app://app/nw/public/debug.html",
+      App.ipc("window:open", {
         position: "center"
         width: 800
         height: 400
-        # frame: false
         toolbar: false
         title: "Debug"
-
-      debug.once "loaded", =>
-        @focus(debug)
-
-        ## pass moment up
-        debug.window.moment = moment
-
-        debug.showDevTools() if App.config.get("debug")
-
-        ## grab the debug region from other window
-        $el = $("#debug-region", debug.window.document)
-
-        ## attach to the app as a custom region object
-        App.addRegions
-          debugRegion: Marionette.Region.extend(el: $el)
-
-        App.vent.trigger "start:debug:app", App.debugRegion, debug
-
-      debug.once "close", ->
-        ## remove app region when this is closed down
-        App.removeRegion("debugRegion") if App.debugRegion
-
-        delete windows.debug
-
-        ## really shut down the window!
-        @close(true)
+        type: "DEBUG"
+      })
 
     preferences: ->
-      if preferences = windows.preferences
-        return preferences.focus()
-
-      windows.preferences = preferences = App.request "gui:open", "./preferences.html",
+      App.ipc("window:open", {
         position: "center"
         width: 520
         height: 270
-        # frame: false
         toolbar: false
         title: "Preferences"
-
-      preferences.once "loaded", =>
-        @focus(preferences)
-
-        preferences.showDevTools() if App.config.get("debug")
-
-        ## grab the preferences region from other window
-        $el = $("#preferences-region", preferences.window.document)
-
-        ## attach to the app as a custom region object
-        App.addRegions
-          preferencesRegion: Marionette.Region.extend(el: $el)
-
-        App.vent.trigger "start:preferences:app", App.preferencesRegion, preferences
-
-      preferences.once "close", ->
-        ## remove app region when this is closed down
-        App.removeRegion("preferencesRegion") if App.preferencesRegion
-
-        delete windows.preferences
-
-        ## really shut down the window!
-        @close(true)
+        type: "PREFERENCES"
+      })
 
     tests: ->
       return if not App.config.get("debug")

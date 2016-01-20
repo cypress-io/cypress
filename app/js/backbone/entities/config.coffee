@@ -64,18 +64,6 @@
       data.type = "native"
       @getLog().log("info", text, data)
 
-    getLogs: ->
-      @getLog().getLogs()
-
-    onLog: (fn) ->
-      @getLog().onLog(fn)
-
-    clearLogs: ->
-      @getLog().clearLogs()
-
-    offLog: ->
-      @getLog().off()
-
     cli: (options) ->
       cli = @getCli()
       cli(App, options)

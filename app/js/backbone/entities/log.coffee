@@ -22,28 +22,18 @@
       if date = log.get("timestamp")
         -moment(date).unix()
 
-    offLog: ->
-      App.config.offLog()
-
     refresh: ->
       @reset()
-      _.defer => @fetch()
+      @fetch()
 
     fetch: ->
-      App.config.getLogs().then (array) =>
-        @add(array)
-
-    clear: ->
-      App.config.clearLogs().then => @reset()
+      App.ipc("get:logs").bind(@).then(@add)
 
   API =
     getLogs: ->
       logs = new Entities.LogsCollection
 
       logs.fetch()
-
-      App.config.onLog (log) ->
-        logs.add(log)
 
       logs
 
