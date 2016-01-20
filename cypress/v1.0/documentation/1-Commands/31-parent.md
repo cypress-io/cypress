@@ -1,13 +1,13 @@
 slug: parent
 excerpt: Get the parent of elements
 
-### [cy.parent()](#usage)
+## [cy.parent()](#usage)
 
 Get the parent of each element in the current set of matched elements.
 
 ***
 
-### [cy.parent( *selector* )](#selector-usage)
+## [cy.parent( *selector* )](#selector-usage)
 
 Get the parent of each element in the current set of matched elements filtered by selector.
 
@@ -15,17 +15,17 @@ Get the parent of each element in the current set of matched elements filtered b
 
 ## Usage
 
-#### Get the parent of the active `li`
+Get the parent of the active `li`
 
 ```javascript
-cy.get("li.active").parent().should("have.class", "nav")
+cy.get("li.active").parent()
 ```
 
 ***
 
 ## Selector Usage
 
-#### Get the parent with class `nav` of the active `li`
+Get the parent with class `nav` of the active `li`
 
 ```javascript
 cy.get("li.active").parent(".nav")

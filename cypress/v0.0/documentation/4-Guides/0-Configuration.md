@@ -23,7 +23,7 @@ Option | Default | Description
 
 Option | Default | Description
 ----- | ---- | ----
-`baseUrl` | `null` | Base url to prefix to [`cy.visit`](http://on.cypress.io/api/visit) command
+`baseUrl` | `null` | Base url to prefix to [`cy.visit`](http://on.cypress.io/api/visit) or [`cy.request`](http://on.cypress.io/api/request) command
 `visitTimeout` | `30000` | Time (ms) to wait until [`cy.visit`](http://on.cypress.io/api/visit) times out
 `requestTimeout` | `5000` | Time (ms) to wait for an XHR request during [`cy.wait`](wait) command
 `responseTimeout` | `20000` | Time (ms) to wait until a response for [`cy.request`](request) and [`cy.wait`](http://on.cypress.io/api/wait) commands

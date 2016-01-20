@@ -1,13 +1,13 @@
 slug: parents
 excerpt: Get the parents of elements
 
-### [cy.parents()](#usage)
+## [cy.parents()](#usage)
 
 Get the ancestors of each element in the current set of matched elements.
 
 ***
 
-### [cy.parents( *selector* )](#selector-usage)
+## [cy.parents( *selector* )](#selector-usage)
 
 Get the ancestors of each element in the current set of matched elements filtered by selector
 
@@ -15,7 +15,7 @@ Get the ancestors of each element in the current set of matched elements filtere
 
 ## Usage
 
-#### Get the parents of the active `li`
+Get the parents of the active `li`
 
 ```javascript
 cy.get("li.active").parents()
@@ -25,7 +25,7 @@ cy.get("li.active").parents()
 
 ## Selector Usage
 
-#### Get the parents with class `nav` of the active `li`
+Get the parents with class `nav` of the active `li`
 
 ```javascript
 cy.get("li.active").parents(".nav")

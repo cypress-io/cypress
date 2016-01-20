@@ -1,32 +1,33 @@
 slug: prev
 excerpt: Get the previous sibling of elements
 
-### [cy.prev()](#usage)
+## [cy.prev()](#usage)
 
 Get the immediately preceding sibling of each element in the set of matched elements.
 
 ***
 
-### [cy.prev( *selector* )](#selector-usage)
+## [cy.prev( *selector* )](#selector-usage)
 
 Get the immediately preceding sibling of each element in the set of matched elements filtered by selector.
 
 ***
 
 ## Usage
+
 ```html
 <ul>
-  <li>list item 1</li>
-  <li>list item 2</li>
-  <li class="third-item">list item 3</li>
-  <li>list item 4</li>
-  <li>list item 5</li>
+  <li>Cockatiels</li>
+  <li>Lorikeets</li>
+  <li class="active">Cockatoos</li>
+  <li>Conures</li>
+  <li>Eclectus</li>
 </ul>
 ```
 
 ```javascript
-// returns <li>list item 2</li>
-cy.get(".third-item").prev()
+// returns <li>Lorikeets</li>
+cy.get(".active").prev()
 ```
 
 ***
@@ -35,17 +36,17 @@ cy.get(".third-item").prev()
 
 ```html
 <ul>
-  <li>list item 1</li>
-  <li>list item 2</li>
-  <li class="third-item">list item 3</li>
-  <li>list item 4</li>
-  <li>list item 5</li>
+  <li>Cockatiels</li>
+  <li>Lorikeets</li>
+  <li class="active">Cockatoos</li>
+  <li>Conures</li>
+  <li>Eclectus</li>
 </ul>
 ```
 
 ```javascript
-// returns <li>list item 3</li>
-cy.get("li").prev(".third-item")
+// returns <li>Cockatoos</li>
+cy.get("li").prev(".active")
 ```
 
 ***

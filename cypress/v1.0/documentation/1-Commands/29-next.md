@@ -1,13 +1,13 @@
 slug: next
 excerpt: Get the next sibling of elements
 
-### [cy.next()](#usage)
+## [cy.next()](#usage)
 
-Get the immediately following sibling of each element in the set of matched elements. If a selector is provided, it retrieves the next sibling only if it matches that selector.
+Get the immediately following sibling of each element in the set of matched elements.
 
 ***
 
-### [cy.next( *selector* )](#selector-usage)
+## [cy.next( *selector* )](#selector-usage)
 
 Get the immediately following sibling of each element in the set of matched elements. If a selector is provided, it retrieves the next sibling only if it matches that selector.
 
@@ -15,7 +15,7 @@ Get the immediately following sibling of each element in the set of matched elem
 
 ## Usage
 
-#### Find the element next to `.second`
+Find the element next to `.second`
 
 ```html
 <ul>
@@ -34,7 +34,7 @@ cy.get(".second").next()
 
 ## Selector Usage
 
-#### Find the very next sibling of each li. Keep only the ones with a class `selected`.
+Find the very next sibling of each li. Keep only the ones with a class `selected`.
 
 ```html
 <ul>

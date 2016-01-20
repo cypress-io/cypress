@@ -1,15 +1,15 @@
 slug: not
 excerpt: Remove elements from set
 
-### [cy.not( *selector* )](#selector-usage)
+## [cy.not( *selector* )](#selector-usage)
 
-Remove elements from the set of matched elements. Opposite of [`.filter()`](https://github.com/cypress-io/cypress/wiki#filter)
+Remove elements from the set of matched elements. Opposite of [`cy.filter()`](http://on.cypress.io/api/filter)
 
 ***
 
 ## Selector Usage
 
-> Filter the current subject to the elements that do not have class `active`.
+Filter the current subject to the elements that do not have class `active`.
 
 ```javascript
 cy.get(".left-nav>.nav").find(">li").not(".active")

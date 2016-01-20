@@ -3,7 +3,7 @@ excerpt: Filter elements by selector
 
 ## [cy.filter( *selector* )](#selector-usage)
 
-Reduce the set of matched elements to those that match the selector.
+Reduce the set of matched elements to those that match the selector.  Opposite of [`cy.not()`](http://on.cypress.io/api/not)
 
 ***
 
