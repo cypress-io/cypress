@@ -73,6 +73,10 @@ body {
   font-size: 90%;
 }
 
+.block-show-code .code-tabs a:hover {
+  color: #aaa;
+}
+
 .block-show-code pre {
   margin-top: 0;
   margin-bottom: 16px;
@@ -92,6 +96,14 @@ body {
   white-space: pre;
   background: transparent;
   border: 0;
+}
+
+a>code {
+  color: #0094ff;
+}
+
+.theme-solid .sidebar-nav ul {
+  font-size: 90%;
 }
 
 code {
