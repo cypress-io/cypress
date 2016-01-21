@@ -14,7 +14,7 @@ Wait until the matching [aliased](https://on.cypress.io/guides/using-aliases) XH
 [block:callout]
 {
   "type": "info",
-  "body": "[Read about XHR strategy first.](https://on.cypress.io/guides/network-requests-xhr)",
+  "body": "Read about [Aliasing](https://on.cypress.io/guides/using-aliases) and [XHR strategy](https://on.cypress.io/guides/network-requests-xhr) first.",
   "title": "New to Cypess?"
 }
 [/block]
@@ -35,9 +35,10 @@ Pass in an options object to change the default behavior of `cy.wait`.
 
 Option | Default | Notes
 --- | --- | ---
+`timeout` | `5000`, `20000` | Override the default requestTimeout and responseTimeout (in ms)
 `log` | `true` | Display command in command log
 
-You can also set options for all `cy.wait`'s `requestTimeout` and `responseTimeout` globally in [configuration](https://on.cypress.io/guides/configuration).
+You can also change the default `requestTimeout` and `responseTimeout` that all `cy.wait` use in [configuration](https://on.cypress.io/guides/configuration).
 
 ***
 
