@@ -103,6 +103,7 @@ cy.get("form").contains("submit the form!").click()
 // in this case the <button> is returned which is why we can now drill
 // into its children
 cy.contains("Search").children("i").should("have.class", "fa-search")
+```
 
 ***
 
@@ -224,7 +225,7 @@ cy.contains("ul", "apples")
 
 ## Dual command can be either parent or child
 
-`cy.contains` is a dual command.  This means it can act as both a `parent` and a `child` command.  Read more about [`commands`](https://on.cypress.io/guides/issuing-commands) if this is unfamiliar.
+`cy.contains` is a dual command.  This means it can act as both a `parent` and a `child` command.  Read more about [issuing commands](https://on.cypress.io/guides/issuing-commands) if this is unfamiliar.
 
 Because it is a dual command it can either *begin* a chain of commands or work off of an *existing* subject.
 
