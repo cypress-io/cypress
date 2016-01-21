@@ -1,9 +1,9 @@
 require("./environment")
 
-_         = require("lodash")
-cp        = require("child_process")
-path      = require("path")
-parseArgs = require("./util/parse_args")
+_        = require("lodash")
+cp       = require("child_process")
+path     = require("path")
+argsUtil = require("./util/args")
 
 currentlyRunningElectron = ->
   process.versions and process.versions.electron
@@ -33,7 +33,7 @@ runHeadless = ->
   cp.spawn("nodemon", args, {stdio: "inherit"})
 
 module.exports = (argv) ->
-  options = parseArgs(argv)
+  options = argsUtil.toObject(argv)
 
   ## if we are in smokeTest mode
   ## then just output the pong's value
