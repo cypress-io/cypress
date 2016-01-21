@@ -14,10 +14,14 @@
     ## or display any UI. just finish installing the updates
 
     ## display the GUI
-    App.execute "gui:display", options.coords
+    # App.execute "gui:display", options.coords
+    App.ipc("change:coords", options.coords).then ->
 
-    ## start the updates being applied app so the user knows its still a-happen-ning
-    return App.execute "start:updates:applied:app", options.appPath, options.execPath
+      ## start the updates being applied app so the user knows its still a-happen-ning
+      App.execute "start:updates:applied:app"
+
+      ## and handle the logic for telling the updater to install
+      App.ipc("updater:install", _.pick(options, "appPath", "execPath"))
 
   projects = ->
     ## check cache store for user
@@ -47,7 +51,6 @@
   App.on "start", (mode) ->
 
     App.ipc("get:options").then (options = {}) ->
-
       ## create a App.config model from the passed in options
       App.config = App.request("config:entity", options)
 
@@ -70,6 +73,11 @@
         #   ## and go into debug mode if we should
         #   debugger if @get("debug")
 
+      ## if we are updating then
+      ## immediately return
+      if options.updating
+        return updating(options)
+
       switch mode
         when "about"
           about()
@@ -77,8 +85,6 @@
           debug()
         when "updates"
           updates()
-        when "updating"
-          updating(options)
         else
           projects()
 

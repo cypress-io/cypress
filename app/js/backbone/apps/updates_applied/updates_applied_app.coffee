@@ -7,5 +7,5 @@
 
   router = new Router
 
-  App.commands.setHandler "start:updates:applied:app", (appPath, execPath) ->
-    router.to "show", appPath: appPath, execPath: execPath
+  App.commands.setHandler "start:updates:applied:app", ->
+    router.to "show"
