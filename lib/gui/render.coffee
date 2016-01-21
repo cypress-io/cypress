@@ -10,7 +10,7 @@ pkg           = require("../../package.json")
 cache         = require("../cache")
 session       = require("../session")
 logger        = require("../log")
-updater       = require("../updater")()
+Updater       = require("../updater")
 Cypress       = require("../cypress")
 cypressGui    = require("cypress-gui")
 
@@ -165,13 +165,19 @@ module.exports = (optionsOrArgv) ->
 
       when "updater:install"
         ## send up the appPath, execPath, and initial args
-        updater.install(arg.appPath, arg.execPath, options)
+        Updater().install(arg.appPath, arg.execPath, options)
+
+      when "updater:check"
+        Updater().check({
+          onNewVersion: ->   send(null, true)
+          onNoNewVersion: -> send(null, false)
+        })
 
       when "updater:run"
         set = (event, version) ->
           send(null, {event: event, version: version})
 
-        updater.run({
+        Updater().run({
           onStart: -> set("start")
           onApply: -> set("apply")
           onError: -> set("error")
