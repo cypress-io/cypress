@@ -1,4 +1,4 @@
-slug: philosophy
+slug: our-goals
 excerpt: What we believe and why
 
 There are clear benefits to testing code. But many *web applications* are not fully covered in tests. Why? There are many testing tools for the front end, but most (if not all) suffer from some problems.

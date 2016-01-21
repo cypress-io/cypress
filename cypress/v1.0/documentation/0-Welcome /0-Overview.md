@@ -1,9 +1,7 @@
 slug: overview
 excerpt: Cypress helps you write automated tests for the web
 
-Nullam id dolor id nibh ultricies vehicula ut id elit. Donec id elit non mi porta gravida at eget metus. Etiam porta sem malesuada magna mollis euismod.
-
-**New to Cypress?** Read through our [Guides](https://on.cypress.io/guides/configuration) first.
+**New to Cypress?** Read through our [Guides](https://on.cypress.io/guides/overview) first.
 
 ---
 
