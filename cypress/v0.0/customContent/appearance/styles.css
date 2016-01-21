@@ -37,6 +37,7 @@ body {
 
 .docs-content [marked] p img {
   border: 1px solid #ddd;
+  box-shadow: 0 2px 2px #eee;
 }
 
 /*-------Code tags/variable colors---------*/
