@@ -159,8 +159,7 @@ module.exports = (optionsOrArgv) ->
           .catch(sendErr)
 
       when "get:options"
-        send(null, {
-          env:     process.env.CYPRESS_ENV
+        send null, _.extend({}, options, {
           version: pkg.version
         })
 
