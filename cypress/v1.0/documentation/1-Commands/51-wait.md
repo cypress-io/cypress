@@ -14,7 +14,7 @@ Wait until the matching [aliased](https://on.cypress.io/guides/using-aliases) XH
 [block:callout]
 {
   "type": "info",
-  "body": "Read about [Aliasing](https://on.cypress.io/guides/using-aliases) and [XHR strategy](https://on.cypress.io/guides/network-requests-xhr) first.",
+  "body": "Read about [Network Requests](https://on.cypress.io/guides/network-requests-xhr) and [Aliasing](https://on.cypress.io/guides/using-aliases) first.",
   "title": "New to Cypess?"
 }
 [/block]
