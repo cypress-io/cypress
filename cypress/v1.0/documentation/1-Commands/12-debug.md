@@ -7,13 +7,25 @@ excerpt: Call debugger
 
 Make sure you have your Chrome Dev Tools open for this to hit the breakpoint.
 
-```javascript
-cy.get("button").debug()
-```
+***
+
+# Options
+
+Pass in an options object to specify the conditions of the command.
+
+**cy.debug(*options* )**
+
+`cy.debug` supports these options:
+
+Option | Default | Notes
+--- | --- | ---
+`log` | `true` | Display command in command log
 
 ***
 
 # Usage
+
+## Log out the current subject for debugging
 
 ```javascript
 // Cypress will log out the current subject and other
@@ -25,4 +37,4 @@ cy.get("a").debug().should("have.attr", "href")
 
 # Related
 
-1. [pause](https://on.cypress.io/api/pause)
+- [pause](https://on.cypress.io/api/pause)

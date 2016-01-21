@@ -3,7 +3,7 @@ excerpt: Check to see if matching element contains text
 
 # [cy.contains( *text* )](#text-usage)
 
-Returns the deepest element containing the text.  Elements can contain *more* than the desired text and still match.
+Returns the deepest element containing the text. Elements can contain *more* than the desired text and still match.
 
 Additionally, Cypress will prefer some elements over the deepest element found. Preference order:
 
@@ -12,13 +12,7 @@ Additionally, Cypress will prefer some elements over the deepest element found. 
 - `a`
 - `label`
 
-If Cypress does not find a matching element, it will continue to retry until the [`commandTimeout`](options) has been reached.
-
-***
-
-# [cy.contains( *text*, *options* )](#text-options)
-
-Pass in an options object to specify the conditions of the element.
+If Cypress does not find a matching element, it will continue to retry until the [`commandTimeout`](https://on.cypress.io/guides/configuration) has been reached.
 
 ***
 
@@ -30,9 +24,24 @@ Using a selector allows you to return more *shallow* elements in the tree which 
 
 ***
 
+# Options
+
+Pass in an options object to specify the conditions of the command.
+
+**cy.contains( *text*, *options* )**
+**cy.contains( *selector*, *text*, *options* )**
+
+`cy.contains` supports these options:
+
+Option | Default | Notes
+--- | --- | ---
+`log` | `true` | Display command in command log
+
+***
+
 # Text Usage
 
-Find the deepest element containing the text `apples`
+## Find the deepest element containing some text
 
 ```html
 <ul>
@@ -49,7 +58,7 @@ cy.contains("apples")
 
 ***
 
-Find the input[type='submit'] by value <br>
+## Find the input[type='submit'] by value
 
 ```html
 <div id="main">
@@ -77,7 +86,7 @@ cy.get("form").contains("submit the form!").click()
 
 ***
 
-Cypress will favor `button` over other elements
+## Favor of `button` over other elements
 
 ```html
 <form>
@@ -99,7 +108,7 @@ cy.contains("Search").children("i").should("have.class", "fa-search")
 
 ***
 
-Cypress will favor `a`
+## Favor of `a` over other elements
 
 ```html
 <nav>
@@ -125,7 +134,7 @@ cy.get("nav").contains("Sign Out").should("have.attr", "href", "/signout")
 
 ***
 
-Cypress will favor `label`
+## Favor of `label` over other elements
 
 ```html
 <form>
@@ -152,7 +161,7 @@ cy.contains("Age").find("input").type("29")
 
 ***
 
-Only the *first* matched element will be returned
+## Only the *first* matched element will be returned
 
 ```html
 <ul id="header">
@@ -184,7 +193,7 @@ cy.get("#main").contains("Jane Lane")
 
 # Selector and Text Usage
 
-Specify a selector to return a specific element
+## Specify a selector to return a specific element
 
 ```html
 <html>
@@ -215,22 +224,20 @@ cy.contains("ul", "apples")
 
 # Notes
 
+## Dual command can be either parent or child
+
 `cy.contains` is a dual command.  This means it can act as both a `parent` and a `child` command.  Read more about [`commands`](https://on.cypress.io/guides/issuing-commands) if this is unfamiliar.
 
 Because it is a dual command it can either *begin* a chain of commands or work off of an *existing* subject.
 
-***
-
-Start a chain of commands
+**Start a chain of commands**
 
 ```javascript
 // search from the root scope (default: document)
 cy.contains("some content")
 ```
 
-***
-
-Find content within an existing scope
+**Find content within an existing scope**
 
 ```javascript
 // search within an existing subject for the content
@@ -239,9 +246,7 @@ Find content within an existing scope
 cy.get("#main").find("aside").contains("Add a user")
 ```
 
-***
-
-Be wary of chaining multiple contains
+**Be wary of chaining multiple contains**
 
 ```javascript
 // let's imagine a scenario where you click a user's delete button
@@ -261,9 +266,7 @@ cy
 
 ```
 
-***
-
-End previous chains to get back to the root scope
+**End previous chains to get back to the root scope**
 
 ```javascript
 cy
@@ -297,15 +300,18 @@ cy
 
 # Command Log
 
+## Element contains text "New User"
+
 <img width="536" alt="screen shot 2015-11-27 at 1 43 22 pm" src="https://cloud.githubusercontent.com/assets/1271364/11446973/009ac32c-950d-11e5-9eaa-09f8b8ddf086.png">
 
 When clicking on the `contains` command within the command log, the console outputs the following:
 
 <img width="477" alt="screen shot 2015-11-27 at 1 43 50 pm" src="https://cloud.githubusercontent.com/assets/1271364/11446977/04b31be4-950d-11e5-811e-4fd83d364d00.png">
+
 ***
 
 # Related
 
-1. [get](https://on.cypress.io/api/get)
-2. [within](https://on.cypress.io/api/within)
-3. [root](https://on.cypress.io/api/root)
+- [get](https://on.cypress.io/api/get)
+- [within](https://on.cypress.io/api/within)
+- [root](https://on.cypress.io/api/root)

@@ -24,7 +24,7 @@ If an extension is omitted, Cypress will attempt to resolve the fixture by order
 
 # Single Fixture Usage
 
-Load the `users.json` fixture
+## Load the `users.json` fixture
 
 ```javascript
 cy.fixture("users.json")
@@ -32,7 +32,7 @@ cy.fixture("users.json")
 
 ***
 
-Omit the extension
+## Omit the fixture file's extension
 
 ```javascript
 cy.fixture("admin")
@@ -46,7 +46,7 @@ Cypress will search for files called `admin` and resolve the first one in this o
 
 ***
 
-Image fixtures will be sent as `base64`
+## Image fixtures will be sent as `base64`
 
 ```javascript
 cy.fixture("images/logo.png").then(function(logo){
@@ -131,6 +131,13 @@ This is useful when asserting about values in the fixture object, or perhaps if 
 
 ***
 
-# More about Fixtures
+# Command Log
 
-For a detailed explanation of when and why to use fixtures, [read more about fixtures here](https://on.cypress.io/guides/creating-fixtures).
+## `fixture` does *not* log in the command log
+
+***
+
+# Related
+
+- [route](https://on.cypress.io/api/route).
+- [Creating Fixtures](https://on.cypress.io/guides/creating-fixtures).

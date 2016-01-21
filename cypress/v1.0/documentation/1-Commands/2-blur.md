@@ -7,28 +7,35 @@ Blur the current subject. Returns the existing subject.
 
 ***
 
-# [cy.blur( *options* )](#options-usage)
+# Options
 
-Blur supports these options:
+Pass in an options object to specify the conditions of the command.
+
+**[cy.blur( *options* )](#options-usage)**
+
+`cy.blur` supports these options:
 
 Option | Default | Notes
 --- | --- | ---
 `force` | `false` | Forces blur, disables error checking prior to blur
+`log` | `true` | Display command in command log
 
 ***
 
 # Usage
 
-Blur the comment input.
+## Blur the comment input.
 
 ```javascript
 // returns the same <textarea> for further chaining
 cy.get("[name='comment']").type("Nice Product!").blur()
 ```
 
+***
+
 # Options Usage
 
-Blur the first input, ignoring whether the input is currently focused.
+## Blur the first input, ignoring whether the input is currently focused.
 
 ```javascript
 // returns the same <input> for further chaining
@@ -38,6 +45,8 @@ cy.get("input:first").blur({force: true})
 ***
 
 # Command Log
+
+## Blur a textarea after typing.
 
 ```javascript
 cy.get("[name='comment']").type("Nice Product!").blur()
@@ -54,5 +63,6 @@ When clicking on the `blur` command within the command log, the console outputs 
 ***
 
 # Related
-1. [focused](https://on.cypress.io/api/focused)
-2. [focus](https://on.cypress.io/api/focus)
+
+- [focused](https://on.cypress.io/api/focused)
+- [focus](https://on.cypress.io/api/focus)

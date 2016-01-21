@@ -7,9 +7,23 @@ Reduce the set of matched elements to the first in the set.
 
 ***
 
+# Options
+
+Pass in an options object to specify the conditions of the command.
+
+**cy.first(*options* )**
+
+`cy.first` supports these options:
+
+Option | Default | Notes
+--- | --- | ---
+`log` | `true` | Display command in command log
+
+***
+
 # Usage
 
-Get the first list item in a list.
+## Get the first list item in a list.
 
 ```html
 <ul>
@@ -29,6 +43,8 @@ cy.get("ul").first()
 
 # Command Log
 
+## Find the first `input` in the `form`
+
 ```javascript
 cy.get("form").find("input").first()
 ```
@@ -45,4 +61,4 @@ When clicking on `first` within the command log, the console outputs the followi
 
 # Related
 
-1. [last](https://on.cypress.io/api/last)
+- [last](https://on.cypress.io/api/last)

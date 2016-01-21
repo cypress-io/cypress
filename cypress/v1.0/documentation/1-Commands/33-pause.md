@@ -7,6 +7,20 @@ excerpt: Pause command
 
 ***
 
+# Options
+
+Pass in an options object to specify the conditions of the command.
+
+**cy.pause(*options* )**
+
+`cy.pause` supports these options:
+
+Option | Default | Notes
+--- | --- | ---
+`log` | `true` | Display command in command log
+
+***
+
 # Usage
 
 ```javascript
@@ -20,4 +34,4 @@ cy
 
 # Related
 
-1. [debug](https://on.cypress.io/api/debug)
+- [debug](https://on.cypress.io/api/debug)

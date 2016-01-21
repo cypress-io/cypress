@@ -35,6 +35,12 @@ body {
   color: #ccc;
 }
 
+.docs-content [marked] p img {
+  border: 1px solid #ddd;
+}
+
+/*-------Code tags/variable colors---------*/
+
 .cm-s-neo .cm-variable {
   color: #333;
 }
@@ -66,11 +72,12 @@ body {
   color: #333;
 }
 
+/*-------Code styles---------*/
+
 .block-show-code {
   padding: 0;
   margin-bottom: 0;
 }
-
 
 .block-show-code .code-tabs a {
   color: #aaa;
@@ -81,15 +88,13 @@ body {
   color: #aaa;
 }
 
-
-
 .block-show-code pre {
   margin-top: 0;
   margin-bottom: 16px;
   font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;
   overflow: auto;
   background-color: #f7f7f7;
-  box-shadow: 0 0 0;
+  box-shadow: 0 0 0 0 #fff;
   padding: 15px;
   font-size: 1em;
 }
@@ -115,6 +120,19 @@ a>code {
 code {
   font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
   font-size: 12px;
+  padding: 0;
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
+  margin: 0;
+  font-size: 0.85em;
+  background-color: rgba(0,0,0,0.04);
+  border-radius: 3px;
+}
+
+code:before,
+code:after {
+  letter-spacing: -0.2em;
+  content: "\00a0";
 }
 
 .block-show-code pre {
@@ -127,11 +145,9 @@ code {
   border: 0;
   margin-bottom: 0;
   word-break: normal;
-}
-
-.block-show-code pre {
   word-wrap: normal;
 }
+
 
 .block-show-code pre code {
   display: inline;
@@ -148,20 +164,4 @@ code {
 .block-show-code pre code:before,
 .block-show-code pre code:after {
   content: normal;
-}
-
-code {
-  padding: 0;
-  padding-top: 0.2em;
-  padding-bottom: 0.2em;
-  margin: 0;
-  font-size: 0.85em;
-  background-color: rgba(0,0,0,0.04);
-  border-radius: 3px;
-}
-
-code:before,
-code:after {
-  letter-spacing: -0.2em;
-  content: "\00a0";
 }

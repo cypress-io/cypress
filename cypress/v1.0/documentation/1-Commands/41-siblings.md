@@ -13,9 +13,24 @@ Get the siblings of each element in the set of matched elements filtered by a se
 
 ***
 
+# Options
+
+Pass in an options object to specify the conditions of the command.
+
+**cy.siblings( *options* )**
+**cy.siblings( *selector*, *options* )**
+
+`cy.siblings` supports these options:
+
+Option | Default | Notes
+--- | --- | ---
+`log` | `true` | Display command in command log
+
+***
+
 # Usage
 
-Get the siblings of each li.
+## Get the siblings of each li.
 
 ```html
 <ul>
@@ -35,7 +50,7 @@ cy.get(".active").siblings()
 
 # Selector Usage
 
-Get siblings of element with class `active`.
+## Get siblings of element with class `active`.
 
 ```javascript
 // returns <li class="active">Services</li>
@@ -45,6 +60,8 @@ cy.get("li").siblings(".active")
 ***
 
 # Command Log
+
+## Get the siblings of element with class `active`
 
 ```javascript
 cy.get(".left-nav").find("li.active").siblings()
@@ -62,5 +79,5 @@ When clicking on `siblings` within the command log, the console outputs the foll
 
 # Related
 
-1. [prev](https://on.cypress.io/api/prev)
-2. [next](https://on.cypress.io/api/next)
+- [prev](https://on.cypress.io/api/prev)
+- [next](https://on.cypress.io/api/next)

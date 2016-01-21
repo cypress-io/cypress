@@ -9,9 +9,23 @@ If there is currently an `activeElement` (a different element currently with foc
 
 ***
 
+# Options
+
+Pass in an options object to specify the conditions of the command.
+
+**cy.focus( *options* )**
+
+`cy.focus` supports these options:
+
+Option | Default | Notes
+--- | --- | ---
+`log` | `true` | Display command in command log
+
+***
+
 # Usage
 
-Focus on the current subject.
+## Focus on the current subject.
 
 ```javascript
 cy.get("[name='comment']").focus()
@@ -28,6 +42,8 @@ cy.get("[name='comment']").focus().type("Nice Product!").blur()
 
 # Command Log
 
+## Focus the textarea.
+
 ```javascript
 cy.get("[name='comment']").focus()
 ```
@@ -43,6 +59,7 @@ When clicking on the `focus` command within the command log, the console outputs
 ***
 
 # Related
-1. [focused](https://on.cypress.io/api/focused)
-2. [blur](https://on.cypress.io/api/blur)
-2. [click](https://on.cypress.io/api/click)
+
+- [focused](https://on.cypress.io/api/focused)
+- [blur](https://on.cypress.io/api/blur)
+- [click](https://on.cypress.io/api/click)

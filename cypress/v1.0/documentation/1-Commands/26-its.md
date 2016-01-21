@@ -29,6 +29,7 @@ cy
 ***
 
 # Related
-1. [invoke](https://on.cypress.io/api/invoke)
-2. [wrap](https://on.cypress.io/api/wrap)
-3. [then](https://on.cypress.io/api/then)
+
+- [invoke](https://on.cypress.io/api/invoke)
+- [wrap](https://on.cypress.io/api/wrap)
+- [then](https://on.cypress.io/api/then)

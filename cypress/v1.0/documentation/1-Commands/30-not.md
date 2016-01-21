@@ -7,9 +7,23 @@ Remove elements from the set of matched elements. Opposite of [`cy.filter()`](ht
 
 ***
 
+# Options
+
+Pass in an options object to specify the conditions of the command.
+
+**cy.not( *selector*, *options* )**
+
+`cy.not` supports these options:
+
+Option | Default | Notes
+--- | --- | ---
+`log` | `true` | Display command in command log
+
+***
+
 # Selector Usage
 
-Filter the current subject to the elements that do not have class `active`.
+## Filter the current subject to the elements that do not have class `active`.
 
 ```javascript
 cy.get(".left-nav>.nav").find(">li").not(".active")
@@ -18,6 +32,8 @@ cy.get(".left-nav>.nav").find(">li").not(".active")
 ***
 
 # Command Log
+
+## Find all buttons that are not of type submit
 
 ```javascript
 cy.get("form").find("button").not("[type='submit']")
@@ -34,4 +50,4 @@ When clicking on `not` within the command log, the console outputs the following
 ***
 # Related
 
-1. [filter](https://on.cypress.io/api/filter)
+- [filter](https://on.cypress.io/api/filter)

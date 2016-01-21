@@ -45,7 +45,7 @@ Does not change the subject. Whatever was passed to the function is what is retu
 
 # Chainers Usage
 
-Assert the checkbox is disabled
+## Assert the checkbox is disabled
 
 ```javascript
 cy.get(":checkbox").should("be.disabled")
@@ -53,7 +53,7 @@ cy.get(":checkbox").should("be.disabled")
 
 ***
 
-The current subject is returned
+## The current subject is returned
 
 ```javascript
 cy.get("option:first").should("be.selected").then(function($option)){
@@ -65,7 +65,7 @@ cy.get("option:first").should("be.selected").then(function($option)){
 
 # Chainers with Value Usage
 
-Assert the class is 'form-horizontal'
+## Assert the class is 'form-horizontal'
 
 ```javascript
 cy.get("form").should("have.class", "form-horizontal")
@@ -73,7 +73,7 @@ cy.get("form").should("have.class", "form-horizontal")
 
 ***
 
-Assert the value is not 'foo'
+## Assert the value is not 'foo'
 
 ```javascript
 cy.get("input").should("not.have.value", "foo")
@@ -81,7 +81,7 @@ cy.get("input").should("not.have.value", "foo")
 
 ***
 
-The current subject is returned
+## The current subject is returned
 
 ```javascript
 cy.get("button").should("have.id", "new-user").then(function($button){
@@ -93,7 +93,7 @@ cy.get("button").should("have.id", "new-user").then(function($button){
 
 # Chainers with Method and Value Usage
 
-Assert the href is equal to '/users'
+## Assert the href is equal to '/users'
 
 ```javascript
 // have.attr comes from chai-jquery
@@ -267,6 +267,8 @@ You can [read more about debugging assertions](https://on.cypress.io/guides/maki
 
 # Command Log
 
+## Assert that there should be 8 children in a nav
+
 ```javascript
 //
 cy
@@ -283,7 +285,9 @@ When clicking on `assert` within the command log, the console outputs the follow
 
 <img width="768" alt="screen shot 2015-11-29 at 12 08 45 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458633/08a7b238-9692-11e5-9d5d-620122436bc0.png">
 
+***
+
 # Related
 
-1. [and](https://on.cypress.io/api/and)
-2. [Assertions](https://on.cypress.io/guides/making-assertions)
+- [and](https://on.cypress.io/api/and)
+- [Assertions](https://on.cypress.io/guides/making-assertions)

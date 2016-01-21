@@ -5,11 +5,32 @@ excerpt: Get the children of elements
 
 Get the children of each element in the set of matched elements.
 
+***
+
 # [cy.children( *selector* )](#selector-usage)
 
 The `.children()` method optionally accepts a selector expression. If the selector is supplied, the elements will be filtered by testing whether they match it.
 
+***
+
+# Options
+
+Pass in an options object to specify the conditions of the command.
+
+**cy.children( *options* )**
+**cy.children( *selector*, *options* )**
+
+`cy.children` supports these options:
+
+Option | Default | Notes
+--- | --- | ---
+`log` | `true` | Display command in command log
+
+***
+
 # Usage
+
+## Get the children of the "secondary-nav"
 
 ```html
 <ul class="primary-nav">
@@ -40,7 +61,12 @@ The `.children()` method optionally accepts a selector expression. If the select
 cy.get("ul.secondary-nav").children()
 ```
 
+***
+
+
 # Selector Usage
+
+## Get the children with class "active"
 
 ```html
 <div>
@@ -56,7 +82,11 @@ cy.get("ul.secondary-nav").children()
 cy.get("ul").children(".active")
 ```
 
+***
+
 # Command Log
+
+## Assert that there should be 8 children elements in a nav
 
 ```javascript
 cy.get(".left-nav>.nav").children().should("have.length", 8)
@@ -70,9 +100,11 @@ When clicking on the `children` command within the command log, the console outp
 
 <img width="542" alt="screen shot 2015-11-27 at 1 52 41 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447071/2e9252bc-950e-11e5-9a32-e5860da89160.png">
 
+***
+
 # Related
 
-1. [parent](https://on.cypress.io/api/parent)
-2. [parents](https://on.cypress.io/api/parents)
-3. [next](https://on.cypress.io/api/next)
-4. [siblings](https://on.cypress.io/api/siblings)
+- [parent](https://on.cypress.io/api/parent)
+- [parents](https://on.cypress.io/api/parents)
+- [next](https://on.cypress.io/api/next)
+- [siblings](https://on.cypress.io/api/siblings)

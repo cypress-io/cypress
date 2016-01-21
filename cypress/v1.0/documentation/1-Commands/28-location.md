@@ -28,9 +28,23 @@ Key | Type | Returns
 
 ***
 
+# Options
+
+Pass in an options object to specify the conditions of the command.
+
+**cy.location( *options* )**
+
+`cy.location` supports these options:
+
+Option | Default | Notes
+--- | --- | ---
+`log` | `true` | Display command in command log
+
+***
+
 # Usage
 
-Test that a redirect works
+## Asset that a redirect works
 
 ```javascript
 // we should be redirected to the login page
@@ -41,7 +55,7 @@ cy
 
 ***
 
-Test searching for a user
+## Check location for query params and pathname
 
 ```javascript
 // we can yield the location subject and work with
@@ -91,8 +105,10 @@ In Cypress, the object we returned is a plain object, and changing or affecting 
 
 # Command Log
 
+## Assert on the location's href
+
 ```javascript
-cy.location().its("href").should("contain", "#users/new")
+cy.location().its("href").should("include", "#users/new")
 ```
 
 The commands above will display in the command log as:
@@ -107,5 +123,5 @@ When clicking on `location` within the command log, the console outputs the foll
 
 # Related
 
-1. [hash](https://on.cypress.io/api/hash)
-2. [url](https://on.cypress.io/api/url)
+- [hash](https://on.cypress.io/api/hash)
+- [url](https://on.cypress.io/api/url)

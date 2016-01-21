@@ -3,9 +3,19 @@ excerpt: Call properties on the current subject
 
 # [cy.invoke( *functionName* )](#function-usage)
 
-`cy.invoke` invokes properties that are functions on the current subject. This works the same way as underscore's `invoke` function.
+`cy.invoke` invokes properties that are functions on the current subject. This works similar to Underscore's `_.invoke` function.
 
-`cy.invoke` is identical to [`cy.its`](https://on.cypress.io/api/its). `cy.its` sometimes reads better when calling regular properties which are not functions.
+`cy.invoke` is identical to [`cy.its`](https://on.cypress.io/api/its). [`cy.its`](https://on.cypress.io/api/its) sometimes reads better when calling regular properties that are not functions.
+
+***
+
+# [cy.invoke( *functionName*, \**arguments* )](#function-with-arguments-usage)
+
+Invokes the function and forwards any additional arguments to the function call. There are no limits to the number of arguments.
+
+***
+
+# Function Usage
 
 ```javascript
 var fn = function(){
@@ -14,28 +24,6 @@ var fn = function(){
 
 cy.wrap({foo: fn}).invoke("foo").should("eq", "bar") // true
 ```
-
-***
-
-# [cy.invoke( *functionName*, \**arguments* )](#function-with-arguments-usage)
-
-Invokes the function and forwards any additional arguments to the function call. There are no limits to the number of arguments.
-
-```javascript
-var fn = function(a, b, c){
-  return a + b + c
-}
-
-cy
-  .wrap({sum: fn})
-  .invoke("sum", 2, 4, 6)
-    .should("be.gt", 10) // true
-    .and("be.lt", 20) // true
-```
-
-***
-
-# Function Usage
 
 Properties that are functions are invoked
 
@@ -78,6 +66,18 @@ cy
 
 # Function with Arguments Usage
 
+```javascript
+var fn = function(a, b, c){
+  return a + b + c
+}
+
+cy
+  .wrap({sum: fn})
+  .invoke("sum", 2, 4, 6)
+    .should("be.gt", 10) // true
+    .and("be.lt", 20) // true
+```
+
 Arguments are automatically forwarded to the function
 
 ```javascript
@@ -90,6 +90,6 @@ cy
 
 # Related
 
-1. [its](https://on.cypress.io/api/its)
-2. [wrap](https://on.cypress.io/api/wrap)
-3. [then](https://on.cypress.io/api/then)
+- [its](https://on.cypress.io/api/its)
+- [wrap](https://on.cypress.io/api/wrap)
+- [then](https://on.cypress.io/api/then)

@@ -7,9 +7,23 @@ Double-clicks the current subject.
 
 ***
 
+# Options
+
+Pass in an options object to specify the conditions of the command.
+
+**cy.dblclick(*options* )**
+
+`cy.dblclick` supports these options:
+
+Option | Default | Notes
+--- | --- | ---
+`log` | `true` | Display command in command log
+
+***
+
 # Usage
 
-Double click anchor link
+## Double click an anchor link
 
 ```html
 <a href='#nav1'>Menu</a>
@@ -23,6 +37,8 @@ cy.get("#nav1").dblclick()
 ***
 
 # Command Log
+
+## Double click on a calendar schedule
 
 ```javascript
 cy.get("[data-schedule-id='4529114']:first").dblclick()
@@ -40,4 +56,4 @@ When clicking on `dblclick` within the command log, the console outputs the foll
 
 # Related
 
-1. [click](https://on.cypress.io/api/click)
+- [click](https://on.cypress.io/api/click)

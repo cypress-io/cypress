@@ -1,9 +1,26 @@
 slug: uncheck
-excerpt: Uncheck a checkbox
+excerpt: Unselect a checkbox or radio
 
 # [cy.uncheck()](#usage)
 
-Unchecks a checkbox.
+Unchecks checkboxes or radios.
+
+***
+
+# Options
+
+Pass in an options object to specify the conditions of the command.
+
+**cy.uncheck( *options* )**
+
+`cy.uncheck` supports these options:
+
+Option | Default | Notes
+--- | --- | ---
+`interval` | `16` | Interval which to retry a uncheck
+`timeout` | `4000` | Total time to retry the uncheck
+`force` | `false` | Forces uncheck, disables error checking prior to uncheck
+`log` | `true` | Display command in command log
 
 ***
 

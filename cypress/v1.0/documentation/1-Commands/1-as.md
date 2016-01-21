@@ -1,10 +1,6 @@
 slug: as
 excerpt: Alias reusable objects for later
 
-# [cy.as( *text* )](#usage)
-
-Create an alias to be used later.
-
 [block:callout]
 {
   "type": "info",
@@ -12,11 +8,16 @@ Create an alias to be used later.
   "title": "New to Cypess?"
 }
 [/block]
+
+# [cy.as( *text* )](#usage)
+
+Create an alias to be used later.
+
 ***
 
 # Usage
 
-Alias a route, then later wait for that route using `@alias`
+## Alias a route, then wait for that route using `@alias`
 
 ```javascript
 cy
@@ -26,9 +27,12 @@ cy
     .its("url").should("contain", "users")
 
 ```
+
 ***
 
 # Command Log
+
+## Alias several routes
 
 ```javascript
 cy
@@ -47,6 +51,6 @@ Aliases of routes display in the routes instrument panel:
 
 # Related
 
-1. [get](https://on.cypress.io/api/get)
-2. [wait](https://on.cypress.io/api/wait)
-3. [Using Aliases](https://on.cypress.io/guides/using-aliases)
+- [get](https://on.cypress.io/api/get)
+- [wait](https://on.cypress.io/api/wait)
+- [Using Aliases](https://on.cypress.io/guides/using-aliases)

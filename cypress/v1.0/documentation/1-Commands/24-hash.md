@@ -9,9 +9,24 @@ If no `#` character is present, an empty string will be returned.
 
 ***
 
+# Options
+
+Pass in an options object to specify the conditions of the command.
+
+**cy.hash( *options* )**
+**cy.hash( *options* )**
+
+`cy.hash` supports these options:
+
+Option | Default | Notes
+--- | --- | ---
+`log` | `true` | Display command in command log
+
+***
+
 # Usage
 
-Assert the hash is `#/users/1` given this remote URL: `http://localhost:8000/app/#/users/1`
+## Assert that the hash is `#/users/1` given the remote URL: `http://localhost:8000/app/#/users/1`
 
 ```javascript
 // Hash returns `#/users/1`
@@ -20,14 +35,12 @@ cy.hash().should("eq", "#/users/1") // => true
 
 ***
 
-Assert the hash matches via regex
+## Assert that the hash matches via RegExp
 
 ```html
 <ul id="users">
   <li>
-    <a href="#/users/8fc45b67-d2e5-465a-b822-b281d9c8e4d1">
-      <img src="/some/picture.png" />
-    </a>
+    <a href="#/users/8fc45b67-d2e5-465a-b822-b281d9c8e4d1">Fred</a>
   </li>
 </ul>
 ```
@@ -63,6 +76,8 @@ cy.hash().should("eq", "#/users/1")
 
 # Command Log
 
+## Assert that the hash matches `#users/new`
+
 ```javascript
 cy.hash().should("eq", "#users/new")
 ```
@@ -80,5 +95,5 @@ When clicking on `hash` within the command log, the console outputs the followin
 
 # Related
 
-1. [location](https://on.cypress.io/api/location)
-2. [url](https://on.cypress.io/api/url)
+- [location](https://on.cypress.io/api/location)
+- [url](https://on.cypress.io/api/url)

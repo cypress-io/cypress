@@ -13,10 +13,14 @@ Select an option within a `<select>` element based on the value of the option.
 
 ***
 
-# [cy.select( *text*, *options* )](#options-usage)
-# [cy.select( *value*, *options* )](#options-usage)
+# Options
 
-Pass in an object containing the following key/values. Select supports the following options:
+Pass in an options object to specify the conditions of the command.
+
+**cy.select( *text*, *options* )**
+**cy.select( *value*, *options* )**
+
+`cy.select` supports these options:
 
 Option | Default | Notes
 --- | --- | ---
@@ -29,7 +33,7 @@ Option | Default | Notes
 
 # Text Usage
 
-Select the option with the text `apples`
+## Select the option with the text `apples`
 
 ```html
 <select>
@@ -48,7 +52,7 @@ cy.get("select").select("apples")
 
 # Value Usage
 
-Select the option with the value "456"
+## Select the option with the value "456"
 
 ```html
 <select>
@@ -67,6 +71,8 @@ cy.get("select").select("456")
 
 # Command Log
 
+## Select the option with the text "Home Simpson"
+
 ```javascript
 cy.get("select").select("Homer Simpson")
 ```
@@ -83,4 +89,4 @@ When clicking on `select` within the command log, the console outputs the follow
 
 # Related
 
-1. [click](https://on.cypress.io/api/click)
+- [click](https://on.cypress.io/api/click)

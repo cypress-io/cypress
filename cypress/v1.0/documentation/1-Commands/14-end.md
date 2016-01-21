@@ -21,6 +21,23 @@ cy
 
 ***
 
+# Command Log
+
+## `end` does *not* log in the command log
+
+```javascript
+cy
+  .contains(".modal-title", "Select Folder Type").end()
+  .contains("li", "Maintenance").should("have.class", "active")
+```
+
+The commands above will display in the command log as:
+
+![screen shot 2016-01-21 at 11 28 39 am](https://cloud.githubusercontent.com/assets/1271364/12486875/8aa69ff0-c032-11e5-815d-b29a5020271a.png)
+
+***
+
 # Related
 
-1. [root](https://on.cypress.io/api/root)
+- [root](https://on.cypress.io/api/root)
+- [within](https://on.cypress.io/api/within)

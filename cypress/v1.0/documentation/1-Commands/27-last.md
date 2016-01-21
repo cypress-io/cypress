@@ -7,9 +7,23 @@ Reduce the set of matched elements to the final one in the set.
 
 ***
 
+# Options
+
+Pass in an options object to specify the conditions of the command.
+
+**cy.last( *options* )**
+
+`cy.last` supports these options:
+
+Option | Default | Notes
+--- | --- | ---
+`log` | `true` | Display command in command log
+
+***
+
 # Usage
 
-Get the last list item in a list.
+## Get the last list item in a list.
 
 ```html
 <ul>
@@ -29,6 +43,8 @@ cy.get("ul").last()
 
 # Command Log
 
+## Find the last button in the form
+
 ```javascript
 cy.get("form").find("button").last()
 ```
@@ -44,4 +60,5 @@ When clicking on `last` within the command log, the console outputs the followin
 ***
 
 # Related
-1. [first](https://on.cypress.io/api/first)
+
+- [first](https://on.cypress.io/api/first)

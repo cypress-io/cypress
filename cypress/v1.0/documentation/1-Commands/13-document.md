@@ -1,13 +1,29 @@
 slug: document
-excerpt: Get the document element
+excerpt: Get the document
 
 # [cy.document()](#usage)
 
-Get the document element
+Get the document and work with its properties or methods.
+
+***
+
+# Options
+
+Pass in an options object to specify the conditions of the command.
+
+**cy.document(*options* )**
+
+`cy.document` supports these options:
+
+Option | Default | Notes
+--- | --- | ---
+`log` | `true` | Display command in command log
 
 ***
 
 # Usage
+
+## Get document and do some work
 
 ```javascript
 cy.document().then(function(document) {
@@ -15,9 +31,17 @@ cy.document().then(function(document) {
 });
 ```
 
+## Make an assertion about the document
+
+```javascript
+cy.document().its("contentType").should("eq", "text/html")
+```
+
 ***
 
 # Command Log
+
+## Get the document
 
 ```javascript
 cy.document()
@@ -35,4 +59,4 @@ When clicking on `document` within the command log, the console outputs the foll
 
 # Related
 
-1. [window](https://on.cypress.io/api/window)
+- [window](https://on.cypress.io/api/window)

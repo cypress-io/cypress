@@ -29,9 +29,13 @@ Make a `GET` request to the provided url with the provided body.
 
 ***
 
-# [cy.request( *options* )](#options-usage)
+# Options
 
-You can additionally specify the following options:
+Pass in an options object to specify the conditions of the command.
+
+**[cy.request( *options* )](#options-usage)**
+
+`cy.request` supports these options:
 
 Option | Default | Notes
 --- | --- | ---
@@ -49,7 +53,7 @@ Option | Default | Notes
 
 # URL Usage
 
-Make a `GET` request
+## Make a `GET` request
 
 ```javascript
 // make a request to seed the database prior to running each test
@@ -60,7 +64,7 @@ beforeEach(function(){
 
 ***
 
-The new subject is set to an XHR's response on request
+## Send the new subject to an XHR's response on request
 
 ```javascript
 // the response object is an object literal
@@ -80,7 +84,7 @@ cy.request("http://dev.local/users").then(function(response){
 
 # Method and URL Usage
 
-Send a `DELETE` request
+## Send a `DELETE` request
 
 ```javascript
 // Delete a user
@@ -91,7 +95,7 @@ cy.request("DELETE", "http://localhost:8888/users/827")
 
 # Method and URL and Body Usage
 
-Send a `POST` request with a JSON body
+## Send a `POST` request with a JSON body
 
 ```javascript
 // the Accepts Request Header is automatically set based
@@ -159,4 +163,4 @@ If Cypress cannot determine the host it will throw an explicit error.
 
 # Related
 
-1. [visit](https://on.cypress.io/api/visit)
+- [visit](https://on.cypress.io/api/visit)

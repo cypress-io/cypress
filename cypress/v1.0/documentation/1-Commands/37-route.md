@@ -37,9 +37,13 @@ Set a route matching the `method` and `url` stubbed with the supplied `response`
 
 ***
 
-# [cy.route( *options* )](#options-usage)
+# Options
 
-Pass in an object containing the following key/values.
+Pass in an options object to specify the conditions of the command.
+
+**[cy.route( *options* )](#options-usage)**
+
+`cy.route` supports these options:
 
 Option | Default | Notes
 --- | --- | ---
@@ -56,7 +60,7 @@ Option | Default | Notes
 
 # Url Usage
 
-Wait on non-stubbed XHR's by url
+## Wait on non-stubbed XHR's by url
 
 ```javascript
 // by not passing a response to the route
@@ -74,7 +78,7 @@ cy
 
 # Method and Url Usage
 
-Wait on non-stubbed XHR's by method + url
+## Wait on non-stubbed XHR's by method + url
 
 ```javascript
 // by not passing a response to the route
@@ -129,9 +133,7 @@ $.get("/users/1337", function(data){
 
 Any request that matches the `method` and `url` of a route will be responded to based on the configuration of that route.
 
-If a request doesn't match any route [it will automatically receive a 404](#notes).
-
-For instance given we have the following routes:
+If a request doesn't match any route [it will automatically receive a 404](#notes). For instance given we have the following routes:
 
 ```javascript
 cy
@@ -157,7 +159,7 @@ $("form").submit(function(){
 })
 ```
 
-The above application code will issue 3 AJAX requests:
+**The above application code will issue 3 AJAX requests:**
 
 1. The `GET /users` will match our 1st route and respond with a 200 status code and the array of users.
 2. The `POST /messages` will match our 2nd route and respond with a 200 status code with the message object.
@@ -167,7 +169,7 @@ The above application code will issue 3 AJAX requests:
 
 # Method, Url, and Response Usage
 
-Specify the method
+## Specify the method
 
 ```javascript
 cy
@@ -181,6 +183,8 @@ cy
 ***
 
 # Options Usage
+
+## Pass in an obtions object
 
 ```javascript
 cy
@@ -305,9 +309,7 @@ cy
   .route(/teams/,   "fixtures:teams").as("teamsGet")
 ```
 
-Whenever you start a server and add routes, Cypress will display a new Instrument Log called **Routes**.
-
-It will list the routing table in the Instrument Log, including the `method`, `url`, `stubbed`, `alias` and number of matched requests:
+Whenever you start a server and add routes, Cypress will display a new Instrument Log called **Routes**. It will list the routing table in the Instrument Log, including the `method`, `url`, `stubbed`, `alias` and number of matched requests:
 
 ![screen shot 2015-12-21 at 7 04 41 pm](https://cloud.githubusercontent.com/assets/1268976/11944789/9b3f69b6-a816-11e5-8b8f-bf8a235cf700.png)
 
@@ -323,7 +325,7 @@ When clicking on `XHR Stub` within the Command Log, the console outputs the foll
 
 # Related
 
-1. [server](https://on.cypress.io/api/server)
-2. [wait](https://on.cypress.io/api/wait)
-3. [as](https://on.cypress.io/api/as)
-4. [Network Requests](https://on.cypress.io/guides/network-requests-xhr)
+- [server](https://on.cypress.io/api/server)
+- [wait](https://on.cypress.io/api/wait)
+- [as](https://on.cypress.io/api/as)
+- [Network Requests](https://on.cypress.io/guides/network-requests-xhr)

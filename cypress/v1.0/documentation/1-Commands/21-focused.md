@@ -9,9 +9,23 @@ If Cypress does not find *any* element with focus, `null` is returned.
 
 ***
 
+# Options
+
+Pass in an options object to specify the conditions of the command.
+
+**cy.focused( *options* )**
+
+`cy.focused` supports these options:
+
+Option | Default | Notes
+--- | --- | ---
+`log` | `true` | Display command in command log
+
+***
+
 # Usage
 
-Return the element that is focused.
+## Get the element that is focused.
 
 ```javascript
 cy.focused()
@@ -19,7 +33,7 @@ cy.focused()
 
 ***
 
-Make an assertion on the focused element.
+## Make an assertion on the focused element.
 
 ```javascript
 cy.focused().should("have.attr", "name", "username")
@@ -28,6 +42,15 @@ cy.focused().should("have.attr", "name", "username")
 ***
 
 # Command Log
+
+## Make an assertion on the focused element.
+
+
+```javascript
+cy.focused().should("have.attr", "name").and("eq", "num")
+```
+
+The commands above will display in the command log as:
 
 <img width="523" alt="screen shot 2015-11-27 at 1 01 51 pm" src="https://cloud.githubusercontent.com/assets/1271364/11446780/f71fb350-9509-11e5-963a-a6940fbc63b6.png">
 
@@ -38,5 +61,6 @@ When clicking on the `focused` command within the command log, the console outpu
 ***
 
 # Related
-1. [focus](https://on.cypress.io/api/focus)
-2. [blur](https://on.cypress.io/api/blur)
+
+- [focus](https://on.cypress.io/api/focus)
+- [blur](https://on.cypress.io/api/blur)

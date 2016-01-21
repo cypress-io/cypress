@@ -1,1 +1,2 @@
+slug: common-assertions
 

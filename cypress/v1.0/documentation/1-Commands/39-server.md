@@ -15,14 +15,18 @@ Use `cy.server` to control the behavior of requests and responses. Start a serve
 
 ***
 
-# [cy.server( *options* )](#options-usage)
+# Options
+
+Pass in an options object to specify the conditions of the command.
+
+**[cy.server(*options* )](#options-usage)**
 
 `cy.server` takes options that are used for 2 different purposes:
 
 1. As defaults which are merged into [`cy.route`](https://on.cypress.io/api/route).
 2. As configuration behavior for *all* requests.
 
-The following options will automatically be merged in as defaults to [`cy.route`](https://on.cypress.io/api/route)
+The following options will be merged in as defaults to [`cy.route`](https://on.cypress.io/api/route)
 
 Option | Default | Notes
 --- | --- | ---
@@ -46,13 +50,13 @@ Option | Default | Notes
 
 # Default Usage
 
-Start a server
+## Start a server
 
 ```javascript
 cy.server()
 ```
 
-After starting a server:
+**After starting a server:**
 
 - Any request that does not match a `cy.route` will be sent a `404` status code.
 - Any request that matches the `options.whitelist` function will **NOT** be logged or stubbed. In other words it is "whitelisted" and ignored.
@@ -98,12 +102,12 @@ cy
 
 ## Change the default delay for all routes
 
+Adding delay can help simulate real world network latency. Normally stubbed responses return in under 20ms. Adding a delay can help you visualize how your application's state reacts to requests that are in flight.
+
 ```javascript
 // delay each response 1500ms
 cy.server({delay: 1500})
 ```
-
-Adding delay can help simulate real world network latency. Normally stubbed responses return in under 20ms. Adding a delay can help you visualize how your application's state reacts to requests that are in flight.
 
 ***
 
@@ -133,14 +137,12 @@ $(function(){
 
   // normally this would be sent back 404
   // since it does not match any of the
-  // cy.routes - but by setting `force404` to false,
+  // cy.routes - but by setting force404 to false,
   // it will not be stubbed and will hit your
   // server like normal
   $.getJSON("/users.json")
 })
 ```
-
-![screen shot 2015-12-21 at 7 38 13 pm](https://cloud.githubusercontent.com/assets/1268976/11945137/73afe840-a81a-11e5-8290-ef62ef6f62e6.png)
 
 ***
 
@@ -271,8 +273,8 @@ You can [read more about XHR strategy here](https://on.cypress.io/guides/network
 
 # Related
 
-1. [route](https://on.cypress.io/api/route)
-2. [wait](https://on.cypress.io/api/wait)
-3. [request](https://on.cypress.io/api/request)
-4. [visit](https://on.cypress.io/api/visit)
-5. [Network Requests](https://on.cypress.io/guides/network-requests-xhr)
+- [route](https://on.cypress.io/api/route)
+- [wait](https://on.cypress.io/api/wait)
+- [request](https://on.cypress.io/api/request)
+- [visit](https://on.cypress.io/api/visit)
+- [Network Requests](https://on.cypress.io/guides/network-requests-xhr)

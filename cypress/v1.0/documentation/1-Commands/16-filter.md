@@ -7,9 +7,23 @@ Reduce the set of matched elements to those that match the selector.  Opposite o
 
 ***
 
+# Options
+
+Pass in an options object to specify the conditions of the command.
+
+**cy.filter( *selector*, *options* )**
+
+`cy.filter` supports these options:
+
+Option | Default | Notes
+--- | --- | ---
+`log` | `true` | Display command in command log
+
+***
+
 # Selector Usage
 
-Filter the current subject to the element with class `active`.
+## Filter the current subject to the element with the class `active`.
 
 ```html
 <ul>
@@ -30,6 +44,8 @@ cy.get("ul").find(">li").filter(".active")
 
 # Command Log
 
+## Filter the `li`'s to the `li` with the class `active`.
+
 ```javascript
 cy.get(".left-nav>.nav").find(">li").filter(".active")
 ```
@@ -44,4 +60,4 @@ When clicking on the `filter` command within the command log, the console output
 
 # Related
 
-1. [not](https://on.cypress.io/api/not)
+- [not](https://on.cypress.io/api/not)

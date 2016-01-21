@@ -13,9 +13,24 @@ Get the immediately following sibling of each element in the set of matched elem
 
 ***
 
+# Options
+
+Pass in an options object to specify the conditions of the command.
+
+**cy.next( *options* )**
+**cy.next( *selector*, *options* )**
+
+`cy.next` supports these options:
+
+Option | Default | Notes
+--- | --- | ---
+`log` | `true` | Display command in command log
+
+***
+
 # Usage
 
-Find the element next to `.second`
+## Find the element next to `.second`
 
 ```html
 <ul>
@@ -34,7 +49,7 @@ cy.get(".second").next()
 
 # Selector Usage
 
-Find the very next sibling of each li. Keep only the ones with a class `selected`.
+## Find the very next sibling of each li. Keep only the ones with a class `selected`.
 
 ```html
 <ul>
@@ -54,6 +69,8 @@ cy.get("li").next(".selected")
 
 # Command Log
 
+## Find the element next to the active li
+
 ```javascript
 cy.get(".left-nav").find("li.active").next()
 ```
@@ -70,4 +87,4 @@ When clicking on `next` within the command log, the console outputs the followin
 
 # Related
 
-1. [prev](https://on.cypress.io/api/prev)
+- [prev](https://on.cypress.io/api/prev)

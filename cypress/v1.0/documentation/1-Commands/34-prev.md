@@ -13,7 +13,24 @@ Get the immediately preceding sibling of each element in the set of matched elem
 
 ***
 
+# Options
+
+Pass in an options object to specify the conditions of the command.
+
+**cy.prev( *options* )**
+**cy.prev( *selector*, *options* )**
+
+`cy.prev` supports these options:
+
+Option | Default | Notes
+--- | --- | ---
+`log` | `true` | Display command in command log
+
+***
+
 # Usage
+
+## Find the previous element of the element with class of `active`
 
 ```html
 <ul>
@@ -34,6 +51,8 @@ cy.get(".active").prev()
 
 # Selector Usage
 
+## Find the previous element with a class of `active`
+
 ```html
 <ul>
   <li>Cockatiels</li>
@@ -52,6 +71,8 @@ cy.get("li").prev(".active")
 ***
 
 # Command Log
+
+## Find the previous element of the active `li`
 
 ```javascript
 cy.get(".left-nav").find("li.active").prev()
