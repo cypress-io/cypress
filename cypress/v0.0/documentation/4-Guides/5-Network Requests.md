@@ -1,5 +1,5 @@
 slug: network-requests-xhr
-excerpt: Manage AJAX/XHR requests
+excerpt: A guide to managing XHR requests
 
 Cypress makes it easy to manage the entire lifecyle of AJAX / XHR requests within your application. Cypress provides you direct access to the XHR objects, enabling you to make assertions about its properties. Additionally you can even stub and mock a request's response.
 

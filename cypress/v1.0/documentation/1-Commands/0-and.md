@@ -125,4 +125,4 @@ When clicking on `assert` within the command log, the console outputs the follow
 # Related
 
 - [should](https://on.cypress.io/api/should)
-- [Assertions](https://on.cypress.io/guides/making-assertions)
+- [Making Assertions](https://on.cypress.io/guides/making-assertions)

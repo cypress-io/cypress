@@ -1,5 +1,13 @@
 slug: then
-excerpt: Yield the current subject as an argument
+excerpt: Invokes a callback function with the current subject
+
+[block:callout]
+{
+  "type": "info",
+  "body": "[Read about issuing commands first.](https://on.cypress.io/guides/issuing-commands)",
+  "title": "New to Cypess?"
+}
+[/block]
 
 # [cy.then( *function* )](#usage)
 
@@ -10,14 +18,6 @@ excerpt: Yield the current subject as an argument
 When `null` or `undefined` is returned by the callback function, the subject will not be modified and will instead carry over to the next command.
 
 Just like Promises, you can return any compatible "thenable" (anything that has a `.then()` interface) and Cypress will wait for that to resolve before continuing forward through the chain of commands.
-
-[block:callout]
-{
-  "type": "info",
-  "body": "[Read about issuing commands first.](https://on.cypress.io/guides/issuing-commands)",
-  "title": "New to Cypess?"
-}
-[/block]
 
 ***
 

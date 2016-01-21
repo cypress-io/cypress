@@ -1,6 +1,14 @@
 slug: fixture
 excerpt: Load a fixture to represent data
 
+[block:callout]
+{
+  "type": "info",
+  "body": "[Read about creating fixtures first.](https://on.cypress.io/guides/creating-fixtures)",
+  "title": "New to Cypess?"
+}
+[/block]
+
 # [cy.fixture( *fixture* )](#single-fixture-usage)
 
 Loads a single fixture by filename.
