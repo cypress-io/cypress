@@ -7,9 +7,21 @@ Get the title of the document.
 
 ***
 
+# Options
+
+Pass in an options object to change the default behavior of the command.
+
+**cy.title( *options* )**
+
+Option | Default | Notes
+--- | --- | ---
+`log` | `true` | Display command in command log
+
+***
+
 # Usage
 
-Assert that the document's title is "New User"
+## Assert that the document's title contains "New User"
 
 ```javascript
 cy.title().should("contain", "New User")
@@ -18,6 +30,8 @@ cy.title().should("contain", "New User")
 ***
 
 # Command Log
+
+## Assert that the document's title contains "New User"
 
 ```javascript
 cy.title().should("contain", "New User")
@@ -35,4 +49,4 @@ When clicking on `title` within the command log, the console outputs the followi
 
 # Related
 
-1. [document](https://on.cypress.io/api/document)
+- [document](https://on.cypress.io/api/document)

@@ -5,15 +5,33 @@ excerpt: Get the closest ancestor
 
 For each element in the set, get the first element that matches the selector by testing the element itself and traversing up through its ancestors in the DOM tree.
 
+***
+
+# Options
+
+Pass in an options object to change the default behavior of the command.
+
+**cy.closest( *selector*, *options* )**
+
+Option | Default | Notes
+--- | --- | ---
+`log` | `true` | Display command in command log
+
+***
+
 # Selector Usage
 
-Find the closest element of the current subject with the class `nav`
+## Find the closest element of the current subject with the class `nav`
 
 ```javascript
 cy.get("li.active").closest(".nav")
 ```
 
+***
+
 # Command Log
+
+## Find the closest element of the current subject with the class `nav`
 
 ```javascript
 cy.get("li.active").closest(".nav")
@@ -27,8 +45,10 @@ When clicking on the `closest` command within the command log, the console outpu
 
 <img width="478" alt="screen shot 2015-11-27 at 2 07 46 pm" src="https://cloud.githubusercontent.com/assets/1271364/11447201/535515c4-9510-11e5-9cf5-088bf21f34ac.png">
 
+***
+
 # Related
 
-1. [parents](https://on.cypress.io/api/parents)
-2. [next](https://on.cypress.io/api/next)
-3. [first](https://on.cypress.io/api/first)
+- [parents](https://on.cypress.io/api/parents)
+- [next](https://on.cypress.io/api/next)
+- [first](https://on.cypress.io/api/first)

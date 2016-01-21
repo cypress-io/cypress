@@ -30,11 +30,9 @@ Key | Type | Returns
 
 # Options
 
-Pass in an options object to specify the conditions of the command.
+Pass in an options object to change the default behavior of the command.
 
 **cy.location( *options* )**
-
-`cy.location` supports these options:
 
 Option | Default | Notes
 --- | --- | ---

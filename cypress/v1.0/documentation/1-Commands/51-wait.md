@@ -27,7 +27,23 @@ Wait for an array of [aliases](https://on.cypress.io/guides/using-aliases) to ha
 
 ***
 
+# Options
+
+Pass in an options object to change the default behavior of the command.
+
+**[cy.wait( *text*, *options* )](#options-usage)**
+
+Option | Default | Notes
+--- | --- | ---
+`log` | `true` | Display command in command log
+
+You can also set options for all `cy.wait`'s `requestTimeout` and `responseTimeout` globally in [configuration](https://on.cypress.io/guides/configuration).
+
+***
+
 # Number Usage
+
+## Wait 500ms
 
 ```javascript
 // Wait 500ms before resolving
@@ -38,7 +54,7 @@ cy.wait(500)
 
 # Alias Usage
 
-Wait for a specific XHR to respond
+## Wait for a specific XHR to respond
 
 ```javascript
 // Wait for the route aliased as `getAccount` to respond
@@ -54,7 +70,9 @@ cy
   })
 ```
 
-Wait automatically increments responses
+***
+
+## Wait automatically increments responses
 
 ```javascript
 // each time we cy.wait() for an alias, Cypress will
@@ -90,7 +108,7 @@ cy
 
 # Alias Array Usage
 
-You can pass an array of aliases that will be waited on before resolving.
+## You can pass an array of aliases that will be waited on before resolving.
 
 ```javascript
 cy
@@ -109,7 +127,7 @@ cy
   })
 ```
 
-You could also use the [`cy.spread`](https://on.cypress.io/api/spread) command here to spread out this array into multiple arguments.
+## You could also use the [`cy.spread`](https://on.cypress.io/api/spread) command here to spread the array into multiple arguments.
 
 ```javascript
 cy
@@ -149,6 +167,8 @@ This gives you the best of both worlds - a fast error feedback loop when request
 
 # Command Log
 
+## Wait for the put to user to resolve.
+
 ```javascript
 cy
   .server()
@@ -170,7 +190,7 @@ When clicking on `wait` within the command log, the console outputs the followin
 
 # Related
 
-1. [server](https://on.cypress.io/api/server)
-2. [route](https://on.cypress.io/api/route)
-3. [as](https://on.cypress.io/api/as)
-4. [spread](https://on.cypress.io/api/spread)
+- [server](https://on.cypress.io/api/server)
+- [route](https://on.cypress.io/api/route)
+- [as](https://on.cypress.io/api/as)
+- [spread](https://on.cypress.io/api/spread)

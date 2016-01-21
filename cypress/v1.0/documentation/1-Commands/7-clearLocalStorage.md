@@ -3,11 +3,19 @@ excerpt: Clear all data in local storage.
 
 # [cy.clearLocalStorage()](#usage)
 
-Clears all data in local storage.
+Clear all data in local storage.
+
+# [cy.clearLocalStorage( *string* )](#usage)
+
+Clears all keys in local storage matching the string.
+
+# [cy.clearLocalStorage( *RegExp* )](#usage)
+
+Clears all keys in local storage matching the RegExp.
 
 # Usage
 
-Clear Local Storage
+## Clear Local Storage
 
 ```javascript
 // returns local storage object

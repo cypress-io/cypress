@@ -9,11 +9,9 @@ Remove elements from the set of matched elements. Opposite of [`cy.filter()`](ht
 
 # Options
 
-Pass in an options object to specify the conditions of the command.
+Pass in an options object to change the default behavior of the command.
 
 **cy.not( *selector*, *options* )**
-
-`cy.not` supports these options:
 
 Option | Default | Notes
 --- | --- | ---

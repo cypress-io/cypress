@@ -9,21 +9,26 @@ Visit a remote url. This will most likely be the first command you run.
 
 ***
 
-# [cy.visit( *url*, *options* )](#options-usage)
+# Options
 
-Visit optionally accepts an `options` object:
+Pass in an options object to change the default behavior of the command.
+
+**[cy.visit( *url*, *options* )](#options-usage)**
 
 Option | Default | Notes
 --- | --- | ---
-`timeout`      | `20000` |
-`onBeforeLoad` | function(){} |
-`onLoad`       | function(){} |
+`onBeforeLoad` | function(){} | Called before your page has loaded all of its resources.
+`onLoad`       | function(){} | Called once your page has fired its load event.
+`timeout`      | `20000` | Total time to retry the visit
+`log` | `true` | Display command in command log
+
+You can also set options for all `cy.visit`'s `visitTimeout` and `baseUrl` globally in [configuration](https://on.cypress.io/guides/configuration).
 
 ***
 
 # Usage
 
-Visit a local server running on http://localhost:8000
+## Visit a local server running on http://localhost:8000
 
 ```javascript
 cy.visit("http://localhost:8000")
@@ -31,7 +36,7 @@ cy.visit("http://localhost:8000")
 
 ***
 
-Protocol can be omitted from common hosts
+## Protocol can be omitted from common hosts
 
 ```javascript
 // Cypress will automatically prepend the http:// protocol
@@ -44,7 +49,9 @@ cy.visit("127.0.0.1:3000") // => http://127.0.0.1:3000
 
 ***
 
-Cypress can optionally act as your web server
+## Cypress can optionally act as your web server
+
+Having Cypress serve your files is useful in simple projects and example apps, but isn't recommended for real apps.  It is always better to run your own server and provide the url to Cypress.
 
 ```javascript
 // Cypress will automatically attempt to serve your files
@@ -54,11 +61,11 @@ Cypress can optionally act as your web server
 cy.visit("app/index.html")
 ```
 
-Having Cypress serve your files is useful in simple projects and example apps, but isn't recommended for real apps.  It is always better to run your own server and provide the url to Cypress.
-
 ***
 
-Visit is automatically prefixed with `baseUrl`.
+## Visit is automatically prefixed with `baseUrl`.
+
+This is recommended. Simply configure `baseUrl` in the `cypress.json` file to prevent repeating yourself in every single `cy.visit(...)`. Read more about [`configuration`](https://on.cypress.io/guides/configuration).
 
 ```javascript
 // cypress.json
@@ -71,15 +78,11 @@ Visit is automatically prefixed with `baseUrl`.
 cy.visit("dashboard")
 ```
 
-This is recommended. Simply configure `baseUrl` in the `cypress.json` file to prevent repeating yourself in every single `cy.visit(...)`.
-
-Read more about [`configuration`](https://on.cypress.io/guides/configuration) here.
-
 ***
 
 # Options Usage
 
-Change the default timeout
+## Change the default timeout
 
 ```javascript
 // change the timeout to be 30 seconds
@@ -88,7 +91,7 @@ cy.visit("/index.html", {timeout: 30000})
 
 ***
 
-Provide an `onBeforeLoad` callback function
+## Provide an `onBeforeLoad` callback function
 
 ```javascript
 // onBeforeLoad is called as soon as possible, before
@@ -101,9 +104,10 @@ cy.visit("http://localhost:3000/#dashboard", {
   }
 })
 ```
+
 ***
 
-Provide an `onLoad` callback function
+## Provide an `onLoad` callback function
 
 ```javascript
 // onLoad is called once your page has fired its load event.
@@ -199,5 +203,5 @@ Cypress will automatically apply the server and routes to the very next `visit` 
 
 # Related
 
-1. [go](https://on.cypress.io/api/go)
-1. [server](https://on.cypress.io/api/server)
+- [go](https://on.cypress.io/api/go)
+- [server](https://on.cypress.io/api/server)

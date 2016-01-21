@@ -17,7 +17,7 @@ Use `cy.server` to control the behavior of requests and responses. Start a serve
 
 # Options
 
-Pass in an options object to specify the conditions of the command.
+Pass in an options object to change the default behavior of the command.
 
 **[cy.server(*options* )](#options-usage)**
 

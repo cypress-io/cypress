@@ -9,11 +9,9 @@ Double-clicks the current subject.
 
 # Options
 
-Pass in an options object to specify the conditions of the command.
+Pass in an options object to change the default behavior of the command.
 
 **cy.dblclick(*options* )**
-
-`cy.dblclick` supports these options:
 
 Option | Default | Notes
 --- | --- | ---

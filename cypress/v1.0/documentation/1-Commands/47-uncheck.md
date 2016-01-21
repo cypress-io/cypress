@@ -3,17 +3,21 @@ excerpt: Unselect a checkbox or radio
 
 # [cy.uncheck()](#usage)
 
-Unchecks checkboxes or radios.
+Unchecks checkboxes or radios. Triggers events associated with check.
+
+***
+
+# [cy.uncheck( *values* )](#values-usage)
+
+Unchecks the checkboxes or radios matching the values. Triggers events associated with uncheck.
 
 ***
 
 # Options
 
-Pass in an options object to specify the conditions of the command.
+Pass in an options object to change the default behavior of the command.
 
 **cy.uncheck( *options* )**
-
-`cy.uncheck` supports these options:
 
 Option | Default | Notes
 --- | --- | ---
@@ -26,13 +30,23 @@ Option | Default | Notes
 
 # Usage
 
-Uncheck the checkbox
+## Uncheck all checkboxes
 
 ```javascript
 cy.get(":checkbox").uncheck()
 ```
 
-Uncheck element with the id `saveUserName`
+***
+
+## Uncheck all radios
+
+```javascript
+cy.get("[type='radio']").uncheck()
+```
+
+***
+
+## Uncheck element with the id `saveUserName`
 
 ```javascript
 cy.get("#saveUserName").uncheck()
@@ -40,7 +54,19 @@ cy.get("#saveUserName").uncheck()
 
 ***
 
+# Values Usage
+
+## Uncheck the checkbox with the value of "ga"
+
+```javascript
+cy.get("input[type='checkbox']").uncheck(["ga"])
+```
+
+***
+
 # Command Log
+
+## Uncheck the first checkbox
 
 ```javascript
 cy
@@ -60,5 +86,5 @@ When clicking on `uncheck` within the command log, the console outputs the follo
 
 # Related
 
-1. [check](https://on.cypress.io/api/check)
-1. [click](https://on.cypress.io/api/click)
+- [check](https://on.cypress.io/api/check)
+- [click](https://on.cypress.io/api/click)

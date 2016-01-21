@@ -9,11 +9,9 @@ Blur the current subject. Returns the existing subject.
 
 # Options
 
-Pass in an options object to specify the conditions of the command.
+Pass in an options object to change the default behavior of the command.
 
 **[cy.blur( *options* )](#options-usage)**
-
-`cy.blur` supports these options:
 
 Option | Default | Notes
 --- | --- | ---

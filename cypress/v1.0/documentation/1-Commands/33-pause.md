@@ -9,11 +9,9 @@ excerpt: Pause command
 
 # Options
 
-Pass in an options object to specify the conditions of the command.
+Pass in an options object to change the default behavior of the command.
 
 **cy.pause(*options* )**
-
-`cy.pause` supports these options:
 
 Option | Default | Notes
 --- | --- | ---

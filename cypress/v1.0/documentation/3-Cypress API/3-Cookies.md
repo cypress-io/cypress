@@ -43,6 +43,8 @@ Set defaults for all cookies such as whitelisting a set of cookies to bypass bei
 
 # Get Usage
 
+## Get the session_id cookie
+
 ```javascript
 // Assuming we had a cookie with the key: 'session_id'
 
@@ -53,6 +55,8 @@ Cypress.Cookies.get("session_id") // => AF6bupO4jOpZReEZnaW-Ho5fpJAXd_48kA
 
 # Set Usage
 
+## Set the remember_token cookie
+
 ```javascript
 Cypress.Cookies.set("remember_token", "foobarbaz")
 
@@ -62,6 +66,8 @@ Cypress.Cookies.get("remember_token") // => foobarbaz
 ***
 
 # Remove Usage
+
+## Remove the remember_token cookie
 
 This will remove a cookies value and override any specific whitelisting or cookie preservation you have. In other words, this will nuke the cookies value no matter what.
 
@@ -82,6 +88,8 @@ Cypress.Cookies.get("remember_token") // => undefined
 ***
 
 # Debug Usage
+
+## Log out when cookie values set or remove
 
 By turning on debugging Cypress will automatically log out to the console when it **sets** or **removes** cookie values. This is useful to help you understand how Cypress removes cookies in between tests, and is useful to visualize how to handle preserving cookies in between tests.
 
@@ -106,6 +114,8 @@ Cypress.Cookies.debug(false) // now debugging is turned off
 ***
 
 # Preserve Usage
+
+## Preserve cookies after a test finished
 
 Cypress gives you a simple interface to automatically preserve cookies *after* a test finished. Cypress will automatically remove all cookies before each new test starts by default.
 
@@ -155,6 +165,8 @@ describe("Dashboard", function(){
 ***
 
 # Defaults Usage
+
+## Set global default cookies
 
 You can modify the global defaults and whitelist a set of Cookies which will always be preserved between tests.
 

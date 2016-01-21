@@ -7,9 +7,21 @@ Returns the global window object of the remote application you've visited.
 
 ***
 
+# Options
+
+Pass in an options object to change the default behavior of the command.
+
+**cy.window( *options* )**
+
+Option | Default | Notes
+--- | --- | ---
+`log` | `true` | Display command in command log
+
+***
+
 # Usage
 
-Returns the remote window object
+## Returns the remote window object
 
 ```javascript
 cy
@@ -23,6 +35,8 @@ cy
 ***
 
 # Command Log
+
+## Get the window
 
 ```javascript
 cy.window()
@@ -40,4 +54,4 @@ When clicking on `window` within the command log, the console outputs the follow
 
 # Related
 
-1. [document](https://on.cypress.io/api/document)
+- [document](https://on.cypress.io/api/document)

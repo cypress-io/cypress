@@ -9,9 +9,21 @@ Follows all of the rules of form submission per the w3c spec.
 
 ***
 
+# Options
+
+Pass in an options object to change the default behavior of the command.
+
+**cy.submit( *options* )**
+
+Option | Default | Notes
+--- | --- | ---
+`log` | `true` | Display command in command log
+
+***
+
 # Usage
 
-Submit a form
+## Submit a form
 
 ```html
 <form id="contact">
@@ -30,6 +42,8 @@ cy.get("#contact").submit()
 
 # Command Log
 
+## Submit a form
+
 ```javascript
 cy.route("POST", /users/, "fixture:user").as("userSuccess")
 cy.get("form").submit()
@@ -47,4 +61,4 @@ When clicking on `submit` within the command log, the console outputs the follow
 
 # Related
 
-1. [click](https://on.cypress.io/api/click)
+- [click](https://on.cypress.io/api/click)

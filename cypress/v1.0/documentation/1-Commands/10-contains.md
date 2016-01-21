@@ -26,12 +26,10 @@ Using a selector allows you to return more *shallow* elements in the tree which 
 
 # Options
 
-Pass in an options object to specify the conditions of the command.
+Pass in an options object to change the default behavior of the command.
 
 **cy.contains( *text*, *options* )**
 **cy.contains( *selector*, *text*, *options* )**
-
-`cy.contains` supports these options:
 
 Option | Default | Notes
 --- | --- | ---

@@ -21,7 +21,9 @@ cy
   })
 ```
 
+***
+
 # Related
 
-1. [then](https://on.cypress.io/api/then)
-2. [wait](https://on.cypress.io/api/wait)
+- [then](https://on.cypress.io/api/then)
+- [wait](https://on.cypress.io/api/wait)

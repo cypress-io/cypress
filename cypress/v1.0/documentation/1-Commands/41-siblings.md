@@ -15,12 +15,10 @@ Get the siblings of each element in the set of matched elements filtered by a se
 
 # Options
 
-Pass in an options object to specify the conditions of the command.
+Pass in an options object to change the default behavior of the command.
 
 **cy.siblings( *options* )**
 **cy.siblings( *selector*, *options* )**
-
-`cy.siblings` supports these options:
 
 Option | Default | Notes
 --- | --- | ---

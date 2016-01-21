@@ -1,11 +1,27 @@
 slug: within
-excerpt: Within
+excerpt: Set the scope to the current subject
 
 # [cy.within( *function* )](#usage)
+
+Set the scope to the current subject
+
+***
+
+# Options
+
+Pass in an options object to change the default behavior of the command.
+
+**cy.within( *options*, *function* )**
+
+Option | Default | Notes
+--- | --- | ---
+`log` | `true` | Display command in command log
 
 ***
 
 # Usage
+
+## Get inputs within a form and submit the form
 
 ```html
 <form>
@@ -28,4 +44,4 @@ cy.get("form").within(function(){
 
 # Related
 
-1. [root](https://on.cypress.io/api/root)
+- [root](https://on.cypress.io/api/root)

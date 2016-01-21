@@ -15,12 +15,10 @@ Get the immediately following sibling of each element in the set of matched elem
 
 # Options
 
-Pass in an options object to specify the conditions of the command.
+Pass in an options object to change the default behavior of the command.
 
 **cy.next( *options* )**
 **cy.next( *selector*, *options* )**
-
-`cy.next` supports these options:
 
 Option | Default | Notes
 --- | --- | ---

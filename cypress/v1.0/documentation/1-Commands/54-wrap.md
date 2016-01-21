@@ -1,13 +1,27 @@
 slug: wrap
 excerpt: Invoke the function on the current subject
 
-# [cy.wrap()](#usage)
+# [cy.wrap( *object* )](#usage)
+
+Set the current subject to the object
+
+***
+
+# Options
+
+Pass in an options object to change the default behavior of the command.
+
+**cy.wrap( *object*, *options* )**
+
+Option | Default | Notes
+--- | --- | ---
+`log` | `true` | Display command in command log
 
 ***
 
 # Usage
 
-Invokes the function on the subject in wrap and returns the new value.
+## Invokes the function on the subject in wrap and returns the new value.
 
 ```javascript
 var fn = function(){
@@ -21,6 +35,6 @@ cy.wrap({foo: fn}).invoke("foo").should("eq", "bar") // true
 
 # Related
 
-1. [invoke](https://on.cypress.io/api/invoke)
-1. [its](https://on.cypress.io/api/its)
-2. [then](https://on.cypress.io/api/then)
+- [invoke](https://on.cypress.io/api/invoke)
+- [its](https://on.cypress.io/api/its)
+- [then](https://on.cypress.io/api/then)

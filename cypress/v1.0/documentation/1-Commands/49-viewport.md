@@ -36,9 +36,24 @@ Pass `landscape` as the orientation to reverse the width/height.
 
 ***
 
+# Options
+
+Pass in an options object to change the default behavior of the command.
+
+**cy.viewport( *width*, *height*, *options* )**
+**cy.viewport( *preset*, *orientation*, *options* )**
+
+Option | Default | Notes
+--- | --- | ---
+`log` | `true` | Display command in command log
+
+You can also set options for the viewport's `viewportWidth` and `viewportHeight` globally in [configuration](https://on.cypress.io/guides/configuration).
+
+***
+
 # Usage
 
-Resize the viewport to 1024x768
+## Resize the viewport to 1024 x 768
 
 ```javascript
 // the viewport will now be changed to 1024x768 pixels
@@ -47,7 +62,7 @@ cy.viewport(1024, 768)
 
 ***
 
-Organize desktop vs mobile tests separately
+## Organize desktop vs mobile tests separately
 
 ```javascript
 describe("Nav Menus", function(){
@@ -87,7 +102,7 @@ describe("Nav Menus", function(){
 
 # Preset Usage
 
-Resize the viewport to iPhone 6 width and height
+## Resize the viewport to iPhone 6 width and height
 
 ```javascript
 // the viewport will now be changed to 414x736
@@ -96,7 +111,7 @@ cy.viewport("iphone-6")
 
 ***
 
-Change the orientation to landscape
+## Change the orientation to landscape
 
 ```javascript
 // the viewport will now be changed to 736x414
@@ -147,4 +162,4 @@ The upsides to this is that tests should consistently pass or fail regardless of
 
 # Related
 
-1. [Configuration](https://on.cypress.io/guides/configuration)
+- [Configuration](https://on.cypress.io/guides/configuration)

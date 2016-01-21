@@ -39,11 +39,9 @@ Set a route matching the `method` and `url` stubbed with the supplied `response`
 
 # Options
 
-Pass in an options object to specify the conditions of the command.
+Pass in an options object to change the default behavior of the command.
 
 **[cy.route( *options* )](#options-usage)**
-
-`cy.route` supports these options:
 
 Option | Default | Notes
 --- | --- | ---
@@ -55,6 +53,8 @@ Option | Default | Notes
 `headers` | `null` | response headers for stubbed routes
 `onRequest` | `null` | callback function when a request is sent
 `onResponse` | `null` | callback function when a response is returned
+
+You can also set options for all `cy.wait`'s `requestTimeout` and `responseTimeout` globally in [configuration](https://on.cypress.io/guides/configuration).
 
 ***
 

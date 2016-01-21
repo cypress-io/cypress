@@ -15,12 +15,10 @@ Get the ancestors of each element in the current set of matched elements filtere
 
 # Options
 
-Pass in an options object to specify the conditions of the command.
+Pass in an options object to change the default behavior of the command.
 
 **cy.parents( *options* )**
 **cy.parents( *selector*, *options* )**
-
-`cy.parents` supports these options:
 
 Option | Default | Notes
 --- | --- | ---

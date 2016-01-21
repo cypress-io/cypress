@@ -29,12 +29,10 @@ Internally Cypress keeps a cache of all aliased elements.  If the element curren
 
 # Options
 
-Pass in an options object to specify the conditions of the command.
+Pass in an options object to change the default behavior of the command.
 
 **cy.get( *selector*, *options* )**
 **cy.get( *alias*, *options* )**
-
-`cy.get` supports these options:
 
 Option | Default | Notes
 --- | --- | ---

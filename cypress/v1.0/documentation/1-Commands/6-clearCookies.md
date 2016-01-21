@@ -13,7 +13,7 @@ You shouldn't need to invoke this command unless you're using it to clear cookie
 
 # Usage
 
-Clear cookies after logging in
+## Clear cookies after logging in
 
 ```javascript
 cy
@@ -25,6 +25,8 @@ cy
 
 In this example, on first login our server sends us back a session cookie. After invoking `cy.clearCookies` this clears the session cookie, and upon navigating to an unauthorized page, our server should have redirected us back to login.
 
+***
+
 # Related
 
-1. [Cypress API Cookies](https://on.cypress.io/api/cookies)
+- [Cypress API Cookies](https://on.cypress.io/api/cookies)

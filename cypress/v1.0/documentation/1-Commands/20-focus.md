@@ -11,11 +11,9 @@ If there is currently an `activeElement` (a different element currently with foc
 
 # Options
 
-Pass in an options object to specify the conditions of the command.
+Pass in an options object to change the default behavior of the command.
 
 **cy.focus( *options* )**
-
-`cy.focus` supports these options:
 
 Option | Default | Notes
 --- | --- | ---

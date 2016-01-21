@@ -31,11 +31,9 @@ Make a `GET` request to the provided url with the provided body.
 
 # Options
 
-Pass in an options object to specify the conditions of the command.
+Pass in an options object to change the default behavior of the command.
 
 **[cy.request( *options* )](#options-usage)**
-
-`cy.request` supports these options:
 
 Option | Default | Notes
 --- | --- | ---
@@ -48,6 +46,8 @@ Option | Default | Notes
 `failOnStatus` | `true` | Whether to fail on response codes other than `2xx`.
 `timeout` | `20000` | Total time to wait for a response (in ms)
 `log` | `true` | Whether to log the request in the Command Log
+
+You can also set options for the `cy.request`'s `baseUrl` and `responseTimeout` globally in [configuration](https://on.cypress.io/guides/configuration).
 
 ***
 

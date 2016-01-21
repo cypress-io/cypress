@@ -15,11 +15,9 @@ Checks the checkboxes or radios matching the values. Triggers events associated 
 
 # Options
 
-Pass in an options object to specify the conditions of the command.
+Pass in an options object to change the default behavior of the command.
 
 **cy.check( *options* )**
-
-`cy.check` supports these options:
 
 Option | Default | Notes
 --- | --- | ---
@@ -37,6 +35,8 @@ Option | Default | Notes
 ```javascript
 cy.get("[type='checkbox']").check()
 ```
+
+***
 
 ## Check all radios
 

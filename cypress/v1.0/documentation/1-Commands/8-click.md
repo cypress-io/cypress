@@ -42,11 +42,13 @@ You can pass a relative `x` and `y` coordinate which will calculate distance in 
 
 ***
 
-# [cy.click( *options* )](#options-usage)
-# [cy.click( *position*, *options* )](#options-usage)
-# [cy.click( *x*, *y*, *options* )](#options-usage)
+# Options
 
-Click supports these options:
+Pass in an options object to change the default behavior of the command.
+
+**[cy.click( *options* )](#options-usage)**
+**[cy.click( *position*, *options* )](#options-usage)**
+**[cy.click( *x*, *y*, *options* )](#options-usage)**
 
 Option | Default | Notes
 --- | --- | ---
@@ -60,7 +62,7 @@ Option | Default | Notes
 
 # Usage
 
-Click the button
+## Click the button
 
 ```javascript
 // returns <button>Save</button>
@@ -71,7 +73,7 @@ cy.get("button").click()
 
 # Position Usage
 
-Specify a corner of the element to click
+## Specify a corner of the element to click
 
 ```javascript
 // click is issued in the top right corner of the element
@@ -82,7 +84,7 @@ cy.get("button").click("topRight")
 
 # Coordinates Usage
 
-Specify explicit coordinates relative to the top left corner
+## Specify explicit coordinates relative to the top left corner
 
 ```javascript
 // the click will be issued inside of the element
@@ -95,7 +97,16 @@ cy.get("button").click(15, 40)
 
 # Options Usage
 
-Force a click regardless of visibility or other elements in front of the element
+## Force a click regardless of visibility or other elements in front of the element
+
+This is useful when you want the click issued no matter what. Forcing a click disables the error checking that happens prior to a click.
+
+[block:callout]
+{
+  "type": "warning",
+  "body": "Be careful with this option because it allows the click to happen when it might actually be impossible for a real user to click."
+}
+[/block]
 
 ```javascript
 // this will disable the built-in logic for ensuring
@@ -103,13 +114,9 @@ Force a click regardless of visibility or other elements in front of the element
 cy.get("button").click({force: true})
 ```
 
-This is useful when you want the click issued no matter what. Forcing a click disables the error checking that happens prior to a click.
-
-Be careful with this option because it allows the click to happen when it might actually be impossible for a real user to click.
-
 ***
 
-Force a click with position argument
+## Force a click with position argument
 
 ```javascript
 cy.get("button").click("bottomLeft", {force: true})
@@ -117,7 +124,7 @@ cy.get("button").click("bottomLeft", {force: true})
 
 ***
 
-Force a click with relative coordinates
+## Force a click with relative coordinates
 
 ```javascript
 cy.get("button").click(5, 60, {force: true})
@@ -135,9 +142,7 @@ Cypress does not currently factor in `pointer-events: none` in its clicking algo
 
 ## Element removal during `mousedown` or `mouseup`
 
-The spec states what should happen if the element clicked is removed from the DOM during `mousedown` or `mouseup`, but Cypress is not currently factoring this in.
-
-This behavior will be added sometime in the near future. [Open an issue](https://github.com/cypress-io/cypress/issues/new?body=**Description**%0A*Include%20a%20high%20level%20description%20of%20the%20error%20here%20including%20steps%20of%20how%20to%20recreate.%20Include%20any%20benefits%2C%20challenges%20or%20considerations.*%0A%0A**Code**%0A*Include%20the%20commands%20used*%0A%0A**Steps%20To%20Reproduce**%0A-%20%5B%20%5D%20Steps%0A-%20%5B%20%5D%20To%0A-%20%5B%20%5D%20Reproduce%2FFix%0A%0A**Additional%20Info**%0A*Include%20any%20images%2C%20notes%2C%20or%20whatever.*%0A) if you need this to be fixed.
+The spec states what should happen if the element clicked is removed from the DOM during `mousedown` or `mouseup`, but Cypress is not currently factoring this in. [Open an issue](https://github.com/cypress-io/cypress/issues/new?body=**Description**%0A*Include%20a%20high%20level%20description%20of%20the%20error%20here%20including%20steps%20of%20how%20to%20recreate.%20Include%20any%20benefits%2C%20challenges%20or%20considerations.*%0A%0A**Code**%0A*Include%20the%20commands%20used*%0A%0A**Steps%20To%20Reproduce**%0A-%20%5B%20%5D%20Steps%0A-%20%5B%20%5D%20To%0A-%20%5B%20%5D%20Reproduce%2FFix%0A%0A**Additional%20Info**%0A*Include%20any%20images%2C%20notes%2C%20or%20whatever.*%0A) if you need this to be fixed.
 
 ***
 
@@ -195,6 +200,8 @@ The coordinates of the click will be recorded the exact moment the click happens
 
 # Command Log
 
+## Click the button in the form that has text "Create User"
+
 ```javascript
 cy.get("form").find("button").contains("Create User").click()
 ```
@@ -211,7 +218,7 @@ When clicking on `click` within the command log, the console outputs the followi
 
 # Related
 
-1. [dblclick](https://on.cypress.io/api/dblclick)
-2. [check](https://on.cypress.io/api/check)
-3. [select](https://on.cypress.io/api/select)
-4. [submit](https://on.cypress.io/api/submit)
+- [dblclick](https://on.cypress.io/api/dblclick)
+- [check](https://on.cypress.io/api/check)
+- [select](https://on.cypress.io/api/select)
+- [submit](https://on.cypress.io/api/submit)

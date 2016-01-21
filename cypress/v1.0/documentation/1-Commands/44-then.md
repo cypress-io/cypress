@@ -23,7 +23,7 @@ Just like Promises, you can return any compatible "thenable" (anything that has 
 
 # Usage
 
-The element `input` is yielded
+## The element `input` is yielded
 
 ```html
 <form id="todos">
@@ -41,7 +41,7 @@ cy.get("form").find("input").then(function($input){
 
 ***
 
-Assert explicitly about the subject `<li>`'s
+## Assert explicitly about the subject `<li>`'s
 
 ```html
 <div id="todos">
@@ -71,7 +71,7 @@ Normally you'd use implicit subject assertions via [should](https://on.cypress.i
 
 ***
 
-The subject is changed by returning `{foo: 'bar'}`
+## The subject is changed by returning `{foo: 'bar'}`
 
 ```javascript
 cy.then(function(){
@@ -84,7 +84,7 @@ cy.then(function(){
 
 ***
 
-Cypress waits for the Promise to resolve before continuing
+## Cypress waits for the Promise to resolve before continuing
 
 ```javascript
 // if using Q
@@ -119,7 +119,7 @@ cy.get("button").click().then(function($button){
 
 ***
 
-Returning `null` or `undefined` will not modify the subject
+## Returning `null` or `undefined` will not modify the subject
 
 ```javascript
 cy
@@ -135,8 +135,10 @@ cy
   })
 ```
 
+***
+
 # Related
 
-1. [its](https://on.cypress.io/api/its)
-2. [invoke](https://on.cypress.io/api/invoke)
-3. [Issuing Commands](https://on.cypress.io/guides/issuing-commands)
+- [its](https://on.cypress.io/api/its)
+- [invoke](https://on.cypress.io/api/invoke)
+- [Issuing Commands](https://on.cypress.io/guides/issuing-commands)

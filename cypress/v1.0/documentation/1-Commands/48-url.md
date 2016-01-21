@@ -7,9 +7,21 @@ Returns the current URL as a string.
 
 ***
 
+# Options
+
+Pass in an options object to change the default behavior of the command.
+
+**cy.url( *options* )**
+
+Option | Default | Notes
+--- | --- | ---
+`log` | `true` | Display command in command log
+
+***
+
 # Usage
 
-Assert the URL is `http://localhost:8000/users/1/edit`
+## Assert the URL is `http://localhost:8000/users/1/edit`
 
 ```javascript
 // clicking the anchor causes the browser to follow the link
@@ -20,7 +32,7 @@ cy
 
 ***
 
-URL is a shortcut for `cy.location().href`
+## URL is a shortcut for `cy.location().href`
 
 `cy.url()` uses `href` under the hood.
 
@@ -35,11 +47,7 @@ cy.location().its("href") // these return the same string
 
 ## Why is this command called `url` instead of `href`?
 
-Given this remote URL:
-
-`http://localhost:8000/index.html`
-
-All 3 of these assertions are the same.
+Given the remote URL, `http://localhost:8000/index.html`, all 3 of these assertions are the same.
 
 ```javascript
 cy.location().its("href").should("eq", "http://localhost:8000/index.html")
@@ -59,6 +67,8 @@ But you may be wondering where the `url` property comes from.  Per the `window.l
 
 # Command Log
 
+## Assert that the url contains "#users/new"
+
 ```javascript
 cy.url().should("contain", "#users/new")
 ```
@@ -75,5 +85,5 @@ When clicking on `url` within the command log, the console outputs the following
 
 # Related
 
-1. [hash](https://on.cypress.io/api/hash)
-2. [location](https://on.cypress.io/api/location)
+- [hash](https://on.cypress.io/api/hash)
+- [location](https://on.cypress.io/api/location)

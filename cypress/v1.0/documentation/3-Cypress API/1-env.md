@@ -39,7 +39,7 @@ Sets multiple environment variables.
 
 # No Arguments Usage
 
-Get all environment variables.
+## Get all environment variables.
 
 ```javascript
 // cypress.json
@@ -59,7 +59,7 @@ Cypress.env() // => {foo: "bar", baz: "quux"}
 
 # Key Usage
 
-Return just a single environment variable value.
+## Return just a single environment variable value.
 
 ```javascript
 // cypress.json
@@ -80,7 +80,7 @@ Cypress.env("baz") // => quux
 
 # Key Value Usage
 
-Cypress allows you to change the values of your environment variables from within your tests.
+## Cypress allows you to change the values of your environment variables from within your tests.
 
 [block:callout]
 {
@@ -109,7 +109,7 @@ Cypress.env("host") // => http://server.dev.local
 
 # Object Usage
 
-You can set multiple values by passing an object literal.
+## You can set multiple values by passing an object literal.
 
 ```javascript
 // cypress.json

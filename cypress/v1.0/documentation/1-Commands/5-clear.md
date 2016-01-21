@@ -3,9 +3,7 @@ excerpt: Clear a value of an input or textarea
 
 # [cy.clear()](#usage)
 
-Clears a value of an `<input>` or `<textarea>`.
-
-Under the hood this is actually a shortcut for writing:
+Clears a value of an `<input>` or `<textarea>`. Under the hood this is actually a shortcut for writing:
 
 ```javascript
 cy.type("{selectall}{backspace}")
@@ -13,9 +11,22 @@ cy.type("{selectall}{backspace}")
 
 ***
 
+# Options
+
+Pass in an options object to change the default behavior of the command.
+
+**cy.clear( *options* )**
+
+Option | Default | Notes
+--- | --- | ---
+`force` | `false` | Forces clear, disables error checking prior to clear
+`log` | `true` | Display command in command log
+
+***
+
 # Usage
 
-Clear the input and type a new value.
+## Clear the input and type a new value.
 
 ```html
 <input name="name" value="John Doe" />
@@ -29,6 +40,8 @@ cy.get("input[name='name']").clear().type("Jane Lane")
 ***
 
 # Command Log
+
+## Clear the input and type a new value
 
 ```javascript
 cy.get("input[name='name']").clear().type("Jane Lane")
@@ -46,4 +59,4 @@ When clicking on `clear` within the command log, the console outputs the followi
 
 # Related
 
-1. [type](https://on.cypress.io/api/type)
+- [type](https://on.cypress.io/api/type)

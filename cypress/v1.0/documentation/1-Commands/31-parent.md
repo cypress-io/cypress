@@ -15,12 +15,10 @@ Get the parent of each element in the current set of matched elements filtered b
 
 # Options
 
-Pass in an options object to specify the conditions of the command.
+Pass in an options object to change the default behavior of the command.
 
 **cy.parent( *options* )**
 **cy.parent( *selector*, *options* )**
-
-`cy.parent` supports these options:
 
 Option | Default | Notes
 --- | --- | ---

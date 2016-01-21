@@ -9,11 +9,9 @@ Get the document and work with its properties or methods.
 
 # Options
 
-Pass in an options object to specify the conditions of the command.
+Pass in an options object to change the default behavior of the command.
 
 **cy.document(*options* )**
-
-`cy.document` supports these options:
 
 Option | Default | Notes
 --- | --- | ---

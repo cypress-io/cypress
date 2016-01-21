@@ -40,7 +40,7 @@ Sets multiple configuration options.
 
 # No Arguments Usage
 
-Get all configuration options.
+## Get all configuration options.
 
 ```javascript
 // cypress.json
@@ -57,7 +57,7 @@ Cypress.config() // => {commandTimeout: 10000, visitTimeout: 30000, ...}
 
 # Key Usage
 
-Return just a single configuration option value.
+## Return just a single configuration option value.
 
 ```javascript
 // cypress.json
@@ -74,7 +74,7 @@ Cypress.config("visitTimeout") // => 60000
 
 # Key Value Usage
 
-Cypress allows you to change the values of your configuration options from within your tests.
+## Cypress allows you to change the values of your configuration options from within your tests.
 
 [block:callout]
 {
@@ -101,7 +101,7 @@ Cypress.config("viewportWidth") // => 800
 
 # Object Usage
 
-You can set multiple values by passing an object literal.
+## You can set multiple values by passing an object literal.
 
 ```javascript
 // cypress.json

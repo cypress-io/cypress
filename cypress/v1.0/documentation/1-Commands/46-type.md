@@ -22,23 +22,25 @@ Sequence | Notes
 
 ***
 
-# [cy.type( *text*, *options* )](#options-usage)
+# Options
 
-Type supports these options:
+Pass in an options object to change the default behavior of the command.
+
+**[cy.type( *text*, *options* )](#options-usage)**
 
 Option | Default | Notes
 --- | --- | ---
-`force` | false | Forces click, disables error checking prior to click
-`delay` | 10 | Delay after each keypress
-`interval` | 16 | Interval which to retry a click
-`timeout` | 4000 | Total time to retry the click
+`delay` | `10` | Delay after each keypress
+`force` | `false` | Forces type, disables error checking prior to type
+`interval` | `16` | Interval which to retry type
+`timeout` | `4000` | Total time to retry the type
 `log` | `true` | Display command in command log
 
 ***
 
 # Usage
 
-Type into a textarea.
+## Type into a textarea.
 
 ```javascript
 // issues all keyboard events
@@ -50,7 +52,9 @@ cy.get("textarea").type("Hello world")
 
 # Options Usage
 
-Force a click to happen prior to type
+## Force a click to happen prior to type
+
+Type issues a [`click`](https://on.cypress.io/api/click) prior to typing (if the element isn't currently focused). Because of this, sometimes it is useful to force the click to happen. Forcing a click disables error checking prior to the click.
 
 ```javascript
 // this will disable the built-in logic for ensuring
@@ -58,8 +62,6 @@ Force a click to happen prior to type
 // prior to typing into it
 cy.get("input[type=text]").type("Test all the things", {force: true})
 ```
-
-Type issues a [`click`](https://on.cypress.io/api/click) prior to typing (if the element isn't currently focused). Because of this, sometimes it is useful to force the click to happen. Forcing a click disables error checking prior to the click.
 
 [block:callout]
 {
@@ -228,6 +230,8 @@ In other words, you get the best of both worlds: simulated when its practical to
 
 # Command Log
 
+## Type into the input
+
 ```javascript
 cy.get("input[name=firstName]").type("Jane Lane")
 ```
@@ -244,6 +248,6 @@ When clicking on `type` within the command log, the console outputs the followin
 
 # Related
 
-1. [clear](https://on.cypress.io/api/clear)
-2. [click](https://on.cypress.io/api/click)
-3. [submit](https://on.cypress.io/api/submit)
+- [clear](https://on.cypress.io/api/clear)
+- [click](https://on.cypress.io/api/click)
+- [submit](https://on.cypress.io/api/submit)
