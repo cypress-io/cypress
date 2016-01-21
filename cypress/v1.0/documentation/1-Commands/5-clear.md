@@ -8,7 +8,7 @@ Clears a value of an `<input>` or `<textarea>`.
 Under the hood this is actually a shortcut for writing:
 
 ```javascript
-.type("{selectall}{backspace}")
+cy.type("{selectall}{backspace}")
 ```
 
 ***
