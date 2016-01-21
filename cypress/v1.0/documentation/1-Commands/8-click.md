@@ -44,7 +44,7 @@ You can pass a relative `x` and `y` coordinate which will calculate distance in 
 
 # Options
 
-Pass in an options object to change the default behavior of the command.
+Pass in an options object to change the default behavior of `cy.click`.
 
 **[cy.click( *options* )](#options-usage)**
 **[cy.click( *position*, *options* )](#options-usage)**

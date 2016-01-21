@@ -9,7 +9,7 @@ Get the title of the document.
 
 # Options
 
-Pass in an options object to change the default behavior of the command.
+Pass in an options object to change the default behavior of `cy.click`.
 
 **cy.title( *options* )**
 

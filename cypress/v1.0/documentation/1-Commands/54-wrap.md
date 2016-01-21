@@ -9,7 +9,7 @@ Set the current subject to the object
 
 # Options
 
-Pass in an options object to change the default behavior of the command.
+Pass in an options object to change the default behavior of `cy.wrap`.
 
 **cy.wrap( *object*, *options* )**
 

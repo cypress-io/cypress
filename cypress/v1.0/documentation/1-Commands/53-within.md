@@ -9,7 +9,7 @@ Set the scope to the current subject
 
 # Options
 
-Pass in an options object to change the default behavior of the command.
+Pass in an options object to change the default behavior of `cy.within`.
 
 **cy.within( *options*, *function* )**
 

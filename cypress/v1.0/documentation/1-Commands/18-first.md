@@ -9,7 +9,7 @@ Reduce the set of matched elements to the first in the set.
 
 # Options
 
-Pass in an options object to change the default behavior of the command.
+Pass in an options object to change the default behavior of `cy.first`.
 
 **cy.first(*options* )**
 

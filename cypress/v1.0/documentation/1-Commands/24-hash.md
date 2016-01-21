@@ -11,7 +11,7 @@ If no `#` character is present, an empty string will be returned.
 
 # Options
 
-Pass in an options object to change the default behavior of the command.
+Pass in an options object to change the default behavior of `cy.hash`.
 
 **cy.hash( *options* )**
 **cy.hash( *options* )**

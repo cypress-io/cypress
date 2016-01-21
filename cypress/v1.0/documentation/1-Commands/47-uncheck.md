@@ -15,7 +15,7 @@ Unchecks the checkboxes or radios matching the values. Triggers events associate
 
 # Options
 
-Pass in an options object to change the default behavior of the command.
+Pass in an options object to change the default behavior of `cy.uncheck`.
 
 **cy.uncheck( *options* )**
 

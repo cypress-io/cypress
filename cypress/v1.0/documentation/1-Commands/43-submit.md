@@ -11,7 +11,7 @@ Follows all of the rules of form submission per the w3c spec.
 
 # Options
 
-Pass in an options object to change the default behavior of the command.
+Pass in an options object to change the default behavior of `cy.submit`.
 
 **cy.submit( *options* )**
 

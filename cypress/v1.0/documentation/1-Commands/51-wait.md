@@ -29,7 +29,7 @@ Wait for an array of [aliases](https://on.cypress.io/guides/using-aliases) to ha
 
 # Options
 
-Pass in an options object to change the default behavior of the command.
+Pass in an options object to change the default behavior of `cy.wait`.
 
 **[cy.wait( *text*, *options* )](#options-usage)**
 

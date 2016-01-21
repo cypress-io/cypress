@@ -9,7 +9,7 @@ For each element in the set, get the first element that matches the selector by 
 
 # Options
 
-Pass in an options object to change the default behavior of the command.
+Pass in an options object to change the default behavior of `cy.closest`.
 
 **cy.closest( *selector*, *options* )**
 

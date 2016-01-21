@@ -15,7 +15,7 @@ The `.children()` method optionally accepts a selector expression. If the select
 
 # Options
 
-Pass in an options object to change the default behavior of the command.
+Pass in an options object to change the default behavior of `cy.children`.
 
 **cy.children( *options* )**
 **cy.children( *selector*, *options* )**

@@ -15,7 +15,7 @@ Select an option within a `<select>` element based on the value of the option.
 
 # Options
 
-Pass in an options object to change the default behavior of the command.
+Pass in an options object to change the default behavior of `cy.select`.
 
 **cy.select( *text*, *options* )**
 **cy.select( *value*, *options* )**

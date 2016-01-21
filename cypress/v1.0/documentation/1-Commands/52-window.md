@@ -9,7 +9,7 @@ Returns the global window object of the remote application you've visited.
 
 # Options
 
-Pass in an options object to change the default behavior of the command.
+Pass in an options object to change the default behavior of `cy.window`.
 
 **cy.window( *options* )**
 

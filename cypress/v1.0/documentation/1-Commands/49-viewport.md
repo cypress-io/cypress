@@ -38,7 +38,7 @@ Pass `landscape` as the orientation to reverse the width/height.
 
 # Options
 
-Pass in an options object to change the default behavior of the command.
+Pass in an options object to change the default behavior of `cy.viewport`.
 
 **cy.viewport( *width*, *height*, *options* )**
 **cy.viewport( *preset*, *orientation*, *options* )**

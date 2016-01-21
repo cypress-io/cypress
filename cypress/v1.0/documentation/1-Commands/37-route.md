@@ -39,7 +39,7 @@ Set a route matching the `method` and `url` stubbed with the supplied `response`
 
 # Options
 
-Pass in an options object to change the default behavior of the command.
+Pass in an options object to change the default behavior of `cy.route`.
 
 **[cy.route( *options* )](#options-usage)**
 

@@ -9,7 +9,7 @@ Reduce the set of matched elements to those that match the selector.  Opposite o
 
 # Options
 
-Pass in an options object to change the default behavior of the command.
+Pass in an options object to change the default behavior of `cy.filter`.
 
 **cy.filter( *selector*, *options* )**
 

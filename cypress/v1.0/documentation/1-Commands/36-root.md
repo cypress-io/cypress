@@ -9,7 +9,7 @@ Get the root element. By default the root is `document`.
 
 # Options
 
-Pass in an options object to change the default behavior of the command.
+Pass in an options object to change the default behavior of `cy.root`.
 
 **cy.root( *options* )**
 

@@ -11,7 +11,7 @@ If Cypress does not find *any* element with focus, `null` is returned.
 
 # Options
 
-Pass in an options object to change the default behavior of the command.
+Pass in an options object to change the default behavior of `cy.focused`.
 
 **cy.focused( *options* )**
 

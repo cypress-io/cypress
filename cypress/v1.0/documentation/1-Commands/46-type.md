@@ -24,7 +24,7 @@ Sequence | Notes
 
 # Options
 
-Pass in an options object to change the default behavior of the command.
+Pass in an options object to change the default behavior of `cy.type`.
 
 **[cy.type( *text*, *options* )](#options-usage)**
 

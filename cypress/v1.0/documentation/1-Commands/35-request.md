@@ -31,7 +31,7 @@ Make a `GET` request to the provided url with the provided body.
 
 # Options
 
-Pass in an options object to change the default behavior of the command.
+Pass in an options object to change the default behavior of `cy.request`.
 
 **[cy.request( *options* )](#options-usage)**
 

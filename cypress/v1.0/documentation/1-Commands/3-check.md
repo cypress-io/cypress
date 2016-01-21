@@ -15,7 +15,7 @@ Checks the checkboxes or radios matching the values. Triggers events associated 
 
 # Options
 
-Pass in an options object to change the default behavior of the command.
+Pass in an options object to change the default behavior of `cy.check`.
 
 **cy.check( *options* )**
 

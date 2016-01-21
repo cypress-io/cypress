@@ -11,7 +11,7 @@ Visit a remote url. This will most likely be the first command you run.
 
 # Options
 
-Pass in an options object to change the default behavior of the command.
+Pass in an options object to change the default behavior of `cy.visit`.
 
 **[cy.visit( *url*, *options* )](#options-usage)**
 

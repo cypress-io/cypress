@@ -9,7 +9,7 @@ Returns the current URL as a string.
 
 # Options
 
-Pass in an options object to change the default behavior of the command.
+Pass in an options object to change the default behavior of `cy.url`.
 
 **cy.url( *options* )**
 

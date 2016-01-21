@@ -15,7 +15,7 @@ Get the immediately preceding sibling of each element in the set of matched elem
 
 # Options
 
-Pass in an options object to change the default behavior of the command.
+Pass in an options object to change the default behavior of `cy.prev`.
 
 **cy.prev( *options* )**
 **cy.prev( *selector*, *options* )**
