@@ -18,15 +18,6 @@
       buttonFormatted: ->
         if @get("state") is "done" then "Restart" else "Close"
 
-    getUpdater: ->
-      @updater ? throw new Error("Updater object not found on model!")
-
-    setUpdater: (upd) ->
-      @updater = upd
-
-      ## pull off additional properties
-      ## like the tmpDestination, appPath, execPath, etc
-
     setState: (state) ->
       switch state
         when "error", "done", "none" then @setFinished()
@@ -49,26 +40,20 @@
       @set "updatesAvailable", bool
 
     check: ->
-      @getUpdater().check
-        onNewVersion:   => @updatesAvailable()
-        onNoNewVersion: => @updatesAvailable(false)
+      App.ipc("updater:check").then (version) =>
+        ## if we have a version then updates
+        ## are available!
+        if version
+          @updatesAvailable()
+        else
+          @updatesAvailable(false)
 
-    run: (options) ->
-      @getUpdater().run(options)
-
-    install: (appPath, execPath) ->
-      @getUpdater().install(appPath, execPath)
-
-    setCoords: (coords = {}) ->
-      @getUpdater().setCoords(coords)
+    # setCoords: (coords = {}) ->
+      # @getUpdater().setCoords(coords)
 
   API =
-    newUpdater: (attrs) ->
-      manifest = App.request "gui:manifest"
+    newUpdater: (version) ->
+      new Entities.Updater({version: version})
 
-      updater = new Entities.Updater _.extend(attrs, {version: manifest.version})
-      updater.setUpdater App.config.getUpdater()
-      updater
-
-  App.reqres.setHandler "new:updater:entity", (attrs = {}) ->
-    API.newUpdater(attrs)
+  App.reqres.setHandler "new:updater:entity", (version) ->
+    API.newUpdater(version)

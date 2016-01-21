@@ -15,8 +15,7 @@
       updater = App.updater
 
       check = ->
-        console.warn("updater.check()")
-        # updater.check()
+        updater.check()
 
       updateView = @getUpdateView(updater)
 
