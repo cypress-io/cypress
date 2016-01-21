@@ -5,6 +5,7 @@ _              = require("lodash")
 glob           = require("glob")
 chmodr         = require("chmodr")
 trash          = require("trash")
+argsUtil       = require("./util/args")
 config         = require("./config")
 Log            = require("./log")
 
@@ -32,7 +33,7 @@ class Updater
   getArgs: ->
     c = @getClient()
 
-    _.compact [c.getAppPath(), c.getAppExec(), "--updating", @getCoords()]
+    _.compact ["--app-path=" + c.getAppPath(), "--exec-path=" + c.getAppExec(), "--updating", @getCoords()]
 
   patchAppPath: ->
     if process.env["CYPRESS_ENV"] isnt "production"
@@ -55,21 +56,29 @@ class Updater
 
     trash([appPath])
 
-  install: (appPath, execPath) ->
+  install: (appPath, execPath, argsObj = {}) ->
     c = @getClient()
 
-    args = @App.argv ? []
-    args = _.without(args, "--updating")
+    ## slice out updating, execPath, and appPath args
+    argsObj = _.omit(argsObj, "updating", "execPath", "appPath")
 
+    args = argsUtil.toArray(argsObj)
+
+    ## trash the 'old' app currently installed at the default
+    ## installation: /Applications/Cypress.app
     @trash(appPath).then =>
       Log.info "installing updated app", appPath: appPath, execPath: execPath
 
+      ## now move the /tmp application over
+      ## to the 'existing / old' app path.
+      ## meaning from from /tmp/Cypress.app to /Applications/Cypress.app
       c.install appPath, (err) =>
         Log.info "running updated app", args: args
 
         c.run(execPath, args)
 
-        @trigger("quit")
+        ## and now quit this process
+        process.exit(0)
 
   ## copies .cy to the new app path
   ## so we dont lose our cache, logs, etc
@@ -94,10 +103,15 @@ class Updater
   runInstaller: (newAppPath) ->
     @copyCyDataTo(newAppPath).bind(@).then ->
 
+      ## get the --updating args + --coords args
       args = @getArgs()
 
       Log.info "running installer from tmp", destination: newAppPath, args: args
 
+      ## runs the 'new' app in the /tmp directory with
+      ## appPath + execPath to the 'existing / old' app
+      ## (which is where its normally installed in /Applications)
+      ## it additionally passes the --updating flag
       @getClient().runInstaller(newAppPath, args, {})
 
       @trigger("quit")

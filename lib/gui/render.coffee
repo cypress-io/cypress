@@ -164,6 +164,10 @@ module.exports = (optionsOrArgv) ->
           version: pkg.version
         })
 
+      when "updater:install"
+        ## send up the appPath, execPath, and initial args
+        updater.install(arg.appPath, arg.execPath, options)
+
       when "updater:run"
         set = (event, version) ->
           send(null, {event: event, version: version})
@@ -174,7 +178,6 @@ module.exports = (optionsOrArgv) ->
           onError: -> set("error")
           onDone: ->  set("done")
           onNone: ->  set("none")
-          onQuit: ->  process.exit()
           onDownload: (version) ->
             set("download", version)
         })
