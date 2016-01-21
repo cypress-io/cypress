@@ -12,13 +12,13 @@ Currently this repo is used to house all of the Cypress documentation, the issue
 
 ### Where's the code?
 
-When Cypress releases its public beta, it will open source the majority of the code base. This will primarily consist of the `cypress-driver`, and backend adapters. The `desktop app` which integrates our `web services` will not be released as open source.
+When Cypress releases its public beta, we will open source the code base. This will consist of the `cypress-driver`, the `cypress-gui`, the `cypress-webapp`, the `cypress-server` and all backend adapters.
 
 ### How do I get Cypress?
 
 Right now you have to be an early adopter to get a hold of Cypress. Visit [http://www.cypress.io](http://www.cypress.io) and get on our mailing list. We send periodic emails asking for additional adopters until we are ready for a public beta.
 
-The public beta is on track for later in 2015.
+The public beta is on track for 2nd quarter in 2016.
 
 ### Contributors
 
