@@ -8,17 +8,14 @@ body {
   word-wrap: break-word;
 }
 
+/*-------Headers---------*/
+
 .theme-solid .docs-header h1 {
-  font-size: 28px;
+  font-size: 2em;
 }
 
 .docs-content [marked] h1 {
-  font-size: 22px;
-  text-transform: none;
-}
-
-.docs-content [marked] h1 {
-  font-size: 22px;
+  font-size: 1.6em;
   text-transform: none;
 }
 
@@ -27,8 +24,15 @@ body {
 }
 
 .docs-content [marked] h2 {
-  font-size: 18px;
+  font-size: 1.2em;
   text-transform: none;
+  margin-bottom: 1em;
+}
+
+.theme-solid .sidebar-nav h4 {
+  font-weight: bold;
+  font-size: 0.75em;
+  color: #ccc;
 }
 
 .cm-s-neo .cm-variable {
@@ -70,12 +74,14 @@ body {
 
 .block-show-code .code-tabs a {
   color: #aaa;
-  font-size: 90%;
+  font-size: 0.90em;
 }
 
 .block-show-code .code-tabs a:hover {
   color: #aaa;
 }
+
+
 
 .block-show-code pre {
   margin-top: 0;
@@ -91,7 +97,7 @@ body {
 .block-show-code pre>code {
   padding: 0;
   margin: 0;
-  font-size: 100%;
+  font-size: 1em;
   word-break: normal;
   white-space: pre;
   background: transparent;
@@ -103,7 +109,7 @@ a>code {
 }
 
 .theme-solid .sidebar-nav ul {
-  font-size: 90%;
+  font-size: 0.90em;
 }
 
 code {
@@ -114,7 +120,7 @@ code {
 .block-show-code pre {
   padding: 16px;
   overflow: auto;
-  font-size: 85%;
+  font-size: 0.85em;
   line-height: 1.45;
   background-color: #f7f7f7;
   border-radius: 3px;
@@ -149,7 +155,7 @@ code {
   padding-top: 0.2em;
   padding-bottom: 0.2em;
   margin: 0;
-  font-size: 85%;
+  font-size: 0.85em;
   background-color: rgba(0,0,0,0.04);
   border-radius: 3px;
 }
