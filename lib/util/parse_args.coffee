@@ -2,7 +2,7 @@ _        = require("lodash")
 path     = require("path")
 minimist = require("minimist")
 
-args     = "apiKey smokeTest getKey generateKey runProject project spec reporter ci debug updating headless ping coords key logs gui clearLogs port returnPkg environmentVariables getChromiumVersion".split(" ")
+args     = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter ci debug updating headless ping coords key logs gui clearLogs port returnPkg environmentVariables getChromiumVersion".split(" ")
 
 parseCoords = (coords) ->
   [x, y] = coords.split("x")
@@ -18,6 +18,8 @@ parseEnv = (envs) ->
 module.exports = (argv) ->
   options = minimist(argv, {
     alias: {
+      "app-path":    "appPath"
+      "exec-path":   "execPath"
       "api-key":     "apiKey"
       "smoke-test":  "smokeTest"
       "get-key":     "getKey"
@@ -43,11 +45,6 @@ module.exports = (argv) ->
   ## normalize runProject or project to projectPath
   if rp = options.runProject or p = options.project
     options.projectPath = path.resolve(process.cwd(), rp ? p)
-
-  if options.updating
-    _.extend options,
-      appPath:  options.argv[0]
-      execPath: options.argv[1]
 
   if options.smokeTest
     options.pong = options.ping
