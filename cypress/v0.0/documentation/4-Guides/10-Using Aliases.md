@@ -1,9 +1,20 @@
 slug: using-aliases
 excerpt: Reference work done in previous commands.
 
-Because all commands in Cypress are asynchronous, it makes referencing commands challenging. Aliasing is a DSL which solves the ability to reference work done in previous commands.
+# Contents
 
-Imagine the following synchronous example in jQuery:
+- :fa-angle-right: [Async Challenges](#section-async-challenges)
+- :fa-angle-right: [Introductin Aliasing](#section-introducing-aliasing)
+- :fa-angle-right: [Aliasing DOM Elements](#section-aliasing-dom-elements)
+- :fa-angle-right: [Aliasing Routes](#section-asliasing-routes)
+
+***
+
+# Async Challenges
+
+Because all commands in Cypress are asynchronous, it makes referencing commands challenging. Aliasing is a DSL that solves referencing work done in previous commands.
+
+**Imagine the following synchronous example in jQuery:**
 
 ```javascript
 var body = $("body")
@@ -14,9 +25,9 @@ var body = $("body")
 body.find("button")
 ```
 
-In jQuery we can assign regular values because work is performed synchronously. But in Cypress, every command is asynchronous, so there is no immediate return value. You'd have to do something like this to get access to previously resolved values:
-
 > In Cypress, every command is asynchronous.
+
+In jQuery we can assign regular values because work is performed synchronously. But in Cypress, every command is asynchronous, so there is no immediate return value. You'd have to do something like this to get access to previously resolved values:
 
 ```javascript
 // A not good example of referencing in Cypress
@@ -34,7 +45,9 @@ cy.then(function(){
 })
 ```
 
-Of course this is not good. It's clunky and difficult to figure out what is going on. Plus, with complex JavaScript applications, the element references may no longer be in the DOM by the time you're ready to use them.
+Of course this is *not good*. It's clunky and difficult to figure out what is going on. Plus, with complex JavaScript applications, the element references may no longer be in the DOM by the time you're ready to use them.
+
+***
 
 # Introducing Aliasing
 
@@ -42,14 +55,14 @@ Of course this is not good. It's clunky and difficult to figure out what is goin
 
 ![alias-commands](https://cloud.githubusercontent.com/assets/1271364/12363262/cf6fee26-bb95-11e5-8592-4f8cd3a6520e.jpg)
 
-Aliasing is incredibly powerful but very simple to use:
+**Aliasing is incredibly powerful but very simple to use:**
 
-* Create an alias with the [`as`](https://on.cypress.io/api/as) command.
-* Reference an alias with the [`get`](https://on.cypress.io/api/get) or [`wait`](https://on.cypress.io/api/wait) command.
+* Create an alias with the [`cy.as`](https://on.cypress.io/api/as) command.
+* Reference an alias with the [`cy.get`](https://on.cypress.io/api/get) or [`cy.wait`](https://on.cypress.io/api/wait) command.
 
 Every time you reference an alias, it should be prefixed with `@`. You can think of this character as "a" for alias or you can think of an alias as a pointer (like how variables point to memory).
 
-# DOM Elements
+# Aliasing DOM Elements
 
 One use case for aliasing is for referencing a DOM Element.
 
@@ -58,9 +71,7 @@ One use case for aliasing is for referencing a DOM Element.
 cy.get("table").find("tr").as("rows")
 ```
 
-Internally Cypress has made a reference to the collection of `<tr>`'s returned as the alias "rows".
-
-To reference these same "rows" later, you can use the `cy.get` command.
+Internally Cypress has made a reference to the `<tr>` collection returned as the alias "rows". To reference these same "rows" later, you can use the [`cy.get`](https://on.cypress.io/api/get) command.
 
 ```javascript
 // Cypress returns the reference to the <tr>'s
@@ -69,16 +80,15 @@ To reference these same "rows" later, you can use the `cy.get` command.
 cy.get("@rows").first().click()
 ```
 
-Because we've used the `@` character in `cy.get`, instead of querying the DOM for elements, `cy.get` looks for an existing alias called `rows` and returns the reference if it finds it.
+Because we've used the `@` character in [`cy.get`](https://on.cypress.io/api/get), instead of querying the DOM for elements, [`cy.get`](https://on.cypress.io/api/get) looks for an existing alias called `rows` and returns the reference (if it finds it).
 
 ***
 
 ## When alias references no longer exist in the DOM
 
-Cypress automatically decides when it should reference existing elements, or re-query for new elements.
+Cypress automatically decides when it should reference existing elements or re-query for new elements.
 
-In many single-page JavaScript applications, the DOM re-renders different parts of the application constantly. If you alias DOM elements that have been removed by the time you call `cy.get` with the alias, Cypress will automatically re-query the DOM to find these elements again.
-
+In many single-page JavaScript applications, the DOM re-renders parts of the application constantly. If you alias DOM elements that have been removed from the DOM by the time you call [`cy.get`](https://on.cypress.io/api/get) with the alias, Cypress automatically re-querys the DOM to find these elements again.
 
 ```html
 <ul id="todos">
@@ -93,9 +103,9 @@ In many single-page JavaScript applications, the DOM re-renders different parts 
 </ul>
 ```
 
-Let's imagine when we click the `.edit` button that our `<li>` is re-rendered in the DOM. Instead of displaying the edit button, it instead displays an `<input />` text field allowing you to edit the todo. The previous `<li>` has been completely removed from the DOM, and a new `<li>` is rendered in its place.
+Let's imagine when we click the `.edit` button that our `<li>` is re-rendered in the DOM. Instead of displaying the edit button, it instead displays an `<input />` text field allowing you to edit the todo. The previous `<li>` has been *completely* removed from the DOM, and a new `<li>` is rendered in its place.
 
-Cypress calculates stale alias references.
+**Cypress calculates stale alias references.**
 
 ```javascript
 cy
@@ -105,21 +115,22 @@ cy
     .find("input").type("Clean the kitchen")
 ```
 
-When we reference `@firstTodo`, Cypress checks to see if all elements its referencing are still in the DOM. If they are, it will return those existing elements. If they aren't, Cypress will replay the commands leading up to the alias definition.
+When we reference `@firstTodo`, Cypress checks to see if all elements its referencing are still in the DOM. If they are, it returns those existing elements. If they aren't, Cypress replays the commands leading up to the alias definition.
 
-In our case it would re-issue the commands: `cy.get("#todos li").first()`. Everything "just works" because the new `<li>` is found.
+In our case it would re-issue the commands: `cy.get("#todos li").first()`. Everything just works because the new `<li>` is found.
 
 [block:callout]
 {
   "type": "warning",
-  "body": "*Usually* replaying previous commands will return what you expect, but not always. Cypress' calculations are complicated and we may improve this algorithm at a later time. It is recommended to not alias DOM elements very far down a chain of commands - **alias elements as soon as possible with as few commands as possible**. When in doubt, you can *always* issue a regular `cy.get` to query for the elements again.",
-  "title": "BEWARE: thar be dragons when aliasing!"
+  "body": "*Usually* replaying previous commands will return what you expect, but not always. Cypress' calculations are complicated and we may improve this algorithm at a later time. It is recommended to not alias DOM elements very far down a chain of commands - **alias elements as soon as possible with as few commands as possible**. When in doubt, you can *always* issue a regular `cy.get` to query for the elements again."
 }
 [/block]
 
-# Routes
+***
 
-Another use case for aliasing is with routes. Using route aliases makes dealing with AJAX requests much easier.
+# Aliasing Routes
+
+Another use case for aliasing is with routes. Using aliases with [`cy.route`](https://on.cypress.io/api/route) makes dealing with AJAX requests much easier.
 
 ```javascript
 cy
@@ -143,7 +154,7 @@ $("form").submit(function(){
 })
 ```
 
-You can tell Cypress to wait until it sees a request that matches your aliased route using the [`wait`](https://on.cypress.io/api/wait) command.
+You can tell Cypress to wait until it sees a request that matches your aliased route using the [`cy.wait`](https://on.cypress.io/api/wait) command.
 
 ```javascript
 cy
@@ -152,7 +163,7 @@ cy
   .get(".success").contains("User successfully created!")
 ```
 
-Telling Cypress to wait for an AJAX request that matches the route: `postUsers` has enormous advantages.
+**Telling Cypress to wait for an AJAX request that matches an aliased route has enormous advantages.**
 
 1. Waiting for an explicit route reference is less flaky. Instead of waiting for an arbitrary period of time, waiting for a specific aliased route is much more predictable.
 2. Cypress will resolve if there's already been a request that matches the alias.

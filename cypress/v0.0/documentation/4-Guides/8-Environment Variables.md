@@ -1,6 +1,17 @@
 slug: environment-variables
 excerpt: Set up environment variables
 
+# Contents
+
+- :fa-angle-right: [Use Case](#section-use-case)
+- :fa-angle-right: [Setting Environment Variables](#section-setting-environment-variables)
+  - :fa-angle-right: [Option #1: Set in `cypress.json`](#section-option-1-set-in-cypress-json-)
+  - :fa-angle-right: [Option #2: Create a `cypress.env.json`](#section-option-2-create-a-cypress-env-json-)
+  - :fa-angle-right: [Option #3: Export as `CYPRESS_*`](#section-option-3-export-as-cypress_-)
+  - :fa-angle-right: [Option #4: Pass in from the CLI as `--env`](#section-option-4-pass-in-from-the-cli-as-env-)
+
+***
+
 # Use Case
 
 Environment variables should be used:
@@ -26,11 +37,14 @@ cy
   .visit(Cypress.env("host"))
 ```
 
-# Setting Env Vars
+***
+
+# Setting Environment Variables
 
 There are 4 different ways to set environment variables. Each has a slightly different use case.
 
-To summarize you can:
+**To summarize you can:**
+
 - set in `cypress.json`
 - create a `cypress.env.json`
 - export as `CYPRESS_*`

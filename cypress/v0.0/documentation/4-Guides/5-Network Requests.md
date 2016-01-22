@@ -1,6 +1,24 @@
 slug: network-requests-xhr
 excerpt: A guide to managing XHR requests
 
+# Contents
+
+- :fa-angle-right: [Strategy](#section-strategy)
+  - :fa-angle-right: [Strategy #1: Don't Stub Responses](#section-strategy-1-don-1-stub-responses)
+  - :fa-angle-right: [Stategy #2: Stub Responses](#section-strategy-2-stub-responses)
+- :fa-angle-right: [Requests](#section-requests)
+- :fa-angle-right: [Responses](#section-responses)
+- :fa-angle-right: [Server + Routing Table](#section-server-routing-table)
+- :fa-angle-right: [Fixtures](#section-fixtures)
+- :fa-angle-right: [Waiting](#section-waiting)
+  - :fa-angle-right: [Removing Flake](#section-removing-flake)
+  - :fa-angle-right: [Clear Source of Failure](#section-clear-source-of-failure)
+  - :fa-angle-right: [Asserting about the XHR Object](#section-asserting-about-the-xhr-object)
+
+***
+
+# Strategy
+
 Cypress makes it easy to manage the entire lifecyle of AJAX / XHR requests within your application. Cypress provides you direct access to the XHR objects, enabling you to make assertions about its properties. Additionally you can even stub and mock a request's response.
 
 **Common testing scenarios:**
@@ -14,25 +32,23 @@ Cypress makes it easy to manage the entire lifecyle of AJAX / XHR requests withi
 - Delaying a response
 - Waiting for a response to happen
 
-# Strategy
-
 Within Cypress, you have the ability to choose whether to stub responses or allow them to actually hit your server. You can also mix and match within the same test by choosing to stub certain requests, while allowing others to hit your server.
 
 Let's investigate both strategies, why you would use one versus the other, and why you should regularly use both.
 
----
+***
 
 ## Strategy #1: Don't Stub Responses
 
-Requests that aren't stubbed will actually reach your server. By not stubbing your responses you are writing true **end to end** tests. This means you are driving your application the same way a real user would.
+Requests that aren't stubbed will actually reach your server. By *not* stubbing your responses, you are writing true **end to end** tests. This means you are driving your application the same way a real user would.
 
-When requests are not stubbed, this gaurantees the *contract* between your client and server is working correctly. In other words, you can have confidence your server is sending the correct data in the correct structure for your client to consume.
+> When requests are not stubbed, this gaurantees the *contract* between your client and server is working correctly.
 
-It is a good idea to have **end to end** tests around your application's *critical paths*. These typically include **user login**, **signup**, and other critical paths such as **billing**.
+In other words, you can have confidence your server is sending the correct data in the correct structure for your client to consume. It is a good idea to have **end to end** tests around your application's *critical paths*. These typically include user login, signup, and other critical paths such as billing.
 
-There are downsides to not stubbing responses you should be aware of:
+**There are downsides to not stubbing responses you should be aware of:**
 
-- Since no responses are stubbed, that means your server has to *actually send real responses*. This becomes problematic because that means prior to every test you'll likely have to *seed the database* to generate the state you wish to test. For instance if you were testing **pagination** you'd have to seed the database with every object that it takes to replicate this feature in your application.
+- Since no responses are stubbed, that means your server has to *actually send real responses*. This can be problematic because you may have to *seed a database* before every test to generate state. For instance, if you were testing **pagination**, you'd have to seed the database with every object that it takes to replicate this feature in your application.
 - Since real responses go through every single layer of your server (controllers / models / views) the tests are often *much* slower than stubbed responses.
 
 If you are writing a traditional server-side application where most of the responses are `HTML` you will likely have few stubbed responses. However, most modern applications that serve `JSON` can take advantage of stubbing.
@@ -61,15 +77,15 @@ If you are writing a traditional server-side application where most of the respo
 }
 [/block]
 
----
+***
 
 ## Strategy #2: Stub Responses
 
 Stubbing responses enables you to control every aspect of the response, including the response body, the status, headers, and even network delay. Stubbing is extremely fast, most responses will be returned in less than 20ms.
 
-Stubbing responses is a great way to control the data that is returned to your client. You don't have to do any work on the server. Your application will have no idea it's requests are being stubbed, so there are **no code changes** needed.
+> Stubbing responses is a great way to control the data that is returned to your client.
 
-In fact stubbed requests will still show up in the Network tab of your Developer Tools, and your application will  continue to work after the test is finished.
+You don't have to do any work on the server. Your application will have no idea it's requests are being stubbed, so there are **no code changes** needed. In fact, stubbed requests will show up in the Network tab of your Developer Tools, and your application will continue to work after the test is finished.
 
 [block:callout]
 {
@@ -95,19 +111,21 @@ In fact stubbed requests will still show up in the Network tab of your Developer
 }
 [/block]
 
----
+***
 
 # Requests
 
-Cypress will automatically indicate when an XHR request happens in your application. These are logged in the Cypress' Command Log regardless of whether or not you are using stubbing. This provides you a visual indicator when a request has happened and when it is finished. Additionally, Cypress will take a snapshot of the DOM when the request is made, and another snapshot when the response comes back.
+Cypress will automatically indicate when an XHR request happens in your application. These are logged in the Command Log regardless of whether or not you are using stubbing. This provides you a visual indicator when a request has started and when it is finished. Additionally, Cypress will take a snapshot of the DOM when the request is made and another snapshot when the response comes back.
 
-By default, Cypress is configured to **ignore** requests that are used to fetch static content like `.js` or `.html` files. This keeps the Command Log less noisy, and this option can be [configured](https://on.cypress.io/guides/configuration).
+By default, Cypress is configured to *ignore* requests that are used to fetch static content like `.js` or `.html` files. This keeps the Command Log less noisy. This option can be changed in the [configuration](https://on.cypress.io/guides/configuration).
 
 Cypress automatically collects the request `headers` and the request `body` and will make this available to you.
 
+***
+
 # Responses
 
-Cypress makes it easy to stub a response and control the body, status, headers, or even delay.
+Cypress makes it easy to stub a response and control the `body`, `status`, `headers`, or even delay.
 
 To begin stubbing responses you have to do two things.
 
@@ -118,6 +136,8 @@ These two commands work together to control the behavior of your responses.
 
 [`cy.server`](https://on.cypress.io/api/server) enables stubbing, while [`cy.route`](https://on.cypress.io/api/route) provides a routing table so Cypress understands which response should go with which request.
 
+***
+
 # Server + Routing Table
 
 ```javascript
@@ -125,7 +145,7 @@ cy
   // enable response stubbing
   .server()
 
-  // Route all GET requests which have a
+  // Route all GET requests that have a
   // URL that matches the RegExp /users/
   // and force the response to be: []
   .route({
@@ -137,20 +157,20 @@ cy
 
 Each [`cy.route`](https://on.cypress.io/api/route) you provide will automatically route those requests to specific responses and control their body, response headers, or even force additional network delay.
 
-When you start a server and provide a routing table, Cypress will display this under Routes in the Command Log.
+When you start a server and provide a routing table, Cypress will display this under "Routes" in the Command Log.
 
 ![Routing Table](https://cloud.githubusercontent.com/assets/1268976/10780221/91743ab8-7d11-11e5-9fe1-8bcbdf5e344c.png)
 
-Once you start a server with [`cy.server`](https://on.cypress.io/api/server), all requests will be controllable for the remainder of the test. When a new test runs, Cypress will restore the default behavior and remove all routing + stubbing.
-
-For a complete reference of the API and options, refer to the documentation for each command.
+Once you start a server with [`cy.server`](https://on.cypress.io/api/server), all requests will be controllable for the remainder of the test. When a new test runs, Cypress will restore the default behavior and remove all routing and stubbing. For a complete reference of the API and options, refer to the documentation for each command.
 
 - [`cy.server`](https://on.cypress.io/api/server)
 - [`cy.route`](https://on.cypress.io/api/route)
 
+***
+
 # Fixtures
 
-When stubbing a response, you typically need to manage potentially large and complex JSON objects. Cypress has first class support for [fixtures](https://on.cypress.io/guides/creating-fixtures), and even allows you to integrate fixture syntax directly into responses.
+When stubbing a response, you typically need to manage potentially large and complex JSON objects. Cypress has support for [fixtures](https://on.cypress.io/guides/creating-fixtures), and even allows you to integrate fixture syntax directly into responses.
 
 
 ```javascript
@@ -161,7 +181,7 @@ cy
   .route("GET", /activities/, "fixture:activities.json")
 ```
 
-You can additionally reference [aliases](https://on.cypress.io/guides/using-aliases) within responses. These aliases do not **need** to point to fixtures, but that is a common use case. Separating out a fixture enables you to work and mutate that object prior to handing it off to a response.
+You can additionally reference [aliases](https://on.cypress.io/guides/using-aliases) within responses. These aliases do not have to point to fixtures, but that is a common use case. Separating out a fixture enables you to work and mutate that object prior to handing it off to a response.
 
 
 ```javascript
@@ -172,9 +192,11 @@ cy
   .route("GET", /activities/, "@activitiesJSON")
 ```
 
+***
+
 # Waiting
 
-Whether or not you choose to stub responses, Cypress enables you to declaratively [`wait`](https://on.cypress.io/api/wait) for requests and their responses.
+Whether or not you choose to stub responses, Cypress enables you to declaratively [`cy.wait`](https://on.cypress.io/api/wait) for requests and their responses.
 
 ```javascript
 cy
@@ -200,13 +222,13 @@ Declaratively waiting for responses has many advantages:
 - Source of failure is clearer
 - You can make assertions about the XHR objects
 
+***
+
 ## Removing Flake
 
-One advantage of declaratively waiting for requests is that it decreases the chances of test flake.
+One advantage of declaratively waiting for requests is that it decreases test flake. You can think of [`cy.wait`](https://on.cypress.io/api/wait) as a guard that indicates to Cypress when you expect a request to be made that matches a specific routing alias. This prevents commands from running until responses come back and it guards against situations where your requests are initially delayed.
 
-You can think of [`wait`](https://on.cypress.io/api/wait) as a guard that indicates to Cypress when you expect a request to be made that matches a specific routing alias. This prevents commands from running until responses come back and it guards against situations where your requests are initially delayed.
-
-Auto-complete Example:
+**Auto-complete Example:**
 
 ```javascript
 cy
@@ -228,33 +250,33 @@ cy
     .and("contain", "Book 2")
 ```
 
-What makes this so powerful is that Cypress will automatically wait for a request that matches the `getSearch` alias.
+What makes this example above so powerful is that Cypress will automatically wait for a request that matches the `getSearch` alias. Instead of forcing Cypress to test the *side effect* of a successful request (the display of the Book results), you can test the actual *cause* of the results.
 
-Instead of forcing Cypress to test the *side effect* of a successful request (the display of the Book results), you can test the actual *cause* of the results.
+***
 
 ## Clear Source of Failure
 
 In our example above, we added an assertion to the display of the search results.
 
-But the search results working are coupled directly to a few things:
+**The search results working are coupled to a few things in our application:**
 
-1. Our application making a request to the correct URL
-2. Our application correctly processing the response,
+1. Our application making a request to the correct URL.
+2. Our application correctly processing the response.
 3. Our application inserting the results into the DOM.
 
-In this example, there are many possible sources of failure. In most testing tools if our request failed to ever go out, we would normally only ever get an error once we attempt to find the results in the DOM and see that there is no matching element.
+In this example, there are many possible sources of failure. In most testing tools, if our request failed to ever go out, we would normally only ever get an error once we attempt to find the results in the DOM and see that there is no matching element. This is problematic because it's unknown *why* the results failed to be displayed. Was there a problem with our rendering code? Did we modify or change an attribute such as an `id` or `class` on an element? Perhaps our server sent us different Book items.
 
-This is problematic because it's unknown *why* the results failed to be displayed. Was there a problem with our rendering code? Did we modify or change an attribute such as an `id` or `class` on an element? Perhaps our server sent us different Book items.
-
-With Cypress, by adding a [`wait`](https://on.cypress.io/api/wait) guard, you can more easily pinpoint your specific problem. If the request never went out, you'll receive errors like this.
+With Cypress, by adding a [`cy.wait`](https://on.cypress.io/api/wait) guard, you can more easily pinpoint your specific problem. If the request never went out, you'll receive errors like this.
 
 ![wait failure](https://cloud.githubusercontent.com/assets/1268976/10780062/a9c3245a-7d0f-11e5-9984-67d84650b0a0.png)
 
 Now we know exactly why our test failed. It had nothing to do with the DOM. Instead we can see that either our request never went out or a request went out to the wrong URL.
 
+***
+
 ## Asserting about the XHR Object
 
-Another benefit of using [`wait`](https://on.cypress.io/api/wait) on requests is that it allows you to access the actual `XHR` object. This is useful when you want to make assertions about this object.
+Another benefit of using [`cy.wait`](https://on.cypress.io/api/wait) on requests is that it allows you to access the actual `XHR` object. This is useful when you want to make assertions about this object.
 
 In our example above we can assert about the request object to verify that it sent data as a query string in the URL. Although we're mocking the response, we can still verify that our application sends the correct request.
 
@@ -276,7 +298,7 @@ cy
     .and("contain", "Book 2")
 ```
 
-The XHR object that [`wait`](https://on.cypress.io/api/wait) yields you has everything you need to make assertions.
+**The XHR object that [`cy.wait`](https://on.cypress.io/api/wait) yields you has everything you need to make assertions including:**
 
 - URL
 - Method
@@ -285,8 +307,3 @@ The XHR object that [`wait`](https://on.cypress.io/api/wait) yields you has ever
 - Request Headers
 - Response Body
 - Response Headers
-
-# Assertions
-- counting number of requests
-- asserting about request body / headers
-- asserting about response body / headers / status

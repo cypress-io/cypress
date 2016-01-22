@@ -1,6 +1,19 @@
 slug: continuous-integration
 excerpt: Run Cypress in any CI provider
 
+# Contents
+
+- :fa-angle-right: [Supported Services](#section-supported-services)
+- :fa-angle-right: [Running in CI](#section-running-in-ci)
+  - :fa-angle-right: [Add your project to your CI provider](#section-add-you-project-to-your-ci-provider)
+  - :fa-angle-right: [Acquire a Cypress secret key](#section-acquire-a-cypress-secret-key)
+  - :fa-angle-right: [Add 2 lines of code to your CI config file](#section-add-2-lines-of-code-to-your-ci-config-file)
+  - :fa-angle-right: [Storing your secret key as an environment variable](#section-storing-your-secret-key-as-an-environment-variable)
+  - :fa-angle-right: [Specifying a version of Cypress](#section-specifying-a-version-of-cypress)
+- :fa-angle-right: [Examples](#section-examples)
+
+***
+
 # Supported Services
 
 Cypress should run on **all** CI providers. We currently have seen Cypress working on the following providers:
@@ -13,6 +26,8 @@ Cypress should run on **all** CI providers. We currently have seen Cypress worki
 
 If you're running on your own `Jenkins` server you may have to install some other dependencies [which are documented here](https://on.cypress.io/guides/troubleshooting).
 
+***
+
 # Running in CI
 
 Running Cypress in CI is very easy. If you're using a hosted CI service, generally the workflow is the same:
@@ -21,9 +36,13 @@ Running Cypress in CI is very easy. If you're using a hosted CI service, general
 2. [Acquire a Cypress secret key](#acquire-a-cypress-secret-key)
 3. [Add 2 lines of code to your CI config file](#add-2-lines-of-code-to-your-ci-config-file)
 
+***
+
 ## Add your project to your CI provider
 
 This is different for each provider, but usually includes logging into your CI service, connecting it with your Github account, and then adding that project's repo.
+
+***
 
 ## Acquire a Cypress secret key
 
@@ -55,6 +74,8 @@ cypress get:key
 }
 [/block]
 
+***
+
 ## Add 2 lines of code to your CI config file
 
 Depending on which CI provider you're using you'll have access to a configuration file such as:
@@ -77,6 +98,8 @@ You'll want to refer to your CI providers documentation for knowing when to run 
 
 For instance, with [Travis CI](https://docs.travis-ci.com/user/customizing-the-build/#The-Build-Lifecycle) they expose a `before_install` and `script` phase. You'd write `npm install -g cypress` in the `before_install` phase, and `cypress ci` in the `script` phase.
 
+***
+
 ## Storing your secret key as an environment variable
 
 Instead of hard-coding your secret key into a configuration file, you can opt to store this as an environment variable with your CI provider. This prevents your secret key from being stored in version control. Each CI provider will be different, but generally each exposes a way to set environment variables.
@@ -88,11 +111,15 @@ Set the name of the environment variable to `CYPRESS_CI_KEY` and paste your secr
 cypress ci
 ```
 
+***
+
 ## Specifying a version of Cypress
 
 You can specify a specific version of Cypress to use in CI by setting an Environment Variable: `CYPRESS_VERSION`.
 
 As long as a previous version has not been removed (due to security issues) this will work.
+
+***
 
 # Examples
 

@@ -15,3 +15,10 @@ For instance Cypress will log out the following:
 * Whenever the page finishes loading
 * Whenever an XHR is issued (when the `cy.server` has been started)
 
+# Debugging Assertions
+
+- When assertions fail
+- Determining Subject Changes
+- Clicking on an assertion for more information
+- Inspecting Objects
+- Making multiple assertions

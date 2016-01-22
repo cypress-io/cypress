@@ -1,6 +1,15 @@
 slug: writing-your-first-test
 excerpt: Walkthrough writing your first test
 
+# Contents
+
+- :fa-angle-right: [Folder Structure](#section-folder-structure)
+- :fa-angle-right: [Test Files](#section-test-files)
+- :fa-angle-right: [How to Write Tests](#section-how-to-write-tests)
+- :fa-angle-right: [Command Line Tools](#section-command-line-tools)
+
+***
+
 # Folder Structure
 
 After adding your project, Cypress will automatically scaffold out a suggested folder structure. By default it will create:

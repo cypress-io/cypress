@@ -1,11 +1,22 @@
 slug: issuing-commands
 excerpt: Traverse the dom and perform actions with commands
 
-# Async
+# Contents
 
-When writing functional (integration) tests, you will inevitably traverse the DOM and perform user actions. In traditional server-side rendered views, it's unlikely you'll be dealing with many application state changes. However, if you're writing an application using a modern JavaScript framework, you'll likely need to navigate through highly complex, dynamic states.
+- :fa-angle-right: [Commands are Async](#section-commands-are-async)
+- :fa-angle-right: [Subjects](#section-subjects)
+- :fa-angle-right: [Chaining](#section-chaining)
+  - :fa-angle-right: [Parent Commands](#section-parent-commands)
+  - :fa-angle-right: [Child Commands](#section-child-commands)
+  - :fa-angle-right: [Dual Commands](#section-dual-commands)
 
-Cypress is designed to handle both of these situations.
+***
+
+# Commands are Async
+
+When writing integration tests, you will need to traverse the DOM and perform user actions. In traditional server-side rendered views, it's unlikely you be deal with many application state changes. However, if you're writing an application using a modern JavaScript framework, you'll likely need to navigate through highly complex, dynamic states.
+
+> Cypress is designed to handle *both* traditional server-side rendered views & modern JavaScript framework applications.
 
 The architecture of Cypress focuses around asynchronicity. The DOM is a highly complex, mutable object; to handle the indeterminate state of the DOM, we've designed our commands to be asynchronous.
 
@@ -17,9 +28,9 @@ The architecture of Cypress focuses around asynchronicity. The DOM is a highly c
 
 Cypress is designed to also handle the disadvantages of async. One example is [aliasing](https://on.cypress.io/guides/using-aliases). This works around the need to assign values to variables.
 
-The [Command API](https://on.cypress.io/api) attempts to balance readability, terseness, flexibility, and capability all while being designed similar to familiar APIs.
+The [Command API](https://on.cypress.io/api) attempts to balance readability, terseness, flexibility, and capability all while being designed similar to familiar APIs. The [Command API](https://on.cypress.io/api) is also fluent - that is, you chain all commands together - similar to how jQuery's API is designed.
 
-The [Command API](https://on.cypress.io/api) is also fluent - that is, you chain all commands together - similar to how jQuery's API is designed.
+***
 
 # Subjects
 
@@ -65,7 +76,7 @@ cy.get("#main").find("button").then(function($button){
 })
 ```
 
-When chaining together multiple commands you rarely should need to yield the subject via a [`then`](https://on.cypress.io/api/then) command. Cypress favors readability and terseness, and even [assertions](https://on.cypress.io/guides/making-assertions) can be implicitly run without having to use a [`then`](https://on.cypress.io/api/then) command.
+When chaining together multiple commands you rarely should need to yield the subject via a [`cy.then`](https://on.cypress.io/api/then) command. Cypress favors readability and terseness, and even [assertions](https://on.cypress.io/guides/making-assertions) can be implicitly run without having to use a [`cy.then`](https://on.cypress.io/api/then) command.
 
 ```javascript
 // we're testing that an 'active' class is
@@ -73,21 +84,24 @@ When chaining together multiple commands you rarely should need to yield the sub
 cy.get("#main").find("button").click().should("have.class", "active")
 ```
 
+***
+
 # Chaining
 
 Because Cypress implements a fluent API, all commands are linked together.  Cypress has a small, but powerful, set of rules to know how to process the chain of commands.
 
-There are 3 types of commands:
+**There are 3 types of commands:**
 
-- Parent Commands
-- Child Commands
-- Dual Commands
+- [Parent Commands](#section-parent-commands)
+- [Child Commands](#section-child-commands)
+- [Dual Commands](#section-dual-commands)
 
 ## Parent Commands
 
-Parent commands always **begin** a new chain of commands. Even if you've written a previous chain, parent commands will always start a new chain, and ignore previous chains. Parent commands should be written off the `cy` object:
+Parent commands always *begin* a new chain of commands. Even if you've written a previous chain, parent commands will always start a new chain, and ignore previous chains. Parent commands should be written off the `cy` object:
 
-Examples of parent commands:
+**Examples of parent commands:**
+
  - [`visit`](https://on.cypress.io/api/visit)
  - [`server`](https://on.cypress.io/api/server)
  - [`get`](https://on.cypress.io/api/get)
@@ -111,7 +125,8 @@ cy
 
 Child commands are always chained off of a **parent** command, or another **child** command.
 
-Examples of child commands:
+**Examples of child commands:**
+
 - [`find`](https://on.cypress.io/api/find)
 - [`click`](https://on.cypress.io/api/click)
 - [`type`](https://on.cypress.io/api/type)
@@ -157,7 +172,8 @@ cy
 
 While parent commands always start a new chain of commands and child commands require being chained off a parent command, dual commands can behave as parent or child command. That is, they can **start** a new chain, or be chained off of an **existing** chain.
 
-Examples of dual commands:
+**Examples of dual commands:**
+
 - [`contains`](https://on.cypress.io/api/contains)
 - [`wait`](https://on.cypress.io/api/wait)
 

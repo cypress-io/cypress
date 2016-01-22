@@ -1,13 +1,13 @@
 slug: errors
-excerpt: Understand errors thrown in Cypress
+excerpt: Errors that require additional explanation are listed here.
 
-Errors that require additional explanation are listed here.
+# Contents
 
-- [Sorry, there's something wrong with this file](#sorry-theres-something-wrong-with-this-file)
-- [Cypress cannot execute commands outside a running test](#cypress-cannot-execute-commands-outside-a-running-test)
-- [cy.method() failed because the element you are chaining off of has become detached or removed from the dom](#cymethod-failed-because-the-element-you-are-chaining-off-of-has-become-detached-or-removed-from-the-dom)
-- [cy.method() failed because the element cannot be interacted with](#cymethod-failed-because-the-element-cannot-be-interacted-with)
-- [cy.method() failed because the element is currently animating](#cymethod-failed-because-the-element-is-currently-animating)
+- :fa-angle-right: [Sorry, there's something wrong with this file](#section-sorry-there-s-something-wrong-with-this-file)
+- :fa-angle-right: [Cypress cannot execute commands outside a running test](#section-cypress-cannot-execute-commands-outside-a-running-test)
+- :fa-angle-right: [cy.method() failed because the element you are chaining off of has become detached or removed from the dom](#section-cy-method-failed-because-the-element-you-are-chaining-off-of-has-become-detached-or-removed-from-the-dom)
+- :fa-angle-right: [cy.method() failed because the element cannot be interacted with](#section-cy-method-failed-because-the-element-cannot-be-interacted-with)
+- :fa-angle-right: [cy.method() failed because the element is currently animating](#section-cy-method-failed-because-the-element-is-currently-animating)
 
 ***
 

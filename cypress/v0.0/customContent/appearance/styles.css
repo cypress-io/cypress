@@ -8,6 +8,8 @@ body {
   word-wrap: break-word;
 }
 
+
+
 /*-------Headers---------*/
 
 .theme-solid .docs-header h1 {
@@ -20,7 +22,7 @@ body {
 }
 
 .blocks-parent .block>div>div [marked] h1:first-child {
-  margin-top: 0;
+  margin-top: 1em;
 }
 
 .docs-content [marked] h2 {
@@ -35,9 +37,38 @@ body {
   color: #ccc;
 }
 
+/*-------Contents UL---------*/
+
+.blocks-parent .block>div>div [marked] h1:first-child + ul {
+  list-style-type: none;
+  padding-left: 0.25em;
+}
+
+.blocks-parent .block>div>div [marked] h1:first-child + ul>li i {
+  color: #0094ff;
+  margin-right: 0.25em;
+}
+
+.blocks-parent .block>div>div [marked] h1:first-child + ul>li>ul {
+  list-style-type: none;
+  padding-left: 1.5em;
+  font-size: 0.95em;
+}
+
+/*-------Images---------*/
+
 .docs-content [marked] p img {
   border: 1px solid #ddd;
   box-shadow: 0 2px 2px #eee;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+/*-------HR---------*/
+
+.docs-content .docs-body hr {
+  margin-top: 3em;
+  margin-bottom: 1em;
 }
 
 /*-------Code tags/variable colors---------*/

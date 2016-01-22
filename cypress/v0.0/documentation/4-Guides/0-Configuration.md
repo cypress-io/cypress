@@ -1,6 +1,16 @@
 slug: configuration
 excerpt: Configure global, network, directory, viewport, and animation options
 
+# Contents
+
+- :fa-angle-right: [Global Options](#section-global-options)
+- :fa-angle-right: [Network Options](#section-network-options)
+- :fa-angle-right: [Directory Options](#section-directory-options)
+- :fa-angle-right: [Viewport Options](#section-viewport-options)
+- :fa-angle-right: [Animation Options](#section-animation-options)
+
+***
+
 When a project is added to Cypress, a `cypress.json` file is created in your project. This file contains your `projectId`.
 
 ```json
