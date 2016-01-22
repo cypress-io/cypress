@@ -21,6 +21,8 @@ mainWindow = null
 ## global reference to any open projects
 openProject = null
 
+windows = []
+
 getUrl = (type) ->
   switch type
     when "GITHUB_LOGIN"
@@ -59,11 +61,15 @@ module.exports = (optionsOrArgv) ->
 
       obj
 
+    sendResponse = (data = {}) ->
+      try
+        event.sender.send("response", data)
+
     sendErr = (err) ->
-      event.sender.send("response", {id: id, __error: cloneErr(err)})
+      sendResponse({id: id, __error: cloneErr(err)})
 
     send = (err, data) ->
-      event.sender.send("response", {id: id, __error: err, data: data})
+      sendResponse({id: id, __error: err, data: data})
 
     switch type
       when "show:directory:dialog"
@@ -133,6 +139,14 @@ module.exports = (optionsOrArgv) ->
             send(null, code)
 
         win = new BrowserWindow(args)
+
+        win.webContents.id = _.uniqueId("webContents")
+
+        windows.push(win)
+
+        win.on "closed", ->
+          ## slice the window out of windows reference
+          windows = _.without(windows, win)
 
         ## open dev tools if they're true
         if args.devTools
@@ -283,6 +297,10 @@ module.exports = (optionsOrArgv) ->
       #   allowRunningInsecureContent: true
       }
     })
+
+    windows.push(mainWindow)
+
+    mainWindow.webContents.id = _.uniqueId("webContents")
 
     ## and load the index.html of the app.
     mainWindow.loadURL(options.url)
