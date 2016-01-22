@@ -1,7 +1,7 @@
 slug: dblclick
 excerpt: Double-click on a subject
 
-# [cy.dblclick()](#usage)
+# [cy.dblclick()](#section-usage)
 
 Double-clicks the current subject.
 

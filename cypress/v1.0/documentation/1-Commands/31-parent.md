@@ -1,13 +1,13 @@
 slug: parent
 excerpt: Get the parent of elements
 
-# [cy.parent()](#usage)
+# [cy.parent()](#section-usage)
 
 Get the parent of each element in the current set of matched elements.
 
 ***
 
-# [cy.parent( *selector* )](#selector-usage)
+# [cy.parent( *selector* )](#section-selector-usage)
 
 Get the parent of each element in the current set of matched elements filtered by selector.
 

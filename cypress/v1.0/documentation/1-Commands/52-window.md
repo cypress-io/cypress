@@ -1,7 +1,7 @@
 slug: window
 excerpt: Get global window object
 
-# [cy.window()](#usage)
+# [cy.window()](#section-usage)
 
 Returns the global window object of the remote application you've visited.
 

@@ -9,7 +9,7 @@ excerpt: Load a fixture to represent data
 }
 [/block]
 
-# [cy.fixture( *fixture* )](#single-fixture-usage)
+# [cy.fixture( *fixture* )](#section-single-fixture-usage)
 
 Loads a single fixture by filename.
 

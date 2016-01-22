@@ -1,13 +1,13 @@
 slug: prev
 excerpt: Get the previous sibling of elements
 
-# [cy.prev()](#usage)
+# [cy.prev()](#section-usage)
 
 Get the immediately preceding sibling of each element in the set of matched elements.
 
 ***
 
-# [cy.prev( *selector* )](#selector-usage)
+# [cy.prev( *selector* )](#section-selector-usage)
 
 Get the immediately preceding sibling of each element in the set of matched elements filtered by selector.
 

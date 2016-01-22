@@ -1,7 +1,7 @@
 slug: document
 excerpt: Get the document
 
-# [cy.document()](#usage)
+# [cy.document()](#section-usage)
 
 Get the document and work with its properties or methods.
 

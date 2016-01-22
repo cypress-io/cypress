@@ -1,13 +1,13 @@
 slug: siblings
 excerpt: Get the siblings of elements
 
-# [cy.siblings()](#usage)
+# [cy.siblings()](#section-usage)
 
 Get the siblings of each element in the set of matched elements.
 
 ***
 
-# [cy.siblings( *selector* )](#selector-usage)
+# [cy.siblings( *selector* )](#section-selector-usage)
 
 Get the siblings of each element in the set of matched elements filtered by a selector.
 

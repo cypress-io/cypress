@@ -1,7 +1,7 @@
 slug: route
 excerpt: Route responses to matching requests
 
-# [cy.route( *url* )](#url-usage)
+# [cy.route( *url* )](#section-url-usage)
 
 Use `cy.route` to route responses to matching requests.
 
@@ -17,13 +17,13 @@ Set a route matching the specific `url` which is not stubbed but can be waited o
 
 ***
 
-# [cy.route( *method*, *url* )](#method-and-url-usage)
+# [cy.route( *method*, *url* )](#section-method-and-url-usage)
 
 Set a route matching the specific `method` and `url` which is not stubbed but can be waited on later.
 
 ***
 
-# [cy.route( *url*, *response* )](#url-and-response-usage)
+# [cy.route( *url*, *response* )](#section-url-and-response-usage)
 
 Set a route matching the `url` stubbed with the supplied `response`.
 
@@ -31,7 +31,7 @@ By default this will match `GET` request methods.
 
 ***
 
-# [cy.route( *method*, *url*, *response* )](#method-url-and-response-usage)
+# [cy.route( *method*, *url*, *response* )](#section-method-url-and-response-usage)
 
 Set a route matching the `method` and `url` stubbed with the supplied `response`.
 

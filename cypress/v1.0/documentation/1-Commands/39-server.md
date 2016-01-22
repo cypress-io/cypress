@@ -1,7 +1,7 @@
 slug: server
 excerpt: Control the behavior of network requests and responses.
 
-# [cy.server()](#default-usage)
+# [cy.server()](#section-default-usage)
 
 Use `cy.server` to control the behavior of requests and responses. Start a server to begin routing responses to your requests.
 

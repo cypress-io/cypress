@@ -1,7 +1,7 @@
 slug: debug
 excerpt: Call debugger
 
-# [cy.debug()](#usage)
+# [cy.debug()](#section-usage)
 
 `cy.debug` will call `debugger` in JavaScript.
 

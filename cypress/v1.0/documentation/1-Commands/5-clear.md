@@ -1,7 +1,7 @@
 slug: clear
 excerpt: Clear a value of an input or textarea
 
-# [cy.clear()](#usage)
+# [cy.clear()](#section-usage)
 
 Clears a value of an `<input>` or `<textarea>`. Under the hood this is actually a shortcut for writing:
 

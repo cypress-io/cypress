@@ -1,13 +1,13 @@
 slug: children
 excerpt: Get the children of elements
 
-# [cy.children()](#usage)
+# [cy.children()](#section-usage)
 
 Get the children of each element in the set of matched elements.
 
 ***
 
-# [cy.children( *selector* )](#selector-usage)
+# [cy.children( *selector* )](#section-selector-usage)
 
 The `.children()` method optionally accepts a selector expression. If the selector is supplied, the elements will be filtered by testing whether they match it.
 

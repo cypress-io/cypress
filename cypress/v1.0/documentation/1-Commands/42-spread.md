@@ -1,7 +1,7 @@
 slug: spread
 excerpt: Spread an array as individual arguments to a callback function
 
-# [cy.spead()](#usage)
+# [cy.spead()](#section-usage)
 
 The spread command allows an expression to be expanded in places where multiple arguments are expected. Similar to [`cy.then`](https://on.cypress.io/api/then)
 

@@ -9,7 +9,7 @@ excerpt: Alias reusable objects for later
 }
 [/block]
 
-# [cy.as( *text* )](#usage)
+# [cy.as( *text* )](#section-usage)
 
 Create an alias to be used later.
 

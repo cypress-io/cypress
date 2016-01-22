@@ -1,13 +1,13 @@
 slug: next
 excerpt: Get the next sibling of elements
 
-# [cy.next()](#usage)
+# [cy.next()](#section-usage)
 
 Get the immediately following sibling of each element in the set of matched elements.
 
 ***
 
-# [cy.next( *selector* )](#selector-usage)
+# [cy.next( *selector* )](#section-selector-usage)
 
 Get the immediately following sibling of each element in the set of matched elements. If a selector is provided, it retrieves the next sibling only if it matches that selector.
 

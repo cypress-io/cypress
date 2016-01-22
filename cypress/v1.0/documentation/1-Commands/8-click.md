@@ -1,7 +1,7 @@
 slug: click
 excerpt: Click the current DOM subject
 
-# [cy.click()](#usage)
+# [cy.click()](#section-usage)
 
 Like all child commands, `click` returns the current subject for further chaining.
 
@@ -13,7 +13,7 @@ By default, the click is issued at the exact center of the element. You can pass
 
 ***
 
-# [cy.click( *position* )](#position-usage)
+# [cy.click( *position* )](#section-position-usage)
 
 Clicks the element at the specified position. The `center` position is the default position.
 
@@ -27,7 +27,7 @@ Position | Default | Notes
 
 ***
 
-# [cy.click( *x*, *y* )](#coordinates-usage)
+# [cy.click( *x*, *y* )](#section-coordinates-usage)
 
 You can pass a relative `x` and `y` coordinate which will calculate distance in pixels from the top left corner of the element and isssue the click at the calculated coordinate.
 

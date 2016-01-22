@@ -1,7 +1,7 @@
 slug: last
 excerpt: Get the last element
 
-# [cy.last()](#usage)
+# [cy.last()](#section-usage)
 
 Reduce the set of matched elements to the final one in the set.
 

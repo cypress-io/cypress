@@ -1,7 +1,7 @@
 slug: clearcookies
 excerpt: Clear all browser cookies.
 
-# [cy.clearCookies()](#usage)
+# [cy.clearCookies()](#section-usage)
 
 Clears all of the browser cookies.
 

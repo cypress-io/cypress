@@ -1,7 +1,7 @@
 slug: visit
 excerpt: Visit a remote url
 
-# [cy.visit( *url* )](#usage)
+# [cy.visit( *url* )](#section-usage)
 
 Visit a remote url. This will most likely be the first command you run.
 

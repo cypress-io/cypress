@@ -1,7 +1,7 @@
 slug: title
 excerpt: Get the title of the document
 
-# [cy.title()](#usage)
+# [cy.title()](#section-usage)
 
 Get the title of the document.
 

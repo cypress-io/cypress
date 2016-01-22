@@ -1,7 +1,7 @@
 slug: find
 excerpt: Get descendants of elements
 
-# [cy.find( *selector* )](#selector-usage)
+# [cy.find( *selector* )](#section-selector-usage)
 
 Get the descendants of each element in the current set of matched elements within the selector.
 

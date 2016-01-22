@@ -1,7 +1,7 @@
 slug: focused
 excerpt: Get the element that is focused
 
-# [cy.focused()](#usage)
+# [cy.focused()](#section-usage)
 
 Returns the current element that is focused.
 

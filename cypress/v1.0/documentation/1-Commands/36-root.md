@@ -1,7 +1,7 @@
 slug: root
 excerpt: Get the root element
 
-# [cy.root()](#root-usage)
+# [cy.root()](#section-root-usage)
 
 Get the root element. By default the root is `document`.
 

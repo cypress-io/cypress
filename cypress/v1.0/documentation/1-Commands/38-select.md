@@ -1,13 +1,13 @@
 slug: select
 excerpt: Select an option
 
-# [cy.select( *text* )](#text-usage)
+# [cy.select( *text* )](#section-text-usage)
 
 Select an option within a `<select>` element based on the text content of the option.
 
 ***
 
-# [cy.select( *value* )](#value-usage)
+# [cy.select( *value* )](#section-value-usage)
 
 Select an option within a `<select>` element based on the value of the option.
 

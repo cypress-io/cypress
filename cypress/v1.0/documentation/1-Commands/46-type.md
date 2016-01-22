@@ -1,7 +1,7 @@
 slug: type
 excerpt: Type into an element
 
-# [cy.type( *text* )](#usage)
+# [cy.type( *text* )](#section-usage)
 
 Types into the current DOM subject.
 

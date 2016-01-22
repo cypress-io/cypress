@@ -1,7 +1,7 @@
 slug: location
 excerpt: Get window.location
 
-# [cy.location()](#usage)
+# [cy.location()](#section-usage)
 
 Returns an object literal that matches the `window.location` spec.
 

@@ -1,7 +1,7 @@
 slug: invoke
 excerpt: Call properties on the current subject
 
-# [cy.invoke( *functionName* )](#function-usage)
+# [cy.invoke( *functionName* )](#section-function-usage)
 
 `cy.invoke` invokes properties that are functions on the current subject. This works similar to Underscore's `_.invoke` function.
 
@@ -9,7 +9,7 @@ excerpt: Call properties on the current subject
 
 ***
 
-# [cy.invoke( *functionName*, \**arguments* )](#function-with-arguments-usage)
+# [cy.invoke( *functionName*, \**arguments* )](#section-function-with-arguments-usage)
 
 Invokes the function and forwards any additional arguments to the function call. There are no limits to the number of arguments.
 

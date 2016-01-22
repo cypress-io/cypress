@@ -1,7 +1,7 @@
 slug: filter
 excerpt: Filter elements by selector
 
-# [cy.filter( *selector* )](#selector-usage)
+# [cy.filter( *selector* )](#section-selector-usage)
 
 Reduce the set of matched elements to those that match the selector.  Opposite of [`cy.not()`](https://on.cypress.io/api/not)
 

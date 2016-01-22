@@ -1,7 +1,7 @@
 slug: end
 excerpt: End the command chain
 
-# [cy.end()](#usage)
+# [cy.end()](#section-usage)
 
 Ends the Cypress command chain and returns `null`. This is equivalent to the jQuery `end()` method.
 

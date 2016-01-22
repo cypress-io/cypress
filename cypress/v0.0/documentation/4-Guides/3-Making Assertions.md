@@ -259,7 +259,7 @@ This example above may be more familiar to you if you've written tests in JavaSc
 
 If you look closely, you'll see that we've passed a callback function to the [`cy.should`](https://on.cypress.io/api/should) method. This allows us to write expectations inside of that callback function, yet still receive all of the wonderful benefits of [`cy.should`](https://on.cypress.io/api/should).
 
-Read about [resolving assertions](https://on.cypress.io/guides/making-assertions#resolving-assertions) below to learn how [`cy.should`](https://on.cypress.io/api/should) works under the hood.
+Read about [resolving assertions](https://on.cypress.io/guides/making-assertions#section-resolving-assertions) below to learn how [`cy.should`](https://on.cypress.io/api/should) works under the hood.
 
 ***
 

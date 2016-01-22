@@ -1,7 +1,7 @@
 slug: focus
 excerpt: Focus on the current subject
 
-# [cy.focus()](#usage)
+# [cy.focus()](#section-usage)
 
 Focus on the current subject. Returns the existing subject.
 

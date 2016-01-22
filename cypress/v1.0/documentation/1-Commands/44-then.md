@@ -9,7 +9,7 @@ excerpt: Invokes a callback function with the current subject
 }
 [/block]
 
-# [cy.then( *function* )](#usage)
+# [cy.then( *function* )](#section-usage)
 
 `cy.then()` will yield you the current subject as the first argument.
 

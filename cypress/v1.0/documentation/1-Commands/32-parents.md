@@ -1,13 +1,13 @@
 slug: parents
 excerpt: Get the parents of elements
 
-# [cy.parents()](#usage)
+# [cy.parents()](#section-usage)
 
 Get the ancestors of each element in the current set of matched elements.
 
 ***
 
-# [cy.parents( *selector* )](#selector-usage)
+# [cy.parents( *selector* )](#section-selector-usage)
 
 Get the ancestors of each element in the current set of matched elements filtered by selector
 

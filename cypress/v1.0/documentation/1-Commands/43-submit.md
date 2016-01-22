@@ -1,7 +1,7 @@
 slug: submit
 excerpt: Submit a form
 
-# [cy.submit()](#usage)
+# [cy.submit()](#section-usage)
 
 Submits the current subject if it is a form.
 

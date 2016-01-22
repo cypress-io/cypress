@@ -1,7 +1,7 @@
 slug: url
 excerpt: Get the current URL
 
-# [cy.url()](#usage)
+# [cy.url()](#section-usage)
 
 Returns the current URL as a string.
 

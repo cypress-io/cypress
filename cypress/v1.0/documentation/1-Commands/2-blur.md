@@ -1,7 +1,7 @@
 slug: blur
 excerpt: Blur the current subject
 
-# [cy.blur()](#usage)
+# [cy.blur()](#section-usage)
 
 Blur the current subject. Returns the existing subject.
 

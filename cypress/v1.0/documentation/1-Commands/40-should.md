@@ -1,7 +1,7 @@
 slug: should
 excerpt: Make an assertion about the current subject
 
-# [cy.should( *chainers* )](#chainers-usage)
+# [cy.should( *chainers* )](#section-chainers-usage)
 
 `cy.should` makes assertions about the current subject. Implicitly assert about the current subject. Returns the existing current subject.
 
@@ -19,7 +19,7 @@ When chaining multiple assertions together, [`cy.and`](https://on.cypress.io/api
 
 ***
 
-# [cy.should( *chainers*, *value* )](#chainers-with-value-usage)
+# [cy.should( *chainers*, *value* )](#section-chainers-with-value-usage)
 
 Implicitly assert a value about the current subject. Returns the existing current subject (usually).
 
@@ -27,7 +27,7 @@ Some chai methods and chai-jQuery methods return a new (different) subject for c
 
 ***
 
-# [cy.should( *chainers*, *method*, *value* )](#chainers-with-method-and-value-usage)
+# [cy.should( *chainers*, *method*, *value* )](#section-chainers-with-method-and-value-usage)
 
 Implicitly assert about the subject by calling a method and providing a value to that method.
 
@@ -35,7 +35,7 @@ Returns the new assertion subject for further assertion chain-ability.
 
 ***
 
-# [cy.should( *function* )](#function-usage)
+# [cy.should( *function* )](#section-function-usage)
 
 Pass a function that can have any number of explicit assertions within it.
 

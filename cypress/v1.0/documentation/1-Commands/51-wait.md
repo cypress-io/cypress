@@ -1,13 +1,13 @@
 slug: wait
 excerpt: Wait for a specific amount of time or resource to resolve
 
-# [cy.wait( *number* )](#number-usage)
+# [cy.wait( *number* )](#section-number-usage)
 
 Wait a specific amount of `ms` before resolving and continuing onto the next command.
 
 ***
 
-# [cy.wait( *alias* )](#alias-usage)
+# [cy.wait( *alias* )](#section-alias-usage)
 
 Wait until the matching [aliased](https://on.cypress.io/guides/using-aliases) XHR has a response.
 

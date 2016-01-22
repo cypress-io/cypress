@@ -1,7 +1,7 @@
 slug: closest
 excerpt: Get the closest ancestor
 
-# [cy.closest( *selector* )](#selector-usage)
+# [cy.closest( *selector* )](#section-selector-usage)
 
 For each element in the set, get the first element that matches the selector by testing the element itself and traversing up through its ancestors in the DOM tree.
 

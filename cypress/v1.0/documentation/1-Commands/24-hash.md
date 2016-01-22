@@ -1,7 +1,7 @@
 slug: hash
 excerpt: Get the current URL hash
 
-# [cy.hash()](#usage)
+# [cy.hash()](#section-usage)
 
 Returns the current URL hash as a string, including the `#` character.
 

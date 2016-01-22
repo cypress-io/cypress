@@ -1,7 +1,7 @@
 slug: first
 excerpt: Get the first element within elements
 
-# [cy.first()](#usage)
+# [cy.first()](#section-usage)
 
 Reduce the set of matched elements to the first in the set.
 

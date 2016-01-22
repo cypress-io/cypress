@@ -1,13 +1,13 @@
 slug: uncheck
 excerpt: Unselect a checkbox or radio
 
-# [cy.uncheck()](#usage)
+# [cy.uncheck()](#section-usage)
 
 Unchecks checkboxes or radios. Triggers events associated with check.
 
 ***
 
-# [cy.uncheck( *values* )](#values-usage)
+# [cy.uncheck( *values* )](#section-values-usage)
 
 Unchecks the checkboxes or radios matching the values. Triggers events associated with uncheck.
 

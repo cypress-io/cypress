@@ -9,7 +9,7 @@ excerpt: Enables chaining multiple assertions together
 }
 [/block]
 
-# [cy.and( *chainers*)](#chainers-usage)
+# [cy.and( *chainers*)](#section-chainers-usage)
 
 `cy.and` makes assertions about the current subject. Implicitly assert about the current subject. Returns the existing current subject.
 
@@ -19,7 +19,7 @@ When chaining multiple assertions together, `cy.and` sometimes reads better than
 
 ***
 
-# [cy.and( *chainers*, *value* )](#chainers-with-value-usage)
+# [cy.and( *chainers*, *value* )](#section-chainers-with-value-usage)
 
 Implicitly assert a value about the current subject. Returns the existing current subject (usually).
 
@@ -27,7 +27,7 @@ Some chai methods and chai-jQuery methods return a new (different) subject for c
 
 ***
 
-# [cy.and( *chainers*, *method*, *value* )](#chainers-with-method-and-value-usage)
+# [cy.and( *chainers*, *method*, *value* )](#section-chainers-with-method-and-value-usage)
 
 Implicitly assert about the subject by calling a method and providing a value to that method.
 
@@ -35,7 +35,7 @@ Returns the new assertion subject for further assertion chain-ability.
 
 ***
 
-# [cy.and( *function* )](#function-usage)
+# [cy.and( *function* )](#section-function-usage)
 
 Pass a function that can have any number of explicit assertions within it.
 

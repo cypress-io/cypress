@@ -1,7 +1,7 @@
 slug: its
 excerpt: Call properties on the current subject
 
-# [cy.its( *propertyName* )](#usage)
+# [cy.its( *propertyName* )](#section-usage)
 
 `cy.its` calls properties on the current subject and returns that new value.
 

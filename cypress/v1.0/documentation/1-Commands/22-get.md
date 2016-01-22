@@ -1,7 +1,7 @@
 slug: get
 excerpt: Get an element
 
-# [cy.get( *selector* )](#selector-usage)
+# [cy.get( *selector* )](#section-selector-usage)
 
 Matches one or more DOM elements based on the selector.  The selector can be any valid jQuery selector.
 
@@ -11,7 +11,7 @@ If Cypress does not find any matching element(s), it will continue to retry unti
 
 ***
 
-# [cy.get( *alias* )](#alias-usage)
+# [cy.get( *alias* )](#section-alias-usage)
 
 [block:callout]
 {

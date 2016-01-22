@@ -1,7 +1,7 @@
 slug: viewport
 excerpt: Change the screen size of your application
 
-# [cy.viewport( *width*, *height* )](#usage)
+# [cy.viewport( *width*, *height* )](#section-usage)
 
 Use `cy.viewport` to control the screen size of your application.
 
@@ -13,7 +13,7 @@ This command is useful for when you need to test your application in a specific 
 
 ***
 
-# [cy.viewport( *preset*, *orientation* )](#preset-usage)
+# [cy.viewport( *preset*, *orientation* )](#section-preset-usage)
 
 Viewport supports the following presets (in pixels):
 

@@ -1,7 +1,7 @@
 slug: wrap
 excerpt: Invoke the function on the current subject
 
-# [cy.wrap( *object* )](#usage)
+# [cy.wrap( *object* )](#section-usage)
 
 Set the current subject to the object
 

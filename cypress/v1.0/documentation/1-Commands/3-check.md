@@ -1,13 +1,13 @@
 slug: check
 excerpt: Select a checkbox or radio
 
-# [cy.check()](#usage)
+# [cy.check()](#section-usage)
 
 Checks checkboxes or radios. Triggers events associated with check.
 
 ***
 
-# [cy.check( *values* )](#values-usage)
+# [cy.check( *values* )](#section-values-usage)
 
 Checks the checkboxes or radios matching the values. Triggers events associated with check.
 

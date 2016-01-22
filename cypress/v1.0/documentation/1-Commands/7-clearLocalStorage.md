@@ -1,15 +1,15 @@
 slug: clearlocalstorage
 excerpt: Clear all data in local storage.
 
-# [cy.clearLocalStorage()](#usage)
+# [cy.clearLocalStorage()](#section-usage)
 
 Clear all data in local storage.
 
-# [cy.clearLocalStorage( *string* )](#usage)
+# [cy.clearLocalStorage( *string* )](#section-usage)
 
 Clears all keys in local storage matching the string.
 
-# [cy.clearLocalStorage( *RegExp* )](#usage)
+# [cy.clearLocalStorage( *RegExp* )](#section-usage)
 
 Clears all keys in local storage matching the RegExp.
 

@@ -1,7 +1,7 @@
 slug: not
 excerpt: Remove elements from set
 
-# [cy.not( *selector* )](#selector-usage)
+# [cy.not( *selector* )](#section-selector-usage)
 
 Remove elements from the set of matched elements. Opposite of [`cy.filter()`](https://on.cypress.io/api/filter)
 

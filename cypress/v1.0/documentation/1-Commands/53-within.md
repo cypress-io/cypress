@@ -1,7 +1,7 @@
 slug: within
 excerpt: Set the scope to the current subject
 
-# [cy.within( *function* )](#usage)
+# [cy.within( *function* )](#section-usage)
 
 Set the scope to the current subject
 

@@ -1,7 +1,7 @@
 slug: contains
 excerpt: Check to see if matching element contains text
 
-# [cy.contains( *text* )](#text-usage)
+# [cy.contains( *text* )](#section-text-usage)
 
 Returns the deepest element containing the text. Elements can contain *more* than the desired text and still match.
 
@@ -16,7 +16,7 @@ If Cypress does not find a matching element, it will continue to retry until the
 
 ***
 
-# [cy.contains( *selector*, *text* )](#selector-and-text-usage)
+# [cy.contains( *selector*, *text* )](#section-selector-and-text-usage)
 
 Specify a selector to filter elements containing the text. Cypress will **ignore** it's default preference for the specified selector.
 
