@@ -1,7 +1,9 @@
 _             = require("lodash")
 path          = require("path")
-BrowserWindow = require("electron").BrowserWindow
+uri           = require("url")
 cypressGui    = require("cypress-gui")
+BrowserWindow = require("electron").BrowserWindow
+session       = require("../../session")
 
 windows = []
 
@@ -45,13 +47,13 @@ module.exports = {
       }
     }
 
-    urlChanged = (url) ->
+    urlChanged = (url, resolve) ->
       parsed = uri.parse(url, true)
 
       if code = parsed.query.code
-        win.close()
+        win.destroy()
 
-        send(null, code)
+        resolve(code)
 
     win = new BrowserWindow(args)
 
@@ -75,14 +77,14 @@ module.exports = {
         ## navigate the window here!
         win.loadURL(url)
 
-        # win.once "dom-ready", ->
-        #   send(null, null)
-
         if args.type is "GITHUB_LOGIN"
-          win.webContents.on "will-navigate", (e, url) ->
-            urlChanged(url)
+          new Promise (resolve, reject) ->
+            win.webContents.on "will-navigate", (e, url) ->
+              urlChanged(url, resolve)
 
-          win.webContents.on "did-get-redirect-request", (e, oldUrl, newUrl) ->
-            urlChanged(newUrl)
+            win.webContents.on "did-get-redirect-request", (e, oldUrl, newUrl) ->
+              urlChanged(newUrl, resolve)
+        else
+          Promise.resolve()
 
 }

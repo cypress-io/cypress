@@ -9,10 +9,7 @@ module.exports = {
     session.logIn(code)
     .then (user) ->
       cache.setUser(user)
-      .then ->
-        ## TODO: what does cache
-        ## setUser return us?
-        send(null, user)
+      .return(user)
 
   logOut: (token) ->
     session.logOut(token)
