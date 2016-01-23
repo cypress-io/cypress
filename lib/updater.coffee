@@ -5,6 +5,7 @@ _              = require("lodash")
 glob           = require("glob")
 chmodr         = require("chmodr")
 trash          = require("trash")
+NwUpdater      = require("node-webkit-updater")
 argsUtil       = require("./util/args")
 config         = require("./config")
 Log            = require("./log")
@@ -13,17 +14,20 @@ trash  = Promise.promisify(trash)
 chmodr = Promise.promisify(chmodr)
 
 class Updater
-  constructor: ->
+  constructor: (callbacks) ->
     if not (@ instanceof Updater)
-      return new Updater
+      return new Updater(callbacks)
 
-    @client     = null
-    @coords     = null
-    @callbacks  = {}
+    @client     = new NwUpdater @getPackage()
+    # @coords     = null
+    @request    = null
+    @cancelled  = false
+    @callbacks  = callbacks
 
-    @patchAppPath()
+    if process.env["CYPRESS_ENV"] isnt "production"
+      @patchAppPath()
 
-  setCoords: (@coords) ->
+  # setCoords: (@coords) ->
 
   getCoords: ->
     return if not c = @coords
@@ -36,8 +40,7 @@ class Updater
     _.compact ["--app-path=" + c.getAppPath(), "--exec-path=" + c.getAppExec(), "--updating", @getCoords()]
 
   patchAppPath: ->
-    if process.env["CYPRESS_ENV"] isnt "production"
-      @getClient().getAppPath = -> process.cwd()
+    @getClient().getAppPath = -> process.cwd()
 
   getPackage: ->
     pkg = fs.readJsonSync path.join(process.cwd(), "package.json")
@@ -46,8 +49,7 @@ class Updater
 
   getClient: ->
     ## requiring inline due to easier testability
-    NwUpdater = require("node-webkit-updater")
-    @client ?= new NwUpdater @getPackage()
+    @client ? throw new Error("missing Updater#client")
 
   trash: (appPath) ->
     ## moves the current appPath to the trash
@@ -124,6 +126,8 @@ class Updater
     fn = (err, newAppPath) =>
       return @trigger("error", err) if err
 
+      return if @cancelled
+
       @runInstaller(newAppPath)
 
     @getClient().unpack(destinationPath, fn, manifest)
@@ -138,10 +142,20 @@ class Updater
 
       ## fixes issue with updater failing during unpack
       setTimeout =>
+        return if @cancelled
+
         @unpack(destinationPath, manifest)
       , 1000
 
-    @getClient().download(fn, manifest)
+    @request = @getClient().download(fn, manifest)
+
+  cancel: ->
+    @cancelled = true
+
+    try
+      ## attempt to abort the request
+      ## and slurp up any errors
+      @request.abort()
 
   trigger: (event, args...) ->
     ## normalize event name
@@ -159,10 +173,10 @@ class Updater
         Log.info "new version exists", version: manifest.version
         options.onNewVersion?(manifest)
       else
-        Log.info "new version does not exist", version: manifest?.version
+        Log.info "new version does not exist"
         options.onNoNewVersion?()
 
-  run: (@callbacks = {}) ->
+  run: ->
     @trigger("start")
 
     @check
@@ -171,5 +185,16 @@ class Updater
 
       onNoNewVersion: =>
         @trigger("none")
+
+    return @
+
+  @install = (appPath, execPath, options) ->
+    Updater().install(appPath, execPath, options)
+
+  @check = (options = {}) ->
+    Updater().check(options)
+
+  @run = (callbacks = {}) ->
+    Updater(callbacks).run()
 
 module.exports = Updater
