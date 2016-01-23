@@ -7,8 +7,8 @@
 
       updatesView = @getUpdatesView(updater)
 
-      # @listenTo updatesView, "button:clicked", ->
-        # window.close()
+      @listenTo updatesView, "button:clicked", ->
+        App.ipc("window:close")
 
       @listenTo updatesView, "changelog:clicked", ->
         ## this needs to be moved to an .env variable
@@ -30,6 +30,9 @@
               set("downloading")
 
       @show updatesView
+
+    onDestroy: ->
+      App.ipc.off("updater:run")
 
     getUpdatesView: (updater) ->
       new Show.Updates
