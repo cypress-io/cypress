@@ -5,7 +5,7 @@ cypressGui    = require("cypress-gui")
 BrowserWindow = require("electron").BrowserWindow
 session       = require("../../session")
 
-windows = []
+windows = {}
 
 getUrl = (type) ->
   switch type
@@ -24,16 +24,25 @@ getUrl = (type) ->
 
 module.exports = {
   reset: ->
-    windows = []
+    windows = {}
+
+  _getByType: (type) ->
+    windows[type]
 
   get: (type) ->
-    windows[type] ? throw new Error("No window exists for: '#{type}'")
+    @_getByType(type) ? throw new Error("No window exists for: '#{type}'")
 
   getByWebContents: (webContents) ->
     _.find windows, (win) ->
       win.webContents is webContents
 
   create: (options = {}) ->
+    ## if we already have a window open based
+    ## on that type then just show + focus it!
+    if win = @_getByType(options.type)
+      win.show()
+      return Promise.resolve()
+
     args = _.defaults {}, options, {
       url: getUrl(options.type)
       width:  600
@@ -57,13 +66,13 @@ module.exports = {
 
     win = new BrowserWindow(args)
 
-    windows.push(win)
+    windows[options.type] = win
 
     win.webContents.id = _.uniqueId("webContents")
 
     win.on "closed", ->
       ## slice the window out of windows reference
-      windows = _.without(windows, win)
+      windows = _.omit windows, _.identity(win)
 
     ## open dev tools if they're true
     if args.devTools
