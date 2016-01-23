@@ -1,13 +1,26 @@
 @App.module "Utilities", (Utilities, App, Backbone, Marionette, $, _) ->
   msgs = {}
 
+  addMsg = (id, event, fn) ->
+    msgs[id] = {
+      event: event
+      fn: fn
+    }
+
+  removeMsgsByEvent = (event) ->
+    msgs = _(msgs).omit (msg) ->
+      msg.event is event
+
+  removeMsgById = (id) ->
+    msgs = _(msgs).omit(""+id)
+
   createIpc = ->
     console.warn("Missing 'ipc'. Polyfilling temporarily.")
 
-    return {
-      on: ->
-      send: ->
-    }
+    fn = ->
+    fn.off = ->
+
+    return fn
 
   ipc = window.ipc ? createIpc()
 
@@ -15,10 +28,12 @@
     {id, __error, data} = obj
 
     ## standard node callback implementation
-    if fn = msgs[id]
-      fn(__error, data)
+    if msg = msgs[id]
+      msg.fn(__error, data)
 
   App.ipc = (args...) ->
+    return msgs if args.length is 0
+
     ## our ipc interface can either be a standard
     ## node callback or a promise interface
     ## we support both because oftentimes we want
@@ -29,6 +44,9 @@
     ## generate an id
     id = Math.random()
 
+    ## first arg is the event
+    event = args[0]
+
     ## get the last argument
     lastArg = args.pop()
 
@@ -38,7 +56,7 @@
     ## function directly
     if lastArg and _.isFunction(lastArg)
       fn = ->
-        msgs[id] = lastArg
+        addMsg id, event, lastArg
     else
       ## push it back onto the array
       args.push(lastArg)
@@ -48,7 +66,11 @@
         ## same time store this callback function
         ## by id in msgs
         new Promise (resolve, reject) ->
-          msgs[id] = (err, data) ->
+          addMsg id, event, (err, data) ->
+            ## cleanup messages using promise interface
+            ## automatically
+            removeMsgById(id)
+
             if err
               reject(err)
             else
@@ -58,3 +80,6 @@
     ipc.send.apply ipc, ["request", id].concat(args)
 
     return fn()
+
+  App.ipc.off = (event) ->
+    removeMsgsByEvent(event)
