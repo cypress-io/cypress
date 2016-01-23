@@ -15,8 +15,8 @@ runGui = (options) ->
   ## process
   if currentlyRunningElectron()
     ## just run the gui code directly here
-    ## and pass our options directly to render
-    require("./gui/render")(options)
+    ## and pass our options directly to main
+    require("./gui/main")(options)
   else
     ## we are in dev mode and can just run electron
     ## in our gui folder which kicks things off
