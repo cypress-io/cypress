@@ -7,9 +7,10 @@ project     = require("./project")
 pgk         = require("./package")
 cloneError  = require("./clone_error")
 Renderer    = require("./renderer")
+logger      = require("../../log")
 Updater     = require("../../updater")
 
-handleEvent = (event, id, type, arg, options, pkg) ->
+handleEvent = (event, id, type, arg, options) ->
   sendResponse = (data = {}) ->
     try
       event.sender.send("response", data)
@@ -48,6 +49,9 @@ handleEvent = (event, id, type, arg, options, pkg) ->
       Renderer.create(arg)
       .then(send)
       .catch(sendErr)
+
+    when "window:close"
+      Renderer.getByWebContents(event.sender).destroy()
 
     when "get:options"
       pgk(options)
@@ -136,8 +140,8 @@ module.exports = {
   stop: ->
     ipc.removeAllListeners()
 
-  start: (options, pkg) ->
-    ## curry right options + pkg
-    ipc.on "request", _.partialRight(handleEvent, options, pkg)
+  start: (options) ->
+    ## curry right options
+    ipc.on "request", _.partialRight(handleEvent, options)
 
 }
