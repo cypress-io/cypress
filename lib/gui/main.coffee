@@ -1,6 +1,7 @@
-app           = require("electron").app
-Events        = require("./handlers/events")
-Renderer      = require("./handlers/renderer")
+app        = require("electron").app
+Tray       = require("electron").Tray
+Events     = require("./handlers/events")
+Renderer   = require("./handlers/renderer")
 
 module.exports = (optionsOrArgv) ->
   ## if we've been passed an array of argv
@@ -24,6 +25,13 @@ module.exports = (optionsOrArgv) ->
   ## This method will be called when Electron has finished
   ## initialization and is ready to create browser windows.
   app.on "ready", ->
+    icon = new Tray("nw/public/img/tray/mac-normal@2x.png")
+    icon.setToolTip("Cypress.io")
+
+    ## handle right click to show context menu!
+    ## handle drop events for automatically adding projects!
+    ## use the same icon as the cloud app
+
     Events.start(options)
 
     Renderer.create({
