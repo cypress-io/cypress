@@ -22,15 +22,15 @@ getUrl = (type) ->
     else
       throw new Error("No acceptable window type found for: '#{arg.type}'")
 
+getByType = (type) ->
+  windows[type]
+
 module.exports = {
   reset: ->
     windows = {}
 
-  _getByType: (type) ->
-    windows[type]
-
   get: (type) ->
-    @_getByType(type) ? throw new Error("No window exists for: '#{type}'")
+    getByType(type) ? throw new Error("No window exists for: '#{type}'")
 
   getByWebContents: (webContents) ->
     _.find windows, (win) ->
@@ -39,9 +39,9 @@ module.exports = {
   create: (options = {}) ->
     ## if we already have a window open based
     ## on that type then just show + focus it!
-    if win = @_getByType(options.type)
+    if win = getByType(options.type)
       win.show()
-      return Promise.resolve()
+      return Promise.resolve(win)
 
     args = _.defaults {}, options, {
       url: getUrl(options.type)
@@ -94,6 +94,6 @@ module.exports = {
             win.webContents.on "did-get-redirect-request", (e, oldUrl, newUrl) ->
               urlChanged(newUrl, resolve)
         else
-          Promise.resolve()
+          Promise.resolve(win)
 
 }
