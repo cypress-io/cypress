@@ -107,6 +107,8 @@ The following chainers are available for your use:
 
 ## Chai
 
+[Chai](http://chaijs.com/) chainers are available for assertions.
+
 | Chainable getters |
 | --- |
 | to |
@@ -190,7 +192,7 @@ The following chainers are available for your use:
 
 ## Chai-jQuery
 
-Additionally these chainers are added when asserting about a DOM object.
+[Chai-jQuery](https://github.com/chaijs/chai-jquery) chainers are available when asserting about a DOM object.
 
 | Chainers | Assertion |
 | --- | --- |
@@ -222,7 +224,7 @@ You will commonly use these chainers after using DOM commands like: [`cy.get`](h
 
 ## Chai-Sinon
 
-All Sinon assertions are available in Sinon–Chai.
+All Sinon assertions are available in [Sinon–Chai](https://github.com/domenic/sinon-chai).
 
 | Sinon.JS property/method | Assertion |
 | -- | -- |
