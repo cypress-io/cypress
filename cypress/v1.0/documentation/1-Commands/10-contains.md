@@ -13,7 +13,7 @@ Get the element containing the text. Elements can contain *more* than the desire
 | | |
 |--- | --- |
 | **Returns** | the deepest DOM element containing the text  |
-| **Timeout** | the assertion will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+| **Timeout** | `cy.contains` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
 
 ***
 

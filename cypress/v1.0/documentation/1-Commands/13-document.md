@@ -6,7 +6,7 @@ Get the document and work with its properties or methods.
 | | |
 |--- | --- |
 | **Returns** | the window.document object |
-| **Timeout** | the document will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+| **Timeout** | `cy.document` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
 
 ***
 

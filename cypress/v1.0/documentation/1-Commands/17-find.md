@@ -1,6 +1,15 @@
 slug: find
 excerpt: Get descendants of elements
 
+Get the descendents elements of a specific selector.
+
+| | |
+|--- | --- |
+| **Returns** | the current subject for futher chaining. |
+| **Timeout** | `cy.find` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+
+***
+
 # [cy.find( *selector* )](#section-selector-usage)
 
 Get the descendants of each element in the current set of matched elements within the selector.

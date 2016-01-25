@@ -1,9 +1,18 @@
 slug: filter
 excerpt: Filter elements by selector
 
+Get elements that match a specific selector. Opposite of [`cy.not()`](https://on.cypress.io/api/not)
+
+| | |
+|--- | --- |
+| **Returns** | the current subject for futher chaining. |
+| **Timeout** | `cy.filter` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+
+***
+
 # [cy.filter( *selector* )](#section-selector-usage)
 
-Reduce the set of matched elements to those that match the selector.  Opposite of [`cy.not()`](https://on.cypress.io/api/not)
+Reduce the set of matched elements to those that match the selector.
 
 ***
 

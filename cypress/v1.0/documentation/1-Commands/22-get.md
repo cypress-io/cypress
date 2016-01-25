@@ -1,13 +1,20 @@
 slug: get
 excerpt: Get an element
 
-# [cy.get( *selector* )](#section-selector-usage)
-
-Matches one or more DOM elements based on the selector.  The selector can be any valid jQuery selector.
+Get an element by selector or [alias](https://on.cypress.io/guides/using-aliases).
 
 `cy.get()` will **always** query from the current scope (default: document), and ignore previous commands.
 
-If Cypress does not find any matching element(s), it will continue to retry until the [`commandTimeout`](https://on.cypress.io/guides/configuration) has been reached.
+| | |
+|--- | --- |
+| **Returns** | the current subject for futher chaining. |
+| **Timeout** | `cy.get` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+
+***
+
+# [cy.get( *selector* )](#section-selector-usage)
+
+Finds one or more DOM elements based on the selector.
 
 ***
 
@@ -21,7 +28,7 @@ If Cypress does not find any matching element(s), it will continue to retry unti
 }
 [/block]
 
-You can pass in the `@` character to find an [aliased](https://on.cypress.io/guides/using-aliases) element.
+You can pass in the `@` character and the name of an alias as a parameter to find an [aliased](https://on.cypress.io/guides/using-aliases) element.
 
 Internally Cypress keeps a cache of all aliased elements.  If the element currently exists in the DOM, it is immediately returned.  If the element no longer exists, Cypress will re-query the element based on the previous selector path to find it again.
 

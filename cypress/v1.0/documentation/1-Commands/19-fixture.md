@@ -9,9 +9,7 @@ excerpt: Load a fixture to represent data
 }
 [/block]
 
-# [cy.fixture( *fixture* )](#section-single-fixture-usage)
-
-Loads a single fixture by filename.
+Loads a single fixture file. Image fixtures will be sent as `base64`.
 
 If an extension is omitted, Cypress will attempt to resolve the fixture by order of these extensions:
 
@@ -27,6 +25,17 @@ If an extension is omitted, Cypress will attempt to resolve the fixture by order
 * `.tif`
 * `.tiff`
 * `.zip`
+
+| | |
+|--- | --- |
+| **Returns** | the contents of the file, formatted by file extension |
+| **Timeout** | cannot timeout |
+
+***
+
+# [cy.fixture( *fixture* )](#section-single-fixture-usage)
+
+Loads the fixture at the specified filepath.
 
 ***
 

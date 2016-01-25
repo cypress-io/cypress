@@ -1,11 +1,20 @@
 slug: focus
 excerpt: Focus on the current subject
 
+Focus on an element. If there is currently a different element currently with focus, Cypress will issue a `blur` event to that element first.
+
+**The following events are fired during focus:** `focusin`, `focus`
+
+| | |
+|--- | --- |
+| **Returns** | the current subject for futher chaining. |
+| **Timeout** | `cy.focus` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+
+***
+
 # [cy.focus()](#section-usage)
 
-Focus on the current subject. Returns the existing subject.
-
-If there is currently an `activeElement` (a different element currently with focus), Cypress will issue a `blur` event to that element first, as per the w3c spec.
+Focus on the subject of the previous command.
 
 ***
 

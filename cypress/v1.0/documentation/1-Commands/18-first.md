@@ -1,6 +1,15 @@
 slug: first
 excerpt: Get the first element within elements
 
+Get the first element within a set of elements.
+
+| | |
+|--- | --- |
+| **Returns** | the current subject for futher chaining. |
+| **Timeout** | `cy.first` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+
+***
+
 # [cy.first()](#section-usage)
 
 Reduce the set of matched elements to the first in the set.

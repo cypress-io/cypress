@@ -1,6 +1,9 @@
 slug: click
 excerpt: Click the current DOM subject
 
+**The following events are fired during click:** `mousedown`, `focus`, `mouseup`, `click`
+
+
 # [cy.click()](#section-usage)
 
 Like all child commands, `click` returns the current subject for further chaining.
@@ -170,7 +173,7 @@ cy.get("button").click()
 // click
 ```
 
-The events are fired exactly to spec, including the coordinates of where the event took place.
+The events are fired to spec, including the coordinates of where the event took place.
 
 At the moment, `mouseover` and `mouseout` events are *not* fired but this will be done soon.
 

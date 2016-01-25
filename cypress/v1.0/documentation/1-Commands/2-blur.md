@@ -1,9 +1,20 @@
 slug: blur
 excerpt: Blur the current subject
 
+Make an element lose focus.
+
+**The following events are fired during blur:** `focusout`, `blur`
+
+| | |
+|--- | --- |
+| **Returns** | the current subject for futher chaining. |
+| **Timeout** | `cy.blur` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+
+***
+
 # [cy.blur()](#section-usage)
 
-Blur the current subject. Returns the existing subject.
+Blur the current subject.
 
 ***
 

@@ -1,7 +1,6 @@
 slug: and
 excerpt: Enables chaining multiple assertions together
 
-
 [block:callout]
 {
   "type": "info",

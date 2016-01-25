@@ -1,11 +1,18 @@
 slug: focused
 excerpt: Get the element that is focused
 
+Get the element that is currently focused.
+
+| | |
+|--- | --- |
+| **Returns** | the current element that is focused or `null` |
+| **Timeout** | `cy.focused` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+
+***
+
 # [cy.focused()](#section-usage)
 
-Returns the current element that is focused.
-
-If Cypress does not find *any* element with focus, `null` is returned.
+Get the focused element.
 
 ***
 
