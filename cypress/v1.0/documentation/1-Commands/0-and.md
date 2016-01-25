@@ -10,7 +10,7 @@ excerpt: Enables chaining multiple assertions together
 }
 [/block]
 
-`cy.and` is used to make assertions about the current subject. `cy.and` is identical to [`cy.should`](https://on.cypress.io/api/should), but `cy.and` sometimes reads better when chaining multiple assertions together.
+`cy.and` makes chaining together assertions easy. `cy.and` is identical to [`cy.should`](https://on.cypress.io/api/should), but `cy.and` sometimes reads better when chaining multiple assertions together.
 
 | | |
 |--- | --- |
@@ -19,15 +19,13 @@ excerpt: Enables chaining multiple assertions together
 
 ***
 
-# Syntax
-
-## [cy.and( *chainers* )](#section-chainers-usage)
+# [cy.and( *chainers* )](#section-chainers-usage)
 
 Make an assertion about the current subject using assertion chainers.
 
 ***
 
-## [cy.and( *chainers*, *value* )](#section-chainers-with-value-usage)
+# [cy.and( *chainers*, *value* )](#section-chainers-with-value-usage)
 
 Make an assertion about the value of the current subject.
 
@@ -35,13 +33,13 @@ Some chai methods and chai-jQuery methods return a new (different) subject for c
 
 ***
 
-## [cy.and( *chainers*, *method*, *value* )](#section-chainers-with-method-and-value-usage)
+# [cy.and( *chainers*, *method*, *value* )](#section-chainers-with-method-and-value-usage)
 
 Make an assertion about the subject by calling a method and providing a value to that method.
 
 ***
 
-## [cy.and( *function* )](#section-function-usage)
+# [cy.and( *function* )](#section-function-usage)
 
 Pass a function that can have any number of explicit assertions written within it.
 
@@ -56,6 +54,11 @@ Does not change the subject. Whatever was passed to the function is what is retu
 ```javascript
 cy.get("button").should("have.class", "active").and("not.be.disabled")
 ```
+
+***
+
+# Chainers with Value Usage
+
 ## Chain assertions on subject change
 
 ```html
@@ -88,6 +91,92 @@ cy
   // assert that the string does not
   // have a '#' character within it
   .and("not.include", "#")
+```
+
+***
+
+# Chainers with Method and Value Usage
+
+## Assert the href is equal to '/users'
+
+```javascript
+// have.attr comes from chai-jquery
+cy
+  .get("#header a")
+  .should("have.class", "active")
+  .and("have.attr", "href", "/users")
+```
+
+***
+
+# Function Usage
+
+## Verify length, content, and classes from multiple `<p>`
+
+Passing a function to `and` enables you to assert on arbitrary subjects. This gives you the opportunity to *massage* what you'd like to assert on.
+
+Just be sure *not* to include any code that has side effects in your callback function.
+
+The callback function will be retried over and over again until no assertions within it throw.
+
+```html
+<div>
+  <p class="text-primary">Hello World</p>
+  <p class="text-danger">You have an error</p>
+  <p class="text-default">Try again later</p>
+</div>
+```
+
+```javascript
+cy
+  .get("p")
+  .should("not.be.empty")
+  .and(function($p){
+    // should have found 3 elements
+    expect($p).to.have.length(3)
+
+    // make sure the first contains some text content
+    expect($p.first()).to.contain("Hello World")
+
+    // use jquery's map to grab all of their classes
+    // jquery's map returns a new jquery object
+    var classes = $p.map(function(i, el){
+      return cy.$(el).attr("class")
+    })
+
+    // call classes.get() to make this a plain array
+    expect(classes.get()).to.deep.eq([
+      "text-primary",
+      "text-danger",
+      "text-default"
+    ])
+  })
+```
+
+***
+
+## Using a callback function will not change the subject
+
+```javascript
+cy
+  .get("button")
+  .should("be.active")
+  .and(function($button){
+    // whatever we return here is ignored
+    // as Cypress will always force the return
+    // value for future commands to be the same
+    // as the previous subject which is <button>
+
+    expect({foo: "bar"}).to.deep.eq({foo: "bar"})
+
+    // whatever the return value (if any) is ignored
+    return {foo: "bar"}
+  })
+
+  .then(function($button){
+    // $button === <button>
+    // the subject is unchanged no matter what was returned
+  })
 ```
 
 ***

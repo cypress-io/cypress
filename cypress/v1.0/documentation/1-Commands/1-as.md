@@ -1,5 +1,5 @@
 slug: as
-excerpt: Alias reusable objects for later
+excerpt: Alias a route or DOM element for use later.
 
 [block:callout]
 {
@@ -9,9 +9,18 @@ excerpt: Alias reusable objects for later
 }
 [/block]
 
+Assign an alias to a route or DOM element for use later. Reference the alias later within the [`cy.get`](https://on.cypress.io/api/get) or [`cy.wait`](https://on.cypress.io/api/wait) command with the prefix `@`.
+
+| | |
+|--- | --- |
+| **Returns** | the DOM element or route being aliased  |
+| **Timeout** | the assertion will retry for the duration of the [Command Timeout](#section-global-options) |
+
+***
+
 # [cy.as( *text* )](#section-usage)
 
-Create an alias to be used later.
+Create an alias to be used later, passing the name of the alias as a parameter.
 
 ***
 
