@@ -4,8 +4,8 @@ excerpt: A guide to managing XHR requests
 # Contents
 
 - :fa-angle-right: [Strategy](#section-strategy)
-  - :fa-angle-right: [Strategy #1: Don't Stub Responses](#section-strategy-1-don-1-stub-responses)
-  - :fa-angle-right: [Stategy #2: Stub Responses](#section-strategy-2-stub-responses)
+  - :fa-angle-right: [1: Don't Stub Responses](#section-1-don-1-stub-responses)
+  - :fa-angle-right: [2: Stub Responses](#section-2-stub-responses)
 - :fa-angle-right: [Requests](#section-requests)
 - :fa-angle-right: [Responses](#section-responses)
 - :fa-angle-right: [Server + Routing Table](#section-server-routing-table)
@@ -38,7 +38,7 @@ Let's investigate both strategies, why you would use one versus the other, and w
 
 ***
 
-## Strategy #1: Don't Stub Responses
+## 1: Don't Stub Responses
 
 Requests that aren't stubbed will actually reach your server. By *not* stubbing your responses, you are writing true **end to end** tests. This means you are driving your application the same way a real user would.
 
@@ -79,7 +79,7 @@ If you are writing a traditional server-side application where most of the respo
 
 ***
 
-## Strategy #2: Stub Responses
+## 2: Stub Responses
 
 Stubbing responses enables you to control every aspect of the response, including the response body, the status, headers, and even network delay. Stubbing is extremely fast, most responses will be returned in less than 20ms.
 
