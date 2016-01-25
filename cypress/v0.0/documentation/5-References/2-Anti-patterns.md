@@ -1,5 +1,9 @@
 slug: anti-patterns
-excerpt: Patterns that are ineffective and risks being counterproductive
+excerpt: Patterns that are ineffective and risk being counterproductive
+
+# Contents
+
+- :fa-angle-right: [Forcing arbitrary waits](#section-forcing-arbitrary-waits)
 
 # Forcing arbitrary waits
 
