@@ -168,10 +168,10 @@ Additionally these chainers are added when asserting about a DOM object.
 
 | Chainers | Assertion |
 | --- | --- |
-| attr( *name* *[, value]*) | `expect($('body')).to.have.attr('foo', 'bar')` |
-| prop( *name* *[, value]*) | `expect($('body')).to.have.prop('disabled', false)` |
-| css( *name* *[, value]*) | `expect($('body')).to.have.css('background-color', 'rgb(0, 0, 0)')` |
-| data( *name* *[, value]*) | `expect($('body')).to.have.data('foo', 'bar')` |
+| attr( *name*, *[value]*) | `expect($('body')).to.have.attr('foo', 'bar')` |
+| prop( *name*, *[value]*) | `expect($('body')).to.have.prop('disabled', false)` |
+| css( *name*, *[value]*) | `expect($('body')).to.have.css('background-color', 'rgb(0, 0, 0)')` |
+| data( *name*, *[value]*) | `expect($('body')).to.have.data('foo', 'bar')` |
 | class( *className* ) | `expect($('body')).to.have.class('foo')` |
 | id( *id* ) | `expect($('body')).to.have.id('foo')` |
 | html( *html*)  | `expect($('#title')).to.have.html('Chai Tea')` |
@@ -200,27 +200,27 @@ All Sinon assertions are available in Sinon–Chai.
 
 | Sinon.JS property/method | Assertion |
 | -- | -- |
-| `called` |  spy.should.have.been.called |
-| `callCount` | spy.should.have.callCount(n) |
-| `calledOnce` |  spy.should.have.been.calledOnce |
-| `calledTwice` | spy.should.have.been.calledTwice |
-| `calledThrice` |  spy.should.have.been.calledThrice |
-| `calledBefore` |  spy1.should.have.been.calledBefore(spy2) |
-| `calledAfter` | spy1.should.have.been.calledAfter(spy2) |
-| `calledWithNew` | spy.should.have.been.calledWithNew |
-| `alwaysCalledWithNew` | spy.should.always.have.been.calledWithNew |
-| `calledOn` |  spy.should.have.been.calledOn(context) |
-| `alwaysCalledOn` |  spy.should.always.have.been.calledOn(context) |
-| `calledWith` |  spy.should.have.been.calledWith(...args) |
-| `alwaysCalledWith` |  spy.should.always.have.been.calledWith(...args) |
-| `calledWithExactly` | spy.should.have.been.calledWithExactly(...args) |
-| `alwaysCalledWithExactly` | spy.should.always.have.been.calledWithExactly(...args) |
-| `calledWithMatch` | spy.should.have.been.calledWithMatch(...args) |
-| `alwaysCalledWithMatch` | spy.should.always.have.been.calledWithMatch(...args) |
-| `returned` |  spy.should.have.returned(returnVal) |
-| `alwaysReturned` |  spy.should.have.always.returned(returnVal) |
-| `threw` | spy.should.have.thrown(errorObjOrErrorTypeStringOrNothing) |
-| `alwaysThrew` | spy.should.have.always.thrown(errorObjOrErrorTypeStringOrNothing) |
+| `called` |  `expect(spy).to.be.called` |
+| `callCount` | `expect(spy).to.have.callCount(n)` |
+| `calledOnce` |  `expect(spy).to.be.calledOnce` |
+| `calledTwice` | `expect(spy).to.be.calledTwice` |
+| `calledThrice` |  `expect(spy).to.be.calledThrice` |
+| `calledBefore` |  `expect(spy1).to.be.calledBefore(spy2)` |
+| `calledAfter` | `expect(spy1).to.be.calledAfter(spy2)` |
+| `calledWithNew` | `expect(spy).to.be.calledWithNew` |
+| `alwaysCalledWithNew` | `expect(spy).to.always.be.calledWithNew` |
+| `calledOn` |  `expect(spy).to.be.calledOn(context)` |
+| `alwaysCalledOn` |  `expect(spy).to.always.be.calledOn(context)` |
+| `calledWith` |  `expect(spy).to.be.calledWith(...args)` |
+| `alwaysCalledWith` |  `expect(spy).to.always.be.calledWith(...args)` |
+| `calledWithExactly` | `expect(spy).to.be.calledWithExactly(...args)` |
+| `alwaysCalledWithExactly` | `expect(spy).to.always.be.calledWithExactly(...args)` |
+| `calledWithMatch` | `expect(spy).to.be.calledWithMatch(...args)` |
+| `alwaysCalledWithMatch` | `expect(spy).to.always.be.calledWithMatch(...args)` |
+| `returned` |  `expect(spy).to.have.returned(returnVal)` |
+| `alwaysReturned` |  `expect(spy).to.have.always.returned(returnVal)` |
+| `threw` | `expect(spy).to.have.thrown(errorObjOrErrorTypeStringOrNothing)` |
+| `alwaysThrew` | `expect(spy).to.have.always.thrown(errorObjOrErrorTypeStringOrNothing)` |
 
 ***
 
