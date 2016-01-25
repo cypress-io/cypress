@@ -107,27 +107,34 @@ The following chainers are available for your use:
 
 ## Chai
 
-| Chainer | Assertion |
+| Chainable getters |
+| --- |
+| to |
+| be |
+| been |
+| is |
+| that |
+| which |
+| and |
+| has |
+| have |
+| with |
+| at |
+| of |
+| same |
+
+| Assertion | Example |
 | --- | --- |
-| to | Chainable getter |
-| be | Chainable getter |
-| been | Chainable getter |
-| is | Chainable getter |
-| that | Chainable getter |
-| which | Chainable getter |
-| and | Chainable getter |
-| has | Chainable getter |
-| have | Chainable getter |
-| with | Chainable getter |
-| at | Chainable getter |
-| of | Chainable getter |
-| same | Chainable getter |
 | not | `expect(foo).to.not.equal('bar')` |
 | deep | `expect(foo).to.deep.equal({ bar: 'baz' })` |
 | any | `expect(foo).to.have.any.keys('bar', 'baz')` |
 | all | `expect(foo).to.have.all.keys('bar', 'baz')` |
-| a( *type* ) / an( *type* ) | `expect(undefined).to.be.an('undefined')` |
-| include( *value* ) / contain( *value* ) / includes( *value* ) / contains( *value* ) | `expect([1,2,3]).to.include(2)` |
+| a( *type* ) | `expect('test').to.be.a('string')` |
+| an( *type* ) | `expect(undefined).to.be.an('undefined')` |
+| include( *value* )  | `expect([1,2,3]).to.include(2)` |
+| contain( *value* )  | `expect('foobar').to.contain('foo')` |
+| includes( *value* )  | `expect([1,2,3]).includes(2)` |
+| contains( *value* ) | `expect('foobar').contains('foo')` |
 | ok | `expect(undefined).to.not.be.ok` |
 | true | `expect(true).to.be.true` |
 | false | `expect(false).to.be.false` |
@@ -135,30 +142,49 @@ The following chainers are available for your use:
 | undefined | `expect(undefined).to.be.undefined` |
 | exist | `expect(foo).to.exist` |
 | empty | `expect([]).to.be.empty` |
-| arguments / Arguments | `expect(arguments).to.be.arguments` |
-| equal( *value* ) / equals( *value* ) / eq( *value* ) deep.equal( *value* ) | `expect(42).to.equal(42)` |
-| eql( *value* ) /  eqls( *value* ) / deep.equal( *value* ) | `expect({ foo: 'bar' }).to.eql({ foo: 'bar' })` |
-| above( *value* ) / gt( *value* ) / greaterThan( *value* ) | `expect(10).to.be.above(5)` |
-| least( *value* ) / gte( *value* )| `expect(10).to.be.at.least(10)` |
-| below( *value* ) / lt( *value* ) / lessThan( *value* ) | `expect(5).to.be.below(10)` |
-| most( *value* ) / lte( *value* ) | `expect(5).to.be.at.most(5)` |
+| arguments | `expect(arguments).to.be.arguments` |
+| equal( *value* )  | `expect(42).to.equal(42)` |
+| equals( *value* )  | `expect(42).equals(42)` |
+| eq( *value* )  | `expect(42).to.eq(42)` |
+| deep.equal( *value* ) | `expect({ foo: 'bar' }).to.deep.equal({ foo: 'bar' })` |
+| eql( *value* )  | `expect({ foo: 'bar' }).to.eql({ foo: 'bar' })` |
+| eqls( *value* )  | `expect([ 1, 2, 3 ]).eqls([ 1, 2, 3 ])` |
+| above( *value* )  | `expect(10).to.be.above(5)` |
+| gt( *value* )  | `expect(10).to.be.gt(5)` |
+| greaterThan( *value* ) | `expect(10).to.be.greaterThan(5)` |
+| least( *value* ) | `expect(10).to.be.at.least(10)` |
+| gte( *value* ) | `expect(10).to.be.gte(10)` |
+| below( *value* ) | `expect('foo').to.have.length.below(4)` |
+| lt( *value* )  | `expect(3).to.be.ls(4)` |
+| lessThan( *value* ) | `expect(5).to.be.lessThan(10)` |
+| most( *value* ) | `expect('foo').to.have.length.of.at.most(4)` |
+| lte( *value* ) | `expect(5).to.be.lte(5)` |
 | within( *start*, *finish* ) | `expect(7).to.be.within(5,10)` |
-| instanceof( *constructor* ) / instanceOf( *constructor* ) | `expect([ 1, 2, 3 ]).to.be.instanceof(Array)` |
-| property( *name*, *[value]* ) / deep.property( *name*, *[value]* ) | `expect(obj).to.have.property('foo')` |
-| ownProperty( *name* ) / haveOwnProperty( *name* ) | `expect('test').to.have.ownProperty('length')` |
-| length( *value* ) / lengthOf( *value* ) | `expect([ 1, 2, 3]).to.have.length(3)` |
+| instanceof( *constructor* )| `expect([ 1, 2, 3 ]).to.be.instanceof(Array)` |
+| instanceOf( *constructor* ) | `expect([ 1, 2, 3 ]).to.be.instanceOf(Array)` |
+| property( *name*, *[value]* ) | `expect(obj).to.have.property('foo')` |
+| deep.property( *name*, *[value]* ) | `expect(deepObj).to.have.deep.property('teas[1]', 'matcha')` |
+| ownProperty( *name* )  | `expect('test').to.have.ownProperty('length')` |
+| haveOwnProperty( *name* ) | `expect('test').to.haveOwnProperty('length')` |
+| length( *value* )  | `expect('foo').to.have.length.above(2)` |
+| lengthOf( *value* ) | `expect('foo').to.have.lengthOf(3)` |
 | match( *regexp* ) | `expect('foobar').to.match(/^foo/)` |
 | string( *string* ) | `expect('foobar').to.have.string('bar')` |
-| keys( *key1*, *[key2]*, *[...]* ) / key( *key1*, *[key2]*, *[...]* ) | `expect({ foo: 1, bar: 2 }).to.have.any.keys('foo')` |
-| throw( *constructor* ) / throws( *constructor* ) | `expect(fn).to.throw(Error)` |
+| keys( *key1*, *[key2]*, *[...]* ) | `expect({ foo: 1, bar: 2 }).to.have.key('foo')` |
+| key( *key1*, *[key2]*, *[...]* ) | `expect({ foo: 1, bar: 2 }).to.have.any.keys('foo')` |
+| throw( *constructor* ) | `expect(fn).to.throw(Error)` |
+| throws( *constructor* ) | `expect(fn).throws(ReferenceError, /bad function/)` |
 | respondTo( *method* ) | `expect(obj).to.respondTo('bar')` |
 | itself | `expect(Foo).itself.to.respondTo('bar')` |
 | satisfy( *method* ) | `expect(1).to.satisfy(function(num) { return num > 0; })` |
 | closeTo( *expected*, *delta*) | `expect(1.5).to.be.closeTo(1, 0.5)` |
 | members( *set* ) | `expect([1, 2, 3]).to.include.members([3, 2])` |
-| change( *function* ) / changes( *function* ) | `expect(fn).to.change(obj, 'val')` |
-| increase( *function* ) / increases( *function* ) | `expect(fn).to.increase(obj, 'val')` |
-| decrease( *function* ) / decreases( *function* ) | `expect(fn).to.decrease(obj, 'val')` |
+| change( *function* )  | `expect(fn).to.change(obj, 'val')` |
+| changes( *function* ) | `expect(fn).changes(obj, 'val')` |
+| increase( *function* )  | `expect(fn).to.increase(obj, 'val')` |
+| increases( *function* ) | `expect(fn).increases(obj, 'val')` |
+| decrease( *function* )  | `expect(fn).to.decrease(obj, 'val')` |
+| decreases( *function* ) | `expect(fn).decreases(obj, 'val')` |
 
 ***
 
@@ -200,27 +226,27 @@ All Sinon assertions are available in Sinon–Chai.
 
 | Sinon.JS property/method | Assertion |
 | -- | -- |
-| `called` |  `expect(spy).to.be.called` |
-| `callCount` | `expect(spy).to.have.callCount(n)` |
-| `calledOnce` |  `expect(spy).to.be.calledOnce` |
-| `calledTwice` | `expect(spy).to.be.calledTwice` |
-| `calledThrice` |  `expect(spy).to.be.calledThrice` |
-| `calledBefore` |  `expect(spy1).to.be.calledBefore(spy2)` |
-| `calledAfter` | `expect(spy1).to.be.calledAfter(spy2)` |
-| `calledWithNew` | `expect(spy).to.be.calledWithNew` |
-| `alwaysCalledWithNew` | `expect(spy).to.always.be.calledWithNew` |
-| `calledOn` |  `expect(spy).to.be.calledOn(context)` |
-| `alwaysCalledOn` |  `expect(spy).to.always.be.calledOn(context)` |
-| `calledWith` |  `expect(spy).to.be.calledWith(...args)` |
-| `alwaysCalledWith` |  `expect(spy).to.always.be.calledWith(...args)` |
-| `calledWithExactly` | `expect(spy).to.be.calledWithExactly(...args)` |
-| `alwaysCalledWithExactly` | `expect(spy).to.always.be.calledWithExactly(...args)` |
-| `calledWithMatch` | `expect(spy).to.be.calledWithMatch(...args)` |
-| `alwaysCalledWithMatch` | `expect(spy).to.always.be.calledWithMatch(...args)` |
-| `returned` |  `expect(spy).to.have.returned(returnVal)` |
-| `alwaysReturned` |  `expect(spy).to.have.always.returned(returnVal)` |
-| `threw` | `expect(spy).to.have.thrown(errorObjOrErrorTypeStringOrNothing)` |
-| `alwaysThrew` | `expect(spy).to.have.always.thrown(errorObjOrErrorTypeStringOrNothing)` |
+| called |  `expect(spy).to.be.called` |
+| callCount | `expect(spy).to.have.callCount(n)` |
+| calledOnce |  `expect(spy).to.be.calledOnce` |
+| calledTwice | `expect(spy).to.be.calledTwice` |
+| calledThrice |  `expect(spy).to.be.calledThrice` |
+| calledBefore |  `expect(spy1).to.be.calledBefore(spy2)` |
+| calledAfter | `expect(spy1).to.be.calledAfter(spy2)` |
+| calledWithNew | `expect(spy).to.be.calledWithNew` |
+| alwaysCalledWithNew | `expect(spy).to.always.be.calledWithNew` |
+| calledOn |  `expect(spy).to.be.calledOn(context)` |
+| alwaysCalledOn |  `expect(spy).to.always.be.calledOn(context)` |
+| calledWith |  `expect(spy).to.be.calledWith(...args)` |
+| alwaysCalledWith |  `expect(spy).to.always.be.calledWith(...args)` |
+| calledWithExactly | `expect(spy).to.be.calledWithExactly(...args)` |
+| alwaysCalledWithExactly | `expect(spy).to.always.be.calledWithExactly(...args)` |
+| calledWithMatch | `expect(spy).to.be.calledWithMatch(...args)` |
+| alwaysCalledWithMatch | `expect(spy).to.always.be.calledWithMatch(...args)` |
+| returned |  `expect(spy).to.have.returned(returnVal)` |
+| alwaysReturned |  `expect(spy).to.have.always.returned(returnVal)` |
+| threw | `expect(spy).to.have.thrown(errorObjOrErrorTypeStringOrNothing)` |
+| alwaysThrew | `expect(spy).to.have.always.thrown(errorObjOrErrorTypeStringOrNothing)` |
 
 ***
 
