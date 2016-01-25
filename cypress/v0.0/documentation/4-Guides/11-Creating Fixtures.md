@@ -5,8 +5,8 @@ excerpt: Load fixtures
 
 - :fa-angle-right: [What are Fixtures](#section-what-are-fixtures)
 - :fa-angle-right: [Supported Formats](#section-supported-formats)
-  - :fa-angle-right: [Validation](#section-validation)
-  - :fa-angle-right: [Formatting](#section-formatting)
+  - :fa-minus: [Validation](#section-validation)
+  - :fa-minus: [Formatting](#section-formatting)
 - :fa-angle-right: [Fixtures vs Factories](#section-fixtures-vs-factories)
 - :fa-angle-right: [Routing Responses](#section-routing-responses)
 - :fa-angle-right: [Organizing Fixtures](#section-organizing-fixtures)
@@ -64,14 +64,14 @@ Image fixtures will be sent as `base64`.
 
 Cypress will automatically scaffold out a suggested folder structure for organizing your fixtures on every new project. By default it will create this structure when you boot your project:
 
-```javascript
+```text
 // within your project's root folder
 /tests/_fixtures/example.json
 ```
 
 Your fixtures can be further organized within additional folders. For instance, you could create another folder called `images` and add images:
 
-```
+```text
 /tests/_fixtures/images/cats.png
 /tests/_fixtures/images/dogs.png
 /tests/_fixtures/images/birds.png

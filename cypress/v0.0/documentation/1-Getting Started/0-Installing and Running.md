@@ -44,7 +44,7 @@ You can install Cypress in 2 different ways:
 
 ## Command Line
 
-```bash
+```shell
 # install the Cypress CLI tool
 npm install -g cypress
 
@@ -82,7 +82,7 @@ After installing, you will need to add the project(s) you want to write Cypress 
 
 After adding your project to Cypress, Cypress will generate a `cypress.json` file in your project:
 
-```
+```text
 /cypress.json
 ```
 

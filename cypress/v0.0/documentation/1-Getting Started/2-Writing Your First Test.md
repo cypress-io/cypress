@@ -14,7 +14,7 @@ excerpt: Walkthrough writing your first test
 
 After adding your project, Cypress will automatically scaffold out a suggested folder structure. By default it will create:
 
-```
+```text
 /tests
 /tests/_fixtures
 /tests/_support

@@ -5,10 +5,10 @@ excerpt: Set up environment variables
 
 - :fa-angle-right: [Use Case](#section-use-case)
 - :fa-angle-right: [Setting Environment Variables](#section-setting-environment-variables)
-  - :fa-angle-right: [Option #1: Set in `cypress.json`](#section-option-1-set-in-cypress-json-)
-  - :fa-angle-right: [Option #2: Create a `cypress.env.json`](#section-option-2-create-a-cypress-env-json-)
-  - :fa-angle-right: [Option #3: Export as `CYPRESS_*`](#section-option-3-export-as-cypress_-)
-  - :fa-angle-right: [Option #4: Pass in from the CLI as `--env`](#section-option-4-pass-in-from-the-cli-as-env-)
+  - :fa-minus: [Option #1: Set in `cypress.json`](#section-option-1-set-in-cypress-json-)
+  - :fa-minus: [Option #2: Create a `cypress.env.json`](#section-option-2-create-a-cypress-env-json-)
+  - :fa-minus: [Option #3: Export as `CYPRESS_*`](#section-option-3-export-as-cypress_-)
+  - :fa-minus: [Option #4: Pass in from the CLI as `--env`](#section-option-4-pass-in-from-the-cli-as-env-)
 
 ***
 
@@ -60,7 +60,7 @@ When your tests are running, you can use the [`Cypress.env()`](https://on.cypres
 
 Any key/value you set in your [`cypress.json`](https://on.cypress.io/guides/configuration) under the `env` key will become an environment variable.
 
-```javascript
+```json
 // cypress.json
 {
   "projectId": "128076ed-9868-4e98-9cef-98dd8b705d75",
@@ -103,7 +103,7 @@ You can create your own `cypress.env.json`, which Cypress will automatically che
 
 This strategy is useful because if you add `cypress.env.json` to your `.gitignore` file, the values in here can be different for each developer machine.
 
-```javascript
+```json
 // cypress.env.json
 
 {
@@ -146,7 +146,7 @@ Conflicting values from this method will override `cypress.json` and `cypress.en
 
 Cypress will automatically **strip off** the `CYPRESS_` when adding your environment variables.
 
-```bash
+```shell
 # export cypress env variables from the command line
 export CYPRESS_HOST=laura.dev.local
 export cypress_api_server=http://localhost:8888/api/v1/
@@ -194,7 +194,7 @@ You can use the `--env` option on `cypress ci`.
 }
 [/block]
 
-```bash
+```yaml
 cypress ci --env host=kevin.dev.local,api_server=http://localhost:8888/api/v1
 ```
 

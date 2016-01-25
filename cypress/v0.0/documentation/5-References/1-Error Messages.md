@@ -182,7 +182,7 @@ cy.get("#modal button").click({waitForAnimations: false})
 
 You can globally disable animation error checking, or increase the threshold by modifying your [`cypress.json`](https://on.cypress.io/guides/configuration).
 
-```javascript
+```json
 // cypress.json
 {
   "waitForAnimations": false,

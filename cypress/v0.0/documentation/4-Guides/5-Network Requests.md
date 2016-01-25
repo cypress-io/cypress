@@ -4,16 +4,16 @@ excerpt: A guide to managing XHR requests
 # Contents
 
 - :fa-angle-right: [Strategy](#section-strategy)
-  - :fa-angle-right: [1: Don't Stub Responses](#section-1-don-1-stub-responses)
-  - :fa-angle-right: [2: Stub Responses](#section-2-stub-responses)
+  - :fa-minus: [1: Don't Stub Responses](#section-1-don-1-stub-responses)
+  - :fa-minus: [2: Stub Responses](#section-2-stub-responses)
 - :fa-angle-right: [Requests](#section-requests)
 - :fa-angle-right: [Responses](#section-responses)
 - :fa-angle-right: [Server + Routing Table](#section-server-routing-table)
 - :fa-angle-right: [Fixtures](#section-fixtures)
 - :fa-angle-right: [Waiting](#section-waiting)
-  - :fa-angle-right: [Removing Flake](#section-removing-flake)
-  - :fa-angle-right: [Clear Source of Failure](#section-clear-source-of-failure)
-  - :fa-angle-right: [Asserting about the XHR Object](#section-asserting-about-the-xhr-object)
+  - :fa-minus: [Removing Flake](#section-removing-flake)
+  - :fa-minus: [Clear Source of Failure](#section-clear-source-of-failure)
+  - :fa-minus: [Asserting about the XHR Object](#section-asserting-about-the-xhr-object)
 
 ***
 
