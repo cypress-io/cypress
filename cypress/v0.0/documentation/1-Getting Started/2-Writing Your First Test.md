@@ -30,6 +30,8 @@ While Cypress allows for configuration of where your test files can be located, 
 }
 [/block]
 
+***
+
 # Test Files
 
 Test files may be written as either `.js` or `.coffee` files.
@@ -46,6 +48,8 @@ Navigate to `http://localhost:2020`. You should see this spec file listed inside
 }
 [/block]
 
+***
+
 # How to write tests
 
 Cypress is built on top of [Mocha](https://on.cypress.io/guides/bundled-tools#section-mocha) and uses its `bdd` interface. Tests you write in Cypress will mostly adhere to this style.
@@ -53,6 +57,8 @@ Cypress is built on top of [Mocha](https://on.cypress.io/guides/bundled-tools#se
 If you're familiar with writing tests in JavaScript, then writing tests in Cypress will be a breeze.
 
 We're still working on introductory docs and videos. For now, [check out some examples](https://on.cypress.io/guides/all-example-apps) of applications using Cypress tests.
+
+***
 
 # Command Line Tools
 
