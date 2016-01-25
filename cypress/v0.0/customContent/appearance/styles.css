@@ -8,6 +8,11 @@ body {
   word-wrap: break-word;
 }
 
+/*-------Nav---------*/
+
+.header .searchbox {
+  top: 11px;
+}
 
 
 /*-------Headers---------*/
@@ -44,9 +49,22 @@ body {
   padding-left: 0.25em;
 }
 
-.blocks-parent .block>div>div [marked] h1:first-child + ul>li i {
+.blocks-parent .block>div>div [marked] h1:first-child + ul li {
+  position: relative;
+  padding-left: 15px;
+}
+
+.blocks-parent .block>div>div [marked] h1:first-child + ul li i {
   color: #0094ff;
   margin-right: 0.25em;
+  position: absolute;
+  top: 3px;
+  left: 0;
+}
+
+.blocks-parent .block>div>div [marked] h1:first-child + ul>li i.fa-minus {
+  font-size: 0.7em;
+  top: 7px;
 }
 
 .blocks-parent .block>div>div [marked] h1:first-child + ul>li>ul {
