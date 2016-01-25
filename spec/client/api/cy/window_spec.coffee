@@ -425,6 +425,11 @@ describe "$Cypress.Cy Window Commands", ->
 
       @cy.viewport(800, 600)
 
+    it "triggers reset:viewport before each test", ->
+      trigger = @sandbox.spy @Cypress, "trigger"
+      @Cypress.trigger "test:before:hooks"
+      expect(trigger).to.be.calledWith("restore:viewport")
+
     context "presets", ->
       it "iphone-6", (done) ->
         @Cypress.on "viewport", (viewport) ->

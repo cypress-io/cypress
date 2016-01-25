@@ -15,6 +15,9 @@ $Cypress.register "Window", (Cypress, _, $) ->
 
   validOrientations = ["landscape", "portrait"]
 
+  Cypress.on "test:before:hooks", ->
+    Cypress.trigger "restore:viewport"
+
   Cypress.addParentCommand
     title: (options = {}) ->
       _.defaults options, {log: true}
