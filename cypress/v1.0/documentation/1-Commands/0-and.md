@@ -1,6 +1,7 @@
 slug: and
 excerpt: Enables chaining multiple assertions together
 
+
 [block:callout]
 {
   "type": "info",
@@ -9,35 +10,39 @@ excerpt: Enables chaining multiple assertions together
 }
 [/block]
 
-# [cy.and( *chainers*)](#section-chainers-usage)
+`cy.and` is used to make assertions about the current subject. `cy.and` is identical to [`cy.should`](https://on.cypress.io/api/should), but `cy.and` sometimes reads better when chaining multiple assertions together.
 
-`cy.and` makes assertions about the current subject. Implicitly assert about the current subject. Returns the existing current subject.
+**Returns:** the current subject (usually) for futher assertion chaining.
 
-When chaining multiple assertions together, `cy.and` sometimes reads better than [`cy.should`](https://on.cypress.io/api/should).
-
-`cy.and` is identical to [`cy.should`](https://on.cypress.io/api/should).
+**Timeout:** the assertion with retry for the duration of the [Command Timeout](#section-global-options)
 
 ***
 
-# [cy.and( *chainers*, *value* )](#section-chainers-with-value-usage)
+# Syntax
 
-Implicitly assert a value about the current subject. Returns the existing current subject (usually).
+## [cy.and( *chainers* )](#section-chainers-usage)
+
+Make an assertion about the current subject using assertion chainers.
+
+***
+
+## [cy.and( *chainers*, *value* )](#section-chainers-with-value-usage)
+
+Make an assertion about the value of the current subject.
 
 Some chai methods and chai-jQuery methods return a new (different) subject for chain-ability.
 
 ***
 
-# [cy.and( *chainers*, *method*, *value* )](#section-chainers-with-method-and-value-usage)
+## [cy.and( *chainers*, *method*, *value* )](#section-chainers-with-method-and-value-usage)
 
-Implicitly assert about the subject by calling a method and providing a value to that method.
-
-Returns the new assertion subject for further assertion chain-ability.
+Make an assertion about the subject by calling a method and providing a value to that method.
 
 ***
 
-# [cy.and( *function* )](#section-function-usage)
+## [cy.and( *function* )](#section-function-usage)
 
-Pass a function that can have any number of explicit assertions within it.
+Pass a function that can have any number of explicit assertions written within it.
 
 Does not change the subject. Whatever was passed to the function is what is returned.
 
