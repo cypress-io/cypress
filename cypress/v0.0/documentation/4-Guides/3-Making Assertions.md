@@ -4,12 +4,12 @@ excerpt: Assertions verify an expectation.
 # Contents
 
 - :fa-angle-right: [Writing an Assertion](#section-writing-an-assertion)
-  - :fa-minus: [Implicit Subjects with `cy.should` or `cy.and`](#section-implicit-subjects-with-cy-should-or-cy-and-)
-  - :fa-minus: [Explicit Subjects with `expect` and `assert`](#section-explicit-subjects-with-expect-and-assert-)
+  - [Implicit Subjects with `cy.should` or `cy.and`](#section-implicit-subjects-with-cy-should-or-cy-and-)
+  - [Explicit Subjects with `expect` and `assert`](#section-explicit-subjects-with-expect-and-assert-)
 - :fa-angle-right: [Available Assertions](#section-available-assertions)
-  - :fa-minus: [Chai](#section-chai)
-  - :fa-minus: [Chai-jQuery](#section-chai-jquery)
-  - :fa-minus: [Chai-Sinon](#section-chai-sinon)
+  - [Chai](#section-chai)
+  - [Chai-jQuery](#section-chai-jquery)
+  - [Chai-Sinon](#section-chai-sinon)
 - :fa-angle-right: [Using Chainers with Implicit Subjects](#section-using-chainers-with-implicit-subjects)
 - :fa-angle-right: [Resolving Assertions](#section-resolving-assertions)
 

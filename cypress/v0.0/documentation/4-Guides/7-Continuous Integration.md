@@ -5,11 +5,11 @@ excerpt: Run Cypress in any CI provider
 
 - :fa-angle-right: [Supported Services](#section-supported-services)
 - :fa-angle-right: [Running in CI](#section-running-in-ci)
-  - :fa-minus: [Add your project to your CI provider](#section-add-you-project-to-your-ci-provider)
-  - :fa-minus: [Acquire a Cypress secret key](#section-acquire-a-cypress-secret-key)
-  - :fa-minus: [Add 2 lines of code to your CI config file](#section-add-2-lines-of-code-to-your-ci-config-file)
-  - :fa-minus: [Storing your secret key as an environment variable](#section-storing-your-secret-key-as-an-environment-variable)
-  - :fa-minus: [Specifying a version of Cypress](#section-specifying-a-version-of-cypress)
+  - [Add your project to your CI provider](#section-add-you-project-to-your-ci-provider)
+  - [Acquire a Cypress secret key](#section-acquire-a-cypress-secret-key)
+  - [Add 2 lines of code to your CI config file](#section-add-2-lines-of-code-to-your-ci-config-file)
+  - [Storing your secret key as an environment variable](#section-storing-your-secret-key-as-an-environment-variable)
+  - [Specifying a version of Cypress](#section-specifying-a-version-of-cypress)
 - :fa-angle-right: [Examples](#section-examples)
 
 ***

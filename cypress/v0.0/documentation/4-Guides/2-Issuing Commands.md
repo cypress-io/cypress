@@ -6,9 +6,9 @@ excerpt: Traverse the dom and perform actions with commands
 - :fa-angle-right: [Commands are Async](#section-commands-are-async)
 - :fa-angle-right: [Subjects](#section-subjects)
 - :fa-angle-right: [Chaining](#section-chaining)
-  - :fa-minus: [Parent Commands](#section-parent-commands)
-  - :fa-minus: [Child Commands](#section-child-commands)
-  - :fa-minus: [Dual Commands](#section-dual-commands)
+  - [Parent Commands](#section-parent-commands)
+  - [Child Commands](#section-child-commands)
+  - [Dual Commands](#section-dual-commands)
 
 ***
 

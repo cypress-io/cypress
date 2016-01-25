@@ -5,8 +5,8 @@ excerpt: Quick start guide for using Cypress
 
 - :fa-angle-right: [System Requirements](#section-system-requirements)
 - :fa-angle-right: [Installing](#section-installing)
-  - :fa-minus: [Command Line](#section-command-line)
-  - :fa-minus: [Direct Download](#section-direct-download)
+  - [Command Line](#section-command-line)
+  - [Direct Download](#section-direct-download)
 - :fa-angle-right: [Adding Projects](#section-adding-projects)
 
 ***

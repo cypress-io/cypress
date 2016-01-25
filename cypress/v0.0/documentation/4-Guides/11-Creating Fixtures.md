@@ -5,8 +5,8 @@ excerpt: Load fixtures
 
 - :fa-angle-right: [What are Fixtures](#section-what-are-fixtures)
 - :fa-angle-right: [Supported Formats](#section-supported-formats)
-  - :fa-minus: [Validation](#section-validation)
-  - :fa-minus: [Formatting](#section-formatting)
+  - [Validation](#section-validation)
+  - [Formatting](#section-formatting)
 - :fa-angle-right: [Fixtures vs Factories](#section-fixtures-vs-factories)
 - :fa-angle-right: [Routing Responses](#section-routing-responses)
 - :fa-angle-right: [Organizing Fixtures](#section-organizing-fixtures)

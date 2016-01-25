@@ -4,7 +4,7 @@ excerpt: Get help for common problems in Cypress
 # Contents
 
 - :fa-angle-right: [Installation](#section-installation)
-  - :fa-minus: [Running in CI](#section-running-in-ci)
+  - [Running in CI](#section-running-in-ci)
 
 ***
 

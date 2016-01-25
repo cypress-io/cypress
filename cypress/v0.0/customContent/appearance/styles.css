@@ -68,9 +68,14 @@ body {
 }
 
 .blocks-parent .block>div>div [marked] h1:first-child + ul>li>ul {
-  list-style-type: none;
+  list-style-type: disc;
   padding-left: 1.5em;
   font-size: 0.95em;
+  color: #0094ff;
+}
+
+.blocks-parent .block>div>div [marked] h1:first-child + ul>li>ul>li {
+  padding-left: 0;
 }
 
 /*-------Images---------*/
