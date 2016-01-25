@@ -12,9 +12,10 @@ excerpt: Enables chaining multiple assertions together
 
 `cy.and` is used to make assertions about the current subject. `cy.and` is identical to [`cy.should`](https://on.cypress.io/api/should), but `cy.and` sometimes reads better when chaining multiple assertions together.
 
-**Returns:** the current subject (usually) for futher assertion chaining.
-
-**Timeout:** the assertion with retry for the duration of the [Command Timeout](#section-global-options)
+| | |
+|--- | --- |
+| **Returns** | the current subject (usually) for futher assertion chaining. |
+| **Timeout** | the assertion will retry for the duration of the [Command Timeout](#section-global-options) |
 
 ***
 
