@@ -1,5 +1,7 @@
 $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
+  commandCausingLoading = /^(visit|reload)$/
+
   overrideRemoteLocationGetters = (cy, contentWindow) ->
     navigated = (attr, args) ->
       cy.urlChanged(null, {
@@ -48,7 +50,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
       ## if we are visiting a page which caused
       ## the beforeunload, then dont output this command
-      return if current?.get("name") is "visit"
+      return if commandCausingLoading.test(current?.get("name"))
 
       ## bail if we dont have a runnable
       ## because beforeunload can happen at any time
@@ -110,6 +112,51 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
             @fail(e)
 
   Cypress.addParentCommand
+    reload: (args...) ->
+      throwArgsErr = =>
+        @throwErr("cy.reload() can only accept a boolean or options as its arguments.")
+
+      switch args.length
+        when 0
+          forceReload = false
+          options     = {}
+
+        when 1
+          if _.isObject(args[0])
+            options = args[0]
+          else
+            forceReload = args[0]
+
+        when 2
+          forceReload = args[0]
+          options     = args[1]
+
+        else
+          throwArgsErr()
+
+      new Promise (resolve, reject) =>
+        forceReload ?= false
+        options     ?= {}
+
+        _.defaults options, {log: true}
+
+        if not _.isBoolean(forceReload)
+          throwArgsErr()
+
+        if not _.isObject(options)
+          throwArgsErr()
+
+        if options.log
+          options._log = Cypress.Log.command()
+
+          options._log.snapshot("before", {next: "after"})
+
+        win = @private("window")
+
+        Cypress.on "load", resolve
+
+        win.location.reload(forceReload)
+
     go: (numberOrString, options = {}) ->
       _.defaults options, {log: true}
 

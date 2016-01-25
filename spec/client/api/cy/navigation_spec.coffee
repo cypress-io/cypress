@@ -1,6 +1,130 @@
 describe "$Cypress.Cy Navigation Commands", ->
   enterCommandTestingMode()
 
+  context "#reload", ->
+    it "calls into window.location.reload", (done) ->
+      fn = (arg) ->
+        expect(arg).to.be.false
+        done()
+
+      win = {location: {reload: fn}}
+
+      @cy.private("window", win)
+
+      @cy.reload()
+
+    it "can pass forceReload", (done) ->
+      fn = (arg) ->
+        expect(arg).to.be.true
+        done()
+
+      win = {location: {reload: fn}}
+
+      @cy.private("window", win)
+
+      @cy.reload(true)
+
+    it "can pass forceReload + options", (done) ->
+      fn = (arg) ->
+        expect(arg).to.be.true
+        done()
+
+      win = {location: {reload: fn}}
+
+      @cy.private("window", win)
+
+      @cy.reload(true, {})
+
+    it "can pass just options", (done) ->
+      fn = (arg) ->
+        expect(arg).to.be.false
+        done()
+
+      win = {location: {reload: fn}}
+
+      @cy.private("window", win)
+
+      @cy.reload({})
+
+    describe "errors", ->
+      beforeEach ->
+        @allowErrors()
+
+      it "logs once on failure", (done) ->
+        logs = []
+
+        @Cypress.on "log", (log) ->
+          logs.push log
+
+        @cy.on "fail", (err) ->
+          expect(logs.length).to.eq(1)
+          done()
+
+        @cy.reload(Infinity)
+
+      it "throws passing more than 2 args", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq("cy.reload() can only accept a boolean or options as its arguments.")
+          done()
+
+        @cy.reload(1, 2, 3)
+
+      it "throws passing 2 invalid arguments", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq("cy.reload() can only accept a boolean or options as its arguments.")
+          done()
+
+        @cy.reload(true, 1)
+
+      it "throws passing 1 invalid argument", (done) ->
+        @cy.on "fail", (err) ->
+          expect(err.message).to.eq("cy.reload() can only accept a boolean or options as its arguments.")
+          done()
+
+        @cy.reload(1)
+
+      it "fully refreshes page", ->
+        @cy
+          .window().then (win) ->
+            win.foo = "foo"
+          .reload()
+          .window().then (win) ->
+            expect(win.foo).to.be.undefined
+
+    describe ".log", ->
+      beforeEach ->
+        @Cypress.on "log", (@log) =>
+
+      afterEach ->
+        delete @log
+
+      it "logs reload", ->
+        @cy.reload().then ->
+          expect(@log.get("name")).to.eq("reload")
+
+      it "can turn off logging", ->
+        @cy.reload({log: false}).then ->
+          expect(@log).to.be.undefined
+
+      it "logs before + after", (done) ->
+        beforeunload = false
+
+        @cy
+          .window().then (win) ->
+            $(win).on "beforeunload", =>
+              beforeunload = true
+              expect(@log.get("snapshots").length).to.eq(1)
+              expect(@log.get("snapshots")[0].name).to.eq("before")
+              expect(@log.get("snapshots")[0].state).to.be.an("object")
+              return undefined
+
+          .reload().then ->
+            expect(beforeunload).to.be.true
+            expect(@log.get("snapshots").length).to.eq(2)
+            expect(@log.get("snapshots")[1].name).to.eq("after")
+            expect(@log.get("snapshots")[1].state).to.be.an("object")
+            done()
+
   context "#go", ->
     describe "errors", ->
       beforeEach ->
