@@ -29,12 +29,12 @@ There are two ways to write an assertion in Cypress.
 Using [`cy.should`](https://on.cypress.io/api/should) or [`cy.and`](https://on.cypress.io/api/and) commands is the preferred way of making an assertion in Cypress. The subject of the assertion is inferred from the subject of the last Cypress command, which is why this is called an **implicit subject**.
 
 ```javascript
-// the implicit subject here is the <button>
-// this asserts that the <button> has an .active class
-cy.get("button").should("have.class", "active")
+// the implicit subject here is the first <tr>
+// this asserts that the <tr> has an .active class
+cy.get("tbody tr:first").should("have.class", "active")
 ```
 
-![assertions](https://cloud.githubusercontent.com/assets/1268976/10002810/3102a8a6-6077-11e5-85bf-5f8666bcb1a8.png)
+![implicit_assertion_class_active](https://cloud.githubusercontent.com/assets/1271364/12554600/4cb4115c-c34b-11e5-891c-84ff176ea38f.jpg)
 
 ***
 
