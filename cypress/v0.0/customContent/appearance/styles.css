@@ -10,7 +10,7 @@ body {
 
 /*-------Tables---------*/
 
-.th:empty {
+.docs-content th:empty {
   padding: 0;
   border-bottom: 0;
 }
