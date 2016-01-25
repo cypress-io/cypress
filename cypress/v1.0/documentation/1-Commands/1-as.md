@@ -14,7 +14,7 @@ Assign an alias to a route or DOM element for use later. Reference the alias lat
 | | |
 |--- | --- |
 | **Returns** | the DOM element or route being aliased  |
-| **Timeout** | the assertion will retry for the duration of the [Command Timeout](#section-global-options) |
+| **Timeout** | the alias will retry the chain of commands before the alias assignment for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
 
 ***
 

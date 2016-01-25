@@ -1,9 +1,18 @@
 slug: document
 excerpt: Get the document
 
+Get the document and work with its properties or methods.
+
+| | |
+|--- | --- |
+| **Returns** | the window.document object |
+| **Timeout** | the document will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+
+***
+
 # [cy.document()](#section-usage)
 
-Get the document and work with its properties or methods.
+Get the document.
 
 ***
 

@@ -1,9 +1,18 @@
 slug: end
 excerpt: End the command chain
 
+Ends the Cypress command chain and returns `null`. This is equivalent to the jQuery `end()` method.
+
+| | |
+|--- | --- |
+| **Returns** | null |
+| **Timeout** | cannot timeout |
+
+***
+
 # [cy.end()](#section-usage)
 
-Ends the Cypress command chain and returns `null`. This is equivalent to the jQuery `end()` method.
+End the command chain.
 
 ***
 

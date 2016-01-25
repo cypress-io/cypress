@@ -1,9 +1,18 @@
 slug: dblclick
-excerpt: Double-click on a subject
+excerpt: Double-click on an element
+
+Double-click on the element in the previous command in the chain.
+
+| | |
+|--- | --- |
+| **Returns** | the current subject for futher chaining. |
+| **Timeout** | the dblclick will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+
+***
 
 # [cy.dblclick()](#section-usage)
 
-Double-clicks the current subject.
+Double-click the current subject.
 
 ***
 

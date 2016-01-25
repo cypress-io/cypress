@@ -1,11 +1,18 @@
 slug: debug
 excerpt: Call debugger
 
+`cy.debug` logs the previous command in the command chain. It will also enable you to step through JavaScript code and examine or modify its state to help track down bugs.
+
+Make sure you have your Developer Tools open for `cy.debug` to hit the breakpoint.
+
+| | |
+|--- | --- |
+| **Returns** | the current subject for futher chaining. |
+| **Timeout** | cannot timeout |
+
+***
+
 # [cy.debug()](#section-usage)
-
-`cy.debug` will call `debugger` in JavaScript.
-
-Make sure you have your Chrome Dev Tools open for this to hit the breakpoint.
 
 ***
 

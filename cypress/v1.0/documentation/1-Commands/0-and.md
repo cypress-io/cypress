@@ -15,7 +15,7 @@ excerpt: Enables chaining multiple assertions together
 | | |
 |--- | --- |
 | **Returns** | the current subject (usually) for futher assertion chaining. |
-| **Timeout** | the assertion will retry for the duration of the [Command Timeout](#section-global-options) |
+| **Timeout** | the assertion will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
 
 ***
 

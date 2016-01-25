@@ -1,26 +1,31 @@
 slug: contains
-excerpt: Check to see if matching element contains text
+excerpt: Get an element that contains text
 
-# [cy.contains( *text* )](#section-text-usage)
+Get the element containing the text. Elements can contain *more* than the desired text and still match. Additionally, Cypress will prefer some elements over the deepest element found.
 
-Returns the deepest element containing the text. Elements can contain *more* than the desired text and still match.
-
-Additionally, Cypress will prefer some elements over the deepest element found. Preference order:
+**Preference order:**
 
 - `input[type='submit']`
 - `button`
 - `a`
 - `label`
 
-If Cypress does not find a matching element, it will continue to retry until the [`commandTimeout`](https://on.cypress.io/guides/configuration) has been reached.
+| | |
+|--- | --- |
+| **Returns** | the deepest DOM element containing the text  |
+| **Timeout** | the assertion will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+
+***
+
+# [cy.contains( *text* )](#section-text-usage)
+
+Get the deepest element containing the text.
 
 ***
 
 # [cy.contains( *selector*, *text* )](#section-selector-and-text-usage)
 
-Specify a selector to filter elements containing the text. Cypress will **ignore** it's default preference for the specified selector.
-
-Using a selector allows you to return more *shallow* elements in the tree which contain the specific text.
+Specify a selector to filter elements containing the text. Cypress will **ignore** it's default preference for the specified selector. Using a selector allows you to return more *shallow* elements in the tree which contain the specific text.
 
 ***
 

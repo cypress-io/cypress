@@ -216,7 +216,7 @@ The following chainers are available for your use:
 | match( *selector* ) | `expect($('#empty')).to.match(':empty')` |
 | contain( *text* ) | `expect($('#content')).to.contain('text')` |
 | descendents( *selector* ) | `expect($('#content')).to.have.descendants('div')` |
-| focus() | `expect($('#nonfocused')).not.have.focus()` |
+| focus() | `expect($('#nonfocused'))to.not.have.focus()` |
 
 You will commonly use these chainers after using DOM commands like: [`cy.get`](https://on.cypress.io/api/get), [`cy.contains`](https://on.cypress.io/api/contains), etc.
 
