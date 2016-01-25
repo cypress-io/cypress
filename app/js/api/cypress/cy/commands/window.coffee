@@ -1,5 +1,8 @@
 $Cypress.register "Window", (Cypress, _, $) ->
 
+  ## hold a global reference to defaults
+  viewportDefaults = null
+
   viewports = {
     "macbook-15" : "1440x900"
     "macbook-13" : "1280x800"
@@ -16,7 +19,25 @@ $Cypress.register "Window", (Cypress, _, $) ->
   validOrientations = ["landscape", "portrait"]
 
   Cypress.on "test:before:hooks", ->
-    Cypress.trigger "restore:viewport"
+    ## if we have viewportDefaults it means
+    ## something has changed the default and we
+    ## need to restore prior to running the next test
+    ## after which we simply null and wait for the
+    ## next viewport change
+    if d = viewportDefaults
+      triggerAndSetViewport.call(@, d.viewportWidth, d.viewportHeight)
+      viewportDefaults = null
+
+  triggerAndSetViewport = (width, height) ->
+    @Cypress.config("viewportWidth", width)
+    @Cypress.config("viewportHeight", height)
+
+    viewport = {viewportWidth: width, viewportHeight: height}
+
+    ## force our UI to change to the viewport
+    Cypress.trigger "viewport", viewport
+
+    return viewport
 
   Cypress.addParentCommand
     title: (options = {}) ->
@@ -164,12 +185,12 @@ $Cypress.register "Window", (Cypress, _, $) ->
         else
           throwErrBadArgs()
 
-      @Cypress.config("viewportWidth", width)
-      @Cypress.config("viewportHeight", height)
+      ## backup the previous viewport defaults
+      ## if they dont already exist!
+      if not viewportDefaults
+        viewportDefaults = _.pick(@Cypress.config(), "viewportWidth", "viewportHeight")
 
-      viewport = {viewportWidth: width, viewportHeight: height}
-
-      Cypress.trigger "viewport", viewport
+      viewport = triggerAndSetViewport.call(@, width, height)
 
       if options._log
         options._log.set(viewport)

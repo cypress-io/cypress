@@ -1,7 +1,5 @@
 @App.module "Entities", (Entities, App, Backbone, Marionette, $, _) ->
 
-  viewportDefaults = null
-
   class Entities.Iframe extends Entities.Model
     defaults: ->
       url: null
@@ -33,14 +31,6 @@
 
       @listenTo runner, "after:run", ->
         @isRunning(false)
-
-      @listenTo Cypress, "restore:viewport", =>
-        @setViewport(viewportDefaults) if viewportDefaults
-
-      @listenTo Cypress, "config", (obj) =>
-        ## store these permanently so we can continue to reset to them
-        ## before each test run so our viewport does not leak between each test
-        viewportDefaults = _(obj).pick("viewportHeight", "viewportWidth")
 
       @listenTo Cypress, "stop", =>
         @stop()
