@@ -8,6 +8,13 @@ body {
   word-wrap: break-word;
 }
 
+/*-------Tables---------*/
+
+.th:empty {
+  padding: 0;
+  border-bottom: 0;
+}
+
 /*-------Nav---------*/
 
 .header .searchbox {
