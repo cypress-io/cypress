@@ -17,6 +17,9 @@ $Cypress.Utils = do ($Cypress, _) ->
   }
 
   return {
+    warning: (msg) ->
+      console.warn("Cypress Warning: " + msg)
+
     cypressError: (err) ->
       err = new Error(err)
       err.name = "CypressError"

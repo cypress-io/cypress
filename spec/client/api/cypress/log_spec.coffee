@@ -264,7 +264,7 @@ describe "$Cypress.Log API", ->
         it "displays a deprecation warning", ->
           warn = @sandbox.spy console, "warn"
           @Cypress.command({})
-          expect(warn).to.be.calledWith "Cypress.command() is deprecated. Please update and use: Cypress.Log.command()"
+          expect(warn).to.be.calledWith "Cypress Warning: Cypress.command() is deprecated. Please update and use: Cypress.Log.command()"
 
       context "$Log.log", ->
         it "displays 0 argument", (done) ->

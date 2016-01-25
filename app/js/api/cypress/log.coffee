@@ -290,7 +290,7 @@ $Cypress.Log = do ($Cypress, _, Backbone) ->
 
   $Cypress.extend
     command: (obj = {}) ->
-      console.warn "Cypress.command() is deprecated. Please update and use: Cypress.Log.command()"
+      $Cypress.Utils.warning "Cypress.command() is deprecated. Please update and use: Cypress.Log.command()"
 
       $Log.command(obj)
 
