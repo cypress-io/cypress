@@ -1,6 +1,15 @@
 slug: children
 excerpt: Get the children of elements
 
+Get the children of the elements.
+
+| | |
+|--- | --- |
+| **Returns** | the current subject for futher chaining. |
+| **Timeout** | `cy.children` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+
+***
+
 # [cy.children()](#section-usage)
 
 Get the children of each element in the set of matched elements.

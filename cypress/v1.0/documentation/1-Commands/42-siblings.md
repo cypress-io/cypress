@@ -1,6 +1,15 @@
 slug: siblings
 excerpt: Get the siblings of elements
 
+Get the siblings of the elements.
+
+| | |
+|--- | --- |
+| **Returns** | the current subject for futher chaining. |
+| **Timeout** | `cy.siblings` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+
+***
+
 # [cy.siblings()](#section-usage)
 
 Get the siblings of each element in the set of matched elements.

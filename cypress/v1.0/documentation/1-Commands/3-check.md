@@ -8,7 +8,7 @@ Check the checkboxes or radios within the current subject.
 | | |
 |--- | --- |
 | **Returns** | the current subject for futher chaining. |
-| **Timeout** | `cy.check` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) or the duration of the `timeout` specified in the commands [options](#section-options). |
+| **Timeout** | `cy.check` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) or the duration of the `timeout` specified in the command's [options](#section-options). |
 
 ***
 

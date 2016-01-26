@@ -1,12 +1,6 @@
 slug: route
 excerpt: Route responses to matching requests
 
-# [cy.route( *url* )](#section-url-usage)
-
-Use `cy.route` to route responses to matching requests.
-
-Set a route matching the specific `url` which is not stubbed but can be waited on later.
-
 [block:callout]
 {
   "type": "info",
@@ -14,6 +8,25 @@ Set a route matching the specific `url` which is not stubbed but can be waited o
   "title": "New to Cypess?"
 }
 [/block]
+
+Use `cy.route` to route responses to matching requests.
+
+| | |
+|--- | --- |
+| **Returns** | the `route` as an object literal. |
+| **Timeout** | `cy.request` will wait for the response for the duration of the [responseTimeout](https://on.cypress.io/guides/configuration#section-network-options) or the [`timeout`](#section-options) passed in the options object of the command. |
+
+***
+
+# [cy.route( *url* )](#section-url-usage)
+
+Set a route matching the specific `url` which is not stubbed but can be waited on later. This will match `GET` request methods.
+
+***
+
+# [cy.route( *url*, *response* )](#section-url-and-response-usage)
+
+Set a route matching the `url` stubbed with the supplied `response`. This will match `GET` request methods. When stubbing the response for a route, [cy.server](https://on.cypress.io/api/server) must be started first.
 
 ***
 
@@ -23,23 +36,15 @@ Set a route matching the specific `method` and `url` which is not stubbed but ca
 
 ***
 
-# [cy.route( *url*, *response* )](#section-url-and-response-usage)
-
-Set a route matching the `url` stubbed with the supplied `response`.
-
-By default this will match `GET` request methods.
-
-***
-
 # [cy.route( *method*, *url*, *response* )](#section-method-url-and-response-usage)
 
-Set a route matching the `method` and `url` stubbed with the supplied `response`.
+Set a route matching the `method` and `url` stubbed with the supplied `response`. When stubbing the response for a route, [cy.server](https://on.cypress.io/api/server) must be started first.
 
 ***
 
 # Options
 
-Pass in an options object to change the default behavior of `cy.route`.
+Pass in an options object to change the default behavior of `cy.route`. By default `cy.route` inherits its options from [`cy.server`](https://on.cypress.io/api/server).
 
 **[cy.route( *options* )](#options-usage)**
 
@@ -54,7 +59,7 @@ Option | Default | Notes
 `onRequest` | `null` | callback function when a request is sent
 `onResponse` | `null` | callback function when a response is returned
 
-You can also set options for all `cy.wait`'s `requestTimeout` and `responseTimeout` globally in [configuration](https://on.cypress.io/guides/configuration).
+You can also set options for all [cy.wait](https://on.cypress.io/api/wait) `requestTimeout` and `responseTimeout` globally in [configuration](https://on.cypress.io/guides/configuration) to control how long to wait for the request and response of the supplied route.
 
 ***
 

@@ -1,10 +1,6 @@
 slug: server
 excerpt: Control the behavior of network requests and responses.
 
-# [cy.server()](#section-default-usage)
-
-Use `cy.server` to control the behavior of requests and responses. Start a server to begin routing responses to your requests.
-
 [block:callout]
 {
   "type": "info",
@@ -12,6 +8,14 @@ Use `cy.server` to control the behavior of requests and responses. Start a serve
   "title": "New to Cypess?"
 }
 [/block]
+
+Use `cy.server` to control the behavior of requests and responses.
+
+***
+
+# [cy.server()](#section-default-usage)
+
+Start a server to begin routing responses to your requests.
 
 ***
 

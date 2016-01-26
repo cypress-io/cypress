@@ -1,6 +1,17 @@
 slug: select
 excerpt: Select an option
 
+Select an option within a `<select>` element.
+
+**The following events are fired during check:** `mousedown`, `focus`, `mouseup`, `click`
+
+| | |
+|--- | --- |
+| **Returns** | the current subject for futher chaining. |
+| **Timeout** | `cy.select` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) or the duration of the `timeout` specified in the command's [options](#section-options). |
+
+***
+
 # [cy.select( *text* )](#section-text-usage)
 
 Select an option within a `<select>` element based on the text content of the option.
@@ -69,7 +80,7 @@ cy.get("select").select("456")
 
 # Command Log
 
-## Select the option with the text "Home Simpson"
+## Select the option with the text "Homer Simpson"
 
 ```javascript
 cy.get("select").select("Homer Simpson")

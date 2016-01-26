@@ -1,14 +1,6 @@
 slug: should
 excerpt: Make an assertion about the current subject
 
-# [cy.should( *chainers* )](#section-chainers-usage)
-
-`cy.should` makes assertions about the current subject. Implicitly assert about the current subject. Returns the existing current subject.
-
-When chaining multiple assertions together, [`cy.and`](https://on.cypress.io/api/and) sometimes reads better than `cy.should`.
-
-`cy.should` is identical to [`cy.and`](https://on.cypress.io/api/and).
-
 [block:callout]
 {
   "type": "info",
@@ -17,13 +9,24 @@ When chaining multiple assertions together, [`cy.and`](https://on.cypress.io/api
 }
 [/block]
 
+`cy.should` implicitly asserts about the current subject. `cy.should` is identical to [`cy.and`](https://on.cypress.io/api/and), but [`cy.and`](https://on.cypress.io/api/and) sometimes reads better when chaining multiple assertions together.
+
+| | |
+|--- | --- |
+| **Returns** | the current subject (usually) for futher assertion chaining. |
+| **Timeout** | the assertion will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+
+***
+
+# [cy.should( *chainers* )](#section-chainers-usage)
+
+Implicitly assert about the current subject.
+
 ***
 
 # [cy.should( *chainers*, *value* )](#section-chainers-with-value-usage)
 
-Implicitly assert a value about the current subject. Returns the existing current subject (usually).
-
-Some chai methods and chai-jQuery methods return a new (different) subject for chain-ability.
+Implicitly assert a value about the current subject. Returns the existing current subject (usually). Some chai methods and chai-jQuery methods return a new (different) subject for chain-ability.
 
 ***
 
@@ -31,15 +34,11 @@ Some chai methods and chai-jQuery methods return a new (different) subject for c
 
 Implicitly assert about the subject by calling a method and providing a value to that method.
 
-Returns the new assertion subject for further assertion chain-ability.
-
 ***
 
 # [cy.should( *function* )](#section-function-usage)
 
-Pass a function that can have any number of explicit assertions within it.
-
-Does not change the subject. Whatever was passed to the function is what is returned.
+Pass a function that can have any number of explicit assertions within it. Does not change the subject. Whatever was passed to the function is what is returned.
 
 ***
 

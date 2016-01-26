@@ -1,31 +1,36 @@
 slug: request
 excerpt: Make XHR request
 
-# [cy.request( *url* )](#section-url-usage)
-
-Makes a `GET` request using the url.
-
 Use `cy.request` to make XHR requests. Great for talking to an external endpoint before, during, or after your tests for seeding, querying records, or API testing.
 
-`cy.request` always returns the `response` as an object literal.
+| | |
+|--- | --- |
+| **Returns** | the `response` as an object literal. |
+| **Timeout** | `cy.request` will wait for the response for the duration of the [responseTimeout](https://on.cypress.io/guides/configuration#section-network-options) or the [`timeout`](#section-options) passed in the options object of the command. |
 
 ***
 
-# [cy.request( *method*, *url* )](#section-method-and-url-usage)
+# [cy.request( *url* )](#section-url-usage)
 
-Make a request using the provided method to the url.
-
-***
-
-# [cy.request( *method*, *url*, *body* )](#section-method-and-url-and-body-usage)
-
-Additionally pass in the request `body` as a `String` or `Object Literal`. Cypress will set the `Accepts` request header and serialize the response body by its `Content-Type`.
+Makes a `GET` request using the specified url.
 
 ***
 
 # [cy.request( *url*, *body* )](#section-url-and-body-usage)
 
 Make a `GET` request to the provided url with the provided body.
+
+***
+
+# [cy.request( *method*, *url* )](#section-method-and-url-usage)
+
+Make a request using the provided method to the specified url.
+
+***
+
+# [cy.request( *method*, *url*, *body* )](#section-method-and-url-and-body-usage)
+
+Additionally pass in the request `body` as a `String` or `Object Literal`. Cypress will set the `Accepts` request header and serialize the response body by its `Content-Type`.
 
 ***
 
