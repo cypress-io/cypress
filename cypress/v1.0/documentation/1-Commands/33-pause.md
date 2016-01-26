@@ -1,9 +1,18 @@
 slug: pause
 excerpt: Pause command
 
+`cy.pause` will stop command execution and allow you the ability to interact with your app, resume commands when you're ready, or step into the next command.
+
+| | |
+|--- | --- |
+| **Returns** | the current subject for futher chaining. |
+| **Timeout** | cannot timeout |
+
+***
+
 # [cy.pause()](#section-usage)
 
-`cy.pause` will stop command execution and allow you the ability to interact with your app, resume commands when you're ready, or step into the next command.
+Stop command execution at the current command.
 
 ***
 

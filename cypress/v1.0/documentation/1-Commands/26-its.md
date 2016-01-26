@@ -1,12 +1,20 @@
 slug: its
 excerpt: Call properties on the current subject
 
+`cy.its` calls regular properties on the current subject.
+
+If you want to call a property that is a function on the current subject, use [`cy.invoke`](https://on.cypress.io/api/invoke).
+
+| | |
+|--- | --- |
+| **Returns** | the property |
+| **Timeout** | cannot timeout |
+
+***
+
 # [cy.its( *propertyName* )](#section-usage)
 
-`cy.its` calls properties on the current subject and returns that new value.
-
-`cy.its` is identical to [`cy.invoke`](https://on.cypress.io/api/invoke), which reads better when invoking function properties.
-
+Invokes the function with the specified name
 
 ***
 

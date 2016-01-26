@@ -1,6 +1,17 @@
 slug: uncheck
 excerpt: Unselect a checkbox or radio
 
+Unchecks the checkboxes or radios within the current subject.
+
+**The following events are fired during uncheck:** `mousedown`, `focus`, `mouseup`, `click`
+
+| | |
+|--- | --- |
+| **Returns** | the current subject for futher chaining. |
+| **Timeout** | `cy.uncheck` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) or the duration of the `timeout` specified in the commands [options](#section-options). |
+
+***
+
 # [cy.uncheck()](#section-usage)
 
 Unchecks checkboxes or radios. Triggers events associated with check.

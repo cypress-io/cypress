@@ -1,6 +1,15 @@
 slug: parents
 excerpt: Get the parents of elements
 
+Get the parents of the elements.
+
+| | |
+|--- | --- |
+| **Returns** | the current subject for futher chaining. |
+| **Timeout** | `cy.parents` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+
+***
+
 # [cy.parents()](#section-usage)
 
 Get the ancestors of each element in the current set of matched elements.

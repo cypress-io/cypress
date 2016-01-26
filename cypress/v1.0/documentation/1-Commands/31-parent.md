@@ -1,5 +1,14 @@
 slug: parent
-excerpt: Get the parent of elements
+excerpt: Get the parent of the elements
+
+Get the parent of the elements.
+
+| | |
+|--- | --- |
+| **Returns** | the current subject for futher chaining. |
+| **Timeout** | `cy.parent` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+
+***
 
 # [cy.parent()](#section-usage)
 

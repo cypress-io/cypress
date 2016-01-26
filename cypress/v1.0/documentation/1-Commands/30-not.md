@@ -1,9 +1,18 @@
 slug: not
 excerpt: Remove elements from set
 
+Remove elements from the set of elements. Opposite of [`cy.filter()`](https://on.cypress.io/api/filter)
+
+| | |
+|--- | --- |
+| **Returns** | the current subject for futher chaining. |
+| **Timeout** | `cy.not` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+
+***
+
 # [cy.not( *selector* )](#section-selector-usage)
 
-Remove elements from the set of matched elements. Opposite of [`cy.filter()`](https://on.cypress.io/api/filter)
+Remove the element(s) by it's selector from the elements
 
 ***
 

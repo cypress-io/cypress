@@ -1,5 +1,14 @@
 slug: reload
-excerpt: Refresh the page
+excerpt: Reload the page
+
+Reload the resource from the current URL.
+
+| | |
+|--- | --- |
+| **Returns** | the current subject for futher chaining. |
+| **Timeout** | `cy.prev` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+
+***
 
 # [cy.reload()](#section-usage)
 
@@ -44,6 +53,24 @@ cy
   .visit("http://localhost:3000/admin")
   .reload(true)
 ```
+
+***
+
+# Command Log
+
+## Reload the page
+
+```javascript
+cy.reload()
+```
+
+The commands above will display in the command log as:
+
+![screen shot 2016-01-25 at 6 07 14 pm](https://cloud.githubusercontent.com/assets/1271364/12567711/ace7f1cc-c38e-11e5-9427-f087f9f0fba0.png)
+
+When clicking on `reload` within the command log, the console outputs the following:
+
+![screen shot 2016-01-25 at 6 07 35 pm](https://cloud.githubusercontent.com/assets/1271364/12567712/b0590238-c38e-11e5-9833-9f3a27fd02ae.png)
 
 ***
 

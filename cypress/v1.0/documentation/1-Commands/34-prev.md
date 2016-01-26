@@ -1,6 +1,15 @@
 slug: prev
 excerpt: Get the previous sibling of elements
 
+Get the immediately preceding sibling of each element in the set of the elements.
+
+| | |
+|--- | --- |
+| **Returns** | the current subject for futher chaining. |
+| **Timeout** | `cy.prev` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+
+***
+
 # [cy.prev()](#section-usage)
 
 Get the immediately preceding sibling of each element in the set of matched elements.

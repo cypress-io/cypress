@@ -1,17 +1,9 @@
 slug: location
 excerpt: Get window.location
 
-# [cy.location()](#section-usage)
+Get the `window.location`.
 
-Returns an object literal that matches the `window.location` spec.
-
-Given a remote URL of:
-
-```
-http://localhost:8000/app/index.html?q=brian#/users/123/edit
-```
-
-An object would be returned with the following properties:
+Given a remote URL of `http://localhost:8000/app/index.html?q=dan#/users/123/edit`, an object would be returned with the following properties:
 
 Key | Type | Returns
 --- | --- | ----
@@ -25,6 +17,17 @@ Key | Type | Returns
 `protocol` | string | http:
 `search` | string | ?q=brian
 `toString` | function | http://localhost:8000/app/index.html?q=brian#/users/123/edit
+
+| | |
+|--- | --- |
+| **Returns** | location object detailed above |
+| **Timeout** | cannot timeout |
+
+***
+
+# [cy.location()](#section-usage)
+
+Get the `window.location`
 
 ***
 
@@ -42,7 +45,7 @@ Option | Default | Notes
 
 # Usage
 
-## Asset that a redirect works
+## Assert that a redirect works
 
 ```javascript
 // we should be redirected to the login page
@@ -91,13 +94,9 @@ cy.location().then(function(location){
 })
 ```
 
-Cypress automatically normalizes the `cy.location()` command and strips out extrenuous values and properties found in `window.location`.
+Cypress automatically normalizes the `cy.location()` command and strips out extrenuous values and properties found in `window.location`. Also the object literal returned by `cy.location()` is just a basic object literal, not the special `window.location` object.
 
-Also the object literal returned by `cy.location()` is just a basic object literal, not the special `window.location` object.
-
-When changing properties on the real `window.location` object, it will force the browser to navigate away.
-
-In Cypress, the object we returned is a plain object, and changing or affecting its properties will have no effect on navigation.
+When changing properties on the real `window.location` object, it will force the browser to navigate away. In Cypress, the object we returned is a plain object, and changing or affecting its properties will have no effect on navigation.
 
 ***
 

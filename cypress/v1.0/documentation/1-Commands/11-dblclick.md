@@ -3,6 +3,8 @@ excerpt: Double-click on an element
 
 Double-click on the element in the previous command in the chain.
 
+**The following events are fired during dblclick:** `dblclick`
+
 | | |
 |--- | --- |
 | **Returns** | the current subject for futher chaining. |

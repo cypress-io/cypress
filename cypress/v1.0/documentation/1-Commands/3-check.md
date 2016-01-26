@@ -1,15 +1,26 @@
 slug: check
 excerpt: Select a checkbox or radio
 
+Check the checkboxes or radios within the current subject.
+
+**The following events are fired during check:** `mousedown`, `focus`, `mouseup`, `click`
+
+| | |
+|--- | --- |
+| **Returns** | the current subject for futher chaining. |
+| **Timeout** | `cy.check` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) or the duration of the `timeout` specified in the commands [options](#section-options). |
+
+***
+
 # [cy.check()](#section-usage)
 
-Checks checkboxes or radios. Triggers events associated with check.
+Checks checkboxes or radios.
 
 ***
 
 # [cy.check( *values* )](#section-values-usage)
 
-Checks the checkboxes or radios matching the values. Triggers events associated with check.
+Checks the checkboxes or radios with the matching values.
 
 ***
 

@@ -1,21 +1,32 @@
 slug: invoke
 excerpt: Call properties on the current subject
 
-# [cy.invoke( *functionName* )](#section-function-usage)
-
 `cy.invoke` invokes properties that are functions on the current subject. This works similar to Underscore's `_.invoke` function.
 
-`cy.invoke` is identical to [`cy.its`](https://on.cypress.io/api/its). [`cy.its`](https://on.cypress.io/api/its) sometimes reads better when calling regular properties that are not functions.
+If you want to call a regular property that is not a function on the current subject, use [`cy.its`](https://on.cypress.io/api/its).
+
+| | |
+|--- | --- |
+| **Returns** | the return of the invoked property |
+| **Timeout** | cannot timeout |
+
+***
+
+# [cy.invoke( *functionName* )](#section-function-usage)
+
+Invokes the function with the specified name
 
 ***
 
 # [cy.invoke( *functionName*, \**arguments* )](#section-function-with-arguments-usage)
 
-Invokes the function and forwards any additional arguments to the function call. There are no limits to the number of arguments.
+Invokes the function with the specified name and forwards any additional arguments to the function call. There are no limits to the number of arguments.
 
 ***
 
 # Function Usage
+
+## Assert on a function after invoke
 
 ```javascript
 var fn = function(){
@@ -25,7 +36,7 @@ var fn = function(){
 cy.wrap({foo: fn}).invoke("foo").should("eq", "bar") // true
 ```
 
-Properties that are functions are invoked
+## Properties that are functions are invoked
 
 ```javascript
 // force a hidden div to be 'display: block'
@@ -40,7 +51,7 @@ cy
 
 ***
 
-Useful for 3rd party plugins
+## Useful for 3rd party plugins
 
 ```javascript
 // as a slightly verbose approach
@@ -52,7 +63,7 @@ cy.get("input").invoke("getKendoDropDownList").then(function(dropDownList){
 })
 ```
 
-We can rewrite the previous example in a more terse way and add an assertion.
+## We can rewrite the previous example in a more terse way and add an assertion.
 
 ```javascript
 cy
@@ -66,6 +77,8 @@ cy
 
 # Function with Arguments Usage
 
+## Send specific arguments to the function
+
 ```javascript
 var fn = function(a, b, c){
   return a + b + c
@@ -78,7 +91,7 @@ cy
     .and("be.lt", 20) // true
 ```
 
-Arguments are automatically forwarded to the function
+## Arguments are automatically forwarded to the function
 
 ```javascript
 cy

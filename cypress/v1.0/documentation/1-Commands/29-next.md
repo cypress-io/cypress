@@ -1,15 +1,24 @@
 slug: next
-excerpt: Get the next sibling of elements
+excerpt: Get the next sibling of the elements
+
+Get the immediately following sibling of each element in the set of matched elements.
+
+| | |
+|--- | --- |
+| **Returns** | the current subject for futher chaining. |
+| **Timeout** | `cy.next` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+
+***
 
 # [cy.next()](#section-usage)
 
-Get the immediately following sibling of each element in the set of matched elements.
+Get the next sibling of the elements.
 
 ***
 
 # [cy.next( *selector* )](#section-selector-usage)
 
-Get the immediately following sibling of each element in the set of matched elements. If a selector is provided, it retrieves the next sibling only if it matches that selector.
+When a selector is provided, it retrieves the next sibling only if it matches that selector.
 
 ***
 

@@ -1,6 +1,15 @@
 slug: last
 excerpt: Get the last element
 
+Get the last element within a set of elements.
+
+| | |
+|--- | --- |
+| **Returns** | the current subject for futher chaining. |
+| **Timeout** | `cy.last` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+
+***
+
 # [cy.last()](#section-usage)
 
 Reduce the set of matched elements to the final one in the set.
