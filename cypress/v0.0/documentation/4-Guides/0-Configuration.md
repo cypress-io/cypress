@@ -27,16 +27,16 @@ Option | Default | Description
 ----- | ---- | ----
 `port` | `2020` | Port to use for Cypress
 `env` | `{}` | [Environment Variables](https://on.cypress.io/guides/environment-variables)
-`commandTimeout` | `4000` | Time (ms) to wait until commands time out
+`commandTimeout` | `4000` | Time, in milliseconds, to wait until commands are considered timed out
 
 # Network Options
 
 Option | Default | Description
 ----- | ---- | ----
 `baseUrl` | `null` | Base url to prefix to [`cy.visit`](https://on.cypress.io/api/visit) or [`cy.request`](https://on.cypress.io/api/request) command
-`visitTimeout` | `30000` | Time (ms) to wait until [`cy.visit`](https://on.cypress.io/api/visit) times out
-`requestTimeout` | `5000` | Time (ms) to wait for an XHR request during [`cy.wait`](wait) command
-`responseTimeout` | `20000` | Time (ms) to wait until a response for [`cy.request`](request) and [`cy.wait`](https://on.cypress.io/api/wait) commands
+`visitTimeout` | `30000` | Time, in milliseconds, to wait until [`cy.visit`](https://on.cypress.io/api/visit) times out
+`requestTimeout` | `5000` | Time, in milliseconds, to wait for an XHR request during [`cy.wait`](wait) command
+`responseTimeout` | `20000` | Time, in milliseconds, to wait until a response for [`cy.request`](request) and [`cy.wait`](https://on.cypress.io/api/wait) commands
 
 # Directory Options
 
