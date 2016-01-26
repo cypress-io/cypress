@@ -1,6 +1,15 @@
 slug: wait
 excerpt: Wait for a specific amount of time or resource to resolve
 
+Use `cy.wait` to wait for a number of milliseconds or for a resource to resolve.
+
+| | |
+|--- | --- |
+| **Returns** | the current subject if waiting for number of milliseconds, the xhr object if waiting for a route |
+| **Timeout** | `cy.wait` will wait for the request the duration of the [requestTimeout](https://on.cypress.io/guides/configuration#section-network-options) and wait for the response for the duration of the [responseTimeout](https://on.cypress.io/guides/configuration#section-network-options) or it will wait for both the duration request and response for the `timeout` specified in the command's [options](#section-options).|
+
+***
+
 # [cy.wait( *number* )](#section-number-usage)
 
 Wait a specific amount of `ms` before resolving and continuing onto the next command.
@@ -150,13 +159,13 @@ cy
 
 `cy.wait` goes through two separate "waiting" periods for a matching XHR.
 
-The first period waits for a matching request to leave the browser. This duration is configured by [`requestTimeout`](https://on.cypress.io/guides/configuration) - which has a default of `5000` ms.
+The first period waits for a matching request to leave the browser. This duration is configured by [`requestTimeout`](https://on.cypress.io/guides/configuration#section-network-options) - which has a default of `5000` ms.
 
 This means that when you begin waiting for an XHR, Cypress will wait up to 5 seconds for a matching XHR to be created. If no matching XHR is found, you will get an error message that looks like this:
 
 ![screen shot 2015-12-21 at 5 00 09 pm](https://cloud.githubusercontent.com/assets/1268976/11942578/8e7cba50-a805-11e5-805c-614f8640fbcc.png)
 
-Once Cypress detects that a matching XHR has begun its request it then switches over to the 2nd waiting period. This duration is configured by [`responseTimeout`](https://on.cypress.io/guides/configuration) - which has a default of `20000` ms.
+Once Cypress detects that a matching XHR has begun its request it then switches over to the 2nd waiting period. This duration is configured by [`responseTimeout`](https://on.cypress.io/guides/configuration#section-network-options) - which has a default of `20000` ms.
 
 This means Cypress will now wait up to 20 seconds for the external server to respond to this XHR. If no response is detected, you will get an error message that looks like this:
 

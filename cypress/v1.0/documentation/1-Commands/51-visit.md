@@ -1,11 +1,20 @@
 slug: visit
 excerpt: Visit a remote url
 
+Visit a remote url. This will most likely be the first command you run. `cy.visit(...)` resolves when the remote page fires its `load` event.
+
+Visit is prefixed with `baseUrl`. You can configure the `baseUrl` in the [Network Options](https://on.cypress.io/guides/configuration#section-network-options) to prevent repeating yourself in every single `cy.visit`.
+
+| | |
+|--- | --- |
+| **Returns** | the remote page's window object |
+| **Timeout** | `cy.visit` will retry for the duration of the [visitTimeout](https://on.cypress.io/guides/configuration#section-network-options) or the duration of the `timeout` specified in the command's [options](#section-options).|
+
+***
+
 # [cy.visit( *url* )](#section-usage)
 
-Visit a remote url. This will most likely be the first command you run.
-
-`cy.visit(...)` resolves when the remote page fires its `load` event.
+Visit the specified url passed as a string.
 
 ***
 
@@ -22,7 +31,7 @@ Option | Default | Notes
 `timeout`      | `20000` | Total time to retry the visit
 `log` | `true` | Display command in command log
 
-You can also set options for all `cy.visit`'s `visitTimeout` and `baseUrl` globally in [configuration](https://on.cypress.io/guides/configuration).
+You can also set options for all `cy.visit` `visitTimeout` and `baseUrl` globally in [configuration](https://on.cypress.io/guides/configuration).
 
 ***
 

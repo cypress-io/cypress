@@ -1,21 +1,24 @@
 slug: viewport
 excerpt: Change the screen size of your application
 
+Use `cy.viewport` to control the screen size and orientation of your application. This command is useful for when you need to test your application in a specific width or height, such as responsive applications or applications utilizing media queries. `cy.viewport` width and height must be between 200px and 3000px.
+
+| | |
+|--- | --- |
+| **Returns** | null |
+| **Timeout** | cannot timeout|
+
+***
+
 # [cy.viewport( *width*, *height* )](#section-usage)
 
-Use `cy.viewport` to control the screen size of your application.
-
-Resizes the viewport to the specified dimensions in pixels.
-
-This command is useful for when you need to test your application in a specific width or height, such as responsive applications or applications utilizing media queries.
-
-`cy.viewport` returns `null`.
+Resize the viewport to the specified dimensions in pixels.
 
 ***
 
 # [cy.viewport( *preset*, *orientation* )](#section-preset-usage)
 
-Viewport supports the following presets (in pixels):
+Resize the viewport to a preset dimension. Viewport supports the following presets (in pixels):
 
 | Preset | width | height |
 | ----------- | ----- | ------ |
@@ -30,9 +33,7 @@ Viewport supports the following presets (in pixels):
 | `iphone-4`    | 320   | 480    |
 | `iphone-3`    | 320   | 480    |
 
-The **default orientation** is `portrait`.
-
-Pass `landscape` as the orientation to reverse the width/height.
+The **default orientation** is `portrait`. Pass `landscape` as the orientation to reverse the width/height.
 
 ***
 

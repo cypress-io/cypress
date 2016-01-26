@@ -1,6 +1,15 @@
 slug: title
 excerpt: Get the title of the document
 
+Get the title of the document.
+
+| | |
+|--- | --- |
+| **Returns** | the document's title as a string |
+| **Timeout** | `cy.title` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+
+***
+
 # [cy.title()](#section-usage)
 
 Get the title of the document.

@@ -1,18 +1,24 @@
 slug: click
 excerpt: Click the current DOM subject
 
-**The following events are fired during click:** `mousedown`, `focus`, `mouseup`, `click`
-
-
-# [cy.click()](#section-usage)
-
-Like all child commands, `click` returns the current subject for further chaining.
-
-The DOM subject must be in a "clickable" state prior to the click event happening (It must be visible and not covered by another element). Click will automatically wait and retry until the element becomes "clickable".
+`cy.click` is used to click an element.  The DOM element must be in a "clickable" state prior to the click event happening (it must be visible and not covered by another element).
 
 Cypress automatically scrolls the element into view prior to attempting the click.
 
-By default, the click is issued at the exact center of the element. You can pass a `position` option to override this setting.
+By default, the click is issued at the exact center of the element. You can pass a [`position`](#section-position-usage) option to override this setting.
+
+**The following events are fired during click:** `mousedown`, `focus`, `mouseup`, `click`
+
+| | |
+|--- | --- |
+| **Returns** | the current subject for futher chaining. |
+| **Timeout** | `cy.click` will wait and retry until the element is 'clickable' for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) or the duration of the `timeout` specified in the command's [options](#section-options). |
+
+***
+
+# [cy.click()](#section-usage)
+
+Click the current subject.
 
 ***
 
@@ -131,6 +137,12 @@ cy.get("button").click("bottomLeft", {force: true})
 
 ```javascript
 cy.get("button").click(5, 60, {force: true})
+```
+
+## Click all buttons found on the page
+
+```javascript
+cy.get("button").click({multiple: true})
 ```
 
 ***

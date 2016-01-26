@@ -1,6 +1,15 @@
 slug: clearlocalstorage
 excerpt: Clear all data in local storage.
 
+Clears all data in local storage.
+
+| | |
+|--- | --- |
+| **Returns** | the remote local storage object |
+| **Timeout** | cannot timeout |
+
+***
+
 # [cy.clearLocalStorage()](#section-usage)
 
 Clear all data in local storage.

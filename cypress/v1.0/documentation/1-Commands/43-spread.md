@@ -6,15 +6,19 @@ The spread command allows an expression to be expanded in places where multiple 
 | | |
 |--- | --- |
 | **Returns** | the return value the spead |
-| **Timeout** | `cy.siblings` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+| **Timeout** | cannot timeout |
 
 ***
 
 # [cy.spread()](#section-usage)
 
+Expand an array of arguments.
+
 ***
 
 # Usage
+
+## Expand the array of aliased routes
 
 ```javascript
 cy
@@ -22,7 +26,7 @@ cy
   .route(/users/).as("getUsers")
   .route(/activities/).as("getActivities")
   .route(/comments/).as("getComments")
-  .wait(["@getUsers", "@getActivities", "getComments"])
+  .wait(["@getUsers", "@getActivities", "@getComments"])
   .spread(function(getUsers, getActivities, getComments){
     // each XHR is now an individual argument
   })

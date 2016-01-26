@@ -1,9 +1,18 @@
 slug: within
 excerpt: Set the scope to the current subject
 
+Reset the root scope to the current subject and pass that as an argument to the callback function.
+
+| | |
+|--- | --- |
+| **Returns** | the current subject for futher chaining. |
+| **Timeout** | cannot timeout |
+
+***
+
 # [cy.within( *function* )](#section-usage)
 
-Set the scope to the current subject
+Set the root scope to the current subject
 
 ***
 

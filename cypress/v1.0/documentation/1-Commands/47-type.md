@@ -1,11 +1,9 @@
 slug: type
 excerpt: Type into an element
 
-# [cy.type( *text* )](#section-usage)
-
 Types into the current DOM subject.
 
-Prior to typing, if the element isn't currently focused, Cypress will issue a [click](https://on.cypress.io/api/click) on the elemtn, which will cause the element to receive focus.
+Prior to typing, if the element isn't currently focused, Cypress will issue a [click](https://on.cypress.io/api/click) on the element, which will cause the element to receive focus.
 
 Text may include these special character sequences:
 
@@ -19,6 +17,23 @@ Sequence | Notes
 `{leftarrow}` | Moves cursor left
 `{rightarrow}` | Moves cursor right
 `{selectall}` | Selects all text by creating a `selection range`
+
+**The following events are fired during type:** `keydown`, `keypress`, `textInput`, `input`, `keyup`.
+
+`beforeinput` is *not* fired even though it is in the spec because no browser has adopted it.
+
+Additionally `change` events will be fired either when the `{enter}` key is pressed (and the value has changed since the last focus event), or whenever the element loses focus.
+
+| | |
+|--- | --- |
+| **Returns** | the element that was typed into |
+| **Timeout** | `cy.type` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) or the duration of the `timeout` specified in the command's [options](#section-options). |
+
+***
+
+# [cy.type( *text* )](#section-usage)
+
+Types the text provided into the current DOM subject.
 
 ***
 

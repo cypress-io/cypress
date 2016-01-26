@@ -1,13 +1,29 @@
 slug: clear
 excerpt: Clear a value of an input or textarea
 
-# [cy.clear()](#section-usage)
 
 Clears a value of an `<input>` or `<textarea>`. Under the hood this is actually a shortcut for writing:
 
 ```javascript
 cy.type("{selectall}{backspace}")
 ```
+
+Prior to clearing, if the element isn't currently focused, Cypress will issue a [click](https://on.cypress.io/api/click) on the element, which will cause the element to receive focus.
+
+**The following events are fired during clear:** `keydown`, `keypress`, `textInput`, `input`, `keyup`.
+
+`beforeinput` is *not* fired even though it is in the spec because no browser has adopted it.
+
+| | |
+|--- | --- |
+| **Returns** | the element that was typed into |
+| **Timeout** | `cy.clear` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) or the duration of the `timeout` specified in the command's [options](#section-options).|
+
+***
+
+# [cy.clear()](#section-usage)
+
+Clears the value of an `<input>` or `<textarea>`.
 
 ***
 
@@ -20,6 +36,8 @@ Pass in an options object to change the default behavior of `cy.clear`.
 Option | Default | Notes
 --- | --- | ---
 `force` | `false` | Forces clear, disables error checking prior to clear
+`interval` | `16` | Interval which to retry type
+`timeout` | `4000` | Total time to retry the type
 `log` | `true` | Display command in command log
 
 ***

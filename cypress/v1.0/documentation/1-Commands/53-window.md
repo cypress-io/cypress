@@ -1,6 +1,15 @@
 slug: window
 excerpt: Get global window object
 
+Get the global window object of the remote application [visited](https://on.cypress.io/api/visit).
+
+| | |
+|--- | --- |
+| **Returns** | the window object |
+| **Timeout** | `cy.window` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+
+***
+
 # [cy.window()](#section-usage)
 
 Returns the global window object of the remote application you've visited.
@@ -54,4 +63,5 @@ When clicking on `window` within the command log, the console outputs the follow
 
 # Related
 
+- [visit](https://on.cypress.io/api/visit)
 - [document](https://on.cypress.io/api/document)

@@ -1,9 +1,18 @@
 slug: url
 excerpt: Get the current URL
 
+Get the current URL. `cy.url()` uses [`cy.location.href`](https://on.cypress.io/api/location) under the hood.
+
+| | |
+|--- | --- |
+| **Returns** | the current URL as a string |
+| **Timeout** | cannot timeout|
+
+***
+
 # [cy.url()](#section-usage)
 
-Returns the current URL as a string.
+Get the current URL.
 
 ***
 

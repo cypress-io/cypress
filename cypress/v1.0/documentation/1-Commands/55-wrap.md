@@ -1,6 +1,15 @@
 slug: wrap
 excerpt: Invoke the function on the current subject
 
+Return the object passed into `cy.wrap`.
+
+| | |
+|--- | --- |
+| **Returns** | the object passed into `cy.wrap` |
+| **Timeout** | cannot timeout |
+
+***
+
 # [cy.wrap( *object* )](#section-usage)
 
 Set the current subject to the object
