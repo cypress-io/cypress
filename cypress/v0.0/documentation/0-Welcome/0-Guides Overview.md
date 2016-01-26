@@ -3,7 +3,13 @@ excerpt: Cypress helps you write automated tests for the web
 
 Cypress is a test engine that runs unit and integration tests in your browser. It aims to reduce the mental effort required to write tests. Cypress works in your typical development workflow (in the browser) and allows you to see your application while it's being tested. This enables you to practice true test driven development since there is no context shift between testing and development.
 
-**New to Cypress?** Read about our [Our Goals](https://on.cypress.io/guides/our-goals).
+[block:callout]
+{
+  "type": "info",
+  "body": "Read about our [Our Goals](https://on.cypress.io/guides/our-goals).",
+  "title": "New to Cypess?"
+}
+[/block]
 
 ---
 

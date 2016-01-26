@@ -8,10 +8,52 @@ body {
   word-wrap: break-word;
 }
 
+
+#landing-page h1 {
+  font-size: 2em;
+  font-weight: bold;
+  margin-top: 2em;
+  margin-bottom: 5px;
+}
+
+#landing-page p {
+  color: #888;
+  margin-bottom: 1em;
+}
+
+
+#landing-page h4 {
+  border-bottom: 1px solid #ddd;
+  font-weight: bold;
+  padding-bottom: 10px;
+  margin-top: 2em;
+}
+
+#landing-page ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+#landing-page ul>li {
+  line-height: 2em;  ;
+}
+
+#landing-page .row>.col-xs-6:first-child {
+  border-right: 1px solid #ddd;
+}
+
 /*-------Tables---------*/
+
+.docs-content thead>tr {
+  border-bottom: 1px solid #ccc;
+}
 
 .docs-content th:empty {
   padding: 0;
+  border-bottom: 0;
+}
+
+.docs-content th {
   border-bottom: 0;
 }
 

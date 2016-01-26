@@ -1,11 +1,19 @@
 slug: overview
 excerpt: Cypress helps you write automated tests for the web
 
-**New to Cypress?** Read through our [Guides](https://on.cypress.io/guides/overview) first.
+[block:callout]
+{
+  "type": "info",
+  "body": "Read through our [Guides](https://on.cypress.io/guides/overview) first.",
+  "title": "New to Cypess?"
+}
+[/block]
 
 ---
 
 # Commands
+
+Commands drive your tests in the browser like a real user would. They let you perform actions like typing, clicking, xhr requests, and can also assert things like "my button should be disabled".
 
 | Navigation | |
 | -------------------- | -- |
@@ -115,6 +123,8 @@ excerpt: Cypress helps you write automated tests for the web
 
 # Utilities
 
+Utilities give you access to methods from other commonly used libraries.
+
 | Commands | |
 | -------------------- | -- |
 | [_](https://on.cypress.io/api/underscore) | Call any Underscore method |
@@ -124,6 +134,8 @@ excerpt: Cypress helps you write automated tests for the web
 | [Promise](https://on.cypress.io/api/Promise) | Instantiate a bluebird promise |
 
 # Cypress API
+
+The Cypress API enables you to configure the behavior of how Cypress works internally. You can do things like access Environment Variables, change configuration, create custom commands, and more.
 
 | Commands | |
 | -------------------- | -- |
