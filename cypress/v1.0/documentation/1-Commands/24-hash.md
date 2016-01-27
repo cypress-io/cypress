@@ -34,7 +34,7 @@ Option | Default | Notes
 ## Assert that the hash is `#/users/1` given the remote URL: `http://localhost:8000/app/#/users/1`
 
 ```javascript
-// Hash returns `#/users/1`
+// Hash returns #/users/1
 cy.hash().should("eq", "#/users/1") // => true
 ```
 

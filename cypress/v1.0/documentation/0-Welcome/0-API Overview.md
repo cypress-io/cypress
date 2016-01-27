@@ -9,8 +9,6 @@ excerpt: Our API provides commands and utilities to drive your tests in the brow
 }
 [/block]
 
----
-
 # Commands
 
 Commands drive your tests in the browser like a real user would. They let you perform actions like typing, clicking, xhr requests, and can also assert things like "my button should be disabled".
@@ -62,7 +60,7 @@ Commands drive your tests in the browser like a real user would. They let you pe
 | [type](https://on.cypress.io/api/type) | Type into a DOM element |
 | [uncheck](https://on.cypress.io/api/uncheck) | Type into a DOM element |
 
-| Network Requests (XHR / AJAX) | |
+| Network Requests | |
 | -------------------- | -- |
 | [request](https://on.cypress.io/api/request) | Make XHR request |
 | [route](https://on.cypress.io/api/route) | Route responses to matching requests |

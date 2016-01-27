@@ -67,11 +67,11 @@ cy.reload()
 
 The commands above will display in the command log as:
 
-![screen shot 2016-01-25 at 6 07 14 pm](https://cloud.githubusercontent.com/assets/1271364/12567711/ace7f1cc-c38e-11e5-9427-f087f9f0fba0.png)
+![screen shot 2016-01-27 at 2 49 44 pm](https://cloud.githubusercontent.com/assets/1271364/12626196/6deb6fd0-c505-11e5-8803-cd2998ec0a12.png)
 
-When clicking on `reload` within the command log, the console outputs the following:
+When clicking on `cy.reload` within the command log, the console outputs the following:
 
-![screen shot 2016-01-25 at 6 07 35 pm](https://cloud.githubusercontent.com/assets/1271364/12567712/b0590238-c38e-11e5-9833-9f3a27fd02ae.png)
+![screen shot 2016-01-27 at 2 50 01 pm](https://cloud.githubusercontent.com/assets/1271364/12626199/71a62ea8-c505-11e5-97cf-e7e4b92015e3.png)
 
 ***
 

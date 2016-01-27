@@ -177,7 +177,7 @@ When stubbing a response, you typically need to manage potentially large and com
 cy
   .server()
 
-   // we set the response to be the `activites.json` fixture
+   // we set the response to be the activites.json fixture
   .route("GET", /activities/, "fixture:activities.json")
 ```
 
@@ -289,7 +289,7 @@ cy
   .get("#autocomplete").type("Book")
 
   // this yields us the XHR object which includes
-  // fields for `request`, `response`, `url`, `method`, etc
+  // fields for request, response, url, method, etc
   .wait("@getSearch")
     .its("url").should("include", "/search?query=Book")
 

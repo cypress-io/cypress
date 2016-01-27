@@ -52,16 +52,24 @@ body {
   border-right: 0;
 }
 
-.docs-content tr {
-  border-bottom: 1px solid #eee;
+.docs-content tbody>tr {
+  border-top: 1px solid #ddd;
 }
 
 .docs-content tr:nth-child(even) {
-  background-color: #fafafa;
+  background-color: #f8f8f8;
 }
 
 .docs-content table {
-  border: 1px solid #eee;
+  border: 1px solid #ddd;
+}
+
+thead>tr>th {
+  border-bottom: 1px solid #ddd;
+}
+
+thead>tr>th:empty {
+  padding: 0;
 }
 
 /*-------Nav---------*/
