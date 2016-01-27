@@ -1,11 +1,13 @@
 slug: pause
 excerpt: Pause command
 
-`cy.pause` will stop command execution and allow you the ability to interact with your app, resume commands when you're ready, or step into the next command.
+`cy.pause` will stop command execution and allow you to interact with your app, resume commands when you're ready, or choose when to run the next command.
+
+This does not set a `debugger` in your code, unlike [`cy.debug`](https://on.cypress.io/api/debug)
 
 | | |
 |--- | --- |
-| **Returns** | the current subject for futher chaining. |
+| **Returns** | the subject from the previous command for further chaining |
 | **Timeout** | cannot timeout |
 
 ***

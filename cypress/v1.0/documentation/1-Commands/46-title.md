@@ -5,8 +5,8 @@ Get the title of the document.
 
 | | |
 |--- | --- |
-| **Returns** | the document's title as a string |
-| **Timeout** | `cy.title` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+| **Returns** | the `document` title as a string |
+| **Timeout** | `cy.title` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) |
 
 ***
 

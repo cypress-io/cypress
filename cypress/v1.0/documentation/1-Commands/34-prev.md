@@ -5,8 +5,8 @@ Get the immediately preceding sibling of each element in the set of the elements
 
 | | |
 |--- | --- |
-| **Returns** | the current subject for futher chaining. |
-| **Timeout** | `cy.prev` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+| **Returns** | the new DOM element(s) found by the command. |
+| **Timeout** | `cy.prev` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) |
 
 ***
 

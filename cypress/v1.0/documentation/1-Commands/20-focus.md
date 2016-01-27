@@ -1,20 +1,20 @@
 slug: focus
-excerpt: Focus on the current subject
+excerpt: Focus on a DOM element
 
-Focus on an element. If there is currently a different element currently with focus, Cypress will issue a `blur` event to that element first.
+Focus on a DOM element. If there is currently a different DOM element currently with focus, Cypress will issue a `blur` event to that element first.
 
 **The following events are fired during focus:** `focusin`, `focus`
 
 | | |
 |--- | --- |
-| **Returns** | the current subject for futher chaining. |
-| **Timeout** | `cy.focus` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+| **Returns** | the new DOM element(s) found by the command. |
+| **Timeout** | `cy.focus` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) |
 
 ***
 
 # [cy.focus()](#section-usage)
 
-Focus on the subject of the previous command.
+Focus on the DOM element found in the previous command.
 
 ***
 

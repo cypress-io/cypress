@@ -5,8 +5,8 @@ The spread command allows an expression to be expanded in places where multiple 
 
 | | |
 |--- | --- |
-| **Returns** | the return value the spead |
-| **Timeout** | cannot timeout |
+| **Returns** | the value of the spread |
+| **Timeout** | *cannot timeout* |
 
 ***
 

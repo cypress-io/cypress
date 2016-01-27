@@ -1,14 +1,14 @@
 slug: select
-excerpt: Select an option
+excerpt: Select an option in a select
 
-Select an option within a `<select>` element.
+Select an option within a `<select>` DOM element.
 
 **The following events are fired during check:** `mousedown`, `focus`, `mouseup`, `click`
 
 | | |
 |--- | --- |
-| **Returns** | the current subject for futher chaining. |
-| **Timeout** | `cy.select` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) or the duration of the `timeout` specified in the command's [options](#section-options). |
+| **Returns** | the new DOM element(s) found by the command. |
+| **Timeout** | `cy.select` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) or the duration of the `timeout` specified in the command's [options](#section-options). |
 
 ***
 
@@ -35,7 +35,7 @@ Option | Default | Notes
 --- | --- | ---
 `force` | `false` | Forces select, disables error checking prior to select
 `interval` | `50` | Interval which to retry a select
-`timeout` | `4000` | Total time to retry the select
+`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) | Total time to retry the select
 `log` | `true` | Display command in command log
 
 ***

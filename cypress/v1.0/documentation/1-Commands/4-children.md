@@ -1,24 +1,24 @@
 slug: children
-excerpt: Get the children of elements
+excerpt: Get the children DOM elements of the DOM elements
 
-Get the children of the elements.
+Get the children of each DOM element in the set of matched DOM elements.
 
 | | |
 |--- | --- |
-| **Returns** | the current subject for futher chaining. |
-| **Timeout** | `cy.children` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+| **Returns** | the new DOM element(s) found by the command. |
+| **Timeout** | `cy.children` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) |
 
 ***
 
 # [cy.children()](#section-usage)
 
-Get the children of each element in the set of matched elements.
+Get the children of each DOM element in the set of matched DOM elements.
 
 ***
 
 # [cy.children( *selector* )](#section-selector-usage)
 
-The `.children()` method optionally accepts a selector expression. If the selector is supplied, the elements will be filtered by testing whether they match it.
+The `.children()` method optionally accepts a selector expression. If the selector is supplied, the DOM elements will be filtered by testing whether they match it.
 
 ***
 

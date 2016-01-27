@@ -4,7 +4,7 @@ excerpt: Load a fixture to represent data
 [block:callout]
 {
   "type": "info",
-  "body": "[Read about creating fixtures first.](https://on.cypress.io/guides/creating-fixtures)",
+  "body": "[Read about Creating Fixtures first.](https://on.cypress.io/guides/creating-fixtures)",
   "title": "New to Cypess?"
 }
 [/block]
@@ -29,7 +29,7 @@ If an extension is omitted, Cypress will attempt to resolve the fixture by order
 | | |
 |--- | --- |
 | **Returns** | the contents of the file, formatted by file extension |
-| **Timeout** | cannot timeout |
+| **Timeout** | *cannot timeout* |
 
 ***
 

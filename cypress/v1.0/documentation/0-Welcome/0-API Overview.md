@@ -1,5 +1,5 @@
 slug: overview
-excerpt: Cypress helps you write automated tests for the web
+excerpt: Our API provides commands and utilities to drive your tests in the browser.
 
 [block:callout]
 {

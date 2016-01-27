@@ -6,7 +6,7 @@ Get the current URL. `cy.url()` uses [`cy.location.href`](https://on.cypress.io/
 | | |
 |--- | --- |
 | **Returns** | the current URL as a string |
-| **Timeout** | cannot timeout|
+| **Timeout** | *cannot timeout* |
 
 ***
 

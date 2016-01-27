@@ -1,18 +1,18 @@
 slug: find
-excerpt: Get descendants of elements
+excerpt: Get descendants of DOM elements
 
-Get the descendents elements of a specific selector.
+Get the descendents DOM elements of a specific selector.
 
 | | |
 |--- | --- |
-| **Returns** | the current subject for futher chaining. |
-| **Timeout** | `cy.find` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+| **Returns** | the new DOM element(s) found by the command. |
+| **Timeout** | `cy.find` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) |
 
 ***
 
 # [cy.find( *selector* )](#section-selector-usage)
 
-Get the descendants of each element in the current set of matched elements within the selector.
+Get the descendants of each DOM element in the current set of matched DOM elements within the selector.
 
 ***
 

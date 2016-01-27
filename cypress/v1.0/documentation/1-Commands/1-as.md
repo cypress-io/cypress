@@ -4,7 +4,7 @@ excerpt: Alias a route or DOM element for use later.
 [block:callout]
 {
   "type": "info",
-  "body": "[Read about using aliases first.](https://on.cypress.io/guides/using-aliases)",
+  "body": "[Read about Using Aliases first.](https://on.cypress.io/guides/using-aliases)",
   "title": "New to Cypess?"
 }
 [/block]
@@ -14,7 +14,7 @@ Assign an alias to a route or DOM element for use later. Reference the alias lat
 | | |
 |--- | --- |
 | **Returns** | the DOM element or route being aliased  |
-| **Timeout** | the alias will retry the chain of commands before the alias assignment for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+| **Timeout** | the alias will retry the chain of commands before the alias assignment for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) |
 
 ***
 

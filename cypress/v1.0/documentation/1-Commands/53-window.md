@@ -5,14 +5,14 @@ Get the global window object of the remote application [visited](https://on.cypr
 
 | | |
 |--- | --- |
-| **Returns** | the window object |
-| **Timeout** | `cy.window` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+| **Returns** | the `window` object |
+| **Timeout** | `cy.window` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) |
 
 ***
 
 # [cy.window()](#section-usage)
 
-Returns the global window object of the remote application you've visited.
+Get the global window object of the remote application you've visited.
 
 ***
 

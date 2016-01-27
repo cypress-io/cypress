@@ -4,7 +4,7 @@ excerpt: Control the behavior of network requests and responses.
 [block:callout]
 {
   "type": "info",
-  "body": "[Read about XHR strategy first.](https://on.cypress.io/guides/network-requests-xhr)",
+  "body": "[Read about Network Requests first.](https://on.cypress.io/guides/network-requests-xhr)",
   "title": "New to Cypess?"
 }
 [/block]

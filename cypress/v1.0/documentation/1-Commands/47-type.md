@@ -1,9 +1,9 @@
 slug: type
-excerpt: Type into an element
+excerpt: Type into a DOM element
 
-Types into the current DOM subject.
+Types into the DOM element found in the previous command.
 
-Prior to typing, if the element isn't currently focused, Cypress will issue a [click](https://on.cypress.io/api/click) on the element, which will cause the element to receive focus.
+Prior to typing, if the DOM element isn't currently focused, Cypress will issue a [click](https://on.cypress.io/api/click) on the element, which will cause the element to receive focus.
 
 Text may include these special character sequences:
 
@@ -26,8 +26,8 @@ Additionally `change` events will be fired either when the `{enter}` key is pres
 
 | | |
 |--- | --- |
-| **Returns** | the element that was typed into |
-| **Timeout** | `cy.type` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) or the duration of the `timeout` specified in the command's [options](#section-options). |
+| **Returns** | the DOM element that was typed into |
+| **Timeout** | `cy.type` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) or the duration of the `timeout` specified in the command's [options](#section-options). |
 
 ***
 
@@ -48,7 +48,7 @@ Option | Default | Notes
 `delay` | `10` | Delay after each keypress
 `force` | `false` | Forces type, disables error checking prior to type
 `interval` | `16` | Interval which to retry type
-`timeout` | `4000` | Total time to retry the type
+`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) | Total time to retry the type
 `log` | `true` | Display command in command log
 
 ***

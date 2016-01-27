@@ -1,5 +1,5 @@
 slug: should
-excerpt: Make an assertion about the current subject
+excerpt: Makes an assertion about the current subject
 
 [block:callout]
 {
@@ -9,12 +9,12 @@ excerpt: Make an assertion about the current subject
 }
 [/block]
 
-`cy.should` implicitly asserts about the current subject. `cy.should` is identical to [`cy.and`](https://on.cypress.io/api/and), but [`cy.and`](https://on.cypress.io/api/and) sometimes reads better when chaining multiple assertions together.
+`cy.should` makes assertions about the current subject.
 
 | | |
 |--- | --- |
-| **Returns** | the current subject (usually) for futher assertion chaining. |
-| **Timeout** | the assertion will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+| **Returns** | the current subject but (in some cases) a new subject |
+| **Timeout** | the assertion will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) |
 
 ***
 
@@ -176,7 +176,7 @@ cy
 
 Cypress makes it easy to chain assertions together.
 
-In this example we use [`and`](https://on.cypress.io/api/and) which is identical to `should`.
+In this example we use [`cy.and`](https://on.cypress.io/api/and) which is identical to `should`.
 
 ```javascript
 // our subject is not changed by our first assertion,

@@ -1,12 +1,12 @@
 slug: within
-excerpt: Set the scope to the current subject
+excerpt: Set the root scope to the current subject
 
 Reset the root scope to the current subject and pass that as an argument to the callback function.
 
 | | |
 |--- | --- |
-| **Returns** | the current subject for futher chaining. |
-| **Timeout** | cannot timeout |
+| **Returns** | the new DOM element(s) found by the command. |
+| **Timeout** | *cannot timeout* |
 
 ***
 

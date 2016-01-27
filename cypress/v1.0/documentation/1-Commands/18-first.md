@@ -1,18 +1,18 @@
 slug: first
-excerpt: Get the first element within elements
+excerpt: Get the first DOM element within a set of DOM elements
 
-Get the first element within a set of elements.
+Get the first DOM element within a set of DOM elements.
 
 | | |
 |--- | --- |
-| **Returns** | the current subject for futher chaining. |
-| **Timeout** | `cy.first` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+| **Returns** | the new DOM element(s) found by the command. |
+| **Timeout** | `cy.first` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) |
 
 ***
 
 # [cy.first()](#section-usage)
 
-Reduce the set of matched elements to the first in the set.
+Reduce the set of matched DOM elements to the first in the set.
 
 ***
 

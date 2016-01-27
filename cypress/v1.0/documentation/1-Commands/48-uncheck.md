@@ -1,5 +1,5 @@
 slug: uncheck
-excerpt: Unselect a checkbox or radio
+excerpt: Uncheck a checkbox or radio
 
 Unchecks the checkboxes or radios within the current subject.
 
@@ -7,8 +7,8 @@ Unchecks the checkboxes or radios within the current subject.
 
 | | |
 |--- | --- |
-| **Returns** | the current subject for futher chaining. |
-| **Timeout** | `cy.uncheck` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) or the duration of the `timeout` specified in the commands [options](#section-options). |
+| **Returns** | the new DOM element(s) found by the command. |
+| **Timeout** | `cy.uncheck` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) or the duration of the `timeout` specified in the commands [options](#section-options). |
 
 ***
 
@@ -33,7 +33,7 @@ Pass in an options object to change the default behavior of `cy.uncheck`.
 Option | Default | Notes
 --- | --- | ---
 `interval` | `16` | Interval which to retry a uncheck
-`timeout` | `4000` | Total time to retry the uncheck
+`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) | Total time to retry the uncheck
 `force` | `false` | Forces uncheck, disables error checking prior to uncheck
 `log` | `true` | Display command in command log
 

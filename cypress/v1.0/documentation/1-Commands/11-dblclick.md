@@ -1,14 +1,14 @@
 slug: dblclick
-excerpt: Double-click on an element
+excerpt: Double-click on a DOM element
 
-Double-click on the element in the previous command in the chain.
+Double-click on the DOM element in the previous command.
 
 **The following events are fired during dblclick:** `dblclick`
 
 | | |
 |--- | --- |
-| **Returns** | the current subject for futher chaining. |
-| **Timeout** | `cy.dblclick` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+| **Returns** | the new DOM element(s) found by the command. |
+| **Timeout** | `cy.dblclick` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) |
 
 ***
 

@@ -1,14 +1,14 @@
 slug: get
-excerpt: Get an element
+excerpt: Get DOM element(s) by selector or alias
 
-Get an element by selector or [alias](https://on.cypress.io/guides/using-aliases).
+Get one or more DOM elements by selector or [alias](https://on.cypress.io/guides/using-aliases).
 
-`cy.get()` will **always** query from the current scope (default: document), and ignore previous commands.
+`cy.get()` will **always** query from the current scope (default: `document`), and ignore previous commands.
 
 | | |
 |--- | --- |
-| **Returns** | the current subject for futher chaining. |
-| **Timeout** | `cy.get` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+| **Returns** | the new DOM element(s) found by the command. |
+| **Timeout** | `cy.get` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) |
 
 ***
 

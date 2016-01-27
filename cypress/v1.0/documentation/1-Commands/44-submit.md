@@ -1,14 +1,14 @@
 slug: submit
 excerpt: Submit a form
 
-Submits the current subject if it is a form. Submit can only be called on a single form.
+Submits the DOM element from the previous command if it is a form. Submit can only be called on a single form.
 
 **The following events are fired during submit:** `submit`
 
 | | |
 |--- | --- |
-| **Returns** | the current subject for futher chaining. |
-| **Timeout** | `cy.submit` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options). |
+| **Returns** | the new DOM element(s) found by the command. |
+| **Timeout** | `cy.submit` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options). |
 
 ***
 

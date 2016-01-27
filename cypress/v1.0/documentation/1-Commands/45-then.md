@@ -11,8 +11,8 @@ Just like Promises, you can return any compatible "thenable" (anything that has 
 
 | | |
 |--- | --- |
-| **Returns** | the return of the callback function. |
-| **Timeout** | cannot timeout |
+| **Returns** | the return of the callback function |
+| **Timeout** | *cannot timeout* |
 
 ***
 

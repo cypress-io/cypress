@@ -44,8 +44,8 @@ body {
 
 /*-------Tables---------*/
 
-.docs-content thead>tr {
-  border-bottom: 1px solid #ccc;
+.docs-content thead>tr>th:first-child:empty {
+  border-bottom: 0;
 }
 
 .docs-content th:empty {

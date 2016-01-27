@@ -4,17 +4,17 @@ excerpt: Route responses to matching requests
 [block:callout]
 {
   "type": "info",
-  "body": "[Read about XHR strategy first.](https://on.cypress.io/guides/network-requests-xhr)",
+  "body": "[Read about Network Requests first.](https://on.cypress.io/guides/network-requests-xhr)",
   "title": "New to Cypess?"
 }
 [/block]
 
-Use `cy.route` to route responses to matching requests.
+Use `cy.route` to manage the behavior of network requests.
 
 | | |
 |--- | --- |
-| **Returns** | the `route` as an object literal. |
-| **Timeout** | `cy.request` will wait for the response for the duration of the [responseTimeout](https://on.cypress.io/guides/configuration#section-network-options) or the [`timeout`](#section-options) passed in the options object of the command. |
+| **Returns** | `null` |
+| **Timeout** | *cannot timeout* |
 
 ***
 

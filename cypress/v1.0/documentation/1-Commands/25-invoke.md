@@ -1,7 +1,7 @@
 slug: invoke
 excerpt: Call properties on the current subject
 
-`cy.invoke` invokes properties that are functions on the current subject. This works similar to Underscore's `_.invoke` function.
+`cy.invoke` invokes functions on the current subject. This works similar to Underscore's `_.invoke` function.
 
 If you want to call a regular property that is not a function on the current subject, use [`cy.its`](https://on.cypress.io/api/its).
 

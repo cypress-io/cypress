@@ -7,8 +7,8 @@ Check the checkboxes or radios within the current subject.
 
 | | |
 |--- | --- |
-| **Returns** | the current subject for futher chaining. |
-| **Timeout** | `cy.check` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) or the duration of the `timeout` specified in the command's [options](#section-options). |
+| **Returns** | the new DOM element(s) found by the command. |
+| **Timeout** | `cy.check` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) or the duration of the `timeout` specified in the command's [options](#section-options). |
 
 ***
 
@@ -33,7 +33,7 @@ Pass in an options object to change the default behavior of `cy.check`.
 Option | Default | Notes
 --- | --- | ---
 `interval` | `16` | Interval which to retry a check
-`timeout` | `4000` | Total time to retry the check
+`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) | Total time to retry the check
 `force` | `false` | Forces check, disables error checking prior to check
 `log` | `true` | Display command in command log
 

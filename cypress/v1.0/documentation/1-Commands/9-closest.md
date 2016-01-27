@@ -1,18 +1,18 @@
 slug: closest
 excerpt: Get the closest ancestor
 
-Get the first element that matches the selector whether it be itself or one of it's ancestors.
+Get the first DOM element that matches the selector whether it be itself or one of it's ancestors.
 
 | | |
 |--- | --- |
-| **Returns** | the current subject for futher chaining. |
-| **Timeout** | `cy.filter` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+| **Returns** | the new DOM element(s) found by the command. |
+| **Timeout** | `cy.filter` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) |
 
 ***
 
 # [cy.closest( *selector* )](#section-selector-usage)
 
-For each element in the set, get the first element that matches the selector by testing the element itself and traversing up through its ancestors in the DOM tree.
+For each DOM element in the set, get the first DOM element that matches the selector by testing the DOM element itself and traversing up through its ancestors in the DOM tree.
 
 ***
 

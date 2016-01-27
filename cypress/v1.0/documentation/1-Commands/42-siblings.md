@@ -1,24 +1,24 @@
 slug: siblings
-excerpt: Get the siblings of elements
+excerpt: Get all siblings of the DOM elements
 
-Get the siblings of the elements.
+Get the siblings of DOM each element in the set of matched DOM elements.
 
 | | |
 |--- | --- |
-| **Returns** | the current subject for futher chaining. |
-| **Timeout** | `cy.siblings` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+| **Returns** | the new DOM element(s) found by the command. |
+| **Timeout** | `cy.siblings` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) |
 
 ***
 
 # [cy.siblings()](#section-usage)
 
-Get the siblings of each element in the set of matched elements.
+Get the siblings of each DOM element in the set of matched DOM elements.
 
 ***
 
 # [cy.siblings( *selector* )](#section-selector-usage)
 
-Get the siblings of each element in the set of matched elements filtered by a selector.
+Get the siblings of each DOM element in the set of matched DOM elements filtered by a selector.
 
 ***
 

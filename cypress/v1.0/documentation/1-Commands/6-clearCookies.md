@@ -7,8 +7,8 @@ Cypress automatically invokes this command **between** each test to prevent stat
 
 | | |
 |--- | --- |
-| **Returns** | the cleared cookies |
-| **Timeout** | cannot timeout |
+| **Returns** | the remaining cookies |
+| **Timeout** | *cannot timeout* |
 
 ***
 

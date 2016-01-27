@@ -1,20 +1,20 @@
 slug: blur
-excerpt: Blur the current subject
+excerpt: Blur a DOM element
 
-Make an element lose focus.
+Make the DOM element found in the previous command lose focus.
 
 **The following events are fired during blur:** `focusout`, `blur`
 
 | | |
 |--- | --- |
-| **Returns** | the current subject for futher chaining. |
-| **Timeout** | `cy.blur` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+| **Returns** | the new DOM element(s) found by the command. |
+| **Timeout** | `cy.blur` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) |
 
 ***
 
 # [cy.blur()](#section-usage)
 
-Blur the current subject.
+Blur the DOM element from the previous command.
 
 ***
 

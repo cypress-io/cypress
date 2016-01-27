@@ -44,7 +44,7 @@ Pass in an options object to change the default behavior of `cy.wait`.
 
 Option | Default | Notes
 --- | --- | ---
-`timeout` | `5000`, `20000` | Override the default requestTimeout and responseTimeout (in ms)
+`timeout` | [requestTimeout](https://on.cypress.io/guides/configuration#section-network-options), [responseTimeout](https://on.cypress.io/guides/configuration#section-network-options) | Override the default requestTimeout and responseTimeout (in ms)
 `log` | `true` | Display command in command log
 
 You can also change the default `requestTimeout` and `responseTimeout` that all `cy.wait` use in [configuration](https://on.cypress.io/guides/configuration).

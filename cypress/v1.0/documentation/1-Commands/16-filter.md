@@ -1,18 +1,18 @@
 slug: filter
-excerpt: Filter elements by selector
+excerpt: Filter DOM elements by a selector
 
-Get elements that match a specific selector. Opposite of [`cy.not()`](https://on.cypress.io/api/not)
+Get DOM elements that match a specific selector. Opposite of [`cy.not()`](https://on.cypress.io/api/not)
 
 | | |
 |--- | --- |
-| **Returns** | the current subject for futher chaining. |
-| **Timeout** | `cy.filter` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+| **Returns** | the new DOM element(s) found by the command. |
+| **Timeout** | `cy.filter` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) |
 
 ***
 
 # [cy.filter( *selector* )](#section-selector-usage)
 
-Reduce the set of matched elements to those that match the selector.
+Reduce the set of matched DOM elements to those that match the selector.
 
 ***
 

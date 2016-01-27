@@ -5,7 +5,7 @@ Ends the Cypress command chain and returns `null`. This is equivalent to the jQu
 
 | | |
 |--- | --- |
-| **Returns** | null |
+| **Returns** | `null` |
 | **Timeout** | cannot timeout |
 
 ***

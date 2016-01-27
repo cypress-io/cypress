@@ -6,7 +6,7 @@ Clears all data in local storage.
 | | |
 |--- | --- |
 | **Returns** | the remote local storage object |
-| **Timeout** | cannot timeout |
+| **Timeout** | *cannot timeout* |
 
 ***
 
@@ -14,13 +14,19 @@ Clears all data in local storage.
 
 Clear all data in local storage.
 
+***
+
 # [cy.clearLocalStorage( *string* )](#section-usage)
 
 Clears all keys in local storage matching the string.
 
+***
+
 # [cy.clearLocalStorage( *RegExp* )](#section-usage)
 
 Clears all keys in local storage matching the RegExp.
+
+***
 
 # Usage
 

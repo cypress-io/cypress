@@ -1,20 +1,22 @@
 slug: and
-excerpt: Enables chaining multiple assertions together
+excerpt: Chains multiple assertions together
 
 [block:callout]
 {
   "type": "info",
-  "body": "[Read about making assertions first.](https://on.cypress.io/guides/making-assertions)",
+  "body": "[Read about Making Assertions first.](https://on.cypress.io/guides/making-assertions)",
   "title": "New to Cypess?"
 }
 [/block]
 
-`cy.and` makes chaining together assertions easy. `cy.and` is identical to [`cy.should`](https://on.cypress.io/api/should), but `cy.and` sometimes reads better when chaining multiple assertions together.
+`cy.and` makes chaining together assertions easy.
+
+You'd typically use `cy.and` when you are making multiple assertions about the same subject.
 
 | | |
 |--- | --- |
-| **Returns** | the current subject (usually) for futher assertion chaining. |
-| **Timeout** | the assertion will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+| **Returns** | the current subject but (in some cases) a new subject  |
+| **Timeout** | the assertion will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) |
 
 ***
 
@@ -112,7 +114,7 @@ cy
 
 ## Verify length, content, and classes from multiple `<p>`
 
-Passing a function to `and` enables you to assert on arbitrary subjects. This gives you the opportunity to *massage* what you'd like to assert on.
+Passing a function to `cy.and` enables you to assert on arbitrary subjects. This gives you the opportunity to *massage* what you'd like to assert on.
 
 Just be sure *not* to include any code that has side effects in your callback function.
 

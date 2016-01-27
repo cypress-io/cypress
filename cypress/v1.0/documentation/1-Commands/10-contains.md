@@ -1,7 +1,7 @@
 slug: contains
-excerpt: Get an element that contains text
+excerpt: Get a DOM element that contains specific text
 
-Get the element containing the text. Elements can contain *more* than the desired text and still match. Additionally, Cypress will prefer some elements over the deepest element found.
+Get the DOM element containing the text. DOM elements can contain *more* than the desired text and still match. Additionally, Cypress will prefer some DOM elements over the deepest element found.
 
 **Preference order:**
 
@@ -13,19 +13,19 @@ Get the element containing the text. Elements can contain *more* than the desire
 | | |
 |--- | --- |
 | **Returns** | the deepest DOM element containing the text  |
-| **Timeout** | `cy.contains` will retry for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) |
+| **Timeout** | `cy.contains` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) |
 
 ***
 
 # [cy.contains( *text* )](#section-text-usage)
 
-Get the deepest element containing the text.
+Get the deepest DOM element containing the text.
 
 ***
 
 # [cy.contains( *selector*, *text* )](#section-selector-and-text-usage)
 
-Specify a selector to filter elements containing the text. Cypress will **ignore** it's default preference for the specified selector. Using a selector allows you to return more *shallow* elements in the tree which contain the specific text.
+Specify a selector to filter DOM elements containing the text. Cypress will **ignore** it's default preference for the specified selector. Using a selector allows you to return more *shallow* elements in the tree which contain the specific text.
 
 ***
 

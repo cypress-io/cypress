@@ -5,8 +5,8 @@ Use `cy.viewport` to control the screen size and orientation of your application
 
 | | |
 |--- | --- |
-| **Returns** | null |
-| **Timeout** | cannot timeout|
+| **Returns** | `null` |
+| **Timeout** | *cannot timeout* |
 
 ***
 

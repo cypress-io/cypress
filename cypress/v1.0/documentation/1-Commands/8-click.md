@@ -1,7 +1,7 @@
 slug: click
-excerpt: Click the current DOM subject
+excerpt: Click a DOM element
 
-`cy.click` is used to click an element.  The DOM element must be in a "clickable" state prior to the click event happening (it must be visible and not covered by another element).
+`cy.click` is used to click a DOM element found int he previous command.  The DOM element must be in a "clickable" state prior to the click event happening (it must be visible and not covered by another element).
 
 Cypress automatically scrolls the element into view prior to attempting the click.
 
@@ -11,14 +11,14 @@ By default, the click is issued at the exact center of the element. You can pass
 
 | | |
 |--- | --- |
-| **Returns** | the current subject for futher chaining. |
-| **Timeout** | `cy.click` will wait and retry until the element is 'clickable' for the duration of the [Command Timeout](https://on.cypress.io/guides/configuration#section-global-options) or the duration of the `timeout` specified in the command's [options](#section-options). |
+| **Returns** | the new DOM element(s) found by the command. |
+| **Timeout** | `cy.click` will wait and retry until the element is 'clickable' for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) or the duration of the `timeout` specified in the command's [options](#section-options). |
 
 ***
 
 # [cy.click()](#section-usage)
 
-Click the current subject.
+Click the DOM element.
 
 ***
 
@@ -64,7 +64,7 @@ Option | Default | Notes
 `force` | `false` | Forces click, disables error checking prior to click
 `multiple` | `false` | Enables serially clicking multiple elements
 `interval` | `16` | Interval which to retry a click
-`timeout` | `4000` | Total time to retry the click
+`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) | Total time to retry the click
 `log` | `true` | Display command in command log
 
 ***

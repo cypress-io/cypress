@@ -1,14 +1,16 @@
 slug: visit
 excerpt: Visit a remote url
 
-Visit a remote url. This will most likely be the first command you run. `cy.visit(...)` resolves when the remote page fires its `load` event.
+Visit a remote url. This will most likely be the first command you run. `cy.visit` resolves when the remote page fires its `load` event.
 
-Visit is prefixed with `baseUrl`. You can configure the `baseUrl` in the [Network Options](https://on.cypress.io/guides/configuration#section-network-options) to prevent repeating yourself in every single `cy.visit`.
+Visit is prefixed with the `baseUrl` configured in in the [Network Options](https://on.cypress.io/guides/configuration#section-network-options).
+
+Using `baseUrl` is a great way to prevent repeating yourself in every `cy.visit`.
 
 | | |
 |--- | --- |
 | **Returns** | the remote page's window object |
-| **Timeout** | `cy.visit` will retry for the duration of the [visitTimeout](https://on.cypress.io/guides/configuration#section-network-options) or the duration of the `timeout` specified in the command's [options](#section-options).|
+| **Timeout** | `cy.visit` will retry for the duration of the [visitTimeout](https://on.cypress.io/guides/configuration#section-network-options) or the duration of the `timeout` specified in the command's [options](#section-options). |
 
 ***
 
@@ -26,9 +28,9 @@ Pass in an options object to change the default behavior of `cy.visit`.
 
 Option | Default | Notes
 --- | --- | ---
-`onBeforeLoad` | function(){} | Called before your page has loaded all of its resources.
-`onLoad`       | function(){} | Called once your page has fired its load event.
-`timeout`      | `20000` | Total time to retry the visit
+`onBeforeLoad` | `function` | Called before your page has loaded all of its resources.
+`onLoad`       | `function` | Called once your page has fired its load event.
+`timeout`      | [visitTimeout](https://on.cypress.io/guides/configuration#section-network-options) | Total time to wait until `cy.visit` resolves
 `log` | `true` | Display command in command log
 
 You can also set options for all `cy.visit` `visitTimeout` and `baseUrl` globally in [configuration](https://on.cypress.io/guides/configuration).
@@ -160,7 +162,7 @@ cy
 
 ## Cypress automatically wipes page state between visits
 
-Whenever you `cy.visit(...)`, Cypress will automatically wipe the state of the page before navigating to an external page.
+Whenever you `cy.visit()`, Cypress will automatically wipe the state of the page before navigating to an external page.
 
 Internally Cypress will visit `about:blank` which flushes the window.
 
