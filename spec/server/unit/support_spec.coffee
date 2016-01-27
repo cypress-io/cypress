@@ -41,7 +41,7 @@ describe "Support ", ->
             // become usable in every single test file.
             //
             // You can read more about custom commands here:
-            // https://on.cypress.io/commands#customizing
+            // https://on.cypress.io/api/commands
             // ***********************************************
             //
             // Cypress.addParentCommand("login", function(email, password){
