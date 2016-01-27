@@ -6,7 +6,7 @@ Get the current URL hash. This is the same as [`cy.location().hash`](https://on.
 | | |
 |--- | --- |
 | **Returns** | the current URL hash as a string, including the `#` character. If no `#` character is present, an empty string will be returned. |
-| **Timeout** | cannot timeout |
+| **Timeout** | *cannot timeout* |
 
 ***
 

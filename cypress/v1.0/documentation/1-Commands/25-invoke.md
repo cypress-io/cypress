@@ -8,7 +8,7 @@ If you want to call a regular property that is not a function on the current sub
 | | |
 |--- | --- |
 | **Returns** | the return of the invoked property |
-| **Timeout** | cannot timeout |
+| **Timeout** | *cannot timeout* |
 
 ***
 

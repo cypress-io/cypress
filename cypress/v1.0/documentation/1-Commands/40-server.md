@@ -1,5 +1,5 @@
 slug: server
-excerpt: Control the behavior of network requests and responses.
+excerpt: Control the behavior of network requests and responses
 
 [block:callout]
 {

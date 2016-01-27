@@ -1,7 +1,7 @@
 slug: last
-excerpt: Get the last element
+excerpt: Get the last DOM element
 
-Get the last element within a set of elements.
+Get the last DOM element within a set of DOM elements.
 
 | | |
 |--- | --- |
@@ -12,7 +12,7 @@ Get the last element within a set of elements.
 
 # [cy.last()](#section-usage)
 
-Reduce the set of matched elements to the final one in the set.
+Reduce the set of matched DOM elements to the final one in the set.
 
 ***
 

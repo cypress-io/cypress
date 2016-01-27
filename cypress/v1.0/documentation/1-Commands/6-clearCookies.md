@@ -1,5 +1,5 @@
 slug: clearcookies
-excerpt: Clear all browser cookies.
+excerpt: Clear all browser cookies
 
 Clears all of the browser cookies.
 

@@ -1,7 +1,7 @@
 slug: siblings
-excerpt: Get all siblings of the DOM elements
+excerpt: Get all siblings DOM elements of the DOM elements
 
-Get the siblings of DOM each element in the set of matched DOM elements.
+Get the siblings DOM elements of each element in the set of matched DOM elements.
 
 | | |
 |--- | --- |

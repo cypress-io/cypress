@@ -1,7 +1,7 @@
 slug: parent
-excerpt: Get the parent of the elements
+excerpt: Get the parent DOM element of the DOM elements
 
-Get the parent of the elements.
+Get the parent DOM element of the DOM elements.
 
 | | |
 |--- | --- |

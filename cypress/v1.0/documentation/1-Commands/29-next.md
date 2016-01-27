@@ -1,7 +1,7 @@
 slug: next
-excerpt: Get the next sibling of the elements
+excerpt: Get the next sibling of the DOM elements
 
-Get the immediately following sibling of each element in the set of matched elements.
+Get the immediately following sibling of each DOM element in the set of matched DOM elements.
 
 | | |
 |--- | --- |

@@ -1,7 +1,7 @@
 slug: not
-excerpt: Remove elements from set
+excerpt: Remove DOM elements from the set of DOM elements
 
-Remove elements from the set of elements. Opposite of [`cy.filter()`](https://on.cypress.io/api/filter)
+Remove DOM elements from the set of DOM elements. Opposite of [`cy.filter()`](https://on.cypress.io/api/filter)
 
 | | |
 |--- | --- |

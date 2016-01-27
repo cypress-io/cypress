@@ -1,5 +1,5 @@
 slug: should
-excerpt: Makes an assertion about the current subject
+excerpt: Make an assertion about the current subject
 
 [block:callout]
 {

@@ -1,5 +1,5 @@
 slug: location
-excerpt: Get window.location
+excerpt: Get the `window.location`
 
 Get the `window.location`.
 
@@ -21,7 +21,7 @@ Key | Type | Returns
 | | |
 |--- | --- |
 | **Returns** | location object detailed above |
-| **Timeout** | cannot timeout |
+| **Timeout** | *cannot timeout* |
 
 ***
 

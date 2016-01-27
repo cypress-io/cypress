@@ -1,5 +1,5 @@
 slug: and
-excerpt: Chains multiple assertions together
+excerpt: Chain multiple assertions together
 
 [block:callout]
 {

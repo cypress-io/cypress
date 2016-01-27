@@ -1,5 +1,5 @@
 slug: clearlocalstorage
-excerpt: Clear all data in local storage.
+excerpt: Clear all data in local storage
 
 Clears all data in local storage.
 

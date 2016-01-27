@@ -1,7 +1,7 @@
 slug: parents
-excerpt: Get the parents of elements
+excerpt: Get the parents DOM elements of the DOM elements
 
-Get the parents of the elements.
+Get the parents DOM elements of the DOM elements.
 
 | | |
 |--- | --- |

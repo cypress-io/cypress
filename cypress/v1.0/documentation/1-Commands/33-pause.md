@@ -1,5 +1,5 @@
 slug: pause
-excerpt: Pause command
+excerpt: Pause a command
 
 `cy.pause` will stop command execution and allow you to interact with your app, resume commands when you're ready, or choose when to run the next command.
 
@@ -8,7 +8,7 @@ This does not set a `debugger` in your code, unlike [`cy.debug`](https://on.cypr
 | | |
 |--- | --- |
 | **Returns** | the subject from the previous command for further chaining |
-| **Timeout** | cannot timeout |
+| **Timeout** | *cannot timeout* |
 
 ***
 

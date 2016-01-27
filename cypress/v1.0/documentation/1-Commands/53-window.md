@@ -1,7 +1,7 @@
 slug: window
 excerpt: Get global window object
 
-Get the global window object of the remote application [visited](https://on.cypress.io/api/visit).
+Get the global `window` object of the remote application [visited](https://on.cypress.io/api/visit).
 
 | | |
 |--- | --- |

@@ -1,5 +1,5 @@
 slug: closest
-excerpt: Get the closest ancestor
+excerpt: Get the closest ancestor DOM element
 
 Get the first DOM element that matches the selector whether it be itself or one of it's ancestors.
 

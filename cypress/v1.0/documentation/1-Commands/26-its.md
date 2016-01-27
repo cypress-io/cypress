@@ -8,7 +8,7 @@ If you want to call a function on the current subject, use [`cy.invoke`](https:/
 | | |
 |--- | --- |
 | **Returns** | the value of the property |
-| **Timeout** | cannot timeout |
+| **Timeout** | *cannot timeout* |
 
 ***
 

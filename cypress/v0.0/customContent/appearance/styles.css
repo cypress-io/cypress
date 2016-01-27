@@ -8,7 +8,6 @@ body {
   word-wrap: break-word;
 }
 
-
 #landing-page h1 {
   font-size: 2em;
   font-weight: bold;
@@ -20,7 +19,6 @@ body {
   color: #888;
   margin-bottom: 1em;
 }
-
 
 #landing-page h4 {
   border-bottom: 1px solid #ddd;
@@ -44,17 +42,26 @@ body {
 
 /*-------Tables---------*/
 
-.docs-content thead>tr>th:first-child:empty {
-  border-bottom: 0;
-}
-
-.docs-content th:empty {
-  padding: 0;
-  border-bottom: 0;
-}
-
 .docs-content th {
+  border-right: 0;
   border-bottom: 0;
+}
+
+.docs-content td {
+  border-bottom: 0;
+  border-right: 0;
+}
+
+.docs-content tr {
+  border-bottom: 1px solid #eee;
+}
+
+.docs-content tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.docs-content table {
+  border: 1px solid #eee;
 }
 
 /*-------Nav---------*/
@@ -62,7 +69,6 @@ body {
 .header .searchbox {
   top: 11px;
 }
-
 
 /*-------Headers---------*/
 

@@ -17,74 +17,75 @@ Commands drive your tests in the browser like a real user would. They let you pe
 
 | Navigation | |
 | -------------------- | -- |
-| [go](https://on.cypress.io/api/go) | Navigate back or forward to the previous or next URL in the browser's history |
+| [go](https://on.cypress.io/api/go) | Navigate back or forward to previous or next URL in the browser's history |
+| [reload](https://on.cypress.io/api/reload) | Reload the page |
 | [visit](https://on.cypress.io/api/visit) | Visit a remote url |
 
 | Querying | |
 | -------------------- | -- |
-| [contains](https://on.cypress.io/api/contains) | Check to see if matching element contains text |
-| [get](https://on.cypress.io/api/get) | Get an element |
-| [root](https://on.cypress.io/api/root) | Get the root element |
+| [contains](https://on.cypress.io/api/contains) | Get a DOM element that contains specific text |
+| [get](https://on.cypress.io/api/get) | Get DOM element(s) by selector or aliast |
+| [root](https://on.cypress.io/api/root) | Set the root scope to the current subject |
 | [within](https://on.cypress.io/api/within) | Within |
 
 | Assertions | |
 | -------------------- | -- |
-| [and](https://on.cypress.io/api/and) | Enables chaining multiple assertions together |
-| [should](https://on.cypress.io/api/should) | Make an assertion about current subject |
+| [and](https://on.cypress.io/api/and) | Chain multiple assertions together |
+| [should](https://on.cypress.io/api/should) | Make an assertion about the current subject |
 
 | DOM Traversal | |
 | -------------------- | -- |
-| [children](https://on.cypress.io/api/children) | Get the children of elements |
-| [closest](https://on.cypress.io/api/closest) | Get the closest ancestor |
-| [eq](https://on.cypress.io/api/eq) | Get element at index |
-| [filter](https://on.cypress.io/api/filter) | Filter elements by selector |
-| [find](https://on.cypress.io/api/find) | Get descendants of elements |
-| [first](https://on.cypress.io/api/first) | Get the first element within elements |
-| [last](https://on.cypress.io/api/last) | Get the last element |
-| [next](https://on.cypress.io/api/next) | Get the next sibling of elements |
-| [not](https://on.cypress.io/api/not) | Remove elements from set |
-| [parent](https://on.cypress.io/api/parent) | Get the parent of elements |
-| [parents](https://on.cypress.io/api/parents) | Get the parents of elements |
+| [children](https://on.cypress.io/api/children) | Get the children DOM elements of the DOM elements |
+| [closest](https://on.cypress.io/api/closest) | Get the closest ancestor DOM element |
+| [eq](https://on.cypress.io/api/eq) | Get a DOM element at a specific index |
+| [filter](https://on.cypress.io/api/filter) | Filter DOM elements by a selector |
+| [find](https://on.cypress.io/api/find) | Get descendants of DOM elements |
+| [first](https://on.cypress.io/api/first) | Get the first DOM element within a set of DOM elements |
+| [last](https://on.cypress.io/api/last) | Get the last DOM element |
+| [next](https://on.cypress.io/api/next) | Get the next sibling of the DOM elements |
+| [not](https://on.cypress.io/api/not) | Remove DOM elements from the set of DOM elements |
+| [parent](https://on.cypress.io/api/parent) | Get the parent DOM element of the DOM elements |
+| [parents](https://on.cypress.io/api/parents) | Get the parents DOM elements of the DOM elements |
 | [prev](https://on.cypress.io/api/prev) | Get the previous sibling of elements |
-| [siblings](https://on.cypress.io/api/siblings) | Get the siblings of elements |
+| [siblings](https://on.cypress.io/api/siblings) | Get all siblings DOM elements of the DOM elements |
 
 | Actions | |
 | -------------------- | -- |
-| [blur](https://on.cypress.io/api/blur) | Blur the current subject |
-| [check](https://on.cypress.io/api/check) | Check a checkbox |
+| [blur](https://on.cypress.io/api/blur) | Blur a DOM element |
+| [check](https://on.cypress.io/api/check) | Select a checkbox or radio |
 | [clear](https://on.cypress.io/api/clear) | Clear a value of an input or textarea |
-| [click](https://on.cypress.io/api/click) | Click the current DOM subject |
-| [dblclick](https://on.cypress.io/api/dblclick) | Double-click on the current subject |
-| [focus](https://on.cypress.io/api/focus) | Focus on the current subject |
-| [select](https://on.cypress.io/api/select) | Select an option |
+| [click](https://on.cypress.io/api/click) | Click a DOM element |
+| [dblclick](https://on.cypress.io/api/dblclick) | Double-click on a DOM element |
+| [focus](https://on.cypress.io/api/focus) | Focus on a DOM element |
+| [select](https://on.cypress.io/api/select) | Select an option in a select |
 | [submit](https://on.cypress.io/api/submit) | Submit a form |
-| [type](https://on.cypress.io/api/type) | Type into element |
-| [uncheck](https://on.cypress.io/api/uncheck) | Uncheck a checkbox |
+| [type](https://on.cypress.io/api/type) | Type into a DOM element |
+| [uncheck](https://on.cypress.io/api/uncheck) | Type into a DOM element |
 
 | Network Requests (XHR / AJAX) | |
 | -------------------- | -- |
 | [request](https://on.cypress.io/api/request) | Make XHR request |
 | [route](https://on.cypress.io/api/route) | Route responses to matching requests |
-| [server](https://on.cypress.io/api/server) | Control the behavior of network requests and responses. |
+| [server](https://on.cypress.io/api/server) | Control the behavior of network requests and responses |
 
 | Connectors | |
 | -------------------- | -- |
-| [its](https://on.cypress.io/api/its) | Call properties on the current subject |
-| [invoke](https://on.cypress.io/api/invoke) | Call properties on the current subject |
+| [its](https://on.cypress.io/api/its) | Get properties on the current subject |
+| [invoke](https://on.cypress.io/api/invoke) | Invoke the function on the current subject |
 | [spread](https://on.cypress.io/api/spread) | Spread an array as individual arguments to a callback function |
-| [then](https://on.cypress.io/api/then) | Yield the current subject as an argument |
+| [then](https://on.cypress.io/api/then) | Invokes a callback function with the current subject |
 
 | Location (URL) | |
 | -------------------- | -- |
 | [hash](https://on.cypress.io/api/hash) | Get the current URL hash |
-| [location](https://on.cypress.io/api/location) | Get window.location |
+| [location](https://on.cypress.io/api/location) | Get the `window.location` |
 | [url](https://on.cypress.io/api/url) | Get the current URL |
 
 | Window | |
 | -------------------- | -- |
-| [document](https://on.cypress.io/api/document) | Get the document element |
+| [document](https://on.cypress.io/api/document) | Get the document |
 | [title](https://on.cypress.io/api/title) | Get the title of the document |
-| [window](https://on.cypress.io/api/window) | Get the global window object |
+| [window](https://on.cypress.io/api/window) | Get global window object |
 
 | Waiting | |
 | -------------------- | -- |
@@ -92,7 +93,7 @@ Commands drive your tests in the browser like a real user would. They let you pe
 
 | Aliasing | |
 | -------------------- | -- |
-| [as](https://on.cypress.io/api/as) | Alias reusable objects for later |
+| [as](https://on.cypress.io/api/as) | Alias a route or DOM element for use later. |
 
 | Fixtures | |
 | -------------------- | -- |
@@ -112,13 +113,13 @@ Commands drive your tests in the browser like a real user would. They let you pe
 
 | Debugging | |
 | -------------------- | -- |
-| [debug](https://on.cypress.io/api/debug) | Call debugger |
-| [pause](https://on.cypress.io/api/pause) | Pause current command |
+| [debug](https://on.cypress.io/api/debug) | Set a `debugger` |
+| [pause](https://on.cypress.io/api/pause) | Pause a command |
 
 | Misc | |
 | -------------------- | -- |
 | [end](https://on.cypress.io/api/end) | End the command chain |
-| [focused](https://on.cypress.io/api/focused) | Get the element that is focused |
+| [focused](https://on.cypress.io/api/focused) | Get the DOM element that is focused |
 | [wrap](https://on.cypress.io/api/wrap) | Invoke the function on the current subject |
 
 # Utilities
