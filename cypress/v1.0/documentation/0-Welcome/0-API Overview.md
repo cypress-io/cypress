@@ -58,7 +58,7 @@ Commands drive your tests in the browser like a real user would. They let you pe
 | [select](https://on.cypress.io/api/select) | Select an option in a select |
 | [submit](https://on.cypress.io/api/submit) | Submit a form |
 | [type](https://on.cypress.io/api/type) | Type into a DOM element |
-| [uncheck](https://on.cypress.io/api/uncheck) | Type into a DOM element |
+| [uncheck](https://on.cypress.io/api/uncheck) | Uncheck a checkbox or radio |
 
 | Network Requests | |
 | -------------------- | -- |
