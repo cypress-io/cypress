@@ -223,3 +223,19 @@ describe "$Cypress API", ->
 
     it "creates runner", ->
       expect(@Cypress.Runner.create).to.be.calledWith(@Cypress, {}, "Mocha")
+
+  describe ".$", ->
+    it "is a reference to jQuery", ->
+      expect(@Cypress.$.to.eq(window.$)
+
+  describe "._", ->
+    it "is a reference to underscore", ->
+      expect(@Cypress._).to.eq(window._)
+
+  describe ".Blob", ->
+    it "is a reference to underscore", ->
+      expect(@Cypress.Blob).to.eq(window.blobUtil)
+
+  describe ".Promise", ->
+    it "is a reference to underscore", ->
+      expect(@Cypress.Promise).to.eq(window.Promise)

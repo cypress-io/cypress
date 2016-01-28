@@ -145,6 +145,18 @@ window.$Cypress = do ($, _, Backbone, Promise) ->
 
       Promise.all(restores).return(null)
 
+    $: (selector, context) ->
+      context ?= @private("document")
+      new $.fn.init selector, context
+
+    _: _
+
+    moment: window.moment
+
+    Blob: window.blobUtil
+
+    Promise: Promise
+
     _.extend $Cypress.prototype, Backbone.Events
 
     @create = (options = {}) ->
