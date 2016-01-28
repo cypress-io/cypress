@@ -319,7 +319,7 @@ Every command that comes before a [`cy.should`](https://on.cypress.io/api/should
 ```
 
 ```javascript
-<!-- Our App Code -->
+// Our App Code
 function waitRandomlyThen(fn){
   setTimeout(fn, Math.random() * 3000)
 }
