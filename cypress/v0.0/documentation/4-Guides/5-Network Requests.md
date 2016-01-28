@@ -201,8 +201,8 @@ Whether or not you choose to stub responses, Cypress enables you to declarativel
 ```javascript
 cy
   .server()
-  .route(/activities/, "fixture/activities").as("getActivities")
-  .route(/messages/, "fixture/messages").as("getMessages")
+  .route(/activities/, "fixture:activities").as("getActivities")
+  .route(/messages/, "fixture:messages").as("getMessages")
 
   // visit the dashboard, which should make requests that match
   // the two routes above
