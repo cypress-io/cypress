@@ -101,12 +101,16 @@ $Cypress.register "Debugging", (Cypress, _, $) ->
           end: true
         })
 
-      console.log "\n%c------------------------Cypress Command Info------------------------", "font-weight: bold;"
-      console.log "Runnable:           ", @private("runnable")
-      console.log "Subject:            ", @prop("subject")
-      console.log "Available Aliases:  ", @getAvailableAliases()
-      console.log "Pending Requests:   ", @getPendingRequests()
-      console.log "Completed Requests: ", @getCompletedRequests()
+      previous = @prop("current").get("prev")
+
+      ###
+      cy.debug provides the previous command and the current subject below:
+      ###
+
+      console.log "\n%c------------------------Cypress Debug Info------------------------", "font-weight: bold;"
+      console.log "Previous Command Name: ", previous and previous.get("name")
+      console.log "Previous Command Args: ", previous and previous.get("args")
+      console.log "Current Subject:       ", @prop("subject")
       debugger
 
       ## return the subject
