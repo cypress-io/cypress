@@ -540,21 +540,16 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
 
       return @
 
-    $: (selector, context) ->
-      context ?= @private("document")
-      new $.fn.init selector, context
-
-    _: _
-
-    Promise: Promise
-
-    moment: window.moment
-
-    Blob: window.blobUtil
-
     _.extend $Cy.prototype.$, _($).pick("Event", "Deferred", "ajax", "get", "getJSON", "getScript", "post", "when")
 
     _.extend $Cy.prototype, Backbone.Events
+
+    ["_", "$", "Promise", "Blob", "moment"].forEach (lib) ->
+      Object.defineProperty $Cy.prototype, lib, {
+        get: ->
+          $Cypress.Utils.warning("cy.#{lib} is now deprecated.\n\nThis object is now attached to 'Cypress' and not 'cy'.\n\nPlease update and use: Cypress.#{lib}")
+          $Cypress.prototype[lib]
+      }
 
     @extend = (obj) ->
       _.extend @prototype, obj
