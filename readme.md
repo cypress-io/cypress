@@ -37,7 +37,6 @@ To run development environment:
 
 ```bash
 ## Install project dependencies
-bower install
 npm install
 ```
 
@@ -108,6 +107,19 @@ Code changes which are applied instantly:
 - `driver`
 - `desktop gui`
 - `server`
+
+## Testing
+
+To run tests:
+
+- Navigate to the directory where the `cypress-app` project is on your computer.
+- Run the following commands:
+
+```bash
+gulp test
+```
+
+Navigate to [http://localhost:3500](http://localhost:3500)
 
 ## Deploying
 
