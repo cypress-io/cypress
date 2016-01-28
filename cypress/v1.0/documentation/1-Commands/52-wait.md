@@ -67,7 +67,7 @@ cy.wait(500)
 ## Wait for a specific XHR to respond
 
 ```javascript
-// Wait for the route aliased as `getAccount` to respond
+// Wait for the route aliased as 'getAccount' to respond
 // without changing or stubbing its response
 cy
   .server()
