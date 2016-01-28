@@ -3,7 +3,7 @@ excerpt: Get DOM element(s) by selector or alias
 
 Get one or more DOM elements by selector or [alias](https://on.cypress.io/guides/using-aliases).
 
-`cy.get()` will **always** query from the current scope (default: `document`), and ignore previous commands.
+`cy.get` supports all CSS based selectors. It is analogous to jQuery's `$(...)` in that any selector you pass to jQuery you can also pass to `cy.get`.
 
 | | |
 |--- | --- |
