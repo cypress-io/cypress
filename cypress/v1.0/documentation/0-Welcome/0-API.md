@@ -1,10 +1,10 @@
-slug: overview
+slug: api
 excerpt: Our API provides commands and utilities to drive your tests in the browser.
 
 [block:callout]
 {
   "type": "info",
-  "body": "Read through our [Guides](https://on.cypress.io/guides/overview) first.",
+  "body": "Read through our [Guides](https://on.cypress.io/guides/guides) first.",
   "title": "New to Cypess?"
 }
 [/block]
