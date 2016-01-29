@@ -58,6 +58,7 @@ Option | Default | Notes
 `headers` | `null` | response headers for stubbed routes
 `onRequest` | `null` | callback function when a request is sent
 `onResponse` | `null` | callback function when a response is returned
+`onAbort` | `null` | callback function which fires anytime an XHR is aborted
 
 You can also set options for all [cy.wait](https://on.cypress.io/api/wait) `requestTimeout` and `responseTimeout` globally in [configuration](https://on.cypress.io/guides/configuration) to control how long to wait for the request and response of the supplied route.
 

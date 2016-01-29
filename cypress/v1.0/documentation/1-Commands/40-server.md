@@ -41,6 +41,8 @@ Option | Default | Notes
 `response` | `null` | Default response Body
 `onRequest` | `null` | Default callback function when a request is sent
 `onResponse` | `null` | Default callback function when a response is returned
+`onAbort` | `null` | Default callback function which fires anytime an XHR is aborted
+
 
 The following options control the behavior of the server affecting all requests:
 
