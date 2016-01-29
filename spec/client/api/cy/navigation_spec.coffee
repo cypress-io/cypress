@@ -319,10 +319,10 @@ describe "$Cypress.Cy Navigation Commands", ->
         @allowErrors()
 
         @failVisit = =>
-          cy$ = @cy.$
+          cy$ = @cy.$$
 
           ## act as if we have this node
-          error = @sandbox.stub @cy, "$", (selector) ->
+          error = @sandbox.stub @cy, "$$", (selector) ->
             if selector is "[data-cypress-visit-error]"
               error.restore()
               return {length: 1}
@@ -468,7 +468,7 @@ describe "$Cypress.Cy Navigation Commands", ->
       ## this goes through the same process as visit
       ## where it errors if cypress sent back an error
       it "errors if [cypress-error] was found", (done) ->
-        cy$ = @cy.$
+        cy$ = @cy.$$
 
         logs = []
 
@@ -482,7 +482,7 @@ describe "$Cypress.Cy Navigation Commands", ->
           done()
 
         ## act as if we have this node
-        error = @sandbox.stub @cy, "$", (selector) ->
+        error = @sandbox.stub @cy, "$$", (selector) ->
           if selector is "[data-cypress-visit-error]"
             error.restore()
             return {length: 1}
