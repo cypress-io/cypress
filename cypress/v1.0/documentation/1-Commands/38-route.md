@@ -56,6 +56,7 @@ Option | Default | Notes
 `status` | `200` | response status code when stubbing routes
 `delay` | `0` | delay for stubbed responses (in ms)
 `headers` | `null` | response headers for stubbed routes
+`force404` | `false` | forcibly send XHR's to 404 status when these XHR's do not match any existing [`cy.routes`](https://on.cypress.io/api/routes)
 `onRequest` | `null` | callback function when a request is sent
 `onResponse` | `null` | callback function when a response is returned
 `onAbort` | `null` | callback function which fires anytime an XHR is aborted
@@ -258,16 +259,16 @@ Even the `Initiator` is included, which is a stack trace to what caused the XHR 
 
 ## Requests that don't match a route
 
-By default, **all** requests that do not match a route will automatically be handed back:
+You can force routes that do not match a route to return 404:
 
 Status | Body | Headers
 --- | --- | ---
 `404` | "" | `null`
 
-If you'd like to disable this behavior you need to pass:
+If you'd like to enable this behavior you need to pass:
 
 ```javascript
-cy.server({force404: false})
+cy.server({force404: true})
 ```
 
 You can [read more about this here.](https://on.cypress.io/api/server#prevent-sending-404s-to-unmatched-requests)
