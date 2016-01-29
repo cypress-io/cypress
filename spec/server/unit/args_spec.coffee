@@ -1,14 +1,14 @@
 require("../spec_helper")
 
-path      = require("path")
-parseArgs = require("#{root}lib/util/parse_args")
+path = require("path")
+args = require("#{root}lib/util/args")
 
-describe "parseArgs", ->
+describe "args", ->
   beforeEach ->
     @setup = (args...) ->
       @options = {}
       @options.argv = args
-      parseArgs(@options)
+      args(@options)
 
   context "--smoke-test", ->
     it "sets pong to ping", ->
