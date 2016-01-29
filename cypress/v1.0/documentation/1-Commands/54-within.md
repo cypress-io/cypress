@@ -24,7 +24,7 @@ Pass in an options object to change the default behavior of `cy.within`.
 
 Option | Default | Notes
 --- | --- | ---
-`log` | `true` | Display command in command log
+`log` | `false` | Display command in command log
 
 ***
 
