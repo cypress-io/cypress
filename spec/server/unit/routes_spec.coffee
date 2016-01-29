@@ -1045,7 +1045,7 @@ describe "Routes", ->
             null
           .end(done)
 
-      it "strips HttpOnly and Secure from all cookies", (done) ->
+      it "strips HttpOnly and Secure and domain from all cookies", (done) ->
         nock(@baseUrl)
           .get("/bar")
           .reply 200, "OK", {
@@ -1054,6 +1054,7 @@ describe "Routes", ->
               "user=brian; path=/; HttpOnly"
               "foo=bar; path=/"
               "token=abc-123; path=/; Secure"
+              "ssid=qwerty9999; path=/foo; domain=sevaa.link"
             ]
           }
 
@@ -1066,6 +1067,7 @@ describe "Routes", ->
               "user=brian; path=/"
               "foo=bar; path=/"
               "token=abc-123; path=/"
+              "ssid=qwerty9999; path=/foo"
             ]
             null
           .end(done)

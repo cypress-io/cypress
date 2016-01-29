@@ -17,7 +17,7 @@ Controller    = require "./controller"
 headRe           = /(<head.*?>)/
 htmlRe           = /(<html.*?>)/
 okStatusRe       = /^[2|3|4]\d+$/
-badCookieParamRe = /^(httponly|secure)$/i
+badCookieParamRe = /^(httponly|secure|domain=.+)$/i
 
 class RemoteInitial extends Controller
   constructor: (app) ->
