@@ -9,7 +9,7 @@ describe "Element Dimensions Utility", ->
 
     context "square", ->
       beforeEach ->
-        @square      = @cy.$("#square")
+        @square      = @cy.$$("#square")
         @dimensions  = App.request "element:dimensions", @square
 
       it "returns an object containing dimensions", ->
@@ -23,7 +23,7 @@ describe "Element Dimensions Utility", ->
 
     context "square with padding", ->
       beforeEach ->
-        @square      = @cy.$("#square-padding")
+        @square      = @cy.$$("#square-padding")
         @dimensions  = App.request "element:dimensions", @square
 
       it "sets height to 20", ->
@@ -51,14 +51,14 @@ describe "Element Dimensions Utility", ->
         expect(@dimensions).to.have.property "widthWithPadding", 40
 
       it "layers padding div", ->
-        @layer = App.request "element:box:model:layers", @square, @cy.$("body")
+        @layer = App.request "element:box:model:layers", @square, @cy.$$("body")
         style = @layer.find("[data-layer='Padding']").prop("style")
         expect(style).to.have.property("height", "30px")
         expect(style).to.have.property("width", "40px")
 
     context "square with border", ->
       beforeEach ->
-        @square      = @cy.$("#square-border")
+        @square      = @cy.$$("#square-border")
         @dimensions  = App.request "element:dimensions", @square
 
       it "sets height to 20", ->
@@ -86,14 +86,14 @@ describe "Element Dimensions Utility", ->
         expect(@dimensions).to.have.property "widthWithBorder", 24
 
       it "layers border div", ->
-        @layer = App.request "element:box:model:layers", @square, @cy.$("body")
+        @layer = App.request "element:box:model:layers", @square, @cy.$$("body")
         style = @layer.find("[data-layer='Border']").prop("style")
         expect(style).to.have.property("height", "24px")
         expect(style).to.have.property("width", "24px")
 
     context "square with margin", ->
       beforeEach ->
-        @square      = @cy.$("#square-margin")
+        @square      = @cy.$$("#square-margin")
         @dimensions  = App.request "element:dimensions", @square
 
       it "sets height to 20", ->
@@ -121,24 +121,24 @@ describe "Element Dimensions Utility", ->
         expect(@dimensions).to.have.property "widthWithMargin", 32
 
       it "layers margin div", ->
-        @layer = App.request "element:box:model:layers", @square, @cy.$("body")
+        @layer = App.request "element:box:model:layers", @square, @cy.$$("body")
         style = @layer.find("[data-layer='Margin']").prop("style")
         expect(style).to.have.property("height", "36px")
         expect(style).to.have.property("width", "32px")
 
     context "square with margin, border, padding", ->
       beforeEach ->
-        @square      = @cy.$("#square-margin-border-padding")
+        @square      = @cy.$$("#square-margin-border-padding")
 
       it "layers content div", ->
-        @layer = App.request "element:box:model:layers", @square, @cy.$("body")
+        @layer = App.request "element:box:model:layers", @square, @cy.$$("body")
         style = @layer.find("[data-layer='Content']").prop("style")
         expect(style).to.have.property("height", "20px")
         expect(style).to.have.property("width", "20px")
 
     context "negative margin, padding", ->
       beforeEach ->
-        @square = @cy.$("#square-negative-margin-padding")
+        @square = @cy.$$("#square-negative-margin-padding")
 
       it "does not throw on negative margins or negative padding", ->
         fn = => App.request("element:dimensions", @square)
@@ -146,10 +146,10 @@ describe "Element Dimensions Utility", ->
 
     context "rectangle rotated 90deg", ->
       beforeEach ->
-        @rect = @cy.$("#rect-rotated")
+        @rect = @cy.$$("#rect-rotated")
 
       it "layers rotation correctly", ->
-        @layer = App.request "element:box:model:layers", @rect, @cy.$("body")
+        @layer = App.request "element:box:model:layers", @rect, @cy.$$("body")
         # expect(@layer.children().offset()).to.deep.eq @rect.offset()
 
         @layer.children().each (index, el) ->

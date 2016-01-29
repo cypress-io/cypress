@@ -145,9 +145,11 @@ window.$Cypress = do ($, _, Backbone, Promise) ->
 
       Promise.all(restores).return(null)
 
-    $: (selector, context) ->
-      context ?= @private("document")
-      new $.fn.init selector, context
+    $: ->
+      if not @cy
+        throw $Cypress.Utils.cypressError("Cypress.cy is undefined. You may be trying to query outside of a running test. Cannot call 'Cypress.$'")
+
+      @cy.$$.apply(@cy, arguments)
 
     _: _
 
@@ -156,6 +158,8 @@ window.$Cypress = do ($, _, Backbone, Promise) ->
     Blob: window.blobUtil
 
     Promise: Promise
+
+    _.extend $Cypress.prototype.$, _($).pick("Event", "Deferred", "ajax", "get", "getJSON", "getScript", "post", "when")
 
     _.extend $Cypress.prototype, Backbone.Events
 

@@ -18,7 +18,7 @@ describe "$Cypress.Cy Assertion Commands", ->
     it "works with jquery chai", ->
       div = $("<div class='foo'>asdf</div>")
 
-      @cy.$("body").append(div)
+      @cy.$$("body").append(div)
 
       @cy
         .get("div.foo").should("have.class", "foo").then ($div) ->
@@ -33,19 +33,19 @@ describe "$Cypress.Cy Assertion Commands", ->
 
     it "skips over utility commands", ->
       @cy.on "retry", _.after 2, =>
-        @cy.$("div:first").addClass("foo")
+        @cy.$$("div:first").addClass("foo")
 
       @cy.on "retry", _.after 4, =>
-        @cy.$("div:first").attr("id", "bar")
+        @cy.$$("div:first").attr("id", "bar")
 
       @cy.get("div:first").should("have.class", "foo").debug().and("have.id", "bar")
 
     it "skips over aliasing", ->
       @cy.on "retry", _.after 2, =>
-        @cy.$("div:first").addClass("foo")
+        @cy.$$("div:first").addClass("foo")
 
       @cy.on "retry", _.after 4, =>
-        @cy.$("div:first").attr("id", "bar")
+        @cy.$$("div:first").attr("id", "bar")
 
       @cy.get("div:first").as("div").should("have.class", "foo").debug().and("have.id", "bar")
 
@@ -62,7 +62,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
     describe "function argument", ->
       it "waits until function is true", ->
-        button = @cy.$("button:first")
+        button = @cy.$$("button:first")
 
         @cy.on "retry", _.after 2, =>
           button.addClass("ready")
@@ -96,11 +96,11 @@ describe "$Cypress.Cy Assertion Commands", ->
           logs.push(log)
 
         _.delay =>
-          @cy.$("body").addClass("foo")
+          @cy.$$("body").addClass("foo")
         , Math.random() * 300
 
         _.delay =>
-          @cy.$("body").prop("id", "bar")
+          @cy.$$("body").prop("id", "bar")
         , Math.random() * 300
 
         @cy
@@ -110,7 +110,7 @@ describe "$Cypress.Cy Assertion Commands", ->
           .then ->
             @chai.restore()
 
-            @cy.$("body").removeClass("foo").removeAttr("id")
+            @cy.$$("body").removeClass("foo").removeAttr("id")
 
             expect(logs.length).to.eq(3)
 
@@ -126,11 +126,11 @@ describe "$Cypress.Cy Assertion Commands", ->
           logs.push(log)
 
         _.delay =>
-          @cy.$("body").addClass("foo")
+          @cy.$$("body").addClass("foo")
         , Math.random() * 300
 
         _.delay =>
-          @cy.$("body").prop("id", "bar")
+          @cy.$$("body").prop("id", "bar")
         , Math.random() * 300
 
         @cy
@@ -140,7 +140,7 @@ describe "$Cypress.Cy Assertion Commands", ->
           .then ->
             @chai.restore()
 
-            @cy.$("body").removeClass("foo").removeAttr("id")
+            @cy.$$("body").removeClass("foo").removeAttr("id")
 
             expect(logs.length).to.eq(3)
 
@@ -186,7 +186,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
     describe "not.exist", ->
       it "resolves eventually not exist", ->
-        button = @cy.$("button:first")
+        button = @cy.$$("button:first")
 
         @cy.on "retry", _.after 2, _.once ->
           button.remove()
@@ -225,7 +225,7 @@ describe "$Cypress.Cy Assertion Commands", ->
         @Cypress.on "log", (@log) =>
 
       it "allows valid string numbers", ->
-        length = @cy.$("button").length
+        length = @cy.$$("button").length
 
         @cy.get("button").should("have.length", ""+length)
 
@@ -292,7 +292,7 @@ describe "$Cypress.Cy Assertion Commands", ->
 
       it "snapshots and ends the assertion after retrying", ->
         @cy.on "retry", _.after 3, =>
-          @cy.$("#specific-contains span:first").addClass("active")
+          @cy.$$("#specific-contains span:first").addClass("active")
 
         @cy.contains("foo").should("have.class", "active").then ->
           @chai.restore()
@@ -304,7 +304,7 @@ describe "$Cypress.Cy Assertion Commands", ->
           expect(@log.get("snapshots")[0]).to.be.an("object")
 
       it "retries assertion until true", ->
-        button = @cy.$("button:first")
+        button = @cy.$$("button:first")
 
         retry = _.after 3, ->
           button.addClass("new-class")
@@ -374,7 +374,7 @@ describe "$Cypress.Cy Assertion Commands", ->
         @Cypress.on "log", (@log) =>
           logs.push log
 
-        @cy.$("button:first").click ->
+        @cy.$$("button:first").click ->
           $(@).addClass("foo").remove()
 
         @cy.on "fail", (err) =>
@@ -394,7 +394,7 @@ describe "$Cypress.Cy Assertion Commands", ->
           done("cy.should was supposed to fail")
 
       it "throws when the subject eventually isnt in the DOM", (done) ->
-        button = @cy.$("button:first")
+        button = @cy.$$("button:first")
 
         @cy.on "retry", _.after 2, _.once ->
           button.addClass("foo").remove()
@@ -770,7 +770,7 @@ describe "$Cypress.Cy Assertion Commands", ->
               done()
 
             ## prepend an empty div so it has no id or class
-            @cy.$("body").prepend $("<div />")
+            @cy.$$("body").prepend $("<div />")
 
             @cy.get("div").eq(0).then ($div) ->
               # expect($div).to.match("div")
@@ -782,7 +782,7 @@ describe "$Cypress.Cy Assertion Commands", ->
               done()
 
             ## prepend an empty div so it has no id or class
-            @cy.$("body").prepend $("<input />")
+            @cy.$$("body").prepend $("<input />")
 
             @cy.get("input").eq(0).then ($div) ->
               expect($div).to.match("input")
@@ -900,11 +900,11 @@ describe "$Cypress.Cy Assertion Commands", ->
         @cy.noop([1,2,3]).should("have.length", 3)
 
       it "rejects any element not in the document", ->
-        buttons = @cy.$("button")
+        buttons = @cy.$$("button")
 
         length = buttons.length
 
         @cy.on "retry", _.after 2, =>
-          @cy.$("button:last").remove()
+          @cy.$$("button:last").remove()
 
         @cy.wrap(buttons).should("have.length", length - 1)

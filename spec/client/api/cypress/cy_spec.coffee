@@ -311,59 +311,44 @@ describe "$Cypress.Cy API", ->
 
     describe "#_contains", ->
       it "returns true if the document contains the element", ->
-        btn = @cy.$("#button").get(0)
+        btn = @cy.$$("#button").get(0)
 
         expect(@cy._contains(btn)).to.be.true
 
       it "returns false if the document does not contain the element", ->
-        btn = @cy.$("#button").remove().get(0)
+        btn = @cy.$$("#button").remove().get(0)
 
         expect(@cy._contains(btn)).to.be.false
 
       it "returns true if all elements in the collection are in the document", ->
-        inputs = @cy.$("input")
+        inputs = @cy.$$("input")
 
         expect(@cy._contains(inputs)).to.be.true
 
       it "returns false if any elemen isnt in the document", ->
-        inputs = @cy.$("input")
+        inputs = @cy.$$("input")
         inputs.last().remove()
 
         expect(@cy._contains(inputs)).to.be.false
 
-    describe "#$", ->
+    describe "#$$", ->
       it "queries the remote document", ->
-        input = @cy.$("#by-name input:first")
+        input = @cy.$$("#by-name input:first")
         expect(input.length).to.eq 1
         expect(input.prop("tagName")).to.eq "INPUT"
 
       it "scopes the selector to context if provided", ->
-        input = @cy.$("input:first", @cy.$("#by-name"))
+        input = @cy.$$("input:first", @cy.$$("#by-name"))
         expect(input.length).to.eq 1
         expect(input.prop("tagName")).to.eq "INPUT"
 
-      it "proxies Deferred", (done) ->
-        expect(@cy.$.Deferred).to.be.a("function")
-
-        df = @cy.$.Deferred()
-
-        _.delay ->
-          df.resolve()
-        , 10
-
-        df.done -> done()
-
-      _.each "Event Deferred ajax get getJSON getScript post when".split(" "), (fn) =>
-        it "proxies $.#{fn}", ->
-          expect(@cy.$[fn]).to.be.a("function")
-
+    describe "#$", ->
       it "logs a deprecation", ->
         warning = @sandbox.spy @Cypress.Utils, "warning"
 
         @cy.$("#by-name input:first")
 
         expect(warning).to.be.calledWithMatch("cy.$ is now deprecated")
-
 
     describe "#run", ->
       it "calls prop next() on end if exists", (done) ->
@@ -468,7 +453,7 @@ describe "$Cypress.Cy API", ->
           @cy.get("input:first").type("foo")
 
         @cy.login().then ->
-          expect(@cy.$("input:first")).to.have.value("foo")
+          expect(@cy.$$("input:first")).to.have.value("foo")
 
       it "ensures to splice queue correctly on first custom command", ->
         Cypress.addParentCommand "login", (email) =>

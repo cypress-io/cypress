@@ -3,14 +3,14 @@ describe "$Cypress.Cy Querying Commands", ->
 
   context "#within", ->
     it "scopes additional GET finders to the subject", ->
-      input = @cy.$("#by-name input:first")
+      input = @cy.$$("#by-name input:first")
 
       @cy.get("#by-name").within ->
         @cy.get("input:first").then ($input) ->
           expect($input.get(0)).to.eq input.get(0)
 
     it "scopes additional CONTAINS finders to the subject", ->
-      span = @cy.$("#nested-div span:contains(foo)")
+      span = @cy.$$("#nested-div span:contains(foo)")
 
       @cy.contains("foo").then ($span) ->
         expect($span.get(0)).not.to.eq span.get(0)
@@ -20,19 +20,19 @@ describe "$Cypress.Cy Querying Commands", ->
           expect($span.get(0)).to.eq span.get(0)
 
     it "does not change the subject", ->
-      form = @cy.$("#by-name")
+      form = @cy.$$("#by-name")
 
       @cy.get("#by-name").within(->).then ($form) ->
         expect($form.get(0)).to.eq form.get(0)
 
     it "can call child commands after within on the same subject", ->
-      input = @cy.$("#by-name input:first")
+      input = @cy.$$("#by-name input:first")
 
       @cy.get("#by-name").within(->).find("input:first").then ($input) ->
         expect($input.get(0)).to.eq input.get(0)
 
     it "supports nested withins", ->
-      span = @cy.$("#button-text button span")
+      span = @cy.$$("#button-text button span")
 
       @cy.get("#button-text").within ->
         @cy.get("button").within ->
@@ -40,8 +40,8 @@ describe "$Cypress.Cy Querying Commands", ->
             expect($span.get(0)).to.eq span.get(0)
 
     it "supports complicated nested withins", ->
-      span1 = @cy.$("#button-text a span")
-      span2 = @cy.$("#button-text button span")
+      span1 = @cy.$$("#button-text a span")
+      span2 = @cy.$$("#button-text button span")
 
       @cy.get("#button-text").within ->
         @cy.get("a").within ->
@@ -53,8 +53,8 @@ describe "$Cypress.Cy Querying Commands", ->
             expect($span.get(0)).to.eq span2.get(0)
 
     it "clears withinSubject after within is over", ->
-      input = @cy.$("input:first")
-      span = @cy.$("#button-text button span")
+      input = @cy.$$("input:first")
+      span = @cy.$$("#button-text button span")
 
       @cy.get("#button-text").within ->
         @cy.get("button").within ->
@@ -73,7 +73,7 @@ describe "$Cypress.Cy Querying Commands", ->
         expect(@cy._events).not.to.have.property "command:start"
 
     it "clears withinSubject even if next is null", (done) ->
-      span = @cy.$("#button-text button span")
+      span = @cy.$$("#button-text button span")
 
       @cy.on "end", ->
         ## should be defined here because next would have been
@@ -102,7 +102,7 @@ describe "$Cypress.Cy Querying Commands", ->
           expect(logs.length).to.eq(0)
 
       it "logs immediately before resolving", (done) ->
-        div = @cy.$("div:first")
+        div = @cy.$$("div:first")
 
         @Cypress.on "log", (log) ->
           if log.get("name") is "within"
@@ -151,7 +151,7 @@ describe "$Cypress.Cy Querying Commands", ->
 
       it "throws when subject is not in the document", (done) ->
         @cy.on "command:end", =>
-          @cy.$("#list").remove()
+          @cy.$$("#list").remove()
 
         @cy.on "fail", (err) ->
           expect(err.message).to.include "cy.within() failed because this element"
@@ -161,13 +161,13 @@ describe "$Cypress.Cy Querying Commands", ->
 
   context "#root", ->
     it "returns html", ->
-      html = @cy.$("html")
+      html = @cy.$$("html")
 
       @cy.root().then ($html) ->
         expect($html.get(0)).to.eq html.get(0)
 
     it "returns withinSubject if exists", ->
-      form = @cy.$("form")
+      form = @cy.$$("form")
 
       @cy.get("form").within ->
         @cy
@@ -177,7 +177,7 @@ describe "$Cypress.Cy Querying Commands", ->
 
     it "eventually resolves", ->
       _.delay =>
-        @cy.$("html").addClass("foo").addClass("bar")
+        @cy.$$("html").addClass("foo").addClass("bar")
       , 100
 
       @cy.root().should("have.class", "foo").and("have.class", "bar")
@@ -207,13 +207,13 @@ describe "$Cypress.Cy Querying Commands", ->
           expect(@log.get("snapshots")[0]).to.be.an("object")
 
       it "sets $el to document", ->
-        html = @cy.$("html")
+        html = @cy.$$("html")
 
         @cy.root().then ->
           expect(@log.get("$el").get(0)).to.eq(html.get(0))
 
       it "sets $el to withinSubject", ->
-        form = @cy.$("form")
+        form = @cy.$$("form")
 
         @cy.get("form").within ->
           @cy
@@ -236,7 +236,7 @@ describe "$Cypress.Cy Querying Commands", ->
       @currentTest.timeout(300)
 
     it "finds by selector", ->
-      list = @cy.$("#list")
+      list = @cy.$$("#list")
 
       @cy.get("#list").then ($list) ->
         expect($list.get(0)).to.eq list.get(0)
@@ -248,7 +248,7 @@ describe "$Cypress.Cy Querying Commands", ->
       ## appending the missingEl
       @cy.on "retry", (options) =>
         if options.total + (options._interval * 4) > options._runnableTimeout
-          @cy.$("body").append(missingEl)
+          @cy.$$("body").append(missingEl)
 
       @cy.get("#missing-el").then ($div) ->
         expect($div).to.match missingEl
@@ -268,7 +268,7 @@ describe "$Cypress.Cy Querying Commands", ->
 
       ## but wait 300ms
       _.delay =>
-        @cy.$("body").append(missingEl)
+        @cy.$$("body").append(missingEl)
       , 300
 
       @cy.get("#missing-el", {timeout: 10000})
@@ -277,7 +277,7 @@ describe "$Cypress.Cy Querying Commands", ->
       missingEl = $("<div />", id: "missing-el")
 
       @cy.on "retry", _.after 2, =>
-        @cy.$("body").append(missingEl)
+        @cy.$$("body").append(missingEl)
 
       ## in this example our test has been running 200ms
       ## but the timeout is below this amount, and it
@@ -334,14 +334,14 @@ describe "$Cypress.Cy Querying Commands", ->
     describe "should('exist')", ->
       it "waits until button exists", ->
         @cy.on "retry", _.after 3, =>
-          @cy.$("body").append $("<div id='missing-el'>missing el</div>")
+          @cy.$$("body").append $("<div id='missing-el'>missing el</div>")
 
         @cy.get("#missing-el").should("exist")
 
     describe "should('not.exist')", ->
       it "waits until button does not exist", ->
         @cy.on "retry", _.after 3, =>
-          @cy.$("#button").remove()
+          @cy.$$("#button").remove()
 
         @cy.get("#button").should("not.exist")
 
@@ -354,7 +354,7 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy._timeout(500, true)
 
         retry = _.after 3, =>
-          @cy.$("#list li:last").remove()
+          @cy.$$("#list li:last").remove()
 
         @cy.on "retry", retry
 
@@ -363,14 +363,14 @@ describe "$Cypress.Cy Querying Commands", ->
 
     describe "visibility is unopinionated", ->
       it "finds invisible elements by default", ->
-        button = @cy.$("#button").hide()
+        button = @cy.$$("#button").hide()
 
         @cy.get("#button").then ($button) ->
           expect($button.get(0)).to.eq button.get(0)
 
     describe "should('not.be.visible')", ->
       it "returns invisible element", ->
-        button = @cy.$("#button").hide()
+        button = @cy.$$("#button").hide()
 
         # @cy.get("#button").then ($button) ->
           # expect($button).not.to.be.visible
@@ -385,7 +385,7 @@ describe "$Cypress.Cy Querying Commands", ->
         button = null
 
         retry = _.after 3, =>
-          button = @cy.$("#button").hide()
+          button = @cy.$$("#button").hide()
 
         @cy.on "retry", retry
 
@@ -394,7 +394,7 @@ describe "$Cypress.Cy Querying Commands", ->
 
     describe "should('be.visible')", ->
       it "returns visible element", ->
-        button = @cy.$("#button")
+        button = @cy.$$("#button")
 
         @cy.get("#button").should("be.visible").then ($button) ->
           expect($button.get(0)).to.eq button.get(0)
@@ -403,7 +403,7 @@ describe "$Cypress.Cy Querying Commands", ->
         ## add 500ms to the delta
         @cy._timeout(500, true)
 
-        button = @cy.$("#button").hide()
+        button = @cy.$$("#button").hide()
 
         retry = _.after 3, =>
           button.show()
@@ -415,32 +415,32 @@ describe "$Cypress.Cy Querying Commands", ->
 
     describe "should('have.length', n)", ->
       it "resolves once length equals n", ->
-        forms = @cy.$("form")
+        forms = @cy.$$("form")
 
         @cy.get("form").should("have.length", forms.length).then ($forms) ->
           expect($forms.length).to.eq forms.length
 
       it "retries until length equals n", ->
-        buttons = @cy.$("button")
+        buttons = @cy.$$("button")
 
         length = buttons.length - 2
 
         @cy.on "retry", _.after 2, =>
           buttons.last().remove()
-          buttons = @cy.$("button")
+          buttons = @cy.$$("button")
 
         ## should resolving after removing 2 buttons
         @cy.get("button").should("have.length", length).then ($buttons) ->
           expect($buttons.length).to.eq length
 
       it "retries an alias when not enough elements found", ->
-        buttons = @cy.$("button")
+        buttons = @cy.$$("button")
 
         length = buttons.length + 1
 
         ## add another button after 2 retries, once
         @cy.on "retry", _.after 2, _.once =>
-          $("<button />").appendTo @cy.$("body")
+          $("<button />").appendTo @cy.$$("body")
 
         ## should eventually resolve after adding 1 button
         @cy
@@ -449,7 +449,7 @@ describe "$Cypress.Cy Querying Commands", ->
             expect($buttons.length).to.eq length
 
       it "retries an alias when too many elements found without replaying commands", ->
-        buttons = @cy.$("button")
+        buttons = @cy.$$("button")
 
         length = buttons.length - 2
 
@@ -458,7 +458,7 @@ describe "$Cypress.Cy Querying Commands", ->
         ## add another button after 2 retries, once
         @cy.on "retry", _.after 2, =>
           buttons.last().remove()
-          buttons = @cy.$("button")
+          buttons = @cy.$$("button")
 
         ## should eventually resolve after adding 1 button
         @cy
@@ -471,14 +471,14 @@ describe "$Cypress.Cy Querying Commands", ->
     describe "assertion verification", ->
       it "automatically retries", ->
         _.delay =>
-          @cy.$("button:first").attr("data-foo", "bar")
+          @cy.$$("button:first").attr("data-foo", "bar")
         , 100
 
         @cy.get("button:first").should("have.attr", "data-foo").and("match", /bar/)
 
       it "eventually resolves an alias", ->
         @cy.on "retry", _.after 2, =>
-          @cy.$("button:first").addClass("foo-bar-baz")
+          @cy.$$("button:first").addClass("foo-bar-baz")
 
         @cy
           .get("button:first").as("btn")
@@ -489,13 +489,13 @@ describe "$Cypress.Cy Querying Commands", ->
         @Cypress.on "log", (@log) =>
 
       it "logs elements length", ->
-        buttons = @cy.$("button")
+        buttons = @cy.$$("button")
 
         length = buttons.length - 2
 
         @cy.on "retry", _.after 2, =>
           buttons.last().remove()
-          buttons = @cy.$("button")
+          buttons = @cy.$$("button")
 
         ## should resolving after removing 2 buttons
         @cy.get("button").should("have.length", length).then ($buttons) ->
@@ -621,13 +621,13 @@ describe "$Cypress.Cy Querying Commands", ->
             expect(obj).to.deep.eq {}
 
       it "re-queries for an existing alias", ->
-        body = @cy.$("body")
+        body = @cy.$$("body")
 
         @cy.get("body").as("b").get("@b").then ($body) ->
           expect($body.get(0)).to.eq body.get(0)
 
       it "re-queries the dom if any element in an alias isnt in the document", ->
-        inputs = @cy.$("input")
+        inputs = @cy.$$("input")
 
         @cy
           .get("input").as("inputs").then ($inputs) ->
@@ -709,7 +709,7 @@ describe "$Cypress.Cy Querying Commands", ->
               expect(xhr3).to.be.null
 
       # it "re-queries the dom if any element in an alias isnt visible", ->
-      #   inputs = @cy.$("input")
+      #   inputs = @cy.$$("input")
       #   inputs.hide()
 
       #   cy
@@ -765,7 +765,7 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy.get(".spinner'")
 
       it "throws on too many elements after timing out waiting for length", (done) ->
-        buttons = @cy.$("button")
+        buttons = @cy.$$("button")
 
         @cy.on "fail", (err) ->
           expect(err.message).to.include "Too many elements found. Found '#{buttons.length}', expected '#{buttons.length - 1}'."
@@ -774,7 +774,7 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy.get("button").should("have.length", buttons.length - 1)
 
       it "throws on too few elements after timing out waiting for length", (done) ->
-        buttons = @cy.$("button")
+        buttons = @cy.$$("button")
 
         @cy.on "fail", (err) ->
           expect(err.message).to.include "Not enough elements found. Found '#{buttons.length}', expected '#{buttons.length + 1}'."
@@ -814,7 +814,7 @@ describe "$Cypress.Cy Querying Commands", ->
           .server()
           .route(/json/, {foo: "foo"}).as("getJSON")
           .visit("/fixtures/html/xhr.html").then ->
-            @cy.$("#get-json").click =>
+            @cy.$$("#get-json").click =>
               @cy._timeout(1000)
 
               retry = _.after 3, _.once =>
@@ -840,7 +840,7 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy.get("div:first").should("not.be.visible")
 
       it "throws after timing out trying to find a visible element", (done) ->
-        @cy.$("#button").hide()
+        @cy.$$("#button").hide()
 
         @cy.on "fail", (err) ->
           expect(err.message).to.include "expected '<button#button>' to be visible"
@@ -889,7 +889,7 @@ describe "$Cypress.Cy Querying Commands", ->
           .get("@getUsers.all ")
 
       it "logs out $el when existing $el is found even on failure", (done) ->
-        button = @cy.$("#button").hide()
+        button = @cy.$$("#button").hide()
 
         @Cypress.on "log", (@log) =>
 
@@ -915,8 +915,8 @@ describe "$Cypress.Cy Querying Commands", ->
         expect($el).to.match("li")
 
     it "resets the subject between chain invocations", ->
-      span = @cy.$(".k-in:contains(Quality Control):last")
-      label = @cy.$("#complex-contains label")
+      span = @cy.$$(".k-in:contains(Quality Control):last")
+      label = @cy.$$("#complex-contains label")
 
       @cy.get("#complex-contains").contains("nested contains").then ($label) ->
         expect($label.get(0)).to.eq label.get(0)
@@ -925,7 +925,7 @@ describe "$Cypress.Cy Querying Commands", ->
         expect($span.get(0)).to.eq span.get(0)
 
     it "GET is scoped to the current subject", ->
-      span = @cy.$("#click-me a span")
+      span = @cy.$$("#click-me a span")
 
       @cy.get("#click-me a").contains("click").then ($span) ->
         expect($span.length).to.eq(1)
@@ -942,19 +942,19 @@ describe "$Cypress.Cy Querying Commands", ->
         expect($el).to.match("ul")
 
     it "disregards priority elements when provided a filter", ->
-      form = @cy.$("#click-me")
+      form = @cy.$$("#click-me")
 
       @cy.contains("form", "click me").then ($form) ->
         expect($form.get(0)).to.eq form.get(0)
 
     it "favors input type=submit", ->
-      input = @cy.$("#input-type-submit input")
+      input = @cy.$$("#input-type-submit input")
 
       @cy.contains("click me").then ($input) ->
         expect($input.get(0)).to.eq(input.get(0))
 
     it "favors buttons next", ->
-      button = @cy.$("#button-inside-a button")
+      button = @cy.$$("#button-inside-a button")
 
       @cy.contains("click button").then ($btn) ->
         expect($btn.get(0)).to.eq(button.get(0))
@@ -965,7 +965,7 @@ describe "$Cypress.Cy Querying Commands", ->
         expect($el).to.match("a")
 
     it "reduces right by priority element", ->
-      label = @cy.$("#complex-contains label")
+      label = @cy.$$("#complex-contains label")
 
       ## it should find label because label is the first priority element
       ## out of the collection of contains elements
@@ -978,7 +978,7 @@ describe "$Cypress.Cy Querying Commands", ->
       ## only append the span after we retry
       ## three times
       retry = _.after 3, =>
-        @cy.$("body").append span
+        @cy.$$("body").append span
 
       @cy.on "retry", retry
 
@@ -991,7 +991,7 @@ describe "$Cypress.Cy Querying Commands", ->
           expect($row).to.have.class("active")
 
     it "returns the parent node which contains content spanned across a child element and text node", ->
-      item = @cy.$("#upper .item")
+      item = @cy.$$("#upper .item")
 
       @cy.contains("New York").then ($item) ->
         expect($item).to.be.ok
@@ -1044,7 +1044,7 @@ describe "$Cypress.Cy Querying Commands", ->
 
     describe "should('be.visible')", ->
       it "returns invisible element", ->
-        span = @cy.$("#not-hidden").hide()
+        span = @cy.$$("#not-hidden").hide()
 
         @cy.contains("span", "my hidden content").should("not.be.visible").then ($span) ->
           expect($span.get(0)).to.eq span.get(0)
@@ -1054,20 +1054,20 @@ describe "$Cypress.Cy Querying Commands", ->
 
     describe "subject contains text nodes", ->
       it "searches for content within subject", ->
-        badge = @cy.$("#edge-case-contains .badge:contains(5)")
+        badge = @cy.$$("#edge-case-contains .badge:contains(5)")
 
         @cy.get("#edge-case-contains").find(".badge").contains(5).then ($badge) ->
           expect($badge.get(0)).to.eq badge.get(0)
 
       it "returns the first element when subject contains multiple elements", ->
-        badge = @cy.$("#edge-case-contains .badge-multi:contains(1)")
+        badge = @cy.$$("#edge-case-contains .badge-multi:contains(1)")
 
         @cy.get("#edge-case-contains").find(".badge-multi").contains(1).then ($badge) ->
           expect($badge.length).to.eq(1)
           expect($badge.get(0)).to.eq badge.get(0)
 
       it "returns the subject when it has a text node of matching content", ->
-        count = @cy.$("#edge-case-contains .count:contains(2)")
+        count = @cy.$$("#edge-case-contains .count:contains(2)")
 
         @cy.get("#edge-case-contains").find(".count").contains(2).then ($count) ->
           expect($count.length).to.eq(1)
@@ -1078,7 +1078,7 @@ describe "$Cypress.Cy Querying Commands", ->
 
         ## make sure it retries 3 times!
         retry = _.after 3, =>
-          @cy.$("#edge-case-contains").append(count)
+          @cy.$$("#edge-case-contains").append(count)
 
           @cy.chain().then ($count) ->
             expect($count.length).to.eq(1)
@@ -1093,7 +1093,7 @@ describe "$Cypress.Cy Querying Commands", ->
         count = $("<span class='count'>100</span>")
 
         retry = _.after 3, =>
-          @cy.$("#edge-case-contains").append(count)
+          @cy.$$("#edge-case-contains").append(count)
 
           @cy.chain().then ($count) ->
             expect($count.length).to.eq(1)
@@ -1105,7 +1105,7 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy.get("#edge-case-contains").contains(".count", 100)
 
       it "returns the first matched element when multiple match and there is no filter", ->
-        icon = @cy.$("#edge-case-contains i:contains(25)")
+        icon = @cy.$$("#edge-case-contains i:contains(25)")
 
         @cy.get("#edge-case-contains").contains(25).then ($icon) ->
           expect($icon.length).to.eq(1)
@@ -1114,7 +1114,7 @@ describe "$Cypress.Cy Querying Commands", ->
     describe "special characters", ->
       _.each "' \" [ ] { } ! @ # $ % ^ & * ( ) , ; :".split(" "), (char) ->
         it "finds content with character: #{char}", ->
-          span = $("<span>special char #{char} content</span>").appendTo @cy.$("body")
+          span = $("<span>special char #{char} content</span>").appendTo @cy.$$("body")
 
           @cy.contains("span", char).then ($span) ->
             expect($span.get(0)).to.eq span.get(0)
@@ -1254,7 +1254,7 @@ describe "$Cypress.Cy Querying Commands", ->
         @cy.contains("button").should("not.exist")
 
       it "logs out $el when existing $el is found even on failure", (done) ->
-        button = @cy.$("#button")
+        button = @cy.$$("#button")
 
         @Cypress.on "log", (@log) =>
 

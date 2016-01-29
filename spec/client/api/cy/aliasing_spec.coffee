@@ -3,7 +3,7 @@ describe "$Cypress.Cy Aliasing Commands", ->
 
   context "#as", ->
     it "does not change the subject", ->
-      body = @cy.$("body")
+      body = @cy.$$("body")
 
       @cy.get("body").as("b").then ($body) ->
         expect($body.get(0)).to.eq body.get(0)
@@ -13,7 +13,7 @@ describe "$Cypress.Cy Aliasing Commands", ->
         expect(@cy.prop("aliases").b).to.be.defined
 
     it "stores the resulting subject as the alias", (done) ->
-      body = @cy.$("body")
+      body = @cy.$$("body")
 
       @cy.on "end", ->
         expect(@prop("aliases").b.subject.get(0)).to.eq body.get(0)
@@ -22,7 +22,7 @@ describe "$Cypress.Cy Aliasing Commands", ->
       @cy.get("body").as("b")
 
     it "stores subject of chained aliases", ->
-      li = @cy.$("#list li").eq(0)
+      li = @cy.$$("#list li").eq(0)
 
       @cy.get("#list li").eq(0).as("firstLi").then ($li) ->
         expect($li).to.match li
@@ -198,8 +198,8 @@ describe "$Cypress.Cy Aliasing Commands", ->
             done()
 
       it "replays from last root to current", ->
-        first = @cy.$("#list li").eq(0)
-        second = @cy.$("#list li").eq(1)
+        first = @cy.$$("#list li").eq(0)
+        second = @cy.$$("#list li").eq(1)
 
         @cy
           .get("#list li").eq(0).as("firstLi").then ($li) ->
@@ -226,7 +226,7 @@ describe "$Cypress.Cy Aliasing Commands", ->
           .get("#dom").find("#button").as("button").then ($button) ->
             $button.remove()
 
-            @cy.$("#dom").append $("<button />", id: "button")
+            @cy.$$("#dom").append $("<button />", id: "button")
 
             null
 
@@ -237,7 +237,7 @@ describe "$Cypress.Cy Aliasing Commands", ->
           expect($button).to.have.id("button")
 
       it "skips commands which did not change, and starts at the first valid subject or parent command", (done) ->
-        @cy.$("#list li").click ->
+        @cy.$$("#list li").click ->
           ul  = $(@).parent()
           lis = ul.children().clone()
 

@@ -10,7 +10,7 @@ describe "$Cypress.Cy Angular Commands", ->
 
     context "find by binding", ->
       it "finds color.name binding elements", ->
-        spans = @cy.$(".colors span.name")
+        spans = @cy.$$(".colors span.name")
 
         @cy.ng("binding", "color.name").then ($spans) ->
           $spans.each (i, span) ->
@@ -61,7 +61,7 @@ describe "$Cypress.Cy Angular Commands", ->
       _.each ngPrefixes, (prefix, attr) ->
         it "finds by #{prefix}repeat", ->
           ## make sure we find this element
-          li = @cy.$("[#{prefix}repeat*='#{attr}']")
+          li = @cy.$$("[#{prefix}repeat*='#{attr}']")
           expect(li).to.exist
 
           ## and make sure they are the same DOM element
@@ -69,7 +69,7 @@ describe "$Cypress.Cy Angular Commands", ->
             expect($li.get(0)).to.eq li.get(0)
 
       it "favors earlier items in the array when duplicates are found", ->
-        li = @cy.$("[ng-repeat*='foo in foos']")
+        li = @cy.$$("[ng-repeat*='foo in foos']")
 
         @cy.ng("repeater", "foo in foos").then ($li) ->
           expect($li.get(0)).to.eq li.get(0)
@@ -81,7 +81,7 @@ describe "$Cypress.Cy Angular Commands", ->
         ## appending the missingInput
         @cy.on "retry", (options) =>
           if options.total + (options._interval * 4) > options._runnableTimeout
-            @cy.$("body").append(missingLi)
+            @cy.$$("body").append(missingLi)
 
         @cy.ng("repeater", "li in lis").then ($li) ->
           expect($li).to.match missingLi
@@ -132,7 +132,7 @@ describe "$Cypress.Cy Angular Commands", ->
       _.each ngPrefixes, (prefix, attr) ->
         it "finds element by #{prefix}model", ->
           ## make sure we find this element
-          input = @cy.$("[#{prefix}model=#{attr}]")
+          input = @cy.$$("[#{prefix}model=#{attr}]")
           expect(input).to.exist
 
           ## and make sure they are the same DOM element
@@ -140,7 +140,7 @@ describe "$Cypress.Cy Angular Commands", ->
             expect($input.get(0)).to.eq input.get(0)
 
       it "favors earlier items in the array when duplicates are found", ->
-        input = @cy.$("[ng-model=foo]")
+        input = @cy.$$("[ng-model=foo]")
 
         @cy.ng("model", "foo").then ($input) ->
           expect($input.get(0)).to.eq input.get(0)
@@ -152,7 +152,7 @@ describe "$Cypress.Cy Angular Commands", ->
         ## appending the missingInput
         @cy.on "retry", (options) =>
           if options.total + (options._interval * 4) > options._runnableTimeout
-            @cy.$("body").append(missingInput)
+            @cy.$$("body").append(missingInput)
 
         @cy.ng("model", "missing-input").then ($input) ->
           expect($input).to.match missingInput
@@ -163,7 +163,7 @@ describe "$Cypress.Cy Angular Commands", ->
         missingInput = $("<input />", "data-ng-model": "missing-input")
 
         retry = _.after 6, _.once =>
-          @cy.$("body").append(missingInput)
+          @cy.$$("body").append(missingInput)
 
         @cy.on "retry", retry
 

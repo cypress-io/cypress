@@ -225,8 +225,27 @@ describe "$Cypress API", ->
       expect(@Cypress.Runner.create).to.be.calledWith(@Cypress, {}, "Mocha")
 
   describe ".$", ->
-    it "is a reference to jQuery", ->
-      expect(@Cypress.$.to.eq(window.$)
+    it "proxies back to cy.$$", ->
+      cy = {$$: @sandbox.spy()}
+      @Cypress.cy = cy
+      @Cypress.$("foo", "bar")
+      expect(cy.$$).to.be.calledWith("foo", "bar")
+      expect(cy.$$).to.be.calledOn(cy)
+
+    it "proxies Deferred", (done) ->
+      expect(@Cypress.$.Deferred).to.be.a("function")
+
+      df = @Cypress.$.Deferred()
+
+      _.delay ->
+        df.resolve()
+      , 10
+
+      df.done -> done()
+
+    _.each "Event Deferred ajax get getJSON getScript post when".split(" "), (fn) =>
+      it "proxies $.#{fn}", ->
+        expect(@Cypress.$[fn]).to.be.a("function")
 
   describe "._", ->
     it "is a reference to underscore", ->

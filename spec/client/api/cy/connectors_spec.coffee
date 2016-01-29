@@ -186,7 +186,7 @@ describe "$Cypress.Cy Connectors Commands", ->
           expect(str).to.eq "foo"
 
       it "re-wraps the remote element if its returned", ->
-        parent = @cy.$("input:first").parent()
+        parent = @cy.$$("input:first").parent()
         expect(parent).to.exist
 
         @cy.get("input:first").invoke("parent").then ($parent) ->

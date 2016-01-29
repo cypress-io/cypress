@@ -39,7 +39,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
       if ret and Cypress.Utils.hasElement(ret) and not Cypress.Utils.isInstanceOf(ret, $)
         ## set it back to our own jquery object
         ## to prevent it from being passed downstream
-        ret = Cypress.cy.$(ret)
+        ret = Cypress.cy.$$(ret)
 
       ## then will resolve with the fn's
       ## return or just pass along the subject

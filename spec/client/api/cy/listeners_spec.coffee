@@ -43,7 +43,7 @@ describe "$Cypress.Cy Listeners Extensions", ->
     describe "beforeunload", ->
       beforeEach ->
         @isReady = @sandbox.spy @cy, "isReady"
-        @a = $("<a id='change-page' href='/timeout?ms=200'>foo</a>").appendTo @cy.$("body")
+        @a = $("<a id='change-page' href='/timeout?ms=200'>foo</a>").appendTo @cy.$$("body")
 
       it "sets isReady to false", ->
         ## when we click the a it should synchronously fire

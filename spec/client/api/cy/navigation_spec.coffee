@@ -394,7 +394,7 @@ describe "$Cypress.Cy Navigation Commands", ->
     it "clears current timeout"
 
     it "clears current cy subject", ->
-      input = @cy.$("form#click-me input")
+      input = @cy.$$("form#click-me input")
 
       @cy.get("form#click-me").find("input").click().then (subject) ->
         expect(@cy.commands.names()).to.deep.eq [
@@ -404,7 +404,7 @@ describe "$Cypress.Cy Navigation Commands", ->
         expect(subject).to.be.null
 
     it "clears the current subject on submit event as well", ->
-      form = @cy.$("form#click-me")
+      form = @cy.$$("form#click-me")
 
       @cy.get("form#click-me").submit().then (subject) ->
         expect(@cy.commands.names()).to.deep.eq [

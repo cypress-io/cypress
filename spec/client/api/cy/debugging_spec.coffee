@@ -3,7 +3,7 @@ describe "$Cypress.Cy Debugging Commands", ->
 
   context "#debug", ->
     it "does not change the subject", ->
-      select = @cy.$("select[name=maps]")
+      select = @cy.$$("select[name=maps]")
 
       @cy.get("select[name=maps]").debug().then ($select) ->
         expect($select).to.match select

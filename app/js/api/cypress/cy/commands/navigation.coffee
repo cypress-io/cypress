@@ -90,7 +90,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
         .timeout(options.timeout)
         .then =>
           @_timeout(prevTimeout)
-          if Cypress.cy.$("[data-cypress-visit-error]").length
+          if Cypress.cy.$$("[data-cypress-visit-error]").length
             try
               @throwErr("Loading the new page failed.", options._log)
             catch e
@@ -251,7 +251,7 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
           $remoteIframe.one "load", =>
             @_timeout(prevTimeout)
             options.onLoad?.call(@, win)
-            if Cypress.cy.$("[data-cypress-visit-error]").length
+            if Cypress.cy.$$("[data-cypress-visit-error]").length
               try
                 @throwErr("Could not load the remote page: #{url}", options._log)
               catch e

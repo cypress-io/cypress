@@ -39,7 +39,7 @@ describe "$Cypress.Cy Ensure Extensions", ->
 
       @cy.prop("current", cmd)
 
-      $el    = @cy.$("button:first")
+      $el    = @cy.$$("button:first")
       coords = [{x: 10, y: 20}, {x: 20, y: 30}]
 
       fn = => @cy.ensureElementIsNotAnimating($el, coords)
