@@ -127,7 +127,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
         ## attempt to query for the elements by withinSubject context
         ## and catch any sizzle errors!
         try
-          $el = @$(selector, options.withinSubject)
+          $el = @$$(selector, options.withinSubject)
         catch e
           e.onFail = -> options._log.error(e)
           throw e
@@ -235,7 +235,7 @@ $Cypress.register "Querying", (Cypress, _, $) ->
 
       getOpts = _.extend _.clone(options),
         # error: getErr(text, phrase)
-        withinSubject: subject or @prop("withinSubject") or @$("body")
+        withinSubject: subject or @prop("withinSubject") or @$$("body")
         filter: true
         log: false
         # retry: false ## dont retry because we perform our own element validation

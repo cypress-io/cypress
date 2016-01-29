@@ -91,7 +91,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
           ret = prop.apply (remoteSubject or subject), args
 
           if ret and Cypress.Utils.hasElement(ret) and not Cypress.Utils.isInstanceOf(ret, $)
-            return @$(ret)
+            return @$$(ret)
 
           return ret
 
