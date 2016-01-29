@@ -1,5 +1,5 @@
 app        = require("electron").app
-Tray       = require("electron").Tray
+Tray       = require("./handlers/tray")
 Events     = require("./handlers/events")
 Renderer   = require("./handlers/renderer")
 
@@ -25,8 +25,8 @@ module.exports = (optionsOrArgv) ->
   ## This method will be called when Electron has finished
   ## initialization and is ready to create browser windows.
   app.on "ready", ->
-    icon = new Tray("nw/public/img/tray/mac-normal@2x.png")
-    icon.setToolTip("Cypress.io")
+    ## display the tray
+    Tray.display()
 
     ## handle right click to show context menu!
     ## handle drop events for automatically adding projects!
