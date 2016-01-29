@@ -63,7 +63,7 @@ To link to a page on API:
 
 #### Creating New Files
 
-When creating new files, each file requires an excert and a slug **followed by a newline**:
+When creating new files, each file requires an excerpt and a slug **followed by a newline**:
 ```md
 excerpt: Description at top of page
 slug: slug-for-url
