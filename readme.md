@@ -18,7 +18,7 @@ To make changes to our documentation:
 
 ### Working Locally
 
-You may need to login with your Readme.io credentials before working.
+You may need to login with your Readme.io credentials before working. You may see an error when trying to upload or clean that looks like this: `throw 'Error: Request failed! (Redirected to login...)'`
 
 ```bash
 export README_EMAIL=<readmeio_account_email>
