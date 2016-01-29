@@ -44,6 +44,12 @@
       @listenTo Cypress, "page:loading", (bool) =>
         @setPageLoading(bool)
 
+      @listenTo Cypress, "config", (obj) =>
+        ## we still need to set our initial viewport
+        ## height + width on config because other areas of the app
+        ## like iframe show_view depend on these values
+        @setViewport _(obj).pick("viewportHeight", "viewportWidth")
+
     load: (cb, options) ->
       ## add src and url to options here
 
