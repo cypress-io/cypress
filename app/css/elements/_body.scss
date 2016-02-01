@@ -1,6 +1,7 @@
 html {
   position: relative;
   height: 100%;
+  box-shadow: 5px 2px 2px #333;
 
   &.updates, &.debug, &.about, &.preferences {
     background-color: #ECECEC;
@@ -10,9 +11,39 @@ html {
       margin-bottom: 0;
     }
   }
+
+  &.app {
+
+    body {
+      margin-bottom: $footer-height;
+      padding-top: 12px;
+      border-radius: 10px;
+
+      &:before {
+        content: "";
+        height: 0;
+        width: 0;
+        border-width: 0 8px 8px 8px;
+        border-style: solid;
+        border-color: transparent transparent #eee transparent;
+        position: absolute;
+        top: 4px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+    }
+  }
 }
 
-body {
-  // background-color: rgba(0,0,0,0);
-  margin-bottom: $footer-height;
+html, body {
+  background-color: transparent;
+  margin: 0 auto;
+  overflow: hidden;
+  min-height: 100%;
+}
+
+#app {
+  background-color: white;
+  overflow: hidden;
+  min-height: 400px;
 }
