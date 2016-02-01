@@ -70,7 +70,7 @@ module.exports = {
 
     win.webContents.id = _.uniqueId("webContents")
 
-    win.on "closed", ->
+    win.once "closed", ->
       ## slice the window out of windows reference
       windows = _.omit windows, _.identity(win)
 

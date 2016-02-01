@@ -1,7 +1,5 @@
 app        = require("electron").app
-Tray       = require("./handlers/tray")
-Events     = require("./handlers/events")
-Renderer   = require("./handlers/renderer")
+init       = require("./handlers/init")
 
 module.exports = (optionsOrArgv) ->
   ## if we've been passed an array of argv
@@ -16,26 +14,13 @@ module.exports = (optionsOrArgv) ->
   else
     options = optionsOrArgv
 
-  ## exit when all windows are closed.
   app.on "window-all-closed", ->
-    Events.stop()
+    init.onWindowAllClosed(app)
 
+    ## exit when all windows are closed.
     app.exit(0)
 
   ## This method will be called when Electron has finished
   ## initialization and is ready to create browser windows.
   app.on "ready", ->
-    ## display the tray
-    Tray.display()
-
-    ## handle right click to show context menu!
-    ## handle drop events for automatically adding projects!
-    ## use the same icon as the cloud app
-
-    Events.start(options)
-
-    Renderer.create({
-      width: 1280
-      height: 720
-      type: "INDEX"
-    })
+    init.onReady(app, options)
