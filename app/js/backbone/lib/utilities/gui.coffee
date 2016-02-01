@@ -113,7 +113,7 @@
       App.ipc("window:open", {
         position: "center"
         width: 300
-        height: 210
+        height: 230
         toolbar: false
         title: "About"
         type: "ABOUT"

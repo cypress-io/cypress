@@ -8,3 +8,8 @@
 
     triggers:
       "click @ui.page"      : "page:clicked"
+
+    templateHelpers: ->
+      {
+        src: @options.src
+      }

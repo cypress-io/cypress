@@ -5,14 +5,17 @@
     initialize: (options = {}) ->
       updater = App.updater
 
-      aboutView = @getAboutView(updater)
+      App.ipc("get:about:logo:src").then (src) =>
 
-      @listenTo aboutView, "page:clicked", ->
-        ## this needs to be moved to an .env variable
-        App.ipc("external:open", "https://cypress.io")
+        aboutView = @getAboutView(updater, src)
 
-      @show aboutView
+        @listenTo aboutView, "page:clicked", ->
+          ## this needs to be moved to an .env variable
+          App.ipc("external:open", "https://cypress.io")
 
-    getAboutView: (updater) ->
+        @show aboutView
+
+    getAboutView: (updater, src) ->
       new Show.About
         model: updater
+        src: src
