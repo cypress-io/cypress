@@ -5,7 +5,8 @@ cypressGui    = require("cypress-gui")
 BrowserWindow = require("electron").BrowserWindow
 session       = require("../../session")
 
-windows = {}
+windows               = {}
+recentlyCreatedWindow = false
 
 getUrl = (type) ->
   switch type
@@ -32,6 +33,17 @@ module.exports = {
   get: (type) ->
     getByType(type) ? throw new Error("No window exists for: '#{type}'")
 
+  showAll: ->
+    _.invoke windows, "showInactive"
+
+  hideAllUnlessAnotherWindowIsFocused: ->
+    ## bail if we have another focused window
+    ## or we are in the middle of creating a new one
+    return if BrowserWindow.getFocusedWindow() or recentlyCreatedWindow
+
+    ## else hide all windows
+    _.invoke windows, "hide"
+
   getByWebContents: (webContents) ->
     _.find windows, (win) ->
       win.webContents is webContents
@@ -43,12 +55,18 @@ module.exports = {
       win.show()
       return Promise.resolve(win)
 
+    recentlyCreatedWindow = true
+
+    _.defaults options,
+      onFocus: ->
+      onBlur: ->
+
     args = _.defaults {}, options, {
       url: getUrl(options.type)
       width:  600
       height: 500
       show:   true
-      focus:  true
+      # focus:  true
       preload: path.join(__dirname, "./ipc.js")
       webPreferences: {
         nodeIntegration: false
@@ -66,17 +84,27 @@ module.exports = {
 
     win = new BrowserWindow(args)
 
+    win.on "blur", ->
+      console.log "blur", options.type
+      options.onBlur.apply(win, arguments)
+
+    win.on "focus", ->
+      console.log "focus", options.type
+      options.onFocus.apply(win, arguments)
+
     windows[options.type] = win
 
     win.webContents.id = _.uniqueId("webContents")
 
     win.once "closed", ->
+      win.removeAllListeners()
+
       ## slice the window out of windows reference
-      windows = _.omit windows, _.identity(win)
+      delete windows[options.type]
 
     ## open dev tools if they're true
     if args.devTools
-      win.webContents.openDevTools()
+      win.webContents.openDevTools({detach: true})
 
     ## enable our url to be a promise
     ## and wait for this to be resolved
@@ -85,6 +113,9 @@ module.exports = {
       .then (url) ->
         ## navigate the window here!
         win.loadURL(url)
+
+        ## reset this back to false
+        recentlyCreatedNewWindow = false
 
         if args.type is "GITHUB_LOGIN"
           new Promise (resolve, reject) ->

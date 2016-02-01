@@ -16,7 +16,7 @@ module.exports = {
 
     ## the primary (black) icon can be a template
     ## but the white varient (setPressedImage) CANNOT be a template
-    black = nativeImage.createFromPath(cypressIcons.getPathToTray("mac-normalTemplate.png"))
+    black = nativeImage.createFromPath(cypressIcons.getPathToTray("mac-normal.png"))
     white = nativeImage.createFromPath(cypressIcons.getPathToTray("mac-normal-inverse.png"))
     # white = nativeImage.createFromPath(cypressIcons.getPathToTray("menubar-icon-alt.png"))
     # white = nativeImage.createFromPath(cypressIcons.getPathToTray("mac-normal-inverseTemplate@2x.png"))

@@ -9,13 +9,13 @@ module.exports = {
     iconWidth = bounds.width
 
     translate = (coords) ->
-      coords.x -= Math.floor(300 / 2 - iconWidth)
-      coords.y += 8
+      winWidth = win.getBounds().width
+
+      coords.x -= Math.floor (winWidth / 2) - (iconWidth / 2)
+      coords.y = 0
       coords
 
     coords = translate(bounds)
-
-    console.log coords
 
     ## set these coords on the updater
     # App.updater.setCoords(coords) if App.updater
@@ -43,11 +43,17 @@ module.exports = {
     ## use the same icon as the cloud app
     Renderer.create({
       width: 300
-      height: 500
+      height: 400
+      resizable: false
       frame: false
+      # devTools: true
       transparent: true
-      # backgroundColor: "#000000FF"
+      # backgroundColor: "#FFFFFFFF"
       type: "INDEX"
+      onBlur: ->
+        Renderer.hideAllUnlessAnotherWindowIsFocused()
+      onFocus: ->
+        Renderer.showAll()
     })
     .then (win) =>
       Events.start(options)
