@@ -1,6 +1,9 @@
 app        = require("electron").app
 init       = require("./handlers/init")
 
+## prevent chromium from throttling
+app.commandLine.appendSwitch("disable-renderer-backgrounding")
+
 module.exports = (optionsOrArgv) ->
   ## if we've been passed an array of argv
   ## this means we are in development

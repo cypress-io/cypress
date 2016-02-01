@@ -66,11 +66,9 @@ module.exports = {
       width:  600
       height: 500
       show:   true
-      # focus:  true
       preload: path.join(__dirname, "./ipc.js")
       webPreferences: {
         nodeIntegration: false
-        # pageVisibility:  true
       }
     }
 
