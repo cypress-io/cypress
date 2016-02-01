@@ -1,6 +1,7 @@
 _           = require("lodash")
 ipc         = require("electron").ipcMain
 shell       = require("electron").shell
+cypressIcons = require("cypress-icons")
 user        = require("./user")
 dialog      = require("./dialog")
 project     = require("./project")
@@ -91,6 +92,9 @@ handleEvent = (event, id, type, arg, options) ->
 
     when "update"
       send({foo: "bar"})
+
+    when "get:about:logo:src"
+      send(cypressIcons.getPathToIcon("icon_32x32@2x.png"))
 
     when "get:logs"
       logger.getLogs()
