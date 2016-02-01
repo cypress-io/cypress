@@ -1,0 +1,85 @@
+.cy-main-content .empty-onboarding {
+  margin: 50px auto 0;
+  width: 650px;
+  overflow: auto;
+
+  h1 {
+    text-align: center;
+    color: $pass;
+    font-size: 28px;
+    margin: 60px 0 30px;
+  }
+
+  img {
+    text-align: center;
+    margin: 40px auto;
+    border: 1px solid #e8e8e8;
+    box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.04);
+  }
+
+  ul {
+    list-style-type: none;
+    font-size: 17px;
+
+    li {
+      margin: 20px 0;
+
+      a {
+        border-bottom: 1px dotted lighten($brand-primary, 30%);
+      }
+
+    }
+
+    .steps-num {
+      display: inline-block;
+      background-color: $pass;
+      border-radius: 100px;
+      width: 25px;
+      height: 25px;
+      line-height: 25px;
+      text-align: center;
+      color: white;
+      margin-right: 5px;
+    }
+
+  }
+
+  .helper-line {
+    text-align: center;
+    color: #cdd1d9;
+    font-weight: bold;
+
+    a {
+      display: block;
+      font-size: 16px;
+      margin: 35px 0;
+    }
+
+    &>span {
+      display: inline-block;
+      position: relative;
+      font-size: 14px;
+
+      &:before,
+      &:after {
+        content: "";
+        position: absolute;
+        border-bottom: 1px solid #cdd1d9;
+        top: 50%;
+        width: 100px;
+      }
+      &:before {
+        right: 100%;
+        margin-right: 15px;
+      }
+      &:after {
+        left: 100%;
+        margin-left: 15px;
+      }
+
+    }
+
+  }
+
+
+}

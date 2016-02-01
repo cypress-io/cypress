@@ -1,7 +1,24 @@
-<div class="well well-lg">
-  <h4>
-    <i class="fa fa-warning"></i>
-    Sorry, couldn't find any tests here:
-  </h4>
-  <pre><%= @path %></pre>
+<div class="empty-onboarding">
+  <h1>Let's Add Your First Test File</h1>
+  <ul>
+    <li>
+      <span class="steps-num">1</span>
+      Go to your project directory's newly created
+      <a href="#">integration_tests</a>
+      folder.
+    </li>
+    <li>
+      <span class="steps-num">2</span>
+      Create a JavaScript or CoffeeScript file
+      <span>or</span>
+      <a href="#">create the app_spec.js file for you</a>.
+    </li>
+    <img src="http://placehold.it/640x250">
+    <div class="helper-line">
+      <span>need help?</span>
+      <a class="helper-docs-link" href="https://on.cypress.io/guides/writing-your-first-test">
+        <i class="fa fa-graduation-cap"></i>
+        Read the docs on writing your first test in Cypress
+      </a>
+    </div>
 </div>
