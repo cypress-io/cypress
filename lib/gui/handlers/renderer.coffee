@@ -85,11 +85,9 @@ module.exports = {
     win = new BrowserWindow(args)
 
     win.on "blur", ->
-      console.log "blur", options.type
       options.onBlur.apply(win, arguments)
 
     win.on "focus", ->
-      console.log "focus", options.type
       options.onFocus.apply(win, arguments)
 
     windows[options.type] = win
