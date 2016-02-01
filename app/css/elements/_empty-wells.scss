@@ -1,6 +1,6 @@
 .cy-main-content .empty-onboarding {
   margin: 50px auto 0;
-  width: 650px;
+  max-width: 650px;
   overflow: auto;
 
   h1 {
@@ -13,35 +13,71 @@
   img {
     text-align: center;
     margin: 40px auto;
-    border: 1px solid #e8e8e8;
-    box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.04);
   }
 
-  ul {
-    list-style-type: none;
+  p {
     font-size: 17px;
+    line-height: 28px;
 
-    li {
-      margin: 20px 0;
+    a {
+      border-bottom: 1px dotted lighten($brand-primary, 30%);
+    }
 
-      a {
-        border-bottom: 1px dotted lighten($brand-primary, 30%);
+  }
+
+  .folder-preview-onboarding {
+    background-color: #f6f6f6;
+    padding: 20px 50px;
+    border: 1px solid #e8e8e8;
+    box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.04);
+    margin: 40px auto;
+
+    ul {
+      list-style-type: none;
+      font-size: 16px;
+
+      &>li {
+        position: relative;
+        margin: 7px 0;
+
+        &:before {
+          content: "";
+          position: absolute;
+          border-bottom: 3px solid #cdd1d9;
+          top: 9px;
+          width: 3px;
+          left: -16px;
+        }
+
+
+
+        &.app-code {
+          color: #aaa;
+          font-style: italic;
+        }
+
+        &.new-code {
+        }
+
+        &>ul {
+          margin-left: 20px;
+        }
       }
 
     }
 
-    .steps-num {
-      display: inline-block;
-      background-color: $pass;
-      border-radius: 100px;
-      width: 25px;
-      height: 25px;
-      line-height: 25px;
-      text-align: center;
-      color: white;
-      margin-right: 5px;
+    ul:first-child>li:before {
+      border: 0;
     }
 
+    ul:first-child>li>ul>li>ul>li:after {
+      content: "";
+      position: absolute;
+      border-bottom: 3px solid #cdd1d9;
+      top: 9px;
+      width: 3px;
+      left: -35px;
+    }
   }
 
   .helper-line {
