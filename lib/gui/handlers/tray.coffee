@@ -18,15 +18,6 @@ module.exports = {
     ## but the white varient (setPressedImage) CANNOT be a template
     black = nativeImage.createFromPath(cypressIcons.getPathToTray("mac-normal.png"))
     white = nativeImage.createFromPath(cypressIcons.getPathToTray("mac-normal-inverse.png"))
-    # white = nativeImage.createFromPath(cypressIcons.getPathToTray("menubar-icon-alt.png"))
-    # white = nativeImage.createFromPath(cypressIcons.getPathToTray("mac-normal-inverseTemplate@2x.png"))
-    # white = nativeImage.createFromPath(cypressIcons.getPathToTray("mac-normal-inverseTemplate.png"))
-
-    # black.setTemplateImage(true)
-    # white.setTemplateImage(true)
-
-    # console.log black.isTemplateImage()
-    # console.log white.isTemplateImage()
 
     tray = new Tray(null)
 
@@ -44,7 +35,7 @@ module.exports = {
     tray.setImage(black)
     tray.setPressedImage(white)
     # tray.setPressedImage(cypressIcons.getPathToTray("mac-normal-inverse.png"))
-    # icon.setToolTip("Cypress.io")
+    tray.setToolTip("Cypress")
 
     return tray
 }

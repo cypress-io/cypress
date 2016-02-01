@@ -115,7 +115,7 @@ module.exports = {
         win.loadURL(url)
 
         ## reset this back to false
-        recentlyCreatedNewWindow = false
+        recentlyCreatedWindow = false
 
         if args.type is "GITHUB_LOGIN"
           new Promise (resolve, reject) ->
