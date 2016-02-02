@@ -51,6 +51,8 @@ module.exports = {
       # backgroundColor: "#FFFFFFFF"
       type: "INDEX"
       onBlur: ->
+        return if @webContents.isDevToolsOpened()
+
         Renderer.hideAllUnlessAnotherWindowIsFocused()
       onFocus: ->
         Renderer.showAll()
