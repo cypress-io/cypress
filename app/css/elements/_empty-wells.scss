@@ -8,6 +8,12 @@
   border: 1px dashed #ddd;
 }
 
+strong {
+  font-weight: bold;
+  border-bottom: 1px dotted #ccc;
+  color: #222;
+}
+
 .empty-onboarding {
   margin: 0px auto 0;
   max-width: 650px;
@@ -35,12 +41,25 @@
 
   }
 
+  h6  {
+    margin-top: 30px;
+    font-weight: bold;
+    font-size: 14px;
+    font-style: italic;
+    color: #999;
+    margin-bottom: 2px;
+  }
+
   .folder-preview-onboarding {
-    background-color: #f6f6f6;
-    padding: 20px 50px;
-    border: 1px solid #e8e8e8;
+    background-color: #fcfcfc;
+    padding: 0;
+    border: 1px solid #e9e9e9;
     box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.04);
-    margin: 40px auto;
+    margin: 0 auto 40px;
+    color: #555;
+    margin-top: 30px;
+
+
 
     ul {
       list-style-type: none;
@@ -50,43 +69,76 @@
         position: relative;
         margin: 7px 0;
 
-        &:before {
-          content: "";
-          position: absolute;
-          border-bottom: 3px solid #cdd1d9;
-          top: 9px;
-          width: 3px;
-          left: -16px;
-        }
+        // &:before {
+        //   content: "+";
+        //   position: absolute;
+        //   border-bottom: 3px solid #cdd1d9;
+        //   top: 9px;
+        //   width: 3px;
+        //   left: -16px;
+        // }
 
 
 
         &.app-code {
           color: #aaa;
           font-style: italic;
+          font-weight: 200;
         }
 
         &.new-code {
+          padding-top: 7px;
+          padding-bottom: 4px;
+          padding-left: 31px;
+          margin-left: -30px;
+          margin-bottom: 0;
+          border-top: 1px solid lighten($pass, 54%);
+          background-color: lighten($pass, 58%);
+
         }
 
         &>ul {
-          margin-left: 20px;
+          padding-left: 20px;
         }
       }
 
     }
 
-    ul:first-child>li:before {
-      border: 0;
+    &>ul {
+      margin-bottom: 0;
+      &>li {
+        margin-bottom: 0;
+        padding-left: 10px;
+
+      }
+    }
+
+    // ul:first-child>li:before {
+    //   border: 0;
+    // }
+
+    ul:first-child>li>ul>li:last-child:after {
+      color: lighten($pass, 5%);
+      content: "+";
+      position: absolute;
+      top: 6px;
+      left: 10px;
     }
 
     ul:first-child>li>ul>li>ul>li:after {
-      content: "";
+      color: lighten($pass, 5%);
+      content: "+";
       position: absolute;
-      border-bottom: 3px solid #cdd1d9;
-      top: 9px;
-      width: 3px;
-      left: -35px;
+      top: 0px;
+      left: -40px;
+    }
+
+    ul:first-child>li>ul>li>ul>li>ul>li:after {
+      color: lighten($pass, 5%);
+      content: "+";
+      position: absolute;
+      top: 0px;
+      left: -60px;
     }
   }
 }
