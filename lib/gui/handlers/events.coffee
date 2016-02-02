@@ -1,4 +1,5 @@
 _           = require("lodash")
+Promise     = require("bluebird")
 ipc         = require("electron").ipcMain
 shell       = require("electron").shell
 cypressIcons = require("cypress-icons")
@@ -36,6 +37,25 @@ handleEvent = (event, id, type, arg, options) ->
     when "log:out"
       user.logOut(arg)
       .then(send)
+      .catch(sendErr)
+
+    when "clear:github:cookies"
+      cookies = Promise.promisifyAll(event.sender.session.cookies)
+
+      removeCookie = (cookie) ->
+        console.log "removing", cookie
+        prefix = if cookie.secure then "https://" else "http://"
+        if cookie.domain[0] is "."
+          prefix += "www"
+
+        url = prefix + cookie.domain + cookie.path
+
+        cookies.removeAsync(url, cookie.name)
+
+      cookies.getAsync({domain: "github.com"})
+      .map(removeCookie)
+      .then ->
+        send(null)
       .catch(sendErr)
 
     when "get:current:user"
