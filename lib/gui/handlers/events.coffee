@@ -1,5 +1,4 @@
 _           = require("lodash")
-Promise     = require("bluebird")
 ipc         = require("electron").ipcMain
 shell       = require("electron").shell
 cypressIcons = require("cypress-icons")
@@ -7,6 +6,7 @@ user        = require("./user")
 dialog      = require("./dialog")
 project     = require("./project")
 pgk         = require("./package")
+cookies     = require("./cookies")
 cloneError  = require("./clone_error")
 Renderer    = require("./renderer")
 logger      = require("../../log")
@@ -40,21 +40,8 @@ handleEvent = (options, event, id, type, arg) ->
       .catch(sendErr)
 
     when "clear:github:cookies"
-      cookies = Promise.promisifyAll(event.sender.session.cookies)
-
-      removeCookie = (cookie) ->
-        prefix = if cookie.secure then "https://" else "http://"
-        if cookie.domain[0] is "."
-          prefix += "www"
-
-        url = prefix + cookie.domain + cookie.path
-
-        cookies.removeAsync(url, cookie.name)
-
-      cookies.getAsync({domain: "github.com"})
-      .map(removeCookie)
-      .then ->
-        send(null)
+      cookies.clearGithub(event.sender.session.cookies)
+      .then(send)
       .catch(sendErr)
 
     when "get:current:user"
