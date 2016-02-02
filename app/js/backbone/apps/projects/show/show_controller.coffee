@@ -8,7 +8,14 @@
       projectView = @getProjectView(project)
 
       @listenTo projectView, "client:url:clicked", ->
-        App.ipc("external:open", project.get("clientUrl"))
+        # App.ipc("external:open", project.get("clientUrl"))
+        App.ipc("window:open", {
+          position: "center"
+          width: 1280
+          height: 720
+          url: project.get("clientUrl")
+          type: "PROJECT"
+        })
 
       @listenTo projectView, "stop:clicked ok:clicked" , ->
         App.ipc("close:project").then ->

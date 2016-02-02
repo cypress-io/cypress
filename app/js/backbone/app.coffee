@@ -14,7 +14,6 @@
     ## or display any UI. just finish installing the updates
 
     ## display the GUI
-    # App.execute "gui:display", options.coords
     App.ipc("change:coords", options.coords).then ->
 
       ## start the updates being applied app so the user knows its still a-happen-ning

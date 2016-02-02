@@ -1,8 +1,5 @@
 @App.module "Utilities", (Utilities, App, Backbone, Marionette, $, _) ->
 
-  ## TODO: DO WE NEED TO WHITELIST ANYTHING IN ELECTRON?
-  App.execute("gui:whitelist", "https://github.com/")
-
   API =
     loginRequest: ->
       App.ipc("window:open", {

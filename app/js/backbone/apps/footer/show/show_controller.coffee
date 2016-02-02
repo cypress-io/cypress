@@ -44,6 +44,7 @@
         App.execute "login:request"
 
       @listenTo bottomView, "quit:clicked", ->
+        ## TODO: handle quiting
         App.execute "gui:quit"
 
       @listenTo bottomView, "updates:clicked", ->
