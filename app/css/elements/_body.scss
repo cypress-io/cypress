@@ -33,6 +33,12 @@ html {
       }
     }
   }
+
+  &.login {
+    body:before {
+      border-bottom-color: #fff;
+    }
+  }
 }
 
 html, body {

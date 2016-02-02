@@ -14,6 +14,12 @@
       "change:loggingIn" : "render"
       "change:error"     : "render"
 
+    onShow: ->
+      $("html").addClass("login")
+
     onRender: ->
       loggingIn = @model.get("loggingIn")
       @ui.login.toggleClass("disabled", loggingIn).attr("disabled", loggingIn)
+
+    onDestroy: ->
+      $("html").removeClass("login")
