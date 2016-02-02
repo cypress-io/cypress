@@ -1,6 +1,6 @@
 <div class="empty-onboarding">
   <h1>Add Your First Test File</h1>
-  <p>We've already helped you get started by creating a folder called <a href="#">cypress</a> in your project. You'll find a folder for <a href="#">integration tests</a> and <a href="#">unit tests</a>. Let's start running some tests from your <a href="#">app_spec.js</a> file.</p>
+  <p>We created a folder in your project called <a href="#">cypress</a>. In there, you'll find a folder for <a href="#">integration tests</a> and <a href="#">unit tests</a>.</p>
   <div class="folder-preview-onboarding">
     <ul>
       <li>
@@ -60,10 +60,9 @@
     </ul>
   </div>
   <div class="helper-line">
-    <span>need help?</span>
-    <a class="helper-docs-link" href="https://on.cypress.io/guides/writing-your-first-test">
-      <i class="fa fa-graduation-cap"></i>
-      Read the docs on writing your first test in Cypress
-    </a>
+
+    <button type="button" class="btn btn-success btn-lg" data-dismiss="modal">
+      OK, got it!
+    </button>
   </div>
 </div>

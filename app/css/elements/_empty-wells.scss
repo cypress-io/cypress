@@ -1,3 +1,13 @@
+.empty-well {
+  padding: 50px 100px;
+  margin: 0 30px 30px;
+  text-align: center;
+  font-style: italic;
+  background-color: #f7f7f7;
+  border-radius: 5px;
+  border: 1px dashed #ddd;
+}
+
 .empty-onboarding {
   margin: 0px auto 0;
   max-width: 650px;
@@ -88,7 +98,7 @@
 
   a {
     display: block;
-    font-size: 16px;
+    font-size: 14px;
     margin: 35px 0;
   }
 

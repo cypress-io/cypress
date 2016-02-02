@@ -1,10 +1,13 @@
-<div class="empty">
-No files were found
-  <div class="helper-line">
-    <span>need help?</span>
-    <a class="helper-docs-link" href="https://on.cypress.io/guides/writing-your-first-test">
-      <i class="fa fa-graduation-cap"></i>
-      Read the docs on writing your first test in Cypress
-    </a>
-  </div>
+<div class="empty-well">
+  <h2>
+    No files found in
+    <code><%= @path %></code>
+  </h2>
+</div>
+<div class="helper-line">
+  <span>need help?</span>
+  <a class="helper-docs-link" href="https://on.cypress.io/guides/writing-your-first-test">
+    <i class="fa fa-graduation-cap"></i>
+    Read the docs on writing your first test in Cypress
+  </a>
 </div>

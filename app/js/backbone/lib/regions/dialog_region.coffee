@@ -48,9 +48,6 @@
       # 2. insert the view's el into .modal-body
       @$el.html("<div class='modal-dialog hide'>
         <div class='modal-content'>
-          <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
-            <span aria-hidden='true'>×</span>
-          </button>
           <div class='modal-body'></div>
         </div>
       </div>")
