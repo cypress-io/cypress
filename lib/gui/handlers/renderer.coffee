@@ -77,7 +77,10 @@ module.exports = {
       parsed = uri.parse(url, true)
 
       if code = parsed.query.code
-        win.destroy()
+        ## there is a bug with electron
+        ## crashing when attemping to
+        ## destroy this window synchronously
+        _.defer -> win.destroy()
 
         resolve(code)
 
