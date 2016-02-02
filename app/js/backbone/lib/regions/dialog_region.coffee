@@ -34,7 +34,7 @@
       options.close = (e, ui) => @empty()
 
       _.defaults options,
-        title: "default title"
+        title: null
         dialogClass: options.className ? ""
         type: "default"
         icon: false
@@ -48,12 +48,9 @@
       # 2. insert the view's el into .modal-body
       @$el.html("<div class='modal-dialog hide'>
         <div class='modal-content'>
-          <div class='modal-header'>
-            <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
-              <span aria-hidden='true'>×</span>
-            </button>
-            <h4 class='modal-title'></h4>
-          </div>
+          <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
+            <span aria-hidden='true'>×</span>
+          </button>
           <div class='modal-body'></div>
         </div>
       </div>")
