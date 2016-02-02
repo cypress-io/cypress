@@ -44,8 +44,7 @@
         App.execute "login:request"
 
       @listenTo bottomView, "quit:clicked", ->
-        ## TODO: handle quiting
-        App.execute "gui:quit"
+        App.ipc("quit")
 
       @listenTo bottomView, "updates:clicked", ->
         App.execute "gui:check:for:updates"
