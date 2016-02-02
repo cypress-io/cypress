@@ -51,6 +51,8 @@
       App.vent.trigger "start:login:app"
 
       App.ipc("log:out", user.get("session_token"))
+      .then ->
+        App.ipc("clear:github:cookies")
 
   App.commands.setHandler "login:request", ->
     API.loginRequest()
