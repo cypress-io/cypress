@@ -24,6 +24,17 @@ handleEvent = (options, event, id, type, arg) ->
     sendResponse({id: id, data: data})
 
   switch type
+    when "quit"
+      ## TODO: fix this. if the debug window
+      ## is open and we attempt to quit
+      ## it will not be closed because
+      ## there is a memory reference
+      ## thus we have to remove it first
+      logger.off()
+
+      ## exit the app immediately
+      options.app.exit(0)
+
     when "show:directory:dialog"
       dialog.show()
       .then(send)

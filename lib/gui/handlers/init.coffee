@@ -38,6 +38,8 @@ module.exports = {
     Promise.resolve(renderer)
 
   onReady: (app, options = {}) ->
+    options.app = app
+
     ## handle right click to show context menu!
     ## handle drop events for automatically adding projects!
     ## use the same icon as the cloud app
