@@ -27,24 +27,6 @@
       .catch (err) ->
         App.currentUser.setLoginError(err)
 
-    clearCookies: (cb) ->
-      win = App.request "gui:get"
-      win.cookies.getAll {domain: "github.com"}, (cookies) =>
-        count = 0
-        length = cookies.length
-
-        _.each cookies, (cookie) =>
-          prefix = if cookie.secure then "https://" else "http://"
-          if cookie.domain[0] is "."
-            prefix += "www"
-
-          obj = {name: cookie.name}
-          obj.url = prefix + cookie.domain + cookie.path
-
-          win.cookies.remove obj
-
-        cb()
-
     logOut: (user) ->
       ## immediately log out even before our
       ## promise resolves so we dont block the UI
