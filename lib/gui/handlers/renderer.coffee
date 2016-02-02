@@ -21,7 +21,7 @@ getUrl = (type) ->
     when "INDEX"
       cypressGui.getPathToIndex()
     else
-      throw new Error("No acceptable window type found for: '#{arg.type}'")
+      throw new Error("No acceptable window type found for: '#{type}'")
 
 getByType = (type) ->
   windows[type]
@@ -62,7 +62,6 @@ module.exports = {
       onBlur: ->
 
     args = _.defaults {}, options, {
-      url: getUrl(options.type)
       width:  600
       height: 500
       show:   true
@@ -71,6 +70,8 @@ module.exports = {
         nodeIntegration: false
       }
     }
+
+    args.url ?= getUrl(options.type)
 
     urlChanged = (url, resolve) ->
       parsed = uri.parse(url, true)
