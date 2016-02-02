@@ -48,9 +48,6 @@
         else
           @updatesAvailable(false)
 
-    # setCoords: (coords = {}) ->
-      # @getUpdater().setCoords(coords)
-
   API =
     newUpdater: (version) ->
       new Entities.Updater({version: version})

@@ -1,9 +1,5 @@
 @App.module "Utilities", (Utilities, App, Backbone, Marionette, $, _) ->
 
-  # gui  = require('nw.gui')
-
-  # process.argv = process.argv.concat(gui.App.argv)
-
   windows = {}
 
   API =
