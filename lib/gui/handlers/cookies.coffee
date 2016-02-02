@@ -16,5 +16,5 @@ module.exports = {
 
     cookies.getAsync({domain: "github.com"})
     .map(removeCookie)
-    .then -> send(null)
+    .return(null)
 }
