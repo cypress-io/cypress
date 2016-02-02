@@ -34,6 +34,12 @@
     App.navs = App.request "nav:entities"
 
   App.on "start", (options = {}) ->
+    App.addRegions
+      dialogRegion: {
+        selector: "#dialog-region"
+        regionClass: App.Regions.Dialog
+      }
+
     ## start listening to socket io
     App.execute "socket:start", options.socketId
 

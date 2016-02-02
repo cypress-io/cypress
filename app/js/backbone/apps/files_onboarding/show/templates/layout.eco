@@ -1,0 +1,69 @@
+<div class="empty-onboarding">
+  <h1>Add Your First Test File</h1>
+  <p>We've already helped you get started by creating a folder called <a href="#">cypress</a> in your project. You'll find a folder for <a href="#">integration tests</a> and <a href="#">unit tests</a>. Let's start running some tests from your <a href="#">app_spec.js</a> file.</p>
+  <div class="folder-preview-onboarding">
+    <ul>
+      <li>
+        <span>
+          <i class="fa fa-folder-open-o"></i>
+          project_name_from_cypress
+        </span>
+        <ul>
+          <li class="app-code">
+            <span >
+              <i class="fa fa-folder-o"></i>
+              application_code...
+            </span>
+          </li>
+          <li class="new-code">
+            <span>
+              <i class="fa fa-folder-open-o"></i>
+              cypress
+            </span>
+            <ul>
+              <li>
+                <span>
+                  <i class="fa fa-folder-o"></i>
+                  fixtures
+                </span>
+              </li>
+              <li>
+                <span>
+                  <i class="fa fa-folder-o"></i>
+                  support
+                </span>
+              </li>
+              <li>
+                <span>
+                  <i class="fa fa-folder-o"></i>
+                  unit_tests
+                </span>
+              </li>
+              <li>
+                <span>
+                  <i class="fa fa-folder-open-o"></i>
+                  integration_tests
+                </span>
+                <ul>
+                  <li>
+                    <span>
+                      <i class="fa fa-file-code-o"></i>
+                      app_spec.js
+                    </span>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+  <div class="helper-line">
+    <span>need help?</span>
+    <a class="helper-docs-link" href="https://on.cypress.io/guides/writing-your-first-test">
+      <i class="fa fa-graduation-cap"></i>
+      Read the docs on writing your first test in Cypress
+    </a>
+  </div>
+</div>

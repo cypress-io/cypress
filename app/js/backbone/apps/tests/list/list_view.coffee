@@ -18,9 +18,6 @@
   class List.Empty extends App.Views.ItemView
     template: "tests/list/_empty"
 
-    onRender: ->
-      $(".title-bar").addClass("hidden")
-
     serializeData: ->
       path: @options.path
 

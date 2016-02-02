@@ -7,6 +7,11 @@
 
       @layout = @getLayoutView()
 
+      ## if this is our first time visiting files
+      ## after adding the project, we want to onboard
+      @listenTo @layout, "show", ->
+        @onboardingRegion()
+
       @listenTo files, "sync", =>
         # @searchRegion(files) if files.length
         # @recentFilesRegion(files)
@@ -15,6 +20,9 @@
       @show @layout,
         loading:
           entities: files
+
+    onboardingRegion: ->
+      App.execute "show:files:onboarding"
 
     searchRegion: (files) ->
       searchView = @getSearchView files
