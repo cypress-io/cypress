@@ -12,7 +12,7 @@ Renderer    = require("./renderer")
 logger      = require("../../log")
 Updater     = require("../../updater")
 
-handleEvent = (event, id, type, arg, options) ->
+handleEvent = (options, event, id, type, arg) ->
   sendResponse = (data = {}) ->
     try
       event.sender.send("response", data)
@@ -43,7 +43,6 @@ handleEvent = (event, id, type, arg, options) ->
       cookies = Promise.promisifyAll(event.sender.session.cookies)
 
       removeCookie = (cookie) ->
-        console.log "removing", cookie
         prefix = if cookie.secure then "https://" else "http://"
         if cookie.domain[0] is "."
           prefix += "www"
@@ -80,7 +79,9 @@ handleEvent = (event, id, type, arg, options) ->
       .catch(sendErr)
 
     when "change:coords"
-      send(null)
+      coords = _.mapValues(arg, parseFloat)
+      win = Renderer.getByWebContents(event.sender)
+      win.setPosition(coords.x, coords.y)
 
     when "updater:install"
       ## send up the appPath, execPath, and initial args
@@ -165,7 +166,7 @@ module.exports = {
     ipc.removeAllListeners()
 
   start: (options) ->
-    ## curry right options
-    ipc.on "request", _.partialRight(handleEvent, options)
+    ## curry left options
+    ipc.on "request", _.partial(handleEvent, options)
 
 }
