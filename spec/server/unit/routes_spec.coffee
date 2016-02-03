@@ -1586,6 +1586,17 @@ describe "Routes", ->
             null
           .end(done)
 
+    it "handles 204 no content status codes", (done) ->
+      nock("http://localhost:4000")
+        .get("/user/rooms")
+        .reply(204, "")
+
+      supertest(@app)
+        .get("/http://localhost:4000/user/rooms")
+        .expect(204)
+        .expect("")
+        .end(done)
+
       # it "handles protocol-less proxies", (done) ->
       #   nock("http://www.cdnjs.com")
       #     .get("backbone.js")
