@@ -27,10 +27,37 @@ runGui = (options) ->
       stdio: "inherit"
     })
 
-runHeadless = ->
-  ## move all the crap from bin/cy into here
-  args = []
-  cp.spawn("nodemon", args, {stdio: "inherit"})
+runHeadless = (options) ->
+  switch options.env
+    when "development"
+      args = {}
+
+      if options.debug
+        args.debug = "--debug"
+
+      _.extend(args, {
+        script: "lib/cypress.coffee"
+        watch: ["--watch", "lib"]
+        ignore: ["--ignore", "lib/public"]
+        verbose: "--verbose"
+        exts: ["-e", "coffee,js"]
+        args: ["--", options.project]
+      })
+
+      args = _.chain(args).values().flatten().value()
+
+      cp.spawn("nodemon", args, {stdio: "inherit"})
+
+      if options.debug
+        cp.spawn("node-inspector", [], {stdio: "inherit"})
+
+        require("open")("http://127.0.0.1:8080/debug?ws=127.0.0.1:8080&port=5858")
+
+    when "production"
+      console.log "production"
+
+    else
+      throw new Error("Missing options.env. Must have this value to run Cypress headlessly!")
 
 module.exports = (argv) ->
   options = argsUtil.toObject(argv)
@@ -50,7 +77,7 @@ module.exports = (argv) ->
     process.stdout.write(manifest + "\n")
     return process.exit()
 
-  if process.env.CYPRESS_ENV is "production"
+  if options.env is "production"
     ## start in gui mode by default
     options.gui = true
 
@@ -59,4 +86,4 @@ module.exports = (argv) ->
     runGui(options)
   else
     ## spawn nodemon to run headlessly in server mode
-    runHeadless()
+    runHeadless(options)
