@@ -4,7 +4,7 @@ excerpt: Walkthroughs and tutorials on the core concepts of testing in Cypress.
 [block:callout]
 {
   "type": "info",
-  "body": "[Watch Brian Mann give a live walkthrough of the app.](https://youtu.be/yq99BvSe1AQ)",
+  "body": "[Watch our talk at Nodevember 2015.](https://youtu.be/yq99BvSe1AQ)",
   "title": "Want to see Cypress in action?"
 }
 [/block]
