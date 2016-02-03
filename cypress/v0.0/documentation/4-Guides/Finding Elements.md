@@ -164,14 +164,6 @@ You simply describe the state of your element with assertions, and Cypress knows
 }
 [/block]
 
-[block:callout]
-{
-  "type": "success",
-  "body": "View our list of [Common Assertions](https://on.cypress.io/guides/common-assertions).",
-  "title": "Need more examples?"
-}
-[/block]
-
 ## Length Assertions
 
 ```javascript
