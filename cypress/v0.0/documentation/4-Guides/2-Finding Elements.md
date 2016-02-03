@@ -219,7 +219,7 @@ cy
 
 It's important to note that timeouts will automatically flow down to their cooresponding assertions.
 
-In the example we wait up to a total of 10 seconds to:
+**In the example we wait up to a total of 10 seconds to:**
 
 1. find the `<input>`
 2. ensure it has a value of `foo`
@@ -236,7 +236,7 @@ cy.find("input", {timeout: 10000}).should("have.value", "foo").and("have.class",
 [block:callout]
 {
   "type": "warning",
-  "body": "Assuming you have two assertions, if one passes, and one fails, Cypress will continue to retry until they **both** pass. If Cypress eventually times out you'll get a visual indicator in your Command Log to know which specific assertion failed.",
+  "body": "Assuming you have two assertions, if one passes, and one fails, Cypress will continue to retry until they **both** pass. If Cypress eventually times out you'll get a visual indicator in your Command Log to know which specific assertion failed."
 }
 [/block]
 
