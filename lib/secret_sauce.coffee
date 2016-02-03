@@ -752,6 +752,9 @@ SecretSauce.Socket =
       socket.on "request", =>
         @onRequest.apply(@, arguments)
 
+      socket.on "is:new:project", (fn) =>
+        fn(true)
+
       socket.on "fixture", =>
         @onFixture.apply(@, arguments)
 
