@@ -1,13 +1,11 @@
 slug: guides
 excerpt: Walkthroughs and tutorials on the core concepts of testing in Cypress.
 
-Cypress is a test engine that runs unit and integration tests in your browser. It aims to reduce the mental effort required to write tests. Cypress works in your typical development workflow (in the browser) and allows you to see your application while it's being tested. This enables you to practice true test driven development since there is no context shift between testing and development.
-
 [block:callout]
 {
   "type": "info",
-  "body": "Read about our [Our Goals](https://on.cypress.io/guides/our-goals).",
-  "title": "New to Cypess?"
+  "body": "[Watch Brian Mann give a live walkthrough of the app.](https://youtu.be/yq99BvSe1AQ)",
+  "title": "Want to see Cypress in action?"
 }
 [/block]
 
