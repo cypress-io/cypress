@@ -24,6 +24,7 @@ excerpt: Walkthroughs and tutorials on the core concepts of testing in Cypress.
 | -------------------- | -- |
 | [Configuration](https://on.cypress.io/guides/configuration) | Configure global, network, directory, viewport and animation options |
 | [Issuing Commands](https://on.cypress.io/guides/issuing-commands) | Issue actions to be performed in your test |
+| [Finding Elements](https://on.cypress.io/guides/finding-elements) | Traverse the DOM, find elements, make assertions |
 | [Making Assertions](https://on.cypress.io/guides/making-assertions) | Set expectations for the behavior |
 | [Network Requests](https://on.cypress.io/guides/network-request-xhr) | Handle AJAX/XHR Requests |
 | [Continous Integration](https://on.cypress.io/guides/continuous-integration) | Integrate with CI Providers |

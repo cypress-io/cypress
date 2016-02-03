@@ -10,6 +10,9 @@ excerpt: Traverse the DOM, find elements, make assertions
 - :fa-angle-right: [Existence](#section-existence)
   - [Waiting for an element to exist](#section-waiting-for-an-element-to-exist)
   - [Waiting for an element to not exist](#section-waiting-for-an-element-to-not-exist)
+- :fa-angle-right: [Timeouts](#section-timeouts)
+  - [How retrying works](#section-how-retrying-works)
+  - [Increasing timeouts](#section-increasing-timeouts)
 - :fa-angle-right: [Assertions](#assertions)
   - [Length Assertions](#section-length-assertions)
   - [Class Assertions](#section-class-assertions)
@@ -18,13 +21,10 @@ excerpt: Traverse the DOM, find elements, make assertions
   - [Visibility Assertions](#section-visibility-assertions)
   - [Existence Assertions](#section-existence-assertions)
   - [State Assertions](#section-state-assertions)
-- :fa-angle-right: [Timeouts](#section-timeouts)
-  - [How retrying works](#section-how-retrying-works)
-  - [Increasing timeouts](#section-increasing-timeouts)
 
 ***
 
-# Traversing the DOM
+# Traversal
 
 At the heart of all integration tests is the DOM. Cypress gives you a host of familiar commands to make traversing the DOM as easy as possible.
 
