@@ -7,17 +7,21 @@ excerpt: Traverse the DOM, find elements, make assertions
   - [List of Commands](#dom-traversal-commands)
   - [Starting a Query](#querying-for-elements)
   - [CSS Selectors](#dom-css-selector-support)
-- :fa-angle-right: [Existance](#section-a-dom-element-s-existence)
+- :fa-angle-right: [Existence](#)
   - [Waiting for an element to exist](#section-asserting-an-element-s-existence-is-an-anti-pattern)
-  - [Waiting for an element to not exist](#section-how-to-assert-an-element-does-not-exist)
-- :fa-angle-right: [Assertions](#section-a-dom-element-s-existence)
-  - [Asserting length](#section-how-to-assert-an-element-does-not-exist)
-  - [Asserting classes](#section-how-to-assert-an-element-does-not-exist)
-  - [Asserting value](#section-how-to-assert-an-element-does-not-exist)
-  - [Asserting attributes](#section-how-to-assert-an-element-does-not-exist)
-  - [Asserting text content](#section-how-to-assert-an-element-does-not-exist)
-  - [Asserting visibility](#section-how-to-assert-an-element-does-not-exist)
-  - [Asserting state](#section-how-to-assert-an-element-does-not-exist)
+  - [Waiting for an element to not exist](#)
+- :fa-angle-right: [Assertions](#)
+  - [Length](#)
+  - [Classes](#)
+  - [Value](#)
+  - [Attributes](#)
+  - [Text Content](#)
+  - [Visibility](#)
+  - [Existence](#)
+  - [State](#)
+- :fa-angle-right: [Timeouts](#)
+  - [How retrying works](#)
+  - [Increasing timeouts](#)
 
 ***
 
@@ -31,6 +35,7 @@ You'll notice many of these commands match the same behavior as their [jQuery co
 
 - [children](https://on.cypress.io/api/children)
 - [closest](https://on.cypress.io/api/closest)
+- [contains](https://on.cypress.io/api/contains)
 - [eq](https://on.cypress.io/api/eq)
 - [find](https://on.cypress.io/api/find)
 - [filter](https://on.cypress.io/api/filter)
@@ -84,31 +89,206 @@ cy.get("span:nth-of-type(2)")
 cy.get("input[data-js='user-name'][ng-input]")
 ```
 
-# A DOM Element's Existence
+# Existence
 
-## Asserting an element's existence is an anti-pattern
+## Waiting for an element to exist
 
-All commands that return a DOM element implicitly assert the existence of the DOM element it is attempting to query. Cypress will check for the existence of the DOM element for the duration of the command's [`commandTimeout`](https://on.cypress.io/guides/configuration).
+If you're coming to Cypress from another framework you'll likely first wonder:
 
-```javascript
-// This is an anti-pattern
-cy.get("#nav-bar").should("exist")
-                     ↲
-  // this command will not run until the #nav-bar exists
-        // this assertion is unnecessary
+> How do I wait until an element exists?
 
-```
-
-## How to assert an element does not exist
-
-You would write an assertion if you want to ensure that the DOM element does *not* exist. Cypress knows to disable it's default behavior of checking for the DOM element's existence by looking ahead to the assertion.
+At first glance you may think you need to write this in Cypress:
 
 ```javascript
-cy.get(".dropdown-menu").should("not.exist")
-                            ↲
-  // Cypress looks ahead to see you expect the element to not exist
-      // the 'get' command will no longer check for existence
-
+cy.get("#container").should("exist")
+                          ↲
+         // this assertion is unnecessary
 ```
 
+In Cypress you **never have to explicitly wait for an element to exist**. By default Cypress does this for you.
 
+### What's going on under the hood?
+
+Under the hood Cypress will *automatically* retry commands which do not find elements. Cypress will continue retrying a command until it times outs.
+
+Imagine this example:
+
+```javascript
+cy.get("form").find("inpit").type("foo").parent(".row")
+                       ↲
+    // oops we have a typo here in our selector
+```
+
+Cypress will continue to retry finding the `inpit` element for **4 seconds** and then time out. The `cy.type` and `cy.parent` commands are never issued because Cypress will give up after failing to find the `inpit` element.
+
+Another way to look at it is to imagine there being an implied `.should("exist")` after every DOM command.
+
+It's as if Cypress is writing this for you:
+
+```javascript
+cy
+  .get("form").should("exist")
+  .find("input").should("exist").type("foo")
+  .parent(".row").should("exist")
+```
+
+## Waiting for an element not to exist
+
+If you've read the previous section you may be wondering:
+
+> If Cypress automatically waits for elements to exist, how do I tell Cypress to **wait for an element not to exist**?
+
+The answer is quite simple - just add that assertion and Cypress will *reverse* its default behavior.
+
+```javascript
+cy
+  .get("button").click()
+
+  // now cypress will reverse its behavior.
+  //
+  // instead of retrying until an element DOES exist
+  // it will now retry until this element DOES NOT exist
+  .get("#loading-spinner").should("not.exist")
+```
+
+In fact - assertions *always* tell Cypress when to resolve your DOM commands.
+
+You simply describe the state of your element with assertions, and Cypress knows not to resolve your command until the element(s) in question match the assertion(s).
+
+# Assertions
+[block:callout]
+{
+  "type": "info",
+  "body": "Read about [Making Assertions](https://on.cypress.io/guides/making-assertions) and where they come from.",
+  "title": "New to Cypess?"
+}
+[/block]
+
+[block:callout]
+{
+  "type": "success",
+  "body": "View our list of [Common Assertions](https://on.cypress.io/guides/common-assertions).",
+  "title": "Need more examples?"
+}
+[/block]
+
+## Length Assertions
+
+```javascript
+// retry until we find 3 matching <li.selected>
+cy.get("li.selected").should("have.length", 3)
+```
+
+## Class Assertions
+
+```javascript
+// retry until this input does not have class disabled
+cy.get("form").find("input").should("not.have.class", "disabled")
+```
+
+## Value Assertions
+
+```javascript
+// retry until this textarea has the correct value
+cy.get("textarea").should("have.value", "foo bar baz")
+```
+
+## Text Content Assertions
+
+```javascript
+// retry until this span does not contain 'click me'
+cy.get("a").parent("span.help").should("not.contain", "click me")
+```
+
+## Visibility Assertions
+
+```javascript
+// retry until this button is visible
+cy.get("button").should("be.visible")
+```
+
+## Existence Assertions
+
+```javascript
+// retry until loading spinner no longer exists
+cy.get("#loading").should("not.exist")
+```
+
+## State Assertions
+
+```javascript
+// retry until our radio is checked
+cy.get(":radio").should("be.checked")
+```
+
+# Timeouts
+
+## How retrying works
+
+When you provide assertions, Cypress knows to automatically wait until those assertions pass.
+
+When an assertion does not pass, Cypress will wait a brief period of time and retry again.
+
+By default, all commands will retry until [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) is exceeded. By default this means Cypress will wait up to **4 seconds** per DOM command + its associated assertions.
+
+Imagine this example:
+
+```javascript
+cy
+  .get("#main")     // <-- wait up to 4 seconds for '#main' to be found
+
+  .children("form") // <-- wait up to 4 seconds for 'form' children to be found
+
+  .find("input")                  // <-- wait up to 4 seconds for this 'input' to be found
+    .should("have.value", "foo")  // <-- and to have the value 'foo'
+    .and("have.class", "radio")   // <-- and to have the class 'radio'
+
+  .parents("#foo")                // <--
+    .should("not.exist")          // <-- wait up to 4 seconds for this element NOT to be found
+```
+
+## Increasing timeouts
+
+You have two ways of increasing the amount of time Cypress waits for resolving DOM commands.
+
+1. Change the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) globally
+2. Override the timeout option on a specific command
+
+Overriding the timeout option on a specific command looks like this:
+
+```javascript
+cy
+  .get("#main", {timeout: 5000})   // <-- wait up to 5 seconds for '#main' to be found
+
+  .children("form")                // <-- wait up to 4 seconds again
+
+  .find("input", {timeout: 10000}) // <-- wait up to 10 seconds for this 'input' to be found
+    .should("have.value", "foo")   // <-- and to have the value 'foo'
+    .and("have.class", "radio")    // <-- and to have the class 'radio'
+
+  .parents("#foo", {timeout: 2000}) // <--
+    .should("not.exist")            // <-- wait up to 2 seconds for this element NOT to be found
+```
+
+It's important to note that timeouts will automatically flow down to their cooresponding assertions.
+
+In the example we wait up to a total of 10 seconds to:
+
+1. find the `<input>`
+2. ensure it has a value of `foo`
+3. ensure it has a class of `radio`
+
+```javascript
+cy.find("input", {timeout: 10000}).should("have.value", "foo").and("have.class", "radio")
+                         ↲
+      // adding the timeout here will automatically
+      // flow down to the assertions, and they will
+      // be retried for up to 10 seconds
+```
+
+[block:callout]
+{
+  "type": "warning",
+  "body": "Assuming you have two assertions, if one passes, and one fails, Cypress will continue to retry until they **both** pass. If Cypress eventually times out you'll get a visual indicator in your Command Log to know which specific assertion failed.",
+}
+[/block]
