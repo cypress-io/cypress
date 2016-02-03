@@ -11,6 +11,7 @@ excerpt: Assertions verify an expectation.
   - [Chai-jQuery](#section-chai-jquery)
   - [Chai-Sinon](#section-chai-sinon)
 - :fa-angle-right: [Using Chainers with Implicit Subjects](#section-using-chainers-with-implicit-subjects)
+- :fa-angle-right: [Negating Assertions](#section-negating-assertions)
 - :fa-angle-right: [Resolving Assertions](#section-resolving-assertions)
 
 ***
@@ -288,6 +289,25 @@ This example above may be more familiar to you if you've written tests in JavaSc
 If you look closely, you'll see that we've passed a callback function to the [`cy.should`](https://on.cypress.io/api/should) method. This allows us to write expectations inside of that callback function, yet still receive all of the wonderful benefits of [`cy.should`](https://on.cypress.io/api/should).
 
 Read about [resolving assertions](https://on.cypress.io/guides/making-assertions#section-resolving-assertions) below to learn how [`cy.should`](https://on.cypress.io/api/should) works under the hood.
+
+***
+
+# Negating assertions
+
+Every assertion can be chained with `.not` to assert the opposite behavior on a subject.
+
+**Negating Assertion Examples**
+
+```javascript
+cy.get("button.disabled").should("be.disabled")             // assertion
+cy.get("button.active").should("not.be.disabled")           // negating assertion
+
+cy.title().should("eq", "My Awesome App")                   // assertion
+cy.title().should("not.eq", "My Not So Awesome App")        // negating assertion
+
+cy.get("a").should("have.attr", "popover", "Help")          // assertion
+cy.get("a").should("not.have.attr", "popover", "I'm lost")  // negating assertion
+```
 
 ***
 
