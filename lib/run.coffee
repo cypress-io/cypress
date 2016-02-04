@@ -27,21 +27,24 @@ runGui = (options) ->
       stdio: "inherit"
     })
 
-runHeadless = (options) ->
+runServer = (options) ->
   switch options.env
     when "development"
       args = {}
+
+      if not options.project
+        throw new Error("Missing path to project:\n\nPlease pass 'npm start -- --project path/to/project'\n\n")
 
       if options.debug
         args.debug = "--debug"
 
       _.extend(args, {
-        script: "lib/cypress.coffee"
-        watch: ["--watch", "lib"]
+        script:  "lib/cypress.coffee"
+        watch:  ["--watch", "lib"]
         ignore: ["--ignore", "lib/public"]
         verbose: "--verbose"
-        exts: ["-e", "coffee,js"]
-        args: ["--", options.project]
+        exts:   ["-e", "coffee,js"]
+        args:   ["--", options.project]
       })
 
       args = _.chain(args).values().flatten().value()
@@ -57,7 +60,7 @@ runHeadless = (options) ->
       console.log "production"
 
     else
-      throw new Error("Missing options.env. Must have this value to run Cypress headlessly!")
+      throw new Error("Missing 'options.env'. This value is required to run Cypress server!")
 
 module.exports = (argv) ->
   options = argsUtil.toObject(argv)
@@ -77,6 +80,7 @@ module.exports = (argv) ->
     process.stdout.write(manifest + "\n")
     return process.exit()
 
+  ## TODO: definitely dont force gui mode
   if options.env is "production"
     ## start in gui mode by default
     options.gui = true
@@ -86,4 +90,4 @@ module.exports = (argv) ->
     runGui(options)
   else
     ## spawn nodemon to run headlessly in server mode
-    runHeadless(options)
+    runServer(options)
