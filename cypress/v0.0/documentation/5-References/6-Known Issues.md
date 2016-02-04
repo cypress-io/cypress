@@ -3,7 +3,7 @@ excerpt: Known issues which cause problems in Cypress
 
 # Switching tabs causes Cypress to fail
 
-### Problem
+## Problem
 
 [https://github.com/cypress-io/cypress/issues/9](https://github.com/cypress-io/cypress/issues/9)
 
@@ -15,6 +15,6 @@ There is no way for Cypress to control this behavior, as Chrome has also removed
 
 You'll see your tests fail because Cypress cannot issue its commands fast enough. Your application's code is also being throttled which can cause separate failures as well.
 
-### Workaround
+## Workaround
 
 To work around this issue, don't switch to a different tab. Instead run Cypress in its own window. You can switch between Chrome windows without causing throttling.
