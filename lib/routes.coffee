@@ -1,8 +1,8 @@
 path        = require("path")
-CacheBuster = require("../util/cache_buster")
+CacheBuster = require("./util/cache_buster")
 
 module.exports = (app) ->
-  controllers = require('../controllers')(app)
+  controllers = require('./controllers')(app)
 
   ## routing for the actual specs which are processed automatically
   ## this could be just a regular .js file or a .coffee file
