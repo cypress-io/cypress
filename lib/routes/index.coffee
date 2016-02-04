@@ -26,11 +26,6 @@ module.exports = (app) ->
   app.all "/__cypress/xhrs/*", (req, res, next) ->
     controllers.xhrs.handleXhr(req, res, next)
 
-  ## this serves the html file which is stripped down
-  ## to generate the id's for the test files
-  app.get "/__cypress/id_generator", (req, res, next) ->
-    res.sendFile path.join(process.cwd(), "lib", "public", "id_generator.html"), {etag: false}
-
   app.get "/__root/*", (req, res, next) ->
     file = path.join(app.get("cypress").projectRoot, req.params[0])
 

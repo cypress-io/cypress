@@ -162,10 +162,6 @@ platforms = ["osx64", "linux64"]
 #       @mac.copyFiles().then ->
 #         expect(fs.statSync(@distDir("/src/lib/cache.coffee")).isFile()).to.be.true
 
-#     it "copies lib/id_generator to dist src", ->
-#       @mac.copyFiles().then ->
-#         expect(fs.statSync(@distDir("/src/lib/id_generator.coffee")).isFile()).to.be.true
-
 #     it "copies lib/keys to dist src", ->
 #       @mac.copyFiles().then ->
 #         expect(fs.statSync(@distDir("/src/lib/keys.coffee")).isFile()).to.be.true

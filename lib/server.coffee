@@ -125,19 +125,15 @@ class Server
       clientUrl: rootUrl + obj.clientRoute
       xhrUrl: obj.namespace + obj.xhrRoute
 
-    _.extend obj,
-      idGeneratorUrl: rootUrl + "/__cypress/id_generator"
-
   configureApplication: (options = {}) ->
     _.defaults options,
-      idGenerator: true
       morgan: true
       isHeadless: false
       port: null
       socketId: null
       environmentVariables: null
 
-    _.extend @config, _.pick(options, "idGenerator", "isHeadless")
+    _.extend @config, _.pick(options, "isHeadless")
 
     ## merge these into except
     ## for the 'environmentVariables' key

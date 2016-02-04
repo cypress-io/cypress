@@ -148,7 +148,6 @@ class Platform
           copy("./lib/routes",              "/src/lib/routes")
           copy("./lib/sauce",               "/src/lib/sauce")
           copy("./lib/cache.coffee",        "/src/lib/cache.coffee")
-          copy("./lib/id_generator.coffee", "/src/lib/id_generator.coffee")
           copy("./lib/keys.coffee",         "/src/lib/keys.coffee")
           copy("./lib/logger.coffee",       "/src/lib/logger.coffee")
           copy("./lib/project.coffee",      "/src/lib/project.coffee")

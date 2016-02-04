@@ -3,7 +3,6 @@ fs            = require("fs-extra")
 path          = require("path")
 uuid          = require("node-uuid")
 sauce         = require("./sauce/run")
-IdGenerator   = require("./id_generator")
 Fixtures      = require("./fixtures")
 Request       = require("./request")
 Log           = require("./log")
@@ -24,7 +23,6 @@ class Socket
 
     @app         = app
     @io          = io
-    @idGenerator = IdGenerator(@app)
     @reporter    = Reporter(@app)
 
   onTestFileChange: (filePath, stats) ->
@@ -211,15 +209,6 @@ class Socket
 
       socket.on "watch:test:file", (filePath) =>
         @watchTestFileByPath(filePath, watchers)
-
-      socket.on "generate:test:id", (data, fn) =>
-        Log.info "generate:test:id", data: data
-
-        @idGenerator.getId(data)
-        .then(fn)
-        .catch (err) ->
-          console.log "\u0007", err.details, err.message
-          fn(message: err.message)
 
       socket.on "request", =>
         @onRequest.apply(@, arguments)

@@ -136,10 +136,6 @@ describe "Server Interface", ->
         @server.open({port: 8080}).then =>
           expect(@server.config.clientUrlDisplay).to.eq "http://localhost:8080"
 
-      it "upates idGeneratorUrl", ->
-        @server.open({port: 8080}).then =>
-          expect(@server.config.idGeneratorUrl).to.eq "http://localhost:8080/__cypress/id_generator"
-
     context "errors", ->
       afterEach ->
         Promise.all([
@@ -290,9 +286,6 @@ describe "Server Interface", ->
 
       it "namespace=__cypress", ->
         @defaults "namespace", "__cypress"
-
-      it "idGeneratorUrl=http://localhost:2020/__cypress/id_generator", ->
-        @defaults "idGeneratorUrl", "http://localhost:2020/__cypress/id_generator"
 
       it "baseUrl=http://localhost:8000/app", ->
         @defaults "baseUrl", "http://localhost:8000/app", {

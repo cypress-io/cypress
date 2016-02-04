@@ -255,7 +255,6 @@ class Cli
       @App.vent.trigger "start:projects:app", {
         morgan:      false
         isHeadless:  true
-        idGenerator: !options.ci ## if we are in CI dont use IDGenerator
         socketId:    id
         projectPath: options.projectPath
         port:        options.port

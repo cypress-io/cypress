@@ -82,26 +82,6 @@ describe "Routes", ->
           null
         .end(done)
 
-  context "GET /__cypress/id_generator", ->
-    it "renders id_generator.html", (done) ->
-      ## it may seem silly to use an 'expected fixture'
-      ## here, but because this is such a critical component
-      ## we need to "anchor" or "hard code" our expected result
-      ## else our test would always pass due to any changes
-      ## to the id_generator.html page.  By hard coding it
-      ## we can independently verify that the content meets
-      ## a rigid standard.
-      contents = removeWhitespace Fixtures.get("server/id_generator_expected.html")
-
-      supertest(@app)
-        .get("/__cypress/id_generator")
-        .expect(200)
-        .expect (res) ->
-          body = removeWhitespace(res.text)
-          expect(body).to.eq contents
-          null
-        .end(done)
-
   context "GET /__cypress/files", ->
     beforeEach ->
       Fixtures.scaffold("todos")
