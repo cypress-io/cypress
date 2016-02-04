@@ -4,7 +4,7 @@ excerpt: Reference work done in previous commands.
 # Contents
 
 - :fa-angle-right: [Async Challenges](#section-async-challenges)
-- :fa-angle-right: [Introductin Aliasing](#section-introducing-aliasing)
+- :fa-angle-right: [Introducing Aliasing](#section-introducing-aliasing)
 - :fa-angle-right: [Aliasing DOM Elements](#section-aliasing-dom-elements)
 - :fa-angle-right: [Aliasing Routes](#section-asliasing-routes)
 
