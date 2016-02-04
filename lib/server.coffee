@@ -1,19 +1,19 @@
-express      = require 'express'
-http         = require 'http'
-fs           = require 'fs-extra'
-hbs          = require 'hbs'
-path         = require 'path'
-_            = require 'underscore'
-_.str        = require 'underscore.string'
-allowDestroy = require "server-destroy"
-Promise      = require 'bluebird'
-Log          = require "./log"
-Project      = require "./project"
-Socket       = require "./socket"
-Support      = require "./support"
-Fixtures     = require "./fixtures"
-Watchers     = require "./watchers"
-Settings     = require './util/settings'
+express      = require("express")
+http         = require("http")
+fs           = require("fs-extra")
+hbs          = require("hbs")
+path         = require("path")
+_            = require("underscore")
+str          = require("underscore.string")
+allowDestroy = require("server-destroy")
+Promise      = require("bluebird")
+Log          = require("./log")
+Project      = require("./project")
+Socket       = require("./socket")
+Support      = require("./support")
+Fixtures     = require("./fixtures")
+Watchers     = require("./watchers")
+Settings     = require("./util/settings")
 
 ## cypress following by _ or - or .
 cypressEnvRe = /^(cypress_)/i
@@ -77,7 +77,7 @@ class Server
   setCypressDefaults: (obj = {}) ->
     if url = obj.baseUrl
       ## always strip trailing slashes
-      obj.baseUrl = _.str.rtrim(url, "/")
+      obj.baseUrl = str.rtrim(url, "/")
 
     _.defaults obj,
       baseUrl:        null
