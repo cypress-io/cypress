@@ -4,6 +4,7 @@ _        = require("lodash")
 cp       = require("child_process")
 path     = require("path")
 argsUtil = require("./util/args")
+Cypress  = require("./cypress")
 
 currentlyRunningElectron = ->
   process.versions and process.versions.electron
@@ -27,24 +28,32 @@ runGui = (options) ->
       stdio: "inherit"
     })
 
+runProject = (options) ->
+  ## this code actually starts a project
+  ## and is spawned from nodemon
+  Cypress(options.project).boot()
+
 runServer = (options) ->
   switch options.env
     when "development"
       args = {}
 
       if not options.project
-        throw new Error("Missing path to project:\n\nPlease pass 'npm start -- --project path/to/project'\n\n")
+        throw new Error("Missing path to project:\n\nPlease pass 'npm run server -- --project path/to/project'\n\n")
 
       if options.debug
         args.debug = "--debug"
 
+      ## just spawn our own index.js file again
+      ## but put ourselves in project mode so
+      ## we actually boot a project!
       _.extend(args, {
-        script:  "lib/cypress.coffee"
+        script:  "index.js"
         watch:  ["--watch", "lib"]
         ignore: ["--ignore", "lib/public"]
         verbose: "--verbose"
         exts:   ["-e", "coffee,js"]
-        args:   ["--", options.project]
+        args:   ["--", "--mode", "project", "--project", options.project, "--auto-open"]
       })
 
       args = _.chain(args).values().flatten().value()
@@ -98,6 +107,10 @@ module.exports = (argv) ->
       ## run the server in CI mode
       options.ci = true
       runServer(options)
+
+    when "project"
+      ## start the project
+      runProject(options)
 
     else
       throw new Error("Missing 'options.mode'. This value is required to run Cypress.")

@@ -1,11 +1,11 @@
-require("./environment")
-
 child_process  = require("child_process")
 open           = require("open")
 Promise        = require("bluebird")
 config         = require("./config")
 Server         = require("./server")
 
+## this class can go away and we can boot
+## a project directly now
 class Booter
   constructor: (projectRoot) ->
     if not (@ instanceof Booter)
@@ -17,36 +17,7 @@ class Booter
     @projectRoot = projectRoot
     @child       = null
 
-  createChildProcess: ->
-    new Promise (resolve, reject) =>
-      ## do not assign fork directly for testability
-      ## setting execArgv so tests pass in
-      ## node-inspector debug mode
-      @child = child_process.fork(__filename, [@projectRoot], {execArgv: []})
-
-      @child.on "message", (msg) ->
-        console.log "received message: ", JSON.stringify(msg)
-
-        if msg.done
-          resolve(msg)
-
-      @child.on "error", reject
-
   boot: (options = {}) ->
-    ## if we're supposed to be forking dont boot the
-    ## server and instead fork and create the child
-    ## process to do the work for us
-    return @createChildProcess() if options.fork
-
-    # Promise.onPossiblyUnhandledRejection ->
-    #   debugger
-    # process.on "uncaughtException", (err) ->
-    #   debugger
-      # http.post "airbrake", err
-      ## write to a log file
-
-    send(projectRoot: @projectRoot)
-
     @server = Server(@projectRoot)
 
     @server.open(options).bind(@)
@@ -55,34 +26,5 @@ class Booter
 
   close: ->
     @server.close()
-
-send = (obj) ->
-  if process.send
-    process.send(obj)
-
-isRunningFromCli = ->
-  ## make sure we're not being loaded from a parent module
-  ## and that we're inside of development env!
-  (not module.parent) and (process.env["CYPRESS_ENV"] is "development")
-
-# are we a child process
-# by verifying we have the cyFork
-# env and we are not in debugger
-# mode with node inspector
-isChildProcess = ->
-  !!(process.send and not process.execArgv.length)
-
-## if we are a child process
-## or if we are being run from the command
-## line directly from node (like nodemon)
-if isChildProcess() or isRunningFromCli()
-  projectRoot = process.argv[2]
-
-  ## boot the server and then send this
-  ## to our parent process
-  Booter(projectRoot).boot().then (obj) ->
-    obj.settings.done = true
-
-    send(obj.settings)
 
 module.exports = Booter
