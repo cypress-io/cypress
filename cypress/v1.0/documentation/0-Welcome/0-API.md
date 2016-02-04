@@ -24,7 +24,7 @@ Commands drive your tests in the browser like a real user would. They let you pe
 | [contains](https://on.cypress.io/api/contains) | Get a DOM element that contains specific text |
 | [get](https://on.cypress.io/api/get) | Get DOM element(s) by selector or aliast |
 | [root](https://on.cypress.io/api/root) | Set the root scope to the current subject |
-| [within](https://on.cypress.io/api/within) | Within |
+| [within](https://on.cypress.io/api/within) | Set the root scope to the current subject |
 
 | Assertions | |
 | -------------------- | -- |
