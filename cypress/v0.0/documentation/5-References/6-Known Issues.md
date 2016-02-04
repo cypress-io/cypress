@@ -18,3 +18,7 @@ You'll see your tests fail because Cypress cannot issue its commands fast enough
 ## Workaround
 
 To work around this issue, don't switch to a different tab. Instead run Cypress in its own window. You can switch between Chrome windows without causing throttling.
+
+This problem only manifests itself while you're developing your tests locally. CI is unaffected.
+
+If you see these timeouts happening, don't worry - just refresh your tests and move on. You can try to either run less tests all at once, or run them headlessly (which is also unaffected by this problem).
