@@ -80,14 +80,24 @@ module.exports = (argv) ->
     process.stdout.write(manifest + "\n")
     return process.exit()
 
-  ## TODO: definitely dont force gui mode
-  if options.env is "production"
-    ## start in gui mode by default
-    options.gui = true
+  switch options.mode
+    when "gui"
+      ## run the gui headed
+      runGui(options)
 
-  if options.gui
-    ## spawn the electron gui process
-    runGui(options)
-  else
-    ## spawn nodemon to run headlessly in server mode
-    runServer(options)
+    when "headless"
+      ## run the gui headlessly
+      options.headless = true
+      runGui(options)
+
+    when "server"
+      ## run the server without gui
+      runServer(options)
+
+    when "ci"
+      ## run the server in CI mode
+      options.ci = true
+      runServer(options)
+
+    else
+      throw new Error("Missing 'options.mode'. This value is required to run Cypress.")

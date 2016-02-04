@@ -2,7 +2,7 @@ _        = require("lodash")
 path     = require("path")
 minimist = require("minimist")
 
-whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter ci debug updating headless ping coords key logs gui clearLogs port returnPkg environmentVariables getChromiumVersion".split(" ")
+whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter ci debug updating headless ping coords key logs gui clearLogs port returnPkg environmentVariables getChromiumVersion mode".split(" ")
 
 parseCoords = (coords) ->
   [x, y] = coords.split("x")
