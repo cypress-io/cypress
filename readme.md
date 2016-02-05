@@ -6,6 +6,9 @@ This repository contains the source code for the Cypress Desktop App Gui.
 
 ```bash
 npm install
+
+## post install it will automatically
+## build the files into ./dist
 ```
 
 ## Developing
@@ -29,11 +32,16 @@ cd ../cypress-server
 npm link cypress-gui
 ```
 
-#### Building `/src`
+#### Building `/dist`
 
 ```bash
 ## build and watch /src files
 npm run dev
+```
+
+#### One off build
+```bash
+npm run build
 ```
 
 ## Testing

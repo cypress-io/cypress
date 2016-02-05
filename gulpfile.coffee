@@ -144,7 +144,8 @@ gulp.task "watch:js", ->
         _.each rememberedNames, (name) ->
           $.remember.forgetAll(name)
 
-gulp.task "dev",        ["build", "watch"]
+gulp.task "build", ["build"]
+gulp.task "dev",   ["build", "watch"]
 
 gulp.task "minify", ->
   ## dont minify cypress or sinon

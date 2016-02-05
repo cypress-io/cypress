@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "postinstall": "npm run build",
     "start": "http-server ./dist -o",
+    "prebuild": "rm -rf dist",
+    "build": "gulp build",
     "dev": "gulp dev"
   },
   "repository": {
