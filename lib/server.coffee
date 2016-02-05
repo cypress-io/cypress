@@ -257,8 +257,6 @@ class Server
 
             ## dont wait for this to complete
             return null
-        .then ->
-          require('open')(@config.clientUrl) if @config.autoOpen
         .return(@config)
         .then(resolve)
         .catch(reject)

@@ -38,6 +38,8 @@ runServer = (options) ->
     when "development"
       args = {}
 
+      _.defaults options, { autoOpen: true }
+
       if not options.project
         throw new Error("Missing path to project:\n\nPlease pass 'npm run server -- --project path/to/project'\n\n")
 
@@ -53,12 +55,19 @@ runServer = (options) ->
         ignore: ["--ignore", "lib/public"]
         verbose: "--verbose"
         exts:   ["-e", "coffee,js"]
-        args:   ["--", "--mode", "project", "--project", options.project, "--auto-open"]
+        args:   ["--", "--mode", "project", "--project", options.project]
       })
 
       args = _.chain(args).values().flatten().value()
 
       cp.spawn("nodemon", args, {stdio: "inherit"})
+
+      ## auto open in dev mode directly to our
+      ## default cypress web app client
+      if options.autoOpen
+        _.delay ->
+          require("open")("http://localhost:2020/__")
+        , 2000
 
       if options.debug
         cp.spawn("node-inspector", [], {stdio: "inherit"})
