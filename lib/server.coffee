@@ -184,18 +184,17 @@ class Server
     e.portInUse = true
     e
 
-  open: (options = {}) ->
+  open: (project, options = {}) ->
     return Promise.reject(@config) if @config.jsonError
 
     Promise.try =>
       @configureApplication(options)
-      @_open(options)
+      @_open(project, options)
 
-  _open: (options) ->
+  _open: (project, options) ->
     new Promise (resolve, reject) =>
       @server    = http.createServer(@app)
       @io        = require("socket.io")(@server, {path: "/__socket.io"})
-      @project   = Project(@config.projectRoot)
 
       allowDestroy(@server)
 
@@ -248,12 +247,12 @@ class Server
         )
         .bind(@)
         .then ->
-          @project.ensureProjectId().then (id) =>
+          project.ensureProjectId().then (id) =>
             ## make an external request to
             ## record the user_id
             ## TODO: remove this after a few
             ## upgrades since this is temporary
-            @project.getDetails(id)
+            project.getDetails(id)
 
             ## dont wait for this to complete
             return null

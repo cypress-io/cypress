@@ -1,6 +1,5 @@
 cache   = require("../../cache")
-Cypress = require("../../cypress")
-
+Project = require("../../project")
 
 ## global reference to any open projects
 openProject = null
@@ -17,10 +16,10 @@ module.exports = {
 
   open: (path, options) ->
     ## store the currently open project
-    openProject = Cypress(path)
+    openProject = Project(path)
 
     openProject
-    .boot(options)
+    .open(options)
     .get("settings")
 
   close: ->

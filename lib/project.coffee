@@ -1,13 +1,11 @@
-_        = require 'lodash'
-Promise  = require 'bluebird'
-Request  = require 'request-promise'
-fs       = require 'fs'
-path     = require 'path'
-Log      = require "./log"
-Settings = require './util/settings'
-Routes   = require './util/routes'
-
-fs = Promise.promisifyAll(fs)
+_        = require("lodash")
+Promise  = require("bluebird")
+Request  = require("request-promise")
+path     = require("path")
+Settings = require("./util/settings")
+Routes   = require("./util/routes")
+Log      = require("./log")
+Server   = require("./server")
 
 class Project
   constructor: (projectRoot) ->
@@ -18,6 +16,16 @@ class Project
       throw new Error("Instantiating lib/project requires a projectRoot!")
 
     @projectRoot = projectRoot
+
+  open: (options = {}) ->
+    @server = Server(@projectRoot)
+
+    @server.open(@, options).bind(@)
+    .then (settings) ->
+      {server: @server, settings: settings}
+
+  close: ->
+    @server.close()
 
   ## A simple helper method
   ## to create a project ID if we do not already

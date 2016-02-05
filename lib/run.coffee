@@ -4,7 +4,7 @@ _        = require("lodash")
 cp       = require("child_process")
 path     = require("path")
 argsUtil = require("./util/args")
-Cypress  = require("./cypress")
+Project  = require("./project")
 
 currentlyRunningElectron = ->
   process.versions and process.versions.electron
@@ -31,7 +31,7 @@ runGui = (options) ->
 runProject = (options) ->
   ## this code actually starts a project
   ## and is spawned from nodemon
-  Cypress(options.project).boot()
+  Project(options.project).open()
 
 runServer = (options) ->
   switch options.env
