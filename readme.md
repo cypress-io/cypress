@@ -1,4 +1,10 @@
-# Introduction
+# Cypress Documentation
+
+This is the source code for Cypress's Documentation, Guides, and API.
+
+#### https://docs.cypress.io
+
+## Introduction
 
 The documents in this repo are synchronized remotedly with Readme.io.
 
@@ -6,11 +12,11 @@ The documents in this repo are synchronized remotedly with Readme.io.
 
 It does somewhat complicate the process and is not quite as nice as editing `Github Wikis`, but it's still pretty great.
 
-# Getting Started
+## Getting Started
 
 https://github.com/mobify/readmeio-sync
 
-# Contributing
+## Contributing
 
 To make changes to our documentation:
 
