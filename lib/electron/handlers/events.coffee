@@ -8,8 +8,8 @@ project     = require("./project")
 pgk         = require("./package")
 cookies     = require("./cookies")
 errors      = require("./errors")
+logs        = require("./logs")
 Renderer    = require("./renderer")
-logger      = require("../../log")
 Updater     = require("../../updater")
 
 handleEvent = (options, event, id, type, arg) ->
@@ -117,19 +117,19 @@ handleEvent = (options, event, id, type, arg) ->
       send(cypressIcons.getPathToIcon("icon_32x32@2x.png"))
 
     when "get:logs"
-      logger.getLogs()
+      logs.get()
       .then(send)
       .catch(sendErr)
 
     when "on:log"
-      logger.onLog = send
+      logs.onLog(send)
 
     when "off:log"
-      logger.off()
+      logs.off()
       send(null)
 
     when "clear:logs"
-      logger.clearLogs()
+      logs.clear()
       .then -> send(null)
 
     when "get:project:paths"
