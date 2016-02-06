@@ -2,7 +2,6 @@ _             = require("lodash")
 fs            = require("fs-extra")
 path          = require("path")
 uuid          = require("node-uuid")
-sauce         = require("./sauce/run")
 Fixtures      = require("./fixtures")
 Request       = require("./request")
 Log           = require("./log")
@@ -77,63 +76,6 @@ class Socket
       .then(cb)
       .catch (err) ->
         cb({__error: err.message})
-
-  _runSauce: (socket, spec, fn) ->
-    ## this will be used to group jobs
-    ## together for the runs related to 1
-    ## spec by setting custom-data on the job object
-    batchId = Date.now()
-
-    jobName = @app.get("cypress").testFolder + "/" + spec
-    fn(jobName, batchId)
-
-    ## need to handle platform/browser/version incompatible configurations
-    ## and throw our own error
-    ## https://saucelabs.com/platforms/webdriver
-    jobs = [
-      { platform: "Windows 8.1", browser: "chrome",  version: 43, resolution: "1280x1024" }
-      { platform: "Windows 8.1", browser: "internet explorer",  version: 11, resolution: "1280x1024" }
-      # { platform: "Windows 7",   browser: "internet explorer",  version: 10 }
-      # { platform: "Linux",       browser: "chrome",             version: 37 }
-      { platform: "Linux",       browser: "firefox",            version: 33  }
-      { platform: "OS X 10.9",   browser: "safari",             version: 7 }
-    ]
-
-    normalizeJobObject = (obj) ->
-      obj = _.clone obj
-
-      obj.browser = {
-        "internet explorer": "ie"
-      }[obj.browserName] or obj.browserName
-
-      obj.os = obj.platform
-
-      return _.pick obj, "manualUrl", "browser", "version", "os", "batchId", "guid"
-
-    _.each jobs, (job) =>
-      url = @app.get("cypress").clientUrl + "#/" + jobName
-      options =
-        manualUrl:        url
-        remoteUrl:        url + "?nav=false"
-        batchId:          batchId
-        guid:             uuid.v4()
-        browserName:      job.browser
-        version:          job.version
-        platform:         job.platform
-        screenResolution: job.resolution ? "1024x768"
-        onStart: (sessionID) ->
-          ## pass up the sessionID to the previous client obj by its guid
-          socket.emit "sauce:job:start", clientObj.guid, sessionID
-
-      clientObj = normalizeJobObject(options)
-      socket.emit "sauce:job:create", clientObj
-
-      sauce.run(options)
-        .then (obj) ->
-          {sessionID, runningTime, passed} = obj
-          socket.emit "sauce:job:done", sessionID, runningTime, passed
-        .catch (err) ->
-          socket.emit "sauce:job:fail", clientObj.guid, err
 
   _startListening: (path, watchers, options) ->
     _.defaults options,
@@ -224,14 +166,6 @@ class Socket
         socket.on event, (args...) =>
           args = _.chain(args).reject(_.isUndefined).reject(_.isFunction).value()
           @io.emit event, args...
-
-      ## when we're told to run:sauce we receive
-      ## the spec and callback with the name of our
-      ## sauce labs job
-      ## we'll embed some additional meta data into
-      ## the job name
-      socket.on "run:sauce", (spec, fn) =>
-        @_runSauce(socket, spec, fn)
 
       # socket.on "app:errors", (err) ->
         # process.stdout.write "app:errors"

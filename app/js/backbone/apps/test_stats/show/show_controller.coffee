@@ -71,9 +71,6 @@
         stats.disableNext()
         runner.next()
 
-      @listenTo configView, "clicked:sauce:labs", (option) ->
-        runner.runSauce()
-
       @show configView, region: @layout.configRegion
 
     chosenRegion: (runner, chosen) ->

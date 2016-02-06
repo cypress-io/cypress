@@ -2,7 +2,6 @@ require("../spec_helper")
 
 _            = require("lodash")
 uuid         = require("node-uuid")
-sauce        = require("#{root}lib/sauce/run")
 Socket       = require("#{root}lib/socket")
 Server       = require("#{root}lib/server")
 Watchers     = require("#{root}lib/watchers")
@@ -291,46 +290,3 @@ describe "Socket", ->
         p = Fixtures.project("todos") + "/tests/test1.js"
         @socket.onTestFileChange(p).then =>
           expect(@io.emit).to.be.calledWith("generate:ids:for:test", "tests/test1.js", "test1.js")
-
-  context "#_runSauce", ->
-    beforeEach ->
-      @socket = Socket(@io, @app)
-      @run    = @sandbox.stub(sauce, "run").resolves()
-      @sandbox.stub(Date, "now").returns(10000000)
-      @sandbox.stub(uuid, "v4").returns("abc123-edfg2323")
-
-    afterEach ->
-      @socket.close()
-
-    it "calls callback with jobName and batchId", ->
-      fn = @sandbox.stub()
-      @socket._runSauce @ioSocket, "app_spec.coffee", fn
-      expect(fn).to.be.calledWith "tests/app_spec.coffee", 10000000
-
-    it "emits 'sauce:job:create' with client options", ->
-      fn = @sandbox.stub()
-      @socket._runSauce @ioSocket, "app_spec.coffee", fn
-      expect(@ioSocket.emit).to.be.calledWithMatch "sauce:job:create", {
-        batchId: 10000000
-        browser: "ie"
-        guid: "abc123-edfg2323"
-        manualUrl: "http://localhost:2020/__/#/tests/app_spec.coffee"
-        os: "Windows 8.1"
-        version: 11
-      }
-
-    it "passes options to sauce.run", ->
-      fn = @sandbox.stub()
-      @socket._runSauce @ioSocket, "app_spec.coffee", fn
-      options = @run.getCall(0).args[0]
-      expect(options).to.deep.eq {
-        batchId: 10000000
-        guid: "abc123-edfg2323"
-        manualUrl: "http://localhost:2020/__/#/tests/app_spec.coffee"
-        remoteUrl: "http://localhost:2020/__/#/tests/app_spec.coffee?nav=false"
-        screenResolution: "1280x1024"
-        browserName: options.browserName
-        version:     options.version
-        platform:    options.platform
-        onStart:     options.onStart
-      }
