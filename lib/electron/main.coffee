@@ -1,4 +1,5 @@
 app      = require("electron").app
+key      = require("./handlers/key")
 logs     = require("./handlers/logs")
 headed   = require("./handlers/headed")
 headless = require("./handlers/headless")
@@ -40,6 +41,14 @@ module.exports = (optionsOrArgv) ->
 
       when options.clearLogs
         logs.clear().then(exit)
+
+      when options.getKey
+        ## print the key + exit
+        key.print(options.projectPath).then(exit)
+
+      when options.generateKey
+        ## generate + print the key + exit
+        key.generate(options.projectPath).then(exit)
 
       when options.headless
         headless.run(app, options)

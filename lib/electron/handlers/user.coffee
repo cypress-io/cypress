@@ -5,6 +5,12 @@ module.exports = {
   get: ->
     cache.getUser()
 
+  getProjectToken: (session, project) ->
+    cache.getProjectToken(session, project)
+
+  generateProjectToken: (session, project) ->
+    cache.generateProjectToken(session, project)
+
   logIn: (code) ->
     session.logIn(code)
     .then (user) ->
