@@ -17,7 +17,7 @@ module.exports = {
 
     coords = translate(bounds)
 
-    ## set these coords on the updater
+    ## TODO: where to store these?
     # App.updater.setCoords(coords) if App.updater
 
     win.setPosition(coords.x, coords.y)

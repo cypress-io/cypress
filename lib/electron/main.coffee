@@ -37,9 +37,11 @@ module.exports = (optionsOrArgv) ->
   app.on "ready", ->
     switch
       when options.logs
+        ## print the logs + exit
         logs.print().then(exit)
 
       when options.clearLogs
+        ## clear the logs + exit
         logs.clear().then(exit)
 
       when options.getKey
