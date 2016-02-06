@@ -76,11 +76,11 @@ module.exports = {
         ## finishes running all of the tests.
         ## we're using an event emitter interface
         ## to gracefully handle this in promise land
-        Promise.all([
-          @waitForRendererToConnect(project, id)
-          @waitForTestsToFinishRunning(project)
+        Promise.join(
+          @waitForRendererToConnect(project, id),
+          @waitForTestsToFinishRunning(project),
           @createRenderer()
-        ])
+        )
 
     ## catch any errors and exit with them
     .catch(errors.exitWith)
