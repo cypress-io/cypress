@@ -1,15 +1,6 @@
-user       = require("./user")
-errors     = require("./errors")
 Tray       = require("./tray")
 Events     = require("./events")
 Renderer   = require("./renderer")
-
-ensureSessionToken = (user) ->
-  ## bail if we have a session_token
-  return true if user and user.session_token
-
-  ## else die and log out the auth error
-  errors.die("NOT_LOGGED_IN")
 
 module.exports = {
   onDrop: ->
@@ -43,21 +34,7 @@ module.exports = {
     ## stop all the events
     Events.stop()
 
-  getWindow: (renderer) ->
-    Promise.resolve(renderer)
-
-  runHeadless: (app, options = {}) ->
-    user.get().then (user) ->
-      if ensureSessionToken(user)
-        Renderer.create({
-          width:  1280
-          height: 720
-          show:   false
-          frame:  false
-          type:   "PROJECT"
-        })
-
-  runHeaded: (app, options = {}) ->
+  run: (app, options = {}) ->
     options.app = app
 
     ## handle right click to show context menu!

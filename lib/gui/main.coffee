@@ -1,5 +1,6 @@
-app        = require("electron").app
-init       = require("./handlers/init")
+app      = require("electron").app
+headed   = require("./handlers/headed")
+headless = require("./handlers/headless")
 
 ## prevent chromium from throttling
 app.commandLine.appendSwitch("disable-renderer-backgrounding")
@@ -18,7 +19,8 @@ module.exports = (optionsOrArgv) ->
     options = optionsOrArgv
 
   app.on "window-all-closed", ->
-    init.onWindowAllClosed(app)
+    if options.headless isnt true
+      headed.onWindowAllClosed(app)
 
     ## exit when all windows are closed.
     app.exit(0)
@@ -27,6 +29,6 @@ module.exports = (optionsOrArgv) ->
   ## initialization and is ready to create browser windows.
   app.on "ready", ->
     if options.headless
-      init.runHeadless(app, options)
+      headless.run(app, options)
     else
-      init.runHeaded(app, options)
+      headed.run(app, options)
