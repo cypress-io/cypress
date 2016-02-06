@@ -19,8 +19,14 @@ module.exports = {
     process.exit(code)
 
   log: (err) ->
-    str = [chalk.red(err.message)].concat(msgs).join(" ")
-    console.log(str)
+    ## if our err instance matches
+    ## a type then its come from us
+    ## else just use the standard err.message
+    msg = @getMsgByType(err.type) ? err.message
+
+    console.log chalk.red(msg)
+
+    [chalk.red(err.message)].concat(msgs).join(" ")
 
   exitWith: (err) ->
     @log(err)
