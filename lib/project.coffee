@@ -40,7 +40,11 @@ class Project extends EE
 
       .then ->
           ## start socket io
-          @socket = Socket(@server)
+          ## think about moving this back
+          ## into the server, its its server-esque
+          ## and socket requires dependencies only
+          ## server should know about!
+          @socket = Socket(@server.app)
 
           ## preserve file watchers
           @watchers = Watchers()
@@ -57,7 +61,7 @@ class Project extends EE
           if options.reporter
             reporter = Reporter()
 
-          @socket.startListening(@watchers, {
+          @socket.startListening(@server.getHttpServer(), @watchers, {
             onConnect: (id) =>
               @emit("socket:connected", id)
 

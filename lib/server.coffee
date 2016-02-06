@@ -177,6 +177,8 @@ class Server
   createRoutes: ->
     require("./routes")(@app)
 
+  getHttpServer: -> @server
+
   portInUseErr: (port) ->
     e = new Error("Port: '#{port}' is already in use.")
     e.port = port

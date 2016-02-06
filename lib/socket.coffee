@@ -11,16 +11,14 @@ socketIo      = require("socket.io")
 leadingSlashesRe = /^\/+/
 
 class Socket
-  constructor: (server) ->
+  constructor: (app) ->
     if not (@ instanceof Socket)
-      return new Socket(server)
+      return new Socket(app)
 
-    if not server
-      throw new Error("Instantiating lib/socket requires an server instance!")
+    if not app
+      throw new Error("Instantiating lib/socket requires an app instance!")
 
-    @server      = server
-    @app         = server.app
-    # @reporter    = Reporter(@app)
+    @app = app
 
   onTestFileChange: (filePath, stats) ->
     Log.info "onTestFileChange", filePath: filePath
@@ -75,7 +73,7 @@ class Socket
       .catch (err) ->
         cb({__error: err.message})
 
-  _startListening: (watchers, options) ->
+  _startListening: (server, watchers, options) ->
     _.defaults options,
       socketId: null
       onMocha: ->
@@ -88,7 +86,7 @@ class Socket
 
     {projectRoot, testFolder, socketIoRoute} = @app.get("cypress")
 
-    @io = socketIo(@server, {path: socketIoRoute})
+    @io = socketIo(server, {path: socketIoRoute})
 
     @io.on "connection", (socket) =>
       Log.info "socket connected"
@@ -182,11 +180,11 @@ class Socket
 
     fs.ensureDirAsync(@testsDir).bind(@)
 
-  startListening: (watchers, options) ->
+  startListening: (server, watchers, options) ->
     if process.env["CYPRESS_ENV"] is "development"
       @listenToCssChanges(watchers)
 
-    @_startListening(watchers, options)
+    @_startListening(server, watchers, options)
 
   listenToCssChanges: (watchers) ->
     watchers.watch path.join(process.cwd(), "lib", "public", "css"), {
