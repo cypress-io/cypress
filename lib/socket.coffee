@@ -173,8 +173,8 @@ class Socket
       socket.on "app:connect", (socketId) ->
         options.onConnect(socketId, socket)
 
-      socket.on "mocha", (event, args...) ->
-        options.onMocha(event, args)
+      socket.on "mocha", ->
+        options.onMocha.apply(options, arguments)
 
     @testsDir = path.join(projectRoot, testFolder)
 
