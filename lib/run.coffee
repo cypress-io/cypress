@@ -17,11 +17,11 @@ runGui = (options) ->
   if currentlyRunningElectron()
     ## just run the gui code directly here
     ## and pass our options directly to main
-    require("./gui/main")(options)
+    require("./electron/main")(options)
   else
     ## we are in dev mode and can just run electron
-    ## in our gui folder which kicks things off
-    cp.spawn("electron", [path.join(__dirname, "gui")], {
+    ## in our electron folder which kicks things off
+    cp.spawn("electron", [path.join(__dirname, "electron")], {
       ## we are going to pass the options as CYPRESS_ARGS
       ## for our electron process to avoid doing this again
       env: _.extend({}, process.env, {CYPRESS_ARGS: JSON.stringify(options)})
