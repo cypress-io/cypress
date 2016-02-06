@@ -14,5 +14,13 @@ module.exports = {
   logOut: (token) ->
     session.logOut(token)
     .then(cache.removeUserSession())
-    ## TODO: clear cookies here
+
+  ensureSession: ->
+    user.get().then (user) ->
+      ## return session_token if we have one
+      if user and st = user.session_token
+        return st
+      else
+        ## else die and log out the auth error
+        errors.throw("NOT_LOGGED_IN")
 }
