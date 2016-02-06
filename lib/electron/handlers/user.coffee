@@ -22,7 +22,7 @@ module.exports = {
     .then(cache.removeUserSession())
 
   ensureSession: ->
-    user.get().then (user) ->
+    @get().then (user) ->
       ## return session_token if we have one
       if user and st = user.session_token
         return st

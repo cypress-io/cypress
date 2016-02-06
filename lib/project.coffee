@@ -7,6 +7,7 @@ Settings  = require("./util/settings")
 Routes    = require("./util/routes")
 Log       = require("./log")
 Server    = require("./server")
+Socket    = require("./socket")
 Support   = require("./support")
 Fixtures  = require("./fixtures")
 Watchers  = require("./watchers")
@@ -31,10 +32,14 @@ class Project extends EE
     @server.open(options)
     .bind(@)
     .then (config) ->
+      ## store the config from
+      ## opening the server
+      @config = config
+
       @recordUserID()
 
       .then ->
-        ## start socket io
+          ## start socket io
           @socket = Socket(@server)
 
           ## preserve file watchers
@@ -82,6 +87,9 @@ class Project extends EE
       @socket.close(),
       @watchers.close()
     )
+
+  getConfig: ->
+    @config ? {}
 
   scaffold: (config) ->
     Promise.join(

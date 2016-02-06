@@ -20,7 +20,7 @@ lastCharacterIsNewLine = (str) ->
 class Fixtures
   constructor: (config = {}) ->
     if not (@ instanceof Fixtures)
-      return new Fixtures(app)
+      return new Fixtures(config)
 
     if not pr = config.projectRoot
       throw new Error("Instantiating lib/support requires a projectRoot!")

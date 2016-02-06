@@ -1,7 +1,7 @@
 _     = require("lodash")
 chalk = require("chalk")
 
-module.exports = {
+API = {
   getMsgByType: (type) ->
     switch type
       when "NOT_LOGGED_IN"
@@ -26,7 +26,10 @@ module.exports = {
 
     console.log chalk.red(msg)
 
-    [chalk.red(err.message)].concat(msgs).join(" ")
+    if process.env["CYPRESS_ENV"] isnt "production"
+      console.log err.stack
+
+    [chalk.red(err.message)].concat(msg).join(" ")
 
   exitWith: (err) ->
     @log(err)
@@ -46,3 +49,5 @@ module.exports = {
 
     obj
 }
+
+module.exports = _.bindAll(API)

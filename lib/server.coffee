@@ -121,6 +121,9 @@ class Server
       clientUrl: rootUrl + obj.clientRoute
       xhrUrl: obj.namespace + obj.xhrRoute
 
+    _.extend obj,
+      allTestsUrl: obj.clientUrl + "#/tests/__all?__ui=satellite"
+
   configureApplication: (options = {}) ->
     _.defaults options,
       morgan: true

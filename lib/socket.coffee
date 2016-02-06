@@ -88,7 +88,7 @@ class Socket
 
     {projectRoot, testFolder, socketIoRoute} = @app.get("cypress")
 
-    @io = socketId(@server, {path: socketIoRoute})
+    @io = socketIo(@server, {path: socketIoRoute})
 
     @io.on "connection", (socket) =>
       Log.info "socket connected"

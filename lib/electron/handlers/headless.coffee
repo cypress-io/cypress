@@ -1,3 +1,4 @@
+Promise    = require("bluebird")
 user       = require("./user")
 errors     = require("./errors")
 project    = require("./project")
@@ -23,8 +24,9 @@ module.exports = {
       environmentVariables: options.environmentVariables
     })
 
-  createRenderer: ->
+  createRenderer: (url) ->
     Renderer.create({
+      url:    url
       width:  1280
       height: 720
       show:   false
@@ -34,7 +36,7 @@ module.exports = {
 
   waitForSocketConnection: (project, id) ->
     new Promise (resolve, reject) ->
-      fn = (socketId, socket) ->
+      fn = (socketId) ->
         if socketId is id
           ## remove the event listener if we've connected
           project.off "socket:connected", fn
@@ -64,13 +66,15 @@ module.exports = {
     ## make sure we have a current session
     user.ensureSession()
 
-    .then ->
+    .then =>
       id = @getId()
 
       ## get our project instance (event emitter)
       @openProject(id, options)
 
-      .then (project) ->
+      .then (project) =>
+        config = project.getConfig()
+
         ## we know we're done running headlessly
         ## when the renderer has connected and
         ## finishes running all of the tests.
@@ -79,7 +83,7 @@ module.exports = {
         Promise.join(
           @waitForRendererToConnect(project, id),
           @waitForTestsToFinishRunning(project),
-          @createRenderer()
+          @createRenderer(config.allTestsUrl)
         )
 
     ## catch any errors and exit with them
