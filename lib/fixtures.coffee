@@ -18,15 +18,17 @@ lastCharacterIsNewLine = (str) ->
   str[str.length - 1] is "\n"
 
 class Fixtures
-  constructor: (app) ->
+  constructor: (config = {}) ->
     if not (@ instanceof Fixtures)
       return new Fixtures(app)
 
-    if not app
-      throw new Error("Instantiating lib/fixtures requires an app!")
+    if not pr = config.projectRoot
+      throw new Error("Instantiating lib/support requires a projectRoot!")
 
-    @app    = app
-    @folder = path.join(@app.get("cypress").projectRoot, @app.get("cypress").fixturesFolder)
+    if not ff = config.fixturesFolder
+      throw new Error("Instantiating lib/support requires a fixturesFolder!")
+
+    @folder = path.join(pr, ff)
 
   get: (fixture) ->
     p = path.join(@folder, fixture)
@@ -192,15 +194,11 @@ class Fixtures
     ## will still get the folder support enabled but existing users wont be
     ## annoyed by new example files coming into their projects unnecessarily
 
-    {projectRoot, fixturesFolder} = @app.get("cypress")
-
-    fixturesDir = path.join(projectRoot, fixturesFolder)
-
     ## if the fixtures dir doesnt exist
     ## then create it + the example fixture
-    fs.statAsync(fixturesDir)
+    fs.statAsync(@folder)
       .bind(@)
       .catch ->
-        @copyExample(fixturesDir)
+        @copyExample(@folder)
 
 module.exports = Fixtures

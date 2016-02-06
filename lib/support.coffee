@@ -5,19 +5,21 @@ path      = require "path"
 fs = Promise.promisifyAll(fs)
 
 class Support
-  constructor: (app) ->
+  constructor: (config = {}) ->
     if not (@ instanceof Support)
-      return new Support(app)
+      return new Support(config)
 
-    if not app
-      throw new Error("Instantiating lib/suppoer requires an app!")
+    if not pr = config.projectRoot
+      throw new Error("Instantiating lib/support requires a projectRoot!")
 
-    @app    = app
-    @folder = path.join(@app.get("cypress").projectRoot, @app.get("cypress").supportFolder)
+    if not sf = config.supportFolder
+      throw new Error("Instantiating lib/support requires a supportFolder!")
 
-  copyExample: (supportDir) ->
+    @folder = path.join(pr, sf)
+
+  copyExample: (folder) ->
     src  = path.join(process.cwd(), "lib", "scaffold", "spec_helper.js")
-    dest = path.join(supportDir, "spec_helper.js")
+    dest = path.join(folder, "spec_helper.js")
     fs.copyAsync(src, dest)
 
   scaffold: ->
@@ -33,15 +35,11 @@ class Support
     ## will still get the folder support enabled but existing users wont be
     ## annoyed by new example files coming into their projects unnecessarily
 
-    {projectRoot, supportFolder} = @app.get("cypress")
-
-    supportDir = path.join(projectRoot, supportFolder)
-
     ## if the support dir doesnt exist
     ## then create it + the example fixture
-    fs.statAsync(supportDir)
+    fs.statAsync(@folder)
       .bind(@)
       .catch ->
-        @copyExample(supportDir)
+        @copyExample(@folder)
 
 module.exports = Support
