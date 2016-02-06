@@ -20,7 +20,6 @@ module.exports = {
 
     openProject
     .open(options)
-    .get("settings")
 
   close: ->
     nullify = ->

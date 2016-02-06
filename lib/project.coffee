@@ -1,13 +1,18 @@
-_        = require("lodash")
-Promise  = require("bluebird")
-Request  = require("request-promise")
-path     = require("path")
-Settings = require("./util/settings")
-Routes   = require("./util/routes")
-Log      = require("./log")
-Server   = require("./server")
+path      = require("path")
+EE        = require("events")
+_         = require("lodash")
+Promise   = require("bluebird")
+Request   = require("request-promise")
+Settings  = require("./util/settings")
+Routes    = require("./util/routes")
+Log       = require("./log")
+Server    = require("./server")
+Support   = require("./support")
+Fixtures  = require("./fixtures")
+Watchers  = require("./watchers")
+Reporter  = require("./reporter")
 
-class Project
+class Project extends EE
   constructor: (projectRoot) ->
     if not (@ instanceof Project)
       return new Project(projectRoot)
@@ -16,16 +21,88 @@ class Project
       throw new Error("Instantiating lib/project requires a projectRoot!")
 
     @projectRoot = projectRoot
+    @socket      = null
+    @watchers    = null
 
   open: (options = {}) ->
     @server = Server(@projectRoot)
 
-    @server.open(@, options).bind(@)
-    .then (settings) ->
-      {server: @server, settings: settings}
+    ## TODO: what to return here?
+    @server.open(options)
+    .bind(@)
+    .then (config) ->
+      @recordUserID()
+
+      .then ->
+        ## start socket io
+          @socket = Socket(@server)
+
+          ## preserve file watchers
+          @watchers = Watchers()
+
+          ## whenever the cypress.json file changes we need to reboot
+          @watchers.watch(Settings.pathToCypressJson(@projectRoot), {
+            onChange: (filePath, stats) =>
+              if _.isFunction(options.onReboot)
+                options.onReboot()
+          })
+
+          ## if we've passed down reporter
+          ## then record these via mocha reporter
+          if options.reporter
+            reporter = Reporter()
+
+          @socket.startListening(@watchers, {
+            onConnect: (id) =>
+              @emit("socket:connected", id)
+
+            onMocha: (event, args...) ->
+              ## bail if we dont have a
+              ## reporter instance
+              return if not reporter
+
+              args = [event].concat(args)
+              reporter.emit.apply(reporter, args)
+
+              if event is "end"
+                stats = reporter.stats()
+
+                # console.log stats
+                @emit("end", stats)
+          })
+      .then ->
+        @scaffold(config)
+
+      ## return our project instance
+      .return(@)
 
   close: ->
-    @server.close()
+    Promise.join(
+      @server.close(),
+      @socket.close(),
+      @watchers.close()
+    )
+
+  scaffold: (config) ->
+    Promise.join(
+      ## ensure fixtures dir is created
+      ## and example fixture if dir doesnt exist
+      Fixtures(config).scaffold(),
+      ## ensure support dir is created
+      ## and example support file if dir doesnt exist
+      Support(config).scaffold()
+    )
+
+  recordUserID: ->
+    @ensureProjectId().then (id) =>
+      ## make an external request to
+      ## record the user_id
+      ## TODO: remove this after a few
+      ## upgrades since this is temporary
+      @getDetails(id)
+
+      ## dont wait for this to complete
+      return null
 
   ## A simple helper method
   ## to create a project ID if we do not already

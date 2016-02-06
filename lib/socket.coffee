@@ -78,6 +78,7 @@ class Socket
   _startListening: (watchers, options) ->
     _.defaults options,
       socketId: null
+      onMocha: ->
       onConnect: ->
       onChromiumRun: ->
       checkForAppErrors: ->
@@ -173,6 +174,9 @@ class Socket
 
       socket.on "app:connect", (socketId) ->
         options.onConnect(socketId, socket)
+
+      socket.on "mocha", (event, args...) ->
+        options.onMocha(event, args)
 
     @testsDir = path.join(projectRoot, testFolder)
 

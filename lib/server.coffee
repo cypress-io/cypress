@@ -8,11 +8,6 @@ str          = require("underscore.string")
 allowDestroy = require("server-destroy")
 Promise      = require("bluebird")
 Log          = require("./log")
-Project      = require("./project")
-Socket       = require("./socket")
-Support      = require("./support")
-Fixtures     = require("./fixtures")
-Watchers     = require("./watchers")
 Settings     = require("./util/settings")
 
 ## cypress following by _ or - or .
@@ -83,6 +78,7 @@ class Server
       baseUrl:        null
       clientRoute:    "/__/"
       xhrRoute:       "/xhrs/"
+      socketIoRoute:  "/__socket.io"
       commandTimeout: 4000
       visitTimeout:   30000
       requestTimeout: 5000
@@ -184,43 +180,18 @@ class Server
     e.portInUse = true
     e
 
-  open: (project, options = {}) ->
+  open: (options = {}) ->
     return Promise.reject(@config) if @config.jsonError
 
     Promise.try =>
       @configureApplication(options)
-      @_open(project, options)
+      @_open(options)
 
-  _open: (project, options) ->
+  _open: (options) ->
     new Promise (resolve, reject) =>
-      @server    = http.createServer(@app)
-      @io        = require("socket.io")(@server, {path: "/__socket.io"})
+      @server = http.createServer(@app)
 
       allowDestroy(@server)
-
-      ## preserve file watchers
-      watchers  = Watchers()
-
-      ## whenever the cypress.json file changes we need to reboot
-      watchers.watch(Settings.pathToCypressJson(@config.projectRoot), {
-        onChange: (filePath, stats) =>
-          if _.isFunction(options.onReboot)
-            options.onReboot()
-      })
-
-      ## refactor this class
-      socket = Socket(@io, @app)
-      socket.startListening(watchers, options)
-
-      @app.once "close", =>
-        watchers.close()
-        socket.close()
-
-      # @config.checkForAppErrors = ->
-      #   socket.checkForAppErrors()
-
-      ## expose the socket back to the app
-      # options.socket = socket
 
       onError = (err) =>
         ## if the server bombs before starting
@@ -237,31 +208,10 @@ class Server
 
         @server.removeListener "error", onError
 
-        Promise.join(
-          ## ensure fixtures dir is created
-          ## and example fixture if dir doesnt exist
-          Fixtures(@app).scaffold(),
-          ## ensure support dir is created
-          ## and example support file if dir doesnt exist
-          Support(@app).scaffold()
-        )
-        .bind(@)
-        .then ->
-          project.ensureProjectId().then (id) =>
-            ## make an external request to
-            ## record the user_id
-            ## TODO: remove this after a few
-            ## upgrades since this is temporary
-            project.getDetails(id)
-
-            ## dont wait for this to complete
-            return null
-        .return(@config)
-        .then(resolve)
-        .catch(reject)
+        resolve(@config)
 
   close: ->
-    promise = new Promise (resolve) =>
+    new Promise (resolve) =>
       Log.unsetSettings()
 
       ## bail early we dont have a server or we're not
@@ -270,13 +220,8 @@ class Server
 
       Log.info("Server closing")
 
-      @app.emit("close")
-
       @server.destroy =>
         @isListening = false
         resolve()
-
-    promise.then ->
-      Log.info "Server closed"
 
 module.exports = Server
