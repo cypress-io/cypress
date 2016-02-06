@@ -27,7 +27,6 @@
     "gui":      "npm start",
     "start":    "node index.js --mode gui",
     "server":   "node index.js --mode server",
-    "headless": "node index.js --mode headless",
     "ci":       "node index.js --mode ci",
     "build":    "gulp client:build nw:build",
     "watch":    "gulp client nw",

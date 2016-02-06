@@ -37,7 +37,8 @@ module.exports = {
   getWindow: (renderer) ->
     Promise.resolve(renderer)
 
-  onReady: (app, options = {}) ->
+  runHeadless: (app, options = {}) ->
+  runHeaded: (app, options = {}) ->
     options.app = app
 
     ## handle right click to show context menu!

@@ -26,4 +26,7 @@ module.exports = (optionsOrArgv) ->
   ## This method will be called when Electron has finished
   ## initialization and is ready to create browser windows.
   app.on "ready", ->
-    init.onReady(app, options)
+    if options.headless
+      init.runHeadless(app, options)
+    else
+      init.runHeaded(app, options)

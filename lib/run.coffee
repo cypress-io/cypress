@@ -98,6 +98,12 @@ module.exports = (argv) ->
     process.stdout.write(manifest + "\n")
     return process.exit()
 
+  ## if we have runProject then
+  ## automatically force the mode
+  ## into headless
+  if options.runProject
+    options.mode = "headless"
+
   switch options.mode
     when "gui"
       ## run the gui headed
