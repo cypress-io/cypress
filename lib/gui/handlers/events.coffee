@@ -7,7 +7,7 @@ dialog      = require("./dialog")
 project     = require("./project")
 pgk         = require("./package")
 cookies     = require("./cookies")
-cloneError  = require("./clone_error")
+errors      = require("./errors")
 Renderer    = require("./renderer")
 logger      = require("../../log")
 Updater     = require("../../updater")
@@ -18,7 +18,7 @@ handleEvent = (options, event, id, type, arg) ->
       event.sender.send("response", data)
 
   sendErr = (err) ->
-    sendResponse({id: id, __error: cloneError(err)})
+    sendResponse({id: id, __error: errors.clone(err)})
 
   send = (data) ->
     sendResponse({id: id, data: data})
