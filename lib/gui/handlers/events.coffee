@@ -110,6 +110,7 @@ handleEvent = (options, event, id, type, arg) ->
         upd.cancel()
 
     when "update"
+      ## TODO: fix this
       send({foo: "bar"})
 
     when "get:about:logo:src"
