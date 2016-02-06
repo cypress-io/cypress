@@ -6,8 +6,8 @@ module.exports = {
     switch type
       when "NOT_LOGGED_IN"
         "Sorry, you are not currently logged into Cypress. This request requires authentication.\nPlease log into Cypress and then issue this command again."
-      else
-        "foo"
+      when "TESTS_DID_NOT_START"
+        "Sorry, there was an error while attempting to start your tests. The remote client never connected."
 
   get: (type) ->
     msg = @getMsgByType(type)
