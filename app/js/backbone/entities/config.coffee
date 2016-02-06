@@ -17,11 +17,5 @@
     generateToken: (user) ->
       @getCache().generateToken(user.get("session_token"))
 
-    getProjectToken: (user, project) ->
-      @getCache().getProjectToken(user.get("session_token"), project)
-
-    generateProjectToken: (user, project) ->
-      @getCache().generateProjectToken(user.get("session_token"), project)
-
   App.reqres.setHandler "config:entity", (attrs = {}) ->
     new Entities.Config attrs
