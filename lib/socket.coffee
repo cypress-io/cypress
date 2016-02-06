@@ -6,23 +6,21 @@ Fixtures      = require("./fixtures")
 Request       = require("./request")
 Log           = require("./log")
 Reporter      = require("./reporter")
+socketIo      = require("socket.io")
 
 leadingSlashesRe = /^\/+/
 
 class Socket
-  constructor: (io, app) ->
+  constructor: (server) ->
     if not (@ instanceof Socket)
-      return new Socket(io, app)
+      return new Socket(server)
 
-    if not app
-      throw new Error("Instantiating lib/socket requires an app!")
+    if not server
+      throw new Error("Instantiating lib/socket requires an server instance!")
 
-    if not io
-      throw new Error("Instantiating lib/socket requires an io instance!")
-
-    @app         = app
-    @io          = io
-    @reporter    = Reporter(@app)
+    @server      = server
+    @app         = server.app
+    # @reporter    = Reporter(@app)
 
   onTestFileChange: (filePath, stats) ->
     Log.info "onTestFileChange", filePath: filePath
@@ -77,7 +75,7 @@ class Socket
       .catch (err) ->
         cb({__error: err.message})
 
-  _startListening: (path, watchers, options) ->
+  _startListening: (watchers, options) ->
     _.defaults options,
       socketId: null
       onConnect: ->
@@ -87,7 +85,9 @@ class Socket
     messages = {}
     chromiums = {}
 
-    {projectRoot, testFolder} = @app.get("cypress")
+    {projectRoot, testFolder, socketIoRoute} = @app.get("cypress")
+
+    @io = socketId(@server, {path: socketIoRoute})
 
     @io.on "connection", (socket) =>
       Log.info "socket connected"
@@ -182,7 +182,7 @@ class Socket
     if process.env["CYPRESS_ENV"] is "development"
       @listenToCssChanges(watchers)
 
-    @_startListening(path, watchers, options)
+    @_startListening(watchers, options)
 
   listenToCssChanges: (watchers) ->
     watchers.watch path.join(process.cwd(), "lib", "public", "css"), {
