@@ -10,7 +10,7 @@ ensureSessionToken = (user) ->
   errors.die("NOT_LOGGED_IN")
 
 module.exports = {
-  runHeadless: (app, options = {}) ->
+  run: (app, options = {}) ->
     user.get().then (user) ->
       if ensureSessionToken(user)
         Renderer.create({
