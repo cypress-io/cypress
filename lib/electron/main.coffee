@@ -22,8 +22,8 @@ module.exports = (optionsOrArgv) ->
 
   ## reuse exit function to kill the app
   ## process with default status code of 0
-  exit = (code = 0) ->
-    app.exit(code)
+  exit = ->
+    app.exit(0)
 
   app.on "window-all-closed", ->
     if options.headless isnt true
@@ -53,7 +53,8 @@ module.exports = (optionsOrArgv) ->
         key.generate(options.projectPath).then(exit)
 
       when options.headless
-        headless.run(app, options)
+        ## run headlessly and exit
+        headless.run(app, options).then(exit)
 
       else
         headed.run(app, options)
