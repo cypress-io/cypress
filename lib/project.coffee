@@ -37,7 +37,7 @@ class Project extends EE
 
       @watchFilesAndStartWebsockets(options)
 
-      .then ->
+      .then =>
         @scaffold(config)
 
       ## return our project instance

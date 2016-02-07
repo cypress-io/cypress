@@ -134,10 +134,11 @@ module.exports = {
         ## finishes running all of the tests.
         ## we're using an event emitter interface
         ## to gracefully handle this in promise land
-        Promise.join(
-          @waitForRendererToConnect(project, id),
-          @waitForTestsToFinishRunning(project),
-          @createRenderer(config.allTestsUrl)
-        )
-
+        Promise.props({
+          connection: @waitForRendererToConnect(project, id)
+          stats:      @waitForTestsToFinishRunning(project)
+          renderer:   @createRenderer(config.allTestsUrl)
+        })
+        .get("stats")
+        .get("failures")
 }
