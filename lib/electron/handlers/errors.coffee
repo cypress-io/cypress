@@ -8,6 +8,8 @@ API = {
         "Sorry, you are not currently logged into Cypress. This request requires authentication.\nPlease log into Cypress and then issue this command again."
       when "TESTS_DID_NOT_START"
         "Sorry, there was an error while attempting to start your tests. The remote client never connected."
+      when "PROJECT_DOES_NOT_EXIST"
+        "Sorry, cannot run tests until this project has been added to Cypress."
 
   get: (type) ->
     msg = @getMsgByType(type)

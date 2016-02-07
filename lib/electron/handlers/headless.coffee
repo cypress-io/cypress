@@ -1,4 +1,6 @@
+chalk      = require("chalk")
 Promise    = require("bluebird")
+inquirer   = require("inquirer")
 user       = require("./user")
 errors     = require("./errors")
 project    = require("./project")
@@ -8,6 +10,54 @@ module.exports = {
   getId: ->
     ## return a random id
     Math.random()
+
+  ensureAndOpenProjectByPath: (id, options) ->
+    ## verify we have a project at this path
+    ## and if not prompt the user to add this
+    ## project. once added then open it.
+    {projectPath} = options
+
+    project.exists(projectPath).then (bool) =>
+      open = =>
+        @openProject(id, options)
+
+      ## if we have this project then lets
+      ## immediately open it!
+      return open() if bool
+
+      ## else prompt to add the project
+      ## and then open it!
+      @promptAddProject(projectPath)
+      .then -> open()
+
+  promptAddProject: (projectPath) ->
+    console.log(
+      chalk.yellow("We couldn't find a Cypress project at this path:"),
+      chalk.blue(projectPath)
+      "\n"
+    )
+
+    questions = [{
+      name: "add"
+      type: "list"
+      message: "Would you like to add this project to Cypress?"
+      choices: [{
+        name: "Yes: add this project and run the tests."
+        value: true
+      },{
+        name: "No:  don't add this project."
+        value: false
+      }]
+    }]
+
+    new Promise (resolve, reject) =>
+      inquirer.prompt questions, (answers) =>
+        if answers.add
+          project.add(projectPath).then ->
+            console.log chalk.green("\nOk great, added the project.\n")
+            resolve()
+        else
+          reject errors.get("PROJECT_DOES_NOT_EXIST")
 
   openProject: (id, options) ->
     ## now open the project to boot the server
@@ -70,9 +120,11 @@ module.exports = {
       id = @getId()
 
       ## get our project instance (event emitter)
-      @openProject(id, options)
+      @ensureAndOpenProjectByPath(id, options)
 
       .then (project) =>
+        console.log("\nTests should begin momentarily...\n")
+
         config = project.getConfig()
 
         ## we know we're done running headlessly

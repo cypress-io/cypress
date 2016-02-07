@@ -14,6 +14,10 @@ module.exports = {
   add: (path) ->
     cache.addProject(path)
 
+  exists: (path) ->
+    @paths().then (paths) ->
+      path in paths
+
   open: (path, options) ->
     ## store the currently open project
     openProject = Project(path)
