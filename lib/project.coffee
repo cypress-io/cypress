@@ -72,7 +72,7 @@ class Project extends EE
       onConnect: (id) =>
         @emit("socket:connected", id)
 
-      onMocha: (event, args...) ->
+      onMocha: (event, args...) =>
         ## bail if we dont have a
         ## reporter instance
         return if not reporter

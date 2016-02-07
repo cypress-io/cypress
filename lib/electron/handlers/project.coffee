@@ -14,6 +14,12 @@ module.exports = {
   add: (path) ->
     cache.addProject(path)
 
+  ## TODO: this method should not exist.
+  ## refactor the relationship between
+  ## projects and cache and remove this.
+  id: (path) ->
+    cache.getProjectIdByPath(path)
+
   exists: (path) ->
     @paths().then (paths) ->
       path in paths
