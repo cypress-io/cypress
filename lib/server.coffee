@@ -8,6 +8,7 @@ str          = require("underscore.string")
 allowDestroy = require("server-destroy")
 Promise      = require("bluebird")
 Log          = require("./log")
+Socket       = require("./socket")
 Settings     = require("./util/settings")
 
 ## cypress following by _ or - or .
@@ -215,7 +216,7 @@ class Server
 
         resolve(@config)
 
-  close: ->
+  _close: ->
     new Promise (resolve) =>
       Log.unsetSettings()
 
@@ -228,5 +229,15 @@ class Server
       @server.destroy =>
         @isListening = false
         resolve()
+
+  close: ->
+    Promise.join(
+      @_close()
+      @ws?.close()
+    )
+
+  startWebsockets: (watchers, options) ->
+    @ws = Socket(@app)
+    @ws.startListening(@server, watchers, options)
 
 module.exports = Server

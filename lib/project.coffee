@@ -7,7 +7,6 @@ Settings  = require("./util/settings")
 Routes    = require("./util/routes")
 Log       = require("./log")
 Server    = require("./server")
-Socket    = require("./socket")
 Support   = require("./support")
 Fixtures  = require("./fixtures")
 Watchers  = require("./watchers")
@@ -39,13 +38,6 @@ class Project extends EE
       @recordUserID()
 
       .then ->
-          ## start socket io
-          ## think about moving this back
-          ## into the server, its its server-esque
-          ## and socket requires dependencies only
-          ## server should know about!
-          @socket = Socket(@server.app)
-
           ## preserve file watchers
           @watchers = Watchers()
 
@@ -61,7 +53,7 @@ class Project extends EE
           if options.reporter
             reporter = Reporter()
 
-          @socket.startListening(@server.getHttpServer(), @watchers, {
+          @server.startWebsockets(@watchers, {
             onConnect: (id) =>
               @emit("socket:connected", id)
 
@@ -88,7 +80,6 @@ class Project extends EE
   close: ->
     Promise.join(
       @server.close(),
-      @socket.close(),
       @watchers.close()
     )
 
