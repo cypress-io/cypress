@@ -35,10 +35,7 @@ class Project extends EE
       ## opening the server
       @config = config
 
-      @recordUserID()
-
-      .then ->
-        @watchFilesAndStartWebsockets(options)
+      @watchFilesAndStartWebsockets(options)
 
       .then ->
         @scaffold(config)
@@ -100,17 +97,6 @@ class Project extends EE
       Support(config).scaffold()
     )
 
-  recordUserID: ->
-    @ensureProjectId().then (id) =>
-      ## make an external request to
-      ## record the user_id
-      ## TODO: remove this after a few
-      ## upgrades since this is temporary
-      @getDetails(id)
-
-      ## dont wait for this to complete
-      return null
-
   ## A simple helper method
   ## to create a project ID if we do not already
   ## have one
@@ -163,13 +149,5 @@ class Project extends EE
 
       Log.info "No Project ID found"
       throw new Error("No project ID found")
-
-  getDetails: (projectId) ->
-    require("./cache").getUser().then (user = {}) =>
-      Request.get({
-        url: Routes.project(projectId)
-        headers: {"X-Session": user.session_token}
-      }).catch (err) ->
-        ## swallow any errors
 
 module.exports = Project
