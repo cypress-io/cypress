@@ -38,39 +38,8 @@ class Project extends EE
       @recordUserID()
 
       .then ->
-          ## preserve file watchers
-          @watchers = Watchers()
+        @watchFilesAndStartWebsockets(options)
 
-          ## whenever the cypress.json file changes we need to reboot
-          @watchers.watch(Settings.pathToCypressJson(@projectRoot), {
-            onChange: (filePath, stats) =>
-              if _.isFunction(options.onReboot)
-                options.onReboot()
-          })
-
-          ## if we've passed down reporter
-          ## then record these via mocha reporter
-          if options.reporter
-            reporter = Reporter()
-
-          @server.startWebsockets(@watchers, {
-            onConnect: (id) =>
-              @emit("socket:connected", id)
-
-            onMocha: (event, args...) ->
-              ## bail if we dont have a
-              ## reporter instance
-              return if not reporter
-
-              args = [event].concat(args)
-              reporter.emit.apply(reporter, args)
-
-              if event is "end"
-                stats = reporter.stats()
-
-                # console.log stats
-                @emit("end", stats)
-          })
       .then ->
         @scaffold(config)
 
@@ -82,6 +51,41 @@ class Project extends EE
       @server.close(),
       @watchers.close()
     )
+
+  watchFilesAndStartWebsockets: (options) ->
+    ## preserve file watchers
+    @watchers = Watchers()
+
+    ## whenever the cypress.json file changes we need to reboot
+    @watchers.watch(Settings.pathToCypressJson(@projectRoot), {
+      onChange: (filePath, stats) =>
+        if _.isFunction(options.onReboot)
+          options.onReboot()
+    })
+
+    ## if we've passed down reporter
+    ## then record these via mocha reporter
+    if options.reporter
+      reporter = Reporter()
+
+    @server.startWebsockets(@watchers, {
+      onConnect: (id) =>
+        @emit("socket:connected", id)
+
+      onMocha: (event, args...) ->
+        ## bail if we dont have a
+        ## reporter instance
+        return if not reporter
+
+        args = [event].concat(args)
+        reporter.emit.apply(reporter, args)
+
+        if event is "end"
+          stats = reporter.stats()
+
+          # console.log stats
+          @emit("end", stats)
+    })
 
   getConfig: ->
     @config ? {}
