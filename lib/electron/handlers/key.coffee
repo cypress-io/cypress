@@ -13,9 +13,6 @@ module.exports = {
       ## log this out to the console
       console.log(token)
 
-    ## catch any errors and exit with them
-    .catch(errors.exitWith)
-
   generate: (projectPath) ->
     user.ensureSession()
 
@@ -27,6 +24,4 @@ module.exports = {
       ## log this out to the console
       console.log(token)
 
-    ## catch any errors and exit with them
-    .catch(errors.exitWith)
 }

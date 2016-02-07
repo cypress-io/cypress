@@ -17,10 +17,10 @@ module.exports = {
     ## project. once added then open it.
     {projectPath} = options
 
-    project.exists(projectPath).then (bool) =>
-      open = =>
-        @openProject(id, options)
+    open = =>
+      @openProject(id, options)
 
+    project.exists(projectPath).then (bool) =>
       ## if we have this project then lets
       ## immediately open it!
       return open() if bool
@@ -28,7 +28,7 @@ module.exports = {
       ## else prompt to add the project
       ## and then open it!
       @promptAddProject(projectPath)
-      .then -> open()
+      .then(open)
 
   promptAddProject: (projectPath) ->
     console.log(
@@ -79,7 +79,7 @@ module.exports = {
       url:    url
       width:  1280
       height: 720
-      show:   false
+      # show:   false
       frame:  false
       type:   "PROJECT"
     })
@@ -119,7 +119,9 @@ module.exports = {
     .then =>
       id = @getId()
 
-      ## get our project instance (event emitter)
+      ## verify this is an added project
+      ## and then open it, returning our
+      ## project instance
       @ensureAndOpenProjectByPath(id, options)
 
       .then (project) =>
@@ -138,6 +140,4 @@ module.exports = {
           @createRenderer(config.allTestsUrl)
         )
 
-    ## catch any errors and exit with them
-    .catch(errors.exitWith)
 }
