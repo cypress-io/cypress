@@ -39,7 +39,7 @@ module.exports = {
       fn = (socketId) ->
         if socketId is id
           ## remove the event listener if we've connected
-          project.off "socket:connected", fn
+          project.removeListener "socket:connected", fn
 
           ## resolve the promise
           resolve()
