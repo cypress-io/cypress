@@ -118,11 +118,6 @@ module.exports = (argv) ->
       ## run the server without gui
       runServer(options)
 
-    when "ci"
-      ## run the server in CI mode
-      options.ci = true
-      runServer(options)
-
     when "project"
       ## start the project
       runProject(options)
