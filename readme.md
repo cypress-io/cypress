@@ -2,7 +2,7 @@
 
 This is the CLI for: [https://github.com/cypress-io/cypress](https://github.com/cypress-io/cypress).
 
-View our progress: [https://www.pivotaltracker.com/n/projects/1514636](https://www.pivotaltracker.com/n/projects/1514636)
+View our progress: [https://www.pivotaltracker.com/n/projects/1531501](https://www.pivotaltracker.com/n/projects/1531501)
 
 ## What this does
 
