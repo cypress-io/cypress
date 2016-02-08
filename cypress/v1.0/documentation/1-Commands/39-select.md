@@ -3,7 +3,7 @@ excerpt: Select an option in a select
 
 Select an option within a `<select>` DOM element.
 
-**The following events are fired during check:** `mousedown`, `focus`, `mouseup`, `click`
+**The following events are fired during select:** `mousedown`, `focus`, `mouseup`, `click`
 
 | | |
 |--- | --- |
