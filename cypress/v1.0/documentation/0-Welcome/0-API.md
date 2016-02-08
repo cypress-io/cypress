@@ -120,20 +120,27 @@ Commands drive your tests in the browser like a real user would. They let you pe
 | [focused](https://on.cypress.io/api/focused) | Get the DOM element that is focused |
 | [wrap](https://on.cypress.io/api/wrap) | Invoke the function on the current subject |
 
-# Cypress API
+# Utilities
 
-The Cypress API enables you to configure the behavior of how Cypress works internally. It also give you access to methods from other commonly used libraries. You can do things like access Environment Variables, change configuration, create custom commands, and more.
+Utilities give you access to methods from other commonly used libraries.
 
 | Commands | |
 | -------------------- | -- |
-| [_](https://on.cypress.io/api/cypress-underscore) | Call any Underscore method |
-| [$](https://on.cypress.io/api/cypress-jquery) | Call any jQuery method |
+| [_](https://on.cypress.io/api/underscore) | Call any Underscore method |
+| [$](https://on.cypress.io/api/jquery) | Call any jQuery method |
+| [moment](https://on.cypress.io/api/moment) | Format or parse dates using moment methods |
+| [Blob](https://on.cypress.io/api/Blob) | Convert base64 strings to blob objects |
+| [Promise](https://on.cypress.io/api/Promise) | Instantiate a bluebird promise |
+
+# Cypress API
+
+The Cypress API enables you to configure the behavior of how Cypress works internally. You can do things like access Environment Variables, change configuration, create custom commands, and more.
+
+| Commands | |
+| -------------------- | -- |
 | [config](https://on.cypress.io/api/config) | get and set configuration options |
 | [env](https://on.cypress.io/api/env) | get and set environment variables |
-| [moment](https://on.cypress.io/api/cypress-moment) | Format or parse dates using moment methods |
-| [Blob](https://on.cypress.io/api/cypress-Blob) | Convert base64 strings to blob objects |
 | [Commands](https://on.cypress.io/api/Commands) | Commands API |
 | [Cookies](https://on.cypress.io/api/Cookies) | Manage your application's cookies |
 | [Dom](https://on.cypress.io/api/Dom) | Find out whether an element is hidden |
-| [Promise](https://on.cypress.io/api/cypress-Promise) | Instantiate a bluebird promise |
 | [Server](https://on.cypress.io/api/api-server) | Permanently override default server options |
