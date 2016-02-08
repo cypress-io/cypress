@@ -2,9 +2,8 @@ path      = require("path")
 EE        = require("events")
 _         = require("lodash")
 Promise   = require("bluebird")
-Request   = require("request-promise")
 Settings  = require("./util/settings")
-Routes    = require("./util/routes")
+api       = require("./api")
 Log       = require("./log")
 Server    = require("./server")
 Support   = require("./support")
@@ -132,13 +131,8 @@ class Project extends EE
       return write(id)
 
     require("./cache").getUser().then (user = {}) =>
-      Request.post({
-        url: Routes.projects()
-        headers: {"X-Session": user.session_token}
-        json: true
-      })
-      .then (attrs) ->
-        write(attrs.uuid)
+      api.createProject(user.session_token)
+      .then(write)
 
   getProjectId: ->
     Settings.read(@projectRoot)

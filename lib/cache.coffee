@@ -7,7 +7,6 @@ errors    = require("request-promise/errors")
 config    = require("./config")
 Project   = require("./project")
 Log       = require("./log")
-Routes    = require("./util/routes")
 
 CACHE = config.app.cache_path
 fs    = Promise.promisifyAll(fs)
@@ -206,23 +205,17 @@ class Cache extends require("events").EventEmitter
   remove: ->
     fs.removeSync CACHE
 
-  _token: (method, session) ->
-    url = Routes.token()
-    headers = {"X-Session": session}
-    request({method: method, url: url, headers: headers, json: true})
-      .promise().get("api_token")
-
   getToken: (session) ->
-    @_token("get", session)
+    api.getToken(session)
 
   generateToken: (session) ->
-    @_token("put", session)
+    api.updateToken(session)
 
   getProjectIdByPath: (projectPath) ->
     @getProjects().then (projects) ->
       _.findKey(projects, {PATH: projectPath})
 
-  _projectToken: (method, session, projectPath) ->
+  _projectToken: (method, projectPath, session) ->
     @getProjectIdByPath(projectPath).then (projectId) ->
       if not projectId
         e = new Error
@@ -230,47 +223,16 @@ class Cache extends require("events").EventEmitter
         e.projectPath = projectPath
         throw e
       else
-        request({
-          method:  method
-          url:     Routes.projectToken(projectId)
-          headers: {"X-Session": session}
-          json:    true
-        }).promise().get("api_token")
+        switch method
+          when "get" then api.getProjectToken(projectId, session)
+          when "put" then api.updateProjectToken(projectId, session)
+          else
+            throw new TypeError("Method not recognized. Expected 'get' or 'put', got: '#{method}'")
 
-  getProjectToken: (session, project) ->
-    @_projectToken("get", session, project)
+  getProjectToken: (project, session) ->
+    @_projectToken("get", project, session)
 
-  generateProjectToken: (session, project) ->
-    @_projectToken("put", session, project)
-
-  # ## move this to an auth module
-  # ## and update NW references
-  # logIn: (code) ->
-  #   url = Routes.signin({code: code})
-  #   request.post(url, {json: true})
-  #   .catch errors.StatusCodeError, (err) ->
-  #     ## slice out the status code since RP automatically
-  #     ## adds this before the message
-  #     err.message = err.message.split(" - ").slice(1).join("")
-  #     throw err
-
-  # logOut: (token) ->
-  #   nukeSession = (resolve, reject) ->
-  #     @_get("USER")
-  #     .then (user = {}) =>
-  #       user.session_token = null
-  #       @_set({USER: user})
-  #     .then(resolve)
-  #     .catch(reject)
-
-  #   url = Routes.signout()
-  #   headers = {"X-Session": token}
-
-  #   new Promise (resolve, reject) =>
-  #     nukeSession = _.bind(nukeSession, @, resolve, reject)
-
-  #     request.post({url: url, headers: headers})
-  #       .then(nukeSession)
-  #       .catch(nukeSession)
+  generateProjectToken: (project, session) ->
+    @_projectToken("put", project, session)
 
 module.exports = new Cache

@@ -1,11 +1,10 @@
 _             = require("lodash")
 path          = require("path")
 Promise       = require("bluebird")
-request       = require("request-promise")
 Project       = require("./project")
 cache         = require("./cache")
+api           = require("./api")
 Log           = require("./log")
-Routes        = require("./util/routes")
 
 class Keys
   constructor: (projectRoot) ->
@@ -26,15 +25,8 @@ class Keys
     cache.getProject(id).get("RANGE")
 
   _getNewKeyRange: (projectId) ->
-    url = Routes.projectKeys(projectId)
-
-    Log.info "Requesting new key range", {url: url}
-
     cache.getUser().then (user = {}) =>
-      request.post({
-        url: url
-        headers: {"X-Session": user.session_token}
-      })
+      api.createKeyRange(projectId, user.session_token)
 
   ## Lookup the next Test integer and update
   ## offline location of sync

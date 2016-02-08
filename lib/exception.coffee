@@ -3,9 +3,9 @@ Promise  = require("bluebird")
 winston  = require("winston")
 fs       = require("fs-extra")
 cache    = require("./cache")
+api      = require("./api")
 Log      = require("./log")
 Settings = require("./util/settings")
-Routes   = require("./util/routes")
 
 ## POST http://api.cypress.io/exceptions
 ## sets request body
@@ -16,9 +16,6 @@ Routes   = require("./util/routes")
 ## version: {}
 
 Exception = {
-  getUrl: ->
-    Routes.exceptions()
-
   getCache: ->
     cache.read()
 
@@ -56,16 +53,13 @@ Exception = {
   create: (err, settings) ->
     return Promise.resolve() if process.env["CYPRESS_ENV"] isnt "production"
 
+    ## should probably use Promise.props here
     Promise.all([@getBody(err, settings), @getHeaders()])
       .bind(@)
       .spread (body, headers) ->
-        request.post({
-          url: @getUrl()
-          body: body
-          headers: headers
-          json: true
-        })
-        .promise().timeout(3000)
+        api.createRaygunException(body, headers)
+        .promise()
+        .timeout(3000)
 }
 
 module.exports = Exception

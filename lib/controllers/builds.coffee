@@ -1,7 +1,7 @@
 request     = require("request")
-Controller  = require("./controller")
+api         = require("../api")
 cache       = require("../cache")
-Routes      = require("../util/routes")
+Controller  = require("./controller")
 
 class Builds extends Controller
   constructor: (app) ->
@@ -17,11 +17,10 @@ class Builds extends Controller
 
   handleBuilds: (req, res, next) ->
     cache.getUser().then (user) =>
-      request.get({
-        url: Routes.projectCi(@app.get("cypress").projectId)
-        headers: {"X-Session": user?.session_token}
-        json: true
-      })
+      api.getBuilds(
+        @app.get("cypress").projectId,
+        user?.session_token
+      )
       ## should we send up the error here?
       ## yes most likely, so dont issue next
       ## just send up the error and respond

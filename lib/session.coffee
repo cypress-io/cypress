@@ -1,7 +1,5 @@
 Promise = require("bluebird")
-request = require("request-promise")
-errors  = require("request-promise/errors")
-Routes  = require("./util/routes")
+api     = require("./api")
 
 module.exports = {
   getLoginUrl: ->
@@ -13,16 +11,8 @@ module.exports = {
   ## move this to an auth module
   ## and update NW references
   logIn: (code) ->
-    url = Routes.signin({code: code})
-    request.post(url, {json: true})
-    .catch errors.StatusCodeError, (err) ->
-      ## slice out the status code since RP automatically
-      ## adds this before the message
-      err.message = err.message.split(" - ").slice(1).join("")
-      throw err
+    api.createSignin(code)
 
-  logOut: (token) ->
-    url = Routes.signout()
-    headers = {"X-Session": token}
-    request.post({url: url, headers: headers})
+  logOut: (session) ->
+    api.createSignout(session)
 }
