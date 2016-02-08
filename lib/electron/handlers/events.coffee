@@ -121,16 +121,17 @@ handleEvent = (options, event, id, type, arg) ->
       .then(send)
       .catch(sendErr)
 
+    when "clear:logs"
+      logs.clear()
+      .then -> send(null)
+      .catch(sendErr)
+
     when "on:log"
       logs.onLog(send)
 
     when "off:log"
       logs.off()
       send(null)
-
-    when "clear:logs"
-      logs.clear()
-      .then -> send(null)
 
     when "get:project:paths"
       project.paths()

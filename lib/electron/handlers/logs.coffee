@@ -12,7 +12,7 @@ module.exports = {
     logger.off()
 
   onLog: (fn) ->
-    logger.onLog = fn
+    logger.onLog(fn)
 
   print: ->
     ## print all the logs and exit

@@ -8,6 +8,7 @@ mockery.registerMock("electron", {})
 
 _       = require("lodash")
 cache   = require("#{root}../lib/cache")
+logger  = require("#{root}../lib/log")
 Project = require("#{root}../lib/project")
 events  = require("#{root}../lib/electron/handlers/events")
 errors  = require("#{root}../lib/electron/handlers/errors")
@@ -36,6 +37,42 @@ describe.only "Events", ->
 
     @expectSendErrCalledWith = (err) =>
       expect(@send).to.be.calledWith("response", {id: @id, __error: errors.clone(err)})
+
+  context "log events", ->
+    describe "get:logs", ->
+      it "returns array of logs", ->
+        @sandbox.stub(logger, "getLogs").resolves([])
+
+        @handleEvent("get:logs").then =>
+          @expectSendCalledWith([])
+
+      it "catches errors", ->
+        err = new Error("foo")
+        @sandbox.stub(logger, "getLogs").rejects(err)
+
+        @handleEvent("get:logs").then =>
+          @expectSendErrCalledWith(err)
+
+    describe "clear:logs", ->
+      it "returns null", ->
+        @sandbox.stub(logger, "clearLogs").resolves()
+
+        @handleEvent("clear:logs").then =>
+          @expectSendCalledWith(null)
+
+      it "catches errors", ->
+        err = new Error("foo")
+        @sandbox.stub(logger, "clearLogs").rejects(err)
+
+        @handleEvent("clear:logs").then =>
+          @expectSendErrCalledWith(err)
+
+    describe "on:log", ->
+      it "sets send to onLog", ->
+        onLog = @sandbox.stub(logger, "onLog")
+        @handleEvent("on:log")
+        expect(onLog).to.be.called
+        expect(onLog.getCall(0).args[0]).to.be.a("function")
 
   context "project events", ->
     describe "get:project:paths", ->
