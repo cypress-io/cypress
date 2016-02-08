@@ -151,6 +151,8 @@ You can [change these default dimensions](https://on.cypress.io/guides/configura
 }
 ```
 
+Additionally, Cypress automatically sets the viewport to it's default size between each test.
+
 ***
 
 ## Auto Scaling
