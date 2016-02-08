@@ -126,11 +126,11 @@ Utilities give you access to methods from other commonly used libraries.
 
 | Commands | |
 | -------------------- | -- |
-| [_](https://on.cypress.io/api/underscore) | Call any Underscore method |
-| [$](https://on.cypress.io/api/jquery) | Call any jQuery method |
-| [moment](https://on.cypress.io/api/moment) | Format or parse dates using moment methods |
-| [Blob](https://on.cypress.io/api/Blob) | Convert base64 strings to blob objects |
-| [Promise](https://on.cypress.io/api/Promise) | Instantiate a bluebird promise |
+| [_](https://on.cypress.io/api/cypress-underscore) | Call any Underscore method |
+| [$](https://on.cypress.io/api/cypress-jquery) | Call any jQuery method |
+| [moment](https://on.cypress.io/api/cypress-moment) | Format or parse dates using moment methods |
+| [Blob](https://on.cypress.io/api/cypress-Blob) | Convert base64 strings to blob objects |
+| [Promise](https://on.cypress.io/api/cypress-Promise) | Instantiate a bluebird promise |
 
 # Cypress API
 
