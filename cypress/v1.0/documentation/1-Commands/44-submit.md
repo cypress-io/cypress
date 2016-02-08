@@ -64,7 +64,7 @@ The commands above will display in the command log as:
 
 When clicking on `submit` within the command log, the console outputs the following:
 
-<img width="547" alt="screen shot 2015-11-29 at 12 42 22 pm" src="https://cloud.githubusercontent.com/assets/1271364/11458858/b30b0a0a-9696-11e5-99b9-d785b597287c.png">
+![cy.submit console log](https://cloud.githubusercontent.com/assets/1271364/12888878/222f5522-ce4a-11e5-9edd-f67be2ebce40.png)
 
 ***
 
