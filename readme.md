@@ -1,6 +1,8 @@
-## Cypress CLI [![Circle CI](https://circleci.com/gh/cypress-io/cypress-cli.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress-cli)
+# Cypress CLI [![Circle CI](https://circleci.com/gh/cypress-io/cypress-cli.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress-cli)
 
-This is the CLI for [https://github.com/cypress-io/cypress](https://github.com/cypress-io/cypress).
+This is the CLI for: [https://github.com/cypress-io/cypress](https://github.com/cypress-io/cypress).
+
+View our progress: [https://www.pivotaltracker.com/n/projects/1514636](https://www.pivotaltracker.com/n/projects/1514636)
 
 ## What this does
 
