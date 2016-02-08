@@ -21,11 +21,13 @@ https://github.com/mobify/readmeio-sync
 
 To make changes to our documentation:
 
-1. Make changes **locally** here (in markdown) and then synchronize them **remotely**.
+- Make changes **locally** here (in markdown) and then synchronize them **remotely**.
 
 ### Working Locally
 
-You may need to login with your Readme.io credentials before working. You may see an error when trying to upload or clean that looks like this: `throw 'Error: Request failed! (Redirected to login...)'`
+You will need to login with your Readme.io credentials before working. You may see an error when trying to upload or clean that looks like this: `throw 'Error: Request failed! (Redirected to login...)'`
+
+Login with your Cypress readme.io account credentials.
 
 ```bash
 export README_EMAIL=<readmeio_account_email>
