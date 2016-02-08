@@ -137,13 +137,13 @@ handleEvent = (options, event, id, type, arg) ->
       .then(send)
       .catch(sendErr)
 
-    when "remove:project"
-      project.remove(arg)
+    when "add:project"
+      project.add(arg)
       .then -> send(arg)
       .catch(sendErr)
 
-    when "add:project"
-      project.add(arg)
+    when "remove:project"
+      project.remove(arg)
       .then -> send(arg)
       .catch(sendErr)
 
@@ -161,6 +161,8 @@ handleEvent = (options, event, id, type, arg) ->
       throw new Error("No ipc event registered for: '#{type}'")
 
 module.exports = {
+  handleEvent: handleEvent
+
   stop: ->
     ipc.removeAllListeners()
 

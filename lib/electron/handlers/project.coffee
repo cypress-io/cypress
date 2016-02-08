@@ -31,6 +31,8 @@ module.exports = {
     openProject
     .open(options)
 
+  opened: -> openProject
+
   close: ->
     nullify = ->
       ## null this back out
