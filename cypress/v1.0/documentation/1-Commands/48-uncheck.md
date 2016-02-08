@@ -1,7 +1,7 @@
 slug: uncheck
-excerpt: Uncheck a checkbox or radio
+excerpt: Uncheck a checkbox
 
-Unchecks the checkboxes or radios within the current subject.
+Unchecks the checkboxes within the current subject.
 
 **The following events are fired during uncheck:** `mousedown`, `focus`, `mouseup`, `click`
 
@@ -14,13 +14,13 @@ Unchecks the checkboxes or radios within the current subject.
 
 # [cy.uncheck()](#section-usage)
 
-Unchecks checkboxes or radios. Triggers events associated with check.
+Unchecks checkboxes. Triggers events associated with check.
 
 ***
 
 # [cy.uncheck( *values* )](#section-values-usage)
 
-Unchecks the checkboxes or radios matching the values. Triggers events associated with uncheck.
+Unchecks the checkboxes matching the values. Triggers events associated with uncheck.
 
 ***
 
@@ -52,7 +52,7 @@ cy.get(":checkbox").uncheck()
 ## Uncheck all radios
 
 ```javascript
-cy.get("[type='radio']").uncheck()
+cy.get("[type='checkbox']").uncheck()
 ```
 
 ***
