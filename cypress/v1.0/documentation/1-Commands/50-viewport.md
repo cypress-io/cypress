@@ -27,7 +27,7 @@ Resize the viewport to a preset dimension. Viewport supports the following prese
 | `macbook-11`  | 1366  | 768    |
 | `ipad-2`      | 1024  | 768    |
 | `ipad-mini`   | 1024  | 768    |
-| `iphone-6`+   | 414   | 736    |
+| `iphone-6+`   | 414   | 736    |
 | `iphone-6`    | 375   | 667    |
 | `iphone-5`    | 320   | 568    |
 | `iphone-4`    | 320   | 480    |
