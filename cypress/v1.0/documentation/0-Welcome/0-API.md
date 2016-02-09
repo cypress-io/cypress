@@ -140,7 +140,7 @@ The Cypress API enables you to configure the behavior of how Cypress works inter
 | -------------------- | -- |
 | [config](https://on.cypress.io/api/config) | get and set configuration options |
 | [env](https://on.cypress.io/api/env) | get and set environment variables |
-| [Commands](https://on.cypress.io/api/Commands) | Commands API |
-| [Cookies](https://on.cypress.io/api/Cookies) | Manage your application's cookies |
-| [Dom](https://on.cypress.io/api/Dom) | Find out whether an element is hidden |
+| [Commands](https://on.cypress.io/api/commands) | Commands API |
+| [Cookies](https://on.cypress.io/api/cookies) | Manage your application's cookies |
+| [Dom](https://on.cypress.io/api/dom) | Find out whether an element is hidden |
 | [Server](https://on.cypress.io/api/api-server) | Permanently override default server options |
