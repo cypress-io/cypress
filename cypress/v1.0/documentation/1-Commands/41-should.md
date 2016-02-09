@@ -243,7 +243,7 @@ You can [read more about how Cypress resolves your assertions](https://on.cypres
 
 # Notes
 
-## What assertions and chainers I can use?
+## What assertions and chainers can I use?
 
 The chainers that `cy.should` accepts come from:
 
