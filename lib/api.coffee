@@ -47,7 +47,7 @@ module.exports = {
 
   createSignout: (session) ->
     rp.post({
-      url: Routes.signout(session)
+      url: Routes.signout()
       headers: {
         "X-Session": session
       }
@@ -72,6 +72,14 @@ module.exports = {
         "X-Session": session
       }
     })
+
+  getLoginUrl: ->
+    rp.get({
+      url: Routes.auth(),
+      json: true
+    })
+    .promise()
+    .get("url")
 
   _token: (method, session) ->
     rp({
