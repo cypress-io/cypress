@@ -1,5 +1,5 @@
 slug: wrap
-excerpt: Invoke the function on the current subject
+excerpt: Wrap an object
 
 Return the object passed into `cy.wrap`.
 

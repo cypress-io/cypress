@@ -118,7 +118,7 @@ Commands drive your tests in the browser like a real user would. They let you pe
 | -------------------- | -- |
 | [end](https://on.cypress.io/api/end) | End the command chain |
 | [focused](https://on.cypress.io/api/focused) | Get the DOM element that is focused |
-| [wrap](https://on.cypress.io/api/wrap) | Invoke the function on the current subject |
+| [wrap](https://on.cypress.io/api/wrap) | Wrap an object |
 
 # Utilities
 
