@@ -1,24 +1,29 @@
-session = require("../../session")
-cache   = require("../../cache")
+api   = require("../../api")
+cache = require("../../cache")
 
 module.exports = {
   get: ->
     cache.getUser()
 
-  getProjectToken: (session, project) ->
-    cache.getProjectToken(session, project)
+  getLoginUrl: ->
+    # api.getLoginUrl()
+    url = "https://github.com/login/oauth/authorize?client_id=71bdc3730cd85d30955a&scope=user:email"
+    Promise.delay(1000).return(url)
 
-  generateProjectToken: (session, project) ->
-    cache.generateProjectToken(session, project)
+  getProjectToken: (session, projectPath) ->
+    cache.getProjectToken(session, projectPath)
+
+  generateProjectToken: (session, projectPath) ->
+    cache.generateProjectToken(session, projectPath)
 
   logIn: (code) ->
-    session.logIn(code)
+    api.createSignin(code)
     .then (user) ->
       cache.setUser(user)
       .return(user)
 
-  logOut: (token) ->
-    session.logOut(token)
+  logOut: (session) ->
+    api.createSignout(session)
     .then(cache.removeUserSession())
 
   ensureSession: ->

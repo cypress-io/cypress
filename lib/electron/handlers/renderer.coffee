@@ -3,7 +3,7 @@ path          = require("path")
 uri           = require("url")
 cypressGui    = require("cypress-gui")
 BrowserWindow = require("electron").BrowserWindow
-session       = require("../../session")
+user          = require("./user")
 
 windows               = {}
 recentlyCreatedWindow = false
@@ -11,7 +11,7 @@ recentlyCreatedWindow = false
 getUrl = (type) ->
   switch type
     when "GITHUB_LOGIN"
-      session.getLoginUrl()
+      user.getLoginUrl()
     when "ABOUT"
       cypressGui.getPathToAbout()
     when "DEBUG"
