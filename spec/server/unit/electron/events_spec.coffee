@@ -4,7 +4,10 @@ mockery.enable({
   warnOnUnregistered: false
 })
 
-mockery.registerMock("electron", {})
+mockery.registerMock("electron", electron = {
+  shell: {}
+  ipcMain: {}
+})
 
 _        = require("lodash")
 icons    = require("cypress-icons")
@@ -12,9 +15,12 @@ cache    = require("#{root}../lib/cache")
 logger   = require("#{root}../lib/log")
 Project  = require("#{root}../lib/project")
 Updater  = require("#{root}../lib/updater")
+user     = require("#{root}../lib/electron/handlers/user")
 events   = require("#{root}../lib/electron/handlers/events")
 errors   = require("#{root}../lib/electron/handlers/errors")
+dialog   = require("#{root}../lib/electron/handlers/dialog")
 project  = require("#{root}../lib/electron/handlers/project")
+cookies  = require("#{root}../lib/electron/handlers/cookies")
 Renderer = require("#{root}../lib/electron/handlers/renderer")
 
 describe.only "Events", ->
@@ -24,12 +30,20 @@ describe.only "Events", ->
   beforeEach ->
     ## setup default options and event and id
     ## as the first three arguments
-    @send    = @sandbox.stub()
-    @options = {}
     @id      = Math.random()
+    @send    = @sandbox.spy()
+    @cookies = {}
+    @options = {
+      app: {
+        exit: @sandbox.spy()
+      }
+    }
     @event   = {
       sender: {
         send: @send
+        session: {
+          cookies: @cookies
+        }
       }
     }
 
@@ -40,6 +54,140 @@ describe.only "Events", ->
 
     @expectSendErrCalledWith = (err) =>
       expect(@send).to.be.calledWith("response", {id: @id, __error: errors.clone(err)})
+
+  context ".stop", ->
+    it "calls ipc#removeAllListeners", ->
+      ral = electron.ipcMain.removeAllListeners = @sandbox.spy()
+      events.stop()
+      expect(ral).to.be.calledOnce
+
+  context ".start", ->
+    it "ipc attaches callback on request", ->
+      onFn = electron.ipcMain.on = @sandbox.stub()
+      handleEvent = @sandbox.stub(events, "handleEvent")
+      events.start({foo: "bar"})
+      expect(onFn).to.be.calledWith("request")
+
+    it "partials in options in request callback", ->
+      onFn = electron.ipcMain.on = @sandbox.stub()
+      onFn.yields("arg1", "arg2")
+      handleEvent = @sandbox.stub(events, "handleEvent")
+      events.start({foo: "bar"})
+      expect(handleEvent).to.be.calledWith({foo: "bar"}, "arg1", "arg2")
+
+  context "no ipc event", ->
+    it "throws", ->
+      fn = =>
+        @handleEvent("no:such:event")
+
+      expect(fn).to.throw("No ipc event registered for: 'no:such:event'")
+
+  context "quit", ->
+    it "exits the app", ->
+      @handleEvent("quit")
+      expect(@options.app.exit).to.be.calledWith(0)
+
+    it "calls logs.off", ->
+      @sandbox.stub(logger, "off")
+      @handleEvent("quit")
+      expect(logger.off).to.be.calledOnce
+
+  context "dialog", ->
+    describe "show:directory:dialog", ->
+      it "calls dialog.show and returns", ->
+        @sandbox.stub(dialog, "show").resolves({foo: "bar"})
+        @handleEvent("show:directory:dialog").then =>
+          @expectSendCalledWith({foo: "bar"})
+
+      it "catches errors", ->
+        err = new Error("foo")
+        @sandbox.stub(dialog, "show").rejects(err)
+
+        @handleEvent("show:directory:dialog").then =>
+          @expectSendErrCalledWith(err)
+
+  context "user", ->
+    describe "log:in", ->
+      it "calls user.logIn and returns user", ->
+        @sandbox.stub(user, "logIn").resolves({foo: "bar"})
+        @handleEvent("log:in").then =>
+          @expectSendCalledWith({foo: "bar"})
+
+      it "catches errors", ->
+        err = new Error("foo")
+        @sandbox.stub(user, "logIn").rejects(err)
+
+        @handleEvent("log:in").then =>
+          @expectSendErrCalledWith(err)
+
+    describe "log:out", ->
+      it "calls user.logOut and returns user", ->
+        @sandbox.stub(user, "logOut").resolves({foo: "bar"})
+        @handleEvent("log:out").then =>
+          @expectSendCalledWith({foo: "bar"})
+
+      it "catches errors", ->
+        err = new Error("foo")
+        @sandbox.stub(user, "logOut").rejects(err)
+
+        @handleEvent("log:out").then =>
+          @expectSendErrCalledWith(err)
+
+    describe "get:current:user", ->
+      it "calls user.get and returns user", ->
+        @sandbox.stub(user, "get").resolves({foo: "bar"})
+        @handleEvent("get:current:user").then =>
+          @expectSendCalledWith({foo: "bar"})
+
+      it "catches errors", ->
+        err = new Error("foo")
+        @sandbox.stub(user, "get").rejects(err)
+
+        @handleEvent("get:current:user").then =>
+          @expectSendErrCalledWith(err)
+
+  context "cookies", ->
+    describe "clear:github:cookies", ->
+      it "clears cookies and returns", ->
+        clearGithub = @sandbox.stub(cookies, "clearGithub").resolves({foo: "bar"})
+        @handleEvent("clear:github:cookies").then =>
+          @expectSendCalledWith({foo: "bar"})
+          expect(clearGithub).to.be.calledWith(@cookies)
+
+      it "catches errors", ->
+        err = new Error("foo")
+        clearGithub = @sandbox.stub(cookies, "clearGithub").rejects(err)
+
+        @handleEvent("clear:github:cookies", {foo: "bar"}).then =>
+          @expectSendErrCalledWith(err)
+
+  context "external shell", ->
+    describe "external:open", ->
+      it "shell.openExternal with arg", ->
+        electron.shell.openExternal = @sandbox.spy()
+        @handleEvent("external:open", {foo: "bar"})
+        expect(electron.shell.openExternal).to.be.calledWith({foo: "bar"})
+
+  context "window", ->
+    describe "window:open", ->
+      it "calls Renderer#create with args and resolves with return of Renderer.create", ->
+        @sandbox.stub(Renderer, "create").withArgs({foo: "bar"}).resolves({bar: "baz"})
+        @handleEvent("window:open", {foo: "bar"}).then =>
+          @expectSendCalledWith({bar: "baz"})
+
+      it "catches errors", ->
+        err = new Error("foo")
+        @sandbox.stub(Renderer, "create").withArgs({foo: "bar"}).rejects(err)
+
+        @handleEvent("window:open", {foo: "bar"}).then =>
+          @expectSendErrCalledWith(err)
+
+    describe "window:close", ->
+      it "calls destroy on Renderer#getByWebContents", ->
+        @destroy = @sandbox.stub()
+        @sandbox.stub(Renderer, "getByWebContents").withArgs(@event.sender).returns({destroy: @destroy})
+        @handleEvent("window:close")
+        expect(@destroy).to.be.calledOnce
 
   context "updating", ->
     describe "updater:install", ->

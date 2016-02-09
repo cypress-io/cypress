@@ -30,7 +30,7 @@ handleEvent = (options, event, id, type, arg) ->
       ## it will not be closed because
       ## there is a memory reference
       ## thus we have to remove it first
-      logger.off()
+      logs.off()
 
       ## exit the app immediately
       options.app.exit(0)
@@ -50,13 +50,13 @@ handleEvent = (options, event, id, type, arg) ->
       .then(send)
       .catch(sendErr)
 
-    when "clear:github:cookies"
-      cookies.clearGithub(event.sender.session.cookies)
+    when "get:current:user"
+      user.get()
       .then(send)
       .catch(sendErr)
 
-    when "get:current:user"
-      user.get()
+    when "clear:github:cookies"
+      cookies.clearGithub(event.sender.session.cookies)
       .then(send)
       .catch(sendErr)
 
@@ -172,6 +172,6 @@ module.exports = {
 
   start: (options) ->
     ## curry left options
-    ipc.on "request", _.partial(handleEvent, options)
+    ipc.on "request", _.partial(@handleEvent, options)
 
 }
