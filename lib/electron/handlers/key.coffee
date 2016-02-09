@@ -7,7 +7,7 @@ module.exports = {
 
     .then (session) ->
       ## get the API token
-      user.getProjectToken(projectPath, session)
+      user.getProjectToken(session, projectPath)
 
     .then (token) ->
       ## log this out to the console
@@ -18,7 +18,7 @@ module.exports = {
 
     .then (session) ->
       ## generate a new API Token
-      user.generateProjectToken(projectPath, session)
+      user.generateProjectToken(session, projectPath)
 
     .then (token) ->
       ## log this out to the console
