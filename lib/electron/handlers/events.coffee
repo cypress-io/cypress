@@ -84,6 +84,7 @@ handleEvent = (options, event, id, type, arg) ->
     when "updater:install"
       ## send up the appPath, execPath, and initial args
       Updater.install(arg.appPath, arg.execPath, options)
+      send(null)
 
     when "updater:check"
       Updater.check({
@@ -105,6 +106,8 @@ handleEvent = (options, event, id, type, arg) ->
           echo("download", version)
       })
 
+      ## TODO: there is no note here, what if the window
+      ## is closed once the updater finishes?
       win = Renderer.getByWebContents(event.sender)
       win.once "closed", ->
         upd.cancel()

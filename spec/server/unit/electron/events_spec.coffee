@@ -6,13 +6,16 @@ mockery.enable({
 
 mockery.registerMock("electron", {})
 
-_       = require("lodash")
-cache   = require("#{root}../lib/cache")
-logger  = require("#{root}../lib/log")
-Project = require("#{root}../lib/project")
-events  = require("#{root}../lib/electron/handlers/events")
-errors  = require("#{root}../lib/electron/handlers/errors")
-project = require("#{root}../lib/electron/handlers/project")
+_        = require("lodash")
+icons    = require("cypress-icons")
+cache    = require("#{root}../lib/cache")
+logger   = require("#{root}../lib/log")
+Project  = require("#{root}../lib/project")
+Updater  = require("#{root}../lib/updater")
+events   = require("#{root}../lib/electron/handlers/events")
+errors   = require("#{root}../lib/electron/handlers/errors")
+project  = require("#{root}../lib/electron/handlers/project")
+Renderer = require("#{root}../lib/electron/handlers/renderer")
 
 describe.only "Events", ->
   after ->
@@ -37,6 +40,66 @@ describe.only "Events", ->
 
     @expectSendErrCalledWith = (err) =>
       expect(@send).to.be.calledWith("response", {id: @id, __error: errors.clone(err)})
+
+  context "updating", ->
+    describe "updater:install", ->
+      it "calls Updater#install with appPath, execPath, options and returns null", ->
+        install = @sandbox.stub(Updater, "install")
+        @handleEvent("updater:install", {
+          appPath: "foo"
+          execPath: "bar"
+        })
+        expect(install).to.be.calledWith("foo", "bar", @options)
+        @expectSendCalledWith(null)
+
+    describe "updater:check", ->
+      it "returns true when new version", ->
+        @sandbox.stub(Updater, "check").yieldsTo("onNewVersion")
+        @handleEvent("updater:check")
+        @expectSendCalledWith(true)
+
+      it "returns false when no new version", ->
+        @sandbox.stub(Updater, "check").yieldsTo("onNoNewVersion")
+        @handleEvent("updater:check")
+        @expectSendCalledWith(false)
+
+    describe "updater:run", ->
+      beforeEach ->
+        @once = @sandbox.stub()
+        @sandbox.stub(Renderer, "getByWebContents").withArgs(@event.sender).returns({once: @once})
+
+      it "calls cancel when win is closed", ->
+        cancel = @sandbox.spy()
+        run    = @sandbox.stub(Updater, "run").returns({cancel: cancel})
+        @once.withArgs("closed").yields()
+        @handleEvent("updater:run")
+        expect(cancel).to.be.calledOnce
+
+      _.each {
+        onStart: "start"
+        onApply: "apply"
+        onError: "error"
+        onDone:  "done"
+        onNone:  "none"
+      }, (val, key) ->
+        it "returns #{val} on #{key}", ->
+          @sandbox.stub(Updater, "run").yieldsTo(key)
+          @handleEvent("updater:run")
+          @expectSendCalledWith({event: val, version: undefined})
+
+      it "returns down + version on onDownload", ->
+        @sandbox.stub(Updater, "run").yieldsTo("onDownload", "0.14.0")
+        @handleEvent("updater:run")
+        @expectSendCalledWith({event: "download", version: "0.14.0"})
+
+    describe "update", ->
+      it.skip "does something"
+
+  context "logo src", ->
+    describe "get:about:logo:src", ->
+      it "returns path to icon", ->
+        @handleEvent("get:about:logo:src")
+        @expectSendCalledWith(icons.getPathToIcon("icon_32x32@2x.png"))
 
   context "log events", ->
     describe "get:logs", ->
@@ -73,6 +136,13 @@ describe.only "Events", ->
         @handleEvent("on:log")
         expect(onLog).to.be.called
         expect(onLog.getCall(0).args[0]).to.be.a("function")
+
+    describe "off:log", ->
+      it "calls logger#off and returns null", ->
+        @sandbox.stub(logger, "off")
+        @handleEvent("off:log")
+        expect(logger.off).to.be.calledOnce
+        @expectSendCalledWith(null)
 
   context "project events", ->
     describe "get:project:paths", ->
