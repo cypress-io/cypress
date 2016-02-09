@@ -237,7 +237,7 @@ cy
     .and("not.have.class", "inactive")
 ```
 
-You can [read more about how Cypress resolves your assertions](https://on.cypress.io/guides/making-assertions#resolving-assertions) here.
+You can [read more about how Cypress resolves your assertions](https://on.cypress.io/guides/making-assertions#section-resolving-assertions) here.
 
 ***
 
@@ -256,11 +256,11 @@ A [list of these](https://on.cypress.io/guides/making-assertions#available-asser
 
 ## How do I know which assertions change the subject and which keep it the same?
 
-The chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#chai) or [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#chai-jquery) will always document what they return.
+The chainers that come from [Chai](https://on.cypress.io/guides/bundled-tools#section-chai) or [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#section-chai-jquery) will always document what they return.
 
 Alternatively, it is very easy to use Cypress itself to figure this out.
 
-You can [read more about debugging assertions](https://on.cypress.io/guides/making-assertions#debugging-assertions) here.
+You can [read more about debugging assertions](https://on.cypress.io/guides/making-assertions#sections-debugging-assertions) here.
 
 ***
 

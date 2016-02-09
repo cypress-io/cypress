@@ -45,9 +45,9 @@ Using `expect` or `assert` allows you to pass in a specific subject and make an 
 
 These assertions are more commonly used when writing unit tests, but can also be used when writing integration tests. Cypress comes bundled with some existing tools that handle assertions such as:
 
-* [Chai](https://on.cypress.io/guides/bundled-tolls#chai)
-* [Chai-jQuery](https://on.cypress.io/guides/bundled-tolls#chai-jquery)
-* [Chai-Sinon](https://on.cypress.io/guides/bundled-tolls#sinon-chai)
+* [Chai](https://on.cypress.io/guides/bundled-tools#section-chai)
+* [Chai-jQuery](https://on.cypress.io/guides/bundled-tools#section-chai-jquery)
+* [Chai-Sinon](https://on.cypress.io/guides/bundled-tools#section-sinon-chai)
 
 ```javascript
 // the explicit subject here is the boolean: true
