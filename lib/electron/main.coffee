@@ -74,13 +74,13 @@ main.ready = (options) ->
       .catch(exitErr)
 
     when options.ci
-      ci.run(app, options)
+      ci.run(options)
       .then(exit)
       .catch(exitErr)
 
     when options.headless
       ## run headlessly and exit
-      headless.run(app, options)
+      headless.run(options)
       .then(exit0)
       .catch(exitErr)
 

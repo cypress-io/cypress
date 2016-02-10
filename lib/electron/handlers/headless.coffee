@@ -53,6 +53,14 @@ module.exports = {
     new Promise (resolve, reject) =>
       inquirer.prompt questions, (answers) =>
         if answers.add
+          ## what happens if adding the project fails?
+          ## TODO: handle this edge case since its communicating
+          ## with our remote server. I think currently since this
+          ## is a wrapped promise is that it will bubble all the way
+          ## up and we will console.log the error and report it
+          ## since it'll likely be NetworkError or something.
+          ## But we should still gracefully handle this better
+          ## and provide a custom error message.
           project.add(projectPath).then ->
             console.log chalk.green("\nOk great, added the project.\n")
             resolve()
@@ -79,10 +87,18 @@ module.exports = {
       url:    url
       width:  1280
       height: 720
-      # show:   false
+      show:   false
       frame:  false
       type:   "PROJECT"
     })
+
+  waitForRendererToConnect: (project, id) ->
+    ## wait up to 10 seconds for the renderer
+    ## to connect or die
+    @waitForSocketConnection(project, id)
+    .timeout(10000)
+    .catch Promise.TimeoutError, (err) ->
+      errors.throw("TESTS_DID_NOT_START")
 
   waitForSocketConnection: (project, id) ->
     new Promise (resolve, reject) ->
@@ -98,21 +114,13 @@ module.exports = {
       ## is the one that matches our id!
       project.on "socket:connected", fn
 
-  waitForRendererToConnect: (project, id) ->
-    ## wait up to 10 seconds for the renderer
-    ## to connect or die
-    @waitForSocketConnection(project, id)
-    .timeout(10000)
-    .catch Promise.TimeoutError, (err) ->
-      errors.throw("TESTS_DID_NOT_START")
-
   waitForTestsToFinishRunning: (project) ->
     new Promise (resolve, reject) ->
       ## when our project fires its end event
       ## resolve the promise
       project.once "end", resolve
 
-  run: (app, options = {}) ->
+  run: (options = {}) ->
     ## make sure we have a current session
     user.ensureSession()
 

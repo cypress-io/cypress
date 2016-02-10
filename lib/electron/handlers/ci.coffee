@@ -61,7 +61,7 @@ module.exports = {
         else
           errors.throw("CI_CANNOT_COMMUNICATE")
 
-  run: (app, options) ->
+  run: (options) ->
     {projectPath} = options
 
     @ensureCi()
@@ -73,5 +73,5 @@ module.exports = {
       @ensureProjectAPIToken(id, projectPath, options.key)
     .then (ciGuid) ->
       options.ci_guid = ciGuid
-      headless.run(app, options)
+      headless.run(options)
 }
