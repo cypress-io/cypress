@@ -19,6 +19,8 @@ API = {
         "Sorry, your project's secret CI key: '#{arg}' was not valid. This project cannot run in CI."
       when "CI_CANNOT_COMMUNICATE"
         "Sorry, there was a problem communicating with the remote Cypress servers. This is likely a temporarily problem. Try again later."
+      when "DEV_NO_SERVER"
+        " > It looks like you're not running the local api server in development. This may cause problems running the GUI."
 
   get: (type, arg) ->
     msg = @getMsgByType(type, arg)
@@ -36,14 +38,18 @@ API = {
         ## and its not an exception
         err.type not in exceptions
 
-  log: (err) ->
+  warning: (type) ->
+    err = @get(type)
+    @log(err, "magenta")
+
+  log: (err, color = "red") ->
     Promise.try =>
       ## if our err instance matches
       ## a type then its come from us
       ## else just use the standard err.message
       msg = @getMsgByType(err.type) ? err.message
 
-      console.log chalk.red(msg)
+      console.log chalk[color](msg)
 
       ## bail if this error came from known
       ## list of Cypress errors

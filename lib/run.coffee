@@ -5,6 +5,8 @@ cp       = require("child_process")
 path     = require("path")
 argsUtil = require("./util/args")
 Project  = require("./project")
+api      = require("./api")
+errors   = require("./electron/handlers/errors")
 
 currentlyRunningElectron = ->
   process.versions and process.versions.electron
@@ -19,6 +21,13 @@ runGui = (options) ->
     ## and pass our options directly to main
     require("./electron/main")(options)
   else
+    ## sanity check to ensure we're running
+    ## the local dev server. dont crash just
+    ## log a warning
+    api.ping().catch (err) ->
+      console.log(err.message)
+      errors.warning("DEV_NO_SERVER")
+
     ## we are in dev mode and can just run electron
     ## in our electron folder which kicks things off
     cp.spawn("electron", [path.join(__dirname, "electron")], {

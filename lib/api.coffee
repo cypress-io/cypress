@@ -4,6 +4,9 @@ errors  = require("request-promise/errors")
 Routes  = require("./util/routes")
 
 module.exports = {
+  ping: ->
+    rp.get(Routes.ping())
+
   createCiGuid: (options = {}) ->
     rp.post({
       url: Routes.ci(options.projectId)

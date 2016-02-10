@@ -7,6 +7,7 @@ api_url = config.app.api_url
 routes = {
   api:           ""
   auth:          "v1/auth"
+  ping:          "ping"
   token:         "token"
   signin:        "signin"
   signout:       "signout"
