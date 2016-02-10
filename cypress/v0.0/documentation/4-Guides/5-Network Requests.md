@@ -6,8 +6,8 @@ excerpt: A guide to managing XHR requests
 - :fa-angle-right: [Strategy](#section-strategy)
   - [1: Don't Stub Responses](#section-1-don-1-stub-responses)
   - [2: Stub Responses](#section-2-stub-responses)
+- :fa-angle-right: [How to Stub Responses](#section-how-to-stub-responses)
 - :fa-angle-right: [Requests](#section-requests)
-- :fa-angle-right: [Responses](#section-responses)
 - :fa-angle-right: [Server + Routing Table](#section-server-routing-table)
 - :fa-angle-right: [Fixtures](#section-fixtures)
 - :fa-angle-right: [Waiting](#section-waiting)
@@ -113,17 +113,7 @@ You don't have to do any work on the server. Your application will have no idea 
 
 ***
 
-# Requests
-
-Cypress will automatically indicate when an XHR request happens in your application. These are logged in the Command Log regardless of whether or not you are using stubbing. This provides you a visual indicator when a request has started and when it is finished. Additionally, Cypress will take a snapshot of the DOM when the request is made and another snapshot when the response comes back.
-
-By default, Cypress is configured to *ignore* requests that are used to fetch static content like `.js` or `.html` files. This keeps the Command Log less noisy. This option can be changed in the [configuration](https://on.cypress.io/guides/configuration).
-
-Cypress automatically collects the request `headers` and the request `body` and will make this available to you.
-
-***
-
-# Responses
+# How to stub responses
 
 Cypress makes it easy to stub a response and control the `body`, `status`, `headers`, or even delay.
 
@@ -132,9 +122,20 @@ To begin stubbing responses you have to do two things.
 1. Start a [`cy.server`](https://on.cypress.io/api/server)
 2. Provide a [`cy.route`](https://on.cypress.io/api/route)
 
-These two commands work together to control the behavior of your responses.
+These two commands work together to control the behavior of your responses within the command's options. See [`cy.server` options](https://on.cypress.io/api/server#section-options) and [`cy.route` options](https://on.cypress.io/api/route#section-options) for instructions on how to stub responses.
 
 [`cy.server`](https://on.cypress.io/api/server) enables stubbing, while [`cy.route`](https://on.cypress.io/api/route) provides a routing table so Cypress understands which response should go with which request.
+
+
+***
+
+# Requests
+
+Cypress will automatically indicate when an XHR request happens in your application. These are logged in the Command Log regardless of whether or not you are using stubbing. This provides you a visual indicator when a request has started and when it is finished. Additionally, Cypress will take a snapshot of the DOM when the request is made and another snapshot when the response comes back.
+
+By default, Cypress is configured to *ignore* requests that are used to fetch static content like `.js` or `.html` files. This keeps the Command Log less noisy. This option can be changed in the [configuration](https://on.cypress.io/guides/configuration).
+
+Cypress automatically collects the request `headers` and the request `body` and will make this available to you.
 
 ***
 
