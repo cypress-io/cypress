@@ -32,7 +32,7 @@
       ## promise resolves so we dont block the UI
       App.vent.trigger "start:login:app"
 
-      App.ipc("log:out", user.get("session_token"))
+      App.ipc("log:out")
       .then ->
         App.ipc("clear:github:cookies")
 
