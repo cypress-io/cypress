@@ -1,4 +1,3 @@
-_        = require("lodash")
 Promise  = require("bluebird")
 
 module.exports = {
