@@ -196,11 +196,8 @@ class Cache extends require("events").EventEmitter
 
     @_set {USER: user}
 
-  removeUserSession: ->
-    @getUser()
-    .then (user = {}) =>
-      user.session_token = null
-      @_set({USER: user})
+  removeUser: ->
+    @_set({USER: null})
 
   remove: ->
     fs.removeSync CACHE

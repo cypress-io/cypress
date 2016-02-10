@@ -109,8 +109,8 @@ describe.only "Events", ->
   context "user", ->
     describe "log:in", ->
       it "calls user.logIn and returns user", ->
-        @sandbox.stub(user, "logIn").resolves({foo: "bar"})
-        @handleEvent("log:in").then =>
+        @sandbox.stub(user, "logIn").withArgs("12345").resolves({foo: "bar"})
+        @handleEvent("log:in", "12345").then =>
           @expectSendCalledWith({foo: "bar"})
 
       it "catches errors", ->

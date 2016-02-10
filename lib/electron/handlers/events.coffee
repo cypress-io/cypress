@@ -46,7 +46,7 @@ handleEvent = (options, event, id, type, arg) ->
       .catch(sendErr)
 
     when "log:out"
-      user.logOut(arg)
+      user.logOut()
       .then(send)
       .catch(sendErr)
 

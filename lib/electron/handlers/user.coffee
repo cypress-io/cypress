@@ -1,5 +1,6 @@
-api   = require("../../api")
-cache = require("../../cache")
+api     = require("../../api")
+cache   = require("../../cache")
+errors  = require("./errors")
 
 module.exports = {
   get: ->
@@ -22,9 +23,23 @@ module.exports = {
       cache.setUser(user)
       .return(user)
 
-  logOut: (session) ->
-    api.createSignout(session)
-    .then(cache.removeUserSession())
+  logOut: ->
+    remove = ->
+      cache.removeUser()
+
+    @get()
+    .then (user) ->
+      session = user and user.session_token
+
+      ## if we have a session
+      ## then send it up
+      if session
+        api.createSignout(session)
+        .then(remove)
+      else
+        ## else just remove the
+        ## user from cache
+        remove()
 
   ensureSession: ->
     @get().then (user) ->
@@ -32,6 +47,6 @@ module.exports = {
       if user and st = user.session_token
         return st
       else
-        ## else die and log out the auth error
+        ## else throw the not logged in error
         errors.throw("NOT_LOGGED_IN")
 }
