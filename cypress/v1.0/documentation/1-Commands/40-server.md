@@ -35,7 +35,7 @@ The following options will be merged in as defaults to [`cy.route`](https://on.c
 Option | Default | Notes
 --- | --- | ---
 `delay` | `0` | Default delay for responses
-`method` | `GET` | Default method to match against requests
+`method` | `"GET"` | Default method to match against requests
 `status` | `200` | Default response Status code
 `headers` | `null` | Default response Headers
 `response` | `null` | Default response Body
@@ -49,7 +49,7 @@ The following options control the behavior of the server affecting all requests:
 Option | Default | Notes
 --- | --- | ---
 `enable` | `true` | Pass `false` to disable existing route stubs
-`force404` | `true` | Forces requests that don't match your routes to be sent back `404`.
+`force404` | `false` | Forces requests that don't match your routes to be sent back `404`.
 `whitelist` | function | Callback function that whitelists requests from ever being logged or stubbed. By default this matches against asset-like requests such as `.js`, `.jsx`, `.html`, and `.css`
 
 ***
