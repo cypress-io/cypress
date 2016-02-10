@@ -119,17 +119,17 @@ cy.server({delay: 1500})
 
 ## Prevent sending 404's to unmatched requests
 
-By default, once you start a `cy.server`, Cypress will automatically send requests that don't match routes the following:
+If you'd like Cypress to automatically send requests that do *NOT* match routes the following:
 
 Status | Body | Headers
 --- | --- | ---
 `404` | "" | `null`
 
-If you'd like to disable this behavior and enable requests that do *NOT* match your routes to reach a server, then pass `{force404: false}`.
+Simply set `{force404: true}`
 
 ```javascript
 cy
-  .server({force404: false})
+  .server({force404: true})
   .route(/activities/, "fixture:activities.json")
 ```
 
@@ -138,14 +138,10 @@ cy
 // Application Code
 
 $(function(){
-  // sent back activities.json response fixture
   $.get("/activities")
 
-  // normally this would be sent back 404
-  // since it does not match any of the
-  // cy.routes - but by setting force404 to false,
-  // it will not be stubbed and will hit your
-  // server like normal
+  // this will be sent back 404 since it
+  // does not match any of the cy.routes
   $.getJSON("/users.json")
 })
 ```
