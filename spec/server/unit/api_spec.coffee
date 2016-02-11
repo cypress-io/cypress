@@ -3,6 +3,31 @@ require("../spec_helper")
 api = require("#{root}lib/api")
 
 describe.only "API Wrapper", ->
+  context ".createCiGuid", ->
+    it "POST /ci/:id + returns ci_guid", ->
+      nock("http://localhost:1234", {
+        reqheaders: {
+          "x-project-token": "guid"
+          "x-git-branch": "master"
+          "x-git-author": "brian"
+          "x-git-message": "such hax"
+        }
+      })
+      .post("/ci/project-123")
+      .reply(200, {
+        ci_guid: "new_ci_guid"
+      })
+
+      api.createCiGuid({
+        key: "guid"
+        branch: "master"
+        author: "brian"
+        message: "such hax"
+        projectId: "project-123"
+      })
+      .then (ret) ->
+        expect(ret).to.eq("new_ci_guid")
+
   context ".getLoginUrl", ->
     it "GET /v1/auth + returns the url", ->
       nock("http://localhost:1234")
