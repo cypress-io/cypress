@@ -34,7 +34,7 @@ module.exports = {
     Promise.try =>
       ## TODO: this method is going to change. we'll soon by
       ## removing CI restrictions once we're spinning up instances
-      return #if os.platform() is "linux"
+      return if os.platform() is "linux"
 
       errors.throw("NOT_CI_ENVIRONMENT")
 
@@ -57,7 +57,7 @@ module.exports = {
       .catch (err) ->
         if err.statusCode is 401
           key = key.slice(0, 5) + "..." + key.slice(-5)
-          errors.throw("CI_KEY_NOT_VALID")
+          errors.throw("CI_KEY_NOT_VALID", key)
         else
           errors.throw("CI_CANNOT_COMMUNICATE")
 
