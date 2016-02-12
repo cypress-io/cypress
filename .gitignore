@@ -1,0 +1,5 @@
+app
+build
+node_modules
+*.log
+.publish
