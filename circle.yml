@@ -1,0 +1,11 @@
+machine:
+  node:
+    version: 5.3
+  timezone:
+    America/New_York
+
+dependencies:
+  pre:
+    - npm install
+
+    - npm install -g cypress
