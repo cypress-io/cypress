@@ -3,7 +3,7 @@ excerpt: Applications using Cypress
 
 Name | JS | Server | CI
 --- | --- | --- |
-[Kitchen Sink](https://github.com/cypress-io/examples-kitchen-sink) | jQuery | NA | TravisCI
+[Kitchen Sink](https://github.com/cypress-io/examples-kitchen-sink) | jQuery | *N/A* | TravisCI, CircleCI
 [TodoMVC](https://github.com/cypress-io/examples-react-travis-ci) | React | Node | TravisCI
 [PieChopper](https://github.com/cypress-io/examples-angular-circle-ci) | Angular | Node | CircleCI
 
