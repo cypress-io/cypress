@@ -1,0 +1,25 @@
+{
+  "name": "cypress-example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "preinstall": "rm -rf app && mkdir app",
+    "postinstall": "cp -r node_modules/examples-kitchen-sink/app .",
+    "test": "cypress ci",
+    "build": "gulp build",
+    "deploy": "gulp deploy"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "examples-kitchen-sink": "github:cypress-io/examples-kitchen-sink"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-clean": "^0.3.1",
+    "gulp-gh-pages": "^0.5.4",
+    "gulp-rev-all": "^0.8.22",
+    "run-sequence": "^1.1.5"
+  }
+}
