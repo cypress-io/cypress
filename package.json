@@ -13,7 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "examples-kitchen-sink": "github:cypress-io/examples-kitchen-sink"
+    "examples-kitchen-sink": "cypress-io/examples-kitchen-sink"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
