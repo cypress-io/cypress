@@ -57,6 +57,13 @@ describe "electron/user", ->
         expect(api.createSignout).not.to.be.called
         expect(cache.removeUser).to.be.calledOnce
 
+  context ".getLoginUrl", ->
+    it "calls api.getLoginUrl", ->
+      @sandbox.stub(api, "getLoginUrl").resolves("https://github.com/login")
+
+      user.getLoginUrl().then (url) ->
+        expect(url).to.eq("https://github.com/login")
+
   context ".ensureSession", ->
     it "returns session_token", ->
       @sandbox.stub(cache, "getUser").resolves({name: "brian", session_token: "abc-123"})

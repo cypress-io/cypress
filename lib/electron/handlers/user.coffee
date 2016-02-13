@@ -7,9 +7,7 @@ module.exports = {
     cache.getUser()
 
   getLoginUrl: ->
-    # api.getLoginUrl()
-    url = "https://github.com/login/oauth/authorize?client_id=71bdc3730cd85d30955a&scope=user:email"
-    Promise.delay(1000).return(url)
+    api.getLoginUrl()
 
   getProjectToken: (session, projectPath) ->
     cache.getProjectToken(session, projectPath)
