@@ -26,6 +26,13 @@ describe "Project Interface", ->
     fn = -> Project()
     expect(fn).to.throw "Instantiating lib/project requires a projectRoot!"
 
+  context "#close", ->
+    beforeEach ->
+      @project = Project("path/to/project")
+
+    it "can close when server + watchers arent open", ->
+      @project.close()
+
   context "#getProjectId", ->
     it "returns the project id from json", ->
       @readReturns({projectId: "123456"})

@@ -44,8 +44,8 @@ class Project extends EE
 
   close: ->
     Promise.join(
-      @server.close(),
-      @watchers.close()
+      @server?.close(),
+      @watchers?.close()
     )
 
   watchFilesAndStartWebsockets: (options) ->
