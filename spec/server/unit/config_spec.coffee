@@ -68,4 +68,4 @@ describe "Config", ->
       @eq("log_path", ".cy/production")
 
     it "api_url", ->
-      @eq("api_url", "http://api.cypress.io")
+      @eq("api_url", "https://api.cypress.io")

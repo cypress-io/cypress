@@ -15,4 +15,4 @@ test:
   <<: *development
 
 production:
-  api_url: "http://api.cypress.io"
+  api_url: "https://api.cypress.io"
