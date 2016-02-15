@@ -17,7 +17,7 @@ module.exports = {
     ## that means we're already running in electron
     ## like in production and we shouldn't spawn a new
     ## process
-    if currentlyRunningElectron()
+    if @isCurrentlyRunningElectron()
       ## just run the gui code directly here
       ## and pass our options directly to main
       require("./electron/main")(options)
@@ -108,29 +108,32 @@ module.exports = {
       process.stdout.write(JSON.stringify(manifest) + "\n")
       return process.exit()
 
-    ## if we have runProject then
-    ## automatically force the mode
-    ## into headless
-    if options.runProject
+    ## to ensure we stay backwards compatible with older versions
+    ## of the CLI Tool, we need to automatically set mode to be
+    ## headless when any of these CLI arguments are present
+    ##
+    ## in the future we should be able to remove this code and instead
+    ## automatically blow up if the cli version is too old
+    if options.runProject or options.getKey or options.generateKey
       options.mode = "headless"
 
     switch options.mode
       when "gui"
         ## run the gui headed
-        runGui(options)
+        @runGui(options)
 
       when "headless"
         ## run the gui headlessly
         options.headless = true
-        runGui(options)
+        @runGui(options)
 
       when "server"
         ## run the server without gui
-        runServer(options)
+        @runServer(options)
 
       when "project"
         ## start the project
-        runProject(options)
+        @runProject(options)
 
       else
         throw new Error("Missing 'options.mode'. This value is required to run Cypress.")
