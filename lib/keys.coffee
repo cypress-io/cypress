@@ -4,7 +4,7 @@ Promise       = require("bluebird")
 Project       = require("./project")
 cache         = require("./cache")
 api           = require("./api")
-Log           = require("./log")
+logger        = require("./logger")
 
 class Keys
   constructor: (projectRoot) ->
@@ -39,7 +39,7 @@ class Keys
       range
     .then (range) =>
       range = JSON.parse(range) if _.isString(range)
-      Log.info "Received key range", {range: range}
+      logger.info "Received key range", {range: range}
       cache.updateRange(projectId, range)
       .return(range.start)
 

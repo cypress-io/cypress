@@ -4,7 +4,7 @@ _         = require("lodash")
 Promise   = require("bluebird")
 Settings  = require("./util/settings")
 api       = require("./api")
-Log       = require("./log")
+logger    = require("./logger")
 Server    = require("./server")
 Support   = require("./support")
 Fixtures  = require("./fixtures")
@@ -113,11 +113,11 @@ class Project extends EE
     ## we had an error accessing cypress.json
     throw err if err and err.code is "EACCES"
 
-    Log.info "Creating Project ID"
+    logger.info "Creating Project ID"
 
     write = (id) =>
       attrs = {projectId: id}
-      Log.info "Writing Project ID", _.clone(attrs)
+      logger.info "Writing Project ID", _.clone(attrs)
       Settings
         .write(@projectRoot, attrs)
         .get("projectId")
@@ -138,10 +138,10 @@ class Project extends EE
     Settings.read(@projectRoot)
     .then (settings) ->
       if (id = settings.projectId)
-        Log.info "Returning Project ID", {id: id}
+        logger.info "Returning Project ID", {id: id}
         return id
 
-      Log.info "No Project ID found"
+      logger.info "No Project ID found"
       throw new Error("No project ID found")
 
 module.exports = Project

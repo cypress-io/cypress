@@ -6,7 +6,7 @@ request   = require("request-promise")
 errors    = require("request-promise/errors")
 config    = require("./config")
 Project   = require("./project")
-Log       = require("./log")
+logger    = require("./logger")
 
 CACHE = config.app.cache_path
 fs    = Promise.promisifyAll(fs)
@@ -48,7 +48,7 @@ class Cache extends require("events").EventEmitter
   ## takes in an object and serializes it into JSON
   ## finally returning the JSON object that was written
   _write: (obj = {}) ->
-    Log.info("writing to .cy cache", cache: obj)
+    logger.info("writing to .cy cache", cache: obj)
 
     @emit "write", obj
     fs.outputFileAsync(
@@ -82,7 +82,7 @@ class Cache extends require("events").EventEmitter
   ## if so returns true;
   ## otherwise it inits an empty JSON config file
   ensureExists: ->
-    Log.info "checking existence of .cy cache", path: CACHE
+    logger.info "checking existence of .cy cache", path: CACHE
 
     fs.statAsync(CACHE)
     .bind(@)
@@ -95,7 +95,7 @@ class Cache extends require("events").EventEmitter
   cache_path: CACHE
 
   updateRange: (id, range) ->
-    Log.info "updating range of project #{id}", {range: range}
+    logger.info "updating range of project #{id}", {range: range}
 
     @getProject(id).bind(@)
     .then (p) ->
@@ -106,7 +106,7 @@ class Cache extends require("events").EventEmitter
        .return(p)
 
   updateProject: (id, data) ->
-    Log.info "updating project #{id}", project: data
+    logger.info "updating project #{id}", project: data
 
     @getProjects().then (projects) ->
       @getProject(id).then (project) =>
@@ -168,7 +168,7 @@ class Cache extends require("events").EventEmitter
         return _.without(paths, removedPaths...)
 
   addProject: (path) ->
-    Log.info "adding project from path", path: path
+    logger.info "adding project from path", path: path
 
     project = Project(path)
 
@@ -181,18 +181,18 @@ class Cache extends require("events").EventEmitter
         @updateProject(id, {PATH: path})
 
   removeProject: (path) ->
-    Log.info "removing project from path", path: path
+    logger.info "removing project from path", path: path
 
     @getProjects().then (projects) ->
       @_removeProjectByPath(projects, path)
 
   getUser: ->
-    Log.info "getting user"
+    logger.info "getting user"
 
     @_get("USER")
 
   setUser: (user) ->
-    Log.info "setting user", user: user
+    logger.info "setting user", user: user
 
     @_set {USER: user}
 

@@ -6,7 +6,7 @@ path     = require("path")
 argsUtil = require("./util/args")
 Project  = require("./project")
 api      = require("./api")
-errors   = require("./electron/handlers/errors")
+errors   = require("./errors")
 
 module.exports = {
   isCurrentlyRunningElectron: ->

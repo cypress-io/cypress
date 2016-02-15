@@ -7,7 +7,7 @@ _            = require("underscore")
 str          = require("underscore.string")
 allowDestroy = require("server-destroy")
 Promise      = require("bluebird")
-Log          = require("./log")
+logger       = require("./logger")
 Socket       = require("./socket")
 Settings     = require("./util/settings")
 
@@ -39,7 +39,7 @@ class Server
 
       @setCypressJson(@config)
 
-      Log.setSettings(@config)
+      logger.setSettings(@config)
     catch err
       err.jsonError = true
       @config = err
@@ -210,7 +210,7 @@ class Server
 
       @server.listen @config.port, =>
         @isListening = true
-        Log.info("Server listening", {port: @config.port})
+        logger.info("Server listening", {port: @config.port})
 
         @server.removeListener "error", onError
 
@@ -218,13 +218,13 @@ class Server
 
   _close: ->
     new Promise (resolve) =>
-      Log.unsetSettings()
+      logger.unsetSettings()
 
       ## bail early we dont have a server or we're not
       ## currently listening
       return resolve() if not @server or not @isListening
 
-      Log.info("Server closing")
+      logger.info("Server closing")
 
       @server.destroy =>
         @isListening = false

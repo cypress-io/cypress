@@ -4,7 +4,7 @@ winston  = require("winston")
 fs       = require("fs-extra")
 cache    = require("./cache")
 api      = require("./api")
-Log      = require("./log")
+logger   = require("./logger")
 Settings = require("./util/settings")
 
 ## POST https://api.cypress.io/exceptions
@@ -20,7 +20,7 @@ Exception = {
     cache.read()
 
   getLogs: ->
-    Log.getLogs()
+    logger.getLogs()
 
   getErr: (err) ->
     {

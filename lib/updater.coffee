@@ -8,7 +8,7 @@ trash          = require("trash")
 NwUpdater      = require("node-webkit-updater")
 argsUtil       = require("./util/args")
 config         = require("./config")
-Log            = require("./log")
+logger         = require("./logger")
 
 trash  = Promise.promisify(trash)
 chmodr = Promise.promisify(chmodr)
@@ -54,7 +54,7 @@ class Updater
   trash: (appPath) ->
     ## moves the current appPath to the trash
     ## this is the path to the existing app
-    Log.info "trashing current app", appPath: appPath
+    logger.info "trashing current app", appPath: appPath
 
     trash([appPath])
 
@@ -69,13 +69,13 @@ class Updater
     ## trash the 'old' app currently installed at the default
     ## installation: /Applications/Cypress.app
     @trash(appPath).then =>
-      Log.info "installing updated app", appPath: appPath, execPath: execPath
+      logger.info "installing updated app", appPath: appPath, execPath: execPath
 
       ## now move the /tmp application over
       ## to the 'existing / old' app path.
       ## meaning from from /tmp/Cypress.app to /Applications/Cypress.app
       c.install appPath, (err) =>
-        Log.info "running updated app", args: args
+        logger.info "running updated app", args: args
 
         c.run(execPath, args)
 
@@ -91,7 +91,7 @@ class Updater
 
         newAppConfigPath = path.join(newAppPath, path.dirname(files[0]), config.app.cy_path)
 
-        Log.info "copying .cy to tmp destination", destination: newAppConfigPath
+        logger.info "copying .cy to tmp destination", destination: newAppConfigPath
 
         resolve(newAppConfigPath)
 
@@ -108,7 +108,7 @@ class Updater
       ## get the --updating args + --coords args
       args = @getArgs()
 
-      Log.info "running installer from tmp", destination: newAppPath, args: args
+      logger.info "running installer from tmp", destination: newAppPath, args: args
 
       ## runs the 'new' app in the /tmp directory with
       ## appPath + execPath to the 'existing / old' app
@@ -119,7 +119,7 @@ class Updater
       @trigger("quit")
 
   unpack: (destinationPath, manifest) ->
-    Log.info "unpacking new version", destination: destinationPath
+    logger.info "unpacking new version", destination: destinationPath
 
     @trigger("apply")
 
@@ -133,7 +133,7 @@ class Updater
     @getClient().unpack(destinationPath, fn, manifest)
 
   download: (manifest) ->
-    Log.info "downloading new version", version: manifest.version
+    logger.info "downloading new version", version: manifest.version
 
     @trigger("download", manifest.version)
 
@@ -164,16 +164,16 @@ class Updater
       cb.apply(@, args)
 
   check: (options = {}) ->
-    Log.info "checking for new version"
+    logger.info "checking for new version"
 
     @getClient().checkNewVersion (err, newVersionExists, manifest) =>
       return @trigger("error", err) if err
 
       if newVersionExists
-        Log.info "new version exists", version: manifest.version
+        logger.info "new version exists", version: manifest.version
         options.onNewVersion?(manifest)
       else
-        Log.info "new version does not exist"
+        logger.info "new version does not exist"
         options.onNoNewVersion?()
 
   run: ->

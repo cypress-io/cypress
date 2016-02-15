@@ -4,7 +4,7 @@ path          = require("path")
 uuid          = require("node-uuid")
 Fixtures      = require("./fixtures")
 Request       = require("./request")
-Log           = require("./log")
+logger        = require("./logger")
 Reporter      = require("./reporter")
 socketIo      = require("socket.io")
 
@@ -21,7 +21,7 @@ class Socket
     @app = app
 
   onTestFileChange: (filePath, stats) ->
-    Log.info "onTestFileChange", filePath: filePath
+    logger.info "onTestFileChange", filePath: filePath
 
     ## simple solution for preventing firing test:changed events
     ## when we are making modifications to our own files
@@ -37,7 +37,7 @@ class Socket
         filePath      = filePath.split(@app.get("cypress").projectRoot).join("").replace(leadingSlashesRe, "")
         strippedPath  = filePath.replace(@app.get("cypress").testFolder, "").replace(leadingSlashesRe, "")
 
-        Log.info "generate:ids:for:test", filePath: filePath, strippedPath: strippedPath
+        logger.info "generate:ids:for:test", filePath: filePath, strippedPath: strippedPath
         @io.emit "generate:ids:for:test", filePath, strippedPath
       .catch(->)
 
@@ -49,7 +49,7 @@ class Socket
     ## exact file
     return if testFilePath is @testFilePath
 
-    Log.info "watching test file", {path: testFilePath}
+    logger.info "watching test file", {path: testFilePath}
 
     ## remove the existing file by its path
     watchers.remove(testFilePath)
@@ -89,7 +89,7 @@ class Socket
     @io = socketIo(server, {path: socketIoRoute})
 
     @io.on "connection", (socket) =>
-      Log.info "socket connected"
+      logger.info "socket connected"
 
       socket.on "chromium:connected", =>
         return if socket.inChromiumRoom
@@ -114,7 +114,7 @@ class Socket
           cb({__error: "Could not process 'history:entries'. No chromium servers connected."})
 
       socket.on "remote:connected", =>
-        Log.info "remote:connected"
+        logger.info "remote:connected"
 
         return if socket.inRemoteRoom
 
@@ -124,7 +124,7 @@ class Socket
         socket.on "remote:response", (id, response) =>
           if message = messages[id]
             delete messages[id]
-            Log.info "remote:response", id: id, response: response
+            logger.info "remote:response", id: id, response: response
             message(response)
 
       socket.on "client:request", (message, data, cb) =>
@@ -137,7 +137,7 @@ class Socket
 
         id = uuid.v4()
 
-        Log.info "client:request", id: id, msg: message, data: data
+        logger.info "client:request", id: id, msg: message, data: data
 
         if _.keys(@io.sockets.adapter.rooms.remote).length > 0
           messages[id] = cb
@@ -158,7 +158,7 @@ class Socket
         @onFixture.apply(@, arguments)
 
       socket.on "finished:generating:ids:for:test", (strippedPath) =>
-        Log.info "finished:generating:ids:for:test", strippedPath: strippedPath
+        logger.info "finished:generating:ids:for:test", strippedPath: strippedPath
         @io.emit "test:changed", file: strippedPath
 
       _.each "load:spec:iframe url:changed page:loading command:add command:attrs:changed runner:start runner:end before:run before:add after:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test".split(" "), (event) =>
