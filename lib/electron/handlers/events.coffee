@@ -2,15 +2,15 @@ _           = require("lodash")
 ipc         = require("electron").ipcMain
 shell       = require("electron").shell
 cypressIcons = require("cypress-icons")
-user        = require("./user")
 dialog      = require("./dialog")
 project     = require("./project")
 pgk         = require("./package")
 cookies     = require("./cookies")
-errors      = require("./errors")
 logs        = require("./logs")
 Renderer    = require("./renderer")
+errors      = require("../../errors")
 Updater     = require("../../updater")
+user        = require("../../user")
 
 handleEvent = (options, event, id, type, arg) ->
   sendResponse = (data = {}) ->

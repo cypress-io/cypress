@@ -3,7 +3,7 @@ path          = require("path")
 uri           = require("url")
 cypressGui    = require("cypress-gui")
 BrowserWindow = require("electron").BrowserWindow
-user          = require("./user")
+user          = require("../../user")
 
 windows               = {}
 recentlyCreatedWindow = false

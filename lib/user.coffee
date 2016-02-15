@@ -1,5 +1,5 @@
-api     = require("../../api")
-cache   = require("../../cache")
+api     = require("./api")
+cache   = require("./cache")
 errors  = require("./errors")
 
 module.exports = {

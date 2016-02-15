@@ -1,5 +1,5 @@
 chalk  = require("chalk")
-logger = require("../../log")
+logger = require("../../logger")
 
 module.exports = {
   get: ->
