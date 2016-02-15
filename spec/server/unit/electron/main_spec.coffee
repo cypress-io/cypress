@@ -1,19 +1,5 @@
 require("../../spec_helper")
 
-mockery.enable({
-  warnOnUnregistered: false
-})
-
-mockery.registerMock("electron", electron = {
-  shell: {}
-  ipcMain: {}
-  app: {
-    commandLine: {
-      appendSwitch: ->
-    }
-  }
-})
-
 main     = require("#{root}../lib/electron/main")
 ci       = require("#{root}../lib/electron/handlers/ci")
 key      = require("#{root}../lib/electron/handlers/key")
@@ -22,7 +8,7 @@ errors   = require("#{root}../lib/electron/handlers/errors")
 headed   = require("#{root}../lib/electron/handlers/headed")
 headless = require("#{root}../lib/electron/handlers/headless")
 
-describe.only "electron/main", ->
+describe "electron/main", ->
   beforeEach ->
     @on   = electron.app.on   = @sandbox.spy()
     @exit = electron.app.exit = @sandbox.spy()

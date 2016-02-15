@@ -1,14 +1,5 @@
 require("../../spec_helper")
 
-mockery.enable({
-  warnOnUnregistered: false
-})
-
-mockery.registerMock("electron", electron = {
-  shell: {}
-  ipcMain: {}
-})
-
 _        = require("lodash")
 icons    = require("cypress-icons")
 cache    = require("#{root}../lib/cache")
@@ -23,10 +14,7 @@ project  = require("#{root}../lib/electron/handlers/project")
 cookies  = require("#{root}../lib/electron/handlers/cookies")
 Renderer = require("#{root}../lib/electron/handlers/renderer")
 
-describe.only "Events", ->
-  after ->
-    mockery.disable()
-
+describe "Events", ->
   beforeEach ->
     ## setup default options and event and id
     ## as the first three arguments

@@ -1,19 +1,5 @@
 require("../../spec_helper")
 
-mockery.enable({
-  warnOnUnregistered: false
-})
-
-mockery.registerMock("electron", electron = {
-  shell: {}
-  ipcMain: {}
-  app: {
-    commandLine: {
-      appendSwitch: ->
-    }
-  }
-})
-
 inquirer = require("inquirer")
 Project  = require("#{root}../lib/Project")
 user     = require("#{root}../lib/electron/handlers/user")
@@ -21,8 +7,7 @@ project  = require("#{root}../lib/electron/handlers/project")
 headless = require("#{root}../lib/electron/handlers/headless")
 Renderer = require("#{root}../lib/electron/handlers/renderer")
 
-
-describe.only "electron/headless", ->
+describe "electron/headless", ->
   beforeEach ->
     @projectInstance = Project("path/to/project")
 

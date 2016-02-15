@@ -1,17 +1,9 @@
 require("../../spec_helper")
 
-mockery.enable({
-  warnOnUnregistered: false
-})
-
-mockery.registerMock("electron", electron = {
-  dialog: {}
-})
-
 dialog   = require("#{root}../lib/electron/handlers/dialog")
 Renderer = require("#{root}../lib/electron/handlers/renderer")
 
-describe.only "electron/dialog", ->
+describe "electron/dialog", ->
   after ->
     mockery.disable()
 

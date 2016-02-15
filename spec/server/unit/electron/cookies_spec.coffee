@@ -41,7 +41,7 @@ cookiesArray = [
   }
 ]
 
-describe.only "electron/cookies", ->
+describe "electron/cookies", ->
   context ".clearGithub", ->
     it "returns null", ->
       cookies.clearGithub(cookiesStub).then (ret) ->

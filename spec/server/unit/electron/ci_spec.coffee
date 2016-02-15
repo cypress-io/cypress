@@ -1,26 +1,12 @@
 require("../../spec_helper")
 
-mockery.enable({
-  warnOnUnregistered: false
-})
-
-mockery.registerMock("electron", electron = {
-  shell: {}
-  ipcMain: {}
-  app: {
-    commandLine: {
-      appendSwitch: ->
-    }
-  }
-})
-
 os       = require("os")
 api      = require("#{root}../lib/api")
 ci       = require("#{root}../lib/electron/handlers/ci")
 project  = require("#{root}../lib/electron/handlers/project")
 headless = require("#{root}../lib/electron/handlers/headless")
 
-describe.only "electron/ci", ->
+describe "electron/ci", ->
   after ->
     mockery.disable()
 
