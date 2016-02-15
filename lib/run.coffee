@@ -1,44 +1,66 @@
 require("./environment")
 
-_        = require("lodash")
-cp       = require("child_process")
-path     = require("path")
-argsUtil = require("./util/args")
-Project  = require("./project")
-api      = require("./api")
-errors   = require("./errors")
+_         = require("lodash")
+cp        = require("child_process")
+path      = require("path")
+Promise   = require("bluebird")
+api       = require("./api")
+key       = require("./key")
+logs      = require("./electron/handlers/logs")
+errors    = require("./errors")
+Project   = require("./project")
+argsUtil  = require("./util/args")
+smokeTest = require("./modes/smoke_test")
+returnPkg = require("./modes/pkg")
+
+exit = (code) ->
+  process.exit(code)
+
+exit0 = ->
+  exit(0)
+
+exitErr = (err) ->
+  ## log errors to the console
+  ## and potentially raygun
+  ## and exit with 1
+  errors.log(err)
+  .then -> exit(1)
 
 module.exports = {
   isCurrentlyRunningElectron: ->
     process.versions and process.versions.electron
 
-  runGui: (options) ->
-    ## if we have the electron property on versions
-    ## that means we're already running in electron
-    ## like in production and we shouldn't spawn a new
-    ## process
-    if @isCurrentlyRunningElectron()
-      ## just run the gui code directly here
-      ## and pass our options directly to main
-      require("./electron/main")(options)
-    else
-      ## sanity check to ensure we're running
-      ## the local dev server. dont crash just
-      ## log a warning
-      api.ping().catch (err) ->
-        console.log(err.message)
-        errors.warning("DEV_NO_SERVER")
+  runElectron: (mode, options) ->
+    ## wrap all of this in a promise to force the
+    ## promise interface - even if it doesn't matter
+    ## in dev mode due to cp.spawn
+    Promise.try =>
+      ## if we have the electron property on versions
+      ## that means we're already running in electron
+      ## like in production and we shouldn't spawn a new
+      ## process
+      if @isCurrentlyRunningElectron()
+        ## just run the gui code directly here
+        ## and pass our options directly to main
+        require("./electron")(mode, options)
+      else
+        ## sanity check to ensure we're running
+        ## the local dev server. dont crash just
+        ## log a warning
+        api.ping().catch (err) ->
+          console.log(err.message)
+          errors.warning("DEV_NO_SERVER")
 
-      ## we are in dev mode and can just run electron
-      ## in our electron folder which kicks things off
-      cp.spawn("electron", [path.join(__dirname, "electron")], {
-        ## we are going to pass the options as CYPRESS_ARGS
-        ## for our electron process to avoid doing this again
-        env: _.extend({}, process.env, {CYPRESS_ARGS: JSON.stringify(options)})
-        stdio: "inherit"
-      })
+        ## we are in dev mode and can just run electron
+        ## in our electron folder which kicks things off
+        cp.spawn("electron", [path.join(__dirname, "electron")], {
+          ## we are going to pass the options as CYPRESS_ARGS
+          ## for our electron process to avoid doing this again
+          env: _.extend({}, process.env, {CYPRESS_ARGS: JSON.stringify(options)})
+          stdio: "inherit"
+        })
 
-  runProject: (options) ->
+  openProject: (options) ->
     ## this code actually starts a project
     ## and is spawned from nodemon
     Project(options.project).open()
@@ -65,7 +87,7 @@ module.exports = {
           ignore: ["--ignore", "lib/public"]
           verbose: "--verbose"
           exts:   ["-e", "coffee,js"]
-          args:   ["--", "--mode", "project", "--project", options.project]
+          args:   ["--", "--mode", "openProject", "--project", options.project]
         })
 
         args = _.chain(args).values().flatten().value()
@@ -93,48 +115,105 @@ module.exports = {
   start: (argv) ->
     options = argsUtil.toObject(argv)
 
-    ## if we are in smokeTest mode
-    ## then just output the pong's value
-    ## and exit
-    if options.smokeTest
-      process.stdout.write(options.pong + "\n")
-      return process.exit()
+    ## else determine the mode by
+    ## the passed in arguments / options
+    ## and normalize this mode
+    switch
+      when options.smokeTest
+        options.mode = "smokeTest"
 
-    ## if we are in returnPackage mode
-    ## then just output our package's value
-    ## and exist
-    if options.returnPkg
-      manifest = require("../package.json")
-      process.stdout.write(JSON.stringify(manifest) + "\n")
-      return process.exit()
+      when options.returnPkg
+        options.mode = "returnPkg"
 
-    ## to ensure we stay backwards compatible with older versions
-    ## of the CLI Tool, we need to automatically set mode to be
-    ## headless when any of these CLI arguments are present
-    ##
-    ## in the future we should be able to remove this code and instead
-    ## automatically blow up if the cli version is too old
-    if options.runProject or options.getKey or options.generateKey
-      options.mode = "headless"
+      when options.logs
+        options.mode = "logs"
 
-    switch options.mode
-      when "gui"
-        ## run the gui headed
-        @runGui(options)
+      when options.clearLogs
+        options.mode = "clearLogs"
 
-      when "headless"
-        ## run the gui headlessly
-        options.headless = true
-        @runGui(options)
+      when options.getKey
+        options.mode = "getKey"
 
-      when "server"
-        ## run the server without gui
-        @runServer(options)
+      when options.generateKey
+        options.mode = "generateKey"
 
-      when "project"
-        ## start the project
-        @runProject(options)
+      when options.ci
+        options.mode = "ci"
+
+      when options.runProject
+        ## go into headless mode
+        ## when we have 'runProject'
+        options.mode = "headless"
 
       else
-        throw new Error("Missing 'options.mode'. This value is required to run Cypress.")
+        ## set the default mode as headed
+        options.mode ?= "headed"
+
+    ## remove mode from options
+    mode    = options.mode
+    options = _.omit(options, "mode")
+
+    @startInMode(mode, options)
+
+  startInMode: (mode, options) ->
+    switch mode
+      when "smokeTest"
+        smokeTest(options)
+        .then (pong) ->
+          console.log(pong)
+        .then(exit0)
+        .catch(exitErr)
+
+      when "returnPkg"
+        returnPkg(options)
+        .then (pkg) ->
+          console.log(JSON.stringify(pkg))
+        .then(exit0)
+        .catch(exitErr)
+
+      when "logs"
+        ## print the logs + exit
+        logs.print()
+        .then(exit0)
+        .catch(exitErr)
+
+      when "clearLogs"
+        ## clear the logs + exit
+        logs.clear()
+        .then(exit0)
+        .catch(exitErr)
+
+      when "getKey"
+        ## print the key + exit
+        key.print(options.projectPath)
+        .then(exit0)
+        .catch(exitErr)
+
+      when "generateKey"
+        ## generate + print the key + exit
+        key.generate(options.projectPath)
+        .then(exit0)
+        .catch(exitErr)
+
+      when "headless"
+        ## run headlessly and exit
+        @runElectron(mode, options)
+        .then(exit0)
+        .catch(exitErr)
+
+      when "headed"
+        @runElectron(mode, options)
+
+      when "ci"
+        ## run headlessly in ci mode and exit
+        @runElectron(mode, options)
+        .then(exit)
+        .catch(exitErr)
+
+      when "openProject"
+        ## open + start the project
+        @openProject(options)
+
+      else
+        throw new Error("Cannot start. Invalid mode: '#{mode}'")
 }

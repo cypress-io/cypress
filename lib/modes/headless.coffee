@@ -1,3 +1,4 @@
+app        = require("electron").app
 chalk      = require("chalk")
 Promise    = require("bluebird")
 inquirer   = require("inquirer")
@@ -120,7 +121,7 @@ module.exports = {
       ## resolve the promise
       project.once "end", resolve
 
-  run: (options = {}) ->
+  ready: (options = {}) ->
     ## make sure we have a current session
     user.ensureSession()
 
@@ -149,4 +150,14 @@ module.exports = {
         })
         .get("stats")
         .get("failures")
+
+  run: (options) ->
+    new Promise (resolve, reject) =>
+      app = require("electron").app
+
+      ## prevent chromium from throttling
+      app.commandLine.appendSwitch("disable-renderer-backgrounding")
+
+      app.on "ready", =>
+        resolve @ready(options)
 }

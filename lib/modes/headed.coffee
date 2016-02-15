@@ -1,6 +1,10 @@
-Tray       = require("./tray")
-Events     = require("./events")
-Renderer   = require("./renderer")
+app      = require("electron").app
+key      = require("../key")
+errors   = require("../errors")
+logs     = require("../electron/handlers/logs")
+Tray     = require("../electron/handlers/tray")
+Events   = require("../electron/handlers/events")
+Renderer = require("../electron/handlers/renderer")
 
 module.exports = {
   onDrop: ->
@@ -34,7 +38,10 @@ module.exports = {
     ## stop all the events
     Events.stop()
 
-  run: (app, options = {}) ->
+    ## exit when all windows are closed
+    app.exit(0)
+
+  ready: (app, options = {}) ->
     options.app = app
 
     ## handle right click to show context menu!
@@ -67,4 +74,15 @@ module.exports = {
 
         onRightClick: ->
     })
+
+  run: (options) ->
+    new Promise (resolve, reject) =>
+      ## prevent chromium from throttling
+      app.commandLine.appendSwitch("disable-renderer-backgrounding")
+
+      app.on "window-all-closed", =>
+        @onWindowAllClosed(app)
+
+      app.on "ready", =>
+        resolve @ready(options)
 }
