@@ -1,2 +1,2 @@
 require("coffee-script/register")
-require("./lib/run")(process.argv.slice(2))
+require("./lib/run").start(process.argv.slice(2))
