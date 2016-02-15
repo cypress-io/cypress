@@ -23,8 +23,11 @@ module.exports =
 
   ## returns the path to project fixture
   ## in the tmpDir
-  project: (name) ->
-    path.join tmpDir, name
+  project: ->
+    @projectPath.apply(@, arguments)
+
+  projectPath: (name) ->
+    path.join(tmpDir, name)
 
   get: (fixture) ->
     fs.readFileSync path.join(root, "spec", "fixtures", fixture), "utf8"
