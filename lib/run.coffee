@@ -51,14 +51,13 @@ module.exports = {
           console.log(err.message)
           errors.warning("DEV_NO_SERVER")
 
+        args = ["."].concat(argsUtil.toArray(options))
+
         ## we are in dev mode and can just run electron
         ## in our electron folder which kicks things off
-        cp.spawn("electron", [path.join(__dirname, "electron")], {
-          ## we are going to pass the options as CYPRESS_ARGS
-          ## for our electron process to avoid doing this again
-          env: _.extend({}, process.env, {CYPRESS_ARGS: JSON.stringify(options)})
-          stdio: "inherit"
-        })
+        ## think we still need to stringify the options here
+        ## else running headlessly wont work in dev mode
+        cp.spawn("electron", args, { stdio: "inherit" })
 
   openProject: (options) ->
     ## this code actually starts a project
@@ -110,6 +109,7 @@ module.exports = {
         console.log "production"
 
       else
+        ## TODO: this needs to be in lib/errors plz, kthx
         throw new Error("Missing 'options.env'. This value is required to run Cypress server!")
 
   start: (argv) ->
@@ -185,7 +185,9 @@ module.exports = {
 
       when "getKey"
         ## print the key + exit
-        key.print(options.projectPath)
+        Project.key(options.projectPath)
+        .then (key) ->
+          console.log(key)
         .then(exit0)
         .catch(exitErr)
 
@@ -209,6 +211,9 @@ module.exports = {
         @runElectron(mode, options)
         .then(exit)
         .catch(exitErr)
+
+      when "server"
+        @runServer(options)
 
       when "openProject"
         ## open + start the project

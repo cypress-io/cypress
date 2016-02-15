@@ -4,6 +4,8 @@ _         = require("lodash")
 Promise   = require("bluebird")
 Settings  = require("./util/settings")
 api       = require("./api")
+user      = require("./user")
+cache     = require("./cache")
 logger    = require("./logger")
 Server    = require("./server")
 Support   = require("./support")
@@ -130,18 +132,79 @@ class Project extends EE
     if id = process.env.CYPRESS_PROJECT_ID
       return write(id)
 
-    require("./cache").getUser().then (user = {}) =>
+    cache.getUser().then (user = {}) =>
       api.createProject(user.session_token)
       .then(write)
 
   getProjectId: ->
     Settings.read(@projectRoot)
-    .then (settings) ->
+    .then (settings) =>
       if (id = settings.projectId)
         logger.info "Returning Project ID", {id: id}
         return id
 
-      logger.info "No Project ID found"
-      throw new Error("No project ID found")
+      errors.throw("NO_PROJECT_ID", @projectRoot)
+
+  @paths = ->
+    cache.getProjectPaths()
+
+  @remove = (path) ->
+    cache.removeProject(path)
+
+  @add = (path) ->
+    ## make sure we either have or receive an id
+    Project(path)
+    .ensureProjectId()
+    .then (id) =>
+      ## make sure we've written it to the local .cy file
+      cache.insertProject(id)
+      .then =>
+        ## and make sure we have the correct path
+        cache.updateProject(id, path)
+
+      ## return the project id
+      .return(id)
+
+  ## TODO: this method should not exist.
+  ## refactor the relationship between
+  ## projects and cache and remove this.
+  @id = (path) ->
+    cache.getProjectIdByPath(path)
+
+  @exists = (path) ->
+    @paths().then (paths) ->
+      path in paths
+
+  @key = (path) ->
+    Project(path)
+    .getProjectId()
+    .then (id) ->
+      user.ensureSession()
+      .then (session) ->
+        api.getProjectToken(id, session)
+
+  # _projectToken: (method, projectPath, session) ->
+  #   @getProjectIdByPath(projectPath).then (projectId) ->
+  #     ## TODO: change this to lib/errors
+  #     if not projectId
+  #       e = new Error
+  #       e.projectNotFound = true
+  #       e.projectPath = projectPath
+  #       throw e
+  #     else
+  #       switch method
+  #         when "get" then api.getProjectToken(projectId, session)
+  #         when "put" then api.updateProjectToken(projectId, session)
+  #         else
+  #           throw new TypeError("Method not recognized. Expected 'get' or 'put', got: '#{method}'")
+
+  # getProjectToken: (project, session) ->
+  #   @_projectToken("get", project, session)
+
+  # generateProjectToken: (project, session) ->
+  #   @_projectToken("put", project, session)
+
+  @generateKey = (path) ->
+
 
 module.exports = Project

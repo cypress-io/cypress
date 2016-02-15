@@ -6,19 +6,22 @@ module.exports = {
   get: ->
     cache.getUser()
 
+  set: (user) ->
+    cache.setUser(user)
+
   getLoginUrl: ->
     api.getLoginUrl()
 
-  getProjectToken: (session, projectPath) ->
-    cache.getProjectToken(session, projectPath)
+  # getProjectToken: (session, projectPath) ->
+  #   cache.getProjectToken(projectPath, session)
 
-  generateProjectToken: (session, projectPath) ->
-    cache.generateProjectToken(session, projectPath)
+  # generateProjectToken: (session, projectPath) ->
+  #   cache.generateProjectToken(projectPath, session)
 
   logIn: (code) ->
     api.createSignin(code)
-    .then (user) ->
-      cache.setUser(user)
+    .then (user) =>
+      @set(user)
       .return(user)
 
   logOut: ->

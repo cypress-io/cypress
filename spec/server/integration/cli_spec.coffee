@@ -4,7 +4,9 @@ _  = require("lodash")
 cp = require("child_process")
 
 parse = (str) ->
-  _(str.split("\n")).compact().last()
+  ## remove blank lines and slice off the first 2 lines
+  ## which are junk from npm logs
+  _(str.split("\n")).compact().slice(2).value().join("\n")
 
 describe "CLI Interface", ->
   beforeEach ->

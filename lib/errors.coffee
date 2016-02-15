@@ -21,6 +21,8 @@ API = {
         "Sorry, there was a problem communicating with the remote Cypress servers. This is likely a temporarily problem. Try again later."
       when "DEV_NO_SERVER"
         " > It looks like you're not running the local api server in development. This may cause problems running the GUI."
+      when "NO_PROJECT_ID"
+        "Sorry, a valid project id was not found here: '#{arg}'"
 
   get: (type, arg) ->
     msg = @getMsgByType(type, arg)
