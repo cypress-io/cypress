@@ -52,3 +52,9 @@ npm test
 ## using cypress to test cypress files? YAP!
 npm run cypress
 ```
+
+## Debugging
+If you want to see the `ipc` events which are pending from Cypress tests:
+
+- Switch to 'Your App' frame
+- App.ipc() <-- returns you object with pending events
