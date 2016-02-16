@@ -1,21 +1,27 @@
 describe "Login [000]", ->
   beforeEach ->
-    cy.visit("/", {
-      onBeforeLoad: (contentWindow) =>
-        contentWindow.ipc = @ipc = {
-          on:   ->
-          send: ->
-        }
+    cy
+      .visit("/")
+      .window().its("ipc").as("ipc").then ->
+        @ipc.handle("get:options", null, {})
 
-        # agents = cy.agents()
+  context "without a current user [02s]", ->
+    beforeEach ->
+      @ipc.handle("get:current:user", null, {})
+
+    it "displays 'Cypress.io' [02t]", ->
 
 
-        # ipc.on = (event, cb) ->
-          # if event is "get:options"
+    it "has Github Login button [02u]", ->
 
-        # agents.stub(ipc, "on").withArgs("response").yields("get:options", {})
-    })
+  context "with a current user [02x]", ->
+    it "displays email instead of name [02w]", ->
+      cy
+        .fixture("user").then (@user) ->
+          @user.name = null
 
-  it "foos [001]", ->
-    debugger
-    @ipc.emit("response", "get:options", {})
+          @ipc.handle("get:current:user", null, @user)
+          @ipc.handle("get:project:paths", null, [])
+        .get("header a").should ($a) ->
+          expect($a).to.contain(@user.email)
+
