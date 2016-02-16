@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "postinstall": "npm run build",
-    "start": "http-server ./dist -o",
+    "start": "http-server ./dist -o -p 6060",
     "prebuild": "rm -rf dist",
     "build": "gulp build",
     "dev": "gulp dev"
