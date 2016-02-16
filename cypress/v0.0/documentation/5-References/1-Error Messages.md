@@ -8,6 +8,7 @@ excerpt: Errors that require additional explanation are listed here.
 - :fa-angle-right: [cy.method() failed because the element you are chaining off of has become detached or removed from the dom](#section-cy-method-failed-because-the-element-you-are-chaining-off-of-has-become-detached-or-removed-from-the-dom)
 - :fa-angle-right: [cy.method() failed because the element cannot be interacted with](#section-cy-method-failed-because-the-element-cannot-be-interacted-with)
 - :fa-angle-right: [cy.method() failed because the element is currently animating](#section-cy-method-failed-because-the-element-is-currently-animating)
+- :fa-angle-right: [Running Cypress in CI requires a secret project key](#section-running-cypress-in-ci-requires-a-secret-project-key)
 
 ***
 
@@ -189,3 +190,15 @@ You can globally disable animation error checking, or increase the threshold by 
   "animationDistanceThreshold": 50
 }
 ```
+
+# Running Cypress in CI requires a secret project key
+
+You may receive this error when trying to run Cypress tests in Continous Integration. This means that you did not pass a specific key to: `cypress ci` in your CI configuration file.
+
+Since no key was passed, Cypress then checks for any environment variable with the name `CYPRESS_CI_KEY`, but still didn't find any.
+
+You can get your project's secret key by running the terminal command: `cypress get:key`
+
+Then [add the key to your config file or as an environment variable](https://on.cypress.io/guides/continous-integration#section-acquire-a-cypress-secret-key).
+
+
