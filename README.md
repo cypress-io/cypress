@@ -1,4 +1,4 @@
-## Cypress Example
+## Cypress Example [![Circle CI](https://circleci.com/gh/cypress-io/examples-kitchen-sink.svg?style=svg)](https://circleci.com/gh/cypress-io/examples-kitchen-sink)
 
 This repo contains the source code for pushing out `https://example.cypress.io`.
 
