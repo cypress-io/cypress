@@ -1,10 +1,10 @@
 ## Cypress Example [![Circle CI](https://circleci.com/gh/cypress-io/cypress-example.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress-example)
 
-This repo contains the source code for pushing out `https://example.cypress.io`.
+This repo contains the source code for pushing out [https://example.cypress.io](https://example.cypress.io).
 
 This is not actually a Cypress Example, we use this for internal purposes.
 
-If you're looking for the kitchen sink repo <it is here>.
+If you're looking for the kitchen sink repo [it is here](https://github.com/cypress-io/examples-kitchen-sink).
 
 ## Developing
 
