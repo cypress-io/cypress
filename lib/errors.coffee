@@ -8,7 +8,7 @@ API = {
   getMsgByType: (type, arg) ->
     switch type
       when "NOT_LOGGED_IN"
-        "Sorry, you are not currently logged into Cypress. This request requires authentication.\nPlease log into Cypress and then issue this command again."
+        "Sorry, you are not currently logged into Cypress. This request requires authentication.\n\nPlease log into Cypress and then issue this command again."
       when "TESTS_DID_NOT_START"
         "Sorry, there was an error while attempting to start your tests. The remote client never connected."
       when "PROJECT_DOES_NOT_EXIST"
@@ -16,13 +16,15 @@ API = {
       when "NOT_CI_ENVIRONMENT"
         "Sorry, running in CI requires a valid CI provider and environment."
       when "CI_KEY_NOT_VALID"
-        "Sorry, your project's secret CI key: '#{arg}' was not valid. This project cannot run in CI."
+        "Sorry, your project's secret CI key: #{chalk.blue(arg)} was not valid. This project cannot run in CI."
       when "CI_CANNOT_COMMUNICATE"
         "Sorry, there was a problem communicating with the remote Cypress servers. This is likely a temporarily problem. Try again later."
       when "DEV_NO_SERVER"
         " > It looks like you're not running the local api server in development. This may cause problems running the GUI."
       when "NO_PROJECT_ID"
-        "Sorry, a valid project id was not found here: '#{arg}'"
+        "Sorry, we could not find a 'projectId' in your 'cypress.json' file for this project: " + chalk.blue(arg)
+      when "NO_PROJECT_FOUND_AT_PROJECT_ROOT"
+        "Sorry, we could not find a project at this path: " + chalk.blue(arg)
 
   get: (type, arg) ->
     msg = @getMsgByType(type, arg)
@@ -46,12 +48,7 @@ API = {
 
   log: (err, color = "red") ->
     Promise.try =>
-      ## if our err instance matches
-      ## a type then its come from us
-      ## else just use the standard err.message
-      msg = @getMsgByType(err.type) ? err.message
-
-      console.log chalk[color](msg)
+      console.log chalk[color](err.message)
 
       ## bail if this error came from known
       ## list of Cypress errors
