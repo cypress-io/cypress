@@ -37,7 +37,7 @@ describe('Kitchen Sink [000]', function(){
   it('cy.should - assert that <title> is correct [001]', function(){
 
     // http://on.cypress.io/api/visit
-    cy.visit('')
+    cy.visit('/')
 
     // **** Making Assertions ****
     //
