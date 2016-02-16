@@ -7,6 +7,7 @@ api       = require("./api")
 user      = require("./user")
 cache     = require("./cache")
 logger    = require("./logger")
+errors    = require("./errors")
 Server    = require("./server")
 Support   = require("./support")
 Fixtures  = require("./fixtures")
@@ -140,10 +141,16 @@ class Project extends EE
     Settings.read(@projectRoot)
     .then (settings) =>
       if (id = settings.projectId)
-        logger.info "Returning Project ID", {id: id}
         return id
 
       errors.throw("NO_PROJECT_ID", @projectRoot)
+
+  verifyExistance: ->
+    fs
+    .statAsync(@projectRoot)
+    .return(@)
+    .catch =>
+      errors.throw("NO_PROJECT_FOUND_AT_PROJECT_ROOT", @projectRoot)
 
   @paths = ->
     cache.getProjectPaths()
@@ -176,8 +183,11 @@ class Project extends EE
       path in paths
 
   @key = (path) ->
-    Project(path)
-    .getProjectId()
+    ## verify the project exists at the projectRoot
+    Project(path).verifyExistance()
+
+    ## then get its project id
+    .call("getProjectId")
     .then (id) ->
       user.ensureSession()
       .then (session) ->
