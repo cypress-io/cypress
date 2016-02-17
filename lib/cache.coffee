@@ -26,7 +26,7 @@ module.exports = {
       fs.statAsync(CACHE)
       .return(true)
       .catch =>
-        @write @defaults()
+        @write(@defaults(), false)
 
   exists: ->
     @ensureExists().return(true).catch(false)
@@ -48,13 +48,18 @@ module.exports = {
   ## Writes over the contents of the local file
   ## takes in an object and serializes it into JSON
   ## finally returning the JSON object that was written
-  write: (obj = {}) ->
+  write: (obj = {}, enableQueue = true) ->
     logger.info("writing to .cy cache", cache: obj)
 
-    queue.add ->
+    write = ->
       fs
       .outputJsonAsync(CACHE, obj, {spaces: 2})
       .return(obj)
+
+    if enableQueue
+      queue.add(write)
+    else
+      write()
 
   _mergeOrWrite: (contents, key, val) ->
     switch

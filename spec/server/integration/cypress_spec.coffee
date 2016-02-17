@@ -1,14 +1,21 @@
 require("../spec_helper")
 
+electron = require("electron")
+inquirer = require("inquirer")
 Fixtures = require("../helpers/fixtures")
+Settings = require("#{root}lib/util/settings")
+project  = require("#{root}lib/electron/handlers/project")
+headless = require("#{root}lib/modes/headless")
 api      = require("#{root}lib/api")
 user     = require("#{root}lib/user")
+cache    = require("#{root}lib/cache")
 errors   = require("#{root}lib/errors")
 cypress  = require("#{root}lib/cypress")
 Project  = require("#{root}lib/project")
 
 describe "lib/cypress", ->
   beforeEach ->
+    cache.removeSync()
     Fixtures.scaffold()
     @todosPath = Fixtures.projectPath("todos")
 
@@ -30,6 +37,10 @@ describe "lib/cypress", ->
 
   afterEach ->
     Fixtures.remove()
+
+    ## make sure every project
+    ## we spawn is closed down
+    project.close()
 
   after ->
     mockery.disable()
@@ -140,5 +151,73 @@ describe "lib/cypress", ->
         cypress.start(["--new-key", "--project=#{@todosPath}"]).then =>
           @expectExitWithErr("CANNOT_CREATE_PROJECT_TOKEN")
 
+  context "--run-project", ->
+    beforeEach ->
+      @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
 
+    it "runs project headlessly and exits with status 0", ->
+      @sandbox.stub(headless, "runTests").resolves({
+        connection: null
+        renderer: null
+        stats: {failures: 10}
+      })
 
+      Promise.all([
+        user.set({name: "brian", session_token: "session-123"}),
+
+        Project.add(@todosPath).then (id) =>
+          @projectId = id
+      ])
+      .then =>
+        cypress.start(["--run-project=#{@todosPath}"]).then =>
+          @expectExitWith(0)
+
+    it "prompts to add the project and then immediately runs the tests and exits with 0", ->
+      @sandbox.stub(inquirer, "prompt").yieldsAsync({add: true})
+      @sandbox.stub(headless, "runTests").resolves({
+        connection: null
+        renderer: null
+        stats: {failures: 10}
+      })
+
+      user.set({session_token: "session-123"})
+      .then =>
+        cypress.start(["--run-project=#{@todosPath}"]).then =>
+          @expectExitWith(0)
+
+    it "logs error and exits when user isn't logged in", ->
+      user.set({})
+      .then =>
+        cypress.start(["--run-project=#{@todosPath}"]).then =>
+          @expectExitWithErr("NOT_LOGGED_IN")
+
+    it "logs error and exits when project could not be found at the path and was not chosen to be added to Cypress", ->
+      @sandbox.stub(inquirer, "prompt").yieldsAsync({add: false})
+
+      user.set({session_token: "session-123"})
+      .then =>
+        cypress.start(["--run-project=does/not/exist"]).then =>
+          @expectExitWithErr("PROJECT_DOES_NOT_EXIST")
+
+    ## Currently this is not an error, all this does is simply run the tests
+    ## without an id
+    ## TODO
+    ## consider removing the cache holding onto the project id as this can
+    ## get stale very quickly
+    ## consider only ever looking at the project's ID based on its cypress.json
+    it.skip "logs error and exits when project does not have an id", ->
+      @sandbox.stub(inquirer, "prompt").yieldsAsync({add: true})
+
+      Promise.all([
+        user.set({name: "brian", session_token: "session-123"}),
+
+        Project.add(@todosPath).then (id) =>
+          @projectId = id
+      ])
+      .then =>
+        ## remove the cypress.json id from cypress.json on todos project
+        ## after adding this to the cache
+        Settings.write(@todosPath, {projectId: null})
+      .then =>
+        cypress.start(["--run-project=#{@todosPath}"]).then =>
+          @expectExitWithErr("??")

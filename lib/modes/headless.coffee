@@ -2,10 +2,11 @@ app        = require("electron").app
 chalk      = require("chalk")
 Promise    = require("bluebird")
 inquirer   = require("inquirer")
-user       = require("./user")
-errors     = require("./errors")
-project    = require("./project")
-Renderer   = require("./renderer")
+user       = require("../user")
+errors     = require("../errors")
+Project    = require("../project")
+project    = require("../electron/handlers/project")
+Renderer   = require("../electron/handlers/renderer")
 
 module.exports = {
   getId: ->
@@ -62,7 +63,7 @@ module.exports = {
           ## since it'll likely be NetworkError or something.
           ## But we should still gracefully handle this better
           ## and provide a custom error message.
-          project.add(projectPath).then ->
+          Project.add(projectPath).then ->
             console.log chalk.green("\nOk great, added the project.\n")
             resolve()
         else
@@ -121,12 +122,27 @@ module.exports = {
       ## resolve the promise
       project.once "end", resolve
 
+  runTests: (project, id) ->
+    config = project.getConfig()
+
+    ## we know we're done running headlessly
+    ## when the renderer has connected and
+    ## finishes running all of the tests.
+    ## we're using an event emitter interface
+    ## to gracefully handle this in promise land
+    Promise.props({
+      connection: @waitForRendererToConnect(project, id)
+      stats:      @waitForTestsToFinishRunning(project)
+      renderer:   @createRenderer(config.allTestsUrl)
+    })
+
   ready: (options = {}) ->
     ## make sure we have a current session
     user.ensureSession()
 
     .then =>
       id = @getId()
+
 
       ## verify this is an added project
       ## and then open it, returning our
@@ -136,18 +152,7 @@ module.exports = {
       .then (project) =>
         console.log("\nTests should begin momentarily...\n")
 
-        config = project.getConfig()
-
-        ## we know we're done running headlessly
-        ## when the renderer has connected and
-        ## finishes running all of the tests.
-        ## we're using an event emitter interface
-        ## to gracefully handle this in promise land
-        Promise.props({
-          connection: @waitForRendererToConnect(project, id)
-          stats:      @waitForTestsToFinishRunning(project)
-          renderer:   @createRenderer(config.allTestsUrl)
-        })
+        @runTests(project, id)
         .get("stats")
         .get("failures")
 
