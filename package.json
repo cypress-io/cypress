@@ -39,6 +39,7 @@
     "gulp-remember": "^0.3.0",
     "gulp-sass": "^2.1.1",
     "gulp-tap": "^0.1.3",
+    "http-server": "^0.8.5",
     "js-yaml": "^3.5.2",
     "lodash": "^4.0.0",
     "node-sass-import-once": "^1.2.0",
