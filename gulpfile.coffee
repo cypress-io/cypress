@@ -90,12 +90,19 @@ gulp.task "css", ->
       importer: importOnce
       importOnce: {
         bower: true
+        css: true
       }
     })
     .on('error', $.sass.logError))
     .pipe gulp.dest "dist/css"
 
-gulp.task "fonts", ->
+gulp.task "fonts", ["fa:fonts", "fira:fonts"]
+
+gulp.task "fira:fonts", ->
+  gulp.src("bower_components/fira/woff/**/*")
+    .pipe gulp.dest "dist/css/woff"
+
+gulp.task "fa:fonts", ->
   gulp.src("bower_components/font-awesome/fonts/**")
     .pipe gulp.dest "dist/css/fonts"
 
@@ -112,6 +119,10 @@ gulp.task "js", ->
 
 gulp.task "bower", ->
   $.bower()
+
+gulp.task "clean", ->
+  gulp.src("dist")
+    .pipe $.clean()
 
 gulp.task "html", ->
   gulp.src(["app/html/*"])
@@ -152,4 +163,4 @@ gulp.task "minify", ->
   minify("dist/js/!(cypress|sinon).js", "dist/js")
 
 gulp.task "build",  ["bower"], (cb) ->
-  runSequence ["css", "img", "fonts", "js", "html"], cb
+  runSequence "clean", ["css", "img", "fonts", "js", "html"], cb
