@@ -16,8 +16,6 @@ Renderer = require("#{root}../lib/electron/handlers/renderer")
 
 describe "Events", ->
   beforeEach ->
-    ## setup default options and event and id
-    ## as the first three arguments
     @id      = Math.random()
     @send    = @sandbox.spy()
     @cookies = {}
@@ -35,7 +33,9 @@ describe "Events", ->
       }
     }
 
-    @handleEvent = _.partial((events.handleEvent), @options, @event, @id)
+    ## setup default options and event and id
+    ## as the first three arguments
+    @handleEvent = _.partial(events.handleEvent, @options, @event, @id)
 
     @expectSendCalledWith = (data) =>
       expect(@send).to.be.calledWith("response", {id: @id, data: data})
