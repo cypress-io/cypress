@@ -29,6 +29,8 @@ API = {
         "Sorry, there was a problem fetching this project's secret key."
       when "CANNOT_CREATE_PROJECT_TOKEN"
         "Sorry, there was a problem creating this project's secret key."
+      when "PORT_IN_USE"
+        "Port: '#{arg}' is already in use."
 
   get: (type, arg) ->
     msg = @getMsgByType(type, arg)

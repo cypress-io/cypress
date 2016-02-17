@@ -7,6 +7,7 @@ _            = require("underscore")
 str          = require("underscore.string")
 allowDestroy = require("server-destroy")
 Promise      = require("bluebird")
+errors       = require("./errors")
 logger       = require("./logger")
 Socket       = require("./socket")
 Settings     = require("./util/settings")
@@ -181,7 +182,7 @@ class Server
   getHttpServer: -> @server
 
   portInUseErr: (port) ->
-    e = new Error("Port: '#{port}' is already in use.")
+    e = errors.get("PORT_IN_USE", port)
     e.port = port
     e.portInUse = true
     e
@@ -203,7 +204,7 @@ class Server
         ## if the server bombs before starting
         ## and the err no is EADDRINUSE
         ## then we know to display the custom err message
-        if err.errno is "EADDRINUSE"
+        if err.code is "EADDRINUSE"
           reject @portInUseErr(@config.port)
 
       @server.once "error", onError

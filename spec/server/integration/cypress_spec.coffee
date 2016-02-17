@@ -1,10 +1,13 @@
 require("../spec_helper")
 
+os       = require("os")
+http     = require("http")
 electron = require("electron")
 inquirer = require("inquirer")
 Fixtures = require("../helpers/fixtures")
 Settings = require("#{root}lib/util/settings")
 project  = require("#{root}lib/electron/handlers/project")
+ci       = require("#{root}lib/modes/ci")
 headless = require("#{root}lib/modes/headless")
 api      = require("#{root}lib/api")
 user     = require("#{root}lib/user")
@@ -12,10 +15,12 @@ cache    = require("#{root}lib/cache")
 errors   = require("#{root}lib/errors")
 cypress  = require("#{root}lib/cypress")
 Project  = require("#{root}lib/project")
+Server   = require("#{root}lib/server")
 
 describe "lib/cypress", ->
   beforeEach ->
     cache.removeSync()
+
     Fixtures.scaffold()
     @todosPath = Fixtures.projectPath("todos")
 
@@ -183,7 +188,12 @@ describe "lib/cypress", ->
       user.set({session_token: "session-123"})
       .then =>
         cypress.start(["--run-project=#{@todosPath}"]).then =>
+          expect(inquirer.prompt).to.be.calledOnce
           @expectExitWith(0)
+
+    ## TODO implement the running of a specific spec by its options
+    ## instead of running all of the tests
+    it.skip "runs project by specific spec and exits with status 0", ->
 
     it "logs error and exits when user isn't logged in", ->
       user.set({})
@@ -221,3 +231,119 @@ describe "lib/cypress", ->
       .then =>
         cypress.start(["--run-project=#{@todosPath}"]).then =>
           @expectExitWithErr("??")
+
+    describe "--port", ->
+      beforeEach ->
+        @sandbox.stub(headless, "runTests").resolves({
+          connection: null
+          renderer: null
+          stats: {}
+        })
+
+        Promise.all([
+          user.set({name: "brian", session_token: "session-123"}),
+
+          Project.add(@todosPath).then (id) =>
+            @projectId = id
+        ])
+
+      it "can change the default port to 5555", ->
+        listen = @sandbox.spy(http.Server.prototype, "listen")
+        open   = @sandbox.spy(Server.prototype, "open")
+
+        cypress.start(["--run-project=#{@todosPath}", "--port=5555"]).then =>
+          expect(project.opened().getConfig().port).to.eq(5555)
+          expect(listen).to.be.calledWith(5555)
+          expect(open).to.be.calledWithMatch({port: 5555})
+          @expectExitWith(0)
+
+      ## TODO: handle PORT_IN_USE short + long descriptions
+      it "logs error and exits when port is in use", ->
+        server = http.createServer()
+        server = Promise.promisifyAll(server)
+        server.listenAsync(5555)
+        .then =>
+          cypress.start(["--run-project=#{@todosPath}", "--port=5555"]).then =>
+            @expectExitWithErr("PORT_IN_USE", "5555")
+
+    describe "--env", ->
+      beforeEach ->
+        @sandbox.stub(headless, "runTests").resolves({
+          connection: null
+          renderer: null
+          stats: {}
+        })
+
+        Promise.all([
+          user.set({name: "brian", session_token: "session-123"}),
+
+          Project.add(@todosPath).then (id) =>
+            @projectId = id
+        ])
+
+      it "can set specific environment variables", ->
+        cypress.start([
+          "--run-project=#{@todosPath}",
+          "--env",
+          "version=0.12.1,foo=bar,host=http://localhost:8888"
+        ]).then =>
+          expect(project.opened().getConfig().environmentVariables).to.deep.eq({
+            version: "0.12.1"
+            foo: "bar"
+            host: "http://localhost:8888"
+          })
+
+          @expectExitWith(0)
+
+  ## the majority of the logic in CI is covered already
+  ## in --run-project specs above
+  context "--ci", ->
+    beforeEach ->
+      @sandbox.stub(os, "platform").returns("linux")
+      @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
+      @sandbox.stub(ci, "getBranch").resolves("bem/ci")
+      @sandbox.stub(ci, "getAuthor").resolves("brian")
+      @sandbox.stub(ci, "getMessage").resolves("foo")
+      @sandbox.stub(headless, "runTests").resolves({
+        connection: null
+        renderer: null
+        stats: {failures: 10}
+      })
+
+      Promise.all([
+        user.set({name: "brian", session_token: "session-123"}),
+
+        Project.add(@todosPath).then (id) =>
+          @projectId = id
+      ])
+      .then =>
+        @createCiGuid = @sandbox.stub(api, "createCiGuid").withArgs({
+          key: "secret-key-123"
+          projectId: @projectId
+          branch: "bem/ci"
+          author: "brian"
+          message: "foo"
+        })
+
+    it "runs project in ci and exits with number of failures", ->
+      @createCiGuid.resolves("ci_guid-123")
+
+      cypress.start(["--run-project=#{@todosPath}", "--key=secret-key-123", "--ci"]).then =>
+        @expectExitWith(10)
+
+    it "logs error and exits when ci key is not valid", ->
+      err = new Error
+      err.statusCode = 401
+      @createCiGuid.rejects(err)
+
+      cypress.start(["--run-project=#{@todosPath}", "--key=secret-key-123", "--ci"]).then =>
+        @expectExitWithErr("CI_KEY_NOT_VALID", "secre...y-123")
+
+    it "logs error and exits when cannot communicate with api", ->
+      err = new Error
+      err.statusCode = 404
+      @createCiGuid.rejects(err)
+
+      cypress.start(["--run-project=#{@todosPath}", "--key=secret-key-123", "--ci"]).then =>
+        @expectExitWithErr("CI_CANNOT_COMMUNICATE")
+

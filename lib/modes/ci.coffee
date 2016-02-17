@@ -1,10 +1,10 @@
 os       = require("os")
 git      = require("gift")
 Promise  = require("bluebird")
-api      = require("../../api")
-errors   = require("./errors")
-project  = require("./project")
 headless = require("./headless")
+api      = require("../api")
+errors   = require("../errors")
+Project  = require("../project")
 
 module.exports = {
   getBranchFromGit: (repo) ->
@@ -66,9 +66,9 @@ module.exports = {
 
     @ensureCi()
     .then ->
-      project.add(projectPath)
+      Project.add(projectPath)
     .then ->
-      project.id(projectPath)
+      Project.id(projectPath)
     .then (id) =>
       @ensureProjectAPIToken(id, projectPath, options.key)
     .then (ciGuid) ->

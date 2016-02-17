@@ -143,7 +143,6 @@ module.exports = {
     .then =>
       id = @getId()
 
-
       ## verify this is an added project
       ## and then open it, returning our
       ## project instance
