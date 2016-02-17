@@ -8,7 +8,7 @@ class Builds
       return new Builds(app)
 
     if not app
-      throw new Error("Instantiating controllers/remote_initial requires an app!")
+      throw new Error("Instantiating controllers/proxy requires an app!")
 
     @app = app
 

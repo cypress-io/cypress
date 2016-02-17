@@ -40,4 +40,4 @@ module.exports = (app) ->
     }
 
   app.all "*", (req, res, next) ->
-    controllers.remoteInitial.handle(req, res, next)
+    controllers.proxy.handle(req, res, next)

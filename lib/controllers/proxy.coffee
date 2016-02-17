@@ -18,13 +18,13 @@ htmlRe           = /(<html.*?>)/
 okStatusRe       = /^[2|3|4]\d+$/
 badCookieParamRe = /^(httponly|secure|domain=.+)$/i
 
-class RemoteInitial
+class Proxy
   constructor: (app) ->
-    if not (@ instanceof RemoteInitial)
-      return new RemoteInitial(app)
+    if not (@ instanceof Proxy)
+      return new Proxy(app)
 
     if not app
-      throw new Error("Instantiating controllers/remote_initial requires an app!")
+      throw new Error("Instantiating controllers/proxy requires an app!")
 
     @app = app
 
@@ -412,4 +412,4 @@ class RemoteInitial
       </script>
     "
 
-module.exports = RemoteInitial
+module.exports = Proxy
