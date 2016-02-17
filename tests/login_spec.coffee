@@ -115,7 +115,7 @@ describe "Login [000]", ->
               .fixture("user").then (@user) ->
                 @loginErr = @agents.spy(@App.currentUser, "setLoginError")
                 @ipc.handle("log:in", {message: "There's an error"}, {})
-              .get(".bg-danger")
+              .get(".alert-danger")
                 .should("be.visible")
                 .contains("There's an error")
 
