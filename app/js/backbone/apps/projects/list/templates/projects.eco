@@ -16,7 +16,7 @@
         </ul>
       </div>
     </div>
-    <span class="add-project fa-stack pull-right" title="Add Project...">
+    <span data-js="add-project" class="add-project fa-stack pull-right" title="Add Project...">
       <i class="fa fa-folder-o fa-stack-2x"></i>
       <i class="fa fa-plus fa-stack-1x"></i>
     </span>

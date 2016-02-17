@@ -53,7 +53,10 @@
 
           startProject(project, params)
       else
-        @listenTo projectsView, "button:clicked", addProject
+        @listenTo projectsView, "add:project:clicked", addProject
+
+        ## listen for the button in our empty view too
+        @listenTo projectsView, "childview:add:project:clicked", addProject
 
         @listenTo projectsView, "sign:out:clicked", ->
           App.vent.trigger "log:out", user

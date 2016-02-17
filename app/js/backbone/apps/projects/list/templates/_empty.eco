@@ -1,7 +1,7 @@
 <h4>Let's add your first project</h4>
 <p>Choose a folder directory to begin testing.</p>
 <button class="btn btn-success">
-  <span class="add-project fa-stack">
+  <span data-js="add-project" class="add-project fa-stack">
     <i class="fa fa-folder-o fa-stack-2x"></i>
     <i class="fa fa-plus fa-stack-1x"></i>
   </span>

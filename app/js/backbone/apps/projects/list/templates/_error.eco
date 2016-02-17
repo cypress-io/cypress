@@ -1,8 +1,10 @@
-<div id="projects" class="error">
-  <h3>Error adding project!</h3>
-  <p class="bg-danger">
+<div id="projects" class="alert alert-danger error">
+  <p>
     <i class="fa fa-warning"></i>
+    <strong>Error adding project!</strong>
+  </p>
+  <p class="bg-danger">
     <%- @message.replace("\n", "<br /><br />") %>
   </p>
-  <button data-ok class="btn btn-info">Ok</button>
+  <button data-ok class="btn btn-link">Cancel</button>
 </div>

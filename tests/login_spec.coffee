@@ -157,3 +157,68 @@ describe "Login [000]", ->
           .then ->
             @ipc.handle("get:project:paths", null, [])
           .get(".empty").contains("Add Project")
+
+      context "add project [00j]", ->
+        beforeEach ->
+          cy
+            .then ->
+              @ipc.handle("get:project:paths", null, [])
+            .get(".empty").contains("Add Project")
+
+        it "triggers ipc 'show:directory:dialog on header + [00k]", ->
+          cy.then ->
+            @agents.spy(@App, "ipc")
+          cy.get("header").find("[data-js='add-project']").click().then ->
+            expect(@App.ipc).to.be.calledWith("show:directory:dialog")
+
+        it "triggers ipc 'show:directory:dialog on empty view + [00k]", ->
+          cy.then ->
+            @agents.spy(@App, "ipc")
+          cy.get(".empty").find("[data-js='add-project']").click().then ->
+            expect(@App.ipc).to.be.calledWith("show:directory:dialog")
+
+        describe.only "error thrown [00p]", ->
+          beforeEach ->
+            cy
+              .get("header").find("[data-js='add-project']").click().then ->
+                @ipc.handle("show:directory:dialog", {message: "something bad happened"}, null)
+
+          it "displays error [00m]", ->
+            cy
+              .get(".error")
+                .should("be.visible")
+                .and("contain", "something bad happened")
+
+          it "goes back to projects view on cancel [00q]", ->
+            cy
+              .get(".error").contains("Cancel").click().then ->
+                @ipc.handle("get:project:paths", null, [])
+              .get(".empty").should("be.visible")
+
+        describe "directory dialog cancelled [00l]", ->
+          beforeEach ->
+            cy.get("header").find("[data-js='add-project']").click()
+
+          it "does no action [00m]", ->
+            cy
+              .then ->
+                @agents.spy(@App, "ipc")
+                @ipc.handle("show:directory:dialog", null, null)
+              .get(".empty").should("exist").then ->
+                expect(@App.ipc).to.not.be.calledWith("add:project")
+
+        describe "directory chosen [00n]", ->
+          beforeEach ->
+            cy.get("header").find("[data-js='add-project']").click()
+
+          it "triggers ipc 'add:project' with directory [00o]", ->
+            cy
+              .then ->
+                @agents.spy(@App, "ipc")
+                @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-Fake-Project")
+              .get("#projects-container>li:not(.empty)").should("have.length", 1).then ->
+                expect(@App.ipc).to.be.calledWith("add:project")
+
+
+
+

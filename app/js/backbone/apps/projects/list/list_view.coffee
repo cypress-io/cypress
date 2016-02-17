@@ -42,6 +42,12 @@
     tagName: "li"
     className: "empty"
 
+    ui:
+      "addProject"  : "[data-js='add-project']"
+
+    triggers:
+      "click @ui.addProject" : "add:project:clicked"
+
   class List.Projects extends App.Views.CompositeView
     template: "projects/list/projects"
     childView: List.Project
@@ -51,9 +57,9 @@
       "contextMenu" : "#context-menu"
 
     ui:
-      "button"  : "button"
-      "input"   : "input"
-      "signout" : "li[data-signout]"
+      "addProject"  : "[data-js='add-project']"
+      "input"       : "input"
+      "signout"     : "li[data-signout]"
 
     events:
       "mousedown @ui.signout": "signOutClicked"
@@ -61,7 +67,7 @@
       "change @ui.input"  : "inputChanged"
 
     triggers:
-      "click @ui.button" : "button:clicked"
+      "click @ui.addProject" : "add:project:clicked"
 
     signOutClicked: (e) ->
       @trigger "sign:out:clicked"
