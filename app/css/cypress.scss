@@ -27,19 +27,20 @@
 
 // Fonts
 @import "font-awesome/scss/font-awesome";
+@import "fira/fira";
 
 // Elements
-@import "elements/arrow";
-@import "elements/body";
-@import "elements/empty";
-@import "elements/loading";
+@import "components/elements";
+@import "components/arrow";
+@import "components/empty";
+@import "components/loading";
 
 // Independent Pages
+@import "pages/about";
 @import "pages/debug";
 @import "pages/footer";
 @import "pages/login";
-@import "pages/projects";
-@import "pages/about";
 @import "pages/preferences";
+@import "pages/projects";
 @import "pages/updates";
 @import "pages/updates_applied";
