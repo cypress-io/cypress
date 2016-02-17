@@ -18,10 +18,10 @@
 }
 
 #footer {
-  background-color: #EFF0F3;
+  background-color: $light-gray;
   position: fixed;
   width: 100%;
-  border: 1px solid #DCDEE4;
+  border-top: 1px solid #DCDEE4;
   z-index: 10;
   bottom: 0;
 
@@ -31,18 +31,18 @@
 
   span:hover {
     i {
-      color: #7C7D82;
+      color: #47484C;
     }
   }
 
   .dropup.open {
     i {
-      color: #696A6F;
+      color: #47484C;
     }
   }
 
   i {
-    color: #9B9DA2;
+    color: #7A7B80;
     font-size: 24px;
     line-height: $footer-height;
     margin: 0 10px 0 5px;

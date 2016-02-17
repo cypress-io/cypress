@@ -1,6 +1,6 @@
 <div id="footer">
   <span class="pull-right">
-    <div class="dropup">
+    <div class="dropup" title="Options">
       <i class="fa fa-cog dropdown-toggle" data-toggle="dropdown"></i>
       <ul class="dropdown-menu dropdown-menu-right">
         <% if @debug: %>

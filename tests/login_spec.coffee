@@ -62,7 +62,7 @@ describe "Login [000]", ->
 
         it "triggers ipc 'log:in' [008]", ->
           cy
-            .then ->
+            .get("@loginBtn").click().then ->
               @agents.spy(@App, "ipc")
               @ipc.handle("window:open", null, {})
             .contains("Logging in...").then ->
@@ -95,7 +95,7 @@ describe "Login [000]", ->
               .get("header a").should ($a) ->
                 expect($a).to.contain(@user.name)
 
-        describe.only "on ipc 'log:in' error [00a]", ->
+        describe "on ipc 'log:in' error [00a]", ->
           beforeEach ->
             cy
               .get("@loginBtn").click().then ->
@@ -127,13 +127,33 @@ describe "Login [000]", ->
               .get("@loginBtn").should("not.be.disabled")
 
   context "with a current user [02x]", ->
-    it "displays email instead of name [02w]", ->
-      cy
-        .fixture("user").then (@user) ->
-          @user.name = null
+    describe "username [00f]", ->
+      it "displays user name [00g]", ->
+        cy
+          .fixture("user").then (@user) ->
+            @ipc.handle("get:current:user", null, @user)
+            @ipc.handle("get:project:paths", null, [])
+          .get("header a").should ($a) ->
+            expect($a).to.contain(@user.name)
 
-          @ipc.handle("get:current:user", null, @user)
-          @ipc.handle("get:project:paths", null, [])
-        .get("header a").should ($a) ->
-          expect($a).to.contain(@user.email)
+      it "displays email instead of name [02w]", ->
+        cy
+          .fixture("user").then (@user) ->
+            @user.name = null
 
+            @ipc.handle("get:current:user", null, @user)
+            @ipc.handle("get:project:paths", null, [])
+          .get("header a").should ($a) ->
+            expect($a).to.contain(@user.email)
+
+    describe "projects list [00h]", ->
+      beforeEach ->
+        cy
+          .fixture("user").then (@user) ->
+            @ipc.handle("get:current:user", null, @user)
+
+      it "displays empty view when no projects [00i]", ->
+        cy
+          .then ->
+            @ipc.handle("get:project:paths", null, [])
+          .get(".empty").contains("Add Project")
