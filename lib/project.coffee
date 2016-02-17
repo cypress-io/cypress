@@ -192,29 +192,20 @@ class Project extends EE
       user.ensureSession()
       .then (session) ->
         api.getProjectToken(id, session)
-
-  # _projectToken: (method, projectPath, session) ->
-  #   @getProjectIdByPath(projectPath).then (projectId) ->
-  #     ## TODO: change this to lib/errors
-  #     if not projectId
-  #       e = new Error
-  #       e.projectNotFound = true
-  #       e.projectPath = projectPath
-  #       throw e
-  #     else
-  #       switch method
-  #         when "get" then api.getProjectToken(projectId, session)
-  #         when "put" then api.updateProjectToken(projectId, session)
-  #         else
-  #           throw new TypeError("Method not recognized. Expected 'get' or 'put', got: '#{method}'")
-
-  # getProjectToken: (project, session) ->
-  #   @_projectToken("get", project, session)
-
-  # generateProjectToken: (project, session) ->
-  #   @_projectToken("put", project, session)
+        .catch ->
+          errors.throw("CANNOT_FETCH_PROJECT_TOKEN")
 
   @generateKey = (path) ->
+    ## verify the project exists at the projectRoot
+    Project(path).verifyExistance()
 
+    ## then get its project id
+    .call("getProjectId")
+    .then (id) ->
+      user.ensureSession()
+      .then (session) ->
+        api.updateProjectToken(id, session)
+        .catch ->
+          errors.throw("CANNOT_CREATE_PROJECT_TOKEN")
 
 module.exports = Project

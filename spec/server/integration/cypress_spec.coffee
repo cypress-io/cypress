@@ -43,7 +43,7 @@ describe "lib/cypress", ->
           @projectId = id
       ])
       .then =>
-        @sandbox.stub(console, "log")
+        @sandbox.spy(console, "log")
         @sandbox.stub(api, "getProjectToken")
           .withArgs(@projectId, "session-123")
           .resolves("new-key-123")
@@ -72,4 +72,73 @@ describe "lib/cypress", ->
         cypress.start(["--get-key", "--project=path/to/no/project"]).then =>
           @expectExitWithErr("NO_PROJECT_FOUND_AT_PROJECT_ROOT", "path/to/no/project")
 
-    it "logs error and exits when project token cannot be fetched"
+    it "logs error and exits when project token cannot be fetched", ->
+      Promise.all([
+        user.set({session_token: "session-123"}),
+
+        Project.add(@todosPath).then (id) =>
+          @projectId = id
+      ])
+      .then =>
+        @sandbox.stub(api, "getProjectToken")
+          .withArgs(@projectId, "session-123")
+          .rejects(new Error)
+
+        cypress.start(["--get-key", "--project=#{@todosPath}"]).then =>
+          @expectExitWithErr("CANNOT_FETCH_PROJECT_TOKEN")
+
+  context "--new-key", ->
+    it "writes out key and exits on success", ->
+      Promise.all([
+        user.set({name: "brian", session_token: "session-123"}),
+
+        Project.add(@todosPath).then (id) =>
+          @projectId = id
+      ])
+      .then =>
+        @sandbox.spy(console, "log")
+        @sandbox.stub(api, "updateProjectToken")
+          .withArgs(@projectId, "session-123")
+          .resolves("new-key-123")
+
+        cypress.start(["--new-key", "--project=#{@todosPath}"]).then =>
+          expect(console.log).to.be.calledWith("new-key-123")
+          @expectExitWith(0)
+
+    it "logs error and exits when user isn't logged in", ->
+      user.set({})
+      .then =>
+        cypress.start(["--new-key", "--project=#{@todosPath}"]).then =>
+          @expectExitWithErr("NOT_LOGGED_IN")
+
+    it "logs error and exits when project does not have an id", ->
+      @pristinePath = Fixtures.projectPath("pristine")
+
+      user.set({session_token: "session-123"})
+      .then =>
+        cypress.start(["--new-key", "--project=#{@pristinePath}"]).then =>
+          @expectExitWithErr("NO_PROJECT_ID", @pristinePath)
+
+    it "logs error and exits when project could not be found at the path", ->
+      user.set({session_token: "session-123"})
+      .then =>
+        cypress.start(["--new-key", "--project=path/to/no/project"]).then =>
+          @expectExitWithErr("NO_PROJECT_FOUND_AT_PROJECT_ROOT", "path/to/no/project")
+
+    it "logs error and exits when project token cannot be fetched", ->
+      Promise.all([
+        user.set({session_token: "session-123"}),
+
+        Project.add(@todosPath).then (id) =>
+          @projectId = id
+      ])
+      .then =>
+        @sandbox.stub(api, "updateProjectToken")
+          .withArgs(@projectId, "session-123")
+          .rejects(new Error)
+
+        cypress.start(["--new-key", "--project=#{@todosPath}"]).then =>
+          @expectExitWithErr("CANNOT_CREATE_PROJECT_TOKEN")
+
+
+

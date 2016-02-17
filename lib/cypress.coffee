@@ -193,7 +193,9 @@ module.exports = {
 
       when "generateKey"
         ## generate + print the key + exit
-        key.generate(options.projectPath)
+        Project.generateKey(options.projectPath)
+        .then (key) ->
+          console.log(key)
         .then(exit0)
         .catch(exitErr)
 
