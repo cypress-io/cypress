@@ -48,10 +48,9 @@ npm run build
 
 ```bash
 npm test
-
-## using cypress to test cypress files? YAP!
-npm run cypress
 ```
+
+This will watch your files and run the gui in port `6060`.
 
 ## Debugging
 If you want to see the `ipc` events which are pending from Cypress tests:
