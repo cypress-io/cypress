@@ -1,4 +1,5 @@
 @import "core/variable_overrides";
+@import "core/variables";
 
 // Core variables and mixins
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/variables";
@@ -33,7 +34,9 @@
 @import "components/elements";
 @import "components/arrow";
 @import "components/empty";
+@import "components/general";
 @import "components/loading";
+@import "components/well";
 
 // Independent Pages
 @import "pages/about";

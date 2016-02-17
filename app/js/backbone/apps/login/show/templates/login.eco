@@ -1,9 +1,9 @@
 <div id="login">
   <h3>Cypress.io</h3>
   <div class="well well-lg">
-    <button data-login class="btn btn-default">
+    <button data-login class="btn btn-primary btn-login">
       <i class="fa fa-github"></i>
-      Login with Github
+      Login with GitHub
     </button>
   </div>
   <% if @error: %>

@@ -1,7 +1,3 @@
-h3 {
-  font-family: "Fira Sans";
-}
-
 html {
   position: relative;
   height: 100%;
@@ -52,8 +48,10 @@ html, body {
   min-height: 100%;
 }
 
-#app {
-  background-color: white;
-  overflow: hidden;
-  min-height: 400px;
+h3 {
+  font-family: "Fira Sans";
+}
+
+a {
+  color: $blue-primary;
 }

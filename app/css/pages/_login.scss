@@ -8,14 +8,19 @@
   p.bg-danger {
     padding: 5px;
   }
+}
 
-  button {
-    &:active, &:focus {
-      outline: 0
-    }
+.btn-login {
+  line-height: 24px;
+
+  &:active, &:focus {
+    outline: 0
   }
 
-  .well-lg {
-    border-radius: 0;
+  i {
+    font-size: 18px;
+    position: relative;
+    top: 1px;
+    padding-right: 3px;
   }
 }
