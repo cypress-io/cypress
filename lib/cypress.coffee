@@ -112,7 +112,7 @@ module.exports = {
         ## TODO: this needs to be in lib/errors plz, kthx
         throw new Error("Missing 'options.env'. This value is required to run Cypress server!")
 
-  start: (argv) ->
+  start: (argv = []) ->
     options = argsUtil.toObject(argv)
 
     ## else determine the mode by

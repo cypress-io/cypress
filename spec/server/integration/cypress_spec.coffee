@@ -8,6 +8,7 @@ Fixtures = require("../helpers/fixtures")
 Settings = require("#{root}lib/util/settings")
 project  = require("#{root}lib/electron/handlers/project")
 ci       = require("#{root}lib/modes/ci")
+headed   = require("#{root}lib/modes/headed")
 headless = require("#{root}lib/modes/headless")
 api      = require("#{root}lib/api")
 user     = require("#{root}lib/user")
@@ -346,4 +347,17 @@ describe "lib/cypress", ->
 
       cypress.start(["--run-project=#{@todosPath}", "--key=secret-key-123", "--ci"]).then =>
         @expectExitWithErr("CI_CANNOT_COMMUNICATE")
+
+  context "no args", ->
+    beforeEach ->
+      @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
+      @sandbox.stub(headed, "ready").resolves()
+
+    it "runs headed and does not exit", ->
+      cypress.start().then ->
+        expect(headed.ready).to.be.calledOnce
+
+    it "passes options to headed.ready", ->
+      cypress.start(["--updating"]).then ->
+        expect(headed.ready).to.be.calledWithMatch({updating: true})
 

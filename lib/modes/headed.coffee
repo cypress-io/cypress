@@ -41,7 +41,7 @@ module.exports = {
     ## exit when all windows are closed
     app.exit(0)
 
-  ready: (app, options = {}) ->
+  ready: (options = {}) ->
     options.app = app
 
     ## handle right click to show context menu!
