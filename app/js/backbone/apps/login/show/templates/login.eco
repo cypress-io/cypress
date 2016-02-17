@@ -1,7 +1,5 @@
 <div id="login">
-  <h3>
-    <p>Cypress.io</p>
-  </h3>
+  <h3>Cypress.io</h3>
   <div class="well well-lg">
     <button data-login class="btn btn-default">
       <i class="fa fa-github"></i>
