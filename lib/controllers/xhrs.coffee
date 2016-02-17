@@ -3,7 +3,6 @@ mime        = require("mime")
 request     = require("request")
 str         = require("string-to-stream")
 Promise     = require("bluebird")
-Controller  = require("./controller")
 Fixtures    = require("../fixtures")
 
 fixturesRe = /^(fx:|fixture:)/
@@ -20,7 +19,7 @@ isValidJSON = (text) ->
 
   return false
 
-class Xhr extends Controller
+class Xhr
   constructor: (app) ->
     if not (@ instanceof Xhr)
       return new Xhr(app)
@@ -29,8 +28,6 @@ class Xhr extends Controller
       throw new Error("Instantiating controllers/xhr requires an app!")
 
     @app = app
-
-    super
 
   getStream: (resp) ->
     if fixturesRe.test(resp)

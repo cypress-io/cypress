@@ -9,17 +9,16 @@ through       = require("through")
 jsUri         = require("jsuri")
 trumpet       = require("trumpet")
 urlHelpers    = require("url")
-Log           = require("../log")
+logger        = require("../logger")
 UrlHelpers    = require("../util/url_helpers")
 escapeRegExp  = require("../util/escape_regexp")
-Controller    = require "./controller"
 
 headRe           = /(<head.*?>)/
 htmlRe           = /(<html.*?>)/
 okStatusRe       = /^[2|3|4]\d+$/
 badCookieParamRe = /^(httponly|secure|domain=.+)$/i
 
-class RemoteInitial extends Controller
+class RemoteInitial
   constructor: (app) ->
     if not (@ instanceof RemoteInitial)
       return new RemoteInitial(app)
@@ -28,8 +27,6 @@ class RemoteInitial extends Controller
       throw new Error("Instantiating controllers/remote_initial requires an app!")
 
     @app = app
-
-    super
 
   handle: (req, res, next) ->
     ## if we have an unload header it means
@@ -57,7 +54,7 @@ class RemoteInitial extends Controller
       ## 4. or finally fall back on app instance var
       remoteHost = getRemoteHost(req)
 
-      Log.info "handling initial request", url: req.url, remoteHost: remoteHost
+      logger.info "handling initial request", url: req.url, remoteHost: remoteHost
 
       ## we must have the remoteHost which tell us where
       ## we should request the initial HTML payload from
@@ -158,7 +155,7 @@ class RemoteInitial extends Controller
         ## set cookies to initial=true and our new remoteHost origin
         setCookies(true, newUrl.origin())
 
-        Log.info "redirecting to new url", status: incomingRes.statusCode, url: newUrl.toString()
+        logger.info "redirecting to new url", status: incomingRes.statusCode, url: newUrl.toString()
 
         isInitial = req.cookies["__cypress.initial"] is "true"
 
@@ -172,7 +169,7 @@ class RemoteInitial extends Controller
         if not okStatusRe.test incomingRes.statusCode
           return @errorHandler(null, req, res, remoteHost)
 
-        Log.info "received absolute file content"
+        logger.info "received absolute file content"
         # if ct = incomingRes.headers["content-type"]
           # res.contentType(ct)
           # throw new Error("Missing header: 'content-type'")
@@ -208,7 +205,7 @@ class RemoteInitial extends Controller
 
     req.formattedUrl = file
 
-    Log.info "getting relative file content", file: file
+    logger.info "getting relative file content", file: file
 
     ## set the content-type based on the file extension
     res.contentType(mime.lookup(file))
@@ -235,7 +232,7 @@ class RemoteInitial extends Controller
       console.error(e.stack)
       debugger
 
-    Log.info "error handling initial request", url: url, error: e
+    logger.info "error handling initial request", url: url, error: e
 
     filePath = switch
       when f = req.formattedUrl

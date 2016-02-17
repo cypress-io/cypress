@@ -5,9 +5,8 @@ glob    = require "glob"
 Promise = require "bluebird"
 
 CacheBuster = require "../util/cache_buster"
-Controller  = require "./controller"
 
-class Files extends Controller
+class Files
   constructor: (app) ->
     if not (@ instanceof Files)
       return new Files(app)
@@ -16,8 +15,6 @@ class Files extends Controller
       throw new Error("Instantiating controllers/remote_initial requires an app!")
 
     @app = app
-
-    super
 
   handleFiles: (req, res) ->
     @getTestFiles().then (files) ->

@@ -1,9 +1,8 @@
 request     = require("request")
 api         = require("../api")
 cache       = require("../cache")
-Controller  = require("./controller")
 
-class Builds extends Controller
+class Builds
   constructor: (app) ->
     if not (@ instanceof Builds)
       return new Builds(app)
@@ -12,8 +11,6 @@ class Builds extends Controller
       throw new Error("Instantiating controllers/remote_initial requires an app!")
 
     @app = app
-
-    super
 
   handleBuilds: (req, res, next) ->
     cache.getUser().then (user) =>
