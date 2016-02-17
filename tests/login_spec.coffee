@@ -10,6 +10,7 @@ describe "Login [000]", ->
       @ipc.handle("get:current:user", null, {})
 
     it "displays 'Cypress.io' [02t]", ->
+      cy.get("#login").contains("Cypress.io")
 
 
     it "has Github Login button [02u]", ->
