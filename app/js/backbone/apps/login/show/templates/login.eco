@@ -7,11 +7,12 @@
     </button>
   </div>
   <% if @error: %>
-    <p class="text-danger">Could not log in!</p>
-    <p class="bg-danger">
-      <i class="fa fa-warning"></i>
-      <%= @error %>
-    </p>
+    <div class="alert alert-danger">
+      <p><i class="fa fa-warning"></i> Could not log in!</p>
+      <p>
+        <%= @error %>
+      </p>
+    </div>
   <% end %>
   <% if @loggingIn: %>
     <span>
