@@ -16,6 +16,7 @@
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/forms";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/grid";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/labels";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/alerts";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/navs";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/progress-bars";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/scaffolding";
@@ -32,11 +33,12 @@
 
 // Elements
 @import "components/elements";
+@import "components/alerts";
 @import "components/arrow";
 @import "components/empty";
 @import "components/general";
 @import "components/loading";
-@import "components/well";
+@import "components/wells";
 
 // Independent Pages
 @import "pages/about";
