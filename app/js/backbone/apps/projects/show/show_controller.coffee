@@ -24,7 +24,6 @@
       @show projectView
 
       _.defaults options,
-        onError: ->
         onProjectStart: ->
         onReboot: =>
           project.reset()
@@ -53,7 +52,6 @@
 
       .catch (err) ->
         project.setError(err)
-        options.onError(err)
 
     getProjectView: (project) ->
       new Show.Project
