@@ -51,15 +51,6 @@ describe "Login [000]", ->
               @ipc.handle("window:open", null, {})
             .get("@loginBtn").should("be.disabled")
 
-        it "calls 'loggingIn' on user on ipc response [003]", ->
-          cy
-            .then ->
-              @userLogin = @agents.spy(@App.currentUser, "loggingIn")
-            .get("@loginBtn").click().then ->
-              @ipc.handle("window:open", null, {})
-            .contains("Logging in...").then ->
-              expect(@userLogin).to.be.called
-
         it "triggers ipc 'log:in' [008]", ->
           cy
             .get("@loginBtn").click().then ->
@@ -74,17 +65,6 @@ describe "Login [000]", ->
               .get("@loginBtn").click().then ->
                 @ipc.handle("window:open", null, {})
               .contains("Logging in...")
-
-          it "calls 'loggedIn' on user with user [00b]", ->
-            cy
-              .fixture("user").then (@user) ->
-                @loggedIn = @agents.spy(@App.currentUser, "loggedIn")
-                @ipc.handle("log:in", null, @user)
-              .then ->
-                expect(@loggedIn).to.be.calledWith(@user)
-                @ipc.handle("get:project:paths", null, [])
-              .get("header a").should ($a) ->
-                expect($a).to.contain(@user.name)
 
           it "displays username in UI [00c]", ->
             cy
@@ -102,18 +82,9 @@ describe "Login [000]", ->
                 @ipc.handle("window:open", null, {})
               .contains("Logging in...")
 
-          it "error: calls 'setLoginError' on user with err [00b]", ->
-            cy
-              .fixture("user").then (@user) ->
-                @loginErr = @agents.spy(@App.currentUser, "setLoginError")
-                @ipc.handle("log:in", {message: "There's an error"}, {})
-              .then ->
-                expect(@loginErr).to.be.calledWith({message: "There's an error"})
-
           it "displays error in ui [00d]", ->
             cy
               .fixture("user").then (@user) ->
-                @loginErr = @agents.spy(@App.currentUser, "setLoginError")
                 @ipc.handle("log:in", {message: "There's an error"}, {})
               .get(".alert-danger")
                 .should("be.visible")
@@ -122,7 +93,6 @@ describe "Login [000]", ->
           it "login button should be enabled [00e]", ->
             cy
               .fixture("user").then (@user) ->
-                @loginErr = @agents.spy(@App.currentUser, "setLoginError")
                 @ipc.handle("log:in", {message: "There's an error"}, {})
               .get("@loginBtn").should("not.be.disabled")
 
@@ -177,7 +147,7 @@ describe "Login [000]", ->
           cy.get(".empty").find("[data-js='add-project']").click().then ->
             expect(@App.ipc).to.be.calledWith("show:directory:dialog")
 
-        describe.only "error thrown [00p]", ->
+        describe "error thrown [00p]", ->
           beforeEach ->
             cy
               .get("header").find("[data-js='add-project']").click().then ->
