@@ -31,7 +31,7 @@
     "deploy": "gulp deploy",
     "dist": "gulp dist",
     "release": "gulp release",
-    "test": "npm run test-server && chokidar 'spec/server/**/*' 'lib/**/*' -c 'npm run test-server'",
+    "test": "npm run test-server & chokidar 'spec/server/**/*' 'lib/**/*' -c 'npm run test-server'",
     "test-nw": "node_modules/.bin/nw ./spec/nw_unit",
     "test-server": "NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.*,socket.io:* mocha --opts spec/server/mocha.opts",
     "test-server-debug": "NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.*,socket.io:* node-debug --hidden='(node_modules|bower_components)' --no-preload _mocha --opts spec/server/mocha.opts --watch",
