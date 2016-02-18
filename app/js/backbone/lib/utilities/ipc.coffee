@@ -27,6 +27,7 @@
         ## if we have a pending response then just
         ## invoke it asynchronously
         if response = _.find(responses, {event: event})
+          responses = _.without(responses, response)
           Promise.delay(1).then =>
             @handle(event, response.err, response.data)
             response.resolve()
