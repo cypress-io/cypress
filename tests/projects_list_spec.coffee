@@ -60,6 +60,14 @@ describe "Projects List [00r]", ->
       it "each project has it's folder name [00t]", ->
         cy.contains("h4", "My-Fake-Project")
 
+      it "trigger 'open:project' on click of project [00u]", ->
+        @agents.spy(@App, "ipc")
+
+        cy
+          .get("#projects-container>li").first().click().then ->
+            expect(@App.ipc).to.be.calledWith("open:project")
+
+
     describe "add project [00j]", ->
       beforeEach ->
         cy
