@@ -28,7 +28,7 @@ exitErr = (err) ->
 
 module.exports = {
   isCurrentlyRunningElectron: ->
-    process.versions and process.versions.electron
+    !!(process.versions and process.versions.electron)
 
   runElectron: (mode, options) ->
     ## wrap all of this in a promise to force the
@@ -53,11 +53,12 @@ module.exports = {
 
         args = ["."].concat(argsUtil.toArray(options))
 
-        ## we are in dev mode and can just run electron
-        ## in our electron folder which kicks things off
-        ## think we still need to stringify the options here
-        ## else running headlessly wont work in dev mode
-        cp.spawn("electron", args, { stdio: "inherit" })
+        new Promise (resolve, reject) ->
+          ## kick off the electron process and resolve the calling
+          ## promise code when this new child process closes
+          electron = cp.spawn("electron", args, { stdio: "inherit" })
+          electron.on "close", (code, signal) ->
+            resolve(code)
 
   openProject: (options) ->
     ## this code actually starts a project
