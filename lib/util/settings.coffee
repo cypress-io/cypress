@@ -2,6 +2,7 @@ _        = require("lodash")
 Promise  = require("bluebird")
 path     = require("path")
 fs       = require("fs-extra")
+errors   = require("../errors")
 
 fs = Promise.promisifyAll(fs)
 
@@ -14,19 +15,18 @@ module.exports =
   _pathToFile: (projectRoot, file) ->
     path.join(projectRoot, file)
 
-  _err: (msg, file, err, klass) ->
-    klass ?= Error
-
-    e = new klass "#{msg}#{file}\n#{err.message}"
+  _err: (type, file, err) ->
+    console.log arguments
+    e = errors.get(type, file, err)
     e.code = err.code
     e.errno = err.errno
     throw e
 
   _logReadErr: (file, err) ->
-    @_err("Error reading from: ", file, err)
+    @_err("ERROR_READING_FILE", file, err)
 
   _logWriteErr: (file, err) ->
-    @_err("Error writing to: ", file, err, WriteError)
+    @_err("ERROR_WRITING_FILE", file, err, WriteError)
 
   _stringify: (obj) ->
     JSON.stringify(obj, null, 2)
@@ -94,6 +94,8 @@ module.exports =
 
       throw err if err instanceof WriteError
 
+      ## TODO: this should not be project root
+      ## it should be projectRoot + cypress.env.json
       @_logReadErr(projectRoot, err, options.file)
 
   readSync: (projectRoot) ->

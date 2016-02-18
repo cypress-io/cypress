@@ -171,8 +171,7 @@ describe "lib/cypress", ->
       Promise.all([
         user.set({name: "brian", session_token: "session-123"}),
 
-        Project.add(@todosPath).then (id) =>
-          @projectId = id
+        Project.add(@todosPath)
       ])
       .then =>
         cypress.start(["--run-project=#{@todosPath}"]).then =>
@@ -222,8 +221,7 @@ describe "lib/cypress", ->
       Promise.all([
         user.set({name: "brian", session_token: "session-123"}),
 
-        Project.add(@todosPath).then (id) =>
-          @projectId = id
+        Project.add(@todosPath)
       ])
       .then =>
         ## remove the cypress.json id from cypress.json on todos project
@@ -232,6 +230,47 @@ describe "lib/cypress", ->
       .then =>
         cypress.start(["--run-project=#{@todosPath}"]).then =>
           @expectExitWithErr("??")
+
+    it "logs error and exits when project has cypress.json syntax error", ->
+      Promise.all([
+        user.set({name: "brian", session_token: "session-123"}),
+
+        Project.add(@todosPath)
+      ])
+      .then =>
+        fs.writeFileAsync(@todosPath + "/cypress.json", "{'foo': 'bar}")
+      .then =>
+        cypress.start(["--run-project=#{@todosPath}"]).then =>
+          @expectExitWithErr("ERROR_READING_FILE", @todosPath)
+
+    it "logs error and exits when project has cypress.env.json syntax error", ->
+      Promise.all([
+        user.set({name: "brian", session_token: "session-123"}),
+
+        Project.add(@todosPath)
+      ])
+      .then =>
+        fs.writeFileAsync(@todosPath + "/cypress.env.json", "{'foo': 'bar}")
+      .then =>
+        cypress.start(["--run-project=#{@todosPath}"]).then =>
+          @expectExitWithErr("ERROR_READING_FILE", @todosPath)
+
+    ## TODO: make sure we have integration tests around this
+    ## for headed projects!
+    ## also make sure we test the rest of the integration functionality
+    ## for headed errors! <-- not unit tests, but integration tests!
+    # it.only "logs error and exits when project folder has read permissions only and cannot write cypress.json", ->
+    #   Promise.all([
+    #     user.set({name: "brian", session_token: "session-123"}),
+
+    #     Project.add(@todosPath)
+    #   ])
+    #   .then =>
+    #     fs.removeAsync(@todosPath + "/cypress.json")
+    #   .then =>
+    #     fs.chmodAsync(@todosPath, "111")
+    #   .then =>
+    #     cypress.start(["--run-project=#{@todosPath}"])
 
     describe "--port", ->
       beforeEach ->
@@ -244,8 +283,7 @@ describe "lib/cypress", ->
         Promise.all([
           user.set({name: "brian", session_token: "session-123"}),
 
-          Project.add(@todosPath).then (id) =>
-            @projectId = id
+          Project.add(@todosPath)
         ])
 
       it "can change the default port to 5555", ->
@@ -278,8 +316,7 @@ describe "lib/cypress", ->
         Promise.all([
           user.set({name: "brian", session_token: "session-123"}),
 
-          Project.add(@todosPath).then (id) =>
-            @projectId = id
+          Project.add(@todosPath)
         ])
 
       it "can set specific environment variables", ->
