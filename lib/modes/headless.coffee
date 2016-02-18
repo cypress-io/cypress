@@ -80,9 +80,10 @@ module.exports = {
       reporter:     true
       isHeadless:   true
       port:         options.port
-      # onError:
       environmentVariables: options.environmentVariables
     })
+    .catch {portInUse: true}, (err) ->
+      errors.throw("PORT_IN_USE_LONG", err.port)
 
   createRenderer: (url) ->
     Renderer.create({

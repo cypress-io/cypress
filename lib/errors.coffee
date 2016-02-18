@@ -29,8 +29,10 @@ API = {
         "Sorry, there was a problem fetching this project's secret key."
       when "CANNOT_CREATE_PROJECT_TOKEN"
         "Sorry, there was a problem creating this project's secret key."
-      when "PORT_IN_USE"
+      when "PORT_IN_USE_SHORT"
         "Port: '#{arg1}' is already in use."
+      when "PORT_IN_USE_LONG"
+        "Sorry, could not run this project because this port is currently in use: " + chalk.blue(arg1) + "\n\n" + chalk.yellow("Specify a different port with the '--port <port>' argument or shut down the other process using this port.")
       when "ERROR_READING_FILE"
         "Error reading from: " + chalk.blue(arg1) + "\n\n" + chalk.yellow(arg2)
       when "ERROR_WRITING_FILE"

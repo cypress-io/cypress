@@ -296,14 +296,14 @@ describe "lib/cypress", ->
           expect(open).to.be.calledWithMatch({port: 5555})
           @expectExitWith(0)
 
-      ## TODO: handle PORT_IN_USE short + long descriptions
+      ## TODO: handle PORT_IN_USE short integration test
       it "logs error and exits when port is in use", ->
         server = http.createServer()
         server = Promise.promisifyAll(server)
         server.listenAsync(5555)
         .then =>
           cypress.start(["--run-project=#{@todosPath}", "--port=5555"]).then =>
-            @expectExitWithErr("PORT_IN_USE", "5555")
+            @expectExitWithErr("PORT_IN_USE_LONG", "5555")
 
     describe "--env", ->
       beforeEach ->

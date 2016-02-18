@@ -182,7 +182,7 @@ class Server
   getHttpServer: -> @server
 
   portInUseErr: (port) ->
-    e = errors.get("PORT_IN_USE", port)
+    e = errors.get("PORT_IN_USE_SHORT", port)
     e.port = port
     e.portInUse = true
     e
