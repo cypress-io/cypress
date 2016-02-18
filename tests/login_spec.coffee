@@ -70,7 +70,6 @@ describe "Login [000]", ->
             cy
               .fixture("user").then (@user) ->
                 @ipc.handle("log:in", null, @user)
-              .then ->
                 @ipc.handle("get:project:paths", null, [])
               .get("header a").should ($a) ->
                 expect($a).to.contain(@user.name)
