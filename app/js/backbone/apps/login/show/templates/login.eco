@@ -17,9 +17,9 @@
     </div>
   <% end %>
   <% if @loggingIn: %>
-    <span>
+    <div class="login-spinner">
       <i class="fa fa-spinner fa-spin"></i>
       Logging in...
-    </span>
+    </div>
   <% end %>
 </div>
