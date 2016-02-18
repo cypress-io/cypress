@@ -82,8 +82,14 @@ class Project extends EE
         if event is "end"
           stats = reporter.stats()
 
-          # console.log stats
-          @emit("end", stats)
+          ## TODO: convert this to a promise
+          ## since we need an ack to this end
+          ## event, and then finally emit 'end'
+          @server.end()
+
+          Promise.delay(1000).then =>
+            # console.log stats
+            @emit("end", stats)
     })
 
   getConfig: ->

@@ -237,6 +237,9 @@ class Server
       @ws?.close()
     )
 
+  end: ->
+    @ws and @ws.end()
+
   startWebsockets: (watchers, options) ->
     @ws = Socket(@app)
     @ws.startListening(@server, watchers, options)

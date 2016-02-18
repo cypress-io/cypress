@@ -173,12 +173,17 @@ class Socket
       socket.on "app:connect", (socketId) ->
         options.onConnect(socketId, socket)
 
-      socket.on "mocha", ->
+      socket.on "mocha", =>
         options.onMocha.apply(options, arguments)
 
     @testsDir = path.join(projectRoot, testFolder)
 
     fs.ensureDirAsync(@testsDir).bind(@)
+
+  end: ->
+    ## TODO: we need an 'ack' from this end
+    ## event from the other side
+    @io and @io.emit("tests:finished")
 
   startListening: (server, watchers, options) ->
     if process.env["CYPRESS_ENV"] is "development"
