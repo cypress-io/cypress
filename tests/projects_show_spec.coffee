@@ -27,28 +27,30 @@ describe "Project Show [00r]", ->
 
   describe "server error [00x]", ->
     beforeEach ->
-      @errName = "Port 2020"
-      @errMsg = "There is already a port running"
+      @err = {
+        name: "Port 2020"
+        msg: "There is already a port running"
+      }
 
     it "displays normal error message [00y]", ->
-      @ipc.handle("open:project", {name: @errName, message: @errMsg}, {})
+      @ipc.handle("open:project", {name: @err.name, message: @err.msg}, {})
 
       cy
         .get(".error")
-          .should("contain", @errName)
-          .and("contain", @errMsg)
+          .should("contain", @err.name)
+          .and("contain", @err.msg)
 
     it "displays Port in Use instructions on err [00z]", ->
-      @ipc.handle("open:project", {portInUse: true, name: @errName, message: @errMsg}, {})
+      @ipc.handle("open:project", {portInUse: true, name: @err.name, message: @err.msg}, {})
 
       cy
         .get(".error")
-          .should("contain", @errName)
-          .and("contain", @errMsg)
+          .should("contain", @err.name)
+          .and("contain", @err.msg)
           .and("contain", "To Fix:")
 
     it "returns to projects on cancel button click [010]", ->
-      @ipc.handle("open:project", {name: @errName, message: @errMsg}, {})
+      @ipc.handle("open:project", {name: @err.name, message: @err.msg}, {})
 
       cy
         .contains(".btn", "Cancel").click().then ->
