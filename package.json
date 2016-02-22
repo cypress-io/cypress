@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "preinstall": "rm -rf app && mkdir app",
-    "postinstall": "cp -r node_modules/examples-kitchen-sink/app .",
+    "postinstall": "cp -r node_modules/examples-kitchen-sink/app . && npm run build",
     "test": "cypress ci",
     "build": "gulp build",
     "deploy": "gulp deploy"

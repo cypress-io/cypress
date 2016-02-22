@@ -14,14 +14,15 @@ npm install
 
 This copies the `examples-kitchen-sink` src files here, and they can now be built + pushed.
 
+## Building
+
+```bash
+npm run build
+```
+
 ## Deploying
 
 ```bash
 npm run deploy
 ```
 
-## Building (one off)
-
-```bash
-npm run build
-```

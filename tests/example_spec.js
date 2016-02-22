@@ -1310,7 +1310,7 @@ describe('Kitchen Sink [000]', function(){
         expect(myConfig).to.have.property('responseTimeout', 20000)
         expect(myConfig).to.have.property('viewportHeight', 660)
         expect(myConfig).to.have.property('viewportWidth', 1000)
-        expect(myConfig).to.have.property('visitTimeout', 30000)
+        expect(myConfig).to.have.property('visitTimeout', 30000) // failing
         expect(myConfig).to.have.property('waitForAnimations', true)
 
 
@@ -1321,10 +1321,11 @@ describe('Kitchen Sink [000]', function(){
         // *** set a single configuration option **
         //
         // this will change the config for the rest of your tests!
-        //
         Cypress.config('visitTimeout', 20000)
 
         expect(Cypress.config('visitTimeout')).to.eq(20000)
+
+        Cypress.config('visitTimeout', 30000)
 
       })
 
