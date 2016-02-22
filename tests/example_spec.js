@@ -1262,7 +1262,7 @@ describe('Kitchen Sink [000]', function(){
 
       // use moment's format function
       // http://on.cypress.io/api/cypress-moment
-      var time = Cypress.moment('2014-04-25T19:38:53.196Z').format('h:mm:ss A')
+      var time = Cypress.moment('2014-04-25T19:38:53.196Z').format('h:mm A')
 
       cy
         .get('.utility-moment').contains(time)
