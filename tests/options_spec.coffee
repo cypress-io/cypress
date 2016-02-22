@@ -58,6 +58,24 @@ describe "Options [015]", ->
       cy.contains("a", "Debug Console").click().then ->
           expect(@App.ipc).to.be.calledWith("window:open", @opts)
 
+  context "click check for updates link [018]", ->
+    beforeEach ->
+      @opts = {
+        height: 210
+        position: "center"
+        title: "Updates"
+        toolbar: false
+        type: "UPDATES"
+        width: 300
+      }
+
+    it "triggers window:open [019]", ->
+      @agents.spy(@App, "ipc")
+
+      cy.get("@optionsLink").click()
+      cy.contains("a", "Check for Updates").click().then ->
+          expect(@App.ipc).to.be.calledWith("window:open", @opts)
+
   context "click Quit link [018]", ->
     beforeEach ->
 
