@@ -33,7 +33,6 @@ describe "Options [015]", ->
         type: "ABOUT"
       }
 
-
     it "triggers window:open [019]", ->
       @agents.spy(@App, "ipc")
 
@@ -46,12 +45,11 @@ describe "Options [015]", ->
       @opts = {
         height: 400
         position: "center"
-        title: "Debug"
+        title: "Debug Console"
         toolbar: false
         type: "DEBUG"
         width: 800
       }
-
 
     it "triggers window:open [019]", ->
       @agents.spy(@App, "ipc")
