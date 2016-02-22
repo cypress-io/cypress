@@ -84,7 +84,7 @@ describe "Login [000]", ->
           it "displays error in ui [00d]", ->
             cy
               .fixture("user").then (@user) ->
-                @ipc.handle("log:in", {message: "There's an error"}, {})
+                @ipc.handle("log:in", {message: "There's an error"}, null)
               .get(".alert-danger")
                 .should("be.visible")
                 .contains("There's an error")
@@ -92,5 +92,5 @@ describe "Login [000]", ->
           it "login button should be enabled [00e]", ->
             cy
               .fixture("user").then (@user) ->
-                @ipc.handle("log:in", {message: "There's an error"}, {})
+                @ipc.handle("log:in", {message: "There's an error"}, null)
               .get("@loginBtn").should("not.be.disabled")
