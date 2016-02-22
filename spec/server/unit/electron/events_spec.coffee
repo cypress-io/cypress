@@ -2,6 +2,7 @@ require("../../spec_helper")
 
 _        = require("lodash")
 icons    = require("cypress-icons")
+electron = require("electron")
 cache    = require("#{root}../lib/cache")
 logger   = require("#{root}../lib/logger")
 Project  = require("#{root}../lib/project")
@@ -297,14 +298,14 @@ describe "Events", ->
 
     describe "add:project", ->
       it "adds project + returns arg", ->
-        @sandbox.stub(cache, "addProject").withArgs("path/to/project").resolves()
+        @sandbox.stub(Project, "add").withArgs("path/to/project").resolves()
 
         @handleEvent("add:project", "path/to/project").then =>
           @expectSendCalledWith("path/to/project")
 
       it "catches errors", ->
         err = new Error("foo")
-        @sandbox.stub(cache, "addProject").withArgs("path/to/project").rejects(err)
+        @sandbox.stub(Project, "add").withArgs("path/to/project").rejects(err)
 
         @handleEvent("add:project", "path/to/project").then =>
           @expectSendErrCalledWith(err)

@@ -22,7 +22,7 @@ module.exports = {
     open = =>
       @openProject(id, options)
 
-    project.exists(projectPath).then (bool) =>
+    Project.exists(projectPath).then (bool) =>
       ## if we have this project then lets
       ## immediately open it!
       return open() if bool

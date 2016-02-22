@@ -1,7 +1,8 @@
 require("../../spec_helper")
 
 inquirer = require("inquirer")
-Project  = require("#{root}../lib/Project")
+electron = require("electron")
+Project  = require("#{root}../lib/project")
 user     = require("#{root}../lib/user")
 project  = require("#{root}../lib/electron/handlers/project")
 headless = require("#{root}../lib/modes/headless")
@@ -20,7 +21,7 @@ describe "electron/headless", ->
       @sandbox.stub(project, "open").resolves(@projectInstance)
 
     it "opens the project if it exists at projectPath", ->
-      @sandbox.stub(project, "exists").resolves(true)
+      @sandbox.stub(Project, "exists").resolves(true)
       @sandbox.spy(headless, "promptAddProject")
 
       headless.ensureAndOpenProjectByPath(1234, {projectPath: "path/to/project"}).then ->
@@ -28,7 +29,7 @@ describe "electron/headless", ->
         expect(project.open).to.be.calledWith("path/to/project")
 
     it "prompts to add the project if it doesnt exist at projectPath", ->
-      @sandbox.stub(project, "exists").resolves(false)
+      @sandbox.stub(Project, "exists").resolves(false)
       @sandbox.stub(headless, "promptAddProject").resolves()
 
       headless.ensureAndOpenProjectByPath(1234, {projectPath: "path/to/project"}).then ->
@@ -38,7 +39,7 @@ describe "electron/headless", ->
   context ".promptAddProject", ->
     beforeEach ->
       @log = @sandbox.spy(console, "log")
-      @add = @sandbox.stub(project, "add").resolves()
+      @add = @sandbox.stub(Project, "add").resolves()
 
     it "prompts with questions", ->
       @sandbox.stub(inquirer, "prompt").yields({add: true})
@@ -217,6 +218,7 @@ describe "electron/headless", ->
 
   context ".run", ->
     beforeEach ->
+      @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
       @sandbox.stub(user, "ensureSession").resolves("abc-123")
       @sandbox.stub(headless, "getId").returns(1234)
       @sandbox.stub(headless, "ensureAndOpenProjectByPath").resolves(@projectInstance)

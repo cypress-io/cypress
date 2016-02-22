@@ -5,16 +5,6 @@ Project = require("../../project")
 openProject = null
 
 module.exports = {
-  paths: ->
-    cache.getProjectPaths()
-
-  remove: (path) ->
-    cache.removeProject(path)
-
-  exists: (path) ->
-    @paths().then (paths) ->
-      path in paths
-
   open: (path, options) ->
     ## store the currently open project
     openProject = Project(path)

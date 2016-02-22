@@ -1,5 +1,6 @@
 require("../../spec_helper")
 
+electron = require("electron")
 dialog   = require("#{root}../lib/electron/handlers/dialog")
 Renderer = require("#{root}../lib/electron/handlers/renderer")
 

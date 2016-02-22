@@ -8,9 +8,10 @@ pgk         = require("./package")
 cookies     = require("./cookies")
 logs        = require("./logs")
 Renderer    = require("./renderer")
+user        = require("../../user")
 errors      = require("../../errors")
 Updater     = require("../../updater")
-user        = require("../../user")
+Project     = require("../../project")
 
 handleEvent = (options, event, id, type, arg) ->
   sendResponse = (data = {}) ->
@@ -137,17 +138,17 @@ handleEvent = (options, event, id, type, arg) ->
       send(null)
 
     when "get:project:paths"
-      project.paths()
+      Project.paths()
       .then(send)
       .catch(sendErr)
 
     when "add:project"
-      project.add(arg)
+      Project.add(arg)
       .then -> send(arg)
       .catch(sendErr)
 
     when "remove:project"
-      project.remove(arg)
+      Project.remove(arg)
       .then -> send(arg)
       .catch(sendErr)
 

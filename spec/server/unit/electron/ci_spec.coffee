@@ -163,7 +163,7 @@ describe "electron/ci", ->
       .catch (err) ->
         expect(err.type).to.eq("CI_CANNOT_COMMUNICATE")
 
-  context.only ".run", ->
+  context ".run", ->
     beforeEach ->
       @sandbox.stub(ci, "ensureCi").resolves()
       @sandbox.stub(ci, "ensureProjectAPIToken").resolves("guid-abc")
