@@ -7,6 +7,8 @@ describe "Projects List [00r]", ->
 
         @agents = cy.agents()
 
+        @agents.spy(@App, "ipc")
+
         @ipc.handle("get:options", null, {})
 
   context "with a current user [02x]", ->
@@ -28,6 +30,27 @@ describe "Projects List [00r]", ->
             @ipc.handle("get:project:paths", null, [])
           .get("header a").should ($a) ->
             expect($a).to.contain(@user.email)
+
+    describe "logout of user [02i]", ->
+      beforeEach ->
+        cy
+          .fixture("user").then (@user) ->
+            @ipc.handle("get:current:user", null, @user)
+            @ipc.handle("get:project:paths", null, [])
+
+      it "shows dropdown on click of user name [02j]", ->
+        cy.contains("Jane Lane").click()
+        cy.contains("Logout").should("be.visible")
+
+      it.skip "triggers logout on click of logout [02k]", ->
+        cy.contains("Jane Lane").click()
+        cy.contains("a", "Logout").click().then ->
+          expect(@App.ipc).to.be.calledWith("log:out")
+
+      it.skip "displays login screen on logout [02l]", ->
+        cy.contains("Jane Lane").click()
+        cy.contains("a", "Logout").click()
+        cy.contains(".btn", "Login with GitHub")
 
     describe "no projects [00h]", ->
       beforeEach ->
@@ -61,8 +84,6 @@ describe "Projects List [00r]", ->
         cy.contains("h4", "My-Fake-Project")
 
       it "trigger 'open:project' on click of project [00u]", ->
-        @agents.spy(@App, "ipc")
-
         cy
           .get("#projects-container>li").first().click().then ->
             expect(@App.ipc).to.be.calledWith("open:project")
@@ -77,14 +98,10 @@ describe "Projects List [00r]", ->
           .get(".empty").contains("Add Project")
 
       it "triggers ipc 'show:directory:dialog on header + [00k]", ->
-        @agents.spy(@App, "ipc")
-
         cy.get("header").find("[data-js='add-project']").click().then ->
           expect(@App.ipc).to.be.calledWith("show:directory:dialog")
 
       it "triggers ipc 'show:directory:dialog on empty view + [00k]", ->
-        @agents.spy(@App, "ipc")
-
         cy.get(".empty").find("[data-js='add-project']").click().then ->
           expect(@App.ipc).to.be.calledWith("show:directory:dialog")
 
@@ -111,7 +128,6 @@ describe "Projects List [00r]", ->
           cy.get("header").find("[data-js='add-project']").click()
 
         it "does no action [00m]", ->
-          @agents.spy(@App, "ipc")
           @ipc.handle("show:directory:dialog", null, null)
 
           cy.get(".empty").should("exist").then ->
@@ -122,12 +138,7 @@ describe "Projects List [00r]", ->
           cy.get("header").find("[data-js='add-project']").click()
 
         it "triggers ipc 'add:project' with directory [00o]", ->
-          @agents.spy(@App, "ipc")
           @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-Fake-Project")
 
           cy.get("#projects-container>li:not(.empty)").should("have.length", 1).then ->
             expect(@App.ipc).to.be.calledWith("add:project")
-
-
-
-
