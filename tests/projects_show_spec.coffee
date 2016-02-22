@@ -49,11 +49,65 @@ describe "Project Show [00r]", ->
           .and("contain", @err.msg)
           .and("contain", "To Fix:")
 
+    it "triggers close:project on cancel button click [013]", ->
+      @ipc.handle("open:project", {name: @err.name, message: @err.msg}, {})
+      @agents.spy(@App, "ipc")
+
+      cy
+        .contains(".btn", "Cancel").click().then ->
+          expect(@App.ipc).to.be.calledWith("close:project")
+          @ipc.handle("close:project", null, {})
+        .then ->
+          expect(@App.ipc).to.be.calledWith("get:project:paths")
+
     it "returns to projects on cancel button click [010]", ->
       @ipc.handle("open:project", {name: @err.name, message: @err.msg}, {})
 
       cy
         .contains(".btn", "Cancel").click().then ->
+          @ipc.handle("close:project", null, {})
+          @ipc.handle("get:project:paths", null, @projects)
+        .get("#projects-container")
+
+  describe "successfully starts server [011]", ->
+    beforeEach ->
+      @config = {
+        clientUrl: "http://localhost:2020",
+        clientUrlDisplay: "http://localhost:2020"
+      }
+
+      @ipc.handle("open:project", null, @config)
+
+    it "displays Server url [00v]", ->
+      cy.contains(@config.clientUrlDisplay)
+
+    it "triggers window:open on click of url [012]", ->
+      @agents.spy(@App, "ipc")
+
+      cy
+        .contains("a", @config.clientUrlDisplay).click().then ->
+          expect(@App.ipc).to.be.calledWith("window:open", {
+              position: "center"
+              width: 1280
+              height: 720
+              url: @config.clientUrl
+              type: "PROJECT"
+            })
+
+    it "triggers close:project on click of Stop [014]", ->
+      @agents.spy(@App, "ipc")
+
+      cy
+        .contains(".btn", "Stop").click().then ->
+          expect(@App.ipc).to.be.calledWith("close:project")
+          @ipc.handle("close:project", null, {})
+        .then ->
+          expect(@App.ipc).to.be.calledWith("get:project:paths")
+
+
+    it "returns to projects on Stop button click [010]", ->
+      cy
+        .contains(".btn", "Stop").click().then ->
           @ipc.handle("close:project", null, {})
           @ipc.handle("get:project:paths", null, @projects)
         .get("#projects-container")
