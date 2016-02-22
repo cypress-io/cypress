@@ -30,7 +30,7 @@
         width: 800
         height: 400
         toolbar: false
-        title: "Debug"
+        title: "Debug Console"
         type: "DEBUG"
       })
 

@@ -1,4 +1,8 @@
-<td><%= @timestampFormatted %></td>
+<td>
+  <% if @timestampFormatted: %>
+    <em><%= @timestampFormatted %> ago</em>
+  <% end %>
+</td>
 <td><%= @type %></td>
 <td><%= @message %></td>
 <td class="data"><%= @dataFormatted %></td>

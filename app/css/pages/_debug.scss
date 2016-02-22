@@ -7,12 +7,17 @@
   }
 
   #code {
+
     color: #777;
     background-color: white;
     font-size: 11px;
 
+    em {
+      font-size: 10px;
+    }
+
     td:nth-of-type(1) {
-      width: 15%;
+      width: 12%;
     }
 
     td:nth-of-type(2) {
@@ -24,11 +29,19 @@
     }
 
     td:nth-of-type(4) {
-      width: 60%;
+      width: 63%;
     }
 
     .data {
       @include text-overflow();
+    }
+
+    .empty {
+      font-size: 14px;
+
+      td {
+        padding: 15px;
+      }
     }
   }
 }
