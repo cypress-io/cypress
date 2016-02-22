@@ -4,9 +4,6 @@ dialog   = require("#{root}../lib/electron/handlers/dialog")
 Renderer = require("#{root}../lib/electron/handlers/renderer")
 
 describe "electron/dialog", ->
-  after ->
-    mockery.disable()
-
   context ".show", ->
     beforeEach ->
       @sandbox.stub(Renderer, "get").withArgs("INDEX").returns("path/to/index")

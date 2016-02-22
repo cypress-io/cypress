@@ -2,9 +2,9 @@ require("../../spec_helper")
 
 inquirer = require("inquirer")
 Project  = require("#{root}../lib/Project")
-user     = require("#{root}../lib/electron/handlers/user")
+user     = require("#{root}../lib/user")
 project  = require("#{root}../lib/electron/handlers/project")
-headless = require("#{root}../lib/electron/handlers/headless")
+headless = require("#{root}../lib/modes/headless")
 Renderer = require("#{root}../lib/electron/handlers/renderer")
 
 describe "electron/headless", ->

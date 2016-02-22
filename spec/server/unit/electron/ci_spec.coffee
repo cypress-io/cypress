@@ -2,14 +2,11 @@ require("../../spec_helper")
 
 os       = require("os")
 api      = require("#{root}../lib/api")
-ci       = require("#{root}../lib/electron/handlers/ci")
-project  = require("#{root}../lib/electron/handlers/project")
-headless = require("#{root}../lib/electron/handlers/headless")
+Project  = require("#{root}../lib/project")
+ci       = require("#{root}../lib/modes/ci")
+headless = require("#{root}../lib/modes/headless")
 
 describe "electron/ci", ->
-  after ->
-    mockery.disable()
-
   context ".getBranchFromGit", ->
     beforeEach ->
       @repo = @sandbox.stub({
@@ -153,7 +150,9 @@ describe "electron/ci", ->
           throw new Error("should have failed but did not")
         .catch (err) ->
           expect(err.type).to.eq("CI_KEY_NOT_VALID")
-          expect(err.message).to.include("key: '3206e...158aa' was not valid.")
+          expect(err.message).to.include("key: ")
+          expect(err.message).to.include("3206e...158aa")
+          expect(err.message).to.include("was not valid.")
 
     it "handles all other errors", ->
       api.createCiGuid.rejects(new Error)
@@ -164,12 +163,12 @@ describe "electron/ci", ->
       .catch (err) ->
         expect(err.type).to.eq("CI_CANNOT_COMMUNICATE")
 
-  context ".run", ->
+  context.only ".run", ->
     beforeEach ->
       @sandbox.stub(ci, "ensureCi").resolves()
       @sandbox.stub(ci, "ensureProjectAPIToken").resolves("guid-abc")
-      @sandbox.stub(project, "add").resolves()
-      @sandbox.stub(project, "id").resolves("id-123")
+      @sandbox.stub(Project, "add").resolves()
+      @sandbox.stub(Project, "id").resolves("id-123")
       @sandbox.stub(headless, "run").resolves()
 
     it "ensures ci", ->
@@ -178,11 +177,11 @@ describe "electron/ci", ->
 
     it "adds project with projectPath", ->
       ci.run({projectPath: "path/to/project"}).then ->
-        expect(project.add).to.be.calledWith("path/to/project")
+        expect(Project.add).to.be.calledWith("path/to/project")
 
     it "gets project id by path", ->
       ci.run({projectPath: "path/to/project"}).then ->
-        expect(project.id).to.be.calledWith("path/to/project")
+        expect(Project.id).to.be.calledWith("path/to/project")
 
     it "passes id + projectPath + options.key to ensureProjectAPIToken", ->
       ci.run({projectPath: "path/to/project", key: "key-foo"}).then ->

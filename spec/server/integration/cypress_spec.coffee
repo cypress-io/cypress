@@ -48,9 +48,6 @@ describe "lib/cypress", ->
     ## we spawn is closed down
     project.close()
 
-  after ->
-    mockery.disable()
-
   context "--get-key", ->
     it "writes out key and exits on success", ->
       Promise.all([

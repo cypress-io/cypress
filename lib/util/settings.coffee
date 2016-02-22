@@ -16,7 +16,6 @@ module.exports =
     path.join(projectRoot, file)
 
   _err: (type, file, err) ->
-    console.log arguments
     e = errors.get(type, file, err)
     e.code = err.code
     e.errno = err.errno

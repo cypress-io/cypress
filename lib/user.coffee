@@ -12,12 +12,6 @@ module.exports = {
   getLoginUrl: ->
     api.getLoginUrl()
 
-  # getProjectToken: (session, projectPath) ->
-  #   cache.getProjectToken(projectPath, session)
-
-  # generateProjectToken: (session, projectPath) ->
-  #   cache.generateProjectToken(projectPath, session)
-
   logIn: (code) ->
     api.createSignin(code)
     .then (user) =>
