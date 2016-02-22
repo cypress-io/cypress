@@ -3,13 +3,13 @@ machine:
     version: 5.1.1
 
 dependencies:
-  pre:
+  override:
     - npm install
     - npm install -g cypress
 
 test:
   pre:
-    - npm server:
+    - npm run server:
         background: true
   override:
     - cypress ci
