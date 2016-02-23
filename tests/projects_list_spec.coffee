@@ -88,7 +88,6 @@ describe "Projects List [00r]", ->
           .get("#projects-container>li").first().click().then ->
             expect(@App.ipc).to.be.calledWith("open:project")
 
-
     describe "add project [00j]", ->
       beforeEach ->
         cy
@@ -142,3 +141,29 @@ describe "Projects List [00r]", ->
 
           cy.get("#projects-container>li:not(.empty)").should("have.length", 1).then ->
             expect(@App.ipc).to.be.calledWith("add:project")
+
+
+    describe "remove project [00j]", ->
+      beforeEach ->
+        cy
+          .fixture("user").then (@user) ->
+            @ipc.handle("get:current:user", null, @user)
+          .fixture("projects").then (@projects) ->
+            @ipc.handle("get:project:paths", null, @projects)
+          .get("#projects-container>li").first()
+            .invoke("trigger", "contextmenu")
+
+      it "displays 'remove' link on right click [02m]", ->
+        cy
+          .get("a").contains("Remove Project").should("be.visible")
+
+      it "triggers remove:project with path on right click [02o]", ->
+        cy
+          .get("a").contains("Remove Project").click().then ->
+            expect(@App.ipc).to.be.calledWith("remove:project", @projects[0])
+
+      it "removes the project from the list [02p]", ->
+        cy
+          .get("#projects-container>li").should("have.length", @projects.length)
+          .get("a").contains("Remove Project").click()
+          .get("#projects-container>li").should("have.length", @projects.length - 1)

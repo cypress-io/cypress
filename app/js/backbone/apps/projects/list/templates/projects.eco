@@ -26,7 +26,7 @@
   <div id="context-menu">
     <ul class="dropdown-menu">
       <li data-remove>
-        <a href="#">Remove</a>
+        <a href="#">Remove Project</a>
       </li>
     </ul>
   </div>
