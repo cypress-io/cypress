@@ -5,9 +5,9 @@ winston       = require("winston")
 path          = require("path")
 config        = require("#{root}lib/config")
 logger        = require("#{root}lib/logger")
-Exception     = require("#{root}lib/exception")
+exception     = require("#{root}lib/exception")
 
-describe "Winston Logger", ->
+describe "lib/logger", ->
   beforeEach ->
     logger.clearLogs()
 
@@ -76,7 +76,7 @@ describe "Winston Logger", ->
   describe "#exitOnError", ->
     it "invokes logger.defaultErrorHandler", ->
       err = new Error
-      defaultErrorHandler = @sandbox.stub(Log, "defaultErrorHandler")
+      defaultErrorHandler = @sandbox.stub(logger, "defaultErrorHandler")
       logger.exitOnError(err)
       expect(defaultErrorHandler).to.be.calledWith err
 
@@ -86,16 +86,16 @@ describe "Winston Logger", ->
 
       @err    = new Error
       @exit   = @sandbox.stub(process, "exit")
-      @create = @sandbox.stub(Exception, "create").resolves()
+      @create = @sandbox.stub(exception, "create").resolves()
 
     afterEach ->
       logger.unsetSettings()
 
-    it "calls Exception.create(err)", ->
+    it "calls exception.create(err)", ->
       logger.defaultErrorHandler(@err)
       expect(@create).to.be.calledWith(@err, undefined)
 
-    it "calls Exception.create(err, {})", ->
+    it "calls exception.create(err, {})", ->
       logger.setSettings({foo: "bar"})
       logger.defaultErrorHandler(@err)
       expect(@create).to.be.calledWith(@err, {foo: "bar"})
@@ -110,7 +110,7 @@ describe "Winston Logger", ->
           expect(@exit).to.be.called
 
       it "is called after rejecting", ->
-        @create.rejects()
+        @create.rejects(new Error)
         logger.defaultErrorHandler(@err)
         Promise.delay(50).then =>
           expect(@exit).to.be.called
@@ -135,7 +135,7 @@ describe "Winston Logger", ->
 
   describe "unhandledRejection", ->
     it "passes error to defaultErrorHandler", ->
-      defaultErrorHandler = @sandbox.stub(Log, "defaultErrorHandler")
+      defaultErrorHandler = @sandbox.stub(logger, "defaultErrorHandler")
 
       handlers = process.listeners("unhandledRejection")
 
@@ -146,11 +146,11 @@ describe "Winston Logger", ->
       handlers[0](err)
 
     it "catches unhandled rejections", (done) ->
-      defaultErrorHandler = @sandbox.stub(Log, "defaultErrorHandler")
+      defaultErrorHandler = @sandbox.stub(logger, "defaultErrorHandler")
 
       Promise
         .resolve("")
-        .throw("foo")
+        .throw(new Error("foo"))
 
       Promise.delay(50).then ->
         expect(defaultErrorHandler).to.be.calledOnce
