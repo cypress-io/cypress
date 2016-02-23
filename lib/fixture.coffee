@@ -17,16 +17,16 @@ queue = {}
 lastCharacterIsNewLine = (str) ->
   str[str.length - 1] is "\n"
 
-class Fixtures
+class Fixture
   constructor: (config = {}) ->
-    if not (@ instanceof Fixtures)
-      return new Fixtures(config)
+    if not (@ instanceof Fixture)
+      return new Fixture(config)
 
     if not pr = config.projectRoot
-      throw new Error("Instantiating lib/support requires a projectRoot!")
+      throw new Error("Instantiating lib/fixtures requires a projectRoot!")
 
     if not ff = config.fixturesFolder
-      throw new Error("Instantiating lib/support requires a fixturesFolder!")
+      throw new Error("Instantiating lib/fixtures requires a fixturesFolder!")
 
     @folder = path.join(pr, ff)
 
@@ -201,4 +201,4 @@ class Fixtures
       .catch ->
         @copyExample(@folder)
 
-module.exports = Fixtures
+module.exports = Fixture
