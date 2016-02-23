@@ -37,3 +37,9 @@ describe "Footer [000]", ->
           title: "Updates"
           type: "UPDATES"
         })
+
+    it "gracefully handles error [05o]", ->
+      @ipc.handle("updater:check", "Something bad happened", null)
+      cy.contains("Login with GitHub")
+      cy.get("#footer").should("be.visible")
+
