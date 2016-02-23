@@ -14,7 +14,7 @@ fs    = Promise.promisifyAll(fs)
 queue = new PSemaphore
 
 module.exports = {
-  pathToCache: CACHE
+  path: CACHE
 
   ## Checks to make sure if the local file is already there
   ## if so returns true;
@@ -102,6 +102,7 @@ module.exports = {
       obj[id] = {}
       @_set("PROJECTS", obj)
 
+  ## TODO: refactor this method
   getProject: (id) ->
     @getProjects().then (projects) ->
       if (project = projects[id])
@@ -119,11 +120,11 @@ module.exports = {
     @_set {PROJECTS: projects}
 
   getProjectPaths: ->
-    @getProjects().then (projects) ->
+    @getProjects().then (projects) =>
       paths = _.pluck(projects, "PATH")
 
       pathsToRemove = Promise.reduce paths, (memo, path) ->
-        queue.add =>
+        queue.add ->
           fs.statAsync(path)
           .catch ->
             memo.push(path)
@@ -131,9 +132,9 @@ module.exports = {
       , []
 
       pathsToRemove.then (removedPaths) =>
-        # process.nextTick =>
-          # Promise.each removedPaths, (path) =>
-            # @_removeProjectByPath(projects, path)
+        process.nextTick =>
+          Promise.each removedPaths, (path) =>
+            @_removeProjectByPath(projects, path)
 
         ## return our paths without the ones we're
         ## about to remove
@@ -142,7 +143,7 @@ module.exports = {
   removeProject: (path) ->
     logger.info "removing project from path", path: path
 
-    @getProjects().then (projects) ->
+    @getProjects().then (projects) =>
       @_removeProjectByPath(projects, path)
 
   getUser: ->
@@ -156,16 +157,13 @@ module.exports = {
     @_set {USER: user}
 
   removeUser: ->
-    @_set({USER: null})
+    @_set({USER: {}})
+
+  remove: ->
+    fs.removeAsync(CACHE)
 
   removeSync: ->
     fs.removeSync CACHE
-
-  getToken: (session) ->
-    api.getToken(session)
-
-  generateToken: (session) ->
-    api.updateToken(session)
 
   getProjectIdByPath: (projectPath) ->
     @getProjects().then (projects) ->
