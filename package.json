@@ -4,25 +4,6 @@
   "description": "Javascript Test Engine",
   "main": "index.js",
   "single-instance": false,
-  "window": {
-    "icon": "nw/public/img/cypress.iconset/icon_256x256@2x.png",
-    "title": "Cypress",
-    "frame": false,
-    "toolbar": false,
-    "show": false,
-    "show_in_taskbar": false,
-    "height": 400,
-    "width": 300
-  },
-  "platformOverrides": {
-    "linux": {
-      "window": {
-        "show": true,
-        "show_in_taskbar": true,
-        "frame": true
-      }
-    }
-  },
   "scripts": {
     "start": "node index.js",
     "server": "node index.js --mode server",
