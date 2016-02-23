@@ -1,5 +1,6 @@
 require("../spec_helper")
 
+rp  = require("request-promise")
 api = require("#{root}lib/api")
 
 describe "lib/api", ->
@@ -69,10 +70,48 @@ describe "lib/api", ->
     it "POSTs /signout", ->
       nock("http://localhost:1234", {
         reqheaders: {
-          "X-Session": "abc-123"
+          "x-session": "abc-123"
         }
       })
       .post("/signout")
       .reply(200)
 
       api.createSignout("abc-123")
+
+  context ".createRaygunException", ->
+    beforeEach ->
+      @setup = (body, session, delay = 0) ->
+        nock("http://localhost:1234", {
+          reqheaders: {
+            "x-session": session
+          }
+        })
+        .post("/exceptions", body)
+        .delayConnection(delay)
+        .reply(200)
+
+    it "POSTs /exceptions", ->
+      @setup({foo: "bar"}, "abc-123")
+      api.createRaygunException({foo: "bar"}, "abc-123")
+
+    it "by default times outs after 3 seconds", ->
+      ## return our own specific promise
+      ## so we can spy on the timeout function
+      p = Promise.resolve()
+      @sandbox.spy(p, "timeout")
+      @sandbox.stub(rp.Request.prototype, "promise").returns(p)
+
+      @setup({foo: "bar"}, "abc-123")
+      api.createRaygunException({foo: "bar"}, "abc-123").then ->
+        expect(p.timeout).to.be.calledWith(3000)
+
+    it "times out after exceeding timeout", (done) ->
+      ## force our connection to be delayed 5 seconds
+      @setup({foo: "bar"}, "abc-123", 5000)
+
+      ## and set the timeout to only be 50ms
+      api.createRaygunException({foo: "bar"}, "abc-123", 50)
+        .then ->
+          done("errored: it did not catch the timeout error!")
+        .catch Promise.TimeoutError, ->
+          done()

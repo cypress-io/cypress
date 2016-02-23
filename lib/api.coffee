@@ -21,13 +21,17 @@ module.exports = {
     .promise()
     .get("ci_guid")
 
-  createRaygunException: (body, headers) ->
+  createRaygunException: (body, session, timeout = 3000) ->
     rp.post({
       url: Routes.exceptions()
       body: body
-      headers: headers
       json: true
+      headers: {
+        "X-Session": session
+      }
     })
+    .promise()
+    .timeout(timeout)
 
   createKeyRange: (projectId, session) ->
     rp.post({

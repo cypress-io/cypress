@@ -2,8 +2,9 @@ request  = require("request-promise")
 Promise  = require("bluebird")
 winston  = require("winston")
 fs       = require("fs-extra")
-cache    = require("./cache")
 api      = require("./api")
+user     = require("./user")
+cache    = require("./cache")
 logger   = require("./logger")
 Settings = require("./util/settings")
 
@@ -15,7 +16,7 @@ Settings = require("./util/settings")
 ## settings: {}
 ## version: {}
 
-Exception = {
+module.exports = {
   getCache: ->
     cache.read()
 
@@ -44,22 +45,17 @@ Exception = {
         body.version  = version
       .return(body)
 
-  getHeaders: ->
-    cache.getUser().then (user) ->
-      obj = {}
-      obj["x-session"] = user.session_token if user.session_token
-      obj
+  getSession: ->
+    user.get().then (user) ->
+      user and user.session_token
 
   create: (err, settings) ->
     return Promise.resolve() if process.env["CYPRESS_ENV"] isnt "production"
 
-    ## should probably use Promise.props here
-    Promise.all([@getBody(err, settings), @getHeaders()])
-      .bind(@)
-      .spread (body, headers) ->
-        api.createRaygunException(body, headers)
-        .promise()
-        .timeout(3000)
+    Promise.props({
+      body:    @getBody(err, settings)
+      session: @getSession()
+    })
+    .then (props) ->
+      api.createRaygunException(props.body, props.session)
 }
-
-module.exports = Exception
