@@ -7,7 +7,7 @@
     template: "footer/show/_update"
 
     triggers:
-      "click strong" : "strong:clicked"
+      "click [data-js='download-update']" : "download:update:clicked"
 
     modelEvents:
       "change:updatesAvailable" : "render"

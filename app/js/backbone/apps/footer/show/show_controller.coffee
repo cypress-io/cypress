@@ -24,7 +24,7 @@
         @checkId = setInterval check, (5 * 60 * 1000)
         check()
 
-      @listenTo updateView, "strong:clicked", ->
+      @listenTo updateView, "download:update:clicked", ->
         App.execute "gui:check:for:updates"
 
       @show updateView, region: region
