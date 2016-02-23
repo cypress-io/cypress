@@ -1,7 +1,6 @@
 require("../spec_helper")
 
 path          = require("path")
-Keys          = require("#{root}lib/keys")
 Project       = require("#{root}lib/project")
 cache         = require("#{root}lib/cache")
 Settings      = require("#{root}lib/util/settings")
