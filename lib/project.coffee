@@ -10,7 +10,7 @@ logger    = require("./logger")
 errors    = require("./errors")
 Server    = require("./server")
 Support   = require("./support")
-Fixtures  = require("./fixtures")
+Fixture   = require("./fixture")
 Watchers  = require("./watchers")
 Reporter  = require("./reporter")
 
@@ -99,7 +99,7 @@ class Project extends EE
     Promise.join(
       ## ensure fixtures dir is created
       ## and example fixture if dir doesnt exist
-      Fixtures(config).scaffold(),
+      Fixture(config).scaffold(),
       ## ensure support dir is created
       ## and example support file if dir doesnt exist
       Support(config).scaffold()

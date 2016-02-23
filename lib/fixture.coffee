@@ -23,10 +23,10 @@ class Fixture
       return new Fixture(config)
 
     if not pr = config.projectRoot
-      throw new Error("Instantiating lib/fixtures requires a projectRoot!")
+      throw new Error("Instantiating lib/fixture requires a projectRoot!")
 
     if not ff = config.fixturesFolder
-      throw new Error("Instantiating lib/fixtures requires a fixturesFolder!")
+      throw new Error("Instantiating lib/fixture requires a fixturesFolder!")
 
     @folder = path.join(pr, ff)
 

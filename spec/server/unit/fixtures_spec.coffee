@@ -2,18 +2,17 @@ require("../spec_helper")
 
 path           = require("path")
 Server         = require("#{root}lib/server")
-Fixtures       = require("#{root}lib/fixtures")
+Fixture        = require("#{root}lib/fixture")
 FixturesHelper = require("#{root}/spec/server/helpers/fixtures")
 
-describe "Fixtures", ->
+describe "lib/fixtures", ->
   beforeEach ->
     FixturesHelper.scaffold()
 
     @todos = FixturesHelper.project("todos")
 
     @server  = Server(@todos)
-    @app     = @server.app
-    @fixture = Fixtures(@app)
+    @fixture = Fixture(@server.config)
 
   afterEach ->
     FixturesHelper.remove()

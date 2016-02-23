@@ -2,7 +2,7 @@ _             = require("lodash")
 fs            = require("fs-extra")
 path          = require("path")
 uuid          = require("node-uuid")
-Fixtures      = require("./fixtures")
+Fixture       = require("./fixture")
 Request       = require("./request")
 logger        = require("./logger")
 Reporter      = require("./reporter")
@@ -68,7 +68,7 @@ class Socket
         cb({__error: err.message})
 
   onFixture: (fixture, cb) ->
-    Fixtures(@app).get(fixture)
+    Fixture(@app).get(fixture)
       .then(cb)
       .catch (err) ->
         cb({__error: err.message})

@@ -3,7 +3,7 @@ mime        = require("mime")
 request     = require("request")
 str         = require("string-to-stream")
 Promise     = require("bluebird")
-Fixtures    = require("../fixtures")
+Fixture     = require("../fixture")
 
 fixturesRe = /^(fx:|fixture:)/
 htmlLikeRe = /<.+>[\s\S]+<\/.+>/
@@ -32,7 +32,7 @@ class Xhr
   getStream: (resp) ->
     if fixturesRe.test(resp)
       fixture = resp.replace(fixturesRe, "")
-      Fixtures(@app).get(fixture).then (contents) ->
+      Fixture(@app).get(fixture).then (contents) ->
         str(contents)
     else
       str(resp)
@@ -40,7 +40,7 @@ class Xhr
   getResponse: (resp) ->
     if fixturesRe.test(resp)
       fixture = resp.replace(fixturesRe, "")
-      Fixtures(@app).get(fixture)
+      Fixture(@app).get(fixture)
     else
       Promise.resolve(resp)
 
