@@ -2218,10 +2218,47 @@ describe "$Cypress.Cy Actions Commands", ->
 
   context "#check", ->
     it "does not change the subject", ->
-      checkboxes = "[name=colors]"
-      inputs = @cy.$(checkboxes)
-      @cy.get(checkboxes).check().then ($inputs) ->
-        expect($inputs).to.match(inputs)
+      inputs = @cy.$("[name=colors]")
+
+      @cy.get("[name=colors]").check().then ($inputs) ->
+        expect($inputs.length).to.eq(3)
+        expect($inputs.toArray()).to.deep.eq(inputs.toArray())
+
+    it "changes the subject if specific value passed to check", ->
+      checkboxes = @cy.$("[name=colors]")
+
+      @cy.get("[name=colors]").check(["blue", "red"]).then ($chk) ->
+        expect($chk.length).to.eq(2)
+
+        blue = checkboxes.filter("[value=blue]")
+        red  = checkboxes.filter("[value=red]")
+
+        expect($chk.get(0)).to.eq(blue.get(0))
+        expect($chk.get(1)).to.eq(red.get(0))
+
+    it "filters out values which were not found", ->
+      checkboxes = @cy.$("[name=colors]")
+
+      @cy.get("[name=colors]").check(["blue", "purple"]).then ($chk) ->
+        expect($chk.length).to.eq(1)
+
+        blue = checkboxes.filter("[value=blue]")
+
+        expect($chk.get(0)).to.eq(blue.get(0))
+
+    it "changes the subject when matching values even if noop", ->
+      checked = $("<input type='checkbox' name='colors' value='blue' checked>")
+      @cy.$("[name=colors]").parent().append(checked)
+
+      checkboxes = @cy.$("[name=colors]")
+
+      @cy.get("[name=colors]").check("blue").then ($chk) ->
+        expect($chk.length).to.eq(2)
+
+        blue = checkboxes.filter("[value=blue]")
+
+        expect($chk.get(0)).to.eq(blue.get(0))
+        expect($chk.get(1)).to.eq(blue.get(1))
 
     it "checks a checkbox", ->
       @cy.get(":checkbox[name='colors'][value='blue']").check().then ($checkbox) ->
@@ -2533,7 +2570,7 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@log.get("snapshots")[1].name).to.eq("after")
           expect(@log.get("snapshots")[1].state).to.be.an("object")
 
-      it "logs only 1 check event", ->
+      it "logs only 1 check event on click of 1 checkbox", ->
         logs = []
         checks = []
 
@@ -2542,6 +2579,18 @@ describe "$Cypress.Cy Actions Commands", ->
           checks.push(log) if log.get("name") is "check"
 
         @cy.get("[name=colors][value=blue]").check().then ->
+          expect(logs).to.have.length(2)
+          expect(checks).to.have.length(1)
+
+      it "logs only 1 check event on click with 1 matching value arg", ->
+        logs = []
+        checks = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+          checks.push(log) if log.get("name") is "check"
+
+        @cy.get("[name=colors]").check("blue").then ->
           expect(logs).to.have.length(2)
           expect(checks).to.have.length(1)
 
