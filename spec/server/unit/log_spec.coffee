@@ -4,67 +4,67 @@ _             = require("lodash")
 winston       = require("winston")
 path          = require("path")
 config        = require("#{root}lib/config")
-Log           = require("#{root}lib/log")
+logger        = require("#{root}lib/logger")
 Exception     = require("#{root}lib/exception")
 
 describe "Winston Logger", ->
   beforeEach ->
-    Log.clearLogs()
+    logger.clearLogs()
 
   afterEach ->
-    Log.removeAllListeners("logging")
+    logger.removeAllListeners("logging")
 
   after ->
     fs.removeAsync(config.app.log_path)
 
   it "has 1 transport", ->
-    expect(Log.transports).to.have.keys("all")
+    expect(logger.transports).to.have.keys("all")
 
   it "logs to all", (done) ->
-    Log.on "logging", (transport, level, msg, data) ->
+    logger.on "logging", (transport, level, msg, data) ->
       expect(level).to.eq("info")
       expect(msg).to.eq("foo!")
       expect(data).to.deep.eq({foo: "bar", type: "server"})
       done()
 
-    Log.info("foo!", {foo: "bar"})
+    logger.info("foo!", {foo: "bar"})
 
   describe "#onLog", ->
     it "calls back with log", (done) ->
-      Log.onLog (log) ->
+      logger.onLog (log) ->
         expect(log.level).to.eq("info")
         expect(log.message).to.eq("foo")
         expect(log.data).to.deep.eq({foo: "bar"})
         done()
 
-      Log.info("foo", {foo: "bar"})
+      logger.info("foo", {foo: "bar"})
 
     it "slices type out of data", (done) ->
-      Log.onLog (log) ->
+      logger.onLog (log) ->
         expect(log.level).to.eq("info")
         expect(log.message).to.eq("foo")
         expect(log.data).to.deep.eq({foo: "bar"})
         expect(log.type).to.eq("native")
         done()
 
-      Log.info("foo", {foo: "bar", type: "native"})
+      logger.info("foo", {foo: "bar", type: "native"})
 
   describe "#getLogs", ->
     beforeEach (done) ->
-      Log.onLog (log) ->
+      logger.onLog (log) ->
         done()
 
-      Log.info("foo", {foo: "bar"})
+      logger.info("foo", {foo: "bar"})
 
     it "resolves with logs", ->
-      Log.getLogs("all").then (logs) ->
+      logger.getLogs("all").then (logs) ->
         expect(logs).to.have.length(1)
 
   describe "#getData", ->
     it "nests data object in each log", ->
       obj = {level: "info", message: "foo", type: "native", foo: "bar"}
 
-      expect(Log.getData(obj)).to.deep.eq {
+      expect(logger.getData(obj)).to.deep.eq {
         level: "info"
         message: "foo"
         type: "native"
@@ -77,59 +77,59 @@ describe "Winston Logger", ->
     it "invokes logger.defaultErrorHandler", ->
       err = new Error
       defaultErrorHandler = @sandbox.stub(Log, "defaultErrorHandler")
-      Log.exitOnError(err)
+      logger.exitOnError(err)
       expect(defaultErrorHandler).to.be.calledWith err
 
   describe "#defaultErrorHandler", ->
     beforeEach ->
-      Log.unsetSettings()
+      logger.unsetSettings()
 
       @err    = new Error
       @exit   = @sandbox.stub(process, "exit")
       @create = @sandbox.stub(Exception, "create").resolves()
 
     afterEach ->
-      Log.unsetSettings()
+      logger.unsetSettings()
 
     it "calls Exception.create(err)", ->
-      Log.defaultErrorHandler(@err)
+      logger.defaultErrorHandler(@err)
       expect(@create).to.be.calledWith(@err, undefined)
 
     it "calls Exception.create(err, {})", ->
-      Log.setSettings({foo: "bar"})
-      Log.defaultErrorHandler(@err)
+      logger.setSettings({foo: "bar"})
+      logger.defaultErrorHandler(@err)
       expect(@create).to.be.calledWith(@err, {foo: "bar"})
 
     it "returns false", ->
-      expect(Log.defaultErrorHandler(@err)).to.be.false
+      expect(logger.defaultErrorHandler(@err)).to.be.false
 
     context "handleErr", ->
       it "is called after resolving", ->
-        Log.defaultErrorHandler(@err)
+        logger.defaultErrorHandler(@err)
         Promise.delay(50).then =>
           expect(@exit).to.be.called
 
       it "is called after rejecting", ->
         @create.rejects()
-        Log.defaultErrorHandler(@err)
+        logger.defaultErrorHandler(@err)
         Promise.delay(50).then =>
           expect(@exit).to.be.called
 
       it "calls process.exit(1)", ->
-        Log.defaultErrorHandler(@err)
+        logger.defaultErrorHandler(@err)
         Promise.delay(50).then =>
           expect(@exit).to.be.calledWith(1)
 
       it "calls Log#errorhandler", ->
         fn = @sandbox.spy()
-        Log.setErrorHandler(fn)
-        Log.defaultErrorHandler(@err)
+        logger.setErrorHandler(fn)
+        logger.defaultErrorHandler(@err)
         Promise.delay(50).then =>
           expect(fn).to.be.called
 
       it "calls exit if Log#errorhandler returns true", ->
-        Log.setErrorHandler -> true
-        Log.defaultErrorHandler(@err)
+        logger.setErrorHandler -> true
+        logger.defaultErrorHandler(@err)
         Promise.delay(50).then =>
           expect(@exit).to.be.called
 
@@ -163,7 +163,7 @@ describe "Winston Logger", ->
   #   process.listeners("uncaughtException").pop()
   #   err = (new Error)
 
-  #   Log.on "logging", (transport, level, msg, data) ->
+  #   logger.on "logging", (transport, level, msg, data) ->
   #     debugger
   #     if transport.name is "error"
   #       expect(level).to.eq("error")

@@ -2,7 +2,7 @@ require("../spec_helper")
 
 api = require("#{root}lib/api")
 
-describe "API Wrapper", ->
+describe "lib/api", ->
   context ".createCiGuid", ->
     it "POST /ci/:id + returns ci_guid", ->
       nock("http://localhost:1234", {

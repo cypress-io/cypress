@@ -6,7 +6,7 @@ Support       = require("#{root}lib/support")
 Fixtures      = require("#{root}lib/fixtures")
 Watchers      = require("#{root}lib/watchers")
 Project       = require("#{root}lib/project")
-Log           = require("#{root}lib/log")
+logger        = require("#{root}lib/logger")
 Settings      = require("#{root}lib/util/settings")
 
 describe "Server Interface", ->
@@ -32,7 +32,7 @@ describe "Server Interface", ->
     expect(fn).to.throw "Instantiating lib/server requires a projectRoot!"
 
   it "sets settings on Log", ->
-    expect(Log.getSettings()).to.eq(@server.config)
+    expect(logger.getSettings()).to.eq(@server.config)
 
   context "#close", ->
     it "returns a promise", ->
@@ -48,9 +48,9 @@ describe "Server Interface", ->
           expect(@server.isListening).to.be.false
 
     it "clears settings from Log", ->
-      Log.setSettings({})
+      logger.setSettings({})
       @server.close().then ->
-        expect(Log.getSettings()).to.be.undefined
+        expect(logger.getSettings()).to.be.undefined
 
     it "app fires close event", ->
       emit = @sandbox.spy @server.app, "emit"

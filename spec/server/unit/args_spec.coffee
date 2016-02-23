@@ -3,7 +3,7 @@ require("../spec_helper")
 path     = require("path")
 argsUtil = require("#{root}lib/util/args")
 
-describe "util/args", ->
+describe "lib/util/args", ->
   beforeEach ->
     @setup = (args...) ->
       argsUtil.toObject(args)

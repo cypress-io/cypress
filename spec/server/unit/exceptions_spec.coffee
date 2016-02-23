@@ -5,7 +5,7 @@ delete global.fs
 mock          = require("mock-fs")
 winston       = require("winston")
 Exception     = require("#{root}lib/exception")
-Log           = require("#{root}lib/log")
+logger        = require("#{root}lib/logger")
 cache         = require("#{root}lib/cache")
 Routes        = require("#{root}lib/util/routes")
 Settings      = require("#{root}lib/util/settings")
@@ -81,7 +81,7 @@ describe "Exceptions", ->
   context "#getBody", ->
     beforeEach ->
       @sandbox.stub(cache, "read").resolves({foo: "foo"})
-      @sandbox.stub(Log, "getLogs").resolves([])
+      @sandbox.stub(logger, "getLogs").resolves([])
       @err = new Error
       mock({
         "package.json": JSON.stringify(version: "0.1.2")

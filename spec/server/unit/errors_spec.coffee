@@ -3,7 +3,7 @@ require("../spec_helper")
 chalk  = require("chalk")
 errors = require("#{root}lib/errors")
 
-describe.only "lib/errors", ->
+describe "lib/errors", ->
   beforeEach ->
     @env = process.env.CYPRESS_ENV
     @log = @sandbox.stub(console, "log")
