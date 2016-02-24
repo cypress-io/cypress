@@ -133,7 +133,7 @@ class Project extends EE
     .then =>
       Settings.read(@projectRoot)
     .then (settings) =>
-      if (id = settings.projectId)
+      if settings and id = settings.projectId
         return id
 
       errors.throw("NO_PROJECT_ID", @projectRoot)
