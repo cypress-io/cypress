@@ -2669,6 +2669,18 @@ describe "$Cypress.Cy Actions Commands", ->
             Options: undefined
           }
 
+      it "#onConsole when checkbox with value is already checked", ->
+        @cy.$$("[name=colors][value=blue]").prop("checked", true)
+        @cy.get("[name=colors]").check("blue").then ($input) ->
+          expect(@log.get("coords")).to.be.undefined
+          expect(@log.attributes.onConsole()).to.deep.eq {
+            Command: "check"
+            "Applied To": @log.get("$el").get(0)
+            Elements: 1
+            Note: "This checkbox was already checked. No operation took place."
+            Options: undefined
+          }
+
       it "logs deltaOptions", ->
         @cy.get("[name=colors][value=blue]").check({force: true, timeout: 1000}).then ->
           expect(@log.get("message")).to.eq "{force: true, timeout: 1000}"
