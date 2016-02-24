@@ -68,6 +68,7 @@
     "sinon": "1.12.2",
     "sinon-as-promised": "3.0.0",
     "sinon-chai": "^2.7.0",
+    "socket.io-client": "^1.4.5",
     "stream-to-promise": "^1.1.0",
     "supertest": "^0.15.0",
     "supertest-session": "0.0.7",

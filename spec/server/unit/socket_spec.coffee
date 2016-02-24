@@ -2,6 +2,7 @@ require("../spec_helper")
 
 _            = require("lodash")
 uuid         = require("node-uuid")
+client       = require("socket.io-client")
 Socket       = require("#{root}lib/socket")
 Server       = require("#{root}lib/server")
 Watchers     = require("#{root}lib/watchers")
@@ -10,21 +11,79 @@ Fixtures     = require("#{root}/spec/server/helpers/fixtures")
 
 describe "lib/socket", ->
   beforeEach ->
-    @ioSocket =
-      on: @sandbox.stub()
-      emit: @sandbox.stub()
+    Fixtures.scaffold()
 
-    @io =
-      of: @sandbox.stub().returns({on: ->})
-      on: @sandbox.stub().callsArgWith(1, @ioSocket)
-      emit: @sandbox.stub()
-      close: @sandbox.stub()
-
-    @server = Server(process.cwd())
-    @app    = @server.app
+    @todosPath = Fixtures.projectPath("todos")
+    @server    = Server(@todosPath)
+    @app       = @server.app
 
   afterEach ->
-    Settings.remove(process.cwd())
+    Fixtures.remove()
+    @server.close()
+
+  context.only "integration", ->
+    beforeEach (done) ->
+      ## create a for realz socket.io connection
+      ## so we can test server emit / client emit events
+      @server.open().then =>
+        @server.startWebsockets({}, {})
+        @socket = @server.socket
+
+        ## when our real client connects then we're done
+        @socket.io.on "connection", (socket) ->
+          done()
+
+        {clientUrlDisplay, socketIoRoute} = @server.app.get("cypress")
+        @client = client(clientUrlDisplay, {path: socketIoRoute})
+
+    afterEach ->
+      @client.disconnect()
+
+    context "on(fixture)", ->
+      it "calls socket#onFixture", ->
+        onFixture = @sandbox.stub(@socket, "onFixture").yieldsAsync("bar")
+
+        @client.emit "request", "foo", (resp) ->
+          expect(resp).to.eq("bar")
+
+          ## ensure onFixture was called with those same arguments
+          ## therefore we have verified the socket binding and
+          ## the call into onFixture with the proper arguments
+          expect(onFixture).to.be.calledWith("foo")
+
+    context "on(request)", ->
+      it "calls socket#onRequest", (done) ->
+        onRequest = @sandbox.stub(@socket, "onRequest").yieldsAsync("bar")
+
+        @client.emit "request", "foo", (resp) ->
+          expect(resp).to.eq("bar")
+
+          ## ensure onRequest was called with those same arguments
+          ## therefore we have verified the socket binding and
+          ## the call into onRequest with the proper arguments
+          expect(onRequest).to.be.calledWith("foo")
+          done()
+
+  context "unit", ->
+    # @mockClient = @sandbox.stub({
+    #   on: ->
+    #   emit: ->
+    # })
+
+    # @mockServer = new mock.Server("http://localhost:1111")
+
+    # @mockClient = new mock.SocketIO("http://localhost:1111")
+    # @sandbox.stub(@mockServer, "on").withArgs("connection").yields(@mockClient)
+    # @sandbox.stub(Socket.prototype, "createIo").returns(@mockServer)
+
+    # @io =
+    #   of: @sandbox.stub().returns({on: ->})
+    #   on: @sandbox.stub().callsArgWith(1, @ioSocket)
+    #   emit: @sandbox.stub()
+    #   close: @sandbox.stub()
+
+    # @socket = Socket(@app)
+    # @socket.startListening(@server, {}, {})
 
   it "returns a socket instance", ->
     s = Socket(@app)
@@ -43,8 +102,13 @@ describe "lib/socket", ->
       @socket = Socket(@app)
 
     it "calls close on #io", ->
+      @socket.startListening(@server, {}, {})
+      @sandbox.spy(@socket.io, "close")
       @socket.close()
-      expect(@io.close).to.be.called
+      expect(@socket.io.close).to.be.called
+
+    it "does not error when io isnt defined", ->
+      @socket.close()
 
   context "#watchTestFileByPath", ->
     beforeEach ->
@@ -107,26 +171,6 @@ describe "lib/socket", ->
     afterEach ->
       Fixtures.remove()
 
-    it "binds to 'request' event", ->
-      @socket.startListening().then =>
-        expect(@ioSocket.on).to.be.calledWith("request")
-
-    it "calls socket#onRequest", ->
-      onRequest = @sandbox.stub(@socket, "onRequest")
-
-      @socket.startListening().then =>
-        socketCall = _.find @ioSocket.on.getCalls(), (call) ->
-          call.args[0] is "request"
-
-        ## get the callback function here
-        socketFn = socketCall.args[1]
-        socketFn.call(@socket, "foo", "bar")
-
-        ## ensure onRequest was called with those same arguments
-        ## therefore we have verified the socket binding and
-        ## the call into onRequest with the proper arguments
-        expect(onRequest).to.be.calledWith("foo", "bar")
-
     it "returns the request object", ->
       nock("http://localhost:8080")
         .get("/status.json")
@@ -161,38 +205,6 @@ describe "lib/socket", ->
         obj = cb.getCall(0).args[0]
         expect(obj).to.have.property("__error", "Error: connect ECONNREFUSED 127.0.0.1:1111")
 
-  context "#onFixture", ->
-    beforeEach ->
-      Fixtures.scaffold()
-
-      @todos   = Fixtures.project("todos")
-      @server  = Server(@todos)
-      @app     = @server.app
-      @socket  = Socket(@app)
-
-    afterEach ->
-      Fixtures.remove()
-
-    it "binds to 'fixture' event", ->
-      @socket.startListening().then =>
-        expect(@ioSocket.on).to.be.calledWith("fixture")
-
-    it "calls socket#onFixture", ->
-      onFixture = @sandbox.stub(@socket, "onFixture")
-
-      @socket.startListening().then =>
-        socketCall = _.find @ioSocket.on.getCalls(), (call) ->
-          call.args[0] is "fixture"
-
-        ## get the callback function here
-        socketFn = socketCall.args[1]
-        socketFn.call(@socket, "foo", "bar")
-
-        ## ensure onFixture was called with those same arguments
-        ## therefore we have verified the socket binding and
-        ## the call into onFixture with the proper arguments
-        expect(onFixture).to.be.calledWith("foo", "bar")
-
     it "returns the fixture object", ->
       cb = @sandbox.spy()
 
@@ -212,11 +224,6 @@ describe "lib/socket", ->
   context "#startListening", ->
     beforeEach ->
       @socket = Socket(@app)
-      Fixtures.scaffold()
-
-    afterEach ->
-      @socket.close()
-      Fixtures.remove()
 
     it "creates testFolder if does not exist", ->
       @server.setCypressJson {

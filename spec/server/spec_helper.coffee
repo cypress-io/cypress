@@ -30,6 +30,7 @@ beforeEach ->
     global.fs = fs
 
   nock.disableNetConnect()
+  nock.enableNetConnect(/localhost/)
 
   @sandbox = sinon.sandbox.create()
 

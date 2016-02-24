@@ -234,14 +234,14 @@ class Server
   close: ->
     Promise.join(
       @_close()
-      @ws?.close()
+      @socket?.close()
     )
 
   end: ->
-    @ws and @ws.end()
+    @socket and @socket.end()
 
   startWebsockets: (watchers, options) ->
-    @ws = Socket(@app)
-    @ws.startListening(@server, watchers, options)
+    @socket = Socket(@app)
+    @socket.startListening(@server, watchers, options)
 
 module.exports = Server
