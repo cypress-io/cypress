@@ -13,6 +13,8 @@ module.exports = {
       ## log this out to the console
       console.log(token)
 
+      return token
+
   generate: (projectPath) ->
     user.ensureSession()
 
