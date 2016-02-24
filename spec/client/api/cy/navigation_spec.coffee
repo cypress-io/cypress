@@ -46,6 +46,18 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       @cy.reload({})
 
+    it "returns the window object", ->
+      @cy
+        .window().then (oldWin) ->
+          oldWin.foo = "bar"
+          expect(oldWin.foo).to.eq("bar")
+
+          cy.reload().then (win) ->
+            expect(win).not.to.be.undefined
+            expect(win.foo).to.be.undefined
+
+            expect(win).to.eq(@cy.private("window"))
+
     describe "errors", ->
       beforeEach ->
         @allowErrors()
