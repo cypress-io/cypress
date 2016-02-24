@@ -78,6 +78,18 @@ describe "lib/api", ->
 
       api.createSignout("abc-123")
 
+  context ".createProject", ->
+    it "POSTs /projects", ->
+      nock("http://localhost:1234")
+      .matchHeader("x-session", "session-123")
+      .post("/projects")
+      .reply(200, {
+        uuid: "uuid-123"
+      })
+
+      api.createProject("session-123").then (uuid) ->
+        expect(uuid).to.eq("uuid-123")
+
   context ".createRaygunException", ->
     beforeEach ->
       @setup = (body, session, delay = 0) ->
@@ -111,7 +123,7 @@ describe "lib/api", ->
 
       ## and set the timeout to only be 50ms
       api.createRaygunException({foo: "bar"}, "abc-123", 50)
-        .then ->
-          done("errored: it did not catch the timeout error!")
-        .catch Promise.TimeoutError, ->
-          done()
+      .then ->
+        done("errored: it did not catch the timeout error!")
+      .catch Promise.TimeoutError, ->
+        done()
