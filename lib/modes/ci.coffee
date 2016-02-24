@@ -55,6 +55,7 @@ module.exports = {
         message:   git.message
       })
       .catch (err) ->
+        ## TODO: add status code 404 error handling here
         if err.statusCode is 401
           key = key.slice(0, 5) + "..." + key.slice(-5)
           errors.throw("CI_KEY_NOT_VALID", key)
