@@ -1284,6 +1284,11 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         ## make sure we're an array of values
         values = [].concat(values)
 
+      ## keep an array of subjects which
+      ## are potentially reduced down
+      ## to new filtered subjects
+      matchingElements = []
+
       _.defaults options,
         $el: subject
         log: true
@@ -1305,16 +1310,29 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           when "uncheck"
             $el.is(":checkbox")
 
+      ## does our el have a value
+      ## in the values array?
+      ## or values array is empty
+      elHasMatchingValue = ($el) ->
+        values.length is 0 or $el.val() in values
+
       ## blow up if any member of the subject
       ## isnt a checkbox or radio
       checkOrUncheck = (el, index) =>
         $el = $(el)
 
-        onConsole =
+        isElActionable = elHasMatchingValue($el)
+
+        if isElActionable
+          matchingElements.push(el)
+
+        onConsole = {
           "Applied To":   $Cypress.Utils.getDomElements($el)
           "Elements":     $el.length
+        }
 
-        if options.log
+        if options.log and isElActionable
+
           ## figure out the options which actually change the behavior of clicks
           deltaOptions = Cypress.Utils.filterOutOptions(options)
 
@@ -1332,7 +1350,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           node   = Cypress.Utils.stringifyElement($el)
           word   = Cypress.Utils.plural(options.$el, "contains", "is")
           phrase = if type is "check" then " and :radio" else ""
-          @throwErr ".#{type}() can only be called on :checkbox#{phrase}! Your subject #{word} a: #{node}", options._log
+          @throwErr "cy.#{type}() can only be called on :checkbox#{phrase}! Your subject #{word} a: #{node}", options._log
 
         ## if the checkbox was already checked
         ## then notify the user of this note
@@ -1340,8 +1358,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         if isNoop($el)
           ## still ensure visibility even if the command is noop
           @ensureVisibility $el, options._log
-          onConsole.Note = "This checkbox was already #{type}ed. No operation took place."
           if options._log
+            onConsole.Note = "This checkbox was already #{type}ed. No operation took place."
             options._log.snapshot().end()
 
           return null
@@ -1354,7 +1372,7 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
         ## if we didnt pass in any values or our
         ## el's value is in the array then check it
-        if not values.length or $el.val() in values
+        if isElActionable
           @execute("click", {
             $el: $el
             log: false
@@ -1374,6 +1392,10 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         .each(checkOrUncheck)
         .cancellable()
         .then =>
+          ## filter down our $el to the
+          ## matching elements
+          options.$el = options.$el.filter(matchingElements)
+
           do verifyAssertions = =>
             @verifyUpcomingAssertions(options.$el, options, {
               onRetry: verifyAssertions
