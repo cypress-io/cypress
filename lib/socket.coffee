@@ -2,11 +2,11 @@ _             = require("lodash")
 fs            = require("fs-extra")
 path          = require("path")
 uuid          = require("node-uuid")
+socketIo      = require("socket.io")
 Fixture       = require("./fixture")
 Request       = require("./request")
 logger        = require("./logger")
 Reporter      = require("./reporter")
-socketIo      = require("socket.io")
 
 leadingSlashesRe = /^\/+/
 
@@ -73,6 +73,9 @@ class Socket
       .catch (err) ->
         cb({__error: err.message})
 
+  createIo: (server, path) ->
+    socketIo(server, {path: path})
+
   _startListening: (server, watchers, options) ->
     _.defaults options,
       socketId: null
@@ -86,7 +89,7 @@ class Socket
 
     {projectRoot, testFolder, socketIoRoute} = @app.get("cypress")
 
-    @io = socketIo(server, {path: socketIoRoute})
+    @io = @createIo(server, socketIoRoute)
 
     @io.on "connection", (socket) =>
       logger.info "socket connected"
@@ -203,6 +206,6 @@ class Socket
     }
 
   close: ->
-    @io.close()
+    @io?.close()
 
 module.exports = Socket
