@@ -8,6 +8,12 @@ describe "$Cypress.Cy Connectors Commands", ->
         expect(two).to.eq(2)
         expect(three).to.eq(3)
 
+    it "passes timeout option to spread", ->
+      @cy._timeout(50)
+
+      cy.noop([1,2,3]).spread {timeout: 150}, (one, two, three) ->
+        Promise.delay(100)
+
     describe "errors", ->
       beforeEach ->
         @allowErrors()
@@ -18,6 +24,23 @@ describe "$Cypress.Cy Connectors Commands", ->
           done()
 
         @cy.noop({}).spread ->
+
+      it "throws when promise timeout", (done) ->
+        logs = []
+        @cy._timeout(50)
+
+        @Cypress.on "log", (@log) =>
+          logs.push @log
+
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq(1)
+          expect(@log.get("error")).to.eq(err)
+          expect(err.message).to.include "cy.spread() timed out after waiting '150ms'."
+          done()
+
+        @cy.noop([1,2,3]).spread {timeout: 150}, ->
+          new Promise (resolve, reject) ->
 
   context "#then", ->
     it "mocha inserts 2 arguments to then: anonymous fn for invoking done(), and done reference itself", ->
@@ -48,7 +71,7 @@ describe "$Cypress.Cy Connectors Commands", ->
 
       @cy.noop().then((->), fn)
 
-    it "passes timeout down to then", ->
+    it "passes timeout option to then", ->
       @cy._timeout(50)
 
       @cy.then {timeout: 150}, ->
@@ -65,7 +88,25 @@ describe "$Cypress.Cy Connectors Commands", ->
           @cy.get("div:first")
 
     describe "errors", ->
+      beforeEach ->
+        @allowErrors()
 
+      it "throws when promise timeout", (done) ->
+        logs = []
+        @cy._timeout(50)
+
+        @Cypress.on "log", (@log) =>
+          logs.push @log
+
+
+        @cy.on "fail", (err) =>
+          expect(logs.length).to.eq(1)
+          expect(@log.get("error")).to.eq(err)
+          expect(err.message).to.include "cy.then() timed out after waiting '150ms'."
+          done()
+
+        @cy.then {timeout: 150}, ->
+          new Promise (resolve, reject) ->
 
     describe "yields to remote jQuery subject", ->
       beforeEach ->
