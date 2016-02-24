@@ -59,8 +59,6 @@
     "mockery": "^1.4.0",
     "nock": "2.10.0",
     "nodemon": "^1.8.1",
-    "nw": "0.12.2",
-    "nw-builder": "cypress-io/nw-builder",
     "obfuscator": "^0.5.0",
     "plist": "^1.1.0",
     "proxyquire": "1.7.4",
@@ -75,7 +73,8 @@
     "supertest-session": "0.0.7",
     "tar-fs": "^1.8.1",
     "through2": "0.6.3",
-    "vagrant": "0.0.1"
+    "vagrant": "0.0.1",
+    "xvfb": "cypress-io/node-xvfb"
   },
   "dependencies": {
     "bluebird": "3.3.1",
@@ -128,7 +127,6 @@
     "underscore": "1.6.0",
     "underscore.string": "2.3.3",
     "wd": "^0.3.12",
-    "winston": "^0.9.0",
-    "xvfb": "cypress-io/node-xvfb"
+    "winston": "^0.9.0"
   }
 }
