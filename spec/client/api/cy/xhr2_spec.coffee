@@ -1125,20 +1125,20 @@ describe "$Cypress.Cy XHR Commands", ->
         @cy
           .server({stub: false})
           .then ->
-            expect(@warn).to.be.calledWithMatch("Passing cy.server({stub: false}) is now deprecated.")
+            expect(@warn).to.be.calledWithMatch("Cypress Warning: Passing cy.server({stub: false}) is now deprecated.")
 
       it "logs {stub: false} deprecation on route", ->
         @cy
           .server()
           .route({url: "foo", stub: false})
           .then ->
-            expect(@warn).to.be.calledWithMatch("Passing cy.route({stub: false}) is now deprecated.")
+            expect(@warn).to.be.calledWithMatch("Cypress Warning: Passing cy.route({stub: false}) is now deprecated.")
 
       it "logs on {force404: false}", ->
         @cy
           .server({force404: false})
           .then ->
-            expect(@warn).to.be.calledWith("Passing cy.server({force404: false}) is now the default behavior of cy.server(). You can safely remove this option.")
+            expect(@warn).to.be.calledWith("Cypress Warning: Passing cy.server({force404: false}) is now the default behavior of cy.server(). You can safely remove this option.")
 
       it "does not log on {force404: true}", ->
         @cy

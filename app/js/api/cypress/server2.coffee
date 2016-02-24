@@ -28,14 +28,14 @@ $Cypress.Server = do ($Cypress, _) ->
 
   warnOnStubDeprecation = (obj, type) ->
     if _.has(obj, "stub")
-      console.warn("""
+      $Cypress.Utils.warning("""
         Passing cy.#{type}({stub: false}) is now deprecated. You can safely remove: {stub: false}.\n
-        http://on.cypress.io/deprecated-stub-false-on-#{type}
+        https://on.cypress.io/deprecated-stub-false-on-#{type}
       """)
 
   warnOnForce404Default = (obj) ->
     if obj.force404 is false
-      console.warn("Passing cy.server({force404: false}) is now the default behavior of cy.server(). You can safely remove this option.")
+      $Cypress.Utils.warning("Passing cy.server({force404: false}) is now the default behavior of cy.server(). You can safely remove this option.")
 
   whitelist = (xhr) ->
     ## whitelist if we're GET + looks like we're fetching regular resources
@@ -185,13 +185,13 @@ $Cypress.Server = do ($Cypress, _) ->
 
     requestJSON: {
       get: ->
-        console.warn("requestJSON is now deprecated and will be removed in the next version. Update this to 'requestBody' or 'request.body'.")
+        $Cypress.Utils.warning("requestJSON is now deprecated and will be removed in the next version. Update this to 'requestBody' or 'request.body'.")
         @requestBody
     }
 
     responseJSON: {
       get: ->
-        console.warn("responseJSON is now deprecated and will be removed in the next version. Update this to 'responseBody' or 'response.body'.")
+        $Cypress.Utils.warning("responseJSON is now deprecated and will be removed in the next version. Update this to 'responseBody' or 'response.body'.")
         @responseBody
     }
 
@@ -251,7 +251,7 @@ $Cypress.Server = do ($Cypress, _) ->
 
     normalizeStubUrl: (xhrUrl, url) ->
       if not xhrUrl
-        console.warn("'Server.options.xhrUrl' has not been set")
+        $Cypress.Utils.warning("'Server.options.xhrUrl' has not been set")
 
       ## always ensure this is an absolute-relative url
       ## and remove any double slashes

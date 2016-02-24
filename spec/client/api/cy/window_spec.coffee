@@ -303,15 +303,15 @@ describe "$Cypress.Cy Window Commands", ->
 
   context "#title", ->
     it "returns the pages title as a string", ->
-      title = @cy.$("title").text()
+      title = @cy.$$("title").text()
       @cy.title().then (text) ->
         expect(text).to.eq title
 
     it "retries finding the title", ->
-      @cy.$("title").remove()
+      @cy.$$("title").remove()
 
       retry = _.after 2, =>
-        @cy.$("head").append $("<title>waiting on title</title>")
+        @cy.$$("head").append $("<title>waiting on title</title>")
 
       @cy.on "retry", retry
 
@@ -320,15 +320,15 @@ describe "$Cypress.Cy Window Commands", ->
 
     it "eventually resolves", ->
       _.delay ->
-        @cy.$("title").text("about page")
+        @cy.$$("title").text("about page")
       , 100
 
       cy.title().should("eq", "about page").and("match", /about/)
 
     it "only finds titles in the <head>", ->
-      title = @cy.$("head title").text()
+      title = @cy.$$("head title").text()
 
-      @cy.$("body").append("<title>some title</title>")
+      @cy.$$("body").append("<title>some title</title>")
 
       @cy.title().then ($title) ->
         expect($title).to.eq(title)
@@ -339,7 +339,7 @@ describe "$Cypress.Cy Window Commands", ->
         @allowErrors()
 
       it "throws after timing out", (done) ->
-        @cy.$("title").remove()
+        @cy.$$("title").remove()
 
         @cy.on "fail", (err) ->
           expect(err.message).to.include "Expected to find element: 'title', but never found it."
@@ -348,7 +348,7 @@ describe "$Cypress.Cy Window Commands", ->
         @cy.title()
 
       it "only logs once", (done) ->
-        @cy.$("title").remove()
+        @cy.$$("title").remove()
 
         logs = []
 
@@ -373,7 +373,7 @@ describe "$Cypress.Cy Window Commands", ->
           expect(@log).to.be.undefined
 
       it "logs immediately before resolving", (done) ->
-        input = @cy.$(":text:first")
+        input = @cy.$$(":text:first")
 
         @Cypress.on "log", (log) ->
           if log.get("name") is "title"

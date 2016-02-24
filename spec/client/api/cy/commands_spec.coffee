@@ -2,7 +2,7 @@ describe "$Cypress.Cy Commands", ->
   enterCommandTestingMode()
 
   it "can invoke commands by name", ->
-    body = @cy.$("body")
+    body = @cy.$$("body")
 
     @cy
       .get("body").then ($body) ->
@@ -11,7 +11,7 @@ describe "$Cypress.Cy Commands", ->
         expect($body.get(0)).to.eq(body.get(0))
 
   it "can invoke child commands by name", ->
-    div = @cy.$("body>div:first")
+    div = @cy.$$("body>div:first")
 
     @cy
       .get("body").find("div:first").then ($div) ->
@@ -39,7 +39,7 @@ describe "$Cypress.Cy Commands", ->
           .type(email)
 
     it "works with custom commands", ->
-      input = @cy.$("input:first")
+      input = @cy.$$("input:first")
 
       @cy
         .get("input:first")
@@ -48,7 +48,7 @@ describe "$Cypress.Cy Commands", ->
           expect($input.get(0)).to.eq(input.get(0))
 
     it "works with namespaced commands", ->
-      ce = @cy.$("[contenteditable]").first()
+      ce = @cy.$$("[contenteditable]").first()
 
       @cy
         .command("dashboard.selectRenderer").then ($ce) ->

@@ -186,7 +186,7 @@ describe "$Cypress.Cy Connectors Commands", ->
           expect(str).to.eq "foo"
 
       it "re-wraps the remote element if its returned", ->
-        parent = @cy.$("input:first").parent()
+        parent = @cy.$$("input:first").parent()
         expect(parent).to.exist
 
         @cy.get("input:first").invoke("parent").then ($parent) ->
@@ -217,6 +217,12 @@ describe "$Cypress.Cy Connectors Commands", ->
 
         @cy.noop(obj).invoke("bar").then (val) ->
           expect(val).to.be.undefined
+
+      it "warns on deprecation using invoke as a property", ->
+        warn = @sandbox.spy console, "warn"
+        obj = {foo: "foo"}
+        @cy.noop(obj).invoke("foo").then ->
+          expect(warn).to.be.calledWith("Cypress Warning: Calling cy.invoke() on a property is now deprecated. Use cy.its('foo') instead.\n\nThis deprecation notice will become an actual error in the next major release.")
 
       describe "errors", ->
         beforeEach ->
@@ -442,6 +448,12 @@ describe "$Cypress.Cy Connectors Commands", ->
   context "#its", ->
     it "proxies to #invoke", ->
       @cy.noop({foo: -> "bar"}).its("foo").should("eq", "bar")
+
+    it "warns on deprecation using its on a function", ->
+      warn = @sandbox.spy console, "warn"
+      obj = {foo: -> "foo"}
+      @cy.noop(obj).its("foo").then ->
+        expect(warn).to.be.calledWith("Cypress Warning: Calling cy.its() on a function is now deprecated. Use cy.invoke('foo') instead.\n\nThis deprecation notice will become an actual error in the next major release.")
 
     describe "errors", ->
       beforeEach ->

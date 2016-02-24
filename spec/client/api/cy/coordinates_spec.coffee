@@ -3,7 +3,7 @@ describe "$Cypress.Cy Coordinates Extensions", ->
 
   describe "coordinate calculations", ->
     beforeEach ->
-      @$button = $("<button style='position: absolute; top: 25px; left: 50px; width: 100px; line-height: 50px; padding: 10px;'>foo</button>").appendTo @cy.$("body")
+      @$button = $("<button style='position: absolute; top: 25px; left: 50px; width: 100px; line-height: 50px; padding: 10px;'>foo</button>").appendTo @cy.$$("body")
 
     context "#getElementAtCoordinates", ->
       it "returns same element based on x/y coords", ->

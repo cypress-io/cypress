@@ -1,0 +1,65 @@
+#!/usr/bin/env node
+require("coffee-script/register")
+
+// var nodemon = require('nodemon')
+var path    = require('path')
+var spawn   = require("child_process").spawn
+var open    = require("open")
+var minimist= require("minimist")
+var _       = require("lodash")
+
+// console.log("args are", process.argv)
+
+var cyRoot   = path.join(__dirname, "..", "lib");
+var cyServer = path.join(__dirname, "..", "lib", "cypress.coffee");
+
+// need to add --debug here
+
+var options = minimist(process.argv.slice(2))
+
+console.log(options)
+
+var getArgs = function(){
+  var args = ["--", process.argv[2], "verbose"]
+
+  if (options.ids !== false)
+    args.push("id_generator")
+
+  return args
+}
+
+var opts = {}
+
+if (options.debug !== false)
+  opts.debug = "--debug"
+
+_.extend(opts, {
+  script: cyServer,
+  watch: ["--watch", cyRoot],
+  ignore: ["--ignore", "lib/public"],
+  verbose: "--verbose",
+  exts: ["-e", "coffee,js"],
+  args: getArgs()
+})
+
+var args = []
+
+for (key in opts)
+  args = args.concat(opts[key])
+
+spawn("node_modules/.bin/nodemon", args, {stdio: "inherit"})
+
+if (options.open !== false){
+  setTimeout(function(){
+    open("http://localhost:2020/__/")
+  }, 2000)
+}
+
+
+if (options.debug !== false){
+  spawn("node_modules/.bin/node-inspector", [], {stdio: "inherit"})
+
+  open("http://127.0.0.1:8080/debug?ws=127.0.0.1:8080&port=5858")
+}
+
+// nodemon(cyServer)

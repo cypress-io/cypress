@@ -17,6 +17,9 @@ $Cypress.Utils = do ($Cypress, _) ->
   }
 
   return {
+    warning: (msg) ->
+      console.warn("Cypress Warning: " + msg)
+
     cypressError: (err) ->
       err = new Error(err)
       err.name = "CypressError"
@@ -147,24 +150,28 @@ $Cypress.Utils = do ($Cypress, _) ->
       if @hasDocument(el)
         return "<document>"
 
-      el = if _.isElement(el) then $(el) else el
+      $el = if _.isElement(el) then $(el) else el
 
       switch form
         when "long"
-          text     = _.chain(el.text()).clean().truncate(10).value()
-          children = el.children().length
-          str      = el.clone().empty().prop("outerHTML")
+          text     = _.chain($el.text()).clean().truncate(10).value()
+          children = $el.children().length
+          str      = $el.clone().empty().prop("outerHTML")
           switch
             when children then str.replace("></", ">...</")
             when text     then str.replace("></", ">#{text}</")
             else
               str
         when "short"
-          str = el.prop("tagName").toLowerCase()
-          if id = el.prop("id")
+          str = $el.prop("tagName").toLowerCase()
+          if id = $el.prop("id")
             str += "#" + id
 
-          if klass = el.prop("class")
+          ## using attr here instead of class because
+          ## svg's return an SVGAnimatedString object
+          ## instead of a normal string when calling
+          ## the property 'class'
+          if klass = $el.attr("class")
             str += "." + klass.split(/\s+/).join(".")
 
           "<#{str}>"

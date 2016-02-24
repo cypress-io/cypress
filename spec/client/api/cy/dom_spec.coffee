@@ -12,7 +12,7 @@ describe "$Cypress.jQuery Extensions", ->
   context "hidden overrides", ->
     beforeEach ->
       add = (el) =>
-        $(el).appendTo(@cy.$("body"))
+        $(el).appendTo(@cy.$$("body"))
 
       @$visHidden  = add "<ul style='visibility: hidden;'></ul>"
       @$parentVisHidden = add "<div class='invis' style='visibility: hidden;'><button>foo</button></div>"

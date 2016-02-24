@@ -158,15 +158,34 @@ module.exports = (parentWindow, gui, loadApp) ->
 
         nock(Routes.api())
           .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938")
-          .matchHeader("x-project-token", "abc123")
+          .matchHeader("x-project-token", "a9190860-8b7a-45f2-a488-a605ab8aff65")
           .matchHeader("x-git-branch", "master")
           .matchHeader("x-git-author", "John Henry")
           .matchHeader("x-git-message", "foo msg")
           .reply(401)
 
         cache.setUser({name: "Brian"}).then =>
-          @argsAre("--run-project", @todos, "--ci", "--key", "abc123").then =>
-            expect(@write).to.be.calledWithMatch("Sorry, your project's API Key: 'abc123' was not valid. This project cannot run in CI.")
+          @argsAre("--run-project", @todos, "--ci", "--key", "a9190860-8b7a-45f2-a488-a605ab8aff65").then =>
+            expect(@write).to.be.calledOnce
+            expect(@write).to.be.calledWithMatch("Sorry, your project's secret CI key: 'a9190...aff65' was not valid. This project cannot run in CI.")
+            expect(@exit).to.be.calledWith(1)
+            expect(@trigger).not.to.be.calledWith("start:projects:app")
+
+      it "errors when cypress-api is unavailable", ->
+        @sandbox.stub(os, "platform").returns("linux")
+
+        nock(Routes.api())
+          .post("/ci/e3e58d3f-3769-4b50-af38-e31b8989a938")
+          .matchHeader("x-project-token", "a9190860-8b7a-45f2-a488-a605ab8aff65")
+          .matchHeader("x-git-branch", "master")
+          .matchHeader("x-git-author", "John Henry")
+          .matchHeader("x-git-message", "foo msg")
+          .reply(500)
+
+        cache.setUser({name: "Brian"}).then =>
+          @argsAre("--run-project", @todos, "--ci", "--key", "a9190860-8b7a-45f2-a488-a605ab8aff65").then =>
+            expect(@write).to.be.calledOnce
+            expect(@write).to.be.calledWithMatch("Sorry, there was a problem communicating with the remote Cypress servers. This is likely a temporarily problem. Try again later.")
             expect(@exit).to.be.calledWith(1)
             expect(@trigger).not.to.be.calledWith("start:projects:app")
 

@@ -166,6 +166,13 @@ describe "$Cypress.Cy API", ->
         expect(@cy.Promise.resolve).to.be.a("function")
         expect(@cy.Promise.pending).to.eq(Promise.pending)
 
+      it "logs a deprecation", ->
+        warning = @sandbox.spy @Cypress.Utils, "warning"
+
+        @cy.Promise.resolve()
+
+        expect(warning).to.be.calledWithMatch("cy.Promise is now deprecated")
+
     describe "#_", ->
       beforeEach ->
         @cy = $Cypress.Cy.create(@Cypress, @specWindow)
@@ -175,6 +182,13 @@ describe "$Cypress.Cy API", ->
         expect(@cy._).to.eq(_)
         expect(@cy._.each).to.be.a("function")
         expect(@cy._.findWhere).to.eq(_.findWhere)
+
+      it "logs a deprecation", ->
+        warning = @sandbox.spy @Cypress.Utils, "warning"
+
+        @cy._.each([], ->)
+
+        expect(warning).to.be.calledWithMatch("cy._ is now deprecated")
 
     describe "#moment", ->
       beforeEach ->
@@ -186,6 +200,13 @@ describe "$Cypress.Cy API", ->
         expect(@cy.moment).to.eq(moment)
         expect(@cy.moment().toJSON()).to.eq(moment().toJSON())
 
+      it "logs a deprecation", ->
+        warning = @sandbox.spy @Cypress.Utils, "warning"
+
+        @cy.moment().format("MMM DD, YYYY")
+
+        expect(warning).to.be.calledWithMatch("cy.moment is now deprecated")
+
     describe "#Blob", ->
       beforeEach ->
         @cy = $Cypress.Cy.create(@Cypress, @specWindow)
@@ -195,6 +216,13 @@ describe "$Cypress.Cy API", ->
         expect(@cy).to.have.property("Blob")
         expect(@cy.Blob).to.have.property("dataURLToBlob")
         expect(@cy.Blob).to.have.property("base64StringToBlob")
+
+      it "logs a deprecation", ->
+        warning = @sandbox.spy @Cypress.Utils, "warning"
+
+        @cy.Blob.createBlob(['hello world'])
+
+        expect(warning).to.be.calledWithMatch("cy.Blob is now deprecated")
 
   context "integration", ->
     enterCommandTestingMode()
@@ -283,51 +311,44 @@ describe "$Cypress.Cy API", ->
 
     describe "#_contains", ->
       it "returns true if the document contains the element", ->
-        btn = @cy.$("#button").get(0)
+        btn = @cy.$$("#button").get(0)
 
         expect(@cy._contains(btn)).to.be.true
 
       it "returns false if the document does not contain the element", ->
-        btn = @cy.$("#button").remove().get(0)
+        btn = @cy.$$("#button").remove().get(0)
 
         expect(@cy._contains(btn)).to.be.false
 
       it "returns true if all elements in the collection are in the document", ->
-        inputs = @cy.$("input")
+        inputs = @cy.$$("input")
 
         expect(@cy._contains(inputs)).to.be.true
 
       it "returns false if any elemen isnt in the document", ->
-        inputs = @cy.$("input")
+        inputs = @cy.$$("input")
         inputs.last().remove()
 
         expect(@cy._contains(inputs)).to.be.false
 
-    describe "#$", ->
+    describe "#$$", ->
       it "queries the remote document", ->
-        input = @cy.$("#by-name input:first")
+        input = @cy.$$("#by-name input:first")
         expect(input.length).to.eq 1
         expect(input.prop("tagName")).to.eq "INPUT"
 
       it "scopes the selector to context if provided", ->
-        input = @cy.$("input:first", @cy.$("#by-name"))
+        input = @cy.$$("input:first", @cy.$$("#by-name"))
         expect(input.length).to.eq 1
         expect(input.prop("tagName")).to.eq "INPUT"
 
-      it "proxies Deferred", (done) ->
-        expect(@cy.$.Deferred).to.be.a("function")
+    describe "#$", ->
+      it "logs a deprecation", ->
+        warning = @sandbox.spy @Cypress.Utils, "warning"
 
-        df = @cy.$.Deferred()
+        @cy.$("#by-name input:first")
 
-        _.delay ->
-          df.resolve()
-        , 10
-
-        df.done -> done()
-
-      _.each "Event Deferred ajax get getJSON getScript post when".split(" "), (fn) =>
-        it "proxies $.#{fn}", ->
-          expect(@cy.$[fn]).to.be.a("function")
+        expect(warning).to.be.calledWithMatch("cy.$ is now deprecated")
 
     describe "#run", ->
       it "calls prop next() on end if exists", (done) ->
@@ -432,7 +453,7 @@ describe "$Cypress.Cy API", ->
           @cy.get("input:first").type("foo")
 
         @cy.login().then ->
-          expect(@cy.$("input:first")).to.have.value("foo")
+          expect(@cy.$$("input:first")).to.have.value("foo")
 
       it "ensures to splice queue correctly on first custom command", ->
         Cypress.addParentCommand "login", (email) =>

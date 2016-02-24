@@ -10,7 +10,7 @@ do ($Cypress, _) ->
       ## throw error here if @cy is undefined!
 
       ## clone the body and strip out any script tags
-      body = @cy.$("body").clone()
+      body = @cy.$$("body").clone()
       body.find("script,iframe,link[rel='stylesheet']").remove()
 
       ## here we need to figure out if we're in a remote manual environment

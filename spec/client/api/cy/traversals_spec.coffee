@@ -19,7 +19,7 @@ describe "$Cypress.Cy Traversal Commands", ->
 
     context "##{name}", ->
       it "proxies through to jquery and returns new subject", ->
-        el = @cy.$("#list")[name](arg)
+        el = @cy.$$("#list")[name](arg)
         @cy.get("#list")[name](arg).then ($el) ->
           expect($el).to.match el
 
@@ -36,9 +36,9 @@ describe "$Cypress.Cy Traversal Commands", ->
           @cy.get("#list")[name](arg).should("have.length", "asdf")
 
         it "throws on too many elements after timing out waiting for length", (done) ->
-          el = @cy.$("#list")[name](arg)
+          el = @cy.$$("#list")[name](arg)
 
-          node = $Cypress.Utils.stringifyElement @cy.$("#list"), "short"
+          node = $Cypress.Utils.stringifyElement @cy.$$("#list"), "short"
 
           @cy.on "fail", (err) ->
             expect(err.message).to.include "Too many elements found. Found '#{el.length}', expected '#{el.length - 1}'."
@@ -47,9 +47,9 @@ describe "$Cypress.Cy Traversal Commands", ->
           @cy.get("#list")[name](arg).should("have.length", el.length - 1)
 
         it "throws on too few elements after timing out waiting for length", (done) ->
-          el = @cy.$("#list")[name](arg)
+          el = @cy.$$("#list")[name](arg)
 
-          node = $Cypress.Utils.stringifyElement @cy.$("#list"), "short"
+          node = $Cypress.Utils.stringifyElement @cy.$$("#list"), "short"
 
           @cy.on "fail", (err) ->
             expect(err.message).to.include "Not enough elements found. Found '#{el.length}', expected '#{el.length + 1}'."
@@ -63,7 +63,7 @@ describe "$Cypress.Cy Traversal Commands", ->
 
         it "throws when subject is not in the document", (done) ->
           @cy.on "command:end", =>
-            @cy.$("#list").remove()
+            @cy.$$("#list").remove()
 
           @cy.on "fail", (err) ->
             expect(err.message).to.include "cy.#{name}() failed because this element"
@@ -75,7 +75,7 @@ describe "$Cypress.Cy Traversal Commands", ->
           @cy._timeout(100)
 
           errIncludes = (el, node) =>
-            node = $Cypress.Utils.stringifyElement @cy.$(node), "short"
+            node = $Cypress.Utils.stringifyElement @cy.$$(node), "short"
 
             @cy.on "fail", (err) ->
               expect(err.message).to.include "Expected to find element: '#{el}', but never found it. Queried from element: #{node}"
@@ -138,13 +138,13 @@ describe "$Cypress.Cy Traversal Commands", ->
 
   it "eventually resolves", ->
     _.delay ->
-      @cy.$("button:first").text("foo").addClass("bar")
+      @cy.$$("button:first").text("foo").addClass("bar")
     , 100
 
     cy.root().find("button:first").should("have.text", "foo").and("have.class", "bar")
 
   it "retries until it finds", ->
-    li = @cy.$("#list li:last")
+    li = @cy.$$("#list li:last")
     span = $("<span>foo</span>")
 
     retry = _.after 3, ->
@@ -156,13 +156,13 @@ describe "$Cypress.Cy Traversal Commands", ->
       expect($span.get(0)).to.eq(span.get(0))
 
   it "retries until length equals n", ->
-    buttons = @cy.$("button")
+    buttons = @cy.$$("button")
 
     length = buttons.length - 2
 
     @cy.on "retry", _.after 2, =>
       buttons.last().remove()
-      buttons = @cy.$("button")
+      buttons = @cy.$$("button")
 
     ## should resolving after removing 2 buttons
     @cy.root().find("button").should("have.length", length).then ($buttons) ->
@@ -170,20 +170,20 @@ describe "$Cypress.Cy Traversal Commands", ->
 
   it "should('not.exist')", ->
     @cy.on "retry", _.after 3, =>
-      @cy.$("#nested-div").find("span").remove()
+      @cy.$$("#nested-div").find("span").remove()
 
     @cy.get("#nested-div").find("span").should("not.exist")
 
   it "should('exist')", ->
     @cy.on "retry", _.after 3, =>
-      @cy.$("#nested-div").append($("<strong />"))
+      @cy.$$("#nested-div").append($("<strong />"))
 
     @cy.get("#nested-div").find("strong")
 
   ## https://github.com/cypress-io/cypress/issues/38
   it "works with checkboxes", ->
     @cy.on "retry", _.after 2, =>
-      c = @cy.$("[name=colors]").slice(0, 2)
+      c = @cy.$$("[name=colors]").slice(0, 2)
       c.prop("checked", true)
 
     @cy.get("#by-name").find(":checked").should("have.length", 2)
@@ -264,7 +264,7 @@ describe "$Cypress.Cy Traversal Commands", ->
       @cy.get("div:first").find(".spinner'")
 
     it "logs out $el when existing $el is found even on failure", (done) ->
-      button = @cy.$("#button").hide()
+      button = @cy.$$("#button").hide()
 
       @Cypress.on "log", (@log) =>
 

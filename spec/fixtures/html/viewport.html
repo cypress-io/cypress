@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <link rel="icon" href="data:;base64,=">
+    <script type="text/javascript" src="/lib/public/js/iframe.js"></script>
+    <script type="text/javascript">
+      describe("Viewport Tests", function(){
+        beforeEach(function(){
+          cy.visit("fixtures/html/generic.html")
+        })
+
+        it("changes viewport to iphone-6", function(){
+          cy.viewport(400, 300).get("body").viewport(240, 250)
+        })
+
+        it("does not use viewport", function(){
+          cy.get("body")
+        })
+      })
+    </script>
+  </head>
+  <body>
+  </body>
+</html>

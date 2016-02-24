@@ -264,7 +264,7 @@ describe "$Cypress.Log API", ->
         it "displays a deprecation warning", ->
           warn = @sandbox.spy console, "warn"
           @Cypress.command({})
-          expect(warn).to.be.calledWith "Cypress.command() is deprecated. Please update and use: Cypress.Log.command()"
+          expect(warn).to.be.calledWith "Cypress Warning: Cypress.command() is deprecated. Please update and use: Cypress.Log.command()"
 
       context "$Log.log", ->
         it "displays 0 argument", (done) ->
@@ -381,7 +381,7 @@ describe "$Cypress.Log API", ->
             @Cypress.Log.command({})
 
           it "sets numElements if $el", (done) ->
-            $el = @cy.$("body")
+            $el = @cy.$$("body")
 
             @Cypress.on "log", (obj) ->
               expect(obj.get("numElements")).to.eq 1
@@ -390,7 +390,7 @@ describe "$Cypress.Log API", ->
             @Cypress.Log.command($el: $el)
 
           it "sets highlightAttr if $el", (done) ->
-            $el = @cy.$("body")
+            $el = @cy.$$("body")
 
             @Cypress.on "log", (obj) ->
               expect(obj.get("highlightAttr")).not.to.be.undefined

@@ -39,7 +39,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
       if ret and Cypress.Utils.hasElement(ret) and not Cypress.Utils.isInstanceOf(ret, $)
         ## set it back to our own jquery object
         ## to prevent it from being passed downstream
-        ret = Cypress.cy.$(ret)
+        ret = Cypress.cy.$$(ret)
 
       ## then will resolve with the fn's
       ## return or just pass along the subject
@@ -85,15 +85,21 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
 
       invoke = =>
         if _.isFunction(prop)
+          if name is "its"
+            Cypress.Utils.warning("Calling cy.#{name}() on a function is now deprecated. Use cy.invoke('#{fn}') instead.\n\nThis deprecation notice will become an actual error in the next major release.")
+
           ret = prop.apply (remoteSubject or subject), args
 
           if ret and Cypress.Utils.hasElement(ret) and not Cypress.Utils.isInstanceOf(ret, $)
-            return @$(ret)
+            return @$$(ret)
 
           return ret
 
         else
-          prop
+          if name is "invoke"
+            Cypress.Utils.warning("Calling cy.#{name}() on a property is now deprecated. Use cy.its('#{fn}') instead.\n\nThis deprecation notice will become an actual error in the next major release.")
+
+          return prop
 
       getMessage = ->
         if _.isFunction(prop)

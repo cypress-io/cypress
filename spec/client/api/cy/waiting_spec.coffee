@@ -654,7 +654,7 @@ describe "$Cypress.Cy Waiting Commands", ->
             }
 
         it "#onConsole as a child", ->
-          btn = @cy.$("button:first")
+          btn = @cy.$$("button:first")
 
           @cy.get("button:first").wait(10).then ->
             expect(@log.attributes.onConsole()).to.deep.eq {

@@ -14,7 +14,7 @@ describe "$Cypress.Cy Ensure Extensions", ->
 
       fn = => @cy.ensureDom(button, "foo")
 
-      expect(fn).to.throw("cy.foo() failed because this element you are chaining off of has become detached or removed from the DOM:\n\n<button>foo</button>\n\nhttp://on.cypress.io/element-has-detached-from-dom")
+      expect(fn).to.throw("cy.foo() failed because this element you are chaining off of has become detached or removed from the DOM:\n\n<button>foo</button>\n\nhttps://on.cypress.io/element-has-detached-from-dom")
 
   context "#ensureElementIsNotAnimating", ->
     beforeEach ->
@@ -39,7 +39,7 @@ describe "$Cypress.Cy Ensure Extensions", ->
 
       @cy.prop("current", cmd)
 
-      $el    = @cy.$("button:first")
+      $el    = @cy.$$("button:first")
       coords = [{x: 10, y: 20}, {x: 20, y: 30}]
 
       fn = => @cy.ensureElementIsNotAnimating($el, coords)

@@ -54,11 +54,6 @@ describe "Iframe Entity", ->
       @Cypress.trigger "stop"
       expect(stop).to.be.calledOnce
 
-    it "listens to Cypress initialize", ->
-      setViewport = @sandbox.spy @iframe, "setViewport"
-      @Cypress.trigger "config", {viewportWidth: 500, viewportHeight: 800, foo: "bar"}
-      expect(setViewport).to.be.calledWithExactly({viewportWidth: 500, viewportHeight: 800})
-
   context "#commandExit", ->
     it "triggers 'clear:revert:message' without originalBody", ->
       trigger = @sandbox.spy @iframe, "trigger"
