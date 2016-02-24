@@ -5,7 +5,7 @@ Server         = require("#{root}lib/server")
 Fixture        = require("#{root}lib/fixture")
 FixturesHelper = require("#{root}/spec/server/helpers/fixtures")
 
-describe "lib/fixtures", ->
+describe "lib/fixture", ->
   beforeEach ->
     FixturesHelper.scaffold()
 

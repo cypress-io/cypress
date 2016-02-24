@@ -2,7 +2,7 @@ require("../spec_helper")
 
 Xhrs = require("#{root}lib/controllers/xhrs")
 
-describe "XHRS Controller", ->
+describe "lib/controllers/xhr", ->
   beforeEach ->
     @xhr = new Xhrs({})
 

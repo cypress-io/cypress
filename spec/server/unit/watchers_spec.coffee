@@ -13,7 +13,7 @@ Watchers = proxyquire.noCallThru().load("../../lib/watchers", {
   chokidar: chokidar
 })
 
-describe "Watchers", ->
+describe "lib/watchers", ->
   beforeEach ->
     @watchers = Watchers()
 

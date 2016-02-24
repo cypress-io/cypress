@@ -1,8 +1,8 @@
 require("../spec_helper")
 
-UrlHelpers = require('../../../lib/util/url_helpers')
+UrlHelpers = require("#{root}lib/util/url_helpers")
 
-describe "Url helpers", ->
+describe "lib/util/url_helpers", ->
   context "#isFile", ->
     it "isFile is true", ->
       expect(UrlHelpers.isFile("file://foo.txt")).to.be.true

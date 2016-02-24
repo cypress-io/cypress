@@ -5,15 +5,14 @@ Server      = require("#{root}lib/server")
 Support     = require("#{root}lib/support")
 Fixtures    = require("#{root}/spec/server/helpers/fixtures")
 
-describe "Support ", ->
+describe "lib/support", ->
   beforeEach ->
     Fixtures.scaffold()
 
     @todos = Fixtures.project("todos")
 
     @server  = Server(@todos)
-    @app     = @server.app
-    @support = Support(@app)
+    @support = Support(@server.config)
 
   afterEach ->
     Fixtures.remove()
