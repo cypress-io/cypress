@@ -403,7 +403,7 @@ describe('Kitchen Sink [000]', function(){
     })
 
 
-    it('cy.uncheck() - uncheck a checkbox or radio element [002]', function(){
+    it('cy.uncheck() - uncheck a checkbox element [002]', function(){
 
       // SOME OF THESE ARE COMMENTED OUT DUE TO AN
       // ERROR CURRENTLY IN CYPRESS
@@ -421,7 +421,7 @@ describe('Kitchen Sink [000]', function(){
       // **** Check Value ****
       //
       // cy.uncheck() accepts a value argument
-      // that unchecks only checkboxes or radios
+      // that unchecks only checkboxes
       // with matching values
       //
       // cy.get('.action-check [type='checkbox']').check('checkbox1').uncheck('checkbox1').should('not.be.checked')
