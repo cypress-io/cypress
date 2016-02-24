@@ -2659,7 +2659,7 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(console.Coords).to.deep.eq coords
 
       it "#onConsole when checkbox is already checked", ->
-        @cy.get("[name=colors][value=blue]").check().check().then ($input) ->
+        @cy.get("[name=colors][value=blue]").invoke("prop", "checked", true).check().then ($input) ->
           expect(@log.get("coords")).to.be.undefined
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "check"
@@ -2669,8 +2669,20 @@ describe "$Cypress.Cy Actions Commands", ->
             Options: undefined
           }
 
+      it "#onConsole when radio is already checked", ->
+        @cy.get("[name=gender][value=male]").check().check().then ($input) ->
+          expect(@log.get("coords")).to.be.undefined
+          expect(@log.attributes.onConsole()).to.deep.eq {
+            Command: "check"
+            "Applied To": @log.get("$el").get(0)
+            Elements: 1
+            Note: "This radio was already checked. No operation took place."
+            Options: undefined
+          }
+
       it "#onConsole when checkbox with value is already checked", ->
         @cy.$$("[name=colors][value=blue]").prop("checked", true)
+
         @cy.get("[name=colors]").check("blue").then ($input) ->
           expect(@log.get("coords")).to.be.undefined
           expect(@log.attributes.onConsole()).to.deep.eq {
@@ -3034,6 +3046,19 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "#onConsole when checkbox is already unchecked", ->
         @cy.get("[name=colors][value=blue]").invoke("prop", "checked", false).uncheck().then ($input) ->
+          expect(@log.get("coords")).to.be.undefined
+          expect(@log.attributes.onConsole()).to.deep.eq {
+            Command: "uncheck"
+            "Applied To": @log.get("$el").get(0)
+            Elements: 1
+            Note: "This checkbox was already unchecked. No operation took place."
+            Options: undefined
+          }
+
+      it "#onConsole when checkbox with value is already unchecked", ->
+        @cy.get("[name=colors][value=blue]").invoke("prop", "checked", false)
+        @cy.get("[name=colors]").uncheck("blue").then ($input) ->
+          expect(@log.get("coords")).to.be.undefined
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "uncheck"
             "Applied To": @log.get("$el").get(0)

@@ -1359,7 +1359,8 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
             ## still ensure visibility even if the command is noop
             @ensureVisibility $el, options._log
             if options._log
-              onConsole.Note = "This checkbox was already #{type}ed. No operation took place."
+              inputType = if $el.is(":radio") then "radio" else "checkbox"
+              onConsole.Note = "This #{inputType} was already #{type}ed. No operation took place."
               options._log.snapshot().end()
 
             return null
