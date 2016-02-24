@@ -29,7 +29,6 @@ class Project extends EE
   open: (options = {}) ->
     @server = Server(@projectRoot)
 
-    ## TODO: what to return here?
     @server.open(options)
     .bind(@)
     .then (config) ->
@@ -105,31 +104,15 @@ class Project extends EE
       Support(config).scaffold()
     )
 
-  ## A simple helper method
-  ## to create a project ID if we do not already
-  ## have one
-  ## should refactor this method to only create
-  ## a project ID if we were missing one
-  ## currently this catches all errors like EACCES
-  ## errors which should not try to generate a project id
-  ensureProjectId: ->
-    @getProjectId()
-    .bind(@)
-    .catch(@createProjectId)
+  writeProjectId: (id) ->
+    attrs = {projectId: id}
+    logger.info "Writing Project ID", _.clone(attrs)
+    Settings
+      .write(@projectRoot, attrs)
+      .get("projectId")
 
-  createProjectId: (err) ->
-    ## dont try to create a project id if
-    ## we had an error accessing cypress.json
-    throw err if err and err.code is "EACCES"
-
+  createProjectId: ->
     logger.info "Creating Project ID"
-
-    write = (id) =>
-      attrs = {projectId: id}
-      logger.info "Writing Project ID", _.clone(attrs)
-      Settings
-        .write(@projectRoot, attrs)
-        .get("projectId")
 
     ## allow us to specify the exact key
     ## we want via the CYPRESS_PROJECT_ID env.
@@ -137,14 +120,18 @@ class Project extends EE
     ## file (like in example repos) yet still
     ## use a correct id in the API
     if id = process.env.CYPRESS_PROJECT_ID
-      return write(id)
+      return @writeProjectId(id)
 
-    cache.getUser().then (user = {}) =>
-      api.createProject(user.session_token)
-      .then(write)
+    user.ensureSession()
+    .bind(@)
+    .then (session) ->
+      api.createProject(session)
+    .then(@writeProjectId)
 
   getProjectId: ->
-    Settings.read(@projectRoot)
+    @verifyExistance()
+    .then =>
+      Settings.read(@projectRoot)
     .then (settings) =>
       if (id = settings.projectId)
         return id
@@ -157,6 +144,11 @@ class Project extends EE
     .return(@)
     .catch =>
       errors.throw("NO_PROJECT_FOUND_AT_PROJECT_ROOT", @projectRoot)
+
+  ensureProjectId: ->
+    @getProjectId()
+    .bind(@)
+    .catch({type: "NO_PROJECT_ID"}, @createProjectId)
 
   @paths = ->
     cache.getProjectPaths()
@@ -188,7 +180,7 @@ class Project extends EE
     @paths().then (paths) ->
       path in paths
 
-  @key = (path) ->
+  @getSecretKeyByPath = (path) ->
     ## verify the project exists at the projectRoot
     Project(path).verifyExistance()
 
@@ -201,7 +193,7 @@ class Project extends EE
         .catch ->
           errors.throw("CANNOT_FETCH_PROJECT_TOKEN")
 
-  @generateKey = (path) ->
+  @generateSecretKeyByPath = (path) ->
     ## verify the project exists at the projectRoot
     Project(path).verifyExistance()
 
