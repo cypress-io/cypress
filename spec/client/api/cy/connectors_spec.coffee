@@ -48,6 +48,25 @@ describe "$Cypress.Cy Connectors Commands", ->
 
       @cy.noop().then((->), fn)
 
+    it "passes timeout down to then", ->
+      @cy._timeout(50)
+
+      @cy.then {timeout: 150}, ->
+        Promise.delay(100)
+
+    it "can resolve nested thens", ->
+      @cy.get("div:first").then ->
+        @cy.get("div:first").then ->
+          @cy.get("div:first")
+
+    it.skip "can resolve cypress commands inside of a promise", ->
+      @cy.then ->
+        Promise.delay(10).then =>
+          @cy.get("div:first")
+
+    describe "errors", ->
+
+
     describe "yields to remote jQuery subject", ->
       beforeEach ->
         ## set the jquery path back to our
