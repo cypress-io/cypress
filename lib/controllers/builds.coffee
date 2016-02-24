@@ -1,6 +1,6 @@
 request     = require("request")
 api         = require("../api")
-cache       = require("../cache")
+user        = require("../user")
 
 class Builds
   constructor: (app) ->
@@ -13,7 +13,7 @@ class Builds
     @app = app
 
   handleBuilds: (req, res, next) ->
-    cache.getUser().then (user) =>
+    user.get().then (user) =>
       api.getBuilds(
         @app.get("cypress").projectId,
         user?.session_token
