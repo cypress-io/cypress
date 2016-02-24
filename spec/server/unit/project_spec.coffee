@@ -34,6 +34,51 @@ describe "lib/project", ->
     it "can close when server + watchers arent open", ->
       @project.close()
 
+    it.skip "calls close once on watchers + socket when app closes", ->
+      close1 = @sandbox.stub(Watchers::, "close")
+      close2 = @sandbox.stub(Socket::, "close")
+
+      @server.open().then =>
+        @server.app.emit("close")
+        @server.app.emit("close")
+
+        expect(close1).to.be.calledOnce
+        expect(close2).to.be.calledOnce
+
+  context.skip "#open", ->
+    it "calls Fixture#scaffold", ->
+      @server.open().bind(@).then ->
+        expect(Fixture::scaffold).to.be.calledOnce
+
+    it "calls Support#scaffold", ->
+      @server.open().bind(@).then ->
+        expect(Support::scaffold).to.be.calledOnce
+
+    it "calls project#getDetails", ->
+      @server.open().bind(@).then ->
+        expect(Project::getDetails).to.be.calledWith("a-long-guid-123")
+
+    it "watches cypress.json", ->
+      @server.open().bind(@).then ->
+        expect(Watchers::watch).to.be.calledWith("/Users/brian/app/cypress.json")
+
+    it "passes watchers to Socket.startListening", ->
+      options = {}
+
+      @server.open(options).then ->
+        startListening = Socket::startListening
+        expect(startListening.getCall(0).args[0]).to.be.instanceof(Watchers)
+        expect(startListening.getCall(0).args[1]).to.eq(options)
+
+    it "calls onReboot when cypress.json changes", ->
+      onReboot = @sandbox.spy()
+
+      ## invoke the onChange callback
+      Watchers::watch.yieldsTo("onChange")
+
+      @server.open({onReboot: onReboot}).then ->
+        expect(onReboot).to.be.calledOnce
+
   context "#getProjectId", ->
     beforeEach ->
       @project         = Project("path/to/project")
@@ -145,17 +190,59 @@ describe "lib/project", ->
         expect(createProjectId).not.to.be.calledWith(err)
 
   context ".add", ->
-    it "creates a cypress.json"
+    beforeEach ->
+      @pristinePath = Fixtures.projectPath("pristine")
+      @sandbox.stub(user, "ensureSession").resolves("session-123")
+      @sandbox.stub(api, "createProject").resolves("id-123")
 
-    it "inserts into cache project id + cache"
+    it "creates a cypress.json in projectRoot", ->
+      Project.add(@pristinePath).then =>
+        Settings.read(@pristinePath).then (settings) ->
+          expect(settings).to.deep.eq({
+            projectId: "id-123"
+          })
+
+    it "inserts into cache project id + cache", ->
+      Project.add(@pristinePath).then =>
+        cache.read().then (json) =>
+          expect(json.PROJECTS).to.deep.eq({
+            "id-123": {PATH: @pristinePath}
+          })
+
+    it "resolves with the id", ->
+      Project.add(@pristinePath).then (id) ->
+        expect(id).to.eq("id-123")
 
   context ".remove", ->
+    beforeEach ->
+      @sandbox.stub(cache, "removeProject").resolves()
+
+    it "calls cache.removeProject with path", ->
+      Project.remove("path/to/project").then ->
+        expect(cache.removeProject).to.be.calledWith("path/to/project")
 
   context ".exists", ->
+    beforeEach ->
+      @sandbox.stub(cache, "getProjectPaths").resolves(["foo", "bar", "baz"])
+
+    it "is true if path is in paths", ->
+      Project.exists("bar").then (ret) ->
+        expect(ret).to.be.true
+
+    it "is false if path isnt in paths", ->
+      Project.exists("quux").then (ret) ->
+        expect(ret).to.be.false
 
   context ".id", ->
 
   context ".paths", ->
+    beforeEach ->
+      @sandbox.stub(cache, "getProjectPaths").resolves([])
+
+    it "calls cache.getProjectPaths", ->
+      Project.paths().then (ret) ->
+        expect(ret).to.deep.eq([])
+        expect(cache.getProjectPaths).to.be.calledOnce
 
   context ".getSecretKeyByPath", ->
     beforeEach ->

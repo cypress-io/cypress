@@ -2,7 +2,7 @@ require("../spec_helper")
 
 Reporter = require("#{root}lib/reporter")
 
-describe "Reporter", ->
+describe "lib/reporter", ->
   beforeEach ->
     @reporter = Reporter()
 

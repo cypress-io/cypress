@@ -2,21 +2,16 @@ require("../spec_helper")
 
 Server        = require("#{root}lib/server")
 Socket        = require("#{root}lib/socket")
-Support       = require("#{root}lib/support")
-Fixture       = require("#{root}lib/fixture")
 Watchers      = require("#{root}lib/watchers")
 Project       = require("#{root}lib/project")
 logger        = require("#{root}lib/logger")
 Settings      = require("#{root}lib/util/settings")
 
-describe "Server Interface", ->
+describe "lib/server", ->
   beforeEach ->
     @sandbox.stub(Socket.prototype, "startListening")
     @sandbox.stub(Project.prototype, "ensureProjectId").resolves("a-long-guid-123")
-    @sandbox.stub(Project.prototype, "getDetails").resolves("a-long-guid-123")
     @sandbox.stub(Settings, "readSync").returns({})
-    @sandbox.stub(Support.prototype, "scaffold").resolves({})
-    @sandbox.stub(Fixtures.prototype, "scaffold").resolves({})
     @sandbox.stub(Watchers.prototype, "watch").returns()
     @server = Server("/Users/brian/app")
 
@@ -38,7 +33,7 @@ describe "Server Interface", ->
     it "returns a promise", ->
       expect(@server.close()).to.be.instanceof Promise
 
-    it "calls close on @server", ->
+    it "calls close on this.server", ->
       @server.open().bind(@).then ->
         @server.close()
 
@@ -52,12 +47,11 @@ describe "Server Interface", ->
       @server.close().then ->
         expect(logger.getSettings()).to.be.undefined
 
-    it "app fires close event", ->
-      emit = @sandbox.spy @server.app, "emit"
+    it "calls close on this.ws", ->
+      @server.ws = {close: @sandbox.spy()}
 
-      @server.open().bind(@).then ->
-        @server.close().then ->
-          expect(emit).to.be.calledWith "close"
+      @server.close().then =>
+        expect(@server.ws.close).to.be.calledOnce
 
   context "#open", ->
     it "creates http server"
@@ -76,50 +70,6 @@ describe "Server Interface", ->
     it "isListening=true", ->
       @server.open().bind(@).then ->
         expect(@server.isListening).to.be.true
-
-    it "calls Fixtures#scaffold", ->
-      @server.open().bind(@).then ->
-        expect(Fixtures::scaffold).to.be.calledOnce
-
-    it "calls Support#scaffold", ->
-      @server.open().bind(@).then ->
-        expect(Support::scaffold).to.be.calledOnce
-
-    it "calls project#getDetails", ->
-      @server.open().bind(@).then ->
-        expect(Project::getDetails).to.be.calledWith("a-long-guid-123")
-
-    it "watches cypress.json", ->
-      @server.open().bind(@).then ->
-        expect(Watchers::watch).to.be.calledWith("/Users/brian/app/cypress.json")
-
-    it "passes watchers to Socket.startListening", ->
-      options = {}
-
-      @server.open(options).then ->
-        startListening = Socket::startListening
-        expect(startListening.getCall(0).args[0]).to.be.instanceof(Watchers)
-        expect(startListening.getCall(0).args[1]).to.eq(options)
-
-    it "calls onReboot when cypress.json changes", ->
-      onReboot = @sandbox.spy()
-
-      ## invoke the onChange callback
-      Watchers::watch.yieldsTo("onChange")
-
-      @server.open({onReboot: onReboot}).then ->
-        expect(onReboot).to.be.calledOnce
-
-    it "calls close once on watchers + socket when app closes", ->
-      close1 = @sandbox.stub(Watchers::, "close")
-      close2 = @sandbox.stub(Socket::, "close")
-
-      @server.open().then =>
-        @server.app.emit("close")
-        @server.app.emit("close")
-
-        expect(close1).to.be.calledOnce
-        expect(close2).to.be.calledOnce
 
     context "port", ->
       it "can override default port", ->

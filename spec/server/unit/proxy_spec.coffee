@@ -9,7 +9,7 @@ Readable  = require("stream").Readable
 Server    = require("#{root}lib/server")
 Proxy     = require("#{root}lib/controllers/proxy")
 
-describe "Proxy", ->
+describe "lib/proxy", ->
   beforeEach ->
     @sandbox.stub(Server.prototype, "getCypressJson").returns({})
 

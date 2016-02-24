@@ -2,7 +2,7 @@ require("../spec_helper")
 
 Routes = require("#{root}/lib/util/routes")
 
-describe "Routes Util", ->
+describe "lib/util/routes", ->
   it "signin", ->
     expect(Routes.signin()).to.eq "http://localhost:1234/signin"
 

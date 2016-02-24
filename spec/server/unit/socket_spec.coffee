@@ -8,7 +8,7 @@ Watchers     = require("#{root}lib/watchers")
 Settings     = require("#{root}lib/util/settings")
 Fixtures     = require("#{root}/spec/server/helpers/fixtures")
 
-describe "Socket", ->
+describe "lib/socket", ->
   beforeEach ->
     @ioSocket =
       on: @sandbox.stub()
@@ -27,7 +27,7 @@ describe "Socket", ->
     Settings.remove(process.cwd())
 
   it "returns a socket instance", ->
-    s = Socket(@io, @app)
+    s = Socket(@app)
     expect(s).to.be.instanceof Socket
 
   it "throws without io instance", ->
@@ -40,7 +40,7 @@ describe "Socket", ->
 
   context "#close", ->
     beforeEach ->
-      @socket = Socket(@io, @app)
+      @socket = Socket(@app)
 
     it "calls close on #io", ->
       @socket.close()
@@ -48,7 +48,7 @@ describe "Socket", ->
 
   context "#watchTestFileByPath", ->
     beforeEach ->
-      @socket          = Socket(@io, @app)
+      @socket          = Socket(@app)
       @socket.testsDir = Fixtures.project "todos/tests"
       @filePath        = @socket.testsDir + "/test1.js"
       @watchers        = Watchers()
@@ -102,7 +102,7 @@ describe "Socket", ->
       @todos   = Fixtures.project("todos")
       @server  = Server(@todos)
       @app     = @server.app
-      @socket  = Socket(@io, @app)
+      @socket  = Socket(@app)
 
     afterEach ->
       Fixtures.remove()
@@ -168,7 +168,7 @@ describe "Socket", ->
       @todos   = Fixtures.project("todos")
       @server  = Server(@todos)
       @app     = @server.app
-      @socket  = Socket(@io, @app)
+      @socket  = Socket(@app)
 
     afterEach ->
       Fixtures.remove()
@@ -211,7 +211,7 @@ describe "Socket", ->
 
   context "#startListening", ->
     beforeEach ->
-      @socket = Socket(@io, @app)
+      @socket = Socket(@app)
       Fixtures.scaffold()
 
     afterEach ->
