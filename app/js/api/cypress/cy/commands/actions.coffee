@@ -1346,29 +1346,29 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
           options._log.snapshot("before", {next: "after"})
 
-        if not isAcceptableElement($el)
-          node   = Cypress.Utils.stringifyElement($el)
-          word   = Cypress.Utils.plural(options.$el, "contains", "is")
-          phrase = if type is "check" then " and :radio" else ""
-          @throwErr "cy.#{type}() can only be called on :checkbox#{phrase}! Your subject #{word} a: #{node}", options._log
+          if not isAcceptableElement($el)
+            node   = Cypress.Utils.stringifyElement($el)
+            word   = Cypress.Utils.plural(options.$el, "contains", "is")
+            phrase = if type is "check" then " and :radio" else ""
+            @throwErr "cy.#{type}() can only be called on :checkbox#{phrase}! Your subject #{word} a: #{node}", options._log
 
-        ## if the checkbox was already checked
-        ## then notify the user of this note
-        ## and bail
-        if isNoop($el)
-          ## still ensure visibility even if the command is noop
-          @ensureVisibility $el, options._log
-          if options._log
-            onConsole.Note = "This checkbox was already #{type}ed. No operation took place."
-            options._log.snapshot().end()
+          ## if the checkbox was already checked
+          ## then notify the user of this note
+          ## and bail
+          if isNoop($el)
+            ## still ensure visibility even if the command is noop
+            @ensureVisibility $el, options._log
+            if options._log
+              onConsole.Note = "This checkbox was already #{type}ed. No operation took place."
+              options._log.snapshot().end()
 
-          return null
-        else
-          ## set the coords only if we are actually
-          ## going to go out and click this bad boy
-          coords = @getCoordinates($el)
-          onConsole.Coords = coords
-          options._log.set "coords", coords
+            return null
+          else
+            ## set the coords only if we are actually
+            ## going to go out and click this bad boy
+            coords = @getCoordinates($el)
+            onConsole.Coords = coords
+            options._log.set "coords", coords
 
         ## if we didnt pass in any values or our
         ## el's value is in the array then check it

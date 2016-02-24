@@ -2582,7 +2582,19 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(logs).to.have.length(2)
           expect(checks).to.have.length(1)
 
-      it "logs only 1 check event on click with 1 matching value arg", ->
+      it "logs only 1 check event on click of 1 radio", ->
+        logs = []
+        radios = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+          radios.push(log) if log.get("name") is "check"
+
+        @cy.get("[name=gender][value=female]").check().then ->
+          expect(logs).to.have.length(2)
+          expect(radios).to.have.length(1)
+
+      it "logs only 1 check event on checkbox with 1 matching value arg", ->
         logs = []
         checks = []
 
@@ -2593,6 +2605,18 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("[name=colors]").check("blue").then ->
           expect(logs).to.have.length(2)
           expect(checks).to.have.length(1)
+
+      it "logs only 1 check event on radio with 1 matching value arg", ->
+        logs = []
+        radios = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+          radios.push(log) if log.get("name") is "check"
+
+        @cy.get("[name=gender]").check("female").then ->
+          expect(logs).to.have.length(2)
+          expect(radios).to.have.length(1)
 
       it "passes in $el", ->
         @cy.get("[name=colors][value=blue]").check().then ($input) ->
