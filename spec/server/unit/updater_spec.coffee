@@ -1,10 +1,3 @@
-## must stub due to node-webkit-updater requiring NW
-global.window = {
-  nwDispatcher: {
-    requireNwGui: ->
-  }
-}
-
 require("../spec_helper")
 
 delete global.fs
@@ -13,27 +6,14 @@ mock        = require("mock-fs")
 Updater     = require("#{root}lib/updater")
 Fixtures    = require("#{root}/spec/server/helpers/fixtures")
 
-describe "Updater", ->
-  beforeEach ->
-    nock.disableNetConnect()
-
+describe "lib/updater", ->
   afterEach ->
     mock.restore()
-    nock.enableNetConnect()
-    nock.cleanAll()
 
   context "interface", ->
     it "returns an updater instance", ->
       u = Updater({})
       expect(u).to.be.instanceof Updater
-
-    it "requires an App", ->
-      fn = -> Updater()
-      expect(fn).to.throw "Instantiating lib/updater requires an App!"
-
-    it "stores App", ->
-      u = Updater({})
-      expect(u.App).to.deep.eq {}
 
   context "#getPackage", ->
     beforeEach ->
@@ -87,56 +67,59 @@ describe "Updater", ->
       @updater.coords = {x: 1000, y: 30}
       expect(@updater.getArgs()).to.deep.eq ["foo", "bar", "--updating", "--coords=1000x30"]
 
-  context "#run", ->
+  context ".run", ->
     beforeEach ->
-      @updater = Updater({quit: @sandbox.spy()})
+      @updater = Updater({})
       @updater.getClient()
       @checkNewVersion = @sandbox.stub(@updater.client, "checkNewVersion")
+      @sandbox.stub(process, "exit")
 
     it "invokes onRun", ->
       spy = @sandbox.spy()
-      @updater.run({onStart: spy})
+      Updater.run({onStart: spy})
       expect(spy).to.be.called
 
     describe "client#checkNewVersion", ->
       beforeEach ->
-        @download = @sandbox.stub(@updater, "download")
+        @download = @sandbox.stub(Updater.prototype, "download")
 
       it "is called once", ->
         @updater.run()
         expect(@checkNewVersion).to.be.calledOnce
 
       it "calls #download if new version exists", ->
-        @checkNewVersion.callsArgWith(0, null, true, {})
+        @checkNewVersion.yields(null, true, {})
         @updater.run()
         expect(@download).to.be.calledOnce
 
       it "passes manifest to #download when new version exists", ->
-        @checkNewVersion.callsArgWith(0, null, true, {foo: "bar"})
+        @checkNewVersion.yields(null, true, {foo: "bar"})
         @updater.run()
         expect(@download).to.be.calledWith({foo: "bar"})
 
       it "does not call #download if there isnt a new version", ->
-        @checkNewVersion.callsArgWith(0, null, false, {foo: "bar"})
+        @checkNewVersion.yields(null, false, {foo: "bar"})
         @updater.run()
         expect(@download).not.to.be.called
 
       it "invokes onNone when there isnt a new version", ->
         spy = @sandbox.spy()
-        @checkNewVersion.callsArgWith(0, null, false)
-        @updater.run({onNone: spy})
+        @checkNewVersion.yields(null, false)
+        @updater.callbacks.onNone = spy
+        @updater.run()
         expect(spy).to.be.called
 
       it "does not call #download if there is an error", ->
-        @checkNewVersion.callsArgWith(0, (new Error), true, {foo: "bar"})
+        @checkNewVersion.yields((new Error), true, {foo: "bar"})
         @updater.run()
         expect(@download).not.to.be.called
 
       it "invokes onError callbacks", ->
         err = new Error("checking onError")
         spy = @sandbox.spy()
-        @checkNewVersion.callsArgWith(0, err)
-        @updater.run({onError: spy})
+        @checkNewVersion.yields(err)
+        @updater.callbacks.onError = spy
+        @updater.run()
         expect(spy).to.be.calledWith(err)
 
     describe "#download", ->
@@ -153,13 +136,13 @@ describe "Updater", ->
         expect(spy).to.be.called
 
       it "calls unpack with destinationPath and manifest", ->
-        @updater.client.download.callsArgWith(0, null, "/Users/bmann/app")
+        @updater.client.download.yields(null, "/Users/bmann/app")
         @updater.download({})
         @clock.tick(1000)
         expect(@updater.unpack).to.be.calledOnce.and.to.be.calledWith("/Users/bmann/app", {})
 
       it "does not call unpack on error", ->
-        @updater.client.download.callsArgWith(0, (new Error), "/Users/bmann/app")
+        @updater.client.download.yields((new Error), "/Users/bmann/app")
         @updater.download({})
         @clock.tick(1000)
         expect(@updater.unpack).not.to.be.called
@@ -168,7 +151,7 @@ describe "Updater", ->
         err = new Error("checking onError")
         spy = @sandbox.spy()
         @updater.callbacks.onError = spy
-        @updater.client.download.callsArgWith(0, err)
+        @updater.client.download.yields(err)
         @updater.download({})
         @clock.tick(1000)
         expect(spy).to.be.calledWith(err)
@@ -185,12 +168,12 @@ describe "Updater", ->
         expect(spy).to.be.called
 
       it "calls runInstaller with newAppPath", ->
-        @updater.client.unpack.callsArgWith(1, null, "/Users/bmann/app")
+        @updater.client.unpack.yields(null, "/Users/bmann/app")
         @updater.unpack("/some/path", {})
         expect(@updater.runInstaller).to.be.calledOnce.and.to.be.calledWith("/Users/bmann/app")
 
       it "does not call runInstaller on error", ->
-        @updater.client.unpack.callsArgWith(1, (new Error), "/Users/bmann/app")
+        @updater.client.unpack.yields((new Error), "/Users/bmann/app")
         @updater.unpack("/some/path", {})
         expect(@updater.runInstaller).not.to.be.called
 
@@ -198,7 +181,7 @@ describe "Updater", ->
         err = new Error("checking onError")
         spy = @sandbox.spy()
         @updater.callbacks.onError = spy
-        @updater.client.unpack.callsArgWith(1, err)
+        @updater.client.unpack.yields(err)
         @updater.unpack("/some/path", {})
         expect(spy).to.be.calledWith(err)
 
@@ -211,14 +194,14 @@ describe "Updater", ->
         @updater.runInstaller("/Users/bmann/newApp").then =>
           expect(@updater.copyCyDataTo).to.be.calledWith("/Users/bmann/newApp")
 
-      it "calls quit on the App", ->
+      it "calls process.exit", ->
         @updater.runInstaller("/Users/bmann/newApp").then =>
-          expect(@updater.App.quit).to.be.calledOnce
+          expect(process.exit).to.be.calledOnce
 
       it "calls runInstaller on the client", ->
         c = @updater.client
         @updater.runInstaller("/Users/bmann/newApp").then =>
-          expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec(), "--updating"], {})
+          expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", ["--app-path=#{c.getAppPath()}", "--exec-path=#{c.getAppExec()}", "--updating"], {})
 
       ## we no longer pass up additional App argv
       ## other than from debug i'm not sure why we
@@ -279,7 +262,7 @@ describe "Updater", ->
 
     describe "#install", ->
       beforeEach ->
-        @install = @sandbox.stub(@updater.client, "install").callsArgWith(1, null)
+        @install = @sandbox.stub(@updater.client, "install").yields(null)
         @run     = @sandbox.stub(@updater.client, "run")
         @trash   = @sandbox.stub(@updater, "trash").resolves()
 
@@ -293,7 +276,7 @@ describe "Updater", ->
 
       it "calls App.quit", ->
         @updater.install("/Users/bmann/app_path", "/Users/bmann/app_exec_path").then =>
-          expect(@updater.App.quit).to.be.calledOnce
+          expect(process.exit).to.be.calledOnce
 
       context "args", ->
         it "uses args from App.argv", ->
@@ -364,7 +347,7 @@ describe "Updater", ->
       expect(@updater.client.checkNewVersion).to.be.called
 
     it "calls optsions.newVersionExists when there is a no version", ->
-      @updater.client.checkNewVersion.callsArgWith(0, null, true, {})
+      @updater.client.checkNewVersion.yields(null, true, {})
 
       options = {onNewVersion: @sandbox.spy()}
       @updater.check(options)
@@ -372,7 +355,7 @@ describe "Updater", ->
       expect(options.onNewVersion).to.be.calledWith({})
 
     it "calls options.newVersionExists when there is a no version", ->
-      @updater.client.checkNewVersion.callsArgWith(0, null, false)
+      @updater.client.checkNewVersion.yields(null, false)
 
       options = {onNoNewVersion: @sandbox.spy()}
       @updater.check(options)

@@ -116,7 +116,7 @@ class Updater
       ## it additionally passes the --updating flag
       @getClient().runInstaller(newAppPath, args, {})
 
-      @trigger("quit")
+      process.exit()
 
   unpack: (destinationPath, manifest) ->
     logger.info "unpacking new version", destination: destinationPath
