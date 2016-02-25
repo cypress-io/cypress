@@ -12,7 +12,7 @@
       @set "loggingIn", true
 
     loggedIn: (attrs) ->
-      @set "loggingIn", false
+      # @set "loggingIn", false
       @set attrs
 
     setLoginError: (err) ->

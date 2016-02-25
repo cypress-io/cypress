@@ -33,10 +33,8 @@ describe "Login [000]", ->
         cy.get("#login").contains("button", "Login with GitHub").as("loginBtn")
 
       it "triggers ipc 'window:open' on click [002]", ->
-        @agents.spy(@App, "ipc")
-
         cy
-          .get("#login").contains("button", "Login with GitHub").click().then ->
+          .get("@loginBtn").click().then ->
             expect(@App.ipc).to.be.calledWithExactly("window:open", {
               position: "center"
               focus: true
@@ -47,25 +45,19 @@ describe "Login [000]", ->
               type: "GITHUB_LOGIN"
             })
 
+      it "does not lock up UI if login is clicked multiple times [05u]", ->
+        cy
+          .get("@loginBtn")
+            .click().click()
+          .get("@loginBtn").should("not.be.disabled")
+
+
       context "on 'window:open' ipc response [007]", ->
-        it "displays spinner with 'Logging in...' on ipc response [004]", ->
-          cy
-            .get("@loginBtn").click().then ->
-              @ipc.handle("window:open", null, {})
-            .contains("Logging in...")
-
-        it "disables 'Login' button [006]", ->
-          cy
-            .get("@loginBtn").click().then ->
-              @ipc.handle("window:open", null, {})
-            .get("@loginBtn").should("be.disabled")
-
         it "triggers ipc 'log:in' [008]", ->
           cy
             .get("@loginBtn").click().then ->
-              @agents.spy(@App, "ipc")
               @ipc.handle("window:open", null, {})
-            .contains("Logging in...").then ->
+            .then ->
               expect(@App.ipc).to.be.calledWith("log:in", {})
 
         describe "on ipc 'log:in' success [00a]", ->
@@ -73,12 +65,25 @@ describe "Login [000]", ->
             cy
               .get("@loginBtn").click().then ->
                 @ipc.handle("window:open", null, {})
+              .fixture("user").then (@user) ->
+                @ipc.handle("log:in", null, @user)
+
+          it "displays spinner with 'Logging in...' on ipc response [004]", ->
+            cy
               .contains("Logging in...")
+
+          it "disables 'Login' button [006]", ->
+            cy
+              .get("@loginBtn").should("be.disabled")
+
+          it "triggers get:project:paths [05t]", ->
+            cy
+              .contains("Logging in...").then ->
+                expect(@App.ipc).to.be.calledWith("get:project:paths")
 
           it "displays username in UI [00c]", ->
             cy
-              .fixture("user").then (@user) ->
-                @ipc.handle("log:in", null, @user)
+              .then ->
                 @ipc.handle("get:project:paths", null, [])
               .get("header a").should ($a) ->
                 expect($a).to.contain(@user.name)
@@ -88,7 +93,6 @@ describe "Login [000]", ->
             cy
               .get("@loginBtn").click().then ->
                 @ipc.handle("window:open", null, {})
-              .contains("Logging in...")
 
           it "displays error in ui [00d]", ->
             cy

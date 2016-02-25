@@ -12,16 +12,16 @@
         type: "GITHUB_LOGIN"
       })
       .then (code) ->
-        ## display logging in loading spinner here
-        App.currentUser.loggingIn()
-
         ## TODO: supposed to focus the window here!
         ## i think this is for linux
         ## App.execute "gui:focus"
 
         ## now actually log in
         App.ipc("log:in", code)
+
       .then (user) ->
+        # ## display logging in loading spinner here
+        App.currentUser.loggingIn()
         App.currentUser.loggedIn(user)
         App.vent.trigger "start:projects:app"
       .catch (err) ->
