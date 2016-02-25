@@ -18,23 +18,31 @@
 }
 
 #footer {
-  background-color: #DDD;
+  background-color: $light-gray;
   position: fixed;
   width: 100%;
-  border-top: 1px solid #AAA;
+  border-top: 1px solid #DCDEE4;
   z-index: 10;
   bottom: 0;
 
   span:hover, .dropup.open {
     cursor: pointer;
+  }
 
+  span:hover {
     i {
-      color: #333;
+      color: #47484C;
+    }
+  }
+
+  .dropup.open {
+    i {
+      color: #47484C;
     }
   }
 
   i {
-    color: #777;
+    color: #7A7B80;
     font-size: 24px;
     line-height: $footer-height;
     margin: 0 10px 0 5px;
@@ -42,14 +50,6 @@
 
   .dropdown-menu {
     margin-right: 5px;
-    margin-bottom: -10px;
-  }
-
-  &:before {
-    content: "";
-    position: absolute;
-    height: 1px;
-    width: 100%;
-    background-color: #fff;
+    margin-bottom: -5px;
   }
 }

@@ -5,7 +5,7 @@
     initialize: (options = {}) ->
       logs = App.request "log:entities"
 
-      App.ipc "on:log", (log) ->
+      App.ipc "on:log", (err, log = {}) ->
         logs.add(log)
 
       debugView = @getDebugView(logs)

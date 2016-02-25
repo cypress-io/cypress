@@ -15,14 +15,43 @@
     msgs = _(msgs).omit(""+id)
 
   createIpc = ->
-    console.warn("Missing 'ipc'. Polyfilling temporarily.")
+    console.warn("Missing 'ipc'. Polyfilling in development mode.")
 
-    fn = ->
-    fn.off = ->
+    responses = []
 
-    return fn
+    ## return a mock ipc interface useful in development + testing
+    return {
+      on: ->
+      off: ->
+      send: (resp, id, event) ->
+        ## if we have a pending response then just
+        ## invoke it asynchronously
+        if response = _.find(responses, {event: event})
+          responses = _.without(responses, response)
+          Promise.delay(1).then =>
+            @handle(event, response.err, response.data)
+            response.resolve()
 
-  ipc = window.ipc ? createIpc()
+      handle: (event, err, data) ->
+        new Promise (resolve, reject) ->
+          ## create our own handle function to callback the registered events
+          ##
+          ## grab the first msg by its event
+          msg = _.chain(msgs).where({event: event}).first().value()
+
+          if msg
+            msg.fn(err, data)
+            resolve()
+          else
+            responses.push({
+              event: event
+              err: err
+              data: data
+              resolve: resolve
+            })
+    }
+
+  ipc = window.ipc ?= createIpc()
 
   ipc.on "response", (event, obj = {}) ->
     {id, __error, data} = obj

@@ -7,7 +7,7 @@
 
         try
           data = JSON.stringify(@get("data"))
-          _.str.truncate(data, 80)
+          _.str.truncate(data, 85)
         catch
           ""
 

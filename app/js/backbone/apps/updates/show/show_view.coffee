@@ -18,6 +18,3 @@
     onRender: ->
       if @model.hasError()
         @ui.state.addClass("text-danger")
-
-      if @model.isDone()
-        @ui.state.addClass("text-success")

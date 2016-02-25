@@ -1,24 +1,25 @@
 <div id="login">
-  <h3>
-    <p>Cypress.io</p>
-  </h3>
+  <h3>Cypress.io</h3>
   <div class="well well-lg">
-    <button data-login class="btn btn-default">
+    <button data-login class="btn btn-primary btn-login">
       <i class="fa fa-github"></i>
-      Login with Github
+      Login with GitHub
     </button>
   </div>
   <% if @error: %>
-    <p class="text-danger">Could not log in!</p>
-    <p class="bg-danger">
-      <i class="fa fa-warning"></i>
-      <%= @error %>
-    </p>
+    <div class="alert alert-danger">
+      <p>
+        <i class="fa fa-warning"></i>
+        <strong>Could not log in!</strong></p>
+      <p>
+        <%= @error %>
+      </p>
+    </div>
   <% end %>
   <% if @loggingIn: %>
-    <span>
+    <div class="login-spinner">
       <i class="fa fa-spinner fa-spin"></i>
       Logging in...
-    </span>
+    </div>
   <% end %>
 </div>

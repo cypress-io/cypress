@@ -29,7 +29,8 @@
     "backbone.marionette": "~2.3.2",
     "moment": "2.10.3",
     "jquery": "~2.1.4",
-    "underscore": "1.8.3"
+    "underscore": "1.8.3",
+    "fira": "^0.1.0"
   },
   "resolutions": {
     "jquery": "2.1.4",

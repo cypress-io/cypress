@@ -1,0 +1,47 @@
+.user-name {
+  a, i {
+    color: #7A7B80;
+  }
+
+  &:hover {
+    a, i {
+      color: #47484C;
+      text-decoration: none;
+    }
+  }
+}
+
+header {
+  background-color: $light-gray;
+  border-bottom: 1px solid #CCC;
+  padding: 10px;
+  position: fixed;
+  float: left;
+  width: 100%;
+  line-height: 32px;
+  height: $header-height;
+  z-index: 10;
+
+  p {
+    float: left;
+    margin: 0 5px 0 0;
+  }
+
+  ul.dropdown-menu {
+    min-width: 50px;
+    margin-top: -5px;
+  }
+
+  a:focus, a:active {
+    outline: 0
+  }
+
+  button {
+    float: right;
+    padding: 5px 10px;
+
+    &:focus {
+      outline: 0;
+    }
+  }
+}

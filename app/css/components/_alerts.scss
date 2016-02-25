@@ -1,0 +1,7 @@
+.alert {
+  border-radius: 0;
+
+  &>ul {
+    padding-left: 20px;
+  }
+}

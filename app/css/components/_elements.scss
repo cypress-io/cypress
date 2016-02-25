@@ -17,7 +17,7 @@ html {
     body {
       margin-bottom: $footer-height;
       padding-top: 12px;
-      border-radius: 10px;
+      border-radius: 5px;
 
       &:before {
         content: "";
@@ -48,8 +48,10 @@ html, body {
   min-height: 100%;
 }
 
-#app {
-  background-color: white;
-  overflow: hidden;
-  min-height: 400px;
+h3, h4 {
+  font-family: "Fira Sans";
+}
+
+a {
+  color: $blue-primary;
 }

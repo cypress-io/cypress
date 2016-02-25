@@ -3,41 +3,6 @@
     min-width: inherit;
   }
 
-  header {
-    background-color: #EEE;
-    border-bottom: 1px solid #CCC;
-    padding: 10px;
-    position: fixed;
-    float: left;
-    width: 100%;
-    line-height: 32px;
-    height: $header-height;
-    z-index: 10;
-
-    p {
-      float: left;
-      margin: 0 5px 0 0;
-    }
-
-    ul.dropdown-menu {
-      min-width: 50px;
-      margin-top: -5px;
-    }
-
-    a:focus, a:active {
-      outline: 0
-    }
-
-    button {
-      float: right;
-      padding: 5px 10px;
-
-      &:focus {
-        outline: 0;
-      }
-    }
-  }
-
   ul#projects-container {
     margin-top: $header-height;
     margin-bottom: $footer-height;
@@ -45,12 +10,9 @@
     width: 100%;
 
     li.empty {
-      margin: 25px;
+      margin: 15px;
       text-align: center;
 
-      p {
-        margin-bottom: 0;
-      }
     }
 
     li.project {
@@ -77,11 +39,19 @@
         background-color: #EEE;
       }
 
+      h4 {
+        margin-bottom: 0;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        color: #444;
+      }
+
       small {
-        font-size: 70%;
+        color: #999;
+        font-size: 90%;
         display: block;
-        margin-top: 5px;
+        margin-top: 4px;
         @include text-overflow;
+        margin-bottom: 7px;
       }
 
       i {
@@ -94,6 +64,61 @@
     }
   }
 }
+
+.add-project {
+
+  .fa-stack-1x {
+    font-size: 9px;
+  }
+}
+
+.btn .add-project {
+  position: relative;
+  line-height: inherit;
+  height: auto;
+
+  .fa-stack-2x {
+    font-size: 20px;
+    position: relative;
+    top: 1px;
+  }
+
+  .fa-stack-1x {
+    position: relative;
+    left: -32px;
+    top: -3px;
+    font-size: 7px;
+  }
+}
+
+header {
+  .add-project {
+    position: relative;
+    top: 3px;
+
+    &:hover, &:active {
+      cursor: pointer;
+      i {
+        color: #47484C;
+      }
+    }
+
+    i  {
+      color: #7A7B80;
+    }
+
+    .fa-stack-1x {
+      font-size: 9px;
+    }
+  }
+}
+
+#project {
+  .well {
+    margin: 20px 0;
+  }
+}
+
 
 #project, #projects.error {
   text-align: center;

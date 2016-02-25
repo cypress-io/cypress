@@ -1,0 +1,15 @@
+machine:
+  node:
+    version: 5.1.1
+
+dependencies:
+  override:
+    - npm install
+    - npm install -g cypress
+
+test:
+  pre:
+    - npm run server:
+        background: true
+  override:
+    - cypress ci

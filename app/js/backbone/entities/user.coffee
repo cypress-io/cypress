@@ -4,6 +4,10 @@
     defaults: ->
       loggingIn: false
 
+    mutators:
+      greeting: ->
+        @attributes.name or @attributes.email
+
     loggingIn: ->
       @set "loggingIn", true
 

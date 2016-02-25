@@ -8,14 +8,18 @@
       projectView = @getProjectView(project)
 
       @listenTo projectView, "client:url:clicked", ->
-        # App.ipc("external:open", project.get("clientUrl"))
-        App.ipc("window:open", {
-          position: "center"
-          width: 1280
-          height: 720
-          url: project.get("clientUrl")
-          type: "PROJECT"
-        })
+        App.ipc("external:open", project.get("clientUrl"))
+
+        ## this commented out code runs cypress
+        ## inside of electron as an experiment.
+        ## leave it for the time being.
+        # App.ipc("window:open", {
+        #   position: "center"
+        #   width: 1280
+        #   height: 720
+        #   url: project.get("clientUrl")
+        #   type: "PROJECT"
+        # })
 
       @listenTo projectView, "stop:clicked ok:clicked" , ->
         App.ipc("close:project").then ->
@@ -45,8 +49,6 @@
       ])
       .spread (config) ->
         project.setClientUrl(config.clientUrl, config.clientUrlDisplay)
-
-        # App.execute("start:id:generator", config.idGeneratorUrl) if config.idGenerator
 
         options.onProjectStart(config)
 

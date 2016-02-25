@@ -1,17 +1,28 @@
 #login {
   text-align: center;
+  padding-top: 20px;
 
   h3 {
-    margin-bottom: 20px;
+    margin-bottom: 25px;
   }
 
-  p.bg-danger {
-    padding: 5px;
+}
+
+.btn-login {
+  line-height: 24px;
+
+  &:active, &:focus {
+    outline: 0
   }
 
-  button {
-    &:active, &:focus {
-      outline: 0
-    }
+  i {
+    font-size: 18px;
+    position: relative;
+    top: 1px;
+    padding-right: 3px;
   }
+}
+
+.login-spinner {
+  margin-top: 20px;
 }

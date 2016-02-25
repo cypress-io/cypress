@@ -1,13 +1,13 @@
 <div id="footer">
   <span class="pull-right">
-    <div class="dropup">
+    <div class="dropup" title="Options">
       <i class="fa fa-cog dropdown-toggle" data-toggle="dropdown"></i>
       <ul class="dropdown-menu dropdown-menu-right">
         <% if @debug: %>
-        <li data-tests>
-          <a href="#">Tests</a>
-        </li>
-        <li class="divider"></li>
+          <li data-tests>
+            <a href="#">Tests</a>
+          </li>
+          <li class="divider"></li>
         <% end %>
         <li>
         <li data-about>
@@ -17,7 +17,7 @@
           <a href="#">Debug Console</a>
         </li>
         <li data-updates>
-          <a href="#">Check for updates</a>
+          <a href="#">Check for Updates</a>
         </li>
         <!-- <li class="divider"></li>
         <li data-preferences>

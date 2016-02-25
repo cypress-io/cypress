@@ -1,30 +1,32 @@
 <div id="projects">
   <header>
-    <p class="pull=left">
-      <i class="fa fa-user"></i>
-      Hi,
-    </p>
-    <div class="dropdown pull-left">
-      <a href="#" data-toggle="dropdown">
-        <%= @name %>
-        <i class="fa fa-caret-down"></i>
-      </a>
-      <ul class="dropdown-menu">
-        <li data-signout>
-          <a href="#">Logout</a>
-        </li>
-      </ul>
+    <div class="user-name">
+      <p class="pull-left">
+        <i class="fa fa-user"></i>
+      </p>
+      <div class="dropdown pull-left">
+        <a href="#" data-toggle="dropdown">
+          <%= @greeting %>
+          <i class="fa fa-caret-down"></i>
+        </a>
+        <ul class="dropdown-menu">
+          <li data-signout>
+            <a href="#">Logout</a>
+          </li>
+        </ul>
+      </div>
     </div>
-    <button class="btn btn-default pull-right">
-      <i class="fa fa-plus"></i>
-    </button>
+    <span data-js="add-project" class="add-project fa-stack pull-right" title="Add Project...">
+      <i class="fa fa-folder-o fa-stack-2x"></i>
+      <i class="fa fa-plus fa-stack-1x"></i>
+    </span>
     <input type="file" nwdirectory class="hidden" />
   </header>
   <ul class="list-unstyled" id="projects-container"></ul>
   <div id="context-menu">
     <ul class="dropdown-menu">
       <li data-remove>
-        <a href="#">Remove</a>
+        <a href="#">Remove Project</a>
       </li>
     </ul>
   </div>
