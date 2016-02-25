@@ -101,7 +101,7 @@ describe "Projects List [00r]", ->
           expect(@App.ipc).to.be.calledWith("show:directory:dialog")
 
       it "triggers ipc 'show:directory:dialog on empty view + [00k]", ->
-        cy.get(".empty").find("[data-js='add-project']").click().then ->
+        cy.get(".empty").find(".btn[data-js='add-project']").click().then ->
           expect(@App.ipc).to.be.calledWith("show:directory:dialog")
 
       describe "error thrown [00p]", ->
@@ -116,7 +116,7 @@ describe "Projects List [00r]", ->
               .should("be.visible")
               .and("contain", "something bad happened")
 
-        it.only "goes back to projects view on cancel [00q]", ->
+        it "goes back to projects view on cancel [00q]", ->
           cy
             .contains(".btn", "Go Back").click().then ->
               @ipc.handle("get:project:paths", null, [])
