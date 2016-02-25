@@ -116,9 +116,9 @@ describe "Projects List [00r]", ->
               .should("be.visible")
               .and("contain", "something bad happened")
 
-        it "goes back to projects view on cancel [00q]", ->
+        it.only "goes back to projects view on cancel [00q]", ->
           cy
-            .contains(".btn", "Cancel").click().then ->
+            .contains(".btn", "Go Back").click().then ->
               @ipc.handle("get:project:paths", null, [])
             .get(".empty").should("be.visible")
 

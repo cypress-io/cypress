@@ -17,7 +17,9 @@
         <p>Shut down the other running process <strong>OR</strong> change the port used in cypress.json.</p>
         <hr>
       <% end %>
-      <button data-ok class="btn btn-link">Cancel</button>
+      <button data-ok class="btn btn-default btn-sm">
+        <i class="fa fa-arrow-left"></i> Go Back
+      </button>
     </div>
   <% else: %>
     <% if @clientUrl: %>

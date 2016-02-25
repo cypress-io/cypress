@@ -54,7 +54,7 @@ describe "Project Show [00r]", ->
       @agents.spy(@App, "ipc")
 
       cy
-        .contains(".btn", "Cancel").click().then ->
+        .contains(".btn", "Go Back").click().then ->
           expect(@App.ipc).to.be.calledWith("close:project")
           @ipc.handle("close:project", null, {})
         .then ->
@@ -64,7 +64,7 @@ describe "Project Show [00r]", ->
       @ipc.handle("open:project", {name: @err.name, message: @err.msg}, {})
 
       cy
-        .contains(".btn", "Cancel").click().then ->
+        .contains(".btn", "Go Back").click().then ->
           @ipc.handle("close:project", null, {})
           @ipc.handle("get:project:paths", null, @projects)
         .get("#projects-container")

@@ -6,5 +6,7 @@
   <p class="bg-danger">
     <%- @message.replace("\n", "<br /><br />") %>
   </p>
-  <button data-ok class="btn btn-link">Cancel</button>
+  <button data-ok class="btn btn-default btn-sm">
+    <i class="fa fa-arrow-left"></i> Go Back
+  </button>
 </div>
