@@ -4,3 +4,41 @@
   overflow: hidden;
   border-radius: 5px;
 }
+
+.helper-line {
+  text-align: center;
+  color: #cdd1d9;
+  font-weight: normal;
+  margin-top: 10px;
+
+  a {
+    display: block;
+    font-size: 13px;
+    margin: 10px 0;
+  }
+
+  &>span {
+    display: inline-block;
+    position: relative;
+    font-size: 13px;
+
+    &:before,
+    &:after {
+      content: "";
+      position: absolute;
+      border-bottom: 1px solid #cdd1d9;
+      top: 50%;
+      width: 35px;
+    }
+    &:before {
+      right: 100%;
+      margin-right: 10px;
+    }
+    &:after {
+      left: 100%;
+      margin-left: 10px;
+    }
+
+  }
+
+}

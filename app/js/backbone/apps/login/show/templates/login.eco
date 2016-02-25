@@ -22,4 +22,11 @@
       Logging in...
     </div>
   <% end %>
+  <div class="helper-line">
+    <span>need help?</span>
+    <a class="helper-docs-link" href="https://docs.cypress.io">
+      <i class="fa fa-graduation-cap"></i>
+      Read the docs on using Cypress
+    </a>
+  </div>
 </div>
