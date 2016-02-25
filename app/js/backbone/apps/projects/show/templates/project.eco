@@ -1,5 +1,6 @@
 <div id="project">
   <h3><%= @name %></h3>
+  <p><%= @path %></p>
   <% if @error: %>
     <div class="alert alert-danger error">
       <p>

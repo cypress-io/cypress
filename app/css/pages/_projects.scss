@@ -114,6 +114,8 @@ header {
 }
 
 #project {
+  padding-top: 20px;
+
   .well {
     margin: 20px 0;
   }
@@ -125,6 +127,12 @@ header {
 
   h3 {
     @include text-overflow;
+  }
+
+  p {
+    width: 90%;
+    @include text-overflow;
+    margin: 0 5% 10px;
   }
 
   a {

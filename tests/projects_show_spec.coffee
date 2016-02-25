@@ -22,6 +22,9 @@ describe "Project Show [00r]", ->
     it "displays folder name [00v]", ->
       cy.contains("h3", "My-Fake-Project")
 
+    it "displays folder path [00v]", ->
+      cy.contains(@projects[0])
+
     it "displays Starting Server... message [00w]", ->
       cy.contains("Starting Server...")
 
