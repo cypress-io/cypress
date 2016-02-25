@@ -1,9 +1,9 @@
-Promise   = require "bluebird"
-fs        = require "fs-extra"
-path      = require "path"
-jsonlint  = require "jsonlint"
-check     = require "syntax-error"
-coffee    = require "coffee-script"
+Promise   = require("bluebird")
+fs        = require("fs-extra")
+path      = require("path")
+jsonlint  = require("jsonlint")
+check     = require("syntax-error")
+coffee    = require("coffee-script")
 beautify  = require("js-beautify").html
 pretty    = require("js-object-pretty-print").pretty
 formatter = require("jsonlint/lib/formatter").formatter
@@ -17,25 +17,14 @@ queue = {}
 lastCharacterIsNewLine = (str) ->
   str[str.length - 1] is "\n"
 
-class Fixture
-  constructor: (config = {}) ->
-    if not (@ instanceof Fixture)
-      return new Fixture(config)
-
-    if not pr = config.projectRoot
-      throw new Error("Instantiating lib/fixture requires a projectRoot!")
-
-    if not ff = config.fixturesFolder
-      throw new Error("Instantiating lib/fixture requires a fixturesFolder!")
-
-    @folder = path.join(pr, ff)
-
-  get: (fixture) ->
-    p = path.join(@folder, fixture)
+module.exports = {
+  get: ->
+    p       = path.join.apply(path, arguments)
+    fixture = path.basename(p)
 
     ## if we have an extension go
     ## ahead adn read in the file
-    if ext = path.extname(fixture)
+    if ext = path.extname(p)
       @parseFile(p, fixture, ext)
     else
       ## change this to first glob for
@@ -182,6 +171,8 @@ class Fixture
     fs.copyAsync(src, dest)
 
   scaffold: ->
+    p = path.join.apply(path, arguments)
+
     ## we want to build out the fixturesFolder + and example file
     ## but only create the example file if the fixturesFolder doesnt
     ## exist
@@ -196,9 +187,9 @@ class Fixture
 
     ## if the fixtures dir doesnt exist
     ## then create it + the example fixture
-    fs.statAsync(@folder)
-      .bind(@)
-      .catch ->
-        @copyExample(@folder)
+    fs.statAsync(p)
+    .bind(@)
+    .catch ->
+      @copyExample(p)
 
-module.exports = Fixture
+}
