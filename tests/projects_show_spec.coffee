@@ -81,7 +81,7 @@ describe "Project Show [00r]", ->
     it "displays Server url [00v]", ->
       cy.contains(@config.clientUrlDisplay)
 
-    it.only "triggers window:open on click of url [012]", ->
+    it "triggers window:open on click of url [012]", ->
       @agents.spy(@App, "ipc")
 
       cy
