@@ -8,4 +8,10 @@
   .btn-sm {
     margin-top: 10px;
   }
+
+  &.error p {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: normal;
+  }
 }

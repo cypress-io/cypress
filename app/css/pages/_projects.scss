@@ -129,7 +129,7 @@ header {
     @include text-overflow;
   }
 
-  p {
+  .project-path {
     width: 90%;
     @include text-overflow;
     margin: 0 5% 10px;
