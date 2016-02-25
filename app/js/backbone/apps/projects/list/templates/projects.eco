@@ -1,11 +1,9 @@
 <div id="projects">
   <header>
     <div class="user-name">
-      <p class="pull-left">
-        <i class="fa fa-user"></i>
-      </p>
       <div class="dropdown pull-left">
         <a href="#" data-toggle="dropdown">
+          <i class="fa fa-user"></i>
           <%= @greeting %>
           <i class="fa fa-caret-down"></i>
         </a>
