@@ -44,9 +44,11 @@
 
     ui:
       "addProject"  : "[data-js='add-project']"
+      "help"        : "[data-js='help']"
 
     triggers:
       "click @ui.addProject" : "add:project:clicked"
+      "click @ui.help"       : "help:clicked"
 
   class List.Projects extends App.Views.CompositeView
     template: "projects/list/projects"

@@ -55,8 +55,11 @@
       else
         @listenTo projectsView, "add:project:clicked", addProject
 
-        ## listen for the button in our empty view too
+        ## listen for the buttons in our empty view too
         @listenTo projectsView, "childview:add:project:clicked", addProject
+
+        @listenTo projectsView, "childview:help:clicked", ->
+          App.ipc("external:open", "http://on.cypress.io/guides/installing-and-running/#section-adding-projects")
 
         @listenTo projectsView, "sign:out:clicked", ->
           App.vent.trigger "log:out", user

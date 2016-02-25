@@ -9,7 +9,7 @@
 </button>
 <div class="helper-line">
   <span>need help?</span>
-  <a class="helper-docs-link" href="https://docs.cypress.io">
+  <a class="helper-docs-link" data-js="help" href="#">
     <i class="fa fa-graduation-cap"></i>
     Read about adding projects
   </a>

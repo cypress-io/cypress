@@ -24,7 +24,7 @@
   <% end %>
   <div class="helper-line">
     <span>need help?</span>
-    <a class="helper-docs-link" href="https://docs.cypress.io">
+    <a data-js="help" class="helper-docs-link">
       <i class="fa fa-graduation-cap"></i>
       Read the docs on using Cypress
     </a>

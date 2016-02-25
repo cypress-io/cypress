@@ -11,6 +11,9 @@
         user.unset("error")
         App.execute "login:request"
 
+      @listenTo loginView, "help:clicked", ->
+        App.ipc("external:open", "http://docs.cypress.io")
+
       @show loginView
 
     getLoginView: (user) ->

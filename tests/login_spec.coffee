@@ -7,6 +7,8 @@ describe "Login [000]", ->
 
         @agents = cy.agents()
 
+        @agents.spy(@App, "ipc")
+
         @ipc.handle("get:options", null, {})
 
   context "without a current user [02s]", ->
@@ -18,6 +20,13 @@ describe "Login [000]", ->
 
     it "has Github Login button [02u]", ->
       cy.get("#login").contains("button", "Login with GitHub")
+
+    it "displays help link [05r]", ->
+      cy.contains("a", "Read the docs")
+
+    it "opens link to docs on click of help link [05s]", ->
+      cy.contains("a", "Read the docs").click().then ->
+        expect(@App.ipc).to.be.calledWith("external:open", "http://docs.cypress.io")
 
     describe "click 'Login with GitHub' [005]", ->
       beforeEach ->

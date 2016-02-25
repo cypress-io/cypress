@@ -6,9 +6,11 @@
     ui:
       login: "[data-login]"
       retry: "[data-retry]"
+      help:  "[data-js=help]"
 
     triggers:
       "click @ui.login" : "login:clicked"
+      "click @ui.help"  : "help:clicked"
 
     modelEvents:
       "change:loggingIn" : "render"
