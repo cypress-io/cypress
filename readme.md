@@ -46,13 +46,16 @@ npm run build
 
 ## Testing
 
+1. Watch your files and run the gui in port `6060`.
+
 ```bash
 npm test
 ```
 
-This will watch your files and run the gui in port `6060`.
+2. Start the server within Cypress desktop app and navigate to [http://localhost:2020/](http://localhost:2020/).
 
 ## Debugging
+
 If you want to see the `ipc` events which are pending from Cypress tests:
 
 - Switch to 'Your App' frame
