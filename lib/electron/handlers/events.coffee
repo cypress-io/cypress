@@ -154,7 +154,7 @@ handleEvent = (options, event, id, type, arg) ->
 
     when "open:project"
       project.open(arg.path, arg.options)
-      .then -> send(null)
+      .then(send)
       .catch(sendErr)
 
     when "close:project"

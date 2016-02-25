@@ -333,15 +333,16 @@ describe "Events", ->
         ## to prevent side effects
         project.close()
 
-      it "open project + returns null", ->
-        @sandbox.stub(Project.prototype, "open").withArgs({foo: "bar"}).resolves()
+      it "open project + returns config", ->
+        projectInstance = {getConfig: -> {foo: "bar"}}
+        @sandbox.stub(Project.prototype, "open").withArgs({foo: "bar"}).resolves(projectInstance)
 
         @handleEvent("open:project", {
           path: "path/to/project"
           options: {foo: "bar"}
         })
         .then =>
-          @expectSendCalledWith(null)
+          @expectSendCalledWith({foo: "bar"})
 
       it "catches errors", ->
         err = new Error("foo")

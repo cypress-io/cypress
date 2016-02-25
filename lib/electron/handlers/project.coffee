@@ -9,8 +9,11 @@ module.exports = {
     ## store the currently open project
     openProject = Project(path)
 
+    ## open the project and return
+    ## the config for the project instance
     openProject
     .open(options)
+    .call("getConfig")
 
   opened: -> openProject
 
