@@ -54,4 +54,8 @@ h3, h4 {
 
 a {
   color: $blue-primary;
+
+  &:focus {
+    outline: 0;
+  }
 }
