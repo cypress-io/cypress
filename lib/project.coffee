@@ -1,6 +1,7 @@
 path      = require("path")
 EE        = require("events")
 _         = require("lodash")
+fs        = require("fs-extra")
 Promise   = require("bluebird")
 Settings  = require("./util/settings")
 api       = require("./api")
@@ -13,6 +14,8 @@ Support   = require("./support")
 fixture   = require("./fixture")
 Watchers  = require("./watchers")
 Reporter  = require("./reporter")
+
+fs = Promise.promisifyAll(fs)
 
 class Project extends EE
   constructor: (projectRoot) ->
