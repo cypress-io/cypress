@@ -27,6 +27,8 @@ header {
   line-height: 32px;
   height: $header-height;
   z-index: 10;
+  border-radius: 5px 5px 0 0;
+
 
   p {
     float: left;

@@ -122,8 +122,9 @@ header {
 }
 
 
-#project, #projects.error {
+#project, #projects .error {
   text-align: center;
+  margin-top: 20px;
 
   h3 {
     @include text-overflow;
