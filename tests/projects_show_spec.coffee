@@ -81,18 +81,12 @@ describe "Project Show [00r]", ->
     it "displays Server url [00v]", ->
       cy.contains(@config.clientUrlDisplay)
 
-    it "triggers window:open on click of url [012]", ->
+    it.only "triggers window:open on click of url [012]", ->
       @agents.spy(@App, "ipc")
 
       cy
         .contains("a", @config.clientUrlDisplay).click().then ->
-          expect(@App.ipc).to.be.calledWith("window:open", {
-              position: "center"
-              width: 1280
-              height: 720
-              url: @config.clientUrl
-              type: "PROJECT"
-            })
+          expect(@App.ipc).to.be.calledWith("external:open", "http://localhost:2020")
 
     it "triggers close:project on click of Stop [014]", ->
       @agents.spy(@App, "ipc")
