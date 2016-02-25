@@ -3,7 +3,7 @@ fs            = require("fs-extra")
 path          = require("path")
 uuid          = require("node-uuid")
 socketIo      = require("socket.io")
-Fixture       = require("./fixture")
+fixture       = require("./fixture")
 Request       = require("./request")
 logger        = require("./logger")
 Reporter      = require("./reporter")
@@ -63,15 +63,17 @@ class Socket
 
   onRequest: (options, cb) ->
     Request.send(options)
-      .then(cb)
-      .catch (err) ->
-        cb({__error: err.message})
+    .then(cb)
+    .catch (err) ->
+      cb({__error: err.message})
 
-  onFixture: (fixture, cb) ->
-    Fixture(@app).get(fixture)
-      .then(cb)
-      .catch (err) ->
-        cb({__error: err.message})
+  onFixture: (file, cb) ->
+    {projectRoot, fixturesFolder} = @app.get("cypress")
+
+    fixture.get(projectRoot, fixturesFolder, file)
+    .then(cb)
+    .catch (err) ->
+      cb({__error: err.message})
 
   createIo: (server, path) ->
     socketIo(server, {path: path})
