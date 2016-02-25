@@ -1,7 +1,7 @@
 <h4>
   <%= @name %>
-  <small><%= @path %></small>
 </h4>
+<small><%= @path %></small>
 <% if @loading: %>
   <i class="fa fa-spinner fa-spin"></i>
 <% else: %>

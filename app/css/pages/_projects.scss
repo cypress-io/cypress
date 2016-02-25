@@ -39,11 +39,19 @@
         background-color: #EEE;
       }
 
+      h4 {
+        margin-bottom: 0;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        color: #444;
+      }
+
       small {
-        font-size: 70%;
+        color: #999;
+        font-size: 90%;
         display: block;
-        margin-top: 5px;
+        margin-top: 4px;
         @include text-overflow;
+        margin-bottom: 7px;
       }
 
       i {
