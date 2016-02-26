@@ -1,6 +1,7 @@
 app      = require("electron").app
 key      = require("../key")
 errors   = require("../errors")
+Updater  = require("../updater")
 logs     = require("../electron/handlers/logs")
 Tray     = require("../electron/handlers/tray")
 Events   = require("../electron/handlers/events")
@@ -21,8 +22,8 @@ module.exports = {
 
     coords = translate(bounds)
 
-    ## TODO: where to store these?
-    # App.updater.setCoords(coords) if App.updater
+    ## store the coords on updater
+    Updater.setCoords(coords)
 
     win.setPosition(coords.x, coords.y)
 
@@ -68,6 +69,7 @@ module.exports = {
 
       Tray.display({
         onDrop: ->
+
         onClick: (e, bounds) =>
           @onClick(bounds, win)
 

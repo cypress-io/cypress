@@ -12,6 +12,7 @@ logger         = require("./logger")
 
 trash  = Promise.promisify(trash)
 chmodr = Promise.promisify(chmodr)
+coords = null
 
 class Updater
   constructor: (callbacks) ->
@@ -19,7 +20,6 @@ class Updater
       return new Updater(callbacks)
 
     @client     = new NwUpdater @getPackage()
-    # @coords     = null
     @request    = null
     @cancelled  = false
     @callbacks  = callbacks
@@ -27,10 +27,8 @@ class Updater
     if process.env["CYPRESS_ENV"] isnt "production"
       @patchAppPath()
 
-  # setCoords: (@coords) ->
-
   getCoords: ->
-    return if not c = @coords
+    return if not c = coords
 
     "--coords=#{c.x}x#{c.y}"
 
@@ -187,6 +185,9 @@ class Updater
         @trigger("none")
 
     return @
+
+  @setCoords = (c) ->
+    coords = c
 
   @install = (appPath, execPath, options) ->
     Updater().install(appPath, execPath, options)

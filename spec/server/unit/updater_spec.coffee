@@ -8,6 +8,7 @@ Fixtures    = require("#{root}/spec/server/helpers/fixtures")
 
 describe "lib/updater", ->
   afterEach ->
+    Updater.setCoords(null)
     mock.restore()
 
   context "interface", ->
@@ -49,7 +50,7 @@ describe "lib/updater", ->
       expect(@updater.getCoords()).to.be.undefined
 
     it "returns --coords=800x600", ->
-      @updater.setCoords {x: 800, y: 600}
+      Updater.setCoords {x: 800, y: 600}
       expect(@updater.getCoords()).to.eq "--coords=800x600"
 
   context "#getArgs", ->
@@ -60,12 +61,7 @@ describe "lib/updater", ->
       @sandbox.stub(@updater.client, "getAppExec").returns("bar")
 
     it "compacts null values", ->
-      expect(@updater.getArgs()).to.deep.eq ["foo", "bar", "--updating"]
-
-    it "doesnt concat App.argv", ->
-      @updater.App.argv = ["quux"]
-      @updater.coords = {x: 1000, y: 30}
-      expect(@updater.getArgs()).to.deep.eq ["foo", "bar", "--updating", "--coords=1000x30"]
+      expect(@updater.getArgs()).to.deep.eq ["--app-path=foo", "--exec-path=bar", "--updating"]
 
   context ".run", ->
     beforeEach ->
@@ -209,19 +205,15 @@ describe "lib/updater", ->
       ## its caused a bug in parseArgs and its duplicated
       ## every existing argument
       it "does not pass along additional App argv", ->
-        @updater.App.argv = ["--debug"]
         c = @updater.client
         @updater.runInstaller("/Users/bmann/newApp").then =>
-          # expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec(), "--updating", "--debug"], {})
-          expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec(), "--updating"], {})
+          expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", ["--app-path=#{c.getAppPath()}", "--exec-path=#{c.getAppExec()}", "--updating"], {})
 
       it "passes along App.coords if they exist", ->
-        @updater.setCoords {x: 600, y: 1200}
-        @updater.App.argv = ["--debug"]
+        Updater.setCoords {x: 600, y: 1200}
         c = @updater.client
         @updater.runInstaller("/Users/bmann/newApp").then =>
-          # expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec(), "--updating", "--coords=600x1200", "--debug"], {})
-          expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec(), "--updating", "--coords=600x1200"], {})
+          expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", ["--app-path=#{c.getAppPath()}", "--exec-path=#{c.getAppExec()}", "--updating", "--coords=600x1200"], {})
 
     describe "#copyCyDataTo", ->
       beforeEach ->
@@ -274,26 +266,24 @@ describe "lib/updater", ->
         @updater.install("/Users/bmann/app_path", "/Users/bmann/app_exec_path").then =>
           expect(@updater.client.install).to.be.calledWith "/Users/bmann/app_path"
 
-      it "calls App.quit", ->
+      it "calls process.exit", ->
         @updater.install("/Users/bmann/app_path", "/Users/bmann/app_exec_path").then =>
           expect(process.exit).to.be.calledOnce
 
       context "args", ->
-        it "uses args from App.argv", ->
-          args = ["--foo", "--bar"]
-          @updater.App.argv = args
-          @updater.install("/Users/bmann/app_path", "/Users/bmann/app_exec_path").then =>
-            expect(@run).to.be.calledWith("/Users/bmann/app_exec_path", args)
+        it "uses args object", ->
+          args = {foo: "bar"}
+          @updater.install("/Users/bmann/app_path", "/Users/bmann/app_exec_path", args).then =>
+            expect(@run).to.be.calledWith("/Users/bmann/app_exec_path", [])
 
         it "uses empty array with no args from App.argv", ->
-          @updater.App.argv = null
           @updater.install("/Users/bmann/app_path", "/Users/bmann/app_exec_path").then =>
             expect(@run).to.be.calledWith("/Users/bmann/app_exec_path", [])
 
         it "passes args except for --updating", ->
-          @updater.App.argv = ["--updating", "--foo"]
-          @updater.install("/Users/bmann/app_path", "/Users/bmann/app_exec_path").then =>
-            expect(@run).to.be.calledWith("/Users/bmann/app_exec_path", ["--foo"])
+          args = {updating: true}
+          @updater.install("/Users/bmann/app_path", "/Users/bmann/app_exec_path", args).then =>
+            expect(@run).to.be.calledWith("/Users/bmann/app_exec_path", [])
 
   context "integration", ->
     before ->
