@@ -22,10 +22,10 @@ describe "Login [000]", ->
       cy.get("#login").contains("button", "Login with GitHub")
 
     it "displays help link [05r]", ->
-      cy.contains("a", "Read the docs")
+      cy.contains("a", "Need help?")
 
     it "opens link to docs on click of help link [05s]", ->
-      cy.contains("a", "Read the docs").click().then ->
+      cy.contains("a", "Need help?").click().then ->
         expect(@App.ipc).to.be.calledWith("external:open", "http://docs.cypress.io")
 
     describe "click 'Login with GitHub' [005]", ->

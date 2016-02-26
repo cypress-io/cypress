@@ -8,9 +8,8 @@
   Add Project
 </button>
 <div class="helper-line">
-  <span>need help?</span>
   <a class="helper-docs-link" data-js="help" href="#">
-    <i class="fa fa-graduation-cap"></i>
-    Read about adding projects
+    <i class="fa fa-question-circle"></i>
+    Need help?
   </a>
 </div>

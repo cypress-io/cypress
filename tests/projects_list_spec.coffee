@@ -63,10 +63,10 @@ describe "Projects List [00r]", ->
         cy.get(".empty").contains("Add Project")
 
       it "displays help link [05r]", ->
-        cy.contains("a", "Read about adding projects")
+        cy.contains("a", "Need help?")
 
       it "opens link to docs on click of help link [05s]", ->
-        cy.contains("a", "Read about adding projects").click().then ->
+        cy.contains("a", "Need help?").click().then ->
           expect(@App.ipc).to.be.calledWith("external:open", "http://on.cypress.io/guides/installing-and-running/#section-adding-projects")
 
     describe "lists projects [00h]", ->

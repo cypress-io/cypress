@@ -23,10 +23,9 @@
     </div>
   <% end %>
   <div class="helper-line">
-    <span>need help?</span>
     <a data-js="help" class="helper-docs-link">
-      <i class="fa fa-graduation-cap"></i>
-      Read the docs on using Cypress
+      <i class="fa fa-question-circle"></i>
+      Need help?
     </a>
   </div>
 </div>
