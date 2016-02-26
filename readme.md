@@ -13,36 +13,32 @@ npm install
 
 ## Developing
 
-#### Linking Local Changes
+To run the GUI in dev mode, you need to run the [Cypress App](https://github.com/cypress-io/cypress-app).
 
-If you want to modify src files or branch and want to see those changes take effect you need to link `cypress-gui` with `cypress-server`:
+- Navigate to `cypress-app` and run the following commands:
 
 ```bash
-## make sure node version is same
-## as cypress-server
-node -v
-cd ../cypress_server
-node -v
+npm i
+npm start
 ```
 
+The GUI should now be in your taskbar. Click in the taskbar to open it.
+
+In your console, you will probably see the following error:
+
 ```bash
-## link up node_modules
-npm link
-cd ../cypress-server
-npm link cypress-gui
+Error: connect ECONNREFUSED 127.0.0.1:1234
+ > It looks like you're not running the local api server in development. This may cause problems running the GUI.
 ```
 
-#### Building `/dist`
+In order to access the api to do things like logging into the GUI, we need to run the [Cypress API](https://github.com/cypress-io/cypress-api). Navigate to `cypress-api` and run the following commands:
 
 ```bash
-## build and watch /src files
+npm i
 npm run dev
 ```
 
-#### One off build
-```bash
-npm run build
-```
+If you get any errors doing the above commands, go through the [install instructions](https://github.com/cypress-io/cypress-api) of the cypress-api app.
 
 ## Testing
 
