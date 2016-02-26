@@ -53,7 +53,13 @@ module.exports = {
     ## on that type then just show + focus it!
     if win = getByType(options.type)
       win.show()
-      return Promise.resolve(win)
+
+      if options.type is "GITHUB_LOGIN"
+        err = new Error
+        err.alreadyOpen = true
+        return Promise.reject(err)
+      else
+        return Promise.resolve(win)
 
     recentlyCreatedWindow = true
 
