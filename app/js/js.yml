@@ -7,6 +7,7 @@ vendor:
   - bower_components/backbone.mutators/backbone.mutators.js
   - bower_components/jsuri/Uri.js
   - bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/dropdown.js
+  - bower_components/bootstrap-sass-official/assets/javascripts/bootstrap/tooltip.js
   - bower_components/moment/moment.js
   - bower_components/bootstrap-contextmenu/bootstrap-contextmenu.js
   - bower_components/bluebird/js/browser/bluebird.js

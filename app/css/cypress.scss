@@ -9,20 +9,26 @@
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/normalize";
 
 // Core CSS
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/button-groups";
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/buttons";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/scaffolding";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/type";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/code";
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/dropdowns";
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/forms";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/grid";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/tables";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/forms";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/buttons";
+
+// Components
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/component-animations";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/dropdowns";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/button-groups";
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/navs";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/labels";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/alerts";
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/navs";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/progress-bars";
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/scaffolding";
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/tables";
-@import "bootstrap-sass-official/assets/stylesheets/bootstrap/type";
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/wells";
+
+// Components w/ JavaScript
+@import "bootstrap-sass-official/assets/stylesheets/bootstrap/tooltip";
 
 // Utilities
 @import "bootstrap-sass-official/assets/stylesheets/bootstrap/utilities";

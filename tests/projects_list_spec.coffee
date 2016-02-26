@@ -103,6 +103,11 @@ describe "Projects List [00r]", ->
             @ipc.handle("get:project:paths", null, [])
           .get(".empty").contains("Add Project")
 
+      it "add button has tooltip attrs [05w]", ->
+        cy
+          .get("header").find("[data-js='add-project']")
+            .should("have.attr", "data-original-title")
+
       it "triggers ipc 'show:directory:dialog on header + [00k]", ->
         cy.get("header").find("[data-js='add-project']").click().then ->
           expect(@App.ipc).to.be.calledWith("show:directory:dialog")

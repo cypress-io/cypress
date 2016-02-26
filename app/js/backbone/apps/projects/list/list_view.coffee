@@ -76,3 +76,11 @@
 
     onRender: ->
       @ui.signout.dropdown()
+
+    onShow: ->
+      @ui.addProject.tooltip
+        title: "Add Project"
+        placement: "left"
+
+    onDestroy: ->
+      @ui.addProject.tooltip("destroy")

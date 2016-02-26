@@ -12,10 +12,10 @@ describe "Options [015]", ->
 
       .get(".fa-cog").as("optionsLink")
 
-  it "link to options has title [016]", ->
+  it "link to options has tooltip attrs [016]", ->
     cy
       .get("#footer").find(".dropup")
-        .should("have.attr", "title", "Options")
+        .should("have.attr", "data-original-title")
 
   it "displays options on click [017]", ->
     cy

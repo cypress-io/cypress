@@ -16,7 +16,8 @@
     template: "footer/show/_bottom"
 
     ui:
-      settings:    ".fa-cog"
+      settings:    "[data-js='options']"
+      cog:         ".fa-cog"
       quit:        "[data-quit]"
       updates:     "[data-updates]"
       debug:       "[data-debug]"
@@ -37,7 +38,15 @@
       "click .dropdown-menu a" : "aClicked"
 
     onRender: ->
-      @ui.settings.dropdown()
+      @ui.cog.dropdown()
+
+    onShow: ->
+      @ui.settings.tooltip
+        title: "Options"
+        placement: "left"
 
     aClicked: ->
-      @ui.settings.dropdown("toggle")
+      @ui.cog.dropdown("toggle")
+
+    onDestroy: ->
+      @ui.settings.tooltip("destroy")
