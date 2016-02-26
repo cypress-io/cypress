@@ -26,7 +26,7 @@ describe "Login [000]", ->
 
     it "opens link to docs on click of help link [05s]", ->
       cy.contains("a", "Need help?").click().then ->
-        expect(@App.ipc).to.be.calledWith("external:open", "http://docs.cypress.io")
+        expect(@App.ipc).to.be.calledWith("external:open", "https://docs.cypress.io")
 
     describe "click 'Login with GitHub' [005]", ->
       beforeEach ->

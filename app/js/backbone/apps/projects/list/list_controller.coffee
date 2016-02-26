@@ -59,7 +59,7 @@
         @listenTo projectsView, "childview:add:project:clicked", addProject
 
         @listenTo projectsView, "childview:help:clicked", ->
-          App.ipc("external:open", "http://on.cypress.io/guides/installing-and-running/#section-adding-projects")
+          App.ipc("external:open", "https://on.cypress.io/guides/installing-and-running/#section-adding-projects")
 
         @listenTo projectsView, "sign:out:clicked", ->
           App.vent.trigger "log:out", user

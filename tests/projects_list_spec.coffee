@@ -67,7 +67,7 @@ describe "Projects List [00r]", ->
 
       it "opens link to docs on click of help link [05s]", ->
         cy.contains("a", "Need help?").click().then ->
-          expect(@App.ipc).to.be.calledWith("external:open", "http://on.cypress.io/guides/installing-and-running/#section-adding-projects")
+          expect(@App.ipc).to.be.calledWith("external:open", "https://on.cypress.io/guides/installing-and-running/#section-adding-projects")
 
     describe "lists projects [00h]", ->
       beforeEach ->

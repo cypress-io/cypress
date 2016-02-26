@@ -12,7 +12,7 @@
         App.execute "login:request"
 
       @listenTo loginView, "help:clicked", ->
-        App.ipc("external:open", "http://docs.cypress.io")
+        App.ipc("external:open", "https://docs.cypress.io")
 
       @show loginView
 
