@@ -15,6 +15,10 @@
     display: block;
     font-size: 13px;
     margin: 10px 0;
+
+    &:hover {
+      cursor: pointer;
+    }
   }
 
   &>span {
