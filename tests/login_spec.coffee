@@ -49,7 +49,7 @@ describe "Login [000]", ->
         cy
           .get("@loginBtn").click().click().then ->
             @ipc.handle("window:open", {alreadyOpen: true}, null)
-          .get("@loginBtn").should("not.be.disabled")
+          .get("#login").contains("button", "Login with GitHub").should("not.be.disabled")
 
       context "on 'window:open' ipc response [007]", ->
         beforeEach ->

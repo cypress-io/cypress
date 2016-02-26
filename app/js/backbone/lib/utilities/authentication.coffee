@@ -1,5 +1,8 @@
 @App.module "Utilities", (Utilities, App, Backbone, Marionette, $, _) ->
 
+  alreadyOpen = (err) ->
+    err and err.alreadyOpen
+
   API =
     loginRequest: ->
       App.ipc("window:open", {
@@ -25,7 +28,7 @@
       .then (user) ->
         App.currentUser.loggedIn(user)
         App.vent.trigger "start:projects:app"
-      .catch {alreadyOpen: true}, ->
+      .catch alreadyOpen, (err) ->
         ## do nothing if we're already open!
         return
       .catch (err) ->
