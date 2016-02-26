@@ -16,9 +16,10 @@ module.exports = {
       properties: ["openDirectory"]
     }
 
-    new Promise (resolve, reject) =>
+    new Promise (resolve, reject) ->
       dialog.showOpenDialog Renderer.get("INDEX"), props, (paths = []) ->
-        ## return the first path since there can only ever
-        ## be a single directory selection
-        resolve(paths[0])
+        process.nextTick ->
+          ## return the first path since there can only ever
+          ## be a single directory selection
+          resolve(paths[0])
 }
