@@ -1,4 +1,5 @@
 app      = require("electron").app
+Position = require("electron-positioner")
 key      = require("../key")
 errors   = require("../errors")
 Updater  = require("../updater")
@@ -11,16 +12,9 @@ module.exports = {
   onDrop: ->
 
   onClick: (bounds, win) ->
-    iconWidth = bounds.width
+    positioner = new Position(win)
 
-    translate = (coords) ->
-      winWidth = win.getBounds().width
-
-      coords.x -= Math.floor (winWidth / 2) - (iconWidth / 2)
-      coords.y = 0
-      coords
-
-    coords = translate(bounds)
+    coords = positioner.calculate("trayCenter", bounds)
 
     ## store the coords on updater
     Updater.setCoords(coords)
