@@ -24,7 +24,7 @@ log = (obj = {}) ->
     "\n\tstack:      #{obj.stack}" if obj.showStack,
     "\n}"
   ]
-  $.util.log _(args).compact()...
+  $.util.log(_.compact(args)...)
   $.util.beep()
 
 transform = (paths, options = {}) ->
