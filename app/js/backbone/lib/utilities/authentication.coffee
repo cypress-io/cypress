@@ -25,10 +25,11 @@
       .then (user) ->
         App.currentUser.loggedIn(user)
         App.vent.trigger "start:projects:app"
-      .catch (err) ->
-        App.currentUser.setLoginError(err)
       .catch {alreadyOpen: true}, ->
         ## do nothing if we're already open!
+        return
+      .catch (err) ->
+        App.currentUser.setLoginError(err)
 
     logOut: (user) ->
       ## immediately log out even before our
