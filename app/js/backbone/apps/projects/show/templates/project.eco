@@ -12,11 +12,7 @@
       </p>
       <% if @portInUse: %>
         <hr>
-        <p>
-          <strong>To Fix:</strong>
-        </p>
-        <p>Shut down the other running process <strong>OR</strong> change the port used in cypress.json.</p>
-        <hr>
+        <p><strong>To Fix:</strong> Stop the other running process or change the port in cypress.json.</p>
       <% end %>
       <button data-ok class="btn btn-default btn-sm">
         <i class="fa fa-arrow-left"></i> Go Back
