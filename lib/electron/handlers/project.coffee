@@ -13,7 +13,6 @@ module.exports = {
     ## the config for the project instance
     openProject
     .open(options)
-    .call("getConfig")
 
   opened: -> openProject
 

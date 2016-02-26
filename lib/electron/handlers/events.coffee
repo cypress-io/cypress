@@ -154,6 +154,7 @@ handleEvent = (options, event, id, type, arg) ->
 
     when "open:project"
       project.open(arg.path, arg.options)
+      .call("getConfig")
       .then(send)
       .catch(sendErr)
 

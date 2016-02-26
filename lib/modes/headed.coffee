@@ -27,7 +27,6 @@ module.exports = {
     win.setPosition(coords.x, coords.y)
 
     if win.isVisible()
-      # win.webContents.send("hide")
       win.hide()
     else
       win.show()
