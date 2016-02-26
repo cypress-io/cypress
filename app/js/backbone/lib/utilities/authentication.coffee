@@ -16,14 +16,17 @@
         ## i think this is for linux
         ## App.execute "gui:focus"
 
+        # ## display logging in loading spinner here
+        App.currentUser.loggingIn()
+
         ## now actually log in
         App.ipc("log:in", code)
 
       .then (user) ->
-        # ## display logging in loading spinner here
-        App.currentUser.loggingIn()
         App.currentUser.loggedIn(user)
         App.vent.trigger "start:projects:app"
+      .catch {alreadyOpen: true}, ->
+        ## do nothing if we're already open!
       .catch (err) ->
         App.currentUser.setLoginError(err)
 

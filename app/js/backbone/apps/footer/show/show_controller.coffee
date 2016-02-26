@@ -40,9 +40,6 @@
       @listenTo bottomView, "tests:clicked", ->
         App.execute "gui:tests"
 
-      @listenTo bottomView, "login:clicked", (view, obj) ->
-        App.execute "login:request"
-
       @listenTo bottomView, "quit:clicked", ->
         App.ipc("quit")
 

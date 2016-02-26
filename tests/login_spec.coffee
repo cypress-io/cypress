@@ -47,39 +47,36 @@ describe "Login [000]", ->
 
       it "does not lock up UI if login is clicked multiple times [05u]", ->
         cy
-          .get("@loginBtn")
-            .click().click()
+          .get("@loginBtn").click().click().then ->
+            @ipc.handle("window:open", {alreadyOpen: true}, null)
           .get("@loginBtn").should("not.be.disabled")
 
-
       context "on 'window:open' ipc response [007]", ->
-        it "triggers ipc 'log:in' [008]", ->
+        beforeEach ->
           cy
             .get("@loginBtn").click().then ->
-              @ipc.handle("window:open", null, {})
-            .then ->
-              expect(@App.ipc).to.be.calledWith("log:in", {})
+              @ipc.handle("window:open", null, "code-123")
 
-        describe "on ipc 'log:in' success [00a]", ->
+        it "triggers ipc 'log:in' [008]", ->
+          cy.then ->
+            expect(@App.ipc).to.be.calledWith("log:in", "code-123")
+
+        it "displays spinner with 'Logging in...' on ipc response [004]", ->
+          cy.contains("Logging in...")
+
+        it "disables 'Login' button [006]", ->
+          cy
+            .get("@loginBtn").should("be.disabled")
+
+        describe "on ipc log:in success [05x]", ->
           beforeEach ->
             cy
-              .get("@loginBtn").click().then ->
-                @ipc.handle("window:open", null, {})
+              .contains("Logging in...")
               .fixture("user").then (@user) ->
                 @ipc.handle("log:in", null, @user)
 
-          it "displays spinner with 'Logging in...' on ipc response [004]", ->
-            cy
-              .contains("Logging in...")
-
-          it "disables 'Login' button [006]", ->
-            cy
-              .get("@loginBtn").should("be.disabled")
-
           it "triggers get:project:paths [05t]", ->
-            cy
-              .contains("Logging in...").then ->
-                expect(@App.ipc).to.be.calledWith("get:project:paths")
+            expect(@App.ipc).to.be.calledWith("get:project:paths")
 
           it "displays username in UI [00c]", ->
             cy
@@ -88,12 +85,18 @@ describe "Login [000]", ->
               .get("header a").should ($a) ->
                 expect($a).to.contain(@user.name)
 
-        describe "on ipc 'log:in' error [00a]", ->
-          beforeEach ->
+          it.skip "has login button enabled on logout [05y]", ->
             cy
-              .get("@loginBtn").click().then ->
-                @ipc.handle("window:open", null, {})
+              .then ->
+                @ipc.handle("get:project:paths", null, [])
+              .get("header a").contains("Jane").click()
+            cy
+              .contains("Logout").click().then ->
+                @ipc.handle("log:out")
+              .get("@loginBtn").should("not.be.disabled")
 
+
+        describe "on ipc 'log:in' error [00a]", ->
           it "displays error in ui [00d]", ->
             cy
               .fixture("user").then (@user) ->
