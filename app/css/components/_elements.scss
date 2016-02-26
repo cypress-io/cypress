@@ -34,7 +34,7 @@ html {
     }
   }
 
-  &.login {
+  &.login, &.project-show {
     body:before {
       border-bottom-color: #fff;
     }

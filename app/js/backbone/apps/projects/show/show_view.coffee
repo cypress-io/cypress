@@ -12,3 +12,9 @@
       "click a"           : "client:url:clicked"
       "click [data-stop]" : "stop:clicked"
       "click [data-ok]"   : "ok:clicked"
+
+    onShow: ->
+      $("html").addClass("project-show")
+
+    onDestroy: ->
+      $("html").removeClass("project-show")
