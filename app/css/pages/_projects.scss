@@ -8,6 +8,8 @@
     margin-bottom: $footer-height;
     float: left;
     width: 100%;
+    height: 295px;
+    overflow: auto;
 
     li.empty {
       margin: 15px;
@@ -118,7 +120,8 @@ header {
 }
 
 #project {
-  padding-top: 5px;
+  height: 347px;
+  overflow: auto;
 
   .well {
     margin: 20px 0;
@@ -128,7 +131,7 @@ header {
 
 #project, #projects .error {
   text-align: center;
-  margin-top: 20px;
+  padding-top: 25px;
 
   h3 {
     @include text-overflow;
