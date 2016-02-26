@@ -1,4 +1,3 @@
-app        = require("electron").app
 chalk      = require("chalk")
 Promise    = require("bluebird")
 inquirer   = require("inquirer")
