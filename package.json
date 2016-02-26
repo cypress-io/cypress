@@ -35,7 +35,7 @@
     "chai-jquery": "^2.0.0",
     "chokidar-cli": "^1.2.0",
     "commander": "2.3.0",
-    "electron-prebuilt": "0.36.7",
+    "electron-prebuilt": "0.36.8",
     "gulp": "3.8.8",
     "gulp-awspublish": "^3.0.1",
     "gulp-bower": "0.0.6",
@@ -78,7 +78,7 @@
     "xvfb": "cypress-io/node-xvfb"
   },
   "dependencies": {
-    "bluebird": "3.3.1",
+    "bluebird": "3.3.3",
     "browserify": "6.1.0",
     "chalk": "^1.1.0",
     "chmodr": "^0.1.0",
