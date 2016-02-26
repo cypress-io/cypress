@@ -149,6 +149,11 @@ describe "Projects List [00r]", ->
           cy.get("#projects-container>li:not(.empty)").should("have.length", 1).then ->
             expect(@App.ipc).to.be.calledWith("add:project")
 
+        it "displays project row with spinner [05v]", ->
+          @ipc.handle("show:directory:dialog", null, "/Users/Jane/Projects/My-Fake-Project")
+
+          cy.get(".project.loading").find(".fa-spin").should("be.visible")
+
 
     describe "remove project [00j]", ->
       beforeEach ->
