@@ -4,7 +4,6 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "postinstall": "npm run build",
     "start": "http-server ./dist -o -p 6060",
     "server": "http-server ./dist -p 6060",
     "build": "gulp build",

@@ -12,4 +12,5 @@ test:
     - npm run server:
         background: true
   override:
+    - npm run build
     - cypress ci
