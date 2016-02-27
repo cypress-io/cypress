@@ -1,6 +1,6 @@
 machine:
   node:
-    version: iojs-v1.2.0
+    version: 5.1.1
 
 test:
   pre:
