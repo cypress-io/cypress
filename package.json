@@ -22,9 +22,12 @@
   },
   "homepage": "https://github.com/cypress-io/cypress-gui",
   "dependencies": {
+    "coffee-script": "^1.10.0",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {
     "bluebird": "^3.1.1",
     "bower": "^1.7.2",
-    "coffee-script": "^1.10.0",
     "gulp": "^3.9.0",
     "gulp-bower": "0.0.11",
     "gulp-cached": "^1.1.0",
@@ -43,7 +46,6 @@
     "js-yaml": "^3.5.2",
     "lodash": "^4.0.0",
     "node-sass-import-once": "^1.2.0",
-    "path": "^0.12.7",
     "run-sequence": "^1.1.5"
   }
 }
