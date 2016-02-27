@@ -9,7 +9,3 @@ test:
 
   override:
     - npm run test-server-ci
-    # - ./node_modules/.bin/gulp test:
-    #     background: true
-    # - sleep 6
-    # - ./node_modules/.bin/mocha-phantomjs http://localhost:3500/specs/all_specs
