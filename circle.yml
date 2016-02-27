@@ -8,4 +8,6 @@ test:
     - npm run build
 
   override:
-    - npm run test-server-ci
+    - npm run test-cov
+    - npm run codecov
+    - npm run coveralls
