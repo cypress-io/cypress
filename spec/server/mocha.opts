@@ -1,5 +1,6 @@
 spec/server/unit
 spec/server/integration
+--recursive
 --reporter spec
 --compilers coffee:coffee-script/register
---recursive
+--require ./spec/server/helpers/coverage.coffee

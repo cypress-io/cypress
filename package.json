@@ -13,10 +13,13 @@
     "dist": "gulp dist",
     "release": "gulp release",
     "test": "npm run test-server & chokidar 'spec/server/**/*' 'lib/**/*' -c 'npm run test-server'",
+    "test-cov": "NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 istanbul cover node_modules/.bin/_mocha -- --opts ./spec/server/mocha.opts",
     "test-nw": "node_modules/.bin/nw ./spec/nw_unit",
     "test-server": "NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.*,socket.io:* mocha --opts spec/server/mocha.opts",
     "test-server-debug": "NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.*,socket.io:* node-debug --hidden='(node_modules|bower_components)' --no-preload _mocha --opts spec/server/mocha.opts --watch",
-    "test-server-ci": "NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 NODE_DEBUG=request mocha --opts spec/server/mocha.opts"
+    "test-server-ci": "npm run test-cov && npm run codecov && npm run coveralls",
+    "codecov": "codecov",
+    "coveralls": "cat ./coverage/lcov.info | coveralls"
   },
   "repository": {
     "type": "git",
@@ -34,7 +37,10 @@
     "chai-as-promised": "^4.2.0",
     "chai-jquery": "^2.0.0",
     "chokidar-cli": "^1.2.0",
+    "codecov": "^1.0.1",
+    "coffee-coverage": "^1.0.1",
     "commander": "2.3.0",
+    "coveralls": "^2.11.8",
     "electron-prebuilt": "0.36.8",
     "gulp": "3.8.8",
     "gulp-awspublish": "^3.0.1",
@@ -53,6 +59,7 @@
     "gulp-ruby-sass": "0.5.0",
     "gulp-tap": "0.1.1",
     "gulp-uglify": "^1.2.0",
+    "istanbul": "^0.4.2",
     "js-yaml": "3.1.0",
     "mkdirp": "^0.5.1",
     "mock-fs": "3.6.0",

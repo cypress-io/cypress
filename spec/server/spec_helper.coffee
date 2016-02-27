@@ -1,4 +1,4 @@
-global.root      = '../../../'
+global.root      = "../../../"
 global.supertest = require("supertest")
 global.nock      = require("nock")
 global.fs        = require("fs-extra")

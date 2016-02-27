@@ -16,3 +16,4 @@ cache
 spec/fixtures/nw/cypress.zip
 .vagrant
 bin/chromium
+coverage
