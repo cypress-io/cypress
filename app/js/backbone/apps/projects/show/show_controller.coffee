@@ -3,7 +3,7 @@
   class Show.Controller extends App.Controllers.Application
 
     initialize: (params) ->
-      {project, options} = params
+      {project} = params
 
       projectView = @getProjectView(project)
 
@@ -22,36 +22,43 @@
         # })
 
       @listenTo projectView, "stop:clicked ok:clicked" , ->
-        App.ipc("close:project").then ->
+        @closeProject().then ->
           App.vent.trigger "start:projects:app"
+
+      @listenTo projectView, "show", ->
+        ## delay opening the project so
+        ## we give the UI some time to render
+        ## and not block due to sync require's
+        ## in the main process
+        _.delay =>
+          @openProject(project)
+        , 100
 
       @show projectView
 
-      _.defaults options,
-        onProjectStart: ->
-        onReboot: =>
-          project.reset()
+    reboot: (project) ->
+      project.reset()
 
-          App.ipc("close:project").then =>
-            @openProject(project, options)
+      @closeProject().then =>
+        @openProject(project)
 
-      _.defer => @openProject(project, options)
+    closeProject: ->
+      App.ipc.off("on:project:reboot")
+      App.ipc("close:project")
 
-    openProject: (project, options) ->
+    openProject: (project) ->
       ## wait at least 750ms even if open:project
       ## resolves faster
       Promise.all([
-        App.ipc("open:project", {
-          path:    project.get("path")
-          options: options
-        }),
+        App.ipc("open:project", project.get("path")),
         Promise.delay(500)
       ])
       .spread (config) ->
         project.setClientUrl(config.clientUrl, config.clientUrlDisplay)
-
-        options.onProjectStart(config)
-
+      .then ->
+        App.ipc("on:project:settings:change")
+      .then =>
+        @reboot(project)
       .catch (err) ->
         project.setError(err)
 

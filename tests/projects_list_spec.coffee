@@ -92,7 +92,7 @@ describe "Projects List [00r]", ->
 
       it "trigger 'open:project' on click of project [00u]", ->
         cy
-          .get("#projects-container>li").first().click().then ->
+          .get("#projects-container>li").first().click().should ->
             expect(@App.ipc).to.be.calledWith("open:project")
 
     describe "add project [00j]", ->
@@ -138,7 +138,7 @@ describe "Projects List [00r]", ->
         beforeEach ->
           cy.get("header").find("[data-js='add-project']").click()
 
-        it "does no action [00m]", ->
+        it "does no action [02y]", ->
           @ipc.handle("show:directory:dialog", null, null)
 
           cy.get(".empty").should("exist").then ->
