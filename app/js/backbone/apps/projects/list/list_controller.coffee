@@ -2,14 +2,7 @@
 
   class List.Controller extends App.Controllers.Application
 
-    initialize: (params) ->
-      _.defaults params,
-        projectPath: null
-        onProjectNotFound: ->
-
-      @displayProjects(params)
-
-    displayProjects: (params) ->
+    initialize: ->
       projects = App.request "project:entities"
 
       user = App.request "current:user"
@@ -39,48 +32,39 @@
             project.loaded()
 
         .catch (err) =>
-          @displayError(err.message, params)
+          @displayError(err.message)
 
       startProject = (project, options = {}) ->
         App.vent.trigger "project:clicked", project, options
 
-      if projectPath = params.projectPath
-        @listenTo projectsView, "show", ->
-          project = projects.getProjectByPath(projectPath)
+      @listenTo projectsView, "add:project:clicked", addProject
 
-          ## if we couldnt find this project then bail
-          return params.onProjectNotFound(projectPath) if not project
+      ## listen for the buttons in our empty view too
+      @listenTo projectsView, "childview:add:project:clicked", addProject
 
-          startProject(project, params)
-      else
-        @listenTo projectsView, "add:project:clicked", addProject
+      @listenTo projectsView, "childview:help:clicked", ->
+        App.ipc("external:open", "https://on.cypress.io/guides/installing-and-running/#section-adding-projects")
 
-        ## listen for the buttons in our empty view too
-        @listenTo projectsView, "childview:add:project:clicked", addProject
+      @listenTo projectsView, "sign:out:clicked", ->
+        App.vent.trigger "log:out", user
 
-        @listenTo projectsView, "childview:help:clicked", ->
-          App.ipc("external:open", "https://on.cypress.io/guides/installing-and-running/#section-adding-projects")
+      @listenTo projectsView, "childview:project:clicked", (iv, obj) ->
+        project = obj.model
 
-        @listenTo projectsView, "sign:out:clicked", ->
-          App.vent.trigger "log:out", user
+        ## bail if our project is loading
+        return if project.isLoading()
 
-        @listenTo projectsView, "childview:project:clicked", (iv, obj) ->
-          project = obj.model
+        startProject(project)
 
-          ## bail if our project is loading
-          return if project.isLoading()
+      @listenTo projectsView, "childview:project:remove:clicked", (iv, project) ->
+        projects.remove(project)
 
-          startProject(project, params)
-
-        @listenTo projectsView, "childview:project:remove:clicked", (iv, project) ->
-          projects.remove(project)
-
-          App.ipc("remove:project", project.get("path"))
+        App.ipc("remove:project", project.get("path"))
 
       @listenTo projects, "fetched", ->
         @show projectsView
 
-    displayError: (msg, params) ->
+    displayError: (msg) ->
       errorView = @getErrorView(msg)
 
       @show errorView
@@ -89,7 +73,7 @@
       ## if we attach this before show
       ## so we need to wait until after
       @listenTo errorView, "ok:clicked", ->
-        @displayProjects(params)
+        @initialize()
 
     getErrorView: (msg) ->
       new List.Error

@@ -29,7 +29,7 @@
       App.execute "set:current:user", user
 
       if user and user.session_token?
-        App.vent.trigger "start:projects:app"#, some args here
+        App.vent.trigger "start:projects:app"
       else
         App.vent.trigger "start:login:app"
 
