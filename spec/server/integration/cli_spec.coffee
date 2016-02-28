@@ -2,17 +2,22 @@ require("../spec_helper")
 
 _  = require("lodash")
 cp = require("child_process")
+pr = require("../helpers/process")
+
+anyLineWithCaret = (str) ->
+  str[0] is ">"
 
 parse = (str) ->
-  ## remove blank lines and slice off the first 2 lines
-  ## which are junk from npm logs
-  _(str.split("\n")).compact().slice(2).value().join("\n")
+  ## remove blank lines and slice off any line
+  ## starting with a caret because thats junk
+  ## from npm logs
+  _(str.split("\n")).compact().reject(anyLineWithCaret).value().join("\n")
 
 describe "CLI Interface", ->
   beforeEach ->
     ## set the timeout high due to
     ## spawning child processes
-    @currentTest.timeout(5000)
+    @currentTest.timeout(20000)
 
   it "writes out ping value and exits", (done) ->
     cp.exec "npm start -- --smoke-test --ping=12345", (err, stdout, stderr) ->
