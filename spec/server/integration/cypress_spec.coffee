@@ -157,14 +157,11 @@ describe "lib/cypress", ->
   context "--run-project", ->
     beforeEach ->
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
+      @sandbox.stub(headless, "waitForRendererToConnect")
+      @sandbox.stub(headless, "createRenderer")
+      @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 10})
 
     it "runs project headlessly and exits with status 0", ->
-      @sandbox.stub(headless, "runTests").resolves({
-        connection: null
-        renderer: null
-        stats: {failures: 10}
-      })
-
       Promise.all([
         user.set({name: "brian", session_token: "session-123"}),
 
@@ -172,15 +169,11 @@ describe "lib/cypress", ->
       ])
       .then =>
         cypress.start(["--run-project=#{@todosPath}"]).then =>
+          expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all?__ui=satellite")
           @expectExitWith(0)
 
     it "prompts to add the project and then immediately runs the tests and exits with 0", ->
       @sandbox.stub(inquirer, "prompt").yieldsAsync({add: true})
-      @sandbox.stub(headless, "runTests").resolves({
-        connection: null
-        renderer: null
-        stats: {failures: 10}
-      })
 
       user.set({session_token: "session-123"})
       .then =>
@@ -188,9 +181,27 @@ describe "lib/cypress", ->
           expect(inquirer.prompt).to.be.calledOnce
           @expectExitWith(0)
 
-    ## TODO implement the running of a specific spec by its options
-    ## instead of running all of the tests
-    it.skip "runs project by specific spec and exits with status 0", ->
+    it "runs project by specific spec and exits with status 0", ->
+      Promise.all([
+        user.set({session_token: "session-123"}),
+
+        Project.add(@todosPath)
+      ])
+      .then =>
+        cypress.start(["--run-project=#{@todosPath}", "--spec=test2.coffee"]).then =>
+          expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/test2.coffee?__ui=satellite")
+          @expectExitWith(0)
+
+    it "runs project by specific absolute spec and exits with status 0", ->
+      Promise.all([
+        user.set({session_token: "session-123"}),
+
+        Project.add(@todosPath)
+      ])
+      .then =>
+        cypress.start(["--run-project=#{@todosPath}", "--spec=#{@todosPath}/tests/test2.coffee"]).then =>
+          expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/test2.coffee?__ui=satellite")
+          @expectExitWith(0)
 
     it "logs error and exits when user isn't logged in", ->
       user.set({})
@@ -205,6 +216,26 @@ describe "lib/cypress", ->
       .then =>
         cypress.start(["--run-project=does/not/exist"]).then =>
           @expectExitWithErr("PROJECT_DOES_NOT_EXIST")
+
+    it "logs error and exits when spec file was specified and does not exist", ->
+      Promise.all([
+        user.set({session_token: "session-123"}),
+
+        Project.add(@todosPath)
+      ])
+      .then =>
+        cypress.start(["--run-project=#{@todosPath}", "--spec=path/to/spec"]).then =>
+          @expectExitWithErr("SPEC_FILE_NOT_FOUND", "#{@todosPath}/tests/path/to/spec")
+
+    it "logs error and exits when spec absolute file was specified and does not exist", ->
+      Promise.all([
+        user.set({session_token: "session-123"}),
+
+        Project.add(@todosPath)
+      ])
+      .then =>
+        cypress.start(["--run-project=#{@todosPath}", "--spec=#{@todosPath}/tests/path/to/spec"]).then =>
+          @expectExitWithErr("SPEC_FILE_NOT_FOUND", "#{@todosPath}/tests/path/to/spec")
 
     ## Currently this is not an error, all this does is simply run the tests
     ## without an id
@@ -271,11 +302,7 @@ describe "lib/cypress", ->
 
     describe "--port", ->
       beforeEach ->
-        @sandbox.stub(headless, "runTests").resolves({
-          connection: null
-          renderer: null
-          stats: {}
-        })
+        headless.waitForTestsToFinishRunning.resolves({})
 
         Promise.all([
           user.set({name: "brian", session_token: "session-123"}),
@@ -304,11 +331,7 @@ describe "lib/cypress", ->
 
     describe "--env", ->
       beforeEach ->
-        @sandbox.stub(headless, "runTests").resolves({
-          connection: null
-          renderer: null
-          stats: {}
-        })
+        headless.waitForTestsToFinishRunning.resolves({})
 
         Promise.all([
           user.set({name: "brian", session_token: "session-123"}),

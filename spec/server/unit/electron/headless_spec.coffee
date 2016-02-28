@@ -246,8 +246,8 @@ describe "electron/headless", ->
       headless.run().then =>
         expect(headless.waitForTestsToFinishRunning).to.be.calledWith(@projectInstance)
 
-    it "passes config.allTestsUrl to createRenderer", ->
-      @sandbox.stub(@projectInstance, "getConfig").returns({allTestsUrl: "foo/bar"})
+    it "passes project.ensureSpecUrl to createRenderer", ->
+      @sandbox.stub(@projectInstance, "ensureSpecUrl").resolves("foo/bar")
 
       headless.run().then ->
         expect(headless.createRenderer).to.be.calledWith("foo/bar")

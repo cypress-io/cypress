@@ -122,9 +122,7 @@ module.exports = {
       ## resolve the promise
       project.once "end", resolve
 
-  runTests: (project, id) ->
-    config = project.getConfig()
-
+  runTests: (project, id, url) ->
     ## we know we're done running headlessly
     ## when the renderer has connected and
     ## finishes running all of the tests.
@@ -133,7 +131,7 @@ module.exports = {
     Promise.props({
       connection: @waitForRendererToConnect(project, id)
       stats:      @waitForTestsToFinishRunning(project)
-      renderer:   @createRenderer(config.allTestsUrl)
+      renderer:   @createRenderer(url)
     })
 
   ready: (options = {}) ->
@@ -149,11 +147,16 @@ module.exports = {
       @ensureAndOpenProjectByPath(id, options)
 
       .then (project) =>
-        console.log("\nTests should begin momentarily...\n")
+        ## either get the url to the all specs
+        ## or if we've specificed one make sure
+        ## it exists
+        project.ensureSpecUrl(options.spec)
+        .then (url) =>
+          console.log("\nTests should begin momentarily...\n")
 
-        @runTests(project, id)
-        .get("stats")
-        .get("failures")
+          @runTests(project, id, url)
+          .get("stats")
+          .get("failures")
 
   run: (options) ->
     new Promise (resolve, reject) =>

@@ -37,6 +37,8 @@ API = {
         "Error reading from: " + chalk.blue(arg1) + "\n\n" + chalk.yellow(arg2)
       when "ERROR_WRITING_FILE"
         "Error writing to: " + chalk.blue(arg1) + "\n\n" + chalk.yellow(arg2)
+      when "SPEC_FILE_NOT_FOUND"
+        "Sorry, could not run this specific spec because it was not found: " + chalk.blue(arg1)
 
   get: (type, arg1, arg2) ->
     msg = @getMsgByType(type, arg1, arg2)

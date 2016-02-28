@@ -97,6 +97,35 @@ class Project extends EE
   getConfig: ->
     @config ? {}
 
+  ensureSpecUrl: (spec) ->
+    Promise.try =>
+      if spec
+        @ensureSpecExists(spec)
+        .then (str) =>
+          @getUrlBySpec(str)
+      else
+        @getUrlBySpec("/__all")
+
+  ensureSpecExists: (spec) ->
+    {testFolder} = @getConfig()
+
+    ## TODO this assumes we've already opened the project and have config
+    ## refactor this not to be dependent on state
+    specFile = path.resolve(@projectRoot, testFolder, spec)
+
+    ## we want to make it easy on the user by allowing them to pass both
+    ## an absolute path to the spec, or a relative path from their test folder
+    fs
+    .statAsync(specFile)
+    .then =>
+      ## strip out the projectRoot + testFolder
+      specFile.replace(path.join(@projectRoot, testFolder), "")
+    .catch ->
+      errors.throw("SPEC_FILE_NOT_FOUND", specFile)
+
+  getUrlBySpec: (spec) ->
+    [@getConfig().clientUrl, "#/tests", spec, "?__ui=satellite"].join("")
+
   scaffold: (config) ->
     Promise.join(
       ## ensure fixtures dir is created
@@ -184,11 +213,8 @@ class Project extends EE
       path in paths
 
   @getSecretKeyByPath = (path) ->
-    ## verify the project exists at the projectRoot
-    Project(path).verifyExistance()
-
-    ## then get its project id
-    .call("getProjectId")
+    ## get project id
+    Project(path).getProjectId()
     .then (id) ->
       user.ensureSession()
       .then (session) ->
@@ -197,11 +223,8 @@ class Project extends EE
           errors.throw("CANNOT_FETCH_PROJECT_TOKEN")
 
   @generateSecretKeyByPath = (path) ->
-    ## verify the project exists at the projectRoot
-    Project(path).verifyExistance()
-
-    ## then get its project id
-    .call("getProjectId")
+    ## get project id
+    Project(path).getProjectId()
     .then (id) ->
       user.ensureSession()
       .then (session) ->
