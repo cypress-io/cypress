@@ -7,8 +7,8 @@
   "scripts": {
     "start": "node index.js",
     "server": "node index.js --mode server",
-    "build": "gulp client:build nw:build",
-    "watch": "gulp client nw",
+    "build": "gulp client:build",
+    "watch": "gulp client",
     "deploy": "gulp deploy",
     "dist": "gulp dist",
     "release": "gulp release",
