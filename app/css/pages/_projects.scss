@@ -131,7 +131,7 @@ header {
 
 #project, #projects .error {
   text-align: center;
-  padding-top: 25px;
+  padding-top: 10px;
 
   h3 {
     @include text-overflow;
@@ -149,6 +149,10 @@ header {
     border-top: 1px dashed #999;
     display: inline-block;
   }
+}
+
+#projects .error {
+  padding-top: 25px;
 }
 
 #project, #projects {
