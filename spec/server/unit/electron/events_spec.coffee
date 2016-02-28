@@ -15,7 +15,7 @@ project  = require("#{root}../lib/electron/handlers/project")
 cookies  = require("#{root}../lib/electron/handlers/cookies")
 Renderer = require("#{root}../lib/electron/handlers/renderer")
 
-describe "Events", ->
+describe "lib/electron/handlers/events", ->
   beforeEach ->
     @id      = Math.random()
     @send    = @sandbox.spy()
@@ -334,7 +334,7 @@ describe "Events", ->
         project.close()
 
       it "open project + returns config", ->
-        projectInstance = {getConfig: -> {foo: "bar"}}
+        projectInstance = {getConfig: -> {some: "config"}}
         @sandbox.stub(Project.prototype, "open").withArgs({foo: "bar"}).resolves(projectInstance)
 
         @handleEvent("open:project", {
@@ -342,7 +342,7 @@ describe "Events", ->
           options: {foo: "bar"}
         })
         .then =>
-          @expectSendCalledWith({foo: "bar"})
+          @expectSendCalledWith({some: "config"})
 
       it "catches errors", ->
         err = new Error("foo")

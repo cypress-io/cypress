@@ -14,11 +14,9 @@ describe "lib/electron/handlers/projects", ->
     project.close()
 
   context ".open", ->
-    it "resolves with opened project's config", ->
+    it "resolves with opened project instance", ->
       project.open(@todosPath)
-      .then (config) ->
-        expect(config).to.be.an("object")
-        expect(config).to.have.a.property("clientUrl")
-        expect(config).to.have.a.property("clientUrlDisplay")
+      .then (p) ->
+        expect(p).to.be.an.instanceOf(Project)
 
   context ".close", ->

@@ -8,11 +8,11 @@
     <script type="text/javascript" src="/__cypress/static/js/iframe.js"></script>
 
     {{#each javascripts}}
-      <script type="text/javascript" src="{{this}}"></script>
+      <script type="text/javascript" src="{{{this}}}"></script>
     {{/each}}
 
     {{#each specs}}
-      <script type="text/javascript" src="{{this}}"></script>
+      <script type="text/javascript" src="{{{this}}}"></script>
     {{/each}}
   </body>
 </html>

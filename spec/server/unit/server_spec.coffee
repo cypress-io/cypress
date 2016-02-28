@@ -47,11 +47,11 @@ describe "lib/server", ->
       @server.close().then ->
         expect(logger.getSettings()).to.be.undefined
 
-    it "calls close on this.ws", ->
-      @server.ws = {close: @sandbox.spy()}
+    it "calls close on this.socket", ->
+      @server.socket = {close: @sandbox.spy()}
 
       @server.close().then =>
-        expect(@server.ws.close).to.be.calledOnce
+        expect(@server.socket.close).to.be.calledOnce
 
   context "#open", ->
     it "creates http server"

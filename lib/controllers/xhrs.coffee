@@ -3,7 +3,7 @@ mime        = require("mime")
 request     = require("request")
 str         = require("string-to-stream")
 Promise     = require("bluebird")
-Fixture     = require("../fixture")
+fixture     = require("../fixture")
 
 fixturesRe = /^(fx:|fixture:)/
 htmlLikeRe = /<.+>[\s\S]+<\/.+>/
@@ -29,18 +29,21 @@ class Xhr
 
     @app = app
 
+  _get: (resp) ->
+    file = resp.replace(fixturesRe, "")
+    {projectRoot, fixturesFolder} = @app.get("cypress")
+    fixture.get(projectRoot, fixturesFolder, file)
+
   getStream: (resp) ->
     if fixturesRe.test(resp)
-      fixture = resp.replace(fixturesRe, "")
-      Fixture(@app).get(fixture).then (contents) ->
+      @_get(resp).then (contents) ->
         str(contents)
     else
       str(resp)
 
   getResponse: (resp) ->
     if fixturesRe.test(resp)
-      fixture = resp.replace(fixturesRe, "")
-      Fixture(@app).get(fixture)
+      @_get(resp)
     else
       Promise.resolve(resp)
 

@@ -61,7 +61,8 @@ describe "lib/cache", ->
 
     describe "#removeProject", ->
       beforeEach ->
-        @sandbox.stub(Project.prototype, "createProjectId").returns("foo-bar-baz-123")
+        @sandbox.stub(Project.prototype, "verifyExistance").resolves()
+        @sandbox.stub(Project.prototype, "createProjectId").resolves("foo-bar-baz-123")
         @sandbox.stub(Settings, "read").resolves({})
 
       it "removes project by path", ->
