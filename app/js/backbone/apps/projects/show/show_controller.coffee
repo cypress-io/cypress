@@ -43,7 +43,7 @@
         @openProject(project)
 
     closeProject: ->
-      App.ipc.off("on:project:reboot")
+      App.ipc.off("on:project:settings:change")
       App.ipc("close:project")
 
     openProject: (project) ->
