@@ -382,6 +382,24 @@ describe "lib/cypress", ->
       cypress.start(["--run-project=#{@todosPath}", "--key=secret-key-123", "--ci"]).then =>
         @expectExitWithErr("CI_CANNOT_COMMUNICATE")
 
+  context "--return-pkg", ->
+    beforeEach ->
+      @sandbox.stub(console, "log")
+
+    it "logs package.json and exits", ->
+      cypress.start(["--return-pkg"]).then =>
+        expect(console.log).to.be.calledWithMatch('{"name":"Cypress"')
+        @expectExitWith(0)
+
+  context "--smoke-test", ->
+    beforeEach ->
+      @sandbox.stub(console, "log")
+
+    it "logs pong value and exits", ->
+      cypress.start(["--smoke-test", "--ping=abc123"]).then =>
+        expect(console.log).to.be.calledWith("abc123")
+        @expectExitWith(0)
+
   context "no args", ->
     beforeEach ->
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
