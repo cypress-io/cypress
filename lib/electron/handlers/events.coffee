@@ -153,7 +153,9 @@ handleEvent = (options, event, id, type, arg) ->
       .catch(sendErr)
 
     when "open:project"
-      project.open(arg.path, arg.options)
+      project.open(arg, {
+        changeEvents: true
+      })
       .call("getConfig")
       .then(send)
       .catch(sendErr)
@@ -161,6 +163,11 @@ handleEvent = (options, event, id, type, arg) ->
     when "close:project"
       project.close()
       .then(send)
+      .catch(sendErr)
+
+    when "on:project:settings:change"
+      project.onSettingsChanged()
+      .then -> send(null)
       .catch(sendErr)
 
     else

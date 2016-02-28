@@ -26,11 +26,14 @@ class Project extends EE
       throw new Error("Instantiating lib/project requires a projectRoot!")
 
     @projectRoot = projectRoot
-    @socket      = null
-    @watchers    = null
+    @server      = Server(projectRoot)
+    @watchers    = Watchers()
 
   open: (options = {}) ->
-    @server = Server(@projectRoot)
+    _.defaults options, {
+      reporter:     false
+      changeEvents: false
+    }
 
     @server.open(options)
     .bind(@)
@@ -48,21 +51,26 @@ class Project extends EE
       .return(@)
 
   close: ->
+    @removeAllListeners()
+
     Promise.join(
       @server?.close(),
       @watchers?.close()
     )
 
   watchFilesAndStartWebsockets: (options) ->
-    ## preserve file watchers
-    @watchers = Watchers()
+    obj = {}
 
-    ## whenever the cypress.json file changes we need to reboot
-    @watchers.watch(Settings.pathToCypressJson(@projectRoot), {
-      onChange: (filePath, stats) =>
-        if _.isFunction(options.onReboot)
-          options.onReboot()
-    })
+    ## if we are listening for change events
+    if options.changeEvents
+      obj.onChange = (filePath, stats) =>
+        ## emit settings:changed whenever
+        ## our settings file changes
+        @emit("settings:changed")
+
+    ## whenever the cypress.json file changes we need to close
+    ## this project and re-open it
+    @watchers.watch(Settings.pathToCypressJson(@projectRoot), obj)
 
     ## if we've passed down reporter
     ## then record these via mocha reporter

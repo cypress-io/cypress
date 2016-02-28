@@ -335,23 +335,17 @@ describe "lib/electron/handlers/events", ->
 
       it "open project + returns config", ->
         projectInstance = {getConfig: -> {some: "config"}}
-        @sandbox.stub(Project.prototype, "open").withArgs({foo: "bar"}).resolves(projectInstance)
+        @sandbox.stub(Project.prototype, "open").withArgs({changeEvents: true}).resolves(projectInstance)
 
-        @handleEvent("open:project", {
-          path: "path/to/project"
-          options: {foo: "bar"}
-        })
+        @handleEvent("open:project", "path/to/project")
         .then =>
           @expectSendCalledWith({some: "config"})
 
       it "catches errors", ->
         err = new Error("foo")
-        @sandbox.stub(Project.prototype, "open").withArgs({foo: "bar"}).rejects(err)
+        @sandbox.stub(Project.prototype, "open").withArgs({changeEvents: true}).rejects(err)
 
-        @handleEvent("open:project", {
-          path: "path/to/project"
-          options: {foo: "bar"}
-        })
+        @handleEvent("open:project", "path/to/project")
         .then =>
           @expectSendErrCalledWith(err)
 
@@ -366,12 +360,9 @@ describe "lib/electron/handlers/events", ->
           @expectSendCalledWith(null)
 
       it "closes down open project and returns null", ->
-        @sandbox.stub(Project.prototype, "open").withArgs({foo: "bar"}).resolves()
+        @sandbox.stub(Project.prototype, "open").withArgs({changeEvents: true}).resolves()
 
-        @handleEvent("open:project", {
-          path: "path/to/project"
-          options: {foo: "bar"}
-        })
+        @handleEvent("open:project", "path/to/project")
         .then =>
           ## it should store the opened project
           expect(project.opened()).not.to.be.null
@@ -383,3 +374,16 @@ describe "lib/electron/handlers/events", ->
 
             @expectSendCalledWith(null)
 
+    describe "on:project:settings:change", ->
+      it "returns null", ->
+        @sandbox.stub(project, "onSettingsChanged").resolves()
+
+        @handleEvent("on:project:settings:change").then =>
+          @expectSendCalledWith(null)
+
+      it "catches errors", ->
+        err = new Error("foo")
+        @sandbox.stub(project, "onSettingsChanged").rejects(err)
+
+        @handleEvent("on:project:settings:change").then =>
+          @expectSendErrCalledWith(err)

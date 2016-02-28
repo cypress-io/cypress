@@ -39,6 +39,8 @@ API = {
         "Error writing to: " + chalk.blue(arg1) + "\n\n" + chalk.yellow(arg2)
       when "SPEC_FILE_NOT_FOUND"
         "Sorry, could not run this specific spec because it was not found: " + chalk.blue(arg1)
+      when "NO_CURRENTLY_OPEN_PROJECT"
+        "Sorry, there is not a currently open project."
 
   get: (type, arg1, arg2) ->
     msg = @getMsgByType(type, arg1, arg2)

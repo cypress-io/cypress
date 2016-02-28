@@ -6,6 +6,8 @@ user         = require("#{root}lib/user")
 cache        = require("#{root}lib/cache")
 errors       = require("#{root}lib/errors")
 config       = require("#{root}lib/config")
+fixture      = require("#{root}lib/fixture")
+Support      = require("#{root}lib/support")
 Project      = require("#{root}lib/project")
 Settings     = require("#{root}lib/util/settings")
 
@@ -23,7 +25,7 @@ describe "lib/project", ->
     fn = -> Project()
     expect(fn).to.throw "Instantiating lib/project requires a projectRoot!"
 
-  context.skip "#close", ->
+  context "#close", ->
     beforeEach ->
       @project = Project("path/to/project")
 
@@ -33,6 +35,14 @@ describe "lib/project", ->
 
     it "can close when server + watchers arent open", ->
       @project.close()
+
+    it "removes listeners", ->
+      @project.on "foo", ->
+
+      expect(@project.listeners("foo").length).to.eq(1)
+
+      @project.close().then =>
+        expect(@project.listeners("foo").length).to.be.eq(0)
 
     it.skip "calls close once on watchers + socket when app closes", ->
       close1 = @sandbox.stub(Watchers::, "close")
@@ -45,24 +55,38 @@ describe "lib/project", ->
         expect(close1).to.be.calledOnce
         expect(close2).to.be.calledOnce
 
-  context.skip "#open", ->
-    it "calls Fixture#scaffold", ->
-      @server.open().bind(@).then ->
-        expect(Fixture::scaffold).to.be.calledOnce
+  context "#open", ->
+    beforeEach ->
+      @project = Project("path/to/project")
 
-    it "calls Support#scaffold", ->
-      @server.open().bind(@).then ->
-        expect(Support::scaffold).to.be.calledOnce
+      @sandbox.stub(@project, "watchFilesAndStartWebsockets").resolves()
+      @sandbox.stub(@project, "scaffold").resolves()
+      @sandbox.stub(@project.server, "open").resolves({projectRoot: "a", fixturesFolder: "b"})
 
-    it "calls project#getDetails", ->
+    it "sets changeEvents to false by default", ->
+      opts = {}
+      @project.open(opts).then ->
+        expect(opts.changeEvents).to.be.false
+
+    it "calls #watchFilesAndStartWebsockets with options", ->
+      opts = {}
+      @project.open(opts).then =>
+        expect(@project.watchFilesAndStartWebsockets).to.be.calledWith(opts)
+
+    it "calls #scaffold with server config", ->
+      @project.open().then =>
+        expect(@project.scaffold).to.be.calledWith({projectRoot: "a", fixturesFolder: "b"})
+
+
+    it.skip "calls project#getDetails", ->
       @server.open().bind(@).then ->
         expect(Project::getDetails).to.be.calledWith("a-long-guid-123")
 
-    it "watches cypress.json", ->
+    it.skip "watches cypress.json", ->
       @server.open().bind(@).then ->
         expect(Watchers::watch).to.be.calledWith("/Users/brian/app/cypress.json")
 
-    it "passes watchers to Socket.startListening", ->
+    it.skip "passes watchers to Socket.startListening", ->
       options = {}
 
       @server.open(options).then ->
@@ -70,14 +94,42 @@ describe "lib/project", ->
         expect(startListening.getCall(0).args[0]).to.be.instanceof(Watchers)
         expect(startListening.getCall(0).args[1]).to.eq(options)
 
-    it "calls onReboot when cypress.json changes", ->
-      onReboot = @sandbox.spy()
+  context "#scaffold", ->
+    beforeEach ->
+      @project = Project("path/to/project")
+      @sandbox.stub(fixture, "scaffold").resolves()
+      @sandbox.stub(Support.prototype, "scaffold").resolves()
 
-      ## invoke the onChange callback
-      Watchers::watch.yieldsTo("onChange")
+    it "calls fixture.scaffold with projectRoot + fixturesFolder", ->
+      obj = {projectRoot: "pr", fixturesFolder: "ff", supportFolder: "sf"}
 
-      @server.open({onReboot: onReboot}).then ->
-        expect(onReboot).to.be.calledOnce
+      @project.scaffold(obj).then ->
+        expect(fixture.scaffold).to.be.calledWith(obj.projectRoot, obj.fixturesFolder)
+
+  context "#watchFilesAndStartWebsockets", ->
+    beforeEach ->
+      @project = Project("path/to/project")
+      @project.server = {startWebsockets: ->}
+      @watch = @sandbox.stub(@project.watchers, "watch")
+
+    it "sets onChange event when {changeEvents: true}", (done) ->
+      @project.watchFilesAndStartWebsockets({changeEvents: true})
+
+      ## get the object passed to watchers.watch
+      obj = @watch.getCall(0).args[1]
+
+      @project.on "settings:changed", done
+
+      expect(obj.onChange).to.be.a("function")
+      obj.onChange()
+
+    it "does not set onChange event when {changeEvents: false}", ->
+      @project.watchFilesAndStartWebsockets({changeEvents: false})
+
+      ## get the object passed to watchers.watch
+      obj = @watch.getCall(0).args[1]
+
+      expect(obj).to.deep.eq({})
 
   context "#getProjectId", ->
     beforeEach ->

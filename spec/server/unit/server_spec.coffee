@@ -3,14 +3,12 @@ require("../spec_helper")
 Server        = require("#{root}lib/server")
 Socket        = require("#{root}lib/socket")
 Watchers      = require("#{root}lib/watchers")
-Project       = require("#{root}lib/project")
 logger        = require("#{root}lib/logger")
 Settings      = require("#{root}lib/util/settings")
 
 describe "lib/server", ->
   beforeEach ->
     @sandbox.stub(Socket.prototype, "startListening")
-    @sandbox.stub(Project.prototype, "ensureProjectId").resolves("a-long-guid-123")
     @sandbox.stub(Settings, "readSync").returns({})
     @sandbox.stub(Watchers.prototype, "watch").returns()
     @server = Server("/Users/brian/app")

@@ -20,3 +20,17 @@ describe "lib/electron/handlers/projects", ->
         expect(p).to.be.an.instanceOf(Project)
 
   context ".close", ->
+
+  context ".onSettingsChanged", ->
+    it "binds to 'settings:changed' event", ->
+      project.open(@todosPath)
+      .then (p) ->
+        process.nextTick ->
+          p.emit("settings:changed")
+
+        project.onSettingsChanged()
+
+    it "throws when no project is open", ->
+      project.onSettingsChanged()
+      .catch (err) ->
+        expect(err.type).to.eq("NO_CURRENTLY_OPEN_PROJECT")

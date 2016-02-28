@@ -1,3 +1,5 @@
+Promise = require("bluebird")
+errors  = require("../../errors")
 cache   = require("../../cache")
 Project = require("../../project")
 
@@ -5,7 +7,7 @@ Project = require("../../project")
 openProject = null
 
 module.exports = {
-  open: (path, options) ->
+  open: (path, options = {}) ->
     ## store the currently open project
     openProject = Project(path)
 
@@ -15,6 +17,14 @@ module.exports = {
     .open(options)
 
   opened: -> openProject
+
+  onSettingsChanged: ->
+    Promise.try =>
+      if not openProject
+        errors.throw("NO_CURRENTLY_OPEN_PROJECT")
+      else
+        new Promise (resolve, reject) ->
+          openProject.on "settings:changed", -> resolve()
 
   close: ->
     nullify = ->
