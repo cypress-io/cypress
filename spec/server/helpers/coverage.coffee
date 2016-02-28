@@ -1,8 +1,8 @@
-path           = require("path");
-coffeeCoverage = require("coffee-coverage");
+path           = require("path")
+coffeeCoverage = require("coffee-coverage")
 
-projectRoot = path.resolve(__dirname, "../../..");
-coverageVar = coffeeCoverage.findIstanbulVariable();
+projectRoot = path.resolve(__dirname, "../../..")
+coverageVar = coffeeCoverage.findIstanbulVariable()
 
 ## Only write a coverage report if we"re not running inside of Istanbul.
 writeOnExit = if coverageVar then null else projectRoot + "/coverage/coverage-coffee.json"
@@ -14,7 +14,7 @@ coffeeCoverage.register({
   coverageVar: coverageVar
   writeOnExit: writeOnExit
   initAll: true
-});
+})
 
 ## using hack found here to prevent problems with
 ## coffee-coverage being replaced by modules which
