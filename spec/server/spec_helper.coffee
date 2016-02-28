@@ -1,5 +1,5 @@
 global.root      = "../../../"
-global.supertest = require("supertest")
+global.supertest = require("supertest-as-promised")
 global.nock      = require("nock")
 global.fs        = require("fs-extra")
 global.Promise   = require("bluebird")

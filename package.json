@@ -76,6 +76,7 @@
     "socket.io-client": "^1.4.5",
     "stream-to-promise": "^1.1.0",
     "supertest": "^0.15.0",
+    "supertest-as-promised": "^3.0.0",
     "supertest-session": "0.0.7",
     "tar-fs": "^1.8.1",
     "through2": "0.6.3",
