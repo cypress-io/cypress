@@ -1,6 +1,5 @@
 app      = require("electron").app
 Position = require("electron-positioner")
-key      = require("../key")
 errors   = require("../errors")
 Updater  = require("../updater")
 logs     = require("../electron/handlers/logs")

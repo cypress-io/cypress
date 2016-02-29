@@ -33,14 +33,6 @@ module.exports = {
     .promise()
     .timeout(timeout)
 
-  createKeyRange: (projectId, session) ->
-    rp.post({
-      url: Routes.projectKeys(projectId)
-      headers: {
-        "X-Session": session
-      }
-    })
-
   createSignin: (code) ->
     rp.post({
       url: Routes.signin({code: code})
