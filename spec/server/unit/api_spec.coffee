@@ -90,6 +90,16 @@ describe "lib/api", ->
       api.createProject("session-123").then (uuid) ->
         expect(uuid).to.eq("uuid-123")
 
+  context ".updateProject", ->
+    it "GETs /projects/:id", ->
+      nock("http://localhost:1234")
+      .matchHeader("x-session", "session-123")
+      .get("/projects/project-123")
+      .reply(200, {})
+
+      api.updateProject("project-123", "session-123").then (resp) ->
+        expect(resp).to.deep.eq({})
+
   context ".createRaygunException", ->
     beforeEach ->
       @setup = (body, session, delay = 0) ->

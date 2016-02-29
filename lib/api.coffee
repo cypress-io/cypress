@@ -71,6 +71,16 @@ module.exports = {
     .promise()
     .get("uuid")
 
+  updateProject: (projectId, session) ->
+    ## TODO: change this to PUT method
+    rp.get({
+      url: Routes.project(projectId)
+      json: true
+      headers: {
+        "X-Session": session
+      }
+    })
+
   getBuilds: (projectId, session) ->
     r.get({
       url: Routes.projectCi(projectId)

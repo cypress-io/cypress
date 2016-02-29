@@ -160,6 +160,7 @@ describe "lib/cypress", ->
       @sandbox.stub(headless, "waitForRendererToConnect")
       @sandbox.stub(headless, "createRenderer")
       @sandbox.stub(headless, "waitForTestsToFinishRunning").resolves({failures: 10})
+      @sandbox.spy(api, "updateProject")
 
     it "runs project headlessly and exits with status 0", ->
       Promise.all([
@@ -169,6 +170,7 @@ describe "lib/cypress", ->
       ])
       .then =>
         cypress.start(["--run-project=#{@todosPath}"]).then =>
+          expect(api.updateProject).not.to.be.called
           expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all?__ui=satellite")
           @expectExitWith(0)
 

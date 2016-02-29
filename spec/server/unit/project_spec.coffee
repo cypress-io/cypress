@@ -60,6 +60,8 @@ describe "lib/project", ->
       @project = Project("path/to/project")
 
       @sandbox.stub(@project, "watchFilesAndStartWebsockets").resolves()
+      @sandbox.stub(@project, "ensureProjectId").resolves("id-123")
+      @sandbox.stub(@project, "updateProject").withArgs("id-123").resolves()
       @sandbox.stub(@project, "scaffold").resolves()
       @sandbox.stub(@project.server, "open").resolves({projectRoot: "a", fixturesFolder: "b"})
 
@@ -67,6 +69,11 @@ describe "lib/project", ->
       opts = {}
       @project.open(opts).then ->
         expect(opts.changeEvents).to.be.false
+
+    it "sets updateProject to false by default", ->
+      opts = {}
+      @project.open(opts).then ->
+        expect(opts.updateProject).to.be.false
 
     it "calls #watchFilesAndStartWebsockets with options", ->
       opts = {}
@@ -77,6 +84,27 @@ describe "lib/project", ->
       @project.open().then =>
         expect(@project.scaffold).to.be.calledWith({projectRoot: "a", fixturesFolder: "b"})
 
+    it "passes id + options to updateProject", ->
+      opts = {}
+
+      @project.open(opts).then =>
+        expect(@project.updateProject).to.be.calledWith("id-123", opts)
+
+    it "swallows errors from ensureProjectId", ->
+      @project.ensureProjectId.rejects(new Error)
+      @project.open()
+
+    it "swallows errors from updateProject", ->
+      @project.updateProject.rejects(new Error)
+      @project.open()
+
+    it "does not wait on ensureProjectId", ->
+      @project.ensureProjectId.resolves(Promise.delay(10000))
+      @project.open()
+
+    it "does not wait on updateProject", ->
+      @project.updateProject.resolves(Promise.delay(10000))
+      @project.open()
 
     it.skip "calls project#getDetails", ->
       @server.open().bind(@).then ->
@@ -93,6 +121,20 @@ describe "lib/project", ->
         startListening = Socket::startListening
         expect(startListening.getCall(0).args[0]).to.be.instanceof(Watchers)
         expect(startListening.getCall(0).args[1]).to.eq(options)
+
+  context "#updateProject", ->
+    beforeEach ->
+      @project = Project("path/to/project")
+      @sandbox.stub(api, "updateProject").resolves({})
+      @sandbox.stub(user, "ensureSession").resolves("session-123")
+
+    it "is noop if options.updateProject isnt true", ->
+      @project.updateProject(1).then ->
+        expect(api.updateProject).not.to.be.called
+
+    it "calls api.updateProject with id + session", ->
+      @project.updateProject("project-123", {updateProject: true}).then ->
+        expect(api.updateProject).to.be.calledWith("project-123", "session-123")
 
   context "#scaffold", ->
     beforeEach ->

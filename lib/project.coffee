@@ -33,11 +33,15 @@ class Project extends EE
     _.defaults options, {
       reporter:     false
       changeEvents: false
+      updateProject: false
     }
 
     @server.open(options)
     .bind(@)
     .then (config) ->
+      ## sync but do not block
+      @sync(options)
+
       ## store the config from
       ## opening the server
       @config = config
@@ -50,6 +54,20 @@ class Project extends EE
       ## return our project instance
       .return(@)
 
+  sync: (options) ->
+    ## attempt to sync up with the remote
+    ## server to ensure we have a valid
+    ## project id and user attached to
+    ## this project
+    @ensureProjectId()
+    .then (id) =>
+      @updateProject(id, options)
+    .catch ->
+      ## dont catch ensure project id or
+      ## update project errors which allows
+      ## the user to work offline
+      return
+
   close: ->
     @removeAllListeners()
 
@@ -57,6 +75,15 @@ class Project extends EE
       @server?.close(),
       @watchers?.close()
     )
+
+  updateProject: (id, options = {}) ->
+    Promise.try =>
+      ## bail if updateProject isnt true
+      return if not options.updateProject
+
+      user.ensureSession()
+      .then (session) ->
+        api.updateProject(id, session)
 
   watchFilesAndStartWebsockets: (options) ->
     obj = {}

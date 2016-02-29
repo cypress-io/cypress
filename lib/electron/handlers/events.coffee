@@ -151,6 +151,7 @@ handleEvent = (options, event, id, type, arg) ->
     when "open:project"
       project.open(arg, {
         changeEvents: true
+        updateProject: true
       })
       .call("getConfig")
       .then(send)

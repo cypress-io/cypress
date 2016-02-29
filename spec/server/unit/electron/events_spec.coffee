@@ -335,7 +335,7 @@ describe "lib/electron/handlers/events", ->
 
       it "open project + returns config", ->
         projectInstance = {getConfig: -> {some: "config"}}
-        @sandbox.stub(Project.prototype, "open").withArgs({changeEvents: true}).resolves(projectInstance)
+        @sandbox.stub(Project.prototype, "open").withArgs({changeEvents: true, updateProject: true}).resolves(projectInstance)
 
         @handleEvent("open:project", "path/to/project")
         .then =>
@@ -343,7 +343,7 @@ describe "lib/electron/handlers/events", ->
 
       it "catches errors", ->
         err = new Error("foo")
-        @sandbox.stub(Project.prototype, "open").withArgs({changeEvents: true}).rejects(err)
+        @sandbox.stub(Project.prototype, "open").withArgs({changeEvents: true, updateProject: true}).rejects(err)
 
         @handleEvent("open:project", "path/to/project")
         .then =>
@@ -360,7 +360,7 @@ describe "lib/electron/handlers/events", ->
           @expectSendCalledWith(null)
 
       it "closes down open project and returns null", ->
-        @sandbox.stub(Project.prototype, "open").withArgs({changeEvents: true}).resolves()
+        @sandbox.stub(Project.prototype, "open").withArgs({changeEvents: true, updateProject: true}).resolves()
 
         @handleEvent("open:project", "path/to/project")
         .then =>
