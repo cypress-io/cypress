@@ -22,6 +22,28 @@ describe "lib/cache", ->
             PROJECTS: {}
           }
 
+    it "detects when not defaults and automatically inserts PROJECTS", ->
+      fs.writeJsonAsync(@cache.path, {USER: {name: "brian"}})
+      .then =>
+        @cache.ensureExists()
+      .then =>
+        fs.readJsonAsync(@cache.path).then (json) ->
+          expect(json).to.deep.eq {
+            USER: {name: "brian"}
+            PROJECTS: {}
+          }
+
+    it "detects when not defaults and automatically inserts USER", ->
+      fs.writeJsonAsync(@cache.path, {PROJECTS: {asdf: "jkl"}})
+      .then =>
+        @cache.ensureExists()
+      .then =>
+        fs.readJsonAsync(@cache.path).then (json) ->
+          expect(json).to.deep.eq {
+            USER: {}
+            PROJECTS: {asdf: "jkl"}
+          }
+
     it "creates cache file in root/.cy/{environment}/cache", ->
       @cache.ensureExists().then ->
         fs.statAsync(path.join(process.cwd(), ".cy", process.env["CYPRESS_ENV"], "cache"))

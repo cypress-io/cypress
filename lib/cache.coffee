@@ -20,10 +20,16 @@ module.exports = {
   ## if so returns true;
   ## otherwise it inits an empty JSON config file
   ensureExists: ->
-    logger.info "checking existence of .cy cache", path: CACHE
-
     queue.add =>
-      fs.statAsync(CACHE)
+      fs.readJsonAsync(CACHE)
+      .then (json) =>
+        if not json.USER
+          json.USER = {}
+
+        if not json.PROJECTS
+          json.PROJECTS = {}
+
+        @write(json, false)
       .return(true)
       .catch =>
         @write(@defaults(), false)
