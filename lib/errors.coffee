@@ -9,19 +9,19 @@ API = {
   getMsgByType: (type, arg1, arg2) ->
     switch type
       when "NOT_LOGGED_IN"
-        "Can't fulfill request without authorization. \nLog into Cypress and issue the command again."
+        "You're not logged in.\n\nLog into Cypress and issue the command again."
       when "TESTS_DID_NOT_START"
         "Can't start tests, the remote client never connected."
       when "PROJECT_DOES_NOT_EXIST"
         "Can't find project. Add project to Cypress."
       when "NOT_CI_ENVIRONMENT"
-        "Can't run CI outside of a CI provider and environment"
+        "Can't run CI outside of a CI provider and environment."
       when "CI_KEY_NOT_VALID"
-        "Can't run project in CI. Your project's CI key, #{chalk.blue(arg1)}, is invalid."
+        "Can't run project in CI. Your project's CI key: #{chalk.blue(arg1)} is invalid."
       when "CI_PROJECT_NOT_FOUND"
         "Can't find project. Aborting the CI run.\n\nCheck that your 'projectId' and 'secret CI key' are valid."
       when "CI_CANNOT_COMMUNICATE"
-        "Can't communicate with remote Cypress servers. This is a temporarily problem. Try again later."
+        "Can't communicate with remote Cypress servers. This is a temporary problem. Try again later."
       when "DEV_NO_SERVER"
         " > The local API server isn't running in development. This may cause problems running the GUI."
       when "NO_PROJECT_ID"
@@ -41,7 +41,7 @@ API = {
       when "ERROR_WRITING_FILE"
         "Error writing to: " + chalk.blue(arg1) + "\n\n" + chalk.yellow(arg2)
       when "SPEC_FILE_NOT_FOUND"
-        "Can't find test spec " + chalk.blue(arg1)
+        "Can't find test spec: " + chalk.blue(arg1)
       when "NO_CURRENTLY_OPEN_PROJECT"
         "Can't find open project."
 
