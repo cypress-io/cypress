@@ -17,7 +17,7 @@ API = {
       when "NOT_CI_ENVIRONMENT"
         "Can't run CI outside of a CI provider and environment"
       when "CI_KEY_NOT_VALID"
-        "Can't run project in CI. Your project's CI Key, #{chalk.blue(arg1)}, is invalid."
+        "Can't run project in CI. Your project's CI key, #{chalk.blue(arg1)}, is invalid."
       when "CI_PROJECT_NOT_FOUND"
         "Can't find project. Aborting the CI run.\n\nCheck that your 'projectId' and 'secret CI key' are valid."
       when "CI_CANNOT_COMMUNICATE"
