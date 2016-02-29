@@ -1,5 +1,6 @@
 _       = require("lodash")
 chalk   = require("chalk")
+ansi_up = require("ansi_up")
 Promise = require("bluebird")
 
 exceptions = "CI_CANNOT_COMMUNICATE".split(" ")
@@ -84,7 +85,11 @@ API = {
 
   clone: (err) ->
     ## pull off these properties
-    obj = _.pick(err, "message", "type", "name", "stack", "fileName", "lineNumber", "columnNumber")
+    obj = _.pick(err, "type", "name", "stack", "fileName", "lineNumber", "columnNumber")
+
+    obj.message = ansi_up.ansi_to_html(err.message, {
+      use_classes: true
+    })
 
     ## and any own (custom) properties
     ## of the err object

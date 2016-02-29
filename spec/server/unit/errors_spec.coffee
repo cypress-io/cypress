@@ -46,3 +46,9 @@ describe "lib/errors", ->
       foo = new Error("foo")
       errors.log(foo).then =>
         expect(@log).not.to.be.calledWith(foo.stack)
+
+  context ".clone", ->
+    it "converts err.message from ansi to html with span classes", ->
+      err = new Error("foo" + chalk.blue("bar") + chalk.yellow("baz"))
+      obj = errors.clone(err)
+      expect(obj.message).to.eq('foo<span class="ansi-blue-fg">bar</span><span class="ansi-yellow-fg">baz</span>')

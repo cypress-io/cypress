@@ -113,10 +113,6 @@ handleEvent = (options, event, id, type, arg) ->
       win.once "closed", ->
         upd.cancel()
 
-    when "update"
-      ## TODO: fix this
-      send({foo: "bar"})
-
     when "get:about:logo:src"
       send(cypressIcons.getPathToIcon("icon_32x32@2x.png"))
 
