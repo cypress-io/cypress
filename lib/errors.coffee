@@ -18,6 +18,8 @@ API = {
         "Sorry, running in CI requires a valid CI provider and environment."
       when "CI_KEY_NOT_VALID"
         "Sorry, your project's secret CI key: #{chalk.blue(arg1)} was not valid. This project cannot run in CI."
+      when "CI_PROJECT_NOT_FOUND"
+        "Sorry, your project could not be found by our servers. Aborting the CI run.\n\nCheck that your 'projectId' and 'secret CI key' are valid."
       when "CI_CANNOT_COMMUNICATE"
         "Sorry, there was a problem communicating with the remote Cypress servers. This is likely a temporarily problem. Try again later."
       when "DEV_NO_SERVER"

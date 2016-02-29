@@ -154,6 +154,18 @@ describe "electron/ci", ->
           expect(err.message).to.include("3206e...158aa")
           expect(err.message).to.include("was not valid.")
 
+    it "handles status code errors of 404", ->
+      err = new Error
+      err.statusCode = 404
+
+      api.createCiGuid.rejects(err)
+
+      ci.ensureProjectAPIToken("id-123", "path", "key-123")
+      .then ->
+        throw new Error("should have failed but did not")
+      .catch (err) ->
+        expect(err.type).to.eq("CI_PROJECT_NOT_FOUND")
+
     it "handles all other errors", ->
       api.createCiGuid.rejects(new Error)
 
