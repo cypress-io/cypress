@@ -13,7 +13,7 @@ API = {
       when "TESTS_DID_NOT_START"
         "Can't start tests, the remote client never connected."
       when "PROJECT_DOES_NOT_EXIST"
-        "Can't find project. Add project to Cypress."
+        "You need to add a project to run tests."
       when "NOT_CI_ENVIRONMENT"
         "Can't run CI outside of a CI provider and environment."
       when "CI_KEY_NOT_VALID"
