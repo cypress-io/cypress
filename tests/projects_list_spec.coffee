@@ -128,13 +128,13 @@ describe "Projects List [00r]", ->
               .should("be.visible")
               .and("contain", "something bad happened")
 
-        it "goes back to projects view on cancel [00q]", ->
+        it "goes back to projects view on dismiss [00q]", ->
           cy
-            .contains(".btn", "Go Back").click().then ->
+            .contains(".btn", "Dismiss").click().then ->
               @ipc.handle("get:project:paths", null, [])
             .get(".empty").should("be.visible")
 
-      describe "directory dialog cancelled [00l]", ->
+      describe "directory dialog dismissed [00l]", ->
         beforeEach ->
           cy.get("header").find("[data-js='add-project']").click()
 
@@ -172,15 +172,15 @@ describe "Projects List [00r]", ->
 
       it "displays 'remove' link on right click [02m]", ->
         cy
-          .get("a").contains("Remove Project").should("be.visible")
+          .get("a").contains("Remove project").should("be.visible")
 
       it "triggers remove:project with path on right click [02o]", ->
         cy
-          .get("a").contains("Remove Project").click().then ->
+          .get("a").contains("Remove project").click().then ->
             expect(@App.ipc).to.be.calledWith("remove:project", @projects[0])
 
       it "removes the project from the list [02p]", ->
         cy
           .get("#projects-container>li").should("have.length", @projects.length)
-          .get("a").contains("Remove Project").click()
+          .get("a").contains("Remove project").click()
           .get("#projects-container>li").should("have.length", @projects.length - 1)

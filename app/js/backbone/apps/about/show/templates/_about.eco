@@ -4,7 +4,7 @@
     <strong>Cypress</strong>
   </p>
   <p class="version">
-    <span>Version: <%= @version %></span>
+    <span>Version <%= @version %></span>
   </p>
   <p>
     <a data-page href="#">

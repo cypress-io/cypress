@@ -23,7 +23,7 @@ describe "Project Show [00r]", ->
       cy.contains(@projects[0])
 
     it "displays Starting Server... message [00w]", ->
-      cy.contains("Starting Server...")
+      cy.contains("Starting server...")
 
   describe "server error [00x]", ->
     beforeEach ->
@@ -47,24 +47,24 @@ describe "Project Show [00r]", ->
         .get(".error")
           .should("contain", @err.name)
           .and("contain", @err.msg)
-          .and("contain", "To Fix:")
+          .and("contain", "To fix")
 
-    it "triggers close:project on cancel button click [013]", ->
+    it "triggers close:project on dismiss button click [013]", ->
       @ipc.handle("open:project", {name: @err.name, message: @err.msg}, {})
       @agents.spy(@App, "ipc")
 
       cy
-        .contains(".btn", "Go Back").click().then ->
+        .contains(".btn", "Dismiss").click().then ->
           expect(@App.ipc).to.be.calledWith("close:project")
           @ipc.handle("close:project", null, {})
         .then ->
           expect(@App.ipc).to.be.calledWith("get:project:paths")
 
-    it "returns to projects on cancel button click [010]", ->
+    it "returns to projects on dismiss button click [010]", ->
       @ipc.handle("open:project", {name: @err.name, message: @err.msg}, {})
 
       cy
-        .contains(".btn", "Go Back").click().then ->
+        .contains(".btn", "Dismiss").click().then ->
           @ipc.handle("close:project", null, {})
           @ipc.handle("get:project:paths", null, @projects)
         .get("#projects-container")

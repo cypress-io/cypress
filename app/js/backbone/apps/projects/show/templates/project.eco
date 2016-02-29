@@ -5,32 +5,32 @@
     <div class="alert alert-danger error">
       <p>
         <i class="fa fa-warning"></i>
-        <strong>Could not start server!</strong>
+        <strong>Can't start server</strong>
       </p>
       <p>
         <%- @error.replace("\n", "<br /><br />") %>
       </p>
       <% if @portInUse: %>
         <hr>
-        <p><strong>To Fix:</strong> Stop the other running process or change the port in cypress.json.</p>
+        <p>To fix, stop the other running process or change the port in cypress.json</p>
       <% end %>
       <button data-ok class="btn btn-default btn-sm">
-        <i class="fa fa-arrow-left"></i> Go Back
+        Dismiss
       </button>
     </div>
   <% else: %>
     <% if @clientUrl: %>
       <div class="well well-lg">
-        <div>Server Running</div>
+        <div>Server running</div>
         <div>
           <a href="#"><%= @clientUrlDisplay %></a>
         </div>
       </div>
-      <button data-stop class="btn btn-danger">Stop</button>
+      <button data-stop class="btn btn-danger">Stop server</button>
     <% else: %>
       <span>
         <i class="fa fa-spinner fa-spin"></i>
-        Starting Server...
+        Starting server...
       </span>
     <% end %>
   <% end %>

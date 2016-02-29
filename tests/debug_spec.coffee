@@ -25,7 +25,7 @@ describe "Debug Console [01o]", ->
       @ipc.handle("get:logs", null, [])
 
     it "displays empty logs [01u]", ->
-      cy.get(".empty").should("contain", "No Logs Found.")
+      cy.get(".empty").should("contain", "Can't find any logs")
 
   context "logs list [01r]", ->
     beforeEach ->

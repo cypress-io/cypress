@@ -4,7 +4,7 @@
     template: "debug/show/_log"
 
   class Show.Empty extends App.Views.EmptyView
-    content: "No Logs Found."
+    content: "Can't find any logs"
 
   class Show.Debug extends App.Views.CompositeView
     template: "debug/show/debug"

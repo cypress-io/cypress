@@ -31,8 +31,8 @@ describe "Updates [01o]", ->
       @ipc.handle("updater:run", null, {event: "start"})
       cy.contains("Checking for updates...")
 
-  describe "updater:run apply [02c]", ->
-    it "displays applying updates msg [02b]", ->
+  describe "updater:run apply [05z]", ->
+    it "displays applying updates msg [060]", ->
       @ipc.handle("updater:run", null, {event: "apply"})
       cy.contains("Applying updates...")
 
@@ -43,30 +43,30 @@ describe "Updates [01o]", ->
 
     it "triggers window:close on click of close btn [02d]", ->
       @ipc.handle("updater:run", null, {event: "error"})
-      cy.contains(".btn", "Close").click().then ->
+      cy.contains(".btn", "Done").click().then ->
         expect(@App.ipc).to.be.calledWith("window:close")
 
-  describe "updater:run none [02c]", ->
-    it "displays none msg [02b]", ->
+  describe "updater:run none [061]", ->
+    it "displays none msg [062]", ->
       @ipc.handle("updater:run", null, {event: "none"})
-      cy.contains("No updates available.")
+      cy.contains("No updates available")
 
-    it "triggers window:close on click of close btn [02d]", ->
+    it "triggers window:close on click of close btn [063]", ->
       @ipc.handle("updater:run", null, {event: "none"})
-      cy.contains(".btn", "Close").click().then ->
+      cy.contains(".btn", "Done").click().then ->
         expect(@App.ipc).to.be.calledWith("window:close")
 
-  describe "updater:run download [02c]", ->
-    it "displays download msg [02b]", ->
+  describe "updater:run download [064]", ->
+    it "displays download msg [065]", ->
       @ipc.handle("updater:run", null, {event: "download"})
       cy.contains("Downloading updates...")
 
-  describe "updater:run done [02c]", ->
+  describe "updater:run done [066]", ->
     it "displays done msg [02b]", ->
       @ipc.handle("updater:run", null, {event: "done"})
-      cy.contains("Updates ready!")
+      cy.contains("Updates ready")
 
-    it "triggers window:close on click of restart btn [02d]", ->
+    it "triggers window:close on click of restart btn [067]", ->
       @ipc.handle("updater:run", null, {event: "done"})
       cy.contains(".btn", "Restart").click().then ->
         expect(@App.ipc).to.be.calledWith("window:close")

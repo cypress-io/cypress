@@ -11,12 +11,12 @@
           when "checking"     then "Checking for updates..."
           when "downloading"  then "Downloading updates..."
           when "applying"     then "Applying updates..."
-          when "done"         then "Updates ready!"
-          when "none"         then "No updates available."
-          when "error"        then "An error occurred updating."
+          when "done"         then "Updates ready"
+          when "none"         then "No updates available"
+          when "error"        then "An error occurred updating"
 
       buttonFormatted: ->
-        if @get("state") is "done" then "Restart" else "Close"
+        if @get("state") is "done" then "Restart" else "Done"
 
     setState: (state) ->
       switch state

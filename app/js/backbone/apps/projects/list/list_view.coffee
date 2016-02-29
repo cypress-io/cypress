@@ -79,7 +79,7 @@
 
     onShow: ->
       @ui.addProject.tooltip
-        title: "Add Project..."
+        title: "Add project"
         placement: "left"
 
     onDestroy: ->

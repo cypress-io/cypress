@@ -2,13 +2,13 @@
   <div class="alert alert-danger error">
     <p>
       <i class="fa fa-warning"></i>
-      <strong>Error adding project!</strong>
+      <strong>Project can't be added</strong>
     </p>
     <p class="bg-danger">
       <%- @message.replace("\n", "<br /><br />") %>
     </p>
     <button data-ok class="btn btn-default btn-sm">
-      <i class="fa fa-arrow-left"></i> Go Back
+      Dismiss
     </button>
   </div>
 </div>

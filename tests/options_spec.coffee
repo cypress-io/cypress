@@ -73,7 +73,7 @@ describe "Options [015]", ->
       @agents.spy(@App, "ipc")
 
       cy.get("@optionsLink").click()
-      cy.contains("a", "Check for Updates").click().then ->
+      cy.contains("a", "Check for updates").click().then ->
           expect(@App.ipc).to.be.calledWith("window:open", @opts)
 
   context "click Quit link [018]", ->
