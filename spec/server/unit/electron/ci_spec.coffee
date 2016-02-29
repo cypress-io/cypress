@@ -150,9 +150,9 @@ describe "electron/ci", ->
           throw new Error("should have failed but did not")
         .catch (err) ->
           expect(err.type).to.eq("CI_KEY_NOT_VALID")
-          expect(err.message).to.include("key ")
+          expect(err.message).to.include("key")
           expect(err.message).to.include("3206e...158aa")
-          expect(err.message).to.include("invalid.")
+          expect(err.message).to.include("invalid")
 
     it "handles status code errors of 404", ->
       err = new Error
