@@ -399,9 +399,17 @@ describe "lib/cypress", ->
       cypress.start(["--run-project=#{@todosPath}", "--key=secret-key-123", "--ci"]).then =>
         @expectExitWithErr("CI_KEY_NOT_VALID", "secre...y-123")
 
-    it "logs error and exits when cannot communicate with api", ->
+    it "logs error and exits when project could not be found", ->
       err = new Error
       err.statusCode = 404
+      @createCiGuid.rejects(err)
+
+      cypress.start(["--run-project=#{@todosPath}", "--key=secret-key-123", "--ci"]).then =>
+        @expectExitWithErr("CI_PROJECT_NOT_FOUND")
+
+    it "logs error and exits when cannot communicate with api", ->
+      err = new Error
+      err.statusCode = 500
       @createCiGuid.rejects(err)
 
       cypress.start(["--run-project=#{@todosPath}", "--key=secret-key-123", "--ci"]).then =>

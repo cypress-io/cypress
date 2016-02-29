@@ -55,12 +55,14 @@ module.exports = {
         message:   git.message
       })
       .catch (err) ->
-        ## TODO: add status code 404 error handling here
-        if err.statusCode is 401
-          key = key.slice(0, 5) + "..." + key.slice(-5)
-          errors.throw("CI_KEY_NOT_VALID", key)
-        else
-          errors.throw("CI_CANNOT_COMMUNICATE")
+        switch err.statusCode
+          when 401
+            key = key.slice(0, 5) + "..." + key.slice(-5)
+            errors.throw("CI_KEY_NOT_VALID", key)
+          when 404
+            errors.throw("CI_PROJECT_NOT_FOUND")
+          else
+            errors.throw("CI_CANNOT_COMMUNICATE")
 
   run: (options) ->
     {projectPath} = options
