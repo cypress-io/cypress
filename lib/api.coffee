@@ -1,7 +1,9 @@
-r       = require("request")
-rp      = require("request-promise")
-errors  = require("request-promise/errors")
-Routes  = require("./util/routes")
+r        = require("request")
+rp       = require("request-promise")
+errors   = require("request-promise/errors")
+Routes   = require("./util/routes")
+pkg      = require("../package.json")
+provider = require("./util/provider")
 
 module.exports = {
   ping: ->
@@ -16,6 +18,9 @@ module.exports = {
         "x-git-branch":    options.branch
         "x-git-author":    options.author
         "x-git-message":   options.message
+        "x-version":       pkg.version
+        "x-platform":      process.platform
+        "x-provider":      provider.get()
       }
     })
     .promise()
@@ -27,7 +32,7 @@ module.exports = {
       body: body
       json: true
       headers: {
-        "X-Session": session
+        "x-session": session
       }
     })
     .promise()
@@ -37,6 +42,10 @@ module.exports = {
     rp.post({
       url: Routes.signin({code: code})
       json: true
+      headers: {
+        "x-platform": process.platform
+        "x-version":  pkg.version
+      }
     })
     .catch errors.StatusCodeError, (err) ->
       ## slice out the status code since RP automatically
@@ -48,7 +57,9 @@ module.exports = {
     rp.post({
       url: Routes.signout()
       headers: {
-        "X-Session": session
+        "x-session": session
+        "x-platform": process.platform
+        "x-version":  pkg.version
       }
     })
 
@@ -57,7 +68,8 @@ module.exports = {
       url: Routes.projects()
       json: true
       headers: {
-        "X-Session": session
+        "x-session": session
+        "x-version": pkg.version
       }
     })
     .promise()
@@ -69,7 +81,8 @@ module.exports = {
       url: Routes.project(projectId)
       json: true
       headers: {
-        "X-Session": session
+        "x-session": session
+        "x-version": pkg.version
       }
     })
 
@@ -78,7 +91,7 @@ module.exports = {
       url: Routes.projectCi(projectId)
       json: true
       headers: {
-        "X-Session": session
+        "x-session": session
       }
     })
 
@@ -96,7 +109,7 @@ module.exports = {
       url: Routes.token()
       json: true
       headers: {
-        "X-Session": session
+        "x-session": session
       }
     })
     .promise()
@@ -114,7 +127,7 @@ module.exports = {
       url: Routes.projectToken(projectId)
       json: true
       headers: {
-        "X-Session": session
+        "x-session": session
       }
     })
     .promise()
