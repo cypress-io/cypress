@@ -4303,8 +4303,8 @@ describe "$Cypress.Cy Actions Commands", ->
           bubbles: true
           cancelable: true
           view: @cy.private("window")
-          clientX: coords.x
-          clientY: coords.y
+          clientX: coords.x - @cy.private("window").pageXOffset
+          clientY: coords.y - @cy.private("window").pageYOffset
           button: 0
           buttons: 0
           which: 1
@@ -4340,8 +4340,8 @@ describe "$Cypress.Cy Actions Commands", ->
           bubbles: true
           cancelable: true
           view: @cy.private("window")
-          clientX: coords.x
-          clientY: coords.y
+          clientX: coords.x - @cy.private("window").pageXOffset
+          clientY: coords.y - @cy.private("window").pageYOffset
           button: 0
           buttons: 1
           which: 1
@@ -4368,8 +4368,8 @@ describe "$Cypress.Cy Actions Commands", ->
           bubbles: true
           cancelable: true
           view: @cy.private("window")
-          clientX: coords.x
-          clientY: coords.y
+          clientX: coords.x - @cy.private("window").pageXOffset
+          clientY: coords.y - @cy.private("window").pageYOffset
           button: 0
           buttons: 0
           which: 1
@@ -4396,6 +4396,36 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#button").click().then ->
         expect(events).to.deep.eq ["mousedown", "mouseup", "click"]
+
+    it "records correct clientX when el scrolled", (done) ->
+      button = -> $("<button id='scrolledBtn' style='position: absolute; top: 1600px; left: 1600px; width: 100px;'>foo</button>").appendTo @cy.$$("body")
+      @cy.$$("body").append(button())
+
+      btn = @cy.$$("#scrolledBtn")
+
+      coords = @cy.getCoordinates(btn)
+
+      btn.get(0).addEventListener "click", (e) =>
+        obj = _(e).pick("bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
+        expect(obj.clientX).to.eq coords.x - @cy.private("window").pageXOffset
+        done()
+
+      @cy.get("#scrolledBtn").click()
+
+    it "records correct clientY when el scrolled", (done) ->
+      button = -> $("<button id='scrolledBtn' style='position: absolute; top: 1600px; left: 1600px; width: 100px;'>foo</button>").appendTo @cy.$$("body")
+      @cy.$$("body").append(button())
+
+      btn = @cy.$$("#scrolledBtn")
+
+      coords = @cy.getCoordinates(btn)
+
+      btn.get(0).addEventListener "click", (e) =>
+        obj = _(e).pick("bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
+        expect(obj.clientY).to.eq coords.y - @cy.private("window").pageYOffset
+        done()
+
+      @cy.get("#scrolledBtn").click()
 
     it "will send all events even mousedown is defaultPrevented", ->
       events = []
