@@ -2236,14 +2236,14 @@ describe "$Cypress.Cy Actions Commands", ->
 
   context "#check", ->
     it "does not change the subject", ->
-      inputs = @cy.$("[name=colors]")
+      inputs = @cy.$$("[name=colors]")
 
       @cy.get("[name=colors]").check().then ($inputs) ->
         expect($inputs.length).to.eq(3)
         expect($inputs.toArray()).to.deep.eq(inputs.toArray())
 
     it "changes the subject if specific value passed to check", ->
-      checkboxes = @cy.$("[name=colors]")
+      checkboxes = @cy.$$("[name=colors]")
 
       @cy.get("[name=colors]").check(["blue", "red"]).then ($chk) ->
         expect($chk.length).to.eq(2)
@@ -2255,7 +2255,7 @@ describe "$Cypress.Cy Actions Commands", ->
         expect($chk.get(1)).to.eq(red.get(0))
 
     it "filters out values which were not found", ->
-      checkboxes = @cy.$("[name=colors]")
+      checkboxes = @cy.$$("[name=colors]")
 
       @cy.get("[name=colors]").check(["blue", "purple"]).then ($chk) ->
         expect($chk.length).to.eq(1)
@@ -2266,9 +2266,9 @@ describe "$Cypress.Cy Actions Commands", ->
 
     it "changes the subject when matching values even if noop", ->
       checked = $("<input type='checkbox' name='colors' value='blue' checked>")
-      @cy.$("[name=colors]").parent().append(checked)
+      @cy.$$("[name=colors]").parent().append(checked)
 
-      checkboxes = @cy.$("[name=colors]")
+      checkboxes = @cy.$$("[name=colors]")
 
       @cy.get("[name=colors]").check("blue").then ($chk) ->
         expect($chk.length).to.eq(2)
@@ -2700,14 +2700,14 @@ describe "$Cypress.Cy Actions Commands", ->
 
   context "#uncheck", ->
     it "does not change the subject", ->
-      inputs = @cy.$("[name=birds]")
+      inputs = @cy.$$("[name=birds]")
 
       @cy.get("[name=birds]").uncheck().then ($inputs) ->
         expect($inputs.length).to.eq(2)
         expect($inputs.toArray()).to.deep.eq(inputs.toArray())
 
     it "changes the subject if specific value passed to check", ->
-      checkboxes = @cy.$("[name=birds]")
+      checkboxes = @cy.$$("[name=birds]")
 
       @cy.get("[name=birds]").check(["cockatoo", "amazon"]).then ($chk) ->
         expect($chk.length).to.eq(2)
@@ -2719,7 +2719,7 @@ describe "$Cypress.Cy Actions Commands", ->
         expect($chk.get(1)).to.eq(amazon.get(0))
 
     it "filters out values which were not found", ->
-      checkboxes = @cy.$("[name=birds]")
+      checkboxes = @cy.$$("[name=birds]")
 
       @cy.get("[name=birds]").check(["cockatoo", "parrot"]).then ($chk) ->
         expect($chk.length).to.eq(1)
@@ -2730,9 +2730,9 @@ describe "$Cypress.Cy Actions Commands", ->
 
     it "changes the subject when matching values even if noop", ->
       checked = $("<input type='checkbox' name='birds' value='cockatoo'>")
-      @cy.$("[name=birds]").parent().append(checked)
+      @cy.$$("[name=birds]").parent().append(checked)
 
-      checkboxes = @cy.$("[name=birds]")
+      checkboxes = @cy.$$("[name=birds]")
 
       @cy.get("[name=birds]").check("cockatoo").then ($chk) ->
         expect($chk.length).to.eq(2)
