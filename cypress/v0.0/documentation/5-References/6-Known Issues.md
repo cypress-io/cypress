@@ -5,6 +5,8 @@ excerpt: Known issues which cause problems in Cypress
 
 - :fa-angle-right: [Switching tabs causes Cypress to fail](#section-switching-tabs-causes-cypress-to-fail)
 - :fa-angle-right: [Missing DOM Action Commands](#section-missing-dom-action-commands)
+  - [Right click](#section-right-click)
+  - [Hover](#section-hover)
 
 ***
 
@@ -34,11 +36,11 @@ If you see these timeouts happening, don't worry - just refresh your tests and m
 
 # Missing DOM Action Commands
 
-## Problem
+Some commands have not been implemented in Cypress. Some commands will be implemented in the future and some do not make sense to implement in Cypress.
 
-Some commands have not been implemented in Cypress yet.
+## Right click
 
-- [Right click command](https://github.com/cypress-io/cypress/issues/53)
+[Issue #53](https://github.com/cypress-io/cypress/issues/53)
 
 ## Workaround
 
@@ -47,4 +49,31 @@ Oftentimes you can use [`cy.invoke`](https://on.cypress.io/api/invoke) or [`cy.w
 **Example of right clicking on an element**
 ```javascript
 cy.get("#nav").first().invoke("trigger", "contextmenu")
+```
+
+## Hover
+
+[Issue #10](https://github.com/cypress-io/cypress/issues/10)
+
+Sometimes an element has specific logic on hover. Maybe the element doesn't even display to be clickable until you hover over a specific element.
+
+## Workaround
+
+Oftentimes you can use [`cy.invoke`](https://on.cypress.io/api/invoke) or [`cy.wrap`](https://on.cypress.io/api/wrap) to show the element before you perform the action.
+
+**Example of showing an element in order to perform action**
+```javascript
+cy.get(".content").invoke("show").click()
+```
+
+You can also force the action to be performed on the element regardless of whether the element is visible or not.
+
+**Example of clicking on a hidden element**
+```javascript
+cy.get(".content").click({force: true})
+```
+
+**Example of checking a hidden element**
+```javascript
+cy.get(".checkbox").check({force: true})
 ```
