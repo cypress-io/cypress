@@ -15,8 +15,8 @@
     "test": "npm run test-server & chokidar 'spec/server/**/*' 'lib/**/*' -c 'npm run test-server'",
     "test-cov": "NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 istanbul cover node_modules/.bin/_mocha -- --opts ./spec/server/mocha.opts",
     "test-cov-process": "NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 istanbul cover --include-pid",
-    "test-server": "NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.*,socket.io:* mocha --opts spec/server/mocha.opts",
-    "test-server-debug": "NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.*,socket.io:* node-debug --hidden='(node_modules|bower_components)' --no-preload _mocha --opts spec/server/mocha.opts --watch",
+    "test-server": "NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.*,-nock.common,socket.io:* mocha --opts spec/server/mocha.opts",
+    "test-server-debug": "NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.*,-nock.common,socket.io:* node-debug --hidden='(node_modules|bower_components)' --no-preload _mocha --opts spec/server/mocha.opts --watch",
     "codecov": "codecov",
     "coveralls": "cat ./coverage/lcov.info | coveralls"
   },

@@ -1,19 +1,26 @@
 require("../spec_helper")
 
-rp  = require("request-promise")
-api = require("#{root}lib/api")
+rp       = require("request-promise")
+os       = require("os")
+pkg      = require("#{root}package.json")
+api      = require("#{root}lib/api")
+provider = require("#{root}lib/util/provider")
 
 describe "lib/api", ->
+  beforeEach ->
+    @sandbox.stub(os, "platform").returns("linux")
+    @sandbox.stub(provider, "get").returns("circle")
+
   context ".createCiGuid", ->
     it "POST /ci/:id + returns ci_guid", ->
-      nock("http://localhost:1234", {
-        reqheaders: {
-          "x-project-token": "guid"
-          "x-git-branch": "master"
-          "x-git-author": "brian"
-          "x-git-message": "such hax"
-        }
-      })
+      nock("http://localhost:1234")
+      .matchHeader("x-project-token", "guid")
+      .matchHeader("x-git-branch", "master")
+      .matchHeader("x-git-author", "brian")
+      .matchHeader("x-git-message", "such hax")
+      .matchHeader("x-version", pkg.version)
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-provider", "circle")
       .post("/ci/project-123")
       .reply(200, {
         ci_guid: "new_ci_guid"
@@ -43,6 +50,8 @@ describe "lib/api", ->
   context ".createSignin", ->
     it "POSTs /signin + returns user object", ->
       nock("http://localhost:1234")
+      .matchHeader("x-version", pkg.version)
+      .matchHeader("x-platform", "linux")
       .post("/signin")
       .query({code: "abc-123"})
       .reply(200, {
@@ -68,11 +77,10 @@ describe "lib/api", ->
 
   context ".createSignout", ->
     it "POSTs /signout", ->
-      nock("http://localhost:1234", {
-        reqheaders: {
-          "x-session": "abc-123"
-        }
-      })
+      nock("http://localhost:1234")
+      .matchHeader("x-session", "abc-123")
+      .matchHeader("x-version", pkg.version)
+      .matchHeader("x-platform", "linux")
       .post("/signout")
       .reply(200)
 
@@ -82,6 +90,7 @@ describe "lib/api", ->
     it "POSTs /projects", ->
       nock("http://localhost:1234")
       .matchHeader("x-session", "session-123")
+      .matchHeader("x-version", pkg.version)
       .post("/projects")
       .reply(200, {
         uuid: "uuid-123"
@@ -94,6 +103,7 @@ describe "lib/api", ->
     it "GETs /projects/:id", ->
       nock("http://localhost:1234")
       .matchHeader("x-session", "session-123")
+      .matchHeader("x-version", pkg.version)
       .get("/projects/project-123")
       .reply(200, {})
 
@@ -103,11 +113,8 @@ describe "lib/api", ->
   context ".createRaygunException", ->
     beforeEach ->
       @setup = (body, session, delay = 0) ->
-        nock("http://localhost:1234", {
-          reqheaders: {
-            "x-session": session
-          }
-        })
+        nock("http://localhost:1234")
+        .matchHeader("x-session", session)
         .post("/exceptions", body)
         .delayConnection(delay)
         .reply(200)

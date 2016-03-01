@@ -1,3 +1,4 @@
+os       = require("os")
 r        = require("request")
 rp       = require("request-promise")
 errors   = require("request-promise/errors")
@@ -19,7 +20,7 @@ module.exports = {
         "x-git-author":    options.author
         "x-git-message":   options.message
         "x-version":       pkg.version
-        "x-platform":      process.platform
+        "x-platform":      os.platform()
         "x-provider":      provider.get()
       }
     })
@@ -43,7 +44,7 @@ module.exports = {
       url: Routes.signin({code: code})
       json: true
       headers: {
-        "x-platform": process.platform
+        "x-platform": os.platform()
         "x-version":  pkg.version
       }
     })
@@ -58,7 +59,7 @@ module.exports = {
       url: Routes.signout()
       headers: {
         "x-session": session
-        "x-platform": process.platform
+        "x-platform": os.platform()
         "x-version":  pkg.version
       }
     })
@@ -91,6 +92,7 @@ module.exports = {
       url: Routes.projectCi(projectId)
       json: true
       headers: {
+        ## TODO: add x-version here
         "x-session": session
       }
     })
