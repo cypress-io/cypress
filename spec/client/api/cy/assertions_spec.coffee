@@ -659,7 +659,7 @@ describe "$Cypress.Cy Assertion Commands", ->
         expect(obj.get("message")).to.eq "expected [b]<a>[\\b] to have a [b]href[\\b] attribute with the value [b]#[\\b], and the value was [b]#[\\b]"
         done()
 
-      @cy.get("a").then ($a) ->
+      @cy.get("a:first").then ($a) ->
         expect($a).to.have.attr "href", "#"
 
     it "does not replaces instances of word: 'but' with 'and' for failing assertion", (done) ->
@@ -676,7 +676,7 @@ describe "$Cypress.Cy Assertion Commands", ->
         expect(obj.get("message")).to.eq "expected [b]<a>[\\b] to have a [b]href[\\b] attribute with the value [b]asdf[\\b], but the value was [b]#[\\b]"
         done()
 
-      @cy.get("a").then ($a) ->
+      @cy.get("a:first").then ($a) ->
         expect($a).to.have.attr "href", "asdf"
 
     it "does not replace 'button' with 'andton'", (done) ->
@@ -793,7 +793,7 @@ describe "$Cypress.Cy Assertion Commands", ->
               expect(obj.get("message")).to.eq "expected [b]<form#by-id>[\\b] to have a property [b]length[\\b]"
               done()
 
-            @cy.get("form").should("have.property", "length")
+            @cy.get("form:first").should("have.property", "length")
 
     describe "#expect", ->
       it "proxies to chai.expect", ->
