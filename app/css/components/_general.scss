@@ -3,13 +3,23 @@
   min-height: 388px;
   overflow: hidden;
   border-radius: 5px;
+  position: relative;
+}
+
+html.has-updates {
+  .helper-line {
+    bottom: 85px;
+  }
 }
 
 .helper-line {
   text-align: center;
   color: #cdd1d9;
   font-weight: normal;
-  margin-top: 10px;
+  position: absolute;
+  width: 100%;
+  bottom: 50px;
+  left: 0;
 
   a {
     display: block;

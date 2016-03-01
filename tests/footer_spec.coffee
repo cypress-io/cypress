@@ -16,7 +16,11 @@ describe "Footer [000]", ->
 
   context "update banner [02r]", ->
     it "does not display update banner when no update available [05k]", ->
-      cy.get("#updates-available").should("not.exist")
+      @ipc.handle("updater:check", null, false)
+
+      cy
+        .get("#updates-available").should("not.exist")
+        .get("html").should("not.have.class", "has-updates")
 
     it "checks for update on show [05l]", ->
       expect(@App.ipc).to.be.calledWith("updater:check")
@@ -25,6 +29,11 @@ describe "Footer [000]", ->
       @ipc.handle("updater:check", null, "1.3.4")
       cy.get("#updates-available").should("be.visible")
       cy.contains("New updates are available")
+      cy
+        .get("html").should("have.class", "has-updates")
+        .window().then (win) ->
+          win.App.updater.updatesAvailable(false)
+        .get("html").should("not.have.class", "has-updates")
 
     it "triggers open:window on click of Update link [05n]", ->
       @ipc.handle("updater:check", null, "1.3.4")

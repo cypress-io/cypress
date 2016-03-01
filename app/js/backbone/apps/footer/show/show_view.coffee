@@ -12,6 +12,12 @@
     modelEvents:
       "change:updatesAvailable" : "render"
 
+    onRender: ->
+      $("html").toggleClass("has-updates", @model.get("updatesAvailable"))
+
+    onDestroy: ->
+      $("html").removeClass("has-updates")
+
   class Show.Bottom extends App.Views.ItemView
     template: "footer/show/_bottom"
 
