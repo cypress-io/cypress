@@ -6,6 +6,8 @@ describe "lib/util/provider", ->
   beforeEach ->
     @env = JSON.stringify(process.env)
 
+    process.env = {}
+
     @expects = (key) ->
       expect(provider.get()).to.eq(key)
 
