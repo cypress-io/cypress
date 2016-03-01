@@ -111,7 +111,7 @@ do ($Cypress, _) ->
 
     getCoordinates: ($el, position = "center") ->
       rect = @getBoundingClientRect($el)
-      # rect = {top: 35, left: 60, width: 100, height: 90}
+      ## rect = {top: 35, left: 60, width: 100, height: 90}
 
       switch position
         when "center"       then @getCenterCoordinates(rect)
