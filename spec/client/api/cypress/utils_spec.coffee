@@ -137,6 +137,12 @@ describe "$Cypress.Utils API", ->
         str = $Cypress.Utils.stringifyElement(div, "short")
         expect(str).to.eq("<div#baz.foo.bar>")
 
+      it "returns array of els", ->
+        body = @cy.$$("li")
+
+        str = $Cypress.Utils.stringifyElement(body, "short")
+        expect(str).to.eq "[<li>, ...]"
+
     context "#convertHtmlTags", ->
       it "converts opening brackets to tags", ->
         html = $Cypress.Utils.convertHtmlTags "[strong]foo"

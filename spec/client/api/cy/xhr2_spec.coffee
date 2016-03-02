@@ -1373,7 +1373,7 @@ describe "$Cypress.Cy XHR Commands", ->
             .route(/foo/, {}).then ->
               @route = @log
             .window().then (win) ->
-              @cy.Promise.all [
+              @Cypress.Promise.all [
                 win.$.get("/foo")
                 win.$.get("/foo")
                 win.$.get("/foo")
@@ -1461,7 +1461,7 @@ describe "$Cypress.Cy XHR Commands", ->
     describe "{force404: false}", ->
       beforeEach ->
         @cy
-          .server({force404: false})
+          .server()
           .window().then (win) ->
             win.$.getJSON("/fixtures/ajax/app.json")
 
