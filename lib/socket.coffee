@@ -37,8 +37,7 @@ class Socket
         filePath      = filePath.split(@app.get("cypress").projectRoot).join("").replace(leadingSlashesRe, "")
         strippedPath  = filePath.replace(@app.get("cypress").testFolder, "").replace(leadingSlashesRe, "")
 
-        logger.info "generate:ids:for:test", filePath: filePath, strippedPath: strippedPath
-        @io.emit "generate:ids:for:test", filePath, strippedPath
+        @io.emit "test:changed", {file: strippedPath}
       .catch(->)
 
   watchTestFileByPath: (testFilePath, watchers) ->
@@ -161,10 +160,6 @@ class Socket
 
       socket.on "fixture", =>
         @onFixture.apply(@, arguments)
-
-      socket.on "finished:generating:ids:for:test", (strippedPath) =>
-        logger.info "finished:generating:ids:for:test", strippedPath: strippedPath
-        @io.emit "test:changed", file: strippedPath
 
       _.each "load:spec:iframe url:changed page:loading command:add command:attrs:changed runner:start runner:end before:run before:add after:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test".split(" "), (event) =>
         socket.on event, (args...) =>
