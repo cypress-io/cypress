@@ -164,11 +164,14 @@ module.exports = {
     ## prevent chromium from throttling
     app.commandLine.appendSwitch("disable-renderer-backgrounding")
 
-    waitForReady = =>
-      new Promise (resolve, reject) =>
+    waitForReady = ->
+      new Promise (resolve, reject) ->
         app.on "ready", resolve
 
-    waitForReady()
+    Promise.any([
+      waitForReady()
+      Promise.delay(500)
+    ])
     .then =>
       @ready(options)
 }
