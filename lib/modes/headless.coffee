@@ -159,12 +159,16 @@ module.exports = {
           .get("failures")
 
   run: (options) ->
-    new Promise (resolve, reject) =>
-      app = require("electron").app
+    app = require("electron").app
 
-      ## prevent chromium from throttling
-      app.commandLine.appendSwitch("disable-renderer-backgrounding")
+    ## prevent chromium from throttling
+    app.commandLine.appendSwitch("disable-renderer-backgrounding")
 
-      app.on "ready", =>
-        resolve @ready(options)
+    waitForReady = =>
+      new Promise (resolve, reject) =>
+        app.on "ready", resolve
+
+    waitForReady()
+    .then =>
+      @ready(options)
 }
