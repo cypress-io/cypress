@@ -261,7 +261,7 @@ describe "lib/socket", ->
           @socket.onTestFileChange("foo/bar.js").then =>
             expect(@io.emit).not.to.be.called
 
-        it.only "emits 'generate:ids:for:test'", ->
+        it "emits 'generate:ids:for:test'", ->
           p = Fixtures.project("todos") + "/tests/test1.js"
           @socket.onTestFileChange(p).then =>
             expect(@io.emit).to.be.calledWith("test:changed", {file: "test1.js"})
