@@ -171,8 +171,4 @@ module.exports = {
   removeSync: ->
     fs.removeSync CACHE
 
-  getProjectIdByPath: (projectPath) ->
-    @getProjects().then (projects) ->
-      _.findKey(projects, {PATH: projectPath})
-
 }

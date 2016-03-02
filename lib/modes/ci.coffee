@@ -70,8 +70,6 @@ module.exports = {
     @ensureCi()
     .then ->
       Project.add(projectPath)
-    .then ->
-      Project.id(projectPath)
     .then (id) =>
       @ensureProjectAPIToken(id, projectPath, options.key)
     .then (ciGuid) ->

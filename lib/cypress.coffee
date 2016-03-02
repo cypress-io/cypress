@@ -65,52 +65,43 @@ module.exports = {
     Project(options.project).open()
 
   runServer: (options) ->
-    switch options.env
-      when "development"
-        args = {}
+    args = {}
 
-        _.defaults options, { autoOpen: true }
+    _.defaults options, { autoOpen: true }
 
-        if not options.project
-          throw new Error("Missing path to project:\n\nPlease pass 'npm run server -- --project path/to/project'\n\n")
+    if not options.project
+      throw new Error("Missing path to project:\n\nPlease pass 'npm run server -- --project path/to/project'\n\n")
 
-        if options.debug
-          args.debug = "--debug"
+    if options.debug
+      args.debug = "--debug"
 
-        ## just spawn our own index.js file again
-        ## but put ourselves in project mode so
-        ## we actually boot a project!
-        _.extend(args, {
-          script:  "index.js"
-          watch:  ["--watch", "lib"]
-          ignore: ["--ignore", "lib/public"]
-          verbose: "--verbose"
-          exts:   ["-e", "coffee,js"]
-          args:   ["--", "--mode", "openProject", "--project", options.project]
-        })
+    ## just spawn our own index.js file again
+    ## but put ourselves in project mode so
+    ## we actually boot a project!
+    _.extend(args, {
+      script:  "index.js"
+      watch:  ["--watch", "lib"]
+      ignore: ["--ignore", "lib/public"]
+      verbose: "--verbose"
+      exts:   ["-e", "coffee,js"]
+      args:   ["--", "--mode", "openProject", "--project", options.project]
+    })
 
-        args = _.chain(args).values().flatten().value()
+    args = _.chain(args).values().flatten().value()
 
-        cp.spawn("nodemon", args, {stdio: "inherit"})
+    cp.spawn("nodemon", args, {stdio: "inherit"})
 
-        ## auto open in dev mode directly to our
-        ## default cypress web app client
-        if options.autoOpen
-          _.delay ->
-            require("open")("http://localhost:2020/__")
-          , 2000
+    ## auto open in dev mode directly to our
+    ## default cypress web app client
+    if options.autoOpen
+      _.delay ->
+        require("open")("http://localhost:2020/__")
+      , 2000
 
-        if options.debug
-          cp.spawn("node-inspector", [], {stdio: "inherit"})
+    if options.debug
+      cp.spawn("node-inspector", [], {stdio: "inherit"})
 
-          require("open")("http://127.0.0.1:8080/debug?ws=127.0.0.1:8080&port=5858")
-
-      when "production"
-        console.log "production"
-
-      else
-        ## TODO: this needs to be in lib/errors plz, kthx
-        throw new Error("Missing 'options.env'. This value is required to run Cypress server!")
+      require("open")("http://127.0.0.1:8080/debug?ws=127.0.0.1:8080&port=5858")
 
   start: (argv = []) ->
     options = argsUtil.toObject(argv)

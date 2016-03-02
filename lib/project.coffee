@@ -237,11 +237,8 @@ class Project extends EE
       ## return the project id
       .return(id)
 
-  ## TODO: this method should not exist.
-  ## refactor the relationship between
-  ## projects and cache and remove this.
   @id = (path) ->
-    cache.getProjectIdByPath(path)
+    Project(path).getProjectId()
 
   @exists = (path) ->
     @paths().then (paths) ->

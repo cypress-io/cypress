@@ -328,6 +328,9 @@ describe "lib/project", ->
         expect(ret).to.be.false
 
   context ".id", ->
+    it "returns project id", ->
+      Project.id(@todosPath).then (id) =>
+        expect(id).to.eq(@projectId)
 
   context ".paths", ->
     beforeEach ->
