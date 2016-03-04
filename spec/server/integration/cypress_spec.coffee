@@ -1,6 +1,7 @@
 require("../spec_helper")
 
 os       = require("os")
+path     = require("path")
 http     = require("http")
 electron = require("electron")
 inquirer = require("inquirer")
@@ -290,16 +291,20 @@ describe "lib/cypress", ->
     ## also make sure we test the rest of the integration functionality
     ## for headed errors! <-- not unit tests, but integration tests!
     it "logs error and exits when project folder has read permissions only and cannot write cypress.json", ->
-      permissionsPath = Fixtures.project("permissions")
+      permissionsPath = path.resolve("./permissions")
 
       @sandbox.stub(inquirer, "prompt").yieldsAsync({add: true})
 
       user.set({session_token: "session-123"})
       .then =>
+        fs.ensureDirAsync(permissionsPath)
+      .then =>
         fs.chmodAsync(permissionsPath, "111")
       .then =>
         cypress.start(["--run-project=#{permissionsPath}"]).then =>
-          @expectExitWithErr("ERROR_WRITING_FILE", permissionsPath)
+          fs.chmodAsync(permissionsPath, "644").then =>
+            fs.removeAsync(permissionsPath).then =>
+              @expectExitWithErr("ERROR_WRITING_FILE", permissionsPath)
 
     describe "--port", ->
       beforeEach ->
