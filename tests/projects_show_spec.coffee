@@ -121,6 +121,8 @@ describe "Project Show [00r]", ->
 
           ## cause a settings change event
           @ipc.handle("on:project:settings:change")
+
+      cy
         .contains("http://localhost:8888")
         .then ->
           expect(@App.ipc.off).to.be.calledWith("on:project:settings:change")

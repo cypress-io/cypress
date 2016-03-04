@@ -53,24 +53,16 @@
       ## create a App.config model from the passed in options
       App.config = App.request("config:entity", options)
 
-      # App.config.log("Starting Desktop App", options: _.omit(options, "backend"))
-
       ## create an App.updater model which is shared across the app
       App.updater = App.request "new:updater:entity", options.version
 
-      # window.onerror = (err) ->
+      sendErr = (err) ->
+        App.ipc("gui:error", _.pick(err, "name", "message", "stack"))
 
-      ## TODO: error handling window.onerror
-      console.warn("setErrorHandler")
-        # @getLog().setErrorHandler (err) =>
-        #   ## exit if we're in production (blow up)
-        #   return true if @env("production")
+      window.onerror = (message, source, lineno, colno, err) ->
+        sendErr(err)
 
-        #   ## else log out the err stack
-        #   console.error(err)
-
-        #   ## and go into debug mode if we should
-        #   debugger if @get("debug")
+      window.onunhandledrejection = sendErr
 
       ## if we are updating then
       ## immediately return
