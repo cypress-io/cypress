@@ -40,7 +40,7 @@
     "coffee-coverage": "^1.0.1",
     "commander": "2.3.0",
     "coveralls": "^2.11.8",
-    "electron-prebuilt": "0.36.8",
+    "electron-prebuilt": "0.36.9",
     "gulp": "3.8.8",
     "gulp-awspublish": "^3.0.1",
     "gulp-bower": "0.0.6",
