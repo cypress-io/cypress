@@ -9,6 +9,7 @@ Project  = require("#{root}../lib/project")
 Updater  = require("#{root}../lib/updater")
 user     = require("#{root}../lib/user")
 errors   = require("#{root}../lib/errors")
+logs     = require("#{root}../lib/electron/handlers/logs")
 events   = require("#{root}../lib/electron/handlers/events")
 dialog   = require("#{root}../lib/electron/handlers/dialog")
 project  = require("#{root}../lib/electron/handlers/project")
@@ -280,6 +281,43 @@ describe "lib/electron/handlers/events", ->
         @handleEvent("off:log")
         expect(logger.off).to.be.calledOnce
         @expectSendCalledWith(null)
+
+  context "gui errors", ->
+    describe "gui:error", ->
+      it "calls logs.error with arg", ->
+        err = new Error("foo")
+
+        @sandbox.stub(logs, "error").withArgs(err).resolves()
+
+        @handleEvent("gui:error", err).then =>
+          @expectSendCalledWith(null)
+
+      it "calls logger.createException with error", ->
+        err = new Error("foo")
+
+        @sandbox.stub(logger, "createException").withArgs(err).resolves()
+
+        @handleEvent("gui:error", err).then =>
+          expect(logger.createException).to.be.calledOnce
+          @expectSendCalledWith(null)
+
+      it "swallows logger.createException errors", ->
+        err = new Error("foo")
+
+        @sandbox.stub(logger, "createException").withArgs(err).rejects(new Error("err"))
+
+        @handleEvent("gui:error", err).then =>
+          expect(logger.createException).to.be.calledOnce
+          @expectSendCalledWith(null)
+
+      it "catches errors", ->
+        err = new Error("foo")
+        err2 = new Error("bar")
+
+        @sandbox.stub(logs, "error").withArgs(err).rejects(err2)
+
+        @handleEvent("gui:error", err).then =>
+          @expectSendErrCalledWith(err2)
 
   context "project events", ->
     describe "get:project:paths", ->

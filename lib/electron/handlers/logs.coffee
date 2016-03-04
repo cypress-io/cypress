@@ -14,6 +14,10 @@ module.exports = {
   onLog: (fn) ->
     logger.onLog(fn)
 
+  error: (err) ->
+    ## swallow any errors creating this exception
+    logger.createException(err).catch(->)
+
   print: ->
     ## print all the logs and exit
     @get().then (logs) ->

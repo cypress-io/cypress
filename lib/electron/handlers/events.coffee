@@ -36,6 +36,11 @@ handleEvent = (options, event, id, type, arg) ->
       ## exit the app immediately
       options.app.exit(0)
 
+    when "gui:error"
+      logs.error(arg)
+      .then -> send(null)
+      .catch(sendErr)
+
     when "show:directory:dialog"
       dialog.show()
       .then(send)

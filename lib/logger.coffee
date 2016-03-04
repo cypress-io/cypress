@@ -42,6 +42,9 @@ logger = new (winston.Logger)({
 
 })
 
+logger.createException = (err) ->
+  require("./exception").create(err, logger.getSettings())
+
 logger.defaultErrorHandler = (err) ->
   logger.info("caught error", error: err.message, stack: err.stack)
 
@@ -63,8 +66,7 @@ logger.defaultErrorHandler = (err) ->
       console.error(err.stack)
       exit()
 
-  settings = logger.getSettings()
-  require("./exception").create(err, settings).then(handleErr).catch(handleErr)
+  logger.createException(err).then(handleErr).catch(handleErr)
 
   ## do not exit on error, let us
   ## handle it manually
