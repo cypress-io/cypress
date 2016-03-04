@@ -1,0 +1,40 @@
+require("../spec_helper")
+
+path     = require("path")
+Fixtures = require("../helpers/fixtures")
+ids      = require("#{root}lib/ids")
+
+describe "lib/ids", ->
+  beforeEach ->
+    Fixtures.scaffold()
+
+    @testIdsPath = path.join(Fixtures.projectPath("ids"), "tests")
+
+  afterEach ->
+    Fixtures.remove()
+
+  context ".get", ->
+    it "returns an array of ids", ->
+      ids.get(@testIdsPath)
+      .then (array) ->
+        expect(array).to.include("[000]", "[001]", "[002]", "[i9w]", "[abc]")
+
+    it "returns stats", ->
+      ids.remove(@testIdsPath)
+      .then (stats) ->
+        expect(stats).to.deep.eq({
+          ids: 5
+          files: 2
+        })
+
+    it "removes ids", ->
+      ids
+      .get(@testIdsPath)
+      .then (array) =>
+        expect(array.length).to.be.gt(0)
+
+        ids.remove(@testIdsPath)
+      .then =>
+        ids.get(@testIdsPath)
+        .then (array) ->
+          expect(array.length).to.eq(0)

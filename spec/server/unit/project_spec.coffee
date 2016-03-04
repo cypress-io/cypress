@@ -1,6 +1,7 @@
 require("../spec_helper")
 
 Fixtures     = require("../helpers/fixtures")
+ids          = require("#{root}lib/ids")
 api          = require("#{root}lib/api")
 user         = require("#{root}lib/user")
 cache        = require("#{root}lib/cache")
@@ -340,6 +341,16 @@ describe "lib/project", ->
       Project.paths().then (ret) ->
         expect(ret).to.deep.eq([])
         expect(cache.getProjectPaths).to.be.calledOnce
+
+  context ".removeIds", ->
+    beforeEach ->
+      @sandbox.stub(ids, "remove").resolves({})
+
+    it "calls id.remove with path to project tests", ->
+      p = Fixtures.projectPath("ids")
+
+      Project.removeIds(p).then ->
+        expect(ids.remove).to.be.calledWith(p + "/tests")
 
   context ".getSecretKeyByPath", ->
     beforeEach ->

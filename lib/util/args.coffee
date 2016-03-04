@@ -2,7 +2,7 @@ _        = require("lodash")
 path     = require("path")
 minimist = require("minimist")
 
-whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter ci updating ping coords key logs clearLogs port returnPkg environmentVariables getChromiumVersion mode autoOpen".split(" ")
+whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter ci updating ping coords key logs clearLogs port returnPkg environmentVariables getChromiumVersion mode autoOpen removeIds".split(" ")
 
 parseCoords = (coords) ->
   [x, y] = coords.split("x")
@@ -25,6 +25,7 @@ module.exports = {
         "exec-path":   "execPath"
         "api-key":     "apiKey"
         "smoke-test":  "smokeTest"
+        "remove-ids":  "removeIds"
         "get-key":     "getKey"
         "new-key":     "generateKey"
         "run-project": "runProject"

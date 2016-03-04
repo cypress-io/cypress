@@ -437,6 +437,19 @@ describe "lib/cypress", ->
         expect(console.log).to.be.calledWith("abc123")
         @expectExitWith(0)
 
+  context "--remove-ids", ->
+    it "logs stats", ->
+      idsPath = Fixtures.projectPath("ids")
+      @sandbox.spy(console, "log")
+
+      cypress.start(["--remove-ids", "--project=#{idsPath}"]).then =>
+        expect(console.log).to.be.calledWith("Removed '5' ids from '2' files.")
+        @expectExitWith(0)
+
+    it "catches errors when project is not found", ->
+      cypress.start(["--remove-ids", "--project=path/to/no/project"]).then =>
+        @expectExitWithErr("NO_PROJECT_FOUND_AT_PROJECT_ROOT", "path/to/no/project")
+
   context "no args", ->
     beforeEach ->
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()

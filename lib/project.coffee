@@ -4,6 +4,7 @@ _         = require("lodash")
 fs        = require("fs-extra")
 Promise   = require("bluebird")
 Settings  = require("./util/settings")
+ids       = require("./ids")
 api       = require("./api")
 user      = require("./user")
 cache     = require("./cache")
@@ -237,6 +238,14 @@ class Project extends EE
       ## return the project id
       .return(id)
 
+  @removeIds = (p) ->
+    Project(p)
+    .verifyExistance().then (project) ->
+      config = project.server.config
+
+      ## remove all of the ids for the test files found in the testFolder
+      ids.remove path.join(config.projectRoot, config.testFolder)
+
   @id = (path) ->
     Project(path).getProjectId()
 
@@ -246,7 +255,8 @@ class Project extends EE
 
   @getSecretKeyByPath = (path) ->
     ## get project id
-    Project(path).getProjectId()
+    Project(path)
+    .getProjectId()
     .then (id) ->
       user.ensureSession()
       .then (session) ->
@@ -256,7 +266,8 @@ class Project extends EE
 
   @generateSecretKeyByPath = (path) ->
     ## get project id
-    Project(path).getProjectId()
+    Project(path)
+    .getProjectId()
     .then (id) ->
       user.ensureSession()
       .then (session) ->

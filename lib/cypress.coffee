@@ -110,6 +110,9 @@ module.exports = {
     ## the passed in arguments / options
     ## and normalize this mode
     switch
+      when options.removeIds
+        options.mode = "removeIds"
+
       when options.smokeTest
         options.mode = "smokeTest"
 
@@ -148,6 +151,13 @@ module.exports = {
 
   startInMode: (mode, options) ->
     switch mode
+      when "removeIds"
+        Project.removeIds(options.projectPath)
+        .then (stats = {}) ->
+          console.log("Removed '#{stats.ids}' ids from '#{stats.files}' files.")
+        .then(exit0)
+        .catch(exitErr)
+
       when "smokeTest"
         smokeTest(options)
         .then (pong) ->
