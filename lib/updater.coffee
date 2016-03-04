@@ -158,7 +158,7 @@ class Updater
   trigger: (event, args...) ->
     ## normalize event name
     event = "on" + event[0].toUpperCase() + event.slice(1)
-    if cb = @callbacks[event]
+    if cb = @callbacks and @callbacks[event]
       cb.apply(@, args)
 
   check: (options = {}) ->
