@@ -24,7 +24,7 @@
     "underscore.string": "~2.3.3",
     "jsuri": "1.3.0",
     "backbone.mutators": "~0.4.1",
-    "bluebird": "2.9.25",
+    "bluebird": "3.3.3",
     "bootstrap-contextmenu": "~0.3.2",
     "backbone.marionette": "~2.3.2",
     "moment": "2.10.3",
