@@ -62,9 +62,11 @@ module.exports = {
           ## since it'll likely be NetworkError or something.
           ## But we should still gracefully handle this better
           ## and provide a custom error message.
-          Project.add(projectPath).then ->
+          Project.add(projectPath)
+          .then ->
             console.log chalk.green("\nOk great, added the project.\n")
             resolve()
+          .catch(reject)
         else
           reject errors.get("PROJECT_DOES_NOT_EXIST")
 

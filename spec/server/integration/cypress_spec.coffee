@@ -289,18 +289,17 @@ describe "lib/cypress", ->
     ## for headed projects!
     ## also make sure we test the rest of the integration functionality
     ## for headed errors! <-- not unit tests, but integration tests!
-    # it.only "logs error and exits when project folder has read permissions only and cannot write cypress.json", ->
-    #   Promise.all([
-    #     user.set({name: "brian", session_token: "session-123"}),
+    it "logs error and exits when project folder has read permissions only and cannot write cypress.json", ->
+      permissionsPath = Fixtures.project("permissions")
 
-    #     Project.add(@todosPath)
-    #   ])
-    #   .then =>
-    #     fs.removeAsync(@todosPath + "/cypress.json")
-    #   .then =>
-    #     fs.chmodAsync(@todosPath, "111")
-    #   .then =>
-    #     cypress.start(["--run-project=#{@todosPath}"])
+      @sandbox.stub(inquirer, "prompt").yieldsAsync({add: true})
+
+      user.set({session_token: "session-123"})
+      .then =>
+        fs.chmodAsync(permissionsPath, "111")
+      .then =>
+        cypress.start(["--run-project=#{permissionsPath}"]).then =>
+          @expectExitWithErr("ERROR_WRITING_FILE", permissionsPath)
 
     describe "--port", ->
       beforeEach ->
