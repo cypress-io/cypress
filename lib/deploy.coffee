@@ -279,6 +279,7 @@ class Platform
       overwrite: true
       version: pkg.devDependencies["electron-prebuilt"]
       icon: cypressIcons.getPathToIcon("cypress.icns")
+      "extend-info": path.join(__dirname, "..", "support", "Info.plist")
     })
       # files: @distDir("/**/*")
       # platforms: [@platform]
