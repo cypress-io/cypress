@@ -38,3 +38,16 @@ describe "lib/ids", ->
         ids.get(@testIdsPath)
         .then (array) ->
           expect(array.length).to.eq(0)
+
+    it "strips out whitespace next to the id", ->
+      foo = path.join(@testIdsPath, "foo.coffee")
+
+      ids.remove(@testIdsPath)
+      .then =>
+        fs.readFileAsync(foo, "utf8").then (contents) ->
+          expect(contents).to.eq """
+          describe "foo", ->
+            it "bars", ->
+
+            it 'quux'
+          """

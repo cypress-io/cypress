@@ -4,7 +4,7 @@ glob    = require("glob")
 Promise = require("bluebird")
 
 fs   = Promise.promisifyAll(fs)
-idRe = /\[(.{3})\]/g
+idRe = /\s*\[.{3}\]/g
 
 module.exports = {
   files: (pathToTestFiles) ->
