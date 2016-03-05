@@ -9,6 +9,7 @@ global.proxyquire = require("proxyquire")
 path             = require("path")
 sinon            = require("sinon")
 sinonPromise     = require("sinon-as-promised")
+cache            = require("../../lib/cache")
 
 global.fs = fs = Promise.promisifyAll(global.fs)
 
@@ -42,3 +43,7 @@ afterEach ->
 
   if global.fs isnt fs
     global.fs = fs
+
+  ## always clean up the cache
+  ## after each test
+  cache.remove()
