@@ -8,11 +8,9 @@ Promise       = require "bluebird"
 child_process = require "child_process"
 runSequence   = require "run-sequence"
 os            = require "os"
-deploy        = require "./lib/deploy"
+deploy        = require "./deploy"
 
 fs = Promise.promisifyAll(fs)
-
-require("lodash").bindAll(deploy)
 
 rememberedNames = []
 

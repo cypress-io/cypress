@@ -24,7 +24,7 @@
     "type": "git",
     "url": "https://github.com/cypress-io/cypress.git"
   },
-  "author": "",
+  "author": "Brian Mann",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/cypress-io/cypress/issues"
@@ -40,6 +40,7 @@
     "coffee-coverage": "^1.0.1",
     "commander": "2.3.0",
     "coveralls": "^2.11.8",
+    "electron-osx-sign": "^0.3.0",
     "electron-packager": "electron-userland/electron-packager#ac5098c080a5ed6d1d88584f0a9164cfa258f6da",
     "electron-prebuilt": "0.36.9",
     "gulp": "3.8.8",
