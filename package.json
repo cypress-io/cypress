@@ -40,6 +40,7 @@
     "coffee-coverage": "^1.0.1",
     "commander": "2.3.0",
     "coveralls": "^2.11.8",
+    "electron-packager": "^5.2.1",
     "electron-prebuilt": "0.36.9",
     "gulp": "3.8.8",
     "gulp-awspublish": "^3.0.1",
@@ -132,11 +133,9 @@
     "syntax-error": "^1.1.4",
     "through": "2.3.6",
     "trash": "^1.4.1",
-    "tree-kill": "^1.0.0",
     "trumpet": "cypress-io/node-trumpet",
     "underscore": "1.6.0",
     "underscore.string": "2.3.3",
-    "wd": "^0.3.12",
     "winston": "^0.9.0"
   }
 }
