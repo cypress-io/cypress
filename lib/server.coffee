@@ -163,7 +163,7 @@ class Server
     ## serve static file from public when route is /__cypress/static
     ## this is to namespace the static cypress files away from
     ## the real application by separating the root from the files
-    @app.use "/__cypress/static", express.static(__dirname + "/public")
+    @app.use "/__cypress/static", express.static(cwd("lib", "public"))
 
     ## errorhandler
     @app.use require("errorhandler")()
