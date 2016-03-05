@@ -1,3 +1,4 @@
+os       = require("os")
 app      = require("electron").app
 Position = require("electron-positioner")
 errors   = require("../errors")
@@ -34,6 +35,20 @@ module.exports = {
     ## exit when all windows are closed
     app.exit(0)
 
+  getInitialShow: ->
+    ## on linux initially show the window
+    ## since it is not a tray application
+    if os.platform() is "linux"
+      true
+    else
+      ## for everything else do not show
+
+      ## TODO: add a check here to see if
+      ## the user is logged in. if they are
+      ## not then immediately display the
+      ## login window in the center!
+      false
+
   ready: (options = {}) ->
     options.app = app
 
@@ -45,7 +60,7 @@ module.exports = {
       height: 400
       resizable: false
       frame: false
-      ## show: handle dev env vs prod env and handle linux vs mac
+      show: @getInitialShow()
       # devTools: true
       transparent: true
       # backgroundColor: "#FFFFFFFF"
