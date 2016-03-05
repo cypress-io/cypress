@@ -42,97 +42,7 @@ platforms = ["osx64", "linux64"]
 zipName   = "cypress.zip"
 tarName   = "chromium.tar.gz"
 
-class Linux64 extends Platform
-  buildPathToApp: ->
-    path.join buildDir, @getVersion(), @platform, "Cypress", "Cypress"
-
-  buildPathToChromium: ->
-    path.join @buildPathToChromiumDir(), "Chromium"
-
-  buildPathToChromiumDir: ->
-    path.join buildDir, @getVersion(), @platform, "Cypress", "bin", "chromium"
-
-  codeSign: ->
-    Promise.resolve()
-
-  runSmokeTest: ->
-    xvfb = new Xvfb()
-    xvfb = Promise.promisifyAll(xvfb)
-    xvfb.startAsync().then (xvfxProcess) =>
-      @_runSmokeTest().then ->
-        xvfb.stopAsync()
-
-  nwBuilder: ->
-    src    = path.join(buildDir, @getVersion(), @platform)
-    dest   = path.join(buildDir, @getVersion(), "Cypress")
-    mvDest = path.join(buildDir, @getVersion(), @platform, "Cypress")
-
-    super.then ->
-      fs.renameAsync(src, dest).then ->
-        fs.ensureDirAsync(src).then ->
-          fs.moveAsync(dest, mvDest, {clobber: true})
-
-  npm: ->
-    new Promise (resolve, reject) ->
-      vagrant.ssh ["-c", "cd /cypress-app && npm install"], (code) ->
-        if code isnt 0
-          reject("vagrant.rsync failed!")
-        else
-          resolve()
-
-  rsync: ->
-    new Promise (resolve, reject) ->
-      vagrant.rsync (code) ->
-        if code isnt 0
-          reject("vagrant.rsync failed!")
-        else
-          resolve()
-
-  rsyncBack: ->
-    new Promise (resolve, reject) ->
-      vagrant["rsync-back"] (code) ->
-        if code isnt 0
-          reject("vagrant.rsync-back failed!")
-        else
-          resolve()
-
-  deploy: ->
-    version = @options.version
-
-    getOpts = =>
-      if @options.runTests is false
-        "--skip-tests"
-      else
-        ""
-
-    deploy = =>
-      new Promise (resolve, reject) =>
-        ssh = ->
-          vagrant.ssh ["-c", "cd /cypress-app && gulp dist --version #{version} #{getOpts()}"], (code) ->
-            if code isnt 0
-              reject("vagrant.ssh gulp dist failed!")
-            else
-              resolve()
-
-        vagrant.status (code) ->
-          if code isnt 0
-            vagrant.up (code) ->
-              reject("vagrant.up failed!") if code isnt 0
-              ssh()
-          else
-            ssh()
-
-    @rsync()
-      .bind(@)
-      .then(@npm)
-      .then(deploy)
-      .then(@rsyncBack)
-
 module.exports = {
-  Platform: Platform
-  Osx64: Osx64
-  Linux64: Linux64
-
   getQuestions: (version) ->
     [{
       name: "publish"
@@ -231,17 +141,6 @@ module.exports = {
 
         resolve()
 
-  parseOptions: (argv) ->
-    opts = minimist(argv.slice(2))
-    opts.runTests = false if opts["skip-tests"]
-    opts
-
-  platform: ->
-    {
-      darwin: "osx64"
-      linux:  "linux64"
-    }[os.platform()] or throw new Error("OS Platform: '#{os.platform()}' not supported!")
-
   getPublisher: ->
     aws = @getAwsObj()
 
@@ -289,9 +188,6 @@ module.exports = {
 
   runSmokeTest: ->
     @getPlatform().runSmokeTest()
-
-  build: ->
-    @getPlatform().build()
 
   afterBuild: ->
     @getPlatform().afterBuild()
