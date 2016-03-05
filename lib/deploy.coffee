@@ -140,6 +140,7 @@ class Platform
           copy("./lib/html")
           copy("./lib/public")
           copy("./lib/scaffold")
+          copy("./lib/ipc")
 
           ## copy entry point
           copy("./index.js", "/src/index.js")

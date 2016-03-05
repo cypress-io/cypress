@@ -3,6 +3,7 @@ path          = require("path")
 uri           = require("url")
 cypressGui    = require("cypress-gui")
 BrowserWindow = require("electron").BrowserWindow
+cwd           = require("../../cwd")
 user          = require("../../user")
 
 windows               = {}
@@ -71,7 +72,7 @@ module.exports = {
       width:  600
       height: 500
       show:   true
-      preload: path.join(__dirname, "./ipc.js")
+      preload: cwd("lib", "ipc", "ipc.js")
       webPreferences: {
         nodeIntegration: false
       }
