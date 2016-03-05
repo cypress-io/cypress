@@ -12,7 +12,7 @@ console.log projectRoot
 coffeeCoverage.register({
   instrumentor: "istanbul"
   basePath: projectRoot
-  exclude: ["/gulpfile.coffee", "/dist", "/test", "/spec", "/app", "/bower_components", "/cache", "/support", "/node_modules", "/.git", "/.cy", "/.vagrant", "/.projects"],
+  exclude: ["/gulpfile.coffee", "/dist", "/tmp", "/test", "/spec", "/app", "/bower_components", "/cache", "/support", "/node_modules", "/.git", "/.cy", "/.vagrant", "/.projects"],
   coverageVar: coverageVar
   writeOnExit: writeOnExit
   initAll: true
