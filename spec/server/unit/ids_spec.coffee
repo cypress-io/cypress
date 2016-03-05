@@ -17,7 +17,7 @@ describe "lib/ids", ->
     it "returns an array of ids", ->
       ids.get(@testIdsPath)
       .then (array) ->
-        expect(array).to.include("[000]", "[001]", "[002]", "[i9w]", "[abc]")
+        expect(array).to.include(" [000]", " [001]", " [002]", "[i9w]", "[abc]")
 
     it "returns stats", ->
       ids.remove(@testIdsPath)
