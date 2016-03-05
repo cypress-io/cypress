@@ -9,6 +9,7 @@ through       = require("through")
 jsUri         = require("jsuri")
 trumpet       = require("trumpet")
 urlHelpers    = require("url")
+cwd           = require("../cwd")
 logger        = require("../logger")
 UrlHelpers    = require("../util/url_helpers")
 escapeRegExp  = require("../util/escape_regexp")
@@ -242,7 +243,7 @@ class Proxy
 
     ## using req here to give us an opportunity to
     ## write to req.formattedUrl
-    htmlPath = path.join(process.cwd(), "lib/html/initial_500.html")
+    htmlPath = cwd("lib", "html", "initial_500.html")
     res.status(500).render(htmlPath, {
       url: filePath
       fromFile: !!req.formattedUrl

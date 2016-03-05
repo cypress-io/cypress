@@ -1,10 +1,10 @@
-_       = require "underscore"
-_.str   = require "underscore.string"
-path    = require "path"
-glob    = require "glob"
-Promise = require "bluebird"
-
-CacheBuster = require "../util/cache_buster"
+_           = require("underscore")
+_.str       = require("underscore.string")
+path        = require("path")
+glob        = require("glob")
+Promise     = require("bluebird")
+cwd         = require("../cwd")
+CacheBuster = require("../util/cache_buster")
 
 class Files
   constructor: (app) ->
@@ -24,7 +24,7 @@ class Files
   handleIframe: (req, res) ->
     test = req.params[0]
 
-    filePath = path.join(process.cwd(), "lib/html/empty_inject.html")
+    filePath = cwd("lib", "html", "empty_inject.html")
 
     @getSpecs(test).bind(@).then (specs) ->
       @getJavascripts().bind(@).then (js) ->

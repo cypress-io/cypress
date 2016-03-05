@@ -7,10 +7,12 @@ coverageVar = coffeeCoverage.findIstanbulVariable()
 ## Only write a coverage report if we"re not running inside of Istanbul.
 writeOnExit = if coverageVar then null else projectRoot + "/coverage/coverage-coffee.json"
 
+console.log projectRoot
+
 coffeeCoverage.register({
   instrumentor: "istanbul"
   basePath: projectRoot
-  exclude: ["/gulpfile.coffee", "/lib/cli", "/test", "/spec", "/app", "/bower_components", "/cache", "/support", "/node_modules", "/.git", "/.cy", "/.vagrant", "/.projects"],
+  exclude: ["/gulpfile.coffee", "/dist", "/test", "/spec", "/app", "/bower_components", "/cache", "/support", "/node_modules", "/.git", "/.cy", "/.vagrant", "/.projects"],
   coverageVar: coverageVar
   writeOnExit: writeOnExit
   initAll: true

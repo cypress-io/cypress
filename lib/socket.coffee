@@ -3,6 +3,7 @@ fs            = require("fs-extra")
 path          = require("path")
 uuid          = require("node-uuid")
 socketIo      = require("socket.io")
+cwd           = require("./cwd")
 fixture       = require("./fixture")
 Request       = require("./request")
 logger        = require("./logger")
@@ -192,7 +193,7 @@ class Socket
     @_startListening(server, watchers, options)
 
   listenToCssChanges: (watchers) ->
-    watchers.watch path.join(process.cwd(), "lib", "public", "css"), {
+    watchers.watch cwd("lib", "public", "css"), {
       ignored: (path, stats) =>
         return false if fs.statSync(path).isDirectory()
 

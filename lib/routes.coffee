@@ -1,5 +1,6 @@
 path        = require("path")
 CacheBuster = require("./util/cache_buster")
+cwd         = require("./cwd")
 
 module.exports = (app) ->
   controllers = require('./controllers')(app)
@@ -35,7 +36,7 @@ module.exports = (app) ->
   ## app as '__'  this route shouldn't ever be used by servers
   ## and therefore should not conflict
   app.get app.get("cypress").clientRoute, (req, res) ->
-    res.render path.join(process.cwd(), "lib", "public", "index.html"), {
+    res.render cwd("lib", "public", "index.html"), {
       config: JSON.stringify(app.get("cypress"))
     }
 

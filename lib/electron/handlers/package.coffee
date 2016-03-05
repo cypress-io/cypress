@@ -2,9 +2,10 @@ _       = require("lodash")
 fs      = require("fs-extra")
 path    = require("path")
 Promise = require("bluebird")
+cwd     = require("../../cwd")
 
 fs        = Promise.promisifyAll(fs)
-pathToPkg = path.join(process.cwd(), "package.json")
+pathToPkg = cwd("package.json")
 
 module.exports = (options) ->
   fs.readJsonAsync(pathToPkg)

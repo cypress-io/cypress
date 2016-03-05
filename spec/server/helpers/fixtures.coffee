@@ -1,8 +1,8 @@
 config   = require("konfig")()
-path     = require "path"
-fs       = require "fs-extra"
-Promise  = require "bluebird"
-request  = require "request-promise"
+path     = require("path")
+fs       = require("fs-extra")
+Promise  = require("bluebird")
+request  = require("request-promise")
 
 root       = process.cwd()
 projects   = path.join root, "spec", "fixtures", "projects"

@@ -7,6 +7,7 @@ coffee    = require("coffee-script")
 beautify  = require("js-beautify").html
 pretty    = require("js-object-pretty-print").pretty
 formatter = require("jsonlint/lib/formatter").formatter
+cwd       = require("./cwd")
 
 fs = Promise.promisifyAll(fs)
 
@@ -166,7 +167,7 @@ module.exports = {
       .bind(@)
 
   copyExample: (fixturesDir) ->
-    src  = path.join(process.cwd(), "lib", "scaffold", "example.json")
+    src  = cwd("lib", "scaffold", "example.json")
     dest = path.join(fixturesDir, "example.json")
     fs.copyAsync(src, dest)
 

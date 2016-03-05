@@ -1,6 +1,7 @@
 _        = require("lodash")
 path     = require("path")
 minimist = require("minimist")
+cwd      = require("../cwd")
 
 whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter ci updating ping coords key logs clearLogs port returnPkg environmentVariables getChromiumVersion mode autoOpen removeIds".split(" ")
 
@@ -49,7 +50,7 @@ module.exports = {
 
     ## normalize runProject or project to projectPath
     if rp = options.runProject or p = options.project
-      options.projectPath = path.resolve(process.cwd(), rp ? p)
+      options.projectPath = path.resolve(cwd(), rp ? p)
 
     if options.smokeTest
       options.pong = options.ping

@@ -6,9 +6,10 @@ glob           = require("glob")
 chmodr         = require("chmodr")
 trash          = require("trash")
 NwUpdater      = require("node-webkit-updater")
-argsUtil       = require("./util/args")
+cwd            = require("./cwd")
 config         = require("./config")
 logger         = require("./logger")
+argsUtil       = require("./util/args")
 
 trash  = Promise.promisify(trash)
 chmodr = Promise.promisify(chmodr)
@@ -38,10 +39,10 @@ class Updater
     _.compact ["--app-path=" + c.getAppPath(), "--exec-path=" + c.getAppExec(), "--updating", @getCoords()]
 
   patchAppPath: ->
-    @getClient().getAppPath = -> process.cwd()
+    @getClient().getAppPath = -> cwd()
 
   getPackage: ->
-    pkg = fs.readJsonSync path.join(process.cwd(), "package.json")
+    pkg = fs.readJsonSync cwd("package.json")
     pkg.manifestUrl = config.app.desktop_manifest_url
     pkg
 
@@ -94,7 +95,7 @@ class Updater
         resolve(newAppConfigPath)
 
     p.then (newAppConfigPath) ->
-      cyConfigPath  = path.join(process.cwd(), config.app.cy_path)
+      cyConfigPath  = cwd(config.app.cy_path)
       fs.copyAsync(cyConfigPath, newAppConfigPath).then ->
 
         ## change all the permissions recursively to 0755

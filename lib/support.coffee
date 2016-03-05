@@ -1,6 +1,7 @@
-Promise   = require "bluebird"
-fs        = require "fs-extra"
-path      = require "path"
+Promise   = require("bluebird")
+fs        = require("fs-extra")
+path      = require("path")
+cwd       = require("./cwd")
 
 fs = Promise.promisifyAll(fs)
 
@@ -18,7 +19,7 @@ class Support
     @folder = path.join(pr, sf)
 
   copyExample: (folder) ->
-    src  = path.join(process.cwd(), "lib", "scaffold", "spec_helper.js")
+    src  = cwd("lib", "scaffold", "spec_helper.js")
     dest = path.join(folder, "spec_helper.js")
     fs.copyAsync(src, dest)
 
