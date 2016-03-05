@@ -19,7 +19,13 @@ Xvfb           = require("xvfb")
 tar            = require("tar-fs")
 zlib           = require("zlib")
 stp            = require("stream-to-promise")
+obfuscator     = require("obfuscator")
+pkgr           = require("electron-packager")
+pkg            = require("../package.json")
+cypressIcons   = require("cypress-icons")
 expect         = require("chai").expect
+
+pkgr           = Promise.promisify(pkgr)
 
 vagrant.debug = true
 ["rsync", "rsync-auto", "rsync-back"].forEach (cmd) ->
@@ -134,40 +140,36 @@ class Platform
           copy("./lib/html")
           copy("./lib/public")
           copy("./lib/scaffold")
-          copy("./nw/public")
-          copy("./lib/secret_sauce.bin")
+
+          ## copy entry point
+          copy("./index.js", "/src/index.js")
 
           ## copy coffee src files
-          copy("./lib/backend.coffee",      "/src/lib/backend.coffee")
-          copy("./lib/cli.coffee",          "/src/lib/cli.coffee")
-          copy("./lib/config.coffee",       "/src/lib/config.coffee")
-          copy("./lib/cypress.coffee",      "/src/lib/cypress.coffee")
           copy("./lib/controllers",         "/src/lib/controllers")
+          copy("./lib/electron",            "/src/lib/electron")
+          copy("./lib/modes",               "/src/lib/modes")
           copy("./lib/util",                "/src/lib/util")
-          copy("./lib/routes",              "/src/lib/routes")
-          copy("./lib/sauce",               "/src/lib/sauce")
+          copy("./lib/api.coffee",          "/src/lib/api.coffee")
           copy("./lib/cache.coffee",        "/src/lib/cache.coffee")
-          copy("./lib/keys.coffee",         "/src/lib/keys.coffee")
+          copy("./lib/config.coffee",       "/src/lib/config.coffee")
+          copy("./lib/cwd.coffee",          "/src/lib/cwd.coffee")
+          copy("./lib/cypress.coffee",      "/src/lib/cypress.coffee")
+          copy("./lib/environment.coffee",  "/src/lib/environment.coffee")
+          copy("./lib/errors.coffee",       "/src/lib/errors.coffee")
+          copy("./lib/exception.coffee",    "/src/lib/exception.coffee")
+          copy("./lib/fixture.coffee",      "/src/lib/fixture.coffee")
+          copy("./lib/ids.coffee",          "/src/lib/ids.coffee")
           copy("./lib/logger.coffee",       "/src/lib/logger.coffee")
           copy("./lib/project.coffee",      "/src/lib/project.coffee")
+          copy("./lib/reporter.coffee",     "/src/lib/reporter.coffee")
+          copy("./lib/request.coffee",      "/src/lib/request.coffee")
+          copy("./lib/routes.coffee",       "/src/lib/routes.coffee")
           copy("./lib/server.coffee",       "/src/lib/server.coffee")
           copy("./lib/socket.coffee",       "/src/lib/socket.coffee")
           copy("./lib/support.coffee",      "/src/lib/support.coffee")
-          copy("./lib/request.coffee",      "/src/lib/request.coffee")
-          copy("./lib/fixtures.coffee",     "/src/lib/fixtures.coffee")
-          copy("./lib/watchers.coffee",     "/src/lib/watchers.coffee")
           copy("./lib/updater.coffee",      "/src/lib/updater.coffee")
-          copy("./lib/reporter.coffee",     "/src/lib/reporter.coffee")
-          copy("./lib/environment.coffee",  "/src/lib/environment.coffee")
-          copy("./lib/log.coffee",          "/src/lib/log.coffee")
-          copy("./lib/exception.coffee",    "/src/lib/exception.coffee")
-          copy("./lib/chromium.coffee",     "/src/lib/chromium.coffee")
-
-          ## copy nw_spec files
-          copy("./spec")
-
-          ## copy bower components for testing
-          copy("./bower_components")
+          copy("./lib/user.coffee",         "/src/lib/user.coffee")
+          copy("./lib/watchers.coffee",     "/src/lib/watchers.coffee")
 
         ]
       .all()
@@ -199,165 +201,25 @@ class Platform
       ## root is src
       ## entry is cypress.js
       ## files are all the js files
-      opts = {root: @distDir("src"), entry: @distDir("src/lib/cypress.js"), files: files}
+      opts = {root: @distDir("src"), entry: @distDir("src/index.js"), files: files}
 
-      obfuscator = require('obfuscator').obfuscator
-      obfuscator opts, (err, obfuscated) =>
+      obfuscator.concatenate opts, (err, obfuscated) =>
         return reject(err) if err
 
         ## move to lib
-        fs.writeFileSync(@distDir("lib/cypress.js"), obfuscated)
+        fs.writeFileSync(@distDir("index.js"), obfuscated)
 
         resolve(obfuscated)
-
-  cleanupSpec: ->
-    @log("#cleanupSpec")
-
-    fs.removeAsync @distDir("/spec")
 
   cleanupSrc: ->
     @log("#cleanupSrc")
 
     fs.removeAsync @distDir("/src")
 
-  cleanupBc: ->
-    @log("#cleanupBc")
-
-    fs.removeAsync @distDir("/bower_components")
-
   cleanupPlatform: ->
     @log("#cleanupPlatform")
 
     fs.removeAsync path.join(buildDir, @platform)
-
-  runTests: ->
-    if @options.runTests is false
-      return Promise.resolve()
-
-    Promise.bind(@).then(@nwTests)
-
-  runChromiumSmokeTest: ->
-    @log("#runChromiumSmokeTest")
-
-    @getLatestChromiumVersion().then (version) =>
-      new Promise (resolve, reject) =>
-        env = _.clone(process.env)
-        env.CYPRESS_ENV = ""
-
-        opts = {env: env}
-
-        child_process.exec "#{@buildPathToApp()} --get-chromium-version", opts, (err, stdout, stderr) ->
-          [err, stdout, stderr].forEach (val) ->
-            console.log(val) if val
-
-          return reject(err) if err
-
-          stdout = stdout.replace(/\s/, "")
-
-          if stdout isnt version
-            throw new Error("Chromium version: '#{stdout}' did not match expected version: '#{version}'")
-          else
-            resolve()
-
-  _nwTests: (options = {}) ->
-    _.defaults options,
-      project: false
-      cli: false
-
-    # new Promise (resolve, reject) =>
-    #   retries = 0
-
-    #   nwTests = =>
-    #     retries += 1
-
-    #     # tests = "../../node_modules/.bin/nw ./spec/nw_unit --headless"# --index=#{indexPath}"
-    #     args = ["../../node_modules/.bin/nw", "./spec/nw_unit", "--headless"]
-
-    #     switch
-    #       when options.project
-    #         args.push "--project"
-    #       when options.cli
-    #         args.push "--cli"
-
-    #     console.log args.join(" ")
-    #     spawn = child_process.exec args.join(" "), {cwd: @distDir(), stdio: "inherit"}, (err, stdout, stderr) ->
-
-
-    #     spawn.on "exit", (failures) ->
-    #       console.log "exit failures are", failures
-
-    #     spawn.on "close", (failures) ->
-    #       console.log "failures are", failures
-          # retry = (failures) ->
-          #   if retries is 5
-          #     if failures instanceof Error
-          #       err = failures
-          #     else
-          #       err = new Error("Mocha failed with '#{failures}' failures")
-          #     return reject(err)
-
-          #   console.log gutil.colors.red("'nwTests' failed, retrying")
-          #   nwTests()
-
-          # if failures is 0
-          #   console.log gutil.colors.green("'nwTests' passed with #{failures} failures")
-          #   resolve()
-          # else
-          #   retry(failures)
-
-    new Promise (resolve, reject) =>
-      retries = 0
-
-      nwTests = =>
-        retries += 1
-
-        tests = "../../node_modules/.bin/nw ./spec/nw_unit --headless"# --index=#{indexPath}"
-
-        switch
-          when options.project
-            tests += " --nw-spec project"
-          when options.cli
-            tests += " --nw-spec cli"
-
-        child_process.exec tests, {cwd: @distDir()}, (err, stdout, stderr) =>
-        # child_process.spawn "../../node_modules/.bin/nw", ["./spec/nw_unit", "--headless"], {cwd: @distDir(), stdio: "inherit"}, (err, stdout, stderr) ->
-          console.log "err", err
-          console.log "stdout", stdout
-          console.log "stderr", stderr
-
-          retry = (failures) ->
-            if retries is 5
-              if failures instanceof Error
-                err = failures
-              else
-                err = new Error("Mocha failed with '#{failures}' failures")
-              return reject(err)
-
-            console.log gutil.colors.red("'nwTests' failed, retrying"), gutil.colors.magenta(tests)
-            nwTests()
-
-          results = @distDir("spec/results.json")
-
-          fs.readJsonAsync(results)
-            .then (failures) ->
-              if failures is 0
-                fs.removeSync(results)
-
-                console.log gutil.colors.green("'nwTests' passed with #{failures} failures")
-                resolve()
-              else
-                retry(failures)
-            .catch(retry)
-
-      nwTests()
-
-  nwTests: ->
-    @log("#nwTests")
-
-    @_nwTests()
-    .bind(@)
-    .then -> @_nwTests({cli: true})
-    .then -> @_nwTests({project: true})
 
   ## add tests around this method
   updatePackage: ->
@@ -402,25 +264,36 @@ class Platform
 
       npmInstall()
 
-  nwBuilder: ->
-    @log("#nwBuilder")
+  elBuilder: ->
+    @log("#elBuilder")
 
-    nw = new NwBuilder
-      files: @distDir("/**/*")
-      platforms: [@platform]
-      buildDir: buildDir
-      buildType: => @getVersion()
-      version: "0.12.2"
-      macIcns: "nw/public/img/cypress.icns"
-      macPlist: {
-        CFBundleIdentifier: "com.cypress.io"
-      }
-      # macZip: true
-      zip: false
+    pkgr({
+      dir: @distDir()
+      out: "./tmp/#{@version}"
+      name: "Cypress"
+      platform: ["darwin"]
+      arch: "x64"
+      asar: false
+      prune: true
+      overwrite: true
+      version: pkg.devDependencies["electron-prebuilt"]
+      icon: cypressIcons.getPathToIcon("cypress.icns")
+    })
+      # files: @distDir("/**/*")
+      # platforms: [@platform]
+      # buildDir: buildDir
+      # buildType: => @getVersion()
+      # version: "0.12.2"
+      # macIcns: "nw/public/img/cypress.icns"
+      # macPlist: {
+      #   CFBundleIdentifier: "com.cypress.io"
+      # }
+      # # macZip: true
+      # zip: false
 
-    nw.on "log", console.log
+    # nw.on "log", console.log
 
-    nw.build()
+    # nw.build()
 
   uploadFixtureToS3: ->
     @log("#uploadFixtureToS3")
@@ -446,21 +319,18 @@ class Platform
       .then(@obfuscate)
       .then(@cleanupSrc)
       .then(@npmInstall)
+      .then(@elBuilder)
 
   dist: ->
     Promise.bind(@)
-      .then(@build)
-      .then(@runTests)
-      .then(@cleanupSpec)
-      .then(@cleanupBc)
-      .then(@nwBuilder)
-      .then(@afterBuild)
-      .then(@cleanupDist)
-      .then(@handleChromium)
-      .then(@runSmokeTest)
-      .then(@runChromiumSmokeTest)
-      .then(@codeSign) ## codesign after running smoke tests due to changing .cy
-      .then(@verifyAppCanOpen)
+      # .then(@build)
+      # .then(@afterBuild)
+      # .then(@cleanupDist)
+      # .then(@handleChromium)
+      # .then(@runSmokeTest)
+      # .then(@runChromiumSmokeTest)
+      # .then(@codeSign) ## codesign after running smoke tests due to changing .cy
+      # .then(@verifyAppCanOpen)
 
   fixture: (cb) ->
     @dist()
@@ -487,7 +357,7 @@ class Platform
     @log "gulpBuild"
 
     new Promise (resolve, reject) ->
-      runSequence ["client:build", "nw:build"], ["client:minify", "nw:minify"], (err) ->
+      runSequence "client:build", "client:minify", (err) ->
         if err then reject(err) else resolve()
 
   verifyAppCanOpen: ->
@@ -675,14 +545,6 @@ class Linux64 extends Platform
   codeSign: ->
     Promise.resolve()
 
-  nwTests: ->
-    xvfb = new Xvfb()
-    xvfb = Promise.promisifyAll(xvfb)
-    xvfb.startAsync()
-      .then (xvfxProcess) =>
-        super.then ->
-          xvfb.stopAsync()
-
   runSmokeTest: ->
     xvfb = new Xvfb()
     xvfb = Promise.promisifyAll(xvfb)
@@ -697,13 +559,6 @@ class Linux64 extends Platform
         height: 400
         width: 300
       }).then ->
-        xvfb.stopAsync()
-
-  runChromiumSmokeTest: ->
-    xvfb = new Xvfb()
-    xvfb = Promise.promisifyAll(xvfb)
-    xvfb.startAsync().then (xvfxProcess) =>
-      super.then ->
         xvfb.stopAsync()
 
   nwBuilder: ->
@@ -930,9 +785,6 @@ module.exports = {
 
   cleanupBuild: ->
     fs.removeAsync(buildDir)
-
-  runTests: ->
-    @getPlatform().runTests()
 
   runSmokeTest: ->
     @getPlatform().runSmokeTest()
