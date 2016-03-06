@@ -34,6 +34,7 @@ You can now execute the following commands:
 ##### [cypress get:path](#cypress-getpath-1)
 ##### [cypress get:key](#cypress-getkey-1)
 ##### [cypress new:key](#cypress-newkey-1)
+##### [cypress remove:ids](#cypress-removeids-1)
 ##### [cypress verify](#cypress-verify-1)
 
 --
@@ -135,6 +136,12 @@ Returns your secret project key for use in CI.
 ### cypress new:key
 
 Creates a new secret project key and returns that key for use in CI. This will negate previous secret keys, so be sure to update your CI to use this new key.
+
+### cypress remove:ids
+
+Removes the test IDs found in your specs. In versions of Cypress prior to `0.14.0` we inserted IDs directly into your code.
+
+This feature has been removed for the foreseeable future.
 
 ### cypress verify
 
