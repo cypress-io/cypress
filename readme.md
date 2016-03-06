@@ -1,4 +1,4 @@
-# Cypress CLI [![Circle CI](https://circleci.com/gh/cypress-io/cypress-cli.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress-cli)
+# Cypress CLI [![Circle CI](https://circleci.com/gh/cypress-io/cypress-cli.svg?style=shield)](https://circleci.com/gh/cypress-io/cypress-cli)
 
 This is the CLI for: [https://github.com/cypress-io/cypress](https://github.com/cypress-io/cypress).
 
@@ -6,7 +6,7 @@ View our progress: [https://www.pivotaltracker.com/n/projects/1531501](https://w
 
 ## What this does
 
-This `CLI` enables you to interact with the Cypress Desktop Application through the command line. This is helpful for both local development and running Cypress on a CI server.
+This is the `Cypress CLI` tool used for communicating with the real `Cypress Desktop Application`.
 
 For instance you can do common tasks like:
 
@@ -41,7 +41,7 @@ You can now execute the following commands:
 
 ### cypress install
 
-Installs Cypress to the default location for each Operating System.
+Installs the `Cypress Desktop Application` to the default location for each Operating System.
 
 OS | Path
 :--- | :---
@@ -59,6 +59,8 @@ cypress install --cypress-version 0.13.0
 ```
 
 Additionally if you have a `CYPRESS_VERSION` environment variable set, it will automatically download that version. Useful in CI.
+
+> [Watch a video of Cypress being installed](https://docs.cypress.io/docs/installing-and-running#section-installing)
 
 ### cypress update
 
