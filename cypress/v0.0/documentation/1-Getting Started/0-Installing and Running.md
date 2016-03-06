@@ -8,6 +8,7 @@ excerpt: Quick start guide for using Cypress
   - [Command Line](#section-command-line)
   - [Direct Download](#section-direct-download)
 - :fa-angle-right: [Adding Projects](#section-adding-projects)
+- :fa-angle-right: [Running Headlessly](#section-running-headlessly)
 
 ***
 
@@ -39,10 +40,10 @@ There are no dependencies to install the Desktop Application, although if you wa
 # Installing
 
 You can install Cypress in 2 different ways:
-* From a command line interface
-* By direct download
+* [Cypress CLI Tool](https://github.com/cypress-io/cypress-cli)
+* Direct download
 
-## Command Line
+## Command Line Tool
 
 ```shell
 ## install the Cypress CLI tool
@@ -57,14 +58,14 @@ cypress install
 [block:callout]
 {
   "type": "info",
-  "body": "There are many additional options and commands available to you. See [the Cypress CLI Docs](https://github.com/cypress-io/cypress-cli).",
+  "body": "The Cypress CLI Tool contains many additional options such as installing a specific Cypress version.\n\nSee [the Cypress CLI Docs](https://github.com/cypress-io/cypress-cli#installation).",
   "title": "Cypress CLI"
 }
 [/block]
 
 ## Direct Download
 
-You can download Cypress directly [here.](http://download.cypress.io/latest)
+You can download Cypress directly [here.](http://download.cypress.io/desktop)
 
 [block:callout]
 {
@@ -80,20 +81,43 @@ You can download Cypress directly [here.](http://download.cypress.io/latest)
 
 After installing, you will need to add the project(s) you want to write Cypress tests in.
 
-* Open the Cypress App -- just double click the app from you OS application's folder.
-* Authorize GitHub access to your account (**Note: this requires direct authorization from the Cypress team during Beta to allow your account email.**)
-* Add your project directory to Cypress by clicking :fa-plus:.
-* Click on the project. You should see a `Server Running` message.
-* Click on the `http://localhost:2020` link.
+- Open the Cypress App -- just double click the app from you OS application's folder.
+- Authorize GitHub access to your account**
+- Add your project directory to Cypress by clicking :fa-plus:.
+- Click on the project. You should see a `Server Running` message.
+- Click on the `http://localhost:2020` link.
+
+** *Note: this requires direct authorization from the Cypress team during Beta to allow your account email*
 
 ![project](https://cloud.githubusercontent.com/assets/1268976/9286780/adad94b8-42c9-11e5-9a67-df7abb87fac0.gif)
 
 After adding your project to Cypress, Cypress will generate a `cypress.json` file in your project:
 
 ```text
-/cypress.json
+<your project>/cypress.json
 ```
 
 This file contains your unique `projectId` and allows for specific Cypress [configuration](https://on.cypress.io/guides/configuration).
 
 It is okay to commit this file to `git`.
+
+***
+
+# Running Headlessly
+
+While you'll find yourself working primarily in the GUI, it is helpful to be able to run your tests headlessly.
+
+Once you have the [Cypress CLI Tool](https://github.com/cypress-io/cypress-cli) installed, you can simply execute:
+
+```bash
+cypress run
+```
+
+Additionally you can specify:
+
+- a single test file
+- a specific reporter
+- a different port
+- environment variables
+
+You can [read about all of these options](https://github.com/cypress-io/cypress-cli#cypress-run-1) which are documented on the Cypress CLI tool.
