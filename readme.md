@@ -1,4 +1,4 @@
-[![Circle CI](https://circleci.com/gh/cypress-io/cypress-app.svg?style=svg&circle-token=a6d67217ee174805c91925400b4210ada937def9)](https://circleci.com/gh/cypress-io/cypress-app)
+# Cypress App [![Circle CI](https://circleci.com/gh/cypress-io/cypress-app.svg?style=shield&circle-token=a6d67217ee174805c91925400b4210ada937def9)](https://circleci.com/gh/cypress-io/cypress-app)
 
 ## Docs / API
 

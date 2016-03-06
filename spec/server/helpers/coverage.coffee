@@ -7,8 +7,6 @@ coverageVar = coffeeCoverage.findIstanbulVariable()
 ## Only write a coverage report if we"re not running inside of Istanbul.
 writeOnExit = if coverageVar then null else projectRoot + "/coverage/coverage-coffee.json"
 
-console.log projectRoot
-
 coffeeCoverage.register({
   instrumentor: "istanbul"
   basePath: projectRoot
