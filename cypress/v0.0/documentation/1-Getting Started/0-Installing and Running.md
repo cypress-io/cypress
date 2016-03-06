@@ -45,14 +45,22 @@ You can install Cypress in 2 different ways:
 ## Command Line
 
 ```shell
-# install the Cypress CLI tool
+## install the Cypress CLI tool
 npm install -g cypress
 
-# install the Desktop Cypress app
+## install the Desktop Cypress app
 cypress install
 ```
 
 ![cypress-install](https://cloud.githubusercontent.com/assets/1268976/9279271/5c3826ba-4284-11e5-969b-91b0c27a8dee.gif)
+
+[block:callout]
+{
+  "type": "info",
+  "body": "There are many additional options and commands available to you. See [the Cypress CLI Docs](https://github.com/cypress-io/cypress-cli).",
+  "title": "Cypress CLI"
+}
+[/block]
 
 ## Direct Download
 
