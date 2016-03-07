@@ -375,7 +375,8 @@ describe "lib/cypress", ->
       })
 
       Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
+        ## make sure we have no user object
+        user.set({}),
 
         Project.add(@todosPath).then (id) =>
           @projectId = id

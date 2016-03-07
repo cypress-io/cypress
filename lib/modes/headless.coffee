@@ -144,10 +144,7 @@ module.exports = {
     })
 
   ready: (options = {}) ->
-    ## make sure we have a current session
-    user.ensureSession()
-
-    .then =>
+    ready = =>
       id = @getId()
 
       ## verify this is an added project
@@ -166,6 +163,12 @@ module.exports = {
           @runTests(project, id, url)
           .get("stats")
           .get("failures")
+
+    if options.ensureSession isnt false
+      ## make sure we have a current session
+      user.ensureSession().then(ready)
+    else
+      ready()
 
   run: (options) ->
     app = require("electron").app

@@ -194,7 +194,7 @@ describe "electron/ci", ->
       ci.run({projectPath: "path/to/project", key: "key-foo"}).then ->
         expect(ci.ensureProjectAPIToken).to.be.calledWith("id-123", "path/to/project", "key-foo")
 
-    it "calls headless.run + passes ci_guid into options", ->
+    it "calls headless.run + passes ci_guid + ensureSession into options", ->
       opts = {foo: "bar"}
       ci.run(opts).then ->
-        expect(headless.run).to.be.calledWith({foo: "bar", ci_guid: "guid-abc"})
+        expect(headless.run).to.be.calledWith({foo: "bar", ci_guid: "guid-abc", ensureSession: false})

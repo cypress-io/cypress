@@ -73,6 +73,8 @@ module.exports = {
     .then (id) =>
       @ensureProjectAPIToken(id, projectPath, options.key)
     .then (ciGuid) ->
+      ## dont check that the user is logged in
+      options.ensureSession = false
       options.ci_guid = ciGuid
       headless.run(options)
 }
