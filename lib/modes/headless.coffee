@@ -89,12 +89,19 @@ module.exports = {
   createRenderer: (url) ->
     Renderer.create({
       url:    url
-      width:  1280
-      height: 720
+      width:  0
+      height: 0
       show:   false
       frame:  false
       type:   "PROJECT"
     })
+    .then (win) ->
+      ## there is a bug in electron linux
+      ## which causes the window to open even
+      ## should show is false so we must 'hide'
+      ## the window again and then set its size
+      win.hide()
+      win.setSize(1280, 720)
 
   waitForRendererToConnect: (project, id) ->
     ## wait up to 10 seconds for the renderer
