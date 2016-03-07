@@ -9,7 +9,7 @@ idRe = /\s*\[.{3}\]/g
 module.exports = {
   files: (pathToTestFiles) ->
     new Promise (resolve, reject) ->
-      glob path.join(pathToTestFiles, "**", "*"), {nodir: true}, (err, files) ->
+      glob path.join(pathToTestFiles, "**", "*+(.js|.coffee)"), {nodir: true}, (err, files) ->
         reject(err) if err
 
         resolve(files)
