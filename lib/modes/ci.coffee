@@ -39,6 +39,9 @@ module.exports = {
       errors.throw("NOT_CI_ENVIRONMENT")
 
   ensureProjectAPIToken: (projectId, projectPath, key) ->
+    if not key
+      return errors.throw("CI_KEY_MISSING")
+
     repo = Promise.promisifyAll git(projectPath)
 
     Promise.props({

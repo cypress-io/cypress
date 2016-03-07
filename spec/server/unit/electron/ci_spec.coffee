@@ -169,7 +169,7 @@ describe "electron/ci", ->
     it "handles all other errors", ->
       api.createCiGuid.rejects(new Error)
 
-      ci.ensureProjectAPIToken()
+      ci.ensureProjectAPIToken(1,2,3)
       .then ->
         throw new Error("should have failed but did not")
       .catch (err) ->

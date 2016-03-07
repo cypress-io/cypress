@@ -420,6 +420,14 @@ describe "lib/cypress", ->
       cypress.start(["--run-project=#{@todosPath}", "--key=secret-key-123", "--ci"]).then =>
         @expectExitWithErr("CI_CANNOT_COMMUNICATE")
 
+    it "logs error and exits when ci key is missing", ->
+      err = new Error
+      err.statusCode = 401
+      @createCiGuid.rejects(err)
+
+      cypress.start(["--run-project=#{@todosPath}", "--ci"]).then =>
+        @expectExitWithErr("CI_KEY_MISSING")
+
   context "--return-pkg", ->
     beforeEach ->
       @sandbox.stub(console, "log")
