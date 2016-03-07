@@ -17,8 +17,8 @@ getObj = ->
 
   return {
     deploy: deploy
-
-    platform: deploy.getPlatform()
+    darwin: deploy.getPlatform("darwin")
+    linux:  deploy.getPlatform("linux")
 
     reload: ->
       for key of require.cache
