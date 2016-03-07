@@ -7,28 +7,30 @@ Promise = require("bluebird")
 meta    = require("./meta")
 Base    = require("./base")
 
+sign  = Promise.promisify(sign)
 fs    = Promise.promisifyAll(fs)
 
 class Darwin extends Base
-  buildPathToAppExecutable: ->
-    path.join meta.buildDir, @platform, "Cypress.app", "Contents", "MacOS", "Cypress"
-
   buildPathToAppFolder: ->
-    path.join meta.buildDir, @platform, "Cypress.app"
+    path.join meta.buildDir, @osName
 
-  verifyAppCanOpen: ->
-    @log("#verifyAppCanOpen")
+  buildPathToApp: ->
+    path.join @buildPathToAppFolder(), "Cypress.app"
 
-    new Promise (resolve) =>
-      sp = cp.spawn "spctl", ["-a", @buildPathToAppFolder()], {stdio: "inherit"}
-      sp.on "exit", (code) ->
-        if code is 0
-          resolve()
-        else
-          throw new Error("Verifying App via GateKeeper failed")
+  buildPathToZip: ->
+    path.join @buildPathToAppFolder(), @zipName
+
+  buildPathToAppExecutable: ->
+    path.join @buildPathToApp(), "Contents", "MacOS", "Cypress"
+
+  buildPathToAppResources: ->
+    path.join @buildPathToApp(), "Contents", "Resources", "app"
 
   runSmokeTest: ->
     @_runSmokeTest()
+
+  runProjectTest: ->
+    @_runProjectTest()
 
   afterBuild: (pathToBuilds) ->
     @log("#afterBuild")
@@ -57,18 +59,21 @@ class Darwin extends Base
     @log("#codeSign")
 
     sign({
-      app: @buildPathToAppFolder()
+      app: @buildPathToApp()
       platform: "darwin"
       verbose: true
     })
 
-    # new Promise (resolve, reject) =>
-    #   sp = child_process.spawn "sh", ["./support/codesign.sh", @buildPathToAppFolder()], {stdio: "inherit"}
-    #   sp.on "exit", (code) ->
-    #     if code is 0
-    #       resolve()
-    #     else
-    #       throw new Error("Code Signing failed.")
+  verifyAppCanOpen: ->
+    @log("#verifyAppCanOpen")
+
+    new Promise (resolve, reject) =>
+      sp = cp.spawn "spctl", ["-a", "-vvvv", @buildPathToApp()], {stdio: "inherit"}
+      sp.on "exit", (code) ->
+        if code is 0
+          resolve()
+        else
+          reject new Error("Verifying App via GateKeeper failed")
 
   deploy: ->
     @dist()

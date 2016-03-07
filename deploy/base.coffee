@@ -16,54 +16,34 @@ cypressIcons = require("cypress-icons")
 log          = require("./log")
 meta         = require("./meta")
 pkg          = require("../package.json")
+Fixtures     = require("../spec/server/helpers/fixtures")
 
-pkgr = Promise.promisify(pkgr)
-fs   = Promise.promisifyAll(fs)
+pkgr     = Promise.promisify(pkgr)
+fs       = Promise.promisifyAll(fs)
+zipName  = "cypress.zip"
 
 class Base
-  constructor: (@platform, @options = {}) ->
+  constructor: (os, @options = {}) ->
     _.defaults @options,
-      runTests:         true
+    #   runTests:         true
       version:          null
-      publisher:        null
-      publisherOptions: {}
-      platform:         @platform
+    #   publisher:        null
+    #   publisherOptions: {}
+      # platform:         platform
 
-  getLatestChromiumVersion: ->
-    requestPromise(config.app.chromium_manifest_url, {json: true})
-    .promise()
-    .get("version")
+    @zipName      = zipName
+    @osName       = os
+    @uploadName   = @getUploadNameByOs(os)
 
-  untarChromium: (pathToChromiumFile) ->
-    @log("#untar")
+  getUploadNameByOs: (os) ->
+    {
+      darwin: "osx64"
+      linux:  "linux64"
+      win32:  "win64"
+    }[os]
 
-    ## read from chromium.tar.gz and untar
-    ## and extract into ./bin/chromium
-    rs = fs.createReadStream(pathToChromiumFile)
-    .pipe(zlib.createGunzip())
-    .pipe(tar.extract(@buildPathToChromiumDir()))
-
-    stp(rs)
-
-  downloadChromium: (pathToChromiumFile) ->
-    @log("#downloadChromium")
-
-    osName = switch @platform
-      when "osx64"    then "mac"
-      when "linux64"  then "linux64"
-
-    url = config.app.chromium_url + "?os=#{osName}"
-
-    dir = path.dirname(pathToChromiumFile)
-
-    fs.ensureDirAsync(dir).then =>
-      ## go download chromium
-      r = request(url)
-
-      ## store this in tar in the cache
-      .pipe(fs.createWriteStream(pathToChromiumFile))
-
-      stp(r).return(pathToChromiumFile)
+  getVersion: ->
+    @options.version ? fs.readJsonSync(@distDir("package.json")).version
 
   copyFiles: ->
     @log("#copyFiles")
@@ -135,7 +115,7 @@ class Base
         .on "error", reject
 
   distDir: (src) ->
-    args = _.compact [meta.distDir, @platform, src]
+    args = _.compact [meta.distDir, @osName, src]
     path.join args...
 
   obfuscate: ->
@@ -167,7 +147,7 @@ class Base
   cleanupPlatform: ->
     @log("#cleanupPlatform")
 
-    fs.removeAsync path.join(meta.buildDir, @platform)
+    fs.removeAsync path.join(meta.buildDir, @osName)
 
   ## add tests around this method
   updatePackage: ->
@@ -216,7 +196,7 @@ class Base
         dir: @distDir()
         out: meta.buildDir
         name: "Cypress"
-        platform: @platform
+        platform: @osName
         arch: "x64"
         asar: false
         prune: true
@@ -268,6 +248,46 @@ class Base
       runSequence "client:build", "client:minify", (err) ->
         if err then reject(err) else resolve()
 
+  createCyCache: (todosProject) ->
+    cache = path.join(@buildPathToAppResources(), ".cy", "production", "cache")
+
+    fs.outputJsonAsync(cache, {
+      USER: {session_token: "abc123"}
+      PROJECTS: {
+        ## hard code the todos project id for now
+        "e3e58d3f-3769-4b50-af38-e31b8989a938": {
+          PATH: todosProject
+        }
+      }
+    })
+
+  removeCyCache: ->
+    ## empty the .cy/production folder
+    cache = path.join(@buildPathToAppResources(), ".cy", "production")
+
+    fs.emptyDirAsync(cache)
+
+  _runProjectTest: ->
+    Fixtures.scaffold()
+
+    todos = Fixtures.projectPath("todos")
+
+    runProjectTest = =>
+      new Promise (resolve, reject) =>
+        sp = cp.spawn @buildPathToAppExecutable(), ["--run-project=#{todos}"], {stdio: "inherit"}
+        sp.on "exit", (code) ->
+          Fixtures.remove()
+
+          if code is 0
+            resolve()
+          else
+            reject(new Error("running project tests failed with: '#{code}' errors."))
+
+    @createCyCache(todos)
+    .then(runProjectTest)
+    .then =>
+      @removeCyCache()
+
   _runSmokeTest: ->
     @log("#runSmokeTest")
 
@@ -312,19 +332,21 @@ class Base
 
   build: ->
     Promise.bind(@)
-    # .then(@cleanupPlatform)
-    # .then(@gulpBuild)
-    # .then(@copyFiles)
-    # .then(@updatePackage)
-    # .then(@convertToJs)
-    # .then(@obfuscate)
-    # .then(@cleanupSrc)
-    # .then(@npmInstall)
-    # .then(@elBuilder)
-    # .then(@renameBuilds)
-    # .then(@afterBuild)
-    # .then(@runSmokeTest)
-    # .then(@codeSign) ## codesign after running smoke tests due to changing .cy
+    .then(@cleanupPlatform)
+    .then(@gulpBuild)
+    .then(@copyFiles)
+    .then(@updatePackage)
+    .then(@convertToJs)
+    .then(@obfuscate)
+    .then(@cleanupSrc)
+    .then(@npmInstall)
+    .then(@npmInstall)
+    .then(@elBuilder)
+    .then(@renameBuilds)
+    .then(@afterBuild)
+    .then(@runSmokeTest)
+    .then(@runProjectTest)
+    .then(@codeSign) ## codesign after running smoke tests due to changing .cy
     .then(@verifyAppCanOpen)
 
   dist: ->
