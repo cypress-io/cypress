@@ -120,7 +120,7 @@ module.exports = {
       verify: false
       detached: false
       xvfb: os.platform() is "linux"
-      stdio: ["ignore", process.stdout, "ignore"]
+      stdio: [process.stdin, process.stdout, "ignore"]
 
     spawn = =>
       @verifyCypress().then (pathToCypress) =>
