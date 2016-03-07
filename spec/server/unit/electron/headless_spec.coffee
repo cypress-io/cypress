@@ -103,18 +103,28 @@ describe "electron/headless", ->
 
   context ".createRenderer", ->
     beforeEach ->
-      @create = @sandbox.stub(Renderer, "create").resolves()
+      @win    = @sandbox.stub({
+        hide: ->
+        setSize: ->
+      })
+
+      @create = @sandbox.stub(Renderer, "create").resolves(@win)
 
     it "calls Renderer.create with url + options", ->
       headless.createRenderer("foo/bar/baz").then =>
         expect(@create).to.be.calledWith({
           url: "foo/bar/baz"
-          width: 1280
-          height: 720
+          width: 0
+          height: 0
           show: false
           frame: false
           type: "PROJECT"
         })
+
+    it "calls win.hide + win.setSize on the resolved window", ->
+      headless.createRenderer("foo/bar/baz").then =>
+        expect(@win.hide).to.be.calledOnce
+        expect(@win.setSize).to.be.calledWith(1280, 720)
 
   context ".waitForRendererToConnect", ->
     it "resolves on waitForSocketConnection", ->
