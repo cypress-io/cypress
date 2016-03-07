@@ -14,9 +14,6 @@ class Darwin extends Base
   buildPathToApp: ->
     path.join @buildPathToAppFolder(), "Cypress.app"
 
-  buildPathToZip: ->
-    path.join @buildPathToAppFolder(), @zipName
-
   buildPathToAppExecutable: ->
     path.join @buildPathToApp(), "Contents", "MacOS", "Cypress"
 

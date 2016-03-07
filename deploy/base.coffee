@@ -38,6 +38,9 @@ class Base
   buildPathToAppFolder: ->
     path.join meta.buildDir, @osName
 
+  buildPathToZip: ->
+    path.join @buildPathToAppFolder(), @zipName
+
   getUploadNameByOs: (os) ->
     {
       darwin: "osx64"
