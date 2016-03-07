@@ -1,34 +1,51 @@
+fs      = require("fs")
+path    = require("path")
+Xvfb    = require("xvfb")
+Promise = require("bluebird")
 Base    = require("./base")
+
+fs = Promise.promisifyAll(fs)
 
 class Linux extends Base
   buildPathToApp: ->
-    path.join buildDir, @getVersion(), @platform, "Cypress", "Cypress"
+    path.join @buildPathToAppFolder(), "Cypress"
 
-  buildPathToChromium: ->
-    path.join @buildPathToChromiumDir(), "Chromium"
+  buildPathToAppExecutable: ->
+    path.join @buildPathToApp(), "Cypress"
 
-  buildPathToChromiumDir: ->
-    path.join buildDir, @getVersion(), @platform, "Cypress", "bin", "chromium"
+  buildPathToAppResources: ->
+    path.join @buildPathToApp(), "resources", "app"
 
   codeSign: ->
     Promise.resolve()
 
-  runSmokeTest: ->
+  getBuildDest: (pathToBuild, platform) ->
+    ## returns ./build/linux/Cypress
+    path.join path.dirname(pathToBuild), platform, "Cypress"
+
+  afterBuild: (pathToBuilds) ->
+    return Promise.resolve()
+
+  runProjectTest: ->
+    @_runProjectTest()
+    .catch (err) =>
+      @tryXvfb(@_runProjectTest)
+
+  tryXvfb: (p) ->
     xvfb = new Xvfb()
     xvfb = Promise.promisifyAll(xvfb)
-    xvfb.startAsync().then (xvfxProcess) =>
-      @_runSmokeTest().then ->
+    xvfb.startAsync()
+    .then (xvfxProcess) =>
+      Promise.bind(@).try(p)
+      .finally ->
         xvfb.stopAsync()
 
-  nwBuilder: ->
-    src    = path.join(buildDir, @getVersion(), @platform)
-    dest   = path.join(buildDir, @getVersion(), "Cypress")
-    mvDest = path.join(buildDir, @getVersion(), @platform, "Cypress")
-
-    super.then ->
-      fs.renameAsync(src, dest).then ->
-        fs.ensureDirAsync(src).then ->
-          fs.moveAsync(dest, mvDest, {clobber: true})
+  runSmokeTest: ->
+    ## if we fail assume perhaps
+    ## its due to not starting xvfb
+    @_runSmokeTest()
+    .catch =>
+      @tryXvfb(@_runSmokeTest)
 
   npm: ->
     new Promise (resolve, reject) ->

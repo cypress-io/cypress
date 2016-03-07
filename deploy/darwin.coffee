@@ -11,9 +11,6 @@ sign  = Promise.promisify(sign)
 fs    = Promise.promisifyAll(fs)
 
 class Darwin extends Base
-  buildPathToAppFolder: ->
-    path.join meta.buildDir, @osName
-
   buildPathToApp: ->
     path.join @buildPathToAppFolder(), "Cypress.app"
 
@@ -32,12 +29,16 @@ class Darwin extends Base
   runProjectTest: ->
     @_runProjectTest()
 
-  afterBuild: (pathToBuilds) ->
+  getBuildDest: (pathToBuild, platform) ->
+    ## returns ./build/darwin
+    path.join path.dirname(pathToBuild), platform
+
+  afterBuild: (pathToBuild) ->
     @log("#afterBuild")
 
     Promise.all([
-      @renameExecutable(pathToBuilds[0])
-      @modifyPlist(pathToBuilds[0])
+      @renameExecutable(pathToBuild)
+      @modifyPlist(pathToBuild)
     ])
 
   renameExecutable: (pathToBuild) ->

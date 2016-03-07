@@ -35,6 +35,9 @@ class Base
     @osName       = os
     @uploadName   = @getUploadNameByOs(os)
 
+  buildPathToAppFolder: ->
+    path.join meta.buildDir, @osName
+
   getUploadNameByOs: (os) ->
     {
       darwin: "osx64"
@@ -206,6 +209,18 @@ class Base
         "app-version": json.version
       })
 
+  renameBuild: (pathToBuilds = []) ->
+    @log("#renameBuild")
+
+    src = pathToBuilds[0]
+
+    ## grab the platform between 'Cypress-darwin-x64'
+    platform = path.basename(src).split("-").slice(1, 2).join("")
+    dest     = @getBuildDest(src, platform)
+
+    fs.ensureDirAsync(dest).then ->
+      fs.moveAsync(src, dest, {clobber: true}).return(dest)
+
   uploadFixtureToS3: ->
     @log("#uploadFixtureToS3")
 
@@ -268,6 +283,8 @@ class Base
     fs.emptyDirAsync(cache)
 
   _runProjectTest: ->
+    @log("#runProjectTest")
+
     Fixtures.scaffold()
 
     todos = Fixtures.projectPath("todos")
@@ -322,14 +339,6 @@ class Base
 
     smokeTest().then(verifyAppPackage)
 
-  renameBuilds: (pathToBuilds = []) ->
-    Promise.map pathToBuilds, (build) ->
-      ## grab the platform between 'Cypress-darwin-x64'
-      platform = path.basename(build).split("-").slice(1, 2).join("")
-      dest = path.join(path.dirname(build), platform)
-
-      fs.moveAsync(build, dest, {clobber: true}).return(dest)
-
   build: ->
     Promise.bind(@)
     .then(@cleanupPlatform)
@@ -342,7 +351,7 @@ class Base
     .then(@npmInstall)
     .then(@npmInstall)
     .then(@elBuilder)
-    .then(@renameBuilds)
+    .then(@renameBuild)
     .then(@afterBuild)
     .then(@runSmokeTest)
     .then(@runProjectTest)
