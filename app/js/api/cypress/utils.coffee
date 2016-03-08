@@ -177,7 +177,7 @@ $Cypress.Utils = do ($Cypress, _) ->
           ## if we have more than one element,
           ## format it so that the user can see there's more
           if $el.length > 1
-            "[<#{str}>, ...]"
+            "[ <#{str}>, #{$el.length - 1} more... ]"
           else
             "<#{str}>"
 
