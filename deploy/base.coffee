@@ -153,7 +153,10 @@ class Base
   cleanupPlatform: ->
     @log("#cleanupPlatform")
 
-    fs.removeAsync path.join(meta.buildDir, @osName)
+    cleanup = =>
+      fs.removeAsync path.join(meta.buildDir, @osName)
+
+    cleanup().catch(cleanup)
 
   ## add tests around this method
   updatePackage: ->
