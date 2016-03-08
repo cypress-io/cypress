@@ -29,8 +29,8 @@ describe "lib/util/args", ->
     it "sets x and y", ->
       options = @setup("--coords=800x600")
       expect(options.coords).to.deep.eq({
-        x: "800"
-        y: "600"
+        x: 800
+        y: 600
       })
 
   context "--port", ->
