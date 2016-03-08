@@ -46,3 +46,34 @@ describe "lib/util/args", ->
         version: "0.12.1"
         host: "localhost:8888"
       })
+
+  context ".toArray", ->
+    beforeEach ->
+      @obj = {coords: {x: 1, y: 2}, _coords: "1x2", project: "foo/bar"}
+
+    it "rejects values which have an cooresponding underscore'd key", ->
+      expect(argsUtil.toArray(@obj)).to.deep.eq(["--project=foo/bar", "--coords=1x2"])
+
+  context ".toObject", ->
+    beforeEach ->
+      @obj = @setup("--get-key", "--coords=1x2", "--env=foo=bar,baz=quux")
+
+    it "backs up coords + environmentVariables", ->
+      expect(@obj).to.deep.eq({
+        _: []
+        env: process.env.NODE_ENV
+        "get-key": true
+        getKey: true
+        _coords: "1x2"
+        coords: {x: 1, y: 2}
+        _environmentVariables: "foo=bar,baz=quux"
+        environmentVariables: {
+          foo: "bar"
+          baz: "quux"
+        }
+      })
+
+    it "can transpose back to an array", ->
+      expect(argsUtil.toArray(@obj)).to.deep.eq([
+        "--getKey=true", "--coords=1x2", "--environmentVariables=foo=bar,baz=quux"
+      ])

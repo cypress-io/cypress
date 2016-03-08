@@ -6,7 +6,7 @@ cwd      = require("../cwd")
 whitelist = "appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter ci updating ping coords key logs clearLogs port returnPkg environmentVariables getChromiumVersion mode autoOpen removeIds".split(" ")
 
 parseCoords = (coords) ->
-  [x, y] = coords.split("x")
+  [x, y] = _.map(coords.split("x"), parseFloat)
   {x: x, y: y}
 
 parseEnv = (envs) ->
@@ -15,6 +15,13 @@ parseEnv = (envs) ->
   _(envs.split(",")).map (pair) ->
     pair.split("=")
   .object().value()
+
+backup = (key, options) ->
+  options["_#{key}"] = options[key]
+
+anyUnderscoredValuePairs = (val, key, obj) ->
+  return v if v = obj["_#{key}"]
+  return val
 
 module.exports = {
   toObject: (argv) ->
@@ -43,9 +50,11 @@ module.exports = {
     }
 
     if options.coords
+      backup("coords", options)
       options.coords = parseCoords(options.coords)
 
     if envs = options.environmentVariables
+      backup("environmentVariables", options)
       options.environmentVariables = parseEnv(envs)
 
     ## normalize runProject or project to projectPath
@@ -63,6 +72,7 @@ module.exports = {
     ## only the whitelisted properties and
     ## mapping them to include the argument
     _.chain(obj)
+    .mapValues(anyUnderscoredValuePairs)
     .pick(whitelist...)
     .mapValues (val, key) ->
       "--#{key}=#{val}"
