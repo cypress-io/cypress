@@ -49,6 +49,16 @@ module.exports = {
       env: process.env["CYPRESS_ENV"]
     }
 
+    ## if we are updating we may have to pluck out the
+    ## appPath + execPath from the options._ because
+    ## in previous versions up until 0.14.0 these args
+    ## were not passed as dashes and instead were just
+    ## regular arguments
+    if options.updating and not options.appPath
+      ## take the last two arguments that were unknown
+      ## and apply them to both appPath + execPath
+      [options.appPath, options.execPath] = options._.slice(-2)
+
     if options.coords
       backup("coords", options)
       options.coords = parseCoords(options.coords)

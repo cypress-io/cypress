@@ -77,3 +77,58 @@ describe "lib/util/args", ->
       expect(argsUtil.toArray(@obj)).to.deep.eq([
         "--getKey=true", "--coords=1x2", "--environmentVariables=foo=bar,baz=quux"
       ])
+
+  context "--updating", ->
+
+    ## updating from 0.13.9 will omit the appPath + execPath so we must
+    ## handle these missing arguments manually
+    it "slurps up appPath + execPath if updating and these are omitted", ->
+      argv = [
+        "/private/var/folders/wr/3xdzqnq16lz5r1j_xtl443580000gn/T/cypress/Cypress.app/Contents/MacOS/Cypress"
+        "/Applications/Cypress.app"
+        "/Applications/Cypress.app"
+        "--updating"
+        "--coords=1287x30"
+      ]
+
+      expect(argsUtil.toObject(argv)).to.deep.eq({
+        _: [
+          "/private/var/folders/wr/3xdzqnq16lz5r1j_xtl443580000gn/T/cypress/Cypress.app/Contents/MacOS/Cypress"
+          "/Applications/Cypress.app"
+          "/Applications/Cypress.app"
+        ]
+        env: process.env.NODE_ENV
+        appPath: "/Applications/Cypress.app"
+        execPath: "/Applications/Cypress.app"
+        updating: true
+        _coords: "1287x30"
+        coords: {x: 1287, y: 30}
+      })
+
+    it "does not slurp up appPath + execPath if updating and these are already present in args", ->
+      argv = [
+        "/private/var/folders/wr/3xdzqnq16lz5r1j_xtl443580000gn/T/cypress/Cypress.app/Contents/MacOS/Cypress"
+        "/Applications/Cypress.app1"
+        "/Applications/Cypress.app2"
+        "--app-path=a"
+        "--exec-path=e"
+        "--updating"
+        "--coords=1287x30"
+      ]
+
+      expect(argsUtil.toObject(argv)).to.deep.eq({
+        _: [
+          "/private/var/folders/wr/3xdzqnq16lz5r1j_xtl443580000gn/T/cypress/Cypress.app/Contents/MacOS/Cypress"
+          "/Applications/Cypress.app1"
+          "/Applications/Cypress.app2"
+        ]
+        env: process.env.NODE_ENV
+        appPath: "a"
+        execPath: "e"
+        "app-path": "a"
+        "exec-path": "e"
+        updating: true
+        _coords: "1287x30"
+        coords: {x: 1287, y: 30}
+      })
+
