@@ -1,13 +1,16 @@
 _             = require("lodash")
+os            = require("os")
 fs            = require("fs-extra")
+cp            = require("child_process")
 chalk         = require("chalk")
 path          = require("path")
 request       = require("request")
 progress      = require("request-progress")
 ProgressBar   = require("progress")
 through2      = require("through2")
+readline      = require("readline")
 yauzl         = require("yauzl")
-Decompress    = require("decompress")
+extract       = require("extract-zip")
 Promise       = require("bluebird")
 url           = require("url")
 utils         = require("../utils")
@@ -33,6 +36,7 @@ class Install
       throttle:       100
       zipDestination: "./cypress.zip"
       destination:    utils.getDefaultAppFolder()
+      executable:     utils.getPathToUserExecutable()
       after:          ->
 
     return if not options.initialize
@@ -76,8 +80,8 @@ class Install
       u = url.resolve(baseUrl, u)
 
       ## append os to url
-      if os = utils.getOs()
-        "#{u}?os=#{os}"
+      if o = utils.getOs()
+        "#{u}?os=#{o}"
       else
         u
 
@@ -152,40 +156,88 @@ class Install
         resolve(options)
 
   unzip: (options) ->
-    new Promise (resolve, reject) ->
+    unzip = ->
+      new Promise (resolve, reject) ->
 
-      ascii = [
-        chalk.white("  -")
-        chalk.blue("Unzipping Cypress  ")
-        chalk.yellow("[:bar]")
-        chalk.white(":percent")
-        chalk.gray(":etas")
-      ]
+        ascii = [
+          chalk.white("  -")
+          chalk.blue("Unzipping Cypress  ")
+          chalk.yellow("[:bar]")
+          chalk.white(":percent")
+          chalk.gray(":etas")
+        ]
 
-      yauzl.open options.zipDestination, (err, zipFile) ->
-        return reject(err) if err
+        yauzl.open options.zipDestination, (err, zipFile) ->
+          return reject(err) if err
 
-        count = 0
-        total = Math.floor(zipFile.entryCount / 500)
+          count = 0
+          total = Math.floor(zipFile.entryCount / 500)
 
-        bar = new ProgressBar(ascii.join(" "), {
-          total: total
-          width: options.width
-        })
+          bar = new ProgressBar(ascii.join(" "), {
+            total: total
+            width: options.width
+          })
 
-        new Decompress()
-          .src(options.zipDestination)
-          .dest(options.destination)
-          .use(Decompress.zip())
-          .use through2.obj (file, enc, cb) ->
+          tick = ->
             count += 1
             if count % 500 is 0
               bar.tick(1)
-            cb(null, file)
-          .run (err, files) ->
-            return reject(err) if err
 
-            resolve()
+          ## we attempt to first unzip with the native osx
+          ## ditto because its less likely to have problems
+          ## with corruption, symlinks, or icons causing failures
+          ## and can handle resource forks
+          ## http://automatica.com.au/2011/02/unzip-mac-os-x-zip-in-terminal/
+          unzipWithOsx = ->
+            copyingFileRe = /^copying file/
+
+            sp = cp.spawn "ditto", ["-xkV", options.zipDestination, options.destination]
+            sp.on "error", ->
+              # f-it just unzip with node
+              unzipWithNode()
+
+            sp.on "exit", (code) ->
+              if code is 0
+                ## make sure we get to 100% on the progress bar
+                ## because reading in lines is not really accurate
+                bar.tick(100)
+
+                resolve()
+              else
+                reject()
+
+            readline.createInterface({
+              input: sp.stderr
+            })
+            .on "line", (line) ->
+              if copyingFileRe.test(line)
+                tick()
+
+          unzipWithNode = ->
+            endFn = (err) ->
+              return reject(err) if err
+
+              resolve()
+
+            obj = {
+              dir: options.destination
+              onEntry: tick
+            }
+
+            extract(options.zipDestination, obj, endFn)
+
+          switch os.platform()
+            when "darwin"
+              unzipWithOsx()
+            when "linux"
+              unzipWithNode()
+
+    ## blow away the executable if its found
+    fs.statAsync(options.executable)
+    .then ->
+      fs.removeAsync(options.executable)
+    .then(unzip)
+    .catch(unzip)
 
   cleanupZip: (options) ->
     fs.removeAsync(options.zipDestination)
