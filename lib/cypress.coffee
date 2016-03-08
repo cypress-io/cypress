@@ -6,6 +6,7 @@ path      = require("path")
 Promise   = require("bluebird")
 api       = require("./api")
 logs      = require("./electron/handlers/logs")
+logger    = require("./logger")
 errors    = require("./errors")
 Project   = require("./project")
 argsUtil  = require("./util/args")
@@ -104,6 +105,8 @@ module.exports = {
       require("open")("http://127.0.0.1:8080/debug?ws=127.0.0.1:8080&port=5858")
 
   start: (argv = []) ->
+    logger.info("starting desktop app", args: argv)
+
     options = argsUtil.toObject(argv)
 
     ## else determine the mode by
