@@ -230,9 +230,6 @@ describe "lib/electron/handlers/events", ->
         @handleEvent("updater:run")
         @expectSendCalledWith({event: "download", version: "0.14.0"})
 
-    describe "update", ->
-      it.skip "does something"
-
   context "logo src", ->
     describe "get:about:logo:src", ->
       it "returns path to icon", ->

@@ -367,7 +367,7 @@ describe "$Cypress.Cy API", ->
 
         @cy.noop()
 
-      it.skip "does not reset the timeout on completion when a runnable has a state already", (done) ->
+      it "does not reset the timeout on completion when a runnable has a state already", (done) ->
         ## this happens when using a (done) callback
         ## and using cy commands at the same time!
         ## because mocha detects the test is async
@@ -375,10 +375,17 @@ describe "$Cypress.Cy API", ->
         ## which means our test receives a state
         ## immediately when the done() is called
         @cy.on "command:start", =>
+          @_t = @sandbox.spy @cy, "_timeout"
           @ct = @sandbox.spy @cy.private("runnable"), "clearTimeout"
 
         @cy.on "command:end", =>
-          expect(@ct.callCount).to.eq 0
+          ## we changed cy.then to do a clearTimeout
+          ## so we expect that to be 1, but not 2
+          ## and we expect @_timeout() to be called once
+          ## but with zero arguments
+          expect(@_t.args[0].length).eq 0
+          expect(@_t.callCount).to.eq 1
+          expect(@ct.callCount).to.eq 1
 
           ## clear the state again else the function done()
           ## inside of mocha (runnable.run) will return

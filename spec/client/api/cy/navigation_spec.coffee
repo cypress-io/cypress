@@ -405,7 +405,7 @@ describe "$Cypress.Cy Navigation Commands", ->
 
     it "clears current timeout"
 
-    it.skip "clears current cy subject", ->
+    it "clears current cy subject", ->
       input = @cy.$$("form#click-me input")
 
       @cy.get("form#click-me").find("input").click().then (subject) ->
