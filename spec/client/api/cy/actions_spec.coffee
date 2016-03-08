@@ -2236,10 +2236,47 @@ describe "$Cypress.Cy Actions Commands", ->
 
   context "#check", ->
     it "does not change the subject", ->
-      checkboxes = "[name=colors]"
-      inputs = @cy.$$(checkboxes)
-      @cy.get(checkboxes).check().then ($inputs) ->
-        expect($inputs).to.match(inputs)
+      inputs = @cy.$$("[name=colors]")
+
+      @cy.get("[name=colors]").check().then ($inputs) ->
+        expect($inputs.length).to.eq(3)
+        expect($inputs.toArray()).to.deep.eq(inputs.toArray())
+
+    it "changes the subject if specific value passed to check", ->
+      checkboxes = @cy.$$("[name=colors]")
+
+      @cy.get("[name=colors]").check(["blue", "red"]).then ($chk) ->
+        expect($chk.length).to.eq(2)
+
+        blue = checkboxes.filter("[value=blue]")
+        red  = checkboxes.filter("[value=red]")
+
+        expect($chk.get(0)).to.eq(blue.get(0))
+        expect($chk.get(1)).to.eq(red.get(0))
+
+    it "filters out values which were not found", ->
+      checkboxes = @cy.$$("[name=colors]")
+
+      @cy.get("[name=colors]").check(["blue", "purple"]).then ($chk) ->
+        expect($chk.length).to.eq(1)
+
+        blue = checkboxes.filter("[value=blue]")
+
+        expect($chk.get(0)).to.eq(blue.get(0))
+
+    it "changes the subject when matching values even if noop", ->
+      checked = $("<input type='checkbox' name='colors' value='blue' checked>")
+      @cy.$$("[name=colors]").parent().append(checked)
+
+      checkboxes = @cy.$$("[name=colors]")
+
+      @cy.get("[name=colors]").check("blue").then ($chk) ->
+        expect($chk.length).to.eq(2)
+
+        blue = checkboxes.filter("[value=blue]")
+
+        expect($chk.get(0)).to.eq(blue.get(0))
+        expect($chk.get(1)).to.eq(blue.get(1))
 
     it "checks a checkbox", ->
       @cy.get(":checkbox[name='colors'][value='blue']").check().then ($checkbox) ->
@@ -2551,7 +2588,7 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@log.get("snapshots")[1].name).to.eq("after")
           expect(@log.get("snapshots")[1].state).to.be.an("object")
 
-      it "logs only 1 check event", ->
+      it "logs only 1 check event on click of 1 checkbox", ->
         logs = []
         checks = []
 
@@ -2562,6 +2599,42 @@ describe "$Cypress.Cy Actions Commands", ->
         @cy.get("[name=colors][value=blue]").check().then ->
           expect(logs).to.have.length(2)
           expect(checks).to.have.length(1)
+
+      it "logs only 1 check event on click of 1 radio", ->
+        logs = []
+        radios = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+          radios.push(log) if log.get("name") is "check"
+
+        @cy.get("[name=gender][value=female]").check().then ->
+          expect(logs).to.have.length(2)
+          expect(radios).to.have.length(1)
+
+      it "logs only 1 check event on checkbox with 1 matching value arg", ->
+        logs = []
+        checks = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+          checks.push(log) if log.get("name") is "check"
+
+        @cy.get("[name=colors]").check("blue").then ->
+          expect(logs).to.have.length(2)
+          expect(checks).to.have.length(1)
+
+      it "logs only 1 check event on radio with 1 matching value arg", ->
+        logs = []
+        radios = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+          radios.push(log) if log.get("name") is "check"
+
+        @cy.get("[name=gender]").check("female").then ->
+          expect(logs).to.have.length(2)
+          expect(radios).to.have.length(1)
 
       it "passes in $el", ->
         @cy.get("[name=colors][value=blue]").check().then ($input) ->
@@ -2586,7 +2659,31 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(console.Coords).to.deep.eq coords
 
       it "#onConsole when checkbox is already checked", ->
-        @cy.get("[name=colors][value=blue]").check().check().then ($input) ->
+        @cy.get("[name=colors][value=blue]").invoke("prop", "checked", true).check().then ($input) ->
+          expect(@log.get("coords")).to.be.undefined
+          expect(@log.attributes.onConsole()).to.deep.eq {
+            Command: "check"
+            "Applied To": @log.get("$el").get(0)
+            Elements: 1
+            Note: "This checkbox was already checked. No operation took place."
+            Options: undefined
+          }
+
+      it "#onConsole when radio is already checked", ->
+        @cy.get("[name=gender][value=male]").check().check().then ($input) ->
+          expect(@log.get("coords")).to.be.undefined
+          expect(@log.attributes.onConsole()).to.deep.eq {
+            Command: "check"
+            "Applied To": @log.get("$el").get(0)
+            Elements: 1
+            Note: "This radio was already checked. No operation took place."
+            Options: undefined
+          }
+
+      it "#onConsole when checkbox with value is already checked", ->
+        @cy.$$("[name=colors][value=blue]").prop("checked", true)
+
+        @cy.get("[name=colors]").check("blue").then ($input) ->
           expect(@log.get("coords")).to.be.undefined
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "check"
@@ -2602,14 +2699,57 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(@log.attributes.onConsole().Options).to.deep.eq {force: true, timeout: 1000}
 
   context "#uncheck", ->
+    it "does not change the subject", ->
+      inputs = @cy.$$("[name=birds]")
+
+      @cy.get("[name=birds]").uncheck().then ($inputs) ->
+        expect($inputs.length).to.eq(2)
+        expect($inputs.toArray()).to.deep.eq(inputs.toArray())
+
+    it "changes the subject if specific value passed to check", ->
+      checkboxes = @cy.$$("[name=birds]")
+
+      @cy.get("[name=birds]").check(["cockatoo", "amazon"]).then ($chk) ->
+        expect($chk.length).to.eq(2)
+
+        cockatoo = checkboxes.filter("[value=cockatoo]")
+        amazon   = checkboxes.filter("[value=amazon]")
+
+        expect($chk.get(0)).to.eq(cockatoo.get(0))
+        expect($chk.get(1)).to.eq(amazon.get(0))
+
+    it "filters out values which were not found", ->
+      checkboxes = @cy.$$("[name=birds]")
+
+      @cy.get("[name=birds]").check(["cockatoo", "parrot"]).then ($chk) ->
+        expect($chk.length).to.eq(1)
+
+        cockatoo = checkboxes.filter("[value=cockatoo]")
+
+        expect($chk.get(0)).to.eq(cockatoo.get(0))
+
+    it "changes the subject when matching values even if noop", ->
+      checked = $("<input type='checkbox' name='birds' value='cockatoo'>")
+      @cy.$$("[name=birds]").parent().append(checked)
+
+      checkboxes = @cy.$$("[name=birds]")
+
+      @cy.get("[name=birds]").check("cockatoo").then ($chk) ->
+        expect($chk.length).to.eq(2)
+
+        cockatoo = checkboxes.filter("[value=cockatoo]")
+
+        expect($chk.get(0)).to.eq(cockatoo.get(0))
+        expect($chk.get(1)).to.eq(cockatoo.get(1))
+
     it "unchecks a checkbox", ->
       @cy.get("[name=birds][value=cockatoo]").uncheck().then ($checkbox) ->
         expect($checkbox).not.to.be.checked
 
     it "unchecks a checkbox by value", ->
-      @cy.get("[name=birds]").uncheck("cockatoo").then ($checkboxes) ->
-        expect($checkboxes.filter(":checked").length).to.eq 1
-        expect($checkboxes.filter("[value=cockatoo]")).not.to.be.checked
+      @cy.get("[name=birds]").uncheck("cockatoo").then ($checkbox) ->
+        expect($checkbox.filter(":checked").length).to.eq 0
+        expect($checkbox.filter("[value=cockatoo]")).not.to.be.checked
 
     it "unchecks multiple checkboxes by values", ->
       @cy.get("[name=birds]").uncheck(["cockatoo", "amazon"]).then ($checkboxes) ->
@@ -2848,7 +2988,7 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get(":checkbox:first").check().uncheck()
 
-      it "snapshots before clicking", (done) ->
+      it "snapshots before unchecking", (done) ->
         @cy.$$(":checkbox:first").change =>
           expect(@log.get("snapshots").length).to.eq(1)
           expect(@log.get("snapshots")[0].name).to.eq("before")
@@ -2857,13 +2997,13 @@ describe "$Cypress.Cy Actions Commands", ->
 
         @cy.get(":checkbox:first").invoke("prop", "checked", true).uncheck()
 
-      it "snapshots after clicking", ->
+      it "snapshots after unchecking", ->
         @cy.get(":checkbox:first").invoke("prop", "checked", true).uncheck().then ->
           expect(@log.get("snapshots").length).to.eq(2)
           expect(@log.get("snapshots")[1].name).to.eq("after")
           expect(@log.get("snapshots")[1].state).to.be.an("object")
 
-      it "logs only 1 check event", ->
+      it "logs only 1 uncheck event", ->
         logs = []
         unchecks = []
 
@@ -2872,6 +3012,18 @@ describe "$Cypress.Cy Actions Commands", ->
           unchecks.push(log) if log.get("name") is "uncheck"
 
         @cy.get("[name=colors][value=blue]").uncheck().then ->
+          expect(logs).to.have.length(2)
+          expect(unchecks).to.have.length(1)
+
+      it "logs only 1 uncheck event on uncheck with 1 matching value arg", ->
+        logs = []
+        unchecks = []
+
+        @Cypress.on "log", (log) ->
+          logs.push(log)
+          unchecks.push(log) if log.get("name") is "uncheck"
+
+        @cy.get("[name=colors]").uncheck("blue").then ->
           expect(logs).to.have.length(2)
           expect(unchecks).to.have.length(1)
 
@@ -2894,6 +3046,19 @@ describe "$Cypress.Cy Actions Commands", ->
 
       it "#onConsole when checkbox is already unchecked", ->
         @cy.get("[name=colors][value=blue]").invoke("prop", "checked", false).uncheck().then ($input) ->
+          expect(@log.get("coords")).to.be.undefined
+          expect(@log.attributes.onConsole()).to.deep.eq {
+            Command: "uncheck"
+            "Applied To": @log.get("$el").get(0)
+            Elements: 1
+            Note: "This checkbox was already unchecked. No operation took place."
+            Options: undefined
+          }
+
+      it "#onConsole when checkbox with value is already unchecked", ->
+        @cy.get("[name=colors][value=blue]").invoke("prop", "checked", false)
+        @cy.get("[name=colors]").uncheck("blue").then ($input) ->
+          expect(@log.get("coords")).to.be.undefined
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "uncheck"
             "Applied To": @log.get("$el").get(0)
@@ -4138,8 +4303,8 @@ describe "$Cypress.Cy Actions Commands", ->
           bubbles: true
           cancelable: true
           view: @cy.private("window")
-          clientX: coords.x
-          clientY: coords.y
+          clientX: coords.x - @cy.private("window").pageXOffset
+          clientY: coords.y - @cy.private("window").pageYOffset
           button: 0
           buttons: 0
           which: 1
@@ -4169,14 +4334,16 @@ describe "$Cypress.Cy Actions Commands", ->
 
       coords = @cy.getCoordinates(btn)
 
+      win = @cy.private("window")
+
       btn.get(0).addEventListener "mousedown", (e) =>
         obj = _(e).pick("bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
         expect(obj).to.deep.eq {
           bubbles: true
           cancelable: true
-          view: @cy.private("window")
-          clientX: coords.x
-          clientY: coords.y
+          view: win
+          clientX: coords.x - win.pageXOffset
+          clientY: coords.y - win.pageYOffset
           button: 0
           buttons: 1
           which: 1
@@ -4197,14 +4364,16 @@ describe "$Cypress.Cy Actions Commands", ->
 
       coords = @cy.getCoordinates(btn)
 
+      win = @cy.private("window")
+
       btn.get(0).addEventListener "mouseup", (e) =>
         obj = _(e).pick("bubbles", "cancelable", "view", "clientX", "clientY", "button", "buttons", "which", "relatedTarget", "altKey", "ctrlKey", "shiftKey", "metaKey", "detail", "type")
         expect(obj).to.deep.eq {
           bubbles: true
           cancelable: true
-          view: @cy.private("window")
-          clientX: coords.x
-          clientY: coords.y
+          view: win
+          clientX: coords.x - win.pageXOffset
+          clientY: coords.y - win.pageYOffset
           button: 0
           buttons: 0
           which: 1
@@ -4231,6 +4400,34 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get("#button").click().then ->
         expect(events).to.deep.eq ["mousedown", "mouseup", "click"]
+
+    it "records correct clientX when el scrolled", (done) ->
+      btn = $("<button id='scrolledBtn' style='position: absolute; top: 1600px; left: 1200px; width: 100px;'>foo</button>").appendTo @cy.$$("body")
+
+      coords = @cy.getCoordinates(btn)
+
+      win = @cy.private("window")
+
+      btn.get(0).addEventListener "click", (e) =>
+        expect(win.pageXOffset).to.be.gt(0)
+        expect(e.clientX).to.eq coords.x - win.pageXOffset
+        done()
+
+      @cy.get("#scrolledBtn").click()
+
+    it "records correct clientY when el scrolled", (done) ->
+      btn = $("<button id='scrolledBtn' style='position: absolute; top: 1600px; left: 1200px; width: 100px;'>foo</button>").appendTo @cy.$$("body")
+
+      coords = @cy.getCoordinates(btn)
+
+      win = @cy.private("window")
+
+      btn.get(0).addEventListener "click", (e) =>
+        expect(win.pageYOffset).to.be.gt(0)
+        expect(e.clientY).to.eq coords.y - win.pageYOffset
+        done()
+
+      @cy.get("#scrolledBtn").click()
 
     it "will send all events even mousedown is defaultPrevented", ->
       events = []

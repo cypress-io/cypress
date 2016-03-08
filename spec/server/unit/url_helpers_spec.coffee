@@ -1,7 +1,8 @@
-expect     = require("chai").expect
-UrlHelpers = require('../../../lib/util/url_helpers')
+require("../spec_helper")
 
-describe "Url helpers", ->
+UrlHelpers = require("#{root}lib/util/url_helpers")
+
+describe "lib/util/url_helpers", ->
   context "#isFile", ->
     it "isFile is true", ->
       expect(UrlHelpers.isFile("file://foo.txt")).to.be.true

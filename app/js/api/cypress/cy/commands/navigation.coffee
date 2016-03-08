@@ -151,11 +151,10 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
 
           options._log.snapshot("before", {next: "after"})
 
-        win = @private("window")
+        Cypress.on "load", ->
+          resolve @private("window")
 
-        Cypress.on "load", resolve
-
-        win.location.reload(forceReload)
+        @private("window").location.reload(forceReload)
 
     go: (numberOrString, options = {}) ->
       _.defaults options, {log: true}

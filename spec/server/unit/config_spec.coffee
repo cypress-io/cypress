@@ -1,7 +1,6 @@
-root   = "../../../"
-expect = require("chai").expect
+require("../spec_helper")
 
-describe "Config", ->
+describe "lib/config", ->
   beforeEach ->
     @setup = (env) =>
       process.env["CYPRESS_ENV"] = env

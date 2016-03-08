@@ -9,7 +9,11 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
   ## thens can return more "thenables" which are not resolved
   ## until they're 'really' resolved, so naturally this API
   ## supports nesting promises
-  thenFn = (subject, fn) ->
+  thenFn = (subject, options, fn) ->
+    if _.isFunction(options)
+      fn = options
+      options = {}
+
     ## if this is the very last command we know its the 'then'
     ## called by mocha.  in this case, we need to defer its
     ## fn callback else we will not properly finish the run
@@ -22,18 +26,29 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
     if @isCommandFromMocha(current)
       return @prop("next", fn)
 
+    _.defaults options,
+      timeout: @_timeout()
+
+    ## clear the timeout since we are handling
+    ## it ourselves
+    @_clearTimeout()
+
     remoteSubject = @getRemotejQueryInstance(subject)
 
-    ## we need to wrap this in a try-catch still (even though we're
-    ## using bluebird) because we want to handle the return by
-    ## allow the 'then' to change the subject to the return value
-    ## if its a non null/undefined value else to return the subject
-    try
-      args = remoteSubject or subject
-      args = if args?._spreadArray then args else [args]
+    args = remoteSubject or subject
+    args = if args?._spreadArray then args else [args]
 
-      ret = fn.apply @private("runnable").ctx, args
+    ## name could be invoke or its!
+    name = @prop("current").get("name")
 
+    getRet = =>
+      ret = fn.apply(@private("runnable").ctx, args)
+      if (ret is @ or ret is @chain()) then null else ret
+
+    Promise
+    .try(getRet)
+    .timeout(options.timeout)
+    .then (ret) ->
       ## if ret is a DOM element
       ## and its not an instance of our jQuery
       if ret and Cypress.Utils.hasElement(ret) and not Cypress.Utils.isInstanceOf(ret, $)
@@ -44,8 +59,13 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
       ## then will resolve with the fn's
       ## return or just pass along the subject
       return ret ? subject
-    catch e
-      throw e
+    .catch Promise.TimeoutError, =>
+      @throwErr """
+        cy.#{name}() timed out after waiting '#{options.timeout}ms'.\n
+        Your callback function returned a promise which never resolved.\n
+        The callback function was:\n
+        #{fn.toString()}
+      """, options._log
 
   invokeFn = (subject, fn, args...) ->
     @ensureParent()
@@ -153,14 +173,14 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
         })
 
   Cypress.addChildCommand
-    spread: (subject, fn) ->
+    spread: (subject, options, fn) ->
       ## if this isnt an array blow up right here
       if not _.isArray(subject)
         @throwErr("cy.spread() requires the existing subject be an array!")
 
       subject._spreadArray = true
 
-      thenFn.call(@, subject, fn)
+      thenFn.call(@, subject, options, fn)
 
   Cypress.addDualCommand
 

@@ -1,8 +1,8 @@
 config   = require("konfig")()
-path     = require "path"
-fs       = require "fs-extra"
-Promise  = require "bluebird"
-request  = require "request-promise"
+path     = require("path")
+fs       = require("fs-extra")
+Promise  = require("bluebird")
+request  = require("request-promise")
 
 root       = process.cwd()
 projects   = path.join root, "spec", "fixtures", "projects"
@@ -23,8 +23,11 @@ module.exports =
 
   ## returns the path to project fixture
   ## in the tmpDir
-  project: (name) ->
-    path.join tmpDir, name
+  project: ->
+    @projectPath.apply(@, arguments)
+
+  projectPath: (name) ->
+    path.join(tmpDir, name)
 
   get: (fixture) ->
     fs.readFileSync path.join(root, "spec", "fixtures", fixture), "utf8"

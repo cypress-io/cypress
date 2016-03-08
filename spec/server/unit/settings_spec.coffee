@@ -1,8 +1,8 @@
 require("../spec_helper")
 
-Settings = require "#{root}lib/util/settings"
+Settings = require("#{root}lib/util/settings")
 
-describe "Settings", ->
+describe "lib/settings", ->
   beforeEach ->
     @setup = (obj = {}) ->
       str = JSON.stringify(obj)
@@ -44,7 +44,8 @@ describe "Settings", ->
     it "throws on json errors", ->
       fs.writeFileSync "cypress.json", "{foo: 'bar}"
       fn = -> Settings.readSync process.cwd()
-      expect(fn).to.throw "Error reading from: #{process.cwd()}/cypress.json"
+      expect(fn).to.throw "Error reading from:"
+      expect(fn).to.throw "#{process.cwd()}/cypress.json"
 
   context "#readEnvSync", ->
     afterEach ->

@@ -2,7 +2,7 @@ require("../spec_helper")
 
 Request = require("#{root}lib/request")
 
-describe "Request", ->
+describe "lib/request", ->
   it "is defined", ->
     expect(Request).to.be.an("object")
 

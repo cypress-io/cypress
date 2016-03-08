@@ -2,10 +2,11 @@ request  = require("request-promise")
 Promise  = require("bluebird")
 winston  = require("winston")
 fs       = require("fs-extra")
+api      = require("./api")
+user     = require("./user")
 cache    = require("./cache")
-Log      = require("./log")
+logger   = require("./logger")
 Settings = require("./util/settings")
-Routes   = require("./util/routes")
 
 ## POST https://api.cypress.io/exceptions
 ## sets request body
@@ -15,15 +16,12 @@ Routes   = require("./util/routes")
 ## settings: {}
 ## version: {}
 
-Exception = {
-  getUrl: ->
-    Routes.exceptions()
-
+module.exports = {
   getCache: ->
     cache.read()
 
   getLogs: ->
-    Log.getLogs()
+    logger.getLogs()
 
   getErr: (err) ->
     {
@@ -47,25 +45,17 @@ Exception = {
         body.version  = version
       .return(body)
 
-  getHeaders: ->
-    cache.getUser().then (user) ->
-      obj = {}
-      obj["x-session"] = user.session_token if user.session_token
-      obj
+  getSession: ->
+    user.get().then (user) ->
+      user and user.session_token
 
   create: (err, settings) ->
     return Promise.resolve() if process.env["CYPRESS_ENV"] isnt "production"
 
-    Promise.all([@getBody(err, settings), @getHeaders()])
-      .bind(@)
-      .spread (body, headers) ->
-        request.post({
-          url: @getUrl()
-          body: body
-          headers: headers
-          json: true
-        })
-        .promise().timeout(3000)
+    Promise.props({
+      body:    @getBody(err, settings)
+      session: @getSession()
+    })
+    .then (props) ->
+      api.createRaygunException(props.body, props.session)
 }
-
-module.exports = Exception

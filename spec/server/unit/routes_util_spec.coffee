@@ -1,8 +1,8 @@
-root   = "../../../"
-expect = require("chai").expect
+require("../spec_helper")
+
 Routes = require("#{root}/lib/util/routes")
 
-describe "Routes Util", ->
+describe "lib/util/routes", ->
   it "signin", ->
     expect(Routes.signin()).to.eq "http://localhost:1234/signin"
 
@@ -11,6 +11,9 @@ describe "Routes Util", ->
 
   it "api", ->
     expect(Routes.api()).to.eq "http://localhost:1234"
+
+  it "auth", ->
+    expect(Routes.auth()).to.eq "http://localhost:1234/v1/auth"
 
   it "signout", ->
     expect(Routes.signout()).to.eq "http://localhost:1234/signout"

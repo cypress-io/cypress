@@ -1,79 +1,104 @@
 fs             = require("fs-extra")
+tar            = require("tar-fs")
 path           = require("path")
 Promise        = require("bluebird")
 _              = require("lodash")
 glob           = require("glob")
 chmodr         = require("chmodr")
 trash          = require("trash")
+NwUpdater      = require("node-webkit-updater")
+cwd            = require("./cwd")
 config         = require("./config")
-Log            = require("./log")
+logger         = require("./logger")
+argsUtil       = require("./util/args")
 
 trash  = Promise.promisify(trash)
 chmodr = Promise.promisify(chmodr)
+coords = null
 
 class Updater
-  constructor: (App) ->
+  constructor: (callbacks) ->
     if not (@ instanceof Updater)
-      return new Updater(App)
+      return new Updater(callbacks)
 
-    if not App
-      throw new Error("Instantiating lib/updater requires an App!")
+    @client     = new NwUpdater @getPackage()
+    @request    = null
+    @cancelled  = false
+    @callbacks  = callbacks
 
-    @App        = App
-    @client     = null
-    @coords     = null
-    @callbacks  = {}
-
-    @patchAppPath()
-
-  setCoords: (@coords) ->
+    if process.env["CYPRESS_ENV"] isnt "production"
+      @patchAppPath()
 
   getCoords: ->
-    return if not c = @coords
+    return if not c = coords
 
     "--coords=#{c.x}x#{c.y}"
 
   getArgs: ->
     c = @getClient()
 
-    _.compact [c.getAppPath(), c.getAppExec(), "--updating", @getCoords()]
+    _.compact ["--app-path=" + c.getAppPath(), "--exec-path=" + c.getAppExec(), "--updating", @getCoords()]
 
   patchAppPath: ->
-    if process.env["CYPRESS_ENV"] isnt "production"
-      @getClient().getAppPath = -> process.cwd()
+    @getClient().getAppPath = -> cwd()
 
   getPackage: ->
-    pkg = fs.readJsonSync path.join(process.cwd(), "package.json")
+    pkg = fs.readJsonSync cwd("package.json")
     pkg.manifestUrl = config.app.desktop_manifest_url
     pkg
 
   getClient: ->
     ## requiring inline due to easier testability
-    NwUpdater = require("node-webkit-updater")
-    @client ?= new NwUpdater @getPackage()
+    @client ? throw new Error("missing Updater#client")
 
   trash: (appPath) ->
     ## moves the current appPath to the trash
     ## this is the path to the existing app
-    Log.info "trashing current app", appPath: appPath
+    logger.info "trashing current app", appPath: appPath
 
     trash([appPath])
 
-  install: (appPath, execPath) ->
+  install: (argsObj = {}) ->
     c = @getClient()
 
-    args = @App.argv ? []
-    args = _.without(args, "--updating")
+    {appPath, execPath} = argsObj
 
+    ## slice out updating, execPath, and appPath args
+    argsObj = _.omit(argsObj, "updating", "execPath", "appPath")
+
+    args = argsUtil.toArray(argsObj)
+
+    ## trash the 'old' app currently installed at the default
+    ## installation: /Applications/Cypress.app
     @trash(appPath).then =>
-      Log.info "installing updated app", appPath: appPath, execPath: execPath
+      logger.info "installing updated app", appPath: appPath, execPath: execPath
 
-      c.install appPath, (err) =>
-        Log.info "running updated app", args: args
-
+      @copyTmpToAppPath(c.getAppPath(), appPath).then ->
         c.run(execPath, args)
 
-        @App.quit()
+        ## and now quit this process
+        process.exit(0)
+
+  copyTmpToAppPath: (tmp, appPath) ->
+    new Promise (resolve, reject) ->
+
+      obj = {
+        fs: require("original-fs")
+      }
+
+      ## now move the /tmp application over
+      ## to the 'existing / old' app path.
+      ## meaning from from /tmp/Cypress.app to /Applications/Cypress.app
+
+      ## https://github.com/atom/electron/pull/3641
+      ## tar-fs
+      tar
+      .pack(tmp, obj)
+      .pipe(tar.extract(appPath, obj))
+
+      .on "error", reject
+
+      .on "finish", resolve
 
   ## copies .cy to the new app path
   ## so we dont lose our cache, logs, etc
@@ -84,12 +109,12 @@ class Updater
 
         newAppConfigPath = path.join(newAppPath, path.dirname(files[0]), config.app.cy_path)
 
-        Log.info "copying .cy to tmp destination", destination: newAppConfigPath
+        logger.info "copying .cy to tmp destination", destination: newAppConfigPath
 
         resolve(newAppConfigPath)
 
     p.then (newAppConfigPath) ->
-      cyConfigPath  = path.join(process.cwd(), config.app.cy_path)
+      cyConfigPath  = cwd(config.app.cy_path)
       fs.copyAsync(cyConfigPath, newAppConfigPath).then ->
 
         ## change all the permissions recursively to 0755
@@ -98,28 +123,35 @@ class Updater
   runInstaller: (newAppPath) ->
     @copyCyDataTo(newAppPath).bind(@).then ->
 
+      ## get the --updating args + --coords args
       args = @getArgs()
 
-      Log.info "running installer from tmp", destination: newAppPath, args: args
+      logger.info "running installer from tmp", destination: newAppPath, args: args
 
+      ## runs the 'new' app in the /tmp directory with
+      ## appPath + execPath to the 'existing / old' app
+      ## (which is where its normally installed in /Applications)
+      ## it additionally passes the --updating flag
       @getClient().runInstaller(newAppPath, args, {})
 
-      @App.quit()
+      process.exit()
 
   unpack: (destinationPath, manifest) ->
-    Log.info "unpacking new version", destination: destinationPath
+    logger.info "unpacking new version", destination: destinationPath
 
     @trigger("apply")
 
     fn = (err, newAppPath) =>
       return @trigger("error", err) if err
 
+      return if @cancelled
+
       @runInstaller(newAppPath)
 
     @getClient().unpack(destinationPath, fn, manifest)
 
   download: (manifest) ->
-    Log.info "downloading new version", version: manifest.version
+    logger.info "downloading new version", version: manifest.version
 
     @trigger("download", manifest.version)
 
@@ -128,31 +160,41 @@ class Updater
 
       ## fixes issue with updater failing during unpack
       setTimeout =>
+        return if @cancelled
+
         @unpack(destinationPath, manifest)
       , 1000
 
-    @getClient().download(fn, manifest)
+    @request = @getClient().download(fn, manifest)
+
+  cancel: ->
+    @cancelled = true
+
+    try
+      ## attempt to abort the request
+      ## and slurp up any errors
+      @request.abort()
 
   trigger: (event, args...) ->
     ## normalize event name
     event = "on" + event[0].toUpperCase() + event.slice(1)
-    if cb = @callbacks[event]
+    if cb = @callbacks and @callbacks[event]
       cb.apply(@, args)
 
   check: (options = {}) ->
-    Log.info "checking for new version"
+    logger.info "checking for new version"
 
     @getClient().checkNewVersion (err, newVersionExists, manifest) =>
       return @trigger("error", err) if err
 
       if newVersionExists
-        Log.info "new version exists", version: manifest.version
+        logger.info "new version exists", version: manifest.version
         options.onNewVersion?(manifest)
       else
-        Log.info "new version does not exist", version: manifest?.version
+        logger.info "new version does not exist"
         options.onNoNewVersion?()
 
-  run: (@callbacks = {}) ->
+  run: ->
     @trigger("start")
 
     @check
@@ -161,5 +203,19 @@ class Updater
 
       onNoNewVersion: =>
         @trigger("none")
+
+    return @
+
+  @setCoords = (c) ->
+    coords = c
+
+  @install = (options) ->
+    Updater().install(options)
+
+  @check = (options = {}) ->
+    Updater().check(options)
+
+  @run = (callbacks = {}) ->
+    Updater(callbacks).run()
 
 module.exports = Updater

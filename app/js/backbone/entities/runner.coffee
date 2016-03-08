@@ -173,12 +173,6 @@
         _.each [@commands, @routes, @agents], (collection) ->
           collection.reset([], {silent: true})
 
-      runSauce: ->
-        ## when we get a response from the server with
-        ## the jobName we notify all parties
-        @socket.emit "run:sauce", @specPath, (jobName, batchId) =>
-          @trigger "sauce:running", jobName, batchId
-
       trigger: (event, args...) ->
         ## because of defaults the change:iframes event
         ## fires before our initialize (which is stupid)

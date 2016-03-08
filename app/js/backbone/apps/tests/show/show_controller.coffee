@@ -33,11 +33,6 @@
       @listenTo iframe, "switch:to:manual:browser", (browser, version) ->
         App.execute "switch:to:manual:browser", id, browser, version
 
-      @listenTo runner, "sauce:running", (jobName, batchId) ->
-        @layout.hideIframe()
-        @layout.iframeRegion.empty()
-        @sauceRegion(runner, jobName, batchId)
-
       @layout = @getLayoutView config
 
       @listenTo @layout, "show", ->
@@ -67,9 +62,6 @@
 
     specsRegion: (runner, iframe, spec) ->
       App.execute "list:test:specs", @layout.specsRegion, runner, iframe, spec
-
-    sauceRegion: (runner, jobName, batchId) ->
-      App.execute "list:test:jobs", @layout.jobsRegion, runner, jobName, batchId
 
     onDestroy: (config, runner) ->
       ## nuke our cookies when we leave

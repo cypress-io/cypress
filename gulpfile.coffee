@@ -8,11 +8,9 @@ Promise       = require "bluebird"
 child_process = require "child_process"
 runSequence   = require "run-sequence"
 os            = require "os"
-deploy        = require "./lib/deploy"
+deploy        = require "./deploy"
 
 fs = Promise.promisifyAll(fs)
-
-require("lodash").bindAll(deploy)
 
 rememberedNames = []
 
@@ -105,38 +103,12 @@ getClientJsOpts = ->
 
 gulp.task "client:css", -> compileCss("app", "lib")
 
-gulp.task "nw:css", -> compileCss("nw", "nw")
-
 gulp.task "client:fonts", ->
   gulp.src("bower_components/font-awesome/fonts/**")
     .pipe gulp.dest "lib/public/css/fonts"
-    .pipe gulp.dest "nw/public/css/fonts"
+    .pipe gulp.dest "nw/app/public/css/fonts"
 
 gulp.task "client:img", ["vendor:img", "project:img"]
-
-gulp.task "nw:img", ["nw:icns", "nw:tray", "nw:logo"]
-
-gulp.task "nw:logo", ->
-  gulp.src("nw/img/cypress.iconset/**/*")
-    .pipe gulp.dest "nw/public/img/cypress.iconset"
-    .pipe gulp.dest "lib/public/img/cypress.iconset"
-
-gulp.task "nw:tray", ->
-  gulp.src("nw/img/tray/**/*")
-    .pipe gulp.dest "nw/public/img/tray"
-
-gulp.task "nw:icns", ->
-  p = new Promise (resolve, reject) ->
-    ## bail if we arent on a mac else `iconutil` will fail
-    return resolve() if os.platform() isnt "darwin"
-
-    child_process.exec "iconutil -c icns nw/img/cypress.iconset", (err, stdout, stderr) ->
-      return reject(err) if err
-
-      resolve()
-  p.then ->
-    gulp.src("nw/img/cypress.icns")
-      .pipe gulp.dest "nw/public/img"
 
 gulp.task "vendor:img", ->
   gulp.src("bower_components/jquery-ui/themes/smoothness/images/**")
@@ -149,47 +121,14 @@ gulp.task "project:img", ->
 gulp.task "client:js", ->
   compileJs("app", getClientJsOpts())
 
-gulp.task "nw:js", (cb) ->
-  options =
-    destination: "nw/public/js"
-    basePath: "nw/js"
-
-  compileJs("nw", options, cb)
-
 gulp.task "bower", ->
   $.bower()
-
-gulp.task "build:secret:sauce", (cb) ->
-  ## convert to js from coffee (with bare: true)
-  gulp.src("lib/secret_sauce.coffee")
-    .pipe($.coffee({bare: true}))
-    .pipe gulp.dest("lib")
-    .on "end", ->
-      ## when thats done, lets create the secret_sauce snapshot .bin
-      child_process.exec "./support/#{platform()}/nwjc lib/secret_sauce.js lib/secret_sauce.bin", (err, stdout, stderr) ->
-        console.log("stdout:", stdout)
-        console.log("stderr:", stderr)
-
-        if err
-          console.log("err with nwjc:", err)
-
-        ## finally cleanup any v8 logs and remove secret sauce.js
-        gulp.src(["lib/secret_sauce.js", "./v8.log"])
-          .on "end", cb
-          .pipe($.clean())
-
-  return false
 
 gulp.task "client:html", ->
   gulp.src(["app/html/*"])
     .pipe gulp.dest("lib/public")
 
-gulp.task "nw:html", ->
-  gulp.src("nw/html/*")
-    .pipe gulp.dest("nw/public")
-
 gulp.task "client:watch", ["watch:client:css", "watch:client:js", "watch:client:html"]
-gulp.task "nw:watch",  ["watch:nw:css",  "watch:nw:js",  "watch:nw:html", "watch:nw:secret:sauce"]
 
 gulp.task "watch:client:css", ->
   gulp.watch "app/css/**", ["client:css"]
@@ -221,20 +160,8 @@ gulp.task "watch:client:js", ->
         _.each rememberedNames, (name) ->
           $.remember.forgetAll(name)
 
-gulp.task "watch:nw:css", ->
-  gulp.watch "nw/css/**", ["nw:css"]
-
-gulp.task "watch:nw:js", ->
-  gulp.watch "nw/js/**/*", ["nw:js"]
-
 gulp.task "watch:client:html", ->
   gulp.watch "app/html/index.html", ["client:html"]
-
-gulp.task "watch:nw:html", ->
-  gulp.watch "nw/html/**", ["nw:html"]
-
-gulp.task "watch:nw:secret:sauce", ->
-  gulp.watch "lib/secret_sauce.coffee", ["nw:snapshot"]
 
 gulp.task "server", -> require("./server.coffee")
 
@@ -262,19 +189,10 @@ gulp.task "get:manifest", deploy.getManifest
 gulp.task "deploy", deploy.deploy
 
 gulp.task "client",        ["client:build", "client:watch"]
-gulp.task "nw",            ["nw:build", "nw:watch"]
 
 gulp.task "client:minify", ->
   ## dont minify cypress or sinon
   minify("lib/public/js/!(cypress|sinon).js", "lib/public/js")
 
-gulp.task "nw:minify", ->
-  minify("nw/public/js/*.js", "nw/public/js")
-
 gulp.task "client:build",  ["bower"], (cb) ->
   runSequence ["client:css", "client:img", "client:fonts", "client:js", "client:html"], cb
-
-gulp.task "nw:build",      ["bower"], (cb) ->
-  runSequence ["nw:css", "nw:img", "client:fonts", "nw:js", "nw:html", "nw:snapshot"], cb
-
-gulp.task "nw:snapshot",   ["build:secret:sauce"]

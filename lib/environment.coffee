@@ -1,4 +1,5 @@
-fs = require("fs-extra")
+fs  = require("fs-extra")
+cwd = require("./cwd")
 
 ## never cut off stack traces
 Error.stackTraceLimit = Infinity
@@ -6,7 +7,7 @@ Error.stackTraceLimit = Infinity
 ## cannot use relative require statement
 ## here because when obfuscated package
 ## would not be available
-pkg = process.cwd() + "/package.json"
+pkg = cwd("package.json")
 
 getEnv = ->
   ## instead of setting NODE_ENV we will

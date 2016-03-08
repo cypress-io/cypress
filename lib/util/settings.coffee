@@ -2,31 +2,25 @@ _        = require("lodash")
 Promise  = require("bluebird")
 path     = require("path")
 fs       = require("fs-extra")
+errors   = require("../errors")
 
 fs = Promise.promisifyAll(fs)
-
-class WriteError extends Error
-  constructor: (@message) ->
-    @name = "WriteError"
-    Error.captureStackTrace(@, WriteError)
 
 module.exports =
   _pathToFile: (projectRoot, file) ->
     path.join(projectRoot, file)
 
-  _err: (msg, file, err, klass) ->
-    klass ?= Error
-
-    e = new klass "#{msg}#{file}\n#{err.message}"
+  _err: (type, file, err) ->
+    e = errors.get(type, file, err)
     e.code = err.code
     e.errno = err.errno
     throw e
 
   _logReadErr: (file, err) ->
-    @_err("Error reading from: ", file, err)
+    @_err("ERROR_READING_FILE", file, err)
 
   _logWriteErr: (file, err) ->
-    @_err("Error writing to: ", file, err, WriteError)
+    @_err("ERROR_WRITING_FILE", file, err)
 
   _stringify: (obj) ->
     JSON.stringify(obj, null, 2)
@@ -74,7 +68,7 @@ module.exports =
         else
           obj
       .catch (err) =>
-        throw err if err instanceof WriteError
+        throw err if errors.isCypressErr(err)
 
         @_logReadErr(file, err)
 
@@ -92,8 +86,10 @@ module.exports =
       if err.code is "ENOENT"
         return {}
 
-      throw err if err instanceof WriteError
+      throw err if errors.isCypressErr(err)
 
+      ## TODO: this should not be project root
+      ## it should be projectRoot + cypress.env.json
       @_logReadErr(projectRoot, err, options.file)
 
   readSync: (projectRoot) ->
@@ -111,7 +107,7 @@ module.exports =
       else
         obj
     catch err
-      throw err if err instanceof WriteError
+      throw err if errors.isCypressErr(err)
 
       @_logReadErr(file, err)
 

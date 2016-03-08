@@ -100,13 +100,6 @@ module.exports = (parentWindow, gui, loadApp) ->
             loadApp(@).then =>
               expect(@currentWindow.listeners("blur")).to.have.length(0)
 
-  describe "Secret Sauce", ->
-    beforeEach ->
-      loadApp(@)
-
-    it "has SecretSauce defined globally", ->
-      expect(@contentWindow.SecretSauce).to.be.an("object")
-
   describe "Applying Updates", ->
     beforeEach ->
       loadApp(@, {start: false}).then =>

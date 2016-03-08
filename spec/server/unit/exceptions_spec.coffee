@@ -4,44 +4,35 @@ delete global.fs
 
 mock          = require("mock-fs")
 winston       = require("winston")
-Exception     = require("#{root}lib/exception")
-Log           = require("#{root}lib/log")
+api           = require("#{root}lib/api")
+user          = require("#{root}lib/user")
+logger        = require("#{root}lib/logger")
 cache         = require("#{root}lib/cache")
+exception     = require("#{root}lib/exception")
 Routes        = require("#{root}lib/util/routes")
 Settings      = require("#{root}lib/util/settings")
 
-describe "Exceptions", ->
-  beforeEach ->
-    nock.disableNetConnect()
-
+describe "lib/exceptions", ->
   afterEach ->
     mock.restore()
-    nock.cleanAll()
-    nock.enableNetConnect()
 
-  context "#getUrl", ->
-    it "returns Routes.exceptions_path()", ->
-      expect(Exception.getUrl()).to.eq Routes.exceptions()
-
-  context "#getHeaders", ->
+  context ".getSession", ->
     it "returns session from cache", ->
-      @sandbox.stub(cache, "getUser").resolves({session_token: "abc123"})
+      @sandbox.stub(user, "get").resolves({session_token: "abc-123"})
 
-      Exception.getHeaders().then (obj) ->
-        expect(obj).to.deep.eq {
-          "x-session": "abc123"
-        }
+      exception.getSession().then (session) ->
+        expect(session).to.eq("abc-123")
 
-    it "returns empty object if no session_token", ->
-      @sandbox.stub(cache, "getUser").resolves({})
+    it "returns undefined if no session_token", ->
+      @sandbox.stub(user, "get").resolves({})
 
-      Exception.getHeaders().then (obj) ->
-        expect(obj).to.deep.eq {}
+      exception.getSession().then (session) ->
+        expect(session).to.be.undinefed
 
-  context "#getErr", ->
+  context ".getErr", ->
     it "returns an object literal", ->
       err = new Error
-      expect(Exception.getErr(err)).to.have.keys("name", "message", "stack", "info")
+      expect(exception.getErr(err)).to.have.keys("name", "message", "stack", "info")
 
     describe "fields", ->
       beforeEach ->
@@ -52,63 +43,63 @@ describe "Exceptions", ->
 
 
       it "has name", ->
-        obj = Exception.getErr(@err)
+        obj = exception.getErr(@err)
         expect(obj.name).to.eq @err.name
 
       it "has message", ->
-        obj = Exception.getErr(@err)
+        obj = exception.getErr(@err)
         expect(obj.message).to.eq @err.message
 
       it "has stack", ->
-        obj = Exception.getErr(@err)
+        obj = exception.getErr(@err)
         expect(obj.stack).to.eq @err.stack
 
       it "has info", ->
         getAllInfo = @sandbox.stub(winston.exception, "getAllInfo").returns({})
-        obj = Exception.getErr(@err)
+        obj = exception.getErr(@err)
         expect(obj.info).to.be.an("object")
         expect(getAllInfo).to.be.calledWith(@err)
 
-  context "#getVersion", ->
+  context ".getVersion", ->
     it "returns version from package.json", ->
       mock({
         "package.json": JSON.stringify(version: "0.1.2")
       })
 
-      Exception.getVersion().then (v) ->
+      exception.getVersion().then (v) ->
         expect(v).to.eq("0.1.2")
 
-  context "#getBody", ->
+  context ".getBody", ->
     beforeEach ->
       @sandbox.stub(cache, "read").resolves({foo: "foo"})
-      @sandbox.stub(Log, "getLogs").resolves([])
+      @sandbox.stub(logger, "getLogs").resolves([])
       @err = new Error
       mock({
         "package.json": JSON.stringify(version: "0.1.2")
       })
 
     it "sets err", ->
-      Exception.getBody(@err).then (body) ->
+      exception.getBody(@err).then (body) ->
         expect(body.err).to.be.an("object")
 
     it "sets cache", ->
-      Exception.getBody(@err).then (body) ->
+      exception.getBody(@err).then (body) ->
         expect(body.cache).to.deep.eq {foo: "foo"}
 
     it "sets logs", ->
-      Exception.getBody(@err).then (body) ->
+      exception.getBody(@err).then (body) ->
         expect(body.logs).to.deep.eq []
 
     it "sets settings", ->
       settings = {projectId: "abc123"}
-      Exception.getBody(@err, settings).then (body) ->
+      exception.getBody(@err, settings).then (body) ->
         expect(body.settings).to.eq settings
 
     it "sets version", ->
-      Exception.getBody(@err).then (body) ->
+      exception.getBody(@err).then (body) ->
         expect(body.version).to.eq "0.1.2"
 
-  context "#create", ->
+  context ".create", ->
     beforeEach ->
       @env = process.env["CYPRESS_ENV"]
 
@@ -120,53 +111,36 @@ describe "Exceptions", ->
         process.env["CYPRESS_ENV"] = "development"
 
       it "immediately resolves", ->
-        Exception.create()
+        exception.create()
 
     describe "production", ->
       beforeEach ->
         process.env["CYPRESS_ENV"] = "production"
 
-        err = {name: "ReferenceError", message: "undefined is not a function", stack: "asfd"}
+        @err = {name: "ReferenceError", message: "undefined is not a function", stack: "asfd"}
 
-        @sandbox.stub(Exception, "getBody").resolves({
-          err: err
+        @sandbox.stub(exception, "getBody").resolves({
+          err: @err
           cache: {}
           logs: []
           settings: {}
           version: "0.1.2"
         })
 
-        @sandbox.stub(Exception, "getHeaders").resolves({"x-session": "abc123"})
+        @sandbox.stub(exception, "getSession").resolves("abc-123")
 
-        @exceptions = nock(Routes.api())
-          .log(console.log)
-          .post "/exceptions", (body) ->
-            expect(body.err).to.deep.eq(err)
-            expect(body.cache).to.deep.eq({})
-            expect(body.logs).to.deep.eq([])
-            expect(body.settings).to.deep.eq({})
-            expect(body.version).to.eq("0.1.2")
-            true
-          .matchHeader("X-Session", "abc123")
-          .matchHeader("accept", "application/json")
+        @sandbox.stub(api, "createRaygunException")
 
-      it "requests with correct url, body, headers, and json", ->
-        e = @exceptions.reply(200)
-        Exception.create().then(e.done)
+      it "sends body + session to api.createRaygunException", ->
+        api.createRaygunException.resolves()
 
-      it "times out after 3 seconds", (done) ->
-        @timeout(6000)
+        exception.create().then =>
+          body = {
+            err: @err
+            cache: {}
+            logs: []
+            settings: {}
+            version: "0.1.2"
+          }
 
-        ## setup the clock so we can coerce time
-        # clock = @sandbox.useFakeTimers("setTimeout")
-
-        @exceptions.delayConnection(5000).reply(200)
-
-        Exception.create()
-          .then ->
-            done("errored: it did not catch the timeout error!")
-          .catch Promise.TimeoutError, ->
-            done()
-
-        process.nextTick ->
-          # clock.tick(5000)
+          expect(api.createRaygunException).to.be.calledWith(body, "abc-123")

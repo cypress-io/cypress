@@ -1,6 +1,6 @@
 machine:
   node:
-    version: iojs-v1.2.0
+    version: 5.1.1
 
 test:
   pre:
@@ -8,8 +8,6 @@ test:
     - npm run build
 
   override:
-    - npm run test-server-ci
-    # - ./node_modules/.bin/gulp test:
-    #     background: true
-    # - sleep 6
-    # - ./node_modules/.bin/mocha-phantomjs http://localhost:3500/specs/all_specs
+    - npm run test-cov
+    - npm run codecov
+    - npm run coveralls

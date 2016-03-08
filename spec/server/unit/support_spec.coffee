@@ -1,22 +1,18 @@
-root        = '../../../'
-path        = require 'path'
-fs          = require 'fs-extra'
-chai        = require 'chai'
-Server      = require "#{root}lib/server"
-Support     = require "#{root}lib/support"
-Fixtures    = require "#{root}/spec/server/helpers/fixtures"
+require("../spec_helper")
 
-expect       = chai.expect
+path        = require("path")
+Server      = require("#{root}lib/server")
+Support     = require("#{root}lib/support")
+Fixtures    = require("#{root}/spec/server/helpers/fixtures")
 
-describe "Support ", ->
+describe "lib/support", ->
   beforeEach ->
     Fixtures.scaffold()
 
     @todos = Fixtures.project("todos")
 
     @server  = Server(@todos)
-    @app     = @server.app
-    @support = Support(@app)
+    @support = Support(@server.config)
 
   afterEach ->
     Fixtures.remove()

@@ -1,8 +1,6 @@
-root       = "../../../"
-fs         = require "fs-extra"
-expect     = require("chai").expect
+require("../spec_helper")
 
-describe "Environment", ->
+describe "lib/environment", ->
   beforeEach ->
     @expectedEnv = (env) ->
       require("#{root}lib/environment")

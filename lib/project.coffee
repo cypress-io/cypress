@@ -1,15 +1,24 @@
-_        = require 'lodash'
-Promise  = require 'bluebird'
-Request  = require 'request-promise'
-fs       = require 'fs'
-path     = require 'path'
-Log      = require "./log"
-Settings = require './util/settings'
-Routes   = require './util/routes'
+path      = require("path")
+EE        = require("events")
+_         = require("lodash")
+fs        = require("fs-extra")
+Promise   = require("bluebird")
+Settings  = require("./util/settings")
+ids       = require("./ids")
+api       = require("./api")
+user      = require("./user")
+cache     = require("./cache")
+logger    = require("./logger")
+errors    = require("./errors")
+Server    = require("./server")
+Support   = require("./support")
+fixture   = require("./fixture")
+Watchers  = require("./watchers")
+Reporter  = require("./reporter")
 
 fs = Promise.promisifyAll(fs)
 
-class Project
+class Project extends EE
   constructor: (projectRoot) ->
     if not (@ instanceof Project)
       return new Project(projectRoot)
@@ -18,32 +27,160 @@ class Project
       throw new Error("Instantiating lib/project requires a projectRoot!")
 
     @projectRoot = projectRoot
+    @server      = Server(projectRoot)
+    @watchers    = Watchers()
 
-  ## A simple helper method
-  ## to create a project ID if we do not already
-  ## have one
-  ## should refactor this method to only create
-  ## a project ID if we were missing one
-  ## currently this catches all errors like EACCES
-  ## errors which should not try to generate a project id
-  ensureProjectId: ->
-    @getProjectId()
+  open: (options = {}) ->
+    _.defaults options, {
+      reporter:     false
+      changeEvents: false
+      updateProject: false
+    }
+
+    @server.open(options)
     .bind(@)
-    .catch(@createProjectId)
+    .then (config) ->
+      ## sync but do not block
+      @sync(options)
 
-  createProjectId: (err) ->
-    ## dont try to create a project id if
-    ## we had an error accessing cypress.json
-    throw err if err and err.code is "EACCES"
+      ## store the config from
+      ## opening the server
+      @config = config
 
-    Log.info "Creating Project ID"
+      @watchFilesAndStartWebsockets(options)
 
-    write = (id) =>
-      attrs = {projectId: id}
-      Log.info "Writing Project ID", _.clone(attrs)
-      Settings
-        .write(@projectRoot, attrs)
-        .get("projectId")
+      .then =>
+        @scaffold(config)
+
+      ## return our project instance
+      .return(@)
+
+  sync: (options) ->
+    ## attempt to sync up with the remote
+    ## server to ensure we have a valid
+    ## project id and user attached to
+    ## this project
+    @ensureProjectId()
+    .then (id) =>
+      @updateProject(id, options)
+    .catch ->
+      ## dont catch ensure project id or
+      ## update project errors which allows
+      ## the user to work offline
+      return
+
+  close: ->
+    @removeAllListeners()
+
+    Promise.join(
+      @server?.close(),
+      @watchers?.close()
+    )
+
+  updateProject: (id, options = {}) ->
+    Promise.try =>
+      ## bail if updateProject isnt true
+      return if not options.updateProject
+
+      user.ensureSession()
+      .then (session) ->
+        api.updateProject(id, session)
+
+  watchFilesAndStartWebsockets: (options) ->
+    obj = {}
+
+    ## if we are listening for change events
+    if options.changeEvents
+      obj.onChange = (filePath, stats) =>
+        ## emit settings:changed whenever
+        ## our settings file changes
+        @emit("settings:changed")
+
+    ## whenever the cypress.json file changes we need to close
+    ## this project and re-open it
+    @watchers.watch(Settings.pathToCypressJson(@projectRoot), obj)
+
+    ## if we've passed down reporter
+    ## then record these via mocha reporter
+    if options.reporter
+      reporter = Reporter()
+
+    @server.startWebsockets(@watchers, {
+      onConnect: (id) =>
+        @emit("socket:connected", id)
+
+      onMocha: (event, args...) =>
+        ## bail if we dont have a
+        ## reporter instance
+        return if not reporter
+
+        args = [event].concat(args)
+        reporter.emit.apply(reporter, args)
+
+        if event is "end"
+          stats = reporter.stats()
+
+          ## TODO: convert this to a promise
+          ## since we need an ack to this end
+          ## event, and then finally emit 'end'
+          @server.end()
+
+          Promise.delay(1000).then =>
+            # console.log stats
+            @emit("end", stats)
+    })
+
+  getConfig: ->
+    @config ? {}
+
+  ensureSpecUrl: (spec) ->
+    Promise.try =>
+      if spec
+        @ensureSpecExists(spec)
+        .then (str) =>
+          @getUrlBySpec(str)
+      else
+        @getUrlBySpec("/__all")
+
+  ensureSpecExists: (spec) ->
+    {testFolder} = @getConfig()
+
+    ## TODO this assumes we've already opened the project and have config
+    ## refactor this not to be dependent on state
+    specFile = path.resolve(@projectRoot, testFolder, spec)
+
+    ## we want to make it easy on the user by allowing them to pass both
+    ## an absolute path to the spec, or a relative path from their test folder
+    fs
+    .statAsync(specFile)
+    .then =>
+      ## strip out the projectRoot + testFolder
+      specFile.replace(path.join(@projectRoot, testFolder), "")
+    .catch ->
+      errors.throw("SPEC_FILE_NOT_FOUND", specFile)
+
+  getUrlBySpec: (spec) ->
+    [@getConfig().clientUrl, "#/tests", spec, "?__ui=satellite"].join("")
+
+  scaffold: (config) ->
+    Promise.join(
+      ## ensure fixtures dir is created
+      ## and example fixture if dir doesnt exist
+      fixture.scaffold(config.projectRoot, config.fixturesFolder),
+      ## ensure support dir is created
+      ## and example support file if dir doesnt exist
+      Support(config).scaffold()
+    )
+
+  writeProjectId: (id) ->
+    attrs = {projectId: id}
+    logger.info "Writing Project ID", _.clone(attrs)
+    Settings
+      .write(@projectRoot, attrs)
+      .get("projectId")
+
+  createProjectId: ->
+    logger.info "Creating Project ID"
 
     ## allow us to specify the exact key
     ## we want via the CYPRESS_PROJECT_ID env.
@@ -51,33 +188,91 @@ class Project
     ## file (like in example repos) yet still
     ## use a correct id in the API
     if id = process.env.CYPRESS_PROJECT_ID
-      return write(id)
+      return @writeProjectId(id)
 
-    require("./cache").getUser().then (user = {}) =>
-      Request.post({
-        url: Routes.projects()
-        headers: {"X-Session": user.session_token}
-        json: true
-      })
-      .then (attrs) ->
-        write(attrs.uuid)
+    user.ensureSession()
+    .bind(@)
+    .then (session) ->
+      api.createProject(session)
+    .then(@writeProjectId)
 
   getProjectId: ->
-    Settings.read(@projectRoot)
-    .then (settings) ->
-      if (id = settings.projectId)
-        Log.info "Returning Project ID", {id: id}
+    @verifyExistance()
+    .then =>
+      Settings.read(@projectRoot)
+    .then (settings) =>
+      if settings and id = settings.projectId
         return id
 
-      Log.info "No Project ID found"
-      throw new Error("No project ID found")
+      errors.throw("NO_PROJECT_ID", @projectRoot)
 
-  getDetails: (projectId) ->
-    require("./cache").getUser().then (user = {}) =>
-      Request.get({
-        url: Routes.project(projectId)
-        headers: {"X-Session": user.session_token}
-      }).catch (err) ->
-        ## swallow any errors
+  verifyExistance: ->
+    fs
+    .statAsync(@projectRoot)
+    .return(@)
+    .catch =>
+      errors.throw("NO_PROJECT_FOUND_AT_PROJECT_ROOT", @projectRoot)
+
+  ensureProjectId: ->
+    @getProjectId()
+    .bind(@)
+    .catch({type: "NO_PROJECT_ID"}, @createProjectId)
+
+  @paths = ->
+    cache.getProjectPaths()
+
+  @remove = (path) ->
+    cache.removeProject(path)
+
+  @add = (path) ->
+    ## make sure we either have or receive an id
+    Project(path)
+    .ensureProjectId()
+    .then (id) =>
+      ## make sure we've written it to the local .cy file
+      cache.insertProject(id)
+      .then =>
+        ## and make sure we have the correct path
+        cache.updateProject(id, path)
+
+      ## return the project id
+      .return(id)
+
+  @removeIds = (p) ->
+    Project(p)
+    .verifyExistance().then (project) ->
+      config = project.server.config
+
+      ## remove all of the ids for the test files found in the testFolder
+      ids.remove path.join(config.projectRoot, config.testFolder)
+
+  @id = (path) ->
+    Project(path).getProjectId()
+
+  @exists = (path) ->
+    @paths().then (paths) ->
+      path in paths
+
+  @getSecretKeyByPath = (path) ->
+    ## get project id
+    Project(path)
+    .getProjectId()
+    .then (id) ->
+      user.ensureSession()
+      .then (session) ->
+        api.getProjectToken(id, session)
+        .catch ->
+          errors.throw("CANNOT_FETCH_PROJECT_TOKEN")
+
+  @generateSecretKeyByPath = (path) ->
+    ## get project id
+    Project(path)
+    .getProjectId()
+    .then (id) ->
+      user.ensureSession()
+      .then (session) ->
+        api.updateProjectToken(id, session)
+        .catch ->
+          errors.throw("CANNOT_CREATE_PROJECT_TOKEN")
 
 module.exports = Project

@@ -1,22 +1,15 @@
 require("../spec_helper")
 
-Server        = require "#{root}lib/server"
-Socket        = require "#{root}lib/socket"
-Support       = require "#{root}lib/support"
-Fixtures      = require "#{root}lib/fixtures"
-Watchers      = require "#{root}lib/watchers"
-Project       = require "#{root}lib/project"
-Log           = require "#{root}lib/log"
-Settings      = require "#{root}lib/util/settings"
+Server        = require("#{root}lib/server")
+Socket        = require("#{root}lib/socket")
+Watchers      = require("#{root}lib/watchers")
+logger        = require("#{root}lib/logger")
+Settings      = require("#{root}lib/util/settings")
 
-describe "Server Interface", ->
+describe "lib/server", ->
   beforeEach ->
     @sandbox.stub(Socket.prototype, "startListening")
-    @sandbox.stub(Project.prototype, "ensureProjectId").resolves("a-long-guid-123")
-    @sandbox.stub(Project.prototype, "getDetails").resolves("a-long-guid-123")
     @sandbox.stub(Settings, "readSync").returns({})
-    @sandbox.stub(Support.prototype, "scaffold").resolves({})
-    @sandbox.stub(Fixtures.prototype, "scaffold").resolves({})
     @sandbox.stub(Watchers.prototype, "watch").returns()
     @server = Server("/Users/brian/app")
 
@@ -32,13 +25,13 @@ describe "Server Interface", ->
     expect(fn).to.throw "Instantiating lib/server requires a projectRoot!"
 
   it "sets settings on Log", ->
-    expect(Log.getSettings()).to.eq(@server.config)
+    expect(logger.getSettings()).to.eq(@server.config)
 
   context "#close", ->
     it "returns a promise", ->
       expect(@server.close()).to.be.instanceof Promise
 
-    it "calls close on @server", ->
+    it "calls close on this.server", ->
       @server.open().bind(@).then ->
         @server.close()
 
@@ -48,16 +41,15 @@ describe "Server Interface", ->
           expect(@server.isListening).to.be.false
 
     it "clears settings from Log", ->
-      Log.setSettings({})
+      logger.setSettings({})
       @server.close().then ->
-        expect(Log.getSettings()).to.be.undefined
+        expect(logger.getSettings()).to.be.undefined
 
-    it "app fires close event", ->
-      emit = @sandbox.spy @server.app, "emit"
+    it "calls close on this.socket", ->
+      @server.socket = {close: @sandbox.spy()}
 
-      @server.open().bind(@).then ->
-        @server.close().then ->
-          expect(emit).to.be.calledWith "close"
+      @server.close().then =>
+        expect(@server.socket.close).to.be.calledOnce
 
   context "#open", ->
     it "creates http server"
@@ -77,50 +69,6 @@ describe "Server Interface", ->
       @server.open().bind(@).then ->
         expect(@server.isListening).to.be.true
 
-    it "calls Fixtures#scaffold", ->
-      @server.open().bind(@).then ->
-        expect(Fixtures::scaffold).to.be.calledOnce
-
-    it "calls Support#scaffold", ->
-      @server.open().bind(@).then ->
-        expect(Support::scaffold).to.be.calledOnce
-
-    it "calls project#getDetails", ->
-      @server.open().bind(@).then ->
-        expect(Project::getDetails).to.be.calledWith("a-long-guid-123")
-
-    it "watches cypress.json", ->
-      @server.open().bind(@).then ->
-        expect(Watchers::watch).to.be.calledWith("/Users/brian/app/cypress.json")
-
-    it "passes watchers to Socket.startListening", ->
-      options = {}
-
-      @server.open(options).then ->
-        startListening = Socket::startListening
-        expect(startListening.getCall(0).args[0]).to.be.instanceof(Watchers)
-        expect(startListening.getCall(0).args[1]).to.eq(options)
-
-    it "calls onReboot when cypress.json changes", ->
-      onReboot = @sandbox.spy()
-
-      ## invoke the onChange callback
-      Watchers::watch.yieldsTo("onChange")
-
-      @server.open({onReboot: onReboot}).then ->
-        expect(onReboot).to.be.calledOnce
-
-    it "calls close once on watchers + socket when app closes", ->
-      close1 = @sandbox.stub(Watchers::, "close")
-      close2 = @sandbox.stub(Socket::, "close")
-
-      @server.open().then =>
-        @server.app.emit("close")
-        @server.app.emit("close")
-
-        expect(close1).to.be.calledOnce
-        expect(close2).to.be.calledOnce
-
     context "port", ->
       it "can override default port", ->
         @server.open({port: 8080}).then =>
@@ -135,10 +83,6 @@ describe "Server Interface", ->
       it "updates clientUrlDisplay", ->
         @server.open({port: 8080}).then =>
           expect(@server.config.clientUrlDisplay).to.eq "http://localhost:8080"
-
-      it "upates idGeneratorUrl", ->
-        @server.open({port: 8080}).then =>
-          expect(@server.config.idGeneratorUrl).to.eq "http://localhost:8080/__cypress/id_generator"
 
     context "errors", ->
       afterEach ->
@@ -290,9 +234,6 @@ describe "Server Interface", ->
 
       it "namespace=__cypress", ->
         @defaults "namespace", "__cypress"
-
-      it "idGeneratorUrl=http://localhost:2020/__cypress/id_generator", ->
-        @defaults "idGeneratorUrl", "http://localhost:2020/__cypress/id_generator"
 
       it "baseUrl=http://localhost:8000/app", ->
         @defaults "baseUrl", "http://localhost:8000/app", {

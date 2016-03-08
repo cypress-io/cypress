@@ -137,6 +137,22 @@ describe "$Cypress.Utils API", ->
         str = $Cypress.Utils.stringifyElement(div, "short")
         expect(str).to.eq("<div#baz.foo.bar>")
 
+      it "returns array of els", ->
+        lis = @cy.$$("li")
+
+        str = $Cypress.Utils.stringifyElement(lis, "short")
+        expect(str).to.eq "[ <li>, #{lis.length - 1} more... ]"
+
+      it "stringifies array of elements", ->
+        appendButton = =>
+          @cy.$("body").append $("<button class='stringify'>b</button>")
+
+        _.times 3, appendButton
+
+        btns = @cy.$$(".stringify")
+        str  = $Cypress.Utils.stringifyElement(btns, "short")
+        expect(str).to.eq "[ <button.stringify>, 2 more... ]"
+
     context "#convertHtmlTags", ->
       it "converts opening brackets to tags", ->
         html = $Cypress.Utils.convertHtmlTags "[strong]foo"

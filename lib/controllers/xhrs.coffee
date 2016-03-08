@@ -3,8 +3,7 @@ mime        = require("mime")
 request     = require("request")
 str         = require("string-to-stream")
 Promise     = require("bluebird")
-Controller  = require("./controller")
-Fixtures    = require("../fixtures")
+fixture     = require("../fixture")
 
 fixturesRe = /^(fx:|fixture:)/
 htmlLikeRe = /<.+>[\s\S]+<\/.+>/
@@ -20,7 +19,7 @@ isValidJSON = (text) ->
 
   return false
 
-class Xhr extends Controller
+class Xhr
   constructor: (app) ->
     if not (@ instanceof Xhr)
       return new Xhr(app)
@@ -30,20 +29,21 @@ class Xhr extends Controller
 
     @app = app
 
-    super
+  _get: (resp) ->
+    file = resp.replace(fixturesRe, "")
+    {projectRoot, fixturesFolder} = @app.get("cypress")
+    fixture.get(projectRoot, fixturesFolder, file)
 
   getStream: (resp) ->
     if fixturesRe.test(resp)
-      fixture = resp.replace(fixturesRe, "")
-      Fixtures(@app).get(fixture).then (contents) ->
+      @_get(resp).then (contents) ->
         str(contents)
     else
       str(resp)
 
   getResponse: (resp) ->
     if fixturesRe.test(resp)
-      fixture = resp.replace(fixturesRe, "")
-      Fixtures(@app).get(fixture)
+      @_get(resp)
     else
       Promise.resolve(resp)
 
