@@ -9,7 +9,7 @@ API = {
   getMsgByType: (type, arg1, arg2) ->
     switch type
       when "NOT_LOGGED_IN"
-        "You're not logged in.\n\nLog into Cypress and issue the command again."
+        "You're not logged in.\n\nUse `cypress open` to open the Desktop App and login."
       when "TESTS_DID_NOT_START"
         "Can't start tests, the remote client never connected."
       when "PROJECT_DOES_NOT_EXIST"
