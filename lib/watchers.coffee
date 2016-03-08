@@ -35,12 +35,14 @@ class Watchers
 
   watch: (pathToFile, options = {}) ->
     _.defaults options,
-      ignored:  null
-      onChange: null
-      onReady:  null
-      onError:  null
+      interval:   250
+      usePolling: true
+      ignored:    null
+      onChange:   null
+      onReady:    null
+      onError:    null
 
-    w = chokidar.watch(pathToFile, options.ignored)
+    w = chokidar.watch(pathToFile, options)
 
     @_add(pathToFile, w)
 
