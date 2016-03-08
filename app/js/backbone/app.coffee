@@ -11,16 +11,8 @@
 
   updating = (options) ->
     ## if we are updating then do not start the app
-    ## or display any UI. just finish installing the updates
-
-    ## display the GUI
-    App.ipc("change:coords", options.coords).then ->
-
-      ## start the updates being applied app so the user knows its still a-happen-ning
-      App.execute "start:updates:applied:app"
-
-      ## and handle the logic for telling the updater to install
-      App.ipc("updater:install", _.pick(options, "appPath", "execPath"))
+    ## start the updates being applied app so the user knows its still a-happen-ning
+    App.execute "start:updates:applied:app"
 
   projects = ->
     ## check cache store for user
