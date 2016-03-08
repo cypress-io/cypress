@@ -12,7 +12,7 @@
     "deploy": "gulp deploy",
     "dist": "gulp dist",
     "release": "gulp release",
-    "test": "npm run test-server & chokidar 'spec/server/**/*' 'lib/**/*' -c 'npm run test-server'",
+    "test": "npm run test-server & chokidar 'spec/server/**/*' 'lib/**/*' -c 'npm run test-server' --polling --poll-interval=250 ",
     "test-cov": "NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 istanbul cover node_modules/.bin/_mocha -- --opts ./spec/server/mocha.opts",
     "test-cov-process": "NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 istanbul cover --include-pid",
     "test-server": "NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 DEBUG=nock.*,-nock.common,socket.io:* mocha --opts spec/server/mocha.opts",
