@@ -73,6 +73,15 @@ class Updater
     @trash(appPath).then =>
       logger.info "installing updated app", appPath: appPath, execPath: execPath
 
+      @copyTmpToAppPath(c.getAppPath(), appPath).then ->
+        c.run(execPath, args)
+
+        ## and now quit this process
+        process.exit(0)
+
+  copyTmpToAppPath: (tmp, appPath) ->
+    new Promise (resolve, reject) ->
+
       obj = {
         fs: require("original-fs")
       }
@@ -84,19 +93,12 @@ class Updater
       ## https://github.com/atom/electron/pull/3641
       ## tar-fs
       tar
-      .pack(c.getAppPath(), obj)
+      .pack(tmp, obj)
       .pipe(tar.extract(appPath, obj))
 
-      .on "error", (err) ->
-        throw err
+      .on "error", reject
 
-      .on "finish", ->
-        logger.info "running updated app", args: args
-
-        c.run(execPath, args)
-
-        ## and now quit this process
-        process.exit(0)
+      .on "finish", resolve
 
   ## copies .cy to the new app path
   ## so we dont lose our cache, logs, etc

@@ -2,6 +2,7 @@ require("../spec_helper")
 
 delete global.fs
 
+tar         = require("tar-fs")
 mock        = require("mock-fs")
 Updater     = require("#{root}lib/updater")
 Fixtures    = require("#{root}/spec/server/helpers/fixtures")
@@ -242,6 +243,52 @@ describe "lib/updater", ->
             expect(stdout).to.match /755/
             done()
 
+    describe "#copyTmpToAppPath", ->
+      beforeEach ->
+        @onStub = @sandbox.stub()
+        @onStub.withArgs("error").returnsThis()
+
+        @onPipe = @sandbox.stub().returnsThis()
+
+        @sandbox.stub(tar, "pack").returns({
+          on: @onStub
+          pipe: @onPipe
+        })
+
+        @sandbox.stub(tar, "extract").returns("extractFoo")
+
+      it "calls tar.pack", ->
+        @onStub.withArgs("finish").yieldsAsync()
+
+        @updater.copyTmpToAppPath("a", "b").then ->
+          expect(tar.pack).to.be.calledWith("a", {
+            fs: require("original-fs")
+          })
+
+      it "calls tar.extract", ->
+        @onStub.withArgs("finish").yieldsAsync()
+
+        @updater.copyTmpToAppPath("a", "b").then ->
+          expect(tar.extract).to.be.calledWith("b", {
+            fs: require("original-fs")
+          })
+
+      it "pipes return value of tar.extract", ->
+        @onStub.withArgs("finish").yieldsAsync()
+
+        @updater.copyTmpToAppPath("a", "b").then =>
+          expect(@onPipe).to.be.calledWith("extractFoo")
+
+      it "throws on error", ->
+        err = new Error("foo")
+        @onStub.withArgs("error").yieldsAsync(err)
+
+        @updater.copyTmpToAppPath("a", "b")
+        .then ->
+          throw new Error("should have failed but did not")
+        .catch (e) ->
+          expect(e).to.eq(err)
+
     describe "#trash", ->
       beforeEach ->
         fs.outputFileAsync("random/dirs/and/file.txt", "foobarbaz!")
@@ -254,36 +301,47 @@ describe "lib/updater", ->
 
     describe "#install", ->
       beforeEach ->
-        @install = @sandbox.stub(@updater.client, "install").yields(null)
+        @argsObj = {
+          appPath:  "/Users/bmann/app_path"
+          execPath: "/Users/bmann/app_exec_path"
+          _coords: "1x2"
+          coords: {x: 1, y: 2}
+        }
+
+        @sandbox.stub(@updater.client, "getAppPath").returns("foo")
+        @sandbox.stub(@updater, "copyTmpToAppPath").resolves()
+
         @run     = @sandbox.stub(@updater.client, "run")
         @trash   = @sandbox.stub(@updater, "trash").resolves()
 
       it "trashes current appPath", ->
-        @updater.install("/Users/bmann/app_path", "/Users/bmann/app_exec_path").then =>
+        @updater.install(@argsObj).then =>
           expect(@trash).to.be.calledWith("/Users/bmann/app_path")
 
-      it "calls client#install with appPath", ->
-        @updater.install("/Users/bmann/app_path", "/Users/bmann/app_exec_path").then =>
-          expect(@updater.client.install).to.be.calledWith "/Users/bmann/app_path"
+      it "calls #copyTmpToAppPath with tmp + appPath", ->
+        @updater.install(@argsObj).then =>
+          expect(@updater.copyTmpToAppPath).to.be.calledWith "foo", @argsObj.appPath
 
       it "calls process.exit", ->
-        @updater.install("/Users/bmann/app_path", "/Users/bmann/app_exec_path").then =>
+        @updater.install(@argsObj).then =>
           expect(process.exit).to.be.calledOnce
 
+      it "calls client.run with execPath + args", ->
+        @updater.install(@argsObj).then =>
+          expect(@run).to.be.calledWith(@argsObj.execPath, ["--coords=1x2"])
+
       context "args", ->
+        beforeEach ->
+          @argsObj = {
+            updating: true
+            appPath: "app"
+            execPath: "exec"
+            "getKey": true
+          }
+
         it "uses args object", ->
-          args = {foo: "bar"}
-          @updater.install("/Users/bmann/app_path", "/Users/bmann/app_exec_path", args).then =>
-            expect(@run).to.be.calledWith("/Users/bmann/app_exec_path", [])
-
-        it "uses empty array with no args from App.argv", ->
-          @updater.install("/Users/bmann/app_path", "/Users/bmann/app_exec_path").then =>
-            expect(@run).to.be.calledWith("/Users/bmann/app_exec_path", [])
-
-        it "passes args except for --updating", ->
-          args = {updating: true}
-          @updater.install("/Users/bmann/app_path", "/Users/bmann/app_exec_path", args).then =>
-            expect(@run).to.be.calledWith("/Users/bmann/app_exec_path", [])
+          @updater.install(@argsObj).then =>
+            expect(@run).to.be.calledWith("exec", ["--getKey=true"])
 
   context "integration", ->
     before ->

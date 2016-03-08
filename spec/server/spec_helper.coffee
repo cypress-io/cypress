@@ -26,6 +26,9 @@ mockery.enable({
 ## so because its required from a separate module we must use an absolute reference to it
 mockery.registerSubstitute("electron", path.join(__dirname, "./helpers/electron_stub"))
 
+## stub out electron's original-fs module which is available when running in electron
+mockery.registerMock("original-fs", {})
+
 beforeEach ->
   if global.fs isnt fs
     global.fs = fs
