@@ -57,8 +57,10 @@ class Updater
 
     trash([appPath])
 
-  install: (appPath, execPath, argsObj = {}) ->
+  install: (argsObj = {}) ->
     c = @getClient()
+
+    {appPath, execPath} = argsObj
 
     ## slice out updating, execPath, and appPath args
     argsObj = _.omit(argsObj, "updating", "execPath", "appPath")
@@ -190,8 +192,8 @@ class Updater
   @setCoords = (c) ->
     coords = c
 
-  @install = (appPath, execPath, options) ->
-    Updater().install(appPath, execPath, options)
+  @install = (options) ->
+    Updater().install(options)
 
   @check = (options = {}) ->
     Updater().check(options)
