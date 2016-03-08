@@ -82,16 +82,6 @@ handleEvent = (options, event, id, type, arg) ->
       .then(send)
       .catch(sendErr)
 
-    when "change:coords"
-      coords = _.mapValues(arg, parseFloat)
-      win = Renderer.getByWebContents(event.sender)
-      win.setPosition(coords.x, coords.y)
-
-    when "updater:install"
-      ## send up the appPath, execPath, and initial args
-      Updater.install(arg.appPath, arg.execPath, options)
-      send(null)
-
     when "updater:check"
       Updater.check({
         onNewVersion: ->   send(true)

@@ -38,7 +38,7 @@ module.exports = {
     ## exit when all windows are closed
     app.exit(0)
 
-  getRendererArgs: ->
+  getRendererArgs: (coords) ->
     common = {
       width: 300
       height: 400
@@ -53,6 +53,13 @@ module.exports = {
     }
 
     _.extend(common, @platformArgs())
+
+    ## if we have coordinates automatically add them
+    if coords
+      ## and also set show to true
+      _.extend(common, coords, {show: true})
+
+    return common
 
   platformArgs: ->
     {
@@ -77,9 +84,12 @@ module.exports = {
     ## handle right click to show context menu!
     ## handle drop events for automatically adding projects!
     ## use the same icon as the cloud app
-    Renderer.create(@getRendererArgs())
+    Renderer.create(@getRendererArgs(options.coords))
     .then (win) =>
       Events.start(options)
+
+      if options.updating
+        Updater.install(options)
 
       Tray.display({
         onDrop: ->
