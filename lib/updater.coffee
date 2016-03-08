@@ -1,4 +1,5 @@
 fs             = require("fs-extra")
+tar            = require("tar-fs")
 path           = require("path")
 Promise        = require("bluebird")
 _              = require("lodash")
@@ -72,10 +73,24 @@ class Updater
     @trash(appPath).then =>
       logger.info "installing updated app", appPath: appPath, execPath: execPath
 
+      obj = {
+        fs: require("original-fs")
+      }
+
       ## now move the /tmp application over
       ## to the 'existing / old' app path.
       ## meaning from from /tmp/Cypress.app to /Applications/Cypress.app
-      c.install appPath, (err) =>
+
+      ## https://github.com/atom/electron/pull/3641
+      ## tar-fs
+      tar
+      .pack(c.getAppPath(), obj)
+      .pipe(tar.extract(appPath, obj))
+
+      .on "error", (err) ->
+        throw err
+
+      .on "finish", ->
         logger.info "running updated app", args: args
 
         c.run(execPath, args)
