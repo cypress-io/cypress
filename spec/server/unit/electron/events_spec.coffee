@@ -180,16 +180,6 @@ describe "lib/electron/handlers/events", ->
         expect(@destroy).to.be.calledOnce
 
   context "updating", ->
-    describe "updater:install", ->
-      it "calls Updater#install with appPath, execPath, options and returns null", ->
-        install = @sandbox.stub(Updater, "install")
-        @handleEvent("updater:install", {
-          appPath: "foo"
-          execPath: "bar"
-        })
-        expect(install).to.be.calledWith("foo", "bar", @options)
-        @expectSendCalledWith(null)
-
     describe "updater:check", ->
       it "returns true when new version", ->
         @sandbox.stub(Updater, "check").yieldsTo("onNewVersion")
