@@ -1256,7 +1256,7 @@ describe('Kitchen Sink', function(){
       var time = Cypress.moment('2014-04-25T19:38:53.196Z').format('h:mm A')
 
       cy
-        .get('.utility-moment').contains(time)
+        .get('.utility-moment').contains('3:38 PM')
           .should('have.class', 'badge')
 
     })
