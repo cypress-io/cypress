@@ -41,7 +41,7 @@ class Linux extends Base
     xvfb = Promise.promisifyAll(xvfb)
     xvfb.startAsync()
     .then (xvfxProcess) =>
-      Promise.bind(@).try(p)
+      Promise.try(p.bind(@))
       .finally ->
         xvfb.stopAsync()
 
@@ -51,14 +51,6 @@ class Linux extends Base
     @_runSmokeTest()
     .catch =>
       @tryXvfb(@_runSmokeTest)
-
-  npm: ->
-    new Promise (resolve, reject) ->
-      vagrant.ssh ["-c", "cd /cypress-app && npm install"], (code) ->
-        if code isnt 0
-          reject("vagrant.rsync failed!")
-        else
-          resolve()
 
   rsync: ->
     new Promise (resolve, reject) ->
@@ -88,9 +80,9 @@ class Linux extends Base
     deploy = =>
       new Promise (resolve, reject) =>
         ssh = ->
-          vagrant.ssh ["-c", "cd /cypress-app && gulp dist --version #{version} #{getOpts()}"], (code) ->
+          vagrant.ssh ["-c", "cd /cypress-app && gulp build --version #{version} #{getOpts()}"], (code) ->
             if code isnt 0
-              reject("vagrant.ssh gulp dist failed!")
+              reject("vagrant.ssh gulp build failed!")
             else
               resolve()
 
@@ -103,9 +95,9 @@ class Linux extends Base
             ssh()
 
     @rsync()
-      .bind(@)
-      .then(@npm)
-      .then(deploy)
-      .then(@rsyncBack)
+    .bind(@)
+    .then(deploy)
+    .then(@rsyncBack)
+    .return(@)
 
 module.exports = Linux

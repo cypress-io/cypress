@@ -36,6 +36,7 @@
     "chai-as-promised": "^4.2.0",
     "chai-jquery": "^2.0.0",
     "chokidar-cli": "^1.2.0",
+    "cloudflare-cli": "^1.5.2",
     "codecov": "^1.0.1",
     "coffee-coverage": "^1.0.1",
     "commander": "2.3.0",
@@ -82,7 +83,6 @@
     "supertest": "^0.15.0",
     "supertest-as-promised": "^3.0.0",
     "supertest-session": "0.0.7",
-    "tar-fs": "^1.8.1",
     "through2": "0.6.3",
     "vagrant": "0.0.1",
     "xvfb": "cypress-io/node-xvfb"

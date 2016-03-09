@@ -75,5 +75,6 @@ class Darwin extends Base
 
   deploy: ->
     @build()
+    .return(@)
 
 module.exports = Darwin

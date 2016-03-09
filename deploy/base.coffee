@@ -33,7 +33,7 @@ class Base
 
     @zipName      = zipName
     @osName       = os
-    @uploadName   = @getUploadNameByOs(os)
+    @uploadOsName = @getUploadNameByOs(os)
 
   buildPathToAppFolder: ->
     path.join meta.buildDir, @osName
@@ -171,6 +171,8 @@ class Base
       json.env = "production"
       json.version = version if version
       json.scripts = {}
+
+      @log("#settingVersion: #{json.version}")
 
       delete json.devDependencies
       delete json.bin
@@ -349,7 +351,8 @@ class Base
     smokeTest().then(verifyAppPackage)
 
   build: ->
-    Promise.bind(@)
+    Promise
+    .bind(@)
     .then(@cleanupPlatform)
     .then(@gulpBuild)
     .then(@copyFiles)

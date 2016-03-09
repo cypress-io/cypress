@@ -37,7 +37,10 @@ deploy = {
     opts
 
   build: ->
-    @getPlatform().build()
+    ## read off the argv
+    options = @parseOptions(process.argv)
+
+    @getPlatform(null, options).build()
 
   deploy: ->
     ## read off the argv
@@ -52,8 +55,8 @@ deploy = {
         @getPlatform(o, options).deploy()
       .then (platform) =>
         zip.ditto(platform)
-        .then (zipFile) =>
-          upload.toS3(platform, zipFile)
+        .then =>
+          upload.toS3(platform)
           .then ->
             console.log chalk.bgGreen(" " + chalk.black("Dist Complete") + " ")
           .catch (err) ->

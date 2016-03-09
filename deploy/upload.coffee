@@ -1,7 +1,9 @@
 $       = require("gulp-load-plugins")()
 fs      = require("fs-extra")
+cp      = require("child_process")
 gulp    = require("gulp")
 Promise = require("bluebird")
+config  = require("../lib/config")
 
 fs = Promise.promisifyAll(fs)
 
@@ -19,32 +21,50 @@ module.exports = {
   getAwsObj: ->
     fs.readJsonSync("./support/aws-credentials.json")
 
-  getUploadDirName: (version, uploadName) ->
+  getUploadDirName: (platform) ->
     aws = @getAwsObj()
 
-    [aws.folder, version, uploadName, null].join("/")
+    [aws.folder, platform.getVersion(), platform.uploadOsName, null].join("/")
 
-  toS3: (platform, pathToZipFile) ->
+  purgeCache: (platform) ->
+    new Promise (resolve, reject) =>
+      version      = platform.getVersion()
+      uploadOsName = platform.uploadOsName
+      zipName      = platform.zipName
+
+      url = [config.app.cdn_url, "desktop", version, uploadOsName, zipName].join("/")
+
+      cp.exec "cfcli purgefile #{url}", (err, stdout, stderr) ->
+        return reject(err) if err
+
+        platform.log("#purgeCache: #{url}")
+
+        resolve()
+
+  toS3: (platform) ->
     platform.log("#uploadToS3")
 
-    version = platform.getVersion()
-    name    = platform.uploadName
+    upload = =>
+      new Promise (resolve, reject) =>
 
-    new Promise (resolve, reject) =>
+        pathToZipFile = platform.buildPathToZip()
 
-      publisher = @getPublisher()
+        publisher = @getPublisher()
 
-      headers = {}
-      headers["Cache-Control"] = "no-cache"
+        headers = {}
+        headers["Cache-Control"] = "no-cache"
 
-      gulp.src(pathToZipFile)
-      .pipe $.rename (p) =>
-        p.dirname = @getUploadDirName(version, name)
-        p
-      .pipe $.debug()
-      .pipe publisher.publish(headers)
-      .pipe $.awspublish.reporter()
-      .on "error", reject
-      .on "end", resolve
+        gulp.src(pathToZipFile)
+        .pipe $.rename (p) =>
+          p.dirname = @getUploadDirName(platform)
+          p
+        .pipe $.debug()
+        .pipe publisher.publish(headers)
+        .pipe $.awspublish.reporter()
+        .on "error", reject
+        .on "end", resolve
 
+    upload()
+    .then =>
+      @purgeCache(platform)
 }
