@@ -1,11 +1,34 @@
 machine:
   node:
     version: 5.3
-  timezone:
-    America/New_York
 
 dependencies:
   pre:
     - npm install
 
+    ## install the Cypress CLI Tools
+    ## which gives us access to the
+    ## `cypress` command used below
     - npm install -g cypress
+
+test:
+  pre:
+    ## runs the 'start' script which
+    ## boots our local app server on port 8080
+    ## which cypress expects to be running
+    - npm start:
+        background: true
+  override:
+    ## now run cypress in CI mode
+    ## which runs all of the tests
+    ## and uses the CYPRESS_API_KEY
+    ## environment var by default
+    ## which you need to configure
+    ## on Travis CI behind the scenes
+    - cypress ci
+
+    ## alternatively we could specify
+    ## a specific secret key to use
+    ## like this without having to
+    ## configure anything in Travis CI:
+    ## - cypress ci 703b33d9-a00e-4c66-90c2-40efc0fee2c6
