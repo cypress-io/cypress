@@ -295,12 +295,6 @@ describe('Kitchen Sink [000]', function(){
     })
 
     it('cy.click() - click on a DOM element [00a]', function(){
-      // SOME OF THESE ARE COMMENTED OUT DUE TO AN
-      // ERROR CURRENTLY IN CYPRESS
-      // https://github.com/cypress-io/cypress/issues/98
-      // https://github.com/cypress-io/cypress/issues/99
-      // *******************************************
-
 
       // http://on.cypress.io/api/click
       cy.get('.action-btn').click()
@@ -320,10 +314,10 @@ describe('Kitchen Sink [000]', function(){
       cy.get('#action-canvas').click('topRight')
 
       // click the bottom left corner of the element
-      // cy.get('#action-canvas').click('bottomLeft')
+      cy.get('#action-canvas').click('bottomLeft')
 
       // click the bottom right corner of the element
-      // cy.get('#action-canvas').click('bottomRight')
+      cy.get('#action-canvas').click('bottomRight')
 
 
       // **** Click Coordinate ****
@@ -373,17 +367,12 @@ describe('Kitchen Sink [000]', function(){
 
     it('cy.check() - check a checkbox or radio element [001]', function(){
 
-      // SOME OF THESE ARE COMMENTED OUT DUE TO AN
-      // ERROR CURRENTLY IN CYPRESS
-      // https://github.com/cypress-io/cypress/issues/94
-      // *******************************************
-
       // By default, cy.check() will check all
       // matching checkbox or radio elements in succession, one after another
 
       // http://on.cypress.io/api/check
-      // cy.get('.action-checkboxes [type='checkbox']').not('[disabled]').check().should('be.checked')
-      // cy.get('.action-radios [type='radio']').not('[disabled]').check().should('be.checked')
+      cy.get('.action-checkboxes [type="checkbox"]').not('[disabled]').check().should('be.checked')
+      cy.get('.action-radios [type="radio"]').not('[disabled]').check().should('be.checked')
 
       // **** Check Value ****
       //
@@ -391,7 +380,7 @@ describe('Kitchen Sink [000]', function(){
       // that checks only checkboxes or radios
       // with matching values
       //
-      // cy.get('.action-radios [type='radio']').check('radio1').should('be.checked')
+      cy.get('.action-radios [type="radio"]').check('radio1').should('be.checked')
 
       // **** Check Options ****
       //
@@ -403,17 +392,12 @@ describe('Kitchen Sink [000]', function(){
       cy
         .get('.action-checkboxes [disabled]')
           .check({force: true}).should('be.checked')
-      // cy.get('.action-radios [type='radio']').check('radio3', {force: true}).should('be.checked')
+      cy.get('.action-radios [type="radio"]').check('radio3', {force: true}).should('be.checked')
 
     })
 
 
     it('cy.uncheck() - uncheck a checkbox element [002]', function(){
-
-      // SOME OF THESE ARE COMMENTED OUT DUE TO AN
-      // ERROR CURRENTLY IN CYPRESS
-      // https://github.com/cypress-io/cypress/issues/94
-      // *******************************************
 
       // By default, cy.uncheck() will uncheck all matching
       // checkbox elements in succession, one after another
@@ -429,7 +413,7 @@ describe('Kitchen Sink [000]', function(){
       // that unchecks only checkboxes
       // with matching values
       //
-      // cy.get('.action-check [type='checkbox']').check('checkbox1').uncheck('checkbox1').should('not.be.checked')
+      cy.get('.action-check [type="checkbox"]').check('checkbox1').uncheck('checkbox1').should('not.be.checked')
 
       // **** Uncheck Options ****
       //
@@ -1512,8 +1496,8 @@ describe('Kitchen Sink [000]', function(){
       it('Cypress.Server.defaults() - change default config of server [021]', function(){
 
         Cypress.Server.defaults({
-          delay: 500,
-          force404: true,
+          delay: 0,
+          force404: false,
           whitelist: function(xhr){
             // handle custom logic for whitelisting
           }
