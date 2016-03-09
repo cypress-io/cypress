@@ -74,6 +74,6 @@ class Darwin extends Base
           reject new Error("Verifying App via GateKeeper failed")
 
   deploy: ->
-    @dist()
+    @build()
 
 module.exports = Darwin

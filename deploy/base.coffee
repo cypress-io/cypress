@@ -154,7 +154,10 @@ class Base
     @log("#cleanupPlatform")
 
     cleanup = =>
-      fs.removeAsync path.join(meta.buildDir, @osName)
+      Promise.all([
+        fs.removeAsync path.join(meta.distDir, @osName)
+        fs.removeAsync path.join(meta.buildDir, @osName)
+      ])
 
     cleanup().catch(cleanup)
 
@@ -363,10 +366,6 @@ class Base
     .then(@runProjectTest)
     .then(@codeSign) ## codesign after running smoke tests due to changing .cy
     .then(@verifyAppCanOpen)
-
-  dist: ->
-    Promise.bind(@)
-    # .then(@build)
-    # .then(@cleanupDist)
+    .return(@)
 
 module.exports = Base

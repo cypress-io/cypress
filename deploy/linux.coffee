@@ -1,10 +1,15 @@
 fs      = require("fs")
 path    = require("path")
 Xvfb    = require("xvfb")
+vagrant = require("vagrant")
 Promise = require("bluebird")
 Base    = require("./base")
 
 fs = Promise.promisifyAll(fs)
+
+vagrant.debug = true
+["rsync", "rsync-auto", "rsync-back"].forEach (cmd) ->
+  vagrant[cmd] = vagrant._runWithArgs(cmd)
 
 class Linux extends Base
   buildPathToApp: ->

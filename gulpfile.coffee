@@ -167,16 +167,6 @@ gulp.task "server", -> require("./server.coffee")
 
 gulp.task "test", -> require("./spec/server.coffee")
 
-gulp.task "dist:tests", deploy.runTests
-
-gulp.task "build:smoke:test", deploy.runSmokeTest
-
-gulp.task "after:build", deploy.afterBuild
-
-gulp.task "dist", deploy.dist
-
-gulp.task "build", deploy.build
-
 gulp.task "release", deploy.release
 
 gulp.task "deploy:fixture", ->
@@ -184,7 +174,7 @@ gulp.task "deploy:fixture", ->
 
 gulp.task "deploy:manifest", deploy.manifest
 
-gulp.task "get:manifest", deploy.getManifest
+gulp.task "build", deploy.build
 
 gulp.task "deploy", deploy.deploy
 

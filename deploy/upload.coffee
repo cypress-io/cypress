@@ -24,7 +24,7 @@ module.exports = {
 
     [aws.folder, version, uploadName, null].join("/")
 
-  toS3: (platform) ->
+  toS3: (platform, pathToZipFile) ->
     platform.log("#uploadToS3")
 
     version = platform.getVersion()
@@ -37,7 +37,7 @@ module.exports = {
       headers = {}
       headers["Cache-Control"] = "no-cache"
 
-      gulp.src(platform.buildPathToZip())
+      gulp.src(pathToZipFile)
       .pipe $.rename (p) =>
         p.dirname = @getUploadDirName(version, name)
         p
