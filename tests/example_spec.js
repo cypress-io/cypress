@@ -1249,7 +1249,6 @@ describe('Kitchen Sink', function(){
 
     })
 
-
     it('Cypress.moment() - format or parse dates using a moment method', function(){
 
       // use moment's format function
