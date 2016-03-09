@@ -12,7 +12,7 @@ Just like Promises, you can return any compatible "thenable" (anything that has 
 | | |
 |--- | --- |
 | **Returns** | the return of the callback function |
-| **Timeout** | *cannot timeout* |
+| **Timeout** | `cy.then` will retry for the duration of the [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) or the duration of the `timeout` specified in the command's [options](#section-options). |
 
 ***
 
@@ -41,6 +41,20 @@ cy.get("form").find("input").then(function($input){
 ```
 
 ***
+
+# Options
+
+Pass in an options object to change the default behavior of `cy.then`.
+
+**[cy.click( *options*,  *function* )](#options-usage)**
+
+Option | Default | Notes
+--- | --- | ---
+`timeout` | [`commandTimeout`](https://on.cypress.io/guides/configuration#section-global-options) | Total time to retry the click
+
+***
+
+# Usage
 
 ## Assert explicitly about the subject `<li>`'s
 
@@ -134,6 +148,16 @@ cy
     // our form element carried over and we called
     // .find("input") on it
   })
+```
+
+***
+
+# Options Usage
+
+```javascript
+cy.then({timeout: 7000}, function(){
+  // code here
+})
 ```
 
 ***
