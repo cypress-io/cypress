@@ -172,8 +172,6 @@ gulp.task "release", deploy.release
 gulp.task "deploy:fixture", ->
   require("./lib/deploy")().fixture()
 
-gulp.task "deploy:manifest", deploy.manifest
-
 gulp.task "build", deploy.build
 
 gulp.task "deploy", deploy.deploy

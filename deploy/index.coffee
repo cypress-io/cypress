@@ -11,6 +11,12 @@ Base     = require("./base")
 Linux    = require("./linux")
 Darwin   = require("./darwin")
 
+success = (str) ->
+  console.log chalk.bgGreen(" " + chalk.black(str) + " ")
+
+fail = (str) ->
+  console.log chalk.bgRed(" " + chalk.black(str) + " ")
+
 deploy = {
   zip:    zip
   ask:    ask
@@ -42,6 +48,23 @@ deploy = {
 
     @getPlatform(null, options).build()
 
+  release: ->
+    ## read off the argv
+    options = @parseOptions(process.argv)
+
+    release = (version) =>
+      upload.s3Manifest(version)
+      .then ->
+        success("Release Complete")
+      .catch (err) ->
+        fail("Release Failed")
+        reject(err)
+
+    if v = options.version
+      release(v)
+    else
+      ask.whichRelease(meta.distDir).then(release)
+
   deploy: ->
     ## read off the argv
     options = @parseOptions(process.argv)
@@ -58,9 +81,9 @@ deploy = {
         .then =>
           upload.toS3(platform)
           .then ->
-            console.log chalk.bgGreen(" " + chalk.black("Dist Complete") + " ")
+            success("Dist Complete")
           .catch (err) ->
-            console.log chalk.bgRed(" " + chalk.black("Dist Failed") + " ")
+            fail("Dist Failed")
             console.log(err)
 
 }

@@ -1,4 +1,6 @@
+_        = require("lodash")
 fs       = require("fs-extra")
+glob     = require("glob")
 Promise  = require("bluebird")
 inquirer = require("inquirer")
 
@@ -46,6 +48,18 @@ module.exports = {
         answers.publish
     }]
 
+  getReleases: (releases) ->
+    [{
+      name: "release"
+      type: "list"
+      message: "Release which version?"
+      choices: _.map releases, (r) ->
+        {
+          name: r
+          value: r
+        }
+    }]
+
   deployNewVersion: ->
     new Promise (resolve, reject) =>
       fs.readJsonAsync("./package.json").then (json) =>
@@ -57,6 +71,21 @@ module.exports = {
             resolve(answers.version)
           else
             resolve(json.version)
+
+  whichRelease: (distDir) ->
+    new Promise (resolve, reject) =>
+      ## realpath returns the absolute full path
+      glob "*/package.json", {cwd: distDir, realpath: true}, (err, pkgs) =>
+        return reject(err) if err
+
+        Promise
+        .map pkgs, (pkg) ->
+          fs.readJsonAsync(pkg).get("version")
+        .then (versions) =>
+          versions = _.uniq(versions)
+
+          inquirer.prompt @getReleases(versions), (answers) =>
+            resolve(answers.release)
 
   whichPlatform: ->
     new Promise (resolve, reject) =>

@@ -25,11 +25,7 @@ zipName  = "cypress.zip"
 class Base
   constructor: (os, @options = {}) ->
     _.defaults @options,
-    #   runTests:         true
       version:          null
-    #   publisher:        null
-    #   publisherOptions: {}
-      # platform:         platform
 
     @zipName      = zipName
     @osName       = os
@@ -241,11 +237,6 @@ class Base
     requestPromise(config.app.desktop_manifest_url).then (resp) ->
       console.log resp
 
-  cleanupDist: ->
-    @log("#cleanupDist")
-
-    fs.removeAsync(@distDir())
-
   fixture: (cb) ->
     @dist()
       .then(@uploadFixtureToS3)
@@ -259,13 +250,6 @@ class Base
 
   log: ->
     log.apply(@, arguments)
-
-  manifest: ->
-    Promise.bind(@)
-      .then(@copyFiles)
-      .then(@setVersion)
-      .then(@updateS3Manifest)
-      .then(@cleanupDist)
 
   gulpBuild: ->
     @log "gulpBuild"
