@@ -1,4 +1,4 @@
-## Cypress Example [![Circle CI](https://circleci.com/gh/cypress-io/cypress-example.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress-example)
+## Cypress Example [![Circle CI](https://circleci.com/gh/cypress-io/cypress-example.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress-example) [ ![Codeship Status for cypress-io/cypress-example](https://codeship.com/projects/63b71ec0-c850-0133-987c-12caa2fab171/status?branch=master)](https://codeship.com/projects/139291)
 
 This repo contains the source code for pushing out [https://example.cypress.io](https://example.cypress.io).
 
