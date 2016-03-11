@@ -54,14 +54,6 @@ module.exports = {
     new Promise (resolve, reject) =>
       inquirer.prompt questions, (answers) =>
         if answers.add
-          ## what happens if adding the project fails?
-          ## TODO: handle this edge case since its communicating
-          ## with our remote server. I think currently since this
-          ## is a wrapped promise is that it will bubble all the way
-          ## up and we will console.log the error and report it
-          ## since it'll likely be NetworkError or something.
-          ## But we should still gracefully handle this better
-          ## and provide a custom error message.
           Project.add(projectPath)
           .then ->
             console.log chalk.green("\nOk great, added the project.\n")

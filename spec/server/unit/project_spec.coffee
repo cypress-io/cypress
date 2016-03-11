@@ -287,26 +287,13 @@ describe "lib/project", ->
   context ".add", ->
     beforeEach ->
       @pristinePath = Fixtures.projectPath("pristine")
-      @sandbox.stub(user, "ensureSession").resolves("session-123")
-      @sandbox.stub(api, "createProject").resolves("id-123")
-
-    it "creates a cypress.json in projectRoot", ->
-      Project.add(@pristinePath).then =>
-        Settings.read(@pristinePath).then (settings) ->
-          expect(settings).to.deep.eq({
-            projectId: "id-123"
-          })
 
     it "inserts into cache project id + cache", ->
-      Project.add(@pristinePath).then =>
-        cache.read().then (json) =>
-          expect(json.PROJECTS).to.deep.eq({
-            "id-123": {PATH: @pristinePath}
-          })
-
-    it "resolves with the id", ->
-      Project.add(@pristinePath).then (id) ->
-        expect(id).to.eq("id-123")
+      Project.add(@pristinePath)
+      .then =>
+        cache.read()
+      .then (json) =>
+        expect(json.PROJECTS).to.deep.eq([@pristinePath])
 
   context ".remove", ->
     beforeEach ->

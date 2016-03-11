@@ -175,13 +175,12 @@ class Project extends EE
   writeProjectId: (id) ->
     attrs = {projectId: id}
     logger.info "Writing Project ID", _.clone(attrs)
+
     Settings
-      .write(@projectRoot, attrs)
-      .get("projectId")
+    .write(@projectRoot, attrs)
+    .get("projectId")
 
   createProjectId: ->
-    logger.info "Creating Project ID"
-
     ## allow us to specify the exact key
     ## we want via the CYPRESS_PROJECT_ID env.
     ## this allows us to omit the cypress.json
@@ -225,18 +224,7 @@ class Project extends EE
     cache.removeProject(path)
 
   @add = (path) ->
-    ## make sure we either have or receive an id
-    Project(path)
-    .ensureProjectId()
-    .then (id) =>
-      ## make sure we've written it to the local .cy file
-      cache.insertProject(id)
-      .then =>
-        ## and make sure we have the correct path
-        cache.updateProject(id, path)
-
-      ## return the project id
-      .return(id)
+    cache.insertProject(path)
 
   @removeIds = (p) ->
     Project(p)
@@ -255,8 +243,7 @@ class Project extends EE
 
   @getSecretKeyByPath = (path) ->
     ## get project id
-    Project(path)
-    .getProjectId()
+    Project.id(path)
     .then (id) ->
       user.ensureSession()
       .then (session) ->
@@ -266,8 +253,7 @@ class Project extends EE
 
   @generateSecretKeyByPath = (path) ->
     ## get project id
-    Project(path)
-    .getProjectId()
+    Project.id(path)
     .then (id) ->
       user.ensureSession()
       .then (session) ->

@@ -25,6 +25,7 @@ describe "lib/cypress", ->
 
     Fixtures.scaffold()
     @todosPath = Fixtures.projectPath("todos")
+    @pristinePath = Fixtures.projectPath("pristine")
 
     ## force cypress to call directly into main without
     ## spawning a separate process
@@ -54,7 +55,10 @@ describe "lib/cypress", ->
       Promise.all([
         user.set({name: "brian", session_token: "session-123"}),
 
-        Project.add(@todosPath).then (id) =>
+        Project.add(@todosPath)
+        .then =>
+          Project.id(@todosPath)
+        .then (id) =>
           @projectId = id
       ])
       .then =>
@@ -74,8 +78,6 @@ describe "lib/cypress", ->
           @expectExitWithErr("NOT_LOGGED_IN")
 
     it "logs error and exits when project does not have an id", ->
-      @pristinePath = Fixtures.projectPath("pristine")
-
       user.set({session_token: "session-123"})
       .then =>
         cypress.start(["--get-key", "--project=#{@pristinePath}"]).then =>
@@ -91,7 +93,10 @@ describe "lib/cypress", ->
       Promise.all([
         user.set({session_token: "session-123"}),
 
-        Project.add(@todosPath).then (id) =>
+        Project.add(@todosPath)
+        .then =>
+          Project.id(@todosPath)
+        .then (id) =>
           @projectId = id
       ])
       .then =>
@@ -107,7 +112,10 @@ describe "lib/cypress", ->
       Promise.all([
         user.set({name: "brian", session_token: "session-123"}),
 
-        Project.add(@todosPath).then (id) =>
+        Project.add(@todosPath)
+        .then =>
+          Project.id(@todosPath)
+        .then (id) =>
           @projectId = id
       ])
       .then =>
@@ -127,8 +135,6 @@ describe "lib/cypress", ->
           @expectExitWithErr("NOT_LOGGED_IN")
 
     it "logs error and exits when project does not have an id", ->
-      @pristinePath = Fixtures.projectPath("pristine")
-
       user.set({session_token: "session-123"})
       .then =>
         cypress.start(["--new-key", "--project=#{@pristinePath}"]).then =>
@@ -144,7 +150,10 @@ describe "lib/cypress", ->
       Promise.all([
         user.set({session_token: "session-123"}),
 
-        Project.add(@todosPath).then (id) =>
+        Project.add(@todosPath)
+        .then =>
+          Project.id(@todosPath)
+        .then (id) =>
           @projectId = id
       ])
       .then =>
@@ -174,6 +183,36 @@ describe "lib/cypress", ->
           expect(api.updateProject).not.to.be.called
           expect(headless.createRenderer).to.be.calledWith("http://localhost:8888/__/#/tests/__all?__ui=satellite")
           @expectExitWith(0)
+
+    it "generates a project id if missing one", ->
+      @sandbox.stub(api, "createProject").resolves("pristine-id-123")
+
+      Promise.all([
+        user.set({name: "brian", session_token: "session-123"}),
+
+        Project.add(@pristinePath)
+      ])
+      .then =>
+        cypress.start(["--run-project=#{@pristinePath}"]).then =>
+          @expectExitWith(0)
+
+          ## give it time to request the project id
+          Promise.delay(100).then =>
+            Project(@pristinePath).getProjectId().then (id) ->
+              expect(id).to.eq("pristine-id-123")
+
+    it "does not error when getting a creating a project id fails", ->
+      @sandbox.stub(api, "createProject").rejects(new Error)
+
+      Promise.all([
+        user.set({name: "brian", session_token: "session-123"}),
+
+        Project.add(@pristinePath)
+      ])
+      .then =>
+        cypress.start(["--run-project=#{@pristinePath}"]).then =>
+          Promise.delay(100).then =>
+            @expectExitWith(0)
 
     it "prompts to add the project and then immediately runs the tests and exits with 0", ->
       @sandbox.stub(inquirer, "prompt").yieldsAsync({add: true})
@@ -239,28 +278,6 @@ describe "lib/cypress", ->
       .then =>
         cypress.start(["--run-project=#{@todosPath}", "--spec=#{@todosPath}/tests/path/to/spec"]).then =>
           @expectExitWithErr("SPEC_FILE_NOT_FOUND", "#{@todosPath}/tests/path/to/spec")
-
-    ## Currently this is not an error, all this does is simply run the tests
-    ## without an id
-    ## TODO
-    ## consider removing the cache holding onto the project id as this can
-    ## get stale very quickly
-    ## consider only ever looking at the project's ID based on its cypress.json
-    it.skip "logs error and exits when project does not have an id", ->
-      @sandbox.stub(inquirer, "prompt").yieldsAsync({add: true})
-
-      Promise.all([
-        user.set({name: "brian", session_token: "session-123"}),
-
-        Project.add(@todosPath)
-      ])
-      .then =>
-        ## remove the cypress.json id from cypress.json on todos project
-        ## after adding this to the cache
-        Settings.write(@todosPath, {projectId: null})
-      .then =>
-        cypress.start(["--run-project=#{@todosPath}"]).then =>
-          @expectExitWithErr("??")
 
     it "logs error and exits when project has cypress.json syntax error", ->
       Promise.all([
@@ -376,9 +393,10 @@ describe "lib/cypress", ->
 
       Promise.all([
         ## make sure we have no user object
-        user.set({}),
-
-        Project.add(@todosPath).then (id) =>
+        user.set({})
+        .then =>
+          Project.id(@todosPath)
+        .then (id) =>
           @projectId = id
       ])
       .then =>
