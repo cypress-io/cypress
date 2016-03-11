@@ -1,0 +1,14 @@
+{
+  "USER": {"name": "brian"},
+  "PROJECTS": {
+    "aa66d179-947c-4987-b816-ae0218cd985d": {
+      "PATH": "/Users/bmann/Dev/examples-angular-circle-ci"
+    },
+    "21b1ecae-ddc3-499e-af45-31c499163178": {
+      "PATH": "/Users/bmann/Dev/cypress-gui"
+    },
+    "e3e58d3f-3769-4b50-af38-e31b8989a938": {
+      "PATH": "/Users/bmann/Dev/cypress-app/spec/fixtures/projects/todos"
+    }
+  }
+}

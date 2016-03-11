@@ -27,9 +27,16 @@ module.exports = {
           json.USER = {}
 
         if not json.PROJECTS
-          json.PROJECTS = {}
+          json.PROJECTS = []
 
         @write(json, false)
+      .then (json) =>
+        ## if our project structure is not
+        ## an array then its legacy and we
+        ## need to convert it
+        if not _.isArray(json.PROJECTS)
+          json = @convertLegacyCache(json)
+          @write(json, false)
       .return(true)
       .catch =>
         @write(@defaults(), false)
@@ -40,8 +47,12 @@ module.exports = {
   defaults: ->
     {
       USER: {}
-      PROJECTS: {}
+      PROJECTS: []
     }
+
+  convertLegacyCache: (json) ->
+    json.PROJECTS = _.chain(json.PROJECTS).values().map("PATH").compact().value()
+    json
 
   ## Reads the contents of the local file
   ## returns a JSON object
@@ -89,47 +100,26 @@ module.exports = {
     @read().then (contents) ->
       contents[key]
 
-  updateProject: (id, path) ->
-    @getProjects().then (projects) =>
-      @getProject(id).then (project) =>
-        projects[id] = _.extend(project, {PATH: path})
-        @_set "PROJECTS", projects
-        .return(project)
+  insertProject: (path) ->
+    @_getProjects().then (projects) =>
+      ## bail if we already have this path
+      return projects if path in projects
 
-  insertProject: (id) ->
-    throw new Error("Cannot insert a project without an id!") if not id
+      projects.push(path)
+      @_set("PROJECTS", projects)
 
-    @getProjects().then (projects) =>
-      ## bail if we already have a project
-      return if projects[id]
-
-      ## create an empty nested object
-      obj = {}
-      obj[id] = {}
-      @_set("PROJECTS", obj)
-
-  ## TODO: refactor this method
-  getProject: (id) ->
-    @getProjects().then (projects) ->
-      if (project = projects[id])
-        return project
-
-      throw new Error("Project #{id} not found")
-
-  getProjects: ->
+  _getProjects: ->
     @_get("PROJECTS")
 
-  _removeProjectByPath: (projects, path) ->
-    projects = _.omit projects, (project, key) ->
-      project.PATH is path
+  _removeProjects: (projects, paths) ->
+    ## normalize paths in array
+    projects = _.without(projects, [].concat(paths)...)
 
     @_set {PROJECTS: projects}
 
   getProjectPaths: ->
-    @getProjects().then (projects) =>
-      paths = _.pluck(projects, "PATH")
-
-      pathsToRemove = Promise.reduce paths, (memo, path) ->
+    @_getProjects().then (projects) =>
+      pathsToRemove = Promise.reduce projects, (memo, path) ->
         queue.add ->
           fs.statAsync(path)
           .catch ->
@@ -139,18 +129,15 @@ module.exports = {
 
       pathsToRemove.then (removedPaths) =>
         process.nextTick =>
-          Promise.each removedPaths, (path) =>
-            @_removeProjectByPath(projects, path)
+          @_removeProjects(projects, removedPaths)
 
         ## return our paths without the ones we're
         ## about to remove
-        return _.without(paths, removedPaths...)
+        return _.without(projects, removedPaths...)
 
   removeProject: (path) ->
-    logger.info "removing project from path", path: path
-
-    @getProjects().then (projects) =>
-      @_removeProjectByPath(projects, path)
+    @_getProjects().then (projects) =>
+      @_removeProjects(projects, path)
 
   getUser: ->
     logger.info "getting user"

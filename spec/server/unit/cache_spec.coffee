@@ -3,9 +3,7 @@ require("../spec_helper")
 path      = require("path")
 cwd       = require("#{root}lib/cwd")
 cache     = require("#{root}lib/cache")
-Project   = require("#{root}lib/project")
-Settings  = require("#{root}lib/util/settings")
-Routes    = require("#{root}lib/util/routes")
+Fixtures  = require("../helpers/fixtures")
 
 describe "lib/cache", ->
   context "#ensureExists", ->
@@ -14,7 +12,7 @@ describe "lib/cache", ->
         fs.readJsonAsync(cache.path).then (json) ->
           expect(json).to.deep.eq {
             USER: {}
-            PROJECTS: {}
+            PROJECTS: []
           }
 
     it "detects when not defaults and automatically inserts PROJECTS", ->
@@ -25,7 +23,7 @@ describe "lib/cache", ->
         fs.readJsonAsync(cache.path).then (json) ->
           expect(json).to.deep.eq {
             USER: {name: "brian"}
-            PROJECTS: {}
+            PROJECTS: []
           }
 
     it "detects when not defaults and automatically inserts USER", ->
@@ -36,112 +34,140 @@ describe "lib/cache", ->
         fs.readJsonAsync(cache.path).then (json) ->
           expect(json).to.deep.eq {
             USER: {}
-            PROJECTS: {asdf: "jkl"}
+            PROJECTS: []
+          }
+
+    it "converts legacy cache projects to array", ->
+      fs.writeFileAsync(cache.path, Fixtures.get("server/old_cache.json"))
+      .then =>
+        cache.ensureExists()
+      .then =>
+        fs.readJsonAsync(cache.path).then (json) ->
+          expect(json).to.deep.eq {
+            USER: {name: "brian"}
+            PROJECTS: [
+              "/Users/bmann/Dev/examples-angular-circle-ci"
+              "/Users/bmann/Dev/cypress-gui"
+              "/Users/bmann/Dev/cypress-app/spec/fixtures/projects/todos"
+            ]
           }
 
     it "creates cache file in root/.cy/{environment}/cache", ->
       cache.ensureExists().then ->
         fs.statAsync(cwd(".cy", process.env["CYPRESS_ENV"], "cache"))
 
+  context "#convertLegacyCache", ->
+    beforeEach ->
+      fs.readJsonAsync(Fixtures.path("server/old_cache.json")).then (@oldCache) =>
+
+    it "converts object to array of paths", ->
+      obj = cache.convertLegacyCache(@oldCache)
+      expect(obj).to.deep.eq({
+        USER: {name: "brian"}
+        PROJECTS: [
+          "/Users/bmann/Dev/examples-angular-circle-ci"
+          "/Users/bmann/Dev/cypress-gui"
+          "/Users/bmann/Dev/cypress-app/spec/fixtures/projects/todos"
+        ]
+      })
+
+    it "compacts non PATH values", ->
+      obj = cache.convertLegacyCache({
+        USER: {}
+        PROJECTS: {
+          one: { PATH: "foo/bar" }
+          two: { FOO: "baz" }
+        }
+      })
+
+      expect(obj).to.deep.eq({
+        USER: {}
+        PROJECTS: ["foo/bar"]
+      })
+
   context "projects", ->
     beforeEach ->
       cache.ensureExists()
 
     describe "#insertProject", ->
-      it "throws without an id", ->
-        fn = => cache.insertProject(null)
-        expect(fn).to.throw("Cannot insert a project without an id!")
-
-      it "inserts project by id", ->
-        cache.insertProject(12345).then =>
-          cache.getProjects().then (projects) ->
-            expect(projects).to.deep.eq {"12345": {}}
+      it "inserts project by path", ->
+        cache.insertProject("foo/bar").then =>
+          cache._getProjects().then (projects) ->
+            expect(projects).to.deep.eq ["foo/bar"]
 
       it "is a noop if project already exists by id", ->
-        cache.insertProject(12345)
+        cache.insertProject("foo/bar")
         .then =>
-          cache.updateProject(12345, "path/to/project").then (@project) =>
-            expect(@project).to.deep.eq {PATH: "path/to/project"}
+          cache.insertProject("foo/bar")
         .then =>
-          cache.insertProject(12345).then =>
-            expect(@project).to.deep.eq {PATH: "path/to/project"}
+          cache._getProjects().then (projects) ->
+            expect(projects).to.deep.eq(["foo/bar"])
 
       it "can insert multiple projects", ->
-        insert = (id) =>
-          cache.insertProject(id)
+        insert = (path) =>
+          cache.insertProject(path)
 
-        insert(123).then =>
-          insert(456).then =>
-            insert(789).then =>
-              cache.getProjects().then (projects) ->
-                expect(projects).to.have.keys ["123", "456", "789"]
+        insert("foo")
+        .then =>
+          insert("bar")
+        .then =>
+          insert("baz")
+        .then =>
+          cache._getProjects().then (projects) ->
+            expect(projects).to.deep.eq(["foo", "bar", "baz"])
 
     describe "#removeProject", ->
-      beforeEach ->
-        @sandbox.stub(Project.prototype, "verifyExistance").resolves()
-        @sandbox.stub(Project.prototype, "createProjectId").resolves("foo-bar-baz-123")
-        @sandbox.stub(Settings, "read").resolves({})
-
       it "removes project by path", ->
-        Project.add("/Users/brian/app").then =>
-          cache.removeProject("/Users/brian/app").then =>
-            cache.getProjects().then (projects) ->
-              expect(projects).to.deep.eq {}
+        cache.insertProject("/Users/brian/app")
+        .then =>
+          cache.removeProject("/Users/brian/app")
+        .then =>
+          cache._getProjects().then (projects) ->
+            expect(projects).to.deep.eq []
 
     describe "#getProjectPaths", ->
-      it "returns an array of paths", (done) ->
-        stubId = (id) =>
-          @sandbox.restore()
-          @sandbox.stub(Project.prototype, "getProjectId").resolves(id)
-          @sandbox.stub(fs, "statAsync").resolves()
+      beforeEach ->
+        @statAsync = @sandbox.stub(fs, "statAsync")
 
-        stubId("abc-123")
-        Project.add("/Users/brian/app").then =>
-          stubId("foo-bar-456")
-          Project.add("/Users/sam/app2").then =>
-            cache.getProjectPaths().then (paths) ->
-              expect(paths).to.deep.eq ["/Users/brian/app", "/Users/sam/app2"]
-              done()
-        .catch(done)
+      it "returns an array of paths", ->
+        @statAsync.withArgs("/Users/brian/app").resolves()
+        @statAsync.withArgs("/Users/sam/app2").resolves()
 
-      it "removes any paths which no longer exist on the filesystem", (done) ->
-        stubId = (id) =>
-          @sandbox.restore()
-          @sandbox.stub(Project.prototype, "getProjectId").resolves(id)
-          @sandbox.stub(cache, "ensureExists").resolves()
-          @sandbox.stub(fs, "statAsync")
-            .withArgs("/Users/brian/app").resolves()
-            .withArgs("/Users/sam/app2").rejects(new Error)
+        cache.insertProject("/Users/brian/app")
+        .then =>
+          cache.insertProject("/Users/sam/app2")
+        .then =>
+          cache.getProjectPaths().then (paths) ->
+            expect(paths).to.deep.eq ["/Users/brian/app", "/Users/sam/app2"]
 
-        stubId("abc-123")
-        Project.add("/Users/brian/app").then =>
-          stubId("foo-bar-456")
-          Project.add("/Users/sam/app2").then =>
-            cache.getProjectPaths().then (paths) =>
-              expect(paths).to.deep.eq ["/Users/brian/app"]
+      it "removes any paths which no longer exist on the filesystem", ->
+        @statAsync.withArgs("/Users/brian/app").resolves()
+        @statAsync.withArgs("/Users/sam/app2").rejects(new Error)
 
-              ## we have to wait on the write event because
-              ## of process.nextTick
-              Promise.delay(100).then =>
-                cache.getProjects().then (projects) ->
-                  expect(projects).to.have.all.keys("abc-123")
-                  done()
+        cache.insertProject("/Users/brian/app")
+        .then =>
+          cache.insertProject("/Users/sam/app2")
+        .then =>
+          cache.getProjectPaths().then (paths) =>
+            expect(paths).to.deep.eq ["/Users/brian/app"]
+        .then =>
+          ## we have to wait on the write event because
+          ## of process.nextTick
+          Promise.delay(100).then =>
+            cache._getProjects().then (projects) ->
+              expect(projects).to.deep.eq ["/Users/brian/app"]
 
-    describe "#_removeProjectByPath", ->
-      it "removes projects by path", (done) ->
-        stubId = (id) =>
-          @sandbox.restore()
-          @sandbox.stub(Project.prototype, "getProjectId").resolves(id)
-        stubId(123)
-        Project.add("/Users/brian/app").then =>
-          stubId(456)
-          Project.add("/Users/sam/app2").then =>
-            cache.getProjects().then (projects) =>
-              cache._removeProjectByPath(projects, "/Users/sam/app2").then =>
-                cache.getProjects().then (projects) ->
-                  expect(projects).not.to.have.property(456)
-                  done()
-          .catch(done)
+    describe "#_removeProjects", ->
+      it "removes projects by path",  ->
+        cache.insertProject("/Users/brian/app")
+        .then =>
+          cache.insertProject("/Users/sam/app2")
+        .then =>
+          cache._getProjects().then (projects) =>
+            cache._removeProjects(projects, "/Users/sam/app2")
+        .then =>
+          cache._getProjects().then (projects) ->
+            expect(projects).to.deep.eq ["/Users/brian/app"]
 
   context "sessions", ->
     describe "#getUser", ->
@@ -168,13 +194,11 @@ describe "lib/cache", ->
       beforeEach ->
         cache.ensureExists()
 
-      it "does not override existing properties", (done) ->
+      it "does not override existing properties", ->
         cache.write({foo: "foo"}).then (contents) =>
           cache._set({bar: "bar"}).then (contents) ->
             expect(contents.foo).to.eq "foo"
             expect(contents.bar).to.eq "bar"
-            done()
-        .catch(done)
 
   context "#getUser / #setUser", ->
     beforeEach ->
