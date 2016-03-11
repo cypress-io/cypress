@@ -396,6 +396,10 @@ describe "lib/cypress", ->
       cypress.start(["--run-project=#{@todosPath}", "--key=secret-key-123", "--ci"]).then =>
         @expectExitWith(10)
 
+    it "logs error when missing project id", ->
+      cypress.start(["--run-project=#{@pristinePath}", "--key=secret-key-123", "--ci"]).then =>
+        @expectExitWithErr("NO_PROJECT_ID", @pristinePath)
+
     it "logs error and exits when ci key is not valid", ->
       err = new Error
       err.statusCode = 401
