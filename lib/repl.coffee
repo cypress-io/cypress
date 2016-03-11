@@ -18,6 +18,7 @@ getObj = ->
   deploy = require("../deploy")
 
   return {
+    lodash: _
     deploy: deploy
     darwin: deploy.getPlatform("darwin")
     linux:  deploy.getPlatform("linux")
