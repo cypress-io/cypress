@@ -4,7 +4,6 @@ http    = require("http")
 Promise = require("bluebird")
 
 cache      = {}
-onSocket   = http.ClientRequest.prototype.onSocket
 addRequest = http.Agent.prototype.addRequest
 
 setCache = (options, family) ->
