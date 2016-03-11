@@ -37,6 +37,7 @@ class Watchers
     _.defaults options,
       interval:   250
       usePolling: true
+      useFsEvents: false
       ignored:    null
       onChange:   null
       onReady:    null

@@ -47,7 +47,7 @@ class Project extends EE
       ## opening the server
       @config = config
 
-      @watchFilesAndStartWebsockets(options)
+      @watchSettingsAndStartWebsockets(options)
 
       .then =>
         @scaffold(config)
@@ -86,19 +86,27 @@ class Project extends EE
       .then (session) ->
         api.updateProject(id, session)
 
-  watchFilesAndStartWebsockets: (options) ->
-    obj = {}
+  watchSettings: (options) ->
+    ## bail if we havent been told to
+    ## watch anything
+    return if not options.changeEvents
 
-    ## if we are listening for change events
-    if options.changeEvents
-      obj.onChange = (filePath, stats) =>
+    obj = {
+      onChange: (filePath, stats) =>
+        ## dont fire change events if we generated
+        ## a project id less than 1 second ago
+        return if @generatedProjectIdTimestamp and
+          (new Date - @generatedProjectIdTimestamp) < 1000
+
         ## emit settings:changed whenever
         ## our settings file changes
         @emit("settings:changed")
+    }
 
-    ## whenever the cypress.json file changes we need to close
-    ## this project and re-open it
     @watchers.watch(Settings.pathToCypressJson(@projectRoot), obj)
+
+  watchSettingsAndStartWebsockets: (options) ->
+    @watchSettings(options)
 
     ## if we've passed down reporter
     ## then record these via mocha reporter
@@ -176,9 +184,11 @@ class Project extends EE
     attrs = {projectId: id}
     logger.info "Writing Project ID", _.clone(attrs)
 
+    @generatedProjectIdTimestamp = new Date
+
     Settings
     .write(@projectRoot, attrs)
-    .get("projectId")
+    .return(id)
 
   createProjectId: ->
     ## allow us to specify the exact key

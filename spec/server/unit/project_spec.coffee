@@ -60,7 +60,7 @@ describe "lib/project", ->
     beforeEach ->
       @project = Project("path/to/project")
 
-      @sandbox.stub(@project, "watchFilesAndStartWebsockets").resolves()
+      @sandbox.stub(@project, "watchSettingsAndStartWebsockets").resolves()
       @sandbox.stub(@project, "ensureProjectId").resolves("id-123")
       @sandbox.stub(@project, "updateProject").withArgs("id-123").resolves()
       @sandbox.stub(@project, "scaffold").resolves()
@@ -76,10 +76,10 @@ describe "lib/project", ->
       @project.open(opts).then ->
         expect(opts.updateProject).to.be.false
 
-    it "calls #watchFilesAndStartWebsockets with options", ->
+    it "calls #watchSettingsAndStartWebsockets with options", ->
       opts = {}
       @project.open(opts).then =>
-        expect(@project.watchFilesAndStartWebsockets).to.be.calledWith(opts)
+        expect(@project.watchSettingsAndStartWebsockets).to.be.calledWith(opts)
 
     it "calls #scaffold with server config", ->
       @project.open().then =>
@@ -149,14 +149,14 @@ describe "lib/project", ->
       @project.scaffold(obj).then ->
         expect(fixture.scaffold).to.be.calledWith(obj.projectRoot, obj.fixturesFolder)
 
-  context "#watchFilesAndStartWebsockets", ->
+  context "#watchSettings", ->
     beforeEach ->
       @project = Project("path/to/project")
       @project.server = {startWebsockets: ->}
       @watch = @sandbox.stub(@project.watchers, "watch")
 
     it "sets onChange event when {changeEvents: true}", (done) ->
-      @project.watchFilesAndStartWebsockets({changeEvents: true})
+      @project.watchSettingsAndStartWebsockets({changeEvents: true})
 
       ## get the object passed to watchers.watch
       obj = @watch.getCall(0).args[1]
@@ -166,13 +166,30 @@ describe "lib/project", ->
       expect(obj.onChange).to.be.a("function")
       obj.onChange()
 
-    it "does not set onChange event when {changeEvents: false}", ->
-      @project.watchFilesAndStartWebsockets({changeEvents: false})
+    it "does not call watch when {changeEvents: false}", ->
+      @project.watchSettingsAndStartWebsockets({changeEvents: false})
+
+      expect(@watch).not.to.be.called
+
+    it "does not emit settings:changed when generatedProjectIdTimestamp is less than 1 second", ->
+      @project.generatedProjectIdTimestamp = timestamp = new Date
+
+      emit = @sandbox.spy(@project, "emit")
+
+      @project.watchSettingsAndStartWebsockets({changeEvents: true})
 
       ## get the object passed to watchers.watch
       obj = @watch.getCall(0).args[1]
+      obj.onChange()
 
-      expect(obj).to.deep.eq({})
+      expect(emit).not.to.be.called
+
+      ## subtract 1 second from our timestamp
+      timestamp.setSeconds(timestamp.getSeconds() - 1)
+
+      obj.onChange()
+
+      expect(emit).to.be.calledWith("settings:changed")
 
   context "#getProjectId", ->
     beforeEach ->
@@ -253,6 +270,10 @@ describe "lib/project", ->
     it "calls Settings.write with projectRoot and attrs", ->
       @project.writeProjectId("id-123").then (id) ->
         expect(id).to.eq("id-123")
+
+    it "sets generatedProjectIdTimestamp", ->
+      @project.writeProjectId("id-123").then =>
+        expect(@project.generatedProjectIdTimestamp).to.be.a("date")
 
   context "#ensureProjectId", ->
     beforeEach ->
