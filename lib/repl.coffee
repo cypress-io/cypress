@@ -1,3 +1,5 @@
+require("./util/http_overrides")
+
 _       = require("lodash")
 path    = require("path")
 repl    = require("repl")

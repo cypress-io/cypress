@@ -124,7 +124,7 @@
     "node-webkit-updater": "cypress-io/node-webkit-updater",
     "open": "0.0.5",
     "promise-semaphore": "cypress-io/promise-semaphore",
-    "request": "2.60.0",
+    "request": "2.69.0",
     "request-promise": "2.0.0",
     "requirejs": "2.1.15",
     "server-destroy": "^1.0.0",

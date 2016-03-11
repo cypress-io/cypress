@@ -1435,6 +1435,24 @@ describe "Routes", ->
           .then (res) ->
             expect(res.text).to.eq "{}"
 
+    context "localhost", ->
+      it "makes requests to ipv6 when ipv4 fails", (done) ->
+        ## create a server that is only bound to ipv6
+        ## and ensure that it is found by localhost dns lookup
+        server = require("http").createServer (req, res) ->
+          res.writeHead(200)
+          res.end()
+
+        ## start the server listening on ipv6 only
+        server.listen 6565, "::1", =>
+
+          supertest(@app)
+          .get("/#/foo")
+          .set("Cookie", "__cypress.remoteHost=http://localhost:6565")
+          .expect(200)
+          .then ->
+            server.close -> done()
+
     it "handles 204 no content status codes", ->
       nock("http://localhost:4000")
         .get("/user/rooms")

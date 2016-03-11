@@ -1,3 +1,5 @@
+require("./util/http_overrides")
+
 fs  = require("fs-extra")
 cwd = require("./cwd")
 
