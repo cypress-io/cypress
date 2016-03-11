@@ -179,12 +179,17 @@ describe "electron/ci", ->
     beforeEach ->
       @sandbox.stub(ci, "ensureCi").resolves()
       @sandbox.stub(ci, "ensureProjectAPIToken").resolves("guid-abc")
-      @sandbox.stub(Project, "add").resolves("id-123")
+      @sandbox.stub(Project, "id").resolves("id-123")
       @sandbox.stub(headless, "run").resolves()
+      @sandbox.spy(Project, "add")
 
     it "ensures ci", ->
       ci.run({}).then ->
         expect(ci.ensureCi).to.be.calledOnce
+
+    it "ensures id", ->
+      ci.run({projectPath: "path/to/project"}).then ->
+        expect(Project.id).to.be.calledWith("path/to/project")
 
     it "adds project with projectPath", ->
       ci.run({projectPath: "path/to/project"}).then ->
