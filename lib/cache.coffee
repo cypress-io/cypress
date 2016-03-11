@@ -128,12 +128,9 @@ module.exports = {
       , []
 
       pathsToRemove.then (removedPaths) =>
-        process.nextTick =>
-          @_removeProjects(projects, removedPaths)
-
-        ## return our paths without the ones we're
-        ## about to remove
-        return _.without(projects, removedPaths...)
+        @_removeProjects(projects, removedPaths)
+      .then =>
+        @_getProjects()
 
   removeProject: (path) ->
     @_getProjects().then (projects) =>
