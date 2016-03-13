@@ -153,7 +153,9 @@ handleEvent = (options, event, id, type, arg) ->
       .catch(sendErr)
 
     when "close:project"
-      project.close()
+      project.close({
+        updateProject: true
+      })
       .then(send)
       .catch(sendErr)
 

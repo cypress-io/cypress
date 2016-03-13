@@ -30,9 +30,22 @@ describe "lib/project", ->
     beforeEach ->
       @project = Project("path/to/project")
 
+      @sandbox.stub(@project, "ensureProjectId").resolves("id-123")
+      @sandbox.stub(api, "updateProject").withArgs("id-123", "closed", "session-123").resolves({})
+      @sandbox.stub(user, "ensureSession").resolves("session-123")
+
     it "closes server"
 
     it "closes watchers"
+
+    it "does not sync by default", ->
+      @project.close().then ->
+        expect(api.updateProject).not.to.be.called
+
+    it "can sync", ->
+      @project.close({updateProject: true}).then ->
+        Promise.delay(100).then ->
+          expect(api.updateProject).to.be.called
 
     it "can close when server + watchers arent open", ->
       @project.close()
@@ -45,24 +58,13 @@ describe "lib/project", ->
       @project.close().then =>
         expect(@project.listeners("foo").length).to.be.eq(0)
 
-    it.skip "calls close once on watchers + socket when app closes", ->
-      close1 = @sandbox.stub(Watchers::, "close")
-      close2 = @sandbox.stub(Socket::, "close")
-
-      @server.open().then =>
-        @server.app.emit("close")
-        @server.app.emit("close")
-
-        expect(close1).to.be.calledOnce
-        expect(close2).to.be.calledOnce
-
   context "#open", ->
     beforeEach ->
       @project = Project("path/to/project")
 
       @sandbox.stub(@project, "watchSettingsAndStartWebsockets").resolves()
       @sandbox.stub(@project, "ensureProjectId").resolves("id-123")
-      @sandbox.stub(@project, "updateProject").withArgs("id-123").resolves()
+      @sandbox.stub(@project, "updateProject").withArgs("id-123", "opened").resolves()
       @sandbox.stub(@project, "scaffold").resolves()
       @sandbox.stub(@project.server, "open").resolves({projectRoot: "a", fixturesFolder: "b"})
 
@@ -75,6 +77,11 @@ describe "lib/project", ->
       opts = {}
       @project.open(opts).then ->
         expect(opts.updateProject).to.be.false
+
+    it "sets type to opened by default", ->
+      opts = {}
+      @project.open(opts).then ->
+        expect(opts.type).to.eq("opened")
 
     it "calls #watchSettingsAndStartWebsockets with options", ->
       opts = {}
@@ -107,10 +114,6 @@ describe "lib/project", ->
       @project.updateProject.resolves(Promise.delay(10000))
       @project.open()
 
-    it.skip "calls project#getDetails", ->
-      @server.open().bind(@).then ->
-        expect(Project::getDetails).to.be.calledWith("a-long-guid-123")
-
     it.skip "watches cypress.json", ->
       @server.open().bind(@).then ->
         expect(Watchers::watch).to.be.calledWith("/Users/brian/app/cypress.json")
@@ -134,8 +137,8 @@ describe "lib/project", ->
         expect(api.updateProject).not.to.be.called
 
     it "calls api.updateProject with id + session", ->
-      @project.updateProject("project-123", {updateProject: true}).then ->
-        expect(api.updateProject).to.be.calledWith("project-123", "session-123")
+      @project.updateProject("project-123", {updateProject: true, type: "opened"}).then ->
+        expect(api.updateProject).to.be.calledWith("project-123", "opened", "session-123")
 
   context "#scaffold", ->
     beforeEach ->

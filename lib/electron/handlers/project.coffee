@@ -26,7 +26,7 @@ module.exports = {
         new Promise (resolve, reject) ->
           openProject.on "settings:changed", -> resolve()
 
-  close: ->
+  close: (options = {}) ->
     nullify = ->
       ## null this back out
       openProject = null
@@ -36,6 +36,6 @@ module.exports = {
     if not openProject
       nullify()
     else
-      openProject.close()
+      openProject.close(options)
       .then(nullify)
 }

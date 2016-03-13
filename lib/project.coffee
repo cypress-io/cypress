@@ -32,6 +32,7 @@ class Project extends EE
 
   open: (options = {}) ->
     _.defaults options, {
+      type:         "opened"
       reporter:     false
       changeEvents: false
       updateProject: false
@@ -69,7 +70,14 @@ class Project extends EE
       ## the user to work offline
       return
 
-  close: ->
+  close: (options = {}) ->
+    _.defaults options, {
+      type: "closed"
+      updateProject: false
+    }
+
+    @sync(options)
+
     @removeAllListeners()
 
     Promise.join(
@@ -84,7 +92,7 @@ class Project extends EE
 
       user.ensureSession()
       .then (session) ->
-        api.updateProject(id, session)
+        api.updateProject(id, options.type, session)
 
   watchSettings: (options) ->
     ## bail if we havent been told to

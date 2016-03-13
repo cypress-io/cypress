@@ -376,7 +376,7 @@ describe "lib/electron/handlers/events", ->
 
     describe "close:project", ->
       beforeEach ->
-        @sandbox.stub(Project.prototype, "close").resolves()
+        @sandbox.stub(Project.prototype, "close").withArgs({updateProject: true}).resolves()
 
       it "is noop and returns null when no project is open", ->
         expect(project.opened()).to.be.null

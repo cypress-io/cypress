@@ -103,11 +103,13 @@ describe "lib/api", ->
     it "GETs /projects/:id", ->
       nock("http://localhost:1234")
       .matchHeader("x-session", "session-123")
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-type", "opened")
       .matchHeader("x-version", pkg.version)
       .get("/projects/project-123")
       .reply(200, {})
 
-      api.updateProject("project-123", "session-123").then (resp) ->
+      api.updateProject("project-123", "opened", "session-123").then (resp) ->
         expect(resp).to.deep.eq({})
 
   context ".createRaygunException", ->

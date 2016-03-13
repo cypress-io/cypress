@@ -70,19 +70,22 @@ module.exports = {
       json: true
       headers: {
         "x-session": session
+        "x-platform": os.platform()
         "x-version": pkg.version
       }
     })
     .promise()
     .get("uuid")
 
-  updateProject: (projectId, session) ->
+  updateProject: (projectId, type, session) ->
     ## TODO: change this to PUT method
     rp.get({
       url: Routes.project(projectId)
       json: true
       headers: {
+        "x-type": type
         "x-session": session
+        "x-platform": os.platform()
         "x-version": pkg.version
       }
     })
