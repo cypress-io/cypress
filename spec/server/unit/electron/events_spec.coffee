@@ -360,7 +360,7 @@ describe "lib/electron/handlers/events", ->
 
       it "open project + returns config", ->
         projectInstance = {getConfig: -> {some: "config"}}
-        @sandbox.stub(Project.prototype, "open").withArgs({changeEvents: true, updateProject: true}).resolves(projectInstance)
+        @sandbox.stub(Project.prototype, "open").withArgs({changeEvents: true, sync: true}).resolves(projectInstance)
 
         @handleEvent("open:project", "path/to/project")
         .then =>
@@ -368,7 +368,7 @@ describe "lib/electron/handlers/events", ->
 
       it "catches errors", ->
         err = new Error("foo")
-        @sandbox.stub(Project.prototype, "open").withArgs({changeEvents: true, updateProject: true}).rejects(err)
+        @sandbox.stub(Project.prototype, "open").withArgs({changeEvents: true, sync: true}).rejects(err)
 
         @handleEvent("open:project", "path/to/project")
         .then =>
@@ -376,7 +376,7 @@ describe "lib/electron/handlers/events", ->
 
     describe "close:project", ->
       beforeEach ->
-        @sandbox.stub(Project.prototype, "close").withArgs({updateProject: true}).resolves()
+        @sandbox.stub(Project.prototype, "close").withArgs({sync: true}).resolves()
 
       it "is noop and returns null when no project is open", ->
         expect(project.opened()).to.be.null
@@ -385,7 +385,7 @@ describe "lib/electron/handlers/events", ->
           @expectSendCalledWith(null)
 
       it "closes down open project and returns null", ->
-        @sandbox.stub(Project.prototype, "open").withArgs({changeEvents: true, updateProject: true}).resolves()
+        @sandbox.stub(Project.prototype, "open").withArgs({changeEvents: true, sync: true}).resolves()
 
         @handleEvent("open:project", "path/to/project")
         .then =>

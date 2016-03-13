@@ -33,9 +33,9 @@ class Project extends EE
   open: (options = {}) ->
     _.defaults options, {
       type:         "opened"
+      sync:         false
       reporter:     false
       changeEvents: false
-      updateProject: false
     }
 
     @server.open(options)
@@ -72,8 +72,8 @@ class Project extends EE
 
   close: (options = {}) ->
     _.defaults options, {
+      sync: false
       type: "closed"
-      updateProject: false
     }
 
     @sync(options)
@@ -87,8 +87,8 @@ class Project extends EE
 
   updateProject: (id, options = {}) ->
     Promise.try =>
-      ## bail if updateProject isnt true
-      return if not options.updateProject
+      ## bail if sync isnt true
+      return if not options.sync
 
       user.ensureSession()
       .then (session) ->

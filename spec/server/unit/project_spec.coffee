@@ -34,16 +34,28 @@ describe "lib/project", ->
       @sandbox.stub(api, "updateProject").withArgs("id-123", "closed", "session-123").resolves({})
       @sandbox.stub(user, "ensureSession").resolves("session-123")
 
-    it "closes server"
+    it "closes server", ->
+      @project.server = @sandbox.stub({close: ->})
 
-    it "closes watchers"
+      @project.close().then =>
+        expect(@project.server.close).to.be.calledOnce
+
+    it "closes watchers", ->
+      @project.watchers = @sandbox.stub({close: ->})
+
+      @project.close().then =>
+        expect(@project.watchers.close).to.be.calledOnce
 
     it "does not sync by default", ->
-      @project.close().then ->
-        expect(api.updateProject).not.to.be.called
+      opts = {}
+
+      @project.close(opts).then ->
+        expect(opts.sync).to.be.false
+        Promise.delay(100).then ->
+          expect(api.updateProject).not.to.be.called
 
     it "can sync", ->
-      @project.close({updateProject: true}).then ->
+      @project.close({sync: true}).then ->
         Promise.delay(100).then ->
           expect(api.updateProject).to.be.called
 
@@ -76,7 +88,7 @@ describe "lib/project", ->
     it "sets updateProject to false by default", ->
       opts = {}
       @project.open(opts).then ->
-        expect(opts.updateProject).to.be.false
+        expect(opts.sync).to.be.false
 
     it "sets type to opened by default", ->
       opts = {}
@@ -137,7 +149,7 @@ describe "lib/project", ->
         expect(api.updateProject).not.to.be.called
 
     it "calls api.updateProject with id + session", ->
-      @project.updateProject("project-123", {updateProject: true, type: "opened"}).then ->
+      @project.updateProject("project-123", {sync: true, type: "opened"}).then ->
         expect(api.updateProject).to.be.calledWith("project-123", "opened", "session-123")
 
   context "#scaffold", ->
