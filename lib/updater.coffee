@@ -104,7 +104,7 @@ class Updater
   ## so we dont lose our cache, logs, etc
   copyCyDataTo: (newAppPath) ->
     p = new Promise (resolve, reject) ->
-      glob "**/app.nw/package.json", {cwd: newAppPath}, (err, files) ->
+      glob "**/app/package.json", {cwd: newAppPath}, (err, files) ->
         return reject(err) if err
 
         newAppConfigPath = path.join(newAppPath, path.dirname(files[0]), config.app.cy_path)

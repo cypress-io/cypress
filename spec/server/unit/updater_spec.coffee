@@ -220,7 +220,7 @@ describe "lib/updater", ->
       beforeEach ->
         fs.outputJsonAsync(".cy/cache", {foo: "bar"}).then ->
           fs.outputFileAsync(".cy/foo/bar.txt", "foo!").then ->
-            fs.outputJsonAsync("new/app/path/Contents/Resources/app.nw/package.json", {})
+            fs.outputJsonAsync("new/app/path/Contents/Resources/app/package.json", {})
 
       afterEach ->
         fs.removeAsync("new").then ->
@@ -228,14 +228,14 @@ describe "lib/updater", ->
 
       it "copies .cy folder to new app path", (done) ->
         @updater.copyCyDataTo("new/app/path").then ->
-          expect(fs.statSync("new/app/path/Contents/Resources/app.nw/.cy").isDirectory()).to.be.true
-          expect(fs.statSync("new/app/path/Contents/Resources/app.nw/.cy/foo/bar.txt").isFile()).to.be.true
-          fs.readJsonAsync("new/app/path/Contents/Resources/app.nw/.cy/cache").then (obj) ->
+          expect(fs.statSync("new/app/path/Contents/Resources/app/.cy").isDirectory()).to.be.true
+          expect(fs.statSync("new/app/path/Contents/Resources/app/.cy/foo/bar.txt").isFile()).to.be.true
+          fs.readJsonAsync("new/app/path/Contents/Resources/app/.cy/cache").then (obj) ->
             expect(obj).to.deep.eq {foo: "bar"}
 
           cmd = if process.platform is "darwin" then "-f %Mp%Lp" else "-c %a"
 
-          cmd = "stat #{cmd} new/app/path/Contents/Resources/app.nw/.cy/foo/bar.txt"
+          cmd = "stat #{cmd} new/app/path/Contents/Resources/app/.cy/foo/bar.txt"
 
           ## make sure we have 0755 permissions!
           require("child_process").exec cmd, (err, stdout, stderr) ->
