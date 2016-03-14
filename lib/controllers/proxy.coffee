@@ -235,6 +235,10 @@ class Proxy
 
     logger.info "error handling initial request", url: url, error: e
 
+    if e
+      res.set("x-cypress-error", e.message)
+      res.set("x-cypress-stack", e.stack.replace("\n", "\\n"))
+
     filePath = switch
       when f = req.formattedUrl
         "file://#{f}"

@@ -737,10 +737,32 @@ describe "Routes", ->
         supertest(@app)
           .get("/foo/views/test/index.html")
           .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=<root>")
+          .expect(500)
           .then (res) =>
             expect(res.text).to.include("<span data-cypress-visit-error></span>")
             expect(res.text).to.include("file://")
             expect(res.text).to.include("This file could not be served from your file system.")
+
+      it.only "sets x-cypress-error and x-cypress-stack headers when file does not exist", ->
+        supertest(@app)
+        .get("/foo/views/test/index.html")
+        .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=<root>")
+        .expect(500)
+        .expect("x-cypress-error", /ENOENT: no such file or directory/)
+        .expect("x-cypress-stack", /ENOENT: no such file or directory/)
+
+      it "does not set x-cypress-error or x-cypress-stack when error is null", ->
+        nock(@baseUrl)
+        .get("/index.html")
+        .reply(500, "FAIL WAIL")
+
+        supertest(@app)
+        .get("/index.html")
+        .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=http://www.github.com")
+        .expect(500)
+        .then (res) =>
+          expect(res.get("x-cypress-error")).to.be.undefined
+          expect(res.get("x-cypress-stack")).to.be.undefined
 
       it "does not send back initial 500 content on 4xx errors", ->
         nock(@baseUrl)
