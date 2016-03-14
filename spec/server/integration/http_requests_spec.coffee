@@ -743,7 +743,7 @@ describe "Routes", ->
             expect(res.text).to.include("file://")
             expect(res.text).to.include("This file could not be served from your file system.")
 
-      it.only "sets x-cypress-error and x-cypress-stack headers when file does not exist", ->
+      it "sets x-cypress-error and x-cypress-stack headers when file does not exist", ->
         supertest(@app)
         .get("/foo/views/test/index.html")
         .set("Cookie", "__cypress.initial=true; __cypress.remoteHost=<root>")
@@ -1300,7 +1300,7 @@ describe "Routes", ->
       beforeEach ->
         @baseUrl = "/index.html"
 
-        Fixtures.scaffold("no-server")
+        Fixtures.scaffold()
 
         @server.setCypressJson {
           projectRoot: Fixtures.project("no-server")
@@ -1336,6 +1336,11 @@ describe "Routes", ->
         @session
           .get("/assets/app.css?foo=bar#hash")
           .expect(200, "html { color: black; }")
+
+      it "can serve files with spaces in the path", ->
+        @session
+        .get("/a space/foo.txt")
+        .expect(200, "foo")
 
     context "http file serving", ->
       beforeEach ->

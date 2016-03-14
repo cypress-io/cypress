@@ -202,7 +202,9 @@ class Proxy
     ## strip off any query params from our req's url
     ## since we're pulling this from the file system
     ## it does not understand query params
-    file = urlHelpers.parse(path.join(args...)).pathname
+    ## and make sure we decode the uri which swaps out
+    ## %20 with white space
+    file = decodeURI urlHelpers.parse(path.join(args...)).pathname
 
     req.formattedUrl = file
 
