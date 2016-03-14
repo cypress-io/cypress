@@ -1,14 +1,15 @@
-gulp          = require 'gulp'
-$             = require('gulp-load-plugins')()
-path          = require 'path'
-_             = require 'underscore'
-fs            = require 'fs'
-yaml          = require 'js-yaml'
-Promise       = require "bluebird"
-child_process = require "child_process"
-runSequence   = require "run-sequence"
-os            = require "os"
-deploy        = require "./deploy"
+_             = require("underscore")
+$             = require("gulp-load-plugins")()
+os            = require("os")
+fs            = require("fs")
+gulp          = require("gulp")
+path          = require("path")
+yaml          = require("js-yaml")
+Promise       = require("bluebird")
+child_process = require("child_process")
+runSequence   = require("run-sequence")
+importOnce    = require("node-sass-import-once")
+deploy        = require("./deploy")
 
 fs = Promise.promisifyAll(fs)
 
@@ -68,12 +69,14 @@ isEco     = (file) -> file.isBuffer() and /.eco$/.test(file.path)
 
 compileCss = (source, dest) ->
   gulp.src("#{source}/css/**/*.scss")
-    .pipe $.rubySass
-      trace: true
-      compass: true
-      cacheLocation: ".tmp/.sass-cache"
-      sourcemap: false
-    .on "error", log
+    .pipe($.sass({
+      importer: importOnce
+      importOnce: {
+        bower: true
+        css: true
+      }
+    })
+    .on('error', $.sass.logError))
     .pipe gulp.dest "#{dest}/public/css"
 
 getYaml = (source) ->
