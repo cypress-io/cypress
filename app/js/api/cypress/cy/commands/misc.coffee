@@ -10,18 +10,26 @@ $Cypress.register "Misc", (Cypress, _, $) ->
       ## the max timeout per command
       ## or anything else here...
 
-    noop: (obj) -> obj
+    noop: (subject) -> subject
 
-    wrap: (obj, options = {}) ->
+    wrap: (subject, options = {}) ->
       _.defaults options, {log: true}
+
+      remoteSubject = @getRemotejQueryInstance(subject)
+
+      if remoteSubject
+        cySubject = @$$(remoteSubject)
+      else
+        cySubject = subject
 
       if options.log isnt false
         options._log = Cypress.Log.command()
 
-        if Cypress.Utils.hasElement(obj)
-          options._log.set({$el: obj})
+        if Cypress.Utils.hasElement(subject)
+          options._log.set({$el: subject})
 
       do resolveWrap = =>
-        @verifyUpcomingAssertions(obj, options, {
+        @verifyUpcomingAssertions(subject, options, {
           onRetry: resolveWrap
         })
+        .return(cySubject)

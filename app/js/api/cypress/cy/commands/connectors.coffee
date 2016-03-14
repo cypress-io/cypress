@@ -48,13 +48,13 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
     Promise
     .try(getRet)
     .timeout(options.timeout)
-    .then (ret) ->
+    .then (ret) =>
       ## if ret is a DOM element
       ## and its not an instance of our jQuery
       if ret and Cypress.Utils.hasElement(ret) and not Cypress.Utils.isInstanceOf(ret, $)
         ## set it back to our own jquery object
         ## to prevent it from being passed downstream
-        ret = Cypress.cy.$$(ret)
+        ret = @$$(ret)
 
       ## then will resolve with the fn's
       ## return or just pass along the subject

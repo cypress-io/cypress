@@ -7,9 +7,48 @@ describe "$Cypress.Cy Misc Commands", ->
         expect(subject).to.be.null
 
   context "#wrap", ->
+    beforeEach ->
+      ## set the jquery path back to our
+      ## remote window
+      @Cypress.option "jQuery", @$iframe.prop("contentWindow").$
+
+      @remoteWindow = @cy.private("window")
+
+      delete @remoteWindow.$.fn.foo
+
+    afterEach ->
+      ## restore back to the global $
+      @Cypress.option "jQuery", $
+
     it "sets the subject to the first argument", ->
       @cy.wrap({}).then (subject) ->
         expect(subject).to.deep.eq {}
+
+    it "can wrap jquery objects and continue to chain", ->
+      @remoteWindow.$.fn.foo = "foo"
+
+      append = =>
+        setTimeout =>
+          $("<li class='appended'>appended</li>").appendTo @cy.$$("#list")
+        , 50
+
+      @cy.on "retry", _.after(2, _.once(append))
+
+      @cy.get("#list").then ($ul) ->
+
+        @cy
+          ## ensure that assertions are based on the real subject
+          ## and not the cy subject - therefore foo should be defined
+          .wrap($ul).should("have.property", "foo")
+
+          ## then re-wrap $ul and ensure that the subject passed
+          ## downstream is the cypress instance
+          .wrap($ul)
+          .find("li.appended")
+          .then ($li) ->
+            ## must use explicit non cy.should
+            ## else this test will always pass
+            expect($li.length).to.eq(1)
 
     describe ".log", ->
       beforeEach ->
@@ -30,5 +69,10 @@ describe "$Cypress.Cy Misc Commands", ->
         body = $("body")
 
         @cy.wrap(body).then ($el) ->
-          expect(@log.get("$el")).to.eq $el
+          ## internally we store the real remote jquery
+          ## instance instead of the cypress one
+          expect(@log.get("$el")).not.to.eq($el)
+
+          ## but make sure they are the same DOM object
+          expect(@log.get("$el").get(0)).to.eq $el.get(0)
           expect(@log.get("message")).to.eq "<body>"
