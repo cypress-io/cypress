@@ -82,10 +82,18 @@ describe "$Cypress.Cy Connectors Commands", ->
         @cy.get("div:first").then ->
           @cy.get("div:first")
 
+
     it.skip "can resolve cypress commands inside of a promise", ->
       @cy.then ->
         Promise.delay(10).then =>
           @cy.get("div:first")
+
+    [null, undefined].forEach (val) ->
+      it "passes the existing subject if ret is: #{val}", ->
+        @cy.wrap({foo: "bar"}).then (obj) ->
+          return val
+        .then (obj) ->
+          expect(obj).to.deep.eq({foo: "bar"})
 
     describe "errors", ->
       beforeEach ->

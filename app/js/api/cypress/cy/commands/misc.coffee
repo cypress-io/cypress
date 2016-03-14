@@ -17,11 +17,6 @@ $Cypress.register "Misc", (Cypress, _, $) ->
 
       remoteSubject = @getRemotejQueryInstance(subject)
 
-      if remoteSubject
-        cySubject = @$$(remoteSubject)
-      else
-        cySubject = subject
-
       if options.log isnt false
         options._log = Cypress.Log.command()
 
@@ -32,4 +27,3 @@ $Cypress.register "Misc", (Cypress, _, $) ->
         @verifyUpcomingAssertions(subject, options, {
           onRetry: resolveWrap
         })
-        .return(cySubject)

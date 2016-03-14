@@ -49,15 +49,8 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
     .try(getRet)
     .timeout(options.timeout)
     .then (ret) =>
-      ## if ret is a DOM element
-      ## and its not an instance of our jQuery
-      if ret and Cypress.Utils.hasElement(ret) and not Cypress.Utils.isInstanceOf(ret, $)
-        ## set it back to our own jquery object
-        ## to prevent it from being passed downstream
-        ret = @$$(ret)
-
-      ## then will resolve with the fn's
-      ## return or just pass along the subject
+      ## if ret is null or undefined then
+      ## resolve with the existing subject
       return ret ? subject
     .catch Promise.TimeoutError, =>
       @throwErr """
@@ -108,12 +101,7 @@ $Cypress.register "Connectors", (Cypress, _, $) ->
           if name is "its"
             Cypress.Utils.warning("Calling cy.#{name}() on a function is now deprecated. Use cy.invoke('#{fn}') instead.\n\nThis deprecation notice will become an actual error in the next major release.")
 
-          ret = prop.apply (remoteSubject or subject), args
-
-          if ret and Cypress.Utils.hasElement(ret) and not Cypress.Utils.isInstanceOf(ret, $)
-            return @$$(ret)
-
-          return ret
+          prop.apply (remoteSubject or subject), args
 
         else
           if name is "invoke"
