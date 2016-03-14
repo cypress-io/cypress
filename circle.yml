@@ -4,7 +4,6 @@ machine:
 
 test:
   pre:
-    - bundle
     - npm run build
 
   override:
