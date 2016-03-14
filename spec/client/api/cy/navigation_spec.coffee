@@ -403,7 +403,7 @@ describe "$Cypress.Cy Navigation Commands", ->
       @cy.visit("/foo").then ->
         expect(timeout).to.be.calledWith(1500)
 
-    it.only "does not reset the timeout", (done) ->
+    it "does not reset the timeout", (done) ->
       @cy._timeout(1000)
 
       ## previously loading would reset the timeout

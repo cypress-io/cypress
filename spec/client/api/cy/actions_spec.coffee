@@ -4463,6 +4463,31 @@ describe "$Cypress.Cy Actions Commands", ->
 
       @cy.get(":text:first").click()
 
+    it "does not fire a focus, mouseup, or click event when element has been removed on mousedown", (done) ->
+      btn = @cy.$$("button:first")
+
+      btn.on "mousedown", ->
+        ## synchronously remove this button
+        $(@).remove()
+
+      btn.get(0).addEventListener "focus", -> done("should not have gotten focus")
+      btn.get(0).addEventListener "focusin", -> done("should not have gotten focusin")
+      btn.get(0).addEventListener "mouseup", -> done("should not have gotten mouseup")
+      btn.get(0).addEventListener "click", -> done("should not have gotten click")
+
+      @cy.contains("button").click().then -> done()
+
+    it "does not fire a click when element has been removed on mouseup", (done) ->
+      btn = @cy.$$("button:first")
+
+      btn.on "mouseup", ->
+        ## synchronously remove this button
+        $(@).remove()
+
+      btn.get(0).addEventListener "click", -> done("should not have gotten click")
+
+      @cy.contains("button").click().then -> done()
+
     it "silences errors on unfocusable elements", ->
       div = @cy.$$("div:first")
 
@@ -5338,6 +5363,60 @@ describe "$Cypress.Cy Actions Commands", ->
               }
             }
           ]
+
+      it "#onConsole when no mouseup or click", ->
+        btn = @cy.$$("button:first")
+
+        btn.on "mousedown", ->
+          ## synchronously remove this button
+          $(@).remove()
+
+        @cy.contains("button").click().then ->
+          expect(@log.attributes.onConsole().groups()).to.deep.eq [
+            {
+              name: "MouseDown"
+              items: {
+                preventedDefault: false
+                stoppedPropagation: false
+              }
+            }
+          ]
+
+      it "#onConsole when no click", ->
+        btn = @cy.$$("button:first")
+
+        btn.on "mouseup", ->
+          ## synchronously remove this button
+          $(@).remove()
+
+        @cy.contains("button").click().then ->
+          expect(@log.attributes.onConsole().groups()).to.deep.eq [
+            {
+              name: "MouseDown"
+              items: {
+                preventedDefault: false
+                stoppedPropagation: false
+              }
+            },
+            {
+              name: "MouseUp"
+              items: {
+                preventedDefault: false
+                stoppedPropagation: false
+              }
+            }
+          ]
+
+      it "does not fire a click when element has been removed on mouseup", (done) ->
+        btn = @cy.$$("button:first")
+
+        btn.on "mouseup", ->
+          ## synchronously remove this button
+          $(@).remove()
+
+        btn.get(0).addEventListener "click", -> done("should not have gotten click")
+
+        @cy.contains("button").click().then -> done()
 
       it "logs deltaOptions", ->
         @cy.get("button:first").click({force: true, timeout: 1000}).then ->
