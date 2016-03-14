@@ -325,8 +325,8 @@ describe "$Cypress.Cy Actions Commands", ->
           expect(console.Command).to.eq("select")
           expect(console.Selected).to.deep.eq ["de_dust2"]
           expect(console["Applied To"]).to.eq $select.get(0)
-          expect(console.Coords.x).to.be.closeTo coords.x, 1
-          expect(console.Coords.y).to.be.closeTo coords.y, 1
+          expect(console.Coords.x).to.be.closeTo coords.x, 10
+          expect(console.Coords.y).to.be.closeTo coords.y, 10
 
       it "logs only one select event", ->
         logs = []
