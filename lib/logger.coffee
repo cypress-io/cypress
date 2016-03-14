@@ -30,10 +30,13 @@ createFile = (name, level, opts = {}) ->
 
   new (winston.transports.File)(obj)
 
+transports = [createFile("all", null, {handleExceptions: true})]
+
+if process.env["CYPRESS_DEBUG"]
+  transports.push(new (winston.transports.Console)())
+
 logger = new (winston.Logger)({
-  transports: [
-    createFile("all", null, {handleExceptions: true})
-  ]
+  transports: transports
 
   exitOnError: (err) ->
     ## cannot use a reference here since
