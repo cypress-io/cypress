@@ -104,17 +104,18 @@ class Updater
   ## so we dont lose our cache, logs, etc
   copyCyDataTo: (newAppPath) ->
     p = new Promise (resolve, reject) ->
-      glob "**/app/package.json", {cwd: newAppPath}, (err, files) ->
+      glob "**/app/package.json", {cwd: newAppPath, ignore: "**/node_modules/**"}, (err, files) ->
         return reject(err) if err
 
         newAppConfigPath = path.join(newAppPath, path.dirname(files[0]), config.app.cy_path)
-
-        logger.info "copying .cy to tmp destination", destination: newAppConfigPath
 
         resolve(newAppConfigPath)
 
     p.then (newAppConfigPath) ->
       cyConfigPath  = cwd(config.app.cy_path)
+
+      logger.info "copying .cy to tmp destination", src: cyConfigPath, destination: newAppConfigPath
+
       fs.copyAsync(cyConfigPath, newAppConfigPath).then ->
 
         ## change all the permissions recursively to 0755
