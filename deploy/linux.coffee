@@ -1,6 +1,8 @@
 fs      = require("fs")
+cp      = require("child_process")
 path    = require("path")
 Xvfb    = require("xvfb")
+chalk   = require("chalk")
 vagrant = require("vagrant")
 Promise = require("bluebird")
 Base    = require("./base")
@@ -52,6 +54,14 @@ class Linux extends Base
     .catch =>
       @tryXvfb(@_runSmokeTest)
 
+  npm: ->
+    new Promise (resolve, reject) ->
+      vagrant.ssh ["-c", "cd /cypress-app && npm install"], (code) ->
+        if code isnt 0
+          reject("vagrant.rsync failed!")
+        else
+          resolve()
+
   rsync: ->
     new Promise (resolve, reject) ->
       vagrant.rsync (code) ->
@@ -94,8 +104,9 @@ class Linux extends Base
           else
             ssh()
 
-    @rsync()
+    @npm()
     .bind(@)
+    .then(@rsync)
     .then(deploy)
     .then(@rsyncBack)
     .return(@)
