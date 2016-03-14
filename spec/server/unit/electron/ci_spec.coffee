@@ -123,13 +123,13 @@ describe "electron/ci", ->
       @sandbox.stub(ci, "getBranch").resolves("master")
       @sandbox.stub(ci, "getAuthor").resolves("brian")
       @sandbox.stub(ci, "getMessage").resolves("such hax")
-      @sandbox.stub(api, "createCiGuid")
+      @sandbox.stub(api, "createCi")
 
-    it "calls api.createCiGuid with args", ->
-      api.createCiGuid.resolves()
+    it "calls api.createCi with args", ->
+      api.createCi.resolves()
 
       ci.ensureProjectAPIToken("id-123", "path/to/project", "key-123").then ->
-        expect(api.createCiGuid).to.be.calledWith({
+        expect(api.createCi).to.be.calledWith({
           key: "key-123"
           projectId: "id-123"
           branch: "master"
@@ -141,7 +141,7 @@ describe "electron/ci", ->
       err = new Error
       err.statusCode = 401
 
-      api.createCiGuid.rejects(err)
+      api.createCi.rejects(err)
 
       key = "3206e6d9-51b6-4766-b2a5-9d173f5158aa"
 
@@ -158,7 +158,7 @@ describe "electron/ci", ->
       err = new Error
       err.statusCode = 404
 
-      api.createCiGuid.rejects(err)
+      api.createCi.rejects(err)
 
       ci.ensureProjectAPIToken("id-123", "path", "key-123")
       .then ->
@@ -167,7 +167,7 @@ describe "electron/ci", ->
         expect(err.type).to.eq("CI_PROJECT_NOT_FOUND")
 
     it "handles all other errors", ->
-      api.createCiGuid.rejects(new Error)
+      api.createCi.rejects(new Error)
 
       ci.ensureProjectAPIToken(1,2,3)
       .then ->
@@ -175,12 +175,34 @@ describe "electron/ci", ->
       .catch (err) ->
         expect(err.type).to.eq("CI_CANNOT_COMMUNICATE")
 
+  context ".reportStats", ->
+    beforeEach ->
+      @sandbox.stub(api, "updateCi")
+
+    it "calls api.updateCi", ->
+      api.updateCi.resolves()
+
+      ci.reportStats("id-123", "ci-123", "key-123", {passes: 1})
+
+      expect(api.updateCi).to.be.calledWith({
+        key: "key-123"
+        ciId: "ci-123"
+        projectId: "id-123"
+        stats: {passes: 1}
+      })
+
+    it "swallows errors", ->
+      api.updateCi.rejects(new Error)
+
+      ci.reportStats()
+
   context ".run", ->
     beforeEach ->
       @sandbox.stub(ci, "ensureCi").resolves()
       @sandbox.stub(ci, "ensureProjectAPIToken").resolves("guid-abc")
+      @sandbox.stub(ci, "reportStats").resolves()
       @sandbox.stub(Project, "id").resolves("id-123")
-      @sandbox.stub(headless, "run").resolves()
+      @sandbox.stub(headless, "run").resolves({passes: 10, failures: 2})
       @sandbox.spy(Project, "add")
 
     it "ensures ci", ->
@@ -199,7 +221,15 @@ describe "electron/ci", ->
       ci.run({projectPath: "path/to/project", key: "key-foo"}).then ->
         expect(ci.ensureProjectAPIToken).to.be.calledWith("id-123", "path/to/project", "key-foo")
 
-    it "calls headless.run + passes ci_guid + ensureSession into options", ->
+    it "calls headless.run + ensureSession into options", ->
       opts = {foo: "bar"}
       ci.run(opts).then ->
-        expect(headless.run).to.be.calledWith({foo: "bar", ci_guid: "guid-abc", ensureSession: false})
+        expect(headless.run).to.be.calledWith({foo: "bar", ensureSession: false})
+
+    it "calls reportStats with id, ciGuid, key + stats", ->
+      ci.run({key: "key-123"}).then ->
+        expect(ci.reportStats).to.be.calledWith("id-123", "guid-abc", "key-123", {passes: 10, failures: 2})
+
+    it "returns with the stats failures", ->
+      ci.run({}).then (failures) ->
+        expect(failures).to.eq 2

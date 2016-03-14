@@ -54,11 +54,22 @@ describe "lib/reporter", ->
       @reporter.emit("fail", @testObj, @errorObj)
 
       expect(@reporter.stats()).to.deep.eq({
+        reporter: "spec"
         suites: 0
         tests: 0
         passes: 0
         pending: 0
         failures: 1
+      })
+
+  context "#stats", ->
+    it "merges in reporter name and specific stat properties", ->
+      @reporter.reporter.stats = {foo: "bar", tests: 1}
+      @reporter.reporterName = "foo"
+
+      expect(@reporter.stats()).to.deep.eq({
+        reporter: "foo"
+        tests: 1
       })
 
   context "#emit", ->

@@ -154,7 +154,6 @@ module.exports = {
 
           @runTests(project, id, url)
           .get("stats")
-          .get("failures")
 
     if options.ensureSession isnt false
       ## make sure we have a current session

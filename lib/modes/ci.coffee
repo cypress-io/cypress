@@ -50,7 +50,7 @@ module.exports = {
       message: @getMessage(repo)
     })
     .then (git) ->
-      api.createCiGuid({
+      api.createCi({
         key:       key
         projectId: projectId
         branch:    git.branch
@@ -65,7 +65,23 @@ module.exports = {
           when 404
             errors.throw("CI_PROJECT_NOT_FOUND")
           else
+            ## TODO: shouldn't we report this to raygun?
+            ## logger.createException(err)
             errors.throw("CI_CANNOT_COMMUNICATE")
+
+  reportStats: (projectId, ciId, key, stats) ->
+    api.updateCi({
+      key:       key
+      ciId:      ciId
+      stats:     stats
+      projectId: projectId
+    })
+    .catch (err) ->
+      ## swallow errors
+      ## TODO shouldn't we report
+      ## this to raygun?
+      ## logger.createException(err)
+      return
 
   run: (options) ->
     {projectPath} = options
@@ -77,9 +93,12 @@ module.exports = {
       Project.id(projectPath)
     .then (id) =>
       @ensureProjectAPIToken(id, projectPath, options.key)
-    .then (ciGuid) ->
-      ## dont check that the user is logged in
-      options.ensureSession = false
-      options.ci_guid = ciGuid
-      headless.run(options)
+      .then (ciId) =>
+        ## dont check that the user is logged in
+        options.ensureSession = false
+
+        headless.run(options)
+        .then (stats = {}) =>
+          @reportStats(id, ciId, options.key, stats)
+          .return(stats.failures)
 }

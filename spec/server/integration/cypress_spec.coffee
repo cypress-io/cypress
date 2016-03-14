@@ -400,7 +400,7 @@ describe "lib/cypress", ->
           @projectId = id
       ])
       .then =>
-        @createCiGuid = @sandbox.stub(api, "createCiGuid").withArgs({
+        @createCi = @sandbox.stub(api, "createCi").withArgs({
           key: "secret-key-123"
           projectId: @projectId
           branch: "bem/ci"
@@ -409,9 +409,17 @@ describe "lib/cypress", ->
         })
 
     it "runs project in ci and exits with number of failures", ->
-      @createCiGuid.resolves("ci_guid-123")
+      @createCi.resolves("ci_guid-123")
+
+      @updateCi = @sandbox.stub(api, "updateCi").withArgs({
+        key: "secret-key-123"
+        ciId: "ci_guid-123"
+        projectId: @projectId
+        stats: {failures: 10}
+      }).resolves()
 
       cypress.start(["--run-project=#{@todosPath}", "--key=secret-key-123", "--ci"]).then =>
+        expect(@updateCi).to.be.calledOnce
         @expectExitWith(10)
 
     it "logs error when missing project id", ->
@@ -421,7 +429,7 @@ describe "lib/cypress", ->
     it "logs error and exits when ci key is not valid", ->
       err = new Error
       err.statusCode = 401
-      @createCiGuid.rejects(err)
+      @createCi.rejects(err)
 
       cypress.start(["--run-project=#{@todosPath}", "--key=secret-key-123", "--ci"]).then =>
         @expectExitWithErr("CI_KEY_NOT_VALID", "secre...y-123")
@@ -429,7 +437,7 @@ describe "lib/cypress", ->
     it "logs error and exits when project could not be found", ->
       err = new Error
       err.statusCode = 404
-      @createCiGuid.rejects(err)
+      @createCi.rejects(err)
 
       cypress.start(["--run-project=#{@todosPath}", "--key=secret-key-123", "--ci"]).then =>
         @expectExitWithErr("CI_PROJECT_NOT_FOUND")
@@ -437,7 +445,7 @@ describe "lib/cypress", ->
     it "logs error and exits when cannot communicate with api", ->
       err = new Error
       err.statusCode = 500
-      @createCiGuid.rejects(err)
+      @createCi.rejects(err)
 
       cypress.start(["--run-project=#{@todosPath}", "--key=secret-key-123", "--ci"]).then =>
         @expectExitWithErr("CI_CANNOT_COMMUNICATE")
@@ -445,7 +453,7 @@ describe "lib/cypress", ->
     it "logs error and exits when ci key is missing", ->
       err = new Error
       err.statusCode = 401
-      @createCiGuid.rejects(err)
+      @createCi.rejects(err)
 
       cypress.start(["--run-project=#{@todosPath}", "--ci"]).then =>
         @expectExitWithErr("CI_KEY_MISSING")

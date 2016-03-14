@@ -240,9 +240,9 @@ describe "electron/headless", ->
       headless.run().then ->
         expect(user.ensureSession).to.be.calledOnce
 
-    it "returns failures from stats", ->
-      headless.run().then (failures) ->
-        expect(failures).to.eq(10)
+    it "returns stats", ->
+      headless.run().then (stats) ->
+        expect(stats).to.deep.eq({failures: 10})
 
     it "passes id + options to ensureAndOpenProjectByPath", ->
       headless.run({foo: "bar"}).then ->

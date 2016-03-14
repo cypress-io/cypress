@@ -10,7 +10,7 @@ module.exports = {
   ping: ->
     rp.get(Routes.ping())
 
-  createCiGuid: (options = {}) ->
+  createCi: (options = {}) ->
     rp.post({
       url: Routes.ci(options.projectId)
       json: true
@@ -26,6 +26,21 @@ module.exports = {
     })
     .promise()
     .get("ci_guid")
+
+  updateCi: (options = {}) ->
+    rp.put({
+      url: Routes.ci(options.projectId)
+      json: true
+      body: options.stats
+      timeout: 10000
+      headers: {
+        "x-ci-id":         options.ciId
+        "x-project-token": options.key
+        "x-version":       pkg.version
+        "x-platform":      os.platform()
+        "x-provider":      provider.get()
+      }
+    })
 
   createRaygunException: (body, session, timeout = 3000) ->
     rp.post({

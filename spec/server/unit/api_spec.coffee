@@ -11,7 +11,7 @@ describe "lib/api", ->
     @sandbox.stub(os, "platform").returns("linux")
     @sandbox.stub(provider, "get").returns("circle")
 
-  context ".createCiGuid", ->
+  context ".createCi", ->
     it "POST /ci/:id + returns ci_guid", ->
       nock("http://localhost:1234")
       .matchHeader("x-project-token", "guid")
@@ -26,7 +26,7 @@ describe "lib/api", ->
         ci_guid: "new_ci_guid"
       })
 
-      api.createCiGuid({
+      api.createCi({
         key: "guid"
         branch: "master"
         author: "brian"
@@ -35,6 +35,37 @@ describe "lib/api", ->
       })
       .then (ret) ->
         expect(ret).to.eq("new_ci_guid")
+
+  context ".updateCi", ->
+    it "PUTS /ci/:id", ->
+      nock("http://localhost:1234")
+      .matchHeader("x-project-token", "key-123")
+      .matchHeader("x-version", pkg.version)
+      .matchHeader("x-platform", "linux")
+      .matchHeader("x-provider", "circle")
+      .put("/ci/project-123", {
+        tests: 3
+        passes: 1
+        failures: 2
+      })
+      .reply(200)
+
+      api.updateCi({
+        key: "key-123"
+        ciId: "ci-123"
+        projectId: "project-123"
+        stats: {
+          tests: 3
+          passes: 1
+          failures: 2
+        }
+      })
+
+    it "sets timeout to 10 seconds", ->
+      @sandbox.stub(rp, "put").resolves()
+
+      api.updateCi({}).then ->
+        expect(rp.put).to.be.calledWithMatch({timeout: 10000})
 
   context ".getLoginUrl", ->
     it "GET /v1/auth + returns the url", ->
