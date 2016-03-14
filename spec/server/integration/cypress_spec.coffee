@@ -379,6 +379,9 @@ describe "lib/cypress", ->
   ## the majority of the logic in CI is covered already
   ## in --run-project specs above
   context "--ci", ->
+    afterEach ->
+      delete process.env.CYPRESS_PROJECT_ID
+
     beforeEach ->
       @sandbox.stub(os, "platform").returns("linux")
       @sandbox.stub(electron.app, "on").withArgs("ready").yieldsAsync()
@@ -420,6 +423,17 @@ describe "lib/cypress", ->
 
       cypress.start(["--run-project=#{@todosPath}", "--key=secret-key-123", "--ci"]).then =>
         expect(@updateCi).to.be.calledOnce
+        @expectExitWith(10)
+
+    it "uses process.env.CYPRESS_PROJECT_ID", ->
+      ## set the projectId to be todos even though
+      ## we are running the prisine project
+      process.env.CYPRESS_PROJECT_ID = @projectId
+
+      @createCi.resolves()
+      @sandbox.stub(api, "updateCi").resolves()
+
+      cypress.start(["--run-project=#{@pristinePath}", "--key=secret-key-123", "--ci"]).then =>
         @expectExitWith(10)
 
     it "logs error when missing project id", ->
