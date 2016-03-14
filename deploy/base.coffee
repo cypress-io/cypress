@@ -8,6 +8,7 @@ path         = require("path")
 gulp         = require("gulp")
 glob         = require("glob")
 pkgr         = require("electron-packager")
+chalk        = require("chalk")
 expect       = require("chai").expect
 Promise      = require("bluebird")
 obfuscator   = require("obfuscator")
@@ -190,7 +191,7 @@ class Base
               fs.writeFileSync("./npm-install.log", stderr)
               return reject(err)
 
-            console.log gutil.colors.red("'npm install' failed, retrying")
+            console.log chalk.red("'npm install' failed, retrying")
             return npmInstall()
 
           resolve()
