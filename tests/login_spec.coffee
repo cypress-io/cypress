@@ -85,7 +85,7 @@ describe "Login [000]", ->
               .get("header a").should ($a) ->
                 expect($a).to.contain(@user.name)
 
-          it.skip "has login button enabled on logout [05y]", ->
+          it "has login button enabled on logout [05y]", ->
             cy
               .then ->
                 @ipc.handle("get:project:paths", null, [])
