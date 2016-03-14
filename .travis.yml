@@ -11,23 +11,6 @@ install:
   ## `cypress` command used below
   - npm install -g cypress
 
-before_script:
-  ## runs the 'start' script which
-  ## boots our local app server on port 8080
-  ## which cypress expects to be running
-  ## -----------------------------------
-  ## the '-- --silent' passes arguments
-  ## to http-server which silences its output
-  ## else our travis logs would be cluttered
-  ## with output from HTTP requests
-  ## https://docs.npmjs.com/cli/start
-  ## https://github.com/indexzero/http-server
-  ## ---------------------------------------
-  ## we use the '&' ampersand which tells
-  ## travis to run this process in the background
-  ## else it would block execution and hang travis
-  - npm start -- --silent &
-
 script:
   ## now run cypress in CI mode
   ## which runs all of the tests
