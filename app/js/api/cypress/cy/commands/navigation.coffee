@@ -79,8 +79,6 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
           "Notes": "This page event automatically nulls the current subject. This prevents chaining off of DOM objects which existed on the previous page."
         }
 
-      prevTimeout = @_timeout()
-
       @_clearTimeout()
 
       ready = @prop("ready")
@@ -89,7 +87,6 @@ $Cypress.register "Navigation", (Cypress, _, $, Promise) ->
         .cancellable()
         .timeout(options.timeout)
         .then =>
-          @_timeout(prevTimeout)
           if Cypress.cy.$$("[data-cypress-visit-error]").length
             try
               @throwErr("Loading the new page failed.", options._log)

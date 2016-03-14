@@ -403,7 +403,24 @@ describe "$Cypress.Cy Navigation Commands", ->
       @cy.visit("/foo").then ->
         expect(timeout).to.be.calledWith(1500)
 
-    it "clears current timeout"
+    it.only "does not reset the timeout", (done) ->
+      @cy._timeout(1000)
+
+      ## previously loading would reset the timeout
+      ## which could cause failures on the next test
+      ## if there was logic after a test finished running
+      @cy.window().then (win) =>
+        timeout = @sandbox.spy(@cy, "_timeout")
+
+        @cy.private("$remoteIframe").one "load", =>
+          @cy.prop("ready").promise.then ->
+            _.delay ->
+              expect(timeout.callCount).to.eq(1)
+              expect(timeout.firstCall).to.be.calledWith(1000)
+              done()
+            , 50
+
+        win.location.href = "about:blank"
 
     it "clears current cy subject", ->
       input = @cy.$$("form#click-me input")
