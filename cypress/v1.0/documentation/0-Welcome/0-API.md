@@ -103,11 +103,11 @@ Commands drive your tests in the browser like a real user would. They let you pe
 
 | Local Storage | |
 | -------------------- | -- |
-| [clearLocalStorage](https://on.cypress.io/api/clearLocalStorage) | Clear all data in local storage |
+| [clearLocalStorage](https://on.cypress.io/api/clearlocalstorage) | Clear all data in local storage |
 
 | Cookies | |
 | -------------------- | -- |
-| [clearCookies](https://on.cypress.io/api/clearCookies) | Clear all browser cookies |
+| [clearCookies](https://on.cypress.io/api/clearcookies) | Clear all browser cookies |
 
 | Debugging | |
 | -------------------- | -- |
