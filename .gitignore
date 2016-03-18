@@ -7,6 +7,7 @@ lib/public
 .DS_Store
 npm-debug.log
 .cy/
+nw/app/public
 nw/public
 dist
 build
@@ -15,3 +16,5 @@ cache
 spec/fixtures/nw/cypress.zip
 .vagrant
 bin/chromium
+coverage
+tmp
