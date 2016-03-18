@@ -11,6 +11,12 @@
         <div id="recent-files-region"></div>
         <div id="all-files-region" class="all-files-container"></div>
       </div>
+      <div class="helper-line">
+        <a class="helper-docs-link" href="https://on.cypress.io/guides/writing-your-first-test" target="_blank">
+          <i class="fa fa-question-circle"></i>
+          Need help?
+        </a>
+      </div>
     </div>
   </div>
 </div>
