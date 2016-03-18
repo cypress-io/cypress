@@ -1,8 +1,8 @@
 <div class="empty-onboarding">
   <h1>To help you get started...</h1>
-  <p>We've created a folder in your project called <strong><i class="fa fa-folder-o"></i> cypress</strong>. In there, you'll find a folder for <strong><i class="fa fa-folder-o"></i> integration tests</strong> and <strong><i class="fa fa-folder-o"></i> unit tests</strong>.</p>
+  <p>We've created a folder in your project called <strong><i class="fa fa-folder-o"></i> cypress</strong>. In there, you'll find a folder for <strong><i class="fa fa-folder-o"></i> integration tests</strong>.</p>
   <hr>
-  <p>We've also written some integration tests to get you started in <a href="#"><i class="fa fa-file-code-o"></i> example_spec.js</a>. All you need to do is uncomment the tests!</p>
+  <p>We've also written some integration tests in <strong><i class="fa fa-file-code-o"></i> example_spec.js</strong> to get you started. Just select the file in <strong>My Test Files</strong>.</p>
   <p>
   <!-- <h6>Project Preview</h6> -->
   <div class="folder-preview-onboarding">
@@ -37,12 +37,12 @@
                   support
                 </span>
               </li>
-              <li>
+<!--               <li>
                 <span>
                   <i class="fa fa-folder-o"></i>
                   unit_tests
                 </span>
-              </li>
+              </li> -->
               <li>
                 <span>
                   <i class="fa fa-folder-open-o"></i>
