@@ -1,39 +1,12 @@
-[![Circle CI](https://circleci.com/gh/cypress-io/cypress-app.svg?style=svg&circle-token=a6d67217ee174805c91925400b4210ada937def9)](https://circleci.com/gh/cypress-io/cypress-app)
-
-## Docs / API
-
-[Visit the Wiki](https://github.com/cypress-io/cypress-app/wiki)
+# Cypress App [![Circle CI](https://circleci.com/gh/cypress-io/cypress-app.svg?style=shield&circle-token=a6d67217ee174805c91925400b4210ada937def9)](https://circleci.com/gh/cypress-io/cypress-app)
 
 ## First Time Installs
-
-```bash
-## Getting Node Installed
-curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.29.0/install.sh | bash
-nvm install 1.2
-nvm use 1.2
-```
-
-```bash
-## Need ruby dependencies to run compass / scss (which is written in Ruby)
-curl -sSL https://get.rvm.io | bash
-source /home/vagrant/.rvm/scripts/rvm
-rvm requirements
-rvm install 2.0.0-p481
-rvm use 2.0.0-p481 --default
-gem install bundler
-bundle
-```
 
 ```bash
 npm install -g bower
 ```
 
 ## Development
-
-To run development environment:
-
-- Navigate to the directory where the `cypress-app` project is on your computer.
-- Run the following commands:
 
 ```bash
 ## Install project dependencies
@@ -45,72 +18,64 @@ npm install
 npm run watch
 ```
 
-Now, you have 2 options:
+Now, you have a few options to boot Cypress:
 
-1. Boot the Desktop Application and run a project.
+1. Boot the Desktop Application in GUI mode.
 2. Run a project directly from the command line.
+3. Run a project headlessly.
 
-### 1. Boot the Desktop Application
+### 1. GUI Mode
 
 ```bash
-## Boot Node Webkit
-node_modules/nw/bin/nw .
-
-## With Chrome Dev Tools
-node_modules/nw/bin/nw . --debug
+## this will boot the desktop app and
+## display the 'cy' in your tray
+npm start
 ```
-
-You should now see the Cypress icon in your tray, use Cypress as normal.
 
 Code changes which are applied instantly:
 - `web app`
 - `driver`
 
-Code changes which require you to reboot `nw`:
-- `desktop gui`
+Code changes which require you to restart the running process:
 - `server`
 
-**Optional:** If you're going to be running the project in Desktop GUI mode, and adding new projects, you need to start the Key Server
+> When running in GUI mode you'll notice you may get a warning in your console:
+  *The local API server isn't running in development. This may cause problems running the GUI.*
+
+To avoid this warning make sure you start your API server.
+
 ```bash
-## Start the Key Server
+## Start the API Server
 cd cypress-api
-npm run dev
+npm start
 ```
 
-### 2. Run project from command line
+### 2. Run project directly without GUI
 
 ```bash
 ## boot a specific project
-bin/cy <path-to-the-project-you-want-to-test>
-
-## turn off id generation
-bin/cy <path-to-the-project-you-want-to-test> --no-ids
-
-## turn off debugging
-bin/cy <path-to-the-project-you-want-to-test> --no-debug
-
-## disable auto opening browser
-bin/cy <path-to-the-project-you-want-to-test> --no-open
-
-## turn off all options
-bin/cy <path-to-the-project-you-want-to-test> --no-ids --no-debug --no-open
+npm run server -- --project <path-to-the-project-you-want-to-test>
 ```
 
-If you've disabled auto opening be sure to navigate to:
+You should see `nodemon` watching all of your files.
 
-```bash
-http://localhost:2020/__/
-```
-
-Code changes which are applied instantly:
+Code changes are applied instantly:
 - `web app`
 - `driver`
-- `desktop gui`
 - `server`
 
-## Testing
+### 3. Run project headlessly
 
-To run tests:
+```bash
+## boot a specific project
+npm start -- --run-project <path-to-the-project-you-want-to-test>
+```
+
+You will see Cypress run all the tests headlessly and you'll see output in your console.
+
+## Testing the Driver
+
+To run driver tests:
 
 - Navigate to the directory where the `cypress-app` project is on your computer.
 - Run the following commands:
@@ -125,9 +90,6 @@ Navigate to [http://localhost:3500](http://localhost:3500)
 
 ```bash
 npm run deploy
-
-## with options
-npm run deploy -- --skip-tests
 
 ```
 
@@ -145,25 +107,19 @@ npm run release -- --version 0.9.6
 
 If the user just updated their old app will be in their trash bin. They could always delete the new app and "put back" their trashed app.
 
-### Manually Testing ID Generation
-1. Open app in Cypress
-2. In another tab, navigate to `http://localhost:2020/__cypress/id_generator`
-3. Change watched spec
-4. Id generator tab will output errors to the console if there are errors
-
 ### Manually Completing An Update
 This will manually complete an update given you have the new app downloaded and unzipped (which is the source), and you have the existing app (the destination).
 
 This will copy the new (source) app to the existing (desination) app, and trash the existing (destination) app first.
 
 ```bash
-open <path-to-new-cypress.app> --args <path-to-existing-app-path> <path-to-existing-exec-path> --updating
+open <path-to-new-cypress.app> --args --app-path <path-to-existing-app-path> --exec-path <path-to-existing-exec-path> --updating
 ```
 
 Real example with paths:
 
 ```bash
-open ~/Desktop/cypress.app --args /Users/bmann/Dev/cypress-app/build/0.5.8/osx64/cypress.app /Users/bmann/Dev/cypress-app/build/0.5.8/osx64/cypress.app --updating
+open ~/Desktop/cypress.app --args --app-path /Users/bmann/Dev/cypress-app/build/0.5.8/osx64/cypress.app --exec-path /Users/bmann/Dev/cypress-app/build/0.5.8/osx64/cypress.app --updating
 ```
 
 ## Remote Server Communication

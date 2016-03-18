@@ -174,7 +174,12 @@ $Cypress.Utils = do ($Cypress, _) ->
           if klass = $el.attr("class")
             str += "." + klass.split(/\s+/).join(".")
 
-          "<#{str}>"
+          ## if we have more than one element,
+          ## format it so that the user can see there's more
+          if $el.length > 1
+            "[ <#{str}>, #{$el.length - 1} more... ]"
+          else
+            "<#{str}>"
 
     plural: (obj, plural, singular) ->
       obj = if _.isNumber(obj) then obj else obj.length

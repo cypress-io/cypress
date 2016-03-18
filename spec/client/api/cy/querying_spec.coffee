@@ -1052,6 +1052,18 @@ describe "$Cypress.Cy Querying Commands", ->
       it "returns invisible element when parent chain is visible", ->
         @cy.get("#form-header-region").contains("Back").should("not.be.visible")
 
+    describe.skip "handles whitespace", ->
+      it "finds el with new lines", ->
+        btn = $("""
+          <button id="whitespace">
+          White
+          space
+          </button>
+          """).appendTo @cy.$$("body")
+
+        @cy.contains("White space").then ($btn) ->
+          expect($btn.get(0)).to.eq btn.get(0)
+
     describe "subject contains text nodes", ->
       it "searches for content within subject", ->
         badge = @cy.$$("#edge-case-contains .badge:contains(5)")

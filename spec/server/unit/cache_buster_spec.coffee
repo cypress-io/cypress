@@ -2,7 +2,7 @@ require("../spec_helper")
 
 CacheBuster = require("#{root}lib/util/cache_buster")
 
-describe "Cache Buster", ->
+describe "lib/cache_buster", ->
   context "#get", ->
     it "returns seperator + 3 characters", ->
       expect(CacheBuster.get().length).to.eq(4)

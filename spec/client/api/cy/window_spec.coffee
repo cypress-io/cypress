@@ -426,12 +426,40 @@ describe "$Cypress.Cy Window Commands", ->
       @cy.viewport(800, 600)
 
     context "presets", ->
+      it "ipad-2", (done) ->
+        @Cypress.on "viewport", (viewport) ->
+          expect(viewport).to.deep.eq {viewportWidth: 768, viewportHeight: 1024}
+          done()
+
+        @cy.viewport("ipad-2")
+
+      it "ipad-mini", (done) ->
+        @Cypress.on "viewport", (viewport) ->
+          expect(viewport).to.deep.eq {viewportWidth: 768, viewportHeight: 1024}
+          done()
+
+        @cy.viewport("ipad-mini")
+
+      it "iphone-6+", (done) ->
+        @Cypress.on "viewport", (viewport) ->
+          expect(viewport).to.deep.eq {viewportWidth: 414, viewportHeight: 736}
+          done()
+
+        @cy.viewport("iphone-6+")
+
       it "iphone-6", (done) ->
         @Cypress.on "viewport", (viewport) ->
           expect(viewport).to.deep.eq {viewportWidth: 375, viewportHeight: 667}
           done()
 
         @cy.viewport("iphone-6")
+
+      it "iphone-5", (done) ->
+        @Cypress.on "viewport", (viewport) ->
+          expect(viewport).to.deep.eq {viewportWidth: 320, viewportHeight: 568}
+          done()
+
+        @cy.viewport("iphone-5")
 
       it "can change the orientation to landspace", (done) ->
         @Cypress.on "viewport", (viewport) ->
@@ -602,8 +630,8 @@ describe "$Cypress.Cy Window Commands", ->
           expect(@log.attributes.onConsole()).to.deep.eq {
             Command: "viewport"
             Preset: "ipad-mini"
-            Width: 1024
-            Height: 768
+            Width: 768
+            Height: 1024
           }
 
       it ".onConsole without preset", ->

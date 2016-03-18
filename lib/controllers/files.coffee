@@ -1,23 +1,20 @@
-_       = require "underscore"
-_.str   = require "underscore.string"
-path    = require "path"
-glob    = require "glob"
-Promise = require "bluebird"
+_           = require("underscore")
+_.str       = require("underscore.string")
+path        = require("path")
+glob        = require("glob")
+Promise     = require("bluebird")
+cwd         = require("../cwd")
+CacheBuster = require("../util/cache_buster")
 
-CacheBuster = require "../util/cache_buster"
-Controller  = require "./controller"
-
-class Files extends Controller
+class Files
   constructor: (app) ->
     if not (@ instanceof Files)
       return new Files(app)
 
     if not app
-      throw new Error("Instantiating controllers/remote_initial requires an app!")
+      throw new Error("Instantiating controllers/proxy requires an app!")
 
     @app = app
-
-    super
 
   handleFiles: (req, res) ->
     @getTestFiles().then (files) ->
@@ -27,7 +24,7 @@ class Files extends Controller
   handleIframe: (req, res) ->
     test = req.params[0]
 
-    filePath = path.join(process.cwd(), "lib/html/empty_inject.html")
+    filePath = cwd("lib", "html", "empty_inject.html")
 
     @getSpecs(test).bind(@).then (specs) ->
       @getJavascripts().bind(@).then (js) ->
@@ -70,6 +67,7 @@ class Files extends Controller
           spec = _.compact([rootFolder, spec])
           spec = path.join(spec...)
           spec = _.str.trim(spec, "/")
+
 
       spec += CacheBuster.get()
       "/__cypress/tests?p=#{spec}"

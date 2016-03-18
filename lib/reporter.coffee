@@ -2,6 +2,8 @@ _     = require("lodash")
 Mocha = require("mocha")
 chalk = require("chalk")
 
+STATS = "suites tests passes pending failures start end duration".split(" ")
+
 createSuite = (obj) ->
   suite = new Mocha.Suite(obj.title, {})
 
@@ -46,7 +48,9 @@ class Reporter
     if not (@ instanceof Reporter)
       return new Reporter(options)
 
-    @mocha    = new Mocha({reporter: "spec"})
+    @reporterName = "spec"
+
+    @mocha    = new Mocha({reporter: @reporterName})
     @runner   = new Mocha.Runner(@mocha.suite)
     @reporter = new @mocha._reporter(@runner, {})
 
@@ -68,6 +72,6 @@ class Reporter
       [event].concat(args)
 
   stats: ->
-    @reporter.stats
+    _.extend {reporter: @reporterName}, _.pick(@reporter.stats, STATS)
 
 module.exports = Reporter

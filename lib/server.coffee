@@ -1,19 +1,17 @@
-express      = require 'express'
-http         = require 'http'
-fs           = require 'fs-extra'
-hbs          = require 'hbs'
-path         = require 'path'
-_            = require 'underscore'
-_.str        = require 'underscore.string'
-allowDestroy = require "server-destroy"
-Promise      = require 'bluebird'
-Log          = require "./log"
-Project      = require "./project"
-Socket       = require "./socket"
-Support      = require "./support"
-Fixtures     = require "./fixtures"
-Watchers     = require "./watchers"
-Settings     = require './util/settings'
+express      = require("express")
+http         = require("http")
+fs           = require("fs-extra")
+hbs          = require("hbs")
+path         = require("path")
+_            = require("underscore")
+str          = require("underscore.string")
+allowDestroy = require("server-destroy")
+Promise      = require("bluebird")
+cwd          = require("./cwd")
+errors       = require("./errors")
+logger       = require("./logger")
+Socket       = require("./socket")
+Settings     = require("./util/settings")
 
 ## cypress following by _ or - or .
 cypressEnvRe = /^(cypress_)/i
@@ -43,7 +41,7 @@ class Server
 
       @setCypressJson(@config)
 
-      Log.setSettings(@config)
+      logger.setSettings(@config)
     catch err
       err.jsonError = true
       @config = err
@@ -77,12 +75,13 @@ class Server
   setCypressDefaults: (obj = {}) ->
     if url = obj.baseUrl
       ## always strip trailing slashes
-      obj.baseUrl = _.str.rtrim(url, "/")
+      obj.baseUrl = str.rtrim(url, "/")
 
     _.defaults obj,
       baseUrl:        null
       clientRoute:    "/__/"
       xhrRoute:       "/xhrs/"
+      socketIoRoute:  "/__socket.io"
       commandTimeout: 4000
       visitTimeout:   30000
       requestTimeout: 5000
@@ -125,19 +124,15 @@ class Server
       clientUrl: rootUrl + obj.clientRoute
       xhrUrl: obj.namespace + obj.xhrRoute
 
-    _.extend obj,
-      idGeneratorUrl: rootUrl + "/__cypress/id_generator"
-
   configureApplication: (options = {}) ->
     _.defaults options,
-      idGenerator: true
       morgan: true
       isHeadless: false
       port: null
       socketId: null
       environmentVariables: null
 
-    _.extend @config, _.pick(options, "idGenerator", "isHeadless")
+    _.extend @config, _.pick(options, "isHeadless")
 
     ## merge these into except
     ## for the 'environmentVariables' key
@@ -169,7 +164,7 @@ class Server
     ## serve static file from public when route is /__cypress/static
     ## this is to namespace the static cypress files away from
     ## the real application by separating the root from the files
-    @app.use "/__cypress/static", express.static(__dirname + "/public")
+    @app.use "/__cypress/static", express.static(cwd("lib", "public"))
 
     ## errorhandler
     @app.use require("errorhandler")()
@@ -182,8 +177,10 @@ class Server
   createRoutes: ->
     require("./routes")(@app)
 
+  getHttpServer: -> @server
+
   portInUseErr: (port) ->
-    e = new Error("Port: '#{port}' is already in use.")
+    e = errors.get("PORT_IN_USE_SHORT", port)
     e.port = port
     e.portInUse = true
     e
@@ -197,93 +194,52 @@ class Server
 
   _open: (options) ->
     new Promise (resolve, reject) =>
-      @server    = http.createServer(@app)
-      @io        = require("socket.io")(@server, {path: "/__socket.io"})
-      @project   = Project(@config.projectRoot)
+      @server = http.createServer(@app)
 
       allowDestroy(@server)
-
-      ## preserve file watchers
-      watchers  = Watchers()
-
-      ## whenever the cypress.json file changes we need to reboot
-      watchers.watch(Settings.pathToCypressJson(@config.projectRoot), {
-        onChange: (filePath, stats) =>
-          if _.isFunction(options.onReboot)
-            options.onReboot()
-      })
-
-      ## refactor this class
-      socket = Socket(@io, @app)
-      socket.startListening(watchers, options)
-
-      @app.once "close", =>
-        watchers.close()
-        socket.close()
-
-      # @config.checkForAppErrors = ->
-      #   socket.checkForAppErrors()
-
-      ## expose the socket back to the app
-      # options.socket = socket
 
       onError = (err) =>
         ## if the server bombs before starting
         ## and the err no is EADDRINUSE
         ## then we know to display the custom err message
-        if err.errno is "EADDRINUSE"
+        if err.code is "EADDRINUSE"
           reject @portInUseErr(@config.port)
 
       @server.once "error", onError
 
       @server.listen @config.port, =>
         @isListening = true
-        Log.info("Server listening", {port: @config.port})
+        logger.info("Server listening", {port: @config.port})
 
         @server.removeListener "error", onError
 
-        Promise.join(
-          ## ensure fixtures dir is created
-          ## and example fixture if dir doesnt exist
-          Fixtures(@app).scaffold(),
-          ## ensure support dir is created
-          ## and example support file if dir doesnt exist
-          Support(@app).scaffold()
-        )
-        .bind(@)
-        .then ->
-          @project.ensureProjectId().then (id) =>
-            ## make an external request to
-            ## record the user_id
-            ## TODO: remove this after a few
-            ## upgrades since this is temporary
-            @project.getDetails(id)
+        resolve(@config)
 
-            ## dont wait for this to complete
-            return null
-        .then ->
-          require('open')(@config.clientUrl) if @config.autoOpen
-        .return(@config)
-        .then(resolve)
-        .catch(reject)
-
-  close: ->
-    promise = new Promise (resolve) =>
-      Log.unsetSettings()
+  _close: ->
+    new Promise (resolve) =>
+      logger.unsetSettings()
 
       ## bail early we dont have a server or we're not
       ## currently listening
       return resolve() if not @server or not @isListening
 
-      Log.info("Server closing")
-
-      @app.emit("close")
+      logger.info("Server closing")
 
       @server.destroy =>
         @isListening = false
         resolve()
 
-    promise.then ->
-      Log.info "Server closed"
+  close: ->
+    Promise.join(
+      @_close()
+      @socket?.close()
+    )
+
+  end: ->
+    @socket and @socket.end()
+
+  startWebsockets: (watchers, options) ->
+    @socket = Socket(@app)
+    @socket.startListening(@server, watchers, options)
 
 module.exports = Server

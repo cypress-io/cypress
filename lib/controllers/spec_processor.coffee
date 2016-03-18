@@ -10,16 +10,12 @@ Domain      = require 'domain'
 Snockets    = require 'snockets'
 requirejs   = require 'requirejs'
 
-Controller  = require "./controller"
-
-class SpecProcessor extends Controller
+class SpecProcessor
   constructor: (app) ->
     if not (@ instanceof SpecProcessor)
       return new SpecProcessor(app)
 
     @app = app
-
-    super
 
   browserify: (opts, fileStream) ->
     browserify([fileStream], opts)

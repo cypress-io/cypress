@@ -46,6 +46,18 @@ describe "$Cypress.Cy Navigation Commands", ->
 
       @cy.reload({})
 
+    it "returns the window object", ->
+      @cy
+        .window().then (oldWin) ->
+          oldWin.foo = "bar"
+          expect(oldWin.foo).to.eq("bar")
+
+          cy.reload().then (win) ->
+            expect(win).not.to.be.undefined
+            expect(win.foo).to.be.undefined
+
+            expect(win).to.eq(@cy.private("window"))
+
     describe "errors", ->
       beforeEach ->
         @allowErrors()
@@ -391,7 +403,24 @@ describe "$Cypress.Cy Navigation Commands", ->
       @cy.visit("/foo").then ->
         expect(timeout).to.be.calledWith(1500)
 
-    it "clears current timeout"
+    it "does not reset the timeout", (done) ->
+      @cy._timeout(1000)
+
+      ## previously loading would reset the timeout
+      ## which could cause failures on the next test
+      ## if there was logic after a test finished running
+      @cy.window().then (win) =>
+        timeout = @sandbox.spy(@cy, "_timeout")
+
+        @cy.private("$remoteIframe").one "load", =>
+          @cy.prop("ready").promise.then ->
+            _.delay ->
+              expect(timeout.callCount).to.eq(1)
+              expect(timeout.firstCall).to.be.calledWith(1000)
+              done()
+            , 50
+
+        win.location.href = "about:blank"
 
     it "clears current cy subject", ->
       input = @cy.$$("form#click-me input")

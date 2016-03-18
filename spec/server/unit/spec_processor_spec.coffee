@@ -1,14 +1,14 @@
 require("../spec_helper")
 
-path          = require('path')
-through2      = require('through2')
-through       = require('through')
-_             = require('lodash')
-_s            = require('underscore.string')
+path          = require("path")
+through2      = require("through2")
+through       = require("through")
+_             = require("lodash")
+_s            = require("underscore.string")
 SpecProcessor = require("#{root}lib/controllers/spec_processor")
-FixturesRoot  = path.resolve(__dirname, '../../', 'fixtures/', 'server/')
+FixturesRoot  = path.resolve(__dirname, "../../", "fixtures/", "server/")
 
-describe "Spec Processor", ->
+describe "lib/controllers/spec_processor", ->
   afterEach ->
     try
       fs.unlinkSync(path.join(FixturesRoot, '/sample.js'))

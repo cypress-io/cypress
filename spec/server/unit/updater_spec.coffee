@@ -1,39 +1,21 @@
-## must stub due to node-webkit-updater requiring NW
-global.window = {
-  nwDispatcher: {
-    requireNwGui: ->
-  }
-}
-
 require("../spec_helper")
 
 delete global.fs
 
-mock        = require "mock-fs"
-Updater     = require "#{root}lib/updater"
-Fixtures    = require "#{root}/spec/server/helpers/fixtures"
+tar         = require("tar-fs")
+mock        = require("mock-fs")
+Updater     = require("#{root}lib/updater")
+Fixtures    = require("#{root}/spec/server/helpers/fixtures")
 
-describe "Updater", ->
-  beforeEach ->
-    nock.disableNetConnect()
-
+describe "lib/updater", ->
   afterEach ->
+    Updater.setCoords(null)
     mock.restore()
-    nock.enableNetConnect()
-    nock.cleanAll()
 
   context "interface", ->
     it "returns an updater instance", ->
       u = Updater({})
       expect(u).to.be.instanceof Updater
-
-    it "requires an App", ->
-      fn = -> Updater()
-      expect(fn).to.throw "Instantiating lib/updater requires an App!"
-
-    it "stores App", ->
-      u = Updater({})
-      expect(u.App).to.deep.eq {}
 
   context "#getPackage", ->
     beforeEach ->
@@ -69,7 +51,7 @@ describe "Updater", ->
       expect(@updater.getCoords()).to.be.undefined
 
     it "returns --coords=800x600", ->
-      @updater.setCoords {x: 800, y: 600}
+      Updater.setCoords {x: 800, y: 600}
       expect(@updater.getCoords()).to.eq "--coords=800x600"
 
   context "#getArgs", ->
@@ -80,63 +62,61 @@ describe "Updater", ->
       @sandbox.stub(@updater.client, "getAppExec").returns("bar")
 
     it "compacts null values", ->
-      expect(@updater.getArgs()).to.deep.eq ["foo", "bar", "--updating"]
+      expect(@updater.getArgs()).to.deep.eq ["--app-path=foo", "--exec-path=bar", "--updating"]
 
-    it "doesnt concat App.argv", ->
-      @updater.App.argv = ["quux"]
-      @updater.coords = {x: 1000, y: 30}
-      expect(@updater.getArgs()).to.deep.eq ["foo", "bar", "--updating", "--coords=1000x30"]
-
-  context "#run", ->
+  context ".run", ->
     beforeEach ->
-      @updater = Updater({quit: @sandbox.spy()})
+      @updater = Updater({})
       @updater.getClient()
       @checkNewVersion = @sandbox.stub(@updater.client, "checkNewVersion")
+      @sandbox.stub(process, "exit")
 
     it "invokes onRun", ->
       spy = @sandbox.spy()
-      @updater.run({onStart: spy})
+      Updater.run({onStart: spy})
       expect(spy).to.be.called
 
     describe "client#checkNewVersion", ->
       beforeEach ->
-        @download = @sandbox.stub(@updater, "download")
+        @download = @sandbox.stub(Updater.prototype, "download")
 
       it "is called once", ->
         @updater.run()
         expect(@checkNewVersion).to.be.calledOnce
 
       it "calls #download if new version exists", ->
-        @checkNewVersion.callsArgWith(0, null, true, {})
+        @checkNewVersion.yields(null, true, {})
         @updater.run()
         expect(@download).to.be.calledOnce
 
       it "passes manifest to #download when new version exists", ->
-        @checkNewVersion.callsArgWith(0, null, true, {foo: "bar"})
+        @checkNewVersion.yields(null, true, {foo: "bar"})
         @updater.run()
         expect(@download).to.be.calledWith({foo: "bar"})
 
       it "does not call #download if there isnt a new version", ->
-        @checkNewVersion.callsArgWith(0, null, false, {foo: "bar"})
+        @checkNewVersion.yields(null, false, {foo: "bar"})
         @updater.run()
         expect(@download).not.to.be.called
 
       it "invokes onNone when there isnt a new version", ->
         spy = @sandbox.spy()
-        @checkNewVersion.callsArgWith(0, null, false)
-        @updater.run({onNone: spy})
+        @checkNewVersion.yields(null, false)
+        @updater.callbacks.onNone = spy
+        @updater.run()
         expect(spy).to.be.called
 
       it "does not call #download if there is an error", ->
-        @checkNewVersion.callsArgWith(0, (new Error), true, {foo: "bar"})
+        @checkNewVersion.yields((new Error), true, {foo: "bar"})
         @updater.run()
         expect(@download).not.to.be.called
 
       it "invokes onError callbacks", ->
         err = new Error("checking onError")
         spy = @sandbox.spy()
-        @checkNewVersion.callsArgWith(0, err)
-        @updater.run({onError: spy})
+        @checkNewVersion.yields(err)
+        @updater.callbacks.onError = spy
+        @updater.run()
         expect(spy).to.be.calledWith(err)
 
     describe "#download", ->
@@ -153,13 +133,13 @@ describe "Updater", ->
         expect(spy).to.be.called
 
       it "calls unpack with destinationPath and manifest", ->
-        @updater.client.download.callsArgWith(0, null, "/Users/bmann/app")
+        @updater.client.download.yields(null, "/Users/bmann/app")
         @updater.download({})
         @clock.tick(1000)
         expect(@updater.unpack).to.be.calledOnce.and.to.be.calledWith("/Users/bmann/app", {})
 
       it "does not call unpack on error", ->
-        @updater.client.download.callsArgWith(0, (new Error), "/Users/bmann/app")
+        @updater.client.download.yields((new Error), "/Users/bmann/app")
         @updater.download({})
         @clock.tick(1000)
         expect(@updater.unpack).not.to.be.called
@@ -168,7 +148,7 @@ describe "Updater", ->
         err = new Error("checking onError")
         spy = @sandbox.spy()
         @updater.callbacks.onError = spy
-        @updater.client.download.callsArgWith(0, err)
+        @updater.client.download.yields(err)
         @updater.download({})
         @clock.tick(1000)
         expect(spy).to.be.calledWith(err)
@@ -185,12 +165,12 @@ describe "Updater", ->
         expect(spy).to.be.called
 
       it "calls runInstaller with newAppPath", ->
-        @updater.client.unpack.callsArgWith(1, null, "/Users/bmann/app")
+        @updater.client.unpack.yields(null, "/Users/bmann/app")
         @updater.unpack("/some/path", {})
         expect(@updater.runInstaller).to.be.calledOnce.and.to.be.calledWith("/Users/bmann/app")
 
       it "does not call runInstaller on error", ->
-        @updater.client.unpack.callsArgWith(1, (new Error), "/Users/bmann/app")
+        @updater.client.unpack.yields((new Error), "/Users/bmann/app")
         @updater.unpack("/some/path", {})
         expect(@updater.runInstaller).not.to.be.called
 
@@ -198,7 +178,7 @@ describe "Updater", ->
         err = new Error("checking onError")
         spy = @sandbox.spy()
         @updater.callbacks.onError = spy
-        @updater.client.unpack.callsArgWith(1, err)
+        @updater.client.unpack.yields(err)
         @updater.unpack("/some/path", {})
         expect(spy).to.be.calledWith(err)
 
@@ -211,14 +191,14 @@ describe "Updater", ->
         @updater.runInstaller("/Users/bmann/newApp").then =>
           expect(@updater.copyCyDataTo).to.be.calledWith("/Users/bmann/newApp")
 
-      it "calls quit on the App", ->
+      it "calls process.exit", ->
         @updater.runInstaller("/Users/bmann/newApp").then =>
-          expect(@updater.App.quit).to.be.calledOnce
+          expect(process.exit).to.be.calledOnce
 
       it "calls runInstaller on the client", ->
         c = @updater.client
         @updater.runInstaller("/Users/bmann/newApp").then =>
-          expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec(), "--updating"], {})
+          expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", ["--app-path=#{c.getAppPath()}", "--exec-path=#{c.getAppExec()}", "--updating"], {})
 
       ## we no longer pass up additional App argv
       ## other than from debug i'm not sure why we
@@ -226,25 +206,21 @@ describe "Updater", ->
       ## its caused a bug in parseArgs and its duplicated
       ## every existing argument
       it "does not pass along additional App argv", ->
-        @updater.App.argv = ["--debug"]
         c = @updater.client
         @updater.runInstaller("/Users/bmann/newApp").then =>
-          # expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec(), "--updating", "--debug"], {})
-          expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec(), "--updating"], {})
+          expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", ["--app-path=#{c.getAppPath()}", "--exec-path=#{c.getAppExec()}", "--updating"], {})
 
       it "passes along App.coords if they exist", ->
-        @updater.setCoords {x: 600, y: 1200}
-        @updater.App.argv = ["--debug"]
+        Updater.setCoords {x: 600, y: 1200}
         c = @updater.client
         @updater.runInstaller("/Users/bmann/newApp").then =>
-          # expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec(), "--updating", "--coords=600x1200", "--debug"], {})
-          expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", [c.getAppPath(), c.getAppExec(), "--updating", "--coords=600x1200"], {})
+          expect(@updater.client.runInstaller).to.be.calledWith("/Users/bmann/newApp", ["--app-path=#{c.getAppPath()}", "--exec-path=#{c.getAppExec()}", "--updating", "--coords=600x1200"], {})
 
     describe "#copyCyDataTo", ->
       beforeEach ->
         fs.outputJsonAsync(".cy/cache", {foo: "bar"}).then ->
           fs.outputFileAsync(".cy/foo/bar.txt", "foo!").then ->
-            fs.outputJsonAsync("new/app/path/Contents/Resources/app.nw/package.json", {})
+            fs.outputJsonAsync("new/app/path/Contents/Resources/app/package.json", {})
 
       afterEach ->
         fs.removeAsync("new").then ->
@@ -252,20 +228,66 @@ describe "Updater", ->
 
       it "copies .cy folder to new app path", (done) ->
         @updater.copyCyDataTo("new/app/path").then ->
-          expect(fs.statSync("new/app/path/Contents/Resources/app.nw/.cy").isDirectory()).to.be.true
-          expect(fs.statSync("new/app/path/Contents/Resources/app.nw/.cy/foo/bar.txt").isFile()).to.be.true
-          fs.readJsonAsync("new/app/path/Contents/Resources/app.nw/.cy/cache").then (obj) ->
+          expect(fs.statSync("new/app/path/Contents/Resources/app/.cy").isDirectory()).to.be.true
+          expect(fs.statSync("new/app/path/Contents/Resources/app/.cy/foo/bar.txt").isFile()).to.be.true
+          fs.readJsonAsync("new/app/path/Contents/Resources/app/.cy/cache").then (obj) ->
             expect(obj).to.deep.eq {foo: "bar"}
 
           cmd = if process.platform is "darwin" then "-f %Mp%Lp" else "-c %a"
 
-          cmd = "stat #{cmd} new/app/path/Contents/Resources/app.nw/.cy/foo/bar.txt"
+          cmd = "stat #{cmd} new/app/path/Contents/Resources/app/.cy/foo/bar.txt"
 
           ## make sure we have 0755 permissions!
           require("child_process").exec cmd, (err, stdout, stderr) ->
             done(err) if err
             expect(stdout).to.match /755/
             done()
+
+    describe "#copyTmpToAppPath", ->
+      beforeEach ->
+        @onStub = @sandbox.stub()
+        @onStub.withArgs("error").returnsThis()
+
+        @onPipe = @sandbox.stub().returnsThis()
+
+        @sandbox.stub(tar, "pack").returns({
+          on: @onStub
+          pipe: @onPipe
+        })
+
+        @sandbox.stub(tar, "extract").returns("extractFoo")
+
+      it "calls tar.pack", ->
+        @onStub.withArgs("finish").yieldsAsync()
+
+        @updater.copyTmpToAppPath("a", "b").then ->
+          expect(tar.pack).to.be.calledWith("a", {
+            fs: require("original-fs")
+          })
+
+      it "calls tar.extract", ->
+        @onStub.withArgs("finish").yieldsAsync()
+
+        @updater.copyTmpToAppPath("a", "b").then ->
+          expect(tar.extract).to.be.calledWith("b", {
+            fs: require("original-fs")
+          })
+
+      it "pipes return value of tar.extract", ->
+        @onStub.withArgs("finish").yieldsAsync()
+
+        @updater.copyTmpToAppPath("a", "b").then =>
+          expect(@onPipe).to.be.calledWith("extractFoo")
+
+      it "throws on error", ->
+        err = new Error("foo")
+        @onStub.withArgs("error").yieldsAsync(err)
+
+        @updater.copyTmpToAppPath("a", "b")
+        .then ->
+          throw new Error("should have failed but did not")
+        .catch (e) ->
+          expect(e).to.eq(err)
 
     describe "#trash", ->
       beforeEach ->
@@ -279,38 +301,47 @@ describe "Updater", ->
 
     describe "#install", ->
       beforeEach ->
-        @install = @sandbox.stub(@updater.client, "install").callsArgWith(1, null)
+        @argsObj = {
+          appPath:  "/Users/bmann/app_path"
+          execPath: "/Users/bmann/app_exec_path"
+          _coords: "1x2"
+          coords: {x: 1, y: 2}
+        }
+
+        @sandbox.stub(@updater.client, "getAppPath").returns("foo")
+        @sandbox.stub(@updater, "copyTmpToAppPath").resolves()
+
         @run     = @sandbox.stub(@updater.client, "run")
         @trash   = @sandbox.stub(@updater, "trash").resolves()
 
       it "trashes current appPath", ->
-        @updater.install("/Users/bmann/app_path", "/Users/bmann/app_exec_path").then =>
+        @updater.install(@argsObj).then =>
           expect(@trash).to.be.calledWith("/Users/bmann/app_path")
 
-      it "calls client#install with appPath", ->
-        @updater.install("/Users/bmann/app_path", "/Users/bmann/app_exec_path").then =>
-          expect(@updater.client.install).to.be.calledWith "/Users/bmann/app_path"
+      it "calls #copyTmpToAppPath with tmp + appPath", ->
+        @updater.install(@argsObj).then =>
+          expect(@updater.copyTmpToAppPath).to.be.calledWith "foo", @argsObj.appPath
 
-      it "calls App.quit", ->
-        @updater.install("/Users/bmann/app_path", "/Users/bmann/app_exec_path").then =>
-          expect(@updater.App.quit).to.be.calledOnce
+      it "calls process.exit", ->
+        @updater.install(@argsObj).then =>
+          expect(process.exit).to.be.calledOnce
+
+      it "calls client.run with execPath + args", ->
+        @updater.install(@argsObj).then =>
+          expect(@run).to.be.calledWith(@argsObj.execPath, ["--coords=1x2"])
 
       context "args", ->
-        it "uses args from App.argv", ->
-          args = ["--foo", "--bar"]
-          @updater.App.argv = args
-          @updater.install("/Users/bmann/app_path", "/Users/bmann/app_exec_path").then =>
-            expect(@run).to.be.calledWith("/Users/bmann/app_exec_path", args)
+        beforeEach ->
+          @argsObj = {
+            updating: true
+            appPath: "app"
+            execPath: "exec"
+            "getKey": true
+          }
 
-        it "uses empty array with no args from App.argv", ->
-          @updater.App.argv = null
-          @updater.install("/Users/bmann/app_path", "/Users/bmann/app_exec_path").then =>
-            expect(@run).to.be.calledWith("/Users/bmann/app_exec_path", [])
-
-        it "passes args except for --updating", ->
-          @updater.App.argv = ["--updating", "--foo"]
-          @updater.install("/Users/bmann/app_path", "/Users/bmann/app_exec_path").then =>
-            expect(@run).to.be.calledWith("/Users/bmann/app_exec_path", ["--foo"])
+        it "uses args object", ->
+          @updater.install(@argsObj).then =>
+            expect(@run).to.be.calledWith("exec", ["--getKey=true"])
 
   context "integration", ->
     before ->
@@ -364,7 +395,7 @@ describe "Updater", ->
       expect(@updater.client.checkNewVersion).to.be.called
 
     it "calls optsions.newVersionExists when there is a no version", ->
-      @updater.client.checkNewVersion.callsArgWith(0, null, true, {})
+      @updater.client.checkNewVersion.yields(null, true, {})
 
       options = {onNewVersion: @sandbox.spy()}
       @updater.check(options)
@@ -372,7 +403,7 @@ describe "Updater", ->
       expect(options.onNewVersion).to.be.calledWith({})
 
     it "calls options.newVersionExists when there is a no version", ->
-      @updater.client.checkNewVersion.callsArgWith(0, null, false)
+      @updater.client.checkNewVersion.yields(null, false)
 
       options = {onNoNewVersion: @sandbox.spy()}
       @updater.check(options)

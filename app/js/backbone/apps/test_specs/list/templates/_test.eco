@@ -8,5 +8,5 @@
 </div>
 <div class="runnable-controls">
   <i class="fa fa-warning"></i>
-  <i class="fa fa-repeat"></i>
+  <!-- <i class="fa fa-repeat"></i> -->
 </div>

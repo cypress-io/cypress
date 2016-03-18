@@ -1,5 +1,0 @@
-<%- "<#{@containerTag}>" %>
-  <span>
-    <%= @content %>
-  </span>
-<%- "</#{@containerTag}>" %>

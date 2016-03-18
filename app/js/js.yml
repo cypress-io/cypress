@@ -56,16 +56,3 @@ sinon:
 
 sinon-as-promised:
   - app/js/vendor/sinon-as-promised.js
-
-id_generator:
-  - bower_components/jquery/dist/jquery.js
-  - bower_components/underscore/underscore.js
-  - bower_components/backbone/backbone.js
-  - bower_components/jsuri/Uri.js
-  - bower_components/mocha/mocha.js
-  - bower_components/chai/chai.js
-  - app/js/vendor/bililiteRange.js
-  - app/js/api/cypress.coffee
-  - app/js/api/cypress/*
-  - app/js/api/cypress/cy/**/*
-  - app/js/id_generator/**

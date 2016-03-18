@@ -392,8 +392,6 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
       ## TODO handle pointer-events: none
       ## http://caniuse.com/#feat=pointer-events
 
-      ## TODO handle if element is removed during mousedown / mouseup
-
       switch
         when _.isObject(positionOrX)
             options = positionOrX
@@ -454,6 +452,9 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         if options.errorOnSelect and $el.is("select")
           @throwErr "Cannot call .click() on a <select> element. Use cy.select() command instead to change the value.", options._log
 
+        isAttached = ($elToClick) =>
+          @_contains($elToClick)
+
         ## in order to simulate actual user behavior we need to do the following:
         ## 1. take our element and figure out its center coordinate
         ## 2. check to figure out the element listed at those coordinates
@@ -471,8 +472,14 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           getFirstFocusableEl($el.parent())
 
         afterMouseDown = ($elToClick, coords) =>
-          domEvents.mouseUp = @Cypress.Mouse.mouseUp($elToClick, coords, win)
-          domEvents.click   = @Cypress.Mouse.click($elToClick, coords, win)
+          ## handle mouse events removing DOM elements
+          ## https://www.w3.org/TR/uievents/#event-type-click (scroll up slightly)
+
+          if isAttached($elToClick)
+            domEvents.mouseUp = @Cypress.Mouse.mouseUp($elToClick, coords, win)
+
+          if isAttached($elToClick)
+            domEvents.click   = @Cypress.Mouse.click($elToClick, coords, win)
 
           if options._log
             consoleObj = options._log.attributes.onConsole()
@@ -490,20 +497,24 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
               consoleObj["Actual Element Clicked"] = $Cypress.Utils.getDomElements($elToClick)
 
             consoleObj.groups = ->
-              [
-                {
-                  name: "MouseDown"
-                  items: _(domEvents.mouseDown).pick("preventedDefault", "stoppedPropagation")
-                },
-                {
+              groups = [{
+                name: "MouseDown"
+                items: _(domEvents.mouseDown).pick("preventedDefault", "stoppedPropagation")
+              }]
+
+              if domEvents.mouseUp
+                groups.push({
                   name: "MouseUp"
                   items: _(domEvents.mouseUp).pick("preventedDefault", "stoppedPropagation")
-                }
-                {
+                })
+
+              if domEvents.click
+                groups.push({
                   name: "Click"
                   items: _(domEvents.click).pick("preventedDefault", "stoppedPropagation")
-                }
-              ]
+                })
+
+              return groups
 
             consoleObj
 
@@ -670,10 +681,11 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
               domEvents.mouseDown = @Cypress.Mouse.mouseDown($elToClick, coords, win)
 
-              ## if mousedown was cancelled then
+              ## if mousedown was cancelled then or caused
+              ## our element to be removed from the DOM
               ## just resolve after mouse down and dont
               ## send a focus event
-              if domEvents.mouseDown.preventedDefault
+              if domEvents.mouseDown.preventedDefault or not isAttached($elToClick)
                 afterMouseDown($elToClick, coords)
               else
                 ## retrieve the first focusable $el in our parent chain
@@ -1284,6 +1296,11 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         ## make sure we're an array of values
         values = [].concat(values)
 
+      ## keep an array of subjects which
+      ## are potentially reduced down
+      ## to new filtered subjects
+      matchingElements = []
+
       _.defaults options,
         $el: subject
         log: true
@@ -1305,16 +1322,29 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
           when "uncheck"
             $el.is(":checkbox")
 
+      ## does our el have a value
+      ## in the values array?
+      ## or values array is empty
+      elHasMatchingValue = ($el) ->
+        values.length is 0 or $el.val() in values
+
       ## blow up if any member of the subject
       ## isnt a checkbox or radio
       checkOrUncheck = (el, index) =>
         $el = $(el)
 
-        onConsole =
+        isElActionable = elHasMatchingValue($el)
+
+        if isElActionable
+          matchingElements.push(el)
+
+        onConsole = {
           "Applied To":   $Cypress.Utils.getDomElements($el)
           "Elements":     $el.length
+        }
 
-        if options.log
+        if options.log and isElActionable
+
           ## figure out the options which actually change the behavior of clicks
           deltaOptions = Cypress.Utils.filterOutOptions(options)
 
@@ -1328,33 +1358,34 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
 
           options._log.snapshot("before", {next: "after"})
 
-        if not isAcceptableElement($el)
-          node   = Cypress.Utils.stringifyElement($el)
-          word   = Cypress.Utils.plural(options.$el, "contains", "is")
-          phrase = if type is "check" then " and :radio" else ""
-          @throwErr ".#{type}() can only be called on :checkbox#{phrase}! Your subject #{word} a: #{node}", options._log
+          if not isAcceptableElement($el)
+            node   = Cypress.Utils.stringifyElement($el)
+            word   = Cypress.Utils.plural(options.$el, "contains", "is")
+            phrase = if type is "check" then " and :radio" else ""
+            @throwErr "cy.#{type}() can only be called on :checkbox#{phrase}! Your subject #{word} a: #{node}", options._log
 
-        ## if the checkbox was already checked
-        ## then notify the user of this note
-        ## and bail
-        if isNoop($el)
-          ## still ensure visibility even if the command is noop
-          @ensureVisibility $el, options._log
-          onConsole.Note = "This checkbox was already #{type}ed. No operation took place."
-          if options._log
-            options._log.snapshot().end()
+          ## if the checkbox was already checked
+          ## then notify the user of this note
+          ## and bail
+          if isNoop($el)
+            ## still ensure visibility even if the command is noop
+            @ensureVisibility $el, options._log
+            if options._log
+              inputType = if $el.is(":radio") then "radio" else "checkbox"
+              onConsole.Note = "This #{inputType} was already #{type}ed. No operation took place."
+              options._log.snapshot().end()
 
-          return null
-        else
-          ## set the coords only if we are actually
-          ## going to go out and click this bad boy
-          coords = @getCoordinates($el)
-          onConsole.Coords = coords
-          options._log.set "coords", coords
+            return null
+          else
+            ## set the coords only if we are actually
+            ## going to go out and click this bad boy
+            coords = @getCoordinates($el)
+            onConsole.Coords = coords
+            options._log.set "coords", coords
 
         ## if we didnt pass in any values or our
         ## el's value is in the array then check it
-        if not values.length or $el.val() in values
+        if isElActionable
           @execute("click", {
             $el: $el
             log: false
@@ -1374,6 +1405,10 @@ $Cypress.register "Actions", (Cypress, _, $, Promise) ->
         .each(checkOrUncheck)
         .cancellable()
         .then =>
+          ## filter down our $el to the
+          ## matching elements
+          options.$el = options.$el.filter(matchingElements)
+
           do verifyAssertions = =>
             @verifyUpcomingAssertions(options.$el, options, {
               onRetry: verifyAssertions
