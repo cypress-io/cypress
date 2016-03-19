@@ -121,6 +121,7 @@
     "mocha": "2.4.5",
     "mocha-teamcity-reporter": "cypress-io/mocha-teamcity-reporter",
     "morgan": "1.3.0",
+    "node-notifier": "^4.5.0",
     "node-uuid": "1.4.1",
     "node-webkit-updater": "cypress-io/node-webkit-updater",
     "open": "0.0.5",
