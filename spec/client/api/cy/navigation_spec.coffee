@@ -193,9 +193,11 @@ describe "$Cypress.Cy Navigation Commands", ->
     it "invokes onLoad callback", (done) ->
       cy = @cy
 
+      ctx = @
+
       @cy.visit("fixtures/html/sinon.html", {
         onLoad: (contentWindow) ->
-          expect(@).to.eq(cy)
+          expect(@).to.eq(ctx)
           expect(contentWindow.sinon).to.be.defined
           done()
       })
@@ -203,9 +205,11 @@ describe "$Cypress.Cy Navigation Commands", ->
     it "invokes onBeforeLoad callback with cy context", (done) ->
       cy = @cy
 
+      ctx = @
+
       @cy.visit("fixtures/html/sinon.html", {
         onBeforeLoad: (contentWindow) ->
-          expect(@).to.eq(cy)
+          expect(@).to.eq(ctx)
           expect(contentWindow.sinon).to.be.defined
           done()
       })
