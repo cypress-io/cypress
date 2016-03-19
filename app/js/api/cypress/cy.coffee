@@ -379,30 +379,7 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
         ## also reset recentlyReady back to null
         @prop("recentlyReady", null)
 
-        ## if we became unready when a command
-        ## was being resolved then we need to
-        ## null out the subject here and additionally
-        ## check for child commands and error if found
-        ## only if this is a DOM subject
-        ##
-        ## since we delay the resolving
-        ## of our command subjects, they may have
-        ## caused a page load / form submit so
-        ## if our subject has been nulled we need
-        ## to keep it nulled
         @prop("subject", subject)
-
-        if @prop("pageChangeEvent")
-          @prop("pageChangeEvent", false)
-
-          ## if we currently have a DOM subject and its not longer
-          ## in the document then we need to null out our subject because
-          ## a page change has happened and we want to discontinue chaining
-          if $Cypress.Utils.hasElement(subject) and not @_contains(subject)
-            ## additionally check for errors here
-            ## so we can notify the user if they're trying
-            ## to chain child commands off of this null subject
-            @nullSubject()
 
         @trigger "invoke:end", command
 
@@ -413,7 +390,33 @@ $Cypress.Cy = do ($Cypress, _, Backbone, Promise) ->
         ## resolving we need to ensure it finishes first
         if ready = @prop("ready")
           if ready.promise.isPending()
-            return ready.promise.return(@prop("subject")).catch (err) ->
+            return ready.promise
+            .then =>
+              ## if we became unready when a command
+              ## was being resolved then we need to
+              ## null out the subject here and additionally
+              ## check for child commands and error if found
+              ## only if this is a DOM subject
+              ##
+              ## since we delay the resolving
+              ## of our command subjects, they may have
+              ## caused a page load / form submit so
+              ## if our subject has been nulled we need
+              ## to keep it nulled
+              if @prop("pageChangeEvent")
+                @prop("pageChangeEvent", false)
+
+                ## if we currently have a DOM subject and its not longer
+                ## in the document then we need to null out our subject because
+                ## a page change has happened and we want to discontinue chaining
+                if $Cypress.Utils.hasElement(subject) and not @_contains(subject)
+                  ## additionally check for errors here
+                  ## so we can notify the user if they're trying
+                  ## to chain child commands off of this null subject
+                  @nullSubject()
+
+                return @prop("subject")
+            .catch (err) ->
 
         return @prop("subject")
 
