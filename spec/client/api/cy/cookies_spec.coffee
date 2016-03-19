@@ -14,6 +14,14 @@ describe "$Cypress.Cy Cookie Commands", ->
     it "is defined", ->
       expect(@cy.clearCookies).to.be.defined
 
+    describe "path", ->
+      it "can clear cookie set with path", ->
+        cy
+          .document().then (doc) ->
+            doc.cookie = "asdf=jkl"
+          .clearCookie("asdf")
+          .document().its("cookie").should("not.include", "asdf")
+
     describe "errors", ->
       beforeEach ->
         @allowErrors()
@@ -49,11 +57,6 @@ describe "$Cypress.Cy Cookie Commands", ->
     it "is defined", ->
       expect(@cy.clearCookies).to.be.defined
 
-    it "calls Cypress.Cookies.clearCookies", ->
-      clearCookies = @sandbox.spy $Cypress.Cookies, "clearCookies"
-      @cy.clearCookies().then ->
-        expect(clearCookies).to.be.calledOnce
-
     it "sets the subject to the returned cookies", ->
       @cy.clearCookies().then (cookies) ->
         expect(cookies).to.deep.eq {}
@@ -64,6 +67,14 @@ describe "$Cypress.Cy Cookie Commands", ->
         @Cypress.trigger "test:before:hooks"
         expect(clearCookies).to.be.calledOnce
         expect(clearCookies.getCall(0).args).to.deep.eq [undefined]
+
+    describe "path", ->
+      it "can clear cookies set with path", ->
+        cy
+          .document().then (doc) ->
+            doc.cookie = "foo=bar"
+          .clearCookies()
+          .document().its("cookie").should("not.include", "foo")
 
     describe ".log", ->
       beforeEach ->

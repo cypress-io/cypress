@@ -103,22 +103,33 @@ $Cypress.Cookies = do ($Cypress, _) ->
         memo
       , {}
 
-    clearCookies: (cookie) ->
+    clearCookies: (cookie, options = {}) ->
       ## bail if it starts with our namespace
       return if cookie and isNamespaced(cookie)
+
+      options.force = false
 
       ## if cookie was passed in then just remove cookies
       ## that match that key
       if cookie
-        return @remove(cookie, {force: false})
+        return @remove(cookie, options)
 
-      ## else nuke all the cookies except for our namesapce
-      _.each Cookies.get(), (value, key) =>
-        ## do not remove cypress namespace'd cookies
-        ## no matter what
-        return if isNamespaced(key)
+      getAndRemove = (options) =>
+        ## else nuke all the cookies except for our namesapce
+        _.each Cookies.get(), (value, key) =>
+          ## do not remove cypress namespace'd cookies
+          ## no matter what
+          return if isNamespaced(key)
 
-        @remove(key, {force: false})
+          @remove(key, options)
+
+      if doc = options.document
+        Cookies.setDocument(doc)
+        getAndRemove(options)
+
+      Cookies.setDocument(window.document)
+      options = _.omit(options, "document")
+      getAndRemove(options)
 
     defaults: (obj = {}) ->
       ## merge obj into defaults

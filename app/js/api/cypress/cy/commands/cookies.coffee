@@ -3,8 +3,6 @@ $Cypress.register "Cookies", (Cypress, _, $) ->
   clearCookies = (key) ->
     Cypress.Cookies.clearCookies(key)
 
-    Cypress.Cookies.getAllCookies()
-
   Cypress.on "test:before:hooks", ->
     ## remove all the cookies before each test
     clearCookies()
@@ -15,7 +13,15 @@ $Cypress.register "Cookies", (Cypress, _, $) ->
       if not _.isString(key)
         @throwErr "cy.clearCookie must be passed a string argument"
 
-      cookies = clearCookies(key)
+      doc   = @private("document")
+      path  = @_getLocation("pathname")
+      paths = path.split("/")
+
+      _.each paths, (p, i) ->
+        p = paths.slice(0, i + 1).join("/") or "/"
+        Cypress.Cookies.clearCookies(key, {path: p, document: doc})
+
+      cookies = Cypress.Cookies.getAllCookies()
 
       Cypress.Log.command
         end: true
@@ -26,7 +32,15 @@ $Cypress.register "Cookies", (Cypress, _, $) ->
       return cookies
 
     clearCookies: ->
-      cookies = clearCookies()
+      doc   = @private("document")
+      path  = @_getLocation("pathname")
+      paths = path.split("/")
+
+      _.each paths, (p, i) ->
+        p = paths.slice(0, i + 1).join("/") or "/"
+        Cypress.Cookies.clearCookies(null, {path: p, document: doc})
+
+      cookies = Cypress.Cookies.getAllCookies()
 
       Cypress.Log.command
         end: true
