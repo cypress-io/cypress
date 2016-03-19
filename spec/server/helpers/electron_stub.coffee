@@ -4,6 +4,9 @@ module.exports = {
   shell: {}
   dialog: {}
   ipcMain: {}
+  nativeImage: {
+    createFromPath: ->
+  }
   app: {
     on: ->
     commandLine: {

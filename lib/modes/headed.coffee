@@ -2,8 +2,11 @@ _        = require("lodash")
 os       = require("os")
 app      = require("electron").app
 image    = require("electron").nativeImage
+Promise  = require("bluebird")
 cyIcons  = require("cypress-icons")
 Position = require("electron-positioner")
+notifier = require("node-notifier")
+user     = require("../user")
 errors   = require("../errors")
 Updater  = require("../updater")
 logs     = require("../electron/handlers/logs")
@@ -12,6 +15,9 @@ Events   = require("../electron/handlers/events")
 Renderer = require("../electron/handlers/renderer")
 
 module.exports = {
+  isMac: ->
+    os.platform() is "darwin"
+
   onDrop: ->
 
   onClick: (bounds, win) ->
@@ -77,28 +83,50 @@ module.exports = {
       }
     }[os.platform()]
 
+  notify: ->
+    ## bail if we aren't on mac
+    return if not @isMac()
+
+    user.ensureSession()
+    .catch ->
+      notifier.notify({
+        # subtitle:
+        title: "Cypress is now running..."
+        message: "Click the 'cy' icon in your tray to login."
+        icon: cyIcons.getPathToIcon("icon_32x32@2x.png")
+      })
+
   ready: (options = {}) ->
     options.app = app
 
-    ## TODO:
-    ## handle right click to show context menu!
-    ## handle drop events for automatically adding projects!
-    ## use the same icon as the cloud app
-    Renderer.create(@getRendererArgs(options.coords))
-    .then (win) =>
-      Events.start(options)
+    ready = =>
+      ## TODO:
+      ## handle right click to show context menu!
+      ## handle drop events for automatically adding projects!
+      ## use the same icon as the cloud app
+      Renderer.create(@getRendererArgs(options.coords))
+      .then (win) =>
+        Events.start(options)
 
-      if options.updating
-        Updater.install(options)
+        if options.updating
+          Updater.install(options)
 
-      Tray.display({
-        onDrop: ->
+        Tray.display({
+          onDrop: ->
 
-        onClick: (e, bounds) =>
-          @onClick(bounds, win)
+          onClick: (e, bounds) =>
+            @onClick(bounds, win)
 
-        onRightClick: ->
+          onRightClick: ->
+        })
+
+        return win
+
+    Promise.props({
+      ready: ready()
+      notify: @notify()
     })
+    .get("ready")
 
   run: (options) ->
     new Promise (resolve, reject) =>
