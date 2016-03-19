@@ -104,6 +104,11 @@ describe "$Cypress.Cy Connectors Commands", ->
       .then ->
         expect(_then).to.be.true
 
+    it "can resolve cypress instance inside of a promise", ->
+      @cy.then ->
+        Promise.delay(10).then =>
+          @cy
+
     [null, undefined].forEach (val) ->
       it "passes the existing subject if ret is: #{val}", ->
         @cy.wrap({foo: "bar"}).then (obj) ->
