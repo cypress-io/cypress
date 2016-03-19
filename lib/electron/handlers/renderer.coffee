@@ -91,6 +91,13 @@ module.exports = {
 
         resolve(code)
 
+    if args.transparent and args.show
+      {width, height} = args
+
+      args.show = false
+      args.width = 0
+      args.height = 0
+
     win = new BrowserWindow(args)
 
     win.on "blur", ->
@@ -118,6 +125,11 @@ module.exports = {
     Promise
       .resolve(args.url)
       .then (url) ->
+        if width and height
+          win.webContents.once "dom-ready", ->
+            win.setSize(width, height)
+            win.show()
+
         ## navigate the window here!
         win.loadURL(url)
 
