@@ -82,11 +82,27 @@ describe "$Cypress.Cy Connectors Commands", ->
         @cy.get("div:first").then ->
           @cy.get("div:first")
 
+    it "can resolve cypress commands inside of a promise", ->
+      _then = false
 
-    it.skip "can resolve cypress commands inside of a promise", ->
       @cy.then ->
+
         Promise.delay(10).then =>
-          @cy.get("div:first")
+          @cy.then ->
+            _then = true
+      .then ->
+        expect(_then).to.be.true
+
+    it "can resolve chained cypress commands inside of a promise", ->
+      _then = false
+
+      @cy.then ->
+
+        Promise.delay(10).then =>
+          @cy.get("div:first").then ->
+            _then = true
+      .then ->
+        expect(_then).to.be.true
 
     [null, undefined].forEach (val) ->
       it "passes the existing subject if ret is: #{val}", ->
