@@ -49,3 +49,18 @@ $Cypress.register "Cookies", (Cypress, _, $) ->
           cookies: cookies
 
       return cookies
+
+    getCookies: ->
+      doc  = @private("document")
+      obj1 = Cypress.Cookies.getAllCookies()
+      obj2 = Cypress.Cookies.getAllCookies({document: doc})
+
+      cookies = _.extend(obj1, obj2)
+
+      Cypress.Log.command
+        end: true
+        snapshot: true
+        onConsole: ->
+          cookies: cookies
+
+      return cookies
