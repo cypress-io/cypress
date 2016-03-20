@@ -27,7 +27,15 @@ module.exports = ->
   ## easier testability
   program = new commander.Command()
 
-  program.version(pkg.version)
+  exit = ->
+    process.exit(0)
+
+  displayVersion = ->
+    require("./commands/version")()
+    .then(exit)
+    .catch(exit)
+
+  program.option("-v, --version", "output the version of the cli and desktop app", displayVersion)
 
   program
     .command("install")
@@ -101,9 +109,17 @@ module.exports = ->
     .action ->
       require("./commands/verify")()
 
+  program
+    .command("version")
+    .description("Outputs both the CLI and Desktop App versions")
+    .action(displayVersion)
+
   program.parse(process.argv)
 
-  if not program.args.length
+  ## if the process.argv.length
+  ## is less than or equal to 2
+  if process.argv.length <= 2
+    ## then display the help
     program.help()
 
   return program

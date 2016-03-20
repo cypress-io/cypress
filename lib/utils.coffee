@@ -113,6 +113,39 @@ module.exports = {
   stopXvfb: ->
     xvfb.stopAsync()
 
+  tryXvfb: (fn) ->
+    xvfb.startAsync()
+    .then(fn)
+    .catch(fn)
+
+  tryStopXvfb: (fn) ->
+    xvfb.stopAsync()
+    .then(fn)
+    .catch(fn)
+
+  exec: (args, options = {}) ->
+    e = null
+
+    new Promise (resolve, reject) =>
+      exec = =>
+        @verifyCypress(options)
+        .then (pathToCypress) =>
+          p = new Promise (resolve2, reject2) =>
+            e = cp.exec [pathToCypress, args].join(" "), (err, stdout, stderr) =>
+              return reject(err) if err
+
+              @tryStopXvfb ->
+                resolve(stdout)
+          p
+          .timeout(4000)
+          .catch Promise.TimeoutError, ->
+            e.kill()
+            err = new Error
+            err.versionNotObtained = true
+            reject(err)
+
+      @tryXvfb(exec)
+
   spawn: (args, options = {}) ->
     args = [].concat(args)
 
