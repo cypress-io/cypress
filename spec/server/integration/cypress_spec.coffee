@@ -6,6 +6,7 @@ http     = require("http")
 electron = require("electron")
 inquirer = require("inquirer")
 Fixtures = require("../helpers/fixtures")
+pkg      = require("#{root}package.json")
 Settings = require("#{root}lib/util/settings")
 project  = require("#{root}lib/electron/handlers/project")
 ci       = require("#{root}lib/modes/ci")
@@ -479,6 +480,15 @@ describe "lib/cypress", ->
     it "logs package.json and exits", ->
       cypress.start(["--return-pkg"]).then =>
         expect(console.log).to.be.calledWithMatch('{"name":"Cypress"')
+        @expectExitWith(0)
+
+  context "--version", ->
+    beforeEach ->
+      @sandbox.stub(console, "log")
+
+    it "logs version and exits", ->
+      cypress.start(["--version"]).then =>
+        expect(console.log).to.be.calledWith(pkg.version)
         @expectExitWith(0)
 
   context "--smoke-test", ->

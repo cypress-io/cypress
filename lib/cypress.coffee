@@ -116,6 +116,9 @@ module.exports = {
       when options.removeIds
         options.mode = "removeIds"
 
+      when options.version
+        options.mode = "version"
+
       when options.smokeTest
         options.mode = "smokeTest"
 
@@ -158,6 +161,14 @@ module.exports = {
         Project.removeIds(options.projectPath)
         .then (stats = {}) ->
           console.log("Removed '#{stats.ids}' ids from '#{stats.files}' files.")
+        .then(exit0)
+        .catch(exitErr)
+
+      when "version"
+        returnPkg(options)
+        .get("version")
+        .then (version) ->
+          console.log(version)
         .then(exit0)
         .catch(exitErr)
 
