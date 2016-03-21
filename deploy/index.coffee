@@ -42,11 +42,11 @@ deploy = {
     opts.runTests = false if opts["skip-tests"]
     opts
 
-  build: ->
+  build: (platform) ->
     ## read off the argv
     options = @parseOptions(process.argv)
 
-    @getPlatform(null, options).build()
+    @getPlatform(platform?.osName, options).build()
 
   release: ->
     ## read off the argv

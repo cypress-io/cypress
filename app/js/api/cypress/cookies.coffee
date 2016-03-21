@@ -93,15 +93,25 @@ $Cypress.Cookies = do ($Cypress, _) ->
     getRemoteHost: ->
       @getCy "remoteHost"
 
-    getAllCookies: ->
-      ## return all the cookies except those which
-      ## start with our namespace
-      _.reduce Cookies.get(), (memo, value, key) ->
-        unless isNamespaced(key)
-          memo[key] = value
+    getAllCookies: (options = {}) ->
+      getAll = ->
+        ## return all the cookies except those which
+        ## start with our namespace
+        _.reduce Cookies.get(), (memo, value, key) ->
+          unless isNamespaced(key)
+            memo[key] = value
 
-        memo
-      , {}
+          memo
+        , {}
+
+      if doc = options.document
+        Cookies.setDocument(doc)
+        all = getAll()
+        Cookies.setDocument(window.document)
+
+        return all
+      else
+        getAll()
 
     clearCookies: (cookie, options = {}) ->
       ## bail if it starts with our namespace

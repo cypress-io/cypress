@@ -95,3 +95,49 @@ describe "$Cypress.Cy Cookie Commands", ->
           c = @log.attributes.onConsole().cookies
           expect(c).to.eq cookies
           expect(c).to.deep.eq {}
+
+  context "#getCookies", ->
+    beforeEach ->
+      @cy.clearCookies()
+
+    afterEach ->
+      @cy.clearCookies()
+
+    it "sets the subject to the returned cookies", ->
+      @cy.getCookies().then (cookies) ->
+        expect(cookies).to.deep.eq {}
+
+    describe "path", ->
+      it "can get cookies set with path", ->
+        Cypress.Cookies.set("baz", "quux")
+
+        cy
+          .document().then (doc) ->
+            doc.cookie = "foo=bar"
+          .getCookies().then (cookies) ->
+            expect(cookies).to.deep.eq({
+              foo: "bar"
+              baz: "quux"
+            })
+
+    describe ".log", ->
+      beforeEach ->
+        @Cypress.on "log", (@log) =>
+
+      it "ends immediately", ->
+        @cy.getCookies().then ->
+          expect(@log.get("end")).to.be.true
+          expect(@log.get("state")).to.eq("passed")
+
+      it "snapshots immediately", ->
+        @cy.getCookies().then ->
+          expect(@log.get("snapshots").length).to.eq(1)
+          expect(@log.get("snapshots")[0]).to.be.an("object")
+
+      it "#onConsole", ->
+        Cypress.Cookies.set("foo", "bar")
+
+        @cy.getCookies().then (cookies) ->
+          c = @log.attributes.onConsole().cookies
+          expect(c).to.eq cookies
+          expect(c).to.deep.eq {foo: "bar"}
