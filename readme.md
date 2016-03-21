@@ -36,6 +36,7 @@ You can now execute the following commands:
 ##### [cypress new:key](#cypress-newkey-1)
 ##### [cypress remove:ids](#cypress-removeids-1)
 ##### [cypress verify](#cypress-verify-1)
+##### [cypress version](#cypress-version-1)
 
 --
 
@@ -148,6 +149,10 @@ This feature has been removed for the foreseeable future.
 ### cypress verify
 
 Verifies that the Cypress application is found.
+
+### cypress version
+
+Outputs both the version of the CLI Tool and the installed Cypress application.
 
 ## Upcoming Commands
 
