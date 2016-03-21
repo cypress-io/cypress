@@ -1187,7 +1187,7 @@ describe('Kitchen Sink', function(){
   context('Cookies', function(){
     beforeEach(function(){
       cy
-        .visit('http://localhost:8080/commands/cookies')
+        .visit('/cookies')
         .clearCookies()
 
       Cypress.Cookies.debug(true)
