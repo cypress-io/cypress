@@ -12,21 +12,12 @@ Reporter      = require("./reporter")
 leadingSlashesRe = /^\/+/
 
 class Socket
-  constructor: (app) ->
+  constructor: ->
     if not (@ instanceof Socket)
-      return new Socket(app)
+      return new Socket
 
-    if not app
-      throw new Error("Instantiating lib/socket requires an app instance!")
-
-    @app = app
-
-  onTestFileChange: (filePath, stats) ->
+  onTestFileChange: (config, filePath, stats) ->
     logger.info "onTestFileChange", filePath: filePath
-
-    ## simple solution for preventing firing test:changed events
-    ## when we are making modifications to our own files
-    return if @app.enabled("editFileMode")
 
     ## return if we're not a js or coffee file.
     ## this will weed out directories as well
@@ -35,8 +26,8 @@ class Socket
     fs.statAsync(filePath).bind(@)
       .then ->
         ## strip out our testFolder path from the filePath, and any leading forward slashes
-        filePath      = filePath.split(@app.get("cypress").projectRoot).join("").replace(leadingSlashesRe, "")
-        strippedPath  = filePath.replace(@app.get("cypress").testFolder, "").replace(leadingSlashesRe, "")
+        filePath      = filePath.split(config.projectRoot).join("").replace(leadingSlashesRe, "")
+        strippedPath  = filePath.replace(config.testFolder, "").replace(leadingSlashesRe, "")
 
         @io.emit "test:changed", {file: strippedPath}
       .catch(->)
@@ -58,7 +49,7 @@ class Socket
     @testFilePath = testFilePath
 
     watchers.watchAsync(testFilePath, {
-      onChange: @onTestFileChange.bind(@)
+      onChange: _.bind(@onTestFileChange, @, config)
     })
 
   onRequest: (options, cb) ->
@@ -67,8 +58,8 @@ class Socket
     .catch (err) ->
       cb({__error: err.message})
 
-  onFixture: (file, cb) ->
-    {projectRoot, fixturesFolder} = @app.get("cypress")
+  onFixture: (config, file, cb) ->
+    {projectRoot, fixturesFolder} = config
 
     fixture.get(projectRoot, fixturesFolder, file)
     .then(cb)
@@ -78,7 +69,7 @@ class Socket
   createIo: (server, path) ->
     socketIo(server, {path: path})
 
-  _startListening: (server, watchers, options) ->
+  _startListening: (server, watchers, config, options) ->
     _.defaults options,
       socketId: null
       onMocha: ->
@@ -89,7 +80,7 @@ class Socket
     messages = {}
     chromiums = {}
 
-    {projectRoot, testFolder, socketIoRoute} = @app.get("cypress")
+    {projectRoot, testFolder, socketIoRoute} = config
 
     @io = @createIo(server, socketIoRoute)
 
@@ -156,11 +147,9 @@ class Socket
       socket.on "watch:test:file", (filePath) =>
         @watchTestFileByPath(filePath, watchers)
 
-      socket.on "request", =>
-        @onRequest.apply(@, arguments)
+      socket.on "request", _.bind(@onRequest, @)
 
-      socket.on "fixture", =>
-        @onFixture.apply(@, arguments)
+      socket.on "fixture", _.bind(@onFixture, @, config)
 
       _.each "load:spec:iframe url:changed page:loading command:add command:attrs:changed runner:start runner:end before:run before:add after:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test".split(" "), (event) =>
         socket.on event, (args...) =>
@@ -186,11 +175,11 @@ class Socket
     ## event from the other side
     @io and @io.emit("tests:finished")
 
-  startListening: (server, watchers, options) ->
+  startListening: (server, watchers, config, options) ->
     if process.env["CYPRESS_ENV"] is "development"
       @listenToCssChanges(watchers)
 
-    @_startListening(server, watchers, options)
+    @_startListening(server, watchers, config, options)
 
   listenToCssChanges: (watchers) ->
     watchers.watch cwd("lib", "public", "css"), {

@@ -83,6 +83,7 @@ class Base
           copy("./lib/util",                "/src/lib/util")
           copy("./lib/api.coffee",          "/src/lib/api.coffee")
           copy("./lib/cache.coffee",        "/src/lib/cache.coffee")
+          copy("./lib/config.coffee",       "/src/lib/config.coffee")
           copy("./lib/cwd.coffee",          "/src/lib/cwd.coffee")
           copy("./lib/cypress.coffee",      "/src/lib/cypress.coffee")
           copy("./lib/environment.coffee",  "/src/lib/environment.coffee")

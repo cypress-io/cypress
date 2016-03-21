@@ -8,6 +8,7 @@ ids       = require("./ids")
 api       = require("./api")
 user      = require("./user")
 cache     = require("./cache")
+config    = require("./config")
 logger    = require("./logger")
 errors    = require("./errors")
 Server    = require("./server")
@@ -27,7 +28,7 @@ class Project extends EE
       throw new Error("Instantiating lib/project requires a projectRoot!")
 
     @projectRoot = projectRoot
-    @server      = Server(projectRoot)
+    @server      = Server()
     @watchers    = Watchers()
 
   open: (options = {}) ->
@@ -38,23 +39,24 @@ class Project extends EE
       changeEvents: false
     }
 
-    @server.open(options)
-    .bind(@)
-    .then (config) ->
-      ## sync but do not block
-      @sync(options)
-
-      ## store the config from
-      ## opening the server
-      @config = config
-
-      @watchSettingsAndStartWebsockets(options)
-
+    @getConfig(options)
+    .then (cfg) =>
+      @server.open(@projectRoot, cfg, options)
       .then =>
-        @scaffold(config)
+        ## sync but do not block
+        @sync(options)
 
-      ## return our project instance
-      .return(@)
+        ## store the cfg from
+        ## opening the server
+        @cfg = cfg
+
+        @watchSettingsAndStartWebsockets(options, cfg)
+
+        .then =>
+          @scaffold(cfg)
+
+        ## return our project instance
+        .return(@)
 
   sync: (options) ->
     ## attempt to sync up with the remote
@@ -113,7 +115,7 @@ class Project extends EE
 
     @watchers.watch(Settings.pathToCypressJson(@projectRoot), obj)
 
-  watchSettingsAndStartWebsockets: (options) ->
+  watchSettingsAndStartWebsockets: (options, config) ->
     @watchSettings(options)
 
     ## if we've passed down reporter
@@ -121,7 +123,7 @@ class Project extends EE
     if options.reporter
       reporter = Reporter()
 
-    @server.startWebsockets(@watchers, {
+    @server.startWebsockets(@watchers, config, {
       onConnect: (id) =>
         @emit("socket:connected", id)
 
@@ -146,23 +148,23 @@ class Project extends EE
             @emit("end", stats)
     })
 
-  getConfig: ->
-    @config ? {}
+  getConfig: (options = {}) ->
+    if c = @cfg
+      Promise.resolve(c)
+    else
+      config.get(@projectRoot, options)
 
   ensureSpecUrl: (spec) ->
-    Promise.try =>
+    @getConfig()
+    .then (cfg) =>
       if spec
-        @ensureSpecExists(spec)
+        @ensureSpecExists(cfg.testFolder, spec)
         .then (str) =>
-          @getUrlBySpec(str)
+          @getUrlBySpec(cfg.clientUrl, str)
       else
-        @getUrlBySpec("/__all")
+        @getUrlBySpec(cfg.clientUrl, "/__all")
 
-  ensureSpecExists: (spec) ->
-    {testFolder} = @getConfig()
-
-    ## TODO this assumes we've already opened the project and have config
-    ## refactor this not to be dependent on state
+  ensureSpecExists: (testFolder, spec) ->
     specFile = path.resolve(@projectRoot, testFolder, spec)
 
     ## we want to make it easy on the user by allowing them to pass both
@@ -175,8 +177,8 @@ class Project extends EE
     .catch ->
       errors.throw("SPEC_FILE_NOT_FOUND", specFile)
 
-  getUrlBySpec: (spec) ->
-    [@getConfig().clientUrl, "#/tests", spec, "?__ui=satellite"].join("")
+  getUrlBySpec: (clientUrl, spec) ->
+    [clientUrl, "#/tests", spec, "?__ui=satellite"].join("")
 
   scaffold: (config) ->
     Promise.join(
@@ -249,11 +251,11 @@ class Project extends EE
 
   @removeIds = (p) ->
     Project(p)
-    .verifyExistance().then (project) ->
-      config = project.server.config
-
+    .verifyExistance()
+    .call("getConfig")
+    .then (cfg) ->
       ## remove all of the ids for the test files found in the testFolder
-      ids.remove path.join(config.projectRoot, config.testFolder)
+      ids.remove path.join(cfg.projectRoot, cfg.testFolder)
 
   @id = (path) ->
     Project(path).getProjectId()
