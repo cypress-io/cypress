@@ -108,6 +108,7 @@ Commands drive your tests in the browser like a real user would. They let you pe
 | Cookies | |
 | -------------------- | -- |
 | [clearCookies](https://on.cypress.io/api/clearcookies) | Clear all browser cookies |
+| [getCookies](https://on.cypress.io/api/getcookies) | Get all browser cookies |
 
 | Debugging | |
 | -------------------- | -- |

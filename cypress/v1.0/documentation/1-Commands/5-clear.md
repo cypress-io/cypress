@@ -1,7 +1,6 @@
 slug: clear
 excerpt: Clear a value of an input or textarea
 
-
 Clears a value of an `<input>` or `<textarea>`. Under the hood this is actually a shortcut for writing:
 
 ```javascript
