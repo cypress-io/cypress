@@ -6,33 +6,23 @@ Promise     = require("bluebird")
 cwd         = require("../cwd")
 CacheBuster = require("../util/cache_buster")
 
-class Files
-  constructor: (app) ->
-    if not (@ instanceof Files)
-      return new Files(app)
-
-    if not app
-      throw new Error("Instantiating controllers/proxy requires an app!")
-
-    @app = app
-
-  handleFiles: (req, res) ->
-    @getTestFiles().then (files) ->
+module.exports = {
+  handleFiles: (req, res, config) ->
+    @getTestFiles(config).then (files) ->
       res.set "X-Files-Path", files.path
       res.json files
 
-  handleIframe: (req, res) ->
+  handleIframe: (req, res, config) ->
     test = req.params[0]
 
     filePath = cwd("lib", "html", "empty_inject.html")
 
-    @getSpecs(test).bind(@).then (specs) ->
-      @getJavascripts().bind(@).then (js) ->
+    @getSpecs(test, config).bind(@).then (specs) ->
+      @getJavascripts(config).bind(@).then (js) ->
         res.render filePath, {
           title:        @getTitle(test)
-          # stylesheets:  @getStylesheets()
+          # stylesheets:  @getStylesheets(config)
           javascripts:  js
-          utilities:    @getUtilities()
           specs:        specs
         }
 
@@ -45,11 +35,11 @@ class Files
     files.map (files) ->
       if /^\//.test(files) then files else "/" + files
 
-  convertToSpecPath: (specs, options = {}) ->
+  convertToSpecPath: (specs, config, options = {}) ->
     _.defaults options,
       test: true
 
-    {testFolder, rootFolder, supportFolder} = @app.get("cypress")
+    {testFolder, rootFolder, supportFolder} = config
 
     ## return the specs prefixed with /tests?p=spec
     _(specs).map (spec) ->
@@ -72,20 +62,20 @@ class Files
       spec += CacheBuster.get()
       "/__cypress/tests?p=#{spec}"
 
-  getSpecs: (test) ->
+  getSpecs: (test, config) ->
     ## grab all of the specs if this is ci
     if test is "__all"
-      @getTestFiles().then (specs) =>
-        @convertToSpecPath _(specs).pluck("name")
+      @getTestFiles(config).then (specs) =>
+        @convertToSpecPath _(specs).pluck("name"), config
     else
       ## return just this single test
-      Promise.resolve @convertToSpecPath([test])
+      Promise.resolve @convertToSpecPath([test], config)
 
-  getStylesheets: ->
-    @convertToAbsolutePath @app.get("cypress").stylesheets
+  getStylesheets: (config) ->
+    @convertToAbsolutePath config.stylesheets
 
-  getJavascripts: ->
-    {projectRoot, javascripts, supportFolder} = @app.get("cypress")
+  getJavascripts: (config) ->
+    {projectRoot, javascripts, supportFolder} = config
 
     ## automatically add in our support folder and any javascripts
     files = [].concat path.join(supportFolder, "**", "*"), javascripts
@@ -108,28 +98,12 @@ class Files
           file.replace(projectRoot, "")
         .value()
       .then (files) =>
-        @convertToSpecPath(files, {test: false})
+        @convertToSpecPath(files, config, {test: false})
 
-  getUtilities: ->
-    utils = ["iframe"]
-    # utils = ["jquery", "iframe"]
-
-    ## push sinon into utilities if enabled
-    utils.push "sinon" if @app.get("cypress").sinon
-    # utils.push "chai-jquery" if @app.get("cypress")["chai-jquery"]
-
-    ## i believe fixtures can be moved to the parent since
-    ## its not actually mutated within the specs
-    utils.push "fixtures" if @app.get("cypress").fixtures
-
-    utils.map (util) -> "/__cypress/static/js/#{util}.js"
-
-  getTestFiles: ->
-    cypress = @app.get("cypress")
-
+  getTestFiles: (config) ->
     testFolderPath = path.join(
-      cypress.projectRoot,
-      cypress.testFolder
+      config.projectRoot,
+      config.testFolder
     )
 
     ## support files are not automatically
@@ -138,22 +112,22 @@ class Files
     ## the javascripts array
 
     fixturesFolderPath = path.join(
-      cypress.projectRoot,
-      cypress.fixturesFolder,
+      config.projectRoot,
+      config.fixturesFolder,
       "**",
       "*"
     )
 
     supportFolderPath = path.join(
-      cypress.projectRoot,
-      cypress.supportFolder,
+      config.projectRoot,
+      config.supportFolder,
       "**",
       "*"
     )
 
     ## map all of the javascripts to the project root
-    javascriptsPath = _.map cypress.javascripts, (js) ->
-      path.join(cypress.projectRoot, js)
+    javascriptsPath = _.map config.javascripts, (js) ->
+      path.join(config.projectRoot, js)
 
     new Promise (resolve, reject) ->
       ## ignore _fixtures + _support + javascripts
@@ -175,4 +149,4 @@ class Files
 
         resolve(files)
 
-module.exports = Files
+}

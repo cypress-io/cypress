@@ -19,26 +19,17 @@ htmlRe           = /(<html.*?>)/
 okStatusRe       = /^[2|3|4]\d+$/
 badCookieParamRe = /^(httponly|secure|domain=.+)$/i
 
-class Proxy
-  constructor: (app) ->
-    if not (@ instanceof Proxy)
-      return new Proxy(app)
-
-    if not app
-      throw new Error("Instantiating controllers/proxy requires an app!")
-
-    @app = app
-
-  handle: (req, res, next) ->
+module.exports = {
+  handle: (req, res, config, app, next) ->
     ## if we have an unload header it means
     ## our parent app has been navigated away
     ## directly and we need to automatically redirect
     ## to the clientRoute
     if req.cookies["__cypress.unload"]
-      return res.redirect @app.get("cypress").clientRoute
+      return res.redirect config.clientRoute
 
     getRemoteHost = (req) =>
-      @getOriginFromFqdnUrl(req) ? req.cookies["__cypress.remoteHost"] ? @app.get("cypress").baseUrl ? @app.get("__cypress.remoteHost")
+      @getOriginFromFqdnUrl(req) ? req.cookies["__cypress.remoteHost"] ? config.baseUrl ? app.get("__cypress.remoteHost")
 
     d = Domain.create()
 
@@ -63,11 +54,11 @@ class Proxy
         ## if we dont have a req.session that means we're initially
         ## requesting the cypress app and we need to redirect to the
         ## root path that serves the app
-        return res.redirect @app.get("cypress").clientRoute
+        return res.redirect config.clientRoute
 
       thr = through (d) -> @queue(d)
 
-      @getContent(thr, req, res, remoteHost)
+      @getContent(thr, req, res, remoteHost, app, config)
         .on "error", (e) => @errorHandler(e, req, res, remoteHost)
         .pipe(res)
 
@@ -82,19 +73,19 @@ class Proxy
       ## return the origin
       return origin
 
-  getContent: (thr, req, res, remoteHost) ->
+  getContent: (thr, req, res, remoteHost, app, config) ->
     switch remoteHost
       ## serve from the file system because
       ## we are using cypress as our weberver
       when "<root>"
-        @getFileContent(thr, req, res, remoteHost)
+        @getFileContent(thr, req, res, remoteHost, app, config)
 
       ## else go make an HTTP request to the
       ## real server!
       else
-        @getHttpContent(thr, req, res, remoteHost)
+        @getHttpContent(thr, req, res, remoteHost, app)
 
-  getHttpContent: (thr, req, res, remoteHost) ->
+  getHttpContent: (thr, req, res, remoteHost, app) ->
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
     ## prepends req.url with remoteHost
@@ -106,7 +97,7 @@ class Proxy
 
       res.cookie("__cypress.initial", initial)
       res.cookie("__cypress.remoteHost", remoteHost)
-      @app.set("__cypress.remoteHost", remoteHost)
+      app.set("__cypress.remoteHost", remoteHost)
 
     ## we are setting gzip to false here to prevent automatic
     ## decompression of the response since we dont need to transform
@@ -192,10 +183,10 @@ class Proxy
 
     return thr
 
-  getFileContent: (thr, req, res, remoteHost) ->
+  getFileContent: (thr, req, res, remoteHost, app, config) ->
     args = _.compact([
-      @app.get("cypress").projectRoot,
-      @app.get("cypress").rootFolder,
+      config.projectRoot,
+      config.rootFolder,
       req.url
     ])
 
@@ -215,7 +206,7 @@ class Proxy
 
     res.cookie("__cypress.initial", false)
     res.cookie("__cypress.remoteHost", remoteHost)
-    @app.set("__cypress.remoteHost", remoteHost)
+    app.set("__cypress.remoteHost", remoteHost)
 
     stream = fs.createReadStream(file, "utf8")
 
@@ -418,5 +409,4 @@ class Proxy
         Cypress.onBeforeLoad(window);
       </script>
     "
-
-module.exports = Proxy
+}

@@ -7,6 +7,7 @@ glob          = require("glob")
 path          = require("path")
 str           = require("underscore.string")
 coffee        = require("coffee-script")
+config        = require("#{root}lib/config")
 Server        = require("#{root}lib/server")
 CacheBuster   = require("#{root}/lib/util/cache_buster")
 Fixtures      = require("#{root}/spec/server/helpers/fixtures")
@@ -25,19 +26,20 @@ describe "Routes", ->
 
     nock.enableNetConnect()
 
-    @sandbox.stub(Server.prototype, "getCypressJson").returns({})
+    @setup = (obj = {}) =>
+      @server = Server("/Users/brian/app")
 
-    @server = Server("/Users/brian/app")
-    @server.configureApplication()
+      ## get all the config defaults
+      ## and allow us to override them
+      ## for each test
+      cfg = config.mergeDefaults(obj)
 
-    @app    = @server.app
-    @server.setCypressJson {
-      projectRoot: "/Users/brian/app"
-    }
+      @app = @server.createExpress()
+      @server.createRoutes(@app, cfg)
 
-    ## create a session which will store cookies
-    ## in between session requests :-)
-    @session = new (Session({app: @app}))
+      ## create a session which will store cookies
+      ## in between session requests :-)
+      @session = new (Session({app: @app}))
 
   afterEach ->
     @session.destroy()
@@ -46,6 +48,8 @@ describe "Routes", ->
   context "GET /", ->
     beforeEach ->
       @baseUrl = "http://www.github.com"
+
+      @setup()
 
     it "redirects to config.clientRoute without a __cypress.remoteHost", ->
       supertest(@app)
@@ -84,12 +88,12 @@ describe "Routes", ->
     beforeEach ->
       Fixtures.scaffold("todos")
 
-      @server.setCypressJson {
+      @setup({
         projectRoot: Fixtures.project("todos")
         testFolder: "tests"
         fixturesFolder: "tests/_fixtures"
         javascripts: ["tests/etc/**/*"]
-      }
+      })
 
     afterEach ->
       Fixtures.remove("todos")
@@ -106,13 +110,13 @@ describe "Routes", ->
           expect(files.length).to.be.gt(0)
 
           supertest(@app)
-            .get("/__cypress/files")
-            .expect(200, [
-              { name: "sub/sub_test.coffee" },
-              { name: "test1.js" },
-              { name: "test2.coffee" }
-            ])
-            .then -> done()
+          .get("/__cypress/files")
+          .expect(200, [
+            { name: "sub/sub_test.coffee" },
+            { name: "test1.js" },
+            { name: "test2.coffee" }
+          ])
+          .then -> done()
 
     it "sets X-Files-Path header to the length of files", ->
       filesPath = Fixtures.project("todos") + "/" + "tests"
@@ -127,13 +131,13 @@ describe "Routes", ->
       beforeEach ->
         Fixtures.scaffold("todos")
 
-        @server.setCypressJson {
+        @setup({
           projectRoot: Fixtures.project("todos")
           testFolder: "tests"
           javascripts: ["support/spec_helper.coffee"]
           sinon: false
           fixtures: false
-        }
+        })
 
       afterEach ->
         Fixtures.remove("todos")
@@ -162,13 +166,13 @@ describe "Routes", ->
       beforeEach ->
         Fixtures.scaffold("no-server")
 
-        @server.setCypressJson {
+        @setup({
           projectRoot: Fixtures.project("no-server")
           testFolder: "my-tests"
           javascripts: ["helpers/includes.js"]
           sinon: false
           fixtures: false
-        }
+        })
 
       afterEach ->
         Fixtures.remove("no-server")
@@ -284,10 +288,10 @@ describe "Routes", ->
         beforeEach ->
           Fixtures.scaffold("todos")
 
-          @server.setCypressJson {
+          @setup({
             projectRoot: Fixtures.project("todos")
             testFolder: "tests"
-          }
+          })
 
         afterEach ->
           Fixtures.remove("todos")
@@ -363,13 +367,13 @@ describe "Routes", ->
       beforeEach ->
         Fixtures.scaffold("todos")
 
-        @server.setCypressJson {
+        @setup({
           projectRoot: Fixtures.project("todos")
           testFolder: "tests"
           javascripts: ["tests/etc/etc.js"]
           sinon: false
           fixtures: false
-        }
+        })
 
       afterEach ->
         Fixtures.remove("todos")
@@ -398,7 +402,7 @@ describe "Routes", ->
       beforeEach ->
         Fixtures.scaffold("no-server")
 
-        @server.setCypressJson {
+        @setup({
           projectRoot: Fixtures.project("no-server")
           testFolder: "my-tests"
           javascripts: ["helpers/includes.js"]
@@ -408,7 +412,7 @@ describe "Routes", ->
           rootFolder: "foo"
           sinon: false
           fixtures: false
-        }
+        })
 
       afterEach ->
         Fixtures.remove("no-server")
@@ -452,10 +456,10 @@ describe "Routes", ->
           .expect(200, "foo")
 
       it "falls back to app baseUrl property", ->
+        @setup({baseUrl: "http://localhost:8080"})
+
         ## should ignore this since it has least precendence
         @app.set("__cypress.remoteHost", "http://www.github.com")
-
-        @app.set("cypress", {baseUrl: "http://localhost:8080"})
 
         nock("http://localhost:8080")
           .get("/assets/app.js")
@@ -1302,11 +1306,11 @@ describe "Routes", ->
 
         Fixtures.scaffold()
 
-        @server.setCypressJson {
+        @setup({
           projectRoot: Fixtures.project("no-server")
           rootFolder: "dev"
           testFolder: "my-tests"
-        }
+        })
 
         @session
           .get(@baseUrl)
@@ -1449,7 +1453,7 @@ describe "Routes", ->
             expect(res.text).to.eq "{}"
 
       it "falls back to baseUrl when no FQDN and no remoteHost", ->
-        @server.setCypressJson({
+        @setup({
           baseUrl: "http://www.google.com"
         })
 
