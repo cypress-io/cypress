@@ -9,5 +9,8 @@
     "clean": "readmeio-sync clean-remote"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "readmeio-sync": "git+https://github.com/jennifer-mann/readmeio-sync.git"
+  }
 }

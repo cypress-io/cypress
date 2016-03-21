@@ -25,6 +25,10 @@ To make changes to our documentation:
 
 ### Working Locally
 
+```bash
+npm install
+```
+
 You will need to login with your Readme.io credentials before working. You may see an error when trying to upload or clean that looks like this: `throw 'Error: Request failed! (Redirected to login...)'`
 
 Login with your Cypress readme.io account credentials.
@@ -35,9 +39,6 @@ export README_PASSWORD=<readmeio_account_password>
 ```
 
 ```bash
-# use proper node version
-nvm use 5.3.0
-
 # modify local files
 <hack hack hack>
 
