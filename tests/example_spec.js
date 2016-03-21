@@ -1199,11 +1199,11 @@ describe('Kitchen Sink', function(){
       //
       // // http://on.cypress.io/api/getcookies
       cy
-        .getCookies().should("not.have.property", "fakeCookie1")
+        .getCookies().should('not.have.property', 'fakeCookie1')
 
-        .get(".get-cookies-btn").click()
+        .get('.get-cookies-btn').click()
 
-        .getCookies().should("have.property", "fakeCookie1", "123ABC")
+        .getCookies().should('have.property', 'fakeCookie1', '123ABC')
 
     })
 
@@ -1214,14 +1214,14 @@ describe('Kitchen Sink', function(){
       // http://on.cypress.io/api/clearcookies
 
       cy
-        .getCookies().should("not.have.property", "fakeCookie1")
+        .getCookies().should('not.have.property', 'fakeCookie1')
 
-        .get(".clear-cookies-btn").click()
+        .get('.clear-cookies-btn').click()
 
-        .getCookies().should("have.property", "fakeCookie1", "123ABC")
+        .getCookies().should('have.property', 'fakeCookie1', '123ABC')
 
         // clearCookies() returns cookie represented as an object
-        .clearCookies().should("not.have.property", "fakeCookie1")
+        .clearCookies().should('not.have.property', 'fakeCookie1')
     })
 
   })
