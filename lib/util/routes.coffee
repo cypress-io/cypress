@@ -1,8 +1,8 @@
 _       = require("lodash")
 Uri     = require("jsuri")
-config  = require("../config")
+konfig  = require("../konfig")
 
-api_url = config.app.api_url
+api_url = konfig("api_url")
 
 routes = {
   api:           ""

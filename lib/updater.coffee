@@ -8,7 +8,7 @@ chmodr         = require("chmodr")
 trash          = require("trash")
 NwUpdater      = require("node-webkit-updater")
 cwd            = require("./cwd")
-config         = require("./config")
+konfig         = require("./konfig")
 logger         = require("./logger")
 argsUtil       = require("./util/args")
 
@@ -44,7 +44,7 @@ class Updater
 
   getPackage: ->
     pkg = fs.readJsonSync cwd("package.json")
-    pkg.manifestUrl = config.app.desktop_manifest_url
+    pkg.manifestUrl = konfig("desktop_manifest_url")
     pkg
 
   getClient: ->
@@ -107,12 +107,12 @@ class Updater
       glob "**/app/package.json", {cwd: newAppPath, ignore: "**/node_modules/**"}, (err, files) ->
         return reject(err) if err
 
-        newAppConfigPath = path.join(newAppPath, path.dirname(files[0]), config.app.cy_path)
+        newAppConfigPath = path.join(newAppPath, path.dirname(files[0]), konfig("cy_path"))
 
         resolve(newAppConfigPath)
 
     p.then (newAppConfigPath) ->
-      cyConfigPath  = cwd(config.app.cy_path)
+      cyConfigPath  = cwd(konfig("cy_path"))
 
       logger.info "copying .cy to tmp destination", src: cyConfigPath, destination: newAppConfigPath
 

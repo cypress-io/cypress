@@ -17,6 +17,7 @@ cypressIcons = require("cypress-icons")
 log          = require("./log")
 meta         = require("./meta")
 pkg          = require("../package.json")
+konfig       = require("../konfig")
 Fixtures     = require("../spec/server/helpers/fixtures")
 
 pkgr     = Promise.promisify(pkgr)
@@ -82,7 +83,6 @@ class Base
           copy("./lib/util",                "/src/lib/util")
           copy("./lib/api.coffee",          "/src/lib/api.coffee")
           copy("./lib/cache.coffee",        "/src/lib/cache.coffee")
-          copy("./lib/config.coffee",       "/src/lib/config.coffee")
           copy("./lib/cwd.coffee",          "/src/lib/cwd.coffee")
           copy("./lib/cypress.coffee",      "/src/lib/cypress.coffee")
           copy("./lib/environment.coffee",  "/src/lib/environment.coffee")
@@ -90,6 +90,7 @@ class Base
           copy("./lib/exception.coffee",    "/src/lib/exception.coffee")
           copy("./lib/fixture.coffee",      "/src/lib/fixture.coffee")
           copy("./lib/ids.coffee",          "/src/lib/ids.coffee")
+          copy("./lib/konfig.coffee",       "/src/lib/konfig.coffee")
           copy("./lib/logger.coffee",       "/src/lib/logger.coffee")
           copy("./lib/project.coffee",      "/src/lib/project.coffee")
           copy("./lib/reporter.coffee",     "/src/lib/reporter.coffee")
@@ -235,7 +236,7 @@ class Base
     @uploadToS3("osx64", "fixture")
 
   getManifest: ->
-    requestPromise(config.app.desktop_manifest_url).then (resp) ->
+    requestPromise(konfig("desktop_manifest_url")).then (resp) ->
       console.log resp
 
   fixture: (cb) ->
