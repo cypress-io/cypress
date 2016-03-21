@@ -1186,35 +1186,42 @@ describe('Kitchen Sink', function(){
 
   context('Cookies', function(){
     beforeEach(function(){
-      cy.visit('/commands/cookies')
-    })
-
-    // **** Cookies ****
-    //
-    // Although cookies are automatically cleared
-    // to maintain a clean state in between tests
-    // sometimes we need to clear the cookies manually
-
-    it.skip('cy.clearCookies() - clear browser cookies', function(){
-      // THIS IS SKIPPED DUE TO AN
-      // ERROR CURRENTLY IN CYPRESS
-      // https://github.com/cypress-io/cypress/issues/104
-      // *******************************************
+      cy
+        .visit('http://localhost:8080/commands/cookies')
+        .clearCookies()
 
       Cypress.Cookies.debug(true)
+    })
+
+    it('cy.getCookies() - get browser cookies', function(){
+
+      // **** Get all Cookies ****
+      //
+      // // http://on.cypress.io/api/getcookies
+      cy
+        .getCookies().should("not.have.property", "fakeCookie1")
+
+        .get(".get-cookies-btn").click()
+
+        .getCookies().should("have.property", "fakeCookie1", "123ABC")
+
+    })
+
+    it('cy.clearCookies() - clear browser cookies', function(){
+
       // **** Clear all Cookies ****
       //
       // http://on.cypress.io/api/clearcookies
+
       cy
-        .document().its("cookie").should("not.include", "123ABC")
+        .getCookies().should("not.have.property", "fakeCookie1")
 
-        .get(".cookies-btn").click()
+        .get(".clear-cookies-btn").click()
 
-        .document().its("cookie").should("include", "123ABC")
+        .getCookies().should("have.property", "fakeCookie1", "123ABC")
 
         // clearCookies() returns cookie represented as an object
-        .clearCookies()
-        .document().its("cookie").should("not.include", "123ABC")
+        .clearCookies().should("not.have.property", "fakeCookie1")
     })
 
   })
@@ -1396,7 +1403,7 @@ describe('Kitchen Sink', function(){
 
         Cypress.Cookies.set('fakeCookie', '123ABC')
 
-        cy.document().its('cookie').should('include', 'fakeCookie=123ABC')
+        cy.getCookies().should('have.property', 'fakeCookie', '123ABC')
 
       })
 
