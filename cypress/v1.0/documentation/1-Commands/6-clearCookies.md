@@ -34,6 +34,27 @@ cy
 
 ***
 
+# Command Log
+
+## Clear cookies after getting cookies
+
+```javascript
+cy
+  .getCookies().should("have.property", "fakeCookie1", "123ABC")
+  .clearCookies().should("not.have.property", "fakeCookie1")
+```
+
+The commands above will display in the command log as:
+
+![screen shot 2016-03-21 at 12 16 30 pm](https://cloud.githubusercontent.com/assets/1271364/13925547/0bc16998-ef5f-11e5-8b89-c95fa392d054.png)
+
+When clicking on `clearCookies` within the command log, the console outputs the following:
+
+![screen shot 2016-03-21 at 12 16 49 pm](https://cloud.githubusercontent.com/assets/1271364/13925548/0ef41bce-ef5f-11e5-8fc1-de98817ed495.png)
+
+***
+
 # Related
 
+- [getCookies](https://on.cypress.io/api/getcookies)
 - [Cypress API Cookies](https://on.cypress.io/api/cookies)
