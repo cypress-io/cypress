@@ -87,20 +87,6 @@ module.exports =
       file = @_pathToFile(projectRoot, options.file)
       @_logReadErr(file, err)
 
-    # try
-    #   @_get("readJsonSync", projectRoot, options)
-    # catch err
-    #   ## dont catch errors if
-    #   ## there wasnt a cypress.env.json
-    #   if err.code is "ENOENT"
-    #     return {}
-
-    #   throw err if errors.isCypressErr(err)
-
-    #   ## TODO: this should not be project root
-    #   ## it should be projectRoot + cypress.env.json
-    #   @_logReadErr(projectRoot, err, options.file)
-
   readSync: (projectRoot) ->
     options = {
       file: "cypress.json"
