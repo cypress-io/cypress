@@ -46,5 +46,7 @@ module.exports = (app, config) ->
   app.all "*", (req, res, next) ->
     proxy.handle(req, res, config, app, next)
 
+  ## turn this on to debug error handling
+  ## in test mode
   # app.use (err, req, res, next) ->
   #   console.log err.stack

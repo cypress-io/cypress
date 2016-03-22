@@ -1,7 +1,7 @@
 require("../spec_helper")
 
 path           = require("path")
-Server         = require("#{root}lib/server")
+config         = require("#{root}lib/config")
 fixture        = require("#{root}lib/fixture")
 FixturesHelper = require("#{root}/spec/server/helpers/fixtures")
 
@@ -9,9 +9,10 @@ describe "lib/fixture", ->
   beforeEach ->
     FixturesHelper.scaffold()
 
-    @todos        = FixturesHelper.projectPath("todos")
-    @server       = Server(@todos)
-    @fixturesPath = path.join(@todos, @server.config.fixturesFolder)
+    @todosPath = FixturesHelper.projectPath("todos")
+
+    config.get(@todosPath).then (cfg) =>
+      @fixturesPath = path.join(@todosPath, cfg.fixturesFolder)
 
   afterEach ->
     FixturesHelper.remove()
@@ -318,7 +319,7 @@ describe "lib/fixture", ->
   context "#scaffold", ->
     it "creates both fixturesFolder and example.json when fixturesFolder does not exist", ->
       ## todos has a fixtures folder so let's first nuke it and then scaffold
-      fs.removeAsync(@todos).then =>
+      fs.removeAsync(@todosPath).then =>
         fixture.scaffold(@fixturesPath).then =>
           fs.readFileAsync(@fixturesPath + "/example.json", "utf8").then (str) ->
             expect(str).to.eq """

@@ -25,18 +25,18 @@ module.exports = {
       spec
     )
 
-    config =
+    options =
       baseUrl: config.projectRoot
       name: filePath
       out: "main.js"
 
     if config.requirejs
-      requirejs.optimize config, (buildResponse) ->
+      requirejs.optimize options, (buildResponse) ->
         ## need to wrap these contents with almond so we dont
         ## have to add the require.js script tag (which is huge)
-        contents = fs.readFileSync(config.out, 'utf8')
+        contents = fs.readFileSync(options.out, 'utf8')
 
-        ## also we need to delete config.out since requirejs
+        ## also we need to delete options.out since requirejs
         ## generates this
         debugger
 

@@ -34,7 +34,7 @@ describe "Routes", ->
       ## for each test
       cfg = config.mergeDefaults(obj)
 
-      @app = @server.createExpress()
+      @app = @server.createExpressApp()
       @server.createRoutes(@app, cfg)
 
       ## create a session which will store cookies

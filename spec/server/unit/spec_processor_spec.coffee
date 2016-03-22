@@ -1,45 +1,45 @@
 require("../spec_helper")
 
-path          = require("path")
-through2      = require("through2")
-through       = require("through")
 _             = require("lodash")
-_s            = require("underscore.string")
-SpecProcessor = require("#{root}lib/controllers/spec_processor")
-FixturesRoot  = path.resolve(__dirname, "../../", "fixtures/", "server/")
+fs            = require("fs-extra")
+str           = require("underscore.string")
+path          = require("path")
+through       = require("through")
+through2      = require("through2")
+specProcessor = require("#{root}lib/controllers/spec_processor")
+fixturesRoot  = path.resolve(__dirname, "../../", "fixtures/", "server/")
+
+fs = Promise.promisifyAll(fs)
 
 describe "lib/controllers/spec_processor", ->
   afterEach ->
-    try
-      fs.unlinkSync(path.join(FixturesRoot, '/sample.js'))
+    fs.removeAsync(path.join(fixturesRoot, '/sample.js'))
+    .catch ->
 
   beforeEach ->
-    app =
-      get: (type) ->
-        projectRoot: ""
-        testFolder: FixturesRoot
-        browserify:
-          basedir: FixturesRoot
+    @config = {
+      projectRoot: ""
+      testFolder: fixturesRoot
+      browserify: {
+        basedir: fixturesRoot
+      }
+    }
 
-    @specProcessor = SpecProcessor(app)
     @res = through2.obj (chunk, enc, cb) -> cb(null, chunk)
 
     @res.set  = @sandbox.stub()
     @res.type = @sandbox.stub()
 
-    fs.writeFileSync(path.join(FixturesRoot, '/sample.js'), ';')
-
-  it "returns a new instance", ->
-    expect(@specProcessor).to.be.instanceOf(SpecProcessor)
+    fs.writeFileSync(path.join(fixturesRoot, '/sample.js'), ';')
 
   it "sets the correct content type", ->
-    @specProcessor.handle "#{FixturesRoot}/sample.js", {}, @res, =>
+    specProcessor.handle "#{fixturesRoot}/sample.js", {}, @res, @config, =>
 
     expect(@res.type).to.have.been.calledOnce
     .and.to.have.been.calledWith('js')
 
   it "handles snocket includes", (done) ->
-    @specProcessor.handle "#{FixturesRoot}/snocket_root.js", {}, @res, =>
+    specProcessor.handle "#{fixturesRoot}/snocket_root.js", {}, @res, @config, =>
     @results = ""
 
     ## We have to manually catch the error here
@@ -61,11 +61,11 @@ describe "lib/controllers/spec_processor", ->
 
   context 'coffeescript', ->
     beforeEach ->
-      fs.writeFileSync(path.join(FixturesRoot, '/sample.coffee'), '->')
+      fs.writeFileSync(path.join(fixturesRoot, '/sample.coffee'), '->')
 
     afterEach ->
       try
-        fs.unlinkSync(path.join(FixturesRoot, '/sample.coffee'))
+        fs.unlinkSync(path.join(fixturesRoot, '/sample.coffee'))
       catch
 
     it "compiles coffeescript", (done) ->
@@ -87,19 +87,19 @@ describe "lib/controllers/spec_processor", ->
           done(e)
       )
 
-      @specProcessor.handle "#{FixturesRoot}/sample.coffee", {}, @res, =>
+      specProcessor.handle "#{fixturesRoot}/sample.coffee", {}, @res, @config, =>
 
   context 'browserify', ->
     it "handles commonjs requires", (done) ->
       streamOutput = ''
 
-      @specProcessor.handle "#{FixturesRoot}/commonjs_root.js", {}, @res, (e) => done(e)
+      specProcessor.handle "#{fixturesRoot}/commonjs_root.js", {}, @res, @config, (e) => done(e)
 
       @res.pipe(through (d) ->
         streamOutput += d.toString()
       ).on 'close', ->
-        expectedOutput = fs.readFileSync(path.join(FixturesRoot, '/commonjs_expected'), 'utf8')
-        expect(_s.trim(streamOutput)).to.eql(_s.trim(expectedOutput))
+        expectedOutput = fs.readFileSync(path.join(fixturesRoot, '/commonjs_expected'), 'utf8')
+        expect(str.trim(streamOutput)).to.eql(str.trim(expectedOutput))
         done()
 
   it "handles requirejs"

@@ -27,7 +27,7 @@ module.exports =
 
   _get: (method, projectRoot, options = {}) ->
     if not projectRoot
-      throw new Error("Settings requires projectRoot to be defined!")
+      throw new Error("lib/util/settings requires projectRoot to be defined!")
 
     _.defaults options,
       writeInitial: true

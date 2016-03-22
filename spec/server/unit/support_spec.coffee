@@ -1,7 +1,7 @@
 require("../spec_helper")
 
 path        = require("path")
-Server      = require("#{root}lib/server")
+config      = require("#{root}lib/config")
 Support     = require("#{root}lib/support")
 Fixtures    = require("#{root}/spec/server/helpers/fixtures")
 
@@ -9,17 +9,17 @@ describe "lib/support", ->
   beforeEach ->
     Fixtures.scaffold()
 
-    @todos = Fixtures.project("todos")
+    @todosPath = Fixtures.projectPath("todos")
 
-    @server  = Server(@todos)
-    @support = Support(@server.config)
+    config.get(@todosPath).then (cfg) =>
+      @support = Support(cfg)
 
   afterEach ->
     Fixtures.remove()
 
   context "#constructor", ->
     it "sets folder to supportFolder", ->
-      expect(@support.folder).to.eq @todos + "/tests/_support"
+      expect(@support.folder).to.eq @todosPath + "/tests/_support"
 
   context "#scaffold", ->
     it "creates both supportFolder and spec_helper.js when supportFolder does not exist", ->

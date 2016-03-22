@@ -6,44 +6,14 @@ require("../spec_helper")
 
 through   = require("through")
 Readable  = require("stream").Readable
-Server    = require("#{root}lib/server")
-Proxy     = require("#{root}lib/controllers/proxy")
+proxy     = require("#{root}lib/controllers/proxy")
 
 describe "lib/proxy", ->
-  beforeEach ->
-    @sandbox.stub(Server.prototype, "getCypressJson").returns({})
-
-    @server = Server("/Users/brian/app")
-    @app    = @server.app
-    @server.setCypressJson {
-      projectRoot: "/Users/brian/app"
-    }
-
-    @proxy = Proxy(@app)
-#     @res = through (d) ->
-#     @res.render = ->
-#     @res.send = ->
-#     @res.redirect = ->
-#     @res.contentType = ->
-#     @res.status = => @res
-
-#     @baseUrl      = "http://foo.com"
-#     @redirectUrl  = "http://x.com"
-
-#     nock.disableNetConnect()
-
-  afterEach ->
-#     nock.cleanAll()
-#     nock.enableNetConnect()
-
-  it "returns a new instance", ->
-    expect(@proxy).to.be.instanceOf(Proxy)
-
   context "#getOriginFromFqdnUrl", ->
     beforeEach ->
       @urlIs = (url, remoteHost, reqUrl) ->
         @req = {url: url}
-        url = @proxy.getOriginFromFqdnUrl(@req)
+        url = proxy.getOriginFromFqdnUrl(@req)
         expect(url).to.eq remoteHost
         expect(@req.url).to.eq reqUrl
 
@@ -58,57 +28,57 @@ describe "lib/proxy", ->
 
   context "#stripCookieParams", ->
     it "doesnt require proper white space", ->
-      cookies = @proxy.stripCookieParams(["user=brian;path=/;expires=123;HttpOnly"])
+      cookies = proxy.stripCookieParams(["user=brian;path=/;expires=123;HttpOnly"])
       expect(cookies).to.deep.eq ["user=brian; path=/; expires=123"]
 
     it "strips HttpOnly", ->
-      cookies = @proxy.stripCookieParams(["user=brian; path=/; HttpOnly"])
+      cookies = proxy.stripCookieParams(["user=brian; path=/; HttpOnly"])
       expect(cookies).to.deep.eq ["user=brian; path=/"]
 
     it "strips httponly", ->
-      cookies = @proxy.stripCookieParams(["user=brian; path=/; httponly"])
+      cookies = proxy.stripCookieParams(["user=brian; path=/; httponly"])
       expect(cookies).to.deep.eq ["user=brian; path=/"]
 
     it "strips Secure", ->
-      cookies = @proxy.stripCookieParams(["user=brian; path=/; Secure"])
+      cookies = proxy.stripCookieParams(["user=brian; path=/; Secure"])
       expect(cookies).to.deep.eq ["user=brian; path=/"]
 
     it "strips secure", ->
-      cookies = @proxy.stripCookieParams(["user=brian; path=/; secure"])
+      cookies = proxy.stripCookieParams(["user=brian; path=/; secure"])
       expect(cookies).to.deep.eq ["user=brian; path=/"]
 
     it "strips HttpOnly and Secure", ->
-      cookies = @proxy.stripCookieParams(["user=brian; path=/; Secure; HttpOnly"])
+      cookies = proxy.stripCookieParams(["user=brian; path=/; Secure; HttpOnly"])
       expect(cookies).to.deep.eq ["user=brian; path=/"]
 
     it "strips Secure and HttpOnly", ->
-      cookies = @proxy.stripCookieParams(["user=brian; path=/; HttpOnly; Secure"])
+      cookies = proxy.stripCookieParams(["user=brian; path=/; HttpOnly; Secure"])
       expect(cookies).to.deep.eq ["user=brian; path=/"]
 
   context "#mapHeaders", ->
     it "rewrites x-xhr-referer", ->
       req = {headers: {"x-xhr-referer": "http://localhost:2020"}}
-      headers = @proxy.mapHeaders(req.headers, "http://localhost:2020", "http://localhost:8080")
+      headers = proxy.mapHeaders(req.headers, "http://localhost:2020", "http://localhost:8080")
       expect(headers).to.deep.eq {"x-xhr-referer": "http://localhost:8080"}
 
     it "is case insensitive", ->
       req = {headers: {"X-XHR-REFERER": "http://LOCALHOST:2020"}}
-      headers = @proxy.mapHeaders(req.headers, "http://localhost:2020", "http://localhost:8080")
+      headers = proxy.mapHeaders(req.headers, "http://localhost:2020", "http://localhost:8080")
       expect(headers).to.deep.eq {"X-XHR-REFERER": "http://localhost:8080"}
 
     it "rewrites multiple x-* headers", ->
       req = {headers: {"x-xhr-referer": "http://localhost:2020", "x-host": "http://localhost:2020/foo"}}
-      headers = @proxy.mapHeaders(req.headers, "http://localhost:2020", "http://localhost:8080")
+      headers = proxy.mapHeaders(req.headers, "http://localhost:2020", "http://localhost:8080")
       expect(headers).to.deep.eq {"x-xhr-referer": "http://localhost:8080", "x-host": "http://localhost:8080/foo"}
 
     it "rewrites referer header", ->
       req = {headers: {"referer": "http://localhost:2020/foo"}}
-      headers = @proxy.mapHeaders req.headers, "http://localhost:2020", "https://go.pardot.com"
+      headers = proxy.mapHeaders req.headers, "http://localhost:2020", "https://go.pardot.com"
       expect(headers).to.deep.eq {"referer": "https://go.pardot.com/foo"}
 
     it "rewrites origin header", ->
       req = {headers: {"origin": "http://localhost:2020"}}
-      headers = @proxy.mapHeaders req.headers, "http://localhost:2020", "https://go.pardot.com"
+      headers = proxy.mapHeaders req.headers, "http://localhost:2020", "https://go.pardot.com"
       expect(headers).to.deep.eq {"origin": "https://go.pardot.com"}
 
 #   it "injects content", (done) ->
@@ -117,7 +87,7 @@ describe "lib/proxy", ->
 #     readable.push('<head></head><body></body>')
 #     readable.push(null)
 
-#     readable.pipe(@proxy.injectContent("wow"))
+#     readable.pipe(proxy.injectContent("wow"))
 #     .pipe through (d) ->
 #       expect(d.toString()).to.eq("<head> wow</head><body></body>")
 #       done()
@@ -137,7 +107,7 @@ describe "lib/proxy", ->
 
 #       @res.redirect = (loc) =>
 #         @req.url = loc
-#         @proxy.handle(@req, @res)
+#         proxy.handle(@req, @res)
 
 #     it "redirects on 301", (done) ->
 #       nock(@redirectUrl)
@@ -146,7 +116,7 @@ describe "lib/proxy", ->
 #         done()
 #       )
 
-#       @proxy.handle(@req, @res)
+#       proxy.handle(@req, @res)
 
 #     it "resets session remote after a redirect", (done) ->
 #       nock(@redirectUrl)
@@ -156,40 +126,40 @@ describe "lib/proxy", ->
 #         done()
 #       )
 
-#       @proxy.handle(@req, @res)
+#       proxy.handle(@req, @res)
 
 #   context "#parseReqUrl", ->
 #     it "removes /__remote/", ->
-#       url = @proxy.parseReqUrl("/__remote/www.github.com")
+#       url = proxy.parseReqUrl("/__remote/www.github.com")
 #       expect(url).to.eq "www.github.com"
 
 #     it "removes __initial query param", ->
-#       url = @proxy.parseReqUrl("/__remote/www.github.com?__initial=true")
+#       url = proxy.parseReqUrl("/__remote/www.github.com?__initial=true")
 #       expect(url).to.eq "www.github.com"
 
 #     it "leaves other query params", ->
-#       url = @proxy.parseReqUrl("/__remote/www.github.com?__initial=true&foo=bar")
+#       url = proxy.parseReqUrl("/__remote/www.github.com?__initial=true&foo=bar")
 #       expect(url).to.eq "www.github.com/?foo=bar"
 
 #     it "doesnt strip trailing slashes", ->
-#       url = @proxy.parseReqUrl("/__remote/www.github.com/")
+#       url = proxy.parseReqUrl("/__remote/www.github.com/")
 #       expect(url).to.eq "www.github.com/"
 
 #   context "#prepareUrlForRedirect", ->
 #     it "prepends with /__remote/ and adds __initial=true query param", ->
-#       url = @proxy.prepareUrlForRedirect("www.github.com", "www.github.com/bar")
+#       url = proxy.prepareUrlForRedirect("www.github.com", "www.github.com/bar")
 #       expect(url).to.eq "/__remote/www.github.com/bar?__initial=true"
 
 #     it "doesnt strip leading slashes", ->
-#       url = @proxy.prepareUrlForRedirect("www.github.com", "www.github.com/")
+#       url = proxy.prepareUrlForRedirect("www.github.com", "www.github.com/")
 #       expect(url).to.eq "/__remote/www.github.com/?__initial=true"
 
 #     it "handles url leading slashes", ->
-#       url = @proxy.prepareUrlForRedirect("www.github.com/foo", "www.github.com/foo/")
+#       url = proxy.prepareUrlForRedirect("www.github.com/foo", "www.github.com/foo/")
 #       expect(url).to.eq "/__remote/www.github.com/foo/?__initial=true"
 
 #     it "handles existing query params", ->
-#       url = @proxy.prepareUrlForRedirect("www.github.com", "www.github.com/foo?bar=baz")
+#       url = proxy.prepareUrlForRedirect("www.github.com", "www.github.com/foo?bar=baz")
 #       expect(url).to.eq "/__remote/www.github.com/foo?bar=baz&__initial=true"
 
 #   context "setting session", ->
@@ -207,7 +177,7 @@ describe "lib/proxy", ->
 #         url: "/__remote/#{@baseUrl}"
 #         session: {}
 
-#       @proxy.handle(@req, @res)
+#       proxy.handle(@req, @res)
 
 #       expect(@req.session.remote).to.eql(@baseUrl)
 
@@ -216,13 +186,13 @@ describe "lib/proxy", ->
 #         url: "/__remote/#{@baseUrl}?foo=bar"
 #         session: {}
 
-#       @proxy.handle(@req, @res)
+#       proxy.handle(@req, @res)
 #       expect(@req.session.remote).to.eql(@baseUrl)
 
 #   context "relative files", ->
 #     it "#getRelativeFileContent strips trailing slashes", ->
 #       createReadStream = @sandbox.stub(fs, "createReadStream")
-#       @proxy.getRelativeFileContent("index.html/", {})
+#       proxy.getRelativeFileContent("index.html/", {})
 #       expect(createReadStream).to.be.calledWith("/Users/brian/app/index.html")
 
 #   context "absolute files", ->
