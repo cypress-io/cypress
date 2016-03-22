@@ -3,10 +3,10 @@ require("../spec_helper")
 _            = require("lodash")
 uuid         = require("node-uuid")
 client       = require("socket.io-client")
+config       = require("#{root}lib/config")
 Socket       = require("#{root}lib/socket")
 Server       = require("#{root}lib/server")
 Watchers     = require("#{root}lib/watchers")
-Settings     = require("#{root}lib/util/settings")
 Fixtures     = require("#{root}/spec/server/helpers/fixtures")
 
 describe "lib/socket", ->
@@ -16,6 +16,8 @@ describe "lib/socket", ->
     @todosPath = Fixtures.projectPath("todos")
     @server    = Server(@todosPath)
 
+    config.get(@todosPath).then (@config) =>
+
   afterEach ->
     Fixtures.remove()
     @server.close()
@@ -24,36 +26,59 @@ describe "lib/socket", ->
     beforeEach (done) ->
       ## create a for realz socket.io connection
       ## so we can test server emit / client emit events
-      @server.open().then =>
-        @server.startWebsockets({}, {})
-        @socket = @server.socket
+      @server.open(@todosPath, @config).then =>
+        @options = {}
+        @watchers = {}
+        @server.startWebsockets(@watchers, @config, @options)
+        @socket = @server._socket
 
         ## when our real client connects then we're done
         @socket.io.on "connection", (socket) ->
           done()
 
-        {clientUrlDisplay, socketIoRoute} = @server.app.get("cypress")
+        {clientUrlDisplay, socketIoRoute} = @config
+
         @client = client(clientUrlDisplay, {path: socketIoRoute})
 
     afterEach ->
       @client.disconnect()
 
+    context "on(watch:test:file)", ->
+      it "calls socket#watchTestFileByPath with config, filePath, watchers", (done) ->
+        watchers = {}
+
+        @sandbox.stub(@socket, "watchTestFileByPath").yieldsAsync()
+
+        @client.emit "watch:test:file", "path/to/file", =>
+          expect(@socket.watchTestFileByPath).to.be.calledWith(@config, "path/to/file", watchers)
+          done()
+
+    context "on(app:connect)", ->
+      it "calls options.onConnect with socketId and socket", (done) ->
+        @options.onConnect = (socketId, socket) ->
+          expect(socketId).to.eq("sid-123")
+          expect(socket.connected).to.be.true
+          done()
+
+        @client.emit "app:connect", "sid-123"
+
     context "on(fixture)", ->
-      it "calls socket#onFixture", ->
+      it "calls socket#onFixture", (done) ->
         onFixture = @sandbox.stub(@socket, "onFixture").yieldsAsync("bar")
 
-        @client.emit "request", "foo", (resp) ->
+        @client.emit "fixture", "foo", (resp) =>
           expect(resp).to.eq("bar")
 
           ## ensure onFixture was called with those same arguments
           ## therefore we have verified the socket binding and
           ## the call into onFixture with the proper arguments
-          expect(onFixture).to.be.calledWith("foo")
+          expect(onFixture).to.be.calledWith(@config, "foo")
+          done()
 
       it "returns the fixture object", ->
         cb = @sandbox.spy()
 
-        @socket.onFixture("foo", cb).then ->
+        @socket.onFixture(@config, "foo", cb).then ->
           expect(cb).to.be.calledWith [
             {"json": true}
           ]
@@ -61,7 +86,7 @@ describe "lib/socket", ->
       it "errors when fixtures fails", ->
         cb = @sandbox.spy()
 
-        @socket.onFixture("invalid.exe", cb).then ->
+        @socket.onFixture(@config, "invalid.exe", cb).then ->
           obj = cb.getCall(0).args[0]
           expect(obj).to.have.property("__error")
           expect(obj.__error).to.eq "Invalid fixture extension: '.exe'. Acceptable file extensions are: .json, .js, .coffee, .html, .txt, .png, .jpg, .jpeg, .gif, .tif, .tiff, .zip"
@@ -129,17 +154,13 @@ describe "lib/socket", ->
 
       @sandbox.stub(Socket.prototype, "createIo").returns(@io)
 
-      @server.startWebsockets({}, {})
-      @socket = @server.socket
-
-    it "throws without app", ->
-      fn = => Socket(null)
-      expect(fn).to.throw "Instantiating lib/socket requires an app instance!"
+      @server.startWebsockets({}, @config, {})
+      @socket = @server._socket
 
     context "#close", ->
       beforeEach ->
-        @server.startWebsockets({}, {})
-        @socket = @server.socket
+        @server.startWebsockets({}, @config, {})
+        @socket = @server._socket
 
       it "calls close on #io", ->
         @socket.close()
@@ -159,20 +180,20 @@ describe "lib/socket", ->
 
       it "returns undefined if #testFilePath matches arguments", ->
         @socket.testFilePath = @filePath
-        expect(@socket.watchTestFileByPath("test1.js"), @watchers).to.be.undefined
+        expect(@socket.watchTestFileByPath(@config, "test1.js", @watchers)).to.be.undefined
 
       it "closes existing watchedTestFile", ->
         remove = @sandbox.stub(@watchers, "remove")
         @socket.watchedTestFile = "test1.js"
-        @socket.watchTestFileByPath("test1.js", @watchers).then ->
+        @socket.watchTestFileByPath(@config, "test1.js", @watchers).then ->
           expect(remove).to.be.calledWithMatch("test1.js")
 
       it "sets #testFilePath", ->
-        @socket.watchTestFileByPath("test1.js", @watchers).then =>
+        @socket.watchTestFileByPath(@config, "test1.js", @watchers).then =>
           expect(@socket.testFilePath).to.eq @filePath
 
       it "can normalizes leading slash", ->
-        @socket.watchTestFileByPath("/test1.js", @watchers).then =>
+        @socket.watchTestFileByPath(@config, "/test1.js", @watchers).then =>
           expect(@socket.testFilePath).to.eq @filePath
 
       it "watches file by path", (done) ->
@@ -189,79 +210,64 @@ describe "lib/socket", ->
         ## all the tests. there prob some race condition or we arent
         ## waiting for a promise or something to resolve
         Promise.delay(200).then =>
-          @socket.watchTestFileByPath("test2.coffee", @watchers).bind(@).then ->
+          @socket.watchTestFileByPath(@config, "test2.coffee", @watchers).bind(@).then ->
             fs.writeFileAsync(@socket.testsDir + "/test2.coffee", "foooooooooo")
 
     context "#startListening", ->
       it "creates testFolder if does not exist", ->
-        @server.setCypressJson {
-          projectRoot: Fixtures.project("todos")
-          testFolder: "does-not-exist"
-        }
+        @config.testFolder = "does-not-exist"
 
-        @socket.startListening().then ->
+        @socket.startListening(@server.getHttpServer(), {}, @config, {}).then ->
           dir = fs.statSync(Fixtures.project("todos") + "/does-not-exist")
           expect(dir.isDirectory()).to.be.true
 
       it "sets #testsDir", ->
-        @server.setCypressJson {
-          projectRoot: Fixtures.project("todos")
-          testFolder: "does-not-exist"
-        }
+        @config.testFolder = "does-not-exist"
 
-        @socket.startListening().then ->
+        @socket.startListening(@server.getHttpServer(), {}, @config, {}).then ->
           expect(@testsDir).to.eq Fixtures.project("todos/does-not-exist")
 
       describe "watch:test:file", ->
         it "listens for watch:test:file event", ->
-          @socket.startListening().then =>
+          @socket.startListening(@server.getHttpServer(), {}, @config, {}).then =>
             expect(@mockClient.on).to.be.calledWith("watch:test:file")
 
         it "passes filePath to #watchTestFileByPath", ->
           watchers = {}
-          watchTestFileByPath = @sandbox.stub @socket, "watchTestFileByPath"
+          watchTestFileByPath = @sandbox.stub(@socket, "watchTestFileByPath")
 
           @mockClient.on.withArgs("watch:test:file").yields("foo/bar/baz")
 
-          @socket.startListening(@server, watchers).then =>
-            expect(watchTestFileByPath).to.be.calledWith "foo/bar/baz", watchers
+          @socket.startListening(@server.getHttpServer(), watchers, @config, {}).then =>
+            expect(watchTestFileByPath).to.be.calledWith @config, "foo/bar/baz", watchers
 
       describe "#onTestFileChange", ->
         beforeEach ->
           @statAsync = @sandbox.spy(fs, "statAsync")
 
-          @server.setCypressJson {
-            projectRoot: Fixtures.project("todos")
-            testFolder: "tests"
-          }
-
-        it "does not emit if in editFileMode", ->
-          @socket.app.enable("editFileMode")
-
-          @socket.onTestFileChange("foo/bar/baz")
-          expect(@statAsync).not.to.be.called
+          @config.testFolder = "tests"
 
         it "does not emit if not a js or coffee files", ->
-          @socket.onTestFileChange("foo/bar")
+          @socket.onTestFileChange(@config, "foo/bar")
           expect(@statAsync).not.to.be.called
 
         it "does not emit if a tmp file", ->
-          @socket.onTestFileChange("foo/subl-123.js.tmp")
+          @socket.onTestFileChange(@config, "foo/subl-123.js.tmp")
           expect(@statAsync).not.to.be.called
 
         it "calls statAsync on .js file", ->
-          @socket.onTestFileChange("foo/bar.js").catch(->).then =>
+          @socket.onTestFileChange(@config, "foo/bar.js").catch(->).then =>
             expect(@statAsync).to.be.calledWith("foo/bar.js")
 
         it "calls statAsync on .coffee file", ->
-          @socket.onTestFileChange("foo/bar.coffee").then =>
+          @socket.onTestFileChange(@config, "foo/bar.coffee").then =>
             expect(@statAsync).to.be.calledWith("foo/bar.coffee")
 
         it "does not emit if stat throws", ->
-          @socket.onTestFileChange("foo/bar.js").then =>
+          @socket.onTestFileChange(@config, "foo/bar.js").then =>
             expect(@io.emit).not.to.be.called
 
         it "emits 'generate:ids:for:test'", ->
           p = Fixtures.project("todos") + "/tests/test1.js"
-          @socket.onTestFileChange(p).then =>
+          @socket.onTestFileChange(@config, p).then =>
             expect(@io.emit).to.be.calledWith("test:changed", {file: "test1.js"})

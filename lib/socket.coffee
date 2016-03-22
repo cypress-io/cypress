@@ -32,13 +32,13 @@ class Socket
         @io.emit "test:changed", {file: strippedPath}
       .catch(->)
 
-  watchTestFileByPath: (testFilePath, watchers) ->
+  watchTestFileByPath: (config, testFilePath, watchers, cb = ->) ->
     ## normalize the testFilePath
     testFilePath = path.join(@testsDir, testFilePath)
 
     ## bail if we're already watching this
     ## exact file
-    return if testFilePath is @testFilePath
+    return cb() if testFilePath is @testFilePath
 
     logger.info "watching test file", {path: testFilePath}
 
@@ -51,6 +51,7 @@ class Socket
     watchers.watchAsync(testFilePath, {
       onChange: _.bind(@onTestFileChange, @, config)
     })
+    .then(cb)
 
   onRequest: (options, cb) ->
     Request.send(options)
@@ -144,21 +145,19 @@ class Socket
       socket.on "run:tests:in:chromium", (src) ->
         options.onChromiumRun(src)
 
-      socket.on "watch:test:file", (filePath) =>
-        @watchTestFileByPath(filePath, watchers)
+      socket.on "watch:test:file", (filePath, cb) =>
+        @watchTestFileByPath(config, filePath, watchers, cb)
 
-      socket.on "request", _.bind(@onRequest, @)
+      socket.on "request", =>
+        @onRequest.apply(@, arguments)
 
-      socket.on "fixture", _.bind(@onFixture, @, config)
+      socket.on "fixture", (fixturePath, cb) =>
+        @onFixture(config, fixturePath, cb)
 
       _.each "load:spec:iframe url:changed page:loading command:add command:attrs:changed runner:start runner:end before:run before:add after:add suite:add suite:start suite:stop test test:add test:start test:end after:run test:results:ready exclusive:test".split(" "), (event) =>
         socket.on event, (args...) =>
           args = _.chain(args).reject(_.isUndefined).reject(_.isFunction).value()
           @io.emit event, args...
-
-      # socket.on "app:errors", (err) ->
-        # process.stdout.write "app:errors"
-        # options.onAppError(err)
 
       socket.on "app:connect", (socketId) ->
         options.onConnect(socketId, socket)
