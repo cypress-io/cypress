@@ -3,7 +3,6 @@ EE        = require("events")
 _         = require("lodash")
 fs        = require("fs-extra")
 Promise   = require("bluebird")
-Settings  = require("./util/settings")
 ids       = require("./ids")
 api       = require("./api")
 user      = require("./user")
@@ -16,6 +15,7 @@ Support   = require("./support")
 fixture   = require("./fixture")
 Watchers  = require("./watchers")
 Reporter  = require("./reporter")
+settings  = require("./util/settings")
 
 fs = Promise.promisifyAll(fs)
 
@@ -113,7 +113,7 @@ class Project extends EE
         @emit("settings:changed")
     }
 
-    @watchers.watch(Settings.pathToCypressJson(@projectRoot), obj)
+    @watchers.watch(settings.pathToCypressJson(@projectRoot), obj)
 
   watchSettingsAndStartWebsockets: (options, config) ->
     @watchSettings(options)
@@ -196,7 +196,7 @@ class Project extends EE
 
     @generatedProjectIdTimestamp = new Date
 
-    Settings
+    settings
     .write(@projectRoot, attrs)
     .return(id)
 
@@ -221,7 +221,7 @@ class Project extends EE
       if id = process.env.CYPRESS_PROJECT_ID
         {projectId: id}
       else
-        Settings.read(@projectRoot)
+        settings.read(@projectRoot)
     .then (settings) =>
       if settings and id = settings.projectId
         return id
