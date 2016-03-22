@@ -25,7 +25,7 @@ class Server
     @_server = null
     @_socket = null
 
-  createExpress: (port, morgan) ->
+  createExpressApp: (port, morgan) ->
     app = express()
 
     ## set the cypress config from the cypress.json file
@@ -63,13 +63,14 @@ class Server
 
   open: (projectRoot, config = {}, options = {}) ->
     Promise.try =>
-      app = @createExpress(config.port, config.morgan)
+      app = @createExpressApp(config.port, config.morgan)
 
       logger.setSettings(config)
 
       @createRoutes(app, config)
 
       @createServer(config.port, app)
+      .return(@)
 
   createServer: (port, app) ->
     new Promise (resolve, reject) =>
@@ -92,7 +93,7 @@ class Server
 
         @_server.removeListener "error", onError
 
-        resolve(@)
+        resolve(@_server)
 
   _close: ->
     new Promise (resolve) =>
