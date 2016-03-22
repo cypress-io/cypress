@@ -62,11 +62,10 @@ module.exports = {
       # helpersFolder:     "cypress/helpers/configuration.js"
       javascripts:    []
       namespace:      "__cypress"
-      environmentVariables: null
 
     ## split out our own app wide env from user env variables
     ## and delete envFile
-    config.environmentVariables = @parseEnv(config.env, config.envFile, config.environmentVariables)
+    config.environmentVariables = @parseEnv(config)
     config.env = process.env["CYPRESS_ENV"]
     delete config.envFile
 
@@ -82,16 +81,17 @@ module.exports = {
       clientUrl:        rootUrl + obj.clientRoute
       xhrUrl:           obj.namespace + obj.xhrRoute
 
-  parseEnv: (env = {}, envFile = {}, envVars = {}) ->
-    ## env is from cypress.json
-    ## envFile is from cypress.env.json
+  parseEnv: (cfg) ->
+    envCfg  = cfg.env ? {}
+    envFile = cfg.envFile ? {}
+    envProc = @getProcessEnvVars(process.env) ? {}
+    envCLI  = cfg.environmentVariables ? {}
 
-    _.extend env,
-      envVars,
-      envFile,
-      @getProcessEnvVars(process.env)
-      ## finally get the ones from the CLI --env
-      ## this should come from nw parseArgs?
+    ## envCfg is from cypress.json
+    ## envFile is from cypress.env.json
+    ## envPRoc is from process env vars
+    ## envCLI is from CLI arguments
+    _.extend envCfg, envFile, envProc, envCLI
 
   getProcessEnvVars: (obj = {}) ->
     normalize = (key) ->
